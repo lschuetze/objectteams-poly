@@ -34,18 +34,18 @@ import org.eclipse.objectteams.otre.util.AttributeReadingGuard;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
 import org.eclipse.objectteams.otre.util.RoleBaseBinding;
 
-import de.fub.bytecode.Constants;
-import de.fub.bytecode.Repository;
-import de.fub.bytecode.classfile.Attribute;
-import de.fub.bytecode.classfile.Constant;
-import de.fub.bytecode.classfile.ConstantUtf8;
-import de.fub.bytecode.classfile.InnerClass;
-import de.fub.bytecode.classfile.InnerClasses;
-import de.fub.bytecode.classfile.JavaClass;
-import de.fub.bytecode.classfile.LineNumberTable;
-import de.fub.bytecode.classfile.Method;
-import de.fub.bytecode.classfile.Unknown;
-import de.fub.bytecode.generic.*;
+import org.apache.bcel.Constants;
+import org.apache.bcel.classfile.Attribute;
+import org.apache.bcel.classfile.Constant;
+import org.apache.bcel.classfile.ConstantUtf8;
+import org.apache.bcel.classfile.InnerClass;
+import org.apache.bcel.classfile.InnerClasses;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.classfile.LineNumberTable;
+import org.apache.bcel.classfile.Method;
+import org.apache.bcel.classfile.StackMap;
+import org.apache.bcel.classfile.Unknown;
+import org.apache.bcel.generic.*;
 
 /**
  * Superclass for all transformations in this package.
@@ -665,7 +665,7 @@ public abstract class ObjectTeamsTransformation
     		return; // no main method in the first loaded class...
     	}
     	
-    	MethodGen mainMethod = new MethodGen(main, main_class_name, cpg);
+    	MethodGen mainMethod = newMethodGen(main, main_class_name, cpg);
     	InstructionList il = mainMethod.getInstructionList();
     	
     	int startLine = -1;
@@ -685,8 +685,10 @@ public abstract class ObjectTeamsTransformation
     		Iterator<String> teamIt = teamsToInitialize.iterator();
     		while (teamIt.hasNext()) {
     			String nextTeam = teamIt.next();
-    			JavaClass teamClass = Repository.lookupClass(nextTeam);
-    			if (teamClass == null) {
+    			JavaClass teamClass = null;
+    			try {
+    				teamClass = RepositoryAccess.lookupClass(nextTeam);
+    			} catch (ClassNotFoundException cfne) {
     				System.err.println("Config error: Team class '"+nextTeam+ "' in config file '"+ TEAM_CONFIG_FILE+"' can not be found!");
     				System.err.println("Main class = "+main_class_name+
     									", class loader = "+(this.loader!=null?this.loader.getClass().getName():"null")+
@@ -1372,6 +1374,18 @@ public abstract class ObjectTeamsTransformation
 		return superRoleNames;	
 	}*/
     
+    /** Create a MethodGen and remove some unwanted code attributes (which would need special translation which we don't have) */
+    protected static MethodGen newMethodGen(Method m, String class_name, ConstantPoolGen cp) {
+    	MethodGen mg = new MethodGen(m, class_name, cp);
+    	List<Attribute> attributesToRemove = new ArrayList<Attribute>();
+    	for (Attribute attr : mg.getCodeAttributes())
+    		if (attr instanceof Unknown || attr instanceof StackMap)
+    			attributesToRemove.add(attr);
+		for (Attribute attr : attributesToRemove)
+			mg.removeCodeAttribute(attr);
+    	return mg;
+    }
+    
     /**
      * Remove all contents of a method as preparation for adding a new implementation
 	 *
@@ -1387,9 +1401,9 @@ public abstract class ObjectTeamsTransformation
         mg.getInstructionList().dispose(); //throw away the old implementation
         mg.removeLineNumbers();
         mg.removeLocalVariables();
-        mg.removeLocalVariableTypes();
         mg.removeExceptionHandlers();
         mg.removeAttributes();
+        mg.removeCodeAttributes();
         return mg;
     }
     
@@ -1403,7 +1417,7 @@ public abstract class ObjectTeamsTransformation
 	 */
 	static void addToConstructor(Method m, InstructionList addedCode, ClassGen cg, ConstantPoolGen cpg) {
 		String class_name = cg.getClassName();
-		MethodGen mg = new MethodGen(m, class_name, cpg);
+		MethodGen mg = newMethodGen(m, class_name, cpg);
 		InstructionList il = mg.getInstructionList().copy();
 		InstructionHandle[] ihs = il.getInstructionHandles();
 
@@ -1786,7 +1800,7 @@ public abstract class ObjectTeamsTransformation
 			nestingDepth = countOccurrences(className, '$') - 1;
 			targetName = outerClass.getClassName();
 		}
-		MethodGen mg = new MethodGen(m, className, cpg);
+		MethodGen mg = newMethodGen(m, className, cpg);
 		InstructionList il = mg.getInstructionList();
 		InstructionList prefix = new InstructionList();
 		InstructionHandle try_start = il.getStart();
@@ -1814,20 +1828,7 @@ public abstract class ObjectTeamsTransformation
 				Constants.INVOKEVIRTUAL));
 		// <-- new implicit deactivation
 
-		FindPattern findPattern = new FindPattern(il);
-		String pat = "`ReturnInstruction'";
-		InstructionHandle ih = findPattern.search(pat);
-		while (ih != null) {
-			// insert deactivate-call before return instruction in ih:
-			InstructionList postfixCopy = postfix.copy();
-			if (debugging)
-				mg.addLineNumber(postfixCopy.getStart(), STEP_OVER_LINENUMBER);
-			InstructionHandle inserted = il.insert(ih, postfixCopy); // instruction lists can not be reused
-			il.redirectBranches(ih, inserted); // SH: retarget all jumps that targeted at the return instruction
-			if (ih.getNext() == null)
-				break; // end of instruction list reached
-			ih = findPattern.search(pat, ih.getNext());
-		}
+		insertBeforeReturn(mg, il, postfix);
 
 		/**
 		 * **** add an exception handler which calls deactivate before throwing
@@ -2255,5 +2256,31 @@ public abstract class ObjectTeamsTransformation
 	
 	  	checkLoaded.setTarget(il.append(new NOP()));
 	  	return start;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static void insertBeforeReturn(MethodGen mg, InstructionList il, InstructionList insertion) {
+		// InstructionFinder is broken see https://issues.apache.org/bugzilla/show_bug.cgi?id=40044
+		// which is fixed in r516724 (2007-03-10) but latest release bcel 5.2 is 6. June 2006.
+//		Iterator<InstructionHandle[]> ihIt = new InstructionFinder(il).search("ReturnInstruction");
+//		while (ihIt.hasNext()) {
+//			InstructionHandle[] ihAr = ihIt.next();
+//			InstructionList insertionCopy = insertion.copy();
+//			if (debugging)
+//				mg.addLineNumber(insertionCopy.getStart(), STEP_OVER_LINENUMBER);
+//			InstructionHandle inserted = il.insert(ihAr[0], insertionCopy); // instruction lists can not be reused
+//			il.redirectBranches(ihAr[0], inserted);// SH: retarget all jumps that targeted at the return instruction
+//		}
+		Iterator<InstructionHandle>ihIt = il.iterator();
+		while (ihIt.hasNext()) {
+			InstructionHandle ihAr = ihIt.next();
+			if (!(ihAr.getInstruction() instanceof ReturnInstruction))
+				continue;
+			InstructionList insertionCopy = insertion.copy();
+			if (debugging)
+				mg.addLineNumber(insertionCopy.getStart(), STEP_OVER_LINENUMBER);
+			InstructionHandle inserted = il.insert(ihAr, insertionCopy); // instruction lists can not be reused
+			il.redirectBranches(ihAr, inserted);// SH: retarget all jumps that targeted at the return instruction
+		}
 	}
 }

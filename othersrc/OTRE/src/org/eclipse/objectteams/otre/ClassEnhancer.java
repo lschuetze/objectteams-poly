@@ -16,10 +16,10 @@
  **********************************************************************/
 package org.eclipse.objectteams.otre;
 
-import de.fub.bytecode.classfile.Field;
-import de.fub.bytecode.classfile.Method;
-import de.fub.bytecode.generic.ClassGen;
-import de.fub.bytecode.generic.ConstantPoolGen;
+import org.apache.bcel.classfile.Field;
+import org.apache.bcel.classfile.Method;
+import org.apache.bcel.generic.ClassGen;
+import org.apache.bcel.generic.ConstantPoolGen;
 
 
 

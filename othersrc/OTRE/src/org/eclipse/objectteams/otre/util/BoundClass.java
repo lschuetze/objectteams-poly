@@ -18,7 +18,7 @@ package org.eclipse.objectteams.otre.util;
 
 import java.util.HashSet;
 
-import de.fub.bytecode.generic.ObjectType;
+import org.apache.bcel.generic.ObjectType;
 
 /**
  * @version $Id: BoundClass.java,v 1.8 2006-12-19 21:31:30 stephan Exp $ 

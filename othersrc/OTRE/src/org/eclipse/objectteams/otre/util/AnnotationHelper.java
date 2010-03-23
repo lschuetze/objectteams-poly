@@ -19,9 +19,9 @@ package org.eclipse.objectteams.otre.util;
 import org.eclipse.objectteams.otre.ObjectTeamsTransformation;
 import org.objectteams.ImplicitTeamActivation;
 
-import de.fub.bytecode.classfile.Attribute;
-import de.fub.bytecode.classfile.Unknown;
-import de.fub.bytecode.generic.ConstantPoolGen;
+import org.apache.bcel.classfile.Attribute;
+import org.apache.bcel.classfile.Unknown;
+import org.apache.bcel.generic.ConstantPoolGen;
 
 /** 
  * Helper class for parsing / skipping runtime visible annotations.

@@ -35,6 +35,7 @@ import org.eclipse.objectteams.otre.LiftingParticipantTransformation;
 import org.eclipse.objectteams.otre.LowerableTransformation;
 import org.eclipse.objectteams.otre.OTConstants;
 import org.eclipse.objectteams.otre.ObjectTeamsTransformation;
+import org.eclipse.objectteams.otre.RepositoryAccess;
 import org.eclipse.objectteams.otre.StaticSliceBaseTransformation;
 import org.eclipse.objectteams.otre.SubBoundBaseMethodRedefinition;
 import org.eclipse.objectteams.otre.TeamInterfaceImplementation;
@@ -42,10 +43,10 @@ import org.eclipse.objectteams.otre.ThreadActivation;
 import org.eclipse.objectteams.otre.util.AttributeReadingGuard;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
 
-import de.fub.bytecode.Repository;
-import de.fub.bytecode.classfile.ClassParser;
-import de.fub.bytecode.classfile.JavaClass;
-import de.fub.bytecode.generic.ClassGen;
+import org.apache.bcel.classfile.ClassParser;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.generic.ClassGen;
+import org.apache.bcel.util.ClassLoaderRepository;
 
 
 /**
@@ -112,15 +113,12 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			ProtectionDomain protectionDomain, byte[] classfileBuffer)
 			throws IllegalClassFormatException
 	{
-		if (className.startsWith("org/objectteams/transformer")
-				|| className.startsWith("org/cs3/jmangler")
-				|| className.startsWith("de/fub/bytecode"))
+		if (className.startsWith("org/eclipse/objectteams/otre")
+				|| className.startsWith("org/apache/bcel"))
 		{
-			// skip OTRE, BCEL and JMangler classes
+			// skip OTRE and BCEL classes
 			return null;
 		}
-//		if (!(className.startsWith("java") || className.startsWith("sun")))
-			// System.err.println("ObjectTeamsTransformer transforming: " + className);
 		if (classBeingRedefined != null) {
 			System.out.println("Redefinition!");
 			return null;
@@ -155,8 +153,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			= new ThreadActivation();
 				
 		// tell Repository about the class loader for improved lookupClass()
-		ClassLoader prevLoader= Repository.classLoaders.get();
-		Repository.classLoaders.set(loader);
+		ClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
 		
 		InputStream is  = new ByteArrayInputStream(classfileBuffer);
 		try {
@@ -219,9 +216,12 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		} catch (IOException e) {
 			System.err.println("ClassFileTransformer could not parse class file buffer to JavaClass");
 			e.printStackTrace();
+		} catch (RuntimeException re) {
+			re.printStackTrace();
+			throw re;
 		} finally {
-			// uninstall class loader:
-			Repository.classLoaders.set(prevLoader);
+			// restore previous repository:
+			RepositoryAccess.resetRepository(prevRepository);
 		}
 		return null;
 	}
@@ -253,13 +253,12 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		ClassParser   cp  = new ClassParser(file, fileName);
 		ClassGen      cg  = new ClassGen(cp.parse());
 		JPLISEnhancer jpe = new JPLISEnhancer(cg, /*loader (unused)*/null);
-		ClassLoader prevLoader= Repository.classLoaders.get();
-		Repository.classLoaders.set(loader);
+		ClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
 		try {
 			setFirstTransformation(new ObjectTeamsTransformation(loader, null) {});
 			firstTransformation.checkReadClassAttributes(jpe, cg, cg.getClassName(), cg.getConstantPool());
 		} finally {
-			Repository.classLoaders.set(prevLoader);
+			RepositoryAccess.resetRepository(prevRepository);
 		}
 	}
 	

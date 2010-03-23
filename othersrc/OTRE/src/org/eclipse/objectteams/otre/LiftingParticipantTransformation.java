@@ -19,26 +19,26 @@ package org.eclipse.objectteams.otre;
 
 import org.objectteams.Team;
 
-import de.fub.bytecode.Constants;
-import de.fub.bytecode.classfile.Method;
-import de.fub.bytecode.generic.ALOAD;
-import de.fub.bytecode.generic.BranchInstruction;
-import de.fub.bytecode.generic.ClassGen;
-import de.fub.bytecode.generic.ConstantPoolGen;
-import de.fub.bytecode.generic.DUP;
-import de.fub.bytecode.generic.GOTO;
-import de.fub.bytecode.generic.IFNULL;
-import de.fub.bytecode.generic.INVOKESPECIAL;
-import de.fub.bytecode.generic.InstructionFactory;
-import de.fub.bytecode.generic.InstructionHandle;
-import de.fub.bytecode.generic.InstructionList;
-import de.fub.bytecode.generic.LDC;
-import de.fub.bytecode.generic.MethodGen;
-import de.fub.bytecode.generic.NEW;
-import de.fub.bytecode.generic.NOP;
-import de.fub.bytecode.generic.ObjectType;
-import de.fub.bytecode.generic.POP;
-import de.fub.bytecode.generic.Type;
+import org.apache.bcel.Constants;
+import org.apache.bcel.classfile.Method;
+import org.apache.bcel.generic.ALOAD;
+import org.apache.bcel.generic.BranchInstruction;
+import org.apache.bcel.generic.ClassGen;
+import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.DUP;
+import org.apache.bcel.generic.GOTO;
+import org.apache.bcel.generic.IFNULL;
+import org.apache.bcel.generic.INVOKESPECIAL;
+import org.apache.bcel.generic.InstructionFactory;
+import org.apache.bcel.generic.InstructionHandle;
+import org.apache.bcel.generic.InstructionList;
+import org.apache.bcel.generic.LDC;
+import org.apache.bcel.generic.MethodGen;
+import org.apache.bcel.generic.NEW;
+import org.apache.bcel.generic.NOP;
+import org.apache.bcel.generic.ObjectType;
+import org.apache.bcel.generic.POP;
+import org.apache.bcel.generic.Type;
 
 /**
  * If the property ot.lifting.participant is set transform all lift methods and insert 
@@ -107,7 +107,7 @@ public class LiftingParticipantTransformation extends ObjectTeamsTransformation 
 	}
 
 	private Method weaveLiftingParticipant(Method m, String className, ConstantPoolGen cpg) {
-		MethodGen mg = new MethodGen(m, className, cpg);
+		MethodGen mg = newMethodGen(m, className, cpg);
 		InstructionList il = mg.getInstructionList();
 		InstructionHandle[] ihs = il.getInstructionHandles();
 		for (int i=0; i<ihs.length; i++) {

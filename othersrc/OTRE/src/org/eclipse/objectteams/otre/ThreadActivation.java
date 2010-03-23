@@ -18,10 +18,11 @@ package org.eclipse.objectteams.otre;
 
 import java.util.HashSet;
 
-import de.fub.bytecode.classfile.*;
-import de.fub.bytecode.generic.*;
-import de.fub.bytecode.*;
+import org.apache.bcel.classfile.*;
+import org.apache.bcel.generic.*;
+import org.apache.bcel.*;
 
+import static org.eclipse.objectteams.otre.ObjectTeamsTransformation.newMethodGen;
 
 /**
  * This transformer inserts a notification call to the TeamThreadManager at the 
@@ -47,13 +48,13 @@ public class ThreadActivation
 		String class_name = cg.getClassName();
 		// check if this class is a subtype of Thread or Runnable:
 		try {
-			return Repository.implementationOf(class_name, "java.lang.Runnable") || Repository.instanceOf(class_name, "java.lang.Thread");
-		} catch (NullPointerException npe) {
+			return RepositoryAccess.implementationOf(class_name, "java.lang.Runnable") || RepositoryAccess.instanceOf(class_name, "java.lang.Thread");
+		} catch (ClassNotFoundException cfne) {
 			if (ObjectTeamsTransformation.WORKAROUND_REPOSITORY) {
 				return false;
 			}
 			else
-				throw npe; // rethrow
+				throw new RuntimeException("Could not find class being loaded", cfne); // rethrow
 		}
 	}
 	public void doTransformInterface(ClassEnhancer enhancer, ClassGen cg) {
@@ -93,7 +94,7 @@ public class ThreadActivation
 
 		Method runMethode = cg.containsMethod("run", "()V"); // existence checked in transformInterface
 
-		MethodGen mg = new MethodGen(runMethode, class_name, cpg);
+		MethodGen mg = newMethodGen(runMethode, class_name, cpg);
 		InstructionList il = mg.getInstructionList();
 		InstructionHandle try_start = il.getStart();
 		
@@ -123,18 +124,7 @@ public class ThreadActivation
 				 Constants.INVOKESTATIC));
 		ifIsThreadStarted.setTarget(threadDeactivation.append(new NOP()));
 
-		FindPattern findPattern = new FindPattern(il);
-		String pat = "`ReturnInstruction'";
-		InstructionHandle ih = findPattern.search(pat);
-		while (ih != null) {
-			// insert deactivate-call before return instruction in ih:
-			InstructionList deactivationCopy = threadDeactivation.copy();
-			InstructionHandle inserted = il.insert(ih, deactivationCopy); // instruction lists can not be reused
-			il.redirectBranches(ih, inserted);// SH: retarget all jumps that targeted at the return instruction
-			if (ih.getNext() == null)
-				break; // end of instruction list reached
-			ih = findPattern.search(pat, ih.getNext());
-		}
+		ObjectTeamsTransformation.insertBeforeReturn(mg, il, threadDeactivation);
 
 		/** **** Add an exception handler which calls TeamThreadManager.threadEnded() *****
 		 * ***** before throwing the exception (finaly-simulation): 											        */
@@ -163,7 +153,7 @@ public class ThreadActivation
 			return null;
 		String className = cg.getClassName();
 		ConstantPoolGen cpg = cg.getConstantPool();
-		MethodGen mg = new MethodGen(method, className, cpg);
+		MethodGen mg = newMethodGen(method, className, cpg);
 		InstructionList il = mg.getInstructionList();
 		InstructionHandle ih = il.getStart();
 		while (ih != null && ih.getInstruction().getOpcode() != Constants.INVOKESPECIAL) {

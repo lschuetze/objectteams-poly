@@ -30,8 +30,8 @@ import java.util.WeakHashMap;
  * 
  * @author stephan
  * @since 0.7.0
- * @param <K>
- * @param <V>
+ * @param <K> type of keys: a base class
+ * @param <V> type of values: a role class
  */
 public class DoublyWeakHashMap<K,V> implements Map<K,V> {
 
@@ -40,6 +40,7 @@ public class DoublyWeakHashMap<K,V> implements Map<K,V> {
 	public DoublyWeakHashMap() {
 		this.map = new WeakHashMap<K, WeakReference<V>>();
 	}
+	
 	public int size() {
 		return this.map.size();
 	}
@@ -48,23 +49,28 @@ public class DoublyWeakHashMap<K,V> implements Map<K,V> {
 		return this.map.isEmpty();
 	}
 
+	// used from hasRole() and lifting (duplicate role check)
 	public boolean containsKey(Object key) {
 		return this.map.containsKey(key);
 	}
 
 	public boolean containsValue(Object value) {
-		return this.map.containsValue(value);
+		throw new UnsupportedFeatureException("Method containsValue is not implemented for internal class DoublyWeakHashMap.");
 	}
 
+	// used from getRole()
 	public V get(Object key) {
-		return this.map.get(key).get();
+		WeakReference<V> valRef = this.map.get(key);
+		return valRef == null ? null : valRef.get();
 	}
 
+	// used from migrateToBase() and lifting constructor
 	public V put(K key, V value) {
 		this.map.put(key, new WeakReference<V>(value));
 		return value;
 	}
 
+	// used from unregisterRole(), migrateToBase()
 	public V remove(Object key) {
 		WeakReference<V> value = this.map.remove(key);
 		return (value == null) ? null : value.get();
@@ -83,14 +89,18 @@ public class DoublyWeakHashMap<K,V> implements Map<K,V> {
 		return this.map.keySet();
 	}
 
+	// used from getAllRoles() et al.
 	public Collection<V> values() {
 		ArrayList<V> result = new ArrayList<V>(this.map.size());
-		for (WeakReference<V> valRef : this.map.values())
-			result.add(valRef.get());
+		for (WeakReference<V> valRef : this.map.values()) {
+			V value = valRef.get();
+			if (value != null)
+				result.add(value);
+		}
 		return result;
 	}
 
 	public Set<java.util.Map.Entry<K, V>> entrySet() {
-		throw new UnsupportedFeatureException("Method entrySet is not implemented for DoublyWeakHashMap");
+		throw new UnsupportedFeatureException("Method entrySet is not implemented for internal class DoublyWeakHashMap.");
 	}
 }

@@ -212,10 +212,10 @@ public class RoleBaseBinding {
         out.append(" <-> ");
         out.append(baseClass.getName());
 	    out.append("\nmethod bindings:\n");
-	    List mbsList = getBaseMethodBindings();
-	    Iterator it = mbsList.iterator();
+	    List<MethodBinding> mbsList = getBaseMethodBindings();
+	    Iterator<MethodBinding> it = mbsList.iterator();
 	    while (it.hasNext()) {
-			MethodBinding mb = (MethodBinding)it.next();
+			MethodBinding mb = it.next();
 			out.append("\n");
             out.append(mb.getBaseMethodName());
             out.append(".");

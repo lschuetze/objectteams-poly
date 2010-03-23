@@ -16,7 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otre;
 
-import de.fub.bytecode.generic.*;
+import org.apache.bcel.generic.*;
 
 
 /**
@@ -47,9 +47,9 @@ public interface OTConstants {
     ObjectType liftingVeto   = new ObjectType("org.objectteams.LiftingVetoException");
     /**                            Type <tt>org.eclipse.objectteams.otre.OTREInternalError</tt> */	
     ObjectType internalError = new ObjectType("org.eclipse.objectteams.otre.OTREInternalError");
-	/**                            Type <tt>org.eclipse.objectteams.otre.OTREInternalError</tt> */	
+	/**                            Type <tt>org.objectteams.ResultNotProvidedError</tt> */	
 	ObjectType notProvidedError = new ObjectType("org.objectteams.ResultNotProvidedError");
-	/**                            Type <tt>org.eclipse.objectteams.otre.UnsupportedFeatureException</tt> */	
+	/**                            Type <tt>org.objectteams.UnsupportedFeatureException</tt> */	
 	ObjectType unsupportedFeature = new ObjectType("org.objectteams.UnsupportedFeatureException");
 	
 	ObjectType threadType  = new ObjectType("java.lang.Thread");

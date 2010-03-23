@@ -84,9 +84,9 @@ public class ListValueHashMap<ValueType> {
 	
 	public String toString() {
 		StringBuilder result = new StringBuilder(32);
-		Iterator it = hashMap.entrySet().iterator();
+		Iterator<Entry<String,LinkedList<ValueType>>> it = hashMap.entrySet().iterator();
 		while (it.hasNext()) {
-			Entry entry = (Entry) it.next();
+			Entry<String,LinkedList<ValueType>> entry = it.next();
 			result.append(entry.getKey());
             result.append(": ");
             result.append(entry.getValue().toString());

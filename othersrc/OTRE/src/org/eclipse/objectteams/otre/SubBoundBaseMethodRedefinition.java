@@ -16,9 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otre;
 
-import de.fub.bytecode.classfile.*;
-import de.fub.bytecode.generic.*;
-import de.fub.bytecode.*;
+import org.apache.bcel.classfile.*;
+import org.apache.bcel.generic.*;
+import org.apache.bcel.*;
 
 import java.util.*;
 

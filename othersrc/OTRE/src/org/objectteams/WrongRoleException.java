@@ -27,7 +27,7 @@ public class WrongRoleException extends RuntimeException {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private Class clazz;
+	private Class<?> clazz;
 	private Object base;
 	private Object role;
 
@@ -36,7 +36,7 @@ public class WrongRoleException extends RuntimeException {
 	 * @param base
 	 * @param role
 	 */
-	public WrongRoleException (Class clazz, Object base, Object role) {
+	public WrongRoleException (Class<?> clazz, Object base, Object role) {
 		this.clazz = clazz;
 		this.base = base;
 		this.role = role;

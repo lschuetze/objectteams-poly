@@ -16,9 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otre.util;
 
-import de.fub.bytecode.generic.*;
-import de.fub.bytecode.Constants;
-import java.util.Enumeration;
+import org.apache.bcel.generic.*;
+import org.apache.bcel.Constants;
+import java.util.Iterator;
 
 import org.eclipse.objectteams.otre.OTConstants;
 
@@ -142,9 +142,9 @@ public class DebugUtil {
     @SuppressWarnings("unchecked")
 	public static void printIL (InstructionList il, ConstantPoolGen cpg) {
         int off = 0;
-        Enumeration en =  il.elements();
-        while(en.hasMoreElements()) {
-            Instruction i = ((InstructionHandle)en.nextElement()).getInstruction();
+        Iterator<InstructionHandle> it =  il.iterator();
+        while(it.hasNext()) {
+            Instruction i = it.next().getInstruction();
             off += i.produceStack(cpg);
             off -= i.consumeStack(cpg);
             System.out.print(off);

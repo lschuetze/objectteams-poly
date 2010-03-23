@@ -25,15 +25,15 @@ import org.eclipse.objectteams.otre.util.CallinBindingManager;
 import org.eclipse.objectteams.otre.util.FieldDescriptor;
 import org.eclipse.objectteams.otre.util.SuperMethodDescriptor;
 
-import de.fub.bytecode.Constants;
-import de.fub.bytecode.classfile.Method;
-import de.fub.bytecode.generic.ClassGen;
-import de.fub.bytecode.generic.ConstantPoolGen;
-import de.fub.bytecode.generic.InstructionFactory;
-import de.fub.bytecode.generic.InstructionList;
-import de.fub.bytecode.generic.MethodGen;
-import de.fub.bytecode.generic.ObjectType;
-import de.fub.bytecode.generic.Type;
+import org.apache.bcel.Constants;
+import org.apache.bcel.classfile.Method;
+import org.apache.bcel.generic.ClassGen;
+import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.InstructionFactory;
+import org.apache.bcel.generic.InstructionList;
+import org.apache.bcel.generic.MethodGen;
+import org.apache.bcel.generic.ObjectType;
+import org.apache.bcel.generic.Type;
 
 /**
  *  For each base method that is bound by callout and has

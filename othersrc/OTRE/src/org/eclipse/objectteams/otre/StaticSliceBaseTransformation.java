@@ -16,9 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otre;
 
-import de.fub.bytecode.classfile.*;
-import de.fub.bytecode.generic.*;
-import de.fub.bytecode.*;
+import org.apache.bcel.classfile.*;
+import org.apache.bcel.generic.*;
+import org.apache.bcel.*;
 
 import org.eclipse.objectteams.otre.util.*;
 
@@ -706,7 +706,7 @@ public class StaticSliceBaseTransformation
 		 /* The clinit method always exists at this moment, because it has been added 
          * by the interface transformer part of this transformer if necessary.
          */
-		MethodGen mg = new MethodGen(clinitMethod, cg.getClassName(), cpg);
+		MethodGen mg = newMethodGen(clinitMethod, cg.getClassName(), cpg);
 		InstructionList il = mg.getInstructionList();
 		// add static initialization for added static fields at start of the <clinit> method:
 		il.insert(inizializeStaticFields(cg.getClassName()));

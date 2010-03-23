@@ -16,9 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otre;
 
-import de.fub.bytecode.classfile.*;
-import de.fub.bytecode.generic.*;
-import de.fub.bytecode.*;
+import org.apache.bcel.classfile.*;
+import org.apache.bcel.generic.*;
+import org.apache.bcel.*;
 
 import java.util.*;
 
@@ -110,7 +110,7 @@ public class TeamInterfaceImplementation
 			ConstantPoolGen cpg) {
 		Method clinitMethod = cg.containsMethod(
 				Constants.STATIC_INITIALIZER_NAME, "()V");
-		MethodGen mg = new MethodGen(clinitMethod, cg.getClassName(), cpg);
+		MethodGen mg = newMethodGen(clinitMethod, cg.getClassName(), cpg);
 		InstructionList il = mg.getInstructionList();
 
 		InstructionList addedInitialization = new InstructionList();
@@ -269,7 +269,7 @@ public class TeamInterfaceImplementation
 	 * @param cpg
 	 */
 	private void addToMethodStart(InstructionList additionalInstructions, Method method, ClassGen cg, ConstantPoolGen cpg) {
-		MethodGen mg = new MethodGen(method, cg.getClassName(), cpg);
+		MethodGen mg = newMethodGen(method, cg.getClassName(), cpg);
 		InstructionList il = mg.getInstructionList();
 		il.insert(additionalInstructions);
 		mg.setMaxStack();
@@ -349,6 +349,8 @@ public class TeamInterfaceImplementation
 			
 			il.append(factory.createFieldAccess(class_name, "_OT$ID", Type.INT,
 					Constants.GETSTATIC));
+			// Note: the method _OT$addTeam may be found in a super classes (topmostBoundBase),
+			//       but we'll simply leave this lookup to the VM 
 			il.append(factory.createInvoke(actBase, "_OT$addTeam", Type.VOID,
 					new Type[] { teamType, Type.INT }, Constants.INVOKESTATIC));
 			// generated: <actBase>._OT$addTeam(this, _OT$ID);

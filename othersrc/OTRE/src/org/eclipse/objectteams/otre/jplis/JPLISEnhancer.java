@@ -24,14 +24,14 @@ import org.eclipse.objectteams.otre.ClassEnhancer;
 import org.eclipse.objectteams.otre.OTREInternalError;
 import org.eclipse.objectteams.otre.ObjectTeamsTransformation;
 
-import de.fub.bytecode.Constants;
-import de.fub.bytecode.classfile.ClassParser;
-import de.fub.bytecode.classfile.Field;
-import de.fub.bytecode.classfile.Method;
-import de.fub.bytecode.classfile.Utility;
-import de.fub.bytecode.generic.ClassGen;
-import de.fub.bytecode.generic.ConstantPoolGen;
-import de.fub.bytecode.generic.MethodGen;
+import org.apache.bcel.Constants;
+import org.apache.bcel.classfile.ClassParser;
+import org.apache.bcel.classfile.Field;
+import org.apache.bcel.classfile.Method;
+import org.apache.bcel.classfile.Utility;
+import org.apache.bcel.generic.ClassGen;
+import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.MethodGen;
 
 
 /**
@@ -51,14 +51,14 @@ public class JPLISEnhancer implements ClassEnhancer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.objectteams.otre.ClassEnhancer#addImplements(java.lang.String, de.fub.bytecode.generic.ClassGen)
+	 * @see org.eclipse.objectteams.otre.ClassEnhancer#addImplements(java.lang.String, org.apache.bcel.generic.ClassGen)
 	 */
 	public void addImplements(String interfaceName, ClassGen cg) {
 		cg.addInterface(interfaceName);		
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.objectteams.otre.common.ClassEnhancer#addMethod(de.fub.bytecode.classfile.Method, de.fub.bytecode.generic.ClassGen)
+	 * @see org.eclipse.objectteams.otre.common.ClassEnhancer#addMethod(org.apache.bcel.classfile.Method, de.fub.bytecode.generic.ClassGen)
 	 */
 	public void addMethod(Method m, ClassGen cg) {
 		if (cg.containsMethod(m.getName(), m.getSignature()) != null)
@@ -78,7 +78,7 @@ public class JPLISEnhancer implements ClassEnhancer {
 	}
 	
 	/* (non-Javadoc)
-	 * @see org.eclipse.objectteams.otre.common.ClassEnhancer#addField(de.fub.bytecode.classfile.Field, de.fub.bytecode.generic.ClassGen)
+	 * @see org.eclipse.objectteams.otre.common.ClassEnhancer#addField(org.apache.bcel.classfile.Field, de.fub.bytecode.generic.ClassGen)
 	 */
 	public void addField(Field f, ClassGen cg) {
 		if (cg.containsField(f.getName()) != null)
@@ -109,12 +109,12 @@ public class JPLISEnhancer implements ClassEnhancer {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.objectteams.otre.common.ClassEnhancer#decapsulateMethod(de.fub.bytecode.classfile.Method, java.lang.String, de.fub.bytecode.generic.ConstantPoolGen)
+	 * @see org.eclipse.objectteams.otre.common.ClassEnhancer#decapsulateMethod(org.apache.bcel.classfile.Method, java.lang.String, de.fub.bytecode.generic.ConstantPoolGen)
 	 */
 	public void decapsulateMethod(Method m, ClassGen cg, String packageName, ConstantPoolGen cpg) {
 		String className = cg.getClassName();
 		int flags = m.getAccessFlags();
-		MethodGen mg = new MethodGen(m, className, cpg);
+		MethodGen mg = new MethodGen(m, className, cpg); // no need to remove attributes, code remains unchanged
 
 		if ((flags & Constants.ACC_PUBLIC) == 0) {
 			int newFlags = flags;

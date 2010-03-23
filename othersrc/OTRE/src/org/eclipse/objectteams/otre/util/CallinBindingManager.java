@@ -16,13 +16,13 @@
  **********************************************************************/
 package org.eclipse.objectteams.otre.util;
 
-//import de.fub.bytecode.generic.Type; // just for javadoc.
-import de.fub.bytecode.Repository;
-import de.fub.bytecode.classfile.JavaClass;
-import de.fub.bytecode.generic.ObjectType;
+//import org.apache.bcel.generic.Type; // just for javadoc.
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.generic.ObjectType;
 
 import org.eclipse.objectteams.otre.OTREInternalError;
 import org.eclipse.objectteams.otre.ObjectTeamsTransformation;
+import org.eclipse.objectteams.otre.RepositoryAccess;
 import org.eclipse.objectteams.otre.ObjectTeamsTransformation.BaseMethodInfo;
 
 import java.util.ArrayList;
@@ -78,8 +78,6 @@ public class CallinBindingManager {
 	{
 		BoundClass baseClass = rbb.getBaseClass();
 		ObjectType baseClassType = new ObjectType(baseClassName);
-		if (!checkLookup(baseClassType.getClassName())) // TODO: workaround for classes loaded from special locations
-			return;
 		// clone the set for re-entrance:
 		Iterator<Entry<String, LinkedList<RoleBaseBinding>>> it = getBaseBindingsCloneIterator();
 		while (it.hasNext()) {
@@ -87,11 +85,9 @@ public class CallinBindingManager {
 			String currentBaseClassName = entry.getKey();
 			if (currentBaseClassName.equals(baseClassName)) continue;
 			ObjectType currentType = new ObjectType(currentBaseClassName);
-			if (!checkLookup(currentType.getClassName())) // TODO: workaround for classes loaded from special locations
-				continue;
 			// BoundClass objects are unique per base object, so just take the first binding: 
 			BoundClass currentBaseClass = entry.getValue().getFirst().getBaseClass();
-			if(baseClassType.subclassOf(currentType)) {
+			if(RepositoryAccess.safeSubclassOf(baseClassType, currentType)) {
 				BoundClass rbbSuper = baseClass.getSuper();
 				if (rbbSuper != null)  {
 					if (rbbSuper.getName().equals(currentBaseClassName))
@@ -100,7 +96,7 @@ public class CallinBindingManager {
 				}
 				baseClass.setSuper(currentBaseClass);
 			}
-			else if (currentType.subclassOf(baseClassType)) {
+			else if (RepositoryAccess.safeSubclassOf(currentType, baseClassType)) {
 				BoundClass currentSuper = currentBaseClass.getSuper();
 				// if sub base classes may be registered before super base class, 
 				// this case has to be considered too:
@@ -138,8 +134,14 @@ public class CallinBindingManager {
      * @param baseClassName
      */
     public static void addTeamBaseRelation(String teamClassName, String baseClassName) {
-    	JavaClass baseClass = Repository.lookupClass(baseClassName);
-    	if (checkLookup(baseClassName) && baseClass.isInterface()) { // TODO: workaround for classes loaded from special locations
+    	JavaClass baseClass = null;
+		try {
+			baseClass = RepositoryAccess.lookupClass(baseClassName);
+		} catch (ClassNotFoundException e) {
+			// FIXME(SH): where to log?
+			e.printStackTrace();
+		}
+    	if (baseClass != null && baseClass.isInterface()) { 
     		// TODO (SH): need to register with all implementing classes!
             if (logging) {
                 ObjectTeamsTransformation.printLogMessage("*** Skipping base " + baseClassName + ": is an interface");
@@ -226,7 +228,7 @@ public class CallinBindingManager {
 	 * @param bindingLineOffset TODO
 	 * @param roleMethodName
 	 * @param roleMethodSignature signature ready for interpretation by
-     *                      {@link Type de.fub.bytecode.generic.Type}
+     *                      {@link Type org.apache.bcel.generic.Type}
 	 * @param isStaticRoleMethod TODO
 	 * @param modifier "before", "after" or "replace"
 	 * @param baseMethodName
@@ -400,8 +402,6 @@ public class CallinBindingManager {
 
 		List<MethodBinding> result = new LinkedList<MethodBinding>();
 		ObjectType current = new ObjectType(className);
-		if (!checkLookup(current.getClassName())) // TODO: workaround for classes loaded from special locations
-			return result; 
 		// clone for re-entrance:
 		Iterator<Entry<String, LinkedList<RoleBaseBinding>>> it= getBaseBindingsCloneIterator();
 		while (it.hasNext()) {
@@ -410,11 +410,7 @@ public class CallinBindingManager {
 			// look for true superClass (not same):
 			if (have.equals(className)) continue;
 			ObjectType haveType = new ObjectType(have);
-			//System.err.println(current + " : "+haveType);
-			//System.err.println(de.fub.bytecode.Repository.lookupClass(have));
-			if (!checkLookup(haveType.getClassName())) // TODO: workaround for classes loaded from special locations
-					continue;
-			if (current.subclassOf(haveType)) {
+			if (RepositoryAccess.safeSubclassOf(current, haveType)) {
 				// now we have a true superClass:
 				if (logging)
                     ObjectTeamsTransformation.printLogMessage(className
@@ -448,8 +444,6 @@ public class CallinBindingManager {
 	{
 		List<String> result = new LinkedList<String>();
 		ObjectType current = new ObjectType(className);
-		if (!checkLookup(current.getClassName())) // TODO: workaround for classes loaded from special locations
-			return result; 
 		// clone for re-entrance:
 		Iterator<Entry<String, LinkedList<RoleBaseBinding>>> it = getBaseBindingsCloneIterator();
 		boolean getNextClass = false;
@@ -459,9 +453,7 @@ public class CallinBindingManager {
 			// look for true superClass (not same):
 			if (have.equals(className)) continue;
 			ObjectType haveType = new ObjectType(have);
-			if (!checkLookup(haveType.getClassName())) // TODO: workaround for classes loaded from special locations
-					continue;
-			if (current.subclassOf(haveType)) {
+			if (RepositoryAccess.safeSubclassOf(current, haveType)) {
 				// now we have a true superClass:
 				if (logging)
 					ObjectTeamsTransformation.printLogMessage(className
@@ -515,11 +507,9 @@ public class CallinBindingManager {
 		String subTeamName = subType.substring(0, dollarIdxSub);
 		String superTeamName = superType.substring(0,dollarIdxSuper);
 
-		if (!(checkLookup(subTeamName) && checkLookup(superTeamName)))
-				return false; // Repository can not lookup types
 		ObjectType subTeamType = new ObjectType(subTeamName);
 		ObjectType superTeamType = new ObjectType(superTeamName);
-		if (subTeamType.subclassOf(superTeamType)) {
+		if (RepositoryAccess.safeSubclassOf(subTeamType, superTeamType)) {
             if (logging)
                 ObjectTeamsTransformation.printLogMessage(subType
                         + " implicitly inherits method bindings from " + superType);
@@ -529,22 +519,6 @@ public class CallinBindingManager {
 		return false; // no inheritance relation between teams
 	}
 	
-	/**
-	 * Check to avoid NullPointerExceptions caused by the Repository when classes can not be looked up (because they loaded by
-	 * classloaders with special a classpath)
-	 *
-	 * @param current	The name of the class to look up in the Repository.
-	 * @return False, if the class can not be found, true else.
-	 */
-	private static boolean checkLookup(String className) {
-		if (Repository.lookupClass(className) == null) {
-			if (OTEQUINOX_WARN)
-				System.err.println("Warning: Repository could not lookup class " + className + "!");
-			return false;
-		}
-		return true;
-	}
-
 	/**
 	 * Get all inherited method bindings for a given base method, which are 
 	 * bindings declared for a super base class.
@@ -772,7 +746,7 @@ public class CallinBindingManager {
 //			if (have.equals(baseClassName)) continue;
 //			ObjectType haveType = new ObjectType(have);
 //			//System.err.println(current + " : "+haveType);
-//			//System.err.println(de.fub.bytecode.Repository.lookupClass(have));
+//			//System.err.println(org.apache.bcel.Repository.lookupClass(have));
 //			if (!checkLookup(haveType.getClassName())) // TODO: workaround for classes loaded from special locations
 //					continue;
 //			if (current.subclassOf(haveType)) {
@@ -924,11 +898,15 @@ public class CallinBindingManager {
 	
 	private static List<String> getSuperTeamsWithParamMappigs(String teamName) {
 		LinkedList<String> result = new LinkedList<String>();
-		if (!checkLookup(teamName)) // TODO: workaround for classes loaded from special locations
-			return result;
-		for (JavaClass superTeam : Repository.getSuperClasses(teamName))
-			if (paramMappings.get(superTeam.getClassName()) != null)
-				result.add(superTeam.getClassName());
+		try {
+			for (JavaClass superTeam : RepositoryAccess.getSuperClasses(teamName))
+				if (paramMappings.get(superTeam.getClassName()) != null)
+					result.add(superTeam.getClassName());
+		} catch (ClassNotFoundException e) {
+			// FIXME(SH): where to log to?
+			e.printStackTrace();
+			// continue, just nothing added to result
+		}
 		return result;
 	}
 	

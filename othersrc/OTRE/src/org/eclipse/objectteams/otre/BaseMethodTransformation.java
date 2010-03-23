@@ -35,50 +35,50 @@ import org.eclipse.objectteams.otre.util.ListValueHashMap;
 import org.eclipse.objectteams.otre.util.MethodBinding;
 import org.eclipse.objectteams.otre.util.TeamIdDispenser;
 
-import de.fub.bytecode.Constants;
-import de.fub.bytecode.classfile.Field;
-import de.fub.bytecode.classfile.LineNumber;
-import de.fub.bytecode.classfile.LineNumberTable;
-import de.fub.bytecode.classfile.Method;
-import de.fub.bytecode.generic.AASTORE;
-import de.fub.bytecode.generic.ACONST_NULL;
-import de.fub.bytecode.generic.ALOAD;
-import de.fub.bytecode.generic.ANEWARRAY;
-import de.fub.bytecode.generic.ARRAYLENGTH;
-import de.fub.bytecode.generic.ATHROW;
-import de.fub.bytecode.generic.ArrayType;
-import de.fub.bytecode.generic.BasicType;
-import de.fub.bytecode.generic.BranchInstruction;
-import de.fub.bytecode.generic.ClassGen;
-import de.fub.bytecode.generic.ConstantPoolGen;
-import de.fub.bytecode.generic.DUP;
-import de.fub.bytecode.generic.DUP_X1;
-import de.fub.bytecode.generic.FieldGen;
-import de.fub.bytecode.generic.GOTO;
-import de.fub.bytecode.generic.IADD;
-import de.fub.bytecode.generic.ICONST;
+import org.apache.bcel.Constants;
+import org.apache.bcel.classfile.Field;
+import org.apache.bcel.classfile.LineNumber;
+import org.apache.bcel.classfile.LineNumberTable;
+import org.apache.bcel.classfile.Method;
+import org.apache.bcel.generic.AASTORE;
+import org.apache.bcel.generic.ACONST_NULL;
+import org.apache.bcel.generic.ALOAD;
+import org.apache.bcel.generic.ANEWARRAY;
+import org.apache.bcel.generic.ARRAYLENGTH;
+import org.apache.bcel.generic.ATHROW;
+import org.apache.bcel.generic.ArrayType;
+import org.apache.bcel.generic.BasicType;
+import org.apache.bcel.generic.BranchInstruction;
+import org.apache.bcel.generic.ClassGen;
+import org.apache.bcel.generic.ConstantPoolGen;
+import org.apache.bcel.generic.DUP;
+import org.apache.bcel.generic.DUP_X1;
+import org.apache.bcel.generic.FieldGen;
+import org.apache.bcel.generic.GOTO;
+import org.apache.bcel.generic.IADD;
+import org.apache.bcel.generic.ICONST;
 
-import de.fub.bytecode.generic.IFNE;
-import de.fub.bytecode.generic.IFNONNULL;
-import de.fub.bytecode.generic.IF_ICMPLT;
-import de.fub.bytecode.generic.IINC;
-import de.fub.bytecode.generic.INVOKESPECIAL;
-import de.fub.bytecode.generic.Instruction;
-import de.fub.bytecode.generic.InstructionConstants;
-import de.fub.bytecode.generic.InstructionFactory;
-import de.fub.bytecode.generic.InstructionHandle;
-import de.fub.bytecode.generic.InstructionList;
-import de.fub.bytecode.generic.InvokeInstruction;
-import de.fub.bytecode.generic.LDC;
-import de.fub.bytecode.generic.LocalVariableGen;
-import de.fub.bytecode.generic.MONITOREXIT;
-import de.fub.bytecode.generic.MethodGen;
-import de.fub.bytecode.generic.NOP;
-import de.fub.bytecode.generic.ObjectType;
-import de.fub.bytecode.generic.POP;
-import de.fub.bytecode.generic.PUSH;
-import de.fub.bytecode.generic.TABLESWITCH;
-import de.fub.bytecode.generic.Type;
+import org.apache.bcel.generic.IFNE;
+import org.apache.bcel.generic.IFNONNULL;
+import org.apache.bcel.generic.IF_ICMPLT;
+import org.apache.bcel.generic.IINC;
+import org.apache.bcel.generic.INVOKESPECIAL;
+import org.apache.bcel.generic.Instruction;
+import org.apache.bcel.generic.InstructionConstants;
+import org.apache.bcel.generic.InstructionFactory;
+import org.apache.bcel.generic.InstructionHandle;
+import org.apache.bcel.generic.InstructionList;
+import org.apache.bcel.generic.InvokeInstruction;
+import org.apache.bcel.generic.LDC;
+import org.apache.bcel.generic.LocalVariableGen;
+import org.apache.bcel.generic.MONITOREXIT;
+import org.apache.bcel.generic.MethodGen;
+import org.apache.bcel.generic.NOP;
+import org.apache.bcel.generic.ObjectType;
+import org.apache.bcel.generic.POP;
+import org.apache.bcel.generic.PUSH;
+import org.apache.bcel.generic.TABLESWITCH;
+import org.apache.bcel.generic.Type;
 
 
 /**
@@ -197,7 +197,7 @@ public class BaseMethodTransformation
 	{
         if (m.isAbstract() || m.isNative())
             return null;
-		MethodGen mg = new MethodGen(m, className, cpg);
+		MethodGen mg = newMethodGen(m, className, cpg);
 		String method_name = m.getName();
 		InstructionHandle[] ihs = mg.getInstructionList().getInstructionHandles();
 		boolean found = false;
@@ -355,7 +355,7 @@ public class BaseMethodTransformation
     		MethodBinding match= matchingBinding(inheritedBindings, m, false);
     		if (bindingsForMethod != null || (match!= null && !m.isStatic() && !m.isPrivate())) {
     			
-    			mg = new MethodGen(m, class_name, cpg);
+    			mg = newMethodGen(m, class_name, cpg);
     			Method orig_method;
 					
     			String name_orig = genOrigMethName(method_name);
@@ -493,7 +493,6 @@ public class BaseMethodTransformation
 		}
 		if (debugging) {
 			mg.removeLocalVariables();
-			mg.removeLocalVariableTypes();
 			int slot = 0;
 			// create local variable table for "this" and arguments:
 			if (!m.isAbstract())
@@ -1733,7 +1732,7 @@ public class BaseMethodTransformation
 		{
 			ObjectType actualObj = (ObjectType)actual;
 			ObjectType formalObj = (ObjectType)formal;
-			if (actualObj.subclassOf(formalObj))
+			if (RepositoryAccess.safeSubclassOf(actualObj, formalObj))
 				return formalObj;
 		}
 		return actual;

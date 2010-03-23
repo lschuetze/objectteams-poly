@@ -19,10 +19,10 @@ package org.eclipse.objectteams.otre;
 import java.util.HashSet;
 import java.util.Set;
 
-import de.fub.bytecode.Constants;
-import de.fub.bytecode.generic.ClassGen;
-import de.fub.bytecode.generic.MethodGen;
-import de.fub.bytecode.generic.Type;
+import org.apache.bcel.Constants;
+import org.apache.bcel.generic.ClassGen;
+import org.apache.bcel.generic.MethodGen;
+import org.apache.bcel.generic.Type;
 
 /**
  * This transformer helps legacy class files pre 1.3.2 to cope with changes re ILowerable.lower().

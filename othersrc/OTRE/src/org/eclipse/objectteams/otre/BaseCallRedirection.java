@@ -16,9 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otre;
 
-import de.fub.bytecode.classfile.*;
-import de.fub.bytecode.generic.*;
-import de.fub.bytecode.*;
+import org.apache.bcel.classfile.*;
+import org.apache.bcel.generic.*;
+import org.apache.bcel.*;
 
 import java.util.*;
 
@@ -155,7 +155,7 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 
 		ConstantPoolGen cpg = cg.getConstantPool();
 		String class_name = cg.getClassName();
-		MethodGen mg = new MethodGen(m, class_name, cpg);
+		MethodGen mg = newMethodGen(m, class_name, cpg);
 		
 		if (isTSuperWrapper(mg)) {
 			// tsuper wrapper do not need base call surrogates
@@ -438,7 +438,7 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
         String class_name   = cg.getClassName();
         String method_name  = m.getName();
 
-        MethodGen mg = new MethodGen(m, class_name, cpg);
+        MethodGen mg = newMethodGen(m, class_name, cpg);
 
 		Type[]   argumentTypes         = mg.getArgumentTypes();
         Type     returnType            = mg.getReturnType();
@@ -1438,7 +1438,7 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 /*
  * (non-Javadoc)
  * 
- * @see org.eclipse.objectteams.otre.common.ObjectTeamsTransformation#doTransformCode(de.fub.bytecode.generic.ClassGen)
+ * @see org.eclipse.objectteams.otre.common.ObjectTeamsTransformation#doTransformCode(org.apache.bcel.generic.ClassGen)
  */
     public void doTransformCode(ClassGen cg) {
         // nothing to do
