@@ -47,6 +47,9 @@ public class EqualExpression extends BinaryExpression {
 					initsWhenTrue.markAsComparedEqualToNonNull(local); // from thereon it is set
 					initsWhenFalse.markAsComparedEqualToNull(local); // from thereon it is set
 				}
+				if ((flowContext.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) != 0) {
+					flowInfo.markedAsNullOrNonNullInAssertExpression(local);
+				}
 				break;
 			case FlowInfo.NON_NULL :
 				if (((this.bits & OperatorMASK) >> OperatorSHIFT) == EQUAL_EQUAL) {
@@ -58,12 +61,6 @@ public class EqualExpression extends BinaryExpression {
 							FlowContext.CAN_ONLY_NULL | FlowContext.IN_COMPARISON_NULL, flowInfo);
 				}
 				break;
-		}
-		// set the optimize constant to optimize code gen
-		if ((initsWhenTrue.tagBits & FlowInfo.UNREACHABLE) != 0) {
-			this.optimizedBooleanConstant = BooleanConstant.fromValue(false);
-		} else if ((initsWhenFalse.tagBits & FlowInfo.UNREACHABLE) != 0) {
-			this.optimizedBooleanConstant = BooleanConstant.fromValue(true);
 		}
 		// we do not impact enclosing try context because this kind of protection
 		// does not preclude the variable from being null in an enclosing scope

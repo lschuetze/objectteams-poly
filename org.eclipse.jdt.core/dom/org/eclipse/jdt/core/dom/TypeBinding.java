@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
@@ -103,9 +104,13 @@ class TypeBinding implements ITypeBinding {
 		if (this.annotations != null) {
 			return this.annotations;
 		}
-		if (this.binding.isAnnotationType() || this.binding.isClass() || this.binding.isEnum() || this.binding.isInterface()) {
-			org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding refType =
-				(org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding) this.binding;
+		org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding refType = null;
+		if (this.binding instanceof ParameterizedTypeBinding) {
+			refType = ((ParameterizedTypeBinding) this.binding).genericType();
+		} else if (this.binding.isAnnotationType() || this.binding.isClass() || this.binding.isEnum() || this.binding.isInterface()) {
+			refType = (org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding) this.binding;
+		}
+		if (refType != null) {
 //{ObjectTeams: calling getAnnotations() requires Dependencies control:
 /* orig:			
 			org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] internalAnnotations = refType.getAnnotations();
@@ -197,7 +202,7 @@ class TypeBinding implements ITypeBinding {
 		}
 		return null;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getGenericTypeOfWildcardType()
 	 */
@@ -265,16 +270,16 @@ class TypeBinding implements ITypeBinding {
 						FieldBinding fieldBinding = fieldBindings[i];
 						IVariableBinding variableBinding = this.resolver.getVariableBinding(fieldBinding);
 						if (variableBinding != null) {
-						newFields[convertedFieldCount++] = variableBinding;
-					}
+							newFields[convertedFieldCount++] = variableBinding;
+						}
 					}
 
 					if (convertedFieldCount != length) {
 						if (convertedFieldCount == 0) {
 							return this.fields = NO_VARIABLE_BINDINGS;
-						}						
+						}
 						System.arraycopy(newFields, 0, (newFields = new IVariableBinding[convertedFieldCount]), 0, convertedFieldCount);
-					}					
+					}
 					return this.fields = newFields;
 				}
 			}
@@ -322,9 +327,11 @@ class TypeBinding implements ITypeBinding {
 						if (methodBinding.isDefaultAbstract() || methodBinding.isSynthetic() || (methodBinding.isConstructor() && isInterface())) {
 							continue;
 						}
+//{ObjectTeams:
 						if (   methodBinding.copyInheritanceSrc != null 
 							|| CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, methodBinding.selector()))
 							continue;
+// SH}
 						IMethodBinding methodBinding2 = this.resolver.getMethodBinding(methodBinding);
 						if (methodBinding2 != null) {
 							newMethods[convertedMethodCount++] = methodBinding2;
@@ -575,15 +582,18 @@ class TypeBinding implements ITypeBinding {
 		return getUnresolvedJavaElement(this.binding);
 	}
 	private JavaElement getUnresolvedJavaElement(org.eclipse.jdt.internal.compiler.lookup.TypeBinding typeBinding ) {
+		if (JavaCore.getPlugin() == null) {
+			return null;
+		}
 		if (this.resolver instanceof DefaultBindingResolver) {
 			DefaultBindingResolver defaultBindingResolver = (DefaultBindingResolver) this.resolver;
+			if (!defaultBindingResolver.fromJavaProject) return null;
 			return org.eclipse.jdt.internal.core.util.Util.getUnresolvedJavaElement(
 					typeBinding,
 					defaultBindingResolver.workingCopyOwner,
 					defaultBindingResolver.getBindingsToNodesMap());
-		} else {
-			return org.eclipse.jdt.internal.core.util.Util.getUnresolvedJavaElement(typeBinding, null, null);
 		}
+		return null;
 	}
 
 	/*
@@ -916,17 +926,17 @@ class TypeBinding implements ITypeBinding {
 		if (this.binding.isParameterizedTypeWithActualArguments()) {
 			ParameterizedTypeBinding parameterizedTypeBinding = (ParameterizedTypeBinding) this.binding;
 			final org.eclipse.jdt.internal.compiler.lookup.TypeBinding[] arguments = parameterizedTypeBinding.arguments;
-				int argumentsLength = arguments.length;
-				ITypeBinding[] newTypeArguments = new ITypeBinding[argumentsLength];
-				for (int i = 0; i < argumentsLength; i++) {
-					ITypeBinding typeBinding = this.resolver.getTypeBinding(arguments[i]);
-					if (typeBinding == null) {
-						return this.typeArguments = NO_TYPE_BINDINGS;
-					}
-					newTypeArguments[i] = typeBinding;
+			int argumentsLength = arguments.length;
+			ITypeBinding[] newTypeArguments = new ITypeBinding[argumentsLength];
+			for (int i = 0; i < argumentsLength; i++) {
+				ITypeBinding typeBinding = this.resolver.getTypeBinding(arguments[i]);
+				if (typeBinding == null) {
+					return this.typeArguments = NO_TYPE_BINDINGS;
 				}
-				return this.typeArguments = newTypeArguments;
+				newTypeArguments[i] = typeBinding;
 			}
+			return this.typeArguments = newTypeArguments;
+		}
 		return this.typeArguments = NO_TYPE_BINDINGS;
 	}
 

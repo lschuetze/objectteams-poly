@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -97,6 +97,7 @@ public class UnconditionalFlowInfo extends FlowInfo {
 
 	// Constants
 	public static final int BitCacheSize = 64; // 64 bits in a long.
+	public int[] nullStatusChangedInAssert; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=303448
 
 public FlowInfo addInitializationsFrom(FlowInfo inits) {
 	if (this == DEAD_END)
@@ -125,9 +126,9 @@ public FlowInfo addInitializationsFrom(FlowInfo inits) {
 			this.nullBit4 = otherInits.nullBit4;
 			if (COVERAGE_TEST_FLAG) {
 				if (CoverageTestId == 1) {
-			  this.nullBit4 = ~0;
+				  this.nullBit4 = ~0;
+				}
 			}
-		}
 		}
 		else {
 			this.nullBit1 = (b1 = otherInits.nullBit1)
@@ -160,9 +161,9 @@ public FlowInfo addInitializationsFrom(FlowInfo inits) {
                       				| a1 & (nb2 & nb3 | a2 & a3)) & b4;
 			if (COVERAGE_TEST_FLAG) {
 				if (CoverageTestId == 2) {
-			  this.nullBit4 = ~0;
+				  this.nullBit4 = ~0;
+				}
 			}
-		}
 		}
 		this.tagBits |= NULL_FLAG_MASK; // in all cases - avoid forgetting extras
 	}
@@ -184,18 +185,18 @@ public FlowInfo addInitializationsFrom(FlowInfo inits) {
 					copyLimit = otherLength;
 					if (COVERAGE_TEST_FLAG) {
 						if (CoverageTestId == 3) {
-						throw new AssertionFailedException("COVERAGE 3"); //$NON-NLS-1$
-					}
+							throw new AssertionFailedException("COVERAGE 3"); //$NON-NLS-1$
+						}
 					}
 				} else {
 					// current storage is longer
 					mergeLimit = otherLength;
 					if (COVERAGE_TEST_FLAG) {
 						if (CoverageTestId == 4) {
-						throw new AssertionFailedException("COVERAGE 4"); //$NON-NLS-1$
+							throw new AssertionFailedException("COVERAGE 4"); //$NON-NLS-1$
+						}
 					}
 				}
-			}
 			}
 		} else if (otherInits.extra != null) {
 			// no storage here, but other has extra storage.
@@ -214,9 +215,9 @@ public FlowInfo addInitializationsFrom(FlowInfo inits) {
 				}
 				if (COVERAGE_TEST_FLAG) {
 					if (CoverageTestId == 5) {
-					this.extra[5][otherLength - 1] = ~0;
+						this.extra[5][otherLength - 1] = ~0;
+					}
 				}
-			}
 			}
 			else {
 				for (int j = 2; j < extraLength; j++) {
@@ -224,10 +225,10 @@ public FlowInfo addInitializationsFrom(FlowInfo inits) {
 				}
 				if (COVERAGE_TEST_FLAG) {
 					if (CoverageTestId == 6) {
-					throw new AssertionFailedException("COVERAGE 6"); //$NON-NLS-1$
+						throw new AssertionFailedException("COVERAGE 6"); //$NON-NLS-1$
+					}
 				}
 			}
-		}
 		}
 		int i;
 		// manage definite assignment info
@@ -281,9 +282,9 @@ public FlowInfo addInitializationsFrom(FlowInfo inits) {
                       				| a1 & (nb2 & nb3 | a2 & a3)) & b4;
 			if (COVERAGE_TEST_FLAG) {
 				if (CoverageTestId == 7) {
-			  this.extra[5][i] = ~0;
+				  this.extra[5][i] = ~0;
+				}
 			}
-		}
 		}
 		for (; i < copyLimit; i++) {
 			for (int j = 2; j < extraLength; j++) {
@@ -291,11 +292,12 @@ public FlowInfo addInitializationsFrom(FlowInfo inits) {
 			}
 			if (COVERAGE_TEST_FLAG) {
 				if (CoverageTestId == 8) {
-			  this.extra[5][i] = ~0;
+				  this.extra[5][i] = ~0;
+				}
 			}
 		}
 	}
-	}
+	combineNullStatusChangeInAssertInfo(otherInits);
 	return this;
 }
 
@@ -398,8 +400,8 @@ public UnconditionalFlowInfo addPotentialNullInfoFrom(
             			| a1 & a2 & (nb1 & b4 | na4 & (b2 | b1) & nb3));
 		if (COVERAGE_TEST_FLAG) {
 			if (CoverageTestId == 9) {
-		  this.nullBit4 = ~0;
-		}
+			  this.nullBit4 = ~0;
+			}
 		}
 		if ((this.nullBit2 | this.nullBit3 | this.nullBit4) != 0) { //  bit1 is redundant
 		  	thisHasNulls = true;
@@ -413,8 +415,8 @@ public UnconditionalFlowInfo addPotentialNullInfoFrom(
   		this.nullBit4 = ~b1 & ~b3 & (b4 = otherInits.nullBit4) | ~b2 & (b1 & ~b3 | ~b1 & b4);
 		if (COVERAGE_TEST_FLAG) {
 			if (CoverageTestId == 10) {
-		  this.nullBit4 = ~0;
-		}
+			  this.nullBit4 = ~0;
+			}
 		}
 		if ((this.nullBit2 | this.nullBit3 | this.nullBit4) != 0) { //  bit1 is redundant
 		  	thisHasNulls = true;
@@ -430,8 +432,8 @@ public UnconditionalFlowInfo addPotentialNullInfoFrom(
 			}
 			if (COVERAGE_TEST_FLAG) {
 				if (CoverageTestId == 11) {
-				throw new AssertionFailedException("COVERAGE 11"); //$NON-NLS-1$
-			}
+					throw new AssertionFailedException("COVERAGE 11"); //$NON-NLS-1$
+				}
 			}
 		} else {
 			mergeLimit = copyLimit;
@@ -447,11 +449,11 @@ public UnconditionalFlowInfo addPotentialNullInfoFrom(
     				// will do with a copy -- caveat: only valid because definite assignment bits copied above
         			if (COVERAGE_TEST_FLAG) {
         				if (CoverageTestId == 12) {
-						throw new AssertionFailedException("COVERAGE 12"); //$NON-NLS-1$
+							throw new AssertionFailedException("COVERAGE 12"); //$NON-NLS-1$
+        				}
         			}
 				}
 			}
-		}
 		}
 		// PREMATURE skip operations for fields
 		int i;
@@ -482,9 +484,9 @@ public UnconditionalFlowInfo addPotentialNullInfoFrom(
     		}
 			if (COVERAGE_TEST_FLAG) {
 				if (CoverageTestId == 13) {
-			  this.nullBit4 = ~0;
+				  this.nullBit4 = ~0;
+				}
 			}
-		}
 		}
 		for (; i < copyLimit; i++) {
     		this.extra[1 + 1][i] = 0;
@@ -498,11 +500,12 @@ public UnconditionalFlowInfo addPotentialNullInfoFrom(
     		}
 			if (COVERAGE_TEST_FLAG) {
 				if (CoverageTestId == 14) {
-			  this.extra[5][i] = ~0;
+				  this.extra[5][i] = ~0;
+				}
 			}
 		}
 	}
-	}
+	combineNullStatusChangeInAssertInfo(otherInits);
 	if (thisHasNulls) {
 		this.tagBits |= NULL_FLAG_MASK;
 	}
@@ -634,6 +637,7 @@ public FlowInfo copy() {
 			}
 		}
 	}
+	copy.nullStatusChangedInAssert = this.nullStatusChangedInAssert;
 	return copy;
 }
 
@@ -823,11 +827,11 @@ final public boolean isDefinitelyUnknown(LocalVariableBinding local) {
 }
 
 //{ObjectTeams: variant for BaseCallTrackingVariable:
-	public boolean isDefinitelyAssigned(BaseCallTrackingVariable local) {
-		// don't check reachability!
-		return isDefinitelyAssigned(local.binding.id + this.maxFieldCount);
-	}
-// SH}
+      public boolean isDefinitelyAssigned(BaseCallTrackingVariable local) {
+              // don't check reachability!
+              return isDefinitelyAssigned(local.binding.id + this.maxFieldCount);
+      }
+//SH}
 
 /**
  * Check status of potential assignment at a given position.
@@ -1038,9 +1042,9 @@ public void markAsComparedEqualToNonNull(LocalVariableBinding local) {
 				}
 				if (COVERAGE_TEST_FLAG) {
 					if (CoverageTestId == 16) {
-					throw new AssertionFailedException("COVERAGE 16"); //$NON-NLS-1$
+						throw new AssertionFailedException("COVERAGE 16"); //$NON-NLS-1$
+					}
 				}
-			}
 			}
 			else {
 				int oldLength;
@@ -1053,10 +1057,10 @@ public void markAsComparedEqualToNonNull(LocalVariableBinding local) {
 					}
 					if (COVERAGE_TEST_FLAG) {
 						if (CoverageTestId == 17) {
-						throw new AssertionFailedException("COVERAGE 17"); //$NON-NLS-1$
+							throw new AssertionFailedException("COVERAGE 17"); //$NON-NLS-1$
+						}
 					}
 				}
-			}
 			}
 			// MACRO :'b,'es/nullBit\(.\)/extra[\1 + 1][vectorIndex]/gc
 			if (((mask = 1L << (position % BitCacheSize))
@@ -1081,11 +1085,11 @@ public void markAsComparedEqualToNonNull(LocalVariableBinding local) {
   			this.extra[3 + 1][vectorIndex] |= mask;
 			if (COVERAGE_TEST_FLAG) {
 				if (CoverageTestId == 18) {
-			  	this.extra[5][vectorIndex] = ~0;
+				  	this.extra[5][vectorIndex] = ~0;
+				}
 			}
 		}
 	}
-}
 }
 
 public void markAsComparedEqualToNull(LocalVariableBinding local) {
@@ -1117,9 +1121,9 @@ public void markAsComparedEqualToNull(LocalVariableBinding local) {
 			this.nullBit2 |= mask;
 			if (COVERAGE_TEST_FLAG) {
 				if (CoverageTestId == 19) {
-			  	this.nullBit4 = ~0;
+				  	this.nullBit4 = ~0;
+				}
 			}
-		}
 		}
 		else {
 			// use extra vector
@@ -1133,9 +1137,9 @@ public void markAsComparedEqualToNull(LocalVariableBinding local) {
 				}
 				if (COVERAGE_TEST_FLAG) {
 					if(CoverageTestId == 20) {
-					throw new AssertionFailedException("COVERAGE 20"); //$NON-NLS-1$
+						throw new AssertionFailedException("COVERAGE 20"); //$NON-NLS-1$
+					}
 				}
-			}
 			}
 			else {
 				int oldLength;
@@ -1148,10 +1152,10 @@ public void markAsComparedEqualToNull(LocalVariableBinding local) {
 					}
 					if (COVERAGE_TEST_FLAG) {
 						if(CoverageTestId == 21) {
-						throw new AssertionFailedException("COVERAGE 21"); //$NON-NLS-1$
+							throw new AssertionFailedException("COVERAGE 21"); //$NON-NLS-1$
+						}
 					}
 				}
-			}
 			}
 			if ((mask & this.extra[1 + 1][vectorIndex]) != 0) {
   			  	if ((mask
@@ -1242,9 +1246,9 @@ public void markAsDefinitelyNonNull(LocalVariableBinding local) {
     		this.nullBit4 &= mask;
     		if (COVERAGE_TEST_FLAG) {
     			if(CoverageTestId == 22) {
-    		  	this.nullBit1 = 0;
+	    		  	this.nullBit1 = 0;
+    			}
     		}
-    	}
     	}
     	else {
     		// use extra vector
@@ -1256,11 +1260,11 @@ public void markAsDefinitelyNonNull(LocalVariableBinding local) {
     		this.extra[5][vectorIndex] &= mask;
     		if (COVERAGE_TEST_FLAG) {
     			if(CoverageTestId == 23) {
-    			this.extra[2][vectorIndex] = 0;
+	    			this.extra[2][vectorIndex] = 0;
+    			}
     		}
     	}
 	}
-}
 }
 
 public void markAsDefinitelyNull(LocalVariableBinding local) {
@@ -1279,9 +1283,9 @@ public void markAsDefinitelyNull(LocalVariableBinding local) {
     		this.nullBit4 &= mask;
     		if (COVERAGE_TEST_FLAG) {
     			if(CoverageTestId == 24) {
-    		  	this.nullBit4 = ~0;
+	    		  	this.nullBit4 = ~0;
+    			}
     		}
-    	}
     	}
     	else {
     		// use extra vector
@@ -1293,11 +1297,11 @@ public void markAsDefinitelyNull(LocalVariableBinding local) {
     		this.extra[5][vectorIndex] &= mask;
     		if (COVERAGE_TEST_FLAG) {
     			if(CoverageTestId == 25) {
-    			this.extra[5][vectorIndex] = ~0;
+	    			this.extra[5][vectorIndex] = ~0;
+    			}
     		}
     	}
 	}
-}
 }
 
 /**
@@ -1323,9 +1327,9 @@ public void markAsDefinitelyUnknown(LocalVariableBinding local) {
 			this.nullBit3 &= mask;
 			if (COVERAGE_TEST_FLAG) {
 				if(CoverageTestId == 26) {
-			  	this.nullBit4 = 0;
+				  	this.nullBit4 = 0;
+				}
 			}
-		}
 		}
 		else {
 			// use extra vector
@@ -1337,27 +1341,27 @@ public void markAsDefinitelyUnknown(LocalVariableBinding local) {
 			this.extra[4][vectorIndex] &= mask;
 			if (COVERAGE_TEST_FLAG) {
 				if(CoverageTestId == 27) {
-				this.extra[5][vectorIndex] = 0;
+					this.extra[5][vectorIndex] = 0;
+				}
 			}
 		}
 	}
-}
 }
 
 public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
 	if ((otherInits.tagBits & UNREACHABLE) != 0 && this != DEAD_END) {
 		if (COVERAGE_TEST_FLAG) {
 			if(CoverageTestId == 28) {
-			throw new AssertionFailedException("COVERAGE 28"); //$NON-NLS-1$
-		}
+				throw new AssertionFailedException("COVERAGE 28"); //$NON-NLS-1$
+			}
 		}
 		return this;
 	}
 	if ((this.tagBits & UNREACHABLE) != 0) {
 		if (COVERAGE_TEST_FLAG) {
 			if(CoverageTestId == 29) {
-			throw new AssertionFailedException("COVERAGE 29"); //$NON-NLS-1$
-		}
+				throw new AssertionFailedException("COVERAGE 29"); //$NON-NLS-1$
+			}
 		}
 		return (UnconditionalFlowInfo) otherInits.copy(); // make sure otherInits won't be affected
 	}
@@ -1407,8 +1411,8 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
                 			| a2 & (nb1 & b4 | a3 & na4 & b1) & nb3);
     		if (COVERAGE_TEST_FLAG) {
     			if(CoverageTestId == 30) {
-    		  	this.nullBit4 = ~0;
-    		}
+	    		  	this.nullBit4 = ~0;
+    			}
     		}
     	} else { // other has no null info
     		a1 = this.nullBit1;
@@ -1418,9 +1422,9 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
       		this.nullBit4 = (na3 | na2) & na1 & a4	| a1 & na3 & na2;
     		if (COVERAGE_TEST_FLAG) {
     			if(CoverageTestId == 31) {
-    		  	this.nullBit4 = ~0;
+	    		  	this.nullBit4 = ~0;
+    			}
     		}
-    	}
     	}
 	} else if (otherHasNulls) { // only other had nulls
   		this.nullBit1 = 0;
@@ -1429,8 +1433,8 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
   		this.nullBit4 = (nb3 | nb2) & nb1 & b4	| b1 & nb3 & nb2;
   		if (COVERAGE_TEST_FLAG) {
   			if(CoverageTestId == 32) {
-  		  	this.nullBit4 = ~0;
-  		}
+	  		  	this.nullBit4 = ~0;
+  			}
   		}
     	thisHasNulls =
     		// redundant with the three following ones
@@ -1458,9 +1462,9 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
 					copyLimit = otherLength;
 					if (COVERAGE_TEST_FLAG) {
 						if(CoverageTestId == 33) {
-						throw new AssertionFailedException("COVERAGE 33"); //$NON-NLS-1$
+							throw new AssertionFailedException("COVERAGE 33"); //$NON-NLS-1$
+						}
 					}
-				}
 				}
 				else {
 					// current storage is longer
@@ -1468,19 +1472,19 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
 					resetLimit = length;
 					if (COVERAGE_TEST_FLAG) {
 						if(CoverageTestId == 34) {
-						throw new AssertionFailedException("COVERAGE 34"); //$NON-NLS-1$
+							throw new AssertionFailedException("COVERAGE 34"); //$NON-NLS-1$
+						}
 					}
 				}
-			}
 			}
 			else {
 				resetLimit = this.extra[0].length;
 				if (COVERAGE_TEST_FLAG) {
 					if(CoverageTestId == 35) {
-					throw new AssertionFailedException("COVERAGE 35"); //$NON-NLS-1$
+						throw new AssertionFailedException("COVERAGE 35"); //$NON-NLS-1$
+					}
 				}
 			}
-		}
 		}
 		else if (otherInits.extra != null) {
 			// no storage here, but other has extra storage.
@@ -1494,9 +1498,9 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
 			copyLimit = otherLength;
 			if (COVERAGE_TEST_FLAG) {
 				if(CoverageTestId == 36) {
-				throw new AssertionFailedException("COVERAGE 36"); //$NON-NLS-1$
+					throw new AssertionFailedException("COVERAGE 36"); //$NON-NLS-1$
+				}
 			}
-		}
 		}
         // MACRO :'b,'es/nullBit\(.\)/extra[\1 + 1][i]/g
 		// manage definite assignment
@@ -1555,9 +1559,9 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
 				this.extra[5][i] != 0 ;
 			if (COVERAGE_TEST_FLAG) {
 				if(CoverageTestId == 37) {
-				this.extra[5][i] = ~0;
+					this.extra[5][i] = ~0;
+				}
 			}
-		}
 		}
 		for (; i < copyLimit; i++) {
     		this.extra[1 + 1][i] = 0;
@@ -1570,9 +1574,9 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
 				this.extra[5][i] != 0;
 			if (COVERAGE_TEST_FLAG) {
 				if(CoverageTestId == 38) {
-				this.extra[5][i] = ~0;
+					this.extra[5][i] = ~0;
+				}
 			}
-		}
 		}
 		for (; i < resetLimit; i++) {
     		a1 = this.extra[1 + 1][i];
@@ -1586,11 +1590,12 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
 				this.extra[5][i] != 0;
 			if (COVERAGE_TEST_FLAG) {
 				if(CoverageTestId == 39) {
-				this.extra[5][i] = ~0;
+					this.extra[5][i] = ~0;
+				}
 			}
 		}
 	}
-	}
+	combineNullStatusChangeInAssertInfo(otherInits);
 	if (thisHasNulls) {
 		this.tagBits |= NULL_FLAG_MASK;
 	}
@@ -1644,7 +1649,7 @@ public FlowInfo safeInitsWhenTrue() {
 public FlowInfo setReachMode(int reachMode) {
 	if (this == DEAD_END) {// cannot modify DEAD_END
 		return this;
-	}
+	}	
 	if (reachMode == REACHABLE ) {
 		this.tagBits &= ~UNREACHABLE;
 	} else {
@@ -1752,6 +1757,7 @@ public UnconditionalFlowInfo unconditionalFieldLessCopy() {
 		copy.nullBit3 = this.nullBit3 & mask;
 		copy.nullBit4 = this.nullBit4 & mask;
 	}
+	copy.nullStatusChangedInAssert = this.nullStatusChangedInAssert;
 	// use extra vector
 	if (this.extra == null) {
 		return copy; // if vector not yet allocated, then not initialized
@@ -1793,6 +1799,61 @@ public UnconditionalFlowInfo unconditionalInits() {
 
 public UnconditionalFlowInfo unconditionalInitsWithoutSideEffect() {
 	return this;
+}
+
+public void markedAsNullOrNonNullInAssertExpression(LocalVariableBinding local) {
+	int position = local.id + this.maxFieldCount;
+	int oldLength;
+	if (this.nullStatusChangedInAssert == null) {
+		this.nullStatusChangedInAssert = new int[position + 1];
+	}
+	else {
+		if(position >= (oldLength = this.nullStatusChangedInAssert.length)) {
+			System.arraycopy(this.nullStatusChangedInAssert, 0, (this.nullStatusChangedInAssert = new int[position + 1]), 0, oldLength); 
+		}
+	}
+	this.nullStatusChangedInAssert[position] = 1;
+}
+
+public boolean isMarkedAsNullOrNonNullInAssertExpression(LocalVariableBinding local) {
+	int position = local.id + this.maxFieldCount;
+	if(this.nullStatusChangedInAssert == null || position >= this.nullStatusChangedInAssert.length) {
+		return false;
+	}
+	if(this.nullStatusChangedInAssert[position] == 1) {
+		return true;
+	}
+	return false;
+}
+
+/**
+ * Combine the null status changes in assert expressions info
+ * @param otherInits
+ */
+// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=303448
+private void combineNullStatusChangeInAssertInfo(UnconditionalFlowInfo otherInits) {
+	if (this.nullStatusChangedInAssert != null || otherInits.nullStatusChangedInAssert != null) {
+		int mergedLength, length;
+		if (this.nullStatusChangedInAssert != null) {
+			if (otherInits.nullStatusChangedInAssert != null) {
+				if(otherInits.nullStatusChangedInAssert.length > this.nullStatusChangedInAssert.length) {
+					mergedLength = otherInits.nullStatusChangedInAssert.length;
+					length = this.nullStatusChangedInAssert.length;
+					System.arraycopy(this.nullStatusChangedInAssert, 0, (this.nullStatusChangedInAssert = new int[mergedLength]), 0, length);
+					for(int i = 0; i < length; i ++) {
+						this.nullStatusChangedInAssert[i] |= otherInits.nullStatusChangedInAssert[i];
+					}
+					System.arraycopy(otherInits.nullStatusChangedInAssert, length, this.nullStatusChangedInAssert, length, mergedLength - length);
+				} else {
+					for(int i = 0; i < otherInits.nullStatusChangedInAssert.length; i ++) {
+						this.nullStatusChangedInAssert[i] |= otherInits.nullStatusChangedInAssert[i];
+					}
+				}
+			}
+		} else if (otherInits.nullStatusChangedInAssert != null) {
+			this.nullStatusChangedInAssert = otherInits.nullStatusChangedInAssert;
+		}
+	}
 }
 }
 

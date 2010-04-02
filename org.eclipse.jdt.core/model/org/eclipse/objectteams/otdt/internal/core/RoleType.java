@@ -341,7 +341,7 @@ public class RoleType extends OTType implements IRoleType
     	// class name must exist and be unique
 		if ((qualifiedTypes != null) && (qualifiedTypes.length == 1))
 		{
-			String fqBaseName = Util.concat(qualifiedTypes[0][0], '.', qualifiedTypes[0][1]);
+			String fqBaseName = Util.concatenateName(qualifiedTypes[0][0], qualifiedTypes[0][1], '.');
 			// get JavaModel element by resolved name
 			return referenceType.getJavaProject().findType(fqBaseName);			
 		}

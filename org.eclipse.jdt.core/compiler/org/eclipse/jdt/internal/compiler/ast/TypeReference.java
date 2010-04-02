@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -350,7 +350,22 @@ public TypeBinding resolveTypeArgument(BlockScope blockScope, ReferenceBinding g
 }
 
 public TypeBinding resolveTypeArgument(ClassScope classScope, ReferenceBinding genericType, int rank) {
-    return resolveType(classScope);
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=294057, circularity is allowed when we are
+	// resolving type arguments i.e interface A<T extends C> {}	interface B extends A<D> {}
+	// interface D extends C {}	interface C extends B {}
+	ReferenceBinding ref = classScope.referenceContext.binding;
+	boolean pauseHierarchyCheck = false;
+	try {
+		if (ref.isHierarchyBeingConnected()) {
+			ref.tagBits |= TagBits.PauseHierarchyCheck;
+			pauseHierarchyCheck = true;
+		}
+	    return resolveType(classScope);
+	} finally {
+		if (pauseHierarchyCheck) {
+			ref.tagBits &= ~TagBits.PauseHierarchyCheck;
+		}
+	}
 }
 
 public abstract void traverse(ASTVisitor visitor, BlockScope scope);

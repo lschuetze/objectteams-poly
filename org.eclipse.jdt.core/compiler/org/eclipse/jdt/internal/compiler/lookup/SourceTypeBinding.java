@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1932,7 +1932,7 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 					method.tagBits |= TagBits.HasMissingType;
 				}
 				TypeBinding leafType = parameterType.leafComponentType();
-			    if (leafType instanceof ReferenceBinding && (((ReferenceBinding) leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0)
+				if (leafType instanceof ReferenceBinding && (((ReferenceBinding) leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0)
 					method.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
 				newParameters[i] = parameterType;
 //{ObjectTeams: don't overwrite existing binding (only fill in detail) 
@@ -2419,7 +2419,7 @@ public String toString() {
 	return buffer.toString();
 }
 public TypeVariableBinding[] typeVariables() {
-	return this.typeVariables;
+	return this.typeVariables != null ? this.typeVariables : Binding.NO_TYPE_VARIABLES;
 }
 void verifyMethods(MethodVerifier verifier) {
 //{ObjectTeams: shortcut for predefined confined types (override final methods???)
@@ -2433,6 +2433,10 @@ void verifyMethods(MethodVerifier verifier) {
 	  if (!this.memberTypes[i].isBinaryBinding())
 // SH}
 		 ((SourceTypeBinding) this.memberTypes[i]).verifyMethods(verifier);
+}
+
+public FieldBinding[] unResolvedFields() {
+	return this.fields;
 }
 //{ObjectTeams:  in state final we lost the scope, cannot use some code.
 private boolean isStateFinal() {

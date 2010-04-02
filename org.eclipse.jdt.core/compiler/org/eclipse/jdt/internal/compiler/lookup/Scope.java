@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -981,10 +981,26 @@ public abstract class Scope {
 		ReferenceBinding memberType = enclosingType.getMemberType(typeName);
 		if (memberType != null) {
 			unitScope.recordTypeReference(memberType);
-			if (enclosingReceiverType == null
-				? memberType.canBeSeenBy(getCurrentPackage())
-				: memberType.canBeSeenBy(enclosingType, enclosingReceiverType))
+			if (enclosingReceiverType == null) {
+				if (memberType.canBeSeenBy(getCurrentPackage())) {
 					return memberType;
+				}
+				// maybe some type in the compilation unit is extending some class in some package
+				// and the selection is for some protected inner class of that superclass
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=235658
+				if (this instanceof CompilationUnitScope) {
+					TypeDeclaration[] types = ((CompilationUnitScope)this).referenceContext.types;
+					if (types != null) {
+						for (int i = 0, max = types.length; i < max; i++) {
+							if (memberType.canBeSeenBy(enclosingType, types[i].binding)) {
+								return memberType;
+							}
+						}
+					}
+				}
+			} else if (memberType.canBeSeenBy(enclosingType, enclosingReceiverType)) {
+				return memberType;
+			}
 			return new ProblemReferenceBinding(new char[][]{typeName}, memberType, ProblemReasons.NotVisible);
 		}
 		return null;
@@ -1025,7 +1041,7 @@ public abstract class Scope {
 				if (argumentTypes == Binding.NO_PARAMETERS
 				    && CharOperation.equals(selector, TypeConstants.GETCLASS)
 				    && exactMethod.returnType.isParameterizedType()/*1.5*/) {
-						return ParameterizedMethodBinding.instantiateGetClass(receiverType, exactMethod, this);
+						return environment().createGetClassMethod(receiverType, exactMethod, this);
 			    }
 				// targeting a generic method could find an exact match with variable return type
 				if (invocationSite.genericTypeArguments() != null) {
@@ -1633,7 +1649,7 @@ public abstract class Scope {
 			            break;
 			        case 'g':
 			            if (CharOperation.equals(selector, TypeConstants.GETCLASS) && methodBinding.returnType.isParameterizedType()/*1.5*/) {
-							return ParameterizedMethodBinding.instantiateGetClass(receiverType, methodBinding, this);
+							return environment().createGetClassMethod(receiverType, methodBinding, this);
 			            }
 			            break;
 			    }
@@ -2234,7 +2250,7 @@ public abstract class Scope {
 										if (argumentTypes == Binding.NO_PARAMETERS
 										    && CharOperation.equals(selector, TypeConstants.GETCLASS)
 										    && methodBinding.returnType.isParameterizedType()/*1.5*/) {
-												return ParameterizedMethodBinding.instantiateGetClass(receiverType, methodBinding, this);
+												return environment().createGetClassMethod(receiverType, methodBinding, this);
 										}
 										return methodBinding;
 									}
@@ -2536,7 +2552,7 @@ public abstract class Scope {
 			if (argumentTypes == Binding.NO_PARAMETERS
 			    && CharOperation.equals(selector, TypeConstants.GETCLASS)
 			    && methodBinding.returnType.isParameterizedType()/*1.5*/) {
-					return ParameterizedMethodBinding.instantiateGetClass(receiverType, methodBinding, this);
+					return environment().createGetClassMethod(receiverType, methodBinding, this);
 		    }
 			return methodBinding;
 		} catch (AbortCompilation e) {

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -146,11 +146,16 @@ class DefaultBindingResolver extends BindingResolver {
 	 * Toggle controlling whether DOM bindings should be created when missing internal compiler bindings..
 	 */
 	boolean isRecoveringBindings;
-
+	
+	/**
+	 * Set to <code>true</code> if initialized from a java project
+	 */
+	boolean fromJavaProject;
+	
 	/**
 	 * Constructor for DefaultBindingResolver.
 	 */
-	DefaultBindingResolver(CompilationUnitScope scope, WorkingCopyOwner workingCopyOwner, BindingTables bindingTables, boolean isRecoveringBindings) {
+	DefaultBindingResolver(CompilationUnitScope scope, WorkingCopyOwner workingCopyOwner, BindingTables bindingTables, boolean isRecoveringBindings, boolean fromJavaProject) {
 		this.newAstToOldAst = new HashMap();
 		this.astNodesToBlockScope = new HashMap();
 		this.bindingsToAstNodes = new HashMap();
@@ -158,9 +163,10 @@ class DefaultBindingResolver extends BindingResolver {
 		this.scope = scope;
 		this.workingCopyOwner = workingCopyOwner;
 		this.isRecoveringBindings = isRecoveringBindings;
+		this.fromJavaProject = fromJavaProject;
 	}
 
-	DefaultBindingResolver(LookupEnvironment lookupEnvironment, WorkingCopyOwner workingCopyOwner, BindingTables bindingTables, boolean isRecoveringBindings) {
+	DefaultBindingResolver(LookupEnvironment lookupEnvironment, WorkingCopyOwner workingCopyOwner, BindingTables bindingTables, boolean isRecoveringBindings, boolean fromJavaProject) {
 		this.newAstToOldAst = new HashMap();
 		this.astNodesToBlockScope = new HashMap();
 		this.bindingsToAstNodes = new HashMap();
@@ -168,6 +174,7 @@ class DefaultBindingResolver extends BindingResolver {
 		this.scope = new CompilationUnitScope(new CompilationUnitDeclaration(null, null, -1), lookupEnvironment);
 		this.workingCopyOwner = workingCopyOwner;
 		this.isRecoveringBindings = isRecoveringBindings;
+		this.fromJavaProject = fromJavaProject;
 	}
 
 	/*

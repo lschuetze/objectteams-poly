@@ -42,7 +42,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 public class HookConfigurator implements org.eclipse.osgi.baseadaptor.HookConfigurator {
 
 	
-	private static final String OTDT_BUILD_ID = "OT-1.4.0M2"; //$NON-NLS-1$
+	private static final String OTDT_BUILD_ID = "OT-0.7.0M1"; //$NON-NLS-1$
 	private static final String ECLIPSE_BUILD_ID = "eclipse.buildId"; //$NON-NLS-1$
 	/** Has OT/Equinox been enabled (using system property ot.equinox set to anything but "false")? */
 	public static final boolean OT_EQUINOX_ENABLED;

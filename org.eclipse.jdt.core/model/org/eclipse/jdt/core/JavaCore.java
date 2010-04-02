@@ -83,6 +83,7 @@
  *     IBM Corporation - added getOptionForConfigurableSeverity(int)
  *     Benjamin Muskalla - added COMPILER_PB_MISSING_SYNCHRONIZED_ON_INHERITED_METHOD
  *     Stephan Herrmann  - added COMPILER_PB_UNUSED_OBJECT_ALLOCATION
+ *     Stephan Herrmann  - added COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS
  *
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
@@ -1437,6 +1438,21 @@ public final class JavaCore extends Plugin {
 	 * @category CompilerOptionID
 	 */
 	public static final String COMPILER_PB_SUPPRESS_WARNINGS = PLUGIN_ID + ".compiler.problem.suppressWarnings"; //$NON-NLS-1$
+	/**
+	 * Compiler option ID: Further Determining the Effect of <code>@SuppressWarnings</code> if also
+	 * {@link #COMPILER_PB_SUPPRESS_WARNINGS} is enabled.
+	 * <p>When enabled, the <code>@SuppressWarnings</code> annotation can additionally be used to suppress 
+	 * optional compiler diagnostics that have been configured as {@link #ERROR}.
+	 * <p>When disabled, all <code>@SuppressWarnings</code> annotations only affects warnings.
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.suppressOptionalErrors"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "enabled", "disabled" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"disabled"</code></dd>
+	 * </dl>
+	 * @since 3.6
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS = PLUGIN_ID + ".compiler.problem.suppressOptionalErrors"; //$NON-NLS-1$
 	/**
 	 * Compiler option ID: Reporting Unhandled Warning Token for <code>@SuppressWarnings</code>.
 	 * <p>When enabled, the compiler will issue an error or a warning when encountering a token
@@ -4601,6 +4617,33 @@ public final class JavaCore extends Plugin {
 			false, // no access rules to combine
 			extraAttributes);
 	}
+	
+	/**
+	 * Returns an array of classpath entries that are referenced directly or indirectly 
+	 * by a given classpath entry. For the entry kind {@link IClasspathEntry#CPE_LIBRARY}, 
+	 * the method returns the libraries that are included in the Class-Path section of 
+	 * the MANIFEST.MF file. If a referenced JAR file has further references to other library 
+	 * entries, they are processed recursively and added to the list. For entry kinds other 
+	 * than {@link IClasspathEntry#CPE_LIBRARY}, this method returns an empty array.
+	 * <p> 
+	 * If a referenced entry has already been stored 
+	 * in the given project's .classpath, the stored attributes are populated in the corresponding
+	 * referenced entry. For more details on storing referenced entries see
+	 * see {@link IJavaProject#setRawClasspath(IClasspathEntry[], IClasspathEntry[], IPath, 
+	 * IProgressMonitor)}. 
+	 * </p>
+	 * 
+	 * @param libraryEntry the library entry whose referenced entries are sought 
+	 * @param project project where the persisted referenced entries to be retrieved from
+	 * @return an array of classpath entries that are referenced directly or indirectly by the given entry. 
+	 * 			If not applicable, returns an empty array.
+	 * @since 3.6
+	 */
+	public static IClasspathEntry[] getReferencedClasspathEntries(IClasspathEntry libraryEntry, IJavaProject project) {
+		JavaModelManager manager = JavaModelManager.getJavaModelManager();
+		return manager.getReferencedClasspathEntries(libraryEntry, project);
+	}
+	
 	/**
 	 * Removed the given classpath variable. Does nothing if no value was
 	 * set for this classpath variable.

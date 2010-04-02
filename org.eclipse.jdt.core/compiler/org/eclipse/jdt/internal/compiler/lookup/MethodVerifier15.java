@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -138,6 +138,15 @@ boolean areTypesEqual(TypeBinding one, TypeBinding two, MethodBinding methodTwo)
 	//		return ((UnresolvedReferenceBinding) two).resolvedType == one;
 	return false; // all other type bindings are identical
 }
+// Given `overridingMethod' which overrides `inheritedMethod' answer whether some subclass method that
+// differs in erasure from overridingMethod could override `inheritedMethod'
+protected boolean canOverridingMethodDifferInErasure(MethodBinding overridingMethod, MethodBinding inheritedMethod) {
+	if (overridingMethod.areParameterErasuresEqual(inheritedMethod))
+		return false;  // no further change in signature is possible due to parameterization.
+	if (overridingMethod.declaringClass.isRawType())
+		return false;  // no parameterization is happening anyways.
+	return true;
+}
 boolean canSkipInheritedMethods() {
 	if (this.type.superclass() != null)
 		if (this.type.superclass().isAbstract() || this.type.superclass().isParameterizedType())
@@ -163,8 +172,11 @@ void checkConcreteInheritedMethod(MethodBinding concreteMethod, MethodBinding[] 
 				problemReporter().unsafeReturnTypeOverride(concreteMethod, originalInherited, this.type);
 
 		// check whether bridge method is already defined above for interface methods
+		// skip generation of bridge method for current class & method if an equivalent
+		// bridge will be/would have been generated in the context of the super class since
+		// the bridge itself will be inherited. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=298362
 		if (originalInherited.declaringClass.isInterface()) {
-			if ((concreteMethod.declaringClass == this.type.superclass && this.type.superclass.isParameterizedType())
+			if ((concreteMethod.declaringClass == this.type.superclass && this.type.superclass.isParameterizedType() && !areMethodsCompatible(concreteMethod, originalInherited))
 				|| this.type.superclass.erasure().findSuperTypeOriginatingFrom(originalInherited.declaringClass) == null)
 					this.type.addSyntheticBridgeMethod(originalInherited, concreteMethod.original());
 		}
@@ -522,6 +534,20 @@ void checkMethods() {
 					continue; // both inherited methods matched the same currentMethod
 				if (canSkipInheritedMethods(inheritedMethod, otherInheritedMethod))
 					continue;
+				// Skip the otherInheritedMethod if it is completely replaced by inheritedMethod
+				// This elimination used to happen rather eagerly in computeInheritedMethods step
+				// itself earlier. (https://bugs.eclipse.org/bugs/show_bug.cgi?id=302358)
+				if (inheritedMethod.declaringClass != otherInheritedMethod.declaringClass) {
+					if (otherInheritedMethod.declaringClass.isInterface()) {
+						if (isInterfaceMethodImplemented(otherInheritedMethod, inheritedMethod, otherInheritedMethod.declaringClass)) {
+							skip[j] = true;
+							continue;
+						}
+					} else if (areMethodsCompatible(inheritedMethod, otherInheritedMethod)) {
+						skip[j] = true;
+						continue;
+					}
+				}
 				otherInheritedMethod = computeSubstituteMethod(otherInheritedMethod, inheritedMethod);
 				if (otherInheritedMethod != null) {
 					if (inheritedMethod.declaringClass != otherInheritedMethod.declaringClass
@@ -696,10 +722,14 @@ MethodBinding computeSubstituteMethod(MethodBinding inheritedMethod, MethodBindi
 boolean detectInheritedNameClash(MethodBinding inherited, MethodBinding otherInherited) {
 	if (!inherited.areParameterErasuresEqual(otherInherited))
 		return false;
-	// skip it if otherInherited is defined by a subtype of inherited's declaringClass
-	if (inherited.declaringClass.erasure() != otherInherited.declaringClass.erasure())
+	// skip it if otherInherited is defined by a subtype of inherited's declaringClass or vice versa.
+	// avoid being order sensitive and check with the roles reversed also.
+	if (inherited.declaringClass.erasure() != otherInherited.declaringClass.erasure()) {
 		if (inherited.declaringClass.findSuperTypeOriginatingFrom(otherInherited.declaringClass) != null)
 			return false;
+		if (otherInherited.declaringClass.findSuperTypeOriginatingFrom(inherited.declaringClass) != null)
+			return false;
+	}
 
 	problemReporter().inheritedMethodsHaveNameClash(this.type, inherited, otherInherited);
 	return true;

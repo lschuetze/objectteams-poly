@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.formatter;
 
+import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.formatter.comment.IJavaDocTagConstants;
 
 /**
@@ -31,7 +32,8 @@ public class FormatJavadocBlock extends FormatJavadocNode implements IJavaDocTag
 	final static int PARAM_TAG = 0x0020;
 	final static int IN_PARAM_TAG = 0x0040;
 	final static int IN_DESCRIPTION = 0x0080;
-	
+	final static int IMMUTABLE = 0x0100;
+
 	// constants
 	final static int MAX_TAG_HIERARCHY = 10;
 
@@ -53,6 +55,11 @@ public FormatJavadocBlock(int start, int end, int line, int value) {
 		case TAG_THROWS_VALUE:
 		case TAG_EXCEPTION_VALUE:
 			this.flags |= PARAM_TAG;
+			break;
+		case TAG_CODE_VALUE:
+		case TAG_LITERAL_VALUE:
+			this.flags |= IMMUTABLE;
+			break;
 	}
 }
 
@@ -62,7 +69,7 @@ private void addNode(FormatJavadocNode node) {
 		this.nodes = new FormatJavadocNode[DEFAULT_ARRAY_SIZE];
 	} else if (this.nodesPtr >= this.nodes.length) {
 		System.arraycopy(
-			this.nodes, 0, 
+			this.nodes, 0,
 			this.nodes = new FormatJavadocNode[this.nodes.length+INCREMENT_ARRAY_SIZE], 0,
 			this.nodesPtr);
 	}
@@ -141,6 +148,9 @@ void addText(FormatJavadocText text) {
 		}
 	}
 	addNode(text);
+	if (isImmutable()) {
+		text.immutable = true;
+	}
 }
 
 void clean() {
@@ -227,7 +237,7 @@ FormatJavadocText[] getTextHierarchy(FormatJavadocNode node, int htmlDepth) {
 
 /**
  * Returns whether the text is on the same line of the tag or not.
- * 
+ *
  * @return <code>true</code> if the text is on the same line than the tag,
  * 	<code>false</code> otherwise.
  */
@@ -239,7 +249,7 @@ public boolean hasTextOnTagLine() {
  * Returns whether the block is the javadoc comment description or not.
  * The description begins after the starting delimiter and continues until the tag
  * section.
- * 
+ *
  * @return <code>true</code> if the block is the javadoc description,
  * 	<code>false</code> otherwise.
  */
@@ -250,7 +260,7 @@ public boolean isDescription() {
 /**
  * Returns whether the block is the first block of the javadoc comment or not
  * (independently of the fact it's a description or not).
- * 
+ *
  * @return <code>true</code> if the block is the first of the javadoc
  * 	comment, <code>false</code> otherwise.
  */
@@ -261,7 +271,7 @@ public boolean isFirst() {
 /**
  * Returns whether the first block starts on the same line than the javadoc
  * starting delimiter or not.
- * 
+ *
  * @return <code>true</code> if the the first block starts on the same line
  * 	than the javadoc starting delimiter, <code>false</code> otherwise.
  */
@@ -270,9 +280,22 @@ public boolean isHeaderLine() {
 }
 
 /**
- * Returns whether the block is a description or inlined in a description. 
+ * Returns whether the block is immutable or not.
+ * <p>
+ * Currently, only {@code} and {@literal} inline tags block are considered as
+ * immutable.
+ * </p>
+ * @return <code>true</code> if the block is immutable,
+ * 	<code>false</code> otherwise.
+ */
+public boolean isImmutable() {
+	return (this.flags & IMMUTABLE) == IMMUTABLE;
+}
+
+/**
+ * Returns whether the block is a description or inlined in a description.
  * @see #isParamTag()
- * 
+ *
  * @return <code>true</code> if the block is a description or inlined in a
  * 	description, <code>false</code> otherwise.
  */
@@ -282,7 +305,7 @@ public boolean isInDescription() {
 
 /**
  * Returns whether the text is on the same line of the tag.
- * 
+ *
  * @return <code>true</code> if the text is on the same line than the tag,
  * 	<code>false</code> otherwise.
  */
@@ -291,9 +314,9 @@ public boolean isInlined() {
 }
 
 /**
- * Returns whether the block is a param tag or inlined in a param tag. 
+ * Returns whether the block is a param tag or inlined in a param tag.
  * @see #isParamTag()
- * 
+ *
  * @return <code>true</code> if the block is a param tag or inlined in a param
  * 	tag, <code>false</code> otherwise.
  */
@@ -302,9 +325,9 @@ public boolean isInParamTag() {
 }
 
 /**
- * Returns whether the text is on the same line of the tag.
- * 
- * @return <code>true</code> if the text is on the same line than the tag,
+ * Returns whether the the tag is on one line only.
+ *
+ * @return <code>true</code> if the tag is on one line only,
  * 	<code>false</code> otherwise.
  */
 public boolean isOneLineTag() {
@@ -314,7 +337,7 @@ public boolean isOneLineTag() {
 /**
  * Returns whether the block is a param tag or not.  Note that this also includes
  * &#064;serialField, &#064;throws and &#064;exception tags.
- * 
+ *
  * @return <code>true</code> if the block is a param tag,
  * 	<code>false</code> otherwise.
  */
@@ -332,9 +355,14 @@ void setHeaderLine(int javadocLineStart) {
 }
 
 protected void toString(StringBuffer buffer) {
-	if ((this.flags & INLINED) != 0) buffer.append('{');
+	boolean inlined = (this.flags & INLINED) != 0;
+	if (inlined) buffer.append("	{"); //$NON-NLS-1$
 	buffer.append('@');
-	buffer.append(this.tagValue);
+	if (this.tagValue == TAG_OTHERS_VALUE) {
+		buffer.append("others_tag"); //$NON-NLS-1$
+	} else {
+		buffer.append(TAG_NAMES[this.tagValue]);
+	}
 	super.toString(buffer);
 	if (this.reference == null) {
 		buffer.append('\n');
@@ -343,8 +371,52 @@ protected void toString(StringBuffer buffer) {
 		this.reference.toString(buffer);
 		buffer.append(")\n"); //$NON-NLS-1$
 	}
+	StringBuffer flagsBuffer = new StringBuffer();
+	if (isDescription()) {
+		if (flagsBuffer.length() > 0) flagsBuffer.append(',');
+		flagsBuffer.append("description"); //$NON-NLS-1$
+	}
+	if (isFirst()) {
+		if (flagsBuffer.length() > 0) flagsBuffer.append(',');
+		flagsBuffer.append("first"); //$NON-NLS-1$
+	}
+	if (isHeaderLine()) {
+		if (flagsBuffer.length() > 0) flagsBuffer.append(',');
+		flagsBuffer.append("header line"); //$NON-NLS-1$
+	}
+	if (isImmutable()) {
+		if (flagsBuffer.length() > 0) flagsBuffer.append(',');
+		flagsBuffer.append("immutable"); //$NON-NLS-1$
+	}
+	if (isInDescription()) {
+		if (flagsBuffer.length() > 0) flagsBuffer.append(',');
+		flagsBuffer.append("in description"); //$NON-NLS-1$
+	}
+	if (isInlined()) {
+		if (flagsBuffer.length() > 0) flagsBuffer.append(',');
+		flagsBuffer.append("inlined"); //$NON-NLS-1$
+	}
+	if (isInParamTag()) {
+		if (flagsBuffer.length() > 0) flagsBuffer.append(',');
+		flagsBuffer.append("in param tag"); //$NON-NLS-1$
+	}
+	if (isOneLineTag()) {
+		if (flagsBuffer.length() > 0) flagsBuffer.append(',');
+		flagsBuffer.append("one line tag"); //$NON-NLS-1$
+	}
+	if (isParamTag()) {
+		if (flagsBuffer.length() > 0) flagsBuffer.append(',');
+		flagsBuffer.append("param tag"); //$NON-NLS-1$
+	}
+	if (flagsBuffer.length() > 0) {
+		if (inlined) buffer.append('\t');
+		buffer.append("	flags: "); //$NON-NLS-1$
+		buffer.append(flagsBuffer);
+		buffer.append('\n');
+	}
 	if (this.nodesPtr > -1) {
 		for (int i = 0; i <= this.nodesPtr; i++) {
+			if (inlined) buffer.append('\t');
 			this.nodes[i].toString(buffer);
 		}
 	}
@@ -366,6 +438,18 @@ public void toStringDebug(StringBuffer buffer, char[] source) {
 	}
 	for (int i=0; i<=this.nodesPtr; i++) {
 		this.nodes[i].toStringDebug(buffer, source);
+	}
+}
+
+void update(Scanner scanner) {
+	int blockEnd = scanner.getLineNumber(this.sourceEnd);
+	if (blockEnd == this.lineStart) {
+		this.flags |= FormatJavadocBlock.ONE_LINE_TAG;
+	}
+	for (int i=0; i<=this.nodesPtr; i++) {
+		if (!this.nodes[i].isText()) {
+			((FormatJavadocBlock)this.nodes[i]).update(scanner);
+		}
 	}
 }
 }

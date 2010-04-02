@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak - Contribution for bug 150741
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -121,7 +122,6 @@ import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.core.util.CodeSnippetParsingUtil;
 import org.eclipse.jdt.internal.formatter.align.Alignment;
 import org.eclipse.jdt.internal.formatter.align.AlignmentException;
-import org.eclipse.jdt.internal.formatter.comment.CommentRegion;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
@@ -877,7 +877,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		configureKeywordMode(compilationUnitSource);
 // SH}
 		this.localScanner.setSource(compilationUnitSource);
-		this.scribe.initializeScanner(compilationUnitSource);
+		this.scribe.resetScanner(compilationUnitSource);
 
 		if (nodes == null) {
 			return null;
@@ -917,7 +917,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		configureKeywordMode(compilationUnitSource);
 // SH}
 		this.localScanner.setSource(compilationUnitSource);
-		this.scribe.initializeScanner(compilationUnitSource);
+		this.scribe.resetScanner(compilationUnitSource);
 
 		this.lastLocalDeclarationSourceStart = -1;
 		try {
@@ -949,7 +949,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		configureKeywordMode(compilationUnitSource);
 // SH}		
 		this.localScanner.setSource(compilationUnitSource);
-		this.scribe.initializeScanner(compilationUnitSource);
+		this.scribe.resetScanner(compilationUnitSource);
 
 		if (constructorDeclaration == null) {
 			return null;
@@ -996,7 +996,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		configureKeywordMode(compilationUnitSource);
 // SH}		
 		this.localScanner.setSource(compilationUnitSource);
-		this.scribe.initializeScanner(compilationUnitSource);
+		this.scribe.resetScanner(compilationUnitSource);
 
 		if (expression == null) {
 			return null;
@@ -1028,38 +1028,6 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		}
 	}
 //SH}
-
-	/**
-	 * @see org.eclipse.jdt.core.formatter.CodeFormatter#format(int, String, int, int, int, String)
-	 */
-	public TextEdit format(String string, CommentRegion region) {
-		// reset the scribe
-		this.scribe.reset();
-
-		if (region == null) {
-			return failedToFormat();
-		}
-
-		long startTime = 0;
-		if (DEBUG){
-			startTime = System.currentTimeMillis();
-		}
-
-		final char[] compilationUnitSource = string.toCharArray();
-
-		this.scribe.initializeScanner(compilationUnitSource);
-
-		TextEdit result = null;
-		try {
-			result = region.format(this.preferences.initial_indentation_level, true);
-		} catch(AbortFormatting e){
-			return failedToFormat();
-		}
-		if (DEBUG){
-			System.out.println("Formatting time: " + (System.currentTimeMillis() - startTime));  //$NON-NLS-1$
-		}
-		return result;
-	}
 
 	/**
 	 * @param source the source of the comment to format
@@ -1553,8 +1521,16 @@ public class CodeFormatterVisitor extends ASTVisitor {
 				this.scribe.scanner.currentPosition);
 		this.scribe.enterAlignment(cascadingMessageSendAlignment);
 		boolean ok = false;
+		boolean setStartingColumn = startingPositionInCascade == 1;
+		switch (this.preferences.alignment_for_arguments_in_method_invocation) {
+			case Alignment.M_COMPACT_FIRST_BREAK_SPLIT:
+			case Alignment.M_NEXT_SHIFTED_SPLIT:
+			case Alignment.M_ONE_PER_LINE_SPLIT:
+				setStartingColumn = false;
+				break;
+		}
 		do {
-			if (startingPositionInCascade == 1) {
+			if (setStartingColumn) {
 				cascadingMessageSendAlignment.startingColumn = this.scribe.column;
 			}
 			try {
@@ -3536,7 +3512,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		} else {
 			// no method body
 			this.scribe.printNextToken(TerminalTokens.TokenNameSEMICOLON, this.preferences.insert_space_before_semicolon);
-			this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.COMPLEX_TRAILING_COMMENT);
+			this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
 		}
 		return false;
 	}
@@ -4180,6 +4156,9 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		if (this.preferences.insert_space_after_colon_in_labeled_statement) {
 			this.scribe.space();
 		}
+		if (this.preferences.insert_new_line_after_label) {
+			this.scribe.printNewLine();
+		}
 		final Statement statement = labeledStatement.statement;
 		statement.traverse(this, scope);
 		if (statement instanceof Expression) {
@@ -4259,15 +4238,21 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			Alignment messageAlignment = null;
 			if (!messageSend.receiver.isImplicitThis()) {
 				messageSend.receiver.traverse(this, scope);
+				int alignmentMode = this.preferences.alignment_for_selector_in_method_invocation;
 				messageAlignment = this.scribe.createAlignment(
 						"messageAlignment", //$NON-NLS-1$
-						this.preferences.alignment_for_selector_in_method_invocation,
+						alignmentMode,
 						1,
 						this.scribe.scanner.currentPosition);
 				this.scribe.enterAlignment(messageAlignment);
 				boolean ok = false;
 				do {
-					messageAlignment.startingColumn = this.scribe.column;
+					switch (alignmentMode) {
+						case Alignment.M_COMPACT_SPLIT:
+						case Alignment.M_NEXT_PER_LINE_SPLIT:
+							messageAlignment.startingColumn = this.scribe.column;
+							break;
+					}
 					try {
 						formatMessageSend(messageSend, scope, messageAlignment);
 						ok = true;
@@ -4317,84 +4302,109 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			return false;
 		}
 
-        /*
-         * Print comments to get proper line number
-         */
-        this.scribe.printComment();
-        int line = this.scribe.line;
-
-        this.scribe.printModifiers(methodDeclaration.annotations, this, ICodeFormatterConstants.ANNOTATION_ON_MEMBER);
-
-		if (this.scribe.line > line) {
-        	// annotations introduced new line, but this is not a line wrapping
-			// see 158267
-			line = this.scribe.line;
-		}
-		this.scribe.space();
-
-		TypeParameter[] typeParameters = methodDeclaration.typeParameters;
-		if (typeParameters != null) {
-			this.scribe.printNextToken(TerminalTokens.TokenNameLESS, this.preferences.insert_space_before_opening_angle_bracket_in_type_parameters);
-			if (this.preferences.insert_space_after_opening_angle_bracket_in_type_parameters) {
-				this.scribe.space();
-			}
-			int length = typeParameters.length;
-			for (int i = 0; i < length - 1; i++) {
-				typeParameters[i].traverse(this, methodDeclaration.scope);
-				this.scribe.printNextToken(TerminalTokens.TokenNameCOMMA, this.preferences.insert_space_before_comma_in_type_parameters);
-				if (this.preferences.insert_space_after_comma_in_type_parameters) {
-					this.scribe.space();
-				}
-			}
-			typeParameters[length - 1].traverse(this, methodDeclaration.scope);
-			if (isClosingGenericToken()) {
-				this.scribe.printNextToken(CLOSING_GENERICS_EXPECTEDTOKENS, this.preferences.insert_space_before_closing_angle_bracket_in_type_parameters);
-			}
-			if (this.preferences.insert_space_after_closing_angle_bracket_in_type_parameters) {
-				this.scribe.space();
-			}
-		}
-
 		/*
-		 * Print the method return type
+		 * Print comments to get proper line number
 		 */
-		final TypeReference returnType = methodDeclaration.returnType;
+		this.scribe.printComment();
+		int line = this.scribe.line;
+
+		// Create alignment
+		Alignment methodDeclAlignment = this.scribe.createAlignment(
+				"methodDeclaration",//$NON-NLS-1$
+				this.preferences.alignment_for_method_declaration,
+				Alignment.R_INNERMOST,
+				3,
+				this.scribe.scanner.currentPosition);
+		this.scribe.enterAlignment(methodDeclAlignment);
+		boolean ok = false;
 		final MethodScope methodDeclarationScope = methodDeclaration.scope;
+		do {
+			try {
 
-		if (returnType != null) {
-			returnType.traverse(this, methodDeclarationScope);
-		}
-		/*
-		 * Print the method name
-		 */
-		this.scribe.printNextToken(TerminalTokens.TokenNameIdentifier, true);
+				this.scribe.printModifiers(methodDeclaration.annotations, this, ICodeFormatterConstants.ANNOTATION_ON_MEMBER);
+				int fragmentIndex = 0;
+				this.scribe.alignFragment(methodDeclAlignment, fragmentIndex);
 
-		formatMethodArguments(
-			methodDeclaration,
-			this.preferences.insert_space_before_opening_paren_in_method_declaration,
-			this.preferences.insert_space_between_empty_parens_in_method_declaration,
-			this.preferences.insert_space_before_closing_paren_in_method_declaration,
-			this.preferences.insert_space_after_opening_paren_in_method_declaration,
-			this.preferences.insert_space_before_comma_in_method_declaration_parameters,
-			this.preferences.insert_space_after_comma_in_method_declaration_parameters,
-			this.preferences.alignment_for_parameters_in_method_declaration);
+				if (this.scribe.line > line) {
+					// annotations introduced new line, but this is not a line wrapping
+					// see 158267
+					line = this.scribe.line;
+				}
+				this.scribe.space();
 
-		/*
-		 * Check for extra dimensions
-		 */
-		int extraDimensions = getDimensions();
-		if (extraDimensions != 0) {
-			 for (int i = 0; i < extraDimensions; i++) {
-			 	this.scribe.printNextToken(TerminalTokens.TokenNameLBRACKET);
-			 	this.scribe.printNextToken(TerminalTokens.TokenNameRBRACKET);
-			 }
-		}
+				TypeParameter[] typeParameters = methodDeclaration.typeParameters;
+				if (typeParameters != null) {
+					this.scribe.printNextToken(TerminalTokens.TokenNameLESS, this.preferences.insert_space_before_opening_angle_bracket_in_type_parameters);
+					if (this.preferences.insert_space_after_opening_angle_bracket_in_type_parameters) {
+						this.scribe.space();
+					}
+					int length = typeParameters.length;
+					for (int i = 0; i < length - 1; i++) {
+						typeParameters[i].traverse(this, methodDeclaration.scope);
+						this.scribe.printNextToken(TerminalTokens.TokenNameCOMMA, this.preferences.insert_space_before_comma_in_type_parameters);
+						if (this.preferences.insert_space_after_comma_in_type_parameters) {
+							this.scribe.space();
+						}
+					}
+					typeParameters[length - 1].traverse(this, methodDeclaration.scope);
+					if (isClosingGenericToken()) {
+						this.scribe.printNextToken(CLOSING_GENERICS_EXPECTEDTOKENS, this.preferences.insert_space_before_closing_angle_bracket_in_type_parameters);
+					}
+					if (this.preferences.insert_space_after_closing_angle_bracket_in_type_parameters) {
+						this.scribe.space();
+					}
+					this.scribe.alignFragment(methodDeclAlignment, ++fragmentIndex);
+				}
 
-		formatThrowsClause(
-			methodDeclaration,
-			this.preferences.insert_space_before_comma_in_method_declaration_throws,
-			this.preferences.insert_space_after_comma_in_method_declaration_throws,
-			this.preferences.alignment_for_throws_clause_in_method_declaration);
+				/*
+				 * Print the method return type
+				 */
+				final TypeReference returnType = methodDeclaration.returnType;
+		
+				if (returnType != null) {
+					returnType.traverse(this, methodDeclarationScope);
+				}
+				this.scribe.alignFragment(methodDeclAlignment, ++fragmentIndex);
+
+				/*
+				 * Print the method name
+				 */
+				this.scribe.printNextToken(TerminalTokens.TokenNameIdentifier, true);
+
+				// Format arguments
+				formatMethodArguments(
+					methodDeclaration,
+					this.preferences.insert_space_before_opening_paren_in_method_declaration,
+					this.preferences.insert_space_between_empty_parens_in_method_declaration,
+					this.preferences.insert_space_before_closing_paren_in_method_declaration,
+					this.preferences.insert_space_after_opening_paren_in_method_declaration,
+					this.preferences.insert_space_before_comma_in_method_declaration_parameters,
+					this.preferences.insert_space_after_comma_in_method_declaration_parameters,
+					this.preferences.alignment_for_parameters_in_method_declaration);
+
+				/*
+				 * Check for extra dimensions
+				 */
+				int extraDimensions = getDimensions();
+				if (extraDimensions != 0) {
+					 for (int i = 0; i < extraDimensions; i++) {
+					 	this.scribe.printNextToken(TerminalTokens.TokenNameLBRACKET);
+					 	this.scribe.printNextToken(TerminalTokens.TokenNameRBRACKET);
+					 }
+				}
+
+				// Format throws
+				formatThrowsClause(
+					methodDeclaration,
+					this.preferences.insert_space_before_comma_in_method_declaration_throws,
+					this.preferences.insert_space_after_comma_in_method_declaration_throws,
+					this.preferences.alignment_for_throws_clause_in_method_declaration);
+				ok = true;
+			} catch (AlignmentException e) {
+				this.scribe.redoAlignment(e);
+			}
+		} while (!ok);
+		this.scribe.exitAlignment(methodDeclAlignment, true);
 
 		if (!methodDeclaration.isNative() && !methodDeclaration.isAbstract() && ((methodDeclaration.modifiers & ExtraCompilerModifiers.AccSemicolonBody) == 0)) {
 			/*
@@ -4436,10 +4446,11 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		} else {
 			// no method body
 			this.scribe.printNextToken(TerminalTokens.TokenNameSEMICOLON, this.preferences.insert_space_before_semicolon);
-			this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
+			this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.COMPLEX_TRAILING_COMMENT);
 		}
 		return false;
 	}
+
 	public boolean visit(NormalAnnotation annotation, BlockScope scope) {
 		this.scribe.printNextToken(TerminalTokens.TokenNameAT);
 		if (this.preferences.insert_space_after_at_in_annotation) {
@@ -4453,14 +4464,32 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		MemberValuePair[] memberValuePairs = annotation.memberValuePairs;
 		if (memberValuePairs != null) {
 			int length = memberValuePairs.length;
-			for (int i = 0; i < length - 1; i++) {
-				memberValuePairs[i].traverse(this, scope);
-				this.scribe.printNextToken(TerminalTokens.TokenNameCOMMA, this.preferences.insert_space_before_comma_in_annotation);
-				if (this.preferences.insert_space_after_comma_in_annotation) {
-					this.scribe.space();
+			Alignment annotationAlignment = this.scribe.createAlignment(
+					"annotationMemberValuePairs",//$NON-NLS-1$
+					this.preferences.alignment_for_arguments_in_annotation,
+					length,
+					this.scribe.scanner.currentPosition);
+			this.scribe.enterAlignment(annotationAlignment);
+			boolean ok = false;
+			do {
+				try {
+					for (int i = 0; i < length; i++) {
+						if (i > 0) {
+							this.scribe.printNextToken(TerminalTokens.TokenNameCOMMA, this.preferences.insert_space_before_comma_in_annotation);
+							this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
+						}
+						this.scribe.alignFragment(annotationAlignment, i);
+						if (i > 0 && this.preferences.insert_space_after_comma_in_annotation) {
+							this.scribe.space();
+						}
+						memberValuePairs[i].traverse(this, scope);
+					}
+					ok = true;
+				} catch (AlignmentException e) {
+					this.scribe.redoAlignment(e);
 				}
-			}
-			memberValuePairs[length - 1].traverse(this, scope);
+			} while (!ok);
+			this.scribe.exitAlignment(annotationAlignment, true);
 		}
 		this.scribe.printNextToken(TerminalTokens.TokenNameRPAREN, this.preferences.insert_space_before_closing_paren_in_annotation);
 		return false;

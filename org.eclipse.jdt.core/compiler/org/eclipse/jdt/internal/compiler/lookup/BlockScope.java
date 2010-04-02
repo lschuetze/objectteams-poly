@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -240,7 +240,7 @@ void computeLocalVariablePositions(int ilocal, int initOffset, CodeStream codeSt
 			LocalVariableBinding local = this.locals[ilocal]; // if no local at all, will be locals[ilocal]==null
 
 			// check if variable is actually used, and may force it to be preserved
-			boolean generateCurrentLocalVar = (local.useFlag == LocalVariableBinding.USED && local.constant() == Constant.NotAConstant);
+			boolean generateCurrentLocalVar = (local.useFlag != LocalVariableBinding.UNUSED && local.constant() == Constant.NotAConstant);
 
 			// do not report fake used variable
 			if (local.useFlag == LocalVariableBinding.UNUSED
@@ -250,7 +250,7 @@ void computeLocalVariablePositions(int ilocal, int initOffset, CodeStream codeSt
 // SH}
 				&& ((local.declaration.bits & ASTNode.IsLocalDeclarationReachable) != 0)) { // declaration is reachable
 
-				if (!(local.declaration instanceof Argument))  // do not report unused catch arguments
+				if (!(local.declaration instanceof Argument)) // do not report unused catch arguments
 					problemReporter().unusedLocalVariable(local.declaration);
 			}
 

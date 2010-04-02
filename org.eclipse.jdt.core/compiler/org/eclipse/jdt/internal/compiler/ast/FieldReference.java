@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemFieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -215,7 +216,6 @@ public void generateAssignment(BlockScope currentScope, CodeStream codeStream, A
     // if nothing generated, generate regular receiver code:
 // SH}
 	this.receiver.generateCode(currentScope, codeStream, !codegenBinding.isStatic());
-
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
 	assignment.expression.generateCode(currentScope, codeStream, true);
 	fieldStore(currentScope, codeStream, codegenBinding, this.syntheticAccessors == null ? null : this.syntheticAccessors[FieldReference.WRITE], this.actualReceiverType, this.receiver.isImplicitThis(), valueRequired);
@@ -473,7 +473,6 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 			if (this.syntheticAccessors == null)
 				this.syntheticAccessors = new MethodBinding[2];
 			this.syntheticAccessors[isReadAccess ? FieldReference.READ : FieldReference.WRITE] =
-
 				((SourceTypeBinding) codegenBinding.declaringClass).addSyntheticMethod(codegenBinding, isReadAccess, false /* not super ref in remote type*/,
 //{ObjectTeams: new arg:
 								RoleTypeBinding.isRoleWithExplicitAnchor(this.actualReceiverType));
@@ -492,7 +491,6 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 // SH}
 		currentScope.problemReporter().needToEmulateFieldAccess(codegenBinding, this, isReadAccess);
 		return;
-
 
 //{ObjectTeams: references to the enclosing team and role other than current need accessor, too:
 	/* orig:
@@ -667,7 +665,22 @@ public TypeBinding resolveType(BlockScope scope) {
 		if (!avoidSecondary) {
 			scope.problemReporter().invalidField(this, this.actualReceiverType);
 		}
-		return null;
+		if (fieldBinding instanceof ProblemFieldBinding) {
+			ProblemFieldBinding problemFieldBinding = (ProblemFieldBinding) fieldBinding;
+			FieldBinding closestMatch = problemFieldBinding.closestMatch;
+			switch(problemFieldBinding.problemId()) {
+				case ProblemReasons.InheritedNameHidesEnclosingName :
+				case ProblemReasons.NotVisible :
+				case ProblemReasons.NonStaticReferenceInConstructorInvocation :
+				case ProblemReasons.NonStaticReferenceInStaticContext :
+					if (closestMatch != null) {
+						fieldBinding = closestMatch;
+					}
+			}
+		}
+		if (!fieldBinding.isValidBinding()) {
+			return null;
+		}
 // :giro
 	  }
 // SH}

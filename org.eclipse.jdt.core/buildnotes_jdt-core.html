@@ -40,6 +40,822 @@
 	</td>
   </tr>
 </table>
+<a name="v_A39"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6M6 - March 9, 2010 - 3.6.0 M6
+<br>Project org.eclipse.jdt.core v_A39
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A39">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=289057">289057</a>
+Java Content Assist taking too long
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=303830">303830</a>
+&quot;X cannot be resolved or is not a field&quot; erroneously reported
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=235658">235658</a>
+Valid identifier unrecognized.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304841">304841</a>
+[search] NPE in IndexSelector.initializeIndexLocations
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=295866">295866</a>
+FormalParameter in JDT DOM/AST documentation
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304817">304817</a>
+Review documentation of ASTParser class
+
+<a name="v_A38"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6M6 - March 5, 2010
+<br>Project org.eclipse.jdt.core v_A38
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A38">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>
+Added two new preferences to allow to disable the formatter in a section of the code.
+These two preference define respectively the tag which disables the formatting
+and the tag which re-enable it.
+<p>
+These new preferences are controlled with the options:</p>
+<code>DefaultCodeFormatterConstants.FORMATTER_DISABLING_TAG</code>
+<code>DefaultCodeFormatterConstants.FORMATTER_ENABLING_TAG</code>
+<pre>
+/**
+ * FORMATTER / Option to define the tag to put in a comment to disable the formatting.
+ * See the {@link #FORMATTER_ENABLING_TAG} option to re-enable it.
+ *     - option id:         "org.eclipse.jdt.core.formatter.disabling_tag"
+ *     - possible values:   String, with constraints mentioned below
+ *     - default:           &quot;&quot;
+ * 
+ * Note that:
+ * 
+ * 1. The tag name will be trimmed. Hence if it does contain white spaces
+ *    at the beginning or at the end, they will not be taken into account while
+ *    searching for the tag in the comments
+ * 2. If a tag is starting with a letter or digit, then it cannot be leaded by
+ *    another letter or digit to be recognized
+ *    (<b><i>"ToDisableFormatter"</i></b> will not be recognized as a disabling tag
+ *    <b><i>"DisableFormatter"</i></b>, but <b><i>"Re:DisableFormatter"</i></b>
+ *    will be detected for either tag <b><i>"DisableFormatter"</i></b> or
+ *    <b><i>":DisableFormatter"</i></b>).
+ *    Respectively, a tag ending with a letter or digit cannot be followed by a letter
+ *    or digit to be recognized (<b><i>"DisableFormatter1"</i></b> will not be
+ *    recognized as a disabling tag <b><i>"DisableFormatter"</i></b>, but
+ *    <b><i>"DisableFormatter:1"</i></b> will be detected either for tag
+ *    <b><i>"DisableFormatter"</i></b> or <b><i>"DisableFormatter:"</i></b>)
+ * 3. As soon as the formatter encounters the defined disabling tag, it stops to
+ *    format the code from the beginning of the comment including this tag. If it
+ *    was already disabled, the tag has no special effect.
+ *    For example, the second defined enabling tag &quot;<b>disable-formatter</b>&quot;
+ *    in the following snippet is not necessary as the formatter was already disabled
+ *    since the first one:
+ *     class X {
+ *     // disable-formatter
+ *     void foo1() {}
+ *     // disable-formatter
+ *     void foo2() {}
+ *     void bar1() {}
+ *     void bar2() {}
+ *     }
+ *
+ * 4. If no enabling tag is found by the formatter after the disabling tag, then
+ *    the end of the snippet won't be formatted.
+ *    For example, when a disabling tag is put at the beginning of the code, then
+ *    the entire content of a compilation unit is not formatted:
+ *     // disable-formatter
+ *     class X {
+ *     void foo1() {}
+ *     void foo2() {}
+ *     void bar1() {}
+ *     void bar2() {}
+ *     }
+ * 
+ * 5. If a mix of disabling and enabling tags is done in the same comment, then
+ *    the formatter will only take into account the last encountered tag in the
+ *    comment.
+ *    For example, in the following snippet, the formatter will be disabled after
+ *    the comment:
+ *     class X {
+ *     &#47;&#42;
+ *     &nbsp;&#42; This is a comment with a mix of disabling and enabling tags:
+ *     &nbsp;&#42;  - <b>disable-formatter</b>
+ *     &nbsp;&#42;  - <b>enable-formatter</b>
+ *     &nbsp;&#42;  - <b>disable-formatter</b>
+ *     &nbsp;&#42; The formatter will stop to format from the beginning of this comment...
+ *     &nbsp;&#42;&#47;
+ *     void foo() {}
+ *     void bar() {}
+ *     }
+ * 
+ * 6. The tag cannot include newline character (i.e. &#39;&#92;n&#39;) but it can have white spaces.
+ *    E.g. "<b>format: off</b>" is a valid disabling tag
+ *    In the future, newlines may be used to support multiple disabling tags.
+ * 
+ * @since 3.6
+ */
+
+/**
+ * FORMATTER / Option to define the tag to put in a comment to re-enable the
+ * formatting after it has been disabled (see {@link #FORMATTER_DISABLING_TAG})
+ *     - option id:         "org.eclipse.jdt.core.formatter.enabling_tag"
+ *     - possible values:   String, with constraints mentioned below
+ *     - default:           &quot;&quot;
+ * 
+ * Note that:
+ * 
+ * 1. The tag name will be trimmed. Hence if it does contain white spaces
+ *    at the beginning or at the end, they will not be taken into account while
+ *    searching for the tag in the comments
+ * 2. If a tag is starting with a letter or digit, then it cannot be leaded by
+ *    another letter or digit to be recognized
+ *    (<b>"ReEnableFormatter"</b> will not be recognized as an enabling tag
+ *    <b><i>"EnableFormatter"</i></b>, but <b><i>"Re:EnableFormatter"</i></b>
+ *    will be detected for either tag <b><i>"EnableFormatter"</i></b> or
+ *    <b><i>":EnableFormatter"</i></b>).
+ *    Respectively, a tag ending with a letter or digit cannot be followed by a letter
+ *    or digit to be recognized (<b><i>"EnableFormatter1"</i></b> will not be
+ *    recognized as an enabling tag <b><i>"EnableFormatter"</i></b>, but
+ *    <b><i>"EnableFormatter:1"</i></b> will be detected either for tag
+ *    <b><i>"EnableFormatter"</i></b> or <b><i>"EnableFormatter:"</i></b>)
+ * 3. As soon as the formatter encounters the defined enabling tag, it re-starts
+ *    to format the code just after the comment including this tag. If it was already
+ *    active, i.e. already re-enabled or never disabled, the tag has no special effect.
+ *    For example, the defined enabling tag &quot;<b>enable-formatter</b>&quot;
+ *    in the following snippet is not necessary as the formatter has never been
+ *    disabled:
+ *     class X {
+ *     void foo1() {}
+ *     void foo2() {}
+ *     // enable-formatter
+ *     void bar1() {}
+ *     void bar2() {}
+ *     }
+ * 
+ *    Or, in the following other snippet, the second enabling tag is not necessary as
+ *    the formatting will have been re-enabled by the first one:
+ *     class X {
+ *     // disable-formatter
+ *     void foo1() {}
+ *     void foo2() {}
+ *     // enable-formatter
+ *     void bar1() {}
+ *     // enable-formatter
+ *     void bar2() {}
+ *     }
+ * 
+ * 4. If a mix of disabling and enabling tags is done in the same comment, then
+ *    the formatter will only take into account the last encountered tag in the
+ *    comment.
+ *    For example, in the following snippet, the formatter will be re-enabled after
+ *    the comment:
+ *     // disable-formatter
+ *     class X {
+ *     &#47;&#42;
+ *     &nbsp;&#42; This is a comment with a mix of disabling and enabling tags:
+ *     &nbsp;&#42;  - <b>enable-formatter</b>
+ *     &nbsp;&#42;  - <b>disable-formatter</b>
+ *     &nbsp;&#42;  - <b>enable-formatter</b>
+ *     &nbsp;&#42; The formatter will restart to format after this comment...
+ *     &nbsp;&#42;&#47;
+ *     void foo() {}
+ *     void bar() {}
+ *     }
+ * 
+ * 5. The tag cannot include newline character (i.e. &#39;&#92;n&#39;) but it can have white spaces.
+ *    E.g. "<b>format: on</b>" is a valid enabling tag
+ *    In the future, newlines may be used to support multiple enabling tags.
+ * 
+ * @since 3.6
+ */
+</pre>
+<p>For example, the following snippet:</p>
+<pre>
+public class Test {
+/* disable-formatter */
+void     foo(    )      {	
+				//      unformatted       area  	  
+}
+/* enable-formatter */
+void     bar(    )      {	
+				//      formatted       area  	  
+}
+}
+</pre>
+formatted with disabling tags = &quot;disable-formatter&quot; and enabling tags
+= &quot;enable-formatter&quot; produces the following output:
+<pre>
+public class Test {
+
+/* disable-formatter *	
+void     foo(    )      {
+				//      unformatted       area  	  
+}
+/* enable-formatter *
+	void bar() {
+		// formatted area
+	}
+}
+</pre>
+See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=27079">27079</a> for more details.
+</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=129804">129804</a>
+[dom] Local variable bindings from ASTParser#createASTs(.., String[], .., ..) have no declaring method
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304705">304705</a>
+[formatter] Unexpected indentation of wrapped line comments when 'Never indent line comment on first column' preference is checked
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304656">304656</a>
+StringIndexOutOfBoundsException when using JDT dom methods to process sourcefile
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304506">304506</a>
+Task descriptions always have a space after the tag
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304081">304081</a>
+IJavaProject#isOnClasspath(IJavaElement) returns false for type from referenced JAR
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304122">304122</a>
+TypeBindings.getAnnotations() breaks interface
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304416">304416</a>
+VerifyError after compiling without preserve all locals
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304529">304529</a>
+[formatter] NPE when either the disabling or the enabling tag is not defined
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=27079">27079</a>
+Tags for disabling/enabling code formatter (feature)
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304316">304316</a>
+NPE when javadoc URL is invalid
+
+<a name="v_A37"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6M6 - March 2, 2010
+<br>Project org.eclipse.jdt.core v_A37
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A37">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>Added new configurable option to fix bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=295551">295551</a>:<br>
+<pre>
+/**
+ * Compiler option ID: Further Determining the Effect of @SuppressWarnings if also
+ * COMPILER_PB_SUPPRESS_WARNINGS is enabled.
+ * When enabled, the @SuppressWarnings annotation can additionally be used to suppress 
+ * optional compiler diagnostics that have been configured as ERROR.
+ * When disabled, all @SuppressWarnings annotations only affects warnings.
+ *
+ * Option id: "org.eclipse.jdt.core.compiler.problem.suppressOptionalErrors"
+ * Possible values: { "enabled", "disabled" }
+ * Default: "disabled"
+ * 
+ * @since 3.6
+ * @category CompilerOptionID
+ */
+public static final String COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS = PLUGIN_ID + ".compiler.problem.suppressOptionalErrors";
+</pre>
+</li>
+<li>
+Added a new formatter preferences to align method declaration.
+<p>
+This new preference is controlled with the option:</p>
+<code>DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_METHOD_DECLARATION</code>
+<pre>
+/**
+ * FORMATTER / Option for alignment of method declaration
+ *     - option id:         "org.eclipse.jdt.core.formatter.alignment_for_method_declaration"
+ *     - possible values:   values returned by <code>createAlignmentValue(boolean, int, int)</code> call
+ *     - default:           createAlignmentValue(false, WRAP_NO_SPLIT, INDENT_DEFAULT)
+ * 
+ * @see #createAlignmentValue(boolean, int, int)
+ * @since 3.6
+ */
+</pre>
+<p>For example, the following snippet:</p>
+<pre>
+public class Test {
+public final synchronized java.lang.String a_method_which_has_a_very_long_name() {
+return null;
+}
+}
+</pre>
+formatted with this preference activated as 'Wrap only when necessary', will
+produce the following output:
+<pre>
+public class Test {
+	public final synchronized java.lang.String
+			a_method_which_has_a_very_long_name() {
+		return null;
+	}
+}
+</pre>
+See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=284789">284789</a> for more details.
+</li>
+<li>New API to fix bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=246594">246594</a>. See the bug for details.
+<pre>
+	/**
+	 * Returns the signatures for this type parameter's bounds. The type parameter may have 
+	 * been declared as part of a type or a method. The signatures represent only the individual 
+	 * bounds and do not include the type variable name or the <code>extends</code> keyword.  
+	 * The signatures may be either unresolved (for source types) or resolved (for binary types). 
+	 * See {@link Signature} for details.
+	 * 
+	 * @return the signatures for the bounds of this formal type parameter
+	 * @throws JavaModelException
+	 *             if this element does not exist or if an exception occurs while accessing its corresponding resource.
+	 * @see Signature
+	 * @since 3.6
+	 */
+	String[] getBoundsSignatures() throws JavaModelException;
+</pre>
+</li>
+<li>
+Added a new formatter preference to enable or disable the formatting of line
+comments that start on the first column.<br>
+Note that the indentation of line comments will also be disabled when activating
+this option, as otherwise the formatter could not produce stable outputs...
+<p>
+The default is to format these comments to have a backward compatible behavior.
+</p><p>
+This new preferences is controlled with the options:</p>
+<code>DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT_STARTING_ON_FIRST_COLUMN</code>
+<pre>
+/**
+ * FORMATTER / Option to format line comments that start on the first column
+ *     - option id:         "org.eclipse.jdt.core.formatter.format_line_comment_starting_on_first_column"
+ *     - possible values:   { TRUE, FALSE }
+ *     - default:           TRUE
+ * 
+ * Note that this option is ignored if either the
+ * {@link #FORMATTER_COMMENT_FORMAT_LINE_COMMENT} option has been set to
+ * {@link #FALSE} or the formatter is created with the mode
+ * {@link ToolFactory#M_FORMAT_NEW}.
+ * 
+ * @see #TRUE
+ * @see #FALSE
+ * @see ToolFactory#createCodeFormatter(Map, int)
+ * @since 3.6
+ */
+</pre>
+<p>For example, the following snippet:</p>
+<pre>
+public class X01 {
+//    int	a  =   1;
+//    int	b  =   2;
+}
+</pre>
+will be untouched by the formatter if both options are activated.
+See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=251133">251133</a> for more details.
+</li>
+<li>New API to fix bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=252431">252431</a>. See the bug for details.
+<pre>
+org.eclipse.jdt.core.IClasspathEntry
+	/**
+	 * Returns the classpath entry that is making a reference to this classpath entry. For entry kinds 
+	 * {@link #CPE_LIBRARY}, the return value is the entry that is representing the JAR that includes 
+	 * <code>this</code> in the MANIFEST.MF file's Class-Path section. For entry kinds other than 
+	 * {@link #CPE_LIBRARY}, this returns <code>null</code>. For those entries that are on the raw classpath already, 
+	 * this returns <code>null</code>.
+	 *
+	 * It is possible that multiple library entries refer to the same entry
+	 * via the MANIFEST.MF file. In those cases, this method returns the first classpath entry 
+	 * that appears in the raw classpath. However, this does not mean that the other referencing 
+	 * entries do not relate to their referenced entries. 
+	 * See {@link JavaCore#getReferencedClasspathEntries(IClasspathEntry, IJavaProject)} for 
+	 * more details.
+	 * 
+	 * @return the classpath entry that is referencing this entry or <code>null</code> if 
+	 * 		not applicable.
+	 * @since 3.6
+	 */
+	IClasspathEntry getReferencingEntry();
+
+
+org.eclipse.jdt.core.IJavaProject
+	/**
+	 * Works similar to {@link #setRawClasspath(IClasspathEntry[], IPath, IProgressMonitor)} and 
+	 * additionally allows persisting the given array of referenced entries for this project.
+	 * The referenced entries and their attributes are stored in the .classpath file of this 
+	 * project. For details on referenced entries, see 
+	 * {@link JavaCore#getReferencedClasspathEntries(IClasspathEntry, IJavaProject)}
+	 * and {@link IClasspathEntry#getReferencingEntry()}.
+	 * 
+	 * Since the referenced entries are stored in the .classpath file, clients can store additional 
+	 * information that belong to these entries and retrieve them across sessions, though the referenced
+	 * entries themselves may not be present in the raw classpath. By passing a <code>null</code>
+	 * referencedEntries, clients can choose not to modify the already persisted referenced entries,
+	 * which is fully equivalent to {@link #setRawClasspath(IClasspathEntry[], IPath, IProgressMonitor)}.
+	 * If an empty array is passed as referencedEntries, the already persisted referenced entries, 
+	 * if any, will be cleared. 
+	 * 
+	 * If there are duplicates of a referenced entry or if any of the <code>referencedEntries</code> 
+	 * is already present in the raw classpath(<code>entries</code>) those referenced entries will 
+	 * be excluded and not be persisted.
+	 *
+	 * @param entries a list of classpath entries
+	 * @param referencedEntries the list of referenced classpath entries to be persisted
+	 * @param outputLocation the default output location
+	 * @param monitor the given progress monitor
+	 * @exception JavaModelException if the classpath could not be set. Reasons include:
+	 *  	This Java element does not exist (ELEMENT_DOES_NOT_EXIST)
+	 *  	The classpath is being modified during resource change event notification (CORE_EXCEPTION)
+	 *  	The classpath failed the validation check as defined by {@link JavaConventions#validateClasspath(IJavaProject, IClasspathEntry[], IPath)}
+	 * @see IClasspathEntry
+	 * @see #getReferencedClasspathEntries()
+	 * @since 3.6
+	 */
+	void setRawClasspath(IClasspathEntry[] entries, IClasspathEntry[] referencedEntries, IPath outputLocation,
+			IProgressMonitor monitor) throws JavaModelException;
+
+	/**
+	 * Returns the list of referenced classpath entries stored in the .classpath file of <code>this</code> 
+	 * java project. Clients can store the referenced classpath entries using 
+	 * {@link #setRawClasspath(IClasspathEntry[], IClasspathEntry[], IPath, IProgressMonitor)}
+	 * If the client has not stored any referenced entries for this project, an empty array is returned.
+	 *
+	 * @throws JavaModelException
+	 * @return an array of referenced classpath entries stored for this java project or an empty array if none
+	 * 			stored earlier.
+	 * @since 3.6
+	 */
+	IClasspathEntry[] getReferencedClasspathEntries() throws JavaModelException;
+	
+
+org.eclipse.jdt.core.IPackageFragmentRoot
+	/**
+	 * Returns the first resolved classpath entry that corresponds to this package fragment root.
+	 * A resolved classpath entry is said to correspond to a root if the path of the resolved
+	 * entry is equal to the root's path.
+	 * 
+	 * @return the first resolved classpath entry that corresponds to this package fragment root
+	 * @throws JavaModelException if this element does not exist or if an
+	 *		exception occurs while accessing its corresponding resource. 
+	 * @since 3.6
+	 */
+	IClasspathEntry getResolvedClasspathEntry() throws JavaModelException;
+	
+
+org.eclipse.jdt.core.JavaCore
+	/**
+	 * Returns an array of classpath entries that are referenced directly or indirectly 
+	 * by a given classpath entry. For the entry kind {@link IClasspathEntry#CPE_LIBRARY}, 
+	 * the method returns the libraries that are included in the Class-Path section of 
+	 * the MANIFEST.MF file. If a referenced JAR file has further references to other library 
+	 * entries, they are processed recursively and added to the list. For entry kinds other 
+	 * than {@link IClasspathEntry#CPE_LIBRARY}, this method returns an empty array.
+	 *
+	 * If a referenced entry has already been stored 
+	 * in the given project's .classpath, the stored attributes are populated in the corresponding
+	 * referenced entry. For more details on storing referenced entries see
+	 * see {@link IJavaProject#setRawClasspath(IClasspathEntry[], IClasspathEntry[], IPath, 
+	 * IProgressMonitor)}. 
+	 * 
+	 * @param libraryEntry the library entry whose referenced entries are sought 
+	 * @param project project where the persisted referenced entries to be retrieved from
+	 * @return an array of classpath entries that are referenced directly or indirectly by the given entry. 
+	 * 			If not applicable, returns an empty array.
+	 * @since 3.6
+	 */
+	public static IClasspathEntry[] getReferencedClasspathEntries(IClasspathEntry libraryEntry, IJavaProject project);	
+</pre>
+</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=252431">252431</a>
+New API is needed to better identify referenced jars in the Class-Path: entry
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=251133">251133</a>
+[formatter] Automatic formatting single line comments is incoherent among tools
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=248897">248897</a>
+[1.5][compiler] Wrong warning 'The local variable 'var' is never read'.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=304031">304031</a>
+Unused @SuppressWarnings(..) not flagged when suppressed problem is set to Error
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=295551">295551</a>
+Add option to automatically promote all warnings to errors
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=303810">303810</a>
+Compact boolean fields on FlowContext
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=251227">251227</a>
+[compiler] Fup of bug 115814, comparing doubles should not be flagged
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=268798">268798</a>
+[1.5][compiler] Eclipse 3.5M5/6 produces new compiler errors with generics
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=303448">303448</a>
+Wrong code generation optimization when assert condition is false
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=303776">303776</a>
+Member types imports are removed too aggressively
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302949">302949</a>
+JavaModelManager hangs accessing the nonChainingJars set
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=246594">246594</a>
+[model] API request: ITypeParameter#getBoundsSignatures() or #getSignature()
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=253896">253896</a>
+[compiler][null] wrong &quot;Null comparison always yields false&quot; problem for auto-unboxing
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=284789">284789</a>
+[formatter] Does not line-break method declaration exception with parameters
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=303480">303480</a>
+[1.5][compiler] CCE: org.eclipse.jdt.internal.compiler.parser.RecoveredBlock cannot be cast to org.eclipse.jdt.internal.compiler.parser.RecoveredType
+
+<a name="v_A36"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6M6 - February 23, 2010
+<br>Project org.eclipse.jdt.core v_A36
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A36">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>
+Added a new formatter preferences to align annotation arguments (ie. element-value pairs).
+<p>
+This new preference is controlled with the option:</p>
+<code>DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_ANNOTATION</code>
+<pre>
+/**
+ * FORMATTER / Option for alignment of arguments in annotation
+ *     - option id:         "org.eclipse.jdt.core.formatter.alignment_for_arguments_in_annotation"
+ *     - possible values:   values returned by <code>createAlignmentValue(boolean, int, int)</code> call
+ *     - default:           createAlignmentValue(false, WRAP_NO_SPLIT, INDENT_DEFAULT)
+ * 
+ * @see #createAlignmentValue(boolean, int, int)
+ * @since 3.6
+ */
+</pre>
+<p>For example, the following snippet:</p>
+<pre>
+@MyAnnot(value1 = "this is an example", value2 = "of an annotation", value3 = "with several arguments", value4 = "which may need to be wrapped")
+public class Test {
+}
+</pre>
+formatted with this preference activated, will produce the following output
+while using the <code>Eclipse [built-in]</code> profile:
+<pre>
+@MyAnnot(value1 = "this is an example", value2 = "of an annotation",
+		value3 = "with several arguments",
+		value4 = "which may need to be wrapped")
+public class Test {
+}
+</pre>
+See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=282030">282030</a> for more details.
+</li>
+<li>In order to get bindings outside of the Eclipse environment, the following method has been added on the ASTParser class.
+<br>See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=206391">206391</a> for details.<br>
+<pre>
+	/**
+	 * Set the environment that can be used when no IJavaProject are available.
+	 * 
+	 * The user has to be sure to include all required types on the classpaths for binary types
+	 * or on the sourcepaths for source types to resolve the given source code.
+	 * All classpath and sourcepath entries are absolute paths.
+	 * If sourcepaths contain units using a specific encoding (not the platform encoding), then the
+	 * given encodings must be set. If the given encodings is set, its length must
+	 * match the length of the sourcepaths parameter or an IllegalArgumentException will be thrown.
+	 * If encodings is not null, the given sourcepathEntries must not be null.
+	 * 
+	 * @param classpathEntries the given classpath entries to be used to resolve bindings
+	 * @param sourcepathEntries the given sourcepath entries to be used to resolve bindings
+	 * @param encodings the encodings of the corresponding sourcepath entries or null if the platform encoding
+	 * can be used.
+	 * @param includeRunningVMBootclasspath true if the bootclasspath of the running VM must be prepended to the
+	 * given classpath and false if the bootclasspath of the running VM should be ignored.
+	 * @throws IllegalArgumentException if the size of the given encodings is not equals to the size of the given
+	 * sourcepathEntries
+	 * @since 3.6
+	 */
+	public void setEnvironment(String[] classpathEntries, String[] sourcepathEntries, String[] encodings, boolean includeRunningVMBootclasspath);
+</pre>
+</li>
+<li>
+Added two new formatter preferences to condense block and javadoc comments.
+<p>
+These new preferences are controlled respectively with the options:</p>
+<code>DefaultCodeFormatterConstants.FORMATTER_COMMENT_NEW_LINES_AT_BLOCK_BOUNDARIES</code><br>
+<code>DefaultCodeFormatterConstants.FORMATTER_COMMENT_NEW_LINES_AT_JAVADOC_BOUNDARIES</code>
+<pre>
+/**
+ * FORMATTER / Option to control whether block comments will have new lines at boundaries
+ *     - option id:         "org.eclipse.jdt.core.formatter.comment.new_lines_at_block_boundaries"
+ *     - possible values:   { TRUE, FALSE }
+ *     - default:           TRUE
+ * 
+ * @see #TRUE
+ * @see #FALSE
+ * @since 3.6
+ */
+
+/**
+ * FORMATTER / Option to control whether javadoc comments will have new lines at boundaries
+ *     - option id:         "org.eclipse.jdt.core.formatter.comment.new_lines_at_javadoc_boundaries"
+ *     - possible values:   { TRUE, FALSE }
+ *     - default:           TRUE
+ * 
+ * @see #TRUE
+ * @see #FALSE
+ * @since 3.6
+ */
+ </pre>
+<p>For example, when both of these options are used, the following snippet:</p>
+<pre>
+public class X {
+	/*
+	 * This block comment after formatting will no longer use a new line
+	 * at the beginning and at the end of the comment...
+	 */
+	void foo() {
+	}
+	/**
+	 * This javadoc comment after formatting will no longer use a new line
+	 * at the beginning and at the end of the comment...
+	 */
+	void bar() {
+	}
+}
+</pre>
+formatted with this preference activated, will produce the following output:
+<pre>
+public class X {
+	/* This block comment after formatting will no longer use a new line at the
+	 * beginning and at the end of the comment... */
+	void foo() {
+	}
+
+	/** This javadoc comment after formatting will no longer use a new line at
+	 * the beginning and at the end of the comment... */
+	void bar() {
+	}
+}
+</pre>
+See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=270209">270209</a> for more details.
+</li>
+<li>
+The <code>CodeFormatter.F_INCLUDE_COMMENT</code> flag now works for all kind
+of snippet while using the formatter.<br>
+See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=236406">236406</a> for more details.
+</li>
+<li>
+Added a new formatter preferences to insert a new line after a label.
+<p>
+This new preference is controlled with the option:</p>
+<code>DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_LABEL</code>
+<pre>
+/**
+ * FORMATTER / Option to insert a new line after a label
+ *     - option id:         "org.eclipse.jdt.core.formatter.insert_new_line_after_label"
+ *     - possible values:   { INSERT, DO_NOT_INSERT }
+ *     - default:           DO_NOT_INSERT
+ *
+ * @see JavaCore#INSERT
+ * @see JavaCore#DO_NOT_INSERT
+ * @since 3.6
+ */
+</pre>
+<p>For example, the following snippet:</p>
+<pre>
+public class X {
+	void foo() {
+		LABEL:for (int i = 0; i &lt; 10; i++) {
+		}
+	}
+}
+</pre>
+formatted with this preference activated, will produce the following output:
+<pre>
+public class X {
+	void foo() {
+		LABEL:
+		for (int i = 0; i &lt; 10; i++) {
+		}
+	}
+}
+</pre>
+See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=150741">150741</a> for more details.
+</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=298362">298362</a>
+[1.5][compiler] Compiler returns java.lang.Object instead of generic type T when javac returns T
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=281655">281655</a>
+[formatter] &quot;Never join lines&quot; does not work for annotations.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=282030">282030</a>
+[formatter] Java annotation formatting
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=270209">270209</a>
+[format] Condensed block comment formatting
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=236406">236406</a>
+[formatter] The comments flags should work for all kind of snippet
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=294360">294360</a>
+Duplicate entries in Classpath Resolution when importing dependencies from parent project
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=206391">206391</a>
+[DOM] Binding Resolutions for projects outside of Eclipse workspace
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=150409">150409</a>
+[compiler] AST does not expose method bindings for non-visible inherited field
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302358">302358</a>
+Compiler finds wrong method for method invocation with generics
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302919">302919</a>
+misreported cast Error when mixing generic and raw class in nested class
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=150741">150741</a>
+[formatter] Add  option: &quot;add new line after label&quot;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=287939">287939</a>
+[code assist] The instanceof and the auto cast feature should also work for an assignment
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=303108">303108</a>
+[import rewrite] ImportRewrite#removeImport(String) does not work with setUseContextToFilterImplicitImports(true)
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=295619">295619</a>
+Test failure caused by a timing issue in M20091118-0800
+
+<a name="v_A35"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6M6 - February 16, 2010
+<br>Project org.eclipse.jdt.core v_A35
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A35">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>In order to fix bugs <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=235253">235253</a> and
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=194358">194358</a>, a new API was added to preserve the existing pre-3.6 behavior for existing clients:<br>
+<pre>
+	/**
+	 * Sets whether a context should be used to properly filter implicit imports.
+	 *
+	 * By default, the option is disabled to preserve pre-3.6 behavior.
+	 *
+	 *
+	 * When this option is set, the context passed to the addImport*(...) methods is used to determine
+	 * whether an import can be filtered because the type is implicitly visible. Note that too many imports
+	 * may be kept if this option is set and addImport*(...) methods are called without a context.
+	 *
+	 * 
+	 * @param useContextToFilterImplicitImports the given setting
+	 * 
+	 * @see #setFilterImplicitImports(boolean)
+	 * @since 3.6
+	 */
+	public void setUseContextToFilterImplicitImports(boolean useContextToFilterImplicitImports);
+</pre>
+</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302455">302455</a>
+java.lang.ClassCastException in secondary types removal
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=102279">102279</a>
+[search] method reference performance depends on method name
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=236814">236814</a>
+[jsr199] EclipseCompiler#getTask does not respect its contract when its first argument is null
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302552">302552</a>
+[formatter] Formatting qualified invocations can be broken when the Line Wrapping policy forces element to be on a new line
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302587">302587</a>
+Encoding/decoding of problem arguments in Marker fails if argument contains #
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=301438">301438</a>
+Eclipse hangs when attempting to refactor using the &quot;change method signature&quot;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=260381">260381</a>
+[formatter] Javadoc formatter breaks {@code ...} tags.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302446">302446</a>
+[compiler] Regression in if statement flow analysis related to null checks
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=194358">194358</a>
+[import rewrite] Organize Imports produces wrong order of imports
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=235253">235253</a>
+[organize imports] Organize imports removes needed import statement.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302379">302379</a>
+[search] JavaSearchTests.testZIPArchive2() test failed in I20100209-0800
+
+<a name="v_A34"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6M6 - February 9, 2010
+<br>Project org.eclipse.jdt.core v_A34
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A34">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302123">302123</a>
+[formatter] AssertionFailedException occurs while formatting a source containing the specific javadoc comment /** ***/
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=300379">300379</a>
+[formatter] Fup of bug 287833
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=250056">250056</a>
+[compiler][null] Another assert and &quot;Redundant null check&quot;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=301683">301683</a>
+Annotations are broken when native methods are present in a class
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=300734">300734</a>
+Extract temp misses duplicate occurrence.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=289560">289560</a>
+Eclipse hangs after modifying user libraries
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=301562">301562</a>
+[JSR269] Error in EclipseFileManager.collectAllMatchingFiles
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=298637">298637</a>
+Could not retrieve declared methods (NPE in ParameterizedTypeBinding.resolve)
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=294057">294057</a>
+[1.5][compiler] Imports not resolved correctly with generics and inner interfaces
+
+<a name="v_A33"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6M6 - February 2, 2010
+<br>Project org.eclipse.jdt.core v_A33
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A33">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=300136">300136</a>
+classpathentry OPTIONAL attribute not honored for var entries
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=300723">300723</a>
+Fup of bug 235783
+
 <a name="v_A32a"></a>
 <hr><h1>
 Eclipse Platform Build Notes<br>
