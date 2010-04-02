@@ -4,15 +4,16 @@
       label="OT/Equinox Feature"
       version="1.4.0.qualifier"
       provider-name="Eclipse Object Teams Project"
-      plugin="org.eclipse.objectteams.otequinox">
+      plugin="org.eclipse.objectteams.otequinox"
+      colocation-affinity="org.eclipse.rcp">
 
    <description url="http://www.eclipse.org/objectteams">
       This feature enables Equinox to run plugins written in OT/J.
    </description>
 
    <copyright>
-      The copyright is held by the Technische Unversit&#228;t Berlin
- Author: Stephan Herrmann.
+      The copyright is held by the Technische Unversität Berlin
+Author: Stephan Herrmann.
    </copyright>
 
    <license url="%licenseURL">
