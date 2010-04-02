@@ -128,7 +128,9 @@ public class QualifiedTypeReference extends TypeReference {
 		Binding binding = scope.getPackage(this.tokens);
 //{ObjectTeams: give it a try as a team.R type:	FIXME(SH): redundant if invoked from resolveType()
 		if (binding == null || binding.problemId() == ProblemReasons.NotFound) {
-			if (this.tokens.length >= 2) {
+			// inheritance from anchored type is not allowed (OTJLD 1.2.2(g)).
+			boolean isSearchingSuper = ((scope instanceof ClassScope) && ((ClassScope)scope).superTypeReference == this);
+			if (this.tokens.length >= 2 && !isSearchingSuper) {
 				// 0-dimensions because ArrayQualifiedTypeReference will wrap roleType in an ArrayBinding later.
 				TypeBinding roleType = RoleTypeCreator.resolveAnchoredType(scope, this, this.tokens, 0);
 				if (roleType != null && roleType.problemId() != ProblemReasons.NotFound) {

@@ -2273,7 +2273,6 @@ public class ClassScope extends Scope {
  *           Does OTClassScope need to override getTypeOrPackage/getPackage ??
  */
 			unitScope.recordQualifiedReference(typeReference.getTypeName());
-			this.superTypeReference = typeReference;
 //{ObjectTeams: preferably resolve using base import scope:
 /* orig:
 			ReferenceBinding superType = (ReferenceBinding) typeReference.resolveSuperType(this);
@@ -2302,7 +2301,6 @@ public class ClassScope extends Scope {
 			throw e;
 		} finally {
 			env.missingClassFileLocation = null;
-			this.superTypeReference = null;
 		}
 	}
 
