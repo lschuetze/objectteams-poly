@@ -29,9 +29,9 @@
 				<include name="org/eclipse/jdt/internal/compiler/**"/>
 				<include name="org/eclipse/jdt/core/compiler/**"/>
 <!--{ObjectTeams:-->
-				<include name="org/objectteams/otdt/core/compiler/**"/>
-				<include name="org/objectteams/otdt/core/internal/compiler/**"/>
-				<include name="org/objectteams/otdt/core/exceptions/**"/>
+				<include name="org/eclipse/objectteams/otdt/core/compiler/**"/>
+				<include name="org/eclipse/objectteams/otdt/internal/core/compiler/**"/>
+				<include name="org/eclipse/objectteams/otdt/core/exceptions/**"/>
 	        	<include name="org/eclipse/jdt/internal/codeassist/select/SelectionNodeFound.class"/>
 <!-- SH} -->
 				<exclude name="**/package.htm*"/>
