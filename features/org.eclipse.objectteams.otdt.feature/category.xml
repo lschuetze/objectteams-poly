@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site>
-   <feature url="features/org.eclipse.objectteams.otdt_1.4.0.qualifier.jar" id="org.eclipse.objectteams.otdt" version="1.4.0.qualifier">
+   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[1.4.0,1.4.1)">
       <category name="org.eclipse.objectteams.otdt_1.4"/>
-   </feature>
-   <feature url="features/org.eclipse.objectteams.otequinox_1.4.0.qualifier.jar" id="org.eclipse.objectteams.otequinox" version="1.4.0.qualifier">
+   </iu>
+   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[1.4.0,1.4.1)">
       <category name="org.eclipse.objectteams.otdt_1.4"/>
-   </feature>
+   </iu>
    <category-def name="org.eclipse.objectteams.otdt_1.4" label="OTDT 1.4.x based on Eclipse 3.6">
       <description>
          The Object Teams Development Tooling versions 1.4.x based on Eclipse 3.6.x
