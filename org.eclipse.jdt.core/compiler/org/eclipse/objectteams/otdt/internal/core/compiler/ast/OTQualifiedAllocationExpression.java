@@ -212,8 +212,6 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	        			MethodBinding ctor = role.getExactConstructor(creator.parameters);
 	        			if (Lifting.isLiftToConstructor(ctor, role))
 	        				scope.problemReporter().qualifiedUseOfLiftingConstructor(ctor, this.creatorCall);
-	        			if (RoleTypeBinding.isRoleWithExplicitAnchor(this.resolvedType) && !ctor.isPublic())
-	        				scope.problemReporter().externalizedCallToNonpublic(ctor, role, this);
 	        		}
 	        	}
 	        }

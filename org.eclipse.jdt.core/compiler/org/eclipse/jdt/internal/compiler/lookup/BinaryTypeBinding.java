@@ -40,6 +40,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
@@ -792,9 +793,26 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 		result.modifiers &= ~ExtraCompilerModifiers.AccCallsBaseCtor;
 		MethodModel.setCallsBaseCtor(result);
 	}
-	// is it some other OT-generated method requiring to be marked as fake?
+	// handle various OT-specific methods:
 	char[] selector = method.getSelector();
 	if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, selector)) {
+		// connect creation method to original constructor:
+		if (CopyInheritance.isCreator(result)) {
+			// extract the role name:
+			char[] roleName = ((ReferenceBinding) result.returnType).sourceName;
+			int dollarPos = CharOperation.lastIndexOf('$', roleName);
+			if (dollarPos > -1) // for unresolved bindings
+				roleName = CharOperation.subarray(roleName, dollarPos+1, -1);
+			// get the role class:
+			ReferenceBinding roleClass = getMemberType(CharOperation.concat(IOTConstants.OT_DELIM_NAME, roleName));
+			if (roleClass instanceof UnresolvedReferenceBinding)
+				roleClass = ((UnresolvedReferenceBinding)roleClass).resolve(this.environment, false);
+			// get and store the original ctor:
+			MethodBinding srcCtor = roleClass.getExactConstructor(result.parameters);
+			if (srcCtor != null)
+				MethodModel.getModel(result)._srcCtor = srcCtor;
+		}
+		// is it some other OT-generated method requiring to be marked as fake?
 		int secondDollar = CharOperation.indexOf('$', selector, 4, selector.length);
 		if (   secondDollar != -1
 			&& CharOperation.prefixEquals(AstConverter.PRIVATE, CharOperation.subarray(selector, secondDollar, -1)))

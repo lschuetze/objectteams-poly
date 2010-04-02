@@ -3107,6 +3107,17 @@ public void invalidConstructor(Statement statement, MethodBinding targetConstruc
 			}
 			break;
 		case ProblemReasons.NotVisible :
+//{ObjectTeams: more specific message?
+		  if (shownConstructor.declaringClass.isRole()) {
+			if (   statement instanceof TSuperMessageSend
+				&& ((ReferenceBinding)((TSuperMessageSend)statement).actualReceiverType).getRealType() != shownConstructor.declaringClass.getRealType())
+				id = IProblem.IndirectTSuperInvisible;
+			else if (statement instanceof MessageSend && !((MessageSend)statement).receiver.isThis())
+				id= IProblem.ExternalizedCallToNonPublicConstructor;
+			else
+				id = IProblem.NotVisibleRoleConstructor;
+		  } else
+// SH}
 			if (insideDefaultConstructor){
 				id = IProblem.NotVisibleConstructorInDefaultConstructor;
 			} else if (insideImplicitConstructorCall){
@@ -8147,21 +8158,6 @@ public void staticRole(SourceTypeBinding type) {
         arguments,
         type.sourceStart(),
         type.sourceEnd());
-}
-public void externalizedCallToNonpublic(MethodBinding method, ReferenceBinding roleType, ASTNode location) {
-	String[] arguments = new String[] {
-			new String(roleType.readableName()),
-			new String(method.readableName())
-	};
-	String[] shortArguments = new String[] {
-			new String(roleType.shortReadableName()),
-			new String(method.shortReadableName())
-	};
-	this.handle(
-			method.isConstructor()? IProblem.ExternalizedCallToNonPublicConstructor : IProblem.ExternalizedCallToNonPublicMethod,
-			arguments, shortArguments,
-			location.sourceStart,
-			location.sourceEnd);
 }
 public void roleCantInitializeStaticField(FieldDeclaration fieldDecl)
 {

@@ -1362,12 +1362,13 @@ void setSourceStart(int sourceStart);
 	int StaticRole                               = TEAM_RELATED + 2101; // 1.2.1
 	int IllegalModifierForRole                   = TEAM_RELATED + 2102; // 1.2.1(a)
 	int NotVisibleRoleMethod                     = TEAM_RELATED + 2103; // 1.2.1(e)
-	int DifferentTeamInstance 					 = TEAM_RELATED + 2104; // 1.2.1(e)
-	int NonPublicFieldOfExternalizedRole         = TEAM_RELATED + 2105; // 1.2.1(e)
-	int ExternalizedCallToNonPublicMethod		 = TEAM_RELATED + 2106; // 1.2.1(e)
-	int ExternalizedCallToNonPublicConstructor 	 = TEAM_RELATED + 2107; // 1.2.1(e)
-	int IndirectTSuperInvisible					 = TEAM_RELATED + 2108; // 1.2.1(e)
-	int RoleCantInitializeStaticField            = TEAM_RELATED + 2109; // 1.2.1(g)
+	int NotVisibleRoleConstructor 				 = TEAM_RELATED + 2104; // 1.2.1(e)
+	int DifferentTeamInstance 					 = TEAM_RELATED + 2105; // 1.2.1(e)
+	int NonPublicFieldOfExternalizedRole         = TEAM_RELATED + 2106; // 1.2.1(e)
+	int ExternalizedCallToNonPublicMethod		 = TEAM_RELATED + 2107; // 1.2.1(e)
+	int ExternalizedCallToNonPublicConstructor 	 = TEAM_RELATED + 2108; // 1.2.1(e)
+	int IndirectTSuperInvisible					 = TEAM_RELATED + 2109; // 1.2.1(e)
+	int RoleCantInitializeStaticField            = TEAM_RELATED + 2110; // 1.2.1(g)
 
 	int ExternalizingNonPublicRole               = TEAM_RELATED + 2200; // 1.2.2(a)
 	// unused: TEAM_RELATED + 2201
