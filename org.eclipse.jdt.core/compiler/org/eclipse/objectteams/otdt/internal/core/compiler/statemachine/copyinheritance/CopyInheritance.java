@@ -493,7 +493,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			    	TypeDeclaration localDecl = copyRoleNestedInternal(teamModel, roleModel, tsuperNestedBinding);
 			    	if (localDecl != null) {
 			    		TypeLevel.mergeSuperinterfaces(superTeam, tsuperNestedBinding, localDecl.binding);
-			    		TypeLevel.copyAdjustSuperclass(tsuperNestedBinding, localDecl);
+			    		TypeLevel.copyAdjustSuperclass(tsuperNestedBinding, localDecl, null);
 			    	}
 			    }
 		    }
@@ -767,17 +767,19 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     static class SupertypeObligation {
     	ReferenceBinding thatSuperType;
     	ReferenceBinding thisSuperType;
-		SupertypeObligation(ReferenceBinding thisSupertype, ReferenceBinding thatSupertype)
+    	ASTNode location;
+		SupertypeObligation(ReferenceBinding thisSupertype, ReferenceBinding thatSupertype, ASTNode location)
 		{
 			this.thisSuperType = thisSupertype;
 			this.thatSuperType = thatSupertype;
+			this.location = location;
 		}
 		void check(TypeDeclaration subRole) {
 			if (!this.thisSuperType.isCompatibleWith(this.thatSuperType))
 				// this message is not precise (could be superinterfaces),
 				// and I'm not sure whether the parameters actually make sense..
 				subRole.scope.problemReporter().incompatibleSuperclasses(
-						subRole,
+						(this.location != null) ? this.location : subRole,
 						this.thisSuperType,
 						this.thatSuperType);
 		}

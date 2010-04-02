@@ -83,12 +83,12 @@ public class TypeLevel {
 			if (!tsuperRoles[i].isInterface()) // inherited instead of merged
 				mergeSuperinterfaces(superTeam, tsuperRoles[i], destRole);
 		    if (!roleDecl.isInterface())
-		    	copyAdjustSuperclass(tsuperRoles[i], roleDecl);
+		    	copyAdjustSuperclass(tsuperRoles[i], roleDecl, obligations);
 		    copyBaseclass(tsuperRoles[i], roleDecl);
 	    }
 	    if (tsuperRoles.length == 0)
 	    	// no tsupers to merge with, but still need to adjust the super class:
-	    	copyAdjustSuperclass(null, roleDecl);
+	    	copyAdjustSuperclass(null, roleDecl, obligations);
 
 		adjustSuperinterfaces(superTeam, destRole, obligations);
 		// compatibility may have changed, clear negative cache entries:
@@ -124,7 +124,7 @@ public class TypeLevel {
 	                    teamType.getMemberType(superinterfaces[i].internalName());
 	            if (superinterface != destRole) // not for the tsuper link.
 	            {
-	                obligations.add(new SupertypeObligation(superinterface, superinterfaces[i]));
+	                obligations.add(new SupertypeObligation(superinterface, superinterfaces[i], null));
 	                superinterfaces[i] = superinterfaces[i].transferTypeArguments(superinterface);
 	                destRole.scope.compilationUnitScope().recordSuperTypeReference(superinterface);
 	            }
@@ -340,8 +340,9 @@ public class TypeLevel {
 	 *
 	 * @param tsuperRole   may be null
 	 * @param destRoleDecl @pre: !isInterface()
+	 * @param obligations 
 	 */
-	static void copyAdjustSuperclass(ReferenceBinding tsuperRole, TypeDeclaration destRoleDecl) {
+	static void copyAdjustSuperclass(ReferenceBinding tsuperRole, TypeDeclaration destRoleDecl, ArrayList<SupertypeObligation> obligations) {
 		if(tsuperRole != null) {
 		    if (   destRoleDecl.superclass == null
 		    	&& CharOperation.equals(tsuperRole.internalName(), IOTConstants.OTCONFINED))
@@ -358,7 +359,7 @@ public class TypeLevel {
 			return; // no hope without a binding
 		ReferenceBinding destTeam  = destRoleDecl.binding.enclosingType();
 	    assert(destTeam != null);
-	    checkAdjustSuperclass(destRoleDecl, destTeam, tsuperRole);
+	    checkAdjustSuperclass(destRoleDecl, destTeam, tsuperRole, obligations);
 	}
 
 	/**
@@ -368,11 +369,13 @@ public class TypeLevel {
 	 * @param destRoleDecl @pre: !isInterface()
 	 * @param destTeam
 	 * @param tsuperRole (may be null)
+	 * @param obligations record here any sub-type relations that need checking after all roles have been adjusted 
 	 */
 	private static void checkAdjustSuperclass(
 			TypeDeclaration  destRoleDecl,
 			ReferenceBinding destTeam,
-			ReferenceBinding tsuperRole)
+			ReferenceBinding tsuperRole,
+			ArrayList<SupertypeObligation> obligations)
 	{
 		ClassScope destScope = destRoleDecl.scope;
 
@@ -415,32 +418,29 @@ public class TypeLevel {
 		        return;
 		    }
 		}
+	    if (newSuperclass != null)
+    		newSuperclass = strengthenSuper(destTeam, newSuperclass);
 		if (inheritedSuperclass != null)
 		{
+			inheritedSuperclass = strengthenSuper(destTeam, inheritedSuperclass);
 		    if (newSuperclass == null) {
 		    	newSuperclass = inheritedSuperclass;
 		    } else if (newSuperclass != inheritedSuperclass) {
-		    	if (TeamModel.isTeamContainingRole(destTeam.superclass(), inheritedSuperclass))
-		    		inheritedSuperclass = destTeam.getMemberType(inheritedSuperclass.internalName());
-		    	if (!newSuperclass.isCompatibleWith(inheritedSuperclass))
-		    	{
-		    		// is the old superclass actually a tsuper version of the new superclass?
-		    		if (   newSuperclass.roleModel == null
-		    			|| !newSuperclass.roleModel.hasTSuperRole(inheritedSuperclass))
-		    		{
-		    			destScope.problemReporter().incompatibleSuperclasses(
-		    					newExtends,
-								newSuperclass,
-								inheritedSuperclass);
-			    		return;
-		    		}
-		    	}
+	    		// is the old superclass actually a tsuper version of the new superclass?
+	    		if (   newSuperclass.roleModel == null
+	    			|| !newSuperclass.roleModel.hasTSuperRole(inheritedSuperclass))
+	    		{
+	    			SupertypeObligation oblig = new SupertypeObligation(newSuperclass, inheritedSuperclass, newExtends);
+	    			// check now or later?
+	    			if (obligations != null)
+	    				obligations.add(oblig);
+	    			else
+	    				oblig.check(destRoleDecl);
+	    		}
 		    	destRoleDecl.getRoleModel()._refinesExtends = true;
 		    }
 		}
 	    if (newSuperclass != null) {
-	    	if (TeamModel.isTeamContainingRole(destTeam, newSuperclass))
-	    		newSuperclass = destTeam.getMemberType(newSuperclass.internalName());
 	    	if (newSuperclass == destRoleDecl.binding) {
 	    		// a role extends its implicit super role: circularity!
 	    		// error is already reported on behalf of the interface part (real circularity)
@@ -458,6 +458,26 @@ public class TypeLevel {
 	        // don't update AST: not needed beside error reporting
 			// and then only the old node has source positions..
 	    }
+	}
+	
+	// don't use TeamModel.strengthenRole because we don't want a RoleTypeBinding.
+	static ReferenceBinding strengthenSuper(ReferenceBinding destTeam, ReferenceBinding superRole) {
+		if (!superRole.isRole())
+			return superRole;
+		if (TeamModel.isTeamContainingRole(destTeam.superclass(), superRole))
+			return destTeam.getMemberType(superRole.internalName());
+		if (destTeam.isRole())
+			for (ReferenceBinding tsuperTeam : destTeam.roleModel.getTSuperRoleBindings()) {
+				if (tsuperTeam == superRole.enclosingType())
+					return destTeam.getMemberType(superRole.internalName());
+				if (TeamModel.isTeamContainingRole(tsuperTeam, superRole)) {
+					ReferenceBinding strongEnclosing = destTeam.getMemberType(superRole.enclosingType().internalName());
+					if (strongEnclosing != null)
+						return strengthenSuper(strongEnclosing, superRole);
+					return superRole;
+				}
+			}
+		return superRole;
 	}
 
 }
