@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -24,10 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.StandardClasspathProvider;
@@ -41,9 +38,7 @@ public class OTRuntimeClasspathProvider extends StandardClasspathProvider
 {
 	public static final String PROVIDER_ID = "org.eclipse.objectteams.otdt.OTRuntimeClasspathProvider"; //$NON-NLS-1$
 
-	public static IPath BCEL_JAR = getVariablePath("/lib/BCEL.jar"); //$NON-NLS-1$
-
-    public IRuntimeClasspathEntry[] computeUnresolvedClasspath(ILaunchConfiguration configuration) throws CoreException
+	public IRuntimeClasspathEntry[] computeUnresolvedClasspath(ILaunchConfiguration configuration) throws CoreException
     {
     	// add BCEL, JMangler-core and JMangler-start (classpath / bootclasspath)
     	IRuntimeClasspathEntry[] origEntries = super.computeUnresolvedClasspath(configuration);
@@ -75,7 +70,7 @@ public class OTRuntimeClasspathProvider extends StandardClasspathProvider
 		for (int i = 0; i < origEntries.length; i++)
         {
             IRuntimeClasspathEntry entry = origEntries[i];
-			if (BCEL_JAR.equals(entry.getPath()))
+			if (OTREContainer.BCEL_JAR.equals(entry.getPath()))
 				hasBCEL = true;
         }
 
@@ -86,7 +81,7 @@ public class OTRuntimeClasspathProvider extends StandardClasspathProvider
 // Also fix getVariablePath() then.
 		if (!hasBCEL)
 		{
-			entry = JavaRuntime.newArchiveRuntimeClasspathEntry(BCEL_JAR);
+			entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTREContainer.BCEL_JAR);
 			entry.setClasspathProperty(IRuntimeClasspathEntry.BOOTSTRAP_CLASSES);
 			result.add(entry);			
 		}
@@ -103,13 +98,6 @@ public class OTRuntimeClasspathProvider extends StandardClasspathProvider
 		
 		return result.toArray(new IRuntimeClasspathEntry[result.size()]);
 	}
-
-    private static IPath getVariablePath(String filename)
-    {
-		Path path = new Path(OTDTPlugin.OTRUNTIME_INSTALLDIR + filename);
-		//return path;
-		return JavaCore.getResolvedVariablePath(path);
-    }
 
     public IRuntimeClasspathEntry[] resolveClasspath(
         IRuntimeClasspathEntry[] entries,

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -37,12 +37,14 @@ import org.eclipse.objectteams.otequinox.internal.ASMByteCodeAnalyzer;
 import org.eclipse.objectteams.otequinox.internal.AspectBinding;
 import org.eclipse.objectteams.otequinox.internal.AspectPermissionManager;
 import org.eclipse.objectteams.otequinox.internal.MasterTeamLoader;
+import org.eclipse.objectteams.otequinox.internal.TransformerServiceDelegate;
 import org.eclipse.objectteams.otequinox.hook.ClassScanner;
 import org.eclipse.objectteams.otequinox.hook.HookConfigurator;
 import org.eclipse.objectteams.otequinox.hook.IAspectRegistry;
 import org.eclipse.objectteams.otequinox.hook.IByteCodeAnalyzer;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otequinox.hook.IOTEquinoxService;
+import org.eclipse.objectteams.otequinox.hook.IOTTransformer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -87,7 +89,8 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 	
 	/** The instance that is created by the framework. */
 	private static TransformerPlugin instance;
-	private ServiceRegistration serviceRegistration;
+	private ServiceRegistration serviceRegistration;  // IOTEquinoxService
+	private ServiceRegistration serviceRegistration2; // IOTTransformer
 	private ILogger log;
 	
 	/** instances which may have pending team classes waiting for instantiation. */
@@ -125,11 +128,13 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 		this.permissionManager.loadAspectBindingNegotiators(context);
 		loadAspectBindings();
 		this.serviceRegistration = context.registerService(IOTEquinoxService.class.getName(), this, new Properties());		
+		this.serviceRegistration2 = context.registerService(IOTTransformer.class.getName(), new TransformerServiceDelegate(), new Properties());		
 	}
 		
 	/* be a good citizen: clean up. */
 	public void stop(BundleContext context) throws Exception {
 		serviceRegistration.unregister();
+		serviceRegistration2.unregister();
 	}
 
 	public static TransformerPlugin getDefault() {

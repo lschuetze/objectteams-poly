@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2008 Technical University Berlin, Germany.
+ * Copyright 2008, 2010 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -22,17 +22,13 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
-import org.eclipse.objectteams.otdt.core.ext.OTRuntimeClasspathProvider;
-import org.eclipse.objectteams.otdt.debug.IOTLaunchConstants;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.OTVMRunnerAdaptor;
 import org.eclipse.objectteams.otdt.debug.TeamBreakpointInstaller;
@@ -93,7 +89,7 @@ public team class JDTLaunchingAdaptor {
 			for (int i = 0; i < origEntries.length; i++)
 	        {
 	            IRuntimeClasspathEntry entry = origEntries[i];
-				if (OTRuntimeClasspathProvider.BCEL_JAR.equals(entry.getPath()))
+				if (OTREContainer.BCEL_JAR.equals(entry.getPath()))
 					hasBCEL = true;
 				else if (OTREContainer.OTRE_JAR_PATH.equals(entry.getPath().toString()))
 					hasOTRE_min = true;
@@ -103,7 +99,7 @@ public team class JDTLaunchingAdaptor {
 			IRuntimeClasspathEntry entry;
 	
 			if (!hasBCEL) {
-				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTRuntimeClasspathProvider.BCEL_JAR);
+				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTREContainer.BCEL_JAR);
 				entry.setClasspathProperty(IRuntimeClasspathEntry.BOOTSTRAP_CLASSES);
 				result.add(entry);			
 			}
@@ -117,7 +113,7 @@ public team class JDTLaunchingAdaptor {
 			}		    	
 			
 			if (!hasOTRE_min && !useJMangler) {
-				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(JavaCore.getResolvedVariablePath(new Path(OTREContainer.OTRE_MIN_JAR_PATH)));
+				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTREContainer.OTRE_MIN_JAR_PATH);
 				entry.setClasspathProperty(IRuntimeClasspathEntry.BOOTSTRAP_CLASSES);
 				result.add(entry);
 			}
@@ -188,9 +184,10 @@ public team class JDTLaunchingAdaptor {
 	}
 	
 	static boolean isNormalOTJLaunch(ILaunchConfiguration config) {
+		// FIXME(SH): see https://bugs.eclipse.org/302976
 		try {
 			return    config.getAttribute(OTDebugPlugin.OT_LAUNCH, false)                               // OT/J ?
-				  && !config.getAttribute(IOTLaunchConstants.ATTR_USE_JPLIS, false)					    // not JPLIS ?
+				  && false//&& !config.getAttribute(IOTLaunchConstants.ATTR_USE_JPLIS, false)					    // not JPLIS ?
 				  && (config.getAttribute(IPDEUIConstants.LAUNCHER_PDE_VERSION, (String)null) == null); // not PDE ?
 		} catch (CoreException e) {
 			return false; // don't apply adaptations to bogus config
@@ -200,7 +197,7 @@ public team class JDTLaunchingAdaptor {
 	static boolean isJPLISOTJLaunch(ILaunchConfiguration config) {
 		try {
 			return    config.getAttribute(OTDebugPlugin.OT_LAUNCH, false)                               // OT/J ?
-				  &&  config.getAttribute(IOTLaunchConstants.ATTR_USE_JPLIS, false)					    // JPLIS ?
+				  //&&  config.getAttribute(IOTLaunchConstants.ATTR_USE_JPLIS, false)					    // JPLIS ?
 				  && (config.getAttribute(IPDEUIConstants.LAUNCHER_PDE_VERSION, (String)null) == null); // not PDE ?
 		} catch (CoreException e) {
 			return false; // don't apply adaptations to bogus config

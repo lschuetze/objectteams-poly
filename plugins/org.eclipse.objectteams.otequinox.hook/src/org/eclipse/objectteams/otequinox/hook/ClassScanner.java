@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2008 Technical University Berlin, Germany.
+ * Copyright 2008, 2010 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -24,8 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.eclipse.objectteams.otequinox.internal.hook.Util;
-import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
-import org.eclipse.objectteams.otre.util.CallinBindingManager;
 import org.osgi.framework.Bundle;
 
 /**
@@ -41,7 +39,8 @@ public class ClassScanner
 	// default is "on", leave this switch for trouble shooting and profiling:
 	public static final boolean REPOSITORY_USE_RESOURCE_LOADER = !"off".equals(System.getProperty("otequinox.repository.hook"));
 
-	ObjectTeamsTransformer transformer = new ObjectTeamsTransformer();
+	// access to the OTRE
+	IOTTransformer transformerService;
 	
 	// collect class names recorded by readOTAttributes:
 	
@@ -51,6 +50,10 @@ public class ClassScanner
 	ArrayList<String> allBaseClassNames = new ArrayList<String>();
 	ArrayList<String> roleClassNames = new ArrayList<String>();
 
+
+	public ClassScanner(IOTTransformer transformerService) {
+		this.transformerService = transformerService;
+	}
 
 	/** 
 	 * Read all OT byte code attributes for the specified class.
@@ -71,8 +74,8 @@ public class ClassScanner
 		URL classFile = bundle.getResource(className.replace('.', '/')+".class");
 		if (classFile == null) 
 			throw new ClassNotFoundException(className);
-		this.transformer.readOTAttributes(classFile.openStream(), classFile.getFile(), loader);
-		Collection<String> currentBaseNames = this.transformer.fetchAdaptedBases(); // destructive read
+		Object token = this.transformerService.readOTAttributes(classFile.openStream(), classFile.getFile(), loader);
+		Collection<String> currentBaseNames = this.transformerService.fetchAdaptedBases(token); // destructive read
 		if (currentBaseNames != null) {
 			// store per team:
 			ArrayList<String> basesPerTeam = this.baseClassNamesByTeam.get(className);
@@ -123,7 +126,7 @@ public class ClassScanner
 										  String                 className, 
 										  ClassLoader			 resourceLoader)
 	{
-		List<String> roles = CallinBindingManager.getRolePerTeam(className);
+		List<String> roles = this.transformerService.getRolesPerTeam(className);
 		if (roles != null) {
 			ILogger logger = HookConfigurator.getLogger();
 			for (String roleName: roles) {

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry exported="true" kind="lib" path="lib/BCEL.jar" sourcepath="/bcel-5.2/src/java"/>
+	<classpathentry exported="true" kind="lib" path="lib/otre.jar"/>
 </classpath>

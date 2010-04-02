@@ -1,10 +1,17 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OTRE OSGI Extension Bundle
-Bundle-SymbolicName: org.eclipse.objectteams.otequinox.runtime
-Bundle-Version: 1.4.0.qualifier
-Bundle-Vendor: objectteams.org
-Fragment-Host: org.eclipse.osgi;bundle-version="[3.6.0.v20090928,4.0.0)"
+Bundle-SymbolicName: org.eclipse.objectteams.runtime
+Bundle-Version: 0.7.0.qualifier
+Bundle-Vendor: Eclipse Object Teams Project
 Export-Package: org.objectteams,
- org.eclipse.objectteams.otre
+ org.eclipse.objectteams.otre,
+ org.eclipse.objectteams.otre.jplis,
+ org.eclipse.objectteams.otre.util,
+ org.apache.bcel,
+ org.apache.bcel.classfile,
+ org.apache.bcel.generic,
+ org.apache.bcel.util
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ClassPath: lib/BCEL.jar,
+ lib/otre.jar

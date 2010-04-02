@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2007 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2007, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -25,6 +25,7 @@ import java.net.URLConnection;
 import java.util.Properties;
 
 import org.eclipse.objectteams.otequinox.hook.IOTEquinoxService;
+import org.eclipse.objectteams.otequinox.hook.IOTTransformer;
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.hooks.AdaptorHook;
 import org.eclipse.osgi.framework.log.FrameworkLog;
@@ -67,6 +68,20 @@ public class OTEquinoxServiceWatcher implements AdaptorHook {
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		transformerFilter = "(objectclass="+IOTTransformer.class.getName()+")";  //$NON-NLS-1$ //$NON-NLS-2$
+		//Add listener to listen for the registration of the OTRE service:
+		transformerListener = new ServiceListener() {
+			public void serviceChanged(ServiceEvent event) {
+				if(event.getType() == ServiceEvent.REGISTERED)
+					connectOTTransformerService(context);
+			}
+		};
+		try {
+			context.addServiceListener(transformerListener,transformerFilter);
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		ServiceReference ref= context.getServiceReference(PackageAdmin.class.getName());
 		if (ref!=null)
 			this.hook.connectPackageAdmin((PackageAdmin)context.getService(ref));
@@ -77,8 +92,13 @@ public class OTEquinoxServiceWatcher implements AdaptorHook {
 		ServiceReference ref= context.getServiceReference(IOTEquinoxService.class.getName());
 		if (ref!=null)
 			this.hook.connectOTEquinoxService((IOTEquinoxService)context.getService(ref));
+	}	
+
+	private void connectOTTransformerService (BundleContext context) {
+		ServiceReference ref= context.getServiceReference(IOTTransformer.class.getName());
+		if (ref!=null)
+			this.hook.connectOTTransformerService((IOTTransformer)context.getService(ref));
 	}
-	
 	
 	/** 
 	 * Capture the system bundle at start-up:

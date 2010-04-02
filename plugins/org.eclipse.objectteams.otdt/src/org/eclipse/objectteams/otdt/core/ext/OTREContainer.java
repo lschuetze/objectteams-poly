@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2003, 2007 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -33,17 +33,25 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
+ * This class serves the "OTRE" classpath container.
+ * It also provides access to resolved paths for all OTRE-related jars.
  * @author gis
  */
 public class OTREContainer implements IClasspathContainer
 {
-    public static final String OTRE_CONTAINER_NAME   = "OTRE"; //$NON-NLS-1$
-    public static final String OTRE_JAR_FILENAME     = "otre.jar"; //$NON-NLS-1$
-    public static final String OTRE_MIN_JAR_FILENAME = "otre_min.jar"; //$NON-NLS-1$
+    public static final String OTRE_CONTAINER_NAME     = "OTRE"; //$NON-NLS-1$
+    public static final String OTRE_JAR_FILENAME       = "otre.jar"; //$NON-NLS-1$
+    public static final String BCEL_JAR_FILENAME       = "BCEL.jar"; //$NON-NLS-1$
+    public static final String OTRE_MIN_JAR_FILENAME   = "otre_min.jar"; //$NON-NLS-1$
+    public static final String OTRE_AGENT_JAR_FILENAME = "otre_agent.jar"; //$NON-NLS-1$
     
     public static final IPath  OTRE_CONTAINER_PATH = new Path(OTRE_CONTAINER_NAME);
-    public static final String OTRE_JAR_PATH  	   = OTDTPlugin.OTDT_INSTALLDIR + "/lib/" + OTRE_JAR_FILENAME; //$NON-NLS-1$
-    public static final String OTRE_MIN_JAR_PATH   = OTDTPlugin.OTDT_INSTALLDIR + "/lib/" + OTRE_MIN_JAR_FILENAME; //$NON-NLS-1$
+    // these are served from the current plugin:
+    public static final IPath  OTRE_MIN_JAR_PATH   = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_MIN_JAR_FILENAME); //$NON-NLS-1$
+    public static final IPath  OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$
+    // these are served from org.eclipse.objectteams.runtime/lib:
+    public static final String OTRE_JAR_PATH  	   = OTDTPlugin.OTRUNTIME_LIBDIR + '/' + OTRE_JAR_FILENAME; //$NON-NLS-1$
+    public static final IPath  BCEL_JAR            = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTRUNTIME_LIBDIR, BCEL_JAR_FILENAME); //$NON-NLS-1$
 
     private IClasspathEntry[] _cpEntries;
 

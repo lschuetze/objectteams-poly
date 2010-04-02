@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.debug.internal.TempFileManager;
 
 
@@ -54,7 +55,7 @@ public class OTVMRunnerAdaptor
 	static {
 		JPLIS_VMARGS = new ArrayList<String>();
 		JPLIS_VMARGS.add("-Dot.otdt");
-		JPLIS_VMARGS.add("-javaagent:" + OTDTPlugin.calculateAbsoluteRuntimePath("/lib/otre_agent.jar"));
+		JPLIS_VMARGS.add("-javaagent:" + "\""+OTREContainer.OTRE_AGENT_JAR_PATH.toOSString()+'"'); // support blanks in path
 	}
 
 	final static private boolean _useJPLIS = true;

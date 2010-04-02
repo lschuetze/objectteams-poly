@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2003, 2007 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.core.ext;
 
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
@@ -40,6 +41,7 @@ public class OTDTPlugin extends Plugin
 	public static final String PLUGIN_ID = JavaCore.OTDT_PLUGIN_ID;
 
 	public static final String OTDT_INSTALLDIR = "OTDT_INSTALLDIR"; //$NON-NLS-1$
+	public static final String OTRUNTIME_LIBDIR = "OTRUNTIME_LIBDIR" ; //$NON-NLS-1$
 	
 	// === IDs for configurable options for the compiler : ===
 	public static final String OT_COMPILER_BASE_CALL =
@@ -92,9 +94,6 @@ public class OTDTPlugin extends Plugin
 	public static final String OT_COMPILER_DEPRECATED_PATH_SYNTAX = 
 		PLUGIN_ID + ".compiler.problem.deprecated_path_syntax"; //$NON-NLS-1$;
 
-
-	public static String OTRUNTIME_INSTALLDIR = "OTRUNTIME_INSTALLDIR"; //$NON-NLS-1$
-
     private static OTDTPlugin _singleton = null;
 
 
@@ -143,13 +142,12 @@ public class OTDTPlugin extends Plugin
 	    return new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, exception);
 	}
 	
-    /** 
-     * Take relativeFileName relative to OTRUNTIME_INSTALLDIR and make an absolute path from that.
-     * The returned string is enclosed in double-quotes so it is safe to have blanks within.
+	/** 
+     * Take relativeFileName relative to a given classpath variable and make an absolute path from that.
      */
-	public static String calculateAbsoluteRuntimePath(String relativeFileName)
+	public static IPath getResolvedVariablePath(String variableName, String relativeFilename)
 	{
-		Path path = new Path(OTDTPlugin.OTRUNTIME_INSTALLDIR + relativeFileName);
-		return "\""+JavaCore.getResolvedVariablePath( path ).toOSString()+'"'; //$NON-NLS-1$
+		Path path = new Path(variableName + '/'+ relativeFilename);
+		return JavaCore.getResolvedVariablePath(path);
 	}
 }

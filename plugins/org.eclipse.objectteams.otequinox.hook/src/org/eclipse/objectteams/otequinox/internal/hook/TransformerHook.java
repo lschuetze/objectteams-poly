@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2009 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -21,6 +21,7 @@
 package org.eclipse.objectteams.otequinox.internal.hook;
 
 import java.io.InputStream;
+import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.net.URL;
 import java.security.ProtectionDomain;
@@ -51,9 +52,9 @@ import org.eclipse.objectteams.otequinox.hook.HookConfigurator;
 import org.eclipse.objectteams.otequinox.hook.IByteCodeAnalyzer;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otequinox.hook.IOTEquinoxService;
+import org.eclipse.objectteams.otequinox.hook.IOTTransformer;
 import org.eclipse.objectteams.otequinox.hook.ITeamLoader;
 import org.eclipse.objectteams.otequinox.internal.hook.Util.ProfileKind;
-import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.osgi.framework.Bundle;
 import org.osgi.service.packageadmin.PackageAdmin;
 
@@ -179,6 +180,9 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	// logging (console or via FrameworkLog):
 	final private ILogger logger;
 
+	// gateway to the OTRE proper:
+	private IOTTransformer transformerService;
+
 	final private HashSet<Bundle> uninstalling = new HashSet<Bundle>();
 	
 	// Class loaders for which initializedClassLoader is currently executing (usable, but not yet registered):
@@ -203,6 +207,11 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 		this.aspectRegistry.connectOTEquinoxService(otEquinoxService, this.logger);
 		this.byteCodeAnalyzer= otEquinoxService.getByteCodeAnalyzer();
 		this.logger.log(Util.INFO, "OT/Equinox: connected the transformer service");
+	}
+	
+	/** Invoked when the TransformerPlugin has registered the OTRE as a service. */
+	void connectOTTransformerService(IOTTransformer transformerService) {
+		this.transformerService = transformerService;
 	}
 	
 	void connectPackageAdmin(PackageAdmin packageAdmin) {
@@ -241,7 +250,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 			// on each invocation because the OTRE is _not_ thread safe, 
 			// specifically the field ObjectTeamsTransformation.factory 
 			// MUST NOT be accessed or even assigned concurrently.
-			ObjectTeamsTransformer objectTeamsTransformer= null;
+			ClassFileTransformer objectTeamsTransformer= null;
 
 			ClassLoader resourceLoader = null;
 			if (ClassScanner.REPOSITORY_USE_RESOURCE_LOADER)
@@ -253,13 +262,13 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 			ClassKind classKind= fetchTransformationKind(classbytes, name, resourceLoader, bundle);
 			if (Util.PROFILE) Util.profile(time, ProfileKind.SuperClassFetching, "", this.logger);
 			if (classKind == ClassKind.BASE) {
-				objectTeamsTransformer= new ObjectTeamsTransformer();
+				objectTeamsTransformer= this.transformerService.getNewTransformer();
 				classbytes= transformClass(objectTeamsTransformer, resourceLoader,
 										   name, classbytes, domain, 
 								           "potential base", ProfileKind.BaseTransformation);
 			// ==== loading a role class? 
 			} else if (classKind == ClassKind.ROLE) {
-				objectTeamsTransformer= new ObjectTeamsTransformer();
+				objectTeamsTransformer= this.transformerService.getNewTransformer();
 				classbytes= transformClass(objectTeamsTransformer, resourceLoader,
 										   name, classbytes, domain, 
 										   "role", ProfileKind.AspectTransformation); //$NON-NLS-1$
@@ -277,7 +286,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 						}
 						AspectBundleRole.markLoadingTeams(bundleRegistry, bundle.getSymbolicName(), true);
 						// transform the aspect:
-						objectTeamsTransformer= new ObjectTeamsTransformer();
+						objectTeamsTransformer= this.transformerService.getNewTransformer();
 						classbytes= transformClass(objectTeamsTransformer, resourceLoader,
 												   name, classbytes, domain, 
 												   "team", ProfileKind.AspectTransformation);				 //$NON-NLS-1$
@@ -289,7 +298,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 						   && WEAVE_BUNDLES.contains(bundle.getSymbolicName())
 						   && this.aspectRegistry.isAdaptedBasePlugin(bundle.getSymbolicName()))
 				{
-					objectTeamsTransformer= new ObjectTeamsTransformer();
+					objectTeamsTransformer= this.transformerService.getNewTransformer();
 					classbytes= transformClass(objectTeamsTransformer, resourceLoader,
 											   name, classbytes, domain, 
 									           "ordinary class (could be sub base class)", ProfileKind.BaseTransformation);
@@ -306,7 +315,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	}
 
 	// transform, log and profile:
-	private byte[] transformClass(ObjectTeamsTransformer objectTeamsTransformer, ClassLoader resourceLoader,
+	private byte[] transformClass(ClassFileTransformer objectTeamsTransformer, ClassLoader resourceLoader,
 								  String name, byte[] classbytes, ProtectionDomain domain, 
 								  String kind, ProfileKind profileKind)
 			throws IllegalClassFormatException 
@@ -320,7 +329,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	}
 	
 	// hook method, no specific action
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public boolean addClassPathEntry(
 			ArrayList cpEntries, 
 			String cp,
@@ -452,7 +461,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	private void checkLoadTeams(BaseClassLoader bundleClassLoader, Bundle bundle) 
 	{
 		this.pendingClassLoaders.put(bundle,bundleClassLoader);
-		ClassScanner scanner = new ClassScanner();
+		ClassScanner scanner = new ClassScanner(this.transformerService);
 		this.bundleRegistry.checkLoadTeams(bundle, this.aspectRegistry, this.teamLoadingService, scanner);
 		recordRolesAndBases(scanner);
 		this.pendingClassLoaders.remove(bundle);
@@ -520,7 +529,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 			// aspectRole needed to record 'aspectRole.isLoading' from processClass().
 			this.bundleRegistry.createAspectRole(bundle.getSymbolicName());
 			this.logger.log(Util.OK, "Will load internal teams of "+bundle.getSymbolicName());
-			ClassScanner scanner = new ClassScanner();
+			ClassScanner scanner = new ClassScanner(this.transformerService);
 			if (this.teamLoadingService.loadInternalTeams(bundle, scanner)) {
 				recordRolesAndBases(scanner);
 				BaseBundleRole baseRole= BaseBundleRole.createBaseBundleRole(bundleRegistry, bundle, bundle); // self-adapting
@@ -636,7 +645,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	public URL postFindResource(String name, BundleClassLoader classLoader, BundleData data) {
 		return null;
 	}
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration postFindResources(String name, BundleClassLoader classLoader, BundleData data) {
 		return null;
 	}
@@ -646,7 +655,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	public URL preFindResource(String name, BundleClassLoader classLoader, BundleData data) {
 		return null;
 	}
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public Enumeration preFindResources(String name, BundleClassLoader classLoader, BundleData data) {
 		return null;
 	}
