@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
@@ -173,6 +174,18 @@ public class TSuperMessageSend extends MessageSend {
 			}
 		}
 		return returnType; // not updated
+	}
+	
+	@Override @SuppressWarnings("hiding")
+	public boolean checkInvocationArguments(BlockScope scope, Expression receiver, TypeBinding receiverType,
+			MethodBinding method, Expression[] arguments, TypeBinding[] argumentTypes, boolean argsContainCast,
+			InvocationSite invocationSite) 
+	{
+		if (arguments != null && argumentTypes.length == arguments.length + 1) {
+			int len = arguments.length;
+			System.arraycopy(argumentTypes, 0, argumentTypes = new TypeBinding[len], 0, len);
+		}
+		return super.checkInvocationArguments(scope, receiver, receiverType, method, arguments, argumentTypes, argsContainCast, invocationSite);
 	}
 
 	private MethodBinding getAlternateMethod(
