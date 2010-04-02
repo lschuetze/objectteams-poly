@@ -607,9 +607,14 @@ public class JavadocParser extends AbstractCommentParser {
 					this.tagValue = TAG_ROLE_VALUE;
 					if (!this.inlineTagStarted) {
 						valid = parseIdentifierTag(true);
-						if (valid)
+						if (valid) {
 							pushRoleName(createTypeReference(TerminalTokens.TokenNameIdentifier));
-						// else parseIdentifierTag already reported the missing identifier
+						} else {
+							// parseIdentifierTag already reported the missing identifier
+							// reset scanner to previous position:
+							this.index = this.tokenPreviousPosition;
+							this.scanner.resetTo(this.index, this.javadocEnd);
+						}
 					}
 				}
 //SH}
