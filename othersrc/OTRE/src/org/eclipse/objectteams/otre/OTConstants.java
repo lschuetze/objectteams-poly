@@ -90,6 +90,9 @@ public interface OTConstants {
     // required compiler revision in the 1.4 stream:
     public static final int    OT14_REVISION = 1;
 
+    // required compiler revision in the 1.5 stream:
+    public static final int    OT15_REVISION = 0;
+
     // ------------------------------------------
 	// ---------- Flags and Modifiers: ----------
 	// ------------------------------------------

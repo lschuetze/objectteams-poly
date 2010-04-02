@@ -1129,8 +1129,18 @@ public abstract class ObjectTeamsTransformation
                     if(logging) printLogMessage("**** class file was produced by compiler version "
                             + major + "." + minor + "." + revision + " ****");
                     IS_COMPILER_GREATER_123 = false; // reset, may be updated below
+					// 1.5 stream:
+					if (major == 1 && minor == 5) {
+						if (revision < OT15_REVISION) {
+							if (class_name.startsWith(OTConstants.teamClassName))
+								continue; // no specific byte codes in ooTeam and its inner classes.
+							throw new InternalError("OTRE: Class " + class_name + " has unsupported revision " + revision);
+						}
+						IS_COMPILER_GREATER_123 = true;
+						IS_COMPILER_13X_PLUS = true;
+						IS_COMPILER_14X_PLUS = true;
 					// 1.4 stream:
-					if (major == 1 && minor == 4) {
+					} else if (major == 1 && minor == 4) {
 						if (revision < OT14_REVISION) {
 							if (class_name.startsWith(OTConstants.teamClassName))
 								continue; // no specific byte codes in ooTeam and its inner classes.
