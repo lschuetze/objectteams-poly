@@ -69,7 +69,7 @@ This software is based on Eclipse and the Java Development Tooling
          version="3.3.100"/>
 
    <plugin
-         id="org.objectteams.otdt.tests"
+         id="org.eclipse.objectteams.otdt.tests"
          download-size="0"
          install-size="0"
          version="0.7.0"/>
@@ -93,31 +93,31 @@ This software is based on Eclipse and the Java Development Tooling
          version="3.6.0"/>
     
    <plugin
-         id="org.objectteams.otdt.debug.tests"
+         id="org.eclipse.objectteams.otdt.debug.tests"
          download-size="0"
          install-size="0"
          version="0.7.0"/>
 
    <plugin
-         id="org.objectteams.otdt.ui.tests"
+         id="org.eclipse.objectteams.otdt.ui.tests"
          download-size="0"
          install-size="0"
          version="0.7.0"/>
 
    <plugin
-         id="org.objectteams.otdt.ui.tests.dom"
+         id="org.eclipse.objectteams.otdt.ui.tests.dom"
          download-size="0"
          install-size="0"
          version="0.7.0"/>
 
    <plugin
-         id="org.objectteams.otdt.ui.tests.refactoring"
+         id="org.eclipse.objectteams.otdt.ui.tests.refactoring"
          download-size="0"
          install-size="0"
          version="0.7.0"/>
 
     <plugin
-         id="org.objectteams.otdt.test.builder"
+         id="org.eclipse.objectteams.otdt.test.builder"
          download-size="0"
          install-size="0"
          version="0.7.0"/>
