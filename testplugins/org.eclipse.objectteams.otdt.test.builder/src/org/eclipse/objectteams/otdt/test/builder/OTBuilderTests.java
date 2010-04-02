@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.tests.builder.BuilderTests;
 import org.eclipse.jdt.core.tests.builder.Problem;
+import org.eclipse.jdt.core.tests.builder.TestingEnvironment;
 import org.eclipse.objectteams.otdt.internal.compiler.adaptor.BuildManager;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 
@@ -41,6 +42,8 @@ public class OTBuilderTests extends BuilderTests {
 						+ File.separator
 						+ "otre.jar"; //$NON-NLS-1$
 	}
+	
+	OTTestingEnvironment otenv;
 
 	public OTBuilderTests(String name) {
 		super(name);
@@ -52,13 +55,21 @@ public class OTBuilderTests extends BuilderTests {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		env = new OTTestingEnvironment();
-		env.openEmptyWorkspace();
-		env.resetWorkspace();
+		this.otenv = new OTTestingEnvironment();
+		this.otenv.activate();
+		this.env = new TestingEnvironment();
+		this.env.openEmptyWorkspace();
+		this.env.resetWorkspace();
 	
 		BuildManager.DEBUG = 2;
 	}
 
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		this.otenv.deactivate();
+		this.otenv = null;
+	}
 	/** Verifies that the given element has problems.
 	 * Old implementation from BuilderTests
 	 */

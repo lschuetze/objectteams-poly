@@ -10,7 +10,7 @@
                id="org.eclipse.jdt.core.tests.builder">
          </basePlugin>
          <team
-               activation="ALL_THREADS"
+               activation="NONE"
                class="org.eclipse.objectteams.otdt.test.builder.OTTestingEnvironment"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
