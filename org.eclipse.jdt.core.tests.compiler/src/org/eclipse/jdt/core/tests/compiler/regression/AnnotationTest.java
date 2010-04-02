@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann  - Contribution for bug 295551
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -44,7 +45,7 @@ public class AnnotationTest extends AbstractComparableTest {
 	// All specified tests which do not belong to the class are skipped...
 	static {
 //		TESTS_NAMES = new String[] { "test127" };
-//		TESTS_NUMBERS = new int[] { 278 };
+//		TESTS_NUMBERS = new int[] { 286 };
 //		TESTS_RANGE = new int[] { 249, -1 };
 	}
 
@@ -997,7 +998,7 @@ public class AnnotationTest extends AbstractComparableTest {
 		this.runConformTest(
 			new String[] {
 				"X.java",
-				"@Foo(type=String.class) public class X {\r\n" +
+				"@Foo(type=String.class) public class X {\n" +
 				"}"
 			},
 			"",
@@ -1246,8 +1247,8 @@ public class AnnotationTest extends AbstractComparableTest {
 				"}\n"
 			},
 		"----------\n" +
-		"1. ERROR in X.java (at line 12)\r\n" +
-		"	public @MyAnn void something() { }	\r\n" +
+		"1. ERROR in X.java (at line 12)\n" +
+		"	public @MyAnn void something() { }	\n" +
 		"	       ^^^^^^\n" +
 		"The annotation @MyAnn is disallowed for this location\n" +
 		"----------\n");
@@ -2723,8 +2724,8 @@ public class AnnotationTest extends AbstractComparableTest {
 				"}\n"
 			},
 		"----------\n" +
-		"1. ERROR in X.java (at line 4)\r\n" +
-		"	@Inherited\r\n" +
+		"1. ERROR in X.java (at line 4)\n" +
+		"	@Inherited\n" +
 		"	^^^^^^^^^^\n" +
 		"The annotation @Inherited is disallowed for this location\n" +
 		"----------\n");
@@ -2958,8 +2959,8 @@ public class AnnotationTest extends AbstractComparableTest {
 				"}\n",
 			},
 			"----------\n" +
-			"1. ERROR in X.java (at line 3)\r\n" +
-			"	@Target(Element)\r\n" +
+			"1. ERROR in X.java (at line 3)\n" +
+			"	@Target(Element)\n" +
 			"	        ^^^^^^^\n" +
 			"Element cannot be resolved to a variable\n" +
 			"----------\n");
@@ -4064,7 +4065,11 @@ public class AnnotationTest extends AbstractComparableTest {
     		"	class S implements Serializable {\n" +
     		"	      ^\n" +
     		"The serializable class S does not declare a static final serialVersionUID field of type long\n" +
-    		"----------\n");
+    		"----------\n",
+    		null,
+    		true,
+    		null,
+    		"java.lang.Error");
     }
     // check @SuppressWarning support
     //https://bugs.eclipse.org/bugs/show_bug.cgi?id=89436
@@ -4368,8 +4373,8 @@ public class AnnotationTest extends AbstractComparableTest {
     public void test140() {
     	String expectedOutput = new CompilerOptions(getCompilerOptions()).sourceLevel < ClassFileConstants.JDK1_6
 		?	"----------\n" +
-    		"1. ERROR in X.java (at line 6)\r\n" +
-    		"	static void foo(){}	\r\n" +
+    		"1. ERROR in X.java (at line 6)\n" +
+    		"	static void foo(){}	\n" +
     		"	            ^^^^^\n" +
     		"The method foo() of type Bar must override a superclass method\n" +
     		"----------\n"
@@ -4503,6 +4508,8 @@ public class AnnotationTest extends AbstractComparableTest {
 			true,
 			raiseInvalidJavadocSeverity);
 	}
+// check that @SuppressWarning is reported as unused when corresponding warning is moved from
+// warning to error
 public void test142c() {
 	Map raiseDeprecationReduceInvalidJavadocSeverity =
 		new HashMap(2);
@@ -4534,16 +4541,21 @@ public void test142c() {
         },
         null,
         raiseDeprecationReduceInvalidJavadocSeverity,
-		"----------\n" +
-		"1. ERROR in X.java (at line 2)\n" +
-		"	public class X extends p.OldStuff {\n" +
-		"	                       ^^^^^^^^^^\n" +
-		"The type OldStuff is deprecated\n" +
-		"----------\n" +
-		"2. ERROR in X.java (at line 8)\n" +
-		"	super.foo();\n" +
-		"	^^^^^^^^^^^\n" +
-		"The method foo() from the type OldStuff is deprecated\n" +
+        "----------\n" + 
+		"1. WARNING in X.java (at line 1)\n" + 
+		"	@SuppressWarnings(\"deprecation\")\n" + 
+		"	                  ^^^^^^^^^^^^^\n" + 
+		"Unnecessary @SuppressWarnings(\"deprecation\")\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 2)\n" + 
+		"	public class X extends p.OldStuff {\n" + 
+		"	                       ^^^^^^^^^^\n" + 
+		"The type OldStuff is deprecated\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 8)\n" + 
+		"	super.foo();\n" + 
+		"	^^^^^^^^^^^\n" + 
+		"The method foo() from the type OldStuff is deprecated\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -5831,10 +5843,10 @@ public void test143() {
     			"import static java.lang.annotation.RetentionPolicy.*;\n" +
     			"import java.lang.annotation.Retention;\n" +
     			"import java.lang.annotation.Target;\n" +
-    			"@Target({TYPE, FIELD, METHOD,\r\n" +
-    			"         PARAMETER, CONSTRUCTOR,\r\n" +
-    			"         LOCAL_VARIABLE, PACKAGE,})\r\n" +
-    			"@Retention(CLASS)\r\n" +
+    			"@Target({TYPE, FIELD, METHOD,\n" +
+    			"         PARAMETER, CONSTRUCTOR,\n" +
+    			"         LOCAL_VARIABLE, PACKAGE,})\n" +
+    			"@Retention(CLASS)\n" +
     			"public @interface X {}"
     		},
     		"",
@@ -6327,8 +6339,8 @@ public void test193() {
 			"}"
 		},
 		"----------\n" +
-		"1. ERROR in A.java (at line 2)\r\n" +
-		"	A circular1();\r\n" +
+		"1. ERROR in A.java (at line 2)\n" +
+		"	A circular1();\n" +
 		"	^\n" +
 		"Cycle detected: the annotation type A cannot contain attributes of the annotation type itself\n" +
 		"----------\n"
@@ -6345,18 +6357,18 @@ public void test193() {
 			"}"
 		},
 		"----------\n" +
-		"1. ERROR in A.java (at line 2)\r\n" +
-		"	B circular2();\r\n" +
+		"1. ERROR in A.java (at line 2)\n" +
+		"	B circular2();\n" +
 		"	^\n" +
 		"Cycle detected: a cycle exists between annotation attributes of A and B\n" +
 		"----------\n" +
-		"2. ERROR in A.java (at line 3)\r\n" +
-		"	A circular1();\r\n" +
+		"2. ERROR in A.java (at line 3)\n" +
+		"	A circular1();\n" +
 		"	^\n" +
 		"Cycle detected: the annotation type A cannot contain attributes of the annotation type itself\n" +
 		"----------\n" +
-		"3. ERROR in A.java (at line 6)\r\n" +
-		"	A circular();\r\n" +
+		"3. ERROR in A.java (at line 6)\n" +
+		"	A circular();\n" +
 		"	^\n" +
 		"Cycle detected: a cycle exists between annotation attributes of B and A\n" +
 		"----------\n"
@@ -6373,18 +6385,18 @@ public void test193() {
 			"}"
 		},
 		"----------\n" +
-		"1. ERROR in A.java (at line 2)\r\n" +
-		"	A circular1();\r\n" +
+		"1. ERROR in A.java (at line 2)\n" +
+		"	A circular1();\n" +
 		"	^\n" +
 		"Cycle detected: the annotation type A cannot contain attributes of the annotation type itself\n" +
 		"----------\n" +
-		"2. ERROR in A.java (at line 3)\r\n" +
-		"	B circular2();\r\n" +
+		"2. ERROR in A.java (at line 3)\n" +
+		"	B circular2();\n" +
 		"	^\n" +
 		"Cycle detected: a cycle exists between annotation attributes of A and B\n" +
 		"----------\n" +
-		"3. ERROR in A.java (at line 6)\r\n" +
-		"	A circular();\r\n" +
+		"3. ERROR in A.java (at line 6)\n" +
+		"	A circular();\n" +
 		"	^\n" +
 		"Cycle detected: a cycle exists between annotation attributes of B and A\n" +
 		"----------\n"
@@ -7091,8 +7103,8 @@ public void test215() {
 	if (new CompilerOptions(getCompilerOptions()).sourceLevel < ClassFileConstants.JDK1_6) {
 		this.runNegativeTest(sources,
 			"----------\n" +
-			"1. ERROR in Y.java (at line 3)\r\n" +
-			"	public void foo() {}\r\n" +
+			"1. ERROR in Y.java (at line 3)\n" +
+			"	public void foo() {}\n" +
 			"	            ^^^^^\n" +
 			"The method foo() of type Y must override a superclass method\n" +
 			"----------\n");
@@ -8147,8 +8159,8 @@ public void test248() {
 				"}"
 			},
 			"----------\n" +
-			"1. ERROR in TestAnnotation.java (at line 2)\r\n" +
-			"	String targetItem() default void.class;\r\n" +
+			"1. ERROR in TestAnnotation.java (at line 2)\n" +
+			"	String targetItem() default void.class;\n" +
 			"	                            ^^^^^^^^^^\n" +
 			"Type mismatch: cannot convert from Class<Void> to String\n" +
 			"----------\n");
@@ -9278,5 +9290,232 @@ public void test278() {
 			testString,
 			expectedOutput,
 			JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=301683
+public void test279() {
+	String testString [] = new String[] {
+			"A.java",
+			"public class A {\n" +
+			"    public @interface Inline {\n" +
+			"        String value();\n" +
+			"    }\n" +
+			"    @Inline(\"foo\")\n" +
+			"    public Zork test;\n" +
+			"    public native void method();\n" +
+			"}"
+			};
+	String expectedOutput =
+		"----------\n" + 
+		"1. ERROR in A.java (at line 6)\n" + 
+		"	public Zork test;\n" + 
+		"	       ^^^^\n" + 
+		"Zork cannot be resolved to a type\n" +
+		"----------\n";
+	this.runNegativeTest(
+			testString,
+			expectedOutput,
+			JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=295551
+public void test280() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+	String testFiles [] = new String[] {
+			"A.java",
+			"public class A {\n" +
+			"	@SuppressWarnings(\"unused\")\n" +
+			"	private int i;\n" + // problem configured as warning but still suppressed
+			"}\n"
+			};
+	runConformTest(
+			testFiles,
+			null,
+			null,
+			true,
+			null,
+			customOptions,
+			null);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=295551
+public void test281() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_SuppressWarnings, CompilerOptions.DISABLED); // this option overrides the next
+	customOptions.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+	String testFiles [] = new String[] {
+			"A.java",
+			"public class A {\n" +
+			"	@SuppressWarnings(\"unused\")\n" +
+			"	private int i;\n" +
+			"}\n"
+			};
+	String expectedErrorString = 
+			"----------\n" + 
+			"1. ERROR in A.java (at line 3)\n" + 
+			"	private int i;\n" + 
+			"	            ^\n" + 
+			"The field A.i is never read locally\n" + 
+			"----------\n";
+	runNegativeTest(
+			true,
+			testFiles,
+			null, 
+			customOptions,
+			expectedErrorString,
+			JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=295551
+public void test282() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+	String testFiles [] = new String[] {
+			"A.java",
+			"import java.util.Map;\n" +
+			"public class A {\n" +
+			"	@SuppressWarnings({\"rawtypes\", \"unused\"})\n" + //suppress a warning and an error
+			"	private Map i;\n" + 
+			"}\n"
+			};
+	runConformTest(
+			testFiles,
+			null,
+			null,
+			true,
+			null,
+			customOptions,
+			null);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=295551
+public void test283() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+	String testFiles [] = new String[] {
+			"A.java",
+			"public class A {\n" +
+			"	@SuppressWarnings(\"all\")\n" +
+			"	private void i;\n" + // cannot suppress mandatory error
+			"}\n"
+			};
+	String expectedErrorString = 
+			"----------\n" + 
+			"1. ERROR in A.java (at line 3)\n" + 
+			"	private void i;\n" + 
+			"	             ^\n" + 
+			"void is an invalid type for the variable i\n" + 
+			"----------\n";
+	runNegativeTest(
+			true,
+			testFiles,
+			null, 
+			customOptions,
+			expectedErrorString,
+			JavacTestOptions.SKIP);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=304031
+public void test284() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnnecessaryTypeCheck, CompilerOptions.WARNING);
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedWarningToken, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+	String testFiles [] = new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"    void m() {\n" + 
+			"        @SuppressWarnings(\"cast\")\n" + 
+			"        int i= (int) 0;\n" + 
+			"        @SuppressWarnings(\"cast\")\n" + 
+			"        byte b= (byte) i;\n" + 
+			"        System.out.println(b);\n" + 
+			"    }\n" + 
+			"}"
+	};
+	String expectedErrorString = 
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	@SuppressWarnings(\"cast\")\n" + 
+		"	                  ^^^^^^\n" + 
+		"Unnecessary @SuppressWarnings(\"cast\")\n" + 
+		"----------\n";
+	runNegativeTest(
+			true,
+			testFiles,
+			null, 
+			customOptions,
+			expectedErrorString,
+			JavacTestOptions.SKIP);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=304031
+public void test285() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnnecessaryTypeCheck, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedWarningToken, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+	String testFiles [] = new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"    void m() {\n" + 
+			"        @SuppressWarnings(\"cast\")\n" + 
+			"        int i= (int) 0;\n" + 
+			"        @SuppressWarnings(\"cast\")\n" + 
+			"        byte b= (byte) i;\n" + 
+			"        System.out.println(b);\n" + 
+			"    }\n" + 
+			"}"
+	};
+	String expectedErrorString = 
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	@SuppressWarnings(\"cast\")\n" + 
+		"	                  ^^^^^^\n" + 
+		"Unnecessary @SuppressWarnings(\"cast\")\n" + 
+		"----------\n";
+	runNegativeTest(
+			true,
+			testFiles,
+			null, 
+			customOptions,
+			expectedErrorString,
+			JavacTestOptions.SKIP);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=304031
+public void test286() {
+	Map raiseDeprecationReduceInvalidJavadocSeverity =
+		new HashMap(2);
+	raiseDeprecationReduceInvalidJavadocSeverity.put(
+			CompilerOptions.OPTION_ReportDeprecation, CompilerOptions.ERROR);
+	raiseDeprecationReduceInvalidJavadocSeverity.put(
+			CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+	raiseDeprecationReduceInvalidJavadocSeverity.put(
+			CompilerOptions.OPTION_ReportInvalidJavadoc, CompilerOptions.WARNING);
+	this.runConformTest(
+		new String[] {
+				"X.java",
+				"@SuppressWarnings(\"deprecation\")\n" +
+				"public class X extends p.OldStuff {\n" +
+				"	/**\n" +
+				"	 * @see p.OldStuff#foo()\n" +
+				"	 */\n" +
+				"	@Override\n" +
+				"	public void foo() {\n" +
+				"		super.foo();\n" +
+				"	}\n" +
+				"}\n",
+				"p/OldStuff.java",
+				"package p;\n" +
+				"@Deprecated\n" +
+				"public class OldStuff {\n" +
+				"	public void foo() {\n" +
+				"	}	\n" +
+				"}\n",
+		},
+		"",
+		null,
+		true,
+		null,
+		raiseDeprecationReduceInvalidJavadocSeverity,
+		null);
 }
 }

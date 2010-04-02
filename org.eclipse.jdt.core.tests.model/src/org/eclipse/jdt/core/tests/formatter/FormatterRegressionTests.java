@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Brock Janiczak - Contribution for bug 150741
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.formatter;
 
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.formatter.DefaultCodeFormatter;
 import org.eclipse.jdt.internal.formatter.DefaultCodeFormatterOptions;
+import org.eclipse.jdt.internal.formatter.align.Alignment;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.text.edits.TextEdit;
@@ -218,17 +220,17 @@ public class FormatterRegressionTests extends AbstractJavaModelTests {
 		assertSourceEquals("Different number of length", Util.convertToIndependantLineDelimiter(expectedContents), actualContents);
 	}
 
+	void assertLineEquals(String actualContents, String originalSource, String expectedContents) {
+		String outputSource = expectedContents == null ? originalSource : expectedContents;
+		assertLineEquals(actualContents, originalSource, outputSource, false /* do not check null */);
+	}
+
 	DefaultCodeFormatter codeFormatter() {
 		if (this.formatterOptions == null) {
 			this.formatterOptions = JAVA_PROJECT.getOptions(true);
 		}
 		DefaultCodeFormatter codeFormatter = new DefaultCodeFormatter(this.formatterPrefs, this.formatterOptions);
 		return codeFormatter;
-	}
-	
-	void assertLineEquals(String actualContents, String originalSource, String expectedContents) {
-		String outputSource = expectedContents == null ? originalSource : expectedContents;
-		assertLineEquals(actualContents, originalSource, outputSource, false /* do not check null */);
 	}
 
 	void formatSource(String source) {
@@ -238,6 +240,10 @@ public class FormatterRegressionTests extends AbstractJavaModelTests {
 
 	void formatSource(String source, String formattedOutput) {
 		formatSource(source, formattedOutput, CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS, 0, true /*repeat formatting twice*/);
+	}
+
+	void formatSource(String source, String formattedOutput, int kind) {
+		formatSource(source, formattedOutput, kind, 0, true /*repeat formatting twice*/);
 	}
 	
 	void formatSource(String source, String formattedOutput, boolean repeat) {
@@ -273,11 +279,11 @@ public class FormatterRegressionTests extends AbstractJavaModelTests {
 			}
 			assertLineEquals(result, newSource, formattedOutput);
 		} else {
-			formatSource(source, formattedOutput, kind, indentationLevel, false, 0, -1, null, repeat);
+			formatSource(source, formattedOutput, kind, indentationLevel, 0, -1, null, repeat);
 		}
 	}
 	
-	void formatSource(String source, String formattedOutput, int kind, int indentationLevel, boolean checkNull, int offset, int length, String lineSeparator, boolean repeat) {
+	void formatSource(String source, String formattedOutput, int kind, int indentationLevel, int offset, int length, String lineSeparator, boolean repeat) {
 		DefaultCodeFormatter codeFormatter = codeFormatter();
 		String result;
 		if (length == -1) {
@@ -285,7 +291,14 @@ public class FormatterRegressionTests extends AbstractJavaModelTests {
 		} else {
 			result = runFormatter(codeFormatter, source, kind, indentationLevel, offset, length, lineSeparator, repeat);
 		}
-		assertLineEquals(result, source, formattedOutput);
+		if (lineSeparator == null) {
+			assertLineEquals(result, source, formattedOutput);
+		} else {
+			// Do not convert line delimiter while comparing result when a specific one is specified
+			assertNotNull("Error(s) occured while formatting", result);
+			String outputSource = formattedOutput == null ? source : formattedOutput;
+			assertSourceEquals("Different number of length", outputSource, result, false/*do not convert line delimiter*/);
+		}
 	}
 
 
@@ -7310,6 +7323,30 @@ public class FormatterRegressionTests extends AbstractJavaModelTests {
 			JavaCore.setOptions(javaCoreOptions);
 		}
 	}
+	public void test527b() {
+		Map options = DefaultCodeFormatterConstants.getJavaConventionsSettings();
+		DefaultCodeFormatterOptions preferences = new DefaultCodeFormatterOptions(options);
+		preferences.tab_char = DefaultCodeFormatterOptions.TAB;
+        preferences.tab_size = 4;
+		preferences.alignment_for_arguments_in_annotation = Alignment.M_COMPACT_SPLIT;
+		Hashtable javaCoreOptions = JavaCore.getOptions();
+		try {
+			Hashtable newJavaCoreOptions = JavaCore.getOptions();
+			newJavaCoreOptions.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_5);
+			newJavaCoreOptions.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_5);
+			newJavaCoreOptions.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_5);
+			JavaCore.setOptions(newJavaCoreOptions);
+
+			Map compilerOptions = new HashMap();
+			compilerOptions.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_5);
+			compilerOptions.put(CompilerOptions.OPTION_TargetPlatform, CompilerOptions.VERSION_1_5);
+			compilerOptions.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_5);
+			DefaultCodeFormatter codeFormatter = new DefaultCodeFormatter(preferences, compilerOptions);
+			runTest(codeFormatter, "test527b", "A.java", CodeFormatter.K_COMPILATION_UNIT, false);//$NON-NLS-1$ //$NON-NLS-2$
+		} finally {
+			JavaCore.setOptions(javaCoreOptions);
+		}
+	}
 
 	/**
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=79779
@@ -8737,9 +8774,9 @@ public class FormatterRegressionTests extends AbstractJavaModelTests {
 			"/**\r\n" + 
 			" * Mensagens SMTP tem o seguinte formato:\r\n" + 
 			" * <pre>\r\n" + 
-			" * resposta de uma linha só:\r\n" + 
+			" * resposta de uma linha sï¿½:\r\n" + 
 			" *  nnn [SP] lalalal [CR] [LF]\r\n" + 
-			" * resposta de várias linhas:\r\n" + 
+			" * resposta de vï¿½rias linhas:\r\n" + 
 			" *  nnn [-] lalalalal [CR] [LF]\r\n" + 
 			" *  nnn [-] lalalalal [CR] [LF]\r\n" + 
 			" *  ...\r\n" + 
@@ -8751,9 +8788,9 @@ public class FormatterRegressionTests extends AbstractJavaModelTests {
 			" * Mensagens SMTP tem o seguinte formato:\n" + 
 			" * \n" + 
 			" * <pre>\n" + 
-			" * resposta de uma linha só:\n" + 
+			" * resposta de uma linha sï¿½:\n" + 
 			" *  nnn [SP] lalalal [CR] [LF]\n" + 
-			" * resposta de várias linhas:\n" + 
+			" * resposta de vï¿½rias linhas:\n" + 
 			" *  nnn [-] lalalalal [CR] [LF]\n" + 
 			" *  nnn [-] lalalalal [CR] [LF]\n" + 
 			" *  ...\n" + 
@@ -10621,5 +10658,28 @@ public void test723() {
 	compilerOptions.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_5);
 	DefaultCodeFormatter codeFormatter = new DefaultCodeFormatter(preferences, compilerOptions);
 	runTest(codeFormatter, "test723", "A.java", CodeFormatter.K_COMPILATION_UNIT, false);//$NON-NLS-1$ //$NON-NLS-2$
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=150741
+public void test724() {
+	this.formatterPrefs.insert_new_line_after_label = true;
+	String source =
+		"public class X {\n" + 
+		"	public static void main(String[] args) {\n" + 
+		"		LABEL:for (int i = 0; i < 10; i++) {\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"\n" + 
+		"}\n" + 
+		"";
+	formatSource(source,
+		"public class X {\n" + 
+		"	public static void main(String[] args) {\n" + 
+		"		LABEL:\n" + 
+		"		for (int i = 0; i < 10; i++) {\n" + 
+		"		}\n" + 
+		"	}\n" + 
+		"\n" + 
+		"}\n"
+	);
 }
 }

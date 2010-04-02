@@ -725,11 +725,21 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 	 * The line separators in 'actual' are converted to '\n' before the comparison.
 	 */
 	protected void assertSourceEquals(String message, String expected, String actual) {
+		assertSourceEquals(message, expected, actual, true/*convert line delimiter*/);
+	}
+	/*
+	 * Asserts that the given actual source is equal to the expected one.
+	 * Note that if the line separators in 'actual' are converted to '\n' before the comparison,
+	 * 'expected' is assumed to have the same '\n' line separator.
+	 */
+	protected void assertSourceEquals(String message, String expected, String actual, boolean convert) {
 		if (actual == null) {
 			assertEquals(message, expected, null);
 			return;
 		}
-		actual = org.eclipse.jdt.core.tests.util.Util.convertToIndependantLineDelimiter(actual);
+		if (convert) {
+			actual = org.eclipse.jdt.core.tests.util.Util.convertToIndependantLineDelimiter(actual);
+		}
 		if (!actual.equals(expected)) {
 			System.out.println("Expected source in "+getName()+" should be:");
 			System.out.print(org.eclipse.jdt.core.tests.util.Util.displayString(actual.toString(), 2));
@@ -2818,13 +2828,23 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		return result;
 	}
 	protected void touch(File f) {
-		int time = 1000;
+		final int time = 1000;
 		long lastModified = f.lastModified();
 		f.setLastModified(lastModified + time);
 		org.eclipse.jdt.core.tests.util.Util.waitAtLeast(time);
-		// Assertion to track the reason of unexpected failures with tests on external resources
+		// Loop until the last modified time has really changed on the file
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=295619
-		assertEquals("The file "+f.getAbsolutePath()+" was not touched!", lastModified+time, f.lastModified());
+		int n = 1;
+		while (n < 10) { // retry 9 times more if necessary
+			if (f.lastModified() != lastModified) {
+				// We can leave the loop as the file has been really touched
+				return;
+			}
+			f.setLastModified(lastModified + n*time);
+			org.eclipse.jdt.core.tests.util.Util.waitAtLeast(time);
+			n++;
+		}
+		assertFalse("The file "+f.getAbsolutePath()+" was not touched!", lastModified == f.lastModified());
 	}
 
 	protected String toString(String[] strings) {

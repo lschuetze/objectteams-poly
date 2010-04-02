@@ -15,10 +15,12 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.internal.formatter.DefaultCodeFormatter;
 import org.eclipse.jdt.internal.formatter.DefaultCodeFormatterOptions;
+import org.eclipse.jdt.internal.formatter.align.Alignment;
 
 public class FormatterBugsTests extends FormatterRegressionTests {
 
@@ -62,6 +64,573 @@ public void setUpSuite() throws Exception {
 		JAVA_PROJECT = setUpJavaProject("FormatterBugs", "1.5"); //$NON-NLS-1$
 	}
 	super.setUpSuite();
+}
+
+/**
+ * @bug 27079: [formatter] Tags for disabling/enabling code formatter (feature)
+ * @test Ensure that the formatter does not format code between specific javadoc comments
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=27079"
+ */
+public void testBug027079a() throws JavaModelException {
+	String source =
+		"public class X01 {\n" + 
+		"\n" + 
+		"/* disable-formatter */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"/* enable-formatter */\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X01 {\n" + 
+		"\n" + 
+		"	/* disable-formatter */\n" + 
+		"	void foo() {\n" + 
+		"		// unformatted comment\n" + 
+		"	}\n" + 
+		"\n" + 
+		"	/* enable-formatter */\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079a1() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X01 {\n" + 
+		"\n" + 
+		"/* disable-formatter */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"/* enable-formatter */\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X01 {\n" + 
+		"\n" + 
+		"/* disable-formatter */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"/* enable-formatter */\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079a2() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X01 {\n" + 
+		"\n" + 
+		"/** disable-formatter */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"/** enable-formatter */\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X01 {\n" + 
+		"\n" + 
+		"/** disable-formatter */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"/** enable-formatter */\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079a3() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X01 {\n" + 
+		"\n" + 
+		"// disable-formatter\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"// enable-formatter\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X01 {\n" + 
+		"\n" + 
+		"// disable-formatter\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"// enable-formatter\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079a4() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X01 {\n" + 
+		"\n" + 
+		"// disable-formatter\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment  	  \n" + 
+		"}\n" + 
+		"// enable-formatter \n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment  	  \n" + 
+		"				/* disable-formatter *//*      unformatted		comment  	  *//* enable-formatter */\n" + 
+		"}\n" + 		"}\n";
+	formatSource(source,
+		"public class X01 {\n" + 
+		"\n" + 
+		"// disable-formatter\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment  	  \n" + 
+		"}\n" + 
+		"// enable-formatter \n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"		/* disable-formatter *//*      unformatted		comment  	  *//* enable-formatter */\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079b() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X02 {\n" + 
+		"void foo() {\n" + 
+		"/* disable-formatter */\n" + 
+		"				/*       unformatted		comment  	  */\n" + 
+		"	String test1= \"this\"+\n" + 
+		"					\"is\"+\n" + 
+		"			\"a specific\"+\n" + 
+		"		\"line wrapping \";\n" + 
+		"\n" + 
+		"/* enable-formatter */\n" + 
+		"				/*       formatted		comment  	  */\n" + 
+		"	String test2= \"this\"+\n" + 
+		"					\"is\"+\n" + 
+		"			\"a specific\"+\n" + 
+		"		\"line wrapping \";\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X02 {\n" + 
+		"	void foo() {\n" + 
+		"/* disable-formatter */\n" + 
+		"				/*       unformatted		comment  	  */\n" + 
+		"	String test1= \"this\"+\n" + 
+		"					\"is\"+\n" + 
+		"			\"a specific\"+\n" + 
+		"		\"line wrapping \";\n" + 
+		"\n" + 
+		"/* enable-formatter */\n" + 
+		"		/* formatted comment */\n" + 
+		"		String test2 = \"this\" + \"is\" + \"a specific\" + \"line wrapping \";\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079c() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X03 {\n" + 
+		"void foo() {\n" + 
+		"/* disable-formatter */\n" + 
+		"	bar(\n" + 
+		"				/**       unformatted		comment  	  */\n" + 
+		"				\"this\"  ,\n" + 
+		"					\"is\",\n" + 
+		"			\"a specific\",\n" + 
+		"		\"line wrapping \"\n" + 
+		"	);\n" + 
+		"\n" + 
+		"/* enable-formatter */\n" + 
+		"	bar(\n" + 
+		"				/**       formatted		comment  	  */\n" + 
+		"				\"this\"  ,\n" + 
+		"					\"is\",\n" + 
+		"			\"a specific\",\n" + 
+		"		\"line wrapping \"\n" + 
+		"	);\n" + 
+		"}\n" + 
+		"void bar(String... str) {}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X03 {\n" + 
+		"	void foo() {\n" + 
+		"/* disable-formatter */\n" + 
+		"	bar(\n" + 
+		"				/**       unformatted		comment  	  */\n" + 
+		"				\"this\"  ,\n" + 
+		"					\"is\",\n" + 
+		"			\"a specific\",\n" + 
+		"		\"line wrapping \"\n" + 
+		"	);\n" + 
+		"\n" + 
+		"/* enable-formatter */\n" + 
+		"		bar(\n" + 
+		"		/** formatted comment */\n" + 
+		"		\"this\", \"is\", \"a specific\", \"line wrapping \");\n" + 
+		"	}\n" + 
+		"\n" + 
+		"	void bar(String... str) {\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079c2() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X03b {\n" + 
+		"void foo() {\n" + 
+		"	bar(\n" + 
+		"// disable-formatter\n" + 
+		"				/**       unformatted		comment  	  */\n" + 
+		"				\"this\"  ,\n" + 
+		"					\"is\",\n" + 
+		"			\"a specific\",\n" + 
+		"		\"line wrapping \"\n" + 
+		"// enable-formatter\n" + 
+		"	);\n" + 
+		"	bar(\n" + 
+		"				/**       formatted		comment  	  */\n" + 
+		"				\"this\"  ,\n" + 
+		"					\"is\",\n" + 
+		"			\"a specific\",\n" + 
+		"		\"line wrapping \"\n" + 
+		"	);\n" + 
+		"}\n" + 
+		"void bar(String... str) {}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X03b {\n" + 
+		"	void foo() {\n" + 
+		"		bar(\n" + 
+		"// disable-formatter\n" + 
+		"				/**       unformatted		comment  	  */\n" + 
+		"				\"this\"  ,\n" + 
+		"					\"is\",\n" + 
+		"			\"a specific\",\n" + 
+		"		\"line wrapping \"\n" + 
+		"// enable-formatter\n" + 
+		"		);\n" + 
+		"		bar(\n" + 
+		"		/** formatted comment */\n" + 
+		"		\"this\", \"is\", \"a specific\", \"line wrapping \");\n" + 
+		"	}\n" + 
+		"\n" + 
+		"	void bar(String... str) {\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079d() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X04 {\r\n" + 
+		"\r\n" + 
+		"/* disable-formatter */\r\n" + 
+		"void     foo(    )      {	\r\n" + 
+		"				//      unformatted       comment  	  \r\n" + 
+		"}\r\n" + 
+		"/* enable-formatter */\r\n" + 
+		"void     bar(    )      {	\r\n" + 
+		"				//      formatted       comment  	  \r\n" + 
+		"}\r\n" + 
+		"}\r\n";
+	formatSource(source,
+		"public class X04 {\n" + 
+		"\n" + 
+		"/* disable-formatter */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment  	  \n" + 
+		"}\n" + 
+		"/* enable-formatter */\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n",
+		CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS,
+		0 /* indentation level */,
+		0 /* offset */,
+		-1 /* length (all) */,
+		"\n",
+		true/*repeat*/);
+}
+public void testBug027079d2() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X04b {\n" + 
+		"\n" + 
+		"/* disable-formatter */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment  	  \n" + 
+		"}\n" + 
+		"/* enable-formatter */\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment  	  \n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X04b {\r\n" + 
+		"\r\n" + 
+		"/* disable-formatter */\r\n" + 
+		"void     foo(    )      {	\r\n" + 
+		"				//      unformatted       comment  	  \r\n" + 
+		"}\r\n" + 
+		"/* enable-formatter */\r\n" + 
+		"	void bar() {\r\n" + 
+		"		// formatted comment\r\n" + 
+		"	}\r\n" + 
+		"}\r\n",
+		CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS,
+		0 /* indentation level */,
+		0 /* offset */,
+		-1 /* length (all) */,
+		"\r\n",
+		true/*repeat*/);
+}
+public void testBug027079d3() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X04c {\r\n" + 
+		"\r\n" + 
+		"/* disable-formatter */\r\n" + 
+		"void     foo(    )      {	\r\n" + 
+		"				//      unformatted       comment  	  \r\n" + 
+		"}\r\n" + 
+		"/* enable-formatter */\r\n" + 
+		"void     bar(    )      {	\r\n" + 
+		"				//      formatted       comment  	  \r\n" + 
+		"}\r\n" + 
+		"}\r\n";
+	formatSource(source,
+		"public class X04c {\r\n" + 
+		"\r\n" + 
+		"/* disable-formatter */\r\n" + 
+		"void     foo(    )      {	\r\n" + 
+		"				//      unformatted       comment  	  \r\n" + 
+		"}\r\n" + 
+		"/* enable-formatter */\r\n" + 
+		"	void bar() {\r\n" + 
+		"		// formatted comment\r\n" + 
+		"	}\r\n" + 
+		"}\r\n",
+		CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS,
+		0 /* indentation level */,
+		0 /* offset */,
+		-1 /* length (all) */,
+		"\r\n",
+		true/*repeat*/);
+}
+public void testBug027079d4() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "disable-formatter".toCharArray();
+	this.formatterPrefs.enabling_tag = "enable-formatter".toCharArray();
+	String source =
+		"public class X04d {\n" + 
+		"\n" + 
+		"/* disable-formatter */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment  	  \n" + 
+		"}\n" + 
+		"/* enable-formatter */\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment  	  \n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X04d {\n" + 
+		"\n" + 
+		"/* disable-formatter */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment  	  \n" + 
+		"}\n" + 
+		"/* enable-formatter */\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n",
+		CodeFormatter.K_COMPILATION_UNIT | CodeFormatter.F_INCLUDE_COMMENTS,
+		0 /* indentation level */,
+		0 /* offset */,
+		-1 /* length (all) */,
+		"\n",
+		true/*repeat*/);
+}
+public void testBug027079e() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "format: off".toCharArray();
+	this.formatterPrefs.enabling_tag = "format: on".toCharArray();
+	String source =
+		"public class X05 {\n" + 
+		"\n" + 
+		"/* format: off */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"/* format: on */\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X05 {\n" + 
+		"\n" + 
+		"/* format: off */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"/* format: on */\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079f() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "format: off".toCharArray();
+	this.formatterPrefs.enabling_tag = "format: on".toCharArray();
+	String source =
+		"public class X06 {\n" + 
+		"\n" + 
+		"// format: off\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"// format: on\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X06 {\n" + 
+		"\n" + 
+		"// format: off\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"// format: on\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079f2() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "format: off".toCharArray();
+	this.formatterPrefs.enabling_tag = "format: on".toCharArray();
+	String source =
+		"public class X06b {\n" + 
+		"\n" + 
+		"/** format: off */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"/** format: on */\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X06b {\n" + 
+		"\n" + 
+		"/** format: off */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"/** format: on */\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079f3() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "    format:  	  off    ".toCharArray();
+	this.formatterPrefs.enabling_tag = "	format:	  	on	".toCharArray();
+	String source =
+		"public class X06c {\n" + 
+		"\n" + 
+		"/*    format:  	  off    */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"// 	format:	  	on	\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X06c {\n" + 
+		"\n" + 
+		"/*    format:  	  off    */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       comment\n" + 
+		"}\n" + 
+		"// 	format:	  	on	\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug027079f4() throws JavaModelException {
+	this.formatterPrefs.disabling_tag = "    format:  	  off    ".toCharArray();
+	this.formatterPrefs.enabling_tag = "	format:	  	on	".toCharArray();
+	String source =
+		"public class X06d {\n" + 
+		"\n" + 
+		"/* format: off */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      formatted       comment\n" + 
+		"}\n" + 
+		"/* format: on */\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       comment\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X06d {\n" + 
+		"\n" + 
+		"	/* format: off */\n" + 
+		"	void foo() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"\n" + 
+		"	/* format: on */\n" + 
+		"	void bar() {\n" + 
+		"		// formatted comment\n" + 
+		"	}\n" + 
+		"}\n"
+	);
 }
 
 /**
@@ -581,6 +1150,360 @@ public void testBug252556() {
 }
 
 /**
+ * @bug 281655: [formatter] "Never join lines" does not work for annotations.
+ * @test Verify that "Never join lines" now works for annotations and also that
+ * 		element-value pairs are well wrapped using the new formatter option
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=281655"
+ */
+public void testBug281655() throws JavaModelException {
+	this.formatterPrefs.join_wrapped_lines = false;
+	String source =
+		"@MessageDriven(mappedName = \"filiality/SchedulerMQService\", \n" + 
+		"        activationConfig = { \n" + 
+		"            @ActivationConfigProperty(propertyName = \"cronTrigger\",\n" + 
+		"propertyValue = \"0/10 * * * * ?\") \n" + 
+		"        })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MessageDriven(mappedName = \"filiality/SchedulerMQService\",\n" + 
+		"		activationConfig = {\n" + 
+		"			@ActivationConfigProperty(propertyName = \"cronTrigger\",\n" + 
+		"					propertyValue = \"0/10 * * * * ?\")\n" + 
+		"		})\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+public void testBug281655a() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_NO_ALIGNMENT;
+	String source =
+		"@MessageDriven(mappedName = \"filiality/SchedulerMQService\", \n" + 
+		"        activationConfig = { \n" + 
+		"            @ActivationConfigProperty(propertyName = \"cronTrigger\",\n" + 
+		"propertyValue = \"0/10 * * * * ?\") \n" + 
+		"        })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MessageDriven(mappedName = \"filiality/SchedulerMQService\", activationConfig = { @ActivationConfigProperty(propertyName = \"cronTrigger\", propertyValue = \"0/10 * * * * ?\") })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+public void testBug281655b() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_COMPACT_SPLIT;
+	String source =
+		"@MessageDriven(mappedName = \"filiality/SchedulerMQService\", \n" + 
+		"        activationConfig = { \n" + 
+		"            @ActivationConfigProperty(propertyName = \"cronTrigger\",\n" + 
+		"propertyValue = \"0/10 * * * * ?\") \n" + 
+		"        })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MessageDriven(\n" + 
+		"		mappedName = \"filiality/SchedulerMQService\",\n" + 
+		"		activationConfig = { @ActivationConfigProperty(\n" + 
+		"				propertyName = \"cronTrigger\", propertyValue = \"0/10 * * * * ?\") })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+public void testBug281655c() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_COMPACT_FIRST_BREAK_SPLIT;
+	String source =
+		"@MessageDriven(mappedName = \"filiality/SchedulerMQService\", \n" + 
+		"        activationConfig = { \n" + 
+		"            @ActivationConfigProperty(propertyName = \"cronTrigger\",\n" + 
+		"propertyValue = \"0/10 * * * * ?\") \n" + 
+		"        })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MessageDriven(\n" + 
+		"		mappedName = \"filiality/SchedulerMQService\",\n" + 
+		"		activationConfig = { @ActivationConfigProperty(\n" + 
+		"				propertyName = \"cronTrigger\", propertyValue = \"0/10 * * * * ?\") })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+public void testBug281655d() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_ONE_PER_LINE_SPLIT;
+	String source =
+		"@MessageDriven(mappedName = \"filiality/SchedulerMQService\", \n" + 
+		"        activationConfig = { \n" + 
+		"            @ActivationConfigProperty(propertyName = \"cronTrigger\",\n" + 
+		"propertyValue = \"0/10 * * * * ?\") \n" + 
+		"        })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MessageDriven(\n" + 
+		"		mappedName = \"filiality/SchedulerMQService\",\n" + 
+		"		activationConfig = { @ActivationConfigProperty(\n" + 
+		"				propertyName = \"cronTrigger\",\n" + 
+		"				propertyValue = \"0/10 * * * * ?\") })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+public void testBug281655e() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_NEXT_SHIFTED_SPLIT;
+	String source =
+		"@MessageDriven(mappedName = \"filiality/SchedulerMQService\", \n" + 
+		"        activationConfig = { \n" + 
+		"            @ActivationConfigProperty(propertyName = \"cronTrigger\",\n" + 
+		"propertyValue = \"0/10 * * * * ?\") \n" + 
+		"        })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MessageDriven(\n" + 
+		"		mappedName = \"filiality/SchedulerMQService\",\n" + 
+		"			activationConfig = { @ActivationConfigProperty(\n" + 
+		"					propertyName = \"cronTrigger\",\n" + 
+		"						propertyValue = \"0/10 * * * * ?\") })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+public void testBug281655f() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_NEXT_PER_LINE_SPLIT;
+	String source =
+		"@MessageDriven(mappedName = \"filiality/SchedulerMQService\", \n" + 
+		"        activationConfig = { \n" + 
+		"            @ActivationConfigProperty(propertyName = \"cronTrigger\",\n" + 
+		"propertyValue = \"0/10 * * * * ?\") \n" + 
+		"        })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MessageDriven(mappedName = \"filiality/SchedulerMQService\",\n" + 
+		"		activationConfig = { @ActivationConfigProperty(propertyName = \"cronTrigger\",\n" + 
+		"				propertyValue = \"0/10 * * * * ?\") })\n" + 
+		"@RunAs(\"admin\")\n" + 
+		"@ResourceAdapter(\"quartz-ra.rar\")\n" + 
+		"@TransactionAttribute(TransactionAttributeType.NOT_SUPPORTED)\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+
+/**
+ * @bug 282030: [formatter] Java annotation formatting
+ * @test Verify that element-value pairs are well wrapped using the new formatter option
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=282030"
+ */
+public void testBug282030() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_COMPACT_SPLIT;
+	String source =
+		"@DeclareParents(value =\n" + 
+		"\"com.apress.springrecipes.calculator.ArithmeticCalculatorImpl\", defaultImpl =\n" + 
+		"MaxCalculatorImpl.class) \n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@DeclareParents(\n" + 
+		"		value = \"com.apress.springrecipes.calculator.ArithmeticCalculatorImpl\",\n" + 
+		"		defaultImpl = MaxCalculatorImpl.class)\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+public void testBug282030a() throws JavaModelException {
+	String source =
+		"@MyAnnot(value1 = \"this is an example\", value2 = \"of an annotation\", value3 = \"with several arguments\", value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MyAnnot(value1 = \"this is an example\", value2 = \"of an annotation\", value3 = \"with several arguments\", value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n"
+	);
+}
+public void testBug282030b() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_COMPACT_SPLIT;
+	String source =
+		"@MyAnnot(value1 = \"this is an example\", value2 = \"of an annotation\", value3 = \"with several arguments\", value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MyAnnot(value1 = \"this is an example\", value2 = \"of an annotation\",\n" + 
+		"		value3 = \"with several arguments\",\n" + 
+		"		value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n"
+	);
+}
+public void testBug282030c() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_COMPACT_FIRST_BREAK_SPLIT;
+	String source =
+		"@MyAnnot(value1 = \"this is an example\", value2 = \"of an annotation\", value3 = \"with several arguments\", value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MyAnnot(\n" + 
+		"		value1 = \"this is an example\", value2 = \"of an annotation\",\n" + 
+		"		value3 = \"with several arguments\",\n" + 
+		"		value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n"
+	);
+}
+public void testBug282030d() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_ONE_PER_LINE_SPLIT;
+	String source =
+		"@MyAnnot(value1 = \"this is an example\", value2 = \"of an annotation\", value3 = \"with several arguments\", value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MyAnnot(\n" + 
+		"		value1 = \"this is an example\",\n" + 
+		"		value2 = \"of an annotation\",\n" + 
+		"		value3 = \"with several arguments\",\n" + 
+		"		value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n"
+	);
+}
+public void testBug282030e() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_NEXT_SHIFTED_SPLIT;
+	String source =
+		"@MyAnnot(value1 = \"this is an example\", value2 = \"of an annotation\", value3 = \"with several arguments\", value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MyAnnot(\n" + 
+		"		value1 = \"this is an example\",\n" + 
+		"			value2 = \"of an annotation\",\n" + 
+		"			value3 = \"with several arguments\",\n" + 
+		"			value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n"
+	);
+}
+public void testBug282030f() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_NEXT_PER_LINE_SPLIT;
+	String source =
+		"@MyAnnot(value1 = \"this is an example\", value2 = \"of an annotation\", value3 = \"with several arguments\", value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MyAnnot(value1 = \"this is an example\",\n" + 
+		"		value2 = \"of an annotation\",\n" + 
+		"		value3 = \"with several arguments\",\n" + 
+		"		value4 = \"which may need to be wrapped\")\n" + 
+		"public class Test {\n" + 
+		"}\n"
+	);
+}
+public void testBug282030g1() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_ONE_PER_LINE_SPLIT;
+	String source =
+		"@MyAnnot1(member1 = \"sample1\", member2 = \"sample2\")\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MyAnnot1(member1 = \"sample1\", member2 = \"sample2\")\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+public void testBug282030g2() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_ONE_PER_LINE_SPLIT | Alignment.M_FORCE;
+	String source =
+		"@MyAnnot1(member1 = \"sample1\", member2 = \"sample2\")\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MyAnnot1(\n" +
+		"		member1 = \"sample1\",\n" +
+		"		member2 = \"sample2\")\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+public void testBug282030h1() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_ONE_PER_LINE_SPLIT;
+	String source =
+		"@MyAnnot1(name = \"sample1\", \n" + 
+		"                value = { \n" + 
+		"                        @MyAnnot2(name = \"sample2\",\n" + 
+		"value = \"demo\") \n" + 
+		"                })\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MyAnnot1(name = \"sample1\", value = { @MyAnnot2(\n" + 
+		"		name = \"sample2\",\n" + 
+		"		value = \"demo\") })\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+public void testBug282030h2() throws JavaModelException {
+	this.formatterPrefs.alignment_for_arguments_in_annotation = Alignment.M_ONE_PER_LINE_SPLIT | Alignment.M_FORCE;
+	String source =
+		"@MyAnnot1(name = \"sample1\", \n" + 
+		"                value = { \n" + 
+		"                        @MyAnnot2(name = \"sample2\",\n" + 
+		"value = \"demo\") \n" + 
+		"                })\n" + 
+		"public class X {\n" + 
+		"}\n";
+	formatSource(source,
+		"@MyAnnot1(\n" +
+		"		name = \"sample1\",\n" +
+		"		value = { @MyAnnot2(\n" +
+		"				name = \"sample2\",\n" + 
+		"				value = \"demo\") })\n" + 
+		"public class X {\n" + 
+		"}\n"
+	);
+}
+
+/**
  * @bug 283467: [formatter] wrong indentation with 'Never join lines' selected
  * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=283467"
  */
@@ -617,6 +1540,252 @@ public void testBug283467() throws JavaModelException {
 		"	public static int doInCallback(Runnable r) {\n" +
 		"		return 0;\n" +
 		"	}\n" +
+		"}\n"
+	);
+}
+
+/**
+ * @bug 284789: [formatter] Does not line-break method declaration exception with parameters
+ * @test Verify that the new preference to split method declaration works properly
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=284789"
+ */
+public void testBug284789() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_COMPACT_SPLIT;
+	String source =
+		"public class Test {\n" + 
+		"public synchronized List<FantasticallyWonderfulContainer<FantasticallyWonderfulClass>> getMeTheFantasticContainer() {\n" + 
+		"	return null;\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class Test {\n" + 
+		"	public synchronized\n" + 
+		"			List<FantasticallyWonderfulContainer<FantasticallyWonderfulClass>>\n" + 
+		"			getMeTheFantasticContainer() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_01a() throws JavaModelException {
+	// default is no wrapping for method declaration
+	String source =
+		"class X01 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X01 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_01b() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_COMPACT_SPLIT;
+	String source =
+		"class X01 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X01 {\n" + 
+		"	public final synchronized java.lang.String\n" + 
+		"			a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_01c() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_COMPACT_FIRST_BREAK_SPLIT;
+	String source =
+		"class X01 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X01 {\n" + 
+		"	public final synchronized\n" + 
+		"			java.lang.String a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_01d() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_ONE_PER_LINE_SPLIT;
+	String source =
+		"class X01 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X01 {\n" + 
+		"	public final synchronized\n" + 
+		"			java.lang.String\n" + 
+		"			a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_01e() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_NEXT_SHIFTED_SPLIT;
+	String source =
+		"class X01 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X01 {\n" + 
+		"	public final synchronized\n" + 
+		"			java.lang.String\n" + 
+		"				a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_01f() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_NEXT_PER_LINE_SPLIT;
+	String source =
+		"class X01 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X01 {\n" + 
+		"	public final synchronized java.lang.String\n" + 
+		"			a_method_which_have_a_very_long_name() {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_02a() throws JavaModelException {
+	// default is no wrapping for method declaration
+	String source =
+		"class X02 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name(String first, String second, String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X02 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name(\n" + 
+		"			String first, String second, String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_02b() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_COMPACT_SPLIT;
+	this.formatterPrefs.alignment_for_parameters_in_method_declaration = Alignment.M_COMPACT_SPLIT;
+	String source =
+		"class X02 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name(String first, String second, String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X02 {\n" + 
+		"	public final synchronized java.lang.String\n" + 
+		"			a_method_which_have_a_very_long_name(String first, String second,\n" + 
+		"					String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_02c() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_COMPACT_FIRST_BREAK_SPLIT;
+	this.formatterPrefs.alignment_for_parameters_in_method_declaration = Alignment.M_COMPACT_FIRST_BREAK_SPLIT;
+	String source =
+		"class X02 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name(String first, String second, String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X02 {\n" + 
+		"	public final synchronized\n" + 
+		"			java.lang.String a_method_which_have_a_very_long_name(\n" + 
+		"					String first, String second, String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_02d() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_ONE_PER_LINE_SPLIT;
+	this.formatterPrefs.alignment_for_parameters_in_method_declaration = Alignment.M_ONE_PER_LINE_SPLIT;
+	String source =
+		"class X02 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name(String first, String second, String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X02 {\n" + 
+		"	public final synchronized\n" + 
+		"			java.lang.String\n" + 
+		"			a_method_which_have_a_very_long_name(\n" + 
+		"					String first,\n" + 
+		"					String second,\n" + 
+		"					String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_02e() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_NEXT_SHIFTED_SPLIT;
+	this.formatterPrefs.alignment_for_parameters_in_method_declaration = Alignment.M_NEXT_SHIFTED_SPLIT;
+	String source =
+		"class X02 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name(String first, String second, String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X02 {\n" + 
+		"	public final synchronized\n" + 
+		"			java.lang.String\n" + 
+		"				a_method_which_have_a_very_long_name(\n" + 
+		"						String first,\n" + 
+		"							String second,\n" + 
+		"							String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug284789_02f() throws JavaModelException {
+	this.formatterPrefs.alignment_for_method_declaration = Alignment.M_NEXT_PER_LINE_SPLIT;
+	this.formatterPrefs.alignment_for_parameters_in_method_declaration = Alignment.M_NEXT_PER_LINE_SPLIT;
+	String source =
+		"class X02 {\n" + 
+		"	public final synchronized java.lang.String a_method_which_have_a_very_long_name(String first, String second, String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source,
+		"class X02 {\n" + 
+		"	public final synchronized java.lang.String\n" + 
+		"			a_method_which_have_a_very_long_name(String first,\n" + 
+		"					String second,\n" + 
+		"					String third) {\n" + 
+		"		return null;\n" + 
+		"	}\n" + 
 		"}\n"
 	);
 }
@@ -3928,4 +5097,280 @@ public void testBug298243() {
 		"}\n";
 	formatSource(source);
 }
+
+/**
+ * @bug 302123: [formatter] AssertionFailedException occurs while formatting a source containing the specific javadoc comment...
+ * @test Verify that no exception occurs while formatting source including the specific comment
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=302123"
+ */
+public void testBug302123() {
+	String source = 
+		"package test;\n" + 
+		"public class Test {\n" + 
+		"	public static void main(String[] args) {\n" + 
+		"		String s=\"X\"+/** ***/\"Y\";\n" + 
+		"	}\n" + 
+		"\n" + 
+		"}\n";
+	formatSource(source,
+		"package test;\n" + 
+		"\n" + 
+		"public class Test {\n" + 
+		"	public static void main(String[] args) {\n" + 
+		"		String s = \"X\" + /** ***/\n" + 
+		"		\"Y\";\n" + 
+		"	}\n" + 
+		"\n" + 
+		"}\n"
+	);
+}
+public void testBug302123b() {
+	String source = 
+		"package test;\n" + 
+		"public class Test {\n" + 
+		"	public static void main(String[] args) {\n" + 
+		"		String s=\"X\"+/**    XXX   ***/\"Y\";\n" + 
+		"	}\n" + 
+		"\n" + 
+		"}\n";
+	formatSource(source,
+		"package test;\n" + 
+		"\n" + 
+		"public class Test {\n" + 
+		"	public static void main(String[] args) {\n" + 
+		"		String s = \"X\" + /** XXX ***/\n" + 
+		"		\"Y\";\n" + 
+		"	}\n" + 
+		"\n" + 
+		"}\n"
+	);
+}
+public void testBug302123c() {
+	String source = 
+		"package test;\n" + 
+		"public class Test {\n" + 
+		"	public static void main(String[] args) {\n" + 
+		"		String s=\"X\"+/**    **  XXX  **    ***/\"Y\";\n" + 
+		"	}\n" + 
+		"\n" + 
+		"}\n";
+	formatSource(source,
+		"package test;\n" + 
+		"\n" + 
+		"public class Test {\n" + 
+		"	public static void main(String[] args) {\n" + 
+		"		String s = \"X\" + /** ** XXX ** ***/\n" + 
+		"		\"Y\";\n" + 
+		"	}\n" + 
+		"\n" + 
+		"}\n"
+	);
+}
+public void testBug302123d() {
+	String source = 
+		"package test;\n" + 
+		"public class Test {\n" + 
+		"	public static void main(String[] args) {\n" + 
+		"		String s=\"X\"+/**AAA   *** BBB ***   CCC***/\"Y\";\n" + 
+		"	}\n" + 
+		"\n" + 
+		"}\n";
+	formatSource(source,
+		"package test;\n" + 
+		"\n" + 
+		"public class Test {\n" + 
+		"	public static void main(String[] args) {\n" + 
+		"		String s = \"X\" + /** AAA *** BBB *** CCC ***/\n" + 
+		"		\"Y\";\n" + 
+		"	}\n" + 
+		"\n" + 
+		"}\n"
+	);
+}
+
+/**
+ * @bug 302552: [formatter] Formatting qualified invocations can be broken when the Line Wrapping policy forces element to be on a new line
+ * @test Verify that wrapping policies forcing the first element to be on a new line are working again...
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=302552"
+ */
+public void testBug302552_LW0() {
+	this.formatterPrefs.page_width = 20;
+	this.formatterPrefs.alignment_for_selector_in_method_invocation = Alignment.M_NO_ALIGNMENT;
+	String source = 
+		"class Sample2 {int foo(Some a) {return a.getFirst();}}\n";
+	formatSource(source,
+		"class Sample2 {\n" + 
+		"	int foo(Some a) {\n" + 
+		"		return a.getFirst();\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug302552_LW1() {
+	this.formatterPrefs.page_width = 20;
+	this.formatterPrefs.alignment_for_selector_in_method_invocation = Alignment.M_COMPACT_SPLIT;
+	String source = 
+		"class Sample2 {int foo(Some a) {return a.getFirst();}}\n";
+	formatSource(source,
+		"class Sample2 {\n" + 
+		"	int foo(Some a) {\n" + 
+		"		return a.getFirst();\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug302552_LW2() {
+	this.formatterPrefs.page_width = 20;
+	this.formatterPrefs.alignment_for_selector_in_method_invocation = Alignment.M_COMPACT_FIRST_BREAK_SPLIT;
+	String source = 
+		"class Sample2 {int foo(Some a) {return a.getFirst();}}\n";
+	formatSource(source,
+		"class Sample2 {\n" + 
+		"	int foo(Some a) {\n" + 
+		"		return a\n" + 
+		"				.getFirst();\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug302552_LW3() {
+	this.formatterPrefs.page_width = 20;
+	this.formatterPrefs.alignment_for_selector_in_method_invocation = Alignment.M_ONE_PER_LINE_SPLIT;
+	String source = 
+		"class Sample2 {int foo(Some a) {return a.getFirst();}}\n";
+	formatSource(source,
+		"class Sample2 {\n" + 
+		"	int foo(Some a) {\n" + 
+		"		return a\n" + 
+		"				.getFirst();\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug302552_LW4() {
+	this.formatterPrefs.page_width = 20;
+	this.formatterPrefs.alignment_for_selector_in_method_invocation = Alignment.M_NEXT_SHIFTED_SPLIT;
+	String source = 
+		"class Sample2 {int foo(Some a) {return a.getFirst();}}\n";
+	formatSource(source,
+		"class Sample2 {\n" + 
+		"	int foo(Some a) {\n" + 
+		"		return a\n" + 
+		"				.getFirst();\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug302552_LW5() {
+	this.formatterPrefs.page_width = 20;
+	this.formatterPrefs.alignment_for_selector_in_method_invocation = Alignment.M_NEXT_PER_LINE_SPLIT;
+	String source = 
+		"class Sample2 {int foo(Some a) {return a.getFirst();}}\n";
+	formatSource(source,
+		"class Sample2 {\n" + 
+		"	int foo(Some a) {\n" + 
+		"		return a.getFirst();\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+
+/**
+ * @bug 304529: [formatter] NPE when either the disabling or the enabling tag is not defined
+ * @test Verify that having an empty disabling or enabling is now accepted by the formatter
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=304529"
+ */
+public void testBug304529() {
+	this.formatterPrefs.disabling_tag = "off".toCharArray();
+	this.formatterPrefs.enabling_tag = null;
+	String source =
+		"/* off */\n" + 
+		"public class X01 {\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       area\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source);
+}
+public void testBug304529b() {
+	this.formatterPrefs.disabling_tag = null;
+	this.formatterPrefs.enabling_tag = "on".toCharArray();
+	String source =
+		"/* on */\n" + 
+		"public class X01 {\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      formatted       area\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"/* on */\n" + 
+		"public class X01 {\n" + 
+		"	void foo() {\n" + 
+		"		// formatted area\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug304529c() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_DISABLING_TAG, "off");
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_ENABLING_TAG, "");
+	String source =
+		"/* off */\n" + 
+		"public class X01 {\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       area\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source);
+}
+public void testBug304529d() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_DISABLING_TAG, "");
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_ENABLING_TAG, "on");
+	String source =
+		"/* on */\n" + 
+		"public class X01 {\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      formatted       area\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"/* on */\n" + 
+		"public class X01 {\n" + 
+		"	void foo() {\n" + 
+		"		// formatted area\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+public void testBug304529e() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_DISABLING_TAG, "off");
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_ENABLING_TAG, "on");
+	String source =
+		"public class X01 {\n" + 
+		"/* off */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       area\n" + 
+		"}\n" + 
+		"/* on */\n" + 
+		"void     bar(    )      {	\n" + 
+		"				//      formatted       area\n" + 
+		"}\n" + 
+		"}\n";
+	formatSource(source,
+		"public class X01 {\n" + 
+		"/* off */\n" + 
+		"void     foo(    )      {	\n" + 
+		"				//      unformatted       area\n" + 
+		"}\n" + 
+		"/* on */\n" + 
+		"	void bar() {\n" + 
+		"		// formatted area\n" + 
+		"	}\n" + 
+		"}\n"
+	);
+}
+
 }

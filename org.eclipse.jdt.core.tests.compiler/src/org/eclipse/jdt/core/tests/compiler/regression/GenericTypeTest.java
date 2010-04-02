@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,7 +32,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 	// All specified tests which does not belong to the class are skipped...
 	static {
 //		TESTS_NAMES = new String[] { "test0788" };
-//		TESTS_NUMBERS = new int[] { 1459 };
+//		TESTS_NUMBERS = new int[] { 1455 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
 	public static Test suite() {
@@ -2125,8 +2125,8 @@ public class GenericTypeTest extends AbstractComparableTest {
 			"----------\n" +
 			"1. ERROR in X.java (at line 9)\n" +
 			"	super(xt.t);\n" +
-			"	      ^^^^\n" +
-			"xt.t cannot be resolved or is not a field\n" +
+			"	         ^\n" +
+			"t cannot be resolved or is not a field\n" +
 			"----------\n" +
 			"2. WARNING in X.java (at line 12)\n" +
 			"	X x = new X();\n" +
@@ -6468,7 +6468,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 			"----------\n",
 			// runtime results
 			null /* do not check output string */,
-			null /* do not check error string */,
+			"java.lang.IndexOutOfBoundsException" /* do not check error string */,
 			// javac options
 			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);
 	}
@@ -14398,52 +14398,57 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"   } \n" +
 				"}\n"
 			},
-			"----------\n" +
-			"1. WARNING in test\\Foo.java (at line 4)\n" +
-			"	private R dosomething(){ return s; } \n" +
-			"	          ^^^^^^^^^^^^^\n" +
-			"The method dosomething() from the type Foo<R> is never used locally\n" +
-			"----------\n" +
-			"2. WARNING in test\\Foo.java (at line 5)\n" +
-			"	private class Bar {} \n" +
-			"	              ^^^\n" +
-			"The type Foo<R>.Bar is never used locally\n" +
-			"----------\n" +
-			"----------\n" +
-			"1. ERROR in test02\\FooBar.java (at line 6)\n" +
-			"	f.s = \"foo\"; \n" +
-			"	  ^\n" +
-			"The field Foo<String>.s is not visible\n" +
-			"----------\n" +
-			"2. ERROR in test02\\FooBar.java (at line 7)\n" +
-			"	this.s = \"foo\";\n" +
-			"	     ^\n" +
-			"The field Foo<R>.s is not visible\n" +
-			"----------\n" +
-			"3. ERROR in test02\\FooBar.java (at line 8)\n" +
-			"	f.dosomething(); \n" +
-			"	  ^^^^^^^^^^^\n" +
-			"The method dosomething() from the type Foo<String> is not visible\n" +
-			"----------\n" +
-			"4. ERROR in test02\\FooBar.java (at line 9)\n" +
-			"	this.dosomething();  \n" +
-			"	     ^^^^^^^^^^^\n" +
-			"The method dosomething() from the type Foo<R> is not visible\n" +
-			"----------\n" +
-			"5. ERROR in test02\\FooBar.java (at line 10)\n" +
-			"	Bar b1; \n" +
-			"	^^^\n" +
-			"The type Bar is not visible\n" +
-			"----------\n" +
-			"6. ERROR in test02\\FooBar.java (at line 11)\n" +
-			"	FooBar<String>.Bar b2; \n" +
-			"	^^^^^^^^^^^^^^^^^^\n" +
-			"The type FooBar.Bar is not visible\n" +
-			"----------\n" +
-			"7. ERROR in test02\\FooBar.java (at line 12)\n" +
-			"	Foo<String>.Bar b3; \n" +
-			"	^^^^^^^^^^^^^^^\n" +
-			"The type Foo.Bar is not visible\n" +
+			"----------\n" + 
+			"1. WARNING in test\\Foo.java (at line 4)\n" + 
+			"	private R dosomething(){ return s; } \n" + 
+			"	          ^^^^^^^^^^^^^\n" + 
+			"The method dosomething() from the type Foo<R> is never used locally\n" + 
+			"----------\n" + 
+			"2. WARNING in test\\Foo.java (at line 5)\n" + 
+			"	private class Bar {} \n" + 
+			"	              ^^^\n" + 
+			"The type Foo<R>.Bar is never used locally\n" + 
+			"----------\n" + 
+			"----------\n" + 
+			"1. ERROR in test02\\FooBar.java (at line 6)\n" + 
+			"	f.s = \"foo\"; \n" + 
+			"	  ^\n" + 
+			"The field Foo<String>.s is not visible\n" + 
+			"----------\n" + 
+			"2. ERROR in test02\\FooBar.java (at line 7)\n" + 
+			"	this.s = \"foo\";\n" + 
+			"	     ^\n" + 
+			"The field Foo<R>.s is not visible\n" + 
+			"----------\n" + 
+			"3. ERROR in test02\\FooBar.java (at line 7)\n" + 
+			"	this.s = \"foo\";\n" + 
+			"	         ^^^^^\n" + 
+			"Type mismatch: cannot convert from String to R\n" + 
+			"----------\n" + 
+			"4. ERROR in test02\\FooBar.java (at line 8)\n" + 
+			"	f.dosomething(); \n" + 
+			"	  ^^^^^^^^^^^\n" + 
+			"The method dosomething() from the type Foo<String> is not visible\n" + 
+			"----------\n" + 
+			"5. ERROR in test02\\FooBar.java (at line 9)\n" + 
+			"	this.dosomething();  \n" + 
+			"	     ^^^^^^^^^^^\n" + 
+			"The method dosomething() from the type Foo<R> is not visible\n" + 
+			"----------\n" + 
+			"6. ERROR in test02\\FooBar.java (at line 10)\n" + 
+			"	Bar b1; \n" + 
+			"	^^^\n" + 
+			"The type Bar is not visible\n" + 
+			"----------\n" + 
+			"7. ERROR in test02\\FooBar.java (at line 11)\n" + 
+			"	FooBar<String>.Bar b2; \n" + 
+			"	^^^^^^^^^^^^^^^^^^\n" + 
+			"The type FooBar.Bar is not visible\n" + 
+			"----------\n" + 
+			"8. ERROR in test02\\FooBar.java (at line 12)\n" + 
+			"	Foo<String>.Bar b3; \n" + 
+			"	^^^^^^^^^^^^^^^\n" + 
+			"The type Foo.Bar is not visible\n" + 
 			"----------\n");
 	}
 	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=81594
@@ -36688,8 +36693,8 @@ public void test1085() {
 		"----------\n" + 
 		"7. ERROR in Y.java (at line 9)\n" + 
 		"	E e2 = e2.e;\n" + 
-		"	       ^^^^\n" + 
-		"e2.e cannot be resolved or is not a field\n" + 
+		"	          ^\n" + 
+		"e cannot be resolved or is not a field\n" + 
 		"----------\n");
 }
 
@@ -45578,11 +45583,11 @@ public void test1336() {
 				"	}\n" +
 				"}\n", // =================
 			},
-			"----------\n" +
-			"1. ERROR in X.java (at line 3)\n" +
-			"	Other<String>.Member m = (Other<String>.Member) om2;\n" +
-			"	                         ^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
-			"Cannot cast from Other2<?>.Member2<capture#1-of ?> to Other<String>.Member\n" +
+			"----------\n" + 
+			"1. WARNING in X.java (at line 3)\n" + 
+			"	Other<String>.Member m = (Other<String>.Member) om2;\n" + 
+			"	                         ^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from Other2<?>.Member2<capture#1-of ?> to Other<String>.Member\n" + 
 			"----------\n");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=233800 - variation
@@ -45603,11 +45608,11 @@ public void test1337() {
 				"	}\n" +
 				"}\n", // =================
 			},
-			"----------\n" +
-			"1. ERROR in X.java (at line 3)\n" +
-			"	Other<String>.Member m = (Other<String>.Member) om2;\n" +
-			"	                         ^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
-			"Cannot cast from Other2.Member2<capture#1-of ?> to Other<String>.Member\n" +
+			"----------\n" + 
+			"1. WARNING in X.java (at line 3)\n" + 
+			"	Other<String>.Member m = (Other<String>.Member) om2;\n" + 
+			"	                         ^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from Other2.Member2<capture#1-of ?> to Other<String>.Member\n" + 
 			"----------\n");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=234619
@@ -45667,10 +45672,11 @@ public void test1340() {
 			new String[] {
 				"Derived_A.java", // =================
 				"import java.util.Map;\n" +
+				"import java.util.HashMap;\n" +
 				"class Base_A {}\n" +
 				"public class Derived_A extends Base_A {\n" +
 				"	public Map<Object, Base_B> getMap() {\n" +
-				"		return null;\n" +
+				"		return new HashMap<Object, Base_B>();\n" +
 				"	}\n" +
 				"}\n", // =================
 				"Derived_B.java", // =================
@@ -49797,8 +49803,8 @@ public void test1454() {
 public void test1455() {
 	this.runNegativeTest(
 		new String[] {
-			"X.java",
-			"class Outer<E> {\n" +
+			"Outer.java",
+			"public class Outer<E> {\n" +
 			"  Inner inner;\n" +
 			"  class Inner {\n" +
 			"    E e;\n" +
@@ -49821,7 +49827,7 @@ public void test1455() {
 			"}"
 		},
 		"----------\n" + 
-		"1. WARNING in X.java (at line 8)\n" + 
+		"1. WARNING in Outer.java (at line 8)\n" + 
 		"	Inner that = (Inner) other;\n" + 
 		"	             ^^^^^^^^^^^^^\n" + 
 		"Type safety: Unchecked cast from Object to Outer<E>.Inner\n" + 
@@ -50087,6 +50093,66 @@ public void test294724() {
 		"	clone.setData(cloneCollection(data, HashSet.class, Data.class));\n" + 
 		"	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 		"Type safety: The expression of type Set needs unchecked conversion to conform to Set<SimpleExample.Data>\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=268798
+public void test268798() {
+	this.runNegativeTest(
+		new String[] {
+	    "GenericDemo.java",
+	    "import java.util.Collections;\n" +
+	    "import java.util.List;\n" +
+	    "public class GenericDemo {\n" +
+	    "  static class A implements Comparable {\n" +
+	    "    public int compareTo(Object o) {\n" +
+	    "      return 0;\n" +
+	    "    }\n" +
+	    "  }\n" +
+	    "  void someCode(List<A> list) {\n" +
+	    "    A min = Collections.min(list); \n" +
+	    "  }\n" +
+	    "}\n"
+	    },
+		"----------\n" + 
+		"1. WARNING in GenericDemo.java (at line 4)\n" + 
+		"	static class A implements Comparable {\n" + 
+		"	                          ^^^^^^^^^^\n" + 
+		"Comparable is a raw type. References to generic type Comparable<T> should be parameterized\n" + 
+		"----------\n" + 
+		"2. WARNING in GenericDemo.java (at line 10)\n" + 
+		"	A min = Collections.min(list); \n" + 
+		"	        ^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: Unchecked invocation min(List<GenericDemo.A>) of the generic method min(Collection<? extends T>) of type Collections\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=268798
+public void test268798a() {
+	this.runNegativeTest(
+		new String[] {
+	    "Bug268798.java",
+	    "public class Bug268798 {\n" +
+	    "  interface SomeInterface<T> {\n" +
+	    "  }\n" +
+	    "  class A implements SomeInterface {\n" +
+	    "  }\n" +
+	    "  <T extends SomeInterface<? super T>> T someMethod() {\n" +
+	    "    return null;\n" +
+	    "  }\n" +
+	    "  void someCode() {\n" +
+	    "    A a = someMethod();\n" +
+	    "  }\n" +
+	    "}\n"
+	    },
+		"----------\n" + 
+		"1. WARNING in Bug268798.java (at line 4)\n" + 
+		"	class A implements SomeInterface {\n" + 
+		"	                   ^^^^^^^^^^^^^\n" + 
+		"Bug268798.SomeInterface is a raw type. References to generic type Bug268798.SomeInterface<T> should be parameterized\n" + 
+		"----------\n" + 
+		"2. WARNING in Bug268798.java (at line 10)\n" + 
+		"	A a = someMethod();\n" + 
+		"	      ^^^^^^^^^^^^\n" + 
+		"Type safety: Unchecked invocation someMethod() of the generic method someMethod() of type Bug268798\n" + 
 		"----------\n");
 }
 }

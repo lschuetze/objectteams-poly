@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2913,7 +2913,7 @@ public void test068() {
 			"interface C extends B, A {}\n" +
 			"interface D extends A, B {}\n" +
 			"public class X<T> {\n" +
-			"	public static void main(String[] args) {\n" +
+			"	public void bar() {\n" +
 			"		C c = null;\n" +
 			"		X<? extends B> c_b = c.foo();\n" +
 			"		D d = null;\n" +
@@ -3527,5 +3527,323 @@ public void test080() {
 			"}\n"
 		},
 		"SUCCESS");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=302358
+public void test081() {
+	this.runConformTest(
+		new String[] {
+			"C.java",
+			"class A<ModelType extends D, ValueType> implements I<ModelType, ValueType> {\n" +
+			"    public void doSet(ModelType valueGetter) {\n" +
+			"        this.set((ValueType) valueGetter.getObject());\n" +
+			"    }\n" +
+			"    public void set(Object object) {\n" +
+			"        System.out.println(\"In A.set(Object)\");\n" +
+			"    }\n" +
+			"}\n" +
+			"class B extends A<E, CharSequence> {\n" +
+			"	public void set(CharSequence string) {\n" +
+			"        System.out.println(\"In B.set(CharSequence)\");\n" +
+			"    }\n" +
+			"}\n" +
+			"public class C extends B {\n" +
+			"    static public void main(String[] args) {\n" +
+			"        C c = new C();\n" +
+			"        c.run();\n" +
+			"    }\n" +
+			"    public void run() {\n" +
+			"        E e = new E<String>(String.class);\n" +
+			"        this.doSet(e);\n" +
+			"    }\n" +
+			"}\n" +
+			"class D {\n" +
+			"    public Object getObject() {\n" +
+			"        return null;\n" +
+			"    }\n" +
+			"}\n" +
+			"class E<Type extends CharSequence> extends D {\n" +
+			"    private Class<Type> typeClass;\n" +
+			"    public E(Class<Type> typeClass) {\n" +
+			"        this.typeClass = typeClass;\n" +
+			"    }\n" +
+			"    public Type getObject() {\n" +
+			"        try {\n" +
+			"            return (Type) typeClass.newInstance();\n" +
+			"        } catch (Exception e) {\n" +
+			"            throw new RuntimeException(e);\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"interface I<ModelType, ValueType> {\n" +
+			"    public void doSet(ModelType model);\n" +
+			"    public void set(ValueType value);\n" +
+			"}\n"
+
+		},
+		"In B.set(CharSequence)");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=302358
+public void test082() {
+	this.runConformTest(
+		new String[] {
+			"C.java",
+			"class A<ModelType extends D, ValueType> extends I<ModelType, ValueType> {\n" +
+			"    public void doSet(ModelType valueGetter) {\n" +
+			"        this.set((ValueType) valueGetter.getObject());\n" +
+			"    }\n" +
+			"    public void set(Object object) {\n" +
+			"        System.out.println(\"In A.set(Object)\");\n" +
+			"    }\n" +
+			"}\n" +
+			"class B extends A<E, CharSequence> {\n" +
+			"	public void set(CharSequence string) {\n" +
+			"        System.out.println(\"In B.set(CharSequence)\");\n" +
+			"    }\n" +
+			"}\n" +
+			"public class C extends B {\n" +
+			"    static public void main(String[] args) {\n" +
+			"        C c = new C();\n" +
+			"        c.run();\n" +
+			"    }\n" +
+			"    public void run() {\n" +
+			"        E e = new E<String>(String.class);\n" +
+			"        this.doSet(e);\n" +
+			"    }\n" +
+			"}\n" +
+			"class D {\n" +
+			"    public Object getObject() {\n" +
+			"        return null;\n" +
+			"    }\n" +
+			"}\n" +
+			"class E<Type extends CharSequence> extends D {\n" +
+			"    private Class<Type> typeClass;\n" +
+			"    public E(Class<Type> typeClass) {\n" +
+			"        this.typeClass = typeClass;\n" +
+			"    }\n" +
+			"    public Type getObject() {\n" +
+			"        try {\n" +
+			"            return (Type) typeClass.newInstance();\n" +
+			"        } catch (Exception e) {\n" +
+			"            throw new RuntimeException(e);\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"abstract class I<ModelType, ValueType> {\n" +
+			"    public abstract void doSet(ModelType model);\n" +
+			"    public abstract void set(ValueType value);\n" +
+			"}\n"
+
+		},
+		"In B.set(CharSequence)");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=302358
+public void test083() {
+	this.runConformTest(
+		new String[] {
+			"C.java",
+			"class A<ModelType extends D, ValueType> implements I<ModelType, ValueType> {\n" +
+			"    public void doSet(ModelType valueGetter) {\n" +
+			"        this.set((ValueType) valueGetter.getObject());\n" +
+			"    }\n" +
+			"    public void set(Object object) {\n" +
+			"        System.out.println(\"In A.set(Object)\");\n" +
+			"    }\n" +
+			"}\n" +
+			"class B extends A<E, CharSequence> implements I<E, CharSequence> {\n" +
+			"	public void set(CharSequence string) {\n" +
+			"        System.out.println(\"In B.set(CharSequence)\");\n" +
+			"    }\n" +
+			"}\n" +
+			"public class C extends B {\n" +
+			"    static public void main(String[] args) {\n" +
+			"        C c = new C();\n" +
+			"        c.run();\n" +
+			"    }\n" +
+			"    public void run() {\n" +
+			"        E e = new E<String>(String.class);\n" +
+			"        this.doSet(e);\n" +
+			"    }\n" +
+			"}\n" +
+			"class D {\n" +
+			"    public Object getObject() {\n" +
+			"        return null;\n" +
+			"    }\n" +
+			"}\n" +
+			"class E<Type extends CharSequence> extends D {\n" +
+			"    private Class<Type> typeClass;\n" +
+			"    public E(Class<Type> typeClass) {\n" +
+			"        this.typeClass = typeClass;\n" +
+			"    }\n" +
+			"    public Type getObject() {\n" +
+			"        try {\n" +
+			"            return (Type) typeClass.newInstance();\n" +
+			"        } catch (Exception e) {\n" +
+			"            throw new RuntimeException(e);\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"interface I<ModelType, ValueType> {\n" +
+			"    public void doSet(ModelType model);\n" +
+			"    public void set(ValueType value);\n" +
+			"}\n"
+
+		},
+		"In B.set(CharSequence)");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=302358
+public void test084() {
+	this.runConformTest(
+		new String[] {
+			"C.java",
+			"abstract class A<ModelType extends D, ValueType> implements I<ModelType, ValueType> {\n" +
+			"    public void doSet(ModelType valueGetter) {\n" +
+			"        this.set((ValueType) valueGetter.getObject());\n" +
+			"    }\n" +
+			"    public void set(Object object) {\n" +
+			"        System.out.println(\"In A.set(Object)\");\n" +
+			"    }\n" +
+			"}\n" +
+			"class B extends A<E, CharSequence> {\n" +
+			"}\n" +
+			"public class C extends B {\n" +
+			"    static public void main(String[] args) {\n" +
+			"        C c = new C();\n" +
+			"        c.run();\n" +
+			"    }\n" +
+			"    public void run() {\n" +
+			"        E e = new E<String>(String.class);\n" +
+			"        this.doSet(e);\n" +
+			"    }\n" +
+			"}\n" +
+			"class D {\n" +
+			"    public Object getObject() {\n" +
+			"        return null;\n" +
+			"    }\n" +
+			"}\n" +
+			"class E<Type extends CharSequence> extends D {\n" +
+			"    private Class<Type> typeClass;\n" +
+			"    public E(Class<Type> typeClass) {\n" +
+			"        this.typeClass = typeClass;\n" +
+			"    }\n" +
+			"    public Type getObject() {\n" +
+			"        try {\n" +
+			"            return (Type) typeClass.newInstance();\n" +
+			"        } catch (Exception e) {\n" +
+			"            throw new RuntimeException(e);\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"interface I<ModelType, ValueType> {\n" +
+			"    public void doSet(ModelType model);\n" +
+			"    public void set(ValueType value);\n" +
+			"}\n"
+
+		},
+		"In A.set(Object)");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=302358
+public void test085() {
+	this.runConformTest(
+		new String[] {
+			"C.java",
+			"class A<ModelType extends D, ValueType> implements I<ModelType, ValueType> {\n" +
+			"    public void doSet(ModelType valueGetter) {\n" +
+			"        this.set((ValueType) valueGetter.getObject());\n" +
+			"    }\n" +
+			"    public void set(Object object) {\n" +
+			"        System.out.println(\"In A.set(Object)\");\n" +
+			"    }\n" +
+			"}\n" +
+			"class B extends A<E, CharSequence> {\n" +
+			"}\n" +
+			"public class C extends B {\n" +
+			"    static public void main(String[] args) {\n" +
+			"        C c = new C();\n" +
+			"        c.run();\n" +
+			"    }\n" +
+			"    public void run() {\n" +
+			"        E e = new E<String>(String.class);\n" +
+			"        this.doSet(e);\n" +
+			"    }\n" +
+			"}\n" +
+			"class D {\n" +
+			"    public Object getObject() {\n" +
+			"        return null;\n" +
+			"    }\n" +
+			"}\n" +
+			"class E<Type extends CharSequence> extends D {\n" +
+			"    private Class<Type> typeClass;\n" +
+			"    public E(Class<Type> typeClass) {\n" +
+			"        this.typeClass = typeClass;\n" +
+			"    }\n" +
+			"    public Type getObject() {\n" +
+			"        try {\n" +
+			"            return (Type) typeClass.newInstance();\n" +
+			"        } catch (Exception e) {\n" +
+			"            throw new RuntimeException(e);\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"interface I<ModelType, ValueType> {\n" +
+			"    public void doSet(ModelType model);\n" +
+			"    public void set(ValueType value);\n" +
+			"}\n"
+
+		},
+		"In A.set(Object)");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=302358
+public void test086() {
+	this.runConformTest(
+		new String[] {
+			"C.java",
+			"class A<ModelType extends D, ValueType> {\n" +
+			"    public void doSet(ModelType valueGetter) {\n" +
+			"        this.set((ValueType) valueGetter.getObject());\n" +
+			"    }\n" +
+			"    public void set(Object object) {\n" +
+			"        System.out.println(\"In A.set(Object)\");\n" +
+			"    }\n" +
+			"}\n" +
+			"class B extends A<E, CharSequence> {\n" +
+			"	public void set(CharSequence string) {\n" +
+			"        System.out.println(\"In B.set(CharSequence)\");\n" +
+			"    }\n" +
+			"}\n" +
+			"public class C extends B {\n" +
+			"    static public void main(String[] args) {\n" +
+			"        C c = new C();\n" +
+			"        c.run();\n" +
+			"    }\n" +
+			"    public void run() {\n" +
+			"        E e = new E<String>(String.class);\n" +
+			"        this.doSet(e);\n" +
+			"    }\n" +
+			"}\n" +
+			"class D {\n" +
+			"    public Object getObject() {\n" +
+			"        return null;\n" +
+			"    }\n" +
+			"}\n" +
+			"class E<Type extends CharSequence> extends D {\n" +
+			"    private Class<Type> typeClass;\n" +
+			"    public E(Class<Type> typeClass) {\n" +
+			"        this.typeClass = typeClass;\n" +
+			"    }\n" +
+			"    public Type getObject() {\n" +
+			"        try {\n" +
+			"            return (Type) typeClass.newInstance();\n" +
+			"        } catch (Exception e) {\n" +
+			"            throw new RuntimeException(e);\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"interface I<ModelType, ValueType> {\n" +
+			"    public void doSet(ModelType model);\n" +
+			"    public void set(ValueType value);\n" +
+			"}\n"
+
+		},
+		"In A.set(Object)");
 }
 }

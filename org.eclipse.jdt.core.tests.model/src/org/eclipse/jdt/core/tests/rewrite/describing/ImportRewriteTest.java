@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.tests.model.AbstractJavaModelTests;
@@ -300,6 +302,39 @@ public class ImportRewriteTest extends AbstractJavaModelTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	public void testAddImports5() throws Exception {
+		getJavaProject("P").setOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON, JavaCore.INSERT);
+		
+		IPackageFragment pack1= this.sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "java", "java.util", "com", "pack" };
+
+		ImportRewrite imports= newImportsRewrite(cu, order, 1, 1, true);
+		imports.setUseContextToFilterImplicitImports(true);
+		imports.addImport("java.util.Map");
+		imports.addImport("java.util.Set");
+		imports.addImport("java.util.Map.Entry");
+		imports.addImport("java.util.Collections");
+
+		apply(imports);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.* ;\n");
+		buf.append("import java.util.Map.Entry ;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
 	public void testAddImportsWithGroupsOfUnmatched1() throws Exception {
 
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("pack1", false, null);
@@ -446,6 +481,57 @@ public class ImportRewriteTest extends AbstractJavaModelTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	public void testRemoveImports3() throws Exception {
+		IPackageFragment pack= this.sourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    public class Inner {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		IPackageFragment test1= this.sourceFolder.createPackageFragment("test1", false, null);
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import pack.A;\n");
+		buf.append("import pack.A.Inner;\n");
+		buf.append("import pack.A.NotThere;\n");
+		buf.append("import pack.B;\n");
+		buf.append("import pack.B.Inner;\n");
+		buf.append("import pack.B.NotThere;\n");
+		buf.append("\n");
+		buf.append("public class T {\n");
+		buf.append("}\n");
+		ICompilationUnit cuT= test1.createCompilationUnit("T.java", buf.toString(), false, null);
+		
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setSource(cuT);
+		parser.setResolveBindings(true);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
+		
+		ImportRewrite imports= newImportsRewrite(astRoot, new String[0], 99, 99, true);
+		imports.setUseContextToFilterImplicitImports(true);
+		
+		imports.removeImport("pack.A.Inner");
+		imports.removeImport("pack.A.NotThere");
+		imports.removeImport("pack.B.Inner");
+		imports.removeImport("pack.B.NotThere");
+		
+		apply(imports);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import pack.A;\n");
+		buf.append("import pack.B;\n");
+		buf.append("\n");
+		buf.append("public class T {\n");
+		buf.append("}\n");
+		assertEqualString(cuT.getSource(), buf.toString());
+	}
 
 	public void testAddImports_bug23078() throws Exception {
 
@@ -572,6 +658,145 @@ public class ImportRewriteTest extends AbstractJavaModelTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	/**
+	 * Test that the Inner class import comes in the right order (i.e. after the enclosing type's import) when re-organized
+	 * 
+	 * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=194358"
+	 */
+	public void testBug194358() throws Exception {
+
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import pack2.A;\n");
+		buf.append("import pack2.A.Inner;\n");
+		buf.append("import pack2.B;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+
+		IPackageFragment pack1= this.sourceFolder.createPackageFragment("pack1", false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		// We need to actually make some state in the AST for the classes, to test that we can 
+		// disambiguate between packages and inner classes (see the bug for details).
+		IPackageFragment pack2= this.sourceFolder.createPackageFragment("pack2", false, null);
+		ICompilationUnit aUnit= pack2.createCompilationUnit("A.java", "", false, null);
+		ICompilationUnit bUnit= pack2.createCompilationUnit("B.java", "", false, null);
+		bUnit.createType("class B {}", null, false, null);
+
+		IType aType= aUnit.createType("class A {}", null, false, null);
+		aType.createType("class Inner {}", null, false, null);
+		String[] order= new String[] { "java" };
+
+		ImportRewrite imports= newImportsRewrite(cu, order, 99, 99, false);
+		imports.setUseContextToFilterImplicitImports(true);
+		imports.addImport("pack2.A");
+		imports.addImport("pack2.B");
+		imports.addImport("pack2.A.Inner");
+
+		apply(imports);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import pack2.A;\n");
+		buf.append("import pack2.A.Inner;\n");
+		buf.append("import pack2.B;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+
+	/**
+	 * Test that a valid inner class import is not removed even when the container
+	 * class is implicitly available. This tests the case where the classes are in 
+	 * different compilation units.
+	 * 
+	 * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=194358"
+	 */
+	public void testBug194358a() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package com.pack1;\n");
+		buf.append("\n");
+		buf.append("import com.pack1.A;\n");
+		buf.append("import com.pack1.A.Inner;\n");
+		buf.append("import com.pack2.B;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+
+		IPackageFragment pack1= this.sourceFolder.createPackageFragment("com.pack1", false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		ICompilationUnit aUnit= pack1.createCompilationUnit("A.java", "", false, null);
+
+		IPackageFragment pack2= this.sourceFolder.createPackageFragment("com.pack2", false, null);
+		ICompilationUnit bUnit= pack2.createCompilationUnit("B.java", "", false, null);
+		bUnit.createType("class B {}", null, false, null);
+		IType aType= aUnit.createType("class A {}", null, false, null);
+		aType.createType("class Inner {}", null, false, null);
+		String[] order= new String[] { "java" };
+
+		ImportRewrite imports= newImportsRewrite(cu, order, 99, 99, false);
+		imports.setUseContextToFilterImplicitImports(false);
+		imports.addImport("com.pack1.A");
+		imports.addImport("com.pack1.A.Inner");
+		imports.addImport("com.pack2.B");
+
+		apply(imports);
+
+		buf= new StringBuffer();
+		buf.append("package com.pack1;\n");
+		buf.append("\n");
+		buf.append("import com.pack1.A.Inner;\n");
+		buf.append("import com.pack2.B;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	/**
+	 * Test that the Inner type imports are not removed while organizing even though the 
+	 * containing class is implicitly available - for the case when both the classes are 
+	 * in the same compilation unit
+	 * 
+	 * see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=235253"
+	 */
+	public void testBug235253() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package bug;\n");
+		buf.append("\n");
+		buf.append("class Bug {\n");
+		buf.append("public void addFile(File file) {}\n");
+		buf.append("\tinterface Proto{};\n");
+		buf.append("}\n");		
+		buf.append("class Foo implements Proto{}");
+
+		IPackageFragment pack1= this.sourceFolder.createPackageFragment("bug", false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("Bug.java", buf.toString(), false, null);
+		String[] order= new String[] { "bug" , "java" };
+		ImportRewrite imports= newImportsRewrite(cu, order, 99, 99, false);
+		imports.setUseContextToFilterImplicitImports(true);
+		imports.addImport("bug.Bug.Proto");
+		imports.addImport("java.io.File"); 
+		
+		apply(imports);
+		buf = new StringBuffer();
+		buf.append("package bug;\n");
+		buf.append("\n");
+		buf.append("import bug.Bug.Proto;\n");
+		buf.append("\n");
+		buf.append("import java.io.File;\n");
+		buf.append("\n");
+		buf.append("class Bug {\n");
+		buf.append("public void addFile(File file) {}\n");
+		buf.append("\tinterface Proto{};\n");
+		buf.append("}\n");		
+		buf.append("class Foo implements Proto{}");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+		
 	public void testAddStaticImports1() throws Exception {
 
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("pack1", false, null);
@@ -1000,6 +1225,14 @@ public class ImportRewriteTest extends AbstractJavaModelTests {
 	}
 
 	private ImportRewrite newImportsRewrite(ICompilationUnit cu, String[] order, int normalThreshold, int staticThreshold, boolean restoreExistingImports) throws CoreException, BackingStoreException {
+		ImportRewrite rewrite= ImportRewrite.create(cu, restoreExistingImports);
+		rewrite.setImportOrder(order);
+		rewrite.setOnDemandImportThreshold(normalThreshold);
+		rewrite.setStaticOnDemandImportThreshold(staticThreshold);
+		return rewrite;
+	}
+
+	protected ImportRewrite newImportsRewrite(CompilationUnit cu, String[] order, int normalThreshold, int staticThreshold, boolean restoreExistingImports) {
 		ImportRewrite rewrite= ImportRewrite.create(cu, restoreExistingImports);
 		rewrite.setImportOrder(order);
 		rewrite.setOnDemandImportThreshold(normalThreshold);
