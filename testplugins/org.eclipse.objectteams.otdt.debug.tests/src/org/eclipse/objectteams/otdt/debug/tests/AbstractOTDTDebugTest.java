@@ -104,8 +104,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.util.SafeRunnable;
-import org.eclipse.objectteams.otdt.core.ext.OTRuntimeClasspathProvider;
-import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.ui.internal.actions.OTToggleBreakpointAdapter;
 import org.eclipse.ui.console.IConsole;
 import org.eclipse.ui.console.IHyperlink;
@@ -1397,12 +1395,6 @@ public abstract class AbstractOTDTDebugTest extends TestCase implements  IEvalua
         ILaunchConfigurationWorkingCopy config = type.newInstance(getJavaProject().getProject().getFolder("launchConfigurations"), mainTypeName);
         config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, mainTypeName);
         config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, getJavaProject().getElementName());
-//{ObjectTeams: make it an OT/J launch:
-        if (OTDebugPlugin.OT_LAUNCH_CONFIGURATION_TYPE.equals(launchType)) {
-        	config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_CLASSPATH_PROVIDER, OTRuntimeClasspathProvider.PROVIDER_ID);
-        	config.setAttribute(OTDebugPlugin.OT_LAUNCH, true);
-        }
-// SH}
         // use 'java' instead of 'javaw' to launch tests (javaw is problematic
         // on JDK1.4.2)
         Map map = new HashMap(1);

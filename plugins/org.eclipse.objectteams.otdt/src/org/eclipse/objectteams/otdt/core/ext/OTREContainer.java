@@ -20,8 +20,11 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.core.ext;
 
+import java.io.IOException;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
@@ -31,6 +34,10 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * This class serves the "OTRE" classpath container.
@@ -41,7 +48,6 @@ public class OTREContainer implements IClasspathContainer
 {
     public static final String OTRE_CONTAINER_NAME     = "OTRE"; //$NON-NLS-1$
     public static final String OTRE_JAR_FILENAME       = "otre.jar"; //$NON-NLS-1$
-    public static final String BCEL_JAR_FILENAME       = "BCEL.jar"; //$NON-NLS-1$
     public static final String OTRE_MIN_JAR_FILENAME   = "otre_min.jar"; //$NON-NLS-1$
     public static final String OTRE_AGENT_JAR_FILENAME = "otre_agent.jar"; //$NON-NLS-1$
     
@@ -49,9 +55,13 @@ public class OTREContainer implements IClasspathContainer
     // these are served from the current plugin:
     public static final IPath  OTRE_MIN_JAR_PATH   = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_MIN_JAR_FILENAME); //$NON-NLS-1$
     public static final IPath  OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$
-    // these are served from org.eclipse.objectteams.runtime/lib:
+    // this is served from org.eclipse.objectteams.runtime/lib:
     public static final String OTRE_JAR_PATH  	   = OTDTPlugin.OTRUNTIME_LIBDIR + '/' + OTRE_JAR_FILENAME; //$NON-NLS-1$
-    public static final IPath  BCEL_JAR            = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTRUNTIME_LIBDIR, BCEL_JAR_FILENAME); //$NON-NLS-1$
+    
+    public static IPath  BCEL_PATH; // will be initialized in {@link findBCEL(BundleContext)}
+    // data for initializing the above BCEL_PATH:
+    private static final String BCEL_BUNDLE_NAME = "org.apache.bcel"; //$NON-NLS-1$
+    private static final String BCEL_VERSION_RANGE = "[5.2.0,5.3.0)"; //$NON-NLS-1$
 
     private IClasspathEntry[] _cpEntries;
 
@@ -155,5 +165,18 @@ public class OTREContainer implements IClasspathContainer
 	    			
 			throw new CoreException( reason );
 		}
+	}
+	
+	/** Fetch the location of the bcel bundle into BCEL_PATH. */
+	static void findBCEL(BundleContext context) throws IOException {
+		ServiceReference ref= context.getServiceReference(PackageAdmin.class.getName());
+		if (ref == null)
+			throw new IllegalStateException("Cannot connect to PackageAdmin");
+		PackageAdmin packageAdmin = (PackageAdmin)context.getService(ref);
+		for (Bundle bundle : packageAdmin.getBundles(BCEL_BUNDLE_NAME, BCEL_VERSION_RANGE)) {			
+			BCEL_PATH = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile());
+			return;
+		}
+		throw new RuntimeException("bundle org.apache.bcel not found");
 	}
 }

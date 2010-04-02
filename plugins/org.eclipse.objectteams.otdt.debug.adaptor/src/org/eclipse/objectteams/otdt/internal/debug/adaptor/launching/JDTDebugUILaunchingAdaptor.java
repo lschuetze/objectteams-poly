@@ -16,14 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.debug.adaptor.launching;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.internal.debug.ui.jres.JREsComboBlock;
-import org.eclipse.objectteams.otdt.debug.IOTLaunchConstants;
-import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -48,13 +41,10 @@ import base org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
 public team class JDTDebugUILaunchingAdaptor {
 
 	/**
-	 * Adds the "use JPLIS" option to an OTREBlock, and also connects the OTREBlock to its base.
+	 * Connects the OTREBlock to its base.
 	 */
 	protected class JavaJRETab extends OTREBlock playedBy JavaJRETab {
-
-		Button _jplisToggleButton;
-		boolean _useJPLIS = true;
-		
+	
 		// === Imports (callout) : ===
 		@SuppressWarnings("decapsulation")
 		Control getJREControl() -> get JREsComboBlock fJREBlock
@@ -69,41 +59,21 @@ public team class JDTDebugUILaunchingAdaptor {
 		@SuppressWarnings("decapsulation")
 		void updateLaunchConfigurationDialog() -> void updateLaunchConfigurationDialog();
 		
+		// === Triggers (callin) : ===
+		
 		// build the GUI:
 		Group createOTRESection(Composite parent) <- after void createControl(Composite parent);
 		public Group createOTRESection(Composite parent) {
 			Composite enclosingComposite = (Composite) this.getJREControl();
 			Group group = super.createOTRESection(enclosingComposite, true/*useSWTFactory*/);
-	        this._jplisToggleButton = createCheckButton(group, OTDTUIPlugin.getResourceString("OTJavaMainTab.jplis_checkbox_label")); //$NON-NLS-1$
-	        this._jplisToggleButton.addSelectionListener(new SelectionAdapter() 
-		        {
-		            public void widgetSelected(SelectionEvent e)
-		            {
-		                JavaJRETab.this._useJPLIS = JavaJRETab.this._jplisToggleButton.getSelection();
-		                setDirty(true);
-		                updateLaunchConfigurationDialog();
-		            }
-		        });
 			return group;
 		}
-		
+
 		// read stored value:
-		void initializeFrom(ILaunchConfiguration config) <- after void initializeFrom(ILaunchConfiguration config);
-		
-		protected void tryInitializeFrom(ILaunchConfiguration config, boolean hasOTJProject) throws CoreException {
-			super.tryInitializeFrom(config, hasOTJProject);
-			this._jplisToggleButton.setEnabled(hasOTJProject);
-			this._useJPLIS = config.getAttribute(IOTLaunchConstants.ATTR_USE_JPLIS, this._useJPLIS);
-			this._jplisToggleButton.setSelection(this._useJPLIS);
-		}
-		
+		initializeFrom <- after initializeFrom;
+
 		// apply value change:
-		void performApply(ILaunchConfigurationWorkingCopy config) 
-				<- after void performApply(ILaunchConfigurationWorkingCopy config);
-		public void performApply(ILaunchConfigurationWorkingCopy config) {
-	     	super.performApply(config);
-	     	config.setAttribute(IOTLaunchConstants.ATTR_USE_JPLIS, this._useJPLIS);
-	    }
+		performApply <- after performApply;
 	}
 	
 	/** Add an OTRE block to the "Connect" tab for remote debugging. */
@@ -128,9 +98,11 @@ public team class JDTDebugUILaunchingAdaptor {
 			Group group = super.createOTRESection(enclosingComposite, true/*useSWTFactory*/);
 			return group;
 		}
+
+		// read stored value:
+		initializeFrom <- after initializeFrom;
 		
 		// hook the trigger for passing the ot-launch attribute:
-		void performApply(ILaunchConfigurationWorkingCopy config) 
-			<- after void performApply(ILaunchConfigurationWorkingCopy config);
+		performApply <- after performApply;
 	}
 }

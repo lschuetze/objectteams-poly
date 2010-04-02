@@ -53,11 +53,4 @@
 	 		id="OTRE"
             class="org.eclipse.objectteams.otdt.core.ext.OTREContainerInitializer"/>
    </extension>
-   
-   <extension point="org.eclipse.jdt.launching.classpathProviders">
-	   <classpathProvider 
-	      id="org.eclipse.objectteams.otdt.OTRuntimeClasspathProvider"
-	      class="org.eclipse.objectteams.otdt.core.ext.OTRuntimeClasspathProvider">
-	   </classpathProvider>
-   </extension>
 </plugin>

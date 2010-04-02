@@ -40,7 +40,7 @@ import base org.eclipse.jdt.launching.StandardClasspathProvider;
 /**
  * This team observes java launches and potentially modifies them for OT/J capabilities.
  * <ul>
- * <li>Add BCEL and JMangler to the classpath (role {@link ClasspathExtender})
+ * <li>Add BCEL and otre_min to the classpath (role {@link ClasspathExtender})
  * <li>Maintain an OTVMRunnerAdaptor for adapting vm- and program args (role {@link JDTLaunchingAdaptor.AbstractJavaLaunchConfigurationDelegate}).
  * </ul>
  * Role {@link JDTLaunchingAdaptor.JavaLaunchDelegate} only binds the above behavior into Java launches.
@@ -53,7 +53,7 @@ import base org.eclipse.jdt.launching.StandardClasspathProvider;
 public team class JDTLaunchingAdaptor {
 
 	/**
-	 * This role extends the classpath with BCEL and JMangler paths if OT/J is enabled for the launch.
+	 * This role extends the classpath with BCEL and otre_min paths if OT/J is enabled for the launch.
 	 */
 	protected class ClasspathExtender playedBy StandardClasspathProvider {
 
@@ -64,13 +64,12 @@ public team class JDTLaunchingAdaptor {
 		{
 	    	IRuntimeClasspathEntry[] origEntries = base.computeUnresolvedClasspath(config);
 	    	
-	    	boolean useJMangler = isNormalOTJLaunch(config);
-	    	if (!useJMangler && !isJPLISOTJLaunch(config))
+	    	if (!isJPLISOTJLaunch(config))
 	    		return origEntries;
 	    	
-	    	// add BCEL, JMangler-core and JMangler-start (classpath / bootclasspath)
+	    	// add BCEL and otre_min (classpath / bootclasspath)
 	    	int oldLength = origEntries.length;
-			IRuntimeClasspathEntry[] otRuntimeEntries = computePathsToAdd(origEntries, useJMangler);
+			IRuntimeClasspathEntry[] otRuntimeEntries = computePathsToAdd(origEntries);
 			
 			// merge results:
 	    	IRuntimeClasspathEntry[] result = new IRuntimeClasspathEntry[oldLength + otRuntimeEntries.length];
@@ -79,17 +78,15 @@ public team class JDTLaunchingAdaptor {
 	        return result;
 		}
 		
-	    static IRuntimeClasspathEntry[] computePathsToAdd( IRuntimeClasspathEntry[] origEntries, boolean useJMangler )
+	    static IRuntimeClasspathEntry[] computePathsToAdd( IRuntimeClasspathEntry[] origEntries)
 		{
 			boolean hasBCEL = false;
-			boolean hasJManglerCore = false;
-			boolean hasJManglerStart = false;
 			boolean hasOTRE_min = false;
 	
 			for (int i = 0; i < origEntries.length; i++)
 	        {
 	            IRuntimeClasspathEntry entry = origEntries[i];
-				if (OTREContainer.BCEL_JAR.equals(entry.getPath()))
+				if (OTREContainer.BCEL_PATH.equals(entry.getPath()))
 					hasBCEL = true;
 				else if (OTREContainer.OTRE_JAR_PATH.equals(entry.getPath().toString()))
 					hasOTRE_min = true;
@@ -99,20 +96,11 @@ public team class JDTLaunchingAdaptor {
 			IRuntimeClasspathEntry entry;
 	
 			if (!hasBCEL) {
-				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTREContainer.BCEL_JAR);
-				entry.setClasspathProperty(IRuntimeClasspathEntry.BOOTSTRAP_CLASSES);
+				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTREContainer.BCEL_PATH);
 				result.add(entry);			
 			}
-	
-			if (!hasJManglerCore && useJMangler) {
-				throw new RuntimeException("JMangler is no longer supported");
-			}  
-			
-			if (!hasJManglerStart && useJMangler) { 	
-				throw new RuntimeException("JMangler is no longer supported");			
-			}		    	
-			
-			if (!hasOTRE_min && !useJMangler) {
+
+			if (!hasOTRE_min) {
 				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTREContainer.OTRE_MIN_JAR_PATH);
 				entry.setClasspathProperty(IRuntimeClasspathEntry.BOOTSTRAP_CLASSES);
 				result.add(entry);
@@ -131,7 +119,6 @@ public team class JDTLaunchingAdaptor {
 		IJavaProject getJavaProject(ILaunchConfiguration arg0) -> IJavaProject getJavaProject(ILaunchConfiguration arg0);
 
 		OTVMRunnerAdaptor fAdaptor;
-		boolean useJMangler = false;
 		String fOriginalMain;
 
 		// --- Initiate adaptations: (this callin actually applies to sub-base-classes)
@@ -140,8 +127,7 @@ public team class JDTLaunchingAdaptor {
 		void prepareLaunch(ILaunchConfiguration config, String mode, ILaunch launch) throws CoreException 
 		{
 			this.fOriginalMain = null; // reset potential left over from previous launching
-			this.useJMangler = isNormalOTJLaunch(config);
-			if (!this.useJMangler && !isJPLISOTJLaunch(config)) {
+			if (!isJPLISOTJLaunch(config)) {
 				this.fAdaptor = null;
 				return;
 			}
@@ -150,15 +136,6 @@ public team class JDTLaunchingAdaptor {
 			// install OT-breakpoints
 			if (ILaunchManager.DEBUG_MODE.equals(mode))
 				TeamBreakpointInstaller.installTeamBreakpoints(getJavaProject(config));
-		}
-
-		// --- Main Type Name: ---
-		String verifyMainTypeName(ILaunchConfiguration config) 
-				<- replace String verifyMainTypeName(ILaunchConfiguration config)
-			when (this.useJMangler);
-
-		callin String verifyMainTypeName(ILaunchConfiguration config) throws CoreException {
-			throw new RuntimeException("JMangler is no longer supported");
 		}
 
 		// --- VM Arguments: ---
@@ -182,22 +159,10 @@ public team class JDTLaunchingAdaptor {
 			return this.fOriginalMain + ' ' + programArguments;
 		}		
 	}
-	
-	static boolean isNormalOTJLaunch(ILaunchConfiguration config) {
-		// FIXME(SH): see https://bugs.eclipse.org/302976
-		try {
-			return    config.getAttribute(OTDebugPlugin.OT_LAUNCH, false)                               // OT/J ?
-				  && false//&& !config.getAttribute(IOTLaunchConstants.ATTR_USE_JPLIS, false)					    // not JPLIS ?
-				  && (config.getAttribute(IPDEUIConstants.LAUNCHER_PDE_VERSION, (String)null) == null); // not PDE ?
-		} catch (CoreException e) {
-			return false; // don't apply adaptations to bogus config
-		}
-	}
 		
 	static boolean isJPLISOTJLaunch(ILaunchConfiguration config) {
 		try {
 			return    config.getAttribute(OTDebugPlugin.OT_LAUNCH, false)                               // OT/J ?
-				  //&&  config.getAttribute(IOTLaunchConstants.ATTR_USE_JPLIS, false)					    // JPLIS ?
 				  && (config.getAttribute(IPDEUIConstants.LAUNCHER_PDE_VERSION, (String)null) == null); // not PDE ?
 		} catch (CoreException e) {
 			return false; // don't apply adaptations to bogus config

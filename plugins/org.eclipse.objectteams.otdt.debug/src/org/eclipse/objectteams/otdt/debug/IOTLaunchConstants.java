@@ -38,6 +38,4 @@ public interface IOTLaunchConstants {
 	 */
 	public static final String ATTR_TEAMCONFIG_ACTIVE = uniquePrefix + ".TEAMCONFIG_ACTIVE_ATTR"; //$NON-NLS-1$
 
-	public static final String ATTR_USE_JPLIS = uniquePrefix + ".USE_JPLIS"; //$NON-NLS-1$
-
 }

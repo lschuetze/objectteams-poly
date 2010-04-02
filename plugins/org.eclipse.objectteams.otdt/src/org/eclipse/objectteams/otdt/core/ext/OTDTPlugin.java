@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
+import org.osgi.framework.BundleContext;
 
 
 /**
@@ -108,6 +109,16 @@ public class OTDTPlugin extends Plugin
         return _singleton;
     }
 
+    @Override
+    public void start(BundleContext context) throws Exception {    
+    	super.start(context);
+    	try {
+    		OTREContainer.findBCEL(context);
+    	} catch (RuntimeException re) {
+    		this.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, "Cannot initialize BCEL location", re));
+    	}
+    }
+    
 	public static String[] createProjectNatures(IProjectDescription prjDesc)
 	{
 	    String[] natures = prjDesc.getNatureIds();

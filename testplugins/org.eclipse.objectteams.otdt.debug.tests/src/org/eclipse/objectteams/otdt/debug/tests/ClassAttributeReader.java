@@ -29,14 +29,15 @@ import java.util.Vector;
 
 import org.eclipse.core.runtime.IPath;
 
-import de.fub.bytecode.Repository;
-import de.fub.bytecode.classfile.Attribute;
-import de.fub.bytecode.classfile.ClassParser;
-import de.fub.bytecode.classfile.ConstantPool;
-import de.fub.bytecode.classfile.ConstantUtf8;
-import de.fub.bytecode.classfile.JavaClass;
-import de.fub.bytecode.classfile.Method;
-import de.fub.bytecode.classfile.Unknown;
+import org.apache.bcel.Repository;
+import org.apache.bcel.classfile.Attribute;
+import org.apache.bcel.classfile.ClassFormatException;
+import org.apache.bcel.classfile.ClassParser;
+import org.apache.bcel.classfile.ConstantPool;
+import org.apache.bcel.classfile.ConstantUtf8;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.classfile.Method;
+import org.apache.bcel.classfile.Unknown;
 
 /**
  * @author ike
@@ -59,22 +60,28 @@ public class ClassAttributeReader
     
     public ClassAttributeReader(IPath classFilePath)
     {
-        if ((_javaclass = Repository.lookupClass(classFilePath.toOSString())) == null)
-            try
-            {
+        try {
+        	if ((_javaclass = Repository.lookupClass(classFilePath.toOSString())) == null) {
                 _javaclass = new ClassParser(classFilePath.toOSString()).parse(); // May throw
                 readAndStoreAttributes();
-            }
-            catch (ClassFormatError e)
-            {
-                _error = e.getMessage();
-                e.printStackTrace();
-            }
-            catch (IOException e)
-            {
-                _error = e.getMessage();
-                e.printStackTrace();
-            }
+        	}
+        }
+        catch (ClassFormatError e)
+        {
+            _error = e.getMessage();
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            _error = e.getMessage();
+            e.printStackTrace();
+        } catch (ClassFormatException e) {
+            _error = e.getMessage();
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+            _error = e.getMessage();
+			e.printStackTrace();
+		}
     }
     
     public String getError()

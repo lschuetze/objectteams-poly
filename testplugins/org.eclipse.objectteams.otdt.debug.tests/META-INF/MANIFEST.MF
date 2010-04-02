@@ -3,11 +3,11 @@ Bundle-ManifestVersion: 2
 Bundle-Name: OTDT DebugTest Plug-in
 Bundle-SymbolicName: org.eclipse.objectteams.otdt.debug.tests;singleton:=true
 Bundle-Version: 1.3.0
-Bundle-ClassPath: otdt-debugtests.jar,
- BCEL.jar
+Bundle-ClassPath: otdt-debugtests.jar
 Bundle-Activator: org.eclipse.objectteams.otdt.debug.tests.DebugTestsPlugin
 Bundle-Vendor: Fraunhofer FIRST
-Require-Bundle: org.eclipse.ui,
+Require-Bundle: org.apache.bcel, 
+ org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.jdt.debug.tests,
  org.eclipse.jdt.debug,
