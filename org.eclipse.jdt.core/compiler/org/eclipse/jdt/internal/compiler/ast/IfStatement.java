@@ -90,6 +90,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	    if (thenFlowInfo == FlowInfo.DEAD_END
 	            && (this.bits & IsElseIfStatement) == 0 	// else of an else-if
 	            && !(this.elseStatement instanceof IfStatement)) {
+//{ObjectTeams: silent for generated methods:
+	      if (!currentScope.isGeneratedScope())
+// SH}
 	        currentScope.problemReporter().unnecessaryElse(this.elseStatement);
 	    }
 		// Save info for code gen
