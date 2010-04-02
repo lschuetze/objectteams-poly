@@ -155,6 +155,10 @@ public class MethodModel extends ModelElement {
 		}
 	}
 
+	public static boolean isRoleMethodInheritedFromNonPublicRegular(MethodBinding current) {
+		if (current.model == null) return false;
+		return current.model.problemDetail == ProblemDetail.RoleInheritsNonPublic;
+	}
 
 	// TODO(SH): note that role feature bridges are not really faked, since they are actually generated (synthetic?)
     public static enum FakeKind { NOT_FAKED, BASECALL_SURROGATE, ROLE_FEATURE_BRIDGE, TEAM_REGISTRATION_METHOD }

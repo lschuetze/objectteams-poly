@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.impl.*;
@@ -23,6 +24,7 @@ import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.compiler.util.Util;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.InsertTypeAdjustmentsVisitor;
@@ -207,6 +209,10 @@ public void resolve(MethodScope initializationScope) {
 				if (existingField.original() == this.binding) break checkHiding;
 				if (!existingField.isStatic() && declaringType.isStatic()) break checkHiding;
 			}
+//{ObjectTeams: never report hiding re _OT$base, _OT$cacheInitTrigger et al
+			if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, this.name)) 
+				break checkHiding;
+// SH}
 			// collision with outer field or local variable
 			initializationScope.problemReporter().fieldHiding(this, existingVariable);
 		}

@@ -1296,7 +1296,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 					if (   currentField.binding != null
 						&& currentField.binding.copyInheritanceSrc != null
 						&& currentField.binding.copyInheritanceSrc == field.copyInheritanceSrc)
-						break; // not a problem: repeated inheritance of the same field!
+						return; // not a problem: repeated inheritance of the same field!
 
 					ProblemReporter problemReporter = currentField.isStatic() ?
 							roleDeclaration.staticInitializerScope.problemReporter() :

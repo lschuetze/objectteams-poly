@@ -1665,6 +1665,10 @@ public abstract class Scope {
 							MethodBinding current = currentMethods[c];
 							for (int f = 0; f < foundSize; f++)
 								if (current == found.elementAt(f)) continue next;
+//{ObjectTeams: some fake ifc methods are not relevant here:
+							if (MethodModel.isRoleMethodInheritedFromNonPublicRegular(current))
+								continue next;
+// SH}
 							found.add(current);
 						}
 					} else {
