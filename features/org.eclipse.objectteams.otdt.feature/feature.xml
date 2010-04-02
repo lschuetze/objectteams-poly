@@ -86,7 +86,7 @@ Project Leader:
          id="org.eclipse.objectteams.otdt.debug"
          download-size="39"
          install-size="39"
-         version="0.7.0.qualifier"
+         version="0.0.0"
          unpack="false"/>
 
    <plugin
