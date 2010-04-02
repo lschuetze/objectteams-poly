@@ -80,13 +80,13 @@ Project Leader:
          id="org.eclipse.objectteams.otdt"
          download-size="189"
          install-size="228"
-         version="0.7.0"/>
+         version="0.0.0"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.debug"
          download-size="39"
          install-size="39"
-         version="0.7.0"
+         version="0.7.0.qualifier"
          unpack="false"/>
 
    <plugin
