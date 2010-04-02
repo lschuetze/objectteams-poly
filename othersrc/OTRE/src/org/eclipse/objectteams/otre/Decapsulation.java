@@ -221,7 +221,7 @@ public class Decapsulation
 			Iterator<FieldDescriptor> it = getter.iterator();
 			while (it.hasNext()) {
 				FieldDescriptor fd = it.next();
-				String key = "get_" + fd.getFieldName() + fd.getFieldSignature();
+				String key = "get_" + class_name +"." + fd.getFieldName() + fd.getFieldSignature();
 				if (logging)
 					printLogMessage("Generating getter method "+key);
 				if (addedAccessMethods == null)
@@ -240,7 +240,7 @@ public class Decapsulation
 			Iterator<FieldDescriptor> it = setter.iterator();
 			while (it.hasNext()) {
 				FieldDescriptor fd = it.next();
-				String key = "set_"+fd.getFieldName()+fd.getFieldSignature();
+				String key = "set_"+ class_name +"." + fd.getFieldName()+fd.getFieldSignature();
 				if (logging)
 					printLogMessage("Generating setter method "+key);
 				if (addedAccessMethods == null)
