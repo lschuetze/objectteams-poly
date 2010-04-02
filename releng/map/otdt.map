@@ -37,7 +37,7 @@ plugin@org.eclipse.objectteams.otdt.samples=SVN,url=svn://localhost/svnroot/tool
 !***************  OTDT Test CONTRIBUTION  ******************************************************** 
 
 
-feature@org.eclipse.objectteams.otdt-tests=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=deployment/OTFeature/unit-tests-feature
+feature@org.eclipse.objectteams.otdt-tests=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=features/org.eclipse.objectteams.otdt.feature/unit-tests-feature
 
 plugin@org.eclipse.jdt.core.tests.builder=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=src/testplugins/org.eclipse.jdt.core.tests.builder
 plugin@org.eclipse.jdt.core.tests.compiler=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=src/testplugins/org.eclipse.jdt.core.tests.compiler
@@ -52,5 +52,5 @@ plugin@org.eclipse.objectteams.otdt.debug.tests=SVN,url=svn://localhost/svnroot/
 plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=src/testplugins/org.eclipse.objectteams.otdt.ui.tests.refactoring
 
 !** OT/J Test Plugins **!
-plugin@org.eclipse.objectteams.otdt.test.builder=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=src/ottestplugins/org.eclipse.objectteams.otdt.test.builder
+plugin@org.eclipse.objectteams.otdt.test.builder=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=src/testplugins/org.eclipse.objectteams.otdt.test.builder
 plugin@org.eclipse.objectteams.otdt.ui.tests=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=src/testplugins/org.eclipse.objectteams.otdt.ui.tests
