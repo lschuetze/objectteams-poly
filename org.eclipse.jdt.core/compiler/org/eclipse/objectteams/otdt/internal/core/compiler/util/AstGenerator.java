@@ -777,7 +777,8 @@ public class AstGenerator extends AstFactory {
 	}
 	public ReturnStatement returnStatement(Expression expression, boolean synthetic) {
 		ReturnStatement returnStatement = new ReturnStatement(expression, this.sourceStart, this.sourceEnd);
-		returnStatement.bits |= ASTNode.IsGenerated;
+		if (synthetic)
+			returnStatement.bits |= ASTNode.IsGenerated;
 		return returnStatement;
 	}
 	public IfStatement ifStatement(Expression condition, Statement thenStatement) {
