@@ -14,6 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
+import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLAG_DEFINITELY_MISSING_BASECALL;
+import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -28,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
+import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
@@ -161,8 +165,47 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		//               NullReferenceTest#test0510
 	}
 	manageSyntheticAccessIfNecessary(currentScope, flowInfo);
+//{ObjectTeams: base calls via super:
+	flowInfo = checkBaseCallsIfSuper(currentScope, flowInfo);
+// SH}
 	return flowInfo;
 }
+//{ObjectTeams: checkBaseCallsIfSuper
+protected FlowInfo checkBaseCallsIfSuper(BlockScope currentScope, FlowInfo flowInfo) {
+	MethodScope methodScope = currentScope.methodScope();
+	if (methodScope == null) 
+		return flowInfo;
+	AbstractMethodDeclaration methodDecl = methodScope.referenceMethod();
+	if (methodDecl == null || !methodDecl.isCallin()) 
+		return flowInfo;
+	if (!this.isSuperAccess())
+		return flowInfo;
+	MethodDeclaration callinMethod = (MethodDeclaration) methodDecl;
+	if (MethodModel.hasCallinFlag(this.binding, CALLIN_FLAG_DEFINITELY_MISSING_BASECALL))
+		return flowInfo; // no effect
+	
+	boolean definitelyViaSuper = !MethodModel.hasCallinFlag(this.binding, CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL);
+		
+	LocalVariableBinding trackingVariable = callinMethod.baseCallTrackingVariable.binding;
+	if (flowInfo.isDefinitelyAssigned(callinMethod.baseCallTrackingVariable)) {
+		if (definitelyViaSuper)
+			currentScope.problemReporter().definitelyDuplicateBasecall(this);
+		else
+			currentScope.problemReporter().potentiallyDuplicateBasecall(this);
+	} else if (flowInfo.isPotentiallyAssigned(trackingVariable)) {
+		currentScope.problemReporter().potentiallyDuplicateBasecall(this);
+	} else {
+		if (definitelyViaSuper) {
+			flowInfo.markAsDefinitelyAssigned(trackingVariable);
+		} else {
+			FlowInfo potential = flowInfo.copy();
+			potential.markAsDefinitelyAssigned(trackingVariable);
+			flowInfo = FlowInfo.conditional(flowInfo.initsWhenTrue(), potential.initsWhenTrue());
+		}
+	}
+	return flowInfo;
+}
+// SH}
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#computeConversion(org.eclipse.jdt.internal.compiler.lookup.Scope, org.eclipse.jdt.internal.compiler.lookup.TypeBinding, org.eclipse.jdt.internal.compiler.lookup.TypeBinding)
  */

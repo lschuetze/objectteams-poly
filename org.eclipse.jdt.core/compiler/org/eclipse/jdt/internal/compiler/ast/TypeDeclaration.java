@@ -49,6 +49,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.smap.RoleSmapGenerato
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.TeamSmapGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.RoleSplitter;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.Sorting;
 
 /**
  * OTDT changes:
@@ -1205,6 +1206,8 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 		// type value parameters are non static fields, which are a-priori assigned.
 		nonStaticFieldInfo = TypeValueParameter.analyseCode(this.typeParameters, this.initializerScope, flowContext, nonStaticFieldInfo);
 	}
+	// analyse member types in topological order (super before sub):
+	Sorting.sortMemberTypes(this);
 // SH}
 	if (this.memberTypes != null) {
 		for (int i = 0, count = this.memberTypes.length; i < count; i++) {

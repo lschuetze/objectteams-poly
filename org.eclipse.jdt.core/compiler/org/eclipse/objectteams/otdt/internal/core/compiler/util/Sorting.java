@@ -16,6 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.util;
 
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
@@ -151,5 +152,29 @@ public class Sorting {
 			}
 		}
 		return o;
+	}
+	
+	/** Apply the sorting from member type bindings to their ASTs, too. */
+	public static void sortMemberTypes(TypeDeclaration typeDeclaration) {
+		if (typeDeclaration.memberTypes == null) return;
+		ReferenceBinding[] bindings = typeDeclaration.binding.memberTypes;
+		TypeDeclaration[] unsorted = typeDeclaration.memberTypes;
+		TypeDeclaration[] newMembers = new TypeDeclaration[unsorted.length];
+		int k = unsorted.length-1;
+		allMembers: for (int i=0; i<unsorted.length; i++) {
+			ReferenceBinding current = unsorted[i].binding;
+			if (current != null) {
+				// find insertion point from sorted bindings:
+				for (int j=0; j<bindings.length; j++) {
+					if (bindings[j] == current) {
+						newMembers[j] = unsorted[i];
+						continue allMembers;
+					}
+				}
+			}
+			// emergency, so we'll never lose any member types:
+			newMembers[k--] = unsorted[i];
+		}
+		typeDeclaration.memberTypes = newMembers;
 	}
 }
