@@ -73,7 +73,7 @@ public class FormatterTests extends AbstractJavaModelTests {
 	 */
 	protected String getPluginDirectoryPath() {
 		try {
-			URL platformURL = Platform.getBundle("org.eclispe.objectteams.otdt.tests").getEntry("/");
+			URL platformURL = Platform.getBundle("org.eclipse.objectteams.otdt.tests").getEntry("/");
 			return new File(FileLocator.toFileURL(platformURL).getFile()).getAbsolutePath();
 		} catch (IOException e) {
 			e.printStackTrace();

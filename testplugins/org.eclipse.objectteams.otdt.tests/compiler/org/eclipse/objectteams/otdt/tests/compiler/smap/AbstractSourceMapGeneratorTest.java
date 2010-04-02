@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.debug.core.breakpoints.IOOTBreakPoints;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
 import org.eclipse.objectteams.otdt.tests.compiler.CustomizedCompiler;
@@ -95,22 +96,7 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 
     private String getOTRE_Path()
     {
-        URL url = FileLocator.find(OTDTPlugin.getDefault().getBundle(), new Path("lib/otre.jar"), null);
-        URL resolved_url = null;
-        try
-        {
-            resolved_url = FileLocator.resolve(url);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-
-        if (resolved_url != null)
-            return resolved_url.getPath();
-        else
-            return url.getPath();
-        
+    	return OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTRUNTIME_LIBDIR, OTREContainer.OTRE_JAR_FILENAME).toString();
     }
 
     public static Test suite()

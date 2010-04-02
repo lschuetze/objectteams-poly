@@ -73,26 +73,13 @@ public class TestBase extends TestCase
 													+ File.separator 
 													+ "rt.jar";
     
-    public static final String OT_RUNTIME_PATH;  
-    static {
-    		OT_RUNTIME_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTDT_INSTALLDIR).toOSString();
-    }
-    	
+	public static final String OT_RUNTIME_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTRUNTIME_LIBDIR).toOSString();
+	
     
 	public static final String OTRE_JAR_PATH = OT_RUNTIME_PATH 
 													+ File.separator
-													+ "lib"
-													+ File.separator
 													+ "otre.jar";
 	
-    public static final String OT_SCRIPT_PATH = OT_RUNTIME_PATH
-													+ File.separator
-													+ "otj"
-													+ File.separator
-													+ "bin" 
-													+ File.separator
-													+ "ot";
-	         
     public static final String PROJECT_PATH = USER_HOME 
 													+ File.separator 
 													+ WORKSPACE_NAME 
@@ -133,98 +120,7 @@ public class TestBase extends TestCase
     	}
     	file.delete();
     }
-    	
-    /**
-     * Executes the main() method of a given classfile.
-     * @param fname e.g. MyMainClass
-     * @param expectedResult e.g. OK
-     * @return e.g. OK
-     */
-    public boolean executeFile(String fname, String expectedResult)
-    {
-    	System.out.println(" ***** executed ***** ");     	
-    	String result = executeCommand(OT_SCRIPT_PATH + " -classpath " + PROJECT_PATH +" "+ fname);
-    	if(result.compareTo(expectedResult) != 0)
-    	{
-    		System.out.println(" Expected result: " + expectedResult);
-    		System.out.println(" Actual result:   " + result);
-    		
-    		return false;
-    	}
-    	return true;
-    }
 
-    /**
-     * execute unix shell command
-     * @param commandToExecute
-     * @return the result from output stream
-     */
-    private static String executeCommand(String commandToExecute) 
-	{	
-    	ArrayList<Exception> exceptions = new ArrayList<Exception>();
- 	
-    	Process commandExecutionProcess;
-    	
-		StringWriter output = new StringWriter();
-		StringWriter errors = new StringWriter();
-		
-		try 
-		{
-			commandExecutionProcess = Runtime.getRuntime().exec(commandToExecute);
-					 			
-			StreamRedirectThread outRedirect = 
-				new StreamRedirectThread(
-					"output_reader",
-					commandExecutionProcess.getInputStream(), 
-					output);
-			StreamRedirectThread errRedirect = new StreamRedirectThread("error_reader",
-				commandExecutionProcess.getErrorStream(), errors);
-		
-			outRedirect.start();
-			errRedirect.start();
-		
-			commandExecutionProcess.waitFor();
-		    		
-			outRedirect.join(); // wait until output (std out) of commandline tool is fully read
-			errRedirect.join(); //  wait until  standard error of commandline tool is fully read
-			if (outRedirect.getException() != null) 
-			{
-				exceptions.add(outRedirect.getException());
-			} 
-			if (errRedirect.getException() != null) 
-			{
-				exceptions.add(errRedirect.getException());
-			} 			
-			}
-		catch (Exception ex)
-		{	
-			exceptions.add(ex);
-		}
-		finally 
-		{
-			output.flush();
-			try
-			{
-				output.close();
-			}
-			catch (Exception ex)
-			{	
-				exceptions.add(ex);
-			}	
-			errors.flush();
-			try
-			{
-				errors.close();
-			}
-			catch (Exception ex)
-			{	
-				exceptions.add(ex);
-			}	    	
-		}
-		
-		return errors.toString() + output.toString();
-		
-	}
     // -- use default options: --
     public void compileFile(String fname)
     {

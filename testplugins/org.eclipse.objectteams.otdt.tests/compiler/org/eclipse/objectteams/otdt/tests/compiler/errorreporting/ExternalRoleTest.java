@@ -87,10 +87,10 @@ public class ExternalRoleTest extends TestBase implements IOTConstants{
                         NL + "      private MyRole r = null;" +
 						NL + "}");
 		
-		compileFile("org"+File.separator+"objectteams"+File.separator+"MyTeam"+File.separator+"MyRole");
+		compileFile("org"+File.separator+"eclipse"+File.separator+"objectteams"+File.separator+"MyTeam"+File.separator+"MyRole");
         assertTrue(isCompilationSuccessful());
 
-		compileFile("org"+File.separator+"objectteams"+File.separator+"MyTeam");
+		compileFile("org"+File.separator+"eclipse"+File.separator+"objectteams"+File.separator+"MyTeam");
 		assertTrue(isCompilationSuccessful());
 	}
 
