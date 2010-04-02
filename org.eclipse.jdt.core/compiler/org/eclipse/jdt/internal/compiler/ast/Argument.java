@@ -80,6 +80,10 @@ public class Argument extends LocalDeclaration {
 						if (methodDecl != null && CharOperation.prefixEquals(SET, methodDecl.selector)) {
 							isSpecialArgument = true; // setter argument
 						}
+//{ObjectTeams: more special arguments (in generated methods):
+						if (methodDecl != null && methodDecl.isGenerated)
+							isSpecialArgument = true;
+// SH}
 					}
 				}
 				scope.problemReporter().localVariableHiding(this, existingVariable, isSpecialArgument);
