@@ -26,5 +26,6 @@ Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Export-Package: org.eclipse.objectteams.otdt.internal.ui.assist;x-friends:="org.eclipse.objectteams.otdt.ui.tests",
- org.eclipse.objectteams.otdt.internal.ui.packageview;x-friends:="org.eclipse.objectteams.otdt.ui.tests"
+ org.eclipse.objectteams.otdt.internal.ui.packageview;x-friends:="org.eclipse.objectteams.otdt.ui.tests",
+ org.eclipse.objectteams.otdt.internal.ui.javaeditor;x-internal:="true"
 
