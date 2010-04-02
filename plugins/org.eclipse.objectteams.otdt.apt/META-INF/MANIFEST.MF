@@ -1,11 +1,11 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Adaptor for the JDT/APT
+Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.otdt.apt;singleton:=true
-Bundle-Version: 1.4.0.qualifier
-Bundle-Vendor: objectteams.org
+Bundle-Version: 0.7.0.qualifier
+Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
-Require-Bundle: org.eclipse.objectteams.otequinox;bundle-version="[1.2.6,2.0.0)",
+Require-Bundle: org.eclipse.objectteams.otequinox;bundle-version="[0.7.0,0.8.0)",
  org.eclipse.osgi;bundle-version="[3.4.2,4.0.0)",
- org.eclipse.jdt.core;bundle-version="[3.5.0.v_OTDT_r130,4.0.0)"
+ org.eclipse.jdt.core;bundle-version="[3.6.0.v_OTDT_r070,3.6.0.v_OTDT_r080)"
 Bundle-ActivationPolicy: lazy

@@ -1,14 +1,14 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: ObjectTeams/Equinox Integration
+Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.otequinox;singleton:=true
-Bundle-Version: 1.4.0.qualifier
-Bundle-Vendor: objectteams.org
+Bundle-Version: 0.7.0.qualifier
+Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.equinox.common,
  org.eclipse.equinox.registry,
  org.eclipse.osgi;bundle-version="[3.6.0.v20090928,4.0.0)",
  org.objectweb.asm;bundle-version="[3.1.0,4.0.0)",
- org.eclipse.objectteams.runtime;bundle-version="[0.7.0,1.0.0)";visibility:=reexport
+ org.eclipse.objectteams.runtime;bundle-version="[0.7.0,0.8.0)";visibility:=reexport
 Import-Package: org.eclipse.core.internal.runtime;resolution:=optional,
  org.eclipse.objectteams.otequinox.hook
 Bundle-Activator: org.eclipse.objectteams.otequinox.TransformerPlugin

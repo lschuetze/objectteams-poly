@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OT/J Refactoring Adaptor Plug-in
+Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.otdt.refactoring;singleton:=true
-Bundle-Version: 1.4.0.qualifier
-Bundle-Vendor: The TOPPrax consortium
+Bundle-Version: 0.7.0.qualifier
+Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.jdt.ui,
  org.eclipse.jdt.core,

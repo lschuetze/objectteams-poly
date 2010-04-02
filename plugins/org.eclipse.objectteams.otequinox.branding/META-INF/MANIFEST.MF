@@ -1,9 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Example Plug-in for the Equinox-OTRE integration
+Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.otequinox.branding;singleton:=true
-Bundle-Version: 1.4.0.qualifier
-Bundle-Vendor: objectteams.org
+Bundle-Version: 0.7.0.qualifier
+Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.objectteams.otequinox,

@@ -1,9 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OTRE OSGI Extension Bundle
+Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.runtime
 Bundle-Version: 0.7.0.qualifier
-Bundle-Vendor: Eclipse Object Teams Project
+Bundle-Vendor: %providerName
+Bundle-Localization: plugin
 Export-Package: org.objectteams,
  org.eclipse.objectteams.otre,
  org.eclipse.objectteams.otre.jplis,

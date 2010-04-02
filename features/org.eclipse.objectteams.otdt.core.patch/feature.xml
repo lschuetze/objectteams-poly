@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <feature
       id="org.eclipse.objectteams.otdt.core.patch"
-      label="OTDT Core Patch Feature"
-      version="1.4.0.qualifier"
-      provider-name="Eclipse Object Teams Project"
+      label="%featureName"
+      version="0.7.0.qualifier"
+      provider-name="%providerName"
       plugin="org.eclipse.jdt.core">
 
    <description url="http://www.eclipse.org/objectteams">
@@ -55,7 +55,7 @@ Project Leader:
    </license>
 
    <url>
-      <update label="Object Teams Updates" url="http://www.eclipse.org/downloads/download.php?file=/objectteams/otdt-updates-0.7"/>
+      <update label="Object Teams Updates" url="http://www.eclipse.org/downloads/objectteams/otdt-updates-0.7"/>
    </url>
 
    <requires>
@@ -64,9 +64,9 @@ Project Leader:
 
    <plugin
          id="org.eclipse.jdt.core"
-         download-size="5380"
-         install-size="5380"
-         version="3.6.0.v_OTDT_r140_qualifier"
+         download-size="5614"
+         install-size="5614"
+         version="3.6.0.v_OTDT_r070_qualifier"
          unpack="false"/>
 
 </feature>
