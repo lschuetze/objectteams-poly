@@ -100,7 +100,7 @@ Project Leader:
          id="org.eclipse.objectteams.otdt.ui"
          download-size="285"
          install-size="285"
-         version="0.0.0"
+         version="0.7.0"
          unpack="false"/>
 
    <plugin

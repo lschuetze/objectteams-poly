@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.objectteams.otdt-tests"
       label="OTDT Development Tools Unit Tests"
-      version="1.2.4"
+      version="0.7.0"
       provider-name="Eclipse Object Teams Project">
 
    <description>
@@ -90,7 +90,7 @@ This software is based on Eclipse and the Java Development Tooling
          id="org.eclipse.jdt.ui.tests"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.6.0"/>
     
    <plugin
          id="org.objectteams.otdt.debug.tests"
