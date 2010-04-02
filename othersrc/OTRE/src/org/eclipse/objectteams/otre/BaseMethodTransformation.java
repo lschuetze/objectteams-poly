@@ -288,13 +288,6 @@ public class BaseMethodTransformation
 		 }*/
 		//inheritedSigns.addAll(interfaceInheritedSigns);
 			
-    	boolean haveDirectCallin =
-    		CallinBindingManager.isBoundBaseClass(class_name);
-		// IMPLICIT_INHERITANCE
-    	if (inheritedBindings.size() == 0 && !haveDirectCallin /*&& interfaceInheritedSigns.size()==0*/) {
-            if(logging) printLogMessage("\nCallins: nothing to do for class " + class_name); //$NON-NLS-1$
-    		return; // nothing to do
-    	}
     	// if class is already transformed by this transformer
     	/*
     	 if (interfaceTransformedClasses.contains(class_name))
@@ -302,8 +295,41 @@ public class BaseMethodTransformation
 		*/
 			
     	if(cg.isInterface()) {
+    		// may need to add an interface version of the chaining wrapper, to be called for a base-call
+    		int lastDollar = class_name.lastIndexOf('$');
+    		if (lastDollar != -1) {
+    			// try inserting __OT__ to last type name segment
+	    		String roleClassName = class_name.substring(0, lastDollar+1)+"__OT__"+class_name.substring(lastDollar+1);
+				if (CallinBindingManager.isBoundBaseClass(roleClassName)) {
+			    	Method[] methods = cg.getMethods();
+			    	for (int i=0; i<methods.length; i++) {
+			    		Method m           = methods[i];
+			    		if (m.isVolatile()) // bridge method!
+			    			continue;
+			    		String method_name = m.getName();
+						String signature   = m.getSignature();
+						Collection<MethodBinding> bindingsForMethod = CallinBindingManager .
+		    					getBindingForBaseMethod(roleClassName, method_name, signature);
+		    			if (bindingsForMethod!= null) {
+			    			MethodGen chainGen = generateChainingWrapper(class_name, cpg, 
+			    					m.getAccessFlags()|Constants.ACC_ABSTRACT, method_name, signature, null/*argumentNames*/);
+			    			if (cg.containsMethod(chainGen.getName(), chainGen.getSignature()) == null)
+			    				ce.addMethod(chainGen.getMethod(), cg);
+		    			}
+			    	}
+	    		}
+    		}
+
     		//CallinBindingManager.addBoundBaseInterface(class_name); // <- this is to late, implementing class may be loaded before!!
     		return; // No transfomations neccessary for interfaces.
+    	}
+
+    	boolean haveDirectCallin =
+    		CallinBindingManager.isBoundBaseClass(class_name);
+		// IMPLICIT_INHERITANCE
+    	if (inheritedBindings.size() == 0 && !haveDirectCallin /*&& interfaceInheritedSigns.size()==0*/) {
+            if(logging) printLogMessage("\nCallins: nothing to do for class " + class_name); //$NON-NLS-1$
+    		return; // nothing to do
     	}
 			
         if(logging) printLogMessage("\nCallin bindings may be changing class " //$NON-NLS-1$
@@ -340,7 +366,6 @@ public class BaseMethodTransformation
     		
     		MethodGen mg = null;
     		int firstLine = STEP_OVER_LINENUMBER;
-    		String original_signature = method_signature;
     		/*if (bindingsForMethod != null || containsSign(inheritedSigns, m)*/ /*|| containsSign(interfaceInheritedSigns, m)*/ //) {
     		MethodBinding inheritedBinding = matchingBinding(inheritedBindings, m, false);
     		String method_key = method_name+'.'+method_signature;
@@ -380,10 +405,11 @@ public class BaseMethodTransformation
     		//CH: changed 'inheritedCallinBindings' to 'inheritedSigns', because it was the same.
     		if (bindingsForMethod != null) { 
     			//add method '_OT$<method_name>$chain' :
-    			Method chain;
     			mg = getConcretMethodGen(m, class_name, cpg);
-    			chain = generateChainingWrapper(mg, method_name,
-    									original_signature/*method_signature*/, class_name, cpg, cg, firstLine);
+    			MethodGen chainGen = generateChainingWrapper(class_name, cpg,
+    									mg.getAccessFlags(), method_name, method_signature, mg.getArgumentNames());
+    			Method    chain    = generateChainingWrapperBody(class_name, cg, cpg, 
+    									mg, method_name, method_signature, chainGen, firstLine);
 													
     			if (cg.containsMethod(chain.getName(), chain.getSignature()) == null)
     				ce.addMethod(chain, cg);
@@ -735,44 +761,64 @@ public class BaseMethodTransformation
 	
 	/**
 	 * Generate a chaining wrapper for the original method described by the passed arguments. 
-	 * This includes dispatch code and the termination condition for the recursion.
-	 * @param mg								the MethodGen of the original method
+	 * @param class_name			the name of the appropriate class
+	 * @param cpg					the ConstantPoolGen of the class
+	 * @param accessFlags			raw flags of the method to add, visibility will however be ignored/set to public inside
 	 * @param method_name			the name of the original method
-	 * @param method_signature	the signature of the original method
-	 * @param class_name				the name of the appropriate class
-	 * @param cpg								the ConstantPoolGen of the class
-	 * @param cg								the ClassGen of the class
-	 * @param firstLine							the first real source line of this method
+	 * @param method_signature	    the signature of the original method
+	 * @param argumentNames			source level argument names, may be null
+	 * @return an new method with an empty instruction list
+	 */
+	MethodGen generateChainingWrapper(String 	 		class_name, 
+								      ConstantPoolGen 	cpg, 
+								      int	   			accessFlags,
+								      String 	 		method_name,
+								      String 	 		method_signature,
+								      String[] 			argumentNames)
+    {
+		Type[] argumentTypes = Type.getArgumentTypes(method_signature);
+		if (argumentNames == null) {
+			argumentNames = new String[argumentTypes.length];
+			for (int i = 0; i < argumentNames.length; i++)
+				argumentNames[i] = "arg"+i;
+		}
+        return new MethodGen(makePublicFlags(accessFlags), // the chaining wrapper has to be 'public' because it will be called by base calls:
+        					 object,  					   // ALWAYS!
+        					 enhanceArgumentTypes(argumentTypes),
+        					 enhanceArgumentNames(argumentNames),
+        					 genChainMethName(method_name),
+        					 class_name,
+        					 new InstructionList(), 
+        					 cpg);
+    }
+	
+	/**
+	 * Create the instructions for the chaining wrapper, which includes dispatch code
+	 * and the termination condition for the recursion.
+	 * @param class_name
+	 * @param cg
+	 * @param cpg
+	 * @param mg
+	 * @param method_name
+	 * @param method_signature
+	 * @param chainMethod
+	 * @param firstLine
 	 * @return
 	 */
-	Method generateChainingWrapper(MethodGen 		mg,
-								   String 	 		method_name,
-								   String 	 		method_signature,
-								   String 	 		class_name, 
-								   ConstantPoolGen 	cpg, 
-								   ClassGen  		cg,
-								   int 		 		firstLine)
-    {
-        Type     origReturnType        = mg.getReturnType();
-        Type[]   argumentTypes         = mg.getArgumentTypes();
-        String[] argumentNames         = mg.getArgumentNames();
-        Type[]   enhancedArgumentTypes = enhanceArgumentTypes(argumentTypes);
-        String[] enhancedArgumentNames = enhanceArgumentNames(argumentNames);
-        Type enhancedReturnType = object;  // ALWAYS!
-
-        InstructionList il = new InstructionList();
-
-        // the chaining wrapper has to be 'public' because it will be called by base calls:
-        int accessFlags = makePublicFlags(mg.getAccessFlags());
+	Method generateChainingWrapperBody(String 	 		class_name,
+			   						   ClassGen  		cg,
+			   						   ConstantPoolGen 	cpg,
+			   						   MethodGen 		mg,
+			   						   String 	 		method_name,
+			   						   String 	 		method_signature, 
+			   						   MethodGen		chainMethod,
+			   						   int 		 		firstLine)
+	{
+		Type 			origReturnType     = mg.getReturnType();
+		Type[]          argumentTypes      = mg.getArgumentTypes();
+        Type 			enhancedReturnType = chainMethod.getReturnType(); 
+        InstructionList il     			   = chainMethod.getInstructionList();
         
-        MethodGen chainMethod = new MethodGen(accessFlags,
-                                              enhancedReturnType,
-                                              enhancedArgumentTypes,
-                                              enhancedArgumentNames,
-                                              genChainMethName(method_name),
-                                              class_name,
-                                              il, cpg);
-
 		// All chaining calls return an Object.
 		// Need to store this in a local variable to keep the stack
 		// balanced, because each section (before, replace, after)

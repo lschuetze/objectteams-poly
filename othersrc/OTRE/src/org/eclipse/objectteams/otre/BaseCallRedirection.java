@@ -875,6 +875,16 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
             														   mb.getBaseMethodSignature());
             InstructionHandle nextBranch = il.append(new NOP());
 
+            short invocationKind = isSuperAccess 
+            						? Constants.INVOKESTATIC
+					   				: Constants.INVOKEVIRTUAL;
+            
+            String boundBaseClassName 		 = mb.getBaseClassName();
+            if (boundBaseClassName.indexOf(OTDT_PREFIX) != -1) {
+            	// if base is a role class, switch now to the interface part to support base-side implicit inheritance:
+				boundBaseClassName = ObjectTeamsTransformation.genRoleInterfaceName(boundBaseClassName);
+				invocationKind = Constants.INVOKEINTERFACE;
+			}
 			String baseMethodName            = mb.getBaseMethodName();
 			String baseMethodSignature       = mb.getBaseMethodSignature();
 			Type[] baseMethodArgumentTypes   = Type.getArgumentTypes(baseMethodSignature);
@@ -911,10 +921,10 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 			InstructionHandle baseCallLine = il.append(InstructionFactory.createThis());
 			il.append(factory.createFieldAccess(className, BASE, baseClass, Constants.GETFIELD));
 			
-			if (!baseClass.getClassName().equals(mb.getBaseClassName())) {
+			if (!baseClass.getClassName().equals(boundBaseClassName)) {
 				// playedBy has been refined in the sub role;
 				// create a cast to the sub base class:
-				il.append(factory.createCast(baseClass, new ObjectType(mb.getBaseClassName())));
+				il.append(factory.createCast(baseClass, new ObjectType(boundBaseClassName)));
 			}
 			
 			// --- load arguments of the new method: ---
@@ -946,13 +956,11 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 			// --- done loading ---									 
 
 			// invoke the chaining method of the base class (base-call!):
-			il.append(factory.createInvoke(mb.getBaseClassName(),
+			il.append(factory.createInvoke(boundBaseClassName,
 										   baseChainMethodName,
 										   baseChainReturnType,
 										   enhancedBaseArgumentTypes,
-										   isSuperAccess 
-											   ? Constants.INVOKESTATIC
-											   : Constants.INVOKEVIRTUAL
+										   invocationKind
 										   ));
 										   
 			boolean resultLiftingNecessary = ((mb.getTranslationFlags()&1)!=0);
