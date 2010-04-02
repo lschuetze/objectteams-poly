@@ -21,7 +21,7 @@ public team class T1 extends T0
                 result <- result
             }
     
-        Integer m5(Integer val) <- after Integer m5(Integer val);
+        ci1: Integer m5(Integer val) <- after Integer m5(Integer val);
         
         
         public abstract void m1();
@@ -32,4 +32,23 @@ public team class T1 extends T0
         }
         
     }
+	
+	public class R2 playedBy bindings.basepkg.C1 
+	{
+        
+        ci2: Integer m2(Integer val) <- after Integer m5(Integer val);
+
+		public Integer m2(Integer val)
+		{
+			return val*2;
+		}        
+		ci3: Integer m3(Integer val) <- after Integer m5(Integer val);
+
+		public Integer m3(Integer val)
+		{
+			return val*3;
+		}
+		precedence ci3, ci2;
+    }
+	precedence R1.ci1, ci2;
 }

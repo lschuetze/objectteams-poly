@@ -35,6 +35,8 @@ import org.eclipse.jdt.core.dom.IMethodMappingBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.PrecedenceDeclaration;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
@@ -170,4 +172,34 @@ public class MethodMappingBindingTest extends FileBasedDOMTest
         assertTrue(isCallinReplace);
     }
     
+    /** Resolve a qualified callin name in a precedence declaration. */
+    public void testPrecedence1() {
+    	PrecedenceDeclaration prec = (PrecedenceDeclaration) _teamDecl.precedences().get(0);
+    	Name name = (Name) prec.elements().get(0);
+    	Object binding = name.resolveBinding();
+    	assertNotNull(binding);
+    	assertTrue("Is mapping binding", binding instanceof IMethodMappingBinding);
+    	assertEquals("Has expected representation", "ci1: java.lang.Integer m5(java.lang.Integer) <- after java.lang.Integer m5(java.lang.Integer) ;", binding.toString());
+    }
+    
+    /** Try to resolve an unqualified callin name in a precedence declaration -> fails to resolve but shouldn't CCE. */
+    public void testPrecedence2() {
+    	PrecedenceDeclaration prec = (PrecedenceDeclaration) _teamDecl.precedences().get(0);
+    	Name name = (Name) prec.elements().get(1);
+    	Object binding = name.resolveBinding();
+    	assertNotNull(binding);
+    	assertTrue("Is mapping binding", binding instanceof IMethodMappingBinding);
+    	assertEquals("Has expected representation", "missingCallin:ci2: NULL ROLE METHODS<- <unknown> ;", binding.toString());
+    }
+    
+    /** Resolve an unqualified callin name in a precedence declaration */
+    public void testPrecedence3() {
+    	RoleTypeDeclaration role2Decl = (RoleTypeDeclaration)_teamDecl.getRoles()[1];
+		PrecedenceDeclaration prec = (PrecedenceDeclaration) role2Decl.precedences().get(0);
+    	Name name = (Name) prec.elements().get(0);
+    	Object binding = name.resolveBinding();
+    	assertNotNull(binding);
+    	assertTrue("Is mapping binding", binding instanceof IMethodMappingBinding);
+    	assertEquals("Has expected representation", "ci3: java.lang.Integer m3(java.lang.Integer) <- after java.lang.Integer m5(java.lang.Integer) ;", binding.toString());
+    }
 }

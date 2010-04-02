@@ -73,6 +73,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeRefere
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
 
 /**
@@ -1315,6 +1316,10 @@ class DefaultBindingResolver extends BindingResolver {
 					}
 				}
 			} else {
+//{ObjectTeams: the case of a callin name:
+				if (qualifiedNameReference.binding instanceof CallinCalloutBinding)
+					return this.getMethodMappingBinding((CallinCalloutBinding) qualifiedNameReference.binding);
+// SH}
 				/* This is the case for a name which is part of a qualified name that
 				 * cannot be resolved. See PR 13063.
 				 */
@@ -1431,6 +1436,9 @@ class DefaultBindingResolver extends BindingResolver {
 				Binding binding = singleNameReference.binding;
 //{ObjectTeams: if binding is an internal local variable of a callin/callout wrapper try to find the actual surface element:
 				binding = CallinCalloutScope.maybeReResolveReference(singleNameReference, binding);
+				// the case of a callin name:
+				if (binding instanceof CallinCalloutBinding)
+					return this.getMethodMappingBinding((CallinCalloutBinding)binding);
 // SH}
 				if (binding != null) {
 					if (binding.isValidBinding()) {
