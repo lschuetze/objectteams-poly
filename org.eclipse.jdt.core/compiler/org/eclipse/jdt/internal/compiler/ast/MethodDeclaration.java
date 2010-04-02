@@ -245,6 +245,9 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 			} else {
 				//In case of  a concrete class method, we have to check if it overrides(in 1.5 and above) OR implements a method(1.6 and above).
 				//Also check if the method has a signature that is override-equivalent to that of any public method declared in Object.
+//{ObjectTeams: don't report against generated/copied method:
+			  if (!this.isGenerated && !this.isCopied)
+// SH}
 				if (!this.binding.declaringClass.isInterface()){
 						if((bindingModifiers & (ClassFileConstants.AccStatic|ExtraCompilerModifiers.AccOverriding)) == ExtraCompilerModifiers.AccOverriding) {
 							this.scope.problemReporter().missingOverrideAnnotation(this);
@@ -253,9 +256,6 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 								&& compilerOptions.reportMissingOverrideAnnotationForInterfaceMethodImplementation
 								&& this.binding.isImplementing()) {
 									// actually overrides, but did not claim to do so
-//{ObjectTeams: don't report against generated/copied method:
-							  	  if (!this.isGenerated && !this.isCopied)
-// SH}
 
 									this.scope.problemReporter().missingOverrideAnnotationForInterfaceMethodImplementation(this);
 							}
