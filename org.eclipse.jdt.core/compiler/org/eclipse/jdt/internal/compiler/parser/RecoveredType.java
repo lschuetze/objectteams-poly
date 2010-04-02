@@ -300,7 +300,7 @@ public RecoveredElement add(TypeDeclaration memberTypeDeclaration, int bracketBa
 	RecoveredType element = new RecoveredType(memberTypeDeclaration, this, bracketBalanceValue);
 	this.memberTypes[this.memberTypeCount++] = element;
 //{ObjectTeams: mark members of a team as roles:
-	if (this.typeDeclaration.isTeam())
+	if (this.typeDeclaration.isTeam() && (memberTypeDeclaration.modifiers & ClassFileConstants.AccEnum) == 0)
 		memberTypeDeclaration.modifiers |= ExtraCompilerModifiers.AccRole;
 // SH}
 	if(this.pendingAnnotationCount > 0) {
