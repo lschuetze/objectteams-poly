@@ -425,9 +425,9 @@ public TypeBinding resolveType(BlockScope scope) {
 	ReferenceBinding allocationType = (ReferenceBinding) this.resolvedType;
 //{ObjectTeams: may need to instantiate parameters of constructor
     AnchorMapping anchorMapping = AnchorMapping.setupNewMapping(null, this.arguments, scope);
-    // ensure allocation type has methods:
-    Dependencies.ensureBindingState(allocationType, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS);
   try {
+	  // ensure allocation type has methods:
+	  Dependencies.ensureBindingState(allocationType, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS);
 // SH}
 	if (!(this.binding = scope.getConstructor(allocationType, argumentTypes, this)).isValidBinding()) {
 //{ObjectTeams: baseclass decapsulation?
