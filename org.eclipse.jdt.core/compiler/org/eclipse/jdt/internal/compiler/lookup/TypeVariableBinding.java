@@ -485,7 +485,10 @@ public class TypeVariableBinding extends ReferenceBinding {
     		for (int i = 0; i < this.anchors.length; i++) {
 				if (i>0)
 					buf.append(',');
-				buf.append(this.anchors[i].readableName());
+				if (this.anchors[i] == null)
+					buf.append("null anchor"); //$NON-NLS-1$
+				else
+					buf.append(this.anchors[i].readableName());
 			}
     		buf.append('>');
     		return buf.toString().toCharArray();
