@@ -95,7 +95,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBi
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.ProblemDetail;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReplaceSingleNameVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
@@ -856,7 +855,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	 * @param targetRoleDecl target role class
 	 */
 	private static void copyMethod(
-	        MethodBinding   method,
+	        MethodBinding 	method,
 	        TypeDeclaration targetRoleDecl)
 	{
 		boolean wasSynthetic = false;
@@ -1010,17 +1009,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     	if (method.isPrivate())
     		newMethodDecl.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed; // don't warn unused copied method
 
-    	// detect default ctor in bound role
-	    if (   newMethodDecl.isConstructor()
-	    	&& newMethodDecl.arguments == null
-	    	&& !MethodModel.callsBaseCtor(method)
-	    	&& targetRoleDecl.binding.baseclass() != null)
-	    {
-	    	// ctor without base object creation/assignment in a bound role: illegal!
-    		MethodModel.getModel(newMethodDecl).problemDetail = ProblemDetail.IllegalDefaultCtor;
-    		newMethodDecl.isGenerated= true;
-        }
-
 	    newMethodDecl.binding.setCopyInheritanceSrc(origin);
 	    newMethodDecl.binding.copiedInContext = tgtTeam.enclosingType();
 	    MethodModel newModel = MethodModel.getModel(newMethodDecl);
@@ -1056,8 +1044,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    		newMethodDecl.isTSuper = true;
 	    	if (method.model != null && method.model.callinFlags != 0)
 	    		MethodModel.addCallinFlag(newMethodDecl, method.model.callinFlags);
-	    	if (MethodModel.callsBaseCtor(method))
-	    		MethodModel.setCallsBaseCtor(newMethodDecl.binding);
 	    	if (method.isAnyCallin())
 	    		MethodModel.saveReturnType(newMethodDecl.binding, MethodModel.getReturnType(method));
 	    	else {

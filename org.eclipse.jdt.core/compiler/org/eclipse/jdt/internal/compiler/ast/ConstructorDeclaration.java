@@ -28,12 +28,11 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTransformer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
-import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
-import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.ProblemDetail;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.InsertTypeAdjustmentsVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
@@ -101,7 +100,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 	flowInfo.setReachMode(initialReachMode);
 
 //{ObjectTeams:
-	// already processed?
+	// already processed? (see below "force called constructor to be analyzed")
 	if (this.isCodeAnalyzed)
 		return;
 	this.isCodeAnalyzed = true;
@@ -109,12 +108,15 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 	ReferenceBinding roleType = this.scope.enclosingSourceType();
 	// don't analyze copied:
     if (this.isCopied) {
-    	// but ensure all tsuper roles are analyzed wrt. callsBaseCtor
-    	if (roleType.isRole()) {
-        	ReferenceBinding[] tsupers = roleType.roleModel.getTSuperRoleBindings();
-        	for (int i = 0; i < tsupers.length; i++) {
-            	Dependencies.ensureBindingState(tsupers[i], ITranslationStates.STATE_CODE_ANALYZED);
-			}
+    	// ... except for base ctor issues:
+    	if (MethodModel.callsBaseCtor(this.binding.copyInheritanceSrc))
+    		MethodModel.setCallsBaseCtor(this);
+    	if (   this.arguments == null 
+    		&& !MethodModel.callsBaseCtor(this.binding)
+    		&& roleType.baseclass() != null)
+    	{
+    		MethodModel.getModel(this).problemDetail = ProblemDetail.IllegalDefaultCtor;
+    		this.isGenerated = true; // prevent conversion to DOM AST
     	}
         return;
     }

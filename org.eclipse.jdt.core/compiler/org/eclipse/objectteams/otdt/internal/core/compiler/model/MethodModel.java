@@ -103,7 +103,7 @@ public class MethodModel extends ModelElement {
 
     private AbstractMethodDeclaration _decl     		= null;
     private MethodBinding 			  _binding 	        = null;
-    private boolean    				  _callsBaseCtor    = false;
+    private boolean    				  _callsBaseCtor    = false; // may be uninitialized before analyseCode
    	public  int                       callinFlags       = 0;
    	public  boolean                   isCallinForRoFi   = false;
    	// for method generated from a method mapping (currently: callin only):
@@ -473,15 +473,20 @@ public class MethodModel extends ModelElement {
 		model.setCallsBaseCtor();
 	}
 
-	// does the method contain a call to a base constructor?
+	/** 
+	 * Does the method contain a call to a base constructor?
+	 * Note: don't call before analyseCode because we may need our tsupers to be analysed, too.
+	 */
 	public static boolean callsBaseCtor(MethodBinding method) {
 		if (method.model != null) {
 			if (method.model._callsBaseCtor)
 				return true;
 		}
 
-		if (method.copyInheritanceSrc != null)
+		if (method.copyInheritanceSrc != null) {
+			Dependencies.ensureBindingState(method.copyInheritanceSrc.declaringClass, ITranslationStates.STATE_CODE_ANALYZED);
 			return callsBaseCtor(method.copyInheritanceSrc);
+		}
 		return false;
 	}
 	public void storeModifiers(int modifiers) {
