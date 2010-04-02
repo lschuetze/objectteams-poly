@@ -16,9 +16,11 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance;
 
+import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
@@ -109,11 +111,17 @@ interface IAlienScopeTypeReference {
 		}
 		@Override
 		public TypeBinding resolveType(ClassScope scope) {
+			TypeDeclaration referenceContext = scope.referenceContext;
+			CheckPoint cp = null;
+			if (referenceContext != null)
+				cp = referenceContext.compilationResult().getCheckPoint(referenceContext);
 			TypeBinding result= super.resolveType(scope);
 			if (result != null && result.isValidBinding())
 				return result;
 			// reset:
 			this.resolvedType = null;
+			if (cp != null)
+				referenceContext.compilationResult.rollBack(cp);
 			return super.resolveType(this.alienScope);
 		}
 		@Override
