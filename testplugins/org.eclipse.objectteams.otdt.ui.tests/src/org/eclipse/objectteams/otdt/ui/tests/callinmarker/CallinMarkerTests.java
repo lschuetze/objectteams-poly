@@ -323,6 +323,23 @@ public class CallinMarkerTests extends FileBasedUITest
         assertMarkers(expectedMarkers, markers);
     }
     
+    /** Cycle a la https://bugs.eclipse.org/303474 and callin-to-callin */
+    public void testMarkers_4() throws JavaModelException, PartInitException
+    {
+        _baseType = getJavaType(getTestProjectDir(), SRC_FOLDER, "cycle2", "B");
+        _baseResource = _baseType.getResource();
+
+        assertNotNull(_baseResource);
+        
+        synchronousCreateMarkers(_baseResource);
+
+        Set<String> expectedMarkers = new HashSet<String>();
+        expectedMarkers.add("=CallinMarker/src<cycle{B.java[B$R[A$Q~run");
+        
+        IMarker[] markers = getCallinMarkers(_baseResource);
+        assertMarkers(expectedMarkers, markers);
+    }
+    
     // see http://trac.objectteams.org/ot/ticket/188
     public void testMarkers_NonJavaPrj1() throws CoreException, IOException, InterruptedException
     {
