@@ -80,20 +80,20 @@ Project Leader:
          id="org.eclipse.objectteams.otdt"
          download-size="189"
          install-size="228"
-         version="0.0.0"/>
+         version="0.7.0"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.debug"
          download-size="39"
          install-size="39"
-         version="0.0.0"
+         version="0.7.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.debug.ui"
          download-size="84"
          install-size="84"
-         version="0.0.0"
+         version="0.7.0"
          unpack="false"/>
 
    <plugin
@@ -107,61 +107,61 @@ Project Leader:
          id="org.eclipse.objectteams.otdt.ui.help"
          download-size="778"
          install-size="3180"
-         version="0.0.0"/>
+         version="0.7.0"/>
 
    <!--plugin
          id="org.eclipse.objectteams.otdt.metrics"
          download-size="123"
          install-size="123"
-         version="0.0.0.qualifier"
+         version="0.7.0.qualifier"
          unpack="false"/-->
          
    <plugin
          id="org.eclipse.objectteams.otdt.jdt.ui"
          download-size="427"
          install-size="427"
-         version="0.0.0"
+         version="0.7.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.compiler.adaptor"
          download-size="146"
          install-size="146"
-         version="0.0.0"
+         version="0.7.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.debug.adaptor"
          download-size="10"
          install-size="10"
-         version="0.0.0"
+         version="0.7.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.pde.ui"
          download-size="16"
          install-size="16"
-         version="0.0.0"
+         version="0.7.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.refactoring"
          download-size="77"
          install-size="77"
-         version="0.0.0"
+         version="0.7.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.samples"
          download-size="398"
          install-size="752"
-         version="0.0.0"/>
+         version="0.7.0"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.apt"
          download-size="15"
          install-size="15"
-         version="0.0.0"
+         version="0.7.0"
          unpack="false"/>
 
 </feature>

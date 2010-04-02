@@ -48,43 +48,43 @@ This software is based on Eclipse and the Java Development Tooling
          id="org.eclipse.test.performance"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.6.0"/>
 
    <plugin
          id="org.eclipse.jdt.core.tests.compiler"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.3.100"/>
 
    <plugin
          id="org.eclipse.jdt.core.tests.builder"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.3.100"/>
 
    <plugin
          id="org.eclipse.jdt.core.tests.model"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.3.100"/>
 
    <plugin
          id="org.objectteams.otdt.tests"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.7.0"/>
 
    <plugin
          id="org.eclipse.jdt.ui.tests.refactoring"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.6.0"/>
 
    <plugin
          id="org.eclipse.jdt.debug.tests"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="3.1.100"/>
 
    <plugin
          id="org.eclipse.jdt.ui.tests"
@@ -96,29 +96,29 @@ This software is based on Eclipse and the Java Development Tooling
          id="org.objectteams.otdt.debug.tests"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.7.0"/>
 
    <plugin
          id="org.objectteams.otdt.ui.tests"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.7.0"/>
 
    <plugin
          id="org.objectteams.otdt.ui.tests.dom"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.7.0"/>
 
    <plugin
          id="org.objectteams.otdt.ui.tests.refactoring"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.7.0"/>
 
     <plugin
          id="org.objectteams.otdt.test.builder"
          download-size="0"
          install-size="0"
-         version="0.0.0"/>
+         version="0.7.0"/>
 </feature>
