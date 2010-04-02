@@ -920,8 +920,6 @@ public void generateCode(ClassFile enclosingClassFile) {
 			TypeDeclaration superType = ((SourceTypeBinding)prevSuper).scope.referenceContext;
 			superType.generateCode((ClassScope)null, enclosingSuperClassFile);
 		}
-
-		CopyInheritance.copySyntheticRoleFieldsAndMethods(this);
 	}
 	if (isTeam()) {
 		CopyInheritance.copySyntheticTeamMethods(this);

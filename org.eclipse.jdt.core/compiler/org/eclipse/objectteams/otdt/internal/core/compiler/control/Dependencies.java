@@ -1904,11 +1904,8 @@ public class Dependencies implements ITranslationStates {
 			// method mappings without baseclass are reported within resolve() below:
 			MethodMappingResolver resolver = new MethodMappingResolver(role);
 			success = resolver.resolve(!hasBaseclassProblem && needMethodBodies(roleDecl));
-//{ObjectTeams:
 			if (roleDecl.isDirectRole() && !roleDecl.isInterface())
 				SyntheticBaseCallSurrogate.addFakedBaseCallSurrogates((SourceTypeBinding)roleBinding);
-// SH}
-
 		}
 		role.setState(ITranslationStates.STATE_MAPPINGS_RESOLVED);
 		return success;
@@ -2082,6 +2079,7 @@ public class Dependencies implements ITranslationStates {
                 //           we cannot really separate byte code generation!
                 success = ensureBindingState(tsuperRoleModel.getBinding(), STATE_BYTE_CODE_GENERATED);
             }
+			CopyInheritance.copySyntheticRoleFieldsAndMethods(roleDecl);
         }
         role.setState(STATE_BYTE_CODE_PREPARED);
         return success;

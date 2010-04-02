@@ -776,11 +776,14 @@ public class ClassScope extends Scope {
 		{
 			// not added to member types
 			// FIXME(SH): as soon as LocalTypeBinding is complete re 210422 reconsider null:
+			// 			  see also Bug 307523			
 			memberScope.buildLocalType(sourceType, null /* anonymous super type*/, getCurrentPackage());
 			// ensure the copy has the same relative constant pool name (e.g., "1" as in T$__OT__R$1)
 			char[] computedConstantPoolName = CharOperation.concatWith(
 						new char[][]{sourceType.constantPoolName(), memberTypeDeclaration.name}, '$');
-			((LocalTypeBinding)memberTypeDeclaration.binding).setConstantPoolName(computedConstantPoolName);
+			LocalTypeBinding localTypeBinding = (LocalTypeBinding)memberTypeDeclaration.binding;
+			localTypeBinding.setConstantPoolName(computedConstantPoolName);
+			referenceCompilationUnit().record(localTypeBinding);
 		} else {
 			assert (this.referenceContext.memberTypes != null);
 
