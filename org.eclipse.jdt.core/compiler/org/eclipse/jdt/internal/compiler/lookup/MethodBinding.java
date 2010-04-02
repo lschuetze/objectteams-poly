@@ -1347,6 +1347,13 @@ public final char[] signature(boolean retrenchRoleMethod) {
 	if (needSynthetics) {
 		// take into account the synthetic argument type signatures as well
 		ReferenceBinding[] syntheticArgumentTypes = this.declaringClass.syntheticEnclosingInstanceTypes();
+//{ObjectTeams: manual weakening of synthetic enclosing team arg:
+		if (this.copyInheritanceSrc != null && this.isStatic()) {
+			syntheticArgumentTypes = this.copyInheritanceSrc.declaringClass.syntheticEnclosingInstanceTypes();
+			if (syntheticArgumentTypes != null && syntheticArgumentTypes.length > 0 && syntheticArgumentTypes[0].isRole())
+				syntheticArgumentTypes[0] = syntheticArgumentTypes[0].getRealType();
+		}
+// SH}
 		if (syntheticArgumentTypes != null) {
 			for (int i = 0, count = syntheticArgumentTypes.length; i < count; i++) {
 				buffer.append(syntheticArgumentTypes[i].signature());
