@@ -361,11 +361,13 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	{
 		Bundle bundle = data.getBundle();
 
-		if (this.pendingClassLoaders.containsKey(bundle))
-			// a class loader is being announced via initializedClassloader,
-			// yet, before that method returns, the Bundle isn't yet wired to the class loader,
-			// so grab it from our intermediate storage:
-			return this.pendingClassLoaders.get(bundle);
+		synchronized (this.pendingClassLoaders) {			
+			if (this.pendingClassLoaders.containsKey(bundle))
+				// a class loader is being announced via initializedClassloader,
+				// yet, before that method returns, the Bundle isn't yet wired to the class loader,
+				// so grab it from our intermediate storage:
+				return this.pendingClassLoaders.get(bundle);
+		}
 		
 		// some paranoid sanity checks (shouldn't trigger any more)
 		if (   bundle != this.otEquinoxBundle
@@ -375,8 +377,14 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 			BaseBundleRole baseBundle= this.bundleRegistry.adaptedBaseBundles.get(bundle.getSymbolicName());
 			if (baseBundle != null && baseBundle.state != BaseBundleRole.State.INITIAL) {
 				
+				synchronized (this.pendingClassLoaders) {
+					if (!this.pendingClassLoaders.containsKey(bundle)) {
+						this.logger.log(ILogger.WARNING, "False alarm regarding circular class path for "+bundle.getSymbolicName()+", bundle state is "+baseBundle.state);
+						return null; // false alarm
+					}
+				}
 				// defensive:
-				this.logger.log(Util.ERROR, "Circular class path for "+bundle.getSymbolicName());
+				this.logger.log(new ClassCircularityError(), "Circular class path for "+bundle.getSymbolicName()+", bundle state is "+baseBundle.state);
 				// return a dummy class loader that rather fails than dead-locking.
 				return new DefaultClassLoader(parent, delegate, domain, data, bundleclasspath) 
 				{
@@ -460,11 +468,15 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	
 	private void checkLoadTeams(BaseClassLoader bundleClassLoader, Bundle bundle) 
 	{
-		this.pendingClassLoaders.put(bundle,bundleClassLoader);
+		synchronized (this.pendingClassLoaders) {			
+			this.pendingClassLoaders.put(bundle,bundleClassLoader);
+		}
 		ClassScanner scanner = new ClassScanner(this.transformerService);
 		this.bundleRegistry.checkLoadTeams(bundle, this.aspectRegistry, this.teamLoadingService, scanner);
 		recordRolesAndBases(scanner);
-		this.pendingClassLoaders.remove(bundle);
+//		synchronized (this.pendingClassLoaders) {			
+//			this.pendingClassLoaders.remove(bundle);
+//		}
 	}
 	
 	private void recordRolesAndBases(ClassScanner scanner) {
