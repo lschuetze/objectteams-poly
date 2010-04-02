@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
@@ -33,7 +34,6 @@ import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
@@ -1735,9 +1735,13 @@ public class ClassScope extends Scope {
 					sourceType.tagBits |= TagBits.HierarchyHasProblems;
 					sourceType.baseclass = null;
 					return true;
-				} else if (illegalBaseClassRedefinition(this.referenceContext.baseclass, sourceType, baseclass)) {
-					// proceed below
 				} else {
+					RoleModel roleModel = sourceType.roleModel;
+					roleModel._state.addJob(ITranslationStates.STATE_ROLES_LINKED, new Runnable() {
+						public void run() {
+							checkBaseClassRedefinition(ClassScope.this.referenceContext);
+						}
+					});
 					// only want to reach here when no errors are reported
 					sourceType.baseclass = baseclass;
 
@@ -1779,34 +1783,30 @@ public class ClassScope extends Scope {
 	}
 
 	// check OTJLD 2.1(c) and OTJLD 2.1(d)
-	private boolean illegalBaseClassRedefinition(TypeReference baseclassRef,
-												 SourceTypeBinding sourceType,
-												 ReferenceBinding baseclass)
+	void checkBaseClassRedefinition(TypeDeclaration roleDecl)
 	{
-		ReferenceBinding superclass = sourceType.superclass;
+		ReferenceBinding baseclass = roleDecl.binding.baseclass;
+		Dependencies.ensureBindingState(baseclass, ITranslationStates.STATE_ROLES_LINKED);
+
+		ReferenceBinding superclass = roleDecl.binding.superclass;
 		if (superclass != null) {
 			ReferenceBinding superBase = superclass.rawBaseclass();
 			if (   superBase != null
-				&& !baseclass.isCompatibleWith(superBase))
+					&& !baseclass.isCompatibleWith(superBase))
 			{
-				problemReporter().illegalPlayedByRedefinition(baseclassRef,
-														  	  baseclass,
-														  	  superclass,
-														  	  superBase);
-				return true;
+				problemReporter().illegalPlayedByRedefinition(roleDecl.baseclass, baseclass,
+															  superclass,		  superBase);
 			}
 		}
-		for (ReferenceBinding tsuperRole: sourceType.roleModel.getTSuperRoleBindings()) {
-			ReferenceBinding tsuperBase = tsuperRole.rawBaseclass();
+		for (ReferenceBinding tsuperRole: roleDecl.getRoleModel().getTSuperRoleBindings()) {
+			ReferenceBinding tsuperBase = tsuperRole.baseclass();
 			if (   tsuperBase != null
 				&& tsuperBase != baseclass
 				&& !TSuperHelper.isTSubOf(baseclass, tsuperBase))
 			{
-				problemReporter().overridesPlayedBy(this.referenceContext, tsuperBase);
-				return true;
+				problemReporter().overridesPlayedBy(ClassScope.this.referenceContext, tsuperBase);
 			}
 		}
-		return false;
 	}
 
 	// mostly like connectSuperclass
