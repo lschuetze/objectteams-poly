@@ -98,7 +98,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	/** {@inheritDoc} */
 	@Override
 	public ReferenceBinding transferTypeArguments(ReferenceBinding other) {
-		return this.environment.createParameterizedType(other, this.arguments, other.enclosingType());
+		return this.environment.createParameterizedType((ReferenceBinding)other.original(), this.arguments, other.enclosingType());
 	}
 // SH}
 	/**

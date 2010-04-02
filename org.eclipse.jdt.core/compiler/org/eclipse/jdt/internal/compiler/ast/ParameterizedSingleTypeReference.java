@@ -26,6 +26,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.OTClassScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ProblemAnchorBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
@@ -310,6 +311,9 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		     if (argType == null) {
 		         argHasError = true;
 		     } else {
+//{ObjectTeams:
+		    	argType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(scope, argType, typeArgument);
+// SH}
 			    argTypes[i] = argType;
 		     }
 		}

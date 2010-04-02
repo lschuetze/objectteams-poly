@@ -262,7 +262,10 @@ public class RoleTypeCreator implements TagBits {
         		// old version: directly report:
         		//problemReporter.anchorPathNotFinal(anchorExpr, variableBinding, refBinding.sourceName());
         		// new version: don't complain now but use a non-compatible anchor:
-        		variableBinding = new LocalVariableBinding(variableBinding.internalName(), variableBinding.getResolvedType(), ClassFileConstants.AccFinal, false) {
+        		TypeBinding variableType = variableBinding.getResolvedType();
+        		if (variableType.isRole())
+        			variableType = ((ReferenceBinding)variableType).getRealClass(); // will be asked for members later
+				variableBinding = new LocalVariableBinding(variableBinding.internalName(), variableType, ClassFileConstants.AccFinal, false) {
         			@Override public int problemId() { return IProblem.AnchorNotFinal; }
         		};
         	}
@@ -590,9 +593,9 @@ public class RoleTypeCreator implements TagBits {
 	        	TypeVariableBinding typeVariable= (TypeVariableBinding)refBinding;
 	        	typeVariable.firstBound= maybeWrapUnqualifiedRoleType(scope, site, typeVariable.firstBound, typedNode, problemReporter);
 	        	typeVariable.superclass= (ReferenceBinding)maybeWrapUnqualifiedRoleType(scope, site, typeVariable.superclass, typedNode, problemReporter);
-	        	for (int i = 0; i < typeVariable.superInterfaces.length; i++) {
-					typeVariable.superInterfaces[i]= (ReferenceBinding)maybeWrapUnqualifiedRoleType(scope, site, typeVariable.superInterfaces[i], typedNode, problemReporter);
-				}
+	        	if (typeVariable.superInterfaces != null)
+		        	for (int i = 0; i < typeVariable.superInterfaces.length; i++)
+						typeVariable.superInterfaces[i]= (ReferenceBinding)maybeWrapUnqualifiedRoleType(scope, site, typeVariable.superInterfaces[i], typedNode, problemReporter);
 	        	return originalType;
 	        }
 	        if (  !refBinding.isDirectRole()) {

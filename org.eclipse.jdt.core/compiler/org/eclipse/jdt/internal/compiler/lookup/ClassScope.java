@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -1393,9 +1394,17 @@ public class ClassScope extends Scope {
 
 	// Perform deferred bound checks for parameterized type references (only done after hierarchy is connected)
 	public void  checkParameterizedTypeBounds() {
+//{ObjectTeams: expect re-entry:
+/* orig:
 		for (int i = 0, l = this.deferredBoundChecks == null ? 0 : this.deferredBoundChecks.size(); i < l; i++)
 			((TypeReference) this.deferredBoundChecks.get(i)).checkBounds(this);
 		this.deferredBoundChecks = null;
+  :giro */
+		ArrayList toCheck = this.deferredBoundChecks;
+		this.deferredBoundChecks = null;
+		for (int i = 0, l = toCheck == null ? 0 : toCheck.size(); i < l; i++)
+			((TypeReference) toCheck.get(i)).checkBounds(this);
+// SH}
 
 		ReferenceBinding[] memberTypes = this.referenceContext.binding.memberTypes;
 		if (memberTypes != null && memberTypes != Binding.NO_MEMBER_TYPES)

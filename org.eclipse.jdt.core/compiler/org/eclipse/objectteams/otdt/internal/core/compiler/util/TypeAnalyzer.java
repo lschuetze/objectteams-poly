@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MemberTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
@@ -49,9 +50,11 @@ import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
@@ -349,6 +352,12 @@ public class TypeAnalyzer  {
     		int l = tb.compoundName.length;
     		return new char[][]{tb.compoundName[l-1]};
     	}
+    	if (tb instanceof UnresolvedReferenceBinding) {
+    		LookupEnvironment env = Config.getLookupEnvironment();
+    		if (env == null)
+    			throw new InternalCompilerError("No lookup environment configured"); //$NON-NLS-1$
+    		tb = ((UnresolvedReferenceBinding)tb).resolve(env, false);
+    	}
         if (   createTeamAnchor
         	&& DependentTypeBinding.isDependentType(tb)
            	&& ((DependentTypeBinding)tb).hasExplicitAnchor())
@@ -358,7 +367,7 @@ public class TypeAnalyzer  {
         	// for role types the prefix is a variable not a type:
         	ITeamAnchor[] path = roleTypeBinding._teamAnchor.getBestNamePath();
 
-        	// If anchor is a field, repend a team anchor with "Outer.this"
+        	// If anchor is a field, prepend a team anchor with "Outer.this"
         	// for the type containing the anchor field.
         	char[] declaringClass = null;
         	int prefixLen = 0;

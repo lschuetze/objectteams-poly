@@ -706,6 +706,25 @@ public class RoleTypeBinding extends DependentTypeBinding
     	return null;
     }
 
+    @Override
+    public ReferenceBinding findSuperTypeOriginatingFrom(int wellKnownOriginalID, boolean originalIsClass) {
+		// interface part first:
+		ReferenceBinding ifcBinding = this.transferTypeArguments(this._staticallyKnownRoleType);
+		ReferenceBinding superRef = ifcBinding.findSuperTypeOriginatingFrom(wellKnownOriginalID, originalIsClass);
+		// for regular superclass also search class part:
+		if (superRef == null && this._staticallyKnownRoleClass != null) {
+			ReferenceBinding classBinding = this.transferTypeArguments(this._staticallyKnownRoleClass);
+			superRef = classBinding.findSuperTypeOriginatingFrom(wellKnownOriginalID, originalIsClass);
+		}
+		if (superRef != null) {
+			if (superRef.isRole())
+				return (ReferenceBinding) this._teamAnchor.getRoleTypeBinding(superRef, 0);
+			else
+				return superRef;
+		}
+		return null;
+    }
+
     /** Forward to either part: */
     @Override
     public boolean isProvablyDistinct(TypeBinding otherType) {
