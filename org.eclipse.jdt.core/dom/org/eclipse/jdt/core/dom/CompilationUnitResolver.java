@@ -956,6 +956,9 @@ class CompilationUnitResolver extends Compiler {
 		} finally {
 			// disconnect ourselves from ast requestor
 			astRequestor.compilationUnitResolver = null;
+//{ObjectTeams: restore:
+            Dependencies.release(this);
+// SH+KM}
 		}
 	}
 
@@ -992,6 +995,11 @@ class CompilationUnitResolver extends Compiler {
 				}
 				sourceUnits[count++] = new org.eclipse.jdt.internal.compiler.batch.CompilationUnit(contents, sourceUnitPath, encoding);
 			}
+//{ObjectTeams:
+			Dependencies.setup(this, this.parser, this.lookupEnvironment, 
+								true/*verify*/, !this.options.ignoreMethodBodies/*analyze*/, !this.options.ignoreMethodBodies/*generate*/, 
+								true, true, false);
+// SH}
 			beginToCompile(sourceUnits, bindingKeys);
 			// process all units (some more could be injected in the loop by the lookup environment)
 			for (int i = 0; i < this.totalUnits; i++) {
@@ -1091,7 +1099,7 @@ class CompilationUnitResolver extends Compiler {
 			astRequestor.compilationUnitResolver = null;
 //{ObjectTeams: restore:
             Dependencies.release(this);
-// SH+KM}            
+// SH}            
 		}
 	}
 

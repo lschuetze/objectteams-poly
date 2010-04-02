@@ -499,7 +499,7 @@ public final class ImportRewriteAnalyzer {
 	
 //{ObjectTeams: added param 'isBase':
 	public void addImport(String fullTypeName, boolean isStatic, boolean isBase) {
-		String typeContainerName= Signature.getQualifier(fullTypeName);
+		String typeContainerName= getQualifier(fullTypeName, isStatic);
 		ImportDeclEntry decl= new ImportDeclEntry(typeContainerName.length(), fullTypeName, isStatic, null);
 		if (isBase)
 			decl.setIsBase(isBase);
