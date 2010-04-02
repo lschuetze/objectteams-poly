@@ -13,7 +13,7 @@ plugin@org.eclipse.objectteams.otdt.ui,0.7.0=SVN,url=svn://localhost/svnroot/too
 plugin@org.eclipse.objectteams.otdt.ui.help,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.ui.help
 plugin@org.eclipse.objectteams.otdt.metrics,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.metrics
 
-fragment@org.eclipse.objectteams.otequinox.runtime,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.runtime
+plugin@org.eclipse.objectteams.runtime,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.runtime
 fragment@org.eclipse.objectteams.otequinox.hook,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.hook
 fragment@org.eclipse.objectteams.otequinox.sunjvm,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.sunjvm
 plugin@org.eclipse.objectteams.otequinox,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox
