@@ -65,7 +65,7 @@ import base org.eclipse.jdt.internal.ui.refactoring.PullUpMethodPage.PullUpHiera
 @SuppressWarnings({ "restriction", "decapsulation" }) // private base classes
 public team class PullUpAdaptor {
 
-	public team class PullUpRefactoringProcessorRole playedBy PullUpRefactoringProcessor {
+	public class PullUpRefactoringProcessorRole playedBy PullUpRefactoringProcessor {
 		
 		@SuppressWarnings("rawtypes")
 		void setFCachedSkippedSuperTypes(Set fCachedSkippedSuperTypes) -> set Set fCachedSkippedSuperTypes;
@@ -74,19 +74,7 @@ public team class PullUpAdaptor {
 		IMember[] getMembersToDelete(IProgressMonitor monitor) -> IMember[] getMembersToDelete(IProgressMonitor monitor);
 		IMethod[] getFDeletedMethods() -> get IMethod[] fDeletedMethods;
 		IMember[] getFMembersToMove() -> get IMember[] fMembersToMove;
-
-		/**
-		 * Pure Gateway.
-		 */
-		public class PullUpAstNodeMapper playedBy PullUpAstNodeMapper{
-			@SuppressWarnings("decapsulation")
-			protected PullUpAstNodeMapper(final CompilationUnitRewrite sourceRewriter, final CompilationUnitRewrite targetRewriter, final ASTRewrite rewrite, final IType type, final TypeVariableMaplet[] mapping, final IMethodBinding enclosing) {
-				base(sourceRewriter, targetRewriter,
-						rewrite, type, mapping,
-						enclosing);
-			}
-		}
-		
+			
 		private ITypeHierarchy _destinationOTTypeHierachy;
 
 		// callouts

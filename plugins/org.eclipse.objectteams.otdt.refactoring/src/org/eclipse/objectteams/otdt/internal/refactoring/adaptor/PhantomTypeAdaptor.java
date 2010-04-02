@@ -15,7 +15,8 @@ import base org.eclipse.objectteams.otdt.core.PhantomType;
  * {@link PhantomType}, that would otherwise throw an
  * <code>UnsupportedOperationException</code>. The methods are used in
  * {@link RenameTypeAdaptor} to search for <code>PhantomType</code> references
- * with the java search. This team should be removed if the necessary methods
+ * with the java search. 
+ * FIXME: This team should be removed if the necessary methods
  * are implemented in the original {@link PhantomType}.
  * 
  * @author Johannes Gebauer

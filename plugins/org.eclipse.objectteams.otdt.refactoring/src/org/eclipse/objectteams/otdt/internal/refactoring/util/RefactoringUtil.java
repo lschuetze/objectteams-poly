@@ -148,52 +148,6 @@ public class RefactoringUtil implements ITeamConstants {
 		}
 		return null;
 	}
-
-	/**
-	 * Returns all role types contained in the given project.
-	 * 
-	 * @param thisProject
-	 *            the given project
-	 * @return an array containing all role types of the given project
-	 * @throws JavaModelException
-	 * 
-	 * @deprecated use getAllRoleClasses(IJavaProject, IProgressMonitor) instead
-	 */
-	public static IType[] getAllRoleTypes(IJavaProject thisProject) throws JavaModelException {
-		List<IType> roles = new ArrayList<IType>();
-		IPackageFragment[] packages = thisProject.getPackageFragments();
-
-		for (int idx = 0; idx < packages.length; idx++) {
-			if (packages[idx].getKind() != IPackageFragmentRoot.K_BINARY) {
-				// get all compilation units in this package
-				ICompilationUnit[] compUnits = packages[idx].getCompilationUnits();
-				if (compUnits != null && compUnits.length != 0) {
-					for (int idy = 0; idy < compUnits.length; idy++) {
-						// get all top-level types declared
-						// in this compilation unit
-						IType[] types = compUnits[idy].getTypes();
-						if (types != null && types.length != 0) {
-							for (int idz = 0; idz < types.length; idz++) {
-								// add role files
-								if (TypeHelper.isRole(types[idz].getFlags())) {
-									roles.add(types[idz]);
-								}
-								if (Modifier.isTeam(types[idz].getFlags())) {
-									// get all roles of this team
-									IType[] rolesOfTeam = types[idz].getTypes();
-									for (int roleNr = 0; roleNr < rolesOfTeam.length; roleNr++) {
-										roles.add(rolesOfTeam[roleNr]);
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-		return roles.toArray(new IType[roles.size()]);
-	}
-
 	/**
 	 * Returns all role types contained in the given project and related
 	 * projects.
@@ -914,6 +868,7 @@ public class RefactoringUtil implements ITeamConstants {
 		// get all subtypes of focus type
 		IType[] subTypes = focusTypeHierarchy.getAllSubtypes(focusType);
 		// get all role types in this project
+		// FIXME(SH): should replace gettingAllRoles with s.t. like RefactoringUtil.getAllRolesForBase(focusType);
 		IOTType[] roleTypes = RefactoringUtil.getAllRoleClasses(compUnit.getJavaProject(), pm);
 		// get all base types
 		ArrayList<IType> baseTypes = RefactoringUtil.getAllDeclaredBaseTypes(roleTypes);
@@ -1046,6 +1001,7 @@ public class RefactoringUtil implements ITeamConstants {
 		// get all subtypes of focus type
 		IType[] subTypes = completeHierarchy.getAllSubtypes(focusType);
 		// get all role types in this project
+		// FIXME(SH): should replace gettingAllRoles with s.t. like RefactoringUtil.getAllRolesForBase(focusType);
 		IOTType[] roleTypes = RefactoringUtil.getAllRoleClasses(compUnit.getJavaProject(), pm);
 		// get all base types
 		ArrayList<IType> baseTypes = RefactoringUtil.getAllDeclaredBaseTypes(roleTypes);
