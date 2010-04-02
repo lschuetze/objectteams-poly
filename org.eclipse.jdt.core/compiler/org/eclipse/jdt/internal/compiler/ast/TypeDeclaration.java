@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.compiler.problem.*;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
+import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDeclaration;
@@ -587,8 +588,12 @@ public void analyseCode(CompilationUnitScope unitScope) {
 /* orig:
 		internalAnalyseCode(null, FlowInfo.initial(this.maxFieldCount));
   :giro */
-		if (this.isRoleFile())
-			Dependencies.ensureBindingState(this.binding.enclosingType(), ITranslationStates.STATE_RESOLVED);
+		if (this.isRoleFile()) {
+			if (this.binding.enclosingType() != null)
+				Dependencies.ensureBindingState(this.binding.enclosingType(), ITranslationStates.STATE_RESOLVED);
+			else if (!this.compilationResult.hasErrors())
+				throw new InternalCompilerError("Role file unexpectedly has no enclosing team"); //$NON-NLS-1$
+		}
 		int myMaxFieldCount = this.scope.outerMostClassScope().referenceType().maxFieldCount;
 		internalAnalyseCode(null, FlowInfo.initial(myMaxFieldCount));
 // SH}
