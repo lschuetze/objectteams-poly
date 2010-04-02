@@ -273,7 +273,7 @@ public class SyntheticRoleFieldAccess extends SyntheticMethodBinding {
 			}
 			this.parameters[0] = roleType;
 		}
-		if (this.purpose == FieldReadAccess) {
+		if (this.purpose == FieldReadAccess || this.purpose == SuperFieldReadAccess) {
 			insertOuterAccess(codeStream, roleType); // role -> role,team
 			codeStream.swap();                       // role,team -> team,role
 			codeStream.invoke(Opcodes.OPC_invokevirtual,
