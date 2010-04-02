@@ -24,7 +24,6 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
-import org.eclipse.jdt.internal.compiler.ast.EqualExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.IfStatement;
 import org.eclipse.jdt.internal.compiler.ast.OR_OR_Expression;
@@ -121,29 +120,38 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 	    for (int idx = caseObjects.length-1; idx >= 0; idx--) {
 	        RoleModel object = caseObjects[idx];
 
-	        Expression condition = object._hasBindingAmbiguity
-	         ?	gen.equalExpression(gen.messageSend(gen.singleNameReference(LOCAL_BASE_NAME), "getClass".toCharArray(), null), //$NON-NLS-1$
-	        		 				gen.classLiteralAccess(gen.baseclassReference(object.getBaseTypeBinding())),
-	        		 				EqualExpression.EQUAL_EQUAL)
-	         :  gen.instanceOfExpression(gen.singleNameReference(LOCAL_BASE_NAME),
-					    				 gen.baseclassReference(object.getBaseTypeBinding()));
-	        // more checks for known sub-classes of base:
-	        Set<ReferenceBinding> otherBases = object.getTeamModel().getSubBases(object, caseObjects);
-	        for (Iterator<ReferenceBinding> bases = otherBases.iterator(); bases.hasNext();) {
-	        	ReferenceBinding baseBinding = bases.next();
-	        	condition = new OR_OR_Expression(condition, 
-	        									 gen.instanceOfExpression(gen.singleNameReference(LOCAL_BASE_NAME), 
-	        											 				  gen.baseclassReference(baseBinding)), 
-	        									 OperatorIds.OR_OR);
-	        }
 	        Statement s = createCaseStatement(object, gen);
-	        if (s != null) {
-				IfStatement is = gen.ifStatement(condition, s);
-		        if (prevIf == null)
-		        	stmts[1] = is;				// this is the root "if"
-		        else
-		        	prevIf.elseStatement = is;	// hook into existing "if"
-		        prevIf = is;
+	        if (object.getBaseTypeBinding().equals(staticBaseType) && idx == 0) {
+	        	// shortcut if last type matches the static type: no need for a final instanceof check
+	        	if (prevIf == null)
+	        		stmts[1] = s;
+	        	else
+	        		prevIf.elseStatement = s;
+	        	return gen.block(stmts); // don't generate default.
+	        } else {
+		        Expression condition = object._hasBindingAmbiguity
+		         ?	gen.equalExpression(gen.messageSend(gen.singleNameReference(LOCAL_BASE_NAME), "getClass".toCharArray(), null), //$NON-NLS-1$
+		        		 				gen.classLiteralAccess(gen.baseclassReference(object.getBaseTypeBinding())),
+		        		 				OperatorIds.EQUAL_EQUAL)
+		         :  gen.instanceOfExpression(gen.singleNameReference(LOCAL_BASE_NAME),
+						    				 gen.baseclassReference(object.getBaseTypeBinding()));
+		        // more checks for known sub-classes of base:
+		        Set<ReferenceBinding> otherBases = object.getTeamModel().getSubBases(object, caseObjects);
+		        for (Iterator<ReferenceBinding> bases = otherBases.iterator(); bases.hasNext();) {
+		        	ReferenceBinding baseBinding = bases.next();
+		        	condition = new OR_OR_Expression(condition, 
+		        									 gen.instanceOfExpression(gen.singleNameReference(LOCAL_BASE_NAME), 
+		        											 				  gen.baseclassReference(baseBinding)), 
+		        									 OperatorIds.OR_OR);
+		        }
+		        if (s != null) {
+					IfStatement is = gen.ifStatement(condition, s);
+			        if (prevIf == null)
+			        	stmts[1] = is;				// this is the root "if"
+			        else
+			        	prevIf.elseStatement = is;	// hook into existing "if"
+			        prevIf = is;
+		        }
 	        }
 	    }
 	    /*
