@@ -3164,7 +3164,7 @@ private boolean findEnclosingTeam() {
 	while (i >= 0) {
 		if (this.astStack[i] instanceof TypeDeclaration) {
 			TypeDeclaration enclosingType = (TypeDeclaration)this.astStack[i];
-			if (enclosingType.isTeam())
+			if (enclosingType.isTeam() && enclosingType.bodyEnd == 0) // team and still open (= no '}' seen yet?)
 				return true;
 		}
 		i--;
