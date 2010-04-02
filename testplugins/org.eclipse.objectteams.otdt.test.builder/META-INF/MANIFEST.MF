@@ -17,6 +17,6 @@ Require-Bundle: org.junit,
  org.eclipse.jdt.core,
  org.eclipse.test.performance,
  org.eclipse.objectteams.otdt.tests,
- org.objectteams.otequinox
+ org.eclipse.objectteams.otequinox
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.6
