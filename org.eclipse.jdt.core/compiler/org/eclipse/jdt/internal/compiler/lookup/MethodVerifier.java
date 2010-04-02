@@ -253,6 +253,9 @@ void checkAgainstInheritedMethods(MethodBinding currentMethod, MethodBinding[] m
 
 			// want to tag currentMethod even if return types are not equal
 			if (inheritedMethod.isAbstract()) {
+//{ObjectTeams: don't tag role class/ifc implementation:
+			  if (!RoleModel.isSynthIfcOfClass(inheritedMethod.declaringClass, currentMethod.declaringClass))
+// SH}
 				if (inheritedMethod.declaringClass.isInterface()) {
 					currentMethod.modifiers |= ExtraCompilerModifiers.AccImplementing;
 				} else {
