@@ -1,8 +1,8 @@
 !***************  OTDT CONTRIBUTION  ******************************************************** 
 
-feature@org.eclipse.objectteams.otdt,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.feature
-feature@org.eclipse.objectteams.otdt.core.patch,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.core.patch
-feature@org.eclipse.objectteams.otequinox,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature
+feature@org.eclipse.objectteams.otdt=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.feature
+feature@org.eclipse.objectteams.otdt.core.patch=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.core.patch
+feature@org.eclipse.objectteams.otequinox=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature
 
 plugin@org.eclipse.jdt.core,3.6.0.v_OTDT_r070_qualifier=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.jdt.core
 plugin@org.eclipse.objectteams.otdt=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt
@@ -36,7 +36,7 @@ plugin@org.eclipse.objectteams.otdt.samples,0.7.0=SVN,url=svn://localhost/svnroo
 !***************  OTDT Test CONTRIBUTION  ******************************************************** 
 
 
-feature@org.eclipse.objectteams.otdt-tests,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=features/org.eclipse.objectteams.otdt.feature/unit-tests-feature
+feature@org.eclipse.objectteams.otdt-tests=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=features/org.eclipse.objectteams.otdt.feature/unit-tests-feature
 
 !plugin@org.eclipse.jdt.core.tests.builder=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.builder
 plugin@org.eclipse.jdt.core.tests.compiler,3.3.100=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.compiler
