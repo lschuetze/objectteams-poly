@@ -38,7 +38,6 @@ import org.eclipse.objectteams.otre.util.*;
 public class SubBoundBaseMethodRedefinition 
 	extends ObjectTeamsTransformation {
 
-	public SubBoundBaseMethodRedefinition(SharedState state) { this(null, state); }
 	public SubBoundBaseMethodRedefinition(ClassLoader loader, SharedState state) { super(loader, state); }
 
 	/**

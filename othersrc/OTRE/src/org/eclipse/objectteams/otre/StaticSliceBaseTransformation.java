@@ -47,7 +47,6 @@ public class StaticSliceBaseTransformation
 	static final String _OT_ACTIVE_TEAMS=    "_OT$activeTeams";   //$NON-NLS-1$
 	static final String _OT_ACTIVE_TEAM_IDS= "_OT$activeTeamIDs"; //$NON-NLS-1$
 
-	public StaticSliceBaseTransformation(SharedState state) { this(null, state); }
 	public StaticSliceBaseTransformation(ClassLoader loader, SharedState state) { super(loader, state); }
 	
 	public void doTransformCode(ClassGen cg) {

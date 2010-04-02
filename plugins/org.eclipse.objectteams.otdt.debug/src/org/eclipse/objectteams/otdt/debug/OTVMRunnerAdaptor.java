@@ -36,14 +36,12 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
-import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.debug.internal.TempFileManager;
 
 
 /**
  * @author gis
- * @version $Id: OTLaunchConfigurationDelegate.java 11843 2006-05-09 10:36:01Z carp $
  */
 @SuppressWarnings("nls")
 public class OTVMRunnerAdaptor
@@ -58,7 +56,6 @@ public class OTVMRunnerAdaptor
 		JPLIS_VMARGS.add("-javaagent:" + "\""+OTREContainer.OTRE_AGENT_JAR_PATH.toOSString()+'"'); // support blanks in path
 	}
 
-	final static private boolean _useJPLIS = true;
 	private ILaunchConfiguration _launchConfig;
 	private String _mode;
 	private ILaunch _launch;
@@ -68,10 +65,6 @@ public class OTVMRunnerAdaptor
 		_launchConfig = configuration;
 		_mode = mode;
 		_launch = launch;
-	}
-	
-	public boolean usesJPLIS() {
-		return _useJPLIS;
 	}
 	
 	public VMRunnerConfiguration adapt(VMRunnerConfiguration vmRunnerConfig) throws CoreException
@@ -146,9 +139,8 @@ public class OTVMRunnerAdaptor
 		String sep = " ";
 	    StringBuffer result = new StringBuffer(vmArguments);
 	    
-	    if (_useJPLIS)
-			for (String arg : JPLIS_VMARGS)
-				result.append(sep).append(arg);
+		for (String arg : JPLIS_VMARGS)
+			result.append(sep).append(arg);
 	    
 	    String callinSteppingVMArg = getCallinSteppingVMArg();
 	    if (callinSteppingVMArg != null)

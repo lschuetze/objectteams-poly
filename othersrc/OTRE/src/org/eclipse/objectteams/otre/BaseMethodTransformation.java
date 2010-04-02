@@ -132,15 +132,12 @@ public class BaseMethodTransformation
 
 	private final static int NORESULT = -1;
 
-	// FIXME(SH): once we remove JMangler support, these maps can be reduced to their RHS because then we'll consistently have one transformer per class:
-    private HashMap /* class_name -> HashSet(method_name) */<String, HashSet<String>> transformableMethods = new HashMap<String, HashSet<String>>();
-    private HashMap /* class_name -> HashSet(method_name) */<String, HashSet<String>> overridableMethods = new HashMap<String, HashSet<String>>();
+	// methods awaiting statements as an initial wrapper:
+    private HashSet<String/*methodName*/> pendingInitialWrappers;
+    // methods awaiting a super call to an existing initial wrapper:
+    private HashSet<String/*methodName*/> pendingSuperDelegationWrappers;
 
 	public boolean useReflection = false;
-	
-	public BaseMethodTransformation(SharedState state) {
-		this(null, state);
-	}
 
 	public BaseMethodTransformation(ClassLoader loader, SharedState state) {
 		super(loader, state);
@@ -175,11 +172,9 @@ public class BaseMethodTransformation
     		String method_signature = m.getSignature();
 
     		if (state.interfaceTransformedClasses.contains(class_name)) {
-    			HashSet<String> transformable = transformableMethods.get(class_name);
-    			HashSet<String> overridable = overridableMethods.get(class_name);
-    			if (transformable.contains(method_name + '.' + method_signature))
+    			if (pendingInitialWrappers.contains(method_name + '.' + method_signature))
     				cg.replaceMethod(m, m = generateInitialWrapper(m, class_name, cg.getMajor(), cpg));
-    			else if (overridable.contains(method_name + '.' + method_signature))
+    			else if (pendingSuperDelegationWrappers.contains(method_name + '.' + method_signature))
     				cg.replaceMethod(m, m = generateSuperCall(m, cg, cpg));
     			
     			Method replacement = checkReplaceWickedSuper(class_name, m, cpg);
@@ -252,16 +247,11 @@ public class BaseMethodTransformation
     		}
     	}
 
-    	HashSet<String> transformedMethods = transformableMethods.get(class_name);
-    	if (transformedMethods == null) {
-    		transformedMethods = new HashSet<String>();
-    		transformableMethods.put(class_name, transformedMethods);
-    	}
-    	HashSet<String> renamedMethods = overridableMethods.get(class_name);
-    	if (renamedMethods == null) {
-    		renamedMethods = new HashSet<String>();
-    		overridableMethods.put(class_name, renamedMethods);
-    	}
+    	if (pendingInitialWrappers == null)
+    		pendingInitialWrappers = new HashSet<String>();
+    	if (pendingSuperDelegationWrappers == null)
+    		pendingSuperDelegationWrappers = new HashSet<String>();
+
 
     	checkReadClassAttributes(ce, cg, class_name, cpg);
 		
@@ -352,8 +342,9 @@ public class BaseMethodTransformation
     		int firstLine = STEP_OVER_LINENUMBER;
     		String original_signature = method_signature;
     		/*if (bindingsForMethod != null || containsSign(inheritedSigns, m)*/ /*|| containsSign(interfaceInheritedSigns, m)*/ //) {
-    		MethodBinding match= matchingBinding(inheritedBindings, m, false);
-    		if (bindingsForMethod != null || (match!= null && !m.isStatic() && !m.isPrivate())) {
+    		MethodBinding inheritedBinding = matchingBinding(inheritedBindings, m, false);
+    		String method_key = method_name+'.'+method_signature;
+			if (bindingsForMethod != null || (inheritedBinding != null && !m.isStatic() && !m.isPrivate())) {
     			
     			mg = newMethodGen(m, class_name, cpg);
     			Method orig_method;
@@ -377,10 +368,12 @@ public class BaseMethodTransformation
                 if(logging) printLogMessage("Method " + method_name + " was backuped as " //$NON-NLS-1$ //$NON-NLS-2$
     						+ name_orig + '.');
 
-                if (match == null || method_signature.equals(match.getBaseMethodSignature()))
-                	renamedMethods.add(method_name+'.'+method_signature);
-                else // override with covariant return: at the VM-level this is a *new* method.
-                	transformedMethods.add(method_name+'.'+method_signature);
+                if (inheritedBinding != null) {
+                	if (method_signature.equals(inheritedBinding.getBaseMethodSignature()))
+                		pendingSuperDelegationWrappers.add(method_key);
+                	else // override with covariant return: at the VM-level this is a *new* method, need a new initial wrapper
+                		pendingInitialWrappers.add(method_key);
+                }
     		}
 
     		/*if (bindingsForMethod != null || (containsSign(inheritedSigns,m) && m.isStatic())*/ /*|| containsSign(interfaceInheritedSigns, m)*/ //) {
@@ -395,7 +388,8 @@ public class BaseMethodTransformation
     			if (cg.containsMethod(chain.getName(), chain.getSignature()) == null)
     				ce.addMethod(chain, cg);
 
-    			transformedMethods.add(method_name + '.' + method_signature);
+    			pendingInitialWrappers.add(method_key);
+    			pendingSuperDelegationWrappers.remove(method_key); // might have prematurely added this above
     		}
     		if (mg == null)
                 if (logging) printLogMessage("No method binding (direct or inherited) found for " //$NON-NLS-1$

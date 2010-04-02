@@ -49,7 +49,7 @@ import org.apache.bcel.generic.*;
 
 /**
  * Superclass for all transformations in this package.
- * This class and its subclasses depends on neither JMangler nor JPLIS.
+ * This class and its subclasses does not directly depend on JPLIS.
  * 
  * Contains common fields and methods.
  *
@@ -109,8 +109,6 @@ public abstract class ObjectTeamsTransformation
     
     /** Which class loader are we working for? */
     protected ClassLoader loader;
-    
-	public ObjectTeamsTransformation(SharedState state) { this(null, state); }
 
 	public ObjectTeamsTransformation(ClassLoader loader, SharedState state) {
 		this.loader = loader;
@@ -1131,7 +1129,6 @@ public abstract class ObjectTeamsTransformation
                     if(logging) printLogMessage("**** class file was produced by compiler version "
                             + major + "." + minor + "." + revision + " ****");
                     IS_COMPILER_GREATER_123 = false; // reset, may be updated below
-                    LowerableTransformation.checkRequiresAdaptation(major, minor, revision, cg);
 					// 1.4 stream:
 					if (major == 1 && minor == 4) {
 						if (revision < OT14_REVISION) {

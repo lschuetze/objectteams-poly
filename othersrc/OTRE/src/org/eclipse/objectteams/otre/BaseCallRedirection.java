@@ -57,7 +57,6 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 		public InstructionHandle snd() {return _ih2; }
 	}
 
-	public BaseCallRedirection(SharedState state) { this(null, state); }
     public BaseCallRedirection(ClassLoader loader, SharedState state) {
     	super(loader, state);
     }

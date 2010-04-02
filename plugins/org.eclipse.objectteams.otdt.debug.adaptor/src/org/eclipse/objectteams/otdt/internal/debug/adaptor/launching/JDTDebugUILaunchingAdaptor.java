@@ -26,11 +26,7 @@ import base org.eclipse.jdt.debug.ui.launchConfigurations.JavaConnectTab;
 import base org.eclipse.jdt.debug.ui.launchConfigurations.JavaJRETab;
 
 /**
- * This team adds a new section to the JRE tab containing
- * <ul> 
- * <li>a checkbox "Enable OTRE"
- * <li>a checkbox "Use JPLIS (experimental)"
- * </ul>
+ * This team adds a new section to the JRE tab containing a checkbox "Enable OTRE"
  * If this box is enabled, launching will happen in OT/J mode, which is
  * managed by the {@link JDTLaunchingAdaptor}.
  * 

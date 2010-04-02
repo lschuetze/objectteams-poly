@@ -32,7 +32,6 @@ import org.eclipse.objectteams.otre.BaseMethodTransformation;
 import org.eclipse.objectteams.otre.BaseTagInsertion;
 import org.eclipse.objectteams.otre.Decapsulation;
 import org.eclipse.objectteams.otre.LiftingParticipantTransformation;
-import org.eclipse.objectteams.otre.LowerableTransformation;
 import org.eclipse.objectteams.otre.OTConstants;
 import org.eclipse.objectteams.otre.ObjectTeamsTransformation;
 import org.eclipse.objectteams.otre.RepositoryAccess;
@@ -64,7 +63,6 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		BaseTagInsertion.class,
 		Decapsulation.class,
 		LiftingParticipantTransformation.class,
-		LowerableTransformation.class,
 		StaticSliceBaseTransformation.class,
 		SubBoundBaseMethodRedefinition.class,
 		TeamInterfaceImplementation.class,
@@ -80,7 +78,6 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		BaseTagInsertion.SharedState 		  btiState = new BaseTagInsertion.SharedState();
 		Decapsulation.SharedState 			  decState = new Decapsulation.SharedState();
 		ObjectTeamsTransformation.SharedState lptState = new ObjectTeamsTransformation.SharedState();
-		ObjectTeamsTransformation.SharedState lowState = new ObjectTeamsTransformation.SharedState();
 		ObjectTeamsTransformation.SharedState ssbtState = new ObjectTeamsTransformation.SharedState();
 		ObjectTeamsTransformation.SharedState sbbmrState = new ObjectTeamsTransformation.SharedState();
 		ObjectTeamsTransformation.SharedState tiiState = new ObjectTeamsTransformation.SharedState();
@@ -141,14 +138,12 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			= new Decapsulation(					loader,	states.decState);
 		LiftingParticipantTransformation liftingParticipantTransformation 
 			= new LiftingParticipantTransformation(	loader, states.lptState);
-		LowerableTransformation lowerableTransformation 
-			= new LowerableTransformation(			loader, states.lowState);
 		StaticSliceBaseTransformation staticSliceBaseTransformation
 			= new StaticSliceBaseTransformation(	loader, states.ssbtState);
 		SubBoundBaseMethodRedefinition subBoundBaseMethodRedefinition 
 			= new SubBoundBaseMethodRedefinition(	loader,	states.sbbmrState);
 		TeamInterfaceImplementation teamInterfaceImplementation 
-			= new TeamInterfaceImplementation(true, loader, states.tiiState);
+			= new TeamInterfaceImplementation(		loader, states.tiiState);
 		ThreadActivation threadActivation 
 			= new ThreadActivation();
 				
@@ -186,7 +181,6 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			t.printStackTrace();
 		}
 			baseTagInsertion.doTransformInterface(jpe, cg);
-			lowerableTransformation.doTransformInterface(jpe, cg);
 			staticSliceBaseTransformation.doTransformInterface(jpe, cg);
 			teamInterfaceImplementation.doTransformInterface(jpe, cg);
 			

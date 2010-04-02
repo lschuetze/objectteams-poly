@@ -16,7 +16,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otre;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -38,8 +37,7 @@ import org.apache.bcel.generic.Type;
 /**
  *  For each base method that is bound by callout and has
  *  insufficient visibility, the visibility is set to public.
- *  If the corresponding JMangler-patch is installed, check
- *  whether the affected base class resides in a sealed package.
+ *  Check whether the affected base class resides in a sealed package.
  *  In that case dissallow decapsulation by throwing an IllegalAccessError.
  *  
  *  @version $Id: Decapsulation.java 23408 2010-02-03 18:07:35Z stephan $
@@ -53,19 +51,14 @@ public class Decapsulation
 //	HashSet modifiedPackages = new HashSet();
 
 	public static class SharedState extends ObjectTeamsTransformation.SharedState {
-		private HashMap /* class_name -> HashSet(callout accessed fields) */<String, HashSet<String>> generatedFieldCalloutAccessors
-			= new HashMap<String, HashSet<String>>();
-		private HashMap /* class_name -> HashSet(super-accessed methods (sign))*/<String, HashSet<String>> generatedSuperAccessors
-    		= new HashMap<String, HashSet<String>>();
+		private HashSet<String/*callout accessed fields*/> generatedFieldCalloutAccessors = new HashSet<String>();
+		private HashSet<String/*super-accessed methods (sign)*/> generatedSuperAccessors  = new HashSet<String>();
 	}
 	@Override
 	SharedState state() {
 		return (SharedState)this.state;
 	}
    
-    public Decapsulation(SharedState state) {
-    	this(null, state);
-    }
     public Decapsulation(ClassLoader loader, SharedState state) {
     	super(loader, state);
     	// FIXME(SH): can we ever release this transformer and its state?
@@ -220,7 +213,7 @@ public class Decapsulation
 	private void generateFieldAccessForCallout(ClassEnhancer ce, ClassGen cg, String class_name, ConstantPoolGen cpg) {
 		InstructionFactory factory = null;
 		
-		HashSet<String> addedAccessMethods = state().generatedFieldCalloutAccessors.get(class_name);
+		HashSet<String> addedAccessMethods = state().generatedFieldCalloutAccessors;
 
 		List<FieldDescriptor> getter = CallinBindingManager.getCalloutGetFields(class_name);
 		if (getter != null) {
@@ -237,7 +230,6 @@ public class Decapsulation
 					continue; // this getter has already been created
 				ce.addMethod(generateGetter(cpg, class_name, fd, factory), cg);
 				addedAccessMethods.add(key);
-				state().generatedFieldCalloutAccessors.put(class_name, addedAccessMethods);
 			}
 		}
 
@@ -257,7 +249,6 @@ public class Decapsulation
 					continue; // this setter has already been created
 				ce.addMethod(generateSetter(cpg, class_name, fd, factory), cg);
 				addedAccessMethods.add(key);
-				state().generatedFieldCalloutAccessors.put(class_name, addedAccessMethods);
 			}
 		}
 	}
@@ -359,7 +350,7 @@ public class Decapsulation
 	private void generateSuperAccessors(ClassEnhancer ce, ClassGen cg, String class_name, ConstantPoolGen cpg) {
 		InstructionFactory factory = null;
 		
-		HashSet<String> addedAccessMethods = state().generatedSuperAccessors.get(class_name);
+		HashSet<String> addedAccessMethods = state().generatedSuperAccessors;
 
 		List<SuperMethodDescriptor> methods = CallinBindingManager.getSuperAccesses(class_name);
 		if (methods != null) {
@@ -374,7 +365,6 @@ public class Decapsulation
 					continue; // this accessor has already been created
 				ce.addMethod(generateSuperAccessor(cpg, class_name, superMethod, factory), cg);
 				addedAccessMethods.add(key);
-				state().generatedSuperAccessors.put(class_name, addedAccessMethods);
 			}
 		}
 	}

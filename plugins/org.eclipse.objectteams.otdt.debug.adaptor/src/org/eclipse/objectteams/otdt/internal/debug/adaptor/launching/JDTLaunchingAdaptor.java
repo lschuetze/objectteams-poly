@@ -64,7 +64,7 @@ public team class JDTLaunchingAdaptor {
 		{
 	    	IRuntimeClasspathEntry[] origEntries = base.computeUnresolvedClasspath(config);
 	    	
-	    	if (!isJPLISOTJLaunch(config))
+	    	if (!isOTJApplicationLaunch(config))
 	    		return origEntries;
 	    	
 	    	// add BCEL and otre_min (classpath / bootclasspath)
@@ -127,7 +127,7 @@ public team class JDTLaunchingAdaptor {
 		void prepareLaunch(ILaunchConfiguration config, String mode, ILaunch launch) throws CoreException 
 		{
 			this.fOriginalMain = null; // reset potential left over from previous launching
-			if (!isJPLISOTJLaunch(config)) {
+			if (!isOTJApplicationLaunch(config)) {
 				this.fAdaptor = null;
 				return;
 			}
@@ -160,7 +160,7 @@ public team class JDTLaunchingAdaptor {
 		}		
 	}
 		
-	static boolean isJPLISOTJLaunch(ILaunchConfiguration config) {
+	static boolean isOTJApplicationLaunch(ILaunchConfiguration config) {
 		try {
 			return    config.getAttribute(OTDebugPlugin.OT_LAUNCH, false)                               // OT/J ?
 				  && (config.getAttribute(IPDEUIConstants.LAUNCHER_PDE_VERSION, (String)null) == null); // not PDE ?

@@ -44,16 +44,9 @@ import org.eclipse.objectteams.otre.util.*;
 public class TeamInterfaceImplementation 
 	extends ObjectTeamsTransformation {
 
-	private boolean isJPLIS;
 
-
-	public TeamInterfaceImplementation(boolean isJPLIS, SharedState state) {
-		this(isJPLIS, null, state);
-	}
-
-	public TeamInterfaceImplementation(boolean isJPLIS, ClassLoader loader, SharedState state) {
+	public TeamInterfaceImplementation(ClassLoader loader, SharedState state) {
 		super(loader, state);
-		this.isJPLIS = isJPLIS;
 	}
 
 	/**
@@ -416,8 +409,6 @@ public class TeamInterfaceImplementation
 	private String getErrorMessage(String teamName, String baseName, String action) {
 		String errorMessage = action+" of team '" + teamName + "' failed! Callins of this team have NOT been WOVEN into base class '" + baseName + "'!\n" 
 		  + "This is probably caused by a loading order problem.";
-		if (!isJPLIS)
-			errorMessage += "\nIf "+baseName+" is loaded from the bootstrap classpath launching the program in JPLIS mode may perhaps avoid this problem.";
 		return errorMessage;
 	}
 	
