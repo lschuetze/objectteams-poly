@@ -227,6 +227,12 @@ public interface IOTConstants
 																	 "IBaseMigratable".toCharArray()};
 	public static final char[] MIGRATE_TO_BASE = "migrateToBase".toCharArray();
 
+	public static final char[][] OTRE_INTERNAL_ERROR = new char[][]{"org".toCharArray(), 
+																	"eclipse".toCharArray(), 
+																	"objectteams".toCharArray(), 
+																	"otre".toCharArray(), 
+																	"OTREInternalError".toCharArray()};
+
 	// Type IDs (cf. type TypeIds)
 	public static final int T_OrgObjectTeamsITeam      = 64;
 	public static final int T_OrgObjectTeamsTeam       = 65;
