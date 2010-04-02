@@ -5,19 +5,18 @@ feature@org.eclipse.objectteams.otdt.core.patch,0.7.0=SVN,url=svn://localhost/sv
 feature@org.eclipse.objectteams.otequinox,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature
 
 plugin@org.eclipse.jdt.core,3.6.0.v_OTDT_r070_qualifier=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.jdt.core
-plugin@org.eclipse.objectteams.otdt,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt
-plugin@org.eclipse.objectteams.runtime,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.runtime
+plugin@org.eclipse.objectteams.otdt=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt
 plugin@org.eclipse.objectteams.otdt.debug,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug
 plugin@org.eclipse.objectteams.otdt.debug.ui,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug.ui
 plugin@org.eclipse.objectteams.otdt.ui,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.ui
 plugin@org.eclipse.objectteams.otdt.ui.help,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.ui.help
 plugin@org.eclipse.objectteams.otdt.metrics,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.metrics
 
-plugin@org.eclipse.objectteams.runtime,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.runtime
-fragment@org.eclipse.objectteams.otequinox.hook,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.hook
-fragment@org.eclipse.objectteams.otequinox.sunjvm,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.sunjvm
-plugin@org.eclipse.objectteams.otequinox,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox
-plugin@org.eclipse.objectteams.eclipse.monitor,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.eclipse.monitor
+plugin@org.eclipse.objectteams.runtime=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.runtime
+fragment@org.eclipse.objectteams.otequinox.hook,0.7.0.qualifier=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.hook
+fragment@org.eclipse.objectteams.otequinox.sunjvm,0.7.0.qualifier=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.sunjvm
+plugin@org.eclipse.objectteams.otequinox,0.7.0.qualifier=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox
+plugin@org.eclipse.objectteams.eclipse.monitor,0.7.0.qualifier=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.eclipse.monitor
 
 !not currently maintained:
 !plugin@org.eclipse.objectteams.otdt.earlyui=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.earlyui
@@ -52,9 +51,9 @@ plugin@org.eclipse.objectteams.otdt.debug.tests,0.7.0=SVN,url=svn://localhost/sv
 plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring,0.7.0=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.refactoring
 
 !from original CVS:
-plugin@org.eclipse.test.performance,3.6.0=v20100122,/cvsroot/eclipse,
-plugin@org.eclipse.jdt.core.tests.builder,3.3.100=v_A42,/cvsroot/eclipse,
-plugin@org.eclipse.jdt.debug.tests,3.1.100=v20100322,/cvsroot/eclipse,
+plugin@org.eclipse.test.performance=v20100122,/cvsroot/eclipse,
+plugin@org.eclipse.jdt.core.tests.builder=v_A42,/cvsroot/eclipse,
+plugin@org.eclipse.jdt.debug.tests=v20100322,/cvsroot/eclipse,
 
 
 

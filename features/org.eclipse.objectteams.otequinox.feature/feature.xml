@@ -29,7 +29,7 @@ Author: Stephan Herrmann.
          id="org.eclipse.objectteams.otequinox.hook"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="0.7.0.qualifier"
          fragment="true"
          unpack="false"/>
 
@@ -37,14 +37,14 @@ Author: Stephan Herrmann.
          id="org.eclipse.objectteams.runtime"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="0.7.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otequinox"
          download-size="0"
          install-size="0"
-         version="0.0.0"
+         version="0.7.0.qualifier"
          unpack="false"/>
 
    <plugin
@@ -52,7 +52,7 @@ Author: Stephan Herrmann.
          os="linux"
          download-size="1"
          install-size="1"
-         version="0.0.0"
+         version="0.7.0.qualifier"
          fragment="true"
          unpack="false"/>
 
@@ -61,7 +61,7 @@ Author: Stephan Herrmann.
          os="solaris"
          download-size="1"
          install-size="1"
-         version="0.0.0"
+         version="0.7.0.qualifier"
          fragment="true"
          unpack="false"/>
 
@@ -70,7 +70,7 @@ Author: Stephan Herrmann.
          os="win32"
          download-size="1"
          install-size="1"
-         version="0.0.0"
+         version="0.7.0.qualifier"
          fragment="true"
          unpack="false"/>
 
@@ -78,14 +78,14 @@ Author: Stephan Herrmann.
          id="org.eclipse.objectteams.otequinox.branding"
          download-size="10"
          install-size="10"
-         version="0.0.0"
+         version="0.7.0.qualifier"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.eclipse.monitor"
          download-size="14"
          install-size="14"
-         version="0.0.0"
+         version="0.7.0.qualifier"
          unpack="false"/>
 
 </feature>
