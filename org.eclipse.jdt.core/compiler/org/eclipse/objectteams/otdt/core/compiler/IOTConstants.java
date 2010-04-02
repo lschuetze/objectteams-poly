@@ -189,6 +189,7 @@ public interface IOTConstants
 	public static final char[][] ORG_OBJECTTEAMS_ITEAM = {ORG, OBJECTTEAMS, ITEAM};
 	public static final char[][] ORG_OBJECTTEAMS_TEAM = {ORG, OBJECTTEAMS, TEAM};
 	public static final char[] STR_ORG_OBJECTTEAMS_TEAM = ("org.objectteams.Team").toCharArray();
+	public static final char[] STR_ORG_OBJECTTEAMS_ITEAM = ("org.objectteams.ITeam").toCharArray();
 
 	public static final char[] ICONFINED = "IConfined".toCharArray();
 	public static final char[][] ORG_OBJECTTEAMS_ICONFINED = {ORG, OBJECTTEAMS, ICONFINED};

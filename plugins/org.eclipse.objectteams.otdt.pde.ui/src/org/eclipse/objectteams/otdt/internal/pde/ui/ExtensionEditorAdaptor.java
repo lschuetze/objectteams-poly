@@ -241,7 +241,8 @@ public team class ExtensionEditorAdaptor
 			String basedOn = attInfo.getBasedOn();
 			if (basedOn == null)
 				return false;
-			return basedOn.equals(String.valueOf(IOTConstants.STR_ORG_OBJECTTEAMS_TEAM));
+			return    basedOn.equals(String.valueOf(IOTConstants.STR_ORG_OBJECTTEAMS_TEAM))
+				   || basedOn.equals(':'+String.valueOf(IOTConstants.STR_ORG_OBJECTTEAMS_ITEAM));
 		}
 
 		String getFClassName() 							-> get String fClassName;
