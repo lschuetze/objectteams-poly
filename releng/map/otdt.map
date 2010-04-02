@@ -39,17 +39,24 @@ plugin@org.eclipse.objectteams.otdt.samples=SVN,url=svn://localhost/svnroot/tool
 
 feature@org.eclipse.objectteams.otdt-tests=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=features/org.eclipse.objectteams.otdt.feature/unit-tests-feature
 
-plugin@org.eclipse.jdt.core.tests.builder=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.builder
+!plugin@org.eclipse.jdt.core.tests.builder=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.builder
 plugin@org.eclipse.jdt.core.tests.compiler=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.compiler
 plugin@org.eclipse.jdt.core.tests.model=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.model
-plugin@org.eclipse.jdt.debug.tests=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.debug.tests
+!plugin@org.eclipse.jdt.debug.tests=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.debug.tests
 plugin@org.eclipse.jdt.ui.tests=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.ui.tests
 plugin@org.eclipse.jdt.ui.tests.refactoring=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.ui.tests.refactoring
-plugin@org.eclipse.test.performance=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.test.performance
+!plugin@org.eclipse.test.performance=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.test.performance
 plugin@org.eclipse.objectteams.otdt.tests=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.tests
 plugin@org.eclipse.objectteams.otdt.ui.tests.dom=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.dom
 plugin@org.eclipse.objectteams.otdt.debug.tests=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.debug.tests
 plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.refactoring
+
+!from original CVS:
+plugin@org.eclipse.test.performance=v20100122,/cvsroot/eclipse,
+plugin@org.eclipse.jdt.core.tests.builder=v_A42,/cvsroot/eclipse,
+plugin@org.eclipse.jdt.debug.tests=v20100322,/cvsroot/eclipse,
+
+
 
 !** OT/J Test Plugins **!
 plugin@org.eclipse.objectteams.otdt.test.builder=SVN,url=svn://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.test.builder
