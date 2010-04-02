@@ -161,7 +161,7 @@ public class MethodModel extends ModelElement {
 	}
 
 	// TODO(SH): note that role feature bridges are not really faked, since they are actually generated (synthetic?)
-    public static enum FakeKind { NOT_FAKED, BASECALL_SURROGATE, ROLE_FEATURE_BRIDGE, TEAM_REGISTRATION_METHOD }
+    public static enum FakeKind { NOT_FAKED, BASECALL_SURROGATE, ROLE_FEATURE_BRIDGE, TEAM_REGISTRATION_METHOD, BASE_FIELD_ACCESSOR }
 
     public FakeKind _fakeKind = FakeKind.NOT_FAKED;
     private MethodBinding _baseCallSurrogate = null;

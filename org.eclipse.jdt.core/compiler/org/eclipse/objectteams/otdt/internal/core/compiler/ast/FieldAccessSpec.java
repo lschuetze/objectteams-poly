@@ -41,8 +41,10 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
@@ -245,13 +247,15 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
 		TypeBinding[] argTypes = resolvedField.isStatic() ?
 									new TypeBinding[0] :
 									new TypeBinding[]{baseType};
-		return new MethodBinding(
+		MethodBinding result = new MethodBinding(
 					ClassFileConstants.AccPublic|ClassFileConstants.AccStatic,
 					CharOperation.concat(IOTConstants.OT_GETFIELD, resolvedField.name),
 					resolvedField.type,
 					argTypes,
 					Binding.NO_EXCEPTIONS,
 					baseType);
+		MethodModel.getModel(result)._fakeKind = FakeKind.BASE_FIELD_ACCESSOR;
+		return result;
 	}
 
     public TypeBinding resolvedType() {
