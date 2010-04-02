@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
@@ -131,12 +132,13 @@ public class DeclaredLifting implements IOTConstants {
 					liftingTypeArguments.get(0));
 	    	return;
 	    }
-	    // generate the required lift_dynamic method:
-	    for (Argument arg : liftingTypeArguments) {
-	    	TypeBinding roleType = teamDecl.binding.getMemberType(((LiftingTypeReference)arg.type).roleToken);
-	    	if (roleType != null)
-	    		genLiftDynamicMethod(teamDecl, arg.type, roleType, needMethodBody);
-	    }
+	    // generate lift_dynamic method if <T base B> type parameter is declared
+	    if (hasBaseBoundedTypeParameters(method))
+		    for (Argument arg : liftingTypeArguments) {
+		    	TypeBinding roleType = teamDecl.binding.getMemberType(((LiftingTypeReference)arg.type).roleToken);
+		    	if (roleType != null)
+		    		genLiftDynamicMethod(teamDecl, arg.type, roleType, needMethodBody);
+		    }
 
 	    if (!needMethodBody)
 	    	return; // no more details needed
@@ -180,6 +182,16 @@ public class DeclaredLifting implements IOTConstants {
 			System.arraycopy(originalStatements,0,newStatements,statements.length,originalStatements.length);
 			method.setStatements(newStatements);
 		}
+	}
+
+	static boolean hasBaseBoundedTypeParameters(AbstractMethodDeclaration method) {
+		TypeParameter[] typeParameters = method.typeParameters();
+		if (typeParameters == null)
+			return false;
+		for (TypeParameter typeParameter : typeParameters)
+			if (typeParameter.hasBaseBound())
+				return true;
+		return false;
 	}
 
 	public static void transformCatch(Scope scope, Block block, Argument argument) {
