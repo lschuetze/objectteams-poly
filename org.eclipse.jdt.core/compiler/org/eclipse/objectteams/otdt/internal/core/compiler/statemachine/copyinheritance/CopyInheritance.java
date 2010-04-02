@@ -1257,6 +1257,30 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     	}
     	return dstMethod;
     }
+
+    /**
+     * Default role constructors are not copied but created anew for each role
+     * (see the caller of this method).
+     * This method records the new ctor as overriding all its tsuper versions (if any).
+     */
+    public static void connectDefaultCtor(RoleModel clazz, MethodBinding binding) {
+            ReferenceBinding[] tsupers = clazz.getTSuperRoleBindings();
+            if (tsupers.length == 0) return;
+            MethodBinding[] tsuperCtors = new MethodBinding[tsupers.length];
+            int j=0;
+            for (int i=0; i<tsupers.length; i++) {
+                    MethodBinding tsuperCtor = tsupers[i].getExactConstructor(Binding.NO_PARAMETERS);
+                    if (tsuperCtor != null)
+                            tsuperCtors[j++] = tsuperCtor;
+            }
+            if (j>0) {
+                    if (j == tsupers.length)
+                            binding.overriddenTSupers = tsuperCtors;
+                    else
+                            System.arraycopy(tsuperCtors, 0, binding.overriddenTSupers=new MethodBinding[j], 0, j);
+            }
+    }
+
     /**
      * Nothing exciting here, just create a new field declaration.
      * @param field

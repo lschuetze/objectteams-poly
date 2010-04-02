@@ -653,8 +653,12 @@ public ConstructorDeclaration createDefaultConstructor(	boolean needExplicitCons
 	//the default int instead of just null (consistency purpose)
 
 //{ObjectTeams: no default constructor for bound roles
-//      (cf. also StandardElementGenerator.removeDefaultConstructor())
-	if (this.baseclass != null)
+//      (cf. also AstEdit.removeDefaultConstructor())
+// 	    also unbound roles defer constructor creation to Dependencies.establishMethodsCreated(RoleModel)
+	// if roleModel != null assume were called later than during parsing:
+	//  - from CopyInheritance.copyMethod(OTConfined)
+	//  - crom Dependencies.establishMethodsCreated(RoleModel)
+	if (this.isDirectRole() && this.roleModel == null) 
 		return null;
 // SH}
 

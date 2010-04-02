@@ -273,6 +273,7 @@ public class AstEdit {
 	 * After we found a bound role (binding might be inherited through some
 	 * dimension), we have to ensure, that it has no default constructor,
 	 * because those are superceded by lifting constructors.
+	 * Similar for roles with implicitly inherited explicit constructors.
 	 * @param roleType
 	 */
 	public static void removeDefaultConstructor(TypeDeclaration roleType) {

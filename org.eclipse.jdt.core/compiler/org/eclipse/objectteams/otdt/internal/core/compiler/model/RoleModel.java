@@ -618,6 +618,8 @@ public class RoleModel extends TypeModel
 	 * Then from there on inwards only role names are compared.
 	 */
 	public boolean hasTSuperRole(ReferenceBinding role) {
+		if (!role.isRole())
+			return false;
 		ReferenceBinding otherClass = null, otherIfc = null;
 		if(role.isInterface()) {
 			otherIfc = role;

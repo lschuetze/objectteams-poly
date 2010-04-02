@@ -68,8 +68,10 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TransformStatementsVisitor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleFileHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
@@ -1612,6 +1614,21 @@ public class Dependencies implements ITranslationStates {
             { // interfaces have not constructores, don't bother.
             	boolean needMethodBodies = needMethodBodies(subRoleDecl);
                 AbstractMethodDeclaration[] methodDeclarations = subRoleDecl.methods;
+                // may need to create default constructor first:
+                boolean hasConstructor = false;
+                if (methodDeclarations != null)
+	                for (int i=0; i<methodDeclarations.length; i++)
+	                	if (methodDeclarations[i].isConstructor() && !TSuperHelper.isTSuper(methodDeclarations[i].binding)) {
+	                		hasConstructor = true; 
+	                		break; 
+	                	}
+                if (!hasConstructor) {
+                	ConstructorDeclaration defCtor = subRoleDecl.createDefaultConstructor(needMethodBodies, false);
+                	AstEdit.addMethod(subRoleDecl, defCtor);
+                	CopyInheritance.connectDefaultCtor(clazz, defCtor.binding);
+                	methodDeclarations = subRoleDecl.methods;
+                }
+                // now the creation methods for all constructors:
                 if (methodDeclarations != null)
                 {
                     for (int i=0; i<methodDeclarations.length; i++)

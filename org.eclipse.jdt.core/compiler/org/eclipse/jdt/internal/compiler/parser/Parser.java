@@ -3152,6 +3152,9 @@ private void checkIsRoleFile(TypeDeclaration typeDecl) {
 			// two-way-link type declarations:
 			AstEdit.addMemberTypeDeclaration(this.currentTeam, typeDecl); // also sets enclosingType.
 		}
+	} else {
+		if (findEnclosingTeam()) // FIXME(SH): skip role local types
+			typeDecl.modifiers |= ExtraCompilerModifiers.AccRole;
 	}
 }
 private boolean findEnclosingTeam() {

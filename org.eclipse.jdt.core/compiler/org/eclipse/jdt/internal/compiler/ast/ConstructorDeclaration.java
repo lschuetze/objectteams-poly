@@ -154,8 +154,9 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
                 this.scope.problemReporter().baseConstructorCallInLiftingConstructor(this);
         } else {
             if (!calledHere && !calledIndirectly) {
-                this.scope.problemReporter().missingCallToBaseConstructor(
-                        this, this.binding.declaringClass);
+            	if (!(isDefaultConstructor() && roleType.roleModel != null && roleType.roleModel.hasBaseclassProblem())) // ignore if wrong def.ctor was created 
+            		this.scope.problemReporter().missingCallToBaseConstructor(
+            				this, this.binding.declaringClass);
             } else if (calledHere && calledIndirectly) {
                 this.scope.problemReporter().
                         tooManyCallsToBaseConstructor(this.statements[0], this.constructorCall);
