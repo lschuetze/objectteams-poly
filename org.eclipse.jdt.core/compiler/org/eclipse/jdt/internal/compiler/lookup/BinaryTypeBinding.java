@@ -479,6 +479,9 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 
 			// attempt to find the superclass if it exists in the cache (otherwise - resolve it when requested)
 			this.superclass = (ReferenceBinding) this.environment.getTypeFromTypeSignature(wrapper, typeVars, this, missingTypeNames);
+//{ObjectTeams: wrapping of type (incl. its arguments)?
+			this.superclass = (ReferenceBinding) RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.superclass, this);
+// SH}
 			this.tagBits |= TagBits.HasUnresolvedSuperclass;
 
 			this.superInterfaces = Binding.NO_SUPERINTERFACES;
@@ -486,7 +489,13 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 				// attempt to find each superinterface if it exists in the cache (otherwise - resolve it when requested)
 				java.util.ArrayList types = new java.util.ArrayList(2);
 				do {
+//{ObjectTeams: wrapping of type (incl. its arguments)?
+/* orig:
 					types.add(this.environment.getTypeFromTypeSignature(wrapper, typeVars, this, missingTypeNames));
+  :giro*/
+					TypeBinding type = this.environment.getTypeFromTypeSignature(wrapper, typeVars, this, missingTypeNames);
+					types.add(RoleTypeCreator.maybeWrapUnqualifiedRoleType(type, this));
+// SH}
 				} while (!wrapper.atEnd());
 				this.superInterfaces = new ReferenceBinding[types.size()];
 				types.toArray(this.superInterfaces);

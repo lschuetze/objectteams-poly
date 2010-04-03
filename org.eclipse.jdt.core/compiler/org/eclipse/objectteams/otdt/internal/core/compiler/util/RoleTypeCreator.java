@@ -560,10 +560,10 @@ public class RoleTypeCreator implements TagBits {
 	    }
 	    // common implementation:
 	    public static TypeBinding maybeWrapUnqualifiedRoleType (final Scope            scope,
-	    												 final ReferenceBinding site,
-	    												       TypeBinding      typeToWrap,
-	    												 final ASTNode          typedNode,
-	    												       ProblemReporter  problemReporter)
+	    												 		final ReferenceBinding site,
+	    												              TypeBinding      typeToWrap,
+	    												        final ASTNode          typedNode,
+	    												              ProblemReporter  problemReporter)
 	    {
 	        assert( ! (site == null));
 	        if (typeToWrap == null) return null;
@@ -587,6 +587,19 @@ public class RoleTypeCreator implements TagBits {
 			// easy problems first:
 	        if (!(typeToWrap instanceof ReferenceBinding))
 	            return originalType;
+	        
+	        if (typeToWrap instanceof UnresolvedReferenceBinding) {
+	        	// defer wrapping until resolve():
+	        	final UnresolvedReferenceBinding rawUnresolved = (UnresolvedReferenceBinding) typeToWrap;
+	        	final ProblemReporter originalReporter = problemReporter; 
+	        	return new UnresolvedReferenceBinding(rawUnresolved.compoundName, rawUnresolved.getPackage()) {
+	        		@Override
+	        		public ReferenceBinding resolve(LookupEnvironment environment, boolean convertGenericToRawType) {
+	        			ReferenceBinding type = rawUnresolved.resolve(environment, convertGenericToRawType);
+	        			return (ReferenceBinding) maybeWrapUnqualifiedRoleType(scope, site, type, typedNode, originalReporter);
+	        		}
+	        	};
+	        }
 	        ReferenceBinding refBinding = (ReferenceBinding)typeToWrap;
 	        if (refBinding.isTypeVariable()) {
 	        	// inplace modifying the type variable. TODO(SH): is this ok, or do we need a copy?

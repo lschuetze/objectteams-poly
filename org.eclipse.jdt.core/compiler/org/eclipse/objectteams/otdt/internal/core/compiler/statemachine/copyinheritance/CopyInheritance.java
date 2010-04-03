@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodVerifier;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
@@ -1566,8 +1567,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		MethodDeclaration ifcCreator = null;
 		if (teamBinding.isRole()) {
 			ReferenceBinding ifcBinding = teamBinding.roleModel.getInterfacePartBinding();
-			MethodBinding foundMethod = TypeAnalyzer.getMethod(ifcBinding, creatorDecl.selector);
-			if (foundMethod == null) {
+			MethodBinding foundMethod = TypeAnalyzer.findMethod(creatorDecl.scope, ifcBinding, creatorDecl.selector, creatorDecl.binding.parameters);
+			if (foundMethod == null || foundMethod.problemId() == ProblemReasons.NotFound) {
 		    	TypeDeclaration enclTeamDecl = teamBinding.roleModel.getTeamModel().getAst();
 		    	ifcCreator = AstConverter.genRoleIfcMethod(enclTeamDecl, creatorDecl);
 		    	AstEdit.addMethod(teamBinding.roleModel.getInterfaceAst(), ifcCreator);
