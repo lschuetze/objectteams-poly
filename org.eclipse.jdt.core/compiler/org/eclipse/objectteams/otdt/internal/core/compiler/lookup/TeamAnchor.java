@@ -349,7 +349,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		return false;
 	}
 	/** Hook method to be overridden in FieldBinding. */
-	void resolveInitIfNeeded() {/*nothing*/}
+	protected void resolveInitIfNeeded() {/*nothing*/}
 
 	/**
      * API for generating team anchors into byte-code attributes.

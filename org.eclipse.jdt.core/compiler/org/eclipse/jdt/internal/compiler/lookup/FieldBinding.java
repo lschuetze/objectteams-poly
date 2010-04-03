@@ -59,7 +59,7 @@ public class FieldBinding extends VariableBinding implements IProtectable {
 	}
 	/** If this field is a candidate for a team anchor, ensure that its initialization
 	 *  is resolved such that the best name is set. */
-	void resolveInitIfNeeded() {
+	protected void resolveInitIfNeeded() {
 		if (this.model != null) {
 			FieldDeclaration decl = this.model.getAST();
 			if (decl != null && decl.needsResolveInit()) {
