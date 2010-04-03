@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 public class ForeachStatement extends Statement {
 
@@ -474,6 +475,10 @@ public class ForeachStatement extends Statement {
 					this.kind = GENERIC_ITERABLE;
 
 					this.collectionElementType = arguments[0];
+//{ObjectTeams: wrap role type from receiver:
+					this.collectionElementType = RoleTypeCreator.maybeWrapQualifiedRoleType(
+													upperScope, this.collection, this.collectionElementType, this.collection);
+// SH}
 					if (!this.collectionElementType.isCompatibleWith(elementType)
 							&& !this.scope.isBoxingCompatibleWith(this.collectionElementType, elementType)) {
 						this.scope.problemReporter().notCompatibleTypesErrorInForeach(this.collection, this.collectionElementType, elementType);
