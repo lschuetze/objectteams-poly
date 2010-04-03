@@ -1265,10 +1265,7 @@ public void fieldAccess(byte opcode, FieldBinding fieldBinding, TypeBinding decl
 	if (opcode == Opcodes.OPC_getfield) {
 		if ((fieldBinding.tagBits & TagBits.IsFakedField) != 0) {
 			origType = fieldBinding.type;
-			ReferenceBinding superRole = fieldBinding.model.actualDeclaringClass;
-			fieldBinding = superRole.getField(fieldBinding.name, true);
-			if (fieldBinding == null)
-				throw new InternalCompilerError("Expected base field not found in super Role "+new String(superRole.readableName())); //$NON-NLS-1$
+			fieldBinding = fieldBinding.model.getOriginalFromFake();
 		} else if ((fieldBinding.tagBits & TagBits.IsRoleClassField) != 0) {
 			checkcast(fieldBinding.declaringClass); // don't try to access via the interface part
 		}

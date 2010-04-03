@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorUsageRanksAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
@@ -107,6 +108,15 @@ public class FieldModel extends ModelElement {
 			if (f.model != null)
 				return f.model.actualDeclaringClass;
 		return f.declaringClass;
+	}
+
+	/** Given that this is the model of a fake strong base field, return the original field from the super role. */
+	public FieldBinding getOriginalFromFake() {
+		ReferenceBinding superRole = this.actualDeclaringClass;
+		FieldBinding fieldBinding = superRole.getField(this._binding.name, true);
+		if (fieldBinding == null)
+			throw new InternalCompilerError("Expected base field not found in super Role "+new String(superRole.readableName())); //$NON-NLS-1$
+		return fieldBinding;
 	}
 
 	/** After inserting a field into a role interface create an attribute to store its source modifiers. */

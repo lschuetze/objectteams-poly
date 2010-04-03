@@ -24,11 +24,10 @@ import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * @author Markus Witte
  * @version $Id: ConstantPoolObjectWriter.java 23416 2010-02-03 19:59:31Z stephan $
  */
@@ -60,6 +59,8 @@ public class ConstantPoolObjectWriter implements ClassFileConstants  {
 				return this.dstClassFile.codeStream.recordTypeBinding(cpo.getClassObject()); // record type anchor, too.
 			case FieldRefTag :
 				FieldBinding fieldBinding = cpo.getFieldRef();
+				if ((fieldBinding.tagBits & TagBits.IsFakedField) != 0)
+					fieldBinding = fieldBinding.model.getOriginalFromFake();
 				return this.dstClassFile.constantPool.literalIndexForField(
 														fieldBinding.declaringClass.constantPoolName(),
 														fieldBinding.name,
