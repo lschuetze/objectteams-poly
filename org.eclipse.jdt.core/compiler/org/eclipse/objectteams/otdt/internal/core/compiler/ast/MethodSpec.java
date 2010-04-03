@@ -429,11 +429,25 @@ public class MethodSpec extends ASTNode
 		if (this.resolvedMethod == null) {
 			scope.problemReporter().unresolvedMethodSpec(this, type, isCallout);
 			this.resolvedMethod = new ProblemMethodBinding(this.selector, Binding.NO_PARAMETERS, type, ProblemReasons.NotFound);
+			return;
 		} else if (!this.resolvedMethod.isValidBinding()) {
-			scope.problemReporter().ambiguousMethodMapping(this, type, isCallout);
-		} else {
-			initTranslationBits();
+			switch (this.resolvedMethod.problemId()) {
+				case ProblemReasons.Ambiguous:
+					scope.problemReporter().ambiguousMethodMapping(this, type, isCallout);
+					return;
+				case ProblemReasons.NotVisible:
+					ReferenceBinding declaringClass = this.resolvedMethod.declaringClass;
+					if (!declaringClass.isRole() && ((ProblemMethodBinding)this.resolvedMethod).closestMatch.isProtected()) {
+						this.resolvedMethod = ((ProblemMethodBinding)this.resolvedMethod).closestMatch;
+						break; // ignore
+					}
+					//$FALL-THROUGH$
+				default:
+					scope.problemReporter().missingImplementation(this, "Unexpected compile error at MethodSpec "+this); //$NON-NLS-1$
+					return;
+			}			
 		}
+		initTranslationBits();
 	}
 
 
