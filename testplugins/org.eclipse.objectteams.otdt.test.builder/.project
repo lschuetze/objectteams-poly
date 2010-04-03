@@ -6,7 +6,7 @@
 	</projects>
 	<buildSpec>
 		<buildCommand>
-			<name>org.eclipse.jdt.core.javabuilder</name>
+			<name>org.eclipse.objectteams.otdt.builder.OTJBuilder</name>
 			<arguments>
 			</arguments>
 		</buildCommand>
@@ -24,6 +24,6 @@
 	<natures>
 		<nature>org.eclipse.pde.PluginNature</nature>
 		<nature>org.eclipse.jdt.core.javanature</nature>
-		<nature>org.objectteams.otdt.OTJavaNature</nature>
+		<nature>org.eclipse.objectteams.otdt.OTJavaNature</nature>
 	</natures>
 </projectDescription>
