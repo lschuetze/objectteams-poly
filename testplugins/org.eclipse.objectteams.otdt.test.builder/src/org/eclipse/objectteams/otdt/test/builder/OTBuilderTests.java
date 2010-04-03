@@ -57,9 +57,9 @@ public class OTBuilderTests extends BuilderTests {
 		
 		this.otenv = new OTTestingEnvironment();
 		this.otenv.activate();
-		this.env = new TestingEnvironment();
-		this.env.openEmptyWorkspace();
-		this.env.resetWorkspace();
+		env = new TestingEnvironment();
+		env.openEmptyWorkspace();
+		env.resetWorkspace();
 	
 		BuildManager.DEBUG = 2;
 	}
