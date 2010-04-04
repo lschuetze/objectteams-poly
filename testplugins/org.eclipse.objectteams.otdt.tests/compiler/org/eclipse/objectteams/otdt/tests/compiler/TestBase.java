@@ -67,11 +67,16 @@ public class TestBase extends TestCase
 	public static final String JAVA_HOME = System.getProperty("java.home");
 	public static final String USER_HOME = System.getProperty("user.home");
 	
-	public static final String JRE_JAR_PATH = JAVA_HOME 
-													+ File.separator 
-													+ "lib" 
-													+ File.separator 
-													+ "rt.jar";
+	public static final String JRE_JAR_PATH;
+	static {
+		String path = JAVA_HOME+File.separator+"lib"+File.separator+"rt.jar";
+		if ((new File(path).exists())) {
+			JRE_JAR_PATH = path;
+		} else {
+			JRE_JAR_PATH = JAVA_HOME+File.separator+"lib"+File.separator+"vm.jar";
+			System.err.println("TestBase: using alternate jre "+JRE_JAR_PATH);
+		}
+	}
     
 	public static final String OT_RUNTIME_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTRUNTIME_LIBDIR).toOSString();
 	
@@ -149,9 +154,10 @@ public class TestBase extends TestCase
         
         try
         {
-	        if (!validClasspathEntries())
+        	String missing;
+	        if ((missing = missingClasspathEntry()) != null)
 	        {
-	            throw new FileNotFoundException("Whether OTRE_JAR_PATH (otre.jar) or JRE_JAR_PATH (rt.jar) is unvalid.");
+	            throw new FileNotFoundException("Missing library "+missing);
 	        }
 	        
 	        String[] args = (classpath == null)  
@@ -192,12 +198,16 @@ public class TestBase extends TestCase
         }
     }
 
-    private boolean validClasspathEntries()
+    private String missingClasspathEntry()
     {
         File otreJar = new File(OTRE_JAR_PATH);
         File jreJar = new File(JRE_JAR_PATH);
         
-        return (otreJar.exists() && jreJar.exists());
+        if (!otreJar.exists())
+        	return OTRE_JAR_PATH;
+        if (!jreJar.exists())
+        	return JRE_JAR_PATH;
+        return null;
     }
 
     public void createFile(String fname, String content)
