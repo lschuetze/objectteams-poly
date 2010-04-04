@@ -94,7 +94,7 @@ public class SourceElementParserTest extends FileBasedModelTest implements ISour
                 "ParserTest",
                 "src",
                 "sourcelocations",
-                "Disposition.java"); // FIXME(SH): need a new test file
+                "JdtTestAdaptor.java");
         
         String    src = unit.getSource();
         IResource res = unit.getCorrespondingResource();        
