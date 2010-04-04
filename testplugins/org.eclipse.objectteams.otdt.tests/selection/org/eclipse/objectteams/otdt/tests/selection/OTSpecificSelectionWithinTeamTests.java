@@ -147,8 +147,6 @@ public class OTSpecificSelectionWithinTeamTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"  }\n" +
 			"  <SelectOnType:T1> t1;\n" +
 			"  t1.R1 r1;\n" +

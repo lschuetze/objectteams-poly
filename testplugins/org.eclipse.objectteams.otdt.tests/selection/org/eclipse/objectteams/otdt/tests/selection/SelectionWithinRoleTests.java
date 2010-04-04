@@ -56,8 +56,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"import java.io.*;\n" + 
 			"public team class T1 {\n" + 
 			"  public role class R1 extends <SelectOnType:IOException> {\n" +
-			"    public R1() {\n" + 
-			"    }\n" +
 			"  }\n" +
 			"  public T1() {\n" +
 			"  }\n" +
@@ -101,8 +99,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"import java.io.*;\n" + 
 			"public team class T1 {\n" + 
 			"  public role class R1 extends IOException implements <SelectOnType:Serializable> {\n" +
-			"    public R1() {\n" + 
-			"    }\n" +
 			"    int foo() {\n" + 
 			"    }\n" + 
 			"  }\n" +
@@ -144,8 +140,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 extends <SelectOnType:java.io.IOException> {\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"  }\n" + 
 			"  public T1() {\n" +
 			"  }\n" + 
@@ -185,8 +179,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 extends <SelectOnType:java.io> {\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"  }\n" + 
 			"  public T1() {\n" +
 			"  }\n" + 
@@ -226,8 +218,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 extends java.io.IOException {\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"    int foo() {\n" + 
 			"      <SelectOnMessageSend:System.out.println(\"hello\")>;\n" + 
 			"    }\n" + 
@@ -270,8 +260,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"    int foo() {\n" + 
 			"      <SelectOnMessageSend:System.out.println(\"hello\")>;\n" + 
 			"    }\n" + 
@@ -319,8 +307,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"    int foo() {\n" + 
 			"      <SelectOnMessageSend:this.bar(\"hello\")>;\n" + 
 			"    }\n" + 
@@ -369,8 +355,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
 			"    int num;\n" + 
-			"    public R1() {\n" +
-			"    }\n" +
 			"    int foo() {\n" + 
 			"      int j = <SelectionOnFieldReference:this.num>;\n" + 
 			"    }\n" + 
@@ -421,16 +405,12 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"team class T1 {\n" +
 			"  public role class R1 {\n" +
 			"    int num;\n" + 
-			"    public R1() {\n" +
-			"    }\n" +
 			"  }\n" + 
 			"  T1() {\n" +
 			"  }\n" + 
 			"}\n" +
 			"public team class T2 extends T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"    int foo() {\n" + 
 			"      int j = <SelectionOnFieldReference:this.num>;\n" + 
 			"    }\n" + 
@@ -477,8 +457,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
 			"    int num;\n" + 
-			"    public R1() {\n" +
-			"    }\n" +
 			"    int foo() {\n" + 
 			"      int j = <SelectionOnFieldReference:this.num>;\n" + 
 			"    }\n" + 
@@ -526,8 +504,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
 			"    R1 x;\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"    int foo() {\n" + 
 			"      int j = <SelectionOnFieldReference:this.x>;\n" + 
 			"    }\n" + 
@@ -624,8 +600,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" + 
-			"    }\n" + 
 			"    int foo() {\n" + 
 			"      <SelectOnName:java.lang.System>;\n" + 
 			"    }\n" + 
@@ -671,8 +645,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" + 
-			"    }\n" + 
 			"    int foo() {\n" + 
 			"      System sys = <SelectOnName:java.lang.System>;\n" + 
 			"    }\n" + 
@@ -718,8 +690,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" + 
-			"    }\n" + 
 			"    int foo() {\n" + 
 			"      final <SelectOnType:System> sys;\n" + 
 			"    }\n" + 
@@ -765,8 +735,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" + 
-			"    }\n" + 
 			"    int foo() {\n" + 
 			"      <SelectOnType:System> sys;\n" + 
 			"    }\n" + 
@@ -812,8 +780,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" + 
-			"    }\n" + 
 			"    int foo() {\n" + 
 			"      <SelectOnName:System>;\n" + 
 			"    }\n" + 
@@ -864,8 +830,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" + 
-			"    }\n" + 
 			"    int foo() {\n" + 
 			"      <SelectOnAllocationExpression:new Object() {\n" +
 			"      }>;\n" + 
@@ -914,8 +878,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" + 
-			"    }\n" + 
 			"    Object foo() {\n" + 
 			"      return (<SelectOnType:Object>) this;\n" + 
 			"    }\n" + 
@@ -960,8 +922,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"team package <SelectOnPackage:x.y>;\n" + 
 			"public role class R1 {\n" +
-			"  public R1() {\n" + 
-			"  }\n" + 
 			"  int foo() {\n" + 
 			"  }\n" + 
 			"}\n";
@@ -1004,8 +964,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"team package a.b.T1;\n" + 
 			"import <SelectOnImport:x.y.Other>;\n" + 
 			"public role class R1 {\n" +
-			"  public R1() {\n" + 
-			"  }\n" + 
 			"  int foo() {\n" + 
 			"  }\n" + 
 			"}\n";
@@ -1048,8 +1006,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"team package a.b.T1;\n" + 
 			"import <SelectOnImport:x.y.other>;\n" + 
 			"public role class R1 {\n" +
-			"  public R1() {\n" + 
-			"  }\n" + 
 			"  int foo() {\n" + 
 			"  }\n" + 
 			"}\n";
@@ -1091,8 +1047,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" + 
 			"  public role class R1 {\n" +
-			"    public R1() {\n" + 
-			"    }\n" + 
 			"    int foo() {\n" + 
 			"      String[] p = <SelectOnType:String>;\n" + 
 			"    }\n" + 
@@ -1140,8 +1094,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" + 
 			"  public role class R1 {\n" +
-			"    public R1() {\n" + 
-			"    }\n" + 
 			"    Object foo() {\n" + 
 			"      return <SelectOnSuper:super>;\n" + 
 			"    }\n" + 
@@ -1193,8 +1145,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" + 
 			"  public role class R1 {\n" +
-			"    public R1() {\n" + 
-			"    }\n" + 
 			"    Object foo() {\n" + 
 			"      new X() {\n" + 
 			"        Object bar() {\n" + 
@@ -1296,8 +1246,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class G {\n" + 
 			"  role class M {\n" + 
-			"    M() {\n" + 
-			"    }\n" + 
 			"    static Object foo() {\n" + 
 			"      class X extends M {\n" + 
 			"        X() {\n" + 
@@ -1351,8 +1299,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class G {\n" + 
 			"  role class M {\n" + 
-			"    M() {\n" + 
-			"    }\n" + 
 			"  }\n" + 
 			"  public G() {\n" + 
 			"  }\n" + 
@@ -1453,8 +1399,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"public team class G {\n" + 
 			"  role class M {\n" + 
 			"    <SelectOnType:Y> f;\n" +
-			"    M() {\n" +
-			"    }\n" +
 			"    void foo() {\n" +
 			"    }\n" +
 			"  }\n" + 
@@ -1507,8 +1451,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class G {\n" + 
 			"  role class M {\n" + 
-			"    M() {\n" +
-			"    }\n" +
 			"    static Object foo() {\n" + 
 			"      class X {\n" + 
 			"        X() {\n" +
@@ -1561,8 +1503,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n"+
 			"  role class R1 {\n"+
-			"    R1() {\n" +
-			"    }\n"+
 			"    void foo() {\n"+
 			"      <SelectOnType:Object>;\n"+
 			"    }\n"+
@@ -1609,8 +1549,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n"+
 			"  role class R1 {\n"+
-			"    R1() {\n" +
-			"    }\n"+
 			"    void foo() {\n"+
 			"      boolean y = <SelectOnType:Object>;\n"+
 			"    }\n"+
@@ -1656,8 +1594,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"public team class T1 {\n"+
 			"  role class R1 {\n"+
 			"    boolean y = <SelectOnType:Object>;\n"+
-			"    R1() {\n" +
-			"    }\n"+
 			"  }\n"+
 			"  public T1() {\n"+
 			"  }\n"+
@@ -1701,8 +1637,6 @@ public class SelectionWithinRoleTests extends AbstractSelectionTest
 			"  role class R1 {\n"+
 			"    R1 x = <SelectOnAllocationExpression:new R1() {\n" +
 			"    }>;\n"+
-			"    R1() {\n"+
-			"    }\n"+
 			"  }\n"+
 			"  public T1() {\n"+
 			"  }\n"+

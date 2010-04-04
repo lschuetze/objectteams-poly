@@ -1156,8 +1156,6 @@ public class SelectionWithinTeamTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class G {\n" + 
 			"  role class M {\n" + 
-			"    M() {\n" + 
-			"    }\n" + 
 			"  }\n" + 
 			"  public G() {\n" + 
 			"  }\n" + 

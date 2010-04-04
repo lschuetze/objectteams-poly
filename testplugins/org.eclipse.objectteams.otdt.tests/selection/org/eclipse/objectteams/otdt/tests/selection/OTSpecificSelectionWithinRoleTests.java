@@ -102,8 +102,6 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"  }\n" +
 			"  final T1 t1;\n" +
 			"  <SelectOnType:t1.R1> r1;\n" +
@@ -150,8 +148,6 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"  }\n" +
 			"  final T1 t1;\n" +
 			"  <SelectOnType:R1<@t1>> r1;\n" +
@@ -198,8 +194,6 @@ public class OTSpecificSelectionWithinRoleTests extends AbstractSelectionTest
 		String expectedUnitDisplayString =
 			"public team class T1 {\n" +
 			"  public role class R1 {\n" +
-			"    public R1() {\n" +
-			"    }\n" +
 			"  }\n" +
 			"  public T1() {\n" +
 			"  }\n" +
