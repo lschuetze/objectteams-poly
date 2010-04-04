@@ -20,6 +20,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
@@ -160,21 +161,22 @@ public class Sorting {
 		ReferenceBinding[] bindings = typeDeclaration.binding.memberTypes;
 		TypeDeclaration[] unsorted = typeDeclaration.memberTypes;
 		TypeDeclaration[] newMembers = new TypeDeclaration[unsorted.length];
-		int k = unsorted.length-1;
-		allMembers: for (int i=0; i<unsorted.length; i++) {
-			ReferenceBinding current = unsorted[i].binding;
-			if (current != null) {
-				// find insertion point from sorted bindings:
-				for (int j=0; j<bindings.length; j++) {
-					if (bindings[j] == current) {
-						newMembers[j] = unsorted[i];
-						continue allMembers;
-					}
+		int l = 0;
+		allMembers: for (int i=0; i<bindings.length; i++) {
+			ReferenceBinding current = bindings[i];
+			if (current.isBinaryBinding()) 
+				continue; // no AST: phantom or reused rofi
+			// find corresponding AST
+			for (int j=0; j<unsorted.length; j++) {
+				if (unsorted[j].binding == current) {
+					newMembers[l++] = unsorted[j];
+					continue allMembers;
 				}
 			}
-			// emergency, so we'll never lose any member types:
-			newMembers[k--] = unsorted[i];
+			throw new InternalCompilerError("Unmatched member type "+String.valueOf(current.readableName())); //$NON-NLS-1$
 		}
+		if (l<newMembers.length)
+			throw new InternalCompilerError("Not all member types matched: "+l); //$NON-NLS-1$
 		typeDeclaration.memberTypes = newMembers;
 	}
 }
