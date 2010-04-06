@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.compiler.problem.*;
 import org.eclipse.jdt.internal.compiler.util.Messages;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
  * OTDT changes:
@@ -526,6 +527,12 @@ public final boolean checkCastTypesCompatibility(
 						} else {
 							// ( CLASS ) INTERFACE
 							if (castType.id == TypeIds.T_JavaLangObject) { // no runtime error
+//{ObjectTeams: exception for confined type (except from generated like _OT$addRole(Object)):
+								if (TypeAnalyzer.isConfined(expressionType) && !scope.isGeneratedScope()) {
+									tagAsNeedCheckCast();
+									return false;
+								}
+// SH}
 								tagAsUnnecessaryCast(scope, castType);
 								return true;
 							}

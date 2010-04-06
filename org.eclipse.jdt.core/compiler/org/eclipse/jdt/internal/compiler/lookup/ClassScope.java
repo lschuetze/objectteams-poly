@@ -1967,6 +1967,12 @@ public class ClassScope extends Scope {
 				sourceType.tagBits |= TagBits.HierarchyHasProblems;
 				continue nextInterface;
 			}
+			if (   sourceType.isInterface() 
+				&& TypeAnalyzer.isConfined(superInterface) 
+				&& this.referenceContext.superclass == null) 
+			{
+				sourceType.superclass = null; // cancel premature superclass j.l.Object				
+			}
 // SH}
 
 			// check for simple interface collisions
