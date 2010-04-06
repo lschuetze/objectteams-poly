@@ -65,13 +65,13 @@ public class DoublyWeakHashMap<K,V> implements Map<K,V> {
 	}
 
 	// used from migrateToBase() and lifting constructor
-	public V put(K key, V value) {
+	public synchronized V put(K key, V value) {
 		this.map.put(key, new WeakReference<V>(value));
 		return value;
 	}
 
 	// used from unregisterRole(), migrateToBase()
-	public V remove(Object key) {
+	public synchronized V remove(Object key) {
 		WeakReference<V> value = this.map.remove(key);
 		return (value == null) ? null : value.get();
 	}
@@ -90,7 +90,7 @@ public class DoublyWeakHashMap<K,V> implements Map<K,V> {
 	}
 
 	// used from getAllRoles() et al.
-	public Collection<V> values() {
+	public synchronized Collection<V> values() {
 		ArrayList<V> result = new ArrayList<V>(this.map.size());
 		for (WeakReference<V> valRef : this.map.values()) {
 			V value = valRef.get();
