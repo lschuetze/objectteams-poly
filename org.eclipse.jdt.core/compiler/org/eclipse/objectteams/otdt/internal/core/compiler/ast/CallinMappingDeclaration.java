@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -262,8 +261,10 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			this.binding.tagBits |= TagBits.HasMappingIncompatibility;
 			return false;
 		} else {
-			if (this.roleMethodSpec.parameters == null || this.roleMethodSpec.parameters == Binding.NO_PARAMETERS)
-				this.roleMethodSpec.parameters = new TypeBinding[roleParams.length];
+			// before modifying the parameters array copy it:
+			System.arraycopy(this.roleMethodSpec.parameters, 0, 
+							 this.roleMethodSpec.parameters = new TypeBinding[roleParams.length], 0,
+							 roleParams.length);
 			for (int j = 0; j < roleParams.length; j++) {
 				TypeBinding baseParam = baseParams[j];
 				TypeBinding roleParam = roleParams[j];
