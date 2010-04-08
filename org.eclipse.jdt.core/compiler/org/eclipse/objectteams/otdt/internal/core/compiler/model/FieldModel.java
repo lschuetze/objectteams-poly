@@ -74,7 +74,7 @@ public class FieldModel extends ModelElement {
     /** Faked _OT$base fields store here, in which super-role a real base field can be found. */
 	public ReferenceBinding actualDeclaringClass;
 
-	// store inferred callouts to avoid duplicate generation:
+	// store inferred callouts to avoid duplicate generation: // FIXME(SH): should be per adapting role
 	public CalloutMappingDeclaration _setterCallout= null;
 	public CalloutMappingDeclaration _getterCallout= null;
 
@@ -145,6 +145,13 @@ public class FieldModel extends ModelElement {
 			return null;
 		AnchorUsageRanksAttribute attr = (AnchorUsageRanksAttribute) field.model.getAttribute(IOTConstants.ANCHOR_USAGE_RANKS);
 		return attr.getRanks();
+	}
+	/** Is the given field accessed via an inferred callout-to-field? */
+	public static boolean isCalloutAccessed(FieldBinding fieldBinding) {
+		FieldModel model = fieldBinding.model;
+		if (model == null)
+			return false;
+		return model._setterCallout != null || model._getterCallout != null;
 	}
 
 }

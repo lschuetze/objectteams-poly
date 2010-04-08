@@ -44,6 +44,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDec
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 /**
@@ -465,6 +466,14 @@ public boolean isTypeAccess() {
 public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo flowInfo, boolean isReadAccess) {
 	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE) != 0)	return;
 	
+//{ObjectTeams: don't create (more) synthetics for base field accessed via callout:
+	if (   FieldModel.isCalloutAccessed(this.binding) 
+		&& this.syntheticAccessors != null 
+		&& this.syntheticAccessors[isReadAccess ? FieldReference.READ : FieldReference.WRITE] != null) 
+	{
+		return; // synthetic binding already created during resolveType; avoid CCE if declaringClass is binary. 
+	}
+// SH}
 	// if field from parameterized type got found, use the original field at codegen time
 	FieldBinding codegenBinding = this.binding.original();
 	if (this.binding.isPrivate()) {
