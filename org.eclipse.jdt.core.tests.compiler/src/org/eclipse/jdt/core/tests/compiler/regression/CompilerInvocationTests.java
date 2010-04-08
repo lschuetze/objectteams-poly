@@ -879,6 +879,7 @@ public void _test011_problem_categories() {
         expectedProblemAttributes.put("DeprecatedPathSyntax", new ProblemAttributes(CategorizedProblem.CAT_CODE_STYLE));
         expectedProblemAttributes.put("StaticRole", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
         expectedProblemAttributes.put("NotVisibleRoleMethod", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
+        expectedProblemAttributes.put("NotVisibleRoleConstructor", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
         expectedProblemAttributes.put("DifferentTeamInstance", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
         expectedProblemAttributes.put("NonPublicFieldOfExternalizedRole", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
         expectedProblemAttributes.put("ExternalizedCallToNonPublicMethod", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
@@ -1591,6 +1592,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("StaticRole", SKIP);
         expectedProblemAttributes.put("IllegalModifierForRole", SKIP);
         expectedProblemAttributes.put("NotVisibleRoleMethod", SKIP);
+        expectedProblemAttributes.put("NotVisibleRoleConstructor", SKIP);
         expectedProblemAttributes.put("DifferentTeamInstance", SKIP);
         expectedProblemAttributes.put("NonPublicFieldOfExternalizedRole", SKIP);
         expectedProblemAttributes.put("ExternalizedCallToNonPublicMethod", SKIP);
