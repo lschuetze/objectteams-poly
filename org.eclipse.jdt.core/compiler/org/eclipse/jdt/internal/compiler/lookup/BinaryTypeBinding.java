@@ -813,7 +813,10 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 			if (dollarPos > -1) // for unresolved bindings
 				roleName = CharOperation.subarray(roleName, dollarPos+1, -1);
 			// get the role class:
-			ReferenceBinding roleClass = getMemberType(CharOperation.concat(IOTConstants.OT_DELIM_NAME, roleName));
+			ReferenceBinding site = this;
+			if (isSynthInterface())
+				site = site.roleModel.getClassPartBinding();
+			ReferenceBinding roleClass = site.getMemberType(CharOperation.concat(IOTConstants.OT_DELIM_NAME, roleName));
 			if (roleClass instanceof UnresolvedReferenceBinding)
 				roleClass = ((UnresolvedReferenceBinding)roleClass).resolve(this.environment, false);
 			// get and store the original ctor:
