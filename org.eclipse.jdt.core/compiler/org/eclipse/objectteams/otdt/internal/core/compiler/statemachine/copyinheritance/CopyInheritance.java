@@ -570,6 +570,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    			subRoleDecl = findMemberType(subTeamDecl, superRole.sourceName);
 	    		if (subRoleDecl != null && (subRoleDecl.binding.tagBits & TagBits.BeginHierarchyCheck) == 0)
 	    			subRoleDecl.scope.connectTypeHierarchyWithoutMembers();
+	    		if (subRoleDecl == null) // still?
+	    			return null; // assume recompile has been scheduled
 	    	}
 
 		    // If type doesn't exist, create now
