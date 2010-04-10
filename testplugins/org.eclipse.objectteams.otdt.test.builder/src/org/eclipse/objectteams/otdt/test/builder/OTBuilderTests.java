@@ -35,10 +35,8 @@ public class OTBuilderTests extends BuilderTests {
 	public static final String OT_RUNTIME_PATH;
 	public static final String OTRE_JAR_PATH;
 	static {
-		OT_RUNTIME_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTDT_INSTALLDIR).toOSString();
-		OTRE_JAR_PATH = OT_RUNTIME_PATH 
-						+ File.separator
-						+ "lib" //$NON-NLS-1$
+		OT_RUNTIME_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTRUNTIME_LIBDIR).toOSString();
+		OTRE_JAR_PATH = OT_RUNTIME_PATH
 						+ File.separator
 						+ "otre.jar"; //$NON-NLS-1$
 	}
