@@ -59,7 +59,7 @@ if [ ! -f ${TEAM} ]; then
 fi
 
 # OUTPUT:
-OUT=src/org/objectteams/otdt/debug/core/breakpoints/IOOTBreakPoints.java
+OUT=src/org/eclipse/objectteams/otdt/debug/core/breakpoints/IOOTBreakPoints.java
 
 if [ "$2" != "RUN" ]
 then
@@ -71,7 +71,7 @@ else
 
 	echo "${HEADER}"
     i=0
-    while read 
+    while read REPLY
     do
         i=`expr $i + 1`
         l=`echo "$REPLY" | sed -e "s/^.*[$]Debug(\(.*\))/\1/"`
