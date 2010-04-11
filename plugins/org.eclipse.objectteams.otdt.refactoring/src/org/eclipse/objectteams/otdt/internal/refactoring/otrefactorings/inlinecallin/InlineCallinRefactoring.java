@@ -739,7 +739,7 @@ public class InlineCallinRefactoring extends Refactoring {
 		if (hasParameterMapping(callinMapping)) {
 			copyRoleParameterMappingsToInvocation(invocation, callinMappingDecl, baseMethodInfo);
 		} else {
-			copyInvocationParameters(invocation, baseMethodInfo.getMethod());
+			copyInvocationParameters(invocation, this.fRoleMethod);
 		}
 		if (needsReturnStatement(baseMethodInfo)) {
 			ReturnStatement statement = invocation.getAST().newReturnStatement();
