@@ -338,6 +338,7 @@ public class TeamMethodGenerator {
     	}
     	@Override
     	public void generateCode(ClassScope classScope, ClassFile classFile) {
+    		this.binding.copyInheritanceSrc = this.descriptor.binding;
     		ConstantPoolObjectMapper mapper = new TeamConstantPoolMapper(this.descriptor.binding, this.binding);
     		ConstantPoolObjectReader reader = new ConstantPoolObjectReader( classBytes, 
     																		constantPoolOffsets, 
