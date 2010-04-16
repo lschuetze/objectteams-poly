@@ -279,6 +279,8 @@ public class Lowering implements IOTConstants {
 			else
 				this.castRequired = pushedType != popType;
 			this.provider = provider;
+			this.sourceStart = provider.sourceStart;
+			this.sourceEnd = provider.sourceEnd;
 			this.constant = Constant.NotAConstant;
 		}
 		/* (non-Javadoc)
