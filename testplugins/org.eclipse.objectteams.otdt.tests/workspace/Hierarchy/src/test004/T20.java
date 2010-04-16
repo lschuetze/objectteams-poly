@@ -1,6 +1,6 @@
 package test004;
 
-public team class T20
+public team class T20 extends java.util.ArrayList
 {
 	public team class T10
 	{

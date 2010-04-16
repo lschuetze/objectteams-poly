@@ -125,4 +125,26 @@ public class TypeHelperTest002 extends FileBasedModelTest
 
         assertTrue( compareTypes(expected, actual) );
     }
+    
+    // test hierarchy of team extending non-team
+    public void testGetAllRoleTypes2() throws JavaModelException 
+    {
+        IType teamIType =
+            getType(getTestProjectDir(),
+                "analysis",
+                "teamhierarchy",
+                "Team6");
+        IOTType team6 = OTModelManager.getOTElement(teamIType);
+        
+        IType[] expected = new IType[] {
+			        		getRole(getTestProjectDir(),
+				                "analysis",
+				                "teamhierarchy",
+				                "Team6",
+				                "R")
+				            };
+        IType[] actual = TypeHelper.getAllRoleTypes(team6);
+
+        assertTrue( compareTypes(expected, actual) );
+    }
 }

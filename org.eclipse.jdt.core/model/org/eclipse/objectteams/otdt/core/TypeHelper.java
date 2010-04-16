@@ -656,7 +656,8 @@ public class TypeHelper
                 continue;
             }
             
-            if (superTeams[teamsIdx].getFullyQualifiedName().compareTo(ORG_OBJECTTEAMS_TEAM) == 0)
+            if (   superTeams[teamsIdx].getFullyQualifiedName().compareTo(ORG_OBJECTTEAMS_TEAM) == 0
+            	|| !isTeam(superTeams[teamsIdx].getFlags()))
             {
                 break;
             }

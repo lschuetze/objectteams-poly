@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.JavaModelStatus;
@@ -131,7 +132,8 @@ public class OTTypeHierarchyBuilder
             throws JavaModelException
     {
         if (teamType.equals(this._enclosingTeamHierarchy.ORG_OBJECTTEAMS_TEAM)
-            || teamType.equals(this._enclosingTeamHierarchy.JAVA_LANG_OBJECT))
+            || teamType.equals(this._enclosingTeamHierarchy.JAVA_LANG_OBJECT)
+            || !Flags.isTeam(teamType.getFlags()))
         {
             return null;
         }
