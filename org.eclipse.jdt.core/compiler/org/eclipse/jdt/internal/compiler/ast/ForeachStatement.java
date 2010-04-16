@@ -15,6 +15,7 @@ import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.BranchLabel;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
+import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext;
@@ -24,9 +25,12 @@ import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 public class ForeachStatement extends Statement {
@@ -47,6 +51,7 @@ public class ForeachStatement extends Statement {
 	public void markRaw() {
 		this.kind = RAW_ITERABLE;
 	}
+	private boolean needLowering;
 // SH}
 
 	private TypeBinding iteratorReceiverType;
@@ -267,6 +272,13 @@ public class ForeachStatement extends Statement {
 						codeStream.load(this.indexVariable);
 					}
 					codeStream.arrayAt(this.collectionElementType.id);
+//{ObjectTeams: lowering?
+					if (this.needLowering) {
+						ReferenceBinding roleType = (ReferenceBinding)this.collectionElementType;
+						MethodBinding getBase = roleType.getMethod(currentScope, IOTConstants._OT_GETBASE);
+						codeStream.invoke(Opcodes.OPC_invokeinterface, getBase, roleType);
+					} else
+// SH}
 					if (this.elementVariableImplicitWidening != -1) {
 						codeStream.generateImplicitConversion(this.elementVariableImplicitWidening);
 					}
@@ -284,6 +296,13 @@ public class ForeachStatement extends Statement {
 				codeStream.load(this.indexVariable);
 				codeStream.invokeJavaUtilIteratorNext();
 				if (this.elementVariable.binding.type.id != T_JavaLangObject) {
+//{ObjectTeams: lowering?
+					if (this.needLowering) {
+						ReferenceBinding roleType = (ReferenceBinding)this.collectionElementType;
+						MethodBinding getBase = roleType.getMethod(currentScope, IOTConstants._OT_GETBASE);
+						codeStream.invoke(Opcodes.OPC_invokeinterface, getBase, roleType);
+					} else
+// SH}
 					if (this.elementVariableImplicitWidening != -1) {
 						codeStream.checkcast(this.collectionElementType);
 						codeStream.generateImplicitConversion(this.elementVariableImplicitWidening);
@@ -396,10 +415,20 @@ public class ForeachStatement extends Statement {
 			if (collectionType.isArrayType()) { // for(E e : E[])
 				this.kind = ARRAY;
 				this.collectionElementType = ((ArrayBinding) collectionType).elementsType();
+//{ObjectTeams: may need lowering:
+				// role type wrapping not needed in this branch, array element type already carries all information
+				boolean oldLower = Config.getLoweringRequired();
+				Config.setLoweringRequired(false); // reset
+// orig:
 				if (!this.collectionElementType.isCompatibleWith(elementType)
 						&& !this.scope.isBoxingCompatibleWith(this.collectionElementType, elementType)) {
 					this.scope.problemReporter().notCompatibleTypesErrorInForeach(this.collection, this.collectionElementType, elementType);
 				}
+// :giro
+				if (Config.getLoweringRequired())
+					this.needLowering = true;
+				Config.setLoweringRequired(oldLower); // restore
+//SH}
 				// in case we need to do a conversion
 				int compileTimeTypeID = this.collectionElementType.id;
 				if (elementType.isBaseType()) {
@@ -478,11 +507,18 @@ public class ForeachStatement extends Statement {
 //{ObjectTeams: wrap role type from receiver:
 					this.collectionElementType = RoleTypeCreator.maybeWrapQualifiedRoleType(
 													upperScope, this.collection, this.collectionElementType, this.collection);
-// SH}
+					boolean oldLower = Config.getLoweringRequired();
+					Config.setLoweringRequired(false); // reset
+// orig:
 					if (!this.collectionElementType.isCompatibleWith(elementType)
 							&& !this.scope.isBoxingCompatibleWith(this.collectionElementType, elementType)) {
 						this.scope.problemReporter().notCompatibleTypesErrorInForeach(this.collection, this.collectionElementType, elementType);
 					}
+// :giro
+					if (Config.getLoweringRequired())
+						this.needLowering = true;
+					Config.setLoweringRequired(oldLower); // restore
+// SH}
 					int compileTimeTypeID = this.collectionElementType.id;
 					// no conversion needed as only for reference types
 					if (elementType.isBaseType()) {
