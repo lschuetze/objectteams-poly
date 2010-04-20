@@ -1309,8 +1309,9 @@ public class Dependencies implements ITranslationStates {
 	            if((tsuperRoleBinding != null)
 	                && (!tsuperRoleBinding.isInterface()))
 	            {
-	            	// want to copy methods generated from a mapping, too:
-	                if (!ensureTeamState(tsuperRoleBinding.roleModel.getTeamModel(), STATE_MAPPINGS_TRANSFORMED))
+	            	// prepare for transitive copying:
+	            	// (later added features are copied via RoleModel.setState()->CopyInheritance.copyGeneratedFeatures())
+	                if (!ensureTeamState(tsuperRoleBinding.roleModel.getTeamModel(), STATE_ROLE_FEATURES_COPIED))
 	                {
 	                    role.setState(STATE_ROLE_FEATURES_COPIED);
 	                    roleType.tagAsHavingErrors(); // missing methods from tsuper.
@@ -1710,7 +1711,6 @@ public class Dependencies implements ITranslationStates {
 		if (teamDecl != null) {
 			if (needMethodBodies(teamDecl))
 				DeclaredLifting.prepareArgLifting(teamDecl);
-    		CopyInheritance.weakenTeamMethodSignatures(teamDecl);
         	if (teamDecl.isRole()) {
         		ensureRoleState(teamDecl.getRoleModel(), STATE_TYPES_ADJUSTED);
         	}
@@ -1725,6 +1725,8 @@ public class Dependencies implements ITranslationStates {
 	            }
 	        }
 
+	        CopyInheritance.weakenTeamMethodSignatures(teamDecl);
+	        
 		    AbstractMethodDeclaration[] methods = teamDecl.methods;
 		    if (methods != null) {
 		    	for (int i=0; i<methods.length; i++)
@@ -1900,6 +1902,9 @@ public class Dependencies implements ITranslationStates {
 			if (roleBinding.superclass() != null)
 				ensureBindingState(roleBinding.superclass(), STATE_MAPPINGS_TRANSFORMED);
 
+			// make sure tsuper wrappers are copied to current role:
+			CopyInheritance.copyGeneratedFeatures(role);
+			
 			// actually need to proceed even with no base class, because
 			// method mappings without baseclass are reported within resolve() below:
 			MethodMappingResolver resolver = new MethodMappingResolver(role);

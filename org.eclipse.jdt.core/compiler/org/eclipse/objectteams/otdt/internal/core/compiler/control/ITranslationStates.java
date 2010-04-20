@@ -56,8 +56,8 @@ public interface ITranslationStates {
     public static final int STATE_STATEMENTS_TRANSFORMED  = 17;//TransformStatementsVisitor
     public static final int STATE_MAPPINGS_RESOLVED  	  = 18;//ResolveMethodMappings
     public static final int STATE_MAPPINGS_TRANSFORMED    = 19;//MethodMappingImplementor
-    public static final int STATE_METHODS_VERIFIED        = 20;//Scope
-    public static final int STATE_LATE_ATTRIBUTES_EVALUATED= 21; // ModelElement, TypeModel
+    public static final int STATE_LATE_ATTRIBUTES_EVALUATED= 20; // ModelElement, TypeModel
+    public static final int STATE_METHODS_VERIFIED        = 21;//Scope
     public static final int STATE_RESOLVED                = 22;//AST
     public static final int STATE_LATE_ELEMENTS_COPIED    = 23;//CopyInheritance
     public static final int STATE_CODE_ANALYZED           = 24;//AST
@@ -92,8 +92,8 @@ public interface ITranslationStates {
         "statements transformed",
         "method mappings resolved",
         "method mappings transformed",
-        "methods verified",
         "late attributes evaluated",
+        "methods verified",
         "resolved",
 		"late elements copied",
         "code analyzed",

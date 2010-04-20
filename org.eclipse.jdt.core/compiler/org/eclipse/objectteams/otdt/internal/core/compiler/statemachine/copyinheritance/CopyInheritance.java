@@ -877,8 +877,11 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		if (TypeContainerMethod.isTypeContainer(method))
 			return;  // don't copy these dummy methods
 
-	    if (isCreator(method))
-	        return; // creators are generated anew in each team.
+	    if (   isCreator(method)
+	    	|| CharOperation.equals(IOTConstants._OT_GETBASE, method.selector)
+	    	|| CharOperation.prefixEquals(IOTConstants.CAST_PREFIX, method.selector)
+	    	|| CharOperation.prefixEquals(IOTConstants.GET_CLASS_PREFIX, method.selector))
+	        return; // create/getBase/cast/getClass-methods are generated anew in each team.
 	    	// (can only happen in a team that is a role of an outer team.)
 	        // Note: we don't use AccSynthetic on creators, because
 	        // Synthetic methods are not read from byte code.
@@ -886,9 +889,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 
 	    if (MethodModel.isFakedMethod(method))
 	    	return; // will be generated anew (basecall-surrogate, rolefield-bridge)
-
-	    if (CharOperation.equals(IOTConstants._OT_GETBASE, method.selector))
-	    	return; // _OT$getBase will be generated anew, don't bother with regular/bridge versions of this method!
 
 	    if (CharOperation.equals(IOTConstants.MIGRATE_TO_TEAM, method.selector))
 	    	return; // can only be used from the exact team
@@ -1574,6 +1574,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		    	TypeDeclaration enclTeamDecl = teamBinding.roleModel.getTeamModel().getAst();
 		    	ifcCreator = AstConverter.genRoleIfcMethod(enclTeamDecl, creatorDecl);
 		    	AstEdit.addMethod(teamBinding.roleModel.getInterfaceAst(), ifcCreator);
+		    	MethodModel.getModel(ifcCreator)._srcCtor = creatorDecl.model._srcCtor;
 			}
 		}
 	}
@@ -2033,6 +2034,9 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
             MethodBinding             template)
     {
         MethodBinding binding = method.binding;
+        // no weakening for constructors:
+        if (method.isConstructor())
+        	return false;
         // do not touch broken methods:
         if (binding == null || method.hasErrors())
         	return false;

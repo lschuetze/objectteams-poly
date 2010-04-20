@@ -1274,6 +1274,17 @@ public class RoleModel extends TypeModel
 		}
 	}
 
+	@Override
+	public void evaluateLateAttributes(int state) {
+		if (state == ITranslationStates.STATE_LATE_ATTRIBUTES_EVALUATED) {
+			for (ReferenceBinding tsuperRole : this.getTSuperRoleBindings())
+				Dependencies.ensureBindingState(tsuperRole, ITranslationStates.STATE_LATE_ATTRIBUTES_EVALUATED);
+		}
+		if (this._ast != null)
+			CopyInheritance.copyGeneratedFeatures(this);
+		super.evaluateLateAttributes(state);
+	}
+	
 	public void releaseClassFile() {
 		this._classFile= null;
 	}
