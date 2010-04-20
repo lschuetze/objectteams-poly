@@ -121,13 +121,11 @@ public class BytecodeTransformer
         	// if the team has a copied ctor (w/ arg-lifting), bytecodes
         	// for the team need to be copied from the super-team, too:
         	for (MethodBinding method : dstType.methods()) {
-				if (method.model != null && method.model.liftedParams != null) {
-					method= method.copyInheritanceSrc;
-					if (method == null || method.model == null) continue; // shouldn't happen anyway
-					this._reader= new ConstantPoolObjectReader(method.model, srcModel, scope.environment());
-					copyAllNonWideConstants(method.model.getConstantPoolOffsets().length);
-					return; // triggered by any method, this team class is fully handled.
-				}
+				method= method.copyInheritanceSrc;
+				if (method == null || method.model == null) continue; // shouldn't happen anyway
+				this._reader= new ConstantPoolObjectReader(method.model, srcModel, scope.environment());
+				copyAllNonWideConstants(method.model.getConstantPoolOffsets().length);
+				return; // triggered by any method, this team class is fully handled.
 			}
         }
     }

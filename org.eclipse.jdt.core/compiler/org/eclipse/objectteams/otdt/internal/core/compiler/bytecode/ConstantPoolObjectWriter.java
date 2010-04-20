@@ -40,6 +40,9 @@ public class ConstantPoolObjectWriter implements ClassFileConstants  {
 	 */
 	public ConstantPoolObjectWriter(ClassFile dstClassFile) {
 		this.dstClassFile=dstClassFile;
+		// during copyNonWideConstants the codeStream may be uninitialized:
+		if (this.dstClassFile.codeStream.constantPool == null)
+			this.dstClassFile.codeStream.constantPool = this.dstClassFile.constantPool;
 	}
 
 	/**

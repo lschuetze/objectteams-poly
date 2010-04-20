@@ -687,6 +687,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 					case StringTag:
 					case IntegerTag:
 					case FloatTag:
+					case ClassTag:
 						return true;
 					// note: No need to handle long,
 					//       which is stored using ldc2_w of which no non-wide version exists
