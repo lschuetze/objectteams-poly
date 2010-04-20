@@ -490,9 +490,9 @@ public class StandardElementGenerator {
 	/**
      * Create the binding between a role and its base:
      * For lowering:
-     * + create the __OT__base field.
+     * + create the _OT$base field.
      * and/or
-     * + create the __OT__getBase method (abstract or implemented)
+     * + create the _OT$getBase method (abstract or implemented)
      *
      * Bytecode:
      * + Add the "PlayedBy" Attribute.
