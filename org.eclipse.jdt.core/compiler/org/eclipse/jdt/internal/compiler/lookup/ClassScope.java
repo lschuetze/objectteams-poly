@@ -51,6 +51,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationS
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.OTClassScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -1795,19 +1796,31 @@ public class ClassScope extends Scope {
 		if (superclass != null) {
 			ReferenceBinding superBase = superclass.rawBaseclass();
 			if (   superBase != null
-					&& !baseclass.isCompatibleWith(superBase))
+				&& !baseclass.isCompatibleWith(superBase))
 			{
 				problemReporter().illegalPlayedByRedefinition(roleDecl.baseclass, baseclass,
 															  superclass,		  superBase);
 			}
 		}
+		// for comparison with tsuper's baseclass separately check type and type-anchor:
+		ITeamAnchor baseAnchor = null;
+		if (RoleTypeBinding.isRoleWithExplicitAnchor(baseclass)) {
+			baseAnchor = ((RoleTypeBinding)baseclass)._teamAnchor;
+			baseclass = baseclass.getRealType();
+		}
 		for (ReferenceBinding tsuperRole: roleDecl.getRoleModel().getTSuperRoleBindings()) {
 			ReferenceBinding tsuperBase = tsuperRole.baseclass();
-			if (   tsuperBase != null
-				&& tsuperBase != baseclass
-				&& !TSuperHelper.isTSubOf(baseclass, tsuperBase))
-			{
-				problemReporter().overridesPlayedBy(ClassScope.this.referenceContext, tsuperBase);
+			if (   tsuperBase != null && tsuperBase != baseclass) {
+				ITeamAnchor tsuperAnchor = null;
+				if (RoleTypeBinding.isRoleWithExplicitAnchor(tsuperBase)) {
+					tsuperAnchor = ((RoleTypeBinding)tsuperBase)._teamAnchor;
+					tsuperBase = tsuperBase.getRealType();
+				}
+				if (   !TSuperHelper.isTSubOf(baseclass, tsuperBase)
+					|| !TSuperHelper.isEquivalentField(baseAnchor, tsuperAnchor)) 
+				{
+					problemReporter().overridesPlayedBy(ClassScope.this.referenceContext, tsuperBase);
+				}
 			}
 		}
 	}

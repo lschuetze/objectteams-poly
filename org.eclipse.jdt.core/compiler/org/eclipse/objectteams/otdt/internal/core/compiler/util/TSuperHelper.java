@@ -37,15 +37,18 @@ import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 
 /**
@@ -275,6 +278,27 @@ public class TSuperHelper {
 			return false;
 		return class1.enclosingType().superclass() == other.enclosingType()
 			|| isTSubOf(class1.enclosingType(), other.enclosingType());
+	}
+
+	/** Do two type anchors basically refer to the same field (modulo impl/expl. inheritance)? */
+	public static boolean isEquivalentField(ITeamAnchor currentAnchor, ITeamAnchor tsuperAnchor) {
+		if (currentAnchor == tsuperAnchor)
+			return true;
+		if ((currentAnchor == null) || (tsuperAnchor == null))
+			return false;
+		if (!(currentAnchor instanceof FieldBinding))
+			return false;
+		if (!(tsuperAnchor instanceof FieldBinding))
+			return false;
+		FieldBinding currentField = (FieldBinding)currentAnchor;
+		FieldBinding tsuperField = (FieldBinding)tsuperAnchor;
+		if (!CharOperation.equals(currentField.name, tsuperField.name))
+			return false;
+		if (   currentField.declaringClass.isCompatibleWith(tsuperField.declaringClass)
+			|| isTSubOf(currentField.declaringClass, tsuperField.declaringClass))
+			// different fields means one should be a faked strong copy of the other:
+			return (currentField.tagBits & TagBits.IsFakedField) != 0;
+		return true;
 	}
 
 // UNUSED but commit this code at least once to facility retrieval should it be needed later.
