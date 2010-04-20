@@ -43,6 +43,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBindin
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance.SupertypeObligation;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.Protections;
 
@@ -187,7 +188,8 @@ public class TypeLevel {
 
 		if (original instanceof ParameterizedSingleTypeReference) {
 			ParameterizedSingleTypeReference pstRef = (ParameterizedSingleTypeReference) original;
-			return new AlienScopeParameterizedSingleTypeReference(pstRef.token, pstRef.typeArguments, pstRef.dimensions, pos, origScope);
+			TypeReference[] typeArguments = AstClone.copyTypeArguments(original, pos, pstRef.typeArguments);
+			return new AlienScopeParameterizedSingleTypeReference(pstRef.token, typeArguments, pstRef.dimensions, pos, origScope);
 		} else if (original instanceof SingleTypeReference) {
 			SingleTypeReference singleTypeRef = (SingleTypeReference) original;
 			return new AlienScopeSingleTypeReference(singleTypeRef.token, pos, origScope);

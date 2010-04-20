@@ -219,7 +219,7 @@ public class AstClone
     }
 
 
-	private static TypeReference[] copyTypeArguments(TypeReference typeReference, long pos, TypeReference[] arguments)
+	public static TypeReference[] copyTypeArguments(TypeReference typeReference, long pos, TypeReference[] arguments)
 	{
 		TypeReference[] newArgs = copyTypeArray(arguments);
 		if (   typeReference.resolvedType != null
