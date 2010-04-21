@@ -113,6 +113,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
  * What: Pass class file name from AbstractImageBuilder down to TypeModel
  *       (See comment near field generatingModel).
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ClassFile implements TypeConstants, TypeIds {
 
 	private byte[] bytes;
@@ -8693,6 +8694,17 @@ public class ClassFile implements TypeConstants, TypeIds {
 	//    The same for RoleModel.getByteCode().
 	// After releaseModel() this data flow is no longer possible.
 	private TypeModel generatingModel = null;
+
+	/** Make a best effort at determining whether this is the ClassFile for type. */
+	public boolean isForType(ReferenceBinding type) {
+		if (this.generatingModel == null)
+			return this.referenceBinding == type;
+		if (this.generatingModel == type.roleModel)
+			return true;
+		if (this.generatingModel == type._teamModel)
+			return true;
+		return false;
+	}
 	/**
 	 * Teams need a class file path for copying constructors and callin wrappers calling private role methods.
 	 * Roles need a class file path for copying everything.
