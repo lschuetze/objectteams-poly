@@ -834,9 +834,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 						// implemented previously abstract method?
 						MethodBinding[] existingMethod = model.getBinding().methods();
 						for (int k = 0; k < existingMethod.length; k++) {
-							if (   (   existingMethod[k].copyInheritanceSrc == methods[j]
-							        || existingMethod[k].copyInheritanceSrc == methods[j].copyInheritanceSrc)
-								&& existingMethod[k].isAbstract() )
+							if (   existingMethod[k].isCopiedFrom(methods[j])
+								&& existingMethod[k].isAbstract())
 							{
 								// keep methods and update modifiers:
 								existingMethod[k].modifiers &= ~(AccAbstract|AccSemicolonBody);

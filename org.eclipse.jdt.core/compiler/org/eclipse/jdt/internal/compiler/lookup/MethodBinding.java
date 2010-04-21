@@ -172,6 +172,14 @@ public class MethodBinding extends Binding implements IProtectable {
     public boolean isCallin() {
     	return (this.modifiers & ExtraCompilerModifiers.AccCallin) != 0 && !CharOperation.contains('$', this.selector);
     }
+    /** Has this method been (indirectly) copied from other? */
+    public boolean isCopiedFrom(MethodBinding other) {
+    	if (this.copyInheritanceSrc == null)
+    		return false;
+    	if (this.copyInheritanceSrc == other)
+    		return true;
+    	return this.copyInheritanceSrc == other.copyInheritanceSrc;
+    }
     /** Static role methods require synthetic arguments.
      *  Note: the actual values are produced by MessageSend.generateCode().
      */
