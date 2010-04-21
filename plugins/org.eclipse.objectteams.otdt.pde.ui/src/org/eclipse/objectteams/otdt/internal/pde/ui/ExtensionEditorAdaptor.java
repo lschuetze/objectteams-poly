@@ -17,26 +17,22 @@
 package org.eclipse.objectteams.otdt.internal.pde.ui;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
-import org.eclipse.jdt.internal.core.search.HierarchyScope;
-import org.eclipse.jdt.ui.IJavaElementSearchConstants;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.ui.wizards.NewTeamWizardPage;
+import org.eclipse.objectteams.otdt.internal.ui.wizards.OTNewWizardMessages;
+import org.eclipse.objectteams.otdt.ui.ImageManager;
+import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
+import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.pde.core.plugin.IPluginAttribute;
-import org.eclipse.pde.core.plugin.IPluginBase;
 import org.eclipse.pde.core.plugin.IPluginElement;
 import org.eclipse.pde.core.plugin.IPluginExtension;
 import org.eclipse.pde.internal.core.ischema.IMetaAttribute;
@@ -46,22 +42,10 @@ import org.eclipse.pde.internal.core.ischema.ISchemaElement;
 import org.eclipse.pde.internal.core.plugin.PluginAttribute;
 import org.eclipse.pde.internal.core.schema.SchemaRegistry;
 import org.eclipse.pde.internal.core.util.IdUtil;
-import org.eclipse.pde.internal.core.util.PDEJavaHelper;
 import org.eclipse.pde.internal.ui.PDEPlugin;
-import org.eclipse.pde.internal.ui.PDEUIMessages;
-import org.eclipse.swt.widgets.Text;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.internal.ui.wizards.NewTeamWizardPage;
-import org.eclipse.objectteams.otdt.internal.ui.wizards.OTNewWizardMessages;
-import org.eclipse.objectteams.otdt.ui.ImageManager;
-import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
-import org.eclipse.objectteams.otequinox.Constants;
 
 import base org.eclipse.pde.internal.ui.editor.plugin.ExtensionsSection;
 import base org.eclipse.pde.internal.ui.editor.plugin.JavaAttributeWizard;
-import base org.eclipse.pde.internal.ui.editor.plugin.rows.ClassAttributeRow;
 import base org.eclipse.pde.internal.ui.editor.text.XMLUtil;
 
 /**
@@ -150,82 +134,6 @@ public team class ExtensionEditorAdaptor
 		String[] getCOMMON_LABEL_PROPERTIES() -> get String[] COMMON_LABEL_PROPERTIES;
 		ISchemaElement getSchemaElement(IPluginElement element) -> ISchemaElement getSchemaElement(IPluginElement element);
 		String stripShortcuts(String input) -> String stripShortcuts(String input);
-	}
-	/**
-	 * This role anticipates a fix to https://bugs.eclipse.org/bugs/show_bug.cgi?id=61185
-	 * Restricting type selection dialogs for extension details to the 'basedOn' type, if given.
-	 * Although bug 61185 is partly fixed, this role also covers bug 215139.
-	 */
-	protected class ClassAttributeRow playedBy ClassAttributeRow 
-	{
-		IPluginBase getPluginBase() -> IPluginBase getPluginBase();
-		Text getText() -> get Text text;
-		
-		doOpenSelectionDialog <- replace doOpenSelectionDialog;
-		@SuppressWarnings("basecall")
-		callin void doOpenSelectionDialog() {
-			String superType= null;
-			try {
-				ISchemaAttribute att= getAttribute();
-				superType= att.getBasedOn();
-			} catch (Throwable t) {
-				// e.g., a CCE in getAttribute()?
-			}
-			if (superType != null && superType.startsWith(":")) //$NON-NLS-1$
-				superType= superType.substring(1);
-			if (superType == null || "java.lang.Object".equals(superType)) { //$NON-NLS-1$
-				// if no useful super type was found do the normal thing:
-				base.doOpenSelectionDialog();
-				return;
-			}
-			IResource resource = getPluginBase().getModel().getUnderlyingResource();
-			String type = selectType(
-					resource, 
-					IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES, 
-					getText().getText(),
-					superType);
-			if (type != null)
-				getText().setText(type);
-		}
-		ISchemaAttribute getAttribute() -> get Object att
-			with { result <- (ISchemaAttribute)att }
-		
-		// from PDEJavaHelperUI, added param supertype
-		static String selectType(IResource resource, int scope, String filter, String superTypeName) 
-		{
-			if (resource == null) return null;
-			IProject project = resource.getProject();
-			try {
-				// create new scope (hierarchy):
-				IJavaSearchScope searchScope = null;
-				if (superTypeName != null && !superTypeName.equals("java.lang.Object")) { //$NON-NLS-1$
-					IJavaProject javaProject = JavaCore.create(project);
-					IType superType = javaProject.findType(superTypeName);
-					if (superType != null)
-						searchScope= SearchEngine.createHierarchyScope(javaProject, superType, true, true, DefaultWorkingCopyOwner.PRIMARY);
-					/* Eclipse version:
-						searchScope = SearchEngine.createHierarchyScope(superType);
-				     */
-				}
-				if (searchScope == null)
-					searchScope = PDEJavaHelper.getSearchScope(project);
-				
-				SelectionDialog dialog = JavaUI.createTypeDialog(
-						PDEPlugin.getActiveWorkbenchShell(),
-						PlatformUI.getWorkbench().getProgressService(),
-						searchScope,
-						//orig: PDEJavaHelper.getSearchScope(project),
-						scope, 
-						false, "**"/*filter*/);  //$NON-NLS-1$
-				dialog.setTitle(PDEUIMessages.ClassAttributeRow_dialogTitle); 
-				if (dialog.open() == Window.OK) {
-					IType type = (IType) dialog.getResult()[0];
-					return type.getFullyQualifiedName('$');
-				}
-			} catch (JavaModelException e) {
-			}
-			return null;
-		}
 	}
 
 	/**
