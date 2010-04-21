@@ -1049,9 +1049,12 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    		newMethodDecl.isTSuper = true;
 	    	if (method.model != null && method.model.callinFlags != 0)
 	    		MethodModel.addCallinFlag(newMethodDecl, method.model.callinFlags);
-	    	if (method.isAnyCallin())
-	    		MethodModel.saveReturnType(newMethodDecl.binding, MethodModel.getReturnType(method));
-	    	else {
+	    	if (method.isAnyCallin()) {
+	    		TypeBinding inheritedSrcReturn = MethodModel.getReturnType(method);
+	    		if (inheritedSrcReturn.isRole())
+	    			inheritedSrcReturn = RoleTypeCreator.maybeWrapUnqualifiedRoleType(inheritedSrcReturn, targetRoleDecl.binding);
+				MethodModel.saveReturnType(newMethodDecl.binding, inheritedSrcReturn);
+	    	} else {
 			    if (   !method.isPublic()                  // non-public source-level class method?
 			    	&& !method.isConstructor()
 			    	&& !targetRoleDecl.isInterface()
