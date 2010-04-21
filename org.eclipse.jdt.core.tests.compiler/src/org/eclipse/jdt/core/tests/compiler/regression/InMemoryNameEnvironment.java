@@ -16,6 +16,9 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 
 public class InMemoryNameEnvironment implements INameEnvironment {
+//{ObjectTeams: visible for subclass:
+	protected
+// SH}
 	INameEnvironment[] classLibs;
 	HashtableOfObject compilationUnits = new HashtableOfObject();
 public InMemoryNameEnvironment(String[] compilationUnits, INameEnvironment[] classLibs) {

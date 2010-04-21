@@ -18,6 +18,9 @@ import org.eclipse.jdt.internal.compiler.batch.FileSystem;
 
 public class RegressionTestSetup extends CompilerTestSetup {
 
+//{ObjectTeams: visible for tests in other plugin:
+	public
+// SH}
 	TestVerifier verifier = new TestVerifier(true);
 	INameEnvironment javaClassLib;
 

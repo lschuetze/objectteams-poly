@@ -2227,7 +2227,12 @@ protected void runNegativeTest(String[] testFiles, String expectedCompilerLog) {
 		compilerOptions.produceReferenceInfo = true;
 		Throwable exception = null;
 		try {
+//{ObjectTeams: extracted as new hook:
+/* orig:
 			batchCompiler.compile(Util.compilationUnits(testFiles)); // compile all files together
+  :giro */
+			compileTestFiles(batchCompiler, testFiles);
+// SH}
 		} catch(RuntimeException e){
 			exception = e;
 			throw e;
@@ -2263,11 +2268,21 @@ protected void runNegativeTest(String[] testFiles, String expectedCompilerLog) {
 			String className = sourceFile.substring(0, sourceFile.length() - 5).replace('/', '.').replace('\\', '.');
 			if (className.endsWith(PACKAGE_INFO_NAME)) return;
 
+//{ObjectTeams: also reuse if same set of vmArguments:
+/* orig:
 			if (vmArguments != null) {
+  :giro */
+			if (this.verifier != null && !this.verifier.vmArgsEqual(vmArguments)) {
+// SH}
 				if (this.verifier != null) {
 					this.verifier.shutDown();
 				}
+//{ObjectTeams: make configurable:
+/* orig:
 				this.verifier = new TestVerifier(false);
+  :giro */
+				this.verifier = getTestVerifier(false);
+// SH}
 				this.createdVerifier = true;
 			}
 			boolean passed =
@@ -2313,6 +2328,14 @@ protected void runNegativeTest(String[] testFiles, String expectedCompilerLog) {
 					javacTestOptions, vmArguments);
 		}
 	}
+//{ObjectTeams: new hooks:
+	protected TestVerifier getTestVerifier(boolean reuseVM) {
+		return new TestVerifier(reuseVM);
+	}
+	protected void compileTestFiles(Compiler batchCompiler, String[] testFiles) {
+		batchCompiler.compile(Util.compilationUnits(testFiles)); // compile all files together
+	}
+// SH}
 
 //	runConformTest(
 //		// test directory preparation

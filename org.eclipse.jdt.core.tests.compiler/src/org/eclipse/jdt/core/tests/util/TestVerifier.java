@@ -22,6 +22,9 @@ public class TestVerifier {
 	public String failureReason;
 
 	boolean reuseVM = true;
+//{ObjectTeams: support reuse even in presence of vmargs, if unchanged:
+	protected String[] vmArguments = null;
+// SH}
 	String[] classpathCache;
 	LocalVirtualMachine vm;
 	StringBuffer outputBuffer;
@@ -236,6 +239,17 @@ private String getVerifyTestsCode() {
 		"		if (name.startsWith(\"java\"))\n" +
 		"			return true;\n" +
 		"			\n" +
+//{ObjectTeams: don't process core OT-classes either (unpacked .class not available on classpath):
+"		if (name.startsWith(\"org.objectteams\"))\n" +
+"			return true;\n" +
+"			\n" +
+"		if (name.startsWith(\"org.eclipse.objectteams.otre\"))\n" +
+"			return true;\n" +
+"			\n" +
+"		if (name.startsWith(\"de.fub.bytecode\"))\n" +
+"			return true;\n" +
+"			\n" +
+// SH}
 		"		// exclude the user defined package paths\n" +
 		"		for (int i= 0; i < fExcluded.length; i++) {\n" +
 		"			if (name.startsWith(fExcluded[i])) {\n" +
@@ -650,4 +664,16 @@ private void waitForFullBuffers() {
 	this.errorBuffer.setLength(errorEndStringStart);
 	this.outputBuffer.setLength(outputEndStringStart);
 }
+//{ObjectTeams: helper
+public boolean vmArgsEqual(String[] newArgs) {
+	if (this.vmArguments == null || newArgs == null) 
+		return this.vmArguments == null && newArgs == null;
+	if (this.vmArguments.length != newArgs.length)
+		return false;
+	for (int i=0; i<newArgs.length; i++)
+		if (!this.vmArguments[i].equals(newArgs[i]))
+			return false;
+	return true;
+}
+// SH}
 }
