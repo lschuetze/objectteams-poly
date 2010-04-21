@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-    <jar path="org.objectteams.otdt.samples/samples/ordersystem.zip"/>
+    <jar path="org.eclipse.objectteams.otdt.samples/samples/ordersystem.zip"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/OTSample-ordersystem-src/ordersystem-zip.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="true"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
