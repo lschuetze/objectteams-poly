@@ -1613,6 +1613,12 @@ public class Dependencies implements ITranslationStates {
             // 1. create creation methods from constructors (AST version)
             if (subRole.isClass())
             { // interfaces have not constructores, don't bother.
+
+            	// ensure we have all constructors from tsuper (incl. default ctor)
+            	for (ReferenceBinding tsuperRole : clazz.getTSuperRoleBindings())
+            		ensureBindingState(tsuperRole, ITranslationStates.STATE_METHODS_CREATED);
+            	CopyInheritance.copyGeneratedFeatures(clazz);
+
             	boolean needMethodBodies = needMethodBodies(subRoleDecl);
                 AbstractMethodDeclaration[] methodDeclarations = subRoleDecl.methods;
                 // may need to create default constructor first:
