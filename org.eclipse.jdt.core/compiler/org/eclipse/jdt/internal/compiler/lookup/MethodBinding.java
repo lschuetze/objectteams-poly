@@ -796,14 +796,6 @@ public void resetParameters() {
 		this.generalizedReturnType = null;
 	}
 }
-/** Permantently assign returnType, even if we are in the state of switched parameters. */
-public void setReturnType(TypeBinding returnType) {
-	if (this.switchCount > 0) {
-		assert this.returnType == this.generalizedReturnType : "confict between return generalization and weakening"; //$NON-NLS-1$
-		this.generalizedReturnType = returnType;
-	}
-	this.returnType = returnType;
-}
 //MW+SH}
 
 /* Answer the receiver's constant pool name.
