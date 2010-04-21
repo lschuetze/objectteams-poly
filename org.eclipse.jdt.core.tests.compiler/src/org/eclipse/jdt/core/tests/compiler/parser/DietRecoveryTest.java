@@ -4675,8 +4675,6 @@ public void test75() {
 		"  }\n" +
 		"  A foo(int i) {\n" +
 		"  }\n" +
-		"  clone() {\n" +
-		"  }\n" +
 		"  int bar() {\n" +
 		"  }\n" +
 		"}\n";

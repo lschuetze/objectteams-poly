@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.formatter.DefaultCodeFormatterOptions;
 
@@ -6145,6 +6146,21 @@ public void testBug287833c() {
 }
 
 /**
+ * @bug 295825: [formatter] Commentaries are running away after formatting are used
+ * @test Verify that block comment stay unchanged when text starts with a star
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=295825"
+ */
+public void testBug295825() {
+	String source = 
+		"public class A {\n" + 
+		"	/* * command */\n" + 
+		"	void method() {\n" + 
+		"	}\n" + 
+	    "}\n";
+	formatSource(source);
+}
+
+/**
  * @bug 300379: [formatter] Fup of bug 287833
  * @test Verify that the leading '{' is not deleted while formatting
  * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=300379"
@@ -6237,6 +6253,299 @@ public void testBug304705b() {
 		" */\n" + 
 		"	int foo();\n" + 
 	    "}\n");
+}
+
+/**
+ * @bug 305281: [formatter] Turning off formatting changes comment's formatting
+ * @test Verify that turning off formatting in a javadoc does not screw up its indentation
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=305281"
+ */
+public void testBug305281() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_DISABLING_TAG, "format: OFF");
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_ENABLING_TAG, "format: ON");
+	String source = 
+		"public class test {\n" + 
+		"\n" + 
+		"    /**\n" + 
+		"     * @param args\n" + 
+		"     * format: OFF\n" + 
+		"     */\n" + 
+		"    public static void main(String[] args) {\n" + 
+		"        do {\n" + 
+		"            } while (false);\n" + 
+		"        for (;;) {\n" + 
+		"        }\n" + 
+		"        // format: ON\n" + 
+		"    }\n" + 
+	    "}\n";
+	formatSource(source,
+		"public class test {\n" + 
+		"\n" + 
+		"	/**\n" + 
+		"     * @param args\n" + 
+		"     * format: OFF\n" + 
+		"     */\n" + 
+		"    public static void main(String[] args) {\n" + 
+		"        do {\n" + 
+		"            } while (false);\n" + 
+		"        for (;;) {\n" + 
+		"        }\n" + 
+		"        // format: ON\n" + 
+		"	}\n" + 
+	    "}\n");
+}
+
+/**
+ * @bug 305371: [formatter] Unexpected indentation of line comment
+ * @test Verify that comments with too different indentation are not considered as contiguous
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=305371"
+ */
+public void testBug305371() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT_STARTING_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.FALSE);
+	String source = 
+		"class X01 {\n" + 
+		"//  unformatted    comment    !\n" + 
+		"        //  formatted    comment    !\n" + 
+	    "}\n";
+	formatSource(source,
+		"class X01 {\n" + 
+		"//  unformatted    comment    !\n" + 
+		"	// formatted comment !\n" + 
+	    "}\n");
+}
+public void testBug305371b() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT_STARTING_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.FALSE);
+	String source = 
+		"class X02 {\n" + 
+		"        //  formatted    comment    !\n" + 
+		"//  unformatted    comment    !\n" + 
+	    "}\n";
+	formatSource(source,
+		"class X02 {\n" + 
+		"	// formatted comment !\n" + 
+		"//  unformatted    comment    !\n" + 
+	    "}\n");
+}
+public void testBug305371c() {
+	String source = 
+		"class X03 {\n" + 
+		"        //  formatted    comment    1\n" + 
+		"    //  formatted    comment    2\n" + 
+	    "}\n";
+	formatSource(source,
+		"class X03 {\n" + 
+		"	// formatted comment 1\n" + 
+		"	// formatted comment 2\n" + 
+	    "}\n");
+}
+public void testBug305371d() {
+	String source = 
+		"class X04 {\n" + 
+		"    //  formatted    comment    1\n" + 
+		"        //  formatted    comment    2\n" + 
+	    "}\n";
+	formatSource(source,
+		"class X04 {\n" + 
+		"	// formatted comment 1\n" + 
+		"	// formatted comment 2\n" + 
+	    "}\n");
+}
+
+/**
+ * @bug 305518: [formatter] Line inside <pre> tag is wrongly indented by one space when starting just after the star
+ * @test Verify formatting of a <pre> tag section keep lines right indented
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=305518"
+ */
+public void testBug305518() {
+	String source = 
+		"public interface Test {\n" + 
+		"/**\n" + 
+		" * <pre>\n" + 
+		" *    A\n" + 
+		" *   / \\\n" + 
+		" *  B   C\n" + 
+		" * / \\ / \\\n" + 
+		" *D  E F  G\n" + 
+		" * </pre>\n" + 
+		" */\n" + 
+		"public void foo();\n" + 
+	    "}\n";
+	formatSource(source,
+		"public interface Test {\n" + 
+		"	/**\n" + 
+		"	 * <pre>\n" + 
+		"	 *     A\n" + 
+		"	 *    / \\\n" + 
+		"	 *   B   C\n" + 
+		"	 *  / \\ / \\\n" + 
+		"	 * D  E F  G\n" + 
+		"	 * </pre>\n" + 
+		"	 */\n" + 
+		"	public void foo();\n" + 
+	    "}\n");
+}
+public void testBug305518_wksp2_01() {
+	String source = 
+		"public class X01 {\n" + 
+		"/**\n" + 
+		"	<P> This is an example of starting and shutting down the Network Server in the example\n" + 
+		"	above with the API.\n" + 
+		"	<PRE>\n" + 
+		"	\n" + 
+		"	NetworkServerControl serverControl = new NetworkServerControl(InetAddress.getByName(\"myhost\"),1621)\n" + 
+		"\n" + 
+		"	serverControl.shutdown();\n" + 
+		"	</PRE>\n" + 
+		"\n" + 
+		"	\n" + 
+		"*/\n" + 
+		"public void foo() {}\n" + 
+	    "}\n";
+	formatSource(source,
+		"public class X01 {\n" + 
+		"	/**\n" + 
+		"	 * <P>\n" + 
+		"	 * This is an example of starting and shutting down the Network Server in\n" + 
+		"	 * the example above with the API.\n" + 
+		"	 * \n" + 
+		"	 * <PRE>\n" + 
+		"	 * \n" + 
+		"	 * 	NetworkServerControl serverControl = new NetworkServerControl(InetAddress.getByName(\"myhost\"),1621)\n" + 
+		"	 * \n" + 
+		"	 * 	serverControl.shutdown();\n" + 
+		"	 * </PRE>\n" + 
+		"	 */\n" + 
+		"	public void foo() {\n" + 
+		"	}\n" + 
+	    "}\n");
+}
+public void testBug305518_wksp2_02() {
+	String source = 
+		"public class X02 {\n" + 
+		"/**\n" + 
+		" * Represents namespace name:\n" + 
+		" * <pre>e.g.<pre>MyNamespace;\n" + 
+		" *MyProject\\Sub\\Level;\n" + 
+		" *namespace\\MyProject\\Sub\\Level;\n" + 
+		" */\n" + 
+		"public void foo() {}\n" + 
+	    "}\n";
+	formatSource(source,
+		"public class X02 {\n" + 
+		"	/**\n" + 
+		"	 * Represents namespace name:\n" + 
+		"	 * \n" + 
+		"	 * <pre>e.g.\n" + 
+		"	 * \n" + 
+		"	 * <pre>\n" + 
+		"	 * MyNamespace;\n" + 
+		"	 * MyProject\\Sub\\Level;\n" + 
+		"	 * namespace\\MyProject\\Sub\\Level;\n" + 
+		"	 */\n" + 
+		"	public void foo() {\n" + 
+		"	}\n" + 
+	    "}\n");
+}
+public void testBug305518_wksp2_03() {
+	String source = 
+		"public class X03 {\n" + 
+		"/**\n" + 
+		"* <PRE>\n" + 
+		"*  String s = ... ; // get string from somewhere\n" + 
+		"*  byte [] compressed = UnicodeCompressor.compress(s);\n" + 
+		"* </PRE>\n" + 
+		" */\n" + 
+		"public void foo() {}\n" + 
+	    "}\n";
+	formatSource(source,
+		"public class X03 {\n" + 
+		"	/**\n" + 
+		"	 * <PRE>\n" + 
+		"	 *  String s = ... ; // get string from somewhere\n" + 
+		"	 *  byte [] compressed = UnicodeCompressor.compress(s);\n" + 
+		"	 * </PRE>\n" + 
+		"	 */\n" + 
+		"	public void foo() {\n" + 
+		"	}\n" + 
+	    "}\n");
+}
+
+/**
+ * @bug 305830: [formatter] Turning off formatting changes comment's formatting
+ * @test Verify that turning off formatting in a javadoc does not screw up its indentation
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=305830"
+ */
+public void testBug305830() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "40");
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, "40");
+	String source = 
+		"public class X01 {\n" + 
+		"void foo() {\n" + 
+		"bar(\"a non-nls string\", 0 /*a    comment*/); //$NON-NLS-1$\n" + 
+		"}\n" + 
+		"void bar(String string, int i) {\n" + 
+		"}\n" + 
+	    "}\n";
+	formatSource(source,
+		"public class X01 {\n" + 
+		"	void foo() {\n" + 
+		"		bar(\"a non-nls string\", 0 /*a    comment*/); //$NON-NLS-1$\n" + 
+		"	}\n" + 
+		"\n" + 
+		"	void bar(String string, int i) {\n" + 
+		"	}\n" + 
+	    "}\n"
+	);
+}
+public void testBug305830b() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "40");
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, "40");
+	String source = 
+		"public class X02 {\n" + 
+		"void foo() {\n" + 
+		"bar(\"str\", 0 /*a    comment*/); //$NON-NLS-1$\n" + 
+		"}\n" + 
+		"void bar(String string, int i) {\n" + 
+		"}\n" + 
+	    "}\n";
+	formatSource(source,
+		"public class X02 {\n" + 
+		"	void foo() {\n" + 
+		"		bar(\"str\", 0 /* a comment */); //$NON-NLS-1$\n" + 
+		"	}\n" + 
+		"\n" + 
+		"	void bar(String string, int i) {\n" + 
+		"	}\n" + 
+	    "}\n"
+	);
+}
+public void testBug305830c() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "40");
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_LINE_LENGTH, "40");
+	String source = 
+		"public class X03 {\n" + 
+		"void foo() {\n" + 
+		"bar(\"str\", 0 /*              a						comment                            */); //$NON-NLS-1$\n" + 
+		"}\n" + 
+		"void bar(String string, int i) {\n" + 
+		"}\n" + 
+	    "}\n";
+	formatSource(source,
+		"public class X03 {\n" + 
+		"	void foo() {\n" + 
+		"		bar(\"str\", 0 /* a comment */); //$NON-NLS-1$\n" + 
+		"	}\n" + 
+		"\n" + 
+		"	void bar(String string, int i) {\n" + 
+		"	}\n" + 
+	    "}\n"
+	);
 }
 
 }

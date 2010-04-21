@@ -20766,4 +20766,281 @@ public void testBug287939d() throws JavaModelException {
 			"returnZero[METHOD_REF_WITH_CASTED_RECEIVER]{((CompletionAfterInstanceOf)a).returnZero(), Ltest.CompletionAfterInstanceOf;, ()I, Ltest.CompletionAfterInstanceOf;, returnZero, null, replace["+start2+", "+end2+"], token["+start1+", "+end1+"], receiver["+start3+", "+end3+"], " + (relevance1) + "}",
 			requestor.getResults());
 }
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=202634
+public void testBug202634a() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Test.java",
+		"package test;\n" +
+		"public class Test {\n" +
+		"	public static void bar(){" +
+		"		System.out.println(\"bar\");\n" +
+		"	}\n" +
+		"	void foo() {\n" +
+		"		sup\n" +
+		"	}\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, true, true, true, true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "sup";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	
+	int start1 = str.lastIndexOf("sup");
+	int end1 = start1 + "sup".length();
+	
+	assertResults(
+			"super[KEYWORD]{super, null, null, super, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=202634
+public void testBug202634b() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Test.java",
+		"package test;\n" +
+		"public class Test {\n" +
+		"	void foo() {\n" +
+		"		sup\n" +
+		"	}\n" +
+		"	public static void bar(){" +
+		"		System.out.println(\"bar\");\n" +
+		"	}\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, true, true, true, true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "sup";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	
+	int start1 = str.lastIndexOf("sup");
+	int end1 = start1 + "sup".length();
+	
+	assertResults(
+			"super[KEYWORD]{super, null, null, super, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=202634
+public void testBug202634c() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Test.java",
+		"package test;\n" +
+		"public class Test {\n" +
+		"	public static void bar(){" +
+		"		System.out.println(\"bar\");\n" +
+		"	}\n" +
+		"	{" +
+		"		sup" +
+		"	}" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, true, true, true, true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "sup";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	
+	int start1 = str.lastIndexOf("sup");
+	int end1 = start1 + "sup".length();
+	
+	assertResults(
+			"super[KEYWORD]{super, null, null, super, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=202634
+public void testBug202634d() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Test.java",
+		"package test;\n" +
+		"public class Test {\n" +
+		"	public static void bar(){" +
+		"		System.out.println(\"bar\");\n" +
+		"	}\n" +
+		"	Test() {" +
+		"		sup" +
+		"	}" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, true, true, true, true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "sup";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	
+	int start1 = str.lastIndexOf("sup");
+	int end1 = start1 + "sup".length();
+	
+	assertResults(
+			"super[KEYWORD]{super, null, null, super, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}\n" +
+			"super[METHOD_REF<CONSTRUCTOR>]{super(), Ljava.lang.Object;, ()V, super, null, replace[" + start1 + ", " + end1 + "], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=202634
+public void testBug202634e() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Test.java",
+		"package test;\n" +
+		"public class Test {\n" +
+		"	public static void bar(){" +
+		"		System.out.println(\"bar\");\n" +
+		"	}\n" +
+		"	{" +
+		"		thi" +
+		"	}" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, true, true, true, true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "thi";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	
+	int start1 = str.lastIndexOf("thi");
+	int end1 = start1 + "thi".length();
+	
+	assertResults(
+			"this[KEYWORD]{this, null, null, this, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=202634
+public void testBug202634f() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Test.java",
+		"package test;\n" +
+		"public class Test {\n" +
+		"	public static void bar(){" +
+		"		System.out.println(\"bar\");\n" +
+		"	}\n" +
+		"	Test() {" +
+		"		thi" +
+		"	}" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, true, true, true, true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "thi";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	
+	int start1 = str.lastIndexOf("thi");
+	int end1 = start1 + "thi".length();
+	
+	assertResults(
+			"this[KEYWORD]{this, null, null, this, null, replace[" + start1 + ", " + end1 +"], token[" + start1 + ", " + end1 + "], " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE+ R_NON_RESTRICTED) + "}",
+			requestor.getResults());
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=307337
+public void testBug307337() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/TestBug307337.java",
+		"package test;\n" +
+		"public class TestBug307337 {\n" +
+		"    Object obj = new Object() {\n" +
+		"    TestBug307337\n" + 	
+		"     };\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, true, true, true, true);
+	requestor.allowAllRequiredProposals();
+	requestor.setRequireExtendedContext(true);
+	requestor.setComputeEnclosingElement(true);
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "TestBug307337";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+	
+	assertResults(
+			"expectedTypesSignatures=null\n" +
+			"expectedTypesKeys=null\n" +
+			"enclosingElement=<anonymous #1> {key=Ltest/TestBug307337$64;} [in obj [in TestBug307337 [in [Working copy] TestBug307337.java [in test [in src [in Completion]]]]]]",
+			requestor.getContext());
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292087
+// To verify that anonymous class in array initializer doesnt cause
+// grief to content assist
+public void testBug292087() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Try.java",
+		"package test;\n" +
+		"public class Try extends Thread{\n" +
+		"	public Runnable member[] = { new Runnable (){\n" +
+		"		public void run() {}\n" +
+		"		}\n" +
+		"	};\n" +
+		"	Tr\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "Tr";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	assertResults(
+			// without the fix no proposals obtained.
+			"Tr[POTENTIAL_METHOD_DECLARATION]{Tr, Ltest.Try;, ()V, Tr, null, 14}\n" +
+			"transient[KEYWORD]{transient, null, null, transient, null, 14}\n" +
+			"Try[TYPE_REF]{Try, test, Ltest.Try;, null, null, 27}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=249704
+public void testBug249704() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Try.java",
+		"package test;\n" +
+		"import java.util.Arrays;\n" +
+		"public class Try {\n" +
+		"	Object obj = new Object() {\n" +
+		"		public void method() {\n" +
+		"			Object obj = new Object() {\n" +
+		"				int a = 1;\n" +
+		"				public void anotherMethod() {\n" +
+		"					try {}\n" +
+		"					catch (Throwable e) {}\n" +
+		"					Arrays.sort(new String[]{\"\"});\n" +
+		"				}\n" +
+		"			};\n" +
+		"			e\n" +
+		"		}\n" +
+		"	};\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "e";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	assertResults(
+			// without the fix no proposals obtained.
+			"Error[TYPE_REF]{Error, java.lang, Ljava.lang.Error;, null, null, 17}\n" +
+			"Exception[TYPE_REF]{Exception, java.lang, Ljava.lang.Exception;, null, null, 17}\n" +
+			"equals[METHOD_REF]{Try.this.equals(), Ljava.lang.Object;, (Ljava.lang.Object;)Z, equals, (obj), 24}\n" +
+			"equals[METHOD_REF]{equals(), Ljava.lang.Object;, (Ljava.lang.Object;)Z, equals, (obj), 27}",
+			requestor.getResults());
+}
 }
