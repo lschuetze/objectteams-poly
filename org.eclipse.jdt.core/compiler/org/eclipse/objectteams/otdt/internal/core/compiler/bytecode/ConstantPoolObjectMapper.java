@@ -61,8 +61,8 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 	private MethodBinding _dstMethod; //The destination-Method for bytecode-copy will receive transformed bytecode from source-Method
 
 	/**
-	 * @param srcRoleBinaryTypeBinding
-	 * @param dstRoleSourceTypeBinding
+	 * @param srcMethodBinding where bytes are copied from
+	 * @param dstMethodBinding where bytes are copied to
 	 */
 	public ConstantPoolObjectMapper(
 			MethodBinding srcMethodBinding,
@@ -169,7 +169,11 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 	 * this method realizes the logic of the mapping
 	 * @return destination type
 	 */
-	private static TypeBinding mapClass(MethodBinding srcMethod, TypeBinding typeBinding, ReferenceBinding dstTeam)
+	private static TypeBinding mapClass(MethodBinding srcMethod, TypeBinding typeBinding, ReferenceBinding dstTeam) {
+		return mapClass(getTeam(srcMethod), typeBinding, dstTeam);
+	}
+
+	public static TypeBinding mapClass(ReferenceBinding srcTeamBinding, TypeBinding typeBinding, ReferenceBinding dstTeam)
 	{
 		boolean isArrayBinding = typeBinding instanceof ArrayBinding;
 		int dimension = 0;
@@ -190,7 +194,6 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 			ReferenceBinding refTeamBinding=getTeam(refTypeBinding);
 			if(refTeamBinding != null)
 			{
-				ReferenceBinding srcTeamBinding = getTeam(srcMethod);
 				if(srcTeamBinding != null)
 				{
 					while (   srcTeamBinding != null
@@ -370,8 +373,6 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 
 	/**
 	 * Is given method a super-call to the constructor of an __OT__Confined role?
-	 * @param refMethodBinding
-	 * @return
 	 */
 	private static boolean isConfinedSuperCtor(MethodBinding srcMethod, MethodBinding refMethodBinding) {
 		// constructor?

@@ -70,6 +70,9 @@ public class ConstantPoolObject implements ClassFileConstants {
 	public boolean isField() {
 		return this._type == FieldRefTag;
 	}
+	public boolean isClass() {
+		return this._type == ClassTag;
+	}
 	public boolean isSpecificType(char[][] compoundName) {
 		if (this._type != ClassTag)
 			return false;

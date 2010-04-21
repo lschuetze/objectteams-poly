@@ -104,7 +104,7 @@ public class BytecodeTransformer
 
                 this._reader = new ConstantPoolObjectReader(srcRole, srcConstantPool, scope.environment());
 
-                copyAllNonWideConstants(srcRole.getConstantPoolOffsets().length);
+                copyAllNonWideConstants(srcRole.getConstantPoolOffsets().length, srcRole.getBinding().enclosingType(), dstType);
 			}
         }
         if (dstType.isTeam()) {
@@ -113,7 +113,7 @@ public class BytecodeTransformer
         		&& !dstType.superclass.isTeam()) 
         	{
         		this._reader = new ConstantPoolObjectReader(TeamMethodGenerator.classBytes, TeamMethodGenerator.constantPoolOffsets, orgObjectteamsTeam.getTeamModel(), scope.environment());
-        		copyAllNonWideConstants(TeamMethodGenerator.constantPoolOffsets.length);
+        		copyAllNonWideConstants(TeamMethodGenerator.constantPoolOffsets.length, dstType.superclass, dstType);
         	}
 
         	TeamModel srcModel= dstType.superclass.getTeamModel();
@@ -124,7 +124,7 @@ public class BytecodeTransformer
 				method= method.copyInheritanceSrc;
 				if (method == null || method.model == null) continue; // shouldn't happen anyway
 				this._reader= new ConstantPoolObjectReader(method.model, srcModel, scope.environment());
-				copyAllNonWideConstants(method.model.getConstantPoolOffsets().length);
+				copyAllNonWideConstants(method.model.getConstantPoolOffsets().length, dstType.superclass, dstType);
 				return; // triggered by any method, this team class is fully handled.
 			}
         }
@@ -491,15 +491,17 @@ public class BytecodeTransformer
     }
 
     /**
-     * Ths method replaces all references to constantpool of the superclass with references
+     * This method replaces all references to constantpool of the superclass with references
      * to current subclass constantpool
      *  - all References in codeToAdjust will be exchanged
      *  - unknown references must be added to the ConstantPool of classFile
      *
-     * @param srcMethodBinding the method from which will be copied
-     *                   (just a stored reference to orignal BinaryMethodBinding)
      * @param dstClassFile This is the destination Classfile wich contains the later flushed ConstantPool
+     * @param mModel the destination method
      * @param codeToAdjust this is the duplicated code-part of the code_attribute (see getCodeByteCode)
+     * @param codeAttributeOffset attribute offset within codeToAdjust 
+     * @param codeLength   length of codeToAdjust
+     * @param isCtorAddingMarkArg are we copying into a tsuper ctor with additional marger arg?
      */
 	private void adjustCode(
             ClassFile   dstClassFile,
@@ -631,17 +633,24 @@ public class BytecodeTransformer
 	}
 
 	/**
-	 * Watch out: String/Integer constants require a LDC or a LDCW opcode depending on their index
+	 * Watch out: String/Integer & Class constants require a LDC or a LDCW opcode depending on their index
 	 * in the constant pool. This method tries to prioritize constants with low index,
 	 * to avoid that they get a high index in the target class, which will lead to invalid
 	 * copied LDC operations.
 	 * @param nConstants number of constants in the src constant pool
 	 */
-	private void copyAllNonWideConstants(int nConstants) {
+	private void copyAllNonWideConstants(int nConstants, ReferenceBinding srcTeamBinding, ReferenceBinding dstType) {
 		Iterator<ConstantPoolObject> it = this._reader.getNonWideConstantIterator(nConstants);
+		if (dstType.isRole())
+			dstType = dstType.enclosingType();
 		while (it.hasNext()) {
 			ConstantPoolObject src_cpo = it.next();
-			this._writer.writeConstantPoolObject(src_cpo);
+			ConstantPoolObject dst_cpo = src_cpo.isClass()
+				? new ConstantPoolObject(
+						ClassFileConstants.ClassTag, 
+						ConstantPoolObjectMapper.mapClass(srcTeamBinding, src_cpo.getClassObject(), dstType))
+				: src_cpo;				
+			this._writer.writeConstantPoolObject(dst_cpo);
 		}
 	}
 
