@@ -313,7 +313,7 @@ public class MethodModel extends ModelElement {
 	/**
 	 * Ensure we have bytes and constantPoolOffsets ready to use.
 	 */
-	private void setupByteCode() {
+	private void setupByteCode(boolean bytesRequired) {
 		if (this._bytes == null || this._constantPoolOffsets == null)
 		{
 			try {
@@ -325,7 +325,7 @@ public class MethodModel extends ModelElement {
 					if (this._classFile == null && this._decl != null) {
 						char[] className = binding.declaringClass.constantPoolName();
 						this._classFile = (ClassFile) this._decl.compilationResult.compiledTypes.get(className);
-						if (!CharOperation.equals(className, this._classFile.referenceBinding.constantPoolName())) {
+						if (this._classFile != null && !this._classFile.isForType(binding.declaringClass)) {
 							this._classFile = null; // has been reset thus cannot be used for this type any more.
 						}
 					}
@@ -344,9 +344,13 @@ public class MethodModel extends ModelElement {
 				} else {
 	 				// Currently only team-ctors use a MethodModel for byte code retrieval.
 					// Use the stored file name for reading the byte code from disc:
-					reader = binding.declaringClass.getTeamModel().read();
-					if (reader == null)
-						throw new InternalCompilerError("No byte code available for "+new String(binding.readableName())); //$NON-NLS-1$
+					if (binding.declaringClass.isTeam())
+						reader = binding.declaringClass.getTeamModel().read();
+					if (reader == null) {
+						if (bytesRequired)
+							throw new InternalCompilerError("No byte code available for "+new String(binding.readableName())); //$NON-NLS-1$
+						return;
+					}
 					this._bytes = reader.getBytes();
 				}
 				this._classFile = null; // don't use any more
@@ -362,7 +366,8 @@ public class MethodModel extends ModelElement {
 						return;
 					}
 				}
-				throw new InternalCompilerError("Method "+String.valueOf(this._binding.readableName())+"not found in class file "+String.valueOf(reader.getFileName())); //$NON-NLS-1$ //$NON-NLS-2$
+				if (bytesRequired)
+					throw new InternalCompilerError("Method "+String.valueOf(this._binding.readableName())+"not found in class file "+String.valueOf(reader.getFileName())); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (ClassFormatException ex) {
 				throw new InternalCompilerError(ex.getMessage());
 			} catch (IOException ex) {
@@ -372,13 +377,18 @@ public class MethodModel extends ModelElement {
 
 	}
 	public int[] getConstantPoolOffsets() {
-		setupByteCode();
+		setupByteCode(true);
 		return this._constantPoolOffsets;
 	}
 	public byte[] getBytes() {
 		if (this._bytes == null)
-			setupByteCode();
+			setupByteCode(true);
 		return this._bytes;
+	}
+	public boolean hasBytes() {
+		if (this._bytes == null)
+			setupByteCode(false);
+		return this._bytes != null;		
 	}
 	public int getStructOffset() {
 		return this._structOffset;

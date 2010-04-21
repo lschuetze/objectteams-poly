@@ -123,6 +123,7 @@ public class BytecodeTransformer
         	for (MethodBinding method : dstType.methods()) {
 				method= method.copyInheritanceSrc;
 				if (method == null || method.model == null) continue; // shouldn't happen anyway
+				if (!method.model.hasBytes()) continue; // method not relevant for copying
 				this._reader= new ConstantPoolObjectReader(method.model, srcModel, scope.environment());
 				copyAllNonWideConstants(method.model.getConstantPoolOffsets().length, dstType.superclass, dstType);
 				return; // triggered by any method, this team class is fully handled.
