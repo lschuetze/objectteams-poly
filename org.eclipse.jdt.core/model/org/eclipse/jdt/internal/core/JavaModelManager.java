@@ -1563,9 +1563,8 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	}
 	
 	public void addNonChainingJar(IPath path) {
-		if (this.nonChainingJars == null)
-			return;
-		this.nonChainingJars.add(path);
+		if (this.nonChainingJars != null)
+			this.nonChainingJars.add(path);
 	}
 
 	/**
@@ -1862,8 +1861,11 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	public IClasspathEntry[] getReferencedClasspathEntries(IClasspathEntry libraryEntry, IJavaProject project) {
 		
 		IClasspathEntry[] referencedEntries = ((ClasspathEntry)libraryEntry).resolvedChainedLibraries();
-		PerProjectInfo perProjectInfo = getPerProjectInfo(project.getProject(), false);
 		
+		if (project == null)
+			return referencedEntries;
+		
+		PerProjectInfo perProjectInfo = getPerProjectInfo(project.getProject(), false);
 		if(perProjectInfo == null) 
 			return referencedEntries;
 		
@@ -2073,6 +2075,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		// backward compatibility
 		addDeprecatedOptions(options);
 
+		Util.fixTaskTags(options);
 		// store built map in cache
 		this.optionsCache = new Hashtable(options);
 
@@ -2933,7 +2936,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	}
 	
 	private Set loadNonChainingJarsCache() {
-		Set nonChainingJarsCache = Collections.synchronizedSet(new HashSet());
+		Set nonChainingJarsCache = new HashSet();
 		File nonChainingJarsFile = getNonChainingJarsFile();
 		DataInputStream in = null;
 		try {
@@ -2955,7 +2958,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 				}
 			}
 		}
-		return nonChainingJarsCache;
+		return Collections.synchronizedSet(nonChainingJarsCache);
 	}
 
 	private File getNonChainingJarsFile() {
@@ -2963,9 +2966,12 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	}
 	
 	private Set getNonChainingJarsCache() throws CoreException {
-		if (this.nonChainingJars != null)
+		// Even if there is one entry in the cache, just return it. It may not be 
+		// the complete cache, but avoid going through all the projects to populate the cache.
+		if (this.nonChainingJars != null && this.nonChainingJars.size() > 0) {
 			return this.nonChainingJars;
-		Set result = Collections.synchronizedSet(new HashSet());
+		}
+		Set result = new HashSet();
 		IJavaProject[] projects = getJavaModel().getJavaProjects();
 		for (int i = 0, length = projects.length; i < length; i++) {
 			IJavaProject javaProject = projects[i];
@@ -2980,7 +2986,8 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 				}
 			}
 		}
-		return result;
+		this.nonChainingJars = Collections.synchronizedSet(result);
+		return this.nonChainingJars;
 	}
 
 	public void loadVariablesAndContainers() throws CoreException {
@@ -3671,6 +3678,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 				info.forgetExternalTimestampsAndIndexes();
 			}
 		}
+		resetNonChainingJarsCache();
 	}
 
 	/*
@@ -3713,7 +3721,8 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	}
 	
 	public void resetNonChainingJarsCache() {
-		this.nonChainingJars = null;
+		if (this.nonChainingJars != null) 
+			this.nonChainingJars.clear();
 	}
 
 	/*
@@ -4665,6 +4674,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 			instancePreferences.flush();
 
 			// update cache
+			Util.fixTaskTags(cachedValue);
 			this.optionsCache = cachedValue;
 		} catch (BackingStoreException e) {
 			// ignore

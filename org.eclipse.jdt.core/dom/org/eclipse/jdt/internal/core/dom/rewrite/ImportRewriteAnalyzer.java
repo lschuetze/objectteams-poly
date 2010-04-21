@@ -44,15 +44,15 @@ import org.eclipse.text.edits.MultiTextEdit;
 
 @SuppressWarnings("unchecked")
 public final class ImportRewriteAnalyzer {
-	
+
 	private final ICompilationUnit compilationUnit;
 	private final ArrayList packageEntries;
-	
+
 	private final List importsCreated;
 	private final List staticImportsCreated;
 
 	private final IRegion replaceRange;
-	
+
 	private final int importOnDemandThreshold;
 	private final int staticImportOnDemandThreshold;
 
@@ -61,12 +61,12 @@ public final class ImportRewriteAnalyzer {
 	private boolean findAmbiguousImports;
 
 	private int flags= 0;
-	
+
 	private static final int F_NEEDS_LEADING_DELIM= 2;
 	private static final int F_NEEDS_TRAILING_DELIM= 4;
-	
+
 	private static final String JAVA_LANG= "java.lang"; //$NON-NLS-1$
-	
+
 	public ImportRewriteAnalyzer(
 			ICompilationUnit cu,
 			CompilationUnit root,
@@ -82,12 +82,12 @@ public final class ImportRewriteAnalyzer {
 
 		this.filterImplicitImports= true;
 		this.findAmbiguousImports= true; //!restoreExistingImports;
-		
+
 		this.packageEntries= new ArrayList(20);
 		this.importsCreated= new ArrayList();
 		this.staticImportsCreated= new ArrayList();
 		this.flags= 0;
-		
+
 		this.replaceRange= evaluateReplaceRange(root);
 		if (restoreExistingImports) {
 			addExistingImports(root);
@@ -103,10 +103,10 @@ public final class ImportRewriteAnalyzer {
 				order[i]= new PackageEntry(curr, curr, false); // normal import group
 			}
 		}
-		
+
 		addPreferenceOrderHolders(order);
 	}
-	
+
 	private int getSpacesBetweenImportGroups() {
 		try {
 			int num= Integer.parseInt(this.compilationUnit.getJavaProject().getOption(DefaultCodeFormatterConstants.FORMATTER_BLANK_LINES_BETWEEN_IMPORT_GROUPS, true));
@@ -131,9 +131,9 @@ public final class ImportRewriteAnalyzer {
 		} else {
 			// match the preference order entries to existing imports
 			// entries not found are appended after the last successfully matched entry
-			
+
 			PackageEntry[] lastAssigned= new PackageEntry[preferenceOrder.length];
-			
+
 			// find an existing package entry that matches most
 			for (int k= 0; k < this.packageEntries.size(); k++) {
 				PackageEntry entry= (PackageEntry) this.packageEntries.get(k);
@@ -159,7 +159,7 @@ public final class ImportRewriteAnalyzer {
 					}
 					if (bestGroupIndex != -1) {
 						entry.setGroupID(preferenceOrder[bestGroupIndex].getName());
-						lastAssigned[bestGroupIndex]= entry; // remember last entry 
+						lastAssigned[bestGroupIndex]= entry; // remember last entry
 					}
 				}
 			}
@@ -236,19 +236,19 @@ public final class ImportRewriteAnalyzer {
 		String name= decl.getName().getFullyQualifiedName();
 		return decl.isOnDemand() ? name + ".*": name; //$NON-NLS-1$
 	}
-	
+
 	private void addExistingImports(CompilationUnit root) {
 		List/*ImportDeclaration*/ decls= root.imports();
 		if (decls.isEmpty()) {
 			return;
-		}				
+		}
 		PackageEntry currPackage= null;
-			
+
 		ImportDeclaration curr= (ImportDeclaration) decls.get(0);
 		int currOffset= curr.getStartPosition();
 		int currLength= curr.getLength();
 		int currEndLine= root.getLineNumber(currOffset + currLength);
-		
+
 		for (int i= 1; i < decls.size(); i++) {
 			boolean isStatic= curr.isStatic();
 			String name= getFullName(curr);
@@ -264,7 +264,7 @@ public final class ImportRewriteAnalyzer {
 			ImportDeclaration next= (ImportDeclaration) decls.get(i);
 			int nextOffset= next.getStartPosition();
 			int nextLength= next.getLength();
-			int nextOffsetLine= root.getLineNumber(nextOffset); 
+			int nextOffsetLine= root.getLineNumber(nextOffset);
 
 			// if next import is on a different line, modify the end position to the next line begin offset
 			if (currEndLine < nextOffsetLine) {
@@ -278,15 +278,15 @@ public final class ImportRewriteAnalyzer {
 // SH}
 			currOffset= nextOffset;
 			curr= next;
-				
+
 			// add a comment entry for spacing between imports
 			if (currEndLine < nextOffsetLine) {
 				nextOffset= root.getPosition(nextOffsetLine, 0);
-				
+
 				currPackage= new PackageEntry(); // create a comment package entry for this
 				this.packageEntries.add(currPackage);
 				currPackage.add(new ImportDeclEntry(packName.length(), null, false, new Region(currOffset, nextOffset - currOffset)));
-					
+
 				currOffset= nextOffset;
 			}
 			currEndLine= root.getLineNumber(nextOffset + nextLength);
@@ -311,7 +311,7 @@ public final class ImportRewriteAnalyzer {
 //{ObjectTeams: base import
 		if (isBase)
 			currPackage.getLast().setIsBase(true);
-//SH}		
+//SH}
 	}
 
 	/**
@@ -341,23 +341,23 @@ public final class ImportRewriteAnalyzer {
 	 */
 	public void setFindAmbiguousImports(boolean findAmbiguousImports) {
 		this.findAmbiguousImports= findAmbiguousImports;
-	}	
-			
+	}
+
 	private static class PackageMatcher {
 		private String newName;
 		private String bestName;
 		private int bestMatchLen;
-		
+
 		public PackageMatcher() {
 			// initialization in 'initialize'
 		}
-		
+
 		public void initialize(String newImportName, String bestImportName) {
 			this.newName= newImportName;
 			this.bestName= bestImportName;
 			this.bestMatchLen= getCommonPrefixLength(bestImportName, newImportName);
 		}
-		
+
 		public boolean isBetterMatch(String currName, boolean preferCurr) {
 			boolean isBetter;
 			int currMatchLen= getCommonPrefixLength(currName, this.newName);
@@ -378,7 +378,7 @@ public final class ImportRewriteAnalyzer {
 			}
 			return isBetter;
 		}
-				
+
 		private boolean sameMatchLenTest(String currName) {
 			int matchLen= this.bestMatchLen;
 			// known: bestName and currName differ from newName at position 'matchLen'
@@ -429,7 +429,7 @@ public final class ImportRewriteAnalyzer {
 		}
 		return 0;
 	}
-	
+
 //{ObjectTeams: added: 'isBase':	
 	private PackageEntry findBestMatch(String newName, boolean isStatic, boolean isBase) {
 // SH}
@@ -480,9 +480,9 @@ public final class ImportRewriteAnalyzer {
 		}
 		return bestMatch;
 	}
-		
+
 	private boolean isImplicitImport(String qualifier) {
-		if (JAVA_LANG.equals(qualifier)) { 
+		if (JAVA_LANG.equals(qualifier)) {
 			return true;
 		}
 		ICompilationUnit cu= this.compilationUnit;
@@ -496,7 +496,7 @@ public final class ImportRewriteAnalyzer {
 		}
 		return qualifier.equals(packageName +'.' + mainTypeName);
 	}
-	
+
 //{ObjectTeams: added param 'isBase':
 	public void addImport(String fullTypeName, boolean isStatic, boolean isBase) {
 		String typeContainerName= getQualifier(fullTypeName, isStatic);
@@ -506,6 +506,7 @@ public final class ImportRewriteAnalyzer {
 		sortIn(typeContainerName, decl, isStatic, isBase);
 	}
 // SH}
+
 //{ObjectTeams: added isBase:
 /* orig:
 	public boolean removeImport(String qualifiedName, boolean isStatic) {
@@ -513,7 +514,7 @@ public final class ImportRewriteAnalyzer {
 	public boolean removeImport(String qualifiedName, boolean isStatic, boolean isBase) {
 // orig:
 		String containerName= getQualifier(qualifiedName, isStatic);
-		
+
 		int nPackages= this.packageEntries.size();
 		for (int i= 0; i < nPackages; i++) {
 			PackageEntry entry= (PackageEntry) this.packageEntries.get(i);
@@ -623,13 +624,13 @@ public final class ImportRewriteAnalyzer {
 		return this.packageEntries.size();
 	}
 // SH}
-			
+
 	private IRegion evaluateReplaceRange(CompilationUnit root) {
 		List imports= root.imports();
 		if (!imports.isEmpty()) {
 			ImportDeclaration first= (ImportDeclaration) imports.get(0);
 			ImportDeclaration last= (ImportDeclaration) imports.get(imports.size() - 1);
-			
+
 			int startPos= first.getStartPosition(); // no extended range for first: bug 121428
 			int endPos= root.getExtendedStartPosition(last) + root.getExtendedLength(last);
 			int endLine= root.getLineNumber(endPos);
@@ -648,39 +649,39 @@ public final class ImportRewriteAnalyzer {
 		} else {
 			int start= getPackageStatementEndPos(root);
 			return new Region(start, 0);
-		}		
+		}
 	}
-	
+
 	public MultiTextEdit getResultingEdits(IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		try {			
+		try {
 			int importsStart=  this.replaceRange.getOffset();
 			int importsLen= this.replaceRange.getLength();
-					
+
 			String lineDelim= this.compilationUnit.findRecommendedLineSeparator();
 			IBuffer buffer= this.compilationUnit.getBuffer();
-									
+
 			int currPos= importsStart;
 			MultiTextEdit resEdit= new MultiTextEdit();
-			
+
 			if ((this.flags & F_NEEDS_LEADING_DELIM) != 0) {
 				// new import container
 				resEdit.addChild(new InsertEdit(currPos, lineDelim));
 			}
-			
+
 			PackageEntry lastPackage= null;
-			
+
 			Set onDemandConflicts= null;
 			if (this.findAmbiguousImports) {
 				onDemandConflicts= evaluateStarImportConflicts(monitor);
 			}
-			
+
 			int spacesBetweenGroups= getSpacesBetweenImportGroups();
-			
+
 			ArrayList stringsToInsert= new ArrayList();
-			
+
 			int nPackageEntries= this.packageEntries.size();
 			for (int i= 0; i < nPackageEntries; i++) {
 				PackageEntry pack= (PackageEntry) this.packageEntries.get(i);
@@ -705,10 +706,10 @@ public final class ImportRewriteAnalyzer {
 					}
 				}
 				lastPackage= pack;
-				
+
 				boolean isStatic= pack.isStatic();
 				int threshold= isStatic ? this.staticImportOnDemandThreshold : this.importOnDemandThreshold;
-				
+
 				boolean doStarImport= pack.hasStarImport(threshold, onDemandConflicts);
 				if (doStarImport && (pack.find("*") == null)) { //$NON-NLS-1$
 					String[] imports = getNewImportStrings(pack, isStatic, lineDelim);
@@ -716,41 +717,59 @@ public final class ImportRewriteAnalyzer {
 						stringsToInsert.add(imports[j]);
 					}
 				}
-				
+
 				for (int k= 0; k < nImports; k++) {
 					ImportDeclEntry currDecl= pack.getImportAt(k);
 					IRegion region= currDecl.getSourceRange();
-					
+
 					if (region == null) { // new entry
 						if (!doStarImport || currDecl.isOnDemand() || (onDemandConflicts != null && onDemandConflicts.contains(currDecl.getSimpleName()))) {
-//{ObjectTeams: new 3. param:					
+//{ObjectTeams: new 3. param:
 							String str= getNewImportString(currDecl.getElementName(), isStatic, currDecl.isBase(), lineDelim);
-// SH}							
-							stringsToInsert.add(str);
-						}
-					} else {
-						if (!doStarImport || currDecl.isOnDemand() || onDemandConflicts == null || onDemandConflicts.contains(currDecl.getSimpleName())) {
-							int offset= region.getOffset();
-							removeAndInsertNew(buffer, currPos, offset, stringsToInsert, resEdit);
-							stringsToInsert.clear();
-//{ObjectTeams:
-							if (currDecl.isBase()) {
-								int endPos = offset+region.getLength();
-								int importPos = findInBuffer(buffer, "import", offset, endPos); //$NON-NLS-1$
-								int basePos = findInBuffer(buffer, "base", importPos, endPos); //$NON-NLS-1$
-								if (basePos == -1) // "base" not yet set
-									resEdit.addChild(new InsertEdit(importPos+"import ".length(), "base ")); //$NON-NLS-1$ //$NON-NLS-2$
-							}
 // SH}
-							currPos= offset + region.getLength();
+							stringsToInsert.add(str);
+						} else if (doStarImport && !currDecl.isOnDemand()) {
+							String simpleName = currDecl.getTypeQualifiedName();
+							if (simpleName.indexOf('.') != -1) {
+//{ObjectTeams: new 3. param:
+								String str= getNewImportString(currDecl.getElementName(), isStatic, currDecl.isBase(), lineDelim);
+// SH}
+								if (stringsToInsert.indexOf(str) == -1) {
+									stringsToInsert.add(str);
+								}
+							}
+						}
+					} else if (!doStarImport || currDecl.isOnDemand() || onDemandConflicts == null || onDemandConflicts.contains(currDecl.getSimpleName())) {
+						int offset= region.getOffset();
+						removeAndInsertNew(buffer, currPos, offset, stringsToInsert, resEdit);
+						stringsToInsert.clear();
+//{ObjectTeams:
+						if (currDecl.isBase()) {
+							int endPos = offset+region.getLength();
+							int importPos = findInBuffer(buffer, "import", offset, endPos); //$NON-NLS-1$
+							int basePos = findInBuffer(buffer, "base", importPos, endPos); //$NON-NLS-1$
+							if (basePos == -1) // "base" not yet set
+								resEdit.addChild(new InsertEdit(importPos+"import ".length(), "base ")); //$NON-NLS-1$ //$NON-NLS-2$
+						}
+// SH}
+						currPos= offset + region.getLength();
+					} else if (doStarImport && !currDecl.isOnDemand()) {
+						String simpleName = currDecl.getTypeQualifiedName();
+						if (simpleName.indexOf('.') != -1) {
+//{ObjectTeams: new 3. param:
+							String str= getNewImportString(currDecl.getElementName(), isStatic, currDecl.isBase(), lineDelim);
+// SH}
+							if (stringsToInsert.indexOf(str) == -1) {
+								stringsToInsert.add(str);
+							}
 						}
 					}
 				}
 			}
-			
+
 			int end= importsStart + importsLen;
 			removeAndInsertNew(buffer, currPos, end, stringsToInsert, resEdit);
-			
+
 			if (importsLen == 0) {
 				if (!this.importsCreated.isEmpty() || !this.staticImportsCreated.isEmpty()) { // new import container
 					if ((this.flags & F_NEEDS_TRAILING_DELIM) != 0) {
@@ -816,12 +835,12 @@ public final class ImportRewriteAnalyzer {
 		}
 		return -1;
 	}
-	
+
 	private Set evaluateStarImportConflicts(IProgressMonitor monitor) throws JavaModelException {
 		//long start= System.currentTimeMillis();
-		
+
 		final HashSet/*String*/ onDemandConflicts= new HashSet();
-		
+
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] { this.compilationUnit.getJavaProject() });
 
 		ArrayList/*<char[][]>*/  starImportPackages= new ArrayList();
@@ -842,16 +861,16 @@ public final class ImportRewriteAnalyzer {
 		if (starImportPackages.isEmpty()) {
 			return null;
 		}
-		
+
 		starImportPackages.add(this.compilationUnit.getParent().getElementName().toCharArray());
 		starImportPackages.add(JAVA_LANG.toCharArray());
-		
+
 		char[][] allPackages= (char[][]) starImportPackages.toArray(new char[starImportPackages.size()][]);
 		char[][] allTypes= (char[][]) simpleTypeNames.toArray(new char[simpleTypeNames.size()][]);
-		
+
 		TypeNameRequestor requestor= new TypeNameRequestor() {
 			HashMap foundTypes= new HashMap();
-			
+
 			private String getTypeContainerName(char[] packageName, char[][] enclosingTypeNames) {
 				StringBuffer buf= new StringBuffer();
 				buf.append(packageName);
@@ -862,11 +881,11 @@ public final class ImportRewriteAnalyzer {
 				}
 				return buf.toString();
 			}
-			
+
 			public void acceptType(int modifiers, char[] packageName, char[] simpleTypeName, char[][] enclosingTypeNames, String path) {
 				String name= new String(simpleTypeName);
 				String containerName= getTypeContainerName(packageName, enclosingTypeNames);
-				
+
 				String oldContainer= (String) this.foundTypes.put(name, containerName);
 				if (oldContainer != null && !oldContainer.equals(containerName)) {
 					onDemandConflicts.add(name);
@@ -876,7 +895,7 @@ public final class ImportRewriteAnalyzer {
 		new SearchEngine().searchAllTypeNames(allPackages, allTypes, scope, requestor, IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH, monitor);
 		return onDemandConflicts;
 	}
-		
+
 //{ObjectTeams: added 3. parameter		
 	private String getNewImportString(String importName, boolean isStatic, boolean isBase, String lineDelim) {
 // SH}
@@ -889,12 +908,11 @@ public final class ImportRewriteAnalyzer {
 		  else if (isBase)
 			buf.append("base "); //$NON-NLS-1$
 // SH}
-		
 		buf.append(importName);
 		if (insertSpaceBeforeSemicolon()) buf.append(' ');
 		buf.append(';');
 		buf.append(lineDelim);
-		
+
 		if (isStatic) {
 			this.staticImportsCreated.add(importName);
 		} else {
@@ -902,7 +920,7 @@ public final class ImportRewriteAnalyzer {
 		}
 		return buf.toString();
 	}
-		
+	
 	private String[] getNewImportStrings(PackageEntry packageEntry, boolean isStatic, String lineDelim) {
 		boolean isStarImportAdded = false;
 		List allImports = new ArrayList();
@@ -923,7 +941,7 @@ public final class ImportRewriteAnalyzer {
 		}
 		return (String[]) allImports.toArray(new String[allImports.size()]);
 	}
-	
+
 	private static int getFirstTypeBeginPos(CompilationUnit root) {
 		List types= root.types();
 		if (!types.isEmpty()) {
@@ -931,7 +949,7 @@ public final class ImportRewriteAnalyzer {
 		}
 		return -1;
 	}
-	
+
 	private int getPackageStatementEndPos(CompilationUnit root) {
 		PackageDeclaration packDecl= root.getPackage();
 		if (packDecl != null) {
@@ -959,7 +977,7 @@ public final class ImportRewriteAnalyzer {
 		this.flags |= F_NEEDS_TRAILING_DELIM;
 		return 0;
 	}
-	
+
 	public String toString() {
 		int nPackages= this.packageEntries.size();
 		StringBuffer buf= new StringBuffer("\n-----------------------\n"); //$NON-NLS-1$
@@ -970,11 +988,11 @@ public final class ImportRewriteAnalyzer {
 			}
 			buf.append(entry.toString());
 		}
-		return buf.toString();	
+		return buf.toString();
 	}
-	
+
 	private static final class ImportDeclEntry {
-		
+
 		private String elementName;
 		private IRegion sourceRange;
 		private final boolean isStatic;
@@ -993,7 +1011,7 @@ public final class ImportRewriteAnalyzer {
 		public String getElementName() {
 			return this.elementName;
 		}
-		
+
 		public int compareTo(String fullName, boolean isStaticImport) {
 			int cmp= this.elementName.compareTo(fullName);
 			if (cmp == 0) {
@@ -1004,10 +1022,10 @@ public final class ImportRewriteAnalyzer {
 			}
 			return cmp;
 		}
-		
+
 		public String getSimpleName() {
 			return Signature.getSimpleName(this.elementName);
-		}		
+		}
 
 		public String getTypeQualifiedName() {
 			return this.elementName.substring(this.containerNameLength + 1);
@@ -1016,22 +1034,23 @@ public final class ImportRewriteAnalyzer {
 		public boolean isOnDemand() {
 			return this.elementName != null && this.elementName.endsWith(".*"); //$NON-NLS-1$
 		}
-		
+
 		public boolean isStatic() {
 			return this.isStatic;
 		}
-			
+
 		public boolean isNew() {
 			return this.sourceRange == null;
 		}
-		
+
 		public boolean isComment() {
 			return this.elementName == null;
 		}
-		
+
 		public IRegion getSourceRange() {
 			return this.sourceRange;
 		}
+
 //{ObjectTeams: base import:
 		public void setIsBase(boolean flag) {
 			this.isBase = flag;
@@ -1041,7 +1060,7 @@ public final class ImportRewriteAnalyzer {
 		}
 // SH}
 	}
-	
+
 	/*
 	 * Internal element for the import structure: A container for imports
 	 * of all types from the same package
@@ -1054,14 +1073,14 @@ public final class ImportRewriteAnalyzer {
 //{ObjectTeams: base import
 		private boolean isBase;
 // SH}
-	
+
 		/**
 		 * Comment package entry
 		 */
 		public PackageEntry() {
 			this("!", null, false); //$NON-NLS-1$
 		}
-		
+
 		/**
 		 * @param name Name of the package entry. e.g. org.eclipse.jdt.ui, containing imports like
 		 * org.eclipse.jdt.ui.JavaUI.
@@ -1083,12 +1102,11 @@ public final class ImportRewriteAnalyzer {
 			return this.isBase;
 		}
 // SH}
-		
-		
+
 		public boolean isStatic() {
 			return this.isStatic;
 		}
-		
+
 //{ObjectTeams: also compare base flag:
 /* orig:
 		public int compareTo(String otherName, boolean isOtherStatic) {
@@ -1108,7 +1126,7 @@ public final class ImportRewriteAnalyzer {
 			}
 			return cmp;
 		}
-						
+
 		public void sortIn(ImportDeclEntry imp) {
 			String fullImportName= imp.getElementName();
 			int insertPosition= -1;
@@ -1130,12 +1148,12 @@ public final class ImportRewriteAnalyzer {
 				this.importEntries.add(insertPosition, imp);
 			}
 		}
-		
-		
+
+
 		public void add(ImportDeclEntry imp) {
 			this.importEntries.add(imp);
 		}
-		
+
 		public ImportDeclEntry find(String simpleName) {
 			int nInports= this.importEntries.size();
 			for (int i= 0; i < nInports; i++) {
@@ -1147,12 +1165,12 @@ public final class ImportRewriteAnalyzer {
 						if ((dotPos == -1) || (dotPos > 0 && currName.charAt(dotPos) == '.')) {
 							return curr;
 						}
-					}						
+					}
 				}
 			}
 			return null;
 		}
-		
+
 		public boolean remove(String fullName, boolean isStaticImport) {
 			int nInports= this.importEntries.size();
 			for (int i= 0; i < nInports; i++) {
@@ -1183,11 +1201,11 @@ public final class ImportRewriteAnalyzer {
 				}
 			}
 		}
-		
+
 		public ImportDeclEntry getImportAt(int index) {
 			return (ImportDeclEntry) this.importEntries.get(index);
 		}
-		
+
 		public boolean hasStarImport(int threshold, Set explicitImports) {
 			if (isComment() || isDefaultPackage()) { // can not star import default package
 				return false;
@@ -1208,23 +1226,23 @@ public final class ImportRewriteAnalyzer {
 			}
 			return (count >= threshold) && containsNew;
 		}
-		
+
 		public int getNumberOfImports() {
 			return this.importEntries.size();
-		}	
-			
+		}
+
 		public String getName() {
 			return this.name;
 		}
-		
+
 		public String getGroupID() {
 			return this.group;
 		}
-		
+
 		public void setGroupID(String groupID) {
 			this.group= groupID;
 		}
-		
+
 		public boolean isSameGroup(PackageEntry other) {
 			if (this.group == null) {
 				return other.getGroupID() == null;
@@ -1246,11 +1264,11 @@ public final class ImportRewriteAnalyzer {
 		public boolean isComment() {
 			return "!".equals(this.name); //$NON-NLS-1$
 		}
-		
+
 		public boolean isDefaultPackage() {
 			return this.name.length() == 0;
 		}
-		
+
 		public String toString() {
 			StringBuffer buf= new StringBuffer();
 			if (isComment()) {
@@ -1278,14 +1296,14 @@ public final class ImportRewriteAnalyzer {
 			}
 			return buf.toString();
 		}
-	}	
-	
+	}
+
 	public String[] getCreatedImports() {
 	    return (String[]) this.importsCreated.toArray(new String[this.importsCreated.size()]);
 	}
-	
+
 	public String[] getCreatedStaticImports() {
 	    return (String[]) this.staticImportsCreated.toArray(new String[this.staticImportsCreated.size()]);
 	}
-	
+
 }

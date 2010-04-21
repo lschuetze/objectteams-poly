@@ -236,7 +236,8 @@ public TypeBinding checkResolvedType(TypeBinding type, Scope scope, boolean hasE
 		scope.problemReporter().cannotAllocateVoidArray(this);
 		return null;
 	}
-	if (isTypeUseDeprecated(type, scope)) {
+	if (!(this instanceof QualifiedTypeReference)   // QualifiedTypeReference#getTypeBinding called above will have already checked deprecation
+			&& isTypeUseDeprecated(type, scope)) {
 		reportDeprecatedType(type, scope);
 	}
 	type = scope.environment().convertToRawType(type, false /*do not force conversion of enclosing types*/);

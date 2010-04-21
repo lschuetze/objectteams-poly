@@ -593,6 +593,12 @@ private Binding internalGetBinding(char[][] compoundName, int mask, InvocationSi
 		}
 		if ((binding = findMemberType(nextName, referenceBinding)) == null) {
 			if ((mask & Binding.FIELD) != 0) {
+				return new ProblemFieldBinding(
+						null,
+						referenceBinding,
+						nextName,
+						ProblemReasons.NotFound);
+			} else if ((mask & Binding.VARIABLE) != 0) {
 				return new ProblemBinding(
 					CharOperation.subarray(compoundName, 0, currentIndex),
 					referenceBinding,

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -164,7 +164,7 @@ public class ASTRewrite {
 	 * <p>
 	 * For nodes in the original that are being replaced or deleted,
 	 * this rewriter computes the adjusted source ranges
-	 * by calling <code>getTargetSourceRangeComputer().computeSourceRange(node)</code>.
+	 * by calling {@link TargetSourceRangeComputer#computeSourceRange(ASTNode) getExtendedSourceRangeComputer().computeSourceRange(node)}.
 	 * </p>
 	 * <p>
 	 * Calling this methods does not discard the modifications
@@ -219,7 +219,7 @@ public class ASTRewrite {
 	 * <p>
 	 * For nodes in the original that are being replaced or deleted,
 	 * this rewriter computes the adjusted source ranges
-	 * by calling <code>getTargetSourceRangeComputer().computeSourceRange(node)</code>.
+	 * by calling {@link TargetSourceRangeComputer#computeSourceRange(ASTNode) getExtendedSourceRangeComputer().computeSourceRange(node)}.
 	 * </p>
 	 * <p>
 	 * Calling this methods does not discard the modifications
@@ -670,6 +670,7 @@ public class ASTRewrite {
 	 *
 	 * @return an extended source range computer
 	 * @since 3.1
+	 * @see #setTargetSourceRangeComputer(TargetSourceRangeComputer)
 	 */
 	public final TargetSourceRangeComputer getExtendedSourceRangeComputer() {
 		if (this.targetSourceRangeComputer == null) {
@@ -687,9 +688,10 @@ public class ASTRewrite {
 	 * or <code>null</code> to restore the default value of
 	 * <code>new TargetSourceRangeComputer()</code>
 	 * @since 3.1
+	 * @see #getExtendedSourceRangeComputer()
 	 */
 	public final void setTargetSourceRangeComputer(TargetSourceRangeComputer computer) {
-		// if computer==null, rely on lazy init code in getTargetSourceRangeComputer()
+		// if computer==null, rely on lazy init code in getExtendedSourceRangeComputer()
 		this.targetSourceRangeComputer = computer;
 	}
 
