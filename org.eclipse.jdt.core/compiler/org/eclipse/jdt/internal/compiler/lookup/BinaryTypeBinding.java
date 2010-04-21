@@ -41,7 +41,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
-import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
@@ -527,7 +526,7 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 			((ClassFileReader)binaryType).evaluateOTAttributes(this, this.environment, missingTypeNames);
 			// remember o.o.Team:
 			if (needFieldsAndMethods && TypeAnalyzer.isOrgObjectteamsTeam(this))
-				TeamMethodGenerator.maybeRegisterTeamClassBytes((ClassFileReader)binaryType, this);
+				this.environment.getTeamMethodGenerator().maybeRegisterTeamClassBytes((ClassFileReader)binaryType, this);
 		}
 // SH}
 		if (this.environment.globalOptions.storeAnnotations)
@@ -837,7 +836,7 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 	if (result != null && (method instanceof MethodInfo)) {
 		((MethodInfo)method).maybeRegister(this, result, this.environment);
 		if (TypeAnalyzer.isOrgObjectteamsTeam(this))
-			TeamMethodGenerator.registerTeamMethod(method, result);
+			this.environment.getTeamMethodGenerator().registerTeamMethod(method, result);
 	}
   }
 // SH}

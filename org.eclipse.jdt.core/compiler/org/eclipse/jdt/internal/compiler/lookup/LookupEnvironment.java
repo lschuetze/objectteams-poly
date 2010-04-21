@@ -35,6 +35,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleFileHelper;
 
@@ -126,6 +127,15 @@ public class LookupEnvironment implements ProblemReasons, TypeConstants {
 
 	static final ProblemPackageBinding TheNotFoundPackage = new ProblemPackageBinding(CharOperation.NO_CHAR, NotFound);
 	static final ProblemReferenceBinding TheNotFoundType = new ProblemReferenceBinding(CharOperation.NO_CHAR_CHAR, null, NotFound);
+
+//{ObjectTeams: shared instance within a compilation:
+	private TeamMethodGenerator teamMethodGenerator;
+	public TeamMethodGenerator getTeamMethodGenerator() {
+		if (this.teamMethodGenerator == null)
+			this.teamMethodGenerator = new TeamMethodGenerator();
+		return this.teamMethodGenerator;
+	}
+// SH}
 
 public LookupEnvironment(ITypeRequestor typeRequestor, CompilerOptions globalOptions, ProblemReporter problemReporter, INameEnvironment nameEnvironment) {
 	this.typeRequestor = typeRequestor;
@@ -1580,6 +1590,9 @@ public void reset() {
 	this.classFilePool.reset();
 	// name environment has a longer life cycle, and must be reset in
 	// the code which created it.
+//{ObjectTeams: more state to release:
+	this.teamMethodGenerator = null;
+// SH}
 }
 
 /**

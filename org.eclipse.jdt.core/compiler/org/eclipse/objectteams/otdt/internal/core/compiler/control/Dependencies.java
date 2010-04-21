@@ -66,7 +66,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinhe
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.RecordLocalTypesVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.RoleSplitter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
-import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TransformStatementsVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleFileHelper;
@@ -1041,8 +1040,7 @@ public class Dependencies implements ITranslationStates {
     }
 
     /**
-	 * @param teamDeclaration
-	 * @param subRoles
+	 * @param teamModel traverse members of this team and link them to the correct enclosing
 	 */
 	private static void fixEnclosingType(TeamModel teamModel)
 	{
@@ -1542,7 +1540,10 @@ public class Dependencies implements ITranslationStates {
         if (teamModel.getAst() != null) {
 			if (   !TypeAnalyzer.isOrgObjectteamsTeam(teamModel.getBinding())
 				&& !teamModel.getBinding().superclass().isTeam())
-				TeamMethodGenerator.addMethodsAndFields(teamModel.getAst());
+			{
+				LookupEnvironment env = teamModel.getAst().scope.environment();
+				env.getTeamMethodGenerator().addMethodsAndFields(teamModel.getAst());
+			}
         }
 		return true;
 	}

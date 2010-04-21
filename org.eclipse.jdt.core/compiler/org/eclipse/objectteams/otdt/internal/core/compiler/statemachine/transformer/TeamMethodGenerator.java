@@ -120,7 +120,7 @@ public class TeamMethodGenerator {
 	enum Args { NONE, THREAD, BOOLEAN }
 	/** Public methods to copy from o.o.Team: */
 	@SuppressWarnings("nls")
-	final static MethodDescriptor[] methodDescriptors = new MethodDescriptor[] {
+	final MethodDescriptor[] methodDescriptors = new MethodDescriptor[] {
     	new MethodDescriptor("activate",                         	"()V", 					Args.NONE, 		false,	AccPublic),
     	new MethodDescriptor("activate",   							"(Ljava/lang/Thread;)V",Args.THREAD,	false,	AccPublic),
     	new MethodDescriptor("deactivate", 							"()V", 					Args.NONE,		false,	AccPublic),
@@ -137,37 +137,37 @@ public class TeamMethodGenerator {
 	};
 
 	// ==== Currently, this is where we globally store the byte code of org.objectteams.Team: ====
-	public static byte[] classBytes;
-	public static int headerOffset;
-	public static int[] constantPoolOffsets;
+	public byte[] classBytes;
+	public int headerOffset;
+	public int[] constantPoolOffsets;
 	// ==== ====
 	
 	/** When o.o.Team is read from .class file, record the byte code here. */
-    public static synchronized void maybeRegisterTeamClassBytes(ClassFileReader teamClass, ReferenceBinding teamClassBinding) {
-    	if (classBytes != null)
+    public synchronized void maybeRegisterTeamClassBytes(ClassFileReader teamClass, ReferenceBinding teamClassBinding) {
+    	if (this.classBytes != null)
     		return;
-    	classBytes = teamClass.getBytes();
-    	headerOffset = teamClass.getHeaderOffset();
-    	constantPoolOffsets = teamClass.getConstantPoolOffsets();
+    	this.classBytes = teamClass.getBytes();
+    	this.headerOffset = teamClass.getHeaderOffset();
+    	this.constantPoolOffsets = teamClass.getConstantPoolOffsets();
     	for (IBinaryMethod method : teamClass.getMethods()) {
-			for (int s = 0; s < methodDescriptors.length; s++) {
-				if (   String.valueOf(method.getSelector()).equals(methodDescriptors[s].selector)
-					&& String.valueOf(method.getMethodDescriptor()).equals(methodDescriptors[s].signature))
+			for (int s = 0; s < this.methodDescriptors.length; s++) {
+				if (   String.valueOf(method.getSelector()).equals(this.methodDescriptors[s].selector)
+					&& String.valueOf(method.getMethodDescriptor()).equals(this.methodDescriptors[s].signature))
 				{
-					methodDescriptors[s].methodCodeOffset = ((MethodInfo)method).getStructOffset();
-					methodDescriptors[s].declaringClass = teamClassBinding;
+					this.methodDescriptors[s].methodCodeOffset = ((MethodInfo)method).getStructOffset();
+					this.methodDescriptors[s].declaringClass = teamClassBinding;
 					break;
 				}
 			}
     	}
     }
     /** When binary methods for o.o.Team are created record the relevant method bindings. */
-    public static void registerTeamMethod(IBinaryMethod method, MethodBinding methodBinding) {
-		for (int s = 0; s < methodDescriptors.length; s++) {
-			if (   String.valueOf(method.getSelector()).equals(methodDescriptors[s].selector)
-				&& String.valueOf(method.getMethodDescriptor()).equals(methodDescriptors[s].signature))
+    public void registerTeamMethod(IBinaryMethod method, MethodBinding methodBinding) {
+		for (int s = 0; s < this.methodDescriptors.length; s++) {
+			if (   String.valueOf(method.getSelector()).equals(this.methodDescriptors[s].selector)
+				&& String.valueOf(method.getMethodDescriptor()).equals(this.methodDescriptors[s].signature))
 			{
-				methodDescriptors[s].binding = methodBinding;
+				this.methodDescriptors[s].binding = methodBinding;
 				break;
 			}
 		}    	
@@ -176,7 +176,7 @@ public class TeamMethodGenerator {
      * At the AST representing all relevant methods and fields from o.o.Team,
      * and prepare methods for byte-code copy.
      */
-    public static void addMethodsAndFields(TypeDeclaration teamDecl) {
+    public void addMethodsAndFields(TypeDeclaration teamDecl) {
     	// FIXME(SH): test subteams of teams already treated by this generator!
     	AstGenerator gen = new AstGenerator(teamDecl);
     	
@@ -188,7 +188,7 @@ public class TeamMethodGenerator {
     		}			
     	}
     	// methods:
-		for (MethodDescriptor methodDescriptor : methodDescriptors) {
+		for (MethodDescriptor methodDescriptor : this.methodDescriptors) {
 			MethodDeclaration newMethod = null;
 			if (methodDescriptor.modifiers == AccPublic) {
 				// public methods are always copied
@@ -213,7 +213,7 @@ public class TeamMethodGenerator {
     }
     /** create field ASTs. */
     @SuppressWarnings("nls")
-	static void addFields(TypeDeclaration teamDecl, AstGenerator gen) {
+	void addFields(TypeDeclaration teamDecl, AstGenerator gen) {
 		// private WeakHashMap<Thread, Boolean> _OT$activatedThreads = new WeakHashMap<Thread, Boolean>();
     	addPrivateField(teamDecl, gen,
     			weakHashMapTypeReference(gen), 
@@ -271,12 +271,12 @@ public class TeamMethodGenerator {
     			"_OT$implicitActivationsPerThread".toCharArray(),
     			gen.anonymousAllocation(threadLocalReference(gen), null/*arguments*/, anonThreadLocal));
     }
-	static void addPrivateField(TypeDeclaration teamDecl, AstGenerator gen, TypeReference type, char[] name, Expression init) {
+	void addPrivateField(TypeDeclaration teamDecl, AstGenerator gen, TypeReference type, char[] name, Expression init) {
     	FieldDeclaration field = gen.field(AccPrivate, type, name, init);
     	AstEdit.addField(teamDecl, field, true, false);
     	field.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed;     	
     }
-	static QualifiedTypeReference weakHashMapTypeReference(AstGenerator gen) {
+	QualifiedTypeReference weakHashMapTypeReference(AstGenerator gen) {
 		return gen.parameterizedQualifiedTypeReference(
 				JAVA_LANG_WEAKHASHMAP, 
 				new TypeReference[]{
@@ -284,7 +284,7 @@ public class TeamMethodGenerator {
 					gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_BOOLEAN)
 				});
 	}
-	static QualifiedTypeReference threadLocalReference(AstGenerator gen) {
+	QualifiedTypeReference threadLocalReference(AstGenerator gen) {
 		return gen.parameterizedQualifiedTypeReference(
 				JAVA_LANG_THREADLOCAL,
 				new TypeReference[] {
@@ -293,7 +293,7 @@ public class TeamMethodGenerator {
 	}
     
 	/** 
-	 * Add fake method bindings for methods are will be generated by the OTRE.
+	 * Add fake method bindings for methods that will be generated by the OTRE.
 	 * These bindings are needed by the TeamConstantPoolMapper.
 	 */
 	public static void addFakedTeamRegistrationMethods(ReferenceBinding teamBinding) {
@@ -317,7 +317,7 @@ public class TeamMethodGenerator {
 	}
 
 	/** Special crippled method declarations that only serve as place-holder for copy-inheritance. */
-    static class CopiedTeamMethod extends MethodDeclaration {
+    class CopiedTeamMethod extends MethodDeclaration {
     	MethodDescriptor descriptor;
 		public CopiedTeamMethod(CompilationResult compilationResult, MethodDescriptor descriptor, AstGenerator gen) {
 			super(compilationResult);
@@ -340,13 +340,15 @@ public class TeamMethodGenerator {
     	public void generateCode(ClassScope classScope, ClassFile classFile) {
     		this.binding.copyInheritanceSrc = this.descriptor.binding;
     		ConstantPoolObjectMapper mapper = new TeamConstantPoolMapper(this.descriptor.binding, this.binding);
-    		ConstantPoolObjectReader reader = new ConstantPoolObjectReader( classBytes, 
-    																		constantPoolOffsets, 
+    		ConstantPoolObjectReader reader = new ConstantPoolObjectReader( TeamMethodGenerator.this.classBytes, 
+    																		TeamMethodGenerator.this.constantPoolOffsets, 
     																		this.descriptor.declaringClass.getTeamModel(), 
     																		this.scope.environment());
 			new BytecodeTransformer().doCopyMethodCode( null /*srcRoleModel*/, this.binding, 								// source
     													(SourceTypeBinding)this.binding.declaringClass, this, 				// destination
-    													classBytes, constantPoolOffsets, this.descriptor.methodCodeOffset, 	// source bytes 
+    													TeamMethodGenerator.this.classBytes, 				 				// source bytes
+    													TeamMethodGenerator.this.constantPoolOffsets,
+    													this.descriptor.methodCodeOffset,
     													reader, mapper,														// mapping strategies 
     													classFile);															// final destination
     	}
