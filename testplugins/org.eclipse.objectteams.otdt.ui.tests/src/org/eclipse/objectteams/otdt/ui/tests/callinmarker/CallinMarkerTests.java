@@ -334,7 +334,7 @@ public class CallinMarkerTests extends FileBasedUITest
         synchronousCreateMarkers(_baseResource);
 
         Set<String> expectedMarkers = new HashSet<String>();
-        expectedMarkers.add("=CallinMarker/src<cycle{B.java[B$R[A$Q~run");
+        expectedMarkers.add("=CallinMarker/src<cycle2{B.java[B[R~run");
         
         IMarker[] markers = getCallinMarkers(_baseResource);
         assertMarkers(expectedMarkers, markers);

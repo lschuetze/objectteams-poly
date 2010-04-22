@@ -1,4 +1,4 @@
-package compileorder;
+package cycle2;
 public team class A<B b> {
         public void run() {
                 System.out.println("A.run()");

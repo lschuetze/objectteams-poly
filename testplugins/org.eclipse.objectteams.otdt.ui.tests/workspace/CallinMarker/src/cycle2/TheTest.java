@@ -1,4 +1,4 @@
-package compileorder;
+package cycle2;
 public class TheTest {
         final B b = new B();
         final A a = new A<@b>();

@@ -33,11 +33,13 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelStatus;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.core.JavaModelStatus;
+import org.eclipse.jdt.internal.core.TypeParameter;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
@@ -320,11 +322,22 @@ public class RoleType extends OTType implements IRoleType
         else
         {
 	        IField field = currentType.getField(anchorField);
-	        if (!field.exists())
-	            return null;
-            
-	        String fieldType = Signature.toString(field.getTypeSignature());
-	        anchorType = resolveInType(enclosingTeam, fieldType);
+	        String fieldType = null;
+	        if (field.exists()) {
+	        	fieldType = Signature.toString(field.getTypeSignature());
+	        } else {
+	        	// try value parameter instead:
+	        	for (ITypeParameter param : currentType.getTypeParameters()) {
+	        		if (((TypeParameter)param).isValueParameter) {
+	        			if (param.getElementName().equals(anchorField)) {
+	        				fieldType = param.getBounds()[0]; // FIXME(SH): one value param only
+	        				break;
+	        			}
+	        		}
+	        	}
+	        }
+	        if (fieldType != null)
+	        	anchorType = resolveInType(enclosingTeam, fieldType);
         }
         
         if (anchorType == null || !anchorType.exists())
