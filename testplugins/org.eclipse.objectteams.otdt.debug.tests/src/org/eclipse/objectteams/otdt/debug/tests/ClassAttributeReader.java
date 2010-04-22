@@ -27,9 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Vector;
 
-import org.eclipse.core.runtime.IPath;
-
-import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.Attribute;
 import org.apache.bcel.classfile.ClassFormatException;
 import org.apache.bcel.classfile.ClassParser;
@@ -38,6 +35,7 @@ import org.apache.bcel.classfile.ConstantUtf8;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.classfile.Method;
 import org.apache.bcel.classfile.Unknown;
+import org.eclipse.core.runtime.IPath;
 
 /**
  * @author ike
@@ -61,10 +59,8 @@ public class ClassAttributeReader
     public ClassAttributeReader(IPath classFilePath)
     {
         try {
-        	if ((_javaclass = Repository.lookupClass(classFilePath.toOSString())) == null) {
-                _javaclass = new ClassParser(classFilePath.toOSString()).parse(); // May throw
-                readAndStoreAttributes();
-        	}
+             _javaclass = new ClassParser(classFilePath.toOSString()).parse(); // May throw
+             readAndStoreAttributes();
         }
         catch (ClassFormatError e)
         {
@@ -76,9 +72,6 @@ public class ClassAttributeReader
             _error = e.getMessage();
             e.printStackTrace();
         } catch (ClassFormatException e) {
-            _error = e.getMessage();
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
             _error = e.getMessage();
 			e.printStackTrace();
 		}
