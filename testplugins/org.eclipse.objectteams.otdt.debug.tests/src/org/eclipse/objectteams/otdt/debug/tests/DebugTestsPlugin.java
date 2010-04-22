@@ -68,7 +68,7 @@ public class DebugTestsPlugin extends AbstractUIPlugin {
 
     protected String getPluginID()
     {
-        return "org.eclispe.objectteams.otdt.debug.tests";
+        return "org.eclipse.objectteams.otdt.debug.tests";
     }
     
     /**

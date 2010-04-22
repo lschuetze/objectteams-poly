@@ -43,8 +43,8 @@ public class OTLaunchConfigMigrationDelegate implements ILaunchConfigurationMigr
 
 	final static HashMap<String,String> oldToNew = new HashMap<String, String>();
 	static {
-		oldToNew.put(OTDebugPlugin.OT_LAUNCH_CONFIGURATION_TYPE, 	IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
-		// 'referencing' constants from downstream plug-ins (old, removed launch configuration types)
+		// 'referencing' deleted constants from old plug-ins (old, removed launch configuration types)
+		oldToNew.put("org.objectteams.otdt.debug.LaunchConfigurationType", 	IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION); //$NON-NLS-1$
 		oldToNew.put("org.objectteams.otdt.pde.ui.OTEquinoxLaunchConfigurationType", 		  "org.eclipse.pde.ui.EquinoxLauncher");  //$NON-NLS-1$ //$NON-NLS-2$
 		oldToNew.put("org.objectteams.otdt.pde.ui.EclipseApplicationLaunchConfigurationType", "org.eclipse.pde.ui.RuntimeWorkbench"); //$NON-NLS-1$ //$NON-NLS-2$
 	}

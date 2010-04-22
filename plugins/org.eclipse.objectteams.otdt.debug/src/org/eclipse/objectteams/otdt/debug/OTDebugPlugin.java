@@ -51,10 +51,6 @@ public class OTDebugPlugin extends Plugin
 {
 	public static final String PLUGIN_ID = "org.eclipse.objectteams.otdt.debug"; //$NON-NLS-1$
 	public static final String OT_LAUNCH = "org.eclipse.objectteams.launch"; //$NON-NLS-1$
-	/**
-	 * @deprecated reference to a removed launch configuration type.
-	 */
-    public static final String OT_LAUNCH_CONFIGURATION_TYPE = "org.objectteams.otdt.debug.LaunchConfigurationType"; //$NON-NLS-1$
     
     private OTDebugElementsContainerFactory _containerFactory;
 

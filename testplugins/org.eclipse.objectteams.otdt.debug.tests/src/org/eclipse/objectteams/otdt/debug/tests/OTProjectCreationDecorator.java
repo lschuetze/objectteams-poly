@@ -150,10 +150,10 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
         // this one used by StratumTests:
         createLaunchConfiguration("Breakpoints");
 //{ObjectTeams: own tests:        
-        createLaunchConfiguration("rofitests.RoFiTeam", OTDebugPlugin.OT_LAUNCH_CONFIGURATION_TYPE);
-        createLaunchConfiguration("copyinheritancetests.SubTeam", OTDebugPlugin.OT_LAUNCH_CONFIGURATION_TYPE);
-        createLaunchConfiguration("copyinheritancetests.SubTeam2", OTDebugPlugin.OT_LAUNCH_CONFIGURATION_TYPE);
-        createLaunchConfiguration("copyinheritancetests.SubTeam3", OTDebugPlugin.OT_LAUNCH_CONFIGURATION_TYPE);
+        createLaunchConfiguration("rofitests.RoFiTeam");
+        createLaunchConfiguration("copyinheritancetests.SubTeam");
+        createLaunchConfiguration("copyinheritancetests.SubTeam2");
+        createLaunchConfiguration("copyinheritancetests.SubTeam3");
 // SH}
     }
 
