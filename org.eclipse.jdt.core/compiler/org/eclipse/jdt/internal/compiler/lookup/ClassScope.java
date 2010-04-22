@@ -1816,7 +1816,7 @@ public class ClassScope extends Scope {
 					tsuperAnchor = ((RoleTypeBinding)tsuperBase)._teamAnchor;
 					tsuperBase = tsuperBase.getRealType();
 				}
-				if (   !TSuperHelper.isTSubOf(baseclass, tsuperBase)
+				if (   !(baseclass == tsuperBase || TSuperHelper.isTSubOf(baseclass, tsuperBase))
 					|| !TSuperHelper.isEquivalentField(baseAnchor, tsuperAnchor)) 
 				{
 					problemReporter().overridesPlayedBy(ClassScope.this.referenceContext, tsuperBase);

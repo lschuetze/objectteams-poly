@@ -294,11 +294,12 @@ public class TSuperHelper {
 		FieldBinding tsuperField = (FieldBinding)tsuperAnchor;
 		if (!CharOperation.equals(currentField.name, tsuperField.name))
 			return false;
-		if (   currentField.declaringClass.isCompatibleWith(tsuperField.declaringClass)
-			|| isTSubOf(currentField.declaringClass, tsuperField.declaringClass))
+		if (currentField.declaringClass.isCompatibleWith(tsuperField.declaringClass))
 			// different fields means one should be a faked strong copy of the other:
 			return (currentField.tagBits & TagBits.IsFakedField) != 0;
-		return true;
+		if (isTSubOf(currentField.declaringClass, tsuperField.declaringClass))
+			return true;
+		return false;
 	}
 
 // UNUSED but commit this code at least once to facility retrieval should it be needed later.
