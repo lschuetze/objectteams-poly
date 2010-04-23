@@ -2,9 +2,10 @@ package p;
 
 public team class T{
 	protected class R playedBy B{
-		void n(int j){
+		callin void n(int j){
 			int v = j;
+			base.n(j);
 		}
-		n <- before m;
+		n <- replace m;
 	}
 }
