@@ -17,6 +17,9 @@
 package org.objectteams;
 
 import java.awt.EventQueue;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.WeakHashMap;
@@ -487,4 +490,37 @@ public /* team */ class Team implements ITeam {
 		@SuppressWarnings("unused")
 		int i= 2+3; // Note: body must not be empty for debuggger to be able to stop.
 	} // $Debug(FinalizeMethod)
+	
+	/** 
+	 * If a serializable team wishes to persist its global activation status it must
+	 * call this method from its writeObject() method and correspondingly call
+	 * {@link #readGlobalActivationState(ObjectInputStream)} from its readObject().
+	 */
+	protected void writeGlobalActivationState(ObjectOutputStream out) throws IOException {
+		out.writeBoolean(this._OT$globalActive);
+	}
+	/** 
+	 * If a serializable team wishes to persist its global activation status it must
+	 * call this method from its readObject() method and correspondingly call
+	 * {@link #writeGlobalActivationState(ObjectOutputStream)} from its writeObject().
+	 * If a team is restored that was globally active when serialized, it will be activated
+	 * correspondingly during deserialization when this method is called.
+	 */
+	protected void readGlobalActivationState(ObjectInputStream in) throws IOException {
+		this._OT$globalActive = in.readBoolean();
+		if (this._OT$globalActive) {
+			this._OT$lazyGlobalActiveFlag = true;
+			this.doRegistration();
+		}
+	}
+	/**
+	 * Serializable teams must invoke this method once from their readObject() method
+	 * in order to re-initialize internal data structures.
+	 */
+	protected void restore() { /* empty; implementation will be generated for each serializable sub-class. */ }
+	/**
+	 * Serializable teams must invoke this method from their readObject() method
+	 * for each role that has been retrieved and shall be re-registered for this team.
+	 */
+	protected void restoreRole(Class<?> clazz, Object role) { /* empty; implementation will be generated for each serializable sub-class. */ }
 }

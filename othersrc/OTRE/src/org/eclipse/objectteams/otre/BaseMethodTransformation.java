@@ -1825,7 +1825,7 @@ public class BaseMethodTransformation
 	 * @return				the generated field
 	 */
 	private Field generateRoleSet(ConstantPoolGen cpg, String class_name) {
-		FieldGen fg = new FieldGen(Constants.ACC_PROTECTED, 
+		FieldGen fg = new FieldGen(Constants.ACC_PROTECTED|Constants.ACC_TRANSIENT, 
                                    OTConstants.roleSetType,
                                    OTConstants.ROLE_SET,
                                    cpg);

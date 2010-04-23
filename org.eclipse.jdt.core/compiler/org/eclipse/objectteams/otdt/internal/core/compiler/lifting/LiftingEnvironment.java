@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPublic;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccSynthetic;
+import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccTransient;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CACHE_PREFIX;
 
 import java.util.HashMap;
@@ -60,6 +61,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SourcePosition;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.StepOverSourcePosition;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReflectionGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.RoleMigrationImplementor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.SerializationGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
@@ -327,7 +329,7 @@ public class LiftingEnvironment
 
 		// caches are not final for the sake of initCaches-methods.
 	    FieldDeclaration field = gen.field(
-	    		(AccPublic|AccSynthetic), fieldTypeRef, cacheName, /*alloc*/null);
+	    		(AccPublic|AccSynthetic|AccTransient), fieldTypeRef, cacheName, /*alloc*/null);
 	    // Note (SH): if the cache would be generated with lesser access rights
 	    // (e.g., protected), we would need synthetic access methods, when accessing
 	    // across packages, and all accesses would have to be redirected.
@@ -389,6 +391,9 @@ public class LiftingEnvironment
     				}
     			}
     		}
+
+    		// Serialization: generate restore methods to initialize caches/register roles:
+    		SerializationGenerator.generateRestoreMethods(teamType, gen);    		
     	}
 
     	return initMethod;
@@ -449,6 +454,8 @@ public class LiftingEnvironment
 		}
     	statements[caches.length] = gen.returnStatement(gen.booleanLiteral(true));
     	initMethod.setStatements(statements);
+    	// Serialization:
+    	SerializationGenerator.fillRestoreRole(teamType, caches);
 
     	// ===== also add the field that triggers invocation of this method from all constructors: =====
 
