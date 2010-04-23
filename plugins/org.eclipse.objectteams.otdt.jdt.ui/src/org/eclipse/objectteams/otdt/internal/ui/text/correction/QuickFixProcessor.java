@@ -109,6 +109,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 		case IProblem.ExternalizedCallToNonPublicConstructor:
 		case IProblem.ExternalizedCallToNonPublicMethod:
 		case IProblem.NotVisibleRoleMethod:
+		case IProblem.NotVisibleRoleConstructor:
 		case IProblem.TSubMethodReducesVisibility:
 // inferred callouts:
 		case IProblem.UsingCalloutToFieldForFieldRead:
@@ -330,6 +331,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				}
 				break;
 			case IProblem.NotVisibleRoleMethod:
+			case IProblem.NotVisibleRoleConstructor:
 				// this processor is orig jdt, but it is adapted by OTQuickFixes/QuickFixCoreAdaptor:
 				ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE, 10);
 				break;
