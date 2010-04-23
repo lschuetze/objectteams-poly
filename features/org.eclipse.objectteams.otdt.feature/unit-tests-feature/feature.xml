@@ -41,20 +41,9 @@ This software is based on Eclipse and the Java Development Tooling
       <import plugin="org.eclipse.jdt.debug"/>
       <import plugin="org.eclipse.team.core"/>
       <import plugin="org.eclipse.text"/>
+      <import plugin="org.eclipse.test.performance"/>
+      <import plugin="org.eclipse.ant.optional.junit"/>
    </requires>
-
-
-   <plugin
-         id="org.eclipse.test.performance"
-         download-size="0"
-         install-size="0"
-         version="0.0.0"/>
-
-   <plugin
-   		 id="org.eclipse.ant.optional.junit"
-   		 download-size="0"
-   		 install-size="0"
-   		 version="0.0.0"/>
 
    <plugin
          id="org.eclipse.jdt.core.tests.compiler"
