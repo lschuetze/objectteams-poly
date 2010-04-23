@@ -89,8 +89,7 @@ public class TeamSelectionDialog extends TwoPaneElementSelector
 
 		fScope= scope;
 		
-		// FIXME: workaround for https://bugs.eclipse.org/307403
-//		setUpperListLabel(OTNewWizardMessages.TeamSelectionDialog_upperLabel); 
+		setUpperListLabel(OTNewWizardMessages.TeamSelectionDialog_upperLabel); 
 		setLowerListLabel(OTNewWizardMessages.TeamSelectionDialog_lowerLabel); 
 	}
 
