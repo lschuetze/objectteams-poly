@@ -739,7 +739,11 @@ public class InlineCallinRefactoring extends Refactoring {
 		if (hasParameterMapping(callinMapping)) {
 			copyRoleParameterMappingsToInvocation(invocation, callinMappingDecl, baseMethodInfo);
 		} else {
-			copyInvocationParameters(invocation, this.fRoleMethod);
+			String[] parameterNames = baseMethodInfo.getMethod().getParameterNames();
+			int length = callinMapping.getCallinKind() ==  ICallinMapping.KIND_REPLACE 
+						? parameterNames.length 
+						: this.fRoleMethod.getParameterNames().length;
+			copyInvocationParameters(invocation, parameterNames, length);
 		}
 		if (needsReturnStatement(baseMethodInfo)) {
 			ReturnStatement statement = invocation.getAST().newReturnStatement();
@@ -951,11 +955,15 @@ public class InlineCallinRefactoring extends Refactoring {
 	 *            the method that declares the parameters
 	 * @throws JavaModelException
 	 */
-	@SuppressWarnings("unchecked")
 	private void copyInvocationParameters(MethodInvocation invocation, IMethod method) throws JavaModelException {
-		String[] names = method.getParameterNames();
-		for (String element : names)
-			invocation.arguments().add(fBaseAST.newSimpleName(element));
+		String[] parameterNames = method.getParameterNames();
+		copyInvocationParameters(invocation, parameterNames, parameterNames.length);		
+	}
+	// this variant allows to cut off unneeded parameters (only for before/after callins):
+	@SuppressWarnings("unchecked")
+	private void copyInvocationParameters(MethodInvocation invocation, String[] names, int n) throws JavaModelException {
+		for (int i=0; i<n; i++)
+			invocation.arguments().add(fBaseAST.newSimpleName(names[i]));
 	}
 
 	/**

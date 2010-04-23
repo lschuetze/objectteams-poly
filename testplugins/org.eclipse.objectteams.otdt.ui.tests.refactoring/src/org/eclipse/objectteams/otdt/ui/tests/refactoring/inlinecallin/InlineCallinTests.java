@@ -254,6 +254,11 @@ public class InlineCallinTests extends RefactoringTest {
 				"B");
 	}	
 	
+	public void testDifferentParamLengthBeforeCallin() throws Exception {
+		performInlineCallin_pass(new String[] { "T", "B" }, "n", new String[] { "I" }, new String[] { "m" }, new String[][] { new String[] { "I", "QString;" } }, new int[] { CallinMapping.KIND_BEFORE }, false, "R",
+				"B");
+	}	
+	
 	public void testSimpleParameterMapping() throws Exception {
 		performInlineCallin_pass(new String[] { "T", "B" }, "n", new String[] { "I" }, new String[] { "m" }, new String[][] { new String[] { "I", "I" } },
 				new int[] { CallinMapping.KIND_AFTER }, false, "R", "B");
