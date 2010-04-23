@@ -125,7 +125,7 @@ public class SerializationGenerator {
 				    					  gen.castExpression(gen.singleNameReference(ROLE_ARG_NAME), 
 				    							  			 gen.typeReference(roleBinding), CastExpression.RAW)),
 				    	// Base base = role._OT$getBase();
-				    	gen.localVariable(IOTConstants.BASE, gen.typeReference(roleBinding.baseclass()),
+				    	gen.localVariable(IOTConstants.BASE, gen.baseclassReference(roleBinding.baseclass()),
 				    					  gen.messageSend(
 				    							  gen.singleNameReference(CASTED_ROLE), 
 				    							  IOTConstants._OT_GETBASE, 
