@@ -14,7 +14,7 @@
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.store;
+package org.eclipse.objectteams.samples.ordersystem.store;
 
 /**
  * This is a simple implementation of a stock item. It contains the name of the item,

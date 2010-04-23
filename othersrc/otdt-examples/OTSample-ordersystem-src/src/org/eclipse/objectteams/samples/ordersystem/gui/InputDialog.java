@@ -14,7 +14,7 @@
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.gui;
+package org.eclipse.objectteams.samples.ordersystem.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -38,10 +38,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
-import org.objectteams.samples.ordersystem.data.Address;
-import org.objectteams.samples.ordersystem.data.Customer;
-import org.objectteams.samples.ordersystem.order.StockOrder;
-import org.objectteams.samples.ordersystem.store.StockItem;
+import org.eclipse.objectteams.samples.ordersystem.data.Address;
+import org.eclipse.objectteams.samples.ordersystem.data.Customer;
+import org.eclipse.objectteams.samples.ordersystem.order.StockOrder;
+import org.eclipse.objectteams.samples.ordersystem.store.StockItem;
 
 
 

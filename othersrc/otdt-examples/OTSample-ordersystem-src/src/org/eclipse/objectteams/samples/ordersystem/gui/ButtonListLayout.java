@@ -14,7 +14,7 @@
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.gui;
+package org.eclipse.objectteams.samples.ordersystem.gui;
 
 import java.awt.Component;
 import java.awt.Container;

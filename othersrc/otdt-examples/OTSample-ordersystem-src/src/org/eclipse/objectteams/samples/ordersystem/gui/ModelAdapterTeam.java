@@ -14,7 +14,7 @@
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.gui;
+package org.eclipse.objectteams.samples.ordersystem.gui;
 
 import java.awt.Component;
 import java.util.HashMap;
@@ -28,15 +28,15 @@ import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
 
+import org.eclipse.objectteams.samples.ordersystem.data.Address;
+import org.eclipse.objectteams.samples.ordersystem.data.Customer;
+import org.eclipse.objectteams.samples.ordersystem.order.StockOrder;
+import org.eclipse.objectteams.samples.ordersystem.reservation.Reservations;
+import org.eclipse.objectteams.samples.ordersystem.store.StockItem;
 import org.objectteams.Team;
-import org.objectteams.samples.ordersystem.data.Address;
-import org.objectteams.samples.ordersystem.order.StockOrder;
-import org.objectteams.samples.ordersystem.reservation.Reservations;
-import org.objectteams.samples.ordersystem.store.StockItem;
 
-import org.objectteams.samples.ordersystem.data.Customer;
-import base org.objectteams.samples.ordersystem.reservation.StockReservations;
-import base org.objectteams.samples.ordersystem.store.Storage;
+import base org.eclipse.objectteams.samples.ordersystem.reservation.StockReservations;
+import base org.eclipse.objectteams.samples.ordersystem.store.Storage;
 
 
 
@@ -319,7 +319,7 @@ public team class ModelAdapterTeam {
                                    };
         
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getColumnNames()
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getColumnNames()
          */
         protected String[] getColumnNames() {
             return columnNames;
@@ -346,7 +346,7 @@ public team class ModelAdapterTeam {
         }
         
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getElements()
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getElements()
          */
         // Note: abstract method is implemented using callout binding:
         @SuppressWarnings("decapsulation")
@@ -376,14 +376,14 @@ public team class ModelAdapterTeam {
         protected Vector<Customer> elements = new Vector<Customer>();
         
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getColumnNames()
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getColumnNames()
          */
         protected String[] getColumnNames() {
             return columnNames;
         }
 
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getValueAt(int, int)
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getValueAt(int, int)
          */
         public Object getValueAt(int aRowIndex, int aColumnIndex) {
             Vector<Customer> tempElements = getElements();
@@ -408,7 +408,7 @@ public team class ModelAdapterTeam {
         }
         
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getElements()
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getElements()
          */
         public Vector<Customer> getElements() {
             return elements;
@@ -474,21 +474,21 @@ public team class ModelAdapterTeam {
 		ReservationAdapter theInstance() -> StockReservations theInstance();		
         
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getColumnNames()
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getColumnNames()
          */
         protected String[] getColumnNames() {
             return columnNames;
         }
 
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getElements()
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getElements()
          */
         public Vector<StockItem> getElements() {
 			return getStorageAdapter().getElements();
         }
 
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getValueAt(int, int)
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getValueAt(int, int)
          */
         public Object getValueAt(int aRowIndex, int aColumnIndex) {
             Vector<StockItem> tempElements = getElements();
@@ -536,21 +536,21 @@ public team class ModelAdapterTeam {
            };
         
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getColumnNames()
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getColumnNames()
          */
         protected String[] getColumnNames() {
             return columnNames;
         }
         
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getElements()
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getElements()
          */
         public Vector<StockOrder> getElements() {
             return elements;
         }
 
         /**
-         * @see org.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getValueAt(int, int)
+         * @see org.eclipse.objectteams.samples.ordersystem.gui.AbstractTableModelTemplate#getValueAt(int, int)
          */
         public Object getValueAt(int aRowIndex, int aColumnIndex) {
             return getElements().elementAt(aRowIndex).toString();

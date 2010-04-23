@@ -14,13 +14,13 @@
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.order;
+package org.eclipse.objectteams.samples.ordersystem.order;
 
-import org.objectteams.samples.ordersystem.reservation.StockReservations;
+import org.eclipse.objectteams.samples.ordersystem.reservation.StockReservations;
 
-import base org.objectteams.samples.ordersystem.data.Customer;
-import base org.objectteams.samples.ordersystem.data.Address;
-import base org.objectteams.samples.ordersystem.store.StockItem;
+import base org.eclipse.objectteams.samples.ordersystem.data.Customer;
+import base org.eclipse.objectteams.samples.ordersystem.data.Address;
+import base org.eclipse.objectteams.samples.ordersystem.store.StockItem;
 
 /**
  * The team <code>StockOrder</code> is a specialization of the <code>Order</code>. 

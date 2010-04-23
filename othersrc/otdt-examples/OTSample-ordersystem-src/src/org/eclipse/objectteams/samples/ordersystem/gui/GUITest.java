@@ -7,20 +7,27 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Tab.java 23502 2010-02-08 18:33:32Z stephan $
+ * $Id: GUITest.java 23502 2010-02-08 18:33:32Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.gui;
+package org.eclipse.objectteams.samples.ordersystem.gui;
 
-/**
- * Enum representing actual foreground tab.
- */
-public enum Tab {
 
-    STORE, CUSTOMER, RESERVATION, ORDER;
+public class GUITest {
+
+    public static void main(String[] args) {
+        GUITest tempGUITest = new GUITest();
+        tempGUITest.init();
+    }
+    
+    private void init() {
+        // hook for security application
+        // TODO: remove this when OT can adapt constructors
+        new OrderSystemMainFrame();
+    }
     
 }

@@ -14,9 +14,9 @@
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.reservation;
+package org.eclipse.objectteams.samples.ordersystem.reservation;
 
-import base org.objectteams.samples.ordersystem.store.StockItem;
+import base org.eclipse.objectteams.samples.ordersystem.store.StockItem;
 
 /**
  * Team class <code>StockReservations</code> extends the abstract team class <code>Reservations</code>

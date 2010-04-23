@@ -14,7 +14,7 @@
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.order;
+package org.eclipse.objectteams.samples.ordersystem.order;
 
 import java.util.LinkedList;
 import java.util.Iterator;

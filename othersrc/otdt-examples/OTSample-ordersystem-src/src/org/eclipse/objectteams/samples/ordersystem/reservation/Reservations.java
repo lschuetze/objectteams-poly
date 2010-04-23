@@ -14,7 +14,7 @@
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.reservation;
+package org.eclipse.objectteams.samples.ordersystem.reservation;
 
 /**
  * This is a team implementation for a simple reservation system.

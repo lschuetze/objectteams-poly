@@ -14,7 +14,7 @@
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.gui;
+package org.eclipse.objectteams.samples.ordersystem.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,11 +23,11 @@ import java.util.Vector;
 import javax.swing.JButton;
 import javax.swing.JTable;
 
+import org.eclipse.objectteams.samples.ordersystem.data.Customer;
+import org.eclipse.objectteams.samples.ordersystem.order.StockOrder;
+import org.eclipse.objectteams.samples.ordersystem.store.StockItem;
+import org.eclipse.objectteams.samples.ordersystem.store.Storage;
 import org.objectteams.Team;
-import org.objectteams.samples.ordersystem.data.Customer;
-import org.objectteams.samples.ordersystem.order.StockOrder;
-import org.objectteams.samples.ordersystem.store.StockItem;
-import org.objectteams.samples.ordersystem.store.Storage;
 
 /**
  * @author Dehla Sokenou

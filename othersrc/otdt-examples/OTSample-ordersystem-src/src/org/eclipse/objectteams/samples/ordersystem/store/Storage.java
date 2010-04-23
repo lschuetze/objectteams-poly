@@ -14,7 +14,7 @@
  * Contributors:
  * 	  Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.objectteams.samples.ordersystem.store;
+package org.eclipse.objectteams.samples.ordersystem.store;
 
 import java.util.HashMap;
 import java.util.Iterator;
