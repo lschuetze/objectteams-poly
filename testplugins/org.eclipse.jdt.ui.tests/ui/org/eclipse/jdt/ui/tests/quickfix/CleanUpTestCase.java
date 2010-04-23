@@ -133,9 +133,6 @@ public class CleanUpTestCase extends QuickFixTest {
 		new InstanceScope().getNode(JavaUI.ID_PLUGIN).put(CleanUpConstants.SAVE_PARTICIPANT_PROFILE, fProfile.getID());
 
 		disableAll();
-		fJProject1= null;
-		fSourceFolder= null;
-		fProfile= null;
 	}
 
 	protected void tearDown() throws Exception {
