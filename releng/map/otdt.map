@@ -57,6 +57,7 @@ plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring,0.7.0=SVN,url=svn://loc
 plugin@org.eclipse.test.performance=v20100122,/cvsroot/eclipse,
 plugin@org.eclipse.jdt.core.tests.builder=v_A45,/cvsroot/eclipse,
 plugin@org.eclipse.jdt.debug.tests=v20100322,/cvsroot/eclipse,
+plugin@org.eclipse.ant.optional.junit=v20080717,/cvsroot/eclipse,
 
 
 
