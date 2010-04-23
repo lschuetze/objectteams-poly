@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.model;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -467,8 +468,23 @@ public class TypeModel extends ModelElement {
 	}
 	public ClassFileReader read () throws IOException, ClassFormatException
 	{
-		if (this._classFilePath != null)
-			return ClassFileReader.read(this._classFilePath); // not recording attributes
+		if (this._classFilePath != null) {
+			FileNotFoundException fileNotFoundException = null;
+			for (int i=0; i<5; i++) { // make <= 5 attempts thus waiting <= 500 ms
+				try {
+					return ClassFileReader.read(this._classFilePath); // not recording attributes
+				} catch (FileNotFoundException ex) {
+					fileNotFoundException = ex;
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			if (fileNotFoundException != null)
+				throw fileNotFoundException;
+		}
 		return null;
 	}
 	/**
