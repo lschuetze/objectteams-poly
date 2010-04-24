@@ -441,7 +441,7 @@ public class NLSSearchTest extends TestCase {
 		buf.append("Main.indirect=Main.indirect\n");
 		IFile propertiesFile= write((IFolder)pack1.getCorrespondingResource(), buf.toString(), "Accessor.properties");
 
-		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 0);
+		NLSSearchTestHelper.assertNumberOfProblems(accessor, propertiesFile, 1);
 	}
 
 	public void testBug247012_3() throws Exception {
