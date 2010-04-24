@@ -387,6 +387,9 @@ public class RoleSplitter
                 if (m.isPrivate())	 	continue; // not inherited
                 if (m.isStatic())       continue; // not applicable in roles
                 if (!m.isPublic()) { 			  // not visible via interface
+                	MethodBinding existingMethod = TypeAnalyzer.findMethod(roleIfcDecl.scope, ifcBinding, m.selector, m.parameters);
+					if (existingMethod != null && existingMethod.isValidBinding())
+                		continue;
                 	ProblemMethodBinding problemMethod = new ProblemMethodBinding(m, m.selector, m.parameters, ProblemReasons.NotVisible);
                 	problemMethod.modifiers = m.modifiers;
                 	problemMethod.modifiers |= AccAbstract|AccSemicolonBody; // don't confuse the MethodVerifier with class method in ifc
