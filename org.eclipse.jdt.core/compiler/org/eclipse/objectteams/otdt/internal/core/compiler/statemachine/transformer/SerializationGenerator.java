@@ -16,6 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
@@ -27,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -157,6 +159,15 @@ public class SerializationGenerator {
 		restoreMethod.setStatements(statements);
 		if (StateMemento.hasMethodResolveStarted(teamType.binding))
 			restoreMethod.resolve(teamType.scope);
+	}
+
+	public static boolean isSerializationMethod(MethodBinding method) {
+		int nParams = method.parameters.length;
+		if (CharOperation.equals(method.selector, RESTORE))
+			return (nParams == 0);
+		if (CharOperation.equals(method.selector, RESTORE_ROLE))
+			return (nParams == 2);
+		return false;
 	}
 
 }

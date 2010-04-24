@@ -96,7 +96,9 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBi
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReflectionGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReplaceSingleNameVisitor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.SerializationGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
@@ -887,6 +889,11 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	        // Synthetic methods are not read from byte code.
 	    	// FIXME(SH): this last note is not true any more.
 
+	    if (   targetRoleDecl.isTeam() 
+	    	&& 
+			   (   ReflectionGenerator.isReflectionMethod(method) 
+				|| SerializationGenerator.isSerializationMethod(method)))
+	    	return;
 	    if (MethodModel.isFakedMethod(method))
 	    	return; // will be generated anew (basecall-surrogate, rolefield-bridge)
 

@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
@@ -961,6 +962,19 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 		if (foundMethod == methodDecl)
 			return;
 		AstEdit.addGeneratedMethod(teamDecl, methodDecl);
+	}
+
+	public static boolean isReflectionMethod(MethodBinding method) {
+		int nParams = method.parameters.length;
+		if (CharOperation.equals(method.selector, HAS_ROLE))
+			return (nParams == 1) || (nParams == 2);
+		if (CharOperation.equals(method.selector, GET_ROLE))
+			return (nParams == 1) || (nParams == 2);
+		if (CharOperation.equals(method.selector, GET_ALL_ROLES))
+			return (nParams == 0) || (nParams == 1);
+		if (CharOperation.equals(method.selector, UNREGISTER_ROLE))
+			return (nParams == 1) || (nParams == 2);
+		return false;
 	}
 
 }
