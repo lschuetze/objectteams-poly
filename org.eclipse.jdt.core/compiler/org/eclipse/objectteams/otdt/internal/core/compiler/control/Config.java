@@ -222,7 +222,10 @@ public class Config {
     	}
 	}
 
-	public static Config getConfig()
+	public static Config getConfig() {
+		return getConfig(true);
+	}
+	public static Config getConfig(boolean logError)
 	{
 		if (_configs == null) {
 			InternalCompilerError.log("Dependencies has no _configs"); //$NON-NLS-1$
@@ -231,7 +234,8 @@ public class Config {
     	synchronized (_configs) {
     	    Stack<Config> configStack = _configs.get();
 			if (configStack == null) {
-				InternalCompilerError.log("Dependencies not configured"); //$NON-NLS-1$
+				if (logError)
+					InternalCompilerError.log("Dependencies not configured"); //$NON-NLS-1$
 				return null;
 			}
     	    return configStack.peek();
@@ -326,7 +330,7 @@ public class Config {
 	}
 
 	public static boolean getSourceTypeRequired() {
-		final Config config = getConfig();
+		final Config config = getConfig(false/*logError*/);
 		return config != null && config.sourceTypeRequired;
 	}
 
