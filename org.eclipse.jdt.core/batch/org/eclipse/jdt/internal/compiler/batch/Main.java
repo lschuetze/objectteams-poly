@@ -17,8 +17,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.batch;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
@@ -43,6 +45,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.StringTokenizer;
@@ -1780,6 +1783,7 @@ public void configure(String[] argv) {
 	final int INSIDE_PROCESSOR_start = 18;
 	final int INSIDE_S_start = 19;
 	final int INSIDE_CLASS_NAMES = 20;
+	final int INSIDE_WARNINGS_PROPERTIES = 21;
 
 	final int DEFAULT = 0;
 	ArrayList bootclasspaths = new ArrayList(DEFAULT_SIZE_CLASSPATH);
@@ -2162,7 +2166,7 @@ public void configure(String[] argv) {
 					continue;
 				}
 				if (currentArg.equals("-inlineJSR")) { //$NON-NLS-1$
-				    mode = DEFAULT;
+					mode = DEFAULT;
 					this.options.put(
 							CompilerOptions.OPTION_InlineJsr,
 							CompilerOptions.ENABLED);
@@ -2451,6 +2455,10 @@ public void configure(String[] argv) {
 					mode = INSIDE_CLASS_NAMES;
 					continue;
 				}
+				if (currentArg.equals("-properties")) { //$NON-NLS-1$
+					mode = INSIDE_WARNINGS_PROPERTIES;
+					continue;
+				}
 				break;
 			case INSIDE_TARGET :
 				if (this.didSpecifyTarget) {
@@ -2627,6 +2635,10 @@ public void configure(String[] argv) {
 				}
 				mode = DEFAULT;
 				continue;
+			case INSIDE_WARNINGS_PROPERTIES :
+				initializeWarnings(currentArg);
+				mode = DEFAULT;
+				continue;
 		}
 
 		// default is input directory, if no custom destination path exists
@@ -2801,6 +2813,37 @@ public void configure(String[] argv) {
 			this.logger.logPendingError(message);
 		}
 		this.pendingErrors = null;
+	}
+}
+private void initializeWarnings(String propertiesFile) {
+	File file = new File(propertiesFile);
+	if (!file.exists()) {
+		throw new IllegalArgumentException(this.bind("configure.missingwarningspropertiesfile", propertiesFile)); //$NON-NLS-1$
+	}
+	BufferedInputStream stream = null;
+	Properties properties = null;
+	try {
+		stream = new BufferedInputStream(new FileInputStream(propertiesFile));
+		properties = new Properties();
+		properties.load(stream);
+	} catch(IOException e) {
+		e.printStackTrace();
+		throw new IllegalArgumentException(this.bind("configure.ioexceptionwarningspropertiesfile", propertiesFile)); //$NON-NLS-1$
+	} finally {
+		if (stream != null) {
+			try {
+				stream.close();
+			} catch(IOException e) {
+				// ignore
+			}
+		}
+	}
+	for (Iterator iterator = properties.entrySet().iterator(); iterator.hasNext(); ) {
+		Map.Entry entry = (Map.Entry) iterator.next();
+		final String key = (String) entry.getKey();
+		if (key.startsWith("org.eclipse.jdt.core.compiler.problem")) { //$NON-NLS-1$
+			this.options.put(key, entry.getValue());
+		}
 	}
 }
 protected void disableWarnings() {

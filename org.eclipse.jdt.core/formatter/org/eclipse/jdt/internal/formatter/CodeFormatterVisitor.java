@@ -497,7 +497,12 @@ public class CodeFormatterVisitor extends ASTVisitor {
 
 		if ((builder.realFragmentsSize() > 1 || fragmentsSize > 4) && numberOfParens == 0) {
 			this.scribe.printComment();
-			Alignment binaryExpressionAlignment = this.scribe.createAlignment("binaryExpressionAlignment", this.preferences.alignment_for_binary_expression, Alignment.R_OUTERMOST, fragmentsSize, this.scribe.scanner.currentPosition); //$NON-NLS-1$
+			Alignment binaryExpressionAlignment = this.scribe.createAlignment(
+					Alignment.BINARY_EXPRESSION,
+					this.preferences.alignment_for_binary_expression,
+					Alignment.R_OUTERMOST,
+					fragmentsSize,
+					this.scribe.scanner.currentPosition);
 			this.scribe.enterAlignment(binaryExpressionAlignment);
 			boolean ok = false;
 			ASTNode[] fragments = builder.fragments();
@@ -699,7 +704,12 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			if (this.preferences.insert_space_after_assignment_operator) {
 				this.scribe.space();
 			}
-			Alignment assignmentAlignment = this.scribe.createAlignment("fieldDeclarationAssignmentAlignment", this.preferences.alignment_for_assignment, Alignment.R_INNERMOST, 1, this.scribe.scanner.currentPosition); //$NON-NLS-1$
+			Alignment assignmentAlignment = this.scribe.createAlignment(
+					Alignment.FIELD_DECLARATION_ASSIGNMENT,
+					this.preferences.alignment_for_assignment,
+					Alignment.R_INNERMOST,
+					1,
+					this.scribe.scanner.currentPosition);
 			this.scribe.enterAlignment(assignmentAlignment);
 			boolean ok = false;
 			do {
@@ -790,7 +800,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		final int multipleFieldDeclarationsLength = multiFieldDeclaration.declarations.length;
 
 		Alignment multiFieldDeclarationsAlignment =this.scribe.createAlignment(
-				"multiple_field",//$NON-NLS-1$
+				Alignment.MULTIPLE_FIELD,
 				this.preferences.alignment_for_multiple_fields,
 				multipleFieldDeclarationsLength - 1,
 				this.scribe.scanner.currentPosition);
@@ -1100,7 +1110,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		final TypeReference superclass = typeDeclaration.superclass;
 		if (superclass != null) {
 			Alignment superclassAlignment =this.scribe.createAlignment(
-					"superclass", //$NON-NLS-1$
+					Alignment.SUPER_CLASS,
 					this.preferences.alignment_for_superclass_in_type_declaration,
 					2,
 					this.scribe.scanner.currentPosition);
@@ -1138,7 +1148,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			}
 			int superInterfaceLength = superInterfaces.length;
 			Alignment interfaceAlignment =this.scribe.createAlignment(
-					"superInterfaces",//$NON-NLS-1$
+					Alignment.SUPER_INTERFACES,
 					alignment_for_superinterfaces,
 					superInterfaceLength+1,  // implements token is first fragment
 					this.scribe.scanner.currentPosition);
@@ -1246,7 +1256,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 				hasConstants = enumConstantsLength != 0;
 				if (enumConstantsLength > 1) {
 					Alignment enumConstantsAlignment = this.scribe.createAlignment(
-							"enumConstants",//$NON-NLS-1$
+							Alignment.ENUM_CONSTANTS,
 							this.preferences.alignment_for_enum_constants,
 							enumConstantsLength,
 							this.scribe.scanner.currentPosition,
@@ -1477,7 +1487,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 				}
 				int argumentLength = arguments.length;
 				Alignment argumentsAlignment = this.scribe.createAlignment(
-						"messageArguments", //$NON-NLS-1$
+						Alignment.MESSAGE_ARGUMENTS,
 						this.preferences.alignment_for_arguments_in_method_invocation,
 						Alignment.R_OUTERMOST,
 						argumentLength,
@@ -1512,17 +1522,18 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			}
 			startingPositionInCascade = 2;
 		}
+		int tieBreakRule = size-startingPositionInCascade > 2 ? Alignment.R_OUTERMOST : Alignment.R_INNERMOST;
 		Alignment cascadingMessageSendAlignment =
 			this.scribe.createAlignment(
-				"cascadingMessageSendAlignment", //$NON-NLS-1$
+				Alignment.CASCADING_MESSAGE_SEND,
 				this.preferences.alignment_for_selector_in_method_invocation,
-				Alignment.R_INNERMOST,
+				tieBreakRule,
 				size,
 				this.scribe.scanner.currentPosition);
 		this.scribe.enterAlignment(cascadingMessageSendAlignment);
 		boolean ok = false;
-		boolean setStartingColumn = startingPositionInCascade == 1;
-		switch (this.preferences.alignment_for_arguments_in_method_invocation) {
+		boolean setStartingColumn = true;
+		switch (this.preferences.alignment_for_arguments_in_method_invocation & Alignment.SPLIT_MASK) {
 			case Alignment.M_COMPACT_FIRST_BREAK_SPLIT:
 			case Alignment.M_NEXT_SHIFTED_SPLIT:
 			case Alignment.M_ONE_PER_LINE_SPLIT:
@@ -1572,15 +1583,22 @@ public class CodeFormatterVisitor extends ASTVisitor {
 							this.scribe.space();
 						}
 						int argumentLength = arguments.length;
+						int alignmentMode = this.preferences.alignment_for_arguments_in_method_invocation;
 						Alignment argumentsAlignment = this.scribe.createAlignment(
-								"messageArguments", //$NON-NLS-1$
-								this.preferences.alignment_for_arguments_in_method_invocation,
+								Alignment.MESSAGE_ARGUMENTS,
+								alignmentMode,
 								Alignment.R_OUTERMOST,
 								argumentLength,
 								this.scribe.scanner.currentPosition);
 						this.scribe.enterAlignment(argumentsAlignment);
 						boolean okForArguments = false;
 						do {
+							switch (alignmentMode & Alignment.SPLIT_MASK) {
+								case Alignment.M_COMPACT_SPLIT:
+								case Alignment.M_NEXT_PER_LINE_SPLIT:
+									argumentsAlignment.startingColumn = this.scribe.column;
+									break;
+							}
 							try {
 								for (int j = 0; j < argumentLength; j++) {
 									if (j > 0) {
@@ -1588,10 +1606,16 @@ public class CodeFormatterVisitor extends ASTVisitor {
 										this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
 									}
 									this.scribe.alignFragment(argumentsAlignment, j);
-									if (j > 0 && this.preferences.insert_space_after_comma_in_method_invocation_arguments) {
+									if (j == 0) {
+										int fragmentIndentation = argumentsAlignment.fragmentIndentations[j];
+										if ((argumentsAlignment.mode & Alignment.M_INDENT_ON_COLUMN) != 0 && fragmentIndentation > 0) {
+											this.scribe.indentationLevel = fragmentIndentation;
+										}	
+									} else if (this.preferences.insert_space_after_comma_in_method_invocation_arguments) {
 										this.scribe.space();
 									}
 									arguments[j].traverse(this, scope);
+									argumentsAlignment.startingColumn = -1;
 								}
 								okForArguments = true;
 							} catch (AlignmentException e) {
@@ -1627,7 +1651,11 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		final int FIELD = 1, METHOD = 2, TYPE = 3;
 		this.scribe.lastNumberOfNewLines = 1;
 		ASTNode[] mergedNodes = computeMergedMemberDeclarations(nodes);
-		Alignment memberAlignment = this.scribe.createMemberAlignment("typeMembers", this.preferences.align_type_members_on_columns ? Alignment.M_MULTICOLUMN : Alignment.M_NO_ALIGNMENT, 4, this.scribe.scanner.currentPosition); //$NON-NLS-1$
+		Alignment memberAlignment = this.scribe.createMemberAlignment(
+				Alignment.TYPE_MEMBERS,
+				this.preferences.align_type_members_on_columns ? Alignment.M_MULTICOLUMN : Alignment.M_NO_ALIGNMENT,
+				4,
+				this.scribe.scanner.currentPosition);
 		this.scribe.enterMemberAlignment(memberAlignment);
 		boolean isChunkStart = false;
 		boolean ok = false;
@@ -1670,7 +1698,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 						isChunkStart = memberAlignment.checkChunkStart(TYPE, i, this.scribe.scanner.currentPosition);
 						format((TypeDeclaration)member, null, isChunkStart, i == 0);
 					}
-					if (isNextToken(TerminalTokens.TokenNameSEMICOLON)) {
+					while (isNextToken(TerminalTokens.TokenNameSEMICOLON)) {
 						this.scribe.printNextToken(TerminalTokens.TokenNameSEMICOLON, this.preferences.insert_space_before_semicolon);
 						this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
 					}
@@ -1777,7 +1805,12 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			if (this.preferences.insert_space_after_assignment_operator) {
 				this.scribe.space();
 			}
-			Alignment assignmentAlignment = this.scribe.createAlignment("localDeclarationAssignmentAlignment", this.preferences.alignment_for_assignment, Alignment.R_OUTERMOST, 1, this.scribe.scanner.currentPosition); //$NON-NLS-1$
+			Alignment assignmentAlignment = this.scribe.createAlignment(
+					Alignment.LOCAL_DECLARATION_ASSIGNMENT,
+					this.preferences.alignment_for_assignment,
+					Alignment.R_OUTERMOST,
+					1,
+					this.scribe.scanner.currentPosition);
 			this.scribe.enterAlignment(assignmentAlignment);
 			boolean ok = false;
 			do {
@@ -1807,9 +1840,10 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		Alignment messageAlignment) {
 
 		if (messageAlignment != null) {
-			this.scribe.alignFragment(messageAlignment, 0);
+			if (messageAlignment.canAlign()) {
+				this.scribe.alignFragment(messageAlignment, 0);
+			}
 			this.scribe.printNextToken(TerminalTokens.TokenNameDOT);
-			messageAlignment.startingColumn = -1;
 		}
 		TypeReference[] typeArguments = messageSend.typeArguments;
 		if (typeArguments != null) {
@@ -1843,14 +1877,21 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			}
 			int argumentsLength = arguments.length;
 			if (argumentsLength > 1) {
+				int alignmentMode = this.preferences.alignment_for_arguments_in_method_invocation;
 				Alignment argumentsAlignment = this.scribe.createAlignment(
-						"messageArguments", //$NON-NLS-1$
-						this.preferences.alignment_for_arguments_in_method_invocation,
+						Alignment.MESSAGE_ARGUMENTS,
+						alignmentMode,
 						argumentsLength,
 						this.scribe.scanner.currentPosition);
 				this.scribe.enterAlignment(argumentsAlignment);
 				boolean ok = false;
 				do {
+					switch (alignmentMode & Alignment.SPLIT_MASK) {
+						case Alignment.M_COMPACT_SPLIT:
+						case Alignment.M_NEXT_PER_LINE_SPLIT:
+							argumentsAlignment.startingColumn = this.scribe.column;
+							break;
+					}
 					try {
 						for (int i = 0; i < argumentsLength; i++) {
 							if (i > 0) {
@@ -1861,7 +1902,18 @@ public class CodeFormatterVisitor extends ASTVisitor {
 							if (i > 0 && this.preferences.insert_space_after_comma_in_method_invocation_arguments) {
 								this.scribe.space();
 							}
+							int fragmentIndentation = 0;
+							if (i == 0) {
+								int wrappedIndex = argumentsAlignment.wrappedIndex();
+								if (wrappedIndex >= 0) {
+									fragmentIndentation = argumentsAlignment.fragmentIndentations[wrappedIndex];
+									if ((argumentsAlignment.mode & Alignment.M_INDENT_ON_COLUMN) != 0 && fragmentIndentation > 0) {
+										this.scribe.indentationLevel = fragmentIndentation;
+									}
+								}
+							}
 							arguments[i].traverse(this, scope);
+							argumentsAlignment.startingColumn = -1;
 						}
 						ok = true;
 					} catch (AlignmentException e) {
@@ -1870,16 +1922,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 				} while (!ok);
 				this.scribe.exitAlignment(argumentsAlignment, true);
 			} else {
-				for (int i = 0; i < argumentsLength; i++) {
-					if (i > 0) {
-						this.scribe.printNextToken(TerminalTokens.TokenNameCOMMA, this.preferences.insert_space_before_comma_in_method_invocation_arguments);
-						this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
-					}
-					if (i > 0 && this.preferences.insert_space_after_comma_in_method_invocation_arguments) {
-						this.scribe.space();
-					}
-					arguments[i].traverse(this, scope);
-				}
+				arguments[0].traverse(this, scope);
 			}
 			this.scribe.printNextToken(TerminalTokens.TokenNameRPAREN, this.preferences.insert_space_before_closing_paren_in_method_invocation);
 		} else {
@@ -1911,13 +1954,19 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			}
 			int argumentLength = arguments.length;
 			Alignment argumentsAlignment = this.scribe.createAlignment(
-					"methodArguments",//$NON-NLS-1$
+					Alignment.METHOD_ARGUMENTS,
 					methodDeclarationParametersAlignment,
 					argumentLength,
 					this.scribe.scanner.currentPosition);
 			this.scribe.enterAlignment(argumentsAlignment);
 			boolean ok = false;
 			do {
+				switch (methodDeclarationParametersAlignment & Alignment.SPLIT_MASK) {
+					case Alignment.M_COMPACT_SPLIT:
+					case Alignment.M_NEXT_PER_LINE_SPLIT:
+						argumentsAlignment.startingColumn = this.scribe.column;
+						break;
+				}
 				try {
 					for (int i = 0; i < argumentLength; i++) {
 						if (i > 0) {
@@ -1925,10 +1974,16 @@ public class CodeFormatterVisitor extends ASTVisitor {
 							this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
 						}
 						this.scribe.alignFragment(argumentsAlignment, i);
-						if (i > 0 && spaceAfterComma) {
+						if (i == 0) {
+							int fragmentIndentation = argumentsAlignment.fragmentIndentations[0];
+							if ((argumentsAlignment.mode & Alignment.M_INDENT_ON_COLUMN) != 0 && fragmentIndentation > 0) {
+								this.scribe.indentationLevel = fragmentIndentation;
+							}
+						} else if (spaceAfterComma) {
 							this.scribe.space();
 						}
 						arguments[i].traverse(this, methodDeclaration.scope);
+						argumentsAlignment.startingColumn = -1;
 					}
 					ok = true;
 				} catch (AlignmentException e) {
@@ -1962,7 +2017,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		if (arguments != null) {
 			int argumentLength = arguments.length;
 			Alignment argumentsAlignment = this.scribe.createAlignment(
-					"enumConstantArguments",//$NON-NLS-1$
+					Alignment.ENUM_CONSTANTS_ARGUMENTS,
 					methodDeclarationParametersAlignment,
 					argumentLength,
 					this.scribe.scanner.currentPosition);
@@ -2100,7 +2155,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		if (thrownExceptions != null) {
 			int thrownExceptionsLength = thrownExceptions.length;
 			Alignment throwsAlignment = this.scribe.createAlignment(
-					"throws",//$NON-NLS-1$
+					Alignment.THROWS,
 					alignmentForThrowsClause,
 					thrownExceptionsLength, // throws is the first token
 					this.scribe.scanner.currentPosition);
@@ -2138,7 +2193,11 @@ public class CodeFormatterVisitor extends ASTVisitor {
 	 * Merged traversal of member (types, fields, methods)
 	 */
 	private void formatTypeMembers(TypeDeclaration typeDeclaration) {
-		Alignment memberAlignment = this.scribe.createMemberAlignment("typeMembers", this.preferences.align_type_members_on_columns ? Alignment.M_MULTICOLUMN : Alignment.M_NO_ALIGNMENT, 3, this.scribe.scanner.currentPosition); //$NON-NLS-1$
+		Alignment memberAlignment = this.scribe.createMemberAlignment(
+				Alignment.TYPE_MEMBERS,
+				this.preferences.align_type_members_on_columns ? Alignment.M_MULTICOLUMN : Alignment.M_NO_ALIGNMENT,
+				3,
+				this.scribe.scanner.currentPosition);
 		this.scribe.enterMemberAlignment(memberAlignment);
 		ASTNode[] members = computeMergedMemberDeclarations(typeDeclaration);
 		boolean isChunkStart = false;
@@ -2197,7 +2256,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 							isChunkStart = memberAlignment.checkChunkStart(Alignment.CHUNK_TYPE, i, this.scribe.scanner.currentPosition);
 							format((TypeDeclaration)member, typeDeclaration.scope, isChunkStart, i == 0);
 						}
-						if (isNextToken(TerminalTokens.TokenNameSEMICOLON)) {
+						while (isNextToken(TerminalTokens.TokenNameSEMICOLON)) {
 							this.scribe.printNextToken(TerminalTokens.TokenNameSEMICOLON, this.preferences.insert_space_before_semicolon);
 							this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
 						}
@@ -2505,7 +2564,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			}
 			int argumentLength = arguments.length;
 			Alignment argumentsAlignment =this.scribe.createAlignment(
-					"allocation",//$NON-NLS-1$
+					Alignment.ALLOCATION,
 					this.preferences.alignment_for_arguments_in_allocation_expression,
 					argumentLength,
 					this.scribe.scanner.currentPosition);
@@ -2706,7 +2765,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 					this.scribe.printNewLine();
 				}
 				Alignment arrayInitializerAlignment =this.scribe.createAlignment(
-						"array_initializer",//$NON-NLS-1$
+						Alignment.ARRAY_INITIALIZER,
 						this.preferences.alignment_for_expressions_in_array_initializer,
 						Alignment.R_OUTERMOST,
 						expressionsLength,
@@ -2979,7 +3038,12 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			this.scribe.space();
 		}
 
-		Alignment assignmentAlignment = this.scribe.createAlignment("assignmentAlignment", this.preferences.alignment_for_assignment, Alignment.R_OUTERMOST, 1, this.scribe.scanner.currentPosition); //$NON-NLS-1$
+		Alignment assignmentAlignment = this.scribe.createAlignment(
+				Alignment.ASSIGNMENT,
+				this.preferences.alignment_for_assignment,
+				Alignment.R_OUTERMOST,
+				1,
+				this.scribe.scanner.currentPosition);
 		this.scribe.enterAlignment(assignmentAlignment);
 		boolean ok = false;
 		do {
@@ -3304,7 +3368,12 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		if (this.preferences.insert_space_after_assignment_operator) {
 			this.scribe.space();
 		}
-		Alignment assignmentAlignment = this.scribe.createAlignment("compoundAssignmentAlignment", this.preferences.alignment_for_assignment, Alignment.R_OUTERMOST, 1, this.scribe.scanner.currentPosition); //$NON-NLS-1$
+		Alignment assignmentAlignment = this.scribe.createAlignment(
+				Alignment.COMPOUND_ASSIGNMENT,
+				this.preferences.alignment_for_assignment,
+				Alignment.R_OUTERMOST,
+				1,
+				this.scribe.scanner.currentPosition);
 		this.scribe.enterAlignment(assignmentAlignment);
 		boolean ok = false;
 		do {
@@ -3338,7 +3407,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
     	conditionalExpression.condition.traverse(this, scope);
 
     	Alignment conditionalExpressionAlignment =this.scribe.createAlignment(
-    			"conditionalExpression", //$NON-NLS-1$
+    			Alignment.CONDITIONAL_EXPRESSION,
     			this.preferences.alignment_for_conditional_expression,
     			2,
     			this.scribe.scanner.currentPosition);
@@ -3743,7 +3812,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			}
 			int argumentLength = arguments.length;
 			Alignment argumentsAlignment =this.scribe.createAlignment(
-					"explicit_constructor_call",//$NON-NLS-1$
+					Alignment.EXPLICIT_CONSTRUCTOR_CALL,
 					this.preferences.alignment_for_arguments_in_explicit_constructor_call,
 					argumentLength,
 					this.scribe.scanner.currentPosition);
@@ -4002,7 +4071,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 				}
 			} else if (elseStatement == null && this.preferences.keep_simple_if_on_one_line) {
 				Alignment compactIfAlignment = this.scribe.createAlignment(
-						"compactIf", //$NON-NLS-1$
+						Alignment.COMPACT_IF,
 						this.preferences.alignment_for_compact_if,
 						Alignment.R_OUTERMOST,
 						1,
@@ -4240,14 +4309,14 @@ public class CodeFormatterVisitor extends ASTVisitor {
 				messageSend.receiver.traverse(this, scope);
 				int alignmentMode = this.preferences.alignment_for_selector_in_method_invocation;
 				messageAlignment = this.scribe.createAlignment(
-						"messageAlignment", //$NON-NLS-1$
+						Alignment.MESSAGE_SEND,
 						alignmentMode,
 						1,
 						this.scribe.scanner.currentPosition);
 				this.scribe.enterAlignment(messageAlignment);
 				boolean ok = false;
 				do {
-					switch (alignmentMode) {
+					switch (alignmentMode & Alignment.SPLIT_MASK) {
 						case Alignment.M_COMPACT_SPLIT:
 						case Alignment.M_NEXT_PER_LINE_SPLIT:
 							messageAlignment.startingColumn = this.scribe.column;
@@ -4310,7 +4379,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 
 		// Create alignment
 		Alignment methodDeclAlignment = this.scribe.createAlignment(
-				"methodDeclaration",//$NON-NLS-1$
+				Alignment.METHOD_DECLARATION,
 				this.preferences.alignment_for_method_declaration,
 				Alignment.R_INNERMOST,
 				3,
@@ -4465,7 +4534,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		if (memberValuePairs != null) {
 			int length = memberValuePairs.length;
 			Alignment annotationAlignment = this.scribe.createAlignment(
-					"annotationMemberValuePairs",//$NON-NLS-1$
+					Alignment.ANNOTATION_MEMBERS_VALUE_PAIRS,
 					this.preferences.alignment_for_arguments_in_annotation,
 					length,
 					this.scribe.scanner.currentPosition);
@@ -4813,7 +4882,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			}
 			int argumentLength = arguments.length;
 			Alignment argumentsAlignment =this.scribe.createAlignment(
-					"allocation",//$NON-NLS-1$
+					Alignment.ALLOCATION,
 					this.preferences.alignment_for_arguments_in_qualified_allocation_expression,
 					argumentLength,
 					this.scribe.scanner.currentPosition);
@@ -5072,7 +5141,12 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		this.scribe.printComment();
 		ASTNode[] fragments = stringLiteral.literals;
 		int fragmentsSize = stringLiteral.counter;
-		Alignment binaryExpressionAlignment = this.scribe.createAlignment("binaryExpressionAlignment", this.preferences.alignment_for_binary_expression, Alignment.R_OUTERMOST, fragmentsSize, this.scribe.scanner.currentPosition); //$NON-NLS-1$
+		Alignment binaryExpressionAlignment = this.scribe.createAlignment(
+				Alignment.BINARY_EXPRESSION,
+				this.preferences.alignment_for_binary_expression,
+				Alignment.R_OUTERMOST,
+				fragmentsSize,
+				this.scribe.scanner.currentPosition);
 		this.scribe.enterAlignment(binaryExpressionAlignment);
 		boolean ok = false;
 		do {
@@ -5915,7 +5989,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		if (arguments != null) {
 			int argumentLength = arguments.length;
 			Alignment argumentsAlignment = this.scribe.createAlignment(
-					"methodSpecArguments",//$NON-NLS-1$
+					Alignment.METHOD_ARGUMENTS,
 					methodDeclarationParametersAlignment,
 					argumentLength,
 					this.scribe.scanner.currentPosition);
@@ -5964,7 +6038,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		
 		int methodSpecLength = methodSpecs.length;
 		Alignment argumentsAlignment = this.scribe.createAlignment(
-				"methodSpecs",//$NON-NLS-1$
+				Alignment.THROWS, // FIXME(SH): do we need a new Alignment kind?
 				methodDeclarationParametersAlignment,
 				methodSpecLength,
 				this.scribe.scanner.currentPosition);

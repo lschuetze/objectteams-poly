@@ -94,10 +94,13 @@ public class CompletionParser extends AssistParser {
 	protected static final int K_CONTROL_STATEMENT_DELIMITER = COMPLETION_PARSER + 38;
 	protected static final int K_INSIDE_ASSERT_EXCEPTION = COMPLETION_PARSER + 39;
 	protected static final int K_INSIDE_FOR_CONDITIONAL = COMPLETION_PARSER + 40;
+	// added for https://bugs.eclipse.org/bugs/show_bug.cgi?id=261534
+	protected static final int K_BETWEEN_INSTANCEOF_AND_RPAREN = COMPLETION_PARSER + 41;
+
 //{ObjectTeams: OT specific kinds
-	protected static final int K_BETWEEN_WITH_AND_RIGHT_PAREN = COMPLETION_PARSER + 41;
-	protected static final int K_BETWEEN_WITHIN_AND_RIGHT_PAREN = COMPLETION_PARSER + 42;
-	protected static final int K_EXPECTING_RIGHT_METHODSPEC = COMPLETION_PARSER + 43;
+	protected static final int K_BETWEEN_WITH_AND_RIGHT_PAREN = COMPLETION_PARSER + 42;
+	protected static final int K_BETWEEN_WITHIN_AND_RIGHT_PAREN = COMPLETION_PARSER + 43;
+	protected static final int K_EXPECTING_RIGHT_METHODSPEC = COMPLETION_PARSER + 44;
 //gbr+SH}
 
 	public final static char[] FAKE_TYPE_NAME = new char[]{' '};
@@ -594,9 +597,12 @@ protected void attachOrphanCompletionNode(){
 			if(expression == this.assistNode
 				|| (expression instanceof Assignment	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=287939
 					&& ((Assignment)expression).expression == this.assistNode
-					&& (this.expressionPtr > 0 && this.expressionStack[this.expressionPtr - 1] instanceof InstanceOfExpression))
+					&& ((this.expressionPtr > 0 && this.expressionStack[this.expressionPtr - 1] instanceof InstanceOfExpression)
+						|| (this.elementPtr >= 0 && this.elementObjectInfoStack[this.elementPtr] instanceof InstanceOfExpression)))
 				|| (expression instanceof AllocationExpression
-					&& ((AllocationExpression)expression).type == this.assistNode)){
+					&& ((AllocationExpression)expression).type == this.assistNode)
+				|| (expression instanceof AND_AND_Expression
+						&& (this.elementPtr >= 0 && this.elementObjectInfoStack[this.elementPtr] instanceof InstanceOfExpression))){
 				buildMoreCompletionContext(expression);
 				if (this.assistNodeParent == null
 					&& expression instanceof Assignment) {
@@ -1103,8 +1109,16 @@ private Statement buildMoreCompletionEnclosingContext(Statement statement) {
 
 	int blockIndex = lastIndexOfElement(K_BLOCK_DELIMITER);
 	int controlIndex = lastIndexOfElement(K_CONTROL_STATEMENT_DELIMITER);
-	int index = blockIndex != -1 && controlIndex < blockIndex ? blockIndex : controlIndex;
-
+	int index;
+	if (controlIndex != -1) {
+		index = blockIndex != -1 && controlIndex < blockIndex ? blockIndex : controlIndex;
+	} else {
+		// To handle the case when the completion is requested before enclosing R_PAREN
+		// and an instanceof expression is also present
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=261534
+		int instanceOfIndex = lastIndexOfElement(K_BETWEEN_INSTANCEOF_AND_RPAREN);
+		index = blockIndex != -1 && instanceOfIndex < blockIndex ? blockIndex : instanceOfIndex;
+	}
 	if (index != -1 && this.elementInfoStack[index] == IF && this.elementObjectInfoStack[index] != null) {
 		Expression condition = (Expression)this.elementObjectInfoStack[index];
 
@@ -1125,18 +1139,20 @@ private Statement buildMoreCompletionEnclosingContext(Statement statement) {
 
 				this.currentElement = recoveredBlock;
 
+			}
 		}
+		if (statement instanceof AND_AND_Expression && this.assistNode instanceof Statement) {
+			statement = (Statement) this.assistNode;
 		}
-
-			IfStatement ifStatement =
-				new IfStatement(
+		IfStatement ifStatement =
+			new IfStatement(
 					condition,
 					statement,
 					condition.sourceStart,
 					statement.sourceEnd);
-			this.enclosingNode = ifStatement;
-			return ifStatement;
-		}
+		this.enclosingNode = ifStatement;
+		return ifStatement;
+	}
 
 	return statement;
 }
@@ -2927,6 +2943,10 @@ protected void consumeInsideCastExpressionWithQualifiedGenerics() {
 protected void consumeInstanceOfExpression() {
 	super.consumeInstanceOfExpression();
 	popElement(K_BINARY_OPERATOR);
+	// to handle https://bugs.eclipse.org/bugs/show_bug.cgi?id=261534
+	if (topKnownElementKind(COMPLETION_OR_ASSIST_PARSER) == K_BETWEEN_IF_AND_RIGHT_PAREN) {
+		pushOnElementStack(K_BETWEEN_INSTANCEOF_AND_RPAREN, IF, this.expressionStack[this.expressionPtr]);
+	}
 
 	InstanceOfExpression exp = (InstanceOfExpression) this.expressionStack[this.expressionPtr];
 	if(this.assistNode != null && exp.type == this.assistNode) {
@@ -3808,6 +3828,9 @@ protected void consumeToken(int token) {
 					case K_BETWEEN_CATCH_AND_RIGHT_PAREN :
 						popElement(K_BETWEEN_CATCH_AND_RIGHT_PAREN);
 						break;
+					case K_BETWEEN_INSTANCEOF_AND_RPAREN :
+						popElement(K_BETWEEN_INSTANCEOF_AND_RPAREN);
+						//$FALL-THROUGH$
 					case K_BETWEEN_IF_AND_RIGHT_PAREN :
 						if(topKnownElementInfo(COMPLETION_OR_ASSIST_PARSER) == this.bracketDepth) {
 							popElement(K_BETWEEN_IF_AND_RIGHT_PAREN);

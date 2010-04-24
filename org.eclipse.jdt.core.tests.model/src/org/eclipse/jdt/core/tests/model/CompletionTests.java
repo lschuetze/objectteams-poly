@@ -21043,4 +21043,294 @@ public void testBug249704() throws JavaModelException {
 			"equals[METHOD_REF]{equals(), Ljava.lang.Object;, (Ljava.lang.Object;)Z, equals, (obj), 27}",
 			requestor.getResults());
 }
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=244820
+// To verify that autocast works correctly even when the compilation unit
+// has some compilation errors.
+public void testBug244820() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/CompletionAfterInstanceOf.java",
+		"package test;" +
+		"class MyString {\n" +
+		"	public String toWelcome() {\n" +
+		"		return \"welcome\";\n" +
+		"	}\n" +
+		"}\n" +
+		"public class CompletionAfterInstanceOf {\n" +
+		"	void foo() {\n" +
+		"	    Object chars= null;\n" +
+		"	    Object ch = null;\n" +
+		"		String lower = null;\n" +
+		"       if (ch instanceof MyString) {\n" +
+		"			ch.t; \n" +
+		"		}\n" +
+		"       if (ch instanceof MyString) {\n" +
+		"			return ch.t; \n" +
+		"		}\n" +
+		"       if (chars instanceof MyString) {\n" +
+		"			lower = chars.to; \n" +
+		"		}\n" +
+		"       if (ch instanceof MyString) {\n" +
+		"			String low = ch.t; \n" +
+		"		}\n" +
+		"	}\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, true, true, true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "lower = chars.to";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	int relevance1 = R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_STATIC + R_NON_RESTRICTED + R_EXACT_EXPECTED_TYPE;
+	int start1 = str.lastIndexOf("to") + "".length();
+	int end1 = start1 + "to".length();
+	int start2 = str.lastIndexOf("chars.to");
+	int end2 = start2 + "chars.to".length();
+	int start3 = str.lastIndexOf("chars.");
+	int end3 = start3 + "chars".length();
+	
+	assertResults(
+			"toString[METHOD_REF]{toString(), Ljava.lang.Object;, ()Ljava.lang.String;, null, null, toString, null, replace[" + start1 + ", " + end1 + "], token[" + start1 + ", " + end1 +"], " + relevance1 + "}\n" +
+			"toWelcome[METHOD_REF_WITH_CASTED_RECEIVER]{((MyString)chars).toWelcome(), Ltest.MyString;, ()Ljava.lang.String;, Ltest.MyString;, null, null, toWelcome, null, replace[" + start2 +", " + end2 + "], token[" + start1 + ", " + end1 + "], receiver[" + start3 + ", " + end3 + "], " + relevance1 + "}",
+			requestor.getResults());
+}
+
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=308980
+public void testBug308980a() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Try.java",
+		"package test;\n" +
+		"import java.util.Arrays;\n" +
+		"public class Try {\n" +
+		"	public static final AClass a1 = new JustTry(\n" +
+		"								new byte[][] {\n" +
+		"								{0x00,0x3C},\n" +
+		"								{0x04,0x2C}}) {\n" +
+		"									int justReturn (int a){\n" +
+		"										return a;\n" +
+		"									}\n" +
+		"								};\n" +
+		"   public static final AC" +
+		"}\n" +
+		"class AClass{\n" +
+		"	public byte[][] field1;\n" +
+		"	public AClass(byte[][] byteArray) {\n" +
+		"		field1 = byteArray;\n" +
+		"	}\n" +
+		"}\n" +
+		"abstract class JustTry extends AClass {\n" +
+		"	public byte[][] field1;\n" +
+		"	public JustTry (byte[][] byteArray){\n" +
+		"		field1 = byteArray;\n" +
+		"	}\n" +
+		"	abstract int justReturn(int a);\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "public static final AC";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	assertResults(
+			"AClass[TYPE_REF]{AClass, test, Ltest.AClass;, null, null, 27}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=308980
+public void testBug308980b() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Try.java",
+		"package test;\n" +
+		"import java.util.Arrays;\n" +
+		"public class Try {\n" +
+		"	public static final test.AClass a1 = new JustTry(\n" +
+		"								new byte[][] {\n" +
+		"								{0x00,0x3C},\n" +
+		"								{0x04,0x2C}}) {\n" +
+		"									int justReturn (int a){\n" +
+		"										return a;\n" +
+		"									}\n" +
+		"								};\n" +
+		"   public static final AC" +
+		"}\n" +
+		"class AClass{\n" +
+		"	public byte[][] field1;\n" +
+		"	public AClass(byte[][] byteArray) {\n" +
+		"		field1 = byteArray;\n" +
+		"	}\n" +
+		"}\n" +
+		"abstract class JustTry extends AClass {\n" +
+		"	public byte[][] field1;\n" +
+		"	public JustTry (byte[][] byteArray){\n" +
+		"		field1 = byteArray;\n" +
+		"	}\n" +
+		"	abstract int justReturn(int a);\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "public static final AC";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	assertResults(
+			"AClass[TYPE_REF]{AClass, test, Ltest.AClass;, null, null, 27}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=267091
+// To verify that we get interface proposals after 'implements'
+public void testBug267091a() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Try.java",
+		"package test;\n" +
+		"interface In{}\n" +
+		"interface Inn{\n" +
+		"	interface Inn2{}\n" +
+		"}\n" +
+		"class ABC {\n" +
+		"	interface ABCInterface;\n" +
+		"}\n" +
+		"public class Try implements {\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "Try implements ";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	assertResults(
+			// without the fix no proposals obtained.
+			"Inn.Inn2[TYPE_REF]{test.Inn.Inn2, test, Ltest.Inn$Inn2;, null, null, 44}\n" +
+			"ABC.ABCInterface[TYPE_REF]{ABCInterface, test, Ltest.ABC$ABCInterface;, null, null, 47}\n" +
+			"In[TYPE_REF]{In, test, Ltest.In;, null, null, 47}\n" +
+			"Inn[TYPE_REF]{Inn, test, Ltest.Inn;, null, null, 47}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=267091
+// To verify that we get type proposals after 'extends'
+public void testBug267091b() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/Try.java",
+		"package test;\n" +
+		"class In{}\n" +
+		"class Inn{\n" +
+		"	class Inn2{\n" +
+		"		class Inn3{\n" +
+		"		}\n" +
+		"	}\n" +
+		"}\n" +
+		"class ABC extends Inn{}\n" +
+		"public class Try extends {\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "Try extends ";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	assertResults(
+			// without the fix no proposals obtained.
+			"Inn.Inn2[TYPE_REF]{test.Inn.Inn2, test, Ltest.Inn$Inn2;, null, null, 44}\n" +
+			"Inn.Inn2.Inn3[TYPE_REF]{test.Inn.Inn2.Inn3, test, Ltest.Inn$Inn2$Inn3;, null, null, 44}\n" +
+			"ABC[TYPE_REF]{ABC, test, Ltest.ABC;, null, null, 47}\n" +
+			"In[TYPE_REF]{In, test, Ltest.In;, null, null, 47}\n" +
+			"Inn[TYPE_REF]{Inn, test, Ltest.Inn;, null, null, 47}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=261534
+// To verify that autocast works correctly even when instanceof expression
+// and completion node are in the same binary expression, related by &&
+public void testBug261534a() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/CompletionAfterInstanceOf.java",
+		"package test;" +
+		"class MyString {\n" +
+		"	public String toWelcome() {\n" +
+		"		return \"welcome\";\n" +
+		"	}\n" +
+		"}\n" +
+		"public class CompletionAfterInstanceOf {\n" +
+		"	void foo() {\n" +
+		"	Object chars= null;\n" +
+		"       if (chars instanceof MyString && chars.to) {\n" +
+		"		}\n" +
+		"	}\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, true, true, true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "chars instanceof MyString && chars.to";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	int relevance1 = R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_STATIC + R_NON_RESTRICTED;
+	int start1 = str.lastIndexOf("to") + "".length();
+	int end1 = start1 + "to".length();
+	int start2 = str.lastIndexOf("chars.to");
+	int end2 = start2 + "chars.to".length();
+	int start3 = str.lastIndexOf("chars.");
+	int end3 = start3 + "chars".length();
+	
+	assertResults(
+			"toString[METHOD_REF]{toString(), Ljava.lang.Object;, ()Ljava.lang.String;, null, null, toString, null, replace[" + start1 + ", " + end1 + "], token[" + start1 + ", " + end1 +"], " + relevance1 + "}\n" +
+			"toWelcome[METHOD_REF_WITH_CASTED_RECEIVER]{((MyString)chars).toWelcome(), Ltest.MyString;, ()Ljava.lang.String;, Ltest.MyString;, null, null, toWelcome, null, replace[" + start2 +", " + end2 + "], token[" + start1 + ", " + end1 + "], receiver[" + start3 + ", " + end3 + "], " + relevance1 + "}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=261534
+// Negative test - To verify that proposals from casted receiver are not obtained
+// when completion node is in an OR_OR_Expression along with an instanceof exp.
+public void testBug261534b() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Completion/src/test/CompletionAfterInstanceOf.java",
+		"package test;" +
+		"class MyString {\n" +
+		"	public String toWelcome() {\n" +
+		"		return \"welcome\";\n" +
+		"	}\n" +
+		"}\n" +
+		"public class CompletionAfterInstanceOf {\n" +
+		"	void foo() {\n" +
+		"	Object chars= null;\n" +
+		"       if (chars instanceof MyString || chars.to) {\n" +
+		"		}\n" +
+		"	}\n" +
+		"}\n");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, true, true, true, true, true);
+	requestor.allowAllRequiredProposals();
+	String str = this.workingCopies[0].getSource();
+	String completeBehind = "chars instanceof MyString || chars.to";
+	int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+
+	int relevance1 = R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_STATIC + R_NON_RESTRICTED;
+	int start1 = str.lastIndexOf("to") + "".length();
+	int end1 = start1 + "to".length();
+	
+	assertResults(
+			"toString[METHOD_REF]{toString(), Ljava.lang.Object;, ()Ljava.lang.String;, null, null, toString, null, replace[" + start1 + ", " + end1 + "], token[" + start1 + ", " + end1 +"], " + relevance1 + "}",
+			requestor.getResults());
+}
 }
