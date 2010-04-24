@@ -10,7 +10,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: IOOTBreakPoints.java 23427 2010-02-03 22:23:59Z stephan $
+ * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -28,11 +28,11 @@ package org.eclipse.objectteams.otdt.debug.core.breakpoints;
  */
 public interface IOOTBreakPoints 
 {
-  int LINE_TeamConstructor = 60;
-  int LINE_ConfinedGetTeam = 91;
-  int LINE_ActivateMethod		 = 162;
-  int LINE_DeactivateMethod = 196;
-  int LINE_ImplicitActivateMethod = 243;
-  int LINE_ImplicitDeactivateMethod = 278;
-  int LINE_FinalizeMethod = 489;
+  int LINE_TeamConstructor = 63;
+  int LINE_ConfinedGetTeam = 94;
+  int LINE_ActivateMethod = 165;
+  int LINE_DeactivateMethod = 199;
+  int LINE_ImplicitActivateMethod = 246;
+  int LINE_ImplicitDeactivateMethod = 281;
+  int LINE_FinalizeMethod = 492;
 }
