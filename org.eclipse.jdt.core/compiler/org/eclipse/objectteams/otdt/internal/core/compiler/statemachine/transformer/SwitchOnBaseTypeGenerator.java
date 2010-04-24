@@ -121,7 +121,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 	        RoleModel object = caseObjects[idx];
 
 	        Statement s = createCaseStatement(object, gen);
-	        if (object.getBaseTypeBinding().equals(staticBaseType) && idx == 0) {
+	        if (object.getBaseTypeBinding().equals(staticBaseType) && idx == 0 && !hasBindingAmbiguity) {
 	        	// shortcut if last type matches the static type: no need for a final instanceof check
 	        	if (prevIf == null)
 	        		stmts[1] = s;
