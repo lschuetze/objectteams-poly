@@ -50,7 +50,7 @@ public class IncrementalTests extends OTBuilderTests {
 	 */
 	public void testRemoveTeamType() throws JavaModelException {
 		System.out.println("***** testRemoveTeamType() *****");
-		IPath projectPath = env.addProject("Project"); 
+		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 
@@ -93,7 +93,7 @@ public class IncrementalTests extends OTBuilderTests {
 	 */
 	public void testRemoveRoleType() throws JavaModelException {
 		System.out.println("***** testRemoveRoleType() *****");
-		IPath projectPath = env.addProject("Project"); 
+		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 
@@ -138,7 +138,7 @@ public class IncrementalTests extends OTBuilderTests {
 	}
 	public void testRemoveRoleFile() throws JavaModelException {
 		System.out.println("***** testRemoveRoleFile() *****");
-		IPath projectPath = env.addProject("Project"); 
+		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 
@@ -177,7 +177,7 @@ public class IncrementalTests extends OTBuilderTests {
 	 */
 	public void testRemoveRoleMethod() throws JavaModelException {
 		System.out.println("***** testRemoveRoleMethod() *****");
-		IPath projectPath = env.addProject("Project");
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 
@@ -238,7 +238,7 @@ public class IncrementalTests extends OTBuilderTests {
 	 */
 	public void testModifyTSuperRole1() throws JavaModelException {
 		System.out.println("***** testModifyTSuperRole1() *****");
-		IPath projectPath = env.addProject("Project"); 
+		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 
@@ -295,7 +295,7 @@ public class IncrementalTests extends OTBuilderTests {
 	 */
 	public void testModifyTSuperRole2() throws Exception {
 		System.out.println("***** testModifyTSuperRole2() *****");
-		IPath projectPath = env.addProject("Project"); 
+		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 
@@ -356,7 +356,7 @@ public class IncrementalTests extends OTBuilderTests {
 	 */
 	public void testModifyTSuperRole3() throws Exception {
 		System.out.println("***** testModifyTSuperRole3() *****");
-		IPath projectPath = env.addProject("Project");
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 
@@ -423,7 +423,7 @@ public class IncrementalTests extends OTBuilderTests {
 	 */
 	public void testModifySuperRole1() throws JavaModelException {
 		System.out.println("***** testModifySuperRole1() *****");
-		IPath projectPath = env.addProject("Project"); 
+		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 
@@ -476,7 +476,7 @@ public class IncrementalTests extends OTBuilderTests {
 	 */
 	public void testModifySiblingRole1() throws JavaModelException {
 		System.out.println("***** testModifySiblingRole1() *****");
-		IPath projectPath = env.addProject("Project"); 
+		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 
@@ -601,7 +601,7 @@ public class IncrementalTests extends OTBuilderTests {
 		throws JavaModelException
 	{
 		System.out.println("***** testAddRoFiToCompiledTeam() *****");
-		IPath projectPath = env.addProject("Project");
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 
@@ -654,7 +654,7 @@ public class IncrementalTests extends OTBuilderTests {
 		throws JavaModelException
 	{
 		System.out.println("***** testAddRoFiToBrokenTeam() *****");
-		IPath projectPath = env.addProject("Project");
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 	
@@ -716,7 +716,7 @@ public class IncrementalTests extends OTBuilderTests {
 		throws JavaModelException
 	{
 		System.out.println("***** testBreakTeamWithRoFi() *****");
-		IPath projectPath = env.addProject("Project");
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 	
@@ -761,7 +761,7 @@ public class IncrementalTests extends OTBuilderTests {
 		throws JavaModelException
 	{
 		System.out.println("***** testRoFiExtendsInline() *****");
-		IPath projectPath = env.addProject("Project");
+		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
 		env.addExternalJar(projectPath, OTRE_JAR_PATH);
 

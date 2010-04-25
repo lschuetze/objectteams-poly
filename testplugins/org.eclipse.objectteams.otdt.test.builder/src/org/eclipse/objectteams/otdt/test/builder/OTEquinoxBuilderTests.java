@@ -235,7 +235,7 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		expectingOnlySpecificProblemsFor(aspectPlugin.getPath(), new Problem[] {
 			new Problem("", "Illegal base import: this package is not provided by the declared base plug-in(s) Trac18b (OT/Equinox).",
 						aspectPlugin.getPath().append(new Path("src/WrongBaseImportTeam1.java")),
-						12, 55,
+						12, 63,
 						CategorizedProblem.CAT_CODE_STYLE, IMarker.SEVERITY_ERROR)
 		});		
 	}
