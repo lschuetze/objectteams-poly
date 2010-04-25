@@ -1,0 +1,66 @@
+###############################################################################
+# Copyright (c) 2010 Stephan Herrmann and others.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the Eclipse Public License v1.0
+# which accompanies this distribution, and is available at
+# http://www.eclipse.org/legal/epl-v10.html
+#
+# Contributors:
+#     Stephan Herrmann - initial API and implementation
+###############################################################################
+
+# Environment variables for the script otdt_runtests.sh
+
+# EXPORT: Root location on build.eclipse.org:
+BASEDIR=/shared/tools/objectteams
+
+# EXPORT: root directory for building and testing:
+OT_TESTSUITE_DIR=${BASEDIR}/testrun
+
+# EXPORT: tmp directory for logging:
+TMPDIR="${BASEDIR}/tmp"
+
+# EXPORT: directory for metadata from previous builds:
+METADATA="${BASEDIR}/metadata}"
+
+# EXPORT: mail address to receive notification about build result (currently only build failures):
+OT_RECIPIENT="stephan@cs.tu-berlin.de"
+
+# Configure ANT:
+ANT_HOME=/shared/common/apache-ant-1.7.1/
+PATH=${ANT_HOME}/bin:${PATH}
+
+# EXPORT: additional arguments to pass to Ant:
+ANT_PROFILE="-verbose"
+
+# EXPORT: Nice-level for the Ant process:
+NICE="10"
+
+# EXPORT: virtual or real X server (XVFB or X11):
+X11=XVFB
+
+# VERSIONS:
+# Eclipse SKD build identifier:
+EVERSION=I20100423-0906
+# Architecture (as used by OSGi):
+ARCH="-ppc64"
+# used only locally:
+DROP=${BASEDIR}/drops/I20100423-0906
+
+# EXPORT: archive file of the base eclipse SDK build:
+ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk${ARCH}.tar.gz
+
+# EXPORT: archive file of the eclipse test framework:
+ECLIPSE_TESTLIB_ZIP=${DROP}/eclipse-test-framework-${EVERSION}.zip
+
+# used only below:
+ORBIT_DROP=/home/data/httpd/download.eclipse.org/tools/orbit/downloads/drops/S20100308015149
+
+# EXPORT: bcel jar file from orbit:
+BCEL_JAR=${ORBIT_DROP}/bundles/org.apache.bcel_5.2.0.v200803061811.jar
+
+# EXPORT: directory holding various otre jar files:
+OTRE_LIB=${BASEDIR}/lib
+
+
+
