@@ -184,13 +184,19 @@ public class RoleMigrationImplementor
 	 */
 	public static void checkAddMigrateToBaseMethod(TypeDeclaration roleClassDecl, TreeNode node) {
 		AstGenerator gen = new AstGenerator(roleClassDecl.sourceStart, roleClassDecl.sourceEnd);
-		FieldBinding baseField = roleClassDecl.scope.getField(roleClassDecl.binding, IOTConstants._OT_BASE, gen.singleNameReference(IOTConstants._OT_BASE));
-		if (baseField == null) {
-			assert !node.getTreeObject().isBound() : "bound role must have base field added"; //$NON-NLS-1$
-			return;
+		if (roleClassDecl.isInterface()) {
+			if (!roleClassDecl.binding.isCompatibleWith(roleClassDecl.scope.getOrgObjectteamsIBaseMigratable()))
+				return;
+		} else {
+			// this test is cheaper than checking compatibility with IBaseMigratable (which has been checked before):
+			FieldBinding baseField = roleClassDecl.scope.getField(roleClassDecl.binding, IOTConstants._OT_BASE, gen.singleNameReference(IOTConstants._OT_BASE));
+			if (baseField == null) {
+				assert !node.getTreeObject().isBound() : "bound role must have base field added"; //$NON-NLS-1$
+				return;
+			}
+			if (baseField.isFinal())
+				return;
 		}
-		if (baseField.isFinal())
-			return;
 		char[] cacheName = LiftingEnvironment.getCacheName(node.getTopmostBoundParent(true).getTreeObject());
 
 		doAddMigrateMethod(roleClassDecl,

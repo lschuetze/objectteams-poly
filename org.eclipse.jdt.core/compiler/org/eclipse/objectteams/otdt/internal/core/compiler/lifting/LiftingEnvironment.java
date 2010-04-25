@@ -244,7 +244,7 @@ public class LiftingEnvironment
 
 		// specific elements for the role only if not binary:
         if (!roleModel.getBinding().isBinaryBinding()) {
-			if (roleType != null  && !roleType.isInterface())
+			if (roleType != null  && !roleModel.getBinding().isSynthInterface())
 			{
 			    StandardElementGenerator.generatePlayedByElements(
 			            roleType.getRoleModel(),
