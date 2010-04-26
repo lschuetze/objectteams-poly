@@ -5,6 +5,8 @@
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
     <selectedElements exportClassFiles="false" exportJavaFiles="true" exportOutputFolder="false">
-        <javaElement handleIdentifier="=OTSample-Observer-src"/>
+        <file path="/OTSample-Observer-src/.classpath"/>
+        <javaElement handleIdentifier="=OTSample-Observer-src/src"/>
+        <file path="/OTSample-Observer-src/.project"/>
     </selectedElements>
 </jardesc>
