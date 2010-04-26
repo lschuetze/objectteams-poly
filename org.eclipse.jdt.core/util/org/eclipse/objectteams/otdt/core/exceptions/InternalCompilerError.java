@@ -43,7 +43,7 @@ public class InternalCompilerError extends Error
     
     private static final String INTRO = new String(
             "You discovered a bug in the Object Teams Development Tooling." + (char)Character.LINE_SEPARATOR +  //$NON-NLS-1$
-    		"Please mail this stacktrace and a description how to reproduce the bug to bugs@objectteams.org" + (char)Character.LINE_SEPARATOR + //$NON-NLS-1$
+    		"Please consider filing a bug including this stacktrace and a description how to reproduce at https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Objectteams" + (char)Character.LINE_SEPARATOR + //$NON-NLS-1$
     		"Thank you -- the OTDT Development Team." + (char)Character.LINE_SEPARATOR); //$NON-NLS-1$
     
 	public String getMessage()
