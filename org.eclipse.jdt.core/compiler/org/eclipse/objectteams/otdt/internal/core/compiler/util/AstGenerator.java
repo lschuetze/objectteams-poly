@@ -335,6 +335,7 @@ public class AstGenerator extends AstFactory {
 		return baseclassReference(type, false);
 	}
 	public TypeReference baseclassReference(TypeBinding type, boolean erase) {
+		erase &= type.isParameterizedType();
 		if (erase)
 			type = type.erasure();
 		TypeReference result = typeReference(type);
