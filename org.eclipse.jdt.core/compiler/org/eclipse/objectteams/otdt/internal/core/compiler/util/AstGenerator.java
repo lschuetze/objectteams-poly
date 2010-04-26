@@ -332,6 +332,11 @@ public class AstGenerator extends AstFactory {
 		return typeReference;
 	}
 	public TypeReference baseclassReference(TypeBinding type) {
+		return baseclassReference(type, false);
+	}
+	public TypeReference baseclassReference(TypeBinding type, boolean erase) {
+		if (erase)
+			type = type.erasure();
 		TypeReference result = typeReference(type);
 		result.setBaseclassDecapsulation(DecapsulationState.REPORTED);
 		TypeReference[] parameters = null;
@@ -346,6 +351,8 @@ public class AstGenerator extends AstFactory {
 			for (TypeReference parameter : parameters)
 				parameter.setBaseclassDecapsulation(DecapsulationState.REPORTED);
 
+		if (erase)
+			result.bits |= ASTNode.IgnoreRawTypeCheck;
 		return result;
 	}
 	public TypeReference roleTypeReference(ITeamAnchor baseSideAnchor, ReferenceBinding roleType, int dims)

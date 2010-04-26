@@ -62,15 +62,19 @@ public class SerializationGenerator {
 	 * @param gen AstGenerator with proper positions for generating.
 	 */
 	public static void generateRestoreMethods(TypeDeclaration teamType, AstGenerator gen) {
+		boolean superIsTeam = teamType.binding.superclass.isTeam();
 		MethodDeclaration restore = gen.method(teamType.compilationResult, ClassFileConstants.AccProtected,
 				gen.singleTypeReference(TypeConstants.VOID), RESTORE, null/*arguments*/,
 				new Statement[] {
-					gen.messageSend(gen.superReference(), RESTORE, null),
+					superIsTeam
+					? gen.messageSend(gen.superReference(), RESTORE, null)
+					: gen.emptyStatement(),
 					gen.messageSend(gen.thisReference(), IOTConstants.OT_INIT_CACHES, null)
 		});
-		restore.annotations = new Annotation[] {
-				gen.markerAnnotation(TypeConstants.JAVA_LANG_OVERRIDE)
-		};
+		if (superIsTeam)
+			restore.annotations = new Annotation[] {
+					gen.markerAnnotation(TypeConstants.JAVA_LANG_OVERRIDE)
+			};
 		AstEdit.addMethod(teamType, restore);
 		
 		MethodDeclaration restoreRole = gen.method(
@@ -82,9 +86,10 @@ public class SerializationGenerator {
 					gen.argument(CLASS_ARG_NAME, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_CLASS)),
 					gen.argument(ROLE_ARG_NAME, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT))
 				});
-		restoreRole.annotations = new Annotation[] {
-				gen.markerAnnotation(TypeConstants.JAVA_LANG_OVERRIDE)
-		};
+		if (superIsTeam)
+			restoreRole.annotations = new Annotation[] {
+					gen.markerAnnotation(TypeConstants.JAVA_LANG_OVERRIDE)
+			};
 		AstEdit.addMethod(teamType, restoreRole);    	
 	}
 
@@ -98,8 +103,10 @@ public class SerializationGenerator {
 		if (restoreMethod == null) {
 			return;
 		}
+		boolean superIsTeam = teamType.binding.superclass.isTeam();
+
 		AstGenerator gen = new AstGenerator(restoreMethod); // re-use position
-		Statement[] statements = new Statement[caches.length+1];
+		Statement[] statements = new Statement[caches.length+(superIsTeam?1:0)];
 		
 		// find the matching cache for argument Class clazz:
 		for (int i = 0; i < caches.length; i++) {
@@ -127,7 +134,7 @@ public class SerializationGenerator {
 				    					  gen.castExpression(gen.singleNameReference(ROLE_ARG_NAME), 
 				    							  			 gen.typeReference(roleBinding), CastExpression.RAW)),
 				    	// Base base = role._OT$getBase();
-				    	gen.localVariable(IOTConstants.BASE, gen.baseclassReference(roleBinding.baseclass()),
+				    	gen.localVariable(IOTConstants.BASE, gen.baseclassReference(roleBinding.baseclass(), true /*erase*/),
 				    					  gen.messageSend(
 				    							  gen.singleNameReference(CASTED_ROLE), 
 				    							  IOTConstants._OT_GETBASE, 
@@ -137,7 +144,7 @@ public class SerializationGenerator {
 				    		gen.singleNameReference(caches[i].name),
 				    		PUT,
 				    		new Expression[] {
-				    			gen.singleNameReference(IOTConstants.BASE),
+				    			gen.baseNameReference(IOTConstants.BASE),
 				    			gen.singleNameReference(CASTED_ROLE)
 				    		}),
 				    	// ((IBoundBase)base)._OT$addRole(castedRole);
@@ -151,11 +158,13 @@ public class SerializationGenerator {
 			}));
 		}
 		
-		// if no suitable cache found so far:
-		// super.restoreRole(clazz, role);
-		statements[caches.length] = gen.messageSend(gen.superReference(), RESTORE_ROLE, 
-					new Expression[] {gen.singleNameReference(CLASS_ARG_NAME), 
-									  gen.singleNameReference(ROLE_ARG_NAME)});
+		if (superIsTeam) {
+			// if no suitable cache found so far:
+			// super.restoreRole(clazz, role);
+			statements[caches.length] = gen.messageSend(gen.superReference(), RESTORE_ROLE,
+						new Expression[] {gen.singleNameReference(CLASS_ARG_NAME),
+										  gen.singleNameReference(ROLE_ARG_NAME)});
+		}
 		restoreMethod.setStatements(statements);
 		if (StateMemento.hasMethodResolveStarted(teamType.binding))
 			restoreMethod.resolve(teamType.scope);
