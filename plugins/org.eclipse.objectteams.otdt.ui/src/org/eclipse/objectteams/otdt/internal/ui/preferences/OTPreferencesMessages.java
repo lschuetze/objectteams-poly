@@ -57,6 +57,7 @@ public class OTPreferencesMessages {
 	public static String OTCompilerConfigurationBlock_unsafe_role_instantiation_label;
 	public static String OTCompilerConfigurationBlock_effectless_fieldaccess_label;
 	public static String OTCompilerConfigurationBlock_fragile_callin_label;
+	public static String OTCompilerConfigurationBlock_ignoring_role_result;
 	public static String OTCompilerConfigurationBlock_unused_parammap_label;
 	public static String OTCompilerConfigurationBlock_potential_ambiguous_playedby_label;
 	public static String OTCompilerConfigurationBlock_ambiguous_lowering_label;

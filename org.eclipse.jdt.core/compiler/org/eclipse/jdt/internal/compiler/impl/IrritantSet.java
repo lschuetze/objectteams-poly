@@ -101,6 +101,8 @@ public class IrritantSet {
             CompilerOptions.AmbiguousLowering);
 	public static final IrritantSet ADAPT_DEPRECATED = new IrritantSet(
             CompilerOptions.AdaptingDeprecated);
+	public static final IrritantSet IGNORING_ROLE_RETURN = new IrritantSet(
+			CompilerOptions.IgnoringRoleReturn);
 // SH}
 	static {
 //{ObjectTeams: default to error:
@@ -122,7 +124,8 @@ public class IrritantSet {
 				| CompilerOptions.DeprecatedPathSyntax
 				| CompilerOptions.WeaveIntoSystemClass
 				| CompilerOptions.DangerousCallin
-				| CompilerOptions.AmbiguousLowering)
+				| CompilerOptions.AmbiguousLowering
+				| CompilerOptions.IgnoringRoleReturn)
 // SH}
 			// group-0 warnings enabled by default
 			.set(

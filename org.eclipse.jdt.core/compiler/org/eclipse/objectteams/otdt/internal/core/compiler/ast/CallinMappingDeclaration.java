@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
+import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
@@ -170,6 +171,15 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			} else {
 				MethodSpec spec = this.baseMethodSpecs[i];
 				baseMethods[i] = new ProblemMethodBinding(spec.selector, null, baseType, 0);
+			}
+		}
+		for (MethodBinding aBaseMethod : baseMethods) {
+			if (aBaseMethod.isValidBinding() && aBaseMethod.returnType != TypeBinding.VOID) {
+				if (   this.callinModifier == TerminalTokens.TokenNameafter
+					&& this.roleMethodSpec.isValid()
+					&& this.roleMethodSpec.resolvedType() != TypeBinding.VOID)
+					this.scope.problemReporter().ignoringRoleMethodReturn(this.roleMethodSpec);
+				break;
 			}
 		}
 		this.binding._baseMethods = baseMethods;

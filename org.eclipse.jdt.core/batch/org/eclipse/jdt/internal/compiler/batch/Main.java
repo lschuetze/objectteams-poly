@@ -3418,6 +3418,9 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			} else if (token.equals("inferredcallout")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportInferredCallout, severity, isEnabling);
 				return;
+			} else if (token.equals("ignoredresult")) { //$NON-NLS-1$
+				setSeverity(CompilerOptions.OPTION_ReportInferredCallout, severity, isEnabling);
+				return;
 // SH}
 			}
 			break;

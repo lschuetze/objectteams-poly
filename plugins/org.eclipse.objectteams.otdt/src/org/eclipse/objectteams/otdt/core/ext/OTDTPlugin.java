@@ -88,6 +88,9 @@ public class OTDTPlugin extends Plugin
 	
 	public static final String OT_COMPILER_ADAPTING_DEPRECATED =
 		PLUGIN_ID + ".compiler.problem.adapting_deprecated"; //$NON-NLS-1$
+	
+	public static final String OT_COMPILER_IGNORING_ROLE_RETURN = 
+		PLUGIN_ID + ".compiler.problem.ignoring_role_return"; //$NON-NLS-1$
 
 	public static final String OT_COMPILER_SCOPED_KEYWORDS = 
 		PLUGIN_ID + ".compiler.option.scoped_keywords"; //$NON-NLS-1$

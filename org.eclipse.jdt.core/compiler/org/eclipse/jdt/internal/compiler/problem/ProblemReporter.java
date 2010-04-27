@@ -451,6 +451,9 @@ public static int getIrritant(int problemID) {
 
 		case IProblem.DangerousCallinBinding:
 			return CompilerOptions.DangerousCallin;
+			
+		case IProblem.IgnoringRoleMethodReturn:
+			return CompilerOptions.IgnoringRoleReturn;
 
 		case IProblem.OverridingFinalRole:
 			return CompilerOptions.OverridingFinalRole;
@@ -586,6 +589,7 @@ public static int getProblemCategory(int severity, int problemID) {
 				return CategorizedProblem.CAT_CODE_STYLE;
 			case CompilerOptions.WeaveIntoSystemClass:
 			case CompilerOptions.DangerousCallin:
+			case CompilerOptions.IgnoringRoleReturn:
 				return CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM;
 			case CompilerOptions.AdaptingDeprecated :
 				return CategorizedProblem.CAT_DEPRECATION;
@@ -10518,6 +10522,27 @@ public void callinParameterMappingMissingSignatures(CallinMappingDeclaration cal
 			callinBinding.bodyStart,
 			callinBinding.bodyEnd);
 }
+
+public void ignoringRoleMethodReturn(MethodSpec roleMethodSpec) {
+	int start, end;
+	if (roleMethodSpec.hasSignature) {
+		start = roleMethodSpec.returnType.sourceStart;
+		end =   roleMethodSpec.returnType.sourceEnd;
+	} else {
+		start = roleMethodSpec.sourceStart;
+		end   = roleMethodSpec.sourceEnd;
+	}
+	String[] args = new String[] {
+		new String(roleMethodSpec.resolvedType().readableName())
+	};
+	this.handle(
+			IProblem.IgnoringRoleMethodReturn,
+			args,
+			args,
+			start, 
+			end);
+}
+
 public void nonResultExpressionInReplaceResult(Expression resultMapper) {
 	this.handle(
 			IProblem.NonReplaceExpressionInReplaceResult,

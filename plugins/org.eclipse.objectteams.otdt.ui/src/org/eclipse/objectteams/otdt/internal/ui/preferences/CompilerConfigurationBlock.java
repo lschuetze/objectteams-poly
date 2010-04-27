@@ -116,6 +116,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 	private static final Key PREF_PB_ADAPTING_DEPRECATED = getJDTCoreKey(OTDTPlugin.OT_COMPILER_ADAPTING_DEPRECATED);
 
+	private static final Key PREF_PB_IGNORING_ROLE_RETURN = getJDTCoreKey(OTDTPlugin.OT_COMPILER_IGNORING_ROLE_RETURN);
+
 //	private static final Key PREF_PB_INCOMPLETE_BUILD = getJDTCoreKey(OTDTPlugin.OT_COMPILER_INCOMPLETE_BUILD);
 	
 	// feature enablement:
@@ -152,6 +154,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_BASECALL, PREF_PB_UNSAFE_ROLE_INSTANTIATION, 
 //				PREF_PB_EFFECTLESS_FIELDACCESS, 
 				PREF_PB_FRAGILE_CALLIN,
+				PREF_PB_IGNORING_ROLE_RETURN,
 //				PREF_PB_UNUSED_PARAMMAP,
 				PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY, PREF_PB_ABSTRACT_POTENTIAL_RELEVANT_ROLE,
 				PREF_PB_DECAPSULATION,
@@ -245,7 +248,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_fragile_callin_label;
 		addComboBox(inner, label, PREF_PB_FRAGILE_CALLIN, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
-//		label= OTPreferencesMessages.OTCompilerConfigurationBlock_unused_parammap_label;
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_ignoring_role_result;
+		addComboBox(inner, label, PREF_PB_IGNORING_ROLE_RETURN, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
+
+		//		label= OTPreferencesMessages.OTCompilerConfigurationBlock_unused_parammap_label;
 //		addComboBox(inner, label, PREF_PB_UNUSED_PARAMMAP, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_potential_ambiguous_playedby_label;

@@ -179,6 +179,9 @@ public class CompilerOptions {
 	
 	public static final String OPTION_ReportAdaptingDeprecated=
 		"org.eclipse.objectteams.otdt.compiler.problem.adapting_deprecated"; //$NON-NLS-1$
+	
+	public static final String OPTION_ReportIgnoringRoleMethodReturn=
+		"org.eclipse.objectteams.otdt.compiler.problem.ignoring_role_return"; //$NON-NLS-1$
 
 	public static final String OPTION_AllowScopedKeywords =
 		"org.eclipse.objectteams.otdt.compiler.option.scoped_keywords"; //$NON-NLS-1$
@@ -316,6 +319,7 @@ public class CompilerOptions {
 	public static final int ExceptionInGuard=				 OTJFlag | ASTNode.Bit13;
 	public static final int AmbiguousLowering=				 OTJFlag | ASTNode.Bit14;
 	public static final int AdaptingDeprecated=              OTJFlag | ASTNode.Bit15;
+	public static final int IgnoringRoleReturn=			     OTJFlag | ASTNode.Bit16;
 // SH}
 
 
@@ -664,6 +668,8 @@ public class CompilerOptions {
 				return OPTION_ReportAmbiguousLowering;
 			case AdaptingDeprecated:
 				return OPTION_ReportAdaptingDeprecated;
+			case IgnoringRoleReturn:
+				return OPTION_ReportIgnoringRoleMethodReturn;
 // SH}
 		}
 		return null;
@@ -814,6 +820,7 @@ public class CompilerOptions {
 			OPTION_ReportExceptionInGuard,
 			OPTION_ReportAmbiguousLowering,
 			OPTION_ReportAdaptingDeprecated,
+			OPTION_ReportIgnoringRoleMethodReturn,
 			OPTION_AllowScopedKeywords,
 // SH}
 		};
@@ -913,6 +920,8 @@ public class CompilerOptions {
 				return "ambiguouslowering"; //$NON-NLS-1$
 			case AdaptingDeprecated :
 				return "adapt-deprecated"; //$NON-NLS-1$
+			case IgnoringRoleReturn :
+				return "ignoredresult";  //$NON-NLS-1$
 // SH}
 		}
 		return null;
@@ -1023,6 +1032,8 @@ public class CompilerOptions {
 		case 'i' :
 			if ("inferredcallout".equals(warningToken)) //$NON-NLS-1$
 				return IrritantSet.ADDING_INFERRED_CALLOUT;
+			if ("ignoredresult".equals(warningToken)) //$NON-NLS-1$
+				return IrritantSet.IGNORING_ROLE_RETURN;
 			break;
 		case 'o' :
 			if ("overridefinalrole".equals(warningToken)) //$NON-NLS-1$
@@ -1169,6 +1180,7 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportExceptionInGuard, getSeverityString(ExceptionInGuard));
 		optionsMap.put(OPTION_ReportAmbiguousLowering, getSeverityString(AmbiguousLowering));
 		optionsMap.put(OPTION_ReportAdaptingDeprecated, getSeverityString(AdaptingDeprecated));
+		optionsMap.put(OPTION_ReportIgnoringRoleMethodReturn, getSeverityString(IgnoringRoleReturn));
 
 		optionsMap.put(OPTION_AllowScopedKeywords, this.allowScopedKeywords? ENABLED : DISABLED);
 		optionsMap.put(OPTION_PureJavaOnly, this.isPureJava ? ENABLED : DISABLED);
@@ -1600,6 +1612,7 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportExceptionInGuard)) != null) updateSeverity(ExceptionInGuard, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportAmbiguousLowering)) != null) updateSeverity(AmbiguousLowering, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportAdaptingDeprecated)) != null) updateSeverity(AdaptingDeprecated, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportIgnoringRoleMethodReturn)) != null) updateSeverity(IgnoringRoleReturn, optionValue);
 
 		if ((optionValue = optionsMap.get(OPTION_AllowScopedKeywords)) != null) {
 			if (ENABLED.equals(optionValue)) {
