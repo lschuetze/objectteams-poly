@@ -77,16 +77,21 @@ public class JavadocSingleTypeReference extends SingleTypeReference {
 					}
 				}
 //{ObjectTeams: be nice: for OTClassScope also respect base imports scope (second chance):
-				if (scope instanceof OTClassScope) {
-					Scope baseScope = ((OTClassScope)scope).getBaseImportScope();
-					if (baseScope != null) {
-						TypeBinding previousType = this.resolvedType;
-						this.resolvedType = null; // start over
-						this.resolvedType = internalResolveType(baseScope);
-						if (this.resolvedType != null && this.resolvedType.isValidBinding())
-							return this.resolvedType;
-						this.resolvedType = previousType; // restore previous problem type
+				Scope currentScope = scope;
+				while (currentScope != null) {
+					if (currentScope instanceof OTClassScope) {
+						Scope baseScope = ((OTClassScope)currentScope).getBaseImportScope();
+						if (baseScope != null) {
+							TypeBinding previousType = this.resolvedType;
+							this.resolvedType = null;
+							TypeBinding baseImportedType = getTypeBinding(baseScope);
+							if (baseImportedType != null && baseImportedType.isValidBinding())
+								return this.resolvedType = baseImportedType;
+							this.resolvedType = previousType;
+							break;
+						}
 					}
+					currentScope = currentScope.parent;
 				}
 // SH}
 				reportInvalidType(scope);
