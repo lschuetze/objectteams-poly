@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.compiler.util.Util;
  * <p>
  * For more information on Ant check out the website at http://jakarta.apache.org/ant/ .
  * </p>
- * 
+ *
  * @since 2.0
  */
 public class JDTCompilerAdapter extends DefaultCompilerAdapter {
@@ -61,7 +61,7 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 	private Map fileEncodings = null;
 	private Map dirEncodings = null;
 	private List accessRules = null;
-	
+
 	/**
 	 * Performs a compile using the JDT batch compiler
 	 * @throws BuildException if anything wrong happen during the compilation
@@ -88,14 +88,14 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 			throw new BuildException(ex);
 		}
 	}
-	
-	
+
+
 	protected Commandline setupJavacCommand() throws BuildException {
 		Commandline cmd = new Commandline();
 		this.customDefaultOptions = new CompilerOptions().getMap();
-		
+
 		Class javacClass = Javac.class;
-		
+
 		/*
 		 * Read in the compiler arguments first since we might need to modify
 		 * the classpath if any access rules were specified
@@ -103,67 +103,67 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 		String [] compilerArgs = processCompilerArguments(javacClass);
 
 		/*
-		 * This option is used to never exit at the end of the ant task. 
+		 * This option is used to never exit at the end of the ant task.
 		 */
 		cmd.createArgument().setValue("-noExit"); //$NON-NLS-1$
 
-        if (this.bootclasspath != null) {
+		if (this.bootclasspath != null) {
 			cmd.createArgument().setValue("-bootclasspath"); //$NON-NLS-1$
-        	if (this.bootclasspath.size() != 0) {
-			/*
-			 * Set the bootclasspath for the Eclipse compiler.
-			 */
-			cmd.createArgument().setPath(this.bootclasspath);        	
-        } else {
-    			cmd.createArgument().setValue(Util.EMPTY_STRING);
-        	}
-        }
+			if (this.bootclasspath.size() != 0) {
+				/*
+				 * Set the bootclasspath for the Eclipse compiler.
+				 */
+				cmd.createArgument().setPath(this.bootclasspath);
+			} else {
+				cmd.createArgument().setValue(Util.EMPTY_STRING);
+			}
+		}
 
-        Path classpath = new Path(this.project);
+		Path classpath = new Path(this.project);
 
-       /*
-         * Eclipse compiler doesn't support -extdirs.
-         * It is emulated using the classpath. We add extdirs entries after the 
-         * bootclasspath.
-         */
-        if (this.extdirs != null) {
+		/*
+		 * Eclipse compiler doesn't support -extdirs.
+		 * It is emulated using the classpath. We add extdirs entries after the
+		 * bootclasspath.
+		 */
+		if (this.extdirs != null) {
 			cmd.createArgument().setValue("-extdirs"); //$NON-NLS-1$
-			cmd.createArgument().setPath(this.extdirs);        	
-        }
+			cmd.createArgument().setPath(this.extdirs);
+		}
 
 		/*
 		 * The java runtime is already handled, so we simply want to retrieve the
 		 * ant runtime and the compile classpath.
 		 */
-        classpath.append(getCompileClasspath());
+		classpath.append(getCompileClasspath());
 
-        // For -sourcepath, use the "sourcepath" value if present.
-        // Otherwise default to the "srcdir" value.
-        Path sourcepath = null;
-        
-        // retrieve the method getSourcepath() using reflect
-        // This is done to improve the compatibility to ant 1.5
-        Method getSourcepathMethod = null;
-        try {
-	        getSourcepathMethod = javacClass.getMethod("getSourcepath", null); //$NON-NLS-1$
-        } catch(NoSuchMethodException e) {
-        	// if not found, then we cannot use this method (ant 1.5)
-        }
-        Path compileSourcePath = null;
-        if (getSourcepathMethod != null) {
-	 		try {
+		// For -sourcepath, use the "sourcepath" value if present.
+		// Otherwise default to the "srcdir" value.
+		Path sourcepath = null;
+
+		// retrieve the method getSourcepath() using reflect
+		// This is done to improve the compatibility to ant 1.5
+		Method getSourcepathMethod = null;
+		try {
+			getSourcepathMethod = javacClass.getMethod("getSourcepath", null); //$NON-NLS-1$
+		} catch(NoSuchMethodException e) {
+			// if not found, then we cannot use this method (ant 1.5)
+		}
+		Path compileSourcePath = null;
+		if (getSourcepathMethod != null) {
+			try {
 				compileSourcePath = (Path) getSourcepathMethod.invoke(this.attributes, null);
 			} catch (IllegalAccessException e) {
 				// should never happen
 			} catch (InvocationTargetException e) {
 				// should never happen
 			}
-        }
-        if (compileSourcePath != null) {
-            sourcepath = compileSourcePath;
-        } else {
-            sourcepath = this.src;
-        }
+		}
+		if (compileSourcePath != null) {
+			sourcepath = compileSourcePath;
+		} else {
+			sourcepath = this.src;
+		}
 		classpath.append(sourcepath);
 		/*
 		 * Set the classpath for the Eclipse compiler.
@@ -171,38 +171,38 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 		cmd.createArgument().setValue("-classpath"); //$NON-NLS-1$
 		createClasspathArgument(cmd, classpath);
 
-        final String javaVersion = JavaEnvUtils.getJavaVersion();
+		final String javaVersion = JavaEnvUtils.getJavaVersion();
 		String memoryParameterPrefix = javaVersion.equals(JavaEnvUtils.JAVA_1_1) ? "-J-" : "-J-X";//$NON-NLS-1$//$NON-NLS-2$
-        if (this.memoryInitialSize != null) {
-            if (!this.attributes.isForkedJavac()) {
-                this.attributes.log(AntAdapterMessages.getString("ant.jdtadapter.info.ignoringMemoryInitialSize"), Project.MSG_WARN); //$NON-NLS-1$
-            } else {
-                cmd.createArgument().setValue(memoryParameterPrefix
-                                              + "ms" + this.memoryInitialSize); //$NON-NLS-1$
-            }
-        }
+		if (this.memoryInitialSize != null) {
+			if (!this.attributes.isForkedJavac()) {
+				this.attributes.log(AntAdapterMessages.getString("ant.jdtadapter.info.ignoringMemoryInitialSize"), Project.MSG_WARN); //$NON-NLS-1$
+			} else {
+				cmd.createArgument().setValue(memoryParameterPrefix
+						+ "ms" + this.memoryInitialSize); //$NON-NLS-1$
+			}
+		}
 
-        if (this.memoryMaximumSize != null) {
-            if (!this.attributes.isForkedJavac()) {
-                this.attributes.log(AntAdapterMessages.getString("ant.jdtadapter.info.ignoringMemoryMaximumSize"), Project.MSG_WARN); //$NON-NLS-1$
-            } else {
-                cmd.createArgument().setValue(memoryParameterPrefix
-                                              + "mx" + this.memoryMaximumSize); //$NON-NLS-1$
-            }
-        }
+		if (this.memoryMaximumSize != null) {
+			if (!this.attributes.isForkedJavac()) {
+				this.attributes.log(AntAdapterMessages.getString("ant.jdtadapter.info.ignoringMemoryMaximumSize"), Project.MSG_WARN); //$NON-NLS-1$
+			} else {
+				cmd.createArgument().setValue(memoryParameterPrefix
+						+ "mx" + this.memoryMaximumSize); //$NON-NLS-1$
+			}
+		}
 
-        if (this.debug) {
-	       // retrieve the method getSourcepath() using reflect
-	        // This is done to improve the compatibility to ant 1.5
-	        Method getDebugLevelMethod = null;
-	        try {
-		        getDebugLevelMethod = javacClass.getMethod("getDebugLevel", null); //$NON-NLS-1$
-	        } catch(NoSuchMethodException e) {
-	        	// if not found, then we cannot use this method (ant 1.5)
-	        	// debug level is only available with ant 1.5.x
-	        }
-     	    String debugLevel = null;
-	        if (getDebugLevelMethod != null) {
+		if (this.debug) {
+			// retrieve the method getSourcepath() using reflect
+			// This is done to improve the compatibility to ant 1.5
+			Method getDebugLevelMethod = null;
+			try {
+				getDebugLevelMethod = javacClass.getMethod("getDebugLevel", null); //$NON-NLS-1$
+			} catch(NoSuchMethodException e) {
+				// if not found, then we cannot use this method (ant 1.5)
+				// debug level is only available with ant 1.5.x
+			}
+			String debugLevel = null;
+			if (getDebugLevelMethod != null) {
 				try {
 					debugLevel = (String) getDebugLevelMethod.invoke(this.attributes, null);
 				} catch (IllegalAccessException e) {
@@ -210,11 +210,11 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 				} catch (InvocationTargetException e) {
 					// should never happen
 				}
-        	}
+			}
 			if (debugLevel != null) {
-					this.customDefaultOptions.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.DO_NOT_GENERATE);
-					this.customDefaultOptions.put(CompilerOptions.OPTION_LineNumberAttribute, CompilerOptions.DO_NOT_GENERATE);
-					this.customDefaultOptions.put(CompilerOptions.OPTION_SourceFileAttribute , CompilerOptions.DO_NOT_GENERATE);
+				this.customDefaultOptions.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.DO_NOT_GENERATE);
+				this.customDefaultOptions.put(CompilerOptions.OPTION_LineNumberAttribute, CompilerOptions.DO_NOT_GENERATE);
+				this.customDefaultOptions.put(CompilerOptions.OPTION_SourceFileAttribute , CompilerOptions.DO_NOT_GENERATE);
 				if (debugLevel.length() != 0) {
 					if (debugLevel.indexOf("vars") != -1) {//$NON-NLS-1$
 						this.customDefaultOptions.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
@@ -230,18 +230,18 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 				this.customDefaultOptions.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
 				this.customDefaultOptions.put(CompilerOptions.OPTION_LineNumberAttribute, CompilerOptions.GENERATE);
 				this.customDefaultOptions.put(CompilerOptions.OPTION_SourceFileAttribute , CompilerOptions.GENERATE);
-            }
-        } else {
+			}
+		} else {
 			this.customDefaultOptions.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.DO_NOT_GENERATE);
 			this.customDefaultOptions.put(CompilerOptions.OPTION_LineNumberAttribute, CompilerOptions.DO_NOT_GENERATE);
 			this.customDefaultOptions.put(CompilerOptions.OPTION_SourceFileAttribute , CompilerOptions.DO_NOT_GENERATE);
-        }
-    	
+		}
+
 		/*
 		 * Handle the nowarn option. If none, then we generate all warnings.
 		 */
 		if (this.attributes.getNowarn()) {
-	        // disable all warnings
+			// disable all warnings
 			Object[] entries = this.customDefaultOptions.entrySet().toArray();
 			for (int i = 0, max = entries.length; i < max; i++) {
 				Map.Entry entry = (Map.Entry) entries[i];
@@ -255,23 +255,23 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 			}
 			this.customDefaultOptions.put(CompilerOptions.OPTION_TaskTags, Util.EMPTY_STRING);
 			if (this.deprecation) {
-				this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecation, CompilerOptions.WARNING); 
-				this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationInDeprecatedCode, CompilerOptions.ENABLED); 
-				this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationWhenOverridingDeprecatedMethod, CompilerOptions.ENABLED); 
+				this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecation, CompilerOptions.WARNING);
+				this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationInDeprecatedCode, CompilerOptions.ENABLED);
+				this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationWhenOverridingDeprecatedMethod, CompilerOptions.ENABLED);
 			}
 		} else if (this.deprecation) {
-			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecation, CompilerOptions.WARNING); 
-			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationInDeprecatedCode, CompilerOptions.ENABLED); 
-			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationWhenOverridingDeprecatedMethod, CompilerOptions.ENABLED); 
+			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecation, CompilerOptions.WARNING);
+			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationInDeprecatedCode, CompilerOptions.ENABLED);
+			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationWhenOverridingDeprecatedMethod, CompilerOptions.ENABLED);
 		} else {
-			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecation, CompilerOptions.IGNORE); 
-			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationInDeprecatedCode, CompilerOptions.DISABLED); 
-			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationWhenOverridingDeprecatedMethod, CompilerOptions.DISABLED); 
+			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecation, CompilerOptions.IGNORE);
+			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationInDeprecatedCode, CompilerOptions.DISABLED);
+			this.customDefaultOptions.put(CompilerOptions.OPTION_ReportDeprecationWhenOverridingDeprecatedMethod, CompilerOptions.DISABLED);
 		}
 
-	   	/*
+		/*
 		 * destDir option.
-		 */		
+		 */
 		if (this.destDir != null) {
 			cmd.createArgument().setValue("-d"); //$NON-NLS-1$
 			cmd.createArgument().setFile(this.destDir.getAbsoluteFile());
@@ -302,20 +302,12 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 		 * source option
 		 */
 		String source = this.attributes.getSource();
-        if (source != null) {
+		if (source != null) {
 			this.customDefaultOptions.put(CompilerOptions.OPTION_Source, source);
-        }
-
-		/*
-		 * encoding option
-		 */
-        if (this.encoding != null) {
-            cmd.createArgument().setValue("-encoding"); //$NON-NLS-1$
-            cmd.createArgument().setValue(this.encoding);
-        }
+		}
 
 		if (compilerArgs != null) {
-	        /*
+			/*
 			 * Add extra argument on the command line
 			 */
 			final int length = compilerArgs.length;
@@ -325,19 +317,28 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 					if (this.logFileName == null && "-log".equals(arg) && ((i + 1) < max)) { //$NON-NLS-1$
 						this.logFileName = compilerArgs[i + 1];
 					}
-			        cmd.createArgument().setValue(arg);
+					cmd.createArgument().setValue(arg);
 				}
 			}
-	   	}
-     	/*
+		}
+		/*
+		 * encoding option. javac task encoding property must be the last encoding on the command
+		 * line as compiler arg might also specify an encoding.
+		 */
+		if (this.encoding != null) {
+			cmd.createArgument().setValue("-encoding"); //$NON-NLS-1$
+			cmd.createArgument().setValue(this.encoding);
+		}
+
+		/*
 		 * Eclipse compiler doesn't have a -sourcepath option. This is
 		 * handled through the javac task that collects all source files in
 		 * srcdir option.
-		 */        
-        logAndAddFilesToCompile(cmd);
-        return cmd;
+		 */
+		logAndAddFilesToCompile(cmd);
+		return cmd;
 	}
-	
+
 	/**
 	 * Get the compiler arguments
 	 * @param javacClass
@@ -388,8 +389,8 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 						while (CharOperation.isWhitespace(content[end])) {
 							end--;
 						}
-						
-						// end is inclusive, but in the API end is exclusive 
+
+						// end is inclusive, but in the API end is exclusive
 						if (CharOperation.equals(ADAPTER_ENCODING, content, start, start + ADAPTER_ENCODING.length)) {
 							CharOperation.replace(content, SEPARATOR_CHARS, File.separatorChar, start, end + 1);
 							// file or folder level custom encoding
@@ -434,7 +435,7 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 		}
 
 	}
-	
+
 	/**
 	 * Copy the classpath to the command line with access rules included.
 	 * @param cmd the given command line
@@ -501,10 +502,10 @@ public class JDTCompilerAdapter extends DefaultCompilerAdapter {
 		arg.setValue(result.toString());
 	}
 	/**
-	 * Modified from base class, Logs the compilation parameters, adds the files 
+	 * Modified from base class, Logs the compilation parameters, adds the files
 	 * to compile and logs the &quot;niceSourceList&quot;
 	 * Appends encoding information at the end of arguments
-	 * 
+	 *
 	 * @param cmd the given command line
 	 */
 	protected void logAndAddFilesToCompile(Commandline cmd) {
