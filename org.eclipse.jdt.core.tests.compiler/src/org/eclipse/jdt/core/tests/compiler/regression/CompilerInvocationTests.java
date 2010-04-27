@@ -874,6 +874,7 @@ public void _test011_problem_categories() {
         expectedProblemAttributes.put("OTJ_RELATED", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         expectedProblemAttributes.put("BaseImportFromSplitPackage", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
         expectedProblemAttributes.put("BaseImportFromSplitPackagePlural", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
+        expectedProblemAttributes.put("IgnoringRoleMethodReturn", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
         expectedProblemAttributes.put("CallinToDeprecated", new ProblemAttributes(CategorizedProblem.CAT_DEPRECATION));
         expectedProblemAttributes.put("DeprecatedBaseclass", new ProblemAttributes(CategorizedProblem.CAT_DEPRECATION));
         expectedProblemAttributes.put("DeprecatedPathSyntax", new ProblemAttributes(CategorizedProblem.CAT_CODE_STYLE));
@@ -1812,6 +1813,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("DuplicateCallinParamMapping", SKIP);
         expectedProblemAttributes.put("ResultNotDefinedForVoidMethodCallin", SKIP);
         expectedProblemAttributes.put("UnmappedRoleParameter", SKIP);
+        expectedProblemAttributes.put("IgnoringRoleMethodReturn", SKIP);
         expectedProblemAttributes.put("NonReplaceExpressionInReplaceResult", SKIP);
         expectedProblemAttributes.put("CallinIllegalRoleReturn", SKIP);
         expectedProblemAttributes.put("CallinIncompatibleReturnType", SKIP);
