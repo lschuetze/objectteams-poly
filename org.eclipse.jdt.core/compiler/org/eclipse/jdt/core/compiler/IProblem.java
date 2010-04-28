@@ -1530,6 +1530,7 @@ void setSourceStart(int sourceStart);
 
 	int AddingInferredCalloutForInherited 		 = CALLOUT_RELATED + 1014; // 3.1(j)
 	int UsingInferredCalloutForMessageSend		 = CALLOUT_RELATED + 1015; // 3.1(j)
+	int InferredCalloutInCompoundAssignment		 = CALLOUT_RELATED + 1016; // 3.1(j)
 
 	int UnusedParamMap 							 = CALLOUT_RELATED + 2001; // 3.2
 	int CalloutParameterMappingMissingSignatures = CALLOUT_RELATED + 2002; // 3.2(a)

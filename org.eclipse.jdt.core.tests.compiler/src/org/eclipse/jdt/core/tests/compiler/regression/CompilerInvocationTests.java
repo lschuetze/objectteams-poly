@@ -1738,6 +1738,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("CalloutUndeclaredException", SKIP);
         expectedProblemAttributes.put("CalloutOverrideReducesVisibility", SKIP);
         expectedProblemAttributes.put("AddingInferredCalloutForInherited", SKIP);
+        expectedProblemAttributes.put("InferredCalloutInCompoundAssignment", SKIP);
         expectedProblemAttributes.put("UsingInferredCalloutForMessageSend", SKIP);
         expectedProblemAttributes.put("UnusedParamMap", SKIP);
         expectedProblemAttributes.put("CalloutParameterMappingMissingSignatures", SKIP);

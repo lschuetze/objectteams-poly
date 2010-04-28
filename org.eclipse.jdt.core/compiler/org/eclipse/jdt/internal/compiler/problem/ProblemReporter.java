@@ -9830,6 +9830,15 @@ public void usingInferredCalloutToFieldForMessageSend(MessageSend send) {
 			send.sourceStart,
 			send.sourceEnd);
 }
+public void inferredCalloutInCompoundAssignment(ASTNode location, char[] fieldName) {
+	String[] args = { String.valueOf(fieldName) };
+	this.handle(
+			IProblem.InferredCalloutInCompoundAssignment,
+			args,
+			args,
+			location.sourceStart,
+			location.sourceEnd);
+}
 // -- 3.2 --
 public void unusedParamMap(
         AbstractMethodMappingDeclaration mappingDeclaration,

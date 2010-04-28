@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
@@ -1232,8 +1233,15 @@ public class CalloutImplementor extends MethodMappingImplementor
 			AstGenerator gen= new AstGenerator(location.sourceStart, location.sourceEnd);
 			callout = inferCalloutToField(type, fieldName, accessorName, isSetter, expectedType, gen);
 		}
-		if (callout != null)
+
+		if (callout != null) {
+			if ((location.bits & ASTNode.IsCompoundAssigned) != 0) {
+				// not legal in this context
+				scope.problemReporter().inferredCalloutInCompoundAssignment(location, fieldName);
+				return null;
+			}
 			scope.problemReporter().inferredUseOfCalloutToField(isSetter, location, fieldName, ((FieldAccessSpec)callout.baseMethodSpec).resolvedField);
+		}
 		return callout;
 	}
 
