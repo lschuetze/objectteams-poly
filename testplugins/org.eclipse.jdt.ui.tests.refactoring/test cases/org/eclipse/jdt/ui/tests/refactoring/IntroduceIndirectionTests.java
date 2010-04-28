@@ -256,7 +256,9 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 		helperWarn(new String[] { "p.Foo" }, "bar", "p.Foo", 11, 25, 11, 28);
 	}
 
-	public void test24() throws Exception {
+//{ObjectTeams: disabled, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=310874
+	public void _test24() throws Exception {
+// SH}
 		// assure common super type is used even if the hierarchy branches downwards
 		helperPass(new String[] { "p.Foo" }, "bar", "p.Foo", 11, 11, 11, 14);
 	}
