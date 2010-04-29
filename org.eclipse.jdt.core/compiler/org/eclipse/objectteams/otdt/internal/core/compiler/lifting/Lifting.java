@@ -437,7 +437,19 @@ public class Lifting extends SwitchOnBaseTypeGenerator
             		});
 
         // ((IBoundBase)_OT$base).addRole(this); // prevent premature garbage collection
-        statements[1] =
+        Expression roleExpression = gen.thisReference();
+        if (TypeAnalyzer.isConfined(boundRootRoleModel.getBinding())) {
+        	// pretend this were compatible to Object:
+			roleExpression.resolvedType = scope.getJavaLangObject();
+			roleExpression.constant = Constant.NotAConstant;
+		} else {
+			// here an (unnecessary) cast to j.l.Object prevents a warning re OTJLD 2.2(f):
+			roleExpression = gen.castExpression(
+								roleExpression, 
+								gen.qualifiedNameReference(TypeConstants.JAVA_LANG_OBJECT), 
+								CastExpression.RAW);
+		}
+		statements[1] =
 			// OTDYN: Slightly different methods depending on the weaving strategy:
         	CallinImplementorDyn.DYNAMIC_WEAVING 
         	? gen.messageSend(
@@ -447,10 +459,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 							CastExpression.RAW),
 					ADD_REMOVE_ROLE,
 					new Expression[] {
-						gen.castExpression( // here an (unnecessary) cast to j.l.Object prevents a warning re OTJLD 2.2(f):
-								gen.thisReference(), // the payload 
-								gen.qualifiedNameReference(TypeConstants.JAVA_LANG_OBJECT), 
-								CastExpression.RAW),
+						roleExpression,
 						gen.booleanLiteral(true)}) // isAdding
 			: gen.messageSend(
 					gen.castExpression(
@@ -458,11 +467,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 						gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE),
 						CastExpression.RAW),
 					ADD_ROLE,
-					new Expression[] {
-						gen.castExpression( // here an (unnecessary) cast to j.l.Object prevents a warning re OTJLD 2.2(f):
-								gen.thisReference(), // the payload 
-								gen.qualifiedNameReference(TypeConstants.JAVA_LANG_OBJECT), 
-								CastExpression.RAW)});
+					new Expression[] {roleExpression});
         return statements;
     }
 
