@@ -109,7 +109,14 @@ public class MasterTeamLoader {
 		{
 			TransformerPlugin.getDefault().log(IStatus.OK, "reading attributes of team "+teamName);
 			ClassLoader loader = (ClassLoader) ((BundleHost)aspectBundle).getLoaderProxy().getBundleLoader().createClassLoader();
-			scanner.readOTAttributes(aspectBundle, teamName, loader);
+			while (teamName != null) {
+				try {
+					scanner.readOTAttributes(aspectBundle, teamName, loader);
+					break;
+				} catch (ClassNotFoundException e) {
+					teamName = nextTeamName(teamName);
+				}				
+			}
 			Collection<String> baseClassNames = scanner.getCollectedBaseClassNames(teamName);
 			if (baseClassNames != null && !baseClassNames.isEmpty())
 				TransformerPlugin.getDefault().storeAdaptedBaseClassNames(this.aspectBundle.getSymbolicName(), teamName, baseClassNames);
@@ -117,16 +124,38 @@ public class MasterTeamLoader {
 		
 		public boolean isAlreadyHandled() throws ClassNotFoundException {
 			if (this.clazz == null)
-				this.clazz = this.aspectBundle.loadClass(this.teamName);
+				loadClass();
 			return allInstantiatedTeams.contains(this.clazz);
 		}
 
 		public Object newInstance() throws Exception {
 			if (this.clazz == null)
-				this.clazz = this.aspectBundle.loadClass(this.teamName);
+				loadClass();
 			allInstantiatedTeams.add(this.clazz); // do this before accessing the constructor to avoid circularity (see Trac #257).
 			Object newInstance = this.clazz.newInstance();
 			return newInstance;
+		}
+		
+		private void loadClass() throws ClassNotFoundException {
+			String teamName = this.teamName;
+			while (teamName != null) {
+				try {
+					this.clazz = this.aspectBundle.loadClass(teamName);
+					return; 
+				} catch (ClassNotFoundException ex) {
+					teamName = nextTeamName(teamName);
+				}
+			}
+			throw new ClassNotFoundException(this.teamName);
+		}
+
+		private String nextTeamName(String teamName) {
+			int pos = teamName.lastIndexOf('.');
+			if (pos < 0)
+				return null;
+			String prefix = teamName.substring(0, pos); 
+			String postfix = teamName.substring(pos+1);
+			return prefix+"$__OT__"+postfix;
 		}
 
 		public void markAsActivated() {
