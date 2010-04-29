@@ -128,7 +128,7 @@ public class CallinCalloutScope extends MethodScope {
 			&& localBinding.declaringScope.isMethodMappingWrapper()) 		// defined in a method mapping wrapper
 		{
 			// hide internal local var but re-resolve:
-			CallinCalloutScope mappingScope = ((MethodScope)localBinding.declaringScope).getDeclaringMappingScope();
+			CallinCalloutScope mappingScope = localBinding.declaringScope.methodScope().getDeclaringMappingScope();
 			if (mappingScope != null)
 				binding = mappingScope.getSurfaceBinding(singleNameReference, singleNameReference.baseclassDecapsulation.isAllowed());
 		}
