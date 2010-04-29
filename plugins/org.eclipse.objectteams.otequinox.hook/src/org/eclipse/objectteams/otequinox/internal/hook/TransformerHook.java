@@ -30,12 +30,15 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Stack;
 import java.util.StringTokenizer;
 
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.bundlefile.BundleEntry;
 import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingHook;
+import org.eclipse.osgi.baseadaptor.hooks.ClassLoadingStatsHook;
 import org.eclipse.osgi.baseadaptor.loader.BaseClassLoader;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathEntry;
 import org.eclipse.osgi.baseadaptor.loader.ClasspathManager;
@@ -74,7 +77,7 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * @version $Id: TransformerHook.java 23468 2010-02-04 22:34:27Z stephan $
  */
 @SuppressWarnings("nls")
-public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLoaderDelegateHook
+public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLoaderDelegateHook, ClassLoadingStatsHook
 {
 	// As an OSGI extension bundle, we can't depend on the transformer plugin, so we have to hardcode this
 	public static final String  TRANSFORMER_PLUGIN_ID         = "org.eclipse.objectteams.otequinox" ; //$NON-NLS-1$
@@ -188,6 +191,19 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	// Class loaders for which initializedClassLoader is currently executing (usable, but not yet registered):
 	private HashMap<Bundle,BaseClassLoader> pendingClassLoaders = new HashMap<Bundle, BaseClassLoader>(); 
 	
+	// -- The next three collections manage activation of teams adapting base bundles without an activation policy --
+	
+	// bundles that do not have a lazy activation policy and have not yet loaded a class:
+	public HashSet<Bundle> pendingNonLazyActivationBundles = new HashSet<Bundle>();
+	
+	// stack of classes currently being defined (used to avoid activation while a class is still being defined -> ClassCircularityError)
+	Stack<String> currentlyDefiningClasses = new Stack<String>();
+	
+	// bundles that formerly were in pendingNonLazyActivationBundles which wait for currentlyDefiningClasses to become empty
+	List<Bundle> activatableBundles = new ArrayList<Bundle>(); 
+
+	// --
+	
 	/** Constructor invoked by the framework (via {@link HookConfigurator#addHooks(org.eclipse.osgi.baseadaptor.HookRegistry)}). */
 	public TransformerHook(BaseAdaptor adaptor) {
 		this.logger = HookConfigurator.getLogger();
@@ -228,6 +244,10 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 			ClasspathEntry classpathEntry, BundleEntry entry,
 			ClasspathManager manager) 
 	{	
+		synchronized (this.currentlyDefiningClasses) {			
+			this.currentlyDefiningClasses.add(name); // block aspect activation while defining a class
+		}
+
 		String previousClassName = currentlyProcessedClassName.get();
 		this.currentlyProcessedClassName.set(name);
 		try {
@@ -670,6 +690,49 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	@SuppressWarnings("rawtypes")
 	public Enumeration preFindResources(String name, BundleClassLoader classLoader, BundleData data) {
 		return null;
+	}
+
+	public void preFindLocalClass(String name, ClasspathManager manager) throws ClassNotFoundException {
+		// noop		
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public synchronized void postFindLocalClass(String name, Class clazz, ClasspathManager manager) throws ClassNotFoundException {
+		// noop
+	}
+
+	public void preFindLocalResource(String name, ClasspathManager manager) {
+		// noop
+	}
+
+	public void postFindLocalResource(String name, URL resource, ClasspathManager manager) {
+		// noop		
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public void recordClassDefine(String name, Class clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) 
+	{
+		// is this the first class from a pendingNonLazyActivationBundle?
+		synchronized (this.activatableBundles) {
+			Bundle bundle = manager.getBaseData().getBundle();
+			if (pendingNonLazyActivationBundles.remove(bundle))
+				activatableBundles.add(bundle); // schedule for activation when currentlyDefiningClasses is empty
+		}
+		// is the stack of currentlyDefiningClasses empty?
+		boolean shouldTrigger = false;
+		synchronized (this.currentlyDefiningClasses) {			
+			this.currentlyDefiningClasses.remove(name);
+			if (this.currentlyDefiningClasses.isEmpty())
+				shouldTrigger = true;
+		}
+		// perform scheduled activations:
+		if (shouldTrigger)
+			synchronized (this.activatableBundles) {
+				Bundle[] copy = this.activatableBundles.toArray(new Bundle[this.activatableBundles.size()]);
+				for (Bundle bundle : copy)
+					BaseBundleRole.endActivation(this.bundleRegistry, bundle, this.aspectRegistry, this.teamLoadingService);
+				this.activatableBundles.clear();
+			}
 	}
 
 }

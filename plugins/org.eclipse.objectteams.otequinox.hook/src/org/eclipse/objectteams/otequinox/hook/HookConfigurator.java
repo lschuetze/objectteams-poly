@@ -91,13 +91,14 @@ public class HookConfigurator implements org.eclipse.osgi.baseadaptor.HookConfig
 		hookRegistry.addClassLoadingHook(transformerHook);
 		hookRegistry.addClassLoaderDelegateHook(transformerHook);
 		hookRegistry.addWatcher(transformerHook);
+		hookRegistry.addClassLoadingStatsHook(transformerHook);
 		hookRegistry.addAdaptorHook(new OTEquinoxServiceWatcher(transformerHook));
 		synchronized (hookRegistry) {
-			insertStorageHook(hookRegistry);
+			insertStorageHook(hookRegistry, transformerHook);
 		}
 	}
 	/* Insert an OTStorageHook before EclipseStorageHook as to intercept getManifest(): */
-	private void insertStorageHook(org.eclipse.osgi.baseadaptor.HookRegistry hookRegistry) 
+	private void insertStorageHook(org.eclipse.osgi.baseadaptor.HookRegistry hookRegistry, TransformerHook transformerHook) 
 	{
 		hookRegistry.addStorageHook(null); // grow array, fill in below:
 		StorageHook[] allStorageHooks= hookRegistry.getStorageHooks();
@@ -106,7 +107,7 @@ public class HookConfigurator implements org.eclipse.osgi.baseadaptor.HookConfig
 		for (int i=allStorageHooks.length-1; i>0; i--) {
 			allStorageHooks[i]= allStorageHooks[i-1];
 			if (allStorageHooks[i] instanceof EclipseStorageHook) 
-				storageHook= new OTStorageHook(null, (EclipseStorageHook)allStorageHooks[i]);
+				storageHook= new OTStorageHook((EclipseStorageHook)allStorageHooks[i], transformerHook);
 		}
 		if (storageHook != null) // only install if validly wired
 			allStorageHooks[0]= storageHook; 

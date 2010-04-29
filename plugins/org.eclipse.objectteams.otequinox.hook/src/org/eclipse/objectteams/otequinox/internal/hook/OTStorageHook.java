@@ -34,6 +34,7 @@ import org.eclipse.core.runtime.internal.adaptor.EclipseStorageHook;
 import org.eclipse.objectteams.otequinox.hook.AspectPermission;
 import org.eclipse.osgi.baseadaptor.BaseData;
 import org.eclipse.osgi.baseadaptor.hooks.StorageHook;
+import org.eclipse.osgi.framework.internal.core.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 import org.eclipse.osgi.framework.util.Headers;
@@ -201,11 +202,17 @@ public class OTStorageHook implements StorageHook
 	static FrameworkLog fwLog;
 	
 	BaseData bundleData;
-	EclipseStorageHook manifestProvider;	
+	EclipseStorageHook manifestProvider;
+	TransformerHook transformerHook;	
 	
-	public OTStorageHook(BaseData bundleData, EclipseStorageHook manifestProvider) {
+	public OTStorageHook(EclipseStorageHook manifestProvider, TransformerHook transformerHook) {
+		this.manifestProvider = manifestProvider;
+		this.transformerHook = transformerHook;
+	}
+	public OTStorageHook(BaseData bundleData, EclipseStorageHook manifestProvider, TransformerHook transformerHook) {
 		this.bundleData = bundleData;
 		this.manifestProvider = manifestProvider;
+		this.transformerHook = transformerHook;
 		if (fwLog == null && bundleData != null)
 			fwLog = bundleData.getAdaptor().getFrameworkLog();
 	}
@@ -217,7 +224,7 @@ public class OTStorageHook implements StorageHook
 	}
 
 	public StorageHook create(BaseData bundledata) throws BundleException {
-		return new OTStorageHook(bundledata, this.manifestProvider);
+		return new OTStorageHook(bundledata, this.manifestProvider, this.transformerHook);
 	}
 
 	public boolean forgetStartLevelChange(int startlevel) {
@@ -230,7 +237,10 @@ public class OTStorageHook implements StorageHook
 
 	public Dictionary<?,?> getManifest(boolean firstLoad) throws BundleException 
 	{
-		final Dictionary<?,?> orig= this.manifestProvider.create(this.bundleData).getManifest(firstLoad);
+		StorageHook manifestProviderInstance = this.manifestProvider.create(this.bundleData);
+		final Dictionary<?,?> orig= manifestProviderInstance.getManifest(firstLoad);
+		
+		checkActivationPolicy(orig);
 		
 		// wrap the original answer:
 		return new Headers(orig.size()) 
@@ -266,6 +276,20 @@ public class OTStorageHook implements StorageHook
 		};
 	}
 
+	/** Let the TransformerHook know if we see a bundle without an activation policy. */
+	protected void checkActivationPolicy(Dictionary<?, ?> orig) {
+		orig.keys(); // force initialization of manifest
+		String value = (String) orig.get(Constants.BUNDLE_ACTIVATIONPOLICY);
+		String value2 = (String)orig.get(Constants.ECLIPSE_LAZYSTART);
+		if (   (value == null  || !value.trim().startsWith(Constants.ACTIVATION_LAZY))
+			&& (value2 == null || !value2.trim().equalsIgnoreCase("true"))) //$NON-NLS-1$
+		{
+			synchronized (this.transformerHook) {
+				this.transformerHook.pendingNonLazyActivationBundles.add(this.bundleData.getBundle());
+			}
+		}
+	}
+
 	static void logError(String message) {
 		fwLog.log(new FrameworkLogEntry(OTStorageHook.class.getName(),
 									    message,
@@ -277,7 +301,7 @@ public class OTStorageHook implements StorageHook
 		return STORAGE_VERSION;
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public void initialize(final Dictionary manifest) throws BundleException {
 		// no-op
 	}
@@ -285,7 +309,7 @@ public class OTStorageHook implements StorageHook
 	public StorageHook load(BaseData bundledata, DataInputStream is)
 			throws IOException 
 	{
-		return new OTStorageHook(bundledata, this.manifestProvider);
+		return new OTStorageHook(bundledata, this.manifestProvider, this.transformerHook);
 	}
 
 	public boolean matchDNChain(String pattern) {
