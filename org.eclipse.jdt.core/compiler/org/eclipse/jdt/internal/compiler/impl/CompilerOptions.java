@@ -475,6 +475,7 @@ public class CompilerOptions {
 		"exceptioninguard",     //$NON-NLS-1$
 		"ambiguouslowering",	//$NON-NLS-1$
 		"adapt-deprecated", 	//$NON-NLS-1$
+		"ignoredresult", 		//$NON-NLS-1$
 // SH}
 	};
 
