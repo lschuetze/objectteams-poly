@@ -317,7 +317,17 @@ public class OTModelManager
 	/**
 	 * Utility function.
 	 * @param type
-	 * @return
+	 * @return true if an OT-Type is registered for type that is a role
+	 */
+	public static boolean isRole(IType type) {
+		IOTType ottype = getOTElement(type);
+		return ottype != null && ottype.isRole();
+	}
+	
+	/**
+	 * Utility function.
+	 * @param type
+	 * @return true if an OT-Type is registered for type that is a team
 	 */
 	public static boolean isTeam(IType type) {
 		if (hasOTElementFor(type))
