@@ -520,7 +520,7 @@ private char[] returnTypeName(MethodSpec spec) {
 
 						for(int argIdx = 0; argIdx < argListLength; argIdx++)
 						{
-							char[] argType = Signature.toQualifiedName(spec.arguments[argIdx].type.getTypeName());
+							char[] argType = Signature.toQualifiedName(spec.arguments[argIdx].type.getParameterizedTypeName());
 							baseArgTypes[argIdx] = argType;
 							baseArgNames[argIdx] = spec.arguments[argIdx].name;
 
@@ -528,7 +528,7 @@ private char[] returnTypeName(MethodSpec spec) {
 						baseInfos[idx].parameterNames= baseArgNames;
 						baseInfos[idx].parameterTypes= baseArgTypes;
 						if (spec.returnType != null)
-						    baseInfos[idx].returnType = Signature.toQualifiedName(spec.returnType.getTypeName());
+						    baseInfos[idx].returnType = Signature.toQualifiedName(spec.returnType.getParameterizedTypeName());
 					}
 				}
 				info.right= baseInfos;
