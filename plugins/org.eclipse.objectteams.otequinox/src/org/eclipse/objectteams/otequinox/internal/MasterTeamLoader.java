@@ -109,13 +109,16 @@ public class MasterTeamLoader {
 		{
 			TransformerPlugin.getDefault().log(IStatus.OK, "reading attributes of team "+teamName);
 			ClassLoader loader = (ClassLoader) ((BundleHost)aspectBundle).getLoaderProxy().getBundleLoader().createClassLoader();
-			while (teamName != null) {
-				try {
-					scanner.readOTAttributes(aspectBundle, teamName, loader);
-					break;
-				} catch (ClassNotFoundException e) {
-					teamName = nextTeamName(teamName);
-				}				
+			trying: {
+				for(String candidateName : possibleTeamNames(teamName)) {
+					try {
+						scanner.readOTAttributes(aspectBundle, candidateName, loader);
+						break trying;
+					} catch (ClassNotFoundException e) {
+						// keep going if we still have candidates
+					}				
+				}
+				throw new ClassNotFoundException(teamName);
 			}
 			Collection<String> baseClassNames = scanner.getCollectedBaseClassNames(teamName);
 			if (baseClassNames != null && !baseClassNames.isEmpty())
@@ -137,25 +140,50 @@ public class MasterTeamLoader {
 		}
 		
 		private void loadClass() throws ClassNotFoundException {
-			String teamName = this.teamName;
-			while (teamName != null) {
+			for (String candidateName : possibleTeamNames(this.teamName)) {
 				try {
-					this.clazz = this.aspectBundle.loadClass(teamName);
+					this.clazz = this.aspectBundle.loadClass(candidateName);
 					return; 
 				} catch (ClassNotFoundException ex) {
-					teamName = nextTeamName(teamName);
+					// keep going if we still have candidates
 				}
 			}
 			throw new ClassNotFoundException(this.teamName);
 		}
 
-		private String nextTeamName(String teamName) {
-			int pos = teamName.lastIndexOf('.');
-			if (pos < 0)
-				return null;
-			String prefix = teamName.substring(0, pos); 
-			String postfix = teamName.substring(pos+1);
-			return prefix+"$__OT__"+postfix;
+		/** 
+		 * Starting from currentName compute a list of potential binary names of (nested) teams
+		 * using "$__OT__" as the separator, to find class parts of nested teams.  
+		 */
+		private List<String> possibleTeamNames(String currentName) {
+			List<String> result = new ArrayList<String>();
+			result.add(currentName);
+			char sep = '.'; // assume source name
+			if (currentName.indexOf('$') > -1)
+				// binary name
+				sep = '$';
+			int from = currentName.length()-1;
+			while (true) {
+				int pos = currentName.lastIndexOf(sep, from);
+				if (pos == -1)
+					break;
+				String prefix = currentName.substring(0, pos); 
+				String postfix = currentName.substring(pos+1);
+				if (sep=='$') {
+					if (!postfix.startsWith("__OT__"))
+						result.add(0, currentName = prefix+"$__OT__"+postfix);
+				} else {
+					// heuristic: 
+					// only replace if parent element looks like a class (expected to start with uppercase)
+					int prevDot = prefix.lastIndexOf('.');
+					if (prevDot > -1 && Character.isUpperCase(prefix.charAt(prevDot+1))) 
+						result.add(0, currentName = prefix+"$__OT__"+postfix);
+					else 
+						break;
+				}
+				from = pos-1;
+			}
+			return result;
 		}
 
 		public void markAsActivated() {
