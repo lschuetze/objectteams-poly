@@ -34,11 +34,13 @@ import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -172,30 +174,48 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 			RoleModel roleModel)
 	{
 		TypeDeclaration  teamDecl    = teamModel.getAst();
+		ReferenceBinding teamBinding = teamModel.getBinding();
 		TypeDeclaration  roleDecl    = roleModel.getAst();
 		ReferenceBinding roleBinding = roleModel.getBinding();
 		char[] selector = CharOperation.concat(GET_CLASS_PREFIX, roleBinding.sourceName());
-		MethodBinding[] existingMethods = teamModel.getBinding().getMethods(selector);
+		TypeBinding result = ensureGetClassMethodPart(teamDecl, teamBinding, roleDecl, roleBinding, selector);
+		if (teamBinding.isRole()) {
+			TypeDeclaration teamIfc = teamBinding.roleModel.getInterfaceAst();
+			if (teamIfc != null)
+				ensureGetClassMethodPart(teamIfc, teamIfc.binding, roleDecl, roleBinding, selector);
+		}
+		return result;
+	}
+
+	private static TypeBinding ensureGetClassMethodPart(TypeDeclaration teamDecl, ReferenceBinding teamBinding,
+													    TypeDeclaration roleDecl, ReferenceBinding roleBinding, char[] selector) 
+	{
+		MethodBinding[] existingMethods = teamBinding.getMethods(selector);
 		if (existingMethods != NO_METHODS)
 			return existingMethods[0].returnType; // already generated
 		if (teamDecl == null)
-			throw new InternalCompilerError("Requesting to generate a method for binary type "+teamModel);		 //$NON-NLS-1$
+			throw new InternalCompilerError("Requesting to generate a method for binary type "+String.valueOf(teamBinding.readableName()));		 //$NON-NLS-1$
 		AstGenerator gen;
 		if (roleDecl != null)
 			gen = new AstGenerator(roleDecl.scope.compilerOptions().sourceLevel, roleDecl.sourceStart, roleDecl.sourceEnd);
 		else
 			gen = new AstGenerator(teamDecl.scope.compilerOptions().sourceLevel, teamDecl.sourceStart, teamDecl.sourceEnd);
 		MethodDeclaration method = gen.method(teamDecl.compilationResult,
-				roleBinding.modifiers & AccVisibilityMASK,
+				(teamBinding.isRole())
+					? ClassFileConstants.AccPublic // advertized via ifc, must be public
+					: roleBinding.modifiers & AccVisibilityMASK,
 				gen.parameterizedQualifiedTypeReference( // java.lang.Class<R>
 							TypeConstants.JAVA_LANG_CLASS,
 							new TypeBinding[] { roleBinding.getRealType() },
 							true/*deeply generic*/),
 				selector,
 				null);
-		method.setStatements(new Statement[] {
-			gen.returnStatement(new ClassLiteralAccess(gen.sourceEnd, gen.typeReference(roleBinding), true))
-		});
+		if (teamBinding.isInterface())
+			method.modifiers |= ClassFileConstants.AccAbstract|ExtraCompilerModifiers.AccSemicolonBody;
+		else
+			method.setStatements(new Statement[] {
+				gen.returnStatement(new ClassLiteralAccess(gen.sourceEnd, gen.typeReference(roleBinding), true))
+			});
 		AstEdit.addMethod(teamDecl, method);
 		return method.returnType.resolvedType;
 	}

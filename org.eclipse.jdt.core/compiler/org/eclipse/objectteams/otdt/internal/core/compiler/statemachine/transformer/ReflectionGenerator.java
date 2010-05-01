@@ -279,7 +279,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 		HashSet<String> processedCaches = new HashSet<String>();
 		for (int i = 0; i < roles.length; i++) {
 			if (roles[i].isSynthInterface()) continue;
-			if (TypeAnalyzer.isConfined(roles[i].getBinding())) continue;
+			if (TypeAnalyzer.isTopConfined(roles[i].getBinding())) continue;
 			if (roles[i].isIgnoreFurtherInvestigation()) continue;
 			RoleModel boundRootRole = roles[i].getBoundRootRole();
 			if (boundRootRole != null && boundRootRole.isIgnoreFurtherInvestigation()) continue;
@@ -297,7 +297,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 					unregStats1[u1++] = createRememberIfContains(roleType, cacheName, gen2, u1==4);
 				}
 				// one lookup per bound role class:
-				hasStats2  [m2]   = createIfTypeEqualAndContains(roleType, cacheName, gen);
+				hasStats2  [m2]   = createIfTypeEqualAndContains(roleType, cacheName, gen, objectBinding);
 				getStats2  [m2++] = createIfTypeEqualAndGet     (roleType, cacheName, gen);
 				getAStats2 [g2++] = createIfTypeEqualFetchValues(roleType, cacheName, gen);
 				unregStats2[u2++] = createRemove                (roleType, cacheName, gen);
@@ -606,7 +606,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 
 
 	private static Statement createIfTypeEqualAndContains(
-			ReferenceBinding roleType, char[] cacheName, AstGenerator gen)
+			ReferenceBinding roleType, char[] cacheName, AstGenerator gen, TypeBinding objectBinding)
 	{
 		/*
 		 * for each bound roleType generate:
@@ -662,7 +662,8 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 											gen.messageSend(
 												gen.fieldReference(gen.thisReference(), cacheName),
 												GET,
-												new Expression[] { gen.singleNameReference(_OT_BASE_ARG) }
+												new Expression[] { gen.singleNameReference(_OT_BASE_ARG) },
+												objectBinding // pretend to return object even if role is confined (avoid lowering)
 											)
 										}
 									)

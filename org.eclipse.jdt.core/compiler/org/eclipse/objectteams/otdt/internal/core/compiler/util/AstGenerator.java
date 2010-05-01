@@ -65,8 +65,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * This factory creates "generated" elements, ie., elements that have
  * no direct connection to source code. Most functions are just simple factory
  * methods which however set source positions.
@@ -662,6 +660,25 @@ public class AstGenerator extends AstFactory {
 
 	public MessageSend messageSend(Expression receiver, char[] selector, Expression[] parameters) {
 		MessageSend messageSend = new MessageSend();
+		messageSend.sourceStart = this.sourceStart;
+		messageSend.sourceEnd   = this.sourceEnd;
+		messageSend.statementEnd = this.sourceEnd;
+		messageSend.nameSourcePosition = this.pos;
+		messageSend.receiver = receiver;
+		messageSend.selector = selector;
+		messageSend.arguments = parameters;
+		messageSend.constant = Constant.NotAConstant;
+		return messageSend;
+	}
+
+	public MessageSend messageSend(Expression receiver, char[] selector, Expression[] parameters, final TypeBinding resolvedReturn) {
+		MessageSend messageSend = new MessageSend() {
+			@Override
+			public TypeBinding resolveType(BlockScope scope) {
+				super.resolveType(scope);
+				return this.resolvedType = resolvedReturn;
+			}
+		};
 		messageSend.sourceStart = this.sourceStart;
 		messageSend.sourceEnd   = this.sourceEnd;
 		messageSend.statementEnd = this.sourceEnd;
