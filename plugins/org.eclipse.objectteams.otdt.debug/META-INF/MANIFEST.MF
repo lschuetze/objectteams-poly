@@ -5,6 +5,7 @@ Bundle-SymbolicName: org.eclipse.objectteams.otdt.debug;singleton:=true
 Bundle-Version: 0.7.0.qualifier
 Bundle-Activator: org.eclipse.objectteams.otdt.debug.OTDebugPlugin
 Bundle-Vendor: %providerName
+Bundle-Localization: plugin
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.debug.core,
  org.eclipse.jdt.debug,
