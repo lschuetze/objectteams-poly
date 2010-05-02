@@ -16,6 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.pde.ui;
 
+import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
@@ -111,8 +112,7 @@ public class ToggleOTSupportAction implements IObjectActionDelegate {
 					project.getFile(ICoreConstants.BUNDLE_FILENAME_DESCRIPTOR),
 					project.getFile(ICoreConstants.PLUGIN_FILENAME_DESCRIPTOR));
 			IPluginBase pluginBase = fModel.getPluginBase();
-			IPluginReference ref = new PluginReference(
-					"org.eclipse.objectteams.otequinox", null, 0);
+			IPluginReference ref = new PluginReference(TRANSFORMER_PLUGIN_ID, null, 0);
 			IPluginImport iimport = fModel.getPluginFactory().createImport();
 			iimport.setId(ref.getId());
 			iimport.setVersion(ref.getVersion());
