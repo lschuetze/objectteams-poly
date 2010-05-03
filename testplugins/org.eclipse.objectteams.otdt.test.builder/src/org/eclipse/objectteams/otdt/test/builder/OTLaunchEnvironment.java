@@ -22,6 +22,8 @@ package org.eclipse.objectteams.otdt.test.builder;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -84,6 +86,18 @@ public class OTLaunchEnvironment extends URLClassLoader
 		}
 		// this will use the URL pointing to the OTRE:
 		return super.findClass(name);
+	}
+	
+	@Override
+	public InputStream getResourceAsStream(String name) {
+		File file = new File(bindir.append(name).toOSString());
+		if (file.exists())
+			try {
+				return new FileInputStream(file);
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} 
+		return super.getResourceAsStream(name);
 	}
 	
 	/* We found an existing file, load its bytes and define the class. */
