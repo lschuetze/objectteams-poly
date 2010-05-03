@@ -6,5 +6,5 @@ Bundle-Version: 1.0.0
 Bundle-Activator: trac213b1.Activator1
 Require-Bundle: org.eclipse.core.runtime
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: trac213b1
