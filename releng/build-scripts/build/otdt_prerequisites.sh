@@ -41,11 +41,11 @@ X11=XVFB
 
 # VERSIONS:
 # Eclipse SKD build identifier:
-EVERSION=I20100428-1300
+EVERSION=3.6M7
 # Architecture (as used by OSGi):
 ARCH="-ppc64"
 # used only locally:
-DROP=${BASEDIR}/drops/I20100428-1300
+DROP=${BASEDIR}/drops/S-3.6M7-201004291549
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk${ARCH}.tar.gz
