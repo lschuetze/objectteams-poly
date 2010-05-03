@@ -152,7 +152,7 @@
       <!-- debug tests don't like parallelization -->
       <antcall target="jdt_debug_tests" />
       <antcall target="otdt_debug_tests" />
-	  <parallel threadCount="2">
+	  <!--parallel threadCount="2"-->
                 <!-- "slow", ui tests come first -->
                 <antcall target="jdt_ref_tests" />
                 <antcall target="jdt_ui_tests" />
@@ -165,7 +165,7 @@
                 <antcall target="jdtcore_model_tests" />
                 <antcall target="otdt_builder_tests" />
                 <!-- antcall target="otdt_metrics_tests" / -->
-	  </parallel>
+	  <!--/parallel-->
 	</target>
 	
 	<target name="onlyone">
