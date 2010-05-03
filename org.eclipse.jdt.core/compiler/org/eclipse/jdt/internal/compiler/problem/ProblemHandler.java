@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.util.Util;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDeclaration;
 
 /*
  * Compiler error handler, responsible to determine whether
@@ -152,7 +153,9 @@ private void protectedHandle(
 	if (referenceContext instanceof AbstractMethodDeclaration) {
 		AbstractMethodDeclaration method = (AbstractMethodDeclaration)referenceContext;
 		if (   method.isCopied
-			|| (method.isGenerated && (method.isMappingWrapper == WrapperKind.NONE)) )
+			|| (   method.isGenerated
+				&& (method.isMappingWrapper == WrapperKind.NONE)
+				&& !(method instanceof GuardPredicateDeclaration)))
 		{
 			// safer to ignore only if some error has already been reported
 			boolean alreadyReported = ((severity & ProblemSeverities.Error) != 0)
