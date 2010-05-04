@@ -270,6 +270,10 @@ class TypeBinding implements ITypeBinding {
 					IVariableBinding[] newFields = new IVariableBinding[length];
 					for (int i = 0; i < length; i++) {
 						FieldBinding fieldBinding = fieldBindings[i];
+//{ObjectTeams: skip internal fields:
+						if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, fieldBinding.name))
+							continue;
+// SH}
 						IVariableBinding variableBinding = this.resolver.getVariableBinding(fieldBinding);
 						if (variableBinding != null) {
 							newFields[convertedFieldCount++] = variableBinding;
