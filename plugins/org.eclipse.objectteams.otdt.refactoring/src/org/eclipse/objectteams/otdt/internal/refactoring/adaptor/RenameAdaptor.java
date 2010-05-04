@@ -28,7 +28,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -43,6 +46,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
 import org.eclipse.objectteams.otdt.internal.refactoring.adaptor.rename.RenameMethodAmbuguityMsgCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.adaptor.rename.RenameMethodOverloadingMsgCreator;
@@ -51,6 +55,7 @@ import org.eclipse.objectteams.otdt.internal.refactoring.corext.rename.BaseCallF
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 
 import base org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
+import base org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 
@@ -247,7 +252,6 @@ public team class RenameAdaptor
 		doCheckFinalConditions <- replace doCheckFinalConditions;
 	
 		//	also check for overloading and ambiguity in OT-subclassed elements
-		@SuppressWarnings("nls")
 		private RefactoringStatus checkOverloadingAndAmbiguity(IProgressMonitor pm)
 				throws JavaModelException 
 		{
@@ -272,7 +276,7 @@ public team class RenameAdaptor
 			{
 	    		//TODO(jsv): Use meaningful message and store it in the message file
 	    		RefactoringStatus result = new RefactoringStatus();
-	    		result.addError("Error while checking overloading and ambiguity");
+	    		result.addError(OTRefactoringCoreMessages.getString("RenameAdaptor.error_check_overload_ambiguity")); //$NON-NLS-1$
 	    		return result;
 			}
 		}
@@ -335,5 +339,49 @@ public team class RenameAdaptor
 		@SuppressWarnings({ "unchecked", "rawtypes" })
 		Set<IMethod> getMethodsToRename() -> Set     getMethodsToRename();
 		IMethod getMethod() 		      -> IMethod getMethod();
+	}
+	
+	/** Detect when trying to rename a team package. */
+	protected class RenamePackage playedBy RenamePackageProcessor {
+
+		@SuppressWarnings("decapsulation")
+		IPackageFragment getFPackage() -> get IPackageFragment fPackage;
+
+		checkInitialConditions <- replace checkInitialConditions;
+
+		callin RefactoringStatus checkInitialConditions() throws CoreException {
+			RefactoringStatus status = base.checkInitialConditions();
+			String qualifiedName = getFPackage().getElementName();
+			int pos = qualifiedName.lastIndexOf('.');
+			if (pos == -1) 
+				return status;
+			// find "parent" package:
+			String parentName = qualifiedName.substring(0, pos);
+			IPackageFragment parentPackage = ((IPackageFragmentRoot) getFPackage().getParent()).getPackageFragment(parentName);
+			if (!parentPackage.exists()) {
+				status.addWarning(OTRefactoringCoreMessages.getString("RenameAdaptor.error_parent_package_not_exist")); //$NON-NLS-1$
+				return status;
+			}
+			// search "parent" package for a class corresponding to this package
+			String simpleName = qualifiedName.substring(pos+1);
+			for (IJavaElement sibling : parentPackage.getChildren())
+				if (sibling.getElementName().equals(simpleName+".java")) //$NON-NLS-1$
+					switch (sibling.getElementType()) {
+					case IJavaElement.COMPILATION_UNIT:
+						 for (IType type : ((ICompilationUnit)sibling).getTypes())
+							 if (   type.getElementName().equals(simpleName)
+								 && OTModelManager.isTeam(type)) 
+							 {
+								 // yep, have a team class of the same FQN, so it must be a team package.
+								 status.addFatalError(OTRefactoringCoreMessages.getString("RenameAdaptor.error_cannot_rename_team_package")); //$NON-NLS-1$
+								 return status;
+							 }
+						 break;
+					case IJavaElement.CLASS_FILE:
+						status.addError(OTRefactoringCoreMessages.getString("RenameAdaptor.error_binary_class_potential_team_package")); //$NON-NLS-1$
+						return status;
+					}
+			return status;
+		}		
 	}
 }
