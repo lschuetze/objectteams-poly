@@ -67,9 +67,11 @@ import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer.FlexibleBuffer;
 import org.eclipse.jdt.ui.text.IJavaColorConstants;
 
 import base org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import base org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer;
 import base org.eclipse.jdt.internal.ui.InterfaceIndicatorLabelDecorator;
 import base org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import base org.eclipse.jdt.ui.JavaElementLabels;
@@ -268,51 +270,14 @@ public team class ViewAdaptor extends JFaceDecapsulator
 		}
 		void beautifyOTLabel(StringBuffer buf) <- after void getTypeLabel(IType type, long flags, StringBuffer buf) 
 			with { buf <- buf }
+		// for constructors:
 		void beautifyOTLabel(StringBuffer buf) <- after void getMethodLabel(IMethod method, long flags, StringBuffer buf) 
 			with { buf <- buf }
 
-		/** handle guard predicate names. */
-		static callin void beautifyGuardLabel(IMethod method, long flags, StyledString builder) {
-			String name = method.getElementName();
-			String displayName = null;
-			String guardedElement = null;
-			if (name.startsWith(String.valueOf(IOTConstants.BASE_PREDICATE_PREFIX))) {
-				displayName = "base when"; //$NON-NLS-1$
-				guardedElement = getGuardString(name.substring(IOTConstants.BASE_PREDICATE_PREFIX.length), method); 
-			} else if (name.startsWith(String.valueOf(IOTConstants.PREDICATE_METHOD_NAME))) {
-				displayName = "when"; //$NON-NLS-1$
-				guardedElement = getGuardString(name.substring(IOTConstants.PREDICATE_METHOD_NAME.length), method); 
-			}
-			if (displayName != null) {
-				// displayName as keyword:
-				final Color keywordColor = ViewAdaptor.this.getKeywordColor();
-				builder.append(displayName, new StyledString.Styler() {
-					@Override public void applyStyles(TextStyle textStyle) {
-						textStyle.foreground = keywordColor;
-					}
-				});
-				// append explanation:
-				builder.append(MessageFormat.format(Messages.ViewAdaptor_guard_predicate_postfix,
-												    new Object[]{guardedElement}),
-							   StyledString.QUALIFIER_STYLER);
-			} else {
-				base.beautifyGuardLabel(method, flags, builder);
-			}
-		}
-		private static String getGuardString(String suffix, IMethod method) {
-			if (suffix.length() == 0)
-				return method.getDeclaringType().getElementName();
-			StringTokenizer tokens = new StringTokenizer(suffix, "$"); //$NON-NLS-1$
-			String roleSelector = tokens.nextToken();
-			tokens.nextToken(); // modifier, unused
-			String baseSelector = tokens.nextToken();
-			return roleSelector+"<-"+baseSelector; //$NON-NLS-1$
-		}
-		void beautifyGuardLabel(IMethod method, long flags, StyledString builder) 
-			<- replace void getMethodLabel(IMethod method, long flags, StyledString builder);
-		
+		/** Qualification for method mappings. */
 		void getElementLabel(IJavaElement element, long flags, StringBuffer buf) 
-			<- replace void getElementLabel(IJavaElement element, long flags, StringBuffer buf);
+		<- replace void getElementLabel(IJavaElement element, long flags, StringBuffer buf);
+
 		static callin void getElementLabel(IJavaElement element, long flags, StringBuffer buf) 
 		{
 			base.getElementLabel(element, flags, buf);
@@ -326,7 +291,7 @@ public team class ViewAdaptor extends JFaceDecapsulator
 			}
 		}
 
-		
+		/** Styled labels for method mappings. */
 		void getElementLabel(IJavaElement element, long flags, StyledString res)
 		<- replace void getElementLabel(IJavaElement element, long flags, StyledString res);
 		
@@ -353,7 +318,6 @@ public team class ViewAdaptor extends JFaceDecapsulator
 			getMethodMappingLabel((IMethodMapping)element, flags, result);
 		}
 
-		
 		private static void getMethodMappingLabel(IMethodMapping element, long flags, StyledString result) {
 
 			result.append(element.getElementName());
@@ -368,10 +332,9 @@ public team class ViewAdaptor extends JFaceDecapsulator
 				}
 			}
 		}
-		
 	}
 	
-	/** Helper for {@link JavaElementLabels#beautifyGuardLabel()} retrieve and cache keyword color. */
+	/** Helper for {@link JavaElementLabelComposer#beautifyGuardLabel(IMethod,long)} retrieve and cache keyword color. */
 	Color keywordColor = null;
 	Color getKeywordColor() {
 		if (keywordColor == null) {
@@ -379,6 +342,55 @@ public team class ViewAdaptor extends JFaceDecapsulator
 			keywordColor = new Color(Display.getCurrent(), rgb);
 		}
 		return keywordColor;
+	}
+	
+	protected class JavaElementLabelComposer playedBy JavaElementLabelComposer {
+
+		FlexibleBuffer getFBuffer() -> get FlexibleBuffer fBuffer;
+		
+		void beautifyGuardLabel(IMethod method, long flags) <- replace void appendMethodLabel(IMethod method, long flags);
+
+		callin void beautifyGuardLabel(IMethod method, long flags) {
+			String name = method.getElementName();
+			String displayName = null;
+			String guardedElement = null;
+			if (name.startsWith(String.valueOf(IOTConstants.BASE_PREDICATE_PREFIX))) {
+				displayName = "base when"; //$NON-NLS-1$
+				guardedElement = getGuardString(name.substring(IOTConstants.BASE_PREDICATE_PREFIX.length), method); 
+			} else if (name.startsWith(String.valueOf(IOTConstants.PREDICATE_METHOD_NAME))) {
+				displayName = "when"; //$NON-NLS-1$
+				guardedElement = getGuardString(name.substring(IOTConstants.PREDICATE_METHOD_NAME.length), method); 
+			}
+			if (displayName != null) {
+				// displayName as keyword:
+				FlexibleBuffer buffer = this.getFBuffer();
+				final Color keywordColor = ViewAdaptor.this.getKeywordColor();
+				int offset = buffer.length();
+				buffer.append(displayName); 
+				buffer.setStyle(offset, displayName.length(), new StyledString.Styler() {
+					@Override public void applyStyles(TextStyle textStyle) {
+						textStyle.foreground = keywordColor;
+					}
+				});
+				// append explanation:
+				offset = buffer.length();
+				String qualifier = MessageFormat.format(Messages.ViewAdaptor_guard_predicate_postfix,
+					    			new Object[]{guardedElement});
+				buffer.append(qualifier);
+				buffer.setStyle(offset, qualifier.length(), StyledString.QUALIFIER_STYLER);
+			} else {
+				base.beautifyGuardLabel(method, flags);
+			}
+		}
+		private static String getGuardString(String suffix, IMethod method) {
+			if (suffix.length() == 0)
+				return method.getDeclaringType().getElementName();
+			StringTokenizer tokens = new StringTokenizer(suffix, "$"); //$NON-NLS-1$
+			String roleSelector = tokens.nextToken();
+			tokens.nextToken(); // modifier, unused
+			String baseSelector = tokens.nextToken();
+			return roleSelector+"<-"+baseSelector; //$NON-NLS-1$
+		}
 	}
 	
 	/**
