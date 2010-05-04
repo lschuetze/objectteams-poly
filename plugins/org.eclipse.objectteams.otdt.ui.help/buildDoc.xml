@@ -18,6 +18,7 @@
 	</target>
 
 	<target name="convertSchemaToHtml" if="eclipse.running">
+		<mkdir dir="reference"/>
 		<property name="dest" value="reference/extension-points" />
 		<record name="${basedir}/otdtconvert.txt" action="start"/>
 		<echo message="recording schema conversion ... in ${basedir}/otdtconvert.txt"/>
