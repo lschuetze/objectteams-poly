@@ -309,5 +309,11 @@ public class FieldAccess extends Expression {
 			+ (this.expression == null ? 0 : getExpression().treeSize())
 			+ (this.fieldName == null ? 0 : getName().treeSize());
 	}
+
+//{ObjectTeams: accessor for a method in a package private class:
+	public static boolean isCalloutAccessed(IVariableBinding binding) {
+		return ((VariableBinding)binding).isCalloutAccessed();
+	}
+// SH}
 }
 

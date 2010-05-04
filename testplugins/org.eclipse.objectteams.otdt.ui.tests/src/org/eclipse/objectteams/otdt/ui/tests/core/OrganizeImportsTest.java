@@ -10,7 +10,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OrganizeImportsTest.java 23495 2010-02-05 23:15:16Z stephan $
+ * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -809,6 +809,56 @@ public class OrganizeImportsTest extends TestCase
 		buf.append("    BaseTeam t;\n");
 		buf.append("    BaseRole r;\n");
 		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+    }
+
+    // Bug 311432 -  Inferred callouts to private static fields make OrganizeImports to import private fields
+    public void testDontImportStaticField() throws CoreException, BackingStoreException {
+        IPackageFragmentRoot sourceFolder = JavaProjectHelper.addSourceContainer(_project, "src");
+
+		IPackageFragment basePkg = sourceFolder.createPackageFragment(
+		        "basePkg",
+		        false,
+		        null);
+		StringBuffer buf = new StringBuffer();
+		buf.append("package basePkg;\n");
+		buf.append("public class Base {\n");
+		buf.append("    private static boolean field;\n");
+		buf.append("    void m() {}\n");
+		buf.append("}\n");
+		basePkg.createCompilationUnit("Base.java", buf.toString(), false, null);
+		
+		IPackageFragment teamPkg = sourceFolder.createPackageFragment(
+		        "teamPkg",
+		        false,
+		        null);
+		buf = new StringBuffer();
+		buf.append("package teamPkg;\n");
+		buf.append("import base basePkg.Base;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy Base {\n");
+		buf.append("    	m <-replace m;\n");
+		buf.append("        @SuppressWarnings({ \"inferredcallout\", \"decapsulation\" })\n");
+		buf.append("		callin void m(){\n");
+		buf.append("			boolean v = field;\n");
+		buf.append("		    System.out.println(v);\n");
+		buf.append("		}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu = teamPkg.createCompilationUnit("T1.java", buf
+		        .toString(), false, null);
+		
+		String[] order = new String[0];
+		IChooseImportQuery query = createQuery(
+		        "T1",
+		        new String[] {},
+		        new int[] {});
+		
+		OrganizeImportsOperation op = createOperation(cu, order,
+		        99, false, true, true, query);
+		op.run(null);
+		
+		// buf remains unchanged
 		assertEqualString(cu.getSource(), buf.toString());
     }
     

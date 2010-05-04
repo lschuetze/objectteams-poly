@@ -882,6 +882,11 @@ public final class ImportRewrite {
 			if (binding instanceof IVariableBinding) {
 				IVariableBinding variableBinding= (IVariableBinding) binding;
 				if (variableBinding.isField()) {
+//{ObjectTeams: don't import field that can only be accessed by callout (decapsulation):
+					if (   !Flags.isPublic(variableBinding.getModifiers())
+						&& FieldAccess.isCalloutAccessed(variableBinding))
+						return null;
+// SH}
 					ITypeBinding declaringType= variableBinding.getDeclaringClass();
 					return addStaticImport(getRawQualifiedName(declaringType), binding.getName(), true, context);
 				}

@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.core.LocalVariable;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 
 /**
  * Internal implementation of variable bindings.
@@ -416,6 +417,12 @@ class VariableBinding implements IVariableBinding {
 	public boolean isRecovered() {
 		return false;
 	}
+
+//{ObjectTeams: additional query:
+	public boolean isCalloutAccessed() {
+		return this.binding != null && this.isField() && FieldModel.isCalloutAccessed((FieldBinding) this.binding);
+	}
+// SH}
 
 	/*
 	 * For debugging purpose only.
