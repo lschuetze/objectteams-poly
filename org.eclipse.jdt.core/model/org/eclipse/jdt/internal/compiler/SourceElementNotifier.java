@@ -807,9 +807,9 @@ protected void notifySourceElementRequestor(
 }
 protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boolean notifyTypePresence, TypeDeclaration declaringType, ImportReference currentPackage) {
 
-	// TODO (SH): the following check produces random results for role files:
-    // Either all role files should be rejected (based on filename?)
-    // or source positions must be ignored completely for role files!
+//{ObjectTeams: don't convert generated types (role ifc part):
+	if (typeDeclaration.isGenerated) return;
+// SH}
 
 	if (CharOperation.equals(TypeConstants.PACKAGE_INFO_NAME, typeDeclaration.name)) return;
 
@@ -877,13 +877,16 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 			} else {
 				typeInfo.declarationStart = typeDeclaration.allocation.sourceStart;
 			}
-//{ObjectTeams: let Role/Team flags pass through:
-			typeInfo.modifiers = deprecated ? (currentModifiers & ExtraCompilerModifiers.AccOTTypeJustFlag) | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccOTTypeJustFlag;
+//{ObjectTeams: let Role/Team flags pass through, strip __OT__ prefix
 /* orig:
   			typeInfo.modifiers = deprecated ? (currentModifiers & ExtraCompilerModifiers.AccJustFlag) | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccJustFlag;
-  :giro */
-// SH}
 			typeInfo.name = typeDeclaration.name;
+  :giro */
+			typeInfo.modifiers = deprecated ? (currentModifiers & ExtraCompilerModifiers.AccOTTypeJustFlag) | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccOTTypeJustFlag;
+			typeInfo.name = typeDeclaration.name;
+			if (CharOperation.prefixEquals(IOTConstants.OT_DELIM_NAME, typeInfo.name))
+				typeInfo.name = CharOperation.subarray(typeInfo.name, IOTConstants.OT_DELIM_LEN, -1);
+// SH}
 			typeInfo.nameSourceStart = isEnumInit ? typeDeclaration.allocation.enumConstant.sourceStart : typeDeclaration.sourceStart;
 			typeInfo.nameSourceEnd = sourceEnd(typeDeclaration);
 			typeInfo.superclass = superclassName;
@@ -985,6 +988,9 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 				break;
 			case 1 :
 				methodIndex++;
+//{ObjectTeams: don't convert generated methods:
+				if (nextMethodDeclaration.isGenerated) break;
+// SH}
 				notifySourceElementRequestor(nextMethodDeclaration, typeDeclaration, currentPackage);
 				break;
 			case 2 :
