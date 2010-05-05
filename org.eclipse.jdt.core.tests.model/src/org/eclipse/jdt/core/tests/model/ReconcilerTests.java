@@ -4387,8 +4387,14 @@ public void testFallthroughDiagnosis() throws CoreException, InterruptedExceptio
 public void testIgnoreMethodBodies1() throws CoreException {	
 	setWorkingCopyContents(
 		"package p1;\n" +
+//{ObjectTeams: we don't check imports before analyze (see CUD.resolve())
+/* orig:		
 		"import p2.*;" +
 		"public class X {\n" +
+ */
+// trigger a different warning:
+		"public class X implements java.io.Serializable {\n" +
+// SH}
 		"  public int foo() {\n" + // force an error by not returning
 		"    int i = 0;\n" + 
 		"  }\n" +
@@ -4398,17 +4404,29 @@ public void testIgnoreMethodBodies1() throws CoreException {
 	assertProblems("Working copy should have problems:",
 			"----------\n" +
 			"1. WARNING in /Reconciler/src/p1/X.java (at line 2)\n"+
+//{ObjectTeams: expect different warning:
+/* orig:
 			"	import p2.*;public class X {\n" +
 			"	       ^^\n" +
 			"The import p2 is never used\n"+
+  :giro */
+			"	public class X implements java.io.Serializable {\n" + 
+			"	             ^\n" + 
+			"The serializable class X does not declare a static final serialVersionUID field of type long\n" +
+// SH}
 			"----------\n"
 		);
 	// statement declaring i should not be in the AST
 	assertASTNodeEquals(
 			"Unexpected participant ast",
 			"package p1;\n" +
+//{ObjectTeams: different AST (see above):
+/* orig: 
 			"import p2.*;\n" +
 			"public class X {\n" +
+  :giro */
+			"public class X implements java.io.Serializable {\n" +
+// SH}
 			"  public int foo(){\n" +
 			"  }\n" +
 			"}\n",
