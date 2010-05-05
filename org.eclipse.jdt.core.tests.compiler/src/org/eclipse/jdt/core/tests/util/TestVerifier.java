@@ -246,7 +246,7 @@ private String getVerifyTestsCode() {
 "		if (name.startsWith(\"org.eclipse.objectteams.otre\"))\n" +
 "			return true;\n" +
 "			\n" +
-"		if (name.startsWith(\"de.fub.bytecode\"))\n" +
+"		if (name.startsWith(\"org.apache.bcel\"))\n" +
 "			return true;\n" +
 "			\n" +
 // SH}
