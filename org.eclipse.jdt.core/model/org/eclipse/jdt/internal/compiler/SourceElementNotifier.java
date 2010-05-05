@@ -59,6 +59,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMap
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
@@ -989,7 +990,8 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 			case 1 :
 				methodIndex++;
 //{ObjectTeams: don't convert generated methods:
-				if (nextMethodDeclaration.isGenerated) break;
+				if (nextMethodDeclaration.isGenerated && !(nextMethodDeclaration instanceof GuardPredicateDeclaration)) 
+					break;
 // SH}
 				notifySourceElementRequestor(nextMethodDeclaration, typeDeclaration, currentPackage);
 				break;
