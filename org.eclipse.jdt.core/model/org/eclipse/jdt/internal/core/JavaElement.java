@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
+import org.eclipse.objectteams.otdt.internal.core.OTJavaElement;
 
 /**
  * Root of Java element handle hierarchy.
@@ -137,6 +138,9 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 				case JEM_PACKAGEFRAGMENT:
 				case JEM_FIELD:
 				case JEM_METHOD:
+//{ObjectTeams: one more char:
+				case OTJavaElement.OTEM_METHODMAPPING:
+// SH}
 				case JEM_INITIALIZER:
 				case JEM_COMPILATIONUNIT:
 				case JEM_CLASSFILE:
