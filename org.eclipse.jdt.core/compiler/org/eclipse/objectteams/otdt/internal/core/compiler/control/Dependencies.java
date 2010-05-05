@@ -322,7 +322,13 @@ public class Dependencies implements ITranslationStates {
 	            		unit.scope.checkAndSetImports();
 	            		break;
 	            	case STATE_LENV_CONNECT_TYPE_HIERARCHY:
-	            		unit.scope.connectTypeHierarchy();
+	            		CompilationUnitDeclaration previousUnit = lookupEnvironment.unitBeingCompleted;
+	            		lookupEnvironment.unitBeingCompleted = unit;
+	            		try {
+	            			unit.scope.connectTypeHierarchy();
+	            		} finally {
+	            			lookupEnvironment.unitBeingCompleted = previousUnit;
+	            		}
 	            		break;
 	            	case STATE_LENV_DONE_FIELDS_AND_METHODS:
 	            		unit.scope.checkParameterizedTypes();
