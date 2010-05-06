@@ -17,12 +17,14 @@
 package org.eclipse.objectteams.otdt.internal.pde.ui;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -33,6 +35,7 @@ import org.eclipse.objectteams.otdt.ui.ImageManager;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.pde.core.plugin.IPluginAttribute;
+import org.eclipse.pde.core.plugin.IPluginBase;
 import org.eclipse.pde.core.plugin.IPluginElement;
 import org.eclipse.pde.core.plugin.IPluginExtension;
 import org.eclipse.pde.internal.core.ischema.IMetaAttribute;
@@ -43,9 +46,11 @@ import org.eclipse.pde.internal.core.plugin.PluginAttribute;
 import org.eclipse.pde.internal.core.schema.SchemaRegistry;
 import org.eclipse.pde.internal.core.util.IdUtil;
 import org.eclipse.pde.internal.ui.PDEPlugin;
+import org.eclipse.pde.internal.ui.util.PDEJavaHelperUI;
 
 import base org.eclipse.pde.internal.ui.editor.plugin.ExtensionsSection;
 import base org.eclipse.pde.internal.ui.editor.plugin.JavaAttributeWizard;
+import base org.eclipse.pde.internal.ui.editor.plugin.rows.ClassAttributeRow;
 import base org.eclipse.pde.internal.ui.editor.text.XMLUtil;
 
 /**
@@ -136,6 +141,29 @@ public team class ExtensionEditorAdaptor
 		String stripShortcuts(String input) -> String stripShortcuts(String input);
 	}
 
+	protected class ClassAttributeRow playedBy ClassAttributeRow {
+		doOpenSelectionDialog <- replace doOpenSelectionDialog;
+		@SuppressWarnings({ "inferredcallout", "basecall" })
+		callin void doOpenSelectionDialog() {
+			IResource resource = getPluginBase().getModel().getUnderlyingResource();
+			ISchemaAttribute attr = getAttribute();
+			String superName = attr != null ? attr.getBasedOn() : null;
+			int index = superName != null ? superName.indexOf(':') : -1;
+			if (index > 0)
+				// if the schema specifies a class and interface, then show only types that extend the class (currently can't search on both).
+				superName = superName.substring(0, index);
+//{ObjectTeams: consider the case where we only have an interface:			
+			else if (index == 0)
+				superName = superName.substring(1);
+// SH}
+			String filter = text.getText();
+			if (filter.length() == 0 && superName != null)
+				filter = "**"; //$NON-NLS-1$
+			String type = PDEJavaHelperUI.selectType(resource, IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES, filter, superName);
+			if (type != null)
+				text.setText(type);			
+		}
+	}
 	/**
 	 * This role adapts the PDE/UI's version of a NewTypeWizard as to use our
 	 * NewTeamWizardPage when appropriate.
