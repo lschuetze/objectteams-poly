@@ -87,6 +87,13 @@ public abstract class AbstractIndexer implements IIndexConstants {
 			SUPER_REF, 
 			SuperTypeReferencePattern.createIndexKey(
 				modifiers, packageName, name, enclosingTypeNames, typeParameterSignatures, CLASS_SUFFIX, superclass, CLASS_SUFFIX));
+//{ObjectTeams: handle team inheriting from possibly non-team:
+		if (Flags.isTeam(modifiers) && superclass != null)
+			addIndexEntry(
+				SUPER_REF,
+				SuperTypeReferencePattern.createIndexKey(
+					modifiers, packageName, name, enclosingTypeNames, typeParameterSignatures, CLASS_SUFFIX, ITEAM, INTERFACE_SUFFIX));		
+// SH}
 		if (superinterfaces != null) {
 			for (int i = 0, max = superinterfaces.length; i < max; i++) {
 				char[] superinterface = erasure(superinterfaces[i]);

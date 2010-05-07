@@ -59,7 +59,6 @@ public static char[] createIndexKey(
 
 	if (superTypeName == null)
 //{ObjectTeams: needed for generating correct index
-      //TODO (carp): do we really need this? where? in the hierarchy?
   	  if (Flags.isTeam(modifiers))
 		superTypeName = TEAM;
 	  else

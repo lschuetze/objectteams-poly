@@ -35,8 +35,9 @@ public interface IIndexConstants {
 	char[] BASE_REF = "baseRef/".toCharArray(); //$NON-NLS-1$
 	char[] REF_TO_TEAMPACKAGE = "refToTeam".toCharArray(); //$NON-NLS-1$
 
-	// supertype of all teams
-	char[] TEAM = "org.objectteams.Team".toCharArray(); //$NON-NLS-1$
+	// supertypes of all teams
+	char[] TEAM  = "org.objectteams.Team".toCharArray(); //$NON-NLS-1$
+	char[] ITEAM = "org.objectteams.ITeam".toCharArray(); //$NON-NLS-1$
 //Andreas Kaiser}
 
 	char[][] COUNTS= 
