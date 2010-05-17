@@ -48,7 +48,7 @@ ARCH=`arch`
 DROP=${BASEDIR}/drops/S-3.6RC1-201005131500
 
 # EXPORT: archive file of the base eclipse SDK build:
-ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk${ARCH}.tar.gz
+ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
 
 # EXPORT: archive file of the eclipse test framework:
 ECLIPSE_TESTLIB_ZIP=${DROP}/eclipse-test-framework-${EVERSION}.zip
