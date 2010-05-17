@@ -1076,8 +1076,12 @@ MethodSpecListLong ::= MethodSpecListLong ',' BaseMethodSpecLong
 
 -- ==== PRECEDENCE DECLARATION ====
 PrecedenceDeclaration ::= 'precedence' BindingNames ';'
-/.$putCase consumePrecedenceDeclaration(); $break ./
+/.$putCase consumePrecedenceDeclaration(false); $break ./
 /:$readableName PrecedenceDeclaration:/
+
+PrecedenceDeclaration ::= 'precedence' 'after' BindingNames ';'
+/.$putCase consumePrecedenceDeclaration(true); $break ./
+/:$readableName PrecedenceAfterDeclaration:/
 
 BindingNames -> BindingName
 BindingNames ::= BindingNames ',' BindingName

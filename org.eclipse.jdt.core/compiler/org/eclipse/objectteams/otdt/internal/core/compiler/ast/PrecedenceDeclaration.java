@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.PrecedenceBinding;
@@ -57,11 +58,13 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
  */
 public class PrecedenceDeclaration extends ASTNode {
 
+	public boolean isAfter;
 	public NameReference[] bindingNames;
 	public int declarationSourceStart;
 	public PrecedenceBinding binding;
 
-	public PrecedenceDeclaration(int start, int end, NameReference[] bindingNames) {
+	public PrecedenceDeclaration(int start, int end, boolean isAfter, NameReference[] bindingNames) {
+		this.isAfter = isAfter;
 		this.bindingNames = bindingNames;
 		this.sourceStart = bindingNames[0].sourceStart;
 		this.sourceEnd   = end;
@@ -102,6 +105,11 @@ public class PrecedenceDeclaration extends ASTNode {
 				type.scope.problemReporter().callinBindingNotFound(name, token, enclosing);
 				char[] missingName = CharOperation.concat("missingCallin:".toCharArray(), token); //$NON-NLS-1$
 				name.binding = new CallinCalloutBinding(type.binding, missingName);
+			} else if (name.binding instanceof CallinCalloutBinding){
+				CallinCalloutBinding callinBinding = (CallinCalloutBinding) name.binding;
+				boolean bindingIsAfter = callinBinding.callinModifier == TerminalTokens.TokenNameafter;
+				if (bindingIsAfter != this.isAfter)
+					type.scope.problemReporter().mismatchingAfterInPrecedence(name, this.isAfter);
 			}
 		}
 		checkOverriding(this.bindingNames, type.scope);
@@ -339,6 +347,8 @@ public class PrecedenceDeclaration extends ASTNode {
 	public StringBuffer print(int indent, StringBuffer output) {
 		printIndent(indent, output);
 		output.append("precedence "); //$NON-NLS-1$
+		if (this.isAfter)
+			output.append("after "); //$NON-NLS-1$
 		for (int i = 0; i < this.bindingNames.length; i++) {
 			this.bindingNames[i].print(indent, output);
 			output.append(i == this.bindingNames.length-1 ? ';' : ',');

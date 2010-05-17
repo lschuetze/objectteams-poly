@@ -10777,7 +10777,25 @@ private AbstractMethodMappingDeclaration findMappingDeclaration(CallinCalloutBin
 	}
 	return null;
 }
-
+public void mismatchingAfterInPrecedence(NameReference name, boolean precedenceIsAfter) {
+	if (precedenceIsAfter) {
+		CallinCalloutBinding binding = (CallinCalloutBinding) name.binding;
+		String[] args = new String[] { CallinMappingDeclaration.callinModifier(binding.callinModifier) };
+		this.handle(
+				IProblem.NonAfterCallinInAfterPrecedence, 
+				args,
+				args,
+				name.sourceStart,
+				name.sourceEnd);
+	} else {
+		this.handle(
+				IProblem.AfterCallinInNonAfterPrecedence, 
+				NoArgument,
+				NoArgument,
+				name.sourceStart,
+				name.sourceEnd);
+	}
+}
 public void precedenceInRegularClass(TypeDeclaration type, PrecedenceDeclaration[] precedences) {
 	String[] args = new String[] {
 		new String(type.binding.readableName())
