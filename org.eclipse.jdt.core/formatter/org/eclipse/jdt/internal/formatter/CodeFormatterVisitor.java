@@ -9,6 +9,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Brock Janiczak - Contribution for bug 150741
+ *     Nanda Firdausi - Contribution for bug 298844
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -3563,8 +3564,10 @@ public class CodeFormatterVisitor extends ASTVisitor {
 				if (this.preferences.indent_statements_compare_to_body) {
 					this.scribe.unIndent();
 				}
-			} else if (this.preferences.insert_new_line_in_empty_method_body) {
-				this.scribe.printNewLine();
+			} else {
+				if (this.preferences.insert_new_line_in_empty_method_body) {
+					this.scribe.printNewLine();
+				}
 				if (this.preferences.indent_statements_compare_to_body) {
 					this.scribe.indent();
 				}
@@ -4497,8 +4500,10 @@ public class CodeFormatterVisitor extends ASTVisitor {
 				if (this.preferences.indent_statements_compare_to_body) {
 					this.scribe.unIndent();
 				}
-			} else if (this.preferences.insert_new_line_in_empty_method_body) {
-				this.scribe.printNewLine();
+			} else {
+				if (this.preferences.insert_new_line_in_empty_method_body) {
+					this.scribe.printNewLine();
+				}
 				if (this.preferences.indent_statements_compare_to_body) {
 					this.scribe.indent();
 				}
@@ -5142,7 +5147,7 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		ASTNode[] fragments = stringLiteral.literals;
 		int fragmentsSize = stringLiteral.counter;
 		Alignment binaryExpressionAlignment = this.scribe.createAlignment(
-				Alignment.BINARY_EXPRESSION,
+				Alignment.STRING_CONCATENATION,
 				this.preferences.alignment_for_binary_expression,
 				Alignment.R_OUTERMOST,
 				fragmentsSize,

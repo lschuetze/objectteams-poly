@@ -600,7 +600,11 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 	fixSupertypeBindings();
 
 	int objectIndex = -1;
+	IProgressMonitor progressMonitor = this.builder.hierarchy.progressMonitor;
 	for (int current = this.typeIndex; current >= 0; current--) {
+		if (progressMonitor != null && progressMonitor.isCanceled())
+			throw new OperationCanceledException();
+		
 		ReferenceBinding typeBinding = this.typeBindings[current];
 
 		// java.lang.Object treated at the end
@@ -884,13 +888,16 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 			CompilationUnitDeclaration parsedUnit = parsedUnits[i];
 			if (parsedUnit != null) {
 				try {
-					if (hasLocalType[i]) // NB: no-op if method bodies have been already parsed
+					if (hasLocalType[i]) { // NB: no-op if method bodies have been already parsed
+						if (monitor != null && monitor.isCanceled())
+							throw new OperationCanceledException();
 //{ObjectTeams
 						Dependencies.ensureState(parsedUnit, ITranslationStates.STATE_METHODS_PARSED);
 /* orig:
 						parser.getMethodBodies(parsedUnit);
   :giro */
 //carp}
+					}
 				} catch (AbortCompilation e) {
 					// classpath problem for this type: don't try to resolve (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=49809)
 					hasLocalType[i] = false;
@@ -913,6 +920,8 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 			if (parsedUnit != null) {
 				boolean containsLocalType = hasLocalType[i];
 				if (containsLocalType) {
+					if (monitor != null && monitor.isCanceled())
+						throw new OperationCanceledException();
 //{ObjectTeams
 // faultInTypes is ensured by Dependencies
 /* orig:

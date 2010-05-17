@@ -40,6 +40,106 @@
 	</td>
   </tr>
 </table>
+<a name="v_A53"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6RC1 - May 12, 2010 - 3.6.0 RC1
+<br>Project org.eclipse.jdt.core v_A53
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A53">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=312326">312326</a>
+IllegalArgumentException using open type dialog
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=310159">310159</a>
+Hang in JavaModel.getExternalTarget(JavaModel.java:333)
+
+<a name="v_A52"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6RC1 - May 11, 2010
+<br>Project org.eclipse.jdt.core v_A52
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A52">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=157847">157847</a>
+NPE in WildcardBinding.computeUniqueKey during code assist
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311849">311849</a>
+[quick fix] @SuppressWarnings does not work as expected inside a for loop
+
+<a name="v_A51"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6RC1 - May 8, 2010
+<br>Project org.eclipse.jdt.core v_A51
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A51">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=306170">306170</a>
+[perfs] Regression for FullSourceWorkspaceTypeHierarchyTests#testPerfAllTypes()
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=298844">298844</a>
+[formatter] New lines in empty method body wrong behavior
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311864">311864</a>
+[formatter] NPE with empty {@code }
+
+<a name="v_A50"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6RC1 - May 6, 2010
+<br>Project org.eclipse.jdt.core v_A50
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A50">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>
+Added a new preference to switch on/off the usage of the disabling/enabling tags of the formatter.
+<p>
+This new preference is controlled with the option:</p>
+<code>DefaultCodeFormatterConstants.FORMATTER_USE_ON_OFF_TAGS</code>
+<pre>
+/**
+ * FORMATTER / Option to use the disabling and enabling tags defined respectively by the {@link #FORMATTER_DISABLING_TAG} and the {@link #FORMATTER_ENABLING_TAG} options.
+ *     - option id:         "org.eclipse.jdt.core.formatter.use_on_off_tags"
+ *     - possible values:   TRUE / FALSE
+ *     - default:           FALSE
+ * 
+ * @since 3.6
+ */
+</pre>
+See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311582">311582</a> for more details.
+</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311617">311617</a>
+[formatter] provide default tags to enable/disable formatter
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311582">311582</a>
+[formatter] Master switch to enable/disable on/off tags
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=307040">307040</a>
+Search Job with HierarchyScope on Object does not cancel
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302295">302295</a>
+After associating source folder with rt.jar project refresh takes exceedingly long time.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311048">311048</a>
+AbortCompilation propagated from CompilationUnitProblemFinder.process()
+
+<a name="v_A49"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.6RC1 - May 4, 2010
+<br>Project org.eclipse.jdt.core v_A49
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_A49">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=310811">310811</a>
+[perfs] Big regression on FullSourceWorkspaceFormatterTests#testFormatDefaultBigFile()
+
 <a name="v_A48"></a>
 <hr><h1>
 Eclipse Platform Build Notes<br>
@@ -52,8 +152,6 @@ Eclipse SDK 3.6M7 - April 25, 2010 - 3.6.0 M7
 <h3>Problem Reports Fixed</h3>
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=310330">310330</a>
 Add multiple encoding support for the batch compiler
-<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302295">302295</a>
-After associating source folder with rt.jar project refresh takes exceedingly long time.
 
 <a name="v_A47"></a>
 <hr><h1>

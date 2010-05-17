@@ -4,7 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CompilationUnitProblemFinder.java 23404 2010-02-03 14:10:22Z stephan $
+ * $Id$
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -124,9 +124,10 @@ public class CompilationUnitProblemFinder extends Compiler {
 				newDependencySetup= true;
 				Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false);
 			}
-			// Note(SH): this will redirect:
+// orig:  Note(SH): this will redirect:
 			this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
 			this.lookupEnvironment.completeTypeBindings(unit);
+// :giro			
 		  } finally {
 			if (newDependencySetup)
 				Dependencies.release(this);
