@@ -265,5 +265,5 @@ protected class ImageBuilder playedBy IncrementalImageBuilder
 		System.out.println("Incremental compilation: "+msg+" for "+getWorkQueue());
 	}
 	
-	precedence resetQueue, logDone;
+	precedence after logDone, resetQueue;
 }
