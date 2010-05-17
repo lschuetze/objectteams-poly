@@ -43,7 +43,7 @@ X11=XVFB
 # Eclipse SKD build identifier:
 EVERSION=3.6RC1
 # Architecture (as used by OSGi):
-ARCH="-ppc64"
+ARCH=`arch`
 # used only locally:
 DROP=${BASEDIR}/drops/S-3.6RC1-201005131500
 
