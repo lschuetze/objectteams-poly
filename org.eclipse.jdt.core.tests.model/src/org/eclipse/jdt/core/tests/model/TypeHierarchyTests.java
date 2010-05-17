@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -666,7 +666,7 @@ public void testEfficiencyMultipleProjects() throws CoreException {
 		}
 		ProgressCounter counter = new ProgressCounter();
 		type.newTypeHierarchy(counter);
-		assertEquals("Unexpected work count", 76, counter.count);
+		assertEquals("Unexpected work count", 85, counter.count);
 	} finally {
 		deleteProjects(new String[] {"P1", "P2", "P3"});
 	}
