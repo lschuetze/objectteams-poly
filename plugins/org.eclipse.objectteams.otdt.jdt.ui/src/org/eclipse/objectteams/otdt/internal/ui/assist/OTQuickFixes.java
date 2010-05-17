@@ -144,7 +144,7 @@ public team class OTQuickFixes  {
 	protected class SuppressWarningsAdaptor playedBy SuppressWarningsSubProcessor
 	{
 		@SuppressWarnings("basecall")  
-		static callin void addSuppressWarningsProposal(ICompilationUnit cu, 
+		static callin int addSuppressWarningsProposal(ICompilationUnit cu, 
 													   ASTNode node, 
 													   String warningToken, 
 													   int relevance, 
@@ -175,8 +175,7 @@ public team class OTQuickFixes  {
 				break;
 			default: 
 				// other cases are already handled by the original method.
-				base.addSuppressWarningsProposal(cu, node, warningToken, relevance, proposals);
-				return;
+				return base.addSuppressWarningsProposal(cu, node, warningToken, relevance, proposals);
 			}
 			String label= Messages.format(
 								CorrectionMessages.SuppressWarningsSubProcessor_suppress_warnings_label, 
@@ -188,10 +187,11 @@ public team class OTQuickFixes  {
 					new SuppressWarningsProposal(warningToken, label, cu, node, property, relevance);
 
 			proposals.add(proposal);
+			return 0; // not affecting a local variable
 		}
 		
 		@SuppressWarnings({ "unchecked", "decapsulation" }) // base-side arg "proposals" is not generic 
-		addSuppressWarningsProposal <- replace addSuppressWarningsProposal; 
+		addSuppressWarningsProposal <- replace addSuppressWarningsProposalIfPossible; 
 	}
 	
 	/**
