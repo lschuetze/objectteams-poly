@@ -1833,6 +1833,8 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("ReplaceCallinIncompatibleStatic", SKIP);
         expectedProblemAttributes.put("UnknownPrecedence", SKIP);
         expectedProblemAttributes.put("PrecedenceInRegularClass", SKIP);
+        expectedProblemAttributes.put("AfterCallinInNonAfterPrecedence", SKIP);
+        expectedProblemAttributes.put("NonAfterCallinInAfterPrecedence", SKIP);
         expectedProblemAttributes.put("CallinBindingNotFound", SKIP);
         expectedProblemAttributes.put("IllegalEnclosingForCallinName", SKIP);
         expectedProblemAttributes.put("IncompatiblePrecedenceLists", SKIP);
