@@ -1134,7 +1134,7 @@ public class BaseMethodTransformation
 		while (teamIterator.hasNext()) {
 			Entry<String, LinkedList<MethodBinding>> entry = teamIterator.next();
 			String teamName = entry.getKey();
-			methodBindingsForTeam = entry.getValue();
+			methodBindingsForTeam = CallinBindingManager.sortMethodBindings(entry.getValue(), teamName);
 			//System.out.println(methodBindings.get(teamName));
 			
 			/*MethodBinding*/ mb = methodBindingsForTeam.get(0);
@@ -1271,25 +1271,31 @@ public class BaseMethodTransformation
 	 * Create a block for a before or after callin as a case with a surrounding switch.
 	 * @param mg TODO
 	 * @param il InstructionList being assembled.
-	 * @param connectorClassName name of a Team which has a callin to this method.
-	 * @param mbList MethodBindings describing the callins.
+	 * @param teamClassName name of a Team which has a callin to this method.
+	 * @param sortedMBList MethodBindings describing the callins (already processed by CallinBindingManager.sortMethodBindings)
 	 * @param ot_result index of local variable <tt>_OT$result</tt>.
 	 * @param ot_team  index of local variable <tt>_OT$team</tt>.l
 	 * @param major
 	 * @param firstLine							the first real source line of this method
 	 */
 	void createBeforeAfterCase(MethodGen mg,
-							   InstructionList il, String connectorClassName,
-							   List<MethodBinding> mbList, int ot_result, int ot_team,
+							   InstructionList il, String teamClassName,
+							   List<MethodBinding> sortedMBList, int ot_result, int ot_team,
 							   int major, int firstLine)
     {	
 
-		MethodBinding mb = mbList.get(0);
+		MethodBinding mb = sortedMBList.get(0);
 		ConstantPoolGen cpg = mg.getConstantPool();
+
+		// after bindings are processed back-to-front:
+		if (mb.isAfter()) {
+			List<MethodBinding> reverse = new ArrayList<MethodBinding>(sortedMBList.size());
+			for(int i=sortedMBList.size()-1; i>=0; i--)
+				reverse.add(sortedMBList.get(i));
+			sortedMBList = reverse;
+		}
 		
-		mbList = CallinBindingManager.sortMethodBindings(mbList, connectorClassName);
-		
-		Iterator<MethodBinding> it = mbList.iterator();
+		Iterator<MethodBinding> it = sortedMBList.iterator();
 		while (it.hasNext()) {
 			/*MethodBinding nextMethodBinding*/mb = it.next();
 		
@@ -1317,7 +1323,7 @@ public class BaseMethodTransformation
 				argArray = il.append(new ANEWARRAY(cpg.addClass(object)));
 				
 			} else {
-				il.append(factory.createCast(teamType, new ObjectType(connectorClassName)));
+				il.append(factory.createCast(teamType, new ObjectType(teamClassName)));
 				// generated: (<TeamClass>)_OT$team
 			}
 			
@@ -1375,7 +1381,7 @@ public class BaseMethodTransformation
 				callinCall = il.append(factory.createInvoke("java.lang.reflect.Method", "invoke", object, new Type[]{object, objectArray}, Constants.INVOKEVIRTUAL));
 				il.append(new POP()); // before/after wrappers return void
 			} else {
-				callinCall = il.append(factory.createInvoke(connectorClassName,
+				callinCall = il.append(factory.createInvoke(teamClassName,
 											   mb.getWrapperName(),
 											   Type.VOID, wrapperArgTypes,
 											   Constants.INVOKEVIRTUAL));
@@ -1441,23 +1447,20 @@ public class BaseMethodTransformation
 	 * same team to this base method, the bindings are sorted according to the precedence list of this team.
 	 * @param mg base method being generated.
 	 * @param il instruction list being assembled.
-	 * @param connectorClassName name of a Team which has a callin to this method.
-	 * @param mbList list of 'MethodBinding's
+	 * @param teamClassName name of a Team which has a callin to this method.
+	 * @param sortedMBList MethodBindings describing the callins (already processed by CallinBindingManager.sortMethodBindings)
 	 * @param ot_result index of a local variable <tt>_OT$result</tt>.
 	 * @param ot_team  index of local variable <tt>_OT$team</tt>.
 	 * @param major class file version
 	 */
 	void createReplaceCase(MethodGen mg, InstructionList il,
-						   String connectorClassName, List<MethodBinding> mbList,
+						   String teamClassName, List<MethodBinding> sortedMBList,
 						   int ot_result, int ot_team, int major, int firstLine)
     {
 		
 		int indexOffset = mg.isStatic() ? -1 : 0; // argument indizes are decremented for static methods, 
 												  // because of the missing 'this' 
-		boolean multipleBindings = mbList.size() > 1;
-		mbList = CallinBindingManager.sortMethodBindings(mbList, connectorClassName);
-		
-		MethodBinding mb = mbList.get(0); // default, if only one binding exists
+		boolean multipleBindings = sortedMBList.size() > 1;
 		
 		LocalVariableGen unused_args_lg = mg.addLocalVariable(UNUSED, objectArray, null, null);
 		int unused_args = unused_args_lg.getIndex();
@@ -1469,7 +1472,7 @@ public class BaseMethodTransformation
 			InstructionHandle switchStart = addition.append(InstructionFactory.createLoad(Type.INT, BIND_IDX_ARG+indexOffset)); 
 			// loaded _OT$bindIdx
 			
-			int numberOfCases = mbList.size();
+			int numberOfCases = sortedMBList.size();
 			
 			// one break for each case clause
 			GOTO[] breaks = new GOTO[numberOfCases];
@@ -1480,13 +1483,14 @@ public class BaseMethodTransformation
 			InstructionHandle[] targets = new InstructionHandle[numberOfCases];
 			
 			int      caseCounter     = 0;
-			Iterator<MethodBinding> mbIterator = mbList.iterator();
+			Iterator<MethodBinding> mbIterator = sortedMBList.iterator();
+			MethodBinding mb = null; // safe because loop will definitely be entered (mbList.size() > 1)
 			while (mbIterator.hasNext()) {
 				mb = mbIterator.next();
 				matches[caseCounter] = caseCounter;
 				InstructionHandle nextBranch = addition.append(new NOP());
 				// ========== create Cases: ===========
-				addition.append(createSingleReplaceCallin(mg, connectorClassName, mb, ot_result, ot_team, unused_args, multipleBindings, mg.isStatic(), major, firstLine));
+				addition.append(createSingleReplaceCallin(mg, teamClassName, mb, ot_result, ot_team, unused_args, multipleBindings, mg.isStatic(), major, firstLine));
 				// ==============================
 				targets[caseCounter] = nextBranch;
 				/*InstructionHandle break_instr =*/ addition.append(breaks[caseCounter]);
@@ -1524,7 +1528,8 @@ public class BaseMethodTransformation
 			skipHdlr.setTarget(nop);
 			il.append(addition);
 		} else { // only a single replace callin:
-			il.append(createSingleReplaceCallin(mg, connectorClassName, mb, ot_result, ot_team, unused_args, multipleBindings, mg.isStatic(), major, firstLine));
+			MethodBinding mb = sortedMBList.get(0); // default, if only one binding exists
+			il.append(createSingleReplaceCallin(mg, teamClassName, mb, ot_result, ot_team, unused_args, multipleBindings, mg.isStatic(), major, firstLine));
 		}
 		unused_args_lg.setEnd(il.getEnd());
 	}
