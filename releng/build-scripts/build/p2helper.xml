@@ -53,8 +53,6 @@
 	        classpath="${baseLocation}/plugins/${org.eclipse.equinox.launcher_jar}">
 	            <arg value="-consoleLog"/>
 	            <arg value="-nosplash"/>
-	    	    <arg value="-arch"/>
-	    	    <arg value="ppc64"/> <!-- FIXME -->
 	            <arg value="-application"/>
 	            <arg value="org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher" />
 	            <arg value="-source"/>
@@ -93,8 +91,6 @@
                 classpath="${targetEclipseDir}/plugins/${org.eclipse.equinox.launcher_jar}">
             <jvmarg value="-Declipse.p2.MD5Check=false" />
             <arg value="-consoleLog"/>
-            <arg value="-arch"/>
-            <arg value="ppc64"/> <!-- FIXME -->
             <arg value="-application"/>
             <arg value="org.eclipse.equinox.p2.director"/>
             <arg value="-metadataRepository" />

@@ -80,7 +80,7 @@ should test be run (true|false)?
 		<available file="${saxon.jar.path}" property="_hasSaxon.jar" />
 		
 		<!-- ant's os.arch is slightly different than osgi's arch -->
-		<condition property="arch" value="x86">
+		<condition property="arch" value="x86_64"> <!-- HACK: hard coding 64-bit architecture -->
 			<os arch="i386" />
 		</condition>
 		<condition property="arch" value="ppc64"> <!-- HACK: hard coding 64-bit architecture -->
