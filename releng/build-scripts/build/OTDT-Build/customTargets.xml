@@ -66,11 +66,17 @@
 	<target name="assemble.org.eclipse.objectteams.otequinox.linux.gtk.ppc64">
 		<echo message="Not assembling org.eclipse.objectteams.otequinox.linux.gtk.ppc64, will create update.jars instead (later during the build)" />
 	</target>
+	<target name="assemble.org.eclipse.objectteams.otequinox.linux.gtk.x86_64">
+		<echo message="Not assembling org.eclipse.objectteams.otequinox.linux.gtk.x86_64, will create update.jars instead (later during the build)" />
+	</target>
 	<target name="assemble.org.eclipse.objectteams.otdt">
 		<echo message="Not assembling org.eclipse.objectteams.otdt, will create update.jars instead (later during the build)" />
 	</target>
 	<target name="assemble.org.eclipse.objectteams.otdt.linux.gtk.ppc64">
 		<echo message="Not assembling org.eclipse.objectteams.otdt.linux.gtk.ppc64, will create update.jars instead (later during the build)" />
+	</target>
+	<target name="assemble.org.eclipse.objectteams.otdt.linux.gtk.x86_64">
+		<echo message="Not assembling org.eclipse.objectteams.otdt.linux.gtk.x86_64, will create update.jars instead (later during the build)" />
 	</target>
 
 	<target name="assemble.org.eclipse.objectteams.otdt-tests">
@@ -79,9 +85,10 @@
 		</ant>
 	</target>
 	<target name="assemble.org.eclipse.objectteams.otdt-tests.linux.gtk.ppc64">
-		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
-			<property name="zipargs" value="" />
-		</ant>
+		<antcall target="assemble.org.eclipse.objectteams.otdt-tests"/>
+	</target>
+	<target name="assemble.org.eclipse.objectteams.otdt-tests.linux.gtk.x86_64">
+		<antcall target="assemble.org.eclipse.objectteams.otdt-tests"/>
 	</target>
 
 	<!-- ===================================================================== -->
