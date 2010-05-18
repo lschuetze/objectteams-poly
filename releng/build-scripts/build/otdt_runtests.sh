@@ -23,7 +23,7 @@
 # BCEL_JAR              jar file of the bcel jar from orbit
 # OTRE_LIB              directory holding various otre jar files
 # ANT_PROFILE           configure the ant process
-# X11                   XVFB or X11
+# X11                   XVFB, XVNC or X11
 # NICE                  niceness value for nice -n ${NICE}
 # =============================================================================
 # OUTPUT: Variables passed to the toplevel ant script
@@ -60,7 +60,15 @@ notifyTestRunFailure()
 	grep -q "svn.*connection timed out" "$OT_SUITE_LOG" && { subject="OT Testsuite: SVN timeout"; message="Nothing to fix, next run hopefully works"; }
 	tail -1000 "$OT_SUITE_LOG" | gzip -f - > "${OT_SUITE_LOG}-tail.gz"
 	echo -e "$message" | mutt -s "$subject" $cmdLogfiles $OT_RECIPIENT
+	cleanup
 	exit 1;
+}
+
+cleanup()
+{
+	if test $X11 = "XVNC"; then
+		vncserver -kill $VNC_DISPLAY
+	fi
 }
 
 _prefix=`dirname $0`
@@ -81,6 +89,9 @@ DO_BUILD="true"
 
 #LOCAL: should the tests be run?
 DO_RUN="true"
+
+#LOCAL: Display to be used by VNC:
+VNC_DISPLAY=:23
 
 while test $# -gt 0; do
 	case "$1" in 
@@ -151,8 +162,14 @@ if test "$X11" = "XVFB" && test `which xvfb-run` > /dev/null; then
         export PATH="$PATH:/usr/bin/X11"
         # try to start with DISPLAY=10 instead of default 99 -- seems to not work everywhere
         exec xvfb-run -n 10 -e xvfb.log --auto-servernum $CMD < /dev/null > ${OT_SUITE_LOG} 2>&1 || { notifyTestRunFailure; }
+elif test "$X11" = "XVNC"; then
+		echo "starting vncserver $VNC_DISPLAY"
+		vncserver $VNC_DISPLAY
+		DISPLAY=$VNC_DISPLAY
+		export DISPLAY
+		exec $CMD < /dev/null > ${OT_SUITE_LOG} 2>&1  && { cleanup; } || { notifyTestRunFailure; }
 else
-        echo "##### You don't have xvfb-run, the GUI tests will appear on your display... ####"
+        echo "##### You don't have xvfb nor vnc, the GUI tests will appear on your display... ####"
         echo "Running $CMD"
         eval "$CMD" < /dev/null
 fi

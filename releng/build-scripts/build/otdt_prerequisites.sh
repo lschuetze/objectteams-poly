@@ -36,8 +36,14 @@ ANT_PROFILE="-verbose"
 # EXPORT: Nice-level for the Ant process:
 NICE="10"
 
-# EXPORT: virtual or real X server (XVFB or X11):
-X11=XVFB
+# EXPORT: virtual or real X server (XVFB, XVNC or X11):
+if test `which Xvfb` > /dev/null; then
+	X11=XVFB
+if test `which Xvnc` > /dev/null; then
+	X11=XVNC
+else
+	X11=X11
+fi
 
 # VERSIONS:
 # Eclipse SKD build identifier:
