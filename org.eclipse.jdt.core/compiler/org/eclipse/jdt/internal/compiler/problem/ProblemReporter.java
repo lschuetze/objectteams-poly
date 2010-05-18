@@ -11228,6 +11228,7 @@ public void missingCopiedRole(TypeBinding tsuperRole, ReferenceBinding enclosing
 			IProblem.MissingCopiedRole,
 			args,
 			args,
+			ProblemSeverities.Error | ProblemSeverities.AbortType | ProblemSeverities.Fatal,
 			0,
 			0);
 }

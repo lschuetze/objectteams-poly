@@ -685,16 +685,16 @@ public class TeamModel extends TypeModel {
 			if (Protections.hasClassKindProblem(enclosingTeam))
 				return roleType; // can't do better..
 			if (!enclosingTeam.isBinaryBinding()) {
-				Scope scope= ((SourceTypeBinding)enclosingTeam).scope;
+				Scope scope= ((SourceTypeBinding)enclosingTeam.getRealType()).scope;
 				scope.problemReporter().missingCopiedRole(roleType, enclosingTeam);
 			} else if (!site.isBinaryBinding()) {
-				Scope scope= ((SourceTypeBinding)site).scope;
+				Scope scope= ((SourceTypeBinding)site.getRealType()).scope;
 				scope.problemReporter().missingCopiedRole(roleType, enclosingTeam);
 			} else {
 				throw new InternalCompilerError("could not find role "+String.valueOf(roleType.constantPoolName()) //$NON-NLS-1$
 												+" in "+String.valueOf(site.constantPoolName()) +" and could not report regularly"); //$NON-NLS-1$ //$NON-NLS-2$
 			}
-			return roleType; // can't do better..
+			return roleType; // can't do better, but shouldn't reach here, because missingCopiedRole triggers AbortType.
 		}
 		VariableBinding anchor = enclosingTeam.getTeamModel().getTThis();
 		if (roleType.isParameterizedType()) {

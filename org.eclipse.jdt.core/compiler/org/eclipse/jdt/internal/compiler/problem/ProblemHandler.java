@@ -214,6 +214,9 @@ private void protectedHandle(
 		case IProblem.AbstractPotentiallyRelevantRole:
 		case IProblem.AbstractRelevantRole:
 			break;
+		// also report build problems:
+		case IProblem.MissingCopiedRole:
+			break;
 		default:
 			return;
 		}
