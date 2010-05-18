@@ -868,5 +868,61 @@ public class IncrementalTests extends OTBuilderTests {
 		fullBuild(projectPath);
 		expectingNoProblems();
 	}
+	// This scenario was observed to throw a CCE, see https://bugs.eclipse.org/311885
+	public void testPhantomRole() 	
+			throws JavaModelException
+	{
+		System.out.println("***** testPhantomRole() *****");
+		IPath projectPath = env.addProject("Project", "1.5");
+		env.addExternalJars(projectPath, Util.getJavaClassLibs());
+		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+
+		// remove old package fragment root so that names don't collide 
+		env.removePackageFragmentRoot(projectPath, "");
+
+		IPath root = env.addPackageFragmentRoot(projectPath, "src");
+		env.setOutputFolder(projectPath, "bin");
+
+		env.addClass(root, "p", "TeamBug311885_1",
+				"package p;\n" +
+				"public team class TeamBug311885_1 {\n" +
+    			"	public team class T11 {\n" +
+    			"		protected class R1 {\n" +
+    			"			void m() {}\n" +
+    			"		}\n" +
+    			"		protected class R3 extends R1 {\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	public team class T12 extends T11 {\n" +
+    			"	}\n" +
+    			"}\n");
+		env.addClass(root, "p", "TeamBug311885_2",
+				"package p;	\n"+
+				"public team class TeamBug311885_2 extends TeamBug311885_1 {\n" +
+    			"	public team class T12 {\n" +
+    			"		protected class R3 {\n" +
+    			"           void m() {}\n" + 
+    			" 		}\n" +
+    			" 	}\n" +
+    			"}\n");
+		
+		fullBuild(projectPath);
+		expectingNoProblems();
+
+		// change whitespace only:
+		env.addClass(root, "p", "TeamBug311885_2",
+				"package p;	\n"+
+				"public team class TeamBug311885_2 extends TeamBug311885_1 {\n" +
+    			"	public team class T12 {\n" +
+    			"		protected class R3 {\n" +
+    			"           void m() {	}\n" + 
+    			" 		}\n" +
+    			" 	}\n" +
+    			"}\n");
+
+		// must not throw CCE
+		incrementalBuild(projectPath);
+		expectingNoProblems();
+	}
 
 }
