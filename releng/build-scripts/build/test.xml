@@ -16,6 +16,9 @@
 
 	<!--properties file containing the build information-->
 	<property file="src/label.properties" />
+	
+	<!-- reconstruct the file name of the test feature zip: -->
+	<property name="config" value="${osgi.os}.${osgi.ws}.${osgi.arch}"/>
 
 	<target name="readFlags">
 		<condition property="really.build.all">
