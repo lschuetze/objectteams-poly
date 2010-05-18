@@ -3,8 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
    <head>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <meta name="copyright"
-            content="Copyright Technical University Berlin and others 2004, 2010. This page is made available under the Eclipse Public License v1.0. For full details see http://www.eclipse.org/legal/epl-v10.html" />
       <link rel="stylesheet" type="text/css" href="../css/ot.css" />
       <link rel="stylesheet" type="text/css" href="../css/otjld.css" />
       <title>OT/J Language Definition v1.3</title>
@@ -20,11 +18,15 @@
          </table>
          <div class="breadcrumb"><a class="nav" href="s2.html" rel="section">&sect;2&nbsp;Role Binding</a></div>
          <div class="sect depth2" id="s2.1">
-            <h2 class="sect">&sect;2.1&nbsp;playedBy relation</h2>
+            <h2 class="sect">&sect;2.1&nbsp;playedBy relation<a class="img" href="s2.1.html"
+                  title="PermaLink to &sect;2.1&nbsp;playedBy relation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                       alt="" /></a></h2>
             <div class="syntaxlink"><a href="sA.html#sA.1.1" title="&sect;A.1.1&nbsp;ClassDeclaration"
                   class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.1.1</a></div>
             <div class="subsect depth3" id="s2.1.a">
-               <h4 class="subsect">(a)&nbsp;<span class="title">Role-base binding</span></h4>
+               <h4 class="subsect">(a)&nbsp;<span class="title">Role-base binding</span><a class="img" href="s2.1.a.html"
+                     title="PermaLink to (a)&nbsp;Role-base binding"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>Roles are bound to a base class by the <code>playedBy</code> keyword.
                   			
                </p>
@@ -54,7 +56,8 @@
                </div>
             </div>
             <div class="subsect depth3" id="s2.1.b">
-               <h4 class="subsect">(b)&nbsp;<span class="title">Inheritance</span></h4>
+               <h4 class="subsect">(b)&nbsp;<span class="title">Inheritance</span><a class="img" href="s2.1.b.html" title="PermaLink to (b)&nbsp;Inheritance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>The <code>playedBy</code> relation is inherited along
                   		explicit and implicit (<a href="s1.3.1.c.html"
                      title="&sect;1.3.1.(c)&nbsp;Overriding and implicit inheritance"
@@ -64,7 +67,9 @@
                </p>
             </div>
             <div class="subsect depth3" id="s2.1.c">
-               <h4 class="subsect">(c)&nbsp;<span class="title">Covariant refinement</span></h4>
+               <h4 class="subsect">(c)&nbsp;<span class="title">Covariant refinement</span><a class="img" href="s2.1.c.html"
+                     title="PermaLink to (c)&nbsp;Covariant refinement"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>An <em>explicit</em> sub-role (sub-class using <code>extends</code>) 
                   		can refine the <code>playedBy</code> relation to a more 
                   		specific base class (this is the basis for 
@@ -77,7 +82,8 @@
                </p>
             </div>
             <div class="subsect depth3" id="s2.1.d">
-               <h4 class="subsect">(d)&nbsp;<span class="title">No-variance</span></h4>
+               <h4 class="subsect">(d)&nbsp;<span class="title">No-variance</span><a class="img" href="s2.1.d.html" title="PermaLink to (d)&nbsp;No-variance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>An <em>implicit</em> sub-role (according to <a href="s1.3.1.c.html"
                      title="&sect;1.3.1.(c)&nbsp;Overriding and implicit inheritance"
                      class="sect">&sect;1.3.1.(c)</a>)
@@ -90,7 +96,9 @@
                </p>
             </div>
             <div class="subsect depth3" id="s2.1.e">
-               <h4 class="subsect">(e)&nbsp;<span class="title">Use of playedBy bindings</span></h4>
+               <h4 class="subsect">(e)&nbsp;<span class="title">Use of playedBy bindings</span><a class="img" href="s2.1.e.html"
+                     title="PermaLink to (e)&nbsp;Use of playedBy bindings"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>The <code>playedBy</code> relation by itself has no effect
                   	    on the behavior of role and base objects.
                   	    It is, however, the precondition for translation polymorphism
@@ -100,7 +108,9 @@
                </p>
             </div>
             <div class="subsect depth3" id="s2.1.f">
-               <h4 class="subsect">(f)&nbsp;<span class="title">Effect on garbage collection</span></h4>
+               <h4 class="subsect">(f)&nbsp;<span class="title">Effect on garbage collection</span><a class="img" href="s2.1.f.html"
+                     title="PermaLink to (f)&nbsp;Effect on garbage collection"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>A role and its base object form one conceptual entity. The garbage collector will see a role
                   and its base object as linked in a bidirectional manner. As a result, a role cannot be
                   garbage collected if its base is still reachable and vice versa.
@@ -119,7 +129,9 @@
                </p>
             </div>
             <div class="sect depth3" id="s2.1.1">
-               <h3 class="sect">&sect;2.1.1&nbsp;Binding interfaces<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2.1</a></span></h3>
+               <h3 class="sect">&sect;2.1.1&nbsp;Binding interfaces<a class="img" href="s2.1.1.html"
+                     title="PermaLink to &sect;2.1.1&nbsp;Binding interfaces"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2.1</a></span></h3>
                <p>Role base bindings may involve classes and/or interfaces.
                   	An interface defined as a member of a team is a role interface and may therefore
                   	have a <code>playedBy</code> clause. Also the type mentioned after the
@@ -134,7 +146,9 @@
                </div>
             </div>
             <div class="sect depth3" id="s2.1.2">
-               <h3 class="sect">&sect;2.1.2&nbsp;Legal base classes<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2.1</a></span></h3>
+               <h3 class="sect">&sect;2.1.2&nbsp;Legal base classes<a class="img" href="s2.1.2.html"
+                     title="PermaLink to &sect;2.1.2&nbsp;Legal base classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2.1</a></span></h3>
                <p>Generally, the base class mentioned after <code>playedBy</code> must be
                   		visible in the enclosing scope (see <a href="#s2.1.2.c" title="&sect;2.1.2.(c)&nbsp;Base class decapsulation"
                      class="sect">below (&sect;2.1.2.(c))</a> for an exception).
@@ -146,7 +160,9 @@
                   			
                </p>
                <div class="subsect depth4" id="s2.1.2.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">No role of the same team</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">No role of the same team</span><a class="img" href="s2.1.2.a.html"
+                        title="PermaLink to (a)&nbsp;No role of the same team"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The base class of any role class must not be a role of the same team.
                      			<br />
                      			It is also not allowed to declare a role class of the same name
@@ -161,7 +177,8 @@
                   </p>
                </div>
                <div class="subsect depth4" id="s2.1.2.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">No cycles</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">No cycles</span><a class="img" href="s2.1.2.b.html" title="PermaLink to (b)&nbsp;No cycles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The base class mentioned after <code>playedBy</code> may not be
                      an enclosing type (at any depth) of the role class being defined.
                      <br />
@@ -177,7 +194,9 @@
                   </p>
                </div>
                <div class="subsect depth4" id="s2.1.2.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Base class decapsulation</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Base class decapsulation</span><a class="img" href="s2.1.2.c.html"
+                        title="PermaLink to (c)&nbsp;Base class decapsulation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If a base class referenced after <code>playedBy</code> exists but is not visible under normal visibility rules of Java, 
                      				this restriction may be overridden. This concept is called <strong>decapsulation</strong>, i.e., the opposite of encapsulation 
                      				(see also <a href="s3.4.html" title="&sect;3.4&nbsp;Overriding access restrictions"
@@ -211,7 +230,8 @@
                   </ul>
                </div>
                <div class="subsect depth4" id="s2.1.2.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Base imports</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Base imports</span><a class="img" href="s2.1.2.d.html" title="PermaLink to (d)&nbsp;Base imports"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If the main type in a file denotes a team, the modifier <code>base</code> can be applied to an import in order to specify that this type 
                      					should be imported for application as a base type only. Example:
                      				
@@ -256,7 +276,9 @@
                   </p>
                </div>
                <div class="subsect depth4" id="s2.1.2.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">No free type parameters</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">No free type parameters</span><a class="img" href="s2.1.2.e.html"
+                        title="PermaLink to (e)&nbsp;No free type parameters"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>
                      				Neither the role class nor the base class in a playedBy binding must have any <em>free type parameters</em>.
                      				If both classes are specified with a type parameter of the same name, both parameters are identified
@@ -412,9 +434,10 @@
          <div class="breadcrumb"><a class="nav" href="s2.html" rel="section">&sect;2&nbsp;Role Binding</a></div>
       </div>
       <div id="footer">
-         <hr />
-         <address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
-         			OT/J version 1.3 &mdash; last modified: 2010-02-20
+         <hr /><a class="w3c img" href="http://jigsaw.w3.org/css-validator/check/referer"
+            shape="rect"><img src="../images/valid-css2-blue.png" alt="Valid CSS!" height="31" width="88" /></a><a class="w3c img" href="http://validator.w3.org/check?uri=referer" shape="rect"><img src="../images/valid-xhtml10-blue.png" alt="Valid XHTML 1.0 Strict" height="31"
+                 width="88" /></a><address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
+         			OT/J version 1.3 &mdash; last modified: 2010-05-18
       </div>
    </body>
 </html>

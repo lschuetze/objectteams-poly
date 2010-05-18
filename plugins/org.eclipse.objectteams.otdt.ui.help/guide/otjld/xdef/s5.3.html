@@ -3,8 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
    <head>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <meta name="copyright"
-            content="Copyright Technical University Berlin and others 2004, 2010. This page is made available under the Eclipse Public License v1.0. For full details see http://www.eclipse.org/legal/epl-v10.html" />
       <link rel="stylesheet" type="text/css" href="../css/ot.css" />
       <link rel="stylesheet" type="text/css" href="../css/otjld.css" />
       <title>OT/J Language Definition v1.3</title>
@@ -20,7 +18,9 @@
          </table>
          <div class="breadcrumb"><a class="nav" href="s5.html" rel="section">&sect;5&nbsp;Team Activation</a></div>
          <div class="sect depth2" id="s5.3">
-            <h2 class="sect">&sect;5.3&nbsp;Implicit team activation</h2>
+            <h2 class="sect">&sect;5.3&nbsp;Implicit team activation<a class="img" href="s5.3.html"
+                  title="PermaLink to &sect;5.3&nbsp;Implicit team activation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                       alt="" /></a></h2>
             <p>Implicit team activation is intended to ensure that
                	whenever the control flow is passed to a team or one of its roles,
                	the team is implicitly activated for the current thread.
@@ -35,7 +35,9 @@
                		
             </p>
             <div class="subsect depth3" id="s5.3.a">
-               <h4 class="subsect">(a)&nbsp;<span class="title">Team level methods</span></h4>
+               <h4 class="subsect">(a)&nbsp;<span class="title">Team level methods</span><a class="img" href="s5.3.a.html"
+                     title="PermaLink to (a)&nbsp;Team level methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>While executing a <strong>team level method</strong>, the target team
                   	    is always active. Activation is reset to the previous state
                   	    when leaving the team method, unless the team has been explicitly activated during
@@ -47,7 +49,9 @@
                </p>
             </div>
             <div class="subsect depth3" id="s5.3.b">
-               <h4 class="subsect">(b)&nbsp;<span class="title">Methods of externalized roles</span></h4>
+               <h4 class="subsect">(b)&nbsp;<span class="title">Methods of externalized roles</span><a class="img" href="s5.3.b.html"
+                     title="PermaLink to (b)&nbsp;Methods of externalized roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>Invoking a method on an <strong>externalized role</strong>
                   	    (see <a href="s1.2.2.html" title="&sect;1.2.2&nbsp;Externalized roles" class="sect">&sect;1.2.2</a>) also has the
                   	    effect of temporary activation of the team containing the role for the current thread.
@@ -56,7 +60,8 @@
                </p>
             </div>
             <div class="subsect depth3" id="s5.3.c">
-               <h4 class="subsect">(c)&nbsp;<span class="title">Nested teams</span></h4>
+               <h4 class="subsect">(c)&nbsp;<span class="title">Nested teams</span><a class="img" href="s5.3.c.html" title="PermaLink to (c)&nbsp;Nested teams"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>Implicit activation has additional consequences for nested teams 
                   		(see <a href="s1.5.html" title="&sect;1.5&nbsp;Team and role nesting" class="sect">&sect;1.5</a>):
                   
@@ -67,7 +72,9 @@
                </ul>
             </div>
             <div class="subsect depth3" id="s5.3.d">
-               <h4 class="subsect">(d)&nbsp;<span class="title">Configuring implicit activation</span></h4>
+               <h4 class="subsect">(d)&nbsp;<span class="title">Configuring implicit activation</span><a class="img" href="s5.3.d.html"
+                     title="PermaLink to (d)&nbsp;Configuring implicit activation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>Implicit activation is disabled by default and can be enabled by adding the annotation
                   				<code>@org.objectteams.ImplicitTeamActivation</code>, which can be applied to a type or a method.
                   				When applied to a method it is ensured that invoking this method will trigger implicit activation.
@@ -105,9 +112,10 @@
          <div class="breadcrumb"><a class="nav" href="s5.html" rel="section">&sect;5&nbsp;Team Activation</a></div>
       </div>
       <div id="footer">
-         <hr />
-         <address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
-         			OT/J version 1.3 &mdash; last modified: 2010-02-20
+         <hr /><a class="w3c img" href="http://jigsaw.w3.org/css-validator/check/referer"
+            shape="rect"><img src="../images/valid-css2-blue.png" alt="Valid CSS!" height="31" width="88" /></a><a class="w3c img" href="http://validator.w3.org/check?uri=referer" shape="rect"><img src="../images/valid-xhtml10-blue.png" alt="Valid XHTML 1.0 Strict" height="31"
+                 width="88" /></a><address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
+         			OT/J version 1.3 &mdash; last modified: 2010-05-18
       </div>
    </body>
 </html>

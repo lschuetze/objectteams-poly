@@ -3,8 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
    <head>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <meta name="copyright"
-            content="Copyright Technical University Berlin and others 2004, 2010. This page is made available under the Eclipse Public License v1.0. For full details see http://www.eclipse.org/legal/epl-v10.html" />
       <link rel="stylesheet" type="text/css" href="../css/ot.css" />
       <link rel="stylesheet" type="text/css" href="../css/otjld.css" />
       <title>OT/J Language Definition v1.3</title>
@@ -20,7 +18,9 @@
          </table>
          <div class="breadcrumb"><a class="nav" href="s9.html" rel="section">&sect;9&nbsp;Value Dependent Classes</a></div>
          <div class="sect depth2" id="s9.2">
-            <h2 class="sect">&sect;9.2&nbsp;Using classes with value parameters</h2>
+            <h2 class="sect">&sect;9.2&nbsp;Using classes with value parameters<a class="img" href="s9.2.html"
+                  title="PermaLink to &sect;9.2&nbsp;Using classes with value parameters"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                       alt="" /></a></h2>
             <div class="syntaxlink"><a href="sA.html#sA.9.2" title="&sect;A.9.2&nbsp;ActualTypeArgument"
                   class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.9.2</a></div>
             <p>When using a class which declares one or more value parameters (type anchors) 
@@ -28,7 +28,9 @@
                		
             </p>
             <div class="sect depth3" id="s9.2.1">
-               <h3 class="sect">&sect;9.2.1&nbsp;Parameter substitution<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;9.2</a></span></h3>
+               <h3 class="sect">&sect;9.2.1&nbsp;Parameter substitution<a class="img" href="s9.2.1.html"
+                     title="PermaLink to &sect;9.2.1&nbsp;Parameter substitution"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;9.2</a></span></h3>
                <p>Substitution of a type anchor of a class <code>MyClass&lt;YourType p&gt;</code> is denoted as 
                   		<code>MyClass&lt;@v&gt;</code>.
                   	In this term <code>v</code> must be a value which is conform to the declaration of the value 
@@ -50,7 +52,9 @@
                   			
                </div>
                <div class="subsect depth4" id="s9.2.1.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Instance constrained type parameters</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Instance constrained type parameters</span><a class="img" href="s9.2.1.a.html"
+                        title="PermaLink to (a)&nbsp;Instance constrained type parameters"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>In addition to normal usage, a value parameter can be applied nested to a regular type parameter:
                      				
                   </p>
@@ -74,14 +78,18 @@ MyClass <em>&lt;anchor, YourDependent&lt;<strong>anchor</strong>&gt;&gt;</em></p
                </div>
             </div>
             <div class="sect depth3" id="s9.2.2">
-               <h3 class="sect">&sect;9.2.2&nbsp;Type conformance<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;9.2</a></span></h3>
+               <h3 class="sect">&sect;9.2.2&nbsp;Type conformance<a class="img" href="s9.2.2.html"
+                     title="PermaLink to &sect;9.2.2&nbsp;Type conformance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;9.2</a></span></h3>
                <p>Two value dependent types (anchored types) are considered conform only if the anchors 
                   		of both types refer to <i>the same object(s)</i>.  The compiler must be able to statically 
                   		analyze this anchor identity.
                   			
                </p>
                <div class="subsect depth4" id="s9.2.2.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Substitutions for type anchors</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Substitutions for type anchors</span><a class="img" href="s9.2.2.a.html"
+                        title="PermaLink to (a)&nbsp;Substitutions for type anchors"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Only two substitutions are considered for determining anchor identity:
                      				
                   </p>
@@ -107,7 +115,9 @@ MyClass <em>&lt;anchor, YourDependent&lt;<strong>anchor</strong>&gt;&gt;</em></p
                   </ol>
                </div>
                <div class="subsect depth4" id="s9.2.2.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Conformance of raw types</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Conformance of raw types</span><a class="img" href="s9.2.2.b.html"
+                        title="PermaLink to (b)&nbsp;Conformance of raw types"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>After anchors have been proven identical, the raw types are checked for compatibility 
                      			using the standard Java rules.
                      				
@@ -125,9 +135,10 @@ MyClass <em>&lt;anchor, YourDependent&lt;<strong>anchor</strong>&gt;&gt;</em></p
          <div class="breadcrumb"><a class="nav" href="s9.html" rel="section">&sect;9&nbsp;Value Dependent Classes</a></div>
       </div>
       <div id="footer">
-         <hr />
-         <address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
-         			OT/J version 1.3 &mdash; last modified: 2010-02-20
+         <hr /><a class="w3c img" href="http://jigsaw.w3.org/css-validator/check/referer"
+            shape="rect"><img src="../images/valid-css2-blue.png" alt="Valid CSS!" height="31" width="88" /></a><a class="w3c img" href="http://validator.w3.org/check?uri=referer" shape="rect"><img src="../images/valid-xhtml10-blue.png" alt="Valid XHTML 1.0 Strict" height="31"
+                 width="88" /></a><address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
+         			OT/J version 1.3 &mdash; last modified: 2010-05-18
       </div>
    </body>
 </html>

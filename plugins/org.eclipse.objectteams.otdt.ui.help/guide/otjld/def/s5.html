@@ -3,8 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
    <head>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <meta name="copyright"
-            content="Copyright Technical University Berlin and others 2004, 2010. This page is made available under the Eclipse Public License v1.0. For full details see http://www.eclipse.org/legal/epl-v10.html" />
       <link rel="stylesheet" type="text/css" href="../css/ot.css" />
       <link rel="stylesheet" type="text/css" href="../css/otjld.css" />
       <title>OT/J Language Definition v1.3</title>
@@ -53,7 +51,9 @@
                <div class="line"></div>
             </div>
             <div class="sect depth2" id="s5.1">
-               <h2 class="sect">&sect;5.1&nbsp;Effect of team activation<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;5</a></span></h2>
+               <h2 class="sect">&sect;5.1&nbsp;Effect of team activation<a class="img" href="s5.html#s5.1"
+                     title="PermaLink to &sect;5.1&nbsp;Effect of team activation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;5</a></span></h2>
                <p>Activating a team instance has the effect of enabling all its callin bindings. 
                   	All effects defined in <a href="s4.html" title="&sect;4&nbsp;Callin Binding" class="sect">&sect;4</a> apply only if a corresponding 
                   	team instance is active.<br />
@@ -64,7 +64,9 @@
                   		
                </p>
                <div class="sect depth3" id="s5.1.1">
-                  <h3 class="sect">&sect;5.1.1&nbsp;Global vs. thread local team activation<span class="toplink"><a href="#s5.1">&uarr;&nbsp;&sect;5.1</a></span></h3>
+                  <h3 class="sect">&sect;5.1.1&nbsp;Global vs. thread local team activation<a class="img" href="s5.html#s5.1.1"
+                        title="PermaLink to &sect;5.1.1&nbsp;Global vs. thread local team activation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s5.1">&uarr;&nbsp;&sect;5.1</a></span></h3>
                   <p>While <strong>thread local</strong> activation only enables the callin bindings of 
                      		a team instance for a certain thread, <strong>global</strong> activation activates the 
                      		team instance for all threads of the application.
@@ -72,7 +74,9 @@
                   </p>
                </div>
                <div class="sect depth3" id="s5.1.2">
-                  <h3 class="sect">&sect;5.1.2&nbsp;Effect on garbage collection<span class="toplink"><a href="#s5.1">&uarr;&nbsp;&sect;5.1</a></span></h3>
+                  <h3 class="sect">&sect;5.1.2&nbsp;Effect on garbage collection<a class="img" href="s5.html#s5.1.2"
+                        title="PermaLink to &sect;5.1.2&nbsp;Effect on garbage collection"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s5.1">&uarr;&nbsp;&sect;5.1</a></span></h3>
                   <p>Any active team is referenced by internal infrastructure. 
                      		Thus, a team cannot be reclaimed by the garbage collector while it is active.
                      			
@@ -80,9 +84,13 @@
                </div>
             </div>
             <div class="sect depth2" id="s5.2">
-               <h2 class="sect">&sect;5.2&nbsp;Explicit team activation<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;5</a></span></h2>
+               <h2 class="sect">&sect;5.2&nbsp;Explicit team activation<a class="img" href="s5.html#s5.2"
+                     title="PermaLink to &sect;5.2&nbsp;Explicit team activation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;5</a></span></h2>
                <div class="subsect depth3" id="s5.2.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Activation block</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Activation block</span><a class="img" href="s5.html#s5.2.a"
+                        title="PermaLink to (a)&nbsp;Activation block"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A team can be activated thread local by the block construct</p>
                   <div class="listing plain"><pre><b>within</b> (myTeam) { <i>stmts</i> }</pre></div>
                   <p>If <em>stmts</em> has only one statement this can be abbreviated to
@@ -102,7 +110,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s5.2.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Imperative activation</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Imperative activation</span><a class="img" href="s5.html#s5.2.b"
+                        title="PermaLink to (b)&nbsp;Imperative activation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Each team class implicitly provides methods from the predefined interface 
                      		<code>org.objectteams.ITeam</code> (super interface of all team classes) to control team 
                      		activation disregarding the block structure of the program. The methods <code>activate()</code> 
@@ -118,7 +128,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s5.2.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Multiple and mixed activations</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Multiple and mixed activations</span><a class="img" href="s5.html#s5.2.c"
+                        title="PermaLink to (c)&nbsp;Multiple and mixed activations"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <ul>
                      <li>If <code>activate()</code> is invoked on a team instance
                         				    that has been explicitly activated before, this statement has
@@ -138,7 +150,9 @@
                </div>
             </div>
             <div class="sect depth2" id="s5.3">
-               <h2 class="sect">&sect;5.3&nbsp;Implicit team activation<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;5</a></span></h2>
+               <h2 class="sect">&sect;5.3&nbsp;Implicit team activation<a class="img" href="s5.html#s5.3"
+                     title="PermaLink to &sect;5.3&nbsp;Implicit team activation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;5</a></span></h2>
                <p>Implicit team activation is intended to ensure that
                   	whenever the control flow is passed to a team or one of its roles,
                   	the team is implicitly activated for the current thread.
@@ -153,7 +167,9 @@
                   		
                </p>
                <div class="subsect depth3" id="s5.3.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Team level methods</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Team level methods</span><a class="img" href="s5.html#s5.3.a"
+                        title="PermaLink to (a)&nbsp;Team level methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>While executing a <strong>team level method</strong>, the target team
                      	    is always active. Activation is reset to the previous state
                      	    when leaving the team method, unless the team has been explicitly activated during
@@ -165,7 +181,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s5.3.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Methods of externalized roles</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Methods of externalized roles</span><a class="img" href="s5.html#s5.3.b"
+                        title="PermaLink to (b)&nbsp;Methods of externalized roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Invoking a method on an <strong>externalized role</strong>
                      	    (see <a href="s1.html#s1.2.2" title="&sect;1.2.2&nbsp;Externalized roles"
                         class="sect">&sect;1.2.2</a>) also has the
@@ -175,7 +193,8 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s5.3.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Nested teams</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Nested teams</span><a class="img" href="s5.html#s5.3.c" title="PermaLink to (c)&nbsp;Nested teams"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Implicit activation has additional consequences for nested teams 
                      		(see <a href="s1.html#s1.5" title="&sect;1.5&nbsp;Team and role nesting"
                         class="sect">&sect;1.5</a>):
@@ -187,7 +206,9 @@
                   </ul>
                </div>
                <div class="subsect depth3" id="s5.3.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Configuring implicit activation</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Configuring implicit activation</span><a class="img" href="s5.html#s5.3.d"
+                        title="PermaLink to (d)&nbsp;Configuring implicit activation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Implicit activation is disabled by default and can be enabled by adding the annotation
                      				<code>@org.objectteams.ImplicitTeamActivation</code>, which can be applied to a type or a method.
                      				When applied to a method it is ensured that invoking this method will trigger implicit activation.
@@ -216,7 +237,9 @@
                </p>
             </div>
             <div class="sect depth2" id="s5.4">
-               <h2 class="sect">&sect;5.4&nbsp;Guard predicates<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;5</a></span></h2>
+               <h2 class="sect">&sect;5.4&nbsp;Guard predicates<a class="img" href="s5.html#s5.4"
+                     title="PermaLink to &sect;5.4&nbsp;Guard predicates"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;5</a></span></h2>
                <div class="syntaxlink"><a href="sA.html#sA.7" title="&sect;A.7&nbsp;Guard predicates" class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.7</a></div>
                <p>The effect of callins can further be controlled using so called guard predicates. 
                   	Guards appear at four different levels:
@@ -233,7 +256,9 @@
                   		
                </p>
                <div class="subsect depth3" id="s5.4.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">General syntax for guards</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">General syntax for guards</span><a class="img" href="s5.html#s5.4.a"
+                        title="PermaLink to (a)&nbsp;General syntax for guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A guard is declared using the keyword <code>when</code> followed by a 
                      		boolean expression in parentheses:
                      			
@@ -248,7 +273,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s5.4.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">No side effects</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">No side effects</span><a class="img" href="s5.html#s5.4.b"
+                        title="PermaLink to (b)&nbsp;No side effects"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A guard predicate should have no side effects. 
                      			   A compiler should optionally check this condition, but inter-procedural analysis
                      			   actually depends on the availability of appropriate means to mark any method as side-effect free.
@@ -256,7 +283,8 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s5.4.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Exceptions</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Exceptions</span><a class="img" href="s5.html#s5.4.c" title="PermaLink to (c)&nbsp;Exceptions"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A guard predicate should not throw any exceptions. 
                      			   Yet, any exception thrown within a guard predicate cause the guard to evaluate to <code>false</code> 
                      			   rather than propagating the exception, meaning that the evaluation of a guard predicate will never
@@ -268,14 +296,18 @@
                   </p>
                </div>
                <div class="sect depth3" id="s5.4.1">
-                  <h3 class="sect">&sect;5.4.1&nbsp;Regular guards<span class="toplink"><a href="#s5.4">&uarr;&nbsp;&sect;5.4</a></span></h3>
+                  <h3 class="sect">&sect;5.4.1&nbsp;Regular guards<a class="img" href="s5.html#s5.4.1"
+                        title="PermaLink to &sect;5.4.1&nbsp;Regular guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s5.4">&uarr;&nbsp;&sect;5.4</a></span></h3>
                   <p>This group of guards evaluates within the context of a given role. 
                      		These guards are evaluated <em>after</em> a callin target is lifted and 
                      		<em>before</em> a callin bound role method is invoked.
                      			
                   </p>
                   <div class="subsect depth4" id="s5.4.1.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Method binding guards</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Method binding guards</span><a class="img" href="s5.html#s5.4.1.a"
+                           title="PermaLink to (a)&nbsp;Method binding guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A guard may be attached to a callin method binding as in:
                         				
                      </p>
@@ -307,7 +339,9 @@
                      </ul>
                   </div>
                   <div class="subsect depth4" id="s5.4.1.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Method guards</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Method guards</span><a class="img" href="s5.html#s5.4.1.b"
+                           title="PermaLink to (b)&nbsp;Method guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A method guard is similar to a method binding guard, but it applies 
                         			to all callin method bindings of this method.<br />
                         			A method guard is declared between the method signature and the method body:
@@ -317,7 +351,9 @@
   <b>when</b> (ir &gt; MyTeam.this.threshold) { <i>body statements</i> }</pre></div>
                   </div>
                   <div class="subsect depth4" id="s5.4.1.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Role level guards</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Role level guards</span><a class="img" href="s5.html#s5.4.1.c"
+                           title="PermaLink to (c)&nbsp;Role level guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>When a guard is specified at the role level, i.e., directly before the 
                         			class body of a role class, it applies to all callin method bindings of 
                         			the role class:
@@ -341,7 +377,9 @@
                      </ul>
                   </div>
                   <div class="subsect depth4" id="s5.4.1.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Team level guards</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Team level guards</span><a class="img" href="s5.html#s5.4.1.d"
+                           title="PermaLink to (d)&nbsp;Team level guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A guard specified in the header of a team class may disable the callin 
                         			bindings of all contained role classes. The syntax corresponds to the syntax 
                         			of role level guards.<br />
@@ -361,7 +399,9 @@
                   </p>
                </div>
                <div class="sect depth3" id="s5.4.2">
-                  <h3 class="sect">&sect;5.4.2&nbsp;Base guards<span class="toplink"><a href="#s5.4">&uarr;&nbsp;&sect;5.4</a></span></h3>
+                  <h3 class="sect">&sect;5.4.2&nbsp;Base guards<a class="img" href="s5.html#s5.4.2"
+                        title="PermaLink to &sect;5.4.2&nbsp;Base guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s5.4">&uarr;&nbsp;&sect;5.4</a></span></h3>
                   <p>The intention behind base guards is to prevent lifting of a callin-target
                      		if a guard evaluates to <code>false</code> and thus refuses to invoke the
                      		callin bound role method. Using base guards it is easier to prevent any
@@ -400,14 +440,18 @@
                      			
                   </p>
                   <div class="subsect depth4" id="s5.4.2.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Base object reference</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Base object reference</span><a class="img" href="s5.html#s5.4.2.a"
+                           title="PermaLink to (a)&nbsp;Base object reference"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>In all base guard predicates the special identifier <code>base</code> 
                         			can be used to denote the base object that is about to be lifted.
                         				
                      </p>
                   </div>
                   <div class="subsect depth4" id="s5.4.2.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Method binding guards</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Method binding guards</span><a class="img" href="s5.html#s5.4.2.b"
+                           title="PermaLink to (b)&nbsp;Method binding guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A base method binding guard may access parameters as passed to the
                         			base method. Parameter mappings are not considered.<br />
                         Additionally, for <code>after</code> callin bindings, the identifier <code>result</code> 
@@ -426,14 +470,18 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s5.4.2.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Method guards</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Method guards</span><a class="img" href="s5.html#s5.4.2.c"
+                           title="PermaLink to (c)&nbsp;Method guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>In contrast to regular method guards, a <em>base</em> guard attached to a role method 
                         			cannot access any method parameters. See the next item (d) for values that are actually in scope.
                         				
                      </p>
                   </div>
                   <div class="subsect depth4" id="s5.4.2.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Role level guards</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Role level guards</span><a class="img" href="s5.html#s5.4.2.d"
+                           title="PermaLink to (d)&nbsp;Role level guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Role level base guards may use these values:
                         				
                      </p>
@@ -445,7 +493,9 @@
                      </ul>
                   </div>
                   <div class="subsect depth4" id="s5.4.2.e">
-                     <h4 class="subsect">(e)&nbsp;<span class="title">Team level guards</span></h4>
+                     <h4 class="subsect">(e)&nbsp;<span class="title">Team level guards</span><a class="img" href="s5.html#s5.4.2.e"
+                           title="PermaLink to (e)&nbsp;Team level guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Team level base guards have the same scope as role level base guards (d). 
                         			However, the type of the role instance is not known here, i.e., here <code>base</code> 
                         			has the static type <code>java.lang.Object</code>.
@@ -453,7 +503,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s5.4.2.f">
-                     <h4 class="subsect">(f)&nbsp;<span class="title">Unbound roles</span></h4>
+                     <h4 class="subsect">(f)&nbsp;<span class="title">Unbound roles</span><a class="img" href="s5.html#s5.4.2.f"
+                           title="PermaLink to (f)&nbsp;Unbound roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>In contrast to regular guards, base guards cannot be attached to
                         	unbound role classes nor to their methods.<br />
                         	Only team level base guards are independent of role binding.
@@ -461,7 +513,9 @@
                      </p>
                   </div><img src="../images/guards.png" alt="Overview: Guard predicates" /></div>
                <div class="sect depth3" id="s5.4.3">
-                  <h3 class="sect">&sect;5.4.3&nbsp;Multiple guards<span class="toplink"><a href="#s5.4">&uarr;&nbsp;&sect;5.4</a></span></h3>
+                  <h3 class="sect">&sect;5.4.3&nbsp;Multiple guards<a class="img" href="s5.html#s5.4.3"
+                        title="PermaLink to &sect;5.4.3&nbsp;Multiple guards"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s5.4">&uarr;&nbsp;&sect;5.4</a></span></h3>
                   <p>Due to the different ranges of applicability different guards may affect the same method binding. 
                      		In that case all applicable guards are conjoined using a logical <code>and</code>.<br />
                      Any guard is interpreted as the conjunction of these predicates (if present):
@@ -555,7 +609,9 @@
                </div>
             </div>
             <div class="sect depth2" id="s5.5">
-               <h2 class="sect">&sect;5.5&nbsp;Unanticipated team activation<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;5</a></span></h2>
+               <h2 class="sect">&sect;5.5&nbsp;Unanticipated team activation<a class="img" href="s5.html#s5.5"
+                     title="PermaLink to &sect;5.5&nbsp;Unanticipated team activation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;5</a></span></h2>
                <p>If an application should be adapted unanticipatedly by one or more teams, 
                   	this can be achieved without explicitly changing the program code of this application.
                   		
@@ -661,9 +717,10 @@
          </table>
       </div>
       <div id="footer">
-         <hr />
-         <address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
-         			OT/J version 1.3 &mdash; last modified: 2010-02-20
+         <hr /><a class="w3c img" href="http://jigsaw.w3.org/css-validator/check/referer"
+            shape="rect"><img src="../images/valid-css2-blue.png" alt="Valid CSS!" height="31" width="88" /></a><a class="w3c img" href="http://validator.w3.org/check?uri=referer" shape="rect"><img src="../images/valid-xhtml10-blue.png" alt="Valid XHTML 1.0 Strict" height="31"
+                 width="88" /></a><address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
+         			OT/J version 1.3 &mdash; last modified: 2010-05-18
       </div>
    </body>
 </html>

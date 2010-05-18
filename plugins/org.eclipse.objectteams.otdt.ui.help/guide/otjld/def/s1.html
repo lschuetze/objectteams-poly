@@ -3,8 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
    <head>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <meta name="copyright"
-            content="Copyright Technical University Berlin and others 2004, 2010. This page is made available under the Eclipse Public License v1.0. For full details see http://www.eclipse.org/legal/epl-v10.html" />
       <link rel="stylesheet" type="text/css" href="../css/ot.css" />
       <link rel="stylesheet" type="text/css" href="../css/otjld.css" />
       <title>OT/J Language Definition v1.3</title>
@@ -60,7 +58,9 @@
                <div class="line"></div>
             </div>
             <div class="sect depth2" id="s1.1">
-               <h2 class="sect">&sect;1.1&nbsp;Team classes<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;1</a></span></h2>
+               <h2 class="sect">&sect;1.1&nbsp;Team classes<a class="img" href="s1.html#s1.1"
+                     title="PermaLink to &sect;1.1&nbsp;Team classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;1</a></span></h2>
                <div class="syntaxlink"><a href="sA.html#sA.1.1" title="&sect;A.1.1&nbsp;ClassDeclaration"
                      class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.1.1</a></div>
                <p>A class declared with the modifier <code>team</code> is a <em>team class</em> (or team for short).
@@ -134,7 +134,9 @@
                </p>
             </div>
             <div class="sect depth2" id="s1.2">
-               <h2 class="sect">&sect;1.2&nbsp;Role classes and objects<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;1</a></span></h2>
+               <h2 class="sect">&sect;1.2&nbsp;Role classes and objects<a class="img" href="s1.html#s1.2"
+                     title="PermaLink to &sect;1.2&nbsp;Role classes and objects"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;1</a></span></h2>
                <p>Each direct inner class of a team is a role class.
                   Just like inner classes, each instance of a role class has an implicit reference
                   to its enclosing team instance. This reference is immutable.
@@ -175,14 +177,18 @@
                   		
                </p>
                <div class="sect depth3" id="s1.2.1">
-                  <h3 class="sect">&sect;1.2.1&nbsp;Modifiers for roles<span class="toplink"><a href="#s1.2">&uarr;&nbsp;&sect;1.2</a></span></h3>
+                  <h3 class="sect">&sect;1.2.1&nbsp;Modifiers for roles<a class="img" href="s1.html#s1.2.1"
+                        title="PermaLink to &sect;1.2.1&nbsp;Modifiers for roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s1.2">&uarr;&nbsp;&sect;1.2</a></span></h3>
                   <p>Member classes of a team cannot be <code>static</code>.
                      Also the use of access modifiers for roles is restricted and modifiers have different (stronger) semantics than for 
                      regular classes (see below). With respect to accessibility a team acts mainly like a package regarding its roles.
                      			
                   </p>
                   <div class="subsect depth4" id="s1.2.1.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Role class protection</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Role class protection</span><a class="img" href="s1.html#s1.2.1.a"
+                           title="PermaLink to (a)&nbsp;Role class protection"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A role class must have exactly one of the access modifiers <code>public</code>
                         			or <code>protected</code>.<br />
                         This rule does not affect the class modifiers <code>abstract</code>, <code>final</code> and <code>strictfp</code>.
@@ -190,7 +196,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.1.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">protected role classes</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">protected role classes</span><a class="img" href="s1.html#s1.2.1.b"
+                           title="PermaLink to (b)&nbsp;protected role classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A <code>protected</code> role can only be accessed from within the enclosing
                         			team or any of its sub-teams. The actual border of encapsulation is the
                         			enclosing team <em>instance</em>. The rules for protected roles are given
@@ -199,7 +207,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.1.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">public role classes</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">public role classes</span><a class="img" href="s1.html#s1.2.1.c"
+                           title="PermaLink to (c)&nbsp;public role classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Only <code>public</code> roles can ever be accessed outside their enclosing	team.
                         			Accessing a role outside the enclosing team instance is governed by the rules
                         			of <strong>externalized roles</strong>, to be defined next (<a href="#s1.2.2" title="&sect;1.2.2&nbsp;Externalized roles" class="sect">&sect;1.2.2</a>).
@@ -207,7 +217,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.1.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">abstract role classes</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">abstract role classes</span><a class="img" href="s1.html#s1.2.1.d"
+                           title="PermaLink to (d)&nbsp;abstract role classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A role class has to be marked <strong>abstract</strong> if any of its methods
                         			is not effective.<br />
                         			The <em>methods of a role class</em> comprise direct methods and
@@ -231,7 +243,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.1.e">
-                     <h4 class="subsect">(e)&nbsp;<span class="title">Role features</span></h4>
+                     <h4 class="subsect">(e)&nbsp;<span class="title">Role features</span><a class="img" href="s1.html#s1.2.1.e"
+                           title="PermaLink to (e)&nbsp;Role features"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Access modifiers for members of roles have some special interpretation:
                         				
                      </p>
@@ -258,7 +272,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.1.f">
-                     <h4 class="subsect">(f)&nbsp;<span class="title">Static role methods</span></h4>
+                     <h4 class="subsect">(f)&nbsp;<span class="title">Static role methods</span><a class="img" href="s1.html#s1.2.1.f"
+                           title="PermaLink to (f)&nbsp;Static role methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>In contrast to inner classes in pure Java, a role class may indeed define static methods. A static role method requires no
                         role 
                         				instance <em>but</em> it still requires a team instance in scope. Static role methods can be called:
@@ -276,7 +292,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.1.g">
-                     <h4 class="subsect">(g)&nbsp;<span class="title">No static initializers</span></h4>
+                     <h4 class="subsect">(g)&nbsp;<span class="title">No static initializers</span><a class="img" href="s1.html#s1.2.1.g"
+                           title="PermaLink to (g)&nbsp;No static initializers"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A static field of a role class must not have a non-constant initialization expression.
                         					   Static initialization blocks are already prohibited for inner classes by Java (see <a href="http://java.sun.com/docs/books/jls/second_edition/html/classes.doc.html#262890"
                            class="ext">JLS &sect;8.1.2</a>).
@@ -295,7 +313,9 @@
                   </div>
                </div>
                <div class="sect depth3" id="s1.2.2">
-                  <h3 class="sect">&sect;1.2.2&nbsp;Externalized roles<span class="toplink"><a href="#s1.2">&uarr;&nbsp;&sect;1.2</a></span></h3>
+                  <h3 class="sect">&sect;1.2.2&nbsp;Externalized roles<a class="img" href="s1.html#s1.2.2"
+                        title="PermaLink to &sect;1.2.2&nbsp;Externalized roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s1.2">&uarr;&nbsp;&sect;1.2</a></span></h3>
                   <div class="syntaxlink"><a href="sA.html#sA.9.2" title="&sect;A.9.2&nbsp;ActualTypeArgument"
                         class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.9.2</a></div>
                   <p>Normally, a team encapsulates its role against unwanted access from the outside.
@@ -324,13 +344,16 @@
                      			
                   </p>
                   <div class="subsect depth4" id="s1.2.2.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Visibility</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Visibility</span><a class="img" href="s1.html#s1.2.2.a" title="PermaLink to (a)&nbsp;Visibility"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Only instances of a <code>public</code> role class can ever be externalized.
                         			  	
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.2.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Declaration with anchored type</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Declaration with anchored type</span><a class="img" href="s1.html#s1.2.2.b"
+                           title="PermaLink to (b)&nbsp;Declaration with anchored type"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Outside a team role types are legal only if denoted relative
                         				to an existing team instance (further on called "anchored types").
                         				The syntax is:
@@ -352,7 +375,9 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s1.2.2.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Immutable anchor</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Immutable anchor</span><a class="img" href="s1.html#s1.2.2.c"
+                           title="PermaLink to (c)&nbsp;Immutable anchor"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Anchoring the type of an externalized role to a team instance
                         				requires the team to be referenced by a variable which
                         				is marked <code>final</code> (i.e., immutable).
@@ -363,7 +388,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.2.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Implicit type anchors</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Implicit type anchors</span><a class="img" href="s1.html#s1.2.2.d"
+                           title="PermaLink to (d)&nbsp;Implicit type anchors"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>The current team instance can be used as a default anchor
                         				for role types:
                         				
@@ -387,7 +414,8 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.2.e">
-                     <h4 class="subsect">(e)&nbsp;<span class="title">Conformance</span></h4>
+                     <h4 class="subsect">(e)&nbsp;<span class="title">Conformance</span><a class="img" href="s1.html#s1.2.2.e" title="PermaLink to (e)&nbsp;Conformance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Conformance between
                         				two types <code>RoleX&lt;@teamA&gt;</code> and <code>RoleY&lt;@teamB&gt;</code>
                         				not only requires the role types to be compatible, but also
@@ -397,7 +425,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.2.f">
-                     <h4 class="subsect">(f)&nbsp;<span class="title">Substitutions for type anchors</span></h4>
+                     <h4 class="subsect">(f)&nbsp;<span class="title">Substitutions for type anchors</span><a class="img" href="s1.html#s1.2.2.f"
+                           title="PermaLink to (f)&nbsp;Substitutions for type anchors"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Only two substitutions are considered for determining
                         				team identity:
                         				
@@ -425,7 +455,9 @@
                      </ol>
                   </div>
                   <div class="subsect depth4" id="s1.2.2.g">
-                     <h4 class="subsect">(g)&nbsp;<span class="title">Legal contexts</span></h4>
+                     <h4 class="subsect">(g)&nbsp;<span class="title">Legal contexts</span><a class="img" href="s1.html#s1.2.2.g"
+                           title="PermaLink to (g)&nbsp;Legal contexts"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Anchored types for externalized roles may be used in the
                         			following contexts:
                         				
@@ -456,7 +488,9 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s1.2.2.h">
-                     <h4 class="subsect">(h)&nbsp;<span class="title">Externalized creation</span></h4>
+                     <h4 class="subsect">(h)&nbsp;<span class="title">Externalized creation</span><a class="img" href="s1.html#s1.2.2.h"
+                           title="PermaLink to (h)&nbsp;Externalized creation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A role can be created as externalized using either of these equivalent forms:</p>
                      <div class="listing plain"><pre>outer.<b>new</b> Role()
 <b>new</b> Role&lt;@outer&gt;()</pre></div>
@@ -470,7 +504,8 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.2.i">
-                     <h4 class="subsect">(i)&nbsp;<span class="title">No import</span></h4>
+                     <h4 class="subsect">(i)&nbsp;<span class="title">No import</span><a class="img" href="s1.html#s1.2.2.i" title="PermaLink to (i)&nbsp;No import"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>It is neither useful nor legal to import a role type.<br /></p>
                      <div class="note">
                         <h5>Rationale:</h5>
@@ -626,25 +661,33 @@
                   </div>
                </div>
                <div class="sect depth3" id="s1.2.3">
-                  <h3 class="sect">&sect;1.2.3&nbsp;Protected roles<span class="toplink"><a href="#s1.2">&uarr;&nbsp;&sect;1.2</a></span></h3>
+                  <h3 class="sect">&sect;1.2.3&nbsp;Protected roles<a class="img" href="s1.html#s1.2.3"
+                        title="PermaLink to &sect;1.2.3&nbsp;Protected roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s1.2">&uarr;&nbsp;&sect;1.2</a></span></h3>
                   <p>Roles can only be <code>public</code> or <code>protected</code>.
                      	A <code>protected</code> role is encapsulated
                      	by its enclosing team instance. This is enforced by these rules:
                      			
                   </p>
                   <div class="subsect depth4" id="s1.2.3.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Importing role classes</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Importing role classes</span><a class="img" href="s1.html#s1.2.3.a"
+                           title="PermaLink to (a)&nbsp;Importing role classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p><i>This rule is superseded by <a href="#s1.2.2.i" title="&sect;1.2.2.(i)&nbsp;No import" class="sect">&sect;1.2.2.(i)</a></i></p>
                   </div>
                   <div class="subsect depth4" id="s1.2.3.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Qualified role types</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Qualified role types</span><a class="img" href="s1.html#s1.2.3.b"
+                           title="PermaLink to (b)&nbsp;Qualified role types"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>The name of a <code>protected</code> role class may never be used qualified, neither
                         			prefixed by its <em>enclosing type</em> nor parameterized by a <em>variable as type anchor</em> (cf. <a href="#s1.2.2.a" title="&sect;1.2.2.(a)&nbsp;Visibility" class="sect">&sect;1.2.2.(a)</a>).
                         				
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.3.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Mixing qualified and unqualified types</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Mixing qualified and unqualified types</span><a class="img" href="s1.html#s1.2.3.c"
+                           title="PermaLink to (c)&nbsp;Mixing qualified and unqualified types"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>An externalized role type is never compatible to an unqualified role type,
                         			except for the substitutions in <a href="#s1.2.2.f"
                            title="&sect;1.2.2.(f)&nbsp;Substitutions for type anchors"
@@ -661,7 +704,9 @@
                      			
                   </p>
                   <div class="subsect depth4" id="s1.2.3.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Levels of encapsulation</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Levels of encapsulation</span><a class="img" href="s1.html#s1.2.3.d"
+                           title="PermaLink to (d)&nbsp;Levels of encapsulation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Since protected role types can not be used for externalization, instances of these types are already quite effectively encapsulated
                         by their enclosing team.
                         			Based on this concept, encapsulation for protected roles can be made even stricter by the rules of <em>role confinement</em>.
@@ -672,13 +717,16 @@
                   </div>
                </div>
                <div class="sect depth3" id="s1.2.4">
-                  <h3 class="sect">&sect;1.2.4&nbsp;Type tests and casts<span class="toplink"><a href="#s1.2">&uarr;&nbsp;&sect;1.2</a></span></h3>
+                  <h3 class="sect">&sect;1.2.4&nbsp;Type tests and casts<a class="img" href="s1.html#s1.2.4"
+                        title="PermaLink to &sect;1.2.4&nbsp;Type tests and casts"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s1.2">&uarr;&nbsp;&sect;1.2</a></span></h3>
                   <p>In accordance with <a href="#s1.2.2.e" title="&sect;1.2.2.(e)&nbsp;Conformance" class="sect">&sect;1.2.2.(e)</a>, in OT/J
                      	the <code>instanceof</code> operator and type casts have extended semantics for roles.
                      			
                   </p>
                   <div class="subsect depth4" id="s1.2.4.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">instanceof</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">instanceof</span><a class="img" href="s1.html#s1.2.4.a" title="PermaLink to (a)&nbsp;instanceof"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>For role types the <code>instanceof</code> operator yields true only if
                         			both components of the type match: the dynamic role type must be compatible
                         			to the given static type, and also type anchors must be the same instance.
@@ -686,7 +734,8 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.4.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Casting</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Casting</span><a class="img" href="s1.html#s1.2.4.b" title="PermaLink to (b)&nbsp;Casting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Casts may also fail if the casted expression is anchored to a different
                         			team instance than the cast type. Such failure is signaled by a
                         			<code>org.objectteams.RoleCastException</code>.
@@ -694,7 +743,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.4.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Class literal</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Class literal</span><a class="img" href="s1.html#s1.2.4.c"
+                           title="PermaLink to (c)&nbsp;Class literal"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A class literal of form <code>R.class</code> is dynamically bound to the class <code>R</code>
                         					visible in the current instance context. Using a class literal for a role outside its
                         					enclosing team instance (see <a href="#s1.2.2" title="&sect;1.2.2&nbsp;Externalized roles" class="sect">&sect;1.2.2</a>) requires the following syntax:
@@ -704,21 +755,26 @@
                   </div>
                </div>
                <div class="sect depth3" id="s1.2.5">
-                  <h3 class="sect">&sect;1.2.5&nbsp;File structure<span class="toplink"><a href="#s1.2">&uarr;&nbsp;&sect;1.2</a></span></h3>
+                  <h3 class="sect">&sect;1.2.5&nbsp;File structure<a class="img" href="s1.html#s1.2.5"
+                        title="PermaLink to &sect;1.2.5&nbsp;File structure"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s1.2">&uarr;&nbsp;&sect;1.2</a></span></h3>
                   <p>Just like regular inner classes, role classes may be inlined in the
                      	source code of the enclosing team. As an alternative style it is possible
                      	to store role classes in separate <strong>role files</strong> according to the following rules:
                      			
                   </p>
                   <div class="subsect depth4" id="s1.2.5.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Role directory</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Role directory</span><a class="img" href="s1.html#s1.2.5.a"
+                           title="PermaLink to (a)&nbsp;Role directory"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>In the directory of the team class a new directory is created
                         			which has the same name as the team without the <tt>.java</tt> suffix.
                         				
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.5.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Role files</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Role files</span><a class="img" href="s1.html#s1.2.5.b" title="PermaLink to (b)&nbsp;Role files"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Role classes are stored in this directory (a). The file names are
                         			derived from the role class name extended by <tt>.java</tt>.<br />
                         			A role file must contain exactly one top-level type.
@@ -726,7 +782,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.5.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">package statement</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">package statement</span><a class="img" href="s1.html#s1.2.5.c"
+                           title="PermaLink to (c)&nbsp;package statement"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A role class in a role file declares as its package the fully qualified
                         			name of the enclosing team class. The package statement of a role file
                         			must use the <code>team</code> modifier as its first token.
@@ -734,20 +792,26 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.5.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Reference to role file</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Reference to role file</span><a class="img" href="s1.html#s1.2.5.d"
+                           title="PermaLink to (d)&nbsp;Reference to role file"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A team should mention in its javadoc comment each role class which
                         			is stored externally using a <tt>@role</tt> tag.
                         				
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.5.e">
-                     <h4 class="subsect">(e)&nbsp;<span class="title">Legal types in role files</span></h4>
+                     <h4 class="subsect">(e)&nbsp;<span class="title">Legal types in role files</span><a class="img" href="s1.html#s1.2.5.e"
+                           title="PermaLink to (e)&nbsp;Legal types in role files"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>The type in a role file must not be an <code>enum</code>.
                         				
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.2.5.f">
-                     <h4 class="subsect">(f)&nbsp;<span class="title">Imports in role files</span></h4>
+                     <h4 class="subsect">(f)&nbsp;<span class="title">Imports in role files</span><a class="img" href="s1.html#s1.2.5.f"
+                           title="PermaLink to (f)&nbsp;Imports in role files"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A role file may have imports of its own. 
                         				Within the role definition these imports are visible <em>in addition</em> to all imports of the enclosing team. 
                         				Only <code>base</code> imports (see <a href="s2.html#s2.1.2.d" title="&sect;2.1.2.(d)&nbsp;Base imports"
@@ -843,7 +907,9 @@
                </div>
             </div>
             <div class="sect depth2" id="s1.3">
-               <h2 class="sect">&sect;1.3&nbsp;Acquisition and implicit inheritance of role classes<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;1</a></span></h2>
+               <h2 class="sect">&sect;1.3&nbsp;Acquisition and implicit inheritance of role classes<a class="img" href="s1.html#s1.3"
+                     title="PermaLink to &sect;1.3&nbsp;Acquisition and implicit inheritance of role classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;1</a></span></h2>
                <p> Every team class implicitly implements the predefined interface <code>org.objectteams.ITeam</code>.
                   	If a team class has no explicit <code>extends</code> clause it implicitly extends <code>org.objectteams.Team</code>, 
                   	thus providing implementations for the methods in <code>org.objectteams.ITeam</code>.
@@ -857,7 +923,9 @@
                   		
                </p>
                <div class="sect depth3" id="s1.3.1">
-                  <h3 class="sect">&sect;1.3.1&nbsp;Acquisition and implicit inheritance of role classes<span class="toplink"><a href="#s1.3">&uarr;&nbsp;&sect;1.3</a></span></h3>
+                  <h3 class="sect">&sect;1.3.1&nbsp;Acquisition and implicit inheritance of role classes<a class="img" href="s1.html#s1.3.1"
+                        title="PermaLink to &sect;1.3.1&nbsp;Acquisition and implicit inheritance of role classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s1.3">&uarr;&nbsp;&sect;1.3</a></span></h3>
                   <p>A team acquires all roles from its super-team. This relation is
                      similar to inheritance of inner classes, but with a few decisive
                      differences as defined next. Two implementation options are mentioned <a href="#aux1.1" class="int">below</a>,
@@ -955,7 +1023,9 @@
                      </table>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Role class acquisition</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Role class acquisition</span><a class="img" href="s1.html#s1.3.1.a"
+                           title="PermaLink to (a)&nbsp;Role class acquisition"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A team <code>T</code> which extends a super-team <code>S</code>
                         	    has one role class <code>T.R</code> corresponding to each role <code>S.R</code>
                         	    of the super-team.
@@ -973,7 +1043,9 @@
                               class="sect">&sect;1.2.3.(b)</a>). Here they are used for explanatory purposes only)</em></div>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Direct role acquisition</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Direct role acquisition</span><a class="img" href="s1.html#s1.3.1.b"
+                           title="PermaLink to (b)&nbsp;Direct role acquisition"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Within a sub-team <code>T</code> each role <code>S.R</code> of its
                         	    super-team <code>S</code> is available by the simple name <code>R</code>
                         	    without further declaration.
@@ -985,7 +1057,9 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Overriding and implicit inheritance</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Overriding and implicit inheritance</span><a class="img" href="s1.html#s1.3.1.c"
+                           title="PermaLink to (c)&nbsp;Overriding and implicit inheritance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If a team contains a role class definition by the same name as
                         	    a role defined in its super-team,
                         	    the new role class overrides the corresponding role from the super-team
@@ -1016,7 +1090,9 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Lack of subtyping</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Lack of subtyping</span><a class="img" href="s1.html#s1.3.1.d"
+                           title="PermaLink to (d)&nbsp;Lack of subtyping"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Direct acquisition of roles from a super-team and implicit inheritance
                         	    do not establish a <strong>subtype</strong> relation.
                         	    A role of a given team is never conform (i.e., substitutable)
@@ -1026,7 +1102,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.e">
-                     <h4 class="subsect">(e)&nbsp;<span class="title">Dynamic binding of types</span></h4>
+                     <h4 class="subsect">(e)&nbsp;<span class="title">Dynamic binding of types</span><a class="img" href="s1.html#s1.3.1.e"
+                           title="PermaLink to (e)&nbsp;Dynamic binding of types"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Overriding an acquired role by a new role class has the following
                         	    implication: If an expression or declaration, which is evaluated on behalf of
                         	    an instance of team <code>T</code> or one of its contained roles,
@@ -1061,7 +1139,8 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.f">
-                     <h4 class="subsect">(f)&nbsp;<span class="title">tsuper</span></h4>
+                     <h4 class="subsect">(f)&nbsp;<span class="title">tsuper</span><a class="img" href="s1.html#s1.3.1.f" title="PermaLink to (f)&nbsp;tsuper"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <div class="syntaxlink"><a href="sA.html#sA.5.4" title="&sect;A.5.4&nbsp;TSuperCall" class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.5.4</a></div>
                      <p>Super calls along implicit inheritance use the new keyword
                         	    <strong>tsuper</strong>. While <code>super</code> is still available
@@ -1093,7 +1172,9 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.g">
-                     <h4 class="subsect">(g)&nbsp;<span class="title">Implicitly inheriting super-types</span></h4>
+                     <h4 class="subsect">(g)&nbsp;<span class="title">Implicitly inheriting super-types</span><a class="img" href="s1.html#s1.3.1.g"
+                           title="PermaLink to (g)&nbsp;Implicitly inheriting super-types"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If a role class has an explicit super class (using <code>extends</code>)
                         		this relation is inherited along implicit inheritance.
                         				
@@ -1114,7 +1195,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.h">
-                     <h4 class="subsect">(h)&nbsp;<span class="title">Preserving visibility</span></h4>
+                     <h4 class="subsect">(h)&nbsp;<span class="title">Preserving visibility</span><a class="img" href="s1.html#s1.3.1.h"
+                           title="PermaLink to (h)&nbsp;Preserving visibility"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A role class must provide at least as much access as the implicit super role,
                         		or a compile-time error occurs (this is in analogy to <a href="http://java.sun.com/docs/books/jls/second_edition/html/classes.doc.html#227965"
                            class="ext">JLS &sect;8.4.6.3</a>).
@@ -1124,7 +1207,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.i">
-                     <h4 class="subsect">(i)&nbsp;<span class="title">Dynamic binding of constructors</span></h4>
+                     <h4 class="subsect">(i)&nbsp;<span class="title">Dynamic binding of constructors</span><a class="img" href="s1.html#s1.3.1.i"
+                           title="PermaLink to (i)&nbsp;Dynamic binding of constructors"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>When creating a role instance using <code>new</code> not only the
                         			type to instantiate is bound dynamically (cf. <a href="#s1.3.1.e" title="&sect;1.3.1.(e)&nbsp;Dynamic binding of types"
                            class="sect">&sect;1.3.1.(e)</a>), but also the constructor to
@@ -1143,7 +1228,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.j">
-                     <h4 class="subsect">(j)&nbsp;<span class="title">Overriding and compatibility</span></h4>
+                     <h4 class="subsect">(j)&nbsp;<span class="title">Overriding and compatibility</span><a class="img" href="s1.html#s1.3.1.j"
+                           title="PermaLink to (j)&nbsp;Overriding and compatibility"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>The rules of <a href="http://java.sun.com/docs/books/jls/second_edition/html/classes.doc.html#228745"
                            class="ext">JLS &sect;8.4.6</a> 
                         			also apply to methods <em>and constructors</em> inherited via implicit inheritance.
@@ -1151,7 +1238,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.3.1.k">
-                     <h4 class="subsect">(k)&nbsp;<span class="title">Covariant return types</span></h4>
+                     <h4 class="subsect">(k)&nbsp;<span class="title">Covariant return types</span><a class="img" href="s1.html#s1.3.1.k"
+                           title="PermaLink to (k)&nbsp;Covariant return types"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Given a team <code>T1</code> with two roles <code>R1</code> and <code>R2</code> where <code>R2</code> explicitly inherits from <code>R1</code>, both roles defining
                         					a method <code>m</code> returning some type <code>A</code>.
                         				   Given also a sub-team of <code>T1</code>, <code>T2</code>, where <code>T2.R1</code> overrides <code>m</code> with a covariant return type <code>B</code>
@@ -1332,13 +1421,17 @@ age=27</pre></div>
                   </div>
                </div>
                <div class="sect depth3" id="s1.3.2">
-                  <h3 class="sect">&sect;1.3.2&nbsp;Regular role inheritance<span class="toplink"><a href="#s1.3">&uarr;&nbsp;&sect;1.3</a></span></h3>
+                  <h3 class="sect">&sect;1.3.2&nbsp;Regular role inheritance<a class="img" href="s1.html#s1.3.2"
+                        title="PermaLink to &sect;1.3.2&nbsp;Regular role inheritance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s1.3">&uarr;&nbsp;&sect;1.3</a></span></h3>
                   <p>In addition to implicit inheritance, roles may also inherit using
                      	the standard Java keyword <code>extends</code>. These restrictions apply:
                      			
                   </p>
                   <div class="subsect depth4" id="s1.3.2.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Super-class restrictions</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Super-class restrictions</span><a class="img" href="s1.html#s1.3.2.a"
+                           title="PermaLink to (a)&nbsp;Super-class restrictions"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If the super-class of a role is again a role it must be a direct role of
                         			an enclosing team
                         			This rule is simply enforced by disallowing type anchors in the
@@ -1349,7 +1442,9 @@ age=27</pre></div>
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.3.2.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Inheriting and overriding the extends clause</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Inheriting and overriding the extends clause</span><a class="img" href="s1.html#s1.3.2.b"
+                           title="PermaLink to (b)&nbsp;Inheriting and overriding the extends clause"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If a role overrides another role by implicit inheritance, it may
                         			change the inherited <code>extends</code> clause
                         			(see <a href="#s1.3.1.g"
@@ -1362,7 +1457,9 @@ age=27</pre></div>
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.3.2.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Constructors and overridden 'extends' </span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Constructors and overridden 'extends' </span><a class="img" href="s1.html#s1.3.2.c"
+                           title="PermaLink to (c)&nbsp;Constructors and overridden 'extends' "><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Each constructor of a role class that overrides the extends clause of its
                         		  implicit super-role must invoke a constructor of this newly introduced
                         		  explicit super-class. Thus it may not use a <code>tsuper</code> constructor
@@ -1373,7 +1470,9 @@ age=27</pre></div>
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.3.2.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Adding implemented interfaces</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Adding implemented interfaces</span><a class="img" href="s1.html#s1.3.2.d"
+                           title="PermaLink to (d)&nbsp;Adding implemented interfaces"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p><code>implements</code> declarations are additive, i.e., an implicit
                         			sub-role may add more interfaces but has to implement all interfaces of
                         			its implicit super-role, too.
@@ -1381,7 +1480,9 @@ age=27</pre></div>
                      </p>
                   </div>
                   <div class="subsect depth4" id="s1.3.2.e">
-                     <h4 class="subsect">(e)&nbsp;<span class="title">Visibility of inherited methods</span></h4>
+                     <h4 class="subsect">(e)&nbsp;<span class="title">Visibility of inherited methods</span><a class="img" href="s1.html#s1.3.2.e"
+                           title="PermaLink to (e)&nbsp;Visibility of inherited methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>
                         					When a role inherits non-public methods from a regular class (as its super class),
                         					these methods are considered as private for the role, i.e., they can only be
@@ -1392,19 +1493,25 @@ age=27</pre></div>
                </div>
             </div>
             <div class="sect depth2" id="s1.4">
-               <h2 class="sect">&sect;1.4&nbsp;Name clashes<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;1</a></span></h2>
+               <h2 class="sect">&sect;1.4&nbsp;Name clashes<a class="img" href="s1.html#s1.4"
+                     title="PermaLink to &sect;1.4&nbsp;Name clashes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;1</a></span></h2>
                <p>OT/J restricts Java with respect to handling of conflicting names.
                   		
                </p>
                <div class="subsect depth3" id="s1.4.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Names of role classes</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Names of role classes</span><a class="img" href="s1.html#s1.4.a"
+                        title="PermaLink to (a)&nbsp;Names of role classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A role class may not have the same name as a method or field of
                      			its enclosing team. A role class may not shadow another class that is visible in the scope of the enclosing team.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s1.4.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Names of role methods and fields</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Names of role methods and fields</span><a class="img" href="s1.html#s1.4.b"
+                        title="PermaLink to (b)&nbsp;Names of role methods and fields"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Along implicit inheritance, the names of methods or fields may
                      				not hide, shadow or obscure any previously visible name.<br />
                      				(see JLS <a href="http://java.sun.com/docs/books/jls/second_edition/html/classes.doc.html#40898"
@@ -1426,7 +1533,9 @@ age=27</pre></div>
                </div>
             </div>
             <div class="sect depth2" id="s1.5">
-               <h2 class="sect">&sect;1.5&nbsp;Team and role nesting<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;1</a></span></h2>
+               <h2 class="sect">&sect;1.5&nbsp;Team and role nesting<a class="img" href="s1.html#s1.5"
+                     title="PermaLink to &sect;1.5&nbsp;Team and role nesting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;1</a></span></h2>
                <p>Multi-level nesting of classes is restricted only by the following rules.
                   		
                </p>
@@ -1568,7 +1677,8 @@ age=27</pre></div>
                   </table>
                </div>
                <div class="subsect depth3" id="s1.5.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Nested teams</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Nested teams</span><a class="img" href="s1.html#s1.5.a" title="PermaLink to (a)&nbsp;Nested teams"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If a role class is also marked using the <code>team</code> modifier,
                      			it may contain roles at the next level of nesting.
                      			
@@ -1585,7 +1695,9 @@ age=27</pre></div>
                   </p>
                </div>
                <div class="subsect depth3" id="s1.5.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Nested classes of roles</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Nested classes of roles</span><a class="img" href="s1.html#s1.5.b"
+                        title="PermaLink to (b)&nbsp;Nested classes of roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A regular role class (ie., not marked as <code>team</code>, see above)
                      			may contain local types (see <a href="http://java.sun.com/docs/books/jls/second_edition/html/statements.doc.html#247766"
                         class="ext">JLS &sect;14.3</a>
@@ -1604,13 +1716,17 @@ age=27</pre></div>
                   </p>
                </div>
                <div class="subsect depth3" id="s1.5.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Prohibition of cycles</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Prohibition of cycles</span><a class="img" href="s1.html#s1.5.c"
+                        title="PermaLink to (c)&nbsp;Prohibition of cycles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A nested team may not extend its own enclosing team.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s1.5.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Prohibition of name clashes</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Prohibition of name clashes</span><a class="img" href="s1.html#s1.5.d"
+                        title="PermaLink to (d)&nbsp;Prohibition of name clashes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A nested team may inherit roles from multiple sources: its explicit super team
                      and any of its implicit super classes (roles) from different levels of nesting.
                      If from different sources a team inherits two or more roles of the same name
@@ -1619,7 +1735,9 @@ age=27</pre></div>
                   </p>
                </div>
                <div class="subsect depth3" id="s1.5.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">Precedence among different supers</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">Precedence among different supers</span><a class="img" href="s1.html#s1.5.e"
+                        title="PermaLink to (e)&nbsp;Precedence among different supers"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If a role inherits the same feature from several super roles (super and tsuper), 
                      			an implicitly inherited version always overrides any explicitly inherited feature. <br />
                      		    Also implicit inheritance alone may produce several candidate methods inherited by a role class. 
@@ -1644,7 +1762,9 @@ age=27</pre></div>
                   </div>
                </div>
                <div class="subsect depth3" id="s1.5.f">
-                  <h4 class="subsect">(f)&nbsp;<span class="title">Qualified tsuper</span></h4>
+                  <h4 class="subsect">(f)&nbsp;<span class="title">Qualified tsuper</span><a class="img" href="s1.html#s1.5.f"
+                        title="PermaLink to (f)&nbsp;Qualified tsuper"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A role in a nested team may qualify the keyword <code>tsuper</code> (see <a href="#s1.3.1.f" title="&sect;1.3.1.(f)&nbsp;tsuper" class="sect">&sect;1.3.1.(f)</a> above) by a type name 
                      			in order to select among different method version inherited from different implicit super classes. A term <code>OuterTeam.tsuper</code> evaluates 
                      			to the super-class, say <code>SuperOuter</code>, of an enclosing team "<code>OuterTeam</code>". A method call <code>OuterTeam.tsuper.m()</code> 
@@ -1703,9 +1823,10 @@ age=27</pre></div>
          </table>
       </div>
       <div id="footer">
-         <hr />
-         <address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
-         			OT/J version 1.3 &mdash; last modified: 2010-02-20
+         <hr /><a class="w3c img" href="http://jigsaw.w3.org/css-validator/check/referer"
+            shape="rect"><img src="../images/valid-css2-blue.png" alt="Valid CSS!" height="31" width="88" /></a><a class="w3c img" href="http://validator.w3.org/check?uri=referer" shape="rect"><img src="../images/valid-xhtml10-blue.png" alt="Valid XHTML 1.0 Strict" height="31"
+                 width="88" /></a><address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
+         			OT/J version 1.3 &mdash; last modified: 2010-05-18
       </div>
    </body>
 </html>

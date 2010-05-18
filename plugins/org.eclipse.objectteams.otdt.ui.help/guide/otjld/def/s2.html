@@ -3,8 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
    <head>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <meta name="copyright"
-            content="Copyright Technical University Berlin and others 2004, 2010. This page is made available under the Eclipse Public License v1.0. For full details see http://www.eclipse.org/legal/epl-v10.html" />
       <link rel="stylesheet" type="text/css" href="../css/ot.css" />
       <link rel="stylesheet" type="text/css" href="../css/otjld.css" />
       <title>OT/J Language Definition v1.3</title>
@@ -78,11 +76,15 @@
                <div class="line"></div>
             </div>
             <div class="sect depth2" id="s2.1">
-               <h2 class="sect">&sect;2.1&nbsp;playedBy relation<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
+               <h2 class="sect">&sect;2.1&nbsp;playedBy relation<a class="img" href="s2.html#s2.1"
+                     title="PermaLink to &sect;2.1&nbsp;playedBy relation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
                <div class="syntaxlink"><a href="sA.html#sA.1.1" title="&sect;A.1.1&nbsp;ClassDeclaration"
                      class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.1.1</a></div>
                <div class="subsect depth3" id="s2.1.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Role-base binding</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Role-base binding</span><a class="img" href="s2.html#s2.1.a"
+                        title="PermaLink to (a)&nbsp;Role-base binding"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Roles are bound to a base class by the <code>playedBy</code> keyword.
                      			
                   </p>
@@ -112,7 +114,8 @@
                   </div>
                </div>
                <div class="subsect depth3" id="s2.1.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Inheritance</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Inheritance</span><a class="img" href="s2.html#s2.1.b" title="PermaLink to (b)&nbsp;Inheritance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The <code>playedBy</code> relation is inherited along
                      		explicit and implicit (<a href="s1.html#s1.3.1.c"
                         title="&sect;1.3.1.(c)&nbsp;Overriding and implicit inheritance"
@@ -122,7 +125,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.1.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Covariant refinement</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Covariant refinement</span><a class="img" href="s2.html#s2.1.c"
+                        title="PermaLink to (c)&nbsp;Covariant refinement"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>An <em>explicit</em> sub-role (sub-class using <code>extends</code>) 
                      		can refine the <code>playedBy</code> relation to a more 
                      		specific base class (this is the basis for 
@@ -135,7 +140,8 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.1.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">No-variance</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">No-variance</span><a class="img" href="s2.html#s2.1.d" title="PermaLink to (d)&nbsp;No-variance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>An <em>implicit</em> sub-role (according to <a href="s1.html#s1.3.1.c"
                         title="&sect;1.3.1.(c)&nbsp;Overriding and implicit inheritance"
                         class="sect">&sect;1.3.1.(c)</a>)
@@ -147,7 +153,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.1.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">Use of playedBy bindings</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">Use of playedBy bindings</span><a class="img" href="s2.html#s2.1.e"
+                        title="PermaLink to (e)&nbsp;Use of playedBy bindings"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The <code>playedBy</code> relation by itself has no effect
                      	    on the behavior of role and base objects.
                      	    It is, however, the precondition for translation polymorphism
@@ -157,7 +165,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.1.f">
-                  <h4 class="subsect">(f)&nbsp;<span class="title">Effect on garbage collection</span></h4>
+                  <h4 class="subsect">(f)&nbsp;<span class="title">Effect on garbage collection</span><a class="img" href="s2.html#s2.1.f"
+                        title="PermaLink to (f)&nbsp;Effect on garbage collection"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A role and its base object form one conceptual entity. The garbage collector will see a role
                      and its base object as linked in a bidirectional manner. As a result, a role cannot be
                      garbage collected if its base is still reachable and vice versa.
@@ -176,7 +186,9 @@
                   </p>
                </div>
                <div class="sect depth3" id="s2.1.1">
-                  <h3 class="sect">&sect;2.1.1&nbsp;Binding interfaces<span class="toplink"><a href="#s2.1">&uarr;&nbsp;&sect;2.1</a></span></h3>
+                  <h3 class="sect">&sect;2.1.1&nbsp;Binding interfaces<a class="img" href="s2.html#s2.1.1"
+                        title="PermaLink to &sect;2.1.1&nbsp;Binding interfaces"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s2.1">&uarr;&nbsp;&sect;2.1</a></span></h3>
                   <p>Role base bindings may involve classes and/or interfaces.
                      	An interface defined as a member of a team is a role interface and may therefore
                      	have a <code>playedBy</code> clause. Also the type mentioned after the
@@ -191,7 +203,9 @@
                   </div>
                </div>
                <div class="sect depth3" id="s2.1.2">
-                  <h3 class="sect">&sect;2.1.2&nbsp;Legal base classes<span class="toplink"><a href="#s2.1">&uarr;&nbsp;&sect;2.1</a></span></h3>
+                  <h3 class="sect">&sect;2.1.2&nbsp;Legal base classes<a class="img" href="s2.html#s2.1.2"
+                        title="PermaLink to &sect;2.1.2&nbsp;Legal base classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s2.1">&uarr;&nbsp;&sect;2.1</a></span></h3>
                   <p>Generally, the base class mentioned after <code>playedBy</code> must be
                      		visible in the enclosing scope (see <a href="#s2.1.2.c" title="&sect;2.1.2.(c)&nbsp;Base class decapsulation"
                         class="sect">below (&sect;2.1.2.(c))</a> for an exception).
@@ -204,7 +218,9 @@
                      			
                   </p>
                   <div class="subsect depth4" id="s2.1.2.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">No role of the same team</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">No role of the same team</span><a class="img" href="s2.html#s2.1.2.a"
+                           title="PermaLink to (a)&nbsp;No role of the same team"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>The base class of any role class must not be a role of the same team.
                         			<br />
                         			It is also not allowed to declare a role class of the same name
@@ -219,7 +235,8 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.1.2.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">No cycles</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">No cycles</span><a class="img" href="s2.html#s2.1.2.b" title="PermaLink to (b)&nbsp;No cycles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>The base class mentioned after <code>playedBy</code> may not be
                         an enclosing type (at any depth) of the role class being defined.
                         <br />
@@ -235,7 +252,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.1.2.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Base class decapsulation</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Base class decapsulation</span><a class="img" href="s2.html#s2.1.2.c"
+                           title="PermaLink to (c)&nbsp;Base class decapsulation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If a base class referenced after <code>playedBy</code> exists but is not visible under normal visibility rules of Java, 
                         				this restriction may be overridden. This concept is called <strong>decapsulation</strong>, i.e., the opposite of encapsulation 
                         				(see also <a href="s3.html#s3.4" title="&sect;3.4&nbsp;Overriding access restrictions"
@@ -269,7 +288,9 @@
                      </ul>
                   </div>
                   <div class="subsect depth4" id="s2.1.2.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Base imports</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Base imports</span><a class="img" href="s2.html#s2.1.2.d"
+                           title="PermaLink to (d)&nbsp;Base imports"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If the main type in a file denotes a team, the modifier <code>base</code> can be applied to an import in order to specify that this type 
                         					should be imported for application as a base type only. Example:
                         				
@@ -314,7 +335,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.1.2.e">
-                     <h4 class="subsect">(e)&nbsp;<span class="title">No free type parameters</span></h4>
+                     <h4 class="subsect">(e)&nbsp;<span class="title">No free type parameters</span><a class="img" href="s2.html#s2.1.2.e"
+                           title="PermaLink to (e)&nbsp;No free type parameters"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>
                         				Neither the role class nor the base class in a playedBy binding must have any <em>free type parameters</em>.
                         				If both classes are specified with a type parameter of the same name, both parameters are identified
@@ -461,21 +484,27 @@
                </div>
             </div>
             <div class="sect depth2" id="s2.2">
-               <h2 class="sect">&sect;2.2&nbsp;Lowering<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
+               <h2 class="sect">&sect;2.2&nbsp;Lowering<a class="img" href="s2.html#s2.2"
+                     title="PermaLink to &sect;2.2&nbsp;Lowering"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
                <p>Each instance of a bound role class internally stores a reference to its
                   	base object. The reference is guaranteed to exist for each bound role
                   	instance, and cannot be changed during its lifetime.
                   		
                </p>
                <div class="subsect depth3" id="s2.2.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Definition of lowering</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Definition of lowering</span><a class="img" href="s2.html#s2.2.a"
+                        title="PermaLink to (a)&nbsp;Definition of lowering"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Retrieving the base object from a role object is called <strong>lowering</strong>.
                      		No other means exists for accessing the base reference.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s2.2.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Places of lowering</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Places of lowering</span><a class="img" href="s2.html#s2.2.b"
+                        title="PermaLink to (b)&nbsp;Places of lowering"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The lowering translation is not meant to be invoked
                      		by client code, but <strong>implicit translations</strong> are inserted by
                      		the compiler at all places where a role type is provided while the
@@ -578,14 +607,17 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.2.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Typing</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Typing</span><a class="img" href="s2.html#s2.2.c" title="PermaLink to (c)&nbsp;Typing"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The static type of an implicit lowering translation is the base class
                      		declared using <code>playedBy</code> in the respective role class.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s2.2.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Explicit lowering</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Explicit lowering</span><a class="img" href="s2.html#s2.2.d"
+                        title="PermaLink to (d)&nbsp;Explicit lowering"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If a base type is also the super type of its role,
                      		which frequently happens, if a base reference is known only by
                      		the type <code>Object</code>, lowering cannot be deduced automatically,
@@ -637,7 +669,9 @@
                   </div>
                </div>
                <div class="subsect depth3" id="s2.2.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">Lowering of arrays</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">Lowering of arrays</span><a class="img" href="s2.html#s2.2.e"
+                        title="PermaLink to (e)&nbsp;Lowering of arrays"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Lowering also works for arrays of role objects.
                      		In order to lower an array of role objects,
                      		a new array is created and filled with base objects, one for each
@@ -649,7 +683,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.2.f">
-                  <h4 class="subsect">(f)&nbsp;<span class="title">Ambiguous lowering</span></h4>
+                  <h4 class="subsect">(f)&nbsp;<span class="title">Ambiguous lowering</span><a class="img" href="s2.html#s2.2.f"
+                        title="PermaLink to (f)&nbsp;Ambiguous lowering"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>When assigning a value of a bound role type to a variable or argument of type <code>java.lang.Object</code>
                      			this situation is considered as ambiguous lowering because the assignment could apply either (a) a direct upcast to <code>Object</code>
                      			or (b) lowering and then upcasting.
@@ -659,7 +695,8 @@
                </div>
             </div>
             <div class="sect depth2" id="s2.3">
-               <h2 class="sect">&sect;2.3&nbsp;Lifting<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
+               <h2 class="sect">&sect;2.3&nbsp;Lifting<a class="img" href="s2.html#s2.3" title="PermaLink to &sect;2.3&nbsp;Lifting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
                <p>Lifting is the reverse translation of lowering. However, lifting is
                   	a bit more demanding, since a given base object may have zero to
                   	many role objects bound to it. Therefor, the lifting translation
@@ -668,7 +705,9 @@
                   		
                </p>
                <div class="subsect depth3" id="s2.3.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Definition of lifting</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Definition of lifting</span><a class="img" href="s2.html#s2.3.a"
+                        title="PermaLink to (a)&nbsp;Definition of lifting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Retrieving a role for a given base object is called <strong>lifting</strong>.
                      	    Lifting is guaranteed to yield the same role object for subsequent
                      	    calls regarding the same base object, the same team instance and
@@ -679,7 +718,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.3.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Places of lifting</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Places of lifting</span><a class="img" href="s2.html#s2.3.b"
+                        title="PermaLink to (b)&nbsp;Places of lifting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The lifting translation is not meant to be invoked
                      		by client code, but translations are inserted by the compiler
                      		at the following locations:
@@ -696,7 +737,8 @@
                   </ul>
                </div>
                <div class="subsect depth3" id="s2.3.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Typing</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Typing</span><a class="img" href="s2.html#s2.3.c" title="PermaLink to (c)&nbsp;Typing"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A lifting translation statically expects a specific role class.
                      		This expected role class must have a <code>playedBy</code> clause
                      		(either directly, or inherited (explicitly or implicitly)
@@ -705,7 +747,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.3.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Lifting of arrays</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Lifting of arrays</span><a class="img" href="s2.html#s2.3.d"
+                        title="PermaLink to (d)&nbsp;Lifting of arrays"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Lifting also works for arrays of role objects.
                      		For lifting an array of base objects
                      		a new array is created and filled with role objects, one for each
@@ -723,14 +767,18 @@
                   		
                </p>
                <div class="sect depth3" id="s2.3.1">
-                  <h3 class="sect">&sect;2.3.1&nbsp;Implicit role creation<span class="toplink"><a href="#s2.3">&uarr;&nbsp;&sect;2.3</a></span></h3>
+                  <h3 class="sect">&sect;2.3.1&nbsp;Implicit role creation<a class="img" href="s2.html#s2.3.1"
+                        title="PermaLink to &sect;2.3.1&nbsp;Implicit role creation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s2.3">&uarr;&nbsp;&sect;2.3</a></span></h3>
                   <p>Lifting tries to reuse existing role objects so that role state persists across
                      	lifting and lowering. If no suitable role instance is found during lifting,
                      	a new role is created.
                      			
                   </p>
                   <div class="subsect depth4" id="s2.3.1.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Reuse of existing role objects</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Reuse of existing role objects</span><a class="img" href="s2.html#s2.3.1.a"
+                           title="PermaLink to (a)&nbsp;Reuse of existing role objects"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A role object is considered suitable for reuse during lifting, if
                         		these three items are identical:
                         				
@@ -746,7 +794,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.3.1.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Default lifting constructor</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Default lifting constructor</span><a class="img" href="s2.html#s2.3.1.b"
+                           title="PermaLink to (b)&nbsp;Default lifting constructor"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Lifting uses a default constructor which takes exactly one argument of the type
                         			of the declared base class (after <code>playedBy</code>).
                         			By default the compiler generates such a constructor for each bound role.
@@ -766,7 +816,9 @@
                      </ul>
                   </div>
                   <div class="subsect depth4" id="s2.3.1.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Custom lifting constructor</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Custom lifting constructor</span><a class="img" href="s2.html#s2.3.1.c"
+                           title="PermaLink to (c)&nbsp;Custom lifting constructor"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If a role class declares a custom constructor with the same signature
                         			as the default lifting constructor, this constructor is used during lifting.
                         			This custom constructor may pre-assume that the role has been setup
@@ -780,10 +832,14 @@
                   </div>
                </div>
                <div class="sect depth3" id="s2.3.2">
-                  <h3 class="sect">&sect;2.3.2&nbsp;Declared lifting<span class="toplink"><a href="#s2.3">&uarr;&nbsp;&sect;2.3</a></span></h3>
+                  <h3 class="sect">&sect;2.3.2&nbsp;Declared lifting<a class="img" href="s2.html#s2.3.2"
+                        title="PermaLink to &sect;2.3.2&nbsp;Declared lifting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s2.3">&uarr;&nbsp;&sect;2.3</a></span></h3>
                   <div class="syntaxlink"><a href="sA.html#sA.6.2" title="&sect;A.6.2&nbsp;LiftingType" class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.6.2</a></div>
                   <div class="subsect depth4" id="s2.3.2.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Parameters with declared lifting</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Parameters with declared lifting</span><a class="img" href="s2.html#s2.3.2.a"
+                           title="PermaLink to (a)&nbsp;Parameters with declared lifting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A non-static team-level method or constructor may declare a parameter with two types 
                         			in order to explicitly denote a place of <strong>lifting</strong>. Using the syntax
                         				
@@ -805,7 +861,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.3.2.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Super in the context of declared lifting</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Super in the context of declared lifting</span><a class="img" href="s2.html#s2.3.2.b"
+                           title="PermaLink to (b)&nbsp;Super in the context of declared lifting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Calling <code>super</code> or <code>tsuper</code> in a method or constructor which 
                         			declares lifting for one or more parameters refers to a method or constructor with role type parameters, 
                         			i.e., lifting takes place <em>before</em> super invocation. Nevertheless, the super method may also 
@@ -814,7 +872,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.3.2.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Declared lifting of arrays</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Declared lifting of arrays</span><a class="img" href="s2.html#s2.3.2.c"
+                           title="PermaLink to (c)&nbsp;Declared lifting of arrays"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If a parameter involving explicit lifting should be of an <strong>array</strong> type, the syntax is
                         				
                      </p>
@@ -825,7 +885,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.3.2.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Declared lifting for catch blocks</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Declared lifting for catch blocks</span><a class="img" href="s2.html#s2.3.2.d"
+                           title="PermaLink to (d)&nbsp;Declared lifting for catch blocks"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Also the argument of a catch block may apply declared lifting like in:
                         				
                      </p>
@@ -843,7 +905,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.3.2.e">
-                     <h4 class="subsect">(e)&nbsp;<span class="title">Generic declared lifting</span></h4>
+                     <h4 class="subsect">(e)&nbsp;<span class="title">Generic declared lifting</span><a class="img" href="s2.html#s2.3.2.e"
+                           title="PermaLink to (e)&nbsp;Generic declared lifting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A method with declared lifting may introduce a type parameter that is bounded relative to a given role type.
                         					Such bound is declared as:
                         				
@@ -939,14 +1003,18 @@
                   </div>
                </div>
                <div class="sect depth3" id="s2.3.3">
-                  <h3 class="sect">&sect;2.3.3&nbsp;Smart lifting<span class="toplink"><a href="#s2.3">&uarr;&nbsp;&sect;2.3</a></span></h3>
+                  <h3 class="sect">&sect;2.3.3&nbsp;Smart lifting<a class="img" href="s2.html#s2.3.3"
+                        title="PermaLink to &sect;2.3.3&nbsp;Smart lifting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s2.3">&uarr;&nbsp;&sect;2.3</a></span></h3>
                   <p>In situations where role and base classes are part of some inheritance
                      		hierarchies (<code>extends</code>), choosing the appropriate role class during
                      		lifting involves the following rules:
                      			
                   </p>
                   <div class="subsect depth4" id="s2.3.3.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Static adjustment</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Static adjustment</span><a class="img" href="s2.html#s2.3.3.a"
+                           title="PermaLink to (a)&nbsp;Static adjustment"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If a base class <code>B</code> shall be lifted to a role class
                         			<code>R</code> that is not bound to (<code>playedBy</code>)
                         			<code>B</code>, but if a subclass of <code>R</code>
@@ -964,7 +1032,9 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s2.3.3.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Dynamic selection of a role class</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Dynamic selection of a role class</span><a class="img" href="s2.html#s2.3.3.b"
+                           title="PermaLink to (b)&nbsp;Dynamic selection of a role class"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>At runtime also the dynamic type of a base object is considered:
 			Lifting always tries to use a role class that is bound to the
 			exact class of the base object. Lifting considers all role&ndash;base
@@ -980,7 +1050,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.3.3.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Team as closed world</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Team as closed world</span><a class="img" href="s2.html#s2.3.3.c"
+                           title="PermaLink to (c)&nbsp;Team as closed world"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>In the above analysis gathering all role-base pairs is performed at
                         			compile-time. From this follows, that a team class can only be
                         			compiled when all its contained role classes are known and a role class
@@ -992,7 +1064,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.3.3.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Selection regardless of abstractness</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Selection regardless of abstractness</span><a class="img" href="s2.html#s2.3.3.d"
+                           title="PermaLink to (d)&nbsp;Selection regardless of abstractness"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Smart lifting is not affected by abstractness of role classes.
                         			For the effect of abstract role classes see <a href="#s2.5" title="&sect;2.5&nbsp;Abstract Roles" class="sect">&sect;2.5</a>.
                         				
@@ -1077,14 +1151,18 @@
                   </div>
                </div>
                <div class="sect depth3" id="s2.3.4">
-                  <h3 class="sect">&sect;2.3.4&nbsp;Binding ambiguities<span class="toplink"><a href="#s2.3">&uarr;&nbsp;&sect;2.3</a></span></h3>
+                  <h3 class="sect">&sect;2.3.4&nbsp;Binding ambiguities<a class="img" href="s2.html#s2.3.4"
+                        title="PermaLink to &sect;2.3.4&nbsp;Binding ambiguities"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s2.3">&uarr;&nbsp;&sect;2.3</a></span></h3>
                   <p>While all examples so far have only shown 1-to-1 class bindings,
                      	    several cases of multiple bindings are allowable. Ambiguities may be
                      	    detected at compile time and/or at runtime.
                      			
                   </p>
                   <div class="subsect depth4" id="s2.3.4.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Potential ambiguity</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Potential ambiguity</span><a class="img" href="s2.html#s2.3.4.a"
+                           title="PermaLink to (a)&nbsp;Potential ambiguity"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A <strong>potential ambiguity</strong> is given,
                         				if two role classes <code>R1</code> and <code>R2</code>
                         				exist such that
@@ -1147,7 +1225,9 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s2.3.4.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Definite ambiguity</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Definite ambiguity</span><a class="img" href="s2.html#s2.3.4.b"
+                           title="PermaLink to (b)&nbsp;Definite ambiguity"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>A <strong>definite ambiguity</strong> is given if
                         				
                      </p>
@@ -1200,7 +1280,9 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s2.3.4.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Actual ambiguity</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Actual ambiguity</span><a class="img" href="s2.html#s2.3.4.c"
+                           title="PermaLink to (c)&nbsp;Actual ambiguity"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>At runtime <strong>actual ambiguity</strong> may occur if for the
                         			<em>dynamic type</em> of a base to be lifted the conditions of (b)
                         			above hold accordingly. Actual ambiguity is only possible in cases
@@ -1260,7 +1342,9 @@
                      </div>
                   </div>
                   <div class="subsect depth4" id="s2.3.4.d">
-                     <h4 class="subsect">(d)&nbsp;<span class="title">Mismatching role</span></h4>
+                     <h4 class="subsect">(d)&nbsp;<span class="title">Mismatching role</span><a class="img" href="s2.html#s2.3.4.d"
+                           title="PermaLink to (d)&nbsp;Mismatching role"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>In cases of potential ambiguity another runtime error may occur:
                         			a <strong>mismatching role</strong> is encountered when a role is found
                         			in the cache, which is not conform to the required type.
@@ -1348,19 +1432,25 @@
                </div>
             </div>
             <div class="sect depth2" id="s2.4">
-               <h2 class="sect">&sect;2.4&nbsp;Explicit role creation<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
+               <h2 class="sect">&sect;2.4&nbsp;Explicit role creation<a class="img" href="s2.html#s2.4"
+                     title="PermaLink to &sect;2.4&nbsp;Explicit role creation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
                <p>Lifting is the normal technique by which role objects are created implicitly.
                   This section defines under which conditions a role can also be created explicitly.
                   		
                </p>
                <div class="sect depth3" id="s2.4.1">
-                  <h3 class="sect">&sect;2.4.1&nbsp;Role creation via a lifting constructor<span class="toplink"><a href="#s2.4">&uarr;&nbsp;&sect;2.4</a></span></h3>
+                  <h3 class="sect">&sect;2.4.1&nbsp;Role creation via a lifting constructor<a class="img" href="s2.html#s2.4.1"
+                        title="PermaLink to &sect;2.4.1&nbsp;Role creation via a lifting constructor"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s2.4">&uarr;&nbsp;&sect;2.4</a></span></h3>
                   <p>Lifting uses the default constructor for roles (see <a href="#s2.3.1" title="&sect;2.3.1&nbsp;Implicit role creation" class="sect">&sect;2.3.1</a>).
                      This constructor can be invoked from client code, if the following rules are respected.
                      			
                   </p>
                   <div class="subsect depth4" id="s2.4.1.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Team context</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Team context</span><a class="img" href="s2.html#s2.4.1.a"
+                           title="PermaLink to (a)&nbsp;Team context"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>The lifting constructor can be used only within the enclosing team of
                         		the role to be instantiated. Thus, qualified allocation expressions
                         		(<code>someTeam.new SomeRole(..)</code>) may never use the lifting constructor.
@@ -1368,7 +1458,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.4.1.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Fresh base object</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Fresh base object</span><a class="img" href="s2.html#s2.4.1.b"
+                           title="PermaLink to (b)&nbsp;Fresh base object"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If the argument to a lifting constructor invocation is a <code>new</code>
                         		expression, creating a fresh base object, the use of the lifting constructor
                         		is safe. Otherwise the rules of (c) below apply.
@@ -1376,7 +1468,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.4.1.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Duplicate role runtime check</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Duplicate role runtime check</span><a class="img" href="s2.html#s2.4.1.c"
+                           title="PermaLink to (c)&nbsp;Duplicate role runtime check"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>If it cannot be syntactically derived, that the argument to a lifting
                         		constructor is a freshly created base object (b), a compile time warning will
                         		signal that an additional runtime check is needed: It must be prevented that
@@ -1393,7 +1487,9 @@
                   </div>
                </div>
                <div class="sect depth3" id="s2.4.2">
-                  <h3 class="sect">&sect;2.4.2&nbsp;Role creation via a regular constructor<span class="toplink"><a href="#s2.4">&uarr;&nbsp;&sect;2.4</a></span></h3>
+                  <h3 class="sect">&sect;2.4.2&nbsp;Role creation via a regular constructor<a class="img" href="s2.html#s2.4.2"
+                        title="PermaLink to &sect;2.4.2&nbsp;Role creation via a regular constructor"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s2.4">&uarr;&nbsp;&sect;2.4</a></span></h3>
                   <p>Roles may also be created explicitly using a custom constructor with arbitrary signature
                      other than the signature of the lifting constructor.<br />
                      	Within role constructors, four kinds of self-calls are possible:
@@ -1415,14 +1511,17 @@
                      </dd>
                   </dl>
                   <div class="subsect depth4" id="s2.4.2.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Unbound roles</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Unbound roles</span><a class="img" href="s2.html#s2.4.2.a"
+                           title="PermaLink to (a)&nbsp;Unbound roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Each constructor of a role that is <strong>not bound</strong> to a base class must use
                         		one of <code>this(..)</code>, <code>super(..)</code> or <code>tsuper(..)</code>.
                         				
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.4.2.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Bound roles</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Bound roles</span><a class="img" href="s2.html#s2.4.2.b" title="PermaLink to (b)&nbsp;Bound roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Each constructor of a <strong>bound role</strong> must directly or indirectly invoke either 
                         		a <code>base(..)</code> constructor or a lifting constructor (see <a href="#s2.3.1" title="&sect;2.3.1&nbsp;Implicit role creation" class="sect">&sect;2.3.1</a>). 
                         		Indirect calls to the base constructor or lifting constructor may use any of <code>this(..)</code>, <code>super(..)</code> 
@@ -1439,7 +1538,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s2.4.2.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Super-call for bound roles</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Super-call for bound roles</span><a class="img" href="s2.html#s2.4.2.c"
+                           title="PermaLink to (c)&nbsp;Super-call for bound roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>Instead of or prior to calling <code>base(..)</code> a constructor of a bound role explicitly or implicitly calls a super constructor.
                         Which constructor is applicable depends on the super role and its <code>playedBy</code> clause.
                         				
@@ -1488,7 +1589,9 @@
                   </p>
                </div>
                <div class="sect depth3" id="s2.4.3">
-                  <h3 class="sect">&sect;2.4.3&nbsp;Role creation in the presence of smart lifting<span class="toplink"><a href="#s2.4">&uarr;&nbsp;&sect;2.4</a></span></h3>
+                  <h3 class="sect">&sect;2.4.3&nbsp;Role creation in the presence of smart lifting<a class="img" href="s2.html#s2.4.3"
+                        title="PermaLink to &sect;2.4.3&nbsp;Role creation in the presence of smart lifting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s2.4">&uarr;&nbsp;&sect;2.4</a></span></h3>
                   <p>Explicitly instantiating a role <code>R1</code> bound to a base <code>B</code> where smart lifting of <code>B</code> to <code>R1</code> would actually 
                      	provide a subrole <code>R2</code> is dangerous: Instantiation enters the <code>R1</code> into the team's internal cache. If at any time later lifting 
                      	this <code>B</code> to <code>R2</code> is requested, which is a legal request, the runtime system will answer by throwing a <code>org.objectteams.WrongRoleException</code> 
@@ -1575,7 +1678,9 @@
                </div>
             </div>
             <div class="sect depth2" id="s2.5">
-               <h2 class="sect">&sect;2.5&nbsp;Abstract Roles<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
+               <h2 class="sect">&sect;2.5&nbsp;Abstract Roles<a class="img" href="s2.html#s2.5"
+                     title="PermaLink to &sect;2.5&nbsp;Abstract Roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
                <p>Overriding of role classes and dynamic binding of role types (<a href="s1.html#s1.3.1.e"
                      title="&sect;1.3.1.(e)&nbsp;Dynamic binding of types"
                      class="sect">&sect;1.3.1.(e)</a>)
@@ -1583,7 +1688,9 @@
                   		
                </p>
                <div class="subsect depth3" id="s2.5.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Using abstract classes for creation</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Using abstract classes for creation</span><a class="img" href="s2.html#s2.5.a"
+                        title="PermaLink to (a)&nbsp;Using abstract classes for creation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Abstract role classes can indeed be used for object creation.
                      			The effect of such a statement is that the team must be
                      			marked <code>abstract</code>. Only those sub-teams are concrete
@@ -1608,7 +1715,9 @@
                   </div>
                </div>
                <div class="subsect depth3" id="s2.5.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Relevant roles</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Relevant roles</span><a class="img" href="s2.html#s2.5.b"
+                        title="PermaLink to (b)&nbsp;Relevant roles"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A team must be marked <code>abstract</code> if one of its <strong>relevant roles</strong> is abstract.
                      		<br />
                      		A role is relevant in this sense if
@@ -1642,7 +1751,9 @@
                </div>
             </div>
             <div class="sect depth2" id="s2.6">
-               <h2 class="sect">&sect;2.6&nbsp;Explicit base references<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
+               <h2 class="sect">&sect;2.6&nbsp;Explicit base references<a class="img" href="s2.html#s2.6"
+                     title="PermaLink to &sect;2.6&nbsp;Explicit base references"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
                <p>The role-base link is not meant to be accessed explicitly from programs,
                   but it is fully under the control of compiler and runtime environment.
                   Accessing features of a role's base object is done by
@@ -1652,7 +1763,9 @@
                   		
                </p>
                <div class="subsect depth3" id="s2.6.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Externalized roles of a base team</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Externalized roles of a base team</span><a class="img" href="s2.html#s2.6.a"
+                        title="PermaLink to (a)&nbsp;Externalized roles of a base team"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If the base class of a role <code>T1.R1</code> is again a team
                      <code>T2</code>, roles of that team <code>T2</code> can be
                      externalized (see <a href="s1.html#s1.2.2" title="&sect;1.2.2&nbsp;Externalized roles"
@@ -1697,7 +1810,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.6.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Explicit base object creation</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Explicit base object creation</span><a class="img" href="s2.html#s2.6.b"
+                        title="PermaLink to (b)&nbsp;Explicit base object creation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Within a role constructor (which is not the lifting constructor)
                      the syntax <code>base(<em>arguments</em>)</code> causes an instance
                      of the bound base class to be created and linked (see <a href="#s2.4.2"
@@ -1707,7 +1822,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.6.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Base call in callin method</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Base call in callin method</span><a class="img" href="s2.html#s2.6.c"
+                        title="PermaLink to (c)&nbsp;Base call in callin method"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Within a <a href="s4.html#s4.2.d" title="&sect;4.2.(d)&nbsp;Callin methods"
                         class="sect">callin method (&sect;4.2.(d))</a>
                      an expression <code>base.m(<em>args</em>)</code> is used to invoke the
@@ -1716,7 +1833,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.6.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Base guard predicates</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Base guard predicates</span><a class="img" href="s2.html#s2.6.d"
+                        title="PermaLink to (d)&nbsp;Base guard predicates"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p><a href="s5.html#s5.4" title="&sect;5.4&nbsp;Guard predicates" class="sect">Guard predicates (&sect;5.4)</a> can
                      be specified to act on the base side using the <code><strong>base when</strong></code> keywords. 
                      Within such a base guard predicate <code>base</code> is interpreted as a special identifier
@@ -1727,7 +1846,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.6.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">Parameter mappings</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">Parameter mappings</span><a class="img" href="s2.html#s2.6.e"
+                        title="PermaLink to (e)&nbsp;Parameter mappings"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>An expression at the right-hand side of a parameter mapping 
                      		(parameter in a callin binding (<a href="s4.html#s4.4" title="&sect;4.4&nbsp;Callin parameter mapping"
                         class="sect">&sect;4.4</a>) or 
@@ -1738,14 +1859,18 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s2.6.f">
-                  <h4 class="subsect">(f)&nbsp;<span class="title">Inhibition of modification</span></h4>
+                  <h4 class="subsect">(f)&nbsp;<span class="title">Inhibition of modification</span><a class="img" href="s2.html#s2.6.f"
+                        title="PermaLink to (f)&nbsp;Inhibition of modification"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>In all cases, the <code>base</code> reference is immutable,
                      i.e., <code>base</code> can never appear as the left-hand-side of an assignment.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s2.6.g">
-                  <h4 class="subsect">(g)&nbsp;<span class="title">Decapsulation via base reference</span></h4>
+                  <h4 class="subsect">(g)&nbsp;<span class="title">Decapsulation via base reference</span><a class="img" href="s2.html#s2.6.g"
+                        title="PermaLink to (g)&nbsp;Decapsulation via base reference"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>In cases <a href="#s2.6.d" title="&sect;2.6.(d)&nbsp;Base guard predicates"
                         class="sect">&sect;2.6.(d)</a> and <a href="#s2.6.e" title="&sect;2.6.(e)&nbsp;Parameter mappings" class="sect">&sect;2.6.(e)</a> above, members of the base
                      			   object may be accessed that would not be visible under Java's visibility rules.
@@ -1760,28 +1885,33 @@
                <div class="newpage"></div>
             </div>
             <div class="sect depth2" id="s2.7">
-               <h2 class="sect">&sect;2.7&nbsp;Advanced structures<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
+               <h2 class="sect">&sect;2.7&nbsp;Advanced structures<a class="img" href="s2.html#s2.7"
+                     title="PermaLink to &sect;2.7&nbsp;Advanced structures"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;2</a></span></h2>
                <p>This section discusses how role containment and the playedBy relationship can be combined. 
                   	It does not define new rules, but illustrates rules defined above. The central idea is that any class 
                   	can have more than one of the three flavors <em>team, role, </em>and<em> base</em>.
                   		
                </p>
                <div class="subsect depth3" id="s2.7.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Nesting</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Nesting</span><a class="img" href="s2.html#s2.7.a" title="PermaLink to (a)&nbsp;Nesting"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If a role (contained in a team) is also a team (marked with the <code>team</code> modifier) 
                      		it is a <strong>nested team</strong>. The depth of nesting is not restricted.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s2.7.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Stacking</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Stacking</span><a class="img" href="s2.html#s2.7.b" title="PermaLink to (b)&nbsp;Stacking"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If the base class to which a role is bound using <code>playedBy</code> is a team, 
                      		the role is said to be <strong>stacked</strong> on the base team.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s2.7.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Layering</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Layering</span><a class="img" href="s2.html#s2.7.c" title="PermaLink to (c)&nbsp;Layering"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If roles of a team <code>Secondary</code> are played by roles of another team <code>Primary</code> 
                      		(i.e., base classes are roles), the team <code>Secondary</code> defines a <strong>layer</strong> over the team <code>Primary</code>.
                      		Such layering requires a final reference <code>anchor</code> from <code>Secondary</code> to an instance of <code>Primary</code>. 
@@ -1803,7 +1933,9 @@
                </div>
                <div class="newpage"></div>
                <div class="subsect depth3" id="s2.7.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Implicit playedBy specialization</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Implicit playedBy specialization</span><a class="img" href="s2.html#s2.7.d"
+                        title="PermaLink to (d)&nbsp;Implicit playedBy specialization"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>According to <a href="#s2.1.d" title="&sect;2.1.(d)&nbsp;No-variance" class="sect">&sect;2.1.(d)</a> an implicit sub-role may <em>implicitly</em> specialize an existing <code>playedBy</code> relation.
                      		This requires the base class to be specified relative to some implicit (<code>OuterTeam.this</code>) or explicit (<code>OuterTeam.base</code>) team anchor. 
                      		Specializing that team anchor automatically specializes the playedBy declaration, too.
@@ -1860,9 +1992,10 @@
          </table>
       </div>
       <div id="footer">
-         <hr />
-         <address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
-         			OT/J version 1.3 &mdash; last modified: 2010-02-20
+         <hr /><a class="w3c img" href="http://jigsaw.w3.org/css-validator/check/referer"
+            shape="rect"><img src="../images/valid-css2-blue.png" alt="Valid CSS!" height="31" width="88" /></a><a class="w3c img" href="http://validator.w3.org/check?uri=referer" shape="rect"><img src="../images/valid-xhtml10-blue.png" alt="Valid XHTML 1.0 Strict" height="31"
+                 width="88" /></a><address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
+         			OT/J version 1.3 &mdash; last modified: 2010-05-18
       </div>
    </body>
 </html>

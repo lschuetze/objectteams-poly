@@ -3,8 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
    <head>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <meta name="copyright"
-            content="Copyright Technical University Berlin and others 2004, 2010. This page is made available under the Eclipse Public License v1.0. For full details see http://www.eclipse.org/legal/epl-v10.html" />
       <link rel="stylesheet" type="text/css" href="../css/ot.css" />
       <link rel="stylesheet" type="text/css" href="../css/otjld.css" />
       <title>OT/J Language Definition v1.3</title>
@@ -20,7 +18,9 @@
          </table>
          <div class="breadcrumb"><a class="nav" href="s2.html" rel="section">&sect;2&nbsp;Role Binding</a></div>
          <div class="sect depth2" id="s2.6">
-            <h2 class="sect">&sect;2.6&nbsp;Explicit base references</h2>
+            <h2 class="sect">&sect;2.6&nbsp;Explicit base references<a class="img" href="s2.6.html"
+                  title="PermaLink to &sect;2.6&nbsp;Explicit base references"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                       alt="" /></a></h2>
             <p>The role-base link is not meant to be accessed explicitly from programs,
                but it is fully under the control of compiler and runtime environment.
                Accessing features of a role's base object is done by
@@ -30,7 +30,9 @@
                		
             </p>
             <div class="subsect depth3" id="s2.6.a">
-               <h4 class="subsect">(a)&nbsp;<span class="title">Externalized roles of a base team</span></h4>
+               <h4 class="subsect">(a)&nbsp;<span class="title">Externalized roles of a base team</span><a class="img" href="s2.6.a.html"
+                     title="PermaLink to (a)&nbsp;Externalized roles of a base team"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>If the base class of a role <code>T1.R1</code> is again a team
                   <code>T2</code>, roles of that team <code>T2</code> can be
                   externalized (see <a href="s1.2.2.html" title="&sect;1.2.2&nbsp;Externalized roles" class="sect">&sect;1.2.2</a>)
@@ -74,7 +76,9 @@
                </p>
             </div>
             <div class="subsect depth3" id="s2.6.b">
-               <h4 class="subsect">(b)&nbsp;<span class="title">Explicit base object creation</span></h4>
+               <h4 class="subsect">(b)&nbsp;<span class="title">Explicit base object creation</span><a class="img" href="s2.6.b.html"
+                     title="PermaLink to (b)&nbsp;Explicit base object creation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>Within a role constructor (which is not the lifting constructor)
                   the syntax <code>base(<em>arguments</em>)</code> causes an instance
                   of the bound base class to be created and linked (see <a href="s2.4.2.html"
@@ -84,7 +88,9 @@
                </p>
             </div>
             <div class="subsect depth3" id="s2.6.c">
-               <h4 class="subsect">(c)&nbsp;<span class="title">Base call in callin method</span></h4>
+               <h4 class="subsect">(c)&nbsp;<span class="title">Base call in callin method</span><a class="img" href="s2.6.c.html"
+                     title="PermaLink to (c)&nbsp;Base call in callin method"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>Within a <a href="s4.2.d.html" title="&sect;4.2.(d)&nbsp;Callin methods" class="sect">callin method (&sect;4.2.(d))</a>
                   an expression <code>base.m(<em>args</em>)</code> is used to invoke the
                   originally called method (see <a href="s4.3.html" title="&sect;4.3&nbsp;Base calls" class="sect">&sect;4.3</a>).
@@ -92,7 +98,9 @@
                </p>
             </div>
             <div class="subsect depth3" id="s2.6.d">
-               <h4 class="subsect">(d)&nbsp;<span class="title">Base guard predicates</span></h4>
+               <h4 class="subsect">(d)&nbsp;<span class="title">Base guard predicates</span><a class="img" href="s2.6.d.html"
+                     title="PermaLink to (d)&nbsp;Base guard predicates"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p><a href="s5.4.html" title="&sect;5.4&nbsp;Guard predicates" class="sect">Guard predicates (&sect;5.4)</a> can
                   be specified to act on the base side using the <code><strong>base when</strong></code> keywords. 
                   Within such a base guard predicate <code>base</code> is interpreted as a special identifier
@@ -103,7 +111,9 @@
                </p>
             </div>
             <div class="subsect depth3" id="s2.6.e">
-               <h4 class="subsect">(e)&nbsp;<span class="title">Parameter mappings</span></h4>
+               <h4 class="subsect">(e)&nbsp;<span class="title">Parameter mappings</span><a class="img" href="s2.6.e.html"
+                     title="PermaLink to (e)&nbsp;Parameter mappings"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>An expression at the right-hand side of a parameter mapping 
                   		(parameter in a callin binding (<a href="s4.4.html" title="&sect;4.4&nbsp;Callin parameter mapping"
                      class="sect">&sect;4.4</a>) or 
@@ -113,14 +123,18 @@
                </p>
             </div>
             <div class="subsect depth3" id="s2.6.f">
-               <h4 class="subsect">(f)&nbsp;<span class="title">Inhibition of modification</span></h4>
+               <h4 class="subsect">(f)&nbsp;<span class="title">Inhibition of modification</span><a class="img" href="s2.6.f.html"
+                     title="PermaLink to (f)&nbsp;Inhibition of modification"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>In all cases, the <code>base</code> reference is immutable,
                   i.e., <code>base</code> can never appear as the left-hand-side of an assignment.
                   			
                </p>
             </div>
             <div class="subsect depth3" id="s2.6.g">
-               <h4 class="subsect">(g)&nbsp;<span class="title">Decapsulation via base reference</span></h4>
+               <h4 class="subsect">(g)&nbsp;<span class="title">Decapsulation via base reference</span><a class="img" href="s2.6.g.html"
+                     title="PermaLink to (g)&nbsp;Decapsulation via base reference"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a></h4>
                <p>In cases <a href="#s2.6.d" title="&sect;2.6.(d)&nbsp;Base guard predicates"
                      class="sect">&sect;2.6.(d)</a> and <a href="#s2.6.e" title="&sect;2.6.(e)&nbsp;Parameter mappings" class="sect">&sect;2.6.(e)</a> above, members of the base
                   			   object may be accessed that would not be visible under Java's visibility rules.
@@ -143,9 +157,10 @@
          <div class="breadcrumb"><a class="nav" href="s2.html" rel="section">&sect;2&nbsp;Role Binding</a></div>
       </div>
       <div id="footer">
-         <hr />
-         <address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
-         			OT/J version 1.3 &mdash; last modified: 2010-02-20
+         <hr /><a class="w3c img" href="http://jigsaw.w3.org/css-validator/check/referer"
+            shape="rect"><img src="../images/valid-css2-blue.png" alt="Valid CSS!" height="31" width="88" /></a><a class="w3c img" href="http://validator.w3.org/check?uri=referer" shape="rect"><img src="../images/valid-xhtml10-blue.png" alt="Valid XHTML 1.0 Strict" height="31"
+                 width="88" /></a><address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
+         			OT/J version 1.3 &mdash; last modified: 2010-05-18
       </div>
    </body>
 </html>

@@ -3,8 +3,6 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
    <head>
       <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-      <meta name="copyright"
-            content="Copyright Technical University Berlin and others 2004, 2010. This page is made available under the Eclipse Public License v1.0. For full details see http://www.eclipse.org/legal/epl-v10.html" />
       <link rel="stylesheet" type="text/css" href="../css/ot.css" />
       <link rel="stylesheet" type="text/css" href="../css/otjld.css" />
       <title>OT/J Language Definition v1.3</title>
@@ -68,18 +66,24 @@
                <div class="line"></div>
             </div>
             <div class="sect depth2" id="s4.1">
-               <h2 class="sect">&sect;4.1&nbsp;Callin method binding<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
+               <h2 class="sect">&sect;4.1&nbsp;Callin method binding<a class="img" href="s4.html#s4.1"
+                     title="PermaLink to &sect;4.1&nbsp;Callin method binding"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
                <div class="syntaxlink"><a href="sA.html#sA.3.3" title="&sect;A.3.3&nbsp;Callin binding"
                      class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.3.3</a></div>
                <div class="subsect depth3" id="s4.1.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Method call interception</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Method call interception</span><a class="img" href="s4.html#s4.1.a"
+                        title="PermaLink to (a)&nbsp;Method call interception"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A role method may intercept calls to a base method by
                      	    a callin binding.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s4.1.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Prerequisite: Class binding</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Prerequisite: Class binding</span><a class="img" href="s4.html#s4.1.b"
+                        title="PermaLink to (b)&nbsp;Prerequisite: Class binding"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A callin binding requires the enclosing class to be a role class
                      	    bound to a base class according to <a href="s2.html#s2.1" title="&sect;2.1&nbsp;playedBy relation" class="sect">&sect;2.1</a>. 
                      	    An <em>unliftable</em> role (see <a href="s2.html#s2.3.4.a" title="&sect;2.3.4.(a)&nbsp;Potential ambiguity"
@@ -90,7 +94,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.1.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Callin declaration</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Callin declaration</span><a class="img" href="s4.html#s4.1.c"
+                        title="PermaLink to (c)&nbsp;Callin declaration"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A callin binding composes an existing role method with a
                      	    given base method.
                      	    It may appear within the role class at any place where feature
@@ -112,7 +118,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.1.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Multiple base methods</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Multiple base methods</span><a class="img" href="s4.html#s4.1.d"
+                        title="PermaLink to (d)&nbsp;Multiple base methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Base method designators may furthermore enumerate a
                      	    list of methods. If multiple base methods are bound in one
                      	    callin declaration generally all signatures in this binding must be conform.
@@ -126,7 +134,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.1.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">Named callin bindin</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">Named callin binding</span><a class="img" href="s4.html#s4.1.e"
+                        title="PermaLink to (e)&nbsp;Named callin binding"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Any callin binding may be labeled with a name. The name of a callin binding is used 
                      			for declaring <em>precedence</em> (<a href="#s4.8" title="&sect;4.8&nbsp;Callin precedence" class="sect">&sect;4.8</a>). 
                      			A named callin binding <em>overrides</em> any inherited callin binding 
@@ -139,7 +149,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.1.f">
-                  <h4 class="subsect">(f)&nbsp;<span class="title">Callin to final</span></h4>
+                  <h4 class="subsect">(f)&nbsp;<span class="title">Callin to final</span><a class="img" href="s4.html#s4.1.f"
+                        title="PermaLink to (f)&nbsp;Callin to final"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>When binding to a final base method, the enclosing role must be played by the exact base class 
                      			declaring the final method. I.e., callin binding to a final method inherited from the 
                      			base class's super-class is not allowed. This is motivated by the fact that no sub-class may have 
@@ -148,14 +160,18 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.1.g">
-                  <h4 class="subsect">(g)&nbsp;<span class="title">Declared exceptions</span></h4>
+                  <h4 class="subsect">(g)&nbsp;<span class="title">Declared exceptions</span><a class="img" href="s4.html#s4.1.g"
+                        title="PermaLink to (g)&nbsp;Declared exceptions"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>It is an error if a role method to be bound by callin declares in its <tt>throws</tt> clause 
                      		any exceptions that are not declared by the corresponding base method(s).
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s4.1.h">
-                  <h4 class="subsect">(h)&nbsp;<span class="title">Method of enclosing class</span></h4>
+                  <h4 class="subsect">(h)&nbsp;<span class="title">Method of enclosing class</span><a class="img" href="s4.html#s4.1.h"
+                        title="PermaLink to (h)&nbsp;Method of enclosing class"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>In a <code>before</code> or <code>after</code> callin binding the left hand side may alternatively
                      			resolve to a method of an enclosing class rather than the current role.
                      			
@@ -163,9 +179,13 @@
                </div>
             </div>
             <div class="sect depth2" id="s4.2">
-               <h2 class="sect">&sect;4.2&nbsp;Callin modifiers (before, after, replace)<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
+               <h2 class="sect">&sect;4.2&nbsp;Callin modifiers (before, after, replace)<a class="img" href="s4.html#s4.2"
+                     title="PermaLink to &sect;4.2&nbsp;Callin modifiers (before, after, replace)"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
                <div class="subsect depth3" id="s4.2.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Method composition</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Method composition</span><a class="img" href="s4.html#s4.2.a"
+                        title="PermaLink to (a)&nbsp;Method composition"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The kind of method composition is controlled by adding one
                      	    of the modifiers <strong>before, after</strong> or <strong>replace</strong> after the
                      	    "<code>&lt;-</code>" token of the binding declaration.
@@ -173,7 +193,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.2.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Additive composition</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Additive composition</span><a class="img" href="s4.html#s4.2.b"
+                        title="PermaLink to (b)&nbsp;Additive composition"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The <code>before</code> and <code>after</code> modifiers have the
                      	    effect of adding a call to the role method at the beginning or end
                      	    of the base method, resp.<br />
@@ -223,7 +245,9 @@
                   </div>
                </div>
                <div class="subsect depth3" id="s4.2.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Replacing composition</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Replacing composition</span><a class="img" href="s4.html#s4.2.c"
+                        title="PermaLink to (c)&nbsp;Replacing composition"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The <code>replace</code> modifier causes <em>only</em> the role method to be
                      	    invoked, replacing the base method.
                      	    <br />
@@ -232,7 +256,9 @@
                         class="sect">&sect;4.3.(e)</a></p>
                </div>
                <div class="subsect depth3" id="s4.2.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Callin methods</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Callin methods</span><a class="img" href="s4.html#s4.2.d"
+                        title="PermaLink to (d)&nbsp;Callin methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Role methods to be bound by a callin replacement binding must have
                      	    the modifier <code>callin</code>. This modifier is only allowed for methods
                      	    of a role class.<br />
@@ -266,7 +292,9 @@
                </div>
             </div>
             <div class="sect depth2" id="s4.3">
-               <h2 class="sect">&sect;4.3&nbsp;Base calls<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
+               <h2 class="sect">&sect;4.3&nbsp;Base calls<a class="img" href="s4.html#s4.3"
+                     title="PermaLink to &sect;4.3&nbsp;Base calls"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
                <div class="syntaxlink"><a href="sA.html#sA.5.3" title="&sect;A.5.3&nbsp;BaseCall" class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.5.3</a></div>
                <p>Role methods with a <code>callin</code> modifier should contain
                   a <em>base call</em> which uses the special name <code>base</code>
@@ -274,7 +302,8 @@
                   		
                </p>
                <div class="subsect depth3" id="s4.3.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Syntax</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Syntax</span><a class="img" href="s4.html#s4.3.a" title="PermaLink to (a)&nbsp;Syntax"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The syntax for base calls is <code>base.m()</code>,
                      		which is in analogy to super calls.
                      	    A <code>base.m()</code> call must use the same name and signature
@@ -284,7 +313,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.3.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Missing base call</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Missing base call</span><a class="img" href="s4.html#s4.3.b"
+                        title="PermaLink to (b)&nbsp;Missing base call"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>For each callin method, the compiler uses some flow analysis to check whether
                      		a base call will be invoked on each path of execution (analysis is very similar 
                      		to the analysis for definite assignment regarding final variables - 
@@ -299,7 +330,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.3.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Duplicate base call</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Duplicate base call</span><a class="img" href="s4.html#s4.3.c"
+                        title="PermaLink to (c)&nbsp;Duplicate base call"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If a callin method contains several base calls, the compiler gives
                      		a warning if this will result in duplicate base call invocations on all
                      		paths (definitely duplicate) or on some paths (potentially duplicate).
@@ -308,7 +341,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.3.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Parameter tunneling</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Parameter tunneling</span><a class="img" href="s4.html#s4.3.d"
+                        title="PermaLink to (d)&nbsp;Parameter tunneling"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If a base method has more parameters
                      	    than a callin method to which it is composed, additional
                      	    parameters are implicitly passed unchanged from the original
@@ -320,7 +355,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.3.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">Fragile callin binding</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">Fragile callin binding</span><a class="img" href="s4.html#s4.3.e"
+                        title="PermaLink to (e)&nbsp;Fragile callin binding"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If a role method returns void, but the bound base method declares a
                      		non-void result, this is reported as a <em>fragile callin binding</em>:
                      The result can still be provided by the base call, but omitting the
@@ -341,7 +378,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.3.f">
-                  <h4 class="subsect">(f)&nbsp;<span class="title">Base super calls</span></h4>
+                  <h4 class="subsect">(f)&nbsp;<span class="title">Base super calls</span><a class="img" href="s4.html#s4.3.f"
+                        title="PermaLink to (f)&nbsp;Base super calls"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>If a callin method <code>rm</code> is bound to a base method <code>B1.m</code> 
                      			that in turn overrides an inherited method <code>B0.m</code> 
                      			(<code>B0</code> is a super class of <code>B1</code>),
@@ -430,9 +469,13 @@
                </div>
             </div>
             <div class="sect depth2" id="s4.4">
-               <h2 class="sect">&sect;4.4&nbsp;Callin parameter mapping<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
+               <h2 class="sect">&sect;4.4&nbsp;Callin parameter mapping<a class="img" href="s4.html#s4.4"
+                     title="PermaLink to &sect;4.4&nbsp;Callin parameter mapping"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
                <div class="subsect depth3" id="s4.4.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">General case parameter mapping</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">General case parameter mapping</span><a class="img" href="s4.html#s4.4.a"
+                        title="PermaLink to (a)&nbsp;General case parameter mapping"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The rules for mapping callin parameters and result type
                      	    are mainly the same as for callout bindings (<a href="s3.html#s3.2" title="&sect;3.2&nbsp;Callout parameter mapping"
                         class="sect">&sect;3.2</a>)
@@ -448,7 +491,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.4.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Restrictions for callin replace bindings</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Restrictions for callin replace bindings</span><a class="img" href="s4.html#s4.4.b"
+                        title="PermaLink to (b)&nbsp;Restrictions for callin replace bindings"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>The right-hand side of a parameter mapping may either be
                      		the simple name of a base method argument without further computation, 
                      		or an arbitrary expression <em>not</em> containing any base method argument.
@@ -490,7 +535,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.4.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Mapping the result of a base method</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Mapping the result of a base method</span><a class="img" href="s4.html#s4.4.c"
+                        title="PermaLink to (c)&nbsp;Mapping the result of a base method"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>In an <code>after</code> callin binding, the right-hand side
                      		of a parameter mapping may use the identifier <code>result</code>
                      to refer to the result of the base method.
@@ -504,7 +551,9 @@
                         class="sect">&sect;4.4.(a)</a></p>
                </div>
                <div class="subsect depth3" id="s4.4.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Multiple base methods</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Multiple base methods</span><a class="img" href="s4.html#s4.4.d"
+                        title="PermaLink to (d)&nbsp;Multiple base methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A callin binding listing more than one base method may use parameter
                      		mappings with only the following restriction: if any base parameter should be mapped this parameter 
                      		must have the same name and type in all listed base method designators. 
@@ -515,7 +564,9 @@
                </div>
             </div>
             <div class="sect depth2" id="s4.5">
-               <h2 class="sect">&sect;4.5&nbsp;Lifting and lowering<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
+               <h2 class="sect">&sect;4.5&nbsp;Lifting and lowering<a class="img" href="s4.html#s4.5"
+                     title="PermaLink to &sect;4.5&nbsp;Lifting and lowering"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
                <p>For basic definition see <a href="s2.html#s2.2" title="&sect;2.2&nbsp;Lowering" class="sect">&sect;2.2</a>
                   and <a href="s2.html#s2.3" title="&sect;2.3&nbsp;Lifting" class="sect">&sect;2.3</a>.
                   <br />
@@ -524,7 +575,9 @@
                   		
                </p>
                <div class="subsect depth3" id="s4.5.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Call target translation</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Call target translation</span><a class="img" href="s4.html#s4.5.a"
+                        title="PermaLink to (a)&nbsp;Call target translation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Invoking a role method due to a callin binding first
                      	    <strong>lifts</strong> the base object to the role class of the
                      	    callin binding, in order to obtain the effective call target. 
@@ -537,21 +590,26 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.5.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Parameter translation</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Parameter translation</span><a class="img" href="s4.html#s4.5.b"
+                        title="PermaLink to (b)&nbsp;Parameter translation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>During callin execution, each parameter for which the role method expects a role
                      	    object is implicitly <strong>lifted</strong> to the declared role class.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s4.5.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Result translation</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Result translation</span><a class="img" href="s4.html#s4.5.c"
+                        title="PermaLink to (c)&nbsp;Result translation"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Returning a role object from a callin method implicitly
                      	    <strong>lowers</strong> this object.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s4.5.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Typing rules</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Typing rules</span><a class="img" href="s4.html#s4.5.d" title="PermaLink to (d)&nbsp;Typing rules"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A parameter mapping (implicit by parameter position or explicit
                      	    by a <code>with</code> clause) is <strong>well typed</strong> if
                      	    the right hand side conforms to the left hand side, either by
@@ -589,7 +647,8 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.5.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">Role arrays</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">Role arrays</span><a class="img" href="s4.html#s4.5.e" title="PermaLink to (e)&nbsp;Role arrays"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>For arrays of roles as parameters <a href="s2.html#s2.3.d" title="&sect;2.3.(d)&nbsp;Lifting of arrays"
                         class="sect">&sect;2.3.(d)</a> applies 
                      		accordingly. For arrays as return value <a href="s2.html#s2.2.e" title="&sect;2.2.(e)&nbsp;Lowering of arrays"
@@ -598,7 +657,8 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.5.f">
-                  <h4 class="subsect">(f)&nbsp;<span class="title">Base calls</span></h4>
+                  <h4 class="subsect">(f)&nbsp;<span class="title">Base calls</span><a class="img" href="s4.html#s4.5.f" title="PermaLink to (f)&nbsp;Base calls"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>For base calls these rules are reversed again, i.e., a
                      		base call behaves like a callout binding.
                      			
@@ -606,7 +666,9 @@
                </div>
             </div>
             <div class="sect depth2" id="s4.6">
-               <h2 class="sect">&sect;4.6&nbsp;Overriding access restrictions<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
+               <h2 class="sect">&sect;4.6&nbsp;Overriding access restrictions<a class="img" href="s4.html#s4.6"
+                     title="PermaLink to &sect;4.6&nbsp;Overriding access restrictions"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
                <p>Callin bindings may also mention inaccessible methods
                   	(cf. decapsulation <a href="s3.html#s3.4" title="&sect;3.4&nbsp;Overriding access restrictions"
                      class="sect">&sect;3.4</a>).
@@ -624,7 +686,9 @@
                   		
                </div>
                <div class="subsect depth3" id="s4.6.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Private methods from super classes</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Private methods from super classes</span><a class="img" href="s4.html#s4.6.a"
+                        title="PermaLink to (a)&nbsp;Private methods from super classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p><em>(Cf. <a href="s3.html#s3.4.d"
                            title="&sect;3.4.(d)&nbsp;Private methods from super classes"
                            class="sect">&sect;3.4.(d)</a>)</em>
@@ -642,21 +706,27 @@
                </div>
             </div>
             <div class="sect depth2" id="s4.7">
-               <h2 class="sect">&sect;4.7&nbsp;Callin binding with static methods<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
+               <h2 class="sect">&sect;4.7&nbsp;Callin binding with static methods<a class="img" href="s4.html#s4.7"
+                     title="PermaLink to &sect;4.7&nbsp;Callin binding with static methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
                <p>The normal case of callin bindings refers to non-static methods on both
                   	sides (base and role). Furthermore, in Java inner classes can not define
                   	static methods. Both restrictions are relaxed by the following rules:
                   		
                </p>
                <div class="subsect depth3" id="s4.7.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Static role methods</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Static role methods</span><a class="img" href="s4.html#s4.7.a"
+                        title="PermaLink to (a)&nbsp;Static role methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A role class may define static methods (see also <a href="s1.html#s1.2.1.f" title="&sect;1.2.1.(f)&nbsp;Static role methods"
                         class="sect">&sect;1.2.1.(f)</a>).
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s4.7.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Binding static to static</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Binding static to static</span><a class="img" href="s4.html#s4.7.b"
+                        title="PermaLink to (b)&nbsp;Binding static to static"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A callin binding may bind a static role method to one or more
                      		static base methods. It is, however, an error to bind a static base method to a non-static role method, 
                      		because such binding would require to lift a base object that is not provided.
@@ -664,14 +734,16 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.7.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">before/after</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">before/after</span><a class="img" href="s4.html#s4.7.c" title="PermaLink to (c)&nbsp;before/after"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>In addition to the above, <code>before</code> and <code>after</code>
                      		callin bindings may also bind a static role method to non-static base methods.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s4.7.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">replace</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">replace</span><a class="img" href="s4.html#s4.7.d" title="PermaLink to (d)&nbsp;replace"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>In contrast to <a href="#s4.7.c" title="&sect;4.7.(c)&nbsp;before/after" class="sect">&sect;4.7.(c)</a> above, a <code>replace</code> callin binding
                      		cannot bind a static role method to a non-static base method.
                      			
@@ -703,7 +775,8 @@
                   </tr>
                </table>
                <div class="subsect depth3" id="s4.7.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">No overriding</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">No overriding</span><a class="img" href="s4.html#s4.7.e" title="PermaLink to (e)&nbsp;No overriding"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Since static methods are not dynamically bound, <i>overriding</i> does not
                      				   apply in the normal semantics. Regarding callin bindings this has the
                      				   following consequences (assuming a role <code>RMid</code> played by
@@ -733,7 +806,9 @@
                </div>
             </div>
             <div class="sect depth2" id="s4.8">
-               <h2 class="sect">&sect;4.8&nbsp;Callin precedence<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
+               <h2 class="sect">&sect;4.8&nbsp;Callin precedence<a class="img" href="s4.html#s4.8"
+                     title="PermaLink to &sect;4.8&nbsp;Callin precedence"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
                <div class="syntaxlink"><a href="sA.html#sA.8" title="&sect;A.8&nbsp;Precedence declaration"
                      class="syntax">&rarr;&nbsp;Syntax&nbsp;&sect;A.8</a></div>
                <p>If multiple callins from the same team refer to the same base method and also have the same 
@@ -742,16 +817,33 @@
                   		
                </p>
                <div class="subsect depth3" id="s4.8.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Precedence declaration</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Precedence declaration</span><a class="img" href="s4.html#s4.8.a"
+                        title="PermaLink to (a)&nbsp;Precedence declaration"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>A precedence declaration consists of the keyword <code>precedence</code> followed by 
-                     		a list of names referring to callin bindings (see <a href="#s4.1.e" title="&sect;4.1.(e)&nbsp;Named callin bindin" class="sect">&sect;4.1.(e)</a> for named callin bindings).
-                     		<br />
-                     	A precedence declaration is only legal within a role or team class.
+                     		a list of names referring to callin bindings (see <a href="#s4.1.e" title="&sect;4.1.(e)&nbsp;Named callin binding" class="sect">&sect;4.1.(e)</a> for named callin bindings).
+                     		
+                  </p>
+                  <div class="listing plain"><pre><b>precedence</b> callinBinding1, callinBinding2;</pre></div>
+                  <p>
+                     	A precedence declaration is only legal within a role or team class.<br />
+                     	The order of elements in a precedence declaration determines their <strong>priority</strong> during dispatch,
+                     	similar to priorities based on activation of several team instances (<a href="s5.html#s5.1" title="&sect;5.1&nbsp;Effect of team activation"
+                        class="sect">&sect;5.1</a>).
+                     	This means that <code>before</code> and <code>replace</code> binding with highest priority trigger first, 
+                     	whereas <code>after</code> bindings with highest priority trigger last.
+                     	For binding precedences (as opposed to class based precedence, see <a href="#s4.8.c" title="&sect;4.8.(c)&nbsp;Class based precedence"
+                        class="sect">&sect;4.8.(c)</a> below)
+                     	which refer to <code>after</code> bindings, the precedence declaration must also use the <code>after</code> keyword
+                     	to remind the programmer that the execution order is inverse to the textual order.
                      			
                   </p>
+                  <div class="listing plain"><pre><b>precedence</b> <b>after</b> importantExecuteLast, lessImportantExecuteEarlier;</pre></div>
                </div>
                <div class="subsect depth3" id="s4.8.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Qualified and unqualified names</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Qualified and unqualified names</span><a class="img" href="s4.html#s4.8.b"
+                        title="PermaLink to (b)&nbsp;Qualified and unqualified names"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Within a role class a callin binding may be referenced by its unqualified name. 
                      		A precedence declaration in a team class must qualify the callin name with the name of the declaring 
                      		role class. A team with nested teams may concat role class names. 
@@ -766,14 +858,18 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.8.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Class based precedence</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Class based precedence</span><a class="img" href="s4.html#s4.8.c"
+                        title="PermaLink to (c)&nbsp;Class based precedence"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>At the team level a precedence declaration may contain role class names without 
                      		explicitly mentioning callin bindings in order to refer to all callin bindings of the role.
                      			
                   </p>
                </div>
                <div class="subsect depth3" id="s4.8.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Multiple precedence statements</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Multiple precedence statements</span><a class="img" href="s4.html#s4.8.d"
+                        title="PermaLink to (d)&nbsp;Multiple precedence statements"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>All precedence statements are collected at the outer-most team. At that level all 
                      		precedence declarations involving the same base method are merged using the 
                      		C3 algorithm <a href="#fn3-c3-algorithm" class="int">[3]</a>. It is an error to declare 
@@ -782,9 +878,11 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.8.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">Binding overriding</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">Binding overriding</span><a class="img" href="s4.html#s4.8.e"
+                        title="PermaLink to (e)&nbsp;Binding overriding"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>Precedence declarations may conflict with overriding of callin bindings 
-                     		(see <a href="#s4.1.e" title="&sect;4.1.(e)&nbsp;Named callin bindin" class="sect">&sect;4.1.(e)</a>): For each pair of callin bindings of which one 
+                     		(see <a href="#s4.1.e" title="&sect;4.1.(e)&nbsp;Named callin binding" class="sect">&sect;4.1.(e)</a>): For each pair of callin bindings of which one 
                      		callin binding overrides the other one, precedence declarations are not applicable, 
                      		since dynamic binding will already select exactly one callin binding.
                      		<br />
@@ -867,13 +965,17 @@
                </div>
             </div>
             <div class="sect depth2" id="s4.9">
-               <h2 class="sect">&sect;4.9&nbsp;Callin inheritance<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
+               <h2 class="sect">&sect;4.9&nbsp;Callin inheritance<a class="img" href="s4.html#s4.9"
+                     title="PermaLink to &sect;4.9&nbsp;Callin inheritance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
                <p>
                   			This section defines how callin bindings and callin methods relate to inheritance.
                   		
                </p>
                <div class="sect depth3" id="s4.9.1">
-                  <h3 class="sect">&sect;4.9.1&nbsp;Base side inheritance<span class="toplink"><a href="#s4.9">&uarr;&nbsp;&sect;4.9</a></span></h3>
+                  <h3 class="sect">&sect;4.9.1&nbsp;Base side inheritance<a class="img" href="s4.html#s4.9.1"
+                        title="PermaLink to &sect;4.9.1&nbsp;Base side inheritance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s4.9">&uarr;&nbsp;&sect;4.9</a></span></h3>
                   <p>
                      				Generally, a callin binding affects all sub-types of its bound base.
                      				Specifically, if a role type <code>R</code> bound to a base type <code>B</code> 
@@ -882,7 +984,9 @@
                      			
                   </p>
                   <div class="subsect depth4" id="s4.9.1.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">Effect on sub-classes</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">Effect on sub-classes</span><a class="img" href="s4.html#s4.9.1.a"
+                           title="PermaLink to (a)&nbsp;Effect on sub-classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>The callin binding also effects instances of any type <code>BSub</code> 
                         	that is a sub-type of <code>B</code>.
                         	If <code>BSub</code> overrides the bound base method <code>bm</code>,
@@ -896,7 +1000,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s4.9.1.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">No effect on super-classes</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">No effect on super-classes</span><a class="img" href="s4.html#s4.9.1.b"
+                           title="PermaLink to (b)&nbsp;No effect on super-classes"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>The binding never affects an instance of any super-type of <code>B</code> 
                         	                even if the method <code>bm</code> is inherited from a super-class 
                         	                or overrides an inherited method. 
@@ -912,7 +1018,9 @@
                   </p>
                </div>
                <div class="sect depth3" id="s4.9.2">
-                  <h3 class="sect">&sect;4.9.2&nbsp;Role side inheritance<span class="toplink"><a href="#s4.9">&uarr;&nbsp;&sect;4.9</a></span></h3>
+                  <h3 class="sect">&sect;4.9.2&nbsp;Role side inheritance<a class="img" href="s4.html#s4.9.2"
+                        title="PermaLink to &sect;4.9.2&nbsp;Role side inheritance"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s4.9">&uarr;&nbsp;&sect;4.9</a></span></h3>
                   <p>
                      	Any sub-type of <code>R</code> inherits the given callin binding 
                      	(for overriding of bindings see <a href="#s4.8.e" title="&sect;4.8.(e)&nbsp;Binding overriding" class="sect">&sect;4.8.(e)</a>).
@@ -922,7 +1030,9 @@
                   </p>
                </div>
                <div class="sect depth3" id="s4.9.3">
-                  <h3 class="sect">&sect;4.9.3&nbsp;Covariant return types<span class="toplink"><a href="#s4.9">&uarr;&nbsp;&sect;4.9</a></span></h3>
+                  <h3 class="sect">&sect;4.9.3&nbsp;Covariant return types<a class="img" href="s4.html#s4.9.3"
+                        title="PermaLink to &sect;4.9.3&nbsp;Covariant return types"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a><span class="toplink"><a href="#s4.9">&uarr;&nbsp;&sect;4.9</a></span></h3>
                   <p>
                      				Since version 5, Java supports the covariant redefinition of a method's return type 
                      				(see <a href="http://java.sun.com/docs/books/jls/third_edition/html/classes.html#8.4.5"
@@ -949,7 +1059,9 @@
                      </li>
                   </ol>
                   <div class="subsect depth4" id="s4.9.3.a">
-                     <h4 class="subsect">(a)&nbsp;<span class="title">No covariant callin methods</span></h4>
+                     <h4 class="subsect">(a)&nbsp;<span class="title">No covariant callin methods</span><a class="img" href="s4.html#s4.9.3.a"
+                           title="PermaLink to (a)&nbsp;No covariant callin methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>
                         					A method declared with the <code>callin</code> modifier that overrides an inherited method
                         					must not redefine the return type with respect to the inherited method.
@@ -960,7 +1072,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s4.9.3.b">
-                     <h4 class="subsect">(b)&nbsp;<span class="title">Capturing covariant base methods</span></h4>
+                     <h4 class="subsect">(b)&nbsp;<span class="title">Capturing covariant base methods</span><a class="img" href="s4.html#s4.9.3.b"
+                           title="PermaLink to (b)&nbsp;Capturing covariant base methods"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>
                         					If a callin binding should indeed affect not only the specified base method
                         					but also overriding versions which covariantly redefine the return type,
@@ -976,7 +1090,9 @@
                      </p>
                   </div>
                   <div class="subsect depth4" id="s4.9.3.c">
-                     <h4 class="subsect">(c)&nbsp;<span class="title">Covariant replace binding</span></h4>
+                     <h4 class="subsect">(c)&nbsp;<span class="title">Covariant replace binding</span><a class="img" href="s4.html#s4.9.3.c"
+                           title="PermaLink to (c)&nbsp;Covariant replace binding"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                                alt="" /></a></h4>
                      <p>
                         					When using the syntax of <a href="#s4.9.3.b"
                            title="&sect;4.9.3.(b)&nbsp;Capturing covariant base methods"
@@ -1141,7 +1257,9 @@
                </div>
             </div>
             <div class="sect depth2" id="s4.10">
-               <h2 class="sect">&sect;4.10&nbsp;Generic callin bindings<span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
+               <h2 class="sect">&sect;4.10&nbsp;Generic callin bindings<a class="img" href="s4.html#s4.10"
+                     title="PermaLink to &sect;4.10&nbsp;Generic callin bindings"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                          alt="" /></a><span class="toplink"><a href="#top">&uarr;&nbsp;&sect;4</a></span></h2>
                <p>
                   			As mentioned in <a href="#s4.5.d" title="&sect;4.5.(d)&nbsp;Typing rules" class="sect">&sect;4.5.(d)</a> replace bindings do not support subtype polymorphism
                   			in either direction.
@@ -1160,7 +1278,9 @@
                   		
                </p>
                <div class="subsect depth3" id="s4.10.a">
-                  <h4 class="subsect">(a)&nbsp;<span class="title">Fresh type parameter</span></h4>
+                  <h4 class="subsect">(a)&nbsp;<span class="title">Fresh type parameter</span><a class="img" href="s4.html#s4.10.a"
+                        title="PermaLink to (a)&nbsp;Fresh type parameter"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>
                      			If a callin method declares a type parameter <code>&lt;T&gt;</code> for
                      			capturing a covariant return type
@@ -1174,7 +1294,8 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.10.b">
-                  <h4 class="subsect">(b)&nbsp;<span class="title">Type bounds</span></h4>
+                  <h4 class="subsect">(b)&nbsp;<span class="title">Type bounds</span><a class="img" href="s4.html#s4.10.b" title="PermaLink to (b)&nbsp;Type bounds"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>
                      			The type parameter of a callin binding may be bounded by an upper bound as in <code>&lt;T extends C&gt;</code>.
                      			In this case <code>T</code> can only be instantiated by types conforming to the upper bound <code>C</code>.
@@ -1182,7 +1303,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.10.c">
-                  <h4 class="subsect">(c)&nbsp;<span class="title">Generic replace binding</span></h4>
+                  <h4 class="subsect">(c)&nbsp;<span class="title">Generic replace binding</span><a class="img" href="s4.html#s4.10.c"
+                        title="PermaLink to (c)&nbsp;Generic replace binding"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>
                      			A generic <code>callin</code> method according to the above rules is bound using a replace
                      			binding that declares the same number of type parameters,
@@ -1193,7 +1316,9 @@
                   </p>
                </div>
                <div class="subsect depth3" id="s4.10.d">
-                  <h4 class="subsect">(d)&nbsp;<span class="title">Binding to a type parameter</span></h4>
+                  <h4 class="subsect">(d)&nbsp;<span class="title">Binding to a type parameter</span><a class="img" href="s4.html#s4.10.d"
+                        title="PermaLink to (d)&nbsp;Binding to a type parameter"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>
                      			A fresh type parameter can be used to capture arbitrary types in the base methods to be bound.
                      			The type parameter may be instantiated differently for each bound base method.
@@ -1292,7 +1417,9 @@
                   </ul>
                </div>
                <div class="subsect depth3" id="s4.10.e">
-                  <h4 class="subsect">(e)&nbsp;<span class="title">Propagating type parameters</span></h4>
+                  <h4 class="subsect">(e)&nbsp;<span class="title">Propagating type parameters</span><a class="img" href="s4.html#s4.10.e"
+                        title="PermaLink to (e)&nbsp;Propagating type parameters"><img style="vertical-align:text-top;margin-left:5px;" src="../images/permalink.png"
+                             alt="" /></a></h4>
                   <p>
                      				If a callin binding binds to a generic base method, 
                      				any type parameter(s) of the base method must be propagated into the role method 
@@ -1377,9 +1504,10 @@
          </table>
       </div>
       <div id="footer">
-         <hr />
-         <address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
-         			OT/J version 1.3 &mdash; last modified: 2010-02-20
+         <hr /><a class="w3c img" href="http://jigsaw.w3.org/css-validator/check/referer"
+            shape="rect"><img src="../images/valid-css2-blue.png" alt="Valid CSS!" height="31" width="88" /></a><a class="w3c img" href="http://validator.w3.org/check?uri=referer" shape="rect"><img src="../images/valid-xhtml10-blue.png" alt="Valid XHTML 1.0 Strict" height="31"
+                 width="88" /></a><address>&copy; Stephan Herrmann, Christine Hundt, Marco Mosconi</address>
+         			OT/J version 1.3 &mdash; last modified: 2010-05-18
       </div>
    </body>
 </html>
