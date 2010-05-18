@@ -37,9 +37,9 @@ ANT_PROFILE="-verbose"
 NICE="10"
 
 # EXPORT: virtual or real X server (XVFB, XVNC or X11):
-if test `which Xvfb` > /dev/null; then
+if test `which Xvfb` &> /dev/null; then
 	X11=XVFB
-if test `which Xvnc` > /dev/null; then
+elif test `which Xvnc` &> /dev/null; then
 	X11=XVNC
 else
 	X11=X11
