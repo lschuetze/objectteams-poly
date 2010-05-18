@@ -94,12 +94,12 @@ public interface ITeam {
 	 * 
 	 * @param aBase any object, i.e., no checks are performed whether the base object's
 	 * 		class is bound by any role class in this team.
-	 * @param roleClass Class instance specifying the required role type.
-	 *      If this does not specify an existing role class an IllegalArgumentException will be thrown.
+	 * @param roleType Class instance specifying the required role type.
 	 *      TODO (SH): is it legal to pass an unbound role class? 	
+	 * @throws IllegalArgumentException if <code>roleType</code> does not represent a member type of this team.
 	 * @return
 	 */
-	public abstract boolean hasRole(Object aBase, Class<?> roleType);
+	public abstract boolean hasRole(Object aBase, Class<?> roleType) throws IllegalArgumentException;
 
 	/**
 	 * Retrieve a role for a given base object.
@@ -116,11 +116,11 @@ public interface ITeam {
 	 * 
 	 * @param aBase any object, i.e., no checks are performed whether the base object's
 	 * 		class is bound by any role class in this team.
-	 * @param roleClass Class instance specifying the required role type.
-	 *      If this does not specify an existing role class an IllegalArgumentException will be thrown.
+	 * @param roleType Class instance specifying the required role type.
 	 * @return
+	 * @throws IllegalArgumentException if <code>roleType</code> does not represent a member type of this team.
 	 */
-	public abstract <T> T getRole(Object aBase, Class<T> roleType);
+	public abstract <T> T getRole(Object aBase, Class<T> roleType) throws IllegalArgumentException;
 
 	/**
 	 * Retrieve all bound roles registered in the current team.
@@ -147,8 +147,9 @@ public interface ITeam {
 	 * 
 	 * @param roleType must be a top-most bound role of this team. 
 	 * @return a non-null array.
+	 * @throws IllegalArgumentException if <code>roleType</code> does not represent a member type of this team.
 	 */
-	public abstract <T> T[] getAllRoles(Class<T> roleType);
+	public abstract <T> T[] getAllRoles(Class<T> roleType) throws IllegalArgumentException;
 
 	/**
 	 * Query whether any role instance of this team instance is currently executing a
@@ -171,8 +172,9 @@ public interface ITeam {
 	 *  
 	 * @param aRole
 	 * @param roleType
+	 * @throws IllegalArgumentException if <code>roleType</code> does not represent a member type of this team.
 	 */
-	public abstract void unregisterRole(Object aRole, Class<?> roleType);
+	public abstract void unregisterRole(Object aRole, Class<?> roleType) throws IllegalArgumentException;
 
 	/**
 	 * Not API.
