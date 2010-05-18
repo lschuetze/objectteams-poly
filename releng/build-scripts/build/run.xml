@@ -86,6 +86,9 @@ should test be run (true|false)?
 		<condition property="arch" value="ppc64"> <!-- HACK: hard coding 64-bit architecture -->
 			<os arch="ppc" />
 		</condition>
+		<condition property="arch" value="x86_64"> <!-- Map ant's arch to OSGi arch -->
+			<os arch="amd64" />
+		</condition>
 		<!-- if not set above, set it to os.arch -->
 		<property name="arch" value="${os.arch}" />
 
