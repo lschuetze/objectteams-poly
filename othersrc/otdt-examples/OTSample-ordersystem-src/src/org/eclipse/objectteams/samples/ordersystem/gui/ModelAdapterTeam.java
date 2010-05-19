@@ -246,7 +246,7 @@ public team class ModelAdapterTeam {
         void setCellRenderer(Tab aTab) <- after JPanel getOrderTab() with { aTab <- Tab.ORDER }
       
         // two callins to the same base method exist, must declare precedence:
-        precedence setOrderModel, setOrderRenderer;
+        precedence after setOrderRenderer, setOrderModel;
         
         
         protected void setModels(Tab aTab) {
