@@ -16,9 +16,6 @@
 
 	<!--properties file containing the build information-->
 	<property file="src/label.properties" />
-	
-	<!-- reconstruct the file name of the test feature zip: -->
-	<property name="config" value="${osgi.os}.${osgi.ws}.${osgi.arch}"/>
 
 	<target name="readFlags">
 		<condition property="really.build.all">
@@ -50,7 +47,8 @@
 		<echo message="Setting up tests in ${test.eclipseDir}"/>
 
 		<echo message="Unpacking OTDT Tests..."/>
-        <unzip src="${buildDirectory}/${buildLabel}/org.eclipse.objectteams.otdt-tests-${buildId}-${config}.zip"
+		<!-- Regarding the config "${os}.${ws}.*" see the comment in OTDT-Build/build.properties -->
+        <unzip src="${buildDirectory}/${buildLabel}/org.eclipse.objectteams.otdt-tests-${buildId}-${os}.${ws}.*.zip"
         	   dest="${testsUpdatesDir}"/>
 		
 		<!-- do install using p2: -->

@@ -63,20 +63,15 @@
 	<target name="assemble.org.eclipse.objectteams.otequinox">
 		<echo message="Not assembling org.eclipse.objectteams.otequinox, will create update.jars instead (later during the build)" />
 	</target>
-	<target name="assemble.org.eclipse.objectteams.otequinox.linux.gtk.ppc64">
-		<echo message="Not assembling org.eclipse.objectteams.otequinox.linux.gtk.ppc64, will create update.jars instead (later during the build)" />
-	</target>
-	<target name="assemble.org.eclipse.objectteams.otequinox.linux.gtk.x86_64">
-		<echo message="Not assembling org.eclipse.objectteams.otequinox.linux.gtk.x86_64, will create update.jars instead (later during the build)" />
+	<!-- Regarding the config "linux.gtk.*" see comment in build.properties -->
+	<target name="assemble.org.eclipse.objectteams.otequinox.linux.gtk.*">
+		<echo message="Not assembling org.eclipse.objectteams.otequinox.linux.gtk.*, will create update.jars instead (later during the build)" />
 	</target>
 	<target name="assemble.org.eclipse.objectteams.otdt">
 		<echo message="Not assembling org.eclipse.objectteams.otdt, will create update.jars instead (later during the build)" />
 	</target>
-	<target name="assemble.org.eclipse.objectteams.otdt.linux.gtk.ppc64">
-		<echo message="Not assembling org.eclipse.objectteams.otdt.linux.gtk.ppc64, will create update.jars instead (later during the build)" />
-	</target>
-	<target name="assemble.org.eclipse.objectteams.otdt.linux.gtk.x86_64">
-		<echo message="Not assembling org.eclipse.objectteams.otdt.linux.gtk.x86_64, will create update.jars instead (later during the build)" />
+	<target name="assemble.org.eclipse.objectteams.otdt.linux.gtk.*">
+		<echo message="Not assembling org.eclipse.objectteams.otdt.linux.gtk.*, will create update.jars instead (later during the build)" />
 	</target>
 
 	<target name="assemble.org.eclipse.objectteams.otdt-tests">
@@ -84,10 +79,7 @@
 			<property name="zipargs" value="" />
 		</ant>
 	</target>
-	<target name="assemble.org.eclipse.objectteams.otdt-tests.linux.gtk.ppc64">
-		<antcall target="assemble.org.eclipse.objectteams.otdt-tests"/>
-	</target>
-	<target name="assemble.org.eclipse.objectteams.otdt-tests.linux.gtk.x86_64">
+	<target name="assemble.org.eclipse.objectteams.otdt-tests.linux.gtk.*">
 		<antcall target="assemble.org.eclipse.objectteams.otdt-tests"/>
 	</target>
 
