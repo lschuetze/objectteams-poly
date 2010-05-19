@@ -2420,6 +2420,7 @@ private int lookaheadAfterCallinHeader(int speclength, CallinMappingDeclaration 
 		switch (this.currentToken) {
 		case TokenNameSEMICOLON:
 		case TokenNameCOMMA:
+		case TokenNamewith:
 			// syntax is OK, proceed as normal.
 			break;
 		default:
@@ -6330,6 +6331,9 @@ private void consumePrecedenceDeclaration(boolean isAfter) {
             references,    0,
             length);
     this.listLength = 0; // reset
+
+    if (isAfter)
+    	this.intPtr -= 2; // discard start/end positions of "after"
 
     pushOnAstStack(new PrecedenceDeclaration(
 				    		this.intStack[this.intPtr--],

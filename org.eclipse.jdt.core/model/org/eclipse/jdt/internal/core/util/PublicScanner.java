@@ -82,9 +82,11 @@ public class PublicScanner implements IScanner, ITerminalSymbols {
     	return (this._isOTSource || atStartOfImport) && !this._forceBaseIsIdentifier;
     }
 
-    // remember if the previous token was a callin/callout symbol
+    // remember if the previous token was a callin/callout symbol ...
     protected boolean _calloutSeen = false;
     protected boolean _callinSeen = false;
+    // ... or the "precedence" keyword
+	protected boolean _precedenceSeen = false;
 
     // after a '.' even 'team' can be an identifier:
     private int _dotSeen = 0; // 0: no, 1: previos, 2: this token
@@ -3012,11 +3014,13 @@ public int scanIdentifierOrKeyword() {
 }
 
 private int internalScanIdentifierOrKeyword(int index, int length, char[] data) {
-//{ObjectTeams: callin/calloutSeen/atStartOfImport has effect only once:
+//{ObjectTeams: callin/calloutSeen/atStartOfImport/precedenceSeen has effect only once:
 	boolean calloutSeen = this._calloutSeen;
 	this._calloutSeen = false;
 	boolean callinSeen = this._callinSeen;
 	this._callinSeen = false;
+	boolean precedenceSeen = this._precedenceSeen;
+	this._precedenceSeen = false;
 	boolean atStartOfImport = this._atStartOfImport;
 	this._atStartOfImport = false;
 // SH}
@@ -3044,9 +3048,9 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						} else {
 							return TokenNameIdentifier;
 						}
-//{ObjectTeams: 'after' (only if after "<-"):
+//{ObjectTeams: 'after' (only if after "<-" or "precedence"):
 				case 5:
-					if (callinSeen) {
+					if (callinSeen || precedenceSeen) {
 						if (   (data[++index] == 'f')
 							&& (data[++index] == 't')
 							&& (data[++index] == 'e')
@@ -3491,6 +3495,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 						&& (data[++index] == 'n')
 						&& (data[++index] == 'c')
 						&& (data[++index] == 'e')) {
+						this._precedenceSeen = true;
 						return TokenNameprecedence;
 					} else
 						return TokenNameIdentifier;
