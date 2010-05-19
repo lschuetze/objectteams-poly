@@ -222,6 +222,13 @@ public void cleanup() {
 	for (int i = 0, max = this.classpaths.length; i < max; i++)
 		this.classpaths[i].reset();
 }
+//{ObjectTeams: for tests: reset only directory caches, but keep zipfiles
+public void softReset() {
+    for (Classpath cp : this.classpaths)
+        if (cp instanceof ClasspathDirectory)
+        	cp.reset();
+}
+// SH}
 private static String convertPathSeparators(String path) {
 	return File.separatorChar == '/'
 		? path.replace('\\', '/')
