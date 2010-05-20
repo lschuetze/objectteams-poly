@@ -11,6 +11,8 @@ public team class Team1
         callin2: roleMethod2 <- before baseMethod2, baseMethod4, baseMethod5;
         callin3: roleMethod3 <- before baseMethod0, baseMethod4;
 
+        callinA2: roleMethod2 <- after baseMethod2;
+        callinA3: roleMethod3 <- after baseMethod3;
 
         public void roleMethod0() {}
         public void roleMethod1() {}
@@ -19,6 +21,8 @@ public team class Team1
     
         precedence callin1, callin2;
         precedence callin3, callin2;
+        
+        precedence after callinA3, callinA2;
     }
 	public class Role2 {}
 	

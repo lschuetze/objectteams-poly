@@ -89,7 +89,7 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 	        TypeDeclaration role1 = types[0];
 	        List precedences = role1.precedences();
 	        assertFalse("precedences are non-null", precedences == null);
-	        assertTrue("Role1 has 2 precedence lists", precedences.size() == 2);
+	        assertTrue("Role1 has 3 precedence lists", precedences.size() == 3);
 	        
 	        PrecedenceDeclaration prec;
 	        prec = (PrecedenceDeclaration)precedences.get(0);
@@ -98,6 +98,7 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 			assertTrue("1. list has 2 elements", elements.size() == 2);
 			assertEquals("expecting element", elements.get(0).toString(), "callin1");
 			assertEquals("expecting element", elements.get(1).toString(), "callin2");
+			assertFalse("has 'after' keyword", prec.isAfter());
 
 			prec = (PrecedenceDeclaration)precedences.get(1);
 	        elements = prec.elements();
@@ -105,6 +106,15 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 			assertTrue("2. list has 2 elements", elements.size() == 2);
 			assertEquals("expecting element", elements.get(0).toString(), "callin3");
 			assertEquals("expecting element", elements.get(1).toString(), "callin2");
+			assertFalse("has 'after' keyword", prec.isAfter());
+
+			prec = (PrecedenceDeclaration)precedences.get(2);
+	        elements = prec.elements();
+	        assertFalse("3 list is non-null", elements == null);
+			assertTrue("3. list has 2 elements", elements.size() == 2);
+			assertEquals("expecting element", elements.get(0).toString(), "callinA3");
+			assertEquals("expecting element", elements.get(1).toString(), "callinA2");
+			assertTrue("has 'after' keyword", prec.isAfter());
 		}
 
 		public void testPrecedencesInTeam() {
@@ -149,12 +159,15 @@ public class PrecedenceDeclarationTest extends FileBasedDOMTest
 						"callin1: roleMethod1 <- before baseMethod2;"+
 						"callin2: roleMethod2 <- before baseMethod2,baseMethod4,baseMethod5;"+
 						"callin3: roleMethod3 <- before baseMethod0,baseMethod4;"+
+				        "callinA2: roleMethod2 <- after baseMethod2;"+
+				        "callinA3: roleMethod3 <- after baseMethod3;"+
 						"public void roleMethod0(){}"+
 						"public void roleMethod1(){}"+
 						"public void roleMethod2(){}"+
 						"public void roleMethod3(){}"+
 						"precedence callin1, callin2;"+
-						"precedence callin3, callin2;"+
+						"precedence callin3, callin2;" +
+						"precedence after callinA3, callinA2;"+
 					"}"+
 					"public class Role2 {}"+	
 					"precedence Role1.callin2, Role1.callin1;"+
