@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2096,7 +2096,27 @@ public class NaiveASTFlattener extends ASTVisitor {
 		this.buffer.append("}\n");//$NON-NLS-1$
 		return false;
     } 
-//gbr}
+    
+	/*
+	 * @see ASTVisitor#visit(PrecedenceDeclaration)
+	 */
+	@SuppressWarnings("nls")
+	@Override
+	public boolean visit(PrecedenceDeclaration node)
+	{
+		buffer.append("precedence ");
+		if (node.isAfter())
+			buffer.append("after ");
+		for (Iterator iter = node.elements().iterator(); iter.hasNext();)  {
+            Name name = (Name) iter.next();
+			name.accept(this);
+			if (iter.hasNext())
+				buffer.append(", ");
+        }
+		buffer.append(";");
+		return false;
+	}
+//gbr+SH}
 	
 
 }

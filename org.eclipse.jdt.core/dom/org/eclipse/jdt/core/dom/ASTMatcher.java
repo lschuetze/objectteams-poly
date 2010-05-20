@@ -2828,7 +2828,8 @@ public class ASTMatcher {
 		}
 		PrecedenceDeclaration otherPrecedence = (PrecedenceDeclaration) other;
 
-		return safeSubtreeMatch(node.elements(), otherPrecedence.elements());
+		return     node.isAfter() == otherPrecedence.isAfter()
+				&& safeSubtreeMatch(node.elements(), otherPrecedence.elements());
 	}
 	
 	public boolean match(GuardPredicateDeclaration node, Object other) {

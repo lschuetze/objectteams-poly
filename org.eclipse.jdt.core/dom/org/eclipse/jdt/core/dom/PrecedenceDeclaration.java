@@ -36,12 +36,21 @@ public class PrecedenceDeclaration extends ASTNode {
 	public static final ChildListPropertyDescriptor ELEMENTS_PROPERTY =
 		new ChildListPropertyDescriptor(PrecedenceDeclaration.class, "elements", Name.class, NO_CYCLE_RISK);
 
+	/**
+	 * The "after" structural property of this node type.
+	 * @since 0.7.0
+	 */
+	@SuppressWarnings("nls")
+	public static final SimplePropertyDescriptor AFTER_PROPERTY = 
+		new SimplePropertyDescriptor(PrecedenceDeclaration.class, "after", boolean.class, MANDATORY); //$NON-NLS-1$
+
 	private static final List PROPERTY_DESCRIPTORS_3_0;
 	
 	static {
-		List propertyList = new ArrayList(2);
+		List propertyList = new ArrayList(3);
 		createPropertyList(PrecedenceDeclaration.class, propertyList);
 		addProperty(ELEMENTS_PROPERTY, propertyList);
+		addProperty(AFTER_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
 	}
 	
@@ -54,6 +63,11 @@ public class PrecedenceDeclaration extends ASTNode {
 	}
 	
 	ASTNode.NodeList _elements = new ASTNode.NodeList(ELEMENTS_PROPERTY);
+
+	/**
+	 * <code>true</code> for <code>precedence after</code>, else <code>false</code>.
+	 */
+	boolean isAfter = false;
 	
 	PrecedenceDeclaration(AST ast)
 	{
@@ -61,14 +75,28 @@ public class PrecedenceDeclaration extends ASTNode {
 	}
 	
      List internalGetChildListProperty(ChildListPropertyDescriptor property)
-    {
-		if (property == ELEMENTS_PROPERTY) {
-			return this._elements;
-		}
-		// allow default implementation to flag the error
-		return super.internalGetChildListProperty(property);
-    }
-     
+     {
+    	 if (property == ELEMENTS_PROPERTY) {
+    		 return this._elements;
+    	 }
+    	 // allow default implementation to flag the error
+    	 return super.internalGetChildListProperty(property);
+     }
+ 
+     @Override
+     boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value) {
+    	 if (property == AFTER_PROPERTY) {
+    		 if (get) {
+    			 return isAfter();
+    		 } else {
+    			 setAfter(value);
+    			 return false;
+    		 }
+    	 }
+    	 // allow default implementation to flag the error
+    	 return super.internalGetSetBooleanProperty(property, get, value);
+     }
+
 	@Override
 	void accept0(ASTVisitor visitor) {
 		boolean visitChildren = visitor.visit(this);
@@ -98,6 +126,7 @@ public class PrecedenceDeclaration extends ASTNode {
 		PrecedenceDeclaration result = new PrecedenceDeclaration(target);
 		result.setSourceRange(this.getStartPosition(), this.getLength());
 		result.elements().addAll(ASTNode.copySubtrees(target, elements()));
+		result.setAfter(isAfter());
 		return result;
 	}
 
@@ -115,9 +144,25 @@ public class PrecedenceDeclaration extends ASTNode {
 		return this._elements;
 	}
 
+	/**
+	 * Mark whether this is a <code>precedence after</code> declaration. 
+	 */
+    public void setAfter(boolean isAfter) {
+		preValueChange(AFTER_PROPERTY);
+		this.isAfter = isAfter;
+		postValueChange(AFTER_PROPERTY);		
+    }
+
+	/**
+	 * Answer whether this is a <code>precedence after</code> declaration. 
+	 */
+    public boolean isAfter() {
+		return this.isAfter;
+    }
+
 	@Override
 	int memSize() {
-		return BASE_NODE_SIZE;
+		return BASE_NODE_SIZE + 1;
 	}
 
 	@Override

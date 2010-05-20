@@ -1741,6 +1741,8 @@ public class ASTRewriteFlattener extends ASTVisitor {
 	@Override
 	public boolean visit(PrecedenceDeclaration node) {
 		this.result.append("precedence ");
+		if (node.isAfter())
+			this.result.append("after ");
 		String sep = "";
 		for (Object element: node.elements()) {
 			this.result.append(sep);

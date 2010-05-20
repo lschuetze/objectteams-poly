@@ -3619,6 +3619,8 @@ public BaseConstructorInvocation convert(
 		for (org.eclipse.jdt.internal.compiler.ast.NameReference nameRef: aPrecedence.bindingNames) {
 			newPrecedence.elements().add(convert(nameRef));			
 		}
+		if (aPrecedence.isAfter)
+			newPrecedence.setAfter(true);
 		return newPrecedence;
 	}
 	

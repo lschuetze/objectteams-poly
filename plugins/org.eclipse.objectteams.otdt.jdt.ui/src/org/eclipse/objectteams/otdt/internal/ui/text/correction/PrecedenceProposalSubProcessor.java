@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodMappingBinding;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrecedenceDeclaration;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
@@ -181,6 +183,7 @@ public class PrecedenceProposalSubProcessor {
 				Messages.format(CorrectionMessages.OTQuickfix_addbindingprecedence_description,
 						new String[]{roleType.getName().getIdentifier()}), 
 				callin1, callin2,
+				Modifier.isAfter(mapping1.getCallinModifier()),
 			 	name1 != null, name2 != null);
 
 		// create new, editable labels (linked to their mentioning within the precedence declaration):
@@ -221,6 +224,7 @@ public class PrecedenceProposalSubProcessor {
 							new String[]{teamType.getName().getIdentifier()}), 
 					Signature.getSimpleName(problemArguments[0])+"."+callin1, //$NON-NLS-1$
 					Signature.getSimpleName(problemArguments[2])+"."+callin2, //$NON-NLS-1$
+					ModifierKeyword.AFTER_KEYWORD.toString().equals(problemArguments[4]),
 					false, false /* don't link labels */);
 	}
 
@@ -245,6 +249,7 @@ public class PrecedenceProposalSubProcessor {
 							new String[]{teamType.getName().getIdentifier()}), 
 					Signature.getSimpleName(problemArguments[0]), 
 					Signature.getSimpleName(problemArguments[2]),
+					ModifierKeyword.AFTER_KEYWORD.toString().equals(problemArguments[4]),
 					false, false /* don't link labels */);
 	}
 
@@ -268,6 +273,7 @@ public class PrecedenceProposalSubProcessor {
 			 									  		   String label,
 			 									  		   String callin1,
 			 									  		   String callin2,
+			 									  		   boolean isAfter,
 			 									  		   boolean linkLabel1,
 			 									  		   boolean linkLabel2) 
 	{
@@ -282,6 +288,8 @@ public class PrecedenceProposalSubProcessor {
 		Name element2 = ast.newName(callin2);
 		newPrecedence.elements().add(element1);
 		newPrecedence.elements().add(element2);
+		if (isAfter)
+			newPrecedence.setAfter(true);
 		listRewrite.insertLast(newPrecedence, null);
 		MyLinkedCorrectionProposal proposal = new MyLinkedCorrectionProposal(
 						label,

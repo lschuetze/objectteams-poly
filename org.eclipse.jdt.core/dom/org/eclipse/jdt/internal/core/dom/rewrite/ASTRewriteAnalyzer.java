@@ -3869,6 +3869,25 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 
 	@Override
 	public boolean visit(PrecedenceDeclaration node) {
+		// 'after' keyword:
+        boolean isAfter = ((Boolean) getOriginalValue(node, PrecedenceDeclaration.AFTER_PROPERTY)).booleanValue();
+        boolean invertAfter = isChanged(node, PrecedenceDeclaration.AFTER_PROPERTY);
+        if (invertAfter) {
+        	if (isAfter) {
+	        	try {
+	        		getScanner().readToToken(TerminalTokens.TokenNameafter, node.getStartPosition());
+	                int start= getScanner().getCurrentStartOffset();
+	                int end= getScanner().getCurrentEndOffset();
+	                doTextRemove(start, end-start+1, getEditGroup(node, PrecedenceDeclaration.AFTER_PROPERTY));
+	        	} catch (CoreException e) {
+	        		// ignore
+	        	}
+        	} else {
+        		int pos = node.getStartPosition()+"precedence".length(); //$NON-NLS-1$
+        		doTextInsert(pos, " after", getEditGroup(node, PrecedenceDeclaration.AFTER_PROPERTY)); //$NON-NLS-1$
+        	}
+        }
+        // elements
 		RewriteEvent precedencesEvent = getEvent(node, PrecedenceDeclaration.ELEMENTS_PROPERTY);
 		if (   precedencesEvent == null
 				|| precedencesEvent.getChangeKind() == RewriteEvent.UNCHANGED)
