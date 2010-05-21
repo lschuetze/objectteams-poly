@@ -121,6 +121,15 @@ public abstract class OTREBlock
 	// apply the value from the checkbox:
 	public void performApply(ILaunchConfigurationWorkingCopy config) {
 		if (this._otreToggleButton != null)
-			config.setAttribute(OTDebugPlugin.OT_LAUNCH, this._useOTRE);
+			try {
+				if (config.getAttribute(OTDebugPlugin.OT_LAUNCH, false) != this._useOTRE)
+					config.setAttribute(OTDebugPlugin.OT_LAUNCH, this._useOTRE);
+			} catch (CoreException ex) {
+	            OTDebugAdaptorPlugin.getDefault().getLog().log(
+	            		new Status(Status.ERROR, 
+	            				   OTDebugAdaptorPlugin.PLUGIN_ID, 
+	            				   DebugMessages.OTLaunching_loading_failed_msg,  
+	            				   ex));
+			}
     }
 }
