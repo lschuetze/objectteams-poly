@@ -47,11 +47,11 @@ fi
 
 # VERSIONS:
 # Eclipse SKD build identifier:
-EVERSION=3.6RC1
+EVERSION=3.6RC2
 # Architecture (as used by OSGi):
 ARCH=`arch`
 # used only locally:
-DROP=${BASEDIR}/drops/S-3.6RC1-201005131500
+DROP=${BASEDIR}/drops/S-3.6RC2-201005201744
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
