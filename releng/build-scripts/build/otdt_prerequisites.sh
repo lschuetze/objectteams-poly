@@ -21,7 +21,7 @@ OT_TESTSUITE_DIR=${BASEDIR}/testrun
 TMPDIR="${BASEDIR}/tmp"
 
 # EXPORT: directory for metadata from previous builds:
-METADATA="${BASEDIR}/metadata}"
+METADATA="${BASEDIR}/metadata"
 
 # EXPORT: mail address to receive notification about build result (currently only build failures):
 OT_RECIPIENT="stephan@cs.tu-berlin.de"
