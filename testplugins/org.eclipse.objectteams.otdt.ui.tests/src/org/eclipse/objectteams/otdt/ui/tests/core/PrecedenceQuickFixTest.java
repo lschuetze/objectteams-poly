@@ -17,7 +17,6 @@
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -25,12 +24,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jface.preference.IPreferenceStore;
 
 
 /**
@@ -45,6 +39,7 @@ public class PrecedenceQuickFixTest extends OTQuickFixTest {
 		super(name);
 	}
 
+	@SuppressWarnings("unchecked")
 	public static Test allTests() {
 		return setUpTest(new TestSuite(THIS));
 	}
