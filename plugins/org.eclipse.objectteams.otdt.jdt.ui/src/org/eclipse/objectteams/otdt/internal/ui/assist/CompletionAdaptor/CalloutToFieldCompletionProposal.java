@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility;
 import org.eclipse.swt.graphics.Image;
 
 /**
@@ -80,7 +81,7 @@ protected class CalloutToFieldCompletionProposal extends CreateMethodMappingComp
 			return false;
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(this.fJavaProject);
 		// create callout:
-		CalloutMappingDeclaration stub= StubUtility2.createCalloutToField(
+		CalloutMappingDeclaration stub= OTStubUtility.createCalloutToField(
 											iCU, rewrite, importRewrite,
 											this.fMethodName,
 											field, this.isSetter, roleBinding.getName(),

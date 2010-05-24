@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.objectteams.otdt.internal.ui.util.Images;
+import org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility;
 import org.eclipse.swt.graphics.Image;
 
 /**
@@ -109,7 +110,7 @@ protected class CallinRHSCompletionProposal extends MethodMappingCompletionPropo
 
 		// create and insert:
 		boolean hasSignature= callinMapping.getRoleMappingElement().hasSignature();
-		MethodSpec spec= StubUtility2
+		MethodSpec spec= OTStubUtility
 					.createMethodSpec(iCU, rewrite, importRewrite, method, hasSignature);
 		baseSpecsRewrite.insertAt(spec, insertPosition, null);
 		

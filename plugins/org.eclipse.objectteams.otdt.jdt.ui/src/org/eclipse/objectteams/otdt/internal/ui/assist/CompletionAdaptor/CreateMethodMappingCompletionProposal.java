@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.objectteams.otdt.internal.ui.util.Images;
+import org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -141,9 +142,9 @@ protected class CreateMethodMappingCompletionProposal extends MethodMappingCompl
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);
 		// create callout:
 		AbstractMethodMappingDeclaration stub= this.fIsOnlyCallin 
-				? StubUtility2.createCallin(iCU, rewrite, importRewrite,
+				? OTStubUtility.createCallin(iCU, rewrite, importRewrite,
 						 				    method, baseBinding.getName(), ModifierKeyword.BEFORE_KEYWORD, settings)
-				: StubUtility2.createCallout(iCU, rewrite, importRewrite,
+				: OTStubUtility.createCallout(iCU, rewrite, importRewrite,
 											 method, baseBinding.getName(), settings);
 		if (stub != null) {
 			insertStub(rewrite, type, bodyProperty, stub);

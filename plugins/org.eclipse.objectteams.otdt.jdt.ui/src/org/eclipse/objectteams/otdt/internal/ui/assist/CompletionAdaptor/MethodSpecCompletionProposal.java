@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility;
 import org.eclipse.swt.graphics.Image;
 
 /**
@@ -70,7 +71,7 @@ protected class MethodSpecCompletionProposal extends MethodMappingCompletionProp
 		if (method == null)
 			return false;
 		// create and insert:
-		MethodSpec spec= StubUtility2
+		MethodSpec spec= OTStubUtility
 					.createMethodSpec(iCU, rewrite, importRewrite, method, partialMapping.hasSignature());
 		if (partialMapping instanceof CalloutMappingDeclaration)
 			rewrite.set(partialMapping, CalloutMappingDeclaration.BASE_MAPPING_ELEMENT_PROPERTY, spec, null);

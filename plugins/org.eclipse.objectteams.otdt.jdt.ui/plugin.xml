@@ -127,6 +127,11 @@
               class="org.eclipse.objectteams.otdt.internal.ui.javaeditor.JavaEditorAdaptor"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
+        <team
+              activation="NONE"
+              class="org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility"
+              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+        </team>
      </aspectBinding>   
      <aspectBinding icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
 	     <basePlugin 
@@ -180,6 +185,14 @@
             	%BoundRoleDecorator_description
             </description>
       </decorator>
+   </extension>
+   <extension
+         point="org.eclipse.jdt.ui.quickAssistProcessors">
+      <quickAssistProcessor
+            class="org.eclipse.objectteams.otdt.internal.ui.text.correction.QuickAssitProcessor"
+            id="org.eclipse.objectteams.otdt.ui.text.correction.QuickAssitProcessor"
+            name="OT/J Quick Assit Processor">
+      </quickAssistProcessor>
    </extension>
 
 </plugin>
