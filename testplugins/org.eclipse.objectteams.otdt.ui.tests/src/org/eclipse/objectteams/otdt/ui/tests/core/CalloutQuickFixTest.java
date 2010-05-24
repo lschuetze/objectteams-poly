@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.ui.tests.core;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -30,10 +31,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 
 /**
- * Test OT-specific quickfixes (here: callout related issues).
+ * Test OT-specific quickfixes and quick assists (here: callout related issues).
  * @author stephan
  * @since 1.2.8
  */
@@ -414,4 +416,129 @@ public class CalloutQuickFixTest extends OTQuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
 	}
+	
+
+	/* Remove signatures from a callout to field. */
+	public void testRemoveSignatures1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B1 {\n");
+		buf.append("    String foo;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
+
+		buf = new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy B1 {\n");
+		buf.append("        abstract String getFoo();\n");
+		buf.append("		String getFoo() -> get String foo;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("getFoo() -> get");
+		AssistContext context= getCorrectionContext(cuteam, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String[] expectedProposals = new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy B1 {\n");
+		buf.append("        abstract String getFoo();\n");
+		buf.append("		getFoo -> get foo;\n"); // removed signatures
+		buf.append("    }\n");
+		buf.append("}\n");
+		expectedProposals[0] = buf.toString();
+
+		assertExpectedExistInProposals(proposals, expectedProposals);
+	}
+
+	/* Add signatures to a callout. */
+	public void testAddSignatures1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B1 {\n");
+		buf.append("    String foo(Object o) { return null; }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
+
+		buf = new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy B1 {\n");
+		buf.append("        abstract String getFoo(Boolean b);\n");
+		buf.append("		getFoo -> foo;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("getFoo -> foo");
+		AssistContext context= getCorrectionContext(cuteam, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String[] expectedProposals = new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy B1 {\n");
+		buf.append("        abstract String getFoo(Boolean b);\n");
+		buf.append("		String getFoo(Boolean b) -> String foo(Object o);\n"); // added signatures
+		buf.append("    }\n");
+		buf.append("}\n");
+		expectedProposals[0] = buf.toString();
+
+		assertExpectedExistInProposals(proposals, expectedProposals);
+	}
+
+	/* Add signatures to a callout to field. */
+	public void testAddSignatures2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B1 {\n");
+		buf.append("    String foo;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
+
+		buf = new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy B1 {\n");
+		buf.append("        abstract String getFoo();\n");
+		buf.append("		getFoo -> get foo;\n"); 
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("getFoo -> get");
+		AssistContext context= getCorrectionContext(cuteam, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String[] expectedProposals = new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy B1 {\n");
+		buf.append("        abstract String getFoo();\n");
+		buf.append("		String getFoo() -> get String foo;\n"); // added signatures
+		buf.append("    }\n");
+		buf.append("}\n");
+		expectedProposals[0] = buf.toString();
+
+		assertExpectedExistInProposals(proposals, expectedProposals);
+	}
+
 }
