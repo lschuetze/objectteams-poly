@@ -174,7 +174,7 @@ public class FieldAccessSpec extends MethodMappingElement
 		return super.internalGetSetChildProperty(property, isGetRequest, child);
 	}
 	
-	SimplePropertyDescriptor internalSignatureProperty() {
+	public SimplePropertyDescriptor signatureProperty() {
 		return SIGNATURE_PROPERTY;
 	}
 	
@@ -231,31 +231,11 @@ public class FieldAccessSpec extends MethodMappingElement
 	/**
 	 * Returns the field type of the field in this FieldAccessSpec,
 	 * exclusive of any extra array dimensions (JLS2 API only). 
-	 * This is one of the few places where the void type is meaningful.
 	 * <p>
-	 * Note that this child is not relevant for constructor declarations
-	 * (although, it does still figure in subtree equality comparisons
-	 * and visits), and is devoid of the binding information ordinarily
-	 * available.
-	 * </p>
 	 * 
-	 * @return the return type, possibly the void primitive type
+	 * @return the field type, possibly null
 	 */
-	public Type getFieldType()
-	{
-		if (this._fieldType == null)
-		{
-			// lazy init must be thread-safe for readers
-			synchronized (this)
-			{
-				if (this._fieldType == null)
-				{
-					preLazyInit();
-					this._fieldType = this.ast.newPrimitiveType(PrimitiveType.VOID);
-					postLazyInit(this._fieldType, FIELD_TYPE_PROPERTY);
-				}
-			}
-		}
+	public Type getFieldType() {
 		return this._fieldType;
 	}
 
@@ -277,10 +257,6 @@ public class FieldAccessSpec extends MethodMappingElement
 	 */
 	public void setFieldType(Type type)
 	{
-		if (type == null)
-		{
-			throw new IllegalArgumentException();
-		}
 		ASTNode oldChild = this._fieldType;
 		preReplaceChild(oldChild, type, FIELD_TYPE_PROPERTY);
 		this._fieldType = type;

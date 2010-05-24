@@ -66,7 +66,7 @@ public abstract class MethodMappingElement extends ASTNode {
 	 * 
 	 * @return the property descriptor
 	 */
-	abstract SimplePropertyDescriptor internalSignatureProperty();
+	public abstract SimplePropertyDescriptor signatureProperty();
 	
 	/**
 	 * Returns structural property descriptor for the "name" property
@@ -109,7 +109,7 @@ public abstract class MethodMappingElement extends ASTNode {
 	 */ 
 	public void setSignatureFlag(boolean hasSignature)
 	{
-		SimplePropertyDescriptor p = internalSignatureProperty();
+		SimplePropertyDescriptor p = signatureProperty();
 		preValueChange(p);
 		this._hasSignature = hasSignature;
 		postValueChange(p);

@@ -4224,41 +4224,114 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		if (!hasChildrenChanges(node)) {
 			return doVisitUnchangedChildren(node);
 		}
+		RewriteEvent signatureEvent = getEvent(node, MethodSpec.SIGNATURE_PROPERTY);
+		boolean removeSignature = false;
+		boolean addSignature = false;
+		if (signatureEvent != null && signatureEvent.getChangeKind() == RewriteEvent.REPLACED) {
+			if ((Boolean)signatureEvent.getOriginalValue())
+				removeSignature = !(Boolean)signatureEvent.getNewValue();
+			else
+				addSignature = (Boolean)signatureEvent.getNewValue();
+		}
+		
 		int pos= node.getStartPosition();
 		// type parameters
-		if (node.getAST().apiLevel() == AST.JLS3) {
-			pos= rewriteOptionalTypeParameters(node, MethodSpec.TYPE_PARAMETERS_PROPERTY, pos, " ", true, false); //$NON-NLS-1$
-		}
+		if (node.getAST().apiLevel() == AST.JLS3)
+			pos= rewriteOptionalTypeParameters(node, MethodSpec.TYPE_PARAMETERS_PROPERTY, pos, String.valueOf(' '), true, pos != node.getStartPosition());
+
 		// return type
-		rewriteRequiredNode(node, MethodSpec.RETURN_TYPE2_PROPERTY);
+		pos= rewriteNode(node, MethodSpec.RETURN_TYPE2_PROPERTY, pos, 
+						 pos == node.getStartPosition() ? ASTRewriteFormatter.NONE : ASTRewriteFormatter.SPACE);
+		try {
+			// add/remove whitespace upto next token
+			int nextStart = getScanner().getNextStartOffset(pos, false);
+			if (removeSignature) {
+				doTextRemove(pos, nextStart-pos, getEditGroup(node, MethodSpec.RETURN_TYPE2_PROPERTY));
+			} else if (addSignature) {
+				if (pos == nextStart)
+					doTextInsert(pos, String.valueOf(' '), getEditGroup(node, MethodSpec.RETURN_TYPE2_PROPERTY));
+			}
+		} catch (CoreException e) {
+			// ignore
+		}			
+
 		// method name
 		pos= rewriteRequiredNode(node, MethodSpec.NAME_PROPERTY);
 
 		// parameters
 		try {
-			if (isChanged(node, MethodSpec.PARAMETERS_PROPERTY)) {
-				pos= getScanner().getTokenEndOffset(TerminalTokens.TokenNameLPAREN, pos);
-				pos= rewriteNodeList(node, MethodSpec.PARAMETERS_PROPERTY, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
-			} else {
-				pos= doVisit(node, MethodSpec.PARAMETERS_PROPERTY, pos);
+			boolean newHasSignature = (signatureEvent != null)	
+				? signatureEvent.getNewValue() == Boolean.TRUE
+				: node.hasSignature();
+			if (newHasSignature) {
+				if (addSignature)
+					doTextInsert(pos, String.valueOf('('), null);
+				if (isChanged(node, MethodSpec.PARAMETERS_PROPERTY)) {
+					if (!addSignature)
+						pos= getScanner().getTokenEndOffset(TerminalTokens.TokenNameLPAREN, pos);
+					pos= rewriteNodeList(node, MethodSpec.PARAMETERS_PROPERTY, pos, "", ", "); //$NON-NLS-1$ //$NON-NLS-2$
+				} else {
+					pos= doVisit(node, MethodSpec.PARAMETERS_PROPERTY, pos);
+				}
+				if (addSignature)
+					doTextInsert(pos, String.valueOf(')'), null);
+			} else if (removeSignature) {
+				List parameters = node.parameters();
+				int endPos;
+				if (parameters.size() > 0) {
+					ASTNode lastNode = (ASTNode) parameters.get(parameters.size()-1);
+					endPos = lastNode.getStartPosition() + lastNode.getLength() + 1;
+				} else {
+					endPos= getScanner().getTokenEndOffset(TerminalTokens.TokenNameRPAREN, pos);
+				}
+				doTextRemove(pos, endPos-pos, null);
 			}
+			// !newHasSignature && !removeSignature -> nothing to rewrite
 		} catch (CoreException e) {
 			// ignore
 		}
 		return false;
 	}
 
-	//FIXME(SH): XXX COMPLETE THESE!!!
-
 	public boolean visit(FieldAccessSpec node)
 	{
 		if (!hasChildrenChanges(node)) {
-//			System.out.println("visit FieldAccessSpec unchanged");
 			return doVisitUnchangedChildren(node);
 		}
-//		System.out.println("visit FieldAccessSpec changed");
-		return true;
+		RewriteEvent signatureEvent = getEvent(node, FieldAccessSpec.SIGNATURE_PROPERTY);
+		boolean removeSignature = false;
+		boolean addSignature = false;
+		if (signatureEvent != null && signatureEvent.getChangeKind() == RewriteEvent.REPLACED) {
+			if ((Boolean)signatureEvent.getOriginalValue())
+				removeSignature = !(Boolean)signatureEvent.getNewValue();
+			else
+				addSignature = (Boolean)signatureEvent.getNewValue();
+		}
+		
+		int pos= node.getStartPosition();
+
+		// field type
+		pos= rewriteNode(node, FieldAccessSpec.FIELD_TYPE_PROPERTY, pos, ASTRewriteFormatter.NONE);
+		try {
+			// add/remove whitespace upto next token
+			int nextStart = getScanner().getNextStartOffset(pos, false);
+			if (removeSignature) {
+				doTextRemove(pos, nextStart-pos, getEditGroup(node, FieldAccessSpec.FIELD_TYPE_PROPERTY));
+			} else if (addSignature) {
+				if (pos == nextStart)
+					doTextInsert(pos, String.valueOf(' '), getEditGroup(node, FieldAccessSpec.FIELD_TYPE_PROPERTY));
+			}
+		} catch (CoreException e) {
+			// ignore
+		}			
+		
+		// field name
+		pos= rewriteRequiredNode(node, FieldAccessSpec.NAME_PROPERTY);
+
+		return false;
 	}
+
+	//FIXME(SH): XXX COMPLETE THESE!!!
 
 	public boolean visit(LiftingType node)
 	{

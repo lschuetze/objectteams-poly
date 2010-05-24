@@ -402,6 +402,15 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		_baseMappingElement = baseMappingElement;
 		postReplaceChild(oldChild, baseMappingElement, BASE_MAPPING_ELEMENT_PROPERTY);        
     }
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void removeSignatures() {
+		super.removeSignatures();
+		removeSignatureFrom(getBaseMappingElement());
+	}
 
 	/**
 	 * 

@@ -198,7 +198,37 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 		return getRoleMappingElement().hasSignature();
 	}
 	
-    public IMethodMappingBinding resolveBinding()
+	/** 
+	 * Mark this method mapping as not having signatures and actually
+	 * remove signatures from all method specs.
+	 */
+	public void removeSignatures() {
+		removeSignatureFrom(getRoleMappingElement());
+	}
+	
+    void removeSignatureFrom(MethodMappingElement mappingElement) {
+		mappingElement.setSignatureFlag(false);
+		switch (mappingElement.getNodeType()) {
+			case ASTNode.METHOD_SPEC:
+				MethodSpec spec = (MethodSpec) mappingElement;
+				spec.setReturnType2(null);
+				@SuppressWarnings("rawtypes")
+				List typeParams = spec.typeParameters();
+				while (typeParams.size() > 0)
+					typeParams.remove(0);
+				@SuppressWarnings("rawtypes")
+				List params = spec.parameters();
+				while (params.size() > 0)
+					params.remove(0);
+				break;
+			case ASTNode.FIELD_ACCESS_SPEC:
+				FieldAccessSpec fieldSpec = (FieldAccessSpec) mappingElement;
+				fieldSpec.setFieldType(null);
+				break;
+		}
+	}
+
+	public IMethodMappingBinding resolveBinding()
     {
         return this.ast.getBindingResolver().resolveMethodMapping(this);
     }

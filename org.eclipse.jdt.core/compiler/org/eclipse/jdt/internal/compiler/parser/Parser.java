@@ -2212,9 +2212,12 @@ protected void consumeCallinBindingLeft(boolean hasSignature) {
 	callinBinding.bindingTokenStart  	 = this.intStack[this.intPtr--];
 	callinBinding.modifierEnd = callinBinding.bindingTokenStart+1; // assume just '<-' until we find the actual callin modifier (might be missing)
 	// not setting callinBinding.declarationSourceEnd means: this mapping is not yet finished.
-	if (hasSignature) // parsed as a MethodDeclaration it may include the javadoc.
-		callinBinding.roleMethodSpec.declarationSourceStart =
-						callinBinding.roleMethodSpec.returnType.sourceStart;
+	if (hasSignature) { // parsed as a MethodDeclaration it may include the javadoc.
+		// if we have type parameters keep current start, which includes the type parameters
+		if (callinBinding.roleMethodSpec.typeParameters == null)
+			callinBinding.roleMethodSpec.declarationSourceStart =
+					callinBinding.roleMethodSpec.returnType.sourceStart;
+	}
 
 	if (   this.astPtr > 0
 		&& this.astStack[this.astPtr] instanceof CallinLabel)

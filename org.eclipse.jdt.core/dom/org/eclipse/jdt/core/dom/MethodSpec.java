@@ -156,16 +156,9 @@ public class MethodSpec extends MethodMappingElement
 	
 	/**
 	 * The return type.
-	 * JLS2 behevior: lazily initialized; defaults to void.
-	 * Note that this field is ignored for constructor declarations.
+	 * JLS2 behevior: lazily initialized; defaults to null.
 	 */
 	private Type returnType = null;
-	
-	/**
-	 * Indicated whether the return type has been initialized.
-	 * @since 3.1
-	 */
-	private boolean returnType2Initialized = false;
 
 	/**
 	 * The type paramters (element type: <code>TypeParameter</code>). 
@@ -308,7 +301,7 @@ public class MethodSpec extends MethodMappingElement
         return null;
     }
     
-    SimplePropertyDescriptor internalSignatureProperty() {
+    public SimplePropertyDescriptor signatureProperty() {
 		return SIGNATURE_PROPERTY;
 	}
 	
@@ -494,17 +487,6 @@ public class MethodSpec extends MethodMappingElement
 	 */ 
 	public Type getReturnType2() {
 	    unsupportedIn2();
-		if (this.returnType == null && !this.returnType2Initialized) {
-			// lazy init must be thread-safe for readers
-			synchronized (this) {
-				if (this.returnType == null && !this.returnType2Initialized) {
-					preLazyInit();
-					this.returnType = this.ast.newPrimitiveType(PrimitiveType.VOID);
-					this.returnType2Initialized = true;
-					postLazyInit(this.returnType, RETURN_TYPE2_PROPERTY);
-				}
-			}
-		}
 		return this.returnType;
 	}
 	
@@ -532,7 +514,6 @@ public class MethodSpec extends MethodMappingElement
 	 */ 
 	public void setReturnType2(Type type) {
 	    unsupportedIn2();
-		this.returnType2Initialized = true;
 		ASTNode oldChild = this.returnType;
 		preReplaceChild(oldChild, type, RETURN_TYPE2_PROPERTY);
 		this.returnType = type;

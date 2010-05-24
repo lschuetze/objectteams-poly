@@ -429,7 +429,17 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		return _baseMappingElements;
 	}
 
-    /**
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void removeSignatures() {
+		super.removeSignatures();
+		for (Object baseElement : getBaseMappingElements())
+			removeSignatureFrom((MethodMappingElement) baseElement);
+	}
+
+	/**
 	 * Returns the callin modifiers explicitly specified on this declaration.
 	 * 
 	 * @return exactly one of before, after, replace using constants from Modifier
