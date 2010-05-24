@@ -39,7 +39,9 @@ import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterMapping;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTNodeCreator;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -445,5 +447,230 @@ public class ASTRewritingModifyingCallinMappingDeclarationTest extends ASTRewrit
 		assertEqualString(preview, buf.toString());
 	}
 
+	/**
+	 * remove signatures, 2 base methods.
+	 */
+	public void test0009() throws MalformedTreeException, JavaModelException, BadLocationException {		
+	    IPackageFragment pack1= sourceFolder.createPackageFragment("test0009", false, null);
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("package test0009;\n");
+		buf.append("public team class Team {\n");
+		buf.append("	public class Role playedBy Base {\n");
+		buf.append("        String roleMethod(String s1) <- before String baseMethod(String s2), String fooBaseMethod(String s3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+			
+		ICompilationUnit cu = pack1.createCompilationUnit("Team.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= createCU(cu, false);
+		
+		astRoot.recordModifications();
+			
+		TypeDeclaration aTeam = (TypeDeclaration) astRoot.types().get(0);
+		RoleTypeDeclaration role = (RoleTypeDeclaration) aTeam.bodyDeclarations().get(0);
+		CallinMappingDeclaration callin = (CallinMappingDeclaration) role.bodyDeclarations().get(0); 
+		callin.removeSignatures();
+
+		String preview = evaluateRewrite(cu.getSource(), astRoot);
+		
+		buf= new StringBuffer();
+		buf.append("package test0009;\n");
+		buf.append("public team class Team {\n");
+		buf.append("	public class Role playedBy Base {\n");
+		buf.append("        roleMethod <- before baseMethod, fooBaseMethod;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertEqualString(preview, buf.toString());
+	}
+
+	/**
+	 * remove signatures, 2 base methods, some arg-lists are empty, w/ linebreaks
+	 */
+	public void test0010() throws MalformedTreeException, JavaModelException, BadLocationException {		
+	    IPackageFragment pack1= sourceFolder.createPackageFragment("test0010", false, null);
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("package test0010;\n");
+		buf.append("public team class Team {\n");
+		buf.append("	public class Role playedBy Base {\n");
+		buf.append("        String roleMethod()// should keep this comment\n");
+		buf.append("		<- before\n");
+		buf.append("			String baseMethod(),\n");
+		buf.append("			String fooBaseMethod(String s3);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+			
+		ICompilationUnit cu = pack1.createCompilationUnit("Team.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= createCU(cu, false);
+		
+		astRoot.recordModifications();
+			
+		TypeDeclaration aTeam = (TypeDeclaration) astRoot.types().get(0);
+		RoleTypeDeclaration role = (RoleTypeDeclaration) aTeam.bodyDeclarations().get(0);
+		CallinMappingDeclaration callin = (CallinMappingDeclaration) role.bodyDeclarations().get(0); 
+		callin.removeSignatures();
+
+		String preview = evaluateRewrite(cu.getSource(), astRoot);
+		
+		buf= new StringBuffer();
+		buf.append("package test0010;\n");
+		buf.append("public team class Team {\n");
+		buf.append("	public class Role playedBy Base {\n");
+		buf.append("        roleMethod// should keep this comment\n");
+		buf.append("		<- before\n");
+		buf.append("			baseMethod,\n");
+		buf.append("			fooBaseMethod;\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertEqualString(preview, buf.toString());
+	}
+
+	/**
+	 * remove signatures, 1 base method, type parameter
+	 */
+	public void test0011() throws MalformedTreeException, JavaModelException, BadLocationException {		
+	    IPackageFragment pack1= sourceFolder.createPackageFragment("test0011", false, null);
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("package test0011;\n");
+		buf.append("public team class Team {\n");
+		buf.append("	public class Role playedBy Base {\n");
+		buf.append("        <E> String roleMethod(E s1) <- before String baseMethod(String s2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+			
+		ICompilationUnit cu = pack1.createCompilationUnit("Team.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= createCU(cu, false);
+		
+		astRoot.recordModifications();
+			
+		TypeDeclaration aTeam = (TypeDeclaration) astRoot.types().get(0);
+		RoleTypeDeclaration role = (RoleTypeDeclaration) aTeam.bodyDeclarations().get(0);
+		CallinMappingDeclaration callin = (CallinMappingDeclaration) role.bodyDeclarations().get(0); 
+		callin.removeSignatures();
+
+		String preview = evaluateRewrite(cu.getSource(), astRoot);
+		
+		buf= new StringBuffer();
+		buf.append("package test0011;\n");
+		buf.append("public team class Team {\n");
+		buf.append("	public class Role playedBy Base {\n");
+		buf.append("        roleMethod <- before baseMethod;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertEqualString(preview, buf.toString());
+	}
+
+	/**
+	 * add signatures, 2 base methods.
+	 */
+	public void test0012() throws MalformedTreeException, JavaModelException, BadLocationException {		
+	    IPackageFragment pack1= sourceFolder.createPackageFragment("test0012", false, null);
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("package test0012;\n");
+		buf.append("public team class Team {\n");
+		buf.append("	public class Role playedBy Base {\n");
+		buf.append("        roleMethod <- before baseMethod, fooBaseMethod;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+			
+		ICompilationUnit cu = pack1.createCompilationUnit("Team.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= createCU(cu, false);
+		
+		astRoot.recordModifications();
+			
+		TypeDeclaration aTeam = (TypeDeclaration) astRoot.types().get(0);
+		RoleTypeDeclaration role = (RoleTypeDeclaration) aTeam.bodyDeclarations().get(0);
+		CallinMappingDeclaration callin = (CallinMappingDeclaration) role.bodyDeclarations().get(0); 
+		addSignature(astRoot.getAST(),
+					 (MethodSpec)callin.getRoleMappingElement(),
+					 "String", new String[] {"String"}, new String[] {"s1"} );
+		addSignature(astRoot.getAST(),
+				 (MethodSpec)callin.getBaseMappingElements().get(0),
+				 "String", new String[] {"String"}, new String[] {"s2"} );
+		addSignature(astRoot.getAST(),
+				 (MethodSpec)callin.getBaseMappingElements().get(1),
+				 "String", new String[] {"String", "Object"}, new String[] {"s3", "ignored"} );
+
+		String preview = evaluateRewrite(cu.getSource(), astRoot);
+		
+		buf= new StringBuffer();
+		buf.append("package test0012;\n");
+		buf.append("public team class Team {\n");
+		buf.append("	public class Role playedBy Base {\n");
+		buf.append("        String roleMethod(String s1) <- before String baseMethod(String s2), String fooBaseMethod(String s3, Object ignored);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertEqualString(preview, buf.toString());
+	}
+
+	/**
+	 * add signatures, 1 base method, type parameter
+	 */
+	public void test0013() throws MalformedTreeException, JavaModelException, BadLocationException {		
+	    IPackageFragment pack1= sourceFolder.createPackageFragment("test0013", false, null);
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("package test0013;\n");
+		buf.append("public team class Team {\n");
+		buf.append("	public class Role playedBy Base {\n");
+		buf.append("        roleMethod <- before baseMethod;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+			
+		ICompilationUnit cu = pack1.createCompilationUnit("Team.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= createCU(cu, false);
+		AST ast = astRoot.getAST();
+		
+		astRoot.recordModifications();
+			
+		TypeDeclaration aTeam = (TypeDeclaration) astRoot.types().get(0);
+		RoleTypeDeclaration role = (RoleTypeDeclaration) aTeam.bodyDeclarations().get(0);
+		CallinMappingDeclaration callin = (CallinMappingDeclaration) role.bodyDeclarations().get(0); 
+		MethodSpec roleMethodSpec = (MethodSpec)callin.getRoleMappingElement();
+		TypeParameter typeParameter = ast.newTypeParameter();
+		typeParameter.setName(ast.newSimpleName("E"));
+		roleMethodSpec.typeParameters().add(typeParameter);
+		addSignature(ast,
+					 roleMethodSpec,
+					 "E", new String[] {"String"}, new String[] {"s1"} );
+		addSignature(ast,
+				 (MethodSpec)callin.getBaseMappingElements().get(0),
+				 "E", new String[] {"String"}, new String[] {"s2"} );
+
+		String preview = evaluateRewrite(cu.getSource(), astRoot);
+		
+		buf= new StringBuffer();
+		buf.append("package test0013;\n");
+		buf.append("public team class Team {\n");
+		buf.append("	public class Role playedBy Base {\n");
+		buf.append("        <E> E roleMethod(String s1) <- before E baseMethod(String s2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		
+		assertEqualString(preview, buf.toString());
+	}
+
+	@SuppressWarnings("unchecked")
+	private void addSignature(AST ast, MethodSpec mspec, String returnType, String[] argTypes, String[] argNames) {
+		mspec.setSignatureFlag(true);
+		mspec.setReturnType2(ast.newSimpleType(ast.newSimpleName(returnType)));
+		for (int i = 0; i < argTypes.length; i++) {
+			SingleVariableDeclaration arg = ast.newSingleVariableDeclaration();
+			arg.setName(ast.newSimpleName(argNames[i]));
+			arg.setType(ast.newSimpleType(ast.newSimpleName(argTypes[i])));
+			mspec.parameters().add(arg);
+		}
+	}
 }
 	
