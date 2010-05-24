@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.NumberLiteral;
+import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression.Operator;
@@ -225,7 +226,9 @@ public class ASTRewritingModifyingRoleTest extends ASTRewritingModifyingTest {
 		baseMethodSpec.setName(ast.newSimpleName("baseMethodSpec"));
 		roleMethodSpec.setName(ast.newSimpleName("roleMethodSpec"));
 		baseMethodSpec.setSignatureFlag(true);
+		baseMethodSpec.setReturnType2(ast.newPrimitiveType(PrimitiveType.VOID));
 		roleMethodSpec.setSignatureFlag(true);
+		roleMethodSpec.setReturnType2(ast.newPrimitiveType(PrimitiveType.VOID));
 		
 		callout.setBaseMappingElement(baseMethodSpec);
 		callout.setRoleMappingElement(roleMethodSpec);
@@ -314,7 +317,9 @@ public class ASTRewritingModifyingRoleTest extends ASTRewritingModifyingTest {
 		baseMethodSpec.setName(ast.newSimpleName("baseMethodSpec"));
 		roleMethodSpec.setName(ast.newSimpleName("roleMethodSpec"));
 		baseMethodSpec.setSignatureFlag(true);
+		baseMethodSpec.setReturnType2(ast.newPrimitiveType(PrimitiveType.VOID));
 		roleMethodSpec.setSignatureFlag(true);
+		roleMethodSpec.setReturnType2(ast.newPrimitiveType(PrimitiveType.VOID));
 		
 		callin.getBaseMappingElements().add(baseMethodSpec);
 		callin.setRoleMappingElement(roleMethodSpec);
