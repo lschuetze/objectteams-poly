@@ -1413,9 +1413,11 @@ public class ASTRewriteFlattener extends ASTVisitor {
 		{
     		if(node.getAST().apiLevel() == AST.JLS3) {
     			visitList(node, MethodSpec.TYPE_PARAMETERS_PROPERTY, String.valueOf(','), String.valueOf('<'), " >"); //$NON-NLS-1$
-    			getChildNode(node, MethodSpec.RETURN_TYPE2_PROPERTY).accept(this);
+    			if (node.hasSignature())
+    				getChildNode(node, MethodSpec.RETURN_TYPE2_PROPERTY).accept(this);
     		} else {
-    			getChildNode(node, MethodSpec.RETURN_TYPE_PROPERTY).accept(this);
+    			if (node.hasSignature())
+    				getChildNode(node, MethodSpec.RETURN_TYPE_PROPERTY).accept(this);
     		}
     		if (getBooleanAttribute(node, MethodSpec.COVARIANT_RETURN_PROPERTY))
     			this.result.append('+');
