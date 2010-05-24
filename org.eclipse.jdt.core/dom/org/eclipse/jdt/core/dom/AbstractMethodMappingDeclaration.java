@@ -60,7 +60,7 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 		new ASTNode.NodeList(internalParameterMappingsProperty());
 
 	/** Return the structural property descriptor for the roleMappingElement property of this node. */
-	abstract ChildPropertyDescriptor internalGetRoleElementProperty();
+	public abstract ChildPropertyDescriptor getRoleElementProperty();
 
 	/** Return the structural property descriptor for the bindingOperator property of this node. */ 
 	abstract ChildPropertyDescriptor internalGetBindingOperatorProperty();
@@ -86,7 +86,7 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 	
 	ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child)
 	{
-   	    if (property == internalGetRoleElementProperty())
+   	    if (property == getRoleElementProperty())
 		{
 			if (get) {
 				return getRoleMappingElement();
@@ -121,7 +121,7 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 				if (this.roleMappingElement == null) {
 					preLazyInit();
 					this.roleMappingElement = new MethodSpec(this.ast);
-					postLazyInit(this.roleMappingElement, internalGetRoleElementProperty());
+					postLazyInit(this.roleMappingElement, getRoleElementProperty());
 				}
 			}
 		}		
@@ -146,12 +146,11 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 			throw new IllegalArgumentException();
 		}
 		ASTNode oldChild = roleMappingElement;
-		preReplaceChild(oldChild, roleMappingElement, internalGetRoleElementProperty());
+		preReplaceChild(oldChild, roleMappingElement, getRoleElementProperty());
 		this.roleMappingElement = roleMappingElement;
-		postReplaceChild(oldChild, roleMappingElement, internalGetRoleElementProperty());
+		postReplaceChild(oldChild, roleMappingElement, getRoleElementProperty());
     }
 
-	
 	public void setBindingOperator(MethodBindingOperator bindingOp) {
 		ChildPropertyDescriptor propertyDescriptor = internalGetBindingOperatorProperty();
 		MethodBindingOperator oldOperator = this.bindingOperator;

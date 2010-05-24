@@ -198,6 +198,13 @@ public class MethodBindingOperator extends ASTNode {
 	{
 		return bindingModifier;
 	}
+	
+	/** Returns whether this method mapping is a callout to field (get or set). */
+	public boolean isCalloutToField() {
+		int modifier = this.getBindingModifier();
+		return    Modifier.isGet(modifier)
+			   || Modifier.isSet(modifier);
+	}
 
 	void accept0(ASTVisitor visitor) {
 		boolean visitChildren = visitor.visit(this);

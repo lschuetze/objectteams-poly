@@ -219,7 +219,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		return MODIFIERS2_PROPERTY;
 	}
 
-	ChildPropertyDescriptor internalGetRoleElementProperty() {
+	public ChildPropertyDescriptor getRoleElementProperty() {
 		return ROLE_MAPPING_ELEMENT_PROPERTY;
 	}
 

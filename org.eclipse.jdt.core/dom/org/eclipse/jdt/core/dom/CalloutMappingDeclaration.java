@@ -209,7 +209,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		return JAVADOC_PROPERTY;
     }
 
-	ChildPropertyDescriptor internalGetRoleElementProperty() {
+	public ChildPropertyDescriptor getRoleElementProperty() {
 		return ROLE_MAPPING_ELEMENT_PROPERTY;
 	}
 	
