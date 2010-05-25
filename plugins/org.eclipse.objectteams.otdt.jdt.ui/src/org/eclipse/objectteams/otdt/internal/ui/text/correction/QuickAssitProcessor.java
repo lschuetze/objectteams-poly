@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldAccessSpec;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -36,7 +37,6 @@ import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
@@ -156,36 +156,37 @@ public class QuickAssitProcessor implements IQuickAssistProcessor {
 	}
 
 	/* Proposals for adding signatures to method mappings. */
-	private void getAddMethodMappingSignaturesProposal(ICompilationUnit cu,
+	private void getAddMethodMappingSignaturesProposal(final ICompilationUnit cu,
 			  										   ASTNode coveringNode,
 												       ArrayList<ASTRewriteCorrectionProposal> resultingCollections) 
 	{
-		AbstractMethodMappingDeclaration mapping = getMethodMapping(coveringNode);
+		final AbstractMethodMappingDeclaration mapping = getMethodMapping(coveringNode);
 		if (mapping != null && !mapping.hasSignature()) {
-			AST ast= mapping.getAST();
-			ASTRewrite rewrite= ASTRewrite.create(ast);
-			TextEditGroup editGroup = new TextEditGroup("Add Signatures");
-			try {
-				ImportRewrite imports = StubUtility.createImportRewrite(cu, true);
-				// role method:
-				IMethodBinding roleMethod = mapping.resolveBinding().getRoleMethod();
-				MethodSpec newSpec = OTStubUtility.createMethodSpec(cu, rewrite, imports, roleMethod, true);
-				rewrite.set(mapping, mapping.getRoleElementProperty(), newSpec, editGroup);
-				
-				// base method(s):
-				if (mapping.getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
-					addSignatureToCallinBases(cu, rewrite, imports, (CallinMappingDeclaration) mapping, editGroup);
-				else
-					addSignatureToCalloutBase(cu, rewrite, imports, (CalloutMappingDeclaration) mapping, editGroup);
-				
-				String label= "Add signatures to method binding";
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
-				resultingCollections.add(proposal);
-			} catch (CoreException e) {
-				OTDTUIPlugin.log(e);
-			}
+			final AST ast= mapping.getAST();
+			final ASTRewrite rewrite= ASTRewrite.create(ast);
 			
+			String label= "Add signatures to method binding";
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image) {
+				@Override
+				protected ASTRewrite getRewrite() throws CoreException 
+				{
+					TextEditGroup editGroup = new TextEditGroup("Add Signatures");
+					ImportRewrite imports = createImportRewrite((CompilationUnit) ASTNodes.getParent(mapping, ASTNode.COMPILATION_UNIT));
+					// role method:
+					IMethodBinding roleMethod = mapping.resolveBinding().getRoleMethod();
+					MethodSpec newSpec = OTStubUtility.createMethodSpec(cu, rewrite, imports, roleMethod, true);
+					rewrite.set(mapping, mapping.getRoleElementProperty(), newSpec, editGroup);
+					
+					// base method(s):
+					if (mapping.getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
+						addSignatureToCallinBases(cu, rewrite, imports, (CallinMappingDeclaration) mapping, editGroup);
+					else
+						addSignatureToCalloutBase(cu, rewrite, imports, (CalloutMappingDeclaration) mapping, editGroup);
+					return rewrite;
+				}
+			};
+			resultingCollections.add(proposal);
 		}		
 	}
 
