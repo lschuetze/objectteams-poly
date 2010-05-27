@@ -428,7 +428,10 @@ public class TypeAnchorReference extends TypeReference {
 	// post: return is either a valid anchor or null and problem has been reported.
 	private ITeamAnchor checkAnchor(Scope scope, Reference reference, char[] token, int start, int end, ITeamAnchor anchorBinding) {
 		if (anchorBinding == null) {
-			scope.problemReporter().typeAnchorNotFound(token, start, end);
+			if (scope instanceof ClassScope && ((ClassScope)scope).superTypeReference != null)
+				scope.problemReporter().extendingExternalizedRole(((ClassScope)scope).superTypeReference);
+			else
+				scope.problemReporter().typeAnchorNotFound(token, start, end);
 			return null;
 		}
 		if (anchorBinding instanceof ProblemFieldBinding) {

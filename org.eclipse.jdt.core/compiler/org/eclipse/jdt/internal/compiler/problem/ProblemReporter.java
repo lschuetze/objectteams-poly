@@ -8407,6 +8407,14 @@ public void extendingExternalizedRole(TypeBinding role, ASTNode location) {
 			location.sourceStart,
 			location.sourceEnd);
 }
+public void extendingExternalizedRole(TypeReference reference) {
+	this.handle(
+			IProblem.ExtendingExternalizedRole,
+			NoArgument,
+			NoArgument,
+			reference.sourceStart,
+			reference.sourceEnd);
+}
 
 public void cycleInFieldAnchor(FieldBinding field) {
 	String[] args = new String[] {
