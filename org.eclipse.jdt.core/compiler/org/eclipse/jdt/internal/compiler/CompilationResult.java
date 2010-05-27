@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.parser.RecoveryScannerData;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblem;
@@ -522,4 +523,14 @@ public String toString(){
 	}
 	return buffer.toString();
 }
+//{ObjectTeams: try to retrieve class file that has been generated but perhaps not yet written to disk:
+public ClassFile findClassFile(ReferenceBinding typeBinding) {
+	for (Object cfObj : this.compiledTypes.values()) {
+		ClassFile classFile = (ClassFile) cfObj;
+		if (classFile.referenceBinding == typeBinding)
+			return classFile;
+	}
+	return null;
+}
+// SH}
 }

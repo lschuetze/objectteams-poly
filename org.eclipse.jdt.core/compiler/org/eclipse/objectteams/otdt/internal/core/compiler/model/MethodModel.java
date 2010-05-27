@@ -333,7 +333,8 @@ public class MethodModel extends ModelElement {
 					if (this._classFile != null && this._classFile.isForType(this._binding.declaringClass)) {
 						this._bytes = this._classFile.getBytes();
 						this._structOffset += this._classFile.headerOffset; // structOffset did not yet include the headerOffset
-						this._constantPoolOffsets = this._classFile.constantPool.offsets;
+						int olen = this._classFile.constantPool.currentIndex;
+						System.arraycopy(this._classFile.constantPool.offsets, 0, this._constantPoolOffsets = new int[olen], 0, olen);
 						this._classFile = null; // don't use any more
 						return;
 					}

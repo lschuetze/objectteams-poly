@@ -356,6 +356,8 @@ public class RoleModel extends TypeModel
     public byte[] getByteCode ()
     {
         if (this._classByteCode == null) {
+        	if (this._classFile == null && this._ast != null)
+        		this._classFile = this._ast.compilationResult.findClassFile(this._binding);
             if (this._classFile != null) // nullified once a class file is re-used for a different type
             {
             	this._classByteCode = this._classFile.getBytes();

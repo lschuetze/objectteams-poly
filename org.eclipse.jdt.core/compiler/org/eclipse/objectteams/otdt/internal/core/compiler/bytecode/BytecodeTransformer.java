@@ -124,9 +124,16 @@ public class BytecodeTransformer
         	for (MethodBinding method : dstType.methods()) {
 				method= method.copyInheritanceSrc;
 				if (method == null || method.model == null) continue; // shouldn't happen anyway
+				TeamModel methodSrcTeam = srcModel;
+				if (method.declaringClass != srcModel.getBinding()) {
+					// copied from implicit super team - find the source:
+					if (!method.declaringClass.isTeam())
+						continue;
+					methodSrcTeam = method.declaringClass.getTeamModel();
+				}
 				if (!method.model.hasBytes()) continue; // method not relevant for copying
-				this._reader= new ConstantPoolObjectReader(method.model, srcModel, scope.environment());
-				copyAllNonWideConstants(method.model.getConstantPoolOffsets().length, dstType.superclass, dstType);
+				this._reader= new ConstantPoolObjectReader(method.model, methodSrcTeam, scope.environment());
+				copyAllNonWideConstants(method.model.getConstantPoolOffsets().length, methodSrcTeam.getBinding(), dstType);
 				return; // triggered by any method, this team class is fully handled.
 			}
         }
@@ -643,7 +650,7 @@ public class BytecodeTransformer
 	 */
 	private void copyAllNonWideConstants(int nConstants, ReferenceBinding srcTeamBinding, ReferenceBinding dstType) {
 		Iterator<ConstantPoolObject> it = this._reader.getNonWideConstantIterator(nConstants);
-		if (dstType.isRole())
+		if (!dstType.isTeam() &&  dstType.isRole())
 			dstType = dstType.enclosingType();
 		while (it.hasNext()) {
 			ConstantPoolObject src_cpo = it.next();

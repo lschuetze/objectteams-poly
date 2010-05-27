@@ -1026,6 +1026,12 @@ public void generateCode(ClassFile enclosingClassFile) {
 			this,
 			this.scope.referenceCompilationUnit().compilationResult);
 	}
+//{ObjectTeams: mark as done:
+	finally {
+		if (this.isTeam())
+			this.teamModel.setState(ITranslationStates.STATE_BYTE_CODE_GENERATED);			
+	}
+// SH}
 }
 
 //{ObjectTeams: don't let tsub-roles search for byte code of this or members:
