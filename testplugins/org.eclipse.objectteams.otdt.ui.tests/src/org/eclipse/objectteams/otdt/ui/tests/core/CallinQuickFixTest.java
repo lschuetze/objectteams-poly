@@ -221,6 +221,84 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 	}
 
 
+    /* Do not propose to remove signatures from a callin binding, where argument is used in a predicate. */
+    public void testRemoveSignatures2() throws Exception {
+            IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+            StringBuffer buf= new StringBuffer();
+            buf.append("package test1;\n");
+            buf.append("public class B1 {\n");
+            buf.append("    public void foo(String val) {};\n");
+            buf.append("}\n");
+            pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
+
+            buf = new StringBuffer();
+            buf.append("package test1;\n");
+            buf.append("public team class T1 {\n");
+            buf.append("    protected class R playedBy B1 {\n");
+            buf.append("        @SuppressWarnings(\"basecall\") void foo() {\n");
+            buf.append("            System.out.print(\"OK\");\n");
+            buf.append("            }\n");
+            buf.append("            void foo() <- after void foo(String val)\n");
+            buf.append("                base when(val != null);\n");
+            buf.append("    }\n");
+            buf.append("}\n");
+            ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+
+            int offset= buf.toString().indexOf("foo() <- after");
+            AssistContext context= getCorrectionContext(cuteam, offset, 0);
+            List proposals= collectAssists(context, false);
+
+            assertNumberOfProposals(proposals, 0);
+    }
+
+
+    /* Remove signatures from a callin binding despite guard predicate (no arg used). */
+    public void testRemoveSignature3() throws Exception {
+            IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+            StringBuffer buf= new StringBuffer();
+            buf.append("package test1;\n");
+            buf.append("public class B1 {\n");
+            buf.append("    public void foo(String val) {};\n");
+            buf.append("}\n");
+            pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
+
+            buf = new StringBuffer();
+            buf.append("package test1;\n");
+            buf.append("public team class T1 {\n");
+            buf.append("    protected class R playedBy B1 {\n");
+            buf.append("        @SuppressWarnings(\"basecall\") void foo() {\n");
+            buf.append("            System.out.print(\"OK\");\n");
+            buf.append("            }\n");
+            buf.append("            void foo() <- after void foo(String val)\n");
+            buf.append("                base when (hasRole(base, R.class));\n");
+            buf.append("    }\n");
+            buf.append("}\n");
+            ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+
+            int offset= buf.toString().indexOf("foo() <- after");
+            AssistContext context= getCorrectionContext(cuteam, offset, 0);
+            List proposals= collectAssists(context, false);
+
+            assertNumberOfProposals(proposals, 1);
+            assertCorrectLabels(proposals);
+
+            String[] expectedProposals = new String[1];
+            buf= new StringBuffer();
+            buf.append("package test1;\n");
+            buf.append("public team class T1 {\n");
+            buf.append("    protected class R playedBy B1 {\n");
+            buf.append("        @SuppressWarnings(\"basecall\") void foo() {\n");
+            buf.append("            System.out.print(\"OK\");\n");
+            buf.append("            }\n");
+            buf.append("            foo <- after foo\n"); // removed signatures
+            buf.append("                base when (hasRole(base, R.class));\n");
+            buf.append("    }\n");
+            buf.append("}\n");
+            expectedProposals[0] = buf.toString();
+
+            assertExpectedExistInProposals(proposals, expectedProposals);
+    }
+
 	/* Remove signatures from a callin binding. */
 	public void testAddSignatures1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
