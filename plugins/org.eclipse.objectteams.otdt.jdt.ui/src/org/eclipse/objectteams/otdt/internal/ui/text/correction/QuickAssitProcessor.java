@@ -25,15 +25,19 @@ import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldAccessSpec;
+import org.eclipse.jdt.core.dom.GuardPredicateDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodMappingElement;
 import org.eclipse.jdt.core.dom.MethodSpec;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -71,10 +75,6 @@ public class QuickAssitProcessor implements IQuickAssistProcessor {
 				AbstractMethodMappingDeclaration methodMapping = (AbstractMethodMappingDeclaration)coveringNode;
 				if (methodMapping.hasParameterMapping())
 					return false;
-//				if (methodMapping instanceof CallinMappingDeclaration) {
-//					GuardPredicateDeclaration guardPredicate = ((CallinMappingDeclaration)methodMapping).getGuardPredicate();
-//					if (guardPredicate != null && ??) TODO(SH): finish: no assist if guard uses method arguments
-//				}
 				return true;
 			case ASTNode.TYPE_DECLARATION:
 			case ASTNode.ROLE_TYPE_DECLARATION:
@@ -111,6 +111,11 @@ public class QuickAssitProcessor implements IQuickAssistProcessor {
 	{
 		AbstractMethodMappingDeclaration mapping = getMethodMapping(coveringNode);
 		if (mapping != null && mapping.hasSignature()) {
+			
+			if (mapping.getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
+				if (predicateUsesMethodSpecArgument((CallinMappingDeclaration) mapping))
+					return; // don't propose to remove signatures, since an arg is used in the predicate
+			
 			AST ast= mapping.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -131,6 +136,37 @@ public class QuickAssitProcessor implements IQuickAssistProcessor {
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
 			resultingCollections.add(proposal);
 		}
+	}
+
+	// helper: detect whether a guard predicate uses an argument of the corresponding method spec.
+	private boolean predicateUsesMethodSpecArgument(CallinMappingDeclaration callinMapping) 
+	{
+		GuardPredicateDeclaration predicate = callinMapping.getGuardPredicate();
+		if (predicate == null)
+			return false;
+		final List<String> argNames = new ArrayList<String>();
+		if (predicate.isBase())
+			for (Object baseMethodObject : callinMapping.getBaseMappingElements()) 
+				for (Object baseArgObj : ((MethodSpec)baseMethodObject).parameters())
+					argNames.add(((SingleVariableDeclaration) baseArgObj).getName().getIdentifier());
+		else
+			for (Object roleArgObj : ((MethodSpec)callinMapping.getRoleMappingElement()).parameters())
+				argNames.add(((SingleVariableDeclaration) roleArgObj).getName().getIdentifier());
+		
+		try {
+			predicate.getExpression().accept(new ASTVisitor() {
+				@Override
+				public boolean visit(SimpleName node) {
+					for (String argName : argNames)
+						if (argName.equals(node.getIdentifier()))
+							throw new RuntimeException();
+					return false;
+				}
+			});
+		} catch (RuntimeException re) {
+			return true; 
+		}
+		return false;
 	}
 	
 	// helper: remove the signature from one mapping element (method spec or field access spec).
