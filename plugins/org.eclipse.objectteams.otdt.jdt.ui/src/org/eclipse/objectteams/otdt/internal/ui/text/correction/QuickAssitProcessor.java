@@ -33,11 +33,15 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldAccessSpec;
 import org.eclipse.jdt.core.dom.GuardPredicateDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodMappingElement;
 import org.eclipse.jdt.core.dom.MethodSpec;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -119,6 +123,11 @@ public class QuickAssitProcessor implements IQuickAssistProcessor {
 			AST ast= mapping.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
+			// remove type parameters (only LHS):
+			ListRewrite typeParamters = rewrite.getListRewrite(mapping.getRoleMappingElement(), MethodSpec.TYPE_PARAMETERS_PROPERTY);
+			for (Object typeParamObject : ((MethodSpec)mapping.getRoleMappingElement()).typeParameters())
+				typeParamters.remove((ASTNode) typeParamObject, null);
+			
 			// remove role signature:
 			removeSignature(rewrite, mapping.getRoleMappingElement());
 			
@@ -212,6 +221,7 @@ public class QuickAssitProcessor implements IQuickAssistProcessor {
 					// role method:
 					IMethodBinding roleMethod = mapping.resolveBinding().getRoleMethod();
 					MethodSpec newSpec = OTStubUtility.createMethodSpec(cu, rewrite, imports, roleMethod, true);
+					convertTypeParameters(ast, roleMethod, newSpec);
 					rewrite.set(mapping, mapping.getRoleElementProperty(), newSpec, editGroup);
 					
 					// base method(s):
@@ -220,6 +230,18 @@ public class QuickAssitProcessor implements IQuickAssistProcessor {
 					else
 						addSignatureToCalloutBase(cu, rewrite, imports, (CalloutMappingDeclaration) mapping, editGroup);
 					return rewrite;
+				}
+
+				@SuppressWarnings("unchecked")
+				private void convertTypeParameters(final AST ast, IMethodBinding roleMethod, MethodSpec destMethodSpec) 
+				{
+					for (ITypeBinding typeParameter : roleMethod.getTypeParameters()) {
+						TypeParameter newTypeParameter = ast.newTypeParameter();
+						newTypeParameter.setName(ast.newSimpleName(typeParameter.getName()));
+						for (ITypeBinding typeBound : typeParameter.getTypeBounds())
+							newTypeParameter.typeBounds().add(convertType(ast, typeBound));
+						destMethodSpec.typeParameters().add(newTypeParameter);
+					}
 				}
 			};
 			resultingCollections.add(proposal);
@@ -274,6 +296,24 @@ public class QuickAssitProcessor implements IQuickAssistProcessor {
 		if (coveringNode instanceof AbstractMethodMappingDeclaration)
 			return (AbstractMethodMappingDeclaration) coveringNode;
 		return (AbstractMethodMappingDeclaration) ASTNodes.getParent(coveringNode, AbstractMethodMappingDeclaration.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Type convertType(AST ast, ITypeBinding typeBinding) {
+		if (typeBinding.isTypeVariable())
+			return ast.newSimpleType(ast.newSimpleName(typeBinding.getName()));
+		String typeName = typeBinding.getErasure().getQualifiedName();
+		Type type = (typeName.indexOf('.') > -1)
+			? ast.newSimpleType(ast.newName(typeName))
+			: ast.newSimpleType(ast.newSimpleName(typeName));
+		ITypeBinding[] typeArguments = typeBinding.getTypeArguments();
+		if (typeArguments.length > 0) {
+			ParameterizedType parameterizedType = ast.newParameterizedType(type);
+			for (ITypeBinding bound : typeArguments)
+				parameterizedType.typeArguments().add(convertType(ast, bound));
+			return parameterizedType;
+		}
+		return type;
 	}
 
 	static boolean noErrorsAtLocation(IProblemLocation[] locations) {
