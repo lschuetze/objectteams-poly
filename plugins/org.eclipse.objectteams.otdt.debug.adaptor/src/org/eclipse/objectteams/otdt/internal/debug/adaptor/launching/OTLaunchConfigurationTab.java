@@ -28,6 +28,7 @@ import java.util.List;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
@@ -42,6 +43,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.debug.IOTLaunchConstants;
+import org.eclipse.objectteams.otdt.internal.debug.adaptor.DebugMessages;
+import org.eclipse.objectteams.otdt.internal.debug.adaptor.OTDebugAdaptorPlugin;
 import org.eclipse.objectteams.otdt.ui.ImageConstants;
 import org.eclipse.objectteams.otdt.ui.ImageManager;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
@@ -136,14 +139,25 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
 		}
     }
 
+    final static List<String> EMPTY_LIST = new ArrayList<String>(0); 
     public void performApply(ILaunchConfigurationWorkingCopy configuration)
     {
     	removeUnavailableTeamsErrorMessage(); // not really 
     	
         List<String> teamHandles = getTeamModelAsHandles();
 
-    	configuration.setAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_LIST, teamHandles);
-    	configuration.setAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_ACTIVE, _teamConfig.isActive());
+		try {
+			if (configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_ACTIVE, true) != this._teamConfig.isActive())
+				configuration.setAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_ACTIVE, this._teamConfig.isActive());
+			if (!configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_LIST, EMPTY_LIST).equals(teamHandles))
+				configuration.setAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_LIST, teamHandles);
+		} catch (CoreException ex) {
+            OTDebugAdaptorPlugin.getDefault().getLog().log(
+            		new Status(Status.ERROR, 
+            				   OTDebugAdaptorPlugin.PLUGIN_ID, 
+            				   DebugMessages.OTLaunching_loading_failed_msg,  
+            				   ex));
+		}
     }
 
     private void removeUnavailableTeamsErrorMessage()
