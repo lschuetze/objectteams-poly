@@ -30,6 +30,7 @@ import java.util.List;
  *  
  * @author stephan
  */
+@SuppressWarnings("rawtypes")
 public class PrecedenceDeclaration extends ASTNode {
 
 	@SuppressWarnings("nls")
@@ -42,7 +43,7 @@ public class PrecedenceDeclaration extends ASTNode {
 	 */
 	@SuppressWarnings("nls")
 	public static final SimplePropertyDescriptor AFTER_PROPERTY = 
-		new SimplePropertyDescriptor(PrecedenceDeclaration.class, "after", boolean.class, MANDATORY); //$NON-NLS-1$
+		new SimplePropertyDescriptor(PrecedenceDeclaration.class, "after", boolean.class, MANDATORY);
 
 	private static final List PROPERTY_DESCRIPTORS_3_0;
 	
