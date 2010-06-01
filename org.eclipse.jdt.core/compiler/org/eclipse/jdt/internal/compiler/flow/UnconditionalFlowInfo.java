@@ -22,8 +22,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallTrackingVariable;
 
 /**
- * MIGRATION_STATE: 3.3
- *
  * OTDT changes:
  *
  * What: special query regarding base-call tracking variable.
@@ -734,6 +732,10 @@ final public boolean isDefinitelyAssigned(FieldBinding field) {
 	if ((this.tagBits & UNREACHABLE) != 0) {
 		return true;
 	}
+//{ObjectTeams: if it is copied don't require definite assignment again
+	if (field.copyInheritanceSrc != null)
+		return true;
+// SH}
 	return isDefinitelyAssigned(field.id);
 }
 
