@@ -189,7 +189,7 @@
    <extension
          point="org.eclipse.jdt.ui.quickAssistProcessors">
       <quickAssistProcessor
-            class="org.eclipse.objectteams.otdt.internal.ui.text.correction.QuickAssitProcessor"
+            class="org.eclipse.objectteams.otdt.internal.ui.text.correction.QuickAssistProcessor"
             id="org.eclipse.objectteams.otdt.ui.text.correction.QuickAssitProcessor"
             name="OT/J Quick Assit Processor">
       </quickAssistProcessor>

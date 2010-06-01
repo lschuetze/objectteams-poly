@@ -62,7 +62,7 @@ import org.eclipse.text.edits.TextEditGroup;
  * @since 0.7.0
  */
 @SuppressWarnings("restriction")
-public class QuickAssitProcessor implements IQuickAssistProcessor {
+public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
