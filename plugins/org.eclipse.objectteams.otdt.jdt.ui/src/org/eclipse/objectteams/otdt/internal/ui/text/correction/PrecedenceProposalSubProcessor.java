@@ -302,13 +302,14 @@ public class PrecedenceProposalSubProcessor {
 		{
 			if (!linkLabel1 && !linkLabel2) 
 			{
+				String prefix = isAfter ? "precedence after " : "precedence "; //$NON-NLS-1$ //$NON-NLS-2$
 				// setup two alternatives (different order):
 				proposal.addLinkedPosition(this.rewrite.track(newPrecedence), false, KEY_PRECEDENCE);
 				proposal.addLinkedPositionProposal(KEY_PRECEDENCE, 
-												   "precedence "+callin1+", "+callin2+";",//$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+												   prefix+callin1+", "+callin2+";",//$NON-NLS-1$ //$NON-NLS-2$ 
 												   null); 
 				proposal.addLinkedPositionProposal(KEY_PRECEDENCE, 
-												   "precedence "+callin2+", "+callin1+";", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+												   prefix+callin2+", "+callin1+";", //$NON-NLS-1$ //$NON-NLS-2$
 												   null);
 			}
 			else 
