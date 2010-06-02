@@ -8354,6 +8354,9 @@ public final class CompletionEngine
 						&& !(this.options.camelCaseMatch && CharOperation.camelCaseMatch(methodName, method.selector)))
 					continue next;
 			}
+//{ObjectTeams: different methods may produce different completion kinds
+			int curKind = kind;
+// SH}
 
 			for (int i = methodsFound.size; --i >= 0;) {
 				MethodBinding otherMethod = (MethodBinding) methodsFound.elementAt(i);
@@ -8363,17 +8366,17 @@ public final class CompletionEngine
 				if (CharOperation.equals(method.selector, otherMethod.selector, true)
 						&& this.lookupEnvironment.methodVerifier().isMethodSubsignature(otherMethod, method)) {
 //{ObjectTeams: callout (override)? (the ui expands callout to a choice of any method binding)
-					if (kind != CompletionProposal.METHOD_DECLARATION) {
+					if (curKind != CompletionProposal.METHOD_DECLARATION) {
 						if (otherMethod.declaringClass.isCompatibleWith(method.declaringClass))
 							continue next; // comparing two base methods.
 						if (MethodModel.isAbstract(otherMethod)) {
-							kind = CompletionProposal.OT_CALLOUT_DECLARATION;
+							curKind = CompletionProposal.OT_CALLOUT_DECLARATION;
 						} else {
 							if(   otherMethod.declaringClass == receiverType
 							   && otherMethod.copyInheritanceSrc == null)
-								kind = CompletionProposal.OT_CALLIN_DECLARATION; // no overriding of local methods, only callin allowed
+								curKind = CompletionProposal.OT_CALLIN_DECLARATION; // no overriding of local methods, only callin allowed
 							else
-								kind = CompletionProposal.OT_CALLOUT_OVERRIDE_DECLARATION;
+								curKind = CompletionProposal.OT_CALLOUT_OVERRIDE_DECLARATION;
 						}
 						break;
 					}
@@ -8411,8 +8414,8 @@ public final class CompletionEngine
 			StringBuffer completion = new StringBuffer(10);
 			if (!exactMatch) {
 //{ObjectTeams: callout?
-			  if (kind != CompletionProposal.METHOD_DECLARATION)
-				createMethodBinding(method, parameterPackageNames, parameterFullTypeNames, parameterNames, kind, scope, completion);
+			  if (curKind != CompletionProposal.METHOD_DECLARATION)
+				createMethodBinding(method, parameterPackageNames, parameterFullTypeNames, parameterNames, curKind, scope, completion);
 			  else
 // SH}
 				createMethod(method, parameterPackageNames, parameterFullTypeNames, parameterNames, scope, completion);
@@ -8437,7 +8440,7 @@ public final class CompletionEngine
 /*orig:
 				InternalCompletionProposal proposal =  createProposal(CompletionProposal.METHOD_DECLARATION, this.actualCompletionPosition);
 */
-				InternalCompletionProposal proposal = createProposal(kind, this.actualCompletionPosition);
+				InternalCompletionProposal proposal = createProposal(curKind, this.actualCompletionPosition);
 // SH}
 				proposal.setDeclarationSignature(getSignature(method.declaringClass));
 				proposal.setDeclarationKey(method.declaringClass.computeUniqueKey());
@@ -8457,7 +8460,7 @@ public final class CompletionEngine
 				proposal.setName(method.selector);
 				proposal.setFlags(method.modifiers);
 //{ObjectTeams: callout?
-				switch (kind) {
+				switch (curKind) {
 				case CompletionProposal.OT_CALLOUT_OVERRIDE_DECLARATION:
 					proposal.setFlags(TerminalTokens.TokenNameCALLOUT_OVERRIDE); break;
 				case CompletionProposal.OT_CALLOUT_DECLARATION:
