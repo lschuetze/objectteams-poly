@@ -5,4 +5,5 @@ public class CompletionBaseclass {
 	public boolean check() { return true; }
 	private int fred;
 	private String frood;
+	public String toString() { return "Base"; }
 }

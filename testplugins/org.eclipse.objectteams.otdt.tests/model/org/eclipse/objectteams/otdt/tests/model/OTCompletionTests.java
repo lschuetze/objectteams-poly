@@ -447,7 +447,7 @@ public void testCompletionMethodSpecLong1() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
-		"toString[METHOD_SPEC]{String toString();, Ljava.lang.Object;, ()Ljava.lang.String;, toString, null, "+
+		"toString[METHOD_SPEC]{String toString();, LCompletionBaseclass;, ()Ljava.lang.String;, toString, null, "+
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_EXACT_EXPECTED_TYPE+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
@@ -469,7 +469,7 @@ public void testCompletionMethodSpecLong2() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
-		"toString[METHOD_SPEC]{toString();, Ljava.lang.Object;, ()Ljava.lang.String;, toString, null, "+
+		"toString[METHOD_SPEC]{toString();, LCompletionBaseclass;, ()Ljava.lang.String;, toString, null, "+
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
@@ -577,7 +577,7 @@ public void testCompletionMethodSpecShort1() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
-		"toString[METHOD_SPEC]{toString;, Ljava.lang.Object;, ()Ljava.lang.String;, toString, null, "+
+		"toString[METHOD_SPEC]{toString;, LCompletionBaseclass;, ()Ljava.lang.String;, toString, null, "+
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
@@ -627,6 +627,35 @@ public void testCompletionCalloutDeclaration1() throws JavaModelException {
 		"fubar[CALLOUT_DECLARATION]{long fubar(int fred, String zork) -> long fubar(int fred, String zork);, LCompletionBaseclass;, (ILjava.lang.String;)J, fubar, (fred, zork), " +
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
+}
+// same as above but without a typed prefix
+public void testCompletionCalloutDeclaration1a() throws JavaModelException {		
+	this.wc = getWorkingCopy(
+            "/Completion/src/CompletionTeam1.java",
+            "public team class CompletionTeam1 {\n" +
+            "public class CompletionRole playedBy CompletionBaseclass {\n" +
+            "/*here*/ \n"+
+            "}");
+    
+    
+    CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+    String str = this.wc.getSource();
+    String completeBehind = "/*here*/ ";
+    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+    this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
+
+    String[] results = requestor.getStringsResult();
+    assertTrue("Expect more than one proposal", results.length > 1);
+    for (int i = 0; i < results.length; i++) {
+		if (results[i].startsWith("fubar")) {
+			assertEquals("Expected proposal",  
+					"fubar[CALLOUT_DECLARATION]{long fubar(int fred, String zork) -> long fubar(int fred, String zork);, LCompletionBaseclass;, (ILjava.lang.String;)J, fubar, (fred, zork), " +
+					(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
+					results[i]);
+			return; // enough seen
+		}
+	}
+    fail("Expected proposal not found");
 }
 // callout-override
 public void testCompletionCalloutDeclaration2() throws JavaModelException {		
