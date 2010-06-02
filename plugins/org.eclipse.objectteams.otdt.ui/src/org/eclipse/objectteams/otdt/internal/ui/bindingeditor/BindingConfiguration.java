@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
+import org.eclipse.jdt.core.dom.FieldAccessSpec;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodMappingElement;
 import org.eclipse.jdt.core.dom.MethodSpec;
@@ -95,6 +96,7 @@ public class BindingConfiguration extends Composite
 	private static final String OT_GENERATED_INDICATOR = "_OT$"; //$NON-NLS-1$
 	private static final String FAKED_METHOD_NAME = '\''+Messages.BindingConfiguration_new_method_label;
 	private static final Object[] EMPTY_LIST = new Object[0];
+	private static final String[] NO_STRINGS = new String[0];
 	private static final int OT_CALLOUT = 0x1000000;
 	private static final int OT_CALLOUT_OVERRIDE = 0x2000000;
 	
@@ -112,7 +114,7 @@ public class BindingConfiguration extends Composite
 	private Button _callinAfterBtn;
 	private RoleTypeDeclaration _selectedRole;
 	private CalloutMappingDeclaration _selectedCalloutDecl;
-	private CalloutMappingDeclaration _calloutMapping;
+	private CalloutMappingDeclaration[] _calloutMappings;
 	private CallinMappingDeclaration _selectedCallinDecl;
 	private CallinMappingDeclaration _callinMapping;
 	private BindingEditor _bindingEditor;
@@ -1042,7 +1044,17 @@ public class BindingConfiguration extends Composite
 		
 		if (_newCallout)
 		{
-			return createCalloutMapping(ast, roleMethod, baseMethods[0], methMapModifier, calloutOverride, signatureFlag);
+			if (baseMethods[0] instanceof IField) {
+				this._calloutMappings = new CalloutMappingDeclaration[] {
+					createCalloutMapping(ast, roleMethod, baseMethods[0], Modifier.OT_GET_CALLOUT, calloutOverride, signatureFlag),
+				    createCalloutMapping(ast, roleMethod, baseMethods[0], Modifier.OT_SET_CALLOUT, calloutOverride, signatureFlag)};
+				return this._calloutMappings[0] != null && this._calloutMappings[1] != null;
+			} else {
+				this._calloutMappings = new CalloutMappingDeclaration[] {
+					createCalloutMapping(ast, roleMethod, baseMethods[0], methMapModifier, calloutOverride, signatureFlag)
+				};
+				return this._calloutMappings[0] != null;
+			}
 		}
 		else
 		{
@@ -1107,10 +1119,10 @@ public class BindingConfiguration extends Composite
 		return true;
 	}
 	
-	private boolean createCalloutMapping(
+	private CalloutMappingDeclaration createCalloutMapping(
 			AST ast, 
 			IMethod roleMethod, 
-			IMember baseMethod, 
+			IMember baseMember, 
 			int bindingModifier, 
 			boolean calloutOverride, 
 			boolean signatureFlag)
@@ -1122,39 +1134,77 @@ public class BindingConfiguration extends Composite
 		{
 			selRolMethSpec = (MethodSpec)_selectedCalloutDecl.getRoleMappingElement();
 			selBasMethSpec = _selectedCalloutDecl.getBaseMappingElement();
-			if (baseMethod instanceof IMethod && !(selBasMethSpec instanceof MethodSpec))
-				return false; // cannot change from method to field.
+			if (baseMember instanceof IMethod && !(selBasMethSpec instanceof MethodSpec))
+				return null; // cannot change from method to field.
+			if (baseMember instanceof IField && !(selBasMethSpec instanceof FieldAccessSpec))
+				return null; // cannot change from field to method.
 		}
 		
 		MethodMappingElement baseMethodSpec =  null;
-		if (baseMethod instanceof IMethod)
+		if (baseMember instanceof IMethod)
 			baseMethodSpec = createMethodSpec(
 				ast, 
-				(IMethod)baseMethod, 
+				(IMethod)baseMember, 
 				(MethodSpec)selBasMethSpec, 
 				signatureFlag);
-		/* FIXME: implement all other combinations
 		else
-			baseMethodSpec = createFieldAccessSpec(ast, (IField)baseIMember, baseMSpec, signatureFlag);
-		*/
+			try {
+				IField iField = (IField)baseMember;
+				baseMethodSpec = ASTNodeCreator.createFieldAccSpec(
+						ast,
+						(bindingModifier == Modifier.OT_GET_CALLOUT)/*isSetter*/,
+						iField.getElementName(),
+						Signature.toString(iField.getTypeSignature()),
+						signatureFlag
+				);
+				;
+			} catch (Exception e) {
+				return null;
+			}
+
 		if (baseMethodSpec == null)
 		{
-			return false;
+			return null;
 		}    
 		
 		MethodMappingElement roleMethodSpec = null;
 		if (roleMethod.getElementName().startsWith(FAKED_METHOD_NAME))
 		{
-			if (baseMethod instanceof IMethod)
+			if (baseMember instanceof IMethod)
 				roleMethodSpec = createMethodSpec(
 						ast, 
-						(IMethod)baseMethod, 
-						(MethodSpec)selBasMethSpec, 
+						(IMethod)baseMember, 
+						null/*givenSpec*/, 
 						signatureFlag);
-			/* FIXME: implement: 
 			else
-				roleMethodSpec = createFieldAccess((IField)baseMethod...);
-			 */  
+				try {
+					IField baseField = (IField) baseMember;
+					String name = baseMember.getElementName();
+					if (name.length() == 1)
+						name = name.toUpperCase();
+					else
+						name = Character.toUpperCase(name.charAt(0))+name.substring(1);
+					if (bindingModifier == Modifier.OT_GET_CALLOUT)
+						roleMethodSpec = createMethodSpec(
+								ast,
+								baseField.getTypeSignature(),
+								"get"+name, //$NON-NLS-1$
+								NO_STRINGS/*parameterTypes*/,
+								NO_STRINGS/*parameterNames*/,
+								null/*givenSpec*/,
+								signatureFlag);
+					else
+						roleMethodSpec = createMethodSpec(
+								ast,
+								"V", //$NON-NLS-1$
+								"set"+name, //$NON-NLS-1$
+								new String[]{baseField.getTypeSignature()},
+								new String[]{baseMember.getElementName()},
+								null/*givenSpec*/,
+								signatureFlag);						
+				} catch (JavaModelException e) {
+					return null;
+				}
 		}
 		else
 		{
@@ -1166,7 +1216,7 @@ public class BindingConfiguration extends Composite
 		}
 		if (roleMethodSpec == null)
 		{
-			return false;
+			return null;
 		}
 		
 		if (_selectedCalloutDecl == null)
@@ -1174,45 +1224,35 @@ public class BindingConfiguration extends Composite
 			_parameterMappings = null;
 		}
 		
-		_calloutMapping =  ASTNodeCreator.createCalloutMappingDeclaration(
+		return ASTNodeCreator.createCalloutMappingDeclaration(
 				ast, 
 				null, 
 				0, // modifiers 
 				roleMethodSpec, 
 				baseMethodSpec, 
-				bindingModifier, // FIXME(SH): not yet provided from caller
+				bindingModifier,
 				_parameterMappings, 
 				calloutOverride, 
 				signatureFlag);
 
-		return true;
+	}
+	
+	private MethodSpec createMethodSpec(AST ast, IMethod baseMember, MethodSpec givenMethodSpec, boolean signatureFlag) {
+		try {
+			return createMethodSpec(ast, baseMember.getReturnType(), baseMember.getElementName(), baseMember.getParameterTypes(), baseMember.getParameterNames(), givenMethodSpec, signatureFlag);
+		} catch (JavaModelException e) {
+			return null;
+		}
 	}
 
-	private MethodSpec createMethodSpec(AST ast, IMethod iMethod, MethodSpec givenMethodSpec, boolean signatureFlag)
+	private MethodSpec createMethodSpec(AST ast, 
+										String typeSignature, String name, String[] parameterTypes, String[] parameterNames, 
+										MethodSpec givenMethodSpec, boolean signatureFlag)
 	{
-		String returnTypeString;
-		try
-		{
-			returnTypeString = Signature.toString(iMethod.getReturnType());
-		}
-		catch (JavaModelException e)
-		{
-			return null;    
-		}
+		String returnTypeString = Signature.toString(typeSignature);
 		
 		Type returnType = ASTNodeCreator.createType(ast, returnTypeString);
 		
-		String [] parameterTypes = iMethod.getParameterTypes();
-		String [] parameterNames = null;
-		
-		try
-		{
-			parameterNames = iMethod.getParameterNames();            
-		}
-		catch (JavaModelException e1)
-		{
-			return null;
-		}
 		
 		List mSpecParameters = null;
 		if (givenMethodSpec != null)
@@ -1246,7 +1286,7 @@ public class BindingConfiguration extends Composite
 		
 		MethodSpec methodSpec = ASTNodeCreator.createMethodSpec(
 				ast,
-				iMethod.getElementName(),
+				name,
 				returnType,
 				methodParameters,
 				signatureFlag
@@ -1255,7 +1295,7 @@ public class BindingConfiguration extends Composite
 		
 		return methodSpec;
 	}
-	
+
 	//copied from org.soothsayer.util.ASTNodeHelper;
 	public static String getMethodSignature(IMethod meth)
 	{
@@ -1320,13 +1360,13 @@ public class BindingConfiguration extends Composite
 			currentRole= (RoleTypeDeclaration)ASTNodes.getParent(_selectedRole, ASTNode.ROLE_TYPE_DECLARATION);
 		}
 		
-		_calloutMapping = null;
+		_calloutMappings = null;
 		_callinMapping = null;
 		int selectedIndex = -1;
 		
 		if (createMethodMapping())
 		{
-			if (_calloutMapping != null)
+			if (_calloutMappings != null)
 			{
 				if (_selectedCalloutDecl != null)
 				{
@@ -1340,11 +1380,15 @@ public class BindingConfiguration extends Composite
 				}
 				
 				if (selectedIndex == -1){
-					_selectedRole.bodyDeclarations().add(_calloutMapping);
+					_selectedRole.bodyDeclarations().add(_calloutMappings[0]);
+					if (_calloutMappings.length>1)
+						_selectedRole.bodyDeclarations().add(_calloutMappings[1]);
 				}
 				else
 				{
-					_selectedRole.bodyDeclarations().add(selectedIndex, _calloutMapping);
+					_selectedRole.bodyDeclarations().add(selectedIndex, _calloutMappings[0]);
+					if (_calloutMappings.length>1)
+						_selectedRole.bodyDeclarations().add(selectedIndex, _calloutMappings[1]);
 				}
 			}
 			
@@ -1380,10 +1424,13 @@ public class BindingConfiguration extends Composite
 			
 			_bindingEditor.refresh();
 			
-			AbstractMethodMappingDeclaration mapping = _callinMapping;
-			if (mapping == null)
-				mapping = _calloutMapping;
-			_bindingEditor.methodBindingAdded(mapping);
+			if (this._callinMapping != null) {
+				_bindingEditor.methodBindingAdded(this._callinMapping);
+			} else {
+				_bindingEditor.methodBindingAdded(this._calloutMappings[0]);
+				if (this._calloutMappings.length > 1)
+					_bindingEditor.methodBindingAdded(this._calloutMappings[1]);
+			}
 		}
 		else
 		{
