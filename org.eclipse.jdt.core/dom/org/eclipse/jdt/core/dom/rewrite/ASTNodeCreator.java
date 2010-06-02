@@ -254,17 +254,13 @@ public class ASTNodeCreator
         return newCalloutMapping;
     }
     
-    public static FieldAccessSpec createFieldAccSpec(AST ast, boolean isSetter, String fieldName, PrimitiveType.Code simpleType, String type, boolean hasSignature)
+    public static FieldAccessSpec createFieldAccSpec(AST ast, boolean isSetter, String fieldName, String fieldType, boolean hasSignature)
     {
         FieldAccessSpec newFieldAcc = ast.newFieldAccessSpec();
         newFieldAcc.setName(ast.newSimpleName(fieldName));
         
-        if (simpleType!= null)
-            newFieldAcc.setFieldType(ast.newPrimitiveType(simpleType));
-            
-        if (type!= null)
-            newFieldAcc.setFieldType(ast.newSimpleType(ast.newName(type)));
-        
+        newFieldAcc.setFieldType(createType(ast, fieldType));
+                
         newFieldAcc.setSignatureFlag(hasSignature);
         return newFieldAcc;
     }
