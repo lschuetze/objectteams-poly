@@ -20,7 +20,6 @@
 # OT_RECIPIENT          mail address for failure messages
 # ECLIPSE_SDK_TGZ       archive file of the base eclipse SDK build (full path)
 # ECLIPSE_TESTLIB_ZIP   archive file of the eclipse test framework (full path)
-# BCEL_JAR              jar file of the bcel jar from orbit
 # OTRE_LIB              directory holding various otre jar files
 # ANT_PROFILE           configure the ant process
 # X11                   XVFB, XVNC or X11
@@ -35,7 +34,6 @@
 ## As Java Properties:
 ##      -Declipse-app.tgz       path of eclipse SDK
 ##      -Declipse.tests.zip     path of eclipse test framework
-##      -Dbcel.jar              path of bcel jar
 ##      -Dotre.lib              directory to otre jars
 ##      -Ddo.build.all          true|false: should OTDT and tests be built?
 ##      -Ddo.run.tests          true|false: should test be run?
@@ -145,7 +143,6 @@ trap "echo Aborting by SIGTERM; cleanup; exit 130" INT
 ANT_OPTIONS="${ANT_PROFILE} \
     -Declipse-app.tgz=${ECLIPSE_SDK_TGZ} \
     -Declipse.tests.zip=${ECLIPSE_TESTLIB_ZIP} \
-    -Dbcel.jar=${BCEL_JAR} \
     -Dotre.lib=${OTRE_LIB} \
     -Ddo.run.tests=${DO_RUN} \
     -Ddo.build.all=${DO_BUILD}"

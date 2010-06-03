@@ -59,12 +59,6 @@ ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
 # EXPORT: archive file of the eclipse test framework:
 ECLIPSE_TESTLIB_ZIP=${DROP}/eclipse-test-framework-${EVERSION}.zip
 
-# used only below:
-ORBIT_DROP=/home/data/httpd/download.eclipse.org/tools/orbit/downloads/drops/S20100308015149
-
-# EXPORT: bcel jar file from orbit:
-BCEL_JAR=${ORBIT_DROP}/bundles/org.apache.bcel_5.2.0.v200803061811.jar
-
 # EXPORT: directory holding various otre jar files:
 OTRE_LIB=${BASEDIR}/lib
 

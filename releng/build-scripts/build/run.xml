@@ -19,8 +19,6 @@ path of eclipse SDK:
 		eclipse-app.tgz  = ${eclipse-app.tgz}
 path of eclipse test framework:
 		eclipse.tests.zip= ${eclipse.tests.zip}     
-path of bcel jar:
-		bcel.jar         = ${bcel.jar}
 directory to otre jars:
 		otre.lib         = ${otre.lib}
 should sources be built (true|false)?
@@ -52,7 +50,6 @@ should test be run (true|false)?
 		<property name="build.root.dir" value="${user.dir}/build-root" />
 			<!-- These names are hard coded in pde-build: -->
 			<property name="buildDirectory"		value="${build.root.dir}/src" />
-			<property name="base" 				value="${build.root.dir}" />
 			<property name="baseLocation"   	value="${build.root.dir}/eclipse" />
 	
 		<!--	directories for testing: -->
@@ -277,7 +274,6 @@ should test be run (true|false)?
 				<arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 				<arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
 				<arg value="-Dotre.lib=${otre.lib}"/>
-				<arg value="-Dbcel.jar=${bcel.jar}"/>
 				<arg value="-verbose" />
 				<jvmarg value="${vm.args}"/>
 				<jvmarg value="${vm.args2}"/>
