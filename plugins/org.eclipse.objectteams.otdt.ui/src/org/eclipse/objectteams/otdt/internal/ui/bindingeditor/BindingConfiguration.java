@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
@@ -55,7 +54,10 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTNodeCreator;
+import org.eclipse.jdt.internal.core.JavaElement;
+import org.eclipse.jdt.internal.core.SourceMethod;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.TreeHierarchyLayoutProblemsDecorator;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -67,15 +69,19 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
+import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
+import org.eclipse.objectteams.otdt.core.util.MethodData;
+import org.eclipse.objectteams.otdt.ui.ImageConstants;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FormAttachment;
 import org.eclipse.swt.layout.FormData;
 import org.eclipse.swt.layout.FormLayout;
@@ -142,7 +148,7 @@ public class BindingConfiguration extends Composite
 				IMember curElem = _baseMethods[idx];
 				try {
 					if (   !curElem.getElementName().startsWith(OT_GENERATED_INDICATOR)
-						&& !Flags.isSynthetic(curElem.getFlags()))
+						&& (!curElem.exists() || !Flags.isSynthetic(curElem.getFlags()))) // methods representing callout don't exist and can't answer getFlags()
 					{
 						result.add(curElem);
 					}
@@ -204,7 +210,20 @@ public class BindingConfiguration extends Composite
 		
 		_bindingEditor = (BindingEditor)parent.getParent();
 		
-		JavaUILabelProvider labelProvider = new JavaUILabelProvider();
+		JavaUILabelProvider labelProvider = new JavaUILabelProvider() {
+			@Override
+			public Image getImage(Object element) {
+				if (element instanceof IMethod) {
+					// the FAKED_METHOD ('New method) get's a special image:
+					if (((IMethod)element).getElementName().equals(FAKED_METHOD_NAME))
+						return JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+					// other methods that don't exist() are assumed to represent a short-hand callout:
+					if (!((IMethod)element).exists())
+						return OTDTUIPlugin.getDefault().getImageRegistry().get(ImageConstants.CALLOUTBINDING_IMG);
+				}
+				return super.getImage(element);
+			}
+		};
 		labelProvider.addLabelDecorator(new TreeHierarchyLayoutProblemsDecorator());
 		labelProvider.setTextFlags(JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES);
 		
@@ -504,7 +523,21 @@ public class BindingConfiguration extends Composite
 					result.add(method);
 					signatures.add(signature);
 				}
-			}	
+			}
+			IOTType otType = OTModelManager.getOTElement(typeParents[i]);
+			if (otType != null && otType.isRole()) {
+				// add short-hand callout methods:
+				IMethodMapping[] mappings = ((IRoleType)otType).getMethodMappings(IRoleType.CALLOUTS);
+				for (int j = 0; j < mappings.length; j++) {
+					MethodData method = mappings[j].getRoleMethodHandle();
+					String signature = method.getSelector()+method.getSignature();
+					if (!signatures.contains(signature))
+					{
+						result.add(SourceMethod.createHandle((JavaElement)typeParents[i], method));
+						signatures.add(signature);
+					}
+				}
+			}
 		}
 		// -----------
 		
@@ -1157,7 +1190,6 @@ public class BindingConfiguration extends Composite
 						Signature.toString(iField.getTypeSignature()),
 						signatureFlag
 				);
-				;
 			} catch (Exception e) {
 				return null;
 			}
@@ -1350,6 +1382,8 @@ public class BindingConfiguration extends Composite
 			if (currentRole == null)
 				break;
 			if (currentRole.isRoleFile()) {
+				if (this._bindingEditor.isRootTeam(currentRole))
+					break;
 				openErrorDialog(MessageFormat.format(
 						Messages.BindingConfiguration_error_cant_edit_rolefile_nested,
 						new Object[]{_selectedRole.getName().getIdentifier(),

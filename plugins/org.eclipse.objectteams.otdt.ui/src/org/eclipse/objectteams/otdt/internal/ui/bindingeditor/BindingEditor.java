@@ -718,4 +718,8 @@ public class BindingEditor extends Composite
         return result;
 	}
 
+	public boolean isRootTeam(TypeDeclaration currentType) {
+		return this._rootTeam == currentType;
+	}
+
 }
