@@ -62,7 +62,7 @@ should test be run (true|false)?
 		<!--	directories for update sites: -->
 		<property name="otdtUpdatesDir" 		value="${user.dir}/updateSite"/>
 		<property name="testsUpdatesDirBase" 	value="${user.dir}/updateSiteTests"/>
-			<property name="testsUpdatesDir" 	value="${testsUpdatesDirBase}/eclipse"/>
+			<!-- will have sub directories "eclipse" and "otdt" -->
 
 		<!-- ======== More Configuration Details: ======== -->
 		<!-- maybe obsolete: file prefix to distinguish output files. -->
@@ -169,9 +169,8 @@ should test be run (true|false)?
 		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${build.root.dir}"/>
 	</target>
 	
-	<target name="AddPluginsToEclipse" description="Add bcel and svn.pde.build plugins to the base Eclipse">
+	<target name="AddPluginsToEclipse" description="Add svn.pde.build plugin to the base Eclipse">
 		<mkdir dir="${baseLocation}/dropins/plugins"/>
-		<copy file="${bcel.jar}" todir="${baseLocation}/dropins/plugins"/>
 		<copy file="${OTScriptDir}/lib/${svn.pde.build}" todir="${baseLocation}/dropins/plugins" />
 	</target>
 
@@ -230,11 +229,11 @@ should test be run (true|false)?
 		
         <!-- Make org.eclipse.test.performance available while compiling test projects: -->
         <echo message="Pre-installing Eclipse Test Framework into OTCompilerEclipse..."/>
-        <mkdir dir="${testsUpdatesDir}"/>
-        <unzip dest="${testsUpdatesDirBase}" src="${eclipse.tests.zip}"/>
+        <mkdir dir="${testsUpdatesDirBase}"/>
+        <unzip dest="${testsUpdatesDirBase}" src="${eclipse.tests.zip}"/> <!-- unfolds into "eclipse" subdir -->
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.test.feature.group"/>
-            <property name="sourceUpdatesDir" value="${testsUpdatesDir}"/>
+            <property name="sourceUpdatesDir" value="${testsUpdatesDirBase}/eclipse"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
         </ant>
 	
@@ -261,6 +260,7 @@ should test be run (true|false)?
 				<arg value="-D${installmode}=true"/>
 				<arg value="-Dcomponent.short=OTDT-Build"/>
 				<arg value="-DotdtUpdatesDir=${otdtUpdatesDir}"/>
+				<arg value="-DtestsUpdatesDirBase=${testsUpdatesDirBase}"/>
 				<arg value="-Dbaseos=${os}"/>
 				<arg value="-Dbasews=${ws}"/>
 				<arg value="-Dbasearch=${arch}"/>
@@ -283,17 +283,17 @@ should test be run (true|false)?
 				<!-- arg value="${verboseAnt}"/ -->
 				<!-- arg value="-debug" / -->
 		</java>
-		<!-- At this point a local update site exists 
-		     (created from build.xml#postOTDT-Build -> p2helper.xml#createLocalUpdateSite) 
-		  -->
+		<!-- At this point a local update site exists, thanks to p2gathering=true -->
 		
 		<!-- Generate accumulating metadata by pre-loading existing metadata: -->
+<!--
 		<copy failonerror="false" flatten="true" toDir="${otdtUpdatesDir}">
 		        <fileset dir="${user.dir}/metadata">
 	                       <include name="*.xml"/>
 	            </fileset>
 	    </copy>
 		<ant antfile="${OTScriptDir}/p2helper.xml" dir="${buildDirectory}" target="generateMetadata"/>
+-->
 
 		<property name="_hasCreatedOTDTEclipse" value="true" />
 	</target>
@@ -311,7 +311,7 @@ should test be run (true|false)?
 			<property name="eclipse-app.tgz" value="${eclipse-app.tgz}" />
 			<property file="${buildDirectory}/label.properties" />
 			<property name="otdtUpdatesDir" value="${otdtUpdatesDir}" />
-			<property name="testsUpdatesDir" value="${testsUpdatesDir}" />
+			<property name="testsUpdatesDirBase" value="${testsUpdatesDirBase}" />
 		</ant>
 	</target>
 
@@ -324,7 +324,7 @@ should test be run (true|false)?
 			<property name="basews" value="${ws}" />
 			<property name="basearch" value="${arch}" />
 			<property name="otdtUpdatesDir" value="${otdtUpdatesDir}" />
-			<property name="testsUpdatesDir" value="${testsUpdatesDir}" />
+			<property name="testsUpdatesDirBase" value="${testsUpdatesDirBase}" />
 			<property name="vmargs" value="${vmargs}" />
 		</ant>
 	</target>

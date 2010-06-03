@@ -59,7 +59,18 @@
 	<!-- ===================================================================== -->
 	
 	<!-- org.eclipse.objectteams.otdt.core.patch is included from otdt -->
-
+	<!-- different features are gathered into two different locations:
+		OTDT	-> ${otdtUpdatesDir}
+		tests	-> ${testsUpdatesDirBase}/otdt 
+	-->
+    <target name="assemble.org.eclipse.objectteams.otequinox.p2">
+        <ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="p2.build.repo" value="file://${otdtUpdatesDir}"/>
+		</ant>
+    </target>
+    <target name="assemble.org.eclipse.objectteams.otequinox.group.group.group">
+        <ant antfile="${assembleScriptName}" dir="${buildDirectory}"/>
+    </target>
 	<target name="assemble.org.eclipse.objectteams.otequinox">
 		<echo message="Not assembling org.eclipse.objectteams.otequinox, will create update.jars instead (later during the build)" />
 	</target>
@@ -67,6 +78,14 @@
 	<target name="assemble.org.eclipse.objectteams.otequinox.linux.gtk.*">
 		<echo message="Not assembling org.eclipse.objectteams.otequinox.linux.gtk.*, will create update.jars instead (later during the build)" />
 	</target>
+    <target name="assemble.org.eclipse.objectteams.otdt.p2">
+            <ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+		<property name="p2.build.repo" value="file://${otdtUpdatesDir}"/>
+	</ant>
+    </target>
+    <target name="assemble.org.eclipse.objectteams.otdt.group.group.group">
+            <ant antfile="${assembleScriptName}" dir="${buildDirectory}"/>
+    </target>
 	<target name="assemble.org.eclipse.objectteams.otdt">
 		<echo message="Not assembling org.eclipse.objectteams.otdt, will create update.jars instead (later during the build)" />
 	</target>
@@ -74,6 +93,14 @@
 		<echo message="Not assembling org.eclipse.objectteams.otdt.linux.gtk.*, will create update.jars instead (later during the build)" />
 	</target>
 
+	<target name="assemble.org.eclipse.objectteams.otdt-tests.p2">
+        <ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="p2.build.repo" value="file://${testsUpdatesDirBase}/otdt"/>
+		</ant>
+	</target>
+	<target name="assemble.org.eclipse.objectteams.otdt-tests.group.group.group">
+		<echo message="empty target" />
+	</target>
 	<target name="assemble.org.eclipse.objectteams.otdt-tests">
 		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
 			<property name="zipargs" value="" />

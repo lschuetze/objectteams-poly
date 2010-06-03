@@ -45,12 +45,6 @@
 		description="Installes the OTDT-Tests into the OTDT"
 	>
 		<echo message="Setting up tests in ${test.eclipseDir}"/>
-
-		<echo message="Unpacking OTDT Tests..."/>
-		<!-- Regarding the config "${os}.${ws}.*" see the comment in OTDT-Build/build.properties -->
-        <unzip src="${buildDirectory}/${buildLabel}/org.eclipse.objectteams.otdt-tests-${buildId}-${os}.${ws}.*.zip"
-        	   dest="${testsUpdatesDir}"/>
-		
 		<!-- do install using p2: -->
 		<ant antfile="${OTScriptDir}/p2helper.xml" target="installTests" dir="${test.eclipseDir}"/>
 

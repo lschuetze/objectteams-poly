@@ -116,19 +116,20 @@
         </antcall>
 		<echo message="Generating accumulating metadata in ${otdtUpdatesDir}" />
 		<!-- existing meta data are pre-loaded from build.xml -->
-		<antcall target="generateMetadata" />
     </target>
 
     <target name="installTests">
-        <echo message="Installing the Tests from ${testsUpdatesDir} into ${test.eclipseDir}"/>
+        <echo message="Installing the Tests from ${testsUpdatesDirBase} into ${test.eclipseDir}"/>
+        <!-- eclipse tests have been expanded into "eclipse", don't have meta data -->
         <antcall target="installFeature">
             <param name="feature" value="org.eclipse.test.feature.group"/>
-            <param name="sourceUpdatesDir" value="${testsUpdatesDir}"/>
+            <param name="sourceUpdatesDir" value="${testsUpdatesDirBase}/eclipse"/>
             <param name="targetEclipseDir" value="${test.eclipseDir}"/>
         </antcall>
+        <!-- otdt tests have been gathered into "otdt", have and need meta data -->
         <antcall target="installFeature">
             <param name="feature" value="org.eclipse.objectteams.otdt-tests.feature.group"/>
-            <param name="sourceUpdatesDir" value="${testsUpdatesDir}"/>
+            <param name="sourceUpdatesDir" value="${testsUpdatesDirBase}/otdt"/>
             <param name="targetEclipseDir" value="${test.eclipseDir}"/>
         </antcall>
     </target>

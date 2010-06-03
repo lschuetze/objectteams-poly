@@ -53,19 +53,6 @@
 		<!--run the pde-build for the specified ${builder} (OT-Compiler or OTDT-Build) -->
 		<ant antfile="build.xml" dir="${baseLocation}/${run.eclipseScriptDir}" />
 		
-		<!--and call our custom post- action -->
-	 	<antcall target="post${component.short}"/>	
-	</target>
-
-	<target name="postOTDT-Build">
-	    <!-- Export the build into an update site suitable to install by using the p2 director: -->
-        <ant antfile="${OTScriptDir}/p2helper.xml" target="createLocalUpdateSite" dir="${buildDirectory}"/>
-	    <!-- add the bcel jar to the update site: -->
-	    <copy file="${bcel.jar}" todir="${otdtUpdatesDir}/plugins"/>
-	</target>
-
-	<target name="postOT-Compiler">
-		<echo message="Nothing to do post OT-Compiler"/>
 	</target>
 	
 	<target name="create.label.properties" unless="label.properties.exists">
