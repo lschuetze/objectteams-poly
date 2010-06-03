@@ -50,9 +50,10 @@ should test be run (true|false)?
 			
 		<!--	directories for the build: -->
 		<property name="build.root.dir" value="${user.dir}/build-root" />
-			<!-- Both these names are hard coded in pde-build: -->
-			<property name="buildDirectory"    value="${build.root.dir}/src" />
-			<property name="baseLocation"   value="${build.root.dir}/eclipse" />
+			<!-- These names are hard coded in pde-build: -->
+			<property name="buildDirectory"		value="${build.root.dir}/src" />
+			<property name="base" 				value="${build.root.dir}" />
+			<property name="baseLocation"   	value="${build.root.dir}/eclipse" />
 	
 		<!--	directories for testing: -->
 		<property name="test.root.dir" value="${user.dir}/test-root" />
