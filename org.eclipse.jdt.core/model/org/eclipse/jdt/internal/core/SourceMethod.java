@@ -45,7 +45,19 @@ protected SourceMethod(JavaElement parent, String name, String[] parameterTypes)
 }
 //{ObjectTeams: converting factory method:
 public static IMethod createHandle(JavaElement parent, MethodData methodData) {
-	return new SourceMethod(parent, methodData.getSelector(), methodData.getArgumentTypes());
+	final String returnType = methodData.getReturnType();
+	final String[] parameterNames = methodData.getArgumentNames();
+	// create a handle that can answer some bits without computing infos:
+	return new SourceMethod(parent, methodData.getSelector(), methodData.getArgumentTypes()) {
+		@Override
+		public String getReturnType() {
+			return returnType;
+		}
+		@Override
+		public String[] getParameterNames() {
+			return parameterNames;
+		}
+	};
 }
 // SH}
 protected void closing(Object info) throws JavaModelException {

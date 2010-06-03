@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.core.util;
 
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -136,7 +137,12 @@ public class MethodData
     {
     	return _returnType;
     }
-    
+
+    /** Similar to {@link IMethod#getSignature()}, but works as a handle only method. */
+	public String getSignature() {
+		return Signature.createMethodSignature(this._argumentsTypes, this._returnType);
+	}
+	
     public boolean isDeclaration() {
     	return _isDeclaration;
     }
