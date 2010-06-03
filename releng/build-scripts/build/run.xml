@@ -18,7 +18,9 @@
 path of eclipse SDK:
 		eclipse-app.tgz  = ${eclipse-app.tgz}
 path of eclipse test framework:
-		eclipse.tests.zip= ${eclipse.tests.zip}     
+		eclipse.tests.zip= ${eclipse.tests.zip}
+path of published updates:
+		published.updates= ${published.updates}
 directory to otre jars:
 		otre.lib         = ${otre.lib}
 should sources be built (true|false)?
@@ -234,6 +236,20 @@ should test be run (true|false)?
             <property name="sourceUpdatesDir" value="${testsUpdatesDirBase}/eclipse"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
         </ant>
+		
+		<!-- pre-load updateSite with published releases: -->
+		<mkdir dir="${otdtUpdatesDir}"/>
+		<copy todir="${otdtUpdatesDir}" flatten="false">
+		  <fileset dir="${published.updates}">
+		    <include name="**/*.jar"/>
+		  </fileset>
+		</copy>
+		<!-- pre-load category-less metadata: -->
+		<copy failonerror="false" flatten="true" toDir="${otdtUpdatesDir}">
+	        <fileset dir="${user.dir}/metadata">
+                       <include name="*.xml"/>
+            </fileset>
+    	</copy>
 	
 		<echo message="Invoke pdebuild for creating a full OTDT"/>
 		<java
