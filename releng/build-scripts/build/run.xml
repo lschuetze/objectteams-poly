@@ -301,16 +301,6 @@ should test be run (true|false)?
 				<!-- arg value="-debug" / -->
 		</java>
 		<!-- At this point a local update site exists, thanks to p2gathering=true -->
-		
-		<!-- Generate accumulating metadata by pre-loading existing metadata: -->
-<!--
-		<copy failonerror="false" flatten="true" toDir="${otdtUpdatesDir}">
-		        <fileset dir="${user.dir}/metadata">
-	                       <include name="*.xml"/>
-	            </fileset>
-	    </copy>
-		<ant antfile="${OTScriptDir}/p2helper.xml" dir="${buildDirectory}" target="generateMetadata"/>
--->
 
 		<property name="_hasCreatedOTDTEclipse" value="true" />
 	</target>
