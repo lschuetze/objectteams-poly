@@ -238,12 +238,16 @@ should test be run (true|false)?
         </ant>
 		
 		<!-- pre-load updateSite with published releases: -->
-		<mkdir dir="${otdtUpdatesDir}"/>
-		<copy todir="${otdtUpdatesDir}" flatten="false">
-		  <fileset dir="${published.updates}">
-		    <include name="**/*.jar"/>
-		  </fileset>
-		</copy>
+        <mkdir dir="${otdtUpdatesDir}/plugins"/>
+        <mkdir dir="${otdtUpdatesDir}/features"/>
+        <exec executable="/bin/sh">
+                <arg value="-c"/>
+                <arg value="ln -s ${published.updates}/features/* ${otdtUpdatesDir}/features/"/>
+        </exec>
+        <exec executable="/bin/sh">
+                <arg value="-c"/>
+                <arg value="ln -s ${published.updates}/plugins/* ${otdtUpdatesDir}/plugins/"/>
+        </exec>
 		<!-- pre-load category-less metadata: -->
 		<copy failonerror="false" flatten="true" toDir="${otdtUpdatesDir}">
 	        <fileset dir="${user.dir}/metadata">
