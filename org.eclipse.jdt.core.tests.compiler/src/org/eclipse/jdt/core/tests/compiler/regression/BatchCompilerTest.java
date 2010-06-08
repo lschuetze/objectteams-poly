@@ -1919,7 +1919,8 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedParameterWhenOverridingConcrete\" value=\"disabled\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedPrivateMember\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedTypeArgumentsForMethodInvocation\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedWarningToken\" value=\"warning\"/>\n" +			"		<option key=\"org.eclipse.jdt.core.compiler.problem.varargsArgumentNeedCast\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unusedWarningToken\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.varargsArgumentNeedCast\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.processAnnotations\" value=\"disabled\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.source\" value=\"1.5\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.taskCaseSensitive\" value=\"enabled\"/>\n" +
@@ -1934,6 +1935,7 @@ public void test012b(){
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.basecall\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.binding_conventions\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.decapsulation\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.definite_ambiguity\" value=\"error\"/>\n" +
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.deprecated_path_syntax\" value=\"warning\"/>\n" +			
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.exception_in_guard\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.fragile_callin\" value=\"warning\"/>\n" + 
