@@ -137,12 +137,9 @@ public class CallinImplementor extends MethodMappingImplementor
 		}
 
 		if (this._role._hasBindingAmbiguity) {
-			for (int i = 0; i < methodMappings.length; i++) {
+			for (int i = 0; i < methodMappings.length; i++)
 				this._roleScope.problemReporter().callinDespiteBindingAmbiguity(
 									this._role.getBinding(), methodMappings[i]);
-				methodMappings[i].tagAsHavingErrors();
-			}
-			return false;
 		}
 		boolean result = true;
         CallinMappingDeclaration[] callinMappings = new CallinMappingDeclaration[methodMappings.length];

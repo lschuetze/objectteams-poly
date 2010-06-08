@@ -150,6 +150,8 @@ public class CompilerOptions {
 
 	public static final String OPTION_ReportPotentialAmbiguousPlayedby =
 		"org.eclipse.objectteams.otdt.compiler.problem.potential_ambiguous_playedby"; //$NON-NLS-1$
+	public static final String OPTION_ReportDefiniteBindingAmbiguity=
+		"org.eclipse.objectteams.otdt.compiler.problem.definite_ambiguity"; //$NON-NLS-1$
 	public static final String OPTION_ReportAbstractPotentialRelevantRole =
 		"org.eclipse.objectteams.otdt.compiler.problem.abstract_potential_relevant_role"; //$NON-NLS-1$
 
@@ -320,6 +322,7 @@ public class CompilerOptions {
 	public static final int AmbiguousLowering=				 OTJFlag | ASTNode.Bit14;
 	public static final int AdaptingDeprecated=              OTJFlag | ASTNode.Bit15;
 	public static final int IgnoringRoleReturn=			     OTJFlag | ASTNode.Bit16;
+	public static final int DefiniteBindingAmbiguity=		 OTJFlag | ASTNode.Bit17;
 // SH}
 
 
@@ -645,6 +648,8 @@ public class CompilerOptions {
 				return OPTION_ReportFragileCallin;
 			case PotentialAmbiguousPlayedBy :
 				return OPTION_ReportPotentialAmbiguousPlayedby;
+			case DefiniteBindingAmbiguity:
+				return OPTION_ReportDefiniteBindingAmbiguity;
 			case AbstractPotentialRelevantRole :
 				return OPTION_ReportAbstractPotentialRelevantRole;
 			case Decapsulation :
@@ -811,6 +816,7 @@ public class CompilerOptions {
 			OPTION_ReportUnsafeRoleInstantiation,
 			OPTION_ReportFragileCallin,
 			OPTION_ReportPotentialAmbiguousPlayedby,
+			OPTION_ReportDefiniteBindingAmbiguity,
 			OPTION_ReportAbstractPotentialRelevantRole,
 			OPTION_ReportDecapsulation,
 			OPTION_ReportDeprecatedPathSyntax,
@@ -899,6 +905,8 @@ public class CompilerOptions {
 				return "fragilecallin";  //$NON-NLS-1$
 			case PotentialAmbiguousPlayedBy :
 				return "ambiguousbinding"; //$NON-NLS-1$
+			case DefiniteBindingAmbiguity :
+				return "def-bind-ambiguity"; //$NON-NLS-1$
 			case AbstractPotentialRelevantRole :
 				return "abstractrelevantrole"; //$NON-NLS-1$
 			case Decapsulation :
@@ -1021,6 +1029,8 @@ public class CompilerOptions {
 				return IrritantSet.DECAPSULATION;
 			if ("dangerouscallin".equals(warningToken)) //$NON-NLS-1$
 				return IrritantSet.DANGEROUS_CALLIN;
+			if ("def-bind-ambiguity".equals(warningToken)) //$NON-NLS-1$
+				return IrritantSet.DEFINITE_BINDING_AMBIGUITY;
 			break;
 		case 'e' :
 			if ("exceptioninguard".equals(warningToken)) //$NON-NLS-1$
@@ -1168,6 +1178,7 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportFragileCallin, getSeverityString(FragileCallin));
 
 		optionsMap.put(OPTION_ReportPotentialAmbiguousPlayedby, getSeverityString(PotentialAmbiguousPlayedBy));
+		optionsMap.put(OPTION_ReportDefiniteBindingAmbiguity, getSeverityString(DefiniteBindingAmbiguity));
 		optionsMap.put(OPTION_ReportAbstractPotentialRelevantRole, getSeverityString(AbstractPotentialRelevantRole));
 
 		optionsMap.put(OPTION_ReportDecapsulation, getSeverityString(Decapsulation));
@@ -1600,6 +1611,7 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportFragileCallin)) != null) updateSeverity(FragileCallin, optionValue);
 
 		if ((optionValue = optionsMap.get(OPTION_ReportPotentialAmbiguousPlayedby)) != null) updateSeverity(PotentialAmbiguousPlayedBy, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportDefiniteBindingAmbiguity)) != null) updateSeverity(DefiniteBindingAmbiguity, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportAbstractPotentialRelevantRole)) != null) updateSeverity(AbstractPotentialRelevantRole, optionValue);
 
 		if ((optionValue = optionsMap.get(OPTION_ReportDecapsulation)) != null) updateSeverity(Decapsulation, optionValue);

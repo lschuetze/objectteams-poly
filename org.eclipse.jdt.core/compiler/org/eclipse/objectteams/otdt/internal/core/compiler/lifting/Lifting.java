@@ -642,18 +642,12 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 	        	needToAdd = true;
 	        }
 
-	        if (caseObjects.length == 0) {
-	            if (teamBinding.isAbstract()) {
-	                liftToMethodDeclaration.modifiers |= AccAbstract|AccSemicolonBody;
-	                if (liftToMethodDeclaration.binding != null)
-	                	liftToMethodDeclaration.binding.modifiers |= AccAbstract;
-	            } else {
-	            	assert roleModel._hasBindingAmbiguity;
-	            	liftToMethodDeclaration.setStatements(new Statement[] {
-	            		genLiftingFailedException(BASE, roleClassBinding, this._gen)
-	            	});
-	            	needToAdd = true;
-	            }
+	        if (   caseObjects.length == 0
+	        	&& teamBinding.isAbstract())
+	        {
+                liftToMethodDeclaration.modifiers |= AccAbstract|AccSemicolonBody;
+                if (liftToMethodDeclaration.binding != null)
+                	liftToMethodDeclaration.binding.modifiers |= AccAbstract;
 	        } else {
 	        	final MethodDeclaration newMethod = liftToMethodDeclaration;
 	        	final AstGenerator gen = this._gen;
@@ -824,7 +818,9 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 					// (create a role of the best matching type:)
 					new Statement[] {
 //					/*debug*/createPrintBaseTag(teamType, returnType, caseObjects, _gen),
-					createSwitchStatement(teamType, returnType, caseObjects, this._gen)}),
+					caseObjects.length > 0 
+						? createSwitchStatement(teamType, returnType, caseObjects, this._gen)
+						: genLiftingFailedException(BASE, returnType, this._gen)}),
 				// (else: return existing role)
 				createElseBlock(returnType, teamType));
     }

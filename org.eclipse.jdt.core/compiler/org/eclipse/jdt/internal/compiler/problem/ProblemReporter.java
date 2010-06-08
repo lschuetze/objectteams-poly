@@ -411,6 +411,8 @@ public static int getIrritant(int problemID) {
 
 		case IProblem.RoleBindingPotentiallyAmbiguous:
 			return CompilerOptions.PotentialAmbiguousPlayedBy;
+		case IProblem.CallinDespiteBindingAmbiguity:
+			return CompilerOptions.DefiniteBindingAmbiguity;
 		case IProblem.AbstractPotentiallyRelevantRole:
 			return CompilerOptions.AbstractPotentialRelevantRole;
 
@@ -587,6 +589,7 @@ public static int getProblemCategory(int severity, int problemID) {
 				return CategorizedProblem.CAT_CODE_STYLE;
 			case CompilerOptions.DeprecatedPathSyntax:
 				return CategorizedProblem.CAT_CODE_STYLE;
+			case CompilerOptions.DefiniteBindingAmbiguity:
 			case CompilerOptions.WeaveIntoSystemClass:
 			case CompilerOptions.DangerousCallin:
 			case CompilerOptions.IgnoringRoleReturn:
