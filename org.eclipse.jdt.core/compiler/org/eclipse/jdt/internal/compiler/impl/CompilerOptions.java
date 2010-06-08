@@ -467,6 +467,7 @@ public class CompilerOptions {
 		"roleinstantiation",    //$NON-NLS-1$
 		"fragilecallin",        //$NON-NLS-1$
 		"ambiguousbinding",     //$NON-NLS-1$
+		"def-bind-ambiguity",   //$NON-NLS-1$
 		"abstractrelevantrole", //$NON-NLS-1$
 		"decapsulation",        //$NON-NLS-1$
 		"bindingconventions",   //$NON-NLS-1$
