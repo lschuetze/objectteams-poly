@@ -1707,9 +1707,9 @@ public void resolve() {
 		{
 			if (isTeam() || isRole()) {
 				this.binding.precedences = new PrecedenceBinding[this.precedences.length];
-				for (int i = 0; i < this.precedences.length; i++) {
+				// process back to front because addResolvedPrecedenceDeclaration will always insert at front:
+				for (int i = this.precedences.length-1; i>=0; i--)
 					this.binding.precedences[i] = this.precedences[i].resolve(this);
-				}
 			} else {
 				this.scope.problemReporter().precedenceInRegularClass(this, this.precedences);
 			}
@@ -2022,18 +2022,21 @@ public void addResolvedPrecedenceDeclaration(
 		this.precedences = new PrecedenceDeclaration[] { decl };
 		this.binding.precedences = new PrecedenceBinding[] { decl.binding };
 	} else {
+		// insert at front to account for ordering according to 4.8(d):
+		// - inner before outer
+		// - textual order (same nesting level)
 		int len = this.precedences.length;
 		assert len == this.binding.precedences.length;
 		System.arraycopy(
 				this.precedences, 0,
-				this.precedences = new PrecedenceDeclaration[len+1], 0,
+				this.precedences = new PrecedenceDeclaration[len+1], 1,
 				len);
-		this.precedences[len] = decl;
+		this.precedences[0] = decl;
 		System.arraycopy(
 				this.binding.precedences, 0,
-				this.binding.precedences = new PrecedenceBinding[len+1], 0,
+				this.binding.precedences = new PrecedenceBinding[len+1], 1,
 				len);
-		this.binding.precedences[len] = decl.binding;
+		this.binding.precedences[0] = decl.binding;
 	}
 }
 // SH}
