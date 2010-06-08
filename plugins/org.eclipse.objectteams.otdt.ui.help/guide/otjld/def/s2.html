@@ -1242,9 +1242,18 @@
                      </ul>
                      <div class="note">
                         <h5>Effect:</h5>
-                        					Definite ambiguity is a compile time error.
+                        					Definite ambiguity is a compile time error. 
                         				
                      </div>
+                     <p>
+                        					A compiler may still choose to make this error configurable/suppressable
+                        					(using the warning token <code>"def-bind-ambiguity"</code>)
+                        					to account for corner cases that may work as desired despite a definite binding ambiguity.
+                        					Such corner cases may arise if lifting already finds an appropriate role in the cache or 
+                        					if an (indirect) subrole of the ambiguously bound role is an unambiguous lift target for the
+                        					concrete type of the base object at run-time.
+                        				
+                     </p>
                      <h5 class="listing">Example code (Definite Ambiguity):</h5>
                      <div class="listing example frame">
                         <table class="listing">

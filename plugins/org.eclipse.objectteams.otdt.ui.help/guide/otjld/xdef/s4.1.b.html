@@ -24,9 +24,18 @@
             <p>A callin binding requires the enclosing class to be a role class
                	    bound to a base class according to <a href="s2.1.html" title="&sect;2.1&nbsp;playedBy relation" class="sect">&sect;2.1</a>. 
                	    An <em>unliftable</em> role (see <a href="s2.3.4.a.html" title="&sect;2.3.4.(a)&nbsp;Potential ambiguity"
-                  class="sect">&sect;2.3.4.(a)</a>) cannot define 
-               	    callin bindings. In that case callin bindings can only be introduced in sub-roles 
+                  class="sect">&sect;2.3.4.(a)</a>) cannot define callin bindings
+               	    In this case callin bindings can only be introduced in sub-roles 
                	    which (by an appropriately refined <code>playedBy</code> clause) disambiguate the lifting translation.
+               			
+            </p>
+            <p>
+               		For corner cases the above rule can be overridden by suppressing the corresponding error
+               		using the <code>"def-bind-ambiguity"</code> token (see <a href="s2.3.4.b.html" title="&sect;2.3.4.(b)&nbsp;Definite ambiguity"
+                  class="sect">&sect;2.3.4.(b)</a>).  
+               		This will allow callin bindings to be defined even for unliftable roles expecting that lifting
+               		may still succeed by one of the patterns desribed in <a href="s2.3.4.b.html" title="&sect;2.3.4.(b)&nbsp;Definite ambiguity"
+                  class="sect">&sect;2.3.4.(b)</a>.
                			
             </p>
          </div>
