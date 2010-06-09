@@ -1986,57 +1986,24 @@ public void resetErrorFlag() {
 // SH}
 
 //{ObjectTeams: push precedence declaration out to the team:
-public void addResolvedPrecedenceDeclaration(
-			char[] roleName, PrecedenceDeclaration decl)
+public void addResolvedPrecedence(char[] roleName, PrecedenceBinding precBinding)
 {
-	char[][] prefix = new char[][]{roleName}; // for easier arrayConcat.
-	for (int i = 0; i < decl.bindingNames.length; i++) {
-		NameReference bindingName = decl.bindingNames[i];
-		QualifiedNameReference newRef;
-		char[][] tokens;
-		long[] poss;
-		if (bindingName instanceof SingleNameReference) {
-			SingleNameReference sref = (SingleNameReference)bindingName;
-			tokens = CharOperation.arrayConcat(prefix, sref.token);
-			long pos = ((long)sref.sourceStart<<32)+sref.sourceEnd;
-			poss = new long[]{pos, pos};
-		} else {
-			assert bindingName instanceof QualifiedNameReference;
-			QualifiedNameReference qref = (QualifiedNameReference)bindingName;
-			int oldLen = qref.tokens.length;
-			tokens = CharOperation.arrayConcat(prefix, qref.tokens);
-			poss = new long[oldLen+1];
-			poss[0] = qref.sourcePositions[0];
-			System.arraycopy(qref.sourcePositions, 0, poss, 1, oldLen);
-		}
-		newRef = new QualifiedNameReference(tokens, poss,
-				bindingName.sourceStart, bindingName.sourceEnd);
-		newRef.binding = bindingName.binding;
-		decl.bindingNames[i] = newRef;
-	}
 	if (this.enclosingType != null) {
-		this.enclosingType.addResolvedPrecedenceDeclaration(this.name, decl);
+		this.enclosingType.addResolvedPrecedence(this.name, precBinding);
 		return;
 	}
-	if (this.precedences == null) {
-		this.precedences = new PrecedenceDeclaration[] { decl };
-		this.binding.precedences = new PrecedenceBinding[] { decl.binding };
+	if (this.binding.precedences == PrecedenceBinding.NoPrecedences) {
+		this.binding.precedences = new PrecedenceBinding[] { precBinding };
 	} else {
 		// insert at front to account for ordering according to 4.8(d):
 		// - inner before outer
 		// - textual order (same nesting level)
-		int len = this.precedences.length;
-		assert len == this.binding.precedences.length;
-		System.arraycopy(
-				this.precedences, 0,
-				this.precedences = new PrecedenceDeclaration[len+1], 1,
-				len);
-		this.precedences[0] = decl;
+		int len = this.binding.precedences.length;
 		System.arraycopy(
 				this.binding.precedences, 0,
 				this.binding.precedences = new PrecedenceBinding[len+1], 1,
 				len);
-		this.binding.precedences[0] = decl.binding;
+		this.binding.precedences[0] = precBinding;
 	}
 }
 // SH}

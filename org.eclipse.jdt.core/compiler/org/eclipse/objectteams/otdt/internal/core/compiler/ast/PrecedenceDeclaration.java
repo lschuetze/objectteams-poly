@@ -117,9 +117,9 @@ public class PrecedenceDeclaration extends ASTNode {
 		if (   type.enclosingType != null
 			&& type.enclosingType.isTeam())
 		{
-			type.enclosingType.addResolvedPrecedenceDeclaration(
+			type.enclosingType.addResolvedPrecedence(
 					type.binding.sourceName(),
-					this);
+					this.binding);
 		}
 		return this.binding;
 	}
@@ -231,7 +231,7 @@ public class PrecedenceDeclaration extends ASTNode {
 	 */
 	public static PrecedenceBinding[] mergePrecedences(TypeDeclaration type)
 	{
-		int len = (type.precedences != null) ? type.precedences.length : 0;
+		int len = (type.binding.precedences != null) ? type.binding.precedences.length : 0;
 		// TODO (SH): tsuper teams!
 		ReferenceBinding superTeam = type.binding.superclass();
 		int lenSuper = (superTeam != null) ? superTeam.precedences.length : 0;
@@ -240,7 +240,7 @@ public class PrecedenceDeclaration extends ASTNode {
 
 		PrecedenceBinding[] precedences = new PrecedenceBinding[len + lenSuper];
 		for (int i = 0; i < len; i++) {
-			precedences[i] = type.precedences[i].binding;
+			precedences[i] = type.binding.precedences[i];
 		}
 		for (int i = 0; i < lenSuper; i++) {
 			precedences[len+i] = strengthenPrecendence(type, superTeam.precedences[i]);
@@ -268,7 +268,8 @@ public class PrecedenceDeclaration extends ASTNode {
 					count--;
 				} else {
 					if (i < len)
-						type.scope.problemReporter().incompatiblePrecedenceLists(type.precedences[i].bindingNames[i], type);
+						type.scope.problemReporter().incompatiblePrecedenceLists(findPrecedenceSource(precedences[i], precedences[j], type), 
+																				 type, precedences[i], precedences[j]);
 					else
 						throw new InternalCompilerError("Incompatible inherited precedence lists"); //$NON-NLS-1$
 				}
@@ -284,6 +285,14 @@ public class PrecedenceDeclaration extends ASTNode {
 			precedences = newPrecs;
 		}
 		return precedences;
+	}
+	
+	private static ASTNode findPrecedenceSource(PrecedenceBinding prec1, PrecedenceBinding prec2, TypeDeclaration type) {
+		if (type.precedences != null)
+			for (int i = 0; i < type.precedences.length; i++)
+				if (type.precedences[i].binding == prec1 || type.precedences[i].binding == prec2)
+					return type.precedences[i];
+		return type;
 	}
 
 	/**

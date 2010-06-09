@@ -1646,8 +1646,9 @@ void setSourceStart(int sourceStart);
 	int NonAfterCallinInAfterPrecedence			 = CALLIN_RELATED + 8004; // 4.8(a)
 	int CallinBindingNotFound 					 = CALLIN_RELATED + 8005; // 4.8(b)
 	int IllegalEnclosingForCallinName 			 = CALLIN_RELATED + 8006; // 4.8(b)
-	int IncompatiblePrecedenceLists              = CALLIN_RELATED + 8007; // 4.8(d)
-	int PrecedenceForOverriding 				 = CALLIN_RELATED + 8008; // 4.8(e)
+	int IncompatiblePrecedenceListsOther         = CALLIN_RELATED + 8007; // 4.8(d)
+	int IncompatiblePrecedenceListsSymmetric     = CALLIN_RELATED + 8008; // 4.8(d)
+	int PrecedenceForOverriding 				 = CALLIN_RELATED + 8009; // 4.8(e)
 
 	int CovariantReturnRequiresTypeParameter     = CALLIN_RELATED + 9001; // 4.9.3(c)
 

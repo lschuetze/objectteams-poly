@@ -60,6 +60,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.PrecedenceBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -10845,16 +10846,31 @@ public void illegalEnclosingForCallinName(PrecedenceDeclaration precDecl,
 			precDecl.sourceStart,
 			precDecl.sourceEnd);
 }
-public void incompatiblePrecedenceLists(NameReference reference, TypeDeclaration declaration) {
-	String[] args = new String[] {
-		new String(declaration.name)
-	};
+public void incompatiblePrecedenceLists(ASTNode location, TypeDeclaration declaration, PrecedenceBinding prec1, PrecedenceBinding prec2) {
+	String[] args;
+	int problemId;
+	if (location instanceof PrecedenceDeclaration) {
+		problemId = IProblem.IncompatiblePrecedenceListsOther;
+		args = new String[] {
+				new String(declaration.name),
+				(((PrecedenceDeclaration)location).binding == prec1
+						? prec2.toString()
+								: prec1.toString())
+		};
+	} else { // prec decl not found, report both bindings in the details
+		problemId = IProblem.IncompatiblePrecedenceListsSymmetric;
+		args = new String[] {
+				new String(declaration.name),
+				prec1.toString(),
+				prec2.toString()
+		};
+	}
 	this.handle(
-			IProblem.IncompatiblePrecedenceLists,
+			problemId,
 			args,
 			args,
-			reference.sourceStart,
-			reference.sourceEnd);
+			location.sourceStart,
+			location.sourceEnd);
 }
 public void precedenceForOverriding(NameReference ref_i, NameReference ref_j) {
 	String[] args = new String[] {
