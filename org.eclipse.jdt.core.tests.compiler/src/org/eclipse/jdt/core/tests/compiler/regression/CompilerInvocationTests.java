@@ -1837,7 +1837,8 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("NonAfterCallinInAfterPrecedence", SKIP);
         expectedProblemAttributes.put("CallinBindingNotFound", SKIP);
         expectedProblemAttributes.put("IllegalEnclosingForCallinName", SKIP);
-        expectedProblemAttributes.put("IncompatiblePrecedenceLists", SKIP);
+        expectedProblemAttributes.put("IncompatiblePrecedenceListsOther", SKIP);
+        expectedProblemAttributes.put("IncompatiblePrecedenceListsSymmetric", SKIP);
         expectedProblemAttributes.put("PrecedenceForOverriding", SKIP);
         expectedProblemAttributes.put("CovariantReturnRequiresTypeParameter", SKIP);
         expectedProblemAttributes.put("ACTIVATION_RELATED", SKIP);
