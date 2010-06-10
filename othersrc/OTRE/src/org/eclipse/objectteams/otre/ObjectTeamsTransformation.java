@@ -1655,9 +1655,9 @@ public abstract class ObjectTeamsTransformation
 	 * @return true if this is a team which has to be extended
 	 */
 	protected static boolean classNeedsTeamExtensions(ClassGen cg) {
-		return !(( (cg.getAccessFlags() & OTConstants.TEAM) == 0)
-				|| (cg.getClassName().equals(OTConstants.teamClassName))
-				|| ((cg.getAccessFlags() & Constants.ACC_ABSTRACT) != 0));
+		return     ((cg.getAccessFlags() & OTConstants.TEAM) != 0)			// must be a team
+				&& ((cg.getAccessFlags() & Constants.ACC_ABSTRACT) == 0)	// and non-abstract
+				&& !(cg.getClassName().equals(OTConstants.teamClassName));	// and not o.o.Team itself.
 	}
 
 	/**
