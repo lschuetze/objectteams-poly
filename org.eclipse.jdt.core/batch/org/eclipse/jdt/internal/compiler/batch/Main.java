@@ -2892,6 +2892,11 @@ private void initializeWarnings(String propertiesFile) {
 		if (key.startsWith("org.eclipse.jdt.core.compiler.problem")) { //$NON-NLS-1$
 			this.options.put(key, entry.getValue());
 		}
+//{ObjectTeams: also use OT-options:
+		else if (key.startsWith("org.eclipse.objectteams.otdt.compiler")) { //$NON-NLS-1$
+			this.options.put(key, entry.getValue());
+		}
+// SH}
 	}
 }
 protected void disableWarnings() {
