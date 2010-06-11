@@ -10,64 +10,9 @@
 -->
 <project name="p2.helper">
 
-    <!-- The following tasks prepare a local update site to install the OTDT from -->
-    <target name="createLocalUpdateSite">
-            <echo message="Creating local update site in ${otdtUpdatesDir}"/>
+    <target name="patchMetadata">
+        <echo message="Patching metadata in ${otdtUpdatesDir} to relax version requirement of our patch feature"/>
 
-            <!-- Create the directory structure -->
-            <mkdir dir="${otdtUpdatesDir}"/>
-            <mkdir dir="${otdtUpdatesDir}/features"/>
-            <mkdir dir="${otdtUpdatesDir}/plugins"/>
-            <!-- Build the jar files -->
-            <ant antfile="${builder}/customTargets.xml" target="allElements" dir="${otdtUpdatesDir}">
-                    <property name="genericTargets" value="${OTScriptDir}/p2helper.xml"/>
-                    <property name="target" value="updateSiteExport"/>
-            </ant>
-<!-- better to do this from run.xml (outside eclipse) -->
-<!--            <antcall target="generateMetadata"/> -->
-    </target>
-
-    <target name="updateSiteExport">
-		<condition property="isTestFeature">
-			<contains string="${id}" substring="tests"/>
-		</condition>
-		<antcall target="doUpdateSiteExport"/>
-    </target>
-
-    <target name="doUpdateSiteExport" unless="isTestFeature">
-            <echo message="Creating content for updateSite, feature ${id}"/>
-
-            <ant antfile="build.xml" dir="${buildDirectory}/features/${id}/" target="build.update.jar">
-                    <property name="feature.destination" value="${otdtUpdatesDir}/features"/>
-                    <property name="plugin.destination" value="${otdtUpdatesDir}/plugins"/>
-            </ant>
-    </target>
-
-    <target name="generateMetadata">
-        <echo message="Generating metadata for features and plugins in ${otdtUpdatesDir}"/>
-        <java
-	        inputstring=""
-	        dir="${baseLocation}"
-	        fork="true"
-	        classname="org.eclipse.equinox.launcher.Main"
-	        classpath="${baseLocation}/plugins/${org.eclipse.equinox.launcher_jar}">
-	            <arg value="-consoleLog"/>
-	            <arg value="-nosplash"/>
-	            <arg value="-application"/>
-	            <arg value="org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher" />
-	            <arg value="-source"/>
-	            <arg value="${otdtUpdatesDir}"/>
-	            <arg value="-metadataRepository" />
-	            <arg value="file:${otdtUpdatesDir}" />
-	            <arg value="-metadataRepositoryName" />
-	            <arg value="Object Teams Updates" />
-	            <arg value="-artifactRepository" />
-	            <arg value="file:${otdtUpdatesDir}" />
-		    	<arg value="-append" />
-	    	<!-- arg value="-compress" /-->
-	    	<!-- don't categorize features at this stage! -->
-        </java>
-	
 		<!-- patch feature version in content.xml -->
 		<property name="patch-content.xsltFile" value="${OTScriptDir}/patch-content-xml.xsl" />
 		<property name="content.origFile" value="content.xml" />
@@ -76,6 +21,8 @@
                 <outputproperty name="method" value="xml"/>
                 <outputproperty name="encoding" value="UTF-8"/>
                 <outputproperty name="indent" value="yes"/>
+        		<param name="version" value="${jdt.feature.version}"/>
+        		<param name="versionnext" value="${jdt.feature.version.next}"/>
                 <mapper type="glob" from="${content.origFile}" to="${content.transFile}"/>
         </xslt>
         <move file="${otdtUpdatesDir}/${content.transFile}" tofile="${otdtUpdatesDir}/${content.origFile}" overwrite="yes"/>	

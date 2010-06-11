@@ -301,7 +301,9 @@ should test be run (true|false)?
 				<!-- arg value="-debug" / -->
 		</java>
 		<!-- At this point a local update site exists, thanks to p2gathering=true -->
-
+		
+        <ant antfile="${OTScriptDir}/p2helper.xml" target="patchMetadata" dir="${otdtUpdatesDir}"/>
+		
 		<property name="_hasCreatedOTDTEclipse" value="true" />
 	</target>
 	
