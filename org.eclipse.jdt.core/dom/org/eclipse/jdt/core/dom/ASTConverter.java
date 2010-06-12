@@ -241,6 +241,12 @@ class ASTConverter {
 //gbr}			
 			switch (nextDeclarationType) {
 				case 0 :
+//{ObjectTeams: skip generated:
+					if (nextFieldDeclaration.isGenerated) {
+						fieldsIndex++;
+						continue;
+					}
+// SH}
 					if (nextFieldDeclaration.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
 						typeDecl.bodyDeclarations().add(convert(nextFieldDeclaration));
 					} else {
@@ -276,7 +282,7 @@ class ASTConverter {
 					if (   nextMemberDeclaration.isGenerated  
                         || Flags.isSynthetic(nextMemberDeclaration.modifiers))
 						continue;
-					if (!includeRoleFiles && nextMemberDeclaration.isRoleFile())
+					if (!this.includeRoleFiles && nextMemberDeclaration.isRoleFile())
 						continue;
 // SH, jwl}						
 					ASTNode node = convert(nextMemberDeclaration);
