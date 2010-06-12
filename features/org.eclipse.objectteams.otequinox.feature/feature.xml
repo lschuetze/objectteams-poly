@@ -3,7 +3,7 @@
       id="org.eclipse.objectteams.otequinox"
       label="%featureName"
       version="0.7.0.qualifier"
-      provider-name="%provider"
+      provider-name="%providerName"
       plugin="org.eclipse.objectteams.otequinox"
       colocation-affinity="org.eclipse.rcp">
 
