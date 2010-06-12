@@ -62,7 +62,9 @@ public class AllTests extends TestCase
             RoleTypeDeclarationTest.class,
             TSuperConstructorInvocationTest.class,
             TSuperMessageSendTest.class,
-            WithinStatementTest.class
+            WithinStatementTest.class,
+            
+            DOMRegressionTests.class
         };
     }
 
