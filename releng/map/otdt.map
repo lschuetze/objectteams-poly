@@ -61,7 +61,7 @@ plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring,0.7.0=SVN,url=svn://bui
 
 !-- .. but from original CVS:
 plugin@org.eclipse.jdt.core.tests.builder=v_A58,/cvsroot/eclipse,
-plugin@org.eclipse.jdt.debug.tests=v20100505,/cvsroot/eclipse,
+plugin@org.eclipse.jdt.debug.tests=v20100526,/cvsroot/eclipse,
 
 !-- not compiled but taken from org.eclipse.test:
 !plugin@org.eclipse.test.performance=v20100122,/cvsroot/eclipse,
