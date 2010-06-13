@@ -6,7 +6,7 @@ feature@org.eclipse.objectteams.otdt.core.patch=SVN,url=svn://build/svnroot/tool
 feature@org.eclipse.objectteams.otequinox=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature
 
 !-- Also don't use version numbers for those plugins that hold the various otre jars: --
-plugin@org.eclipse.jdt.core,3.6.0.v_OTDT_r070_qualifier=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.jdt.core,tag=tags/builds/201006111053
+plugin@org.eclipse.jdt.core,3.6.0.v_OTDT_r070_qualifier=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.jdt.core
 plugin@org.eclipse.objectteams.otdt=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt,tag=tags/builds/201006111053
 plugin@org.eclipse.objectteams.otdt.debug,0.7.0=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug,tag=tags/builds/201005062059
 plugin@org.eclipse.objectteams.otdt.debug.ui,0.7.0=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug.ui,tag=tags/builds/201005062059
@@ -27,7 +27,7 @@ plugin@org.eclipse.objectteams.eclipse.monitor,0.7.0=SVN,url=svn://build/svnroot
 
 !** OT/J Plugins **!
 plugin@org.eclipse.objectteams.otequinox.branding,0.7.0=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.branding,tag=tags/builds/201005062059
-plugin@org.eclipse.objectteams.otdt.jdt.ui,0.7.0=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.jdt.ui,tag=tags/builds/201006111053
+plugin@org.eclipse.objectteams.otdt.jdt.ui,0.7.0=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.jdt.ui
 plugin@org.eclipse.objectteams.otdt.apt,0.7.0=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.apt,tag=tags/builds/201006111053
 plugin@org.eclipse.objectteams.otdt.compiler.adaptor,0.7.0=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor,tag=tags/builds/201006111053
 plugin@org.eclipse.objectteams.otdt.debug.adaptor,0.7.0=SVN,url=svn://build/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor,tag=tags/builds/201006111053
