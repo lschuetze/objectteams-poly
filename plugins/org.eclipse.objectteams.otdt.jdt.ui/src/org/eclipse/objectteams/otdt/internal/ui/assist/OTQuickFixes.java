@@ -74,6 +74,7 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.compiler.ConfigHelper;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.ui.text.correction.MappingProposalSubProcessor;
 import org.eclipse.objectteams.otdt.internal.ui.text.correction.TypeProposalSubProcessor;
 import org.eclipse.objectteams.otdt.internal.ui.util.Images;
@@ -250,9 +251,12 @@ public team class OTQuickFixes  {
 		@SuppressWarnings("basecall")
 		static callin void addMissingCastParentsProposal(ICompilationUnit cu, MethodInvocation invocationNode) {
 			Expression sender = invocationNode.getExpression();
-			if (sender != null && sender.getNodeType() == ASTNode.SIMPLE_NAME) 
+			if (sender != null && sender.getNodeType() == ASTNode.SIMPLE_NAME) {
 				if (((SimpleName)sender).getIdentifier().equals(MappingProposalSubProcessor.FAKETHIS))
 					return;
+				if (((SimpleName)sender).getIdentifier().startsWith(IOTConstants.OT_DOLLAR))
+					return;
+			}
 			base.addMissingCastParentsProposal(cu, invocationNode);
 		}
 		
@@ -341,8 +345,8 @@ public team class OTQuickFixes  {
 				rewrite.setToOTJ();
 		}
 		
-		protected void adjustModifiers(CallinMappingDeclaration callinMapping) {
-			if (callinMapping.getCallinModifier()==Modifier.OT_REPLACE_CALLIN) {
+		protected void adjustModifiers(CallinMappingDeclaration callinMapping, boolean isRoleSide) {
+			if (isRoleSide && callinMapping.getCallinModifier()==Modifier.OT_REPLACE_CALLIN) {
 				this.needCallinModifier= true;
 				Image baseImage = JavaPluginImages.get(JavaPluginImages.IMG_MISC_DEFAULT);
 				setImage(Images.decorateImage(baseImage, CALLINMETHOD_IMG, IDecoration.TOP_RIGHT));
@@ -359,7 +363,7 @@ public team class OTQuickFixes  {
 	 * @param spec     the unresolved method spec 
 	 * @param proposal a new completion proposal to be adapted
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	public void registerNewMethodCorrectionProposal(MethodSpec spec,
 				NewMethodCorrectionProposal as NewMethodCompletionProposal proposal) 
 	{
@@ -371,8 +375,10 @@ public team class OTQuickFixes  {
 		}
 		proposal.returnType= spec.getReturnType2();
 		ASTNode mapping= spec.getParent();
-		if (mapping instanceof CallinMappingDeclaration)
-			proposal.adjustModifiers((CallinMappingDeclaration)mapping);
+		if (mapping instanceof CallinMappingDeclaration) {
+			CallinMappingDeclaration callinDecl = (CallinMappingDeclaration)mapping;
+			proposal.adjustModifiers(callinDecl, spec == callinDecl.getRoleMappingElement());
+		}
 	}
 	
 	/** 
