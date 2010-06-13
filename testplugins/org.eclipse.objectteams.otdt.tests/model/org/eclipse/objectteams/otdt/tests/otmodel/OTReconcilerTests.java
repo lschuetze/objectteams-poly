@@ -874,4 +874,56 @@ public class OTReconcilerTests extends ReconcilerTests {
 		}
 	}
 	
+	//  Bug 316658 -  [reconciler] implicitly inherited field reports "illegal modifier"
+    public void testImplicitlyInheritedInitializedField1() throws CoreException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			//prjDesc.setNatureIds(OTDTPlugin.createProjectNatures(prjDesc));
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+	
+			OTREContainer.initializeOTJProject(project);
+			this.createFile(
+				"/P/MyTeam.java",
+	    			"public team class MyTeam {\n" +
+	    			"	protected class R {\n" +
+	    			"		final String val= new String(\"OK\");\n" +
+	    			"	}\n" +
+	    			"}\n");
+			
+			String sourceString = "public team class MySubTeam extends MyTeam {\n" +
+			"	protected class R {\n" +
+			"		protected R() { super(); }\n" +
+			"		protected void test() {\n" +
+			"			//nop\n" +
+			"		}\n" +
+			"	}\n" +
+			"	public void test() {\n" +
+			"		new R().test();\n" +
+			"	}\n" +
+			"	public static void main(String... args) {\n" +
+			"		new MySubTeam().test();\n" +
+			"	}\n" +
+			"}\n";
+			this.createFile(
+				"/P/MySubTeam.java",
+	    			sourceString);
+
+			char[] sourceChars = sourceString.toCharArray();
+			this.problemRequestor.initialize(sourceChars);
+			
+			getCompilationUnit("/P/MySubTeam.java").getWorkingCopy(this.wcOwner, null);
+			
+			assertProblems(
+				"Unexpected problems",
+				"----------\n" +
+				"----------\n");
+
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
 }
