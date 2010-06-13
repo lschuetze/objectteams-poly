@@ -356,7 +356,47 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
-	
+
+	// non-static non-callin method created (base side)
+	// Bug 316665 -  [quickfix] create method from unresolved replace callin RHS adds "callin" modifier
+	public void testCallinMethod3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("	public class R playedBy B {\n");
+		buf.append("        String voo(int j, Boolean b) <- replace String foo(int i, Boolean b);\n");
+		buf.append("        callin String voo(int j, Boolean b) {\n");
+		buf.append("            return base.voo(j, b);\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("\n");
+		buf.append("    public String foo(int i, Boolean b) {\n"); // expect no "callin" modifier
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
 /* some orig tests for use in OT-variants:	
 	
 	public void testClassInstanceCreation() throws Exception {
