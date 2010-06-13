@@ -52,7 +52,7 @@ public class PrecedenceBinding extends Binding {
 	public static final PrecedenceBinding[] NoPrecedences = new PrecedenceBinding[0];
 	public ReferenceBinding enclosingType;
 
-	/** Elements are either CallinCalloutBinding (of type CALLIN) or ReferenceBinding. */
+	/** Elements are either CallinCalloutBinding (of type CALLIN) or ReferenceBinding or <code>null</code> (unresolvable). */
 	private Binding[] elements;
 
 	public PrecedenceBinding(ReferenceBinding enclosingType, NameReference[] callinNames) {
@@ -95,7 +95,7 @@ public class PrecedenceBinding extends Binding {
 	public boolean hasCommonBaseMethod(PrecedenceBinding other) {
 		HashSet<MethodBinding> otherBaseMethods = new HashSet<MethodBinding>();
 		for (int i = 0; i < other.elements.length; i++) {
-			if (!other.elements[i].isValidBinding())
+			if (other.elements[i] == null || !other.elements[i].isValidBinding())
 				continue;
 			if (other.elements[i].kind() == BINDING)
 			{
@@ -107,7 +107,7 @@ public class PrecedenceBinding extends Binding {
 			}
 		}
 		for (int i = 0; i < other.elements.length; i++) {
-			if (!other.elements[i].isValidBinding())
+			if (this.elements[i] == null || !this.elements[i].isValidBinding())
 				continue;
 			if (this.elements[i].kind() == BINDING)
 			{
@@ -383,9 +383,11 @@ public class PrecedenceBinding extends Binding {
 	public char[] readableName() {
 		char[][] names = new char[this.elements.length][];
 		for (int i = 0; i < this.elements.length; i++) {
-			if (this.elements[i].kind() == Binding.BINDING)
+			if (this.elements[i] == null)
+				names[i] = "<unresolved>".toCharArray(); //$NON-NLS-1$
+			else if (this.elements[i].kind() == Binding.BINDING)
 				names[i] = ((CallinCalloutBinding)this.elements[i]).name;
-			else
+			else 
 				names[i] = ((ReferenceBinding)this.elements[i]).sourceName();
 		}
 		return CharOperation.concatWith(names, ',');
