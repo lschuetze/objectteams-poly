@@ -1335,8 +1335,10 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
         FieldDeclaration fieldDeclaration =
                 AstConverter.createField(field, roleDeclaration, gen);
         AstEdit.addField(roleDeclaration,fieldDeclaration, true, false/*typeProblem*/);
-        if (fieldDeclaration.binding != null)
-        	fieldDeclaration.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
+        if (fieldDeclaration.binding != null) {
+        	fieldDeclaration.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed; 
+        	fieldDeclaration.binding.modifiers |= (field.modifiers&ExtraCompilerModifiers.AccBlankFinal); // BlankFinal was omitted on the fieldDecl
+        }
 
     	if (   field.isPrivate() // private role field need special preparation for callout:
 	    	&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, field.name))

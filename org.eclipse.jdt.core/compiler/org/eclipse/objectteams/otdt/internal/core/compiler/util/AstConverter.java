@@ -212,7 +212,7 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
 		FieldDeclaration fieldDeclaration = new FieldDeclaration();
 		fieldDeclaration.type = gen.typeReference(fieldBinding.type);
 
-		fieldDeclaration.modifiers = fieldBinding.modifiers;
+		fieldDeclaration.modifiers = (fieldBinding.modifiers &~ExtraCompilerModifiers.AccBlankFinal); // this modifier is not used on fieldDecl (AST), overlaps with AccReadOnly
 		fieldDeclaration.name = fieldBinding.name;
 		if (fieldBinding.copyInheritanceSrc != null)
 			fieldDeclaration.copyInheritanceSrc = fieldBinding.copyInheritanceSrc;
