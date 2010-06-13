@@ -10,7 +10,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: UnresolvedMethodsQuickFixTest.java 23495 2010-02-05 23:15:16Z stephan $
+ * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
