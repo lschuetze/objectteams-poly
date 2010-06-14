@@ -10,7 +10,7 @@ then
     echo "Generating Repository based on ${MASTER}"
 else
     echo "No such repository ${MASTER}"
-    echo "Usage: $0 updateMasterRelativePath [ -nosign ]"
+    echo "Usage: $0 updateMasterRelativePath [ -nosign ] [ statsVersionId ]"
     exit 1
 fi
 
@@ -46,6 +46,7 @@ zip ${STAGINGBASE}/in/otdt.zip ${JARS}
 if [ "$2" == "-nosign" ]
 then
     echo "SKIPING SIGNING"
+    shift
 else
     /bin/rm ${STAGINGBASE}/out/otdt.zip
     sign ${STAGINGBASE}/in/otdt.zip nomail ${STAGINGBASE}/out
@@ -103,6 +104,14 @@ xsltproc  -o content.xml --stringparam version ${JDTVERSIONA}-${JDTVERSIONB} \
     ../build/patch-content-xml.xsl content.xml-orig
 ls -ltr *\.*
 
+echo "====Step 6: add download stats capability===="
+XSLT_FILE=${BASE}/bin/addDownloadStats.xsl
+
+if [ $# == 2 ]; then
+	mv artifacts.xml artifacts.xml.original
+	if grep p2.statsURI artifacts.xml.original ; then echo "p2.statsURI already defined: exiting"; exit 1; fi
+	xsltproc -o artifacts.xml --stringparam repo "http://download.eclipse.org/stats/objectteams/${1}" --stringparam version $2 $XSLT_FILE artifacts.xml.original
+fi
 
 echo "Step 6: jar-up metadata"
 jar cf content.jar content.xml
