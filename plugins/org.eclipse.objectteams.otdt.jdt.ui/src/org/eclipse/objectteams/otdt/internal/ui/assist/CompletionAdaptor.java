@@ -19,6 +19,8 @@ package org.eclipse.objectteams.otdt.internal.ui.assist;
 
 
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -60,6 +62,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.java.FieldProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -125,6 +129,7 @@ public team class CompletionAdaptor
 			case CompletionProposal.OT_CALLIN_DECLARATION:
 			case CompletionProposal.OT_FIELD_SPEC:
 			case CompletionProposal.OT_METHOD_SPEC:
+			case CompletionProposal.OVERRIDE_ROLE_DECLARATION:
 				char[] declaration= proposal.getDeclarationSignature();
 				return Signature.toCharArray(declaration);
 			default:
@@ -146,6 +151,8 @@ public team class CompletionAdaptor
 				return createMappingProposal(proposal, proposal.getKind());
 			case CompletionProposal.OT_FIELD_SPEC:
 				return createFieldSpecProposal(proposal);
+			case CompletionProposal.OVERRIDE_ROLE_DECLARATION:
+				return createRoleProposal(proposal);
 			case CompletionProposal.KEYWORD:
 				IJavaCompletionProposal result = base.createJavaCompletionProposal(proposal);
 				if (CharOperation.endsWith(proposal.getCompletion(), Keywords.WHEN)) {
@@ -161,6 +168,20 @@ public team class CompletionAdaptor
 			}
 		}
 		
+		private IJavaCompletionProposal createRoleProposal(CompletionProposal proposal) {
+			// compute label: image ...
+			ImageDescriptor baseDesc = ImageManager.getSharedInstance().getDescriptor(ImageConstants.ROLECLASS_IMG);
+			Image image= getImage(new JavaElementImageDescriptor(baseDesc, JavaElementImageDescriptor.OVERRIDES, JavaElementImageProvider.SMALL_SIZE));
+			// ... and styled string:
+			String superTeamName = Signature.toString(String.valueOf(proposal.getDeclarationSignature()));
+			StyledString buf= new StyledString();
+			buf.append(String.valueOf(proposal.getName()));
+			buf.append(" - ", StyledString.QUALIFIER_STYLER); //$NON-NLS-1$
+			buf.append(org.eclipse.objectteams.otdt.internal.ui.Messages.Completion_override_role_label+superTeamName, StyledString.QUALIFIER_STYLER);
+			
+			return new OverrideRoleCompletionProposal(getCompilationUnit(), proposal, getLength(proposal), buf, image);
+		}
+
 		private IJavaCompletionProposal createMappingProposal(CompletionProposal proposal, int kind) 
 		{
 			if (getCompilationUnit() == null || getJavaProject() == null)
@@ -674,11 +695,11 @@ public team class CompletionAdaptor
 	{
 		static callin void getMethodBodyContent(boolean isConstructor, String bodyStatement) throws CoreException 
 		{
-			String pattern = "super.";
-			String replacement = "tsuper.";
+			String pattern = "super."; //$NON-NLS-1$
+			String replacement = "tsuper."; //$NON-NLS-1$
 			if (isConstructor) {
-				pattern = "super(";
-				replacement = "tsuper(";
+				pattern = "super("; //$NON-NLS-1$
+				replacement = "tsuper("; //$NON-NLS-1$
 			}
 			bodyStatement = bodyStatement.replaceFirst(pattern, replacement);
 			base.getMethodBodyContent(isConstructor, bodyStatement);
@@ -690,5 +711,32 @@ public team class CompletionAdaptor
 
 	int computeRelevance(CompletionProposal proposal) {
 		return proposal.getRelevance() + R_METHOD_MAPPING;
+	}
+	
+	/** find insertion position, and insert: */
+	@SuppressWarnings("rawtypes") // DOM-lists
+	void insertStub(ASTRewrite                  rewrite, 
+					ASTNode                     node, 
+					ChildListPropertyDescriptor bodyProperty,
+					int                         position,
+					ASTNode                     stub) 
+	{
+		ListRewrite bodyRewrite= rewrite.getListRewrite(node, bodyProperty);
+		List bodyDecls= (List)node.getStructuralProperty(bodyProperty);
+
+		ASTNode prev= null;
+		if (bodyDecls != null && !bodyDecls.isEmpty()) {
+			for (Iterator iterator = bodyDecls.iterator(); iterator.hasNext();) {
+				ASTNode cur= (ASTNode) iterator.next();
+				if (cur.getStartPosition()<position)
+					prev= cur;
+				else 
+					break;
+			}
+		}
+		if (prev != null)
+			bodyRewrite.insertAfter(stub, prev, null);
+		else
+			bodyRewrite.insertFirst(stub, null);
 	}
 }

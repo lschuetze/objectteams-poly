@@ -21,7 +21,6 @@ import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_BEFOR
 import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_REPLACE_IMG;
 import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLOUTBINDING_IMG;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -37,13 +36,12 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodBindingOperator;
 import org.eclipse.jdt.core.dom.MethodSpec;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -147,7 +145,7 @@ protected class CreateMethodMappingCompletionProposal extends MethodMappingCompl
 				: OTStubUtility.createCallout(iCU, rewrite, importRewrite,
 											 method, baseBinding.getName(), settings);
 		if (stub != null) {
-			insertStub(rewrite, type, bodyProperty, stub);
+			insertStub(rewrite, type, bodyProperty, fReplaceStart, stub);
 			addLinkedPosition(rewrite.track(stub.getRoleMappingElement().getName()), true, ROLEMETHODNAME_KEY);
 			
 			if (roleBinding != null)
@@ -208,31 +206,4 @@ protected class CreateMethodMappingCompletionProposal extends MethodMappingCompl
 			}				
 		}		
 	}
-	
-	/** find insertion position, and insert: */
-	@SuppressWarnings("rawtypes") // DOM-lists
-	void insertStub(ASTRewrite                  rewrite, 
-					ASTNode                     node, 
-					ChildListPropertyDescriptor bodyProperty, 
-					ASTNode                     stub) 
-	{
-		ListRewrite bodyRewrite= rewrite.getListRewrite(node, bodyProperty);
-		List bodyDecls= (List)node.getStructuralProperty(bodyProperty);
-
-		ASTNode prev= null;
-		if (bodyDecls != null && !bodyDecls.isEmpty()) {
-			for (Iterator iterator = bodyDecls.iterator(); iterator.hasNext();) {
-				ASTNode cur= (ASTNode) iterator.next();
-				if (cur.getStartPosition()<fReplaceStart)
-					prev= cur;
-				else 
-					break;
-			}
-		}
-		if (prev != null)
-			bodyRewrite.insertAfter(stub, prev, null);
-		else
-			bodyRewrite.insertFirst(stub, null);
-	}
-
 }

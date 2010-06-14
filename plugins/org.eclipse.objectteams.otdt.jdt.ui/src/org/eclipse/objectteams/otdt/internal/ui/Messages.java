@@ -29,6 +29,8 @@ public class Messages extends NLS {
 
 	public static String Completion_default_lifting_constructor_label;
 
+	public static String Completion_override_role_label;
+
 	public static String OTLayoutActionGroup_MenuOTPresentations;
 	public static String OTLayoutActionGroup_MenuShowCallinLabels;
 	public static String OTLayoutActionGroup_MenuDontShowCallinLabels;

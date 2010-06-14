@@ -88,7 +88,7 @@ protected class CalloutToFieldCompletionProposal extends CreateMethodMappingComp
 											settings);
 		if (stub != null) {
 			stub.bindingOperator().setBindingKind(this.fIsOverride ? MethodBindingOperator.KIND_CALLOUT_OVERRIDE : MethodBindingOperator.KIND_CALLOUT);
-			insertStub(rewrite, node, bodyProperty, stub);
+			insertStub(rewrite, node, bodyProperty, this.fReplaceStart, stub);
 		}
 		return true;
 	}
