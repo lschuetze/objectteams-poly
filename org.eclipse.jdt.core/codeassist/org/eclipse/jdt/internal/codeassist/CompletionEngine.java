@@ -2257,6 +2257,13 @@ public final class CompletionEngine
 				if (!this.requestor.isIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION)) {
 					proposeNewMethod(this.completionToken, enclosingType);
 				}
+//{ObjectTeams: override-role proposals?
+				if (!this.requestor.isIgnored(CompletionProposal.OVERRIDE_ROLE_DECLARATION)) {
+					findOverridableRoles(
+							this.completionToken,
+							enclosingType);
+				}
+// SH}
 			}
 		}
 	}
@@ -4405,6 +4412,26 @@ public final class CompletionEngine
 		}
 		return proposal;
 	}
+//{ObjectTeams:
+	private void createRole(ReferenceBinding superRole, int modifiers, StringBuffer completion) {
+		//// Modifiers
+		if(modifiers != ClassFileConstants.AccDefault){
+			ASTNode.printModifiers(modifiers, completion);
+		}
+
+		//// Keyword
+		if ((modifiers & ClassFileConstants.AccInterface) != 0)
+			completion.append("interface "); //$NON-NLS-1$
+		else
+			completion.append("class "); //$NON-NLS-1$
+
+		//// Name
+		completion.append(superRole.sourceName);
+
+		//// Empty body
+		completion.append(" {}"); //$NON-NLS-1$
+	}
+// SH}
 
 	private void createType(TypeBinding type, Scope scope, StringBuffer completion) {
 		switch (type.kind()) {
@@ -10420,6 +10447,67 @@ public final class CompletionEngine
 			scope = scope.parent;
 		}
 	}
+
+//{ObjectTeams: propose to override a role from the super team
+	private void findOverridableRoles(char[] completionToken, SourceTypeBinding enclosingType) {
+		if (!enclosingType.isTeam())
+			return;
+		ReferenceBinding superTeam = enclosingType.superclass();
+		if (!superTeam.isTeam())
+			return;
+		ReferenceBinding[] superRoles = superTeam.memberTypes();
+		for (int i = 0; i < superRoles.length; i++) {
+			ReferenceBinding superRole = superRoles[i];
+			if (!superRole.isInterface())
+				continue;
+			if (TypeAnalyzer.isTopConfined(superRole)) // can't override Confined/IConfined
+				continue;
+			if (TSuperHelper.isMarkerInterface(superRole)) // invisible type
+				continue;
+			if (completionToken.length > 0)
+				if (!CharOperation.prefixEquals(completionToken, superRole.sourceName)) // FIXME: ignore case?
+					continue;
+			
+			ReferenceBinding classPart = superRole.roleModel.getClassPartBinding();
+			int modifiers = classPart != null ? classPart.modifiers : superRole.modifiers;
+			
+			StringBuffer completion = new StringBuffer(10);
+			createRole(superRole, modifiers, completion);
+
+			int relevance = computeBaseRelevance();
+			relevance += computeRelevanceForResolution();
+			relevance += computeRelevanceForInterestingProposal();
+//			relevance += computeRelevanceForCaseMatching(methodName, method.selector);
+			
+			// via analogy:
+			relevance += R_METHOD_OVERIDE;
+			if((modifiers & ClassFileConstants.AccAbstract) != 0) relevance += R_ABSTRACT_METHOD;
+
+			relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE);
+
+			this.noProposal = false;
+			if(!this.requestor.isIgnored(CompletionProposal.OVERRIDE_ROLE_DECLARATION)) {
+				InternalCompletionProposal proposal =  createProposal(CompletionProposal.OVERRIDE_ROLE_DECLARATION, this.actualCompletionPosition);
+				proposal.setDeclarationSignature(getSignature(superTeam));
+				proposal.setDeclarationKey(superTeam.computeUniqueKey());
+				proposal.setSignature(getSignature(superRole));
+				proposal.setKey(superRole.computeUniqueKey());
+				proposal.setDeclarationPackageName(superTeam.qualifiedPackageName());
+				proposal.setDeclarationTypeName(superTeam.qualifiedSourceName());
+				proposal.setCompletion(completion.toString().toCharArray());
+				proposal.setName(superRole.sourceName);
+				proposal.setFlags(modifiers);
+				proposal.setReplaceRange(this.startPosition - this.offset, this.endPosition - this.offset);
+				proposal.setTokenRange(this.tokenStart - this.offset, this.tokenEnd - this.offset);
+				proposal.setRelevance(relevance);
+				this.requestor.accept(proposal);
+				if(DEBUG) {
+					this.printDebug(proposal);
+				}
+			}
+		}
+	}
+// SH}
 
 	private void findPackages(CompletionOnPackageReference packageStatement) {
 

@@ -918,6 +918,11 @@ public class CompletionProposal {
 	 *   <pre>String bar(double d) -> String bar(double d);</pre>
 	 */
 	public static final int OT_METHOD_SPEC= 34;
+	
+	/**
+	 * Generate a role type declaration overriding an implicitly inherited role from the super team.
+	 */
+	public static final int OVERRIDE_ROLE_DECLARATION= 35;
 // SH}
 
 	/**
@@ -936,7 +941,7 @@ public class CompletionProposal {
 /* orig:
 	protected static final int LAST_KIND = ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION;
   :giro */
-	protected static final int LAST_KIND = OT_METHOD_SPEC;
+	protected static final int LAST_KIND = OVERRIDE_ROLE_DECLARATION;
 // SH}
 
 	/**
