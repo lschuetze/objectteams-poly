@@ -470,11 +470,19 @@ public class RoleModel extends TypeModel
 		return this._ast != null ? this._ast.isSourceRole() : this._binding.isSourceRole();
 	}
 
+	/** Answer whether the role is purely copied (aka phantom role) are exists in source. */
+	public boolean isPurelyCopied() {
+		if (this._ast != null)
+			return this._ast.isPurelyCopied;
+		else
+			return (this._extraRoleFlags & IOTConstants.OT_CLASS_PURELY_COPIED) != 0;
+	}
+
 	// can be role file and/or purely copied
 	private int _extraRoleFlags = 0;
 	public boolean isRoleFile() {
 		if (this._ast == null)
-			return (this._extraRoleFlags & WordValueAttribute.OT_CLASS_ROLE_FILE) != 0;
+			return (this._extraRoleFlags & IOTConstants.OT_CLASS_ROLE_FILE) != 0;
 		return this._ast.isRoleFile();
 	}
 
@@ -1332,5 +1340,4 @@ public class RoleModel extends TypeModel
 		}
 		return null;
 	}
-
 }

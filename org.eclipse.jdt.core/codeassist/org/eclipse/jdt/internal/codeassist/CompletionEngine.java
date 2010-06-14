@@ -14,8 +14,10 @@
 package org.eclipse.jdt.internal.codeassist;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
@@ -2259,9 +2261,7 @@ public final class CompletionEngine
 				}
 //{ObjectTeams: override-role proposals?
 				if (!this.requestor.isIgnored(CompletionProposal.OVERRIDE_ROLE_DECLARATION)) {
-					findOverridableRoles(
-							this.completionToken,
-							enclosingType);
+					findOverridableRoles(enclosingType);
 				}
 // SH}
 			}
@@ -10449,14 +10449,29 @@ public final class CompletionEngine
 	}
 
 //{ObjectTeams: propose to override a role from the super team
-	private void findOverridableRoles(char[] completionToken, SourceTypeBinding enclosingType) {
+	private void findOverridableRoles(SourceTypeBinding enclosingType) {
 		if (!enclosingType.isTeam())
 			return;
 		ReferenceBinding superTeam = enclosingType.superclass();
 		if (!superTeam.isTeam())
 			return;
+		Set<String> knownRoles = new HashSet<String>();
+		for (ReferenceBinding existingRole : enclosingType.memberTypes())
+			if (!existingRole.roleModel.isPurelyCopied())
+				knownRoles.add(String.valueOf(existingRole.internalName()));
+		findOverridableRolesFrom(superTeam, knownRoles);
+		if (enclosingType.isRole())
+			for (ReferenceBinding tsuperTeam : enclosingType.roleModel.getTSuperRoleBindings())
+				findOverridableRolesFrom(tsuperTeam, knownRoles);
+	}
+
+	private void findOverridableRolesFrom(ReferenceBinding superTeam, Set<String> knownRoles) 
+	{
+		int nameLength = this.completionToken.length;
 		ReferenceBinding[] superRoles = superTeam.memberTypes();
-		for (int i = 0; i < superRoles.length; i++) {
+		
+		for (int i = 0; i < superRoles.length; i++)
+		{
 			ReferenceBinding superRole = superRoles[i];
 			if (!superRole.isInterface())
 				continue;
@@ -10464,9 +10479,21 @@ public final class CompletionEngine
 				continue;
 			if (TSuperHelper.isMarkerInterface(superRole)) // invisible type
 				continue;
-			if (completionToken.length > 0)
-				if (!CharOperation.prefixEquals(completionToken, superRole.sourceName)) // FIXME: ignore case?
+			if (CharOperation.equals(superRole.sourceName, IOTConstants.ILOWERABLE)) // not interesting to override
+				continue;
+			
+			if (this.completionToken.length > 0) {
+				if (nameLength > superRole.sourceName.length)
 					continue;
+
+				if (!CharOperation.prefixEquals(this.completionToken, superRole.sourceName, false/* ignore case */)
+						&& !(this.options.camelCaseMatch && CharOperation.camelCaseMatch(this.completionToken, superRole.sourceName)))
+					continue;
+			}
+			
+			String roleName = String.valueOf(superRole.sourceName);
+			if (!knownRoles.add(roleName))
+				continue;
 			
 			ReferenceBinding classPart = superRole.roleModel.getClassPartBinding();
 			int modifiers = classPart != null ? classPart.modifiers : superRole.modifiers;
@@ -10477,7 +10504,7 @@ public final class CompletionEngine
 			int relevance = computeBaseRelevance();
 			relevance += computeRelevanceForResolution();
 			relevance += computeRelevanceForInterestingProposal();
-//			relevance += computeRelevanceForCaseMatching(methodName, method.selector);
+			relevance += computeRelevanceForCaseMatching(this.completionToken, superRole.sourceName);
 			
 			// via analogy:
 			relevance += R_METHOD_OVERIDE;
