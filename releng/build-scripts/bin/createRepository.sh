@@ -10,7 +10,7 @@ then
     echo "Generating Repository based on ${MASTER}"
 else
     echo "No such repository ${MASTER}"
-    echo "Usage: $0 updateMasterRelativePath [ -nosign ] [ statsVersionId ]"
+    echo "Usage: $0 updateMasterRelativePath [ -nosign ] [ statsRepoId statsVersionId ]"
     exit 1
 fi
 
@@ -107,13 +107,13 @@ ls -ltr *\.*
 echo "====Step 6: add download stats capability===="
 XSLT_FILE=${BASE}/bin/addDownloadStats.xsl
 
-if [ $# == 2 ]; then
+if [ $# == 3 ]; then
 	mv artifacts.xml artifacts.xml.original
 	if grep p2.statsURI artifacts.xml.original ; then echo "p2.statsURI already defined: exiting"; exit 1; fi
-	xsltproc -o artifacts.xml --stringparam repo "http://download.eclipse.org/stats/objectteams/${1}" --stringparam version $2 $XSLT_FILE artifacts.xml.original
+	xsltproc -o artifacts.xml --stringparam repo "http://download.eclipse.org/stats/objectteams/${2}" --stringparam version $3 $XSLT_FILE artifacts.xml.original
 fi
 
-echo "Step 6: jar-up metadata"
+echo "====Step 7: jar-up metadata===="
 jar cf content.jar content.xml
 jar cf artifacts.jar artifacts.xml
 /bin/rm *.xml
