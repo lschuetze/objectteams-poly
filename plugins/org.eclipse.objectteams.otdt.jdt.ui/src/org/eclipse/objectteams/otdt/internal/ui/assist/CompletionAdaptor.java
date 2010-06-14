@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -111,8 +112,11 @@ import base org.eclipse.jdt.ui.text.java.JavaTextMessages;
 public team class CompletionAdaptor
 {
 	
-	/** Relevance constant. */
-	public static int R_METHOD_MAPPING = 100;
+	/** 
+	 * Relevance factor.
+	 * (cf. e.g. {@link org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeRelevance()} 
+	 */
+	public static int R_METHOD_MAPPING = 16;
 	/**
 	 * This role defines the entry-hooks of this team. 
 	 */
@@ -170,7 +174,9 @@ public team class CompletionAdaptor
 		
 		private IJavaCompletionProposal createRoleProposal(CompletionProposal proposal) {
 			// compute label: image ...
-			ImageDescriptor baseDesc = ImageManager.getSharedInstance().getDescriptor(ImageConstants.ROLECLASS_IMG);
+			int modifiers = proposal.getFlags();			
+			String roleclassImg = Flags.isTeam(modifiers) ? ImageConstants.TEAM_ROLE_IMG : ImageConstants.ROLECLASS_IMG;
+			ImageDescriptor baseDesc = ImageManager.getSharedInstance().getDescriptor(roleclassImg);
 			Image image= getImage(new JavaElementImageDescriptor(baseDesc, JavaElementImageDescriptor.OVERRIDES, JavaElementImageProvider.SMALL_SIZE));
 			// ... and styled string:
 			String superTeamName = Signature.toString(String.valueOf(proposal.getDeclarationSignature()));
@@ -372,45 +378,40 @@ public team class CompletionAdaptor
 		
 		// display nested types including their outer class, relevant for distinguishing tsuper role.
 		createOverrideMethodProposalLabel <- replace createOverrideMethodProposalLabel;
-		@SuppressWarnings("basecall")
+		@SuppressWarnings({ "basecall", "inferredcallout" })
 		callin StyledString createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
 			char[] declaringClass = methodProposal.getDeclarationSignature();
-			if (CharOperation.lastIndexOf('$', declaringClass) != -1) 
-				// a nested class, do not discard enclosing type.
-				return createNestedOverrideMethodProposal(methodProposal);
-			else
+			if (CharOperation.lastIndexOf('$', declaringClass) != -1) {
+				StyledString nameBuffer= new StyledString();
+				
+				// method name
+				nameBuffer.append(methodProposal.getName());
+				
+				// parameters
+				nameBuffer.append('(');
+				appendUnboundedParameterList(nameBuffer, methodProposal);
+				nameBuffer.append(')');
+
+				nameBuffer.append(RETURN_TYPE_SEPARATOR);
+				
+				// return type
+				// TODO remove SignatureUtil.fix83600 call when bugs are fixed
+				char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
+				nameBuffer.append(returnType);
+				
+				// declaring type
+				nameBuffer.append(QUALIFIER_SEPARATOR, StyledString.QUALIFIER_STYLER);
+				
+				// SH: this is the only change: neither use FQN nor strip outer class:
+				String declaringType= new String(Signature.getSignatureSimpleName(methodProposal.getDeclarationSignature()));
+				nameBuffer.append(Messages.format(JavaTextMessages.getResultCollector_overridingmethod(), new String(declaringType)), StyledString.QUALIFIER_STYLER);
+				
+				return nameBuffer;
+			} else {
 				return base.createOverrideMethodProposalLabel(methodProposal);
+			}
 		}
 		
-		@SuppressWarnings("restriction")
-		StyledString createNestedOverrideMethodProposal(CompletionProposal methodProposal) {
-			// mostly copied from its base method.
-			
-			StyledString nameBuffer= new StyledString();
-
-			// method name
-			nameBuffer.append(methodProposal.getName());
-
-			// parameters
-			nameBuffer.append('(');
-			appendUnboundedParameterList(nameBuffer, methodProposal);
-			nameBuffer.append(")  "); //$NON-NLS-1$
-
-			// return type
-			// TODO remove SignatureUtil.fix83600 call when bugs are fixed
-			char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
-			nameBuffer.append(returnType);
-
-			// declaring type
-			nameBuffer.append(" - "); //$NON-NLS-1$
-
-			// SH: this is the only change: neither use FQN nor strip outer class:
-			String declaringType= new String(Signature.getSignatureSimpleName(methodProposal.getDeclarationSignature()));
-			nameBuffer.append(Messages.format(JavaTextMessages.getResultCollector_overridingmethod(), new String(declaringType)));
-
-			return nameBuffer;
-		}			
-
 		// CALLOUTS:
 		StyledString appendUnboundedParameterList(StyledString buffer, CompletionProposal methodProposal)
 			-> StyledString appendUnboundedParameterList(StyledString buffer, CompletionProposal methodProposal);
@@ -460,7 +461,7 @@ public team class CompletionAdaptor
 	}
 	
 	/** 
-	 * When roposing a new constructor declaration, do these two adjustments for roles:
+	 * When proposing a new constructor declaration, do these two adjustments for roles:
 	 * <ul>
 	 * <li>Strip the <code>__OT__</code> prefix
 	 * <li>Insert a base class argument if the role is bound.
@@ -710,7 +711,7 @@ public team class CompletionAdaptor
 	}
 
 	int computeRelevance(CompletionProposal proposal) {
-		return proposal.getRelevance() + R_METHOD_MAPPING;
+		return proposal.getRelevance() * R_METHOD_MAPPING;
 	}
 	
 	/** find insertion position, and insert: */
