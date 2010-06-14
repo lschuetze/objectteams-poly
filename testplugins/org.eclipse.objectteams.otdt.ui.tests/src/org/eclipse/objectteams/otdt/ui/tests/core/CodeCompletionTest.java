@@ -91,7 +91,6 @@ public class CodeCompletionTest extends CoreTests {
 
 	private static final Class<CodeCompletionTest> THIS= CodeCompletionTest.class;
 
-
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
 	}
@@ -1061,6 +1060,40 @@ public class CodeCompletionTest extends CoreTests {
 		int posAfter = expectedContent.indexOf("}")+1;
 		
 		assertProposal("", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
+	}
+
+	
+	public void testOverrideRole1() throws Exception {
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		pkg.createCompilationUnit("SuperTeam.java", 
+				"package test1.p1;\n" +
+				"public team class SuperTeam {\n" +
+				"	public class MyRole {\n" +
+				"	}\n" + 
+				"}\n",
+				true, null);
+		
+		StringBuffer subTeamContent = new StringBuffer(); 
+		subTeamContent.append("package test1;\n");
+		subTeamContent.append("import test1.p1.SuperTeam;\n");
+		subTeamContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
+		subTeamContent.append("    \n");
+		subTeamContent.append("}");
+		
+		StringBuffer expectedContent = new StringBuffer(); 
+		expectedContent.append("package test1;\n");
+		expectedContent.append("import test1.p1.SuperTeam;\n");
+		expectedContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
+		expectedContent.append("    @Override\n");
+		expectedContent.append("    public class MyRole {\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("}");
+
+		String completeAfter = "    ";
+		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
+		int posAfter = expectedContent.indexOf("}")+1;
+		
+		assertProposal("MyRole - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
 	}
 	
 	// == Below: Helper methods/fields. ==
