@@ -14,6 +14,7 @@ import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 
 public class JavadocArgumentExpression extends Expression {
 	public char[] token;
@@ -41,6 +42,10 @@ public class JavadocArgumentExpression extends Expression {
 			if (typeRef != null) {
 				this.resolvedType = typeRef.getTypeBinding(scope);
 				typeRef.resolvedType = this.resolvedType;
+//{ObjectTeams: unpack lifting type:
+				if (typeRef instanceof LiftingTypeReference)
+					typeRef = ((LiftingTypeReference)typeRef).baseReference;
+// SH}
 				// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=195374
 				// reproduce javadoc 1.3.1 / 1.4.2 behavior
 				if (typeRef instanceof SingleTypeReference &&

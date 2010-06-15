@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.core.search.indexing.*;
 import org.eclipse.jdt.internal.core.search.matching.*;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 
 /**
  * Search basic engine. Public search engine (see {@link org.eclipse.jdt.core.search.SearchEngine}
@@ -783,6 +784,10 @@ public class BasicSearchEngine {
 											parameterNames[l] = argument.name;
 											if (argument.type instanceof SingleTypeReference) {
 												parameterTypes[l] = ((SingleTypeReference)argument.type).token;
+//{ObjectTeams: one more kind of type reference: (note that TypeAnchorReference cannot occur as an argument type)
+											} else if (argument.type instanceof LiftingTypeReference) {
+												parameterTypes[l] = CharOperation.concatWith(((LiftingTypeReference)argument.type).baseTokens, '.');
+// SH}
 											} else {
 												parameterTypes[l] = CharOperation.concatWith(((QualifiedTypeReference)argument.type).tokens, '.');
 											}
