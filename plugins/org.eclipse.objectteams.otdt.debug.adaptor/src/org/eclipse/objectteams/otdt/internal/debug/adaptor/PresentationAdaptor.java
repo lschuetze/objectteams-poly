@@ -1,13 +1,13 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2007 Technical University Berlin, Germany.
+ * Copyright 2007, 2010 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: PresentationAdaptor.java 23456 2010-02-04 20:44:45Z stephan $
+ * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -102,19 +102,6 @@ public team class PresentationAdaptor
 			}
 			return false;
 		}
-		
-		getTypeName <- replace getReceivingTypeName, getDeclaringTypeName;
-		callin String getTypeName() throws DebugException {
-			return analyzeType(base.getTypeName());
-		}
-		
-		String analyzeType(String typeName) {
-//			this.isRole= typeName.contains("__OT__");
-//			this.isTeam= (modifiers() & 0x8000) != 0;
-//			if (this.isRole)
-				return typeName.replaceAll("__OT__", ""); //$NON-NLS-1$ //$NON-NLS-2$
-//			return typeName;
-		}
 
 		String getMethodName() <- replace String getMethodName();
 		@SuppressWarnings("nls")
@@ -206,7 +193,7 @@ public team class PresentationAdaptor
 					try {
 						return editor.getStartLineOfEnclosingElement(result-1)+1; // map between 0/1 based counting.
 					} catch (BadLocationException e) {
-						OTDebugAdaptorPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, OTDebugAdaptorPlugin.PLUGIN_ID, "Failed to retrieve line number", e));
+						OTDebugAdaptorPlugin.getDefault().getLog().log(new Status(IStatus.WARNING, OTDebugAdaptorPlugin.PLUGIN_ID, "Failed to retrieve line number", e)); //$NON-NLS-1$
 					}
 				}
 			}
@@ -232,9 +219,11 @@ public team class PresentationAdaptor
 				typeNames= stripped;
 				stripped= stripEnhancementParams(typeNames);
 			}
-			// go into details: strip __OT__ prefix of individual types
-			for (int i=0; i<stripped.size(); i++)
-				stripped.set(i, analyzeType(stripped.get(i)));
+// This is now generally done in PresentationAdaptorActivator.ModelPresentation.beautifyQualifiedName()
+// Keeping these lines just in case we are now missing some control flows.
+//			// go into details: strip __OT__ prefix of individual types
+//			for (int i=0; i<stripped.size(); i++)
+//				stripped.set(i, beautifyOTTypeName(stripped.get(i)));
 			return stripped;
 		}
 		private List<String> stripEnhancementParams(List<String> typeNames) {
@@ -275,7 +264,7 @@ public team class PresentationAdaptor
 			IDocument doc = getDocumentProvider().getDocument(getEditorInput());
 			IJavaElement element = getElementAt(doc.getLineOffset(line));
 			if (!(element instanceof ISourceReference))
-				throw new BadLocationException("Element is not an ISourceReference: "+element);
+				throw new BadLocationException("Element is not an ISourceReference: "+element); //$NON-NLS-1$
 			try {
 				ISourceRange range = (element instanceof Member)
 						? ((Member) element).getNameRange()
@@ -318,7 +307,7 @@ public team class PresentationAdaptor
 	{
 		if (stackFrame.kind == MethodKind.INITIAL) // this we didn't know when creating the label text			
 			return labelText.replace(DebugUIMessages.JDIModelPresentation_line__76+' '+DebugUIMessages.JDIModelPresentation_not_available, 
-							         "[about to enter]");
+							         "[about to enter]"); //$NON-NLS-1$
 
 		return labelText;
 	}

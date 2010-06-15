@@ -1,13 +1,13 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2007 Technical University Berlin, Germany.
+ * Copyright 2007, 2010 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: PresentationAdaptorActivator.java 23456 2010-02-04 20:44:45Z stephan $
+ * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -33,6 +33,8 @@ import base org.eclipse.jdt.internal.debug.ui.JDIModelPresentation;
  * This team watches over a method from JDTModelPresentation
  * to enable adaptation of String representations by PresentationAdaptor,
  * given that the current launch is some OT/J launch.
+ * 
+ * Also, generally the "__OT__" prefix is filtered from all qualified type names. 
  * 
  * @author stephan
  * @since 1.1.7
@@ -106,5 +108,16 @@ public team class PresentationAdaptorActivator
 			}
 			return base.getForeground(element);
 		}
+		
+		// generally always remove "__OT__" prefixes:
+		@SuppressWarnings("decapsulation")
+		String beautifyQualifiedName() 
+		<- replace String getQualifiedName(String qualifiedName),
+				   String getSimpleName(String qualifiedName);
+
+		callin String beautifyQualifiedName() {
+			String rawName = base.beautifyQualifiedName();
+			return rawName.replaceAll("__OT__", ""); //$NON-NLS-1$ //$NON-NLS-2$
+		}		
 	}
 }

@@ -1,13 +1,13 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2007, 2008 Technical University Berlin, Germany.
+ * Copyright 2007, 2010 Technical University Berlin, Germany.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: VariablesViewAdaptor.java 23456 2010-02-04 20:44:45Z stephan $
+ * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -97,7 +97,7 @@ public team class VariablesViewAdaptor
 		}
 
 	}
-	
+
 	/**
 	 * Filter from rawChildren ot-internal variables and/or static fields.
 	 */
@@ -116,13 +116,15 @@ public team class VariablesViewAdaptor
 	// helper checking conditions for above method:
 	static boolean isFiltered(IVariable var, boolean filterOTInternals, boolean filterStatics) {
 		try {
-			if (filterOTInternals && var.getName().startsWith(IOTConstants.OT_DOLLAR))
+			if (   filterOTInternals
+				&& var.getName().startsWith(IOTConstants.OT_DOLLAR)
+				&& !var.getName().equals(String.valueOf(IOTConstants._OT_BASE))) // always show _OT$base
 				return true;
 			if (filterStatics && var instanceof IJavaFieldVariable)
 				if (((IJavaFieldVariable)var).isStatic())
 					return true;
 		} catch (DebugException e) {
-			return true; // cannot display any way.
+			return true; // cannot display anyway.
 		}
 		return false;
 	}
