@@ -86,9 +86,9 @@ import org.eclipse.ui.texteditor.ITextEditor;
  */
 public class CodeCompletionTest extends CoreTests {
 
-	private static final int CALLOUT_BASE_RELEVANCE = CompletionAdaptor.R_METHOD_MAPPING+R_DEFAULT+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED;
-	private static final int INTERESTING_CALLIN_CALLOUT_PROPOSAL = 16 * CALLOUT_BASE_RELEVANCE;
-	private static final int VERY_INTERESTING_CALLIN_CALLOUT_PROPOSAL = 16 * (CALLOUT_BASE_RELEVANCE+R_EXPECTED_TYPE);
+	private static final int CALLOUT_BASE_RELEVANCE = R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_METHOD_OVERIDE+R_NON_RESTRICTED;
+	private static final int INTERESTING_CALLIN_CALLOUT_PROPOSAL = CompletionAdaptor.R_METHOD_MAPPING * CALLOUT_BASE_RELEVANCE;
+	private static final int VERY_INTERESTING_CALLIN_CALLOUT_PROPOSAL = CompletionAdaptor.R_METHOD_MAPPING * (CALLOUT_BASE_RELEVANCE+R_EXPECTED_TYPE);
 
 	private static final Class<CodeCompletionTest> THIS= CodeCompletionTest.class;
 
