@@ -822,5 +822,14 @@ public class TypeHelper
     {
         return CharOperation.equals(IOTConstants.STR_ORG_OBJECTTEAMS_TEAM, type.getFullyQualifiedName().toCharArray());
     }
+    
+    public static boolean isConfined(IType type) {
+    	String simpleTypeName = type.getElementName();
+    	return CONFINED.equals(simpleTypeName) || ICONFINED.equals(simpleTypeName);
+    }
+
+	public static boolean isMarkerInterface(IType superRole) {
+		return superRole.getElementName().startsWith(IOTConstants.TSUPER_OT);
+	}
 }
 

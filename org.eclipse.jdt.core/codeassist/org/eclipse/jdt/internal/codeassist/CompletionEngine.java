@@ -74,6 +74,9 @@ import org.eclipse.jdt.internal.core.SearchableEnvironment;
 import org.eclipse.jdt.internal.core.SourceTypeElementInfo;
 import org.eclipse.jdt.internal.core.search.matching.JavaSearchNameEnvironment;
 import org.eclipse.jdt.internal.core.util.Messages;
+import org.eclipse.objectteams.otdt.core.IOTType;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
+import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnFieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnMethodSpec;
@@ -4413,7 +4416,44 @@ public final class CompletionEngine
 		return proposal;
 	}
 //{ObjectTeams:
-	private void createRole(ReferenceBinding superRole, int modifiers, StringBuffer completion) {
+	private void createOverrideRoleProposal(ReferenceBinding superTeam, char[] roleName, char[] roleTypeSignature, int modifiers) {
+		StringBuffer completion = new StringBuffer(10);
+		createRole(roleName, modifiers, completion);
+
+		int relevance = computeBaseRelevance();
+		relevance += computeRelevanceForResolution();
+		relevance += computeRelevanceForInterestingProposal();
+		relevance += computeRelevanceForCaseMatching(this.completionToken, roleName);
+
+		// via analogy:
+		relevance += R_METHOD_OVERIDE;
+		if((modifiers & ClassFileConstants.AccAbstract) != 0) relevance += R_ABSTRACT_METHOD;
+
+		relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE);
+
+		this.noProposal = false;
+		if(!this.requestor.isIgnored(CompletionProposal.OVERRIDE_ROLE_DECLARATION)) {
+			InternalCompletionProposal proposal =  createProposal(CompletionProposal.OVERRIDE_ROLE_DECLARATION, this.actualCompletionPosition);
+			proposal.setDeclarationSignature(getSignature(superTeam));
+			proposal.setDeclarationKey(superTeam.computeUniqueKey());
+			proposal.setSignature(roleTypeSignature); 
+//			proposal.setKey(superRole.getKey().toCharArray()); // FIXME(SH): unused?
+			proposal.setDeclarationPackageName(superTeam.qualifiedPackageName());
+			proposal.setDeclarationTypeName(superTeam.qualifiedSourceName());
+			proposal.setCompletion(completion.toString().toCharArray());
+			proposal.setName(roleName);
+			proposal.setFlags(modifiers);
+			proposal.setReplaceRange(this.startPosition - this.offset, this.endPosition - this.offset);
+			proposal.setTokenRange(this.tokenStart - this.offset, this.tokenEnd - this.offset);
+			proposal.setRelevance(relevance);
+			this.requestor.accept(proposal);
+			if(DEBUG) {
+				this.printDebug(proposal);
+			}
+		}
+	}
+	
+	private void createRole(char[] superRoleName, int modifiers, StringBuffer completion) {
 		//// Modifiers
 		if(modifiers != ClassFileConstants.AccDefault){
 			ASTNode.printModifiers(modifiers, completion);
@@ -4426,7 +4466,7 @@ public final class CompletionEngine
 			completion.append("class "); //$NON-NLS-1$
 
 		//// Name
-		completion.append(superRole.sourceName);
+		completion.append(superRoleName);
 
 		//// Empty body
 		completion.append(" {}"); //$NON-NLS-1$
@@ -10456,10 +10496,13 @@ public final class CompletionEngine
 		if (!superTeam.isTeam())
 			return;
 		Set<String> knownRoles = new HashSet<String>();
+		// pre-load existing roles:
 		for (ReferenceBinding existingRole : enclosingType.memberTypes())
 			if (!existingRole.roleModel.isPurelyCopied())
 				knownRoles.add(String.valueOf(existingRole.internalName()));
+		// search direct super team:
 		findOverridableRolesFrom(superTeam, knownRoles);
+		// search tsuper-teams:
 		if (enclosingType.isRole())
 			for (ReferenceBinding tsuperTeam : enclosingType.roleModel.getTSuperRoleBindings())
 				findOverridableRolesFrom(tsuperTeam, knownRoles);
@@ -10470,69 +10513,87 @@ public final class CompletionEngine
 		int nameLength = this.completionToken.length;
 		ReferenceBinding[] superRoles = superTeam.memberTypes();
 		
+		// inline roles:
 		for (int i = 0; i < superRoles.length; i++)
-		{
-			ReferenceBinding superRole = superRoles[i];
-			if (!superRole.isInterface())
-				continue;
-			if (TypeAnalyzer.isTopConfined(superRole)) // can't override Confined/IConfined
-				continue;
-			if (TSuperHelper.isMarkerInterface(superRole)) // invisible type
-				continue;
-			if (CharOperation.equals(superRole.sourceName, IOTConstants.ILOWERABLE)) // not interesting to override
-				continue;
-			
-			if (this.completionToken.length > 0) {
-				if (nameLength > superRole.sourceName.length)
-					continue;
-
-				if (!CharOperation.prefixEquals(this.completionToken, superRole.sourceName, false/* ignore case */)
-						&& !(this.options.camelCaseMatch && CharOperation.camelCaseMatch(this.completionToken, superRole.sourceName)))
-					continue;
-			}
-			
-			String roleName = String.valueOf(superRole.sourceName);
-			if (!knownRoles.add(roleName))
-				continue;
-			
-			ReferenceBinding classPart = superRole.roleModel.getClassPartBinding();
-			int modifiers = classPart != null ? classPart.modifiers : superRole.modifiers;
-			
-			StringBuffer completion = new StringBuffer(10);
-			createRole(superRole, modifiers, completion);
-
-			int relevance = computeBaseRelevance();
-			relevance += computeRelevanceForResolution();
-			relevance += computeRelevanceForInterestingProposal();
-			relevance += computeRelevanceForCaseMatching(this.completionToken, superRole.sourceName);
-			
-			// via analogy:
-			relevance += R_METHOD_OVERIDE;
-			if((modifiers & ClassFileConstants.AccAbstract) != 0) relevance += R_ABSTRACT_METHOD;
-
-			relevance += computeRelevanceForRestrictions(IAccessRule.K_ACCESSIBLE);
-
-			this.noProposal = false;
-			if(!this.requestor.isIgnored(CompletionProposal.OVERRIDE_ROLE_DECLARATION)) {
-				InternalCompletionProposal proposal =  createProposal(CompletionProposal.OVERRIDE_ROLE_DECLARATION, this.actualCompletionPosition);
-				proposal.setDeclarationSignature(getSignature(superTeam));
-				proposal.setDeclarationKey(superTeam.computeUniqueKey());
-				proposal.setSignature(getSignature(superRole));
-				proposal.setKey(superRole.computeUniqueKey());
-				proposal.setDeclarationPackageName(superTeam.qualifiedPackageName());
-				proposal.setDeclarationTypeName(superTeam.qualifiedSourceName());
-				proposal.setCompletion(completion.toString().toCharArray());
-				proposal.setName(superRole.sourceName);
-				proposal.setFlags(modifiers);
-				proposal.setReplaceRange(this.startPosition - this.offset, this.endPosition - this.offset);
-				proposal.setTokenRange(this.tokenStart - this.offset, this.tokenEnd - this.offset);
-				proposal.setRelevance(relevance);
-				this.requestor.accept(proposal);
-				if(DEBUG) {
-					this.printDebug(proposal);
-				}
-			}
+			checkOverridableRole(superTeam, knownRoles, superRoles[i], nameLength);
+		
+		// secondary types like the super team are inserted into compilation using the 
+		// SourceTypeConverter, which doesn't know about role files. 
+		// Thus we use the search engine (via IOTType.getRoleTypes) to find role files:
+		try {
+			IType superType = this.javaProject.findType(String.valueOf(superTeam.readableName()));
+			IOTType superTeamType = OTModelManager.getOTElement(superType);
+			if (superTeamType != null)
+				for (IType type : superTeamType.getRoleTypes(IOTType.ROLEFILE))
+					checkOverridableRole(superTeam, knownRoles, type, nameLength);				
+		} catch (JavaModelException e) {
+			// ignore
 		}
+	}
+	private void checkOverridableRole(ReferenceBinding superTeam, 
+									  Set<String> knownRoles, 
+									  ReferenceBinding superRole,
+									  int nameLength) 
+	{
+		if (!superRole.isInterface())
+			return;
+		if (TypeAnalyzer.isTopConfined(superRole)) // can't override Confined/IConfined
+			return;
+		if (TSuperHelper.isMarkerInterface(superRole)) // invisible type
+			return;
+		char[] superRoleName = superRole.sourceName;
+		if (CharOperation.equals(superRoleName, IOTConstants.ILOWERABLE)) // not interesting to override
+			return;
+		
+		if (this.completionToken.length > 0) {
+			if (this.completionToken.length > superRoleName.length)
+				return;
+
+			if (!CharOperation.prefixEquals(this.completionToken, superRoleName, false/* ignore case */)
+					&& !(this.options.camelCaseMatch && CharOperation.camelCaseMatch(this.completionToken, superRoleName)))
+				return;
+		}
+		
+		String roleName = String.valueOf(superRoleName);
+		if (!knownRoles.add(roleName))
+			return;
+		
+		ReferenceBinding classPart = superRole.roleModel.getClassPartBinding();
+		int modifiers = classPart != null ? classPart.modifiers : superRole.modifiers;
+		
+		createOverrideRoleProposal(superTeam, superRoleName, getSignature(superRole), modifiers);
+	}
+	// similar to above, version for IType:
+	private void checkOverridableRole(ReferenceBinding superTeam, 
+			  						  Set<String> knownRoles, 
+			  						  IType superRole,
+			  						  int nameLength) throws JavaModelException 
+	{
+		// don't check for interface, java model has no role-splitting
+		if (TypeHelper.isConfined(superRole)) // can't override Confined/IConfined
+			return;
+		if (TypeHelper.isMarkerInterface(superRole)) // invisible type
+			return;
+		char[] superRoleName = superRole.getElementName().toCharArray();
+		if (CharOperation.equals(superRoleName, IOTConstants.ILOWERABLE)) // not interesting to override
+			return;
+
+		if (this.completionToken.length > 0) {
+			if (this.completionToken.length > superRoleName.length)
+				return;
+
+			if (!CharOperation.prefixEquals(this.completionToken, superRoleName, false/* ignore case */)
+					&& !(this.options.camelCaseMatch && CharOperation.camelCaseMatch(this.completionToken, superRoleName)))
+				return;
+		}
+
+		String roleName = String.valueOf(superRoleName);
+		if (!knownRoles.add(roleName))
+			return;
+
+		char[] roleTypeSignature = Signature.createTypeSignature(superRole.getFullyQualifiedName(), true/*resolved*/).toCharArray();
+
+		createOverrideRoleProposal(superTeam, superRoleName, roleTypeSignature, superRole.getFlags());
 	}
 // SH}
 
