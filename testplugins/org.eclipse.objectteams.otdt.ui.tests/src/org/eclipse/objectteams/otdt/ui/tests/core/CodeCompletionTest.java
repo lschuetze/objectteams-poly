@@ -106,7 +106,7 @@ public class CodeCompletionTest extends CoreTests {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new CodeCompletionTest("testCreateCalloutOverride1"));
+			suite.addTest(new CodeCompletionTest("testOverrideRole3"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -1063,7 +1063,7 @@ public class CodeCompletionTest extends CoreTests {
 		assertProposal("", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
 	}
 
-	
+	// override role, simple case
 	public void testOverrideRole1() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
@@ -1096,6 +1096,81 @@ public class CodeCompletionTest extends CoreTests {
 		
 		assertProposal("MyRole - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
 	}
+	
+	// override role, role file with mentioning in the team
+	public void testOverrideRole2() throws Exception {
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		pkg.createCompilationUnit("SuperTeam.java", 
+				"package test1.p1;\n" +
+				"public team class SuperTeam {\n" +
+				"	RoleFile field\n;" + // help the compiler to find the role file
+				"}\n",
+				true, null);
+		IPackageFragment rolePack = CompletionTestSetup.getTestPackage("p1.SuperTeam");
+		rolePack.createCompilationUnit("RoleFile.java", 
+				"team package test1.p1.SuperTeam;\n" +
+				"protected class RoleFile { }\n", 
+				true, null);
+		
+		StringBuffer subTeamContent = new StringBuffer(); 
+		subTeamContent.append("package test1;\n");
+		subTeamContent.append("import test1.p1.SuperTeam;\n");
+		subTeamContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
+		subTeamContent.append("    \n");
+		subTeamContent.append("}");
+		
+		StringBuffer expectedContent = new StringBuffer(); 
+		expectedContent.append("package test1;\n");
+		expectedContent.append("import test1.p1.SuperTeam;\n");
+		expectedContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
+		expectedContent.append("    @Override\n");
+		expectedContent.append("    protected class RoleFile {\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("}");
+
+		String completeAfter = "    ";
+		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
+		int posAfter = expectedContent.indexOf("}")+1;
+		
+		assertProposal("RoleFile - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
+	}	
+	
+	// override role, role file, without mentioning in the team (requires search engine help)
+	public void testOverrideRole3() throws Exception {
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		pkg.createCompilationUnit("SuperTeam.java", 
+				"package test1.p1;\n" +
+				"public team class SuperTeam {\n" + // no mentioning of RoleFile
+				"}\n",
+				true, null);
+		IPackageFragment rolePack = CompletionTestSetup.getTestPackage("p1.SuperTeam");
+		ICompilationUnit rofiCU = rolePack.createCompilationUnit("RoleFile.java", 
+				"team package test1.p1.SuperTeam;\n" +
+				"protected class RoleFile { }\n", 
+				true, null);
+		
+		StringBuffer subTeamContent = new StringBuffer(); 
+		subTeamContent.append("package test1;\n");
+		subTeamContent.append("import test1.p1.SuperTeam;\n");
+		subTeamContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
+		subTeamContent.append("    \n");
+		subTeamContent.append("}");
+		
+		StringBuffer expectedContent = new StringBuffer(); 
+		expectedContent.append("package test1;\n");
+		expectedContent.append("import test1.p1.SuperTeam;\n");
+		expectedContent.append("public team class Completion_testOverrideRole1 extends SuperTeam {\n");
+		expectedContent.append("    @Override\n");
+		expectedContent.append("    protected class RoleFile {\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("}");
+
+		String completeAfter = "    ";
+		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
+		int posAfter = expectedContent.indexOf("}")+1;
+		
+		assertProposal("RoleFile - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
+	}	
 	
 	// == Below: Helper methods/fields. ==
 	
