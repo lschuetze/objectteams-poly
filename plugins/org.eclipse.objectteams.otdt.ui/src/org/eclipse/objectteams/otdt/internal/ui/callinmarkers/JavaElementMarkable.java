@@ -33,18 +33,18 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 /**
- * Implement markable protocol for java elements.
+ * Implement markable protocol for IClassFile elements.
  * 
  * @author stephan
  * @since 1.2.5
  */
 public class JavaElementMarkable extends AbstractMarkable {
-	IJavaElement fJavaElement;
+	IClassFile fJavaElement;
 
 	/**
 	 * @param javaElement should actually be an IClassFile (otherwise use ResourceMarkable on the IFile (source file))
 	 */
-	public JavaElementMarkable(IJavaElement javaElement) {
+	public JavaElementMarkable(IClassFile javaElement) {
 		this.fJavaElement = javaElement;
 	}
 
@@ -54,20 +54,19 @@ public class JavaElementMarkable extends AbstractMarkable {
 	
 	public Set<IType> getAllTypes(IJavaProject[] projects, IProgressMonitor monitor) throws JavaModelException {
 		Set<IType> result = new HashSet<IType>(13);
-		if (this.fJavaElement instanceof IClassFile) {
-			
-			IType type = ((IClassFile)this.fJavaElement).getType();
+		
+		IType type = this.fJavaElement.getType();
 
-			Set<IType> members = new HashSet<IType>(5);
-			Set<IType> supers = new HashSet<IType>(5);
-			members.add(type);
-			addSuperAndMemberTypes(members, supers, type, this.fJavaElement.getJavaProject(), projects, monitor);
-			result.addAll(members);
-			result.addAll(supers);
-			monitor.worked(5);
-			
-			result.addAll(getSubTypes(members, new MySubProgressMonitor(monitor, 5)));
-		}
+		Set<IType> members = new HashSet<IType>(5);
+		Set<IType> supers = new HashSet<IType>(5);
+		members.add(type);
+		addSuperAndMemberTypes(members, supers, type, this.fJavaElement.getJavaProject(), projects, monitor);
+		result.addAll(members);
+		result.addAll(supers);
+		monitor.worked(5);
+		
+		result.addAll(getSubTypes(members, new MySubProgressMonitor(monitor, 5)));
+
 		monitor.done();
 		return result;
 	}
@@ -76,7 +75,7 @@ public class JavaElementMarkable extends AbstractMarkable {
 		CallinMarkerRemover.removeCallinMarkers(this.fJavaElement);		
 	}
 
-	public IJavaElement getJavaElement() {
+	public IClassFile getJavaElement() {
 		return this.fJavaElement;
 	}
 	

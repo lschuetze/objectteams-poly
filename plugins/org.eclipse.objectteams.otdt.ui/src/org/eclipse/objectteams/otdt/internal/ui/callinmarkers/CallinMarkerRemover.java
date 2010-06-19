@@ -26,8 +26,10 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 
@@ -93,17 +95,17 @@ public class CallinMarkerRemover
     }
     
 
-    public static void removeCallinMarkers(IJavaElement element) throws CoreException
+    public static void removeCallinMarkers(IClassFile element) throws CoreException
     {
 		if (element.exists())
 		{
 			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+			IMarker[] allMarkers = CallinMarker.getAllBindingMarkers(root);
 			
-			// FIXME(SH): implement!
-//			resource.deleteMarkers(CallinMarker.ID, 
-//			        			   true, 
-//								   IResource.DEPTH_INFINITE);
-		}
+			for (IMarker marker : allMarkers)
+				if (JavaCore.isReferencedBy(element, marker))
+					marker.delete();
+    	}
     }
     
 

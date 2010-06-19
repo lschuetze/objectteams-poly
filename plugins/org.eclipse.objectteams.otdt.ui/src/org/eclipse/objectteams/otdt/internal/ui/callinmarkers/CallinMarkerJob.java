@@ -25,7 +25,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 
 /**
@@ -34,7 +34,7 @@ import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 public abstract class CallinMarkerJob extends org.eclipse.core.runtime.jobs.Job
 {
     private final IResource _resource;
-    private final IJavaElement _javaElement;
+    private final IClassFile _javaElement;
     
     public CallinMarkerJob(final AbstractMarkable target)
     {
@@ -75,7 +75,7 @@ public abstract class CallinMarkerJob extends org.eclipse.core.runtime.jobs.Job
         return this._resource;
     }
     
-    public final IJavaElement getJavaElement() 
+    public final IClassFile getJavaElement() 
     {
         return this._javaElement;
     }

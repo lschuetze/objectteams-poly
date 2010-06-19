@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
@@ -99,7 +100,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 	protected CallinMarkerJob _currentJob;
 	private Map<IJavaElement,IType> m_cachedBaseForRole = new HashMap<IJavaElement,IType>();
     private Set<IResource> m_cachedMarkersForResources = new HashSet<IResource>();
-    private Set<IJavaElement> m_cachedMarkersForJavaElements = new HashSet<IJavaElement>();
+    private Set<IClassFile> m_cachedMarkersForJavaElements = new HashSet<IClassFile>();
     private boolean m_enabled = false;
     protected AnnotationHelper annotationHelper;
 
@@ -184,32 +185,44 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		}
 	}
 	public void invalidateBase(IJavaElement baseClass) {
-		invalidateBaseCU(baseClass.getAncestor(IJavaElement.COMPILATION_UNIT));
+		
+		IClassFile baseClassFile = (IClassFile) baseClass.getAncestor(IJavaElement.CLASS_FILE);
+		if (baseClassFile != null)
+			invalidateBaseMarkable(new JavaElementMarkable(baseClassFile));
+		else
+			invalidateBaseMarkable(new ResourceMarkable(baseClass.getResource()));
 	}
 
 	/** API for {@link RoleBindingChangedListener}. */
-	public void invalidateBaseCU(IJavaElement cu) {
-		if (cu != null) {
-			this.m_cachedMarkersForJavaElements.remove(cu);
-			IResource resource = null;
-			try {
-				resource = cu.getCorrespondingResource();
-			} catch (JavaModelException e) {
-				// ignore, just check for null below
-			}
-			if (resource != null)
-				this.m_cachedMarkersForResources.remove(resource);
+	public void invalidateBaseMarkable(AbstractMarkable baseMarkable) {
+		IEditorPart editor = (IEditorPart) this.fActiveEditor;
+		if (baseMarkable instanceof JavaElementMarkable) {
+			IClassFile baseJavaElement = ((JavaElementMarkable)baseMarkable).getJavaElement();
+			this.m_cachedMarkersForJavaElements.remove(baseJavaElement);
 			if (this.fActiveEditor != null && this.fActiveEditor instanceof IEditorPart) {
-				IEditorPart editor = (IEditorPart) this.fActiveEditor;
+				if (editor.getEditorInput() instanceof IClassFileEditorInput) {
+					IClassFile editorClassFile = ((IClassFileEditorInput)editor.getEditorInput()).getClassFile();
+					if (editorClassFile != null && !isCreatingMarkersFor(editorClassFile) && editorClassFile.equals(baseJavaElement))
+						updateForBaseMarkable(baseMarkable, editor);					
+				}
+			}
+		} else {
+			IResource baseResource = baseMarkable.getResource();
+			this.m_cachedMarkersForResources.remove(baseResource);
+			if (this.fActiveEditor != null && this.fActiveEditor instanceof IEditorPart) {
 				if (editor.getEditorInput() instanceof IFileEditorInput) {
 					IResource editorResource = ((IFileEditorInput)editor.getEditorInput()).getFile();
-					if (editorResource != null && !isCreatingMarkersFor(editorResource) && editorResource.equals(cu.getResource())) {
-						IStatusLineManager statusLine = editor.getEditorSite().getActionBars().getStatusLineManager();
-						updateCallinMarkers(new ResourceMarkable(editorResource), statusLine);
-					}
+					if (editorResource != null && !isCreatingMarkersFor(editorResource) && editorResource.equals(baseResource))
+						updateForBaseMarkable(baseMarkable, editor);
 				}
 			}
 		}
+	}
+
+	private void updateForBaseMarkable(AbstractMarkable baseMarkable,
+			IEditorPart editor) {
+		IStatusLineManager statusLine = editor.getEditorSite().getActionBars().getStatusLineManager();
+		updateCallinMarkers(baseMarkable, statusLine);
 	}
 	
     /**
@@ -234,16 +247,18 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		this.annotationHelper = new AnnotationHelper(targetEditor, editorInput);
 		
 		AbstractMarkable target= null;
-		if ((editorInput instanceof IFileEditorInput)) { // source file
+		if ((editorInput instanceof IFileEditorInput)) { 			// source file
 			IResource resource = ((IFileEditorInput)editorInput).getFile();
 			if (resource == null || isCached(resource) || isCreatingMarkersFor(resource))
 				return; // already has markers -- skip it
 			target = new ResourceMarkable(resource);
-		} else {										 // binary java element
-			IJavaElement element = getInputJavaElement((IEditorPart) editor);
+		} else if (editorInput instanceof IClassFileEditorInput) {	// binary java element
+			IClassFile element = ((IClassFileEditorInput) editorInput).getClassFile();
 			if (element == null || isCached(element) || isCreatingMarkersFor(element))
 				return; // already has markers -- skip it
 			target = new JavaElementMarkable(element);
+		} else {
+			return; // unexpected editor input
 		}
 		
 		if (target.exists())
@@ -427,7 +442,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
     {
         return m_cachedMarkersForResources.contains(resource);
     }
-    private boolean isCached(IJavaElement element)
+    private boolean isCached(IClassFile element)
     {
     	return m_cachedMarkersForJavaElements.contains(element);
     }
@@ -436,7 +451,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
     {
         m_cachedMarkersForResources.add(resource);
     }
-    private void setCached(final IJavaElement element)
+    private void setCached(final IClassFile element)
     {
     	m_cachedMarkersForJavaElements.add(element);
     }
@@ -445,7 +460,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
     {
         m_cachedMarkersForResources.remove(resource);
     }
-    private void removeFromCache(final IJavaElement element)
+    private void removeFromCache(final IClassFile element)
     {
         m_cachedMarkersForJavaElements.remove(element);
     }
@@ -744,9 +759,9 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 									}
 						    	} else if (!baseElement.isBinary()) {
 							    	if (nameRange.getOffset() < 0)
-							    		throw new BadLocationException("Offset must be >= 0, is "+nameRange.getOffset());
+							    		throw new BadLocationException("Offset must be >= 0, is "+nameRange.getOffset()); //$NON-NLS-1$
 							    	if (nameRange.getLength() < 0)
-							    		throw new BadLocationException("Length must be >= 0, is "+nameRange.getLength());
+							    		throw new BadLocationException("Length must be >= 0, is "+nameRange.getLength()); //$NON-NLS-1$
 						    	}
                             }
                             catch (BadLocationException ex) {
@@ -788,7 +803,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
                     	else
                     		removeFromCache(resource);
                     else {
-                    	IJavaElement element = job.getJavaElement();
+                    	IClassFile element = job.getJavaElement();
                     	if (status == IStatus.OK)
                     		setCached(element);
                     	else

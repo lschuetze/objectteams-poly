@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -107,6 +108,19 @@ public class CallinMarker
 		marker.setAttributes(_attribs);
 		_attribs.clear(); // clear attributes for reuse of this object
     }
+
+	/** get all playedBy and callin markers for the given resource. */
+	public static IMarker[] getAllBindingMarkers(IResource resource) throws CoreException {
+		IMarker[] markers1 = resource.findMarkers(PLAYEDBY_ID, true, IResource.DEPTH_INFINITE);
+		IMarker[] markers2 = resource.findMarkers(CALLIN_ID, true, IResource.DEPTH_INFINITE);
+		IMarker[] markers3 = resource.findMarkers(CALLOUT_ID, true, IResource.DEPTH_INFINITE);
+		int len1 = markers1.length, len2 = markers2.length, len3 = markers3.length;
+		IMarker[] result = new IMarker[len1+len2+len3];
+		System.arraycopy(markers1, 0, result, 0, len1);
+		System.arraycopy(markers2, 0, result, len1, len2);
+		System.arraycopy(markers3, 0, result, len1+len2, len3);
+		return result;
+	}
 
 	public static boolean isTypeMarker(IMarker marker) {
 		try {

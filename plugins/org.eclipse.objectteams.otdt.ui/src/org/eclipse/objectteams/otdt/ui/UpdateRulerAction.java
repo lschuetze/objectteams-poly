@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
@@ -140,13 +139,13 @@ public class UpdateRulerAction extends AbstractRulerActionDelegate
 			IFileEditorInput fileEditorInput = (IFileEditorInput)editorInput;
 			IFile            file            = fileEditorInput.getFile();			
 	
-			IMarker[] result = getAllBindingMarkers(file);
+			IMarker[] result = CallinMarker.getAllBindingMarkers(file);
 			return result;
 		} 
 		else if (editorInput instanceof IClassFileEditorInput) 
 		{			
 			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			IMarker[] allMarkers = getAllBindingMarkers(root);
+			IMarker[] allMarkers = CallinMarker.getAllBindingMarkers(root);
 			
 			// now we have all CallinMarkers for all class files in the workspace, need to filter now: 
 			IClassFile classFile = ((IClassFileEditorInput) editorInput).getClassFile();
@@ -157,19 +156,6 @@ public class UpdateRulerAction extends AbstractRulerActionDelegate
 			return filteredMarkers.toArray(new IMarker[filteredMarkers.size()]);
 		}
 		return null;
-	}
-
-	/** get all playedBy and callin markers for the given resource. */
-	private IMarker[] getAllBindingMarkers(IResource resource) throws CoreException {
-		IMarker[] markers1 = resource.findMarkers(CallinMarker.PLAYEDBY_ID, true, IResource.DEPTH_INFINITE);
-		IMarker[] markers2 = resource.findMarkers(CallinMarker.CALLIN_ID, true, IResource.DEPTH_INFINITE);
-		IMarker[] markers3 = resource.findMarkers(CallinMarker.CALLOUT_ID, true, IResource.DEPTH_INFINITE);
-		int len1 = markers1.length, len2 = markers2.length, len3 = markers3.length;
-		IMarker[] result = new IMarker[len1+len2+len3];
-		System.arraycopy(markers1, 0, result, 0, len1);
-		System.arraycopy(markers2, 0, result, len1, len2);
-		System.arraycopy(markers3, 0, result, len1+len2, len3);
-		return result;
 	}
 
 	/** Get the context menu of kind 'markerKind', creating it if ondemand. */

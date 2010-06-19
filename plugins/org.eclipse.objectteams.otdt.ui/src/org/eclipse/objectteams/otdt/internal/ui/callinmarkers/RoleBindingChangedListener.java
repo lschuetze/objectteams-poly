@@ -66,7 +66,7 @@ public class RoleBindingChangedListener implements IElementChangedListener
 		Set<ICompilationUnit> invalidatedCUs = new HashSet<ICompilationUnit>();
         updateCallinMarkers(new IJavaElementDelta[] { event.getDelta() }, invalidatedCUs);
         for (ICompilationUnit cu : invalidatedCUs)
-			OTDTUIPlugin.getDefault().getCallinMarkerCreator().invalidateBaseCU(cu);
+			OTDTUIPlugin.getDefault().getCallinMarkerCreator().invalidateBaseMarkable(new ResourceMarkable(cu.getResource()));
 	}
 
 	private void updateCallinMarkers(IJavaElementDelta[] deltas, Set<ICompilationUnit> invalidatedCUs)
