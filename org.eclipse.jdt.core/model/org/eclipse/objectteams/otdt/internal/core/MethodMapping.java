@@ -345,15 +345,22 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 			{
 				IMethod tmpMethod = methods[methIdx];
 				// check for equal method name and signature            	
-				if (tmpMethod.getElementName().equals(methodHandle.getSelector())
-					&& 
-						(methodHandle.isIncomplete() ||
-						Util.equalArraysOrNull(tmpMethod.getParameterTypes(), methodHandle.getArgumentTypes())))
-				{
+				String selector = tmpMethod.getElementName();
+				if (isEqualMethod(methodHandle, tmpMethod, selector))
 					// return immediately on first match
 					return tmpMethod;
+			}
+			IOTType otType = OTModelManager.getOTElement(types[parIdx]);
+			if (otType != null && otType.isRole()) {
+				for (IMethodMapping mapping : ((IRoleType)otType).getMethodMappings(IRoleType.CALLOUTS)) {
+					AbstractCalloutMapping tmpMethod = (AbstractCalloutMapping)mapping;
+					// check for equal method name and signature            	
+					String selector = tmpMethod.getCorrespondingJavaElement().getElementName();
+					if (isEqualMethod(methodHandle, tmpMethod, selector))
+						// return immediately on first match
+						return tmpMethod;
 				}
-			}            
+			}
 		}
 		IMethod methodReference= SourceMethod.createHandle((JavaElement)types[0], methodHandle);
 		// failure might be due to mismatching qualified/simple types
@@ -364,6 +371,15 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 				return methods[0];
 		}
 		return null;		
+	}
+
+	// helper for above to generalize over real methods and callouts:
+	private boolean isEqualMethod(MethodData baseMethodHandle, IMethod foundMethodOrCallout, String foundSelector) {
+		if (!foundSelector.equals(baseMethodHandle.getSelector()))
+			return false;
+		if (baseMethodHandle.isIncomplete())
+			return true;
+		return Util.equalArraysOrNull(foundMethodOrCallout.getParameterTypes(), baseMethodHandle.getArgumentTypes());
 	}
     
 	protected void log(String msg, JavaModelException ex)
