@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.callinmarkers;
 
+import org.eclipse.core.internal.resources.ResourceException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
@@ -42,7 +43,7 @@ public class CallinMarkerRemover
 				resource.deleteMarkers(id, true, IResource.DEPTH_INFINITE);
     }
     
-	public static synchronized void removeCallinMarker(IMember member, IResource resource)
+	public static void removeCallinMarker(IMember member, IResource resource)
     {
         // we need to pass the resource, as the method might already be removed and hence would
         // not be able to give us a resource.
@@ -61,6 +62,10 @@ public class CallinMarkerRemover
                 if (marker != null)
                     marker.delete();
             }
+	        catch (ResourceException ex) {
+	        	// tree might be locked for modifications
+	        	// FIXME(SH): handle this case, currently we just ignore this situation
+	        }
             catch (CoreException ex)
             {
     			OTDTUIPlugin.getExceptionHandler().
@@ -73,7 +78,7 @@ public class CallinMarkerRemover
      * Finds the marker attached to the given method.
      * Note: may return null if nothing found.
      */
-    private static synchronized IMarker getCallinMarker(IMember baseElement, String markerKind, IResource resource) throws JavaModelException, CoreException
+    private static IMarker getCallinMarker(IMember baseElement, String markerKind, IResource resource) throws JavaModelException, CoreException
     {
         IMarker[] markers = resource.findMarkers(markerKind, true, IResource.DEPTH_INFINITE);
 

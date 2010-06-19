@@ -183,17 +183,32 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 			invalidateBase(cachedBaseClass);
 		}
 	}
-	void invalidateBase(IJavaElement baseClass) {
-		this.m_cachedMarkersForJavaElements.remove(baseClass);
-		try {
-			IJavaElement cu = baseClass.getAncestor(IJavaElement.COMPILATION_UNIT);
-			if (cu != null) {
-				IResource resource = cu.getCorrespondingResource();
-				if (resource != null)
-					this.m_cachedMarkersForResources.remove(resource);
+	public void invalidateBase(IJavaElement baseClass) {
+		invalidateBaseCU(baseClass.getAncestor(IJavaElement.COMPILATION_UNIT));
+	}
+
+	/** API for {@link RoleBindingChangedListener}. */
+	public void invalidateBaseCU(IJavaElement cu) {
+		if (cu != null) {
+			this.m_cachedMarkersForJavaElements.remove(cu);
+			IResource resource = null;
+			try {
+				resource = cu.getCorrespondingResource();
+			} catch (JavaModelException e) {
+				// ignore, just check for null below
 			}
-		} catch (JavaModelException e) {
-			// cannot uncache missing resource
+			if (resource != null)
+				this.m_cachedMarkersForResources.remove(resource);
+			if (this.fActiveEditor != null && this.fActiveEditor instanceof IEditorPart) {
+				IEditorPart editor = (IEditorPart) this.fActiveEditor;
+				if (editor.getEditorInput() instanceof IFileEditorInput) {
+					IResource editorResource = ((IFileEditorInput)editor.getEditorInput()).getFile();
+					if (editorResource != null && !isCreatingMarkersFor(editorResource) && editorResource.equals(cu.getResource())) {
+						IStatusLineManager statusLine = editor.getEditorSite().getActionBars().getStatusLineManager();
+						updateCallinMarkers(new ResourceMarkable(editorResource), statusLine);
+					}
+				}
+			}
 		}
 	}
 	
@@ -348,7 +363,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 			    Map<IMember, Set<IType>> playedByMap = searchPlayedByBindings(allTypes,
 			    															  new IJavaProject[]{member.getJavaProject()}, 
 			    															  new MySubProgressMonitor(monitor, 20));
-			    if (playedByMap == null)
+			    if (playedByMap == null || playedByMap.isEmpty())
 			    	return;
 
 			    // collect all roles w/ subroles for use as search scope:
@@ -492,6 +507,10 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 
 					members.addAll(Arrays.asList(type.getMethods()));
 					members.addAll(Arrays.asList(type.getFields()));
+					IOTType otType = OTModelManager.getOTElement(type);
+					if (otType != null && otType.isRole())
+						for (IMethodMapping mapping : ((IRoleType)otType).getMethodMappings(IRoleType.CALLOUTS))
+							members.add(mapping);
 					// handle all inner types
 					IType[] memberTypes = type.getTypes();
 					for (int idx = 0; idx < memberTypes.length; idx++)

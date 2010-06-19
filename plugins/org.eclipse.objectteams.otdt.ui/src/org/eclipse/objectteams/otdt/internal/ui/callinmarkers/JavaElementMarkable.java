@@ -41,6 +41,9 @@ import org.eclipse.jdt.core.JavaModelException;
 public class JavaElementMarkable extends AbstractMarkable {
 	IJavaElement fJavaElement;
 
+	/**
+	 * @param javaElement should actually be an IClassFile (otherwise use ResourceMarkable on the IFile (source file))
+	 */
 	public JavaElementMarkable(IJavaElement javaElement) {
 		this.fJavaElement = javaElement;
 	}

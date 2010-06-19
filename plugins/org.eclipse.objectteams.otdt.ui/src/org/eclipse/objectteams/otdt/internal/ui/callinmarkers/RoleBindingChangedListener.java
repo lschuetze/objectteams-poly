@@ -20,8 +20,12 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.callinmarkers;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.resources.IResource;
 import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IElementChangedListener;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -59,16 +63,22 @@ public class RoleBindingChangedListener implements IElementChangedListener
 {
 	public void elementChanged(ElementChangedEvent event)
 	{
-        updateCallinMarkers(new IJavaElementDelta[] { event.getDelta() });        
+		Set<ICompilationUnit> invalidatedCUs = new HashSet<ICompilationUnit>();
+        updateCallinMarkers(new IJavaElementDelta[] { event.getDelta() }, invalidatedCUs);
+        for (ICompilationUnit cu : invalidatedCUs)
+			OTDTUIPlugin.getDefault().getCallinMarkerCreator().invalidateBaseCU(cu);
 	}
 
-	private void updateCallinMarkers(IJavaElementDelta[] deltas)
+	private void updateCallinMarkers(IJavaElementDelta[] deltas, Set<ICompilationUnit> invalidatedCUs)
 	{
 		if (deltas != null)
 		{
 //		    if (deltas.length > 0)
 //		        _CallinMarkerCreator2.reset();
-		    
+		    Set<IOTType> invalidatedRoles = new HashSet<IOTType>();
+		    Set<IMember> addedBaseMembers = new HashSet<IMember>();
+		    ICompilationUnit curCU = null;
+			
 			for (int idx = 0; idx < deltas.length; idx++)
 			{
 				IJavaElementDelta curDelta = deltas[idx];
@@ -79,7 +89,7 @@ public class RoleBindingChangedListener implements IElementChangedListener
 				if (curElem instanceof IParent)
 				{
 					// visit child's deltas recursively				
-					updateCallinMarkers(curDelta.getAffectedChildren());
+					updateCallinMarkers(curDelta.getAffectedChildren(), invalidatedCUs);
 				}
 				// addition/removal of role types:
 				if (   curElem instanceof IType 
@@ -89,22 +99,34 @@ public class RoleBindingChangedListener implements IElementChangedListener
 				{
 					IType roleType = (IType)curElem;
 					IOTType otType = OTModelManager.getOTElement(roleType);
-					if (otType != null && otType.isRole())
-						invalidateRole((IRoleType)otType, roleType);
+					if (otType != null && otType.isRole()) {
+						if (invalidatedRoles.add(otType)) // only if not already handled
+							invalidateRole((IRoleType)otType, roleType);
+					}
 				}
 				// changes of base methods & fields:
 				if (curElem instanceof IMethod || curElem instanceof IField)
 				{
-					handleDeltaKind(curDelta, (IMember)curElem);
+					handleDeltaKind(curDelta, (IMember)curElem, addedBaseMembers);
+					curCU = ((IMember)curElem).getCompilationUnit();
 				}
 				// any changes in method mappings:
 				if (curElem instanceof IMethodMapping) {
 					// changes in method mappings invalidate the current role's baseclass:
 					IJavaElement parent = curElem.getParent();
 					if (parent instanceof IRoleType) {
-						invalidateRole((IRoleType)parent, (IType) ((IRoleType)parent).getCorrespondingJavaElement());
+						IRoleType roleParent = (IRoleType)parent;
+						if (invalidatedRoles.add(roleParent)) // only if not already handled
+							invalidateRole(roleParent, (IType) roleParent.getCorrespondingJavaElement());
 					}
 				}
+			}
+			if (!addedBaseMembers.isEmpty()) {
+				if (addedBaseMembers.size() < 3 && !invalidatedCUs.contains(curCU))
+					for (IMember baseMember : addedBaseMembers)
+						baseMemberAdded(baseMember);
+				else
+					invalidatedCUs.add(curCU);
 			}
 		}
 	}
@@ -118,11 +140,12 @@ public class RoleBindingChangedListener implements IElementChangedListener
 		OTDTUIPlugin.getDefault().getCallinMarkerCreator().invalidateRole(roleType, baseClass);
 	}
 
-    private void handleDeltaKind(IJavaElementDelta delta, IMember baseMember)
+    private void handleDeltaKind(IJavaElementDelta delta, IMember baseMember, Set<IMember> addedBaseMembers)
     {
 		if (delta.getKind() == IJavaElementDelta.ADDED)
 		{
-            baseMemberAdded(baseMember);
+			// don't yet handle, first count how many additions we have
+            addedBaseMembers.add(baseMember);
 		}
 		else if (delta.getKind() == IJavaElementDelta.REMOVED)
 		{
