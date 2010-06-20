@@ -102,6 +102,9 @@ public class RepositoryAccess {
 		} catch (ClassNotFoundException e) {
 			// consider classes as incommensurable if they can't both be loaded in the current class loader
 			return false;
+		} catch (ClassCircularityError e) {
+			// assume that circularity was caused by resolving framework classes during class loading
+			return false;
 		}
 	}
 
