@@ -42,6 +42,7 @@ echo "NAME          = ${NAME}"
 echo "====Step 1: zip and request signing===="
 cd ${BASE}/testrun/updateSite
 JARS=`find . -name \*.jar -type f`
+/bin/rm ${STAGINGBASE}/in/otdt.zip
 zip ${STAGINGBASE}/in/otdt.zip ${JARS}
 if [ "$2" == "-nosign" ]
 then
