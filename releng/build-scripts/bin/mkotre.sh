@@ -21,7 +21,7 @@ svn up
 
 # COMPILE
 cd ${ROOT}/OTRE/src
-javac -g -d ../bin -classpath ${BCEL_JAR}:. `find . -name \*.java`
+javac -g -target 1.5 -d ../bin -classpath ${BCEL_JAR}:. `find . -name \*.java`
 
 cd ${ROOT}/OTRE/bin
 
