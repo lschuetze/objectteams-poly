@@ -66,6 +66,8 @@ public class MonitorView extends ViewPart {
 	 * Setup the GUI.
 	 */
 	public void createPartControl(Composite parent) {
+		Activator.registerMonitorView(this);
+
 		table = new Table(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL | SWT.CHECK);
         table.setHeaderVisible(true);
         table.setLinesVisible(true);
@@ -159,6 +161,10 @@ public class MonitorView extends ViewPart {
 		};
 		job.setPriority(Job.SHORT);
 		job.schedule(1000);
+	}
+
+	public void stop() {
+		this.autoRefresh = false;
 	}
 
 	/**

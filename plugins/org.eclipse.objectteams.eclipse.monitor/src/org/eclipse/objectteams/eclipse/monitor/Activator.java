@@ -35,6 +35,8 @@ public class Activator extends AbstractUIPlugin {
 
 	// The shared instance
 	private static Activator plugin;
+
+	private MonitorView view;
 	
 	/**
 	 * The constructor
@@ -57,6 +59,8 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		if (view != null)
+			view.stop();
 		super.stop(context);
 	}
 
@@ -78,5 +82,9 @@ public class Activator extends AbstractUIPlugin {
 	 */
 	public static ImageDescriptor getImageDescriptor(String path) {
 		return imageDescriptorFromPlugin(PLUGIN_ID, path);
+	}
+	
+	public static void registerMonitorView(MonitorView view) {
+		plugin.view = view;
 	}
 }
