@@ -20,7 +20,13 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.wizards;
 
+import static org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor.DUMMY_CU_NAME;
+import static org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor.DUMMY_CLASS_NAME;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRequestor;
@@ -191,8 +197,32 @@ public class NewRoleWizardPage extends NewTypeWizardPage
 			}
 		});
 
+		setBaseClassCompletionContext(baseClassCompletionProcessor);
+
 		ControlContentAssistHelper.createTextContentAssistant(text, baseClassCompletionProcessor);
 		TextFieldNavigationHandler.install(text);
+	}
+
+	// setup-up a context after "playedBy" of the role which will be created by this wizard
+	private void setBaseClassCompletionContext(JavaTypeCompletionProcessor baseClassCompletionProcessor) {
+		if (getEnclosingType() != null) {
+			// to make it a role of this team fake a role file in the corresponding team package:
+			String           teamName = getEnclosingType().getFullyQualifiedName();
+			IPackageFragment currPack = getEnclosingType().getPackageFragment();
+			IPackageFragment teamPack = ((IPackageFragmentRoot) currPack.getParent()).getPackageFragment(teamName);
+			ICompilationUnit cu       = teamPack.getCompilationUnit(DUMMY_CU_NAME);
+			baseClassCompletionProcessor.setCompletionContext(cu, 
+					"team package "+teamName+";\n" + //$NON-NLS-1$ //$NON-NLS-2$
+					"public class " + DUMMY_CLASS_NAME + " playedBy ", " {}"); //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+		} else if (getPackageFragmentRoot() != null) {
+			// no enclosing team, just fake a new team in the default package
+			IPackageFragment pack = getPackageFragmentRoot().getPackageFragment(""); //$NON-NLS-1$
+			ICompilationUnit cu   = pack.getCompilationUnit(DUMMY_CU_NAME);
+			baseClassCompletionProcessor.setCompletionContext(cu, 
+					"package "+pack.getElementName()+";\n" + //$NON-NLS-1$ //$NON-NLS-2$
+					"public team class "+DUMMY_CLASS_NAME+" {\n" + //$NON-NLS-1$ //$NON-NLS-2$
+					"  protected class R playedBy ", " {}}"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
 	}
 
 	protected void initTypePage(IJavaElement elem) 
