@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otequinox;
 
 import static org.eclipse.objectteams.otequinox.Constants.*;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -91,6 +92,12 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 	private static TransformerPlugin instance;
 	private ServiceRegistration serviceRegistration;  // IOTEquinoxService
 	private ServiceRegistration serviceRegistration2; // IOTTransformer
+
+	/* unevaluated content of liftingParticipant extension: */
+	private IConfigurationElement liftingParticipantConfig; 
+	/* Field of <code>org.objectteams.Team</code> holding a configured lifting participant: */
+	private static final String LIFTING_PARTICIPANT_FIELD = "_OT$liftingParticipant";
+
 	private ILogger log;
 	
 	/** instances which may have pending team classes waiting for instantiation. */
@@ -127,6 +134,7 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 		this.permissionManager = new AspectPermissionManager(this.log, context.getBundle(), this.packageAdmin);
 		this.permissionManager.loadAspectBindingNegotiators(context);
 		loadAspectBindings();
+		loadLiftingParticipant();
 		this.serviceRegistration = context.registerService(IOTEquinoxService.class.getName(), this, new Properties());		
 		this.serviceRegistration2 = context.registerService(IOTTransformer.class.getName(), new TransformerServiceDelegate(), new Properties());		
 	}
@@ -314,6 +322,42 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 			Exception e = new Exception("No such aspect binding");
 			log(e, "Class "+teamName+" not registered(2) (declared to be superclass of team "+subTeamName);
 		}		
+	}
+
+	/* Load extension for org.eclipse.objectteams.otequinox.liftingParticipant. */
+	private void loadLiftingParticipant() {
+		IConfigurationElement[] liftingParticipantConfigs = RegistryFactory.getRegistry().getConfigurationElementsFor(
+				TRANSFORMER_PLUGIN_ID, LIFTING_PARTICIPANT_EXTPOINT_ID);
+		
+		if (liftingParticipantConfigs.length != 1) {
+			if (liftingParticipantConfigs.length > 1)
+				log(ILogger.ERROR, "Cannot install more than one lifting participant.");
+			return;
+		}
+		this.liftingParticipantConfig = liftingParticipantConfigs[0];
+		// defer initialization until when o.o.Team is naturally being loaded.
+	}
+
+	/** 
+	 * Callback to initialize class <code>org.objectteams.Team</code> after it has been loaded.
+	 * Here it is used to initialized a lifting participant if such an extension is defined.
+	 */
+	public void initializeOOTeam(Class<?> ooTeam) {
+		if (this.liftingParticipantConfig == null)
+			return;
+		try {
+			// can't directly access class Team in this plugin:
+			Field participantField = ooTeam.getDeclaredField(TransformerPlugin.LIFTING_PARTICIPANT_FIELD);
+			
+			Object participantInstance = liftingParticipantConfig.createExecutableExtension(CLASS);
+			
+			participantField.set(null/*no target, field is static*/, participantInstance);
+			
+			log(ILogger.INFO, "registered lifting participant:\n\t"+participantInstance.getClass().getName());
+			
+		} catch (Throwable t) {
+			log(t, "Invalid lifting participant extension");
+		}
 	}
 
 	/**

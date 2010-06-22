@@ -17,6 +17,8 @@
 package org.eclipse.objectteams.otre;
 
 
+import java.lang.reflect.Field;
+
 import org.objectteams.Team;
 
 import org.apache.bcel.Constants;
@@ -70,22 +72,17 @@ public class LiftingParticipantTransformation extends ObjectTeamsTransformation 
 
 	public void doTransformCode(ClassGen cg) 
 	{
-		if (PARTICIPANT_NAME == null) return;
-	
 		if (!classNeedsTeamExtensions(cg)) return;
-		
+
 		synchronized (LiftingParticipantTransformation.class) {
-			if (!checked) {
-				try {
-					// install a shared instance into class Team:
-					Class<?> participantClass = loader.loadClass(PARTICIPANT_NAME);
-					Team.class.getField(LIFTING_PARTICIPANT_FIELD).set(null, participantClass.newInstance());
-				} catch (Exception e) {
-					new IllegalArgumentException("Lifting participant "+PARTICIPANT_NAME+" is invalid.", e).printStackTrace();
-					PARTICIPANT_NAME = null;
-				}
-				checked = true;
+			try {
+				checkInitParticipant();
+			} catch (Exception e) {
+				new IllegalArgumentException("Lifting participant "+PARTICIPANT_NAME+" is invalid.", e).printStackTrace();
+				PARTICIPANT_NAME = null;
 			}
+			if (PARTICIPANT_NAME == null)
+				return;
 		}
 		
     	factory = new InstructionFactory(cg);
@@ -102,6 +99,31 @@ public class LiftingParticipantTransformation extends ObjectTeamsTransformation 
     		
 			cg.replaceMethod(m, m = weaveLiftingParticipant(m, class_name, cpg));
     	}
+	}
+
+	private void checkInitParticipant() throws Exception {
+		if (checked) return;
+		checked = true;
+
+		Field participantField = Team.class.getField(LIFTING_PARTICIPANT_FIELD);
+		Object participant = participantField.get(null);
+
+		if (PARTICIPANT_NAME != null) 
+		{
+			// initialize from property "ot.lifting.participant"
+			if (participant != null)
+				throw new IllegalStateException("liftingParticipant already installed.");				
+			// install a shared instance into class Team:
+			Class<?> participantClass = loader.loadClass(PARTICIPANT_NAME);
+			participantField.set(null, participantClass.newInstance());
+		} 
+		else if (participant != null) 
+		{
+			// field was already initialized by a third party
+			
+			// fetch the class name to signal that transformations are needed.
+			PARTICIPANT_NAME = participant.getClass().getName();
+		}
 	}
 
 	private Method weaveLiftingParticipant(Method m, String className, ConstantPoolGen cpg) {

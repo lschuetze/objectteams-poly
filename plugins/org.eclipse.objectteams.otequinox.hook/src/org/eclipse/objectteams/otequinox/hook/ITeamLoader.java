@@ -59,4 +59,8 @@ public interface ITeamLoader {
 	 */
 	public void instantiateTeams(final Bundle baseBundle, String triggerClassName);
 
+	/**
+	 * Triggered once class <code>org.objectteams.Team</code> has been loaded and can be further initialized.
+	 */
+	void initializeOOTeam(Class<?> clazz);
 }

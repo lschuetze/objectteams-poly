@@ -80,13 +80,16 @@ import org.osgi.service.packageadmin.PackageAdmin;
 public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLoaderDelegateHook, ClassLoadingStatsHook
 {
 	// As an OSGI extension bundle, we can't depend on the transformer plugin, so we have to hardcode this
-	public static final String  TRANSFORMER_PLUGIN_ID         = "org.eclipse.objectteams.otequinox" ; //$NON-NLS-1$
+	public static final String  TRANSFORMER_PLUGIN_ID           = "org.eclipse.objectteams.otequinox";
 	
 	private static final String WORKSPACE_INITIALIZER_PLUGIN_ID = "org.eclipse.objectteams.otdt.earlyui";
 	private static final String OTDT_QUALIFIER = "OTDT";
 
 	// another non-transformable bundle:
-	private static final String ASM_PLUGIN_ID = "org.objectweb.asm"; //$NON-NLS-1$
+	private static final String ASM_PLUGIN_ID = "org.objectweb.asm";
+
+	// specific action may be required when this class is loaded:
+	private static final String ORG_OBJECTTEAMS_TEAM = "org.objectteams.Team";
 
 	private static final HashSet<String> WEAVE_BUNDLES = new HashSet<String>();
 	static {
@@ -733,6 +736,9 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 					BaseBundleRole.endActivation(this.bundleRegistry, bundle, this.aspectRegistry, this.teamLoadingService);
 				this.activatableBundles.clear();
 			}
+
+		if (name.equals(ORG_OBJECTTEAMS_TEAM))
+			this.teamLoadingService.initializeOOTeam(clazz);
 	}
 
 }

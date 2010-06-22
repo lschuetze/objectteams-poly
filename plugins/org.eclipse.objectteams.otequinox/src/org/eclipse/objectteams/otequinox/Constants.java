@@ -33,6 +33,9 @@ public interface Constants {
 	static final String ASPECT_BINDING_EXTPOINT_ID    = "aspectBindings";
 	static final String ASPECT_BINDING_FQEXTPOINT_ID  = TRANSFORMER_PLUGIN_ID+'.'+ASPECT_BINDING_EXTPOINT_ID;
 	
+	/** Simple name of the extension point org.eclipse.objectteams.otequinox.liftingParticipant. */
+	static final String LIFTING_PARTICIPANT_EXTPOINT_ID    = "liftingParticipant";
+
 	/** Attribute of "team" and "basePlugin" elements. */
 	static final String ID = "id";
 
