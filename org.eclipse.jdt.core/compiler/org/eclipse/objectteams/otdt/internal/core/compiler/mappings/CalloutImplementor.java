@@ -572,7 +572,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 	    				         len);
     		}
     		// add to front (callout-to-method), or simply replace (callout-to-field) first arg:
-	    	arguments[0] = gen.singleNameReference(IOTConstants._OT_BASE);
+	    	arguments[0] = gen.baseNameReference(IOTConstants._OT_BASE);
     	}
 
 		MessageSend messageSend = gen.messageSend
