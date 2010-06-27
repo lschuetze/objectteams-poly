@@ -16,7 +16,6 @@
  **********************************************************************/
 package org.objectteams;
 
-import java.awt.EventQueue;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -174,9 +173,6 @@ public /* team */ class Team implements ITeam {
 		synchronized (this._OT$registrationLock) {
 			boolean shouldUnregister= false;
 			synchronized(this) {
-				if (_OT$globalActive && EventQueue.isDispatchThread()) {
-					System.err.println("Warning: Deactivation for the AWT-Event-Thread is not effective right now!");
-				}
 				if (thread.equals(ALL_THREADS)) {
 					_OT$globalActive = false;
 					TeamThreadManager.removeGlobalActiveTeam(this);
@@ -313,8 +309,6 @@ public /* team */ class Team implements ITeam {
 	 * {@inheritDoc}
 	 */
 	public boolean isActive(Thread thread) {
-		if (_OT$globalActive && EventQueue.isDispatchThread())
-			return true;
 		if (thread.equals(ALL_THREADS)) {
 			return _OT$globalActive;
 		}

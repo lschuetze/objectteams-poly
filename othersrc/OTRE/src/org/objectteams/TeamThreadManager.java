@@ -38,10 +38,11 @@ public class TeamThreadManager {
 	private static HashSet<Thread> existingThreads = new HashSet<Thread>();
 	
 	public static boolean newThreadStarted(boolean isMain, Thread parent) {
-		if (!isMain && (new Exception().getStackTrace().length > 3))
+		Thread currentThread = Thread.currentThread();
+		// already registered?
+		if (existingThreads.contains(currentThread))
 			return false;
 		// workaround for application hang on Mac OS with Apple JVM:
-		Thread currentThread = Thread.currentThread();
 		if (System.getProperty("os.name").startsWith("Mac"))
 			if (currentThread.getName().equals("AWT-Shutdown"))
 				return false;
@@ -50,6 +51,11 @@ public class TeamThreadManager {
 		ITeam[] inheritableTeams;
 		synchronized (TeamThreadManager.class) {
 			existingThreads.add(currentThread);
+			if (isMain) {
+				for (Thread thread : fetchSystemThreads(currentThread))
+					if (thread != null)
+						existingThreads.add(thread);
+			}
 			
 			globalTeams = globalActiveTeams.toArray(new ITeam[globalActiveTeams.size()]);
 			inheritableTeams = teamsWithActivationInheritance.keySet().toArray(new ITeam[teamsWithActivationInheritance.size()]);
@@ -63,6 +69,24 @@ public class TeamThreadManager {
 					t.activate(currentThread); // pass activation from parent to child thread
 		return true;
 	}
+	
+	/* Fetch all existing threads existing at this point in time. Result array is padded with nulls. */
+	private static Thread[] fetchSystemThreads(Thread currentThread) {
+		ThreadGroup group = currentThread.getThreadGroup();
+		{
+			ThreadGroup parentGroup;
+			while ((parentGroup= group.getParent()) != null)
+				group = parentGroup;
+		}
+		int size = group.activeCount();
+		Thread[] allThreads;
+		do {
+			size += 2;
+			allThreads = new Thread[size];
+		} while (group.enumerate(allThreads) == size);
+		return allThreads;
+	}
+	
 	public static void threadEnded() {
 		ITeam[] teamsToDeactivate = internalThreadEnded();
 		// + remove per thread activation:
