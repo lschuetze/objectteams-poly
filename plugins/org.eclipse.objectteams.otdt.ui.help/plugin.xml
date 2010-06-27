@@ -115,6 +115,13 @@
          </view>
       </perspectiveExtension>
    </extension>
+   <extension
+         point="org.eclipse.objectteams.otdt.ui.updateRulerActionExtenders">
+      <extender
+            class="org.eclipse.objectteams.otdt.ui.help.actions.UpdateRulerAction"
+            editorClass="org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor">
+      </extender>
+   </extension>
 
    <!--
    <extension

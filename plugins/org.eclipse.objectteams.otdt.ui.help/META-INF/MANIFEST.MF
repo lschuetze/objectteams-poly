@@ -15,7 +15,10 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.ui.ide,
- org.eclipse.ui.browser
+ org.eclipse.ui.browser,
+ org.eclipse.ui.workbench.texteditor,
+ org.eclipse.jface.text,
+ org.eclipse.jdt.ui
 Bundle-ActivationPolicy: lazy
 Bundle-Classpath: otdtuihelp.jar
 Export-Package: org.eclipse.objectteams.otdt.ui.help,

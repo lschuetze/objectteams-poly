@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.help;
 
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -34,6 +35,8 @@ public class OTHelpPlugin extends AbstractUIPlugin {
 	public static final String PLUGIN_ID = "org.eclipse.objectteams.otdt.ui.help"; //$NON-NLS-1$
 	public static final String OTJLD_VIEW = "org.eclipse.objectteams.otdt.ui.help.views.OTJLDView"; //$NON-NLS-1$
 		
+	private static final String ICON_OTJLD = "icons/ot_paragraph.gif"; //$NON-NLS-1$
+
 	/**
 	 * The constructor.
 	 */
@@ -66,5 +69,9 @@ public class OTHelpPlugin extends AbstractUIPlugin {
 	public static ExceptionHandler getExceptionHandler()
 	{
 		return new ExceptionHandler(PLUGIN_ID);
+	}
+	
+	public static ImageDescriptor getOTJLDImage() {
+		return imageDescriptorFromPlugin(PLUGIN_ID, ICON_OTJLD);
 	}
 }

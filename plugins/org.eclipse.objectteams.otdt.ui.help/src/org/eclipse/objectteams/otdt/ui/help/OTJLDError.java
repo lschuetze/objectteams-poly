@@ -181,4 +181,8 @@ public class OTJLDError
     public static OTURL getHomepageURL() {
     	return new OTURL(OTHelpPlugin.getDefault().getBundle().getEntry(getHome()));
     }
+    
+    public static boolean isOTJProblem(String text) {
+    	return OTLD_MARKER_PATTERN.matcher(text).matches();
+    }
 }
