@@ -71,7 +71,7 @@ mkdir features
 (cd features; ln -s ${MASTER}/features/* .)
 mkdir plugins
 (cd plugins; ln -s ${MASTER}/plugins/* .)
-unzip ${STAGINGBASE}/out/otdt.zip
+unzip -n ${STAGINGBASE}/out/otdt.zip
 
 LOCATION=${BASE}/stagingRepo
 echo "LOCATION  = ${LOCATION}"
@@ -117,7 +117,10 @@ fi
 echo "====Step 7: jar-up metadata===="
 jar cf content.jar content.xml
 jar cf artifacts.jar artifacts.xml
-/bin/rm *.xml
+/bin/rm *.xml*
 ls -ltr *\.*
+
+echo "====Step 8: cleanup: remove symbolic links===="
+find . -type l -exec /bin/rm {} \;
 
 echo "====DONE===="
