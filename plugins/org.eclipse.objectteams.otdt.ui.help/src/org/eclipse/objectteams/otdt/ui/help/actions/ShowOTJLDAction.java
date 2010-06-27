@@ -35,8 +35,10 @@ import org.eclipse.objectteams.otdt.ui.help.OTJLDError.OTURL;
 import org.eclipse.objectteams.otdt.ui.help.views.OTJLDView;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.markers.MarkerItem;
 
 /**
@@ -88,7 +90,8 @@ public class ShowOTJLDAction implements IViewActionDelegate
         {
             if (OTJLDView.hasBrowser())
             {
-				m_otjldView = (OTJLDView) m_site.getPage().showView(OTHelpPlugin.OTJLD_VIEW);
+            	IWorkbenchPage page = m_site != null ? m_site.getPage() : PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+				m_otjldView = (OTJLDView) page.showView(OTHelpPlugin.OTJLD_VIEW);
 				m_otjldView.setURL(m_urls[0].getURL());
             }
         }

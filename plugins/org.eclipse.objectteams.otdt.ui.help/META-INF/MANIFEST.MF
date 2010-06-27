@@ -6,6 +6,9 @@ Bundle-Version: 0.7.0.qualifier
 Bundle-Activator: org.eclipse.objectteams.otdt.ui.help.OTHelpPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
+Export-Package: org.eclipse.objectteams.otdt.ui.help,
+ org.eclipse.objectteams.otdt.ui.help.actions,
+ org.eclipse.objectteams.otdt.ui.help.views
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.objectteams.otdt.ui,
@@ -18,10 +21,8 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.browser,
  org.eclipse.ui.workbench.texteditor,
  org.eclipse.jface.text,
- org.eclipse.jdt.ui
+ org.eclipse.jdt.ui,
+ org.eclipse.objectteams.otequinox
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Bundle-Classpath: otdtuihelp.jar
-Export-Package: org.eclipse.objectteams.otdt.ui.help,
- org.eclipse.objectteams.otdt.ui.help.actions,
- org.eclipse.objectteams.otdt.ui.help.views
-Bundle-RequiredExecutionEnvironment: J2SE-1.5
