@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
 <plugin>
+   <extension-point id="updateRulerActionExtenders" name="Update Ruler Action Extenders" schema="schema/updateRulerActionExtenders.exsd"/>
 
 <!-- Perspectives -->
    <extension
@@ -291,7 +292,7 @@
         	   actionID="RulerClick"
                label="openteam"
                class="org.eclipse.objectteams.otdt.ui.UpdateRulerAction"
-               id="org.eclipse.objectteams.otdt.refactoring.ui.actions.UpdateRulerAction">
+               id="org.eclipse.objectteams.otdt.ui.actions.UpdateRulerAction">
          </action>
       </editorContribution>
       <editorContribution
@@ -301,7 +302,7 @@
         	   actionID="RulerClick"
                label="openteam"
                class="org.eclipse.objectteams.otdt.ui.UpdateRulerAction"
-               id="org.eclipse.objectteams.otdt.refactoring.ui.actions.UpdateRulerAction">
+               id="org.eclipse.objectteams.otdt.ui.actions.UpdateRulerAction">
          </action>
       </editorContribution>
    </extension>

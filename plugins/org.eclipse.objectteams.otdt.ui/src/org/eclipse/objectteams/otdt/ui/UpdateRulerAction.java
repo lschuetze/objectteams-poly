@@ -28,6 +28,8 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -70,6 +72,8 @@ public class UpdateRulerAction extends AbstractRulerActionDelegate
 	
 	private IEditorPart        _editor = null;
 	private IVerticalRulerInfo _rulerInfo = null;
+	
+	private List<IUpdateRulerActionExtender> extenders = null;
 
 	public UpdateRulerAction()
 	{
@@ -91,32 +95,32 @@ public class UpdateRulerAction extends AbstractRulerActionDelegate
 	
 	public void menuAboutToShow(IMenuManager contextMenu)
 	{
+		IDocument    document    = null;
+		int          clickedLine = _rulerInfo.getLineOfLastMouseButtonActivity();
+		if (this._editor instanceof ITextEditor) {
+			ITextEditor textEditor = (ITextEditor) this._editor;
+			document= textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput());
+		}
 		try
 		{
-			IMarker[] markers = findMarkers();
+			IMarker[] markers = findCallinMarkers();
 
 			if (markers != null && markers.length != 0)
 			{				
-				Integer      clickedLine = new Integer(_rulerInfo.getLineOfLastMouseButtonActivity() + 1);
-				IDocument    document    = null;
-				if (this._editor instanceof ITextEditor) {
-					ITextEditor textEditor = (ITextEditor) this._editor;
-					document= textEditor.getDocumentProvider().getDocument(textEditor.getEditorInput());
-				}
 				for (int idx = 0; idx < markers.length; idx++)
 				{
 					IMarker curMarker = markers[idx];
 
-					Object lineAttribute = curMarker.getAttribute(IMarker.LINE_NUMBER);
-					if (lineAttribute != null)
+					int line = curMarker.getAttribute(IMarker.LINE_NUMBER, -1);
+					if (line != -1)
 					{
-						if (lineAttribute.equals(clickedLine))
+						if (line-1  == clickedLine) // IMarker.LINE_NUMBER is 1-based, others are 0-based
 							insertTeamMenus(contextMenu, curMarker);
 					} else if (document != null) {
 						// markers in ClassFileEditor have no line number, must go via position:
-						Integer startAttribute = (Integer) curMarker.getAttribute(IMarker.CHAR_START);
+						int start = curMarker.getAttribute(IMarker.CHAR_START, -1);
 						try {
-							if (clickedLine.equals(document.getLineOfOffset(startAttribute)+1))
+							if (clickedLine == document.getLineOfOffset(start))
 								insertTeamMenus(contextMenu, curMarker);
 						}
 						catch (BadLocationException e) { /* nop */ }
@@ -128,9 +132,14 @@ public class UpdateRulerAction extends AbstractRulerActionDelegate
 		{
 			OTDTUIPlugin.getExceptionHandler().logCoreException("Problems extending ruler context menu", ex); //$NON-NLS-1$
 		}
+		// load and notify extenders:
+		if (this.extenders == null)
+			loadExtenders();
+		for (IUpdateRulerActionExtender extender : this.extenders)
+			extender.menuAboutToShow(contextMenu, document, this._editor, clickedLine);
 	}
 
-	private IMarker[] findMarkers() throws CoreException
+	private IMarker[] findCallinMarkers() throws CoreException
 	{
 		
 		final IEditorInput editorInput = _editor.getEditorInput();
@@ -284,4 +293,18 @@ public class UpdateRulerAction extends AbstractRulerActionDelegate
     {
         return getSubMenu(menu, subMenuName) != null;
     }
+
+	private void loadExtenders() {
+		this.extenders = new ArrayList<IUpdateRulerActionExtender>();
+		IConfigurationElement[] configs = RegistryFactory.getRegistry().getConfigurationElementsFor(
+				OTDTUIPluginConstants.UIPLUGIN_ID, OTDTUIPluginConstants.UPDATE_RULER_ACTION_EXTENDER_ID);
+		for (IConfigurationElement config : configs) {
+			try {
+				if (this._editor.getClass().getName().equals(config.getAttribute(OTDTUIPluginConstants.UPDATE_RULER_ACTION_EXTENDER_EDITORCLASS)))
+					this.extenders.add((IUpdateRulerActionExtender) config.createExecutableExtension(OTDTUIPluginConstants.UPDATE_RULER_ACTION_EXTENDER_CLASS));
+			} catch (CoreException e) {
+				OTDTUIPlugin.log(e);
+			}
+		}		
+	}
 }
