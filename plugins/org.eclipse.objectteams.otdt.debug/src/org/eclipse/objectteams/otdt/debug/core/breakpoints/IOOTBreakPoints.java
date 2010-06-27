@@ -28,11 +28,11 @@ package org.eclipse.objectteams.otdt.debug.core.breakpoints;
  */
 public interface IOOTBreakPoints 
 {
-  int LINE_TeamConstructor = 63;
-  int LINE_ConfinedGetTeam = 94;
-  int LINE_ActivateMethod = 165;
-  int LINE_DeactivateMethod = 199;
-  int LINE_ImplicitActivateMethod = 246;
-  int LINE_ImplicitDeactivateMethod = 281;
-  int LINE_FinalizeMethod = 492;
+  int LINE_TeamConstructor = 62;
+  int LINE_ConfinedGetTeam = 93;
+  int LINE_ActivateMethod = 164;
+  int LINE_DeactivateMethod = 195;
+  int LINE_ImplicitActivateMethod = 242;
+  int LINE_ImplicitDeactivateMethod = 277;
+  int LINE_FinalizeMethod = 486;
 }
