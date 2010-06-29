@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.util.Messages;
-import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 
 /**
  * @see IJavaModelStatus
@@ -186,9 +185,6 @@ public class JavaModelStatus extends Status implements IJavaModelStatus, IJavaMo
 	 * Returns the message that is relevant to the code of this status.
 	 */
 	public String getMessage() {
-//{ObjectTeams: watch out for OTJavaElements:
-	  try {
-// SH}
 		Throwable exception = getException();
 		if (exception == null) {
 			switch (getCode()) {
@@ -401,15 +397,6 @@ public class JavaModelStatus extends Status implements IJavaModelStatus, IJavaMo
 				return exception.toString();
 			}
 		}
-//{ObjectTeams: problem due to OT element?
-	  } catch (ClassCastException cce) {
-		if (this.elements[0] instanceof IOTJavaElement) {
-			this.elements[0] = ((IOTJavaElement)this.elements[0]).getCorrespondingJavaElement();
-			return getMessage(); // try again.
-		}
-		return "Unknown Status: "+cce.getMessage();  //$NON-NLS-1$
-	  }
-// SH}
 	}
 	/**
 	 * @see IJavaModelStatus#getPath()

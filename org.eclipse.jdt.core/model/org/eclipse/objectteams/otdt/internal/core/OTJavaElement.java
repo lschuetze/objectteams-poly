@@ -25,7 +25,6 @@ import java.util.List;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.PlatformObject;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
@@ -34,6 +33,8 @@ import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.core.JavaElement;
+import org.eclipse.jdt.internal.core.Member;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 
@@ -44,7 +45,7 @@ import org.eclipse.objectteams.otdt.core.IOTJavaElement;
  * @author jwloka
  * @version $Id: OTJavaElement.java 23416 2010-02-03 19:59:31Z stephan $
  */
-public abstract class OTJavaElement extends PlatformObject implements IOTJavaElement
+public abstract class OTJavaElement extends Member implements IOTJavaElement
 {
     // previously, a mapping and its referenced method had the same handle identifier.
     // However, cf.
@@ -57,7 +58,6 @@ public abstract class OTJavaElement extends PlatformObject implements IOTJavaEle
     public static final String METHODMAPPING = Character.toString(OTEM_METHODMAPPING);
 
 	private int          _type;
-	protected IJavaElement _parent;
 	private List<IJavaElement>         _children;
 	private IJavaElement _correspondingJavaElem;
 	
@@ -71,15 +71,13 @@ public abstract class OTJavaElement extends PlatformObject implements IOTJavaEle
 	 */
 	public OTJavaElement(int type, IJavaElement correspondingJavaElem, IJavaElement parent, boolean addAsChild)
 	{
+		super((JavaElement) parent);
 		_type     = type;
 		_correspondingJavaElem = correspondingJavaElem;
-		_parent   = parent;
 		_children = new ArrayList<IJavaElement>();
 
-		if (addAsChild && _parent instanceof OTJavaElement)
-		{
-			((OTJavaElement)_parent).addChild(this);
-		}
+		if (addAsChild && parent instanceof OTJavaElement)
+			((OTJavaElement)parent).addChild(this);
 	}
 
 	public boolean hasChildren()
@@ -110,12 +108,10 @@ public abstract class OTJavaElement extends PlatformObject implements IOTJavaEle
 	{
 //{OTModelUpdate : if null return the parent of the wrapped java element
 //orig:		return _parent;
-	    IJavaElement result = _parent;
+	    IJavaElement result = this.parent;
 	    
-	    if(_parent == null)
-	    {
+	    if (result == null)
 	        result = getCorrespondingJavaElement().getParent();
-	    }
 	    
 	    return result;
 //jwl}	    
@@ -192,6 +188,12 @@ public abstract class OTJavaElement extends PlatformObject implements IOTJavaEle
         return _correspondingJavaElem.exists();
     }
 
+    @Override
+    public void close() throws JavaModelException {
+    	super.close();
+    	((JavaElement) this._correspondingJavaElem).close();
+    }
+    
     public IJavaElement getAncestor(int ancestorType)
     {
     	// first see if an OT element was requested (COPY&PASTE from JavaElement):

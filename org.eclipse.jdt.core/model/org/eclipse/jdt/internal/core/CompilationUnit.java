@@ -526,12 +526,7 @@ public IJavaElement[] findElements(IJavaElement element) {
 	if (element == null) return null;
 	IJavaElement currentElement = this;
 	for (int i = children.size()-1; i >= 0; i--) {
-//ObjectTeams: defensive: IOTJavaElements are not SourceRefElement:
-/* orig:
 		SourceRefElement child = (SourceRefElement)children.get(i);
-  :giro */
-		IJavaElement child = (IJavaElement)children.get(i);
-// SH}
 		switch (child.getElementType()) {
 			case IJavaElement.PACKAGE_DECLARATION:
 				currentElement = ((ICompilationUnit)currentElement).getPackageDeclaration(child.getElementName());
@@ -553,22 +548,12 @@ public IJavaElement[] findElements(IJavaElement element) {
 					case IJavaElement.FIELD:
 					case IJavaElement.INITIALIZER:
 					case IJavaElement.METHOD:
-//{ObjectTeams: stronger cast now, that we know what kind of element:
-/* orig:
 						currentElement =  ((IMember)currentElement).getType(child.getElementName(), child.occurrenceCount);
-  :giro */
-						currentElement =  ((IMember)currentElement).getType(child.getElementName(), ((SourceRefElement)child).occurrenceCount);
-// SH}
 						break;
 				}
 				break;
 			case IJavaElement.INITIALIZER:
-//{ObjectTeams: stronger cast now, that we know what kind of element:
-/* orig:
 				currentElement = ((IType)currentElement).getInitializer(child.occurrenceCount);
-  :giro */
-				currentElement = ((IType)currentElement).getInitializer(((SourceRefElement)child).occurrenceCount);
-// SH}
 				break;
 			case IJavaElement.FIELD:
 				currentElement = ((IType)currentElement).getField(child.getElementName());

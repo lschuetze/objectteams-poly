@@ -48,6 +48,7 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.util.FieldData;
 import org.eclipse.objectteams.otdt.core.util.MethodData;
 import org.eclipse.objectteams.otdt.internal.core.MappingElementInfo;
+import org.eclipse.objectteams.otdt.internal.core.SourceMethodMappingInfo;
 
 /**
  * A requestor for the fuzzy parser, used to compute the children of an ICompilationUnit.
@@ -215,9 +216,7 @@ public void acceptProblem(CategorizedProblem problem) {
 		this.hasSyntaxErrors = true;
 	}
 }
-//{ObjectTeams: relax from JavaElement to IJavaElement:
-private void addToChildren(Object parentInfo, IJavaElement handle) {
-// SH}
+private void addToChildren(Object parentInfo, JavaElement handle) {
 	ArrayList childrenList = (ArrayList) this.children.get(parentInfo);
 	if (childrenList == null)
 		this.children.put(parentInfo, childrenList = new ArrayList());
@@ -803,8 +802,10 @@ public void exitCallinMapping(int sourceEnd, int declarationSourceEnd)
 	info.setDeclarationSourceEnd(declarationSourceEnd);
 
 	IMethodMapping handle = OTModelManager.getSharedInstance().addCallinBinding(parent, info);
-	if (handle != null)
-		addToChildren(this.infoStack.peek(), handle);
+	if (handle != null) {
+		createCallinInfo(info, handle);
+		addToChildren(this.infoStack.peek(), (JavaElement)handle);
+	}
 }
 
 public void exitCalloutMapping(int sourceEnd, int declarationSourceEnd)
@@ -818,7 +819,7 @@ public void exitCalloutMapping(int sourceEnd, int declarationSourceEnd)
 
 	IMethodMapping handle = OTModelManager.getSharedInstance().addCalloutBinding(parent, info);
 	if (handle != null)
-		addToChildren(this.infoStack.peek(), handle);
+		addToChildren(this.infoStack.peek(), (JavaElement)handle);
 }
 
 public void exitCalloutToFieldMapping(int sourceEnd, int declarationSourceEnd)
@@ -832,9 +833,63 @@ public void exitCalloutToFieldMapping(int sourceEnd, int declarationSourceEnd)
 
     IMethodMapping handle = OTModelManager.getSharedInstance().addCalloutToFieldBinding(parent, info);
 	if (handle != null)
-		addToChildren(this.infoStack.peek(), handle);
+		addToChildren(this.infoStack.peek(), (JavaElement)handle);
 }
 
+private SourceMethodMappingInfo createCallinInfo(MappingElementInfo mappingInfo, IMethodMapping handle) {
+	// TODO(SH): handle annotations and nested elements (anonymous type in parameter mapping??)
+	SourceMethodMappingInfo info = new SourceMethodMappingInfo();
+	info.setSourceRangeStart(mappingInfo.getDeclarationSourceStart());
+	int flags = mappingInfo.getDeclaredModifiers();
+	info.setNameSourceStart(mappingInfo.getSourceStart());
+	info.setNameSourceEnd(mappingInfo.getSourceEnd());
+	info.setFlags(flags);
+	JavaModelManager manager = JavaModelManager.getJavaModelManager();
+	
+	MethodData roleMethod = mappingInfo.getRoleMethod();
+	{
+		String[] parameterNames = roleMethod.getArgumentNames();
+		for (int i = 0, length = parameterNames.length; i < length; i++)
+			parameterNames[i] = manager.intern(parameterNames[i]);
+		info.setRoleArgumentNames(parameterNames);
+		String returnType = roleMethod.getReturnType();
+		if (returnType == null) returnType = "void";
+		info.setRoleReturnType(manager.intern(returnType));
+	}
+
+	MethodData[] baseMethods = mappingInfo.getBaseMethods();
+	String[][] baseParameterNames = new String[baseMethods.length][];
+	String[] baseReturnTypes = new String[baseMethods.length];
+	for (int m = 0; m < baseMethods.length; m++) {
+		String[] parameterNames = baseMethods[m].getArgumentNames();
+		for (int i = 0, length = parameterNames.length; i < length; i++)
+			parameterNames[i] = manager.intern(parameterNames[i]);
+		baseParameterNames[m] = parameterNames;
+		String returnType = baseMethods[m].getReturnType();
+		if (returnType == null) returnType = "void";
+		baseReturnTypes[m] = manager.intern(returnType);		
+	}
+	info.setBaseArgumentNames(baseParameterNames);
+	info.setBaseReturnType(baseReturnTypes);			
+	this.newElements.put(handle, info);
+
+// TODO:
+//	if (mappingInfo.typeParameters != null) {
+//		for (int i = 0, length = mappingInfo.typeParameters.length; i < length; i++) {
+//			TypeParameterInfo typeParameterInfo = mappingInfo.typeParameters[i];
+//			acceptTypeParameter(typeParameterInfo, info);
+//		}
+//	}
+//	if (mappingInfo.annotations != null) {
+//		int length = mappingInfo.annotations.length;
+//		this.unitInfo.annotationNumber += length;
+//		for (int i = 0; i < length; i++) {
+//			org.eclipse.jdt.internal.compiler.ast.Annotation annotation = mappingInfo.annotations[i];
+//			acceptAnnotation(annotation, info, handle);
+//		}
+//	}
+	return info;
+}
 
 /**
  * OTDT extension

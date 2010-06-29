@@ -17,7 +17,6 @@ import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 
 /**
  * @see IJavaElementDelta
@@ -582,15 +581,7 @@ public String toDebugString(int depth) {
 	for (int i= 0; i < depth; i++) {
 		buffer.append('\t');
 	}
-//{ObjectTeams: ot elements are not JavaElement
-  try {
-// orig:
 	buffer.append(((JavaElement)getElement()).toDebugString());
-// :giro
-  } catch (ClassCastException cce) {
-	((IOTJavaElement)getElement()).toString(depth, buffer);
-  }
-// SH}
 	toDebugString(buffer);
 	IJavaElementDelta[] children = getAffectedChildren();
 	if (children != null) {

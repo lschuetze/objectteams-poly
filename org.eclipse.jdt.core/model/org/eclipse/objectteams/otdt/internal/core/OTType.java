@@ -51,6 +51,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.core.JavaElement;
+import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IOTTypeHierarchy;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
@@ -716,5 +718,21 @@ public class OTType extends OTJavaElement implements IOTType
 
 	public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelException {
 		return getIType().getAttachedJavadoc(monitor);
+	}
+
+	@Override
+	public void close() throws JavaModelException {
+		super.close();
+		OTModelManager.removeOTElement(this);
+	}
+	
+	@Override
+	protected Object createElementInfo() {
+		throw new UnsupportedOperationException("Not yet implemented for OTType");
+	}
+
+	@Override
+	public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento, WorkingCopyOwner owner) {
+		return ((JavaElement) getCorrespondingJavaElement()).getHandleFromMemento(token, memento, owner);
 	}
 }

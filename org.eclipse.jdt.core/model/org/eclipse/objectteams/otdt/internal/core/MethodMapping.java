@@ -762,4 +762,9 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	public IAnnotation[] getAnnotations() throws JavaModelException {
 		return getIMethod().getAnnotations();
 	}
+
+	@Override
+	protected char getHandleMementoDelimiter() {
+		return OTEM_METHODMAPPING;
+	}
 }

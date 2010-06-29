@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.jdt.internal.core.util.Util;
-import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.internal.core.OTJavaElement;
 
 /**
@@ -216,9 +215,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		int size = children.length;
 		ArrayList list = new ArrayList(size);
 		for (int i = 0; i < size; ++i) {
-//{ObjectTeams: relaxed from JavaElement to IJavaElement:
-			IJavaElement elt = (IJavaElement)children[i];
-// SH}
+			JavaElement elt = (JavaElement)children[i];
 			if (elt.getElementType() == type) {
 				list.add(elt);
 			}
@@ -377,16 +374,8 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 			IJavaElement[] children = getChildren();
 			for (int i = children.length-1; i >= 0; i--) {
 				IJavaElement aChild = children[i];
-//{ObjectTeams: relax type from SourceRefElement to ISourceReference
-				// note: descending from a compilation unit we can never reach OTTypes,
-				//       but SourceTypes do contain MethodMappings.
-/* orig:
 				if (aChild instanceof SourceRefElement) {
 					SourceRefElement child = (SourceRefElement) children[i];
-  :giro */
-				if (aChild instanceof ISourceReference) {
-					ISourceReference child = (ISourceReference)children[i];
-// SH}
 					ISourceRange range = child.getSourceRange();
 					int start = range.getOffset();
 					int end = start + range.getLength();
@@ -396,49 +385,21 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 							int declarationStart = start;
 							SourceRefElement candidate = null;
 							do {
-//{ObjectTeams: need a SourceRefElement variable:
-								SourceRefElement childElem = null;
-								if (child instanceof SourceRefElement)
-									childElem = (SourceRefElement)child;
-// orig:
 								// check name range
 								range = ((IField)child).getNameRange();
 								if (position <= range.getOffset() + range.getLength()) {
-/* orig:
 									candidate = child;
 								} else {
 									return candidate == null ? child.getSourceElementAt(position) : candidate.getSourceElementAt(position);
-  :giro */
-				// use the new var with original type:
-									candidate = childElem;
-								} else {
-									return candidate == null ? childElem.getSourceElementAt(position) : candidate.getSourceElementAt(position);
 								}
-  /* orig:
 								child = --i>=0 ? (SourceRefElement) children[i] : null;
-    :giro */					// weaker cast also here:
-								child = --i>=0 ? (ISourceReference) children[i] : null;
-// SH}
 							} while (child != null && child.getSourceRange().getOffset() == declarationStart);
 							// position in field's type: use first field
 							return candidate.getSourceElementAt(position);
 						} else if (child instanceof IParent) {
-//{ObjectTeams: add checked cast:
-/* orig:
 							return child.getSourceElementAt(position);
-  :giro */
-							if (child instanceof JavaElement)
-								return ((JavaElement)child).getSourceElementAt(position);
-							else
-								return aChild; // assumed to be an OTJavaElement, don't descend further
-// SH}
 						} else {
-//{ObjectTeams: use reference of different type:
-/* orig:
 							return child;
-  :giro */
-							return aChild;
-// SH}
 						}
 					}
 				}
@@ -659,15 +620,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		IJavaElement[] children = ((JavaElementInfo)info).getChildren();
 		for (int i = 0; i < children.length; i++) {
 			buffer.append("\n"); //$NON-NLS-1$
-//{ObjectTeams: also cope with IOTJavaElements:
-		  try {
-// orig:
 			((JavaElement)children[i]).toString(tab + 1, buffer);
-// :giro
-		  } catch (ClassCastException cce) {
-			((IOTJavaElement)children[i]).toString(tab+1, buffer);
-		  }
-// SH}
 		}
 	}
 	/**

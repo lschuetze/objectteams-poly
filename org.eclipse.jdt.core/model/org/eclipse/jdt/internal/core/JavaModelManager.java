@@ -66,9 +66,6 @@ import org.eclipse.jdt.internal.core.util.WeakHashSet;
 import org.eclipse.jdt.internal.core.util.WeakHashSetOfCharArray;
 import org.eclipse.jdt.internal.core.util.LRUCache.Stats;
 import org.eclipse.jdt.internal.formatter.DefaultCodeFormatter;
-import org.eclipse.objectteams.otdt.core.IOTJavaElement;
-import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.osgi.service.prefs.BackingStoreException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -77,8 +74,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 /**
- * MIGRATION_STATE: 3.3.2
- *
  * <h4>OTDT changes:</h4>
  * <dl>
  * <dt>What:<dd> respect IOTJavaElement which cannot be casted to JavaElement
@@ -3497,19 +3492,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		if (info instanceof JavaElementInfo) {
 			IJavaElement[] children = ((JavaElementInfo)info).getChildren();
 			for (int i = 0, size = children.length; i < size; ++i) {
-//{ObjectTeams: check for OTJavaElement:
-				JavaElement child = null;
-				if (children[i] instanceof IOTJavaElement) {
-					child = (JavaElement)((IOTJavaElement)children[i]).getCorrespondingJavaElement();
-					if (children[i] instanceof IOTType) // more cleanup necessary here:
-						OTModelManager.removeOTElement((IOTType) children[i]);
-				} else {
-					child = (JavaElement) children[i];
-				}
-/* orig:
 				JavaElement child = (JavaElement) children[i];
-  :giro */
-// SH}
 				try {
 					child.close();
 				} catch (JavaModelException e) {

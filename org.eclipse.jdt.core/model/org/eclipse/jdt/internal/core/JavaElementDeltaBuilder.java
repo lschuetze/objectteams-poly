@@ -196,10 +196,6 @@ private void findAdditions(IJavaElement newElement, int depth) {
 		newInfo = (JavaElementInfo)((JavaElement)newElement).getElementInfo();
 	} catch (JavaModelException npe) {
 		return;
-//{ObjectTeams: ot elements are not JavaElement:
-	} catch (ClassCastException cce) {
-		return; // no details for ot elements
-// SH}
 	}
 
 	findContentChange(oldInfo, newInfo, newElement);
@@ -229,10 +225,6 @@ private void findChangesInPositioning(IJavaElement element, int depth) {
 	if (element instanceof IParent) {
 		JavaElementInfo info = null;
 		try {
-//{ObjectTeams: for IOTJavaElemens:
-			if (element instanceof IOTJavaElement)
-				element = ((IOTJavaElement)element).getCorrespondingJavaElement();
-// SH}
 			info = (JavaElementInfo)((JavaElement)element).getElementInfo();
 		} catch (JavaModelException npe) {
 			return;
@@ -313,6 +305,8 @@ private void findContentChange(JavaElementInfo oldInfo, JavaElementInfo newInfo,
 					((SourceFieldElementInfo)newInfo).getTypeName())) {
 				this.delta.changed(newElement, IJavaElementDelta.F_CONTENT);
 			}
+//{ObjectTeams: FIXME: compare SourceMethodMappingInfo:
+// SH}
 		} else if (oldInfo instanceof SourceTypeElementInfo && newInfo instanceof SourceTypeElementInfo) {
 			SourceTypeElementInfo oldSourceTypeInfo = (SourceTypeElementInfo)oldInfo;
 			SourceTypeElementInfo newSourceTypeInfo = (SourceTypeElementInfo)newInfo;
@@ -431,7 +425,7 @@ private void recordElementInfo(IJavaElement element, JavaModel model, int depth)
 		return;
 	}
 	JavaElementInfo info = (JavaElementInfo)JavaModelManager.getJavaModelManager().getInfo(element);
-//{ObjectTeams: for OT elements use the corresponding java element to find an info:
+//{ObjectTeams: for OT elements use the corresponding java element to find an info: FIXME(SH): still needed?
 	if (info == null && element instanceof IOTJavaElement)
 		info = (JavaElementInfo)JavaModelManager.getJavaModelManager().getInfo(((IOTJavaElement)element).getCorrespondingJavaElement());
 // SH}
@@ -466,10 +460,6 @@ private void recordNewPositions(IJavaElement newElement, int depth) {
 	if (depth < this.maxDepth && newElement instanceof IParent) {
 		JavaElementInfo info = null;
 		try {
-//{ObjectTeams: for IOTJavaElemens:
-			if (newElement instanceof IOTJavaElement)
-				newElement = ((IOTJavaElement)newElement).getCorrespondingJavaElement();
-// SH}
 			info = (JavaElementInfo)((JavaElement)newElement).getElementInfo();
 		} catch (JavaModelException npe) {
 			return;

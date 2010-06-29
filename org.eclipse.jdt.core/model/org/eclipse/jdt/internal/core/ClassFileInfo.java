@@ -53,12 +53,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CalloutMappi
 	 * <code>ClassFile</code>. These are kept here because we don't have
 	 * access to the <code>BinaryType</code> info (<code>ClassFileReader</code>).
 	 */
-//{ObjectTeams: support IJavaElement:
-/* orig:
 	protected JavaElement[] binaryChildren = null;
-  :giro */
-	protected IJavaElement[] binaryChildren = null;
-// SH}
 	/*
 	 * The type parameters in this class file.
 	 */
@@ -474,12 +469,7 @@ protected void readBinaryChildren(ClassFile classFile, HashMap newElements, IBin
 // SH}
 	}
 
-//{ObjectTeams: admit IJavaElement (for IOTJavaElement):
-/* orig:
 	this.binaryChildren = new JavaElement[childrenHandles.size()];
-  :giro */
-	this.binaryChildren = new IJavaElement[childrenHandles.size()];
-// SH}
 	childrenHandles.toArray(this.binaryChildren);
 	int typeParameterHandleSize = typeParameterHandles.size();
 	if (typeParameterHandleSize == 0) {
@@ -497,21 +487,11 @@ void removeBinaryChildren() throws JavaModelException {
 	if (this.binaryChildren != null) {
 		JavaModelManager manager = JavaModelManager.getJavaModelManager();
 		for (int i = 0; i <this.binaryChildren.length; i++) {
-//{ObjectTeams: use IJavaElement where possible:
-/* orig:
 			JavaElement child = this.binaryChildren[i];
-  :giro */
-			IJavaElement child = this.binaryChildren[i];
-  //orig:
 			if (child instanceof BinaryType) {
 				manager.removeInfoAndChildren((JavaElement)child.getParent());
 			} else {
-/*
 				manager.removeInfoAndChildren(child);
-  :giro */
-				if (child instanceof JavaElement)
-					manager.removeInfoAndChildren((JavaElement) child);
-// SH}
 			}
 		}
 		this.binaryChildren = JavaElement.NO_ELEMENTS;
