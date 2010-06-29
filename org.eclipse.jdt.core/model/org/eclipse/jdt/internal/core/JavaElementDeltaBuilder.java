@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
+import org.eclipse.objectteams.otdt.internal.core.SourceMethodMappingInfo;
 
 /**
  * OTDT changes:
@@ -305,7 +306,20 @@ private void findContentChange(JavaElementInfo oldInfo, JavaElementInfo newInfo,
 					((SourceFieldElementInfo)newInfo).getTypeName())) {
 				this.delta.changed(newElement, IJavaElementDelta.F_CONTENT);
 			}
-//{ObjectTeams: FIXME: compare SourceMethodMappingInfo:
+//{ObjectTeams: compare SourceMethodMappingInfo:
+		} else if (oldInfo instanceof SourceMethodMappingInfo && newInfo instanceof SourceMethodMappingInfo) {
+			SourceMethodMappingInfo oldMappingInfo = (SourceMethodMappingInfo) oldInfo;
+			SourceMethodMappingInfo newMappingInfo = (SourceMethodMappingInfo) newInfo;
+			if (!oldMappingInfo.modifiersEqual(newMappingInfo))
+				this.delta.changed(newElement, IJavaElementDelta.F_MODIFIERS);
+			char[] oldName = oldMappingInfo.getCallinName();
+			char[] newName = newMappingInfo.getCallinName();
+			if (   oldMappingInfo.isCallin()
+				&& !(oldName[0] == '<' && newName[0] == '<') // if both are generated don't bother to compare 
+				&& !CharOperation.equals(oldName, newName))
+				this.delta.changed(newElement, IJavaElementDelta.F_CONTENT);
+			if (!oldMappingInfo.signaturesEqual(newMappingInfo))
+				this.delta.changed(newElement, IJavaElementDelta.F_CONTENT);
 // SH}
 		} else if (oldInfo instanceof SourceTypeElementInfo && newInfo instanceof SourceTypeElementInfo) {
 			SourceTypeElementInfo oldSourceTypeInfo = (SourceTypeElementInfo)oldInfo;

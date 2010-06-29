@@ -210,10 +210,14 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 		}
 
 		CallinMapping other = (CallinMapping)obj;
-		if (   (this._name.charAt(0) != '<' || other._name.charAt(0) != '<')
-			&& !this._name.equals(other._name)) // only compare source level names, not generated ones
+		if (   (this._name.charAt(0) != '<' && other._name.charAt(0) != '<')
+			&& !this._name.equals(other._name)) // require only source level names to be equal, not generated ones
 			return false;
-		return this._callinKind == other._callinKind && super.equals(obj);
+		if (!super.equals(obj))
+			return false;
+		if (this._name.equals(other._name)) // if names are equal ignore changes in callin kind
+			return true;
+		return this._callinKind == other._callinKind;
     }
     
     @Override

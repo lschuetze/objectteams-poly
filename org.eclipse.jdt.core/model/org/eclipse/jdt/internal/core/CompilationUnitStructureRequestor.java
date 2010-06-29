@@ -794,7 +794,7 @@ protected Object getMemberValue(org.eclipse.jdt.internal.core.MemberValuePair me
 //{OTDTUI: added implementation to corresponding extension in ISourceElementRequestor
 public void exitCallinMapping(int sourceEnd, int declarationSourceEnd)
 {
-	// TODO(ak): add support for parameter mapping
+	// no support for parameter mapping, are considered as the body of the mapping
 	IType parent = (IType)this.handleStack.peek();
 
 	MappingElementInfo info = (MappingElementInfo)this.infoStack.pop();
@@ -803,14 +803,14 @@ public void exitCallinMapping(int sourceEnd, int declarationSourceEnd)
 
 	IMethodMapping handle = OTModelManager.getSharedInstance().addCallinBinding(parent, info);
 	if (handle != null) {
-		createCallinInfo(info, handle);
+		createMappingInfo(info, handle);
 		addToChildren(this.infoStack.peek(), (JavaElement)handle);
 	}
 }
 
 public void exitCalloutMapping(int sourceEnd, int declarationSourceEnd)
 {
-	// TODO(ak): add support for parameter mapping
+	// no support for parameter mapping, are considered as the body of the mapping
 	IType parent = (IType)this.handleStack.peek();
 
 	MappingElementInfo info = (MappingElementInfo)this.infoStack.pop();
@@ -818,25 +818,29 @@ public void exitCalloutMapping(int sourceEnd, int declarationSourceEnd)
 	info.setDeclarationSourceEnd(declarationSourceEnd);
 
 	IMethodMapping handle = OTModelManager.getSharedInstance().addCalloutBinding(parent, info);
-	if (handle != null)
+	if (handle != null) {
+		createMappingInfo(info, handle);
 		addToChildren(this.infoStack.peek(), (JavaElement)handle);
+	}
 }
 
 public void exitCalloutToFieldMapping(int sourceEnd, int declarationSourceEnd)
 {
-    //TODO(gbr) add support for value mapping
-    IType parent = (IType)this.handleStack.peek();
+	// no support for parameter mapping, are considered as the body of the mapping
+	IType parent = (IType)this.handleStack.peek();
 
     MappingElementInfo info = (MappingElementInfo)this.infoStack.pop();
     info.setSourceEnd(sourceEnd);
     info.setDeclarationSourceEnd(declarationSourceEnd);
 
     IMethodMapping handle = OTModelManager.getSharedInstance().addCalloutToFieldBinding(parent, info);
-	if (handle != null)
+	if (handle != null) {
+		createMappingInfo(info, handle);
 		addToChildren(this.infoStack.peek(), (JavaElement)handle);
+	}
 }
 
-private SourceMethodMappingInfo createCallinInfo(MappingElementInfo mappingInfo, IMethodMapping handle) {
+private SourceMethodMappingInfo createMappingInfo(MappingElementInfo mappingInfo, IMethodMapping handle) {
 	// TODO(SH): handle annotations and nested elements (anonymous type in parameter mapping??)
 	SourceMethodMappingInfo info = new SourceMethodMappingInfo();
 	info.setSourceRangeStart(mappingInfo.getDeclarationSourceStart());
@@ -844,6 +848,12 @@ private SourceMethodMappingInfo createCallinInfo(MappingElementInfo mappingInfo,
 	info.setNameSourceStart(mappingInfo.getSourceStart());
 	info.setNameSourceEnd(mappingInfo.getSourceEnd());
 	info.setFlags(flags);
+	if (mappingInfo.getCallinKind() != 0)
+		info.setCallinKind(mappingInfo.getCallinKind(), mappingInfo.hasSignature(), mappingInfo.getCallinName());
+	else if (mappingInfo.getBaseField() != null)
+		info.setCalloutKind(mappingInfo.isOverride(), mappingInfo.getDeclaredModifiers(), mappingInfo.getBaseField().isSetter());
+	else
+		info.setCalloutKind(mappingInfo.isOverride(), mappingInfo.getDeclaredModifiers());
 	JavaModelManager manager = JavaModelManager.getJavaModelManager();
 	
 	MethodData roleMethod = mappingInfo.getRoleMethod();
@@ -852,24 +862,28 @@ private SourceMethodMappingInfo createCallinInfo(MappingElementInfo mappingInfo,
 		for (int i = 0, length = parameterNames.length; i < length; i++)
 			parameterNames[i] = manager.intern(parameterNames[i]);
 		info.setRoleArgumentNames(parameterNames);
-		String returnType = roleMethod.getReturnType();
-		if (returnType == null) returnType = "void";
-		info.setRoleReturnType(manager.intern(returnType));
 	}
 
 	MethodData[] baseMethods = mappingInfo.getBaseMethods();
 	String[][] baseParameterNames = new String[baseMethods.length][];
+	String[][] baseParameterTypes = new String[baseMethods.length][];
 	String[] baseReturnTypes = new String[baseMethods.length];
 	for (int m = 0; m < baseMethods.length; m++) {
 		String[] parameterNames = baseMethods[m].getArgumentNames();
 		for (int i = 0, length = parameterNames.length; i < length; i++)
 			parameterNames[i] = manager.intern(parameterNames[i]);
 		baseParameterNames[m] = parameterNames;
+		String[] parameterTypes = roleMethod.getArgumentTypes();
+		for (int i = 0, length = parameterTypes.length; i < length; i++)
+			parameterTypes[i] = manager.intern(parameterTypes[i]);
+		baseParameterTypes[m] = parameterTypes;
+
 		String returnType = baseMethods[m].getReturnType();
 		if (returnType == null) returnType = "void";
 		baseReturnTypes[m] = manager.intern(returnType);		
 	}
 	info.setBaseArgumentNames(baseParameterNames);
+	info.setBaseArgumentTypes(baseParameterTypes);
 	info.setBaseReturnType(baseReturnTypes);			
 	this.newElements.put(handle, info);
 
