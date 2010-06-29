@@ -359,6 +359,21 @@ public abstract class AbstractJavaModelTests extends SuiteOfTestCases {
 		description.setNatureIds(new String[] {JavaCore.NATURE_ID});
 		project.setDescription(description, null);
 	}
+
+//{ObjectTeams: new method:
+	protected void addOTJavaNature(String projectName) throws CoreException {
+		IProject project = getWorkspaceRoot().getProject(projectName);
+		IProjectDescription description = project.getDescription();
+		String[] oldNatures = description.getNatureIds();
+		int l = oldNatures.length;
+		String[] newNatures = new String[l+1];
+		System.arraycopy(oldNatures, 0, newNatures, 0, l);
+		newNatures[l] = JavaCore.OTJ_NATURE_ID;
+		description.setNatureIds(newNatures);
+		project.setDescription(description, null);
+	}
+// SH}
+
 	protected void assertSearchResults(String expected, Object collector) {
 		assertSearchResults("Unexpected search results", expected, collector);
 	}
