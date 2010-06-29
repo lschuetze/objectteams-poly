@@ -551,6 +551,9 @@ public team class ViewAdaptor extends JFaceDecapsulator
 					break;
 				case IOTJavaElement.TEAM:
 				case IOTJavaElement.ROLE:
+					// we indeed see these types:
+					// - when rendering breadcrumb parents for method mappings
+					// - when rendering the type of a role file in the package explorer
 					obj = new FakedType((OTType)obj);
 					break;
 				}
