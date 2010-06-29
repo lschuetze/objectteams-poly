@@ -865,26 +865,28 @@ private SourceMethodMappingInfo createMappingInfo(MappingElementInfo mappingInfo
 	}
 
 	MethodData[] baseMethods = mappingInfo.getBaseMethods();
-	String[][] baseParameterNames = new String[baseMethods.length][];
-	String[][] baseParameterTypes = new String[baseMethods.length][];
-	String[] baseReturnTypes = new String[baseMethods.length];
-	for (int m = 0; m < baseMethods.length; m++) {
-		String[] parameterNames = baseMethods[m].getArgumentNames();
-		for (int i = 0, length = parameterNames.length; i < length; i++)
-			parameterNames[i] = manager.intern(parameterNames[i]);
-		baseParameterNames[m] = parameterNames;
-		String[] parameterTypes = roleMethod.getArgumentTypes();
-		for (int i = 0, length = parameterTypes.length; i < length; i++)
-			parameterTypes[i] = manager.intern(parameterTypes[i]);
-		baseParameterTypes[m] = parameterTypes;
-
-		String returnType = baseMethods[m].getReturnType();
-		if (returnType == null) returnType = "void";
-		baseReturnTypes[m] = manager.intern(returnType);		
+	if (baseMethods != null) { // incomplete mapping during editing?
+		String[][] baseParameterNames = new String[baseMethods.length][];
+		String[][] baseParameterTypes = new String[baseMethods.length][];
+		String[] baseReturnTypes = new String[baseMethods.length];
+		for (int m = 0; m < baseMethods.length; m++) {
+			String[] parameterNames = baseMethods[m].getArgumentNames();
+			for (int i = 0, length = parameterNames.length; i < length; i++)
+				parameterNames[i] = manager.intern(parameterNames[i]);
+			baseParameterNames[m] = parameterNames;
+			String[] parameterTypes = roleMethod.getArgumentTypes();
+			for (int i = 0, length = parameterTypes.length; i < length; i++)
+				parameterTypes[i] = manager.intern(parameterTypes[i]);
+			baseParameterTypes[m] = parameterTypes;
+	
+			String returnType = baseMethods[m].getReturnType();
+			if (returnType == null) returnType = "void";
+			baseReturnTypes[m] = manager.intern(returnType);		
+		}
+		info.setBaseArgumentNames(baseParameterNames);
+		info.setBaseArgumentTypes(baseParameterTypes);
+		info.setBaseReturnType(baseReturnTypes);
 	}
-	info.setBaseArgumentNames(baseParameterNames);
-	info.setBaseArgumentTypes(baseParameterTypes);
-	info.setBaseReturnType(baseReturnTypes);			
 	this.newElements.put(handle, info);
 
 // TODO:
