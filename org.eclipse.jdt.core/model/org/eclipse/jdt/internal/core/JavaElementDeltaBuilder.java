@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.core.util.Util;
-import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.internal.core.SourceMethodMappingInfo;
 
 /**
@@ -439,10 +438,6 @@ private void recordElementInfo(IJavaElement element, JavaModel model, int depth)
 		return;
 	}
 	JavaElementInfo info = (JavaElementInfo)JavaModelManager.getJavaModelManager().getInfo(element);
-//{ObjectTeams: for OT elements use the corresponding java element to find an info: FIXME(SH): still needed?
-	if (info == null && element instanceof IOTJavaElement)
-		info = (JavaElementInfo)JavaModelManager.getJavaModelManager().getInfo(((IOTJavaElement)element).getCorrespondingJavaElement());
-// SH}
 	if (info == null) // no longer in the java model.
 		return;
 	this.infos.put(element, info);

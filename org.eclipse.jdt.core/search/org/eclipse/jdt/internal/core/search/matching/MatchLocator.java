@@ -85,7 +85,6 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.internal.core.OTJavaElement;
 import org.eclipse.objectteams.otdt.internal.core.RoleType;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
@@ -1567,11 +1566,6 @@ public FieldReferenceMatch newFieldReferenceMatch(
 	SearchParticipant participant = getParticipant();
 	IResource resource = this.currentPossibleMatch.resource;
 	if (enclosingBinding != null) {
-//{ObjectTeams: method mappings are no JavaElements: 		
-	  if (enclosingElement instanceof OTJavaElement) 
-		enclosingElement = ((OTJavaElement) enclosingElement).resolved(enclosingBinding);
-	  else
-//sko}
 		enclosingElement = ((JavaElement) enclosingElement).resolved(enclosingBinding);
 	}
 	FieldReferenceMatch match = new FieldReferenceMatch(enclosingElement, accuracy, offset, length, isReadAccess, isWriteAccess, insideDocComment, participant, resource);
@@ -1626,11 +1620,6 @@ public MethodReferenceMatch newMethodReferenceMatch(
 	IResource resource = this.currentPossibleMatch.resource;
 	boolean insideDocComment = (reference.bits & ASTNode.InsideJavadoc) != 0;
 	if (enclosingBinding != null) {
-//{ObjectTeams: method mappings are no JavaElements:
-	  if (enclosingElement instanceof OTJavaElement)
-		enclosingElement = ((OTJavaElement) enclosingElement).resolved(enclosingBinding);
-	  else
-// SH}
 		enclosingElement = ((JavaElement) enclosingElement).resolved(enclosingBinding);
 	}
 	boolean isOverridden = (accuracy & PatternLocator.SUPER_INVOCATION_FLAVOR) != 0;
@@ -1673,16 +1662,7 @@ public TypeReferenceMatch newTypeReferenceMatch(
 	IResource resource = this.currentPossibleMatch.resource;
 	boolean insideDocComment = (reference.bits & ASTNode.InsideJavadoc) != 0;
 	if (enclosingBinding != null)
-//{ObjectTeams:  handle OTJavaElement
-	{
-	  if(enclosingElement instanceof OTJavaElement)
-		enclosingElement = ((OTJavaElement) enclosingElement).resolved(enclosingBinding);
-	  else
-// orig:			
 		enclosingElement = ((JavaElement) enclosingElement).resolved(enclosingBinding);
-// :giro
-	}	
-//	km}
 	return new TypeReferenceMatch(enclosingElement, accuracy, offset, length, insideDocComment, participant, resource);
 }
 
