@@ -202,13 +202,9 @@ public void acceptResult(CompilationResult result) {
 		if (result.hasAnnotations && this.filesWithAnnotations != null) // only initialized if an annotation processor is attached
 			this.filesWithAnnotations.add(compilationUnit);
 
-//{ObjectTeams: intermediate patch for https://bugs.eclipse.org/bugs/show_bug.cgi?id=229480
-		if (this.inCompiler)
-			this.compiler.lookupEnvironment.releaseClassFiles(classFiles);
+		this.compiler.lookupEnvironment.releaseClassFiles(classFiles);
 		finishedWith(typeLocator, result, compilationUnit.getMainTypeName(), definedTypeNames, duplicateTypeNames);
-		if (this.inCompiler)
-			this.notifier.compiled(compilationUnit);
-// SH}
+		this.notifier.compiled(compilationUnit);
 	}
 }
 
