@@ -279,5 +279,247 @@ public void testAddCallinToRole2() throws CoreException {
 		deleteProject("P");
 	}
 }
+
+/*
+ * changing the callin modifier of an existing callin binding
+ */
+public void testModifyCallin1() throws CoreException {
+	ICompilationUnit copy = null;
+	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
+	try {
+		createJavaProject("P", new String[] {"src"}, "bin");
+		addOTJavaNature("P");
+		createFolder("P/src/p1");
+		createFile("/P/src/p1/Base.java",
+					"package p1;\n" +
+					"public class Base {\n" +
+					"    void bar() {}" +
+					"}\n");
+		createFile("/P/src/p1/MyTeam.java", 
+					"package p1;\n" +
+					"public team class MyTeam {\n" +
+					"   protected class Role {\n" +
+					"		void foo() {}\n" +
+					"		void foo2() {}\n" +
+					"		foo <- after bar;\n" +
+					"		foo2 <- after bar;\n" + 
+					"	}\n"+
+				    "}\n");
+
+		ICompilationUnit unit = getCompilationUnit("P", "src", "p1", "MyTeam.java");
+		copy = unit.getWorkingCopy(null);
+
+		// add callin to working copy
+		copy.getBuffer().setContents(
+				"package p1;\n" +
+				"public team class MyTeam {\n" +
+				"   protected class Role {\n" +
+				"		void foo() {}\n" +
+				"		void foo2() {}\n" +
+				"		foo <- before bar;\n" + // <= changed
+				"		foo2 <- after bar;\n" + 
+				"	}\n"+
+			    "}\n");
+
+		// commit working copy
+		JavaCore.addElementChangedListener(listener, ElementChangedEvent.POST_CHANGE);
+		copy.commitWorkingCopy(true, null);
+		assertEquals(
+			"Unexpected delta after committing working copy",
+			"P[*]: {CHILDREN}\n" +
+			"	src[*]: {CHILDREN}\n" +
+			"		p1[*]: {CHILDREN}\n" +
+			"			MyTeam.java[*]: {CHILDREN | FINE GRAINED | PRIMARY RESOURCE}\n" +
+			"				MyTeam[*]: {CHILDREN | FINE GRAINED}\n" +
+			"					Role[*]: {CHILDREN | FINE GRAINED}\n" +
+			"						foo <- bar[*]: {MODIFIERS CHANGED}",
+			listener.toString());
+	} finally {
+		JavaCore.removeElementChangedListener(listener);
+		if (copy != null) copy.discardWorkingCopy();
+		deleteProject("P");
+	}
+}
+
+/*
+ * adding a callin label to an existing callin binding
+ */
+public void testModifyCallin2() throws CoreException {
+	ICompilationUnit copy = null;
+	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
+	try {
+		createJavaProject("P", new String[] {"src"}, "bin");
+		addOTJavaNature("P");
+		createFolder("P/src/p1");
+		createFile("/P/src/p1/Base.java",
+					"package p1;\n" +
+					"public class Base {\n" +
+					"    void bar() {}" +
+					"}\n");
+		createFile("/P/src/p1/MyTeam.java", 
+					"package p1;\n" +
+					"public team class MyTeam {\n" +
+					"   protected class Role {\n" +
+					"		void foo() {}\n" +
+					"		void foo2() {}\n" +
+					"		foo <- after bar;\n" +
+					"		foo2 <- after bar;\n" + 
+					"	}\n"+
+				    "}\n");
+
+		ICompilationUnit unit = getCompilationUnit("P", "src", "p1", "MyTeam.java");
+		copy = unit.getWorkingCopy(null);
+
+		// add callin to working copy
+		copy.getBuffer().setContents(
+				"package p1;\n" +
+				"public team class MyTeam {\n" +
+				"   protected class Role {\n" +
+				"		void foo() {}\n" +
+				"		void foo2() {}\n" +
+				"		this_one: foo <- after bar;\n" + // <= changed
+				"		foo2 <- after bar;\n" + 
+				"	}\n"+
+			    "}\n");
+
+		// commit working copy
+		JavaCore.addElementChangedListener(listener, ElementChangedEvent.POST_CHANGE);
+		copy.commitWorkingCopy(true, null);
+		assertEquals(
+			"Unexpected delta after committing working copy",
+			"P[*]: {CHILDREN}\n" +
+			"	src[*]: {CHILDREN}\n" +
+			"		p1[*]: {CHILDREN}\n" +
+			"			MyTeam.java[*]: {CHILDREN | FINE GRAINED | PRIMARY RESOURCE}\n" +
+			"				MyTeam[*]: {CHILDREN | FINE GRAINED}\n" +
+			"					Role[*]: {CHILDREN | FINE GRAINED}\n" +
+			"						foo <- bar[*]: {CONTENT}",
+			listener.toString());
+	} finally {
+		JavaCore.removeElementChangedListener(listener);
+		if (copy != null) copy.discardWorkingCopy();
+		deleteProject("P");
+	}
+}
+
+/*
+ * changing an existing callout binding from => (bug) to ->
+ */
+public void testModifyCallout1() throws CoreException {
+	ICompilationUnit copy = null;
+	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
+	try {
+		createJavaProject("P", new String[] {"src"}, "bin");
+		addOTJavaNature("P");
+		createFolder("P/src/p1");
+		createFile("/P/src/p1/Base.java",
+					"package p1;\n" +
+					"public class Base {\n" +
+					"    void bar() {}" +
+					"}\n");
+		createFile("/P/src/p1/MyTeam.java", 
+					"package p1;\n" +
+					"public team class MyTeam {\n" +
+					"   protected class Role {\n" +
+					"		abstract void foo() {}\n" +
+					"		void foo2() {}\n" +
+					"		foo => bar;\n" +
+					"		foo2 <- after bar;\n" + 
+					"	}\n"+
+				    "}\n");
+
+		ICompilationUnit unit = getCompilationUnit("P", "src", "p1", "MyTeam.java");
+		copy = unit.getWorkingCopy(null);
+
+		// add callin to working copy
+		copy.getBuffer().setContents(
+				"package p1;\n" +
+				"public team class MyTeam {\n" +
+				"   protected class Role {\n" +
+				"		abstract void foo() {}\n" +
+				"		void foo2() {}\n" +
+				"		foo -> bar;\n" + 		// <= changed
+				"		foo2 <- after bar;\n" + 
+				"	}\n"+
+			    "}\n");
+
+		// commit working copy
+		JavaCore.addElementChangedListener(listener, ElementChangedEvent.POST_CHANGE);
+		copy.commitWorkingCopy(true, null);
+		assertEquals(
+			"Unexpected delta after committing working copy",
+			"P[*]: {CHILDREN}\n" +
+			"	src[*]: {CHILDREN}\n" +
+			"		p1[*]: {CHILDREN}\n" +
+			"			MyTeam.java[*]: {CHILDREN | FINE GRAINED | PRIMARY RESOURCE}\n" +
+			"				MyTeam[*]: {CHILDREN | FINE GRAINED}\n" +
+			"					Role[*]: {CHILDREN | FINE GRAINED}\n" +
+			"						foo -> bar[*]: {MODIFIERS CHANGED}",
+			listener.toString());
+	} finally {
+		JavaCore.removeElementChangedListener(listener);
+		if (copy != null) copy.discardWorkingCopy();
+		deleteProject("P");
+	}
+}
+
+/*
+ * changing a parameter name in an existing callout binding
+ */
+public void testModifyCallout2() throws CoreException {
+	ICompilationUnit copy = null;
+	DeltaListener listener = new DeltaListener(ElementChangedEvent.POST_CHANGE);
+	try {
+		createJavaProject("P", new String[] {"src"}, "bin");
+		addOTJavaNature("P");
+		createFolder("P/src/p1");
+		createFile("/P/src/p1/Base.java",
+					"package p1;\n" +
+					"public class Base {\n" +
+					"    void bar(int i) {}" +
+					"}\n");
+		createFile("/P/src/p1/MyTeam.java", 
+					"package p1;\n" +
+					"public team class MyTeam {\n" +
+					"   protected class Role {\n" +
+					"		void foo2() {}\n" +
+					"		void foo(int j) => void bar(int i);\n" +
+					"		foo2 <- after bar;\n" + 
+					"	}\n"+
+				    "}\n");
+
+		ICompilationUnit unit = getCompilationUnit("P", "src", "p1", "MyTeam.java");
+		copy = unit.getWorkingCopy(null);
+
+		// add callin to working copy
+		copy.getBuffer().setContents(
+				"package p1;\n" +
+				"public team class MyTeam {\n" +
+				"   protected class Role {\n" +
+				"		void foo2() {}\n" +
+				"		void foo(int k) => void bar(int i);\n" +
+				"		foo2 <- after bar;\n" + 
+				"	}\n"+
+			    "}\n");
+
+		// commit working copy
+		JavaCore.addElementChangedListener(listener, ElementChangedEvent.POST_CHANGE);
+		copy.commitWorkingCopy(true, null);
+		assertEquals(
+			"Unexpected delta after committing working copy",
+			"P[*]: {CHILDREN}\n" +
+			"	src[*]: {CHILDREN}\n" +
+			"		p1[*]: {CHILDREN}\n" +
+			"			MyTeam.java[*]: {CHILDREN | FINE GRAINED | PRIMARY RESOURCE}\n" +
+			"				MyTeam[*]: {CHILDREN | FINE GRAINED}\n" +
+			"					Role[*]: {CHILDREN | FINE GRAINED}\n" +
+			"						foo(int) -> bar(int)[*]: {CONTENT}",
+			listener.toString());
+	} finally {
+		JavaCore.removeElementChangedListener(listener);
+		if (copy != null) copy.discardWorkingCopy();
+		deleteProject("P");
+	}
+}
 }
 
