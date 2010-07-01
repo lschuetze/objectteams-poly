@@ -50,5 +50,6 @@
 	<topic label="OT/Equinox Extension Points Reference">
 	 	<topic label="org.eclipse.objectteams.otequinox.aspectBindings" href="/org.eclipse.objectteams.otdt.ui.help/reference/extension-points/org_eclipse_objectteams_otequinox_aspectBindings.html"/>
 	 	<topic label="org.eclipse.objectteams.otequinox.aspectBindingNegotiators" href="/org.eclipse.objectteams.otdt.ui.help/reference/extension-points/org_eclipse_objectteams_otequinox_aspectBindingNegotiators.html"/>
+	 	<topic label="org.eclipse.objectteams.otequinox.liftingParticipant" href="/org.eclipse.objectteams.otdt.ui.help/reference/extension-points/org_eclipse_objectteams_otequinox_liftingParticipant.html"/>
 	</topic>
 </toc>
