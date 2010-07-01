@@ -13,15 +13,18 @@
 			<topic label="OT/J content/code assist" href="guide/contentassist.html">
 				<topic label="OT/J code completion" href="guide/completion.html"/>
 				<topic label="OT/J quick fixes" href="guide/quickfix.html"/>
+				<topic label="OT/J quick assists" href="guide/quickassist.html"/>
 			</topic>
 			<topic label="Binding markers" href="guide/callinmarker.html"/>
+			<topic label="Comparing bound methods" href="guide/methodcompare.html"/>
+			<topic label="Refactoring Object Teams programs" href="guide/refactoring.html"/>
 		</topic>
 		<topic label="Object Teams structural/navigational views" href="guide/views.html">
 			<topic label="OT/J package explorer" href="guide/packageexplorer.html"/>
 			<topic label="OT/J outline" href="guide/outline.html"/>
 			<topic label="OT/J type hierarchy" href="guide/typehierarchy.html"/>
-   			<topic href="guide/callhierarchy.html" label="Call hierarchy extended for OT/J">
-   </topic>
+   			<topic label="Call hierarchy extended for OT/J" href="guide/callhierarchy.html">
+   		</topic>
 		</topic>
 		<topic label="Compiling Object Teams programs" href="guide/compilation.html">
 			<topic label="Java builder extended for Object Teams" href="guide/builder.html"/>
@@ -31,7 +34,6 @@
 			<topic label="Team monitor view" href="guide/teammonitor.html"/>
 			<topic label="Stepping through OT/J code" href="guide/stepping.html"/>
 		</topic>
-		<topic label="Refactoring Object Teams programs" href="guide/refactoring.html"/>
 	</topic>
 	<topic label="Object Teams Language Definition" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/index.html">
 		<topic label="Teams and Roles" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/s1.html"/>
