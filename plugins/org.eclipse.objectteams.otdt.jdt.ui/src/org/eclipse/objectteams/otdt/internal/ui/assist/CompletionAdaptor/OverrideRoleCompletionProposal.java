@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.TypeProposalInfo;
 import org.eclipse.jdt.ui.SharedASTProvider;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -78,6 +79,7 @@ protected class OverrideRoleCompletionProposal extends JavaTypeCompletionProposa
 		fRoleName=      String.valueOf(proposal.getName());
 		fModifiers=     proposal.getFlags();
 		fReplaceStart=  proposal.getReplaceStart();
+		setProposalInfo(new TypeProposalInfo(fJavaProject, proposal));
 	}
 	
 	public StyledString getStyledDisplayString() {
