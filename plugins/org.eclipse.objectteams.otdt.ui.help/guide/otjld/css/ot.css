@@ -92,8 +92,6 @@ a.nohover:hover {
 /* page heading (title) */
 #head h1 {
 	margin: 0;
-	margin-left: 240px; /* width of #left + #logo */
-	margin-right: 49px; /* width of #logo, to center above content */
 	margin-top: 40px; /* vertically centered in head */
 	padding: 0;
 	text-align: center;
