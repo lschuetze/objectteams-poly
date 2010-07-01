@@ -12,16 +12,17 @@
     </head>
     <body>
         <div id="head">
-            <h1>Features of the OTDT (version 1.4.x)</h1>
+            <h1>Features of the OTDT (version 0.7 (Incubation) from Eclipse.org)</h1>
         </div>
-		<div style="margin:10px;">
-        
-			<h2 style="text-align:center;margin-top:0px;"><img style="vertical-align:middle;" alt="Built on Eclipse" src="../images/built-on-eclipse.gif"/> Version 3.5.0</h2>
-
-			The release 1.4.0 M1 is based on Eclipse 3.6.0 M3. It contains a modified version of the JDT core
-			and several added plugins.
-
-			<br/><br/>
+		<div style="margin:10px;margin-top:100px;">
+		 <div style="margin-left:40px;padding:2px;float:left;background-color:#D0D0D0;">
+          <div style="padding:4px;background-color:#def4fe;">
+			The release 0.7.0 (incubation) is based on Eclipse SDK 3.6.0.<br/>
+			It supersedes the version 1.4.0 distributed from <a href="http://www.objectteams.org/distrib/otdt.html">objectteams.org</a>.<br/>
+			The OTDT contains a modified version of the JDT core and several added plugins.
+          </div>
+         </div>
+			<br style="clear:both;"/><br/>
 
 			The following components are available:
 			
@@ -32,7 +33,7 @@
 			  <li><a href="#bindingEditor">Binding Editor</a></li>
 			  <li><a href="#refactoring">Refactoring</a></li>
 			  <li><a href="#structureViewers">Structure Viewers</a></li>
-			  <li><a href="#search">Search</a></li>
+			  <li><a href="#Search">Search</a></li>
 			  <li><a href="#execution">Execution Environment</a></li>
 			  <li><a href="#otequinox">OT/Equinox</a></li>
 			  <li><a href="#debugging">Debugging</a></li>
@@ -50,16 +51,16 @@
 			<dl>
 			<dt><strong>Language Definition</strong></dt>
 			<dd>The compiler implements the language as defined in the OT/J
-				<a href="otjld/def/index.html">language definition</a> version 1.1 (OTJLD).
+				<a href="otjld/def/index.html">language definition</a> version 1.3 (OTJLD).
 				The language definition has continuously been revised to precisely specify the language 
 				including various corner cases and combinations of features.
 			</dd>
 			<dt><strong>Language Implementation</strong></dt>
 			<dd>
 				The compiler supports all features of OT/J according to the 
-				<a href="otjld/def/index.html"><img alt="otjld" src="../images/ot_paragraph.png"/> OTJLD v1.1</a>
-				&sect;&sect;1-7.
-				Support for the join point sub-language (<a href="http://www.objectteams.org/def/0.9/joinpoints.html"><img alt="otjld"  src="../images/ot_paragraph.png"/> OTJLD &#167; 8</a>) is not included in the stable release 1.3.x.
+				<a href="otjld/def/index.html"><img alt="otjld" src="../images/ot_paragraph.png"/> OTJLD v1.3</a>
+				&sect;&sect;1-7,9.
+				Support for the join point sub-language (<a href="http://www.objectteams.org/def/0.9/joinpoints.html"><img alt="otjld"  src="../images/ot_paragraph.png"/> OTJLD &#167; 8</a>) is not included.
 				<p></p>
 				The compiler can be <strong>configured</strong> using global <code>Preferences</code> or project
 				specific <code>Properties</code>.
@@ -69,9 +70,6 @@
 				      source code using the <code>@SuppressWarnings</code> annotation.</li>
 				  <li>Scoped keywords <a href="otjld/def/sA.html#sA.0.1"><img alt="otjld"  src="../images/ot_paragraph.png"/> OTJLD &#167; A.0.1</a> can be disabled (default is enabled).
 				  </li>
-				<!--
-				  <li>Compiler support for the join point language (<a href="../def/1.0/joinpoints.html"><img border="0" src="../images/ot_paragraph.png"/> OTJLD &#167 8</a>) is not included in this release. Note, that the runtime environment does not yet support the join point language, thus this feature could mainly be used for learning the join point language.
-				-->  
 				</ul>
 			</dd>
 			</dl>
@@ -81,7 +79,7 @@
 			</div></div>
 			<ul>
 			
-			<li>The first step to developing with Object Teams in Eclipse is creating an <img class="inline" alt="" src="../images/newprj_wiz.gif"/><code>&nbsp;Object&nbsp;Teams&nbsp;Project</code>. A wizard will guide you through that process. It will also add the Object Teams class library (<tt>otre.jar</tt>) to your project's classpath.
+			<li>The first step to developing with Object Teams in Eclipse is creating an <img class="inline" alt="" src="../images/newprj_wiz.gif"/><code>&nbsp;Object&nbsp;Teams&nbsp;Project</code>. A wizard will guide you through that process. It will also add the Object Teams Runtime Environment (<tt>otre.jar</tt>) to your project's classpath.
 			</li>
 			
 			<li>
@@ -149,23 +147,25 @@
                 <h1>Refactoring</h1>
 	        </div></div>
 			<p></p>
-			<div style="margin:15pt"><i><span style="text-decoration:underline;">Note:</span> The extended refactoring support has been developed based on Eclipse 3.0. Some of this functionality has not yet been ported to Eclipse 3.5 and thus is not yet available in OTDT 1.3.x.</i></div>
 			Significant work has been put into supporting the automated refactoring of OT/J code.
 			The following refactorings take into account the Object Teams-specific 
 			relationships (implicit role inheritance, team nesting, role-base bindings and method 
 			bindings).
 			<ul>
-			<li style="color:gray;">Extract Method <i>(extended support currently unavailable)</i></li>
-			<li style="color:gray;">Move Method <i>(extended support currently unavailable)</i></li>
-			<li>Rename Method</li>
-			<li>Rename Project</li>
-			<li>Rename Source folder</li>
-			<li>Rename Field</li>
+			<li><b>Extract Method</b></li>
+			<li><b>Move Method</b></li>
+			<li><b>Pull Up</b> applicable to method or field</li>
+			<li><b>Push Down</b> applicable to method or field</li>
+			<li><b>Rename</b> applicable to: project, source folder, package, type, method, field.<br/>
+				<i>When trying to rename a team package you'll be asked to rename the team class instead.</i></li>
 			</ul>
-			The Rename Package refactoring is also available, with the only limitation
-			that you cannot rename team-packages. The Rename Type refactoring does not
-			yet support role files (<a href="otjld/def/s1.html#s1.2.5"><img alt="otjld"  src="../images/ot_paragraph.png"/> OTJLD &sect; 1.2.5</a>).
+			Additionally, specific refactorings for OT/J are being developed. Currently these are implemented:
+			<ul>
+			<li><b>Extract Callin</b></li>
+			<li><b>Inline Callin</b></li>
+			</ul>
 			<p></p>
+
 			
 			<div id="structureViewers" class="headl"><div class="headr">
 		       <h1>Structure Viewers</h1>
@@ -199,8 +199,6 @@
 			    <li>
 			    The new implicit inheritance has been integrated completely into the standard JDT 
 			    <em>Hierarchy View</em>.
-			    The revised Hierarchy View supercedes the incomplete support which was provided by 
-			    a specific "Implicit Hierarchy View" in previous releases of the OTDT.
 			    </li>
 			</ul></dd>
 			</dl>
@@ -258,15 +256,11 @@
 			</dd>
 			<dt><strong>Technology used</strong></dt>
 			<dd><ul>
-			<li id="JPLIS">Alternative support for a Java 5 based weaver.
-			    The original OT/J-weaver uses the <a href="http://roots.iai.uni-bonn.de/research/jmangler/">JMangler</a> framework for 
-			    intercepting classes during class loading. 
-			    The new version uses the Java-agent concept of Java 5 
-			    (<a href="http://java.sun.com/developer/technicalArticles/releases/j2se15/index.html">JPLIS</a>) instead,
-			    which means we are independent of JMangler. In the future this version will support
-			    aspect weaving not only at load time but also while an application is running.<br/>
-			    The launch configuration for OT/J applications contains a new checkbox for selecting
-			    the weaver ("Java 5 JPLIS Launching"). 
+			<li id="JPLIS">Integrating the weaver into the JVM leverages the Java-agent concept of Java 5 
+			    (<a href="http://java.sun.com/developer/technicalArticles/releases/j2se15/index.html">JPLIS</a>).
+			    (<i>The original implementation using the JMangler framework is no longer maintained</i>).<br/> 
+				In the future this integration will support aspect weaving not only at load time 
+				but also while an application is running.
 			    </li>
 			</ul></dd>
 			</dl>
@@ -274,20 +268,14 @@
 			
 			<div id="otequinox" class="headl"><div class="headr">
 	            <h1>OT/Equinox</h1>
-			    <!--<td width="77%"></td>-->
-			    <!--<td align="right" style="margin-top:0px; margin-bottom:0px;">-->
-			    <!--
-			    <img style="margin-top:0px; margin-bottom:-10px; margin-right:5px; height:60px; align=middle;" src="../images/ot_eclipse_120.gif"/>
-			    -->
-			    <!--</td>-->
 	        </div></div>
 			<p></p>
-			Starting with the OTDT version 0.9.9 it is possible to develop Eclipse plugins using
+			Starting with the OTDT version 0.9.9 (2006) it is possible to develop Eclipse plugins using
 			OT/J as the implementation language. 
 			<ul>
 			<li>Using the plugin <code>org.eclipse.objectteams.otequinox</code>, a plugin ("aspect plugin") 
 			    may declare that it adapts classes from a specified other plugin ("base plugin").</li>
-			<li>By an integration of the Object Teams Runtime Environment with new hooks in the 
+			<li>By an integration of the Object Teams Runtime Environment with hooks in the 
 			    Equinox implementation a <code class="keyword">team</code> class from an <em>aspect plugin</em>
 			    can trigger byte-code aspect weaving into its <em>base plugin</em> at load-time.
 			    As a result an aspect plugin can indeed adapt the behaviour of another plugin.
@@ -298,7 +286,7 @@
 			    which aspect plugins. This information is found in the version column of the mentioned dialog.
 			    This way a user of the OTDT can always check whether a given plugin performs as shipped,
 			    or whether it has been adapted by another plugin.</li>
-			<li>The OTDT uses the capabilities of OT/Equinox for some parts of its own implementation.
+			<li>The OTDT uses the capabilities of OT/Equinox for its own implementation.
 			    The technology is mainly used for making the JDT-UI aware of Object Teams without having
 			    to copy source code or modifying source code of the JDT-UI in place.</li>
 			<li>A new project nature <img class="inline" alt="" src="../images/newpprj_wiz.gif"/>     
@@ -308,7 +296,7 @@
 			<li>If desired the load-time weaver can be disabled by commenting out or removing the following
 			    line from the file <code>configuration/config.ini</code>:
 			    <div class="ttindent" style="font-size:small;">
-			    osgi.hook.configurators.include=org.eclipse.objectteams.eclipse.transformer.hook.HookConfigurator</div>
+			    osgi.hook.configurators.include=org.eclipse.objectteams.otequinox.hook.HookConfigurator</div>
 			    Ideally, disabling OT/Equinox will be handled by temporarily uninstalling this feature,
 			    but the required support by the p2 provisioning system is not yet stable enough to do this.</li>
 			</ul>
@@ -385,22 +373,6 @@
 			<li>Problems that are listed in the problem view are linked (when possible) to a corresponding explanatory entry in the language definition.
 			(Context menu -&gt; <img alt="" src="../images/ot_paragraph.png"/><code>&nbsp;Go&nbsp;to&nbsp;Language&nbsp;Definition</code>).</li>
 			</ul>
-			<p>
-			<!--
-			<table width="100%" class="h2"><tr>
-			          <td class="h2">Movies demonstrating the OTDT</td></tr>
-			    </table>
-			
-			<p>
-			As an introduction to the OTDT you may watch the following movies (requires a plugin for Shockwave Flash Media):
-			<ul>
-			 <li><a href="javascript:popup_window( 'otdt/IntroductionToOTDT_viewlet_swf.html', 'IntroductionToOTDT', 1048, 816 );">Introduction to the Object Teams Development Tooling</a>
-			 <li><a href="javascript:popup_window( 'otdt/OTDTbyExample_viewlet_swf.html', 'OTDTbyExample', 1048, 816 );">Introducing the Object Teams Development Tooling by Example</a>
-			
-			 <li>... more movies will follow.
-			 </ul><p></p>
-			-->
-			</p>
 		</div><!-- content -->
 	</body>
 </html>
