@@ -314,12 +314,14 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		    Set<IType> allTypes = target.getAllTypes(projects, monitor); // 10 ticks
 		    Map<IMember, Set<IType>> playedByMap = searchPlayedByBindings(allTypes, projects, new MySubProgressMonitor(monitor, 20));
 			if (playedByMap == null || playedByMap.size() == 0)
-				return;
+				return; // no base types or cancelled
 
 			createMarkersFor(target, playedByMap, CallinMarker.PLAYEDBY_ID, new MySubProgressMonitor(monitor, 5));
 
 		    // collect all roles for use as search scope:
 		    IMember[] allRoleTypes = collectRolesAndSubroles(playedByMap, new MySubProgressMonitor(monitor, 10));
+		    if (monitor.isCanceled())
+		    	return;
 		    
 		    // ==== callin/callout bindings: ====
 		    Set<IMember> allMembers = getAllMethodsAndFields(target.getJavaElement());
@@ -340,6 +342,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		for (Set<IType> value : playedByMap.values()) {
 			collectedRoleTypes.addAll(value);
 			for (IType member : value) {
+				if (submon.isCanceled()) return null;
 				if (member.exists()) {
 					IOTType otType = OTModelManager.getOTElement(member);
 					if (otType != null) {
@@ -379,10 +382,12 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 			    															  new IJavaProject[]{member.getJavaProject()}, 
 			    															  new MySubProgressMonitor(monitor, 20));
 			    if (playedByMap == null || playedByMap.isEmpty())
-			    	return;
+			    	return; // no base types or cancelled
 
 			    // collect all roles w/ subroles for use as search scope:
 			    IMember[] allRoleTypes = collectRolesAndSubroles(playedByMap, new MySubProgressMonitor(monitor, 10));
+			    if (monitor.isCanceled())
+			    	return;
 			    
 			    ArrayList<IMember> memberSet = new ArrayList<IMember>(1);
 			    memberSet.add(member);
@@ -401,6 +406,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 			Map<IMember, Set<IMember>> callinMap = new HashMap<IMember, Set<IMember>>();
 			Map<IMember, Set<IMember>> calloutMap = new HashMap<IMember, Set<IMember>>();
 			searchMemberBindings(memberSet, allRoleTypes, callinMap, calloutMap, new MySubProgressMonitor(monitor, 20));
+			if (monitor.isCanceled()) return;
 			createMarkersFor(target, callinMap, CallinMarker.CALLIN_ID, new MySubProgressMonitor(monitor, 10));
 			createMarkersFor(target, calloutMap, CallinMarker.CALLOUT_ID, new MySubProgressMonitor(monitor, 10));
 		} finally {
@@ -568,6 +574,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 	        
 	        for (final IType baseType : baseTypes)
 	        {
+	        	if (monitor.isCanceled()) return null;
 	        	try
 	        	{
 		            IProgressMonitor searchMonitor = new SubProgressMonitor(monitor, 1);
@@ -633,6 +640,8 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
         // given all potential role types, just directly traverse to the callin bindings:
         for (IMember roleMember : allRoleTypes) 
         {
+        	if (monitor.isCanceled()) return;
+        	
 			IOTType otType = OTModelManager.getOTElement((IType)roleMember);
 			if (otType == null || !otType.isRole()) continue;
 			IRoleType roleType = (IRoleType)otType;
