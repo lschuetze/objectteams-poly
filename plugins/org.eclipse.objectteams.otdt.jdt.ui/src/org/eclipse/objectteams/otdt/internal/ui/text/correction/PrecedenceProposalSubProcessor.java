@@ -342,10 +342,10 @@ public class PrecedenceProposalSubProcessor {
 	}
 	
 
-	@SuppressWarnings("unchecked") // uses parameterless list of DOM AST.
 	private static CallinMappingDeclaration findCallinMapping(TypeDeclaration roleType, String callinName)
 	{
 		boolean isAnonymous = callinName.charAt(0) == '<';
+		@SuppressWarnings("rawtypes")
 		List members = roleType.bodyDeclarations();
 		if (members != null) { 
 			for (Object object : members) {
@@ -356,9 +356,11 @@ public class PrecedenceProposalSubProcessor {
 							return mapping;
 					} else if (isAnonymous) {
 						IMethodMappingBinding binding = mapping.resolveBinding();
-						String currentName = binding.getName();
-						if (currentName.startsWith(callinName)) // binding name comprises the full declaration
-							return mapping;
+						if (binding != null) {
+							String currentName = binding.getName();
+							if (currentName.startsWith(callinName)) // binding name comprises the full declaration
+								return mapping;
+						}
 					}
 				}
 			}
