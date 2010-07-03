@@ -4,14 +4,20 @@ BASE=/shared/tools/objectteams
 STAGINGBASE=/opt/public/download-staging.priv/tools/objectteams
 
 # Find the master repository to build upon:
-MASTER=${HOME}/downloads/objectteams/updates/$1
-if [ -r ${MASTER}/features ]
+if [ "$1" == "none" ]
 then
-    echo "Generating Repository based on ${MASTER}"
+	MASTER="none"
+	echo "Generating fresh new repository"
 else
-    echo "No such repository ${MASTER}"
-    echo "Usage: $0 updateMasterRelativePath [ -nosign ] [ statsRepoId statsVersionId ]"
-    exit 1
+	MASTER=${HOME}/downloads/objectteams/updates/$1
+	if [ -r ${MASTER}/features ]
+	then
+	    echo "Generating Repository based on ${MASTER}"
+	else
+	    echo "No such repository ${MASTER}"
+	    echo "Usage: $0 updateMasterRelativePath [ -nosign ] [ statsRepoId statsVersionId ]"
+	    exit 1
+	fi
 fi
 
 # Analyze the version number of the JDT feature as needed for patching content.xml later:
@@ -67,10 +73,16 @@ then
 fi
 mkdir ${BASE}/stagingRepo
 cd ${BASE}/stagingRepo
-mkdir features
-(cd features; ln -s ${MASTER}/features/* .)
-mkdir plugins
-(cd plugins; ln -s ${MASTER}/plugins/* .)
+if [ "$MASTER" != "none" ]
+then
+	mkdir features
+	(cd features; ln -s ${MASTER}/features/* .)
+	mkdir plugins
+	(cd plugins; ln -s ${MASTER}/plugins/* .)
+else
+	mkdir plugins
+	cp ${BASE}/testrun/updateSite/plugins/org.apache.bcel* plugins/
+fi
 unzip -n ${STAGINGBASE}/out/otdt.zip
 
 LOCATION=${BASE}/stagingRepo
