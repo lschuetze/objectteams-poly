@@ -506,7 +506,7 @@ public team class ViewAdaptor extends JFaceDecapsulator
 		
 		// ===== callout interface: =====
 		int getAdornments()                                -> int getAdronments(); // note: typo in jdt.ui
-		org.eclipse.swt.graphics.Point getSize()           -> org.eclipse.swt.graphics.Point getSize();
+		Point getSize()           						   -> Point getSize();
 		ImageData getImageData(ImageDescriptor descriptor) -> ImageData getImageData(ImageDescriptor descriptor);
 	}
 	
