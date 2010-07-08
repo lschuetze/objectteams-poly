@@ -137,7 +137,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 	/**
 	 * Starting at a callin mapping find the most suitable base predicate check(s).
 	 * + If a base predicate is found at role level or below,
-	 *   create a switch statement (based on the base tag),
+	 *   create a switch statement (based on instanceof checks),
 	 *   simulating dynamic binding of a role object which might not yet exist.
 	 * + Otherwise only check a team-level base predicate if present.
 	 * + If no matching base predicate is found return null.

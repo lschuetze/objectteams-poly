@@ -853,9 +853,6 @@ public class RoleModel extends TypeModel
         return this._binding.baseclass();
     }
 
-    public int getBaseTag() {
-        return getTeamModel().getBaseTag(getBaseTypeBinding());
-    }
     /**
      * Is current a direct supertype of model?
      * Considers superClass and superInterfaces

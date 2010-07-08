@@ -550,17 +550,12 @@ public class Lifting extends SwitchOnBaseTypeGenerator
           	//
 	            if(!_OT$cache_OT$RootRole.containsKey(base))
 	            {
-	                switch(base.getMyTeam_OT$Tag)
-	                {
-	                    case 4:
-	                        myRole = new __OT__MySubRoleA((MySubBaseA)base);
-	                        break;
-	                    case 5:
-	                        myRole = new __OT__MySubRoleB((MySubBaseB)base);
-	                        break;
-	                    default:
-	                        throw new LiftingFailedException((Object)base, "MyRole");
-	                }
+	                if (base instanceof MySubBaseA)
+                        myRole = new __OT__MySubRoleA((MySubBaseA)base);
+					else if (base instanceof MySubBaseB)
+	                     myRole = new __OT__MySubRoleB((MySubBaseB)base);
+					else
+	                    throw new LiftingFailedException((Object)base, "MyRole");
 	            }
 	            else
 	            {
@@ -817,7 +812,6 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 				this._gen.block(
 					// (create a role of the best matching type:)
 					new Statement[] {
-//					/*debug*/createPrintBaseTag(teamType, returnType, caseObjects, _gen),
 					caseObjects.length > 0 
 						? createSwitchStatement(teamType, returnType, caseObjects, this._gen)
 						: genLiftingFailedException(BASE, returnType, this._gen)}),

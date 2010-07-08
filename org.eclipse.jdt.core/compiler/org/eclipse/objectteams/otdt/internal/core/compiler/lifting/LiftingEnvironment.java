@@ -146,7 +146,6 @@ public class LiftingEnvironment
      * Creates the following infrastructure for lifting:
      * + role caches
      * + liftto methods
-     * + assign base tags
      * + reflection methods
      *
      * @param lateRole
@@ -186,18 +185,14 @@ public class LiftingEnvironment
         	}
         }
         // Different strategies for early/late roles:
-        // 1. base tags
-        // 2. role caches
-        // 3. reflection methods
+        // 1. role caches
+        // 2. reflection methods
         if (lateRole == null) {
-            this._teamType.getTeamModel().createBaseTagsAttribute();
             generateRoleCaches(this._teamType);
             // TODO(SH): split into decl and statements (see fillGeneratedMethods()).
             if (needMethodBodies && !Protections.hasClassKindProblem(this._teamType.binding))
             	ReflectionGenerator.createRoleQueryMethods(this._teamType);
         } else {
-        	if (lateRole.getBaseTypeBinding() != null)
-            	this._teamType.getTeamModel().addBaseTag(lateRole);
         	// isTopBound?
     		if (node != null && node.getTopmostBoundParent(true) == node) {
     			generateRoleCache(this._teamType, lateRole);

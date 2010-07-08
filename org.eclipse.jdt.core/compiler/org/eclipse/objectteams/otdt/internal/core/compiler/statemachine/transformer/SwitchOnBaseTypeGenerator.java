@@ -48,7 +48,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
     /**
      * Create the statement for one base type in the big cascade.
      *
-	 * @param role       the most suitable role for the selected base_tag.
+	 * @param role       the most suitable role for the detected base type.
 	 * @param gen        use for AST-generation
 	 * @return           the generated statement or null
 	 */
@@ -168,21 +168,4 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 	char[] baseVarName() {
 		return BASE; // default: "base" (predicate method argument)
 	}
-//	DEBUG
-//    protected Statement createPrintBaseTag(ReferenceBinding teamType,
-//			 							   ReferenceBinding staticRoleType,
-//			 							   RoleModel[] caseObjects,
-//			 							   AstGenerator gen)
-//    {
-//    	// System.out.println(_OT$base_arg.getMyTeam_OT$Tag())
-//    	Expression expression;
-//    	char[] baseTagFieldName = CharOperation.concat(
-//    			CharOperation.concatWith(teamType.compoundName, '$'),
-//    			_OT_TAG);
-//   		Expression baseArg = gen.singleNameReference(baseVarName());
-//   		expression =
-//    			createFakedGetBaseTagMessageSend(baseArg, baseTagFieldName, staticRoleType);
-//    	return gen.println("basetag=", expression);
-//    }
-
 }

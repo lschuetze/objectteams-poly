@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
  * Bytecode attributes with a uniform list of values.
  * Currently handled (by sub-classes):
  * <ul>
- * <li>BaseClassTags    by class BaseClassTagsAttribute
  * <li>TypeAnchorList   by class AnchorListAttribute
  * <li>ReferenceTeams   by class ReferencedTeamsAttribute
  * <li>RoleBaseBindings by class RoleBaseBindingsAttribute

@@ -201,7 +201,6 @@ public class RoleHierarchieAnalyzer
         if (ambiguitySet.size() == 1)
         {
         	result.add(role);
-            role.getTeamModel().addKnownBase(baseBinding); // not folded, remember this base.
         }
         else
         {

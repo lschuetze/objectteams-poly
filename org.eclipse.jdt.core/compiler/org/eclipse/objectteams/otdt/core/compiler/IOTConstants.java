@@ -98,7 +98,6 @@ public interface IOTConstants
     public static final char[] ROLE_BASE_BINDINGS     = "CallinRoleBaseBindings".toCharArray();
     public static final char[] BOUND_CLASSES_HIERARCHY= "BoundClassesHierarchy".toCharArray();
 	public static final char[] ROLE_FILES             = "RoleFiles".toCharArray();
-    public static final char[] BASE_CLASS_TAGS        = "BaseClassTags".toCharArray();
     public static final char[] MODIFIERS_NAME         = "Modifiers".toCharArray();
     public static final char[] ROLECLASS_METHOD_MODIFIERS_NAME
 												      = "RoleClassMethodModifiers".toCharArray();

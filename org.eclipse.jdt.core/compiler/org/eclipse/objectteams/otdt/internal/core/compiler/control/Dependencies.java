@@ -1443,7 +1443,7 @@ public class Dependencies implements ITranslationStates {
 
     /* **** STATE_FULL_LIFTING (OT/J) ****
      * - Re-create role hierarchy for LiftingEnvironment (late roles only)
-     * - Create lifting infrastructure (caches, methods, constructors, assign base-tags)
+     * - Create lifting infrastructure (caches, methods, constructors)
      *
      * GENERATES:
      * - field: _OT$cache$R

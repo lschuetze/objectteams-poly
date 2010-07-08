@@ -21,12 +21,10 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -48,7 +46,6 @@ import org.eclipse.objectteams.otdt.core.compiler.Pair;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleFileCache;
-import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BaseClassTagsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BoundClassesHierarchyAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.RoleBaseBindingsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
@@ -68,7 +65,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  *
  * Tasks:
  * <ul>
- *   <li>Management of base tags.
  *   <li>Navigate to all roles.
  * </ul>
  *
@@ -80,11 +76,6 @@ public class TeamModel extends TypeModel {
 	/** The Marker interface created for this Team (_TSuper__OT__TeamName); */
 	public TypeDeclaration markerInterface;
 
-    /* base tags are assigned on demand (see getBaseTag()) */
-    private Map<ReferenceBinding,Integer> baseToTag = new HashMap<ReferenceBinding, Integer>();
-    private int nextBaseTag = 1; // "0" is reserved for abstract roles.
-
-    public HashSet<ReferenceBinding>knownBases = new HashSet<ReferenceBinding>();
     private RoleBaseBindingsAttribute roleBaseBindings = null;
 
     // pairs of base-role classes for which lifting would be ambiguous
@@ -139,36 +130,6 @@ public class TeamModel extends TypeModel {
 				this.caches = new FieldDeclaration[len+1], 0,
 				len);
     	this.caches[len] = cache;
-    }
-
-    /**
-     * Get the base tag by which a given base class is identified
-     * within the current team.
-     * Tags are assigned on demand.
-     *
-     * @param baseBinding base class to be identified by the tag.
-     * @return the tag value
-     */
-    public int getBaseTag(ReferenceBinding baseBinding) {
-        Integer t = this.baseToTag.get(baseBinding);
-        if (t == null) {
-        	if (this._attributes != null) {
-        		// if attribute was already created, add the new tag:
-	        	for (int i = 0; i < this._attributes.length; i++) {
-	    			if (this._attributes[i].nameEquals(IOTConstants.BASE_CLASS_TAGS)) {
-	    				BaseClassTagsAttribute attribute = (BaseClassTagsAttribute)this._attributes[i];
-	    				attribute.setBaseTag(baseBinding.attributeName(), this.nextBaseTag, -1);
-	    				break;
-	    			}
-	        	}
-    		}
-        	t = new Integer(this.nextBaseTag++);
-        	this.baseToTag.put(baseBinding, t);
-        }
-        return t.intValue();
-    }
-	public void addKnownBase(ReferenceBinding baseClass) {
-    	this.knownBases.add(baseClass);
     }
 
     /** Get all other base types bound by this team where the bound roles are:
@@ -237,42 +198,6 @@ public class TeamModel extends TypeModel {
     	attribute.add(subClass.attributeName(), superClass.attributeName());
     }
 
-    public void createBaseTagsAttribute() {
-        Iterator<ReferenceBinding> bases = this.baseToTag.keySet().iterator();
-        BaseClassTagsAttribute attribute = new BaseClassTagsAttribute(this.baseToTag.size());
-        int i=0;
-        while (bases.hasNext())
-        {
-            ReferenceBinding baseType = bases.next();
-            Integer tag = this.baseToTag.get(baseType);
-            attribute.setBaseTag(baseType.getRealClass().attributeName(), tag.intValue(), i++);
-        }
-        addAttribute(attribute);
-    }
-
-    public void addBaseTag(RoleModel role) {
-    	BaseClassTagsAttribute attribute = null;
-    	for (int i = 0; i < this._attributes.length; i++) {
-			if (this._attributes[i].nameEquals(IOTConstants.BASE_CLASS_TAGS)) {
-				attribute = (BaseClassTagsAttribute)this._attributes[i];
-				break;
-			}
-		}
-    	int i = -1;
-    	if (attribute == null) {
-    		attribute = new BaseClassTagsAttribute(1);
-    		i = 0;
-    		addAttribute(attribute);
-    	}
-    	ReferenceBinding baseTypeBinding = role.getBaseTypeBinding();
-    	if (baseTypeBinding != null) {
-    		this.baseToTag.put(baseTypeBinding, new Integer(this.nextBaseTag));
-    		attribute.setBaseTag(baseTypeBinding.attributeName(), this.nextBaseTag++, i);
-    	} else {
-    		if (!role.hasBaseclassProblem())
-    			throw new InternalCompilerError("expecting a role with base class"); //$NON-NLS-1$
-    	}
-    }
     /**
      * Add a base class binding ready to write out as attribute.
      * @param roleName
@@ -952,9 +877,6 @@ public class TeamModel extends TypeModel {
 		return result;
 	}
 
-	public void cleanup() {
-		this.baseToTag.clear(); // not needed anymore
-	}
 	public TypeBinding getMarkerInterfaceBinding(Scope scope) {
 		if (this.markerInterface != null)
 			return this.markerInterface.binding;
