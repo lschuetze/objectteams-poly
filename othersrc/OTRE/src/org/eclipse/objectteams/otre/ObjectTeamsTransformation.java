@@ -1068,7 +1068,6 @@ public abstract class ObjectTeamsTransformation
 	                	if (flag == 1) {
 							CallinBindingManager.addBaseClassForModifierChange(names[0]);
 						} else {
-							CallinBindingManager.addExtraReferencedBase(class_name, names[0]);
 	                		// [OT/Equinox]: store adapted bases:
                 			adaptedBases.add(names[0]);
 						}
@@ -1085,31 +1084,6 @@ public abstract class ObjectTeamsTransformation
                         classesToLoad.add(referenced_team);
 
                     }
-                } else if (attrName.equals("BaseClassTags")) {
-                    numberOfEntries = 2;
-                    String baseClass = "";
-		            int tag = 0;
-		            HashMap<String, Integer> tagMap = new HashMap<String, Integer>();
-
-                    int i = 2;
-                    int n = 2 * count * numberOfEntries; //count << 2; 
-                    while (i <= n) {
-						for (int j = 0; j < numberOfEntries; j++) {
-							int nextIndex = combineTwoBytes(indizes, i);
-							if (j == 0) {
-								ConstantUtf8 cons = (ConstantUtf8) cpg
-										.getConstant(nextIndex);
-								baseClass = cons.getBytes();
-							} else if (j == 1) {
-								tag = nextIndex;
-							}
-							i += 2;
-						}
-			            tagMap.put(baseClass, Integer.valueOf(tag));
-                        if(logging) printLogMessage("**** found Base tag: " + class_name + "."
-                                + baseClass + "->" + tag);
-                    }
-		            CallinBindingManager.addBaseTags(class_name, tagMap);
 				} else if (attrName.equals("PlayedBy")) {
 					names = new String[1];
 					scanStrings(names, indizes, 0, cpg);
@@ -1304,7 +1278,6 @@ public abstract class ObjectTeamsTransformation
                 attrName.equals("WrappedRoleSignature")   	||
 				attrName.equals("WrappedBaseSignature") 	||
                 attrName.equals("ReferencedTeams")        	||
-                attrName.equals("BaseClassTags")		  	||
                 attrName.equals("PlayedBy") 			  	||
                 attrName.equals("Modifiers")				||
                 attrName.equals("OTCompilerVersion") 		||

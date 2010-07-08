@@ -27,9 +27,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.bcel.classfile.ClassParser;
+import org.apache.bcel.classfile.JavaClass;
+import org.apache.bcel.generic.ClassGen;
+import org.apache.bcel.util.ClassLoaderRepository;
 import org.eclipse.objectteams.otre.BaseCallRedirection;
 import org.eclipse.objectteams.otre.BaseMethodTransformation;
-import org.eclipse.objectteams.otre.BaseTagInsertion;
 import org.eclipse.objectteams.otre.Decapsulation;
 import org.eclipse.objectteams.otre.LiftingParticipantTransformation;
 import org.eclipse.objectteams.otre.OTConstants;
@@ -41,11 +44,6 @@ import org.eclipse.objectteams.otre.TeamInterfaceImplementation;
 import org.eclipse.objectteams.otre.ThreadActivation;
 import org.eclipse.objectteams.otre.util.AttributeReadingGuard;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
-
-import org.apache.bcel.classfile.ClassParser;
-import org.apache.bcel.classfile.JavaClass;
-import org.apache.bcel.generic.ClassGen;
-import org.apache.bcel.util.ClassLoaderRepository;
 
 
 /**
@@ -60,7 +58,6 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	static Class<?>[] transformerClasses = new Class<?>[] {	
 		BaseCallRedirection.class, 
 		BaseMethodTransformation.class,
-		BaseTagInsertion.class,
 		Decapsulation.class,
 		LiftingParticipantTransformation.class,
 		StaticSliceBaseTransformation.class,
@@ -75,7 +72,6 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	static class StateGroup {
 		ObjectTeamsTransformation.SharedState bcrState = new ObjectTeamsTransformation.SharedState();
 		ObjectTeamsTransformation.SharedState bmtState = new ObjectTeamsTransformation.SharedState();
-		BaseTagInsertion.SharedState 		  btiState = new BaseTagInsertion.SharedState();
 		Decapsulation.SharedState 			  decState = new Decapsulation.SharedState();
 		ObjectTeamsTransformation.SharedState lptState = new ObjectTeamsTransformation.SharedState();
 		ObjectTeamsTransformation.SharedState ssbtState = new ObjectTeamsTransformation.SharedState();
@@ -133,8 +129,6 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			= new BaseCallRedirection(				loader,	states.bcrState);
 		BaseMethodTransformation baseMethodTransformation 
 			= new BaseMethodTransformation(			loader,	states.bmtState);
-		BaseTagInsertion baseTagInsertion 
-			= new BaseTagInsertion(							states.btiState);
 		Decapsulation decapsulation 
 			= new Decapsulation(					loader,	states.decState);
 		LiftingParticipantTransformation liftingParticipantTransformation 
@@ -181,7 +175,6 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			System.err.println("Error transforming class: "+cg.getClassName());
 			t.printStackTrace();
 		}
-			baseTagInsertion.doTransformInterface(jpe, cg);
 			staticSliceBaseTransformation.doTransformInterface(jpe, cg);
 			teamInterfaceImplementation.doTransformInterface(jpe, cg);
 			
@@ -189,7 +182,6 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 //			baseCallRedirection.doTransformInterface(jpe, cg);
 //			decapsulation.doTransformInterface(jpe, cg);
 //			baseMethodTransformation.doTransformInterface(jpe, cg);
-//			baseTagInsertion.doTransformInterface(jpe, cg);
 //			staticSliceBaseTransformation.doTransformInterface(jpe, cg);
 //			teamInterfaceImplementation.doTransformInterface(jpe, cg);
 			threadActivation.doTransformInterface(jpe, cg);
@@ -197,7 +189,6 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			
 //			baseCallRedirection.doTransformCode(cg); // empty method
 			baseMethodTransformation.doTransformCode(cg);
-			baseTagInsertion.doTransformCode(cg);
 			liftingParticipantTransformation.doTransformCode(cg);
 			staticSliceBaseTransformation.doTransformCode(cg);
 			teamInterfaceImplementation.doTransformCode(cg);

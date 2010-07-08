@@ -53,10 +53,6 @@ public class CallinBindingManager {
 	//	maps a team to its contained roles: teamClassName -> List[RoleClassName]
 	private static ListValueHashMap<String> rolesPerTeam = new ListValueHashMap<String>();
 	
-	// store sets of bases indexed by a team name, 
-	// where the team adapts (decapsulates) the given bases without a direct playedBy relation
-	private static HashMap<String, HashSet<String>> extraReferencedBases = new HashMap<String, HashSet<String>>();
-
 	/**
 	 * Add super-link of the BoundRole object for the RoleBaseBinding of 'className' to 'superClassName'.
 	 * @param className				the name of the class for which to add the super-link
@@ -199,26 +195,6 @@ public class CallinBindingManager {
     	return allRoles.contains(roleName);
     }
     
-    public static void addExtraReferencedBase(String teamName, String baseName) {
-    	HashSet<String> bases = extraReferencedBases.get(teamName);
-    	if (bases == null) {
-    		bases = new HashSet<String>();
-    		extraReferencedBases.put(teamName, bases);
-    	}
-    	bases.add(baseName);
-    }
-    
-    /**
-     * Get all bases adapted by a team without a direct playedBy relation.
-     * @param teamName
-     * @return non-null Set (may be empty).
-     */
-    public static Set<String> getExtraReferencedBases(String teamName) {
-    	Set<String> bases = extraReferencedBases.get(teamName);
-    	if (bases != null)
-    		return bases;
-    	return new HashSet<String>();
-    }
     
 	/**
      * Declare binding of a pair of methods.
@@ -909,66 +885,6 @@ public class CallinBindingManager {
 		}
 		return result;
 	}
-	
-
-    // -----------------------------------------------
-    //   tags for teams per base class:
-    // -----------------------------------------------
-    // baseName -> HashMap  (teamName -> tag (Integer))
-    private static HashMap<String, HashMap<String, Integer>> baseTags = new HashMap<String, HashMap<String, Integer>>();
-
-    /**
-     * @param teamName
-     * @param baseToTag
-     */
-    public static void addBaseTags (String teamName, HashMap<String, Integer> baseToTag) {
-	    Iterator<Entry<String, Integer>> iter = baseToTag.entrySet().iterator();
-	    while (iter.hasNext()) {
-	    	Entry<String,Integer> entry = iter.next();
-	        String baseName = entry.getKey();
-	        Integer tag = entry.getValue();
-	        HashMap<String, Integer> thisBaseTags = baseTags.get(baseName);
-	        if (thisBaseTags == null) {
-    		    thisBaseTags = new HashMap<String, Integer>();
-    		    baseTags.put(baseName, thisBaseTags);
-	        }
-	        thisBaseTags.put(teamName, tag);
-	    }
-    }
-
-    /**
-     *  Get all tags of teams which have callins for a given base class.
-     * @param baseClassName base class name.
-     * @return HashMap: team name -> tag (Integer)
-     */
-    public static HashMap<String, Integer> getBaseTags (String baseClassName) {
-    	HashMap<String, Integer> baseClassTags = baseTags.get(baseClassName);
-    	if (baseClassTags == null)
-    		return new HashMap<String, Integer>();
-    	return baseTags.get(baseClassName); 
-    }
-    
-    /**
-     * Get all tags of teams which have callins for implicit super types
-     * of the given base class. 
-     * Note: this is only possible if the base class is a role at the same time! 
-     * @param baseClassName	base class name.
-     * @return HashMap: team name -> tag (Integer)
-     */
-    public static HashMap<String, Integer> getInheritedBaseTags(String baseClassName) {
-    	HashMap<String, Integer> result = new HashMap<String, Integer>();
-    	// clone for re-entrance:
-    	Iterator<String> it = getBaseBindingsKeyIterator();
-		while (it.hasNext()) {
-			String have = it.next();
-			// look for true superClass (not same):
-			if (have.equals(baseClassName)) 
-				continue;
-			if (isImplicitSubtype(baseClassName, have))
-				result.putAll(getBaseTags(have));
-		}
-		return result;
-    }
 
 	// -----------------------------------------------
 	//   callout bindings that require adjustment:
