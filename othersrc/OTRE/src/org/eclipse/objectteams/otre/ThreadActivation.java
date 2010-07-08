@@ -148,6 +148,7 @@ public class ThreadActivation
         il.dispose();
 	}
 	// is method a constructor that does not invoke another this()-ctor?
+	@SuppressWarnings("deprecation")
 	private MethodGen isRootCtor(Method method, ClassGen cg) {
 		if (!method.getName().equals("<init>"))
 			return null;
@@ -161,7 +162,7 @@ public class ThreadActivation
 		}
 		if (ih == null)
 			return null;
-		if (((InvokeInstruction)ih.getInstruction()).getClassName(cpg).equals(className))
+		if (((InvokeInstruction)ih.getInstruction()).getClassName(cpg).equals(className)) // unsafe due to object/array ambiguity, but we have no array (is an invokespecial!)
 			return null; // this-call
 		return mg;
 	}
