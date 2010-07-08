@@ -1279,6 +1279,7 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 	 * @param loading					the originally loaded arguments 
 	 * @return	the instruction list containing the method call ingredients							
 	 */
+	@SuppressWarnings("deprecation") // ii.getClassName() is deprecated 
 	InstructionList genEnhancedSuperCall(ConstantPoolGen cpg, InvokeInstruction ii,
 										   MethodGen enhancedMethod, InstructionList loading)
 	{
@@ -1304,7 +1305,7 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 		else
 			kind = Constants.INVOKEVIRTUAL;
 
-		il.append(factory.createInvoke(ii.getClassName(cpg),
+		il.append(factory.createInvoke(ii.getClassName(cpg), // deprecated but we're safe because we have not array here (super/tsuper call)
 													 	ii.getMethodName(cpg),
 												  	 	returnType,
 														argTypes,
@@ -1320,6 +1321,7 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 	 * @param loading					the originally loaded arguments 
 	 * @return	the instruction list containing the method call ingredients		
 	 */
+	@SuppressWarnings("deprecation") // iv.getClassName is deprecated
 	InstructionList genBaseCallSurrogateCall(ConstantPoolGen cpg, InvokeInstruction/*INVOKEVIRTUAL*/ iv,
 											   MethodGen enhancedMethod, InstructionList loading, 
 											   String roleClassName, String calleeClassName) //JU: added String roleClassName and teamClassName to the method signature
@@ -1328,7 +1330,7 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 																								// because of the missing 'this' 
 		// for static methods callee is 'null' -> substitute by current class (JU)
 		if(calleeClassName == null) {
-			calleeClassName = iv.getClassName(cpg);
+			calleeClassName = iv.getClassName(cpg); // deprecated but we're safe because we have not array here (activate() call)
 		}
 		
 		Type returnType = enhancedMethod.getReturnType();
