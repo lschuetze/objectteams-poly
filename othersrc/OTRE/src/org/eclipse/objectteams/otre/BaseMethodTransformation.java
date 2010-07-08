@@ -204,6 +204,7 @@ public class BaseMethodTransformation
 				if (   !is_name.equals(method_name) 							// not same method
 					&& !is_name.equals("<init>"))    							// not ctor call
 				{ 
+					@SuppressWarnings("deprecation") // type of is (invokespecial) cannot be array type
 					String superClassName = is.getClassName(cpg);
 					if (   !superClassName.equals(className)					// not private method of same class
 						&& CallinBindingManager.isBoundBaseMethod( 				// target method is callin-affected
@@ -457,6 +458,7 @@ public class BaseMethodTransformation
 				INVOKESPECIAL is = (INVOKESPECIAL)actInstruction;
 				String is_name = is.getName(cpg);
 				if(is_name.equals(method_name)) {
+					@SuppressWarnings("deprecation") // type if is (invokespecial) cannot be array type
 					String superClassName = is.getClassName(cpg);
                     if(logging) printLogMessage("super-call to " + is_name //$NON-NLS-1$
                             + " has to be redirected to the orig-version!"); //$NON-NLS-1$
