@@ -33,7 +33,8 @@ then
     echo "JDT feature not correctly found in ${BASE}/testrun/build-root/eclipse/features"
     exit 2
 fi
-
+OTDTVERSION=`cat ${BASE}/testrun/build-root/src/finalFeaturesVersions.properties|grep "objectteams.otdt="|cut -d '=' -f 2`
+echo "OTDTVERSION is $OTDTVERSION"
 
 # Configure for calling various p2 applications:
 LAUNCHER=`grep equinox.launcher_jar= ${BASE}/build/run.properties | cut -d '=' -f 2`
@@ -100,7 +101,19 @@ java -jar ${LAUNCHER_PATH} -consoleLog -application ${FABPUB} \
 ls -ltr *\.*
 
 
-echo "====Step 4: generate category===="
+echo "====Step 4: patch content for feature inclusion version range===="
+mv content.xml content.xml-orig
+xsltproc  -o content.xml --stringparam version ${JDTVERSIONA}-${JDTVERSIONB} \
+    --stringparam versionnext ${JDTVERSIONA}-${JDTVERSIONB2} \
+    ../build/patch-content-xml.xsl content.xml-orig
+ls -ltr *\.*
+
+echo "====Step 5: archive raw meta data===="
+mkdir ../metadata/$OTDTVERSION
+cp *.xml ../metadata/$OTDTVERSION
+ls -ltr ../metadata/$OTDTVERSION/*.xml
+
+echo "====Step 6: generate category===="
 CATEGORYARGS="-categoryDefinition file:${BASE}/testrun/build-root/src/features/org.eclipse.objectteams.otdt/category.xml"
 echo "CATEGORYARGS  = ${CATEGORYARGS}"
 java -jar ${LAUNCHER_PATH} -consoleLog -application ${CATPUB} \
@@ -110,14 +123,7 @@ java -jar ${LAUNCHER_PATH} -consoleLog -application ${CATPUB} \
 ls -ltr *\.*
 
 
-echo "====Step 5: patch content for feature inclusion version range===="
-mv content.xml content.xml-orig
-xsltproc  -o content.xml --stringparam version ${JDTVERSIONA}-${JDTVERSIONB} \
-    --stringparam versionnext ${JDTVERSIONA}-${JDTVERSIONB2} \
-    ../build/patch-content-xml.xsl content.xml-orig
-ls -ltr *\.*
-
-echo "====Step 6: add download stats capability===="
+echo "====Step 7: add download stats capability===="
 XSLT_FILE=${BASE}/bin/addDownloadStats.xsl
 
 if [ $# == 3 ]; then
@@ -126,13 +132,13 @@ if [ $# == 3 ]; then
 	xsltproc -o artifacts.xml --stringparam repo "http://download.eclipse.org/stats/objectteams/${2}" --stringparam version $3 $XSLT_FILE artifacts.xml.original
 fi
 
-echo "====Step 7: jar-up metadata===="
+echo "====Step 8: jar-up metadata===="
 jar cf content.jar content.xml
 jar cf artifacts.jar artifacts.xml
 /bin/rm *.xml*
 ls -ltr *\.*
 
-echo "====Step 8: cleanup: remove symbolic links===="
+echo "====Step 9: cleanup: remove symbolic links===="
 find . -type l -exec /bin/rm {} \;
 
 echo "====DONE===="
