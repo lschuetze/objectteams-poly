@@ -151,6 +151,9 @@ public class RoleModel extends TypeModel
 
     /** does this bound role have a binding ambiguity prohibiting lifting? */
     public boolean _hasBindingAmbiguity = false;
+    
+    /** is the baseclass an (indirect) enclosing class? */
+	public boolean _playedByEnclosing = false;
 
     /** map synthetic methods/fields of tsuper role to this role's */
     private HashMap<Binding, Binding> _syntheticMap = new HashMap<Binding, Binding>();

@@ -288,6 +288,11 @@ public class BaseAllocationExpression extends Assignment {
     }
 
     public TypeBinding resolveType(BlockScope scope) {
+    	TypeDeclaration roleDecl = scope.referenceType();
+    	if (roleDecl != null && roleDecl.isRole() && roleDecl.getRoleModel()._playedByEnclosing) {
+    		scope.problemReporter().baseAllocationDespiteBaseclassCycle(this, roleDecl);
+    		return null;
+    	}
         if (!checkGenerate(scope)) { // createAst failed.
             return null;
         }

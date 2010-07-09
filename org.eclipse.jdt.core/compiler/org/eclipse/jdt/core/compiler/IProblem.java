@@ -1493,11 +1493,12 @@ void setSourceStart(int sourceStart);
 	int BaseConstructorCallInLiftingConstructor  = ROLE_RELATED + 4202; // 2.4.2
 	int CallsCtorWithMismatchingBaseCtor         = ROLE_RELATED + 4203; // 2.4.2
 	int InvalidExplicitTSuperConstructorCall     = ROLE_RELATED + 4204; // 2.4.2
-	int BaseCtorCallIsNotFirst                   = ROLE_RELATED + 4205; // 2.4.2(b)
-	int MissingCallToBaseConstructor             = ROLE_RELATED + 4206; // 2.4.2(b)
-	int TooManyCallsToBaseConstructor            = ROLE_RELATED + 4207; // 2.4.2(b)
-	int DecapsulationBaseCtor                    = ROLE_RELATED + 4208; // 2.4.2(b)
-	int RoleConstructorHiddenByLiftingConstructor= ROLE_RELATED + 4209; // 2.4.2(d)
+	int BaseAllocationDespiteBaseclassCycle      = ROLE_RELATED + 4205; // 2.4.2
+	int BaseCtorCallIsNotFirst                   = ROLE_RELATED + 4206; // 2.4.2(b)
+	int MissingCallToBaseConstructor             = ROLE_RELATED + 4207; // 2.4.2(b)
+	int TooManyCallsToBaseConstructor            = ROLE_RELATED + 4208; // 2.4.2(b)
+	int DecapsulationBaseCtor                    = ROLE_RELATED + 4209; // 2.4.2(b)
+	int RoleConstructorHiddenByLiftingConstructor= ROLE_RELATED + 4210; // 2.4.2(d)
 	int InstantiatingSupercededRole 			 = ROLE_RELATED + 4301; // 2.4.3
 
 
@@ -1517,16 +1518,17 @@ void setSourceStart(int sourceStart);
 	int CALLOUT_RELATED = OTJ_RELATED + 3*OTCHAP;
 	int CalloutMappingInNonRole                  = CALLOUT_RELATED + 1001; // 3.1(a)
 	int CalloutMappingInUnboundRole              = CALLOUT_RELATED + 1002; // 3.1(a)
-	int UnresolvedCalloutMethodSpec 			 = CALLOUT_RELATED + 1003; // 3.1(c)
-	int AmbiguousCalloutMethodSpec               = CALLOUT_RELATED + 1004; // 3.1(c)
-	int DifferentReturnInCalloutMethodSpec 		 = CALLOUT_RELATED + 1005; // 3.1(c)
-	int DifferentParamInCalloutMethodSpec 	     = CALLOUT_RELATED + 1006; // 3.1(c)
-	int RegularCalloutOverrides 				 = CALLOUT_RELATED + 1007; // 3.1(e)
-	int AbstractMethodBoundAsOverride            = CALLOUT_RELATED + 1008; // 3.1(e)
-	int CalloutOverridesLocal 					 = CALLOUT_RELATED + 1009; // 3.1(e)
-	int RegularCalloutOverridesCallout 			 = CALLOUT_RELATED + 1010; // 3.1(f)
-	int DuplicateCalloutBinding 				 = CALLOUT_RELATED + 1011; // 3.1(g)
-	int CalloutUndeclaredException               = CALLOUT_RELATED + 1012; // 3.1(h)
+	int CalloutToEnclosing						 = CALLOUT_RELATED + 1003; // 3.1(a)
+	int UnresolvedCalloutMethodSpec 			 = CALLOUT_RELATED + 1004; // 3.1(c)
+	int AmbiguousCalloutMethodSpec               = CALLOUT_RELATED + 1005; // 3.1(c)
+	int DifferentReturnInCalloutMethodSpec 		 = CALLOUT_RELATED + 1006; // 3.1(c)
+	int DifferentParamInCalloutMethodSpec 	     = CALLOUT_RELATED + 1007; // 3.1(c)
+	int RegularCalloutOverrides 				 = CALLOUT_RELATED + 1008; // 3.1(e)
+	int AbstractMethodBoundAsOverride            = CALLOUT_RELATED + 1009; // 3.1(e)
+	int CalloutOverridesLocal 					 = CALLOUT_RELATED + 1010; // 3.1(e)
+	int RegularCalloutOverridesCallout 			 = CALLOUT_RELATED + 1011; // 3.1(f)
+	int DuplicateCalloutBinding 				 = CALLOUT_RELATED + 1012; // 3.1(g)
+	int CalloutUndeclaredException               = CALLOUT_RELATED + 1013; // 3.1(h)
 
 	int AddingInferredCalloutForInherited 		 = CALLOUT_RELATED + 1014; // 3.1(j)
 	int UsingInferredCalloutForMessageSend		 = CALLOUT_RELATED + 1015; // 3.1(j)

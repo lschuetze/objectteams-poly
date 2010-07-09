@@ -1901,7 +1901,7 @@ public class Dependencies implements ITranslationStates {
 			
 			if (!hasBaseclassProblem) {
 				ReferenceBinding baseclass = role.getBaseTypeBinding();
-				if (baseclass != null)
+				if (baseclass != null && !role._playedByEnclosing)
 					// some methods accessible to callout/callin might be added during
 					// callout transformation.
 					ensureBindingState(baseclass, STATE_MAPPINGS_TRANSFORMED);

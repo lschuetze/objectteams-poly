@@ -1663,7 +1663,8 @@ public class ClassScope extends Scope {
 	        while (currentType != null && baseclass != null) {
 	        	if (currentType == baseclass) {
 	        		problemReporter().playedByEnclosing(sourceType, this.referenceContext.baseclass, baseclass);
-	        		baseclass = null;
+	        		sourceType.roleModel._playedByEnclosing = true;
+	        		break;
 	        	}
 	        	currentType = currentType.enclosingType();
 	        }

@@ -34,6 +34,9 @@ import org.eclipse.jdt.internal.compiler.util.Util;
  * OTDT changes:
  * 	several new configurable options
  */
+//{ObjectTeams: be nice:
+@SuppressWarnings("rawtypes") // for Maps of options
+//SH}
 public class CompilerOptions {
 
 	/**
@@ -142,6 +145,8 @@ public class CompilerOptions {
 //{ObjectTeams: sync with constants in OTDTPlugin:
 	public static final String OPTION_ReportNotExactlyOneBasecall =
 		"org.eclipse.objectteams.otdt.compiler.problem.basecall"; //$NON-NLS-1$
+	public static final String OPTION_ReportBaseclassCycle =
+		"org.eclipse.objectteams.otdt.compiler.problem.baseclass_cycle";  //$NON-NLS-1$
 	public static final String OPTION_ReportUnsafeRoleInstantiation   =
 		"org.eclipse.objectteams.otdt.compiler.problem.unsafe_role_instantiation"; //$NON-NLS-1$
 
@@ -323,6 +328,7 @@ public class CompilerOptions {
 	public static final int AdaptingDeprecated=              OTJFlag | ASTNode.Bit15;
 	public static final int IgnoringRoleReturn=			     OTJFlag | ASTNode.Bit16;
 	public static final int DefiniteBindingAmbiguity=		 OTJFlag | ASTNode.Bit17;
+	public static final int BaseclassCycle=				     OTJFlag | ASTNode.Bit18;
 // SH}
 
 
@@ -464,6 +470,7 @@ public class CompilerOptions {
 		"unused", //$NON-NLS-1$
 //{ObjectTeams:
 		"basecall",             //$NON-NLS-1$
+		"baseclasscycle",       //$NON-NLS-1$
 		"roleinstantiation",    //$NON-NLS-1$
 		"fragilecallin",        //$NON-NLS-1$
 		"ambiguousbinding",     //$NON-NLS-1$
@@ -643,6 +650,8 @@ public class CompilerOptions {
 //{ObjectTeams:
 			case NotExactlyOneBasecall :
 				return OPTION_ReportNotExactlyOneBasecall;
+			case BaseclassCycle:
+				return OPTION_ReportBaseclassCycle;
 			case UnsafeRoleInstantiation :
 				return OPTION_ReportUnsafeRoleInstantiation;
 			case FragileCallin :
@@ -814,6 +823,7 @@ public class CompilerOptions {
 			OPTION_ReportUnusedTypeArgumentsForMethodInvocation,
 //{ObjectTeams:
 			OPTION_ReportNotExactlyOneBasecall,
+			OPTION_ReportBaseclassCycle,
 			OPTION_ReportUnsafeRoleInstantiation,
 			OPTION_ReportFragileCallin,
 			OPTION_ReportPotentialAmbiguousPlayedby,
@@ -900,6 +910,8 @@ public class CompilerOptions {
 //{ObjectTeams:
 			case NotExactlyOneBasecall :
 				return "basecall"; //$NON-NLS-1$
+			case BaseclassCycle:
+				return "baseclasscycle";  //$NON-NLS-1$
 			case UnsafeRoleInstantiation :
 				return "roleinstantiation";  //$NON-NLS-1$
 			case FragileCallin :
@@ -1020,6 +1032,8 @@ public class CompilerOptions {
 		case 'b' :
 			if ("basecall".equals(warningToken)) //$NON-NLS-1$
 				return IrritantSet.NOT_EXACTLY_ONE_BASECALL;
+			else if ("baseclasscycle".equals(warningToken)) //$NON-NLS-1$
+				return IrritantSet.BASECALL_CYCLE;
 			else if ("bindingconventions".equals(warningToken)) //$NON-NLS-1$
 				return IrritantSet.BINDING_CONVENTIONS;
 			else if ("bindingtosystemclass".equals(warningToken)) //$NON-NLS-1$
@@ -1062,7 +1076,6 @@ public class CompilerOptions {
 		return null;
 	}
 
-	
 //{ObjectTeams: be nice:
 	@SuppressWarnings("unchecked")
 // SH}
@@ -1174,6 +1187,7 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_Decapsulation, this.decapsulation);
 
 		optionsMap.put(OPTION_ReportNotExactlyOneBasecall, getSeverityString(NotExactlyOneBasecall));
+		optionsMap.put(OPTION_ReportBaseclassCycle, getSeverityString(BaseclassCycle));
 		optionsMap.put(OPTION_ReportUnsafeRoleInstantiation, getSeverityString(UnsafeRoleInstantiation));
 
 		optionsMap.put(OPTION_ReportFragileCallin, getSeverityString(FragileCallin));
@@ -1607,6 +1621,7 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportUnusedObjectAllocation)) != null) updateSeverity(UnusedObjectAllocation, optionValue);
 //{ObjectTeams:
 		if ((optionValue = optionsMap.get(OPTION_ReportNotExactlyOneBasecall)) != null) updateSeverity(NotExactlyOneBasecall, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportBaseclassCycle)) != null) updateSeverity(BaseclassCycle, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportUnsafeRoleInstantiation)) != null) updateSeverity(UnsafeRoleInstantiation, optionValue);
 
 		if ((optionValue = optionsMap.get(OPTION_ReportFragileCallin)) != null) updateSeverity(FragileCallin, optionValue);
@@ -1853,6 +1868,7 @@ public class CompilerOptions {
 //{ObjectTeams
 		buf.append("\n\t- decapsulation : ").append(this.decapsulation); //$NON-NLS-1$
 		buf.append("\n\t- report if not exactly one basecall in callin method : ").append(getSeverityString(NotExactlyOneBasecall)); //$NON-NLS-1$
+		buf.append("\n\t- report baseclass cycle (playedBy enclosing): ").append(getSeverityString(BaseclassCycle)); //$NON-NLS-1$
 
 		buf.append("\n\t- report if callin is fragile (possibly no result) : ").append(getSeverityString(FragileCallin)); //$NON-NLS-1$
 		buf.append("\n\t- report if role instantiation is unsafe : ").append(getSeverityString(UnsafeRoleInstantiation)); //$NON-NLS-1$

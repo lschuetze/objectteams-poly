@@ -3348,6 +3348,9 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			} else if (token.equals("basecall")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNotExactlyOneBasecall, severity, isEnabling);
 				return;
+			} else if (token.equals("baseclasscycle")) { //$NON-NLS-1$
+				setSeverity(CompilerOptions.OPTION_ReportBaseclassCycle, severity, isEnabling);
+				return;
 			} else if (token.equals("bindingconventions")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportBindingConventions, severity, isEnabling);
 				return;

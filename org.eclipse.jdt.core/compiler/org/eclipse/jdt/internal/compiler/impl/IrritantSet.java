@@ -73,6 +73,8 @@ public class IrritantSet {
 //{ObjectTeams: new irritants:
 	public static final IrritantSet NOT_EXACTLY_ONE_BASECALL = new IrritantSet(
             CompilerOptions.NotExactlyOneBasecall);
+	public static final IrritantSet BASECALL_CYCLE = new IrritantSet(
+            CompilerOptions.BaseclassCycle);
 	public static final IrritantSet UNSAFE_ROLE_INSTANTIATION = new IrritantSet(
             CompilerOptions.UnsafeRoleInstantiation);
 	public static final IrritantSet FRAGILE_CALLIN = new IrritantSet(
@@ -119,6 +121,7 @@ public class IrritantSet {
 //{ObjectTeams: default to warning (group 3):
 			.set(CompilerOptions.BindingConventions
 				| CompilerOptions.NotExactlyOneBasecall
+				| CompilerOptions.BaseclassCycle
 				| CompilerOptions.UnsafeRoleInstantiation
 				| CompilerOptions.FragileCallin
 				| CompilerOptions.PotentialAmbiguousPlayedBy

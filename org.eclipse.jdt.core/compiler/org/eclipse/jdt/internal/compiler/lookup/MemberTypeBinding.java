@@ -138,11 +138,13 @@ public ReferenceBinding baseclass() {
         	this.baseclass= NoBaseclass;
         checkRefineBaseFromSuperInterfaces();
     }
-    String circle = hasBaseclassCircularity();
-    if (circle != null) {
-    	circle = new String(readableName())+circle;
-    	this.scope.problemReporter().baseclassCircularity(circle, this.scope.referenceContext.baseclass);
-    	this.tagBits |= TagBits.BaseclassHasProblems;
+    if (!this.roleModel._playedByEnclosing && !isSynthInterface()) {
+	    String circle = hasBaseclassCircularity();
+	    if (circle != null) {
+	    	circle = new String(readableName())+circle;
+	    	this.scope.problemReporter().baseclassCircularity(circle, this.scope.referenceContext.baseclass);
+	    	this.roleModel._playedByEnclosing = true;
+	    }
     }
     return rawBaseclass();
 }
@@ -157,43 +159,50 @@ private String hasBaseclassCircularity() {
 	this.hasCheckedBaseclassCircularity = true;
 	if (this.baseclass == null)
 		return null;
-	HashSet<ReferenceBinding> visitedTypes = new HashSet<ReferenceBinding>();
-	//visitedTypes.add(this.enclosingType());
-	//visitedTypes.add(this);
-	return internalHasBaseclassCircularity(visitedTypes, this.baseclass);
+	HashSet<ReferenceBinding> upEnclosing = new HashSet<ReferenceBinding>(); // set of all enclosings and their supers
+	ReferenceBinding out = this;
+	while ((out  = out.enclosingType()) != null) {
+		ReferenceBinding up = out;
+		while (up != null && up.id != TypeIds.T_JavaLangObject) {
+			upEnclosing.add(up);
+			up = up.superclass();
+		}
+	}
+	return internalHasBaseclassCircularity(upEnclosing, new HashSet<ReferenceBinding>(), this.baseclass);
 }
 @SuppressWarnings("nls")
 private String internalHasBaseclassCircularity(
+		HashSet<ReferenceBinding> upEnclosing,
 		HashSet<ReferenceBinding> visitedTypes,
 		ReferenceBinding type)
 {
 	if (type == null || type == NoBaseclass || type == ProblemBaseClass)
 		return null;
+	// completing a cycle that started from the focus role?
 	if (visitedTypes.contains(type))
-		return "";//new String(type.readableName());
+		return "";
+	// completing a cycle that started from "above" the focus role (enclosing types and their supers)?
+	if (upEnclosing.contains(type))
+		return "->" + new String(type.readableName());
 	visitedTypes.add(type);
 	String circle = null;
 	if (type.rawBaseclass() != null) {
-		circle = internalHasBaseclassCircularity(visitedTypes, type.baseclass);
+		circle = internalHasBaseclassCircularity(upEnclosing, visitedTypes, type.baseclass);
 		if (circle != null)
 			return "->"+new String(type.shortReadableName())+circle;
 		visitedTypes.remove(type.baseclass);
 	}
-	ReferenceBinding[] memberTypes = type.memberTypes();
-	if (memberTypes == null)
+	ReferenceBinding[] members = type.memberTypes();
+	if (members == null)
 		return null;
-	for (ReferenceBinding member : memberTypes) {
-		circle = internalHasBaseclassCircularity(visitedTypes, member);
+	for (ReferenceBinding member : members) {
+		circle = internalHasBaseclassCircularity(upEnclosing, visitedTypes, member);
 		if (circle != null)
 			return "->"+new String(type.shortReadableName())+circle;
 		visitedTypes.remove(member);
 	}
 	return null;
 }
-/**
- *
- * @param roleDecl
- */
 public void checkRefineBaseFromSuperInterfaces()
 {
 	TypeDeclaration roleDecl = this.roleModel.getAst();

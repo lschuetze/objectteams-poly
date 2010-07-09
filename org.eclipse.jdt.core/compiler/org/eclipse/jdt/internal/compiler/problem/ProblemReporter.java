@@ -401,6 +401,9 @@ public static int getIrritant(int problemID) {
 		case IProblem.PotentiallyMissingBaseCall:
 		case IProblem.PotentiallyDuplicateBaseCall:
 			return CompilerOptions.NotExactlyOneBasecall;
+		case IProblem.BaseclassIsEnclosing:
+		case IProblem.BaseclassCircularity:
+			return CompilerOptions.BaseclassCycle;
 		case IProblem.LiftCtorArgNotAllocation:
 		case IProblem.InstantiatingSupercededRole:
 		case IProblem.RoleConstructorHiddenByLiftingConstructor:
@@ -574,6 +577,7 @@ public static int getProblemCategory(int severity, int problemID) {
 			
 //{ObjectTeams:
 			case CompilerOptions.NotExactlyOneBasecall:
+			case CompilerOptions.BaseclassCycle:
 			case CompilerOptions.UnsafeRoleInstantiation:
 			case CompilerOptions.FragileCallin:
 			case CompilerOptions.PotentialAmbiguousPlayedBy:
@@ -9370,6 +9374,10 @@ public void baseCallOutsideMethod(ASTNode reference) {
 			reference.sourceStart,
 			reference.sourceEnd);
 }
+public void baseAllocationDespiteBaseclassCycle(BaseAllocationExpression baseAllocation, TypeDeclaration roleDecl) {
+	String[] arguments = { String.valueOf(roleDecl.binding.readableName())};
+	this.handle(IProblem.BaseAllocationDespiteBaseclassCycle, arguments, arguments, baseAllocation.sourceStart, baseAllocation.sourceEnd);
+}
 // ====== METHOD_MAPPINGS (generic) =====
 // -- 3.1 / 4.1 --
 public void methodMappingNotInBoundRole(
@@ -9850,6 +9858,12 @@ public void inferredCalloutInCompoundAssignment(ASTNode location, char[] fieldNa
 			args,
 			location.sourceStart,
 			location.sourceEnd);
+}
+
+public void calloutToEnclosing(CalloutMappingDeclaration mapping, RoleModel role) {
+	String[] args = { String.valueOf(role.getBinding().readableName()),
+					  String.valueOf(role.getBaseTypeBinding().readableName()) };
+	this.handle(IProblem.CalloutToEnclosing, args, args, mapping.sourceStart, mapping.sourceEnd);	
 }
 // -- 3.2 --
 public void unusedParamMap(
