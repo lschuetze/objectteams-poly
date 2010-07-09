@@ -47,6 +47,8 @@ public class OTDTPlugin extends Plugin
 	// === IDs for configurable options for the compiler : ===
 	public static final String OT_COMPILER_BASE_CALL =
 		PLUGIN_ID + ".compiler.problem.basecall"; //$NON-NLS-1$
+	public static final String OT_COMPILER_BASECLASS_CYCLE =
+		PLUGIN_ID + ".compiler.problem.baseclass_cycle"; //$NON-NLS-1$
 	public static final String OT_COMPILER_UNSAFE_ROLE_INSTANTIATION =
 		PLUGIN_ID + ".compiler.problem.unsafe_role_instantiation"; //$NON-NLS-1$
 
