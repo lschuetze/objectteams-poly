@@ -89,6 +89,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	
 	// proplem severities:
 	private static final Key PREF_PB_BASECALL = getJDTCoreKey(OTDTPlugin.OT_COMPILER_BASE_CALL);
+	private static final Key PREF_PB_BASECLASS_CYCLE = getJDTCoreKey(OTDTPlugin.OT_COMPILER_BASECLASS_CYCLE);
 	private static final Key PREF_PB_UNSAFE_ROLE_INSTANTIATION = getJDTCoreKey(OTDTPlugin.OT_COMPILER_UNSAFE_ROLE_INSTANTIATION);
 
 //	private static final Key PREF_PB_EFFECTLESS_FIELDACCESS = getJDTCoreKey(OTDTPlugin.OT_COMPILER_EFFECTLESS_FIELDACCESS);
@@ -151,7 +152,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private static Key[] getKeys() {
 		return new Key[] {
-				PREF_PB_BASECALL, PREF_PB_UNSAFE_ROLE_INSTANTIATION, 
+				PREF_PB_BASECALL,
+				PREF_PB_BASECLASS_CYCLE,
+				PREF_PB_UNSAFE_ROLE_INSTANTIATION, 
 //				PREF_PB_EFFECTLESS_FIELDACCESS, 
 				PREF_PB_FRAGILE_CALLIN,
 				PREF_PB_IGNORING_ROLE_RETURN,
@@ -255,7 +258,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 //		addComboBox(inner, label, PREF_PB_UNUSED_PARAMMAP, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_potential_ambiguous_playedby_label;
-		addComboBox(inner, label, PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
+		addComboBox(inner, label, PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY, errorWarningIgnore, errorWarningIgnoreLabels, 0);
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_baseclass_cycle_label;
+		addComboBox(inner, label, PREF_PB_BASECLASS_CYCLE, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_ambiguous_lowering_label;
 		addComboBox(inner, label, PREF_PB_AMBIGUOUS_LOWERING, errorWarningIgnore, errorWarningIgnoreLabels, 0);			

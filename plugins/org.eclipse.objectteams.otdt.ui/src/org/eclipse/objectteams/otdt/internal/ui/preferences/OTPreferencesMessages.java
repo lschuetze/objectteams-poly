@@ -54,6 +54,7 @@ public class OTPreferencesMessages {
 	public static String OTCompilerFeatureEnablement_description;
 
 	public static String OTCompilerConfigurationBlock_not_exactly_one_basecall_label;
+	public static String OTCompilerConfigurationBlock_baseclass_cycle_label;
 	public static String OTCompilerConfigurationBlock_unsafe_role_instantiation_label;
 	public static String OTCompilerConfigurationBlock_effectless_fieldaccess_label;
 	public static String OTCompilerConfigurationBlock_fragile_callin_label;
