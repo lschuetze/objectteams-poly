@@ -1679,6 +1679,8 @@ public void test012b(){
 //OT:
         "      basecall           + base call not issued exactly once on each path\n" +
         "                           (OTJLD 4.3(b,c))\n" +
+        "      baseclasscycle     + role involved in a baseclass-member cycle\n" +
+        "                           (OTJLD 2.1.2(b)\n" +
 //OT:
         "      bindingconventions + discouraged use of import / import base\n" +
         "                           (OTJLD 2.1.2(d))\n" +
@@ -1933,6 +1935,7 @@ public void test012b(){
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.adapting_deprecated\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.ambiguous_lowering\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.basecall\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.baseclass_cycle\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.binding_conventions\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.decapsulation\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.definite_ambiguity\" value=\"error\"/>\n" +

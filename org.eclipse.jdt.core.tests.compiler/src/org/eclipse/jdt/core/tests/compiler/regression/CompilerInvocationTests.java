@@ -1710,6 +1710,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("BaseConstructorCallInLiftingConstructor", SKIP);
         expectedProblemAttributes.put("CallsCtorWithMismatchingBaseCtor", SKIP);
         expectedProblemAttributes.put("InvalidExplicitTSuperConstructorCall", SKIP);
+        expectedProblemAttributes.put("BaseAllocationDespiteBaseclassCycle", SKIP);
         expectedProblemAttributes.put("BaseCtorCallIsNotFirst", SKIP);
         expectedProblemAttributes.put("MissingCallToBaseConstructor", SKIP);
         expectedProblemAttributes.put("TooManyCallsToBaseConstructor", SKIP);
@@ -1726,6 +1727,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("CALLOUT_RELATED", SKIP);
         expectedProblemAttributes.put("CalloutMappingInNonRole", SKIP);
         expectedProblemAttributes.put("CalloutMappingInUnboundRole", SKIP);
+        expectedProblemAttributes.put("CalloutToEnclosing", SKIP);
         expectedProblemAttributes.put("UnresolvedCalloutMethodSpec", SKIP);
         expectedProblemAttributes.put("AmbiguousCalloutMethodSpec", SKIP);
         expectedProblemAttributes.put("DifferentReturnInCalloutMethodSpec", SKIP);
