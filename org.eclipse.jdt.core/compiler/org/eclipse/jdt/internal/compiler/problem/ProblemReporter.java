@@ -11376,14 +11376,17 @@ public void roleFileCantBeEnum(TypeDeclaration typeDecl, char[][] tokens) {
 			typeDecl.sourceEnd);
 
 }
-public void baseclassCircularity(String circle, TypeReference baseclass) {
+public void baseclassCircularity(String circle, TypeDeclaration roleDecl) {
+	int s, e;
+	if (roleDecl.baseclass != null) {
+		s = roleDecl.baseclass.sourceStart;
+		e = roleDecl.baseclass.sourceEnd;
+	} else {
+		s = roleDecl.sourceStart;
+		e = roleDecl.sourceEnd;
+	}
 	String[] args = new String[] { circle };
-	this.handle(
-			IProblem.BaseclassCircularity,
-			args,
-			args,
-			baseclass.sourceStart,
-			baseclass.sourceEnd);
+	this.handle(IProblem.BaseclassCircularity, args, args, s, e);
 }
 
 public void staleTSuperRole(ReferenceBinding roleType, ReferenceBinding tsuperRole, String methodDesignator) {

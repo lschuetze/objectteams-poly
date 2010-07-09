@@ -142,7 +142,7 @@ public ReferenceBinding baseclass() {
 	    String circle = hasBaseclassCircularity();
 	    if (circle != null) {
 	    	circle = new String(readableName())+circle;
-	    	this.scope.problemReporter().baseclassCircularity(circle, this.scope.referenceContext.baseclass);
+	    	this.scope.problemReporter().baseclassCircularity(circle, this.scope.referenceContext);
 	    	this.roleModel._playedByEnclosing = true;
 	    }
     }
