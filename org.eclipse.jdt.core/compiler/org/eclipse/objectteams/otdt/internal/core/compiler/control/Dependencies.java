@@ -1529,10 +1529,12 @@ public class Dependencies implements ITranslationStates {
 	 * For team:
 	 * 1. copy synthetic access methods
 	 * For role:
+	 * 0. Binary roles: bindings for methods to be created by the OTRE 
 	 * 1. creation methods
      * 2. getTeam methods
 	 * 3. add method from non-role superclasses to the interface part.
 	 * 4. cast methods (calls getTeam method)
+	 * 5. abstract _OT$getBase() method for unbound lowerable role
 	 */
 	private static boolean establishMethodsCreated(TeamModel teamModel) {
 		if (teamModel.getBinding().isRole())
@@ -1561,17 +1563,17 @@ public class Dependencies implements ITranslationStates {
         TypeDeclaration  subRoleDecl     = clazz.getAst();
 
         if (subRole == null) { // extra caution, none of the code below would work
-            clazz.setState(STATE_TYPES_ADJUSTED);
+            clazz.setState(STATE_METHODS_CREATED);
         	return false;
         }
 
         if (   OTNameUtils.isTSuperMarkerInterface(clazz.getInternalName())
         	|| teamType == null)
         {
-        	// binary only: create OTRE-generated methods:
+        	// 0. binary only: create OTRE-generated methods:
         	if (subRole.isBinaryBinding())
        			((BinaryTypeBinding)subRole).createOTREMethods(clazz);
-            clazz.setState(STATE_TYPES_ADJUSTED);
+            clazz.setState(STATE_METHODS_CREATED);
             return true; // nothing to do
         }
 
@@ -1697,7 +1699,7 @@ public class Dependencies implements ITranslationStates {
         		RoleClassLiteralAccess.ensureGetClassMethod(teamType.getTeamModel(), clazz);
         }
 
-        // special case roles which need an abstract _OT$getBase() method:
+        // 5. special case roles which need an abstract _OT$getBase() method:
 		StandardElementGenerator.createGetBaseForUnboundLowerable(clazz);
         
         clazz.setState(STATE_METHODS_CREATED);
