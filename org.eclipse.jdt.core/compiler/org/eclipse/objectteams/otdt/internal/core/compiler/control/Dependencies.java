@@ -25,7 +25,6 @@ import java.util.Iterator;
 
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.Clinit;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
@@ -69,7 +68,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TransformStatementsVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleFileHelper;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
@@ -1491,6 +1489,9 @@ public class Dependencies implements ITranslationStates {
      * Doing fault in types here and not via CompilationUnitScope
      * allows us to process single types without processing the whole
      * compilation unit!
+     * We also add some OT-specific transformantions:
+     * - faultInRoleImports
+     * - evaluateLateAttributes
 	 */
 	private static boolean establishFaultInTypes(TypeModel clazz) {
 		TypeDeclaration ast = clazz.getAst();
@@ -1521,6 +1522,21 @@ public class Dependencies implements ITranslationStates {
 			faultInRoleImports(roleType);
 		}
 	}
+	
+//        	if (teamDecl.isRole()) {
+//        		ensureRoleState(teamDecl.getRoleModel(), STATE_TYPES_ADJUSTED);
+//        	}
+
+//        	TeamModel superTeam = teamModel.getSuperTeam();
+//	        if (superTeam != null) {
+//	            if (!ensureTeamState(superTeam, STATE_TYPES_ADJUSTED))
+//	            {
+//	            	teamDecl.tagAsHavingErrors();
+//	                return;
+//	            }
+//	        }
+
+//	        CopyInheritance.weakenTeamMethodSignatures(teamDecl);
 
 	/* **** STATE_METHODS_CREATED (OT/J) ****
 	 * - generate methods relating to roles and implicit inheritance.
@@ -1535,6 +1551,7 @@ public class Dependencies implements ITranslationStates {
 	 * 3. add method from non-role superclasses to the interface part.
 	 * 4. cast methods (calls getTeam method)
 	 * 5. abstract _OT$getBase() method for unbound lowerable role
+	 * 6. callout methods
 	 */
 	private static boolean establishMethodsCreated(TeamModel teamModel) {
 		if (teamModel.getBinding().isRole())
@@ -1702,6 +1719,10 @@ public class Dependencies implements ITranslationStates {
         // 5. special case roles which need an abstract _OT$getBase() method:
 		StandardElementGenerator.createGetBaseForUnboundLowerable(clazz);
         
+		// 6. resolve method mappings and create callout methods:
+		resolveMethodMappings(clazz);
+		transformCallouts(clazz);
+
         clazz.setState(STATE_METHODS_CREATED);
         return true;
     }
@@ -1742,15 +1763,6 @@ public class Dependencies implements ITranslationStates {
 
 	        CopyInheritance.weakenTeamMethodSignatures(teamDecl);
 	        
-		    AbstractMethodDeclaration[] methods = teamDecl.methods;
-		    if (methods != null) {
-		    	for (int i=0; i<methods.length; i++)
-		    	{
-		    		if (   ! (methods[i] instanceof Clinit)
-		    			&& !methods[i].isCopied) // copied roles are already wrapped if needed.
-		    			RoleTypeCreator.wrapTypesInMethodDeclSignature(methods[i].binding, methods[i]);
-		    	}
-		    }
 		}
 		teamModel.setState(STATE_TYPES_ADJUSTED);
 		return true;
@@ -1773,30 +1785,6 @@ public class Dependencies implements ITranslationStates {
         }
 
         SourceTypeBinding subTeam = teamType.binding;
-
-        // 1. Wrap role types in signatures:
-        // Try method ASTs first:
-        AbstractMethodDeclaration[] srcMethods = null;
-        if (subRoleDecl != null)
-            srcMethods  = subRoleDecl.methods;
-
-        if (srcMethods != null) {
-        	subRole.methods(); // need resolved types in method bindings below.
-            for (int i=0; i<srcMethods.length; i++)
-            {
-                if (srcMethods[i].binding != null) {
-                	// copied methods are already wrapped during addMethod.
-                	// copied synthetic methods must not be wrapped alltogether.
-                	if (!srcMethods[i].isCopied) 
-                        RoleTypeCreator.wrapTypesInMethodDeclSignature(srcMethods[i].binding, srcMethods[i]);
-                }
-                else
-                    assert(  srcMethods[i].ignoreFurtherInvestigation
-                           ||srcMethods[i].isClinit() );
-                    // why does clinit have no binding (not a problem, but funny)?
-            }
-        }
-
 
         // Remaining translations only for source types (no role nested types)
         if (   subRoleDecl != null
@@ -1891,8 +1879,13 @@ public class Dependencies implements ITranslationStates {
      */
 	private static boolean establishMethodMappingsResolved(RoleModel role)
 	{
-		boolean success = true;
-
+		// FIXME(SH): remove this state
+		role.setState(ITranslationStates.STATE_MAPPINGS_RESOLVED);
+		return true;
+	}
+	
+	private static void resolveMethodMappings(RoleModel role) 
+	{
 		ReferenceBinding roleBinding = role.getBinding();
 
 		TypeDeclaration roleDecl = role.getAst();
@@ -1906,16 +1899,16 @@ public class Dependencies implements ITranslationStates {
 				if (baseclass != null && !role._playedByEnclosing)
 					// some methods accessible to callout/callin might be added during
 					// callout transformation.
-					ensureBindingState(baseclass, STATE_MAPPINGS_TRANSFORMED);
+					ensureBindingState(baseclass, STATE_METHODS_CREATED);
 			}
 			ReferenceBinding[] tsuperRoles = role.getTSuperRoleBindings();
 			for (int i = 0; i < tsuperRoles.length; i++) {
 				// need the generated wrappers to determine abstractness of methods
-				ensureBindingState(tsuperRoles[i], STATE_MAPPINGS_TRANSFORMED);
+				ensureBindingState(tsuperRoles[i], STATE_METHODS_CREATED);
 			}
 			// same reason as for tsuper roles:
 			if (roleBinding.superclass() != null)
-				ensureBindingState(roleBinding.superclass(), STATE_MAPPINGS_TRANSFORMED);
+				ensureBindingState(roleBinding.superclass(), STATE_METHODS_CREATED);
 
 			// make sure tsuper wrappers are copied to current role:
 			CopyInheritance.copyGeneratedFeatures(role);
@@ -1923,12 +1916,10 @@ public class Dependencies implements ITranslationStates {
 			// actually need to proceed even with no base class, because
 			// method mappings without baseclass are reported within resolve() below:
 			MethodMappingResolver resolver = new MethodMappingResolver(role);
-			success = resolver.resolve(!hasBaseclassProblem && needMethodBodies(roleDecl));
+			resolver.resolve(!hasBaseclassProblem && needMethodBodies(roleDecl));
 			if (roleDecl.isDirectRole() && !roleDecl.isInterface())
 				SyntheticBaseCallSurrogate.addFakedBaseCallSurrogates((SourceTypeBinding)roleBinding);
 		}
-		role.setState(ITranslationStates.STATE_MAPPINGS_RESOLVED);
-		return success;
 	}
 
     /* **** STATE_MAPPINGS_TRANSFORMED (OT/J) ***
@@ -1953,6 +1944,21 @@ public class Dependencies implements ITranslationStates {
 		return true;
 	}
 
+	private static boolean transformCallouts(RoleModel role) {
+		// FIXME(SH): move to CalloutImplementor
+		boolean success = true;
+		TypeDeclaration roleDecl = role.getAst();
+		if (roleDecl != null && !roleDecl.isPurelyCopied) { // no source level bindings present any way
+	    	boolean needMethodBodies = needMethodBodies(roleDecl) && !role.hasBaseclassProblem() && !role.isIgnoreFurtherInvestigation();
+	    	if (!roleDecl.binding.isSynthInterface()) {
+	    		// synth interfaces have no callouts anyway ;-)
+	            CalloutImplementor calloutImplementor = new CalloutImplementor(role);
+	            success &= calloutImplementor.transform(needMethodBodies);
+	    	}
+		}
+    	return success;
+	}
+
 	private static boolean establishMethodMappingsTransformed(RoleModel role)
 	{
         boolean success = true;
@@ -1971,10 +1977,7 @@ public class Dependencies implements ITranslationStates {
 			} else if (!roleDecl.isPurelyCopied) { // no source level bindings present any way
 	        	boolean needMethodBodies = needMethodBodies(roleDecl) && !role.hasBaseclassProblem() && !role.isIgnoreFurtherInvestigation();
 	        	if (!roleDecl.binding.isSynthInterface()) {
-	        		// synth interfaces have no callouts anyway ;-)
-		            CalloutImplementor calloutImplementor = new CalloutImplementor(role);
-		            success = calloutImplementor.transform(needMethodBodies);
-
+	        		// synth interfaces have no callins anyway ;-)
 		            if (needMethodBodies) {  // not translating callin bindings will cause no secondary errors -> skip if no body needed
 //{OTDyn:
 		            	if (CallinImplementorDyn.DYNAMIC_WEAVING) {

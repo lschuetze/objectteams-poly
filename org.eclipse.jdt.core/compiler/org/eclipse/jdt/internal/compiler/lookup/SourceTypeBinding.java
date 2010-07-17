@@ -1958,9 +1958,9 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
             // if decapsulation was actually used, try if that was legal:
             if (arg.type.getBaseclassDecapsulation().isAllowed() != previousDecapsulation.isAllowed())
             {
-            	ReferenceBinding baseclass = method.declaringClass.baseclass();
-            	if (   baseclass == null
-            		|| !parameterType.isCompatibleWith(baseclass))
+            	ReferenceBinding declaredBaseclass = method.declaringClass.baseclass();
+            	if (   declaredBaseclass == null
+            		|| !parameterType.isCompatibleWith(declaredBaseclass))
             	{
             		ProblemReferenceBinding problemBinding = new ProblemReferenceBinding(
             				parameterType.readableName(), (ReferenceBinding)parameterType, ProblemReasons.NotVisible);
@@ -2056,6 +2056,10 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 				typeParameters[i].binding = null;
 		return null;
 	}
+//{ObjectTeams: all types in resolved signatures may require wrapping:
+	if (this.isRole() || this.isTeam())
+		RoleTypeCreator.wrapTypesInMethodDeclSignature(method, methodDecl);
+// SH}
 	if (foundReturnTypeProblem)
 		return method; // but its still unresolved with a null return type & is still connected to its method declaration
 

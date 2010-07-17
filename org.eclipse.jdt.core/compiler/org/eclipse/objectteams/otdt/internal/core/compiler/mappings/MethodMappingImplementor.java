@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
@@ -47,12 +48,12 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReferen
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReplaceResultReferenceVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 /**
- * MIGRATION_STATE: complete.
  * moved here from package org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.resolve
  *
  * Generalize some functions of implementing callout and callin.
@@ -89,6 +90,13 @@ public abstract class MethodMappingImplementor {
 			boolean                isFieldAccess,
 			boolean                hasResultArgument)
 	{
+		// prepare parameter mappings:
+		if (methodMapping.mappings != null) {
+			methodMapping.traverse(new ReplaceResultReferenceVisitor(methodMapping), methodMapping.scope.classScope());
+			if (methodMapping.isReplaceCallin())
+				((CallinMappingDeclaration)methodMapping).checkResultMapping();
+		}
+		
 	    Argument[]   wrapperMethodArguments = wrapperMethodDeclaration.arguments;
 	    Expression[] arguments;
 
@@ -321,7 +329,7 @@ public abstract class MethodMappingImplementor {
 				} else {
 					// from role method:
 					TypeVariableBinding[] typeVariables = rrrBinding.typeVariables;
-					if (typeVariables != MethodBinding.NO_TYPE_VARIABLES) {
+					if (typeVariables != Binding.NO_TYPE_VARIABLES) {
 						typeParams= new TypeParameter[typeVariables.length];
 						for (int i = 0; i < typeVariables.length; i++)
 							typeParams[i]= gen.typeParameter(typeVariables[i]);

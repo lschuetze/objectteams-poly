@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedThisReference;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
-import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
@@ -39,16 +38,10 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
-import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseReference;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ResultReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
@@ -64,9 +57,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  *
  * (1) Each tsuper(...) call -> this(..., markerArg)
  *     Works for constructor calls only.
- * (2) Withing parameter mappings:
- *     replace SingleNameReference("result") by a ResultReference.
- * (3) Adjust according to signature enhancing of callin methods:
+ * (2) Adjust according to signature enhancing of callin methods:
  *     - 'recursive' calls need more arguments
  *     - return expressions need to be generalized wrt their type.
  *
@@ -83,8 +74,6 @@ public class TransformStatementsVisitor
 {
 
     // -- fields and methods for scope management ---
-    private AbstractMethodMappingDeclaration _methodMapping = null;
-    private int _bindingDirection    = 0;
     private Stack<MethodDeclaration> _methodDeclarationStack = new Stack<MethodDeclaration>();
 
     /**
@@ -290,70 +279,6 @@ public class TransformStatementsVisitor
     		}
     	}
     	super.endVisit(methodDecl, scope);
-    }
-
-    // === Follows: infrastructure for translating parameter mappings
-
-    public boolean visit(CalloutMappingDeclaration mapping, ClassScope scope)
-    {
-        this._methodMapping = mapping;
-        return true;
-    }
-    public void endVisit(CalloutMappingDeclaration mapping, ClassScope scope)
-    {
-        this._methodMapping = null;
-        super.endVisit(mapping, scope);
-    }
-
-    public boolean visit(CallinMappingDeclaration mapping, ClassScope scope)
-    {
-        this._methodMapping = mapping;
-        return true;
-    }
-    public void endVisit(CallinMappingDeclaration mapping, ClassScope scope)
-    {
-        this._methodMapping = null;
-        super.endVisit(mapping, scope);
-    }
-    public boolean visit(ParameterMapping mapping, BlockScope scope)
-    {
-        this._bindingDirection = mapping.direction;
-        return true;
-    }
-    public void endVisit(ParameterMapping mapping, BlockScope scope)
-    {
-        this._bindingDirection = 0;
-        super.endVisit(mapping, scope);
-    }
-    /**
-     * Translate "result" in the expression of a parameter mapping.
-     * Upgrade the SingleNameReference to a ResultReference.
-     */
-    public boolean visit(SingleNameReference ref, BlockScope scope)
-    {
-        if (this._methodMapping != null && CharOperation.equals(ref.token, IOTConstants.RESULT))
-        {
-            boolean isResultDir = false;
-            if (this._methodMapping.isCallin()) {
-                isResultDir = this._bindingDirection == TerminalTokens.TokenNameBINDOUT;
-                if (   !isResultDir
-                	&& 	((CallinMappingDeclaration)this._methodMapping).callinModifier
-					     == TerminalTokens.TokenNameafter)
-                {
-                	isResultDir = true;
-                }
-            } else
-                isResultDir = this._bindingDirection == TerminalTokens.TokenNameBINDIN;
-            if (isResultDir) {
-            	AstGenerator gen = new AstGenerator(ref.sourceStart, ref.sourceEnd);
-                ResultReference resultRef = gen.resultReference(ref, this._methodMapping);
-                enterExpression(ref, resultRef, ref);
-            } else {
-                scope.problemReporter().illegalDirectionForResult(ref, this._methodMapping.isCallout());
-                return false;
-            }
-        }
-        return true;
     }
 
     /**

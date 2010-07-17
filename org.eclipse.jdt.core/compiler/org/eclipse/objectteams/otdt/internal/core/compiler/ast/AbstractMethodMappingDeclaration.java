@@ -46,7 +46,6 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
@@ -331,7 +330,7 @@ public abstract class AbstractMethodMappingDeclaration
 								checkParametersCompatibility(methodSpec);
 								checkReturnCompatibility(methodSpec);
 							}
-							checkVisibility(this.scope, methodSpec, baseType);
+							checkVisibility(methodSpec, baseType);
 							checkThrownExceptions(methodSpec);
 						}
 					}
@@ -374,7 +373,7 @@ public abstract class AbstractMethodMappingDeclaration
 								checkResult(methodSpec);
 							}
 							// check these in both cases (?)
-							checkVisibility(this.scope, methodSpec, baseType);
+							checkVisibility(methodSpec, baseType);
 							checkThrownExceptions(methodSpec);
 						}
 		    		} finally {
@@ -391,7 +390,7 @@ public abstract class AbstractMethodMappingDeclaration
 		{
 			if (isCallin())
 				if (baseMethodSpecs[idx].resolvedMethod != null && baseMethodSpecs[idx].resolvedMethod.isDeprecated())
-					scope.problemReporter().callinToDeprecated(baseMethodSpecs[idx], baseMethodSpecs[idx].resolvedMethod);
+					this.scope.problemReporter().callinToDeprecated(baseMethodSpecs[idx], baseMethodSpecs[idx].resolvedMethod);
 			baseMethodSpecs[idx].resolveFinished();
 		}
 //haebor}
@@ -420,8 +419,8 @@ public abstract class AbstractMethodMappingDeclaration
 									// yes, so we need a wrapper:
 									Expression wrappedExpr= new SingleNameReference(token,pos) {
 										@Override
-										public TypeBinding resolveType(BlockScope scope) {
-											TypeBinding result= super.resolveType(scope);
+										public TypeBinding resolveType(BlockScope blockScope) {
+											TypeBinding result= super.resolveType(blockScope);
 											if (this.binding instanceof ITeamAnchor)
 												if (((ITeamAnchor)this.binding).isValidAnchor())
 													arg.binding.shareBestName((ITeamAnchor)this.binding);
@@ -447,7 +446,7 @@ public abstract class AbstractMethodMappingDeclaration
 		}
 	}
 
-	public boolean checkVisibility (Scope scope, MethodSpec spec, ReferenceBinding baseType)
+	public boolean checkVisibility (MethodSpec spec, ReferenceBinding baseType)
 	{
 		if (spec.isPrivate()) {
 			if (baseType.getRealClass() != spec.getDeclaringClass()) {
@@ -455,7 +454,7 @@ public abstract class AbstractMethodMappingDeclaration
 				return false; // don't report decapsulation if this error is detected.
 			}
 		}
-		spec.checkDecapsulation(baseType, scope);
+		spec.checkDecapsulation(baseType, this.scope);
 		return true;
 	}
 
@@ -627,11 +626,9 @@ public abstract class AbstractMethodMappingDeclaration
 	 * The method mapping contains parameter mappings and the index is within the
 	 * range of source code arguments, so let's lookup the argument expression.
 	 *
-	 * @param methodMapping
 	 * @param sourceMethodSpec
 	 * @param implIdx		   index into arguments of the implementation(target) method
 	 * @param targetArgName
-	 * @param mappedArgExpr
 	 * @return Pair:{the argument expression, the src arg position}
 	 */
 	Pair<Expression, Integer> getMappedArgument(MethodSpec  sourceMethodSpec,
@@ -686,11 +683,11 @@ public abstract class AbstractMethodMappingDeclaration
 	 * For error reporting only, thus only the first occurrence is of interest.
 	 *
 	 * @param mappedArgExpr expression to investigate
-	 * @param scope         just to please the visitor
+	 * @param blockScope    just to please the visitor
 	 * @param arguments     base arguments to match against
 	 * @return a found reference or null.
 	 */
-	SingleNameReference findBaseArgName(Expression mappedArgExpr, BlockScope scope, final Argument[] arguments) {
+	SingleNameReference findBaseArgName(Expression mappedArgExpr, BlockScope blockScope, final Argument[] arguments) {
 		@SuppressWarnings("serial")
 		class FoundException extends RuntimeException {
 			SingleNameReference name;
@@ -698,7 +695,7 @@ public abstract class AbstractMethodMappingDeclaration
 		}
 
 		ASTVisitor visitor = new ASTVisitor() {
-			public void endVisit(SingleNameReference nameRef, BlockScope blockScope) {
+			public void endVisit(SingleNameReference nameRef, BlockScope blockScope2) {
 				for (int i = 0; i < arguments.length; i++) {
 					if (CharOperation.equals(arguments[i].name, nameRef.token))
 						throw new FoundException(nameRef);
@@ -706,7 +703,7 @@ public abstract class AbstractMethodMappingDeclaration
 			}
 		};
 		try {
-			mappedArgExpr.traverse(visitor, scope);
+			mappedArgExpr.traverse(visitor, blockScope);
 		} catch (FoundException e) {
 			return e.name;
 		}

@@ -42,12 +42,12 @@ import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
@@ -186,7 +186,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 	boolean isDangerousMethod(MethodBinding method) {
 		if (CharOperation.equals(method.selector, "hashCode".toCharArray())) //$NON-NLS-1$
-			return method.parameters == MethodBinding.NO_PARAMETERS;
+			return method.parameters == Binding.NO_PARAMETERS;
 		if (CharOperation.equals(method.selector, "equals".toCharArray())) //$NON-NLS-1$
 			return (method.parameters.length == 1) && (method.parameters[0].id == TypeIds.T_JavaLangObject);
 		return false;
@@ -207,7 +207,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 
 	/**
      * In this case: check match of "replace" and "callin" flags, plus static-ness
-     * @param scope
+     * @param haveBaseMethods have base methods been resolved?
+     * @param baseClass       the role's bound base class
 	 */
 	@Override
 	protected void checkModifiers(boolean haveBaseMethods, ReferenceBinding baseClass) {
@@ -339,7 +340,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 					{
 						// success by translation
 						methodSpec.argNeedsTranslation[j] = true;
-						roleMethodSpec.argNeedsTranslation[j] = true;
+						this.roleMethodSpec.argNeedsTranslation[j] = true;
 						this.roleMethodSpec.parameters[j] = roleToLiftTo; // this applies to all bindings
 						continue;
 					}
@@ -392,9 +393,9 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 
 	@Override
-	public boolean checkVisibility(Scope scope, MethodSpec spec, ReferenceBinding baseType)
+	public boolean checkVisibility(MethodSpec spec, ReferenceBinding baseType)
 	{
-		if (!super.checkVisibility(scope, spec, baseType))
+		if (!super.checkVisibility(spec, baseType))
 			return false;
 		if (isReplaceCallin()) {
 			// create a faked invocationSite:
@@ -402,43 +403,15 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			anticipatedBaseCall.receiver = new SingleNameReference("<fake>".toCharArray(), 0); //$NON-NLS-1$
 			anticipatedBaseCall.receiver.resolvedType =
 				     anticipatedBaseCall.actualReceiverType = baseType;
-			if (   !spec.resolvedMethod.canBeSeenBy(baseType, anticipatedBaseCall, scope.classScope())
+			if (   !spec.resolvedMethod.canBeSeenBy(baseType, anticipatedBaseCall, this.scope.classScope())
 				&& (spec.resolvedMethod.modifiers & ClassFileConstants.AccProtected) == 0) // protected is not a warning
-				scope.problemReporter().callinDecapsulation(spec, scope);
+				this.scope.problemReporter().callinDecapsulation(spec, this.scope);
 		}
 		return true;
 	}
 
 	/** Check whether the baseSpec has a result compatible via replace. */
 	public void checkResultForReplace(MethodSpec baseSpec) {
-		// for replace callins, a "result" mapping is not allowed,
-		// unless an expected result is otherwise missing.
-		if (this.mappings != null)
-		{
-			for (int i = 0; i < this.mappings.length; i++) {
-				if (CharOperation.equals(this.mappings[i].ident.token, IOTConstants.RESULT))
-				{
-					this.isResultMapped = true;
-					// OTJLD 4.4(b): "If the base method declares a result, then ...
-					if (baseSpec.resolvedType() != TypeBinding.VOID) {
-					//                * if the role method also declares a result,
-						if (this.roleMethodSpec.resolvedType() != TypeBinding.VOID) {
-							Expression resultExpr = this.mappings[i].expression;
-					//                  => result must be mapped to itself
-							if (! (resultExpr instanceof ResultReference))  {
-								this.scope.problemReporter().nonResultExpressionInReplaceResult(resultExpr);
-								this.binding.tagBits |= TagBits.HasMappingIncompatibility;
-							}
-						} // no else because:
-					//                * if the role method does not declare a result,
-				    //                  an arbitrary expression may be mapped to result
-	            	} else {
-	            		this.scope.problemReporter().resultMappingForVoidMethod(this, baseSpec, this.mappings[i]);
-	    				this.binding.tagBits |= TagBits.HasMappingIncompatibility;
-	            	}
-				}
-			}
-		}
 		boolean typeIdentityRequired= true; // default unless return is type variable
 		// covariant return requires a fresh type parameter for the role's return type:
 		if (baseSpec.covariantReturn && this.roleMethodSpec.returnType != null) {
@@ -567,6 +540,37 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 				this.scope.problemReporter().callinIncompatibleReturnTypeBaseCall(
 						baseSpec, this.roleMethodSpec);
 				this.binding.tagBits |= TagBits.HasMappingIncompatibility;
+			}
+		}
+	}
+	/** Check OTJLD 4.4(b) "Callin parameter mapping / Restrictions for callin replace bindings" */
+	public void checkResultMapping() {
+		// for replace callins, a "result" mapping is not allowed,
+		// unless an expected result is otherwise missing.
+
+		for (MethodSpec baseSpec : this.baseMethodSpecs) {
+			for (int i = 0; i < this.mappings.length; i++) {
+				if (CharOperation.equals(this.mappings[i].ident.token, IOTConstants.RESULT))
+				{
+					this.isResultMapped = true;
+					// OTJLD 4.4(b): "If the base method declares a result, then ...
+					if (baseSpec.resolvedType() != TypeBinding.VOID) {
+					//                * if the role method also declares a result,
+						if (this.roleMethodSpec.resolvedType() != TypeBinding.VOID) {
+							Expression resultExpr = this.mappings[i].expression;
+					//                  => result must be mapped to itself
+							if (! (resultExpr instanceof ResultReference))  {
+								this.scope.problemReporter().nonResultExpressionInReplaceResult(resultExpr);
+								this.binding.tagBits |= TagBits.HasMappingIncompatibility;
+							}
+						} // no else because:
+					//                * if the role method does not declare a result,
+				    //                  an arbitrary expression may be mapped to result
+			    	} else {
+			    		this.scope.problemReporter().resultMappingForVoidMethod(this, baseSpec, this.mappings[i]);
+						this.binding.tagBits |= TagBits.HasMappingIncompatibility;
+			    	}
+				}
 			}
 		}
 	}

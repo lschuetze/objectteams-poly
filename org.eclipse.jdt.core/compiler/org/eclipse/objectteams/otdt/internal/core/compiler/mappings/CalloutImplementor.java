@@ -1103,7 +1103,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 		callout.baseMethodSpec = fromMethodBinding(candidate, gen);
 
 		// now we have all information for checking 3.4(d) (see Trac #96):
-		if (!callout.checkVisibility(callout.scope, callout.baseMethodSpec, baseType))
+		if (!callout.checkVisibility(callout.baseMethodSpec, baseType))
 			return false; // don't generate illegal access.
 
 		CallinCalloutBinding calloutBinding;
