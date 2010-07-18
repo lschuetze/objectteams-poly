@@ -20,25 +20,19 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.test.builder;
 
-import java.io.File;
-
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.tests.builder.BuilderTests;
 import org.eclipse.jdt.core.tests.builder.Problem;
 import org.eclipse.jdt.core.tests.builder.TestingEnvironment;
-import org.eclipse.objectteams.otdt.internal.compiler.adaptor.BuildManager;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.eclipse.objectteams.otdt.internal.compiler.adaptor.BuildManager;
 
 public class OTBuilderTests extends BuilderTests {
 
-	public static final String OT_RUNTIME_PATH;
 	public static final String OTRE_JAR_PATH;
 	static {
-		OT_RUNTIME_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTRUNTIME_LIBDIR).toOSString();
-		OTRE_JAR_PATH = OT_RUNTIME_PATH
-						+ File.separator
-						+ "otre.jar"; //$NON-NLS-1$
+		OTRE_JAR_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTRE_CONTAINER_PATH).toOSString();
 	}
 	
 	OTTestingEnvironment otenv;
