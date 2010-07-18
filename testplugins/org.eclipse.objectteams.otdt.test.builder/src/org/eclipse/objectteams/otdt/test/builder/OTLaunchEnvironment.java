@@ -70,7 +70,10 @@ public class OTLaunchEnvironment extends URLClassLoader
 	
 	static URL getOTREURL() throws MalformedURLException {
 		IClasspathEntry[] entries = new OTREContainer().getClasspathEntries();
-		return new URL("file:"+entries[0].getPath()); //$NON-NLS-1$
+		String url = "file:"+entries[0].getPath();  //$NON-NLS-1$
+		if (url.endsWith("bin"))  //$NON-NLS-1$
+			url += '/';
+		return new URL(url);
 	}
 	@Override
 	protected Class<?> findClass(String name) throws ClassNotFoundException {
