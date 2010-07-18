@@ -566,8 +566,8 @@ public class Dependencies implements ITranslationStates {
                     success = establishStatementsTransformed(model);
                     done = NESTED_TEAMS;
                     break;
-                case STATE_MAPPINGS_TRANSFORMED:
-                	success = establishMethodMappingsTransformed(model);
+                case STATE_CALLINS_TRANSFORMED:
+                	success = establishCallinsTransformed(model);
                 	done = NONE;
                 	break;
                 case STATE_LATE_ELEMENTS_COPIED:
@@ -703,8 +703,7 @@ public class Dependencies implements ITranslationStates {
     			//case STATE_ROLE_INIT_METHODS:
     			case STATE_ROLE_HIERARCHY_ANALYZED:
     			case STATE_FULL_LIFTING:
-    			case STATE_MAPPINGS_RESOLVED:
-    			case STATE_MAPPINGS_TRANSFORMED:
+    			case STATE_CALLINS_TRANSFORMED:
                 case STATE_METHODS_VERIFIED:
     			case STATE_RESOLVED:
     				model.setState(nextState);
@@ -752,11 +751,8 @@ public class Dependencies implements ITranslationStates {
                 case STATE_TYPES_ADJUSTED:
                     success &= establishTypesAdjusted(model);
                     break;
-				case STATE_MAPPINGS_RESOLVED:
-					success &= establishMethodMappingsResolved(model);
-					break;
-                case STATE_MAPPINGS_TRANSFORMED:
-                	success &= establishMethodMappingsTransformed(model);
+                case STATE_CALLINS_TRANSFORMED:
+                	success &= establishCallinsTransformed(model);
                 	break;
                 case STATE_LATE_ELEMENTS_COPIED:
                 	success &= establishLateElementsCopied(model);
@@ -989,8 +985,7 @@ public class Dependencies implements ITranslationStates {
                 case STATE_FULL_LIFTING:
                 case STATE_METHODS_CREATED:
                 case STATE_TYPES_ADJUSTED:
-                case STATE_MAPPINGS_RESOLVED:
-				case STATE_MAPPINGS_TRANSFORMED:
+				case STATE_CALLINS_TRANSFORMED:
 				case STATE_LATE_ATTRIBUTES_EVALUATED:
 				case STATE_LATE_ELEMENTS_COPIED:
                 case STATE_BYTE_CODE_PREPARED:
@@ -1605,86 +1600,18 @@ public class Dependencies implements ITranslationStates {
             if (   subRole.isClass()       // interfaces have not constructores, don't bother.
             	&& !subRole.isLocalType()) // local types need no creators, are only copied along with their containing method
             {
-            	boolean needMethodBodies = needMethodBodies(teamType);
-                MethodBinding[] methodBindings = subRole.methods();
-                if (methodBindings != null)
-                {
-                    for (int i=0; i<methodBindings.length; i++)
-                    {
-                        if (methodBindings[i].isConstructor()) {
-                            AbstractMethodDeclaration creator =
-                                CopyInheritance.createCreationMethod(
-                                        teamType,
-                                        clazz,
-                                        null, // ConstructorDeclaration
-                                        methodBindings[i],
-										needMethodBodies);
-                            if (   creator != null
-                            	&& !creator.ignoreFurtherInvestigation)
-                            {
-                                subTeam.resolveGeneratedMethod(creator.binding);
-                                // this also wraps the signature using wrapTypesInMethodDeclSignature
-                            }
-                        }
-                    }
-                }
-                // no steps 2.+3.
+            	createCreators(clazz, teamType, subRole, subTeam);
             }
+            // no steps 2.+3.
         }
         // Next translations only for source types (no role nested types)
         if (   subRoleDecl != null
         	&& subRole.isDirectRole())
         {
             // 1. create creation methods from constructors (AST version)
-            if (subRole.isClass())
-            { // interfaces have not constructores, don't bother.
+            if (subRole.isClass())  // interfaces have not constructores, don't bother.
+            	createCtorsAndCreators(clazz, teamType, subRoleDecl, subTeam);
 
-            	// ensure we have all constructors from tsuper (incl. default ctor)
-            	for (ReferenceBinding tsuperRole : clazz.getTSuperRoleBindings())
-            		ensureBindingState(tsuperRole, ITranslationStates.STATE_METHODS_CREATED);
-            	CopyInheritance.copyGeneratedFeatures(clazz);
-
-            	boolean needMethodBodies = needMethodBodies(subRoleDecl);
-                AbstractMethodDeclaration[] methodDeclarations = subRoleDecl.methods;
-                // may need to create default constructor first:
-                boolean hasConstructor = false;
-                if (methodDeclarations != null)
-	                for (int i=0; i<methodDeclarations.length; i++)
-	                	if (methodDeclarations[i].isConstructor() && !TSuperHelper.isTSuper(methodDeclarations[i].binding)) {
-	                		hasConstructor = true; 
-	                		break; 
-	                	}
-                if (!hasConstructor) {
-                	ConstructorDeclaration defCtor = subRoleDecl.createDefaultConstructor(needMethodBodies, false);
-                	AstEdit.addMethod(subRoleDecl, defCtor);
-                	CopyInheritance.connectDefaultCtor(clazz, defCtor.binding);
-                	methodDeclarations = subRoleDecl.methods;
-                }
-                // now the creation methods for all constructors:
-                if (methodDeclarations != null)
-                {
-                    for (int i=0; i<methodDeclarations.length; i++)
-                    {
-                        if (methodDeclarations[i].isConstructor()) {
-                            ConstructorDeclaration constructor =
-                                (ConstructorDeclaration)methodDeclarations[i];
-                            MethodDeclaration creator =
-                                CopyInheritance.createCreationMethod(
-                                        teamType,
-                                        clazz,
-                                        constructor,
-										constructor.binding, needMethodBodies);
-                            if (   creator != null
-                            	&& !creator.ignoreFurtherInvestigation)
-                            {
-                            	CopyInheritance.createCreatorIfcPart(subTeam, creator);
-                                subTeam.resolveGeneratedMethod(creator.binding);
-                                // this also wraps the signature using wrapTypesInMethodDeclSignature
-                            }
-                        }
-                    }
-                }
-            }
             // 2. create getTeam methods:
            	if (subRoleDecl.isInterface()) {
                 	// process class and ifc at the same time, because otherwise an error
@@ -1699,18 +1626,16 @@ public class Dependencies implements ITranslationStates {
                 RoleSplitter.setupInterfaceForExtends(clazz.getTeamModel().getAst(), subRoleDecl, clazz.getInterfaceAst());
         }
 
-        // 4. cast methods (independent of the source/binary difference):
+        // 4. cast and getClass methods (independent of the source/binary difference):
         if (   subRole.isInterface()
         		&& (subRoleDecl == null || needMethodBodies(subRoleDecl)))
         {
         	TypeDeclaration sourceType = subRoleDecl != null ? subRoleDecl : teamType;
-        	int start = sourceType.sourceStart;
-        	int end   = sourceType.sourceEnd;
         	TypeDeclaration classPart = clazz.getClassPartAst();
         	if (classPart != null)
         		StandardElementGenerator.createCastMethod(clazz.getTeamModel(), classPart, /*dims*/ 0); // FIXME dimensions
         	else // difference is only in source positions used.
-        		StandardElementGenerator.getCastMethod(clazz.getTeamModel(), subRole, teamType.scope, /*dims*/ 0, false, start, end); // FIXME dimensions
+        		StandardElementGenerator.getCastMethod(clazz.getTeamModel(), subRole, teamType.scope, /*dims*/ 0, false, sourceType.sourceStart, sourceType.sourceEnd); // FIXME dimensions
         	if (subRole.isPublic())
         		RoleClassLiteralAccess.ensureGetClassMethod(teamType.getTeamModel(), clazz);
         }
@@ -1720,11 +1645,127 @@ public class Dependencies implements ITranslationStates {
         
 		// 6. resolve method mappings and create callout methods:
 		resolveMethodMappings(clazz);
-		transformCallouts(clazz);
+		CalloutImplementor.transformCallouts(clazz);
 
         clazz.setState(STATE_METHODS_CREATED);
         return true;
     }
+
+    // detail of STATE_METHODS_CREATED (binary case):
+	private static void createCreators(RoleModel clazz, TypeDeclaration teamType, ReferenceBinding subRole, SourceTypeBinding subTeam) 
+	{
+		boolean needMethodBodies = needMethodBodies(teamType);
+		MethodBinding[] methodBindings = subRole.methods();
+		if (methodBindings != null)
+		{
+		    for (int i=0; i<methodBindings.length; i++)
+		    {
+		        if (methodBindings[i].isConstructor()) {
+		            AbstractMethodDeclaration creator =
+		                CopyInheritance.createCreationMethod(
+		                        teamType,
+		                        clazz,
+		                        null, // ConstructorDeclaration
+		                        methodBindings[i],
+								needMethodBodies);
+		            if (   creator != null
+		            	&& !creator.ignoreFurtherInvestigation)
+		            {
+		                subTeam.resolveGeneratedMethod(creator.binding);
+		                // this also wraps the signature using wrapTypesInMethodDeclSignature
+		            }
+		        }
+		    }
+		}
+	}
+
+	// detail of STATE_METHODS_CREATED (AST case):
+	private static void createCtorsAndCreators(RoleModel clazz, TypeDeclaration teamType, TypeDeclaration subRoleDecl, SourceTypeBinding subTeam) 
+	{
+		// ensure we have all constructors from tsuper (incl. default ctor)
+		for (ReferenceBinding tsuperRole : clazz.getTSuperRoleBindings())
+			ensureBindingState(tsuperRole, ITranslationStates.STATE_METHODS_CREATED);
+		CopyInheritance.copyGeneratedFeatures(clazz);
+
+		boolean needMethodBodies = needMethodBodies(subRoleDecl);
+		AbstractMethodDeclaration[] methodDeclarations = subRoleDecl.methods;
+		// may need to create default constructor first:
+		boolean hasConstructor = false;
+		if (methodDeclarations != null)
+		    for (int i=0; i<methodDeclarations.length; i++)
+		    	if (methodDeclarations[i].isConstructor() && !TSuperHelper.isTSuper(methodDeclarations[i].binding)) {
+		    		hasConstructor = true; 
+		    		break; 
+		    	}
+		if (!hasConstructor) {
+			ConstructorDeclaration defCtor = subRoleDecl.createDefaultConstructor(needMethodBodies, false);
+			AstEdit.addMethod(subRoleDecl, defCtor);
+			CopyInheritance.connectDefaultCtor(clazz, defCtor.binding);
+			methodDeclarations = subRoleDecl.methods;
+		}
+		// now the creation methods for all constructors:
+		if (methodDeclarations != null)
+		{
+		    for (int i=0; i<methodDeclarations.length; i++)
+		    {
+		        if (methodDeclarations[i].isConstructor()) {
+		            ConstructorDeclaration constructor =
+		                (ConstructorDeclaration)methodDeclarations[i];
+		            MethodDeclaration creator =
+		                CopyInheritance.createCreationMethod(
+		                        teamType,
+		                        clazz,
+		                        constructor,
+								constructor.binding, needMethodBodies);
+		            if (   creator != null
+		            	&& !creator.ignoreFurtherInvestigation)
+		            {
+		            	CopyInheritance.createCreatorIfcPart(subTeam, creator);
+		                subTeam.resolveGeneratedMethod(creator.binding);
+		                // this also wraps the signature using wrapTypesInMethodDeclSignature
+		            }
+		        }
+		    }
+		}
+	}
+
+	// detail of STATE_METHODS_CREATED:
+	private static void resolveMethodMappings(RoleModel role) 
+	{
+		ReferenceBinding roleBinding = role.getBinding();
+
+		TypeDeclaration roleDecl = role.getAst();
+		if (   roleDecl != null
+			&& Config.getConfig().verifyMethods)
+		{
+			boolean hasBaseclassProblem = role.hasBaseclassProblem();
+			
+			if (!hasBaseclassProblem) {
+				ReferenceBinding baseclass = role.getBaseTypeBinding();
+				if (baseclass != null && !role._playedByEnclosing)
+					// some methods accessible to callout/callin might be added during
+					// callout transformation.
+					ensureBindingState(baseclass, STATE_METHODS_CREATED);
+			}
+			ReferenceBinding[] tsuperRoles = role.getTSuperRoleBindings();
+			for (int i = 0; i < tsuperRoles.length; i++) {
+				// need the generated wrappers to determine abstractness of methods
+				ensureBindingState(tsuperRoles[i], STATE_METHODS_CREATED);
+			}
+			// same reason as for tsuper roles:
+			if (roleBinding.superclass() != null)
+				ensureBindingState(roleBinding.superclass(), STATE_METHODS_CREATED);
+
+			// make sure tsuper wrappers are copied to current role:
+			CopyInheritance.copyGeneratedFeatures(role);
+			
+			// actually need to proceed even with no base class, because
+			// method mappings without baseclass are reported within resolve() below:
+			MethodMappingResolver resolver = new MethodMappingResolver(role);
+			resolver.resolve(!hasBaseclassProblem && needMethodBodies(roleDecl));
+		}
+	}
+
 
 	/* **** STATE_TYPES_ADJUSTED (OT/J) ****
 	 * - wrap types in signatures using RoleTypeBinding
@@ -1864,71 +1905,15 @@ public class Dependencies implements ITranslationStates {
         return true;
     }
 
-    /* **** STATE_MAPPINGS_RESOLVED (OT/J) ****
-     * Resolve method mappings (except for their argument mappings).
-     *
-     * GENERATE:
-     * - binding for each callout implementing an inherited method
-     */
-
-    /**
-     * Resolve method-mapping (method-specs)
-     * @param role
-     * @return success
-     */
-	private static boolean establishMethodMappingsResolved(RoleModel role)
-	{
-		// FIXME(SH): remove this state
-		role.setState(ITranslationStates.STATE_MAPPINGS_RESOLVED);
-		return true;
-	}
-	
-	private static void resolveMethodMappings(RoleModel role) 
-	{
-		ReferenceBinding roleBinding = role.getBinding();
-
-		TypeDeclaration roleDecl = role.getAst();
-		if (   roleDecl != null
-			&& Config.getConfig().verifyMethods)
-		{
-			boolean hasBaseclassProblem = role.hasBaseclassProblem();
-			
-			if (!hasBaseclassProblem) {
-				ReferenceBinding baseclass = role.getBaseTypeBinding();
-				if (baseclass != null && !role._playedByEnclosing)
-					// some methods accessible to callout/callin might be added during
-					// callout transformation.
-					ensureBindingState(baseclass, STATE_METHODS_CREATED);
-			}
-			ReferenceBinding[] tsuperRoles = role.getTSuperRoleBindings();
-			for (int i = 0; i < tsuperRoles.length; i++) {
-				// need the generated wrappers to determine abstractness of methods
-				ensureBindingState(tsuperRoles[i], STATE_METHODS_CREATED);
-			}
-			// same reason as for tsuper roles:
-			if (roleBinding.superclass() != null)
-				ensureBindingState(roleBinding.superclass(), STATE_METHODS_CREATED);
-
-			// make sure tsuper wrappers are copied to current role:
-			CopyInheritance.copyGeneratedFeatures(role);
-			
-			// actually need to proceed even with no base class, because
-			// method mappings without baseclass are reported within resolve() below:
-			MethodMappingResolver resolver = new MethodMappingResolver(role);
-			resolver.resolve(!hasBaseclassProblem && needMethodBodies(roleDecl));
-		}
-	}
-
-    /* **** STATE_MAPPINGS_TRANSFORMED (OT/J) ***
-     * Generate the wrappers for callin/callout bindings.
+    /* **** STATE_CALLINS_TRANSFORMED (OT/J) ***
+     * Generate the wrappers for callin bindings.
      *
      * GENERATES:
-     * - callout wrappers
      * - callin wrappers incl. corresponding attributes
      * COPIES from super/tsuper:
      * - CallinMethodMappingsAttribute and StaticReplaceBindingsAttribute
      */
-	private static boolean establishMethodMappingsTransformed(TeamModel aTeam)
+	private static boolean establishCallinsTransformed(TeamModel aTeam)
 	{
 		CopyInheritance.copyAttribute(aTeam);
 //{OTDyn:
@@ -1937,26 +1922,11 @@ public class Dependencies implements ITranslationStates {
     		callinImplementor.transformTeam(aTeam);
     	}
 // SH}
-		aTeam.setState(STATE_MAPPINGS_TRANSFORMED);
+		aTeam.setState(STATE_CALLINS_TRANSFORMED);
 		return true;
 	}
 
-	private static boolean transformCallouts(RoleModel role) {
-		// FIXME(SH): move to CalloutImplementor
-		boolean success = true;
-		TypeDeclaration roleDecl = role.getAst();
-		if (roleDecl != null && !roleDecl.isPurelyCopied) { // no source level bindings present any way
-	    	boolean needMethodBodies = needMethodBodies(roleDecl) && !role.hasBaseclassProblem() && !role.isIgnoreFurtherInvestigation();
-	    	if (!roleDecl.binding.isSynthInterface()) {
-	    		// synth interfaces have no callouts anyway ;-)
-	            CalloutImplementor calloutImplementor = new CalloutImplementor(role);
-	            success &= calloutImplementor.transform(needMethodBodies);
-	    	}
-		}
-    	return success;
-	}
-
-	private static boolean establishMethodMappingsTransformed(RoleModel role)
+	private static boolean establishCallinsTransformed(RoleModel role)
 	{
         boolean success = true;
         TypeDeclaration roleDecl = role.getAst();
@@ -1991,7 +1961,7 @@ public class Dependencies implements ITranslationStates {
         }
 		// less preconditions for copying these attributes:
         CopyInheritance.copyAttribute(role);
-		role.setState(STATE_MAPPINGS_TRANSFORMED);
+		role.setState(STATE_CALLINS_TRANSFORMED);
 		return success;
 	}
 

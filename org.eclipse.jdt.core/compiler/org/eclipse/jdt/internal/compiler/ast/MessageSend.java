@@ -922,7 +922,7 @@ protected AnchorMapping beforeMethodLookup(
 		if (this.actualReceiverType instanceof ReferenceBinding) // funny thing: receiver could be array..
 			Dependencies.ensureBindingState(
 	            (ReferenceBinding)this.actualReceiverType,
-	            ITranslationStates.STATE_MAPPINGS_TRANSFORMED); // creates bindings for shorthand callout
+	            ITranslationStates.STATE_METHODS_CREATED); // creates bindings for possible target methods (incl. shorthand callout) 
 	} finally {
 		// it is essential that we setup an anchor mapping in any case.
 		result = AnchorMapping.setupNewMapping(receiverForAnchorMapping(scope), this.arguments, scope);

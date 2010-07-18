@@ -123,18 +123,29 @@ public class CalloutImplementor extends MethodMappingImplementor
 
 	private RoleModel _role;
 
+	/**
+	 * Generates a callout method for every callout mapping in the given RoleModel.
+	 * @return false if errors had been reported during transformation, true else.
+	 */
+	public static boolean transformCallouts(RoleModel role) {
+		boolean success = true;
+		TypeDeclaration roleDecl = role.getAst();
+		if (roleDecl != null && !roleDecl.isPurelyCopied && !roleDecl.binding.isSynthInterface()) { // no source level bindings present any way
+	    	boolean needMethodBodies = Dependencies.needMethodBodies(roleDecl) && !role.hasBaseclassProblem() && !role.isIgnoreFurtherInvestigation();
+    		// synth interfaces have no callouts anyway ;-)
+            CalloutImplementor calloutImplementor = new CalloutImplementor(role);
+            success &= calloutImplementor.transform(needMethodBodies);
+		}
+		return success;
+	}
+
 	public CalloutImplementor(RoleModel role)
 	{
 		this._role = role;
 	    this.bindingDirection = TerminalTokens.TokenNameBINDOUT;
 	}
 
-	/**
-	 * Generates a callout method for every callout mapping in the given
-	 * RoleModel.
-	 * @return false if errors had been reported during transformation, true else.
-	 */
-	public boolean transform(boolean needMethodBodies)
+	private boolean transform(boolean needMethodBodies)
 	{
 		AbstractMethodMappingDeclaration[] methodMappings =
 			this._role.getAst().callinCallouts;

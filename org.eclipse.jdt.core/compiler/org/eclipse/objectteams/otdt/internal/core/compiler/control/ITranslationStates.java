@@ -21,8 +21,6 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.control;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Constants for the translation states of classes.
  * @author stephan
  * @version $Id: ITranslationStates.java 23416 2010-02-03 19:59:31Z stephan $
@@ -54,20 +52,19 @@ public interface ITranslationStates {
     public static final int STATE_METHODS_CREATED         = 15;//RoleTypeBinding, CopyInheritance
     public static final int STATE_TYPES_ADJUSTED          = 16;//RoleTypeBinding, CopyInheritance
     public static final int STATE_STATEMENTS_TRANSFORMED  = 17;//TransformStatementsVisitor
-    public static final int STATE_MAPPINGS_RESOLVED  	  = 18;//ResolveMethodMappings
-    public static final int STATE_MAPPINGS_TRANSFORMED    = 19;//MethodMappingImplementor
-    public static final int STATE_LATE_ATTRIBUTES_EVALUATED= 20; // ModelElement, TypeModel
-    public static final int STATE_METHODS_VERIFIED        = 21;//Scope
-    public static final int STATE_RESOLVED                = 22;//AST
-    public static final int STATE_LATE_ELEMENTS_COPIED    = 23;//CopyInheritance
-    public static final int STATE_CODE_ANALYZED           = 24;//AST
-    public static final int STATE_BYTE_CODE_PREPARED      = 25;//Dependencies
-    public static final int STATE_BYTE_CODE_GENERATED     = 26;//AST
+    public static final int STATE_CALLINS_TRANSFORMED     = 18;//CallinImplementor[Dyn]
+    public static final int STATE_LATE_ATTRIBUTES_EVALUATED= 19; // ModelElement, TypeModel
+    public static final int STATE_METHODS_VERIFIED        = 20;//Scope
+    public static final int STATE_RESOLVED                = 21;//AST
+    public static final int STATE_LATE_ELEMENTS_COPIED    = 22;//CopyInheritance
+    public static final int STATE_CODE_ANALYZED           = 23;//AST
+    public static final int STATE_BYTE_CODE_PREPARED      = 24;//Dependencies
+    public static final int STATE_BYTE_CODE_GENERATED     = 25;//AST
     /**
      * Note, that this state does not trigger intermediate steps, in fact never use it
      * with ensureState() but directly invoke Dependencies.cleanup!
      */
-    public static final int STATE_FINAL                   = 27;
+    public static final int STATE_FINAL                   = 26;
 
 	@SuppressWarnings("nls")
 	public static final String[] STATE_NAMES =
@@ -90,8 +87,7 @@ public interface ITranslationStates {
         "methods created",
         "types adjusted",
         "statements transformed",
-        "method mappings resolved",
-        "method mappings transformed",
+        "callins transformed",
         "late attributes evaluated",
         "methods verified",
         "resolved",

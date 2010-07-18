@@ -391,7 +391,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 						rofi= sourceRole.getRealClass();
 						if (rofi != null && rofi.isInterface())
 							// observed an infinite loop, probably caused by rofi remaining unchanged by getRealClass above. Want to see why.
-							throw new InternalCompilerError("Role has no class-part");  
+							throw new InternalCompilerError("Role has no class-part");   //$NON-NLS-1$
 					} else {
 						rofi= null; // terminate loop
 					}
@@ -732,7 +732,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     	if (subRole != null) {
 	    	ReferenceBinding[] tsuperRoles = subRole.getTSuperRoleBindings();
 	    	for (int i = 0; i < tsuperRoles.length; i++) {
-	    		Dependencies.ensureBindingState(tsuperRoles[i], ITranslationStates.STATE_MAPPINGS_TRANSFORMED);
+	    		Dependencies.ensureBindingState(tsuperRoles[i], ITranslationStates.STATE_CALLINS_TRANSFORMED);
 	    		subRole.copyAttributeFrom(tsuperRoles[i].roleModel, IOTConstants.CALLIN_METHOD_MAPPINGS);
 			}
     	}
@@ -754,7 +754,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    		&& superTeam.isTeam()
 	    		&& !TypeAnalyzer.isOrgObjectteamsTeam(superTeam))
 	    	{
-	            Dependencies.ensureBindingState(superTeam, STATE_MAPPINGS_TRANSFORMED);
+	            Dependencies.ensureBindingState(superTeam, STATE_CALLINS_TRANSFORMED);
 	    		subTeam.copyAttributeFrom(superTeam.getTeamModel(), IOTConstants.STATIC_REPLACE_BINDINGS);
 	    		//subTeam.copyAttributeFrom(superTeam.getTeamModel(), OTDynCallinBindingsAttribute.ATTRIBUTE_NAME);
 	    		OTSpecialAccessAttribute attrib = (OTSpecialAccessAttribute)superTeam.getTeamModel().getAttribute(IOTConstants.OTSPECIAL_ACCESS);
@@ -1917,7 +1917,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
         	return;
         if (roleIfcDecl.binding.erasure() != superRole.erasure()) // no need to treat our ifc-part
         {
-	        //Dependencies.ensureBindingState(superRole, STATE_METHODS_CREATED);
 	        Dependencies.ensureBindingState(superRole, STATE_TYPES_ADJUSTED);
 	        MethodBinding[] superMethods = superRole.methods();
 	        if (superMethods != null)

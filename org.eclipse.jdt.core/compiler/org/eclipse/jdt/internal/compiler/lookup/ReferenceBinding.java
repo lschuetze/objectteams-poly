@@ -327,7 +327,7 @@ public MethodBinding[] availableMethods() {
 //{ObjectTeams: clients should see some generated methods, too:
 	try {
 		if (isRole())
-			Dependencies.ensureBindingState(this, ITranslationStates.STATE_MAPPINGS_TRANSFORMED);
+			Dependencies.ensureBindingState(this, ITranslationStates.STATE_METHODS_CREATED);
 	} catch (Throwable t) {}
 // SH}
 	return methods();

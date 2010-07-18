@@ -52,8 +52,7 @@ public class StateHelper
 		case STATE_FAULT_IN_TYPES:
 		case STATE_METHODS_CREATED:
 		case STATE_STATEMENTS_TRANSFORMED: // detects and marks local types
-		case STATE_MAPPINGS_RESOLVED:
-		case STATE_MAPPINGS_TRANSFORMED:
+		case STATE_CALLINS_TRANSFORMED:
 		case STATE_METHODS_VERIFIED:
 		case STATE_RESOLVED:
 	    case STATE_CODE_ANALYZED:
@@ -236,7 +235,7 @@ public class StateHelper
 	 *  (role- and team-models of type plus enclosing team).
 	 * @param type
 	 * @param state state according to ITranslationStates
-	 * @param sub-step according to LookupEnvironment
+	 * @param step sub-step according to LookupEnvironment
 	 */
 	public static boolean startProcessing(TypeDeclaration type, int state, int step)
 	{
