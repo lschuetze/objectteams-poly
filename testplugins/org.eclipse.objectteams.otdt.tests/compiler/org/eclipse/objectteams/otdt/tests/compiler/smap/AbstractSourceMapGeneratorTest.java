@@ -21,8 +21,6 @@
 package org.eclipse.objectteams.otdt.tests.compiler.smap;
 
 import java.io.File;
-import java.io.IOException;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -32,8 +30,7 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.core.runtime.Path;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -54,7 +51,6 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
-import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.debug.core.breakpoints.IOOTBreakPoints;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
 import org.eclipse.objectteams.otdt.tests.compiler.CustomizedCompiler;
@@ -96,7 +92,7 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 
     private String getOTRE_Path()
     {
-    	return OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTRUNTIME_LIBDIR, OTREContainer.OTRE_JAR_FILENAME).toString();
+    	return JavaCore.getClasspathVariable(OTDTPlugin.OTRE_CONTAINER_PATH).toString();
     }
 
     public static Test suite()

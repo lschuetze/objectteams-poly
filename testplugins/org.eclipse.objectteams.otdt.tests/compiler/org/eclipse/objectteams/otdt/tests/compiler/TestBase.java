@@ -25,10 +25,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -77,13 +75,8 @@ public class TestBase extends TestCase
 			System.err.println("TestBase: using alternate jre "+JRE_JAR_PATH);
 		}
 	}
-    
-	public static final String OT_RUNTIME_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTRUNTIME_LIBDIR).toOSString();
-	
-    
-	public static final String OTRE_JAR_PATH = OT_RUNTIME_PATH 
-													+ File.separator
-													+ "otre.jar";
+       
+	public static final String OTRE_JAR_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTRE_CONTAINER_PATH).toOSString();
 	
     public static final String PROJECT_PATH = USER_HOME 
 													+ File.separator 
