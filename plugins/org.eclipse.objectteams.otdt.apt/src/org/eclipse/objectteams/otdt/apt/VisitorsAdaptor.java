@@ -57,7 +57,7 @@ public team class VisitorsAdaptor {
 				AbstractMethodMappingDeclaration mapping = (AbstractMethodMappingDeclaration) scope.referenceContext();
 				RoleModel roleModel = scope.referenceType().getRoleModel();
 				if (roleModel != null)
-					Dependencies.ensureRoleState(roleModel, ITranslationStates.STATE_MAPPINGS_RESOLVED); // needed for accessing the method binding.
+					Dependencies.ensureRoleState(roleModel, ITranslationStates.STATE_METHODS_CREATED); // needed for accessing the method binding.
 				MethodBinding binding = mapping.getRoleMethod(); 
 				//
 				if (binding != null) {
