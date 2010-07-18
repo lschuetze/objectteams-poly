@@ -21,8 +21,8 @@
                 <outputproperty name="method" value="xml"/>
                 <outputproperty name="encoding" value="UTF-8"/>
                 <outputproperty name="indent" value="yes"/>
-        		<param name="version" value="${jdt.feature.version}"/>
-        		<param name="versionnext" value="${jdt.feature.version.next}"/>
+        		<param name="version" expression="${jdt.feature.version}"/>
+        		<param name="versionnext" expression="${jdt.feature.version.next}"/>
                 <mapper type="glob" from="${content.origFile}" to="${content.transFile}"/>
         </xslt>
         <move file="${otdtUpdatesDir}/${content.transFile}" tofile="${otdtUpdatesDir}/${content.origFile}" overwrite="yes"/>	
