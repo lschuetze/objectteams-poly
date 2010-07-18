@@ -52,7 +52,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleInitializatio
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.DeclaredLifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.LiftingEnvironment;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.OTClassScope;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
@@ -1917,8 +1916,6 @@ public class Dependencies implements ITranslationStates {
 			// method mappings without baseclass are reported within resolve() below:
 			MethodMappingResolver resolver = new MethodMappingResolver(role);
 			resolver.resolve(!hasBaseclassProblem && needMethodBodies(roleDecl));
-			if (roleDecl.isDirectRole() && !roleDecl.isInterface())
-				SyntheticBaseCallSurrogate.addFakedBaseCallSurrogates((SourceTypeBinding)roleBinding);
 		}
 	}
 

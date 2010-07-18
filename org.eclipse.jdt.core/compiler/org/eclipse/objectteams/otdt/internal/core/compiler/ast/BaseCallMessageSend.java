@@ -144,6 +144,10 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 			}
 		}
 
+		if (this.isSuperAccess)
+			// 	signal that the base call surrogate needs to handle super-access:
+			MethodModel.addCallinFlag(currentScope.methodScope().referenceMethod(), IOTConstants.CALLIN_FLAG_BASE_SUPER_CALL);
+
 		return flowInfo;
 	}
 

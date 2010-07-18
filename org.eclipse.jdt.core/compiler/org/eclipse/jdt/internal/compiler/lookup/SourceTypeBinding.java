@@ -2483,6 +2483,12 @@ void verifyMethods(MethodVerifier verifier) {
 	  if (!this.memberTypes[i].isBinaryBinding())
 // SH}
 		 ((SourceTypeBinding) this.memberTypes[i]).verifyMethods(verifier);
+//{ObjectTeams: one more structure to connect:
+	// (requires inherited callin bindings (from STATE_LATE_ATTRIBUTES_EVALUATED), but must happend
+	//  before resolve() so resolving BaseCallMessageSends will find inherited surrogates)
+	if (this.isDirectRole() && !this.isInterface())
+		SyntheticBaseCallSurrogate.addFakedBaseCallSurrogates(this);
+// SH}
 }
 
 public FieldBinding[] unResolvedFields() {

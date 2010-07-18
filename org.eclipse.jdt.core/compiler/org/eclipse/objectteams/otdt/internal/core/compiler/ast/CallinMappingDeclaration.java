@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
@@ -151,21 +152,11 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 
 		if (!resolveBaseMethods)
 			return;
-		boolean hasBaseSuperCall = false;
-		if (this.roleMethodSpec.isValid())
-			hasBaseSuperCall = MethodModel.hasCallinFlag(this.roleMethodSpec.resolvedMethod, CALLIN_FLAG_BASE_SUPER_CALL);
 
 		MethodBinding[] baseMethods = new MethodBinding[this.baseMethodSpecs.length];
 		for (int i = 0; i < this.baseMethodSpecs.length; i++) {
 			if (this.baseMethodSpecs[i].resolvedMethod != null) {
 				baseMethods[i] = this.baseMethodSpecs[i].resolvedMethod;
-				if (hasBaseSuperCall) {
-					if (!MethodModel.isOverriding(baseMethods[i], this.scope.compilationUnitScope()))
-						this.scope.problemReporter().baseSuperCallToNonOverriding(this.baseMethodSpecs[i], this.roleMethodSpec);
-					else
-						// create the special access attribute that signals the need to handle super access:
-						role.addMethodSuperAccess(baseMethods[i]);
-				}
 				if (isDangerousMethod(baseMethods[i]))
 					this.scope.problemReporter().dangerousCallinBinding(this.baseMethodSpecs[i]);
 			} else {
@@ -543,6 +534,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			}
 		}
 	}
+
 	/** Check OTJLD 4.4(b) "Callin parameter mapping / Restrictions for callin replace bindings" */
 	public void checkResultMapping() {
 		// for replace callins, a "result" mapping is not allowed,
@@ -596,29 +588,6 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			checkResultForReplace(baseSpec);
 	}
 
-	/**
-	 * Check whether a base result is missing.
-	 * Requires analyzeCode() of methods to be finished.
-	 */
-	public void checkBaseResult() {
-		if (this.baseMethodNeedingResultFromBasecall == null)
-			return;
-		if (this.isResultMapped)
-			return;
-		if (MethodModel.hasCallinFlag(this.roleMethodSpec.resolvedMethod, CALLIN_FLAG_DEFINITELY_MISSING_BASECALL))
-		{
-			this.scope.problemReporter().callinMappingMissingResult(
-					this, this.baseMethodNeedingResultFromBasecall);
-			this.binding.tagBits |= TagBits.HasMappingIncompatibility;
-		}
-		else if (MethodModel.hasCallinFlag(this.roleMethodSpec.resolvedMethod, CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL))
-		{
-			this.scope.problemReporter().fragileCallinMapping(
-					this, this.baseMethodNeedingResultFromBasecall);
-		}
-	}
-
-
 	protected void checkThrownExceptions(MethodSpec baseSpec) {
 		checkThrownExceptions(this.roleMethodSpec.resolvedMethod, baseSpec.resolvedMethod);
 		// transfer all exceptions of base methods to the role method (model):
@@ -626,6 +595,42 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		if (baseExceptions != null && baseExceptions.length > 0) {
 			MethodModel roleMethodModel = MethodModel.getModel(this.roleMethodSpec.resolvedMethod);
 			roleMethodModel.addBaseExceptions(baseExceptions);
+		}
+	}
+
+	/** Check details that require analyseCode() of methods to be finished: */
+	public void analyseDetails(TypeDeclaration roleClass) 
+	{		
+		// check validity of base-super call
+		if (   this.roleMethodSpec.isValid()
+			&& MethodModel.hasCallinFlag(this.roleMethodSpec.resolvedMethod, CALLIN_FLAG_BASE_SUPER_CALL)) 
+		{
+			for (int i = 0; i < this.baseMethodSpecs.length; i++) {
+				MethodBinding baseMethod = this.baseMethodSpecs[i].resolvedMethod;
+				if (baseMethod != null) {
+					if (!MethodModel.isOverriding(baseMethod, this.scope.compilationUnitScope()))
+						this.scope.problemReporter().baseSuperCallToNonOverriding(this.baseMethodSpecs[i], this.roleMethodSpec);
+					else
+						// create the special access attribute that signals the need to handle super access:
+						roleClass.getRoleModel().addMethodSuperAccess(baseMethod);
+				}
+			}
+		}
+		// check whether a base result is missing
+		if (   this.baseMethodNeedingResultFromBasecall != null
+			&& !this.isResultMapped) 
+		{
+			if (MethodModel.hasCallinFlag(this.roleMethodSpec.resolvedMethod, CALLIN_FLAG_DEFINITELY_MISSING_BASECALL))
+			{
+				this.scope.problemReporter().callinMappingMissingResult(
+						this, this.baseMethodNeedingResultFromBasecall);
+				this.binding.tagBits |= TagBits.HasMappingIncompatibility;
+			}
+			else if (MethodModel.hasCallinFlag(this.roleMethodSpec.resolvedMethod, CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL))
+			{
+				this.scope.problemReporter().fragileCallinMapping(
+						this, this.baseMethodNeedingResultFromBasecall);
+			}
 		}
 	}
 

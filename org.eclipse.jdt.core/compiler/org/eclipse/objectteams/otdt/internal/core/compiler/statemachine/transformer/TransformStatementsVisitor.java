@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
@@ -163,18 +162,6 @@ public class TransformStatementsVisitor
 			messageSend.arguments = MethodSignatureEnhancer.enhanceArguments(args, messageSend.sourceEnd+1);
 			messageSend.bits |= ASTNode.HasBeenTransformed;
     	}
-    	return true;
-    }
-    @Override
-    public boolean visit(BaseCallMessageSend messageSend, BlockScope scope) {
-    	if (this._methodDeclarationStack.isEmpty())
-    		return false;
-    	MethodDeclaration methodDecl = this._methodDeclarationStack.peek();
-    	if (   methodDecl.isCallin()
-    		&& isRecursiveCall(methodDecl, messageSend.getMessageSend(), true)
-    		&& messageSend.isSuperAccess)
-    		// signal that the base call surrogate needs to handle super-access:
-    			MethodModel.addCallinFlag(methodDecl, CALLIN_FLAG_BASE_SUPER_CALL);
     	return true;
     }
 

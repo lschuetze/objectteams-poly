@@ -54,7 +54,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.Sorting;
 /**
  * OTDT changes:
  *
- * New structural elelements:
+ * New structural elements:
  * + baseclass for "playedBy"
  * + precedences
  * + callinCallouts for method mappings
@@ -1259,7 +1259,7 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 	if (this.callinCallouts != null)  {
 		for (int i = 0; i < this.callinCallouts.length; i++) {
 			if (this.callinCallouts[i].isReplaceCallin())
-				((CallinMappingDeclaration)this.callinCallouts[i]).checkBaseResult();
+				((CallinMappingDeclaration)this.callinCallouts[i]).analyseDetails(this);
 		}
 	}
 // SH}
@@ -1855,7 +1855,7 @@ public void resolve() {
         StateMemento.methodResolveStart(this.binding);
 // SH}
 //{ObjectTeams: should we work?
-        if (fieldsAndMethods) {
+      if (fieldsAndMethods) {
 // SH}
 		if (this.methods != null) {
 			for (int i = 0, count = this.methods.length; i < count; i++) {
@@ -1863,7 +1863,7 @@ public void resolve() {
 			}
 		}
 //{ObjectTeams:
-        }
+      }
 // SH}
 		// Resolve javadoc
 		if (this.javadoc != null) {
