@@ -55,8 +55,6 @@ public class OTREContainer implements IClasspathContainer
     // these are served from the current plugin:
     public static final IPath  OTRE_MIN_JAR_PATH   = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_MIN_JAR_FILENAME); //$NON-NLS-1$
     public static final IPath  OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$
-    // this is served from org.eclipse.objectteams.runtime/lib:
-    public static final String OTRE_JAR_PATH  	   = OTDTPlugin.OTRUNTIME_LIBDIR + '/' + OTRE_JAR_FILENAME; //$NON-NLS-1$
     
     public static IPath  BCEL_PATH; // will be initialized in {@link findBCEL(BundleContext)}
     // data for initializing the above BCEL_PATH:
@@ -70,7 +68,7 @@ public class OTREContainer implements IClasspathContainer
         if (_cpEntries == null)
         {
             _cpEntries = new IClasspathEntry[1];
-    		IPath fullPath = new Path(OTRE_JAR_PATH);
+    		IPath fullPath = new Path(OTDTPlugin.OTRE_CONTAINER_PATH);
     		IClasspathEntry varOTREEntry = JavaCore.newVariableEntry(fullPath, fullPath, fullPath, true);
     		_cpEntries[0] = JavaCore.getResolvedClasspathEntry(varOTREEntry);
         }

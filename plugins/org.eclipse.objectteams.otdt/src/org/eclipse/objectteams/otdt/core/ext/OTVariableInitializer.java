@@ -51,9 +51,9 @@ public class OTVariableInitializer extends ClasspathVariableInitializer
     	{
 			setPluginInstallationPathVariable(OTDTPlugin.getDefault(), null, null, variable);
 		}
-    	else if (OTDTPlugin.OTRUNTIME_LIBDIR.equals(variable))
+    	else if (OTDTPlugin.OTRE_CONTAINER_PATH.equals(variable))
 		{
-			setPluginInstallationPathVariable(OTDTPlugin.getDefault(), "org.eclipse.objectteams.runtime", "lib", variable);
+			setPluginInstallationPathVariable(OTDTPlugin.getDefault(), "org.eclipse.objectteams.runtime", "bin", variable); 
 		}
 
     }
@@ -74,9 +74,15 @@ public class OTVariableInitializer extends ClasspathVariableInitializer
 			// parsing fail (device, e.g. 'C:' is not detected). We must use java.io.File to parse it
 			// properly.
 			String path = FileLocator.toFileURL(installDirectory).getPath();
-			if (relativeDir != null)
-				path += relativeDir;
-			String fixedPath = new File(path).getPath();
+			File f = null;
+			if (relativeDir != null) {
+				f = new File(path + relativeDir);
+				if (!f.exists())
+					f = null; // proceed with only "path"
+			}
+			if (f == null)
+				f = new File(path);
+			String fixedPath = f.getPath();
 			JavaCore.setClasspathVariable(variable, new Path(fixedPath), new NullProgressMonitor());
 		}
 		catch (Exception ex)
