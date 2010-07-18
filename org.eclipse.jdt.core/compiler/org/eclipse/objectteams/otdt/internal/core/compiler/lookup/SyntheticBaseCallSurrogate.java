@@ -49,6 +49,9 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  */
 public class SyntheticBaseCallSurrogate extends SyntheticMethodBinding
 {
+	// this corresponds to IOTConstants.OT_DOLLAR_NAME without the trailing '$':
+	private static final char[] _OT = "_OT".toCharArray(); //$NON-NLS-1$
+
 	private TypeBinding errorType;
 	private ReferenceBinding stringType;
 	
@@ -80,11 +83,11 @@ public class SyntheticBaseCallSurrogate extends SyntheticMethodBinding
 
 	/** Directly generate the instruction for this method's body (no AST available). */
 	public void generateInstructions(CodeStream codeStream) {
-		codeStream.new_(errorType);
+		codeStream.new_(this.errorType);
 		codeStream.dup();
-		codeStream.ldc("Binding error: base-call impossible!");
-		MethodBinding ctorBinding = ((ReferenceBinding)errorType).getExactConstructor(new TypeBinding[]{this.stringType});
-		codeStream.invoke(Opcodes.OPC_invokespecial, ctorBinding, errorType);
+		codeStream.ldc("Binding error: base-call impossible!"); //$NON-NLS-1$
+		MethodBinding ctorBinding = ((ReferenceBinding)this.errorType).getExactConstructor(new TypeBinding[]{this.stringType});
+		codeStream.invoke(Opcodes.OPC_invokespecial, ctorBinding, this.errorType);
 		codeStream.athrow();
 		codeStream.aconst_null(); // always generalized to Object
 		codeStream.areturn();
@@ -139,7 +142,7 @@ public class SyntheticBaseCallSurrogate extends SyntheticMethodBinding
 	 * @param callinMethod
 	 * @param environment   needed for lookup of java/lang/Object (needed for return type generalization).
 	 *                      and for wrapping role types.
-	 * @return
+	 * @return a MethodBinding (if it already exists or if role is binary) or a new SyntheticBaseCallSurrogate or null (if none is required)
 	 */
 	public static MethodBinding getBaseCallSurrogate(MethodBinding callinMethod, RoleModel clazz, LookupEnvironment environment)
 	{
@@ -239,10 +242,10 @@ public class SyntheticBaseCallSurrogate extends SyntheticMethodBinding
 	{
 		if (isStatic)
 			return CharOperation.concatWith(
-					new char[][] {"_OT".toCharArray(), roleName, methodName, "base".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$
+					new char[][] {_OT, roleName, methodName, "base".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$
 					'$');
 		return CharOperation.concatWith(
-				new char[][] {"_OT".toCharArray(), methodName, "base".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$
+				new char[][] {_OT, methodName, "base".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$
 				'$');
 	}
 
@@ -250,7 +253,7 @@ public class SyntheticBaseCallSurrogate extends SyntheticMethodBinding
 		char[][] split = CharOperation.splitOn('$', name);
 		if (split.length < 3)
 			return false;
-		return CharOperation.equals(split[0], "_OT".toCharArray())
+		return CharOperation.equals(split[0], _OT)
 			&& CharOperation.equals(split[split.length-1], IOTConstants.BASE);
 	}
 
