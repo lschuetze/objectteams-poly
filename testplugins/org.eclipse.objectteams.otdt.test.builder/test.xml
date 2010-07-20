@@ -25,12 +25,12 @@
 	<!-- This target defines the tests that need to be run. -->
 	<target name="suite">
 
-		<!-- OTDT Non UI tests -->
+		<!-- OTDT UI tests -->
 		<property name="otdt-builder-folder" 
               value="${otdt-tests-workspace}/otdt-builder-folder"/>
-		<delete dir="${otdt-nonUI-folder}" quiet="true"/>
+		<delete dir="${otdt-builder-folder}" quiet="true"/>
 
-		<ant target="core-test" antfile="${library-file}" dir="${test.eclipseDir}">
+		<ant target="ui-test" antfile="${library-file}" dir="${test.eclipseDir}">
 			<property name="data-dir" value="${otdt-builder-folder}"/>
 			<property name="plugin-name" value="${plugin-name}"/>
 			<property name="classname" value="org.eclipse.objectteams.otdt.test.builder.AllTests"/>
