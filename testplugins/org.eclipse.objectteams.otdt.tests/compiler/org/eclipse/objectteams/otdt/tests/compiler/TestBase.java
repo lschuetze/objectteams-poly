@@ -38,11 +38,10 @@ import junit.framework.TestSuite;
 import junit.textui.TestRunner;
 
 import org.eclipse.core.runtime.Path;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.batch.Main;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
-import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
+import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 
 /**
  * This class represents a base for testing the compiler with several files.
@@ -75,9 +74,7 @@ public class TestBase extends TestCase
 			System.err.println("TestBase: using alternate jre "+JRE_JAR_PATH);
 		}
 	}
-       
-	public static final String OTRE_JAR_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTRE_CONTAINER_PATH).toOSString();
-	
+
     public static final String PROJECT_PATH = USER_HOME 
 													+ File.separator 
 													+ WORKSPACE_NAME 
@@ -193,11 +190,11 @@ public class TestBase extends TestCase
 
     private String missingClasspathEntry()
     {
-        File otreJar = new File(OTRE_JAR_PATH);
+        File otreJar = new File(ClasspathUtil.OTRE_PATH);
         File jreJar = new File(JRE_JAR_PATH);
         
         if (!otreJar.exists())
-        	return OTRE_JAR_PATH;
+        	return ClasspathUtil.OTRE_PATH;
         if (!jreJar.exists())
         	return JRE_JAR_PATH;
         return null;
@@ -496,7 +493,7 @@ public class TestBase extends TestCase
         String[] args =
         {
             "-classpath",
-            new Path(OTRE_JAR_PATH).toString()
+            new Path(ClasspathUtil.OTRE_PATH).toString()
                 		+ File.pathSeparator
                 		+ new Path(JRE_JAR_PATH).toString()
                 		+ File.pathSeparator

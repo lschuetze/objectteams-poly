@@ -30,7 +30,6 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -50,9 +49,9 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
-import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.debug.core.breakpoints.IOOTBreakPoints;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
+import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 import org.eclipse.objectteams.otdt.tests.compiler.CustomizedCompiler;
 import org.eclipse.objectteams.otdt.tests.compiler.ICallbackClient;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
@@ -77,8 +76,6 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 	
 	public static boolean optimizeStringLiterals = false;
 	public static long sourceLevel = ClassFileConstants.JDK1_5; //$NON-NLS-1$
-    
-	public String OTRE_JAR_PATH = getOTRE_Path(); 
 
 	public static String OUTPUT_DIR = Util.getOutputDirectory() + File.separator + "smaptest";
 	
@@ -88,11 +85,6 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
     public AbstractSourceMapGeneratorTest(String testName)
     {
         super(testName);
-    }
-
-    private String getOTRE_Path()
-    {
-    	return JavaCore.getClasspathVariable(OTDTPlugin.OTRE_CONTAINER_PATH).toString();
     }
 
     public static Test suite()
@@ -171,7 +163,7 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 
     protected String[] getDefaultClassPaths()
     {
-        return Util.concatWithClassLibs(OTRE_JAR_PATH, false);
+        return Util.concatWithClassLibs(ClasspathUtil.OTRE_PATH, false);
     }
 
     protected IErrorHandlingPolicy getErrorHandlingPolicy()
