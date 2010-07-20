@@ -28,7 +28,6 @@ import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
 import org.eclipse.jdt.launching.JavaRuntime;
-import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.OTVMRunnerAdaptor;
@@ -89,7 +88,7 @@ public team class JDTLaunchingAdaptor {
 	            IRuntimeClasspathEntry entry = origEntries[i];
 				if (OTREContainer.BCEL_PATH.equals(entry.getPath()))
 					hasBCEL = true;
-				else if (OTDTPlugin.OTRE_CONTAINER_PATH.equals(entry.getPath().toString())) // FIXME(SH): this is inconsistent otre.jar vs. otre_min.jar
+				else if (OTREContainer.OTRE_CONTAINER_NAME.equals(entry.getPath().toString())) // FIXME(SH): this is inconsistent otre.jar vs. otre_min.jar
 					hasOTRE_min = true;
 	        }
 	
