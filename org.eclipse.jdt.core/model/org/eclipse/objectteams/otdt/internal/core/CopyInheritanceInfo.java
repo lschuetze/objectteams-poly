@@ -26,8 +26,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.objectteams.otdt.core.PhantomType;
 
 
@@ -36,6 +40,7 @@ import org.eclipse.objectteams.otdt.core.PhantomType;
  * @version $Id: CopyInheritanceInfo.java 23416 2010-02-03 19:59:31Z stephan $
  */
 //TODO(mkr) rename to TeamInfo
+@SuppressWarnings("unqualified-field-access") // fields are marked with "_" prefix.
 class CopyInheritanceInfo
 {
     // role name -> declared role type or phantom role type
@@ -76,7 +81,14 @@ class CopyInheritanceInfo
                 	// FIXME(SH): adjust for Trac #144:
                     _superclasses.put(role.getElementName(),
                                       _hierarchy.ORG_OBJECTTEAMS_TEAM);
-                    _hierarchy.addRootClass(_hierarchy.ORG_OBJECTTEAMS_TEAM);
+                    if (_hierarchy.ORG_OBJECTTEAMS_TEAM != null) {
+                    	_hierarchy.addRootClass(_hierarchy.ORG_OBJECTTEAMS_TEAM);
+                    } else {
+                    	String prjName = _team.getJavaProject().getElementName();
+                    	JavaModelException jme = new JavaModelException(new JavaModelStatus(IStatus.ERROR, "Classpath problem: cannot find class org.objectteams.Team.")); //$NON-NLS-1$
+                    	JavaCore.getJavaCore().getLog().log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, "Problem computing OT/J type hierarchy for project "+prjName, jme)); //$NON-NLS-1$
+                    	_hierarchy.addRootClass(_hierarchy.JAVA_LANG_OBJECT);
+                    }
                 }
                 else
                 {
