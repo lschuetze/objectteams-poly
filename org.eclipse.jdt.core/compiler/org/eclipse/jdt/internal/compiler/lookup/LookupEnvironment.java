@@ -168,6 +168,10 @@ public ReferenceBinding askForType(char[][] compoundName) {
 	NameEnvironmentAnswer answer = this.nameEnvironment.findType(compoundName);
 	if (answer == null) return null;
 
+//{ObjectTeams: if we were looking specifically for a source type, and if this is satisfied now, reset to normal:
+	if (!answer.isBinaryType())
+		Config.setSourceTypeRequired(false);
+// SH}
 	if (answer.isBinaryType()) {
 		// the type was found as a .class file
 		this.typeRequestor.accept(answer.getBinaryType(), computePackageFrom(compoundName, false /* valid pkg */), answer.getAccessRestriction());
@@ -194,6 +198,10 @@ ReferenceBinding askForType(PackageBinding packageBinding, char[] name) {
 	if (answer == null)
 		return null;
 
+//{ObjectTeams: if we were looking specifically for a source type, and if this is satisfied now, reset to normal:
+	if (!answer.isBinaryType())
+		Config.setSourceTypeRequired(false);
+// SH}
 	if (answer.isBinaryType()) {
 		// the type was found as a .class file
 		this.typeRequestor.accept(answer.getBinaryType(), packageBinding, answer.getAccessRestriction());
