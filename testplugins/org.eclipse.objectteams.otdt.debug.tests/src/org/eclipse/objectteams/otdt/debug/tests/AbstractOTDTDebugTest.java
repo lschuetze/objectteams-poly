@@ -1383,15 +1383,7 @@ public abstract class AbstractOTDTDebugTest extends TestCase implements  IEvalua
      * Creates a shared launch configuration for the type with the given name.
      */
     protected void createLaunchConfiguration(String mainTypeName) throws Exception {
-//{ObjectTeams: make launch type configurable:
-    	createLaunchConfiguration(mainTypeName, IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION);
-    }
-    protected void createLaunchConfiguration(String mainTypeName, String launchType) throws Exception {
-        ILaunchConfigurationType type = getLaunchManager().getLaunchConfigurationType(launchType);
-/*orig:
         ILaunchConfigurationType type = getLaunchManager().getLaunchConfigurationType(IJavaLaunchConfigurationConstants.ID_JAVA_APPLICATION); 
- :giro */
-// SH}
         ILaunchConfigurationWorkingCopy config = type.newInstance(getJavaProject().getProject().getFolder("launchConfigurations"), mainTypeName);
         config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, mainTypeName);
         config.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, getJavaProject().getElementName());
