@@ -4670,7 +4670,15 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 			this.optionsCache = cachedValue;
 		} catch (BackingStoreException e) {
 			// ignore
-			e.printStackTrace(); // harness for  Bug 302850 -  13 failures in JavaModel tests for the N20100214-2000 Mac OS X - Cocoa test machine
+//{ObjectTeams: harness for  Bug 302850 -  13 failures in JavaModel tests for the N20100214-2000 Mac OS X - Cocoa test machine
+			e.printStackTrace(); 
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			throw e;
+		} catch (Error e) {
+			e.printStackTrace();
+			throw e;
+// SH}
 		}
 	}
 
