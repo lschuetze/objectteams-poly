@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.tests.builder.Problem;
 import org.eclipse.jdt.core.tests.util.Util;
+import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 
 
 public class CompilationOrderTests extends OTBuilderTests {
@@ -51,7 +52,7 @@ public class CompilationOrderTests extends OTBuilderTests {
 		System.out.println("***** test177otjd5f() *****");
 		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, ClasspathUtil.OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
@@ -81,6 +82,7 @@ public class CompilationOrderTests extends OTBuilderTests {
 	 * Witness for an NPE in ExplicitConstructorCall.resolve():
 	 * If o.o.Team cannot be found, receiverType could be null!
 	 */
+	@SuppressWarnings("nls")
 	public void testMissingOTRE() throws JavaModelException {
 		System.out.println("***** testMissingOTRE() *****");
 		IPath projectPath = env.addProject("Project", "1.5"); 

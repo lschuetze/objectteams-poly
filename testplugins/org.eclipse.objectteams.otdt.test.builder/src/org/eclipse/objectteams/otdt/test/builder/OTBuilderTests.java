@@ -21,20 +21,13 @@
 package org.eclipse.objectteams.otdt.test.builder;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.tests.builder.BuilderTests;
 import org.eclipse.jdt.core.tests.builder.Problem;
 import org.eclipse.jdt.core.tests.builder.TestingEnvironment;
-import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.internal.compiler.adaptor.BuildManager;
 
 public class OTBuilderTests extends BuilderTests {
 
-	public static final String OTRE_JAR_PATH;
-	static {
-		OTRE_JAR_PATH = JavaCore.getClasspathVariable(OTDTPlugin.OTRE_CONTAINER_PATH).toOSString();
-	}
-	
 	OTTestingEnvironment otenv;
 
 	public OTBuilderTests(String name) {

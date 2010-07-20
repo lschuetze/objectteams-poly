@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.tests.builder.Problem;
 import org.eclipse.jdt.core.tests.util.Util;
 
+import static org.eclipse.objectteams.otdt.tests.ClasspathUtil.OTRE_PATH;
 /**
  * This test class tests incremental compilation of teams and roles.
  */
@@ -52,7 +53,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testRemoveTeamType() *****");
 		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
@@ -95,7 +96,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testRemoveRoleType() *****");
 		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
@@ -140,7 +141,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testRemoveRoleFile() *****");
 		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
@@ -179,7 +180,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testRemoveRoleMethod() *****");
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, "");
@@ -240,7 +241,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testModifyTSuperRole1() *****");
 		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, ""); 
@@ -297,7 +298,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testModifyTSuperRole2() *****");
 		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, ""); 
@@ -358,7 +359,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testModifyTSuperRole3() *****");
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide 
 		env.removePackageFragmentRoot(projectPath, "");
@@ -425,7 +426,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testModifySuperRole1() *****");
 		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, ""); 
@@ -478,7 +479,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testModifySiblingRole1() *****");
 		IPath projectPath = env.addProject("Project", "1.5"); 
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, ""); 
@@ -533,7 +534,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testModifyTeam1() *****");
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide
 		env.removePackageFragmentRoot(projectPath, ""); 
@@ -603,7 +604,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testAddRoFiToCompiledTeam() *****");
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide 
 		env.removePackageFragmentRoot(projectPath, "");
@@ -656,7 +657,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testAddRoFiToBrokenTeam() *****");
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 	
 		// remove old package fragment root so that names don't collide 
 		env.removePackageFragmentRoot(projectPath, "");
@@ -718,7 +719,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testBreakTeamWithRoFi() *****");
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 	
 		// remove old package fragment root so that names don't collide 
 		env.removePackageFragmentRoot(projectPath, "");
@@ -763,7 +764,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testRoFiExtendsInline() *****");
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide 
 		env.removePackageFragmentRoot(projectPath, "");
@@ -818,7 +819,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testRemoveBoundBaseMethod() *****");
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide 
 		env.removePackageFragmentRoot(projectPath, "");
@@ -875,7 +876,7 @@ public class IncrementalTests extends OTBuilderTests {
 		System.out.println("***** testPhantomRole() *****");
 		IPath projectPath = env.addProject("Project", "1.5");
 		env.addExternalJars(projectPath, Util.getJavaClassLibs());
-		env.addExternalJar(projectPath, OTRE_JAR_PATH);
+		env.addExternalJar(projectPath, OTRE_PATH);
 
 		// remove old package fragment root so that names don't collide 
 		env.removePackageFragmentRoot(projectPath, "");
