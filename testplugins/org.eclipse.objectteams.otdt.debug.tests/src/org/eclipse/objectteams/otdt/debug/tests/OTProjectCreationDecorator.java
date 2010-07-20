@@ -44,7 +44,6 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
-import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.ui.IPerspectiveDescriptor;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
@@ -125,7 +124,7 @@ public class OTProjectCreationDecorator extends AbstractOTDTDebugTest {
         assertNotNull("No default JRE", vm);
         JavaProjectHelper.addContainerEntry(fJavaProject, new Path(JavaRuntime.JRE_CONTAINER));
 //{ObjectTeams: add otre.jar:
-        JavaProjectHelper.addContainerEntry(fJavaProject, OTREContainer.OTRE_CONTAINER_PATH);
+        JavaProjectHelper.addContainerEntry(fJavaProject, new Path(OTREContainer.OTRE_CONTAINER_NAME));
 // SH}
         pro = fJavaProject.getProject();
 
