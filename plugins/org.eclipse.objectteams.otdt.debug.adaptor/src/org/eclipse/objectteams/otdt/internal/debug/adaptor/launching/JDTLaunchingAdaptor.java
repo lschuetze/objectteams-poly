@@ -88,7 +88,7 @@ public team class JDTLaunchingAdaptor {
 	            IRuntimeClasspathEntry entry = origEntries[i];
 				if (OTREContainer.BCEL_PATH.equals(entry.getPath()))
 					hasBCEL = true;
-				else if (OTREContainer.OTRE_CONTAINER_NAME.equals(entry.getPath().toString())) // FIXME(SH): this is inconsistent otre.jar vs. otre_min.jar
+				else if (OTREContainer.OTRE_MIN_JAR_PATH.equals(entry.getPath().toString()))
 					hasOTRE_min = true;
 	        }
 	
