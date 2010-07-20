@@ -94,7 +94,8 @@ public class OTREContainer implements IClasspathContainer
 
     public int getKind()
     {
-    	return IClasspathContainer.K_DEFAULT_SYSTEM;
+    	// don't mark as K_SYSTEM or K_SYSTEM_DEFAULT, which would prevent jdt.debug from adding this to the runtime classpath. 
+    	return IClasspathContainer.K_APPLICATION;
     }
 
     public IPath getPath()
