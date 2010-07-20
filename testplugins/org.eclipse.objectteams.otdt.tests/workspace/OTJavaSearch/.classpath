@@ -2,6 +2,6 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
     <classpathentry kind="var" path="JCL_LIB" sourcepath="JCL_SRC" rootpath="JCL_SRCROOT"/>
-	<classpathentry kind="var" path="OTRUNTIME_LIBDIR/otre.jar"/>
+	<classpathentry kind="con" path="OTRE"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
