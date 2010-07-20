@@ -46,31 +46,42 @@ import org.osgi.service.packageadmin.PackageAdmin;
  */
 public class OTREContainer implements IClasspathContainer
 {
-    public static final String OTRE_CONTAINER_NAME     = "OTRE"; //$NON-NLS-1$
-    public static final String OTRE_JAR_FILENAME       = "otre.jar"; //$NON-NLS-1$
-    public static final String OTRE_MIN_JAR_FILENAME   = "otre_min.jar"; //$NON-NLS-1$
-    public static final String OTRE_AGENT_JAR_FILENAME = "otre_agent.jar"; //$NON-NLS-1$
+	/** Name of this classpath container, which hosts the full OTRE. */
+	public static final String OTRE_CONTAINER_NAME     = "OTRE"; //$NON-NLS-1$
     
-    public static final IPath  OTRE_CONTAINER_PATH = new Path(OTRE_CONTAINER_NAME);
     // these are served from the current plugin:
-    public static final IPath  OTRE_MIN_JAR_PATH   = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_MIN_JAR_FILENAME); //$NON-NLS-1$
-    public static final IPath  OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$
+    public static final IPath  OTRE_MIN_JAR_PATH;
+    public static final IPath  OTRE_AGENT_JAR_PATH;
+
     
     public static IPath  BCEL_PATH; // will be initialized in {@link findBCEL(BundleContext)}
+
+    // details of this container: name and hosting plugin:
+    private static final IPath  OTRE_CONTAINER_PATH = new Path(OTRE_CONTAINER_NAME);
+    private static final String OT_RUNTIME_PLUGIN = "org.eclipse.objectteams.runtime"; //$NON-NLS-1$
+
+    // file names for the above OTRE_X_JAR_PATH constants:
+    private static final String OTRE_MIN_JAR_FILENAME   = "otre_min.jar"; //$NON-NLS-1$
+    private static final String OTRE_AGENT_JAR_FILENAME = "otre_agent.jar"; //$NON-NLS-1$
+
     // data for initializing the above BCEL_PATH:
     private static final String BCEL_BUNDLE_NAME = "org.apache.bcel"; //$NON-NLS-1$
     private static final String BCEL_VERSION_RANGE = "[5.2.0,5.3.0)"; //$NON-NLS-1$
 
+
+    static {
+        OTRE_MIN_JAR_PATH   = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_MIN_JAR_FILENAME); //$NON-NLS-1$
+        OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$    	
+    }
+    
     private IClasspathEntry[] _cpEntries;
 
     public IClasspathEntry[] getClasspathEntries()
     {
         if (_cpEntries == null)
         {
-            _cpEntries = new IClasspathEntry[1];
-    		IPath fullPath = new Path(OTDTPlugin.OTRE_CONTAINER_PATH);
-    		IClasspathEntry varOTREEntry = JavaCore.newVariableEntry(fullPath, fullPath, fullPath, true);
-    		_cpEntries[0] = JavaCore.getResolvedClasspathEntry(varOTREEntry);
+            IPath fullPath = new Path(OTVariableInitializer.getInstallatedPath(OTDTPlugin.getDefault(), OT_RUNTIME_PLUGIN, "bin")); //$NON-NLS-1$
+            _cpEntries = new IClasspathEntry[] {JavaCore.newLibraryEntry(fullPath, fullPath, new Path("/"))}; //$NON-NLS-1$
         }
         
         return _cpEntries;
@@ -83,7 +94,7 @@ public class OTREContainer implements IClasspathContainer
 
     public int getKind()
     {
-        return IClasspathContainer.K_APPLICATION;
+    	return IClasspathContainer.K_DEFAULT_SYSTEM;
     }
 
     public IPath getPath()
@@ -169,12 +180,16 @@ public class OTREContainer implements IClasspathContainer
 	static void findBCEL(BundleContext context) throws IOException {
 		ServiceReference ref= context.getServiceReference(PackageAdmin.class.getName());
 		if (ref == null)
-			throw new IllegalStateException("Cannot connect to PackageAdmin");
+			throw new IllegalStateException("Cannot connect to PackageAdmin"); //$NON-NLS-1$
 		PackageAdmin packageAdmin = (PackageAdmin)context.getService(ref);
 		for (Bundle bundle : packageAdmin.getBundles(BCEL_BUNDLE_NAME, BCEL_VERSION_RANGE)) {			
-			BCEL_PATH = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile());
+			BCEL_PATH = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
 			return;
 		}
-		throw new RuntimeException("bundle org.apache.bcel not found");
+		throw new RuntimeException("bundle org.apache.bcel not found"); //$NON-NLS-1$
+	}
+
+	public String getResolvedPathString() {
+		return getClasspathEntries()[0].getPath().toOSString();
 	}
 }

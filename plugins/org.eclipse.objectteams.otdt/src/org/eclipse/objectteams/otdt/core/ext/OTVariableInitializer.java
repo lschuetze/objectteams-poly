@@ -24,16 +24,19 @@ import java.io.File;
 import java.net.URL;
 
 import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ClasspathVariableInitializer;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.osgi.framework.Bundle;
 
 
 /**
- * ClassPathVariableInitializer to initialize the OTRE_INSTALL variable.
+ * ClassPathVariableInitializer to initialize the OTRE_INSTALLDIR variable.
  * 
  * @author gis
  * @version $Id: OTVariableInitializer.java 23427 2010-02-03 22:23:59Z stephan $
@@ -47,47 +50,61 @@ public class OTVariableInitializer extends ClasspathVariableInitializer
 
     public void initialize(String variable)
     {
+    	String installPath = null;
     	if (OTDTPlugin.OTDT_INSTALLDIR.equals(variable))
     	{
-			setPluginInstallationPathVariable(OTDTPlugin.getDefault(), null, null, variable);
-		}
-    	else if (OTDTPlugin.OTRE_CONTAINER_PATH.equals(variable))
-		{
-			setPluginInstallationPathVariable(OTDTPlugin.getDefault(), "org.eclipse.objectteams.runtime", "bin", variable); 
+			installPath = getOTDTPluginInstallationPath();
+		} else {
+			OTDTPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDTPlugin.PLUGIN_ID, "Mismatching name for classpath variable during initialization")); //$NON-NLS-1$
 		}
 
+    	try {
+			JavaCore.setClasspathVariable(variable, new Path(installPath), new NullProgressMonitor());
+		} catch (JavaModelException e) {
+			OTDTPlugin.getExceptionHandler().logException(e);
+		}
     }
 
-	public static void setPluginInstallationPathVariable(Plugin relativePlugin, String bundleName, String relativeDir, String variable)
+	public static String getOTDTPluginInstallationPath()
 	{
 		try 
 		{
-			URL installDirectory;
-			if (bundleName == null)
-				installDirectory = relativePlugin.getBundle().getEntry("/"); //$NON-NLS-1$
-			else
-				installDirectory = getBundle(bundleName).getEntry("/"); //$NON-NLS-1$
+			URL installDirectory = OTDTPlugin.getDefault().getBundle().getEntry("/"); //$NON-NLS-1$
 			
+			// On Windows, the next line leads to something like "/C:/Programme/Eclipse/plugins/my.plugin
+			// If we simply make an org.eclipse.core.runtime.Path out of it, the leading '/' makes the
+			// parsing fail (device, e.g. 'C:' is not detected). We must use java.io.File to parse it
+			// properly.
+			String path = FileLocator.toFileURL(installDirectory).getPath();
+			return new File(path).getPath();
+		}
+		catch (Exception ex)
+		{
+			OTDTPlugin.getExceptionHandler().logException(ex);
+			return null;
+		}
+	}
+
+	public static String getInstallatedPath(Plugin hostPlugin, String bundleName, String optionalRelativeDir)
+	{
+		try 
+		{
+			URL installDirectory = getBundle(bundleName).getEntry("/"); //$NON-NLS-1$
 
 			// On Windows, the next line leads to something like "/C:/Programme/Eclipse/plugins/my.plugin
 			// If we simply make an org.eclipse.core.runtime.Path out of it, the leading '/' makes the
 			// parsing fail (device, e.g. 'C:' is not detected). We must use java.io.File to parse it
 			// properly.
 			String path = FileLocator.toFileURL(installDirectory).getPath();
-			File f = null;
-			if (relativeDir != null) {
-				f = new File(path + relativeDir);
-				if (!f.exists())
-					f = null; // proceed with only "path"
-			}
-			if (f == null)
-				f = new File(path);
-			String fixedPath = f.getPath();
-			JavaCore.setClasspathVariable(variable, new Path(fixedPath), new NullProgressMonitor());
+			File f = new File(path + optionalRelativeDir);
+			if (!f.exists())
+				f = new File(path); // proceed with only "path"
+			return f.getPath();
 		}
 		catch (Exception ex)
 		{
 			OTDTPlugin.getExceptionHandler().logException(ex);
+			return null;
 		}
 	}
 	

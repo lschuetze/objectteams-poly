@@ -41,9 +41,6 @@
       <classpathVariableInitializer 
          	variable="OTDT_INSTALLDIR" 
          	class="org.eclipse.objectteams.otdt.core.ext.OTVariableInitializer"/> 
-      <classpathVariableInitializer 
-         	variable="OTRUNTIME_LIBDIR" 
-         	class="org.eclipse.objectteams.otdt.core.ext.OTVariableInitializer"/> 
    </extension>
    
    <extension 

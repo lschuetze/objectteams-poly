@@ -49,12 +49,7 @@ public class OTREContainerInitializer extends ClasspathContainerInitializer
         JavaCore.setClasspathContainer(
                 containerPath, 
                 new IJavaProject[] { project }, 
-                new IClasspathContainer[] { createOTREContainer() }, 
+                new IClasspathContainer[] { new OTREContainer() }, 
                 null);
-    }
-
-    private IClasspathContainer createOTREContainer()
-    {
-        return new OTREContainer();
     }
 }

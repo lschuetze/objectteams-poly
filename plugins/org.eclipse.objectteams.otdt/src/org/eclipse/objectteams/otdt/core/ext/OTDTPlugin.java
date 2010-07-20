@@ -42,7 +42,6 @@ public class OTDTPlugin extends Plugin
 	public static final String PLUGIN_ID = JavaCore.OTDT_PLUGIN_ID;
 
 	public static final String OTDT_INSTALLDIR = "OTDT_INSTALLDIR"; //$NON-NLS-1$
-	public static final String OTRE_CONTAINER_PATH = "OTRUNTIME_LIBDIR" ; //$NON-NLS-1$ // FIXME(SH): rename variable if successful
 	
 	// === IDs for configurable options for the compiler : ===
 	public static final String OT_COMPILER_BASE_CALL =
@@ -120,7 +119,7 @@ public class OTDTPlugin extends Plugin
     	try {
     		OTREContainer.findBCEL(context);
     	} catch (RuntimeException re) {
-    		this.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, "Cannot initialize BCEL location", re));
+    		this.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, "Cannot initialize BCEL location", re)); //$NON-NLS-1$
     	}
     }
     
