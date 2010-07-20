@@ -2759,7 +2759,14 @@ public class JavaProject
 			}
 		}
 		if (resolvedEntry.getEntryKind() == IClasspathEntry.CPE_LIBRARY && ExternalFoldersManager.isExternalFolderPath(resolvedPath)) {
-			externalFoldersManager.addFolder(resolvedPath); // no-op if not an external folder or if already registered
+			// FIXME(SH): check with JDT/Core team if this is correct to do:
+			try {
+				externalFoldersManager.createLinkFolder(resolvedPath, false, null/*monitor*/);
+			} catch (CoreException e) {
+				Util.log(e, "Exception while updating linked folder");
+			}
+			// this makes resolvedPath known to externalFoldersManager but not to the workspace!
+//			externalFoldersManager.addFolder(resolvedPath); // no-op if not an external folder or if already registered
 		}
 	}
 
