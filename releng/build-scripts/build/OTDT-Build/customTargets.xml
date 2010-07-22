@@ -101,9 +101,6 @@
 	<!-- Steps to do after fetching the build elements -->
 	<!-- ===================================================================== -->
 	<target name="postFetch">
-		<echo message="Inserting OTRE into source tree"/>
-		<copy file="${otre.lib}/otre_min.jar" todir="${buildDirectory}/plugins/org.eclipse.objectteams.otdt/lib" />
-		<copy file="${otre.lib}/otre_agent.jar" todir="${buildDirectory}/plugins/org.eclipse.objectteams.otdt/lib" />
 	</target>
 
 	<!-- ===================================================================== -->
