@@ -21,8 +21,6 @@ path of eclipse test framework:
 		eclipse.tests.zip= ${eclipse.tests.zip}
 path of published updates:
 		published.updates= ${published.updates}
-directory to otre jars:
-		otre.lib         = ${otre.lib}
 should sources be built (true|false)?
 		do.build.all     = ${do.build.all}
 should test be run (true|false)?
@@ -293,7 +291,6 @@ should test be run (true|false)?
 				<arg value="-Ddo.build.all=${do.build.all}"/>
 				<arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 				<arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
-				<arg value="-Dotre.lib=${otre.lib}"/>
 				<arg value="-verbose" />
 				<jvmarg value="${vm.args}"/>
 				<jvmarg value="${vm.args2}"/>

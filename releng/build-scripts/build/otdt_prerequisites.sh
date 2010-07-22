@@ -59,8 +59,5 @@ ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
 # EXPORT: archive file of the eclipse test framework:
 ECLIPSE_TESTLIB_ZIP=${DROP}/eclipse-test-framework-${EVERSION}.zip
 
-# EXPORT: directory holding various otre jar files:
-OTRE_LIB=${BASEDIR}/lib
-
 # EXPORT: where to find previously published plugins&features:
 PUBLISHED_UPDATES=${HOME}/downloads/objectteams/updates/0.7
