@@ -54,6 +54,7 @@ zip ${STAGINGBASE}/in/otdt.zip ${JARS}
 if [ "$2" == "-nosign" ]
 then
     echo "SKIPING SIGNING"
+    /bin/mv ${STAGINGBASE}/in/otdt.zip ${STAGINGBASE}/out/otdt.zip
     shift
 else
     /bin/rm ${STAGINGBASE}/out/otdt.zip
