@@ -113,6 +113,10 @@ public void complainIfUnusedExceptionHandlers(AbstractMethodDeclaration method) 
 					continue nextHandledException;
 				}
 			}
+//{ObjectTeams: don't complain in callin wrapper, which declares all exceptions of its base, but role doesn't need to use this
+			if (method.isMappingWrapper._callin())
+				continue;
+// SH}
 			scope.problemReporter().unusedDeclaredThrownException(
 				this.handledExceptions[index],
 				method,
