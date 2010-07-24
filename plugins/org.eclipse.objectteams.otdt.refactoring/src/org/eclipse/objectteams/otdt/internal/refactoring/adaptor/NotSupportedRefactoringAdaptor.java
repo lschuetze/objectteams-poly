@@ -29,7 +29,7 @@ import base org.eclipse.jdt.internal.corext.refactoring.structure.IntroduceParam
  * 
  */
 @SuppressWarnings("restriction")
-public team class NotSuppoertedRefactoringAdaptor {
+public team class NotSupportedRefactoringAdaptor {
 	
 	protected class IntroduceIndirectionRefactoring playedBy IntroduceIndirectionRefactoring {
 		
@@ -90,7 +90,7 @@ public team class NotSuppoertedRefactoringAdaptor {
 
 	 protected class ChangeSignatureProcessor playedBy ChangeSignatureProcessor {
 		@SuppressWarnings("decapsulation")
-		IMethod getFMethod() -> get IMethod fMethod;
+		protected IMethod getFMethod() -> get IMethod fMethod;
 
 		protected void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) when(!status.hasFatalError()) {
 			status.merge(RefactoringUtil.checkForExistingRoles("Change Signature", getFMethod().getJavaProject(), pm));
