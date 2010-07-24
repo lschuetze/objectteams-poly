@@ -53,21 +53,22 @@ public class MethodMappingResolver
 	/** Index is the methods name+signature */
 	private Map<String, List<CalloutMappingDeclaration>> _foundRoleMethods
 							= new HashMap<String, List<CalloutMappingDeclaration>>();
-
+	boolean resolveBaseMethods;
 
 	/**
 	 * @param role
 	 */
-	public MethodMappingResolver(RoleModel role)
+	public MethodMappingResolver(RoleModel role, boolean resolveBaseMethods)
 	{
 		this._role      = role;
 		this._roleScope = role.getAst().scope; // we definitely have an AST here
+		this.resolveBaseMethods = resolveBaseMethods;
 	}
 
 	/**
 	 * Main entry for STATE_MAPPINGS_RESOLVED
 	 */
-	public boolean resolve(boolean resolveBaseMethods)
+	public boolean resolve(boolean doCallout)
 	{
 		AbstractMethodMappingDeclaration[] methodMappings =
 			this._role.getAst().callinCallouts;
@@ -81,10 +82,12 @@ public class MethodMappingResolver
 		for (int idx = 0; idx < methodMappings.length; idx++)
 		{
 			AbstractMethodMappingDeclaration methodMapping = methodMappings[idx];
+			if (methodMapping.isCallout() != doCallout)
+				continue;
 			if (this._role.getBinding().baseclass() == null && !this._role.hasBaseclassProblem()) {
 				this._roleScope.problemReporter().methodMappingNotInBoundRole(methodMapping, this._role.getAst());
 				methodMapping.tagAsHavingErrors();
-				resolveBaseMethods = false;
+				this.resolveBaseMethods = false;
 			}
 
 			methodMapping.resolveAnnotations();
@@ -95,12 +98,12 @@ public class MethodMappingResolver
 					this._roleScope.problemReporter().calloutToEnclosing((CalloutMappingDeclaration)methodMapping, this._role);
 					result = false;
 				} else {
-					result &= resolveCalloutMapping((CalloutMappingDeclaration) methodMapping, resolveBaseMethods);
+					result &= resolveCalloutMapping((CalloutMappingDeclaration) methodMapping);
 				}
 			}
 			else // callin:
 			{
-				result &= resolveCallinMapping((CallinMappingDeclaration) methodMapping, resolveBaseMethods);
+				result &= resolveCallinMapping((CallinMappingDeclaration) methodMapping);
 			}
 
 		}
@@ -119,11 +122,10 @@ public class MethodMappingResolver
      * Reports as many errors as can be found.
      * @return true if no error occurred
      */
-    private boolean resolveCallinMapping(CallinMappingDeclaration callinMappingDeclaration,
-    								     boolean resolveBaseMethods)
+    private boolean resolveCallinMapping(CallinMappingDeclaration callinMappingDeclaration)
     {
 		// main resolving task:
-		callinMappingDeclaration.resolveMethodSpecs(this._role, this._role.getBaseTypeBinding(), resolveBaseMethods);
+		callinMappingDeclaration.resolveMethodSpecs(this._role, this._role.getBaseTypeBinding(), this.resolveBaseMethods);
 
 		callinMappingDeclaration.binding._roleMethodBinding = callinMappingDeclaration.getRoleMethod();
 
@@ -135,7 +137,7 @@ public class MethodMappingResolver
      * Reports as many errors as can be found.
      * @return true if no error occurred
      */
-    private boolean resolveCalloutMapping(CalloutMappingDeclaration calloutMappingDeclaration, boolean resolveBaseMethod)
+    private boolean resolveCalloutMapping(CalloutMappingDeclaration calloutMappingDeclaration)
 	{
 		if (calloutMappingDeclaration.scope == null) { // severe error
 			assert calloutMappingDeclaration.hasErrors();
@@ -146,13 +148,13 @@ public class MethodMappingResolver
 		// A callout-with-signatures should always resolve its base method,
 		// because that base method could determine the static flag.
 		calloutMappingDeclaration.resolveMethodSpecs(this._role,this._role.getBaseTypeBinding(),
-													 resolveBaseMethod||calloutMappingDeclaration.hasSignature);
+													 this.resolveBaseMethods||calloutMappingDeclaration.hasSignature);
 
 //		This binding is part of the interface part of a role:
 		MethodBinding roleMethodBinding = calloutMappingDeclaration.roleMethodSpec.resolvedMethod;
 
 		calloutMappingDeclaration.binding._roleMethodBinding = roleMethodBinding;
-		if (resolveBaseMethod) {
+		if (this.resolveBaseMethods) {
 			if (   calloutMappingDeclaration.baseMethodSpec != null
 				&& calloutMappingDeclaration.baseMethodSpec.resolvedMethod != null)
 			{

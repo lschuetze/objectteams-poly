@@ -1644,8 +1644,10 @@ public class Dependencies implements ITranslationStates {
 		StandardElementGenerator.createGetBaseForUnboundLowerable(clazz);
         
 		// 6. resolve method mappings and create callout methods:
-		resolveMethodMappings(clazz);
+		MethodMappingResolver resolver = resolveCalloutMappings(clazz);
 		CalloutImplementor.transformCallouts(clazz);
+		if (resolver != null)
+			resolver.resolve(false/*doCallout*/); // callins last so all methods incl. callout are already in place
 
         clazz.setState(STATE_METHODS_CREATED);
         return true;
@@ -1730,7 +1732,7 @@ public class Dependencies implements ITranslationStates {
 	}
 
 	// detail of STATE_METHODS_CREATED:
-	private static void resolveMethodMappings(RoleModel role) 
+	private static MethodMappingResolver resolveCalloutMappings(RoleModel role) 
 	{
 		ReferenceBinding roleBinding = role.getBinding();
 
@@ -1761,9 +1763,11 @@ public class Dependencies implements ITranslationStates {
 			
 			// actually need to proceed even with no base class, because
 			// method mappings without baseclass are reported within resolve() below:
-			MethodMappingResolver resolver = new MethodMappingResolver(role);
-			resolver.resolve(!hasBaseclassProblem && needMethodBodies(roleDecl));
+			MethodMappingResolver resolver = new MethodMappingResolver(role, !hasBaseclassProblem && needMethodBodies(roleDecl));
+			resolver.resolve(true/*doCallout*/);
+			return resolver; // pass this resolver so establishMethodsCreated can continue with resolving callins
 		}
+		return null;
 	}
 
 

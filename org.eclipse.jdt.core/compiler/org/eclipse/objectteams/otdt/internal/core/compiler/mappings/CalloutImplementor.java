@@ -374,7 +374,7 @@ public class CalloutImplementor extends MethodMappingImplementor
     	if (calloutBindingDeclaration.binding.inferred == InferenceKind.NONE) { // don't advertise inferred callout via the interface.
     		if (templateBinding.isStatic())		 // no real ifc part for static method, fake it! 
 	    		createInterfaceFakeStatic(templateBinding, calloutBindingDeclaration);
-    		else if (!overridesExplicitNonRole)  // also no ifc part for method from explicit non-role super
+    		else if (((modifiers & AccPrivate) == 0) && !overridesExplicitNonRole)  // also no ifc part for privates and methods from explicit non-role super
 			    createAbstractRoleMethodDeclarationPart(templateBinding,
 				    calloutBindingDeclaration,
 				    modifiers,
@@ -458,10 +458,13 @@ public class CalloutImplementor extends MethodMappingImplementor
 		}
 		else // == CLASS
 		{
-			if (calloutBindingDeclaration.binding.inferred == InferenceKind.NONE) { // only if actually advertised in the ifc-part
+			if ((modifiers & AccPrivate) != 0) { // don't advertize in ifc
+				// FIXME(SH): need to generate bridge methdods?
+			} else if (calloutBindingDeclaration.binding.inferred == InferenceKind.NONE) { // only if actually advertised in the ifc-part
 				// generated callout method must be public in the classPart.
 				// access control is done only via the interface part.
-				newMethod.modifiers &= ~(AccProtected | AccPrivate);
+				MethodModel.getModel(newMethod).storeModifiers(newMethod.modifiers);
+				newMethod.modifiers &= ~(AccProtected);
 				newMethod.modifiers |= AccPublic;
 			}
 			// abstract will be cleared once we are done.
