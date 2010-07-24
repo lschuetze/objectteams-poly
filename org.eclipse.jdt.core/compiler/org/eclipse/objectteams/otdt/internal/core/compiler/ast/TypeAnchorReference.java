@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
@@ -482,6 +483,9 @@ public class TypeAnchorReference extends TypeReference {
 			if (currentParam == null) {
 				scope.problemReporter().typeHasNoValueParamAt(typeReference, refBinding, typeParamPosition);
 				return null;
+			}
+			if (currentParam.type instanceof UnresolvedReferenceBinding) {
+				currentParam.type = ((UnresolvedReferenceBinding)currentParam.type).resolve(scope.environment(), false);
 			}
 			if (currentParam.isValidBinding() && !anchorBinding.isTypeCompatibleWith((ReferenceBinding)currentParam.type))
 			{
