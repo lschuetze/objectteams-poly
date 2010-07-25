@@ -107,13 +107,15 @@ public class MethodMappingResolver
 			}
 
 		}
-		// check for double method mappings
-		for (Iterator<String> iter = this._foundRoleMethods.keySet().iterator(); iter.hasNext();)
-		{
-			String roleMethodKey = iter.next();
-			result &= checkForDuplicateMethodMappings(roleMethodKey);
+		if (doCallout) {
+			// check for double callout mappings
+			for (Iterator<String> iter = this._foundRoleMethods.keySet().iterator(); iter.hasNext();)
+			{
+				String roleMethodKey = iter.next();
+				result &= checkForDuplicateMethodMappings(roleMethodKey);
+			}
 		}
-
+		
 		return result;
 	}
 
