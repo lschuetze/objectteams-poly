@@ -4034,7 +4034,10 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 	}
 	if (   typeIsBogus
 		&& CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, method.selector))
+	{
+		this.referenceContext.tagAsHavingErrors(); // avoid generating bogus code
 		return; // silently
+	}
 //SH}
 
 	this.handle(

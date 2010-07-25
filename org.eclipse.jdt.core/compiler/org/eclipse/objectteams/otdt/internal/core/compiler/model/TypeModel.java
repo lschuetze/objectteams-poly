@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -523,6 +524,12 @@ public class TypeModel extends ModelElement {
 
 	public static boolean isConverted(ReferenceBinding declaringClass) {
 		TypeDeclaration result;
+		if (declaringClass instanceof SourceTypeBinding) {
+			Scope scope = ((SourceTypeBinding) declaringClass).scope;
+			if (scope != null && scope.referenceType() != null)
+				return scope.referenceType().isConverted;
+		}
+		// TODO(SH): the rest of this method is probably obsoleted the above
 		if (declaringClass.isRole()) {
 			RoleModel roleModel = declaringClass.roleModel;
 			if (roleModel != null) {

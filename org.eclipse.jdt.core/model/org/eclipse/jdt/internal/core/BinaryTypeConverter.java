@@ -338,7 +338,7 @@ public class BinaryTypeConverter extends TypeConverter {
 				typeDeclaration.memberTypes[i] = alreadyComputedMemberDeclaration;
 			} else {
 				typeDeclaration.memberTypes[i] = convert(memberTypes[i], null, null);
-//{ObjectTeams: bugfix:
+//{ObjectTeams: fix for  Bug 320841 -  TypeConverters don't set enclosingType
                 typeDeclaration.memberTypes[i].enclosingType = typeDeclaration;
 // SH}
 			}

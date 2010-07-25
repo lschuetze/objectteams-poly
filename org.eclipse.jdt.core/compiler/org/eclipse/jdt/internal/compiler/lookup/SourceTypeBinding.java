@@ -2274,7 +2274,15 @@ public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, 
 //	    scope.connectTypeVariables(methodDeclaration.typeParameters(), true);
 	    if (   StateMemento.hasMethodResolveStarted(this)
 	    	&& methodDeclaration.binding.isValidBinding())
+	    {
+	    	// manually detect overriding, if we're past the MethodVerifier:
+	    	if (StateHelper.hasState(this, ITranslationStates.STATE_METHODS_VERIFIED))
+	    		if (methodBinding != null && methodBinding.isValidBinding() && methodBinding.declaringClass != this)
+	    			methodDeclaration.binding.modifiers |= methodBinding.declaringClass.isInterface() 
+									    					? ExtraCompilerModifiers.AccImplementing 
+									    					: ExtraCompilerModifiers.AccOverriding;
 	        methodDeclaration.resolve(this.scope);
+	    }
     } finally {
     	if (cp != null)
     		// type already had errors, roll back errors in generated methods

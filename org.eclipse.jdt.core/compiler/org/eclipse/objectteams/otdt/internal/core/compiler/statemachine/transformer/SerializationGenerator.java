@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
@@ -83,7 +84,7 @@ public class SerializationGenerator {
 				TypeBinding.VOID, 
 				RESTORE_ROLE, 
 				new Argument[] {
-					gen.argument(CLASS_ARG_NAME, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_CLASS)),
+					gen.argument(CLASS_ARG_NAME, gen.parameterizedQualifiedTypeReference(TypeConstants.JAVA_LANG_CLASS, new TypeReference[]{gen.wildcard(Wildcard.UNBOUND)})),
 					gen.argument(ROLE_ARG_NAME, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT))
 				});
 		if (superIsTeam)

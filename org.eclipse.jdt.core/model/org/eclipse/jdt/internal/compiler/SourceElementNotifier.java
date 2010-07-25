@@ -885,8 +885,16 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
   :giro */
 			typeInfo.modifiers = deprecated ? (currentModifiers & ExtraCompilerModifiers.AccOTTypeJustFlag) | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccOTTypeJustFlag;
 			typeInfo.name = typeDeclaration.name;
-			if (CharOperation.prefixEquals(IOTConstants.OT_DELIM_NAME, typeInfo.name))
+			// existing __OT__ prefix and special treatment for o.o.Team.Confined:
+			if (CharOperation.prefixEquals(IOTConstants.OT_DELIM_NAME, typeInfo.name)) {
 				typeInfo.name = CharOperation.subarray(typeInfo.name, IOTConstants.OT_DELIM_LEN, -1);
+				if (CharOperation.equals(IOTConstants.CONFINED, typeInfo.name) && CharOperation.equals(new char[][]{IOTConstants.CONFINED}, interfaceNames)) {
+					// avoid Confined implements Confined (revert manual role splitting)
+					superclassName = null;
+					interfaceNames = null;
+				}
+				// filtering interface o.o.T.Confined is already done at the call site.
+			}
 // SH}
 			typeInfo.nameSourceStart = isEnumInit ? typeDeclaration.allocation.enumConstant.sourceStart : typeDeclaration.sourceStart;
 			typeInfo.nameSourceEnd = sourceEnd(typeDeclaration);
@@ -997,6 +1005,11 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 				break;
 			case 2 :
 				memberTypeIndex++;
+//{ObjectTeams: don't convert interface o.o.T.Confined:
+				if (   currentPackage != null && CharOperation.equals(IOTConstants.ORG_OBJECTTEAMS, currentPackage.tokens)
+					&& CharOperation.equals(IOTConstants.TEAM, typeDeclaration.name)
+					&& CharOperation.equals(IOTConstants.CONFINED, nextMemberDeclaration.name))
+					break;
 				notifySourceElementRequestor(nextMemberDeclaration, true, null, currentPackage);
 //{ObjectTeams:
 				break;

@@ -593,8 +593,7 @@ public class SourceTypeConverter extends TypeConverter {
 			type.memberTypes = new TypeDeclaration[sourceMemberTypeCount];
 			for (int i = 0; i < sourceMemberTypeCount; i++) {
 				type.memberTypes[i] = convert(sourceMemberTypes[i], compilationResult);
-//{ObjectTeams: bugfix!
-//TODO (carp,SH): who needs this?
+//{ObjectTeams: fix for  Bug 320841 -  TypeConverters don't set enclosingType
                 type.memberTypes[i].enclosingType = type;
 // SH}
 			}
