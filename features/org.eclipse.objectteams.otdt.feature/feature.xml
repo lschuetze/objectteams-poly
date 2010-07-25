@@ -64,7 +64,7 @@ Project Leader:
 
    <includes
          id="org.eclipse.objectteams.otdt.core.patch"
-         version="0.7.0.qualifier"/>
+         version="0.7.1.qualifier"/>
 
    <requires>
       <import plugin="org.eclipse.core.resources"/>
