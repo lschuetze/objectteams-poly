@@ -208,7 +208,9 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 
     public IResource getCorrespondingResource() throws JavaModelException
     {
-        return _correspondingJavaElem.getCorrespondingResource();
+    	// see SourceRefElement
+    	if (!exists()) throw newNotPresentException();
+    	return null;
     }
 
     public String getHandleIdentifier()
