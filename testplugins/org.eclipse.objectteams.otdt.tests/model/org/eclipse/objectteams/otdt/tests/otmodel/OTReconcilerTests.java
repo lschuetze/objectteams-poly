@@ -36,6 +36,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -916,6 +917,108 @@ public class OTReconcilerTests extends ReconcilerTests {
 			this.problemRequestor.initialize(sourceChars);
 			
 			getCompilationUnit("/P/MySubTeam.java").getWorkingCopy(this.wcOwner, null);
+			
+			assertProblems(
+				"Unexpected problems",
+				"----------\n" +
+				"----------\n");
+
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
+	
+    // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files
+    //   should report as error
+    public void testNLSinRoFi1() throws CoreException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+			this.createFolder("/P/MyTeam");
+			String roleSourceString =	
+				"team package MyTeam;\n" +
+				"public class Role {\n" +
+				"	void foo() {\n" +
+				"		String val= \"OK\";\n" +
+				"	}\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam/Role.java",
+	    			roleSourceString);
+			
+			String teamSourceString =
+				"public team class  MyTeam {\n" +
+				"	Role r;\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam.java",
+	    			teamSourceString);
+
+			char[] roleSourceChars = roleSourceString.toCharArray();
+			this.problemRequestor.initialize(roleSourceChars);
+			
+			getCompilationUnit("/P/MyTeam/Role.java").getWorkingCopy(this.wcOwner, null);
+			
+			assertProblems(
+				"Unexpected problems",
+				"----------\n" + 
+				"1. ERROR in /P/MyTeam/Role.java (at line 4)\n" + 
+				"	String val= \"OK\";\n" + 
+				"	            ^^^^\n" + 
+				"Non-externalized string literal; it should be followed by //$NON-NLS-<n>$\n" + 
+				"----------\n");
+
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
+    
+    // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files
+    //   using $NON-NLS-<n>$
+    public void testNLSinRoFi2() throws CoreException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+			this.createFolder("/P/MyTeam");
+			String roleSourceString =	
+				"team package MyTeam;\n" +
+				"public class Role {\n" +
+				"	void foo() {\n" +
+				"		String val= \"OK\"; //$NON-NLS-1$\n" +
+				"	}\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam/Role.java",
+	    			roleSourceString);
+			
+			String teamSourceString =
+				"public team class  MyTeam {\n" +
+				"	Role r;\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam.java",
+	    			teamSourceString);
+
+			char[] roleSourceChars = roleSourceString.toCharArray();
+			this.problemRequestor.initialize(roleSourceChars);
+			
+			getCompilationUnit("/P/MyTeam/Role.java").getWorkingCopy(this.wcOwner, null);
 			
 			assertProblems(
 				"Unexpected problems",
