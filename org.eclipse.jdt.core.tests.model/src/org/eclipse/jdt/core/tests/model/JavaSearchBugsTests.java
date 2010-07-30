@@ -32,6 +32,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.*;
@@ -10968,6 +10970,7 @@ public void testBug286379c() throws CoreException {
 	System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
 	System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
 	System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+	printPreference();
 	
 	IContentType javaContentType = Platform.getContentTypeManager().getContentType(JavaCore.JAVA_SOURCE_CONTENT_TYPE);
 	TestResourceChangeListener changeListener = new TestResourceChangeListener();
@@ -11015,6 +11018,7 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		printPreference();
 		// Restart to let the indexes to be refreshed
 		simulateExit();
 		simulateRestart();
@@ -11023,6 +11027,7 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		printPreference();
 		waitUntilIndexesReady();
 
 		// Search for the new type with new extension
@@ -11047,6 +11052,7 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		printPreference();
 		// Restarting should update the index file to remove the references of any .torem files
 		simulateExit();
 		simulateRestart();	
@@ -11055,6 +11061,7 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		printPreference();
 		waitUntilIndexesReady();
 
 		// Search for the new type with new extension
@@ -11071,6 +11078,7 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		printPreference();
 	} finally {
 		getWorkspace().removeResourceChangeListener(changeListener);
 		if (javaContentType != null)
@@ -11080,8 +11088,16 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		printPreference();
 		System.out.println("================================================================================");
 	}
+}
+private void printPreference() {
+	IPreferencesService service;
+	IEclipsePreferences[] lookups;
+	service = Platform.getPreferencesService();
+	lookups = new IEclipsePreferences[] { JavaModelManager.getJavaModelManager().getInstancePreferences(), JavaModelManager.getJavaModelManager().getDefaultPreferences()};
+	System.out.println("       + Task tags from preferences: "+service.get(JavaCore.COMPILER_TASK_TAGS, null, lookups));
 }
 
 /**
