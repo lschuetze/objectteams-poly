@@ -647,6 +647,7 @@ public void resolve() {
 /* orig:
 		if (!this.compilationResult.hasErrors()) checkUnusedImports();
   :giro */
+	  if (!isRoleUnit())
 // SH}
 		reportNLSProblems();
 	} catch (AbortCompilationUnit e) {

@@ -1604,7 +1604,7 @@ public void resolve() {
 	// signaling:
 	StateHelper.startProcessing(this, ITranslationStates.STATE_RESOLVED, 0);
 	// warnings in ROFI:
-	if (isRoleFile() && !this.isGenerated)
+	if (isRoleFile() && isSourceRole())
 		this.compilationUnit.reportNLSProblems();
 // SH}
 	SourceTypeBinding sourceType = this.binding;
