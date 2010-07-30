@@ -280,6 +280,14 @@ public team class ViewAdaptor extends JFaceDecapsulator
 
 		static callin void getElementLabel(IJavaElement element, long flags, StringBuffer buf) 
 		{
+			if (element instanceof IMethodMapping) {
+				// base method only uses elementName(), may need to prepend qualification:
+				if (getFlag(flags, M_FULLY_QUALIFIED)) {
+					new org.eclipse.jdt.internal.ui.viewsupport.JavaElementLabelComposer(buf)
+						.appendTypeLabel(((IMethodMapping)element).getDeclaringType(), T_FULLY_QUALIFIED | (flags & QUALIFIER_FLAGS));
+					buf.append('.');
+				}				
+			}
 			base.getElementLabel(element, flags, buf);
 			
 			if (element instanceof IMethodMapping) {
