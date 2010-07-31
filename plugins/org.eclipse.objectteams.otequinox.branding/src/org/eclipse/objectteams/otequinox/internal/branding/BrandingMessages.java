@@ -29,5 +29,6 @@ public class BrandingMessages extends NLS {
 	}
 
 	private BrandingMessages() {
+		// don't instantiate
 	}
 }
