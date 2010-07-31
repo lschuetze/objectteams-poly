@@ -31,11 +31,14 @@ public class ActionMessages extends NLS {
 	public static String ChangeTeamActivationAction_error_title;
 	public static String ChangeTeamActivationAction_error_exception;
 	public static String ChangeTeamActivationAction_error_no_thread_suspended;
+	public static String UpdateTeamViewAction_permanently_update_description;
+	public static String UpdateTeamViewAction_permanently_update_tooltip;
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, ActionMessages.class);
 	}
 
 	private ActionMessages() {
+		// don't instantiate
 	}
 }

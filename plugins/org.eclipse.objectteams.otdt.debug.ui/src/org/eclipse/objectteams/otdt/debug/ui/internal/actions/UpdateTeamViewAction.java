@@ -31,9 +31,9 @@ public class UpdateTeamViewAction extends Action
 
 	public UpdateTeamViewAction(TeamView teamView)
 	{
-		super("", AS_CHECK_BOX);
-		setToolTipText("Permanently update Team Monitor");
-		setDescription("Shows teams and their activation state while the application is running.");
+		super("", AS_CHECK_BOX); //$NON-NLS-1$
+		setToolTipText(ActionMessages.UpdateTeamViewAction_permanently_update_tooltip);
+		setDescription(ActionMessages.UpdateTeamViewAction_permanently_update_description);
 		setImageDescriptor(OTDebugImages.get(OTDebugImages.UPDATE_TEAM_VIEW_ACTION));
 		_teamView = teamView;
 	}
