@@ -167,7 +167,7 @@ public team class PackageExplorerAdaptor
 		void refreshAspectBindings(IResourceChangeEvent event) {
 			IResourceDelta delta = event.getDelta();
 			if (delta != null)
-				delta = delta.findMember(this.javaProject.getPath().append("plugin.xml"));
+				delta = delta.findMember(this.javaProject.getPath().append("plugin.xml")); //$NON-NLS-1$
 			if (delta != null) {
 				if (this.viewer == null || this.viewer.getControl().isDisposed() || !this.javaProject.isOpen()) {
 					ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
@@ -197,7 +197,7 @@ public team class PackageExplorerAdaptor
 		/* Aspect bindings are not yet present, wait for an event that could signal addition of aspect bindings. */
 		void detectPluginXmlChanges(IResourceDelta delta) {
 			if (delta != null)
-				delta = delta.findMember(this.javaProject.getPath().append("plugin.xml"));
+				delta = delta.findMember(this.javaProject.getPath().append("plugin.xml")); //$NON-NLS-1$
 			if (delta != null) {
 				// this listener is done:
 				ResourcesPlugin.getWorkspace().removeResourceChangeListener(this);
@@ -311,7 +311,7 @@ public team class PackageExplorerAdaptor
 		@SuppressWarnings("decapsulation")
 		boolean checkEnabled(IStructuredSelection selection) <- replace boolean checkEnabled(IStructuredSelection selection);
 
-		@SuppressWarnings("unchecked") // selection.iterator() is raw type
+		@SuppressWarnings("rawtypes") // selection.iterator() is raw type
 		callin boolean checkEnabled(IStructuredSelection selection) {
 			if (base.checkEnabled(selection))
 				return true;
@@ -381,7 +381,7 @@ public team class PackageExplorerAdaptor
 
 		// this callin filters applicable base objects
 		void register(String tag) <- after void setXMLTagName(String tag)
-			base when ("basePlugin".equals(tag));
+			base when ("basePlugin".equals(tag)); //$NON-NLS-1$
 
 		private void register(String tag) {
 			// nop, just registered this role
@@ -392,7 +392,7 @@ public team class PackageExplorerAdaptor
 			base when (hasRole(base, BasePluginNodeInterceptor.class));
 		
 		void setXMLAttribute(IDocumentAttributeNode attribute) {
-			if ("id".equals(attribute.getAttributeName()))
+			if ("id".equals(attribute.getAttributeName())) //$NON-NLS-1$
 				this.basePluginName = attribute.getAttributeValue();
 		}
 	}

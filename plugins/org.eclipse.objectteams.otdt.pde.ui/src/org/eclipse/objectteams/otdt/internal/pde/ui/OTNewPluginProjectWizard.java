@@ -75,7 +75,7 @@ public class OTNewPluginProjectWizard extends NewPluginProjectWizard {
 									  OTPDEUIMessages.OTNewPluginProjectWizard_ProjectCreationError, 
 									  OTPDEUIMessages.OTNewPluginProjectWizard_CantAddOTSpecifics, 
 									  ex.getStatus());
-				OTPDEUIPlugin.getDefault().getLog().log(OTPDEUIPlugin.createErrorStatus("Project creation error", ex));
+				OTPDEUIPlugin.getDefault().getLog().log(OTPDEUIPlugin.createErrorStatus("Project creation error", ex)); //$NON-NLS-1$
 			}
 		}
 		else

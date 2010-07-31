@@ -97,7 +97,7 @@ public class ToggleOTSupportAction implements IObjectActionDelegate {
 		}
 		catch (CoreException e) {
 			ErrorDialog.openError(shell, "Project Configuration Error", "Error Configuring Project " + project.getName() + ".", e.getStatus());
-			OTPDEUIPlugin.getDefault().getLog().log(OTPDEUIPlugin.createErrorStatus("Project configuration error", e));
+			OTPDEUIPlugin.getDefault().getLog().log(OTPDEUIPlugin.createErrorStatus("Project configuration error", e)); //$NON-NLS-1$
 		}
 	}
 

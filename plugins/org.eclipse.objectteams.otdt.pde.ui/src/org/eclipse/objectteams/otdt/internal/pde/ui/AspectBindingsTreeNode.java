@@ -49,7 +49,7 @@ public abstract class AspectBindingsTreeNode {
 		}
 		@Override
 		public String toString() {
-			return "~"+ASPECT_BINDINGS_NAME; // prepend "~" to make sorting a bit more deterministic, should we encounter CUDs at toplevel
+			return "~"+ASPECT_BINDINGS_NAME; // prepend "~" to make sorting a bit more deterministic, should we encounter CUDs at toplevel //$NON-NLS-1$
 		}
 	}
 	
@@ -68,7 +68,7 @@ public abstract class AspectBindingsTreeNode {
 			for (IPluginObject child : element.getChildren()) {
 				if (child instanceof PluginElement) {
 					if (Constants.BASE_PLUGIN.equals(child.getName())) {
-						this.basePlugin = ((PluginElement)child).getAttribute("id").getValue();
+						this.basePlugin = ((PluginElement)child).getAttribute("id").getValue(); //$NON-NLS-1$
 						for (IPluginObject subChild : ((PluginElement)child).getChildren())
 							if (Constants.FORCED_EXPORTS_ELEMENT.equals(((PluginElement)subChild).getName()))
 								this.hasForcedExports = true;
@@ -95,11 +95,11 @@ public abstract class AspectBindingsTreeNode {
 				if (child instanceof PluginElement)
 					if (Constants.TEAM.equals(child.getName()))
 						teams.add(new TeamNode(this.javaProject, 
-											   ((PluginElement)child).getAttribute("class").getValue()));
+											   ((PluginElement)child).getAttribute("class").getValue())); //$NON-NLS-1$
 			return this.teams = teams.toArray();
 		}
 		protected Object getPluginXml() {
-			return this.javaProject.getProject().findMember("plugin.xml");
+			return this.javaProject.getProject().findMember("plugin.xml"); //$NON-NLS-1$
 		}
 	}
 	/**
@@ -120,7 +120,7 @@ public abstract class AspectBindingsTreeNode {
 				return this.javaProject.findType(this.teamName);
 			} catch (JavaModelException e) {
 				OTPDEUIPlugin.getDefault().getLog().log(
-					OTPDEUIPlugin.createErrorStatus("OpenAction: Cannot resolve team type '"+this.teamName+"'", e));
+					OTPDEUIPlugin.createErrorStatus("OpenAction: Cannot resolve team type '"+this.teamName+"'", e)); //$NON-NLS-1$ //$NON-NLS-2$
 				return null;
 			}
 		}
