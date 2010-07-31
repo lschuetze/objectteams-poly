@@ -251,7 +251,7 @@ public team class SamplesAdapter
 		                    IDE.openEditor(page, (IFile)resource);
 		                }
 		                catch (PartInitException ex)
-		                {} // ignore, user will try to open it manually, then
+		                { /* ignore, user will try to open it manually, then */ } 
 		            }
 		        }
 			}

@@ -34,5 +34,6 @@ public class SampleMessages extends NLS {
 	}
 
 	private SampleMessages() {
+		// don't instantiate
 	}
 }
