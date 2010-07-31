@@ -31,5 +31,6 @@ public class DebugMessages extends NLS {
 	}
 
 	private DebugMessages() {
+		// don't instantiate
 	}
 }

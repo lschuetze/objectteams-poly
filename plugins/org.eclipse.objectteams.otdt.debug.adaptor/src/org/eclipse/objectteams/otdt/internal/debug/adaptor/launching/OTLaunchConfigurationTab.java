@@ -57,7 +57,7 @@ import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
  */
 public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab implements ILaunchConfigurationTab
 {
-	private List<IType> _teamModel = new ArrayList<IType>();
+	private List<IType> _teamsModel = new ArrayList<IType>();
     
     private TeamConfig _teamConfig;
     private IProject _project = null;
@@ -74,11 +74,12 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
         // nothing to do -- empty defaults
     }
 
-    public void initializeFrom(ILaunchConfiguration configuration)
+    @SuppressWarnings("unchecked") // getAttribute(String,List) uses raw type
+	public void initializeFrom(ILaunchConfiguration configuration)
     {
-        _teamModel.clear();
+        _teamsModel.clear();
         
-    	List teamHandles = new LinkedList(); 
+    	List<String> teamHandles = new LinkedList<String>(); 
     	boolean teamsActive = true;
     	try {
 			teamHandles =  configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_LIST, teamHandles);	
@@ -89,8 +90,8 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
 
 		_teamConfig.clearTeamList();
 		List<String> badTeams = new LinkedList<String>();
-		for (Iterator iter = teamHandles.iterator(); iter.hasNext();) {
-			String teamHandle = (String) iter.next();
+		for (Iterator<String> iter = teamHandles.iterator(); iter.hasNext();) {
+			String teamHandle = iter.next();
 			IType type = (IType) JavaCore.create(teamHandle);
 			if (type != null)
 			{
@@ -99,7 +100,7 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
 			        IOTType otType = OTModelManager.getOTElement(type);
 			        if (otType != null)
 			        {
-			            _teamModel.add(otType);
+			            _teamsModel.add(otType);
 			            continue;
 			        }
 			    }
@@ -112,7 +113,7 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
 		reportBadTeams(badTeams);
 		
 		_teamConfig.setActive(teamsActive);
-		_teamConfig.setTeamInput(_teamModel);
+		_teamConfig.setTeamInput(_teamsModel);
 		_teamConfig.checkEnablement();
 		
 		String projectName = getProjectFromConfig(configuration);
@@ -147,8 +148,8 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
         List<String> teamHandles = getTeamModelAsHandles();
 
 		try {
-			if (configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_ACTIVE, true) != this._teamConfig.isActive())
-				configuration.setAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_ACTIVE, this._teamConfig.isActive());
+			if (configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_ACTIVE, true) != this._teamConfig.isTeamConfigActive())
+				configuration.setAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_ACTIVE, this._teamConfig.isTeamConfigActive());
 			if (!configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_LIST, EMPTY_LIST).equals(teamHandles))
 				configuration.setAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_LIST, teamHandles);
 		} catch (CoreException ex) {
@@ -202,9 +203,9 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
 		return _project;
 	}
 	
-	public List<IType> getTeamModel()
+	public List<IType> getTeamsModel()
     {
-        return _teamModel;
+        return _teamsModel;
     }
 
     /**
@@ -215,7 +216,7 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
     private List<String> getTeamModelAsHandles()
     {
         List<String> teamHandles = new LinkedList<String>();
-        for (Iterator<IType> iter = _teamModel.iterator(); iter.hasNext();)
+        for (Iterator<IType> iter = _teamsModel.iterator(); iter.hasNext();)
         {
             IType type = iter.next();
             teamHandles.add(type.getHandleIdentifier());

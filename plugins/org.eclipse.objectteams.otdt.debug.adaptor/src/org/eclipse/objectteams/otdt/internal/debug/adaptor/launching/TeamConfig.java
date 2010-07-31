@@ -95,7 +95,7 @@ public class TeamConfig extends Composite
 		_activeCheckButton.setFont(this.getFont());
 		_activeCheckButton.addSelectionListener(new SelectionListener() {
             public void widgetSelected(SelectionEvent e) {
-            	boolean active = isActive();	
+            	boolean active = isTeamConfigActive();	
             	_teamList.getControl().setEnabled(active);
             	_otLaunchConfigTab.setModified();
             }
@@ -126,8 +126,8 @@ public class TeamConfig extends Composite
                 return null;
             }
 
-            public void dispose() {}
-            public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {}
+            public void dispose() {/*empty*/}
+            public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {/*empty*/}
         });
         
         _teamList.addPostSelectionChangedListener(new ISelectionChangedListener() {
@@ -243,7 +243,7 @@ public class TeamConfig extends Composite
     	    if (teamType != null)
     	    {
     	        // TODO (carp): perform further checks (e.g. must have public default constructor)
-				_otLaunchConfigTab.getTeamModel().add(teamType);
+				_otLaunchConfigTab.getTeamsModel().add(teamType);
             	_otLaunchConfigTab.setModified();
 		        checkEnablement();
 		        _teamList.refresh();
@@ -260,12 +260,12 @@ public class TeamConfig extends Composite
     }
     
     public void clearTeamList() {
-        _otLaunchConfigTab.getTeamModel().clear();
+        _otLaunchConfigTab.getTeamsModel().clear();
     	checkEnablement();
         _teamList.refresh();
     }
 
-    public boolean isActive() {
+    public boolean isTeamConfigActive() {
     	return _activeCheckButton.getSelection();
     }
     
@@ -292,13 +292,13 @@ public class TeamConfig extends Composite
 		dialog.addSearchFilter(new ISearchFilter() {
             public IOTType[] filterTypes(IOTType[] types)
             {
-                List teamModel = _otLaunchConfigTab.getTeamModel();
+                List<IType> teamsModel = _otLaunchConfigTab.getTeamsModel();
                 List<IOTType> result = new ArrayList<IOTType>(types.length);
                 for (int i = 0; i < types.length; i++)
                 {
                     IOTType type = types[i];
                     // hide abstract teams and those already in the list
-                    if (!Flags.isAbstract(type.getFlags()) && !teamModel.contains(type))
+                    if (!Flags.isAbstract(type.getFlags()) && !teamsModel.contains(type))
                         result.add(type);
                 }
                 
@@ -318,10 +318,10 @@ public class TeamConfig extends Composite
     private void removeSelected()
     {
         IStructuredSelection selection = (IStructuredSelection)_teamList.getSelection();
-        for (Iterator iterator = selection.iterator(); iterator.hasNext();)
+        for (@SuppressWarnings("rawtypes") Iterator iterator = selection.iterator(); iterator.hasNext();)
         {
             IType selectedType = (IType) iterator.next();
-            _otLaunchConfigTab.getTeamModel().remove(selectedType);
+            _otLaunchConfigTab.getTeamsModel().remove(selectedType);
         }
         _otLaunchConfigTab.setModified();
         checkEnablement();
@@ -347,7 +347,7 @@ public class TeamConfig extends Composite
 
     private void moveSelectedUp()
     {
-        List<IType> teamModel = _otLaunchConfigTab.getTeamModel();
+        List<IType> teamModel = _otLaunchConfigTab.getTeamsModel();
         
         final int currentIndex = getTeamSelectionIndex();
         if (currentIndex > 0) {
@@ -364,10 +364,10 @@ public class TeamConfig extends Composite
 
     private void moveSelectedDown()
     {
-        List<IType> teamModel = _otLaunchConfigTab.getTeamModel();
+        List<IType> teamModel = _otLaunchConfigTab.getTeamsModel();
         
         final int currentIndex = getTeamSelectionIndex();
-        if (currentIndex < _otLaunchConfigTab.getTeamModel().size() - 1) {
+        if (currentIndex < _otLaunchConfigTab.getTeamsModel().size() - 1) {
         	IType currentTeam = teamModel.get(currentIndex);
         	IType belowTeam = teamModel.get(currentIndex + 1);
         	teamModel.set(currentIndex + 1, currentTeam);
@@ -397,7 +397,7 @@ public class TeamConfig extends Composite
 
     private void checkActiveEnablement()
     {
-        boolean enable = !_otLaunchConfigTab.getTeamModel().isEmpty();
+        boolean enable = !_otLaunchConfigTab.getTeamsModel().isEmpty();
         _activeCheckButton.setEnabled(enable);
     }
     
@@ -412,7 +412,7 @@ public class TeamConfig extends Composite
     	    return;
     	}
         
-        final int count = _otLaunchConfigTab.getTeamModel().size();
+        final int count = _otLaunchConfigTab.getTeamsModel().size();
         boolean canMove = count >= 2;
 
         if (index == 0)
@@ -434,7 +434,7 @@ public class TeamConfig extends Composite
 
     private int getTeamIndex(Object element)
     {
-        return _otLaunchConfigTab.getTeamModel().indexOf(element);
+        return _otLaunchConfigTab.getTeamsModel().indexOf(element);
     }
     
     private int getTeamSelectionIndex()
@@ -446,7 +446,7 @@ public class TeamConfig extends Composite
         return getTeamIndex(selection.getFirstElement());
     }
 
-    public void setTeamInput(List teamModel)
+    public void setTeamInput(List<IType> teamModel)
     {
         _teamList.setInput(teamModel);
     }
