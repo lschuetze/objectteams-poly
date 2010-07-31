@@ -395,6 +395,7 @@ public class CallinMappingConfiguration extends Group
         _paraListViewer.refresh();
     }
     
+	@SuppressWarnings("unchecked") // DOM list _callin.getParameterMappings()
     protected void updateParameterMapping(String identifier, String expr)
     {
         ParameterMapping paraMap = null;

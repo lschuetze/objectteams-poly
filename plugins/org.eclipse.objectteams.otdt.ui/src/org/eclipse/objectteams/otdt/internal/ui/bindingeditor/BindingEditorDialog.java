@@ -194,7 +194,8 @@ public class BindingEditorDialog extends Dialog
             
             // tell the ASTConverter to include contained role files.
             // Note, that currently these role files cannot be modified by the binding editor (Trac #93).
-            HashMap<String, String> options= new HashMap<String, String>(JavaCore.getOptions());
+            @SuppressWarnings("unchecked")
+			HashMap<String, String> options= new HashMap<String, String>(JavaCore.getOptions());
             options.put(JavaCore.AST_INCLUDES_ROLE_FILES, JavaCore.ENABLED);
             parser.setCompilerOptions(options);
             

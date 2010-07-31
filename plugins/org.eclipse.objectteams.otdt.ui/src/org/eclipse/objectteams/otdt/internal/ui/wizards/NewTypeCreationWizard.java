@@ -103,6 +103,7 @@ public abstract class NewTypeCreationWizard  extends NewElementWizard
 	}
 	
 	
+	@SuppressWarnings("unchecked") // raw list page.getSuperInterfaces()
 	protected TypeInfo setTypeData(TypeCreator creator)
 	{
 	    NewTypeWizardPage page = getPage();	    
