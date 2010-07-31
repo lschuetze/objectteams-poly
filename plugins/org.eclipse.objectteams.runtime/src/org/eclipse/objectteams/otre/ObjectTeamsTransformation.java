@@ -893,11 +893,16 @@ public abstract class ObjectTeamsTransformation
 						i = scanStrings(names, indizes, i, cpg);
 						String role_name = names[0];
 						String base_name = names[1];
+						boolean baseIsInterface = false;
+						if (base_name.charAt(0) == '^') {
+							baseIsInterface = true;
+							base_name = base_name.substring(1);
+						}
                         if(logging) printLogMessage("**** Binding: " + role_name 
                                                     + " playedBy " + base_name);
 
                         //set binding:
-                        CallinBindingManager.addRoleBaseBinding(role_name, base_name, class_name);
+                        CallinBindingManager.addRoleBaseBinding(role_name, base_name, baseIsInterface, class_name);
                         CallinBindingManager.addTeamBaseRelation(class_name, base_name);
                         
                 		// [OT/Equinox] store adapted bases:

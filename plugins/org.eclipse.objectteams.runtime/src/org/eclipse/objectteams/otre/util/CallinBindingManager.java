@@ -111,11 +111,12 @@ public class CallinBindingManager {
 	 *
      * @param roleClassName		the name of the played role class
      * @param baseClassName		the name of the playing base class
+     * @param baseIsInterface   whether the given base is an interface
      */
-    public static void addRoleBaseBinding(String roleClassName, String baseClassName, String teamClassName) {
+    public static void addRoleBaseBinding(String roleClassName, String baseClassName, boolean baseIsInterface, String teamClassName) {
 		RoleBaseBinding rbb = roleBindings.get(roleClassName);
 		if (rbb == null) {
-			rbb = new RoleBaseBinding(roleClassName, baseClassName, teamClassName);
+			rbb = new RoleBaseBinding(roleClassName, baseClassName, baseIsInterface, teamClassName);
 			roleBindings.put(roleClassName, rbb);
 		}
 		addSuperBaseLink(teamClassName, baseClassName, rbb);
@@ -231,7 +232,7 @@ public class CallinBindingManager {
 				throw new OTREInternalError("PlayedBy attribute must be read before method bindings.");
 			int lastDollar = roleClassName.lastIndexOf('$');
 			String teamClassName = roleClassName.substring(0, lastDollar);
-			rbb = new RoleBaseBinding(roleClassName, baseClassName, teamClassName);
+			rbb = new RoleBaseBinding(roleClassName, baseClassName, false, teamClassName);
 			roleBindings.put(roleClassName, rbb);
 		}
 		//System.err.println(rbb.getRoleClass().getName()+"<-*->"+rbb.getBaseClass().getName());
@@ -643,6 +644,24 @@ public class CallinBindingManager {
 		// IMPLICIT_INHERITANCE
 		//if (isUnboundSubBase(baseClassName))
 		//	return true;
+		return false;
+	}
+
+	/**
+	 * @param baseClassName
+	 * @return
+	 */
+	public static boolean boundBaseParentIsIfc(String baseClassName) {
+		LinkedList<RoleBaseBinding> rbbList = baseBindings.get(baseClassName);
+		if (rbbList != null) {
+			Iterator<RoleBaseBinding> it = rbbList.iterator();
+			while (it.hasNext()) {
+				RoleBaseBinding rbb = it.next();
+				BoundClass baseSuper = rbb.getBaseClass().getSuper();
+				if (baseSuper!=null)
+					return baseSuper.isInterface;
+			}
+		}
 		return false;
 	}
 	

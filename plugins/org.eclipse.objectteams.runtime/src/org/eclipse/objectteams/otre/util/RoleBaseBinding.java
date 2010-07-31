@@ -42,11 +42,13 @@ public class RoleBaseBinding {
     /**
      * @param _roleClassName
      * @param _baseClassName
+     * @param baseIsInterface 
      * @param teamClassName
      */
-    public RoleBaseBinding(String _roleClassName, String _baseClassName, String teamClassName) {
+    public RoleBaseBinding(String _roleClassName, String _baseClassName, boolean baseIsInterface, String teamClassName) {
     	roleClass = new BoundClass(_roleClassName, teamClassName);
     	baseClass = CallinBindingManager.getBoundBaseClass(_baseClassName, teamClassName);
+    	baseClass.isInterface = baseIsInterface;
     }
 
     /**

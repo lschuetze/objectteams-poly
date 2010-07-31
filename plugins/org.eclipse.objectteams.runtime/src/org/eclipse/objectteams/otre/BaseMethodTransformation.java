@@ -238,13 +238,21 @@ public class BaseMethodTransformation
 
     	ConstantPoolGen cpg = cg.getConstantPool();
     	factory = new InstructionFactory(cg);
-    	if (CallinBindingManager.isBoundBaseClass(class_name) && !cg.isInterface())  {
+    	if (CallinBindingManager.isBoundBaseClass(class_name)) {
     		// TODO: where to add the role set infrastructure, if only an interface is bound? Implementing classes?
-    		if (cg.containsField(OTConstants.ROLE_SET) == null && !CallinBindingManager.hasBoundBaseParent(class_name)) {
-    			ce.addField(generateRoleSet(cpg, class_name), cg);
-    			ce.addMethod(generateAddRole(cpg, class_name), cg);
-    			ce.addMethod(generateRemoveRole(cpg, class_name), cg);
-    			ce.addImplements(OTConstants.IBOUND_BASE, cg);
+    		if (cg.containsField(OTConstants.ROLE_SET) == null) { // TODO(SH): this doesn't help for interfaces, do we need to check more?
+    			if (!CallinBindingManager.hasBoundBaseParent(class_name)) {
+	    			if (!cg.isInterface())  {
+		    			ce.addField(generateRoleSet(cpg, class_name), cg);
+		    			ce.addMethod(generateAddRole(cpg, class_name), cg);
+		    			ce.addMethod(generateRemoveRole(cpg, class_name), cg);
+	    			}
+	    			ce.addImplements(OTConstants.IBOUND_BASE, cg); // regardless of ifc or class
+    			} else if (!cg.isInterface() && CallinBindingManager.boundBaseParentIsIfc(class_name)) {
+	    			ce.addField(generateRoleSet(cpg, class_name), cg);
+	    			ce.addMethod(generateAddRole(cpg, class_name), cg);
+	    			ce.addMethod(generateRemoveRole(cpg, class_name), cg);    				
+    			}
     		}
     	}
 

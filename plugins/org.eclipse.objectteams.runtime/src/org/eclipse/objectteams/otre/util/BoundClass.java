@@ -29,7 +29,9 @@ public class BoundClass {
 	
 	private BoundClass _super;
 	//private BoundClass _tsuper;
-	private HashSet<String> adaptingTeams = new HashSet<String>(); 
+	private HashSet<String> adaptingTeams = new HashSet<String>();
+
+	public boolean isInterface = false; // currently only for base classes
 
 	public BoundClass(String className, String teamName) {
 		name = className;
