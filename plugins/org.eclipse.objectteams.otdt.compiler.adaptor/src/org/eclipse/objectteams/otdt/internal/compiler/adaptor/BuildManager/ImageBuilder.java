@@ -144,7 +144,7 @@ protected class ImageBuilder playedBy IncrementalImageBuilder
 		if (binaryHasProblem(cResult.problems(), binaryTypeName))
 			return false;
 		
-		String binaryTypeString = packagePath.toString()+"/"+new String(binaryTypeName);
+		String binaryTypeString = packagePath.toString()+'/'+new String(binaryTypeName);
 		if (DEBUG >= 2)
 			System.out.print("candidate for preserving: "+binaryTypeString); //$NON-NLS-1$
 		
@@ -181,12 +181,12 @@ protected class ImageBuilder playedBy IncrementalImageBuilder
 		if (BuildManager.this.staleRoles.contains(binaryTypeString)) {
 			BuildManager.this.staleRoles.remove(binaryTypeString);
 			if (DEBUG >= 2)
-				System.out.println(" NO(changed).");
+				System.out.println(" NO(changed)."); //$NON-NLS-1$
 			return false;
 		}
 		
 		if (DEBUG >= 2)
-			System.out.println(" YES");
+			System.out.println(" YES"); //$NON-NLS-1$
 		return true;		
 	}
 	
@@ -253,16 +253,16 @@ protected class ImageBuilder playedBy IncrementalImageBuilder
 		
 	// ==== LOGGING ====
 	void logCompile(String msg) <- before void compile(SourceFile[] units)
-		with { msg <- "Starting" }
+		with { msg <- "Starting" } //$NON-NLS-1$
 
 	logDone:
 	void logCompile(String msg) <- after void compile(SourceFile[] units)
-		with { msg <- "Done" }
+		with { msg <- "Done" } //$NON-NLS-1$
 
 	void logCompile(String msg)
 		when (DEBUG > 0)
 	{
-		System.out.println("Incremental compilation: "+msg+" for "+getWorkQueue());
+		System.out.println("Incremental compilation: "+msg+" for "+getWorkQueue()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
 	precedence after logDone, resetQueue;

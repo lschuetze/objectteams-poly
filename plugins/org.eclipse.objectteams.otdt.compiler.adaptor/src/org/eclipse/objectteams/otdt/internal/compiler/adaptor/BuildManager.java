@@ -249,7 +249,7 @@ public team class BuildManager extends CompilationThreadWatcher
 		// TODO(SH): workaround for lowering problem concerning base call in ImageBuilder.shouldPreserveBinary() 
 		boolean hasBinaryMember(char[] typeName) ->     boolean hasBinaryMember(char[] typeName);
 		
-		@SuppressWarnings({"decapsulation", "unchecked"})
+		@SuppressWarnings({"decapsulation", "rawtypes"})
 	  protected
 		boolean isReusingBinaryMember() 		 -> get ArrayList binaryMemberNames
 			with { result <- !(result == null || result.isEmpty()) }

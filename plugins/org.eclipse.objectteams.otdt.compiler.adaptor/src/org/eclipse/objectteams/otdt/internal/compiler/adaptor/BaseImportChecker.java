@@ -119,6 +119,7 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 				switch (getBaseclassDecapsulation(location)) {
 				case ALLOWED:
 					decapsulationByForcedExport((ReferenceBinding)type, location);
+					break;
 				case REPORTED:
 					break;
 				default:

@@ -237,7 +237,7 @@ public team class PDEAdaptor
 	 */
 	protected class ModelListener playedBy WorkspaceExtensionsModel {
 		void resetAspectReader() <- after void load(InputStream is, boolean reload);
-		void resetAspectReader () throws CoreException {
+		void resetAspectReader () {
 			try {
 				BundleModel bundle= getFBundleModel();
 				if (bundle != null && bundle.aspectBindingReader != null)
