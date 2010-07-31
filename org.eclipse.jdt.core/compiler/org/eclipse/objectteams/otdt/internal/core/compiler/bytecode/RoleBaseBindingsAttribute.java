@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.bytecode;
 
 import java.util.LinkedList;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -62,7 +63,9 @@ public class RoleBaseBindingsAttribute extends ListValueAttribute {
     }
 
 	/** Add a role-base pair to this attribute. */
-    public void add(char[] roleName, char[] baseName) {
+    public void add(char[] roleName, char[] baseName, boolean baseIsInterface) {
+    	if (baseIsInterface)
+    		baseName = CharOperation.concat(new char[]{'^'}, baseName);
         this._count++;
         this.roleNames.add(roleName);
         this.baseNames.add(baseName);

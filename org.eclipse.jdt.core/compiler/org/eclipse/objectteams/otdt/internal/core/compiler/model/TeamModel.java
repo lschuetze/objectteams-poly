@@ -203,9 +203,9 @@ public class TeamModel extends TypeModel {
      * @param roleName
      * @param baseName
      */
-    public void addRoleBaseBindingAttribute(char[] roleName, char[] baseName) {
+    public void addRoleBaseBindingAttribute(char[] roleName, char[] baseName, boolean baseIsInterface) {
     	ensureRoleBaseBindingsAttribute();
-    	this.roleBaseBindings.add(roleName, baseName);
+    	this.roleBaseBindings.add(roleName, baseName, baseIsInterface);
     }
 
     private void ensureRoleBaseBindingsAttribute() {

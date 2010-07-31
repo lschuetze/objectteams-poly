@@ -8828,6 +8828,7 @@ public void baseclassMustBeAClass(SourceTypeBinding type, TypeReference baseclas
 		 IProblem.BaseclassMustBeAClass,
 		 new String[] {new String(baseType.readableName()), new String(type.sourceName())},
 		 new String[] {new String(baseType.shortReadableName()), new String(type.sourceName())},
+		 ProblemSeverities.Warning,
 		 baseclassRef.sourceStart,
 		 baseclassRef.sourceEnd);
 }

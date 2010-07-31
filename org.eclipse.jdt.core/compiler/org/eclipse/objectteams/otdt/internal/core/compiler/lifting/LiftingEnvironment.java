@@ -227,7 +227,8 @@ public class LiftingEnvironment
         // Attribute:
         roleModel.getTeamModel().addRoleBaseBindingAttribute(
                 roleModel.getBinding().attributeName(),
-                roleModel.getBaseclassAttributename(false)); // don't include anchor
+                roleModel.getBaseclassAttributename(false), // don't include anchor
+                roleModel.getBaseTypeBinding().isInterface());
         // TODO(SH): move to STATE_FULL_LIFTING: (?)
         // Analysis may detect errors and prepares for liftmethod generation.
         if (needMethodBodies) {
