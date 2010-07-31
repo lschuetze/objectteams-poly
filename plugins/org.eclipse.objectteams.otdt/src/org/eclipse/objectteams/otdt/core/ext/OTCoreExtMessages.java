@@ -34,5 +34,6 @@ public class OTCoreExtMessages extends NLS {
 	}
 
 	private OTCoreExtMessages() {
+		// don't instantiate
 	}
 }
