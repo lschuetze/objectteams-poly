@@ -23,6 +23,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -32,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
@@ -145,8 +147,15 @@ public abstract class ArrayTranslations {
 
 	        MethodDeclaration transformMethod =
 	                generateTransformArrayMethod(teamDecl, transformMethodName, providedType.dimensions());
+	        if (teamDecl.isRole())
+	        	transformMethod.modifiers |= ClassFileConstants.AccPublic;
 	        AstEdit.addMethod(teamDecl, transformMethod);
 	        methodBinding = transformMethod.binding;
+	        if (teamDecl.isRole()) {
+	        	TypeDeclaration ifcPart = teamDecl.getRoleModel().getInterfaceAst();
+	        	MethodDeclaration ifcMethod = AstConverter.genIfcMethodFromBinding(ifcPart.enclosingType, methodBinding, new AstGenerator(transformMethod));
+	        	AstEdit.addMethod(ifcPart, ifcMethod);
+	        }
 	    }
 		return methodBinding;
 	}
