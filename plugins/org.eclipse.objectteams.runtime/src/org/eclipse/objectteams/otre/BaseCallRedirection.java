@@ -965,23 +965,36 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 										   
 			boolean resultLiftingNecessary = ((mb.getTranslationFlags()&1)!=0);
 			
-			if (resultLiftingNecessary) { // call the static lift-method:
+			if (resultLiftingNecessary) { // call the lift-method:
 				// STATIC_PARTS_OK: in role: lift method call
-//TODO: lift method args!
 				String liftMethodName = mb.getLiftMethodName();
 				Type liftMethodReturnType = Type.getReturnType(mb.getLiftMethodSignature());
 				Type[] liftMethodArgs = Type.getArgumentTypes(mb.getLiftMethodSignature());
 				
 				il.append(factory.createCast(baseChainReturnType, baseMethodReturnType));
-                il.append(InstructionFactory.createThis());
                 
-                int nestingDepth = countOccurrences(className, '$') -1;
-                il.append(factory.createGetField(className, "this$" + nestingDepth, outerClass ));
+				// determine receiver for lift-call:
+                ObjectType liftType = (ObjectType)((liftMethodReturnType instanceof ArrayType)
+			                						? ((ArrayType) liftMethodReturnType).getBasicType()
+			                						: liftMethodReturnType);
+                int liftedDepth = countOccurrences(liftType.getClassName(), '$');
+                int thisNestingDepth = countOccurrences(className, '$');
+                ObjectType liftReceiverType = outerClass; // default;
+                if (liftedDepth == thisNestingDepth) {
+                	// normal case: liftedType is at the same nesting level as "this" 
+                	il.append(InstructionFactory.createThis());
+                	il.append(factory.createGetField(className, "this$" + (thisNestingDepth-1), outerClass)); // access enclosing team-this
+                } else if (liftedDepth == thisNestingDepth+1){
+                	// current role is already the team containing the role to get
+                	liftReceiverType = new ObjectType(className);
+                	il.append(new ALOAD(0));
+                } else {
+                	throw new OTREInternalError("Mismatching nesting levels for lift-call in base-call-surrogate: "+thisNestingDepth+" vs. "+liftedDepth);
+                }
 
-                il.append(new SWAP()); // -> .., this$0, (BaseType)result
-				//il.append(new ICONST(LIFT_ARG_RES));
+                il.append(new SWAP()); // -> .., liftReceiver, (BaseType)result
 				
-				il.append(factory.createInvoke(outerClass.getClassName(),
+				il.append(factory.createInvoke(liftReceiverType.getClassName(),
 											   liftMethodName,
 											   liftMethodReturnType,
 											   liftMethodArgs,
