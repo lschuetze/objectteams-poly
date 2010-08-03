@@ -773,11 +773,13 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     	ReferenceBinding thatSuperType;
     	ReferenceBinding thisSuperType;
     	ASTNode location;
-		SupertypeObligation(ReferenceBinding thisSupertype, ReferenceBinding thatSupertype, ASTNode location)
+    	ReferenceBinding outerTSuper; // where the outer extends was inherited from
+		SupertypeObligation(ReferenceBinding thisSupertype, ReferenceBinding thatSupertype, ASTNode location, ReferenceBinding outerTSuper)
 		{
 			this.thisSuperType = thisSupertype;
 			this.thatSuperType = thatSupertype;
 			this.location = location;
+			this.outerTSuper = outerTSuper;
 		}
 		void check(TypeDeclaration subRole) {
 			if (!this.thisSuperType.isCompatibleWith(this.thatSuperType))
@@ -786,7 +788,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 				subRole.scope.problemReporter().incompatibleSuperclasses(
 						(this.location != null) ? this.location : subRole,
 						this.thisSuperType,
-						this.thatSuperType);
+						this.thatSuperType,
+						this.outerTSuper);
 		}
     }
 

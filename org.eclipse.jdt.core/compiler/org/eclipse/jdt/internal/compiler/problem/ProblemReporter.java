@@ -8634,14 +8634,15 @@ public void extendIncompatibleEnclosingTypes(
            clazz.superclass.sourceEnd);
 }
 public void incompatibleSuperclasses(
-	       ASTNode location, ReferenceBinding newSuperclass, ReferenceBinding oldSuperclass)
+	       ASTNode location, ReferenceBinding newSuperclass, ReferenceBinding oldSuperclass, ReferenceBinding outerTSuper)
 {
- this.handle(
-    IProblem.IncompatibleSuperclasses,
-    new String[]{new String(newSuperclass.readableName()), new String(oldSuperclass.readableName())},
-    new String[]{new String(newSuperclass.shortReadableName()), new String(oldSuperclass.shortReadableName())},
-    location.sourceStart,
-    location.sourceEnd);
+	 String outerTSuperName = outerTSuper == null ? "<unknown>" : String.valueOf(outerTSuper.readableName());
+	 this.handle(
+			 IProblem.IncompatibleSuperclasses,
+			 new String[]{new String(newSuperclass.readableName()), new String(oldSuperclass.readableName()), outerTSuperName},
+			 new String[]{new String(newSuperclass.shortReadableName()), new String(oldSuperclass.shortReadableName()), outerTSuperName},
+			 location.sourceStart,
+			 location.sourceEnd);
 }
 public void tsuperCtorDespiteRefinedExtends (Statement tsuperCall, ReferenceBinding superclass)
 {

@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
@@ -74,22 +75,24 @@ public class TypeLevel {
 		ArrayList<SupertypeObligation> obligations = new ArrayList<SupertypeObligation>();
 	    ReferenceBinding[] tsuperRoles  = roleDecl.getRoleModel().getTSuperRoleBindings();
 	    SourceTypeBinding destRole     = roleDecl.binding;
-	    // reverse loop: most specific tsuper is first (TODO (SH): is that the right strategy?? Need tests!)
-	    for (int i = tsuperRoles.length-1; i>=0; i--)
-	    {
-	        assert(tsuperRoles[i].isDirectRole());
-
+	    if (tsuperRoles.length > 0) {
+	    	// connect to the last added tsuper role. Earlier tsupers have already been processed
+	    	// in earlier invocations as ClassScope.connectTeamMemberTypes(..) descends depth first
+	        ReferenceBinding tsuperRole = tsuperRoles[tsuperRoles.length-1];
+			assert(tsuperRole.isDirectRole());
+	
 			// don't bother with AST, we are called after hierarchies have been connected
 			// at the binding level.
-			if (!tsuperRoles[i].isInterface()) // inherited instead of merged
-				mergeSuperinterfaces(superTeam, tsuperRoles[i], destRole);
+			if (!tsuperRole.isInterface()) // inherited instead of merged
+				mergeSuperinterfaces(superTeam, tsuperRole, destRole);
 		    if (!roleDecl.isInterface())
-		    	copyAdjustSuperclass(tsuperRoles[i], roleDecl, obligations);
-		    copyBaseclass(tsuperRoles[i], roleDecl);
-	    }
-	    if (tsuperRoles.length == 0)
+		    	copyAdjustSuperclass(tsuperRole, roleDecl, obligations);
+		    copyBaseclass(tsuperRole, roleDecl);
+	
+	    } else {
 	    	// no tsupers to merge with, but still need to adjust the super class:
-	    	copyAdjustSuperclass(null, roleDecl, obligations);
+	    	copyAdjustSuperclass(null, roleDecl, obligations);	    	
+	    }
 
 		adjustSuperinterfaces(superTeam, destRole, obligations);
 		// compatibility may have changed, clear negative cache entries:
@@ -125,7 +128,7 @@ public class TypeLevel {
 	                    teamType.getMemberType(superinterfaces[i].internalName());
 	            if (superinterface != destRole) // not for the tsuper link.
 	            {
-	                obligations.add(new SupertypeObligation(superinterface, superinterfaces[i], null));
+	                obligations.add(new SupertypeObligation(superinterface, superinterfaces[i], null, null));
 	                superinterfaces[i] = superinterfaces[i].transferTypeArguments(superinterface);
 	                destRole.scope.compilationUnitScope().recordSuperTypeReference(superinterface);
 	            }
@@ -393,11 +396,13 @@ public class TypeLevel {
 			}
 		}
 		TypeReference newExtends = destRoleDecl.superclass;
-		if (   newExtends == null
-			&& !refineToTeam)
-			newSuperclass = null; // drop default 'extends java.lang.Object'
-		// an implicit extends to org.objectteams.Team is not dropped,
-		// if the tsuper was not a team.
+		if (   newExtends == null	 // no source-level "extends" -> investige implicit (binding-level) extends:
+			&& newSuperclass != null // either implicit super (j.l.Object or o.o.Team) or inherited from other tsuper
+			&& !refineToTeam	     // an implicit extends to org.objectteams.Team is NOT dropped if the tsuper was not a team
+			&& ((newSuperclass.id == TypeIds.T_JavaLangObject) || destScope.isOrgObjectteamsTeam(newSuperclass))) // otherwise it was copied from a tsuper role
+		{
+			newSuperclass = null; // drop default 'extends java.lang.Object' or o.o.Team			
+		}
 
 		// extends __OT_Confined overriding nothing or __OT__Confined is OK:
 		if (   (   newSuperclass != null
@@ -432,7 +437,7 @@ public class TypeLevel {
 	    		if (   newSuperclass.roleModel == null
 	    			|| !newSuperclass.roleModel.hasTSuperRole(inheritedSuperclass))
 	    		{
-	    			SupertypeObligation oblig = new SupertypeObligation(newSuperclass, inheritedSuperclass, newExtends);
+	    			SupertypeObligation oblig = new SupertypeObligation(newSuperclass, inheritedSuperclass, newExtends, tsuperRole);
 	    			// check now or later?
 	    			if (obligations != null)
 	    				obligations.add(oblig);
