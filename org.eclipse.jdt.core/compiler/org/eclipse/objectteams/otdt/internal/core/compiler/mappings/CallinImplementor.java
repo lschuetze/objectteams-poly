@@ -64,6 +64,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMap
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLiftExpression;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLowerExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialRoleReceiverExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CallinMethodMappingsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CallinParamMappingsAttribute;
@@ -327,7 +328,7 @@ public class CallinImplementor extends MethodMappingImplementor
 				liftCallSelector = Lifting.getLiftMethodName(roleReturn);
 			}
 			// now find the lift method for use in the CallinMethodMappings attribute
-			TypeDeclaration teamType = this._roleScope.referenceContext.enclosingType;
+			TypeDeclaration teamType = this._roleScope.referenceContext;
 			AbstractMethodDeclaration liftMethod = null;
 			while (liftMethod == null) {
 				if (teamType == null)
@@ -611,7 +612,7 @@ public class CallinImplementor extends MethodMappingImplementor
 			statements.add(callinBindingDeclaration.resultVar);
 			roleMessageSendStatement = gen.assignment(
 											gen.singleNameReference(IOTConstants.RESULT),
-											roleMessageSend);
+											new PotentialLowerExpression(roleMessageSend, wrapperReturnType, receiver));
 			TryStatement tryFinally = gen.tryFinally(
 								new Statement[] {roleMessageSendStatement},
 								new Statement[] {resetFlag});

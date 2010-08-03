@@ -299,7 +299,7 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
 	            		if (!isGeneratedCodeLoweringConfined(scope, expr.resolvedType, expectedType))
 	            			scope.problemReporter().illegalImplicitLower(expr, expectedType, expr.resolvedType);
 	            	} else {
-	            		newExpr = new Lowering().lowerExpression(scope, expr, expr.resolvedType, expectedType, true);
+	            		newExpr = new Lowering().lowerExpression(scope, expr, expr.resolvedType, expectedType, null/*teamExpression*/, true); // not enough context to provide teamExpr
 	            	}
 	            }
             } finally {

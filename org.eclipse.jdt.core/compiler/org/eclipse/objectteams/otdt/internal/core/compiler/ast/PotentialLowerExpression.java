@@ -45,6 +45,9 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lowering;
 public class PotentialLowerExpression extends PotentialTranslationExpression {
 
 
+	// array lowering may need to reference a team to invoke the arrayLowering method
+	private Expression teamExpression;
+
     /**
      * Create a wrapper for an expression to defer the decission of lowering until
      * resolveType(..).
@@ -55,8 +58,17 @@ public class PotentialLowerExpression extends PotentialTranslationExpression {
             Expression  expression,
             TypeBinding expectedType)
     {
+    	this(expression, expectedType, null);
+    }
+    
+    public PotentialLowerExpression(
+            Expression  expression,
+            TypeBinding expectedType,
+            Expression  teamExpression)
+    {
         super(expression, expectedType);
-        this.operator     = "lower"; //$NON-NLS-1$
+        this.operator       = "lower"; //$NON-NLS-1$
+        this.teamExpression = teamExpression;
     }
 
     public TypeBinding resolveType(BlockScope scope)
@@ -120,7 +132,7 @@ public class PotentialLowerExpression extends PotentialTranslationExpression {
         // successfully recognized the need for lowering, create the lowering now:
         this.rawExpression = this.expression;
         this.operator = "lower"; // redundant; //$NON-NLS-1$
-        this.expression = new Lowering().lowerExpression(scope, this.expression, rawType, this.expectedType, true/*needNullCheck*/);
+        this.expression = new Lowering().lowerExpression(scope, this.expression, rawType, this.expectedType, this.teamExpression, true/*needNullCheck*/);
         return this.resolvedType = this.expression.resolvedType = this.expectedType;
     }
     @Override

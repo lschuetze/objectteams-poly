@@ -152,9 +152,11 @@ public abstract class ArrayTranslations {
 	        AstEdit.addMethod(teamDecl, transformMethod);
 	        methodBinding = transformMethod.binding;
 	        if (teamDecl.isRole()) {
+	        	// if team is a role, also generate a ifc-part for the method and use that
 	        	TypeDeclaration ifcPart = teamDecl.getRoleModel().getInterfaceAst();
 	        	MethodDeclaration ifcMethod = AstConverter.genIfcMethodFromBinding(ifcPart.enclosingType, methodBinding, new AstGenerator(transformMethod));
 	        	AstEdit.addMethod(ifcPart, ifcMethod);
+	        	methodBinding = ifcMethod.binding;
 	        }
 	    }
 		return methodBinding;

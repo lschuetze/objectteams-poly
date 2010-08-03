@@ -61,6 +61,7 @@ public class Lowering implements IOTConstants {
 	 * @param expression original
 	 * @param unloweredType either a RoleTypeBinding or an ArrayBinding thereof.
 	 * @param requiredType  the base type (or ArrayBinding thereof).
+	 * @param teamExpression can be used as a receiver for array lowering method calls
 	 * @param needNullCheck if expression maybe null, a null-check is required at runtime.
 	 * @return translation expression
 	 */
@@ -69,6 +70,7 @@ public class Lowering implements IOTConstants {
               final Expression  expression,
 		      TypeBinding unloweredType,
 			  TypeBinding requiredType,
+			  Expression  teamExpression,
 			  boolean     needNullCheck)
 	{
         // Note, this method is responsible for 'resolving' all AST nodes it generates!
@@ -89,7 +91,7 @@ public class Lowering implements IOTConstants {
         if(unloweredType.isArrayType())
 		{
         	// (1) array translation:
-			ArrayLowering trans = new ArrayLowering();
+			ArrayLowering trans = new ArrayLowering(teamExpression);
 			loweringExpr =  trans.lowerArray(
 								scope,
 								needNullCheck ?

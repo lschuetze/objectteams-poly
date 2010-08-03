@@ -176,7 +176,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 			// trigger creation of array lifter
 			if (needLowering) {
 				Expression dumExpr= new SingleNameReference("dummy".toCharArray(), 0L); //$NON-NLS-1$
-				new ArrayLowering().ensureTransformMethod(scope, dumExpr, expectedRole, providedType, false);
+				new ArrayLowering(teamExpr).ensureTransformMethod(scope, dumExpr, expectedRole, providedType, false);
 			}
 
 			ArrayLifting arrayLifting = new ArrayLifting();

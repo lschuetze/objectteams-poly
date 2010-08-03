@@ -28,7 +28,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
 
 /**
- * MIGRATION_STATE: complete.
  * moved here from org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.
  *
  * @author stephan
@@ -36,6 +35,10 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
  */
 public class ArrayLowering extends ArrayTranslations {
 
+	ArrayLowering(Expression teamExpression) {
+		this._teamExpr = teamExpression;
+	}
+	
 	/** API for Lowering. */
 	Expression lowerArray(
 			BlockScope  scope,
@@ -46,13 +49,14 @@ public class ArrayLowering extends ArrayTranslations {
 		// TODO (SH): check if we need to use the team anchor of a RoleTypeBinding
 		//            as receiver for the translation call.
 		ReferenceBinding teamBinding = ((ReferenceBinding)providedType.leafComponentType()).enclosingType();
-		this._teamExpr = new AstGenerator(expression).qualifiedThisReference(teamBinding);
+		if (this._teamExpr == null)
+			this._teamExpr = new AstGenerator(expression).qualifiedThisReference(teamBinding);
 		this._teamExpr.resolveType(scope);
 		return translateArray(scope, expression, providedType, requiredType, /*isLifting*/false);
 	}
 
 	/* implement hook. */
 	Expression translation(Expression rhs, TypeBinding providedType, TypeBinding requiredType) {
-		return new Lowering().lowerExpression(this._scope, rhs, providedType, requiredType, false);
+		return new Lowering().lowerExpression(this._scope, rhs, providedType, requiredType, this._teamExpr, false);
 	}
 }

@@ -89,6 +89,7 @@ public void resolve(BlockScope scope) {
 																   this.exception,
 																   this.exceptionType,
 																   expectedExceptionType,
+																   null /*teamExpression*/,
 																   true /*needNullCheck*/);
 						this.exceptionType = roleType.baseclass();
 					}
