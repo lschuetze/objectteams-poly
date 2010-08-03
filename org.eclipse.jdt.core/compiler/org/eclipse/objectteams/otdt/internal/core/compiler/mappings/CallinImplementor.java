@@ -605,14 +605,29 @@ public class CallinImplementor extends MethodMappingImplementor
 			//     return _OT$result;
 			//   $endif
 
-			Statement roleMessageSendStatement = roleMessageSend;
+			Expression roleMessageSendExpression = roleMessageSend;
+			
+			if (roleMethodBinding.returnType.isArrayType()) {
+				// if return from role method requires array-lowering, we must determine how to access the team (receiver of lowering-method):
+				TypeBinding returnLeaf = roleMethodBinding.returnType.leafComponentType();
+				findEnclosingTeam: 
+				if (returnLeaf.isRole()) {
+					ReferenceBinding returnEnclosing = returnLeaf.enclosingType(); // the team type containing the returned role
+					ReferenceBinding currentType = roleModel.getBinding();
+					while ((currentType = currentType.enclosingType()) != null)	   // traverse all types accessible as this$<n>
+						if (currentType == returnEnclosing)
+							break findEnclosingTeam; // successful
+					// not found, which means this$<n> is not a suitable receiver for array lowering, must use 'receiver' instead:
+					roleMessageSendExpression = new PotentialLowerExpression(roleMessageSend, wrapperReturnType, receiver);
+				}
+			}
 			callinBindingDeclaration.resultVar = gen.localVariable(
 											IOTConstants.RESULT, wrapperReturnType, null);
 			callinBindingDeclaration.resultVar.type.setBaseclassDecapsulation(DecapsulationState.REPORTED);
 			statements.add(callinBindingDeclaration.resultVar);
-			roleMessageSendStatement = gen.assignment(
+			Statement roleMessageSendStatement = gen.assignment(
 											gen.singleNameReference(IOTConstants.RESULT),
-											new PotentialLowerExpression(roleMessageSend, wrapperReturnType, receiver));
+											roleMessageSendExpression);
 			TryStatement tryFinally = gen.tryFinally(
 								new Statement[] {roleMessageSendStatement},
 								new Statement[] {resetFlag});
