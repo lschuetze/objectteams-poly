@@ -131,7 +131,8 @@ public abstract class ArrayTranslations {
 
 		char[] transformMethodName = getTransformMethodName(providedType, roleType, isLifting);
 
-	    MethodBinding[] transformMethods = roleType.enclosingType().getMethods(transformMethodName);
+	    ReferenceBinding enclosingTeam = roleType.enclosingType().getRealType();
+		MethodBinding[] transformMethods = enclosingTeam.getMethods(transformMethodName);
 	    MethodBinding methodBinding = null;
 	    if ((transformMethods != null) && (transformMethods.length != 0)) {
 	        if (transformMethods.length > 1) {

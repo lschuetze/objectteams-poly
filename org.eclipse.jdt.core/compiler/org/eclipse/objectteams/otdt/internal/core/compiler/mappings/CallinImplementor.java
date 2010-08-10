@@ -334,6 +334,8 @@ public class CallinImplementor extends MethodMappingImplementor
 				if (teamType == null)
 					throw new InternalCompilerError("Required lift method "+String.valueOf(liftCallSelector)+ 						  //$NON-NLS-1$
 							                        " not found in scope of role "+String.valueOf(this._roleScope.referenceContext.name)); //$NON-NLS-1$
+				if (teamType.isRole())
+					teamType = teamType.getRoleModel().getInterfaceAst();
 				liftMethod = TypeAnalyzer.findMethodDecl(teamType, liftCallSelector, 1);
 				teamType = teamType.enclosingType;
 			}
