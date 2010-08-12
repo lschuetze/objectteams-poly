@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -46,10 +45,9 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
  * @author Johannes Gebauer
  * 
  */
+@SuppressWarnings({ "nls", "restriction" })
 public class PushDownTests extends RefactoringTest {
 
-	private static final Class clazz= PushDownTests.class;
-	
 	private static final String REFACTORING_PATH= "PushDown/";
 
 	public PushDownTests(String name) {
@@ -128,9 +126,6 @@ public class PushDownTests extends RefactoringTest {
 	}
 	
 	private static PushDownRefactoringProcessor createRefactoringProcessor(IMember[] methods) throws JavaModelException {
-		IJavaProject project = null;
-		if (methods != null && methods.length > 0)
-			project = methods[0].getJavaProject();
 		if (RefactoringAvailabilityTester.isPullUpAvailable(methods)) {
 			PushDownRefactoringProcessor processor = new PushDownRefactoringProcessor(methods);
 			new ProcessorBasedRefactoring(processor);
