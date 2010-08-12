@@ -26,7 +26,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
+import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 /**
@@ -59,7 +59,8 @@ public class OrdinaryInterfaceHierarchyTests extends FileBasedModelTest
         {
             return new Suite(OrdinaryInterfaceHierarchyTests.class);
         }
-        junit.framework.TestSuite suite = new Suite(OrdinaryInterfaceHierarchyTests.class.getName());
+        @SuppressWarnings("unused")
+		junit.framework.TestSuite suite = new Suite(OrdinaryInterfaceHierarchyTests.class.getName());
         return suite;
     }
     
@@ -78,7 +79,7 @@ public class OrdinaryInterfaceHierarchyTests extends FileBasedModelTest
                 "standard.interface_hierarchy",
                 "AnInterface");
         
-        _testObject = new OTTypeHierarchy(_focusInterface, _focusInterface.getJavaProject(), true);
+        _testObject = new TypeHierarchy(_focusInterface, null, _focusInterface.getJavaProject(), true);
         _testObject.refresh(new NullProgressMonitor());
         
         _javaLangObject = getJavaLangObject(_focusInterface.getJavaProject());

@@ -27,6 +27,7 @@ import junit.framework.Test;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.core.PhantomType;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.tests.hierarchy.FileBasedHierarchyTest;
 
 /**
@@ -85,6 +86,7 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
 		{
 			return new Suite(OTSubTypeHierarchyTest001.class);
 		}
+		@SuppressWarnings("unused")
 		junit.framework.TestSuite suite = 
 			new Suite(OTSubTypeHierarchyTest001.class.getName());
 		return suite;
@@ -177,7 +179,7 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
 	public void testGetAllSubtypes_T1_R1() throws JavaModelException
 	{
 		_focusType = _T1_R1;
-        _testObj = createOTTypeHierarchy(_focusType);
+        _testObj = createTypeHierarchy(_focusType);
         
 		IType[] expected = new IType[] {
 								         _T2_R1, _T2_R2,
@@ -195,11 +197,33 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
 		assertTrue(compareTypes(expected, actual));
 	}
     
+	  
+	public void testGetAllSubtypes_T1_R1_phantomMode() throws JavaModelException
+	{
+		_focusType = _T1_R1;
+        _testObj = createTypeHierarchy(_focusType);
+        OTTypeHierarchies.getInstance().setPhantomMode(_testObj, true);
 
+		IType[] expected = new IType[] {
+								         _T2_R1, _T2_R2,
+								         _T3_R1, _T3_R2,
+								         _T4_R2, _phantom_T4_R1,
+										 _T5_R1, _T5_R2, _T5_R3,
+										 _T6_R1, _phantom_T6_R2,
+										 _T7_R2, _T7_R3, _phantom_T7_R1,
+										 _T8_R2, _phantom_T8_R1
+								         };
+		
+		IType [] actual = _testObj.getAllSubtypes(_focusType);
+
+		assertEquals(expected.length, actual.length);		
+		assertTrue(compareTypes(expected, actual));
+	}
+  
 	public void testGetAllSubtypes_T1_R2() throws JavaModelException
 	{
 		_focusType = _T1_R2;
-        _testObj = createOTTypeHierarchy(_focusType);
+        _testObj = createTypeHierarchy(_focusType);
         
 		IType[] expected = new IType[] {
 								         _T2_R2,
@@ -219,10 +243,10 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
 	public void testGetSubtypes_T2_R1() throws JavaModelException
 	{
 		_focusType = _T2_R1;
-        _testObj = createOTTypeHierarchy(_focusType);
+        _testObj = createTypeHierarchy(_focusType);
         
 		IType[] expected = new IType[] {
-										_T4_R2,
+//										_T4_R2, // indirect via phantom
 								        _T2_R2,
 								        _T3_R1,
 										_T5_R1,
@@ -239,10 +263,10 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
 	public void testGetSubclasses_T2_R1() throws JavaModelException
 	{
 		_focusType = _T2_R1;
-        _testObj = createOTTypeHierarchy(_focusType);
+        _testObj = createTypeHierarchy(_focusType);
         
 		IType[] expected = new IType[] {
-										_T4_R2,
+//										_T4_R2, // indirect via phantom
 										_T2_R2,
 								        _T3_R1,
 										_T5_R1,
@@ -259,11 +283,30 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
 	public void testGetSubclasses_T5_R1() throws JavaModelException
 	{
 		_focusType = _T5_R1;
-        _testObj = createOTTypeHierarchy(_focusType);
+        _testObj = createTypeHierarchy(_focusType);
         
-		IType[] expected = new IType[] { _T5_R3, _T7_R3 };
+		IType[] expected = new IType[] {
+										_T5_R3, 
+//										_T7_R3 // indirect via phantom 
+										};
 		
 		IType [] actual = _testObj.getSubclasses(_focusType);
+
+		assertEquals(expected.length, actual.length);		
+		assertTrue(compareTypes(expected, actual));
+	}
+
+	public void testGetAllSubtypes_T5_R1() throws JavaModelException
+	{
+		_focusType = _T5_R1;
+        _testObj = createTypeHierarchy(_focusType);
+        
+		IType[] expected = new IType[] {
+										_T5_R2, _T5_R3,
+										_T7_R2, _T7_R3 // indirect via phantom 
+										};
+		
+		IType [] actual = _testObj.getAllSubtypes(_focusType);
 
 		assertEquals(expected.length, actual.length);		
 		assertTrue(compareTypes(expected, actual));
@@ -273,10 +316,12 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
 	public void testGetSubclasses_T6_R1() throws JavaModelException
 	{
 		_focusType = _T6_R1;
-        _testObj = createOTTypeHierarchy(_focusType);
+        _testObj = createTypeHierarchy(_focusType);
         
-		IType[] expected = new IType[] { _T8_R2,
-                                         _T2_R2 };
+		IType[] expected = new IType[] { 
+//										 _T8_R2, // indirect
+//                                       _T2_R2  // not a subclass of T6$R1 
+                                       };
 		
 		IType [] actual = _testObj.getSubclasses(_focusType);
 
@@ -287,12 +332,14 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
     public void testGetSubclasses_T6_R1_phantomMode() throws JavaModelException
     {
         _focusType = _T6_R1;
-        _testObj = createOTTypeHierarchy(_focusType);
-        _testObj.setPhantomMode(true);
+        _testObj = createTypeHierarchy(_focusType);
+        OTTypeHierarchies.getInstance().setPhantomMode(_testObj, true);
         
-        IType[] expected = new IType[] { _phantom_T8_R1,
+        IType[] expected = new IType[] { 
+        								 _phantom_T8_R1,
                                          _phantom_T6_R2,
-                                         _T8_R2};
+//                                         _T8_R2 // indirect
+                                       };
         
         IType [] actual = _testObj.getSubclasses(_focusType);
 
@@ -303,10 +350,12 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
     public void testGetSubclasses_T6_R1_in_T2_R2() throws JavaModelException
     {
         _focusType = _T2_R2;
-        _testObj = createOTTypeHierarchy(_focusType);
+        _testObj = createTypeHierarchy(_focusType);
         
-        IType[] expected = new IType[] { _T8_R2,
-                                         _T2_R2 };
+        IType[] expected = new IType[] { 
+//        							     _T8_R2, // indirect
+//                                       _T2_R2  //  not a subclass of T6$R1 
+                                        };
         
         IType [] actual = _testObj.getSubclasses(_T6_R1);
 
@@ -317,10 +366,12 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
     public void testGetSubtypes_T6_R1() throws JavaModelException
     {
         _focusType = _T6_R1;
-        _testObj = createOTTypeHierarchy(_focusType);
+        _testObj = createTypeHierarchy(_focusType);
         
-        IType[] expected = new IType[] { _T8_R2,
-                                         _T2_R2 };
+        IType[] expected = new IType[] { 
+//        								 _T8_R2, // indirect
+//                                       _T2_R2 // not a sub type of T6$R1 
+                                       };
         
         IType [] actual = _testObj.getSubtypes(_focusType);
 
@@ -331,12 +382,13 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
     public void testGetSubtypes_T6_R1_phantomMode() throws JavaModelException
     {
         _focusType = _T6_R1;
-        _testObj = createOTTypeHierarchy(_focusType);
-        _testObj.setPhantomMode(true);
+        _testObj = createTypeHierarchy(_focusType);
+        OTTypeHierarchies.getInstance().setPhantomMode(_testObj, true);
         
         IType[] expected = new IType[] { _phantom_T6_R2,
                                          _phantom_T8_R1,
-                                         _T8_R2 };        
+//                                         _T8_R2 // indirect 
+                                       };        
         IType [] actual = _testObj.getSubtypes(_focusType);
 
         assertEquals(expected.length, actual.length);       
@@ -346,12 +398,14 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
     public void testGetAllSubtypes_T6_R1_in_T2R1() throws JavaModelException
     {
         _focusType = (_T2_R1);
-        _testObj = createOTTypeHierarchy(_focusType);
+        _testObj = createTypeHierarchy(_focusType);
         
-        IType[] expected = new IType[] { _T8_R2, _T2_R2 };
+        IType[] expected = new IType[] { _T8_R2, 
+//        								 _T2_R2 // not a subtype of T6$R1
+        								};
         IType [] actual = _testObj.getAllSubtypes(_T6_R1);
 
-        assertEquals(expected.length, actual.length);       
+        assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
     }
 

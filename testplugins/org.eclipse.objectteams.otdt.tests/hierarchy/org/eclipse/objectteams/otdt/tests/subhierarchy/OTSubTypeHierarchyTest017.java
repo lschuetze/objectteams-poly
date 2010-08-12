@@ -24,10 +24,11 @@ import junit.framework.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
+import org.eclipse.objectteams.otdt.core.PhantomType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 /**
@@ -38,7 +39,7 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
  */
 public class OTSubTypeHierarchyTest017 extends FileBasedModelTest {
 	
-	private ITypeHierarchy _testObj;
+	private TypeHierarchy _testObj;
 	@SuppressWarnings("unused")
 	private IType _focusType;
     private IType _TA;
@@ -57,6 +58,9 @@ public class OTSubTypeHierarchyTest017 extends FileBasedModelTest {
     private IType _TD_R1;
     private IType _TE_R2;
     private IType _TE_R3;
+    private IType _phantom_TB_R3;
+    private IType _phantom_TE_R1;
+    private IType _phantom_TD_R2;
 
     
     
@@ -75,6 +79,7 @@ public class OTSubTypeHierarchyTest017 extends FileBasedModelTest {
 		{
 			return new Suite(OTSubTypeHierarchyTest017.class);
 		}
+		@SuppressWarnings("unused")
 		junit.framework.TestSuite suite = 
 			new Suite(OTSubTypeHierarchyTest017.class.getName());
 		return suite;
@@ -110,13 +115,17 @@ public class OTSubTypeHierarchyTest017 extends FileBasedModelTest {
         _TD_R1 = TypeHelper.findNestedRoleType(_TD, "TD.R1");
         _TE_R2 = TypeHelper.findNestedRoleType(_TE, "TE.R2");
         _TE_R3 = TypeHelper.findNestedRoleType(_TE, "TE.R3");
+        
+        _phantom_TB_R3 = new PhantomType(_TB, _TA_R3);
+        _phantom_TD_R2 = new PhantomType(_TD, _TB_R2);
+        _phantom_TE_R1 = new PhantomType(_TE, _TD_R1);
 
     }
 
     private void initHierarchy(IType focus, boolean computeSubtypes)
             throws JavaModelException
     {        
-    	_testObj = new OTTypeHierarchy(focus, focus.getJavaProject(), computeSubtypes);
+    	_testObj = new TypeHierarchy(focus, null, focus.getJavaProject(), computeSubtypes);
     	_testObj.refresh(new NullProgressMonitor());
         _focusType = focus;
     }
@@ -148,7 +157,25 @@ public class OTSubTypeHierarchyTest017 extends FileBasedModelTest {
     {
         initHierarchy(_TA_R1, true);
         
-        IType[] expected = new IType[] { _TB_R2, _TE_R2 };
+        IType[] expected = new IType[] { 
+//        								_TB_R2, // not sub of TD$R1 
+//        								_TE_R2  // indirect
+        								};
+        IType[] actual = _testObj.getSubtypes(_TD_R1);
+        
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
+    }
+
+    public void testGetSubtypes_TD_R1_phantomMode() throws JavaModelException
+    {
+        initHierarchy(_TA_R1, true);
+        OTTypeHierarchies.getInstance().setPhantomMode(_testObj, true);
+        
+        IType[] expected = new IType[] { 
+        								_phantom_TE_R1,
+        								_phantom_TD_R2
+        								};
         IType[] actual = _testObj.getSubtypes(_TD_R1);
         
         assertEquals(expected.length, actual.length);
@@ -159,7 +186,12 @@ public class OTSubTypeHierarchyTest017 extends FileBasedModelTest {
     {
         initHierarchy(_TA_R1, true);
         
-        IType[] expected = new IType[] { _TA_R3, _TB_R2, _TE_R2, _TE_R3 };
+        IType[] expected = new IType[] { 
+//        								 _TA_R3, // not sub of TD$R1 
+//        								 _TB_R2, // not sub of TD$R1 
+        								 _TE_R2, 
+        								 _TE_R3 
+        								 };
         IType[] actual = _testObj.getAllSubtypes(_TD_R1);
         
         assertEquals(expected.length, actual.length);
@@ -170,7 +202,29 @@ public class OTSubTypeHierarchyTest017 extends FileBasedModelTest {
     {
         initHierarchy(_TA_R1, true);
         
-        IType[] expected = new IType[] { _TA_R3, _TC_R2, _TC_R3, _TE_R2, _TE_R3};
+        IType[] expected = new IType[] { 
+//        								_TA_R3, // not sub of TB$R2 
+        								_TC_R2, 
+//        								_TC_R3, // indirect
+//        								_TE_R2, // indirect
+//        								_TE_R3  // indirect
+        								};
+        IType[] actual = _testObj.getSubtypes(_TB_R2);
+        
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
+    }
+
+    public void testGetSubtypes_TB_R2_phantomMode() throws JavaModelException
+    {
+        initHierarchy(_TA_R1, true);
+        OTTypeHierarchies.getInstance().setPhantomMode(_testObj, true);
+
+        IType[] expected = new IType[] { 
+        								_TC_R2, 
+        								_phantom_TD_R2,
+        								_phantom_TB_R3,
+        								};
         IType[] actual = _testObj.getSubtypes(_TB_R2);
         
         assertEquals(expected.length, actual.length);
@@ -181,7 +235,9 @@ public class OTSubTypeHierarchyTest017 extends FileBasedModelTest {
     {
         initHierarchy(_TA_R1, true);
         
-        IType[] expected = new IType[] { _TA_R3, _TC_R2, _TC_R3, _TE_R2, _TE_R3 };
+        IType[] expected = new IType[] { 
+//        								_TA_R3, // not sub of TB$R2 
+        								_TC_R2, _TC_R3, _TE_R2, _TE_R3 };
         IType[] actual = _testObj.getAllSubtypes(_TB_R2);
         
         assertEquals(expected.length, actual.length);

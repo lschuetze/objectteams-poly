@@ -25,7 +25,7 @@ import junit.framework.Test;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
+import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 /**
@@ -35,7 +35,7 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
  */
 public class OTSubTypeHierarchyTest002 extends FileBasedModelTest {
 	
-	private OTTypeHierarchy _testObj;
+	private TypeHierarchy _testObj;
 
 	private IType _focusType;
 	
@@ -67,6 +67,7 @@ public class OTSubTypeHierarchyTest002 extends FileBasedModelTest {
 		{
 			return new Suite(OTSubTypeHierarchyTest002.class);
 		}
+		@SuppressWarnings("unused")
 		junit.framework.TestSuite suite = 
 			new Suite(OTSubTypeHierarchyTest002.class.getName());
 		return suite;
@@ -116,7 +117,7 @@ public class OTSubTypeHierarchyTest002 extends FileBasedModelTest {
 	{
 		_focusType = _T1_R1;
 
-		_testObj = new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+		_testObj = new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         _testObj.refresh(new NullProgressMonitor());
         
 		IType[] expected = new IType[] { _T2_R1, _T3_R1};
@@ -131,7 +132,7 @@ public class OTSubTypeHierarchyTest002 extends FileBasedModelTest {
 	{
 		_focusType = _classA;
 
-		_testObj = new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+		_testObj = new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         _testObj.refresh(new NullProgressMonitor());
         
 		IType[] expected = new IType[] { _T2_R1, _T3_R1};

@@ -27,8 +27,9 @@ import junit.framework.Test;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.objectteams.otdt.core.IRoleType;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 /**
@@ -78,7 +79,7 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
     private IType     _subSubClass12;
     private IType	  _object;
     
-    private OTTypeHierarchy _hierarchy;
+    private TypeHierarchy _hierarchy;
     
     
     public CompleteRoleHierarchyWithClasses(String name)
@@ -92,7 +93,8 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         {
             return new Suite(CompleteRoleHierarchyWithClasses.class);
         }
-        junit.framework.TestSuite suite = 
+        @SuppressWarnings("unused")
+		junit.framework.TestSuite suite = 
             new Suite(CompleteRoleHierarchyWithClasses.class.getName());
         return suite;
     }
@@ -110,7 +112,7 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
                 "ATeam",
                 "R1");
  
-        _hierarchy = new OTTypeHierarchy(_focusRole, _focusRole.getJavaProject(), true);
+        _hierarchy = new TypeHierarchy(_focusRole, null, _focusRole.getJavaProject(), true);
         _hierarchy.refresh(new NullProgressMonitor());        
         
         _implSuperRole = 
@@ -207,43 +209,43 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
  
     public void testGetExplicitSuperclass_ofFocusRole() throws JavaModelException
     {
-        assertEquals(_class, _hierarchy.getExplicitSuperclass((IType)_focusRole.getCorrespondingJavaElement()));
+        assertEquals(_class, OTTypeHierarchies.getInstance().getExplicitSuperclass(_hierarchy, (IType)_focusRole.getCorrespondingJavaElement()));
     }        
     
     
     public void testGetExplicitSuperclass_ofImplSuperSuperRole() throws JavaModelException
     {
-        assertEquals(_object, _hierarchy.getExplicitSuperclass((IType)_implSuperSuperRole.getCorrespondingJavaElement()));
+        assertEquals(_object, OTTypeHierarchies.getInstance().getExplicitSuperclass(_hierarchy, (IType)_implSuperSuperRole.getCorrespondingJavaElement()));
     }
     
     
     public void testGetExplicitSuperclass_ofImplSuperRole() throws JavaModelException
     {
-        assertEquals(_class, _hierarchy.getExplicitSuperclass((IType)_implSuperRole.getCorrespondingJavaElement()));
+        assertEquals(_class, OTTypeHierarchies.getInstance().getExplicitSuperclass(_hierarchy, (IType)_implSuperRole.getCorrespondingJavaElement()));
     }
 
     
     public void testGetExplicitSuperclass_ofImplSubRole1() throws JavaModelException
     {
-        assertEquals(_class, _hierarchy.getExplicitSuperclass((IType)_implSubRole1.getCorrespondingJavaElement()));
+        assertEquals(_class, OTTypeHierarchies.getInstance().getExplicitSuperclass(_hierarchy, (IType)_implSubRole1.getCorrespondingJavaElement()));
     }
     
     
     public void testGetExplicitSuperclass_ofImplSubRole2() throws JavaModelException
     {
-        assertEquals(_subSubClass11, _hierarchy.getExplicitSuperclass((IType)_implSubRole2.getCorrespondingJavaElement()));
+        assertEquals(_subSubClass11, OTTypeHierarchies.getInstance().getExplicitSuperclass(_hierarchy, (IType)_implSubRole2.getCorrespondingJavaElement()));
     }
     
     
     public void testGetExplicitSuperclass_ofImplSubSubRole11() throws JavaModelException
     {
-        assertEquals(_subClass2, _hierarchy.getExplicitSuperclass((IType)_implSubSubRole11.getCorrespondingJavaElement()));
+        assertEquals(_subClass2, OTTypeHierarchies.getInstance().getExplicitSuperclass(_hierarchy, (IType)_implSubSubRole11.getCorrespondingJavaElement()));
     }
     
     
     public void testGetExplicitSuperclass_ofImplSubSubRole12() throws JavaModelException
     {
-        assertEquals(_subClass1, _hierarchy.getExplicitSuperclass((IType)_implSubSubRole12.getCorrespondingJavaElement()));
+        assertEquals(_subClass1, OTTypeHierarchies.getInstance().getExplicitSuperclass(_hierarchy, (IType)_implSubSubRole12.getCorrespondingJavaElement()));
     }
     
     
@@ -260,9 +262,9 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_object);
         expectedList.add(_superClass);
         expectedList.add(_class);
-        expectedList.add(_subClass1);
-        expectedList.add(_subClass2);
-        expectedList.add(_subSubClass11);
+//        expectedList.add(_subClass1); // not reachable from focusRole 
+//        expectedList.add(_subClass2); // not reachable from focusRole
+//        expectedList.add(_subSubClass11); // not reachable from focusRole
         
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
         IType[] actual = _hierarchy.getAllClasses();
@@ -284,13 +286,49 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_superClass);
         expectedList.add(_object);
         expectedList.add(_class);
-        expectedList.add(_subClass1);
-        expectedList.add(_subClass2);
-        expectedList.add(_subSubClass11);
-        IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
+//        expectedList.add(_subClass1);
+//        expectedList.add(_subClass2);
+//        expectedList.add(_subSubClass11);
         
-        assertTrue(compareTypes(expected, _hierarchy.getAllTypes()));
+        IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
+        IType[] actual = _hierarchy.getAllTypes();
+        
+        assertEquals(expected.length, actual.length);
+        assertTrue(compareTypes(expected, actual));
     }
+
+    public void testGetAllTypes_withLowFocus() throws JavaModelException
+    {
+    	try {
+    		_hierarchy = new TypeHierarchy(_implSubRole2, null, _implSubRole2.getJavaProject(), true);
+    		_hierarchy.refresh(null);
+
+            ArrayList<IType> expectedList = new ArrayList<IType>();
+            expectedList.add(_implSuperSuperRole);
+            expectedList.add(_implSuperRole);
+            expectedList.add(_focusRole);
+//            expectedList.add(_implSubRole1); // no longer reached
+            expectedList.add(_implSubRole2);
+//            expectedList.add(_implSubSubRole11); // no longer reached
+//            expectedList.add(_implSubSubRole12); // no longer reached
+            expectedList.add(_superClass);
+            expectedList.add(_object);
+            expectedList.add(_class);
+            expectedList.add(_subClass1);
+//            expectedList.add(_subClass2); // still outside
+            expectedList.add(_subSubClass11);
+            
+            IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
+            IType[] actual = _hierarchy.getAllTypes();
+            
+            assertEquals(expected.length, actual.length);
+            assertTrue(compareTypes(expected, actual));
+    	} finally {
+    		_hierarchy = new TypeHierarchy(_focusRole, null, _focusRole.getJavaProject(), true);
+    		_hierarchy.refresh(new NullProgressMonitor());
+    	}
+    }
+    
     
     public void testGetAllSuperclasses_ofFocusRole()
     {
@@ -304,6 +342,7 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]); 
         IType[] actual = _hierarchy.getAllSuperclasses((IType)_focusRole.getCorrespondingJavaElement());
         
+        assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
     }
     
@@ -313,8 +352,9 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_object);
     
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
-        IType[] actual = _hierarchy.getAllSuperclasses((IType)_implSuperSuperRole.getCorrespondingJavaElement());
+        IType[] actual = _hierarchy.getAllSuperclasses(_implSuperSuperRole);
         
+        assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
     }
     
@@ -329,6 +369,7 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
         IType[] actual = _hierarchy.getAllSuperclasses((IType)_implSuperRole.getCorrespondingJavaElement());
 
+        assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
     }
     
@@ -344,6 +385,8 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
         IType[] actual = _hierarchy.getAllSuperclasses((IType)_implSubRole1.getCorrespondingJavaElement());
+        
+        assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
     }
     
@@ -355,14 +398,41 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_focusRole);
         expectedList.add(_superClass);
         expectedList.add(_class);
-        expectedList.add(_subClass1);
-        expectedList.add(_subSubClass11);
+//        expectedList.add(_subClass1); 	// not related to focus type
+//        expectedList.add(_subSubClass11); // not related to focus type
         expectedList.add(_object);
         
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
         IType[] actual = _hierarchy.getAllSuperclasses((IType)_implSubRole2.getCorrespondingJavaElement());
         
+        assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
+    }
+
+    public void testGetAllSuperclasses_ofImplSubRole2_withFocus() throws JavaModelException
+    {
+    	try {
+    		_hierarchy = new TypeHierarchy(_implSubRole2, null, _implSubRole2.getJavaProject(), true);
+    		_hierarchy.refresh(null);
+    		ArrayList<IType> expectedList = new ArrayList<IType>();
+	        expectedList.add(_implSuperSuperRole);
+	        expectedList.add(_implSuperRole);
+	        expectedList.add(_focusRole);
+	        expectedList.add(_superClass);
+	        expectedList.add(_class);
+	        expectedList.add(_subClass1);
+	        expectedList.add(_subSubClass11);
+	        expectedList.add(_object);
+	        
+	        IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
+	        IType[] actual = _hierarchy.getAllSuperclasses((IType)_implSubRole2.getCorrespondingJavaElement());
+
+	        assertEquals(expected.length, actual.length);
+	        assertTrue(compareTypes(expected, actual));
+    	} finally {
+    		_hierarchy = new TypeHierarchy(_focusRole, null, _focusRole.getJavaProject(), true);
+    		_hierarchy.refresh(new NullProgressMonitor());
+    	}
     }
     
     public void testGetAllSuperclasses_ofImplSubSubRole11()
@@ -374,12 +444,13 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_implSubRole1);
         expectedList.add(_superClass);
         expectedList.add(_class);
-        expectedList.add(_subClass2);
+//        expectedList.add(_subClass2); // not related to focus type
         expectedList.add(_object);
         
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
         IType[] actual = _hierarchy.getAllSuperclasses((IType)_implSubSubRole11.getCorrespondingJavaElement());
         
+        assertEquals(expected.length, actual.length);
 		assertTrue(compareTypes(expected, actual));
     }
     
@@ -392,15 +463,43 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_implSubRole1);
         expectedList.add(_superClass);
         expectedList.add(_class);
-        expectedList.add(_subClass1);
+//        expectedList.add(_subClass1); // not related to focus
         expectedList.add(_object);
         
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);        
         IType[] actual = _hierarchy.getAllSuperclasses((IType)_implSubSubRole12.getCorrespondingJavaElement());
         
+        assertEquals(expected.length, actual.length);
 		assertTrue(compareTypes(expected, actual));
     }
     
+
+    public void testGetAllSuperclasses_ofImplSubSubRole12_withFocus() throws JavaModelException
+    {
+    	try {
+    		_hierarchy = new TypeHierarchy(_implSubSubRole12, null, _implSubSubRole12.getJavaProject(), true);
+    		_hierarchy.refresh(null);
+
+	        ArrayList<IType> expectedList = new ArrayList<IType>();
+	        expectedList.add(_implSuperSuperRole);
+	        expectedList.add(_implSuperRole);
+	        expectedList.add(_focusRole);
+	        expectedList.add(_implSubRole1);
+	        expectedList.add(_superClass);
+	        expectedList.add(_class);
+	        expectedList.add(_subClass1);
+	        expectedList.add(_object);
+	        
+	        IType[] expected = expectedList.toArray(new IType[expectedList.size()]);        
+	        IType[] actual = _hierarchy.getAllSuperclasses((IType)_implSubSubRole12.getCorrespondingJavaElement());
+	        
+	        assertEquals(expected.length, actual.length);
+			assertTrue(compareTypes(expected, actual));
+    	} finally {
+    		_hierarchy = new TypeHierarchy(_focusRole, null, _focusRole.getJavaProject(), true);
+    		_hierarchy.refresh(new NullProgressMonitor());
+    	}
+    }
     
     public void testGetAllSupertypes_ofFocusRole()
     {
@@ -412,7 +511,7 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_class);
        
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]); 
-        IType[] actual = _hierarchy.getAllSupertypes((IType)_focusRole.getCorrespondingJavaElement());
+        IType[] actual = OTTypeHierarchies.getInstance().getAllSupertypes(_hierarchy, (IType)_focusRole.getCorrespondingJavaElement());
        
         assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
@@ -426,6 +525,7 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]); 
         IType[] actual = _hierarchy.getAllSupertypes((IType)_implSuperSuperRole.getCorrespondingJavaElement());
 
+        assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
     }
     
@@ -438,7 +538,7 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_object);
         
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);        
-        IType[] actual = _hierarchy.getAllSupertypes((IType)_implSuperRole.getCorrespondingJavaElement());
+        IType[] actual = OTTypeHierarchies.getInstance().getAllSupertypes(_hierarchy, (IType)_implSuperRole.getCorrespondingJavaElement());
         
         assertEquals(expected.length, actual.length);
 		assertTrue(compareTypes(expected, actual));
@@ -455,8 +555,9 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_object);
         
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
-        IType[] actual = _hierarchy.getAllSupertypes((IType)_implSubRole1.getCorrespondingJavaElement());
+        IType[] actual = OTTypeHierarchies.getInstance().getAllSupertypes(_hierarchy, (IType)_implSubRole1.getCorrespondingJavaElement());
         
+        assertEquals(expected.length, actual.length);
 		assertTrue(compareTypes(expected, actual));
     }
     
@@ -468,12 +569,12 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_focusRole);
         expectedList.add(_superClass);
         expectedList.add(_class);
-        expectedList.add(_subClass1);
-        expectedList.add(_subSubClass11);
+//        expectedList.add(_subClass1); 	// not reachable from focusRole
+//        expectedList.add(_subSubClass11); // not reachable from focusRole
         expectedList.add(_object);
         
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
-        IType[] actual = _hierarchy.getAllSupertypes((IType)_implSubRole2.getCorrespondingJavaElement());
+        IType[] actual = OTTypeHierarchies.getInstance().getAllSupertypes(_hierarchy, (IType)_implSubRole2.getCorrespondingJavaElement());
         
         assertEquals(expected.length, actual.length);
 		assertTrue(compareTypes(expected, actual));
@@ -488,11 +589,11 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_implSubRole1);
         expectedList.add(_superClass);
         expectedList.add(_class);
-        expectedList.add(_subClass2);
+//        expectedList.add(_subClass2); // not reachable from focusRole
         expectedList.add(_object);
         
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
-        IType[] actual = _hierarchy.getAllSupertypes((IType)_implSubSubRole11.getCorrespondingJavaElement());
+        IType[] actual = OTTypeHierarchies.getInstance().getAllSupertypes(_hierarchy, (IType)_implSubSubRole11.getCorrespondingJavaElement());
         
         assertEquals(expected.length, actual.length);
 		assertTrue(compareTypes(expected, actual));
@@ -507,11 +608,11 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
         expectedList.add(_implSubRole1);
         expectedList.add(_superClass);
         expectedList.add(_class);
-        expectedList.add(_subClass1);
+//        expectedList.add(_subClass1); // not reachable from focusRole
         expectedList.add(_object);
         
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
-        IType[] actual = _hierarchy.getAllSupertypes((IType)_implSubSubRole12.getCorrespondingJavaElement());
+        IType[] actual = OTTypeHierarchies.getInstance().getAllSupertypes(_hierarchy, (IType)_implSubSubRole12.getCorrespondingJavaElement());
         
         assertEquals(expected.length, actual.length);
 		assertTrue(compareTypes(expected, actual));

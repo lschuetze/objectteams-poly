@@ -24,6 +24,7 @@ import junit.framework.Test;
 
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.tests.hierarchy.FileBasedHierarchyTest;
 
 /**
@@ -162,12 +163,12 @@ public class OTSuperTypeHierarchyTest007_Stress extends FileBasedHierarchyTest
     private void runActualTestCase() throws JavaModelException
     {
         _focusType = _T2_R2;
-        _testObj = createOTSuperTypeHierarchy(_focusType);
+        _testObj = createSuperTypeHierarchy(_focusType);
         
         IType[] expected = new IType[] { _interfaceA,
                                          _interfaceB,
                                          _interfaceC };        
-        IType [] actual = _testObj.getAllSuperInterfaces(_focusType);
+        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperInterfaces(_testObj, _focusType);
         
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));

@@ -28,8 +28,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.objectteams.otdt.core.IRoleType;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 /**
@@ -93,7 +93,8 @@ public class OrdinaryClassesHierarchyWithSubRolesTest extends FileBasedModelTest
         {
             return new Suite(OrdinaryClassesHierarchyWithSubRolesTest.class);
         }
-        junit.framework.TestSuite suite = 
+        @SuppressWarnings("unused")
+		junit.framework.TestSuite suite = 
             new Suite(OrdinaryClassesHierarchyWithSubRolesTest.class.getName());
         return suite;
     }
@@ -195,7 +196,7 @@ public class OrdinaryClassesHierarchyWithSubRolesTest extends FileBasedModelTest
     {
         assertNotNull(_superClass);
         assertTrue(_superClass.exists());
-        _testObj = new OTTypeHierarchy(_superClass, _superClass.getJavaProject(), true);
+        _testObj = new TypeHierarchy(_superClass, null, _superClass.getJavaProject(), true);
         _testObj.refresh(new NullProgressMonitor());
         
         ArrayList<IType> expectedList = new ArrayList<IType>();

@@ -25,9 +25,10 @@ import junit.framework.Test;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
+import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 
 /**
  * @author mkr
@@ -59,6 +60,7 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
 		{
 			return new Suite(OTSubTypeHierarchyTest010.class);
 		}
+		@SuppressWarnings("unused")
 		junit.framework.TestSuite suite = 
 			new Suite(OTSubTypeHierarchyTest010.class.getName());
 		return suite;
@@ -122,8 +124,8 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _T1R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getSubtypes(_focusType);
@@ -137,8 +139,8 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _T2R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getSubtypes(_focusType);
@@ -152,24 +154,23 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _interfaceA;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getSubtypes(_focusType);
-        IType[] expected = new IType[] { _T2R1, _T3R1 };
+        IType[] expected = new IType[] { _T2R1 };
    
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));        
     }
-
         
     public void testGetAllSubtypes_T1R1() throws JavaModelException
     {
         _focusType = _T1R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getAllSubtypes(_focusType);
@@ -187,8 +188,8 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _T2R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getAllSubtypes(_focusType);
@@ -202,8 +203,8 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _interfaceA;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getAllSubtypes(_focusType);
@@ -220,8 +221,8 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _T1R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getRootClasses();
@@ -235,8 +236,8 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _interfaceA;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getRootClasses();
@@ -250,8 +251,8 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _interfaceA;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getRootInterfaces();
@@ -266,8 +267,8 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _T1R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType actual = hierarchy.getType();
@@ -280,14 +281,14 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _interfaceA;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getImplementingClasses(_focusType);
         IType[] expected = new IType[] {
         								_T2R1,
-										_T3R1
+//										_T3R1 // indirect
 										};
    
         assertEquals(expected.length, actual.length);        
@@ -299,8 +300,8 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _interfaceA;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
 
@@ -315,8 +316,8 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _T1R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
         IType[] actual = hierarchy.getAllClasses();
@@ -335,12 +336,27 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _T1R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
-        IType[] actual = hierarchy.getTSuperTypes(_T3R1);
+        IType[] actual = OTTypeHierarchies.getInstance().getTSuperTypes(hierarchy, _T3R1);
         IType[] expected = new IType[] { _T2R1 };
+   
+        assertEquals(expected.length, actual.length);        
+        assertTrue(compareTypes(expected, actual));        
+    }
+
+    public void testGetAllTSuperTypes_T1R1() throws JavaModelException
+    {
+        _focusType = _T1R1;
+        
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
+        hierarchy.refresh(new NullProgressMonitor());
+
+        IType[] actual = OTTypeHierarchies.getInstance().getAllTSuperTypes(hierarchy, _T3R1);
+        IType[] expected = new IType[] { _T2R1, _T1R1 };
    
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));        
@@ -351,11 +367,11 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _T2R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
-        IType actual = hierarchy.getExplicitSuperclass(_T2R1);
+        IType actual = OTTypeHierarchies.getInstance().getExplicitSuperclass(hierarchy, _T2R1);
         IType expected = _objectType;
            
         assertTrue(compareTypes(expected, actual));        
@@ -365,11 +381,11 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _T2R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
-        IType actual = hierarchy.getExplicitSuperclass(_T3R1);
+        IType actual = OTTypeHierarchies.getInstance().getExplicitSuperclass(hierarchy, _T3R1);
         IType expected = _objectType;
            
         assertTrue(compareTypes(expected, actual));        
@@ -380,11 +396,11 @@ public class OTSubTypeHierarchyTest010 extends FileBasedModelTest
     {
         _focusType = _T2R1;
         
-        OTTypeHierarchy hierarchy =
-            new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), true);
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), true);
         hierarchy.refresh(new NullProgressMonitor());
 
-        IType actual = hierarchy.getExplicitSuperclass(_T1R1);
+        IType actual = OTTypeHierarchies.getInstance().getExplicitSuperclass(hierarchy, _T1R1);
         IType expected = _objectType;
            
         assertTrue(compareTypes(expected, actual));        

@@ -22,10 +22,16 @@ package org.eclipse.objectteams.otdt.tests.subhierarchy;
 
 import junit.framework.Test;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.internal.core.hierarchy.HierarchyBuilder;
+import org.eclipse.jdt.internal.core.hierarchy.IndexBasedHierarchyBuilder;
+import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
 import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchyBuilder;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
@@ -65,9 +71,8 @@ public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 	public static Test suite()
 	{
 		if (true)
-		{
 			return new Suite(OTTypeHierarchyBuilderTest.class);
-		}
+		@SuppressWarnings("unused")
 		junit.framework.TestSuite suite = 
 			new Suite(OTTypeHierarchyBuilderTest.class.getName());
 		return suite;
@@ -128,12 +133,12 @@ public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 		assertCreation(_T21T11T00R2);
     }
  
-	public void testGetResult_T20T10T00R0() throws JavaModelException
+	public void testGetResult_T20T10T00R0() throws CoreException
 	{
 	    _focusType = _T20T10T00R0;
-	    OTTypeHierarchy hierarchy = new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), false);
+	    TypeHierarchy hierarchy = new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
 	    hierarchy.refresh(new NullProgressMonitor());
-	    OTTypeHierarchyBuilder builder = new OTTypeHierarchyBuilder(hierarchy);
+	    HierarchyBuilder builder = new IndexBasedHierarchyBuilder(hierarchy, SearchEngine.createJavaSearchScope(new IJavaElement[] {_focusType.getJavaProject()} ));
 
 	    IType[] expected = { _T21T11T00R0, _T21T11T00R1, _T21T11T00R2 };
 	    

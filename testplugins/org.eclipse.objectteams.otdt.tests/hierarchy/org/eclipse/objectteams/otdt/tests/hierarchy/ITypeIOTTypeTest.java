@@ -25,10 +25,11 @@ import junit.framework.Test;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.IOTTypeHierarchy;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.PhantomType;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 
 /**
  * Testing OTTypeHiearchy with respect to IType vs. IOTType instances as input
@@ -68,6 +69,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 		{
 			return new Suite(ITypeIOTTypeTest.class);
 		}
+		@SuppressWarnings("unused")
 		junit.framework.TestSuite suite = 
 			new Suite(ITypeIOTTypeTest.class.getName());
 		return suite;
@@ -114,25 +116,28 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 	    
     public void testHierarchyCreation_equalFocusType() throws JavaModelException
     {
-        IOTTypeHierarchy first  = createOTTypeHierarchy(_MyTeam);
-        IOTTypeHierarchy second = createOTTypeHierarchy(_OT_MyTeam);
+        TypeHierarchy first  = createTypeHierarchy(_MyTeam);
+        TypeHierarchy second = createTypeHierarchy(_OT_MyTeam);
         
-		assertEquals(first.getFocusType(), second.getFocusType());		
+		assertEquals(first.getType(), second.getType());		
     }
     
-    public void testGetOTSuperTypeHierarchy() throws JavaModelException
+    // disabled, because this test used to challenge caching of hierarchies, which is not implemented for normal TypeHierarchies
+    public void _testGetOTSuperTypeHierarchy() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyTeam);
+        _testObj = createTypeHierarchy(_MyTeam);
         
-		ITypeHierarchy first  = _testObj.getOTSuperTypeHierarchy(_MyTeam);
-		ITypeHierarchy second = _testObj.getOTSuperTypeHierarchy(_OT_MyTeam);
+        ITypeHierarchy first = new TypeHierarchy(_MyTeam, null, _MyTeam.getJavaProject(), false);
+        first.refresh(null);
+        ITypeHierarchy second = new TypeHierarchy(_OT_MyTeam, null, _OT_MyTeam.getJavaProject(), false);
+        second.refresh(null);
 
 		assertEquals(first, second);		
     }
     
     public void testGetSubtypes() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyTeam);
+        _testObj = createTypeHierarchy(_MyTeam);
         
 		IType [] first  = _testObj.getSubtypes(_MyTeam);
 		IType [] second = _testObj.getSubtypes(_OT_MyTeam);
@@ -143,7 +148,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 
     public void testGetAllSuperclasses() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MySubTeam);
+        _testObj = createTypeHierarchy(_MySubTeam);
         
 		IType [] first  = _testObj.getAllSuperclasses(_MySubTeam);
 		IType [] second = _testObj.getAllSuperclasses(_OT_MySubTeam);
@@ -155,7 +160,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
     // TODO: actually use test data with interfaces
     public void testGetAllSuperInterfaces() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyTeam);
+        _testObj = createTypeHierarchy(_MyTeam);
         
 		IType [] first  = _testObj.getAllSuperInterfaces(_MyTeam);
 		IType [] second = _testObj.getAllSuperInterfaces(_OT_MyTeam);
@@ -166,7 +171,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 	
     public void testGetAllSupertypes() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MySubTeam);
+        _testObj = createTypeHierarchy(_MySubTeam);
         
 		IType [] first  = _testObj.getAllSupertypes(_MySubTeam);
 		IType [] second = _testObj.getAllSupertypes(_OT_MySubTeam);
@@ -177,7 +182,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 
 	public void testGetAllSubtypes() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyTeam);
+        _testObj = createTypeHierarchy(_MyTeam);
         
 		IType [] first  = _testObj.getAllSubtypes(_MyTeam);
 		IType [] second = _testObj.getAllSubtypes(_OT_MyTeam);
@@ -188,7 +193,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 	
 	public void testGetCachedFlags() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyTeam);
+        _testObj = createTypeHierarchy(_MyTeam);
         
 		int first  = _testObj.getCachedFlags(_MyTeam);
 		int second = _testObj.getCachedFlags(_OT_MyTeam);
@@ -198,7 +203,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 
 	public void testGetSubclasses() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyTeam);
+        _testObj = createTypeHierarchy(_MyTeam);
         
 		IType [] first  = _testObj.getSubclasses(_MyTeam);
 		IType [] second = _testObj.getSubclasses(_OT_MyTeam);
@@ -209,7 +214,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 
 	public void testGetSuperclass() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MySubTeam);
+        _testObj = createTypeHierarchy(_MySubTeam);
         
 		IType first  = _testObj.getSuperclass(_MySubTeam);
 		IType second = _testObj.getSuperclass(_OT_MySubTeam);
@@ -219,10 +224,10 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 
 	public void testGetSuperclasses() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MySubTeam);
+        _testObj = createTypeHierarchy(_MySubTeam);
         
-		IType [] first  = _testObj.getSuperclasses(_MySubTeam);
-		IType [] second = _testObj.getSuperclasses(_OT_MySubTeam);
+		IType [] first  = OTTypeHierarchies.getInstance().getSuperclasses(_testObj, _MySubTeam);
+		IType [] second = OTTypeHierarchies.getInstance().getSuperclasses(_testObj, _OT_MySubTeam);
 
 		assertEquals(first.length, second.length);		
 		assertTrue(compareTypes(first, second));
@@ -231,7 +236,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 	// TODO: actually use test data with interfaces
 	public void testGetSuperInterfaces() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyTeam);
+        _testObj = createTypeHierarchy(_MyTeam);
         
 		IType [] first  = _testObj.getSuperInterfaces(_MyTeam);
 		IType [] second = _testObj.getSuperInterfaces(_OT_MyTeam);
@@ -242,7 +247,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 
 	public void testGetSupertypes() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MySubTeam);
+        _testObj = createTypeHierarchy(_MySubTeam);
         
 		IType [] first  = _testObj.getSupertypes(_MySubTeam);
 		IType [] second = _testObj.getSupertypes(_OT_MySubTeam);
@@ -253,10 +258,10 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 
 	public void testGetTSuperTypes() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyOtherSubTeam_MyRole);
+        _testObj = createTypeHierarchy(_MyOtherSubTeam_MyRole);
         
-		IType [] first  = _testObj.getTSuperTypes(_MyOtherSubTeam_MyRole);
-		IType [] second = _testObj.getTSuperTypes(_OT_MyOtherSubTeam_MyRole);
+		IType [] first  = OTTypeHierarchies.getInstance().getTSuperTypes(_testObj, _MyOtherSubTeam_MyRole);
+		IType [] second = OTTypeHierarchies.getInstance().getTSuperTypes(_testObj, _OT_MyOtherSubTeam_MyRole);
 
 		assertEquals(first.length, second.length);		
 		assertTrue(compareTypes(first, second));
@@ -264,10 +269,10 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 
     public void testGetAllTSuperTypes() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyOtherSubTeam_MyRole);
+        _testObj = createTypeHierarchy(_MyOtherSubTeam_MyRole);
         
-		IType [] first  = _testObj.getAllTSuperTypes(_MyOtherSubTeam_MyRole);
-		IType [] second = _testObj.getAllTSuperTypes(_OT_MyOtherSubTeam_MyRole);
+		IType [] first  = OTTypeHierarchies.getInstance().getAllTSuperTypes(_testObj, _MyOtherSubTeam_MyRole);
+		IType [] second = OTTypeHierarchies.getInstance().getAllTSuperTypes(_testObj, _OT_MyOtherSubTeam_MyRole);
 
 		assertEquals(first.length, second.length);		
 		assertTrue(compareTypes(first, second));
@@ -275,10 +280,10 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 
     public void testGetExplicitSuperclass() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MySubTeam);
+        _testObj = createTypeHierarchy(_MySubTeam);
         
-		IType first  = _testObj.getExplicitSuperclass(_MySubTeam);
-		IType second = _testObj.getExplicitSuperclass(_OT_MySubTeam);
+		IType first  = OTTypeHierarchies.getInstance().getExplicitSuperclass(_testObj, _MySubTeam);
+		IType second = OTTypeHierarchies.getInstance().getExplicitSuperclass(_testObj, _OT_MySubTeam);
 
 		assertTrue(compareTypes(first, second));
     }
@@ -286,7 +291,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
     // TODO: actually use test data with interfaces
     public void testGetExtendingInterfaces() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyTeam);
+        _testObj = createTypeHierarchy(_MyTeam);
         
 		IType [] first  = _testObj.getExtendingInterfaces(_MyTeam);
 		IType [] second = _testObj.getExtendingInterfaces(_OT_MyTeam);
@@ -298,7 +303,7 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
     // TODO: actually use test data with interfaces
     public void testGetImplementingClasses() throws JavaModelException
     {
-        _testObj = createOTTypeHierarchy(_MyTeam);
+        _testObj = createTypeHierarchy(_MyTeam);
         
 		IType [] first  = _testObj.getImplementingClasses(_MyTeam);
 		IType [] second = _testObj.getImplementingClasses(_OT_MyTeam);

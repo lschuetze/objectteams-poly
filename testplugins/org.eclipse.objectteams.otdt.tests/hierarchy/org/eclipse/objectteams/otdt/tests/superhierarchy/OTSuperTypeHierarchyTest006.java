@@ -25,6 +25,7 @@ import junit.framework.Test;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.core.PhantomType;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.tests.hierarchy.FileBasedHierarchyTest;
 
 /**
@@ -60,6 +61,7 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
 		{
 			return new Suite(OTSuperTypeHierarchyTest006.class);
 		}
+		@SuppressWarnings("unused")
 		junit.framework.TestSuite suite = 
 			new Suite(OTSuperTypeHierarchyTest006.class.getName());
 		return suite;
@@ -111,12 +113,12 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
     public void testGetAllSuperclasses_T1R1() throws JavaModelException
     {
         _focusType = _T1_R1;
-        _testObj = createOTSuperTypeHierarchy(_focusType);
+        _testObj = createSuperTypeHierarchy(_focusType);
         
         IType[] expected = new IType[] { _objectType,
                 						 _classA };
         
-        IType [] actual = _testObj.getAllSuperclasses(_focusType);
+        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(_testObj, _focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
@@ -125,11 +127,11 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
     public void testGetAllSuperclasses_T2R2() throws JavaModelException
     {
         _focusType = _T1_R2;
-        _testObj = createOTSuperTypeHierarchy(_focusType);
+        _testObj = createSuperTypeHierarchy(_focusType);
         
         IType[] expected = new IType[] { _objectType };
         
-        IType [] actual = _testObj.getAllSuperclasses(_focusType);
+        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(_testObj, _focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
@@ -138,13 +140,13 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
     public void testGetAllSuperclasses_T2R1() throws JavaModelException
     {
         _focusType = _T2_R1;
-        _testObj = createOTSuperTypeHierarchy(_focusType);
+        _testObj = createSuperTypeHierarchy(_focusType);
         
         IType[] expected = new IType[] { _objectType,
                                          _T1_R1,
                                          _classA };
         
-        IType [] actual = _testObj.getAllSuperclasses(_focusType);
+        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(_testObj, _focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
@@ -153,7 +155,7 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
     public void testGetAllSuperclasses_T3R2() throws JavaModelException
     {
         _focusType = _T3_R2;
-        _testObj = createOTSuperTypeHierarchy(_focusType);
+        _testObj = createSuperTypeHierarchy(_focusType);
         
         IType[] expected = new IType[] { _objectType,
                                          _T2_R1,
@@ -161,7 +163,7 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
                                          _T1_R2,
                                          _classA };
         
-        IType [] actual = _testObj.getAllSuperclasses(_focusType);
+        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(_testObj, _focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
@@ -170,8 +172,8 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
     public void testGetAllSuperclasses_T3R2_phantomMode() throws JavaModelException
     {
         _focusType = _T3_R2;
-        _testObj = createOTSuperTypeHierarchy(_focusType);
-        _testObj.setPhantomMode(true);
+        _testObj = createSuperTypeHierarchy(_focusType);
+        OTTypeHierarchies.getInstance().setPhantomMode(_testObj, true);
         
         IType[] expected = new IType[] { _objectType,
                                          _T2_R1,
@@ -181,7 +183,7 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
                                          _phantom_T3_R1,
                                          _classA };
         
-        IType [] actual = _testObj.getAllSuperclasses(_focusType);
+        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(_testObj, _focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
@@ -190,10 +192,10 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
 	public void testGetExplicitSuperclass_T3R2() throws JavaModelException
     {
         _focusType = _T3_R2;
-        _testObj = createOTSuperTypeHierarchy(_focusType);
+        _testObj = createSuperTypeHierarchy(_focusType);
               
         IType expected = _T2_R1;        
-        IType actual = _testObj.getExplicitSuperclass(_focusType);
+        IType actual = OTTypeHierarchies.getInstance().getExplicitSuperclass(_testObj, _focusType);
 
         assertTrue(compareTypes(expected, actual));
     }
@@ -201,11 +203,11 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
     public void testGetExplicitSuperclass_T3R2_phantomMode() throws JavaModelException
     {
         _focusType = _T3_R2;
-        _testObj = createOTSuperTypeHierarchy(_focusType);
-        _testObj.setPhantomMode(true);
+        _testObj = createSuperTypeHierarchy(_focusType);
+        OTTypeHierarchies.getInstance().setPhantomMode(_testObj, true);
               
         IType expected = _phantom_T3_R1;
-        IType actual = _testObj.getExplicitSuperclass(_focusType);
+        IType actual = OTTypeHierarchies.getInstance().getExplicitSuperclass(_testObj, _focusType);
 
         assertTrue(compareTypes(expected, actual));
     }
@@ -214,11 +216,11 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
 	public void testGetAllTSuperTypes_T3R2() throws JavaModelException
     {
         _focusType = _T3_R2;
-        _testObj = createOTSuperTypeHierarchy(_focusType);
+        _testObj = createSuperTypeHierarchy(_focusType);
 
         IType[] expected = new IType[] { _T1_R2 };
         
-        IType [] actual = _testObj.getAllTSuperTypes(_focusType);
+        IType [] actual = OTTypeHierarchies.getInstance().getAllTSuperTypes(_testObj, _focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
@@ -227,10 +229,10 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
 	public void testGetAllTSuperTypes_T2R1() throws JavaModelException
     {
         _focusType = _T2_R1;
-        _testObj = createOTSuperTypeHierarchy(_focusType);
+        _testObj = createSuperTypeHierarchy(_focusType);
         
         IType[] expected = new IType[] { _T1_R1 };
-        IType [] actual = _testObj.getAllTSuperTypes(_focusType);
+        IType [] actual = OTTypeHierarchies.getInstance().getAllTSuperTypes(_testObj, _focusType);
 
         assertEquals(expected.length, actual.length);
         assertTrue(compareTypes(expected, actual));
