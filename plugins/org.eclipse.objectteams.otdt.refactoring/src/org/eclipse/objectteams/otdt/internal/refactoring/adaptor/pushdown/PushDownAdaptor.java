@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.ResolvedSourceMethod;
+import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor.MemberActionInfo;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -34,10 +35,9 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
-import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.PhantomType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IAmbuguityMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IOverloadingMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
@@ -101,9 +101,8 @@ public team class PushDownAdaptor {
 						
 						// shadowing fields is just forbidden in implicit hierarchies
 						if(TypeHelper.isRole(type.getFlags())){
-							OTTypeHierarchy implicitHierarchy = new OTTypeHierarchy(type, type.getJavaProject(), false);
-							implicitHierarchy.refresh(pm);
-							IType[] implicitSuperTypes = implicitHierarchy.getAllTSuperTypes(type);
+							TypeHierarchy implicitHierarchy = (TypeHierarchy) type.newSupertypeHierarchy(pm);
+							IType[] implicitSuperTypes = OTTypeHierarchies.getInstance().getAllTSuperTypes(implicitHierarchy, type);
 							
 							for (int j = 0; j < implicitSuperTypes.length; j++) {
 								IType implicitSuperType = implicitSuperTypes[i];
@@ -268,19 +267,16 @@ public team class PushDownAdaptor {
 			RefactoringStatus status = new RefactoringStatus();
 			ITypeHierarchy hier = getHierarchyOfDeclaringClass(pm);
 			
-			if(hier instanceof OTTypeHierarchy){
-				OTTypeHierarchy otHier = (OTTypeHierarchy)hier;
-				otHier.setPhantomMode(true);
-				IType[] subTypes = otHier.getSubtypes(getDeclaringType());
-				for (int i = 0; i < subTypes.length; i++) {
-					IType subType = subTypes[i];
-					if(subType instanceof PhantomType){
-						String msg = Messages.format("An implicit sub role of ''{0}'' is a phantom role, therefore the pushed down members cannot be moved to ''{1}''.", new String[] { getDeclaringType().getFullyQualifiedName('.'), subType.getFullyQualifiedName('.') });
-						status.addError(msg, JavaStatusContext.create(subType));
-					}
+			OTTypeHierarchies.getInstance().setPhantomMode((TypeHierarchy)hier, true);
+			IType[] subTypes = hier.getSubtypes(getDeclaringType());
+			for (int i = 0; i < subTypes.length; i++) {
+				IType subType = subTypes[i];
+				if(subType instanceof PhantomType){
+					String msg = Messages.format("An implicit sub role of ''{0}'' is a phantom role, therefore the pushed down members cannot be moved to ''{1}''.", new String[] { getDeclaringType().getFullyQualifiedName('.'), subType.getFullyQualifiedName('.') });
+					status.addError(msg, JavaStatusContext.create(subType));
 				}
-				otHier.setPhantomMode(false);
 			}
+			OTTypeHierarchies.getInstance().setPhantomMode((TypeHierarchy)hier, false);
 			return status;
 		}
 		
@@ -301,9 +297,9 @@ public team class PushDownAdaptor {
 				IMember[] membersToPushDown = getMembersToMove();
 				
 				// create the ot hierarchy to check implicit super types
-				OTTypeHierarchy hierarchy = new OTTypeHierarchy(type, type.getJavaProject(), false);
+				TypeHierarchy hierarchy = new TypeHierarchy(type, null, type.getJavaProject(), false);
 				hierarchy.refresh(pm);
-				IType[] superRoles = hierarchy.getTSuperTypes(type);
+				IType[] superRoles = OTTypeHierarchies.getInstance().getTSuperTypes(hierarchy, type);
 				
 				pm.beginTask("Checking Overriding", superRoles.length);
 				pm.subTask(""); //$NON-NLS-1$
@@ -379,30 +375,5 @@ public team class PushDownAdaptor {
 			pm.done();
 			return status;
 		}
-		
-		
-		/**
-		 * Replaces the jdt hierarchy with the ot hierarchy. 
-		 * @throws JavaModelException 
-		 */
-		@SuppressWarnings("basecall")
-		callin ITypeHierarchy getOTHierarchyOfDeclaringClass(IProgressMonitor monitor) throws JavaModelException  {
-			try {
-				if (fDeclaringTypeHierachy != null)
-					return fDeclaringTypeHierachy;
-				if(OTModelManager.hasOTElementFor(getDeclaringType())){
-					fDeclaringTypeHierachy = OTModelManager.getOTElement(getDeclaringType()).newOTTypeHierarchy(monitor);
-				}else{
-					fDeclaringTypeHierachy = base.getOTHierarchyOfDeclaringClass(monitor);
-				}
-				return fDeclaringTypeHierachy;
-			} finally {
-				monitor.done();
-			}
-		}
-		
-		getOTHierarchyOfDeclaringClass <- replace getHierarchyOfDeclaringClass;
-		
-	}
- 
+	} 
 }
