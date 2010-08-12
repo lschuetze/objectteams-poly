@@ -51,7 +51,7 @@ char separator = Index.DEFAULT_SEPARATOR;
 /* orig:
 public static final String SIGNATURE= "INDEX VERSION 1.126"; //$NON-NLS-1$
   :giro */
-public static final String SIGNATURE= "INDEX VERSION 1.126 OT1"; //$NON-NLS-1$
+public static final String SIGNATURE= "INDEX VERSION 1.126 OT2"; //$NON-NLS-1$
 // SH}
 private static final char[] SIGNATURE_CHARS = SIGNATURE.toCharArray();
 public static boolean DEBUG = false;

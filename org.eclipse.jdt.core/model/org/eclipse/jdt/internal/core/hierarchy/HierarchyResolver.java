@@ -37,8 +37,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -169,9 +172,14 @@ public void accept(ISourceType[] sourceTypes, PackageBinding packageBinding, Acc
 			this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
 
 			org.eclipse.jdt.core.ICompilationUnit cu = ((SourceTypeElementInfo)sourceType).getHandle().getCompilationUnit();
+//{ObjectTeams: swap order so rememberAllTypes catches also copy-inherited roles:
+/* orig:
 			rememberAllTypes(unit, cu, false);
-
+ */
 			this.lookupEnvironment.completeTypeBindings(unit, true/*build constructor only*/);
+// :giro
+			rememberAllTypes(unit, cu, false);
+// SH}
 		} catch (AbortCompilation e) {
 			// missing 'java.lang' package: ignore
 		}
@@ -429,7 +437,12 @@ private void remember(IGenericType suppliedType, ReferenceBinding typeBinding) {
 	this.typeBindings[this.typeIndex] = typeBinding;
 }
 private void remember(IType type, ReferenceBinding typeBinding) {
+//{ObjectTeams: for phantom roles avoid hitting the JME (phantom has no info) but proceed into else as to record what we have
+/* orig:
 	if (((CompilationUnit)type.getCompilationUnit()).isOpen()) {
+  :giro */
+	if (((CompilationUnit)type.getCompilationUnit()).isOpen() && !isPurelyCopiedRole(typeBinding)) {
+// SH}
 		try {
 			IGenericType genericType = (IGenericType)((JavaElement)type).getElementInfo();
 			remember(genericType, typeBinding);
@@ -483,6 +496,13 @@ private void remember(IType type, ReferenceBinding typeBinding) {
 	}
 
 }
+//{ObjectTeams: helper for above:
+private boolean isPurelyCopiedRole(ReferenceBinding typeBinding) {
+	if (typeBinding == null || typeBinding.roleModel == null)
+		return false;
+	return typeBinding.roleModel.isPurelyCopied();
+}
+// SH}
 /*
  * Remembers all type bindings defined in the given parsed unit, adding local/anonymous types if specified.
  */
@@ -628,6 +648,24 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 				typeBinding = typeBinding.roleModel.getClassPartBinding();
 			}
 		}
+		if (typeBinding.isSynthInterface())
+			continue; // don't report synthetic ifc parts
+		
+		// prepare additional info to pass to the builder (viz. the OTTypeHierarchies team)
+		IType[] tsuperClasses = new IType[0];
+		boolean[] arePhantoms = new boolean[0]; // one flag for each role in tsuperClasses
+		if (typeBinding.isSourceRole()) {
+			ReferenceBinding[] tsuperBindings = typeBinding.roleModel.getTSuperRoleBindings();
+			if (tsuperBindings.length > 0) {
+				tsuperClasses = new IType[tsuperBindings.length];
+				arePhantoms = new boolean[tsuperBindings.length];
+				for (int i = 0; i < tsuperBindings.length; i++) {
+					tsuperClasses[i] = getHandle(tsuperBindings[i]);
+					arePhantoms[i] = tsuperBindings[i].roleModel.isPurelyCopied();
+				}
+			}
+		}
+		boolean isPhantom = typeBinding.roleModel != null && typeBinding.roleModel.isPurelyCopied();
 // SH}
 		if (typeBinding.isInterface()){ // do not connect interfaces to Object
 			superclass = null;
@@ -636,7 +674,12 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 		}
 		IType[] superinterfaces = findSuperInterfaces(suppliedType, typeBinding);
 
+//{ObjectTeams: also announce tsuper classes and info about phantomness:
+/* orig:
 		this.builder.connect(suppliedType, this.builder.getHandle(suppliedType, typeBinding), superclass, superinterfaces);
+  :giro */
+		this.builder.hookableConnect(this.focusType, typeBinding, suppliedType, this.builder.getHandle(suppliedType, typeBinding), isPhantom, superclass, tsuperClasses, arePhantoms, superinterfaces);
+// SH}
 	}
 	// add java.lang.Object only if the super class is not missing
 	if (objectIndex > -1 && (!this.hasMissingSuperClass || this.focusType == null)) {
@@ -644,6 +687,17 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 		this.builder.connect(objectType, this.builder.getHandle(objectType, this.typeBindings[objectIndex]), null, null);
 	}
 }
+//{ObjectTeams: 
+private IType getHandle(ReferenceBinding typeBinding) {
+	for (int t = this.typeIndex; t >= 0; t--) {
+		if (this.typeBindings[t] == typeBinding) {
+			 return this.builder.getHandle(this.typeModels[t], typeBinding);
+		}
+	}
+	JavaCore.getPlugin().getLog().log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, "Inconsistency between typeIndex and typeBindings")); //$NON-NLS-1$
+	return null;
+}
+// SH}
 private void reset(){
 	this.lookupEnvironment.reset();
 
@@ -1013,61 +1067,17 @@ private boolean subTypeOfType(ReferenceBinding subType, ReferenceBinding typeBin
 //	if (superclass != null && superclass.id == TypeIds.T_JavaLangObject && subType.isHierarchyInconsistent()) return false;
 	if (subTypeOfType(superclass, typeBinding)) return true;
 	ReferenceBinding[] superInterfaces = subType.superInterfaces();
+// {ObjectTeams: check implicit inheritance:
+	if (subType.isSourceRole())
+		for (ReferenceBinding tsuperBinding : subType.roleModel.getTSuperRoleBindings())
+			if (subTypeOfType(tsuperBinding, typeBinding)) 
+				return true;
+// SH}
 	if (superInterfaces != null) {
-// {OTDTUI: Subtype check for roles and non-roles:
-	  if (subType.isRole())
-	  {
-		// Role interface -> check superinterfaces
-		if (subType.isRegularInterface())
-		{
-			for (int i = 0, length = superInterfaces.length; i < length; i++)
-			{
-				if (subTypeOfType(superInterfaces[i], typeBinding)) return true;
-			}
-		}
-		// Interface part of roles -> check superinterfaces, class part
-		else if (subType.isSynthInterface())
-		{
-			for (int i = 0, length = superInterfaces.length; i < length; i++)
-			{
-				if (superInterfaces[i].isSynthInterface())
-				{
-					// Ignore (tsuper's) synthetic.
-					// I don't know why ak skipped them in earlier revisions,
-					// but it seems like we don't need to consider implicit
-					// inheritance here.
-					continue;
-				}
-				if (subTypeOfType(superInterfaces[i], typeBinding)) return true;
-			}
-			if (typeBinding.isClass())
-			{
-				ReferenceBinding classPart = subType.roleModel.getClassPartBinding();
-				if (subTypeOfType(classPart, typeBinding)) return true;
-			}
-		}
-		// role class -> check superinterfaces
-		else
-		{
-			if (typeBinding.isInterface())
-			{
-				for (int i = 0, length = superInterfaces.length; i < length; i++)
-				{
-					if (subTypeOfType(superInterfaces[i], typeBinding)) return true;
-				}
-			}
-		}
-	  }
-		// non role types -> check superinterfaces
-	  else {
-// orig:
 		for (int i = 0, length = superInterfaces.length; i < length; i++) {
 			ReferenceBinding superInterface = (ReferenceBinding) superInterfaces[i].erasure();
 			if (subTypeOfType(superInterface, typeBinding)) return true;
 		}
-// :giro
-	  }
-// mkr}
 	}
 	return false;
 }

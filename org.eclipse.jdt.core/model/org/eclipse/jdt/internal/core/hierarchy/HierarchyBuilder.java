@@ -119,6 +119,20 @@ public abstract class HierarchyBuilder {
 			this.hierarchy.addRootClass(focusType);
 		}
 	}
+	/** Wrapper method as hook for OTTypeHierarchies. */
+	public void hookableConnect(
+			ReferenceBinding focusType,
+			ReferenceBinding typeBinding,
+			IGenericType type,
+			IType typeHandle,
+			boolean isPhantom,
+			IType superclassHandle,
+			IType[] tsuperclassHandles,
+			boolean[] arePhantoms,
+			IType[] superinterfaceHandles) 
+	{
+		connect(type, typeHandle, superclassHandle, superinterfaceHandles);
+	}
 	/**
 	 * Connect the supplied type to its superclass & superinterfaces.
 	 * The superclass & superinterfaces are the identical binary or source types as

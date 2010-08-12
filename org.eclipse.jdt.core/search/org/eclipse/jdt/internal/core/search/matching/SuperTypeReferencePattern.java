@@ -116,7 +116,12 @@ public static char[] createIndexKey(
 	int simpleLength = simpleName == null ? 0 : simpleName.length;
 	int enclosingLength = enclosingTypeName == null ? 0 : enclosingTypeName.length;
 	int packageLength = packageName == null ? 0 : packageName.length;
+//{ObjectTeams: one more char for modifiers
+/* orig:
 	char[] result = new char[superLength + superQLength + simpleLength + enclosingLength + typeParametersLength + packageLength + 9];
+  :giro */
+	char[] result = new char[superLength + superQLength + simpleLength + enclosingLength + typeParametersLength + packageLength + 10];
+// SH}
 	int pos = 0;
 	if (superLength > 0) {
 		System.arraycopy(superSimpleName, 0, result, pos, superLength);
@@ -150,7 +155,13 @@ public static char[] createIndexKey(
 	result[pos++] = SEPARATOR;
 	result[pos++] = superClassOrInterface;
 	result[pos++] = classOrInterface;
+//{ObjectTeams: expand to also cover AccRole:
+/* orig:
 	result[pos] = (char) modifiers;
+  :giro */
+	result[pos++] = (char) modifiers;
+	result[pos] = (char) (modifiers>>16);
+// SH}
 	return result;
 }
 
@@ -232,7 +243,12 @@ public void decodeIndexKey(char[] key) {
 
 	this.superClassOrInterface = key[slash + 1];
 	this.classOrInterface = key[slash + 2];
+//{ObjectTeams: expanded to also cover AccRole:
+/* orig:
 	this.modifiers = key[slash + 3]; // implicit cast to int type
+   :giro */
+	this.modifiers = key[slash + 3] + (key[slash + 4]<<16);
+// SH}
 }
 public SearchPattern getBlankPattern() {
 	return new SuperTypeReferencePattern(R_EXACT_MATCH | R_CASE_SENSITIVE);

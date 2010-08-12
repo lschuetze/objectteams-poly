@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.core.*;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.core.IOTType;
 
 /**
  * @see ITypeHierarchy
@@ -154,6 +155,10 @@ public TypeHierarchy(IType type, ICompilationUnit[] workingCopies, IJavaProject 
  * Creates a TypeHierarchy on the given type.
  */
 public TypeHierarchy(IType type, ICompilationUnit[] workingCopies, IJavaSearchScope scope, boolean computeSubtypes) {
+//{ObjectTeams: always unwrap OTTypes, hierarchy only stores plain java types (SourceType, BinaryType):
+	if (type instanceof IOTType)
+		type = (IType) ((IOTType) type).getCorrespondingJavaElement();
+// SH}
 	this.focusType = type == null ? null : (IType) ((JavaElement) type).unresolved(); // unsure the focus type is unresolved (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=92357)
 	this.workingCopies = workingCopies;
 	this.computeSubtypes = computeSubtypes;

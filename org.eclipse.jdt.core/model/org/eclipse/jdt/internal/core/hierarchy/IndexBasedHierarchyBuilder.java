@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.search.*;
 import org.eclipse.jdt.internal.compiler.env.AccessRuleSet;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObjectToInt;
@@ -38,6 +39,8 @@ import org.eclipse.jdt.internal.core.search.matching.MatchLocator;
 import org.eclipse.jdt.internal.core.search.matching.SuperTypeReferencePattern;
 import org.eclipse.jdt.internal.core.util.HandleFactory;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.core.IRoleType;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
 
 public class IndexBasedHierarchyBuilder extends HierarchyBuilder implements SuffixConstants {
 	public static final int MAXTICKS = 800; // heuristic so that there still progress for deep hierachies
@@ -487,6 +490,9 @@ public static void searchAllPossibleSubTypes(
 					&& !foundSuperNames.containsKey(typeName)){
 				foundSuperNames.put(typeName, typeName);
 				queue.add(typeName);
+//{ObjectTeams: check if we need additional traversal role->enclosing team in order to cover implicit inheritance, too.
+				reportIndexMatch(record, queue, foundSuperNames);
+// SH}
 			}
 			return true;
 		}
@@ -509,6 +515,12 @@ public static void searchAllPossibleSubTypes(
 
 	int ticks = 0;
 	queue.add(type.getElementName().toCharArray());
+//{ObjectTeams: additional traversal role->enclosing team in order to cover implicit inheritance, too.
+	while (OTModelManager.isRole(type)) {
+		type = ((IRoleType)OTModelManager.getOTElement(type)).getTeamJavaType();
+		queue.add(type.getElementName().toCharArray());
+	}
+// SH}	
 	try {
 		while (queue.start <= queue.end) {
 			if (progressMonitor != null && progressMonitor.isCanceled()) return;
@@ -544,4 +556,25 @@ public static void searchAllPossibleSubTypes(
 		job.finished();
 	}
 }
+//{ObjectTeams: additional traversal role->enclosing team in order to cover implicit inheritance, too.
+static void reportIndexMatch(SuperTypeReferencePattern record, Queue q, HashtableOfObject foundSuperNames) {
+	if ((record.modifiers & ExtraCompilerModifiers.AccRole) != 0) {
+		char[][] enclosingNames = CharOperation.splitOn('$', record.enclosingTypeName);
+		char[] teamSimpleName;
+		if (enclosingNames.length > 0) {
+			teamSimpleName = enclosingNames[enclosingNames.length-1];
+		} else {
+			char[][] packageNames = CharOperation.splitOn('$', record.pkgName);
+			if (packageNames.length > 0)
+				teamSimpleName = packageNames[packageNames.length-1];
+			else
+				return; // no success (enclosing team name not found)
+		}
+		if (!foundSuperNames.containsKey(teamSimpleName)) {
+			q.add(teamSimpleName);
+			foundSuperNames.put(teamSimpleName, teamSimpleName);
+		}
+	}
+}
+// SH}
 }
