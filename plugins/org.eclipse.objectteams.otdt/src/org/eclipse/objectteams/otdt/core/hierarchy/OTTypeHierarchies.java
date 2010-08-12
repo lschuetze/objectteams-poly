@@ -268,10 +268,6 @@ public team class OTTypeHierarchies {
 								result[i++] = this.allTSupersLinearized.get(skip++);
 							return result;
 						}
-					} else {
-						System.out.println("HERE "+this);
-						// not focus type but seemingly bottom of the lattice, take all known tsupers
-						return this.allTSupersLinearized.toArray(new ConnectedType[size]);
 					}
 				}
 				return new ConnectedType[0];
