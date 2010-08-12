@@ -301,6 +301,8 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
 	                break;
 	            }
 	        }
+	        if (!loopResult)
+	        	System.out.println("Not found: "+curExpName);
 	        result &= loopResult;
         }
         return result;
