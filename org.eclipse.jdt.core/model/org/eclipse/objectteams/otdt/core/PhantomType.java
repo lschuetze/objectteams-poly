@@ -69,7 +69,7 @@ public class PhantomType implements IType
     private IType _realType;
     private IType _enclosingTeam;
     
-    public PhantomType(IType enclosingTeam, IType tsuperRole) throws JavaModelException
+    public PhantomType(IType enclosingTeam, IType tsuperRole)
     {
         _enclosingTeam = enclosingTeam;
         this.setRealType(tsuperRole);        
