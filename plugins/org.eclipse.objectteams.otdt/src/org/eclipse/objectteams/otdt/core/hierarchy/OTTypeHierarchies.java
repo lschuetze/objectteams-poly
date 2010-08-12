@@ -21,12 +21,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.env.IGenericType;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
+import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 
 // both base type and directly used:
 import org.eclipse.jdt.core.IType;
@@ -141,6 +145,9 @@ public team class OTTypeHierarchies {
 		@SuppressWarnings("abstractrelevantrole")
 		protected abstract class ConnectedType  playedBy IType 
 		{
+			ConnectedType getParent() -> IJavaElement getParent() 
+				with { result <- (IType)result } // TODO(SH): make safer, consider role files
+
 			/** Is this type a phantom role? */
 			protected boolean isPhantom;
 
@@ -220,10 +227,17 @@ public team class OTTypeHierarchies {
 			protected ConnectedType getRealTSuper() throws JavaModelException {
 				if (!isPhantom)
 					return this;
-				if (this.allTSupersLinearized != null)
+				if (this.allTSupersLinearized != null) {
 					for(ConnectedType other : this.allTSupersLinearized)
 						if (!other.isPhantom)
 							return other;
+				} else if (this.directTSupers != null) {
+					for (ConnectedType direct : this.directTSupers) { // TODO(SH): check whether we need breadth-first search
+						ConnectedType candidate = direct.getRealTSuper();
+						if (candidate != null)
+							return candidate;
+					}						
+				}
 				throw new JavaModelException(new JavaModelStatus(JavaModelStatus.ERROR, this, "no non-phantom type found in allTSupersLinearized")); //$NON-NLS-1$
 			}
 			
@@ -290,7 +304,13 @@ public team class OTTypeHierarchies {
 		protected class ConnectedBinaryType extends ConnectedType playedBy BinaryType { /*just class binding, no details*/ }
 		
 		// binding binary variant of IType
-		protected class ConnectedPhantomType extends ConnectedType playedBy PhantomType { /*just class binding, no details*/ }
+		protected class ConnectedPhantomType extends ConnectedType playedBy PhantomType { /* mainly class binding */
+			/** Create a new phantom type (role and base) */
+			protected ConnectedPhantomType(IType enclosingTeam, IType realTSuper) {
+				// super(base(enclosingTeam, realTSuper)); // FIXME(SH): syntax err??
+				super(new org.eclipse.objectteams.otdt.core.PhantomType(enclosingTeam, realTSuper));
+			}
+		}
 
 		// binding binary variant of IType
 		protected class ConnectedOTType extends ConnectedType playedBy OTType { /*just class binding, no details*/ }
@@ -348,7 +368,7 @@ public team class OTTypeHierarchies {
 			IType focusType = getFocusType();
 			if (type.equals(focusType))
 				return true;
-			return focusType.getParent().equals(type.getParent()); // FIXME(SH) elaborate more
+			return focusType.getParent().equals(type.getParent()); // TODO(SH) elaborate more
 		}
 		
 		boolean isStrictlyBelowFocusType(IType type) {
@@ -416,8 +436,19 @@ public team class OTTypeHierarchies {
 				return unfiltered;
 			Set<ConnectedType> filtered = new HashSet<ConnectedType>();
 			for(ConnectedType type : unfiltered)
-				if (this.phantomMode || !type.isPhantom)
-					filtered.add(type);
+				if (this.phantomMode || !type.isPhantom) {
+					if (type.isPhantom && !(type instanceof ConnectedPhantomType)) {
+						try {
+							// insert type as a phantom type:
+							filtered.add(new ConnectedPhantomType(type.getParent(), type.getRealTSuper()));
+						} catch (JavaModelException e) {
+							// couldn't find real tsuper, skip this type
+							OTDTPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDTPlugin.PLUGIN_ID, "Failed to find original tsuper role.", e)); //$NON-NLS-1$
+						}
+					} else {
+						filtered.add(type);
+					}
+				}
 			return filtered.toArray(new ConnectedType[filtered.size()]);
 		}
 
