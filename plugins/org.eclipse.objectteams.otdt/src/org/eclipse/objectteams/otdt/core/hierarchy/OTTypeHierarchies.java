@@ -35,6 +35,7 @@ import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 // both base type and directly used:
 import org.eclipse.jdt.core.IType;
 
+import base org.eclipse.jdt.core.ITypeHierarchy;
 import base org.eclipse.jdt.internal.core.BinaryType;
 import base org.eclipse.jdt.internal.core.SourceType;
 import base org.eclipse.jdt.internal.core.hierarchy.HierarchyBuilder;
@@ -85,11 +86,31 @@ public team class OTTypeHierarchies {
 	/** Get the singleton instance of this team, which was created and activated by OT/Equinox. */
 	public static OTTypeHierarchies getInstance() { return instance; }
 	
-	
+	/**
+	 * This role serves as a lift target for API parameters of type ITypeHierarchy.
+	 * All details are found in subclass {@link OTTypeHierarchyImpl}. 
+	 */
+	@SuppressWarnings("abstractrelevantrole")
+	protected abstract team class OTTypeHierarchy playedBy ITypeHierarchy 
+	{		
+		/** Should the hierarchy show phantom roles? */
+		protected boolean phantomMode;
+
+		protected abstract IType[] getAllSuperclasses(IType type);
+		protected abstract IType[] getAllSuperInterfaces(IType type);
+		protected abstract IType[] getAllTSuperTypes(IType type);
+		protected abstract IType[] getDirectTSupers(IType type) throws JavaModelException;
+
+		protected abstract IType getPlainSuperclass(IType type) throws JavaModelException;
+		
+		protected abstract IType[] getAllTSubTypes(IType type);
+		protected abstract IType[] getSuperInterfaces(IType type);
+	}
+
 	/** 
 	 * The stateful part of this team, implemented as a nested team.
 	 */
-	protected team class OTTypeHierarchy playedBy TypeHierarchy 
+	protected team class OTTypeHierarchyImpl extends OTTypeHierarchy playedBy TypeHierarchy 
 	{
 		// === "Imports" (callout) from plain TypeHierarchy: ===
 		
@@ -315,10 +336,7 @@ public team class OTTypeHierarchies {
 		// binding binary variant of IType
 		protected class ConnectedOTType extends ConnectedType playedBy OTType { /*just class binding, no details*/ }
 
-		// === start main part of nested team OTTypeHierarchy ===
-		
-		/** Should the hierarchy show phantom roles? */
-		protected boolean phantomMode;
+		// === start main part of nested team OTTypeHierarchyImpl ===
 
 		/**
 		 * Connect the found tsuper classes into the connected type for the given type. 
@@ -435,21 +453,25 @@ public team class OTTypeHierarchies {
 			if (unfiltered == null)
 				return unfiltered;
 			Set<ConnectedType> filtered = new HashSet<ConnectedType>();
-			for(ConnectedType type : unfiltered)
-				if (this.phantomMode || !type.isPhantom) {
-					if (type.isPhantom && !(type instanceof ConnectedPhantomType)) {
-						try {
-							// insert type as a phantom type:
-							filtered.add(new ConnectedPhantomType(type.getParent(), type.getRealTSuper()));
-						} catch (JavaModelException e) {
-							// couldn't find real tsuper, skip this type
-							OTDTPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDTPlugin.PLUGIN_ID, "Failed to find original tsuper role.", e)); //$NON-NLS-1$
-						}
-					} else {
-						filtered.add(type);
-					}
-				}
+			for(ConnectedType type : unfiltered) {
+				if (type.isPhantom && !this.phantomMode)
+					continue; // skip
+				type = maybeAdjustPhantom(type);
+				if (type != null)
+					filtered.add(type);
+			}
 			return filtered.toArray(new ConnectedType[filtered.size()]);
+		}
+		
+		protected ConnectedType maybeAdjustPhantom(ConnectedType type) {
+			if (!type.isPhantom || (type instanceof ConnectedPhantomType))
+				return type;
+			try {
+				return new ConnectedPhantomType(type.getParent(), type.getRealTSuper());
+			} catch (JavaModelException e) {
+				OTDTPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDTPlugin.PLUGIN_ID, "Failed to find original tsuper role.", e)); //$NON-NLS-1$
+				return null;
+			}
 		}
 
 		callin void ensureJavaType(IType type) {
@@ -505,6 +527,26 @@ public team class OTTypeHierarchies {
 		protected IType[] getAllSuperclasses(IType type) {
 			return getAllSuperclassesUnfiltered(type);
 		}
+		
+		protected IType[] getAllTSubTypes(IType as ConnectedType type) {
+			Set<ConnectedType> tsubs = new HashSet<ConnectedType>();
+			internalGetAllTSubTypes(type, tsubs);
+			ConnectedType[] result = tsubs.toArray(new ConnectedType[tsubs.size()]);
+			return result;// FIXME(SH) return without intermediate local var -> CCE
+		}
+		protected void internalGetAllTSubTypes(ConnectedType type, Set<ConnectedType> tsubs) { // FIXME(SH) private gives type error (in bridge?)
+			if (type.knownTSubTypes != null) {
+				for (ConnectedType tsub : type.knownTSubTypes) {
+					if (tsub.isPhantom && !this.phantomMode)
+						continue;
+					tsub = maybeAdjustPhantom(tsub);
+					if (tsub == null)
+						continue; // failed to adjust, so better skip this one.
+					tsubs.add(tsub);
+					internalGetAllTSubTypes(tsub, tsubs);
+				}
+			}
+		}
 	}
 	
 	/**
@@ -513,7 +555,7 @@ public team class OTTypeHierarchies {
 	protected class OTHierarchyBuilder playedBy HierarchyBuilder {
 
 		@SuppressWarnings("decapsulation")
-		OTTypeHierarchy getHierarchy() -> get TypeHierarchy hierarchy;
+		OTTypeHierarchyImpl getHierarchy() -> get TypeHierarchy hierarchy;
 
 		connectTSupers  <- before hookableConnect;
 
@@ -536,7 +578,7 @@ public team class OTTypeHierarchies {
 	 * @return a non-null array of ordered implicit super classes
 	 * @throws JavaModelException If the tsuper linearization is corrupt
 	 */
-	public IType[] getAllTSuperTypes(TypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
+	public IType[] getAllTSuperTypes(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
 		return otHierarchy.getAllTSuperTypes(type);
 	}
@@ -550,7 +592,7 @@ public team class OTTypeHierarchies {
 	 * @return a non-null array of ordered implicit super classes
 	 * @throws JavaModelException If the tsuper linearization is corrupt
 	 */
-	public IType[] getTSuperTypes(TypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
+	public IType[] getTSuperTypes(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
 		return otHierarchy.getDirectTSupers(type);
 	}
@@ -564,7 +606,7 @@ public team class OTTypeHierarchies {
 	 * @return a non-null array of ordered super classes.
 	 * @throws JavaModelException If the tsuper linearization is corrupt
 	 */
-	public IType[] getSuperclasses(TypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
+	public IType[] getSuperclasses(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
 		// have superclass (otherwise type == java.lang.Object?)
 		IType superclass = otHierarchy.getPlainSuperclass(type);
@@ -593,7 +635,7 @@ public team class OTTypeHierarchies {
 	 * @return a non-null array of ordered super classes.
 	 * @throws JavaModelException if accessing type failed
 	 */
-	public IType[] getAllSuperclasses(TypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
+	public IType[] getAllSuperclasses(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type.isInterface())
 			return NO_TYPE;
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
@@ -608,14 +650,14 @@ public team class OTTypeHierarchies {
 	 * @return the superclass
 	 * @throws JavaModelException If the tsuper linearization is corrupt
 	 */
-	public IType getExplicitSuperclass(TypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
+	public IType getExplicitSuperclass(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
 		// have superclass (otherwise type == java.lang.Object?)
 		return otHierarchy.getPlainSuperclass(type);
 	}
 
 	/** Get ALL super types: classes and interfaces, explicit and implicit, direct and indirect. */
-	public IType[] getAllSupertypes(TypeHierarchy  as OTTypeHierarchy otHierarchy, IType type) {
+	public IType[] getAllSupertypes(ITypeHierarchy  as OTTypeHierarchy otHierarchy, IType type) {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
 		IType[] superclasses = otHierarchy.getAllSuperclasses(type);
 		IType[] superinterfaces = otHierarchy.getAllSuperInterfaces(type);
@@ -635,7 +677,7 @@ public team class OTTypeHierarchies {
 	 * @return the superinterfaces
 	 * @throws JavaModelException If the tsuper linearization is corrupt
 	 */
-	public IType[] getSuperInterfaces(TypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
+	public IType[] getSuperInterfaces(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
 		IType[] superinterfaces = otHierarchy.getSuperInterfaces(type);
 		if (!OTModelManager.isRole(type))
@@ -660,7 +702,7 @@ public team class OTTypeHierarchies {
 	 * @return the superinterfaces
 	 * @throws JavaModelException If the tsuper linearization is corrupt
 	 */
-	public IType[] getAllSuperInterfaces(TypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
+	public IType[] getAllSuperInterfaces(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (!OTModelManager.isRole(type))
 			return otHierarchy.getAllSuperInterfaces(type);
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
@@ -683,12 +725,23 @@ public team class OTTypeHierarchies {
 	}
 	
 	/**
+	 * API: Query all direct and indirect implicit subtypes of the given type.
+	 * 
+	 * @param otHierarchy a hierarchy that has been focused on the given type
+	 * @param type        the focus type whose subtypes are queried
+	 * @return the tsub types
+	 */
+	public IType[] getAllTSubTypes(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) {
+		return otHierarchy.getAllTSubTypes(type);
+	}
+	
+	/**
 	 * Configure whether the given hierarchy should consider phantom roles or not.
 	 * Depending on the query used, phantom roles will either be filtered out or replaced with their real origins.
 	 * In order for the phantom modes to be respected, the hierarchy must not be directly consulted but only
 	 * via the fassade methods of this team. 
 	 */
-	public void setPhantomMode(TypeHierarchy as OTTypeHierarchy otHierarchy, boolean mode) {
+	public void setPhantomMode(ITypeHierarchy as OTTypeHierarchy otHierarchy, boolean mode) {
 		otHierarchy.phantomMode = mode;		
 	}
 }
