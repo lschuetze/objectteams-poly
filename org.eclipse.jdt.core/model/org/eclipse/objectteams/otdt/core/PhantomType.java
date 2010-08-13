@@ -827,6 +827,14 @@ public class PhantomType implements IType
         throw new UnsupportedOperationException("Unsupported operation on PhantomType " //$NON-NLS-1$
                                                 + getFullyQualifiedName());
     }
+	
+	public ITypeParameter[] getTypeParameters() throws JavaModelException {
+		return _realType.getTypeParameters();
+	}
+	
+	public boolean isResolved() {
+		return _realType.isResolved() && _enclosingTeam.isResolved();
+	}
  
 	// TODO: check whether we need to support any of those methods
 	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor) throws JavaModelException {
@@ -852,19 +860,9 @@ public class PhantomType implements IType
 		return null;
 	}
 
-	public ITypeParameter[] getTypeParameters() throws JavaModelException {
-        handleUnsupported();
-		return null;
-	}
-
 	public ITypeParameter getTypeParameter(String name) {
         handleUnsupported();
 		return null;
-	}
-
-	public boolean isResolved() {
-        handleUnsupported();
-		return false;
 	}
 
 	public String[] getCategories() throws JavaModelException {
