@@ -41,6 +41,11 @@ import java.util.Map.Entry;
  */
 @SuppressWarnings("nls")
 public class CallinBindingManager {
+	/** When asking for a bound super type, we may find a super class, a super interface or nothing. */
+	public static enum BoundSuperKind {
+		NONE, CLASS, INTERFACE;
+	}
+
 	// map of bindings for role classes: roleClassName -> RoleBaseBinding
 	private static HashMap<String, RoleBaseBinding> roleBindings = new HashMap<String, RoleBaseBinding>(); 
 	
@@ -631,27 +636,7 @@ public class CallinBindingManager {
 	 * @param baseClassName
 	 * @return
 	 */
-	public static boolean hasBoundBaseParent(String baseClassName) {
-		LinkedList<RoleBaseBinding> rbbList = baseBindings.get(baseClassName);
-		if (rbbList != null) {
-			Iterator<RoleBaseBinding> it = rbbList.iterator();
-			while (it.hasNext()) {
-				RoleBaseBinding rbb = it.next();
-				if (rbb.getBaseClass().getSuper()!=null)
-					return true;
-			}
-		}
-		// IMPLICIT_INHERITANCE
-		//if (isUnboundSubBase(baseClassName))
-		//	return true;
-		return false;
-	}
-
-	/**
-	 * @param baseClassName
-	 * @return
-	 */
-	public static boolean boundBaseParentIsIfc(String baseClassName) {
+	public static BoundSuperKind hasBoundBaseParent(String baseClassName) {
 		LinkedList<RoleBaseBinding> rbbList = baseBindings.get(baseClassName);
 		if (rbbList != null) {
 			Iterator<RoleBaseBinding> it = rbbList.iterator();
@@ -659,12 +644,14 @@ public class CallinBindingManager {
 				RoleBaseBinding rbb = it.next();
 				BoundClass baseSuper = rbb.getBaseClass().getSuper();
 				if (baseSuper!=null)
-					return baseSuper.isInterface;
+					return baseSuper.isInterface ? BoundSuperKind.INTERFACE : BoundSuperKind.CLASS;
 			}
 		}
-		return false;
+		// IMPLICIT_INHERITANCE
+		//if (isUnboundSubBase(baseClassName))
+		//	return true;
+		return BoundSuperKind.NONE;
 	}
-	
 	
 	/**
 	 * Returns the name of the topmost bound base class.
@@ -712,12 +699,12 @@ public class CallinBindingManager {
 	 * @param baseClassName
 	 * @return
 	 */
-	public static boolean teamAdaptsSuperBase(String teamClassName, String baseClassName) {
+	public static boolean teamAdaptsSuperBaseClass(String teamClassName, String baseClassName) {
 		LinkedList<RoleBaseBinding> rbbList = baseBindings.get(baseClassName);
 		if (rbbList != null && !rbbList.isEmpty()) {
 			RoleBaseBinding rbb = rbbList.getFirst(); // all entries refer to the same base class.
 			BoundClass bc = rbb.getBaseClass().getSuper();
-			while (bc!=null) {
+			while (bc!=null && !bc.isInterface) {
 				if (bc.isAdaptedByTeam(teamClassName))
 					return true;
 				bc = bc.getSuper();

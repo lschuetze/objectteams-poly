@@ -21,6 +21,7 @@ import org.apache.bcel.generic.*;
 import org.apache.bcel.*;
 
 import org.eclipse.objectteams.otre.util.*;
+import org.eclipse.objectteams.otre.util.CallinBindingManager.BoundSuperKind;
 
 
 /**
@@ -62,7 +63,7 @@ public class StaticSliceBaseTransformation
 		if (CallinBindingManager.isBoundBaseClass(cg.getSuperclassName()))
 			continue; // team infrastructur already added by super class
 		*/
-		if (CallinBindingManager.hasBoundBaseParent(class_name))
+		if (CallinBindingManager.hasBoundBaseParent(class_name) == BoundSuperKind.CLASS)
 			return; // team infrastructure already has been added to a super class
 
         ConstantPoolGen cpg = cg.getConstantPool();
@@ -92,7 +93,7 @@ public class StaticSliceBaseTransformation
 		if (CallinBindingManager.isBoundBaseClass(cg.getSuperclassName()))
 		continue; // team infrastructur already added by super class
 		*/
-		if (CallinBindingManager.hasBoundBaseParent(class_name))
+		if (CallinBindingManager.hasBoundBaseParent(class_name) == BoundSuperKind.CLASS)
 			return; // team infrastructure already has been added to a super class
 		if(logging) printLogMessage("StaticSliceBaseTransformer transforms "+ class_name);
 		

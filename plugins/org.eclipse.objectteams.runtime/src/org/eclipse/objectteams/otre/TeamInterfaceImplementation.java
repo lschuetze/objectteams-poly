@@ -335,7 +335,7 @@ public class TeamInterfaceImplementation
 			//String boundBase = CallinBindingManager.getBoundBaseParent(actBase);
 			//if (boundBase != null && handledBases.contains(boundBase))
 			//	continue;
-			if (CallinBindingManager.teamAdaptsSuperBase(class_name, actBase)) 
+			if (CallinBindingManager.teamAdaptsSuperBaseClass(class_name, actBase)) 
 				continue;
 			
 			InstructionHandle startTry = il.append(new ALOAD(0));
@@ -388,7 +388,7 @@ public class TeamInterfaceImplementation
 			// String boundBase = CallinBindingManager.getBoundBaseParent(actBase);
 			//if (boundBase != null && handledBases.contains(boundBase))
 			//	continue;
-			if (CallinBindingManager.teamAdaptsSuperBase(class_name, actBase)) 
+			if (CallinBindingManager.teamAdaptsSuperBaseClass(class_name, actBase)) 
 				continue;
 			
 			InstructionHandle startTry = il.append(new ALOAD(0));

@@ -30,6 +30,7 @@ import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
+import org.eclipse.objectteams.otre.util.CallinBindingManager.BoundSuperKind;
 import org.eclipse.objectteams.otre.util.DebugUtil;
 import org.eclipse.objectteams.otre.util.ListValueHashMap;
 import org.eclipse.objectteams.otre.util.MethodBinding;
@@ -162,7 +163,7 @@ public class BaseMethodTransformation
     		String method_name = m.getName();
 				
     		if (CallinBindingManager.isBoundBaseClass(class_name) 
-    				&& !CallinBindingManager.hasBoundBaseParent(class_name) 
+    				&& (CallinBindingManager.hasBoundBaseParent(class_name) != BoundSuperKind.CLASS) 
     				&& method_name.equals(Constants.CONSTRUCTOR_NAME)) 
     		{
     			addToConstructor(m, getInitializedRoleSet(cg.getClassName(), false), cg, cpg);
@@ -241,17 +242,20 @@ public class BaseMethodTransformation
     	if (CallinBindingManager.isBoundBaseClass(class_name)) {
     		// TODO: where to add the role set infrastructure, if only an interface is bound? Implementing classes?
     		if (cg.containsField(OTConstants.ROLE_SET) == null) { // TODO(SH): this doesn't help for interfaces, do we need to check more?
-    			if (!CallinBindingManager.hasBoundBaseParent(class_name)) {
-	    			if (!cg.isInterface())  {
+    			switch (CallinBindingManager.hasBoundBaseParent(class_name)) {
+    			case NONE:
+	    			ce.addImplements(OTConstants.IBOUND_BASE, cg); // regardless of ifc or class
+	    			//$FALL-THROUGH$
+    			case INTERFACE:
+    				if (!cg.isInterface()) {
 		    			ce.addField(generateRoleSet(cpg, class_name), cg);
 		    			ce.addMethod(generateAddRole(cpg, class_name), cg);
 		    			ce.addMethod(generateRemoveRole(cpg, class_name), cg);
-	    			}
-	    			ce.addImplements(OTConstants.IBOUND_BASE, cg); // regardless of ifc or class
-    			} else if (!cg.isInterface() && CallinBindingManager.boundBaseParentIsIfc(class_name)) {
-	    			ce.addField(generateRoleSet(cpg, class_name), cg);
-	    			ce.addMethod(generateAddRole(cpg, class_name), cg);
-	    			ce.addMethod(generateRemoveRole(cpg, class_name), cg);    				
+    				}
+    				break;
+    			case CLASS:
+    				// do nothing, superclass has all the infra structure already
+    				break;
     			}
     		}
     	}
