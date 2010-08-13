@@ -659,41 +659,22 @@ public class CallinBindingManager {
 	 * @param baseClassName
 	 * @return
 	 */
-	public static String getTopmostBoundBase(String baseClassName) {
+	public static String getTopmostBoundBaseClass(String baseClassName) {
 		LinkedList<RoleBaseBinding> rbbList = baseBindings.get(baseClassName);
 		if (rbbList != null) {
 			// assumption: EVERY BoundClass object has been connected to its bound super classes.
 			RoleBaseBinding anyRBB = rbbList.get(0);
 			BoundClass bc = anyRBB.getBaseClass();
 			while (bc.getSuper() != null) {
+				if (bc.getSuper().isInterface)
+					break; // use bc instead of travelling up to super interfaces
 	            bc = bc.getSuper();
 	        }
 			return bc.getName();
 		}
 		return baseClassName;
 	}
-	
-	/**
-	 * @param baseClassName
-	 * @return
-	 */
-	public static String getBoundBaseParent(String baseClassName) {
-		LinkedList<RoleBaseBinding> rbbList = baseBindings.get(baseClassName);
-		if (rbbList != null) {
-			Iterator<RoleBaseBinding> it = rbbList.iterator();
-			while (it.hasNext()) {
-				RoleBaseBinding rbb = it.next();
-				BoundClass bc = rbb.getBaseClass().getSuper();
-				if (bc!=null)
-					return bc.getName();
-			}
-		}
-		// IMPLICIT_INHERITANCE
-		//if (isUnboundSubBase(baseClassName))
-		//	return true;
-		return null;
-	}
-	
+
 	/**
 	 * @param teamClassName
 	 * @param baseClassName

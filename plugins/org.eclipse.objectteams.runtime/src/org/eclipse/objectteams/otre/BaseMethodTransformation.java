@@ -576,7 +576,7 @@ public class BaseMethodTransformation
 		    teams = lg.getIndex();
 		    
 		    // synchronized (TopMostBoundBaseClass.class) {
-		    Pair<Integer,InstructionHandle> monitorResult = addClassMonitorEnter(mg, il, CallinBindingManager.getTopmostBoundBase(class_name), major, cpg);
+		    Pair<Integer,InstructionHandle> monitorResult = addClassMonitorEnter(mg, il, CallinBindingManager.getTopmostBoundBaseClass(class_name), major, cpg);
 		    monitor = monitorResult.first;
 		    if (debugging)
 		    	// no natural lines in this method: step-over until chain call, which has step-into: debugging => addLineNumber
