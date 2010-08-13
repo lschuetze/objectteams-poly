@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.ResolvedSourceMethod;
-import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor.MemberActionInfo;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -101,7 +100,7 @@ public team class PushDownAdaptor {
 						
 						// shadowing fields is just forbidden in implicit hierarchies
 						if(TypeHelper.isRole(type.getFlags())){
-							TypeHierarchy implicitHierarchy = (TypeHierarchy) type.newSupertypeHierarchy(pm);
+							ITypeHierarchy implicitHierarchy = type.newSupertypeHierarchy(pm);
 							IType[] implicitSuperTypes = OTTypeHierarchies.getInstance().getAllTSuperTypes(implicitHierarchy, type);
 							
 							for (int j = 0; j < implicitSuperTypes.length; j++) {
@@ -267,7 +266,7 @@ public team class PushDownAdaptor {
 			RefactoringStatus status = new RefactoringStatus();
 			ITypeHierarchy hier = getHierarchyOfDeclaringClass(pm);
 			
-			OTTypeHierarchies.getInstance().setPhantomMode((TypeHierarchy)hier, true);
+			OTTypeHierarchies.getInstance().setPhantomMode(hier, true);
 			IType[] subTypes = hier.getSubtypes(getDeclaringType());
 			for (int i = 0; i < subTypes.length; i++) {
 				IType subType = subTypes[i];
@@ -276,7 +275,7 @@ public team class PushDownAdaptor {
 					status.addError(msg, JavaStatusContext.create(subType));
 				}
 			}
-			OTTypeHierarchies.getInstance().setPhantomMode((TypeHierarchy)hier, false);
+			OTTypeHierarchies.getInstance().setPhantomMode(hier, false);
 			return status;
 		}
 		
@@ -288,7 +287,7 @@ public team class PushDownAdaptor {
 		 * @return the <code>RefactoringStatus</code> indicating overriding
 		 * @throws JavaModelException 
 		 */
-		private RefactoringStatus checkOverriding(IType type ,IProgressMonitor pm) throws JavaModelException{
+		private RefactoringStatus checkOverriding(IType type, IProgressMonitor pm) throws JavaModelException{
 			RefactoringStatus status = new RefactoringStatus();
 			
 			// only roles inherit implicitly
@@ -296,9 +295,8 @@ public team class PushDownAdaptor {
 				
 				IMember[] membersToPushDown = getMembersToMove();
 				
-				// create the ot hierarchy to check implicit super types
-				TypeHierarchy hierarchy = new TypeHierarchy(type, null, type.getJavaProject(), false);
-				hierarchy.refresh(pm);
+				// create a hierarchy to check implicit super types
+				ITypeHierarchy hierarchy = type.newSupertypeHierarchy(pm);
 				IType[] superRoles = OTTypeHierarchies.getInstance().getTSuperTypes(hierarchy, type);
 				
 				pm.beginTask("Checking Overriding", superRoles.length);

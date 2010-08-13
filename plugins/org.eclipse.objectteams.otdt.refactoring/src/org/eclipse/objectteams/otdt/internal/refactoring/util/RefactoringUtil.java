@@ -288,14 +288,14 @@ public class RefactoringUtil implements ITeamConstants {
 	 * declaring type is an interface the method returns <code>false</code> if
 	 * it is only declared in that interface.
 	 */
-	public static IMethod isDeclaredInInterface(IMethod method, OTTypeHierarchy hierarchy, IProgressMonitor pm) throws JavaModelException {
+	public static IMethod isDeclaredInInterface(IMethod method, ITypeHierarchy hierarchy, IProgressMonitor pm) throws JavaModelException {
 		assert isVirtual(method);
 		try {
 			IType[] classes = hierarchy.getAllClasses();
 			IProgressMonitor subPm = new SubProgressMonitor(pm, 3);
 			subPm.beginTask("", classes.length); //$NON-NLS-1$
 			for (int idxAllHierarchyClasses = 0; idxAllHierarchyClasses < classes.length; idxAllHierarchyClasses++) {
-				ITypeHierarchy superTypes = hierarchy.getOTSuperTypeHierarchy(classes[idxAllHierarchyClasses]);
+				ITypeHierarchy superTypes = classes[idxAllHierarchyClasses].newSupertypeHierarchy(subPm);
 				IType[] superinterfaces = superTypes.getAllSuperInterfaces(classes[idxAllHierarchyClasses]);
 
 				for (int idxSuperInterfaces = 0; idxSuperInterfaces < superinterfaces.length; idxSuperInterfaces++) {
@@ -333,9 +333,10 @@ public class RefactoringUtil implements ITeamConstants {
 		return true;
 	}
 
-	public static IMethod overridesAnotherMethod(IMethod method, OTTypeHierarchy hier, IProgressMonitor pm) throws JavaModelException {
+	public static IMethod overridesAnotherMethod(IMethod method, ITypeHierarchy hier, IProgressMonitor pm) throws JavaModelException {
 		IType declaringType = method.getDeclaringType();
 		InheritedMethodsRequestor requestor = new InheritedMethodsRequestor(declaringType, true, true);
+		// FIXME(SH): hier is not used, OTTypeHierarchyTraverser should be replaced.
 		OTTypeHierarchyTraverser traverser = new OTTypeHierarchyTraverser(requestor, OTTypeHierarchyTraverser.SUPER_HIERARCHY,
 				OTTypeHierarchyTraverser.TRAVERSE_EXPLICIT_FIRST, false, false, pm);
 
@@ -860,8 +861,7 @@ public class RefactoringUtil implements ITeamConstants {
 		ICompilationUnit compUnit = focusType.getCompilationUnit();
 		// create OT typehierarchy
 		if (focusTypeHierarchy == null) {
-			focusTypeHierarchy = new OTTypeHierarchy(focusType, compUnit.getJavaProject(), true);
-			focusTypeHierarchy.refresh(pm);
+			focusTypeHierarchy = focusType.newTypeHierarchy(pm);
 		}
 		// get all supertypes of focus type
 		IType[] superTypes = focusTypeHierarchy.getAllSupertypes(focusType);
@@ -994,8 +994,7 @@ public class RefactoringUtil implements ITeamConstants {
 		// destination);
 
 		// create OT typehierarchy
-		OTTypeHierarchy completeHierarchy = new OTTypeHierarchy(focusType, compUnit.getJavaProject(), true);
-		completeHierarchy.refresh(pm);
+		ITypeHierarchy completeHierarchy = focusType.newTypeHierarchy(pm);
 		// get all supertypes of focus type
 		IType[] superTypes = completeHierarchy.getAllSupertypes(focusType);
 		// get all subtypes of focus type
@@ -1175,8 +1174,7 @@ public class RefactoringUtil implements ITeamConstants {
 		if (!Flags.isTeam(declaringType.getFlags())) {
 			// heavyweight check for interfaces
 			if (Flags.isInterface(declaringType.getFlags()) && checkImplementingClasses) {
-				OTTypeHierarchy hier = new OTTypeHierarchy(declaringType, declaringType.getJavaProject(), true);
-				hier.refresh(pm);
+				ITypeHierarchy hier = declaringType.newTypeHierarchy(pm);
 				IType[] impementingClasses = hier.getImplementingClasses(declaringType);
 				boolean teamImplementsInterface = false;
 				for (int idx = 0; idx < impementingClasses.length; idx++) {
@@ -1265,25 +1263,19 @@ public class RefactoringUtil implements ITeamConstants {
 		final IType declaringType = method.getDeclaringType();
 		if (!declaringType.isInterface()) {
 			if ((hierarchy == null) || !declaringType.equals(hierarchy.getType())) {
-				hierarchy = new OTTypeHierarchy(declaringType, declaringType.getJavaProject(), false);
-				hierarchy.refresh(monitor);
+				hierarchy = declaringType.newSupertypeHierarchy(monitor);
 			}
-			if (hierarchy instanceof OTTypeHierarchy) {
-				IMethod inInterface = isDeclaredInInterface(method, (OTTypeHierarchy) hierarchy, monitor);
-				if (inInterface != null && !inInterface.equals(method))
-					topmostMethod = inInterface;
-			}
+			IMethod inInterface = isDeclaredInInterface(method, hierarchy, monitor);
+			if (inInterface != null && !inInterface.equals(method))
+				topmostMethod = inInterface;
 		}
 		if (topmostMethod == null) {
 			if (hierarchy == null) {
-				hierarchy = new OTTypeHierarchy(declaringType, declaringType.getJavaProject(), false);
-				hierarchy.refresh(monitor);
+				hierarchy = declaringType.newSupertypeHierarchy(monitor);
 			}
-			if (hierarchy instanceof OTTypeHierarchy) {
-				IMethod overrides = overridesAnotherMethod(method, (OTTypeHierarchy) hierarchy, monitor);
-				if (overrides != null && !overrides.equals(method))
-					topmostMethod = overrides;
-			}
+			IMethod overrides = overridesAnotherMethod(method, hierarchy, monitor);
+			if (overrides != null && !overrides.equals(method))
+				topmostMethod = overrides;
 		}
 		return topmostMethod;
 	}

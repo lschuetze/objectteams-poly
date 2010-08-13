@@ -11,8 +11,6 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
@@ -20,9 +18,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
@@ -33,8 +28,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.structure.TypeVariableMaplet;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -44,19 +37,15 @@ import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.IOTTypeHierarchy;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.internal.core.RoleType;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IAmbuguityMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IOverloadingMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 
 import base org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
-import base org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor.PullUpAstNodeMapper;
-import base org.eclipse.jdt.internal.ui.refactoring.PullUpMethodPage;
-import base org.eclipse.jdt.internal.ui.refactoring.PullUpMethodPage.PullUpHierarchyContentProvider;
 
 /**
  * @author Johannes Gebauer
@@ -74,8 +63,6 @@ public team class PullUpAdaptor {
 		IMember[] getMembersToDelete(IProgressMonitor monitor) -> IMember[] getMembersToDelete(IProgressMonitor monitor);
 		IMethod[] getFDeletedMethods() -> get IMethod[] fDeletedMethods;
 		IMember[] getFMembersToMove() -> get IMember[] fMembersToMove;
-			
-		private ITypeHierarchy _destinationOTTypeHierachy;
 
 		// callouts
 		IType getDestinationType() -> IType getDestinationType();
@@ -107,12 +94,12 @@ public team class PullUpAdaptor {
 				return status;
 			}
 			
-			OTTypeHierarchy hier = (OTTypeHierarchy)getDestinationTypeHierarchy(pm);
+			ITypeHierarchy hier = getDestinationTypeHierarchy(pm);
 			ArrayList<IType> implicitSubRoles = new ArrayList<IType>();
-			implicitSubRoles.addAll(Arrays.asList(hier.getAllTSubtypes(getDestinationType())));
+			implicitSubRoles.addAll(Arrays.asList(OTTypeHierarchies.getInstance().getAllTSubTypes(hier, getDestinationType())));
 			
 			// remove the subtypes of the declaring type
-			implicitSubRoles.removeAll(Arrays.asList(hier.getAllTSubtypes(getDeclaringType())));
+			implicitSubRoles.removeAll(Arrays.asList(OTTypeHierarchies.getInstance().getAllTSubTypes(hier, getDeclaringType())));
 			
 			pm.beginTask("Checking Shadowing", implicitSubRoles.size());
 			pm.subTask(""); //$NON-NLS-1$
@@ -428,109 +415,8 @@ public team class PullUpAdaptor {
 		
 		needsVisibilityAdjustment <- replace needsVisibilityAdjustment;
 			
-		/**
-		 * Replaces the jdt hierarchy with the ot hierarchy. 
-		 */
-		@SuppressWarnings("basecall")
-		callin ITypeHierarchy getDestinationOTTypeHierarchy() throws JavaModelException {
-					if(_destinationOTTypeHierachy != null && _destinationOTTypeHierachy.getType().equals(getDestinationType())){
-						return _destinationOTTypeHierachy;
-					}else{
-						if(OTModelManager.hasOTElementFor(getDestinationType())){
-							_destinationOTTypeHierachy = OTModelManager.getOTElement(getDestinationType()).newOTTypeHierarchy(new NullProgressMonitor());
-						}else{
-							_destinationOTTypeHierachy = base.getDestinationOTTypeHierarchy();
-						}
-						return _destinationOTTypeHierachy;
-					}
-		}
-		
-		getDestinationOTTypeHierarchy <- replace getDestinationTypeHierarchy;
-		
-		/**
-		 * Prevents {@link OTTypeHierarchy#getSuperclass(IType)} calls on OTTypeHierarchies to avoid an
-		 *  <code>UnsupportedOperationException</code>.
-		 */
-		callin void copyBodyOfPulledUpMethod(
-				final CompilationUnitRewrite sourceRewrite,
-				final CompilationUnitRewrite targetRewrite, final IMethod method,
-				final MethodDeclaration oldMethod,
-				final MethodDeclaration newMethod,
-				final TypeVariableMaplet[] mapping, final IProgressMonitor monitor)
-				throws JavaModelException {
-			within(new OTTypeHierarchyAdaptor()){
-				base.copyBodyOfPulledUpMethod(sourceRewrite, targetRewrite, method, oldMethod, newMethod, mapping, monitor);
-			}
-		}
-		copyBodyOfPulledUpMethod <- replace copyBodyOfPulledUpMethod;
-		
-		/**
-		 * Prevents {@link OTTypeHierarchy#getSuperclass(IType)} calls on OTTypeHierarchies to avoid an
-		 *  <code>UnsupportedOperationException</code>.
-		 */
-		@SuppressWarnings({"unchecked", "rawtypes" })
-		callin Set getSkippedSuperTypes(final IProgressMonitor monitor) throws JavaModelException {
-			if(Flags.isRole(getDestinationType().getFlags())){
-				// do not add implicit skipped super types twice
-				if (getFCachedSkippedSuperTypes() != null && getDestinationTypeHierarchy(new SubProgressMonitor(monitor, 1)).getType().equals(getDestinationType()))
-					return base.getSkippedSuperTypes(monitor);
-				
-				// calculate implicit skipped super types
-				final IOTTypeHierarchy otHierarchy = (IOTTypeHierarchy) getDestinationTypeHierarchy(new SubProgressMonitor(monitor, 1));
-				List<IType> subtypes = Arrays.asList(otHierarchy.getAllTSubtypes(getDestinationType()));
-				List<IType> superTypes = Arrays.asList(otHierarchy.getAllTSuperTypes(getDeclaringType()));
-				Set<IType> skippedImplicitTypes = new HashSet();
-				
-				// intersect super types and sub types
-				for (IType type : superTypes) {
-					if(subtypes.contains(type)){
-						skippedImplicitTypes.add(type);
-					}
-				}
-
-				within(new OTTypeHierarchyAdaptor()){
-					// calculate explicit skipped supoer types
-					base.getSkippedSuperTypes(monitor);
-					// add implicit skipped super types
-					getFCachedSkippedSuperTypes().addAll(skippedImplicitTypes);
-					return getFCachedSkippedSuperTypes();
-				}
-			}else{
-				within(new OTTypeHierarchyAdaptor()){
-					return base.getSkippedSuperTypes(monitor);
-				}
-			}
-		}
-		getSkippedSuperTypes <- replace getSkippedSuperTypes;
 	}
 	
-	public class PullUpHierarchyContentProvider playedBy PullUpHierarchyContentProvider{
-		/**
-		 * Prevents {@link OTTypeHierarchy#getSuperclass(IType)} calls on OTTypeHierarchies to avoid an
-		 *  <code>UnsupportedOperationException</code>.
-		 */
-		callin Object getParent(final Object element) {
-			within(new OTTypeHierarchyAdaptor()){	
-				return base.getParent(element);
-			}
-		}
-		getParent <- replace getParent;
-
-	}
-	
-	public class PullUpMethodPage playedBy PullUpMethodPage{
-		/**
-		 * Prevents {@link OTTypeHierarchy#getSuperclass(IType)} calls on OTTypeHierarchies to avoid an
-		 *  <code>UnsupportedOperationException</code>.
-		 */
-		callin void checkAllParents(final IType parent) {
-			within(new OTTypeHierarchyAdaptor()){				
-				base.checkAllParents(parent);
-			}
-		}
-		checkAllParents <- replace checkAllParents;
-
-	}
 }
 
 

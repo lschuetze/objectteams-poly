@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -47,7 +48,7 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.PhantomType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 
@@ -69,7 +70,7 @@ public team class RenameTypeAdaptor {
 		private IPackageFragment fRoleDirectory;
 		private IType[] fImplicitRelatedTypes;
 		private IType[] fImplicitRelatedPhantomTypes;
-		private OTTypeHierarchy fOTTypeHierarchy;
+		private ITypeHierarchy fTypeHierarchy;
 		private boolean fTypeToRenameIsRole;
 		private String fCachedNewElementName;
 		private JavaModelException fCachedException;
@@ -122,7 +123,7 @@ public team class RenameTypeAdaptor {
 			// Special Conditions for Roles
 			if(fTypeToRenameIsRole){
 				jdtStatus.merge(checkForRoleOverriding(pm));
-			    jdtStatus.merge(checkRenameForImplicitRelatedTypes(getFType(), fOTTypeHierarchy, pm));
+			    jdtStatus.merge(checkRenameForImplicitRelatedTypes(getFType(), fTypeHierarchy, pm));
 			}
 			
 			pm.done();
@@ -135,15 +136,14 @@ public team class RenameTypeAdaptor {
 		private void initializeOTInformations(IProgressMonitor pm) throws JavaModelException {
 			// Do not initialize again if the preconditions have not changed.
 			// OT informations depend on the type and the new element name.
-			if(fOTTypeHierarchy != null && fOTTypeHierarchy.getFocusType() == getFType() 
+			if(fTypeHierarchy != null && fTypeHierarchy.getType() == getFType() 
 			   &&  getNewElementName().equals(fCachedNewElementName)){
 				return;
 			}
 
 			fCachedNewElementName = getNewElementName();
-			fOTTypeHierarchy = new OTTypeHierarchy(getFType(), getFType().getJavaProject(), true);
-			fOTTypeHierarchy.refresh(pm);
-			findImplicitRelatedTypes(getFType(), fOTTypeHierarchy, null);
+			fTypeHierarchy = getFType().newTypeHierarchy(pm);
+			findImplicitRelatedTypes(getFType(), fTypeHierarchy, null);
 			fTypeToRenameIsRole = TypeHelper.isRole(getFType().getFlags());
 			if(Flags.isTeam(getFType().getFlags())){
 				fRoleDirectory = getRoleDirectoryForTeam(getFType());
@@ -203,23 +203,20 @@ public team class RenameTypeAdaptor {
 					otPreloadedElementToNameDefault.putAll(getFPreloadedElementToNameDefault());
 				}
 				
-				//TODO: UnsupportedOperationException in PhantomType(the PhantomTypeAdaptor provides a quick fix)
-				within(new PhantomTypeAdaptor()){
-					// find references for implicit related phantom types
-					for (int i = 0; i < fImplicitRelatedPhantomTypes.length; i++) {
-						setFType(fImplicitRelatedPhantomTypes[i]);
-						setFReferences(null);
-						
-						jdtStatus.merge(base.initializeReferences(monitor));
-						
-						// add all references of the implicit related type
-						otReferences.addAll(Arrays.asList(getFReferences()));
-						
-						// add all similar name references of the implicit related type to the maps
-						otPreloadedElementToName.putAll(getFPreloadedElementToName());
-						otPreloadedElementToSelection.putAll(getFPreloadedElementToSelection());
-						otPreloadedElementToNameDefault.putAll(getFPreloadedElementToNameDefault());
-					}
+				// find references for implicit related phantom types
+				for (int i = 0; i < fImplicitRelatedPhantomTypes.length; i++) {
+					setFType(fImplicitRelatedPhantomTypes[i]);
+					setFReferences(null);
+					
+					jdtStatus.merge(base.initializeReferences(monitor));
+					
+					// add all references of the implicit related type
+					otReferences.addAll(Arrays.asList(getFReferences()));
+					
+					// add all similar name references of the implicit related type to the maps
+					otPreloadedElementToName.putAll(getFPreloadedElementToName());
+					otPreloadedElementToSelection.putAll(getFPreloadedElementToSelection());
+					otPreloadedElementToNameDefault.putAll(getFPreloadedElementToNameDefault());
 				}
 			}finally{
 				// ensure that the original focus type is reset after processing the implicit type references
@@ -242,7 +239,7 @@ public team class RenameTypeAdaptor {
 		}
 		initializeReferences <- replace initializeReferences;
 		
-		private RefactoringStatus checkRenameForImplicitRelatedTypes(IType type, OTTypeHierarchy otTypeHierarchy, IProgressMonitor pm) throws CoreException {
+		private RefactoringStatus checkRenameForImplicitRelatedTypes(IType type, ITypeHierarchy otTypeHierarchy, IProgressMonitor pm) throws CoreException {
 			RefactoringStatus status = new RefactoringStatus();
 			for (int i = 0; i < fImplicitRelatedTypes.length; i++) {
 				status.merge(checkShadowingInEnclosingTeams(fImplicitRelatedTypes[i]));
@@ -253,13 +250,12 @@ public team class RenameTypeAdaptor {
 			return status;
 		}
 
-		private void findImplicitRelatedTypes(IType type, OTTypeHierarchy otTypeHierarchy, IProgressMonitor pm) throws JavaModelException {
+		private void findImplicitRelatedTypes(IType type, ITypeHierarchy otTypeHierarchy, IProgressMonitor pm) throws JavaModelException {
 			IType topmostType = findTopMostType(type, otTypeHierarchy);
-			OTTypeHierarchy topmostTypeHierarchy = new OTTypeHierarchy(topmostType, topmostType.getJavaProject(), true);
-			topmostTypeHierarchy.refresh(pm);
+			ITypeHierarchy topmostTypeHierarchy = topmostType.newTypeHierarchy(pm);
 			
 			ArrayList<IType> relatedTypes = new ArrayList<IType>();
-			relatedTypes.addAll(Arrays.asList(topmostTypeHierarchy.getAllTSubtypes(topmostType)));
+			relatedTypes.addAll(Arrays.asList(OTTypeHierarchies.getInstance().getAllTSubTypes(topmostTypeHierarchy, topmostType)));
 
 			// exchange the topmost type with the given type
 			if(!topmostType.equals(type)){
@@ -270,9 +266,9 @@ public team class RenameTypeAdaptor {
 			fImplicitRelatedTypes = relatedTypes.toArray(new IType[relatedTypes.size()]);
 			
 			// search the implicit related phantom types
-			topmostTypeHierarchy.setPhantomMode(true);
+			OTTypeHierarchies.getInstance().setPhantomMode(topmostTypeHierarchy, true);
 			ArrayList<IType> relatedPhantomTypes = new ArrayList<IType>();
-			relatedPhantomTypes.addAll(Arrays.asList(topmostTypeHierarchy.getAllTSubtypes(topmostType)));
+			relatedPhantomTypes.addAll(Arrays.asList(OTTypeHierarchies.getInstance().getAllTSubTypes(topmostTypeHierarchy, topmostType)));
 			relatedPhantomTypes.removeAll(relatedTypes);
 			relatedPhantomTypes.remove(type);
 			fImplicitRelatedPhantomTypes = relatedPhantomTypes.toArray(new IType[relatedPhantomTypes.size()]);
@@ -286,11 +282,12 @@ public team class RenameTypeAdaptor {
 		 * @param type the role type to start the search
 		 * @param otTypeHierarchy for the type
 		 * @return the topmost Role Type for the given type
+		 * @throws JavaModelException if the tsuper hierarchy could not be linearized properly
 		 */
-		private IType findTopMostType(IType type, OTTypeHierarchy otTypeHierarchy) {
-			IType[] superTypes = otTypeHierarchy.getAllTSuperTypes(type);
+		private IType findTopMostType(IType type, ITypeHierarchy otTypeHierarchy) throws JavaModelException {
+			IType[] superTypes = OTTypeHierarchies.getInstance().getAllTSuperTypes(otTypeHierarchy, type);
 			for (int i = 0; i < superTypes.length; i++) {
-				if(otTypeHierarchy.getAllTSuperTypes(superTypes[i]).length == 0){
+				if(OTTypeHierarchies.getInstance().getAllTSuperTypes(otTypeHierarchy, superTypes[i]).length == 0){
 					return superTypes[i];
 				}
 			}
@@ -396,7 +393,7 @@ public team class RenameTypeAdaptor {
 					for (int j = 0; j < roles.length; j++) {
 						IType role = roles[j];
 						if(role.getElementName().equals(getNewElementName())){
-							String msg = Messages.format("A role type named ''{0}'' exists in ''{1}'' and would shadow the renamed type (OTLD �1.4(a)).", new String[] { getNewElementName(),
+							String msg = Messages.format("A role type named ''{0}'' exists in ''{1}'' and would shadow the renamed type (OTJLD §1.4(a)).", new String[] { getNewElementName(),
 									type.getFullyQualifiedName('.') });
 							jdtStatus.addError(msg, JavaStatusContext.create(role));
 						}
@@ -480,8 +477,7 @@ public team class RenameTypeAdaptor {
 				
 				
 				// search for implicit overriding in the subtypes of the enclosing team
-				OTTypeHierarchy teamHierarchy = new OTTypeHierarchy(enclosingTeam, enclosingTeam.getJavaProject(), true);
-				teamHierarchy.refresh(pm);
+				ITypeHierarchy teamHierarchy = enclosingTeam.newTypeHierarchy(pm);
 				IType[] subtypes = teamHierarchy.getAllSubtypes(enclosingTeam);
 				for (int i = 0; i < subtypes.length; i++) {
 					IType[] declaredRoles = getDeclaredRoles(subtypes[i]);
@@ -549,7 +545,7 @@ public team class RenameTypeAdaptor {
 				for (int j = 0; j < nestedRoles.length; j++) {
 					IType role = nestedRoles[j];
 					if(role.getElementName().equals(getNewElementName())){
-						String msg = Messages.format("The role type ''{0}'' would shadow the renamed type (OTLD �1.4(a))."
+						String msg = Messages.format("The role type ''{0}'' would shadow the renamed type (OTJLD §1.4(a))."
 								, new String[] { BasicElementLabels.getJavaElementName(role.getFullyQualifiedName('.')) });
 						status.addError(msg, JavaStatusContext.create(role));
 					}
@@ -567,7 +563,7 @@ public team class RenameTypeAdaptor {
 					}
 					IType role = outerRoles[i];
 					if(role.getElementName().equals(getNewElementName())){
-						String msg = Messages.format("The renamed role type would shadow the visible type ''{0}'' (OTLD �1.4(a))."
+						String msg = Messages.format("The renamed role type would shadow the visible type ''{0}'' (OTJLD §1.4(a))."
 								, new String[] { BasicElementLabels.getJavaElementName(role.getFullyQualifiedName('.')) });
 						status.addError(msg, JavaStatusContext.create(role));
 					}
