@@ -27,7 +27,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
-import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 /**
@@ -128,7 +127,7 @@ public class OTSuperTypeHierarchyTest004 extends FileBasedModelTest {
             new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
         hierarchy.refresh(new NullProgressMonitor());
 
-        IType[] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(hierarchy, _focusType);
+        IType[] actual = hierarchy.getAllSuperclasses(_focusType);
         IType[] expected = new IType[] { _objectType,
                                          _T20T10T00R0,
 										 _T20T10T00R1,

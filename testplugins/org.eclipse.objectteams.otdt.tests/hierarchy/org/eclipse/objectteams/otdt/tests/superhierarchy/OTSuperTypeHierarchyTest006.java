@@ -118,7 +118,7 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
         IType[] expected = new IType[] { _objectType,
                 						 _classA };
         
-        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(_testObj, _focusType);
+        IType [] actual = _testObj.getAllSuperclasses(_focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
@@ -131,7 +131,7 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
         
         IType[] expected = new IType[] { _objectType };
         
-        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(_testObj, _focusType);
+        IType [] actual = _testObj.getAllSuperclasses(_focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
@@ -146,7 +146,7 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
                                          _T1_R1,
                                          _classA };
         
-        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(_testObj, _focusType);
+        IType [] actual = _testObj.getAllSuperclasses(_focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
@@ -163,7 +163,7 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
                                          _T1_R2,
                                          _classA };
         
-        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(_testObj, _focusType);
+        IType [] actual = _testObj.getAllSuperclasses(_focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
@@ -183,7 +183,7 @@ public class OTSuperTypeHierarchyTest006 extends FileBasedHierarchyTest
                                          _phantom_T3_R1,
                                          _classA };
         
-        IType [] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(_testObj, _focusType);
+        IType [] actual = _testObj.getAllSuperclasses(_focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));

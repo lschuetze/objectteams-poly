@@ -148,7 +148,7 @@ public class OTSuperTypeHierarchyTest015 extends FileBasedModelTest {
             new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
         hierarchy.refresh(new NullProgressMonitor());
 
-        IType[] actual = OTTypeHierarchies.getInstance().getAllSuperclasses(hierarchy, _focusType);
+        IType[] actual = hierarchy.getAllSuperclasses(_focusType);
         IType[] expected = new IType[] { _A, _B, _objectType };
 
         assertEquals(expected.length, actual.length);        
