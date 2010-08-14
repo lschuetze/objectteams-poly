@@ -52,10 +52,12 @@ public interface ImageConstants
     // Class icons:
     public static final String ROLECLASS_IMG 			= "role_obj.png";
     public static final String ROLECLASS_PROTECTED_IMG	= "role_protected_obj.png";
+    public static final String ROLE_ALT_IMG				= "role_alt_obj.gif"; // light version
 
     public static final String TEAM_IMG 				= "team_obj.gif";
     public static final String TEAM_ROLE_IMG			= "team_role_obj.gif";
-    public static final String TEAM_ROLE_PROTECTED_IMG	= "team_role_protected_obj.gif";
+    public static final String TEAM_ROLE_PROTECTED_IMG	= "team_role_protected_obj.gif";    
+    public static final String TEAM_ALT_IMG				= "team_alt_obj.gif"; // light version
 
     // Overlay icons:
     public static final String ROLE_OVR					= "role_ovr.png";
