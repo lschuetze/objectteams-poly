@@ -44,8 +44,33 @@ import base org.eclipse.objectteams.otdt.core.PhantomType;
 import base org.eclipse.objectteams.otdt.internal.core.OTType;
 
 /**
- * Adapt the regular Java TypeHierarchy as to handle implicit inheritance, too.
- * 
+ * Adapt the regular Java TypeHierarchy as to handle implicit inheritance, too (OTJLD §1.3.1).
+ * <p>
+ * In addition to explicit inheritance (extends, implements), a role may have
+ * implicit supertypes (tsuper types) and hence implicit subtypes.
+ * Roles don't have to be redeclared in subteams, because of OT/J copy inheritance.
+ * In this case, they are missing in the JavaModel/OTModel,
+ * but are represented in the hierarchy as {@link PhantomType}s.
+ * PhantomTypes are placeholders of copied but not redeclared roles.
+ * </p>
+ * <p>
+ * After creation, the hierarchy may operates in two modes: Default mode and
+ * phantom mode ({@link #setPhantomMode(org.eclipse.jdt.core.ITypeHierarchy, boolean)}. 
+ * In default mode all returned PhantomTypes are either filtered or replaced with their real type.
+ * In phantom mode, PhantomTypes may be returned, e.g. for type hierarchy view.
+ * </p>
+ * <p>
+ * This team is effective in two ways:
+ * <ul>
+ * <li>It hooks into methods of the standard {@link TypeHierarchy} to make those methods OT-aware.
+ * <li>New queries are provided as top-level methods of this team. 
+ * 		<ul>
+ * 		<li>All public methods accept OTModel types (i.e., implementers of {@link IOTType}) as arguments,
+ *   		though only their corresponding java model type is used.
+ * 		<li>No OTModel types are returned, ever.
+ * 		</ul>
+ * </ul>
+ * </p>
  * 
  * @author stephan
  */
@@ -98,7 +123,6 @@ public team class OTTypeHierarchies {
 		/** Should the hierarchy show phantom roles? */
 		protected boolean phantomMode;
 
-		protected abstract IType[] getAllSuperclasses(IType type);
 		protected abstract IType[] getAllSuperInterfaces(IType type);
 		protected abstract IType[] getAllTSuperTypes(IType type);
 		protected abstract IType[] getDirectTSupers(IType type) throws JavaModelException;
@@ -118,7 +142,6 @@ public team class OTTypeHierarchies {
 		
 		@SuppressWarnings("decapsulation") IType getFocusType() 	-> get IType focusType;
 		ConnectedType getSuperclass(IType type) 					-> IType getSuperclass(IType type);
-		ConnectedType[] getAllSuperclassesUnfiltered(IType type) 	-> IType[] getAllSuperclasses(IType type);
 		IType[] getSuperInterfaces(IType type) 						-> IType[] getSuperInterfaces(IType type);
 		IType[] getAllSuperInterfaces(IType type) 					-> IType[] getAllSuperInterfaces(IType type);
 		
@@ -175,6 +198,9 @@ public team class OTTypeHierarchies {
 
 			/** Is this type a phantom role? */
 			protected boolean isPhantom;
+			
+			/** Is this type an interface? */
+			protected boolean isInterface;
 
 			/** The direct tsuper types of this type. */
 			protected ConnectedType[] directTSupers;
@@ -199,8 +225,9 @@ public team class OTTypeHierarchies {
 				this.tsuperChainRoot = this;
 			}
 
-			public void init(boolean isPhantom, ConnectedType[] tsuperclassHandles, FocusRelation focusRelation) {
+			public void init(boolean isPhantom, boolean isInterface, ConnectedType[] tsuperclassHandles, FocusRelation focusRelation) {
 				this.isPhantom = isPhantom;
+				this.isInterface = isInterface;
 				this.directTSupers = tsuperclassHandles;
 				this.focusRelation = focusRelation;			
 			}
@@ -364,12 +391,13 @@ public team class OTTypeHierarchies {
 		 * Connect the found tsuper classes into the connected type for the given type. 
 		 */
 		protected void connectTSupers(IType as ConnectedType connectedType, 
-									  boolean isPhantom, 
+									  boolean isPhantom,
+									  boolean isInterface,
 									  IType as ConnectedType tsuperclassHandles[], 
 									  boolean[] arePhantoms,
 									  FocusRelation focusRelation) 
 		{
-			connectedType.init(isPhantom, tsuperclassHandles, focusRelation);
+			connectedType.init(isPhantom, isInterface, tsuperclassHandles, focusRelation);
 			
 			// connect tsuperclassHandles into the appropriate ConnectedType:
 			switch (focusRelation) {
@@ -411,6 +439,8 @@ public team class OTTypeHierarchies {
 		/** Given that 'type' is element of a superclass linearization return the next super in the chain. */
 		@SuppressWarnings("basecall")
 		callin ConnectedType getSuperclassLinearized(ConnectedType type) {
+			if (type.isInterface) // ask only now (rather than in base guard), because the IType may not exist().
+				return null;
 			// check for tsuper type in the computed list:
 			ConnectedType tsuperType = type.getTSuperType();
 			if (tsuperType != null)
@@ -528,11 +558,6 @@ public team class OTTypeHierarchies {
 			}
 		}
 		
-		// sole purpose of this wrapper: array-lowering
-		protected IType[] getAllSuperclasses(IType type) {
-			return getAllSuperclassesUnfiltered(type);
-		}
-		
 		protected IType[] getAllTSubTypes(IType as ConnectedType type) {
 			Set<ConnectedType> tsubs = new HashSet<ConnectedType>();
 			internalGetAllTSubTypes(type, tsubs);
@@ -568,7 +593,7 @@ public team class OTTypeHierarchies {
 		{
 			if (typeHandle != null && tsuperclassHandles!= null) {
 				FocusRelation focusRelation = FocusRelation.compute(focusType, typeBinding);
-				getHierarchy().connectTSupers(typeHandle, isPhantom, tsuperclassHandles, arePhantoms, focusRelation);
+				getHierarchy().connectTSupers(typeHandle, isPhantom, typeBinding.isInterface(), tsuperclassHandles, arePhantoms, focusRelation);
 			}
 		}
 	}
@@ -596,6 +621,7 @@ public team class OTTypeHierarchies {
 		
 	}
 	
+	// ========================================= A P I : ===============================================
 	/**
 	 * API: Query all direct and indirect implicit superclasses of the given type.
 	 * If phantomMode is set to <code>false</code> any phantom roles will be filtered from the result.
@@ -652,23 +678,7 @@ public team class OTTypeHierarchies {
 		merged[count] = superclass;
 		return merged;
 	}
-	
-	/**
-	 * API: Query all direct and indirect, implicit and explicit superclasses of the given type.
-	 * If phantomMode is set to <code>false</code> any phantom roles will be filtered from the result.
-	 * 
-	 * @param otHierarchy a hierarchy that has been focused on the given type
-	 * @param type        the focus type whose super types are queried
-	 * @return a non-null array of ordered super classes.
-	 * @throws JavaModelException if accessing type failed
-	 */
-	public IType[] getAllSuperclasses(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
-		if (type.isInterface())
-			return NO_TYPE;
-		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
-		return otHierarchy.getAllSuperclasses(type);
-	}
-	
+
 	/**
 	 * API: Query the explicit superclass of the given type.
 	 * 
