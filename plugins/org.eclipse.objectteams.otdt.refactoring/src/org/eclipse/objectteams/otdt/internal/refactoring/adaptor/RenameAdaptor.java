@@ -20,7 +20,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.refactoring.adaptor;
 
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -35,29 +34,25 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.BaseCallMessageSend;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.internal.corext.refactoring.base.ReferencesInBinaryContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
 import org.eclipse.objectteams.otdt.internal.refactoring.adaptor.rename.RenameMethodAmbuguityMsgCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.adaptor.rename.RenameMethodOverloadingMsgCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.OTRefactoringCoreMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.rename.BaseCallFinder;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
+import org.eclipse.text.edits.ReplaceEdit;
 
 import base org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
-import base org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 
 /**
  * @author stephan
@@ -85,66 +80,7 @@ public team class RenameAdaptor
 		}
 		boolean isVirtual(IMethod method) <- replace boolean isVirtual(IMethod method);
 	}
-	
-	@SuppressWarnings("decapsulation") // multiple
-	protected class RippleMethodFinder2 playedBy RippleMethodFinder2 
-	{
-		@SuppressWarnings("basecall")
-		callin void createHierarchyOfDeclarations(IProgressMonitor pm, WorkingCopyOwner owner) 
-				throws JavaModelException 
-		{
-// UNUSED orig:
-//			IRegion region= JavaCore.newRegion();
-//			for (Iterator<IMethod> iter= getFDeclarations().iterator(); iter.hasNext();) {
-//				IType declaringType= iter.next().getDeclaringType();
-//				region.add(declaringType);
-//			}
-//			fHierarchy= JavaCore.newTypeHierarchy(region, owner, pm);
-	//{ObjectTeams: use OTTypeHierarchy
-			IType declaringType= getFMethod().getDeclaringType();
-			// FIXME(SH): OTTypeHierarchy cannot be computed for regions!
-			OTTypeHierarchy hier = new OTTypeHierarchy(declaringType, true);
-			hier.refresh(pm);
-			setFHierarchy(hier);
-	//jsv}		
-		}
-		
-		static callin IMethod[] getRelatedMethods(IMethod method, IProgressMonitor monitor) 
-			throws CoreException 
-		{
-			// for combining two result arrays:
-			HashSet<IMethod> methods = new HashSet<IMethod>();
-		
-			// OT-Strategy (knows about implicit inheritance):
-			// TODO(SH): passing null-TypeHierarchy probably causes a performance penalty.
-			IMethod topMethod= RefactoringUtil.getTopmostMethod(method, null, monitor);
-			if (topMethod != null)
-				method= topMethod;
-			IMethod[] methodArray = RefactoringUtil.getOverriddenMethods(method, monitor);
-			if (methodArray != null)
-				for (IMethod m : methodArray)
-					methods.add(m);
-			
-			// Java-Strategy:
-			methodArray = base.getRelatedMethods(method, monitor);
-			if (methodArray != null)
-				for (IMethod m : methodArray)
-					methods.add(m);
-			
-			// merge results:
-			methodArray = new IMethod[methods.size()];
-			return methods.toArray(methodArray);
-		}
-		IMethod[] getRelatedMethods(IMethod method, IProgressMonitor pm)
-			<- replace IMethod[] getRelatedMethods(IMethod method, ReferencesInBinaryContext binaryRefs,
-												   IProgressMonitor pm, WorkingCopyOwner owner)
-			with { method <- method, pm <- pm, result -> result }
-		
 
-		createHierarchyOfDeclarations <- replace createHierarchyOfDeclarations;
-		void setFHierarchy(ITypeHierarchy fHierarchy) -> set ITypeHierarchy fHierarchy;
-		IMethod getFMethod() -> get IMethod fMethod;
-	}
 	/**
 	 * This class implements the adaptation of the rename virtual method
 	 * refactoring for OT/J 
@@ -173,29 +109,12 @@ public team class RenameAdaptor
 	 * 
 	 * @author brcan
 	 */
-	@SuppressWarnings("decapsulation") // multiple!
+	@SuppressWarnings("decapsulation") // multiple
 	protected class RenameVirtualMethodProcessor
 //			extends JavaRenameProcessor
 			playedBy RenameVirtualMethodProcessor
 	{	
-		// copied from base method
-		@SuppressWarnings("basecall")
-		callin ITypeHierarchy getCachedHierarchy(IType declaring, IProgressMonitor monitor) 
-				throws JavaModelException 
-		{
-			ITypeHierarchy cachedHierarchy = getFCachedHierarchy();
-			if (cachedHierarchy != null && declaring.equals(cachedHierarchy.getType()))
-				return cachedHierarchy;
-	//{ObjectTeams: use OTTypeHierarchy
-			//orig: fCachedHierarchy= declaring.newTypeHierarchy(new SubProgressMonitor(monitor, 1));
-			cachedHierarchy = new OTTypeHierarchy(declaring, true);
-			cachedHierarchy.refresh(monitor);
-			setFCachedHierarchy(cachedHierarchy);
-	//jsv}
-			return cachedHierarchy;
-		}
-		getCachedHierarchy <- replace getCachedHierarchy;
-		
+
 		ITypeHierarchy getFCachedHierarchy() -> get ITypeHierarchy fCachedHierarchy;
 		void setFCachedHierarchy(ITypeHierarchy fCachedHierarchy) -> set ITypeHierarchy fCachedHierarchy;
 

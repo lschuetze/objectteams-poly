@@ -367,7 +367,7 @@ public team class PullUpAdaptor {
 			IOTType otType = OTModelManager.getOTElement(declaring);
 			if(otType != null && otType instanceof RoleType){
 				RoleType role = (RoleType) otType;
-				IType[] otSuperTypes = role.newOTTypeHierarchy(monitor).getAllSupertypes(declaring);
+				IType[] otSuperTypes = role.newTypeHierarchy(monitor).getAllSupertypes(declaring);
 				List<IType> list = new ArrayList<IType>();
 				int binary = 0;
 				for (int i = 0; i < otSuperTypes.length; i++) {
