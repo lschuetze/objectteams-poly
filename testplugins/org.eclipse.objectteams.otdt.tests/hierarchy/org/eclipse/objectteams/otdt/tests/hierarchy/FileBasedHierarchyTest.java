@@ -22,13 +22,14 @@ package org.eclipse.objectteams.otdt.tests.hierarchy;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 public class FileBasedHierarchyTest extends FileBasedModelTest
 {
-	protected TypeHierarchy _testObj;
+	protected ITypeHierarchy _testObj;
 	protected IType _focusType;
 
     public FileBasedHierarchyTest(String name)
@@ -36,19 +37,19 @@ public class FileBasedHierarchyTest extends FileBasedModelTest
         super(name);
     }
     
-    private TypeHierarchy createTypeHierarchy(IType focusType, boolean computeSubtypes) throws JavaModelException
+    private ITypeHierarchy createTypeHierarchy(IType focusType, boolean computeSubtypes) throws JavaModelException
     {
-    	TypeHierarchy hierarchy = new TypeHierarchy(focusType, null, focusType.getJavaProject(), computeSubtypes);
+    	ITypeHierarchy hierarchy = new TypeHierarchy(focusType, null, focusType.getJavaProject(), computeSubtypes);
 		hierarchy.refresh(new NullProgressMonitor());
         return hierarchy;
     }
 
-    public TypeHierarchy createTypeHierarchy(IType focusType) throws JavaModelException
+    public ITypeHierarchy createTypeHierarchy(IType focusType) throws JavaModelException
     {
     	return createTypeHierarchy(focusType, true);
     }
 
-    public TypeHierarchy createSuperTypeHierarchy(IType focusType) throws JavaModelException
+    public ITypeHierarchy createSuperTypeHierarchy(IType focusType) throws JavaModelException
     {
         return createTypeHierarchy(focusType, false);
     }

@@ -137,7 +137,6 @@ public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 	{
 	    _focusType = _T20T10T00R0;
 	    TypeHierarchy hierarchy = new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
-	    hierarchy.refresh(new NullProgressMonitor());
 	    HierarchyBuilder builder = new IndexBasedHierarchyBuilder(hierarchy, SearchEngine.createJavaSearchScope(new IJavaElement[] {_focusType.getJavaProject()} ));
 
 	    IType[] expected = { _T21T11T00R0, _T21T11T00R1, _T21T11T00R2 };
@@ -148,12 +147,11 @@ public class OTTypeHierarchyBuilderTest extends FileBasedModelTest
 	    assertTrue(compareTypes(expected, actual));
 	}
 
-	public void testGetResult_T20T10T00R1() throws JavaModelException
+	public void testGetResult_T20T10T00R1() throws CoreException
 	{
 	    _focusType = _T20T10T00R1;
-	    OTTypeHierarchy hierarchy = new OTTypeHierarchy(_focusType, _focusType.getJavaProject(), false);
-	    hierarchy.refresh(new NullProgressMonitor());
-	    OTTypeHierarchyBuilder builder = new OTTypeHierarchyBuilder(hierarchy);
+	    TypeHierarchy hierarchy = new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
+	    HierarchyBuilder builder = new IndexBasedHierarchyBuilder(hierarchy, SearchEngine.createJavaSearchScope(new IJavaElement[] {_focusType.getJavaProject()} ));
 	    
 	    IType[] expected = { _T21T10T00R1, _T21T10T00R2, _T21T11T00R1, _T21T11T00R2 };
 

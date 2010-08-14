@@ -116,8 +116,8 @@ public class ITypeIOTTypeTest extends FileBasedHierarchyTest
 	    
     public void testHierarchyCreation_equalFocusType() throws JavaModelException
     {
-        TypeHierarchy first  = createTypeHierarchy(_MyTeam);
-        TypeHierarchy second = createTypeHierarchy(_OT_MyTeam);
+        ITypeHierarchy first  = createTypeHierarchy(_MyTeam);
+        ITypeHierarchy second = createTypeHierarchy(_OT_MyTeam);
         
 		assertEquals(first.getType(), second.getType());		
     }

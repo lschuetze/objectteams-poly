@@ -24,6 +24,7 @@ import junit.framework.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.objectteams.otdt.tests.hierarchy.FileBasedHierarchyTest;
@@ -122,7 +123,7 @@ public class OTSuperTypeHierarchyTest008 extends FileBasedHierarchyTest
     {
         _focusType = _T22T11R2;
         
-        TypeHierarchy hierarchy =
+        ITypeHierarchy hierarchy =
             new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
         hierarchy.refresh(new NullProgressMonitor());
 
@@ -141,7 +142,7 @@ public class OTSuperTypeHierarchyTest008 extends FileBasedHierarchyTest
     {
         _focusType = _T22T12R3;
         
-        TypeHierarchy hierarchy =
+        ITypeHierarchy hierarchy =
             new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
         hierarchy.refresh(new NullProgressMonitor());
 
@@ -180,7 +181,7 @@ public class OTSuperTypeHierarchyTest008 extends FileBasedHierarchyTest
     public void testGetAllTSuperTypes_T22T12R3() throws JavaModelException
     {
         _focusType = _T22T12R3;
-        TypeHierarchy hier = createSuperTypeHierarchy(_focusType);
+        ITypeHierarchy hier = createSuperTypeHierarchy(_focusType);
         
         IType[] actual = OTTypeHierarchies.getInstance().getAllTSuperTypes(hier, _focusType);
         IType[] expected = new IType[] { _T21T12R3,
