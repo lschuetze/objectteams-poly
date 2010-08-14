@@ -128,11 +128,12 @@ public team class OTTypeHierarchies {
 		precedence unwrapping, filtering1, superlinearize; // order: outer callins unwrap and filter, inner callin performs computation
 		precedence filtering2, tsuperadding;
 
-		// --- considure implicit inheritance for some queries: ----
+		// --- consider implicit inheritance for some queries: ----
 		
 		// make getSuperclass() traverse the superclass linearization of the focus type:
 	superlinearize: 
-		ConnectedType getSuperclassLinearized(ConnectedType type) <- replace IType getSuperclass(IType type);
+		ConnectedType getSuperclassLinearized(ConnectedType type) <- replace IType getSuperclass(IType type)
+			base when (OTModelManager.isRole(type));
 		
 		// augment original queries to capture tsub-types, too:
 		@SuppressWarnings("decapsulation")
@@ -148,7 +149,8 @@ public team class OTTypeHierarchies {
 		<- replace 
 			IType[] getAllClasses(), 
 			IType[] getImplementingClasses(IType type), 
-			IType[] getAllSuperclasses(IType type) 
+			IType[] getAllSuperclasses(IType type),
+			IType[] getAllSupertypes(IType type)
 					when (!this.phantomMode);
 		
 		// filter intermediate results only at these top-level queries:
@@ -679,18 +681,6 @@ public team class OTTypeHierarchies {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
 		// have superclass (otherwise type == java.lang.Object?)
 		return otHierarchy.getPlainSuperclass(type);
-	}
-
-	/** Get ALL super types: classes and interfaces, explicit and implicit, direct and indirect. */
-	public IType[] getAllSupertypes(ITypeHierarchy  as OTTypeHierarchy otHierarchy, IType type) {
-		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
-		IType[] superclasses = otHierarchy.getAllSuperclasses(type);
-		IType[] superinterfaces = otHierarchy.getAllSuperInterfaces(type);
-		int l1 = superclasses.length, l2 = superinterfaces.length;
-		IType[] result = new IType[l1+l2];
-		System.arraycopy(superclasses, 0, result, 0, l1);
-		System.arraycopy(superinterfaces, 0, result, l1, l2);
-		return result;
 	}
 
 	/**
