@@ -175,7 +175,7 @@ public class OTSuperTypeHierarchyTest010 extends FileBasedHierarchyTest
         IType[] expected = new IType[] { _objectType,
         								 _T1_R1,
 										 _interfaceA };        
-        IType [] actual = OTTypeHierarchies.getInstance().getAllSupertypes(_testObj, _focusType);
+        IType [] actual = _testObj.getAllSupertypes(_focusType);
 
         assertEquals(expected.length, actual.length);        
         assertTrue(compareTypes(expected, actual));
