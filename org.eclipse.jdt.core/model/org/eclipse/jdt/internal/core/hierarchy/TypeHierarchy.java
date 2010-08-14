@@ -501,7 +501,12 @@ private ArrayList getAllSupertypes0(IType type, ArrayList supers) {
 			supers = getAllSuperInterfaces0(superinterfaces[i], supers);
 		}
 	}
-	IType superclass = (IType) this.classToSuperclass.get(type);
+//{ObjectTeams: use query to enable linearization by OTTypeHierarchies:
+/* orig:
+	IType superclass = (IType) this.classToSuperclass.get(type); 	
+  :giro */
+	IType superclass = getSuperclass(type);
+// SH}
 	if (superclass != null) {
 		if (supers == null)
 			supers = new ArrayList();
