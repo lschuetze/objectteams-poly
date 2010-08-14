@@ -42,6 +42,7 @@ import org.eclipse.debug.core.DebugException;
 import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Message;
 import org.eclipse.jdt.debug.core.IJavaBreakpoint;
@@ -55,10 +56,10 @@ import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jdt.internal.debug.ui.BreakpointUtils;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.IOTTypeHierarchy;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.debug.ui.OTDebugUIPlugin;
 
 /**
@@ -328,7 +329,7 @@ public class CopyInheritanceBreakpointManager implements IJavaBreakpointListener
 
     private class TSubClassComputer implements IRunnableWithProgress
     {
-        private IOTTypeHierarchy _hierarchy;
+        private ITypeHierarchy _hierarchy;
         private IRoleType _roleType;
         private IType[] _subClasses;
         
@@ -344,9 +345,9 @@ public class CopyInheritanceBreakpointManager implements IJavaBreakpointListener
 		    IProgressMonitor mon = new SubProgressMonitor(monitor, 1);
 		    try
 		    {
-		        _hierarchy = _roleType.newOTTypeHierarchy(mon);
-		        _hierarchy.setPhantomMode(true);
-		        _subClasses = _hierarchy.getAllTSubtypes((IType)_roleType);
+		        _hierarchy = _roleType.newTypeHierarchy(mon);
+		        OTTypeHierarchies.getInstance().setPhantomMode(_hierarchy, true);
+		        _subClasses = OTTypeHierarchies.getInstance().getAllTSubTypes(_hierarchy, (IType)_roleType);
 
 		    }
 		    catch (JavaModelException ex)
