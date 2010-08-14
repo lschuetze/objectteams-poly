@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
@@ -79,12 +78,12 @@ import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
 import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.ui.OTDTUIPluginConstants;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
-import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.ui.OTDTUIPluginConstants;
 
 /**
  * Individual method copied from {@link org.eclipse.jdt.internal.corext.codemanipulation.StubUtility#getCompilationUnitContent(ICompilationUnit, String, String, String, String)}
@@ -866,11 +865,6 @@ public abstract class TypeCreator
 			monitor.done();
 		}
 	}
-
-    protected ITypeHierarchy createSuperTypeHierarchy(IType type, IProgressMonitor monitor) throws JavaModelException
-    {
-        return type.newSupertypeHierarchy(monitor);
-    }
 
 /**
  * Copied from NewTypeWizardPage.createInheritedMethods

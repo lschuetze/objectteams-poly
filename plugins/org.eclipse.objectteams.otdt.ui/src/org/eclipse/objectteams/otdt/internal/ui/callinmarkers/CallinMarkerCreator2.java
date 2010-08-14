@@ -343,13 +343,10 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 			collectedRoleTypes.addAll(value);
 			for (IType member : value) {
 				if (submon.isCanceled()) return null;
-				if (member.exists()) {
-					IOTType otType = OTModelManager.getOTElement(member);
-					if (otType != null) {
-						IType[] subtypes = otType.newOTTypeHierarchy(submon).getAllSubtypes(otType);
-						for (IType subtype : subtypes)
-							collectedRoleTypes.add(subtype);
-					}
+				if (member.exists() && OTModelManager.isRole(member)) {
+					IType[] subtypes = member.newTypeHierarchy(submon).getAllSubtypes(member);
+					for (IType subtype : subtypes)
+						collectedRoleTypes.add(subtype);
 				}
 				submon.worked(1);
 			}		    		

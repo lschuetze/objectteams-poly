@@ -20,12 +20,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.wizards.typecreation;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
 
@@ -45,14 +39,4 @@ public class TeamCreator extends TypeCreator
 	{
 		return String.valueOf(IOTConstants.STR_ORG_OBJECTTEAMS_TEAM);
 	}
-
-	protected ITypeHierarchy createSuperTypeHierarchy(IType type,
-            IProgressMonitor monitor) throws JavaModelException
-    {
-		IOTType otType = OTModelManager.getOTElement(type);
-		if (otType != null)
-		    return otType.newSuperOTTypeHierarchy(monitor);
-		
-		return super.createSuperTypeHierarchy(type, monitor);
-    }
 }

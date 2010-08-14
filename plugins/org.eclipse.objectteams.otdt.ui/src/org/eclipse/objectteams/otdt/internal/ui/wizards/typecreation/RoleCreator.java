@@ -21,16 +21,9 @@
 package org.eclipse.objectteams.otdt.internal.ui.wizards.typecreation;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.IRoleType;
-import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPluginConstants;
 
 
@@ -85,15 +78,5 @@ public class RoleCreator extends TypeCreator
                                                "The role class " + getTypeInfo().getTypeName() + " must have an enclosing team.", //$NON-NLS-1$ //$NON-NLS-2$
 											   null));
 		}
-	}		
-
-	protected ITypeHierarchy createSuperTypeHierarchy(IType type,
-            IProgressMonitor monitor) throws JavaModelException
-    {
-		IOTType otType = OTModelManager.getOTElement(type);
-		if (otType instanceof IRoleType)
-			return otType.newSuperOTTypeHierarchy(monitor);
-
-		return super.createSuperTypeHierarchy(type, monitor);
-    }
+	}
 }
