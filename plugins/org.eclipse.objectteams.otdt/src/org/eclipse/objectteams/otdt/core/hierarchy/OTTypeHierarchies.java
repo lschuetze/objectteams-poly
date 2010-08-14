@@ -570,7 +570,30 @@ public team class OTTypeHierarchies {
 			}
 		}
 	}
+	
+	/** Lookup of role types requires the OT TypeHierarchy, connect here. */
+	protected class OTType playedBy OTType {
 
+		IType getCorrespondingJavaElement() -> IJavaElement getCorrespondingJavaElement()
+			with { result <- (IType)result }
+
+		@SuppressWarnings("decapsulation")
+		getTypesToSearchForRoles <- replace getTypesToSearchForRoles;
+
+		@SuppressWarnings("basecall")
+		callin IType[] getTypesToSearchForRoles(OTTypeHierarchy hierarchy, int which) throws JavaModelException {
+	        switch (which) {
+	        	case IOTType.EXPLICITLY_INHERITED:
+	        	    return new IType[] { hierarchy.getPlainSuperclass(this.getCorrespondingJavaElement()) };
+	    	    case IOTType.IMPLICTLY_INHERITED:
+	        	    return hierarchy.getAllTSuperTypes(this);
+	        	default:
+	        		return base.getTypesToSearchForRoles(hierarchy, which);
+	        }
+		}
+		
+	}
+	
 	/**
 	 * API: Query all direct and indirect implicit superclasses of the given type.
 	 * If phantomMode is set to <code>false</code> any phantom roles will be filtered from the result.
