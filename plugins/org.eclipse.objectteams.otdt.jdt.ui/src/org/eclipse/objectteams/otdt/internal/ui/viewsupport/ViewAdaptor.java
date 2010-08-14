@@ -121,36 +121,44 @@ public team class ViewAdaptor extends JFaceDecapsulator
 		 * so we indeed have to adapt this method despite the use if IWorkbenchAdapter in
 		 * getBaseImageDescriptor.
 		 */
-		static callin ImageDescriptor getClassImageDescriptor(int flags) {
+		static callin ImageDescriptor getClassImageDescriptor(int flags, boolean useLightIcons) {
 			String img = null;
 			if (Flags.isRole(flags)) {
-				if (Flags.isTeam(flags)) {
-					if (Flags.isProtected(flags)) 
-						img = TEAM_ROLE_PROTECTED_IMG;
-					else
-						img = TEAM_ROLE_IMG;
+				if (useLightIcons) {
+					img = ROLE_ALT_IMG;
 				} else {
-					if (Flags.isProtected(flags))
-						img = ROLECLASS_PROTECTED_IMG;
-					else
-						img = ROLECLASS_IMG;
+					if (Flags.isTeam(flags)) {
+						if (Flags.isProtected(flags)) 
+							img = TEAM_ROLE_PROTECTED_IMG;
+						else
+							img = TEAM_ROLE_IMG;
+					} else {
+						if (Flags.isProtected(flags))
+							img = ROLECLASS_PROTECTED_IMG;
+						else
+							img = ROLECLASS_IMG;
+					}
 				}
 			} else if (Flags.isTeam(flags)) {
-				img = TEAM_IMG;
+				if (useLightIcons)
+					img = TEAM_ALT_IMG;
+				else
+					img = TEAM_IMG;
 			}
 			if (img != null)
 				return ImageManager.getSharedInstance().getDescriptor(img);
-			return base.getClassImageDescriptor(flags);
+			return base.getClassImageDescriptor(flags, useLightIcons);
 		}
-		/** Overriding. */
-		getClassImageDescriptor <- replace getClassImageDescriptor;
-		/** Overriding with parameter mapping. */
-		ImageDescriptor getClassImageDescriptor(int flags) 
-			<- replace ImageDescriptor getInnerClassImageDescriptor(boolean a1, int flags)
-			with { flags  <- flags }
-		ImageDescriptor getClassImageDescriptor(int flags) 
+		// Overriding different base methods using appropriate parameter mappings:
+		ImageDescriptor getClassImageDescriptor(int flags, boolean useLightIcons) // FIXME(SH): combining this callin with the one below gives an exception inside the OTRE
+			<- replace ImageDescriptor getClassImageDescriptor(int flags)
+			with { flags  <- flags, useLightIcons <- false }
+		ImageDescriptor getClassImageDescriptor(int flags, boolean useLightIcons)
+		<- replace ImageDescriptor getInnerClassImageDescriptor(boolean a1, int flags)
+			with { flags  <- flags, useLightIcons <- false }
+		ImageDescriptor getClassImageDescriptor(int flags, boolean useLightIcons) 
 			<- replace ImageDescriptor getTypeImageDescriptor(boolean isInner, boolean isInInterfaceOrAnnotation, int flags, boolean useLightIcons) 
-			with { flags  <- flags }
+			with { flags  <- flags, useLightIcons <- useLightIcons }
 
 		callin ImageDescriptor getBaseImageDescriptor(IJavaElement element) {
 			String name = element.getElementName();
