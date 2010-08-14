@@ -20,7 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.core;
 
-import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -74,7 +74,7 @@ public interface IOTType extends IOTJavaElement, IType
 	/**
 	 * Returns the flags from parsing. These flags provide additional
 	 * information about the type's modifiers e.g. IConstants.AccTeam
-	 * @see org.eclipse.jdt.internal.compiler.env.IConstants
+	 * @see Flags
 	 */	
 	public int getFlags();
 
@@ -99,23 +99,21 @@ public interface IOTType extends IOTJavaElement, IType
 	/**
 	 * Returns all roles of this team. Either the inlined, the role files or both are 
 	 * returned.
+	 * See {@link IOTType#getRoleTypes()} for gathering all role types.
 	 * 
 	 * @param which an ORed combination of IOTType.INLINED, IOTType.ROLEFILE, IOTType.IMPLICITLY_INHERITED,
 	 * IOTType.EXPLICITLY_INHERITED and IOTType.EXCLUDE_SELF
-	 * @see IOTType.getRoleTypes() for gathering all role types.
 	 */
 	public IType[] getRoleTypes(int which) throws JavaModelException;
 	
 	/**
 	 * Returns roles named roleName of this team. Either the inlined, the role files or both are 
 	 * returned.
+	 * See {@link IOTType#getRoleTypes()} for gathering all role types.
 	 * 
 	 * @param which an ORed combination of IOTType.INLINED, IOTType.ROLEFILE, IOTType.IMPLICITLY_INHERITED,
 	 * IOTType.EXPLICITLY_INHERITED and IOTType.EXCLUDE_SELF
-	 * @see IOTType.getRoleTypes() for gathering all role types.
 	 */
 	public IType[] getRoleTypes(int which, String roleName) throws JavaModelException;
 
-	public IOTTypeHierarchy newOTTypeHierarchy(IProgressMonitor monitor) throws JavaModelException;
-	public IOTTypeHierarchy newSuperOTTypeHierarchy(IProgressMonitor monitor) throws JavaModelException;
 }

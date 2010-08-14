@@ -54,7 +54,6 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.IOTTypeHierarchy;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.search.OTSearchEngine;
@@ -129,13 +128,7 @@ public class OTType extends OTJavaElement implements IOTType
 	}	
     
 	/**
-	 * Returns all roles of this team. Either the inlined, the role files or both are 
-	 * returned.
-	 * 
-	 * @param which an ORed combination of IOTType.INLINED, IOTType.ROLEFILE, IOTType.IMPLICITLY_INHERITED,
-	 * IOTType.EXPLICITLY_INHERITED and IOTType.ECLUDE_SELF
-	 * @throws JavaModelException
-	 * @see IOTType.getRoleTypes() for gathering all role types.
+	 * {@inheritDoc}.
 	 */
 	public IType[] getRoleTypes(int which) throws JavaModelException 
 	{
@@ -143,15 +136,7 @@ public class OTType extends OTJavaElement implements IOTType
 	}
 	
 	/**
-	 * Returns roles named roleName of this team. Either the inlined, the role files or both are 
-	 * returned.
-	 * 
-	 * TODO (carp): specify and implement sort order especially with respect to the hierarchy
-	 * 
-	 * @param which an ORed combination of IOTType.INLINED, IOTType.ROLEFILE, IOTType.IMPLICITLY_INHERITED,
-	 * IOTType.EXPLICITLY_INHERITED and IOTType.ECLUDE_SELF
-	 * @throws JavaModelException
-	 * @see IOTType.getRoleTypes() for gathering all role types.
+	 * {@inheritDoc}
 	 */
 	public IType[] getRoleTypes(int which, String roleName) throws JavaModelException 
 	{
@@ -162,18 +147,9 @@ public class OTType extends OTJavaElement implements IOTType
 	    
 	    if ((which & BOTH_HIERARCHIES_MASK) != 0)
 	    {
-	        IOTTypeHierarchy hierarchy = newSuperOTTypeHierarchy(new NullProgressMonitor());
-	        switch (which & BOTH_HIERARCHIES_MASK) {
-	        	case EXPLICITLY_INHERITED:
-	        	    typesToConsider = new IType[] { hierarchy.getExplicitSuperclass(this) };
-	        	    break;
-        	    case IMPLICTLY_INHERITED:
-	        	    typesToConsider = hierarchy.getAllTSuperTypes(this);
-        	        break;
-    	        case BOTH_HIERARCHIES_MASK:
-	        	    typesToConsider = hierarchy.getAllSuperclasses(this);
-    	            break;
-	        }
+	        ITypeHierarchy hierarchy = ((IType)getCorrespondingJavaElement()).newSupertypeHierarchy(new NullProgressMonitor());
+	        typesToConsider = getTypesToSearchForRoles(hierarchy, which & BOTH_HIERARCHIES_MASK);
+
 	    }
 
 	    if ((which & EXCLUDE_SELF) == 0)
@@ -214,6 +190,12 @@ public class OTType extends OTJavaElement implements IOTType
         }
         
         return result.toArray(new IType[result.size()]);
+	}
+
+	// hook for OTTypeHierarchies to select behavior depending of argument 'which':
+	private IType[] getTypesToSearchForRoles(ITypeHierarchy hierarchy, int which) throws JavaModelException {
+		// default case:
+		return hierarchy.getAllSuperclasses(this);
 	}
 	
 	private static IType[] fixTypesToConsider(IType[] typesToConsider)
@@ -299,7 +281,7 @@ public class OTType extends OTJavaElement implements IOTType
 	        {
 		        List<IType> roleFiles = searchEngineGetRoleFiles(new IType[] { this }, simpleName);
 		        if (roleFiles.size() > 0)
-		        	return (IType) roleFiles.get(0); // actually there may be more, due to multiple src-folders...
+		        	return roleFiles.get(0); // actually there may be more, due to multiple src-folders...
 		        
 // previous implementation without search engine
 //			    String encTeamName = this.getFullyQualifiedName();
@@ -657,20 +639,6 @@ public class OTType extends OTJavaElement implements IOTType
     {
         getIType().rename(name, replace, monitor);
     }
-
-    public IOTTypeHierarchy newSuperOTTypeHierarchy(IProgressMonitor monitor) throws JavaModelException
-	{
-	    OTTypeHierarchy hierarchy = new OTTypeHierarchy(this, getJavaProject(), false);
-	    hierarchy.refresh(monitor);
-	    return hierarchy;
-	}
-	
-	public IOTTypeHierarchy newOTTypeHierarchy(IProgressMonitor monitor) throws JavaModelException
-	{
-	    OTTypeHierarchy hierarchy = new OTTypeHierarchy(this, getJavaProject(), true);
-	    hierarchy.refresh(monitor);
-	    return hierarchy;
-	}
 
 	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor) throws JavaModelException {
 		getIType().codeComplete(snippet, insertion, position, localVariableTypeNames, localVariableNames, localVariableModifiers, isStatic, requestor);

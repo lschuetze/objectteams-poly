@@ -15,14 +15,18 @@ package org.eclipse.jdt.internal.core.search.matching;
 
 import java.io.IOException;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.BindingKey;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.internal.core.index.*;
+import org.eclipse.jdt.internal.core.index.EntryResult;
+import org.eclipse.jdt.internal.core.index.Index;
 import org.eclipse.jdt.internal.core.util.Util;
-import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.IOTTypeHierarchy;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 
 public class MethodPattern extends JavaSearchPattern {
@@ -49,7 +53,7 @@ public static ThreadLocal<Object> findingCallers = new ThreadLocal<Object>();
 
 // for tsuper/tsub matching:
 private IType declaringRoleClass= null;
-private IOTTypeHierarchy cachedRoleHierarchy= null;
+private ITypeHierarchy cachedRoleHierarchy= null;
 // SH}
 
 // extra reference info
@@ -449,11 +453,10 @@ protected StringBuffer print(StringBuffer output) {
 }
 //{ObjectTeams:  tsuper/tsub checking:
 public void setDeclaringRoleClass(IType declaringClass) {
-	IOTType roleType= OTModelManager.getOTElement(declaringClass);
-	if (roleType != null) {
+	if (OTModelManager.isRole(declaringClass)) {
 		this.declaringRoleClass= declaringClass;
 		try {
-			cachedRoleHierarchy= roleType.newSuperOTTypeHierarchy(null);
+			this.cachedRoleHierarchy= declaringClass.newSupertypeHierarchy(null); // FIXME(SH): really need to eagerly compute this?
 		} catch (JavaModelException e) { /* no hope for exact matching */ }
 	}
 }
@@ -463,10 +466,11 @@ public int resolveLevelForType(String typeName, int declaringLevel) {
 		return declaringLevel;
 	
 	if (this.cachedRoleHierarchy != null) {
-		IType[] tsubTypes= this.cachedRoleHierarchy.getTSuperTypes(this.declaringRoleClass);
-		for (IType tsubType : tsubTypes) {
-			if (typeName.equals(tsubType.getFullyQualifiedName('.')))
+		IType superType = this.cachedRoleHierarchy.getSuperclass(this.declaringRoleClass); // OTTypeHierarchies will ensure that tsupers are traversed, too.
+		while (superType != null && OTModelManager.isRole(superType)) {
+			if (typeName.equals(superType.getFullyQualifiedName('.')))
 				return declaringLevel;
+			superType = this.cachedRoleHierarchy.getSuperclass(superType);
 		}
 	}
 	return PatternLocator.IMPOSSIBLE_MATCH;

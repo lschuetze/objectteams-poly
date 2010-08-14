@@ -31,8 +31,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModelStatus;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -44,7 +44,6 @@ import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.IOTTypeHierarchy;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
@@ -143,7 +142,10 @@ public class RoleType extends OTType implements IRoleType
 		_baseClass = baseClass;
 	}
 
-	public IType getBaseClass() throws JavaModelException
+	public IType getBaseClass() throws JavaModelException {
+		return getBaseClass(null);
+	}
+	private IType getBaseClass(ITypeHierarchy hierarchy) throws JavaModelException
 	{
 		if (_baseClass == null)
 		{
@@ -152,7 +154,7 @@ public class RoleType extends OTType implements IRoleType
 			try
             {
 //			    System.out.println("RoleType.getBaseClass(): " + getElementName());
-                _baseClass = findBaseClass();
+                _baseClass = findBaseClass(hierarchy);
             }
 			catch (JavaModelException ex)
 			{
@@ -229,10 +231,10 @@ public class RoleType extends OTType implements IRoleType
 	 * 
 	 * @return resolved JavaModel type or null if nothing found 
 	 */
-    private IType findBaseClass() throws JavaModelException
+    private IType findBaseClass(ITypeHierarchy hierarchy) throws JavaModelException
     {
         if (_baseClassName == null)
-            return findSuperBaseClass();
+            return findSuperBaseClass(hierarchy);
         
         if (_baseAnchor != null)
         {
@@ -254,34 +256,34 @@ public class RoleType extends OTType implements IRoleType
         return resolveInType(this, _baseClassName);
     }
 
-    // FIXME remove recursive building of hierarchy through getBaseClass -> findSuperBaseClass -> getBaseOf -> tsuper.getBaseClass()
-    private IType findSuperBaseClass() throws JavaModelException
+    // argument avoids recursive building of hierarchy through getBaseClass -> findSuperBaseClass -> getBaseOf -> tsuper.getBaseClass()
+    private IType findSuperBaseClass(ITypeHierarchy hierarchy) throws JavaModelException
     {
-        IOTTypeHierarchy hierarchy = newSuperOTTypeHierarchy(new NullProgressMonitor());
-        IType[] tsupers = hierarchy.getTSuperTypes((IType) this.getCorrespondingJavaElement());
-        for (int i = 0; i < tsupers.length; i++)
-        {
-            IType baseType = getBaseOf(tsupers[i]);
+        IType currentType = (IType)getCorrespondingJavaElement();
+        if (hierarchy == null)
+        	hierarchy = currentType.newSupertypeHierarchy(new NullProgressMonitor());
+		currentType = hierarchy.getSuperclass(currentType);
+		while (currentType != null && OTModelManager.isRole(currentType)) {
+            IType baseType = getBaseOf(currentType, hierarchy);
             if (baseType != null)
                 return baseType;
+            currentType = hierarchy.getSuperclass(currentType); // relies on OTTypeHierarchies whereby getSuperclass() produces the full (t)super linearization 
         }
-
-        IType explicitSuper = hierarchy.getExplicitSuperclass((IType) this.getCorrespondingJavaElement());
-        return getBaseOf(explicitSuper);
+		return null;
     }
 
-    private IType getBaseOf(IType type) throws JavaModelException
+    private IType getBaseOf(IType type, ITypeHierarchy hierarchy) throws JavaModelException
     {
         if (type != null && type.exists())
         {
             IOTType otType = OTModelManager.getOTElement(type);
-            if (otType == null) // i.e. java.lang.Object
+            if (otType == null) // i.e. non-role superclass
                 return null;
             
             if (otType.isRole())
             {
-                IRoleType tsuperRole = (IRoleType) otType;
-                IType tsuperBase = tsuperRole.getBaseClass();
+                RoleType tsuperRole = (RoleType) otType;
+                IType tsuperBase = tsuperRole.getBaseClass(hierarchy);
                 if (tsuperBase != null)
                     return tsuperBase;
             }
@@ -366,7 +368,7 @@ public class RoleType extends OTType implements IRoleType
     	ArrayList<IType> tsuperRoles = new ArrayList<IType>();
     	IType teamType = getTeam();
     	if (teamType == null)
-    		throw new JavaModelException(new JavaModelStatus(IJavaModelStatus.ERROR, "Enclosing team not found for "+this.getElementName()+" perhaps this element is not on the build path?"));
+    		throw new JavaModelException(new JavaModelStatus(IStatus.ERROR, "Enclosing team not found for "+this.getElementName()+" perhaps this element is not on the build path?")); //$NON-NLS-1$ //$NON-NLS-2$
     	String superteamName = teamType.getSuperclassName();
     	if (superteamName != null) {
     		if (superteamName.indexOf('.') != -1) {
