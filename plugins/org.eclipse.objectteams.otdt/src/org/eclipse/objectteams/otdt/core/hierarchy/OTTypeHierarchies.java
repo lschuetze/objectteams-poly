@@ -64,6 +64,8 @@ public team class OTTypeHierarchies {
 		UNRELATED;
 
 		public static FocusRelation compute(ReferenceBinding focusType, ReferenceBinding typeBinding) {
+			if (focusType == null) // happens for region based hierarchy
+				return UNRELATED;
 			if (focusType.isRole())
 				focusType = focusType.getRealType();
 			if (typeBinding.isRole())
@@ -562,7 +564,7 @@ public team class OTTypeHierarchies {
 		private void connectTSupers(ReferenceBinding focusType, ReferenceBinding typeBinding, IGenericType type, IType typeHandle, boolean isPhantom, 
 									IType superclassHandle, IType[] tsuperclassHandles, boolean[] arePhantoms, IType[] superinterfaceHandles) 
 		{
-			if (tsuperclassHandles!= null) {
+			if (typeHandle != null && tsuperclassHandles!= null) {
 				FocusRelation focusRelation = FocusRelation.compute(focusType, typeBinding);
 				getHierarchy().connectTSupers(typeHandle, isPhantom, tsuperclassHandles, arePhantoms, focusRelation);
 			}
