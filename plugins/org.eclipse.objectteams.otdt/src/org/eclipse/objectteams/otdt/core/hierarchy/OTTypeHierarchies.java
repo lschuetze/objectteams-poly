@@ -159,10 +159,14 @@ public team class OTTypeHierarchies {
 			base when (OTModelManager.isRole(type));
 		
 		// augment original queries to capture tsub-types, too:
+		
+		// adjust internal method as to capture calls from getAllSubtypes(IType), too.
 		@SuppressWarnings("decapsulation")
-		addTSubs <- replace getSubtypesForType; // adjust internal method as to capture calls from getAllSubtypes(IType), too.
+		ConnectedType[] addTSubs(ConnectedType type, boolean isTopLevel) <- replace IType[] getSubtypesForType(IType type) 
+				with { type <- type, isTopLevel <- false }
 	tsuperadding:
-		addTSubs <- replace getSubclasses;
+		ConnectedType[] addTSubs(ConnectedType type, boolean isTopLevel) <- replace IType[] getSubclasses(IType type)
+				with { type <- type, isTopLevel <- true }
 
 		// --- filtering (duplicates and phantoms) and unwrapping (OTTypes): ---
 		
@@ -172,15 +176,19 @@ public team class OTTypeHierarchies {
 		<- replace 
 			IType[] getAllClasses(), 
 			IType[] getImplementingClasses(IType type), 
-			IType[] getAllSuperclasses(IType type),
 			IType[] getAllSupertypes(IType type)
 					when (!this.phantomMode);
-		
+
 		// filter intermediate results only at these top-level queries:
 	filtering2: 	
-		filterDuplicatesAndPhantoms <- replace getSubclasses, getSubtypes, getAllSubtypes, getImplementingClasses; // includes unwrapping of OTTypes
+		filterDuplicatesAndPhantomsToSub <- replace getSubclasses, getSubtypes, getAllSubtypes, getImplementingClasses; // includes unwrapping of OTTypes
 		
-		// all top-level queries unwrap and given OTTypes:
+		// the following methods filter phantoms directly
+		//    getSuperclassLinearized <- getSuperclass
+		// the following methods filter phantoms with sub-methods called:
+		//    getAllSuperclasses() using getSuperclass()
+		
+		// all top-level queries unwrap any given OTTypes:
 	unwrapping:
 		ensureJavaType <- replace getAllSuperclasses, getAllSuperInterfaces, getAllSupertypes,
 							      getCachedFlags, getExtendingInterfaces, 
@@ -252,6 +260,10 @@ public team class OTTypeHierarchies {
 							if (directTSuper.focusRelation == FocusRelation.EQUAL || directTSuper.focusRelation == FocusRelation.BELOW)
 								return directTSuper;
 					return null; // no tsuper leading to focus
+				} else if (this.focusRelation == FocusRelation.UNRELATED) {
+					// don't rely on linearization but still respect direct tsupers:
+					if (this.directTSupers != null && this.directTSupers.length > 0)
+						return this.directTSupers[0];
 				}
 				// shortcut if no tsupers:
 				if (this.allTSupersLinearized == null || this.allTSupersLinearized.size() == 0)
@@ -293,6 +305,18 @@ public team class OTTypeHierarchies {
 				throw new JavaModelException(new JavaModelStatus(JavaModelStatus.ERROR, this, "no non-phantom type found in allTSupersLinearized")); //$NON-NLS-1$
 			}
 			
+			public void collectRealTSubs(Set<ConnectedType> collected) {
+				if (!this.isPhantom) {
+					collected.add(this);
+				} else if (this.knownTSubTypes != null && this.knownTSubTypes.size() > 0) {
+					for (ConnectedType tsub : this.knownTSubTypes)
+						if (!tsub.isPhantom)
+							collected.add(tsub);
+						else
+							tsub.collectRealTSubs(collected);
+				}
+			} 
+
 			/** Get all tsuper types yet respecting phantom mode. */
 			protected ConnectedType[] getAllTSuperTypes() 
 			{
@@ -361,7 +385,7 @@ public team class OTTypeHierarchies {
 			hashCode => hashCode;
 
 			// for debugging:
-			toString => toString; 
+			toString => toString;
 
 		}
 		// binding source variant of IType
@@ -443,29 +467,43 @@ public team class OTTypeHierarchies {
 				return null;
 			// check for tsuper type in the computed list:
 			ConnectedType tsuperType = type.getTSuperType();
-			if (tsuperType != null)
-				return tsuperType;
-			// if type is the last in the list ... 
-			if (type.isLastTSuper()) {
-				// ...we're done with tsupers, start over with super of the focus level type:
-				return base.getSuperclassLinearized(type.tsuperChainRoot);
+			if (tsuperType == null) {
+				// if type is the last in the list ... 
+				if (type.isLastTSuper()) {
+					// ...we're done with tsupers, start over with super of the focus level type:
+					tsuperType = base.getSuperclassLinearized(type.tsuperChainRoot);
+				} else {
+					tsuperType = base.getSuperclassLinearized(type);
+				}
 			}
-			return base.getSuperclassLinearized(type);
+			if (tsuperType != null && tsuperType.isPhantom && !this.phantomMode)
+				try {
+					tsuperType = tsuperType.getRealTSuper();
+				} catch (JavaModelException jme) {
+					OTDTPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDTPlugin.PLUGIN_ID, "Failed to find original tsuper role.", jme)); //$NON-NLS-1$
+					return null; // don't return phantom to client not expecting phantoms
+				}
+			return tsuperType;
 		}
 		
 		/** When querying direct subtypes of type include tsub types, too, respecting phantom mode. */
-		callin ConnectedType[] addTSubs(ConnectedType type) {
-			ConnectedType[] res1 = base.addTSubs(type);
+		callin ConnectedType[] addTSubs(ConnectedType type, boolean isTopLevel) {
+			ConnectedType[] res1 = base.addTSubs(type, isTopLevel);
 			Set<ConnectedType> tsubs = type.knownTSubTypes;
 			
-			if (tsubs == null || tsubs.size() == 0)
-				return this.phantomMode ? res1 : filterDupsAndPhants(res1);
-		
-			Set<ConnectedType> result = new HashSet<ConnectedType>();
-			result.addAll(tsubs);
-			for (ConnectedType t1 : res1)
-				result.add(t1);
-			return result.toArray(new ConnectedType[result.size()]);
+			ConnectedType[] unfiltered = new ConnectedType[0];
+			if (tsubs == null || tsubs.size() == 0) {
+				unfiltered = res1;
+			} else {
+				Set<ConnectedType> result = new HashSet<ConnectedType>();
+				result.addAll(tsubs);
+				for (ConnectedType t1 : res1)
+					result.add(t1);
+				unfiltered = result.toArray(new ConnectedType[result.size()]);
+			}
+			if (this.phantomMode || !isTopLevel)
+				return unfiltered;
+			return filterDupsAndPhantsForSub(unfiltered);
 		}
 
 		// ==== handling for phantom mode: ====
@@ -475,9 +513,9 @@ public team class OTTypeHierarchies {
 			return filterPhantomRoles(base.phantomFilterWrapper());
 		}
 		
-		callin ConnectedType[] filterDuplicatesAndPhantoms(IType type) {
+		callin ConnectedType[] filterDuplicatesAndPhantomsToSub(IType type) {
 			if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
-			return filterDupsAndPhants(base.filterDuplicatesAndPhantoms(type));
+			return filterDupsAndPhantsForSub(base.filterDuplicatesAndPhantomsToSub(type));
 		}
 
 		callin void ensureJavaType(IType type) {
@@ -506,21 +544,22 @@ public team class OTTypeHierarchies {
 			return substituted;
 		}
 
-		ConnectedType[] filterDupsAndPhants(ConnectedType[] unfiltered) {
+		ConnectedType[] filterDupsAndPhantsForSub(ConnectedType[] unfiltered) {
 			if (unfiltered == null)
 				return unfiltered;
 			Set<ConnectedType> filtered = new HashSet<ConnectedType>();
 			for(ConnectedType type : unfiltered) {
-				if (type.isPhantom && !this.phantomMode)
-					continue; // skip
-				type = maybeAdjustPhantom(type);
-				if (type != null)
-					filtered.add(type);
+				if (this.phantomMode) {
+					filtered.add(maybeWrapPhantom(type));
+				} else {
+					for (ConnectedType adjusted : maybeAdjustPhantomToSubs(type))
+						filtered.add(adjusted);
+				}
 			}
 			return filtered.toArray(new ConnectedType[filtered.size()]);
 		}
 		
-		ConnectedType maybeAdjustPhantom(ConnectedType type) {
+		ConnectedType maybeWrapPhantom(ConnectedType type) {
 			if (!type.isPhantom || (type instanceof ConnectedPhantomType))
 				return type;
 			try {
@@ -529,6 +568,14 @@ public team class OTTypeHierarchies {
 				OTDTPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDTPlugin.PLUGIN_ID, "Failed to find original tsuper role.", e)); //$NON-NLS-1$
 				return null;
 			}
+		}
+		
+		ConnectedType[] maybeAdjustPhantomToSubs(ConnectedType type) {
+			if (!type.isPhantom)
+				return new ConnectedType[] {type};
+			Set<ConnectedType> realTSubs = new HashSet<ConnectedType>();
+			type.collectRealTSubs(realTSubs);
+			return realTSubs.toArray(new ConnectedType[realTSubs.size()]);
 		}
 
 		// ==== queries for clients (wrapped by methods of enclosing team, see there for documentation): ====
@@ -567,12 +614,13 @@ public team class OTTypeHierarchies {
 		protected void internalGetAllTSubTypes(ConnectedType type, Set<ConnectedType> tsubs) { // FIXME(SH) private gives type error (in bridge?)
 			if (type.knownTSubTypes != null) {
 				for (ConnectedType tsub : type.knownTSubTypes) {
-					if (tsub.isPhantom && !this.phantomMode)
-						continue;
 					internalGetAllTSubTypes(tsub, tsubs); // use the originally connected type not a mostly empty phantom wrapper
-					tsub = maybeAdjustPhantom(tsub);
-					if (tsub != null)  // if we failed to adjust, so better skip this one.
-						tsubs.add(tsub);
+					if (this.phantomMode) {
+						tsubs.add(maybeWrapPhantom(tsub));
+					} else {
+						for (ConnectedType adjusted : maybeAdjustPhantomToSubs(tsub))
+							tsubs.add(adjusted);
+					}
 				}
 			}
 		}
