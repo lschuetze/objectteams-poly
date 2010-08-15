@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.ui.tests.hierarchy.contentprovider;
 
 import java.util.HashMap;
 
+import org.eclipse.jdt.core.IType;
 import org.eclipse.objectteams.otdt.tests.FileBasedTest;
 
 
@@ -53,6 +54,10 @@ public class TreeNode
             _children.put(childrenElements[idx], new TreeNode(childrenElements[idx]));
         }
         return getChildren();
+    }
+    
+    public void addChildByElement(Object childElement) {
+    	_children.put(childElement, new TreeNode(childElement));
     }
         
     public Object getElement()
@@ -117,4 +122,23 @@ public class TreeNode
         }
         return true;
     }
+
+	public TreeNode findNode(IType value) {
+		if (value == this._element)
+			return this;
+		TreeNode node = this._children.get(value);
+		if (node != null)
+			return node;
+		for (TreeNode childNode : this._children.values()) {
+			node = childNode.findNode(value);
+			if (node != null)
+				return node;
+		}
+		return null;
+	}
+
+	public void addChild(TreeNode node) {
+		this._children.put(node.getElement(), node);
+		
+	}
 }

@@ -20,6 +20,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.hierarchy.contentprovider;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import junit.framework.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -79,6 +82,8 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
 	
 	private IType _T8_R2;
 	
+	private IType _objectType;
+
 	private IType[] _allTypesInProject;
 
     
@@ -262,6 +267,7 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
 					"T8",
 			        "R2").getCorrespondingJavaElement();
         
+		_objectType = getType(getTestProjectDir(), "rt.jar", "java.lang", "Object");
 		
 		_allTypesInProject = new IType[]
 		                              {
@@ -296,18 +302,36 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
         assertNotNull(hierarchy);
     }
     
-    public void testGetParentAlwaysNull()
+    public void testGetParent()
     {
-        Object expected = null;
         Object actual;
+        Map<IType, IType> parents = getParentMap();
+        parents.put(_T2_R2, _T1_R2); // additional link: outside the cone of T1$R1
         
         for (int idx = 0; idx < _allTypesInProject.length; idx++)
         {
             IType cur = _allTypesInProject[idx];
 	        actual = _testObject.getParent(cur);
-	        assertEquals("Parent not null for " + cur.getElementName() + " ", expected, actual);
+	        assertEquals("Parent not null for " + cur.getElementName() + " ", parents.get(cur), actual);
         }
     }
+
+	private Map<IType, IType> getParentMap() {
+		Map<IType,IType> parents = new HashMap<IType, IType>();
+        parents.put(_T1_R1, _objectType);
+        parents.put(_T2_R1, _T1_R1);
+        parents.put(_T3_R1, _T2_R1);
+        parents.put(_T3_R2, _T2_R2);
+        parents.put(_T4_R2, _T2_R2);
+        parents.put(_T5_R1, _T2_R1);
+        parents.put(_T5_R2, _T2_R2);
+        parents.put(_T5_R3, _T5_R1);
+        parents.put(_T6_R1, _T2_R1);
+        parents.put(_T7_R2, _T5_R2);
+        parents.put(_T7_R3, _T5_R3);
+        parents.put(_T8_R2, _T2_R2);
+		return parents;
+	}
     
     public void testRecursiveGetChildren_T1R1()
     {
@@ -330,23 +354,69 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
         
         expectedRoot.setChildrenByElements(new Object[] {_T2_R1});
         
-        expectedRoot.getChildNode(_T2_R1).setChildrenByElements(new Object[] {_T2_R2, _T3_R1, _T5_R1, _T6_R1, _T4_R2});
+        expectedRoot.getChildNode(_T2_R1).setChildrenByElements(new Object[] {_T2_R2, _T3_R1, _T5_R1, _T6_R1}); // T4$R2 is not a direct child of T2$R1
         
-        expectedRoot.getChildNode(_T2_R1).getChildNode(_T2_R2).setChildrenByElements(new Object[] {_T3_R2, _T4_R2, _T5_R2, _T8_R2});
+        expectedRoot.getChildNode(_T2_R1).getChildNode(_T2_R2).setChildrenByElements(new Object[] {_T3_R2, _T4_R2, _T5_R2, _T8_R2}); // include T8$R2: indirect via phantom and tsub
         expectedRoot.getChildNode(_T2_R1).getChildNode(_T3_R1).setChildrenByElements(new Object[] {_T3_R2});
-        expectedRoot.getChildNode(_T2_R1).getChildNode(_T5_R1).setChildrenByElements(new Object[] {_T5_R3, _T7_R3});
-        expectedRoot.getChildNode(_T2_R1).getChildNode(_T6_R1).setChildrenByElements(new Object[] {_T8_R2, _T2_R2});
+        expectedRoot.getChildNode(_T2_R1).getChildNode(_T5_R1).setChildrenByElements(new Object[] {_T5_R3}); // don't include T7$R3: indirect via phantom and extends
+        expectedRoot.getChildNode(_T2_R1).getChildNode(_T6_R1).setChildrenByElements(new Object[] {_T8_R2});
 
         expectedRoot.getChildNode(_T2_R1).getChildNode(_T2_R2).getChildNode(_T5_R2).setChildrenByElements(new Object[] {_T7_R2});
         expectedRoot.getChildNode(_T2_R1).getChildNode(_T5_R1).getChildNode(_T5_R3).setChildrenByElements(new Object[] {_T7_R3, _T5_R2});
-        expectedRoot.getChildNode(_T2_R1).getChildNode(_T5_R1).getChildNode(_T7_R3).setChildrenByElements(new Object[] {_T7_R2});
-        
         expectedRoot.getChildNode(_T2_R1).getChildNode(_T5_R1).getChildNode(_T5_R3).getChildNode(_T7_R3).setChildrenByElements(new Object[] {_T7_R2});
+        
+// already rooted under T5$R2        
+//        expectedRoot.getChildNode(_T2_R1).getChildNode(_T5_R1).getChildNode(_T5_R3).getChildNode(_T7_R3).setChildrenByElements(new Object[] {_T7_R2});
         expectedRoot.getChildNode(_T2_R1).getChildNode(_T5_R1).getChildNode(_T5_R3).getChildNode(_T5_R2).setChildrenByElements(new Object[] {_T7_R2});
 
-        expectedRoot.getChildNode(_T2_R1).getChildNode(_T6_R1).getChildNode(_T2_R2).setChildrenByElements(new Object[] {_T3_R2, _T5_R2, _T4_R2, _T8_R2});
-        expectedRoot.getChildNode(_T2_R1).getChildNode(_T6_R1).getChildNode(_T2_R2).getChildNode(_T5_R2).setChildrenByElements(new Object[]{_T7_R2});
+// T2$R2 is not a sub of T6$R1!
+//        expectedRoot.getChildNode(_T2_R1).getChildNode(_T6_R1).getChildNode(_T2_R2).setChildrenByElements(new Object[] {_T3_R2, _T5_R2, _T4_R2, _T8_R2});
+//        expectedRoot.getChildNode(_T2_R1).getChildNode(_T6_R1).getChildNode(_T2_R2).getChildNode(_T5_R2).setChildrenByElements(new Object[]{_T7_R2});
         
+        actualRoot = fillTree(_testObject, new TreeNode(_T1_R1));
+        
+        assertTrue("Hierarchy trees don't match", expectedRoot.equalsAsserted(actualRoot, new ITypeComparator(), 0));
+    }
+    
+    // this test indirectly asserts symmetry between getChildren() and getParent()
+    public void testRecursiveGetChildren_againstParentMap_T1R1()
+    {
+        try
+        {
+            _lifeCycle.doHierarchyRefresh(_T1_R1, new NullProgressMonitor());
+        }
+        catch (JavaModelException exc)
+        {
+            exc.printStackTrace();
+        }
+        
+        TreeNode actualRoot;
+        TreeNode expectedRoot;
+        
+        expectedRoot = new TreeNode(_T1_R1);
+        Map<IType, IType> parentMap = getParentMap();
+        parentMap.put(_T2_R2, _T2_R1); // replace link for T2$R2: since T1$R2 is outside the cone of T1$R1 we see T2$R2 below its explicit super
+
+        outer: while (parentMap.size() > 1) { // last link to object will remain unconsumed
+        	for (Map.Entry<IType,IType> entry : parentMap.entrySet()) {
+        		TreeNode node = expectedRoot.findNode(entry.getValue());
+        		if (node != null) {
+        			node.addChildByElement(entry.getKey());
+        			parentMap.remove(entry.getKey());
+        			continue outer;
+        		}
+        	}
+        	String parentString = "";
+        	for (IType type : parentMap.values())
+        		parentString += "/"+type.toString();
+        	assertTrue("Nodes from parentMap not found: "+parentMap.size()+":"+parentString, false);
+        }
+        // additional links turning the tree into a general DAG
+        expectedRoot.findNode(_T5_R3).addChild(expectedRoot.findNode(_T5_R2)); // already reachable via T2$R2
+        expectedRoot.findNode(_T7_R3).addChild(expectedRoot.findNode(_T7_R2)); // already reachable via T5$R2
+        expectedRoot.findNode(_T6_R1).addChild(expectedRoot.findNode(_T8_R2)); // already reachable via T2$R2
+        expectedRoot.findNode(_T3_R1).addChild(expectedRoot.findNode(_T3_R2)); // already reachable via T2$R2
+
         actualRoot = fillTree(_testObject, new TreeNode(_T1_R1));
         
         assertTrue("Hierarchy trees don't match", expectedRoot.equalsAsserted(actualRoot, new ITypeComparator(), 0));
