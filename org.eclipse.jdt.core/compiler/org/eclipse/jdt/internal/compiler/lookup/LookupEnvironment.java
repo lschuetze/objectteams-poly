@@ -397,21 +397,49 @@ public void completeTypeBindings(CompilationUnitDeclaration[] parsedUnits, boole
 	for (int i = 0; i < unitCount; i++) {
 		CompilationUnitDeclaration parsedUnit = parsedUnits[i];
 		if (parsedUnit.scope != null)
+//{ObjectTeams: no double treatment:
+		  if (parsedUnit.state.getState() < ITranslationStates.STATE_LENV_CHECK_AND_SET_IMPORTS)
+// SH}
 			(this.unitBeingCompleted = parsedUnit).scope.checkAndSetImports();
+//{ObjectTeams: record that we are done (don't mark RoFi CUs, have their own imports to process):
+	  	StateHelper.setStateRecursive(parsedUnit, ITranslationStates.STATE_LENV_CHECK_AND_SET_IMPORTS, false);
+//SH}
 	}
 
 	for (int i = 0; i < unitCount; i++) {
 		CompilationUnitDeclaration parsedUnit = parsedUnits[i];
 		if (parsedUnit.scope != null)
+//{ObjectTeams: extra step and avoid double treatment:
+		{
+		  boolean done = false;
+		  Dependencies.checkReadKnownRoles(parsedUnit);
+		  if (parsedUnit.state.getState() < ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY) {
+// SH}
 			(this.unitBeingCompleted = parsedUnit).scope.connectTypeHierarchy();
+//{ObjectTeams: record that we are done:
+			done = true;
+		  }
+		  StateHelper.setStateRecursive(parsedUnit, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY, done);
+		}
+// SH}
 	}
 
 	for (int i = 0; i < unitCount; i++) {
 		CompilationUnitDeclaration parsedUnit = parsedUnits[i];
 		if (parsedUnit.scope != null) {
+//{ObjectTeams: no double treatment:
+		  boolean done = false;
+		  if (parsedUnit.state.getState() < ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS)
+		  {
+// SH}
 			(this.unitBeingCompleted = parsedUnit).scope.checkParameterizedTypes();
 			if (buildFieldsAndMethods[i])
 				parsedUnit.scope.buildFieldsAndMethods();
+//{ObjectTeams: record that we are done:
+			done = true;
+		  }
+		  StateHelper.setStateRecursive(parsedUnit, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS, done);
+// SH}
 		}
 	}
 
