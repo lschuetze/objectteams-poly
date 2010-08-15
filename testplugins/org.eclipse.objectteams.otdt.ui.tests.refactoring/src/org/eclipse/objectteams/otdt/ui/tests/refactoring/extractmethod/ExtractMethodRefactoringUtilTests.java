@@ -167,7 +167,7 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		_refactoring.setMethodName("f");
 		_refactoring.setVisibility(Modifier.PROTECTED);
 		_refactoring.checkInitialConditions(new NullProgressMonitor());
-		IMethod[] inheritedMethods = TypeHelper.getInheritedMethods(_a, true, true, true, null);
+		IMethod[] inheritedMethods = RefactoringUtil.getInheritedMethods(_a, true, true, true, null);
 		RefactoringStatus expected = RefactoringUtil.addOverloadingWarning(new ExtractMethodOverloadingMsgCreator());
 		RefactoringStatus actual = RefactoringUtil.checkOverloading(inheritedMethods, _refactoring.getMethodName(), fetchNewParameterTypes(),
 				new ExtractMethodOverloadingMsgCreator());
@@ -184,7 +184,7 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		_refactoring.setMethodName("g");
 		_refactoring.setVisibility(Modifier.PROTECTED);
 		_refactoring.checkInitialConditions(new NullProgressMonitor());
-		IMethod[] inheritedMethods = TypeHelper.getInheritedMethods(_b, true, true, true, null);
+		IMethod[] inheritedMethods = RefactoringUtil.getInheritedMethods(_b, true, true, true, null);
 		RefactoringStatus expected = RefactoringUtil.addOverloadingWarning(new ExtractMethodOverloadingMsgCreator());
 		RefactoringStatus actual = RefactoringUtil.checkOverloading(inheritedMethods, _refactoring.getMethodName(), fetchNewParameterTypes(),
 				new ExtractMethodOverloadingMsgCreator());
@@ -201,7 +201,7 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		_refactoring.setMethodName("g");
 		_refactoring.setVisibility(Modifier.PROTECTED);
 		_refactoring.checkInitialConditions(new NullProgressMonitor());
-		IMethod[] inheritedMethods = TypeHelper.getInheritedMethods(_c, true, true, true, null);
+		IMethod[] inheritedMethods = RefactoringUtil.getInheritedMethods(_c, true, true, true, null);
 		RefactoringStatus expected = RefactoringUtil.addOverloadingWarning(new ExtractMethodOverloadingMsgCreator());
 		RefactoringStatus actual = RefactoringUtil.checkOverloading(inheritedMethods, _refactoring.getMethodName(), fetchNewParameterTypes(),
 				new ExtractMethodOverloadingMsgCreator());
@@ -218,7 +218,7 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		_refactoring.setMethodName("m");
 		_refactoring.setVisibility(Modifier.PROTECTED);
 		_refactoring.checkInitialConditions(new NullProgressMonitor());
-		IMethod[] inheritedMethods = TypeHelper.getInheritedMethods(_q, true, true, true, null);
+		IMethod[] inheritedMethods = RefactoringUtil.getInheritedMethods(_q, true, true, true, null);
 		RefactoringStatus expected = RefactoringUtil.addOverloadingWarning(new ExtractMethodOverloadingMsgCreator());
 		RefactoringStatus actual = RefactoringUtil.checkOverloading(inheritedMethods, _refactoring.getMethodName(), fetchNewParameterTypes(),
 				new ExtractMethodOverloadingMsgCreator());
@@ -235,7 +235,7 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		_refactoring.setMethodName("m");
 		_refactoring.setVisibility(Modifier.PROTECTED);
 		_refactoring.checkInitialConditions(new NullProgressMonitor());
-		IMethod[] inheritedMethods = TypeHelper.getInheritedMethods(_s, true, true, true, null);
+		IMethod[] inheritedMethods = RefactoringUtil.getInheritedMethods(_s, true, true, true, null);
 		RefactoringStatus expected = RefactoringUtil.addOverloadingWarning(new ExtractMethodOverloadingMsgCreator());
 		RefactoringStatus actual = RefactoringUtil.checkOverloading(inheritedMethods, _refactoring.getMethodName(), fetchNewParameterTypes(),
 				new ExtractMethodOverloadingMsgCreator());
@@ -252,7 +252,7 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		_refactoring.setMethodName("m");
 		_refactoring.setVisibility(Modifier.PROTECTED);
 		_refactoring.checkInitialConditions(new NullProgressMonitor());
-		IMethod[] inheritedMethods = TypeHelper.getInheritedMethods(_t1, true, true, true, null);
+		IMethod[] inheritedMethods = RefactoringUtil.getInheritedMethods(_t1, true, true, true, null);
 		RefactoringStatus expected = RefactoringUtil.addOverloadingWarning(new ExtractMethodOverloadingMsgCreator());
 		RefactoringStatus actual = RefactoringUtil.checkOverloading(inheritedMethods, _refactoring.getMethodName(), fetchNewParameterTypes(),
 				new ExtractMethodOverloadingMsgCreator());
@@ -269,7 +269,7 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		_refactoring.setMethodName("m");
 		_refactoring.setVisibility(Modifier.PROTECTED);
 		_refactoring.checkInitialConditions(new NullProgressMonitor());
-		IMethod[] inheritedMethods = TypeHelper.getInheritedMethods(_t2r1, true, true, true, null);
+		IMethod[] inheritedMethods = RefactoringUtil.getInheritedMethods(_t2r1, true, true, true, null);
 		RefactoringStatus expected = RefactoringUtil.addOverloadingWarning(new ExtractMethodOverloadingMsgCreator());
 		RefactoringStatus actual = RefactoringUtil.checkOverloading(inheritedMethods, _refactoring.getMethodName(), fetchNewParameterTypes(),
 				new ExtractMethodOverloadingMsgCreator());
@@ -286,7 +286,7 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		_refactoring.setMethodName("rm");
 		_refactoring.setVisibility(Modifier.PROTECTED);
 		_refactoring.checkInitialConditions(new NullProgressMonitor());
-		IMethod[] inheritedMethods = TypeHelper.getInheritedMethods(_t3r2, true, true, true, null);
+		IMethod[] inheritedMethods = RefactoringUtil.getInheritedMethods(_t3r2, true, true, true, null);
 		RefactoringStatus expected = RefactoringUtil.addOverloadingWarning(new ExtractMethodOverloadingMsgCreator());
 		RefactoringStatus actual = RefactoringUtil.checkOverloading(inheritedMethods, _refactoring.getMethodName(), fetchNewParameterTypes(),
 				new ExtractMethodOverloadingMsgCreator());
@@ -306,7 +306,7 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		_refactoring.setMethodName("n");
 		_refactoring.setVisibility(Modifier.PRIVATE);
 		_refactoring.checkInitialConditions(new NullProgressMonitor());
-		IMethod[] inheritedMethods = TypeHelper.getInheritedMethods(_c, true, true, false, null);
+		IMethod[] inheritedMethods = RefactoringUtil.getInheritedMethods(_c, true, true, false, null);
 		RefactoringStatus expected = RefactoringUtil.addOverloadingWarning(new ExtractMethodOverloadingMsgCreator());
 		RefactoringStatus actual = RefactoringUtil.checkOverloading(inheritedMethods, _refactoring.getMethodName(), fetchNewParameterTypes(),
 				new ExtractMethodOverloadingMsgCreator());
@@ -324,7 +324,7 @@ public class ExtractMethodRefactoringUtilTests extends FileBasedRefactoringTest 
 		_refactoring.setMethodName("k");
 		_refactoring.setVisibility(Modifier.PRIVATE);
 		_refactoring.checkInitialConditions(new NullProgressMonitor());
-		IMethod[] inheritedMethods = TypeHelper.getInheritedMethods(_t3r2, true, true, false, null);
+		IMethod[] inheritedMethods = RefactoringUtil.getInheritedMethods(_t3r2, true, true, false, null);
 		RefactoringStatus expected = RefactoringUtil.addOverloadingWarning(new ExtractMethodOverloadingMsgCreator());
 		RefactoringStatus actual = RefactoringUtil.checkOverloading(inheritedMethods, _refactoring.getMethodName(), fetchNewParameterTypes(),
 				new ExtractMethodOverloadingMsgCreator());

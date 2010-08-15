@@ -46,7 +46,7 @@ public class AllTests
         // Hierarchy
         suite.addTest(org.eclipse.objectteams.otdt.tests.superhierarchy.AllTests.suite());
         // TypeHelper.getInheritedMethods
-        suite.addTest(org.eclipse.objectteams.otdt.tests.otmodel.internal.TypeHelperGetInheritedMethodsTest.suite());
+        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.util.TypeHelperGetInheritedMethodsTest.suite());
         // SearchEngine
         suite.addTest(org.eclipse.objectteams.otdt.tests.search.OTJavaMethodSearchTests.suite());
         suite.addTest(org.eclipse.objectteams.otdt.tests.search.OTJavaTypeSearchTests.suite());

@@ -25,14 +25,17 @@ import junit.framework.Test;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.core.IRoleType;
+import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.FileBasedRefactoringTest;
 
 /**
  * @author svacina
  * @version $Id: RefactoringUtilTest.java 6446 2005-08-02 10:49:59Z svacina $
  */
+@SuppressWarnings("nls")
 public class RefactoringUtilTest extends FileBasedRefactoringTest
 {
 
@@ -58,6 +61,7 @@ public class RefactoringUtilTest extends FileBasedRefactoringTest
 	private IMethod _team4role2m1;
 	private IMethod _team4role2m2;
 	
+	ITypeHierarchy _hierarchy;
 	
     public RefactoringUtilTest(String name)
     {
@@ -72,7 +76,7 @@ public class RefactoringUtilTest extends FileBasedRefactoringTest
     /**
      * Creates a team hierarchy with implicit role type inheritance.
      */
-    public void setUpSuite() throws Exception
+	public void setUpSuite() throws Exception
     {
         setTestProjectDir("RefactoringUtil");
         super.setUpSuite();
@@ -146,7 +150,7 @@ public class RefactoringUtilTest extends FileBasedRefactoringTest
         _team4role2m1 = _team4role2.getMethods()[0];
         
         
-        
+        _hierarchy = ((IType)_team4role2.getCorrespondingJavaElement()).newTypeHierarchy(null);
     }
         
     protected void setUp() throws Exception
@@ -156,36 +160,34 @@ public class RefactoringUtilTest extends FileBasedRefactoringTest
     
     public void testIsDeclaredInInterface_yes() throws JavaModelException
 	{
-    	fail("Not yet implemented");
-//    	MIGRATE
-//    	IMethod expected = _itest2m1;
-//    	IMethod actual = RefactoringUtil.isDeclaredInInterface(_team2role1m1, new NullProgressMonitor());
-//    	assertTrue(expected.equals(actual));
-//	}
-//    
-//    public void testIsDeclaredInInterface_no1() throws JavaModelException
-//	{
-//    	IMethod actual = RefactoringUtil.isDeclaredInInterface(_team2role1m2, new NullProgressMonitor());
-//    	assertNull(actual);
-//	}
-//    
-//    public void testIsDeclaredInInterface_no2() throws JavaModelException
-//	{
-//    	IMethod actual = RefactoringUtil.isDeclaredInInterface(_team4role2m2, new NullProgressMonitor());
-//    	assertNull(actual);
-//	}
-//    
-//    public void testOverridesAnotherMethod_yes() throws JavaModelException
-//	{
-//    	IMethod expected = _cm2;
-//    	IMethod actual = RefactoringUtil.overridesAnotherMethod(_team4role2m2, new NullProgressMonitor());
-//    	assertTrue(expected.equals(actual));
-//	}
-//    
-//    public void testOverridesAnotherMethod_no() throws JavaModelException
-//	{
-//    	IMethod actual = RefactoringUtil.overridesAnotherMethod(_team2role1m2, new NullProgressMonitor());
-//    	assertNull(actual);
+    	IMethod expected = _itest2m1;
+    	IMethod actual = RefactoringUtil.isDeclaredInInterface(_team2role1m1, _hierarchy, new NullProgressMonitor());
+    	assertTrue(expected.equals(actual));
+	}
+    
+    public void testIsDeclaredInInterface_no1() throws JavaModelException
+	{
+    	IMethod actual = RefactoringUtil.isDeclaredInInterface(_team2role1m2, _hierarchy, new NullProgressMonitor());
+    	assertNull(actual);
+	}
+    
+    public void testIsDeclaredInInterface_no2() throws JavaModelException
+	{
+    	IMethod actual = RefactoringUtil.isDeclaredInInterface(_team4role2m2, _hierarchy, new NullProgressMonitor());
+    	assertNull(actual);
+	}
+    
+    public void testOverridesAnotherMethod_yes() throws JavaModelException
+	{
+    	IMethod expected = _cm2;
+    	IMethod actual = RefactoringUtil.overridesAnotherMethod(_team4role2m2, _hierarchy, new NullProgressMonitor());
+    	assertTrue(expected.equals(actual));
+	}
+    
+    public void testOverridesAnotherMethod_no() throws JavaModelException
+	{
+    	IMethod actual = RefactoringUtil.overridesAnotherMethod(_team2role1m2, _hierarchy, new NullProgressMonitor());
+    	assertNull(actual);
 	}
 
     //TODO(jsv) test with nested teams

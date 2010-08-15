@@ -42,6 +42,9 @@ public class AllTests
         TestSuite suite = new TestSuite(
                 "All Refactoring Tests");
 
+        // util
+        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.util.AllTests.suite());
+        
         // OTDT refactoring tests
         // rename
         suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.rename.RenameMethodInInterfaceTests.suite());

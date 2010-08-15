@@ -21,6 +21,7 @@
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.util;
 
 
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -43,6 +44,8 @@ public class AllTests
                 "All OT-Refactoring-Util Tests");
 
         suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.util.RefactoringUtilTest.suite());
+		suite.addTest(TypeHelperGetInheritedMethodsTest.suite());
+
         
         return suite;
     }
