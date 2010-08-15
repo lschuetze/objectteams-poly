@@ -159,7 +159,7 @@ public class OTSubTypeHierarchyTest017 extends FileBasedModelTest {
         
         IType[] expected = new IType[] { 
 //        								_TB_R2, // not sub of TD$R1 
-//        								_TE_R2  // indirect
+        								_TE_R2  // indirect
         								};
         IType[] actual = _testObj.getSubtypes(_TD_R1);
         
@@ -205,9 +205,9 @@ public class OTSubTypeHierarchyTest017 extends FileBasedModelTest {
         IType[] expected = new IType[] { 
 //        								_TA_R3, // not sub of TB$R2 
         								_TC_R2, 
-//        								_TC_R3, // indirect
-//        								_TE_R2, // indirect
-//        								_TE_R3  // indirect
+        								_TC_R3, // indirect
+        								_TE_R2, // indirect
+        								_TE_R3  // indirect
         								};
         IType[] actual = _testObj.getSubtypes(_TB_R2);
         

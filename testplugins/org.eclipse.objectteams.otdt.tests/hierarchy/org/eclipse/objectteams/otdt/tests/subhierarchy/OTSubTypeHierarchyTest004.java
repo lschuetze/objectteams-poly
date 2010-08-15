@@ -156,7 +156,7 @@ public class OTSubTypeHierarchyTest004 extends FileBasedHierarchyTest
         _testObj = createTypeHierarchy(_focusType);
 
 	    IType[] expected = {
-//	    					_T21T11T00R0 // indirect sub 
+	    					_T21T11T00R0 // indirect sub 
 	    					};
 	    IType[] actual = _testObj.getSubtypes(_focusType);
 	    

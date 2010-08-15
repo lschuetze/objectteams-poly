@@ -246,7 +246,7 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
         _testObj = createTypeHierarchy(_focusType);
         
 		IType[] expected = new IType[] {
-//										_T4_R2, // indirect via phantom
+//										_T4_R2, // indirect: explicit subclass of phantom
 								        _T2_R2,
 								        _T3_R1,
 										_T5_R1,
@@ -266,7 +266,7 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
         _testObj = createTypeHierarchy(_focusType);
         
 		IType[] expected = new IType[] {
-//										_T4_R2, // indirect via phantom
+//										_T4_R2, // indirect: explicit subclass of phantom
 										_T2_R2,
 								        _T3_R1,
 										_T5_R1,
@@ -287,7 +287,7 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
         
 		IType[] expected = new IType[] {
 										_T5_R3, 
-//										_T7_R3 // indirect via phantom 
+//										_T7_R3 // indirect: explicit subclass of phantom
 										};
 		
 		IType [] actual = _testObj.getSubclasses(_focusType);
@@ -319,7 +319,7 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
         _testObj = createTypeHierarchy(_focusType);
         
 		IType[] expected = new IType[] { 
-//										 _T8_R2, // indirect
+										 _T8_R2, // indirect: tsub of phantom explicit subclass (T6$R2)
 //                                       _T2_R2  // not a subclass of T6$R1 
                                        };
 		
@@ -338,7 +338,7 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
         IType[] expected = new IType[] { 
         								 _phantom_T8_R1,
                                          _phantom_T6_R2,
-//                                         _T8_R2 // indirect
+//                                       _T8_R2 // indirect: explicit subclass of phantom
                                        };
         
         IType [] actual = _testObj.getSubclasses(_focusType);
@@ -353,7 +353,7 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
         _testObj = createTypeHierarchy(_focusType);
         
         IType[] expected = new IType[] { 
-//        							     _T8_R2, // indirect
+        							     _T8_R2, // indirect
 //                                       _T2_R2  //  not a subclass of T6$R1 
                                         };
         
@@ -369,7 +369,7 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
         _testObj = createTypeHierarchy(_focusType);
         
         IType[] expected = new IType[] { 
-//        								 _T8_R2, // indirect
+        								 _T8_R2, // indirect
 //                                       _T2_R2 // not a sub type of T6$R1 
                                        };
         
@@ -387,7 +387,7 @@ public class OTSubTypeHierarchyTest001 extends FileBasedHierarchyTest
         
         IType[] expected = new IType[] { _phantom_T6_R2,
                                          _phantom_T8_R1,
-//                                         _T8_R2 // indirect 
+//                                         _T8_R2 // indirect: tsub of phantom explicit subclass (T6$R2), but in phantom mode we stop at that phantom
                                        };        
         IType [] actual = _testObj.getSubtypes(_focusType);
 
