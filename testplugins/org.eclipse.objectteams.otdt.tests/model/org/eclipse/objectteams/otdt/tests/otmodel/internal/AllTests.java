@@ -38,7 +38,6 @@ public class AllTests {
 		suite.addTest(TypeHelperTest002.suite());
 		suite.addTest(TypeHelperTest001.suite());
 		suite.addTest(OTModelManagerTest.suite());
-		suite.addTest(TypeHelperGetInheritedMethodsTest.suite());
 		//$JUnit-END$
 		return suite;
 	}
