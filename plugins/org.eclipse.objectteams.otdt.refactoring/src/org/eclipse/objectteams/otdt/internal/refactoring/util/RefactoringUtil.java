@@ -86,11 +86,10 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.core.hierarchy.InheritedMethodsRequestor;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchyTraverser;
 import org.eclipse.objectteams.otdt.core.search.OTSearchEngine;
 import org.eclipse.objectteams.otdt.core.search.OTSearchRequestor;
-import org.eclipse.objectteams.otdt.internal.core.InheritedMethodsRequestor;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchy;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchyTraverser;
 import org.eclipse.objectteams.otdt.internal.refactoring.OTRefactoringPlugin;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.OTRefactoringCoreMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.base.OTRefactoringStatusCodes;
@@ -336,9 +335,8 @@ public class RefactoringUtil implements ITeamConstants {
 	public static IMethod overridesAnotherMethod(IMethod method, ITypeHierarchy hier, IProgressMonitor pm) throws JavaModelException {
 		IType declaringType = method.getDeclaringType();
 		InheritedMethodsRequestor requestor = new InheritedMethodsRequestor(declaringType, true, true);
-		// FIXME(SH): hier is not used, OTTypeHierarchyTraverser should be replaced.
-		OTTypeHierarchyTraverser traverser = new OTTypeHierarchyTraverser(requestor, OTTypeHierarchyTraverser.SUPER_HIERARCHY,
-				OTTypeHierarchyTraverser.TRAVERSE_EXPLICIT_FIRST, false, false, pm);
+		OTTypeHierarchyTraverser traverser = new OTTypeHierarchyTraverser(hier, requestor,
+				false/*implicitFirst*/, false/*focusType*/, false/*rootClass*/, pm);
 
 		traverser.traverse();
 		IMethod[] collectedMethods = requestor.getResult();
@@ -394,6 +392,40 @@ public class RefactoringUtil implements ITeamConstants {
 		ASTNode result = getASTNode(method, MethodDeclaration.class);
 		return (MethodDeclaration) result;
 	}
+	
+
+	public static IMethod[] getInheritedMethods(IOTType iotType, 
+			boolean includeFocusType,
+			boolean includeRootClass,
+			boolean checkVisibility,
+			IProgressMonitor pm) throws JavaModelException
+	{
+		return getInheritedMethods((IType)iotType.getCorrespondingJavaElement(), 
+				includeFocusType,
+				includeRootClass,
+				checkVisibility,
+				pm);
+	}
+	
+	public static IMethod[] getInheritedMethods(IType type, 
+			boolean includeFocusType,
+			boolean includeRootClass,
+			boolean checkVisibility, 
+			IProgressMonitor pm )throws JavaModelException
+	{
+		InheritedMethodsRequestor requestor = new InheritedMethodsRequestor(type, false, checkVisibility);
+    	OTTypeHierarchyTraverser traverser = new OTTypeHierarchyTraverser(
+    			null, // let traverser create the type hierarchy
+    			requestor,
+				true/*implicitFirst*/,
+				includeFocusType, 
+				includeRootClass,
+				pm);
+    	
+    	traverser.traverse();
+		return requestor.getResult();
+	}
+
 
 	/**
 	 * Determines the focus type, i.e. the destination type of the refactored
@@ -665,7 +697,7 @@ public class RefactoringUtil implements ITeamConstants {
 		RefactoringStatusEntry overloading = result.getEntryMatchingCode(Corext.getPluginId(), OTRefactoringStatusCodes.OVERLOADING);
 
 		if (overloading == null) {
-			IMethod[] methods = TypeHelper.getInheritedMethods(focusType, true, true, true, pm);
+			IMethod[] methods = getInheritedMethods(focusType, true, true, true, pm);
 			status.merge(checkOverloading(methods, newMethodName, newParamTypes, msgCreator));
 		}
 		return status;
@@ -702,7 +734,7 @@ public class RefactoringUtil implements ITeamConstants {
 			// private methods. The reason is that method bindings may refer
 			// to hidden base methods (see OTJLD �3.4 and �4.6). This fact
 			// must be considered in the overloading and ambiguity checks.
-			IMethod[] methods = TypeHelper.getInheritedMethods(roleType, true, true, false, pm);
+			IMethod[] methods = getInheritedMethods(roleType, true, true, false, pm);
 			status.merge(checkOverloading(methods, newMethodName, newParamTypes, overloadingMsgCreator));
 		}
 		if (status.hasWarning() || result.hasWarning()) {
@@ -758,7 +790,7 @@ public class RefactoringUtil implements ITeamConstants {
 					// This fact
 					// must be considered in the overloading and ambiguity
 					// checks.
-					IMethod[] baseMethods = TypeHelper.getInheritedMethods(baseClass, true, true, false, pm);
+					IMethod[] baseMethods = getInheritedMethods(baseClass, true, true, false, pm);
 					status.merge(checkOverloading(baseMethods, newMethodName, newParamTypes, overloadingMsgCreator));
 				}
 				// add role that is bound to the base class to the list
