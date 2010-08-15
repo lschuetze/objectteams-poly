@@ -383,6 +383,8 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 						next = memento.nextToken();
 					}
 					bindingName = buf.toString();
+				} else {
+					memento.nextToken(); // consume separator OTEM_METHODMAPPING
 				}
 			}
 			
