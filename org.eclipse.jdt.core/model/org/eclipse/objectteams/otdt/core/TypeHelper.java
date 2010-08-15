@@ -27,7 +27,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -46,9 +45,7 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
-import org.eclipse.objectteams.otdt.internal.core.InheritedMethodsRequestor;
 import org.eclipse.objectteams.otdt.internal.core.OTType;
-import org.eclipse.objectteams.otdt.internal.core.OTTypeHierarchyTraverser;
 
 /**
  * @author jwloka
@@ -754,39 +751,6 @@ public class TypeHelper
     	}
     	return result.toString();
     }
-    
-
-	public static IMethod[] getInheritedMethods(IOTType iotType, 
-			boolean includeFocusType,
-			boolean includeRootClass,
-			boolean checkVisibility,
-			IProgressMonitor pm) throws JavaModelException
-	{
-		return getInheritedMethods((IType)iotType.getCorrespondingJavaElement(), 
-				includeFocusType,
-				includeRootClass,
-				checkVisibility,
-				pm);
-	}
-	
-	public static IMethod[] getInheritedMethods(IType type, 
-			boolean includeFocusType,
-			boolean includeRootClass,
-			boolean checkVisibility, 
-			IProgressMonitor pm )throws JavaModelException
-	{
-		InheritedMethodsRequestor requestor = new InheritedMethodsRequestor(type, false, checkVisibility);
-    	OTTypeHierarchyTraverser traverser = new OTTypeHierarchyTraverser(
-    			requestor,
-				OTTypeHierarchyTraverser.SUPER_HIERARCHY,
-				OTTypeHierarchyTraverser.TRAVERSE_IMPLICIT_FIRST,
-				includeFocusType, 
-				includeRootClass,
-				pm);
-    	
-    	traverser.traverse();
-		return requestor.getResult();
-	}
 
 	/**
 	 * Returns something like somepackage.OuterTeam$__OT__InnerTeam$Role for the given type
