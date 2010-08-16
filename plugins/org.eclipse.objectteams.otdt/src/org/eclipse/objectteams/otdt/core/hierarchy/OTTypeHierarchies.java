@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.compiler.env.IGenericType;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.core.JavaModelStatus;
 import org.eclipse.objectteams.otdt.core.IOTType;
+import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 
@@ -219,6 +220,9 @@ public team class OTTypeHierarchies {
 			/** This type's relation to the focus type. */
 			private FocusRelation focusRelation;
 			
+			// is this type within the same team as the focus type?
+			private Boolean isInFocusLayer = null; // cached value or null (=uninitialized)
+			
 			// the last item in allTSupersLinearized, used as a token for switching from implicit to explicit supers
 			private ConnectedType lastTSuper = null;
 			
@@ -269,7 +273,7 @@ public team class OTTypeHierarchies {
 				if (this.allTSupersLinearized == null || this.allTSupersLinearized.size() == 0)
 					return null;
 				// when starting from the focus layer return the first tsuper role:
-				if (isInFocusLayer(this))
+				if (isInFocusLayer())
 					return this.allTSupersLinearized.get(0);
 				// when type is contained in the list of tsuperRoles return the next tsuper role from the list
 				for (int i = 0; i < this.allTSupersLinearized.size()-1; i++)
@@ -340,7 +344,7 @@ public team class OTTypeHierarchies {
 				if (this.allTSupersLinearized != null && (size = this.allTSupersLinearized.size()) > 0) 
 				{
 					// focus level => all types from the linearization:
-					if (isInFocusLayer(this))
+					if (isInFocusLayer())
 						return this.allTSupersLinearized.toArray(new ConnectedType[size]);
 					
 					// not focus, search in linearization for this type ...
@@ -370,6 +374,21 @@ public team class OTTypeHierarchies {
 				this.knownTSubTypes.add(tsub);
 			}
 
+			protected boolean isInFocusLayer() {
+				if (this.isInFocusLayer != null)
+					return this.isInFocusLayer.booleanValue();
+				IType focusType = getFocusType();
+				if (this.equals(focusType))
+					return true;
+				IOTType focusOTType = OTModelManager.getOTElement(focusType);
+				IOTType thisOTType = OTModelManager.getOTElement(this);
+				if (focusOTType == null || thisOTType == null || !focusOTType.isRole() || !thisOTType.isRole())
+					this.isInFocusLayer = Boolean.FALSE;
+				else
+					this.isInFocusLayer = ((IRoleType)focusOTType).getTeamJavaType().equals(((IRoleType)thisOTType).getTeamJavaType()); // TODO(SH) elaborate more
+				return this.isInFocusLayer.booleanValue();
+			}
+			
 			// let roles reuse equality of their bases:
 			@Override
 			public boolean equals(Object other) {
@@ -451,12 +470,6 @@ public team class OTTypeHierarchies {
 			}
 		}
 
-		private boolean isInFocusLayer(IType type) {
-			IType focusType = getFocusType();
-			if (type.equals(focusType))
-				return true;
-			return focusType.getParent().equals(type.getParent()); // TODO(SH) elaborate more
-		}
 		
 		// ==== adjust original queries for respecting implicit inheritance, too: ===
 
