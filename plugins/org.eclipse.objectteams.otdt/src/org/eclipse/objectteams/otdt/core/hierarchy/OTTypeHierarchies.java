@@ -150,7 +150,8 @@ public team class OTTypeHierarchies {
 		// === Adapt TypeHierarchy (callin bindings): ===
 
 		precedence unwrapping, filtering1, superlinearize; // order: outer callins unwrap and filter, inner callin performs computation
-		precedence filtering2, tsuperadding;
+		precedence filtering2, tsubadding;
+		precedence unwrapping, tsuperadding;
 
 		// --- consider implicit inheritance for some queries: ----
 		
@@ -159,15 +160,20 @@ public team class OTTypeHierarchies {
 		ConnectedType getSuperclassLinearized(ConnectedType type) <- replace IType getSuperclass(IType type)
 			base when (OTModelManager.isRole(type));
 		
-		// augment original queries to capture tsub-types, too:
+		// augment original queries to capture tsub/tsuper-types, too:
 		
 		// adjust internal method as to capture calls from getAllSubtypes(IType), too.
 		@SuppressWarnings("decapsulation")
 		ConnectedType[] addTSubs(ConnectedType type, boolean isTopLevel) <- replace IType[] getSubtypesForType(IType type) 
 				with { type <- type, isTopLevel <- false }
-	tsuperadding:
+	tsubadding:
 		ConnectedType[] addTSubs(ConnectedType type, boolean isTopLevel) <- replace IType[] getSubclasses(IType type)
 				with { type <- type, isTopLevel <- true }
+
+		// opposite direction:
+	tsuperadding:
+		addTSupers <- replace getSupertypes;
+	
 
 		// --- filtering (duplicates and phantoms) and unwrapping (OTTypes): ---
 		
@@ -517,6 +523,33 @@ public team class OTTypeHierarchies {
 			if (this.phantomMode || !isTopLevel)
 				return unfiltered;
 			return filterDupsAndPhantsForSub(unfiltered);
+		}
+
+		/** When querying direct supers of type include tsupers, too, respecting phantom mode. */
+		callin ConnectedType[] addTSupers(ConnectedType type) {
+			ConnectedType[] res1 = null;
+			try {
+				OTTypeHierarchies.this.deactivate();
+				res1 = base.addTSupers(type); // use original query unadapted
+			} finally {
+				OTTypeHierarchies.this.activate();
+			}
+			ConnectedType[] tsupers = type.directTSupers;
+			ConnectedType[] unfiltered = res1; // non-null be definition
+			if (tsupers != null && tsupers.length > 0) {
+				int l1 = res1.length, l2 = tsupers.length;
+				unfiltered = new ConnectedType[l1+l2];
+				System.arraycopy(res1, 0, unfiltered, 0, l1);
+				System.arraycopy(tsupers, 0, unfiltered, l1, l2);
+			}
+			if (this.phantomMode)
+				return unfiltered;
+			try {
+				return maybeSubstitutePhantoms(unfiltered);
+			} catch (JavaModelException jme) {
+				OTDTPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDTPlugin.PLUGIN_ID, "Failed to find original tsuper role.", jme)); //$NON-NLS-1$
+				return unfiltered;
+			}			
 		}
 
 		// ==== handling for phantom mode: ====
