@@ -36,6 +36,7 @@ public class AllTests {
         //$JUnit-BEGIN$
         suite.addTest(OTSubHierarchyContentProviderTests.suite());
         suite.addTest(SuperHierarchyContentProviderTests.suite());
+        suite.addTest(TraditionalHierarchyContentProviderTests.suite());
         //$JUnit-END$
         return suite;
     }
