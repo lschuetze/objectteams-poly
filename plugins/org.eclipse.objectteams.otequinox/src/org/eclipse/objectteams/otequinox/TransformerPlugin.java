@@ -34,9 +34,11 @@ import java.util.Set;
 import org.eclipse.core.internal.runtime.InternalPlatform;
 import org.eclipse.core.runtime.IConfigurationElement; //from: org.eclipse.equinox.registry
 import org.eclipse.core.runtime.RegistryFactory;
+import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.objectteams.otequinox.internal.ASMByteCodeAnalyzer;
 import org.eclipse.objectteams.otequinox.internal.AspectBinding;
 import org.eclipse.objectteams.otequinox.internal.AspectPermissionManager;
+import org.eclipse.objectteams.otequinox.internal.JobAndThreadListener;
 import org.eclipse.objectteams.otequinox.internal.MasterTeamLoader;
 import org.eclipse.objectteams.otequinox.internal.TransformerServiceDelegate;
 import org.eclipse.objectteams.otequinox.hook.ClassScanner;
@@ -136,7 +138,8 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 		loadAspectBindings();
 		loadLiftingParticipant();
 		this.serviceRegistration = context.registerService(IOTEquinoxService.class.getName(), this, new Properties());		
-		this.serviceRegistration2 = context.registerService(IOTTransformer.class.getName(), new TransformerServiceDelegate(), new Properties());		
+		this.serviceRegistration2 = context.registerService(IOTTransformer.class.getName(), new TransformerServiceDelegate(), new Properties());
+		Job.getJobManager().addJobChangeListener(new JobAndThreadListener());
 	}
 		
 	/* be a good citizen: clean up. */
