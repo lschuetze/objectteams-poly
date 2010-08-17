@@ -306,13 +306,12 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
     {
         Object actual;
         Map<IType, IType> parents = getParentMap();
-        parents.put(_T2_R2, _T1_R2); // additional link: outside the cone of T1$R1
         
         for (int idx = 0; idx < _allTypesInProject.length; idx++)
         {
             IType cur = _allTypesInProject[idx];
 	        actual = _testObject.getParent(cur);
-	        assertEquals("Parent not null for " + cur.getElementName() + " ", parents.get(cur), actual);
+	        assertEquals("Unexpected parent for " + cur.getFullyQualifiedName() + " ", parents.get(cur), actual);
         }
     }
 
@@ -330,6 +329,8 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
         parents.put(_T7_R2, _T5_R2);
         parents.put(_T7_R3, _T5_R3);
         parents.put(_T8_R2, _T2_R2);
+        
+        parents.put(_T2_R2, _T2_R1); // since T1$R2 is outside the cone of T1$R1 we see T2$R2 below its explicit super
 		return parents;
 	}
     
@@ -395,7 +396,6 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
         
         expectedRoot = new TreeNode(_T1_R1);
         Map<IType, IType> parentMap = getParentMap();
-        parentMap.put(_T2_R2, _T2_R1); // replace link for T2$R2: since T1$R2 is outside the cone of T1$R1 we see T2$R2 below its explicit super
 
         outer: while (parentMap.size() > 1) { // last link to object will remain unconsumed
         	for (Map.Entry<IType,IType> entry : parentMap.entrySet()) {
