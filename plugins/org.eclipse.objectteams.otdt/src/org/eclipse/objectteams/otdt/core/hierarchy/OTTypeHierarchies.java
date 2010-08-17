@@ -132,6 +132,7 @@ public team class OTTypeHierarchies {
 		
 		protected abstract IType[] getAllTSubTypes(IType type);
 		protected abstract IType[] getSuperInterfaces(IType type);
+		protected abstract IType[] getTypesInTraditionalHierarchy(IType type);
 	}
 
 	/** 
@@ -211,6 +212,8 @@ public team class OTTypeHierarchies {
 			ConnectedType getParent() -> IJavaElement getParent() 
 				with { result <- (IType)result } // TODO(SH): make safer, consider role files
 
+			String getKey() -> String getKey();
+
 			/** Is this type a phantom role? */
 			protected boolean isPhantom;
 			
@@ -224,7 +227,7 @@ public team class OTTypeHierarchies {
 			protected List<ConnectedType> allTSupersLinearized;
 
 			/** This type's relation to the focus type. */
-			private FocusRelation focusRelation;
+			protected FocusRelation focusRelation;
 			
 			// is this type within the same team as the focus type?
 			private Boolean isInFocusLayer = null; // cached value or null (=uninitialized)
@@ -670,6 +673,22 @@ public team class OTTypeHierarchies {
 				}
 			}
 		}
+
+		protected IType[] getTypesInTraditionalHierarchy(IType as ConnectedType type) {
+			if (type.focusRelation == FocusRelation.ABOVE || type.getKey().equals("Ljava/lang/Object;")) { //$NON-NLS-1$
+				IType focusType = getFocusType();
+				IType currentType = focusType;
+				IType superclass;
+				while ((superclass = getSuperclass(currentType)) != null) {
+					if (type.equals(superclass))
+						return new IType[]{currentType};
+					currentType = superclass;
+				}
+				return null;
+			} else {
+				return null;
+			}
+		}
 	}
 	
 	/**
@@ -854,6 +873,11 @@ public team class OTTypeHierarchies {
 		return otHierarchy.getAllTSubTypes(type);
 	}
 	
+	/** Special API for the TypeHierarchyViewAdaptor regarding traditional hierarchy mode. */
+	public IType[] getTypesInTraditionalHierarchy(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) {
+		return otHierarchy.getTypesInTraditionalHierarchy(type);
+	}
+
 	/**
 	 * Configure whether the given hierarchy should consider phantom roles or not.
 	 * Depending on the query used, phantom roles will either be filtered out or replaced with their real origins.
