@@ -21,6 +21,7 @@
 package org.eclipse.objectteams.otdt.internal.ui.typehierarchy;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.jdt.core.IType;
@@ -31,9 +32,11 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
+import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.ui.Util;
 
 import base org.eclipse.jdt.internal.ui.typehierarchy.MethodsContentProvider;
+import base org.eclipse.jdt.internal.ui.typehierarchy.TraditionalHierarchyViewer.TraditionalHierarchyContentProvider;
 
 /**
  * This team adapts the type hierarchy to show method mappings.
@@ -115,5 +118,32 @@ public team class TypeHierarchyViewAdaptor
 		TypeHierarchyLifeCycle getHierarchyLifeCycle() -> get TypeHierarchyLifeCycle fHierarchyLifeCycle;
 
 		boolean getShowInheritedMethods() -> boolean isShowInheritedMethods();
+	}
+	
+	/** 
+	 * This role ensures that the traditional hierarchy view applies super class linearization
+	 * for all classes above the focus type.
+	 */
+	protected class TraditionalHierarchyView playedBy TraditionalHierarchyContentProvider 
+	{
+		@SuppressWarnings("decapsulation")
+		ITypeHierarchy getHierarchy() -> ITypeHierarchy getHierarchy();
+	
+		@SuppressWarnings("unchecked")
+		getTypesInHierarchy <- replace getTypesInHierarchy;
+		
+		@SuppressWarnings("basecall")
+		callin void getTypesInHierarchy(IType type, List<IType> res) {
+			ITypeHierarchy hierarchy = getHierarchy();
+			IType[] typesAboveFocus = null;
+			if (hierarchy != null) {
+				typesAboveFocus = OTTypeHierarchies.getInstance().getTypesInTraditionalHierarchy(hierarchy, type);
+				if (typesAboveFocus != null) {
+					res.addAll(Arrays.asList(typesAboveFocus));
+					return;
+				}
+			} 
+			base.getTypesInHierarchy(type, res);
+		}
 	}
 }
