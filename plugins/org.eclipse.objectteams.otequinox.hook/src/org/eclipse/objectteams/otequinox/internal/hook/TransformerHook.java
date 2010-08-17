@@ -155,12 +155,18 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 		if (kind != null) {
 			return kind;
 		}
+
+		if ("java.lang.Object".equals(className))
+			return null; // shortcut, have no super
 		String superName = null;
 		InputStream is = resourceLoader.getResourceAsStream(className.replace('.', '/')+".class");
 		if (is != null)
 			superName = this.byteCodeAnalyzer.getSuperclass(is, className); 
-		if (superName != null)
+		if (superName != null) {
+			if ("java.lang.Thread".equals(superName))
+				return ClassKind.BASE; // ensure TeamActivation will weave the calls to TeamThreadManager
 			return fetchInheritedTransformationKind(superName, resourceLoader, bundleName);
+		}
 		return kind; 
 	}
 	
