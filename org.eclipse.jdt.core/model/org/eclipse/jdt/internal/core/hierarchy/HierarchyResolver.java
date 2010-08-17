@@ -963,6 +963,10 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 		// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=145333)
 		try {
 			this.lookupEnvironment.completeTypeBindings(parsedUnits, hasLocalType, unitsIndex);
+//{ObjectTeams: additional step: this state creates more hierarchy-related links:
+			for (int i=0; i<unitsIndex; i++)
+				Dependencies.ensureState(parsedUnits[i], ITranslationStates.STATE_ROLES_LINKED);
+// SH}
 		} catch (AbortCompilation e) {
 			// skip it silently
 		}
