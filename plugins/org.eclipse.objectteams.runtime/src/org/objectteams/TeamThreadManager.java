@@ -50,8 +50,9 @@ public class TeamThreadManager {
 		ITeam[] globalTeams;
 		ITeam[] inheritableTeams;
 		synchronized (TeamThreadManager.class) {
+			boolean isFirst = existingThreads.isEmpty();
 			existingThreads.add(currentThread);
-			if (isMain) {
+			if (isMain || isFirst) {
 				for (Thread thread : fetchSystemThreads(currentThread))
 					if (thread != null)
 						existingThreads.add(thread);
