@@ -116,6 +116,10 @@ public class PotentialRoleReceiverExpression extends Expression {
 													 send.selector,
 													 send.arguments);
 				altResult = this.altExpression.resolveType(scope);
+				// share resolved bindings (helps the match locator)
+				((MessageSend)this.expression).binding = ((MessageSend)this.altExpression).binding;
+				((MessageSend)this.expression).resolvedType = ((MessageSend)this.altExpression).resolvedType;
+				((MessageSend)this.expression).actualReceiverType = ((MessageSend)this.altExpression).actualReceiverType;
 			}
 		}
 		
