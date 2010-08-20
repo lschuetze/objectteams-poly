@@ -63,7 +63,7 @@ public class PushDownTests extends RefactoringTest {
 		return new MySetup(new TestSuite(PushDownTests.class));
 	}
 
-	private void performPullUp_pass(String[] cuNames, String[] methodNames, String[][] signatures, String[] fieldNames, String nameOfDeclaringType)
+	private void performPushDown_pass(String[] cuNames, String[] methodNames, String[][] signatures, String[] fieldNames, String nameOfDeclaringType)
 			throws Exception {
 		ICompilationUnit[] cus = createCUs(cuNames);
 		try {
@@ -96,7 +96,7 @@ public class PushDownTests extends RefactoringTest {
 		}
 	}
 	
-	private void performPullUp_fail(String[] cuNames, String[] methodNames, String[][] signatures, String[] fieldNames, String nameOfDeclaringType)
+	private void performPushDown_fail(String[] cuNames, String[] methodNames, String[][] signatures, String[] fieldNames, String nameOfDeclaringType)
 			throws Exception {
 		ICompilationUnit[] cus = createCUs(cuNames);
 		try {
@@ -147,114 +147,113 @@ public class PushDownTests extends RefactoringTest {
 	
 	//--------------------------------------------------------
 	public void testPushDownMethodToImplicitSubclass() throws Exception {
-		performPullUp_pass(new String[] { "TSuper", "T", "B" }, new String[] { "rm" }, new String[][] { new String[0] }, new String[] {}, "R");
+		performPushDown_pass(new String[] { "TSuper", "T", "B" }, new String[] { "rm" }, new String[][] { new String[0] }, new String[] {}, "R");
 	}
 	
 	public void testDeclaringTypeHasADirectPhantomSubRole() throws Exception {
-		performPullUp_fail(new String[] { "TSuper", "T1", "T2" }, new String[] { "rm" }, new String[][] { new String[0] }, new String[] {}, "R");
+		performPushDown_fail(new String[] { "TSuper", "T1", "T2" }, new String[] { "rm" }, new String[][] { new String[0] }, new String[] {}, "R");
 	}
 	
 	public void testPushedDownMethodReferencedInMethodBinding1() throws Exception {
-		performPullUp_fail(new String[] { "B1", "B2", "T" }, new String[] { "bm" }, new String[][] { new String[0] }, new String[] {}, "B1");
+		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] { "bm" }, new String[][] { new String[0] }, new String[] {}, "B1");
 	}
 	
 	public void testPushedDownMethodReferencedInMethodBinding2() throws Exception {
-		performPullUp_fail(new String[] { "B1", "B2", "T" }, new String[] { "bm" }, new String[][] { new String[0] }, new String[] {}, "B1");
+		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] { "bm" }, new String[][] { new String[0] }, new String[] {}, "B1");
 	}
 	
 	public void testPushedDownMethodReferencedInMethodBinding3() throws Exception {
-		performPullUp_fail(new String[] { "T1", "T2", "B" }, new String[] { "rm" }, new String[][] { new String[0] }, new String[] {}, "Role");
+		performPushDown_fail(new String[] { "T1", "T2", "B" }, new String[] { "rm" }, new String[][] { new String[0] }, new String[] {}, "Role");
 	}	
 	
 	public void testPushedDownMethodIsReferencedInRegularGuard1() throws Exception {
-		performPullUp_fail(new String[] { "T", "B" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "R1");
+		performPushDown_fail(new String[] { "T", "B" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "R1");
 	}	
 	
 	public void testPushedDownMethodIsReferencedInRegularGuard2() throws Exception {
-		performPullUp_fail(new String[] { "T", "B" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "R1");
+		performPushDown_fail(new String[] { "T", "B" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "R1");
 	}	
 	
 	public void testPushedDownMethodIsReferencedInBaseGuard1() throws Exception {
-		performPullUp_fail(new String[] { "B1", "B2", "T" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "B1");
+		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "B1");
 	}
 	
 	public void testPushedDownMethodIsReferencedInBaseGuard2() throws Exception {
-		performPullUp_fail(new String[] { "B1", "B2", "T" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "B1");
+		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "B1");
 	}
 
 	public void testPushedDownMethodIsReferencedInBaseGuard3() throws Exception {
-		performPullUp_fail(new String[] { "B1", "B2", "T" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "B1");
+		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] { "b" }, new String[][] { new String[0] }, new String[] {}, "B1");
 	}
 	
 	public void testPushedDownMethodIsReferencedInParameterMapping1() throws Exception {
-		performPullUp_fail(new String[] { "T", "B" }, new String[] { "f" }, new String[][] { new String[0] }, new String[] {}, "R1");
+		performPushDown_fail(new String[] { "T", "B" }, new String[] { "f" }, new String[][] { new String[0] }, new String[] {}, "R1");
 	}
 
 	public void testPushedDownMethodIsReferencedInParameterMapping2() throws Exception {
-		performPullUp_fail(new String[] { "T", "B" }, new String[] { "f" }, new String[][] { new String[0] }, new String[] {}, "R1");
+		performPushDown_fail(new String[] { "T", "B" }, new String[] { "f" }, new String[][] { new String[0] }, new String[] {}, "R1");
 	}
 
-	// See Ticket #286
-	public void _testPushedDownMethodIsReferencedInParameterMapping3() throws Exception {
-		performPullUp_fail(new String[] { "T", "B" }, new String[] { "f" }, new String[][] { new String[0] }, new String[] {}, "R1");
+	public void testPushedDownMethodIsReferencedInParameterMapping3() throws Exception {
+		performPushDown_fail(new String[] { "T", "B" }, new String[] { "f" }, new String[][] { new String[0] }, new String[] {}, "R1");
 	}
 	
 	/* Push Down Field Tests */
 	public void testPushDownFieldToImplicitSubclass() throws Exception {
-		performPullUp_pass(new String[] { "TSuper", "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R");
+		performPushDown_pass(new String[] { "TSuper", "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R");
 	}
 	
 	public void testPushedDownFieldReferencedInCalloutToField() throws Exception {
-		performPullUp_fail(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "B1");
+		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "B1");
 	}
 	
 	public void testPushDownTypeAnchorInstance() throws Exception {
-		performPullUp_fail(new String[] { "T1", "T2", "T3" }, new String[] {}, new String[][] { new String[0] }, new String[] { "anchor" }, "T1");
+		performPushDown_fail(new String[] { "T1", "T2", "T3" }, new String[] {}, new String[][] { new String[0] }, new String[] { "anchor" }, "T1");
 	}
 	
 	public void testPushedDownFieldWouldShadowAnInheritedField() throws Exception {
-		performPullUp_fail(new String[] { "B", "T1", "T2" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "B");
+		performPushDown_fail(new String[] { "B", "T1", "T2" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "B");
 	}
 	
 	public void testPushedDownFieldIsReferencedInRegularGuard1() throws Exception {
-		performPullUp_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "R1");
+		performPushDown_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "R1");
 	}
 
 	public void testPushedDownFieldIsReferencedInRegularGuard2() throws Exception {
-		performPullUp_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "R1");
+		performPushDown_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "R1");
 	}
 
 	public void testPushedDownFieldIsReferencedInBaseGuard1() throws Exception {
-		performPullUp_fail(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "B1");
+		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "B1");
 	}
 
 	public void testPushedDownFieldIsReferencedInBaseGuard2() throws Exception {
-		performPullUp_fail(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "B1");
+		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "B1");
 	}
 
 	public void testPushedDownFieldIsReferencedInBaseGuard3() throws Exception {
-		performPullUp_fail(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "B1");
+		performPushDown_fail(new String[] { "B1", "B2", "T" }, new String[] {}, new String[][] { new String[0] }, new String[] { "b" }, "B1");
 	}
 	
 	public void testPushedDownFieldIsReferencedInParameterMapping1() throws Exception {
-		performPullUp_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R1");
+		performPushDown_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R1");
 	}
 	
 	public void testPushedDownFieldIsReferencedInParameterMapping2() throws Exception {
-		performPullUp_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R1");
+		performPushDown_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R1");
 	}
 	
 	public void testOverrideImplicitInheritedMethod() throws Exception {
-		performPullUp_fail(new String[] { "A", "T1", "T2" }, new String[] { "m" }, new String[][] { new String[0] }, new String[] {}, "A");
+		performPushDown_fail(new String[] { "A", "T1", "T2" }, new String[] { "m" }, new String[][] { new String[0] }, new String[] {}, "A");
 	}
 	
 	public void testOverrideExplicitInheritedMethod() throws Exception {
-		performPullUp_pass(new String[] { "T2", "T1", "A" }, new String[] { "m" }, new String[][] { new String[0] }, new String[] {}, "R");
+		performPushDown_pass(new String[] { "T2", "T1", "A" }, new String[] { "m" }, new String[][] { new String[0] }, new String[] {}, "R");
 	}
 	
 	// See Ticket #286
-	public void _testPushedDownFieldIsReferencedInParameterMapping3() throws Exception {
-		performPullUp_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R1");
+	public void testPushedDownFieldIsReferencedInParameterMapping3() throws Exception {
+		performPushDown_fail(new String[] { "T", "B" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, "R1");
 	}
 
 }

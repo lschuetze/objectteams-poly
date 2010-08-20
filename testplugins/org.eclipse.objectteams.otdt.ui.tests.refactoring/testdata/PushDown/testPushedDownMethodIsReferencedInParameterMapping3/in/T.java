@@ -6,9 +6,9 @@ public team class T {
 			return 0;
 		}
 
-		callin int rm(){return 0;}
+		callin void rm(){ /* empty */ }
 		
-		int rm() <- replace int bm() with {
+		void rm() <- replace int bm() with {
 			f() -> result 
 		}
 	}
