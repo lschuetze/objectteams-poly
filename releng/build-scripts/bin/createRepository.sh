@@ -41,6 +41,7 @@ LAUNCHER=`grep equinox.launcher_jar= ${BASE}/build/run.properties | cut -d '=' -
 LAUNCHER_PATH=${BASE}/testrun/build-root/eclipse/plugins/${LAUNCHER}
 FABPUB=org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher
 CATPUB=org.eclipse.equinox.p2.publisher.CategoryPublisher
+JARPROCESSOR=`ls ${BASE}/testrun/build-root/eclipse/plugins/org.eclipse.equinox.p2.jarprocessor_*.jar`
 NAME="Object Teams"
 
 echo "LAUNCHER_PATH = ${LAUNCHER_PATH}"
@@ -91,30 +92,38 @@ LOCATION=${BASE}/stagingRepo
 echo "LOCATION  = ${LOCATION}"
 cd ${LOCATION}
 
+echo "====Step 3: pack jars ===="
+for dir in ${LOCATION}/features ${LOCATION}/plugins
+do
+        find ${dir} -type f -name \*.jar -exec \
+                java -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
+done
 
-echo "====Step 3: generate metadata===="
+
+echo "====Step 4: generate metadata===="
 java -jar ${LAUNCHER_PATH} -consoleLog -application ${FABPUB} \
     -source ${LOCATION} \
     -metadataRepository file:${LOCATION} \
     -artifactRepository file:${LOCATION} \
     -metadataRepositoryName "${NAME} Updates" \
-    -artifactRepositoryName "${NAME} Artifacts"
+    -artifactRepositoryName "${NAME} Artifacts" \
+    -reusePack200Files -publishArtifacts
 ls -ltr *\.*
 
 
-echo "====Step 4: patch content for feature inclusion version range===="
+echo "====Step 5: patch content for feature inclusion version range===="
 mv content.xml content.xml-orig
 xsltproc  -o content.xml --stringparam version ${JDTVERSIONA}-${JDTVERSIONB} \
     --stringparam versionnext ${JDTVERSIONA}-${JDTVERSIONB2} \
     ../build/patch-content-xml.xsl content.xml-orig
 ls -ltr *\.*
 
-echo "====Step 5: archive raw meta data===="
+echo "====Step 6: archive raw meta data===="
 mkdir ../metadata/$OTDTVERSION
 cp *.xml ../metadata/$OTDTVERSION
 ls -ltr ../metadata/$OTDTVERSION/*.xml
 
-echo "====Step 6: generate category===="
+echo "====Step 7: generate category===="
 CATEGORYARGS="-categoryDefinition file:${BASE}/testrun/build-root/src/features/org.eclipse.objectteams.otdt/category.xml"
 echo "CATEGORYARGS  = ${CATEGORYARGS}"
 java -jar ${LAUNCHER_PATH} -consoleLog -application ${CATPUB} \
@@ -124,7 +133,7 @@ java -jar ${LAUNCHER_PATH} -consoleLog -application ${CATPUB} \
 ls -ltr *\.*
 
 
-echo "====Step 7: add download stats capability===="
+echo "====Step 8: add download stats capability===="
 XSLT_FILE=${BASE}/bin/addDownloadStats.xsl
 
 if [ $# == 3 ]; then
@@ -133,13 +142,13 @@ if [ $# == 3 ]; then
 	xsltproc -o artifacts.xml --stringparam repo "http://download.eclipse.org/stats/objectteams/${2}" --stringparam version $3 $XSLT_FILE artifacts.xml.original
 fi
 
-echo "====Step 8: jar-up metadata===="
+echo "====Step 9: jar-up metadata===="
 jar cf content.jar content.xml
 jar cf artifacts.jar artifacts.xml
 /bin/rm *.xml*
 ls -ltr *\.*
 
-echo "====Step 9: cleanup: remove symbolic links===="
+echo "====Step 10: cleanup: remove symbolic links===="
 find . -type l -exec /bin/rm {} \;
 
 echo "====DONE===="
