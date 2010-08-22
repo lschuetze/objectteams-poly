@@ -1439,12 +1439,16 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		    	for (int i = 0; i < srcArguments.length; i++)
 					newArguments[i].name = srcArguments[i].name;
 	    }
+	    TypeReference[] exceptions = null;
+	    if (constructor.thrownExceptions != null)
+	    	exceptions = AstClone.copyTypeArray(constructor.thrownExceptions);
 
 	    MethodDeclaration newMethod = internalCreateCreationMethod(
 	    		teamDeclaration,
 				roleModel,
 				modifiers,
 				newArguments,
+				exceptions,
 				needMethodBody && !hasError,
 				start, end);
 	    if (hasError)
@@ -1472,6 +1476,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	 * @param roleModel       the role to be instantiated
 	 * @param ctorModifiers   access modifiers of the constructor
 	 * @param newArguments    pre-assembled arguments
+	 * @param thrownExceptions exceptions declared by the constructor
 	 * @param needMethodBody
 	 * @param start			  pretended position of creation method
 	 * @param end             pretended position of creation method
@@ -1482,6 +1487,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			RoleModel       roleModel,
 			int             ctorModifiers,
 			Argument[]      newArguments,
+			TypeReference[] thrownExceptions,
 			boolean         needMethodBody,
 			int start, int end)
 	{
@@ -1507,6 +1513,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    								createRoleTypeRef(roleName, typeVars, gen),
 	    								CharOperation.concat(CREATOR_PREFIX_NAME, roleName),
 	    								newArguments);
+	    newMethod.thrownExceptions = thrownExceptions;
 
 	    // If role is generic so must be the creation method: <T> R<T> _OT$create$R()
         if (typeVars != Binding.NO_TYPE_VARIABLES) {
