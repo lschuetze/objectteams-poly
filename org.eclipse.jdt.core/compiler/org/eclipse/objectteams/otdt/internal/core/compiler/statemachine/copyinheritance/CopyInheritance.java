@@ -1440,8 +1440,13 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 					newArguments[i].name = srcArguments[i].name;
 	    }
 	    TypeReference[] exceptions = null;
-	    if (constructor.thrownExceptions != null)
-	    	exceptions = AstClone.copyTypeArray(constructor.thrownExceptions);
+	    if (constructor != null) {
+		    if (constructor.thrownExceptions != null)
+		    	exceptions = AstClone.copyTypeArray(constructor.thrownExceptions);
+	    } else {
+	    	if (constructorBinding.thrownExceptions != Binding.NO_EXCEPTIONS)
+	    		exceptions = AstClone.copyExceptions(constructorBinding, gen);
+	    }
 
 	    MethodDeclaration newMethod = internalCreateCreationMethod(
 	    		teamDeclaration,
