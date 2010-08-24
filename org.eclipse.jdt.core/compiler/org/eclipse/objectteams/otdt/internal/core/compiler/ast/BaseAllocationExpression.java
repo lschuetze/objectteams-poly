@@ -159,7 +159,7 @@ public class BaseAllocationExpression extends Assignment {
 
         	MessageSend allocSend = new MessageSend() {
         		@Override
-        		protected boolean isDecapsulationAllowed(Scope scope2) {
+				public boolean isDecapsulationAllowed(Scope scope2) {
         			// this message send can decapsulate independent of scope
         			return true;
         		}

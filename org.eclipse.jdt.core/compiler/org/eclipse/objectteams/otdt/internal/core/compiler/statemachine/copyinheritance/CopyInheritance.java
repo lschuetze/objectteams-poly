@@ -91,6 +91,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleFieldAccess;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
@@ -877,6 +878,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			// some, but not all, synthetics shall be generated with strong signatures as indicated by 'site':
 			if (!SyntheticBaseCallSurrogate.isBaseCallSurrogateName(method.selector))
 				site = targetRoleDecl.binding;
+			if (SyntheticRoleBridgeMethodBinding.isPrivateBridgeSelector(method.selector))
+				return; // will be generated anew
 		}
 
 		if (TypeContainerMethod.isTypeContainer(method))
@@ -1035,25 +1038,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    	newMethodDecl.isMappingWrapper = WrapperKind.CALLIN;
 
 	    if (methodFound == null) {
-	    	if (   method.isPrivate() // private role methods need special preparation for callout:
-	    		&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, method.selector)
-	    		&& !method.isConstructor()
-	    		&& !targetRoleDecl.isInterface())
-	    	{
-	    		// re-create (override) bridge methods which are _not_ copied (fake methods):
-	    		AstEdit.addMethod(targetTeamDecl,
-	    				AstConverter.genBridgeForPrivateRoleMethod(targetTeamDecl,
-	    												     targetRoleDecl,
-	    													 srcRole.sourceName(),
-	    													 (MethodDeclaration)newMethodDecl,
-	    													 /*teamPart*/true));
-	    		AstEdit.addMethod(targetRoleDecl,
-	    				AstConverter.genBridgeForPrivateRoleMethod(targetTeamDecl,
-	    												     targetRoleDecl,
-	    													 srcRole.sourceName(),
-	    													 (MethodDeclaration)newMethodDecl,
-	    													 /*teamPart*/false));
-	    	}
 	    	// copy down some more properties:
 	    	if (TSuperHelper.isTSuper(method))
 	    		newMethodDecl.isTSuper = true;
@@ -1149,20 +1133,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 				srcMethod.resolveTypes();
 				srcMethod.resolvedField();
 				copySyntheticMethod(srcMethod, tgtTeamDecl, tgtTeamDecl);
-			} else if (AstConverter.isPrivateBridgeSelector(method.selector)) {
-				TypeBinding roleType = TeamModel.strengthenRoleType(tgtTeamDecl.binding, method.parameters[0]);
-				// need to create team part of a bridge to a binary (re-used) role?
-				if (roleType instanceof ReferenceBinding && ((ReferenceBinding)roleType).isBinaryBinding()) { 
-					// _OT$Role$private$selector <- pick selector (may contain more $s)
-					int start = CharOperation.indexOf('$', method.selector, IOTConstants.OT_DOLLAR_LEN)+AstConverter.PRIVATE.length;
-					char[] targetSelector = CharOperation.subarray(method.selector, start, -1); 
-					if (CharOperation.prefixEquals(IOTConstants.OT_GETFIELD, targetSelector))
-						; // FIXME(SH): implement copying bridge to fieldget
-					else if (CharOperation.prefixEquals(IOTConstants.OT_SETFIELD, targetSelector))
-						; // FIXME(SH): implement copying bridge to fieldset
-					else
-						copyPrivateRoleMethodBridge(tgtTeamDecl, roleType, method, targetSelector);
-				}
 			}
 		}
 	}
@@ -1176,33 +1146,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     	MethodBinding dstMethod = copySyntheticMethod(srcMethod, tgtTypeDecl, targetTeamDecl);
 		if (dstMethod != null)
 			tgtRoleModel.addSyntheticMethodMapping(srcMethod, dstMethod);
-    }
-    
-    private static void copyPrivateRoleMethodBridge(TypeDeclaration tgtTeamDecl, TypeBinding roleType, MethodBinding superMethod, char[] targetSelector) 
-    {
-		ReferenceBinding tgtTeam = tgtTeamDecl.binding;
-		AstGenerator gen = new AstGenerator(tgtTeamDecl);
-		gen.replaceableEnclosingClass = tgtTeam; // like during copyMethod
-		
-		MethodDeclaration newMethodDecl = (MethodDeclaration)AstConverter.createMethod(superMethod, 
-																					   tgtTeam, 
-																					   tgtTeamDecl.compilationResult, 
-																					   DecapsulationState.REPORTED, 
-																					   gen);
-		// we will *not* copy byte code:
-		newMethodDecl.isCopied = false;
-		
-		// but generate AST:
-		newMethodDecl.arguments[0].name = AstConverter.ROLE_ARG_NAME;
-		AstConverter.genPrivateRoleMethodBridgeStatements(targetSelector,
-														  false,  						   // isStatic is irrelevant for team part
-														  superMethod.parameters.length-1, // source args len not including role arg 
-														  newMethodDecl, 
-														  roleType.sourceName(), 
-														  true, 						   // teamPart
-														  gen);
-		
-		AstEdit.addMethod(tgtTeamDecl, newMethodDecl, false/*wasSynthetic*/, false/*addToFront*/);
     }
 
 	/**
@@ -1267,6 +1210,9 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     			if (dstMethod == null)
     				tgtTypeDecl.scope.problemReporter().abortDueToInternalError("Expected synthetic bridge method does not exist: "+new String(srcMethod.readableName())); //$NON-NLS-1$
     			break;
+    		case SyntheticMethodBinding.RoleMethodBridgeInner:
+    		case SyntheticMethodBinding.RoleMethodBridgeOuter:
+    			return null; // not copied but generated anew
     		default:
     			tgtTypeDecl.scope.problemReporter().abortDueToInternalError("Synthetic methods only partially supported"); //$NON-NLS-1$
     		}

@@ -33,7 +33,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleFieldAccess;
 
 /**
@@ -2581,8 +2581,8 @@ public void generateSyntheticBodyForFieldWriteAccess(SyntheticMethodBinding acce
 public void generateSyntheticBodyForMethodAccess(SyntheticMethodBinding accessMethod) {
 	initializeMaxLocals(accessMethod);
 //{ObjectTeams: special treatment for this kind of access method:
-	if (accessMethod instanceof SyntheticBaseCallSurrogate) {
-		((SyntheticBaseCallSurrogate)accessMethod).generateInstructions(this);
+	if (accessMethod instanceof SyntheticOTMethodBinding) {
+		((SyntheticOTMethodBinding)accessMethod).generateInstructions(this);
 		return;
 	}
 //SH}

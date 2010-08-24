@@ -204,24 +204,6 @@ public class RoleSplitter
 									newmethod.binding.tagBits |= TagBits.AnnotationDeprecated;
 								}
 							}});
-					} else {
-						// private methods add a wrapper chain to team/role:
-						final MethodDeclaration bridge1 = AstConverter.genBridgeForPrivateRoleMethod(
-																teamDecl, roleClassDecl, roleIfcDecl.name, method, true);
-						AstEdit.addMethodDeclOnly(teamDecl, bridge1, false);
-						if (teamDecl.binding != null && bridge1.binding == null)
-							roleIfcDecl.getRoleModel()._state.addJob(ITranslationStates.STATE_ROLES_LINKED,
-								new Runnable() { public void run() {
-									teamDecl.binding.resolveGeneratedMethod(bridge1, false);
-								}});
-						final MethodDeclaration bridge2 = AstConverter.genBridgeForPrivateRoleMethod(
-														        teamDecl, roleClassDecl, roleIfcDecl.name, method, false);
-						AstEdit.addMethodDeclOnly(roleClassDecl, bridge2, false);
-						if (teamDecl.binding != null && bridge2.binding == null)
-							roleClassDecl.getRoleModel()._state.addJob(ITranslationStates.STATE_ROLES_LINKED,
-								new Runnable() { public void run() {
-									roleClassDecl.binding.resolveGeneratedMethod(bridge2, false);
-								}});
 					}
                 }
 			}

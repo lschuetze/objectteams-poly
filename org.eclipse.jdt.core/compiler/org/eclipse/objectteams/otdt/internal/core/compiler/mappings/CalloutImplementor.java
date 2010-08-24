@@ -77,6 +77,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutS
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.TThisBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
@@ -85,7 +86,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.AbstractStatementsGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.IProtectable;
@@ -547,7 +547,7 @@ public class CalloutImplementor extends MethodMappingImplementor
         // because the method body is a call to the method specific by the spec.
         sStart = calloutDecl.baseMethodSpec.sourceStart;
         sEnd   = calloutDecl.baseMethodSpec.sourceEnd;
-        AstGenerator gen = new AstGenerator(sStart, sEnd);
+        final AstGenerator gen = new AstGenerator(sStart, sEnd);
 
         Expression receiver;
         char[] selector = calloutDecl.baseMethodSpec.selector;
@@ -560,6 +560,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 							gen.baseclassReference(baseType),
 							CastExpression.DO_WRAP);
 
+		MessageSend messageSend;
     	if (calloutDecl.baseMethodSpec.isPrivate() && baseType.isRole()) {
     		// tricky case: callout to a private role method (base-side)
     		// requires the indirection via two wrapper methods (privateBridgeMethod)
@@ -571,30 +572,43 @@ public class CalloutImplementor extends MethodMappingImplementor
     		// generated message send refers to public bridge, report decapsulation now:
     		calloutDecl.scope.problemReporter().decapsulation(calloutDecl.baseMethodSpec, baseType, calloutDecl.scope);
 
-    		// determine the receiver: convert the team anchor into an expression
-    		receiver = gen.typeAnchorReference(((RoleTypeBinding)baseType)._teamAnchor);
-    		((TypeAnchorReference)receiver).isExpression = true;
+//    		if (!(calloutDecl.baseMethodSpec instanceof FieldAccessSpec)) {
+//	    		// one more argument: the base instance:
+//	    		int len = arguments.length;
+//	    		System.arraycopy(arguments, 0,
+//	    				         arguments = new Expression[len+1], 1,
+//	    				         len);
+//    		}
+//    		// add to front (callout-to-method), or simply replace (callout-to-field) first arg:
+//	    	arguments[0] = gen.baseNameReference(IOTConstants._OT_BASE);
 
-    		// now get the bridge method (at the base-side team)
-    		selector = AstConverter.getPrivateBridgeSelector(selector, baseType.sourceName());
+	    	messageSend = new MessageSend() {
+	    		@Override
+	    		public void generateCode(org.eclipse.jdt.internal.compiler.lookup.BlockScope currentScope, org.eclipse.jdt.internal.compiler.codegen.CodeStream codeStream, boolean valueRequired) {
+	    			// manually redirect to synth bridge:
+	    			// new receiver is the anchor denoting the base role's enclosing team instance:
+	    			TypeAnchorReference syntheticReceiver = gen.typeAnchorReference(((RoleTypeBinding)this.actualReceiverType)._teamAnchor);
+	    			syntheticReceiver.isExpression = true;
+	    			syntheticReceiver.resolve(currentScope);
+	    			syntheticReceiver.generateCode(currentScope, codeStream, true/*valueRequired*/);
+	    			// directly use the accessor and its declaring class for the invoke instruction:
+	    			this.binding = this.syntheticAccessor;
+	    			this.actualReceiverType = this.syntheticAccessor.declaringClass;
+	    			this.syntheticAccessor = null;
+	    			super.generateCode(currentScope, codeStream, valueRequired);
+	    		}
+	    	};
+	    	MethodBinding targetMethod = calloutDecl.baseMethodSpec.resolvedMethod;
+	    	messageSend.syntheticAccessor = SyntheticRoleBridgeMethodBinding.findOuterAccessor(calloutDecl.scope, baseType, targetMethod);
+	    	messageSend.receiver = receiver;
+	    	messageSend.selector = selector;
+	    	messageSend.arguments = arguments;
+	    	messageSend.sourceStart = sStart;
+	    	messageSend.sourceEnd = sEnd;
+    	} else {
 
-    		if (!(calloutDecl.baseMethodSpec instanceof FieldAccessSpec)) {
-	    		// one more argument: the base instance:
-	    		int len = arguments.length;
-	    		System.arraycopy(arguments, 0,
-	    				         arguments = new Expression[len+1], 1,
-	    				         len);
-    		}
-    		// add to front (callout-to-method), or simply replace (callout-to-field) first arg:
-	    	arguments[0] = gen.baseNameReference(IOTConstants._OT_BASE);
+    		messageSend = gen.messageSend(receiver, selector, arguments);
     	}
-
-		MessageSend messageSend = gen.messageSend
-		    (
-        		receiver,
-        		selector,
-				arguments
-			);
         // TODO(SH): create receiver via gen, too.
         messageSend.receiver.sourceStart = sStart;
         messageSend.receiver.sourceEnd   = sEnd;

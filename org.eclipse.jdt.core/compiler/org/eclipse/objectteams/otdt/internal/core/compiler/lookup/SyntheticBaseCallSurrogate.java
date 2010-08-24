@@ -47,7 +47,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  * @author stephan
  * @since 1.3.0
  */
-public class SyntheticBaseCallSurrogate extends SyntheticMethodBinding
+public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 {
 	// this corresponds to IOTConstants.OT_DOLLAR_NAME without the trailing '$':
 	private static final char[] _OT = "_OT".toCharArray(); //$NON-NLS-1$

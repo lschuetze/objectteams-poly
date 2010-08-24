@@ -135,8 +135,8 @@ public class MessageSend extends Expression implements InvocationSite {
 
 //{ObjectTeams:
 	private boolean isDecapsulation = false;
-	// special case: the role method call in a callin wrapper needs special resolving
-	public boolean isCallinRoleMethodCall = false;
+	// special case: the role method call in a method pushed out to the enclosing team needs special resolving
+	public boolean isPushedOutRoleMethodCall = false;
 // SH}
 
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
@@ -601,7 +601,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		this.actualReceiverType = ((WeakenedTypeBinding)this.actualReceiverType).getStrongType();
 		this.bits |= NeedReceiverGenericCast; // addes a cast to this.actualReceiverType;
 	}
-	if (this.receiver.isThis() && !isQualifiedThis(this.receiver) && this.actualReceiverType.isRole()) {
+	if (this.receiver.isThis() && !receiverIsQualifiedThis() && this.actualReceiverType.isRole()) {
 		this.actualReceiverType = ((ReferenceBinding)this.actualReceiverType).getRealClass();
 		if (this.actualReceiverType == null) // happens with true role ifc
 			this.actualReceiverType = ((ReferenceBinding)this.receiver.resolvedType).getRealType();
@@ -624,7 +624,7 @@ public TypeBinding resolveType(BlockScope scope) {
 // SH}
 //{ObjectTeams: for calls to lower() resolve using internal selector _OT$getBase:
 	char[] realSelector = this.selector;
-	if (   CharOperation.equals(selector, IOTConstants.LOWER)
+	if (   CharOperation.equals(this.selector, IOTConstants.LOWER)
 		&& this.actualReceiverType.isRole()
 		&& this.arguments == null
 		&& this.actualReceiverType.isCompatibleWith(scope.getType(
@@ -864,7 +864,7 @@ public TypeBinding resolveType(BlockScope scope) {
 				} else {
 					// signature weakening might have produced the wrong returnType.
 					// check if we must cast this expression to the strengthened version:
-					returnType = checkStrengthenReturnType((ReferenceBinding)returnType, scope);
+					returnType = checkStrengthenReturnType(returnType, scope);
 				}
 			}
 // orig:
@@ -897,14 +897,14 @@ public TypeBinding resolveType(BlockScope scope) {
 }
 
 //{ObjectTeams: utils:
-private boolean isQualifiedThis(Expression receiver) {
-	if (receiver instanceof QualifiedThisReference)
+private boolean receiverIsQualifiedThis() {
+	if (this.receiver instanceof QualifiedThisReference)
 		return true;
-	if (receiver instanceof BaseReference)
-		return (((BaseReference)receiver).isQualified());
+	if (this.receiver instanceof BaseReference)
+		return (((BaseReference)this.receiver).isQualified());
 	return false;
 }
-protected boolean isDecapsulationAllowed(Scope scope) {
+public boolean isDecapsulationAllowed(Scope scope) {
 	// Note: methodScope() may return initializerScope, which has no Method, but the Type as refcontext.
 	if (scope.methodScope().referenceContext instanceof AbstractMethodDeclaration) {
 		AbstractMethodDeclaration method = (AbstractMethodDeclaration) scope.methodScope().referenceContext;
@@ -934,7 +934,7 @@ protected AnchorMapping beforeMethodLookup(
  */
 private Expression receiverForAnchorMapping(Scope scope) {
 	MethodScope methodScope = scope.methodScope();
-	if (methodScope != null && methodScope.isCallinWrapper() && this.isCallinRoleMethodCall)
+	if (methodScope != null && methodScope.isCallinWrapper() && this.isPushedOutRoleMethodCall)
     	return null; // pretend the call target is already "this" = the role.
 
 	return this.receiver;

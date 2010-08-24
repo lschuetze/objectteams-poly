@@ -327,7 +327,7 @@ public class RoleTypeCreator implements TagBits {
         {
         	AbstractMethodDeclaration referenceMethod = scope.methodScope().referenceMethod();
         	if (referenceMethod != null)
-        		isCalloutGet &= (referenceMethod.isMappingWrapper == AbstractMethodDeclaration.WrapperKind.CALLOUT);
+        		isCalloutGet &= (referenceMethod.isMappingWrapper.callout());
         }
         if (!isCalloutGet) {
 	        if (refReturn instanceof WeakenedTypeBinding) {
@@ -533,8 +533,7 @@ public class RoleTypeCreator implements TagBits {
 	    	MethodScope methodScope = scope.methodScope();
 	    	if (   methodScope != null
 	    		&& methodScope.referenceMethod() != null
-	    		&& methodScope.referenceMethod().isMappingWrapper
-	    				== AbstractMethodDeclaration.WrapperKind.CALLIN
+	    		&& methodScope.referenceMethod().isMappingWrapper._callin()
 //{OTDyn
 	    		&& !CallinImplementorDyn.DYNAMIC_WEAVING) // this heuristic doesn't work for dyn weaving, FIXME(SH): check if still needed!
 // SH}

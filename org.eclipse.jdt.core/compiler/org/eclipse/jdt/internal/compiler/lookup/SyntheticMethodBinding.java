@@ -49,8 +49,10 @@ public class SyntheticMethodBinding extends MethodBinding {
 	public final static int EnumValues = 9; // enum #values()
 	public final static int EnumValueOf = 10; // enum #valueOf(String)
 	public final static int SwitchTable = 11; // switch table method
-//{ObjectTeams: another purpose:
+//{ObjectTeams: other purposes:
 	public final static int InferredCalloutToField = 12; // calling an inferred callout-to-field
+	public final static int RoleMethodBridgeOuter = 13; // a team-level bridge method towards a private role method (for callout)
+	public final static int RoleMethodBridgeInner = 14; // a role-level bridge method towards a private role method (for callout)
 // SH}
 
 	public int sourceStart = 0; // start position of the matching declaration

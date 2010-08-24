@@ -2543,6 +2543,17 @@ public abstract class Scope {
 			if (methodBinding != null) return methodBinding;
 
 			methodBinding = findMethod(currentType, selector, argumentTypes, invocationSite);
+//{ObjectTeams: callout to private role method goes through the role class-part:
+			// (will later be replaced by synthetic accessor)
+			if (   methodBinding == null
+				&& invocationSite instanceof MessageSend
+				&& ((MessageSend)invocationSite).isDecapsulationAllowed(this) 
+				&& currentType.isRole())
+			{
+				currentType = currentType.getRealClass();
+				methodBinding = findMethod(currentType, selector, argumentTypes, invocationSite);
+			}
+// SH}
 			if (methodBinding == null)
 				return new ProblemMethodBinding(selector, argumentTypes, ProblemReasons.NotFound);
 			if (!methodBinding.isValidBinding())

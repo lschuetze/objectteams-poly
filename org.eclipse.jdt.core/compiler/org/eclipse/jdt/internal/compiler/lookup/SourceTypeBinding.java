@@ -46,6 +46,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeValueParamete
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.*;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleFieldAccess;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.*;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
@@ -103,8 +104,14 @@ public class SourceTypeBinding extends ReferenceBinding {
 	private final static int METHOD_EMUL = 0;
 	private final static int FIELD_EMUL = 1;
 	private final static int CLASS_LITERAL_EMUL = 2;
-
+//{ObjectTeams: these bridges are not to be found by addSyntheticMethod(MethodBinding,boolean), use only from callout:
+	private final static int ROLE_BRIDGE = 3;
+	
+	private final static int MAX_SYNTHETICS = 4;
+/* orig:
 	private final static int MAX_SYNTHETICS = 3;
+  :giro */
+// SH}
 
 	HashMap[] synthetics;
 	char[] genericReferenceTypeSignature;
@@ -718,7 +725,8 @@ public SyntheticMethodBinding addSyntheticMethod(MethodBinding targetMethod, boo
 	}
 	return accessMethod;
 }
-//{ObjectTeams: add synthetic (mostly empty) basecall surrogate
+//{ObjectTeams: add OT-specific synthetic bridges:
+// (mostly empty) basecall surrogate
 public SyntheticMethodBinding addSyntheticBaseCallSurrogate(MethodBinding callinMethod) {
 	if (this.synthetics == null)
 		this.synthetics = new HashMap[MAX_SYNTHETICS];
@@ -738,6 +746,34 @@ public SyntheticMethodBinding addSyntheticBaseCallSurrogate(MethodBinding callin
 		}
 	}
 	return accessMethod;	
+}
+// bridges towards a private role method
+public SyntheticMethodBinding addSyntheticRoleMethodBridge(SourceTypeBinding declaringRole, MethodBinding targetMethod, int bridgeKind) {
+	if (this.synthetics == null)
+		this.synthetics = new HashMap[MAX_SYNTHETICS];
+	if (this.synthetics[SourceTypeBinding.ROLE_BRIDGE] == null)
+		this.synthetics[SourceTypeBinding.ROLE_BRIDGE] = new HashMap(5);
+
+	SyntheticMethodBinding accessMethod = (SyntheticMethodBinding) this.synthetics[SourceTypeBinding.ROLE_BRIDGE].get(targetMethod);
+	if (accessMethod == null) {
+		accessMethod = new SyntheticRoleBridgeMethodBinding(declaringRole, targetMethod, bridgeKind);
+		this.synthetics[SourceTypeBinding.ROLE_BRIDGE].put(targetMethod, accessMethod);
+	}
+	return accessMethod;	
+}
+// and retrieve an existing accessor:
+public SyntheticMethodBinding findOuterRoleMethodSyntheticAccessor(MethodBinding targetMethod) {
+	SyntheticMethodBinding accessor; 
+	if (this.synthetics != null) {
+		accessor = (SyntheticMethodBinding) this.synthetics[ROLE_BRIDGE].get(targetMethod);
+		if (accessor != null) {
+			if (accessor.isStatic())
+				return ((SourceTypeBinding)enclosingType()).findOuterRoleMethodSyntheticAccessor(accessor);
+			else 
+				return accessor;
+		}
+	}
+	return null;
 }
 // SH}
 /*
@@ -2064,6 +2100,16 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 		return method; // but its still unresolved with a null return type & is still connected to its method declaration
 
 	method.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
+//{ObjectTeams: need role method bridges?
+	if (   isRole() 
+		&& ((method.modifiers & ClassFileConstants.AccPrivate) != 0) 
+		&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, method.selector)
+		&& !methodDecl.isConstructor()) 
+	{
+		MethodBinding inner = addSyntheticRoleMethodBridge(this, method, SyntheticMethodBinding.RoleMethodBridgeInner);
+		((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
+	}
+// SH}
 	return method;
 }
 //{ObjectTeams: helper to find args allowing baseclass decapsulation:
@@ -2317,6 +2363,8 @@ public ReferenceBinding[] superInterfaces() {
 }
 
 public SyntheticMethodBinding[] syntheticMethods() {
+//{ObjectTeams: two different kinds of synthetics:
+/* orig:
 	if (this.synthetics == null 
 			|| this.synthetics[SourceTypeBinding.METHOD_EMUL] == null 
 			|| this.synthetics[SourceTypeBinding.METHOD_EMUL].size() == 0) {
@@ -2325,6 +2373,13 @@ public SyntheticMethodBinding[] syntheticMethods() {
 	// difficult to compute size up front because of the embedded arrays so assume there is only 1
 	int index = 0;
 	SyntheticMethodBinding[] bindings = new SyntheticMethodBinding[1];
+ :giro */
+  if (this.synthetics == null) return null;
+  int index = 0;
+  SyntheticMethodBinding[] bindings = new SyntheticMethodBinding[1];
+  if (this.synthetics[SourceTypeBinding.METHOD_EMUL] != null && this.synthetics[METHOD_EMUL].size() > 0) 
+  {
+//orig:
 	Iterator methodArrayIterator = this.synthetics[SourceTypeBinding.METHOD_EMUL].values().iterator();
 	while (methodArrayIterator.hasNext()) {
 		SyntheticMethodBinding[] methodAccessors = (SyntheticMethodBinding[]) methodArrayIterator.next();
@@ -2337,6 +2392,25 @@ public SyntheticMethodBinding[] syntheticMethods() {
 			}
 		}
 	}
+  }
+// :giro
+// more synthetics to generate:
+  	if (this.synthetics[SourceTypeBinding.ROLE_BRIDGE] != null && this.synthetics[SourceTypeBinding.ROLE_BRIDGE].size() > 0) 
+  	{
+		Iterator methodArrayIterator = this.synthetics[SourceTypeBinding.ROLE_BRIDGE].values().iterator();
+		while (methodArrayIterator.hasNext()) {
+			SyntheticMethodBinding methodAccessor = (SyntheticMethodBinding) methodArrayIterator.next();
+			if (methodAccessor != null) {
+				if (index+1 > bindings.length) {
+					System.arraycopy(bindings, 0, (bindings = new SyntheticMethodBinding[index + 1]), 0, index);
+				}
+				bindings[index++] = methodAccessor; 
+			}
+		}
+	}
+  	if (index == 0)
+  		return null; // nothing found
+// SH}
 	// sort them in according to their own indexes
 	int length;
 	SyntheticMethodBinding[] sortedBindings = new SyntheticMethodBinding[length = bindings.length];

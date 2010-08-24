@@ -585,7 +585,7 @@ public class CallinImplementor extends MethodMappingImplementor
 
 		// ------------- the role message send:
 		MessageSend roleMessageSend = gen.messageSend(receiver, roleMethodName, messageSendArguments);
-		roleMessageSend.isCallinRoleMethodCall = true;
+		roleMessageSend.isPushedOutRoleMethodCall = true;
 
 		// ---------------- store or ignore the result:
 		if (   callinBindingDeclaration.isReplaceCallin())

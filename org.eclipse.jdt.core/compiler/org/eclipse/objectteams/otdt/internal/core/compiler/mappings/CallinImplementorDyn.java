@@ -420,7 +420,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					}
 					// -- assemble the method call:
 					MessageSend roleMethodCall = gen.messageSend(receiver, callinDecl.roleMethodSpec.selector, callArgs);
-					roleMethodCall.isCallinRoleMethodCall = true;
+					roleMethodCall.isPushedOutRoleMethodCall = true;
 					if (isReplace) {
 						blockStatements[statIdx] = gen.returnStatement(roleMethodCall);
 					} else {

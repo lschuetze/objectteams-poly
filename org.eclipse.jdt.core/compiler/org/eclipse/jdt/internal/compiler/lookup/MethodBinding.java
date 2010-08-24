@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorListAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
@@ -200,6 +201,8 @@ public class MethodBinding extends Binding implements IProtectable {
     	if (CharOperation.prefixEquals(IOTConstants.OT_GETFIELD, selector))
     		return false;
     	if (CharOperation.prefixEquals(IOTConstants.OT_SETFIELD, selector))
+    		return false;
+    	if (SyntheticRoleBridgeMethodBinding.isPrivateBridgeSelector(selector))
     		return false;
     	return declaringClass.isRole();
     }

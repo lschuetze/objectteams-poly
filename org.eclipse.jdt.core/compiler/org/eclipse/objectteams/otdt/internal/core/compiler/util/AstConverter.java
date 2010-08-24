@@ -69,10 +69,10 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObjectMapper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 
@@ -489,129 +489,6 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
 		return newmethod;
 	}
 
-	public static char[] getPrivateBridgeSelector(char[] selector, char[] roleName) {
-		return CharOperation.concat(
-				CharOperation.concat(OT_DOLLAR_NAME, roleName),
-				CharOperation.concat(PRIVATE, selector));
-	}
-
-	public static boolean isPrivateBridgeSelector(char[] selector) {
-		if (!CharOperation.prefixEquals(OT_DOLLAR_NAME, selector))
-			return false;
-		return CharOperation.indexOf(PRIVATE, selector, true, OT_DOLLAR_LEN) > -1;
-	}
-
-	/**
-	 * Generate a method that bridges from a callout to a private role method.
-	 * @param teamDecl
-	 * @param roleName
-	 * @param privateRoleMethod
-	 * @param teamPart select whether the team part should be created or the role part.
-	 * @return the new method.
-	 */
-	public static MethodDeclaration genBridgeForPrivateRoleMethod(TypeDeclaration   teamDecl,
-																  TypeDeclaration   roleDecl,
-															      char[]            roleName,
-															      MethodDeclaration privateRoleMethod,
-															      boolean           teamPart)
-	{
-		// teamMeth looks like this (delegates to role method below):
-		// public T MyTeam._OT$R$private$m(R _OT$role, args) {
-		//     [return] __OT__R._OT$R$private$m(_OT$role, args);
-		// }
-
-		// roleMeth looks like this (delegates to original private method):
-		// public static T _OT$R$private$m(R _OT$role, args) {
-		//    [return] ((__OT__R)_OT$role).m(args);
-		// }
-
-		AstGenerator gen = (teamPart && roleDecl.isRoleFile())  
-			? new AstGenerator(teamDecl.sourceStart, teamDecl.sourceEnd) // have no better position
-			: new AstGenerator(privateRoleMethod.sourceStart, privateRoleMethod.sourceEnd);
-
-		MethodDeclaration meth = AstClone.copyMethod(teamPart?teamDecl:roleDecl, privateRoleMethod, gen);
-
-		meth.modifiers = AccPublic;
-		if (!teamPart)
-			meth.modifiers |= AccStatic;
-
-		meth.selector = getPrivateBridgeSelector(meth.selector, roleName);
-
-		// add role argument to front of arguments:
-		int len = 0;
-		if (meth.arguments != null) {
-			len = meth.arguments.length;
-			System.arraycopy(meth.arguments, 0,
-					meth.arguments = new Argument[len+1], 1,
-					len);
-			for (int i=1; i < len+1; i++)
-				if (meth.arguments[i].type instanceof LiftingTypeReference) // defer the declared lifting to the original method
-					meth.arguments[i].type = AstClone.copyTypeReference(((LiftingTypeReference)meth.arguments[i].type).baseReference);
-		} else {
-			meth.arguments = new Argument[1];
-		}
-		meth.arguments[0] = gen.argument(ROLE_ARG_NAME, gen.singleTypeReference(roleName), AccFinal);
-
-		if (!roleDecl.isConverted) {
-			genPrivateRoleMethodBridgeStatements(privateRoleMethod.selector, privateRoleMethod.isStatic(), len, meth, roleName, teamPart, gen); 
-			meth.hasParsedStatements = true;
-		}
-		MethodModel model = MethodModel.getModel(meth);
-		model._fakeKind= FakeKind.ROLE_FEATURE_BRIDGE;
-		model._thisSubstitution = meth.arguments[0];
-		if (teamPart)
-			model._sourceDeclaringType = roleDecl;
-		return meth;
-	}
-
-	public static void genPrivateRoleMethodBridgeStatements (char[]				selector,
-															 boolean 		 	isStatic, // irrelevant for team part
-															 int 				srcArgsLen, 
-															 MethodDeclaration 	bridgeMethod,
-															 char[] 		   	roleName,
-															 boolean 		   	isTeamPart, 
-															 AstGenerator 		gen) 
-	{
-		char[] roleClassName = CharOperation.concat(OT_DELIM_NAME, roleName);
-
-		int offset = 0; // into call arguments (0 or 1)
-		Expression   receiver;
-		if (isTeamPart) {
-			receiver = gen.singleNameReference(roleClassName); // __OT__R.
-			selector = bridgeMethod.selector;						   // _OT$R$private$m
-			offset = 1; // call arguments include role arg
-		} else {
-			if (isStatic)
-				receiver = gen.singleNameReference(roleClassName); // __OT__R.
-			else
-				receiver = gen.castExpression(					   // ((__OT__R)_OT$role).
-						gen.singleNameReference(ROLE_ARG_NAME),
-						gen.singleTypeReference(roleClassName),
-						CastExpression.RAW);
-			// plain call arguments (no offset)
-		}
-
-		// call params differ (according to offset)
-		Expression[] params = new Expression[srcArgsLen+offset];
-		for (int i=0; i<srcArgsLen; i++)
-			params[i+offset] = gen.singleNameReference(bridgeMethod.arguments[i+1].name);
-		if (offset == 1)
-			params[0] = gen.singleNameReference(ROLE_ARG_NAME);
-
-		// assemble call:
-		Expression call = gen.messageSend(receiver, selector, params);
-
-
-		if (   bridgeMethod.returnType instanceof SingleTypeReference
-			&& CharOperation.equals(((SingleTypeReference)bridgeMethod.returnType).token,
-					                 TypeConstants.VOID))
-		{
-			bridgeMethod.statements = new Statement[]{ call };
-		} else {
-			bridgeMethod.statements = new Statement[]{ gen.returnStatement(call) };
-		}
-	}
-
 	/**
 	 * Generate a method that bridges from a callout to a private role field.
 	 * @param teamDecl
@@ -650,7 +527,7 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
 										    isGetter ?
 										    		fieldTypeRef
 										    :  		gen.typeReference(TypeBinding.VOID),
-										    getPrivateBridgeSelector(accessorSelector, roleName),
+										    SyntheticRoleBridgeMethodBinding.getPrivateBridgeSelector(accessorSelector, roleName),
 											isGetter ?
 													new Argument[] {
 										    			roleArg,

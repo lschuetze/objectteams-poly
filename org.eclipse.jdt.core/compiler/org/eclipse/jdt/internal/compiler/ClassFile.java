@@ -1169,6 +1169,10 @@ public class ClassFile implements TypeConstants, TypeIds {
 					case SyntheticMethodBinding.MethodAccess :
 					case SyntheticMethodBinding.SuperMethodAccess :
 					case SyntheticMethodBinding.BridgeMethod :
+//{ObjectTeams: more kinds:
+					case SyntheticMethodBinding.RoleMethodBridgeInner :
+					case SyntheticMethodBinding.RoleMethodBridgeOuter :
+// SH}
 						// generate a method info to emulate an access to a non-accessible method / super-method or bridge method
 						addSyntheticMethodAccessMethod(syntheticMethod);
 						break;
