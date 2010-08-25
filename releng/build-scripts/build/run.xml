@@ -210,7 +210,7 @@ should test be run (true|false)?
 		    	<arg value="-Dsvn.repository.url=${svn.repository.url}"/>
 	            <arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 	            <arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
-	            <arg value="-verbose" />
+	            <!--arg value="-verbose" /-->
 	            <jvmarg value="${vm.args}"/>
 	            <jvmarg value="${vm.args2}"/>
         </java>
@@ -291,7 +291,7 @@ should test be run (true|false)?
 				<arg value="-Ddo.build.all=${do.build.all}"/>
 				<arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 				<arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
-				<arg value="-verbose" />
+				<!--arg value="-verbose" /-->
 				<jvmarg value="${vm.args}"/>
 				<jvmarg value="${vm.args2}"/>
 				<!-- arg value="${verboseAnt}"/ -->

@@ -31,13 +31,14 @@ ANT_HOME=/shared/common/apache-ant-1.7.1/
 PATH=${ANT_HOME}/bin:${PATH}
 
 # EXPORT: additional arguments to pass to Ant:
-ANT_PROFILE="-verbose"
+#ANT_PROFILE="-verbose"
+ANT_PROFILE=""
 
 # EXPORT: Nice-level for the Ant process:
 NICE="10"
 
 # EXPORT: virtual or real X server (XVFB, XVNC or X11):
-if test `which Xvfb` &> /dev/null; then
+if test `which Xvfb` && test `which xvfb-run` &> /dev/null; then
 	X11=XVFB
 elif test `which Xvnc` &> /dev/null; then
 	X11=XVNC
