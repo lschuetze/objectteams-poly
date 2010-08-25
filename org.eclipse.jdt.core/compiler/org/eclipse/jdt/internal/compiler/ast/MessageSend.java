@@ -905,9 +905,10 @@ private boolean receiverIsQualifiedThis() {
 	return false;
 }
 public boolean isDecapsulationAllowed(Scope scope) {
+	MethodScope methodScope = scope.methodScope();
 	// Note: methodScope() may return initializerScope, which has no Method, but the Type as refcontext.
-	if (scope.methodScope().referenceContext instanceof AbstractMethodDeclaration) {
-		AbstractMethodDeclaration method = (AbstractMethodDeclaration) scope.methodScope().referenceContext;
+	if (methodScope != null && methodScope.referenceContext instanceof AbstractMethodDeclaration) {
+		AbstractMethodDeclaration method = (AbstractMethodDeclaration) methodScope.referenceContext;
 		return method.isCalloutWrapper() || method.isBasePredicate();
 	}
 	return false;
