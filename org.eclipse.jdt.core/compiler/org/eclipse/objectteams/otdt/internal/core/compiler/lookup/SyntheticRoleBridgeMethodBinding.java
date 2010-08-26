@@ -44,8 +44,10 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 				// - weakening (using originalRole)
 				// - use ifc-part: inner field accessor uses role class, don't expose it at this level
 				int len = this.parameters.length;
-				System.arraycopy(this.parameters, 0, this.parameters = new TypeBinding[len], 0, len);
-				this.parameters[0] = originalRole.getRealType(); // may also be weakened
+				if (len > 0) { // accessor to static field has no argument
+					System.arraycopy(this.parameters, 0, this.parameters = new TypeBinding[len], 0, len);
+					this.parameters[0] = originalRole.getRealType(); // may also be weakened
+				}
 				break;
 			case RoleMethodBridgeInner:
 				// correction: add role as first parameter:
