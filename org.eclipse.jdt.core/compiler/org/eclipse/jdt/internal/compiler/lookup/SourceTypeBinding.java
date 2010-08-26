@@ -1872,8 +1872,11 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 				originalRole = field.copyInheritanceSrc.declaringClass;
 			inner = FieldModel.getDecapsulatingFieldAccessor(this, field, true/*isGetter*/);
 			((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
-			inner = FieldModel.getDecapsulatingFieldAccessor(this, field, false/*isGetter*/);
-			((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
+			if (!field.isFinal()) { // no setter for final (includes all static role fields)
+								    // otherwise we would have to handle different signatures (w/ w/o role arg), which we currently don't
+				inner = FieldModel.getDecapsulatingFieldAccessor(this, field, false/*isGetter*/);
+				((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
+			}
 		}
 // SH}
 		return field;
