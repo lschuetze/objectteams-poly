@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2009 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -1289,27 +1289,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
         	fieldDeclaration.binding.modifiers |= (field.modifiers&ExtraCompilerModifiers.AccBlankFinal); // BlankFinal was omitted on the fieldDecl
         }
 
-    	if (   field.isPrivate() // private role field need special preparation for callout:
-	    	&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, field.name))
-	    {
-    		// override bridge methods in the team:
-    		TypeDeclaration targetTeamDecl = roleDeclaration.enclosingType;
-    		if (targetTeamDecl != null) {
-    			char[] roleName = roleDeclaration.getRoleModel().getBinding().sourceName();
-    			AstEdit.addMethod(targetTeamDecl,
-    				AstConverter.genBridgeForPrivateRoleField(targetTeamDecl,
-    													      roleDeclaration,
-    														  roleName,
-    														  fieldDeclaration,
-    														  true));
-    			AstEdit.addMethod(targetTeamDecl,
-    				AstConverter.genBridgeForPrivateRoleField(targetTeamDecl,
-    														  roleDeclaration,
-    														  roleName,
-    														  fieldDeclaration,
-    														  false));
-    		}
-    	}
     }
 
     /**

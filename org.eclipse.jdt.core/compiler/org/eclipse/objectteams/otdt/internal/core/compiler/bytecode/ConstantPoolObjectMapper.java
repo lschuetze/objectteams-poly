@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -20,7 +20,6 @@
  **********************************************************************/
 /**
  * ObjectTeams Eclipse source extensions
- * More information available at www.ObjectTeams.org
  *
  * @author Markus Witte
  *
@@ -196,35 +195,47 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 			{
 				if(srcTeamBinding != null)
 				{
-					while (   srcTeamBinding != null
-						   && srcTeamBinding != refTeamBinding
-						   && srcTeamBinding.isRole()) {
-						// the common team to start searching might be an enclosing:
-						srcTeamBinding= srcTeamBinding.enclosingType();
-						dstTeam= dstTeam.enclosingType();
-					}
-					if(refTeamBinding == srcTeamBinding)
-					{
-						if(dstTeam!= null)
-						{
-							TypeBinding newBinding;
+					TypeBinding newBinding = null;
+					ReferenceBinding currentSrcTeam = srcTeamBinding;
+					ReferenceBinding currentDstTeam = dstTeam;
+					while (   currentSrcTeam != null
+						   && currentDstTeam != null) {
+						if(refTeamBinding == currentSrcTeam)	{
 							// mapping the enclosing team which is nested in an outer team?
 							if (typeBinding == refTeamBinding && typeBinding.isRole())
-								newBinding = dstTeam;
+								newBinding = currentDstTeam;
 							else
-								newBinding = searchRoleClass(refTypeBinding, dstTeam);
-							if(isArrayBinding)
-							{
-								// have no scope so can't use Scope.createArray(),
-								// which otherwise should be used throughout.
-								try {
-									newBinding = new ArrayBinding(newBinding, dimension, Config.getLookupEnvironment());
-								} catch (NotConfiguredException e) {
-									e.logWarning("Cannot create array binding"); //$NON-NLS-1$
-								}
-							}
-							return newBinding;
+								newBinding = searchRoleClass(refTypeBinding, currentDstTeam);
+							break;
 						}
+						// try dependent refinement of base classes:
+						ReferenceBinding srcBase = currentSrcTeam.baseclass();
+						if (srcBase != null && (srcBase.isTeam() || srcBase.isRole())) {
+							if (srcBase == refTypeBinding)
+								newBinding = currentDstTeam.baseclass();
+							else
+								newBinding = searchRoleClass(refTypeBinding, currentDstTeam.baseclass());
+							if (newBinding != null)
+								break;
+						}
+						// the common team to start searching might be an enclosing:
+						if (!currentSrcTeam.isRole())
+							break;
+						currentSrcTeam= currentSrcTeam.enclosingType();
+						currentDstTeam= currentDstTeam.enclosingType();
+					}
+					if (newBinding != null) {
+						if(isArrayBinding)
+						{
+							// have no scope so can't use Scope.createArray(),
+							// which otherwise should be used throughout.
+							try {
+								newBinding = new ArrayBinding(newBinding, dimension, Config.getLookupEnvironment());
+							} catch (NotConfiguredException e) {
+								e.logWarning("Cannot create array binding"); //$NON-NLS-1$
+							}
+						}
+						return newBinding;
 					}
 				}
 			}

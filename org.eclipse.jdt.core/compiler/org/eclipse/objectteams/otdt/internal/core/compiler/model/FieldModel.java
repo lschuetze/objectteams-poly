@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -20,23 +20,29 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.model;
 
+import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.OT_GETFIELD;
+import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.OT_SETFIELD;
+import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.AccSynthIfc;
+import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.ANCHOR_USAGE_RANKS;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
-import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorUsageRanksAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Store additional information for a field.
  * + Modifiers (in the case of static final in a synthetic role interface).
  *
@@ -77,6 +83,9 @@ public class FieldModel extends ModelElement {
 	// store inferred callouts to avoid duplicate generation: // FIXME(SH): should be per adapting role
 	public CalloutMappingDeclaration _setterCallout= null;
 	public CalloutMappingDeclaration _getterCallout= null;
+
+	private MethodBinding _decapsulatingGetter = null;
+	private MethodBinding _decapsulatingSetter = null;
 
     private FieldModel(FieldDeclaration decl) {
         this._decl    = decl;
@@ -122,7 +131,7 @@ public class FieldModel extends ModelElement {
 	/** After inserting a field into a role interface create an attribute to store its source modifiers. */
 	public static boolean checkCreateModifiersAttribute(TypeDeclaration type, FieldDeclaration field)
 	{
-		if ((type.modifiers & IOTConstants.AccSynthIfc) != 0) {
+		if ((type.modifiers & AccSynthIfc) != 0) {
 			if ((field.modifiers & ClassFileConstants.AccPublic) == 0) {
 				FieldModel model = getModel(field);
 				model.addAttribute(WordValueAttribute.modifiersAttribute(field.modifiers));
@@ -135,15 +144,48 @@ public class FieldModel extends ModelElement {
 	}
 	/** Record that the rank'th type parameter is anchored to this field. */
 	public void addUsageRank(int rank) {
-		AnchorUsageRanksAttribute attr = (AnchorUsageRanksAttribute) getAttribute(IOTConstants.ANCHOR_USAGE_RANKS);
+		AnchorUsageRanksAttribute attr = (AnchorUsageRanksAttribute) getAttribute(ANCHOR_USAGE_RANKS);
 		attr.addUsageRank(rank);
 	}
 	
+	/** Create a faked method binding for a getAccessor to a given base field. 
+	 * @param isGetter select getter or setter
+	 */
+	public static MethodBinding getDecapsulatingFieldAccessor(ReferenceBinding baseType,
+												         		  FieldBinding     resolvedField,
+												         		  boolean 		   isGetter)
+	{
+		FieldModel model = FieldModel.getModel(resolvedField);
+		MethodBinding accessor = isGetter ? model._decapsulatingGetter : model._decapsulatingSetter;
+		if (accessor != null)
+			return accessor;
+		
+		TypeBinding[] argTypes = resolvedField.isStatic() 
+									? (isGetter 
+											? new TypeBinding[0] 
+											: new TypeBinding[]{resolvedField.type})
+									: (isGetter
+											? new TypeBinding[]{baseType}
+											: new TypeBinding[]{baseType, resolvedField.type});
+		accessor = new MethodBinding(
+					ClassFileConstants.AccPublic|ClassFileConstants.AccStatic,
+					CharOperation.concat(isGetter ? OT_GETFIELD : OT_SETFIELD, resolvedField.name),
+					isGetter ? resolvedField.type : TypeBinding.VOID,
+					argTypes,
+					Binding.NO_EXCEPTIONS,
+					baseType);
+		MethodModel.getModel(accessor)._fakeKind = FakeKind.BASE_FIELD_ACCESSOR;
+		if (isGetter) 
+			model._decapsulatingGetter = accessor;
+		else
+			model._decapsulatingSetter = accessor;
+		return accessor;
+	}
 	/** Retrieve the array of ranks as read from bytecode. Returns null if no such attribute found. */
 	public static int[] getAnchorUsageRanks(FieldBinding field) {
 		if (field.model == null)
 			return null;
-		AnchorUsageRanksAttribute attr = (AnchorUsageRanksAttribute) field.model.getAttribute(IOTConstants.ANCHOR_USAGE_RANKS);
+		AnchorUsageRanksAttribute attr = (AnchorUsageRanksAttribute) field.model.getAttribute(ANCHOR_USAGE_RANKS);
 		return attr.getRanks();
 	}
 	/** Is the given field accessed via an inferred callout-to-field? */

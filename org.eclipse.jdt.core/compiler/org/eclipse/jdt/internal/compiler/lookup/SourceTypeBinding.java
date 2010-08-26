@@ -49,6 +49,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseC
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleFieldAccess;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.*;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.PredicateGenerator;
@@ -748,7 +749,7 @@ public SyntheticMethodBinding addSyntheticBaseCallSurrogate(MethodBinding callin
 	return accessMethod;	
 }
 // bridges towards a private role method
-public SyntheticMethodBinding addSyntheticRoleMethodBridge(SourceTypeBinding declaringRole, MethodBinding targetMethod, int bridgeKind) {
+public SyntheticMethodBinding addSyntheticRoleMethodBridge(SourceTypeBinding declaringRole, ReferenceBinding originalRole, MethodBinding targetMethod, int bridgeKind) {
 	if (this.synthetics == null)
 		this.synthetics = new HashMap[MAX_SYNTHETICS];
 	if (this.synthetics[SourceTypeBinding.ROLE_BRIDGE] == null)
@@ -756,23 +757,25 @@ public SyntheticMethodBinding addSyntheticRoleMethodBridge(SourceTypeBinding dec
 
 	SyntheticMethodBinding accessMethod = (SyntheticMethodBinding) this.synthetics[SourceTypeBinding.ROLE_BRIDGE].get(targetMethod);
 	if (accessMethod == null) {
-		accessMethod = new SyntheticRoleBridgeMethodBinding(declaringRole, targetMethod, bridgeKind);
+		accessMethod = new SyntheticRoleBridgeMethodBinding(declaringRole, originalRole, targetMethod, bridgeKind);
 		this.synthetics[SourceTypeBinding.ROLE_BRIDGE].put(targetMethod, accessMethod);
 	}
 	return accessMethod;	
 }
 // and retrieve an existing accessor:
 public SyntheticMethodBinding findOuterRoleMethodSyntheticAccessor(MethodBinding targetMethod) {
-	SyntheticMethodBinding accessor; 
-	if (this.synthetics != null) {
+	SyntheticMethodBinding accessor;
+	if (this.synthetics != null && this.synthetics[ROLE_BRIDGE] != null) {
 		accessor = (SyntheticMethodBinding) this.synthetics[ROLE_BRIDGE].get(targetMethod);
 		if (accessor != null) {
-			if (accessor.isStatic())
+			if (accessor.isStatic() && isRole())
 				return ((SourceTypeBinding)enclosingType()).findOuterRoleMethodSyntheticAccessor(accessor);
 			else 
 				return accessor;
 		}
 	}
+	if (MethodModel.isFakedMethod(targetMethod, FakeKind.BASE_FIELD_ACCESSOR))
+		return ((SourceTypeBinding)enclosingType()).findOuterRoleMethodSyntheticAccessor(targetMethod);
 	return null;
 }
 // SH}
@@ -1806,58 +1809,72 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 		if (fieldDecls[f].binding != field)
 			continue;
 
-			MethodScope initializationScope = field.isStatic()
-				? this.scope.referenceContext.staticInitializerScope
-				: this.scope.referenceContext.initializerScope;
-			FieldBinding previousField = initializationScope.initializedField;
-			try {
-				initializationScope.initializedField = field;
-				FieldDeclaration fieldDecl = fieldDecls[f];
-				TypeBinding fieldType =
-					fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT
-						? initializationScope.environment().convertToRawType(this, false /*do not force conversion of enclosing types*/) // enum constant is implicitly of declaring enum type
-						: fieldDecl.type.resolveType(initializationScope, true /* check bounds*/);
-				field.type = fieldType;
-				field.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
-				if (fieldType == null) {
-					fieldDecl.binding = null;
-					return null;
-				}
-				if (fieldType == TypeBinding.VOID) {
-					this.scope.problemReporter().variableTypeCannotBeVoid(fieldDecl);
-					fieldDecl.binding = null;
-					return null;
-				}
-				if (fieldType.isArrayType() && ((ArrayBinding) fieldType).leafComponentType == TypeBinding.VOID) {
-					this.scope.problemReporter().variableTypeCannotBeVoidArray(fieldDecl);
-					fieldDecl.binding = null;
-					return null;
-				}
-				if ((fieldType.tagBits & TagBits.HasMissingType) != 0) {
-					field.tagBits |= TagBits.HasMissingType;
-				}
-				TypeBinding leafType = fieldType.leafComponentType();
-				if (leafType instanceof ReferenceBinding && (((ReferenceBinding)leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0) {
-					field.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
-				}
-			} finally {
-			    initializationScope.initializedField = previousField;
+		MethodScope initializationScope = field.isStatic()
+			? this.scope.referenceContext.staticInitializerScope
+			: this.scope.referenceContext.initializerScope;
+		FieldBinding previousField = initializationScope.initializedField;
+		try {
+			initializationScope.initializedField = field;
+			FieldDeclaration fieldDecl = fieldDecls[f];
+			TypeBinding fieldType =
+				fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT
+					? initializationScope.environment().convertToRawType(this, false /*do not force conversion of enclosing types*/) // enum constant is implicitly of declaring enum type
+					: fieldDecl.type.resolveType(initializationScope, true /* check bounds*/);
+			field.type = fieldType;
+			field.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
+			if (fieldType == null) {
+				fieldDecl.binding = null;
+				return null;
 			}
+			if (fieldType == TypeBinding.VOID) {
+				this.scope.problemReporter().variableTypeCannotBeVoid(fieldDecl);
+				fieldDecl.binding = null;
+				return null;
+			}
+			if (fieldType.isArrayType() && ((ArrayBinding) fieldType).leafComponentType == TypeBinding.VOID) {
+				this.scope.problemReporter().variableTypeCannotBeVoidArray(fieldDecl);
+				fieldDecl.binding = null;
+				return null;
+			}
+			if ((fieldType.tagBits & TagBits.HasMissingType) != 0) {
+				field.tagBits |= TagBits.HasMissingType;
+			}
+			TypeBinding leafType = fieldType.leafComponentType();
+			if (leafType instanceof ReferenceBinding && (((ReferenceBinding)leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0) {
+				field.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
+			}
+		} finally {
+		    initializationScope.initializedField = previousField;
+		}
 //{ObjectTeams: copy-inherited fields and anchored types:
-			if (fieldDecls[f].getKind() != AbstractVariableDeclaration.ENUM_CONSTANT) {
-				if (fieldDecls[f].type == null)  // should not happen for non-enum types
-					throw new InternalCompilerError("Field "+fieldDecls[f]+" has no type in "+this);
+		if (fieldDecls[f].getKind() != AbstractVariableDeclaration.ENUM_CONSTANT) {
+			if (fieldDecls[f].type == null)  // should not happen for non-enum types
+				throw new InternalCompilerError("Field "+fieldDecls[f]+" has no type in "+this);
 
-				field.copyInheritanceSrc = fieldDecls[f].copyInheritanceSrc;
-				field.maybeSetFieldTypeAnchorAttribute();
-				// anchored to tthis?
-				field.type = RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.scope, field.type, fieldDecls[f].type);
-				if (field.couldBeTeamAnchor()) {
-					// link decl and binding via model
-					// for early resolving from TeamAnchor.hasSameBestNameAs()
-					FieldModel.getModel(fieldDecls[f]).setBinding(field);
-				}
+			field.copyInheritanceSrc = fieldDecls[f].copyInheritanceSrc;
+			field.maybeSetFieldTypeAnchorAttribute();
+			// anchored to tthis?
+			field.type = RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.scope, field.type, fieldDecls[f].type);
+			if (field.couldBeTeamAnchor()) {
+				// link decl and binding via model
+				// for early resolving from TeamAnchor.hasSameBestNameAs()
+				FieldModel.getModel(fieldDecls[f]).setBinding(field);
 			}
+		}
+		// need role field bridges?
+		if (   isRole() 
+			&& ((field.modifiers & ClassFileConstants.AccPrivate) != 0) 
+			&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, field.name)) 
+		{
+			MethodBinding inner;
+			ReferenceBinding originalRole = field.declaringClass;
+			if (field.copyInheritanceSrc != null)
+				originalRole = field.copyInheritanceSrc.declaringClass;
+			inner = FieldModel.getDecapsulatingFieldAccessor(this, field, true/*isGetter*/);
+			((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
+			inner = FieldModel.getDecapsulatingFieldAccessor(this, field, false/*isGetter*/);
+			((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
+		}
 // SH}
 		return field;
 	}
@@ -2106,8 +2123,11 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 		&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, method.selector)
 		&& !methodDecl.isConstructor()) 
 	{
-		MethodBinding inner = addSyntheticRoleMethodBridge(this, method, SyntheticMethodBinding.RoleMethodBridgeInner);
-		((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
+		ReferenceBinding originalRole = this;
+		if (method.copyInheritanceSrc != null)
+			originalRole = method.copyInheritanceSrc.declaringClass;
+		MethodBinding inner = addSyntheticRoleMethodBridge(this, originalRole, method, SyntheticMethodBinding.RoleMethodBridgeInner);
+		((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
 	}
 // SH}
 	return method;

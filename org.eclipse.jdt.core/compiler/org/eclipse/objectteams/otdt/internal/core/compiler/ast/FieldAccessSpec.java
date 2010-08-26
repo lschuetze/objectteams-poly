@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -41,10 +41,9 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
@@ -222,7 +221,7 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
     		// because several callouts to the same field could exist.
     		// RoleTypeCreator.maybeWrapQualifiedRoleType(MessageSend,BlockScope)
     		// will wrap the type using a faked _OT$base receiver.
-    		return createGetAccessorBinding(baseType, this.resolvedField);
+    		return FieldModel.getDecapsulatingFieldAccessor(baseType, this.resolvedField, true);
 		} else {
     		TypeBinding declaredFieldType = this.hasSignature ?
 					this.parameters[0] :
@@ -240,25 +239,7 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
     	}
 	}
 
-	/** Create a faked method binding for a getAccessor to a given base field. */
-	public static MethodBinding createGetAccessorBinding(ReferenceBinding baseType,
-												         FieldBinding     resolvedField)
-	{
-		TypeBinding[] argTypes = resolvedField.isStatic() ?
-									new TypeBinding[0] :
-									new TypeBinding[]{baseType};
-		MethodBinding result = new MethodBinding(
-					ClassFileConstants.AccPublic|ClassFileConstants.AccStatic,
-					CharOperation.concat(IOTConstants.OT_GETFIELD, resolvedField.name),
-					resolvedField.type,
-					argTypes,
-					Binding.NO_EXCEPTIONS,
-					baseType);
-		MethodModel.getModel(result)._fakeKind = FakeKind.BASE_FIELD_ACCESSOR;
-		return result;
-	}
-
-    public TypeBinding resolvedType() {
+	public TypeBinding resolvedType() {
     	if (this.fieldType != null)
     		return this.fieldType;  // may contain more precise team anchor than the field.
     	return this.resolvedField.type;

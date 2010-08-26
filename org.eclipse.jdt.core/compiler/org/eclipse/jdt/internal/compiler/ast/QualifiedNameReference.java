@@ -49,6 +49,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeB
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.IDependentTypeSubstitution;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
@@ -871,7 +872,7 @@ private void accessAsCalloutToField(ReferenceBinding enclosingReceiver, FieldBin
 	ReferenceBinding baseClass = baseclassField.declaringClass;
 
 	// manually create and add binding as if it were a callout to field:
-	final MethodBinding fakedAccessorBinding = FieldAccessSpec.createGetAccessorBinding(baseClass, baseclassField);
+	final MethodBinding fakedAccessorBinding = FieldModel.getDecapsulatingFieldAccessor(baseClass, baseclassField, true);
 	baseClass.addMethod(fakedAccessorBinding);
 
 	// record the need to have the OTRE create the accessor:

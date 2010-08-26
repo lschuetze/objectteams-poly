@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -93,9 +93,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
- * MIGRATION_STATE: complete.
- * moved here from package org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer
- *
  * This Class transforms all callout-mappings (aka calloutbindings)
  * for a given role. The callout-mappings remain in the role as AST
  * nodes. The role-methods that match these mappings are transformed
@@ -113,6 +110,11 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *        set of locals.
  * Where: createCallout links roleMethodSpec and wrapper
  *        getArgument links baseMethodSpec and wrapper (if not parameter mappings are given).
+ *        
+ * What:  Callout to private members of a role-as-base require access via two bridges
+ * Why:   private methods are not exposed in the ifc-part, implicit inheritance needs
+ *        redirection via the team instance, fields need accessors anyway
+ * Where: see anonymous subclass of MessageSend in transformCalloutMethodBody
  *
  * @author haebor
  */
@@ -549,13 +551,9 @@ public class CalloutImplementor extends MethodMappingImplementor
         sEnd   = calloutDecl.baseMethodSpec.sourceEnd;
         final AstGenerator gen = new AstGenerator(sStart, sEnd);
 
-        Expression receiver;
         char[] selector = calloutDecl.baseMethodSpec.selector;
         ReferenceBinding baseType = this._role.getBaseTypeBinding();
-		if (calloutDecl.baseMethodSpec.isStatic() || calloutDecl.isCalloutToField())
-			receiver = gen.baseNameReference(baseType.getRealClass());
-        else
-       		receiver = new CastExpression(
+		Expression receiver = new CastExpression(
 							gen.baseNameReference(IOTConstants._OT_BASE),
 							gen.baseclassReference(baseType),
 							CastExpression.DO_WRAP);
@@ -572,16 +570,7 @@ public class CalloutImplementor extends MethodMappingImplementor
     		// generated message send refers to public bridge, report decapsulation now:
     		calloutDecl.scope.problemReporter().decapsulation(calloutDecl.baseMethodSpec, baseType, calloutDecl.scope);
 
-//    		if (!(calloutDecl.baseMethodSpec instanceof FieldAccessSpec)) {
-//	    		// one more argument: the base instance:
-//	    		int len = arguments.length;
-//	    		System.arraycopy(arguments, 0,
-//	    				         arguments = new Expression[len+1], 1,
-//	    				         len);
-//    		}
-//    		// add to front (callout-to-method), or simply replace (callout-to-field) first arg:
-//	    	arguments[0] = gen.baseNameReference(IOTConstants._OT_BASE);
-
+    		final boolean isCalloutToField = calloutDecl.isCalloutToField();
 	    	messageSend = new MessageSend() {
 	    		@Override
 	    		public void generateCode(org.eclipse.jdt.internal.compiler.lookup.BlockScope currentScope, org.eclipse.jdt.internal.compiler.codegen.CodeStream codeStream, boolean valueRequired) {
@@ -590,7 +579,15 @@ public class CalloutImplementor extends MethodMappingImplementor
 	    			TypeAnchorReference syntheticReceiver = gen.typeAnchorReference(((RoleTypeBinding)this.actualReceiverType)._teamAnchor);
 	    			syntheticReceiver.isExpression = true;
 	    			syntheticReceiver.resolve(currentScope);
-	    			syntheticReceiver.generateCode(currentScope, codeStream, true/*valueRequired*/);
+	    			if (isCalloutToField)
+	    				// for c-t-f this receiver *replaces* the original receiver,
+	    				// role instance additionally exists as a visible method argument
+	    				this.receiver = syntheticReceiver;
+	    			else
+	    				// for method callout *add* the team instance to the front of pushes
+	    				// original role instance receiver will become the first implicit argument
+	    				syntheticReceiver.generateCode(currentScope, codeStream, true/*valueRequired*/);
+	    			
 	    			// directly use the accessor and its declaring class for the invoke instruction:
 	    			this.binding = this.syntheticAccessor;
 	    			this.actualReceiverType = this.syntheticAccessor.declaringClass;
@@ -606,6 +603,9 @@ public class CalloutImplementor extends MethodMappingImplementor
 	    	messageSend.sourceStart = sStart;
 	    	messageSend.sourceEnd = sEnd;
     	} else {
+    		if (!calloutDecl.baseMethodSpec.isStatic() && calloutDecl.isCalloutToField())
+    			// we thought we should use an instance but normal c-t-f is sent to the base class
+    			receiver = gen.baseNameReference(baseType.getRealClass());
 
     		messageSend = gen.messageSend(receiver, selector, arguments);
     	}

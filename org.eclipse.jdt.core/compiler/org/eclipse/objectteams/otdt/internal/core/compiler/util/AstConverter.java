@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -20,7 +20,6 @@
  **********************************************************************/
 /**
  * ObjectTeams Eclipse source extensions
- * More information available at www.ObjectTeams.org
  *
  * @author Markus Witte
  *
@@ -37,21 +36,18 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.ArrayInitializer;
-import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ImportReference;
-import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
-import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.IntConstant;
 import org.eclipse.jdt.internal.compiler.impl.StringConstant;
@@ -62,7 +58,6 @@ import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
@@ -71,10 +66,6 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObjectMapper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 
 /**
  * Create AST-nodes from some other representation.
@@ -487,101 +478,6 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
 		newmethod.modifiers   = computeIfcpartModifiers(classpartMethod.modifiers);
 		classpartMethod.interfacePartMethod = newmethod;
 		return newmethod;
-	}
-
-	/**
-	 * Generate a method that bridges from a callout to a private role field.
-	 * @param teamDecl
-	 * @param roleName
-	 * @param privateRoleField
-	 * @param isGetter select whether to generate a getter or a setter
-	 * @return the new method.
-	 */
-	public static MethodDeclaration genBridgeForPrivateRoleField(TypeDeclaration  teamDecl,
-																 TypeDeclaration  roleDecl,
-															     char[]           roleName,
-															     FieldDeclaration privateRoleField,
-															     boolean          isGetter)
-	{
-		// getter looks like this:
-		// public T MyTeam._OT$R$private$_OT$get$f(R _OT$role) {
-		//     return ((__OT__R)_OT$role)._OT$get$f();
-		// }
-
-		// setter looks like this:
-		// public void _OT$R$private$f(R _OT$role, T value) {
-		//    ((__OT__R)_OT$role).OT_$set$f(value);
-		// }
-
-		AstGenerator gen = new AstGenerator(privateRoleField.sourceStart, privateRoleField.sourceEnd);
-
-
-		TypeReference fieldTypeRef = AstClone.copyTypeReference(privateRoleField.type);
-		Argument      roleArg      = gen.argument(ROLE_ARG_NAME, gen.singleTypeReference(roleName));
-		char[]    accessorSelector = CharOperation.concat(
-										isGetter ? IOTConstants.OT_GETFIELD : IOTConstants.OT_SETFIELD,
-										privateRoleField.name);
-
-		MethodDeclaration meth = gen.method(teamDecl.compilationResult,
-										    AccPublic,
-										    isGetter ?
-										    		fieldTypeRef
-										    :  		gen.typeReference(TypeBinding.VOID),
-										    SyntheticRoleBridgeMethodBinding.getPrivateBridgeSelector(accessorSelector, roleName),
-											isGetter ?
-													new Argument[] {
-										    			roleArg,
-										    		}
-											:		new Argument[] {
-										    			roleArg,
-										    			gen.argument(
-										    				VALUE_ARG,
-										    				fieldTypeRef)
-										    		});
-
-
-		char[] roleClassName = CharOperation.concat(OT_DELIM_NAME, roleName);
-		Expression receiver = gen.singleNameReference(roleClassName);
-
-		// assemble call:
-		MessageSend call = new MessageSend() {
-			@Override
-			protected AnchorMapping beforeMethodLookup(TypeBinding[] argumentTypes, Scope scope)
-			{
-				// this message send refers to a non-existant method, create the method on demand.
-				TypeBinding returnType = ((MethodDeclaration)scope.methodScope().referenceMethod()).returnType.resolvedType;
-				MethodBinding bridgeMethod = new MethodBinding(AccPublic|AccStatic,
-						                                       this.selector,
-						                                       returnType, // return type
-						                                       argumentTypes,
-						                                       null, // exceptions
-						                                       (ReferenceBinding)this.actualReceiverType);
-				((ReferenceBinding)this.actualReceiverType).addMethod(bridgeMethod);
-				MethodModel.getModel(bridgeMethod)._fakeKind = MethodModel.FakeKind.ROLE_FEATURE_BRIDGE;
-				return super.beforeMethodLookup(argumentTypes, scope);
-			}
-		};
-		call.receiver  = receiver;
-		call.selector  = accessorSelector;
-		Expression roleArg2 = gen.castExpression(
-						gen.singleNameReference(ROLE_ARG_NAME),
-						gen.singleTypeReference(roleClassName),
-						CastExpression.RAW);
-		call.arguments = isGetter ?
-							new Expression[] { roleArg2 }
-				:           new Expression[] { roleArg2,
-											   gen.singleNameReference(VALUE_ARG) };
-
-		if (isGetter)
-			meth.statements = new Statement[]{ gen.returnStatement(call) };
-		else
-			meth.statements = new Statement[]{ call };
-
-		meth.hasParsedStatements = true;
-		MethodModel model = MethodModel.getModel(meth);
-		model._sourceDeclaringType = roleDecl;
-		model._fakeKind= FakeKind.ROLE_FEATURE_BRIDGE;
-		return meth;
 	}
 
 	/**

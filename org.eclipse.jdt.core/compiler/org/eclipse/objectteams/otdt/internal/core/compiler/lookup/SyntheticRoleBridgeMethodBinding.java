@@ -16,8 +16,8 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.lookup;
 
+import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -33,17 +33,23 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 
-	public SyntheticRoleBridgeMethodBinding(SourceTypeBinding declaringRole, MethodBinding targetMethod, int bridgeKind) {
-		super(declaringRole, ClassFileConstants.AccPublic|ClassFileConstants.AccSynthetic, targetMethod.selector, targetMethod.parameters, targetMethod.returnType);
+	public SyntheticRoleBridgeMethodBinding(SourceTypeBinding declaringRole, ReferenceBinding originalRole, MethodBinding targetMethod, int bridgeKind) {
+		super(declaringRole, AccPublic|AccSynthetic, targetMethod.selector, targetMethod.parameters, targetMethod.returnType);
 		this.purpose = bridgeKind;
 		switch (bridgeKind) {
 			case RoleMethodBridgeOuter:
 				// correction: this method sits in the team not the role:
 				this.declaringClass = declaringRole.enclosingType();
+				// perform two adjustments of the first parameter passing the role instance:
+				// - weakening (using originalRole)
+				// - use ifc-part: inner field accessor uses role class, don't expose it at this level
+				int len = this.parameters.length;
+				System.arraycopy(this.parameters, 0, this.parameters = new TypeBinding[len], 0, len);
+				this.parameters[0] = originalRole.getRealType(); // may also be weakened
 				break;
 			case RoleMethodBridgeInner:
 				// correction: add role as first parameter:
-				int len = targetMethod.parameters.length;
+				len = targetMethod.parameters.length;
 				int offset = targetMethod.isStatic()?2:0;
 				this.parameters = new TypeBinding[len+1+offset];
 				this.parameters[0] = declaringRole.getRealType();
@@ -53,7 +59,7 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 				}
 				System.arraycopy(targetMethod.parameters, 0, this.parameters, 1+offset, len);
 				// correction: this bridge is static:
-				this.modifiers |= ClassFileConstants.AccStatic;
+				this.modifiers |= AccStatic;
 				// correction: generate the bridge method name:
 				this.selector = SyntheticRoleBridgeMethodBinding.getPrivateBridgeSelector(targetMethod.selector, declaringRole.sourceName());
 				break;

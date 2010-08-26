@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -63,8 +63,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 
 /**
- * MIGRATION_STATE: complete.
- *
  * This transformer splits each role class into a class part and an interface part.
  *
  * Entries for STATE_ROLES_SPLIT:
@@ -154,26 +152,6 @@ public class RoleSplitter
                     // move the field:
 					AstEdit.addField(roleIfcDecl, field, false, false/*typeProblem*/);
 					AstEdit.removeField(roleClassDecl, field);
-				}
-				if ((field.modifiers & AccPrivate) != 0) {
-					// private fields need a wrapper in the team for access by callout:
-					final MethodDeclaration bridge1 = AstConverter.genBridgeForPrivateRoleField(
-														  teamDecl, roleClassDecl, roleIfcDecl.name, field, true);
-					AstEdit.addMethodDeclOnly(teamDecl, bridge1, false);
-					if (teamDecl.binding != null && bridge1.binding == null)
-						roleIfcDecl.getRoleModel()._state.addJob(ITranslationStates.STATE_ROLES_LINKED,
-							new Runnable() { public void run() {
-								teamDecl.binding.resolveGeneratedMethod(bridge1, false);
-							}});
-
-					final MethodDeclaration bridge2 = AstConverter.genBridgeForPrivateRoleField(
-														  teamDecl, roleClassDecl, roleIfcDecl.name, field, false);
-					AstEdit.addMethodDeclOnly(teamDecl, bridge2, false);
-					if (teamDecl.binding != null && bridge1.binding == null)
-						roleIfcDecl.getRoleModel()._state.addJob(ITranslationStates.STATE_ROLES_LINKED,
-							new Runnable() { public void run() {
-								teamDecl.binding.resolveGeneratedMethod(bridge2, false);
-							}});
 				}
 			}
 		}
@@ -324,7 +302,7 @@ public class RoleSplitter
      * (role superclasses are treated in linkSuperAndBaseInIfc()).
      *
      * @param teamDecl
-     * @param roleClassBinding
+     * @param roleClass
      * @param roleIfcDecl
      */
     public static void setupInterfaceForExtends(
