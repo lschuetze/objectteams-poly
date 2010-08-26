@@ -603,8 +603,9 @@ public class CalloutImplementor extends MethodMappingImplementor
 	    	messageSend.sourceStart = sStart;
 	    	messageSend.sourceEnd = sEnd;
     	} else {
-    		if (!calloutDecl.baseMethodSpec.isStatic() && calloutDecl.isCalloutToField())
-    			// we thought we should use an instance but normal c-t-f is sent to the base class
+    		if (calloutDecl.baseMethodSpec.isStatic() || calloutDecl.isCalloutToField())
+    			// we thought we should use an instance
+    			// but callout-to-static and normal c-t-f is sent to the base *class*
     			receiver = gen.baseNameReference(baseType.getRealClass());
 
     		messageSend = gen.messageSend(receiver, selector, arguments);
