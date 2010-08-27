@@ -1498,7 +1498,8 @@ void setSourceStart(int sourceStart);
 	int MissingCallToBaseConstructor             = ROLE_RELATED + 4207; // 2.4.2(b)
 	int TooManyCallsToBaseConstructor            = ROLE_RELATED + 4208; // 2.4.2(b)
 	int DecapsulationBaseCtor                    = ROLE_RELATED + 4209; // 2.4.2(b)
-	int RoleConstructorHiddenByLiftingConstructor= ROLE_RELATED + 4210; // 2.4.2(d)
+	int BaseConstructorExpressionOutsideCtorCall = ROLE_RELATED + 4210; // 2.4.2(c)
+	int RoleConstructorHiddenByLiftingConstructor= ROLE_RELATED + 4211; // 2.4.2(d)
 	int InstantiatingSupercededRole 			 = ROLE_RELATED + 4301; // 2.4.3
 
 

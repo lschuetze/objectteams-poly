@@ -1170,16 +1170,20 @@ ExplicitConstructorInvocation ::= Name '.' OnlyTypeArguments 'this' '(' Argument
 /:$readableName ExplicitConstructorInvocation:/
 
 -- {ObjectTeams
-BaseConstructorInvocation ::= 'base' '(' ArgumentListopt ')' 
+BaseConstructorExpression ::= 'base' '(' ArgumentListopt ')' 
 /.$putCase consumeExplicitConstructorInvocationBase(0); $break ./
 /:$readableName BaseConstructorInvocation:/
 
-BaseConstructorInvocation ::= Primary . 'base' '(' ArgumentListopt ')' 
+BaseConstructorInvocation ::= 'base' '(' ArgumentListopt ')' 
 /.$putCase consumeExplicitConstructorInvocationBase(1); $break ./
+/:$readableName BaseConstructorInvocation:/
+
+BaseConstructorInvocation ::= Primary . 'base' '(' ArgumentListopt ')' 
+/.$putCase consumeExplicitConstructorInvocationBase(2); $break ./
 /:$readableName QualifiedBaseConstructorInvocation:/
 
 BaseConstructorInvocation ::= Name . 'base' '(' ArgumentListopt ')' 
-/.$putCase consumeExplicitConstructorInvocationBase(2); $break ./
+/.$putCase consumeExplicitConstructorInvocationBase(3); $break ./
 /:$readableName QualifiedBaseConstructorInvocation:/
 -- Markus Witte}
 
@@ -1584,6 +1588,9 @@ PrimaryNoNewArray ::=  PushLPAREN Name PushRPAREN
 /.$putCase consumePrimaryNoNewArrayWithName(); $break ./
 
 PrimaryNoNewArray -> ClassInstanceCreationExpression
+--{ObjectTeams:
+PrimaryNoNewArray -> BaseConstructorExpression
+-- SH}
 PrimaryNoNewArray -> FieldAccess
 --1.1 feature
 PrimaryNoNewArray ::= Name '.' 'this'

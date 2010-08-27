@@ -20,6 +20,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 
+import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CREATOR_PREFIX_NAME;
+import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants._OT_BASE;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
@@ -34,6 +37,7 @@ import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
@@ -52,9 +56,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
-import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CREATOR_PREFIX_NAME;
-import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants._OT_BASE;
-
 /**
  * A base constructor invocation "base(args)";
  * Translated to "_OT$base = new BaseClass(args);"
@@ -68,6 +69,7 @@ public class BaseAllocationExpression extends Assignment {
     public Expression[] arguments;
     public Expression enclosingInstance;
 
+    public boolean isExpression = false;
     private boolean isAstCreated = false;
 	private Boolean checkResult = null; // three-valued logic (incl null)
 
@@ -85,6 +87,8 @@ public class BaseAllocationExpression extends Assignment {
 			FlowContext flowContext,
 			FlowInfo flowInfo)
 	{
+		if (this.isExpression) // don't treat as assignment
+			return this.expression.analyseCode(currentScope, flowContext, flowInfo);
 		// in case of error assume it might relate to duplicate base() calls, don't report again.
 		if (((AbstractMethodDeclaration)currentScope.methodScope().referenceContext).ignoreFurtherInvestigation)
 			return flowInfo;
@@ -117,8 +121,13 @@ public class BaseAllocationExpression extends Assignment {
             return;
         }
         ConstructorDeclaration enclCtor = (ConstructorDeclaration)enclMethodDecl;
-        if (enclCtor.statements[0] != this)
-            scope.problemReporter().baseConstructorCallIsNotFirst(this);
+        if (this.isExpression) {
+        	if (!isArgOfOtherCtor(enclCtor, scope))
+        		scope.problemReporter().baseConstructorExpressionOutsideCtorCall(this);
+        } else {
+        	if (enclCtor.statements[0] != this) 
+        		scope.problemReporter().baseConstructorCallIsNotFirst(this);
+        }
 
         AstGenerator gen = new AstGenerator(this.sourceStart, this.sourceEnd);
         Expression allocation;
@@ -194,6 +203,10 @@ public class BaseAllocationExpression extends Assignment {
         	enclCtor.constructorCall = genLiftCtorCall(allocation);
         	enclCtor.statements[0] = new AstGenerator(this.sourceStart, this.sourceEnd).emptyStatement();
         	// pretend we are not calling base() because we already call the lifting-ctor.
+        } else if (this.isExpression) {
+        	// similar to above:
+        	// translate "super(base(args), ...);" as "super(new MyBase(args), ...);"
+        	this.expression = allocation; // and ignore the assignment flavor of this node.
         } else {
         	if (   !enclType.roleModel.hasBaseclassProblem()
         		&& !scope.referenceType().ignoreFurtherInvestigation)
@@ -220,6 +233,42 @@ public class BaseAllocationExpression extends Assignment {
 	    		enclCtor.setStatements(newStats);
     		}
         }
+    }
+    
+    private boolean isArgOfOtherCtor(ConstructorDeclaration constructorDecl, BlockScope scope) {
+    	class FoundException extends RuntimeException {}
+    	class NotFoundException extends RuntimeException {}
+    	try {
+    		constructorDecl.traverse(new ASTVisitor() {
+    			int inCtorCall=0;
+    			@Override
+    			public boolean visit(ExplicitConstructorCall ctorCall, BlockScope scope) {
+    				this.inCtorCall++;
+   					return super.visit(ctorCall, scope);
+    			}
+    			@Override
+    			public void endVisit(ExplicitConstructorCall explicitConstructor, BlockScope scope) {
+    				super.endVisit(explicitConstructor, scope);
+    				this.inCtorCall--;
+    			}
+    			@Override
+    			public boolean visit(Assignment assig, BlockScope scope) {
+    				if (assig == BaseAllocationExpression.this) {
+    					if (this.inCtorCall>0)
+    						throw new FoundException();
+    					else
+    						throw new NotFoundException();
+    				}
+    				return super.visit(assig, scope);
+    			}
+			},
+			scope.classScope());
+    	} catch (FoundException fe) {
+    		return true;
+    	} catch (NotFoundException nfe) {
+    		return false;
+    	}
+    	return false;
     }
 
 	private AllocationExpression newAllocation(ReferenceBinding baseclass, AstGenerator gen)
@@ -250,6 +299,7 @@ public class BaseAllocationExpression extends Assignment {
 	public boolean checkGenerate(BlockScope scope) {
 		if (this.checkResult != null)
 			return this.checkResult;
+		this.checkResult = Boolean.TRUE; // preliminary, prevent re-entrance from isArgOfOtherCtor
 		return this.checkResult = Boolean.valueOf(internalCheckGenerate(scope));
 	}
 	private boolean internalCheckGenerate(BlockScope scope) {
@@ -296,11 +346,29 @@ public class BaseAllocationExpression extends Assignment {
         if (!checkGenerate(scope)) { // createAst failed.
             return null;
         }
+		if (this.isExpression) // don't treat as assignment
+			return this.resolvedType = this.expression.resolveType(scope);
         if (!scope.methodScope().referenceContext.hasErrors())
             return super.resolveType(scope);
         return null;
     }
+    
+    @Override
+    public void computeConversion(Scope scope, TypeBinding runtimeType, TypeBinding compileTimeType) {
+    	if (this.isExpression)
+    		this.expression.computeConversion(scope, runtimeType, compileTimeType);
+    	else
+    		super.computeConversion(scope, runtimeType, compileTimeType);
+    }
 
+    @Override
+    public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
+		if (this.isExpression) // don't treat as assignment
+			this.expression.generateCode(currentScope, codeStream, valueRequired);
+		else
+			super.generateCode(currentScope, codeStream, valueRequired);
+    }
+    
     public String toString() {
         if (this.expression == null)
             return "unresolved base() call"; //$NON-NLS-1$

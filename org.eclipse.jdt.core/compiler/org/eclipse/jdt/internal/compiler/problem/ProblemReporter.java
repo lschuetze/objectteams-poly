@@ -9248,7 +9248,6 @@ public void callsCtorWithMismatchingBaseCtor(
 		args,
 		selfCall.sourceStart,
 		selfCall.sourceEnd);
-
 }
 public void baseConstructorCallIsNotFirst(BaseAllocationExpression expression) {
     String[] arguments = new String[0];
@@ -9258,7 +9257,15 @@ public void baseConstructorCallIsNotFirst(BaseAllocationExpression expression) {
         arguments,
         expression.sourceStart,
         expression.sourceEnd);
-
+}
+public void baseConstructorExpressionOutsideCtorCall(BaseAllocationExpression expression) {
+    String[] arguments = new String[0];
+    this.handle(
+        IProblem.BaseConstructorExpressionOutsideCtorCall,
+        arguments,
+        arguments,
+        expression.sourceStart,
+        expression.sourceEnd);
 }
 public void missingCallToBaseConstructor(
         ConstructorDeclaration ctor,
