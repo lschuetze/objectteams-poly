@@ -1715,6 +1715,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("MissingCallToBaseConstructor", SKIP);
         expectedProblemAttributes.put("TooManyCallsToBaseConstructor", SKIP);
         expectedProblemAttributes.put("DecapsulationBaseCtor", SKIP);
+        expectedProblemAttributes.put("BaseConstructorExpressionOutsideCtorCall", SKIP);
         expectedProblemAttributes.put("RoleConstructorHiddenByLiftingConstructor", SKIP);
         expectedProblemAttributes.put("InstantiatingSupercededRole", SKIP);
         expectedProblemAttributes.put("AbstractPotentiallyRelevantRole", SKIP);
