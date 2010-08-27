@@ -1752,6 +1752,8 @@ void setSourceStart(int sourceStart);
 	
 	int IncompatibleOTJByteCodeVersion			 = LIMITATIONS + 	 29;
 
+	int CallinBindingToInterface				 = LIMITATIONS + 	 30;
+	
 // ==== EXPERIMENTAL: ====
 	int EXPERIMENTAL = OTJ_RELATED + 12*OTCHAP;
 	int MigrateNonRole 							 = EXPERIMENTAL +     1;

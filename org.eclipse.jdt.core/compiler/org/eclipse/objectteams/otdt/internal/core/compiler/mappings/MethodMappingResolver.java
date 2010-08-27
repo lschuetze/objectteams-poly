@@ -84,10 +84,16 @@ public class MethodMappingResolver
 			AbstractMethodMappingDeclaration methodMapping = methodMappings[idx];
 			if (methodMapping.isCallout() != doCallout)
 				continue;
-			if (this._role.getBinding().baseclass() == null && !this._role.hasBaseclassProblem()) {
-				this._roleScope.problemReporter().methodMappingNotInBoundRole(methodMapping, this._role.getAst());
-				methodMapping.tagAsHavingErrors();
-				this.resolveBaseMethods = false;
+			if (!this._role.hasBaseclassProblem()) {
+				if (this._role.getBinding().baseclass() == null) {
+					this._roleScope.problemReporter().methodMappingNotInBoundRole(methodMapping, this._role.getAst());
+					methodMapping.tagAsHavingErrors();
+					this.resolveBaseMethods = false;
+				} else if (methodMapping.isCallin() && this._role.getBinding().baseclass().isInterface()) {
+					this._roleScope.problemReporter().callinBindingToInterface(methodMapping, this._role.getBinding().baseclass());
+					methodMapping.tagAsHavingErrors();
+					this.resolveBaseMethods = false;					
+				}
 			}
 
 			methodMapping.resolveAnnotations();

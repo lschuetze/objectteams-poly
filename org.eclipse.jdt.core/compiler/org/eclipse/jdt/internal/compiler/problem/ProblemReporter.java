@@ -11567,6 +11567,10 @@ public void incompatibleOTJByteCodeVersion(char[] className, String versionStrin
 			argument,
 			0, 0);
 }
+public void callinBindingToInterface(AbstractMethodMappingDeclaration callinMapping, ReferenceBinding baseIfc) {
+	String[] args = { String.valueOf(baseIfc.readableName()) };
+	this.handle(IProblem.CallinBindingToInterface, args, args, callinMapping.sourceStart, callinMapping.sourceEnd);	
+}
 // EXPERIMENTAL FEATURE:
 public void migrateWithinNonFinalTeam(TypeReference superTypeRef, ReferenceBinding teamType) {
 	String[] args = { String.valueOf(teamType.readableName()) };
