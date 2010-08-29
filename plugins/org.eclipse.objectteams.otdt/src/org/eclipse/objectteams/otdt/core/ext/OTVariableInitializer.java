@@ -110,8 +110,12 @@ public class OTVariableInitializer extends ClasspathVariableInitializer
 	
 	private static Bundle getBundle(String symbolicName) {
 		for (Bundle bundle : OTDTPlugin.getDefault().getBundle().getBundleContext().getBundles())
-			if (bundle.getSymbolicName().equals(symbolicName))
-				return bundle;
+			if (bundle.getSymbolicName().equals(symbolicName)) {
+				if (bundle.getState() == Bundle.UNINSTALLED)
+					OTDTPlugin.getDefault().getLog().log(new Status(IStatus.INFO, OTDTPlugin.PLUGIN_ID, "Skipping uninstalled bundle "+bundle.getSymbolicName()+"."+bundle.getVersion()));
+				else
+					return bundle;
+			}
 		return null;
 	}
 }
