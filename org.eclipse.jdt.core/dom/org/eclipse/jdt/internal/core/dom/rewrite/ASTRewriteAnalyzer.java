@@ -4028,8 +4028,9 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 									? CallinMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY
 									: CalloutMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY;
 		RewriteEvent event= getEvent(parent, bodyProperty);
+		int changeKind = RewriteEvent.CHILDREN_CHANGED; // by default (event==null) make sure we traverse children
 		if (event != null) {
-			int changeKind = event.getChangeKind();
+			changeKind = event.getChangeKind();
 			if (changeKind == RewriteEvent.CHILDREN_CHANGED) {
 				List newNodes = (List) getNewValue(parent, bodyProperty);
 				List origNodes = (List) getOriginalValue(parent, bodyProperty);
@@ -4038,29 +4039,34 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				else if (!origNodes.isEmpty() && newNodes.isEmpty())
 					changeKind = RewriteEvent.REMOVED;
 			}
-			switch (changeKind) {
-				case RewriteEvent.INSERTED: {
-					int endPos= parent.getStartPosition() + parent.getLength();
-					TextEditGroup editGroup= getEditGroup(event);
-					doTextRemove(startPos, endPos - startPos, editGroup);
-					int startIndent= getIndent(parent.getStartPosition()) + 1;
-					String separatorString= getLineDelimiter() + createIndentString(startIndent);
-					endPos = rewriteNodeList(parent, bodyProperty, startPos, " with {"+separatorString, ","+separatorString);
-					doTextInsert(endPos, getLineDelimiter()+createIndentString(startIndent-1)+"}", editGroup);
-					return;
-				}
-				case RewriteEvent.CHILDREN_CHANGED: 
+		}
+		switch (changeKind) {
+			case RewriteEvent.INSERTED: {
+				int endPos= parent.getStartPosition() + parent.getLength();
+				TextEditGroup editGroup= getEditGroup(event);
+				doTextRemove(startPos, endPos - startPos, editGroup);
+				int startIndent= getIndent(parent.getStartPosition()) + 1;
+				String separatorString= getLineDelimiter() + createIndentString(startIndent);
+				endPos = rewriteNodeList(parent, bodyProperty, startPos, " with {"+separatorString, ","+separatorString);
+				doTextInsert(endPos, getLineDelimiter()+createIndentString(startIndent-1)+"}", editGroup);
+				return;
+			}
+			case RewriteEvent.CHILDREN_CHANGED:
+				List newNodes = (List) getNewValue(parent, bodyProperty);
+				if (newNodes.isEmpty()) {
+					doTextInsert(startPos, ";", getEditGroup(event)); //$NON-NLS-1$
+				} else {
 					int startIndent= getIndent(parent.getStartPosition()) + 1;
 					String separatorString= getLineDelimiter() + createIndentString(startIndent);
 					rewriteNodeList(parent, bodyProperty, startPos, "", ","+separatorString);
-					return;
-				case RewriteEvent.REMOVED: {
-					TextEditGroup editGroup= getEditGroup(event);
-					int endPos= parent.getStartPosition() + parent.getLength();
-					doTextRemove(startPos, endPos - startPos, editGroup);
-					doTextInsert(startPos, ";", editGroup); //$NON-NLS-1$
-					return;
 				}
+				return;
+			case RewriteEvent.REMOVED: {
+				TextEditGroup editGroup= getEditGroup(event);
+				int endPos= parent.getStartPosition() + parent.getLength();
+				doTextRemove(startPos, endPos - startPos, editGroup);
+				doTextInsert(startPos, ";", editGroup); //$NON-NLS-1$
+				return;
 			}
 		}
 		voidVisit(parent, bodyProperty);
