@@ -3951,109 +3951,10 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		// right methodSpec
 		pos = rewriteNode(node, CalloutMappingDeclaration.BASE_MAPPING_ELEMENT_PROPERTY, pos, ASTRewriteFormatter.SPACE);
 
-		// rewrite event
-		RewriteEvent mappingEvent= getEvent(node, CalloutMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY);
-
-		// no changes in parameter mappings
-		if (mappingEvent == null || mappingEvent.getChangeKind() == RewriteEvent.UNCHANGED)
-		{
-			pos = doVisit(node, CalloutMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY, pos);
-			if (node.getParameterMappings().isEmpty()) {
-				boolean haveMappings= false;
-				try {
-					if (getScanner().readNext(pos, true) == TerminalTokens.TokenNameSEMICOLON)
-						haveMappings= true; // EMPTY_MAPPINGS ;-)
-				} catch (CoreException e) { /* fall through with haveMappings unset: */ }
-				if (!haveMappings) // ';' not found, insert now:
-					doTextInsert(pos, ";", getEditGroup(node, CalloutMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY)); //$NON-NLS-1$
-			}
-		}
-		// changes in parameter mappings
-		else
-		{
-			List newNodes = (List) getNewValue(node, CalloutMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY);
-			List origNodes = (List) getOriginalValue(node, CalloutMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY);
-
-			if (!newNodes.isEmpty() && origNodes.isEmpty())
-			{
-				// TODO(jsv) format only the with-block with new parameter mapping(s) and not the whole mapping
-				doTextRemove(
-						posAfterJavadoc,
-						(pos-posAfterJavadoc)+1,
-						getEditGroup(node.getParent(),RoleTypeDeclaration.BODY_DECLARATIONS_PROPERTY)
-						);
-
-				doTextInsert(
-						posAfterJavadoc,
-						node,
-						getIndent(node.getParent().getStartPosition()) + 1,
-						true,
-						getEditGroup(node.getParent(),RoleTypeDeclaration.BODY_DECLARATIONS_PROPERTY)
-						);
-
-				return false;
-			}
-
-			int startIndent= getIndent(node.getStartPosition()) + 1;
-			StringBuffer separatorString= new StringBuffer();
-			separatorString.append(',');
-			separatorString.append(getLineDelimiter());
-			separatorString.append(createIndentString(startIndent));
-			pos = rewriteNodeList(
-					node,
-					CalloutMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY,
-					pos,
-					"",//$NON-NLS-1$
-					separatorString.toString()
-					);
-
-			// mappings -> no mappings
-			if (newNodes.isEmpty() && !origNodes.isEmpty())
-			{
-				try {
-					getScanner().readToToken(TerminalTokens.TokenNameRBRACE, pos);
-				} catch (CoreException e) {
-				    handleException(e);
-				}
-
-				int end = getScanner().getCurrentEndOffset();
-
-				doTextReplace(
-						pos,
-						end - pos,
-						";", //$NON-NLS-1$
-						getEditGroup(node, CalloutMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY)
-						);
-			}
-		}
+		// optional parameter mappings:
+		rewriteParameterMappings(node, pos);
 
 //		System.out.println("visit CalloutMappingDeclaration changed");
-		return false;
-	}
-
-
-	public boolean visit(ParameterMapping node)
-	{
-		if (!hasChildrenChanges(node)) {
-//			System.out.println("visit ParameterMapping unchanged");
-			return doVisitUnchangedChildren(node);
-		}
-		@SuppressWarnings("unused")
-		int pos;
-
-
-		if (node.getDirection().equals("->")) //$NON-NLS-1$
-		{
-			pos = rewriteRequiredNode(node, ParameterMapping.EXPRESSION_PROPERTY);
-			pos = rewriteRequiredNode(node, ParameterMapping.IDENTIFIER_PROPERTY);
-		}
-		else
-		{
-			pos = rewriteRequiredNode(node, ParameterMapping.IDENTIFIER_PROPERTY);
-			pos = rewriteRequiredNode(node, ParameterMapping.EXPRESSION_PROPERTY);
-		}
-
-//		System.out.println("visit ParameterMapping changed");
 		return false;
 	}
 
@@ -4116,83 +4017,77 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		// optional guard predicate:
 		pos = rewriteNode(node, CallinMappingDeclaration.GUARD_PROPERTY, pos, ASTRewriteFormatter.SPACE);
 
-		// rewrite event
-		RewriteEvent mappingEvent= getEvent(node, CallinMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY);
+		// optional parameter mappings:
+		rewriteParameterMappings(node, pos);
 
-		// no changes in parameter mappings
-		if (mappingEvent == null || mappingEvent.getChangeKind() == RewriteEvent.UNCHANGED)
-		{
-			pos = doVisit(node, CallinMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY, pos);
-			if (node.getParameterMappings().isEmpty()) {
-				boolean haveMappings= false;
-				try {
-					if (getScanner().readNext(pos, true) == TerminalTokens.TokenNameSEMICOLON)
-						haveMappings= true; // EMPTY_MAPPINGS ;-)
-				} catch (CoreException e) { /* fall through with haveMappings unset: */ }
-				if (!haveMappings) // ';' not found, insert now:
-					doTextInsert(pos, ";", getEditGroup(node, CallinMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY)); //$NON-NLS-1$
+		return false;
+	}
+
+	private void rewriteParameterMappings(AbstractMethodMappingDeclaration parent, int startPos) {
+		ChildListPropertyDescriptor bodyProperty = parent.getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION
+									? CallinMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY
+									: CalloutMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY;
+		RewriteEvent event= getEvent(parent, bodyProperty);
+		if (event != null) {
+			int changeKind = event.getChangeKind();
+			if (changeKind == RewriteEvent.CHILDREN_CHANGED) {
+				List newNodes = (List) getNewValue(parent, bodyProperty);
+				List origNodes = (List) getOriginalValue(parent, bodyProperty);
+				if (origNodes.isEmpty() && !newNodes.isEmpty())
+					changeKind = RewriteEvent.INSERTED;
+				else if (!origNodes.isEmpty() && newNodes.isEmpty())
+					changeKind = RewriteEvent.REMOVED;
+			}
+			switch (changeKind) {
+				case RewriteEvent.INSERTED: {
+					int endPos= parent.getStartPosition() + parent.getLength();
+					TextEditGroup editGroup= getEditGroup(event);
+					doTextRemove(startPos, endPos - startPos, editGroup);
+					int startIndent= getIndent(parent.getStartPosition()) + 1;
+					String separatorString= getLineDelimiter() + createIndentString(startIndent);
+					endPos = rewriteNodeList(parent, bodyProperty, startPos, " with {"+separatorString, ","+separatorString);
+					doTextInsert(endPos, getLineDelimiter()+createIndentString(startIndent-1)+"}", editGroup);
+					return;
+				}
+				case RewriteEvent.CHILDREN_CHANGED: 
+					int startIndent= getIndent(parent.getStartPosition()) + 1;
+					String separatorString= getLineDelimiter() + createIndentString(startIndent);
+					rewriteNodeList(parent, bodyProperty, startPos, "", ","+separatorString);
+					return;
+				case RewriteEvent.REMOVED: {
+					TextEditGroup editGroup= getEditGroup(event);
+					int endPos= parent.getStartPosition() + parent.getLength();
+					doTextRemove(startPos, endPos - startPos, editGroup);
+					doTextInsert(startPos, ";", editGroup); //$NON-NLS-1$
+					return;
+				}
 			}
 		}
-		// changes in parameter mappings
+		voidVisit(parent, bodyProperty);
+	}
+
+	public boolean visit(ParameterMapping node)
+	{
+		if (!hasChildrenChanges(node)) {
+//			System.out.println("visit ParameterMapping unchanged");
+			return doVisitUnchangedChildren(node);
+		}
+		@SuppressWarnings("unused")
+		int pos;
+
+
+		if (node.getDirection().equals("->")) //$NON-NLS-1$
+		{
+			pos = rewriteRequiredNode(node, ParameterMapping.EXPRESSION_PROPERTY);
+			pos = rewriteRequiredNode(node, ParameterMapping.IDENTIFIER_PROPERTY);
+		}
 		else
 		{
-			List newNodes = (List) getNewValue(node, CallinMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY);
-			List origNodes = (List) getOriginalValue(node, CallinMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY);
-
-			if (!newNodes.isEmpty() && origNodes.isEmpty())
-			{
-				// TODO(jsv) format only the with-block with new parameter mapping(s) and not the whole mapping
-				doTextRemove(
-						posAfterJavadoc,
-						(pos-posAfterJavadoc)+1,
-						getEditGroup(node.getParent(),RoleTypeDeclaration.BODY_DECLARATIONS_PROPERTY)
-						);
-
-				doTextInsert(
-						posAfterJavadoc,
-						node,
-						getIndent(node.getParent().getStartPosition()) + 1,
-						true,
-						getEditGroup(node.getParent(),RoleTypeDeclaration.BODY_DECLARATIONS_PROPERTY)
-						);
-
-				return false;
-			}
-
-			int startIndent= getIndent(node.getStartPosition()) + 1;
-			StringBuffer separatorString= new StringBuffer();
-			separatorString.append(',');
-			separatorString.append(getLineDelimiter());
-			separatorString.append(createIndentString(startIndent));
-			pos = rewriteNodeList(
-					node,
-					CallinMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY,
-					pos,
-					"",//$NON-NLS-1$
-					separatorString.toString()
-					);
-
-			// mappings -> no mappings
-			if (newNodes.isEmpty() && !origNodes.isEmpty())
-			{
-				int rBraceToken= TerminalTokens.TokenNameRBRACE;
-				try {
-					getScanner().readToToken(rBraceToken, pos);
-				} catch (CoreException e) {
-				    handleException(e);
-				}
-
-				int end = getScanner().getCurrentEndOffset();
-
-				doTextReplace(
-						pos,
-						end - pos,
-						";", //$NON-NLS-1$
-						getEditGroup(node, CallinMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY)
-						);
-			}
+			pos = rewriteRequiredNode(node, ParameterMapping.IDENTIFIER_PROPERTY);
+			pos = rewriteRequiredNode(node, ParameterMapping.EXPRESSION_PROPERTY);
 		}
 
+//		System.out.println("visit ParameterMapping changed");
 		return false;
 	}
 
