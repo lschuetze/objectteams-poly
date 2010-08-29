@@ -88,24 +88,20 @@ public team class NotSupportedRefactoringAdaptor {
 		}
 	}
 
-	 protected class ChangeSignatureProcessor playedBy ChangeSignatureProcessor {
+	/* gateway to a private field */
+	protected class ChangeSignatureProcessor playedBy ChangeSignatureProcessor {
 		@SuppressWarnings("decapsulation")
 		protected IMethod getFMethod() -> get IMethod fMethod;
-
-		protected void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) when(!status.hasFatalError()) {
-			status.merge(RefactoringUtil.checkForExistingRoles("Change Signature", getFMethod().getJavaProject(), pm));
-		}
-
-		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) <- after RefactoringStatus checkFinalConditions(IProgressMonitor pm,
-				CheckConditionsContext context) with {
-			pm <- pm,
-			status <- result
-		}
 	}
 	
 	protected class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor playedBy IntroduceParameterObjectProcessor {
 		protected void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) when(!status.hasFatalError()) {
 			status.merge(RefactoringUtil.checkForExistingRoles("Introduce Parameter Object", getFMethod().getJavaProject(), pm));
+		}
+		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) <- after RefactoringStatus checkFinalConditions(IProgressMonitor pm,
+				CheckConditionsContext context) with {
+			pm <- pm,
+			status <- result
 		}
 	}
 
