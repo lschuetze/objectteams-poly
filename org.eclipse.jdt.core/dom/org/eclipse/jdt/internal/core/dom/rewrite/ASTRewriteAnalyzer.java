@@ -4054,7 +4054,16 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			case RewriteEvent.CHILDREN_CHANGED:
 				List newNodes = (List) getNewValue(parent, bodyProperty);
 				if (newNodes.isEmpty()) {
-					doTextInsert(startPos, ";", getEditGroup(event)); //$NON-NLS-1$
+					int token = TokenScanner.END_OF_FILE;
+					try {
+						token = getScanner().readNext(startPos, true);
+					} catch(CoreException e) {
+						// ignore
+					}
+					if (token == TerminalTokens.TokenNameSEMICOLON)
+						startPos = getScanner().getCurrentEndOffset();
+					else
+						doTextInsert(startPos, ";", getEditGroup(event)); //$NON-NLS-1$
 				} else {
 					int startIndent= getIndent(parent.getStartPosition()) + 1;
 					String separatorString= getLineDelimiter() + createIndentString(startIndent);
