@@ -1912,6 +1912,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("DangerousCallinBinding", SKIP);
         expectedProblemAttributes.put("UnexpectedAnnotationStructure", SKIP);
         expectedProblemAttributes.put("IncompatibleOTJByteCodeVersion", SKIP);
+        expectedProblemAttributes.put("CallinBindingToInterface", SKIP);
         expectedProblemAttributes.put("EXPERIMENTAL", SKIP);
         expectedProblemAttributes.put("MigrateNonRole", SKIP);
         expectedProblemAttributes.put("MigrateWithinNonFinalTeam", SKIP);
