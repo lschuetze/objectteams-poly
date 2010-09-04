@@ -74,7 +74,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationS
  */
 public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers, IOTConstants {
 
-	public static final char[] PRIVATE = "$private$".toCharArray(); //$NON-NLS-1$
 	static final char[] VALUE_ARG     = "value".toCharArray(); //$NON-NLS-1$
 	public static final char[] ROLE_ARG_NAME = "_OT$rolearg".toCharArray(); //$NON-NLS-1$
 

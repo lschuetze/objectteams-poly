@@ -34,6 +34,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationS
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleFieldAccess;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
@@ -41,7 +42,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
@@ -826,7 +826,7 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 		// is it some other OT-generated method requiring to be marked as fake?
 		int secondDollar = CharOperation.indexOf('$', selector, 4, selector.length);
 		if (   secondDollar != -1
-			&& CharOperation.prefixEquals(AstConverter.PRIVATE, CharOperation.subarray(selector, secondDollar, -1)))
+			&& CharOperation.prefixEquals(SyntheticRoleBridgeMethodBinding.PRIVATE, CharOperation.subarray(selector, secondDollar, -1)))
 		{
 			MethodModel.getModel(result)._fakeKind = FakeKind.ROLE_FEATURE_BRIDGE;
 		}

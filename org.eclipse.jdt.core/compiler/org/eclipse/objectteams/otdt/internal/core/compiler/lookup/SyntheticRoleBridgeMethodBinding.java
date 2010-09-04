@@ -28,10 +28,11 @@ import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
+
+	public static final char[] PRIVATE = "$private$".toCharArray(); //$NON-NLS-1$
 
 	public SyntheticRoleBridgeMethodBinding(SourceTypeBinding declaringRole, ReferenceBinding originalRole, MethodBinding targetMethod, int bridgeKind) {
 		super(declaringRole, AccPublic|AccSynthetic, targetMethod.selector, targetMethod.parameters, targetMethod.returnType);
@@ -154,13 +155,13 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 	public static char[] getPrivateBridgeSelector(char[] selector, char[] roleName) {
 		return CharOperation.concat(
 				CharOperation.concat(IOTConstants.OT_DOLLAR_NAME, roleName),
-				CharOperation.concat(AstConverter.PRIVATE, selector));
+				CharOperation.concat(PRIVATE, selector));
 	}
 
 	public static boolean isPrivateBridgeSelector(char[] selector) {
 		if (!CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, selector))
 			return false;
-		return CharOperation.indexOf(AstConverter.PRIVATE, selector, true, IOTConstants.OT_DOLLAR_LEN) > -1;
+		return CharOperation.indexOf(PRIVATE, selector, true, IOTConstants.OT_DOLLAR_LEN) > -1;
 	}
 
 	public static MethodBinding findOuterAccessor(Scope scope, ReferenceBinding roleType, MethodBinding targetMethod) {
