@@ -624,11 +624,11 @@ public class CallinImplementor extends MethodMappingImplementor
 				}
 			}
 			callinBindingDeclaration.resultVar = gen.localVariable(
-											IOTConstants.RESULT, wrapperReturnType, null);
+											IOTConstants.OT_RESULT, wrapperReturnType, null);
 			callinBindingDeclaration.resultVar.type.setBaseclassDecapsulation(DecapsulationState.REPORTED);
 			statements.add(callinBindingDeclaration.resultVar);
 			Statement roleMessageSendStatement = gen.assignment(
-											gen.singleNameReference(IOTConstants.RESULT),
+											gen.singleNameReference(IOTConstants.OT_RESULT),
 											roleMessageSendExpression);
 			TryStatement tryFinally = gen.tryFinally(
 								new Statement[] {roleMessageSendStatement},
@@ -675,7 +675,7 @@ public class CallinImplementor extends MethodMappingImplementor
 									gen.typeReference(roleModel.getClassPartBinding()))));
 			} else {
 				statements.add(
-					stepOverGen.returnStatement(stepOverGen.singleNameReference(IOTConstants.RESULT)));
+					stepOverGen.returnStatement(stepOverGen.singleNameReference(IOTConstants.OT_RESULT)));
 			}
 		} else {
 			// try {
@@ -1076,7 +1076,7 @@ public class CallinImplementor extends MethodMappingImplementor
 
 		return gen.ifStatement(
 				new EqualExpression(
-					gen.singleNameReference(IOTConstants.RESULT),
+					gen.singleNameReference(IOTConstants.OT_RESULT),
 					gen.nullLiteral(),
 					OperatorIds.EQUAL_EQUAL),
 				gen.block(new Statement[] {
