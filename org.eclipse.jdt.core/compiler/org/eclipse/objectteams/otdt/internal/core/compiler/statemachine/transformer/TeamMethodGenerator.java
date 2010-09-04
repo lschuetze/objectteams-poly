@@ -150,6 +150,11 @@ public class TeamMethodGenerator {
     	this.headerOffset = teamClass.getHeaderOffset();
     	this.constantPoolOffsets = teamClass.getConstantPoolOffsets();
     	for (IBinaryMethod method : teamClass.getMethods()) {
+    		if (this.classBytes == null && method instanceof MethodInfo) {
+    			// repair if class already nulled its byte reference:
+    			this.classBytes = ((MethodInfo)method).reference;
+    			this.constantPoolOffsets = ((MethodInfo)method).constantPoolOffsets;
+    		}
 			for (int s = 0; s < this.methodDescriptors.length; s++) {
 				if (   String.valueOf(method.getSelector()).equals(this.methodDescriptors[s].selector)
 					&& String.valueOf(method.getMethodDescriptor()).equals(this.methodDescriptors[s].signature))

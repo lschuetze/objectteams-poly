@@ -14,12 +14,12 @@
 package org.eclipse.jdt.internal.compiler.classfmt;
 
 abstract public class ClassFileStruct {
-//{ObjectTeams: also used by ConstantPoolSimpleConverter
-	protected
+//{ObjectTeams: also used by ConstantPoolSimpleConverter and TeamMethodGenerator
+	public
 // SH}
 	byte[] reference;
-//{ObjectTeams: also used by ConstantPoolObjectReader
-	protected
+//{ObjectTeams: also used by ConstantPoolObjectReader and TeamMethodGenerator
+	public
 // SH}
 	int[] constantPoolOffsets;
 	int structOffset;

@@ -187,7 +187,9 @@ public void maybeRegister(
     	model.recordByteCode(this.reference, this.structOffset, this.constantPoolOffsets);
     	needByteCode= true;
     }
-    // hack re preserving byte code (see #initialize()): now may be the time to release it
+    // hack re preserving byte code (see #initialize()): now may be the time to release it:
+	// (Note(SH): TeamMethodGenerator depends on any team method containing valid bytecodes and offsets,
+    //            given the ClassFileReader.initialize() nulls "reference")
     if (!needByteCode)
     	reset();
 
