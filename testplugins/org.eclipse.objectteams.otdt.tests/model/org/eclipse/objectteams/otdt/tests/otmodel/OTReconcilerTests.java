@@ -87,7 +87,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 	}
 	
 	static {
-//		TESTS_NAMES = new String[] { "testAnchoredType01", "testAnchoredType02", "testAnchoredType03" };
+//		TESTS_NAMES = new String[] { "testRoFiNestedTeam" };
 	}
 // ===== Copied all our modifications from AbstractJavaModelTests ===== 
 	/*
@@ -1029,4 +1029,56 @@ public class OTReconcilerTests extends ReconcilerTests {
     		deleteProject("P");
     	}
     }
+    
+    // a role file holds a nested team which extends a non-team role file
+    public void testRoFiNestedTeam() throws CoreException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+			this.createFolder("/P/MyTeam");
+			String role1SourceString =	
+				"team package MyTeam;\n" +
+				"public class Role1 {\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam/Role1.java",
+	    			role1SourceString);
+			String role2SourceString =	
+				"team package MyTeam;\n" +
+				"public team class Role2 extends Role1 {\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam/Role2.java",
+	    			role2SourceString);
+			
+			String teamSourceString =
+				"public team class  MyTeam {\n" +
+				"	Role1 r;\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam.java",
+	    			teamSourceString);
+
+			char[] role2SourceChars = role2SourceString.toCharArray();
+			this.problemRequestor.initialize(role2SourceChars);
+			
+			getCompilationUnit("/P/MyTeam/Role2.java").getWorkingCopy(this.wcOwner, null);
+			
+			assertProblems(
+				"Unexpected problems",
+				"----------\n" +
+				"----------\n");
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
+
 }
