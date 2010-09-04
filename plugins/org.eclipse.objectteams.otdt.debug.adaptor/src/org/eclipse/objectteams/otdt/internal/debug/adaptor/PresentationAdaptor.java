@@ -48,7 +48,11 @@ import base org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 public team class PresentationAdaptor 
 {
 	enum MethodKind {
-		PLAIN, INITIAL, CHAIN, ORIG, TEAM_WRAPPER, BASE_CALL, LIFT, WHEN, BASE_WHEN, FIELD_ACCESS
+		PLAIN,
+		INITIAL, CHAIN, ORIG, TEAM_WRAPPER, BASE_CALL, // callin related
+		LIFT,
+		WHEN, BASE_WHEN, // pedicates 
+		DECAPS, FIELD_ACCESS, METHOD_BRIDGE, CREATOR, INIT_FIELDS // various generated accesses
 	}
 	
 	@SuppressWarnings("nls")
@@ -87,6 +91,11 @@ public team class PresentationAdaptor
 			case LIFT:
 			case INITIAL:
 			case CHAIN:
+			case DECAPS:
+			case FIELD_ACCESS:
+			case METHOD_BRIDGE:
+			case CREATOR:
+			case INIT_FIELDS:
 				return true;
 			}
 			return false;
@@ -97,7 +106,6 @@ public team class PresentationAdaptor
 			case BASE_CALL:
 			case WHEN:
 			case BASE_WHEN:
-			case FIELD_ACCESS:
 				return true;
 			}
 			return false;
@@ -125,8 +133,16 @@ public team class PresentationAdaptor
 					return "[when]";
 				case BASE_WHEN:
 					return "[base when]";
+				case DECAPS:
+					return "[decapsulation access]";
 				case FIELD_ACCESS:
 					return "[access to field "+segments[3]+"]";
+				case METHOD_BRIDGE:
+					return "[access to private role method "+segments[3]+"]";
+				case CREATOR:
+					return "[access to constructor of role "+segments[2]+"]";
+				case INIT_FIELDS:
+					return "[initialize role fields]";
 				}
 			}
 			return result;
@@ -149,6 +165,8 @@ public team class PresentationAdaptor
 						this.kind= MethodKind.WHEN;
 					else if (segments[1].equals("base_when"))
 						this.kind= MethodKind.BASE_WHEN;
+					else if (segments[1].equals("InitFields"))
+						this.kind= MethodKind.INIT_FIELDS;
 					break;
 				case 3:
 					if      (segments[2].equals("orig"))   // _OT$bm$orig
@@ -157,6 +175,8 @@ public team class PresentationAdaptor
 						this.kind= MethodKind.CHAIN;
 					else if (segments[1].equals("liftTo")) // _OT$liftTo$R
 						this.kind= MethodKind.LIFT;
+					else if (segments[1].equals("create")) // _OT$create$R
+						this.kind= MethodKind.CREATOR;
 					else if (segments[2].equals("base"))   // _OT$rm$base
 						this.kind= MethodKind.BASE_CALL;
 					break;
@@ -164,10 +184,14 @@ public team class PresentationAdaptor
 					if 		(segments[1].equals("_fieldget_")
 						   ||segments[1].equals("_fieldset_"))
 						this.kind = MethodKind.FIELD_ACCESS;
+					else if (segments[2].equals("private")) // _OT$R$private$m
+						this.kind = MethodKind.METHOD_BRIDGE;
 					else
 						// further analysis needed?
 						this.kind= MethodKind.TEAM_WRAPPER;    // _OT$R$rm$bm
 				}
+				if (segments.length > 1 && segments[1].equals("decaps")) // _OT$decaps$xy.. (even as prefix to other name patterns)
+					this.kind = MethodKind.DECAPS;					
 				return segments;
 			}
 			return null;
