@@ -21,6 +21,9 @@ import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccP
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccProtected;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPublic;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccSynchronized;
+import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccFinal;
+import static org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers.AccVisibilityMASK;
+
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFile;
@@ -125,8 +128,8 @@ public class TeamMethodGenerator {
     	new MethodDescriptor("activate",   							"(Ljava/lang/Thread;)V",Args.THREAD,	false,	AccPublic),
     	new MethodDescriptor("deactivate", 							"()V", 					Args.NONE,		false,	AccPublic),
     	new MethodDescriptor("deactivate", 							"(Ljava/lang/Thread;)V",Args.THREAD,	false,	AccPublic),
-    	new MethodDescriptor("isActive",   							"()Z", 					Args.NONE, 		true,	AccPublic),
-    	new MethodDescriptor("isActive",   							"(Ljava/lang/Thread;)Z",Args.THREAD,	true,	AccPublic),
+    	new MethodDescriptor("isActive",   							"()Z", 					Args.NONE, 		true,	AccPublic|AccFinal),
+    	new MethodDescriptor("isActive",   							"(Ljava/lang/Thread;)Z",Args.THREAD,	true,	AccPublic|AccFinal),
     	new MethodDescriptor("isExecutingCallin", 					"()Z", 					Args.NONE, 		true,	AccPublic),
     	new MethodDescriptor("deactivateForEndedThread",        	"(Ljava/lang/Thread;)V",Args.THREAD,	false,	AccPublic),
     	new MethodDescriptor("internalIsActiveSpecificallyFor", 	"(Ljava/lang/Thread;)Z",Args.THREAD,	true,	AccPublic),
@@ -178,7 +181,7 @@ public class TeamMethodGenerator {
 		}    	
     }
     /** 
-     * At the AST representing all relevant methods and fields from o.o.Team,
+     * Add the AST representing all relevant methods and fields from o.o.Team,
      * and prepare methods for byte-code copy.
      */
     public void addMethodsAndFields(TypeDeclaration teamDecl) {
@@ -195,7 +198,7 @@ public class TeamMethodGenerator {
     	// methods:
 		for (MethodDescriptor methodDescriptor : this.methodDescriptors) {
 			MethodDeclaration newMethod = null;
-			if (methodDescriptor.modifiers == AccPublic) {
+			if ((methodDescriptor.modifiers & AccVisibilityMASK) == AccPublic) {
 				// public methods are always copied
 				newMethod = new CopiedTeamMethod(teamDecl.compilationResult, methodDescriptor, gen);
 			} else {
@@ -205,7 +208,9 @@ public class TeamMethodGenerator {
 				} else {
 					newMethod = gen.method(teamDecl.compilationResult, 
 							methodDescriptor.modifiers, 
-							gen.baseTypeReference(TypeConstants.VOID), 
+							methodDescriptor.hasBooleanReturn
+								? gen.baseTypeReference(TypeConstants.BOOLEAN)
+								: gen.baseTypeReference(TypeConstants.VOID), 
 							methodDescriptor.selector.toCharArray(), 
 							null,
 							new Statement[0]); // regular empty method.
