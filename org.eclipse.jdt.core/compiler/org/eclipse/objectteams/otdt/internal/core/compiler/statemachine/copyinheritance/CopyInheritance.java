@@ -2006,6 +2006,10 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
         																	   	    (ReferenceBinding) template.returnType.leafComponentType(),
         																	   	    template.returnType.dimensions());
 
+        // liftTo methods have no role arguments
+        if (Lifting.isLiftToMethod(method.binding))
+        	return changed;
+
         // Method parameters
         int paramLen = binding.parameters.length;
         assert (paramLen == template.parameters.length);
@@ -2050,10 +2054,12 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
             if (RoleTypeBinding.isRoleWithExplicitAnchor(argument.type.resolvedType))
             	continue;
             TypeReference  newType  = TypeAnalyzer.weakenTypeReferenceFromBinding(
-                        scope, argument.type, binding.parameters[i]);
+                        scope, argument.type, argument.binding.type, binding.parameters[i]);
             if (newType != argument.type)
             {
                 changed = true;
+                
+                newType.setBaseclassDecapsulation(argument.type.getBaseclassDecapsulation());
 
                 // local variable:
                 newLocalStats.add(generateCastedLocal(argument, newType));

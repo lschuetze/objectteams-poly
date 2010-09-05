@@ -25,13 +25,13 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.ast.FieldReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
@@ -53,7 +53,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
@@ -448,17 +447,18 @@ public class TypeAnalyzer  {
     public static TypeReference weakenTypeReferenceFromBinding(
             MethodScope scope,
             TypeReference origRef,
+            TypeBinding origBinding,
             TypeBinding binding)
     {
         if (!(   (binding instanceof ReferenceBinding)
         	  || (binding instanceof ArrayBinding)))
             return origRef;
-        TypeBinding origBind = getType(origRef, scope).erasure();
         binding = binding.erasure();
+        origBinding = origBinding.erasure();
         if (binding instanceof RoleTypeBinding)
-        	if (origBind == ((RoleTypeBinding)binding).getRealType())
+        	if (origBinding == ((RoleTypeBinding)binding).getRealType())
         		return origRef;
-        if (origBind == binding)
+        if (origBinding == binding)
             return origRef;
         AstGenerator gen = new AstGenerator(origRef.sourceStart, origRef.sourceEnd);
         return gen.typeReference(binding);
@@ -484,24 +484,6 @@ public class TypeAnalyzer  {
                 return superMethods[i];
         }
         return null;
-    }
-
-    // helper for weakenTypeReferenceFromBinding
-    private static TypeBinding getType (TypeReference ref, MethodScope scope)
-    {
-    	TypeBinding result;
-        if (ref instanceof SingleTypeReference)
-            result = scope.getType(((SingleTypeReference)ref).token);
-        else if (ref instanceof QualifiedTypeReference) {
-            char[][] tokens = ((QualifiedTypeReference)ref).tokens;
-			result = scope.getType(tokens, tokens.length);
-        } else if (ref instanceof LiftingTypeReference)
-        	return ref.resolvedType; // this is the base type, no need for weakening ;-)
-        else
-        	throw new InternalCompilerError("Unexpected type reference "+ref.toString()); //$NON-NLS-1$
-        if (ref.dimensions() > 0)
-        	result = scope.createArrayType(result, ref.dimensions());
-        return result;
     }
 
     public static boolean isOrgObjectteamsTeam(ReferenceBinding type) {
