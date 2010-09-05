@@ -301,14 +301,14 @@ public /* team */ class Team implements ITeam {
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean isActive() {
+	public final boolean isActive() {
 		return isActive(Thread.currentThread());
 	}
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public boolean isActive(Thread thread) {
+	public final boolean isActive(Thread thread) {
 		if (thread.equals(ALL_THREADS)) {
 			return _OT$globalActive;
 		}
