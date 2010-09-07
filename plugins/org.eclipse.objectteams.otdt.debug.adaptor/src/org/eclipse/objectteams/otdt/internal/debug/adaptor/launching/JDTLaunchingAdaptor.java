@@ -21,6 +21,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
@@ -83,12 +84,13 @@ public team class JDTLaunchingAdaptor {
 			boolean hasBCEL = false;
 			boolean hasOTRE_min = false;
 	
+			IPath otreMinJarPath = OTREContainer.getOtreMinJarPath();
 			for (int i = 0; i < origEntries.length; i++)
 	        {
-	            IRuntimeClasspathEntry entry = origEntries[i];
-				if (OTREContainer.BCEL_PATH.equals(entry.getPath()))
+	            IPath entryPath = origEntries[i].getPath();
+				if (OTREContainer.BCEL_PATH.equals(entryPath))
 					hasBCEL = true;
-				else if (OTREContainer.OTRE_MIN_JAR_PATH.equals(entry.getPath().toString()))
+				else if (otreMinJarPath.equals(entryPath))
 					hasOTRE_min = true;
 	        }
 	
@@ -101,7 +103,7 @@ public team class JDTLaunchingAdaptor {
 			}
 
 			if (!hasOTRE_min) {
-				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTREContainer.OTRE_MIN_JAR_PATH);
+				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(otreMinJarPath);
 				entry.setClasspathProperty(IRuntimeClasspathEntry.BOOTSTRAP_CLASSES);
 				result.add(entry);
 			}
