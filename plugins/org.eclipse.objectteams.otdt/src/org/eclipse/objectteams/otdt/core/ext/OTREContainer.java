@@ -50,9 +50,8 @@ public class OTREContainer implements IClasspathContainer
 	public static final String OTRE_CONTAINER_NAME     = "OTRE"; //$NON-NLS-1$
     
     // these are served from the current plugin:
-    public static final IPath  OTRE_MIN_JAR_PATH;
-    public static final IPath  OTRE_AGENT_JAR_PATH;
-
+    private static IPath  OTRE_MIN_JAR_PATH;
+    private static IPath  OTRE_AGENT_JAR_PATH;
     
     public static IPath  BCEL_PATH; // will be initialized in {@link findBCEL(BundleContext)}
 
@@ -68,12 +67,6 @@ public class OTREContainer implements IClasspathContainer
     private static final String BCEL_BUNDLE_NAME = "org.apache.bcel"; //$NON-NLS-1$
     private static final String BCEL_VERSION_RANGE = "[5.2.0,5.3.0)"; //$NON-NLS-1$
 
-
-    static {
-        OTRE_MIN_JAR_PATH   = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_MIN_JAR_FILENAME); //$NON-NLS-1$
-        OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$    	
-    }
-    
     private IClasspathEntry[] _cpEntries;
 
     public IClasspathEntry[] getClasspathEntries()
@@ -103,6 +96,18 @@ public class OTREContainer implements IClasspathContainer
         return OTRE_CONTAINER_PATH;
     }
 
+    public static IPath getOtreMinJarPath () {
+    	if (OTRE_MIN_JAR_PATH == null)
+            OTRE_MIN_JAR_PATH   = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_MIN_JAR_FILENAME); //$NON-NLS-1$
+    	return OTRE_MIN_JAR_PATH;
+    }
+    
+    public static IPath getOtreAgentJarPath() {
+    	if (OTRE_AGENT_JAR_PATH == null)
+            OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$
+    	return OTRE_AGENT_JAR_PATH;
+    }
+    
 	/**
 	 * Adds the ObjectTeams classes to the given JavaProject's classpath,
 	 * and ensures the Java compliance is >= 1.5
