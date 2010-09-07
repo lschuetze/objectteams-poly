@@ -50,11 +50,6 @@ public class OTVMRunnerAdaptor
 	private static final String OT_DEBUG_CALLIN_STEPPING_VMARG = "-Dot.debug.callin.stepping";
 	private static final String OT_TEAMCONFIG_VMARG = "-Dot.teamconfig";
 	private static List<String> JPLIS_VMARGS;
-	static {
-		JPLIS_VMARGS = new ArrayList<String>();
-		JPLIS_VMARGS.add("-Dot.otdt");
-		JPLIS_VMARGS.add("-javaagent:" + "\""+OTREContainer.OTRE_AGENT_JAR_PATH.toOSString()+'"'); // support blanks in path
-	}
 
 	private ILaunchConfiguration _launchConfig;
 	private String _mode;
@@ -139,7 +134,7 @@ public class OTVMRunnerAdaptor
 		String sep = " ";
 	    StringBuffer result = new StringBuffer(vmArguments);
 	    
-		for (String arg : JPLIS_VMARGS)
+		for (String arg : getJplisVmargs())
 			result.append(sep).append(arg);
 	    
 	    String callinSteppingVMArg = getCallinSteppingVMArg();
@@ -155,6 +150,15 @@ public class OTVMRunnerAdaptor
 	    return result.toString();
 	}
 
+	private List<String> getJplisVmargs() {
+		if (JPLIS_VMARGS == null) {
+			JPLIS_VMARGS = new ArrayList<String>();
+			JPLIS_VMARGS.add("-Dot.otdt");
+			JPLIS_VMARGS.add("-javaagent:" + "\""+OTREContainer.getOtreAgentJarPath().toOSString()+'"'); // support blanks in path
+		}
+		return JPLIS_VMARGS;
+	}
+
 	private String getCallinSteppingVMArg() {
 		String value = OTDebugPlugin.getDefault().getCallinSteppingConfig();
 		if (value == null) return null;
@@ -163,7 +167,7 @@ public class OTVMRunnerAdaptor
 
 	protected List<String> getOTVMArgs()
 	{
-        return new ArrayList<String>(JPLIS_VMARGS);
+        return new ArrayList<String>(getJplisVmargs());
 	}
 	
     /**
