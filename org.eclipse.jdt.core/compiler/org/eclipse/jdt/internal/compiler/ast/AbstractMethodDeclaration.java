@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.problem.*;
 import org.eclipse.jdt.internal.compiler.parser.*;
 import org.eclipse.jdt.internal.compiler.util.Util;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorListAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTransformer;
@@ -484,15 +485,19 @@ public abstract class AbstractMethodDeclaration
 		        this,
 		        classFile,
 		        methodAttributeOffset);
+		boolean shouldRecordTeamMethod = false;
 		if (this.isMappingWrapper._callin()) {
 			AbstractMethodMappingDeclaration mapping = this.model._declaringMapping;
-			if (mapping != null && mapping.isCallin()) {
-				if (mapping.roleMethodSpec.isPrivate()) {
-					MethodModel methodModel = MethodModel.getModel(this);
-					methodModel.recordByteCode(classFile, methodAttributeOffset);
-				}
-			}
+			if (   mapping != null 
+				&& mapping.isCallin()
+				&& mapping.roleMethodSpec.isPrivate())
+				shouldRecordTeamMethod = true;
+		} else if (this.binding.declaringClass.id == IOTConstants.T_OrgObjectTeamsTeam) {
+			if (this.scope.environment().getTeamMethodGenerator().registerSourceMethodBytes(this.binding))
+				shouldRecordTeamMethod = true;
 		}
+		if (shouldRecordTeamMethod)
+			MethodModel.getModel(this).recordByteCode(classFile, methodAttributeOffset);
 	}
 // SH}	
 //{ObjectTeams: new hook

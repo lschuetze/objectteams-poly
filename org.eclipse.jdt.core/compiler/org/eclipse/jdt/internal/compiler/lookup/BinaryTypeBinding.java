@@ -834,9 +834,10 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 	// register byte code, evaluate attributes:
   } finally {
 	if (result != null && (method instanceof MethodInfo)) {
-		((MethodInfo)method).maybeRegister(this, result, this.environment);
 		if (TypeAnalyzer.isOrgObjectteamsTeam(this))
 			this.environment.getTeamMethodGenerator().registerTeamMethod(method, result);
+		// Note, that maybeRegister() may reset the MethodInfo (nulling MethodInfo.reference):
+		((MethodInfo)method).maybeRegister(this, result, this.environment);
 	}
   }
 // SH}

@@ -17,13 +17,12 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer;
 
 
+import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccFinal;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPrivate;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccProtected;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPublic;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccSynchronized;
-import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccFinal;
 import static org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers.AccVisibilityMASK;
-
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFile;
@@ -54,6 +53,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTran
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObject;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObjectMapper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObjectReader;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
@@ -141,16 +142,22 @@ public class TeamMethodGenerator {
 
 	// ==== Currently, this is where we globally store the byte code of org.objectteams.Team: ====
 	public byte[] classBytes;
-	public int headerOffset;
 	public int[] constantPoolOffsets;
+	// --- variant if o.o.Team is a SourceTypeBinding:
+	public SourceTypeBinding ooTeamBinding;
 	// ==== ====
 	
+    /** When binary methods for o.o.Team are created record the relevant method bindings. */
+    public void registerTeamMethod(IBinaryMethod method, MethodBinding methodBinding) {
+    	String selector = String.valueOf(method.getSelector());
+    	String descriptor = String.valueOf(method.getMethodDescriptor());
+		registerTeamMethod(methodBinding.declaringClass, methodBinding, selector, descriptor, -1/*structOffset not yet known*/);    	
+    }
 	/** When o.o.Team is read from .class file, record the byte code here. */
     public synchronized void maybeRegisterTeamClassBytes(ClassFileReader teamClass, ReferenceBinding teamClassBinding) {
     	if (this.classBytes != null)
     		return;
     	this.classBytes = teamClass.getBytes();
-    	this.headerOffset = teamClass.getHeaderOffset();
     	this.constantPoolOffsets = teamClass.getConstantPoolOffsets();
     	for (IBinaryMethod method : teamClass.getMethods()) {
     		if (this.classBytes == null && method instanceof MethodInfo) {
@@ -158,28 +165,64 @@ public class TeamMethodGenerator {
     			this.classBytes = ((MethodInfo)method).reference;
     			this.constantPoolOffsets = ((MethodInfo)method).constantPoolOffsets;
     		}
-			for (int s = 0; s < this.methodDescriptors.length; s++) {
-				if (   String.valueOf(method.getSelector()).equals(this.methodDescriptors[s].selector)
-					&& String.valueOf(method.getMethodDescriptor()).equals(this.methodDescriptors[s].signature))
-				{
-					this.methodDescriptors[s].methodCodeOffset = ((MethodInfo)method).getStructOffset();
-					this.methodDescriptors[s].declaringClass = teamClassBinding;
-					break;
-				}
-			}
+    		String selector = String.valueOf(method.getSelector());
+    		String descriptor = String.valueOf(method.getMethodDescriptor());
+    		int structOffset = ((MethodInfo)method).getStructOffset();
+    		// relevant new info is structOffset, everything has already  been registered from registerTeamMethod(IBinaryMethod,MethodBinding)
+    		registerTeamMethod(teamClassBinding, null, selector, descriptor, structOffset);
     	}
     }
-    /** When binary methods for o.o.Team are created record the relevant method bindings. */
-    public void registerTeamMethod(IBinaryMethod method, MethodBinding methodBinding) {
+	private boolean registerTeamMethod(ReferenceBinding declaringClass, MethodBinding methodBinding, String selector, String descriptor, int structOffset) {
 		for (int s = 0; s < this.methodDescriptors.length; s++) {
-			if (   String.valueOf(method.getSelector()).equals(this.methodDescriptors[s].selector)
-				&& String.valueOf(method.getMethodDescriptor()).equals(this.methodDescriptors[s].signature))
+			if (   selector.equals(this.methodDescriptors[s].selector)
+				&& descriptor.equals(this.methodDescriptors[s].signature))
 			{
-				this.methodDescriptors[s].binding = methodBinding;
-				break;
+				if (methodBinding != null)
+					this.methodDescriptors[s].binding = methodBinding;
+				this.methodDescriptors[s].declaringClass = declaringClass;
+				this.methodDescriptors[s].methodCodeOffset = structOffset;
+				return true;
 			}
-		}    	
+		}
+		return false;
+	}
+	// --- alternative initialization when compiling o.o.Team from source: ---
+    public synchronized void registerOOTeamClass(SourceTypeBinding ooTeamBinding) {
+    	if (this.classBytes != null)
+    		return;
+    	this.ooTeamBinding = ooTeamBinding;
     }
+	public boolean requestBytes() {
+		if (this.classBytes != null)
+			return true;
+		if (this.ooTeamBinding != null) {
+			if (isOOTConverted())
+				return false;
+			boolean result = Dependencies.ensureBindingState(this.ooTeamBinding, ITranslationStates.STATE_BYTE_CODE_GENERATED);
+			// the above causes callbacks to registerSourceMethodBytes(), info will be stored in corresponding MethodModels
+			// finish collecting info:
+			MethodModel model = this.methodDescriptors[0].binding.model;
+			this.classBytes = model.getBytes();
+			this.constantPoolOffsets = model.getConstantPoolOffsets();
+			return result;
+		}
+		return false; // shouldn't
+	}
+	boolean isOOTConverted() {
+		if (this.ooTeamBinding == null)
+			return false;
+		ClassScope scope = this.ooTeamBinding.scope;
+		if (scope == null)
+			return false;
+		TypeDeclaration typeDecl = scope.referenceContext;
+		return typeDecl.isConverted;
+	}
+	public boolean registerSourceMethodBytes(MethodBinding method) {
+		String selector = String.valueOf(method.selector);
+		String signature = String.valueOf(method.signature());
+		return registerTeamMethod(method.declaringClass, method, selector, signature, -1/*no structOffset before class is complete*/);
+	}
+	// ==============
     /** 
      * Add the AST representing all relevant methods and fields from o.o.Team,
      * and prepare methods for byte-code copy.
@@ -348,19 +391,34 @@ public class TeamMethodGenerator {
     	}
     	@Override
     	public void generateCode(ClassScope classScope, ClassFile classFile) {
+    		if (isOOTConverted())
+    			return; // don't actually try to generate, o.o.Team has no byte codes in this scenario
     		this.binding.copyInheritanceSrc = this.descriptor.binding;
     		ConstantPoolObjectMapper mapper = new TeamConstantPoolMapper(this.descriptor.binding, this.binding);
-    		ConstantPoolObjectReader reader = new ConstantPoolObjectReader( TeamMethodGenerator.this.classBytes, 
-    																		TeamMethodGenerator.this.constantPoolOffsets, 
+    		byte[] bytes;
+    		int[] offsets;
+    		int structOffset;
+    		if (this.descriptor.methodCodeOffset == -1) {
+    			MethodModel srcModel = this.descriptor.binding.model;
+    			bytes        = srcModel.getBytes();
+    			offsets      = srcModel.getConstantPoolOffsets();
+    			structOffset = srcModel.getStructOffset();
+    		} else {
+    			bytes        = TeamMethodGenerator.this.classBytes;
+    			offsets      = TeamMethodGenerator.this.constantPoolOffsets;
+    			structOffset = this.descriptor.methodCodeOffset;
+    		}
+			ConstantPoolObjectReader reader = new ConstantPoolObjectReader( bytes, 
+    																		offsets, 
     																		this.descriptor.declaringClass.getTeamModel(), 
     																		this.scope.environment());
-			new BytecodeTransformer().doCopyMethodCode( null /*srcRoleModel*/, this.binding, 								// source
-    													(SourceTypeBinding)this.binding.declaringClass, this, 				// destination
-    													TeamMethodGenerator.this.classBytes, 				 				// source bytes
-    													TeamMethodGenerator.this.constantPoolOffsets,
-    													this.descriptor.methodCodeOffset,
-    													reader, mapper,														// mapping strategies 
-    													classFile);															// final destination
+			new BytecodeTransformer().doCopyMethodCode( null /*srcRoleModel*/, this.binding, 					// source
+    													(SourceTypeBinding)this.binding.declaringClass, this, 	// destination
+    													bytes, 				 									// source bytes
+    													offsets,
+    													structOffset,
+    													reader, mapper,											// mapping strategies 
+    													classFile);												// final destination
     	}
     }
 

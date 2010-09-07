@@ -659,8 +659,10 @@ public class ClassScope extends Scope {
 				}
 			}
 		}
-		if (TypeAnalyzer.isOrgObjectteamsTeam(sourceType)) // handle the case of compiling org.objectteams.Team up front
+		if (TypeAnalyzer.isOrgObjectteamsTeam(sourceType)) {// handle the case of compiling org.objectteams.Team up front
 			this.referenceContext.adjustOrgObjectteamsTeam();
+			this.environment().getTeamMethodGenerator().registerOOTeamClass(sourceType);
+		}
 // SH}
 		checkAndSetModifiers();
 		buildTypeVariables();

@@ -113,8 +113,10 @@ public class BytecodeTransformer
         		&& !dstType.superclass.isTeam()) 
         	{
         		TeamMethodGenerator tmg = scope.environment().getTeamMethodGenerator();
-        		this._reader = new ConstantPoolObjectReader(tmg.classBytes, tmg.constantPoolOffsets, orgObjectteamsTeam.getTeamModel(), scope.environment());
-        		copyAllNonWideConstants(tmg.constantPoolOffsets.length, dstType.superclass, dstType);
+        		if (tmg.requestBytes()) { // if o.o.Team is converted we don't have the bytecode - and shouldn't need it
+        			this._reader = new ConstantPoolObjectReader(tmg.classBytes, tmg.constantPoolOffsets, orgObjectteamsTeam.getTeamModel(), scope.environment());
+        			copyAllNonWideConstants(tmg.constantPoolOffsets.length, dstType.superclass, dstType);
+        		}
         	}
 
         	TeamModel srcModel= dstType.superclass.getTeamModel();
