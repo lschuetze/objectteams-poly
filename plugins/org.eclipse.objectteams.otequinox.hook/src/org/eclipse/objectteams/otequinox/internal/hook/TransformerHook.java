@@ -10,7 +10,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TransformerHook.java 23468 2010-02-04 22:34:27Z stephan $
+ * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -70,11 +70,40 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * osgi.hook.configurators.include=org.eclipse.objectteams.eclipse.transformer.hook.HookConfigurator  
  * </pre>
  * 
- * The principal method is processClass() which delegates to an ObjectTeamsTransformer (OTRE).
- * The plugin life-cycle is controlled by methods initializedClassLoader() and watchBundle().
+ * <h2>class byte transformation</h2>
+ * The principal method is {@link processClass()} which delegates to an ObjectTeamsTransformer (OTRE).
  * 
+ * <h2>bundle life-cycle</h2>
+ * <p>
+ * The bundle life-cycle is monitored by methods {@link #initializedClassLoader()} and 
+ * {@link #watchBundle()}, from where loading and instantiation of teams is triggered.
+ * </p>
+ * If a bundle has no activation policy
+ * (detected in {@link OTStorageHook#checkActivationPolicy()} and stored in {@link #pendingNonLazyActivationBundles})
+ * use the event of loading the first class from that bundle (observed in {@link #recordClassDefine()}
+ * to check if teams adapting this bundle exist that need activating.
+ * 
+ * <h2>finding classes</h2>
+ * <p>
+ * The woven code of a base class needs access to the bound team(s) plus to IBoundBase, 
+ * which are not on the base bundle's classpath. 
+ * Here method {@link #postFindClass()} helps
+ * by manually delegating to the aspect bundles' class loaders in turn.
+ * </p><p>
+ * Similarly, class <code>TeamThreadManager</code> needs to be accessed from any classes extending
+ * Thread (or implementing Runnable - <i>not currently supported</i>). This specific class is
+ * stored in {@link #recordClassDefine()}
+ * and directly answered in {@link #postFindClass()}.
+ * </p>
+ * 
+ * <h2>aspect permission</h2>
+ * <p>
+ * If a weaving request has been denied for a given aspect bundle,
+ * method {@link #preFindClass()} 
+ * will throw an exception to avoid loading of any class from that bundle.
+ * </p>
  * @author stephan
- * @version $Id: TransformerHook.java 23468 2010-02-04 22:34:27Z stephan $
+ * @version $Id$
  */
 @SuppressWarnings("nls")
 public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLoaderDelegateHook, ClassLoadingStatsHook
@@ -90,7 +119,11 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 
 	// specific action may be required when this class is loaded:
 	private static final String ORG_OBJECTTEAMS_TEAM = "org.objectteams.Team";
+	// intercept and store this class:
+	private static final String ORG_OBJECTTEAMS_TEAMTHREADMANAGER = "org.objectteams.TeamThreadManager";
+	private Class<?> teamThreadManagerClass;
 
+	
 	private static final HashSet<String> WEAVE_BUNDLES = new HashSet<String>();
 	static {
 		String value = System.getProperty("otequinox.weave");
@@ -641,6 +674,9 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	public Class<?> postFindClass(String name, BundleClassLoader classLoader, BundleData data) {
 		if (name.equals(currentlySearchedClassName.get()))
 			return null;
+		// special case: any class subclassing Thread or implementing Runnable may depend on this class:
+		if (name.equals(ORG_OBJECTTEAMS_TEAMTHREADMANAGER))
+			return teamThreadManagerClass;
 		String bundleSymbolicName = data.getSymbolicName();
 		BaseBundleRole baseBundle= this.bundleRegistry.adaptedBaseBundles.get(bundleSymbolicName);
 		if (baseBundle == null)
@@ -743,8 +779,12 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 				this.activatableBundles.clear();
 			}
 
-		if (name.equals(ORG_OBJECTTEAMS_TEAM))
-			this.teamLoadingService.initializeOOTeam(clazz);
+		if (name.startsWith("org.objectteams")) {
+			if (name.equals(ORG_OBJECTTEAMS_TEAM))
+				this.teamLoadingService.initializeOOTeam(clazz);
+			else if (name.equals(ORG_OBJECTTEAMS_TEAMTHREADMANAGER))
+				this.teamThreadManagerClass = clazz;
+		}
 	}
 
 }
