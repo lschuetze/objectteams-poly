@@ -51,6 +51,7 @@ import org.eclipse.text.edits.TextEdit;
 protected abstract class MethodMappingCompletionProposal extends LinkedCorrectionProposal 
 {
 	
+	static final String ROLEMETHODRETURN_KEY= "rolemethodreturn"; //$NON-NLS-1$ 
 	static final String ROLEMETHODNAME_KEY= "rolemethodname";  //$NON-NLS-1$
 	static final String ROLEPARAM_KEY= "roleparam";  //$NON-NLS-1$
 	static final String BINDINGKIND_KEY = "bindingkind"; //$NON-NLS-1$

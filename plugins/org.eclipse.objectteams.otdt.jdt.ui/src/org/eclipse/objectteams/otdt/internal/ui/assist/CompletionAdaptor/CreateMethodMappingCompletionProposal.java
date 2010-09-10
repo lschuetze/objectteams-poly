@@ -44,12 +44,16 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.objectteams.otdt.internal.ui.util.Images;
 import org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 /** 
@@ -58,13 +62,28 @@ import org.eclipse.text.edits.TextEdit;
  * Rewrite-based completion for creating full callout mappings, 
  * which afterwards use linked mode editing for choosing the method binding kind.
  * Also the role method name is offered for editing in linked mode.
- * 
+ *
  * @author stephan
  * @since 1.1.2
  */ 
 @SuppressWarnings("restriction")
-protected class CreateMethodMappingCompletionProposal extends MethodMappingCompletionProposal 
+protected team class CreateMethodMappingCompletionProposal extends MethodMappingCompletionProposal 
 {
+
+	/* gateway to private final base class. */
+	@SuppressWarnings("decapsulation")
+	protected class MyJavaLinkedModeProposal playedBy JavaLinkedModeProposal  {
+
+		public MyJavaLinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal, int relevance) {
+			base(unit, typeProposal, relevance);
+		}
+
+		TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) 
+		-> TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model);
+	}
+
+
+
 	boolean fIsOverride = false;
 	boolean fIsOnlyCallin = false; 
 	
@@ -146,26 +165,53 @@ protected class CreateMethodMappingCompletionProposal extends MethodMappingCompl
 											 method, baseBinding.getName(), settings);
 		if (stub != null) {
 			insertStub(rewrite, type, bodyProperty, fReplaceStart, stub);
-			addLinkedPosition(rewrite.track(stub.getRoleMappingElement().getName()), true, ROLEMETHODNAME_KEY);
 			
+			MethodSpec roleMethodSpec = (MethodSpec)stub.getRoleMappingElement();
+			
+			// return type:
+			ITrackedNodePosition returnTypePosition = rewrite.track(roleMethodSpec.getReturnType2());
+			addLinkedPosition(returnTypePosition, true, ROLEMETHODRETURN_KEY);
+			LinkedProposalPositionGroup group1 = getLinkedProposalModel().getPositionGroup(ROLEMETHODRETURN_KEY, true);
+			group1.addProposal(new MyJavaLinkedModeProposal(iCU, method.getReturnType(), 13)); //$NON-NLS-1$
+			group1.addProposal("void", null, 13); //$NON-NLS-1$
+			
+			// role method name:
+			addLinkedPosition(rewrite.track(roleMethodSpec.getName()), false, ROLEMETHODNAME_KEY);
+			
+			// argument lifting?
 			if (roleBinding != null)
 				addLiftingProposals(roleBinding, method, stub, rewrite);
 			
+			// binding operator:
 			addLinkedPosition(rewrite.track(stub.bindingOperator()), false, BINDINGKIND_KEY);
-			LinkedProposalPositionGroup group= getLinkedProposalModel().getPositionGroup(BINDINGKIND_KEY, true);
+			LinkedProposalPositionGroup group2= getLinkedProposalModel().getPositionGroup(BINDINGKIND_KEY, true);
 			if (!this.fIsOnlyCallin) {
 				String calloutToken = "->";
 				if (this.fIsOverride) {
 					calloutToken = "=>";
 					stub.bindingOperator().setBindingKind(MethodBindingOperator.KIND_CALLOUT_OVERRIDE);
 				}
-				group.addProposal(calloutToken, Images.getImage(CALLOUTBINDING_IMG), 13);         //$NON-NLS-1$
+				group2.addProposal(calloutToken, Images.getImage(CALLOUTBINDING_IMG), 13);         //$NON-NLS-1$
 			}
-			group.addProposal("<- before",  Images.getImage(CALLINBINDING_BEFORE_IMG), 13);  //$NON-NLS-1$
-			group.addProposal("<- replace", Images.getImage(CALLINBINDING_REPLACE_IMG), 13); //$NON-NLS-1$
-			group.addProposal("<- after",   Images.getImage(CALLINBINDING_AFTER_IMG), 13);   //$NON-NLS-1$
+			group2.addProposal(makeBeforeAfterBindingProposal("<- before", Images.getImage(CALLINBINDING_BEFORE_IMG), returnTypePosition));  //$NON-NLS-1$
+			group2.addProposal("<- replace", Images.getImage(CALLINBINDING_REPLACE_IMG), 13); //$NON-NLS-1$
+			group2.addProposal(makeBeforeAfterBindingProposal("<- after",  Images.getImage(CALLINBINDING_AFTER_IMG), returnTypePosition));   //$NON-NLS-1$
 		}
 		return true;	
+	}
+	/** Create a method-binding proposal that, when applied, will change the role-returntype to "void": */
+	Proposal makeBeforeAfterBindingProposal(String displayString, Image image, final ITrackedNodePosition returnTypePosition) {
+		return new Proposal(displayString, image, 13) {
+			@Override
+			public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model)
+					throws CoreException 
+			{
+				MultiTextEdit edits = new MultiTextEdit();
+				edits.addChild(new ReplaceEdit(returnTypePosition.getStartPosition(), returnTypePosition.getLength(), "void"));
+				edits.addChild(super.computeEdits(offset, position, trigger, stateMask, model));
+				return edits;
+			}
+		};
 	}
 	
 	/** Check if any parameters or the return type are candidates for lifting/lowering. */
@@ -203,7 +249,7 @@ protected class CreateMethodMappingCompletionProposal extends MethodMappingCompl
 				group.addProposal(type.toString(), null, 13);
 				group.addProposal(roleBinding.getName(), null, 13);
 				break;
-			}				
+			}
 		}		
 	}
 }

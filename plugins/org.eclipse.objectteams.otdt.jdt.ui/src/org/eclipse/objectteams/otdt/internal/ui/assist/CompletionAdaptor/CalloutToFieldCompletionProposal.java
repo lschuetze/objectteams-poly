@@ -40,7 +40,7 @@ import org.eclipse.swt.graphics.Image;
  * @since 1.1.7
  */
 @SuppressWarnings("restriction")
-protected class CalloutToFieldCompletionProposal extends CreateMethodMappingCompletionProposal
+protected team class CalloutToFieldCompletionProposal extends CreateMethodMappingCompletionProposal
 {
 	private String fFieldType;
 	private String fFieldName;

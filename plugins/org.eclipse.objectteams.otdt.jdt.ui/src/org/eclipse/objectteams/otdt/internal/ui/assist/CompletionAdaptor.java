@@ -93,6 +93,7 @@ import base org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import base org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
 import base org.eclipse.jdt.ui.text.java.JavaTextMessages;
 
+import base org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.JavaLinkedModeProposal;
 
 /**
  * This team helps the jdt.ui to handle completion for OT-specific elements.
