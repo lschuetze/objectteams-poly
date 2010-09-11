@@ -376,10 +376,10 @@ public class CodeCompletionTest extends CoreTests {
 
 		String completeAfter = "		";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
-		int posAfter = expectedContent.indexOf("blub(int k)");
+		int posAfter = expectedContent.indexOf("String");
 		
 		// discriminate from overriding "blub(int i)":
-		assertProposal("blub(int k", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 4), 0); // len of "blub" 
+		assertProposal("blub(int k", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, "String".length()), 0); 
 	}
 	
 	
