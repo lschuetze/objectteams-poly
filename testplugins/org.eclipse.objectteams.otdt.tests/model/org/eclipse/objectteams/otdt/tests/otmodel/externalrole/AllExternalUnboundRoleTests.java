@@ -55,7 +55,8 @@ public class AllExternalUnboundRoleTests extends TestCase
             org.eclipse.objectteams.otdt.tests.otmodel.role.unbound.Test4b.class,
             org.eclipse.objectteams.otdt.tests.otmodel.role.unbound.Test5a.class,
             org.eclipse.objectteams.otdt.tests.otmodel.role.unbound.Test5b.class,
-            org.eclipse.objectteams.otdt.tests.otmodel.role.unbound.Test5c.class
+            org.eclipse.objectteams.otdt.tests.otmodel.role.unbound.Test5c.class,
+            org.eclipse.objectteams.otdt.tests.otmodel.role.unbound.Test5d.class
         };
     }
 
