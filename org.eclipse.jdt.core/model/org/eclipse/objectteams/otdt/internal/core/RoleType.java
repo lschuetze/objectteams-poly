@@ -366,7 +366,7 @@ public class RoleType extends OTType implements IRoleType
     
     public IType[] getTSuperRoles() throws JavaModelException {
     	ArrayList<IType> tsuperRoles = new ArrayList<IType>();
-    	IType teamType = getTeam();
+    	IOTType teamType = getTeam();
     	if (teamType == null)
     		throw new JavaModelException(new JavaModelStatus(IStatus.ERROR, "Enclosing team not found for "+this.getElementName()+" perhaps this element is not on the build path?")); //$NON-NLS-1$ //$NON-NLS-2$
     	String superteamName = teamType.getSuperclassName();
@@ -390,9 +390,8 @@ public class RoleType extends OTType implements IRoleType
     		}
     	}
     	// no direct tsuper, search in tsuper-team if some exist:
-    	IOTType teamOTType = OTModelManager.getOTElement(teamType);
-    	if (teamOTType.isRole())
-    		for (IType tsuperTeam : ((IRoleType)teamOTType).getTSuperRoles()) 
+    	if (teamType.isRole())
+    		for (IType tsuperTeam : ((IRoleType)teamType).getTSuperRoles()) 
     			checkAddTSuperRole(tsuperTeam.getFullyQualifiedName('.'), tsuperRoles);
     	return tsuperRoles.toArray(new IType[tsuperRoles.size()]);
     }
