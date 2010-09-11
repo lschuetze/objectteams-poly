@@ -169,11 +169,15 @@ protected team class CreateMethodMappingCompletionProposal extends MethodMapping
 			MethodSpec roleMethodSpec = (MethodSpec)stub.getRoleMappingElement();
 			
 			// return type:
-			ITrackedNodePosition returnTypePosition = rewrite.track(roleMethodSpec.getReturnType2());
-			addLinkedPosition(returnTypePosition, true, ROLEMETHODRETURN_KEY);
-			LinkedProposalPositionGroup group1 = getLinkedProposalModel().getPositionGroup(ROLEMETHODRETURN_KEY, true);
-			group1.addProposal(new MyJavaLinkedModeProposal(iCU, method.getReturnType(), 13)); //$NON-NLS-1$
-			group1.addProposal("void", null, 13); //$NON-NLS-1$
+			ITrackedNodePosition returnTypePosition = null;
+			ITypeBinding returnType = method.getReturnType();
+			if (!(returnType.isPrimitive() && "void".equals(returnType.getName()))) {
+				returnTypePosition = rewrite.track(roleMethodSpec.getReturnType2());
+				addLinkedPosition(returnTypePosition, true, ROLEMETHODRETURN_KEY);
+				LinkedProposalPositionGroup group1 = getLinkedProposalModel().getPositionGroup(ROLEMETHODRETURN_KEY, true);
+				group1.addProposal(new MyJavaLinkedModeProposal(iCU, method.getReturnType(), 13)); //$NON-NLS-1$
+				group1.addProposal("void", null, 13); //$NON-NLS-1$
+			}
 			
 			// role method name:
 			addLinkedPosition(rewrite.track(roleMethodSpec.getName()), false, ROLEMETHODNAME_KEY);
@@ -207,7 +211,8 @@ protected team class CreateMethodMappingCompletionProposal extends MethodMapping
 					throws CoreException 
 			{
 				MultiTextEdit edits = new MultiTextEdit();
-				edits.addChild(new ReplaceEdit(returnTypePosition.getStartPosition(), returnTypePosition.getLength(), "void"));
+				if (returnTypePosition != null)
+					edits.addChild(new ReplaceEdit(returnTypePosition.getStartPosition(), returnTypePosition.getLength(), "void"));
 				edits.addChild(super.computeEdits(offset, position, trigger, stateMask, model));
 				return edits;
 			}
