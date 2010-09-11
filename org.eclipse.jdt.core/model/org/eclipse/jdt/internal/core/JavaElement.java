@@ -34,6 +34,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.core.IOTType;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
+import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.internal.core.OTJavaElement;
 
 /**
@@ -137,7 +140,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 				case JEM_PACKAGEFRAGMENT:
 				case JEM_FIELD:
 				case JEM_METHOD:
-//{ObjectTeams: one more char:
+//{ObjectTeams: one more memento char:
 				case OTJavaElement.OTEM_METHODMAPPING:
 // SH}
 				case JEM_INITIALIZER:
@@ -160,7 +163,15 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 	public boolean exists() {
 
 		try {
+//{ObjectTeams: in addition to checking the JME also check whether RoFi mapping is involved:
+/* orig:
 			getElementInfo();
+  :giro */
+			Object info = getElementInfo();
+			if (info instanceof SourceTypeElementInfo)
+				// answer false if this is the non-canonical representation of a role file
+				return this.equals(((SourceTypeElementInfo) info).getHandle());
+// SH}
 			return true;
 		} catch (JavaModelException e) {
 			// element doesn't exist: return false
@@ -256,7 +267,53 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		JavaModelManager manager = JavaModelManager.getJavaModelManager();
 		Object info = manager.getInfo(this);
 		if (info != null) return info;
+//{ObjectTeams: role files are not found via containment of regular JavaElements:
+	  try {
+// orig:
 		return openWhenClosed(createElementInfo(), monitor);
+// :giro
+	  } catch (JavaModelException jme) {
+		// try to interpret as a ROFI:
+		JavaElement rofiType = getAsRoFi();
+		// has a mapping to ROFI been applied?
+		if (rofiType != null && !rofiType.getCompilationUnit().equals(getCompilationUnit()))
+			return rofiType.getElementInfo(monitor);
+		throw jme; // didn't improve
+	  }
+	}
+	// try to retrieve this element as a role file of its enclosing team (direct or indirect)
+	private JavaElement getAsRoFi() throws JavaModelException {
+		if (!(this instanceof IType))
+			return null;
+		if (OTNameUtils.isTSuperMarkerInterface(getElementName().toCharArray()))
+			return null;
+		JavaElement currentParent = this.parent;
+		if (!(currentParent instanceof IType))
+			return null;
+		// trigger recursion for outer team:
+		boolean parentChanged = false;
+		Object info = currentParent.getElementInfo();
+		if (info instanceof SourceTypeElementInfo) {
+			JavaElement newHandle = (JavaElement) ((SourceTypeElementInfo) info).getHandle();
+			parentChanged = !currentParent.getCompilationUnit().equals(newHandle.getCompilationUnit());
+			currentParent = newHandle;
+		}
+		IOTType otParent = OTModelManager.getOTElement((IType)currentParent);
+		if (otParent == null)
+			return null;
+		// we have an enclosing team, search the role:
+		if (parentChanged) {
+			// retry the simple (cheaper) lookup:
+			JavaElement element = (JavaElement) otParent.getType(getElementName());
+			if (element.exists())
+				return element;
+		}
+		// last resort (expensive): search based lookup:
+		IType roleType = otParent.searchRoleType(getElementName());
+		if (roleType instanceof JavaElement)
+			return (JavaElement)roleType;
+		return null;
+// SH}
 	}
 	/**
 	 * @see IAdaptable

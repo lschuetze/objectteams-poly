@@ -90,6 +90,12 @@ public interface IOTType extends IOTJavaElement, IType
 	 * @param simpleName - the name of the desired role
 	 */
 	public IType getRoleType(String simpleName);
+	
+	/**
+	 * Similar to getRoleType(String), but directly use the search engine
+	 * thus avoiding exists() test on a non-existent ROFI type.
+	 */
+	public IType searchRoleType(String simpleName);
 
     /**
 	 * Returns all role types (inlined and role files) contained by this team.

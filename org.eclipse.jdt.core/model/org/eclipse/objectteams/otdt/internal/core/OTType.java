@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.JavaElement;
+import org.eclipse.jdt.internal.core.SourceTypeElementInfo;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
@@ -272,17 +273,29 @@ public class OTType extends OTJavaElement implements IOTType
 	    if (isTeam() && exists())
 	    {
 		    IType roleType = getType(simpleName);
-		    if (roleType.exists())
-		    {
-		        return roleType;
+		    try {
+		    	// smarter way of asking whether the roleType exists:
+			    Object info = ((JavaElement)roleType).getElementInfo();
+			    // only source types need specific handling of role files.
+			    // for these, getElementInfo() -> getAsRoFi() may have searched the real RoFi element, extract now:
+			    if (info instanceof SourceTypeElementInfo)
+			    	return ((SourceTypeElementInfo) info).getHandle();
+			    return roleType;
+		    } catch (JavaModelException jme) {
+		    	return null;
 		    }
-		    
-		    try
-	        {
-		        List<IType> roleFiles = searchEngineGetRoleFiles(new IType[] { this }, simpleName);
-		        if (roleFiles.size() > 0)
-		        	return roleFiles.get(0); // actually there may be more, due to multiple src-folders...
-		        
+	    }
+	    
+	    return null;
+	}
+	
+	public IType searchRoleType(String simpleName) {
+		try
+		{
+			List<IType> roleFiles = searchEngineGetRoleFiles(new IType[] { this }, simpleName);
+			if (roleFiles.size() > 0)
+				return roleFiles.get(0); // actually there may be more, due to multiple src-folders...
+			
 // previous implementation without search engine
 //			    String encTeamName = this.getFullyQualifiedName();
 //			    String qualName	  = encTeamName + "." + simpleName;
@@ -291,11 +304,9 @@ public class OTType extends OTJavaElement implements IOTType
 //	            {
 //	                return roleType;
 //	            }
-	        }
-	        catch (JavaModelException ignored) {}
-	    }
-	    
-	    return null;
+		}
+		catch (JavaModelException ignored) { /* not found */ }
+		return null;
 	}
 	
 	public boolean equals(Object obj)
