@@ -122,7 +122,7 @@ public Object getInfo(IJavaElement element) {
 		case IJavaElement.COMPILATION_UNIT:
 		case IJavaElement.CLASS_FILE:
 			return this.openableCache.get(element);
-//{ObjectTeams:
+//{ObjectTeams: OT type kinds:
 		case IOTJavaElement.ROLE:
 		case IOTJavaElement.TEAM:
 			element= ((OTType)element).getCorrespondingJavaElement();
@@ -190,7 +190,7 @@ protected Object peekAtInfo(IJavaElement element) {
 		case IJavaElement.COMPILATION_UNIT:
 		case IJavaElement.CLASS_FILE:
 			return this.openableCache.peek(element);
-//{ObjectTeams:
+//{ObjectTeams: OT type kinds
 		case IOTJavaElement.ROLE:
 		case IOTJavaElement.TEAM:
 			element= ((OTType)element).getCorrespondingJavaElement();

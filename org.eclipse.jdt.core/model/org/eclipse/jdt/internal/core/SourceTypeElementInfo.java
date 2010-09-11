@@ -40,7 +40,7 @@ public class SourceTypeElementInfo extends AnnotatableInfo implements ISourceTyp
 	 * fully qualified for source types.
 	 */
 	protected char[] superclassName;
-//{ObjectTeams: addition:
+//{ObjectTeams: addition: baseclass reference
 	/**
 	 * The name of the baseclass for this (role) type, if any. 
 	 * This name is fully qualified for binary types and is NOT

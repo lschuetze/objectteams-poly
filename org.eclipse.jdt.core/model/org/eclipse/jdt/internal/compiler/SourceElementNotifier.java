@@ -822,26 +822,25 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 	FieldDeclaration[] fields = typeDeclaration.fields;
 	AbstractMethodDeclaration[] methods = typeDeclaration.methods;
 	TypeDeclaration[] memberTypes = typeDeclaration.memberTypes;
-//{ObjectTeams:
+//{ObjectTeams: treatment for method mappings
 	AbstractMethodMappingDeclaration[] bindings    = typeDeclaration.callinCallouts;
 //ak}
 	int fieldCounter = fields == null ? 0 : fields.length;
 	int methodCounter = methods == null ? 0 : methods.length;
 	int memberTypeCounter = memberTypes == null ? 0 : memberTypes.length;
-//{ObjectTeams:
+//{ObjectTeams: treatment for method mappings
 	int bindingCount = (bindings == null) ? 0 : bindings.length;
 //ak}
 	int fieldIndex = 0;
 	int methodIndex = 0;
 	int memberTypeIndex = 0;
-//ObjectTeams:
+//ObjectTeams: treatment for method mappings
 	int bindingIndex = 0;
 //ak}
 
 	if (notifyTypePresence){
 		char[][] interfaceNames = getInterfaceNames(typeDeclaration);
-//{ObjectTeams:
-	    // construction of baseclass's name
+//{ObjectTeams: construction of baseclass's name
 		char[] baseclassName = null;
 		char[] baseclassAnchor= null;
 		if (typeDeclaration.baseclass != null)
@@ -907,7 +906,7 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 			typeInfo.annotations = typeDeclaration.annotations;
 			typeInfo.extraFlags = ExtraFlags.getExtraFlags(typeDeclaration);
 			typeInfo.node = typeDeclaration;
-//{ObjectTeams: added baseclass reference, external role
+//{ObjectTeams: added baseclass reference, isRoleFile:
 			typeInfo.baseclassName = baseclassName; // yes, interfaces will have a baseclass, too. (Current compiler limitation though).
 			typeInfo.baseclassAnchor = baseclassAnchor;
 			typeInfo.isRoleFile = typeDeclaration.isRoleFile();
@@ -940,7 +939,7 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 	while ((fieldIndex < fieldCounter)
 			|| (memberTypeIndex < memberTypeCounter)
 			|| (methodIndex < methodCounter)
-// {ObjectTeams:
+// {ObjectTeams: treatment for method mappings
 		    || (bindingIndex < bindingCount))
 // orig:
 	{
@@ -974,7 +973,7 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 				nextDeclarationType = 2; // MEMBER
 			}
 		}
-//{ObjectTeams:
+//{ObjectTeams: treatment for method mappings
 		if (bindingIndex < bindingCount)
 		{
 			nextBindingDeclaration = bindings[bindingIndex];
@@ -1011,7 +1010,7 @@ protected void notifySourceElementRequestor(TypeDeclaration typeDeclaration, boo
 					&& CharOperation.equals(IOTConstants.CONFINED, nextMemberDeclaration.name))
 					break;
 				notifySourceElementRequestor(nextMemberDeclaration, true, null, currentPackage);
-//{ObjectTeams:
+//{ObjectTeams: treatment for method mappings
 				break;
             case 3:
             	bindingIndex++;

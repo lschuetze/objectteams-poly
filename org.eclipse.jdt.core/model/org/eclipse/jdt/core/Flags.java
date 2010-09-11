@@ -375,7 +375,7 @@ public final class Flags {
 		return (flags & AccAnnotation) != 0;
 	}
 
-//{ObjectTeams
+//{ObjectTeams: more queries for element kinds:
 	/**
 	 * Returns whether the given integer includes the <code>team</code> modifier.
 	 *

@@ -570,7 +570,7 @@ IType getType(char[] enclosingTypeName) {
 	  else
 // SH}
 		this.binaryType = new BinaryType(this, getTypeName());
-//{ObjectTeams: experimental:
+//{ObjectTeams: register unopened type, so OTModelManager can already use it and trigger opening:
 		// make it known to the OTModelManager (without opening):
 		OTModelManager.getSharedInstance().addUnopenedType(this.binaryType);
 // SH}

@@ -105,7 +105,7 @@ public class CompilationUnitStructureRequestor extends ReferenceInfoAdapter impl
 	 */
 	protected Stack handleStack;
 
-//{ObjectTeams: for 'team' modifier:
+//{ObjectTeams: 'team' modifier for package declaration:
 	protected int packageModifiers = 0;
 // SH}
 
@@ -185,7 +185,7 @@ public void acceptPackage(ImportReference importReference) {
 		Object parentInfo = this.infoStack.peek();
 		JavaElement parentHandle= (JavaElement) this.handleStack.peek();
 		PackageDeclaration handle = null;
-//{ObjectTeams:
+//{ObjectTeams: team-package ?
 		this.packageModifiers = importReference.modifiers;
 // SH}
 		if (parentHandle.getElementType() == IJavaElement.COMPILATION_UNIT) {
@@ -385,7 +385,7 @@ public void enterMethod(MethodInfo methodInfo) {
 
 	if (parentHandle.getElementType() == IJavaElement.TYPE) {
 		handle = createMethodHandle(parentHandle, methodInfo);
-//{ObjectTeams: propagate this flag array:
+//{ObjectTeams: propagate this flag array (for decapsulation):
 		handle.parameterBaseclassFlags = methodInfo.parameterBaseclassFlags;
 // SH}
 	}
@@ -1067,8 +1067,8 @@ public void enterCallinMapping(ISourceElementRequestor.CallinInfo callinInfo)
     this.infoStack.push(info);
 }
 //jwl, gbr}
-//{ObjectTeams:
-public void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd){}
+//{ObjectTeams: null-impl for baseReference
+public void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd){ /* no-op*/ }
 //haebor}
 
 }

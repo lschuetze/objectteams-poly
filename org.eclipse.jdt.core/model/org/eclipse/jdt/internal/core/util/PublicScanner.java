@@ -3027,7 +3027,7 @@ private int internalScanIdentifierOrKeyword(int index, int length, char[] data) 
 	switch (data[index]) {
 		case 'a' :
 			switch(length) {
-//{ObjectTeams
+//{ObjectTeams: keyword 'as':
 				case 2: //as
 					if (   this._isOTSource
 						&& (data[++index] == 's')) {

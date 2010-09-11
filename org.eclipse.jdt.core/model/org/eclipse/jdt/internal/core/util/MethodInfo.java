@@ -119,7 +119,7 @@ public class MethodInfo extends ClassFileStruct implements IMethodInfo {
 			} else if (equals(attributeName, IAttributeNamesConstants.ANNOTATION_DEFAULT)) {
 				this.attributes[attributesIndex++] = new AnnotationDefaultAttribute(classFileBytes, constantPool, offset + readOffset);
 			} else {
-//{ObjectTeams:
+//{ObjectTeams: OT-specific bytecode attribute
 				if (equals(attributeName, IOTConstants.ROLECLASS_METHOD_MODIFIERS_NAME))
 					this.accessFlags = u2At(classFileBytes, readOffset + 6, offset);
 				// fall through, i.e., store any way.

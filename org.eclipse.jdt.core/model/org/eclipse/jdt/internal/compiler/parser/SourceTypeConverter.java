@@ -184,8 +184,8 @@ public class SourceTypeConverter extends TypeConverter {
 				types[i] = convert((SourceType) typeInfo.getHandle(), compilationResult);
 			}
 			this.unit.types = types;
-//{ObjectTeams:
-			this.unit.parseMethodBodies = false; // converted cud has no source to parse from.
+//{ObjectTeams: converted cud has no source to parse from.
+			this.unit.parseMethodBodies = false;
 // SH}
 			return this.unit;
 		} catch (AnonymousMemberFound e) {
@@ -407,7 +407,7 @@ public class SourceTypeConverter extends TypeConverter {
 			method.arguments = new Argument[argumentCount];
 			for (int i = 0; i < argumentCount; i++) {
 				TypeReference typeReference = createTypeReference(argumentTypeSignatures[i], start, end);
-//{ObjectTeams:
+//{ObjectTeams: evaluate flag-set to see if decapsulation is allowed:
 				if (   methodHandle.parameterBaseclassFlags != null
 					&& methodHandle.parameterBaseclassFlags[i])
 				{

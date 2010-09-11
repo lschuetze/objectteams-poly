@@ -173,7 +173,7 @@ public final class JavaCore extends Plugin {
 	 * (value <code>"org.eclipse.jdt.core"</code>).
 	 */
 	public static final String PLUGIN_ID = "org.eclipse.jdt.core" ; //$NON-NLS-1$
-//{ObjectTeams:
+//{ObjectTeams: OT-specific IDs
 	public static final String OTDT_PLUGIN_ID = "org.eclipse.objectteams.otdt"; //$NON-NLS-1$
 
 	public static final String OTJ_BUILDER_ID = OTDT_PLUGIN_ID + ".builder.OTJBuilder"; //$NON-NLS-1$
@@ -1258,7 +1258,7 @@ public final class JavaCore extends Plugin {
 	 */
 	public static final String COMPILER_PB_MISSING_JAVADOC_COMMENTS_OVERRIDING = PLUGIN_ID + ".compiler.problem.missingJavadocCommentsOverriding"; //$NON-NLS-1$
 
-//{ObjectTeams:
+//{ObjectTeams: new option: scoped keywords (use stateful scanner?)
 	public static final String COMPILER_OPT_SCOPED_KEYWORDS = OTDT_PLUGIN_ID + ".compiler.option.scoped_keywords"; //$NON-NLS-1$
 // SH}
 

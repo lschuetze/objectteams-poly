@@ -937,7 +937,7 @@ public class CompletionProposal {
 	 *
 	 * @since 3.1
 	 */
-//{ObjectTeams:
+//{ObjectTeams: include OT completion kinds
 /* orig:
 	protected static final int LAST_KIND = ANONYMOUS_CLASS_CONSTRUCTOR_INVOCATION;
   :giro */

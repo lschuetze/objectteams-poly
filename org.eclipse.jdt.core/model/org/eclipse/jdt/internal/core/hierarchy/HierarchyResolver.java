@@ -599,7 +599,7 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 			} else {
 				// top level or member type
 				char[] fullyQualifiedName = focus.getFullyQualifiedName().toCharArray();
-//{ObjectTeams: fix for TPX-302
+//{ObjectTeams: fix for TPX-302 (role class name mangling)
 				try {
 					// HierarchyResolver resolves all found types, LookupEnvironment (PackageBinding)
 					// caches them. Our FocusType's name might be "plain", though, i.e. without
@@ -687,7 +687,7 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 		this.builder.connect(objectType, this.builder.getHandle(objectType, this.typeBindings[objectIndex]), null, null);
 	}
 }
-//{ObjectTeams: 
+//{ObjectTeams: helper for reporting tsuper types
 private IType getHandle(ReferenceBinding typeBinding) {
 	for (int t = this.typeIndex; t >= 0; t--) {
 		if (this.typeBindings[t] == typeBinding) {
@@ -762,7 +762,7 @@ public void resolve(IGenericType suppliedType) {
 		}
 	} catch (AbortCompilation e) { // ignore this exception for now since it typically means we cannot find java.lang.Object
 	} finally {
-//{ObjectTeams:
+//{ObjectTeams: cleanup
 	    if (dependenciesSetup)
 	        Dependencies.release(this);
 //SH}
@@ -784,7 +784,7 @@ public void resolve(IGenericType suppliedType) {
  * @param monitor
  */
 public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor monitor) {
-//{ObjectTeams
+//{ObjectTeams: conditional setup
     boolean dependenciesSetup = false;
 //carp}
 	try {
@@ -808,7 +808,7 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 
 		// build type bindings
 		Parser parser = new Parser(this.lookupEnvironment.problemReporter, true);
-//{ObjectTeams
+//{ObjectTeams: setup Dependencies
 		Dependencies.setup(this, parser, this.lookupEnvironment, true/*build constructor only*/, true);
 		dependenciesSetup = true;
 //carp}
@@ -945,7 +945,7 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 					if (hasLocalType[i]) { // NB: no-op if method bodies have been already parsed
 						if (monitor != null && monitor.isCanceled())
 							throw new OperationCanceledException();
-//{ObjectTeams
+//{ObjectTeams: process via Dependencies
 						Dependencies.ensureState(parsedUnit, ITranslationStates.STATE_METHODS_PARSED);
 /* orig:
 						parser.getMethodBodies(parsedUnit);
@@ -980,7 +980,7 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 				if (containsLocalType) {
 					if (monitor != null && monitor.isCanceled())
 						throw new OperationCanceledException();
-//{ObjectTeams
+//{ObjectTeams: process via Dependencies
 // faultInTypes is ensured by Dependencies
 /* orig:
 					parsedUnit.scope.faultInTypes();
@@ -1010,7 +1010,7 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 		if (TypeHierarchy.DEBUG)
 			e.printStackTrace();
 	} finally {
-//{ObjectTeams
+//{ObjectTeams: cleanup
 	    if (dependenciesSetup)
 	        Dependencies.release(this);
 //SH}
