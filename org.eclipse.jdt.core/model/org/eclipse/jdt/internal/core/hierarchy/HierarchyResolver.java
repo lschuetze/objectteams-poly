@@ -449,6 +449,7 @@ private void remember(IType type, ReferenceBinding typeBinding) {
 		} catch (JavaModelException e) {
 			// cannot happen since element is open
 //{ObjectTeams: actually does happen (for generated classes, for which no source, t.i. *ElementInfo is available
+//              E.g.: tsuper marker interfaces don't "exist".
 //              Currently, I don't see a problem with that, though.
 			    // TODO(SH): This return refused to record class parts of role files to be remembered.
 			    //           Lateron a null will be entered as super class ...
