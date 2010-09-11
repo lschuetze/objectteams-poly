@@ -8,5 +8,5 @@ import teampkg.TeamB;
  */
 public class SampleRole playedBy TeamB
 {
-    public class AnInnerclass {}
+    public class AnInnerClass {}
 }
