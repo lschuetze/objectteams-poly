@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
+import org.eclipse.objectteams.otdt.tests.otmodel.RetargetableFileBasedModelTest;
 
 /**
  * @author kaschja
@@ -38,7 +38,7 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
  * This class contains testing methods for a test setting with an empty role class
  * whereas the role class is bound to a baseclass which is a team class
  */
-public class Test1 extends FileBasedModelTest
+public class Test1 extends RetargetableFileBasedModelTest
 {
     public Test1(String name)
     {
@@ -58,7 +58,6 @@ public class Test1 extends FileBasedModelTest
     
     public void setUpSuite() throws Exception
     {
-        setTestProjectDir(getTestSetting().getTestProject());
         getTestSetting().setTeamClass("Team_1");
         super.setUpSuite();
     }
@@ -114,19 +113,20 @@ public class Test1 extends FileBasedModelTest
         assertNotNull(roleOTElem);
 
 //{OTModelUpdate
-        IJavaElement[] childrenOfTeam =  teamOTElem.getChildren();
+        IJavaElement[] childrenOfTeam =  teamOTElem.getRoleTypes();
 //haebor}        
 
         assertNotNull(childrenOfTeam);
-        assertTrue(childrenOfTeam.length == 1);
+        assertEquals(1, childrenOfTeam.length);
         assertEquals(childrenOfTeam[0].getElementName(), roleOTElem.getElementName());
 
-//{OTModelUpdate        
-        IType[] innerTypesOfTeam = teamOTElem.getInnerTypes();
-//haebor}        
-        assertNotNull(innerTypesOfTeam);
-        assertTrue(innerTypesOfTeam.length == 1);
-        assertEquals(innerTypesOfTeam[0].getElementName(), roleOTElem.getElementName());
+// FIXME(SH): check whether there is any use in supporting getInnerTypes()
+////{OTModelUpdate
+//        IType[] innerTypesOfTeam = teamOTElem.getInnerTypes();
+////haebor}        
+//        assertNotNull(innerTypesOfTeam);
+//        assertTrue(innerTypesOfTeam.length == 1);
+//        assertEquals(innerTypesOfTeam[0].getElementName(), roleOTElem.getElementName());
     }
     
     public void testRelationRoleToTeam() throws JavaModelException
@@ -146,7 +146,7 @@ public class Test1 extends FileBasedModelTest
         assertTrue(roleOTElem instanceof IRoleType);
         IRoleType roleRoleOTElem = (IRoleType) roleOTElem;
         
-        assertEquals(roleRoleOTElem.getParent(), teamOTElem);
+        assertEquals(roleRoleOTElem.getTeamJavaType(), teamOTElem.getCorrespondingJavaElement());
         assertEquals(roleRoleOTElem.getTeam(), teamOTElem);
     }
     

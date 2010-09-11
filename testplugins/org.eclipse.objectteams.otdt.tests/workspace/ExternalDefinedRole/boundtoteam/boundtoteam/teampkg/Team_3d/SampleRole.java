@@ -1,4 +1,4 @@
-team package teampkg.Team_3d;
+team package boundtoteam.teampkg.Team_3d;
 
 import teampkg.TeamB;
 

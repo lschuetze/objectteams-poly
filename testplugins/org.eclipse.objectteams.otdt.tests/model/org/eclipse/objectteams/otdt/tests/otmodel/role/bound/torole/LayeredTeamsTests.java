@@ -31,6 +31,7 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
+import org.eclipse.objectteams.otdt.tests.otmodel.RetargetableFileBasedModelTest;
 
 /**
  * @author stephan
@@ -39,7 +40,7 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
  * This class contains testing methods for a test setting with an empty role class
  * where the role class is bound to a baseclass which is a role of a lower team class
  */
-public class LayeredTeamsTests extends FileBasedModelTest
+public class LayeredTeamsTests extends RetargetableFileBasedModelTest
 {
     private IOTType _roleOTElem;
 
@@ -62,7 +63,6 @@ public class LayeredTeamsTests extends FileBasedModelTest
     
     public void setUpSuite() throws Exception
     {
-        setTestProjectDir(getTestSetting().getTestProject());
         super.setUpSuite();
     }
        

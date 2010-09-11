@@ -1,4 +1,4 @@
-team package teampkg.Team_2;
+team package boundtoteam.teampkg.Team_2;
 
 import teampkg.TeamB;
 

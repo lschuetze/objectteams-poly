@@ -25,8 +25,10 @@ import java.lang.reflect.Method;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
+import junit.framework.TestResult;
 import junit.framework.TestSuite;
 
+import org.eclipse.objectteams.otdt.tests.otmodel.RetargetableFileBasedModelTest;
 import org.eclipse.objectteams.otdt.tests.otmodel.TestDataHandler;
 import org.eclipse.objectteams.otdt.tests.otmodel.TestSetting;
 
@@ -71,7 +73,14 @@ public class AllExternalUnboundRoleTests extends TestCase
     
     public static Test suite()
     {
-        TestSuite ts = new TestSuite(AllExternalUnboundRoleTests.class.getName());
+        TestSuite ts = new TestSuite(AllExternalUnboundRoleTests.class.getName()) {
+        	@Override
+        	public void run(TestResult result) {
+        		RetargetableFileBasedModelTest.setProjectDirectory("ExternalDefinedRole");
+        		super.run(result);
+        		RetargetableFileBasedModelTest.setProjectDirectory(null);
+        	}
+        };
 
         Class[] testClasses = getAllTestClasses();
         // Reset forgotten subsets of tests

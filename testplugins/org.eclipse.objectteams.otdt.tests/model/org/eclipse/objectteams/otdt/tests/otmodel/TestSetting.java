@@ -69,6 +69,10 @@ public class TestSetting extends FileBasedModelTest
     	return buffer.toString();
     }
     
+    public void resetProjectDirectory(String directory) {
+    	this._testProject = directory;
+    }
+
     public void setUp() throws Exception
     {
 		super.setUp();

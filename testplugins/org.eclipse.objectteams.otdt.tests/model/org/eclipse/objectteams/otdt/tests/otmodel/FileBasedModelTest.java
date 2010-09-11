@@ -30,7 +30,7 @@ import org.eclipse.objectteams.otdt.tests.FileBasedTest;
  */
 public class FileBasedModelTest extends FileBasedTest {
 
-    public FileBasedModelTest(String name) {
+	public FileBasedModelTest(String name) {
         super(name);
     }
 

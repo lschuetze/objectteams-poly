@@ -29,7 +29,7 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleFileType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
+import org.eclipse.objectteams.otdt.tests.otmodel.RetargetableFileBasedModelTest;
 
 /**
  * @author kaschja
@@ -37,7 +37,7 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
  *
  * This class contains testing methods for a test setting with an empty role class
  */
-public class Test1 extends FileBasedModelTest
+public class Test1 extends RetargetableFileBasedModelTest
 {
     public Test1(String name)
     {
@@ -57,7 +57,6 @@ public class Test1 extends FileBasedModelTest
     
     public void setUpSuite() throws Exception
     {
-        setTestProjectDir(getTestSetting().getTestProject());
         super.setUpSuite();
         getTestSetting().setTeamClass("Team_1");
     }
