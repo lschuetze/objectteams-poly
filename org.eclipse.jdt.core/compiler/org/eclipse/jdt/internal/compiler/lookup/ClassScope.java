@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.compiler.problem.IProblemRechecker;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeValueParameter;
@@ -1655,6 +1656,12 @@ public class ClassScope extends Scope {
         	// leave sourceType.baseclass untouched, might be set by CopyInheritance.copyBaseclass()
             return true;
 		}
+        if (sourceType.roleModel == null) {
+        	// if we already have errors silently quit, otherwise there's a bug here:
+        	if (!this.referenceContext.ignoreFurtherInvestigation)
+        		throw new InternalCompilerError("Missing role model"); //$NON-NLS-1$
+        	return false;
+        }
         try {
         	TypeReference baseclassRef = this.referenceContext.baseclass;
         	
