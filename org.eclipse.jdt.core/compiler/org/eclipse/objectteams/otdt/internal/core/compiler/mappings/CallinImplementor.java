@@ -975,7 +975,9 @@ public class CallinImplementor extends MethodMappingImplementor
 			|| methodMapping.mappings.length == 0
 		    || idx < generatedArgsLen)                  // don't map generated args.
 	    {
-			targetArgName	  = wrapperDeclaration.arguments[idx+wrapperPrefixLen].name;
+			targetArgName	  = idx+wrapperPrefixLen < wrapperDeclaration.arguments.length
+								? wrapperDeclaration.arguments[idx+wrapperPrefixLen].name
+								: CharOperation.concat(IOTConstants.OT_DOLLAR_NAME, "missingArg".toCharArray()); //$NON-NLS-1$
 	        MethodSpec rmSpec = methodMapping.roleMethodSpec;
 			mappedArgExpr     = genSimpleArgExpr(targetArgName, rmSpec);
 			if (idx >= generatedArgsLen)
