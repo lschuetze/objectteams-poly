@@ -29,7 +29,7 @@ JIKESPG_HOME=${JIKESPG_HOME:-/usr/bin}
 export JIKESPG_HOME
 
 # please adjust:
-JDTCORE_JAR=/home/local/eclipse-3.5/plugins/org.eclipse.jdt.core_3.5.0.v_963.jar
+JDTCORE_JAR=/home/local/eclipse-SDK-3.6/plugins/org.eclipse.jdt.core_3.6.0.v_A58.jar
 
 
 
