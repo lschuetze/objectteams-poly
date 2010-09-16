@@ -277,6 +277,19 @@ public class CodeSelectionTests extends AbstractJavaModelTests
  
 
 	/**
+	 * Select a callout mapping (role method spec)
+	 */
+	public void testCallout1() throws JavaModelException
+	{
+	       ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "mappings", "MappingsTeam1.java");
+	       IJavaElement[] elements = codeSelect(cu, "rm2", "rm2");
+	       assertElementsEqual(
+	               "Unexpected elements",
+	               "rm2(int) -> bm1(int) [in R [in MappingsTeam1 [in MappingsTeam1.java [in mappings [in src [in CodeSelection]]]]]]",
+	               elements);
+	}
+
+	/**
 	 * Select argument name inside a callin parameter mapping.
 	 */
 	public void testParamMapping1() throws JavaModelException
