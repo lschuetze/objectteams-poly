@@ -27,6 +27,10 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.objectteams.otdt.core.IMethodMapping;
+import org.eclipse.objectteams.otdt.core.IOTJavaElement;
+import org.eclipse.objectteams.otdt.core.IRoleType;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
 
 /**
  * @author svacina
@@ -42,11 +46,11 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	
 	public static Test suite()
 	{
-	    if (false)
+	    if (true)
 	    {
 	        System.err.println("Warning, only part of the OTJavaMethodSearchTest are being executed!");
 			Suite suite = new Suite(OTJavaMethodSearchTests.class.getName());
-			suite.addTest(new OTJavaMethodSearchTests("test035"));
+			suite.addTest(new OTJavaMethodSearchTests("test325297"));
 			return suite;
 	    }
 	    
@@ -1288,25 +1292,23 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 				resultCollector);
 	}
 
-	// FIXME: add tests for role files, callouts with and without abstract method declaration, callins and callouts with short and long method specs, multiple base methods...
+	public void test325297() throws CoreException
+	{
+		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
+		IJavaProject project= getJavaProject("OTJavaSearch");
+		IType type= project.findType("bug325297.OuterTeam.InnerSubTeam.InnerRole");
+		IRoleType roleType = (IRoleType) OTModelManager.getOTElement(type);
+		IMethodMapping callout = roleType.getMethodMappings(IOTJavaElement.CALLOUT_MAPPING)[0];
+		// not yet seeing the NPE :-/
+		search( callout,
+				REFERENCES,
+				getJavaSearchScopeFromPackages(new String[]{"bug325297","bug325297/OuterTeam"}), 
+				resultCollector);
+		
+		assertSearchResults("Search for references of callout-defined role method in role within specific nesting/inheritance structure",
+				"src/bug325297/OuterTeam/InnerSubTeam.java void bug325297.OuterTeam.InnerSubTeam.test(InnerRole) [concat(\"1\", \"2\")]",
+				resultCollector);
+	}
+
 	
-	// TODO(jsv) clean up block
-	//	IType type = getCompilationUnit("OTJavaSearch", "src", "p",
-	//			"Base1.java").getType("Base1");
-	
-	//	IType type = getType(getTestProjectDir(),
-	//    		"src",
-	//			"p",
-	//			"Base1");
-	//	
-	//	
-	//	IRoleType role = getRole(getTestProjectDir(),
-	//            "src",
-	//            "p",
-	//            "Team1",
-	//            "Role1");
-	
-	//	IMethod method = role.getMethods()[0];
-	
-	//	search(method, DECLARATIONS, getJavaSearchScope(), resultCollector);
 }
