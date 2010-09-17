@@ -22,8 +22,10 @@ package org.eclipse.objectteams.otdt.tests.otmodel;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -207,6 +209,25 @@ public class CalloutMappingTest extends FileBasedModelTest
 		assertTrue("Mapping should have signature", mappingFromMemento.hasSignature());
         
         assertFalse("Expecting no setter", mappingFromMemento.getBaseFieldHandle().isSetter());
+    }
+
+    public void testCtfWithAnnotation() throws JavaModelException
+    {
+        IRoleType roleOTElem = getRoleOTElem();
+        assertNotNull(roleOTElem);
+        IMethodMapping[] calloutMethodMappings = roleOTElem.getMethodMappings(IRoleType.CALLOUTS);
+        
+        IMethodMapping mapping = calloutMethodMappings[3];
+        assertNotNull(mapping);
+        
+        IAnnotation[] annotations = mapping.getAnnotations();
+        assertTrue("Annotations should not be null", annotations != null);
+        assertEquals("Wrong number of annotations", 1, annotations.length);
+        assertEquals("Wrong annotation type", "SuppressWarnings", annotations[0].getElementName());
+        IMemberValuePair[] memberValuePairs = annotations[0].getMemberValuePairs();
+        assertTrue("Pairs should not be null", memberValuePairs != null);
+        assertEquals("Wrong number of pairs", 1, memberValuePairs.length);
+        assertEquals("Wrong value", "decapsulation", memberValuePairs[0].getValue());
     }
     
 }    

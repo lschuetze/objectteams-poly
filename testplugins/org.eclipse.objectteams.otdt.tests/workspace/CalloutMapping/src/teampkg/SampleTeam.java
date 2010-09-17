@@ -13,6 +13,7 @@ public team class SampleTeam
         rm2 -> baseMethod2;
         protected Object rm3(int i) -> Object baseMethod3(int i, double j)
         	with { i -> i, 0.0 -> j, result <- result }
+        @SuppressWarnings("decapsulation")
         String getVal() -> get String val;
     }
 }
