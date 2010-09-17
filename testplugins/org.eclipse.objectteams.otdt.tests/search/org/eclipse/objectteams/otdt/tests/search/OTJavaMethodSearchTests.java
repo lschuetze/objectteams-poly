@@ -46,7 +46,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	
 	public static Test suite()
 	{
-	    if (true)
+	    if (false)
 	    {
 	        System.err.println("Warning, only part of the OTJavaMethodSearchTest are being executed!");
 			Suite suite = new Suite(OTJavaMethodSearchTests.class.getName());
