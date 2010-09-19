@@ -61,13 +61,15 @@ import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.SearchableEnvironment;
 import org.eclipse.jdt.internal.core.SourceType;
-import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.objectteams.otdt.core.IOTType;
+import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
+import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.InsertEdit;
 
 /**
  * Tests for errors shown only in the gutter (CompilationUnitProblemFinder),
@@ -87,7 +89,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 	}
 	
 	static {
-//		TESTS_NAMES = new String[] { "testRoFiNestedTeam" };
+//		TESTS_NAMES = new String[] { "testPlainJava_SyntaxError" };
 	}
 // ===== Copied all our modifications from AbstractJavaModelTests ===== 
 	/*
@@ -1076,6 +1078,299 @@ public class OTReconcilerTests extends ReconcilerTests {
 				"Unexpected problems",
 				"----------\n" +
 				"----------\n");
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
+
+    // a role file holds a nested team which extends a non-team role file
+    // real life witness for  Bug 325681 -  [compiler] syntax error in role file may case NPE in RoleModel.getTeamModel()
+    public void testRoFiNestedTeam_SyntaxError() throws CoreException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+			this.createFile(
+					"/P/JavaLinkedModeProposal.java",
+		    		"public class JavaLinkedModeProposal {\n" +
+		    		"    String baseMethod() { return null; }\n" +
+		    		"}\n");
+			this.createFolder("/P/MyTeam");
+			String role1SourceString =	
+				"team package MyTeam;\n" +
+				"public class Role1 {\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam/Role1.java",
+	    			role1SourceString);
+			String role2SourceString =	
+
+				"team package MyTeam;\n" + 
+				"\n" + 
+				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_AFTER_IMG;\n" + 
+				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_BEFORE_IMG;\n" + 
+				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINBINDING_REPLACE_IMG;\n" + 
+				"import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLOUTBINDING_IMG;\n" + 
+				"\n" + 
+				"import java.util.List;\n" + 
+				"\n" + 
+				"import org.eclipse.core.runtime.CoreException;\n" + 
+				"import org.eclipse.jdt.core.CompletionProposal;\n" + 
+				"import org.eclipse.jdt.core.ICompilationUnit;\n" + 
+				"import org.eclipse.jdt.core.IJavaProject;\n" + 
+				"import org.eclipse.jdt.core.JavaModelException;\n" + 
+				"import org.eclipse.jdt.core.dom.AST;\n" + 
+				"import org.eclipse.jdt.core.dom.ASTNode;\n" + 
+				"import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;\n" + 
+				"import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;\n" + 
+				"import org.eclipse.jdt.core.dom.IMethodBinding;\n" + 
+				"import org.eclipse.jdt.core.dom.ITypeBinding;\n" + 
+				"import org.eclipse.jdt.core.dom.MethodBindingOperator;\n" + 
+				"import org.eclipse.jdt.core.dom.MethodSpec;\n" + 
+				"import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;\n" + 
+				"import org.eclipse.jdt.core.dom.SingleVariableDeclaration;\n" + 
+				"import org.eclipse.jdt.core.dom.Type;\n" + 
+				"import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;\n" + 
+				"import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;\n" + 
+				"import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;\n" + 
+				"import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;\n" + 
+				"import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;\n" + 
+				"import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;\n" + 
+				"import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;\n" + 
+				"import org.eclipse.jface.text.link.LinkedModeModel;\n" + 
+				"import org.eclipse.jface.text.link.LinkedPosition;\n" + 
+				"import org.eclipse.objectteams.otdt.internal.ui.util.Images;\n" + 
+				"import org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility;\n" + 
+				"import org.eclipse.swt.graphics.Image;\n" + 
+				"import org.eclipse.text.edits.DeleteEdit;\n" + 
+				"import org.eclipse.text.edits.MultiTextEdit;\n" + 
+				"import org.eclipse.text.edits.ReplaceEdit;\n" + 
+				"import org.eclipse.text.edits.TextEdit;\n" + 
+				"\n" + 
+				"/** \n" + 
+				" */ \n" + 
+				"@SuppressWarnings(\"restriction\")\n" + 
+				"protected team class CreateMethodMappingCompletionProposal extends MethodMappingCompletionProposal \n" + 
+				"{\n" + 
+				"\n" + 
+				"	/* gateway to private final base class. */\n" + 
+				"	@SuppressWarnings(\"decapsulation\")\n" + 
+				"	protected class MyJavaLinkedModeProposal playedBy JavaLinkedModeProposal  {\n" + 
+				"\n" + 
+				"		public MyJavaLinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal, int relevance) {\n" + 
+				"			base(unit, typeProposal, relevance);\n" + 
+				"		}\n" + 
+				"		TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) \n" + 
+				"		-> TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model);\n" + 
+				"	}\n" + 
+				"\n" + 
+				"\n" + 
+				"\n" + 
+				"	boolean fIsOverride = false;\n" + 
+				"	boolean fIsOnlyCallin = false; \n" + 
+				"	\n" + 
+				"	protected CreateMethodMappingCompletionProposal(IJavaProject 	   jProject, \n" + 
+				"												    ICompilationUnit   cu,\n" + 
+				"												    CompletionProposal proposal,\n" + 
+				"												    String[]           paramTypes,\n" + 
+				"												    boolean 		   isOverride,\n" + 
+				"												    boolean 		   isOnlyCallin,\n" + 
+				"												    int                length,\n" + 
+				"												    String             displayName, \n" + 
+				"												    Image              image)\n" + 
+				"	{\n" + 
+				"		super(jProject, cu, proposal, paramTypes, length, displayName, image);\n" + 
+				"		this.fIsOverride= isOverride;\n" + 
+				"		this.fIsOnlyCallin = isOnlyCallin;\n" + 
+				"	}\n" + 
+				"	protected CreateMethodMappingCompletionProposal(IJavaProject 	   jProject, \n" + 
+				"									    ICompilationUnit   cu,  \n" + 
+				"									    CompletionProposal proposal,\n" + 
+				"									    int                length,\n" + 
+				"									    String             displayName,\n" + 
+				"									    Image              image) \n" + 
+				"	{\n" + 
+				"		super(jProject, cu, proposal, length, displayName, image);\n" + 
+				"	}\n" + 
+				"	\n" + 
+				"	/** Create a rewrite that additionally removes typed fragment if needed. \n" + 
+				"     *  That fragment will not be represented by an AST-node, that could be removed.\n" + 
+				"     */\n" + 
+				"	ASTRewrite createRewrite(AST ast) \n" + 
+				"	{\n" + 
+				"		if (fLength == 0)\n" + 
+				"			return ASTRewrite.create(ast);\n" + 
+				"		\n" + 
+				"		// the typed prefix will have to be deleted:\n" + 
+				"		final TextEdit delete= new DeleteEdit(fReplaceStart, fLength);\n" + 
+				"		\n" + 
+				"		// return a custom rewrite that additionally deletes typed fragment\n" + 
+				"		return new ASTRewrite(ast) {\n" + 
+				"			@Override\n" + 
+				"			public TextEdit rewriteAST() \n" + 
+				"					throws JavaModelException, IllegalArgumentException \n" + 
+				"			{\n" + 
+				"				TextEdit edits = super.rewriteAST();\n" + 
+				"				if (edits instanceof MultiTextEdit) {\n" + 
+				"					MultiTextEdit multi = (MultiTextEdit) edits;\n" + 
+				"					multi.addChild(delete);\n" + 
+				"				}\n" + 
+				"				return edits;\n" + 
+				"			}\n" + 
+				"		};\n" + 
+				"	}\n" + 
+				"	\n" + 
+				"	/** Overridable, see CalloutToFieldCompletionProposal.\n" + 
+				"	 *  At least baseBinding must be set, roleBinding is optional.\n" + 
+				"	 */\n" + 
+				"	boolean setupRewrite(ICompilationUnit                 iCU, \n" + 
+				"			          ASTRewrite       				   rewrite, \n" + 
+				"			          ImportRewrite   			       importRewrite,\n" + 
+				"			          ITypeBinding					   roleBinding,\n" + 
+				"			          ITypeBinding					   baseBinding,\n" + 
+				"			          ASTNode                          type,\n" + 
+				"			          AbstractMethodMappingDeclaration partialMapping,\n" + 
+				"			          ChildListPropertyDescriptor      bodyProperty) \n" + 
+				"			throws CoreException\n" + 
+				"	{\n" + 
+				"		// find base method:\n" + 
+				"		IMethodBinding method= findMethod(baseBinding, fMethodName, fParamTypes);\n" + 
+				"		if (method == null)\n" + 
+				"			return false;\n" + 
+				"		\n" + 
+				"		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fJavaProject);\n" + 
+				"		// create callout:\n" + 
+				"		AbstractMethodMappingDeclaration stub= this.fIsOnlyCallin \n" + 
+				"				? OTStubUtility.createCallin(iCU, rewrite, importRewrite,\n" + 
+				"						 				    method, baseBinding.getName(), ModifierKeyword.BEFORE_KEYWORD, settings)\n" + 
+				"				: OTStubUtility.createCallout(iCU, rewrite, importRewrite,\n" + 
+				"											 method, baseBinding.getName(), settings);\n" + 
+				"		if (stub != null) {\n" + 
+				"			insertStub(rewrite, type, bodyProperty, fReplaceStart, stub);\n" + 
+				"			\n" + 
+				"			MethodSpec roleMethodSpec = (MethodSpec)stub.getRoleMappingElement();\n" + 
+				"			\n" + 
+				"			// return type:\n" + 
+				"			ITrackedNodePosition returnTypePosition = null;\n" + 
+				"			ITypeBinding returnType = method.getReturnType();\n" + 
+				"			if (!(returnType.isPrimitive() && \"void\".equals(returnType.getName()))) {\n" + 
+				"				returnTypePosition = rewrite.track(roleMethodSpec.getReturnType2());\n" + 
+				"				addLinkedPosition(returnTypePosition, true, ROLEMETHODRETURN_KEY);\n" + 
+				"				LinkedProposalPositionGroup group1 = getLinkedProposalModel().getPositionGroup(ROLEMETHODRETURN_KEY, true);\n" + 
+				"				group1.addProposal(new MyJavaLinkedModeProposal(iCU, method.getReturnType(), 13)); //$NON-NLS-1$\n" + 
+				"				group1.addProposal(\"void\", null, 13); //$NON-NLS-1$\n" + 
+				"			}\n" + 
+				"			\n" + 
+				"			// role method name:\n" + 
+				"			addLinkedPosition(rewrite.track(roleMethodSpec.getName()), false, ROLEMETHODNAME_KEY);\n" + 
+				"			\n" + 
+				"			// argument lifting?\n" + 
+				"			if (roleBinding != null)\n" + 
+				"				addLiftingProposals(roleBinding, method, stub, rewrite);\n" + 
+				"			\n" + 
+				"			// binding operator:\n" + 
+				"			addLinkedPosition(rewrite.track(stub.bindingOperator()), false, BINDINGKIND_KEY);\n" + 
+				"			LinkedProposalPositionGroup group2= getLinkedProposalModel().getPositionGroup(BINDINGKIND_KEY, true);\n" + 
+				"			if (!this.fIsOnlyCallin) {\n" + 
+				"				String calloutToken = \"->\";\n" + 
+				"				if (this.fIsOverride) {\n" + 
+				"					calloutToken = \"=>\";\n" + 
+				"					stub.bindingOperator().setBindingKind(MethodBindingOperator.KIND_CALLOUT_OVERRIDE);\n" + 
+				"				}\n" + 
+				"				group2.addProposal(calloutToken, Images.getImage(CALLOUTBINDING_IMG), 13);         //$NON-NLS-1$\n" + 
+				"			}\n" + 
+				"			group2.addProposal(makeBeforeAfterBindingProposal(\"<- before\", Images.getImage(CALLINBINDING_BEFORE_IMG), returnTypePosition));  //$NON-NLS-1$\n" + 
+				"			group2.addProposal(\"<- replace\", Images.getImage(CALLINBINDING_REPLACE_IMG), 13); //$NON-NLS-1$\n" + 
+				"			group2.addProposal(makeBeforeAfterBindingProposal(\"<- after\",  Images.getImage(CALLINBINDING_AFTER_IMG), returnTypePosition));   //$NON-NLS-1$\n" + 
+				"		}\n" + 
+				"		return true;	\n" + 
+				"	}\n" + 
+				"	/** Create a method-binding proposal that, when applied, will change the role-returntype to \"void\": */\n" + 
+				"	Proposal makeBeforeAfterBindingProposal(String displayString, Image image, final ITrackedNodePosition returnTypePosition) {\n" + 
+				"		return new Proposal(displayString, image, 13) {\n" + 
+				"			@Override\n" + 
+				"			public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model)\n" + 
+				"					throws CoreException \n" + 
+				"			{\n" + 
+				"				MultiTextEdit edits = new MultiTextEdit();\n" + 
+				"				if (returnTypePosition != null)\n" + 
+				"					edits.addChild(new ReplaceEdit(returnTypePosition.getStartPosition(), returnTypePosition.getLength(), \"void\"));\n" + 
+				"				edits.addChild(super.computeEdits(offset, position, trigger, stateMask, model));\n" + 
+				"				return edits;\n" + 
+				"			}\n" + 
+				"		};\n" + 
+				"	}\n" + 
+				"	\n" + 
+				"	/** Check if any parameters or the return type are candidates for lifting/lowering. */\n" + 
+				"	@SuppressWarnings(\"rawtypes\")\n" + 
+				"	private void addLiftingProposals(ITypeBinding roleTypeBinding, IMethodBinding methodBinding,\n" + 
+				"			AbstractMethodMappingDeclaration stub, ASTRewrite rewrite) \n" + 
+				"	{\n" + 
+				"		ITypeBinding[] roles= roleTypeBinding.getDeclaringClass().getDeclaredTypes();\n" + 
+				"		MethodSpec roleSpec= (MethodSpec)stub.getRoleMappingElement();\n" + 
+				"		List params= roleSpec.parameters();\n" + 
+				"		ITypeBinding[] paramTypes = methodBinding.getParameterTypes();\n" + 
+				"		for (int i= 0; i<params.size(); i++)\n" + 
+				"			addLiftingProposalGroup(rewrite, ROLEPARAM_KEY+i, roles, \n" + 
+				"							        ((SingleVariableDeclaration)params.get(i)).getType(), paramTypes[i]);\n" + 
+				"		addLiftingProposalGroup(rewrite, ROLEPARAM_KEY+\"return\", roles,  //$NON-NLS-1$\n" + 
+				"									roleSpec.getReturnType2(), methodBinding.getReturnType());\n" + 
+				"	}\n" + 
+				"	/**\n" + 
+				"	 * check whether a given type is played by a role from a given array and create a proposal group containing base and role type. \n" + 
+				"	 * @param rewrite\n" + 
+				"	 * @param positionGroupID \n" + 
+				"	 * @param roles       available roles in the enclosing team\n" + 
+				"	 * @param type        AST node to investigate\n" + 
+				"	 * @param typeBinding type binding of AST node to investigate\n" + 
+				"	 */\n" + 
+				"	void addLiftingProposalGroup(ASTRewrite rewrite, String positionGroupID, ITypeBinding[] roles, Type type, ITypeBinding typeBinding)\n" + 
+				"	{\n" + 
+				"		for (ITypeBinding roleBinding : roles) {\n" + 
+				"			if (roleBinding.isSynthRoleIfc()) continue; // synth ifcs would otherwise cause dupes\n" + 
+				"			if (typeBinding.equals(roleBinding.getBaseClass())) {\n" + 
+				"				ITrackedNodePosition argTypePos= rewrite.track(type);\n" + 
+				"				addLinkedPosition(argTypePos, true, positionGroupID);\n" + 
+				"				LinkedProposalPositionGroup group=\n" + 
+				"					getLinkedProposalModel().getPositionGroup(positionGroupID, true);\n" + 
+				"				group.addProposal(type.toString(), null, 13);\n" + 
+				"				group.addProposal(roleBinding.getName(), null, 13);\n" + 
+				"				break;\n" + 
+				"			}\n" + 
+				"		}		\n" + 
+				"	}\n" + 
+				"}";
+			this.createFile(
+				"/P/MyTeam/CreateMethodMappingCompletionProposal.java",
+	    			role2SourceString);
+			
+			String teamSourceString =
+				"public team class  MyTeam {\n" +
+				"	CreateMethodMappingCompletionProposal r;\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam.java",
+	    			teamSourceString);
+
+			char[] role2SourceChars = role2SourceString.toCharArray();
+			this.problemRequestor.initialize(role2SourceChars);
+			
+			ICompilationUnit cu = getCompilationUnit("/P/MyTeam/CreateMethodMappingCompletionProposal.java").getWorkingCopy(this.wcOwner, null);
+			// inject an error at 'random' location
+			cu.applyTextEdit(new InsertEdit(1000, "\t\t@"), null);
+			IType r2 = cu.getType("CreateMethodMappingCompletionProposal");
+			IType inner = r2.getType("MyJavaLinkedModeProposal");
+			IRoleType innerRole = (IRoleType) OTModelManager.getOTElement(inner);
+			IType base = innerRole.getBaseClass();
+			assertTrue("base should not null", base != null);
+			assertEquals("wrong name of baseclass", "JavaLinkedModeProposal", base.getElementName());
     	} finally {
     		deleteProject("P");
     	}
