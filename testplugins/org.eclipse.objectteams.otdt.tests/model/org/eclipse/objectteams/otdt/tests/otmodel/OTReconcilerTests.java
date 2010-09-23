@@ -1033,6 +1033,7 @@ public class OTReconcilerTests extends ReconcilerTests {
     }
     
     // a role file holds a nested team which extends a non-team role file
+    // Bug 324526 -  [reconciler] NPE during AST creation, team in role file subclassing non-team role
     public void testRoFiNestedTeam() throws CoreException {
     	try {
 			// Resources creation
