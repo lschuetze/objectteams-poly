@@ -27,8 +27,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 
 import org.eclipse.core.internal.runtime.InternalPlatform;
@@ -92,8 +92,8 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 	
 	/** The instance that is created by the framework. */
 	private static TransformerPlugin instance;
-	private ServiceRegistration serviceRegistration;  // IOTEquinoxService
-	private ServiceRegistration serviceRegistration2; // IOTTransformer
+	private ServiceRegistration<IOTEquinoxService> serviceRegistration;
+	private ServiceRegistration<IOTTransformer> serviceRegistration2;
 
 	/* unevaluated content of liftingParticipant extension: */
 	private IConfigurationElement liftingParticipantConfig; 
@@ -127,7 +127,7 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 		this.log = HookConfigurator.getLogger();
 		log(ILogger.INFO, "activating org.eclipse.objectteams.otequinox");
 		
-		ServiceReference ref= context.getServiceReference(PackageAdmin.class.getName());
+		ServiceReference<?> ref= context.getServiceReference(PackageAdmin.class.getName());
 		if (ref!=null)
 			this.packageAdmin = (PackageAdmin)context.getService(ref);
 		else
@@ -137,8 +137,8 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 		this.permissionManager.loadAspectBindingNegotiators(context);
 		loadAspectBindings();
 		loadLiftingParticipant();
-		this.serviceRegistration = context.registerService(IOTEquinoxService.class.getName(), this, new Properties());		
-		this.serviceRegistration2 = context.registerService(IOTTransformer.class.getName(), new TransformerServiceDelegate(), new Properties());
+		this.serviceRegistration = context.registerService(IOTEquinoxService.class, this, new Hashtable<String, Object>());		
+		this.serviceRegistration2 = context.registerService(IOTTransformer.class, new TransformerServiceDelegate(), new Hashtable<String, Object>());
 		Job.getJobManager().addJobChangeListener(new JobAndThreadListener());
 	}
 		
@@ -569,7 +569,7 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 	/** Copy all registered team instances into the given list,
 	 *  which must by of type List<Team>; (can't mention Team in this plugin).
      */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static synchronized void getTeamInstances(List list) {
 		list.addAll(instance.teamInstances);
 	}
