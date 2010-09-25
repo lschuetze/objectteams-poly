@@ -235,19 +235,19 @@ public class OTStorageHook implements StorageHook
 		return false;
 	}
 
-	public Dictionary<?,?> getManifest(boolean firstLoad) throws BundleException 
+	public Dictionary<String, String> getManifest(boolean firstLoad) throws BundleException 
 	{
 		StorageHook manifestProviderInstance = this.manifestProvider.create(this.bundleData);
-		final Dictionary<?,?> orig= manifestProviderInstance.getManifest(firstLoad);
+		final Dictionary<String, String> orig= manifestProviderInstance.getManifest(firstLoad);
 		
 		checkActivationPolicy(orig);
 		
 		// wrap the original answer:
-		return new Headers(orig.size()) 
+		return new Headers<String, String>(orig.size()) 
 		{
 			@Override
-			public Object get(Object key) {
-				Object value = orig.get(key);
+			public String get(Object key) {
+				String value = orig.get(key);
 				if (!EXPORT_PACKAGE.equals(key)) 
 					return value;
 				synchronized (OTStorageHook.class){
@@ -257,7 +257,7 @@ public class OTStorageHook implements StorageHook
 				String exports= grantedForcedExports.get(OTStorageHook.this.bundleData.getSymbolicName());
 				if (exports != null) {
 					// yes, we need to add forced exports:
-					String packages= (String)orig.get(EXPORT_PACKAGE);
+					String packages= orig.get(EXPORT_PACKAGE);
 					if (!exports.contains(XFRIENDS)) {
 						// invalid directive:
 						grantedForcedExports.remove(OTStorageHook.this.bundleData.getSymbolicName()); 
@@ -271,16 +271,16 @@ public class OTStorageHook implements StorageHook
 				return value;
 			}
 			// other methods simply delegate:
-			@Override public synchronized int size()             { return orig.size(); }
-			@Override public synchronized Enumeration<?> keys()  { return orig.keys(); }
+			@Override public synchronized int size()                 { return orig.size(); }
+			@Override public synchronized Enumeration<String> keys() { return orig.keys(); }
 		};
 	}
 
 	/** Let the TransformerHook know if we see a bundle without an activation policy. */
-	protected void checkActivationPolicy(Dictionary<?, ?> orig) {
+	protected void checkActivationPolicy(Dictionary<String, String> orig) {
 		orig.keys(); // force initialization of manifest
-		String value = (String) orig.get(Constants.BUNDLE_ACTIVATIONPOLICY);
-		String value2 = (String)orig.get(Constants.ECLIPSE_LAZYSTART);
+		String value = orig.get(Constants.BUNDLE_ACTIVATIONPOLICY);
+		String value2 = orig.get(Constants.ECLIPSE_LAZYSTART);
 		if (   (value == null  || !value.trim().startsWith(Constants.ACTIVATION_LAZY))
 			&& (value2 == null || !value2.trim().equalsIgnoreCase("true"))) //$NON-NLS-1$
 		{
