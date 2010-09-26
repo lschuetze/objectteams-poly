@@ -16,10 +16,10 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.util;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
@@ -80,19 +80,18 @@ public team class HierarchyUtilAdaptor
 		}
 
 		@SuppressWarnings({ "rawtypes", "decapsulation" })
-		IStatus compileCandidates(List resultlist, IJavaElement elem) <- replace IStatus compileCandidates(List resultlist, IJavaElement elem);
+		void compileCandidates(List resultlist, List elements) <- before IStatus compileCandidates(List resultlist, List elements);
 
-		@SuppressWarnings({ "rawtypes", "unchecked", "basecall" }) // parameter is raw list
-		static callin IStatus compileCandidates(List resultlist, IJavaElement elem) {
-			IStatus ok= Status.OK_STATUS;
-			switch (elem.getElementType()) {
-				case IOTJavaElement.CALLIN_MAPPING:
-				case IOTJavaElement.CALLOUT_MAPPING:
-				case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
-					resultlist.add(elem);
-					return ok;
-				default:
-					return base.compileCandidates(resultlist, elem);
+		@SuppressWarnings({ "rawtypes", "unchecked" }) // parameter are raw lists
+		static void compileCandidates(List resultlist, List elements) {
+			for (Iterator iter= elements.iterator(); iter.hasNext();) {
+				IJavaElement elem= (IJavaElement)iter.next();
+				switch (elem.getElementType()) {
+					case IOTJavaElement.CALLIN_MAPPING:
+					case IOTJavaElement.CALLOUT_MAPPING:
+					case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
+						resultlist.add(elem);
+				}
 			}
 		}		
 	}
