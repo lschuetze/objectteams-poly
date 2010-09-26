@@ -227,8 +227,8 @@ should test be run (true|false)?
 		
         <!-- Make org.eclipse.test.performance available while compiling test projects: -->
         <echo message="Pre-installing Eclipse Test Framework into OTCompilerEclipse..."/>
-        <mkdir dir="${testsUpdatesDirBase}"/>
-        <unzip dest="${testsUpdatesDirBase}" src="${eclipse.tests.zip}"/> <!-- unfolds into "eclipse" subdir -->
+        <mkdir dir="${testsUpdatesDirBase}/eclipse"/>
+        <unzip dest="${testsUpdatesDirBase}/eclipse" src="${eclipse.tests.zip}"/> 
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.test.feature.group"/>
             <property name="sourceUpdatesDir" value="${testsUpdatesDirBase}/eclipse"/>
