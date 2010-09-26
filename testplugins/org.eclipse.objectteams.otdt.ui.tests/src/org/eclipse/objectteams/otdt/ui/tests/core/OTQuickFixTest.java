@@ -21,15 +21,21 @@
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
@@ -89,4 +95,20 @@ public class OTQuickFixTest extends QuickFixTest {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 
+	// variant to test against non-first problem:
+	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int iProblem, AssistContext context) throws CoreException {
+		IProblem[] problems= astRoot.getProblems();
+		if (problems.length != nProblems) {
+			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
+			buf.append(problems.length).append(", expected: ").append(nProblems).append('\n');
+			for (int i= 0; i < problems.length; i++) {
+				buf.append(problems[i]);
+				buf.append('[').append(problems[i].getSourceStart()).append(" ,").append(problems[i].getSourceEnd()).append(']');
+				buf.append('\n');
+			}
+			assertTrue(buf.toString(), false);
+
+		}
+		return collectCorrections(cu, problems[iProblem], context);
+	}
 }
