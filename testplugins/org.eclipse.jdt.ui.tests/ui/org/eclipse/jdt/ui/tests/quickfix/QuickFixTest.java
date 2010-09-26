@@ -200,23 +200,6 @@ public class QuickFixTest extends TestCase {
 		return collectCorrections(cu, astRoot, nProblems, null);
 	}
 
-//{ObjectTeams: variant to test against non-first problem:
-	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, int iProblem, AssistContext context) throws CoreException {
-		IProblem[] problems= astRoot.getProblems();
-		if (problems.length != nProblems) {
-			StringBuffer buf= new StringBuffer("Wrong number of problems, is: ");
-			buf.append(problems.length).append(", expected: ").append(nProblems).append('\n');
-			for (int i= 0; i < problems.length; i++) {
-				buf.append(problems[i]);
-				buf.append('[').append(problems[i].getSourceStart()).append(" ,").append(problems[i].getSourceEnd()).append(']');
-				buf.append('\n');
-			}
-			assertTrue(buf.toString(), false);
-
-		}
-		return collectCorrections(cu, problems[iProblem], context);
-	}
-// SH}
 	protected static final ArrayList collectCorrections(ICompilationUnit cu, CompilationUnit astRoot, int nProblems, AssistContext context) throws CoreException {
 		IProblem[] problems= astRoot.getProblems();
 		assertNumberOfProblems(nProblems, problems);

@@ -732,12 +732,7 @@ public class JavaProjectHelper {
 		};
 	}
 
-//{ObjectTeams: expose to sub-classes
-/* orig:	
 	private static void addNatureToProject(IProject proj, String natureId, IProgressMonitor monitor) throws CoreException {
-  :giro */
-	protected static void addNatureToProject(IProject proj, String natureId, IProgressMonitor monitor) throws CoreException {
-// SH}
 		IProjectDescription description = proj.getDescription();
 		String[] prevNatures= description.getNatureIds();
 		String[] newNatures= new String[prevNatures.length + 1];
