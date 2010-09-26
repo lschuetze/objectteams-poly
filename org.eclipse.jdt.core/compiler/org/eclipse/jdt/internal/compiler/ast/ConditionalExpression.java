@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephen Herrmann <stephan@cs.tu-berlin.de> -  Contributions for bugs 133125, 292478
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -332,8 +333,19 @@ public int nullStatus(FlowInfo flowInfo) {
 	if (ifTrueNullStatus == ifFalseNullStatus) {
 		return ifTrueNullStatus;
 	}
+	// is there a chance of null (or non-null)? -> potentially null etc.
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=133125
+	int status = 0;
+	int combinedStatus = ifTrueNullStatus|ifFalseNullStatus;
+	if ((combinedStatus & (FlowInfo.NULL|FlowInfo.POTENTIALLY_NULL)) != 0)
+		status |= FlowInfo.POTENTIALLY_NULL;
+	if ((combinedStatus & (FlowInfo.NON_NULL|FlowInfo.POTENTIALLY_NON_NULL)) != 0)
+		status |= FlowInfo.POTENTIALLY_NON_NULL;
+	if ((combinedStatus & (FlowInfo.UNKNOWN|FlowInfo.POTENTIALLY_UNKNOWN)) != 0)
+		status |= FlowInfo.POTENTIALLY_UNKNOWN;
+	if (status > 0)
+		return status;
 	return FlowInfo.UNKNOWN;
-	// cannot decide which branch to take, and they disagree
 }
 
 	public Constant optimizedBooleanConstant() {

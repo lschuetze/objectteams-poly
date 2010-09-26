@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -39,9 +39,7 @@ public final class LocalTypeBinding extends NestedTypeBinding {
 	public int sourceStart; // used by computeUniqueKey to uniquely identify this binding
 	public MethodBinding enclosingMethod;
 
-//	public ReferenceBinding anonymousOriginalSuperType;
-
-public LocalTypeBinding(ClassScope scope, SourceTypeBinding enclosingType, CaseStatement switchCase, ReferenceBinding anonymousOriginalSuperType) {
+public LocalTypeBinding(ClassScope scope, SourceTypeBinding enclosingType, CaseStatement switchCase) {
 	super(
 		new char[][] {CharOperation.concat(LocalTypeBinding.LocalTypePrefix, scope.referenceContext.name)},
 		scope,
@@ -139,7 +137,12 @@ public char[] computeUniqueKey(boolean isLeaf) {
 }
 
 public char[] constantPoolName() /* java/lang/Object */ {
-	return this.constantPoolName;
+	if (this.constantPoolName == null && this.scope != null) {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=322154, we do have some
+		// cases where the left hand does not know what the right is doing.
+		this.constantPoolName = this.scope.compilationUnitScope().computeConstantPoolName(this);
+	}
+	return this.constantPoolName;	
 }
 
 ArrayBinding createArrayType(int dimensionCount, LookupEnvironment lookupEnvironment) {
@@ -164,7 +167,7 @@ ArrayBinding createArrayType(int dimensionCount, LookupEnvironment lookupEnviron
  * (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=99686)
  */
 public char[] genericTypeSignature() {
-	if (this.genericReferenceTypeSignature == null && constantPoolName() == null) {
+	if (this.genericReferenceTypeSignature == null && this.constantPoolName == null) {
 		if (isAnonymousType())
 			setConstantPoolName(superclass().sourceName());
 		else
@@ -248,7 +251,7 @@ public void computeConstantPoolName() {
  * (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=102284)
  */
 public char[] signature() {
-	if (this.signature == null && constantPoolName() == null) {
+	if (this.signature == null && this.constantPoolName == null) {
 		if (isAnonymousType())
 			setConstantPoolName(superclass().sourceName());
 		else

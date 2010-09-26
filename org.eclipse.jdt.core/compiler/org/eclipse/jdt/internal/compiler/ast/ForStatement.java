@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
@@ -93,6 +94,9 @@ public class ForStatement extends Statement {
 							new LoopingFlowContext(flowContext, flowInfo, this, null,
 								null, this.scope)),
 						condInfo);
+				if ((this.condition.implicitConversion & TypeIds.UNBOXING) != 0) {
+					this.condition.checkNPE(currentScope, flowContext, flowInfo);
+				}
 			}
 		}
 
@@ -195,7 +199,13 @@ public class ForStatement extends Statement {
 			incrementContext.complainOnDeferredNullChecks(currentScope,
 				actionInfo);
 		}
-
+		if (loopingContext.hasEscapingExceptions()) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=321926
+			FlowInfo loopbackFlowInfo = flowInfo.copy();
+			if (this.continueLabel != null) {  // we do get to the bottom 
+				loopbackFlowInfo.mergedWith(actionInfo.unconditionalCopy());
+			}
+			loopingContext.simulateThrowAfterLoopBack(loopbackFlowInfo);
+		}
 		//end of loop
 		FlowInfo mergedInfo = FlowInfo.mergedOptimizedBranches(
 				(loopingContext.initsOnBreak.tagBits &

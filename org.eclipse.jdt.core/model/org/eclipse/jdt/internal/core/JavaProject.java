@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - inconsistent initialization of classpath container backed by external class folder, see https://bugs.eclipse.org/320618
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.core;
@@ -1650,7 +1651,8 @@ public class JavaProject
 		// Get project specific options
 		JavaModelManager.PerProjectInfo perProjectInfo = null;
 		Hashtable projectOptions = null;
-		HashSet optionNames = JavaModelManager.getJavaModelManager().optionNames;
+		JavaModelManager javaModelManager = JavaModelManager.getJavaModelManager();
+		HashSet optionNames = javaModelManager.optionNames;
 		try {
 			perProjectInfo = getPerProjectInfo();
 			projectOptions = perProjectInfo.options;
@@ -1664,8 +1666,13 @@ public class JavaProject
 				for (int i = 0; i < propertyNames.length; i++){
 					String propertyName = propertyNames[i];
 					String value = projectPreferences.get(propertyName, null);
-					if (value != null && optionNames.contains(propertyName)){
-						projectOptions.put(propertyName, value.trim());
+					if (value != null) {
+						if (optionNames.contains(propertyName)){
+							projectOptions.put(propertyName, value.trim());
+						} else {
+							// Maybe an obsolete preference, try to migrate it...
+							javaModelManager.migrateObsoleteOption(projectOptions, propertyName, value.trim());
+						}
 					}
 				}
 				// cache project options

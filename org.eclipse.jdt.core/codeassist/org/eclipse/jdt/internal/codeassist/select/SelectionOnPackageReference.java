@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -38,10 +38,10 @@ public class SelectionOnPackageReference extends ImportReference {
 //{ObjectTeams: added: modifiers (for the sake of "team"):
 /* orig:
 public SelectionOnPackageReference(char[][] tokens , long[] positions) {
-	super(tokens, positions, true, ClassFileConstants.AccDefault);
+	super(tokens, positions, false, ClassFileConstants.AccDefault);
   :giro*/
 public SelectionOnPackageReference(char[][] tokens , long[] positions, int modifiers) {
-	super(tokens, positions, true, modifiers);
+	super(tokens, positions, false, modifiers);
 // SH}
 }
 public StringBuffer print(int tab, StringBuffer output, boolean withOnDemand) {

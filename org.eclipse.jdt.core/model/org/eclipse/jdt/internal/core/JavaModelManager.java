@@ -76,7 +76,7 @@ import org.xml.sax.SAXException;
 /**
  * <h4>OTDT changes:</h4>
  * <dl>
- * <dt>What:<dd> respect IOTJavaElement which cannot be casted to JavaElement
+ * <dt>What:<dd> Filter IProblem.AdaptedPluginAccess when saving state.
  * </dl>
  * <hr>
  * The <code>JavaModelManager</code> manages instances of <code>IJavaModel</code>.
@@ -1003,9 +1003,8 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 			JavaProjectElementInfo projectInfo = (JavaProjectElementInfo) getJavaModelManager().getInfo(project);
 			ProjectCache projectCache = projectInfo == null ? null : projectInfo.projectCache;
 			HashtableOfArrayToObject allPkgFragmentsCache = projectCache == null ? null : projectCache.allPkgFragmentsCache;
-			IClasspathEntry[] entries =
-				org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(resourcePath.lastSegment())
-					? project.getRawClasspath() // JAVA file can only live inside SRC folder (on the raw path)
+			boolean isJavaLike = org.eclipse.jdt.internal.core.util.Util.isJavaLikeFileName(resourcePath.lastSegment());
+			IClasspathEntry[] entries = isJavaLike ? project.getRawClasspath() // JAVA file can only live inside SRC folder (on the raw path)
 					: ((JavaProject)project).getResolvedClasspath();
 
 			int length	= entries.length;
@@ -1017,6 +1016,8 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 					if (entry.getEntryKind() == IClasspathEntry.CPE_PROJECT) continue;
 					IPath rootPath = entry.getPath();
 					if (rootPath.equals(resourcePath)) {
+						if (isJavaLike) 
+							return null;
 						return project.getPackageFragmentRoot(resource);
 					} else if (rootPath.isPrefixOf(resourcePath)) {
 						// allow creation of package fragment if it contains a .java file that is included
@@ -1408,6 +1409,8 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	public static boolean CP_RESOLVE_VERBOSE_ADVANCED = false;
 	public static boolean CP_RESOLVE_VERBOSE_FAILURE = false;
 	public static boolean ZIP_ACCESS_VERBOSE = false;
+	// temporary debug flag to track failures of bug 302850
+	public static boolean DEBUG_302850 = false;
 
 	/**
 	 * A cache of opened zip files per thread.
@@ -2078,6 +2081,16 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 
 		// backward compatibility
 		addDeprecatedOptions(options);
+		try {
+			final IEclipsePreferences eclipsePreferences = this.preferencesLookup[PREF_INSTANCE];
+			String[] instanceKeys = eclipsePreferences.keys();
+			for (int i=0, length=instanceKeys.length; i<length; i++) {
+				String optionName = instanceKeys[i];
+				migrateObsoleteOption(options, optionName, eclipsePreferences.get(optionName, null));
+			}
+		} catch (BackingStoreException e) {
+			// skip
+		}
 
 		Util.fixTaskTags(options);
 		// store built map in cache
@@ -2085,6 +2098,63 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 
 		// return built map
 		return options;
+	}
+
+	/**
+	 * Migrates an old option value to its new corresponding option name(s)
+	 * when necessary.
+	 * <p>
+	 * Nothing is done if the given option is not obsolete or if no migration has been
+	 * specified for it.
+	 * </p><p>
+	 * Currently, migration is only done for formatter options.
+	 * </p>
+	 * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=308000"
+	 * 
+	 * @param options The options map to update
+	 * @param optionName The old option name to update
+	 * @param optionValue The value of the old option name
+	 */
+	public void migrateObsoleteOption(Map options, String optionName, String optionValue) {
+
+		// Migrate formatter options
+		String[] compatibleConstants = getFormatterCompatibleConstants(optionName);
+		if (compatibleConstants != null) {
+			for (int i=0, length=compatibleConstants.length; i < length; i++) {
+				options.put(compatibleConstants[i], optionValue);
+			}
+			return;
+		}
+	}
+
+	/**
+	 * Return an array of compatible constants for an obsolete constant.
+	 * 
+	 * @param name The name of the obsolete constant
+	 * @return The list as a non-empty array of the compatible constants or
+	 * <code>null</code> if the constant is <b>not</b> obsolete.
+	 * @deprecated As using deprecated formatter constants
+	 */
+	private static String[] getFormatterCompatibleConstants(String name) {
+		if (DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER.equals(name)) {
+			return new String[] {
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE
+			};
+		}
+		if (DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION.equals(name)) {
+			return new String[] {
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_LOCAL_VARIABLE,
+				DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PARAMETER
+			};
+		}
+		return null;
 	}
 
 	// Do not modify without modifying getDefaultOptions()
@@ -3897,6 +3967,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 
 		private void saveAccessRules(IAccessRule[] rules) throws IOException {
 			int count = rules == null ? 0 : rules.length;
+
 			saveInt(count);
 			for (int i = 0; i < count; ++i)
 				saveAccessRule((ClasspathAccessRule) rules[i]);
@@ -4633,14 +4704,27 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	}
 
 	public void setOptions(Hashtable newOptions) {
+		
+		if (DEBUG_302850) {
+			System.out.println("Entering in JavaModelManager.setOptions():"); //$NON-NLS-1$
+			System.out.println(new CompilerOptions(newOptions).toString());
+			System.out.println("	- Call stack:"); //$NON-NLS-1$
+			StackTraceElement[] elements = new Exception().getStackTrace();
+			for (int i=0,n=elements.length; i<n; i++) {
+				System.out.println("		+ "+elements[i]); //$NON-NLS-1$
+			}
+		}
 
-		try {
 			Hashtable cachedValue = newOptions == null ? null : new Hashtable(newOptions);
 			IEclipsePreferences defaultPreferences = getDefaultPreferences();
 			IEclipsePreferences instancePreferences = getInstancePreferences();
 
 			if (newOptions == null){
-				instancePreferences.clear();
+				try {
+					instancePreferences.clear();
+				} catch(BackingStoreException e) {
+					// ignore
+				}
 			} else {
 				Enumeration keys = newOptions.keys();
 				while (keys.hasMoreElements()){
@@ -4660,26 +4744,25 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 						instancePreferences.put(key, value);
 					}
 				}
+				try {
+					// persist options
+					instancePreferences.flush();
+				} catch(BackingStoreException e) {
+					// ignore
+//{ObjectTeams: harness for  Bug 302850 -  13 failures in JavaModel tests for the N20100214-2000 Mac OS X - Cocoa test machine
+					e.printStackTrace(); 
+				} catch (RuntimeException e) {
+					e.printStackTrace();
+					throw e;
+				} catch (Error e) {
+					e.printStackTrace();
+					throw e;
+// SH}
+				}
 			}
-
-			// persist options
-			instancePreferences.flush();
-
 			// update cache
 			Util.fixTaskTags(cachedValue);
 			this.optionsCache = cachedValue;
-		} catch (BackingStoreException e) {
-			// ignore
-//{ObjectTeams: harness for  Bug 302850 -  13 failures in JavaModel tests for the N20100214-2000 Mac OS X - Cocoa test machine
-			e.printStackTrace(); 
-		} catch (RuntimeException e) {
-			e.printStackTrace();
-			throw e;
-		} catch (Error e) {
-			e.printStackTrace();
-			throw e;
-// SH}
-		}
 	}
 
 	public void startup() throws CoreException {

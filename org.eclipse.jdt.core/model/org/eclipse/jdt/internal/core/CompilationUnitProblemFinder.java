@@ -105,34 +105,47 @@ public class CompilationUnitProblemFinder extends Compiler {
 
 		CompilationResult result =
 			new CompilationResult(sourceTypes[0].getFileName(), 1, 1, this.options.maxProblemsPerUnit);
+		
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259, build the compilation unit in its own sand box.
+		final long savedComplianceLevel = this.options.complianceLevel;
+		final long savedSourceLevel = this.options.sourceLevel;
+		
+		try {
+			IJavaProject project = ((SourceTypeElementInfo) sourceTypes[0]).getHandle().getJavaProject();
+			this.options.complianceLevel = CompilerOptions.versionToJdkLevel(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+			this.options.sourceLevel = CompilerOptions.versionToJdkLevel(project.getOption(JavaCore.COMPILER_SOURCE, true));
 
-		// need to hold onto this
-		CompilationUnitDeclaration unit =
-			SourceTypeConverter.buildCompilationUnit(
-				sourceTypes,//sourceTypes[0] is always toplevel here
-				SourceTypeConverter.FIELD_AND_METHOD // need field and methods
-				| SourceTypeConverter.MEMBER_TYPE // need member types
-				| SourceTypeConverter.FIELD_INITIALIZATION, // need field initialization
-				this.lookupEnvironment.problemReporter,
-				result);
+			// need to hold onto this
+			CompilationUnitDeclaration unit =
+				SourceTypeConverter.buildCompilationUnit(
+						sourceTypes,//sourceTypes[0] is always toplevel here
+						SourceTypeConverter.FIELD_AND_METHOD // need field and methods
+						| SourceTypeConverter.MEMBER_TYPE // need member types
+						| SourceTypeConverter.FIELD_INITIALIZATION, // need field initialization
+						this.lookupEnvironment.problemReporter,
+						result);
 
-		if (unit != null) {
+			if (unit != null) {
 //{ObjectTeams: controlled by Dependencies:
-		  boolean newDependencySetup= false;
-		  try {
-			if (!Dependencies.isSetup()) {
-				newDependencySetup= true;
-				Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false);
-			}
+			  boolean newDependencySetup= false;
+			  try {
+				if (!Dependencies.isSetup()) {
+					newDependencySetup= true;
+					Dependencies.setup(this, this.parser, this.lookupEnvironment, true, false);
+				}
 // orig:  Note(SH): this will redirect:
-			this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
-			this.lookupEnvironment.completeTypeBindings(unit);
-// :giro			
-		  } finally {
-			if (newDependencySetup)
-				Dependencies.release(this);
-		  }
+				this.lookupEnvironment.buildTypeBindings(unit, accessRestriction);
+				this.lookupEnvironment.completeTypeBindings(unit);
+// :giro
+			  } finally {
+				if (newDependencySetup)
+					Dependencies.release(this);
+			  }
 // SH}
+			}
+		} finally {
+			this.options.complianceLevel = savedComplianceLevel;
+			this.options.sourceLevel = savedSourceLevel;
 		}
 	}
 

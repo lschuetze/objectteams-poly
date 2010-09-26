@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 292478 - Report potentially null across variable assignment
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -674,8 +675,14 @@ public void checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInf
 		}
 		flowInfo.markAsComparedEqualToNonNull(local);
 			// from thereon it is set
+		if ((flowContext.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) != 0) {
+			flowInfo.markedAsNullOrNonNullInAssertExpression(local);
+		}
 		if (flowContext.initsOnFinally != null) {
 			flowContext.initsOnFinally.markAsComparedEqualToNonNull(local);
+			if ((flowContext.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) != 0) {
+				flowContext.initsOnFinally.markedAsNullOrNonNullInAssertExpression(local);
+			}
 		}
 	}
 }
@@ -1000,13 +1007,8 @@ public int nullStatus(FlowInfo flowInfo) {
 	return FlowInfo.NON_NULL; // constant expression cannot be null
 
 	LocalVariableBinding local = localVariableBinding();
-	if (local != null) {
-		if (flowInfo.isDefinitelyNull(local))
-			return FlowInfo.NULL;
-		if (flowInfo.isDefinitelyNonNull(local))
-			return FlowInfo.NON_NULL;
-		return FlowInfo.UNKNOWN;
-	}
+	if (local != null)
+		return flowInfo.nullStatus(local);
 	return FlowInfo.NON_NULL;
 }
 

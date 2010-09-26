@@ -46,7 +46,7 @@ private long previousStructuralBuildTime;
 private StringSet structurallyChangedTypes;
 public static int MaxStructurallyChangedTypes = 100; // keep track of ? structurally changed types, otherwise consider all to be changed
 
-public static final byte VERSION = 0x0018; // fix for 291472
+public static final byte VERSION = 0x0019; // fix for 325755
 
 static final byte SOURCE_FOLDER = 1;
 static final byte BINARY_FOLDER = 2;
@@ -299,7 +299,7 @@ static State read(IProject project, DataInputStream in) throws IOException {
 			qName[j] = internedSimpleNames[in.readInt()];
 		internedQualifiedNames[i] = qName;
 	}
-	internedQualifiedNames = ReferenceCollection.internQualifiedNames(internedQualifiedNames);
+	internedQualifiedNames = ReferenceCollection.internQualifiedNames(internedQualifiedNames, false);
 
 	newState.references = new SimpleLookupTable(length = in.readInt());
 	for (int i = 0; i < length; i++) {

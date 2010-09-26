@@ -637,7 +637,13 @@ public abstract class Scope {
 	 * @param checkForErasedCandidateCollisions
 	 */
 	protected boolean connectTypeVariables(TypeParameter[] typeParameters, boolean checkForErasedCandidateCollisions) {
-		if (typeParameters == null || compilerOptions().sourceLevel < ClassFileConstants.JDK1_5) return true;
+		/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259 - We used to not bother with connecting
+		   type variables if source level is < 1.5. This creates problems in the reconciler if a 1.4
+		   project references the generified API of a 1.5 project. The "current" project's source
+		   level cannot decide this question for some other project. Now, if we see type parameters
+		   at all, we assume that the concerned java element has some legitimate business with them.
+		 */
+		if (typeParameters == null || typeParameters.length == 0) return true;
 		Map invocations = new HashMap(2);
 		boolean noProblems = true;
 		// preinitializing each type variable
@@ -1052,7 +1058,6 @@ public abstract class Scope {
 		}
 		return null;
 	}
-
 	// Internal use only
 	/*	Answer the field binding that corresponds to fieldName.
 		Start the lookup at the receiverType.
@@ -1060,10 +1065,23 @@ public abstract class Scope {
 			isSuperAccess(); this is used to determine if the discovered field is visible.
 		Only fields defined by the receiverType or its supertypes are answered;
 		a field of an enclosing type will not be found using this API.
-
+    	If no visible field is discovered, null is answered.
+	 */
+	public FieldBinding findField(TypeBinding receiverType, char[] fieldName, InvocationSite invocationSite, boolean needResolve) {
+		return findField(receiverType, fieldName, invocationSite, needResolve, false);
+	}
+	// Internal use only
+	/*	Answer the field binding that corresponds to fieldName.
+		Start the lookup at the receiverType.
+		InvocationSite implements
+			isSuperAccess(); this is used to determine if the discovered field is visible.
+		Only fields defined by the receiverType or its supertypes are answered;
+		a field of an enclosing type will not be found using this API.
+        If the parameter invisibleFieldsOk is true, visibility checks have not been run on
+        any returned fields. The caller needs to apply these checks as needed. Otherwise,
 		If no visible field is discovered, null is answered.
 	*/
-	public FieldBinding findField(TypeBinding receiverType, char[] fieldName, InvocationSite invocationSite, boolean needResolve) {
+	public FieldBinding findField(TypeBinding receiverType, char[] fieldName, InvocationSite invocationSite, boolean needResolve, boolean invisibleFieldsOk) {
 
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordTypeReference(receiverType);
@@ -1111,8 +1129,13 @@ public abstract class Scope {
 
 		currentType.initializeForStaticImports();
 		FieldBinding field = currentType.getField(fieldName, needResolve);
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=316456
+		boolean insideTypeAnnotations = this instanceof MethodScope && ((MethodScope) this).insideTypeAnnotation;
 		if (field != null) {
-			if (invocationSite == null
+			if (invisibleFieldsOk) {
+				return field;
+			}
+			if (invocationSite == null || insideTypeAnnotations
 				? field.canBeSeenBy(getCurrentPackage())
 				: field.canBeSeenBy(currentType, invocationSite, this))
 					return field;
@@ -1150,6 +1173,9 @@ public abstract class Scope {
 			currentType.initializeForStaticImports();
 			currentType = (ReferenceBinding) currentType.capture(this, invocationSite == null ? 0 : invocationSite.sourceEnd());
 			if ((field = currentType.getField(fieldName, needResolve)) != null) {
+				if (invisibleFieldsOk) {
+					return field;
+				}
 				keepLooking = false;
 				if (field.canBeSeenBy(receiverType, invocationSite, this)) {
 					if (visibleField == null)
@@ -1171,6 +1197,9 @@ public abstract class Scope {
 				unitScope.recordTypeReference(anInterface);
 				// no need to capture rcv interface, since member field is going to be static anyway
 				if ((field = anInterface.getField(fieldName, true /*resolve*/)) != null) {
+					if (invisibleFieldsOk) {
+						return field;
+					}
 					if (visibleField == null) {
 						visibleField = field;
 					} else {
@@ -1854,7 +1883,9 @@ public abstract class Scope {
 											}
 											if (foundField.isValidBinding())
 												// if a valid field was found, complain when another is found in an 'immediate' enclosing type (that is, not inherited)
-												if (foundField.declaringClass != fieldBinding.declaringClass)
+												// but only if "valid field" was inherited in the first place.
+												if (foundField.declaringClass != fieldBinding.declaringClass &&
+												    foundField.declaringClass != foundActualReceiverType) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=316956
 													// i.e. have we found the same field - do not trust field identity yet
 													return new ProblemFieldBinding(
 														foundField, // closest match
@@ -4025,6 +4056,7 @@ public abstract class Scope {
 			public void setFieldIndex(int depth) { /* ignore */}
 			public int sourceStart() { return invocationSite.sourceStart(); }
 			public int sourceEnd() { return invocationSite.sourceStart(); }
+			public TypeBinding expectedType() { return invocationSite.expectedType(); }
 		};
 		MethodBinding[] moreSpecific = new MethodBinding[visibleSize];
 		int count = 0;

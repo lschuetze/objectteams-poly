@@ -651,9 +651,6 @@ public List collectMissingTypes(List missingTypes) {
 			}
 		}
 	}
-	if (missingTypes == null) {
-		System.err.println("Could not find missing types in " + this); //$NON-NLS-1$
-	}
 	return missingTypes;
 }
 
@@ -1480,7 +1477,7 @@ public final char[] signature(ClassFile classFile, TypeBinding constantPoolDecla
 		return this.signature;
 	}
 
-	StringBuffer buffer = new StringBuffer(this.parameters.length + 1 * 20);
+	StringBuffer buffer = new StringBuffer((this.parameters.length + 1) * 20);
 	buffer.append('(');
 
 	TypeBinding[] targetParameters = this.parameters;

@@ -16,6 +16,7 @@ package org.eclipse.jdt.internal.compiler.lookup;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -140,7 +141,7 @@ public class ClassScope extends Scope {
 	}
 
 	void buildAnonymousTypeBinding(SourceTypeBinding enclosingType, ReferenceBinding supertype) {
-		LocalTypeBinding anonymousType = buildLocalType(enclosingType, supertype, enclosingType.fPackage);
+		LocalTypeBinding anonymousType = buildLocalType(enclosingType, enclosingType.fPackage);
 		anonymousType.modifiers |= ExtraCompilerModifiers.AccLocallyUsed; // tag all anonymous types as used locally
 		if (supertype.isInterface()) {
 			anonymousType.superclass = getJavaLangObject();
@@ -232,8 +233,8 @@ public class ClassScope extends Scope {
 		for (int i = 0; i < size; i++) {
 			FieldDeclaration field = fields[i];
 			if (field.getKind() == AbstractVariableDeclaration.INITIALIZER) {
-				if (sourceType.isInterface())
-					problemReporter().interfaceCannotHaveInitializers(sourceType, field);
+				// We used to report an error for initializers declared inside interfaces, but
+				// now this error reporting is moved into the parser itself. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=212713
 			} else {
 				FieldBinding fieldBinding = new FieldBinding(field, null, field.modifiers | ExtraCompilerModifiers.AccUnresolved, sourceType);
 				fieldBinding.id = count;
@@ -334,14 +335,14 @@ public class ClassScope extends Scope {
 // SH}
 	}
 
-	private LocalTypeBinding buildLocalType(SourceTypeBinding enclosingType, ReferenceBinding anonymousOriginalSuperType, PackageBinding packageBinding) {
+	private LocalTypeBinding buildLocalType(SourceTypeBinding enclosingType, PackageBinding packageBinding) {
 
 		this.referenceContext.scope = this;
 		this.referenceContext.staticInitializerScope = new MethodScope(this, this.referenceContext, true);
 		this.referenceContext.initializerScope = new MethodScope(this, this.referenceContext, false);
 
 		// build the binding or the local type
-		LocalTypeBinding localType = new LocalTypeBinding(this, enclosingType, innermostSwitchCase(), anonymousOriginalSuperType);
+		LocalTypeBinding localType = new LocalTypeBinding(this, enclosingType, innermostSwitchCase());
 //{ObjectTeams: was assignment; use setter to allow additional setup
 	/* @original
 		this.referenceContext.binding = localType;
@@ -382,7 +383,7 @@ public class ClassScope extends Scope {
 					}
 				}
 				ClassScope memberScope = new ClassScope(this, this.referenceContext.memberTypes[i]);
-				LocalTypeBinding memberBinding = memberScope.buildLocalType(localType, null /* anonymous super type*/, packageBinding);
+				LocalTypeBinding memberBinding = memberScope.buildLocalType(localType, packageBinding);
 				memberBinding.setAsMemberType();
 				memberTypeBindings[count++] = memberBinding;
 			}
@@ -395,7 +396,7 @@ public class ClassScope extends Scope {
 
 	void buildLocalTypeBinding(SourceTypeBinding enclosingType) {
 
-		LocalTypeBinding localType = buildLocalType(enclosingType, null /* anonymous super type*/, enclosingType.fPackage);
+		LocalTypeBinding localType = buildLocalType(enclosingType, enclosingType.fPackage);
 		connectTypeHierarchy();
 		if (compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
 			checkParameterizedTypeBounds();
@@ -779,9 +780,7 @@ public class ClassScope extends Scope {
 		if ((memberTypeDeclaration.bits & ASTNode.IsLocalType) != 0)
 		{
 			// not added to member types
-			// FIXME(SH): as soon as LocalTypeBinding is complete re 210422 reconsider null:
-			// 			  see also Bug 307523			
-			memberScope.buildLocalType(sourceType, null /* anonymous super type*/, getCurrentPackage());
+			memberScope.buildLocalType(sourceType, getCurrentPackage());
 			// ensure the copy has the same relative constant pool name (e.g., "1" as in T$__OT__R$1)
 			char[] computedConstantPoolName = CharOperation.concatWith(
 						new char[][]{sourceType.constantPoolName(), memberTypeDeclaration.name}, '$');
@@ -2078,8 +2077,10 @@ public class ClassScope extends Scope {
 		SourceTypeBinding sourceType = this.referenceContext.binding;
 		if ((sourceType.tagBits & TagBits.BeginHierarchyCheck) == 0) {
 			sourceType.tagBits |= TagBits.BeginHierarchyCheck;
+			environment().typesBeingConnected.add(sourceType);
 			boolean noProblems = connectSuperclass();
 			noProblems &= connectSuperInterfaces();
+			environment().typesBeingConnected.remove(sourceType);
 			sourceType.tagBits |= TagBits.EndHierarchyCheck;
 			noProblems &= connectTypeVariables(this.referenceContext.typeParameters, false);
 			sourceType.tagBits |= TagBits.TypeVariablesAreConnected;
@@ -2134,8 +2135,10 @@ public class ClassScope extends Scope {
 			return;
 
 		sourceType.tagBits |= TagBits.BeginHierarchyCheck;
+		environment().typesBeingConnected.add(sourceType);
 		boolean noProblems = connectSuperclass();
 		noProblems &= connectSuperInterfaces();
+		environment().typesBeingConnected.remove(sourceType);
 		sourceType.tagBits |= TagBits.EndHierarchyCheck;
 		noProblems &= connectTypeVariables(this.referenceContext.typeParameters, false);
 		sourceType.tagBits |= TagBits.TypeVariablesAreConnected;
@@ -2245,11 +2248,25 @@ public class ClassScope extends Scope {
 			org.eclipse.jdt.internal.compiler.ast.TypeReference ref = ((SourceTypeBinding) superType).scope.superTypeReference;
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=133071
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=121734
-			if (ref != null && (ref.resolvedType == null || ((ReferenceBinding) ref.resolvedType).isHierarchyBeingActivelyConnected())) {
+			if (ref != null && ref.resolvedType != null && ((ReferenceBinding) ref.resolvedType).isHierarchyBeingActivelyConnected()) {
 				problemReporter().hierarchyCircularity(sourceType, superType, reference);
 				sourceType.tagBits |= TagBits.HierarchyHasProblems;
 				superType.tagBits |= TagBits.HierarchyHasProblems;
 				return true;
+			}
+			if (ref != null && ref.resolvedType == null) {
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=319885 Don't cry foul prematurely.
+				// Check the edges traversed to see if there really is a cycle.
+				char [] referredName = ref.getLastToken(); 
+				for (Iterator iter = environment().typesBeingConnected.iterator(); iter.hasNext();) {
+					SourceTypeBinding type = (SourceTypeBinding) iter.next();
+					if (CharOperation.equals(referredName, type.sourceName())) {
+						problemReporter().hierarchyCircularity(sourceType, superType, reference);
+						sourceType.tagBits |= TagBits.HierarchyHasProblems;
+						superType.tagBits |= TagBits.HierarchyHasProblems;
+						return true;
+					}
+				}
 			}
 		}
 		if ((superType.tagBits & TagBits.BeginHierarchyCheck) == 0)

@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -141,6 +142,9 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		if (this.arguments != null) {
 			for (int i = 0, count = this.arguments.length; i < count; i++) {
 				flowInfo = this.arguments[i].analyseCode(currentScope, flowContext, flowInfo);
+				if ((this.arguments[i].implicitConversion & TypeIds.UNBOXING) != 0) {
+					this.arguments[i].checkNPE(currentScope, flowContext, flowInfo);
+				}
 			}
 		}
 
@@ -301,6 +305,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 
 		this.constant = Constant.NotAConstant;
 		TypeBinding enclosingInstanceType = null;
+		ReferenceBinding enclosingInstanceReference = null;
 		TypeBinding receiverType = null;
 		boolean hasError = false;
 		boolean enclosingInstanceContainsCast = false;
@@ -328,6 +333,14 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				hasError = true;
 			} else if (this.type instanceof QualifiedTypeReference) {
 				scope.problemReporter().illegalUsageOfQualifiedTypeReference((QualifiedTypeReference)this.type);
+				hasError = true;
+			} else if (!(enclosingInstanceReference = (ReferenceBinding) enclosingInstanceType).canBeSeenBy(scope)) {
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317212
+				enclosingInstanceType = new ProblemReferenceBinding(
+							enclosingInstanceReference.compoundName,
+							enclosingInstanceReference,
+							ProblemReasons.NotVisible);
+				scope.problemReporter().invalidType(this.enclosingInstance, enclosingInstanceType);
 				hasError = true;
 			} else {
 				receiverType = ((SingleTypeReference) this.type).resolveTypeEnclosing(scope, (ReferenceBinding) enclosingInstanceType);

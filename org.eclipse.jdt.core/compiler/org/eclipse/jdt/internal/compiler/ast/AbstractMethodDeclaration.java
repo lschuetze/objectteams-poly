@@ -402,7 +402,7 @@ public abstract class AbstractMethodDeclaration
 
 		classFile.generateMethodInfoHeader(this.binding);
 		int methodAttributeOffset = classFile.contentsOffset;
-		int attributeNumber = classFile.generateMethodInfoAttribute(this.binding);
+		int attributeNumber = classFile.generateMethodInfoAttributes(this.binding);
 //{ObjectTeams: write OT-specific byte code attributes
         if (this.model != null)
             attributeNumber += this.model.writeAttributes(classFile);
@@ -477,7 +477,7 @@ public abstract class AbstractMethodDeclaration
 		} else {
 			checkArgumentsSize();
 		}
-		classFile.completeMethodInfo(methodAttributeOffset, attributeNumber);
+		classFile.completeMethodInfo(this.binding, methodAttributeOffset, attributeNumber);
 	}
 //{ObjectTeams: recording byte code
 	public void maybeRecordByteCode(ClassFile classFile, int methodAttributeOffset) {
@@ -512,7 +512,7 @@ public abstract class AbstractMethodDeclaration
 
 	private void checkArgumentsSize() {
 		TypeBinding[] parameters = this.binding.parameters;
-		int size = 1; // an abstact method or a native method cannot be static
+		int size = 1; // an abstract method or a native method cannot be static
 		for (int i = 0, max = parameters.length; i < max; i++) {
 			switch(parameters[i].id) {
 				case TypeIds.T_long :
@@ -755,7 +755,9 @@ public abstract class AbstractMethodDeclaration
 // SH}
 			}
 		} else if ((this.bits & UndocumentedEmptyBlock) != 0) {
-			this.scope.problemReporter().undocumentedEmptyBlock(this.bodyStart-1, this.bodyEnd+1);
+			if (!this.isConstructor() || this.arguments != null) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=319626
+				this.scope.problemReporter().undocumentedEmptyBlock(this.bodyStart-1, this.bodyEnd+1);
+			}
 		}
 //{ObjectTeams:
 	  } finally {

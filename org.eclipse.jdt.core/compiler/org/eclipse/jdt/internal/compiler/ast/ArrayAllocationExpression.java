@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -41,6 +42,9 @@ public class ArrayAllocationExpression extends Expression {
 			Expression dim;
 			if ((dim = this.dimensions[i]) != null) {
 				flowInfo = dim.analyseCode(currentScope, flowContext, flowInfo);
+				if ((dim.implicitConversion & TypeIds.UNBOXING) != 0) {
+					dim.checkNPE(currentScope, flowContext, flowInfo);
+				}
 			}
 		}
 		if (this.initializer != null) {

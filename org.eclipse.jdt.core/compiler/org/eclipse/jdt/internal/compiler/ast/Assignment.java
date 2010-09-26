@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Genady Beriozkin - added support for reporting assignment with no effect
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     												and bug 292478 - Report potentially null across variable assignment
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -69,6 +71,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 // a field reference, a blank final field reference, a field of an enclosing instance or
 // just a local variable.
 	LocalVariableBinding local = this.lhs.localVariableBinding();
+	if ((this.expression.implicitConversion & TypeIds.UNBOXING) != 0) {
+		this.expression.checkNPE(currentScope, flowContext, flowInfo);
+	}
 	int nullStatus = this.expression.nullStatus(flowInfo);
 	if (local != null && (local.type.tagBits & TagBits.IsBaseType) == 0) {
 		if (nullStatus == FlowInfo.NULL) {
@@ -80,28 +85,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		.analyseAssignment(currentScope, flowContext, flowInfo, this, false)
 		.unconditionalInits();
 	if (local != null && (local.type.tagBits & TagBits.IsBaseType) == 0) {
-		switch(nullStatus) {
-			case FlowInfo.NULL :
-				flowInfo.markAsDefinitelyNull(local);
-				break;
-			case FlowInfo.NON_NULL :
-				flowInfo.markAsDefinitelyNonNull(local);
-				break;
-			default:
-				flowInfo.markAsDefinitelyUnknown(local);
-		}
-		if (flowContext.initsOnFinally != null) {
-			switch(nullStatus) {
-				case FlowInfo.NULL :
-					flowContext.initsOnFinally.markAsDefinitelyNull(local);
-					break;
-				case FlowInfo.NON_NULL :
-					flowContext.initsOnFinally.markAsDefinitelyNonNull(local);
-					break;
-				default:
-					flowContext.initsOnFinally.markAsDefinitelyUnknown(local);
-			}
-		}
+		flowInfo.markNullStatus(local, nullStatus);
+		if (flowContext.initsOnFinally != null)
+			flowContext.initsOnFinally.markNullStatus(local, nullStatus);
 	}
 	return flowInfo;
 }
@@ -192,7 +178,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	}
 	// check for assignment with no effect
 	Binding left = getDirectBinding(this.lhs);
-	if (left != null && left == getDirectBinding(this.expression)) {
+	if (left != null && !left.isVolatile() && left == getDirectBinding(this.expression)) {
 		scope.problemReporter().assignmentHasNoEffect(this, left.shortReadableName());
 	}
 //{ObjectTeams: wrap rhs type:

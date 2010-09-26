@@ -29,7 +29,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
  * @version $Id: Reference.java 23404 2010-02-03 14:10:22Z stephan $
  */
 public abstract class Reference extends Expression  {
-//{ObjectTeams: support expected type
+//{ObjectTeams: store expected type to support infering callout-to-field
 	public TypeBinding expectedType;
 	@Override
 	public void setExpectedType(TypeBinding expectedType) {

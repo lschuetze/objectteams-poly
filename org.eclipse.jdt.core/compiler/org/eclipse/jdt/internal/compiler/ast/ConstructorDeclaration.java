@@ -437,7 +437,7 @@ public void generateSyntheticFieldInitializationsIfNecessary(MethodScope methodS
 private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 	classFile.generateMethodInfoHeader(this.binding);
 	int methodAttributeOffset = classFile.contentsOffset;
-	int attributeNumber = classFile.generateMethodInfoAttribute(this.binding);
+	int attributeNumber = classFile.generateMethodInfoAttributes(this.binding);
 //{ObjectTeams: write OT-specific byte code attributes
     if (this.model != null)
         attributeNumber += this.model.writeAttributes(classFile);
@@ -598,7 +598,7 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 			((StackMapFrameCodeStream) codeStream).resetSecretLocals();
 		}
 	}
-	classFile.completeMethodInfo(methodAttributeOffset, attributeNumber);
+	classFile.completeMethodInfo(this.binding, methodAttributeOffset, attributeNumber);
 }
 
 //{ObjectTeams: ctors are copied for roles and teams:

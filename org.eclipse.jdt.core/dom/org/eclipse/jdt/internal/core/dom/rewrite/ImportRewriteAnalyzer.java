@@ -117,7 +117,7 @@ public final class ImportRewriteAnalyzer {
 		}
 		return 1;
 	}
-	
+
 	private boolean insertSpaceBeforeSemicolon() {
 		return JavaCore.INSERT.equals(this.compilationUnit.getJavaProject().getOption(DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_SEMICOLON, true));
 	}
@@ -228,7 +228,7 @@ public final class ImportRewriteAnalyzer {
 					return testedName;
 				}
 			}
-		} while (index >= 0); 
+		} while (index >= 0);
 		return name;
 	}
 
@@ -325,10 +325,10 @@ public final class ImportRewriteAnalyzer {
 	 * Note: {@link #ImportRewriteAnalyzer(ICompilationUnit, CompilationUnit, String[], int, int, boolean, boolean)} with true as the last
 	 * parameter can be used to filter implicit imports when a context is used.
 	 * </p>
-	 * 
+	 *
 	 * @param filterImplicitImports
 	 *            if <code>true</code>, implicit imports will be filtered
-	 * 
+	 *
 	 * @see #ImportRewriteAnalyzer(ICompilationUnit, CompilationUnit, String[], int, int, boolean, boolean)
 	 */
 	public void setFilterImplicitImports(boolean filterImplicitImports) {
@@ -430,7 +430,7 @@ public final class ImportRewriteAnalyzer {
 		return 0;
 	}
 
-//{ObjectTeams: added: 'isBase':	
+//{ObjectTeams: added: 'isBase':
 	private PackageEntry findBestMatch(String newName, boolean isStatic, boolean isBase) {
 // SH}
 		if (this.packageEntries.isEmpty()) {
@@ -465,7 +465,7 @@ public final class ImportRewriteAnalyzer {
 		matcher.initialize(newName, ""); //$NON-NLS-1$
 		for (int i= 0; i < this.packageEntries.size(); i++) { // find the best match with the same group
 			PackageEntry curr= (PackageEntry) this.packageEntries.get(i);
-			if (!curr.isComment() && curr.isStatic() == isStatic 
+			if (!curr.isComment() && curr.isStatic() == isStatic
 //{ObjectTeams: new check:
 				&& isBase == curr.isBase())
 			{
@@ -530,7 +530,7 @@ public final class ImportRewriteAnalyzer {
 		}
 		return false;
 	}
-	
+
 //{ObjectTeams: base import:
 	public void addBaseImport(String fullTypeName) {
 		String typeContainerName= Signature.getQualifier(fullTypeName);
@@ -562,7 +562,7 @@ public final class ImportRewriteAnalyzer {
 		}
 		return this.packageEntries.size();
 	}
-	
+
 //{ObjectTeams:
 /* orig:
 	private void sortIn(String typeContainerName, ImportDeclEntry decl, boolean isStatic) {
@@ -573,14 +573,14 @@ public final class ImportRewriteAnalyzer {
 // SH}
 		if (bestMatch == null) {
 //{ObjectTeams: isBase:
-/* orig:		
+/* orig:
 			PackageEntry packEntry= new PackageEntry(typeContainerName, null, isStatic);
   :giro */
 			PackageEntry packEntry= new PackageEntry(typeContainerName, null, isStatic, isBase);
 // SH}
 			packEntry.add(decl);
 			int insertPos= packEntry.isStatic() ? 0 : getIndexAfterStatics();
-//{ObjectTeams:			
+//{ObjectTeams:
 			if (isBase) insertPos = getIndexAfterRegular();
 // SH}
 			this.packageEntries.add(insertPos, packEntry);
@@ -597,7 +597,7 @@ public final class ImportRewriteAnalyzer {
 					}
 				}
 //{ObjectTeams: isBase:
-/* orig:				
+/* orig:
 				PackageEntry packEntry= new PackageEntry(typeContainerName, group, isStatic);
   :giro */
 				PackageEntry packEntry= new PackageEntry(typeContainerName, group, isStatic, isBase);
@@ -614,7 +614,7 @@ public final class ImportRewriteAnalyzer {
 			}
 		}
 	}
-//{ObjectTeams: similar to getIndexAfterStatics:			
+//{ObjectTeams: similar to getIndexAfterStatics:
 	private int getIndexAfterRegular() {
 		for (int i= 0; i < this.packageEntries.size(); i++) {
 			if (((PackageEntry) this.packageEntries.get(i)).isBase()) {
@@ -896,7 +896,7 @@ public final class ImportRewriteAnalyzer {
 		return onDemandConflicts;
 	}
 
-//{ObjectTeams: added 3. parameter		
+//{ObjectTeams: added 3. parameter
 	private String getNewImportString(String importName, boolean isStatic, boolean isBase, String lineDelim) {
 // SH}
 		StringBuffer buf= new StringBuffer();
@@ -920,7 +920,7 @@ public final class ImportRewriteAnalyzer {
 		}
 		return buf.toString();
 	}
-	
+
 	private String[] getNewImportStrings(PackageEntry packageEntry, boolean isStatic, String lineDelim) {
 		boolean isStarImportAdded = false;
 		List allImports = new ArrayList();
@@ -1030,7 +1030,7 @@ public final class ImportRewriteAnalyzer {
 		public String getTypeQualifiedName() {
 			return this.elementName.substring(this.containerNameLength + 1);
 		}
-		
+
 		public boolean isOnDemand() {
 			return this.elementName != null && this.elementName.endsWith(".*"); //$NON-NLS-1$
 		}
@@ -1110,8 +1110,8 @@ public final class ImportRewriteAnalyzer {
 //{ObjectTeams: also compare base flag:
 /* orig:
 		public int compareTo(String otherName, boolean isOtherStatic) {
-  :giro */		
-		public int compareTo(String otherName, boolean isOtherStatic, boolean isOtherBase) 
+  :giro */
+		public int compareTo(String otherName, boolean isOtherStatic, boolean isOtherBase)
 		{
 // SH}
 			int cmp= this.name.compareTo(otherName);

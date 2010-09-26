@@ -28,16 +28,99 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
-import org.eclipse.jdt.internal.compiler.*;
-import org.eclipse.jdt.internal.compiler.ast.*;
+import org.eclipse.jdt.internal.compiler.CompilationResult;
+import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
+import org.eclipse.jdt.internal.compiler.IProblemFactory;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
+import org.eclipse.jdt.internal.compiler.ast.AnnotationMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Argument;
+import org.eclipse.jdt.internal.compiler.ast.ArrayAllocationExpression;
+import org.eclipse.jdt.internal.compiler.ast.ArrayQualifiedTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.ArrayReference;
+import org.eclipse.jdt.internal.compiler.ast.ArrayTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.Assignment;
+import org.eclipse.jdt.internal.compiler.ast.BinaryExpression;
+import org.eclipse.jdt.internal.compiler.ast.Block;
+import org.eclipse.jdt.internal.compiler.ast.BranchStatement;
+import org.eclipse.jdt.internal.compiler.ast.CaseStatement;
+import org.eclipse.jdt.internal.compiler.ast.CastExpression;
+import org.eclipse.jdt.internal.compiler.ast.ClassLiteralAccess;
+import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.CompoundAssignment;
+import org.eclipse.jdt.internal.compiler.ast.ConditionalExpression;
+import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.EqualExpression;
+import org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
+import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.FieldReference;
+import org.eclipse.jdt.internal.compiler.ast.ImportReference;
+import org.eclipse.jdt.internal.compiler.ast.Initializer;
+import org.eclipse.jdt.internal.compiler.ast.InstanceOfExpression;
+import org.eclipse.jdt.internal.compiler.ast.JavadocSingleTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.LabeledStatement;
+import org.eclipse.jdt.internal.compiler.ast.Literal;
+import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.MemberValuePair;
+import org.eclipse.jdt.internal.compiler.ast.MessageSend;
+import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.NameReference;
+import org.eclipse.jdt.internal.compiler.ast.ParameterizedQualifiedTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
+import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
+import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.Reference;
+import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
+import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
+import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.Statement;
+import org.eclipse.jdt.internal.compiler.ast.SwitchStatement;
+import org.eclipse.jdt.internal.compiler.ast.ThisReference;
+import org.eclipse.jdt.internal.compiler.ast.TryStatement;
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.ast.UnaryExpression;
+import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
-import org.eclipse.jdt.internal.compiler.lookup.*;
-import org.eclipse.jdt.internal.compiler.parser.*;
+import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
+import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
+import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MemberTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.SyntheticArgumentBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TagBits;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
+import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.WildcardBinding;
+import org.eclipse.jdt.internal.compiler.parser.JavadocTagConstants;
+import org.eclipse.jdt.internal.compiler.parser.Parser;
+import org.eclipse.jdt.internal.compiler.parser.RecoveryScanner;
+import org.eclipse.jdt.internal.compiler.parser.Scanner;
+import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.compiler.util.Messages;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
@@ -1178,7 +1261,7 @@ public void cannotReadSource(CompilationUnitDeclaration unit, AbortCompilationUn
 		if (encoding == null) {
 			encoding = System.getProperty("file.encoding"); //$NON-NLS-1$
 		}
-		String[] arguments = new String[]{ fileName, encoding, };
+		String[] arguments = new String[]{ fileName, encoding };
 		this.handle(
 				IProblem.InvalidEncoding,
 				arguments,
@@ -1191,13 +1274,15 @@ public void cannotReadSource(CompilationUnitDeclaration unit, AbortCompilationUn
 	PrintWriter writer = new PrintWriter(stringWriter);
 	if (verbose) {
 		abortException.exception.printStackTrace(writer);
-	} else {
-		writer.print(abortException.exception.getClass().getName());
-		writer.print(':');
-		writer.print(abortException.exception.getMessage());
+		System.err.println(stringWriter.toString());
+		stringWriter = new StringWriter();
+		writer = new PrintWriter(stringWriter);
 	}
+	writer.print(abortException.exception.getClass().getName());
+	writer.print(':');
+	writer.print(abortException.exception.getMessage());
 	String exceptionTrace = stringWriter.toString();
-	String[] arguments = new String[]{ fileName, exceptionTrace, };
+	String[] arguments = new String[]{ fileName, exceptionTrace };
 	this.handle(
 			IProblem.CannotReadSource,
 			arguments,
@@ -2950,7 +3035,7 @@ public void indirectAccessToStaticMethod(ASTNode location, MethodBinding method)
 		location.sourceStart,
 		location.sourceEnd);
 }
-public void inheritedMethodReducesVisibility(SourceTypeBinding type, MethodBinding concreteMethod, MethodBinding[] abstractMethods) {
+private void inheritedMethodReducesVisibility(int sourceStart, int sourceEnd, MethodBinding concreteMethod, MethodBinding[] abstractMethods) {
 	StringBuffer concreteSignature = new StringBuffer();
 	concreteSignature
 		.append(concreteMethod.declaringClass.readableName())
@@ -2970,8 +3055,14 @@ public void inheritedMethodReducesVisibility(SourceTypeBinding type, MethodBindi
 		new String[] {
 			shortSignature.toString(),
 			new String(abstractMethods[0].declaringClass.shortReadableName())},
-		type.sourceStart(),
-		type.sourceEnd());
+		sourceStart,
+		sourceEnd);
+}
+public void inheritedMethodReducesVisibility(SourceTypeBinding type, MethodBinding concreteMethod, MethodBinding[] abstractMethods) {
+	inheritedMethodReducesVisibility(type.sourceStart(), type.sourceEnd(), concreteMethod, abstractMethods);
+}
+public void inheritedMethodReducesVisibility(TypeParameter typeParameter, MethodBinding concreteMethod, MethodBinding[] abstractMethods) {
+	inheritedMethodReducesVisibility(typeParameter.sourceStart(), typeParameter.sourceEnd(), concreteMethod, abstractMethods);
 }
 public void inheritedMethodsHaveIncompatibleReturnTypes(ASTNode location, MethodBinding[] inheritedMethods, int length) {
 	StringBuffer methodSignatures = new StringBuffer();
@@ -3073,8 +3164,8 @@ public void interfaceCannotHaveConstructors(ConstructorDeclaration constructor) 
 		constructor,
 		constructor.compilationResult());
 }
-public void interfaceCannotHaveInitializers(SourceTypeBinding type, FieldDeclaration fieldDecl) {
-	String[] arguments = new String[] {new String(type.sourceName())};
+public void interfaceCannotHaveInitializers(char [] sourceName, FieldDeclaration fieldDecl) {
+	String[] arguments = new String[] {new String(sourceName)};
 
 	this.handle(
 		IProblem.InterfaceCannotHaveInitializers,
@@ -4137,8 +4228,13 @@ public void invalidType(ASTNode location, TypeBinding type) {
 	if (type.isParameterizedType()) {
 		List missingTypes = type.collectMissingTypes(null);
 		if (missingTypes != null) {
+			ReferenceContext savedContext = this.referenceContext;
 			for (Iterator iterator = missingTypes.iterator(); iterator.hasNext(); ) {
-				invalidType(location, (TypeBinding) iterator.next());
+				try {
+					invalidType(location, (TypeBinding) iterator.next());
+				} finally {
+					this.referenceContext = savedContext;
+				}
 			}
 			return;
 		}
@@ -4187,10 +4283,10 @@ public void invalidType(ASTNode location, TypeBinding type) {
 			break;
 		case ProblemReasons.NonStaticReferenceInStaticContext :
 			id = IProblem.NonStaticTypeFromStaticInvocation;
-		    break;
+			break;
 		case ProblemReasons.IllegalSuperTypeVariable :
-		    id = IProblem.IllegalTypeVariableSuperReference;
-		    break;
+			id = IProblem.IllegalTypeVariableSuperReference;
+			break;
 //{ObjectTeams:
 		case ProblemReasons.AnchorNotFinal:
 			ITeamAnchor anchor = null;
@@ -5679,6 +5775,10 @@ public void missingSynchronizedOnInheritedMethod(MethodBinding currentMethod, Me
 }
 public void missingTypeInConstructor(ASTNode location, MethodBinding constructor) {
 	List missingTypes = constructor.collectMissingTypes(null);
+	if (missingTypes == null) {
+		System.err.println("The constructor " + constructor + " is wrongly tagged as containing missing types"); //$NON-NLS-1$ //$NON-NLS-2$
+		return;
+	}
 	TypeBinding missingType = (TypeBinding) missingTypes.get(0);
 	int start = location.sourceStart;
 	int end = location.sourceEnd;
@@ -5707,6 +5807,10 @@ public void missingTypeInConstructor(ASTNode location, MethodBinding constructor
 
 public void missingTypeInMethod(MessageSend messageSend, MethodBinding method) {
 	List missingTypes = method.collectMissingTypes(null);
+	if (missingTypes == null) {
+		System.err.println("The method " + method + " is wrongly tagged as containing missing types"); //$NON-NLS-1$ //$NON-NLS-2$
+		return;
+	}
 	TypeBinding missingType = (TypeBinding) missingTypes.get(0);
 	this.handle(
 			IProblem.MissingTypeInMethod,
@@ -6596,6 +6700,7 @@ public void rawMemberTypeCannotBeParameterized(ASTNode location, ReferenceBindin
 		location.sourceEnd);
 }
 public void rawTypeReference(ASTNode location, TypeBinding type) {
+	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
 //{ObjectTeams: don't report useless case:
 	CompilationResult result = this.referenceContext.compilationResult();
 	if (result.problems != null)
@@ -7068,6 +7173,22 @@ public void tooManyMethods(TypeDeclaration typeDeclaration) {
 		typeDeclaration.sourceStart,
 		typeDeclaration.sourceEnd);
 }
+public void tooManyParametersForSyntheticMethod(AbstractMethodDeclaration method) {
+	MethodBinding binding = method.binding;
+	String selector = null;
+	if (binding.isConstructor()) {
+		selector = new String(binding.declaringClass.sourceName());
+	} else {
+		selector = new String(method.selector);
+	}
+	this.handle(
+		IProblem.TooManyParametersForSyntheticMethod,
+		new String[] {selector, typesAsString(binding.isVarargs(), binding.parameters, false), new String(binding.declaringClass.readableName()), },
+		new String[] {selector, typesAsString(binding.isVarargs(), binding.parameters, true), new String(binding.declaringClass.shortReadableName()),},
+		ProblemSeverities.AbortMethod | ProblemSeverities.Error | ProblemSeverities.Fatal,
+		method.sourceStart,
+		method.sourceEnd);
+}
 public void typeCastError(CastExpression expression, TypeBinding leftType, TypeBinding rightType) {
 	String leftName = new String(leftType.readableName());
 	String rightName = new String(rightType.readableName());
@@ -7241,9 +7362,10 @@ public void typeMismatchError(TypeBinding typeArgument, TypeVariableBinding type
 		typeParamName = typeParameter.sourceName;
 	else
 		typeParamName = typeParameter.readableName();
+// orig:	
 	this.handle(
 		IProblem.TypeArgumentMismatch,
-/* orig:		
+/*		
 		new String[] { new String(typeArgument.readableName()), new String(genericType.readableName()), new String(typeParameter.sourceName), parameterBoundAsString(typeParameter, false) },
 		new String[] { new String(typeArgument.shortReadableName()), new String(genericType.shortReadableName()), new String(typeParameter.sourceName), parameterBoundAsString(typeParameter, true) },
   :giro */
@@ -7374,6 +7496,7 @@ public void uninitializedBlankFinalField(FieldBinding field, ASTNode location) {
 		nodeSourceEnd(field, location));
 }
 public void uninitializedLocalVariable(LocalVariableBinding binding, ASTNode location) {
+	binding.tagBits |= TagBits.NotInitialized;
 	String[] arguments = new String[] {new String(binding.readableName())};
 	this.handle(
 		IProblem.UninitializedLocalVariable,
@@ -7528,6 +7651,7 @@ public void unresolvableReference(NameReference nameRef, Binding binding) {
 */
 	String[] arguments = new String[] {new String(binding.readableName())};
 	int end = nameRef.sourceEnd;
+	int sourceStart = nameRef.sourceStart;
 	if (nameRef instanceof QualifiedNameReference) {
 		QualifiedNameReference ref = (QualifiedNameReference) nameRef;
 		if (isRecoveredName(ref.tokens)) return;
@@ -7536,6 +7660,11 @@ public void unresolvableReference(NameReference nameRef, Binding binding) {
 	} else {
 		SingleNameReference ref = (SingleNameReference) nameRef;
 		if (isRecoveredName(ref.token)) return;
+		int numberOfParens = (ref.bits & ASTNode.ParenthesizedMASK) >> ASTNode.ParenthesizedSHIFT;
+		if (numberOfParens != 0) {
+			sourceStart = retrieveStartingPositionAfterOpeningParenthesis(sourceStart, end, numberOfParens);
+			end = retrieveEndingPositionAfterOpeningParenthesis(sourceStart, end, numberOfParens);
+		}
 	}
 //{ObjectTeams: perhaps missing signature in callin mapping to pass args to predicate?
 	if (this.referenceContext instanceof GuardPredicateDeclaration) {
@@ -7554,10 +7683,11 @@ public void unresolvableReference(NameReference nameRef, Binding binding) {
 		problemId,
 		arguments,
 		arguments,
-		nameRef.sourceStart,
+		sourceStart,
 		end);
 }
 public void unsafeCast(CastExpression castExpression, Scope scope) {
+	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
 	int severity = computeSeverity(IProblem.UnsafeGenericCast);
 	if (severity == ProblemSeverities.Ignore) return;
 	TypeBinding castedExpressionType = castExpression.expression.resolvedType;
@@ -7588,6 +7718,7 @@ public void unsafeGenericArrayForVarargs(TypeBinding leafComponentType, ASTNode 
 		location.sourceEnd);
 }
 public void unsafeRawFieldAssignment(FieldBinding field, TypeBinding expressionType, ASTNode location) {
+	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
 	int severity = computeSeverity(IProblem.UnsafeRawFieldAssignment);
 	if (severity == ProblemSeverities.Ignore) return;
 	this.handle(
@@ -7601,6 +7732,7 @@ public void unsafeRawFieldAssignment(FieldBinding field, TypeBinding expressionT
 		nodeSourceEnd(field, location));
 }
 public void unsafeRawGenericMethodInvocation(ASTNode location, MethodBinding rawMethod, TypeBinding[] argumentTypes) {
+	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
 	boolean isConstructor = rawMethod.isConstructor();
 	int severity = computeSeverity(isConstructor ? IProblem.UnsafeRawGenericConstructorInvocation : IProblem.UnsafeRawGenericMethodInvocation);
 	if (severity == ProblemSeverities.Ignore) return;
@@ -7643,6 +7775,7 @@ public void unsafeRawGenericMethodInvocation(ASTNode location, MethodBinding raw
     }
 }
 public void unsafeRawInvocation(ASTNode location, MethodBinding rawMethod) {
+	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
 	boolean isConstructor = rawMethod.isConstructor();
 	int severity = computeSeverity(isConstructor ? IProblem.UnsafeRawConstructorInvocation : IProblem.UnsafeRawMethodInvocation);
 	if (severity == ProblemSeverities.Ignore) return;
@@ -7717,6 +7850,7 @@ public void unsafeReturnTypeOverride(MethodBinding currentMethod, MethodBinding 
 			end);
 }
 public void unsafeTypeConversion(Expression expression, TypeBinding expressionType, TypeBinding expectedType) {
+	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
 	int severity = computeSeverity(IProblem.UnsafeTypeConversion);
 	if (severity == ProblemSeverities.Ignore) return;
 	this.handle(

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     												and bug 292478 - Report potentially null across variable assignment
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
@@ -83,6 +85,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	if (this.initialization == null) {
 		return flowInfo;
 	}
+	if ((this.initialization.implicitConversion & TypeIds.UNBOXING) != 0) {
+		this.initialization.checkNPE(currentScope, flowContext, flowInfo);
+	}
 	int nullStatus = this.initialization.nullStatus(flowInfo);
 	flowInfo =
 		this.initialization
@@ -95,16 +100,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	}
 	flowInfo.markAsDefinitelyAssigned(this.binding);
 	if ((this.binding.type.tagBits & TagBits.IsBaseType) == 0) {
-		switch(nullStatus) {
-			case FlowInfo.NULL :
-				flowInfo.markAsDefinitelyNull(this.binding);
-				break;
-			case FlowInfo.NON_NULL :
-				flowInfo.markAsDefinitelyNonNull(this.binding);
-				break;
-			default:
-				flowInfo.markAsDefinitelyUnknown(this.binding);
-		}
+		flowInfo.markNullStatus(this.binding, nullStatus);
 		// no need to inform enclosing try block since its locals won't get
 		// known by the finally block
 	}

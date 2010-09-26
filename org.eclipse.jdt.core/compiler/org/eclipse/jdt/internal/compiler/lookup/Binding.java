@@ -111,6 +111,9 @@ public abstract class Binding {
 	public final boolean isValidBinding() {
 		return problemId() == ProblemReasons.NoError;
 	}
+	public boolean isVolatile() {
+		return false;
+	}
 	/* API
 	* Answer the problem id associated with the receiver.
 	* NoError if the receiver is a valid binding.

@@ -913,7 +913,7 @@ public class DefaultCodeFormatterConstants {
 	 * void bar1() {}
 	 * void bar2() {}
 	 * }
-	 * </pre>
+	 * </pre></p>
 	 * </li>
 	 * <li>If no enabling tag is found by the formatter after the disabling tag, then
 	 * the end of the snippet won't be formatted.<br>
@@ -951,7 +951,45 @@ public class DefaultCodeFormatterConstants {
 	 * <li>The tag cannot include newline character (i.e. '\n') but it can have white
 	 * spaces.<br>
 	 * E.g. "<b>format: off</b>" is a valid disabling tag.<br>
-	 * In the future, newlines may be used to support multiple disabling tags.</li>
+	 * In the future, newlines may be used to support multiple disabling tags.
+	 * </li>
+	 * <li>The tag can include line or block comments start/end tokens.
+	 * <p>If such tags are used, e.g. "<b>//J-</b>", then the single comment can
+	 * also stop the formatting as shown in the following snippet:</p>
+	 * <pre>
+	 * //J-
+	 * // Formatting was stopped from comment above...
+	 * public class X {
+	 * //J+
+	 * // Formatting is restarted from here...
+	 * void foo() {}
+	 * </pre>
+	 * <p>As any disabling tags, as soon as a comment includes it,
+	 * the formatting stops from this comment:</p>
+	 * <pre>
+	 * public class X {
+	 * // Line comment including the disabling tag: //J-
+	 * // Formatting was stopped from comment above...
+	 * void   foo1()   {}
+	 * //J+
+	 * // Formatting restarts from here...
+	 * void   bar1()   {}
+	 * &#47;&#42;
+	 * &nbsp;&#42; Block comment including the disabling tag: //J+
+	 * &nbsp;&#42; The formatter stops from this comment...
+	 * &nbsp;&#42;&#47;
+	 * void   foo2()   {}
+	 * //J+
+	 * // Formatting restarts from here...
+	 * void   bar2()   {}
+	 * &#47;&#42;&#42;
+	 * &nbsp;&#42; Javadoc comment including the enabling tag: //J+
+	 * &nbsp;&#42; The formatter stops from this comment...
+	 * &nbsp;&#42;&#47;
+	 * void   foo3()   {}
+	 * }
+	 * </pre>
+	 * </li>
 	 * </ol>
 	 * </p>
 	 * @since 3.6
@@ -1012,7 +1050,7 @@ public class DefaultCodeFormatterConstants {
 	 * // @formatter:on
 	 * void bar2() {}
 	 * }
-	 * </pre>
+	 * </pre></p>
 	 * </li>
 	 * <li>If a mix of disabling and enabling tags is done in the same comment, then
 	 * the formatter will only take into account the last encountered tag in the
@@ -1033,10 +1071,54 @@ public class DefaultCodeFormatterConstants {
 	 * void bar() {}
 	 * }
 	 * </pre>
+	 * </li>
 	 * <li>The tag cannot include newline character (i.e. '\n') but it can have white
 	 * spaces.<br>
 	 * E.g. "<b>format: on</b>" is a valid enabling tag<br>
-	 * In the future, newlines may be used to support multiple enabling tags.</li>
+	 * In the future, newlines may be used to support multiple enabling tags.
+	 * </li>
+	 * <li>The tag can include line or block comments start/end tokens. Javadoc
+	 * tokens are not considered as valid tags.
+	 * <p>If such tags are used, e.g. "<b>//J+</b>", then the single comment can
+	 * also start the formatting as shown in the following snippet:</p>
+	 * <pre>
+	 * //J-
+	 * // Formatting was stopped from comment above...
+	 * public class X {
+	 * //J+
+	 * // Formatting restarts from here...
+	 * void foo() {}
+	 * }
+	 * </pre>
+	 * <p>As any enabling tags, as soon as a comment includes it,
+	 * the formatting restarts just after the comment:</p>
+	 * <pre>
+	 * public class X {
+	 * //J-
+	 * // Formatting was stopped from comment above...
+	 * void   foo1()   {}
+	 * // Line comment including the enabling tag: //J+
+	 * // Formatting restarts from here...
+	 * void   bar1()   {}
+	 * //J-
+	 * // Formatting was stopped from comment above...
+	 * void   foo2()   {}
+	 * &#47;&#42;
+	 * &nbsp;&#42; Block comment including the enabling tag: //J+
+	 * &nbsp;&#42; The formatter restarts after this comment...
+	 * &nbsp;&#42;&#47;
+	 * // Formatting restarts from here...
+	 * void   bar2()   {}
+	 * //J-
+	 * // Formatting was stopped from comment above...
+	 * void   foo3()   {}
+	 * &#47;&#42;&#42;
+	 * &nbsp;&#42; Javadoc comment including the enabling tag: //J+
+	 * &nbsp;&#42; The formatter restarts after this comment...
+	 * &nbsp;&#42;&#47;
+	 * void   bar3()   {}
+	 * }
+	 * </pre>
 	 * </li>
 	 * </ol>
 	 * </p>
@@ -1206,8 +1288,66 @@ public class DefaultCodeFormatterConstants {
 	 * @see JavaCore#INSERT
 	 * @see JavaCore#DO_NOT_INSERT
 	 * @since 3.4
+	 * @deprecated
+	 * All new options must be enabled to activate old strategy
+	 * {@link #FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD}
+	 * {@link #FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD}
+	 * {@link #FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE}
+	 * {@link #FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE}
 	 */
 	public static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_MEMBER = JavaCore.PLUGIN_ID + ".formatter.insert_new_line_after_annotation_on_member";//$NON-NLS-1$
+
+	/**
+	 * <pre>
+	 * FORMATTER / Option to insert a new line after an annotation on a field declaration
+	 *     - option id:         "org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_field"
+	 *     - possible values:   { INSERT, DO_NOT_INSERT }
+	 *     - default:           INSERT
+	 * </pre>
+	 * @see JavaCore#INSERT
+	 * @see JavaCore#DO_NOT_INSERT
+	 * @since 3.7
+	 */
+	public static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_FIELD = JavaCore.PLUGIN_ID + ".formatter.insert_new_line_after_annotation_on_field";//$NON-NLS-1$
+
+	/**
+	 * <pre>
+	 * FORMATTER / Option to insert a new line after an annotation on a method declaration
+	 *     - option id:         "org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_method"
+	 *     - possible values:   { INSERT, DO_NOT_INSERT }
+	 *     - default:           INSERT
+	 * </pre>
+	 * @see JavaCore#INSERT
+	 * @see JavaCore#DO_NOT_INSERT
+	 * @since 3.7
+	 */
+	public static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_METHOD = JavaCore.PLUGIN_ID + ".formatter.insert_new_line_after_annotation_on_method";//$NON-NLS-1$
+
+	/**
+	 * <pre>
+	 * FORMATTER / Option to insert a new line after an annotation on a package declaration
+	 *     - option id:         "org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_package"
+	 *     - possible values:   { INSERT, DO_NOT_INSERT }
+	 *     - default:           INSERT
+	 * </pre>
+	 * @see JavaCore#INSERT
+	 * @see JavaCore#DO_NOT_INSERT
+	 * @since 3.7
+	 */
+	public static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_PACKAGE = JavaCore.PLUGIN_ID + ".formatter.insert_new_line_after_annotation_on_package";//$NON-NLS-1$
+
+	/**
+	 * <pre>
+	 * FORMATTER / Option to insert a new line after an annotation on a type declaration
+	 *     - option id:         "org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_type"
+	 *     - possible values:   { INSERT, DO_NOT_INSERT }
+	 *     - default:           INSERT
+	 * </pre>
+	 * @see JavaCore#INSERT
+	 * @see JavaCore#DO_NOT_INSERT
+	 * @since 3.7
+	 */
+	public static final String FORMATTER_INSERT_NEW_LINE_AFTER_ANNOTATION_ON_TYPE = JavaCore.PLUGIN_ID + ".formatter.insert_new_line_after_annotation_on_type";//$NON-NLS-1$
 
 	/**
 	 * <pre>

@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *      Stephen Herrmann <stephan@cs.tu-berlin.de> -  Contribution for bug 317046
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -307,7 +308,7 @@ public TypeBinding findSuperTypeOriginatingFrom(TypeBinding otherType) {
 			int nextPosition = 0;
 			do {
 				ReferenceBinding[] itsInterfaces = currentType.superInterfaces();
-				if (itsInterfaces != Binding.NO_SUPERINTERFACES) {
+				if (itsInterfaces != null && itsInterfaces != Binding.NO_SUPERINTERFACES) {
 					if (interfacesToVisit == null) {
 						interfacesToVisit = itsInterfaces;
 						nextPosition = interfacesToVisit.length;
@@ -332,7 +333,7 @@ public TypeBinding findSuperTypeOriginatingFrom(TypeBinding otherType) {
 				if (currentType.original() == otherType)
 					return currentType;
 				ReferenceBinding[] itsInterfaces = currentType.superInterfaces();
-				if (itsInterfaces != Binding.NO_SUPERINTERFACES) {
+				if (itsInterfaces != null && itsInterfaces != Binding.NO_SUPERINTERFACES) {
 					int itsLength = itsInterfaces.length;
 					if (nextPosition + itsLength >= interfacesToVisit.length)
 						System.arraycopy(interfacesToVisit, 0, interfacesToVisit = new ReferenceBinding[nextPosition + itsLength + 5], 0, nextPosition);
@@ -597,11 +598,12 @@ public boolean isParameterizedWithOwnVariables() {
 	return true;
 }
 
-private boolean isProvableDistinctSubType(TypeBinding otherType) {
+private boolean isProvableDistinctSubType(TypeBinding otherType, boolean isClassLiteral) {
 	if (otherType.isInterface()) {
 		if (isInterface())
 			return false;
 		if (isArrayType()
+				|| isClassLiteral // https://bugs.eclipse.org/bugs/show_bug.cgi?id=322531
 				|| ((this instanceof ReferenceBinding) && ((ReferenceBinding) this).isFinal())
 				|| (isTypeVariable() && ((TypeVariableBinding)this).superclass().isFinal())) {
 			return !isCompatibleWith(otherType);
@@ -610,6 +612,7 @@ private boolean isProvableDistinctSubType(TypeBinding otherType) {
 	} else {
 		if (isInterface()) {
 			if (otherType.isArrayType()
+					|| isClassLiteral // https://bugs.eclipse.org/bugs/show_bug.cgi?id=322531
 					|| ((otherType instanceof ReferenceBinding) && ((ReferenceBinding) otherType).isFinal())
 					|| (otherType.isTypeVariable() && ((TypeVariableBinding)otherType).superclass().isFinal())) {
 				return !isCompatibleWith(otherType);
@@ -665,23 +668,22 @@ public boolean isProvablyDistinct(TypeBinding otherType) {
 		            return false;
 
 		    	case Binding.GENERIC_TYPE :
-		            SourceTypeBinding otherGenericType = (SourceTypeBinding) otherType;
-		            if (paramType.genericType() != otherGenericType)
+		            if (paramType.genericType() != otherType)
 		                return true;
 		            if (!paramType.isStatic()) { // static member types do not compare their enclosing
 		            	ReferenceBinding enclosing = enclosingType();
 		            	if (enclosing != null) {
-		            		ReferenceBinding otherEnclosing = otherGenericType.enclosingType();
+		            		ReferenceBinding otherEnclosing = otherType.enclosingType();
 		            		if (otherEnclosing == null) return true;
 		            		if ((otherEnclosing.tagBits & TagBits.HasDirectWildcard) == 0) {
 								if (enclosing != otherEnclosing) return true;
 		            		} else {
-		            			if (!enclosing.isEquivalentTo(otherGenericType.enclosingType())) return true;
+		            			if (!enclosing.isEquivalentTo(otherType.enclosingType())) return true;
 		            		}
 		            	}
 		            }
 		            length = paramType.arguments == null ? 0 : paramType.arguments.length;
-		            otherArguments = otherGenericType.typeVariables();
+		            otherArguments = otherType.typeVariables();
 		            otherLength = otherArguments == null ? 0 : otherArguments.length;
 		            if (otherLength != length)
 		                return true;
@@ -743,6 +745,7 @@ private boolean isProvablyDistinctTypeArgument(TypeBinding otherArgument, final 
 
 	TypeBinding upperBound1 = null;
 	TypeBinding lowerBound1 = null;
+	ReferenceBinding genericType = paramType.genericType();
 	switch (kind()) {
 		case Binding.WILDCARD_TYPE :
 			WildcardBinding wildcard = (WildcardBinding) this;
@@ -777,7 +780,7 @@ private boolean isProvablyDistinctTypeArgument(TypeBinding otherArgument, final 
 			}
 			if (variable.firstBound == null) // unbound variable
 				return false;
-			TypeBinding eliminatedType = Scope.convertEliminatingTypeVariables(variable, paramType.genericType(), rank, null);
+			TypeBinding eliminatedType = Scope.convertEliminatingTypeVariables(variable, genericType, rank, null);
 			switch (eliminatedType.kind()) {
 				case Binding.WILDCARD_TYPE :
 				case Binding.INTERSECTION_TYPE :
@@ -832,7 +835,7 @@ private boolean isProvablyDistinctTypeArgument(TypeBinding otherArgument, final 
 			}
 			if (otherVariable.firstBound == null) // unbound variable
 				return false;
-			TypeBinding otherEliminatedType = Scope.convertEliminatingTypeVariables(otherVariable, paramType.genericType(), rank, null);
+			TypeBinding otherEliminatedType = Scope.convertEliminatingTypeVariables(otherVariable, genericType, rank, null);
 			switch (otherEliminatedType.kind()) {
 				case Binding.WILDCARD_TYPE :
 				case Binding.INTERSECTION_TYPE :
@@ -869,10 +872,10 @@ private boolean isProvablyDistinctTypeArgument(TypeBinding otherArgument, final 
 		if (lowerBound2 != null) {
 			return !lowerBound2.isCompatibleWith(upperBound1);
 		} else if (upperBound2 != null) {
-			return upperBound1.isProvableDistinctSubType(upperBound2)
-							&& upperBound2.isProvableDistinctSubType(upperBound1);
+			return upperBound1.isProvableDistinctSubType(upperBound2, false)
+							&& upperBound2.isProvableDistinctSubType(upperBound1, false);
 		} else {
-			return otherArgument.isProvableDistinctSubType(upperBound1);
+			return otherArgument.isProvableDistinctSubType(upperBound1, genericType.id == TypeIds.T_JavaLangClass);
 		}
 	} else {
 		if (lowerBound2 != null) {
@@ -881,7 +884,7 @@ private boolean isProvablyDistinctTypeArgument(TypeBinding otherArgument, final 
 			}
 			return !lowerBound2.isCompatibleWith(this);
 		} else if (upperBound2 != null) {
-			return isProvableDistinctSubType(upperBound2);
+			return isProvableDistinctSubType(upperBound2, genericType.id == TypeIds.T_JavaLangClass);
 		} else {
 			return true; // ground types should have been the same
 		}

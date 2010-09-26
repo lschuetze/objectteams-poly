@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,14 +30,14 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 	/**
 	 * The type name; lazily initialized; defaults to a unspecified,
 	 * legal Java class identifier.
-	 * @since 2.0 (originally declared on <code>TypeDeclaration</code>)
+	 * @since 2.0 (originally declared on {@link TypeDeclaration})
 	 */
 	SimpleName typeName = null;
 
 	/**
-	 * The body declarations (element type: <code>BodyDeclaration</code>).
+	 * The body declarations (element type: {@link BodyDeclaration}).
 	 * Defaults to an empty list.
-	 * @since 2.0 (originally declared on <code>TypeDeclaration</code>)
+	 * @since 2.0 (originally declared on {@link TypeDeclaration})
 	 */
 	ASTNode.NodeList bodyDeclarations;
 
@@ -81,7 +81,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 
 	/**
 	 * Creates and returns a structural property descriptor for the
-	 * "bodyDeclaration" property declared on the given concrete node type.
+	 * "bodyDeclaration" property declared on the given concrete node type (element type: {@link BodyDeclaration}).
 	 *
 	 * @return the property descriptor
 	 */
@@ -91,7 +91,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 
 	/**
 	 * Creates and returns a structural property descriptor for the
-	 * "name" property declared on the given concrete node type.
+	 * "name" property declared on the given concrete node type (child type: {@link SimpleName}).
 	 *
 	 * @return the property descriptor
 	 */
@@ -119,7 +119,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 	 * Returns the name of the type declared in this type declaration.
 	 *
 	 * @return the type name node
-	 * @since 2.0 (originally declared on <code>TypeDeclaration</code>)
+	 * @since 2.0 (originally declared on {@link TypeDeclaration})
 	 */
 	public SimpleName getName() {
 		if (this.typeName == null) {
@@ -145,7 +145,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
 	 * </ul>
-	 * @since 2.0 (originally declared on <code>TypeDeclaration</code>)
+	 * @since 2.0 (originally declared on {@link TypeDeclaration})
 	 */
 	public void setName(SimpleName typeName) {
 		if (typeName == null) {
@@ -163,8 +163,8 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 	 * declaration.
 	 *
 	 * @return the live list of body declarations
-	 *    (element type: <code>BodyDeclaration</code>)
-	 * @since 2.0 (originally declared on <code>TypeDeclaration</code>)
+	 *    (element type: {@link BodyDeclaration})
+	 * @since 2.0 (originally declared on {@link TypeDeclaration})
 	 */
 	public List bodyDeclarations() {
 		return this.bodyDeclarations;
@@ -180,7 +180,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 	 *
 	 * @return <code>true</code> if this type declaration is a child of
 	 *   a compilation unit node, and <code>false</code> otherwise
-	 * @since 2.0 (originally declared on <code>TypeDeclaration</code>)
+	 * @since 2.0 (originally declared on {@link TypeDeclaration})
 	 */
 	public boolean isPackageMemberTypeDeclaration() {
 		ASTNode parent = getParent();
@@ -198,7 +198,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 	 * @return <code>true</code> if this type declaration is a child of
 	 *   a type declaration node or an anonymous class declaration node,
 	 *   and <code>false</code> otherwise
-	 * @since 2.0 (originally declared on <code>TypeDeclaration</code>)
+	 * @since 2.0 (originally declared on {@link TypeDeclaration})
 	 */
 	public boolean isMemberTypeDeclaration() {
 		ASTNode parent = getParent();

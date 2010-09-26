@@ -385,4 +385,12 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
 	public void setFieldIndex(int depth) {
 		// ignored
 	}
+
+	/**
+	 * Used for generic method resolving, however, FieldAccessSpec is not an invocationSite used for invoking generic methods.
+	 * (we implement InvocationSite only for visibility checking).
+	 */
+	public TypeBinding expectedType() {
+		return null;
+	}
 }

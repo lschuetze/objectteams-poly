@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -93,7 +93,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		internalModifiers2PropertyFactory(TypeDeclaration.class);
 
 	/**
-	 * The "interface" structural property of this node type.
+	 * The "interface" structural property of this node type (type: {@link Boolean}).
 	 * @since 3.0
 	 */
 	public static final SimplePropertyDescriptor INTERFACE_PROPERTY =
@@ -134,35 +134,35 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		internalNamePropertyFactory(TypeDeclaration.class);
 
 	/**
-	 * The "superclass" structural property of this node type (JLS2 API only).
+	 * The "superclass" structural property of this node type (child type: {@link Name}) (JLS2 API only).
 	 * @since 3.0
 	 */
 	public static final ChildPropertyDescriptor SUPERCLASS_PROPERTY =
 		new ChildPropertyDescriptor(TypeDeclaration.class, "superclass", Name.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
-	 * The "superInterfaces" structural property of this node type (JLS2 API only).
+	 * The "superInterfaces" structural property of this node type (element type: {@link Name}) (JLS2 API only).
 	 * @since 3.0
 	 */
 	public static final ChildListPropertyDescriptor SUPER_INTERFACES_PROPERTY =
 		new ChildListPropertyDescriptor(TypeDeclaration.class, "superInterfaces", Name.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
-	 * The "superclassType" structural property of this node type (added in JLS3 API).
+	 * The "superclassType" structural property of this node type (child type: {@link Type}) (added in JLS3 API).
 	 * @since 3.1
 	 */
 	public static final ChildPropertyDescriptor SUPERCLASS_TYPE_PROPERTY =
 		new ChildPropertyDescriptor(TypeDeclaration.class, "superclassType", Type.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
-	 * The "superInterfaceTypes" structural property of this node type (added in JLS3 API).
+	 * The "superInterfaceTypes" structural property of this node type (element type: {@link Type}) (added in JLS3 API).
 	 * @since 3.1
 	 */
 	public static final ChildListPropertyDescriptor SUPER_INTERFACE_TYPES_PROPERTY =
 		new ChildListPropertyDescriptor(TypeDeclaration.class, "superInterfaceTypes", Type.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
-	 * The "typeParameters" structural property of this node type (added in JLS3 API).
+	 * The "typeParameters" structural property of this node type (element type: {@link TypeParameter}) (added in JLS3 API).
 	 * @since 3.1
 	 */
 	public static final ChildListPropertyDescriptor TYPE_PARAMETERS_PROPERTY =
@@ -277,7 +277,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 //gbr}
 
 	/**
-	 * The type paramters (element type: <code>TypeParameter</code>).
+	 * The type paramters (element type: {@link TypeParameter}).
 	 * Null in JLS2. Added in JLS3; defaults to an empty list
 	 * (see constructor).
 	 * @since 3.1
@@ -300,7 +300,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	Name optionalSuperclassName = null;
 // SH}
 	/**
-	 * The superinterface names (element type: <code>Name</code>).
+	 * The superinterface names (element type: {@link Name}).
 	 * JLS2 only; defaults to an empty list. Not used in JLS3.
 	 * (see constructor).
 	 *
@@ -324,7 +324,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	Type optionalSuperclassType = null;
 // SH}
 	/**
-	 * The superinterface types (element type: <code>Type</code>).
+	 * The superinterface types (element type: {@link Type}).
 	 * Null in JLS2. Added in JLS3; defaults to an empty list
 	 * (see constructor).
 	 * @since 3.1
@@ -751,7 +751,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * declaration (added in JLS3 API). This list is non-empty for parameterized types.
 	 *
 	 * @return the live list of type parameters
-	 *    (element type: <code>TypeParameter</code>)
+	 *    (element type: {@link TypeParameter})
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * a JLS2 AST
 	 * @since 3.1
@@ -889,7 +889,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * extends.
 	 *
 	 * @return the live list of interface names
-	 *    (element type: <code>Name</code>)
+	 *    (element type: {@link Name})
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * an AST later than JLS2
 	 * @deprecated In the JLS3 API, this method is replaced by
@@ -919,7 +919,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * these are the interfaces that this interface extends.
 	 *
 	 * @return the live list of interface types
-	 *    (element type: <code>Type</code>)
+	 *    (element type: {@link Type})
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * a JLS2 AST
 	 * @since 3.1

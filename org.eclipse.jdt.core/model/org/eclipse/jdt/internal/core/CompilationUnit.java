@@ -1364,4 +1364,7 @@ protected IStatus validateExistence(IResource underlyingResource) {
 	return JavaModelStatus.VERIFIED_OK;
 }
 
+public ISourceRange getNameRange() {
+	return null;
+}
 }

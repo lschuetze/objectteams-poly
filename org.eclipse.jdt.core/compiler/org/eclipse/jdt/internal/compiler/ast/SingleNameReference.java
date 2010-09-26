@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 292478 - Report potentially null across variable assignment
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -759,6 +760,10 @@ public void manageEnclosingInstanceAccessIfNecessary(BlockScope currentScope, Fl
 	if ((this.bits & ASTNode.RestrictiveFlagMASK) == Binding.LOCAL) {
 		LocalVariableBinding localVariableBinding = (LocalVariableBinding) this.binding;
 		if (localVariableBinding != null) {
+			if ((localVariableBinding.tagBits & TagBits.NotInitialized) != 0) {
+				// local was tagged as uninitialized
+				return;
+			}
 			switch(localVariableBinding.useFlag) {
 				case LocalVariableBinding.FAKE_USED :
 				case LocalVariableBinding.USED :
@@ -818,13 +823,8 @@ public int nullStatus(FlowInfo flowInfo) {
 			return FlowInfo.UNKNOWN;
 		case Binding.LOCAL : // reading a local variable
 			LocalVariableBinding local = (LocalVariableBinding) this.binding;
-			if (local != null) {
-				if (flowInfo.isDefinitelyNull(local))
-					return FlowInfo.NULL;
-				if (flowInfo.isDefinitelyNonNull(local))
-					return FlowInfo.NON_NULL;
-				return FlowInfo.UNKNOWN;
-			}
+			if (local != null)
+				return flowInfo.nullStatus(local);
 	}
 	return FlowInfo.NON_NULL; // never get there
 }

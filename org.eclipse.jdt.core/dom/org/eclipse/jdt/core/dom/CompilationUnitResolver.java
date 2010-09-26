@@ -58,7 +58,7 @@ import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.jdt.internal.core.BinaryMember;
 import org.eclipse.jdt.internal.core.CancelableNameEnvironment;
 import org.eclipse.jdt.internal.core.CancelableProblemFactory;
-import org.eclipse.jdt.internal.core.INameEnviromentWithProgress;
+import org.eclipse.jdt.internal.core.INameEnvironmentWithProgress;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.NameLookup;
 import org.eclipse.jdt.internal.core.SourceRefElement;
@@ -615,7 +615,7 @@ class CompilationUnitResolver extends Compiler {
 			int flags,
 			IProgressMonitor monitor) {
 
-			INameEnviromentWithProgress environment = null;
+			INameEnvironmentWithProgress environment = null;
 			CancelableProblemFactory problemFactory = null;
 			try {
 				if (monitor != null) {
@@ -624,7 +624,7 @@ class CompilationUnitResolver extends Compiler {
 				}
 				Classpath[] allEntries = new Classpath[classpaths.size()];
 				classpaths.toArray(allEntries);
-				environment = new NameEnviromentWithProgress(allEntries, null, monitor);
+				environment = new NameEnvironmentWithProgress(allEntries, null, monitor);
 				problemFactory = new CancelableProblemFactory(monitor);
 				CompilerOptions compilerOptions = getCompilerOptions(options, (flags & ICompilationUnit.ENABLE_STATEMENTS_RECOVERY) != 0);
 				compilerOptions.ignoreMethodBodies = (flags & ICompilationUnit.IGNORE_METHOD_BODIES) != 0;
@@ -664,14 +664,14 @@ class CompilationUnitResolver extends Compiler {
 			IProgressMonitor monitor) throws JavaModelException {
 
 		CompilationUnitDeclaration unit = null;
-		INameEnviromentWithProgress environment = null;
+		INameEnvironmentWithProgress environment = null;
 		CancelableProblemFactory problemFactory = null;
 		CompilationUnitResolver resolver = null;
 		try {
 			if (javaProject == null) {
 				Classpath[] allEntries = new Classpath[classpaths.size()];
 				classpaths.toArray(allEntries);
-				environment = new NameEnviromentWithProgress(allEntries, null, monitor);
+				environment = new NameEnvironmentWithProgress(allEntries, null, monitor);
 			} else {
 				environment = new CancelableNameEnvironment((JavaProject) javaProject, owner, monitor);
 			}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -63,7 +63,7 @@ public class CompilationUnit extends ASTNode {
 	private static final IProblem[] EMPTY_PROBLEMS = new IProblem[0];
 
 	/**
-	 * The "imports" structural property of this node type.
+	 * The "imports" structural property of this node type (element type: {@link ImportDeclaration}).
 	 *
 	 * @since 3.0
 	 */
@@ -71,7 +71,7 @@ public class CompilationUnit extends ASTNode {
 		new ChildListPropertyDescriptor(CompilationUnit.class, "imports", ImportDeclaration.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
-	 * The "package" structural property of this node type.
+	 * The "package" structural property of this node type (child type: {@link PackageDeclaration}).
 	 *
 	 * @since 3.0
 	 */
@@ -87,7 +87,7 @@ public class CompilationUnit extends ASTNode {
 	private static final List PROPERTY_DESCRIPTORS;
 
 	/**
-	 * The "types" structural property of this node type.
+	 * The "types" structural property of this node type (element type: {@link AbstractTypeDeclaration}).
 	 *
 	 * @since 3.0
 	 */
@@ -154,7 +154,7 @@ public class CompilationUnit extends ASTNode {
 	private Message[] messages;
 
 	/**
-	 * The comment list (element type: <code>Comment</code>,
+	 * The comment list (element type: {@link Comment},
 	 * or <code>null</code> if none; initially <code>null</code>.
 	 * @since 3.0
 	 */
@@ -902,7 +902,7 @@ public class CompilationUnit extends ASTNode {
 	 * on record. Subsequence modifications made to the AST
 	 * are added to the ones already on record. If this method
 	 * is called again later, the resulting text edit object will
-	 * accurately reflect the net cumulative affect of all those
+	 * accurately reflect the net cumulative effect of all those
 	 * changes.
 	 * </p>
 	 *

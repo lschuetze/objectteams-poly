@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Andreas Magnusson <andreas.ch.magnusson@gmail.com>- contribution for bug 151500
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.codeassist;
@@ -195,7 +196,8 @@ public class InternalCompletionProposal extends CompletionProposal {
 			}
 		} else {
 			// TODO (david) shouldn't it be NameLookup.ACCEPT_ALL ?
-			NameLookup.Answer answer = this.nameLookup.findType(new String(tName),
+			NameLookup.Answer answer = this.nameLookup.findType(new String(declaringTypeName),
+				new String(declaringTypePackageName),
 				false,
 				NameLookup.ACCEPT_CLASSES & NameLookup.ACCEPT_INTERFACES,
 				true/* consider secondary types */,
@@ -211,21 +213,20 @@ public class InternalCompletionProposal extends CompletionProposal {
 		}
 
 		if(type != null) {
-			String[] args = new String[length];
-			for(int i = 0;	i< length ; i++){
-				args[i] = new String(paramTypeNames[i]);
-			}
-			IMethod method = type.getMethod(new String(selector),args);
-			
-			if (this.hasNoParameterNamesFromIndex) {
-				IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot)type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-				if (packageFragmentRoot.isArchive() ||
-						this.completionEngine.openedBinaryTypes < getOpenedBinaryTypesThreshold()) {
-					SourceMapper mapper = ((JavaElement)method).getSourceMapper();
-					if (mapper != null) {
-						try {
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=316937
+			// BinaryType#getMethod() creates a new instance of BinaryMethod, which is a dummy.
+			// Instead we have to use IType#findMethods() to get a handle to the method of our interest.
+			try {
+				IMethod method = findMethod(type, selector, paramTypeNames);
+				if (this.hasNoParameterNamesFromIndex) {
+
+					IPackageFragmentRoot packageFragmentRoot = (IPackageFragmentRoot)type.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					if (packageFragmentRoot.isArchive() ||
+							this.completionEngine.openedBinaryTypes < getOpenedBinaryTypesThreshold()) {
+						SourceMapper mapper = ((JavaElement)method).getSourceMapper();
+						if (mapper != null) {
 							char[][] paramNames = mapper.getMethodParameterNames(method);
-					
+
 							// map source and try to find parameter names
 							if(paramNames == null) {
 								if (!packageFragmentRoot.isArchive()) this.completionEngine.openedBinaryTypes++;
@@ -236,35 +237,28 @@ public class InternalCompletionProposal extends CompletionProposal {
 								}
 								paramNames = mapper.getMethodParameterNames(method);
 							}
-							
+
 							if(paramNames != null) {
 								parameters = paramNames;
 							}
-						} catch(JavaModelException e){
-							//parameters == null;
 						}
 					}
-				}
-			} else {
-				try{
+				} else {
 					IBinaryMethod info = (IBinaryMethod) ((JavaElement)method).getElementInfo();
 					char[][] argumentNames = info.getArgumentNames();
 					if (argumentNames != null && argumentNames.length == length) {
 						parameters = argumentNames;
+						return parameters;
 					}
-				} catch(JavaModelException e){
-					//parameters == null;
-				}
-				
-				try{
+
 					parameters = new char[length][];
 					String[] params = method.getParameterNames();
 					for(int i = 0;	i< length ; i++){
 						parameters[i] = params[i].toCharArray();
 					}
-				} catch(JavaModelException e){
-					parameters = null;
 				}
+			} catch(JavaModelException e){
+				parameters = null;
 			}
 		}
 
@@ -292,7 +286,8 @@ public class InternalCompletionProposal extends CompletionProposal {
 			}
 		} else {
 			// TODO (david) shouldn't it be NameLookup.ACCEPT_ALL ?
-			NameLookup.Answer answer = this.nameLookup.findType(new String(tName),
+			NameLookup.Answer answer = this.nameLookup.findType(new String(declaringTypeName),
+				new String(declaringTypePackageName),
 				false,
 				NameLookup.ACCEPT_CLASSES & NameLookup.ACCEPT_INTERFACES,
 				true/* consider secondary types */,
@@ -308,12 +303,11 @@ public class InternalCompletionProposal extends CompletionProposal {
 		}
 
 		if(type != null) {
-			String[] args = new String[length];
-			for(int i = 0;	i< length ; i++){
-				args[i] = new String(paramTypeNames[i]);
-			}
-			IMethod method = type.getMethod(new String(selector),args);
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=316937
+			// BinaryType#getMethod() creates a new instance of BinaryMethod, which is a dummy.
+			// Instead we have to use IType#findMethods() to get a handle to the method of our interest.
 			try{
+				IMethod method = findMethod(type, selector, paramTypeNames);
 				parameters = new char[length][];
 				String[] params = method.getParameterNames();
 				for(int i = 0;	i< length ; i++){
@@ -330,6 +324,35 @@ public class InternalCompletionProposal extends CompletionProposal {
 		}
 
 		return parameters;
+	}
+
+	private IMethod findMethod(IType type, char[] selector, char[][] paramTypeNames) throws JavaModelException {
+		IMethod method = null;
+		int startingIndex = 0;
+		String[] args;
+		IType enclosingType = type.getDeclaringType();
+		// If the method is a constructor of a non-static inner type, add the enclosing type as an 
+		// additional parameter to the constructor
+		if (enclosingType != null
+				&& CharOperation.equals(type.getElementName().toCharArray(), selector)
+				&& !Flags.isStatic(type.getFlags())) {
+			args = new String[paramTypeNames.length+1];
+			startingIndex = 1;
+			args[0] = Signature.createTypeSignature(enclosingType.getFullyQualifiedName(), true);
+		} else {
+			args = new String[paramTypeNames.length];
+		}
+		int length = args.length;
+		for(int i = startingIndex;	i< length ; i++){
+			args[i] = new String(paramTypeNames[i-startingIndex]);
+		}
+		method = type.getMethod(new String(selector), args);
+		
+		IMethod[] methods = type.findMethods(method);
+		if (methods != null && methods.length > 0) {
+			method = methods[0];
+		}
+		return method;
 	}
 
 	protected char[] getDeclarationPackageName() {

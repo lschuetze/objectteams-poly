@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - TypeConverters don't set enclosingType - https://bugs.eclipse.org/bugs/show_bug.cgi?id=320841
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -321,7 +322,9 @@ public class SourceTypeConverter extends TypeConverter {
 
 		// convert 1.5 specific constructs only if compliance is 1.5 or above
 		TypeParameter[] typeParams = null;
-		if (this.has1_5Compliance) {
+		// Digest type parameters if compliance level of current project or its prerequisite is >= 1.5
+		// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=323633 && https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
+		if (this.has1_5Compliance || this.problemReporter.options.complianceLevel >= ClassFileConstants.JDK1_5) {
 			/* convert type parameters */
 			char[][] typeParameterNames = methodInfo.getTypeParameterNames();
 			if (typeParameterNames != null) {
@@ -512,7 +515,10 @@ public class SourceTypeConverter extends TypeConverter {
 		if (this.has1_5Compliance) {
 			/* convert annotations */
 			type.annotations = convertAnnotations(typeHandle);
-
+		}
+		// Digest type parameters if compliance level of current project or its prerequisite is >= 1.5
+		// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=323633 && https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
+		if (this.has1_5Compliance || this.problemReporter.options.complianceLevel >= ClassFileConstants.JDK1_5) {
 			/* convert type parameters */
 			char[][] typeParameterNames = typeInfo.getTypeParameterNames();
 			if (typeParameterNames.length > 0) {
@@ -593,9 +599,7 @@ public class SourceTypeConverter extends TypeConverter {
 			type.memberTypes = new TypeDeclaration[sourceMemberTypeCount];
 			for (int i = 0; i < sourceMemberTypeCount; i++) {
 				type.memberTypes[i] = convert(sourceMemberTypes[i], compilationResult);
-//{ObjectTeams: fix for  Bug 320841 -  TypeConverters don't set enclosingType
-                type.memberTypes[i].enclosingType = type;
-// SH}
+				type.memberTypes[i].enclosingType = type;
 			}
 		}
 
