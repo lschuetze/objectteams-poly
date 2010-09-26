@@ -44,7 +44,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	// All specified tests which do not belong to the class are skipped...
 	static {
 //		TESTS_PREFIX =  "testBug86380";
-//		TESTS_NAMES = new String[] { "testCreateBindings23" };
+//		TESTS_NAMES = new String[] { "testLocalVariable6" };
 //		TESTS_NUMBERS = new int[] { 83230 };
 //		TESTS_RANGE = new int[] { 83304, -1 };
 		}
@@ -1481,6 +1481,62 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	}
 
 	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
+	 */
+	public void testLocalVariable6() throws JavaModelException {
+		ASTNode node = buildAST(
+			"public class X {\n" +
+			"	{\n" +
+			"		int local;\n" +
+			"	}\n" +
+			"	public void foo() {\n" +
+			"		int i = 0;\n" +
+			"	}\n" +
+			"	public static void foo(final int n) {\n" +
+			"		int i;\n" +
+			"	}\n" +
+			"	public X(final int j) {\n" +
+			"		int i;\n" +
+			"	}\n" +
+			"}"
+		);
+		node.accept(new ASTVisitor() {
+			public boolean visit(VariableDeclarationFragment fragment) {
+				final IVariableBinding binding = fragment.resolveBinding();
+				final IJavaElement javaElement = binding.getJavaElement();
+				assertNotNull("No java element", javaElement);
+				final int type = javaElement.getElementType();
+				assertEquals("Wrong type", IJavaElement.LOCAL_VARIABLE, type);
+				ILocalVariable variable = (ILocalVariable) javaElement;
+				final ITypeRoot typeRoot = variable.getTypeRoot();
+				assertNotNull("Not type root", typeRoot);
+				assertTrue("Invalid", typeRoot.exists());
+				assertNotNull("No declaring element", variable.getDeclaringMember());
+				int flags = variable.getFlags();
+				assertFalse("wrong modifier for " + variable.getElementName(), Flags.isFinal(flags));
+				assertFalse("wrong value for isParameter" + variable.getElementName(), variable.isParameter());
+				return true;
+			}
+			public boolean visit(SingleVariableDeclaration variableDeclaration) {
+				final IVariableBinding binding = variableDeclaration.resolveBinding();
+				final IJavaElement javaElement = binding.getJavaElement();
+				assertNotNull("No java element", javaElement);
+				final int type = javaElement.getElementType();
+				assertEquals("Wrong type", IJavaElement.LOCAL_VARIABLE, type);
+				ILocalVariable variable = (ILocalVariable) javaElement;
+				final ITypeRoot typeRoot = variable.getTypeRoot();
+				assertNotNull("Not type root", typeRoot);
+				assertTrue("Invalid", typeRoot.exists());
+				assertNotNull("No declaring element", variable.getDeclaringMember());
+				int flags = variable.getFlags();
+				assertTrue("wrong modifier for " + variable.getElementName(), Flags.isFinal(flags));
+				assertTrue("wrong value for isParameter" + variable.getElementName(), variable.isParameter());
+				return true;
+			}
+		});
+	}
+
+	/*
 	 * Ensures that the IJavaElement of an IBinding representing a member type is correct.
 	 */
 	public void testMemberType() throws JavaModelException {
@@ -2113,6 +2169,11 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 			"<T> [in X [in [Working copy] X.java [in <default> [in src [in P]]]]]",
 			element
 		);
+		assertEquals("Wrong type", IJavaElement.TYPE_PARAMETER, element.getElementType());
+		ITypeParameter typeParameter = (ITypeParameter) element;
+		final ITypeRoot typeRoot = typeParameter.getTypeRoot();
+		assertNotNull("Not type root", typeRoot);
+		assertTrue("Invalid", typeRoot.exists());
 	}
 
 	/*
@@ -2222,5 +2283,80 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 			deleteFile(filePath);
 		}
 	}
+	public void test320802() throws CoreException {
+		String filePath = "/P/src/X.java";
+		String filePathY = "/P/src/p/Y.java";
+		try {
+			String contents =
+				"import p.Y;\n" +
+				"public class X {\n" +
+				"	Y<MissingType1, MissingType2> y;\n" +
+				"	public X() {\n" +
+				"		this.y = new Y<MissingType1, MissingType2>();\n" +
+				"	}\n" + 
+				"}";
+			createFile(filePath, contents);
+			ICompilationUnit compilationUnit = getCompilationUnit("P", "src", "", "X.java");
+			assertTrue(compilationUnit.exists());
 
+			String contents2 =
+				"package p;\n" +
+				"public class Y<T, U> {}";
+			createFolder("/P/src/p");
+			createFile(filePathY, contents2);
+			ICompilationUnit compilationUnit2 = getCompilationUnit("P", "src", "p", "Y.java");
+			assertTrue(compilationUnit2.exists());
+
+			final CompilationUnit[] asts = new CompilationUnit[1];
+			BindingRequestor requestor = new BindingRequestor() {
+				public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
+					asts[0] = ast;
+				}
+			};
+			resolveASTs(
+				new ICompilationUnit[] {compilationUnit},
+				new String[0],
+				requestor,
+				getJavaProject("P"),
+				this.workingCopy.getOwner()
+			);
+			assertNotNull("No ast", asts[0]);
+			final IProblem[] problems = asts[0].getProblems();
+			String expectedProblems = 
+				"1. ERROR in /P/src/X.java (at line 3)\n" + 
+				"	Y<MissingType1, MissingType2> y;\n" + 
+				"	  ^^^^^^^^^^^^\n" + 
+				"MissingType1 cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"2. ERROR in /P/src/X.java (at line 3)\n" + 
+				"	Y<MissingType1, MissingType2> y;\n" + 
+				"	                ^^^^^^^^^^^^\n" + 
+				"MissingType2 cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"3. ERROR in /P/src/X.java (at line 5)\n" + 
+				"	this.y = new Y<MissingType1, MissingType2>();\n" + 
+				"	^^^^^^\n" + 
+				"MissingType1 cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"4. ERROR in /P/src/X.java (at line 5)\n" + 
+				"	this.y = new Y<MissingType1, MissingType2>();\n" + 
+				"	^^^^^^\n" + 
+				"MissingType2 cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"5. ERROR in /P/src/X.java (at line 5)\n" + 
+				"	this.y = new Y<MissingType1, MissingType2>();\n" + 
+				"	               ^^^^^^^^^^^^\n" + 
+				"MissingType1 cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"6. ERROR in /P/src/X.java (at line 5)\n" + 
+				"	this.y = new Y<MissingType1, MissingType2>();\n" + 
+				"	                             ^^^^^^^^^^^^\n" + 
+				"MissingType2 cannot be resolved to a type\n" + 
+				"----------\n";
+			assertProblems("Wrong problems", expectedProblems, problems, contents.toCharArray());
+		} finally {
+			deleteFile(filePath);
+			deleteFile(filePathY);
+		}
+	}
 }

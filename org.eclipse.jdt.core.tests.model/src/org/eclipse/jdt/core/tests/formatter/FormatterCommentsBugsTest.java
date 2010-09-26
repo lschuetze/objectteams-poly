@@ -714,7 +714,7 @@ public void testBug228652() {
 		"public class Test {\r\n" +
 		"\r\n" +
 		"	private int field;\r\n" +
-		"\r\n" +
+		"	\r\n" +
 		"	/**\r\n" +
 		"	 * fds\r\n" +
 		"	 */\r\n" +
@@ -954,8 +954,8 @@ public void testBug232768_Javadoc02() throws JavaModelException {
 	// This is due to the fact that the region is adapted to include the edit just before the comment
 	formatSource(source,
 		"public class C {\n" +
-		"\n" +
-		"	/**\n" +
+		"	\n" +
+		"        /**\n" +
 		"	 * a b c d .\n" +
 		"	 */\n" +
 		"	void m1() {\n" +
@@ -987,8 +987,8 @@ public void testBug232768_Javadoc03() throws JavaModelException {
 	// This is due to the fact that the region is adapted to include the edit just before the comment
 	formatSource(source,
 		"public class C {\n" +
-		"\n" +
-		"	/**\n" +
+		"	\n" +
+		"        /**\n" +
 		"	 * a b c d .\n" +
 		"	 */\n" +
 		"	void m1  (   )   {\n" +
@@ -1083,9 +1083,9 @@ public void testBug232768_Javadoc06() throws JavaModelException {
 	// Note that the incorrect indentation before the javadoc is fixed in this test case...
 	// This is due to the fact that the region is adapted to include the edit just before the comment
 	formatSource(source,
-		"   public     class			C{\n" +
-		"\n" +
-		"	/**\n" +
+		"   public     class			C{    \n" +
+		"	\n" +
+		"        /**\n" +
 		"	 * a b c d .\n" +
 		"	 */\n" +
 		"        void		m1  (   )   {\n" +
@@ -1147,8 +1147,8 @@ public void testBug232768_Block02() throws JavaModelException {
 	// This is due to the fact that the region is adapted to include the edit just before the comment
 	formatSource(source,
 		"public class D {\n" +
-		"\n" +
-		"	/*\n" +
+		"	\n" +
+		"        /*\n" +
 		"	 * a b c d .\n" +
 		"	 */\n" +
 		"	void m2() {\n" +
@@ -1180,8 +1180,8 @@ public void testBug232768_Block03() throws JavaModelException {
 	// This is due to the fact that the region is adapted to include the edit just before the comment
 	formatSource(source,
 		"public class D {\n" +
-		"\n" +
-		"	/*\n" +
+		"	\n" +
+		"        /*\n" +
 		"	 * a b c d .\n" +
 		"	 */\n" +
 		"	void m2  (   )   {\n" +
@@ -1276,9 +1276,9 @@ public void testBug232768_Block06() throws JavaModelException {
 	// Note that the incorrect indentation before the javadoc is fixed in this test case...
 	// This is due to the fact that the region is adapted to include the edit just before the comment
 	formatSource(source,
-		"   public     class			D{\n" +
-		"\n" +
-		"	/*\n" +
+		"   public     class			D{    \n" +
+		"	\n" +
+		"        /*\n" +
 		"	 * a b c d .\n" +
 		"	 */\n" +
 		"        void		m2  (   )   {\n" +
@@ -1553,7 +1553,7 @@ public void testBug233011() throws JavaModelException {
 	formatSource(source,
 		"\n" +
 		"public class E01 {\n" +
-		"	/**\n" +
+		"        /**\n" +
 		"	 * Javadoc comment\n" +
 		"	 */\n" +
 		"        /*\n" +
@@ -6758,7 +6758,7 @@ public void testBug309835_wksp2_01() {
  * @test Ensure that no NPE occurs while formatting an empty code inline tag.
  * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=311864"
  */
-public void testBug0311864() throws JavaModelException {
+public void testBug311864() throws JavaModelException {
 	this.formatterPrefs.use_tags = true;
 	String source =
 		"public class Test {\n" + 
@@ -6794,6 +6794,264 @@ public void testBug0311864() throws JavaModelException {
 		"		return value1 > value2;\n" + 
 		"	}\n" + 
 		"}\n"
+	);
+}
+
+/**
+ * @bug 315577: [formatter] NullPointerException (always) on inserting a custom template proposal into java code when "Use code formatter" is on
+ * @test Ensure that no NPE occurs when inserting the custom template
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=315577"
+ */
+public void testBug315577() throws JavaModelException {
+	String source =
+		"public class C {\n" + 
+		"\n" + 
+		"	/**\n" + 
+		"	 * aaaa aaa aaa.<br>\n" + 
+		"	 * {@link C}: aaaa.<br>\n" + 
+		"	 * {@link C}: aaaa.<br>\n" + 
+		"	 * aaa {@link C}: aaaa.<br>\n" + 
+		"	 * {@link C}: aaaa<br>\n" + 
+		"	 * {@link C}: aaaa.<br>\n" + 
+		"	 */\n" + 
+		"	public C() {\n" + 
+		"	}\n" + 
+		"}\n";
+	formatSource(source);
+}
+
+/**
+ * @bug 315732: [formatter] NullPointerException (always) on inserting a custom template proposal into java code when "Use code formatter" is on
+ * @test Ensure that no NPE occurs when inserting the custom template
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=315732"
+ */
+public void testBug315732() throws JavaModelException {
+	this.formatterPrefs.use_tags = true;
+	String source =
+		"// ============================================================================\r\n" +
+		"// /*-*/\r\n" +
+		"// ============================================================================\r\n";
+	formatSource(source,
+		"	// ============================================================================\n" + 
+		"	// /*-*/\n" + 
+		"	// ============================================================================\n",
+		CodeFormatter.K_UNKNOWN,
+		1,
+		true
+	);
+}
+
+/**
+ * @bug 313651: [formatter] Unexpected indentation of line comment
+ * @test Verify that comments with too different indentation are not considered as contiguous
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=313651"
+ */
+public void testBug313651_01() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.FALSE);
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
+	String source = 
+		"public class X01 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"//		System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n";
+	formatSource(source);
+}
+public void testBug313651_01b() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.TRUE);
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT_STARTING_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.FALSE);
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
+	String source = 
+		"public class X01 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"//		System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n";
+	formatSource(source);
+}
+public void testBug313651_01c() {
+	String source = 
+		"public class X01 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"//		System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n";
+	formatSource(source,
+		"public class X01 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"		// System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n"
+	);
+}
+public void testBug313651_02() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.FALSE);
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
+	String source = 
+		"public class X02 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"		System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"//		System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n";
+	formatSource(source);
+}
+public void testBug313651_02b() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.TRUE);
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT_STARTING_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.FALSE);
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
+	String source = 
+		"public class X02 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"		System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"//		System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n";
+	formatSource(source);
+}
+public void testBug313651_02c() {
+	String source = 
+		"public class X02 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"		System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"//		System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n";
+	formatSource(source,
+		"public class X02 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"		System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"		// System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n"
+	);
+}
+public void testBug313651_03() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.FALSE);
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
+	String source = 
+		"public class X03 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"//		System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"//		System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n";
+	formatSource(source);
+}
+public void testBug313651_03b() {
+	this.formatterPrefs = null;
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT, DefaultCodeFormatterConstants.TRUE);
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_COMMENT_FORMAT_LINE_COMMENT_STARTING_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.FALSE);
+	this.formatterOptions.put(DefaultCodeFormatterConstants.FORMATTER_NEVER_INDENT_LINE_COMMENTS_ON_FIRST_COLUMN, DefaultCodeFormatterConstants.TRUE);
+	String source = 
+		"public class X03 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"//		System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"//		System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n";
+	formatSource(source);
+}
+public void testBug313651_03c() {
+	String source = 
+		"public class X03 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"//		System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"//		System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n";
+	formatSource(source,
+		"public class X03 {\n" + 
+		"	public void testMethod() {\n" + 
+		"		// Comment 1\n" + 
+		"		System.out.println(\"start\");\n" + 
+		"		// System.out.println(\"next\");\n" + 
+		"		// Comment 1\n" + 
+		"		// System.out.println(\"end\");\n" + 
+		"	}\n" + 
+	    "}\n"
+	);
+}
+public void testBug313651_wksp3_01() {
+	String source = 
+		"package wksp3;\n" + 
+		"public class X01 implements\n" + 
+		"// start of comment\n" + 
+		"// MyFirstInterface {\n" + 
+		"	MySecondInterface {\n" + 
+		"// end of comment\n" + 
+	    "}\n";
+	formatSource(source,
+		"package wksp3;\n" + 
+		"\n" + 
+		"public class X01 implements\n" + 
+		"// start of comment\n" + 
+		"// MyFirstInterface {\n" + 
+		"		MySecondInterface {\n" + 
+		"	// end of comment\n" + 
+	    "}\n"
+	);
+}
+public void testBug313651_wksp3_02() {
+	String source = 
+		"package wksp3;\n" + 
+		"public class X02 implements MyOtherInterface, \n" + 
+		"// start of comment\n" + 
+		"// MyFirstInterface {\n" + 
+		"	MySecondInterface {\n" + 
+		"// end of comment\n" + 
+	    "}\n";
+	formatSource(source,
+		"package wksp3;\n" + 
+		"\n" + 
+		"public class X02 implements MyOtherInterface,\n" + 
+		"// start of comment\n" + 
+		"// MyFirstInterface {\n" + 
+		"		MySecondInterface {\n" + 
+		"	// end of comment\n" + 
+	    "}\n"
 	);
 }
 

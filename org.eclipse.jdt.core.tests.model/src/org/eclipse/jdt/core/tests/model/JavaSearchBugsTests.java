@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.search.*;
 import org.eclipse.jdt.core.tests.util.Util;
 
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.core.ClassFile;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.SourceMethod;
@@ -8784,6 +8785,7 @@ public void testBug185452() throws CoreException {
 		"lib/b166348.jar  [No source]\n" +
 		"lib/b166348.jar pack [No source]\n" +
 		"lib/b166348.jar test [No source]\n" +
+		"lib/b317264 b317264\n" +
 		"lib/b86293.jar  [No source]\n" +
 		"lib/b87627.jar  [No source]\n" +
 		"lib/b87627.jar b87627 [No source]\n" +
@@ -10964,13 +10966,17 @@ public void testBug286379c() throws CoreException {
         }
 	}
 	// print statement to debug random failures of this test
+	JavaModelManager.DEBUG_302850 = true;
 	System.out.println("================================================================================");
 	System.out.println("Starting test JavaSearchBugTests.testBug286379c()...");
+	System.out.println("	- Default Options at test start:");
+	System.out.println(Util.indentString(new CompilerOptions(JavaCore.getDefaultOptions()).toString(), 1));
 	System.out.println("	- Options at test start:");
-	System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
-	System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
-	System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+	System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
+	System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
+	System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
 	printPreference();
+	System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 	
 	IContentType javaContentType = Platform.getContentTypeManager().getContentType(JavaCore.JAVA_SOURCE_CONTENT_TYPE);
 	TestResourceChangeListener changeListener = new TestResourceChangeListener();
@@ -11015,19 +11021,21 @@ public void testBug286379c() throws CoreException {
 
 		// print statement to debug random failures of this test
 		System.out.println("	- Options before first exit:");
-		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
-		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
-		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
+		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
+		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
 		printPreference();
+		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 		// Restart to let the indexes to be refreshed
 		simulateExit();
 		simulateRestart();
 		// print statement to debug random failures of this test
 		System.out.println("	- Options after first restart:");
-		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
-		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
-		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
+		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
+		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
 		printPreference();
+		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 		waitUntilIndexesReady();
 
 		// Search for the new type with new extension
@@ -11049,18 +11057,19 @@ public void testBug286379c() throws CoreException {
 		
 		// print statement to debug random failures of this test
 		System.out.println("	- Options before second exit:");
-		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
-		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
-		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
+		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
+		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
 		printPreference();
+		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 		// Restarting should update the index file to remove the references of any .torem files
 		simulateExit();
 		simulateRestart();	
 		// print statement to debug random failures of this test
 		System.out.println("	- Options after second restart:");
-		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
-		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
-		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
+		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
+		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
 		printPreference();
 		waitUntilIndexesReady();
 
@@ -11075,21 +11084,24 @@ public void testBug286379c() throws CoreException {
 				null);
 		assertSearchResults("No search results expected", "", collector);
 		System.out.println("	- Options after search:");
-		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
-		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
-		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
+		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
+		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
 		printPreference();
+		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 	} finally {
 		getWorkspace().removeResourceChangeListener(changeListener);
 		if (javaContentType != null)
 			javaContentType.removeFileSpec("torem", IContentType.FILE_EXTENSION_SPEC);
 		deleteProject("P");
 		System.out.println("	- Options at test end:");
-		System.out.println("		+ Task tags:           " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_TAGS));
-		System.out.println("		+ Task priorities:     " + JavaCore.getOptions().get(JavaCore.COMPILER_TASK_PRIORITIES));
-		System.out.println("		+ Forbidden reference: " + JavaCore.getOptions().get(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
+		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
+		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
+		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
+		System.out.println("	- Default Options at test end:");
 		printPreference();
-		System.out.println("================================================================================");
+		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getDefaultOptions()).toString(), 2));
 	}
 }
 private void printPreference() {
@@ -11882,5 +11894,464 @@ public void testBug310213() throws CoreException {
 		deleteFolder("/JavaSearchBugs/src/b310213");
 		deleteFolder("/JavaSearchBugs/src/java");
 	}
+}
+
+/**
+ * @bug 313668: [search] Call hierarchy doesn't show all calls of the method in workspace
+ * @test Search for references to method should even return hierarchy sibling's reference.
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=313668"
+ */
+public void testBug313668() throws CoreException {
+	boolean autoBuild = getWorkspace().isAutoBuilding();
+	IWorkspaceDescription preferences = getWorkspace().getDescription();
+	IJavaProject commonProject = null, clientProject = null, serverProject = null;
+	try {
+		// ensure that the workspace auto-build is ON
+		preferences.setAutoBuilding(true);
+		getWorkspace().setDescription(preferences);
+		
+		// create the common project and create an interface
+		commonProject = createJavaProject("common");	
+		createFolder("/common/com/db");
+		createFile("/common/com/db/Repo.java", 
+				"package com.db;\n" +
+				"public interface Repo {\n"+
+				"public void find();\n}");
+
+		// create the client project, create the class and the reference
+		clientProject = createJavaProject("client");
+		IClasspathEntry entry =  JavaCore.newProjectEntry(new Path("/common"));
+		addClasspathEntry(clientProject, entry);
+		createFolder("/client/com/db");
+		createFile("/client/com/db/ClientRepo.java", 
+				"package com.db;\n" +
+				"public class ClientRepo implements Repo {\n"+
+				"public void find(){};\n}");
+		createFile("/client/com/db/CallerClient.java", 
+				"package com.db;\n" +
+				"public class CallerClient{\n"+
+				"public static void main(String[] args) {\n"+
+				"Repo r = null;\n"+
+				"r.find();}}\n");
+	
+		// create the server project, create the class and the reference
+		serverProject = createJavaProject("server");
+		entry =  JavaCore.newProjectEntry(new Path("/common"));
+		addClasspathEntry(serverProject, entry);
+		createFolder("/server/com/db");
+		createFile("/server/com/db/ServerRepo.java", 
+				"package com.db;\n" +
+				"public class ServerRepo implements Repo{\n"+
+				"public void find(){};\n");
+		createFile("/server/com/db/CallerServer.java", 
+				"package com.db;\n" +
+				"public class CallerServer {\n"+
+				"public static void main(String[] args) {\n"+
+				"Repo r = null;\n"+
+				"r.find();}}\n");
+
+		waitUntilIndexesReady();
+				
+		// search
+		IType type = getCompilationUnit("/server/com/db/ServerRepo.java").getType("ServerRepo");
+		IMethod method = type.getMethod("find", new String[]{});
+		search(method, REFERENCES, EXACT_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+		assertSearchResults(
+				"com/db/CallerClient.java void com.db.CallerClient.main(String[]) [find()] EXACT_MATCH\n"+
+				"com/db/CallerServer.java void com.db.CallerServer.main(String[]) [find()] EXACT_MATCH");
+	}
+	finally {
+		// put back initial setup
+		preferences.setAutoBuilding(autoBuild);
+		getWorkspace().setDescription(preferences);
+
+		// delete projects
+		deleteProject(commonProject);
+		deleteProject(clientProject);
+		deleteProject(serverProject);
+	}
+}
+/**
+ * @bug 317264: Refactoring is impossible with commons.lang added to project
+ * @test types in enum package of org.apache.commons.lang.jar should not be reported for 1.5 projects
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=317264"
+ */
+public void testBug317264a() throws CoreException {
+	IJavaProject project = null;
+	try
+	{
+		project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/JavaSearchBugs/lib/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES | IJavaSearchScope.REFERENCED_PROJECTS;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		
+		waitUntilIndexesReady();
+		TypeNameMatchCollector collector = new TypeNameMatchCollector();
+		new SearchEngine().searchAllTypeNames(
+				"org.apache.commons.lang.enum".toCharArray(),
+				SearchPattern.R_EXACT_MATCH,
+				"".toCharArray(),
+				SearchPattern.R_PREFIX_MATCH,
+				IJavaSearchConstants.TYPE,
+				scope,
+				collector,
+				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+				null);
+		assertSearchResults("Unexpected search results!", "", collector);		
+	} finally {
+		deleteProject(project);
+	}
+}
+// types in enum package of org.apache.commons.lang.jar should be reported for 1.4 projects
+public void testBug317264b() throws CoreException {
+	IJavaProject project = null;
+	try
+	{
+		project = createJavaProject("P");
+		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/JavaSearchBugs/lib/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES | IJavaSearchScope.REFERENCED_PROJECTS;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		
+		waitUntilIndexesReady();
+		TypeNameMatchCollector collector = new TypeNameMatchCollector();
+		new SearchEngine().searchAllTypeNames(
+				"org.apache.commons.lang.enum".toCharArray(),
+				SearchPattern.R_EXACT_MATCH,
+				"".toCharArray(),
+				SearchPattern.R_PREFIX_MATCH,
+				IJavaSearchConstants.TYPE,
+				scope,
+				collector,
+				IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+				null);
+		assertSearchResults("Unexpected search results!",
+				"Enum (not open) [in Enum.class [in org.apache.commons.lang.enum [in /JavaSearchBugs/lib/b317264/org.apache.commons.lang_2.modified.jar [in P]]]]",
+				collector);		
+	} finally {
+		deleteProject(project);
+	}
+}
+
+// types in enum package of org.apache.commons.lang.jar should not be reported for 1.5 projects
+public void testBug317264c() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/JavaSearchBugs/lib/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		search("org.apache.commons.lang.enum*", IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, scope, this.resultCollector);
+		assertSearchResults("Unexpected search results!", "", this.resultCollector);		
+	} finally {
+		deleteProject("P");
+	}
+}
+
+// types in enum package of org.apache.commons.lang.jar should be reported for 1.4 projects
+public void testBug317264d() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P");
+		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/JavaSearchBugs/lib/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		search("org.apache.commons.lang.enum.*", IJavaSearchConstants.TYPE, IJavaSearchConstants.DECLARATIONS, scope, this.resultCollector);
+		assertSearchResults("Unexpected search results!", 
+				"lib/b317264/org.apache.commons.lang_2.modified.jar org.apache.commons.lang.enum.Enum EXACT_MATCH",
+				this.resultCollector);		
+	} finally {
+		deleteProject("P");
+	}
+}
+
+// enum package of org.apache.commons.lang.jar should not be reported for 1.5 projects
+public void testBug317264e() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/JavaSearchBugs/lib/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		search("org.apache.commons.lang.enum*", IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS, scope, this.resultCollector);
+		assertSearchResults("Unexpected search results!",  "", this.resultCollector);		
+	} finally {
+		deleteProject("P");
+	}
+}
+
+//enum package of org.apache.commons.lang.jar should be reported for 1.4 projects
+public void testBug317264f() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P");
+		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/JavaSearchBugs/lib/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		search("org.apache.commons.lang.enum*", IJavaSearchConstants.PACKAGE, IJavaSearchConstants.DECLARATIONS, scope, this.resultCollector);
+		assertSearchResults("Unexpected search results!", 
+				"lib/b317264/org.apache.commons.lang_2.modified.jar org.apache.commons.lang.enum [No source] EXACT_MATCH",
+				this.resultCollector);		
+	} finally {
+		deleteProject("P");
+	}
+}
+
+/**
+ * @bug 322979: [search] use of IJavaSearchConstants.IMPLEMENTORS yields surprising results
+ * @test search of implementors does no longer report matches in type arguments
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=322979"
+ */
+public void testBug322979a() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		createFile("/P/Test.java", 
+			"public class Test extends Object implements Comparable<Object>{\n"+
+		    "public int compareTo(Object o) {\n"+
+		        "return 0;\n"+
+		    "}\n"+
+			"}\n");
+		waitUntilIndexesReady();
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		this.resultCollector.showAccuracy(true);
+		this.resultCollector.showSelection();
+		search("Object", TYPE, IMPLEMENTORS, scope);
+		assertSearchResults(
+			"Test.java Test [public class Test extends !|Object|! implements Comparable<Object>{] EXACT_MATCH"
+		);
+	} finally {
+		deleteProject("P");
+	}
+}
+
+public void testBug322979b() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		createFile("/P/Test.java", 
+			"public class Test extends java.lang.Object implements Comparable<Object>{\n"+
+		    "public int compareTo(Object o) {\n"+
+		        "return 0;\n"+
+		    "}\n"+
+			"}\n");
+		waitUntilIndexesReady();
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		IType type = getClassFile("P", getExternalJCLPathString("1.5"), "java.lang", "Object.class").getType();
+		this.resultCollector.showAccuracy(true);
+		this.resultCollector.showSelection();
+		search(type, IMPLEMENTORS, scope);
+		assertSearchResults(
+			"Test.java Test [public class Test extends !|java.lang.Object|! implements Comparable<Object>{] EXACT_MATCH"
+		);
+	} finally {
+		deleteProject("P");
+	}
+}
+
+public void testBug322979c() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		createFile("/P/Test.java", 
+			"public class Test extends Object implements I01a<Object>, I01b<String>, I01c<Object> {\n" + 
+			"}\n" + 
+			"interface I01a<T> {}\n" + 
+			"interface I01b<T> {}\n" + 
+			"interface I01c<T> {}\n"
+		);
+		waitUntilIndexesReady();
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		this.resultCollector.showSelection();
+		search("java.lang.Object", TYPE, IMPLEMENTORS, scope);
+		assertSearchResults(
+			"Test.java Test [public class Test extends !|Object|! implements I01a<Object>, I01b<String>, I01c<Object> {] EXACT_MATCH"
+		);
+	} finally {
+		deleteProject("P");
+	}
+}
+
+public void testBug322979d() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		createFile("/P/Test.java", 
+			"public class Test extends Object implements I01<\n" + 
+			"	I02<\n" + 
+			"		I03<Object,\n" + 
+			"			I02<Object, I01<Object>>,\n" + 
+			"			I03<Object, I01<Object>, I02<Object, I01<Object>>>\n" + 
+			"			>,\n" + 
+			"		I01<Object>>> {\n" + 
+			"}\n" + 
+			"interface I01<T> {}\n" + 
+			"interface I02<T, U> {}\n" + 
+			"interface I03<T, U, V> {}\n"
+		);
+		waitUntilIndexesReady();
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		this.resultCollector.showSelection();
+		search("Object", TYPE, IMPLEMENTORS, scope);
+		assertSearchResults(
+			"Test.java Test [public class Test extends !|Object|! implements I01<] EXACT_MATCH"
+		);
+	} finally {
+		deleteProject("P");
+	}
+}
+
+public void testBug322979e() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		createFile("/P/Test.java", 
+			"public class Test extends Object implements I01<\n" + 
+			"	I02<\n" + 
+			"		I03<Object,\n" + 
+			"			I02<Object, I01<Object>>,\n" + 
+			"			I03<Object, I01<Object>, I02<Object, I01<Object>>>\n" + 
+			"			>,\n" + 
+			"		I01<Object>>> {\n" + 
+			"}\n" + 
+			"interface I01<T> {}\n" + 
+			"interface I02<T, U> {}\n" + 
+			"interface I03<T, U, V> {}\n"
+		);
+		waitUntilIndexesReady();
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		this.resultCollector.showSelection();
+		search("Object", TYPE, REFERENCES, scope);
+		assertSearchResults(
+			"Test.java Test [public class Test extends !|Object|! implements I01<] EXACT_MATCH\n" + 
+			"Test.java Test [		I03<!|Object|!,] EXACT_MATCH\n" + 
+			"Test.java Test [			I02<!|Object|!, I01<Object>>,] EXACT_MATCH\n" + 
+			"Test.java Test [			I02<Object, I01<!|Object|!>>,] EXACT_MATCH\n" + 
+			"Test.java Test [			I03<!|Object|!, I01<Object>, I02<Object, I01<Object>>>] EXACT_MATCH\n" + 
+			"Test.java Test [			I03<Object, I01<!|Object|!>, I02<Object, I01<Object>>>] EXACT_MATCH\n" + 
+			"Test.java Test [			I03<Object, I01<Object>, I02<!|Object|!, I01<Object>>>] EXACT_MATCH\n" + 
+			"Test.java Test [			I03<Object, I01<Object>, I02<Object, I01<!|Object|!>>>] EXACT_MATCH\n" + 
+			"Test.java Test [		I01<!|Object|!>>> {] EXACT_MATCH\n" + 
+			""+ getExternalJCLPathString("1.5") + " java.lang.Object java.lang.Object.clone() EXACT_MATCH\n" + 
+			""+ getExternalJCLPathString("1.5") + " boolean java.lang.Object.equals(java.lang.Object) EXACT_MATCH\n" + 
+			""+ getExternalJCLPathString("1.5") + " java.lang.Class<? extends java.lang.Object> java.lang.Object.getClass() EXACT_MATCH"
+		);
+	} finally {
+		deleteProject("P");
+	}
+}
+
+public void testBug322979f() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		createFile("/P/Test.java", 
+			"public class Test extends Object implements I01<\n" + 
+			"	I02<\n" + 
+			"		I03<Object,\n" + 
+			"			I02<Object, I01<Object>>,\n" + 
+			"			I03<Object, I01<Object>, I02<Object, I01<Object>>>\n" + 
+			"			>,\n" + 
+			"		I01<Object>>> {\n" + 
+			"}\n" + 
+			"interface I01<T> {}\n" + 
+			"interface I02<T, U> {}\n" + 
+			"interface I03<T, U, V> {}\n"
+		);
+		waitUntilIndexesReady();
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		this.resultCollector.showSelection();
+		search("Object", TYPE, REFERENCES | SUPERTYPE_TYPE_REFERENCE, scope);
+		assertSearchResults(
+			"Test.java Test [public class Test extends !|Object|! implements I01<] EXACT_MATCH"
+		);
+	} finally {
+		deleteProject("P");
+	}
+}
+
+public void testBug322979g() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		createFile("/P/Test.java", 
+			"public class Test extends Object implements I<A<Object>.B<I<Object>>.C<I<A<Object>.B<Object>.C<Object>>>> {\n" + 
+			"}\n" + 
+			"interface I<T> {\n" + 
+			"}\n" + 
+			"class A<T> {\n" + 
+			"	class B<U> {\n" + 
+			"		class C<V> {}\n" + 
+			"	}\n" + 
+			"}\n"
+		);
+		waitUntilIndexesReady();
+		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		this.resultCollector.showSelection();
+		search("Object", TYPE, IMPLEMENTORS, scope);
+		assertSearchResults(
+			"Test.java Test [public class Test extends !|Object|! implements I<A<Object>.B<I<Object>>.C<I<A<Object>.B<Object>.C<Object>>>> {] EXACT_MATCH"
+		);
+	} finally {
+		deleteProject("P");
+	}
+}
+public void testBug322979h() throws CoreException {
+	try
+	{
+		IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		createFile("/P/Test.java", 
+			"public class Test extends Object implements I1<String>, I2<Object>{\n"+
+		    "}\n"+
+		    "Interface I1<T> {}\n"+
+			"Interface I2<T> {}\n");
+		waitUntilIndexesReady();
+		int mask = IJavaSearchScope.SOURCES ;
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, mask);
+		this.resultCollector.showAccuracy(true);
+		this.resultCollector.showSelection();
+		SearchPattern leftPattern = SearchPattern.createPattern(
+				"Object",
+				TYPE,
+				IMPLEMENTORS,
+				EXACT_RULE);
+		SearchPattern rightPattern = SearchPattern.createPattern(
+				"String",
+				TYPE,
+				REFERENCES,
+				EXACT_RULE);
+		search(SearchPattern.createOrPattern(leftPattern, rightPattern), scope, this.resultCollector);
+		assertSearchResults(
+			"Test.java Test [public class Test extends !|Object|! implements I1<String>, I2<Object>{] EXACT_MATCH\n" + 
+			"Test.java Test [public class Test extends Object implements I1<!|String|!>, I2<Object>{] EXACT_MATCH"
+		);
+	} finally {
+		deleteProject("P");
+	}
+}
+
+/**
+ * @bug 324109: [search] Java search shows incorrect results as accurate matches
+ * @test search of method declaration off missing types should report potential matches and not accurate.
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=324109"
+ */
+public void testBug324109() throws CoreException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy("/JavaSearchBugs/src/b324109/X.java",
+		"package b324109;\n" +
+		"public class X extends A {\n" +
+		" public void run() {}\n" +
+		"}"
+	);
+	search("Worker.run()", METHOD, DECLARATIONS);
+	assertSearchResults(
+		"src/b324109/X.java void b324109.X.run() [run] POTENTIAL_MATCH"
+	);
 }
 }

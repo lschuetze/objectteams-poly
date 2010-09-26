@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1338,6 +1338,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		String[] wkbs = {
 			"byte", "char", "short", "int", "long", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$
 			"boolean", "float", "double", "void", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+			"java.lang.AssertionError", //$NON-NLS-1$
 			"java.lang.Class", //$NON-NLS-1$
 			"java.lang.Cloneable", //$NON-NLS-1$
 			"java.lang.Error", //$NON-NLS-1$
@@ -1719,6 +1720,16 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		} catch (RuntimeException e) {
 			// pass
 		}
+		
+		// test for 319900
+		x.setLiteralValue("'");
+		assertEquals("", "\"'\"", x.getEscapedValue());
+		assertEquals("", "'", x.getLiteralValue());
+		
+		// test for 319900
+		x.setEscapedValue("\"'\"");
+		assertEquals("", "\"'\"", x.getEscapedValue());
+		assertEquals("", "'", x.getLiteralValue());
 	}
 
 	public void testStringLiteralUnicode() {

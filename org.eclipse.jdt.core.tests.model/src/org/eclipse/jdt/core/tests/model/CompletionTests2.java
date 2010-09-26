@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.StringTokenizer;
+
+import junit.framework.ComparisonFailure;
+import junit.framework.Test;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -40,8 +43,6 @@ import org.eclipse.jdt.internal.codeassist.RelevanceConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.core.search.indexing.IndexManager;
-
-import junit.framework.*;
 
 public class CompletionTests2 extends ModifyingResourceTests implements RelevanceConstants {
 
@@ -5282,6 +5283,312 @@ public void testBug281598c() throws Exception {
 	} finally {
 		indexManager.enable();
 		deleteProject("P");
+	}
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=151500
+public void testBug151500a() throws Exception {
+	try {
+		IJavaProject p = createJavaProject("P", new String[] {"src"}, new String[]{"JCL15_LIB", "/P/lib151500.jar"}, "bin", "1.4");
+		createJar(
+				new String[] {
+						"foo/Foo.java",
+						"package foo;\n" +
+						"public class Foo {\n"+
+						"  public Foo(int p1) {}\n"+
+						"  public Bar bar = new Bar(1,2);\n"+
+						"  public class Bar {\n" +
+						"    int param1;\n" +
+						"	 int param2;\n" +
+						"	 public Bar (int a, int b) {\n" +
+						"		param1 = a;\n" +
+						"		param2 = b;\n" +
+						"	 }\n" +
+						"	 public void someMethod(String paramName) {}\n"+
+						"  }\n"+
+						"}"
+				},
+				p.getProject().getLocation().append("lib151500.jar").toOSString(),
+				new String[]{getExternalJCLPathString("1.3")},
+				"1.3");
+		
+		refresh(p);
+		
+		waitUntilIndexesReady();
+		
+		this.workingCopies = new ICompilationUnit[1];
+		this.workingCopies[0] = getWorkingCopy(
+				"/P/src/test/Test.java",
+				"package test;\n"+
+				"public class Test {\n" +
+				"  void m() {\n" +
+				"    foo.Foo f = new Foo(1);\n" +
+				"	 f.bar.s\n" +
+				"  }\n" +
+				"}");
+
+		// do completion
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, false, true, true);
+		requestor.allowAllRequiredProposals();
+		NullProgressMonitor monitor = new NullProgressMonitor();
+
+	    String str = this.workingCopies[0].getSource();
+	    String completeBehind = "f.bar.s";
+	    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	    this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
+	    
+	    assertResults(
+			"someMethod[METHOD_REF]{someMethod(), Lfoo.Foo$Bar;, (Ljava.lang.String;)V, someMethod, (paramName), " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED + R_NON_STATIC)+ "}",
+			requestor.getResults());
+	} finally {
+		deleteProject("P");
+	}
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=151500
+public void testBug151500b() throws Exception {	
+	try {
+		IJavaProject p = createJavaProject("P", new String[] {"src"}, new String[]{"JCL15_LIB", "/P/lib151500.jar"}, "bin", "1.4");
+		createJar(
+				new String[] {
+						"foo/Foo.java",
+						"package foo;\n" +
+						"public class Foo {\n"+
+						"  public Foo(int p1) {}\n"+
+						"  public Bar bar = new Bar(1,2);\n"+
+						"  public class Bar {\n" +
+						"    int param1;\n" +
+						"	 int param2;\n" +
+						"	 public Bar (int a, int b) {\n" +
+						"		param1 = a;\n" +
+						"		param2 = b;\n" +
+						"	 }\n" +
+						"	 public void someMethod(String paramName) {}\n"+
+						"  }\n"+
+						"}"
+				},
+				p.getProject().getLocation().append("lib151500.jar").toOSString(),
+				new String[]{getExternalJCLPathString("1.3")},
+				"1.3");
+		
+		refresh(p);
+		
+		waitUntilIndexesReady();
+		
+		this.workingCopies = new ICompilationUnit[1];
+		this.workingCopies[0] = getWorkingCopy(
+				"/P/src/test/Test.java",
+				"package test;\n"+
+				"public class Test {\n" +
+				"  void m() {\n" +
+				"    new foo.Foo(1).new B;\n" +
+				"  }\n" +
+				"}");
+
+		// do completion
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, false, true, true);
+		requestor.allowAllRequiredProposals();
+		NullProgressMonitor monitor = new NullProgressMonitor();
+
+	    String str = this.workingCopies[0].getSource();
+	    String completeBehind = "new foo.Foo(1).new B";
+	    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	    this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
+	    
+	    assertResults(
+	    		"Bar[CONSTRUCTOR_INVOCATION]{(), Lfoo.Foo$Bar;, (II)V, Bar, (a, b), " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED + R_UNQUALIFIED) + "}\n" +
+	    		"   Foo.Bar[TYPE_REF]{Bar, foo, Lfoo.Foo$Bar;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED + R_UNQUALIFIED) + "}",
+			requestor.getResults());
+	} finally {
+		deleteProject("P");
+	}
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=151500
+public void testBug151500c() throws Exception {	
+	try {
+		IJavaProject p = createJavaProject("P", new String[] {"src"}, new String[]{"JCL15_LIB", "/P/lib151500.jar"}, "bin", "1.4");
+		createJar(
+				new String[] {
+						"foo/Foo.java",
+						"package foo;\n" +
+						"public class Foo {\n"+
+						"  public Foo(int p1) {}\n"+
+						"  public Bar bar = new Bar(1,2);\n"+
+						"  public class Bar {\n" +
+						"    int param1;\n" +
+						"	 int param2;\n" +
+						"	 public Bar (int a, int b) {\n" +
+						"		param1 = a;\n" +
+						"		param2 = b;\n" +
+						"	 }\n" +
+						"	 public void someMethod(String paramName) {}\n"+
+						"  }\n"+
+						"}"
+				},
+				p.getProject().getLocation().append("lib151500.jar").toOSString(),
+				new String[]{getExternalJCLPathString("1.3")},
+				"1.3");
+		
+		refresh(p);
+		
+		waitUntilIndexesReady();
+		
+		this.workingCopies = new ICompilationUnit[1];
+		this.workingCopies[0] = getWorkingCopy(
+				"/P/src/test/Test.java",
+				"package test;\n"+
+				"public class Test {\n" +
+				"  void m() {\n" +
+				"    new foo.Foo.B;\n" +
+				"  }\n" +
+				"}");
+
+		// do completion
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, false, true, true);
+		requestor.allowAllRequiredProposals();
+		NullProgressMonitor monitor = new NullProgressMonitor();
+
+	    String str = this.workingCopies[0].getSource();
+	    String completeBehind = "new foo.Foo.B";
+	    int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+	    this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
+	    
+	    assertResults(
+	    		"Bar[CONSTRUCTOR_INVOCATION]{(), Lfoo.Foo$Bar;, (II)V, Bar, (a, b), " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED) + "}\n" +
+	    		"   Foo.Bar[TYPE_REF]{Bar, foo, Lfoo.Foo$Bar;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_NON_RESTRICTED) + "}",
+			requestor.getResults());
+	} finally {
+		deleteProject("P");
+	}
+}
+// types in enum package of org.apache.commons.lang.jar should not be proposed for
+// 1.5 projects. see https://bugs.eclipse.org/bugs/show_bug.cgi?id=317264
+public void testBug317264a() throws CoreException {
+	IJavaProject project = null;
+	try
+	{
+		project = createJavaProject("P2", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/Completion/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
+		
+		createFile(
+				"/P2/X.java",
+				"import org.apache.commons.lang.*;\n"+
+				"public class X {\n"+
+				"  public void foo() {\n"+
+				"    enu\n"+
+				"  }\n"+
+				"}");
+		waitUntilIndexesReady();
+		
+		ICompilationUnit cu= getCompilationUnit("P2", "", "", "X.java");
+
+		String str = cu.getSource();
+		String completeBehind = "enu";
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, false, true, true);
+		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+		cu.codeComplete(cursorLocation, requestor);
+		assertResults(
+				"Enum[TYPE_REF]{Enum, java.lang, Ljava.lang.Enum;, null, null, 17}",
+				requestor.getResults());
+				
+	} finally {
+		deleteProject(project);
+	}
+}
+// types in enum package of org.apache.commons.lang.jar should be proposed for 1.4 projects
+public void testBug317264b() throws CoreException {
+	IJavaProject project = null;
+	try
+	{
+		project = createJavaProject("P2");
+		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/Completion/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
+		
+		createFile(
+				"/P2/X.java",
+				"import org.apache.commons.lang.*;\n"+
+				"public class X {\n"+
+				"  public void foo() {\n"+
+				"    enu\n"+
+				"  }\n"+
+				"}");
+		waitUntilIndexesReady();
+		
+		ICompilationUnit cu= getCompilationUnit("P2", "", "", "X.java");
+
+		String str = cu.getSource();
+		String completeBehind = "enu";
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, false, true, true);
+		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+		cu.codeComplete(cursorLocation, requestor);
+		assertResults(
+				"Enum[TYPE_REF]{org.apache.commons.lang.enum.Enum, org.apache.commons.lang.enum, Lorg.apache.commons.lang.enum.Enum;, null, null, 14}",
+				requestor.getResults());
+				
+	} finally {
+		deleteProject(project);
+	}
+}
+// enum package of org.apache.commons.lang.jar should not be proposed for 1.5 projects
+public void testBug317264c() throws CoreException {
+	IJavaProject project = null;
+	try
+	{
+		project = createJavaProject("P2", new String[] {""}, new String[] {"JCL15_LIB"}, "", "1.5");
+		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/Completion/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
+		
+		createFile(
+				"/P2/X.java",
+				"import org.apache.commons.lang.enu;\n"+
+				"public class X {\n"+
+				"  public void foo() {\n"+   
+				"  }\n"+
+				"}");
+		waitUntilIndexesReady();
+		
+		ICompilationUnit cu= getCompilationUnit("P2", "", "", "X.java");
+
+		String str = cu.getSource();
+		String completeBehind = "lang.enu";
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, false, true, true);
+		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+		cu.codeComplete(cursorLocation, requestor);
+		assertResults("", requestor.getResults());
+				
+	} finally {
+		deleteProject(project);
+	}
+}
+// enum package of org.apache.commons.lang.jar should be proposed for 1.4 projects
+public void testBug317264d() throws CoreException {
+	IJavaProject project = null;
+	try
+	{
+		project = createJavaProject("P2");
+		addClasspathEntry(project, JavaCore.newLibraryEntry(new Path("/Completion/b317264/org.apache.commons.lang_2.modified.jar"), null, null));
+		
+		createFile(
+				"/P2/X.java",
+				"import org.apache.commons.lang.enu;\n"+
+				"public class X {\n"+
+				"  public void foo() {\n"+   
+				"  }\n"+
+				"}");
+		waitUntilIndexesReady();
+		
+		ICompilationUnit cu= getCompilationUnit("P2", "", "", "X.java");
+
+		String str = cu.getSource();
+		String completeBehind = "lang.enu";
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, false, true, true);
+		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+		cu.codeComplete(cursorLocation, requestor);
+		assertResults(
+				"org.apache.commons.lang.enum[PACKAGE_REF]{org.apache.commons.lang.enum.*;, org.apache.commons.lang.enum, null, null, null, 24}",
+				requestor.getResults());
+				
+	} finally {
+		deleteProject(project);
 	}
 }
 }
