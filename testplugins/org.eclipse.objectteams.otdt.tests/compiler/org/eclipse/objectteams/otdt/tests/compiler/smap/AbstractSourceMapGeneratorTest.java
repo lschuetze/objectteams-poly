@@ -460,7 +460,6 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 		
 	}
 	
-	@Override
 	public void acceptImport(int declarationStart, int declarationEnd, int nameStart, int nameEnd, char[][] tokens, 
 			boolean onDemand, int modifiers) {
 		// TODO Auto-generated method stub
