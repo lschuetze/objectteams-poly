@@ -337,7 +337,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.TSubMethodReducesVisibility:
 				// this processor is orig jdt, adaptations needed? 
-				ModifierCorrectionSubProcessor.addChangeOverriddenModfierProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE);
+				ModifierCorrectionSubProcessor.addChangeOverriddenModifierProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_VISIBLE);
 				break;
 			case IProblem.MissingAnchorForRoleType:
 				if (selectedNode instanceof VariableDeclarationStatement) {
