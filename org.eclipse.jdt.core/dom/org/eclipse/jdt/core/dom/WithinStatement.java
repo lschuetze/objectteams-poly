@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
  * Contributors:
@@ -36,38 +36,38 @@ import java.util.List;
  * }
  * </code>
  *
- *  
+ *
  * Within Statements consist of a team expression and
  * a body element (org.eclipse.jdtd.core.dom.Block).
- * 
+ *
  * Within statements can be used in the following AST-nodes:
  * Block
- * 
+ *
  * @author mkr
  */
-public class WithinStatement extends Statement 
+public class WithinStatement extends Statement
 {
     /**
      * The "team expression" structural property of this node type.
      */
-    public static final ChildPropertyDescriptor TEAM_EXPRESSION_PROPERTY = 
+    public static final ChildPropertyDescriptor TEAM_EXPRESSION_PROPERTY =
         new ChildPropertyDescriptor(WithinStatement.class, "team expression", Expression.class, MANDATORY, CYCLE_RISK); //$NON-NLS-1$
-    
+
 	/**
 	 * The "body" structural property of this node type.
 	 */
-	public static final ChildPropertyDescriptor BODY_PROPERTY = 
+	public static final ChildPropertyDescriptor BODY_PROPERTY =
 		new ChildPropertyDescriptor(WithinStatement.class, "body", Statement.class, MANDATORY, CYCLE_RISK); //$NON-NLS-1$
 
-	
+
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
 	@SuppressWarnings("rawtypes")
 	private static final List PROPERTY_DESCRIPTORS;
-	
+
 	static
 	{
 		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(3);
@@ -80,10 +80,10 @@ public class WithinStatement extends Statement
 	/**
 	 * Returns a list of structural property descriptors for this node type.
 	 * Clients must not modify the result.
-	 * 
+	 *
 	 * @param apiLevel the API level; one of the
 	 * <code>AST.JLS&ast;</code> constants
-	 * @return a list of property descriptors (element type: 
+	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
 	@SuppressWarnings("rawtypes")
@@ -92,35 +92,35 @@ public class WithinStatement extends Statement
 		return PROPERTY_DESCRIPTORS;
 	}
 
-    
+
     private Expression teamExpression = null;
-    
+
 	/**
-	 * The body statement; lazily initialized; defaults to an empty block 
+	 * The body statement; lazily initialized; defaults to an empty block
 	 * statement. This is an addition to the statements List.
 	 */
 	private Statement body = null;
-	
+
 	/**
 	 * Creates a new withinStatement node owned by the given AST.
 	 * By default, the withinStatement is empty.
 	 * <p>
 	 * N.B. This constructor is package-private.
 	 * </p>
-	 * 
+	 *
 	 * @param ast the AST that is to own this node
 	 */
     WithinStatement(AST ast)
     {
         super(ast);
     }
-    
+
     @SuppressWarnings("rawtypes")
 	List internalStructuralPropertiesForType(int apiLevel)
     {
         return propertyDescriptors(apiLevel);
     }
-    
+
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
@@ -149,17 +149,17 @@ public class WithinStatement extends Statement
                 setTeamExpression((Expression) child);
                 return null;
             }
-        
+
         }
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, isGet, child);
 	}
-	
+
     int getNodeType0()
     {
         return WITHIN_STATEMENT;
     }
-    
+
     boolean subtreeMatch0(ASTMatcher matcher, Object other)
     {
 		// dispatch to correct overloaded match method
@@ -173,7 +173,7 @@ public class WithinStatement extends Statement
 		result.copyLeadingComment(this);
         result.setTeamExpression((Expression) getTeamExpression().clone(target));
 		result.setBody((Statement) getBody().clone(target));
-        
+
 		return result;
 	}
 
@@ -198,7 +198,7 @@ public class WithinStatement extends Statement
     {
 		return memSize() + this.body.treeSize();
     }
-    
+
     /**
      * Returns the team exception of this within statement.
      * @return team exception
@@ -208,9 +208,9 @@ public class WithinStatement extends Statement
         if (this.teamExpression == null)
         {
             // lazy init must be thread-safe for readers
-            synchronized (this) 
+            synchronized (this)
             {
-                if (this.teamExpression == null) 
+                if (this.teamExpression == null)
                 {
                     preLazyInit();
                     this.teamExpression = new SimpleName(this.ast);
@@ -219,12 +219,12 @@ public class WithinStatement extends Statement
             }
         }
         return this.teamExpression;
-        
+
     }
-    
+
     /**
      * Sets the expression of this while statement.
-     * 
+     *
      * @param expression the expression node
      * @exception IllegalArgumentException if:
      * <ul>
@@ -232,7 +232,7 @@ public class WithinStatement extends Statement
      * <li>the node already has a parent</li>
      * <li>a cycle in would be created</li>
      * </ul>
-     */ 
+     */
     public void setTeamExpression(Expression expression)
     {
         if (expression == null)
@@ -247,9 +247,9 @@ public class WithinStatement extends Statement
 
 	/**
 	 * Returns the body of this within statement.
-	 * 
+	 *
 	 * @return the body statement node
-	 */ 
+	 */
 	public Statement getBody()
     {
         if (this.body == null)
@@ -267,7 +267,7 @@ public class WithinStatement extends Statement
         }
         return this.body;
     }
-    
+
 	/**
 	 * Sets the body of this within statement.
 	 * <p>
@@ -279,7 +279,7 @@ public class WithinStatement extends Statement
 	 * compile, be sure to embed the <code>VariableDeclarationStatement</code>
 	 * inside a <code>Block</code>.
 	 * </p>
-	 * 
+	 *
 	 * @param statement the body statement node
 	 * @exception IllegalArgumentException if:
 	 * <ul>
@@ -287,10 +287,10 @@ public class WithinStatement extends Statement
 	 * <li>the node already has a parent</li>
 	 * <li>a cycle in would be created</li>
 	 * </ul>
-	 */ 
-	public void setBody(Statement statement) 
+	 */
+	public void setBody(Statement statement)
     {
-		if (statement == null) 
+		if (statement == null)
         {
 			throw new IllegalArgumentException();
 		}

@@ -1,19 +1,19 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: LiftingType.java 14417 2006-09-23 11:18:42Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -24,30 +24,30 @@ import java.util.ArrayList;
 import java.util.List;
 /**
  * NEW for OTDT
- * 
+ *
  * This class represents the anchor "@anchor" of a dependent type T<@anchor>.
  * For the compiler this is a value reference but syntactically we treat it
  * as a type reference so the whole type can mimic as a regular generic type.
- * 
+ *
  * @author stephan
  * @version $Id: LiftingType.java 14417 2006-09-23 11:18:42Z stephan $
  */
 public class TypeAnchor extends Type {
-	
+
 	/**
 	 * The "path" structural property of this node type.
 	 */
-	public static final ChildPropertyDescriptor PATH_PROPERTY = 
+	public static final ChildPropertyDescriptor PATH_PROPERTY =
 		new ChildPropertyDescriptor(TypeAnchor.class, "path", Name.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
 	@SuppressWarnings("rawtypes")
 	private static final List PROPERTY_DESCRIPTORS;
-	
+
 	static
 	{
 		List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(2);
@@ -59,10 +59,10 @@ public class TypeAnchor extends Type {
 	/**
 	 * Returns a list of structural property descriptors for this node type.
 	 * Clients must not modify the result.
-	 * 
+	 *
 	 * @param apiLevel the API level; one of the
 	 * <code>AST.JLS&ast;</code> constants
-	 * @return a list of property descriptors (element type: 
+	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
 	@SuppressWarnings("rawtypes")
@@ -70,20 +70,20 @@ public class TypeAnchor extends Type {
 	{
 		return PROPERTY_DESCRIPTORS;
 	}
-			
-	/** 
+
+	/**
 	 * The path node; lazily initialized; defaults to a unspecified, but legal, path.
 	 */
 	private Name path = null;
-	
-	
+
+
 	/**
 	 * Creates a new unparented node for a type anchor owned by the given AST.
 	 * By default, an unspecified, but legal, expression.
 	 * <p>
 	 * N.B. This constructor is package-private.
 	 * </p>
-	 * 
+	 *
 	 * @param ast the AST that is to own this node
 	 */
 	TypeAnchor(AST ast)
@@ -97,7 +97,7 @@ public class TypeAnchor extends Type {
 	{
 		return propertyDescriptors(apiLevel);
 	}
-	
+
 	@Override
 	final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child)
 	{
@@ -116,12 +116,12 @@ public class TypeAnchor extends Type {
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
 	}
-	
+
 	/**
 	 * Returns the path of this type anchor.
-	 * 
+	 *
 	 * @return the path node
-	 */ 
+	 */
 	public Name getPath() {
 		if (this.path == null) {
 			// lazy init must be thread-safe for readers
@@ -135,10 +135,10 @@ public class TypeAnchor extends Type {
 		}
 		return this.path;
 	}
-		
+
 	/**
 	 * Sets the path of this type anchor.
-	 * 
+	 *
 	 * @param path the new path node
 	 * @exception IllegalArgumentException if:
 	 * <ul>
@@ -146,7 +146,7 @@ public class TypeAnchor extends Type {
 	 * <li>the node already has a parent</li>
 	 * <li>a cycle in would be created</li>
 	 * </ul>
-	 */ 
+	 */
 	public void setPath(Name path) {
 		if (path == null) {
 			throw new IllegalArgumentException();
@@ -192,7 +192,7 @@ public class TypeAnchor extends Type {
 
 	@Override
 	int treeSize() {
-		return memSize() 
+		return memSize()
 		+ (this.path == null ? 0 : getPath().treeSize());
 	}
 

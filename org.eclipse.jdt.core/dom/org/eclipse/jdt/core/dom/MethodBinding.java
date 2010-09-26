@@ -37,7 +37,7 @@ class MethodBinding implements IMethodBinding {
 	private static final int VALID_MODIFIERS = Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE |
 //{ObjectTeams: callin:
 		Modifier.OT_CALLIN |
-// SH}		
+// SH}
 		Modifier.ABSTRACT | Modifier.STATIC | Modifier.FINAL | Modifier.SYNCHRONIZED | Modifier.NATIVE |
 		Modifier.STRICTFP;
 	private static final ITypeBinding[] NO_TYPE_BINDINGS = new ITypeBinding[0];
@@ -136,14 +136,14 @@ class MethodBinding implements IMethodBinding {
 	 */
 	public ITypeBinding getDeclaringClass() {
 		if (this.declaringClass == null) {
-//{ObjectTeams: a role-ifc-method representing a one that is inherited from a non-role?			
-			if (this.binding.copyInheritanceSrc != null) 
+//{ObjectTeams: a role-ifc-method representing a one that is inherited from a non-role?
+			if (this.binding.copyInheritanceSrc != null)
 			{
 				this.declaringClass = this.resolver.getTypeBinding(this.binding.copyInheritanceSrc.declaringClass);
 				if (!this.declaringClass.isRole())
 					return this.declaringClass;
 			}
-// SH}			  
+// SH}
 			this.declaringClass = this.resolver.getTypeBinding(this.binding.declaringClass);
 		}
 		return this.declaringClass;
@@ -472,7 +472,7 @@ class MethodBinding implements IMethodBinding {
 	}
 //{ObjectTeams: new query:
 	public boolean isCopied() {
-		return this.binding.copyInheritanceSrc != null; 
+		return this.binding.copyInheritanceSrc != null;
 	}
 // SH}
 }

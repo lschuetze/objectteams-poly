@@ -493,7 +493,7 @@ public class ASTRewrite {
 		if (node == null || property == null) {
 			throw new IllegalArgumentException();
 		}
-		
+
 		validateIsCorrectAST(node);
 		validateIsListProperty(property);
 		validateIsPropertyOfNode(property, node);
@@ -544,7 +544,7 @@ public class ASTRewrite {
 			throw new IllegalArgumentException(message);
 		}
 	}
-	
+
 	private void validateIsPropertyOfNode(StructuralPropertyDescriptor property, ASTNode node) {
 		if (!property.getNodeClass().isInstance(node)) {
 			String message= property.getId() + " is not a property of type " + node.getClass().getName(); //$NON-NLS-1$
@@ -713,7 +713,7 @@ public class ASTRewrite {
 //{ObjectTeams:
 	boolean isOTJsource= false;
 	public void setToOTJ() {
-		this.isOTJsource= true;		
+		this.isOTJsource= true;
 	}
 // SH}
 }

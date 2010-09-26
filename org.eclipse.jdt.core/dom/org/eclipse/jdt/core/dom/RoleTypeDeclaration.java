@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
  * Contributors:
@@ -24,10 +24,10 @@ import java.util.List;
  * NEW for OTDT, built in analogy to TypeDeclaration (its superclass)
  *
  *
- * Represents the DOM-ASTNode for a SubType of TypeDeclaration. This node represents a role in a 
- * compilation unit (a "role file"). 
- * 
- * Contained AST elements: 
+ * Represents the DOM-ASTNode for a SubType of TypeDeclaration. This node represents a role in a
+ * compilation unit (a "role file").
+ *
+ * Contained AST elements:
  * RoleTypeDeclaration is a Subtyp of TypeDeclaration, so it contains all properties and methods from
  * TypeDeclaration, like e.g. TEAM-PROPERTY and getRoles()-Method. This is mandatory, because a role can also
  * be a team see <a href="#codeexample1">CodeExample1</a>.<br>
@@ -37,14 +37,14 @@ import java.util.List;
  * <dt>2. TeamProperty    <dd> Team, which includes this Role -> TypeDeclaration
  * <dt>3. CallinProperty  <dd> a list of all callins which exist inside a role -> List
  * <dt>4. CalloutProperty <dd> a list of all callouts which exist inside a role -> List
- * </dl> 
- * 
- * 
+ * </dl>
+ *
+ *
  * Locations in source code:
- * This node is used in BodyDeclaration. 
- * 
- * TODO(ike): javadoc is not completed yet... 
- * 
+ * This node is used in BodyDeclaration.
+ *
+ * TODO(ike): javadoc is not completed yet...
+ *
  * <a name="codeexample1">CodeExample1</a>
  * <pre>
  * public team MyTeam1 {
@@ -60,7 +60,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * The "javadoc" structural property of this node type.
      * @since 3.0
      */
-    public static final ChildPropertyDescriptor JAVADOC_PROPERTY = 
+    public static final ChildPropertyDescriptor JAVADOC_PROPERTY =
         internalJavadocPropertyFactory(RoleTypeDeclaration.class);
 
     /**
@@ -68,39 +68,39 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * @since 3.0
      * @deprecated Replaced by {@link #MODIFIERS2_PROPERTY} in the JLS3 API.
      */
-    public static final SimplePropertyDescriptor MODIFIERS_PROPERTY = 
+    public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
         internalModifiersPropertyFactory(RoleTypeDeclaration.class);
-    
+
     /**
      * The "modifiers" structural property of this node type (added in JLS3 API).
      * @since 3.0
      */
-    public static final ChildListPropertyDescriptor MODIFIERS2_PROPERTY = 
+    public static final ChildListPropertyDescriptor MODIFIERS2_PROPERTY =
         internalModifiers2PropertyFactory(RoleTypeDeclaration.class);
 
     /**
      * The "interface" structural property of this node type.
      * @since 3.0
      */
-    public static final SimplePropertyDescriptor INTERFACE_PROPERTY = 
+    public static final SimplePropertyDescriptor INTERFACE_PROPERTY =
         new SimplePropertyDescriptor(RoleTypeDeclaration.class, "interface", boolean.class, MANDATORY); //$NON-NLS-1$
 
     /**
      * The "team" structural property of this node type.
      */
-    public static final SimplePropertyDescriptor TEAM_PROPERTY = 
+    public static final SimplePropertyDescriptor TEAM_PROPERTY =
         new SimplePropertyDescriptor(RoleTypeDeclaration.class, "team", boolean.class, MANDATORY); //$NON-NLS-1$
 
     /**
      * The "role" structural property of this node type.
      */
-    public static final SimplePropertyDescriptor ROLE_PROPERTY = 
+    public static final SimplePropertyDescriptor ROLE_PROPERTY =
         new SimplePropertyDescriptor(RoleTypeDeclaration.class, "role", boolean.class, MANDATORY);   //$NON-NLS-1$
 
     /**
      * The "rolefile" structural property of this node type.
      */
-    public static final SimplePropertyDescriptor ROLE_FILE_PROPERTY = 
+    public static final SimplePropertyDescriptor ROLE_FILE_PROPERTY =
         new SimplePropertyDescriptor(RoleTypeDeclaration.class, "rolefile", boolean.class, MANDATORY);   //$NON-NLS-1$
 
     /**
@@ -108,14 +108,14 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * @since 3.0
      * @deprecated Replaced by {@link #BASECLASS_TYPE_PROPERTY} in the JLS3 API.
      */
-    public static final ChildPropertyDescriptor BASECLASS_PROPERTY = 
+    public static final ChildPropertyDescriptor BASECLASS_PROPERTY =
         new ChildPropertyDescriptor(RoleTypeDeclaration.class, "baseClass", Name.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
-    
+
     /**
      * The "baseClassType" structural property of this node type (added in JLS3 API).
      * @since 3.0
      */
-    public static final ChildPropertyDescriptor BASECLASS_TYPE_PROPERTY = 
+    public static final ChildPropertyDescriptor BASECLASS_TYPE_PROPERTY =
         new ChildPropertyDescriptor(RoleTypeDeclaration.class, "baseClassType", Type.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
     /**
@@ -123,21 +123,21 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * @since 3.0
      * @deprecated Replaced by {@link #TEAMCLASS_TYPE_PROPERTY} in the JLS3 API.
      */
-    public static final ChildPropertyDescriptor TEAMCLASS_PROPERTY = 
+    public static final ChildPropertyDescriptor TEAMCLASS_PROPERTY =
         new ChildPropertyDescriptor(RoleTypeDeclaration.class, "teamClass", Name.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
-    
+
     /**
      * The "baseClassType" structural property of this node type (added in JLS3 API).
      * @since 3.0
      */
-    public static final ChildPropertyDescriptor TEAMCLASS_TYPE_PROPERTY = 
+    public static final ChildPropertyDescriptor TEAMCLASS_TYPE_PROPERTY =
         new ChildPropertyDescriptor(RoleTypeDeclaration.class, "teamClassType", Type.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
-   
+
     /**
      * The "name" structural property of this node type.
      * @since 3.0
      */
-    public static final ChildPropertyDescriptor NAME_PROPERTY = 
+    public static final ChildPropertyDescriptor NAME_PROPERTY =
         new ChildPropertyDescriptor(RoleTypeDeclaration.class, "name", SimpleName.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
     /**
@@ -145,7 +145,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * @since 3.0
      * @deprecated Replaced by {@link #SUPERCLASS_TYPE_PROPERTY} in the JLS3 API.
      */
-    public static final ChildPropertyDescriptor SUPERCLASS_PROPERTY = 
+    public static final ChildPropertyDescriptor SUPERCLASS_PROPERTY =
         new ChildPropertyDescriptor(RoleTypeDeclaration.class, "superclass", Name.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
     /**
@@ -153,44 +153,44 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * @since 3.0
      * @deprecated Replaced by {@link #SUPER_INTERFACE_TYPES_PROPERTY} in the JLS3 API.
      */
-    public static final ChildListPropertyDescriptor SUPER_INTERFACES_PROPERTY = 
+    public static final ChildListPropertyDescriptor SUPER_INTERFACES_PROPERTY =
         new ChildListPropertyDescriptor(RoleTypeDeclaration.class, "superInterfaces", Name.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
     /**
      * The "superclassType" structural property of this node type (added in JLS3 API).
      * @since 3.0
      */
-    public static final ChildPropertyDescriptor SUPERCLASS_TYPE_PROPERTY = 
+    public static final ChildPropertyDescriptor SUPERCLASS_TYPE_PROPERTY =
         new ChildPropertyDescriptor(RoleTypeDeclaration.class, "superclassType", Type.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
     /**
      * The "superInterfaceTypes" structural property of this node type (added in JLS3 API).
      * @since 3.0
      */
-    public static final ChildListPropertyDescriptor SUPER_INTERFACE_TYPES_PROPERTY = 
+    public static final ChildListPropertyDescriptor SUPER_INTERFACE_TYPES_PROPERTY =
         new ChildListPropertyDescriptor(RoleTypeDeclaration.class, "superInterfaceTypes", Type.class, NO_CYCLE_RISK); //$NON-NLS-1$
-    
+
     /**
      * The "typeParameters" structural property of this node type (added in JLS3 API).
      * @since 3.0
      */
-    public static final ChildListPropertyDescriptor TYPE_PARAMETERS_PROPERTY = 
+    public static final ChildListPropertyDescriptor TYPE_PARAMETERS_PROPERTY =
         new ChildListPropertyDescriptor(RoleTypeDeclaration.class, "typeParameters", TypeParameter.class, NO_CYCLE_RISK); //$NON-NLS-1$
-    
+
     /**
      * The "guardPredicate" structural property of this node type (added in JLS3 API).
      * @since 0.9.25
      */
-    public static final ChildPropertyDescriptor GUARD_PROPERTY = 
+    public static final ChildPropertyDescriptor GUARD_PROPERTY =
         new ChildPropertyDescriptor(RoleTypeDeclaration.class, "guardPredicate", GuardPredicateDeclaration.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
     /**
      * The "bodyDeclarations" structural property of this node type (added in JLS3 API).
      * @since 3.0
      */
-    public static final ChildListPropertyDescriptor BODY_DECLARATIONS_PROPERTY = 
+    public static final ChildListPropertyDescriptor BODY_DECLARATIONS_PROPERTY =
         internalBodyDeclarationPropertyFactory(RoleTypeDeclaration.class);
-    
+
 	/**
 	 * The "precedence" structural property.
 	 * @since 0.9.24
@@ -198,18 +198,18 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 	public static final ChildListPropertyDescriptor PRECEDENCE_PROPERTY =
 		new ChildListPropertyDescriptor(RoleTypeDeclaration.class, "precedence", Name.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
-    
+
     /**
-     * A list of property descriptors (element type: 
+     * A list of property descriptors (element type:
      * {@link StructuralPropertyDescriptor}),
      * or null if uninitialized.
      * @since 3.0
      */
     @SuppressWarnings("rawtypes")
 	private static final List PROPERTY_DESCRIPTORS_2_0;
-    
+
     /**
-     * A list of property descriptors (element type: 
+     * A list of property descriptors (element type:
      * {@link StructuralPropertyDescriptor}),
      * or null if uninitialized.
      * @since 3.0
@@ -218,7 +218,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 	private static final List PROPERTY_DESCRIPTORS_3_0;
 
 
-    
+
     static {
     	List<StructuralPropertyDescriptor> propertyList = new ArrayList<StructuralPropertyDescriptor>(14);
         createPropertyList(RoleTypeDeclaration.class, propertyList);
@@ -236,7 +236,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         addProperty(BODY_DECLARATIONS_PROPERTY, propertyList);
 		addProperty(PRECEDENCE_PROPERTY, propertyList);
         PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
-        
+
         propertyList = new ArrayList<StructuralPropertyDescriptor>(16);
         createPropertyList(RoleTypeDeclaration.class, propertyList);
         addProperty(JAVADOC_PROPERTY, propertyList);
@@ -260,11 +260,11 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     /**
      * Returns a list of structural property descriptors for this node type.
      * Clients must not modify the result.
-     * 
+     *
      * @param apiLevel the API level; one of the
      * <code>AST.JLS&ast;</code> constants
 
-     * @return a list of property descriptors (element type: 
+     * @return a list of property descriptors (element type:
      * {@link StructuralPropertyDescriptor})
      * @since 3.0
      */
@@ -287,7 +287,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * interface declarations. Not used in 3.0.
      */
     private Name optionalBaseClassName = null;
-    
+
     /**
      * The optional baseClass type; <code>null</code> if none.
      * Defaults to none. Note that this field is not used for
@@ -295,7 +295,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * @since 3.0
      */
     private Type optionalBaseClassType = null;
-    
+
     private Name teamClassName = null;
     private Type teamClassType = null;
 
@@ -305,17 +305,17 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 	private boolean isRoleFile = false;
 
     /**
-     * Creates a new AST node for a type declaration owned by the given 
+     * Creates a new AST node for a type declaration owned by the given
      * AST. By default, the type declaration is for a class of an
-     * unspecified, but legal, name; no modifiers; no javadoc; 
+     * unspecified, but legal, name; no modifiers; no javadoc;
      * no type parameters; no superclass or superinterfaces; and an empty list
      * of body declarations.
      * <p>
-     * N.B. This constructor is package-private; all subclasses must be 
-     * declared in the same package; clients are unable to declare 
+     * N.B. This constructor is package-private; all subclasses must be
+     * declared in the same package; clients are unable to declare
      * additional subclasses.
      * </p>
-     * 
+     *
      * @param ast the AST that is to own this node
      */
     RoleTypeDeclaration(AST ast) {
@@ -337,14 +337,14 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 	final List internalStructuralPropertiesForType(int apiLevel)
     {
         return propertyDescriptors(apiLevel);
-    }    
-    
+    }
+
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
-    final int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean get, int value) 
+    final int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean get, int value)
     {
-        if (property == MODIFIERS_PROPERTY) 
+        if (property == MODIFIERS_PROPERTY)
         {
             if (get) {
                 return getModifiers();
@@ -372,9 +372,9 @@ public class RoleTypeDeclaration extends TypeDeclaration {
             {
                 setInterface(value);
                 return false;
-            }       
+            }
         }
-        
+
         if (property == TEAM_PROPERTY)
         {
             if (get)
@@ -397,7 +397,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
             {
                 setRole(value);
                 return false;
-            }       
+            }
         }
         if (property == ROLE_FILE_PROPERTY)
         {
@@ -409,19 +409,19 @@ public class RoleTypeDeclaration extends TypeDeclaration {
             {
                 setRoleFile(value);
                 return false;
-            }       
+            }
         }
         // allow default implementation to flag the error
         return super.internalGetSetBooleanProperty(property, get, value);
     }
-    
+
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
     @Override
-    final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child) 
+    final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child)
     {
-        if (property == JAVADOC_PROPERTY) 
+        if (property == JAVADOC_PROPERTY)
         {
             if (get) {
                 return getJavadoc();
@@ -480,7 +480,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
                 return null;
             }
         }
-        
+
         if (property == TEAMCLASS_PROPERTY)
         {
             if (get)
@@ -521,31 +521,31 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         {
             return modifiers();
         }
-        
+
         if (property == TYPE_PARAMETERS_PROPERTY)
         {
             return typeParameters();
         }
-        
+
         if (property == SUPER_INTERFACES_PROPERTY)
         {
             return superInterfaces();
         }
-        
+
         if (property == SUPER_INTERFACE_TYPES_PROPERTY)
         {
             return superInterfaceTypes();
         }
-        
+
         if (property == BODY_DECLARATIONS_PROPERTY)
         {
             return bodyDeclarations();
         }
-        
+
         // allow default implementation to flag the error
         return super.internalGetChildListProperty(property);
     }
-    
+
     /* (omit javadoc for this method)
      * Method declared on BodyDeclaration.
      */
@@ -585,7 +585,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     {
         return BODY_DECLARATIONS_PROPERTY;
     }
-    
+
     ChildPropertyDescriptor internalGuardPredicateProperty() {
     	return GUARD_PROPERTY;
     }
@@ -622,7 +622,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 
             result.setBaseClass(
                     (Name) ASTNode.copySubtree(target, getBaseClass()));
-            
+
             result.setTeamClass(
                     (Name) ASTNode.copySubtree(target, getTeamClass()));
         }
@@ -639,10 +639,10 @@ public class RoleTypeDeclaration extends TypeDeclaration {
                     (Type) ASTNode.copySubtree(target, getSuperclassType()));
             result.superInterfaceTypes().addAll(
                     ASTNode.copySubtrees(target, superInterfaceTypes()));
-            
+
             result.setBaseClassType(
                     (Type) ASTNode.copySubtree(target, getBaseClassType()));
-            
+
             result.setTeamClassType(
                     (Type) ASTNode.copySubtree(target, getTeamClassType()));
         }
@@ -661,7 +661,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         // dispatch to correct overloaded match method
         return matcher.match(this, other);
     }
-    
+
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
@@ -696,10 +696,10 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 
 	/**
 	 * Sets wether this type declaration declares a team class or a class.
-	 * 
+	 *
 	 * @param isTeam <code>true</code> if this is a team class
 	 *    declaration, and <code>false</code> if this is a class declaration
-	 */ 
+	 */
 	public void setTeam(boolean isTeam)
 	{
 		preValueChange(TEAM_PROPERTY);
@@ -709,10 +709,10 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 
 	/**
 	 * Sets whether this type declaration declares a role class or a class.
-	 *  
+	 *
 	 * @param isRole <code>true</code> if this is a role class
 	 *    declaration, and <code>false</code> if this is a class declaration
-	 */ 
+	 */
 	public void setRole(boolean isRole)
 	{
 		preValueChange(ROLE_PROPERTY);
@@ -722,32 +722,32 @@ public class RoleTypeDeclaration extends TypeDeclaration {
 
 	/**
 	 * Sets whether this type declaration resides in a role file.
-	 */ 
+	 */
 	public void setRoleFile(boolean isRoleFile)
 	{
 		preValueChange(ROLE_FILE_PROPERTY);
 		this.isRoleFile = isRoleFile;
 		postValueChange(ROLE_FILE_PROPERTY);
 	}
-	
-	/** 
+
+	/**
 	 * Answer whether this role is a role file.
 	 */
 	public boolean isRoleFile() {
 		return this.isRoleFile;
 	}
-    
+
     /** @deprecated replaced by {@link #getBaseClassType()} in JLS3. */
     public Name getBaseClass()
     {
         supportedOnlyIn2();
         return this.optionalBaseClassName;
     }
-    
+
     public Type getBaseClassType()
     {
         unsupportedIn2();
-        return this.optionalBaseClassType;   
+        return this.optionalBaseClassType;
     }
 
     /** @deprecated replaced by {@link #getTeamClassType()} in JLS3. */
@@ -755,14 +755,14 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     {
         supportedOnlyIn2();
         return this.teamClassName;
-    }    
-    
+    }
+
     public Type getTeamClassType()
     {
         unsupportedIn2();
-        return this.teamClassType;   
+        return this.teamClassType;
     }
-    
+
     /** @deprecated use {@link #setBaseClassType(Type)} (JLS3) */
     public void setBaseClass(Name baseClassName)
     {
@@ -770,7 +770,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         ASTNode oldChild = this.optionalBaseClassName;
         preReplaceChild(oldChild, baseClassName, BASECLASS_PROPERTY);
         this.optionalBaseClassName = baseClassName;
-        postReplaceChild(oldChild, baseClassName, BASECLASS_PROPERTY);  
+        postReplaceChild(oldChild, baseClassName, BASECLASS_PROPERTY);
     }
 
     public void setBaseClassType(Type baseClassType)
@@ -780,8 +780,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         preReplaceChild(oldChild, baseClassType, BASECLASS_TYPE_PROPERTY);
         this.optionalBaseClassType = baseClassType;
         postReplaceChild(oldChild, baseClassType, BASECLASS_TYPE_PROPERTY);
-    }  
- 
+    }
+
     /** @deprecated use {@link #setTeamClassType(Type)} (JLS3) */
     public void setTeamClass(Name teamClassName)
     {
@@ -789,7 +789,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         ASTNode oldChild = this.teamClassName;
         preReplaceChild(oldChild, teamClassName, TEAMCLASS_PROPERTY);
         this.teamClassName = teamClassName;
-        postReplaceChild(oldChild, teamClassName, TEAMCLASS_PROPERTY);  
+        postReplaceChild(oldChild, teamClassName, TEAMCLASS_PROPERTY);
     }
 
     public void setTeamClassType(Type teamClassType)
@@ -800,17 +800,17 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         this.teamClassType = teamClassType;
         postReplaceChild(oldChild, teamClassType, TEAMCLASS_TYPE_PROPERTY);
     }
-  
+
     /**
      * Returns the name of the superclass declared in this type
      * declaration, or <code>null</code> if there is none (JLS2 API only).
      * <p>
-     * Note that this child is not relevant for interface 
+     * Note that this child is not relevant for interface
      * declarations (although it does still figure in subtree
      * equality comparisons).
      * </p>
-     * 
-     * @return the superclass name node, or <code>null</code> if 
+     *
+     * @return the superclass name node, or <code>null</code> if
      *    there is none
      * @exception UnsupportedOperationException if this operation is used in
      * an AST later than JLS2
@@ -825,17 +825,17 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     * Returns the superclass declared in this type
     * declaration, or <code>null</code> if there is none (added in JLS3 API).
     * <p>
-    * Note that this child is not relevant for interface 
+    * Note that this child is not relevant for interface
     * declarations (although it does still figure in subtree
     * equality comparisons).
     * </p>
-    * 
-    * @return the superclass type node, or <code>null</code> if 
+    *
+    * @return the superclass type node, or <code>null</code> if
     *    there is none
     * @exception UnsupportedOperationException if this operation is used in
     * a JLS2 AST
     * @since 3.0
-    */ 
+    */
     public Type getSuperclassType() {
         unsupportedIn2();
         return this.optionalSuperclassType;
@@ -845,12 +845,12 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * Sets or clears the name of the superclass declared in this type
      * declaration (JLS2 API only).
      * <p>
-     * Note that this child is not relevant for interface 
+     * Note that this child is not relevant for interface
      * declarations (although it does still figure in subtree
      * equality comparisons).
      * </p>
-     * 
-     * @param superclassName the superclass name node, or <code>null</code> if 
+     *
+     * @param superclassName the superclass name node, or <code>null</code> if
      *    there is none
      * @exception IllegalArgumentException if:
      * <ul>
@@ -876,8 +876,8 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * Note that this child is not relevant for interface declarations
      * (although it does still figure in subtree equality comparisons).
      * </p>
-     * 
-     * @param superclassType the superclass type node, or <code>null</code> if 
+     *
+     * @param superclassType the superclass type node, or <code>null</code> if
      *    there is none
      * @exception IllegalArgumentException if:
      * <ul>
@@ -887,7 +887,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
      * @exception UnsupportedOperationException if this operation is used in
      * a JLS2 AST
      * @since 3.0
-     */ 
+     */
     public void setSuperclassType(Type superclassType) {
         unsupportedIn2();
         ASTNode oldChild = this.optionalSuperclassType;
@@ -897,16 +897,16 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     }
 
     /**
-     * Returns the ordered list of callout declarations of this type 
+     * Returns the ordered list of callout declarations of this type
      * declaration.
      * <p>
      * This convenience method returns this node's body declarations
      * with non-methods filtered out. Unlike <code>bodyDeclarations</code>,
      * this method does not return a live result.
      * </p>
-     * 
+     *
      * @return the (possibly empty) list of role type declarations
-     */ 
+     */
     @SuppressWarnings("rawtypes")
 	public CalloutMappingDeclaration[] getCallOuts()
     {
@@ -933,16 +933,16 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     }
 
     /**
-     * Returns the ordered list of CallIn declarations of this type 
+     * Returns the ordered list of CallIn declarations of this type
      * declaration.
      * <p>
      * This convenience method returns this node's body declarations
      * with non-methods filtered out. Unlike <code>bodyDeclarations</code>,
      * this method does not return a live result.
      * </p>
-     * 
+     *
      * @return the (possibly empty) list of role type declarations
-     */ 
+     */
     @SuppressWarnings("rawtypes")
 	public CallinMappingDeclaration[] getCallIns()
     {
@@ -967,35 +967,35 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         }
         return callIns;
     }
-    
-    
-    
-    
-    
+
+
+
+
+
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
     @SuppressWarnings({ "nls", "rawtypes" })
 	void appendDebugString(StringBuffer buffer)
     {
-        buffer.append("RoleTypeDeclaration[\n"); 
-        buffer.append("class "); 
+        buffer.append("RoleTypeDeclaration[\n");
+        buffer.append("class ");
         buffer.append(getName().getIdentifier());
-        buffer.append("\n"); 
+        buffer.append("\n");
         if (this.optionalGuardPredicate != null) {
         	getGuardPredicate().appendDebugString(buffer);
-        	buffer.append("\n"); 
+        	buffer.append("\n");
         }
         for (Iterator it = bodyDeclarations().iterator(); it.hasNext();) {
             BodyDeclaration d = (BodyDeclaration) it.next();
             d.appendDebugString(buffer);
             if (it.hasNext()) {
-                buffer.append(";\n"); 
+                buffer.append(";\n");
             }
         }
         buffer.append("]");
     }
-        
+
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */
@@ -1003,7 +1003,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
     {
         return super.memSize() + 12 * 4;
     }
-    
+
     /* (omit javadoc for this method)
      * Method declared on ASTNode.
      */

@@ -44,7 +44,7 @@ public final class NodeFinder {
 			return super.visit(type);
 		}
 		public boolean visit(RoleTypeDeclaration roleType) {
-			if (this.topType != null && roleType.isRoleFile()) 
+			if (this.topType != null && roleType.isRoleFile())
 				return false;
 			if (topType == null)
 				topType= roleType;
@@ -126,7 +126,7 @@ public final class NodeFinder {
 	/**
 	 * Maps a selection to a given ASTNode, where the selection is defined using a source range.
 	 * It calls <code>perform(root, range.getOffset(), range.getLength())</code>.
-	 * 
+	 *
 	 * @return the result node
 	 * @see #perform(ASTNode, int, int)
 	 */

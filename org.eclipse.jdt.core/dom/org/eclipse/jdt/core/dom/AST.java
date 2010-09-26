@@ -37,12 +37,12 @@ import org.eclipse.text.edits.TextEdit;
 /**
  * Umbrella owner and abstract syntax tree node factory.
  * An <code>AST</code> instance serves as the common owner of any number of
- * AST nodes, and as the factory for creating new AST nodes owned by that 
+ * AST nodes, and as the factory for creating new AST nodes owned by that
  * instance.
  * <p>
  * Abstract syntax trees may be hand constructed by clients, using the
  * <code>new<i>TYPE</i></code> factory methods to create new nodes, and the
- * various <code>set<i>CHILD</i></code> methods 
+ * various <code>set<i>CHILD</i></code> methods
  * (see {@link org.eclipse.jdt.core.dom.ASTNode ASTNode} and its subclasses)
  * to connect them together.
  * </p>
@@ -89,10 +89,10 @@ import org.eclipse.text.edits.TextEdit;
  * read-only AST.
  * </p>
  * <p>
- * Clients may create instances of this class using {@link #newAST(int)}, 
+ * Clients may create instances of this class using {@link #newAST(int)},
  * but this class is not intended to be subclassed.
  * </p>
- * 
+ *
  * @see ASTParser
  * @see ASTNode
  * @since 2.0
@@ -114,7 +114,7 @@ public final class AST {
 	 * @deprecated Clients should use the {@link #JLS3} AST API instead.
 	 */
 	public static final int JLS2 = 2;
-	
+
 	/**
 	 * Internal synonym for {@link #JLS2}. Use to alleviate
 	 * deprecation warnings.
@@ -130,37 +130,37 @@ public final class AST {
      * JLS3 is a superset of all earlier versions of the
      * Java language, and the JLS3 API can be used to manipulate
      * programs written in all versions of the Java language
-     * up to and including J2SE 5 (aka JDK 1.5). 
+     * up to and including J2SE 5 (aka JDK 1.5).
      *
 	 * @since 3.1
 	 */
 	public static final int JLS3 = 3;
-	
+
 	/**
 	 * The binding resolver for this AST. Initially a binding resolver that
 	 * does not resolve names at all.
 	 */
 	private BindingResolver resolver = new BindingResolver();
-	
+
 	/**
-	 * The event handler for this AST. 
+	 * The event handler for this AST.
 	 * Initially an event handler that does not nothing.
 	 * @since 3.0
 	 */
 	private NodeEventHandler eventHandler = new NodeEventHandler();
-	
+
 	/**
 	 * Level of AST API supported by this AST.
 	 * @since 3.0
 	 */
 	int apiLevel;
-	
+
 	/**
 	 * Internal modification count; initially 0; increases monotonically
 	 * <b>by one or more</b> as the AST is successively modified.
 	 */
 	private long modificationCount = 0;
-	
+
 	/**
 	 * Internal original modification count; value is equals to <code>
 	 * modificationCount</code> at the end of the parse (<code>ASTParser
@@ -320,7 +320,7 @@ public final class AST {
 			IProgressMonitor monitor) {
 		return null;
 	}
-	
+
 	/**
 	 * Creates a new, empty abstract syntax tree using the given options.
 	 * <p>
@@ -1234,8 +1234,8 @@ public final class AST {
 
 	/**
 	 * Creates an unparented node of the given node class
-	 * (non-abstract subclass of {@link ASTNode}). 
-	 * 
+	 * (non-abstract subclass of {@link ASTNode}).
+	 *
 	 * @param nodeClass AST node class
 	 * @return a new unparented node owned by this AST
 	 * @exception IllegalArgumentException if <code>nodeClass</code> is
@@ -1445,14 +1445,14 @@ public final class AST {
 	 *  the binding be of kind VARIABLE. */
 	public SimpleName newResolvedVariableName(String name, Type type) {
 		DefaultBindingResolver resolver = (DefaultBindingResolver)this.resolver;
-		org.eclipse.jdt.internal.compiler.ast.Expression givenCompilerNode = 
+		org.eclipse.jdt.internal.compiler.ast.Expression givenCompilerNode =
 				(org.eclipse.jdt.internal.compiler.ast.Expression)resolver.newAstToOldAst.get(type);
 		long pos = ((long)givenCompilerNode.sourceStart << 32) + givenCompilerNode.sourceEnd;
 		return createMappedVariableNode(name, givenCompilerNode.resolvedType, pos);
 	}
 	public SimpleName newResolvedVariableName(String name, TypeDeclaration type) {
 		DefaultBindingResolver resolver = (DefaultBindingResolver)this.resolver;
-		org.eclipse.jdt.internal.compiler.ast.TypeDeclaration givenCompilerNode = 
+		org.eclipse.jdt.internal.compiler.ast.TypeDeclaration givenCompilerNode =
 				(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration)resolver.newAstToOldAst.get(type);
 		long pos = ((long)givenCompilerNode.sourceStart << 32) + givenCompilerNode.sourceEnd;
 		return createMappedVariableNode(name, givenCompilerNode.binding, pos);
@@ -1460,10 +1460,10 @@ public final class AST {
 
 	private SimpleName createMappedVariableNode(String name,
 										org.eclipse.jdt.internal.compiler.lookup.TypeBinding typeBinding,
-										long pos) 
+										long pos)
 	{
-		org.eclipse.jdt.internal.compiler.ast.SingleNameReference newCompilerNode 
-				= new org.eclipse.jdt.internal.compiler.ast.SingleNameReference(name.toCharArray(), pos); 
+		org.eclipse.jdt.internal.compiler.ast.SingleNameReference newCompilerNode
+				= new org.eclipse.jdt.internal.compiler.ast.SingleNameReference(name.toCharArray(), pos);
 		newCompilerNode.resolvedType = typeBinding;
 		newCompilerNode.binding = new LocalVariableBinding(name.toCharArray(), typeBinding, 0, false);
 		SimpleName result = newSimpleName(name);
@@ -1596,7 +1596,7 @@ public final class AST {
 		return result;
 	}
 // SH}
-	
+
 	/**
 	 * Creates and returns a new unparented qualified type node with
 	 * the given qualifier type and name.
@@ -1638,7 +1638,7 @@ public final class AST {
 	/**
 	 * Creates and returns a new unparented lifting type node with the given
 	 * type name.
-	 * 
+	 *
 	 * @param typeName the name of the class or interface
 	 * @return a new unparented lifting type node
 	 * @exception IllegalArgumentException if:
@@ -1712,29 +1712,29 @@ public final class AST {
 //{ObjectTeams:
 	/**
      * Creates an unparented class declaration node owned by this AST.
-     * The name of the class is an unspecified, but legal, name; 
-     * no modifiers; no doc comment; no superclass or superinterfaces; 
+     * The name of the class is an unspecified, but legal, name;
+     * no modifiers; no doc comment; no superclass or superinterfaces;
      * and an empty class body.
      * <p>
      * To create an interface, use this method and then call
      * <code>RoleTypeDeclaration.setInterface(true)</code>.
      * </p>
-     * 
+     *
      * @return a new unparented roleType declaration node
      */
     public RoleTypeDeclaration newRoleTypeDeclaration() {
     	RoleTypeDeclaration result = new RoleTypeDeclaration(this);
         return result;
-    }    
-    
+    }
+
     public PrecedenceDeclaration newPrecedenceDeclaration() {
     	return new PrecedenceDeclaration(this);
     }
-    
+
     public GuardPredicateDeclaration newGuardPredicateDeclaration () {
     	return new GuardPredicateDeclaration(this);
     }
-// km(merge) }    
+// km(merge) }
 
 	/**
 	 * Creates an unparented method declaration node owned by this AST.
@@ -1941,7 +1941,7 @@ public final class AST {
 		if (Modifier.isVolatile(flags)) {
 			result.add(newModifier(Modifier.ModifierKeyword.VOLATILE_KEYWORD));
 		}
-//{ObjectTeams: OT-specific modifiers (any context):		
+//{ObjectTeams: OT-specific modifiers (any context):
 		if (Modifier.isReplace(flags) || Modifier.isBefore(flags) || Modifier.isAfter(flags))
 			throw new IllegalArgumentException("not applicable for callin modifiers"); //$NON-NLS-1$
 
@@ -1957,7 +1957,7 @@ public final class AST {
 		if (Modifier.isCallin(flags)) {
 			result.add(newModifier(Modifier.ModifierKeyword.CALLIN_KEYWORD));
 		}
-// SH}		
+// SH}
 		return result;
 	}
 
@@ -1965,7 +1965,7 @@ public final class AST {
 	/**
 	 * Creates an unparented callin mapping declaration node owned by this AST.
 	 * The binding kind is set to {@link MethodBindingOperator#KIND_CALLIN}
-	 * 
+	 *
 	 * @return a new unparented callin mapping declaration node
 	 */
 	public CallinMappingDeclaration newCallinMappingDeclaration()
@@ -1979,7 +1979,7 @@ public final class AST {
 	 * Creates an unparented callout mapping declaration node owned by this AST.
 	 * The binding kind is set to {@link MethodBindingOperator#KIND_CALLOUT},
  	 * clients creating a callout override must change this property afterwards.
-	 * 
+	 *
 	 * @return a new unparented callout mapping declaration node
 	 */
 	public CalloutMappingDeclaration newCalloutMappingDeclaration()
@@ -1989,7 +1989,7 @@ public final class AST {
 		return calloutMappingDeclaration;
 	}
 
-	/** 
+	/**
 	 * creates a new unparented method bidning operator node owned by this AST.
 	 * @param keyword one of before/replace/after (callin) or get/set (c-t-f) or null (regular callout)
 	 * @param bindingKind one of {@link MethodBindingOperator#KIND_CALLOUT}, {@link MethodBindingOperator#KIND_CALLOUT_OVERRIDE} or {@link MethodBindingOperator#KIND_CALLIN}.
@@ -2008,21 +2008,21 @@ public final class AST {
 //{ObjectTeams: factory method for MethodSpec
 	/**
 	 * Creates an unparented method spec declaration node owned by this AST.
-	 * 
+	 *
 	 * @return a new unparented method spec declaration node
-	 */	
+	 */
 	public MethodSpec newMethodSpec()
 	{
 	    return new MethodSpec(this);
 	}
 //gbr}
-	
+
 //	{ObjectTeams: factory method for FieldAccessSpec
 	/**
 	 * Creates an unparented method spec declaration node owned by this AST.
-	 * 
+	 *
 	 * @return a new unparented method spec declaration node
-	 */	
+	 */
 	public FieldAccessSpec newFieldAccessSpec()
 	{
 	    return new FieldAccessSpec(this);
@@ -2476,29 +2476,29 @@ public final class AST {
 	/**
 	 * Creates a new unparented within statement node owned by this AST,
 	 * for an empty list of statements.
-	 * 
+	 *
 	 * @return a new unparented, empty within statement node
-	 * 
+	 *
 	 */
 	public WithinStatement newWithinStatement()
 	{
 	    return new WithinStatement(this);
 	}
 //gbr}
-	
+
 //	{ObjectTeams: factory method for ParameterMapping
 	/**
 	 * Creates a new unparented parameter mapping node owned by this AST
-	 * 
+	 *
 	 * @return a new unparented, empty parameter mapping node
-	 * 
+	 *
 	 */
 	public ParameterMapping newParameterMapping()
 	{
 	    return new ParameterMapping(this);
 	}
 //jsv}
-	
+
 	//=============================== EXPRESSIONS ===========================
 	/**
 	 * Creates and returns a new unparented string literal node for
@@ -2945,9 +2945,9 @@ public final class AST {
 
 //{ObjectTeams: factory methods for TSuperMessageSend, BaseConstructorMessageSend, BaseReference, BaseCallMessageSend
 	/**
-	 * Creates and returns a new unparented "tsuper" expression node 
+	 * Creates and returns a new unparented "tsuper" expression node
 	 * owned by this AST. By default, there is no qualifier.
-	 * 
+	 *
 	 * @return a new unparented "tsuper" expression node
 	 */
 	public TSuperMessageSend newTSuperMessageSend()
@@ -2956,9 +2956,9 @@ public final class AST {
 	}
 
     /**
-     * Creates and returns a new unparented "tsuper" statement node 
+     * Creates and returns a new unparented "tsuper" statement node
      * owned by this AST. By default, there is no qualifier.
-     * 
+     *
      * @return a new unparented "tsuper" expression node
      */
     public TSuperConstructorInvocation newTSuperConstructorInvocation()
@@ -2966,33 +2966,33 @@ public final class AST {
         return new TSuperConstructorInvocation(this);
     }
 
-    
-    
+
+
     /**
-     * Creates and returns a new unparented "base" callout node 
+     * Creates and returns a new unparented "base" callout node
      * owned by this AST.
-     * 
+     *
      * @return a new unparented "base" callout  node
      */
     public BaseCallMessageSend newBaseCallMessageSend()
     {
         return new BaseCallMessageSend(this);
     }
-   
-    
-    
+
+
+
 	/**
-	 * Creates and returns a new unparented "base" constructor expression node 
+	 * Creates and returns a new unparented "base" constructor expression node
 	 * owned by this AST.
-	 * 
+	 *
 	 * @return a new unparented "base" constructor expression node
 	 */
 	public BaseConstructorInvocation newBaseConstructorInvocation()
 	{
 	    return new BaseConstructorInvocation(this);
-	}	
+	}
 //gbr,mkr}
-	
+
 	//=============================== ANNOTATIONS ====================
 
 	/**

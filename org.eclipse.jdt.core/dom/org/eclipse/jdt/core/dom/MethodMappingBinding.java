@@ -1,19 +1,19 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2005, 2007 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: MethodMappingBinding.java 23417 2010-02-03 20:13:55Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -40,10 +40,10 @@ class MethodMappingBinding implements IMethodMappingBinding
 	private BindingResolver _resolver;
 	private String _name;
 	private ITypeBinding _declaringClass;
-    private ITypeBinding _baseClass; 
+    private ITypeBinding _baseClass;
     private IMethodBinding _roleMethod;
     private IMethodBinding[] _baseMethods;
-	
+
 	MethodMappingBinding(
             BindingResolver resolver,
             org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding binding)
@@ -51,7 +51,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 		_resolver = resolver;
 		_binding = binding;
 	}
-	
+
 	// svenk: added to hold annotations for method getAnnotations()
   private IAnnotationBinding[] annotations;
 
@@ -64,7 +64,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 		{
 		    _name = new String(_binding.readableName());
 		}
-        
+
 		return _name;
 	}
 
@@ -77,7 +77,7 @@ class MethodMappingBinding implements IMethodMappingBinding
         {
 			_declaringClass = _resolver.getTypeBinding(_binding._declaringRoleClass);
 		}
-        
+
 		return _declaringClass;
 	}
 
@@ -87,15 +87,15 @@ class MethodMappingBinding implements IMethodMappingBinding
     public ITypeBinding getReferencedBaseClass()
     {
         if (_baseClass == null)
-        {            
+        {
             _baseClass = _resolver.getTypeBinding(_binding._declaringRoleClass.baseclass());
             //mkr: This is a workaround because _binding.referencedBaseClass is null
             // _baseClass = _resolver.getTypeBinding(_binding._referencedBaseClass);
         }
-        
+
         return _baseClass;
     }
-    
+
     /*
      * @see IMethodMappingBinding#getRoleMethod()
      */
@@ -105,10 +105,10 @@ class MethodMappingBinding implements IMethodMappingBinding
         {
             _roleMethod = _resolver.getMethodBinding(_binding._roleMethodBinding);
         }
-        
+
         return _roleMethod;
     }
-    
+
     /*
      * @see IMethodMappingBinding#getBaseMethods()
      */
@@ -120,16 +120,16 @@ class MethodMappingBinding implements IMethodMappingBinding
 			if (methodBindings == null)
         		return new IMethodBinding[0];
         	this._baseMethods = new IMethodBinding[methodBindings.length];
-        	for (int i = 0; i < methodBindings.length; i++) 
-				this._baseMethods[i] = _resolver.getMethodBinding(methodBindings[i]);            
+        	for (int i = 0; i < methodBindings.length; i++)
+				this._baseMethods[i] = _resolver.getMethodBinding(methodBindings[i]);
         }
-        
+
         return _baseMethods;
     }
 
     public String[] getBaseArgumentNames() {
     	MethodBinding[] methodBindings = this._binding._baseMethods;
-		if (methodBindings != null && methodBindings.length > 0) 
+		if (methodBindings != null && methodBindings.length > 0)
 		{
 			String[] result = new String[methodBindings[0].parameters.length];
 			AbstractMethodDeclaration methodDecl = methodBindings[0].sourceMethod();
@@ -138,7 +138,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 				if (args != null) {
 					for (int i = 0; i < args.length; i++)
 						result[i] = String.valueOf(args[i].name);
-					
+
 					return result;
 				}
 			}
@@ -148,7 +148,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 		}
     	return new String[0];
     }
-    
+
 	/*
 	 * @see IBinding#getKind()
 	 */
@@ -181,7 +181,7 @@ class MethodMappingBinding implements IMethodMappingBinding
 //            // As for now, CalloutMappings have no modifier,
 //            // since get and set are properties of FieldAccessSpec.
 //        }
-        
+
 	    return 0;
 	}
 
@@ -200,7 +200,7 @@ class MethodMappingBinding implements IMethodMappingBinding
     {
 		return false;
 	}
-	
+
 	public boolean isCallin() {
 		return _binding.isCallin();
 	}
@@ -218,8 +218,8 @@ class MethodMappingBinding implements IMethodMappingBinding
 
         return buffer.toString();
 	}
-	
-	/* 
+
+	/*
 	 * For debugging purpose only.
 	 * @see java.lang.Object#toString()
 	 */
@@ -234,11 +234,11 @@ class MethodMappingBinding implements IMethodMappingBinding
 	}
 
 	public boolean isEqualTo(IBinding other) {
-		if (this == other) 
+		if (this == other)
 			return true;
 		if (other == null)
 			return false;
-		
+
 		if (!(other instanceof MethodMappingBinding)) {
 			// consider a callout as equal to the role method it defines.
 			if (!this.isCallin() && this.getRoleMethod().isEqualTo(other))
@@ -247,11 +247,11 @@ class MethodMappingBinding implements IMethodMappingBinding
 		}
 		// untested below [06.02.09]
 		org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding otherBinding = ((MethodMappingBinding) other)._binding;
-		if (BindingComparator.isEqual(this._binding, otherBinding)) 
+		if (BindingComparator.isEqual(this._binding, otherBinding))
 			return true;
 		return false;
 	}
-	
+
 // (svenk: implement method from IBinding
   public IAnnotationBinding[] getAnnotations() {
     if (this.annotations != null) {

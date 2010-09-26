@@ -145,8 +145,8 @@ class BindingResolver {
 //{ObjectTeams: new retrieval:
 	IMethodMappingBinding getMethodMappingBinding(org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding callbinding) {
 		return null;
-	}	
-// SH}	
+	}
+// SH}
 	/**
 	 * Returns the new member value pair binding corresponding to the given old value pair binding.
 	 * <p>
@@ -602,7 +602,7 @@ class BindingResolver {
 	}
 
 //{ObjectTeams: resolve bindings for OT-specific nodes
-    
+
     IMethodBinding resolveConstructor(BaseConstructorInvocation constructor)
     {
         return null;
@@ -613,12 +613,12 @@ class BindingResolver {
         return null;
     }
 
-    
+
     IMethodBinding resolveMethod(BaseCallMessageSend method)
     {
         return null;
-    }   
-      
+    }
+
 
     IMethodBinding resolveMethod(MethodSpec method)
     {
@@ -628,8 +628,8 @@ class BindingResolver {
     IMethodBinding resolveMethod(TSuperMessageSend method)
     {
         return null;
-    }   
-    
+    }
+
     IMethodMappingBinding resolveMethodMapping(AbstractMethodMappingDeclaration mapping)
     {
         return null;

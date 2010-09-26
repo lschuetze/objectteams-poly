@@ -113,7 +113,7 @@ class CompilationUnitResolver extends Compiler {
 	boolean hasCompilationAborted;
 
 	private IProgressMonitor monitor;
-	
+
 	/**
 	 * Set to <code>true</code> if the receiver was initialized using a java project name environment
 	 */
@@ -178,7 +178,7 @@ class CompilationUnitResolver extends Compiler {
 		SourceTypeElementInfo sourceType = (SourceTypeElementInfo) sourceTypes[0];
 		accept((org.eclipse.jdt.internal.compiler.env.ICompilationUnit) sourceType.getHandle().getCompilationUnit(), accessRestriction);
 	}
-	
+
 	public synchronized void accept(org.eclipse.jdt.internal.compiler.env.ICompilationUnit sourceUnit, AccessRestriction accessRestriction) {
 		super.accept(sourceUnit, accessRestriction);
 	}
@@ -544,7 +544,7 @@ class CompilationUnitResolver extends Compiler {
 			}
 		} else {
 				//fill the methods bodies in order for the code to be generated
-				//real parse of the method....			
+				//real parse of the method....
 				org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] types = compilationUnitDeclaration.types;
 				if (types != null) {
 					for (int j = 0, typeLength = types.length; j < typeLength; j++) {
@@ -854,11 +854,11 @@ class CompilationUnitResolver extends Compiler {
 			org.eclipse.jdt.internal.compiler.env.ICompilationUnit[] sourceUnits = new org.eclipse.jdt.internal.compiler.env.ICompilationUnit[length];
 			System.arraycopy(compilationUnits, 0, sourceUnits, 0, length);
 //{ObjectTeams:
-			Dependencies.setup(this, this.parser, this.lookupEnvironment, 
-								true/*verify*/, !this.options.ignoreMethodBodies/*analyze*/, !this.options.ignoreMethodBodies/*generate*/, 
+			Dependencies.setup(this, this.parser, this.lookupEnvironment,
+								true/*verify*/, !this.options.ignoreMethodBodies/*analyze*/, !this.options.ignoreMethodBodies/*generate*/,
 								true, true, false);
 // SH+KM}
-			
+
 			beginToCompile(sourceUnits, bindingKeys);
 			// process all units (some more could be injected in the loop by the lookup environment)
 			for (int i = 0; i < this.totalUnits; i++) {
@@ -996,8 +996,8 @@ class CompilationUnitResolver extends Compiler {
 				sourceUnits[count++] = new org.eclipse.jdt.internal.compiler.batch.CompilationUnit(contents, sourceUnitPath, encoding);
 			}
 //{ObjectTeams:
-			Dependencies.setup(this, this.parser, this.lookupEnvironment, 
-								true/*verify*/, !this.options.ignoreMethodBodies/*analyze*/, !this.options.ignoreMethodBodies/*generate*/, 
+			Dependencies.setup(this, this.parser, this.lookupEnvironment,
+								true/*verify*/, !this.options.ignoreMethodBodies/*analyze*/, !this.options.ignoreMethodBodies/*generate*/,
 								true, true, false);
 // SH}
 			beginToCompile(sourceUnits, bindingKeys);
@@ -1099,7 +1099,7 @@ class CompilationUnitResolver extends Compiler {
 			astRequestor.compilationUnitResolver = null;
 //{ObjectTeams: restore:
             Dependencies.release(this);
-// SH}            
+// SH}
 		}
 	}
 
@@ -1148,20 +1148,20 @@ class CompilationUnitResolver extends Compiler {
 		try {
 
 //{ObjectTeams:
-			Dependencies.setup(this, this.parser, this.lookupEnvironment, 
+			Dependencies.setup(this, this.parser, this.lookupEnvironment,
 					verifyMethods, analyzeCode, generateCode, true, true, false);
-// SH}				
+// SH}
 			if (unit == null) {
 				// build and record parsed units
 				this.parseThreshold = 0; // will request a full parse
 				beginToCompile(new org.eclipse.jdt.internal.compiler.env.ICompilationUnit[] { sourceUnit });
 				// process all units (some more could be injected in the loop by the lookup environment)
-//{ObjectTeams: due to role files the unit corresponding to sourceUnit need not be in position 0:				
-/* orig:				
+//{ObjectTeams: due to role files the unit corresponding to sourceUnit need not be in position 0:
+/* orig:
 				unit = this.unitsToProcess[0];
   :giro */
 				unit = findCorrespondingUnit(this.unitsToProcess, sourceUnit);
-// SH}				
+// SH}
 			} else {
 				// initial type binding creation
 				this.lookupEnvironment.buildTypeBindings(unit, null /*no access restriction*/);
@@ -1206,12 +1206,12 @@ class CompilationUnitResolver extends Compiler {
 					}
 //{ObjectTeams: no more method bodies, have explicitly parsed those we need:
 					unit.parseMethodBodies = false;
-// SH}				
+// SH}
 				}
 			}
 
 			if (unit.scope != null) {
-//{ObjectTeams: replace single step by Dependencies:				
+//{ObjectTeams: replace single step by Dependencies:
 /* orig:
 				// fault in fields & methods
 				unit.scope.faultInTypes();
@@ -1228,7 +1228,7 @@ class CompilationUnitResolver extends Compiler {
 
 				// code generation
 				if (generateCode) unit.generateCode();
-*/	
+*/
 				if (generateCode)
 					Dependencies.ensureState(unit, ITranslationStates.STATE_BYTE_CODE_GENERATED);
 				else if (analyzeCode)
@@ -1254,9 +1254,9 @@ class CompilationUnitResolver extends Compiler {
 			this.handleInternalException(e, unit, null);
 			throw e; // rethrow
 		} finally {
-//{ObjectTeams:			
+//{ObjectTeams:
 			Dependencies.release(this);
-// SH}			
+// SH}
 			// No reset is performed there anymore since,
 			// within the CodeAssist (or related tools),
 			// the compiler may be called *after* a call
@@ -1270,8 +1270,8 @@ class CompilationUnitResolver extends Compiler {
 //              because a role file might have fetched its team.
 //              So search through the array!
 	private CompilationUnitDeclaration findCorrespondingUnit(
-			CompilationUnitDeclaration[] declarations, 
-			org.eclipse.jdt.internal.compiler.env.ICompilationUnit sourceUnit) 
+			CompilationUnitDeclaration[] declarations,
+			org.eclipse.jdt.internal.compiler.env.ICompilationUnit sourceUnit)
 	{
 		for(CompilationUnitDeclaration cud : declarations) {
 			if (CharOperation.equals(sourceUnit.getFileName(), cud.getFileName()))
@@ -1279,7 +1279,7 @@ class CompilationUnitResolver extends Compiler {
 		}
 		throw new InternalCompilerError("parsed unit not found in units: "+new String(sourceUnit.getFileName())); //$NON-NLS-1$
 	}
-// SH}	
+// SH}
 
 	/*
 	 * Internal API used to resolve a given compilation unit. Can run a subset of the compilation process

@@ -37,7 +37,7 @@ class AnnotationBinding implements IAnnotationBinding {
 		this.binding = annotation;
 		this.bindingResolver = resolver;
 	}
-	
+
 	public IAnnotationBinding[] getAnnotations() {
 		return NoAnnotations;
 	}
@@ -48,7 +48,7 @@ class AnnotationBinding implements IAnnotationBinding {
 			return null;
 		return typeBinding;
 	}
-	
+
 	public IMemberValuePairBinding[] getDeclaredMemberValuePairs() {
 		ReferenceBinding typeBinding = this.binding.getAnnotationType();
 		if (typeBinding == null || ((typeBinding.tagBits & TagBits.HasMissingType) != 0)) {
@@ -98,7 +98,7 @@ class AnnotationBinding implements IAnnotationBinding {
 		}
 		return allPairs;
 	}
-	
+
 	public IJavaElement getJavaElement() {
 		if (!(this.bindingResolver instanceof DefaultBindingResolver)) return null;
 		ASTNode node = (ASTNode) ((DefaultBindingResolver) this.bindingResolver).bindingsToAstNodes.get(this);
@@ -146,7 +146,7 @@ class AnnotationBinding implements IAnnotationBinding {
 		}
 		return this.key;
 	}
-	
+
 	private String getRecipientKey() {
 		if (!(this.bindingResolver instanceof DefaultBindingResolver)) return ""; //$NON-NLS-1$
 		DefaultBindingResolver resolver = (DefaultBindingResolver) this.bindingResolver;
@@ -191,13 +191,13 @@ class AnnotationBinding implements IAnnotationBinding {
 			return annotationType.getName();
 		}
 	}
-	
+
 	public boolean isDeprecated() {
 		ReferenceBinding typeBinding = this.binding.getAnnotationType();
 		if (typeBinding == null) return false;
 		return typeBinding.isDeprecated();
 	}
-	
+
 	public boolean isEqualTo(IBinding otherBinding) {
 		if (this == otherBinding)
 			return true;
@@ -245,5 +245,5 @@ class AnnotationBinding implements IAnnotationBinding {
 		buffer.append(')');
 		return buffer.toString();
 	}
-	
+
 }

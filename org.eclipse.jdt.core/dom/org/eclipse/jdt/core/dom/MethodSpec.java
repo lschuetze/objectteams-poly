@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
  * Contributors:
@@ -22,7 +22,7 @@ import java.util.List;
  * NEW for OTDT, built in analogy to MethodDeclaration.
  *
  * Represents DOM-ASTNode for callout binding to a method of the corresponding
- * base class, which has to handle code 
+ * base class, which has to handle code
  * from e.g. :
  * 		baseMethod
  * to e.g. :
@@ -33,12 +33,12 @@ import java.util.List;
  *  returnType,
  * 	name,
  * 	signature
- * 
+ *
  * This AST node has no modifier.
- * 
- * This node can be used in CalloutMethodDeclaration and 
+ *
+ * This node can be used in CalloutMethodDeclaration and
  * CallinMappingDeclaration
- * 
+ *
  * @author jsv
  */
 public class MethodSpec extends MethodMappingElement
@@ -46,66 +46,66 @@ public class MethodSpec extends MethodMappingElement
 	/**
 	 * The "signature" structural property of this node type.
 	 */
-	public static final SimplePropertyDescriptor SIGNATURE_PROPERTY = 
+	public static final SimplePropertyDescriptor SIGNATURE_PROPERTY =
 		internalSignaturePropertyFactory(MethodSpec.class);
-		
+
 	/**
 	 * The "covariantReturnType" property, flagging if "+" has been specified in the source.
 	 * @since OTDT 1.1.3
 	 */
 	public static final SimplePropertyDescriptor COVARIANT_RETURN_PROPERTY =
 		new SimplePropertyDescriptor(MethodSpec.class, "covariantReturn", boolean.class, MANDATORY); //$NON-NLS-1$
-	
+
 	/**
 	 * The "name" structural property of this node type.
 	 */
-	public static final ChildPropertyDescriptor NAME_PROPERTY = 
+	public static final ChildPropertyDescriptor NAME_PROPERTY =
 		internalNamePropertyFactory(MethodSpec.class);
-	
+
 	/**
 	 * The "returnType" structural property of this node type (JLS2 API only).
 	 */
 	// TODO (jeem) When JLS3 support is complete (post 3.0) - deprecated Replaced by {@link #RETURN_TYPE2_PROPERTY} in the JLS3 API.
-	public static final ChildPropertyDescriptor RETURN_TYPE_PROPERTY = 
+	public static final ChildPropertyDescriptor RETURN_TYPE_PROPERTY =
 		new ChildPropertyDescriptor(MethodSpec.class, "returnType", Type.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The "returnType2" structural property of this node type (added in JLS3 API).
 	 * @since 3.1
 	 */
-	public static final ChildPropertyDescriptor RETURN_TYPE2_PROPERTY = 
+	public static final ChildPropertyDescriptor RETURN_TYPE2_PROPERTY =
 		new ChildPropertyDescriptor(MethodSpec.class, "returnType2", Type.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The "typeParameters" structural property of this node type (added in JLS3 API).
 	 * @since OTDT 1.1.3
 	 */
-	public static final ChildListPropertyDescriptor TYPE_PARAMETERS_PROPERTY = 
+	public static final ChildListPropertyDescriptor TYPE_PARAMETERS_PROPERTY =
 		new ChildListPropertyDescriptor(MethodSpec.class, "typeParameters", TypeParameter.class, NO_CYCLE_RISK); //$NON-NLS-1$
-	
+
 	/**
 	 * The "parameters" structural property of this node type).
 	 */
-	public static final ChildListPropertyDescriptor PARAMETERS_PROPERTY = 
+	public static final ChildListPropertyDescriptor PARAMETERS_PROPERTY =
 		new ChildListPropertyDescriptor(MethodSpec.class, "parameters", SingleVariableDeclaration.class, CYCLE_RISK); //$NON-NLS-1$
-		
-	
+
+
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
 	private static final List PROPERTY_DESCRIPTORS_2_0;
-	
+
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 * @since 3.1
 	 */
 	private static final List PROPERTY_DESCRIPTORS_3_0;
 
-		
+
 	static
 	{
 		List propertyList = new ArrayList(6);
@@ -116,7 +116,7 @@ public class MethodSpec extends MethodMappingElement
 		addProperty(SIGNATURE_PROPERTY, propertyList);
 		addProperty(COVARIANT_RETURN_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
-		
+
 		propertyList = new ArrayList(7);
 		createPropertyList(MethodSpec.class, propertyList);
 		addProperty(RETURN_TYPE2_PROPERTY, propertyList);
@@ -132,9 +132,9 @@ public class MethodSpec extends MethodMappingElement
 	/**
 	 * Returns a list of structural property descriptors for this node type.
 	 * Clients must not modify the result.
-	 * 
+	 *
 	 * @param apiLevel the API level; one of the AST.JLS* constants
-	 * @return a list of property descriptors (element type: 
+	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 * @since 3.0
 	 */
@@ -145,15 +145,15 @@ public class MethodSpec extends MethodMappingElement
 			return PROPERTY_DESCRIPTORS_3_0;
 		}
 	}
-	
+
 	/**
-	 * The parameter declarations 
+	 * The parameter declarations
 	 * (element type: <code>SingleVariableDeclaration</code>).
 	 * Defaults to an empty list.
 	 */
 	private ASTNode.NodeList parameters =
 		new ASTNode.NodeList(PARAMETERS_PROPERTY);
-	
+
 	/**
 	 * The return type.
 	 * JLS2 behevior: lazily initialized; defaults to null.
@@ -161,7 +161,7 @@ public class MethodSpec extends MethodMappingElement
 	private Type returnType = null;
 
 	/**
-	 * The type paramters (element type: <code>TypeParameter</code>). 
+	 * The type paramters (element type: <code>TypeParameter</code>).
 	 * (see constructor).
 	 * @since OTDT 1.1.3
 	 */
@@ -174,18 +174,18 @@ public class MethodSpec extends MethodMappingElement
 	private boolean _hasCovariantReturn;
 
 	/**
-	 * Creates a new AST node for a method spec declaration owned 
+	 * Creates a new AST node for a method spec declaration owned
 	 * by the given AST. By default, the declaration is for a method spec
-	 * of an unspecified, but legal, name; no modifiers; no javadoc; no type 
-	 * parameters; void return type; no parameters; no array dimensions after 
+	 * of an unspecified, but legal, name; no modifiers; no javadoc; no type
+	 * parameters; void return type; no parameters; no array dimensions after
 	 * the parameters; no thrown exceptions; and no body (as opposed to an
 	 * empty body).
 	 * <p>
-	 * N.B. This constructor is package-private; all subclasses must be 
-	 * declared in the same package; clients are unable to declare 
+	 * N.B. This constructor is package-private; all subclasses must be
+	 * declared in the same package; clients are unable to declare
 	 * additional subclasses.
 	 * </p>
-	 * 
+	 *
 	 * @param ast the AST that is to own this node
 	 */
 	MethodSpec(AST ast)
@@ -198,27 +198,27 @@ public class MethodSpec extends MethodMappingElement
 	/**
 	 * Returns the covariantReturn flag
 	 * @since OTDT 1.1.3
-	 */ 
+	 */
 	public boolean hasCovariantReturn()	{
 		return _hasCovariantReturn;
 	}
-	
+
 	/**
 	 * Sets the covariantReturn flag.
 	 * @since OTDT 1.1.3
-	 */ 
+	 */
 	public void setCovariantReturnFlag(boolean hasCovariantReturn)
 	{
 		preValueChange(COVARIANT_RETURN_PROPERTY);
 		this._hasCovariantReturn = hasCovariantReturn;
 		postValueChange(COVARIANT_RETURN_PROPERTY);
 	}
-	
+
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return propertyDescriptors(apiLevel);
 	}
-	
+
 	final boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value)
 	{
 		if (property == SIGNATURE_PROPERTY)
@@ -228,7 +228,7 @@ public class MethodSpec extends MethodMappingElement
 			} else {
 				setSignatureFlag(value);
 				return false;
-			}		
+			}
 		}
 		if (property == COVARIANT_RETURN_PROPERTY)
 		{
@@ -237,9 +237,9 @@ public class MethodSpec extends MethodMappingElement
 			} else {
 				setCovariantReturnFlag(value);
 				return false;
-			}		
+			}
 		}
-		
+
 		return super.internalGetSetBooleanProperty(property, get, value);
 	}
 
@@ -277,12 +277,12 @@ public class MethodSpec extends MethodMappingElement
 				return null;
 			}
 		}
-			
+
 
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
 	}
-	
+
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
 	{
 		if (property == TYPE_PARAMETERS_PROPERTY) {
@@ -295,16 +295,16 @@ public class MethodSpec extends MethodMappingElement
 		return super.internalGetChildListProperty(property);
 	}
 
-		
+
     final ChildListPropertyDescriptor internalModifiers2Property()
     {
         return null;
     }
-    
+
     public SimplePropertyDescriptor signatureProperty() {
 		return SIGNATURE_PROPERTY;
 	}
-	
+
 	ChildPropertyDescriptor internalNameProperty() {
 		return NAME_PROPERTY;
 	}
@@ -344,7 +344,7 @@ public class MethodSpec extends MethodMappingElement
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
-	
+
 	void accept0(ASTVisitor visitor)
 	{
 		boolean visitChildren = visitor.visit(this);
@@ -370,7 +370,7 @@ public class MethodSpec extends MethodMappingElement
 	/**
 	 * Returns the live ordered list of method parameter declarations for this
 	 * method spec.
-	 * 
+	 *
 	 * @return the live list of method parameter declarations
 	 *    (element type: <code>SingleVariableDeclaration</code>)
 	 */
@@ -381,13 +381,13 @@ public class MethodSpec extends MethodMappingElement
 	/**
 	 * Returns the live ordered list of type parameters of this method
 	 * declaration (added in JLS3 API). This list is non-empty for parameterized methods.
-	 * 
+	 *
 	 * @return the live list of type parameters
 	 *    (element type: <code>TypeParameter</code>)
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * a JLS2 AST
 	 * @since OTDT 1.1.3
-	 */ 
+	 */
 	public List typeParameters() {
 		// more efficient than just calling unsupportedIn2() to check
 		if (this.typeParameters == null) {
@@ -399,10 +399,10 @@ public class MethodSpec extends MethodMappingElement
     public IMethodBinding resolveBinding() {
         return this.ast.getBindingResolver().resolveMethod(this);
     }
-    
+
 	/**
 	 * Returns the return type of the method declared in this method spec,
-	 * exclusive of any extra array dimensions (JLS2 API only). 
+	 * exclusive of any extra array dimensions (JLS2 API only).
 	 * This is one of the few places where the void type is meaningful.
 	 * <p>
 	 * Note that this child is not relevant for constructor declarations
@@ -410,7 +410,7 @@ public class MethodSpec extends MethodMappingElement
 	 * and visits), and is devoid of the binding information ordinarily
 	 * available.
 	 * </p>
-	 * 
+	 *
 	 * @return the return type, possibly the void primitive type
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * an AST later than JLS2
@@ -443,7 +443,7 @@ public class MethodSpec extends MethodMappingElement
 	 * Note that this child is not relevant for constructor declarations
 	 * (although it does still figure in subtree equality comparisons and visits).
 	 * </p>
-	 * 
+	 *
 	 * @param type the new return type, possibly the void primitive type
 	 * @exception IllegalArgumentException if:
 	 * <ul>
@@ -466,30 +466,30 @@ public class MethodSpec extends MethodMappingElement
 		this.returnType = type;
 		postReplaceChild(oldChild, type, RETURN_TYPE_PROPERTY);
 	}
-	
+
 	/**
-	 * Returns the return type of the method declared in this method 
-	 * declaration, exclusive of any extra array dimensions (added in JLS3 API). 
+	 * Returns the return type of the method declared in this method
+	 * declaration, exclusive of any extra array dimensions (added in JLS3 API).
 	 * This is one of the few places where the void type is meaningful.
 	 * <p>
 	 * Note that this child is not relevant for constructor declarations
 	 * (although, if present, it does still figure in subtree equality comparisons
 	 * and visits), and is devoid of the binding information ordinarily
-	 * available. In the JLS2 API, the return type is mandatory. 
+	 * available. In the JLS2 API, the return type is mandatory.
 	 * In the JLS3 API, the return type is optional.
 	 * </p>
-	 * 
+	 *
 	 * @return the return type, possibly the void primitive type,
 	 * or <code>null</code> if none
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * a JLS2 AST
 	 * @since 3.1
-	 */ 
+	 */
 	public Type getReturnType2() {
 	    unsupportedIn2();
 		return this.returnType;
 	}
-	
+
 	/**
 	 * Sets the return type of the method declared in this method declaration
 	 * to the given type, exclusive of any extra array dimensions (added in JLS3 API).
@@ -497,10 +497,10 @@ public class MethodSpec extends MethodMappingElement
 	 * <p>
 	 * Note that this child is not relevant for constructor declarations
 	 * (although it does still figure in subtree equality comparisons and visits).
-	 * In the JLS2 API, the return type is mandatory. 
+	 * In the JLS2 API, the return type is mandatory.
 	 * In the JLS3 API, the return type is optional.
 	 * </p>
-	 * 
+	 *
 	 * @param type the new return type, possibly the void primitive type,
 	 * or <code>null</code> if none
 	 * @exception UnsupportedOperationException if this operation is used in
@@ -511,7 +511,7 @@ public class MethodSpec extends MethodMappingElement
 	 * <li>the node already has a parent</li>
 	 * </ul>
 	 * @since 3.1
-	 */ 
+	 */
 	public void setReturnType2(Type type) {
 	    unsupportedIn2();
 		ASTNode oldChild = this.returnType;
@@ -525,7 +525,7 @@ public class MethodSpec extends MethodMappingElement
 	{
 		return BASE_NODE_SIZE + 3 * 4;
 	}
-	
+
 	int treeSize()
 	{
 		return memSize()

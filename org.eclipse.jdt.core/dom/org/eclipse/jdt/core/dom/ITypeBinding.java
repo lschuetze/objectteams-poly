@@ -17,7 +17,7 @@ package org.eclipse.jdt.core.dom;
 
 /**
  * MIGRATION_STATE: 3.4
- * 
+ *
  * <h4>OTDT changes:</h4>
  * <dl>
  * <dt>What:<dd> new lookup functions for teams and roles.
@@ -121,7 +121,7 @@ public interface ITypeBinding extends IBinding {
 	 * @since 3.5
 	 */
 	public int getRank();
-	
+
 	/**
 	 * Returns the binding representing the component type of this array type,
 	 * or <code>null</code> if this is not an array type binding. The component
@@ -137,7 +137,7 @@ public interface ITypeBinding extends IBinding {
 	/**
 	 * Returns a list of bindings representing all the fields declared
 	 * as members of this class, interface, or enum type.
-	 * 
+	 *
 	 * <p>These include public, protected, default (package-private) access,
 	 * and private fields declared by the class, but excludes inherited fields.
 	 * Synthetic fields may or may not be included. Fields from binary types that
@@ -408,7 +408,7 @@ public interface ITypeBinding extends IBinding {
 	 * the package of the enclosing type, or, if the type name is the name of a
 	 * {@linkplain AST#resolveWellKnownType(String) well-known type},
 	 * the package of the matching well-known type.</p>
-	 * 
+	 *
 	 * @return the binding for the package in which this class, interface,
 	 * enum, or annotation type is declared, or <code>null</code> if this type
 	 * binding represents a primitive type, an array type, the null type,
@@ -768,7 +768,7 @@ public interface ITypeBinding extends IBinding {
 	 *    and <code>false</code> otherwise
 	 */
 	public boolean isTeam();
-	
+
 	/**
 	 * Returns whether this type binding represents a role type.
 	 *
@@ -780,22 +780,22 @@ public interface ITypeBinding extends IBinding {
 	/**
 	 * Returns whether this binding is the classpart of other binding
 	 * (which must then be the interface part ;-)
-	 * 
+	 *
 	 * @param other
 	 * @return
 	 */
 	public boolean isClassPartOf(ITypeBinding other);
-	
+
 	/**
 	 * Returns whether this binding is the synthetic interface part of a role
 	 */
 	public boolean isSynthRoleIfc();
-	
+
 	/**
 	 * For a role class returns the corresponding interface part.
 	 */
 	public ITypeBinding getIfcPart();
-	
+
 	/**
 	 * Returns the type binding for the baseclass of the type represented
 	 * by this class binding.
@@ -803,11 +803,11 @@ public interface ITypeBinding extends IBinding {
 	 *    or <code>null</code> if none
 	 */
 	public ITypeBinding getBaseClass();
-	
+
 	/**
 	 * Returns the name of this type as getQualifiedName() would do,
 	 * but respect anchored types.
-	 * 
+	 *
 	 * @return
 	 */
 	public String getOptimalName();
@@ -819,7 +819,7 @@ public interface ITypeBinding extends IBinding {
      * @return super roles or null, if not a role.
      */
     public ITypeBinding[] getSuperRoles();
-//mkr}	
+//mkr}
 	/**
 	 * Returns whether this type binding represents a local class.
 	 * <p>
@@ -1023,19 +1023,19 @@ public interface ITypeBinding extends IBinding {
 	 * @see #isUpperbound()
 	 */
 	public boolean isWildcardType();
-	
+
 //{ObjectTeams:	new queries
 	/**
 	 * Returns whether this type binding represents a dependent type.
 	 * @param onlyRelevant only report dependence on relevant (non-tthis) anchors
 	 */
 	boolean isDependentType(boolean onlyRelevant);
-	
+
 	/**
 	 * If this type binding represents a dependent type
 	 * return the path of its type anchor.
 	 * @return path or empty array.
 	 */
 	public String[] getAnchorPath();
-// SH}	
+// SH}
 }

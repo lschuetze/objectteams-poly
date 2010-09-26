@@ -1,16 +1,16 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2009 Stephan Herrmann
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -35,7 +35,7 @@ public class MethodBindingOperator extends ASTNode {
 	public static final int KIND_CALLOUT 		  = 1;
 	public static final int KIND_CALLOUT_OVERRIDE = 2;
 	public static final int KIND_CALLIN 		  = 3;
-	
+
 	/**
 	 * The "binding-kind" property of this node type.
 	 */
@@ -45,19 +45,19 @@ public class MethodBindingOperator extends ASTNode {
 	/**
 	 * The "binding-modifier" structural property of this node type, none if regular callout.
 	 */
-    public static final ChildPropertyDescriptor BINDING_MODIFIER_PROPERTY = 
+    public static final ChildPropertyDescriptor BINDING_MODIFIER_PROPERTY =
 		new ChildPropertyDescriptor(MethodBindingOperator.class, "bindingModifier", Modifier.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
-    
+
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
 	private static final List PROPERTY_DESCRIPTORS_2_0;
-		
+
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
@@ -77,13 +77,13 @@ public class MethodBindingOperator extends ASTNode {
 		addProperty(BINDING_MODIFIER_PROPERTY, propertyList); // one flag, not a bitset
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
 	}
-    
+
 	/**
 	 * Returns a list of structural property descriptors for this node type.
 	 * Clients must not modify the result.
-	 * 
+	 *
 	 * @param apiLevel the API level; one of the AST.JLS* constants
-	 * @return a list of property descriptors (element type: 
+	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
 	public static List propertyDescriptors(int apiLevel)
@@ -93,7 +93,7 @@ public class MethodBindingOperator extends ASTNode {
 		else
 			return PROPERTY_DESCRIPTORS_2_0;
 	}
-	
+
 	private int bindingKind = 0; // one of KIND_CALLIN, KIND_CALLOUT, KIND_CALLOUT_OVERRIDE;
 	/**
 	 * The modifier flags; exactly one of before, after, replace.
@@ -121,7 +121,7 @@ public class MethodBindingOperator extends ASTNode {
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
 	}
-	
+
 	@Override
 	int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean get, int value) {
 		if (property == BINDING_KIND_PROPERTY) {
@@ -155,22 +155,22 @@ public class MethodBindingOperator extends ASTNode {
 
 	/**
 	 * Returns the callin modifiers explicitly specified on this declaration.
-	 * 
+	 *
 	 * @return exactly one of before, after, replace using constants from Modifier
 	 * @see Modifier
-	 */ 
+	 */
 	public int getBindingModifier()
 	{
-		if (this.bindingModifierFlag == 0 && this.bindingModifier != null) 
+		if (this.bindingModifierFlag == 0 && this.bindingModifier != null)
 		{
 			this.bindingModifierFlag = this.bindingModifier.getKeyword().toFlagValue();
 		}
 		return bindingModifierFlag;
 	}
-	
+
 	/**
 	 * Sets the callin or c-t-f modifier explicitly specified on this declaration.
-	 * 
+	 *
 	 * @param modifiers the given modifiers (bit-wise or of <code>Modifier</code> constants)
 	 * @see Modifier
 	 */
@@ -178,27 +178,27 @@ public class MethodBindingOperator extends ASTNode {
 	{
 		setBindingModifier(this.ast.newModifier(Modifier.ModifierKeyword.fromFlagValue(modifiers)));
 	}
-	
+
 	public void setBindingModifier(Modifier modifier) {
 		ChildPropertyDescriptor propertyDescriptor = BINDING_MODIFIER_PROPERTY;
 		Modifier oldModifier = this.bindingModifier;
 		preReplaceChild(oldModifier, modifier, propertyDescriptor);
 		this.bindingModifierFlag = 0; // clear cached flags
 		this.bindingModifier = modifier;
-		postReplaceChild(oldModifier, modifier, propertyDescriptor);		
+		postReplaceChild(oldModifier, modifier, propertyDescriptor);
 	}
-	
+
 	/**
 	 * Returns the callin or c-t-f modifier for this mapping declaration.
-	 * 
+	 *
      * @see Modifier
 	 * @return one of before, after, replace
-	 */ 
+	 */
 	public Modifier bindingModifier()
 	{
 		return bindingModifier;
 	}
-	
+
 	/** Returns whether this method mapping is a callout to field (get or set). */
 	public boolean isCalloutToField() {
 		int modifier = this.getBindingModifier();

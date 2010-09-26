@@ -37,8 +37,8 @@ import java.util.List;
  * 			<b>{</b> { InterfaceBodyDeclaration | <b>;</b> } <b>}</b>
  * </pre>
  * For JLS3, type parameters and reified modifiers
- * (and annotations) were added, and the superclass type name and superinterface 
- * types names are generalized to type so that parameterized types can be 
+ * (and annotations) were added, and the superclass type name and superinterface
+ * types names are generalized to type so that parameterized types can be
  * referenced:
  * <pre>
  * TypeDeclaration:
@@ -65,67 +65,67 @@ import java.util.List;
  * modifiers or annotations). The source range extends through the last character of the "}"
  * token following the body declarations.
  * </p>
- * 
+ *
  * @since 2.0
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
 public class TypeDeclaration extends AbstractTypeDeclaration {
-	
+
 	/**
 	 * The "javadoc" structural property of this node type.
 	 * @since 3.0
 	 */
-	public static final ChildPropertyDescriptor JAVADOC_PROPERTY = 
+	public static final ChildPropertyDescriptor JAVADOC_PROPERTY =
 		internalJavadocPropertyFactory(TypeDeclaration.class);
 
 	/**
 	 * The "modifiers" structural property of this node type (JLS2 API only).
 	 * @since 3.0
 	 */
-	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY = 
+	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
 		internalModifiersPropertyFactory(TypeDeclaration.class);
-	
+
 	/**
 	 * The "modifiers" structural property of this node type (added in JLS3 API).
 	 * @since 3.1
 	 */
-	public static final ChildListPropertyDescriptor MODIFIERS2_PROPERTY = 
+	public static final ChildListPropertyDescriptor MODIFIERS2_PROPERTY =
 		internalModifiers2PropertyFactory(TypeDeclaration.class);
-	
+
 	/**
 	 * The "interface" structural property of this node type.
 	 * @since 3.0
 	 */
-	public static final SimplePropertyDescriptor INTERFACE_PROPERTY = 
+	public static final SimplePropertyDescriptor INTERFACE_PROPERTY =
 		new SimplePropertyDescriptor(TypeDeclaration.class, "interface", boolean.class, MANDATORY); //$NON-NLS-1$
-	
+
 //{ObjectTeams: OT-specific properties
 	/**
 	 * The "team" structural property of this node type.
 	 */
-	public static final SimplePropertyDescriptor TEAM_PROPERTY = 
+	public static final SimplePropertyDescriptor TEAM_PROPERTY =
 		new SimplePropertyDescriptor(TypeDeclaration.class, "team", boolean.class, MANDATORY); //$NON-NLS-1$
 
 	/**
 	 * The "role" structural property of this node type.
 	 */
-	public static final SimplePropertyDescriptor ROLE_PROPERTY = 
+	public static final SimplePropertyDescriptor ROLE_PROPERTY =
 		new SimplePropertyDescriptor(TypeDeclaration.class, "role", boolean.class, MANDATORY);	 //$NON-NLS-1$
-	
+
 	/**
 	 * The "precedence" structural property.
 	 */
 	public static final ChildListPropertyDescriptor PRECEDENCE_PROPERTY =
 		new ChildListPropertyDescriptor(TypeDeclaration.class, "precedence", PrecedenceDeclaration.class, NO_CYCLE_RISK); //$NON-NLS-1$
-    
+
     /**
      * The "guardPredicate" structural property of this node type.
      * @since 0.9.25
      */
-    public static final ChildPropertyDescriptor GUARD_PROPERTY = 
+    public static final ChildPropertyDescriptor GUARD_PROPERTY =
         new ChildPropertyDescriptor(TypeDeclaration.class, "guardPredicate", GuardPredicateDeclaration.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
-//gbr+SH}	
-	
+//gbr+SH}
+
 	/**
 	 * The "name" structural property of this node type.
 	 * @since 3.0
@@ -137,60 +137,60 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * The "superclass" structural property of this node type (JLS2 API only).
 	 * @since 3.0
 	 */
-	public static final ChildPropertyDescriptor SUPERCLASS_PROPERTY = 
+	public static final ChildPropertyDescriptor SUPERCLASS_PROPERTY =
 		new ChildPropertyDescriptor(TypeDeclaration.class, "superclass", Name.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The "superInterfaces" structural property of this node type (JLS2 API only).
 	 * @since 3.0
 	 */
-	public static final ChildListPropertyDescriptor SUPER_INTERFACES_PROPERTY = 
+	public static final ChildListPropertyDescriptor SUPER_INTERFACES_PROPERTY =
 		new ChildListPropertyDescriptor(TypeDeclaration.class, "superInterfaces", Name.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The "superclassType" structural property of this node type (added in JLS3 API).
 	 * @since 3.1
 	 */
-	public static final ChildPropertyDescriptor SUPERCLASS_TYPE_PROPERTY = 
+	public static final ChildPropertyDescriptor SUPERCLASS_TYPE_PROPERTY =
 		new ChildPropertyDescriptor(TypeDeclaration.class, "superclassType", Type.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The "superInterfaceTypes" structural property of this node type (added in JLS3 API).
 	 * @since 3.1
 	 */
-	public static final ChildListPropertyDescriptor SUPER_INTERFACE_TYPES_PROPERTY = 
+	public static final ChildListPropertyDescriptor SUPER_INTERFACE_TYPES_PROPERTY =
 		new ChildListPropertyDescriptor(TypeDeclaration.class, "superInterfaceTypes", Type.class, NO_CYCLE_RISK); //$NON-NLS-1$
-	
+
 	/**
 	 * The "typeParameters" structural property of this node type (added in JLS3 API).
 	 * @since 3.1
 	 */
-	public static final ChildListPropertyDescriptor TYPE_PARAMETERS_PROPERTY = 
+	public static final ChildListPropertyDescriptor TYPE_PARAMETERS_PROPERTY =
 		new ChildListPropertyDescriptor(TypeDeclaration.class, "typeParameters", TypeParameter.class, NO_CYCLE_RISK); //$NON-NLS-1$
-	
+
 	/**
 	 * The "bodyDeclarations" structural property of this node type (added in JLS3 API).
 	 * @since 3.0
 	 */
-	public static final ChildListPropertyDescriptor BODY_DECLARATIONS_PROPERTY = 
+	public static final ChildListPropertyDescriptor BODY_DECLARATIONS_PROPERTY =
 		internalBodyDeclarationPropertyFactory(TypeDeclaration.class);
-	
+
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 * @since 3.0
 	 */
 	private static final List PROPERTY_DESCRIPTORS_2_0;
-	
+
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 * @since 3.1
 	 */
 	private static final List PROPERTY_DESCRIPTORS_3_0;
-	
+
 	static {
 		List propertyList = new ArrayList(12);
 		createPropertyList(TypeDeclaration.class, propertyList);
@@ -208,7 +208,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		addProperty(SUPER_INTERFACES_PROPERTY, propertyList);
 		addProperty(BODY_DECLARATIONS_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
-		
+
 		propertyList = new ArrayList(13);
 		createPropertyList(TypeDeclaration.class, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
@@ -218,7 +218,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		addProperty(TEAM_PROPERTY, propertyList);
 		addProperty(ROLE_PROPERTY, propertyList);
 		addProperty(PRECEDENCE_PROPERTY, propertyList);
-        addProperty(GUARD_PROPERTY, propertyList);		
+        addProperty(GUARD_PROPERTY, propertyList);
 //gbr+SH}
 		addProperty(NAME_PROPERTY, propertyList);
 		addProperty(TYPE_PARAMETERS_PROPERTY, propertyList);
@@ -231,11 +231,11 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/**
 	 * Returns a list of structural property descriptors for this node type.
 	 * Clients must not modify the result.
-	 * 
+	 *
 	 * @param apiLevel the API level; one of the
 	 * <code>AST.JLS*</code> constants
 
-	 * @return a list of property descriptors (element type: 
+	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 * @since 3.0
 	 */
@@ -246,17 +246,17 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 			return PROPERTY_DESCRIPTORS_3_0;
 		}
 	}
-			
+
 	/**
 	 * <code>true</code> for an interface, <code>false</code> for a class.
 	 * Defaults to class.
 	 */
 //{ObjectTeams: avoid private to allow access from RoleTypeDeclaration without duplicating this field
-/* orig:	
+/* orig:
 	private boolean isInterface = false;
   :giro */
 	boolean isInterface = false;
-// SH}	
+// SH}
 
 //{ObjectTeams: OT-specific fields added
 	/**
@@ -270,47 +270,47 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Defaults to class.
 	 */
 	boolean _isRole = false;
-	
+
 	ASTNode.NodeList _precedences = new ASTNode.NodeList(PRECEDENCE_PROPERTY);
-	
+
     GuardPredicateDeclaration optionalGuardPredicate = null;
 //gbr}
-	
+
 	/**
-	 * The type paramters (element type: <code>TypeParameter</code>). 
+	 * The type paramters (element type: <code>TypeParameter</code>).
 	 * Null in JLS2. Added in JLS3; defaults to an empty list
 	 * (see constructor).
 	 * @since 3.1
 	 */
 //{ObjectTeams: avoid private to allow access from RoleTypeDeclaration without duplicating this field
-/* orig:	
+/* orig:
 	private ASTNode.NodeList typeParameters = null;
   :giro */
 	ASTNode.NodeList typeParameters = null;
-// SH}	
+// SH}
 	/**
 	 * The optional superclass name; <code>null</code> if none.
 	 * Defaults to none. Note that this field is not used for
 	 * interface declarations. Not used in 3.0.
 	 */
 //{ObjectTeams: avoid private to allow access from RoleTypeDeclaration without duplicating this field
-/* orig:	
+/* orig:
 	private Name optionalSuperclassName = null;
   :giro */
 	Name optionalSuperclassName = null;
-// SH}	
+// SH}
 	/**
-	 * The superinterface names (element type: <code>Name</code>). 
+	 * The superinterface names (element type: <code>Name</code>).
 	 * JLS2 only; defaults to an empty list. Not used in JLS3.
 	 * (see constructor).
-	 * 
+	 *
 	 */
 //{ObjectTeams: avoid private to allow access from RoleTypeDeclaration without duplicating this field
-/* orig:	
+/* orig:
 	private ASTNode.NodeList superInterfaceNames = null;
   :giro */
 	ASTNode.NodeList superInterfaceNames = null;
-// SH}	
+// SH}
 	/**
 	 * The optional superclass type; <code>null</code> if none.
 	 * Defaults to none. Note that this field is not used for
@@ -318,35 +318,35 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * @since 3.1
 	 */
 //{ObjectTeams: avoid private to allow access from RoleTypeDeclaration without duplicating this field
-/* orig:	
+/* orig:
 	private Type optionalSuperclassType = null;
   :giro */
 	Type optionalSuperclassType = null;
-// SH}	
+// SH}
 	/**
-	 * The superinterface types (element type: <code>Type</code>). 
+	 * The superinterface types (element type: <code>Type</code>).
 	 * Null in JLS2. Added in JLS3; defaults to an empty list
 	 * (see constructor).
 	 * @since 3.1
 	 */
 //{ObjectTeams: avoid private to allow access from RoleTypeDeclaration without duplicating this field
-/* orig:	
+/* orig:
 	private ASTNode.NodeList superInterfaceTypes = null;
   :giro */
 	ASTNode.NodeList superInterfaceTypes = null;
 // SH}
 	/**
-	 * Creates a new AST node for a type declaration owned by the given 
+	 * Creates a new AST node for a type declaration owned by the given
 	 * AST. By default, the type declaration is for a class of an
-	 * unspecified, but legal, name; no modifiers; no javadoc; 
+	 * unspecified, but legal, name; no modifiers; no javadoc;
 	 * no type parameters; no superclass or superinterfaces; and an empty list
 	 * of body declarations.
 	 * <p>
-	 * N.B. This constructor is package-private; all subclasses must be 
-	 * declared in the same package; clients are unable to declare 
+	 * N.B. This constructor is package-private; all subclasses must be
+	 * declared in the same package; clients are unable to declare
 	 * additional subclasses.
 	 * </p>
-	 * 
+	 *
 	 * @param ast the AST that is to own this node
 	 */
 	TypeDeclaration(AST ast) {
@@ -364,16 +364,16 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Method declared on ASTNode.
 	 * @since 3.0
 	 */
-//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/ List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
 //ike}
-	
+
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
-//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/ int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean get, int value) {
 //      ike}
 		if (property == MODIFIERS_PROPERTY) {
@@ -391,7 +391,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
-//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/ boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value) {
 //  ike}
 		if (property == INTERFACE_PROPERTY) {
@@ -402,7 +402,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 				return false;
 			}
 		}
-//{ObjectTeams: cases for OT-specific properties added		
+//{ObjectTeams: cases for OT-specific properties added
 		if (property == TEAM_PROPERTY)
 		{
 		    if (get)
@@ -425,17 +425,17 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		    {
 		        setRole(value);
 		        return false;
-		    }		
+		    }
 		}
 //gbr}
 		// allow default implementation to flag the error
 		return super.internalGetSetBooleanProperty(property, get, value);
 	}
-	
+
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
-//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/ ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child) {
 //      ike}
 		if (property == JAVADOC_PROPERTY) {
@@ -484,11 +484,11 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
 	}
-	
+
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
-//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/ List internalGetChildListProperty(ChildListPropertyDescriptor property)
 //  ike}
     {
@@ -515,11 +515,11 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		// allow default implementation to flag the error
 		return super.internalGetChildListProperty(property);
 	}
-	
+
 	/* (omit javadoc for this method)
 	 * Method declared on BodyDeclaration.
 	 */
-//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/  ChildPropertyDescriptor internalJavadocProperty()
     {
 //ike}
@@ -529,7 +529,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on BodyDeclaration.
 	 */
-//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/  ChildListPropertyDescriptor internalModifiers2Property()
     {
 //ike}
@@ -539,7 +539,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on BodyDeclaration.
 	 */
-//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/  SimplePropertyDescriptor internalModifiersProperty()
     {
 //ike}
@@ -549,14 +549,14 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on AbstractTypeDeclaration.
 	 */
-//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/  ChildPropertyDescriptor internalNameProperty()
     {
 //ike}
 		return NAME_PROPERTY;
 	}
 
-//{ObjectTeams: new elements    
+//{ObjectTeams: new elements
     ChildPropertyDescriptor internalGuardPredicateProperty() {
     	return GUARD_PROPERTY;
     }
@@ -564,12 +564,12 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
     	return PRECEDENCE_PROPERTY;
     }
 // SH}
-    
+
 	/* (omit javadoc for this method)
 	 * Method declared on AbstractTypeDeclaration.
 	 */
-//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
-    /*final*/  ChildListPropertyDescriptor internalBodyDeclarationsProperty() 
+//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
+    /*final*/  ChildListPropertyDescriptor internalBodyDeclarationsProperty()
     {
 //ike}
 		return BODY_DECLARATIONS_PROPERTY;
@@ -579,7 +579,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
-//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//{ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/ int getNodeType0()
     {
 //ike}
@@ -608,7 +608,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		result.setRole(isRole());
 		result.precedences().addAll(ASTNode.copySubtrees(target, precedences()));
         result.setGuardPredicate((GuardPredicateDeclaration)ASTNode.copySubtree(target, getGuardPredicate()));
-//gbr}		
+//gbr}
 		result.setName((SimpleName) getName().clone(target));
 		if (this.ast.apiLevel >= AST.JLS3) {
 			result.modifiers().addAll(ASTNode.copySubtrees(target, modifiers()));
@@ -627,13 +627,13 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
-//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed  
+//  {ObjectTeams: RoleTypeDeclaration can not inherit all methods, so final modifier removed
     /*final*/ boolean subtreeMatch0(ASTMatcher matcher, Object other) {
 //ike}
 		// dispatch to correct overloaded match method
 		return matcher.match(this, other);
 	}
-	
+
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
@@ -664,14 +664,14 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		}
 		visitor.endVisit(this);
 	}
-	
-//{ObjectTeams: convenience methods for dealing with OT-specific types, i.e. teams/roles	
+
+//{ObjectTeams: convenience methods for dealing with OT-specific types, i.e. teams/roles
 	/**
 	 * Returns whether this type declaration declares a team class or a class.
-	 * 
+	 *
 	 * @return <code>true</code> if this is a team class declaration,
 	 *    and <code>false</code> if this is a class declaration
-	 */ 
+	 */
 	@Override
 	public boolean isTeam()
 	{
@@ -680,10 +680,10 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 
 	/**
 	 * Sets wether this type declaration declares a team class or a class.
-	 * 
+	 *
 	 * @param isTeam <code>true</code> if this is a team class
 	 *    declaration, and <code>false</code> if this is a class declaration
-	 */ 
+	 */
 	public void setTeam(boolean isTeam)
 	{
 		preValueChange(TEAM_PROPERTY);
@@ -693,7 +693,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 
 	/**
 	 * Returns whether this type declaration declares a role class or a class.
-	 * 
+	 *
 	 * @return <code>true</code> if this is a role class declaration,
 	 *    and <code>false</code> if this is a class declaration
 	 */
@@ -705,41 +705,41 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 
 	/**
 	 * Sets whether this type declaration declares a role class or a class.
-	 *  
+	 *
 	 * @param isRole <code>true</code> if this is a role class
 	 *    declaration, and <code>false</code> if this is a class declaration
-	 */ 
+	 */
 	public void setRole(boolean isRole)
 	{
 		preValueChange(ROLE_PROPERTY);
 		_isRole = isRole;
 		postValueChange(ROLE_PROPERTY);
 	}
-	
+
 	public List precedences() {
 		return _precedences;
 	}
 //gbr}
-	
+
 	/**
-	 * Returns whether this type declaration declares a class or an 
+	 * Returns whether this type declaration declares a class or an
 	 * interface.
-	 * 
+	 *
 	 * @return <code>true</code> if this is an interface declaration,
 	 *    and <code>false</code> if this is a class declaration
-	 */ 
+	 */
 	public boolean isInterface() {
 		return this.isInterface;
 	}
-	
+
 	/**
-	 * Sets whether this type declaration declares a class or an 
+	 * Sets whether this type declaration declares a class or an
 	 * interface.
-	 * 
+	 *
 	 * @param isInterface <code>true</code> if this is an interface
 	 *    declaration, and <code>false</code> if this is a class
 	 * 	  declaration
-	 */ 
+	 */
 	public void setInterface(boolean isInterface) {
 		preValueChange(INTERFACE_PROPERTY);
 		this.isInterface = isInterface;
@@ -747,15 +747,15 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	}
 
 	/**
-	 * Returns the live ordered list of type parameters of this type 
+	 * Returns the live ordered list of type parameters of this type
 	 * declaration (added in JLS3 API). This list is non-empty for parameterized types.
-	 * 
+	 *
 	 * @return the live list of type parameters
 	 *    (element type: <code>TypeParameter</code>)
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * a JLS2 AST
 	 * @since 3.1
-	 */ 
+	 */
 	public List typeParameters() {
 		// more efficient than just calling unsupportedIn2() to check
 		if (this.typeParameters == null) {
@@ -763,28 +763,28 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		}
 		return this.typeParameters;
 	}
-	
+
 	/**
 	 * Returns the name of the superclass declared in this type
 	 * declaration, or <code>null</code> if there is none (JLS2 API only).
 	 * <p>
-	 * Note that this child is not relevant for interface 
+	 * Note that this child is not relevant for interface
 	 * declarations (although it does still figure in subtree
 	 * equality comparisons).
 	 * </p>
-	 * 
-	 * @return the superclass name node, or <code>null</code> if 
+	 *
+	 * @return the superclass name node, or <code>null</code> if
 	 *    there is none
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * an AST later than JLS2
 	 * @deprecated In the JLS3 API, this method is replaced by
 	 * {@link #getSuperclassType()}, which returns a <code>Type</code>
 	 * instead of a <code>Name</code>.
-	 */ 
+	 */
 	public Name getSuperclass() {
 		return internalGetSuperclass();
 	}
-	
+
 	/**
 	 * Internal synonym for deprecated method. Used to avoid
 	 * deprecation warnings.
@@ -799,17 +799,17 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	* Returns the superclass declared in this type
 	* declaration, or <code>null</code> if there is none (added in JLS3 API).
 	* <p>
-	* Note that this child is not relevant for interface 
+	* Note that this child is not relevant for interface
 	* declarations (although it does still figure in subtree
 	* equality comparisons).
 	* </p>
-	* 
-	* @return the superclass type node, or <code>null</code> if 
+	*
+	* @return the superclass type node, or <code>null</code> if
 	*    there is none
 	* @exception UnsupportedOperationException if this operation is used in
 	* a JLS2 AST
 	* @since 3.1
-	*/ 
+	*/
 	public Type getSuperclassType() {
 	    unsupportedIn2();
 		return this.optionalSuperclassType;
@@ -819,12 +819,12 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Sets or clears the name of the superclass declared in this type
 	 * declaration (JLS2 API only).
 	 * <p>
-	 * Note that this child is not relevant for interface 
+	 * Note that this child is not relevant for interface
 	 * declarations (although it does still figure in subtree
 	 * equality comparisons).
 	 * </p>
-	 * 
-	 * @param superclassName the superclass name node, or <code>null</code> if 
+	 *
+	 * @param superclassName the superclass name node, or <code>null</code> if
 	 *    there is none
 	 * @exception IllegalArgumentException if:
 	 * <ul>
@@ -833,14 +833,14 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * </ul>
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * an AST later than JLS2
-	 * @deprecated In the JLS3 API, this method is replaced by 
+	 * @deprecated In the JLS3 API, this method is replaced by
 	 * {@link #setSuperclassType(Type)}, which expects a
 	 * <code>Type</code> instead of a <code>Name</code>.
-	 */ 
+	 */
 	public void setSuperclass(Name superclassName) {
 		internalSetSuperclass(superclassName);
 	}
-	
+
 	/**
 	 * Internal synonym for deprecated method. Used to avoid
 	 * deprecation warnings.
@@ -861,8 +861,8 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * Note that this child is not relevant for interface declarations
 	 * (although it does still figure in subtree equality comparisons).
 	 * </p>
-	 * 
-	 * @param superclassType the superclass type node, or <code>null</code> if 
+	 *
+	 * @param superclassType the superclass type node, or <code>null</code> if
 	 *    there is none
 	 * @exception IllegalArgumentException if:
 	 * <ul>
@@ -872,7 +872,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * a JLS2 AST
 	 * @since 3.1
-	 */ 
+	 */
 	public void setSuperclassType(Type superclassType) {
 	    unsupportedIn2();
 		ASTNode oldChild = this.optionalSuperclassType;
@@ -882,23 +882,23 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
  	}
 
 	/**
-	 * Returns the live ordered list of names of superinterfaces of this type 
+	 * Returns the live ordered list of names of superinterfaces of this type
 	 * declaration (JLS2 API only). For a class declaration, these are the names
 	 * of the interfaces that this class implements; for an interface
 	 * declaration, these are the names of the interfaces that this interface
 	 * extends.
-	 * 
+	 *
 	 * @return the live list of interface names
 	 *    (element type: <code>Name</code>)
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * an AST later than JLS2
-	 * @deprecated In the JLS3 API, this method is replaced by 
+	 * @deprecated In the JLS3 API, this method is replaced by
 	 * {@link #superInterfaceTypes()}.
-	 */ 
+	 */
 	public List superInterfaces() {
 		return internalSuperInterfaces();
 	}
-	
+
 	/**
 	 * Internal synonym for deprecated method. Used to avoid
 	 * deprecation warnings.
@@ -911,19 +911,19 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		}
 		return this.superInterfaceNames;
 	}
-	
+
 	/**
-	 * Returns the live ordered list of superinterfaces of this type 
+	 * Returns the live ordered list of superinterfaces of this type
 	 * declaration (added in JLS3 API). For a class declaration, these are the interfaces
 	 * that this class implements; for an interface declaration,
 	 * these are the interfaces that this interface extends.
-	 * 
+	 *
 	 * @return the live list of interface types
 	 *    (element type: <code>Type</code>)
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * a JLS2 AST
 	 * @since 3.1
-	 */ 
+	 */
 	public List superInterfaceTypes() {
 		// more efficient than just calling unsupportedIn2() to check
 		if (this.superInterfaceTypes == null) {
@@ -931,9 +931,9 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		}
 		return this.superInterfaceTypes;
 	}
-	
+
 	/**
-	 * Returns the ordered list of field declarations of this type 
+	 * Returns the ordered list of field declarations of this type
 	 * declaration. For a class declaration, these are the
 	 * field declarations; for an interface declaration, these are
 	 * the constant declarations.
@@ -942,9 +942,9 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * with non-fields filtered out. Unlike <code>bodyDeclarations</code>,
 	 * this method does not return a live result.
 	 * </p>
-	 * 
+	 *
 	 * @return the (possibly empty) list of field declarations
-	 */ 
+	 */
 	public FieldDeclaration[] getFields() {
 		List bd = bodyDeclarations();
 		int fieldCount = 0;
@@ -965,17 +965,17 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	}
 
 	/**
-	 * Returns the ordered list of method declarations of this type 
+	 * Returns the ordered list of method declarations of this type
 	 * declaration.
 	 * <p>
 	 * This convenience method returns this node's body declarations
 	 * with non-methods filtered out. Unlike <code>bodyDeclarations</code>,
 	 * this method does not return a live result.
 	 * </p>
-	 * 
-	 * @return the (possibly empty) list of method (and constructor) 
+	 *
+	 * @return the (possibly empty) list of method (and constructor)
 	 *    declarations
-	 */ 
+	 */
 	public MethodDeclaration[] getMethods() {
 		List bd = bodyDeclarations();
 		int methodCount = 0;
@@ -997,16 +997,16 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 
 //{ObjectTeams: method getRoles()
 	/**
-	 * Returns the ordered list of role type declarations of this type 
+	 * Returns the ordered list of role type declarations of this type
 	 * declaration.
 	 * <p>
 	 * This convenience method returns this node's body declarations
 	 * with non-roles filtered out. Unlike <code>bodyDeclarations</code>,
 	 * this method does not return a live result.
 	 * </p>
-	 * 
+	 *
 	 * @return the (possibly empty) list of role type declarations
-	 */ 
+	 */
 	public RoleTypeDeclaration[] getRoles() {
 		List bd = bodyDeclarations();
 		int roleCount = 0;
@@ -1038,18 +1038,18 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	}
 
 //jsv}
-	
+
 	/**
-	 * Returns the ordered list of member type declarations of this type 
+	 * Returns the ordered list of member type declarations of this type
 	 * declaration.
 	 * <p>
 	 * This convenience method returns this node's body declarations
 	 * with non-types filtered out. Unlike <code>bodyDeclarations</code>,
 	 * this method does not return a live result.
 	 * </p>
-	 * 
+	 *
 	 * @return the (possibly empty) list of member type declarations
-	 */ 
+	 */
 	public TypeDeclaration[] getTypes() {
 		List bd = bodyDeclarations();
 		int typeCount = 0;
@@ -1075,14 +1075,14 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	ITypeBinding internalResolveBinding() {
 		return this.ast.getBindingResolver().resolveType(this);
 	}
-	
+
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
 	int memSize() {
 		return super.memSize() + 6 * 4;
 	}
-	
+
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */

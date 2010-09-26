@@ -95,7 +95,7 @@ class ASTConverter {
 	// comments
 	protected boolean insideComments;
 	protected IProgressMonitor monitor;
-	protected Set pendingNameScopeResolution;	
+	protected Set pendingNameScopeResolution;
 	protected Set pendingThisExpressionScopeResolution;
 	protected boolean resolveBindings;
 	Scanner scanner;
@@ -134,7 +134,7 @@ class ASTConverter {
 			this.scanner.parseOTJonly = JavaCore.DISABLED.equals(option);
 // SH}
 	}
-	
+
 	protected void adjustSourcePositionsForParent(org.eclipse.jdt.internal.compiler.ast.Expression expression) {
 		int start = expression.sourceStart;
 		int end = expression.sourceEnd;
@@ -169,14 +169,14 @@ class ASTConverter {
 		org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] members = typeDeclaration.memberTypes;
 		org.eclipse.jdt.internal.compiler.ast.FieldDeclaration[] fields = typeDeclaration.fields;
 		org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration[] methods = typeDeclaration.methods;
-		
+
 		int fieldsLength = fields == null? 0 : fields.length;
 		int methodsLength = methods == null? 0 : methods.length;
 		int membersLength = members == null ? 0 : members.length;
 		int fieldsIndex = 0;
 		int methodsIndex = 0;
 		int membersIndex = 0;
-		
+
 //{ObjectTeams: more setup before the loop:
 		// members were sorted by inheritance, restore lexical order:
 		if (typeDeclaration.isTeam() && members != null)
@@ -185,26 +185,26 @@ class ASTConverter {
 								   org.eclipse.jdt.internal.compiler.ast.TypeDeclaration t2) {
 					return (t1.sourceStart < t2.sourceStart) ? -1 : 1;
 			}});
-		
+
 		// method mapping declarations (callins, callouts)
 		AbstractMethodMappingDeclaration[] callinCallouts = typeDeclaration.callinCallouts;
 		int methodMappingsLength = callinCallouts == null ? 0 : callinCallouts.length;
 		int methodMappingsIndex = 0;
 //gbr+SH}
-		
+
 		while ((fieldsIndex < fieldsLength)
 			|| (membersIndex < membersLength)
 			|| (methodsIndex < methodsLength)
-//{ObjectTeams			
+//{ObjectTeams
 			|| (methodMappingsIndex < methodMappingsLength)) {
-//gbr}		    
+//gbr}
 			org.eclipse.jdt.internal.compiler.ast.FieldDeclaration nextFieldDeclaration = null;
 			org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration nextMethodDeclaration = null;
 			org.eclipse.jdt.internal.compiler.ast.TypeDeclaration nextMemberDeclaration = null;
 //{ObjectTeams
 			org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration nextMethodMappingDeclaration = null;
-//gbr}		
-		
+//gbr}
+
 			int position = Integer.MAX_VALUE;
 			int nextDeclarationType = -1;
 			if (fieldsIndex < fieldsLength) {
@@ -228,7 +228,7 @@ class ASTConverter {
 					nextDeclarationType = 2; // MEMBER
 				}
 			}
-//{ObjectTeams: case added for method mappings			
+//{ObjectTeams: case added for method mappings
 			if (methodMappingsIndex < methodMappingsLength)
 			{
 				nextMethodMappingDeclaration = callinCallouts[methodMappingsIndex];
@@ -238,7 +238,7 @@ class ASTConverter {
 					nextDeclarationType = 3; // METHOD_MAPPING
 				}
 			}
-//gbr}			
+//gbr}
 			switch (nextDeclarationType) {
 				case 0 :
 //{ObjectTeams: skip generated:
@@ -269,7 +269,7 @@ class ASTConverter {
 					{
 						typeDecl.bodyDeclarations().add(convert(nextMethodDeclaration));
 					}
-//{ObjectTeams: convert reused abstract method declaration					
+//{ObjectTeams: convert reused abstract method declaration
 					else if (isReusedAbstractMethodDeclaration(typeDeclaration,nextMethodDeclaration))
 					{
 						typeDecl.bodyDeclarations().add(convertReusedAbstractMethodDeclaration(nextMethodDeclaration));
@@ -279,12 +279,12 @@ class ASTConverter {
 				case 2 :
 					membersIndex++;
 //{ObjectTeams: skip generated members and role files when visited via enclosing team - conditionally:
-					if (   nextMemberDeclaration.isGenerated  
+					if (   nextMemberDeclaration.isGenerated
                         || Flags.isSynthetic(nextMemberDeclaration.modifiers))
 						continue;
 					if (!this.includeRoleFiles && nextMemberDeclaration.isRoleFile())
 						continue;
-// SH, jwl}						
+// SH, jwl}
 					ASTNode node = convert(nextMemberDeclaration);
 					if (node == null) {
 						typeDecl.setFlags(typeDecl.getFlags() | ASTNode.MALFORMED);
@@ -299,33 +299,33 @@ class ASTConverter {
                     {
                         typeDecl.bodyDeclarations().add(convert(nextMethodMappingDeclaration));
                     }
-//gbr}						
+//gbr}
 			}
 		}
 		// Convert javadoc
 		convert(typeDeclaration.javadoc, typeDecl);
 	}
-	
+
 	protected void buildBodyDeclarations(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration enumDeclaration2, EnumDeclaration enumDeclaration) {
 		// add body declaration in the lexical order
 		org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] members = enumDeclaration2.memberTypes;
 		org.eclipse.jdt.internal.compiler.ast.FieldDeclaration[] fields = enumDeclaration2.fields;
 		org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration[] methods = enumDeclaration2.methods;
-		
+
 		int fieldsLength = fields == null? 0 : fields.length;
 		int methodsLength = methods == null? 0 : methods.length;
 		int membersLength = members == null ? 0 : members.length;
 		int fieldsIndex = 0;
 		int methodsIndex = 0;
 		int membersIndex = 0;
-		
+
 		while ((fieldsIndex < fieldsLength)
 			|| (membersIndex < membersLength)
 			|| (methodsIndex < methodsLength)) {
 			org.eclipse.jdt.internal.compiler.ast.FieldDeclaration nextFieldDeclaration = null;
 			org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration nextMethodDeclaration = null;
 			org.eclipse.jdt.internal.compiler.ast.TypeDeclaration nextMemberDeclaration = null;
-		
+
 			int position = Integer.MAX_VALUE;
 			int nextDeclarationType = -1;
 			if (fieldsIndex < fieldsLength) {
@@ -372,27 +372,27 @@ class ASTConverter {
 		}
 		convert(enumDeclaration2.javadoc, enumDeclaration);
 	}
-	
+
 	protected void buildBodyDeclarations(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration expression, AnonymousClassDeclaration anonymousClassDeclaration) {
 		// add body declaration in the lexical order
 		org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] members = expression.memberTypes;
 		org.eclipse.jdt.internal.compiler.ast.FieldDeclaration[] fields = expression.fields;
 		org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration[] methods = expression.methods;
-		
+
 		int fieldsLength = fields == null? 0 : fields.length;
 		int methodsLength = methods == null? 0 : methods.length;
 		int membersLength = members == null ? 0 : members.length;
 		int fieldsIndex = 0;
 		int methodsIndex = 0;
 		int membersIndex = 0;
-		
+
 		while ((fieldsIndex < fieldsLength)
 			|| (membersIndex < membersLength)
 			|| (methodsIndex < methodsLength)) {
 			org.eclipse.jdt.internal.compiler.ast.FieldDeclaration nextFieldDeclaration = null;
 			org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration nextMethodDeclaration = null;
 			org.eclipse.jdt.internal.compiler.ast.TypeDeclaration nextMemberDeclaration = null;
-		
+
 			int position = Integer.MAX_VALUE;
 			int nextDeclarationType = -1;
 			if (fieldsIndex < fieldsLength) {
@@ -430,17 +430,17 @@ class ASTConverter {
 					if (!nextMethodDeclaration.isDefaultConstructor() && !nextMethodDeclaration.isClinit()
 //{ObjectTeams: ignore generated and copied method declarations
                             && !nextMethodDeclaration.isGenerated
-                            && !nextMethodDeclaration.isCopied) 
+                            && !nextMethodDeclaration.isCopied)
 					{
-//jwl}) 
+//jwl})
 						anonymousClassDeclaration.bodyDeclarations().add(convert(nextMethodDeclaration));
 					}
-//{ObjectTeams: convert reused abstract method declaration					
+//{ObjectTeams: convert reused abstract method declaration
 					else if (isReusedAbstractMethodDeclaration(expression, nextMethodDeclaration))
 					{
 						anonymousClassDeclaration.bodyDeclarations().add(convertReusedAbstractMethodDeclaration(nextMethodDeclaration));
 					}
-//jsv}					
+//jsv}
 					break;
 				case 2 :
 					membersIndex++;
@@ -457,7 +457,7 @@ class ASTConverter {
 			}
 		}
 	}
-	
+
 	/**
 	 * @param compilationUnit
 	 * @param comments
@@ -481,14 +481,14 @@ class ASTConverter {
 		}
 		compilationUnit.setCommentTable(this.commentsTable);
 	}
-	
+
 	protected void checkAndAddMultipleFieldDeclaration(org.eclipse.jdt.internal.compiler.ast.FieldDeclaration[] fields, int index, List bodyDeclarations) {
-//{ObjecTeams: ignore generated field declarations        
+//{ObjecTeams: ignore generated field declarations
         if (Flags.isSynthetic(fields[index].modifiers) || fields[index].copyInheritanceSrc != null)
         {
             return;
         }
-//jwl}		
+//jwl}
 		if (fields[index] instanceof org.eclipse.jdt.internal.compiler.ast.Initializer) {
 			org.eclipse.jdt.internal.compiler.ast.Initializer oldInitializer = (org.eclipse.jdt.internal.compiler.ast.Initializer) fields[index];
 			Initializer initializer = new Initializer(this.ast);
@@ -550,7 +550,7 @@ class ASTConverter {
 			}
 		}
 	}
-		
+
 	public ASTNode convert(org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration methodDeclaration) {
 		checkCanceled();
 		if (methodDeclaration instanceof org.eclipse.jdt.internal.compiler.ast.AnnotationMethodDeclaration) {
@@ -653,7 +653,7 @@ class ASTConverter {
 			methodDecl.setSourceRange(startPosition, closingPosition - startPosition + 1);
 
 			org.eclipse.jdt.internal.compiler.ast.Statement[] statements = methodDeclaration.statements;
-			
+
 			start = retrieveStartBlockPosition(methodHeaderEnd, methodDeclaration.bodyStart);
 			if (start == -1) start = methodDeclaration.bodyStart; // use recovery position for body start
 			end = retrieveRightBrace(methodDeclaration.bodyEnd, methodDeclaration.declarationSourceEnd);
@@ -673,7 +673,7 @@ class ASTConverter {
 				int statementsLength = statements == null ? 0 : statements.length;
 				for (int i = 0; i < statementsLength; i++) {
 //{ObjectTeams: ignore generated local declarations within method declarations
-                    if ((statements[i] instanceof org.eclipse.jdt.internal.compiler.ast.LocalDeclaration) 
+                    if ((statements[i] instanceof org.eclipse.jdt.internal.compiler.ast.LocalDeclaration)
                           && ((org.eclipse.jdt.internal.compiler.ast.LocalDeclaration)statements[i]).isGenerated) {
                         continue;
                     }
@@ -719,7 +719,7 @@ class ASTConverter {
 					block.setSourceRange(start, end - start + 1);
 					methodDecl.setBody(block);
 				}
-			}			
+			}
 		}
 
 		org.eclipse.jdt.internal.compiler.ast.TypeParameter[] typeParameters = methodDeclaration.typeParameters();
@@ -734,7 +734,7 @@ class ASTConverter {
 					}
 			}
 		}
-		
+
 		// The javadoc comment is now got from list store in compilation unit declaration
 		convert(methodDeclaration.javadoc, methodDecl);
 		if (this.resolveBindings) {
@@ -743,9 +743,9 @@ class ASTConverter {
 			methodDecl.resolveBinding();
 		}
 		return methodDecl;
-	}	
-	
-//{ObjectTeams: convert method for OT-specific internal type AbstractMethodMappingDeclaration	
+	}
+
+//{ObjectTeams: convert method for OT-specific internal type AbstractMethodMappingDeclaration
 	public org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration convert(
 	        AbstractMethodMappingDeclaration abstractMethodMapping)
 	{
@@ -759,7 +759,7 @@ class ASTConverter {
 	    }
 		throw new IllegalArgumentException("There does not exist a method binding of type" + abstractMethodMapping.getClass()); //$NON-NLS-1$
 	}
-//gbr}	
+//gbr}
 //	{ObjectTeams: convert methods for OT-specific internal types CallinMappingDeclaration
 //  and CalloutMappingDeclaration
 	public CallinMappingDeclaration convert(
@@ -768,7 +768,7 @@ class ASTConverter {
 				.newCallinMappingDeclaration();
 
 		// annotations
-		setModifiers(result, callinMapping); 
+		setModifiers(result, callinMapping);
 
 		// name
 		if (callinMapping.hasName()) {
@@ -776,7 +776,7 @@ class ASTConverter {
 			labelName.setSourceRange(callinMapping.sourceStart, callinMapping.sourceEnd - callinMapping.sourceStart + 1);
 			result.setName(labelName);
 		}
-		
+
 		// left side, role method
 		if (callinMapping.roleMethodSpec != null)
 			result.setRoleMappingElement(convert(callinMapping.roleMethodSpec));
@@ -825,7 +825,7 @@ class ASTConverter {
 				modifierStart += 2; // skip "<-"
 			modifierLength= 0;
 			break;
-		}	
+		}
 		MethodBindingOperator bindingOperator = this.ast.newMethodBindingOperator(keyword, MethodBindingOperator.KIND_CALLIN);
 		bindingOperator.setSourceRange(callinMapping.bindingTokenStart, callinMapping.modifierEnd-callinMapping.bindingTokenStart+1);
 		bindingOperator.bindingModifier().setSourceRange(modifierStart, modifierLength);
@@ -847,7 +847,7 @@ class ASTConverter {
 	{
 		org.eclipse.jdt.core.dom.CalloutMappingDeclaration result = this.ast
 				.newCalloutMappingDeclaration();
-	
+
 		// annotations
 		setModifiers(result, calloutMapping);
 
@@ -886,7 +886,7 @@ class ASTConverter {
 			result.resolveBinding();
 		}
 		result.setSignatureFlag(calloutMapping.hasSignature);
-		
+
 		// binding operator (kind and modifier)
         ModifierKeyword keyword = null;
         int modifierStart = calloutMapping.modifierStart;
@@ -1003,7 +1003,7 @@ class ASTConverter {
 				else
 					result.setReturnType(returnType);
 			}
-	
+
 			org.eclipse.jdt.internal.compiler.ast.Argument[] parameters = methodSpec.arguments;
 			if (parameters != null) {
 				int parametersLength = parameters.length;
@@ -1011,7 +1011,7 @@ class ASTConverter {
 					result.parameters().add(convert(parameters[idx]));
 				}
 			}
-			
+
 			org.eclipse.jdt.internal.compiler.ast.TypeParameter[] typeParameters = methodSpec.typeParameters;
 			if (typeParameters != null)
 				if (this.ast.apiLevel == AST.JLS3)
@@ -1023,7 +1023,7 @@ class ASTConverter {
 				methodSpec.declarationSourceEnd
 						- methodSpec.declarationSourceStart + 1);
 
-		result.setSignatureFlag(methodSpec.hasSignature); 
+		result.setSignatureFlag(methodSpec.hasSignature);
 		result.setCovariantReturnFlag(methodSpec.covariantReturn);
 
 		if (this.resolveBindings) {
@@ -1033,9 +1033,9 @@ class ASTConverter {
 
 		return result;
 	}
-//gbr}	
+//gbr}
 
-	
+
 	public ClassInstanceCreation convert(org.eclipse.jdt.internal.compiler.ast.AllocationExpression expression) {
 		ClassInstanceCreation classInstanceCreation = new ClassInstanceCreation(this.ast);
 		if (this.resolveBindings) {
@@ -1104,10 +1104,10 @@ class ASTConverter {
 				 	for (int i = 0; i < size - 1; i++) {
 				 		Expression expr = temp;
 				 		temp = new InfixExpression(this.ast);
-				 		
+
 						if (this.resolveBindings) {
 							this.recordNodes(temp, expression);
-						}				 	
+						}
 				 		temp.setLeftOperand(expr);
 					 	temp.setOperator(getOperatorFor(expressionOperatorID));
 						temp.setSourceRange(expr.getStartPosition(), expr.getLength());
@@ -1158,7 +1158,7 @@ class ASTConverter {
 		typeName.setSourceRange(typeDeclaration.sourceStart, typeDeclaration.sourceEnd - typeDeclaration.sourceStart + 1);
 		typeDecl.setName(typeName);
 		typeDecl.setSourceRange(typeDeclaration.declarationSourceStart, typeDeclaration.bodyEnd - typeDeclaration.declarationSourceStart + 1);
-		
+
 		buildBodyDeclarations(typeDeclaration, typeDecl);
 		// The javadoc comment is now got from list store in compilation unit declaration
 		if (this.resolveBindings) {
@@ -1168,7 +1168,7 @@ class ASTConverter {
 		}
 		return typeDecl;
 	}
-	
+
 	public ASTNode convert(org.eclipse.jdt.internal.compiler.ast.AnnotationMethodDeclaration annotationTypeMemberDeclaration) {
 		checkCanceled();
 		if (this.ast.apiLevel == AST.JLS2_INTERNAL) {
@@ -1203,11 +1203,11 @@ class ASTConverter {
 		}
 		return annotationTypeMemberDeclaration2;
 	}
-	
+
 	public SingleVariableDeclaration convert(org.eclipse.jdt.internal.compiler.ast.Argument argument) {
 		SingleVariableDeclaration variableDecl = new SingleVariableDeclaration(this.ast);
 		setModifiers(variableDecl, argument);
-//{ObjectTeams: we have to check the variable name e.g. in a LiftingType		
+//{ObjectTeams: we have to check the variable name e.g. in a LiftingType
 		String[] tokens = (new String(argument.name)).split("\\"+IOTConstants.JAVA_SEPARATOR); //$NON-NLS-1$
 		String realName = tokens[tokens.length-1];
 		final SimpleName name = new SimpleName(this.ast);
@@ -1215,7 +1215,7 @@ class ASTConverter {
 /* orig:
 		name.internalSetIdentifier(new String(argument.name));
   :giro */
-//jsv} Original:  
+//jsv} Original:
 		int start = argument.sourceStart;
 		int nameEnd = argument.sourceEnd;
 		name.setSourceRange(start, nameEnd - start + 1);
@@ -1244,7 +1244,7 @@ class ASTConverter {
 			setTypeForSingleVariableDeclaration(variableDecl, type, extraDimensions);
 		}
 		variableDecl.setSourceRange(argument.declarationSourceStart, rightEnd - argument.declarationSourceStart + 1);
-		
+
 		if (isVarArgs) {
 			switch(this.ast.apiLevel) {
 				case AST.JLS2_INTERNAL :
@@ -1262,7 +1262,7 @@ class ASTConverter {
 		return variableDecl;
 	}
 
-	
+
 	public Annotation convert(org.eclipse.jdt.internal.compiler.ast.Annotation annotation) {
 		if (annotation instanceof org.eclipse.jdt.internal.compiler.ast.SingleMemberAnnotation) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.SingleMemberAnnotation) annotation);
@@ -1280,7 +1280,7 @@ class ASTConverter {
 		}
 		arrayCreation.setSourceRange(expression.sourceStart, expression.sourceEnd - expression.sourceStart + 1);
 		org.eclipse.jdt.internal.compiler.ast.Expression[] dimensions = expression.dimensions;
-		
+
 		int dimensionsLength = dimensions.length;
 		for (int i = 0; i < dimensionsLength; i++) {
 			if (dimensions[i] != null) {
@@ -1294,7 +1294,7 @@ class ASTConverter {
 		Type type = convertType(expression.type);
 		if (this.resolveBindings) {
 			recordNodes(type, expression.type);
-		}		
+		}
 		ArrayType arrayType = null;
 		if (type.isArrayType()) {
 			arrayType = (ArrayType) type;
@@ -1302,7 +1302,7 @@ class ASTConverter {
 			arrayType = this.ast.newArrayType(type, dimensionsLength);
 			if (this.resolveBindings) {
 				completeRecord(arrayType, expression);
-			}			
+			}
 			int start = type.getStartPosition();
 			int end = type.getStartPosition() + type.getLength();
 			int previousSearchStart = end - 1;
@@ -1316,7 +1316,7 @@ class ASTConverter {
 		arrayCreation.setType(arrayType);
 		if (this.resolveBindings) {
 			recordNodes(arrayType, expression);
-		}	
+		}
 		if (expression.initializer != null) {
 			arrayCreation.setInitializer(convert(expression.initializer));
 		}
@@ -1375,7 +1375,7 @@ class ASTConverter {
 		}
 		return assertStatement;
 	}
-	
+
 	public Assignment convert(org.eclipse.jdt.internal.compiler.ast.Assignment expression) {
 		Assignment assignment = new Assignment(this.ast);
 		if (this.resolveBindings) {
@@ -1428,7 +1428,7 @@ class ASTConverter {
 				if (!nextMethodDeclaration.isDefaultConstructor() && !nextMethodDeclaration.isClinit()) {
 //{ObjectTeams: ignore generated and copied method declarations
                     if (!nextMethodDeclaration.isGenerated && !nextMethodDeclaration.isCopied)
-//jwl}				
+//jwl}
 					typeDecl.bodyDeclarations().add(convert(nextMethodDeclaration));
 				}
 			} else if(node instanceof org.eclipse.jdt.internal.compiler.ast.TypeDeclaration) {
@@ -1446,7 +1446,7 @@ class ASTConverter {
 		}
 		return typeDecl;
 	}
-	
+
 	public Expression convert(org.eclipse.jdt.internal.compiler.ast.BinaryExpression expression) {
 		InfixExpression infixExpression = new InfixExpression(this.ast);
 		if (this.resolveBindings) {
@@ -1512,7 +1512,7 @@ class ASTConverter {
 			case org.eclipse.jdt.internal.compiler.ast.OperatorIds.LESS :
 				infixExpression.setOperator(InfixExpression.Operator.LESS);
 		}
-		
+
 		if (expression.left instanceof org.eclipse.jdt.internal.compiler.ast.BinaryExpression
 				&& ((expression.left.bits & org.eclipse.jdt.internal.compiler.ast.ASTNode.ParenthesizedMASK) == 0)) {
 			// create an extended string literal equivalent => use the extended operands list
@@ -1539,10 +1539,10 @@ class ASTConverter {
 				 	for (int i = 0; i < size - 1; i++) {
 				 		Expression expr = temp;
 				 		temp = new InfixExpression(this.ast);
-				 		
+
 						if (this.resolveBindings) {
 							this.recordNodes(temp, expression);
-						}				 	
+						}
 				 		temp.setLeftOperand(expr);
 					 	temp.setOperator(getOperatorFor(expressionOperatorID));
 						temp.setSourceRange(expr.getStartPosition(), expr.getLength());
@@ -1608,19 +1608,19 @@ class ASTConverter {
 				if (statements[i] instanceof org.eclipse.jdt.internal.compiler.ast.LocalDeclaration
 //{ObjectTeams: ignore generated local declarations within blocs
                         && !((org.eclipse.jdt.internal.compiler.ast.LocalDeclaration)statements[i]).isGenerated) {
-//jwl}	
+//jwl}
 					checkAndAddMultipleLocalDeclaration(statements, i, block.statements());
 				} else {
 					Statement statement2 = convert(statements[i]);
 					if (statement2 != null) {
 						block.statements().add(statement2);
 					}
-				}				
+				}
 			}
 		}
 		return block;
 	}
-	
+
 //	{ObjectTeams: convert method for OT-specific internal type WithinStatement
     /**
      * Converts internal compiler type WithinStatement to dom type WithinStatement.
@@ -1646,7 +1646,7 @@ class ASTConverter {
      *     _OT$team$206.deactivate(_OT$level206);
      * }
      * </code>
-     */  
+     */
 	public org.eclipse.jdt.core.dom.WithinStatement convert(WithinStatement statement)
 	{
         org.eclipse.jdt.core.dom.WithinStatement result = this.ast.newWithinStatement();
@@ -1657,7 +1657,7 @@ class ASTConverter {
 		}
 
         result.setTeamExpression(convert(statement.getTeamExpression()));
-        
+
         org.eclipse.jdt.internal.compiler.ast.Statement[] statements = statement.statements;
 		if (statements != null)
 		{
@@ -1666,20 +1666,20 @@ class ASTConverter {
 				if (statements[idx] instanceof org.eclipse.jdt.internal.compiler.ast.TryStatement)
 				{
 					org.eclipse.jdt.internal.compiler.ast.TryStatement tryStatement =
-						(org.eclipse.jdt.internal.compiler.ast.TryStatement)statements[idx];            
-					Block tryBlock = convert(tryStatement.tryBlock);					
+						(org.eclipse.jdt.internal.compiler.ast.TryStatement)statements[idx];
+					Block tryBlock = convert(tryStatement.tryBlock);
 					tryBlock.setParent(null, null);
 					result.setBody(tryBlock);
 					break;
 				}
             }
         }
-        
+
         return result;
 	}
 //mkr}
-	
-	
+
+
 	public BreakStatement convert(org.eclipse.jdt.internal.compiler.ast.BreakStatement statement)  {
 		BreakStatement breakStatement = new BreakStatement(this.ast);
 		breakStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
@@ -1691,8 +1691,8 @@ class ASTConverter {
 		}
 		return breakStatement;
 	}
-		
-		
+
+
 	public SwitchCase convert(org.eclipse.jdt.internal.compiler.ast.CaseStatement statement) {
 		SwitchCase switchCase = new SwitchCase(this.ast);
 		org.eclipse.jdt.internal.compiler.ast.Expression constantExpression = statement.constantExpression;
@@ -1724,7 +1724,7 @@ class ASTConverter {
 	}
 
 	public CharacterLiteral convert(org.eclipse.jdt.internal.compiler.ast.CharLiteral expression) {
-		int length = expression.sourceEnd - expression.sourceStart + 1;	
+		int length = expression.sourceEnd - expression.sourceStart + 1;
 		int sourceStart = expression.sourceStart;
 		CharacterLiteral literal = new CharacterLiteral(this.ast);
 		if (this.resolveBindings) {
@@ -1744,7 +1744,7 @@ class ASTConverter {
 		typeLiteral.setType(convertType(expression.type));
 		return typeLiteral;
 	}
-	
+
 	public CompilationUnit convert(org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration unit, char[] source) {
 		try {
 			if(unit.compilationResult.recoveryScannerData != null) {
@@ -1757,13 +1757,13 @@ class ASTConverter {
 			this.scanner.setSource(source, unit.compilationResult);
 			CompilationUnit compilationUnit = new CompilationUnit(this.ast);
 			compilationUnit.setStatementsRecoveryData(unit.compilationResult.recoveryScannerData);
-	
+
 			// Parse comments
 			int[][] comments = unit.comments;
 			if (comments != null) {
 				buildCommentsTable(compilationUnit, comments);
 			}
-	
+
 			// handle the package declaration immediately
 			// There is no node corresponding to the package declaration
 			if (this.resolveBindings) {
@@ -1780,7 +1780,7 @@ class ASTConverter {
 					compilationUnit.imports().add(convertImport(imports[i]));
 				}
 			}
-	
+
 			org.eclipse.jdt.internal.compiler.ast.TypeDeclaration[] types = unit.types;
 			if (types != null) {
 				int typesLength = types.length;
@@ -1801,7 +1801,7 @@ class ASTConverter {
 				}
 			}
 			compilationUnit.setSourceRange(unit.sourceStart, unit.sourceEnd - unit.sourceStart  + 1);
-	
+
 			int problemLength = unit.compilationResult.problemCount;
 			if (problemLength != 0) {
 				CategorizedProblem[] resizedProblems = null;
@@ -1910,7 +1910,7 @@ class ASTConverter {
 		}
 		return continueStatement;
 	}
-	
+
 	public DoStatement convert(org.eclipse.jdt.internal.compiler.ast.DoStatement statement) {
 		DoStatement doStatement = new DoStatement(this.ast);
 		doStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
@@ -1922,7 +1922,7 @@ class ASTConverter {
 	}
 
 	public NumberLiteral convert(org.eclipse.jdt.internal.compiler.ast.DoubleLiteral expression) {
-		int length = expression.sourceEnd - expression.sourceStart + 1;	
+		int length = expression.sourceEnd - expression.sourceStart + 1;
 		int sourceStart = expression.sourceStart;
 		NumberLiteral literal = new NumberLiteral(this.ast);
 		literal.internalSetToken(new String(this.compilationUnitSource, sourceStart, length));
@@ -1933,13 +1933,13 @@ class ASTConverter {
 		removeLeadingAndTrailingCommentsFromLiteral(literal);
 		return literal;
 	}
-	
+
 	public EmptyStatement convert(org.eclipse.jdt.internal.compiler.ast.EmptyStatement statement) {
 		EmptyStatement emptyStatement = new EmptyStatement(this.ast);
 		emptyStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
 		return emptyStatement;
 	}
-	
+
 	// field is an enum constant
 	public EnumConstantDeclaration convert(org.eclipse.jdt.internal.compiler.ast.FieldDeclaration enumConstant) {
 		checkCanceled();
@@ -2011,9 +2011,9 @@ class ASTConverter {
 				infixExpression.setOperator(InfixExpression.Operator.NOT_EQUALS);
 		}
 		return infixExpression;
-	
+
 	}
-	
+
 	public Statement convert(org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall statement) {
 		Statement newStatement;
 		int sourceStart = statement.sourceStart;
@@ -2033,7 +2033,7 @@ class ASTConverter {
             }
             newStatement = result;
         } else
-//mkr}		
+//mkr}
 		if (statement.isSuperAccess() || statement.isSuper()) {
 			SuperConstructorInvocation superConstructorInvocation = new SuperConstructorInvocation(this.ast);
 			if (statement.qualification != null) {
@@ -2105,7 +2105,7 @@ class ASTConverter {
 		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.Annotation) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.Annotation) expression);
-		}		
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.CastExpression) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.CastExpression) expression);
 		}
@@ -2163,7 +2163,7 @@ class ASTConverter {
 		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.LongLiteralMinValue) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.LongLiteralMinValue) expression);
-		}				
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.LongLiteral) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.LongLiteral) expression);
 		}
@@ -2172,34 +2172,34 @@ class ASTConverter {
 		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.ExtendedStringLiteral) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.ExtendedStringLiteral) expression);
-		}	
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.StringLiteral) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.StringLiteral) expression);
-		}				
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.AND_AND_Expression) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.AND_AND_Expression) expression);
-		}				
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.OR_OR_Expression) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.OR_OR_Expression) expression);
-		}				
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.EqualExpression) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.EqualExpression) expression);
-		}				
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.BinaryExpression) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.BinaryExpression) expression);
-		}				
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.InstanceOfExpression) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.InstanceOfExpression) expression);
-		}				
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.UnaryExpression) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.UnaryExpression) expression);
-		}				
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.ConditionalExpression) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.ConditionalExpression) expression);
-		}				
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.MessageSend) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.MessageSend) expression);
-		}				
+		}
 		if (expression instanceof org.eclipse.jdt.internal.compiler.ast.Reference) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.Reference) expression);
 		}
@@ -2220,11 +2220,11 @@ class ASTConverter {
 			return convert(((org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialTranslationExpression)expression).expression);
 		}
 		org.eclipse.jdt.internal.compiler.ast.Expression unwrapped = Lowering.unwrapExpression(expression);
-		if (unwrapped != null) 
+		if (unwrapped != null)
 		{
 			return convert(unwrapped);
-		}        
-//gbr}		
+		}
+//gbr}
 		return null;
 	}
 
@@ -2246,9 +2246,9 @@ class ASTConverter {
 			this.recordNodes(literal, expression);
 		}
 		literal.setSourceRange(expression.sourceStart, expression.sourceEnd - expression.sourceStart + 1);
-		return literal;	
+		return literal;
 	}
-	
+
 	public Expression convert(org.eclipse.jdt.internal.compiler.ast.FieldReference reference) {
 		if (reference.receiver.isSuper()) {
 			final SuperFieldAccess superFieldAccess = new SuperFieldAccess(this.ast);
@@ -2295,7 +2295,7 @@ class ASTConverter {
 	}
 
 	public NumberLiteral convert(org.eclipse.jdt.internal.compiler.ast.FloatLiteral expression) {
-		int length = expression.sourceEnd - expression.sourceStart + 1;	
+		int length = expression.sourceEnd - expression.sourceStart + 1;
 		int sourceStart = expression.sourceStart;
 		NumberLiteral literal = new NumberLiteral(this.ast);
 		literal.internalSetToken(new String(this.compilationUnitSource, sourceStart, length));
@@ -2306,7 +2306,7 @@ class ASTConverter {
 		removeLeadingAndTrailingCommentsFromLiteral(literal);
 		return literal;
 	}
-	
+
 	public Statement convert(ForeachStatement statement) {
 		switch(this.ast.apiLevel) {
 			case AST.JLS2_INTERNAL :
@@ -2328,7 +2328,7 @@ class ASTConverter {
 				return createFakeEmptyStatement(statement);
 		}
 	}
-	
+
 	public ForStatement convert(org.eclipse.jdt.internal.compiler.ast.ForStatement statement) {
 		ForStatement forStatement = new ForStatement(this.ast);
 		forStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
@@ -2368,7 +2368,7 @@ class ASTConverter {
 		if (increments != null) {
 			int incrementsLength = increments.length;
 			for (int i = 0; i < incrementsLength; i++) {
-				forStatement.updaters().add(convertToExpression(increments[i]));				
+				forStatement.updaters().add(convertToExpression(increments[i]));
 			}
 		}
 		final Statement action = convert(statement.action);
@@ -2376,7 +2376,7 @@ class ASTConverter {
 		forStatement.setBody(action);
 		return forStatement;
 	}
-	
+
 	public IfStatement convert(org.eclipse.jdt.internal.compiler.ast.IfStatement statement) {
 		IfStatement ifStatement = new IfStatement(this.ast);
 		ifStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
@@ -2393,7 +2393,7 @@ class ASTConverter {
 		}
 		return ifStatement;
 	}
-	
+
 	public InstanceofExpression convert(org.eclipse.jdt.internal.compiler.ast.InstanceOfExpression expression) {
 		InstanceofExpression instanceOfExpression = new InstanceofExpression(this.ast);
 		if (this.resolveBindings) {
@@ -2410,7 +2410,7 @@ class ASTConverter {
 	}
 
 	public NumberLiteral convert(org.eclipse.jdt.internal.compiler.ast.IntLiteral expression) {
-		int length = expression.sourceEnd - expression.sourceStart + 1;	
+		int length = expression.sourceEnd - expression.sourceStart + 1;
 		int sourceStart = expression.sourceStart;
 		final NumberLiteral literal = new NumberLiteral(this.ast);
 		literal.internalSetToken(new String(this.compilationUnitSource, sourceStart, length));
@@ -2423,7 +2423,7 @@ class ASTConverter {
 	}
 
 	public NumberLiteral convert(org.eclipse.jdt.internal.compiler.ast.IntLiteralMinValue expression) {
-		int length = expression.sourceEnd - expression.sourceStart + 1;	
+		int length = expression.sourceEnd - expression.sourceStart + 1;
 		int sourceStart = expression.sourceStart;
 		NumberLiteral literal = new NumberLiteral(this.ast);
 		literal.internalSetToken(new String(this.compilationUnitSource, sourceStart, length));
@@ -2480,7 +2480,7 @@ class ASTConverter {
 			}
 		}
 	}
-	
+
 	public LabeledStatement convert(org.eclipse.jdt.internal.compiler.ast.LabeledStatement statement) {
 		LabeledStatement labeledStatement = new LabeledStatement(this.ast);
 		final int sourceStart = statement.sourceStart;
@@ -2496,7 +2496,7 @@ class ASTConverter {
 	}
 
 	public NumberLiteral convert(org.eclipse.jdt.internal.compiler.ast.LongLiteral expression) {
-		int length = expression.sourceEnd - expression.sourceStart + 1;	
+		int length = expression.sourceEnd - expression.sourceStart + 1;
 		int sourceStart = expression.sourceStart;
 		final NumberLiteral literal = new NumberLiteral(this.ast);
 		literal.internalSetToken(new String(this.compilationUnitSource, sourceStart, length));
@@ -2509,7 +2509,7 @@ class ASTConverter {
 	}
 
 	public NumberLiteral convert(org.eclipse.jdt.internal.compiler.ast.LongLiteralMinValue expression) {
-		int length = expression.sourceEnd - expression.sourceStart + 1;	
+		int length = expression.sourceEnd - expression.sourceStart + 1;
 		int sourceStart = expression.sourceStart;
 		final NumberLiteral literal = new NumberLiteral(this.ast);
 		literal.internalSetToken(new String(this.compilationUnitSource, sourceStart, length));
@@ -2534,14 +2534,14 @@ class ASTConverter {
         {
             org.eclipse.jdt.core.dom.TSuperMessageSend result = this.ast.newTSuperMessageSend();
             result.setSourceRange(expression.sourceStart, expression.sourceEnd - expression.sourceStart + 1);
-            
-            org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend send = 
+
+            org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend send =
             	(org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend)expression;
             org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference tsuperRef = send.tsuperReference;
             TypeReference typeReference = tsuperRef.qualification;
 			if (typeReference != null) {
 	        	Name qualification = null;
-            	if (typeReference instanceof QualifiedTypeReference) 
+            	if (typeReference instanceof QualifiedTypeReference)
             	{
                 	long[] poss = ((QualifiedTypeReference)typeReference).sourcePositions;
                 	qualification = setQualifiedNameNameAndSourceRanges(typeReference.getTypeName(), poss, tsuperRef);
@@ -2549,10 +2549,10 @@ class ASTConverter {
             		qualification = this.ast.newSimpleName(new String(((SingleTypeReference)typeReference).token));
             		qualification.setSourceRange(typeReference.sourceStart, typeReference.sourceEnd);
             	}
-            	result.setQualification(qualification);            	
+            	result.setQualification(qualification);
             }
-            	
-        
+
+
             SimpleName name = this.ast.newSimpleName(new String(expression.selector));
             int start = (int)(expression.nameSourcePosition >>> 32);
             int end = (int)(expression.nameSourcePosition & 0xFFFFFFFF);
@@ -2563,7 +2563,7 @@ class ASTConverter {
                 recordNodes(result, expression);
             }
             result.setName(name);
-            
+
             org.eclipse.jdt.internal.compiler.ast.Expression[] arguments = expression.arguments;
             if (arguments != null)
             {
@@ -2579,9 +2579,9 @@ class ASTConverter {
                     result.getArguments().add(argExpr);
                 }
             }
-            return result;     
+            return result;
         }
-//mkr}		
+//mkr}
 		if (expression.isSuperAccess()) {
 			// returns a SuperMethodInvocation
 			final SuperMethodInvocation superMethodInvocation = new SuperMethodInvocation(this.ast);
@@ -2607,7 +2607,7 @@ class ASTConverter {
 				}
 				if (qualifier != null) {
 					sourceStart = qualifier.getStartPosition();
-				}			
+				}
 			}
 			org.eclipse.jdt.internal.compiler.ast.Expression[] arguments = expression.arguments;
 			if (arguments != null) {
@@ -2693,7 +2693,7 @@ class ASTConverter {
 			}
 			expr = methodInvocation;
 		}
-		expr.setSourceRange(sourceStart, expression.sourceEnd - sourceStart + 1);	
+		expr.setSourceRange(sourceStart, expression.sourceEnd - sourceStart + 1);
 		removeTrailingCommentFromExpressionEndingWithAParen(expr);
 		return expr;
 	}
@@ -2724,12 +2724,12 @@ class ASTConverter {
 		start = memberValuePair.sourceStart;
 		end = value.getStartPosition() + value.getLength() - 1;
 		pair.setSourceRange(start, end - start + 1);
-		
+
 		if (memberValuePair.value instanceof SingleNameReference &&
 				((SingleNameReference)memberValuePair.value).token == RecoveryScanner.FAKE_IDENTIFIER) {
 			pair.setFlags(pair.getFlags() | ASTNode.RECOVERED);
 		}
-		
+
 		if (this.resolveBindings) {
 			recordNodes(simpleName, memberValuePair);
 			recordNodes(pair, memberValuePair);
@@ -2761,14 +2761,14 @@ class ASTConverter {
 		infixExpression.setSourceRange(expression.sourceStart, expression.sourceEnd - expression.sourceStart + 1);
 		return infixExpression;
 	}
-	
+
 	public NormalAnnotation convert(org.eclipse.jdt.internal.compiler.ast.NormalAnnotation annotation) {
 		final NormalAnnotation normalAnnotation = new NormalAnnotation(this.ast);
 		setTypeNameForAnnotation(annotation, normalAnnotation);
-		
+
 		int start = annotation.sourceStart;
 		int end = annotation.declarationSourceEnd;
-		
+
 		org.eclipse.jdt.internal.compiler.ast.MemberValuePair[] memberValuePairs = annotation.memberValuePairs;
 		if (memberValuePairs != null) {
 			for (int i = 0, max = memberValuePairs.length; i < max; i++) {
@@ -2780,7 +2780,7 @@ class ASTConverter {
 				normalAnnotation.values().add(memberValuePair);
 		}
 		}
-		
+
 		normalAnnotation.setSourceRange(start, end - start + 1);
 		if (this.resolveBindings) {
 			recordNodes(normalAnnotation, annotation);
@@ -2795,7 +2795,7 @@ class ASTConverter {
 			this.recordNodes(literal, expression);
 		}
 		literal.setSourceRange(expression.sourceStart, expression.sourceEnd - expression.sourceStart + 1);
-		return literal;		
+		return literal;
 	}
 
 	public Expression convert(org.eclipse.jdt.internal.compiler.ast.OR_OR_Expression expression) {
@@ -2831,10 +2831,10 @@ class ASTConverter {
 				 	for (int i = 0; i < size - 1; i++) {
 				 		Expression expr = temp;
 				 		temp = new InfixExpression(this.ast);
-				 		
+
 						if (this.resolveBindings) {
 							this.recordNodes(temp, expression);
-						}				 	
+						}
 				 		temp.setLeftOperand(expr);
 					 	temp.setOperator(getOperatorFor(expressionOperatorID));
 						temp.setSourceRange(expr.getStartPosition(), expr.getLength());
@@ -2943,7 +2943,7 @@ class ASTConverter {
 					for (int i = 0, max = allocation.typeArguments.length; i < max; i++) {
 						classInstanceCreation.typeArguments().add(convertType(allocation.typeArguments[i]));
 					}
-			}			
+			}
 		}
 		if (allocation.anonymousType != null) {
 			int declarationSourceStart = allocation.sourceStart;
@@ -2958,7 +2958,7 @@ class ASTConverter {
 				recordNodes(anonymousClassDeclaration, allocation.anonymousType);
 				anonymousClassDeclaration.resolveBinding();
 			}
-			return classInstanceCreation;			
+			return classInstanceCreation;
 		} else {
 			final int start = allocation.sourceStart;
 			classInstanceCreation.setSourceRange(start, allocation.sourceEnd - start + 1);
@@ -3066,7 +3066,7 @@ public BaseConstructorInvocation convert(
 		}
 		return thisExpression;
 	}
-	
+
 	public Expression convert(org.eclipse.jdt.internal.compiler.ast.Reference reference) {
 		if (reference instanceof org.eclipse.jdt.internal.compiler.ast.NameReference) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.NameReference) reference);
@@ -3093,16 +3093,16 @@ public BaseConstructorInvocation convert(
 		}
 		return null; // cannot be reached
 	}
-	
+
 	public ReturnStatement convert(org.eclipse.jdt.internal.compiler.ast.ReturnStatement statement) {
 		final ReturnStatement returnStatement = new ReturnStatement(this.ast);
-		returnStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);	
+		returnStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
 		if (statement.expression != null) {
 			returnStatement.setExpression(convert(statement.expression));
 		}
 		return returnStatement;
 	}
-	
+
 	public SingleMemberAnnotation convert(org.eclipse.jdt.internal.compiler.ast.SingleMemberAnnotation annotation) {
 		final SingleMemberAnnotation singleMemberAnnotation = new SingleMemberAnnotation(this.ast);
 		setTypeNameForAnnotation(annotation, singleMemberAnnotation);
@@ -3152,7 +3152,7 @@ public BaseConstructorInvocation convert(
         if (statement instanceof org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression) {
             return convert((org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression) statement);
         }
-//carp}		
+//carp}
 		if (statement instanceof org.eclipse.jdt.internal.compiler.ast.Block) {
 			return convert((org.eclipse.jdt.internal.compiler.ast.Block) statement);
 		}
@@ -3235,7 +3235,7 @@ public BaseConstructorInvocation convert(
 					switch(this.ast.apiLevel) {
 						case AST.JLS2_INTERNAL :
 							TypeDeclaration typeDecl = typeDeclarationStatement.internalGetTypeDeclaration();
-							typeDeclarationStatement.setSourceRange(typeDecl.getStartPosition(), typeDecl.getLength());					
+							typeDeclarationStatement.setSourceRange(typeDecl.getStartPosition(), typeDecl.getLength());
 							break;
 						case AST.JLS3 :
 							AbstractTypeDeclaration typeDeclAST3 = typeDeclarationStatement.getDeclaration();
@@ -3265,7 +3265,7 @@ public BaseConstructorInvocation convert(
 		if (expression instanceof StringLiteralConcatenation) {
 			return convert((StringLiteralConcatenation) expression);
 		}
-		int length = expression.sourceEnd - expression.sourceStart + 1;	
+		int length = expression.sourceEnd - expression.sourceStart + 1;
 		int sourceStart = expression.sourceStart;
 		StringLiteral literal = new StringLiteral(this.ast);
 		if (this.resolveBindings) {
@@ -3275,10 +3275,10 @@ public BaseConstructorInvocation convert(
 		literal.setSourceRange(expression.sourceStart, expression.sourceEnd - expression.sourceStart + 1);
 		return literal;
 	}
-	
+
 	public SwitchStatement convert(org.eclipse.jdt.internal.compiler.ast.SwitchStatement statement) {
 		SwitchStatement switchStatement = new SwitchStatement(this.ast);
-		switchStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);	
+		switchStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
 		switchStatement.setExpression(convert(statement.expression));
 		org.eclipse.jdt.internal.compiler.ast.Statement[] statements = statement.statements;
 		if (statements != null) {
@@ -3296,15 +3296,15 @@ public BaseConstructorInvocation convert(
 		}
 		return switchStatement;
 	}
-	
+
 	public SynchronizedStatement convert(org.eclipse.jdt.internal.compiler.ast.SynchronizedStatement statement) {
 		SynchronizedStatement synchronizedStatement = new SynchronizedStatement(this.ast);
-		synchronizedStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);	
+		synchronizedStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
 		synchronizedStatement.setBody(convert(statement.block));
 		synchronizedStatement.setExpression(convert(statement.expression));
 		return synchronizedStatement;
 	}
-	
+
 	public Expression convert(org.eclipse.jdt.internal.compiler.ast.ThisReference reference) {
 		if (reference.isImplicitThis()) {
 			// There is no source associated with an implicit this
@@ -3323,14 +3323,14 @@ public BaseConstructorInvocation convert(
 			return thisExpression;
 		}
 	}
-	
+
 	public ThrowStatement convert(org.eclipse.jdt.internal.compiler.ast.ThrowStatement statement) {
 		final ThrowStatement throwStatement = new ThrowStatement(this.ast);
-		throwStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);	
+		throwStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
 		throwStatement.setExpression(convert(statement.exception));
 		return throwStatement;
 	}
-		
+
 	public BooleanLiteral convert(org.eclipse.jdt.internal.compiler.ast.TrueLiteral expression) {
 		final BooleanLiteral literal = new BooleanLiteral(this.ast);
 		literal.setBooleanValue(true);
@@ -3338,12 +3338,12 @@ public BaseConstructorInvocation convert(
 			this.recordNodes(literal, expression);
 		}
 		literal.setSourceRange(expression.sourceStart, expression.sourceEnd - expression.sourceStart + 1);
-		return literal;		
+		return literal;
 	}
-	
+
 	public TryStatement convert(org.eclipse.jdt.internal.compiler.ast.TryStatement statement) {
 		final TryStatement tryStatement = new TryStatement(this.ast);
-		tryStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);	
+		tryStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
 
 		tryStatement.setBody(convert(statement.tryBlock));
 		org.eclipse.jdt.internal.compiler.ast.Argument[] catchArguments = statement.catchArguments;
@@ -3354,7 +3354,7 @@ public BaseConstructorInvocation convert(
 			for (int i = 0; i < catchArgumentsLength; i++) {
 				CatchClause catchClause = new CatchClause(this.ast);
 				int catchClauseSourceStart = retrieveStartingCatchPosition(start, catchArguments[i].sourceStart);
-				catchClause.setSourceRange(catchClauseSourceStart, catchBlocks[i].sourceEnd - catchClauseSourceStart + 1);	
+				catchClause.setSourceRange(catchClauseSourceStart, catchBlocks[i].sourceEnd - catchClauseSourceStart + 1);
 				catchClause.setBody(convert(catchBlocks[i]));
 				catchClause.setException(convert(catchArguments[i]));
 				tryStatement.catchClauses().add(catchClause);
@@ -3390,7 +3390,7 @@ public BaseConstructorInvocation convert(
 	  TypeDeclaration typeDecl;
       if (!typeDeclaration.isRole())
       {
-//ike}		
+//ike}
 		typeDecl = new TypeDeclaration(this.ast);
 		if (typeDeclaration.modifiersSourceStart != -1) {
 			setModifiers(typeDecl, typeDeclaration);
@@ -3399,13 +3399,13 @@ public BaseConstructorInvocation convert(
 //{ObjectTeams: type declaration can be a team class or a role class, too
    		typeDecl.setTeam(typeDeclaration.isTeam());
    		typeDecl.setRole(typeDeclaration.isSourceRole());
-//gbr}		
+//gbr}
 		final SimpleName typeName = new SimpleName(this.ast);
 		typeName.internalSetIdentifier(new String(typeDeclaration.name));
 		typeName.setSourceRange(typeDeclaration.sourceStart, typeDeclaration.sourceEnd - typeDeclaration.sourceStart + 1);
 		typeDecl.setName(typeName);
 		typeDecl.setSourceRange(typeDeclaration.declarationSourceStart, typeDeclaration.bodyEnd - typeDeclaration.declarationSourceStart + 1);
-		
+
 		// need to set the superclass and super interfaces here since we cannot distinguish them at
 		// the type references level.
 		if (typeDeclaration.superclass != null) {
@@ -3418,7 +3418,7 @@ public BaseConstructorInvocation convert(
 					break;
 			}
 		}
-		
+
 		org.eclipse.jdt.internal.compiler.ast.TypeReference[] superInterfaces = typeDeclaration.superInterfaces;
 		if (superInterfaces != null) {
 			switch(this.ast.apiLevel) {
@@ -3431,7 +3431,7 @@ public BaseConstructorInvocation convert(
 					for (int index = 0, length = superInterfaces.length; index < length; index++) {
 						typeDecl.superInterfaceTypes().add(convertType(superInterfaces[index]));
 					}
-			}					
+			}
 		}
 		org.eclipse.jdt.internal.compiler.ast.TypeParameter[] typeParameters = typeDeclaration.typeParameters;
 		if (typeParameters != null) {
@@ -3451,7 +3451,7 @@ public BaseConstructorInvocation convert(
 			recordNodes(typeName, typeDeclaration);
 			typeDecl.resolveBinding();
 		}
-//{ObjectTeams: do OT-specific stuff            
+//{ObjectTeams: do OT-specific stuff
       }
       else
       {
@@ -3463,7 +3463,7 @@ public BaseConstructorInvocation convert(
       if (typeDeclaration.precedences != null)
     	for (org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrecedenceDeclaration aPrecedence : typeDeclaration.precedences)
     		typeDecl.precedences().add(convertPrecedence(aPrecedence));
-//ike}  		
+//ike}
 		return typeDecl;
 	}
 
@@ -3485,54 +3485,54 @@ public BaseConstructorInvocation convert(
 				}
 				roleTypeDecl.setRoleFile(true);
 			}
-		
+
 			//km: modifers are handled differently in JLS3
-			switch(this.ast.apiLevel) { 
+			switch(this.ast.apiLevel) {
 			case AST.JLS2_INTERNAL: {
 					int modifiers = typeDeclaration.modifiers;
 					modifiers &= ~ClassFileConstants.AccInterface; // remove AccInterface flags
 					// also allow additional flag to be passed:  (how about deprecated?)
-					modifiers &= ExtraCompilerModifiers.AccOTTypeJustFlag;  		
+					modifiers &= ExtraCompilerModifiers.AccOTTypeJustFlag;
 					roleTypeDecl.setModifiers(modifiers);
-					
+
 					if (typeDeclaration.baseclass != null)
 					    roleTypeDecl.setBaseClass(convert(typeDeclaration.baseclass));
-	
+
 					// need to set the superclass and super interfaces here since we cannot distinguish them at
 					// the type references level.
 					if (typeDeclaration.superclass != null)
 						roleTypeDecl.setSuperclass(convert(typeDeclaration.superclass));
-					
+
 				}
 				break;
 			case AST.JLS3:
 				this.setModifiers(roleTypeDecl, typeDeclaration);
-	
+
 				if (   typeDeclaration.baseclass != null
 					&& !typeDeclaration.baseclass.isGenerated())
 				    roleTypeDecl.setBaseClassType(convertType(typeDeclaration.baseclass));
-				
+
 				// need to set the superclass and super interfaces here since we cannot distinguish them at
 				// the type references level.
 				if (   typeDeclaration.superclass != null
 					&& !typeDeclaration.superclass.isGenerated())
 					roleTypeDecl.setSuperclassType(convertType(typeDeclaration.superclass));
-				
+
 				break;
 			}
-			
+
 			roleTypeDecl.setInterface(typeDeclaration.isInterface());
 			roleTypeDecl.setTeam(typeDeclaration.isTeam());
 			roleTypeDecl.setRole(typeDeclaration.isSourceRole());
-			
+
 			SimpleName typeName = this.ast.newSimpleName(
 					getRealName(typeDeclaration.name)
 					);
-			
+
 			typeName.setSourceRange(typeDeclaration.sourceStart, typeDeclaration.sourceEnd - typeDeclaration.sourceStart + 1);
 			roleTypeDecl.setName(typeName);
 			roleTypeDecl.setSourceRange(typeDeclaration.declarationSourceStart, typeDeclaration.bodyEnd - typeDeclaration.declarationSourceStart + 1);
-			
+
 			// fetch superInterfaces from the interface part of the role:
 			org.eclipse.jdt.internal.compiler.ast.TypeReference[] superInterfaces = null;
 			RoleModel roleModel = typeDeclaration.getRoleModel();
@@ -3549,17 +3549,17 @@ public BaseConstructorInvocation convert(
 				for (int index = 0, length = superInterfaces.length; index < length; index++)
 					if (!superInterfaces[index].isGenerated())
 						roleTypeDecl.superInterfaceTypes().add(convertType(superInterfaces[index]));
-			
+
 			org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDeclaration guard = typeDeclaration.predicate;
 			if (guard != null)
 				roleTypeDecl.setGuardPredicate(convertGuardPredicate(guard));
-	
+
 			buildBodyDeclarations(typeDeclaration, roleTypeDecl);
-			
+
 			SimpleName teamClassName = null;
 			if (typeDeclaration.enclosingType!=null)
 			{
-			   org.eclipse.jdt.internal.compiler.ast.TypeDeclaration teamDecl 
+			   org.eclipse.jdt.internal.compiler.ast.TypeDeclaration teamDecl
 			   			= typeDeclaration.enclosingType;
 			   teamClassName = this.ast.newSimpleName(new String(teamDecl.name));
 			   teamClassName.setSourceRange(teamDecl.sourceStart, teamDecl.sourceEnd - teamDecl.sourceStart + 1);
@@ -3571,7 +3571,7 @@ public BaseConstructorInvocation convert(
 			   else
 				   roleTypeDecl.setTeamClass(teamClassName);
 			}
-			
+
 			if (this.resolveBindings)
 	        {
 				recordNodes(roleTypeDecl, typeDeclaration);
@@ -3588,25 +3588,25 @@ public BaseConstructorInvocation convert(
 			}
 		}
 	}
-	
+
 	/** Retrieve the sibling type declaration corresponding to superIfcBinding. */
 	private TypeReference[] getInterfacePartInterfaces(
-			org.eclipse.jdt.internal.compiler.ast.TypeDeclaration typeDeclaration, 
+			org.eclipse.jdt.internal.compiler.ast.TypeDeclaration typeDeclaration,
 			TypeBinding superIfcBinding)
 	{
 		org.eclipse.jdt.internal.compiler.ast.TypeDeclaration enclosing = typeDeclaration.enclosingType;
-		if (enclosing == null) 
+		if (enclosing == null)
 			return null;
 		if (enclosing.memberTypes == null)
 			return null;
-		for (org.eclipse.jdt.internal.compiler.ast.TypeDeclaration memberType : enclosing.memberTypes) 
+		for (org.eclipse.jdt.internal.compiler.ast.TypeDeclaration memberType : enclosing.memberTypes)
 			if (memberType.binding == superIfcBinding)
 				return memberType.superInterfaces;
-		
+
 		return null;
 	}
 
-	private String getRealName(char[] name) 
+	private String getRealName(char[] name)
 	{
 		if (name == null || name.length == 0)
 		{
@@ -3616,20 +3616,20 @@ public BaseConstructorInvocation convert(
 		String[] nameTokens = new String (name).split(IOTConstants.OT_DELIM);
 		realName = nameTokens[nameTokens.length-1];
 		return realName;
-	}	
-	
+	}
+
 	private PrecedenceDeclaration convertPrecedence(org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrecedenceDeclaration aPrecedence)
 	{
 		PrecedenceDeclaration newPrecedence = this.ast.newPrecedenceDeclaration();
 		newPrecedence.setSourceRange(aPrecedence.declarationSourceStart, aPrecedence.sourceEnd - aPrecedence.declarationSourceStart + 1);
 		for (org.eclipse.jdt.internal.compiler.ast.NameReference nameRef: aPrecedence.bindingNames) {
-			newPrecedence.elements().add(convert(nameRef));			
+			newPrecedence.elements().add(convert(nameRef));
 		}
 		if (aPrecedence.isAfter)
 			newPrecedence.setAfter(true);
 		return newPrecedence;
 	}
-	
+
 	private GuardPredicateDeclaration convertGuardPredicate(org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDeclaration guard) {
 		GuardPredicateDeclaration newGuard = this.ast.newGuardPredicateDeclaration();
 		newGuard.setSourceRange(guard.declarationSourceStart, guard.declarationSourceEnd - guard.declarationSourceStart + 1);
@@ -3642,7 +3642,7 @@ public BaseConstructorInvocation convert(
 	}
 
 //ike+SH}
-	
+
 
 	public TypeParameter convert(org.eclipse.jdt.internal.compiler.ast.TypeParameter typeParameter) {
 		final TypeParameter typeParameter2 = new TypeParameter(this.ast);
@@ -3686,7 +3686,7 @@ public BaseConstructorInvocation convert(
 		}
 		return typeParameter2;
 	}
-	
+
 	public Name convert(org.eclipse.jdt.internal.compiler.ast.TypeReference typeReference) {
 		char[][] typeName = typeReference.getTypeName();
 		int length = typeName.length;
@@ -3695,7 +3695,7 @@ public BaseConstructorInvocation convert(
 			// TODO (SH): we probably need information about both names in a lifting type??
 			if (typeReference instanceof LiftingTypeReference)
 				typeReference = ((LiftingTypeReference)typeReference).baseReference;
-// SH}			
+// SH}
 			// QualifiedName
 			org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference qualifiedTypeReference = (org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) typeReference;
 			final long[] positions = qualifiedTypeReference.sourcePositions;
@@ -3711,7 +3711,7 @@ public BaseConstructorInvocation convert(
 			return name;
 		}
 	}
-			
+
 	public PrefixExpression convert(org.eclipse.jdt.internal.compiler.ast.UnaryExpression expression) {
 		final PrefixExpression prefixExpression = new PrefixExpression(this.ast);
 		if (this.resolveBindings) {
@@ -3734,7 +3734,7 @@ public BaseConstructorInvocation convert(
 		}
 		return prefixExpression;
 	}
-	
+
 	public WhileStatement convert(org.eclipse.jdt.internal.compiler.ast.WhileStatement statement) {
 		final WhileStatement whileStatement = new WhileStatement(this.ast);
 		whileStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
@@ -3744,7 +3744,7 @@ public BaseConstructorInvocation convert(
 		whileStatement.setBody(action);
 		return whileStatement;
 	}
-	
+
 	public ImportDeclaration convertImport(org.eclipse.jdt.internal.compiler.ast.ImportReference importReference) {
 		final ImportDeclaration importDeclaration = new ImportDeclaration(this.ast);
 		final boolean onDemand = (importReference.bits & org.eclipse.jdt.internal.compiler.ast.ASTNode.OnDemand) != 0;
@@ -3834,7 +3834,7 @@ public BaseConstructorInvocation convert(
 		convert(compilationUnitDeclaration.javadoc, packageDeclaration);
 		return packageDeclaration;
 	}
-	
+
 	private EnumDeclaration convertToEnumDeclaration(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration typeDeclaration) {
 		checkCanceled();
 		// enum declaration cannot be built if the source is not >= 1.5, since enum is then seen as an identifier
@@ -3845,12 +3845,12 @@ public BaseConstructorInvocation convert(
 		typeName.setSourceRange(typeDeclaration.sourceStart, typeDeclaration.sourceEnd - typeDeclaration.sourceStart + 1);
 		enumDeclaration2.setName(typeName);
 		enumDeclaration2.setSourceRange(typeDeclaration.declarationSourceStart, typeDeclaration.bodyEnd - typeDeclaration.declarationSourceStart + 1);
-		
+
 		org.eclipse.jdt.internal.compiler.ast.TypeReference[] superInterfaces = typeDeclaration.superInterfaces;
 		if (superInterfaces != null) {
 			for (int index = 0, length = superInterfaces.length; index < length; index++) {
 				enumDeclaration2.superInterfaceTypes().add(convertType(superInterfaces[index]));
-			}					
+			}
 		}
 		buildBodyDeclarations(typeDeclaration, enumDeclaration2);
 		if (this.resolveBindings) {
@@ -3899,7 +3899,7 @@ public BaseConstructorInvocation convert(
 		parenthesizedExpression.setExpression(convert(expression));
 		return parenthesizedExpression;
 	}
-		
+
 	public Type convertToType(org.eclipse.jdt.internal.compiler.ast.NameReference reference) {
 		Name name = convert(reference);
 		final SimpleType type = new SimpleType(this.ast);
@@ -3910,7 +3910,7 @@ public BaseConstructorInvocation convert(
 		}
 		return type;
 	}
-	
+
 	protected VariableDeclarationExpression convertToVariableDeclarationExpression(org.eclipse.jdt.internal.compiler.ast.LocalDeclaration localDeclaration) {
 		final VariableDeclarationFragment variableDeclarationFragment = convertToVariableDeclarationFragment(localDeclaration);
 		final VariableDeclarationExpression variableDeclarationExpression = new VariableDeclarationExpression(this.ast);
@@ -3954,7 +3954,7 @@ public BaseConstructorInvocation convert(
 		}
 		return variableDecl;
 	}
-	
+
 	protected VariableDeclarationFragment convertToVariableDeclarationFragment(org.eclipse.jdt.internal.compiler.ast.FieldDeclaration fieldDeclaration) {
 		final VariableDeclarationFragment variableDeclarationFragment = new VariableDeclarationFragment(this.ast);
 		final SimpleName name = new SimpleName(this.ast);
@@ -3999,7 +3999,7 @@ public BaseConstructorInvocation convert(
 		name.internalSetIdentifier(new String(localDeclaration.name));
 		name.setSourceRange(localDeclaration.sourceStart, localDeclaration.sourceEnd - localDeclaration.sourceStart + 1);
 		variableDeclarationFragment.setName(name);
-		int start = localDeclaration.sourceEnd; 
+		int start = localDeclaration.sourceEnd;
 		org.eclipse.jdt.internal.compiler.ast.Expression initialization = localDeclaration.initialization;
 		int extraDimension = retrieveExtraDimension(localDeclaration.sourceEnd + 1, this.compilationUnitSourceLength);
 		variableDeclarationFragment.setExtraDimensions(extraDimension);
@@ -4081,7 +4081,7 @@ public BaseConstructorInvocation convert(
 		{
 		    return convertType((TypeAnchorReference)typeReference);
 		}
-//gbr+SH}		
+//gbr+SH}
 		if (typeReference instanceof org.eclipse.jdt.internal.compiler.ast.SingleTypeReference) {
 			// this is either an ArrayTypeReference or a SingleTypeReference
 			char[] name = ((org.eclipse.jdt.internal.compiler.ast.SingleTypeReference) typeReference).getTypeName()[0];
@@ -4092,7 +4092,7 @@ public BaseConstructorInvocation convert(
 				int end = retrieveEndOfElementTypeNamePosition(sourceStart, sourceStart + length);
 				if (end == -1) {
 					end = sourceStart + length - 1;
-				}					
+				}
 				final PrimitiveType primitiveType = new PrimitiveType(this.ast);
 				primitiveType.setPrimitiveTypeCode(getPrimitiveTypeCode(name));
 				primitiveType.setSourceRange(sourceStart, end - sourceStart + 1);
@@ -4270,7 +4270,7 @@ public BaseConstructorInvocation convert(
 								recordPendingNameScopeResolution(simpleName);
 								QualifiedType qualifiedType = new QualifiedType(this.ast);
 								qualifiedType.setQualifier(currentType);
-								qualifiedType.setName(simpleName);	
+								qualifiedType.setName(simpleName);
                                 if (this.resolveBindings) {
                                     recordNodes(simpleName, typeReference);
                                     recordNodes(qualifiedType, typeReference);
@@ -4294,7 +4294,7 @@ public BaseConstructorInvocation convert(
 									}
 									end = retrieveClosingAngleBracketPosition(end + 1);
 									length = end + 1;
-									parameterizedType2.setSourceRange(start, end - start + 1);							
+									parameterizedType2.setSourceRange(start, end - start + 1);
 									currentType = parameterizedType2;
 								} else {
 									currentType = qualifiedType;
@@ -4312,7 +4312,7 @@ public BaseConstructorInvocation convert(
 			} else {
 				char[][] name = ((org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) typeReference).getTypeName();
 //{ObjectTeams: revert anchored types like in MyTeam.this._OT$base.R => base.R
-				org.eclipse.jdt.internal.compiler.lookup.TypeBinding typeBinding = 
+				org.eclipse.jdt.internal.compiler.lookup.TypeBinding typeBinding =
 					((org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) typeReference).resolvedType;
 				if (typeBinding != null) {
 					typeBinding = typeBinding.leafComponentType();
@@ -4321,12 +4321,12 @@ public BaseConstructorInvocation convert(
 						if (rtb.hasExplicitAnchor()) {
 							char[][] newName = CharOperation.splitOn('.', rtb.optimalName());
 							// refuse to use best name which is longer than source name.
-							if (name.length >= newName.length) 
+							if (name.length >= newName.length)
 								name = newName;
 						}
-					}					
-				}			
-//	 SH}				
+					}
+				}
+//	 SH}
 				int nameLength = name.length;
 				long[] positions = ((org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) typeReference).sourcePositions;
 				sourceStart = (int)(positions[0]>>>32);
@@ -4373,7 +4373,7 @@ public BaseConstructorInvocation convert(
 	    Name name = convert(typeReference);
 	    LiftingType result = this.ast.newLiftingType(name);
 	    result.setSourceRange(typeReference.sourceStart, typeReference.sourceEnd - typeReference.sourceStart + 1);
-		
+
 	    // convert base type
 	    org.eclipse.jdt.internal.compiler.ast.TypeReference baseTypeReference = typeReference.baseReference;
 		if (baseTypeReference != null)
@@ -4381,7 +4381,7 @@ public BaseConstructorInvocation convert(
 			Type baseType = convertType(baseTypeReference);
 			result.setBaseType(baseType);
 		}
-		
+
 		// convert role type
 	    org.eclipse.jdt.internal.compiler.ast.TypeReference roleTypeReference = typeReference.roleReference;
 		if (roleTypeReference != null)
@@ -4389,11 +4389,11 @@ public BaseConstructorInvocation convert(
 			Type roleType = convertType(roleTypeReference);
 			result.setRoleType(roleType);
 		}
-	    
+
 	    if (this.resolveBindings)
 		{
 			this.recordNodes(result, typeReference);
-		}	    
+		}
 	    return result;
 	}
 	// Type Anchor
@@ -4409,7 +4409,7 @@ public BaseConstructorInvocation convert(
 		result.setSourceRange(start, end-start+1);
 		return result;
 	}
-//gbr+SH}	
+//gbr+SH}
 
 	protected Comment createComment(int[] positions) {
 		// Create comment node
@@ -4439,7 +4439,7 @@ public BaseConstructorInvocation convert(
 		}
 		return comment;
 	}
-	
+
 	protected Statement createFakeEmptyStatement(org.eclipse.jdt.internal.compiler.ast.Statement statement) {
 		if (statement == null) return null;
 		EmptyStatement emptyStatement = new EmptyStatement(this.ast);
@@ -4460,7 +4460,7 @@ public BaseConstructorInvocation convert(
 		modifier.setSourceRange(start, end - start + 1);
 		return modifier;
 	}
-	
+
 	protected InfixExpression.Operator getOperatorFor(int operatorID) {
 		switch (operatorID) {
 			case org.eclipse.jdt.internal.compiler.ast.OperatorIds.EQUAL_EQUAL :
@@ -4504,7 +4504,7 @@ public BaseConstructorInvocation convert(
 		}
 		return null;
 	}
-	
+
 	protected PrimitiveType.Code getPrimitiveTypeCode(char[] name) {
 		switch(name[0]) {
 			case 'i' :
@@ -4580,7 +4580,7 @@ public BaseConstructorInvocation convert(
 		}
 		return null; // cannot be reached
 	}
-	
+
 	protected boolean isPrimitiveType(char[] name) {
 		switch(name[0]) {
 			case 'i' :
@@ -4657,7 +4657,7 @@ public BaseConstructorInvocation convert(
 		}
 		return false;
 	}
-	
+
 	private void lookupForScopes() {
 		if (this.pendingNameScopeResolution != null) {
 			for (Iterator iterator = this.pendingNameScopeResolution.iterator(); iterator.hasNext(); ) {
@@ -4671,9 +4671,9 @@ public BaseConstructorInvocation convert(
 				this.ast.getBindingResolver().recordScope(thisExpression, lookupScope(thisExpression));
 			}
 		}
-		
+
 	}
-	
+
 	private BlockScope lookupScope(ASTNode node) {
 		ASTNode currentNode = node;
 		while(currentNode != null
@@ -4737,11 +4737,11 @@ public BaseConstructorInvocation convert(
 			}
 		}
 	}
-	
+
 	protected void recordNodes(ASTNode node, org.eclipse.jdt.internal.compiler.ast.ASTNode oldASTNode) {
 		this.ast.getBindingResolver().store(node, oldASTNode);
 	}
-	
+
 	protected void recordNodes(org.eclipse.jdt.internal.compiler.ast.Javadoc javadoc, TagElement tagElement) {
 		Iterator fragments = tagElement.fragments().listIterator();
 		while (fragments.hasNext()) {
@@ -4764,7 +4764,7 @@ public BaseConstructorInvocation convert(
 						if (expression instanceof org.eclipse.jdt.internal.compiler.ast.TypeReference) {
 							typeRef = (org.eclipse.jdt.internal.compiler.ast.TypeReference) expression;
 						}
-					} 
+					}
 					else if (compilerNode instanceof JavadocMessageSend) {
 						org.eclipse.jdt.internal.compiler.ast.Expression expression = ((JavadocMessageSend)compilerNode).receiver;
 						if (expression instanceof org.eclipse.jdt.internal.compiler.ast.TypeReference) {
@@ -4803,7 +4803,7 @@ public BaseConstructorInvocation convert(
 					if (compilerNode instanceof org.eclipse.jdt.internal.compiler.ast.JavadocAllocationExpression) {
 						typeRef = ((org.eclipse.jdt.internal.compiler.ast.JavadocAllocationExpression)compilerNode).type;
 						if (typeRef != null) recordNodes(name, compilerNode);
-					} 
+					}
 					else if (compilerNode instanceof org.eclipse.jdt.internal.compiler.ast.JavadocMessageSend) {
 						org.eclipse.jdt.internal.compiler.ast.Expression expression = ((org.eclipse.jdt.internal.compiler.ast.JavadocMessageSend)compilerNode).receiver;
 						if (expression instanceof org.eclipse.jdt.internal.compiler.ast.TypeReference) {
@@ -4851,24 +4851,24 @@ public BaseConstructorInvocation convert(
 			}
 		}
 	}
-	
+
 	protected void recordPendingNameScopeResolution(Name name) {
 		if (this.pendingNameScopeResolution == null) {
 			this.pendingNameScopeResolution = new HashSet();
 		}
 		this.pendingNameScopeResolution.add(name);
 	}
-	
+
 	protected void recordPendingThisExpressionScopeResolution(ThisExpression thisExpression) {
 		if (this.pendingThisExpressionScopeResolution == null) {
 			this.pendingThisExpressionScopeResolution = new HashSet();
 		}
 		this.pendingThisExpressionScopeResolution.add(thisExpression);
 	}
-	
+
 	/**
 	 * Remove whitespaces and comments before and after the expression.
-	 */	
+	 */
 	private void trimWhiteSpacesAndComments(org.eclipse.jdt.internal.compiler.ast.Expression expression) {
 		int start = expression.sourceStart;
 		int end = expression.sourceEnd;
@@ -4906,7 +4906,7 @@ public BaseConstructorInvocation convert(
 						 * source end.
 						 */
 						trimRightPosition = removeBlankScanner.currentPosition - 1;
-						first = false;				
+						first = false;
 				}
 			}
 		} catch (InvalidInputException e){
@@ -4945,7 +4945,7 @@ public BaseConstructorInvocation convert(
 			// ignore
 		}
 	}
-	
+
 	/**
 	 * Remove potential trailing comment by settings the source end on the closing parenthesis
 	 */
@@ -5037,7 +5037,7 @@ public BaseConstructorInvocation convert(
 			// ignore
 		}
 		return -1;
-	
+
 	}
 	/**
 	 * This method is used to retrieve the end position of the block.
@@ -5214,7 +5214,7 @@ public BaseConstructorInvocation convert(
 			// ignore
 		}
 	}
-	
+
 	/**
 	 * This method is used to retrieve the start position of the block.
 	 * @return int the dimension found, -1 if none
@@ -5227,7 +5227,7 @@ public BaseConstructorInvocation convert(
 				switch(token) {
 //{ObjectTeams: treat like an Identifier:
 				case TerminalTokens.TokenNamewhen:
-//SH}						
+//SH}
 					case TerminalTokens.TokenNameIdentifier://110
 						return this.scanner.getCurrentTokenEndPosition();
 				}
@@ -5236,7 +5236,7 @@ public BaseConstructorInvocation convert(
 			// ignore
 		}
 		return -1;
-	}	
+	}
 
 	/**
 	 * This method is used to retrieve position before the next comma or semi-colon.
@@ -5339,7 +5339,7 @@ public BaseConstructorInvocation convert(
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * This method is used to retrieve the position of the right bracket.
 	 * @return int the dimension found, -1 if none
@@ -5405,7 +5405,7 @@ public BaseConstructorInvocation convert(
 		}
 		return -1;
 	}
-	
+
 //{ObjectTeams:
 	/**
 	 * This method is used to retrieve the starting position of a  '<-' token
@@ -5427,12 +5427,12 @@ public BaseConstructorInvocation convert(
 		return -1;
 	}
 // SH}
-	
+
 	public void setAST(AST ast) {
 //{ObjectTeams: transfer scanner mode
 		if (ast.scanner != null && this.scanner != null)
 			ast.scanner.copyOTFlags(this.scanner);
-// SH}	
+// SH}
 		this.ast = ast;
 		this.docParser = new DocCommentParser(this.ast, this.scanner, this.insideComments);
 	}
@@ -5441,7 +5441,7 @@ public BaseConstructorInvocation convert(
 		this.scanner.resetTo(typeDeclaration.declarationSourceStart, typeDeclaration.sourceStart);
 		this.setModifiers(typeDecl, typeDeclaration.annotations, typeDeclaration.sourceStart);
 	}
-	
+
 	protected void setModifiers(AnnotationTypeMemberDeclaration annotationTypeMemberDecl, org.eclipse.jdt.internal.compiler.ast.AnnotationMethodDeclaration annotationTypeMemberDeclaration) {
 		this.scanner.resetTo(annotationTypeMemberDeclaration.declarationSourceStart, annotationTypeMemberDeclaration.sourceStart);
 		this.setModifiers(annotationTypeMemberDecl, annotationTypeMemberDeclaration.annotations, annotationTypeMemberDeclaration.sourceStart);
@@ -5476,14 +5476,14 @@ public BaseConstructorInvocation convert(
 					case TerminalTokens.TokenNamefinal:
 						modifier = createModifier(Modifier.ModifierKeyword.FINAL_KEYWORD);
 						break;
-//{ObjectTeams: callin team		
+//{ObjectTeams: callin team
 					case TerminalTokens.TokenNamecallin:
 						modifier = createModifier(Modifier.ModifierKeyword.CALLIN_KEYWORD);
 						break;
 					case TerminalTokens.TokenNameteam:
 						modifier = createModifier(Modifier.ModifierKeyword.TEAM_KEYWORD);
 						break;
-// SH}						
+// SH}
 					case TerminalTokens.TokenNamenative:
 						modifier = createModifier(Modifier.ModifierKeyword.NATIVE_KEYWORD);
 						break;
@@ -5528,7 +5528,7 @@ public BaseConstructorInvocation convert(
 		this.scanner.resetTo(enumDeclaration2.declarationSourceStart, enumDeclaration2.sourceStart);
 		this.setModifiers(enumDeclaration, enumDeclaration2.annotations, enumDeclaration2.sourceStart);
 	}
-	
+
 	protected void setModifiers(EnumConstantDeclaration enumConstantDeclaration, org.eclipse.jdt.internal.compiler.ast.FieldDeclaration fieldDeclaration) {
 		switch(this.ast.apiLevel) {
 			case AST.JLS2_INTERNAL :
@@ -5542,7 +5542,7 @@ public BaseConstructorInvocation convert(
 				this.setModifiers(enumConstantDeclaration, fieldDeclaration.annotations, fieldDeclaration.sourceStart);
 		}
 	}
-	
+
 	/**
 	 * @param fieldDeclaration
 	 * @param fieldDecl
@@ -5560,14 +5560,14 @@ public BaseConstructorInvocation convert(
 				this.setModifiers(fieldDeclaration, fieldDecl.annotations, fieldDecl.sourceStart);
 		}
 	}
-	
+
 	/**
 	 * @param initializer
 	 * @param oldInitializer
 	 */
 	protected void setModifiers(Initializer initializer, org.eclipse.jdt.internal.compiler.ast.Initializer oldInitializer) {
 		switch(this.ast.apiLevel) {
-			case AST.JLS2_INTERNAL: 
+			case AST.JLS2_INTERNAL:
 				initializer.internalSetModifiers(oldInitializer.modifiers & ExtraCompilerModifiers.AccJustFlag);
 				if (oldInitializer.annotations != null) {
 					initializer.setFlags(initializer.getFlags() | ASTNode.MALFORMED);
@@ -5600,7 +5600,7 @@ public BaseConstructorInvocation convert(
 	 * @param methodDecl
 	 * @param methodDeclaration
 	 */
-	protected void setModifiers(org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration mappingDecl, 
+	protected void setModifiers(org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration mappingDecl,
 			AbstractMethodMappingDeclaration mappingDeclaration) {
 		switch(this.ast.apiLevel) {
 			case AST.JLS2_INTERNAL :
@@ -5612,8 +5612,8 @@ public BaseConstructorInvocation convert(
 				this.scanner.resetTo(mappingDeclaration.declarationSourceStart, mappingDeclaration.sourceStart);
 				this.setModifiers(mappingDecl, mappingDeclaration.annotations, mappingDeclaration.sourceStart);
 		}
-	}	
-// SH}	
+	}
+// SH}
 	/**
 	 * @param variableDecl
 	 * @param argument
@@ -5692,7 +5692,7 @@ public BaseConstructorInvocation convert(
 				}
 		}
 	}
-	
+
 	protected void setModifiers(SingleVariableDeclaration variableDecl, LocalDeclaration localDeclaration) {
 		switch(this.ast.apiLevel) {
 		case AST.JLS2_INTERNAL :
@@ -5773,7 +5773,7 @@ public BaseConstructorInvocation convert(
 	 * @param typeDeclaration
 	 */
 	protected void setModifiers(TypeDeclaration typeDecl, org.eclipse.jdt.internal.compiler.ast.TypeDeclaration typeDeclaration) {
-		switch(this.ast.apiLevel) { 
+		switch(this.ast.apiLevel) {
 			case AST.JLS2_INTERNAL :
 				int modifiers = typeDeclaration.modifiers;
 				modifiers &= ~ClassFileConstants.AccInterface; // remove AccInterface flags
@@ -5788,7 +5788,7 @@ public BaseConstructorInvocation convert(
 				this.setModifiers(typeDecl, typeDeclaration.annotations, typeDeclaration.sourceStart);
 		}
 	}
-	
+
 	/**
 	 * @param variableDeclarationExpression
 	 * @param localDeclaration
@@ -5867,7 +5867,7 @@ public BaseConstructorInvocation convert(
 				} catch(InvalidInputException e) {
 					// ignore
 				}
-		}		
+		}
 	}
 
 	/**
@@ -5948,7 +5948,7 @@ public BaseConstructorInvocation convert(
 				} catch(InvalidInputException e) {
 					// ignore
 				}
-		}				
+		}
 	}
 
 	protected QualifiedName setQualifiedNameNameAndSourceRanges(char[][] typeName, long[] positions, org.eclipse.jdt.internal.compiler.ast.ASTNode node) {
@@ -5995,7 +5995,7 @@ public BaseConstructorInvocation convert(
 			qualifiedName.setSourceRange(start0, end - start0 + 1);
 			if (this.resolveBindings) {
 				recordNodes(qualifiedName, node);
-				recordNodes(newPart, node);				
+				recordNodes(newPart, node);
 				recordPendingNameScopeResolution(qualifiedName);
 				recordPendingNameScopeResolution(newPart);
 			}
@@ -6007,7 +6007,7 @@ public BaseConstructorInvocation convert(
 		}
 		return name;
 	}
-	
+
 	protected QualifiedName setQualifiedNameNameAndSourceRanges(char[][] typeName, long[] positions, int endingIndex, org.eclipse.jdt.internal.compiler.ast.ASTNode node) {
  		int length = endingIndex + 1;
 		final SimpleName firstToken = new SimpleName(this.ast);
@@ -6052,7 +6052,7 @@ public BaseConstructorInvocation convert(
 			qualifiedName.setSourceRange(start0, end - start0 + 1);
 			if (this.resolveBindings) {
 				recordNodes(qualifiedName, node);
-				recordNodes(newPart, node);				
+				recordNodes(newPart, node);
 				recordPendingNameScopeResolution(qualifiedName);
 				recordPendingNameScopeResolution(newPart);
 			}
@@ -6063,7 +6063,7 @@ public BaseConstructorInvocation convert(
         }
 		return qualifiedName;
 	}
-	
+
 	protected void setTypeNameForAnnotation(org.eclipse.jdt.internal.compiler.ast.Annotation compilerAnnotation, Annotation annotation) {
 		TypeReference typeReference = compilerAnnotation.type;
 		if (typeReference instanceof QualifiedTypeReference) {
@@ -6086,7 +6086,7 @@ public BaseConstructorInvocation convert(
 			}
 		}
 	}
-	
+
 	protected void setTypeForField(FieldDeclaration fieldDeclaration, Type type, int extraDimension) {
 		if (extraDimension != 0) {
 			if (type.isArrayType()) {
@@ -6127,7 +6127,7 @@ public BaseConstructorInvocation convert(
 			fieldDeclaration.setType(type);
 		}
 	}
-	
+
 	protected void setTypeForMethodDeclaration(MethodDeclaration methodDeclaration, Type type, int extraDimension) {
 		if (extraDimension != 0) {
 			if (type.isArrayType()) {
@@ -6191,7 +6191,7 @@ public BaseConstructorInvocation convert(
 			}
 		}
 	}
-	
+
 	protected void setTypeForMethodDeclaration(AnnotationTypeMemberDeclaration annotationTypeMemberDeclaration, Type type, int extraDimension) {
 		annotationTypeMemberDeclaration.setType(type);
 	}
@@ -6316,18 +6316,18 @@ public BaseConstructorInvocation convert(
 				currentComponentType.setSourceRange(start, rightBracketEndPosition - start + 1);
 				currentComponentType = ((ArrayType) currentComponentType).getComponentType();
 				searchedDimension--;
-			}		
+			}
 		}
 	}
-//{ObjectTeams: convert reused abstract methode declaration	
+//{ObjectTeams: convert reused abstract methode declaration
 	private boolean isReusedAbstractMethodDeclaration(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration typeDeclaration,
 			org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration methodDeclaration)
 	{
 		return (methodDeclaration.isReusingSourceMethod && methodDeclaration.sourceStart > 0 );
 	}
-	
+
 	public MethodDeclaration convertReusedAbstractMethodDeclaration(
-			org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration methodDeclaration) 
+			org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration methodDeclaration)
 	{
 		MethodDeclaration methodDecl = (MethodDeclaration) convert(methodDeclaration);
 		if(methodDecl.ast.apiLevel() == AST.JLS2)

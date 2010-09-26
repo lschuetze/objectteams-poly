@@ -1,19 +1,19 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: CallinMappingDeclaration.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -26,32 +26,32 @@ import java.util.List;
 
 /**
  * NEW for OTDT
- * 
+ *
  * Represents a callin binding of a role method with one ore more base methods (OTJLD §4).
  * Callin bindings must have one modifier (before, replace, after)
  * and may have parameter mappings. A replace callin may also have a result mapping.
  * e.g.:
- * 
+ *
  * ranges from:
  * <code>roleMethod <- after baseMethod;</code>
  * to:
  * <pre>
  * void roleMethod(MyObject obj) <-
- * after char[] baseMethod(String name, SomeClass cls) with 
+ * after char[] baseMethod(String name, SomeClass cls) with
  * {
- *     obj <- cls.foo(), 
+ *     obj <- cls.foo(),
  * }
  * </pre>
  * or:
  * <pre>
  * char[] roleMethod(MyObject obj) <-
- * replace char[] baseMethod(MyObject o, String name) with 
+ * replace char[] baseMethod(MyObject o, String name) with
  * {
  *     obj <- o,
- *     result <- result 
+ *     result <- result
  * }
  * </pre>
- * 
+ *
  * Callin bindings consist of
  * <ol>
  * <li>  a name as mentioned in source code or a generated name "&lt;File:Line,Col&gt;".
@@ -66,27 +66,27 @@ import java.util.List;
  *   <li> result mapping (only replace)
  *   </ol>
  * </ol>
- * 
+ *
  * Callin bindinds can be used in the following AST-nodes:
  * TypeDeclaration (compiler ast)
  * RoleTypeDeclaration (dom/ast)
- * 
+ *
  * @author mkr
  */
 public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 {
 	public static final String CALLIN = "<-"; //$NON-NLS-1$
-    
+
 	/**
-	 * Creates a new AST node for a callin mapping declaration owned 
+	 * Creates a new AST node for a callin mapping declaration owned
 	 * by the given AST. By default, the declaration is for a callin mapping
 	 * of an unspecified, but legal, name;
 	 * <p>
-	 * N.B. This constructor is package-private; all subclasses must be 
-	 * declared in the same package; clients are unable to declare 
+	 * N.B. This constructor is package-private; all subclasses must be
+	 * declared in the same package; clients are unable to declare
 	 * additional subclasses.
 	 * </p>
-	 * 
+	 *
 	 * @param ast the AST that is to own this node
 	 */
 	CallinMappingDeclaration(AST ast)
@@ -97,27 +97,27 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
     /**
      * The "names" structural property of this node type.
      */
-    public static final ChildPropertyDescriptor NAME_PROPERTY = 
+    public static final ChildPropertyDescriptor NAME_PROPERTY =
         new ChildPropertyDescriptor(CallinMappingDeclaration.class, "name", SimpleName.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
-    
+
 	/**
 	 * The "modifiers" structural property of this node type (added in JLS3 API).
 	 * @since 3.1
 	 */
-	public static final ChildListPropertyDescriptor MODIFIERS2_PROPERTY = 
+	public static final ChildListPropertyDescriptor MODIFIERS2_PROPERTY =
 		internalModifiers2PropertyFactory(CallinMappingDeclaration.class);
 
-	
+
 	/**
 	 * The "javadoc" structural property of this node type.
 	 */
-	public static final ChildPropertyDescriptor JAVADOC_PROPERTY = 
+	public static final ChildPropertyDescriptor JAVADOC_PROPERTY =
 		internalJavadocPropertyFactory(CallinMappingDeclaration.class);
 
 	/**
 	 * The "roleMappingElement" structural property of this node type.
 	 */
-	public static final ChildPropertyDescriptor ROLE_MAPPING_ELEMENT_PROPERTY = 
+	public static final ChildPropertyDescriptor ROLE_MAPPING_ELEMENT_PROPERTY =
 		new ChildPropertyDescriptor(CallinMappingDeclaration.class, "roleMappingElement", MethodMappingElement.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -130,44 +130,44 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	/**
 	 * The "baseMappingElements" structural property of this node type.
 	 */
-	public static final ChildListPropertyDescriptor BASE_MAPPING_ELEMENTS_PROPERTY = 
+	public static final ChildListPropertyDescriptor BASE_MAPPING_ELEMENTS_PROPERTY =
 		new ChildListPropertyDescriptor(CallinMappingDeclaration.class, "baseMappingElements", MethodMappingElement.class, NO_CYCLE_RISK); //$NON-NLS-1$
-	
+
     /**
      * The "guardPredicate" structural property of this node type.
      * @since 0.9.25
      */
-    public static final ChildPropertyDescriptor GUARD_PROPERTY = 
+    public static final ChildPropertyDescriptor GUARD_PROPERTY =
         new ChildPropertyDescriptor(CallinMappingDeclaration.class, "guardPredicate", GuardPredicateDeclaration.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
      * The "parameter mappings" structural property of this node type.
      */
-    public static final ChildListPropertyDescriptor PARAMETER_MAPPINGS_PROPERTY = 
+    public static final ChildListPropertyDescriptor PARAMETER_MAPPINGS_PROPERTY =
         internalParameterMappingPropertyFactory(CallinMappingDeclaration.class);
-	    
+
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
 	private static final List PROPERTY_DESCRIPTORS_2_0;
-		
+
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
 
 	private static final List PROPERTY_DESCRIPTORS_3_0;
-	
+
     private SimpleName _labelName = null;
-    
+
 	private MethodMappingElement _roleMappingElement = null; // FIXME(SH): should be MethodSpec??
 	ASTNode.NodeList _baseMappingElements = new ASTNode.NodeList(BASE_MAPPING_ELEMENTS_PROPERTY);
-    
+
 	GuardPredicateDeclaration _optionalGuardPredicate = null;
-	
+
 	static
 	{
 		List propertyList = new ArrayList(7);
@@ -188,17 +188,17 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		addProperty(ROLE_MAPPING_ELEMENT_PROPERTY, propertyList);
 		addProperty(BINDING_OPERATOR_PROPERTY, propertyList);
 		addProperty(BASE_MAPPING_ELEMENTS_PROPERTY, propertyList);
-        addProperty(GUARD_PROPERTY, propertyList);		
+        addProperty(GUARD_PROPERTY, propertyList);
         addProperty(PARAMETER_MAPPINGS_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
 	}
-	
+
 	/**
 	 * Returns a list of structural property descriptors for this node type.
 	 * Clients must not modify the result.
-	 * 
+	 *
 	 * @param apiLevel the API level; one of the AST.JLS* constants
-	 * @return a list of property descriptors (element type: 
+	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
 	public static List propertyDescriptors(int apiLevel)
@@ -208,13 +208,13 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		else
 			return PROPERTY_DESCRIPTORS_2_0;
 	}
-    
+
 	final SimplePropertyDescriptor internalModifiersProperty()
 	{
 		throw new UnsupportedOperationException("JLS2 not supported"); //$NON-NLS-1$
 	}
 
-	final ChildListPropertyDescriptor internalModifiers2Property() 
+	final ChildListPropertyDescriptor internalModifiers2Property()
 	{
 		return MODIFIERS2_PROPERTY;
 	}
@@ -275,7 +275,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		// allow default implementation to flag the error (incl. handling of elements common to all method mappings):
 		return super.internalGetSetChildProperty(property, get, child);
 	}
-	
+
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property)
 	{
         if(property == MODIFIERS2_PROPERTY)
@@ -286,11 +286,11 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 
         if (property == PARAMETER_MAPPINGS_PROPERTY)
             return  getParameterMappings();
-        
+
         // allow default implementation to flag the error
 		return super.internalGetChildListProperty(property);
 	}
-       
+
 	ChildPropertyDescriptor internalJavadocProperty()
     {
 		return JAVADOC_PROPERTY;
@@ -311,7 +311,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
     {
 		CallinMappingDeclaration result = new CallinMappingDeclaration(target);
         result.setName(this.getName());
-		if (this.ast.apiLevel >= AST.JLS3) 
+		if (this.ast.apiLevel >= AST.JLS3)
 			result.modifiers().addAll(ASTNode.copySubtrees(target, modifiers())); // annotations
 		result.setSourceRange(this.getStartPosition(), this.getLength());
 		result.setJavadoc(
@@ -353,7 +353,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		}
 		visitor.endVisit(this);
     }
-    
+
     void appendDebugString(StringBuffer buffer) {
     	if (getName() != null) {
 	        buffer.append(getName().getIdentifier());
@@ -361,18 +361,18 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
     	}
         super.appendDebugString(buffer);
     }
-    
+
     int treeSize()
     {
-		return memSize() + (super.optionalDocComment == null 
-                                ? 0 
+		return memSize() + (super.optionalDocComment == null
+                                ? 0
                                 : getJavadoc().treeSize());
     }
 
 	/**
 	 * Returns the method spec left of the callin arrow.
 	 * @return the left method spec, i.e. the declaring role method
-	 */ 
+	 */
     @Override
 	public MethodMappingElement getRoleMappingElement()
 	{
@@ -391,18 +391,18 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
         }
         return _roleMappingElement;
     }
-	
+
 	/**
 	 * Sets the left method spec (role method spec) declared in this callin
 	 * mapping declaration to the given method spec.
-	 * 
+	 *
 	 * @param roleMappingElement
 	 * @exception IllegalArgumentException if:
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
 	 * </ul>
-	 */ 
+	 */
     public void setRoleMappingElement(MethodMappingElement roleMappingElement)
     {
 		if (roleMappingElement == null)
@@ -418,12 +418,12 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	/**
 	 * Returns the live ordered list of base method specs for this
 	 * callin mapping declaration.
-	 * 
+	 *
 	 * @return the live list of base method specs
 	 *    (element type: <code>IExtendedModifier</code>)
 	 * @exception UnsupportedOperationException if this operation is used in
 	 * a JLS2 AST
-	 */ 
+	 */
 	public List getBaseMappingElements()
 	{
 		return _baseMappingElements;
@@ -441,18 +441,18 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 
 	/**
 	 * Returns the callin modifiers explicitly specified on this declaration.
-	 * 
+	 *
 	 * @return exactly one of before, after, replace using constants from Modifier
 	 * @see Modifier
-	 */ 
+	 */
 	public int getCallinModifier()
 	{
 		return bindingOperator.getBindingModifier();
 	}
-	
+
 	/**
 	 * Sets the callin modifier explicitly specified on this declaration.
-	 * 
+	 *
 	 * @param modifiers the given modifiers (bit-wise or of <code>Modifier</code> constants)
 	 * @see Modifier
 	 * @deprecated use setBindingOperator instead
@@ -461,7 +461,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	{
 		setCallinModifier(this.ast.newModifier(Modifier.ModifierKeyword.fromFlagValue(modifiers)));
 	}
-	
+
 	/**
 	 * @deprecated use setBindingOperator
 	 */
@@ -475,13 +475,13 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			this.bindingOperator.setBindingModifier(modifier);
 		}
 	}
-	
+
 	/**
 	 * Returns the callin modifier for this callin mapping declaration.
-	 * 
+	 *
      * @see Modifier
 	 * @return one of before, after, replace
-	 */ 
+	 */
 	public Modifier callinModifier()
 	{
 		return this.bindingOperator.bindingModifier();
@@ -501,11 +501,11 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		postReplaceChild(oldChild, name, NAME_PROPERTY);
 
     }
- 
+
     public SimpleName getName() {
     	return this._labelName;
     }
-    
+
     public void setGuardPredicate(GuardPredicateDeclaration predicate) {
         ASTNode oldChild = this._optionalGuardPredicate;
         preReplaceChild(oldChild, predicate, GUARD_PROPERTY);
@@ -517,9 +517,9 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		return _optionalGuardPredicate;
 	}
 
-	/** 
+	/**
 	 * Return whether a static base method is bound such that
-	 * no instance will be passed through this binding 
+	 * no instance will be passed through this binding
 	 * (one static base method suffices to determine staticness).
 	 */
 	public boolean isStatic() {

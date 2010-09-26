@@ -5,7 +5,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: TypeBinding.java 23405 2010-02-03 17:02:18Z stephan $
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -54,13 +54,13 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
  * MIGRATION_STATE: 3.4
- * 
+ *
  * <h4>OTDT changes:</h4>
  * <dl>
  * <dt>What:<dd>  implement methods from ITypeBinding
- * 
+ *
  * <dt>What:<dd>  Check for role files.
- * </dl> 
+ * </dl>
  * <hr>
  * Internal implementation of type bindings.
  */
@@ -114,7 +114,7 @@ class TypeBinding implements ITypeBinding {
 		}
 		if (refType != null) {
 //{ObjectTeams: calling getAnnotations() requires Dependencies control:
-/* orig:			
+/* orig:
 			org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] internalAnnotations = refType.getAnnotations();
   :giro */
 			org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding[] internalAnnotations = null;
@@ -122,7 +122,7 @@ class TypeBinding implements ITypeBinding {
 			try {
 				internalAnnotations = refType.getAnnotations();
 			} finally {
-				Dependencies.release(this);  
+				Dependencies.release(this);
 			}
 // SH}
 			int length = internalAnnotations == null ? 0 : internalAnnotations.length;
@@ -204,7 +204,7 @@ class TypeBinding implements ITypeBinding {
 		}
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getGenericTypeOfWildcardType()
 	 */
@@ -220,7 +220,7 @@ class TypeBinding implements ITypeBinding {
 		}
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getRank()
 	 */
@@ -234,7 +234,7 @@ class TypeBinding implements ITypeBinding {
 				return -1;
 		}
 	}
-	
+
 	/*
 	 * @see ITypeBinding#getComponentType()
 	 */
@@ -255,13 +255,13 @@ class TypeBinding implements ITypeBinding {
 		}
 //{ObjectTeams: may need Dependencies:
 		boolean usesDependencies = false;
-// SH}		
+// SH}
 		try {
 			if (isClass() || isInterface() || isEnum()) {
 //{ObjectTeams: calling methods() requires Dependencies control:
 				Dependencies.setup(this, null, this.resolver.lookupEnvironment(), true, true); // TODO(SH): parser, flags?
 				usesDependencies = true;
-// SH}				
+// SH}
 				ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 				FieldBinding[] fieldBindings = referenceBinding.availableFields(); // resilience
 				int length = fieldBindings.length;
@@ -302,7 +302,7 @@ class TypeBinding implements ITypeBinding {
 			if (usesDependencies)
 				Dependencies.release(this);
 		}
-// SH}		
+// SH}
 		return this.fields = NO_VARIABLE_BINDINGS;
 	}
 
@@ -315,13 +315,13 @@ class TypeBinding implements ITypeBinding {
 		}
 //{ObjectTeams: may need Dependencies:
 		boolean usesDependencies = false;
-// SH}		
+// SH}
 		try {
 			if (isClass() || isInterface() || isEnum()) {
 //{ObjectTeams: calling methods() requires Dependencies control:
 				Dependencies.setup(this, null, this.resolver.lookupEnvironment(), true, true); // TODO(SH): parser, flags?
 				usesDependencies = true;
-// SH}				
+// SH}
 				ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 				org.eclipse.jdt.internal.compiler.lookup.MethodBinding[] internalMethods = referenceBinding.availableMethods(); // be resilient
 				int length = internalMethods.length;
@@ -334,7 +334,7 @@ class TypeBinding implements ITypeBinding {
 							continue;
 						}
 //{ObjectTeams:
-						if (   methodBinding.copyInheritanceSrc != null 
+						if (   methodBinding.copyInheritanceSrc != null
 							|| CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, methodBinding.selector()))
 							continue;
 // SH}
@@ -365,7 +365,7 @@ class TypeBinding implements ITypeBinding {
 			if (usesDependencies)
 				Dependencies.release(this);
 		}
-// SH}		
+// SH}
 		return this.methods = NO_METHOD_BINDINGS;
 	}
 
@@ -857,7 +857,7 @@ class TypeBinding implements ITypeBinding {
 		}
 	}
 
-	
+
 //{ObjectTeams: uniform handling of regular types names and anchored role type names:
 		public String getOptimalName() {
 			if (binding instanceof ReferenceBinding)
@@ -1236,14 +1236,14 @@ class TypeBinding implements ITypeBinding {
 	public boolean isTeam() {
 	    return this.binding.isTeam();
 	}
-	
+
 	/*
 	 * @see ITypeBinding#isRole()
 	 */
 	public boolean isRole() {
 	    return this.binding.isRole();
 	}
-	
+
 	/*
 	 * @see ITypeBinding#isClassPartOf()
 	 */
@@ -1253,7 +1253,7 @@ class TypeBinding implements ITypeBinding {
 		RoleModel roleModel = ((ReferenceBinding)this.binding).roleModel;
 		if (roleModel == null)
 			return false;
-		org.eclipse.jdt.internal.compiler.lookup.TypeBinding otherBinding = (other instanceof RecoveredTypeBinding) 
+		org.eclipse.jdt.internal.compiler.lookup.TypeBinding otherBinding = (other instanceof RecoveredTypeBinding)
 				? ((RecoveredTypeBinding)other).getResolvedBinding()
 				: ((TypeBinding)other).binding;
 		return roleModel.getInterfacePartBinding() == otherBinding;
@@ -1290,7 +1290,7 @@ class TypeBinding implements ITypeBinding {
 		}
 	    return this.resolver.getTypeBinding(baseclass);
 	}
-//	ira+SH}	
+//	ira+SH}
 
 	/*
 	 * @see ITypeBinding#isLocal()
@@ -1345,11 +1345,11 @@ class TypeBinding implements ITypeBinding {
 			return RoleTypeBinding.isRoleWithExplicitAnchor(this.binding);
 		return DependentTypeBinding.isDependentType(this.binding);
 	}
-	
+
 	public String[] getAnchorPath() {
 		if (!DependentTypeBinding.isDependentType(this.binding))
 			return new String[0];
-		
+
 		return getBestNamePath((DependentTypeBinding)this.binding);
 	}
 
@@ -1450,7 +1450,7 @@ class TypeBinding implements ITypeBinding {
 	public IMethodMappingBinding[] getResolvedMethodMappings() {
 		List<IMethodMappingBinding> mappings = new ArrayList<IMethodMappingBinding>();
 		if (this.isRole()) {
-			org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding roleBinding 
+			org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding roleBinding
 				= (org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding)this.binding;
 			if (roleBinding.callinCallouts != null) {
 				for (CallinCalloutBinding mapping : roleBinding.callinCallouts) {

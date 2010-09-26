@@ -1,19 +1,19 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: PrecedenceDeclaration.java 23417 2010-02-03 20:13:55Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -25,9 +25,9 @@ import java.util.List;
 
 /**
  * This class represents a precedence declaration in OT/J (OTJLD §4.8).
- * A precedence declaration contains a list of names 
+ * A precedence declaration contains a list of names
  * referring either to classes or to callin bindings.
- *  
+ *
  * @author stephan
  */
 @SuppressWarnings("rawtypes")
@@ -42,11 +42,11 @@ public class PrecedenceDeclaration extends ASTNode {
 	 * @since 0.7.0
 	 */
 	@SuppressWarnings("nls")
-	public static final SimplePropertyDescriptor AFTER_PROPERTY = 
+	public static final SimplePropertyDescriptor AFTER_PROPERTY =
 		new SimplePropertyDescriptor(PrecedenceDeclaration.class, "after", boolean.class, MANDATORY);
 
 	private static final List PROPERTY_DESCRIPTORS_3_0;
-	
+
 	static {
 		List propertyList = new ArrayList(3);
 		createPropertyList(PrecedenceDeclaration.class, propertyList);
@@ -54,7 +54,7 @@ public class PrecedenceDeclaration extends ASTNode {
 		addProperty(AFTER_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
 	}
-	
+
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			throw new UnsupportedOperationException("JLS2 not supported"); //$NON-NLS-1$
@@ -62,19 +62,19 @@ public class PrecedenceDeclaration extends ASTNode {
 			return PROPERTY_DESCRIPTORS_3_0;
 		}
 	}
-	
+
 	ASTNode.NodeList _elements = new ASTNode.NodeList(ELEMENTS_PROPERTY);
 
 	/**
 	 * <code>true</code> for <code>precedence after</code>, else <code>false</code>.
 	 */
 	boolean isAfter = false;
-	
+
 	PrecedenceDeclaration(AST ast)
 	{
 		super(ast);
 	}
-	
+
      List internalGetChildListProperty(ChildListPropertyDescriptor property)
      {
     	 if (property == ELEMENTS_PROPERTY) {
@@ -83,7 +83,7 @@ public class PrecedenceDeclaration extends ASTNode {
     	 // allow default implementation to flag the error
     	 return super.internalGetChildListProperty(property);
      }
- 
+
      @Override
      boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value) {
     	 if (property == AFTER_PROPERTY) {
@@ -122,7 +122,7 @@ public class PrecedenceDeclaration extends ASTNode {
 	@SuppressWarnings("unchecked")
 	@Override
 	ASTNode clone0(AST target) {
-		if (this.ast.apiLevel == AST.JLS2_INTERNAL) 
+		if (this.ast.apiLevel == AST.JLS2_INTERNAL)
 			unsupportedIn2();
 		PrecedenceDeclaration result = new PrecedenceDeclaration(target);
 		result.setSourceRange(this.getStartPosition(), this.getLength());
@@ -140,22 +140,22 @@ public class PrecedenceDeclaration extends ASTNode {
 	List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
-	
+
 	public List elements() {
 		return this._elements;
 	}
 
 	/**
-	 * Mark whether this is a <code>precedence after</code> declaration. 
+	 * Mark whether this is a <code>precedence after</code> declaration.
 	 */
     public void setAfter(boolean isAfter) {
 		preValueChange(AFTER_PROPERTY);
 		this.isAfter = isAfter;
-		postValueChange(AFTER_PROPERTY);		
+		postValueChange(AFTER_PROPERTY);
     }
 
 	/**
-	 * Answer whether this is a <code>precedence after</code> declaration. 
+	 * Answer whether this is a <code>precedence after</code> declaration.
 	 */
     public boolean isAfter() {
 		return this.isAfter;

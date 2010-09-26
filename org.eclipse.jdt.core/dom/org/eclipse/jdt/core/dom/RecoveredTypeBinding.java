@@ -105,14 +105,14 @@ class RecoveredTypeBinding implements ITypeBinding {
 	public ITypeBinding getGenericTypeOfWildcardType() {
 		return null;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getRank()
 	 */
 	public int getRank() {
 		return -1;
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getComponentType()
 	 */
@@ -281,7 +281,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 			buffer.append(CharOperation.toString(referenceBinding.compoundName));
 			buffer.append(brackets);
 			return String.valueOf(buffer);
-		} else { 
+		} else {
 			return getName();
 		}
 	}
@@ -582,7 +582,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 	public String getOptimalName() {
 		return this.getQualifiedName();
 	}
-// SH}	
+// SH}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.IBinding#getAnnotations()
@@ -757,7 +757,7 @@ class RecoveredTypeBinding implements ITypeBinding {
 				return RoleTypeBinding.isRoleWithExplicitAnchor(this.binding);
 			return DependentTypeBinding.isDependentType(this.binding);
 		}
-		if (   this.currentType != null 
+		if (   this.currentType != null
 			&& this.currentType.isParameterizedType())
 			return ((ParameterizedType)this.currentType).isDependentType(onlyRelevant);
 		return false;
@@ -775,12 +775,12 @@ class RecoveredTypeBinding implements ITypeBinding {
 		}
 		return new String[0];
 	}
-	
+
 	public IMethodMappingBinding[] getResolvedMethodMappings() {
 		// copy of TypeBinding.getResolvedMethodMappings:
 		List<IMethodMappingBinding> mappings = new ArrayList<IMethodMappingBinding>();
 		if (this.isRole()) {
-			org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding roleBinding 
+			org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding roleBinding
 				= (org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding)this.binding;
 			if (roleBinding.callinCallouts != null) {
 				for (CallinCalloutBinding mapping : roleBinding.callinCallouts) {

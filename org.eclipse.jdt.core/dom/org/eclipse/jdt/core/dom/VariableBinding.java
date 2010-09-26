@@ -46,7 +46,7 @@ class VariableBinding implements IVariableBinding {
 	private BindingResolver resolver;
 	private ITypeBinding type;
 	private IAnnotationBinding[] annotations;
-	
+
 	VariableBinding(BindingResolver resolver, org.eclipse.jdt.internal.compiler.lookup.VariableBinding binding) {
 		this.resolver = resolver;
 		this.binding = binding;
@@ -173,7 +173,7 @@ class VariableBinding implements IVariableBinding {
 					default:
 						node = node.getParent();
 				}
-			}			
+			}
 		}
 		return null;
 	}

@@ -39,47 +39,47 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 
 /**
  * New for OTDT.
- * 
+ *
  * @author ikeman
  *
- * This class provides helperMethods for the creation of DOMAST-Nodes. 
+ * This class provides helperMethods for the creation of DOMAST-Nodes.
  *
  * @version $Id: ASTNodeCreator.java 22581 2009-09-24 10:26:48Z stephan $
  */
 @SuppressWarnings("unchecked") // assigning from parameterless lists :(
 public class ASTNodeCreator
 {
-    
+
     public static CompilationUnit createCU(AST ast, PackageDeclaration pack, List importList, List typeList)
     {
         CompilationUnit newCU = ast.newCompilationUnit();
-        
+
         if (pack != null)
             newCU.setPackage(pack);
-        
+
         if (importList != null && importList.size()!= 0)
         {
             List<ImportDeclaration> cuImportList = newCU.imports();
             for (int idx = 0; idx < importList.size(); idx++)
             {
                 ImportDeclaration tmp =  (ImportDeclaration)importList.get(idx);
-                cuImportList.add(tmp);                
+                cuImportList.add(tmp);
             }
         }
-        
+
         if (typeList != null && typeList.size()!= 0)
         {
             List<TypeDeclaration> cuTypeList = newCU.types();
             for (int idx = 0; idx < typeList.size(); idx++)
             {
                 TypeDeclaration tmp =  (TypeDeclaration)typeList.get(idx);
-                cuTypeList.add(tmp);                
+                cuTypeList.add(tmp);
             }
         }
         return newCU;
     }
- 
- /* km: not needed anymore? 
+
+ /* km: not needed anymore?
     public static TypeDeclaration createTeam(AST ast, Javadoc javadoc, int modifiers, boolean isInterface, boolean isRole,
             String teamClassName, String superClassName, List superInterfaces, List bodyDeclarations)
     {
@@ -88,9 +88,9 @@ public class ASTNodeCreator
         newTypeDecl.setTeam(true);
         if(ast.apiLevel() == AST.JLS2)
         	newTypeDecl.setModifiers(modifiers);
-        else 
+        else
         	newTypeDecl.modifiers().addAll(ast.newModifiers(modifiers));
-        
+
         newTypeDecl.setRole(isRole);
         newTypeDecl.setInterface(isInterface);
 
@@ -98,21 +98,21 @@ public class ASTNodeCreator
             newTypeDecl.setJavadoc(javadoc);
 
         if(ast.apiLevel() == AST.JLS2) {
-	        if (superClassName != null) 
+	        if (superClassName != null)
 	            newTypeDecl.setSuperclass(ast.newName(superClassName));
-	        
+
 	        if (superInterfaces != null && superInterfaces.size()!= 0)
 	        {
 	            List superInterfacesList = newTypeDecl.superInterfaces();
 	            for (int idx = 0; idx < superInterfaces.size(); idx++)
 	            {
 	                SimpleName tmp =  (SimpleName)superInterfaces.get(idx);
-	                superInterfacesList.add(tmp);                
+	                superInterfacesList.add(tmp);
 	            }
 	        }
         }
         else {
-        	
+
         }
 
         if (bodyDeclarations != null && bodyDeclarations.size()!= 0)
@@ -121,45 +121,45 @@ public class ASTNodeCreator
             for (int idx = 0; idx < bodyDeclarations.size(); idx++)
             {
                 Object tmp =  bodyDeclarations.get(idx);
-                bodyDeclarationList.add(tmp);                
+                bodyDeclarationList.add(tmp);
             }
         }
         return newTypeDecl;
     }
- 
-    
-    public static RoleTypeDeclaration createRole(AST ast, Javadoc javadoc, int modifier, String roleName, String baseClassName, 
+
+
+    public static RoleTypeDeclaration createRole(AST ast, Javadoc javadoc, int modifier, String roleName, String baseClassName,
             String teamClassName, String superClassName, List superInterfaces, boolean isTeam,
             List bodyDeclarations)
     {
         RoleTypeDeclaration role = ast.newRoleTypeDeclaration();
-        
+
         if(ast.apiLevel() == AST.JLS2)
         	role.setModifiers(modifier);
-        else 
+        else
         	role.modifiers().addAll(ast.newModifiers(modifier));
-        
+
         role.setName(ast.newName(roleName));
         role.setTeamClass(ast.newName(teamClassName));
         role.setTeam(isTeam);
-        role.setRole(true);        
+        role.setRole(true);
 
         if (javadoc != null)
             role.setJavadoc(javadoc);
-        
-        if (baseClassName != null) 
+
+        if (baseClassName != null)
             role.setBaseClass(ast.newName(baseClassName));
-        
-        if (superClassName != null) 
+
+        if (superClassName != null)
             role.setSuperclass(ast.newName(superClassName));
-        
+
         if (superInterfaces != null && superInterfaces.size()!= 0)
         {
             List superInterfacesList = role.superInterfaces();
             for (int idx = 0; idx < superInterfaces.size(); idx++)
             {
                 SimpleName tmp =  (SimpleName)superInterfaces.get(idx);
-                superInterfacesList.add(tmp);                
+                superInterfacesList.add(tmp);
             }
         }
 
@@ -169,7 +169,7 @@ public class ASTNodeCreator
             for (int idx = 0; idx < bodyDeclarations.size(); idx++)
             {
                 Object tmp =  bodyDeclarations.get(idx);
-                bodyDeclarationList.add(tmp);                
+                bodyDeclarationList.add(tmp);
             }
         }
         return role;
@@ -180,12 +180,12 @@ public class ASTNodeCreator
     {
         CallinMappingDeclaration newCallinMapping = ast.newCallinMappingDeclaration();
         newCallinMapping.setCallinModifier(modifier);
-        
+
         newCallinMapping.setRoleMappingElement(roleMethod);
-        
+
         if (javadoc != null)
             newCallinMapping.setJavadoc(javadoc);
-        
+
         if (baseMethods != null && baseMethods.size()!= 0)
         {
             List<MethodSpec> baseMappingList = newCallinMapping.getBaseMappingElements();
@@ -201,39 +201,39 @@ public class ASTNodeCreator
             while(!paramMappings.isEmpty())
             {
                 ParameterMapping tmp =  (ParameterMapping)paramMappings.remove(0);
-                parameterMappingList.add(tmp);                
+                parameterMappingList.add(tmp);
             }
         }
         return newCallinMapping;
     }
-    
+
     @SuppressWarnings("deprecation")
 	public static CalloutMappingDeclaration createCalloutMappingDeclaration(
-                       AST ast, 
-                       Javadoc javadoc, 
-                       int modifier, 
+                       AST ast,
+                       Javadoc javadoc,
+                       int modifier,
                        MethodMappingElement roleMethod,
                        MethodMappingElement baseMethod,
                        int bindingModifier,
-                       List paramMappings, 
-                       boolean calloutOverride, 
+                       List paramMappings,
+                       boolean calloutOverride,
                        boolean signatureFlag)
     {
         CalloutMappingDeclaration newCalloutMapping = ast.newCalloutMappingDeclaration();
-        
+
         if (javadoc != null)
             newCalloutMapping.setJavadoc(javadoc);
-        
+
         if(ast.apiLevel() == AST.JLS2)
        		newCalloutMapping.setModifiers(modifier);
-        else 
+        else
         	newCalloutMapping.modifiers().addAll(ast.newModifiers(modifier));
 
-        
+
         newCalloutMapping.setSignatureFlag(signatureFlag);
         newCalloutMapping.setRoleMappingElement(roleMethod);
         newCalloutMapping.setBaseMappingElement(baseMethod);
-        
+
         ModifierKeyword keyword = null;
         switch (bindingModifier) {
         case Modifier.OT_SET_CALLOUT: keyword = ModifierKeyword.SET_KEYWORD; break;
@@ -241,26 +241,26 @@ public class ASTNodeCreator
         }
         int calloutKind = calloutOverride ? MethodBindingOperator.KIND_CALLOUT_OVERRIDE : MethodBindingOperator.KIND_CALLOUT;
         newCalloutMapping.setBindingOperator(ast.newMethodBindingOperator(keyword, calloutKind));
-        
+
         if (paramMappings != null && paramMappings.size()!= 0)
         {
             List<ParameterMapping> parameterMapping = newCalloutMapping.getParameterMappings();
             while(!paramMappings.isEmpty())
             {
                 ParameterMapping tmp =  (ParameterMapping)paramMappings.remove(0);
-                parameterMapping.add(tmp);                
+                parameterMapping.add(tmp);
             }
         }
         return newCalloutMapping;
     }
-    
+
     public static FieldAccessSpec createFieldAccSpec(AST ast, boolean isSetter, String fieldName, String fieldType, boolean hasSignature)
     {
         FieldAccessSpec newFieldAcc = ast.newFieldAccessSpec();
         newFieldAcc.setName(ast.newSimpleName(fieldName));
-        
+
         newFieldAcc.setFieldType(createType(ast, fieldType));
-                
+
         newFieldAcc.setSignatureFlag(hasSignature);
         return newFieldAcc;
     }
@@ -277,7 +277,7 @@ public class ASTNodeCreator
         methodSpec.setName(ast.newSimpleName(methodName));
         methodSpec.setReturnType2(createType(ast, returnType));
         methodSpec.setSignatureFlag(signatureFlag);
-        
+
         if (argumentTypes !=null && argumentTypes.size()!=0)
         {
             List<VariableDeclaration> methodParameters = methodSpec.parameters();
@@ -287,7 +287,7 @@ public class ASTNodeCreator
             						  ? argumentNames.get(idx)
             						  : "arg"+idx; //$NON-NLS-1$
                 VariableDeclaration tmp = createArgument(ast, 0, createType(ast, argumentTypes.get(idx)), argumentName, dimensions.get(idx), null);
-                methodParameters.add(tmp);                
+                methodParameters.add(tmp);
             }
         }
         return methodSpec;
@@ -297,16 +297,16 @@ public class ASTNodeCreator
     {
         MethodSpec methodSpec = ast.newMethodSpec();
         methodSpec.setName(ast.newSimpleName(methodName));
-        methodSpec.setSignatureFlag(signatureFlag);        
+        methodSpec.setSignatureFlag(signatureFlag);
         methodSpec.setReturnType2(returnType);
-        
+
         if (parameters!=null && parameters.size()!=0)
         {
             List<VariableDeclaration> methodParameters = methodSpec.parameters();
             for (int idx = 0; idx < parameters.size(); idx++)
             {
                 VariableDeclaration tmp =  (VariableDeclaration)parameters.get(idx);
-                methodParameters.add(tmp);                
+                methodParameters.add(tmp);
             }
         }
         return methodSpec;
@@ -324,7 +324,7 @@ public class ASTNodeCreator
         Type primType = getPrimitveType(ast, typeName);
         if (primType != null)
         return primType;
-        
+
         if (typeName.endsWith("[]")) //$NON-NLS-1$
         {
             String [] name = typeName.split("\\[\\]");  //$NON-NLS-1$
@@ -341,45 +341,45 @@ public class ASTNodeCreator
                 }
             }
         }
-        
+
         Name name = ast.newName(typeName);
         Type simpleType  = ast.newSimpleType(name);
-        
+
         return simpleType;
     }
-    
+
     private static Type getPrimitveType(AST ast, String typeName)
     {
         if (typeName.equals(PrimitiveType.BOOLEAN.toString()))
-            return ast.newPrimitiveType(PrimitiveType.BOOLEAN);            
+            return ast.newPrimitiveType(PrimitiveType.BOOLEAN);
 
         if (typeName.equals(PrimitiveType.BYTE.toString()))
-            return ast.newPrimitiveType(PrimitiveType.BYTE);            
-     
+            return ast.newPrimitiveType(PrimitiveType.BYTE);
+
         if (typeName.equals(PrimitiveType.CHAR.toString()))
-            return ast.newPrimitiveType(PrimitiveType.CHAR);            
+            return ast.newPrimitiveType(PrimitiveType.CHAR);
 
         if (typeName.equals(PrimitiveType.DOUBLE.toString()))
-            return ast.newPrimitiveType(PrimitiveType.DOUBLE);            
+            return ast.newPrimitiveType(PrimitiveType.DOUBLE);
 
         if (typeName.equals(PrimitiveType.FLOAT.toString()))
-            return ast.newPrimitiveType(PrimitiveType.FLOAT);            
+            return ast.newPrimitiveType(PrimitiveType.FLOAT);
 
         if (typeName.equals(PrimitiveType.INT.toString()))
-            return ast.newPrimitiveType(PrimitiveType.INT);            
+            return ast.newPrimitiveType(PrimitiveType.INT);
 
         if (typeName.equals(PrimitiveType.LONG.toString()))
-            return ast.newPrimitiveType(PrimitiveType.LONG);            
+            return ast.newPrimitiveType(PrimitiveType.LONG);
 
         if (typeName.equals(PrimitiveType.SHORT.toString()))
-            return ast.newPrimitiveType(PrimitiveType.SHORT);            
+            return ast.newPrimitiveType(PrimitiveType.SHORT);
 
         if (typeName.equals(PrimitiveType.VOID.toString()))
             return ast.newPrimitiveType(PrimitiveType.VOID);
-        
+
         return null;
     }
-    
+
     @SuppressWarnings("deprecation")
 	public static SingleVariableDeclaration createArgument(AST ast, int modifier, Type parameterType, String parameterName, int dimension,
             Expression initializer)
@@ -387,16 +387,16 @@ public class ASTNodeCreator
         SingleVariableDeclaration methodSpecParameter = ast.newSingleVariableDeclaration();
         if(ast.apiLevel() == AST.JLS2)
         	methodSpecParameter.setModifiers(modifier);
-        else 
+        else
         	methodSpecParameter.modifiers().addAll(ast.newModifiers(modifier));
-        
+
         methodSpecParameter.setType(parameterType);
         methodSpecParameter.setName(ast.newSimpleName(parameterName));
         methodSpecParameter.setExtraDimensions(dimension);
         methodSpecParameter.setInitializer(initializer);
         return methodSpecParameter;
     }
-    
+
     public static ParameterMapping createParameterMapping(AST ast, Expression expression, SimpleName identName,
             String direction, boolean resultFlag)
     {
@@ -407,7 +407,7 @@ public class ASTNodeCreator
         newParameterMapping.setResultFlag(resultFlag);
         return newParameterMapping;
     }
-    
+
     public static Expression createExpression(AST ast, String expressionName, String methodName)
     {
         MethodInvocation expression = ast.newMethodInvocation();
@@ -415,8 +415,8 @@ public class ASTNodeCreator
         expression.setName(ast.newSimpleName(methodName));
         return expression;
     }
-    
-    
+
+
     /**
      * Parses the source string of an expression and returns a dom ast expression,
      * that belongs to the given ast, or <code>null</code> if something goes wrong.
@@ -455,7 +455,7 @@ public class ASTNodeCreator
             for (int idx = 0; idx < arguments.size(); idx++)
             {
                 Expression tmp =  (Expression)arguments.get(idx);
-                classArguments.add(tmp);                
+                classArguments.add(tmp);
             }
         }
         return expression;

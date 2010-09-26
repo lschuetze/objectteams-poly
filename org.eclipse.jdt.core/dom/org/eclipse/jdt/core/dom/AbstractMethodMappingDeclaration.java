@@ -1,19 +1,19 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: AbstractMethodMappingDeclaration.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * NEW for OTDT.
- * 
+ *
  * Super class for callin/callout method mappings
  * @author brcan
  *
@@ -32,7 +32,7 @@ import java.util.List;
  */
 public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 {
-	
+
 	protected MethodMappingElement roleMappingElement = null;
 
 	// includes info about binding kind and binding modifiers
@@ -44,46 +44,46 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 	 * <p>
 	 * N.B. This constructor is package-private.
 	 * </p>
-	 * 
+	 *
 	 * @param ast the AST that is to own this node
 	 */
 	AbstractMethodMappingDeclaration(AST ast)
 	{
 		super(ast);
 	}
-	
+
 	/**
-	 * The list of parameter mappings (element type: <code>ParameterMapping</code>). 
+	 * The list of parameter mappings (element type: <code>ParameterMapping</code>).
 	 * Defaults to an empty list.
 	 */
-	ASTNode.NodeList _parameterMappings = 
+	ASTNode.NodeList _parameterMappings =
 		new ASTNode.NodeList(internalParameterMappingsProperty());
 
 	/** Return the structural property descriptor for the roleMappingElement property of this node. */
 	public abstract ChildPropertyDescriptor getRoleElementProperty();
 
-	/** Return the structural property descriptor for the bindingOperator property of this node. */ 
+	/** Return the structural property descriptor for the bindingOperator property of this node. */
 	abstract ChildPropertyDescriptor internalGetBindingOperatorProperty();
-	
+
 	/**
 	 * Returns structural property descriptor for the "parameterMappings" property
 	 * of this node.
-	 * 
+	 *
 	 * @return the property descriptor
 	 */
 	abstract ChildListPropertyDescriptor internalParameterMappingsProperty();
-	
+
 	/**
 	 * Creates and returns a structural property descriptor for the
 	 * "parameterMappings" property declared on the given concrete node type.
-	 * 
+	 *
 	 * @return the property descriptor
 	 */
 	static final ChildListPropertyDescriptor internalParameterMappingPropertyFactory(Class nodeClass)
     {
 		return new ChildListPropertyDescriptor(nodeClass, "parameterMappings", ParameterMapping.class, CYCLE_RISK); //$NON-NLS-1$
 	}
-	
+
 	ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean get, ASTNode child)
 	{
    	    if (property == getRoleElementProperty())
@@ -107,12 +107,12 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
         // allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, get, child);
 	}
-	
+
 
 	/**
 	 * Returns the method spec left of the callout/in arrow.
 	 * @return the left method spec, i.e. the declaring role method
-	 */ 
+	 */
 	public MethodMappingElement getRoleMappingElement()
 	{
 		if (this.roleMappingElement == null) {
@@ -124,21 +124,21 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 					postLazyInit(this.roleMappingElement, getRoleElementProperty());
 				}
 			}
-		}		
+		}
 		return this.roleMappingElement;
 	}
 
 	/**
 	 * Sets the left method spec (role method spec) declared in this callout
 	 * mapping declaration to the given method spec.
-	 * 
+	 *
 	 * @param roleMappingElement
 	 * @exception IllegalArgumentException if:
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
 	 * </ul>
-	 */ 
+	 */
     public void setRoleMappingElement(MethodMappingElement roleMappingElement)
     {
 		if (roleMappingElement == null)
@@ -156,9 +156,9 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 		MethodBindingOperator oldOperator = this.bindingOperator;
 		preReplaceChild(oldOperator, bindingOp, propertyDescriptor);
 		this.bindingOperator = bindingOp;
-		postReplaceChild(oldOperator, bindingOp, propertyDescriptor);		
+		postReplaceChild(oldOperator, bindingOp, propertyDescriptor);
 	}
-	
+
 	public MethodBindingOperator bindingOperator() {
         if (this.bindingOperator == null)
         {
@@ -179,11 +179,11 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 	/**
      * Returns the live ordered list of parameter mappings for this
      * callin mapping declaration.
-     * 
+     *
      * @return the live list of parameter mappings
      *    (element type: <code>ParameterMapping</code>)
-     */ 
-    public List getParameterMappings() 
+     */
+    public List getParameterMappings()
     {
         return _parameterMappings;
     }
@@ -196,15 +196,15 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 	public boolean hasSignature() {
 		return getRoleMappingElement().hasSignature();
 	}
-	
-	/** 
+
+	/**
 	 * Mark this method mapping as not having signatures and actually
 	 * remove signatures from all method specs.
 	 */
 	public void removeSignatures() {
 		removeSignatureFrom(getRoleMappingElement());
 	}
-	
+
     void removeSignatureFrom(MethodMappingElement mappingElement) {
 		mappingElement.setSignatureFlag(false);
 		switch (mappingElement.getNodeType()) {

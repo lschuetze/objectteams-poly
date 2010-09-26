@@ -91,11 +91,11 @@ public interface IBinding {
 	 */
 	public static final int MEMBER_VALUE_PAIR = 6;
 
-//{ObjectTeams: Binding for method mappings.    
+//{ObjectTeams: Binding for method mappings.
 	/**
 	 * Kind constant (value 7) indicating a callin/callout method mapping.
 	 * Bindings of this kind can be safely cast to <code>IMethodMappingBinding</code>.
-	 * 
+	 *
 	 * @see #getKind()
 	 * @see IMethodMappingBinding
 	 */

@@ -1,19 +1,19 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: GuardPredicateDeclaration.java 23417 2010-02-03 20:13:55Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -25,7 +25,7 @@ import java.util.List;
 
 /**
  * This class represents a declaration of a guard predicate in OT/J (OTJLD §5.4).
- * 
+ *
  * @author stephan
  */
 public class GuardPredicateDeclaration extends ASTNode {
@@ -39,12 +39,12 @@ public class GuardPredicateDeclaration extends ASTNode {
     /**
      * The "base" structural property of this node type, marking whether it is a "base guard" or not.
      */
-    public static final SimplePropertyDescriptor BASE_PROPERTY = 
+    public static final SimplePropertyDescriptor BASE_PROPERTY =
         new SimplePropertyDescriptor(GuardPredicateDeclaration.class, "base", boolean.class, MANDATORY); //$NON-NLS-1$
 
-    
+
 	private static final List PROPERTY_DESCRIPTORS_3_0;
-	
+
 	static {
 		List propertyList = new ArrayList(3);
 		createPropertyList(GuardPredicateDeclaration.class, propertyList);
@@ -52,7 +52,7 @@ public class GuardPredicateDeclaration extends ASTNode {
 		addProperty(EXPRESSION_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
 	}
-	
+
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			throw new UnsupportedOperationException("JLS2 not supported"); //$NON-NLS-1$
@@ -60,15 +60,15 @@ public class GuardPredicateDeclaration extends ASTNode {
 			return PROPERTY_DESCRIPTORS_3_0;
 		}
 	}
-	
+
 	private Expression expression = null;
 	private boolean isBase = false;
-	
+
 	GuardPredicateDeclaration(AST ast)
 	{
 		super(ast);
 	}
-	
+
 	@Override
     boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value)
     {
@@ -78,7 +78,7 @@ public class GuardPredicateDeclaration extends ASTNode {
             } else {
                 setBase(value);
                 return false;
-            }       
+            }
         }
         // allow default implementation to flag the error
         return super.internalGetSetBooleanProperty(property, get, value);
@@ -103,7 +103,7 @@ public class GuardPredicateDeclaration extends ASTNode {
 	int getNodeType0() {
 		return GUARD_PREDICATE_DECLARATION;
 	}
-	
+
 	@Override
 	void accept0(ASTVisitor visitor) {
 		boolean visitChildren = visitor.visit(this);
@@ -126,7 +126,7 @@ public class GuardPredicateDeclaration extends ASTNode {
 
 	@Override
 	ASTNode clone0(AST target) {
-		if (this.ast.apiLevel == AST.JLS2_INTERNAL) 
+		if (this.ast.apiLevel == AST.JLS2_INTERNAL)
 			unsupportedIn2();
 		GuardPredicateDeclaration result = new GuardPredicateDeclaration(target);
 		result.setSourceRange(this.getStartPosition(), this.getLength());
@@ -134,7 +134,7 @@ public class GuardPredicateDeclaration extends ASTNode {
 		result.setExpression((Expression)ASTNode.copySubtree(target, getExpression()));
 		return result;
 	}
-	
+
 	public boolean isBase()
 	{
 		return isBase;
@@ -143,7 +143,7 @@ public class GuardPredicateDeclaration extends ASTNode {
 	public void setBase(boolean isBase)
 	{
 		preValueChange(BASE_PROPERTY);
-		this.isBase = isBase; 
+		this.isBase = isBase;
 		postValueChange(BASE_PROPERTY);
 	}
 
@@ -161,7 +161,7 @@ public class GuardPredicateDeclaration extends ASTNode {
 		}
 		return this.expression;
 	}
-	
+
 	public void setExpression(Expression expression) {
 		if (expression == null) {
 			throw new IllegalArgumentException();
@@ -176,7 +176,7 @@ public class GuardPredicateDeclaration extends ASTNode {
 	List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
-	
+
 	@Override
 	void appendDebugString(StringBuffer buffer) {
 		if (this.isBase)

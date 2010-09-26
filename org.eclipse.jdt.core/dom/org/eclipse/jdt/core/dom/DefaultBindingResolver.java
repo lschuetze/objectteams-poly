@@ -147,12 +147,12 @@ class DefaultBindingResolver extends BindingResolver {
 	 * Toggle controlling whether DOM bindings should be created when missing internal compiler bindings..
 	 */
 	boolean isRecoveringBindings;
-	
+
 	/**
 	 * Set to <code>true</code> if initialized from a java project
 	 */
 	boolean fromJavaProject;
-	
+
 	/**
 	 * Constructor for DefaultBindingResolver.
 	 */
@@ -951,7 +951,7 @@ class DefaultBindingResolver extends BindingResolver {
         }
         return null;
     }
-        
+
     synchronized IMethodBinding resolveConstructor(TSuperConstructorInvocation constructor)
     {
         org.eclipse.jdt.internal.compiler.ast.ASTNode node =
@@ -961,7 +961,7 @@ class DefaultBindingResolver extends BindingResolver {
             ExplicitConstructorCall explicitConstructorCall = (ExplicitConstructorCall)node;
             return this.getMethodBinding(explicitConstructorCall.binding.copyInheritanceSrc);
         }
-        return null;        
+        return null;
     }
 
     synchronized IMethodBinding resolveMethod(org.eclipse.jdt.core.dom.BaseCallMessageSend method)
@@ -974,8 +974,8 @@ class DefaultBindingResolver extends BindingResolver {
             return this.getMethodBinding(baseCall.getMessageSend().binding);
         }
         return null;
-    }   
-      
+    }
+
     synchronized IMethodBinding resolveMethod(org.eclipse.jdt.core.dom.MethodSpec method)
     {
         org.eclipse.jdt.internal.compiler.ast.ASTNode node =
@@ -999,7 +999,7 @@ class DefaultBindingResolver extends BindingResolver {
             return this.getMethodBinding(msgSend.binding.copyInheritanceSrc);
         }
         return null;
-    }   
+    }
 
     synchronized IMethodMappingBinding resolveMethodMapping(org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration mapping)
     {
@@ -1025,7 +1025,7 @@ class DefaultBindingResolver extends BindingResolver {
 		}
 		return null;
     }
-    
+
 
 
     synchronized IVariableBinding resolveVariable(org.eclipse.jdt.core.dom.FieldAccessSpec field)
@@ -1040,7 +1040,7 @@ class DefaultBindingResolver extends BindingResolver {
         return null;
     }
 //mkr}
-	
+
 	synchronized ITypeBinding resolveTypeBindingForName(Name name) {
 		org.eclipse.jdt.internal.compiler.ast.ASTNode node = (org.eclipse.jdt.internal.compiler.ast.ASTNode) this.newAstToOldAst.get(name);
 		int index = name.index;
@@ -1517,8 +1517,8 @@ class DefaultBindingResolver extends BindingResolver {
 			org.eclipse.jdt.internal.compiler.ast.MemberValuePair memberValuePair = (org.eclipse.jdt.internal.compiler.ast.MemberValuePair) node;
 			return getMethodBinding(memberValuePair.binding);
 		}
-//{ObjectTeams: Resolve bindings for OT-specific elements		
-		else if (node instanceof MethodSpec) 
+//{ObjectTeams: Resolve bindings for OT-specific elements
+		else if (node instanceof MethodSpec)
 		{
 			if (!(node instanceof FieldAccessSpec))
 			{
@@ -1536,7 +1536,7 @@ class DefaultBindingResolver extends BindingResolver {
 			LiftingTypeReference liftingTypeRef = (LiftingTypeReference)node;
 			return getTypeBinding(liftingTypeRef.resolvedType);
 		}
-//jsv}			
+//jsv}
 		return null;
 	}
 
@@ -2021,7 +2021,7 @@ class DefaultBindingResolver extends BindingResolver {
         {
             return null;
         }
-        
+
         if (callbinding.isValidBinding())
         {
             MethodMappingBinding binding =
@@ -2037,9 +2037,9 @@ class DefaultBindingResolver extends BindingResolver {
                 return binding;
             }
         }
-        
+
         return null;
     }
 //mkr}
-	
+
 }

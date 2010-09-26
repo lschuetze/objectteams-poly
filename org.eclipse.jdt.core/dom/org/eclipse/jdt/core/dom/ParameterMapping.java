@@ -1,19 +1,19 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: ParameterMapping.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -27,77 +27,77 @@ import java.util.List;
  * NEW for OTDT.
  *
  * Represents the DOM-ASTNode for parameterMapping, which has to handle mappings for callin (OTJLD §4.4) and callout (OTJLD §3.2) bindings.
- * 
+ *
  * Possible parameter mappings are:
  *   "integer.intValue() -> i" or "result <- new Integer(result)" for callout Bindings or
  *     "what <- uid" or  "new Integer(i) -> result" for callin Bindings
- *    
- * Contained AST elements: 
+ *
+ * Contained AST elements:
  * This class consists of one expression, one identifier, one direction and a flag, whether it is
  * a return-parameter mapping or not. The direction is necessary for determination of callout and callin.
- * 
+ *
  * Locations in source code:
  * This node is used in CalloutMappingDeclartion, CallinMappingDeclaration
- * 
+ *
  * @author ike
  */
 public class ParameterMapping extends Expression
 {
 	/**
-	 * Creates a new AST node for a ParameterMapping declaration owned 
+	 * Creates a new AST node for a ParameterMapping declaration owned
 	 * by the given AST. By default, the declaration is for a ParameterMapping
 	 * of an unspecified, but legal, name;
 	 * <p>
-	 * N.B. This constructor is package-private; all subclasses must be 
-	 * declared in the same package; clients are unable to declare 
+	 * N.B. This constructor is package-private; all subclasses must be
+	 * declared in the same package; clients are unable to declare
 	 * additional subclasses.
 	 * </p>
-	 * 
+	 *
 	 * @param ast the AST that is to own this node
-	 */    
+	 */
 	ParameterMapping(AST ast)
 	{
 		super(ast);
 	}
-	
-	
+
+
 	/**
 	 * The expression structural property of this node type.
 	 */
-	public static final ChildPropertyDescriptor EXPRESSION_PROPERTY = 
+	public static final ChildPropertyDescriptor EXPRESSION_PROPERTY =
 		new ChildPropertyDescriptor(ParameterMapping.class, "expression", Expression.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
-	
+
 	/**
 	 * The identifier structural property of this node type.
 	 */
-	public static final ChildPropertyDescriptor IDENTIFIER_PROPERTY = 
+	public static final ChildPropertyDescriptor IDENTIFIER_PROPERTY =
 		new ChildPropertyDescriptor(ParameterMapping.class, "identifier", SimpleName.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The direction structural property of this node type.
 	 */
-	public static final SimplePropertyDescriptor DIRECTION_PROPERTY = 
+	public static final SimplePropertyDescriptor DIRECTION_PROPERTY =
 		new SimplePropertyDescriptor(ParameterMapping.class, "direction", String.class, MANDATORY);	 //$NON-NLS-1$
-	
+
 	/**
 	 * The is_Result structural property of this node type.
 	 */
     private static final SimplePropertyDescriptor IS_RESULT_PROPERTY =
         new SimplePropertyDescriptor(ParameterMapping.class, "isResult", boolean.class, MANDATORY); //$NON-NLS-1$
 
-	
+
     /**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
 	private static final List PROPERTY_DESCRIPTORS_2_0;
-	
+
 	private Expression _expression = null;
 	private SimpleName _identifier = null;
 	private String _direction = null;
 	private boolean _isResult = false;
-    
+
 	static
 	{
 		List propertyList = new ArrayList(5);
@@ -108,37 +108,37 @@ public class ParameterMapping extends Expression
 		addProperty(IS_RESULT_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
 	}
-	
+
 	/**
 	 * Returns a list of structural property descriptors for this node type.
 	 * Clients must not modify the result.
-	 * 
+	 *
 	 * @param apiLevel the API level; one of the AST.JLS* constants
-	 * @return a list of property descriptors (element type: 
+	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
 	public static List propertyDescriptors(int apiLevel)
 	{
 		return PROPERTY_DESCRIPTORS_2_0;
 	}
-	
-	
+
+
 	/**
 	 * Returns a list of structural property descriptors for this node type.
 	 * Clients must not modify the result.
-	 * 
+	 *
 	 * @param apiLevel the API level; one of the AST.JLS* constants
-	 * @return a list of property descriptors (element type: 
+	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
-	List internalStructuralPropertiesForType(int apiLevel) 
+	List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return PROPERTY_DESCRIPTORS_2_0;
 	}
 
     final ASTNode internalGetSetChildProperty(
-        				ChildPropertyDescriptor property, 
-        				boolean isGet, 
+        				ChildPropertyDescriptor property,
+        				boolean isGet,
         				ASTNode child)
 	{
 		if (property == IDENTIFIER_PROPERTY)
@@ -169,10 +169,10 @@ public class ParameterMapping extends Expression
 		// allow default implementation to flag the error
 		return super.internalGetSetChildProperty(property, isGet, child);
 	}
-	
+
 	final boolean internalGetSetBooleanProperty(
-	    				SimplePropertyDescriptor property, 
-	    				boolean isGet, 
+	    				SimplePropertyDescriptor property,
+	    				boolean isGet,
 	    				boolean value)
 	{
 		if (property == IS_RESULT_PROPERTY)
@@ -185,18 +185,18 @@ public class ParameterMapping extends Expression
 			{
 				setResultFlag(value);
 				return false;
-			}		
+			}
 		}
 		return super.internalGetSetBooleanProperty(property, isGet, value);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTNode#internalGetSetObjectProperty(org.eclipse.jdt.core.dom.SimplePropertyDescriptor, boolean, java.lang.Object)
 	 */
 	final Object internalGetSetObjectProperty(
 	        			SimplePropertyDescriptor property,
-	        			boolean isGet, 
-	        			Object value) 
+	        			boolean isGet,
+	        			Object value)
 	{
 
 		if (property == DIRECTION_PROPERTY)
@@ -213,8 +213,8 @@ public class ParameterMapping extends Expression
 		}
 		return super.internalGetSetObjectProperty(property, isGet, value);
 	}
-	
-	public boolean hasResultFlag() 
+
+	public boolean hasResultFlag()
 	{
 		return _isResult;
 	}
@@ -253,7 +253,7 @@ public class ParameterMapping extends Expression
 		preReplaceChild(oldChild, identifier, IDENTIFIER_PROPERTY);
 		_identifier = identifier;
 		postReplaceChild(oldChild, identifier, IDENTIFIER_PROPERTY);
-	}	
+	}
 
 	public String getDirection()
 	{
@@ -270,11 +270,11 @@ public class ParameterMapping extends Expression
 		}
 		return _direction;
 	}
-	
+
 	public boolean isBindIN() {
 		return "<-".equals(getDirection());
 	}
-	
+
 	public void setDirection(String direction)
 	{
 		if (direction == null)
@@ -313,7 +313,7 @@ public class ParameterMapping extends Expression
 		_expression = expression;
 		postReplaceChild(oldChild, expression, EXPRESSION_PROPERTY);
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTNode#getNodeType0()
 	 */
@@ -321,7 +321,7 @@ public class ParameterMapping extends Expression
 	{
 		return ASTNode.PARAMETER_MAPPING;
 	}
- 
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ASTNode#subtreeMatch0(org.eclipse.jdt.core.dom.ASTMatcher, java.lang.Object)
 	 */

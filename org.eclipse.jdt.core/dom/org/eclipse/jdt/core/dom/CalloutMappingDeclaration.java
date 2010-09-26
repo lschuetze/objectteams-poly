@@ -1,19 +1,19 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
- * 
+ *
  * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: CalloutMappingDeclaration.java 23416 2010-02-03 19:59:31Z stephan $
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
@@ -25,56 +25,56 @@ import java.util.List;
 
 /**
  * NEW for OTDT
- * 
- * Represents DOM-ASTNode for Callout Bindings (OTJLD §2.4.2), 
+ *
+ * Represents DOM-ASTNode for Callout Bindings (OTJLD §2.4.2),
  * which has to handle code from e.g. :
  *    foo => bar;
  * to e.g. :
- *		Integer absoluteValue(Integer integer) -> int abs(int i) with { 
+ *		Integer absoluteValue(Integer integer) -> int abs(int i) with {
  *        integer.intValue() -> i,
  *        result <- new Integer(result)
  *    	}
  * and also the callout to field binding:
  * - without value mapping:
- * 	
+ *
  *     	setValue -> set value;
- * 
+ *
  * 	   	int getValue() -> get int value;
- * 
+ *
  * 	- with value mappings:
- *  	
+ *
  * 		Integer getValue()           -> get int val
  *   		with { result             <-    new Integer(result) }
- * 
+ *
  *		void setValue(Integer i)     -> set int val
  *   		with { integer.intValue() ->    val }
  *
- * 
+ *
  * This class consists of one MethodSpec for bound role method and one MethodSpec for base method
  * or FieldAccessSpec for access to a field of the base class. Also it consists of
  * a callout kind and an optionally mapping of parameters.
- * 
+ *
  * This node is used in TypeDeclaration, particulary in RoleTypeDeclaration.
- * 
+ *
  * @author ike
  */
 public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 {
 	public static final String CALLOUT = "->"; //$NON-NLS-1$
 	public static final String CALLOUT_OVERRIDE = "=>"; //$NON-NLS-1$
-	
+
 	/**
-	 * Creates a new AST node for a callout mapping declaration owned 
+	 * Creates a new AST node for a callout mapping declaration owned
 	 * by the given AST. By default, the declaration is for a callout mapping
 	 * of an unspecified, but legal, name;
 	 * <p>
-	 * N.B. This constructor is package-private; all subclasses must be 
-	 * declared in the same package; clients are unable to declare 
+	 * N.B. This constructor is package-private; all subclasses must be
+	 * declared in the same package; clients are unable to declare
 	 * additional subclasses.
 	 * </p>
-	 * 
+	 *
 	 * @param ast the AST that is to own this node
-	 */    
+	 */
 	CalloutMappingDeclaration(AST ast)
 	{
 		super(ast);
@@ -83,13 +83,13 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	/**
 	 * The "javadoc" structural property of this node type.
 	 */
-	public static final ChildPropertyDescriptor JAVADOC_PROPERTY = 
+	public static final ChildPropertyDescriptor JAVADOC_PROPERTY =
 		internalJavadocPropertyFactory(CalloutMappingDeclaration.class);
-    
+
 	/**
 	 * The left "methodSpec" structural property of this node type.
 	 */
-	public static final ChildPropertyDescriptor ROLE_MAPPING_ELEMENT_PROPERTY = 
+	public static final ChildPropertyDescriptor ROLE_MAPPING_ELEMENT_PROPERTY =
 		new ChildPropertyDescriptor(CalloutMappingDeclaration.class, "roleMappingElement", MethodMappingElement.class, MANDATORY, CYCLE_RISK); //$NON-NLS-1$
 
 	/**
@@ -102,52 +102,52 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	/**
 	 * The right "methodSpec" structural property of this node type.
 	 */
-	public static final ChildPropertyDescriptor BASE_MAPPING_ELEMENT_PROPERTY = 
+	public static final ChildPropertyDescriptor BASE_MAPPING_ELEMENT_PROPERTY =
 		new ChildPropertyDescriptor(CalloutMappingDeclaration.class, "baseMappingElement", MethodMappingElement.class, MANDATORY, CYCLE_RISK); //$NON-NLS-1$
-    
+
     /**
 	 * The "signature" structural property of this node type.
 	 */
-	public static final SimplePropertyDescriptor SIGNATURE_PROPERTY = 
+	public static final SimplePropertyDescriptor SIGNATURE_PROPERTY =
 		new SimplePropertyDescriptor(CalloutMappingDeclaration.class, "signature", boolean.class, MANDATORY); //$NON-NLS-1$
-    
+
 	/**
 	 * The "parameterMappings" structural property of this node type.
 	 */
-	public static final ChildListPropertyDescriptor PARAMETER_MAPPINGS_PROPERTY = 
+	public static final ChildListPropertyDescriptor PARAMETER_MAPPINGS_PROPERTY =
 		internalParameterMappingPropertyFactory(CalloutMappingDeclaration.class);
-	
+
 	/**
 	 * The "modifiers" structural property of this node type.
 	 */
-	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY = 
+	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
 		internalModifiersPropertyFactory(CalloutMappingDeclaration.class);
-	
+
 	/**
 	 * The "modifiers2" structural property of this node type.
 	 */
-	public static final ChildListPropertyDescriptor MODIFIERS2_PROPERTY = 
+	public static final ChildListPropertyDescriptor MODIFIERS2_PROPERTY =
 		internalModifiers2PropertyFactory(CalloutMappingDeclaration.class);
-	
+
     /**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
 	private static final List PROPERTY_DESCRIPTORS_2_0;
-	
+
 	/**
-	 * A list of property descriptors (element type: 
+	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
 	 * or null if uninitialized.
 	 */
 
 	private static final List PROPERTY_DESCRIPTORS_3_0;
-	
+
 	private MethodMappingElement _baseMappingElement = null;
 	private boolean _baseMappingInitialized= false;
 	private boolean _hasSignature = false;
-	
+
 	static
 	{
 		List propertyList = new ArrayList(8);
@@ -160,7 +160,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		addProperty(PARAMETER_MAPPINGS_PROPERTY, propertyList);
 		addProperty(MODIFIERS_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_2_0 = reapPropertyList(propertyList);
-		
+
 		propertyList = new ArrayList(8);
 		createPropertyList(CalloutMappingDeclaration.class, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
@@ -172,13 +172,13 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		addProperty(MODIFIERS2_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
 	}
-	
+
 	/**
 	 * Returns a list of structural property descriptors for this node type.
 	 * Clients must not modify the result.
-	 * 
+	 *
 	 * @param apiLevel the API level; one of the AST.JLS* constants
-	 * @return a list of property descriptors (element type: 
+	 * @return a list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor})
 	 */
 	public static List propertyDescriptors(int apiLevel)
@@ -198,7 +198,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
     {
         return MODIFIERS2_PROPERTY;
     }
-    
+
     final ChildListPropertyDescriptor internalParameterMappingsProperty()
     {
         return PARAMETER_MAPPINGS_PROPERTY;
@@ -212,11 +212,11 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	public ChildPropertyDescriptor getRoleElementProperty() {
 		return ROLE_MAPPING_ELEMENT_PROPERTY;
 	}
-	
+
 	ChildPropertyDescriptor internalGetBindingOperatorProperty() {
 		return BINDING_OPERATOR_PROPERTY;
 	}
-	
+
     final int internalGetSetIntProperty(SimplePropertyDescriptor property, boolean isGetRequest, int value)
 	{
 		if (property == MODIFIERS_PROPERTY)
@@ -234,7 +234,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		// allow default implementation to flag the error
 		return super.internalGetSetIntProperty(property, isGetRequest, value);
 	}
-    
+
     final ASTNode internalGetSetChildProperty(ChildPropertyDescriptor property, boolean isGet, ASTNode child)
 	{
    	    if (property == JAVADOC_PROPERTY)
@@ -261,11 +261,11 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 				setBaseMappingElement((MethodSpec) child);
 				return null;
 			}
-		}		
+		}
 		// allow default implementation to flag the error (incl. handling of elements common to all method mappings):
 		return super.internalGetSetChildProperty(property, isGet, child);
 	}
-    
+
     final boolean internalGetSetBooleanProperty(SimplePropertyDescriptor property, boolean get, boolean value)
 	{
 		if (property == SIGNATURE_PROPERTY)
@@ -278,11 +278,11 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 			{
 				setSignatureFlag(value);
 				return false;
-			}		
+			}
 		}
 		return super.internalGetSetBooleanProperty(property, get, value);
 	}
-    
+
     final List internalGetChildListProperty(ChildListPropertyDescriptor property)
 	{
 		if (property == PARAMETER_MAPPINGS_PROPERTY)
@@ -293,7 +293,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		{
 			return modifiers();
 		}
-		
+
 		// allow default implementation to flag the error
 		return super.internalGetChildListProperty(property);
 	}
@@ -312,8 +312,8 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	ASTNode clone0(AST target)
     {
         CalloutMappingDeclaration result = new CalloutMappingDeclaration(target);
-		if (this.ast.apiLevel >= AST.JLS3) 
-			result.modifiers().addAll(ASTNode.copySubtrees(target, modifiers())); // annotations        
+		if (this.ast.apiLevel >= AST.JLS3)
+			result.modifiers().addAll(ASTNode.copySubtrees(target, modifiers())); // annotations
 		result.setSourceRange(this.getStartPosition(), this.getLength());
 		result.setJavadoc(
 			(Javadoc) ASTNode.copySubtree(target, getJavadoc()));
@@ -325,7 +325,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		result.setSignatureFlag(this.hasSignature());
 		result.getParameterMappings().addAll(
 				ASTNode.copySubtrees(target, this.getParameterMappings()));
-		
+
 		return result;
     }
 
@@ -343,7 +343,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 			// visit children in normal left to right reading order
 			acceptChild(visitor, getJavadoc());
 			if (this.ast.apiLevel >= AST.JLS3)
-				acceptChildren(visitor, modifiers);			
+				acceptChildren(visitor, modifiers);
 			acceptChild(visitor, roleMappingElement);
 			acceptChild(visitor, bindingOperator);
 			acceptChild(visitor, _baseMappingElement);
@@ -354,8 +354,8 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 
     int treeSize()
     {
-		return memSize() + (super.optionalDocComment == null 
-                ? 0 
+		return memSize() + (super.optionalDocComment == null
+                ? 0
                 : getJavadoc().treeSize());
     }
 
@@ -363,7 +363,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * Returns the method spec right of the callout arrow.
 	 * @return the right method spec, i.e. the referenced base method
 	 * @see Modifier
-	 */ 
+	 */
 	public MethodMappingElement getBaseMappingElement()
 	{
 		if (_baseMappingElement == null && !this._baseMappingInitialized)
@@ -380,29 +380,29 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 				}
 			}
 		}
-		return _baseMappingElement;	    
+		return _baseMappingElement;
 	}
 
 	/**
 	 * Sets the right method spec (base method spec) declared in this callout
 	 * mapping declaration to the given method spec.
-	 * 
+	 *
 	 * @param baseMappingElement
 	 * @exception IllegalArgumentException if:
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
 	 * </ul>
-	 */ 
+	 */
     public void setBaseMappingElement(MethodMappingElement baseMappingElement)
     {
 		this._baseMappingInitialized= true;
 		ASTNode oldChild = _baseMappingElement;
 		preReplaceChild(oldChild, baseMappingElement, BASE_MAPPING_ELEMENT_PROPERTY);
 		_baseMappingElement = baseMappingElement;
-		postReplaceChild(oldChild, baseMappingElement, BASE_MAPPING_ELEMENT_PROPERTY);        
+		postReplaceChild(oldChild, baseMappingElement, BASE_MAPPING_ELEMENT_PROPERTY);
     }
-    
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -413,21 +413,21 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 
 	/**
-	 * 
+	 *
 	 * @return the flag, whether callout is a callout override or a simple callout
-	 * 	true, if an override;  
-	 */ 
+	 * 	true, if an override;
+	 */
 	public boolean isCalloutOverride()
 	{
 		return this.bindingOperator().getBindingKind() == MethodBindingOperator.KIND_CALLOUT_OVERRIDE;
 	}
 
-	public boolean hasSignature() 
+	public boolean hasSignature()
 	{
 		return _hasSignature;
 	}
 
-	public void setSignatureFlag(boolean hasSignature) 
+	public void setSignatureFlag(boolean hasSignature)
 	{
 		preValueChange(SIGNATURE_PROPERTY);
 		_hasSignature = hasSignature;
