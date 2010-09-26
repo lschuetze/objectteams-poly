@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.IDecoration;
 import org.eclipse.jface.viewers.StyledString;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.ImageData;
@@ -418,14 +419,16 @@ public team class ViewAdaptor extends JFaceDecapsulator
 		PretendAllRoleFilesArePublic pretendAllRoleFilesArePublic = new PretendAllRoleFilesArePublic();
 		
 		/** Overriding. */
-		getOverlay <- replace getOverlay;
-		callin ImageDescriptor getOverlay(Object element) throws JavaModelException
+		addOverlays <- replace addOverlays;
+		callin void addOverlays(Object element, IDecoration decoration) throws JavaModelException
 		{		
 			IType type = getMainType(element);
 			if (type == null)
 				// base uses index search, needs a little help from us ;-)
-				within (pretendAllRoleFilesArePublic)
-					return base.getOverlay(element);
+				within (pretendAllRoleFilesArePublic) {
+					base.addOverlays(element, decoration);
+					return;
+				}
 			IOTType otType = OTModelManager.getOTElement(type);
 			if (otType != null) {
 				String img = null;
@@ -437,15 +440,17 @@ public team class ViewAdaptor extends JFaceDecapsulator
 				} else if (otType.isTeam()) {
 					img = TEAM_OVR;
 				}
-				if (img != null)
-					return ImageManager.getSharedInstance().getDescriptor(img);
+				if (img != null) {
+					decoration.addOverlay(ImageManager.getSharedInstance().getDescriptor(img), IDecoration.TOP_RIGHT);
+					return;
+				}
 			}
-			return base.getOverlay(type);
+			base.addOverlays(type, decoration);
 		}
 
 		/* Overriding */
-		getOverlayFromFlags <- replace getOverlayFromFlags;
-		callin ImageDescriptor getOverlayFromFlags(int flags) {
+		addOverlaysFromFlags <- replace addOverlaysFromFlags;
+		callin void addOverlaysFromFlags(int flags, IDecoration decoration) {
 			// FIXME(SH): this might be incomplete: do flags always contain role/team??
 			String img = null;
 			if (Flags.isRole(flags)) {
@@ -456,9 +461,11 @@ public team class ViewAdaptor extends JFaceDecapsulator
 			} else if (Flags.isTeam(flags)) {
 				img = TEAM_OVR;
 			}
-			if (img != null)
-				return ImageManager.getSharedInstance().getDescriptor(img);					
-			return base.getOverlayFromFlags(flags);
+			if (img != null) {
+				decoration.addOverlay(ImageManager.getSharedInstance().getDescriptor(img), IDecoration.TOP_RIGHT);
+				return;
+			}
+			base.addOverlaysFromFlags(flags, decoration);
 		}
 		
 		/** By use of the DecoratorManagerAdaptor we may indeed receive package fragments,
