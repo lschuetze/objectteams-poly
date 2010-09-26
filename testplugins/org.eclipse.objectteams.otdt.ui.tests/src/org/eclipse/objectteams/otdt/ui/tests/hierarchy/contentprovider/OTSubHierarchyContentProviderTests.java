@@ -291,7 +291,7 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
     {
         try
         {
-            _lifeCycle.doHierarchyRefresh(_T1_R1, new NullProgressMonitor());
+            _lifeCycle.doHierarchyRefresh(new IType[]{_T1_R1}, new NullProgressMonitor());
         }
         catch (JavaModelException exc)
         {
@@ -338,7 +338,7 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
     {
         try
         {
-            _lifeCycle.doHierarchyRefresh(_T1_R1, new NullProgressMonitor());
+            _lifeCycle.doHierarchyRefresh(new IType[]{_T1_R1}, new NullProgressMonitor());
         }
         catch (JavaModelException exc)
         {
@@ -384,7 +384,7 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
     {
         try
         {
-            _lifeCycle.doHierarchyRefresh(_T1_R1, new NullProgressMonitor());
+            _lifeCycle.doHierarchyRefresh(new IType[]{_T1_R1}, new NullProgressMonitor());
         }
         catch (JavaModelException exc)
         {

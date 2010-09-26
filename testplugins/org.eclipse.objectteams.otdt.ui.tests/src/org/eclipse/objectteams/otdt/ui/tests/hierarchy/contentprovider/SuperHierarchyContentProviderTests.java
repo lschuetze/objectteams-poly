@@ -290,7 +290,7 @@ public class SuperHierarchyContentProviderTests extends FileBasedUITest
 
         try
         {
-            _lifeCycle.doHierarchyRefresh(_T5_R3, new NullProgressMonitor());
+            _lifeCycle.doHierarchyRefresh(new IType[]{_T5_R3}, new NullProgressMonitor());
         }
         catch (JavaModelException exc)
         {
@@ -330,7 +330,7 @@ public class SuperHierarchyContentProviderTests extends FileBasedUITest
     {
         try
 		{
-		    _lifeCycle.doHierarchyRefresh(_T3_R2, new NullProgressMonitor());
+		    _lifeCycle.doHierarchyRefresh(new IType[]{_T3_R2}, new NullProgressMonitor());
 		}
 		catch (JavaModelException exc)
 		{
@@ -348,7 +348,7 @@ public class SuperHierarchyContentProviderTests extends FileBasedUITest
     {
         try
 		{
-		    _lifeCycle.doHierarchyRefresh(_T1_R2, new NullProgressMonitor());
+		    _lifeCycle.doHierarchyRefresh(new IType[]{_T1_R2}, new NullProgressMonitor());
 		}
 		catch (JavaModelException exc)
 		{
@@ -366,7 +366,7 @@ public class SuperHierarchyContentProviderTests extends FileBasedUITest
     {
         try
 		{
-		    _lifeCycle.doHierarchyRefresh(_T8_R2, new NullProgressMonitor());
+		    _lifeCycle.doHierarchyRefresh(new IType[]{_T8_R2}, new NullProgressMonitor());
 		}
 		catch (JavaModelException exc)
 		{
@@ -384,7 +384,7 @@ public class SuperHierarchyContentProviderTests extends FileBasedUITest
     {
         try
         {
-            _lifeCycle.doHierarchyRefresh(_T7_R3, new NullProgressMonitor());
+            _lifeCycle.doHierarchyRefresh(new IType[]{_T7_R3}, new NullProgressMonitor());
         }
         catch (JavaModelException exc)
         {

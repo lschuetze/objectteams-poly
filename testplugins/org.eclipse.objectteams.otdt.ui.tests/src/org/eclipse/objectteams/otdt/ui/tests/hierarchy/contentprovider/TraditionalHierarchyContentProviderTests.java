@@ -296,7 +296,7 @@ public class TraditionalHierarchyContentProviderTests extends FileBasedUITest
     void setHierarchyFocus(IType type) {
     	try
     	{
-    		_lifeCycle.doHierarchyRefresh(type, new NullProgressMonitor());
+    		_lifeCycle.doHierarchyRefresh(new IType[]{type}, new NullProgressMonitor());
     	}
     	catch (JavaModelException exc)
     	{
