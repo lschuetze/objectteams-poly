@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 320170   
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -24,6 +25,10 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
+import junit.framework.AssertionFailedError;
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.flow.NullInfoRegistry;
 import org.eclipse.jdt.internal.compiler.flow.UnconditionalFlowInfo;
@@ -32,10 +37,6 @@ import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-
-import junit.framework.AssertionFailedError;
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * A tests series especially meant to validate the internals of our null
@@ -96,7 +97,7 @@ public class NullReferenceImplTests extends NullReferenceTest {
 			011001
 			011010
 			011011
-			011100
+			011100  pot. n & pot. nn & pot. un
 			011101
 			011110
 			011111
@@ -853,7 +854,7 @@ public void test2500_addInitializationsFrom_for_definites() {
 // Note: coverage tests tend to fill the console with messages, and the
 //       instrumented code is slower, so never release code with active
 //       coverage tests.
-private static int coveragePointsNb = 39;
+private static int coveragePointsNb = 41;
 
 // PREMATURE reactivate coverage tests
 // Coverage by state transition tables methods.

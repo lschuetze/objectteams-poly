@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bugs 325755, 133125, 292478, 319201 and 320170
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -34,7 +35,7 @@ public NullReferenceTest(String name) {
 // Only the highest compliance level is run; add the VM argument
 // -Dcompliance=1.4 (for example) to lower it if needed
 static {
-//		TESTS_NAMES = new String[] { "testBug304416" };
+//		TESTS_NAMES = new String[] { "testBug325229" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -728,17 +729,8 @@ public void test0033_conditional_expression() {
 }
 
 // null analysis -- conditional expression
-// TODO (maxime) fix - may consider simultaneous computation of expression null status
-// this case is one of those which raise the need for the simultaneous calculation of
-// the null status of an expression and the code analysis of the said expression; this
-// case is simplistic: we need a value (here, potentially null), that is *not* carried
-// by the current embodiment of the flow info; other cases are less trivial in which
-// side effects on variables could introduce errors into after the facts evaluations;
-// one possible trick would be to add a slot for this
-// other path: use a tainted unknown expression status; does not seem to cope well
-// with o = (o ==  null ? new Object() : o)
-// TODO (maxime) https://bugs.eclipse.org/bugs/show_bug.cgi?id=133125
-public void _test0034_conditional_expression() {
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=133125
+public void test0034_conditional_expression() {
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -749,12 +741,90 @@ public void _test0034_conditional_expression() {
 			"    o.toString();\n" +
 			"  }\n" +
 			"}\n"},
-		"----------\n" +
-		"1. ERROR in X.java (at line 4)\n" +
-		"	o.toString();\n" +
-		"	^\n" +
-		"The variable o may be null\n" +
-		"----------\n");
+			"----------\n" +
+			"1. ERROR in X.java (at line 5)\n" +
+			"	o.toString();\n" +
+			"	^\n" +
+			"Potential null pointer access: The variable o may be null at this location\n" +
+			"----------\n");
+}
+
+// null analysis -- conditional expression
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=133125
+// variant with constant condition
+public void test0034_conditional_expression_2() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"  boolean b;\n" +
+			"  void foo() {\n" +
+			"    Object o = false ? null : new Object();\n" +
+			"    o.toString();\n" +
+			"  }\n" +
+			"}\n"},
+			"");
+}
+
+// null analysis -- conditional expression
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=133125
+public void test0034_conditional_expression_3() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"  boolean b;\n" +
+			"  void foo(Object a) {\n" +
+			" 	 if (a == null) {}\n" +
+			"    Object o = b ? a : new Object();\n" +
+			"    o.toString();\n" +
+			"  }\n" +
+			"}\n"},
+			"----------\n" +
+			"1. ERROR in X.java (at line 6)\n" +
+			"	o.toString();\n" +
+			"	^\n" +
+			"Potential null pointer access: The variable o may be null at this location\n" +
+			"----------\n");
+}
+
+// null analysis -- conditional expression
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=133125
+// variant with dependency between condition and expression - LocalDeclaration
+// TODO(stephan) cannot analyse this flow dependency
+public void _test0034_conditional_expression_4() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"  boolean b;\n" +
+			"  void foo(Object u) {\n" +
+			"    if (u == null) {}\n" + //taint
+			"    Object o = (u == null) ? new Object() : u;\n" +
+			"    o.toString();\n" +
+			"  }\n" +
+			"}\n"},
+			"");
+}
+
+// null analysis -- conditional expression
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=133125
+// variant with dependency between condition and expression - Assignment
+// TODO(stephan) cannot analyse this flow dependency
+public void _test0034_conditional_expression_5() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"  boolean b;\n" +
+			"  void foo(Object u) {\n" +
+			"    if (u == null) {}\n" + //taint
+			"    Object o;\n" +
+			"    o = (u == null) ? new Object() : u;\n" +
+			"    o.toString();\n" +
+			"  }\n" +
+			"}\n"},
+			"");
 }
 
 // null analysis -- conditional expression
@@ -5482,6 +5552,78 @@ public void test0535_try_finally() {
 				"}",
 			},
 			"");
+}
+
+// null analysis -- try/finally
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=320170 -  [compiler] [null] Whitebox issues in null analysis
+// trigger nullbits 0111 (pot n|nn|un), don't let "definitely unknown" override previous information
+public void test0536_try_finally() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			" X bar () { return null; }\n" +
+			" void foo() {\n" +
+			"   X x = new X();\n" +
+			"   try {\n" +
+			"     x = null;\n" +
+			"     x = new X();\n" +  // if this throws an exception finally finds x==null
+			"     x = bar();\n" +
+			"   } finally {\n" +
+			"     x.toString();\n" + // complain
+			"   }\n" +
+			" }\n" +
+			"}\n"},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 10)\n" + 
+		"	x.toString();\n" + 
+		"	^\n" + 
+		"Potential null pointer access: The variable x may be null at this location\n" + 
+		"----------\n",
+	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+
+// null analysis -- try/finally
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=320170 -  [compiler] [null] Whitebox issues in null analysis
+// trigger nullbits 0111 (pot n|nn|un), don't let "definitely unknown" override previous information
+// multiple variables
+public void test0537_try_finally() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			" X bar () { return null; }\n" +
+			" void foo() {\n" +
+			"   X x1 = new X();\n" +
+			"   X x2 = new X();\n" +
+			"   X x3 = new X();\n" +
+			"   try {\n" +
+			"     x1 = null;\n" +
+			"     x2 = null;\n" +
+			"     x1 = new X();\n" +  // if this throws an exception finally finds x1==null
+			"     x2 = new X();\n" +  // if this throws an exception finally finds x2==null
+			"     x3 = new X();\n" +  // if this throws an exception finally still finds x3!=null
+			"     x1 = bar();\n" +
+			"     x2 = bar();\n" +
+			"   } finally {\n" +
+			"     x1.toString();\n" + // complain
+			"     x2.toString();\n" + // complain
+			"     x3.toString();\n" + // don't complain
+			"   }\n" +
+			" }\n" +
+			"}\n"},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 16)\n" + 
+		"	x1.toString();\n" + 
+		"	^^\n" + 
+		"Potential null pointer access: The variable x1 may be null at this location\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 17)\n" + 
+		"	x2.toString();\n" + 
+		"	^^\n" + 
+		"Potential null pointer access: The variable x2 may be null at this location\n" + 
+		"----------\n",
+	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 
 // null analysis -- try/catch
@@ -11661,5 +11803,1766 @@ public void testBug305590() {
 		"instanceof always yields false: The variable str can only be null at this location\n" + 
 		"----------\n",
 	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=319201
+// unboxing raises an NPE
+//   LocalDeclaration
+public void testBug319201() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"  public void foo() {\n" +
+				"	 Integer i = null;\n" +
+				"	 int j = i;\n" + // should warn
+				"  }\n" +
+				"}"},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 4)\n" + 
+			"	int j = i;\n" + 
+			"	        ^\n" + 
+			"Null pointer access: The variable i can only be null at this location\n" + 
+			"----------\n",
+		    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=319201
+// unboxing could raise an NPE
+//   Assignment
+public void testBug319201a() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"  public void foo(Integer i) {\n" +
+				"    if (i == null) {};\n" +
+				"	 int j;\n" +
+				"	 j = i;\n" + // should warn
+				"  }\n" +
+				"}"},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 5)\n" + 
+			"	j = i;\n" + 
+			"	    ^\n" + 
+			"Potential null pointer access: The variable i may be null at this location\n" + 
+			"----------\n",
+		    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=319201
+// unboxing raises an NPE
+//   MessageSend
+public void testBug319201b() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"  public void foo() {\n" +
+				"    Boolean bo = null;;\n" +
+				"	 bar(bo);\n" + // should warn
+				"  }\n" +
+				"  void bar(boolean b) {}\n" +
+				"}"},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 4)\n" + 
+			"	bar(bo);\n" + 
+			"	    ^^\n" + 
+			"Null pointer access: The variable bo can only be null at this location\n" + 
+			"----------\n",
+		    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=319201
+// unboxing raises an NPE
+// Node types covered (in this order):
+//   ExplicitConstructorCall
+//   AllocationExpression
+//   AND_AND_Expression
+//   OR_OR_Expression
+//   ArrayAllocationExpression
+//   ForStatement
+//   DoStatement
+//   IfStatement
+//   QualifiedAllocationExpression
+//   SwitchStatement
+//   WhileStatement
+//   CastExpression
+//   AssertStatement
+//   ReturnStatement
+public void testBug319201c() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	runNegativeTest(
+			new String[] {
+              "X.java",
+              "class Y { public Y(boolean b1, boolean b2) {} }\n" +
+              "public class X extends Y {\n" +
+              "  public X(boolean b, Boolean b2) {\n" +
+              "      super(b2 == null, b2);\n" +
+              "  }\n" +
+              "  class Z {\n" +
+              "      public Z(boolean b) {}\n" +
+              "  }\n" +
+              "  boolean fB = (Boolean)null;\n" +
+              "  public boolean foo(boolean inB) {\n" +
+              "      Boolean b1 = null;\n" +
+              "      X x = new X(b1, null);\n" +
+              "      Boolean b2 = null;\n" +
+              "      boolean dontcare = b2 && inB;\n" +
+              "      Boolean b3 = null;\n" +
+              "      dontcare = inB || b3;\n" +
+              "      Integer dims = null;\n" +
+              "      char[] cs = new char[dims];\n" +
+              "      Boolean b5 = null;\n" +
+              "      do {\n" +
+              "          Boolean b4 = null;\n" +
+              "          for (int i=0;b4; i++);\n" +
+              "      } while (b5);\n" +
+              "      Boolean b6 = null;\n" +
+              "      if (b6) { }\n" +
+              "      Boolean b7 = null;\n" +
+              "      Z z = this.new Z(b7);\n" +
+              "      Integer sel = null;\n" +
+              "      switch(sel) {\n" +
+              "          case 1: break;\n" +
+              "          default: break;\n" +
+              "      }\n" +
+              "      Boolean b8 = null;\n" +
+              "      while (b8) {}\n" +
+              "      Boolean b9 = null;\n" +
+              "      dontcare = (boolean)b9;\n" +
+              "      Boolean b10 = null;\n" +
+              "      assert b10 : \"shouldn't happen, but will\";\n" +
+              "      Boolean b11 = null;\n" +
+              "      return b11;\n" +
+              "  }\n" +
+				"}"},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 4)\n" + 
+			"	super(b2 == null, b2);\n" + 
+			"	                  ^^\n" + 
+			"Potential null pointer access: The variable b2 may be null at this location\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 12)\n" + 
+			"	X x = new X(b1, null);\n" + 
+			"	            ^^\n" + 
+			"Null pointer access: The variable b1 can only be null at this location\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 14)\n" + 
+			"	boolean dontcare = b2 && inB;\n" + 
+			"	                   ^^\n" + 
+			"Null pointer access: The variable b2 can only be null at this location\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 16)\n" + 
+			"	dontcare = inB || b3;\n" + 
+			"	                  ^^\n" + 
+			"Null pointer access: The variable b3 can only be null at this location\n" + 
+			"----------\n" + 
+			"5. ERROR in X.java (at line 18)\n" + 
+			"	char[] cs = new char[dims];\n" + 
+			"	                     ^^^^\n" + 
+			"Null pointer access: The variable dims can only be null at this location\n" + 
+			"----------\n" + 
+			"6. ERROR in X.java (at line 22)\n" + 
+			"	for (int i=0;b4; i++);\n" + 
+			"	             ^^\n" + 
+			"Null pointer access: The variable b4 can only be null at this location\n" + 
+			"----------\n" + 
+			"7. ERROR in X.java (at line 23)\n" + 
+			"	} while (b5);\n" + 
+			"	         ^^\n" + 
+			"Null pointer access: The variable b5 can only be null at this location\n" + 
+			"----------\n" + 
+			"8. ERROR in X.java (at line 25)\n" + 
+			"	if (b6) { }\n" + 
+			"	    ^^\n" + 
+			"Null pointer access: The variable b6 can only be null at this location\n" + 
+			"----------\n" + 
+			"9. ERROR in X.java (at line 27)\n" + 
+			"	Z z = this.new Z(b7);\n" + 
+			"	                 ^^\n" + 
+			"Null pointer access: The variable b7 can only be null at this location\n" + 
+			"----------\n" + 
+			"10. ERROR in X.java (at line 29)\n" + 
+			"	switch(sel) {\n" + 
+			"	       ^^^\n" + 
+			"Null pointer access: The variable sel can only be null at this location\n" + 
+			"----------\n" + 
+			"11. ERROR in X.java (at line 34)\n" + 
+			"	while (b8) {}\n" + 
+			"	       ^^\n" + 
+			"Null pointer access: The variable b8 can only be null at this location\n" + 
+			"----------\n" + 
+			"12. ERROR in X.java (at line 36)\n" + 
+			"	dontcare = (boolean)b9;\n" + 
+			"	                    ^^\n" + 
+			"Null pointer access: The variable b9 can only be null at this location\n" + 
+			"----------\n" + 
+			"13. ERROR in X.java (at line 38)\n" + 
+			"	assert b10 : \"shouldn\'t happen, but will\";\n" + 
+			"	       ^^^\n" + 
+			"Null pointer access: The variable b10 can only be null at this location\n" + 
+			"----------\n" + 
+			"14. ERROR in X.java (at line 40)\n" + 
+			"	return b11;\n" + 
+			"	       ^^^\n" + 
+			"Null pointer access: The variable b11 can only be null at this location\n" + 
+			"----------\n",
+		    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=319201
+// unboxing raises an NPE
+// DoStatement, variants with assignement and/or continue in the body & empty body
+public void testBug319201d() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnnecessaryElse, CompilerOptions.IGNORE);
+	runNegativeTest(
+			new String[] {
+              "X.java",
+              "public class X {\n" +
+              "  public void foo(boolean cond, boolean cond2) {\n" +
+              "      Boolean b = null;\n" +
+              "      do {\n" +
+              "          b = false;\n" +
+              "          if (cond) continue;\n" +   // shouldn't make a difference
+              "      } while (b);\n" + // don't complain, loop body has already assigned b
+              "      Boolean b2 = null;\n" +
+              "      do {\n" +
+              "          if (cond) continue;\n" +
+              "          b2 = false;\n" +
+              "      } while (b2);\n" + // complain here: potentially null
+              "      Boolean b3 = null;\n" +
+              "      do {\n" +
+              "      } while (b3);\n" + // complain here: definitely null
+              "      Boolean b4 = null;\n" +
+              "      do {\n" +
+              "        if (cond) {\n" +
+              "            b4 = true;\n" +
+              "            if (cond2) continue;\n" +
+              "        }\n" +
+              "        b4 = false;\n" +
+              "      } while (b4);\n" + // don't complain here: definitely non-null
+              "      Boolean b5 = null;\n" +
+              "      do {\n" +
+              "         b5 = true;\n" +
+              "      } while (b5);\n" +  // don't complain 
+              "      Boolean b6 = null;\n" +
+              "      do {\n" +
+              "         b6 = true;\n" +
+              "         continue;\n" +
+              "      } while (b6); \n" + // don't complain
+              "      Boolean b7 = null;\n" +
+              "      Boolean b8 = null;\n" +
+              "      do {\n" +
+              "        if (cond) {\n" +
+              "            b7 = true;\n" +
+              "            continue;\n" +
+              "        } else {\n" +
+              "            b8 = true;\n" +
+              "        }\n" +
+              "      } while (b7);\n" + // complain here: after else branch b7 can still be null
+              "  }\n" +
+			  "}"},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 12)\n" + 
+			"	} while (b2);\n" + 
+			"	         ^^\n" + 
+			"Potential null pointer access: The variable b2 may be null at this location\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 15)\n" + 
+			"	} while (b3);\n" + 
+			"	         ^^\n" + 
+			"Null pointer access: The variable b3 can only be null at this location\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 42)\n" + 
+			"	} while (b7);\n" + 
+			"	         ^^\n" + 
+			"Potential null pointer access: The variable b7 may be null at this location\n" + 
+			"----------\n",
+			null/*classLibraries*/,
+			true/*shouldFlushOutputDirectory*/,
+			customOptions);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=320414
+public void testBug320414() throws Exception {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	options.put(CompilerOptions.OPTION_ReportPotentialNullReference, CompilerOptions.ERROR);
+	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.ERROR);
+	options.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.OPTIMIZE_OUT);
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	static class B {\n" + 
+			"		public static final int CONST = 16;\n" + 
+			"		int i;\n" + 
+			"	}\n" + 
+			"	B b;\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		new X().foo();\n" + 
+			"	}\n" + 
+			"	void foo() {\n" + 
+			"		B localB = b; \n" + 
+			"		int i = localB.CONST;\n" + 
+			"		if (localB != null) {\n" + 
+			"			i = localB.i;\n" + 
+			"		}\n" + 
+			"		System.out.println(i);\n" + 
+			"	}\n" + 
+			"}",
+		},
+		"16",
+		null,
+		true,
+		null,
+		options,
+		null);
+	String expectedOutput =
+		"  void foo();\n" + 
+		"     0  aload_0 [this]\n" + 
+		"     1  getfield X.b : X.B [24]\n" + 
+		"     4  astore_1 [localB]\n" + 
+		"     5  bipush 16\n" + 
+		"     7  istore_2 [i]\n" + 
+		"     8  aload_1 [localB]\n" + 
+		"     9  ifnull 17\n" + 
+		"    12  aload_1 [localB]\n" + 
+		"    13  getfield X$B.i : int [26]\n" + 
+		"    16  istore_2 [i]\n" + 
+		"    17  getstatic java.lang.System.out : java.io.PrintStream [32]\n" + 
+		"    20  iload_2 [i]\n" + 
+		"    21  invokevirtual java.io.PrintStream.println(int) : void [38]\n" + 
+		"    24  return\n";
+	checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=321926
+// To verify that a "redundant null check" warning is NOT elicited for a variable assigned non-null
+// in an infinite while loop inside a try catch block and that code generation shows no surprises.
+public void testBug321926a() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"		while (true) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good");
+}
+// Test that dead code warning does show up.
+public void testBug321926b() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"		while (true) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		}\n" +
+			"       System.out.println(\"This is dead code\");\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 15)\n" + 
+			"	System.out.println(\"This is dead code\");\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Unreachable code\n" + 
+			"----------\n");
+}
+// Check nullness in catch block, finally block and downstream code.
+public void testBug321926c() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"		while (true) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"	 	if (someVariable == null) {\n" +
+			"    		System.out.println(\"Compiler buggy\");\n" +
+			"	 	} else {\n" +
+			"			System.out.print(\"Compiler good \");\n" +
+			"	 	}\n" +
+			"	 } finally {\n" +
+			"	 	if (someVariable == null) {\n" +
+			"    		System.out.println(\"Compiler buggy\");\n" +
+			"	 	} else {\n" +
+			"			System.out.print(\"Compiler good \");\n" +
+			"	 	}\n" +
+            "    }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good Compiler good Compiler good");
+}
+// Various nested loops.
+public void testBug321926d() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       while (true) {\n" +
+			"           for(;;) { \n" +
+			"				while (true) {\n" +
+			"					if (i == 0){\n" +
+			"						someVariable = \"not null\";\n" +
+			"						i++;\n" +
+			"					}\n" +
+			"					else\n" +
+			"						throw new IOException();\n" +
+			"				}\n" +
+			"			}\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"	 	if (someVariable == null) {\n" +
+			"    		System.out.println(\"Compiler buggy\");\n" +
+			"	 	} else {\n" +
+			"			System.out.print(\"Compiler good \");\n" +
+			"	 	}\n" +
+			"	 } finally {\n" +
+			"	 	if (someVariable == null) {\n" +
+			"    		System.out.println(\"Compiler buggy\");\n" +
+			"	 	} else {\n" +
+			"			System.out.print(\"Compiler good \");\n" +
+			"	 	}\n" +
+            "    }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good Compiler good Compiler good");
+}
+// Test widening catch. 
+public void testBug321926e() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"		while (true) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (Exception e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good");
+}
+// Tested nested try blocks.
+public void testBug321926f() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"    public static void main(String[] args) {\n" +
+			"        String someVariable = null;\n" +
+			"        int i = 0;\n" +
+			"        try {\n" +
+			"        	while (true) {\n" +
+			"        		if (i != 0) {\n" +
+			"        			try {\n" +
+			"        				throw new IOException();\n" +
+			"        			} catch (IOException e) {\n" +
+			"        				if (someVariable == null) {\n" +
+			"        					System.out.println(\"The compiler is buggy\");\n" +
+			"        				} else {\n" +
+			"        					System.out.print(\"Compiler good \");\n" +
+			"        				}\n" +
+			"        				throw e;\n" +
+			"        			}\n" +
+			"        		} else {\n" +
+			"        			someVariable = \"not null\";\n" +
+			"        			i++;\n" +
+			"        		}\n" +
+			"        	}\n" +
+			"        } catch (Exception e) {\n" +
+			"            // having broken from loop, continue on\n" +
+			"        }\n" +
+			"        if (someVariable == null) {\n" +
+			"            System.out.println(\"The compiler is buggy\");\n" +
+			"        } else {\n" +
+			"            System.out.println(\"Compiler good\");\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n"},
+		"Compiler good Compiler good");
+}
+// test for loop
+public void testBug321926g() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"		for (int j = 0; true; j++) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good");
+}
+// test do while loop
+public void testBug321926h() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"		do {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		} while(true);\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good");
+}
+// test with while (true) with a break inside. was working already.
+public void testBug321926i() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"		while (true) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"               break;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good");
+}
+// Test with non-explicit throws, i.e call method which throws rather than an inline throw statement. 
+public void testBug321926j() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"		while (true) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				invokeSomeMethod();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"  public static void invokeSomeMethod() throws IOException {\n" +
+			"      throw new IOException();\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good");
+}
+// Variation with nested loops
+public void testBug321926k() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       while (true) {\n" +
+			"       	try {\n" +
+			"				while (true) {\n" +
+			"					if (i == 0){\n" +
+			"						someVariable = \"not null\";\n" +
+			"						i++;\n" +
+			"					}\n" +
+			"					else\n" +
+			"						throw new IOException();\n" +
+			"				}\n" +
+			"       	} catch (IOException e) {\n" +
+			"           }\n" +
+			"	 		if (someVariable == null) {\n" +
+			"    			System.out.println(\"Compiler buggy\");\n" +
+			"	 		} else {\n" +
+			"				System.out.print(\"Compiler good \");\n" +
+			"	 		}\n" +
+			"           throw new IOException();\n" +
+			"       }\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good Compiler good");
+}
+// variation with nested loops.
+public void testBug321926l() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       while (true) {\n" +
+			"           someVariable = null;\n"+
+			"       	try {\n" +
+			"				while (true) {\n" +
+			"					if (i == 0){\n" +
+			"						someVariable = \"not null\";\n" +
+			"						i++;\n" +
+			"					}\n" +
+			"					else\n" +
+			"						throw new IOException();\n" +
+			"				}\n" +
+			"       	} catch (IOException e) {\n" +
+			"           }\n" +
+			"	 		if (someVariable == null) {\n" +
+			"    			System.out.println(\"Compiler buggy\");\n" +
+			"	 		} else {\n" +
+			"				System.out.print(\"Compiler good \");\n" +
+			"	 		}\n" +
+			"           throw new IOException();\n" +
+			"       }\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good Compiler good");
+}
+public void testBug321926m() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"		while (true) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"           if (true) {\n" +
+			"               break;\n" +
+			"           }\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good");
+}
+public void testBug321926n() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \"not null\";\n" +
+			"		while (true) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good");
+}
+public void testBug321926o() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \"not null\";\n" +
+			"		for(;;) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good");
+}
+public void testBug321926p() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \"not null\";\n" +
+			"		do {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		} while (true);\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good");
+}
+public void testBug321926q() {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \"not null\";\n" +
+			"		do {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		} while ((someVariable = \"not null\") != null);\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good", null, true, null, options, null);
+}
+public void testBug321926r() {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.IGNORE);
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       while ((someVariable = \"not null\") != null) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler buggy\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good", null, true, null, options, null
+		);
+}
+public void testBug321926s() {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.IGNORE);
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \" not null\";\n" +
+			"       while ((someVariable = null) != null) {\n" +
+			"			if (i == 0){\n" +
+			"				someVariable = \"not null\";\n" +
+			"				i++;\n" +
+			"			}\n" +
+			"			else\n" +
+			"				throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"		// broken from loop, continue on\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler good\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler buggy\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+		"Compiler good", null, true, null, options, null
+		);
+}
+public void testBug321926t() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"	public static void main(String s[]) {\n" +
+			"		String file = \"non null\";\n" +
+			"		int i = 0;\n" +
+			"       try {\n" +
+			"			while (true) {\n" +
+			"			    if (i == 0) {\n" +
+			"					file = null;\n" +
+			"                   i++;\n"+
+			"               }\n" +
+			"               else \n" +
+			"               	throw new IOException();\n" +
+			"			}\n" +
+			"       } catch (IOException e) {\n" +
+			"       }\n" +
+			"		if (file == null)\n" +
+			"		    System.out.println(\"Compiler good\");\n" +
+			"       else \n" +
+			"		    System.out.println(\"Compiler bad\");\n" +
+			"	}\n" +
+			"}\n"},
+		"Compiler good");
+}
+public void testBug321926u() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"	public static void main(String s[]) {\n" +
+			"		String file = \"non null\";\n" +
+			"		int i = 0;\n" +
+			"       try {\n" +
+			"			while (true) {\n" +
+			"			    if (i == 0) {\n" +
+			"					file = null;\n" +
+			"                   i++;\n"+
+			"               }\n" +
+			"               else {\n" +
+			"                   file = null;\n" +
+			"               	throw new IOException();\n" +
+			"               }\n" +
+			"			}\n" +
+			"       } catch (IOException e) {\n" +
+			"       }\n" +
+			"		if (file == null)\n" +
+			"		    System.out.println(\"Compiler good\");\n" +
+			"       else \n" +
+			"		    System.out.println(\"Compiler bad\");\n" +
+			"	}\n" +
+			"}\n"},
+		"Compiler good");
+}
+public void testBug321926v() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"	public static void main(String s[]) {\n" +
+			"		String file = null;\n" +
+			"		int i = 0;\n" +
+			"       try {\n" +
+			"			while (true) {\n" +
+			"			    if (i == 0) {\n" +
+			"					file = \"non null\";\n" +
+			"                   i++;\n"+
+			"               }\n" +
+			"               else {\n" +
+			"                   file = \"non null\";\n" +
+			"               	throw new IOException();\n" +
+			"               }\n" +
+			"			}\n" +
+			"       } catch (IOException e) {\n" +
+			"       }\n" +
+			"		if (file == null)\n" +
+			"		    System.out.println(\"Compiler bad\");\n" +
+			"       else \n" +
+			"		    System.out.println(\"Compiler good\");\n" +
+			"	}\n" +
+			"}\n"},
+		"Compiler good");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317829
+public void testBug317829a() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \"not null\";\n" +
+			"		while (true) {\n" +
+			"			throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"	 	if (someVariable == null) {\n" +
+			"    		System.out.println(\"Compiler bad\");\n" +
+			"	 	} else {\n" +
+			"			System.out.print(\"Compiler good \");\n" +
+			"	 	}\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler bad\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+			"Compiler good Compiler good");
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=317829
+public void testBug317829b() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \"not null\";\n" +
+			"		while (true) {\n" +
+			"			someMethod();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"	 	if (someVariable == null) {\n" +
+			"    		System.out.println(\"Compiler bad\");\n" +
+			"	 	} else {\n" +
+			"			System.out.print(\"Compiler good \");\n" +
+			"	 	}\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler bad\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"  public static void someMethod() throws IOException {\n" +
+			"      throw new IOException();\n" +
+			"  }\n" +
+			"}"},
+			"Compiler good Compiler good");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317829
+public void testBug317829c() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \"not null\";\n" +
+			"		for (;;) {\n" +
+			"			throw new IOException();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"	 	if (someVariable == null) {\n" +
+			"    		System.out.println(\"Compiler bad\");\n" +
+			"	 	} else {\n" +
+			"			System.out.print(\"Compiler good \");\n" +
+			"	 	}\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler bad\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+			"Compiler good Compiler good");
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=317829
+public void testBug317829d() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \"not null\";\n" +
+			"		for(;;) {\n" +
+			"			someMethod();\n" +
+			"		}\n" +
+			"	 } catch (IOException e) {\n" +
+			"	 	if (someVariable == null) {\n" +
+			"    		System.out.println(\"Compiler bad\");\n" +
+			"	 	} else {\n" +
+			"			System.out.print(\"Compiler good \");\n" +
+			"	 	}\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler bad\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"  public static void someMethod() throws IOException {\n" +
+			"      throw new IOException();\n" +
+			"  }\n" +
+			"}"},
+			"Compiler good Compiler good");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317829
+public void testBug317829e() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \"not null\";\n" +
+			"		do {\n" +
+			"			throw new IOException();\n" +
+			"		} while (true);\n" +
+			"	 } catch (IOException e) {\n" +
+			"	 	if (someVariable == null) {\n" +
+			"    		System.out.println(\"Compiler bad\");\n" +
+			"	 	} else {\n" +
+			"			System.out.print(\"Compiler good \");\n" +
+			"	 	}\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler bad\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"}"},
+			"Compiler good Compiler good");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317829
+public void testBug317829f() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.IOException;\n" +
+			"public class X {\n" +
+			"  public static void main(String[] args) {\n" +
+			"	 String someVariable = null;\n" +
+			"	 int i = 0;\n" +
+			"	 try {\n" +
+			"       someVariable = \"not null\";\n" +
+			"		do {\n" +
+			"			someMethod();\n" +
+			"		} while (true);\n" +
+			"	 } catch (IOException e) {\n" +
+			"	 	if (someVariable == null) {\n" +
+			"    		System.out.println(\"Compiler bad\");\n" +
+			"	 	} else {\n" +
+			"			System.out.print(\"Compiler good \");\n" +
+			"	 	}\n" +
+			"	 }\n" +
+			"	 if (someVariable == null) {\n" +
+			"    	System.out.println(\"Compiler bad\");\n" +
+			"	 } else {\n" +
+			"		System.out.println(\"Compiler good\");\n" +
+			"	 }\n" +
+			"  }\n" +
+			"  public static void someMethod() throws IOException {\n" +
+			"      throw new IOException();\n" +
+			"  }\n" +
+			"}"},
+			"Compiler good Compiler good");
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292478 -  Report potentially null across variable assignment
+// LocalDeclaration
+public void testBug292478() {
+    this.runNegativeTest(
+            new String[] {
+                "X.java",
+                "public class X {\n" +
+                "  void foo(Object o) {\n" +
+                "    if (o != null) {/* */}\n" +
+                "    Object p = o;\n" +
+                "    p.toString();\n" + // complain here
+                "  }\n" +
+                "}"},
+            "----------\n" +
+            "1. ERROR in X.java (at line 5)\n" + 
+            "	p.toString();\n" + 
+            "	^\n" + 
+            "Potential null pointer access: The variable p may be null at this location\n" + 
+            "----------\n",
+            JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292478 -  Report potentially null across variable assignment
+// Assignment
+public void testBug292478a() {
+  this.runNegativeTest(
+          new String[] {
+              "X.java",
+              "public class X {\n" +
+              "  void foo(Object o) {\n" +
+              "    Object p;" +
+              "    if (o != null) {/* */}\n" +
+              "    p = o;\n" +
+              "    p.toString();\n" + // complain here
+              "  }\n" +
+              "}"},
+          "----------\n" +
+          "1. ERROR in X.java (at line 5)\n" + 
+          "	p.toString();\n" + 
+          "	^\n" + 
+          "Potential null pointer access: The variable p may be null at this location\n" + 
+          "----------\n",
+          JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292478 -  Report potentially null across variable assignment
+// Assignment after definite null
+public void testBug292478b() {
+this.runNegativeTest(
+        new String[] {
+            "X.java",
+            "public class X {\n" +
+            "  void foo(Object o) {\n" +
+            "    Object p = null;\n" +
+            "    if (o != null) {/* */}\n" +
+            "    p = o;\n" +
+            "    p.toString();\n" + // complain here
+            "  }\n" +
+            "}"},
+        "----------\n" +
+        "1. ERROR in X.java (at line 6)\n" + 
+        "	p.toString();\n" + 
+        "	^\n" + 
+        "Potential null pointer access: The variable p may be null at this location\n" + 
+        "----------\n",
+        JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292478 -  Report potentially null across variable assignment
+// Assignment after definite null - many locals
+public void testBug292478c() {
+this.runNegativeTest(
+      new String[] {
+          "X.java",
+          "public class X {\n" +
+          "  void foo(Object o) {\n" +
+          "    int i00, i01, i02, i03, i04, i05, i06, i07, i08, i09;\n" +
+          "    int i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;\n" +
+          "    int i20, i21, i22, i23, i24, i25, i26, i27, i28, i29;\n" +
+          "    int i30, i31, i32, i33, i34, i35, i36, i37, i38, i39;\n" +
+          "    int i40, i41, i42, i43, i44, i45, i46, i47, i48, i49;\n" +
+          "    int i50, i51, i52, i53, i54, i55, i56, i57, i58, i59;\n" +
+          "    int i60, i61, i62, i63, i64, i65, i66, i67, i68, i69;\n" +
+          "    Object p = null;\n" +
+          "    if (o != null) {/* */}\n" +
+          "    p = o;\n" +
+          "    p.toString();\n" + // complain here
+          "  }\n" +
+          "}"},
+      "----------\n" +
+      "1. ERROR in X.java (at line 13)\n" + 
+      "	p.toString();\n" + 
+      "	^\n" + 
+      "Potential null pointer access: The variable p may be null at this location\n" + 
+      "----------\n",
+      JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292478 -  Report potentially null across variable assignment
+// Assignment affects initsOnFinally
+public void testBug292478d() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			" X bar() {\n" +
+			"   return null;\n" +
+			" }\n" +
+			" Object foo() {\n" +
+			"   X x = null;\n" +
+			"   X y = new X();\n" +
+			"   X u = null;\n" +
+			"   try {\n" +
+			"     u = bar();\n" +
+			"     x = bar();\n" +
+			"     if (x==null) { }\n" +
+			"     y = x;\n" +				// this makes y potentially null
+			"     if (x==null) { y=bar();} else { y=new X(); }\n" +
+			"     return x;\n" +
+			"   } finally {\n" +
+			"     y.toString();\n" +		// must complain against potentially null, although normal exist of tryBlock says differently (unknown or non-null)
+			"   }\n" +
+			" }\n" +
+			"}\n"},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 17)\n" + 
+		"	y.toString();\n" + 
+		"	^\n" + 
+		"Potential null pointer access: The variable y may be null at this location\n" + 
+		"----------\n");
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292478 -  Report potentially null across variable assignment
+// test regression reported in comment 8
+public void testBug292478e() {
+	this.runConformTest(
+		new String[] {
+			"Test.java",
+			"public class Test {\n" +
+			"	Object foo(int i, boolean b1, boolean b2) {\n" +
+			"		Object o1 = null;\n" +
+			"		done : while (true) { \n" +
+			"			switch (i) {\n" +
+			"				case 1 :\n" +
+			"					Object o2 = null;\n" +
+			"					if (b2)\n" +
+			"						o2 = new Object();\n" +
+			"					o1 = o2;\n" +
+			"					break;\n" +
+			"				case 2 :\n" +
+			"					break done;\n" +
+			"			}\n" +
+			"		}		\n" +
+			"		if (o1 != null)\n" +
+			"			return o1;\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"}\n"
+		});
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292478 -  Report potentially null across variable assignment
+// variant where regression occurred inside the while-switch structure
+public void testBug292478f() {
+	this.runConformTest(
+		new String[] {
+			"Test.java",
+			"public class Test {\n" +
+			"	Object foo(int i, boolean b1, boolean b2) {\n" +
+			"		Object o1 = null;\n" +
+			"		done : while (true) { \n" +
+			"			switch (i) {\n" +
+			"				case 1 :\n" +
+			"					Object o2 = null;\n" +
+			"					if (b2)\n" +
+			"						o2 = new Object();\n" +
+			"					o1 = o2;\n" +
+			"					if (o1 != null)\n" +
+			"						return o1;\n" +
+			"					break;\n" +
+			"				case 2 :\n" +
+			"					break done;\n" +
+			"			}\n" +
+			"		}		\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"}\n"
+		});
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292478 -  Report potentially null across variable assignment
+// variant for transfering state potentially unknown
+public void testBug292478g() {
+	this.runConformTest(
+		new String[] {
+			"Test.java",
+			"public class Test {\n" +
+			"	Object foo(int i, boolean b1, boolean b2, Object o2) {\n" +
+			"		Object o1 = null;\n" +
+			"		done : while (true) { \n" +
+			"			switch (i) {\n" +
+			"				case 1 :\n" +
+			"					if (b2)\n" +
+			"						o2 = bar();\n" +
+			"					o1 = o2;\n" +
+			"					if (o1 != null)\n" +
+			"						return o1;\n" +
+			"					break;\n" +
+			"				case 2 :\n" +
+			"					break done;\n" +
+			"			}\n" +
+			"		}		\n" +
+			"		return null;\n" +
+			"	}\n" +
+			"   Object bar() { return null; }\n" +
+			"}\n"
+		});
+}
+
+// Bug 324762 -  Compiler thinks there is deadcode and removes it!
+// regression caused by the fix for bug 133125
+// ternary is non-null or null
+public void testBug324762() {
+	this.runConformTest(
+		new String[] {
+			"Test.java",
+			"public class Test {\n" +
+			"	void zork(boolean b1) {\n" +
+			"		Object satisfied = null;\n" +
+			"		if (b1) {\n" +
+			"			String[] s = new String[] { \"a\", \"b\" };\n" +
+			"			for (int k = 0; k < s.length && satisfied == null; k++)\n" +
+			"				satisfied = s.length > 1 ? new Object() : null;\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n"
+		});
+}
+
+// Bug 324762 -  Compiler thinks there is deadcode and removes it!
+// regression caused by the fix for bug 133125
+// ternary is unknown or null
+public void testBug324762a() {
+	this.runConformTest(
+		new String[] {
+			"Test.java",
+			"public class Test {\n" +
+			"	void zork(boolean b1) {\n" +
+			"		Object satisfied = null;\n" +
+			"		if (b1) {\n" +
+			"			String[] s = new String[] { \"a\", \"b\" };\n" +
+			"			for (int k = 0; k < s.length && satisfied == null; k++)\n" +
+			"				satisfied = s.length > 1 ? bar() : null;\n" +
+			"		}\n" +
+			"	}\n" +
+			"	Object bar() { return null; }\n" +
+			"}\n"
+		});
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=325229
+// instancof expression
+public void testBug325229a() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_5) {
+		Map compilerOptions = getCompilerOptions();
+		compilerOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
+		this.runConformTest(
+			new String[] {
+				"Test.java",
+				"public class Test {\n" +
+				"	void foo(Object a) {\n" +
+				"		assert a instanceof Object;\n " +
+				"		if (a!=null) {\n" +
+				"			System.out.println(\"a is not null\");\n" +
+				"		 } else{\n" +
+				"			System.out.println(\"a is null\");\n" +
+				"		 }\n" +
+				"	}\n" +
+				"	public static void main(String[] args){\n" +
+				"		Test test = new Test();\n" +
+				"		test.foo(null);\n" +
+				"	}\n" +
+				"}\n"},
+			"a is null",
+			null,
+			true,
+			new String[] {"-da"},
+			compilerOptions,
+			null);
+	}
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=325229
+// MessageSend in assert
+public void testBug325229b() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_5) {
+		Map compilerOptions = getCompilerOptions();
+		compilerOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
+		this.runConformTest(
+			new String[] {
+				"Test.java",
+				"public class Test {\n" +
+				"	boolean bar() {\n" +
+				"		return false;\n" +
+				"	}" +
+				"	void foo(Test a) {\n" +
+				"		assert a.bar();\n " +
+				"		if (a!=null) {\n" +
+				"			System.out.println(\"a is not null\");\n" +
+				"		 } else{\n" +
+				"			System.out.println(\"a is null\");\n" +
+				"		 }\n" +
+				"	}\n" +
+				"	public static void main(String[] args){\n" +
+				"		Test test = new Test();\n" +
+				"		test.foo(null);\n" +
+				"	}\n" +
+				"}\n"},
+			"a is null",
+			null,
+			true,
+			new String[] {"-da"},
+			compilerOptions,
+			null);
+	}
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=325229
+// QualifiedNameReference in assert
+public void testBug325229c() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_5) {
+		Map compilerOptions = getCompilerOptions();
+		compilerOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
+		this.runConformTest(
+			new String[] {
+				"Test.java",
+				"public class Test {\n" +
+				"	boolean bar() {\n" +
+				"		return false;\n" +
+				"	}" +
+				"	Test tfield;\n" +
+				"	void foo(Test a) {\n" +
+				"		assert a.tfield.bar();\n " +
+				"		if (a!=null) {\n" +
+				"			System.out.println(\"a is not null\");\n" +
+				"		 } else{\n" +
+				"			System.out.println(\"a is null\");\n" +
+				"		 }\n" +
+				"	}\n" +
+				"	public static void main(String[] args){\n" +
+				"		Test test = new Test();\n" +
+				"		test.foo(null);\n" +
+				"	}\n" +
+				"}\n"},
+			"a is null",
+			null,
+			true,
+			new String[] {"-da"},
+			compilerOptions,
+			null);
+	}
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=325229
+// EqualExpression in assert, comparison against non null
+public void testBug325229d() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_5) {
+		Map compilerOptions = getCompilerOptions();
+		compilerOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
+		this.runConformTest(
+			new String[] {
+				"Test.java",
+				"public class Test {\n" +
+				"	void foo(Object a) {\n" +
+				"		Object b = null;" +
+				"		assert a == b;\n " +
+				"		if (a!=null) {\n" +
+				"			System.out.println(\"a is not null\");\n" +
+				"		 } else{\n" +
+				"			System.out.println(\"a is null\");\n" +
+				"		 }\n" +
+				"		assert a != b;\n " +
+				"		if (a!=null) {\n" +
+				"			System.out.println(\"a is not null\");\n" +
+				"		 } else{\n" +
+				"			System.out.println(\"a is null\");\n" +
+				"		 }\n" +
+				"	}\n" +
+				"	public static void main(String[] args){\n" +
+				"		Test test = new Test();\n" +
+				"		test.foo(null);\n" +
+				"	}\n" +
+				"}\n"},
+			"a is null\n" +
+			"a is null",
+			null,
+			true,
+			new String[] {"-da"},
+			compilerOptions,
+			null);
+	}
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=325755 
+// null analysis -- conditional expression
+public void testBug325755a() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static Object foo(String s1, String s2) {\n" + 
+			"		String local1 = s1;\n" + 
+			"		String local2 = s2;\n" + 
+			"		\n" + 
+			"		String local3 = null;\n" + 
+			"		if (local1 != null && local2 != null)\n" + 
+			"			local3 = \"\"; //$NON-NLS-1$\n" + 
+			"		else\n" + 
+			"			local3 = local1 != null ? local1 : local2;\n" + 
+			"\n" + 
+			"		if (local3 != null)\n" + 
+			"			return new Integer(local3.length());\n" + 
+			"		return null;\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		System.out.print(foo(null, null));\n" + 
+			"		System.out.print(foo(\"p1\", null));\n" + 
+			"		System.out.print(foo(null, \"p2\"));\n" + 
+			"		System.out.print(foo(\"p1\", \"p2\"));\n" + 
+			"	}\n" + 
+			"}"},
+		"null220");
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=325755 
+// null analysis -- conditional expression, many locals
+public void testBug325755b() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static Object foo(String s1, String s2) {\n" + 
+	          "    int i00, i01, i02, i03, i04, i05, i06, i07, i08, i09;\n" +
+	          "    int i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;\n" +
+	          "    int i20, i21, i22, i23, i24, i25, i26, i27, i28, i29;\n" +
+	          "    int i30, i31, i32, i33, i34, i35, i36, i37, i38, i39;\n" +
+	          "    int i40, i41, i42, i43, i44, i45, i46, i47, i48, i49;\n" +
+	          "    int i50, i51, i52, i53, i54, i55, i56, i57, i58, i59;\n" +
+	          "    int i60, i61, i62, i63, i64, i65, i66, i67, i68, i69;\n" +
+
+			"		String local1 = s1;\n" + 
+			"		String local2 = s2;\n" + 
+			"		\n" + 
+			"		String local3 = null;\n" + 
+			"		if (local1 != null && local2 != null)\n" + 
+			"			local3 = \"\"; //$NON-NLS-1$\n" + 
+			"		else\n" + 
+			"			local3 = local1 != null ? local1 : local2;\n" + 
+			"\n" + 
+			"		if (local3 != null)\n" + 
+			"			return new Integer(local3.length());\n" + 
+			"		return null;\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		System.out.print(foo(null, null));\n" + 
+			"		System.out.print(foo(\"p1\", null));\n" + 
+			"		System.out.print(foo(null, \"p2\"));\n" + 
+			"		System.out.print(foo(\"p1\", \"p2\"));\n" + 
+			"	}\n" + 
+			"}"},
+		"null220");
 }
 }

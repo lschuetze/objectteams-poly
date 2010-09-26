@@ -454,4 +454,74 @@ public void test13() {
 		expectedSyntaxErrorDiagnosis,
 		testName);
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=212713
+public void test14() {
+
+	String s =
+		"public interface Test {\n"+
+		"  static {  }\n"+
+		"  {         }\n"+
+		"}\n";
+
+	String expectedSyntaxErrorDiagnosis =
+		"----------\n" +
+		"1. ERROR in <test> (at line 2)\n" +
+		"	static {  }\n" +
+		"	       ^^^^\n" +
+		"The interface Test cannot define an initializer\n" +
+		"----------\n" +
+		"2. ERROR in <test> (at line 3)\n" +
+		"	{         }\n" +
+		"	^^^^^^^^^^^\n" +
+		"The interface Test cannot define an initializer\n" +
+		"----------\n";
+
+	String testName = "<test>";
+	checkParse(
+		s.toCharArray(),
+		expectedSyntaxErrorDiagnosis,
+		testName);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=210419
+public void test15() {
+
+	String s =
+		"package bug;\n" +
+		"public class Test {\n" +
+		"  static int X;\n" +
+		"  String field = { String str;\n" +
+		"      switch (X) {\n" +
+		"        case 0:\n" +
+		"          str = \"zero\";\n" +
+		"          break;\n" +
+		"        default:\n" +
+		"          str = \"other\";\n" +
+		"          break;\n" +
+		"      }\n" +
+		"      this.field = str;\n" +
+		"  };\n" +
+		"  public static void main(String[] args) {\n" +
+		"    System.out.println(new Test().field);\n" +
+		"  }\n" +
+		"}\n";
+
+	String expectedSyntaxErrorDiagnosis =
+		"----------\n" +
+		"1. ERROR in <test> (at line 4)\n" +
+		"	String field = { String str;\n" +
+		"	               ^^^^^^^^\n" +
+		"Syntax error on token(s), misplaced construct(s)\n" +
+		"----------\n" +
+		"2. ERROR in <test> (at line 4)\n" +
+		"	String field = { String str;\n" +
+		"	                           ^\n" +
+		"Syntax error on token \";\", { expected after this token\n" +
+		"----------\n";
+
+	String testName = "<test>";
+	checkParse(
+		s.toCharArray(),
+		expectedSyntaxErrorDiagnosis,
+		testName);
+}
 }

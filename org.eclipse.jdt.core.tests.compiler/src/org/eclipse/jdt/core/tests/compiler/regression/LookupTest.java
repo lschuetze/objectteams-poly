@@ -35,6 +35,10 @@ public LookupTest(String name) {
 public static Test suite() {
 	return buildAllCompliancesTestSuite(testClass());
 }
+
+static {
+//	TESTS_NAMES = new String [] { "test096" };
+}
 /**
  * Non-static member class
  */
@@ -3096,6 +3100,363 @@ public void test095() {
 	"	                       ^^^^^\n" + 
 	"The type p1.B1 is not visible\n" + 
 	"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id= 317212
+public void test096() {
+	this.runNegativeTest(
+		new String[] {
+			"p0/B.java",//------------------------------
+			"package p0;\n" +
+			"public class B {\n" +
+			"    public static A m() {\n" +
+			"        return new A();\n" +
+			"    }\n" +
+			"}\n" +
+			"class A {\n" +
+			"        public class M {\n" +
+			"            public M() {}\n" +
+			"        }\n" +
+			"}\n",
+			"p1/C.java",//------------------------------
+			"package p1;\n" +
+			"import p0.B;\n" +
+			"public class C {\n" +
+			"    public static void main(String[] args) {\n" +
+			"        B.m().new M();\n" +
+			"    }\n" +
+			"}",
+		},
+		"----------\n" + 
+		"1. ERROR in p1\\C.java (at line 5)\n" + 
+		"	B.m().new M();\n" + 
+		"	^^^^^\n" + 
+		"The type p0.A is not visible\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id= 317212
+public void test097() {
+	this.runNegativeTest(
+		new String[] {
+			"B.java",//------------------------------
+			"public class B {\n" +
+			"    public static A m() {\n" +
+			"        return new B().new A();\n" +
+			"    }\n" +
+			"    private class A {\n" +
+			"        public class M {\n" +
+			"            public M() {}\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"class C {\n" +
+			"    public static void main(String[] args) {\n" +
+			"        B.m().new M();\n" +
+			"    }\n" +
+			"}\n",
+		},
+		"----------\n" + 
+		"1. WARNING in B.java (at line 3)\n" + 
+		"	return new B().new A();\n" + 
+		"	       ^^^^^^^^^^^^^^^\n" + 
+		"Access to enclosing constructor B.A() is emulated by a synthetic accessor method\n" + 
+		"----------\n" + 
+		"2. WARNING in B.java (at line 6)\n" + 
+		"	public class M {\n" + 
+		"	             ^\n" + 
+		"The type B.A.M is never used locally\n" + 
+		"----------\n" + 
+		"3. WARNING in B.java (at line 7)\n" + 
+		"	public M() {}\n" + 
+		"	       ^^^\n" + 
+		"The constructor B.A.M() is never used locally\n" + 
+		"----------\n" + 
+		"4. ERROR in B.java (at line 13)\n" + 
+		"	B.m().new M();\n" + 
+		"	^^^^^\n" + 
+		"The type B$A is not visible\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317858
+public void test098() {
+	this.runConformTest(
+		new String[] {
+			"B.java",//------------------------------
+			"class A {\n" +
+			"    public final static class B {\n" +
+			"        public final static String length = \"very long\";\n" +
+			"    }\n" +
+			"    private  int [] B = new int[5];\n" +    
+			"}\n" +
+			"public class B {\n" +
+			"    public static void main(String[] args) {\n" +
+			"        System.out.println(A.B.length);\n" +
+			"    }\n" +   
+			"}\n",
+		},
+		"very long");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317858
+public void test099() {
+	this.runNegativeTest(
+		new String[] {
+			"B.java",//------------------------------
+			"class A {\n" +
+			"    public final static class B {\n" +
+			"        public final static String length = \"very long\";\n" +
+			"    }\n" +
+			"    public int [] B = new int[5];\n" +    
+			"}\n" +
+			"public class B {\n" +
+			"    public static void main(String[] args) {\n" +
+			"        System.out.println(A.B.length);\n" +
+			"    }\n" +   
+			"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in B.java (at line 9)\n" + 
+		"	System.out.println(A.B.length);\n" + 
+		"	                   ^^^^^^^^^^\n" + 
+		"Cannot make a static reference to the non-static field A.B\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317858
+public void test100() {
+	this.runConformTest(
+		new String[] {
+			"B.java",//------------------------------
+			"class A {\n" +
+			"    public final class B {\n" +
+			"        public final String length = \"very long\";\n" +
+			"    }\n" +
+			"    public static int [] B = new int[5];\n" +    
+			"}\n" +
+			"public class B {\n" +
+			"    public static void main(String[] args) {\n" +
+			"        System.out.println(A.B.length);\n" +
+			"    }\n" +   
+			"}\n",
+		},
+		"5");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317858
+public void test101() {
+	this.runNegativeTest(
+		new String[] {
+			"B.java",//------------------------------
+			"class A {\n" +
+			"    private final class B {\n" +
+			"        public final String length = \"very long\";\n" +
+			"    }\n" +
+			"    private int [] B = new int[5];\n" +    
+			"}\n" +
+			"public class B {\n" +
+			"    public static void main(String[] args) {\n" +
+			"        System.out.println(A.B.length);\n" +
+			"    }\n" +   
+			"}\n",
+		},
+		"----------\n" + 
+		"1. WARNING in B.java (at line 2)\n" + 
+		"	private final class B {\n" + 
+		"	                    ^\n" + 
+		"The type A.B is never used locally\n" + 
+		"----------\n" + 
+		"2. WARNING in B.java (at line 3)\n" + 
+		"	public final String length = \"very long\";\n" + 
+		"	                    ^^^^^^\n" + 
+		"The field A.B.length is never read locally\n" + 
+		"----------\n" + 
+		"3. WARNING in B.java (at line 5)\n" + 
+		"	private int [] B = new int[5];\n" + 
+		"	               ^\n" + 
+		"The field A.B is never read locally\n" + 
+		"----------\n" + 
+		"4. ERROR in B.java (at line 9)\n" + 
+		"	System.out.println(A.B.length);\n" + 
+		"	                     ^\n" + 
+		"The field A.B is not visible\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317858
+public void test102() {
+	this.runNegativeTest(
+		new String[] {
+			"B.java",//------------------------------
+			"class A {\n" +
+			"    public final class B {\n" +
+			"        private final String length = \"very long\";\n" +
+			"    }\n" +
+			"    private int [] B = new int[5];\n" +    
+			"}\n" +
+			"public class B {\n" +
+			"    public static void main(String[] args) {\n" +
+			"        System.out.println(A.B.length);\n" +
+			"    }\n" +   
+			"}\n",
+		},
+		"----------\n" + 
+		"1. WARNING in B.java (at line 3)\n" + 
+		"	private final String length = \"very long\";\n" + 
+		"	                     ^^^^^^\n" + 
+		"The field A.B.length is never read locally\n" + 
+		"----------\n" + 
+		"2. WARNING in B.java (at line 5)\n" + 
+		"	private int [] B = new int[5];\n" + 
+		"	               ^\n" + 
+		"The field A.B is never read locally\n" + 
+		"----------\n" + 
+		"3. ERROR in B.java (at line 9)\n" + 
+		"	System.out.println(A.B.length);\n" + 
+		"	                       ^^^^^^\n" + 
+		"The field A.B.length is not visible\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=316956
+public void test103() {
+	Map options = getCompilerOptions();
+	CompilerOptions compOptions = new CompilerOptions(options);
+	if (compOptions.complianceLevel < ClassFileConstants.JDK1_4) return;
+	this.runNegativeTest(
+		new String[] {
+			"A.java",//------------------------------
+			"public class A {\n" +
+			"	  private int x;\n" +
+			"	  static class B {\n" +
+			"	    private int x;\n" +
+			"	    private C c = new C() {\n" +
+			"	      void foo() {\n" +
+			"	        x = 3;\n" +
+			"	      }\n" +
+			"	    };\n" +
+			"	  }\n" +
+			"	  static class C {\n" +
+			"	    private int x;\n" +
+			"	  }\n" +
+			"	}\n",
+		},
+		"----------\n" + 
+		"1. WARNING in A.java (at line 2)\n" + 
+		"	private int x;\n" + 
+		"	            ^\n" + 
+		"The field A.x is never read locally\n" + 
+		"----------\n" + 
+		"2. WARNING in A.java (at line 4)\n" + 
+		"	private int x;\n" + 
+		"	            ^\n" + 
+		"The field A.B.x is never read locally\n" + 
+		"----------\n" + 
+		"3. WARNING in A.java (at line 5)\n" + 
+		"	private C c = new C() {\n" + 
+		"	          ^\n" + 
+		"The field A.B.c is never read locally\n" + 
+		"----------\n" + 
+		"4. WARNING in A.java (at line 6)\n" + 
+		"	void foo() {\n" + 
+		"	     ^^^^^\n" + 
+		"The method foo() from the type new A.C(){} is never used locally\n" + 
+		"----------\n" + 
+		"5. WARNING in A.java (at line 7)\n" + 
+		"	x = 3;\n" + 
+		"	^\n" + 
+		"Write access to enclosing field A.B.x is emulated by a synthetic accessor method\n" + 
+		"----------\n" + 
+		"6. WARNING in A.java (at line 12)\n" + 
+		"	private int x;\n" + 
+		"	            ^\n" + 
+		"The field A.C.x is never read locally\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=316956
+public void test104() {
+	Map options = getCompilerOptions();
+	CompilerOptions compOptions = new CompilerOptions(options);
+	if (compOptions.complianceLevel < ClassFileConstants.JDK1_4) return;
+	this.runNegativeTest(
+		new String[] {
+			"A.java",//------------------------------
+			"public class A {\n" +
+			"	  private int x;\n" +
+			"	  static class B {\n" +
+			"	    private int x;\n" +
+			"	    private C c = new C() {\n" +
+			"	      void foo() {\n" +
+			"	        x = 3;\n" +
+			"	      }\n" +
+			"	    };\n" +
+			"	  }\n" +
+			"	  static class C {\n" +
+			"	    public int x;\n" +
+			"	  }\n" +
+			"	}\n",
+		},
+		"----------\n" + 
+		"1. WARNING in A.java (at line 2)\n" + 
+		"	private int x;\n" + 
+		"	            ^\n" + 
+		"The field A.x is never read locally\n" + 
+		"----------\n" + 
+		"2. WARNING in A.java (at line 4)\n" + 
+		"	private int x;\n" + 
+		"	            ^\n" + 
+		"The field A.B.x is never read locally\n" + 
+		"----------\n" + 
+		"3. WARNING in A.java (at line 5)\n" + 
+		"	private C c = new C() {\n" + 
+		"	          ^\n" + 
+		"The field A.B.c is never read locally\n" + 
+		"----------\n" + 
+		"4. WARNING in A.java (at line 6)\n" + 
+		"	void foo() {\n" + 
+		"	     ^^^^^\n" + 
+		"The method foo() from the type new A.C(){} is never used locally\n" + 
+		"----------\n");
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=316956
+public void test105() {
+	Map options = getCompilerOptions();
+	CompilerOptions compOptions = new CompilerOptions(options);
+	if (compOptions.complianceLevel < ClassFileConstants.JDK1_4) return;
+	this.runNegativeTest(
+		new String[] {
+			"A.java",//------------------------------
+			"public class A {\n" +
+			"	  private int x;\n" +
+			"	  private C c = new C() {\n" +
+			"	    void foo() {\n" +
+			"	      x = 3;\n" +
+			"	    }\n" +
+			"	  };\n" +
+			"	  static class C {\n" +
+			"	    private int x;\n" +
+			"	  }\n" +
+			"	 }\n",
+		},
+		"----------\n" + 
+		"1. WARNING in A.java (at line 2)\n" + 
+		"	private int x;\n" + 
+		"	            ^\n" + 
+		"The field A.x is never read locally\n" + 
+		"----------\n" + 
+		"2. WARNING in A.java (at line 3)\n" + 
+		"	private C c = new C() {\n" + 
+		"	          ^\n" + 
+		"The field A.c is never read locally\n" + 
+		"----------\n" + 
+		"3. WARNING in A.java (at line 4)\n" + 
+		"	void foo() {\n" + 
+		"	     ^^^^^\n" + 
+		"The method foo() from the type new A.C(){} is never used locally\n" + 
+		"----------\n" + 
+		"4. WARNING in A.java (at line 5)\n" + 
+		"	x = 3;\n" + 
+		"	^\n" + 
+		"Write access to enclosing field A.x is emulated by a synthetic accessor method\n" + 
+		"----------\n" + 
+		"5. WARNING in A.java (at line 9)\n" + 
+		"	private int x;\n" + 
+		"	            ^\n" + 
+		"The field A.C.x is never read locally\n" + 
+		"----------\n");
 }
 public static Class testClass() {	return LookupTest.class;
 }

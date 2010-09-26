@@ -18,6 +18,19 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.env.ClassSignature;
+import org.eclipse.jdt.internal.compiler.env.EnumConstantSignature;
+import org.eclipse.jdt.internal.compiler.impl.BooleanConstant;
+import org.eclipse.jdt.internal.compiler.impl.ByteConstant;
+import org.eclipse.jdt.internal.compiler.impl.CharConstant;
+import org.eclipse.jdt.internal.compiler.impl.Constant;
+import org.eclipse.jdt.internal.compiler.impl.DoubleConstant;
+import org.eclipse.jdt.internal.compiler.impl.FloatConstant;
+import org.eclipse.jdt.internal.compiler.impl.IntConstant;
+import org.eclipse.jdt.internal.compiler.impl.LongConstant;
+import org.eclipse.jdt.internal.compiler.impl.ShortConstant;
+import org.eclipse.jdt.internal.compiler.impl.StringConstant;
+import org.eclipse.jdt.internal.compiler.problem.ShouldNotImplement;
 
 public class ConstantTest extends AbstractRegressionTest {
 
@@ -1100,6 +1113,303 @@ public void test020() {
 		"	                    ^^^^^^^^^^^^\n" +
 		"The field notAConstant cannot be declared static; static fields can only be declared in static or top level types\n" +
 		"----------\n");
+}
+public void testAllConstants() {
+	Constant byteConstant = ByteConstant.fromValue((byte) 1);
+	Constant byteConstant2 = ByteConstant.fromValue((byte) 2);
+	Constant byteConstant3 = ByteConstant.fromValue((byte) 1);
+	Constant charConstant = CharConstant.fromValue('c');
+	Constant charConstant2 = CharConstant.fromValue('d');
+	Constant charConstant3 = CharConstant.fromValue('c');
+	Constant booleanConstant = BooleanConstant.fromValue(true);
+	Constant booleanConstant2 = BooleanConstant.fromValue(false);
+	Constant booleanConstant3 = BooleanConstant.fromValue(true);
+	Constant doubleConstant = DoubleConstant.fromValue(1.0);
+	Constant doubleConstant2 = DoubleConstant.fromValue(2.0);
+	Constant doubleConstant3 = DoubleConstant.fromValue(1.0);
+	Constant floatConstant = FloatConstant.fromValue(1.0f);
+	Constant floatConstant2 =  FloatConstant.fromValue(2.0f);
+	Constant floatConstant3 =  FloatConstant.fromValue(1.0f);
+	Constant intConstant = IntConstant.fromValue(20);
+	Constant intConstant2 = IntConstant.fromValue(30);
+	Constant intConstant3 = IntConstant.fromValue(20);
+	Constant longConstant =  LongConstant.fromValue(3L);
+	Constant longConstant2 =  LongConstant.fromValue(4L);
+	Constant longConstant3 =  LongConstant.fromValue(3L);
+	Constant shortConstant = ShortConstant.fromValue((short) 4);
+	Constant shortConstant2 = ShortConstant.fromValue((short) 3);
+	Constant shortConstant3 = ShortConstant.fromValue((short) 4);
+	Constant stringConstant = StringConstant.fromValue("test");
+	Constant stringConstant2 = StringConstant.fromValue("test2");
+	Constant stringConstant3 = StringConstant.fromValue("test");
+	Constant stringConstant4 = StringConstant.fromValue(null);
+	Constant stringConstant5 = StringConstant.fromValue(null);
+	ClassSignature classSignature = new ClassSignature("java.lang.Object".toCharArray());
+	ClassSignature classSignature2 = new ClassSignature("java.lang.String".toCharArray());
+	ClassSignature classSignature3 = new ClassSignature("java.lang.Object".toCharArray());
+	EnumConstantSignature enumConstantSignature = new EnumConstantSignature("myEnum".toCharArray(), "C".toCharArray());
+	EnumConstantSignature enumConstantSignature2 = new EnumConstantSignature("myEnum".toCharArray(), "A".toCharArray());
+	EnumConstantSignature enumConstantSignature3 = new EnumConstantSignature("myEnum".toCharArray(), "C".toCharArray());
+	EnumConstantSignature enumConstantSignature4 = new EnumConstantSignature("myEnum2".toCharArray(), "A".toCharArray());
+
+	verifyConstantEqualsAndHashcode(byteConstant, byteConstant2, byteConstant3, intConstant);
+	verifyConstantEqualsAndHashcode(charConstant, charConstant2, charConstant3, byteConstant);
+	verifyConstantEqualsAndHashcode(booleanConstant, booleanConstant2, booleanConstant3, byteConstant);
+	verifyConstantEqualsAndHashcode(doubleConstant, doubleConstant2, doubleConstant3, byteConstant);
+	verifyConstantEqualsAndHashcode(floatConstant, floatConstant2, floatConstant3, byteConstant);
+	verifyConstantEqualsAndHashcode(intConstant, intConstant2, intConstant3, stringConstant);
+	verifyConstantEqualsAndHashcode(longConstant, longConstant2, longConstant3, byteConstant);
+	verifyConstantEqualsAndHashcode(shortConstant, shortConstant2, shortConstant3, byteConstant);
+	verifyConstantEqualsAndHashcode(stringConstant, stringConstant2, stringConstant3, byteConstant);
+	verifyConstantEqualsAndHashcode(stringConstant, stringConstant4, stringConstant3, byteConstant);
+	verifyConstantEqualsAndHashcode(stringConstant4, stringConstant3, stringConstant5, byteConstant);
+	verifyConstantEqualsAndHashcode(classSignature, classSignature2, classSignature3, byteConstant);
+	verifyConstantEqualsAndHashcode(enumConstantSignature, enumConstantSignature2, enumConstantSignature3, byteConstant);
+	verifyConstantEqualsAndHashcode(enumConstantSignature, enumConstantSignature4, enumConstantSignature3, byteConstant);
+	assertNotNull(Constant.NotAConstant.toString());
+	
+	verifyValues(byteConstant, charConstant, booleanConstant, doubleConstant, floatConstant, intConstant, longConstant, shortConstant, stringConstant);
+	// check equals between to null string constants
+	assertTrue(stringConstant4.equals(stringConstant5));
+}
+private void verifyValues(
+		Constant byteConstant,
+		Constant charConstant,
+		Constant booleanConstant,
+		Constant doubleConstant,
+		Constant floatConstant,
+		Constant intConstant,
+		Constant longConstant,
+		Constant shortConstant,
+		Constant stringConstant) {
+
+	// byteValue()
+	byteConstant.byteValue();
+	charConstant.byteValue();
+	try {
+		booleanConstant.byteValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	doubleConstant.byteValue();
+	floatConstant.byteValue();
+	intConstant.byteValue();
+	longConstant.byteValue();
+	shortConstant.byteValue();
+	try {
+		stringConstant.byteValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+
+	// booleanValue()
+	try {
+		byteConstant.booleanValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	try {
+		charConstant.booleanValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	booleanConstant.booleanValue();
+	try {
+		doubleConstant.booleanValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	try {
+		floatConstant.booleanValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	try {
+		intConstant.booleanValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	try {
+		longConstant.booleanValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	try {
+		shortConstant.booleanValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	try {
+		stringConstant.booleanValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+
+	// charValue()
+	byteConstant.charValue();
+	charConstant.charValue();
+	try {
+		booleanConstant.charValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	doubleConstant.charValue();
+	floatConstant.charValue();
+	intConstant.charValue();
+	longConstant.charValue();
+	shortConstant.charValue();
+	try {
+		stringConstant.charValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+
+	// doubleValue()
+	byteConstant.doubleValue();
+	charConstant.doubleValue();
+	try {
+		booleanConstant.doubleValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	doubleConstant.doubleValue();
+	floatConstant.doubleValue();
+	intConstant.doubleValue();
+	longConstant.doubleValue();
+	shortConstant.doubleValue();
+	try {
+		stringConstant.doubleValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+
+	// floatValue()
+	byteConstant.floatValue();
+	charConstant.floatValue();
+	try {
+		booleanConstant.floatValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	doubleConstant.floatValue();
+	floatConstant.floatValue();
+	intConstant.floatValue();
+	longConstant.floatValue();
+	shortConstant.floatValue();
+	try {
+		stringConstant.floatValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+
+	// intValue()
+	byteConstant.intValue();
+	charConstant.intValue();
+	try {
+		booleanConstant.intValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	doubleConstant.intValue();
+	floatConstant.intValue();
+	intConstant.intValue();
+	longConstant.intValue();
+	shortConstant.intValue();
+	try {
+		stringConstant.intValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+
+	// longValue()
+	byteConstant.longValue();
+	charConstant.longValue();
+	try {
+		booleanConstant.longValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	doubleConstant.longValue();
+	floatConstant.longValue();
+	intConstant.longValue();
+	longConstant.longValue();
+	shortConstant.longValue();
+	try {
+		stringConstant.longValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+
+	// shortValue()
+	byteConstant.shortValue();
+	charConstant.shortValue();
+	try {
+		booleanConstant.shortValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+	doubleConstant.shortValue();
+	floatConstant.shortValue();
+	intConstant.shortValue();
+	longConstant.shortValue();
+	shortConstant.shortValue();
+	try {
+		stringConstant.shortValue();
+		assertTrue(false);
+	} catch(ShouldNotImplement e) {
+		// ignore
+	}
+
+	// stringValue()
+	byteConstant.stringValue();
+	charConstant.stringValue();
+	booleanConstant.stringValue();
+	doubleConstant.stringValue();
+	floatConstant.stringValue();
+	intConstant.stringValue();
+	longConstant.stringValue();
+	shortConstant.stringValue();
+	stringConstant.stringValue();
+}
+private void verifyConstantEqualsAndHashcode(
+		Object o,
+		Object o2,
+		Object o3,
+		Object o4) {
+	assertTrue(o.equals(o));
+	assertTrue(o.equals(o3));
+	assertFalse(o.equals(o2));
+	assertFalse(o.equals(o4));
+	assertFalse(o.equals(null));
+	assertFalse(o.hashCode() == o2.hashCode());
+	assertNotNull(o.toString());
+	
+	if (o instanceof Constant) {
+		assertTrue("Not the same values", ((Constant) o).hasSameValue((Constant) o3));
+		assertFalse("Have same values", ((Constant) o).hasSameValue((Constant) o2));
+		assertFalse("Have same values", ((Constant) o).hasSameValue((Constant) o4));
+	}
 }
 public static Class testClass() {
 	return ConstantTest.class;

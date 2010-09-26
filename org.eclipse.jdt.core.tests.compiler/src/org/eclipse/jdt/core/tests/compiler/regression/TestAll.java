@@ -77,6 +77,7 @@ public static Test suite() {
 	standardTests.add(LineNumberAttributeTest.class);
 	standardTests.add(ProgrammingProblemsTest.class);
 	standardTests.add(ManifestAnalyzerTest.class);
+	standardTests.add(InitializationTests.class);
 
 	// add all javadoc tests
 	for (int i=0, l=JavadocTest.ALL_CLASSES.size(); i<l; i++) {
@@ -99,6 +100,7 @@ public static Test suite() {
 	since_1_5.add(Deprecated15Test.class);
 	since_1_5.add(InnerEmulationTest_1_5.class);
 	since_1_5.add(AssignmentTest_1_5.class);
+	since_1_5.add(InnerClass15Test.class);
 
 	// Tests to run when compliance is greater than 1.5
 	ArrayList since_1_6 = new ArrayList();
