@@ -201,6 +201,12 @@ public class SourceElementRequestorTest extends FileBasedModelTest implements IS
 		
 	}
 
+	public void acceptImport(int declarationStart, int declarationEnd, int nameStart, int nameEnd, 
+			char[][] tokens, boolean onDemand, int modifiers) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	public void acceptAnnotationTypeReference(char[][] annotation, int sourceStart, int sourceEnd) {
 		// TODO Auto-generated method stub		
 	}
