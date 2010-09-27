@@ -25,18 +25,28 @@ import junit.framework.Test;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
-import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
+import base org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 @SuppressWarnings("restriction")
-public class OTRefactoringTestSetup extends RefactoringTestSetup {
+public team class OTRefactoringTestSetup extends RefactoringTestSetup {
 
 	public OTRefactoringTestSetup(Test test) {
 		super(test);
 	}
 
-//{ObjectTeams: changed project creation:
-	protected IJavaProject createJavaProject(String string, String string2) throws CoreException {
-		return JavaProjectHelper.createOTJavaProject("TestProject"+System.currentTimeMillis(), "bin");
-// SH}
+	@Override
+	protected void setUp() throws Exception {
+		within (this)
+			super.setUp();
+	}
+	
+	protected class ProjectHelper playedBy JavaProjectHelper {
+		
+		IJavaProject createJavaProject(String projectName, String binFolderName) <- replace IJavaProject createJavaProject(String projectName, String binFolderName);
+
+		@SuppressWarnings("basecall")
+		static callin IJavaProject createJavaProject(String projectName, String binFolderName) throws CoreException {
+			return org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper.createOTJavaProject(projectName, binFolderName);
+		}
 	}
 }

@@ -14,6 +14,11 @@
                class="org.eclipse.objectteams.otdt.ui.tests.refactoring.JdtTests"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
+         <team
+               activation="NONE"
+               class="org.eclipse.objectteams.otdt.ui.tests.refactoring.OTRefactoringTestSetup"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
       </aspectBinding>
    </extension>
 
