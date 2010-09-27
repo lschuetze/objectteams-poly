@@ -48,7 +48,6 @@ feature@org.eclipse.objectteams.otdt-tests=SVN,url=file://localhost/svnroot/tool
 
 plugin@org.eclipse.jdt.core.tests.compiler,3.4.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.compiler
 plugin@org.eclipse.jdt.core.tests.model,3.4.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.model
-plugin@org.eclipse.jdt.ui.tests.refactoring,3.6.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.ui.tests.refactoring
 plugin@org.eclipse.objectteams.otdt.tests,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.tests
 plugin@org.eclipse.objectteams.otdt.ui.tests.dom,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.dom
 plugin@org.eclipse.objectteams.otdt.debug.tests,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.debug.tests
@@ -58,11 +57,13 @@ plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring,0.7.0=SVN,url=file://lo
 !plugin@org.eclipse.jdt.core.tests.builder=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.builder
 !plugin@org.eclipse.jdt.debug.tests=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.debug.tests
 !plugin@org.eclipse.jdt.ui.tests,3.6.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.ui.tests
+!plugin@org.eclipse.jdt.ui.tests.refactoring,3.6.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.ui.tests.refactoring
 
 !-- .. but from original CVS:
 plugin@org.eclipse.jdt.core.tests.builder=v_B14a,/cvsroot/eclipse,
 plugin@org.eclipse.jdt.debug.tests=v20100526,/cvsroot/eclipse,
 plugin@org.eclipse.jdt.ui.tests=v20100912-2000,/cvsroot/eclipse,
+plugin@org.eclipse.jdt.ui.tests.refactoring=v20100907-0800,/cvsroot/eclipse,
 
 !-- not compiled but taken from org.eclipse.test:
 !plugin@org.eclipse.test.performance=v20100122,/cvsroot/eclipse,
