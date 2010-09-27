@@ -116,4 +116,29 @@ This software is based on Eclipse and the Java Development Tooling
          download-size="0"
          install-size="0"
          version="0.0.0"/>
+         
+    <plugin
+    	 id="org.eclipse.jdt.text.tests"
+    	 download-size="0"
+    	 install-size="0"
+    	 version="0.0.0"/>
+
+    <plugin
+    	 id="org.eclipse.jface.text.tests"
+    	 download-size="0"
+    	 install-size="0"
+    	 version="0.0.0"/>
+
+    <plugin
+    	 id="org.eclipse.text.tests"
+    	 download-size="0"
+    	 install-size="0"
+    	 version="0.0.0"/>
+
+    <plugin
+    	 id="org.eclipse.core.filebuffers.tests"
+    	 download-size="0"
+    	 install-size="0"
+    	 version="0.0.0"/>
+
 </feature>
