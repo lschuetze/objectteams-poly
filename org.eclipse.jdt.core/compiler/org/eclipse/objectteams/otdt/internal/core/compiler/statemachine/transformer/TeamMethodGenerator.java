@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
+import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTransformer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObject;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObjectMapper;
@@ -80,22 +81,22 @@ public class TeamMethodGenerator {
 	static class MethodDescriptor {
 		String selector;
 		String signature;
-		Args   args;
-		boolean hasBooleanReturn; 	// if false void return is added
-		int     modifiers;
+		Type   args;
+		Type   returnType;
+		int    modifiers;
 		
 		// store from binary method of o.o.Team:
 		int methodCodeOffset;
 		ReferenceBinding declaringClass;
 		MethodBinding binding;
 		
-		MethodDescriptor(String selector, String signature, Args   args, boolean hasBooleanReturn, int modifiers) {
+		MethodDescriptor(String selector, String signature, Type args, Type returnType, int modifiers) {
 			super();
-			this.selector		 	= selector;
-			this.signature 			= signature;
-			this.args 				= args;
-			this.hasBooleanReturn 	= hasBooleanReturn;
-			this.modifiers    = modifiers;
+			this.selector	= selector;
+			this.signature 	= signature;
+			this.args 		= args;
+			this.returnType	= returnType;
+			this.modifiers  = modifiers;
 		}
 
 		Argument[] makeArgs(AstGenerator gen) {
@@ -110,34 +111,48 @@ public class TeamMethodGenerator {
 						gen.argument("flag".toCharArray(),  //$NON-NLS-1$
 								     gen.baseTypeReference(TypeConstants.BOOLEAN))
 					};
+				case INT:
+					return new Argument[] { 
+						gen.argument("flags".toCharArray(),  //$NON-NLS-1$
+								     gen.baseTypeReference(TypeConstants.INT))
+					};
 				default:
 					return null;
 			}
 		}
 		
 		TypeReference makeReturnRef(AstGenerator gen) {
-			if (this.hasBooleanReturn)
-				return gen.baseTypeReference(TypeConstants.BOOLEAN);
-			return gen.baseTypeReference(TypeConstants.VOID);
+			switch (this.returnType) {
+				case BOOLEAN:
+					return gen.baseTypeReference(TypeConstants.BOOLEAN);
+				case INT:
+					return gen.baseTypeReference(TypeConstants.INT);
+				case NONE:
+					return gen.baseTypeReference(TypeConstants.VOID);
+				default:
+					throw new InternalCompilerError("Unexpected return type "+this.returnType); //$NON-NLS-1$
+			}
 		}
 	}
-	enum Args { NONE, THREAD, BOOLEAN }
+	enum Type { NONE, THREAD, BOOLEAN, INT }
 	/** Public methods to copy from o.o.Team: */
 	@SuppressWarnings("nls")
 	final MethodDescriptor[] methodDescriptors = new MethodDescriptor[] {
-    	new MethodDescriptor("activate",                         	"()V", 					Args.NONE, 		false,	AccPublic),
-    	new MethodDescriptor("activate",   							"(Ljava/lang/Thread;)V",Args.THREAD,	false,	AccPublic),
-    	new MethodDescriptor("deactivate", 							"()V", 					Args.NONE,		false,	AccPublic),
-    	new MethodDescriptor("deactivate", 							"(Ljava/lang/Thread;)V",Args.THREAD,	false,	AccPublic),
-    	new MethodDescriptor("isActive",   							"()Z", 					Args.NONE, 		true,	AccPublic|AccFinal),
-    	new MethodDescriptor("isActive",   							"(Ljava/lang/Thread;)Z",Args.THREAD,	true,	AccPublic|AccFinal),
-    	new MethodDescriptor("isExecutingCallin", 					"()Z", 					Args.NONE, 		true,	AccPublic),
-    	new MethodDescriptor("deactivateForEndedThread",        	"(Ljava/lang/Thread;)V",Args.THREAD,	false,	AccPublic),
-    	new MethodDescriptor("internalIsActiveSpecificallyFor", 	"(Ljava/lang/Thread;)Z",Args.THREAD,	true,	AccPublic),
-    	new MethodDescriptor("_OT$setExecutingCallin",				"(Z)Z",					Args.BOOLEAN,	true,	AccPublic),
-    	new MethodDescriptor("_OT$activateForAllThreads",          	"()V", 					Args.NONE, 		false,	AccPrivate),
-		new MethodDescriptor("doRegistration", 						"()V", 					Args.NONE, 		false,	AccPrivate),
-		new MethodDescriptor("doUnregistration", 					"()V", 					Args.NONE, 		false,	AccPrivate),
+    	new MethodDescriptor("activate",                         	"()V", 					Type.NONE, 		Type.NONE,		AccPublic),
+    	new MethodDescriptor("activate",   							"(Ljava/lang/Thread;)V",Type.THREAD,	Type.NONE,		AccPublic),
+    	new MethodDescriptor("deactivate", 							"()V", 					Type.NONE,		Type.NONE,		AccPublic),
+    	new MethodDescriptor("deactivate", 							"(Ljava/lang/Thread;)V",Type.THREAD,	Type.NONE,		AccPublic),
+    	new MethodDescriptor("isActive",   							"()Z", 					Type.NONE, 		Type.BOOLEAN,	AccPublic|AccFinal),
+    	new MethodDescriptor("isActive",   							"(Ljava/lang/Thread;)Z",Type.THREAD,	Type.BOOLEAN,	AccPublic|AccFinal),
+    	new MethodDescriptor("isExecutingCallin", 					"()Z", 					Type.NONE, 		Type.BOOLEAN,	AccPublic),
+    	new MethodDescriptor("deactivateForEndedThread",        	"(Ljava/lang/Thread;)V",Type.THREAD,	Type.NONE,		AccPublic),
+    	new MethodDescriptor("internalIsActiveSpecificallyFor", 	"(Ljava/lang/Thread;)Z",Type.THREAD,	Type.BOOLEAN,	AccPublic),
+    	new MethodDescriptor("_OT$setExecutingCallin",				"(Z)Z",					Type.BOOLEAN,	Type.BOOLEAN,	AccPublic),
+    	new MethodDescriptor("_OT$activateForAllThreads",          	"()V", 					Type.NONE, 		Type.NONE,		AccPrivate),
+    	new MethodDescriptor("_OT$saveActivationState",				"()I",					Type.NONE,		Type.INT, 		AccPublic|AccSynchronized),
+    	new MethodDescriptor("_OT$restoreActivationState",			"(I)V",					Type.INT,		Type.NONE,		AccPublic),
+		new MethodDescriptor("doRegistration", 						"()V", 					Type.NONE, 		Type.NONE,		AccPrivate),
+		new MethodDescriptor("doUnregistration", 					"()V", 					Type.NONE, 		Type.NONE,		AccPrivate),
 	};
 
 	// ==== Currently, this is where we globally store the byte code of org.objectteams.Team: ====
@@ -251,9 +266,7 @@ public class TeamMethodGenerator {
 				} else {
 					newMethod = gen.method(teamDecl.compilationResult, 
 							methodDescriptor.modifiers, 
-							methodDescriptor.hasBooleanReturn
-								? gen.baseTypeReference(TypeConstants.BOOLEAN)
-								: gen.baseTypeReference(TypeConstants.VOID), 
+							methodDescriptor.makeReturnRef(gen), 
 							methodDescriptor.selector.toCharArray(), 
 							null,
 							new Statement[0]); // regular empty method.
