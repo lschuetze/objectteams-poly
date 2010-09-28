@@ -174,8 +174,6 @@ public team class PackageExplorerAdaptor {
 	        
 			setDescription(Messages.PackageExplorer_DisplayRoleFilesDescription);
 			setToolTipText(Messages.PackageExplorer_DisplayRoleFilesTooltip);
-
-			setChecked(this._part.getContentProvider().isHideRolePackages());
 	    }
 
 		/**
