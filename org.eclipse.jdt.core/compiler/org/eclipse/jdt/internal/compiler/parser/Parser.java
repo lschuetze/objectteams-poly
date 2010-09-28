@@ -1419,17 +1419,6 @@ protected void consumeAnnotationTypeDeclaration() {
 
 	//convert constructor that do not have the type's name into methods
 	typeDecl.checkConstructors(this);
-	
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=212713, 
-	// reject initializers that have been tolerated by the grammar.
-	FieldDeclaration [] fields = typeDecl.fields;
-	int fieldCount = fields == null ? 0 : fields.length;
-	for (int i = 0; i < fieldCount; i++) {
-		FieldDeclaration field = fields[i];
-		if (field instanceof Initializer) {
-			problemReporter().interfaceCannotHaveInitializers(typeDecl.name, field);
-		}
-	}
 
 	//always add <clinit> (will be remove at code gen time if empty)
 	if (this.scanner.containsAssertKeyword) {
@@ -4915,6 +4904,17 @@ protected void consumeInterfaceDeclaration() {
 
 	//convert constructor that do not have the type's name into methods
 	typeDecl.checkConstructors(this);
+	
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=212713, 
+	// reject initializers that have been tolerated by the grammar.
+	FieldDeclaration [] fields = typeDecl.fields;
+	int fieldCount = fields == null ? 0 : fields.length;
+	for (int i = 0; i < fieldCount; i++) {
+		FieldDeclaration field = fields[i];
+		if (field instanceof Initializer) {
+			problemReporter().interfaceCannotHaveInitializers(typeDecl.name, field);
+		}
+	}
 
 	//always add <clinit> (will be remove at code gen time if empty)
 	if (this.scanner.containsAssertKeyword) {
