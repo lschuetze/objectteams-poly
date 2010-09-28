@@ -493,6 +493,74 @@ void checkForRedundantSuperinterfaces(ReferenceBinding superclass, ReferenceBind
 				}
 			}
 		}
+		interfacesToCheck.add(toCheck);
+	}
+
+	ReferenceBinding[] itsInterfaces = null;
+	SimpleSet inheritedInterfaces = new SimpleSet(5);
+	ReferenceBinding superType = superclass;
+	while (superType != null && superType.isValidBinding()) {
+		if ((itsInterfaces = superType.superInterfaces()) != Binding.NO_SUPERINTERFACES) {
+			for (int i = 0, l = itsInterfaces.length; i < l; i++) {
+				ReferenceBinding inheritedInterface = itsInterfaces[i];
+				if (!inheritedInterfaces.includes(inheritedInterface) && inheritedInterface.isValidBinding()) {
+					if (interfacesToCheck.includes(inheritedInterface)) {
+						if (redundantInterfaces == null) {
+							redundantInterfaces = new SimpleSet(3);
+						} else if (redundantInterfaces.includes(inheritedInterface)) {
+							continue;
+						}
+						redundantInterfaces.add(inheritedInterface);
+						TypeReference[] refs = this.type.scope.referenceContext.superInterfaces;
+						for (int r = 0, rl = refs.length; r < rl; r++) {
+							if (refs[r].resolvedType == inheritedInterface) {
+								problemReporter().redundantSuperInterface(this.type, refs[r], inheritedInterface, superType);
+								break;
+							}
+						}
+					} else {
+						inheritedInterfaces.add(inheritedInterface);
+					}
+				}
+			}
+		}
+		superType = superType.superclass();
+	}
+
+	int nextPosition = inheritedInterfaces.elementSize;
+	if (nextPosition == 0) return;
+	ReferenceBinding[] interfacesToVisit = new ReferenceBinding[nextPosition];
+	inheritedInterfaces.asArray(interfacesToVisit);
+	for (int i = 0; i < nextPosition; i++) {
+		superType = interfacesToVisit[i];
+		if ((itsInterfaces = superType.superInterfaces()) != Binding.NO_SUPERINTERFACES) {
+			int itsLength = itsInterfaces.length;
+			if (nextPosition + itsLength >= interfacesToVisit.length)
+				System.arraycopy(interfacesToVisit, 0, interfacesToVisit = new ReferenceBinding[nextPosition + itsLength + 5], 0, nextPosition);
+			for (int a = 0; a < itsLength; a++) {
+				ReferenceBinding inheritedInterface = itsInterfaces[a];
+				if (!inheritedInterfaces.includes(inheritedInterface) && inheritedInterface.isValidBinding()) {
+					if (interfacesToCheck.includes(inheritedInterface)) {
+						if (redundantInterfaces == null) {
+							redundantInterfaces = new SimpleSet(3);
+						} else if (redundantInterfaces.includes(inheritedInterface)) {
+							continue;
+						}
+						redundantInterfaces.add(inheritedInterface);
+						TypeReference[] refs = this.type.scope.referenceContext.superInterfaces;
+						for (int r = 0, rl = refs.length; r < rl; r++) {
+							if (refs[r].resolvedType == inheritedInterface) {
+								problemReporter().redundantSuperInterface(this.type, refs[r], inheritedInterface, superType);
+								break;
+							}
+						}
+					} else {
+						inheritedInterfaces.add(inheritedInterface);
+						interfacesToVisit[nextPosition++] = inheritedInterface;
+					}
+				}
+			}
+		}
 	}
 }
 
