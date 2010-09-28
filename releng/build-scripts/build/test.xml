@@ -109,12 +109,16 @@
 	</target>
 
 	<target name="jdt_ui_tests" description="Runs the org.eclipse.jdt.ui.tests test.xml">
+		<property name="library-file"
+		            value="${test.eclipseDir}/plugins/${org.eclipse.test}/library.xml"/>
 		<antcall target="runtests">
 			<param name="testPlugin" value="${org.eclipse.jdt.ui.tests}" />
 		</antcall>
 	</target>
 	
 	<target name="jdt_ref_tests" description="Runs the org.eclipse.jdt.ui.tests.refactoring test.xml">
+		<property name="library-file"
+		            value="${test.eclipseDir}/plugins/${org.eclipse.test}/library.xml"/>
 		<antcall target="runtests">
 			<param name="testPlugin" value="${org.eclipse.jdt.ui.tests.refactoring}" />
 		</antcall>
