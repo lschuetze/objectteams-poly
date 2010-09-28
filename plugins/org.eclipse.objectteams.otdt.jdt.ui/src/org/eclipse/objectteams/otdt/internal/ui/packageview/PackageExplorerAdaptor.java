@@ -76,7 +76,6 @@ public team class PackageExplorerAdaptor {
 		
 		void createPartControl(Composite parent) {
 			HideExternalRolePackagesAction hideRolesAction = new HideExternalRolePackagesAction(this);
-			//TODO: this should be saved and restored somewhere!
 			ContentProvider contentProvider = getContentProvider();
 			if (contentProvider != null) // is null when base is MockPluginView
 				hideRolesAction.setChecked(contentProvider.isHideRolePackages());
