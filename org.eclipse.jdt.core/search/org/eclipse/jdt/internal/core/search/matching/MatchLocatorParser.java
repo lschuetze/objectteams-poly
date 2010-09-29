@@ -314,7 +314,17 @@ protected void consumeClassHeaderExtends() {
 	}
 	this.patternLocator.setFlavors(PatternLocator.NO_FLAVOR);
 }
-
+//{ObjectTeams: treat playedBy similar to extends:
+protected void consumeClassHeaderPlayedBy() {
+	this.patternLocator.setFlavors(PatternLocator.SUPERTYPE_REF_FLAVOR);
+	super.consumeClassHeaderPlayedBy();
+	if ((this.patternFineGrain & IJavaSearchConstants.SUPERTYPE_TYPE_REFERENCE) != 0) {
+		TypeDeclaration typeDeclaration = (TypeDeclaration) this.astStack[this.astPtr];
+		this.patternLocator.match(typeDeclaration.baseclass, this.nodeSet);
+	}
+	this.patternLocator.setFlavors(PatternLocator.NO_FLAVOR);
+}
+// SH}
 protected void consumeClassInstanceCreationExpressionQualifiedWithTypeArguments() {
 	super.consumeClassInstanceCreationExpressionWithTypeArguments();
 	if (this.patternFineGrain == 0) {
