@@ -5,5 +5,6 @@ public class WeakHashMap<K,V> extends AbstractMap<K,V>  {
 	public void clear() {}
 	public boolean isEmpty() { return true; }
 	public boolean containsKey(V v) { return true; }
+	public V get(Object o) { return null; }
 	public V remove(Object o) { return null; }
 }
