@@ -661,6 +661,24 @@ public TypeBinding resolveType(BlockScope scope) {
 		if (problem.closestMatch != null)
 			bindingModifiers = problem.closestMatch.modifiers;
 	}
+	// can we infer a callout to implement the missing method?
+	if (this.binding.problemId() == ProblemReasons.NotFound) {
+		if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, this.selector) && scope.referenceType().ignoreFurtherInvestigation)
+			return null; // type already reported error, this message send is obviously generated, don't bother any more
+		if (CalloutImplementor.inferMappingFromCall(scope.referenceType(), this, argumentTypes)) {
+			scope.problemReporter().usingInferredCalloutForMessageSend(this);
+			returnType = this.binding.returnType;
+			bindingModifiers = this.binding.modifiers;
+		}
+	} else {
+		CalloutMappingDeclaration callout = MethodModel.getImplementingInferredCallout(this.binding); // reusing previously inferred callout?
+		if (callout != null) {
+			if (callout.isCalloutToField())
+				scope.problemReporter().usingInferredCalloutToFieldForMessageSend(this); // error
+			else
+				scope.problemReporter().usingInferredCalloutForMessageSend(this);		 // warning
+		}
+	}
 	if ((bindingModifiers & ExtraCompilerModifiers.AccCallin) != 0) {
 		AbstractMethodDeclaration enclosingMethod = scope.methodScope().referenceMethod();
 		boolean callinAllowed;
@@ -674,23 +692,6 @@ public TypeBinding resolveType(BlockScope scope) {
 			// Note that the problem reporter wrapper of a base call ignores this error:
 			scope.problemReporter().callToCallin(this.binding, this);
 			return this.resolvedType = null;
-		}
-	}
-	// can we infer a callout to implement the missing method?
-	if (this.binding.problemId() == ProblemReasons.NotFound) {
-		if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, this.selector) && scope.referenceType().ignoreFurtherInvestigation)
-			return null; // type already reported error, this message send is obviously generated, don't bother any more
-		if (CalloutImplementor.inferMappingFromCall(scope.referenceType(), this, argumentTypes)) {
-			scope.problemReporter().usingInferredCalloutForMessageSend(this);
-			returnType = this.binding.returnType;
-		}
-	} else {
-		CalloutMappingDeclaration callout = MethodModel.getImplementingInferredCallout(this.binding); // reusing previously inferred callout?
-		if (callout != null) {
-			if (callout.isCalloutToField())
-				scope.problemReporter().usingInferredCalloutToFieldForMessageSend(this); // error
-			else
-				scope.problemReporter().usingInferredCalloutForMessageSend(this);		 // warning
 		}
 	}
 // SH}
