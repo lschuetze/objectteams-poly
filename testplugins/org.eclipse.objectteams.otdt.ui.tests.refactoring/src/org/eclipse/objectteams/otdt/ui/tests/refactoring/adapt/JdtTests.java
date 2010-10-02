@@ -14,7 +14,7 @@
  * Contributors:
  * 	  Stephan Herrmann - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.ui.tests.refactoring;
+package org.eclipse.objectteams.otdt.ui.tests.refactoring.adapt;
 
 import java.io.IOException;
 
@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 
 import base org.eclipse.jdt.ui.tests.refactoring.ChangeSignatureTests;
+import base org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 
 @SuppressWarnings("restriction")
 public team class JdtTests {
@@ -58,9 +59,10 @@ public team class JdtTests {
 
 			String getFileContents(String fileName) <- replace String getFileContents(String fileName);
 
-			static callin String getFileContents(String fileName) throws IOException {
+			callin String getFileContents(String fileName) throws IOException {
 				String orig = base.getFileContents(fileName);
-				return orig.replaceAll("as", OT_NAME);
+				// word "as" appears after " ", "\t" and "(", but don't replace in "class":
+				return orig.replaceAll("([ \t(])as", "$1"+OT_NAME);
 			}			
 		}
 	}
