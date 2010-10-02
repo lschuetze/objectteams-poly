@@ -1172,6 +1172,201 @@ public class CodeCompletionTest extends CoreTests {
 		assertProposal("RoleFile - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
 	}	
 	
+	public void testNewExpression1() throws CoreException {
+		createBaseClass("test2", "AClass", "public boolean check() { return false; }");
+		assertTypeBodyProposal(
+				"protected class ARole playedBy AClass {\n" +
+				"}\n" +
+				"static void foo() {\n" +
+				"    new |\n" +
+				"}\n",
+				"Completion_",
+				"protected class ARole playedBy AClass {\n" +
+				"}\n" +
+				"static void foo() {\n" +
+				"    new Completion_testNewExpression1()|\n" +
+				"}\n",
+				0, false);
+
+	}
+
+	// propose methods invoked via a phantom role, simple case
+	public void testMethodInvocation1() throws CoreException {
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		pkg.createCompilationUnit("SuperTeam.java", 
+				"package test1.p1;\n" +
+				"public team class SuperTeam {\n" +
+				"	 protected class R {\n" +
+				"        /** Doc of foo() */\n" +
+				"        protected void foo() { }\n" +
+				"    }\n" +
+				"}\n",
+				true, null);
+		
+		StringBuffer subTeamContent = new StringBuffer(); 
+		subTeamContent.append("package test1;\n");
+		subTeamContent.append("import test1.p1.SuperTeam;\n");
+		subTeamContent.append("public team class Completion_testMethodInvocation1 extends SuperTeam {\n");
+		subTeamContent.append("    void test(R r) {\n");
+		subTeamContent.append("        r.\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("}");
+		
+		StringBuffer expectedContent = new StringBuffer(); 
+		expectedContent.append("package test1;\n");
+		expectedContent.append("import test1.p1.SuperTeam;\n");
+		expectedContent.append("public team class Completion_testMethodInvocation1 extends SuperTeam {\n");
+		expectedContent.append("    void test(R r) {\n");
+		expectedContent.append("        r.foo()\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("}");
+		
+		String expectedInfo = "<body text=\"#000000\" bgcolor=\"#ffffe1\">Doc of foo() </body></html>";
+
+		String completeAfter = "r.";
+		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
+		int posAfter = expectedContent.indexOf("foo()")+5;
+		
+		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
+		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
+	}
+
+	// propose methods invoked via a phantom role, two direct tsuper roles both have the method, pick the nearest version
+	public void testMethodInvocation2() throws CoreException {
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		pkg.createCompilationUnit("SuperTeam.java", 
+				"package test1.p1;\n" +
+				"public team class SuperTeam {\n" +
+				"  protected team class Mid1 {\n" +
+				"	 protected class R {\n" +
+				"        /** Doc of original foo() */\n" +
+				"        protected void foo() { }\n" +
+				"    }\n" +
+				"  }\n" +
+				"  protected team class Mid2 extends Mid1 {\n" +
+				"	 protected class R {\n" +
+				"        /** foo in SuperMid2 */\n" +
+				"        protected void foo() { }\n" +
+				"    }\n" +
+				"  }\n" +
+				"}\n",
+				true, null);
+		
+		StringBuffer subTeamContent = new StringBuffer(); 
+		subTeamContent.append("package test1;\n");
+		subTeamContent.append("import test1.p1.SuperTeam;\n");
+		subTeamContent.append("public team class Completion_testMethodInvocation2 extends SuperTeam {\n");
+		subTeamContent.append("  protected team class Mid1 {\n");
+		subTeamContent.append("    protected class R {\n");
+		subTeamContent.append("      /** foo in SubMid1 */\n");
+		subTeamContent.append("      protected void foo() {}\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("  }\n");
+		subTeamContent.append("  protected team class Mid2 {\n");
+		subTeamContent.append("    void test(R r) {\n");
+		subTeamContent.append("        r.\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("  }\n");
+		subTeamContent.append("}");
+		
+		StringBuffer expectedContent = new StringBuffer(); 
+		expectedContent.append("package test1;\n");
+		expectedContent.append("import test1.p1.SuperTeam;\n");
+		expectedContent.append("public team class Completion_testMethodInvocation2 extends SuperTeam {\n");
+		expectedContent.append("  protected team class Mid1 {\n");
+		expectedContent.append("    protected class R {\n");
+		expectedContent.append("      /** foo in SubMid1 */\n");
+		expectedContent.append("      protected void foo() {}\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("  }\n");
+		expectedContent.append("  protected team class Mid2 {\n");
+		expectedContent.append("    void test(R r) {\n");
+		expectedContent.append("        r.foo()\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("  }\n");
+		expectedContent.append("}");
+		
+		String superMid1R = "%E2%98%82=TestSetupProject/src%3Ctest1.p1%7BSuperTeam.java%E2%98%83SuperTeam%E2%98%83Mid1%E2%98%83R";
+		String expectedInfo = ">foo in SuperMid2 " +
+							  "<div><b>Overrides:</b> " +
+							  "<a href='eclipse-javadoc:"+superMid1R+"~foo'>foo()</a> " +
+							  "in <a href='eclipse-javadoc:"+superMid1R+"'>R</a></div></body></html>";
+
+		String completeAfter = "r.";
+		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
+		int posAfter = expectedContent.indexOf("r.foo()")+7;
+		
+		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
+		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
+	}
+
+	// propose methods invoked via a phantom role, two direct tsuper roles, only more distant one has the method
+	public void testMethodInvocation3() throws CoreException {
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		pkg.createCompilationUnit("SuperTeam.java", 
+				"package test1.p1;\n" +
+				"public team class SuperTeam {\n" +
+				"  protected team class Mid1 {\n" +
+				"	 protected class R {\n" +
+				"        /** Doc of original foo() */\n" +
+				"        protected void foo() { }\n" +
+				"    }\n" +
+				"  }\n" +
+				"  protected team class Mid2 extends Mid1 {\n" +
+				"	 protected class R {\n" +
+				"    }\n" +
+				"  }\n" +
+				"}\n",
+				true, null);
+		
+		StringBuffer subTeamContent = new StringBuffer(); 
+		subTeamContent.append("package test1;\n");
+		subTeamContent.append("import test1.p1.SuperTeam;\n");
+		subTeamContent.append("public team class Completion_testMethodInvocation3 extends SuperTeam {\n");
+		subTeamContent.append("  protected team class Mid1 {\n");
+		subTeamContent.append("    protected class R {\n");
+		subTeamContent.append("      /** foo in SubMid1 */\n");
+		subTeamContent.append("      protected void foo() {}\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("  }\n");
+		subTeamContent.append("  protected team class Mid2 {\n");
+		subTeamContent.append("    void test(R r) {\n");
+		subTeamContent.append("        r.\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("  }\n");
+		subTeamContent.append("}");
+		
+		StringBuffer expectedContent = new StringBuffer(); 
+		expectedContent.append("package test1;\n");
+		expectedContent.append("import test1.p1.SuperTeam;\n");
+		expectedContent.append("public team class Completion_testMethodInvocation3 extends SuperTeam {\n");
+		expectedContent.append("  protected team class Mid1 {\n");
+		expectedContent.append("    protected class R {\n");
+		expectedContent.append("      /** foo in SubMid1 */\n");
+		expectedContent.append("      protected void foo() {}\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("  }\n");
+		expectedContent.append("  protected team class Mid2 {\n");
+		expectedContent.append("    void test(R r) {\n");
+		expectedContent.append("        r.foo()\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("  }\n");
+		expectedContent.append("}");
+		
+		String superMid1R = "%E2%98%82=TestSetupProject/src%3Ctest1.p1%7BSuperTeam.java%E2%98%83SuperTeam%E2%98%83Mid1%E2%98%83R";
+		String expectedInfo = ">foo in SubMid1 " +
+							  "<div><b>Overrides:</b> " +
+							  "<a href='eclipse-javadoc:"+superMid1R+"~foo'>foo()</a> " +
+							  "in <a href='eclipse-javadoc:"+superMid1R+"'>R</a></div></body></html>";
+
+		String completeAfter = "r.";
+		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
+		int posAfter = expectedContent.indexOf("r.foo()")+7;
+		
+		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
+		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
+	}
+	
 	// == Below: Helper methods/fields. ==
 	
 	private void createBaseClass(String classBody) 
