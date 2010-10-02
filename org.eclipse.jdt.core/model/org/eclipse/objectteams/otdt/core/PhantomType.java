@@ -21,6 +21,10 @@
 package org.eclipse.objectteams.otdt.core;
 
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IPath;
@@ -45,6 +49,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 /**
@@ -53,10 +58,11 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
  * its 'nearest' declared (non-phantom) implicit super role,
  * but is located in a different team context.
  * 
- * A PhantomType wraps only it's 'nearest' tsuper (tsuper0),
- * but may copy inherit members from other tsupers (tsuper1, ...).
+ * A PhantomType wraps it's 'nearest' tsuper in _realType,
+ * but may store any number of tsuper types from different levels of team nesting. 
+ * However, only direct tsupers are remembered, not tsupers of tsupers.
  * 
- * Most methods of this type are forwarded to the real role type
+ * Most methods of this type are forwarded to the nearest real role type
  * or the enclosing team type.
  * A PhantomType (as its wrappee) may also be a nested team.
  * @author Michael Krueger (mkr)
@@ -68,12 +74,22 @@ public class PhantomType implements IType
 
     private IType _realType;
     private IType _enclosingTeam;
+    private IType[] _allRealTypes;
     
     public PhantomType(IType enclosingTeam, IType tsuperRole)
     {
-        _enclosingTeam = enclosingTeam;
+        this._enclosingTeam = enclosingTeam;
         this.setRealType(tsuperRole);        
     }
+
+    public PhantomType(IType enclosingTeam, IType[] allRealTsuperRoles)
+    {
+        this._enclosingTeam = enclosingTeam;
+        this._realType = allRealTsuperRoles[0];
+        this._allRealTypes = allRealTsuperRoles;
+    }
+    
+    // === cannot code complete inside a phantom role for which no source exists: ===
     
     /**
      * @see org.eclipse.jdt.core.IType#codeComplete(char[], int, int, char[][], char[][], int[], boolean, org.eclipse.jdt.core.ICompletionRequestor)
@@ -117,6 +133,15 @@ public class PhantomType implements IType
 	{
 		handleUnsupported();
 	}
+	
+	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor) throws JavaModelException {
+        handleUnsupported();
+	}
+
+	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor, WorkingCopyOwner owner) throws JavaModelException {
+        handleUnsupported();
+	}
+
 
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#createField(java.lang.String, org.eclipse.jdt.core.IJavaElement, boolean, org.eclipse.core.runtime.IProgressMonitor)
@@ -124,7 +149,7 @@ public class PhantomType implements IType
     public IField createField(String contents, IJavaElement sibling,
             boolean force, IProgressMonitor monitor) throws JavaModelException
     {
-        return _realType.createField(contents, sibling, force, monitor);
+        return this._realType.createField(contents, sibling, force, monitor);
     }
 
     /* (non-Javadoc)
@@ -134,7 +159,7 @@ public class PhantomType implements IType
             IJavaElement sibling, IProgressMonitor monitor)
             throws JavaModelException
     {
-        return _realType.createInitializer(contents, sibling, monitor);
+        return this._realType.createInitializer(contents, sibling, monitor);
     }
 
     /* (non-Javadoc)
@@ -143,7 +168,7 @@ public class PhantomType implements IType
     public IMethod createMethod(String contents, IJavaElement sibling,
             boolean force, IProgressMonitor monitor) throws JavaModelException
     {
-        return _realType.createMethod(contents, sibling, force, monitor);
+        return this._realType.createMethod(contents, sibling, force, monitor);
     }
 
     /* (non-Javadoc)
@@ -152,7 +177,7 @@ public class PhantomType implements IType
     public IType createType(String contents, IJavaElement sibling,
             boolean force, IProgressMonitor monitor) throws JavaModelException
     {
-        return _realType.createType(contents, sibling, force, monitor);
+        return this._realType.createType(contents, sibling, force, monitor);
     }
 
     /* (non-Javadoc)
@@ -160,12 +185,19 @@ public class PhantomType implements IType
      */
     public IMethod[] findMethods(IMethod method)
     {
-        return _realType.findMethods(method);
+    	if (this._allRealTypes == null)
+    		return this._realType.findMethods(method);
+    	for (IType type : this._allRealTypes) {
+			IMethod[] ms = type.findMethods(method);
+			if (ms != null)
+				return ms;
+		}
+    	return null;
     }
 
     public String getElementName()
     {
-        return _realType.getElementName();
+        return this._realType.getElementName();
     }
 
     /* (non-Javadoc)
@@ -173,7 +205,14 @@ public class PhantomType implements IType
      */
     public IField getField(String name)
     {
-        return _realType.getField(name);
+    	if (this._allRealTypes == null)
+    		return this._realType.getField(name);
+    	for (IType type : this._allRealTypes) {
+			IField f = type.getField(name);
+			if (f != null)
+				return f;
+		}
+    	return null;
     }
 
     /* (non-Javadoc)
@@ -181,7 +220,15 @@ public class PhantomType implements IType
      */
     public IField[] getFields() throws JavaModelException
     {
-        return _realType.getFields();
+        if (this._allRealTypes == null)
+        	return this._realType.getFields();
+    	List<IField> uniqueFields = new ArrayList<IField>();
+    	Set<String> names = new HashSet<String>();
+    	for (int i = 0; i < this._allRealTypes.length; i++)
+			for (IField field : this._allRealTypes[i].getFields())
+				if (names.add(field.getElementName()))
+					uniqueFields.add(field);
+    	return uniqueFields.toArray(new IField[uniqueFields.size()]);
     }
 
     public String getFullyQualifiedName()
@@ -191,7 +238,7 @@ public class PhantomType implements IType
 
     public String getFullyQualifiedName(char enclosingTypeSeparator)
     {
-        return _enclosingTeam.getFullyQualifiedName(enclosingTypeSeparator)
+        return this._enclosingTeam.getFullyQualifiedName(enclosingTypeSeparator)
                + enclosingTypeSeparator
                + getElementName();        
     }
@@ -201,7 +248,7 @@ public class PhantomType implements IType
      */
     public IInitializer getInitializer(int occurrenceCount)
     {
-        return _realType.getInitializer(occurrenceCount);
+        return this._realType.getInitializer(occurrenceCount);
     }
 
     /* (non-Javadoc)
@@ -209,7 +256,7 @@ public class PhantomType implements IType
      */
     public IInitializer[] getInitializers() throws JavaModelException
     {
-        return _realType.getInitializers();
+        return this._realType.getInitializers();
     }
 
     /* (non-Javadoc)
@@ -217,7 +264,14 @@ public class PhantomType implements IType
      */
     public IMethod getMethod(String name, String[] parameterTypeSignatures)
     {
-        return _realType.getMethod(name, parameterTypeSignatures);
+    	if (this._allRealTypes == null)
+    		return this._realType.getMethod(name, parameterTypeSignatures);
+    	for (int i = 0; i < this._allRealTypes.length; i++) {
+			IMethod method = this._allRealTypes[i].getMethod(name, parameterTypeSignatures);
+			if (method != null)
+				return method;
+    	}
+    	return null;
     }
 
     /* (non-Javadoc)
@@ -225,15 +279,35 @@ public class PhantomType implements IType
      */
     public IMethod[] getMethods() throws JavaModelException
     {
-        return _realType.getMethods();
+        if (this._allRealTypes == null)
+        	return this._realType.getMethods();
+    	List<IMethod> uniqueMethods = new ArrayList<IMethod>();
+    	Set<String> signatures = new HashSet<String>();
+    	for (int i = 0; i < this._allRealTypes.length; i++)
+			for (IMethod method : this._allRealTypes[i].getMethods())
+				if (signatures.add(getSimpleMethodSignature(method)))
+					uniqueMethods.add(method);
+    	return uniqueMethods.toArray(new IMethod[uniqueMethods.size()]);
     }
+
+	private String getSimpleMethodSignature(IMethod method) {
+		String[] params= method.getParameterTypes(); // TODO(SH) types may be type variables (see MethodProposalInfo.isSameMethodSignature)
+		StringBuffer sign = new StringBuffer();
+		for (int i = 0; i < params.length; i++) {			
+			String simpleName= Signature.getSimpleName(params[i]);
+			sign.append(simpleName);
+			if (i>0)
+				sign.append(',');
+		}
+		return sign.toString();
+	}
 
     /* (non-Javadoc)
      * @see org.eclipse.jdt.core.IType#getPackageFragment()
      */
     public IPackageFragment getPackageFragment()
     {
-        return _enclosingTeam.getPackageFragment();
+        return this._enclosingTeam.getPackageFragment();
     }
     
     /**
@@ -241,7 +315,7 @@ public class PhantomType implements IType
      * @see IMember#getTypeRoot()
      */
     public ITypeRoot getTypeRoot() {
-    	return _realType.getTypeRoot();
+    	return this._realType.getTypeRoot();
     }
 
 
@@ -250,7 +324,7 @@ public class PhantomType implements IType
      */
     public String getSuperclassName() throws JavaModelException
     {
-        return _realType.getSuperclassName();
+        return this._realType.getSuperclassName();
     }
 
     /* (non-Javadoc)
@@ -258,7 +332,7 @@ public class PhantomType implements IType
      */
     public String getSuperclassTypeSignature() throws JavaModelException
     {
-        return _realType.getSuperclassTypeSignature();
+        return this._realType.getSuperclassTypeSignature();
     }
 
     /* (non-Javadoc)
@@ -266,7 +340,7 @@ public class PhantomType implements IType
      */
     public String[] getSuperInterfaceTypeSignatures() throws JavaModelException
     {
-        return _realType.getSuperInterfaceTypeSignatures();
+        return this._realType.getSuperInterfaceTypeSignatures();
     }
 
     /* (non-Javadoc)
@@ -274,7 +348,7 @@ public class PhantomType implements IType
      */
     public String[] getSuperInterfaceNames() throws JavaModelException
     {
-        return _realType.getSuperInterfaceNames();
+        return this._realType.getSuperInterfaceNames();
     }
 
     /* (non-Javadoc)
@@ -282,7 +356,7 @@ public class PhantomType implements IType
      */
     public String[] getTypeParameterSignatures() throws JavaModelException
     {
-        return _realType.getTypeParameterSignatures();
+        return this._realType.getTypeParameterSignatures();
     }
 
     /* (non-Javadoc)
@@ -290,7 +364,8 @@ public class PhantomType implements IType
      */
     public IType getType(String name)
     {
-        return _realType.getType(name);
+   		IType inner = this._realType.getType(name);
+   		return new PhantomType(this, inner);
     }
 
     /* (non-Javadoc)
@@ -308,12 +383,12 @@ public class PhantomType implements IType
     {
         if (isBinary())
         {
-            return _enclosingTeam.getTypeQualifiedName(enclosingTypeSeparator);
+            return this._enclosingTeam.getTypeQualifiedName(enclosingTypeSeparator);
         }
         else
         {
-            return _enclosingTeam.getTypeQualifiedName(enclosingTypeSeparator).concat(
-                        enclosingTypeSeparator + _realType.getElementName());
+            return this._enclosingTeam.getTypeQualifiedName(enclosingTypeSeparator).concat(
+                        enclosingTypeSeparator + this._realType.getElementName());
         }
     }
 
@@ -322,7 +397,15 @@ public class PhantomType implements IType
      */
     public IType[] getTypes() throws JavaModelException
     {
-        return _realType.getTypes();
+        if (this._allRealTypes == null)
+        	return this._realType.getTypes();
+    	List<IType> uniqueTypes = new ArrayList<IType>();
+    	Set<String> names = new HashSet<String>();
+    	for (int i = 0; i < this._allRealTypes.length; i++)
+			for (IType type: this._allRealTypes[i].getTypes())
+				if (names.add(type.getElementName()))
+					uniqueTypes.add(type);
+    	return uniqueTypes.toArray(new IType[uniqueTypes.size()]);
     }
 
     /* (non-Javadoc)
@@ -330,7 +413,7 @@ public class PhantomType implements IType
      */
     public boolean isAnonymous() throws JavaModelException
     {
-        return _realType.isAnonymous();
+        return false; // implicit inheritance is by name, thus phantom roles cannot be anoymous
     }
 
     /* (non-Javadoc)
@@ -338,7 +421,7 @@ public class PhantomType implements IType
      */
     public boolean isClass() throws JavaModelException
     {
-        return _realType.isClass();
+        return this._realType.isClass();
     }
 
     /* (non-Javadoc)
@@ -346,7 +429,7 @@ public class PhantomType implements IType
      */
     public boolean isEnum() throws JavaModelException
     {
-        return _realType.isEnum();
+        return this._realType.isEnum();
     }
 
     /* (non-Javadoc)
@@ -354,7 +437,7 @@ public class PhantomType implements IType
      */
     public boolean isInterface() throws JavaModelException
     {
-        return _realType.isInterface();
+        return this._realType.isInterface();
     }
 
     /* (non-Javadoc)
@@ -362,7 +445,7 @@ public class PhantomType implements IType
      */
     public boolean isAnnotation() throws JavaModelException
     {
-        return _realType.isAnnotation();
+        return this._realType.isAnnotation();
     }
 
     /* (non-Javadoc)
@@ -370,7 +453,7 @@ public class PhantomType implements IType
      */
     public boolean isLocal() throws JavaModelException
     {
-        return _realType.isLocal();
+        return this._realType.isLocal();
     }
 
     /* (non-Javadoc)
@@ -378,7 +461,7 @@ public class PhantomType implements IType
      */
     public boolean isMember() throws JavaModelException
     {
-        return _realType.isMember();
+        return true;
     }
 
     /* (non-Javadoc)
@@ -387,7 +470,7 @@ public class PhantomType implements IType
     public ITypeHierarchy loadTypeHierachy(InputStream input,
             IProgressMonitor monitor) throws JavaModelException
     {
-        return _realType.loadTypeHierachy(input, monitor);
+        return this._realType.loadTypeHierachy(input, monitor);
     }
 
     /* (non-Javadoc)
@@ -396,7 +479,7 @@ public class PhantomType implements IType
     public ITypeHierarchy newSupertypeHierarchy(IProgressMonitor monitor)
             throws JavaModelException
     {
-        return _realType.newSupertypeHierarchy(monitor);
+        return this._realType.newSupertypeHierarchy(monitor);
     }
 
     /* (non-Javadoc)
@@ -406,7 +489,7 @@ public class PhantomType implements IType
             ICompilationUnit[] workingCopies, IProgressMonitor monitor)
             throws JavaModelException
     {
-        return _realType.newSupertypeHierarchy(workingCopies, monitor);
+        return this._realType.newSupertypeHierarchy(workingCopies, monitor);
     }
 
     /**
@@ -523,7 +606,6 @@ public class PhantomType implements IType
     public IType getDeclaringType()
     {
     	return this._enclosingTeam;
-        //return _realType.getDeclaringType();
     }
 
     /* (non-Javadoc)
@@ -555,7 +637,7 @@ public class PhantomType implements IType
      */
     public boolean isBinary()
     {
-        return _enclosingTeam.isBinary();
+        return this._enclosingTeam.isBinary();
     }
 
     /* (non-Javadoc)
@@ -563,7 +645,7 @@ public class PhantomType implements IType
      */
     public boolean exists()
     {
-        return _realType.exists();
+        return this._enclosingTeam.exists() && this._realType.exists();
     }
 
     /* (non-Javadoc)
@@ -571,7 +653,7 @@ public class PhantomType implements IType
      */
     public IJavaElement getAncestor(int ancestorType)
     {
-        return _realType.getAncestor(ancestorType);
+        return this._enclosingTeam.getAncestor(ancestorType);
     }
 
     /* (non-Javadoc)
@@ -579,7 +661,7 @@ public class PhantomType implements IType
      */
     public IResource getCorrespondingResource() throws JavaModelException
     {
-        return _enclosingTeam.getCorrespondingResource();
+        return this._enclosingTeam.getCorrespondingResource();
     }
 
     /* (non-Javadoc)
@@ -587,7 +669,7 @@ public class PhantomType implements IType
      */
     public int getElementType()
     {
-        return _realType.getElementType();
+        return TYPE;
     }
 
     /* (non-Javadoc)
@@ -691,7 +773,7 @@ public class PhantomType implements IType
      */
     public boolean isStructureKnown() throws JavaModelException
     {
-        return _realType.isStructureKnown();
+        return this._enclosingTeam.isStructureKnown() && this._realType.isStructureKnown();
     }
 
     /* (non-Javadoc)
@@ -715,7 +797,15 @@ public class PhantomType implements IType
 	}
 
 	public IAnnotation[] getAnnotations() throws JavaModelException {
-		return this._realType.getAnnotations();
+        if (this._allRealTypes == null)
+        	return this._realType.getAnnotations();
+    	List<IAnnotation> uniqueAnnotations = new ArrayList<IAnnotation>();
+    	Set<String> names = new HashSet<String>();
+    	for (int i = 0; i < this._allRealTypes.length; i++)
+			for (IAnnotation annotation : this._allRealTypes[i].getAnnotations())
+				if (names.add(annotation.getElementName()))
+					uniqueAnnotations.add(annotation);
+    	return uniqueAnnotations.toArray(new IAnnotation[uniqueAnnotations.size()]);
 	}
 
     /* (non-Javadoc)
@@ -793,16 +883,12 @@ public class PhantomType implements IType
         return _realType;
     }
     
-    public void setRealType(IType type)
+    private void setRealType(IType type)
     {
         if (type instanceof PhantomType)
-        {
-            _realType = ((PhantomType)type).getRealType();
-        }
-        else
-        {
-            _realType = type;
-        }
+			this._realType = ((PhantomType)type).getRealType();
+		else
+			this._realType = type;
     }
     
 	public int hashCode()
@@ -818,8 +904,8 @@ public class PhantomType implements IType
         }
         
         PhantomType other = (PhantomType)arg0;
-		return _enclosingTeam.equals(other._enclosingTeam)
-                    && (_realType.equals(other._realType));
+		return this._enclosingTeam.equals(other._enclosingTeam)
+                    && (this._realType.equals(other._realType));
 	}
 
 	private void handleUnsupported()
@@ -837,13 +923,6 @@ public class PhantomType implements IType
 	}
  
 	// TODO: check whether we need to support any of those methods
-	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor) throws JavaModelException {
-        handleUnsupported();
-	}
-
-	public void codeComplete(char[] snippet, int insertion, int position, char[][] localVariableTypeNames, char[][] localVariableNames, int[] localVariableModifiers, boolean isStatic, CompletionRequestor requestor, WorkingCopyOwner owner) throws JavaModelException {
-        handleUnsupported();
-	}
 
 	public IJavaElement[] getChildrenForCategory(String category) throws JavaModelException {
         handleUnsupported();
@@ -871,8 +950,7 @@ public class PhantomType implements IType
 	}
 
 	public ISourceRange getJavadocRange() throws JavaModelException {
-        handleUnsupported();
-		return null;
+        return this._realType.getJavadocRange();
 	}
 
 	public int getOccurrenceCount() {
@@ -881,7 +959,6 @@ public class PhantomType implements IType
 	}
 
 	public String getAttachedJavadoc(IProgressMonitor monitor) throws JavaModelException {
-        handleUnsupported();
-		return null;
+        return this._realType.getAttachedJavadoc(monitor);
 	}
 }

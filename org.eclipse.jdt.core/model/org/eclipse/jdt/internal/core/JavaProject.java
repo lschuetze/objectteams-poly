@@ -45,6 +45,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -80,6 +81,7 @@ import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.jdt.internal.eval.EvaluationContext;
+import org.eclipse.objectteams.otdt.core.PhantomType;
 import org.osgi.service.prefs.BackingStoreException;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -1255,10 +1257,30 @@ public class JavaProject
 			if (lastDot == -1) return null;
 			IType type = findType(fullyQualifiedName.substring(0, lastDot), lookup, considerSecondaryTypes, progressMonitor);
 			if (type != null) {
+//{ObjectTeams: also consider phantom roles:
+/* orig:
 				type = type.getType(fullyQualifiedName.substring(lastDot+1));
 				if (!type.exists()) {
 					return null;
 				}
+  :giro */
+				IType originalOuter = type;
+				IType currentOuter = type;
+				ITypeHierarchy hierarchy = null;
+				List<IType> realTypes = new ArrayList<IType>();
+				do {
+					type = currentOuter.getType(fullyQualifiedName.substring(lastDot+1));
+					if (type.exists()) {
+						if (currentOuter == originalOuter) 
+							return type; // nested type found locally, don't create a PhantomType
+						realTypes.add(type);
+					}
+					if (hierarchy ==  null)
+						hierarchy = currentOuter.newSupertypeHierarchy(progressMonitor != null ? new SubProgressMonitor(progressMonitor, 1) : null);
+					currentOuter = hierarchy.getSuperclass(currentOuter);
+				} while (currentOuter != null);
+				return new PhantomType(originalOuter, realTypes.toArray(new IType[realTypes.size()]));
+// SH}
 			}
 			return type;
 		}
