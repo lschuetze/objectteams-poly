@@ -1279,7 +1279,8 @@ public class JavaProject
 						hierarchy = currentOuter.newSupertypeHierarchy(progressMonitor != null ? new SubProgressMonitor(progressMonitor, 1) : null);
 					currentOuter = hierarchy.getSuperclass(currentOuter);
 				} while (currentOuter != null);
-				return new PhantomType(originalOuter, realTypes.toArray(new IType[realTypes.size()]));
+				if (realTypes.size() > 0)
+					return new PhantomType(originalOuter, realTypes.toArray(new IType[realTypes.size()]));
 // SH}
 			}
 			return type;
