@@ -1221,7 +1221,7 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("    }\n");
 		expectedContent.append("}");
 		
-		String expectedInfo = "<body text=\"#000000\" bgcolor=\"#ffffe1\">Doc of foo() </body></html>";
+		String expectedInfo = ">Doc of foo() </body></html>";
 
 		String completeAfter = "r.";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
