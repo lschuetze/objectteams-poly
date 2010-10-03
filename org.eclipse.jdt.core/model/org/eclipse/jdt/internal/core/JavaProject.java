@@ -45,7 +45,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.QualifiedName;
-import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.content.IContentDescription;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
@@ -81,6 +80,7 @@ import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.jdt.internal.eval.EvaluationContext;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.PhantomType;
 import org.osgi.service.prefs.BackingStoreException;
 import org.w3c.dom.Element;
@@ -1264,23 +1264,29 @@ public class JavaProject
 					return null;
 				}
   :giro */
-				IType originalOuter = type;
-				IType currentOuter = type;
-				ITypeHierarchy hierarchy = null;
-				List<IType> realTypes = new ArrayList<IType>();
-				do {
-					type = currentOuter.getType(fullyQualifiedName.substring(lastDot+1));
-					if (type.exists()) {
-						if (currentOuter == originalOuter) 
-							return type; // nested type found locally, don't create a PhantomType
-						realTypes.add(type);
-					}
-					if (hierarchy ==  null)
-						hierarchy = currentOuter.newSupertypeHierarchy(progressMonitor != null ? new SubProgressMonitor(progressMonitor, 1) : null);
-					currentOuter = hierarchy.getSuperclass(currentOuter);
-				} while (currentOuter != null);
-				if (realTypes.size() > 0)
+				IType  originalOuter = type;
+				String innerName     = fullyQualifiedName.substring(lastDot+1);
+
+				type = originalOuter.getType(innerName);
+				if (type.exists())
+					return type; // nested type found locally, don't create a PhantomType
+				
+				if (!OTModelManager.isTeam(originalOuter))
+					return null; // traverse hierarchy only if outer is a team
+				
+				ITypeHierarchy hierarchy    = originalOuter.newSupertypeHierarchy(progressMonitor);
+				IType          currentOuter = originalOuter;
+				List<IType>    realTypes    = new ArrayList<IType>();
+				while ((currentOuter = hierarchy.getSuperclass(currentOuter)) != null) {
+					if (!OTModelManager.isTeam(currentOuter)) // when reaching the end of the team hierarchy...
+						break;								  // ...check out
+					type = currentOuter.getType(innerName);
+					if (type.exists())
+						realTypes.add(type);				  // add to shopping cart
+				}
+				if (realTypes.size() > 0)					  // any items in our cart?
 					return new PhantomType(originalOuter, realTypes.toArray(new IType[realTypes.size()]));
+				return null;
 // SH}
 			}
 			return type;
