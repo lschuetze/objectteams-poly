@@ -499,7 +499,7 @@ public class PhantomType implements IType
     public ITypeHierarchy newSupertypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[] workingCopies,
             IProgressMonitor monitor) throws JavaModelException
     {
-        return _realType.newSupertypeHierarchy(workingCopies, monitor);
+        return this._realType.newSupertypeHierarchy(workingCopies, monitor);
     }
 
     /* (non-Javadoc)
@@ -508,7 +508,7 @@ public class PhantomType implements IType
     public ITypeHierarchy newSupertypeHierarchy(WorkingCopyOwner owner,
             IProgressMonitor monitor) throws JavaModelException
     {
-        return _realType.newSupertypeHierarchy(owner, monitor);
+        return this._realType.newSupertypeHierarchy(owner, monitor);
     }
 
     /* (non-Javadoc)
@@ -517,7 +517,7 @@ public class PhantomType implements IType
     public ITypeHierarchy newTypeHierarchy(IJavaProject project,
             IProgressMonitor monitor) throws JavaModelException
     {
-        return _realType.newTypeHierarchy(project, monitor);
+        return this._realType.newTypeHierarchy(project, monitor);
     }
 
     /* (non-Javadoc)
@@ -527,7 +527,7 @@ public class PhantomType implements IType
             WorkingCopyOwner owner, IProgressMonitor monitor)
             throws JavaModelException
     {
-        return _realType.newTypeHierarchy(project, owner, monitor);
+        return this._realType.newTypeHierarchy(project, owner, monitor);
     }
 
     /* (non-Javadoc)
@@ -536,7 +536,7 @@ public class PhantomType implements IType
     public ITypeHierarchy newTypeHierarchy(IProgressMonitor monitor)
             throws JavaModelException
     {
-        return _realType.newTypeHierarchy(monitor);
+        return this._realType.newTypeHierarchy(monitor);
     }
 
     /* (non-Javadoc)
@@ -545,7 +545,7 @@ public class PhantomType implements IType
     public ITypeHierarchy newTypeHierarchy(ICompilationUnit[] workingCopies,
             IProgressMonitor monitor) throws JavaModelException
     {
-        return _realType.newTypeHierarchy(workingCopies, monitor);
+        return this._realType.newTypeHierarchy(workingCopies, monitor);
     }
 
     /**
@@ -555,7 +555,7 @@ public class PhantomType implements IType
     public ITypeHierarchy newTypeHierarchy(org.eclipse.jdt.core.IWorkingCopy[] workingCopies,
             IProgressMonitor monitor) throws JavaModelException
     {
-        return _realType.newTypeHierarchy(workingCopies, monitor);
+        return this._realType.newTypeHierarchy(workingCopies, monitor);
     }
 
     /* (non-Javadoc)
@@ -564,7 +564,7 @@ public class PhantomType implements IType
     public ITypeHierarchy newTypeHierarchy(WorkingCopyOwner owner,
             IProgressMonitor monitor) throws JavaModelException
     {
-        return _realType.newTypeHierarchy(owner, monitor);
+        return this._realType.newTypeHierarchy(owner, monitor);
     }
 
     /* (non-Javadoc)
@@ -572,7 +572,7 @@ public class PhantomType implements IType
      */
     public String[][] resolveType(String typeName) throws JavaModelException
     {
-        return _realType.resolveType(typeName);
+        return this._realType.resolveType(typeName);
     }
 
     /* (non-Javadoc)
@@ -581,7 +581,7 @@ public class PhantomType implements IType
     public String[][] resolveType(String typeName, WorkingCopyOwner owner)
             throws JavaModelException
     {
-        return _realType.resolveType(typeName, owner);
+        return this._realType.resolveType(typeName, owner);
     }
 
     /* (non-Javadoc)
@@ -589,7 +589,7 @@ public class PhantomType implements IType
      */
     public IClassFile getClassFile()
     {
-        return _enclosingTeam.getClassFile();
+        return this._enclosingTeam.getClassFile();
     }
 
     /* (non-Javadoc)
@@ -597,7 +597,7 @@ public class PhantomType implements IType
      */
     public ICompilationUnit getCompilationUnit()
     {
-        return _enclosingTeam.getCompilationUnit();
+        return this._enclosingTeam.getCompilationUnit();
     }
 
     /* (non-Javadoc)
@@ -613,7 +613,7 @@ public class PhantomType implements IType
      */
     public int getFlags() throws JavaModelException
     {        
-        return _realType.getFlags();
+        return this._realType.getFlags();
     }
     
     /* (non-Javadoc)
@@ -621,7 +621,7 @@ public class PhantomType implements IType
      */
     public ISourceRange getNameRange() throws JavaModelException
     {
-        return _realType.getNameRange();
+        return this._realType.getNameRange();
     }
 
     /* (non-Javadoc)
@@ -629,7 +629,7 @@ public class PhantomType implements IType
      */
     public IType getType(String name, int occurrenceCount)
     {
-        return _realType.getType(name, occurrenceCount);
+        return this._realType.getType(name, occurrenceCount);
     }
 
     /* (non-Javadoc)
@@ -677,7 +677,7 @@ public class PhantomType implements IType
      */
     public String getHandleIdentifier()
     {
-        return _realType.getHandleIdentifier();
+        return this._realType.getHandleIdentifier();
     }
 
     /* (non-Javadoc)
@@ -685,7 +685,7 @@ public class PhantomType implements IType
      */
     public IJavaModel getJavaModel()
     {
-        return _realType.getJavaModel();
+        return this._realType.getJavaModel();
     }
 
     /* (non-Javadoc)
@@ -693,7 +693,7 @@ public class PhantomType implements IType
      */
     public IJavaProject getJavaProject()
     {
-        return _enclosingTeam.getJavaProject();
+        return this._enclosingTeam.getJavaProject();
     }
 
     /* (non-Javadoc)
@@ -701,7 +701,7 @@ public class PhantomType implements IType
      */
     public IOpenable getOpenable()
     {
-        return _enclosingTeam.getOpenable();
+        return this._enclosingTeam.getOpenable();
     }
 
     /* (non-Javadoc)
@@ -709,7 +709,7 @@ public class PhantomType implements IType
      */
     public IJavaElement getParent()
     {
-        return _enclosingTeam;
+        return this._enclosingTeam;
     }
 
     /* (non-Javadoc)
@@ -717,14 +717,14 @@ public class PhantomType implements IType
      */
     public IPath getPath()
     {
-        String lastSegment = _realType.getPath().lastSegment();
+        String lastSegment = this._realType.getPath().lastSegment();
         if (lastSegment != null)
         {
-            return _enclosingTeam.getPath().append(lastSegment);
+            return this._enclosingTeam.getPath().append(lastSegment);
         }
         else
         {
-            return _enclosingTeam.getPath();
+            return this._enclosingTeam.getPath();
         }
     }
 
@@ -733,7 +733,7 @@ public class PhantomType implements IType
      */
     public IJavaElement getPrimaryElement()
     {
-        return _enclosingTeam.getPrimaryElement();
+        return this._enclosingTeam.getPrimaryElement();
     }
 
     /* (non-Javadoc)
@@ -741,7 +741,7 @@ public class PhantomType implements IType
      */
     public IResource getResource()
     {
-        return _enclosingTeam.getResource();
+        return this._enclosingTeam.getResource();
     }
 
     /* (non-Javadoc)
@@ -749,7 +749,7 @@ public class PhantomType implements IType
      */
     public ISchedulingRule getSchedulingRule()
     {
-        return _enclosingTeam.getSchedulingRule();
+        return this._enclosingTeam.getSchedulingRule();
     }
 
     /* (non-Javadoc)
@@ -757,7 +757,7 @@ public class PhantomType implements IType
      */
     public IResource getUnderlyingResource() throws JavaModelException
     {
-        return _enclosingTeam.getUnderlyingResource();
+        return this._enclosingTeam.getUnderlyingResource();
     }
 
     /* (non-Javadoc)
@@ -781,7 +781,7 @@ public class PhantomType implements IType
      */
     public String getSource() throws JavaModelException
     {
-        return _realType.getSource();
+        return this._realType.getSource();
     }
 
     /* (non-Javadoc)
@@ -789,7 +789,7 @@ public class PhantomType implements IType
      */
     public ISourceRange getSourceRange() throws JavaModelException
     {
-        return _realType.getSourceRange();
+        return this._realType.getSourceRange();
     }
 
 	public IAnnotation getAnnotation(String name) {
@@ -815,7 +815,7 @@ public class PhantomType implements IType
             String rename, boolean replace, IProgressMonitor monitor)
             throws JavaModelException
     {
-        _realType.copy(container, sibling, rename, replace, monitor);
+        this._realType.copy(container, sibling, rename, replace, monitor);
     }
 
     /* (non-Javadoc)
@@ -824,7 +824,7 @@ public class PhantomType implements IType
     public void delete(boolean force, IProgressMonitor monitor)
             throws JavaModelException
     {
-        _realType.delete(force, monitor);
+        this._realType.delete(force, monitor);
     }
 
     /* (non-Javadoc)
@@ -834,7 +834,7 @@ public class PhantomType implements IType
             String rename, boolean replace, IProgressMonitor monitor)
             throws JavaModelException
     {
-        _realType.move(container, sibling, rename, replace, monitor);
+        this._realType.move(container, sibling, rename, replace, monitor);
     }
 
     /* (non-Javadoc)
@@ -843,7 +843,7 @@ public class PhantomType implements IType
     public void rename(String name, boolean replace, IProgressMonitor monitor)
             throws JavaModelException
     {
-        _realType.rename(name, replace, monitor);
+        this._realType.rename(name, replace, monitor);
 
     }
 
@@ -852,7 +852,7 @@ public class PhantomType implements IType
      */
     public IJavaElement[] getChildren() throws JavaModelException
     {
-        return _realType.getChildren();
+        return this._realType.getChildren();
     }
 
     /* (non-Javadoc)
@@ -860,27 +860,27 @@ public class PhantomType implements IType
      */
     public boolean hasChildren() throws JavaModelException
     {
-        return _realType.hasChildren();
+        return this._realType.hasChildren();
     }
 
     /* (non-Javadoc)
      * @see org.eclipse.core.runtime.IAdaptable#getAdapter(java.lang.Class)
      */
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("rawtypes")
 	public Object getAdapter(Class adapter)
     {
-        return _realType.getAdapter(adapter);
+        return this._realType.getAdapter(adapter);
     }
  
     @SuppressWarnings("nls")
 	public String toString()
     {
-        return "(" + getFullyQualifiedName() + "|" + _realType.getFullyQualifiedName('.') + ")";
+        return "(" + getFullyQualifiedName() + "|" + this._realType.getFullyQualifiedName('.') + ")";
     }
          
     public IType getRealType()
     {
-        return _realType;
+        return this._realType;
     }
     
     private void setRealType(IType type)
@@ -915,11 +915,11 @@ public class PhantomType implements IType
     }
 	
 	public ITypeParameter[] getTypeParameters() throws JavaModelException {
-		return _realType.getTypeParameters();
+		return this._realType.getTypeParameters();
 	}
 	
 	public boolean isResolved() {
-		return _realType.isResolved() && _enclosingTeam.isResolved();
+		return this._realType.isResolved() && this._enclosingTeam.isResolved();
 	}
  
 	// TODO: check whether we need to support any of those methods
