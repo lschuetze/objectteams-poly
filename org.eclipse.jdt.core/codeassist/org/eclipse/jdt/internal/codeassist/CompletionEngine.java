@@ -8739,6 +8739,8 @@ public final class CompletionEngine
 			} else if (method.isCallin()) {
 				continue next;
 			}
+			if (method.copyInheritanceSrc != null)
+				method = method.copyInheritanceSrc;
 //SH}
 
 			boolean prefixRequired = false;
