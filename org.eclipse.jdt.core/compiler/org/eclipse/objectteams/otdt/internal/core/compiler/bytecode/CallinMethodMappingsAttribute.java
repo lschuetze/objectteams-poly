@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -572,9 +572,9 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 
 	private CallinCalloutBinding findTSuperBinding(char[] name, ReferenceBinding roleType) {
 		ReferenceBinding[] tsuperRoles = roleType.roleModel.getTSuperRoleBindings();
-		for (ReferenceBinding tsuperRole : tsuperRoles) {
-			if (tsuperRole.callinCallouts != null)
-				for (CallinCalloutBinding mapping : tsuperRole.callinCallouts)
+		for (int i = tsuperRoles.length-1; i >= 0; i--) { // check highest prio first (which comes last in the array)
+			if (tsuperRoles[i].callinCallouts != null)
+				for (CallinCalloutBinding mapping : tsuperRoles[i].callinCallouts)
 					if (CharOperation.equals(mapping.name, name))
 						return mapping.copyInheritanceSrc != null ?
 								mapping.copyInheritanceSrc :

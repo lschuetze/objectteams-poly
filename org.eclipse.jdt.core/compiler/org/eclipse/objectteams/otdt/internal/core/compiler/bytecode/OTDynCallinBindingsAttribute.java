@@ -1,7 +1,7 @@
 /** 
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009 Stephan Herrmann
+ * Copyright 2009, 2010 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -434,9 +434,9 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 
 	private CallinCalloutBinding findTSuperBinding(char[] name, ReferenceBinding roleType) {
 		ReferenceBinding[] tsuperRoles = roleType.roleModel.getTSuperRoleBindings();
-		for (ReferenceBinding tsuperRole : tsuperRoles) {
-			if (tsuperRole.callinCallouts != null)
-				for (CallinCalloutBinding mapping : tsuperRole.callinCallouts)
+		for (int i = tsuperRoles.length-1; i >= 0; i--) { // check highest prio first (which comes last in the array)
+			if (tsuperRoles[i].callinCallouts != null)
+				for (CallinCalloutBinding mapping : tsuperRoles[i].callinCallouts)
 					if (CharOperation.equals(mapping.name, name))
 						return mapping.copyInheritanceSrc != null ?
 								mapping.copyInheritanceSrc :

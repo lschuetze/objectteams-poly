@@ -897,7 +897,7 @@ protected int resolveLevelAsSubtype(char[] qualifiedPattern, ReferenceBinding ty
 	RoleModel roleModel = type.roleModel; 
 	if (type.roleModel != null) {
 		ReferenceBinding[] tsuperTypes = roleModel.getTSuperRoleBindings();
-		for (int t = 0; t < tsuperTypes.length; t++) {
+		for (int t = tsuperTypes.length-1; t>=0; t--) { // check highest prio first (which comes last in the array)
 			level = resolveLevelAsSubtype(qualifiedPattern, tsuperTypes[t], argumentTypes);
   // OT_COPY_PASTE from above "matches superclass":			
 			if (level != IMPOSSIBLE_MATCH) {

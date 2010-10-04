@@ -980,7 +980,8 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	        	&& foundSrc != origin)
 	        {
 	        	// found a copied method which has a different origin, choose the more specific:
-        		if (TeamModel.isMoreSpecificThan(origin.declaringClass,foundSrc.declaringClass))
+	        	// if incommensurable prefer the new copy (assuming it comes from *implicit* super team)
+        		if (!TeamModel.isMoreSpecificThan(foundSrc.declaringClass, origin.declaringClass))
 				{
 	        		// more specific method overwrites previous linkage:
 		        	methodFound.binding.setCopyInheritanceSrc(origin);

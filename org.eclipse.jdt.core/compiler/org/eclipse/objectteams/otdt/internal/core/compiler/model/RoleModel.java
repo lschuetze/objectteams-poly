@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -606,7 +606,7 @@ public class RoleModel extends TypeModel
     }
 
     /**
-     * Retrieve the (first) tsuper role.
+     * Retrieve the tsuper role with highest priority.
      *
      * Note, that more tsuper roles may exist due to team nesting.
      * TODO (SH): need to check all callers, whether reading just the first
@@ -615,9 +615,10 @@ public class RoleModel extends TypeModel
      * @return first tsuper role or null
      */
     public ReferenceBinding getTSuperRoleBinding() {
-		return this._tsuperRoleBindings[0];
+		return this._tsuperRoleBindings[this.numTSuperRoles-1];
 	}
 
+    /** Answer all direct tsuper roles of this role in ascending priority. */
     public ReferenceBinding[] getTSuperRoleBindings() {
     	ReferenceBinding[] tsupers = new ReferenceBinding[this.numTSuperRoles];
     	System.arraycopy(this._tsuperRoleBindings, 0, tsupers, 0, this.numTSuperRoles);

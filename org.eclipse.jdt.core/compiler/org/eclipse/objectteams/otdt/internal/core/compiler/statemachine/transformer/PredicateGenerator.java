@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2005, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2005, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -696,7 +696,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 		Expression accumulatedResult = null;
 		if (thisType.isRole()) {
 			ReferenceBinding[] tsuperRoles = thisType.roleModel.getTSuperRoleBindings();
-			for (int i = 0; i < tsuperRoles.length; i++) {
+			for (int i = tsuperRoles.length-1; i >= 0; i--) { // check highest prio first (which comes last in the array)
 				MethodBinding tsuperMethod = TypeAnalyzer.findMethod(
 						pred.scope, tsuperRoles[i], pred.selector, pred.binding.parameters);
 				if (!tsuperMethod.isValidBinding())

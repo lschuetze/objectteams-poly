@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -209,7 +209,7 @@ public class PrecedenceDeclaration extends ASTNode {
 			current = current.superclass();
 		}
 		ReferenceBinding[] tsupers = roleModel.getTSuperRoleBindings();
-		for (int i = 0; i < tsupers.length; i++) {
+		for (int i = tsupers.length-1; i >= 0; i--) { // check highest prio first (which comes last in the array)
 			CallinCalloutBinding callinBinding = findCallinInRole(tsupers[i], name);
 			if (callinBinding != null) {
 				// create an unresolved binding:

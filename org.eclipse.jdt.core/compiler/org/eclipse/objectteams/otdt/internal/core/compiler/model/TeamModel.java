@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -670,6 +670,8 @@ public class TeamModel extends TypeModel {
 	{
 		if (type1.isCompatibleWith(type2))
 			return true;
+		if (!CharOperation.equals(type1.sourceName(), type2.sourceName()))
+			return false;
 		ReferenceBinding enclosingType1 = type1.enclosingType();
 		ReferenceBinding enclosingType2 = type2.enclosingType();
 		if (enclosingType1 != null && enclosingType2 != null)

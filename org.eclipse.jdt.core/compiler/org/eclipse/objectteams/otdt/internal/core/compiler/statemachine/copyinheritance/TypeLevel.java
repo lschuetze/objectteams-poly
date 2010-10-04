@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2008 Technical University Berlin, Germany.
+ * Copyright 2008, 2010 Technical University Berlin, Germany.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -473,17 +473,19 @@ public class TypeLevel {
 			return superRole;
 		if (TeamModel.isTeamContainingRole(destTeam.superclass(), superRole))
 			return destTeam.getMemberType(superRole.internalName());
-		if (destTeam.isRole())
-			for (ReferenceBinding tsuperTeam : destTeam.roleModel.getTSuperRoleBindings()) {
-				if (tsuperTeam == superRole.enclosingType())
+		if (destTeam.isRole()) {
+			ReferenceBinding[] tsuperTeams = destTeam.roleModel.getTSuperRoleBindings();
+			for (int i = tsuperTeams.length-1; i >= 0; i--) { // check highest prio first (which comes last in the array)
+				if (tsuperTeams[i] == superRole.enclosingType())
 					return destTeam.getMemberType(superRole.internalName());
-				if (TeamModel.isTeamContainingRole(tsuperTeam, superRole)) {
+				if (TeamModel.isTeamContainingRole(tsuperTeams[i], superRole)) {
 					ReferenceBinding strongEnclosing = destTeam.getMemberType(superRole.enclosingType().internalName());
 					if (strongEnclosing != null)
 						return strengthenSuper(strongEnclosing, superRole);
 					return superRole;
 				}
 			}
+		}
 		return superRole;
 	}
 
