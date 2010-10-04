@@ -615,7 +615,7 @@ public class RoleModel extends TypeModel
      * @return first tsuper role or null
      */
     public ReferenceBinding getTSuperRoleBinding() {
-		return this._tsuperRoleBindings[this.numTSuperRoles-1];
+		return this._tsuperRoleBindings[this.numTSuperRoles > 0 ? this.numTSuperRoles-1 : 0];
 	}
 
     /** Answer all direct tsuper roles of this role in ascending priority. */
