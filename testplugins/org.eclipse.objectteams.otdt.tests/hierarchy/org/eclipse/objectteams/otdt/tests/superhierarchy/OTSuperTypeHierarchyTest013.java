@@ -238,6 +238,20 @@ public class OTSuperTypeHierarchyTest013 extends FileBasedModelTest
    
         assertTrue(compareTypes(expected, actual));        
     }
+    
+    public void testGetImplicitSuperclass_TA2TB2TC2R1() throws JavaModelException
+    {
+        _focusType = _TA2TB2TC2R1;
+        
+        TypeHierarchy hierarchy =
+            new TypeHierarchy(_focusType, null, _focusType.getJavaProject(), false);
+        hierarchy.refresh(new NullProgressMonitor());
+
+        IType actual = hierarchy.getSuperclass(_focusType);
+        IType expected = _TA1TB2TC2R1;
+   
+        assertTrue(compareTypes(expected, actual));        
+    }
 
     public void testGetAllClasses_TA2TB2TC2R1() throws JavaModelException
     {
