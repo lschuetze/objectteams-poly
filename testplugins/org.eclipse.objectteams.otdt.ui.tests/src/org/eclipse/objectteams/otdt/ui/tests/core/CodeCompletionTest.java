@@ -1367,6 +1367,55 @@ public class CodeCompletionTest extends CoreTests {
 		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
 	}
 	
+
+	// propose methods invoked via a phantom role, simple nested case
+	public void testMethodInvocation4() throws CoreException {
+	
+		
+		StringBuffer subTeamContent = new StringBuffer(); 
+		subTeamContent.append("package test1;\n");
+		subTeamContent.append("public team class Completion_testMethodInvocation4 {\n");
+		subTeamContent.append("  protected team class Mid1 {\n");
+		subTeamContent.append("    protected class R {\n");
+		subTeamContent.append("      /** foo in Mid1 */\n");
+		subTeamContent.append("      protected void foo() {}\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("  }\n");
+		subTeamContent.append("  protected team class Mid2 extends Mid1 {\n");
+		subTeamContent.append("    protected class R {}\n");
+		subTeamContent.append("    void test(R r) {\n");
+		subTeamContent.append("        r.\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("  }\n");
+		subTeamContent.append("}");
+		
+		StringBuffer expectedContent = new StringBuffer(); 
+		expectedContent.append("package test1;\n");
+		expectedContent.append("public team class Completion_testMethodInvocation4 {\n");
+		expectedContent.append("  protected team class Mid1 {\n");
+		expectedContent.append("    protected class R {\n");
+		expectedContent.append("      /** foo in Mid1 */\n");
+		expectedContent.append("      protected void foo() {}\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("  }\n");
+		expectedContent.append("  protected team class Mid2 extends Mid1 {\n");
+		expectedContent.append("    protected class R {}\n");
+		expectedContent.append("    void test(R r) {\n");
+		expectedContent.append("        r.foo()\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("  }\n");
+		expectedContent.append("}");
+		
+		String expectedInfo = ">foo in Mid1 </body></html>";
+
+		String completeAfter = "r.";
+		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
+		int posAfter = expectedContent.indexOf("r.foo()")+7;
+		
+		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
+		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
+	}
+
 	// == Below: Helper methods/fields. ==
 	
 	private void createBaseClass(String classBody) 
