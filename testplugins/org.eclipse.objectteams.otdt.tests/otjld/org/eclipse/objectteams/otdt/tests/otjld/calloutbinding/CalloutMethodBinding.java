@@ -2563,6 +2563,47 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
             customOptions);
     }
 
+    // Bug 326689 -  [compiler] inferred callout not working with overloads and same-named callin method
+    public void test3117_inferredCallout10() {
+        Map customOptions = getCompilerOptions();
+        customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
+
+    	runConformTest(
+    		new String[]{
+    	"Team3117ic10.java",
+    			"public team class Team3117ic10 {\n" + 
+				"\n" + 
+				"	protected class R playedBy T3117ic10 {\n" + 
+				"\n" + 
+				"		String foo(String s, int i) <- replace String foo(String s, int i);\n" + 
+				"\n" + 
+				"		@SuppressWarnings({ \"inferredcallout\", \"basecall\" })\n" + 
+				"		callin String foo(String s, int i) {\n" + 
+				"			return foo(s+\"(\"+i+\")\");\n" + 
+				"		}\n" + 
+				"	}\n" + 
+				"	public static void main(String[] args) {\n" + 
+				"		new Team3117ic10().activate();\n" + 
+				"		System.out.println(new T3117ic10().foo(\"OK\", 23));\n" + 
+				"	}\n" + 
+				"}\n",
+    	"T3117ic10.java",
+    			"public class T3117ic10 {\n" + 
+    			"	String foo(String s, int i) {\n" + 
+    			"		return s+\":\"+i;\n" + 
+    			"	}\n" + 
+    			"	String foo(String s) {\n" + 
+    			"		return s;\n" + 
+    			"	}\n" + 
+    			"}\n",
+    		}, "OK(23)",
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
+    }
+
     // a short callout binding lacks a rhs
     // 3.1.18-otjld-incomplete-callout-binding-1
     public void test3118_incompleteCalloutBinding1() {
