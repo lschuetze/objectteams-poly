@@ -1122,7 +1122,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
 
     // see Bug 318415 -  Copy inheritance problem
     // no harm since illegal ctor is not invoked
-    public void test0c15_overrideBoundSuperRole1() {
+    public void _test0c15_overrideBoundSuperRole1() {
     	runConformTest(
     		new String[] {
     	"T0c15obsr1Main.java",
@@ -1160,7 +1160,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     }
 
     // see Bug 318415 -  Copy inheritance problem
-    public void test0c15_overrideBoundSuperRole4() {
+    public void _test0c15_overrideBoundSuperRole4() {
     	runConformTest(
     		new String[] {
     	"T0c15obsr4Main.java",

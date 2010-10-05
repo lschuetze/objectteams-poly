@@ -331,6 +331,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     }
     
     // private method of nested team accesses protected inner role
+    // Bug 323327 -  [compiler] accessing a protected inner role from a private method of a nested team
     public void test0a1a_privateRoleMethod10() {
         runConformTest(
             new String[] {
@@ -1731,6 +1732,7 @@ public class AccessModifiers extends AbstractOTJLDTest {
     }
 
     // a role has a private static final field, witness for AIOOBE in SyntheticRoleBridgeMethodBinding
+    // Bug 323327 -  [compiler] accessing a protected inner role from a private method of a nested team
     public void test0a9_staticFinalRoleField4() {
         runConformTest(
             new String[] {

@@ -347,6 +347,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 
     // a role is bound to enclosing normal class, illegal callout
     // 2.1.2-otjld-bound-to-related-class-3
+    // Bug 318815 -  [otjld] [compiler] Support the "Internal Role" pattern
     public void test212_boundToRelatedClass3() {
     	Map options = getCompilerOptions();
     	options.put(CompilerOptions.OPTION_ReportBaseclassCycle, CompilerOptions.ERROR);
@@ -393,6 +394,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 
     // a role is bound to its team - legal callin
     // 2.1.2-otjld-bound-to-related-class-4
+    // Bug 318815 -  [otjld] [compiler] Support the "Internal Role" pattern
     public void test212_boundToRelatedClass4() {
         runConformTest(
             new String[] {
@@ -424,6 +426,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 
     // a role is bound to its superteam
     // 2.1.2-otjld-bound-to-related-class-5
+    // Bug 318815 -  [otjld] [compiler] Support the "Internal Role" pattern
     public void test212_boundToRelatedClass5() {
        
        runNegativeTest(
@@ -476,6 +479,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
     }
 
     // a role is indirectly bound to its team - rejected as error
+    // Bug 318815 -  [otjld] [compiler] Support the "Internal Role" pattern
     public void test212_boundToRelatedClass6() {
     	Map customOptions = getCompilerOptions();
     	customOptions.put(CompilerOptions.OPTION_ReportBaseclassCycle, CompilerOptions.ERROR);

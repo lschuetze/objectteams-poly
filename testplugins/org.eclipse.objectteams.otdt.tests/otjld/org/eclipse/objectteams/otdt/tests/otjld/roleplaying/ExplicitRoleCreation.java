@@ -901,6 +901,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
 
     // a role directly bound to a baseclass has a constructor with a base constructor call
     // constructors declare an exception
+    // Bug 322723 -  [compiler] a role constructor with declared exceptions causes bogus compile error
     public void test235_constructorWithBasecall4() {
        
        runConformTest(

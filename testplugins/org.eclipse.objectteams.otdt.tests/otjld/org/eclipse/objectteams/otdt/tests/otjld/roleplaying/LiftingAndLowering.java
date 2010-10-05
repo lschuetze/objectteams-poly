@@ -4057,6 +4057,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 
     // a constructor with declared lifting calls super with a role across several levels
     // 2.2.28-otjld-declared-lifting-in-constructor-5
+    // Bug 326052 [compiler] problems with team ctors with declared lifting in specific inheritance situations 
     public void test2228_declaredLiftingInConstructor5() {
        
        runConformTest(
@@ -4224,7 +4225,8 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 
     // a constructor with declared lifting calls super with a role across several levels -- unsupported data flow
     // 2.2.28-otjld-declared-lifting-in-constructor-6
-    public void test2228_declaredLiftingInConstructor6() {
+    // Bug 326052 [compiler] problems with team ctors with declared lifting in specific inheritance situations 
+    public void _test2228_declaredLiftingInConstructor6() {
         runConformTest(
             new String[] {
 		"Team2228dlic6_3.java",
@@ -4395,7 +4397,8 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 
     // a constructor with declared lifting calls super with a role across several levels  -- unsupported data flow
     // 2.2.28-otjld-declared-lifting-in-constructor-7
-    public void test2228_declaredLiftingInConstructor7() {
+    // Bug 326052 [compiler] problems with team ctors with declared lifting in specific inheritance situations 
+    public void _test2228_declaredLiftingInConstructor7() {
         runConformTest(
             new String[] {
 		"Team2228dlic7_3.java",
