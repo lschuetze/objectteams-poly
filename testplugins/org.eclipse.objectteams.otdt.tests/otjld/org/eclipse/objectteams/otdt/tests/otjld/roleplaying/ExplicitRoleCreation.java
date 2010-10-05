@@ -950,6 +950,108 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
             "OK");
     }
 
+    // Bug 323862 -  base constructor call can not be used as an expression
+    public void test236_constructorWithBasecall5() {
+    	runConformTest(
+    		new String[]{
+    	"Team236cwb5.java",
+    			"public team class Team236cwb5 {\n" +
+    			"    protected class R1 playedBy T236cwb5 {\n" +
+    			"        protected String getVal() -> get String val;\n" +
+    			"    }\n" +
+    			"    protected class R2 extends R1 {\n" +
+    			"        protected R2(String v) {\n" +
+    			"            super(base(v));\n" +
+    			"        }\n" +
+    			"    }\n" +
+    			"    void test() {\n" +
+    			"        R1 r = new R2(\"OK\");\n" +
+    			"        System.out.print(r.getVal());\n" +
+    			"    }\n" +
+    			"    public static void main(String... args) {\n" +
+    			"        new Team236cwb5().test();\n" +
+    			"    }\n" +
+    			"}\n",
+    	"T236cwb5.java",
+    			"public class T236cwb5 {\n" +
+    			"    String val;\n" +
+    			"    T236cwb5(String v) { this.val = v; }\n" +
+    			"}\n"
+    		},
+    		"OK");
+    }
+
+    // Bug 323862 -  base constructor call can not be used as an expression
+    public void test236_constructorWithBasecall6() {
+    	runNegativeTest(
+    		new String[]{
+    	"Team236cwb6.java",
+    			"public team class Team236cwb6 {\n" +
+    			"    protected class R1 {\n" +
+    			"    }\n" +
+    			"    protected class R2 extends R1 playedBy T236cwb6 {\n" +
+    			"        protected String getVal() -> get String val;\n" +
+    			"        protected R2(String v) {\n" +
+    			"            super();\n" +
+    			"            Object b = base(v);\n" +
+    			"        }\n" +
+    			"    }\n" +
+    			"    void test() {\n" +
+    			"        R2 r = new R2(\"OK\");\n" +
+    			"        System.out.print(r.getVal());\n" +
+    			"    }\n" +
+    			"    public static void main(String... args) {\n" +
+    			"        new Team236cwb6().test();\n" +
+    			"    }\n" +
+    			"}\n",
+    	"T236cwb6.java",
+    			"public class T236cwb6 {\n" +
+    			"    String val;\n" +
+    			"    T236cwb6(String v) { this.val = v; }\n" +
+    			"}\n"
+    		},
+    		"----------\n" + 
+    		"1. ERROR in Team236cwb6.java (at line 8)\n" + 
+    		"	Object b = base(v);\n" + 
+    		"	           ^^^^\n" + 
+    		"Base constructor call not allowed in this position, must be first statement or argument to another constructor call (OTJLD 2.4.2(c)).\n" + 
+    		"----------\n");
+    }
+
+    // 
+    public void test236_constructorWithBasecall7() {
+    	runConformTest(
+    		new String[]{
+    	"Team236cwb7.java",
+    			"public team class Team236cwb7 {\n" +
+    			"    protected class R1 playedBy T236cwb7 {\n" +
+    			"        protected String getVal() -> get String val;\n" +
+    			"        protected String getV1() { return \"O\"; }\n" +
+    			"        protected String getV2() { return \"K\"; }\n" +
+    			"    }\n" +
+    			"    protected class R2 extends R1 {\n" +
+    			"        protected R2(R1 r) throws Exception {\n" +
+    			"            super(base(r));\n" +
+    			"        }\n" +
+    			"    }\n" +
+    			"    void test() throws Exception {\n" +
+    			"        R1 r = new R2(new R1(new T236cwb7(\"OK\")));\n" +
+    			"        System.out.print(r.getVal());\n" +
+    			"    }\n" +
+    			"    public static void main(String... args) throws Exception {\n" +
+    			"        new Team236cwb7().test();\n" +
+    			"    }\n" +
+    			"}\n",
+    	"T236cwb7.java",
+    			"public class T236cwb7 {\n" +
+    			"    String val;\n" +
+    			"    T236cwb7(String val) { this.val = val; }\n" +
+    			"    T236cwb7(T236cwb7 other) { this.val = other.val; }\n" +
+    			"}\n"
+    		},
+    		"OK");
+    }
+
     // a role directly bound to a baseclass invokes a nonexisting base constructor
     // 2.3.6-otjld-no-such-base-constructor-1
     public void test236_noSuchBaseConstructor1() {
