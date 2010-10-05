@@ -591,7 +591,7 @@ public class TeamNesting extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "-M2R1:221.221.221.221.221.211.211.111.R2:212.122.221.112.221.122.211.112.");
+            "-M2R1:221.221.221.221.221.211.121.111.R2:212.122.221.112.221.122.121.112.");
     }
 
     // a role inherits features from all possible super roles within nested teams - super and tsuper tree (note, that some of these are re-bound, so full tree is not possible.
