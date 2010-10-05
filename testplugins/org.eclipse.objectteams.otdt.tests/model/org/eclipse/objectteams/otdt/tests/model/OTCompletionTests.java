@@ -1161,7 +1161,7 @@ public void testCompletionCallAbstractTSuper() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
-		"fubar[METHOD_REF]{fubar(), LCompletionTeam1$CompletionRole;, (ILjava.lang.String;)J, fubar, (arg0, arg1), " +
+		"fubar[METHOD_REF]{fubar(), LCompletionSuperTeam$CompletionRole;, (ILjava.lang.String;)J, fubar, (x, z), " +
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_UNQUALIFIED+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
@@ -1184,7 +1184,7 @@ public void testCompletionCallTSuper() throws JavaModelException {
     this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
-		"nothing[METHOD_REF]{nothing(), LCompletionTeam1$CompletionRole;, (ILjava.lang.String;)J, nothing, (arg0, arg1), " +
+		"nothing[METHOD_REF]{nothing(), LCompletionSuperTeam$CompletionRole;, (ILjava.lang.String;)J, nothing, (x, z), " +
 		(R_DEFAULT+R_RESOLVED+R_INTERESTING+R_CASE+R_NON_STATIC+R_NON_RESTRICTED)+"}",
 		requestor.getResults());
 }
