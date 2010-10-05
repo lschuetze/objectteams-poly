@@ -61,6 +61,9 @@ public class AllTests
 		//builder
 		// tests moved to separate plug-in, needs OT/Equinox to enable compiler.adaptor.
 		
+		// the OTJLD suite:
+		suite.addTest(org.eclipse.objectteams.otdt.tests.otjld.AllTests.suite());
+		
 		//$JUnit-END$
 		return suite;
     }
