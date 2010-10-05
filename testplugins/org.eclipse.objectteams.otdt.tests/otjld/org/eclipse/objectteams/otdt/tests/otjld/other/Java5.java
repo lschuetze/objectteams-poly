@@ -2627,7 +2627,7 @@ public class Java5 extends AbstractOTJLDTest {
     }
 
     // a static method in a role file suppresses an nls warning
-    // A.1.13-otjld-suppress-warnings-1
+    // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files 
     public void testA113_suppressWarnings1() {
     	Map customOptions = getCompilerOptions();
     	customOptions.put(CompilerOptions.OPTION_ReportNonExternalizedStringLiteral, CompilerOptions.ERROR);
@@ -2653,6 +2653,39 @@ public class Java5 extends AbstractOTJLDTest {
             null/*classLibs*/,
             true/*shouldFlush*/,
             null/*vmArgs*/,
+            customOptions,
+            null/*requestor*/);
+    }
+
+    // a static method in a role file reports an nls warning
+    // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files 
+    public void testA113_suppressWarnings1w() {
+    	Map customOptions = getCompilerOptions();
+    	customOptions.put(CompilerOptions.OPTION_ReportNonExternalizedStringLiteral, CompilerOptions.ERROR);
+        runNegativeTest(
+            new String[] {
+		"TeamA113sw1.java",
+			    "\n" +
+			    "public team class TeamA113sw1 {}\n" +
+			    "    \n",
+		"TeamA113sw1/R.java",
+			    "\n" +
+			    "team package TeamA113sw1;\n" +
+			    "protected class R {\n" +
+			    "    public static void test() {\n" +
+			    "        System.out.print(\"OK\");\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "----------\n" +
+            "1. ERROR in TeamA113sw1\\R.java (at line 5)\n" +
+            "	System.out.print(\"OK\");\n" +
+            "	                 ^^^^\n" +
+            "Non-externalized string literal; it should be followed by //$NON-NLS-<n>$\n" +
+            "----------\n",
+            null/*classLibs*/,
+            true/*shouldFlush*/,
             customOptions,
             null/*requestor*/);
     }
