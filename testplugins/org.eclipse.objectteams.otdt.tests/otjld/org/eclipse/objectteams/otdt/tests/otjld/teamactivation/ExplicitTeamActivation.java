@@ -264,6 +264,67 @@ public class ExplicitTeamActivation extends AbstractOTJLDTest {
             "ba");
     }
 
+    // a team is explicitly activated and a callin binding is called in the activation context
+    // Bug 326416 -  [compiler] within() not working for team extending non-team
+    public void test521_callinInvocation5() {
+       
+       runConformTest(
+            new String[] {
+		"T521ci5Main.java",
+			    "\n" +
+			    "public class T521ci5Main {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        Team521ci5 t = new Team521ci5();\n" +
+			    "        T521ci5_2  o = new T521ci5_2();\n" +
+			    "\n" +
+			    "        within (t) {\n" +
+			    "            o.test();\n" +
+			    "        }\n" +
+			    "        o.test();\n" +
+			    "        System.out.print(T521ci5_1.getValue());\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T521ci5_1.java",
+			    "\n" +
+			    "public class T521ci5_1 {\n" +
+			    "    private static String value = \"\";\n" +
+			    "    public static void addValue(String txt) {\n" +
+			    "        value += txt;\n" +
+			    "    }\n" +
+			    "    public static String getValue() {\n" +
+			    "        return value;\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T521ci5_2.java",
+			    "\n" +
+			    "public class T521ci5_2 {\n" +
+			    "    public void test() {\n" +
+			    "        T521ci5_1.addValue(\"a\");\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"TSuper521ci5.java",
+				"public class TSuper521ci5 {}\n",
+		"Team521ci5.java",
+			    "\n" +
+			    "public team class Team521ci5 extends TSuper521ci5 {\n" +
+			    "    public class Role521ci5_1 playedBy T521ci5_2 {\n" +
+			    "        public void test() {\n" +
+			    "            T521ci5_1.addValue(\"b\");\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public class Role521ci5_2 extends Role521ci5_1 {\n" +
+			    "        test <- before test;\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "baa");
+    }
+
     // invoking a role method activates the team temporarily
     // 5.2.2-otjld-role-method-invocation-activates-team
     public void test522_roleMethodInvocationActivatesTeam() {
