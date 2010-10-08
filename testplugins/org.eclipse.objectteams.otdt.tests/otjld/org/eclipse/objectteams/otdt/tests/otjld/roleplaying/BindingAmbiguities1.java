@@ -728,7 +728,8 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-7
-     public void test731_ambiguousBinding7() {
+     // see Bug 327334 -  [compiler] generated lift methods fail to detect some lifting ambiguities
+     public void _test731_ambiguousBinding7() {
         
         runConformTest(
              new String[] {
@@ -839,13 +840,15 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-             "Failed to lift 'T731ab7_3' of class T731ab7_3 to type 'Role731ab7_1'\n" +
-        	 "(See OT/J definition para. 7.3(c)).");
+             "org.objectteams.LiftingFailedException: \n" + 
+     		 "Failed to lift \'T731ab7_3\' of class T731ab7_3 to type \'Role731ab7_1\'\n" + 
+     		 "(See OT/J definition para. 2.3.4(c)).");
      }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-8
-     public void test731_ambiguousBinding8() {
+     // see Bug 327334 -  [compiler] generated lift methods fail to detect some lifting ambiguities
+     public void _test731_ambiguousBinding8() {
         
         runConformTest(
              new String[] {
@@ -956,8 +959,125 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-             "Failed to lift 'T731ab8_3' of class T731ab8_3 to type 'Role731ab8_1'\n" +
-        	 "(See OT/J definition para. 7.3(c)).");
+             "org.objectteams.LiftingFailedException: \n" + 
+     		 "Failed to lift \'T731ab8_3\' of class T731ab8_3 to type \'Role731ab8_1\'\n" + 
+     		 "(See OT/J definition para. 2.3.4(c)).");
+     }
+
+     // smart-lifting of a base object to a role object results in an ambiguous binding
+     // manual addition: subtype T4 (OK) of base T2 which also has an ambiguous sub type T3
+     // see Bug 327334 -  [compiler] generated lift methods fail to detect some lifting ambiguities
+     public void _test731_ambiguousBinding9() {
+        
+        runConformTest(
+             new String[] {
+ 		"T731ab9Main.java",
+			    "\n" +
+			    "public class T731ab9Main {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        Team731ab9_1 t = new Team731ab9_3();\n" +
+			    "        T731ab9_1    o = new T731ab9_4();\n" +
+			    "\n" +
+			    "        try {\n" +
+			    "            System.out.print(t.t1(o));\n" +
+			    "        } catch (org.objectteams.LiftingFailedException ex) {\n" +
+			    "            System.out.print(ex.toString());\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "}\n",
+		"T731ab9_3.java",
+			    "\n" +
+			    "public class T731ab9_3 extends T731ab9_2 {\n" +
+			    "    public String toString() {\n" +
+			    "        return \"T731ab9_3\";\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team731ab9_1.java",
+			    "\n" +
+			    "public team class Team731ab9_1 {\n" +
+			    "    public class Role731ab9_1 playedBy T731ab9_1 {\n" +
+			    "        public String toString() {\n" +
+			    "            return Team731ab9_1.this.toString() + \".Role731ab9_1\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public class Role731ab9_2 extends Role731ab9_1 playedBy T731ab9_2 {\n" +
+			    "        public String toString() {\n" +
+			    "            return Team731ab9_1.this.toString() + \".Role731ab9_2\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public String toString() {\n" +
+			    "        return \"Team731ab9_1\";\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public String t1(T731ab9_1 as Role731ab9_1 obj) {\n" +
+			    "        return obj.toString();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team731ab9_2.java",
+			    "\n" +
+			    "public team class Team731ab9_2 extends Team731ab9_1 {\n" +
+			    "    public class Role731ab9_1 {\n" +
+			    "        public String toString() {\n" +
+			    "            return Team731ab9_2.this.toString() + \".Role731ab9_1\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "    public class Role731ab9_3 extends Role731ab9_2 playedBy T731ab9_3 {\n" +
+			    "        public String toString() {\n" +
+			    "            return Team731ab9_2.this.toString() + \".Role731ab9_3\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public String toString() {\n" +
+			    "        return \"Team731ab9_2\";\n" +
+			    "    }\n" +
+			    "\n" +
+			    "}\n" +
+			    "    \n",
+		"T731ab9_1.java",
+			    "\n" +
+			    "public abstract class T731ab9_1 {\n" +
+			    "    public String toString() {\n" +
+			    "        return \"T731ab9_1\";\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team731ab9_3.java",
+			    "\n" +
+			    "public team class Team731ab9_3 extends Team731ab9_2 {\n" +
+			    "    public class Role731ab9_4 extends Role731ab9_1 playedBy T731ab9_3 {\n" +
+			    "        public String toString() {\n" +
+			    "            return Team731ab9_3.this.toString() + \".Role731ab9_4\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public String toString() {\n" +
+			    "        return \"Team731ab9_3\";\n" +
+			    "    }\n" +
+			    "\n" +
+			    "}\n" +
+			    "    \n",
+		"T731ab9_2.java",
+			    "\n" +
+			    "public class T731ab9_2 extends T731ab9_1 {\n" +
+			    "    public String toString() {\n" +
+			    "        return \"T731ab9_2\";\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T731ab9_4.java",
+			    "\n" +
+			    "public class T731ab9_4 extends T731ab9_2 {\n" +
+			    "    public String toString() {\n" +
+			    "        return \"T731ab9_4\";\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "\n"
+             },
+             "Team731ab9_3.Role731ab9_2");
      }
 
 }
