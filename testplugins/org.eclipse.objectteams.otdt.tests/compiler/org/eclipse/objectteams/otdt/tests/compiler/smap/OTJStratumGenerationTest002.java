@@ -91,9 +91,20 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
  
         // letters (a) ... indicate the order in which lines are assigned
         // class position is used by ctor, initFields and getTeam
+
+        FileInfo fileInfo1 = stratum_role.getOrCreateFileInfo("SuperTeam.java", "copyInheritance/SuperTeam.java");
+        LineInfo lineInfo1_role1 = new LineInfo(4,25); // (c) class position (4) mapped to synthetic line 25
+        LineInfo lineInfo2_role1 = new LineInfo(11,26); // (d) roleMethod0 (11..) mapped to synthetic lines 26-28
+        lineInfo2_role1.setRepeatCount(3);
+        LineInfo lineInfo3_role1 = new LineInfo(8,35); // (g) method roleMethod2 (8..) mapped to synthetic lines 35-36 
+        lineInfo3_role1.setRepeatCount(2);
+        
+        fileInfo1.addLineInfo(lineInfo1_role1);
+        fileInfo1.addLineInfo(lineInfo2_role1);
+        fileInfo1.addLineInfo(lineInfo3_role1);
         
         FileInfo fileInfo0 = stratum_role.getOrCreateFileInfo("SuperSuperTeam.java", "copyInheritance/SuperSuperTeam.java");
-        LineInfo lineInfo1_role0 = new LineInfo(4,25); // (c) class position (4) mapped to synthetic line 25
+        LineInfo lineInfo1_role0 = new LineInfo(4,24); // (b) class position (4) mapped to synthetic line 24
         LineInfo lineInfo2_role0 = new LineInfo(8,29); // (e) method roleMethod0 (8..) mapped to synthetic lines 29-30  
         lineInfo2_role0.setRepeatCount(2);
         LineInfo lineInfo3_role0 = new LineInfo(12,31); // (f) method roleMethod1 (12,14,15) mapped to synthetic lines 31,33,34
@@ -103,16 +114,6 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
         fileInfo0.addLineInfo(lineInfo2_role0);
         fileInfo0.addLineInfo(lineInfo3_role0);
          
-        FileInfo fileInfo1 = stratum_role.getOrCreateFileInfo("SuperTeam.java", "copyInheritance/SuperTeam.java");
-        LineInfo lineInfo1_role1 = new LineInfo(4,24); // (b) class position (4) mapped to synthetic line 24
-        LineInfo lineInfo2_role1 = new LineInfo(11,26); // (d) roleMethod0 (11..) mapped to synthetic lines 26-28
-        lineInfo2_role1.setRepeatCount(3);
-        LineInfo lineInfo3_role1 = new LineInfo(8,35); // (g) method roleMethod2 (8..) mapped to synthetic lines 35-36 
-        lineInfo3_role1.setRepeatCount(2);
-        
-        fileInfo1.addLineInfo(lineInfo1_role1);
-        fileInfo1.addLineInfo(lineInfo2_role1);
-        fileInfo1.addLineInfo(lineInfo3_role1);
 
         
         FileInfo fileInfo2 = stratum_role.getOrCreateFileInfo("SubTeam.java", "copyInheritance/SubTeam.java");
