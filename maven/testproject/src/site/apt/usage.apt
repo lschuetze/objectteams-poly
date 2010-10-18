@@ -1,0 +1,67 @@
+	------
+	Using the Object Teams test project POM
+	------
+	Olaf Otto & Stephan Herrmann
+	------
+	2001-10-18
+	------
+
+Using Object Teams with Maven3
+
+ Declaring <<<org.eclipse:objectteams-parent-pom>>> as the parent of your project will add basic capabilities
+ for using OT/J in your sources.
+ 
+* Include the parent pom
+
+ For simple cases two declarations in your pom will suffice:
+
+ [[1]] declare the maven repository for fetching Object Teams related modules
+
++-----
+	<repositories>
+		<repository>
+			<id>ObjectTeamsRepository</id>
+			<name>Object Teams Repository</name>
+			<url>http://download.eclipse.org/objectteams/maven/3/repository</url>
+		</repository>
+	</repositories>
++----- 
+
+ [[1]] declare the parent pom
+
++-----
+	<parent>
+		<groupId>org.eclipse</groupId>
+		<artifactId>objectteams-parent-pom</artifactId>
+		<version>0.8.0-SNAPSHOT</version>
+	</parent>
++-----
+
+* Effect
+ 
+  The above steps suffice to let you
+  
+  * use OT/J syntax in your <<<.java>>> sources and have it compiled just like plain Java.
+  
+  * run OT/J programs via surfire, e.g., as JUnit tests.
+    A predefined <<<\<surefire.argline\>>>> is used that ensures that all required jars are on the classpath and the
+    OT/J agent is activated.
+
+* Override inherited declarations
+
+  The following declarations, although inherited from <<<objectteams-parent-pom>>> should be overridden per project:
+  
+  * <<<\<scm\>>>>
+  
+  * <<<\<url\>>>>
+  
+  * <<<\<distributionManagement\>\<site\>>>>
+
+  []
+
+  <Note that Maven doesn't cope well with declarations depending on properties like \<project.artifactId\>
+  when this declaration is inherited from a project's parent.>
+  
+* Source
+
+  See the full source of {{{http://dev.eclipse.org/viewcvs/index.cgi/trunk/maven/testproject/pom.xml?root=TOOLS_OBJECTTEAMS&revision=HEAD}pom.xml}}.
