@@ -198,6 +198,15 @@ public class InternalExtendedCompletionContext {
 								if (this.visibleFields.size > 0 && this.visibleFields.contains(fieldDeclaration.binding)) {
 									this.visibleFields.remove(fieldDeclaration.binding);
 								}
+								int count = 0;
+								while (count < this.visibleFields.size) {
+									FieldBinding visibleField = (FieldBinding)this.visibleFields.elementAt(count);
+									if (visibleField.id > fieldDeclaration.binding.id) {
+										this.visibleFields.remove(visibleField);
+										continue;
+									}
+									count++;
+								}
 								break done;
 							}
 							/*(Incase fieldDeclaration != null is not sufficient to infer that
@@ -386,7 +395,7 @@ public class InternalExtendedCompletionContext {
 			next : for (int i = 0; i < size; i++) {
 				try {
 					LocalVariableBinding binding = (LocalVariableBinding) this.visibleLocalVariables.elementAt(i);
-					if (assignableTypeBinding != null && !binding.type.isCompatibleWith(assignableTypeBinding)) continue next;
+					if (binding.type == null || (assignableTypeBinding != null && !binding.type.isCompatibleWith(assignableTypeBinding))) continue next;
 					JavaElement localVariable = getJavaElement(binding);
 					if (localVariable != null) result[elementCount++] = localVariable;
 				} catch(AbortCompilation e) {

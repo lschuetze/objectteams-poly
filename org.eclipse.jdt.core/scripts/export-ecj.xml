@@ -101,13 +101,13 @@
 		</zip>
 
 
-		<echo message="UPDATE ecotjsrc-${buildLabel}.zip" />
-		<delete file="${dest}/ecotjsrc-${buildLabel}.zip" failonerror="false"/>
+		<echo message="UPDATE ecotjsrc-${buildLabel}.jar" />
+		<delete file="${dest}/ecotjsrc-${buildLabel}.jar" failonerror="false"/>
 		<copy todir="${ecj-temp-src-folder}">
 			<fileset dir="scripts/source" />
 		</copy>
 		<replace file="${ecj-temp-src-folder}/META-INF/MANIFEST.MF" token="qualifier" value="${buildLabel}"/>
-		<zip zipfile="${dest}/ecotjsrc-${buildLabel}.zip">
+		<zip zipfile="${dest}/ecotjsrc-${buildLabel}.jar">
 			<zipfileset dir="ecj-temp-src-folder" />
 			<zipfileset dir="batch" />
 			<zipfileset dir="compiler" />

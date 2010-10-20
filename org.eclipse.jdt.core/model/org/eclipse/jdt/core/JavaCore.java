@@ -1219,6 +1219,21 @@ public final class JavaCore extends Plugin {
 	 */
 	public static final String COMPILER_PB_MISSING_JAVADOC_TAGS_OVERRIDING = PLUGIN_ID + ".compiler.problem.missingJavadocTagsOverriding"; //$NON-NLS-1$
 	/**
+	 * Compiler option ID: Reporting Missing Javadoc Tags for Method Type Parameters.
+	 * <p>Specify whether a missing <code>@param</code> for a type parameter in a method declaration should be reported.
+	 *    When enabled, the compiler will issue a missing Javadoc tag error or warning for a type parameter without a 
+	 *    corresponding <code>@param</code> tag.</p>
+	 * <p>This option only has an effect if the compiler compliance is 1.5 or greater.</p>
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.missingJavadocTagsMethodTypeParameters"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "enabled", "disabled" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"disabled"</code></dd>
+	 * </dl>
+	 * @since 3.7
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS = PLUGIN_ID + ".compiler.problem.missingJavadocTagsMethodTypeParameters"; //$NON-NLS-1$
+	/**
 	 * Compiler option ID: Reporting Missing Javadoc Comments.
 	 * <p>This is the generic control for the severity of missing Javadoc comment problems.
 	 *    When enabled, the compiler will issue an error or a warning when Javadoc comments are missing.
@@ -1445,6 +1460,21 @@ public final class JavaCore extends Plugin {
 	 */
 	public static final String COMPILER_PB_SUPPRESS_WARNINGS = PLUGIN_ID + ".compiler.problem.suppressWarnings"; //$NON-NLS-1$
 	/**
+	 * Compiler option ID: Raise null related errors or warnings arising because of assert statements.
+	 * <p>When enabled, the compiler will flag all null related errors or warnings that have been enabled by the user,
+	 *    irrespective of whether a variable occurred in an assert statement.</p>
+	 * <p>When disabled, the compiler will not flag null related errors or warnings on variables that got marked as maybe or definitely
+	 *    <code>null</code> in an assert statement upstream.</p>
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.includeNullInfoFromAsserts"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "enabled", "disabled" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"disabled"</code></dd>
+	 * </dl>
+	 * @since 3.7
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS = PLUGIN_ID + ".compiler.problem.includeNullInfoFromAsserts"; //$NON-NLS-1$
+	/**
 	 * Compiler option ID: Further Determining the Effect of <code>@SuppressWarnings</code> if also
 	 * {@link #COMPILER_PB_SUPPRESS_WARNINGS} is enabled.
 	 * <p>When enabled, the <code>@SuppressWarnings</code> annotation can additionally be used to suppress 
@@ -1491,7 +1521,9 @@ public final class JavaCore extends Plugin {
 	 * Compiler option ID: Reporting Null Dereference.
 	 * <p>When enabled, the compiler will issue an error or a warning whenever a
 	 *    variable that is statically known to hold a null value is used to
-	 *    access a field or method.
+	 *    access a field or method.</p>
+	 * <p>Assert statements are ignored unless {@link #COMPILER_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS}
+	 *    is enabled.</p>
 	 * <dl>
 	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.nullReference"</code></dd>
 	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
@@ -1506,7 +1538,9 @@ public final class JavaCore extends Plugin {
 	 * <p>When enabled, the compiler will issue an error or a warning whenever a
 	 *    variable that has formerly been tested against null but is not (no more)
 	 *    statically known to hold a non-null value is used to access a field or
-	 *    method.
+	 *    method.</p>
+	 * <p>Assert statements are ignored unless {@link #COMPILER_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS}
+	 *    is enabled.</p>
 	 * <dl>
 	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.potentialNullReference"</code></dd>
 	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
@@ -1520,7 +1554,9 @@ public final class JavaCore extends Plugin {
 	 * Compiler option ID: Reporting Redundant Null Check.
 	 * <p>When enabled, the compiler will issue an error or a warning whenever a
 	 *    variable that is statically known to hold a null or a non-null value
-	 *    is tested against null.
+	 *    is tested against null.</p>
+	 * <p>Assert statements are ignored unless {@link #COMPILER_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS}
+	 *    is enabled.</p>
 	 * <dl>
 	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.redundantNullCheck"</code></dd>
 	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>

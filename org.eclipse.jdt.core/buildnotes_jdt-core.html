@@ -40,11 +40,163 @@
 	</td>
   </tr>
 </table>
+<a name="v_B18"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M3 - October 19, 2010 - 3.7.0 M3
+<br>Project org.eclipse.jdt.core v_B18
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B18">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=327429">327429</a>
+Use Charset.name() instead of Charset.toString() to get the encoding
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=327817">327817</a>
+ecjsrc.zip should be ecjsrc.jar
+
+<a name="v_B17"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M3 - October 12, 2010
+<br>Project org.eclipse.jdt.core v_B17
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B17">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>New Javacore option org.eclipse.jdt.core.JavaCore.COMPILER_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS added to enable or disable the missing Javadoc tag warning or error for a method
+    paramater without a corresponding <code>@param</code> tag. (see details in bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=322581">322581</a>):
+<pre>
+    /**
+     * Compiler option ID: Reporting Missing Javadoc Tags for Method Type Parameters.
+     * Specify whether a missing <code>@param</code> for a type parameter in a method declaration should be reported.
+     * When enabled, the compiler will issue a missing Javadoc tag error or warning for a type parameter without a 
+     * corresponding <code>@param</code> tag.
+     *	
+     * This option only has an effect if the compiler compliance is 1.5 or greater.
+     * 
+     * Option id:<code>"org.eclipse.jdt.core.compiler.problem.missingJavadocTagsMethodTypeParameters"</code>
+     * Possible values:<code>{ "enabled", "disabled" }</code>
+     * Default:<code>"disabled"</code>
+     * 
+     * @since 3.7
+     * @category CompilerOptionID
+     */
+     public static final String COMPILER_PB_MISSING_JAVADOC_TAGS_METHOD_TYPE_PARAMETERS = PLUGIN_ID + ".compiler.problem.missingJavadocTagsMethodTypeParameters";
+</pre>
+</li>
+<li>Added new API on org.eclipse.jdt.core.dom.rewrite.ASTRewrite to store properties (See bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=325131">325131</a>).
+<pre>
+	/**
+	 * Returns the value of the named property of this rewrite, or null if none.
+	 *
+	 * @param propertyName the property name
+	 * @return the property value, or <code>null</code> if none
+	 * @see #setProperty(String,Object)
+	 * @throws IllegalArgumentException if the given property name is null
+	 * @since 3.7
+	 */
+	public final Object getProperty(String propertyName);
+</pre>
+<pre>
+	/**
+	 * Sets the named property of this rewrite to the given value,
+	 * or to null to clear it.
+	 * 
+	 * Clients should employ property names that are sufficiently unique
+	 * to avoid inadvertent conflicts with other clients that might also be
+	 * setting properties on the same rewrite.
+	 * 
+	 * 
+	 * Note that modifying a property is not considered a modification to the
+	 * AST itself. This is to allow clients to decorate existing rewrites with
+	 * their own properties without jeopardizing certain things (like the
+	 * validity of bindings), which rely on the underlying tree remaining static.
+	 * 
+	 *
+	 * @param propertyName the property name
+	 * @param data the new property value, or null if none
+	 * @see #getProperty(String)
+	 * @throws IllegalArgumentException if the given property name is null
+	 * @since 3.7
+	 */
+	public final void setProperty(String propertyName, Object data);
+</pre>
+</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=324367">324367</a>
+IJavaProject.findPackageFragmentRoots(IClasspathEntry cpe) returns empty list
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=311022">311022</a>
+NPE in InternalExtendedCompletionContext.getVisibleElement
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=325131">325131</a>
+ASTRewrite should offer get/setProperty() like ASTNode
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=322789">322789</a>
+package-info.java Won't Build On First Compile Pass
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=322581">322581</a>
+[5.0] Add Javadoc compiler option to (not) report missing tags for method type parameters
+
+<a name="v_B16"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M3 - October 5, 2010 - 3.7.0 M3
+<br>Project org.eclipse.jdt.core v_B16
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B16">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>New Javacore option org.eclipse.jdt.core.JavaCore.COMPILER_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS added to give the user flexibility to see null related warning arising because of assert statements (see details in <a href="http://bugs.eclipse.org/bugs/show_bug.cgi?id=325342">bug 325342</a>):
+<pre>
+    /**
+     * Compiler option ID: Raise null related errors or warnings arising because of assert statements.
+     * When enabled, the compiler will flag all null related errors or warnings that have been enabled by the user,
+     * irrespective of whether a variable occurred in an assert statement.
+     * When disabled, the compiler will not flag null related errors or warnings on variables that got marked as maybe or definitely
+     * <code>null</code> in an assert statement upstream.
+     *
+     * Option id:<code>"org.eclipse.jdt.core.compiler.problem.includeNullInfoFromAsserts"</code>
+     * Possible values:<code>{ "enabled", "disabled" }</code>
+     * Default:<code>"disabled"</code>
+     *
+     * @since 3.7
+     * @category CompilerOptionID
+     */
+     public static final String COMPILER_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS = PLUGIN_ID + ".compiler.problem.includeNullInfoFromAsserts";
+</pre>
+</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=323012">323012</a>
+[jsr14][compiler] Class literal value is not cached when target is jsr14
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=325342">325342</a>
+Add new option for null analysis based on assert result.
+
+<a name="v_B15"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M3 - September 28, 2010
+<br>Project org.eclipse.jdt.core v_B15
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B15">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=312603">312603</a>
+[content assist] field being declared is proposed as a method argument inside initialization
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=325342">325342</a>
+Add new option for null analysis based on assert result.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=325481">325481</a>
+[assist] fields declared after a particular field are proposed in its initialization
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=325633">325633</a>
+1.4 project confused when referencing a return type of generic array from 1.5 project
+
 <a name="v_B14a"></a>
 <hr><h1>
 Eclipse Platform Build Notes<br>
 Java development tools core</h1>
-Eclipse SDK 3.7M3 - September 21, 2010 - 3.7.0 M3
+Eclipse SDK 3.7M3 - September 21, 2010
 <br>Project org.eclipse.jdt.core v_B14a
 (<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B14a">cvs</a>).
 <h2>What's new in this drop</h2>
