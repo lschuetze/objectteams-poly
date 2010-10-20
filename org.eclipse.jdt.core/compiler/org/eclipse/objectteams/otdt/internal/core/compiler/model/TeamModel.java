@@ -25,7 +25,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFile;
@@ -130,58 +129,6 @@ public class TeamModel extends TypeModel {
 				this.caches = new FieldDeclaration[len+1], 0,
 				len);
     	this.caches[len] = cache;
-    }
-
-    /** Get all other base types bound by this team where the bound roles are:
-     * (a) compatible to role and
-     * (b) not contained in explicitRoles
-     * @param role
-     * @param explicitRoles
-     * @return list of ReferenceBinding
-     */
-    public Set<ReferenceBinding> getSubBases (RoleModel role, RoleModel[] explicitRoles) {
-    	Set<ReferenceBinding> result = new HashSet<ReferenceBinding>();
-    	ReferenceBinding baseBinding = role.getBaseTypeBinding();
-    	// search bases via their roles to ensure compatibility:
-    	bases: for (ReferenceBinding currentRole : this._binding.memberTypes()) {
-    		ReferenceBinding currentBase = currentRole.baseclass();
-    		if (currentBase == null) continue;
-    		// don't report base types with ambiguity: can't lift:
-    		for (Pair<ReferenceBinding, ReferenceBinding> ambig: this.ambigousLifting)
-    			if (ambig.equals(currentBase, role.getBinding()))
-    				continue bases;
-    		if (!currentRole.isCompatibleWith(role.getBinding())) {
-    			// role is unrelated, inspect most specific super class bound to this hierarchy:
-    			if (generalizesTo(currentBase, baseBinding, explicitRoles))
-        			result.add(currentBase);
-    			continue;
-    		}
-			if (currentBase.isCompatibleWith(baseBinding)) {
-				for (int i = 0; i < explicitRoles.length; i++) {
-					if (explicitRoles[i].getBaseTypeBinding() == currentBase)
-						continue bases;
-				}
-
-				result.add(currentBase);
-			}
-		}
-    	return result;
-    }
-    /* Climbing up the hierarchy of alienBase check if we find baseBinding
-     * before hitting a direct base of any of the excludedRoles. */
-    private boolean generalizesTo(ReferenceBinding alienBase, ReferenceBinding baseBinding, RoleModel[] excludedRoles) {
-		ReferenceBinding currentBase = alienBase;
-		while (currentBase != null) {
-			for (RoleModel explicitRole : excludedRoles) {
-				if (currentBase == explicitRole.getBaseTypeBinding())
-					return false; // covered by a different role
-			}
-			currentBase = currentBase.superclass();
-			if (currentBase == baseBinding) {
-				return true;
-			}
-		}
-		return false;
     }
 
     public void addBoundClassLink(ReferenceBinding subClass, ReferenceBinding superClass) {
@@ -904,4 +851,11 @@ public class TeamModel extends TypeModel {
 		return callinID;
 	}
 // SH}
+	public boolean isAmbiguousBaseclass(ReferenceBinding baseBinding) {
+		for (Pair<ReferenceBinding, ReferenceBinding> pair : this.ambigousLifting) {
+			if (pair.first == baseBinding)
+				return true;
+		}
+		return false;
+	}
 }

@@ -867,15 +867,15 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 		    		}));
 	}
 
+	protected Statement createStatementForAmbiguousBase(AstGenerator gen) {
+		return genLiftingFailedException(BASE, this._boundRootRoleModel.getBinding(), gen);
+	}
+
     /*
 	 * see SwitchOnBaseTypeGenerator.createDefaultStatement(ReferenceBinding,AstGenerator).
 	 */
 	protected Statement createDefaultStatement(ReferenceBinding roleType, AstGenerator gen)
 	{
-// disabled implementation of TPX-487 option (2)
-//		/* 0:  break; // nop */
-//		statements.add (gen.caseStatement(gen.intLiteral(0)));
-//		statements.add (gen.breakStatement());
         /*
          * default:
          *     throw new LiftingFailedException(base, "MyRole");

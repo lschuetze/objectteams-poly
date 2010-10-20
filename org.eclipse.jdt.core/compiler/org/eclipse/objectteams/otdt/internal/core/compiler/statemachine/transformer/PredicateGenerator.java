@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -65,7 +66,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * @version $Id: PredicateGenerator.java 23417 2010-02-03 20:13:55Z stephan $
  */
 public class PredicateGenerator extends SwitchOnBaseTypeGenerator
-		implements IOTConstants
 {
 	/** The role holding the callin binding, we are currently working on. */
 	private ReferenceBinding _currentRole;
@@ -430,6 +430,10 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 		return null;
 	}
 
+	protected Statement createStatementForAmbiguousBase(AstGenerator gen) {
+		return null; // nothing to check - lifting will throw LiftingFailedException
+	}
+
 	/**
 	 * If a team level base predicate exists, this is the default for unmatched base objects.
 	 */
@@ -453,7 +457,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 	 *
 	 * @param mapping   the callin mapping to insert the generated check into.
 	 * @param roleType
-	 * @param argName   name of a variabe holding the callin target
+	 * @param target    expression evaluating to the callin target
 	 * @param bindingArgs argument expressions provided from the callin binding (passed from the callin wrapper)
 	 * @param messageArgs argument expressions as passed to the role method (after lifting/parameter mapping).
 	 * @param gen       for generating the statement
@@ -524,7 +528,8 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 	/**
 	 * @param predicateMethodName
 	 * @param params
-	 * @param roleArgName
+	 * @param target
+	 * @param outer
 	 * @param gen
 	 * @return an if-statement
 	 */
@@ -640,7 +645,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 					outerArgs   = new Expression [] { gen.singleNameReference(BASE) };
 				} else {
 					// non-base type-level guard: need no arg
-					outerParams = TypeBinding.NO_PARAMETERS;
+					outerParams = Binding.NO_PARAMETERS;
 				}
 			}
 			if (outerName == null)

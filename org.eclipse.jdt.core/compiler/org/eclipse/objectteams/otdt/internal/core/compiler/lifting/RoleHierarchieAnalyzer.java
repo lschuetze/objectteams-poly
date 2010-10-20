@@ -60,8 +60,8 @@ public class RoleHierarchieAnalyzer
 	{
 		RoleModelList relevantRoles = getRelevantRoles(role);
         checkInstantiability(relevantRoles);
-        RoleModelList result = foldBaseClasses(relevantRoles);
-		RoleModel[] resultArray = result.toArray();
+    	detectLiftingAmbiguity(relevantRoles);
+		RoleModel[] resultArray = relevantRoles.toArray();
 		role.getTreeObject().setSubRoles(resultArray);
 		return resultArray;
 	}
@@ -156,21 +156,12 @@ public class RoleHierarchieAnalyzer
 	/**
 	 * step 5 of smart lifting algorithm (foldBaseClasses)
 	 * @param roles vector of RoleModels (result of getRelevantRoles())
-	 * @return vector of RoleModels
 	 */
-	private RoleModelList foldBaseClasses(RoleModelList roles)
+	private void detectLiftingAmbiguity(RoleModelList roles)
 	{
 		if ((roles == null) || roles.isEmpty())
-		{
-			return new RoleModelList();
-		}
+			return;
 
-	    return filterAmbiguousBaseRoleBindings(roles);
-	}
-
-    private RoleModelList filterAmbiguousBaseRoleBindings(RoleModelList roles)
-    {
-		RoleModelList  result 		   = new RoleModelList();
 		RoleModelList  rolesToAnalyze = new RoleModelList();
 
 		HashSet<RoleModel> ambiguitySet   = new HashSet<RoleModel>();
@@ -197,13 +188,8 @@ public class RoleHierarchieAnalyzer
         	}
         }
 
-        // there was only one reference on base
-        if (ambiguitySet.size() == 1)
-        {
-        	result.add(role);
-        }
-        else
-        {
+        // there were > 1 references on base
+        if (ambiguitySet.size() > 1) {
         	ReferenceBinding[] commonSupers = getCommonBoundSuperRoles(ambiguitySet.iterator());
         	if (commonSupers.length > 0) {
         		this._problemReporter.potentiallyAmbiguousRoleBinding(this._teamTypeDeclaration, ambiguitySet);
@@ -219,10 +205,8 @@ public class RoleHierarchieAnalyzer
 		// call this very method recursively if there are still roles to analyze
 		if (!rolesToAnalyze.isEmpty())
 		{
-			result.addList(filterAmbiguousBaseRoleBindings(rolesToAnalyze));
+			detectLiftingAmbiguity(rolesToAnalyze);
 		}
-
-		return result;
 	}
 
 	/**
