@@ -1716,6 +1716,8 @@ public void test012b(){
         "      hashCode              missing hashCode() method when overriding equals()\n" + 
         "      hiding               macro for fieldHiding, localHiding, typeHiding and\n" +
         "                           maskedCatchBlock\n" +
+        "      includeAssertNull    raise null warnings for variables\n" + 
+        "                           that got tainted in an assert expression\n" + 
         "      incomplete-switch    same as enumSwitch\n" +
         "      indirectStatic       indirect reference to static member\n" +
 //OT:
@@ -1859,6 +1861,7 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.finallyBlockNotCompletingNormally\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.forbiddenReference\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.includeNullInfoFromAsserts\" value=\"disabled\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.incompatibleNonInheritedInterfaceMethod\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.incompleteEnumSwitch\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.indirectStaticAccess\" value=\"ignore\"/>\n" +
@@ -11186,6 +11189,72 @@ public void test292_warn_options() {
 		"The method toString() of type X should be tagged with @Override since it actually overrides a superclass method\n" +
 		"----------\n" +
 		"3 problems (3 warnings)",
+		true);
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=325342
+// -warn option - regression tests to check option includeAssertNull
+// No null problems arising from asserts should be reported here
+// since includeAssertNull is not enabled
+public void test293_warn_options() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	void foo(Object a, Object b, Object c) {\n" +
+			"		assert a == null;\n " +
+			"		if (a!=null) {\n" +
+			"			System.out.println(\"a is not null\");\n" +
+			"		 } else{\n" +
+			"			System.out.println(\"a is null\");\n" +
+			"		 }\n" +
+			"		a = null;\n" +
+			"		if (a== null) {}\n" +
+			"		assert b != null;\n " +
+			"		if (b!=null) {\n" +
+			"			System.out.println(\"b is not null\");\n" +
+			"		 } else{\n" +
+			"			System.out.println(\"b is null\");\n" +
+			"		 }\n" +
+			"		assert c == null;\n" +
+			"		if (c.equals(a)) {\n" +
+			"			System.out.println(\"\");\n" +
+			"		 } else{\n" +
+			"			System.out.println(\"\");\n" +
+			"		 }\n" +
+			"	}\n" +
+			"	public static void main(String[] args){\n" +
+			"		X test = new X();\n" +
+			"		test.foo(null,null, null);\n" +
+			"	}\n" +
+			"}\n",
+		},
+		"\"" + OUTPUT_DIR +  File.separator + "X.java\""
+		+ " -sourcepath \"" + OUTPUT_DIR + "\""
+		+ " -warn:null,includeAssertNull -1.5 -proc:none -d \"" + OUTPUT_DIR + "\"",
+		"",
+		"----------\n" + 
+		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" + 
+		"	if (a!=null) {\n" + 
+		"	    ^\n" + 
+		"Null comparison always yields false: The variable a can only be null at this location\n" + 
+		"----------\n" + 
+		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 10)\n" + 
+		"	if (a== null) {}\n" + 
+		"	    ^\n" + 
+		"Redundant null check: The variable a can only be null at this location\n" + 
+		"----------\n" + 
+		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 12)\n" + 
+		"	if (b!=null) {\n" + 
+		"	    ^\n" + 
+		"Redundant null check: The variable b cannot be null at this location\n" + 
+		"----------\n" + 
+		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 18)\n" + 
+		"	if (c.equals(a)) {\n" + 
+		"	    ^\n" +  
+		"Null pointer access: The variable c can only be null at this location\n" + 
+		"----------\n" + 
+		"4 problems (4 warnings)", 
 		true);
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=280784
