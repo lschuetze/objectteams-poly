@@ -47,7 +47,7 @@ This software is based on Eclipse and the Java Development Tooling
          id="org.eclipse.jdt.core"
          download-size="4704"
          install-size="4704"
-         version="3.7.0.v_B13a"
+         version="3.7.0.v_B18"
          unpack="false"/>         
 
 </feature>
