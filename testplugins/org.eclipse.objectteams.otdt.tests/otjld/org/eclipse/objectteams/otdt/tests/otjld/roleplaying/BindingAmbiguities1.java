@@ -729,7 +729,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-7
      // see Bug 327334 -  [compiler] generated lift methods fail to detect some lifting ambiguities
-     public void _test731_ambiguousBinding7() {
+     public void test731_ambiguousBinding7() {
         
         runConformTest(
              new String[] {
@@ -848,7 +848,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-8
      // see Bug 327334 -  [compiler] generated lift methods fail to detect some lifting ambiguities
-     public void _test731_ambiguousBinding8() {
+     public void test731_ambiguousBinding8() {
         
         runConformTest(
              new String[] {
@@ -967,7 +967,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // manual addition: subtype T4 (OK) of base T2 which also has an ambiguous sub type T3
      // see Bug 327334 -  [compiler] generated lift methods fail to detect some lifting ambiguities
-     public void _test731_ambiguousBinding9() {
+     public void test731_ambiguousBinding9() {
         
         runConformTest(
              new String[] {
