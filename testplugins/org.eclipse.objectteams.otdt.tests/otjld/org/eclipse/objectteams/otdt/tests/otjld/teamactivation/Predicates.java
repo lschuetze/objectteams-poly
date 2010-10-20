@@ -33,7 +33,7 @@ public class Predicates extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-		TESTS_NAMES = new String[] { "test914_bindingPredicate21"};
+//		TESTS_NAMES = new String[] { "test914_bindingPredicate21"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -301,7 +301,8 @@ public class Predicates extends AbstractOTJLDTest {
     // a role within a nested team has a base predicate (reported by kmeier)
     // 9.1.1-otjld-class-predicate-6
     public void test911_classPredicate6() {
-       
+       Map customOptions = getCompilerOptions();
+       customOptions.put(CompilerOptions.OPTION_ReportUnusedLocal, CompilerOptions.WARNING);
        runConformTest(
             new String[] {
 		"Team911cp6.java",
@@ -341,7 +342,12 @@ public class Predicates extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "OKO");
+            "OKO",
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
     }
 
     // a super role has a binding base guard, a sub role has a base guard at class level
