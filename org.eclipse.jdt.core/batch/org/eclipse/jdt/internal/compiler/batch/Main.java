@@ -3373,12 +3373,7 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			} else if (token.equals("charConcat") /*|| token.equals("noImplicitStringConversion")/*backward compatible*/) {//$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportNoImplicitStringConversion, severity, isEnabling);
 				return;
-			} else if (token.equals("includeAssertNull")) { //$NON-NLS-1$
-				this.options.put(
-						CompilerOptions.OPTION_IncludeNullInfoFromAsserts,
-						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
-				return;
-			} 
+			}
 			break;
 		case 'd' :
 			if (token.equals("deprecation")) { //$NON-NLS-1$
@@ -3474,6 +3469,11 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				return;
 			} else if (token.equals("intfRedundant") /*|| token.equals("redundantSuperinterface")*/) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportRedundantSuperinterface, severity, isEnabling);
+				return;
+			} else if (token.equals("includeAssertNull")) { //$NON-NLS-1$
+				this.options.put(
+						CompilerOptions.OPTION_IncludeNullInfoFromAsserts,
+						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
 //{ObjectTeams:
 			} else if (token.equals("inferredcallout")) { //$NON-NLS-1$
