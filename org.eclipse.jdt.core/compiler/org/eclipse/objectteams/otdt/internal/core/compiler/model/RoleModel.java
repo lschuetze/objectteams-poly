@@ -356,7 +356,7 @@ public class RoleModel extends TypeModel
     /** Get the byte code of this role class.
      *  Must be registered with (maybe)recordByteCode
      */
-    public byte[] getByteCode ()
+    public synchronized byte[] getByteCode ()
     {
         if (this._classByteCode == null) {
         	if (this._classFile == null && this._ast != null)
@@ -415,7 +415,7 @@ public class RoleModel extends TypeModel
     }
 
     @Override
-    public void setClassFilePath(String classFilePath) {
+    public synchronized void setClassFilePath(String classFilePath) {
        	super.setClassFilePath(classFilePath);
        	this._classFile = null; // don't use any more but retrieve using the class file path
        	if (isTeam())
@@ -424,14 +424,14 @@ public class RoleModel extends TypeModel
     /**
      *  Currently unusable, since bytecode may be needed any time again!
      */
-    public void forgetByteCode() {
+    public synchronized void forgetByteCode() {
         this._methodByteCodeOffsets = new HashMap<MethodBinding, Integer>();
         this._classFile           = null;
         this._classByteCode       = null;
         this._constantPoolOffsets = null;
     }
 
-    private void recordClassFile(MethodBinding method, ClassFile file, int offset)
+    private synchronized void recordClassFile(MethodBinding method, ClassFile file, int offset)
     {
         this._methodByteCodeOffsets.put(method, new Integer(offset));
         if (   (this._classFile != null)
@@ -1301,7 +1301,7 @@ public class RoleModel extends TypeModel
 		super.evaluateLateAttributes(state);
 	}
 	
-	public void releaseClassFile() {
+	public synchronized void releaseClassFile() {
 		this._classFile= null;
 	}
 
