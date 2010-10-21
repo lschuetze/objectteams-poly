@@ -114,7 +114,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 	    for (int idx = caseObjects.length-1; idx >= 0; idx--) {
 	        RoleModel object = caseObjects[idx];
 
-	        Statement s = (teamType.getTeamModel().isAmbiguousBaseclass(object.getBaseTypeBinding()))
+	        Statement s = (teamType.getTeamModel().isAmbiguousLifting(staticRoleType, object.getBaseTypeBinding()))
 	        				? createStatementForAmbiguousBase(gen)
 	        				: createCaseStatement(object, gen);
 	        if (object.getBaseTypeBinding().equals(staticBaseType) && idx == 0 && !hasBindingAmbiguity) {

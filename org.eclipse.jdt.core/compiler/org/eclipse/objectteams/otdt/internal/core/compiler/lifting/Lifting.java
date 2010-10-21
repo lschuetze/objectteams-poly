@@ -867,6 +867,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 		    		}));
 	}
 
+	@Override
 	protected Statement createStatementForAmbiguousBase(AstGenerator gen) {
 		return genLiftingFailedException(BASE, this._boundRootRoleModel.getBinding(), gen);
 	}

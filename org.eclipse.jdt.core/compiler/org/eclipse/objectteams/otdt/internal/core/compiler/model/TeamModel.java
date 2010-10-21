@@ -851,9 +851,9 @@ public class TeamModel extends TypeModel {
 		return callinID;
 	}
 // SH}
-	public boolean isAmbiguousBaseclass(ReferenceBinding baseBinding) {
+	public boolean isAmbiguousLifting(ReferenceBinding staticRole, ReferenceBinding baseBinding) {
 		for (Pair<ReferenceBinding, ReferenceBinding> pair : this.ambigousLifting) {
-			if (pair.first == baseBinding)
+			if (pair.first == baseBinding && pair.second == staticRole)
 				return true;
 		}
 		return false;

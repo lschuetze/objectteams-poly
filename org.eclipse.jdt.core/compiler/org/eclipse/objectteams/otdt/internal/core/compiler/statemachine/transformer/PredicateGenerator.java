@@ -430,6 +430,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 		return null;
 	}
 
+	@Override
 	protected Statement createStatementForAmbiguousBase(AstGenerator gen) {
 		return null; // nothing to check - lifting will throw LiftingFailedException
 	}
