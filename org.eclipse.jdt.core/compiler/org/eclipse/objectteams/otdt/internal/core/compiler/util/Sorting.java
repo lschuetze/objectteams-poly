@@ -144,7 +144,7 @@ public class Sorting {
 				// search superclass within input:
 				int j = 0;
 				for(j=0; j<input.length; j++)
-					if (input[j].getBinding() == superclass)
+					if (input[j] != null && input[j].getBinding() == superclass)
 						break;
 				if (j < input.length)
 					// depth first traversal:
