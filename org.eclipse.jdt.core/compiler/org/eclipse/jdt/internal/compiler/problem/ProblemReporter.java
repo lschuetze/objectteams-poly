@@ -20,9 +20,9 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -9271,7 +9271,7 @@ public void roleBoundIsNotRole(TypeReference reference, ReferenceBinding bound) 
 
 }
 
-public void potentiallyAmbiguousRoleBinding(TypeDeclaration teamDecl, HashSet<RoleModel> ambiguousRoles)
+public void potentiallyAmbiguousRoleBinding(TypeDeclaration teamDecl, Set<RoleModel> ambiguousRoles)
 {
 	this.referenceContext = teamDecl;
 

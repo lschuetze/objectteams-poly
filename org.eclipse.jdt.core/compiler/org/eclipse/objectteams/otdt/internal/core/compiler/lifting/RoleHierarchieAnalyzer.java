@@ -21,9 +21,12 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -58,10 +61,10 @@ public class RoleHierarchieAnalyzer
 	 */
 	public RoleModel[] analyze(TreeNode role)
 	{
-		RoleModelList relevantRoles = getRelevantRoles(role);
+		Set<RoleModel> relevantRoles = getRelevantRoles(role);
         checkInstantiability(relevantRoles);
     	detectLiftingAmbiguity(relevantRoles);
-		RoleModel[] resultArray = relevantRoles.toArray();
+		RoleModel[] resultArray = relevantRoles.toArray(new RoleModel[relevantRoles.size()]);
 		role.getTreeObject().setSubRoles(resultArray);
 		return resultArray;
 	}
@@ -71,9 +74,9 @@ public class RoleHierarchieAnalyzer
 	 * @param role the role whose sub-hierarchie is analyzed
 	 * @return vector of RoleTreeObjects
 	 */
-	private RoleModelList getRelevantRoles(TreeNode role)
+	private Set<RoleModel> getRelevantRoles(TreeNode role)
 	{
-		RoleModelList result   = new RoleModelList();
+		HashSet<RoleModel> result   = new HashSet<RoleModel>();
 		TreeNode[] 	  children = role.getChildren();
 		RoleModel     parent   = role.getTreeObject();
 
@@ -85,24 +88,24 @@ public class RoleHierarchieAnalyzer
 			return result;
 		}
 
-        result.add(analyzeBaseTypeBindingOfChildren(children, parent));
+        if (isRelevant(parent, children))
+        	result.add(parent);
 
 		// invoke this very method recursively for every child
 	    for (int idx = 0; idx < children.length; idx++)
         {
-            RoleModelList relevantChildren = getRelevantRoles(children[idx]);
+	    	Set<RoleModel> relevantChildren = getRelevantRoles(children[idx]);
             if (!relevantChildren.isEmpty())
-			    result.addList(relevantChildren);
+			    result.addAll(relevantChildren);
 	    }
 
 		return result;
 	}
 
-	public void checkInstantiability(RoleModelList relevantRoles) {
+	public void checkInstantiability(Set<RoleModel> relevantRoles) {
         TeamModel teamModel = null;
-        int i=0;
-        while (i<relevantRoles.getSize()) {
-            RoleModel role  = relevantRoles.get(i);
+        List<RoleModel> irrelevant = new ArrayList<RoleModel>();
+        for (RoleModel role : relevantRoles) {
             if (teamModel == null)
                 teamModel = role.getTeamModel();
             if (role.getBinding().isAbstract()) {
@@ -121,20 +124,20 @@ public class RoleHierarchieAnalyzer
                         this._problemReporter.abstractRelevantRole(
                                 role.getAst(), teamModel.getBinding());
                 }
-                relevantRoles.remove(i);
-            } else
-                i++;
+                irrelevant.add(role);
+            }
         }
+        relevantRoles.removeAll(irrelevant);
     }
 
 	/**
 	 * analyze whether a role has children with the same "playedBy" relation
-	 * @param children
-	 * @param parent
+	 * @param parent the current role under consideration
+	 * @param children known children of parent
+	 * @return true if the role is relevant for lifting, i.e., has no children which
+	 * 			inherit the playedBy binding unmodified.
 	 */
-    private RoleModel analyzeBaseTypeBindingOfChildren(
-        TreeNode[] children,
-        RoleModel parent)
+    private boolean isRelevant(RoleModel parent, TreeNode[] children)
     {
     	ReferenceBinding parentBaseType = parent.getBaseTypeBinding();
 
@@ -146,45 +149,46 @@ public class RoleHierarchieAnalyzer
             if (child.hasBaseclassProblem())
                 continue;
             if(child.getBaseTypeBinding() == parentBaseType)
-            	return null; // not relevant, child can be used for lifting
+            	return false; // not relevant, child can be used for lifting
         }
     	// if the role has no children with the same "playedBy"
     	// relations, it is relevant
-       	return parent;
+       	return true;
     }
 
 	/**
 	 * step 5 of smart lifting algorithm (foldBaseClasses)
 	 * @param roles vector of RoleModels (result of getRelevantRoles())
 	 */
-	private void detectLiftingAmbiguity(RoleModelList roles)
+	private void detectLiftingAmbiguity(Set<RoleModel> roles)
 	{
 		if ((roles == null) || roles.isEmpty())
 			return;
 
-		RoleModelList  rolesToAnalyze = new RoleModelList();
+		Set<RoleModel> rolesToAnalyze = new HashSet<RoleModel>();
 
-		HashSet<RoleModel> ambiguitySet   = new HashSet<RoleModel>();
+		Set<RoleModel> ambiguitySet   = new HashSet<RoleModel>();
 
-        RoleModel role 	= roles.get(0);
+        Iterator<RoleModel> iterator = roles.iterator();
+		RoleModel role 	= iterator.next();
         ReferenceBinding baseBinding = role.getBaseTypeBinding();
 
         ambiguitySet.add(role);
 
         // filter roles with ambiguous base to role bindings
-        for (int idx = 1; idx < roles.getSize(); idx++)
+        while (iterator.hasNext())
         {
-            RoleModel  otherRole 	  = roles.get(idx);
+            RoleModel  otherRole = iterator.next();
         	ReferenceBinding otherBase = otherRole.getBaseTypeBinding();
 
         	// check whether both roles are bound to the same base
         	if (baseBinding == otherBase)
         	{
-        		ambiguitySet.add(roles.get(idx));
+        		ambiguitySet.add(otherRole);
         	}
         	else
         	{
-        		rolesToAnalyze.add(roles.get(idx));
+        		rolesToAnalyze.add(otherRole);
         	}
         }
 

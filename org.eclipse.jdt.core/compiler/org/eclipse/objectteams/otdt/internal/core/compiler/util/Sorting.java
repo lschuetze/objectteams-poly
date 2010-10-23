@@ -16,6 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.util;
 
+import java.util.Arrays;
+import java.util.Comparator;
+
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
@@ -100,6 +103,28 @@ public class Sorting {
 		int o = 0;
 		for(int i=0; i<len; i++)
 			o = sort(unsorted, i, sorted, o);
+		// also consider the base hierarchy, but for roles bound to
+		// the same base keep the existing order.
+		Arrays.sort(sorted, new Comparator<RoleModel>() {
+			public int compare(RoleModel o1, RoleModel o2) {
+				ReferenceBinding b1 = o1.getBaseTypeBinding();
+				ReferenceBinding b2 = o2.getBaseTypeBinding();
+				if (b1 == b2)
+					return 0;
+				if (b1 != null && b1.id != TypeIds.T_JavaLangObject) {
+					if (b2 == null || b2.id == TypeIds.T_JavaLangObject)
+						return 1;
+					if (b1.isCompatibleWith(b2))
+						return 1;
+					if (b2.isCompatibleWith(b1))
+						return -1;
+				} else {
+					if (b2 != null && b2.id != TypeIds.T_JavaLangObject)
+						return -1;
+				}
+				return 0;
+			}
+		});
 		
 		return sorted;
 	}
