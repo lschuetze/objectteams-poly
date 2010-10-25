@@ -1310,5 +1310,20 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 				resultCollector);
 	}
 
-	
+	public void test323076() throws CoreException {
+		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
+		IJavaProject project= getJavaProject("OTJavaSearch");
+		IType type= project.findType("bug323076.MyTeam");
+		IMethod method = type.getMethod("foo", new String[]{"[QMyBase;"});
+		
+		search( method,
+				REFERENCES,
+				getJavaSearchScopeFromPackages(new String[]{"bug323076"}), 
+				resultCollector);
+		
+		assertSearchResults("Search for references to method with array lifting",
+				"src/bug323076/MyTeam.java void bug323076.MyTeam.test() [foo(new MyBase[]{ new MyBase() })]",
+				resultCollector);
+		
+	}
 }
