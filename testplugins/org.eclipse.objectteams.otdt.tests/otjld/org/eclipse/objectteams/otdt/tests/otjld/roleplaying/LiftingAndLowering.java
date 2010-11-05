@@ -2318,7 +2318,39 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
             },
             "OK");
     }
-
+    // Bug 329374 -  Implicit Lowering of a Role Array as return results in compiler error
+    public void test2212_arrayLoweringToBaseclass8() {
+        
+        runConformTest(
+                new String[] {
+            "T2212altb8Main.java",
+            		"public class T2212altb8Main {\n"+
+            		"    public static void main(String[] args){\n"+
+            		"        Team2212altb8 t = new Team2212altb8();\n"+
+            		"        T2212altb8_2 b = new T2212altb8_2();\n"+
+            		"        T2212altb8_1[] as = t.getAs(b);\n"+
+            		"    }\n" +
+            		"}\n",
+            "T2212altb8_1.java",
+            		"public class T2212altb8_1 {}\n",
+            "T2212altb8_2.java",
+                	"public class T2212altb8_2 {}\n",
+            "Team2212altb8.java",
+            		"public team class Team2212altb8 {\n" +
+            		"	 protected class RoleA playedBy T2212altb8_1 {\n" +
+            		"    }\n" +
+            		"    protected class RoleB playedBy T2212altb8_2 {\n" +
+            		"        protected RoleA[] getAs(){\n" +
+            		"            return new RoleA[0];\n" +
+            		"        }\n" +
+            		"    }\n" +
+            		"    public RoleA[] getAs(T2212altb8_2 as RoleB rb) {\n" +
+            		"        return rb.getAs();\n" +
+            		"    }\n" +
+            		"}\n"
+                });
+    }
+    
     // lowering of a role object array for the same base objects produces the an equal object array
     // 2.2.14-otjld-array-lowering-produces-equal-object-1
     public void test2214_arrayLoweringProducesEqualObject1() {
