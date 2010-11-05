@@ -50,12 +50,11 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lowering;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
- * MIGRATION_STATE: Eclipse 3.2.
- *
  * This visitor descends a block scope and checks where type compatibility
  * for role types can only be achieved by explicit adjustment.
  * Supports:
@@ -294,12 +293,31 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
 				                        expectedType,
 										CastExpression.NEED_CLASS);
 	            }
-	            else if (Config.getLoweringRequired()) {
+	            else if (Config.getLoweringRequired()) { // casts to ReferenceBinding below are safe
 	            	if (this.disallowLower) {
 	            		if (!isGeneratedCodeLoweringConfined(scope, expr.resolvedType, expectedType))
 	            			scope.problemReporter().illegalImplicitLower(expr, expectedType, expr.resolvedType);
 	            	} else {
-	            		newExpr = new Lowering().lowerExpression(scope, expr, expr.resolvedType, expectedType, null/*teamExpression*/, true); // not enough context to provide teamExpr
+	            		Expression teamExpression = null;
+	            		if (expectedType.isArrayType()) {
+	            			// https://bugs.eclipse.org/329374 - Implicit Lowering of a Role Array as return results in compiler error
+	            			// need a teamExpression to invoke translation method!
+	            			ReferenceBinding resolvedLeafType = (ReferenceBinding) expr.resolvedType.leafComponentType();
+	            			ReferenceBinding resolvedTeam = resolvedLeafType.enclosingType();
+	            			ReferenceBinding currentType = scope.enclosingReceiverType();
+	            			while (currentType != null && currentType != resolvedTeam)
+	            				currentType = currentType.enclosingType();
+	            			if (currentType == null || RoleTypeBinding.isRoleWithExplicitAnchor(resolvedLeafType)) {
+	            				// resolved type is not a role of an enclosing team
+	            				if (expr instanceof MessageSend) {
+	            					Expression receiver = ((MessageSend) expr).receiver;
+	            					if (TeamModel.isTeamContainingRole((ReferenceBinding) receiver.resolvedType, resolvedLeafType)) {
+	            						teamExpression = receiver;
+	            					}
+	            				}
+	            			}
+	            		}
+	            		newExpr = new Lowering().lowerExpression(scope, expr, expr.resolvedType, expectedType, teamExpression, true);
 	            	}
 	            }
             } finally {
