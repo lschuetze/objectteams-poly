@@ -43,7 +43,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 
 	/**
 	 * Returns structural property descriptor for the "bodyDeclarations" property
-	 * of this node.
+	 * of this node (element type: {@link BodyDeclaration}).
 	 *
 	 * @return the property descriptor
 	 */
@@ -51,7 +51,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 
 	/**
 	 * Returns structural property descriptor for the "bodyDeclarations" property
-	 * of this node.
+	 * of this node (element type: {@link BodyDeclaration}).
 	 *
 	 * @return the property descriptor
 	 * @since 3.1
@@ -62,7 +62,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 
 	/**
 	 * Returns structural property descriptor for the "name" property
-	 * of this node.
+	 * of this node (child type: {@link SimpleName}).
 	 *
 	 * @return the property descriptor
 	 */
@@ -70,7 +70,7 @@ public abstract class AbstractTypeDeclaration extends BodyDeclaration {
 
 	/**
 	 * Returns structural property descriptor for the "name" property
-	 * of this node.
+	 * of this node (child type: {@link SimpleName}).
 	 *
 	 * @return the property descriptor
 	 * @since 3.1

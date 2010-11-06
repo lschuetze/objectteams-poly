@@ -3793,7 +3793,7 @@ public class Scribe implements IJavaDocTagConstants {
 						newLineString = this.tempBuffer.toString();
 					}
 					addReplaceEdit(end+1, this.scanner.getCurrentTokenEndPosition(), newLineString);
-					textLineStart++;
+					textLineStart = Util.getLineNumber(this.scanner.currentPosition-1, this.lineEnds, textLineStart, this.maxLines);
 				}
 			}
 		}
@@ -3982,9 +3982,6 @@ public class Scribe implements IJavaDocTagConstants {
 
 		// Compute indentation if necessary
 		boolean clearBlankLines = this.formatter.preferences.comment_clear_blank_lines_in_javadoc_comment;
-		boolean headerLine = block.isHeaderLine() && this.lastNumberOfNewLines == 0;
-		int firstColumn = 1 + this.indentationLevel + BLOCK_LINE_PREFIX_LENGTH;
-		if (headerLine) firstColumn++;
 
 		// Local variables init
 		int textStart = text.sourceStart;

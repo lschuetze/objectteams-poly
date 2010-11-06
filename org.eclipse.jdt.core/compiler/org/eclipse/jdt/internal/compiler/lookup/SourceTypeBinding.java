@@ -256,8 +256,10 @@ public FieldBinding addSyntheticFieldForInnerclass(LocalVariableBinding actualOu
 		FieldBinding existingField;
 		if ((existingField = getField(synthField.name, true /*resolve*/)) != null) {
 			TypeDeclaration typeDecl = this.scope.referenceContext;
-			for (int i = 0, max = typeDecl.fields.length; i < max; i++) {
-				FieldDeclaration fieldDecl = typeDecl.fields[i];
+			FieldDeclaration[] fieldDeclarations = typeDecl.fields;
+			int max = fieldDeclarations == null ? 0 : fieldDeclarations.length;
+			for (int i = 0; i < max; i++) {
+				FieldDeclaration fieldDecl = fieldDeclarations[i];
 				if (fieldDecl.binding == existingField) {
 					synthField.name = CharOperation.concat(
 						TypeConstants.SYNTHETIC_OUTER_LOCAL_PREFIX,
@@ -313,8 +315,10 @@ public FieldBinding addSyntheticFieldForInnerclass(ReferenceBinding enclosingTyp
 		FieldBinding existingField;
 		if ((existingField = getField(synthField.name, true /*resolve*/)) != null) {
 			TypeDeclaration typeDecl = this.scope.referenceContext;
-			for (int i = 0, max = typeDecl.fields.length; i < max; i++) {
-				FieldDeclaration fieldDecl = typeDecl.fields[i];
+			FieldDeclaration[] fieldDeclarations = typeDecl.fields;
+			int max = fieldDeclarations == null ? 0 : fieldDeclarations.length;
+			for (int i = 0; i < max; i++) {
+				FieldDeclaration fieldDecl = fieldDeclarations[i];
 				if (fieldDecl.binding == existingField) {
 					if (this.scope.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_5) {
 						synthField.name = CharOperation.concat(
@@ -413,8 +417,10 @@ public FieldBinding addSyntheticFieldForClassLiteral(TypeBinding targetType, Blo
 	FieldBinding existingField;
 	if ((existingField = getField(synthField.name, true /*resolve*/)) != null) {
 		TypeDeclaration typeDecl = blockScope.referenceType();
-		for (int i = 0, max = typeDecl.fields.length; i < max; i++) {
-			FieldDeclaration fieldDecl = typeDecl.fields[i];
+		FieldDeclaration[] typeDeclarationFields = typeDecl.fields;
+		int max = typeDeclarationFields == null ? 0 : typeDeclarationFields.length;
+		for (int i = 0; i < max; i++) {
+			FieldDeclaration fieldDecl = typeDeclarationFields[i];
 			if (fieldDecl.binding == existingField) {
 				blockScope.problemReporter().duplicateFieldInType(this, fieldDecl);
 				break;
@@ -452,7 +458,8 @@ public FieldBinding addSyntheticFieldForAssert(BlockScope blockScope) {
 		FieldBinding existingField;
 		if ((existingField = getField(synthField.name, true /*resolve*/)) != null) {
 			TypeDeclaration typeDecl = this.scope.referenceContext;
-			for (int i = 0, max = typeDecl.fields.length; i < max; i++) {
+			int max = (typeDecl.fields == null) ? 0 : typeDecl.fields.length;
+			for (int i = 0; i < max; i++) {
 				FieldDeclaration fieldDecl = typeDecl.fields[i];
 				if (fieldDecl.binding == existingField) {
 					synthField.name = CharOperation.concat(
@@ -495,8 +502,10 @@ public FieldBinding addSyntheticFieldForEnumValues() {
 		FieldBinding existingField;
 		if ((existingField = getField(synthField.name, true /*resolve*/)) != null) {
 			TypeDeclaration typeDecl = this.scope.referenceContext;
-			for (int i = 0, max = typeDecl.fields.length; i < max; i++) {
-				FieldDeclaration fieldDecl = typeDecl.fields[i];
+			FieldDeclaration[] fieldDeclarations = typeDecl.fields;
+			int max = fieldDeclarations == null ? 0 : fieldDeclarations.length;
+			for (int i = 0; i < max; i++) {
+				FieldDeclaration fieldDecl = fieldDeclarations[i];
 				if (fieldDecl.binding == existingField) {
 					synthField.name = CharOperation.concat(
 						TypeConstants.SYNTHETIC_ENUM_VALUES,
@@ -650,8 +659,10 @@ public SyntheticFieldBinding addSyntheticFieldForSwitchEnum(char[] fieldName, St
 		FieldBinding existingField;
 		if ((existingField = getField(synthField.name, true /*resolve*/)) != null) {
 			TypeDeclaration typeDecl = this.scope.referenceContext;
-			for (int i = 0, max = typeDecl.fields.length; i < max; i++) {
-				FieldDeclaration fieldDecl = typeDecl.fields[i];
+			FieldDeclaration[] fieldDeclarations = typeDecl.fields;
+			int max = fieldDeclarations == null ? 0 : fieldDeclarations.length;
+			for (int i = 0; i < max; i++) {
+				FieldDeclaration fieldDecl = fieldDeclarations[i];
 				if (fieldDecl.binding == existingField) {
 					synthField.name = CharOperation.concat(
 						fieldName,
@@ -1814,7 +1825,8 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 	if (hasRestrictedAccess())
 		field.modifiers |= ExtraCompilerModifiers.AccRestrictedAccess;
 	FieldDeclaration[] fieldDecls = this.scope.referenceContext.fields;
-	for (int f = 0, length = fieldDecls.length; f < length; f++) {
+	int length = fieldDecls == null ? 0 : fieldDecls.length;
+	for (int f = 0; f < length; f++) {
 		if (fieldDecls[f].binding != field)
 			continue;
 

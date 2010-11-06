@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 185682 - Increment/decrement operators mark local variables as read
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -341,6 +342,8 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 
 public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeStream, Expression expression, int operator, int assignmentImplicitConversion, boolean valueRequired) {
 	boolean isStatic;
+	// check if compound assignment is the only usage of a private field
+	reportOnlyUselesslyReadPrivateField(currentScope, this.binding, valueRequired);
 	FieldBinding codegenBinding = this.binding.original();
 	this.receiver.generateCode(currentScope, codeStream, !(isStatic = codegenBinding.isStatic()));
 	if (isStatic) {
@@ -388,6 +391,8 @@ public void generateCompoundAssignment(BlockScope currentScope, CodeStream codeS
 
 public void generatePostIncrement(BlockScope currentScope, CodeStream codeStream, CompoundAssignment postIncrement, boolean valueRequired) {
 	boolean isStatic;
+	// check if postIncrement is the only usage of a private field
+	reportOnlyUselesslyReadPrivateField(currentScope, this.binding, valueRequired);
 	FieldBinding codegenBinding = this.binding.original();
 	this.receiver.generateCode(currentScope, codeStream, !(isStatic = codegenBinding.isStatic()));
 	if (isStatic) {
@@ -702,7 +707,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	if (this.actualReceiverType != oldReceiverType && this.receiver.postConversionType(scope) != this.actualReceiverType) { // record need for explicit cast at codegen since receiver could not handle it
 		this.bits |= NeedReceiverGenericCast;
 	}
-	if (isFieldUseDeprecated(fieldBinding, scope, (this.bits & ASTNode.IsStrictlyAssigned) !=0)) {
+	if (isFieldUseDeprecated(fieldBinding, scope, this.bits)) {
 		scope.problemReporter().deprecatedField(fieldBinding, this);
 	}
 	boolean isImplicitThisRcv = this.receiver.isImplicitThis();

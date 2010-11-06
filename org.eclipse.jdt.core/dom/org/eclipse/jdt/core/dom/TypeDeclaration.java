@@ -72,21 +72,21 @@ import java.util.List;
 public class TypeDeclaration extends AbstractTypeDeclaration {
 
 	/**
-	 * The "javadoc" structural property of this node type.
+	 * The "javadoc" structural property of this node type (child type: {@link Javadoc}).
 	 * @since 3.0
 	 */
 	public static final ChildPropertyDescriptor JAVADOC_PROPERTY =
 		internalJavadocPropertyFactory(TypeDeclaration.class);
 
 	/**
-	 * The "modifiers" structural property of this node type (JLS2 API only).
+	 * The "modifiers" structural property of this node type (type: {@link Integer}) (JLS2 API only).
 	 * @since 3.0
 	 */
 	public static final SimplePropertyDescriptor MODIFIERS_PROPERTY =
 		internalModifiersPropertyFactory(TypeDeclaration.class);
 
 	/**
-	 * The "modifiers" structural property of this node type (added in JLS3 API).
+	 * The "modifiers" structural property of this node type (element type: {@link IExtendedModifier}) (added in JLS3 API).
 	 * @since 3.1
 	 */
 	public static final ChildListPropertyDescriptor MODIFIERS2_PROPERTY =
@@ -127,7 +127,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 //gbr+SH}
 
 	/**
-	 * The "name" structural property of this node type.
+	 * The "name" structural property of this node type (child type: {@link SimpleName}).
 	 * @since 3.0
 	 */
 	public static final ChildPropertyDescriptor NAME_PROPERTY =
@@ -169,7 +169,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 		new ChildListPropertyDescriptor(TypeDeclaration.class, "typeParameters", TypeParameter.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
-	 * The "bodyDeclarations" structural property of this node type (added in JLS3 API).
+	 * The "bodyDeclarations" structural property of this node type (element type: {@link BodyDeclaration}) (added in JLS3 API).
 	 * @since 3.0
 	 */
 	public static final ChildListPropertyDescriptor BODY_DECLARATIONS_PROPERTY =

@@ -7308,21 +7308,14 @@ public final class CompletionEngine
 
 		boolean foundSomeFields = false;
 
-		boolean staticsOnly = false;
 		Scope currentScope = scope;
 
 		done : while (true) { // done when a COMPILATION_UNIT_SCOPE is found
 
 			switch (currentScope.kind) {
 
-				case Scope.METHOD_SCOPE :
-					// handle the error case inside an explicit constructor call (see MethodScope>>findField)
-					MethodScope methodScope = (MethodScope) currentScope;
-					staticsOnly |= methodScope.isStatic | methodScope.isConstructorCall;
-					break;
 				case Scope.CLASS_SCOPE :
 					ClassScope classScope = (ClassScope) currentScope;
-					SourceTypeBinding enclosingType = classScope.referenceContext.binding;
 					if(!insideTypeAnnotation) {
 
 						FieldDeclaration[] fields = classScope.referenceContext.fields;
@@ -7344,7 +7337,6 @@ public final class CompletionEngine
 							}
 						}
 					}
-					staticsOnly |= enclosingType.isStatic();
 					insideTypeAnnotation = false;
 					break;
 				case Scope.COMPILATION_UNIT_SCOPE :
@@ -7362,21 +7354,14 @@ public final class CompletionEngine
 		InvocationSite invocationSite,
 		boolean insideTypeAnnotation) {
 
-		boolean staticsOnly = false;
 		Scope currentScope = scope;
 
 		done : while (true) { // done when a COMPILATION_UNIT_SCOPE is found
 
 			switch (currentScope.kind) {
 
-				case Scope.METHOD_SCOPE :
-					// handle the error case inside an explicit constructor call (see MethodScope>>findField)
-					MethodScope methodScope = (MethodScope) currentScope;
-					staticsOnly |= methodScope.isStatic | methodScope.isConstructorCall;
-					break;
 				case Scope.CLASS_SCOPE :
 					ClassScope classScope = (ClassScope) currentScope;
-					SourceTypeBinding enclosingType = classScope.referenceContext.binding;
 					if(!insideTypeAnnotation) {
 
 						AbstractMethodDeclaration[] methods = classScope.referenceContext.methods;
@@ -7430,7 +7415,6 @@ public final class CompletionEngine
 							}
 						}
 					}
-					staticsOnly |= enclosingType.isStatic();
 					insideTypeAnnotation = false;
 					break;
 				case Scope.COMPILATION_UNIT_SCOPE :
