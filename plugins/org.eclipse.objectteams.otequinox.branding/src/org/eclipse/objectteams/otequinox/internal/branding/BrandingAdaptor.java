@@ -25,7 +25,6 @@ import java.util.HashSet;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.otequinox.branding.Activator;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.ui.internal.WorkbenchMessages;
 
 import base org.eclipse.ui.internal.about.AboutBundleData;
 import base org.eclipse.ui.internal.about.AboutPluginsPage.BundleTableLabelProvider;
@@ -34,7 +33,6 @@ import base org.eclipse.ui.internal.about.AboutPluginsPage.BundleTableLabelProvi
  * This aspect adapts the branding of the Eclipse workbench by
  * - adapting the about plug-ins dialog, displaying as a self-application
  *   which plug-ins have been adapted by an OT/J aspect.
- * - changing the startup message "Loading Workbench" to a OT-specific one.
  * 
  * @author stephan
  * @version $Id:AboutAdaptor.java 15202 2007-01-28 11:30:50Z stephan $
