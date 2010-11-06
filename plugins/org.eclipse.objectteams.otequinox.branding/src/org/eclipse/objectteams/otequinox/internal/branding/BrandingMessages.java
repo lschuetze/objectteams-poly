@@ -20,7 +20,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class BrandingMessages extends NLS {
 	private static final String BUNDLE_NAME = BrandingMessages.class.getName();
-	public static String BrandingAdaptor_Loading_Workbench;
 
 	public static String BrandingAdaptor_OT_adapted_by;
 	static {

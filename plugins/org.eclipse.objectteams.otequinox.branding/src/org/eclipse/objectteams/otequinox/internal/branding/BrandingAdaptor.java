@@ -43,8 +43,8 @@ import base org.eclipse.ui.internal.about.AboutPluginsPage.BundleTableLabelProvi
 public team class BrandingAdaptor 
 {
 	public BrandingAdaptor() {
-		WorkbenchMessages.Startup_Loading_Workbench = BrandingMessages.BrandingAdaptor_Loading_Workbench;
 	}
+
 	/** Append OT-adaptations to the version number of any adapted bundle. */
 	protected class AboutBundleAdaptor playedBy AboutBundleData 
 		base when (isAdaptedBaseBundle(base))
