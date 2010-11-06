@@ -4589,7 +4589,7 @@ public void testGenericAPIUsageFromA14Project() throws CoreException {
 			"1. WARNING in /Reconciler1415/src/p1/X.java (at line 5)\n" + 
 			"	String s = (String) context.getService(string); \n" + 
 			"	       ^\n" + 
-			"The local variable s is never read\n" + 
+			"The value of the local variable s is not used\n" + 
 			"----------\n"
 		);
 	} finally {
@@ -4656,7 +4656,7 @@ public void testGenericAPIUsageFromA14Project2() throws CoreException {
 			"1. WARNING in /Reconciler1415/src/p1/X.java (at line 5)\n" + 
 			"	String s = (String) context.getService(string); \n" + 
 			"	       ^\n" + 
-			"The local variable s is never read\n" + 
+			"The value of the local variable s is not used\n" + 
 			"----------\n"
 		);
 	} finally {
@@ -4763,7 +4763,7 @@ public void testGenericAPIUsageFromA14Project3() throws CoreException {
 			"1. WARNING in /Reconciler1415/src/p1/X.java (at line 5)\n" + 
 			"	Collection c = p2.X.getX(); \n" + 
 			"	           ^\n" + 
-			"The local variable c is never read\n" + 
+			"The value of the local variable c is not used\n" + 
 			"----------\n"
 		);
 	} finally {
@@ -4831,7 +4831,7 @@ public void testGenericAPIUsageFromA14Project4() throws CoreException {
 			"1. WARNING in /Reconciler15API/src/p2/X.java (at line 3)\n" + 
 			"	private p1.X x = p1.X.getX();\n" + 
 			"	             ^\n" + 
-			"The field X.x is never read locally\n" + 
+			"The value of the field X.x is not used\n" + 
 			"----------\n"
 		);
 	} finally {
@@ -4900,7 +4900,7 @@ public void testGenericAPIUsageFromA14Project5() throws CoreException {
 			"1. WARNING in /Reconciler1415/src/p1/X.java (at line 5)\n" + 
 			"	private List [] l2 = List.getBackArray(l);\n" + 
 			"	                ^^\n" + 
-			"The field X.l2 is never read locally\n" + 
+			"The value of the field X.l2 is not used\n" + 
 			"----------\n"
 		);
 	} finally {
