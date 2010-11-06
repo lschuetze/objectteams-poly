@@ -40,10 +40,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
  * @version $Id: HookConfigurator.java 23461 2010-02-04 22:10:39Z stephan $
  */
 public class HookConfigurator implements org.eclipse.osgi.baseadaptor.HookConfigurator {
-
 	
-	private static final String OTDT_BUILD_ID = "OT-0.7.1"; //$NON-NLS-1$
-	private static final String ECLIPSE_BUILD_ID = "eclipse.buildId"; //$NON-NLS-1$
 	/** Has OT/Equinox been enabled (using system property ot.equinox set to anything but "false")? */
 	public static final boolean OT_EQUINOX_ENABLED;
 
@@ -68,24 +65,10 @@ public class HookConfigurator implements org.eclipse.osgi.baseadaptor.HookConfig
 		return instance.logger;
 	}
 	
-	private void updateBuildID() {
-		String eclipseBuild = System.getProperty(ECLIPSE_BUILD_ID);
-		if (eclipseBuild == null) {
-			eclipseBuild = OTDT_BUILD_ID;
-		} else {
-			int pos = eclipseBuild.indexOf('-', 8);
-			if (pos > 0)
-				eclipseBuild = eclipseBuild.substring(0, pos);
-			eclipseBuild = eclipseBuild+"."+OTDT_BUILD_ID; //$NON-NLS-1$
-		}
-		System.setProperty(ECLIPSE_BUILD_ID, eclipseBuild);
-	}
-	
 	public void addHooks(org.eclipse.osgi.baseadaptor.HookRegistry hookRegistry) {
 		if (!OT_EQUINOX_ENABLED)
 			return;
 		this.logger = new Logger(hookRegistry.getAdaptor().getFrameworkLog());
-		updateBuildID();
 		TransformerHook transformerHook = new TransformerHook(hookRegistry.getAdaptor());
 		// this instance observes
 		hookRegistry.addClassLoadingHook(transformerHook);
