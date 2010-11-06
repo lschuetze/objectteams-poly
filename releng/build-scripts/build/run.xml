@@ -96,6 +96,7 @@ should test be run (true|false)?
 	<target name="INFO">
 		<echo>Usage:
 	ant -f run.xml ot-junit-all   ->    runs OTDT Build and Testprocess
+	ant -f run.xml ot-junit-otdt  ->    runs OTDT Build and Testprocess excluding jdt tests
 	ant -f run.xml ot-junit-build ->    runs just OTDT Buildprocess
 	ant -f run.xml ot-junit-run   ->    runs just OTDT Tests w/o TestSetup
 	</echo>
@@ -106,6 +107,13 @@ should test be run (true|false)?
 		<antcall target="verifyAntInstall"/>
 		<antcall target="setupTests" />
 		<antcall target="runAllTests"/>
+	</target>
+
+	<target name="ot-junit-otdt" depends="setupProperties,checkOS" description="Build all and run otdt  tests.">
+		<echo message="Starting BuildProcess and Testrun in ${build.root.dir}"/>
+		<antcall target="verifyAntInstall"/>
+		<antcall target="setupTests" />
+		<antcall target="runOTDTTests"/>
 	</target>
 
 	<target name="ot-junit-build" depends="setupProperties,checkOS" description="build everything without running tests">
@@ -322,6 +330,20 @@ should test be run (true|false)?
 
 	<target name="runAllTests" description="Delegate to the next level script to perform the actual testing.">
 		<ant antfile="${OTScriptDir}/test.xml" target="all" dir="${build.root.dir}">
+			<property name="os" value="${os}" />
+			<property name="ws" value="${ws}" />
+			<property name="arch" value="${arch}" />
+			<property name="baseos" value="${os}" />
+			<property name="basews" value="${ws}" />
+			<property name="basearch" value="${arch}" />
+			<property name="otdtUpdatesDir" value="${otdtUpdatesDir}" />
+			<property name="testsUpdatesDirBase" value="${testsUpdatesDirBase}" />
+			<property name="vmargs" value="${vmargs}" />
+		</ant>
+	</target>
+
+	<target name="runOTDTTests" description="Delegate to the next level script to perform the actual testing.">
+		<ant antfile="${OTScriptDir}/test.xml" target="otdt-tests" dir="${build.root.dir}">
 			<property name="os" value="${os}" />
 			<property name="ws" value="${ws}" />
 			<property name="arch" value="${arch}" />

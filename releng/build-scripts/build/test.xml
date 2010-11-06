@@ -166,6 +166,26 @@
                 <!-- antcall target="otdt_metrics_tests" / -->
 	  <!--/parallel-->
 	</target>
+
+	<target name="otdt-tests">
+<!-- enable if we want to debug otre/otequinox:
+<property name="extraVMargs" value="-Dot.dump=1 -Dotequinox.debug=OK" />
+-->
+      <!-- debug tests don't like parallelization -->
+      <antcall target="otdt_debug_tests" />
+	  <!--parallel threadCount="2"-->
+                <!-- "slow", ui tests come first -->
+                <antcall target="otdt_ui_tests" />
+                <antcall target="otdt_ref_tests" />
+                <antcall target="otdt_dom_tests" />
+                <antcall target="otdt_tests" />
+       		<antcall target="jdt_builder_tests" />
+                <antcall target="jdtcore_compiler_tests" />
+                <antcall target="jdtcore_model_tests" />
+                <antcall target="otdt_builder_tests" />
+                <!-- antcall target="otdt_metrics_tests" / -->
+	  <!--/parallel-->
+	</target>
 	
 	<target name="onlyone">
 		<antcall target="otdt_ui_tests" />
