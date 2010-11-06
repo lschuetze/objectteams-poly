@@ -27,10 +27,13 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
+import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ImportBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
@@ -338,6 +341,18 @@ public void finalizeProblems() {
 				if (annotation == null) continue; // implicit annotation
 				IrritantSet irritants = this.suppressWarningIrritants[iSuppress];
 				if (unusedWarningTokenIsWarning && irritants.areAllSet()) continue; // @SuppressWarnings("all") also suppresses unused warning token
+//{ObjectTeams: don't report unused suppress against copy-inherited member:
+				switch (annotation.recipient.kind()) {
+					case Binding.METHOD:
+						if (((MethodBinding)annotation.recipient).copyInheritanceSrc != null)
+							continue;
+						break;
+					case Binding.FIELD:
+						if (((FieldBinding)annotation.recipient).copyInheritanceSrc != null)
+							continue;
+						break;
+				}
+// SH}
 				if (irritants != foundIrritants[iSuppress]) { // mismatch, some warning tokens were unused
 					MemberValuePair[] pairs = annotation.memberValuePairs();
 					pairLoop: for (int iPair = 0, pairCount = pairs.length; iPair < pairCount; iPair++) {
