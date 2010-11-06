@@ -10,6 +10,7 @@
  *     Benjamin Muskalla - Contribution for bug 239066
  *     Stephan Herrmann  - Contribution for bug 236385
  *     Stephan Herrmann  - Contribution for bug 295551
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 185682 - Increment/decrement operators mark local variables as read
  *     Technical University Berlin - adapted for Object Teams
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
@@ -2943,7 +2944,7 @@ public void test032(){
 	        "7. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/Z.java (at line 58)\n" +
 	        "	final XX<?, XY> l1 = (XX<?, XY>) i.getKey();\n" +
 	        "	                ^^\n" +
-	        "The local variable l1 is never read\n" +
+	        "The value of the local variable l1 is not used\n" +
 	        "----------\n" +
 	        "8. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/Z.java (at line 58)\n" +
 	        "	final XX<?, XY> l1 = (XX<?, XY>) i.getKey();\n" +
@@ -3123,7 +3124,7 @@ public void test032(){
         "7. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/Z.java (at line 58)\n" +
         "	final XX<?, XY> l1 = (XX<?, XY>) i.getKey();\n" +
         "	                ^^\n" +
-        "The local variable l1 is never read\n" +
+        "The value of the local variable l1 is not used\n" +
         "----------\n" +
         "8. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/Z.java (at line 58)\n" +
         "	final XX<?, XY> l1 = (XX<?, XY>) i.getKey();\n" +
@@ -6292,7 +6293,7 @@ public void test153_warn_options() {
 		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	String u;\n" +
 		"	       ^\n" +
-		"The local variable u is never read\n" +
+		"The value of the local variable u is not used\n" +
 		"----------\n" +
 		"2 problems (2 warnings)",
 		true);
@@ -6379,7 +6380,7 @@ public void test156_warn_options() {
 		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	String u;\n" +
 		"	       ^\n" +
-		"The local variable u is never read\n" +
+		"The value of the local variable u is not used\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
 		true);
@@ -6411,7 +6412,7 @@ public void test157_warn_options() {
 		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	String u;\n" +
 		"	       ^\n" +
-		"The local variable u is never read\n" +
+		"The value of the local variable u is not used\n" +
 		"----------\n" +
 		"2 problems (2 warnings)",
 		true);
@@ -6438,7 +6439,7 @@ public void test158_warn_options() {
 		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	String u;\n" +
 		"	       ^\n" +
-		"The local variable u is never read\n" +
+		"The value of the local variable u is not used\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
 		true);
@@ -6464,7 +6465,7 @@ public void test159_warn_options() {
 		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	String u;\n" +
 		"	       ^\n" +
-		"The local variable u is never read\n" +
+		"The value of the local variable u is not used\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
 		true);
@@ -6495,7 +6496,7 @@ public void test160_warn_options() {
 		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	String u;\n" +
 		"	       ^\n" +
-		"The local variable u is never read\n" +
+		"The value of the local variable u is not used\n" +
 		"----------\n" +
 		"2 problems (2 warnings)",
 		true);
@@ -6527,7 +6528,7 @@ public void test161_warn_options() {
 		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	String u;\n" +
 		"	       ^\n" +
-		"The local variable u is never read\n" +
+		"The value of the local variable u is not used\n" +
 		"----------\n" +
 		"2 problems (2 warnings)",
 		true);
@@ -7628,7 +7629,7 @@ public void test190_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" +
 		"	int j;\n" +
 		"	    ^\n" +
-		"The local variable j is never read\n" +
+		"The value of the local variable j is not used\n" +
 		"----------\n" +
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	this.<String>bar();\n" +
@@ -7691,7 +7692,7 @@ public void test191_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
 		"	                     ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
@@ -7701,7 +7702,7 @@ public void test191_warn_options() {
 		"5. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" +
 		"	int j;\n" +
 		"	    ^\n" +
-		"The local variable j is never read\n" +
+		"The value of the local variable j is not used\n" +
 		"----------\n" +
 		"6. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	this.<String>bar();\n" +
@@ -7746,7 +7747,7 @@ public void test192_warn_options() {
 		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
 		"	                     ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
 		true);
@@ -7851,7 +7852,7 @@ public void test195_warn_options() {
 		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" +
 		"	int j;\n" +
 		"	    ^\n" +
-		"The local variable j is never read\n" +
+		"The value of the local variable j is not used\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
 		true);
@@ -8006,7 +8007,7 @@ public void test199_warn_options() {
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" +
 		"	int j;\n" +
 		"	    ^\n" +
-		"The local variable j is never read\n" +
+		"The value of the local variable j is not used\n" +
 		"----------\n" +
 		"5. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	this.<String>bar();\n" +
@@ -8056,7 +8057,7 @@ public void test200_warn_options() {
 		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
 		"	                     ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
@@ -8066,7 +8067,7 @@ public void test200_warn_options() {
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" +
 		"	int j;\n" +
 		"	    ^\n" +
-		"The local variable j is never read\n" +
+		"The value of the local variable j is not used\n" +
 		"----------\n" +
 		"5. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	this.<String>bar();\n" +
@@ -8121,7 +8122,7 @@ public void test201_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
 		"	                     ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
@@ -8131,7 +8132,7 @@ public void test201_warn_options() {
 		"5. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" +
 		"	int j;\n" +
 		"	    ^\n" +
-		"The local variable j is never read\n" +
+		"The value of the local variable j is not used\n" +
 		"----------\n" +
 		"6. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	this.<String>bar();\n" +
@@ -8181,7 +8182,7 @@ public void test202_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
 		"	                     ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
@@ -8236,7 +8237,7 @@ public void test203_warn_options() {
 		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
 		"	                     ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
@@ -8246,7 +8247,7 @@ public void test203_warn_options() {
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" +
 		"	int j;\n" +
 		"	    ^\n" +
-		"The local variable j is never read\n" +
+		"The value of the local variable j is not used\n" +
 		"----------\n" +
 		"5. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	this.<String>bar();\n" +
@@ -8301,12 +8302,12 @@ public void test204_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
 		"	                     ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" +
 		"	int j;\n" +
 		"	    ^\n" +
-		"The local variable j is never read\n" +
+		"The value of the local variable j is not used\n" +
 		"----------\n" +
 		"5. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	this.<String>bar();\n" +
@@ -8361,7 +8362,7 @@ public void test205_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
 		"	                     ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" +
 		"	private void foo(int i) throws java.io.IOException {\n" +
@@ -8371,7 +8372,7 @@ public void test205_warn_options() {
 		"5. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" +
 		"	int j;\n" +
 		"	    ^\n" +
-		"The local variable j is never read\n" +
+		"The value of the local variable j is not used\n" +
 		"----------\n" +
 		"6. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 6)\n" +
 		"	next: for (;;) {\n" +
@@ -8444,7 +8445,7 @@ public void test208_warn_options() {
 		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	public void foo(int i) {\n" +
 		"	                    ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
 		true);
@@ -8535,7 +8536,7 @@ public void test212_warn_options() {
 		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	public void foo(int i) {\n" +
 		"	                    ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"2 problems (2 warnings)",
 		true);
@@ -8561,7 +8562,7 @@ public void test213_warn_options() {
 		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	public void foo(int i) {\n" +
 		"	                    ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
 		true);
@@ -9043,7 +9044,7 @@ public void test227_warn_options() {
 		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 5)\n" +
 		"	public void foo(int i) {\n" +
 		"	                    ^\n" +
-		"The parameter i is never read\n" +
+		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
 		true);
@@ -11398,7 +11399,7 @@ public void test299(){
 		"2. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" + 
 		"	private int i;\n" + 
 		"	            ^\n" + 
-		"The field X.i is never read locally\n" + 
+		"The value of the field X.i is not used\n" + 
 		"----------\n" + 
 		"2 problems (1 error, 1 warning)",
 		true);
@@ -11438,7 +11439,7 @@ public void test301(){
 		"1. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" + 
 		"	private int i;\n" + 
 		"	            ^\n" + 
-		"The field X.i is never read locally\n" + 
+		"The value of the field X.i is not used\n" + 
 		"----------\n" + 
 		"1 problem (1 error)",
 		true);
@@ -11461,7 +11462,7 @@ public void test302(){
 		"1. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" + 
 		"	private int i;\n" + 
 		"	            ^\n" + 
-		"The field X.i is never read locally\n" + 
+		"The value of the field X.i is not used\n" + 
 		"----------\n" + 
 		"1 problem (1 error)",
 		true);
@@ -11489,7 +11490,7 @@ public void test303(){
 		"2. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" + 
 		"	private int i;\n" + 
 		"	            ^\n" + 
-		"The field X.i is never read locally\n" + 
+		"The value of the field X.i is not used\n" + 
 		"----------\n" + 
 		"2 problems (1 error, 1 warning)",
 		true);
@@ -11512,7 +11513,7 @@ public void test304(){
 		"1. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 3)\n" + 
 		"	private int i;\n" + 
 		"	            ^\n" + 
-		"The field X.i is never read locally\n" + 
+		"The value of the field X.i is not used\n" + 
 		"----------\n" + 
 		"1 problem (1 error)",
 		true);

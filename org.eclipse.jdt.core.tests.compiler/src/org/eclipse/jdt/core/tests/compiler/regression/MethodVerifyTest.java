@@ -11010,7 +11010,7 @@ public void test212() {
 		"Name clash: The method foo(T) of type Interface<T> has the same erasure as foo(T) of type Base<T> but does not override it\n" + 
 		"----------\n");
 }
-//https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850 
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850 
 public void _test213() {
 	Map compilerOptions15 = getCompilerOptions();
 	compilerOptions15.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
@@ -11060,5 +11060,26 @@ public void _test213() {
 		null,
 		compilerOptions14,
 		null);
+}
+public void test326354() {
+	this.runConformTest(
+			new String[] {
+					"X.java",
+					"public class X extends Y<I>  implements I {\n" +
+					"    public static void main(String[] args) {\n" +
+					"        ((I) new X()).foo(null);\n" +
+					"    }\n" +
+					"}\n" +
+					"\n" +
+					"interface I {\n" +
+					"    public void foo(I i);\n" +
+					"}\n" +
+					" \n" +
+					"abstract class Y<T> {\n" +
+					"	   public void foo(T t) {}\n" +
+					"}\n"
+			},
+			""
+	);
 }
 }
