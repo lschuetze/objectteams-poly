@@ -1108,8 +1108,14 @@ public abstract class ObjectTeamsTransformation
                     if(logging) printLogMessage("**** class file was produced by compiler version "
                             + major + "." + minor + "." + revision + " ****");
                     IS_COMPILER_GREATER_123 = false; // reset, may be updated below
+					// 1.6 stream:
+					if (major == 1 && minor == 6) {
+						// accept all revisions within this stream
+						IS_COMPILER_GREATER_123 = true;
+						IS_COMPILER_13X_PLUS = true;
+						IS_COMPILER_14X_PLUS = true;
 					// 1.5 stream:
-					if (major == 1 && minor == 5) {
+					} else if (major == 1 && minor == 5) {
 						if (revision < OT15_REVISION) {
 							if (class_name.startsWith(OTConstants.teamClassName))
 								continue; // no specific byte codes in ooTeam and its inner classes.
@@ -1167,14 +1173,13 @@ public abstract class ObjectTeamsTransformation
 								continue; // no specific byte codes in ooTeam and its inner classes.
 							throw new InternalError("OTRE: Class " + class_name + " has unsupported revision " + revision);
 						}
-					// 0.8 stream (OBSOLETE!)
+					// other major/minor version?
 					} else {
 						if (major != OT_VERSION_MAJOR)
 							throw new InternalError("OTRE: Class " + class_name + " has unsupported major version " + major);
 						if (minor != OT_VERSION_MINOR)
 							throw new InternalError("OTRE: Class " + class_name + " has unsupported minor version " + minor);
-						if (revision < OT_REVISION)
-							throw new InternalError("OTRE: Class " + class_name + " has unsupported revision " + revision);
+						throw new InternalError("OTRE: Class " + class_name + " has unrecognized version " + major+"."+minor+"."+revision);
 					}
 				} else if (attrName.equals("CallinPrecedence")) {
                     List<String> precedenceList = new LinkedList<String>(); 

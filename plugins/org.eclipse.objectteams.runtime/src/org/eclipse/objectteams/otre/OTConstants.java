@@ -68,9 +68,8 @@ public interface OTConstants {
 	String STRING_BUFFER_NAME    = "java.lang.StringBuffer";
 	
 	// ============ VERSION: ==============
-	public static final int    OT_VERSION_MAJOR = 0;
-    public static final int    OT_VERSION_MINOR = 8;
-    public static final int    OT_REVISION = 18;
+	public static final int    OT_VERSION_MAJOR = 1;
+    public static final int    OT_VERSION_MINOR = 6;
     
     // required compiler revision in the 0.9 stream:
     public static final int    OT09_REVISION = 26;
@@ -90,8 +89,11 @@ public interface OTConstants {
     // required compiler revision in the 1.4 stream:
     public static final int    OT14_REVISION = 1;
 
-    // required compiler revision in the 1.5 stream:
+    // required compiler revision in the 1.5 (=0.7) stream:
     public static final int    OT15_REVISION = 0;
+
+    // required compiler revision in the 1.6 (=0.8) stream:
+    public static final int    OT16_REVISION = 0;
 
     // ------------------------------------------
 	// ---------- Flags and Modifiers: ----------
