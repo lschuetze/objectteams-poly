@@ -90,9 +90,9 @@ import base org.eclipse.jdt.ui.ProblemsLabelDecorator;
 public team class ViewAdaptor extends JFaceDecapsulator
 {
 	/** new, OT-specific adornment flag for methods. */
-	final static int CALLIN = 0x4000;
+	final static int CALLIN = 0x40000;
 	/** new, OT-specific adornment flag for types. */
-	final static int BOUND_ROLE = 0x8000; // must not clash with other bits in JavaElementImageDescriptor
+	final static int BOUND_ROLE = 0x80000; // must not clash with other bits in JavaElementImageDescriptor
 
 	// use this instance for lookup which decorations are enabled:
 	IDecoratorManager decoratorMgr = null;
