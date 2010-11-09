@@ -108,7 +108,7 @@ Project Leader:
          download-size="778"
          install-size="3180"
          version="0.0.0"
-         unpack="false"/>
+         unpack="true"/>
 
    <!--plugin
          id="org.eclipse.objectteams.otdt.metrics"
