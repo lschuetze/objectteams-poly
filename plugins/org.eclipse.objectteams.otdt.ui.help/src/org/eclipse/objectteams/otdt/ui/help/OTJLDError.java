@@ -41,6 +41,8 @@ public class OTJLDError
     private static final Pattern SUBSECTION_PATTERN = Pattern.compile("(.*)\\s*\\(\\s*(.*)\\s*\\).*");
     public static final String URL_PATH = "guide/otjld/xdef/";
     
+    static boolean contentInitialized = false;
+    
     public static class OTURL
     {
         private URL m_url; // the plugin-relative url to the document
@@ -80,7 +82,11 @@ public class OTJLDError
             String result = null;
             try
             {
-                result = FileLocator.resolve(m_url).toString();
+            	if (!contentInitialized) {
+            		FileLocator.toFileURL(OTHelpPlugin.getDefault().getBundle().getEntry(OTJLDError.URL_PATH));
+            		contentInitialized = true;
+            	}
+                result = FileLocator.toFileURL(m_url).toString();
                 result += m_anchor;
             }
             catch (IOException ex)
