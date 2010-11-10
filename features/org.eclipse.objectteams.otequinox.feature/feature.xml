@@ -54,7 +54,7 @@ Author: Stephan Herrmann.
          version="0.0.0"
          unpack="false"/>
 
-   <!--plugin
+   <plugin
          id="org.eclipse.objectteams.otequinox.sunjvm"
          os="linux"
          download-size="1"
@@ -79,7 +79,7 @@ Author: Stephan Herrmann.
          install-size="1"
          version="0.0.0"
          fragment="true"
-         unpack="false"/-->
+         unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otequinox.branding"
