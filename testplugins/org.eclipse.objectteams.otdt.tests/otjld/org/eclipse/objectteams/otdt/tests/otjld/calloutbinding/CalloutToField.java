@@ -33,7 +33,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test332_calloutSet9"};
+//		TESTS_NAMES = new String[] { "test332_calloutGet14"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -295,7 +295,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "		protected void test() {\n" +
 			    "			System.out.print(getValue());\n" +
 			    "		}\n" +
-			    "		int getValue() -> get int value;\n" +
+			    "		int getValue() -> get String value;\n" +
 			    "	}\n" +
 			    "	public Team331cg5b () {\n" +
 			    "		Role r = new Role(new T331cg5b());\n" +
@@ -315,10 +315,48 @@ public class CalloutToField extends AbstractOTJLDTest {
             },
             "----------\n" + 
     		"1. ERROR in Team331cg5b.java (at line 8)\n" + 
-    		"	int getValue() -> get int value;\n" + 
+    		"	int getValue() -> get String value;\n" + 
     		"	^^^^^^^^^^^^^^\n" + 
     		"When binding field value via callout to role method getValue():\n" + 
     		"Incompatible types: can\'t convert java.lang.String to int (OTJLD 3.5(b)).\n" + 
+    		"----------\n");
+    }
+
+    // a getter callout with wrong role method return type and wrong field spec type
+    public void test331_calloutGet5c() {
+        runNegativeTest(
+            new String[] {
+		"Team331cg5c.java",
+			    "\n" +
+			    "public team class Team331cg5c {\n" +
+			    "	protected class Role playedBy T331cg5c {\n" +
+			    "		abstract int getValue();\n" +
+			    "		protected void test() {\n" +
+			    "			System.out.print(getValue());\n" +
+			    "		}\n" +
+			    "		int getValue() -> get int value;\n" +
+			    "	}\n" +
+			    "	public Team331cg5c () {\n" +
+			    "		Role r = new Role(new T331cg5c());\n" +
+			    "		r.test();\n" +
+			    "	}\n" +
+			    "	public static void main (String[] args) {\n" +
+			    "		new Team331cg5c();\n" +
+			    "	}\n" +
+			    "}\n" +
+			    "	\n",
+		"T331cg5c.java",
+			    "\n" +
+			    "public class T331cg5c {\n" +
+			    "	String value = \"O\";\n" +
+			    "}\n" +
+			    "	\n"
+            },
+            "----------\n" + 
+    		"1. ERROR in Team331cg5c.java (at line 8)\n" + 
+    		"	int getValue() -> get int value;\n" + 
+    		"	                      ^^^\n" + 
+    		"Field specifier \'value\' resolves to type java.lang.String whereas type int is specified (OTJLD 3.5(a)).\n" + 
     		"----------\n");
     }
 
@@ -763,6 +801,30 @@ public class CalloutToField extends AbstractOTJLDTest {
             "1.2.1(e)");
     }
 
+    // a field spec incorrectly uses "void" as the field'd type
+    // Bug 329888 -  Missing compiler error when using wrong field specifier in Callout to field (long)
+    public void test332_calloutGet14() {
+    	runNegativeTest(
+    		new String[]{
+    	"Team332cg14.java",
+    			"public team class Team332cg14 {\n" +
+    			"    protected class R playedBy T332cg14 {\n" +
+    			"        String getF() -> get void f;\n" +
+    			"    }\n" +
+    			"}\n",
+    	"T332cg14.java",
+    			"public class T332cg14 {\n" +
+    			"    String f;\n" +
+    			"}\n"
+    		}, 
+    		"----------\n" + 
+    		"1. ERROR in Team332cg14.java (at line 3)\n" + 
+    		"	String getF() -> get void f;\n" + 
+    		"	                     ^^^^\n" + 
+    		"Field specifier \'f\' resolves to type java.lang.String whereas type void is specified (OTJLD 3.5(a)).\n" + 
+    		"----------\n");
+    }
+    
     // a setter callout
     // 3.3.2-otjld-callout-set-1
     public void test332_calloutSet1() {
