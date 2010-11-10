@@ -291,7 +291,7 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
 	public boolean checkBaseReturnType(CallinCalloutScope scope, int bindDir)
 	{
 		TypeBinding accessorReturnType = (this.calloutModifier  == TerminalTokens.TokenNameget) ?
-				resolvedType() :
+				(this.returnType != null ? this.returnType.resolvedType : null):
 				TypeBinding.VOID;
 		if (!TypeAnalyzer.isSameType(scope.enclosingSourceType(), accessorReturnType, this.resolvedMethod.returnType))
 		{
