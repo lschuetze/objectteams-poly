@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ImportBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 
@@ -218,9 +219,9 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 	
 	protected class ImportTracker playedBy CompilationUnitScope
 	{
-		ReferenceBinding[] getTopLevelTypes() -> get ReferenceBinding[] topLevelTypes;
+		SourceTypeBinding[] getTopLevelTypes() -> get SourceTypeBinding[] topLevelTypes;
 	  private // don't publically expose protected role ProblemReporter
-		ProblemReporter    problemReporter()  ->     ProblemReporter    problemReporter();
+		ProblemReporter     problemReporter()  ->     ProblemReporter    problemReporter();
 
 		/** When setting the base imports to a CUScope, check for imports from undeclared plug-ins. */
 		void setBaseImports(ImportBinding[] resolvedBaseImports, int baseCount, ImportReference[] refs) 
@@ -262,9 +263,9 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 			}
 		}
 		private ReferenceBinding findMainType() {
-			ReferenceBinding[] toplevelTypes = getTopLevelTypes();
+			SourceTypeBinding[] toplevelTypes = getTopLevelTypes();
 			if (toplevelTypes != null)
-				for (ReferenceBinding referenceBinding : toplevelTypes) 
+				for (SourceTypeBinding referenceBinding : toplevelTypes) 
 					if (referenceBinding.isPublic())
 						return referenceBinding;
 
