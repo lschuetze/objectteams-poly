@@ -219,7 +219,7 @@ public team class SamplesAdapter
  					
  					// fetch path to help plugin hosting images/ and guide/otjld/def/:
  					Bundle helpBundle = OTHelpPlugin.getDefault().getBundle();
- 					String absPath = FileLocator.resolve(helpBundle.getEntry("/")).toString();  //$NON-NLS-1$
+ 					String absPath = FileLocator.toFileURL(helpBundle.getEntry("/")).toString();  //$NON-NLS-1$
  					String baseTag = "<base href=\""+absPath+"\">\n"; //$NON-NLS-1$ //$NON-NLS-2$
  					
  					// assemble new new file with new content:
