@@ -17,8 +17,11 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 
+import java.util.Map;
+
 import junit.framework.Test;
 
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class BindingAmbiguities2 extends AbstractOTJLDTest {
@@ -42,10 +45,18 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      public static Class testClass() {
          return BindingAmbiguities2.class;
      }
+     
+     @SuppressWarnings("unchecked")
+	 @Override
+     protected Map getCompilerOptions() {
+    	 Map options = super.getCompilerOptions();
+    	 options.put(CompilerOptions.OPTION_ReportAbstractPotentialRelevantRole, CompilerOptions.IGNORE);
+    	 return options;
+    }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-1
-     public void _g_test732_ambiguousBinding1() {
+     public void test732_ambiguousBinding1() {
         
         runConformTest(
              new String[] {
@@ -130,7 +141,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 		"Team732ab1_1.java",
 			    "\n" +
 			    "public team class Team732ab1_1 {\n" +
-			    "    public abstract class Role732ab1_1 playedBy T732ab1_1 {\n" +
+			    "    protected abstract class Role732ab1_1 playedBy T732ab1_1 {\n" +
 			    "        public String toString() {\n" +
 			    "            return Team732ab1_1.this.toString() + \".Role732ab1_1\";\n" +
 			    "        }\n" +
@@ -157,7 +168,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-2
-     public void _g_test732_ambiguousBinding2() {
+     public void test732_ambiguousBinding2() {
         
         runConformTest(
              new String[] {
@@ -183,7 +194,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 		"Team732ab2_1.java",
 			    "\n" +
 			    "public team class Team732ab2_1 {\n" +
-			    "    public abstract class Role732ab2_1 playedBy T732ab2_1 {\n" +
+			    "    protected abstract class Role732ab2_1 playedBy T732ab2_1 {\n" +
 			    "        public String toString() {\n" +
 			    "            return Team732ab2_1.this.toString() + \".Role732ab2_1\";\n" +
 			    "        }\n" +
@@ -269,7 +280,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-3
-     public void _g_test732_ambiguousBinding3() {
+     public void test732_ambiguousBinding3() {
         
         runConformTest(
              new String[] {
@@ -303,7 +314,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 		"Team732ab3_1.java",
 			    "\n" +
 			    "public team class Team732ab3_1 {\n" +
-			    "    public abstract class Role732ab3_1 playedBy T732ab3_1 {\n" +
+			    "    protected abstract class Role732ab3_1 playedBy T732ab3_1 {\n" +
 			    "        public String toString() {\n" +
 			    "            return Team732ab3_1.this.toString() + \".Role732ab3_1\";\n" +
 			    "        }\n" +
@@ -381,7 +392,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-4
-     public void _g_test732_ambiguousBinding4() {
+     public void test732_ambiguousBinding4() {
         
         runConformTest(
              new String[] {
@@ -438,7 +449,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 		"Team732ab4_1.java",
 			    "\n" +
 			    "public team class Team732ab4_1 {\n" +
-			    "    public abstract class Role732ab4_1 playedBy T732ab4_1 {\n" +
+			    "    protected abstract class Role732ab4_1 playedBy T732ab4_1 {\n" +
 			    "        public String toString() {\n" +
 			    "            return Team732ab4_1.this.toString() + \".Role732ab4_1\";\n" +
 			    "        }\n" +
@@ -493,7 +504,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-5
-     public void _g_test732_ambiguousBinding5() {
+     public void test732_ambiguousBinding5() {
         
         runConformTest(
              new String[] {
@@ -578,7 +589,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 		"Team732ab5_1.java",
 			    "\n" +
 			    "public team class Team732ab5_1 {\n" +
-			    "    public abstract class Role732ab5_1 playedBy T732ab5_1 {\n" +
+			    "    protected abstract class Role732ab5_1 playedBy T732ab5_1 {\n" +
 			    "        public String toString() {\n" +
 			    "            return Team732ab5_1.this.toString() + \".Role732ab5_1\";\n" +
 			    "        }\n" +
@@ -605,7 +616,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-6
-     public void _g_test732_ambiguousBinding6() {
+     public void test732_ambiguousBinding6() {
         
         runConformTest(
              new String[] {
@@ -631,7 +642,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 		"Team732ab6_1.java",
 			    "\n" +
 			    "public team class Team732ab6_1 {\n" +
-			    "    public abstract class Role732ab6_1 playedBy T732ab6_1 {\n" +
+			    "    protected abstract class Role732ab6_1 playedBy T732ab6_1 {\n" +
 			    "        public String toString() {\n" +
 			    "            return Team732ab6_1.this.toString() + \".Role732ab6_1\";\n" +
 			    "        }\n" +
@@ -717,7 +728,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-7
-     public void _g_test732_ambiguousBinding7() {
+     public void test732_ambiguousBinding7() {
         
         runConformTest(
              new String[] {
@@ -755,7 +766,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 		"Team732ab7_1.java",
 			    "\n" +
 			    "public team class Team732ab7_1 {\n" +
-			    "    public abstract class Role732ab7_1 playedBy T732ab7_1 {\n" +
+			    "    protected abstract class Role732ab7_1 playedBy T732ab7_1 {\n" +
 			    "        public String toString() {\n" +
 			    "            return Team732ab7_1.this.toString() + \".Role732ab7_1\";\n" +
 			    "        }\n" +
@@ -828,13 +839,14 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
+     		 "org.objectteams.LiftingFailedException: \n" + 
              "Failed to lift 'T732ab7_3' of class T732ab7_3 to type 'Role732ab7_1'\n" +
-        	 "(See OT/J definition para. 7.3(c)).");
+        	 "(See OT/J definition para. 2.3.4(c)).");
      }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.2-otjld_g-ambiguous-binding-8
-     public void _g_test732_ambiguousBinding8() {
+     public void test732_ambiguousBinding8() {
         
         runConformTest(
              new String[] {
@@ -895,7 +907,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 		"Team732ab8_1.java",
 			    "\n" +
 			    "public team class Team732ab8_1 {\n" +
-			    "    public abstract class Role732ab8_1 playedBy T732ab8_1 {\n" +
+			    "    protected abstract class Role732ab8_1 playedBy T732ab8_1 {\n" +
 			    "        public String toString() {\n" +
 			    "            return Team732ab8_1.this.toString() + \".Role732ab8_1\";\n" +
 			    "        }\n" +
@@ -945,8 +957,9 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
+     		 "org.objectteams.LiftingFailedException: \n" + 
              "Failed to lift 'T732ab8_3' of class T732ab8_3 to type 'Role732ab8_1'\n" +
-             "(See OT/J definition para. 7.3(c)).");
+             "(See OT/J definition para. 2.3.4(c)).");
      }
 
 }
