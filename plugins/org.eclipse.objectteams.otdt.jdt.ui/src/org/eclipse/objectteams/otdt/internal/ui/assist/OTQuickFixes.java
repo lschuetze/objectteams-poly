@@ -16,6 +16,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.assist;
 
+import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINMETHOD_IMG;
+
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.List;
@@ -28,6 +31,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
@@ -37,9 +41,9 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodMappingElement;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
@@ -49,27 +53,27 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CleanUpConstants;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddImportCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jface.viewers.IDecoration;
-import org.eclipse.swt.graphics.Image;
-
-import static org.eclipse.objectteams.otdt.ui.ImageConstants.CALLINMETHOD_IMG;
-
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
@@ -78,17 +82,18 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.ui.text.correction.MappingProposalSubProcessor;
 import org.eclipse.objectteams.otdt.internal.ui.text.correction.TypeProposalSubProcessor;
 import org.eclipse.objectteams.otdt.internal.ui.util.Images;
+import org.eclipse.swt.graphics.Image;
 
 import base org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import base org.eclipse.jdt.internal.corext.util.JdtFlags;
-import base org.eclipse.jdt.internal.ui.text.correction.proposals.AbstractMethodCorrectionProposal;
 import base org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
-import base org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import base org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 import base org.eclipse.jdt.internal.ui.text.correction.QuickFixProcessor;
 import base org.eclipse.jdt.internal.ui.text.correction.SuppressWarningsSubProcessor;
 import base org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor;
 import base org.eclipse.jdt.internal.ui.text.correction.SuppressWarningsSubProcessor.SuppressWarningsProposal;
+import base org.eclipse.jdt.internal.ui.text.correction.proposals.AbstractMethodCorrectionProposal;
+import base org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 
 /**
  * This team class extends the quickfix functionality of the jdt.ui for OT/J elements.
@@ -184,7 +189,7 @@ public team class OTQuickFixes  {
 			
 			// instantiate a role wrapping an invisible class 
 			// and immediately lower the object using a public base type:
-			ASTRewriteCorrectionProposal proposal= OTQuickFixes.this.
+			ASTRewriteCorrectionProposal proposal=
 					new SuppressWarningsProposal(warningToken, label, cu, node, property, relevance);
 
 			proposals.add(proposal);
@@ -292,11 +297,30 @@ public team class OTQuickFixes  {
 	 * This role helps the MappingProposalSubProcessor for unresolved method specs.
 	 * Its behavior is initiated by calling {@link OTQuickFixes#registerNewMethodCorrectionProposal}.
 	 */
-	protected class NewMethodCompletionProposal
+	protected team class NewMethodCompletionProposal
 		extends AbstractMethodCompletionProposal
 		playedBy NewMethodCorrectionProposal
 		base when (OTQuickFixes.this.hasRole(base, NewMethodCompletionProposal.class)) // on invitation only
 	{
+		// === Imports using CALLOUT: ===
+		void setImage(Image img)		              				-> void setImage(Image img);
+		
+		@SuppressWarnings("decapsulation")
+		protected String getKEY_TYPE()                				-> get String KEY_TYPE;
+
+		@SuppressWarnings({ "rawtypes", "decapsulation" })
+		protected void setFArguments(List fArguments) 				-> set List fArguments;
+
+		ImportRewrite getImportRewrite()                           	-> ImportRewrite getImportRewrite();
+		ImportRewrite createImportRewrite(CompilationUnit astRoot) 	-> ImportRewrite createImportRewrite(CompilationUnit astRoot);
+
+		@SuppressWarnings("decapsulation")
+		LinkedProposalModel getLinkedProposalModel() 			   	-> LinkedProposalModel getLinkedProposalModel();
+
+		void addLinkedPosition(ITrackedNodePosition position, boolean isFirst, String groupID)
+		-> void addLinkedPosition(ITrackedNodePosition position, boolean isFirst, String groupID);
+
+		// === Basic State: ===
 		/** Actual types etc. from the method spec. */
 		protected Type[] parameterTypes;
 		protected Type returnType;
@@ -319,8 +343,11 @@ public team class OTQuickFixes  {
 		
 		@SuppressWarnings("basecall")
 		callin Type getMethodReturnType (ASTRewrite rewrite) throws CoreException {
-			if (this.returnType != null)
-				return (Type) ASTNode.copySubtree(rewrite.getAST(), this.returnType);
+			if (this.returnType != null) {
+				Type newTypeNode = (Type) ASTNode.copySubtree(rewrite.getAST(), this.returnType);
+				addLinkedPosition(rewrite.track(newTypeNode), false, getKEY_TYPE());
+				return newTypeNode;
+			}
 			return base.getMethodReturnType(rewrite);
 		}
 		getMethodReturnType <- replace getNewMethodType; 
@@ -355,11 +382,98 @@ public team class OTQuickFixes  {
 				this.needStaticModifier= true;
 		}
 
-		void setImage(Image img)		-> void setImage(Image img);
+		// ==== Handle lifting/lowering when inferring method signatures across a method mapping: ====
+
+		/** data class for alternative type proposals to be added as linked proposals, once the rewrite is ready. */
+		protected class TypeProposalsMemento {
+			protected Type originalType;
+			protected List<Type> types = new ArrayList<Type>();
+			protected String positionGroupID;
+			protected TypeProposalsMemento(String positionGroupID, Type originalType) {
+				this.positionGroupID = positionGroupID;
+				this.originalType = originalType;
+			}
+		}
+		List<TypeProposalsMemento> pendingLinkedLiftings = new ArrayList<TypeProposalsMemento>();
+
+		/**
+		 * Propose a type node either directly from typeBinding, 
+		 * or considering a lifting/lowering translation if appropriate. 
+		 * If translation is indeed proposed, schedule a TypeProposalsMemento
+		 * for adding linked proposals once the rewrite is ready.
+		 * @param imports     use this for creating type nodes from type bindings
+		 * @param ast		  the AST we are generating against
+		 * @param typeBinding type binding of AST node to investigate
+		 * @param groupKey 	  key of the linked position group
+		 * @param roles       available roles in the enclosing team
+		 * @param isRoleSide  are we inferring a role method signature?
+		 * @return a suitable type node or null
+		 */
+		protected Type proposeType(ImportRewrite imports, AST ast, ITypeBinding typeBinding, String groupKey, ITypeBinding[] roles, boolean isRoleSide) 
+		{
+			if (!isRoleSide && typeBinding.isRole()) {
+				// if trying to pass one of our roles to the base unconditionally apply lowering
+				for (int i = 0; i < roles.length; i++) {
+					if (typeBinding.getErasure().equals(roles[i].getErasure())) {
+						typeBinding = typeBinding.getBaseClass();
+						if (typeBinding == null)
+							return null; // cannot lower unbound role
+						break;
+					}
+				}
+			}
+			Type newType = imports.addImport(typeBinding, ast);
+			if (isRoleSide) {
+				newType = checkLifting(imports, ast, typeBinding, newType, groupKey, roles);
+			}
+			return newType;
+		}
+
+		/**
+		 * check whether a given type is played by a role from a given array and replace the base type with the given role.
+		 * However, actual creation of the linked proposal has to be deferred until the rewrite is created by our base.
+		 */
+		Type checkLifting(ImportRewrite imports, AST ast, ITypeBinding typeBinding, Type originalType, String groupKey, ITypeBinding[] roles)
+		{
+			Type roleType = null;
+			TypeProposalsMemento memento = null;
+			for (ITypeBinding roleBinding : roles) {
+				if (roleBinding.isSynthRoleIfc()) continue; // synth ifcs would otherwise cause dupes
+				if (typeBinding.equals(roleBinding.getBaseClass())) {
+					// found
+					if (memento == null) {
+						memento = new TypeProposalsMemento(groupKey, originalType);
+						this.pendingLinkedLiftings.add(memento);
+					}
+					Type candidateRoleType = imports.addImport(roleBinding, ast);
+					memento.types.add(candidateRoleType);
+					if (roleType == null) // prefer the first found role type as the primary proposal
+						roleType = candidateRoleType;
+				}
+			}
+			if (roleType != null)
+				return roleType; // replace with translated type
+			return originalType; // unchanged
+		}
+
+		void addPendingLiftingProposals(ASTRewrite rewrite) <- after ASTRewrite getRewrite()
+			with { rewrite <- result }
+		// as the rewrite has been created, add linked proposals now:
+		void addPendingLiftingProposals(ASTRewrite rewrite) {
+			for (TypeProposalsMemento memento : this.pendingLinkedLiftings) {
+				ITrackedNodePosition typePos= rewrite.track(memento.originalType);
+				addLinkedPosition(typePos, true, memento.positionGroupID);
+				LinkedProposalPositionGroup group=
+						getLinkedProposalModel().getPositionGroup(memento.positionGroupID, true);
+				for (Type type : memento.types)				
+					group.addProposal(type.toString(), null, 13); // TODO: relevance
+				group.addProposal(memento.originalType.toString(), null, 13);
+			}
+		}
 	}
 	
 	/** Register a new method completion proposal with a method spec,
-	 *  in order to use the method specs signature for constructing the new method's signature.
+	 *  in order to use the method spec's signature for constructing the new method's signature.
 	 * @param spec     the unresolved method spec 
 	 * @param proposal a new completion proposal to be adapted
 	 */
@@ -367,18 +481,62 @@ public team class OTQuickFixes  {
 	public void registerNewMethodCorrectionProposal(MethodSpec spec,
 				NewMethodCorrectionProposal as NewMethodCompletionProposal proposal) 
 	{
-		List parameters= spec.parameters();
-		proposal.parameterTypes= new Type[parameters.size()];
-		for (int i=0; i<parameters.size(); i++) {
-			SingleVariableDeclaration arg= (SingleVariableDeclaration)parameters.get(i);
-			proposal.parameterTypes[i]= arg.getType();
+		if (spec.hasSignature()) {
+			List parameters= spec.parameters();
+			proposal.parameterTypes= new Type[parameters.size()];
+			for (int i=0; i<parameters.size(); i++) {
+				SingleVariableDeclaration arg= (SingleVariableDeclaration)parameters.get(i);
+				proposal.parameterTypes[i]= arg.getType();
+			}
+			proposal.returnType= spec.getReturnType2();
+		} else {
+			// create signature from resolved other (base/role) element:
+			// Bug 329988 -  Quickfix method generation on missing replace callin method generates wrong method
+			StructuralPropertyDescriptor locationInParent = spec.getLocationInParent();
+			if (locationInParent == CallinMappingDeclaration.ROLE_MAPPING_ELEMENT_PROPERTY) {
+				List baseSpecs = ((CallinMappingDeclaration)spec.getParent()).getBaseMappingElements();
+				if (baseSpecs.size() == 1) {
+					inferMethodSignature(proposal, spec, ((MethodSpec)baseSpecs.get(0)).resolveBinding(), true);
+				}
+			} else if (   locationInParent == CallinMappingDeclaration.BASE_MAPPING_ELEMENTS_PROPERTY
+					   || locationInParent == CalloutMappingDeclaration.BASE_MAPPING_ELEMENT_PROPERTY)
+			{
+				MethodSpec roleSpec = (MethodSpec) ((AbstractMethodMappingDeclaration)spec.getParent()).getRoleMappingElement();
+				inferMethodSignature(proposal, spec, roleSpec.resolveBinding(), false);
+			}
 		}
-		proposal.returnType= spec.getReturnType2();
 		ASTNode mapping= spec.getParent();
 		if (mapping instanceof CallinMappingDeclaration) {
 			CallinMappingDeclaration callinDecl = (CallinMappingDeclaration)mapping;
 			proposal.adjustModifiers(callinDecl, spec == callinDecl.getRoleMappingElement());
 		}
+	}
+	/** 
+	 * A method spec has no signature, infer the signature for a missing method
+	 * from the resolved method at the other side of the method mapping.
+	 */
+	private void inferMethodSignature(NewMethodCompletionProposal proposal, MethodSpec spec, IMethodBinding resolvedMethod, boolean isRoleSide) {
+		AST ast = spec.getAST();
+		ImportRewrite imports = proposal.getImportRewrite();
+		if (imports == null)
+			imports = proposal.createImportRewrite((CompilationUnit) ASTResolving.findAncestor(spec, ASTNode.COMPILATION_UNIT));
+
+		ITypeBinding roleTypeBinding = ((RoleTypeDeclaration) ASTResolving.findAncestor(spec, ASTNode.ROLE_TYPE_DECLARATION)).resolveBinding();
+		ITypeBinding[] roles= roleTypeBinding.getDeclaringClass().getDeclaredTypes();
+
+		// preset return type and parameter types from the resolved method:
+		
+		ITypeBinding returnType = resolvedMethod.getReturnType();
+		proposal.returnType = proposal.proposeType(imports, ast, returnType, NewMethodCompletionProposal.getKEY_TYPE(), roles, isRoleSide);
+		
+		ITypeBinding[] parameterTypes = resolvedMethod.getParameterTypes();
+		proposal.parameterTypes = new Type[parameterTypes.length];
+		List<Expression> arguments = new ArrayList<Expression>(parameterTypes.length);
+		for (int i = 0; i < parameterTypes.length; i++) {
+			proposal.parameterTypes[i] = proposal.proposeType(imports, ast, parameterTypes[i], "arg_type_"+i, roles, isRoleSide); //$NON-NLS-1$
+			arguments.add(ast.newConditionalExpression());  // dummy expr that will be filtered out in StubUtility.getVariableNameSuggestions()
+		}
+		proposal.setFArguments(arguments); // ensure we will loop properly in NewMethodCorrectionProposal.addNewParameters(ASTRewrite, List, List)
 	}
 	
 	/** 
