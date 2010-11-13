@@ -20,23 +20,32 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.core;
 
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 import base org.eclipse.jdt.internal.ui.text.java.ParameterGuessingProposal;
+import base org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 
 public team class ProposalAdaptor {
 
 	/** Just decapsulate one private field ;-) */
+	@SuppressWarnings("decapsulation")
 	protected class GuessingProposal playedBy ParameterGuessingProposal {
 
-		@SuppressWarnings("decapsulation")
-		protected 
-		ICompletionProposal[][] getFChoices() -> get ICompletionProposal[][] fChoices;
+		protected ICompletionProposal[][] getFChoices() -> get ICompletionProposal[][] fChoices;
 		
 	}
 	/** API */
 	public ICompletionProposal[][] getChoices(ParameterGuessingProposal as GuessingProposal proposal) {
 		return proposal.getFChoices();
 	}
-	
+
+	/** Access to one protected method: */
+	protected class CUCorrectionProposal playedBy CUCorrectionProposal {
+		LinkedProposalModel getLinkedProposalModel() -> LinkedProposalModel getLinkedProposalModel();
+	}	
+	/** API */
+	public LinkedProposalModel getLinkedProposalModel(CUCorrectionProposal as CUCorrectionProposal proposal) {
+		return proposal.getLinkedProposalModel();
+	}
 }

@@ -30,6 +30,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
@@ -43,7 +46,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
  * @since 1.2.1
  */
 public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
-	private static final Class THIS= UnresolvedMethodsQuickFixTest.class;
+	private static final Class<UnresolvedMethodsQuickFixTest> THIS= UnresolvedMethodsQuickFixTest.class;
 
 	public UnresolvedMethodsQuickFixTest(String name) {
 		super(name);
@@ -397,6 +400,230 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
+	// callin method created from short callin binding -> need to infer method signature
+	public void testUnresolvedCallinMapping1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("    String foo(int idx, Boolean b) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("	public class R playedBy B {\n");
+		buf.append("        voo <- replace foo;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1); // don't propose to generate into team!!
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("	public class R playedBy B {\n");
+		buf.append("        voo <- replace foo;\n");
+		buf.append("        callin String voo(int i, Boolean boolean1) {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
+	// missing base method created (short callin binding)
+	public void testUnresolvedCallinMapping2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("	public class R playedBy B {\n");
+		buf.append("        voo <- replace foo;\n");
+		buf.append("        callin String voo(int j, Boolean flag) {\n");
+		buf.append("            return base.voo(j, flag);\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("\n");
+		buf.append("    public String foo(int i, Boolean boolean1) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
+	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
+	// non-static callin method created (short callin binding) - lifting/lowering involved
+	public void testUnresolvedCallinMapping3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("    B foo(int idx, B b) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("	public class R1 playedBy B {\n");
+		buf.append("        voo <- replace foo;\n");
+		buf.append("    }\n");
+		buf.append("	public class R2 playedBy B {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1); // don't propose to generate into team!!
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("	public class R1 playedBy B {\n");
+		buf.append("        voo <- replace foo;\n");
+		buf.append("        callin R1 voo(int i, R1 r1) {\n");
+		buf.append("            return null;\n");
+		buf.append("        }\n");		
+		buf.append("    }\n");
+		buf.append("	public class R2 playedBy B {}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+		
+		LinkedProposalModel linkedProposalModel = new ProposalAdaptor().getLinkedProposalModel(proposal);
+		assertLinkedTypeProposals(linkedProposalModel, "arg_type_1", new String[]{"R1", "R2", "B"});
+		assertLinkedTypeProposals(linkedProposalModel, "type", new String[]{"R1", "R2", "B"});
+	}
+
+	// helper for above:
+	private LinkedProposalPositionGroup assertLinkedTypeProposals(LinkedProposalModel linkedProposalModel, String key, String[] expectedStrings) {
+		LinkedProposalPositionGroup typePositionGroup = linkedProposalModel.getPositionGroup(key, false);
+		assertNotNull(typePositionGroup);
+		Proposal[] linkedTypeProposals = typePositionGroup.getProposals();
+		assertEquals("Wrong number of linked type proposals", expectedStrings.length, linkedTypeProposals.length);
+		for (int i = 0; i < expectedStrings.length; i++)
+			assertEquals("Unexpected "+(i+1)+". type", expectedStrings[i], linkedTypeProposals[i].getDisplayString());
+		return typePositionGroup;
+	}
+
+	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
+	// missing base method created (short callout binding)
+	public void testUnresolvedCallout1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("	public class R playedBy B {\n");
+		buf.append("        abstract String voo(int j, Boolean flag);\n");
+		buf.append("        voo -> foo;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("\n");
+		buf.append("    public String foo(int i, Boolean boolean1) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+	
+
+	// Bug 329988 - Quickfix method generation on missing replace callin method generates wrong method
+	// missing base method created (short callout binding) - translation involved
+	public void testUnresolvedCallout2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("	public class R1 playedBy B {\n");
+		buf.append("        abstract R1 voo(int j, R1 r1);\n");
+		buf.append("        voo -> foo;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("\n");
+		buf.append("    public B foo(int i, B b) {\n");
+		buf.append("        return null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
+
 /* some orig tests for use in OT-variants:	
 	
 	public void testClassInstanceCreation() throws Exception {
