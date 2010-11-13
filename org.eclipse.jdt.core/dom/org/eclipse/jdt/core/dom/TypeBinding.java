@@ -29,7 +29,6 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.CaptureBinding;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.MemberTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
@@ -53,8 +52,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBindin
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
- * MIGRATION_STATE: 3.4
- *
  * <h4>OTDT changes:</h4>
  * <dl>
  * <dt>What:<dd>  implement methods from ITypeBinding
@@ -1283,7 +1280,7 @@ class TypeBinding implements ITypeBinding {
 	public ITypeBinding getBaseClass() {
 	    if (! this.binding.isRole())
 			return null;
-	    MemberTypeBinding roleBinding = (MemberTypeBinding) this.binding;
+	    ReferenceBinding roleBinding = (ReferenceBinding) this.binding;
 	    ReferenceBinding baseclass = roleBinding.baseclass();
 	    if (baseclass == null) {
 			return null;
