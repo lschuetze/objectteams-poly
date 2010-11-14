@@ -29,7 +29,7 @@ plugin@org.eclipse.objectteams.otequinox.branding,0.8.0=SVN,url=file://localhost
 plugin@org.eclipse.objectteams.otdt.jdt.ui,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.jdt.ui
 plugin@org.eclipse.objectteams.otdt.ui.help,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.ui.help,tag=tags/builds/201011100445
 plugin@org.eclipse.objectteams.otdt.apt,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.apt,tag=tags/builds/201011100445
-plugin@org.eclipse.objectteams.otdt.compiler.adaptor,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor,tag=tags/builds/201011100445
+plugin@org.eclipse.objectteams.otdt.compiler.adaptor,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor
 plugin@org.eclipse.objectteams.otdt.debug.adaptor,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor,tag=tags/builds/201011100445
 plugin@org.eclipse.objectteams.otdt.refactoring,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.refactoring,tag=tags/builds/201011100445
 plugin@org.eclipse.objectteams.otdt.pde.ui,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.pde.ui,tag=tags/builds/201006211729
