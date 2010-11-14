@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.util.IModifierConstants;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Initializer;
+import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
@@ -29,6 +30,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.core.LocalVariable;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 
 /**
@@ -350,6 +352,18 @@ class VariableBinding implements IVariableBinding {
 	public int getVariableId() {
 		return this.binding.id;
 	}
+
+//{ObjectTeams: arg w/ declared lifting has two ids, answer the max of both:
+	public int getVariableIdMax() {
+		if (!isField()) {
+			LocalDeclaration decl = ((LocalVariableBinding)this.binding).declaration;
+			if (decl != null && decl.type instanceof LiftingTypeReference) {
+				return ((LiftingTypeReference)decl.type).fakedArgument.binding.id;
+			}
+		}
+		return getVariableId(); 
+	}
+// SH}
 
 	/*
 	 * @see IVariableBinding#isParameter()
