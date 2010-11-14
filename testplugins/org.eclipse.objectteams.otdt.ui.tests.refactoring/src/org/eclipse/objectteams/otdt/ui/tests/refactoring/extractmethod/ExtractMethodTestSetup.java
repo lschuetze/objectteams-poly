@@ -58,6 +58,7 @@ public class ExtractMethodTestSetup extends TestSetup
 	private IPackageFragment _rolefileParentPackage;
 	private IPackageFragment _focusTypePackage;
 	private IPackageFragment _overloadingPackage;
+	private IPackageFragment _syntaxPackage;
 	
     public ExtractMethodTestSetup(Test test)
     {
@@ -97,7 +98,8 @@ public class ExtractMethodTestSetup extends TestSetup
 		_nestedTeamPackage = getRoot().createPackageFragment("nestedTeam_in", true, null);
 		_focusTypePackage = getRoot().createPackageFragment("focusType_in", true, null);
 		_overloadingPackage = getRoot().createPackageFragment("overloading_in", true, null);
-		
+		_syntaxPackage = getRoot().createPackageFragment("syntax_in", true, null);
+
 //		_selectionPackage = getRoot().createPackageFragment("selection", true, null);
     }
 
@@ -145,5 +147,9 @@ public class ExtractMethodTestSetup extends TestSetup
 	public IPackageFragment getOverloadingPackage()
 	{
 	    return _overloadingPackage;
+	}
+
+	public IPackageFragment getSyntaxPackage() {
+		return _syntaxPackage;
 	}
 }

@@ -477,4 +477,18 @@ public class ExtractMethodTests extends AbstractSelectionTestCase
 		        COMPARE_WITH_OUTPUT,
 		        "overloading_out");
 	}
+
+	//	=====================================================================================
+	// 	Testing special syntactic nodes
+	//	=====================================================================================	
+
+	// call target is a declared-lifting argument
+	public void testDeclaredLifting1() throws Exception
+	{
+		performTest(
+		        _testSetup.getSyntaxPackage(),
+		        new String[] {"T", "B"},
+		        COMPARE_WITH_OUTPUT,
+		        "syntax_out");
+	}
 }
