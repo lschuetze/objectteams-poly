@@ -47,6 +47,7 @@ public class AllTests extends TestCase
         return new Class[]
         {
             org.eclipse.objectteams.otdt.tests.model.OTCompletionTests.class,
+            org.eclipse.objectteams.otdt.tests.model.MiscRegressionTests.class,
         };
     }
 
