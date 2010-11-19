@@ -159,11 +159,11 @@ Project Leader:
          install-size="752"
          version="0.0.0"/>
 
-   <plugin
+   <!--plugin
          id="org.eclipse.objectteams.otdt.apt"
          download-size="15"
          install-size="15"
          version="0.0.0"
-         unpack="false"/>
+         unpack="false"/-->
 
 </feature>
