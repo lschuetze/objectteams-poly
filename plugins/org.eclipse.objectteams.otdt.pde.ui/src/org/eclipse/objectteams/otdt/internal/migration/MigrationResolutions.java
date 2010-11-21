@@ -197,7 +197,7 @@ public class MigrationResolutions implements IMarkerResolutionGenerator {
 			if (element instanceof IDocumentElementNode) {
 				IDocumentElementNode node = (IDocumentElementNode)element;
 				String icon = node.getXMLAttributeValue(ICON); 
-				if (icon.contains(ORG_OBJECTTEAMS))
+				if (icon != null && icon.contains(ORG_OBJECTTEAMS))
 					node.setXMLAttribute(ICON, icon.replace(ORG_OBJECTTEAMS, ORG_ECLIPSE_OBJECTTEAMS));
 			}
 		}
