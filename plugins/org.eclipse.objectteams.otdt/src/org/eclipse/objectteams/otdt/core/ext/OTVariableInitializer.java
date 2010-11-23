@@ -61,7 +61,7 @@ public class OTVariableInitializer extends ClasspathVariableInitializer
     	try {
 			JavaCore.setClasspathVariable(variable, new Path(installPath), new NullProgressMonitor());
 		} catch (JavaModelException e) {
-			OTDTPlugin.getExceptionHandler().logException(e);
+			OTDTPlugin.logException("Error during initialization of classpath variable "+variable, e);
 		}
     }
 
@@ -80,7 +80,7 @@ public class OTVariableInitializer extends ClasspathVariableInitializer
 		}
 		catch (Exception ex)
 		{
-			OTDTPlugin.getExceptionHandler().logException(ex);
+			OTDTPlugin.logException("Error retrieving OTDT installation path", ex);
 			return null;
 		}
 	}
@@ -103,7 +103,7 @@ public class OTVariableInitializer extends ClasspathVariableInitializer
 		}
 		catch (Exception ex)
 		{
-			OTDTPlugin.getExceptionHandler().logException(ex);
+			OTDTPlugin.logException("Error retrieving path from bundle "+bundleName, ex);
 			return null;
 		}
 	}

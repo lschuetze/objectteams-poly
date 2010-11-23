@@ -28,7 +28,6 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
 import org.osgi.framework.BundleContext;
 
 
@@ -147,9 +146,8 @@ public class OTDTPlugin extends Plugin
 		return otBuildCmd;
 	}
     
-	public static ExceptionHandler getExceptionHandler()
-	{
-		return new ExceptionHandler(PLUGIN_ID);
+	public static void logException(String message, Throwable exception) {
+		_singleton.getLog().log(createErrorStatus(message, exception));
 	}
 	
 	public static Status createErrorStatus(String message, Throwable exception)
