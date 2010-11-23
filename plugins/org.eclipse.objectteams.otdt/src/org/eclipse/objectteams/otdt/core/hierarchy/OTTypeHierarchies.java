@@ -41,8 +41,8 @@ import base org.eclipse.jdt.internal.core.BinaryType;
 import base org.eclipse.jdt.internal.core.SourceType;
 import base org.eclipse.jdt.internal.core.hierarchy.HierarchyBuilder;
 import base org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
-import base org.eclipse.objectteams.otdt.core.PhantomType;
 import base org.eclipse.objectteams.otdt.internal.core.OTType;
+import base org.eclipse.objectteams.otdt.internal.core.PhantomType;
 
 /**
  * Adapt the regular Java TypeHierarchy as to handle implicit inheritance, too (OTJLD §1.3.1).
