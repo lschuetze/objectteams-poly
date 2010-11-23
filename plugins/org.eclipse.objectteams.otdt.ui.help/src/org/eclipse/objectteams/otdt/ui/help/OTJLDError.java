@@ -91,7 +91,7 @@ public class OTJLDError
             }
             catch (IOException ex)
             {
-                OTHelpPlugin.getExceptionHandler().logException("Unable to resolve url: + url", ex);
+                OTHelpPlugin.logException("Unable to resolve url: + url", ex);
             }
 
             return result;

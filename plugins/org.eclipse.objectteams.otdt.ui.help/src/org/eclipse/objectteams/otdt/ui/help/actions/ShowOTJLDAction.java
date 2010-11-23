@@ -97,7 +97,7 @@ public class ShowOTJLDAction implements IViewActionDelegate
         }
         catch (PartInitException ex)
         {
-            OTHelpPlugin.getExceptionHandler().logException("Unable to initialize browser", ex); //$NON-NLS-1$
+            OTHelpPlugin.logException("Unable to initialize browser", ex); //$NON-NLS-1$
         }
     }
 
@@ -147,7 +147,7 @@ public class ShowOTJLDAction implements IViewActionDelegate
         }
         catch (CoreException ex)
         {
-            OTHelpPlugin.getExceptionHandler().logCoreException("Cannot retrieve marker from selection", ex); //$NON-NLS-1$
+            OTHelpPlugin.logException("Cannot retrieve marker from selection", ex); //$NON-NLS-1$
         }
     }
 }
