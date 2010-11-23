@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.search.TypeNameMatch;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
@@ -77,25 +78,32 @@ public team class CodeManipulationAdaptor
 				return base.needsImport(typeBinding, ref);
 // SH}
 			
-			if (!typeBinding.isTopLevel() && !typeBinding.isMember()) {
+			if (!typeBinding.isTopLevel() && !typeBinding.isMember() || typeBinding.isRecovered()) {
 				return false; // no imports for anonymous, local, primitive types or parameters types
 			}
-// disable visibility issues for OT:
-//			int modifiers= typeBinding.getModifiers();
-//			if (Modifier.isPrivate(modifiers)) {
-//				return false; // imports for privates are not required
-//			}
+/*{ObjectTeams disable visibility issues for OT:
+/* orig 
+			int modifiers= typeBinding.getModifiers();
+			if (Modifier.isPrivate(modifiers)) {
+				return false; // imports for privates are not required
+			}
+ :giro */
 			ITypeBinding currTypeBinding= Bindings.getBindingOfParentType(ref);
 			if (currTypeBinding == null) {
+				if (ASTNodes.getParent(ref, ASTNode.PACKAGE_DECLARATION) != null) {
+					return true; // reference in package-info.java
+				}
 				return false; // not in a type
 			}
-// disable for OT:
-//			if (!Modifier.isPublic(modifiers)) {
-//				if (!currTypeBinding.getPackage().getName().equals(typeBinding.getPackage().getName())) {
-//					return false; // not visible
-//				}
-//			}
-			
+/* orig:
+			if (!Modifier.isPublic(modifiers)) {
+				if (!currTypeBinding.getPackage().getName().equals(typeBinding.getPackage().getName())) {
+					return false; // not visible
+				}
+			}
+ :giro */
+// SH}
+
 			ASTNode parent= ref.getParent();
 			while (parent instanceof Type) {
 				parent= parent.getParent();
@@ -103,7 +111,7 @@ public team class CodeManipulationAdaptor
 			if (parent instanceof AbstractTypeDeclaration && parent.getParent() instanceof CompilationUnit) {
 				return true;
 			}
-			
+
 			if (typeBinding.isMember()) {
 //{ObjectTeams:  never import a role
 				if (typeBinding.isRole())
