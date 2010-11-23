@@ -90,7 +90,7 @@ protected class ContentProvider playedBy PackageExplorerContentProvider
                 }
                 catch (JavaModelException ex)
                 {
-                    OTDTUIPlugin.getExceptionHandler().logCoreException(ERROR_MESSAGE, ex);
+                    OTDTUIPlugin.logException(ERROR_MESSAGE, ex);
                 }
                 children.addAll(Arrays.asList(roleFiles));
 			}
@@ -110,7 +110,7 @@ protected class ContentProvider playedBy PackageExplorerContentProvider
 			}
 			catch (JavaModelException ex)
 			{
-				OTDTUIPlugin.getExceptionHandler().logCoreException(ERROR_MESSAGE, ex);
+				OTDTUIPlugin.logException(ERROR_MESSAGE, ex);
 			}
 		}
 	    return Util.replaceOTTypes(children.toArray());
