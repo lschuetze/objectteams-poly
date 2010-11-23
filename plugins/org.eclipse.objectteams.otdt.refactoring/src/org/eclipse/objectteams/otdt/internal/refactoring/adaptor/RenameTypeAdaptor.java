@@ -44,9 +44,9 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.objectteams.otdt.core.IOTType;
+import org.eclipse.objectteams.otdt.core.IPhantomType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.core.PhantomType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 
@@ -599,8 +599,8 @@ public team class RenameTypeAdaptor {
 		private IType getTeam(IType roleType) {
 			IType enclosingTeam;
 			IOTType otElement;
-			if(roleType instanceof PhantomType){
-				enclosingTeam = (IType) ((PhantomType)roleType).getParent();
+			if(roleType instanceof IPhantomType){
+				enclosingTeam = (IType) ((IPhantomType)roleType).getParent();
 			}else{
 				otElement = OTModelManager.getOTElement(roleType);
 				enclosingTeam = ((IRoleType)otElement).getTeam();

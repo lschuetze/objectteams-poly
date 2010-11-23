@@ -34,7 +34,7 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
-import org.eclipse.objectteams.otdt.core.PhantomType;
+import org.eclipse.objectteams.otdt.core.IPhantomType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IAmbuguityMessageCreator;
@@ -270,7 +270,7 @@ public team class PushDownAdaptor {
 			IType[] subTypes = hier.getSubtypes(getDeclaringType());
 			for (int i = 0; i < subTypes.length; i++) {
 				IType subType = subTypes[i];
-				if(subType instanceof PhantomType){
+				if(subType instanceof IPhantomType){
 					String msg = Messages.format("An implicit sub role of ''{0}'' is a phantom role, therefore the pushed down members cannot be moved to ''{1}''.", new String[] { getDeclaringType().getFullyQualifiedName('.'), subType.getFullyQualifiedName('.') });
 					status.addError(msg, JavaStatusContext.create(subType));
 				}
