@@ -163,7 +163,7 @@ public class OTNewProjectWizard
 			
 			String title = OTNewWizardMessages.NewProjectWizard_wizard_creation_failure_title;
 			String message = OTNewWizardMessages.NewProjectWizard_wizard_creation_failure_message;
-			OTDTUIPlugin.getExceptionHandler().logException("Wizard title" + title + ": "+ message, ex); //$NON-NLS-1$ //$NON-NLS-2$
+			OTDTUIPlugin.logException("Wizard title" + title + ": "+ message, ex); //$NON-NLS-1$ //$NON-NLS-2$
 			return false;
 		} catch  (InterruptedException e) {
 			return false; // canceled

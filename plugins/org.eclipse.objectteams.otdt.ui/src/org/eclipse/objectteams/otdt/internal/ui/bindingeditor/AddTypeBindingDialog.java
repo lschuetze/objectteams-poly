@@ -155,7 +155,7 @@ public class AddTypeBindingDialog extends FilteredTypesSelectionDialog
 	    			IType baseType = enclosingRole.getBaseClass();
 					scope = SearchEngine.createJavaSearchScope(new IJavaElement[] {baseType}, false);
 				} catch (JavaModelException ex) {
-					OTDTUIPlugin.getExceptionHandler().logCoreException("Cannot create enclosing-base-searchscope", ex); //$NON-NLS-1$
+					OTDTUIPlugin.logException("Cannot create enclosing-base-searchscope", ex); //$NON-NLS-1$
 				}
     		}
     		// else flag an error? for now, just create the other scope

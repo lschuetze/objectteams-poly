@@ -26,8 +26,8 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 
 /**
  * This resolver proposes the parameter names to be used in a callin/callout parameter mapping
@@ -59,11 +59,11 @@ public class ParameterMappingTemplateResolver extends TemplateVariableResolver {
 					return;
 				} else if (this.getType().equals(CALLIN_PARAMETER_NAME) && methodMapping.getElementType() == IOTJavaElement.CALLIN_MAPPING) 
 				{			
-					MethodData method = methodMapping.getRoleMethodHandle();			
+					IMethodSpec method = methodMapping.getRoleMethodHandle();			
 					argumentNames = method.getArgumentNames();
 				} else if (this.getType().equals(CALLOUT_PARAMETER_NAME) && methodMapping.getElementType() == IOTJavaElement.CALLOUT_MAPPING) 
 				{
-					MethodData method = ((ICalloutMapping) methodMapping).getBaseMethodHandle();			
+					IMethodSpec method = ((ICalloutMapping) methodMapping).getBaseMethodHandle();			
 					argumentNames = method.getArgumentNames();
 				} else {
 					if (isResultMappingSupported(methodMapping))

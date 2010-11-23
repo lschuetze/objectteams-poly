@@ -44,7 +44,7 @@ abstract class JobListener extends JobChangeAdapter
 	    	case IStatus.ERROR:
 	    	    if (_statusLine != null)
 	    	        _statusLine.setErrorMessage(OTDTUIPlugin.getResourceString("CallinMarkerCreator2.search_failed_message")); //$NON-NLS-1$
-	    		OTDTUIPlugin.getExceptionHandler().logException(status.getMessage(), status.getException());
+	    		OTDTUIPlugin.logException(status.getMessage(), status.getException());
 	    	    break;
 	    	case IStatus.CANCEL:
 	    	    if (_statusLine != null)

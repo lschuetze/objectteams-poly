@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
 import org.eclipse.objectteams.otdt.internal.ui.OTElementAdapterFactory;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarkerCreator2;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.RoleBindingChangedListener;
@@ -73,7 +72,7 @@ public class OTDTUIPlugin extends AbstractUIPlugin implements OTDTUIPluginConsta
 		}
 		catch (MissingResourceException ex)
 		{
-			getExceptionHandler().logException(ex);
+			logException("Error initializing resource bundle of OTDT/UI", ex); //$NON-NLS-1$
 			_resourceBundle = null;
 		}
     }
@@ -161,9 +160,9 @@ public class OTDTUIPlugin extends AbstractUIPlugin implements OTDTUIPluginConsta
 		super.stop(context);
 	}
 
-	public static ExceptionHandler getExceptionHandler()
-	{
-		return new ExceptionHandler(UIPLUGIN_ID);
+
+	public static void logException(String message, Throwable exception) {
+		_singleton.getLog().log(new Status(IStatus.ERROR, UIPLUGIN_ID, IStatus.OK, message, exception));
 	}
 
     private void registerAdapter()

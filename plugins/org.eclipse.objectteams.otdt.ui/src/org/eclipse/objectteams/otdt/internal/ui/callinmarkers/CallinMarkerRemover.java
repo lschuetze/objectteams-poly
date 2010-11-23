@@ -70,8 +70,7 @@ public class CallinMarkerRemover
 	        }
             catch (CoreException ex)
             {
-    			OTDTUIPlugin.getExceptionHandler().
-				 logException("Problems removing callin marker", ex); //$NON-NLS-1$
+    			OTDTUIPlugin.logException("Problems removing callin marker", ex); //$NON-NLS-1$
             }
     	}
     }

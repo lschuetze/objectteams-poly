@@ -130,7 +130,7 @@ public class UpdateRulerAction extends AbstractRulerActionDelegate
 		}
 		catch (CoreException ex)
 		{
-			OTDTUIPlugin.getExceptionHandler().logCoreException("Problems extending ruler context menu", ex); //$NON-NLS-1$
+			OTDTUIPlugin.logException("Problems extending ruler context menu", ex); //$NON-NLS-1$
 		}
 		// load and notify extenders:
 		if (this.extenders == null)
@@ -204,7 +204,7 @@ public class UpdateRulerAction extends AbstractRulerActionDelegate
 				}
 				catch (PartInitException ex)
 				{
-					OTDTUIPlugin.getExceptionHandler().logException("Problems initializing editor", ex); //$NON-NLS-1$
+					OTDTUIPlugin.logException("Problems initializing editor", ex); //$NON-NLS-1$
 				}
 			}
 		};

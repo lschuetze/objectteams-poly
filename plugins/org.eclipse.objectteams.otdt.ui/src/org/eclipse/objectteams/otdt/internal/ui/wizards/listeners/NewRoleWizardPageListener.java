@@ -244,7 +244,7 @@ public class NewRoleWizardPageListener extends NewTypeWizardPageListener
 			fSuperTeams = hierarchy.getAllSuperclasses(enclosingType);
 		}
 		catch (JavaModelException ex) {
-		    OTDTUIPlugin.getExceptionHandler().logException("Problems creating supertype hierarchy", ex); //$NON-NLS-1$
+		    OTDTUIPlugin.logException("Problems creating supertype hierarchy", ex); //$NON-NLS-1$
 		}
 	}
 

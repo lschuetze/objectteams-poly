@@ -226,7 +226,7 @@ public class NewTeamWizardPageListener extends NewTypeWizardPageListener
                 }
                 catch (JavaModelException ex)
                 {
-                    OTDTUIPlugin.getExceptionHandler().logCoreException("", ex); //$NON-NLS-1$
+                    OTDTUIPlugin.logException("", ex); //$NON-NLS-1$
                     // let pass			
                 }
             }       

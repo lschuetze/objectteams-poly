@@ -771,7 +771,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 						    	}
                             }
                             catch (BadLocationException ex) {
-                    			OTDTUIPlugin.getExceptionHandler().logException(OTDTUIPlugin.getResourceString("CallinMarkerCreator2.line_number_error_message"), ex); //$NON-NLS-1$
+                    			OTDTUIPlugin.logException(OTDTUIPlugin.getResourceString("CallinMarkerCreator2.line_number_error_message"), ex); //$NON-NLS-1$
                             }
 						    marker.setBaseElement(baseElement);
 						    marker.setRoleElement(bindings);
@@ -790,7 +790,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		try {
 			ResourcesPlugin.getWorkspace().run(runnable, null, IWorkspace.AVOID_UPDATE, monitor);
 		} catch (CoreException ex) {
-			OTDTUIPlugin.getExceptionHandler().logException("Error creating markers", ex); //$NON-NLS-1$
+			OTDTUIPlugin.logException("Error creating markers", ex); //$NON-NLS-1$
 		}
     }
 

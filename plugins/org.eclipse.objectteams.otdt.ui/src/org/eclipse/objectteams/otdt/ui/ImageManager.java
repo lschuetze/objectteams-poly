@@ -108,7 +108,7 @@ public class ImageManager implements ImageConstants
 		}
 		catch (MalformedURLException ex)
 		{
-			OTDTUIPlugin.getExceptionHandler().logException(ex);
+			OTDTUIPlugin.logException("Error registering plugin images", ex); //$NON-NLS-1$
 		}
 	}
 
@@ -150,7 +150,7 @@ public class ImageManager implements ImageConstants
 		}
 		catch (MalformedURLException ex)
 		{
-			OTDTUIPlugin.getExceptionHandler().logException(ex);
+			OTDTUIPlugin.logException("Error initializing images", ex); //$NON-NLS-1$
 		}
 	}
 	

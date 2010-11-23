@@ -137,11 +137,11 @@ public class TeamSelectionDialog extends TwoPaneElementSelector
 	    }
 	    catch (CoreException ex)
 	    {
-	        OTDTUIPlugin.getExceptionHandler().logCoreException("Problems searching team types", ex); //$NON-NLS-1$
+	        OTDTUIPlugin.logException("Problems searching team types", ex); //$NON-NLS-1$
 	    }
 	    catch (InternalCompilerError ex) // be defensive against InternalCompilerErrors :-/
 	    {
-	        OTDTUIPlugin.getExceptionHandler().logException("Problems searching team types", ex); //$NON-NLS-1$
+	        OTDTUIPlugin.logException("Problems searching team types", ex); //$NON-NLS-1$
 	    }
 	    
 		IOTType[] teamsInScope = requestor.getOTTypes();

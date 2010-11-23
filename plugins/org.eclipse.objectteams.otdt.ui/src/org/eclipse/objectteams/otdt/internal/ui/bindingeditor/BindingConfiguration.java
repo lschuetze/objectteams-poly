@@ -70,11 +70,11 @@ import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 import org.eclipse.objectteams.otdt.ui.ImageConstants;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 import org.eclipse.swt.SWT;
@@ -529,7 +529,7 @@ public class BindingConfiguration extends Composite
 				// add short-hand callout methods:
 				IMethodMapping[] mappings = ((IRoleType)otType).getMethodMappings(IRoleType.CALLOUTS);
 				for (int j = 0; j < mappings.length; j++) {
-					MethodData method = mappings[j].getRoleMethodHandle();
+					IMethodSpec method = mappings[j].getRoleMethodHandle();
 					String signature = method.getSelector()+method.getSignature();
 					if (!signatures.contains(signature))
 					{
@@ -592,11 +592,11 @@ public class BindingConfiguration extends Composite
 				if (qualifiedBaseName != null)
 					_baseMethods = getBaseMethods(project.findType(qualifiedBaseName));
 				else
-					OTDTUIPlugin.getExceptionHandler().logCoreException("Failed to resolve focus role - no methods available.", null); //$NON-NLS-1$
+					OTDTUIPlugin.logException("Failed to resolve focus role - no methods available.", null); //$NON-NLS-1$
 			}
 			catch (JavaModelException ex)
 			{
-				OTDTUIPlugin.getExceptionHandler().logCoreException(ex.getMessage(), ex);
+				OTDTUIPlugin.logException(ex.getMessage(), ex);
 			}
 		}
 		

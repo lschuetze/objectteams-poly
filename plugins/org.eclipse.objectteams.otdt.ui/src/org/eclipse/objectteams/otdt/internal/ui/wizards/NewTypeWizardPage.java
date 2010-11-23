@@ -873,7 +873,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 			}
 			catch (JavaModelException ex)
 			{
-				OTDTUIPlugin.getExceptionHandler().logCoreException(null,ex);
+				OTDTUIPlugin.logException("",ex); //$NON-NLS-1$
 			}
 		}            
 	}    

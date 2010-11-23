@@ -270,7 +270,7 @@ public abstract class NewTypeWizardPageListener implements IStringButtonAdapter,
 		} 
 		catch (JavaModelException ex) 
 		{
-			OTDTUIPlugin.getExceptionHandler().logCoreException(null, ex);
+			OTDTUIPlugin.logException(null, ex);
 		}
 		
 		if (packages == null) 
@@ -532,7 +532,7 @@ public abstract class NewTypeWizardPageListener implements IStringButtonAdapter,
 	    catch (JavaModelException ex)
 	    {
 	        status.setError(NewWizardMessages.NewTypeWizardPage_error_EnclosingTypeNotExists);
-            OTDTUIPlugin.getExceptionHandler().logCoreException("", ex);	         //$NON-NLS-1$
+            OTDTUIPlugin.logException("", ex);	         //$NON-NLS-1$
 	        return status;
 	    }
 	}
