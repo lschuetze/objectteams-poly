@@ -15,7 +15,7 @@ import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.core.util.Util;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 
 /**
  * @see IMethod
@@ -44,7 +44,7 @@ protected SourceMethod(JavaElement parent, String name, String[] parameterTypes)
 	}
 }
 //{ObjectTeams: converting factory method:
-public static IMethod createHandle(JavaElement parent, MethodData methodData) {
+public static IMethod createHandle(JavaElement parent, IMethodSpec methodData) {
 	final String returnType = methodData.getReturnType();
 	final String[] parameterNames = methodData.getArgumentNames();
 	// create a handle that can answer some bits without computing infos:

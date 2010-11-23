@@ -52,12 +52,12 @@ import org.eclipse.jdt.internal.core.TypeParameter;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
-import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
 import org.eclipse.objectteams.otdt.core.util.MethodData;
 
 
@@ -158,7 +158,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     abstract protected char getMappingKindChar();
     abstract protected void getBaseMethodsForHandle(StringBuffer buff);
 	
-    protected void getMethodForHandle(MethodData method, StringBuffer buff) {
+    protected void getMethodForHandle(IMethodSpec method, StringBuffer buff) {
     	JavaElement.escapeMementoName(buff, method.getSelector());
     	if (this._hasSignature) {
     		for (String argType : method.getArgumentTypes()) {
@@ -208,7 +208,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
             }
             catch (JavaModelException ex)
             {
-            	log("Failed to lookup original role method element!", ex); //$NON-NLS-1$
+            	Util.log(ex, "Failed to lookup original role method element!"); //$NON-NLS-1$
             }
     	}
     	
@@ -331,7 +331,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	 * @return the first matching IMethod in the set of types or null if
 	 * 		   nothing found
 	 */
-	protected IMethod findMethod(IType[] types, MethodData methodHandle)
+	protected IMethod findMethod(IType[] types, IMethodSpec methodHandle)
 		throws JavaModelException
 	{
 		// cycle through types...
@@ -372,18 +372,14 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	}
 
 	// helper for above to generalize over real methods and callouts:
-	private boolean isEqualMethod(MethodData baseMethodHandle, IMethod foundMethodOrCallout, String foundSelector) {
+	private boolean isEqualMethod(IMethodSpec baseMethodHandle, IMethod foundMethodOrCallout, String foundSelector) {
 		if (!foundSelector.equals(baseMethodHandle.getSelector()))
 			return false;
-		if (baseMethodHandle.isIncomplete())
+		if (!baseMethodHandle.hasSignature())
 			return true;
 		return Util.equalArraysOrNull(foundMethodOrCallout.getParameterTypes(), baseMethodHandle.getArgumentTypes());
 	}
     
-	protected void log(String msg, JavaModelException ex)
-	{
-		ExceptionHandler.getOTDTCoreExceptionHandler().logException(msg, ex);
-	}
 //{OT_COPY_PASTE: SourceRefElement, STATE: 3.4 M7
 	/**
 	 * Return the first instance of IOpenable in the hierarchy of this
@@ -504,7 +500,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	public String[] getParameterNames() throws JavaModelException
 	{
 		if (   this._roleMethodHandle != null
-			&& !this._roleMethodHandle.isIncomplete())
+			&& this._roleMethodHandle.hasSignature())
 				return this._roleMethodHandle.getArgumentNames();
 	    return getIMethod().getParameterNames();
 	}
@@ -517,7 +513,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	public String getReturnType() throws JavaModelException
 	{
 		if (   this._roleMethodHandle != null
-			&& !this._roleMethodHandle.isIncomplete())
+			&& this._roleMethodHandle.hasSignature())
 			return this._roleMethodHandle.getReturnType();
 	    return getIMethod().getReturnType();
 	}

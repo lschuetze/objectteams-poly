@@ -44,11 +44,11 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.jdt.internal.core.util.HandleFactory;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 import org.eclipse.objectteams.otdt.internal.core.MethodMapping;
 
 /**
@@ -612,7 +612,7 @@ protected void acceptSourceMethod(
 			if (otType.isRole()) {
 				for (IMethodMapping mapping : ((IRoleType)otType).getMethodMappings(IRoleType.CALLOUTS))
 				{
-					MethodData roleMethodHandle = mapping.getRoleMethodHandle();
+					IMethodSpec roleMethodHandle = mapping.getRoleMethodHandle();
 					if (   mapping.hasSignature() // could be short-hand callout?
 						&& roleMethodHandle.getSelector().equals(name)
 						&& roleMethodHandle.getArgumentTypes().length == parameterTypeNames.length)
@@ -729,10 +729,10 @@ protected void acceptMethodDeclaration(IType type, char[] selector, int start, i
 			IRoleType role = (IRoleType)otType;
 			IMethodMapping[] mappings = role.getMethodMappings(IRoleType.CALLOUT_MAPPING);
 			for (IMethodMapping mapping : mappings) {
-				MethodData mData = mapping.getRoleMethodHandle();
+				IMethodSpec mData = mapping.getRoleMethodHandle();
 				if (   mData != null
 					&& CharOperation.equals(mData.getSelector().toCharArray(), selector)
-					&& !mData.isIncomplete())
+					&& mData.hasSignature())
 				{
 					addElement(mapping);
 					return;

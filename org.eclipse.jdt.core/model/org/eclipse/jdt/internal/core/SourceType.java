@@ -28,11 +28,11 @@ import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
+import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.core.util.FieldData;
 import org.eclipse.objectteams.otdt.core.util.MethodData;
 import org.eclipse.objectteams.otdt.internal.core.CallinMapping;
 import org.eclipse.objectteams.otdt.internal.core.CalloutMapping;
@@ -412,7 +412,7 @@ public IJavaElement getHandleFromMemento(String token, MementoTokenizer memento,
 				// for callouts it is legal to not have a base method (due to some resolving problem)
 				return new CalloutMapping(0, 0, 0, 0, ottype, corrJavaMethod, roleMethod, (baseMethods.isEmpty() ? null : baseMethods.get(0)), hasSign, isOverride, 0/*declaredModifiers*/);
 			case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
-				FieldData baseField = CalloutToFieldMapping.createFieldData(memento, isSetter);
+				IFieldAccessSpec baseField = CalloutToFieldMapping.createFieldData(memento, isSetter);
 				return new CalloutToFieldMapping(0, 0, 0, 0, ottype, corrJavaMethod, roleMethod, baseField, hasSign, isOverride);
 			default:
 				throw new InternalCompilerError("Unexpected mapping kind");

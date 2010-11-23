@@ -22,7 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.objectteams.otdt.core.util.FieldData;
+import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
 import org.eclipse.objectteams.otdt.core.util.MethodData;
 
 public class ResolvedCalloutToFieldMapping extends CalloutToFieldMapping {
@@ -40,7 +40,7 @@ public class ResolvedCalloutToFieldMapping extends CalloutToFieldMapping {
 			IType  role,
 			IMethod	corrJavaMethod,
             MethodData roleMethodHandle,
-            FieldData baseFieldHandle,
+            IFieldAccessSpec baseFieldHandle,
             boolean hasSignature,
             boolean isOverride,
 	        String uniqueKey) {		

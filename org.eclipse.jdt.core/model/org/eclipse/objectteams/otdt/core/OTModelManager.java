@@ -193,7 +193,7 @@ public class OTModelManager
 		if ((otmRole != null) && (otmRole instanceof IRoleType))
 		{
 //{OTModelUpdate
-		    MethodData corrRoleMethData = info.getRoleMethod();
+		    IMethodSpec corrRoleMethData = info.getRoleMethod();
 		    IMethod correspondingRoleMethod = 
 		        role.getMethod(corrRoleMethData.getSelector(), 
 		                       corrRoleMethData.getArgumentTypes()); 
@@ -227,7 +227,7 @@ public class OTModelManager
 		if ((otmRole != null) && (otmRole instanceof IRoleType))
 		{
 //{OTModelUpdate
-		    MethodData corrRoleMethData = info.getRoleMethod();
+		    IMethodSpec corrRoleMethData = info.getRoleMethod();
 		    IMethod correspondingRoleMethod = 
 		        role.getMethod(corrRoleMethData.getSelector(), 
 		                       corrRoleMethData.getArgumentTypes()); 
@@ -262,7 +262,7 @@ public class OTModelManager
         
         if ((otmRole != null) && (otmRole instanceof IRoleType))
         {
-            MethodData corrRoleMethData = info.getRoleMethod();
+            IMethodSpec corrRoleMethData = info.getRoleMethod();
             IMethod correspondingRoleMethod = 
                 role.getMethod(corrRoleMethData.getSelector(), 
                                corrRoleMethData.getArgumentTypes()); 

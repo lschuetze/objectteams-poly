@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.util.MethodData;
@@ -133,7 +134,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	{
 		if (this._mimicMethodDecl) {
 			
-			MethodData roleMethodHandle = this.getRoleMethodHandle();
+			IMethodSpec roleMethodHandle = this.getRoleMethodHandle();
 			if (roleMethodHandle != null)
 				return roleMethodHandle.getSelector();
 			return "(unknown role method)"; //$NON-NLS-1$
@@ -256,9 +257,9 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 
 	public String[] getExceptionTypes() throws JavaModelException
 	{
-		MethodData roleMethodHandle = getRoleMethodHandle();
+		IMethodSpec roleMethodHandle = getRoleMethodHandle();
 		if (   roleMethodHandle != null
-			&& !roleMethodHandle.isIncomplete())
+			&& roleMethodHandle.hasSignature())
 		{
 			try {
 				return getIMethod().getExceptionTypes();

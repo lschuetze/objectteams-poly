@@ -43,7 +43,9 @@ import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObjectToInt;
 import org.eclipse.jdt.internal.core.util.ReferenceInfoAdapter;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.util.FieldData;
 import org.eclipse.objectteams.otdt.core.util.MethodData;
@@ -861,7 +863,7 @@ private SourceMethodMappingInfo createMappingInfo(MappingElementInfo mappingInfo
 		info.setCalloutKind(mappingInfo.isOverride(), mappingInfo.getDeclaredModifiers());
 	JavaModelManager manager = JavaModelManager.getJavaModelManager();
 	
-	MethodData roleMethod = mappingInfo.getRoleMethod();
+	IMethodSpec roleMethod = mappingInfo.getRoleMethod();
 	{
 		String[] parameterNames = roleMethod.getArgumentNames();
 		for (int i = 0, length = parameterNames.length; i < length; i++)
@@ -869,7 +871,7 @@ private SourceMethodMappingInfo createMappingInfo(MappingElementInfo mappingInfo
 		info.setRoleArgumentNames(parameterNames);
 	}
 
-	MethodData[] baseMethods = mappingInfo.getBaseMethods();
+	IMethodSpec[] baseMethods = mappingInfo.getBaseMethods();
 	if (baseMethods != null) { // incomplete mapping during editing?
 		String[][] baseParameterNames = new String[baseMethods.length][];
 		String[][] baseParameterTypes = new String[baseMethods.length][];
@@ -990,7 +992,7 @@ public void enterCalloutToFieldMapping(ISourceElementRequestor.CalloutToFieldInf
     }
 
     if (calloutInfo.rightSelector != null) {
-	    FieldData baseField = new FieldData(
+	    IFieldAccessSpec baseField = new FieldData(
 	            new String(calloutInfo.rightSelector),
 	            calloutInfo.rightReturnType != null
 	            	? Signature.createTypeSignature(calloutInfo.rightReturnType, false)

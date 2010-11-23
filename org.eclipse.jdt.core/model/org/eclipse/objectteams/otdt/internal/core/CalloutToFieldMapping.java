@@ -29,7 +29,9 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
+import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.util.FieldData;
@@ -44,7 +46,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 {
 	private boolean   _isOverride;
     private IField    _baseField;
-    private FieldData _baseFieldHandle;
+    private IFieldAccessSpec _baseFieldHandle;
 
 	public CalloutToFieldMapping(
             int declarationSourceStart,
@@ -54,7 +56,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
             IRoleType role,
             IMethod correspondingJavaElem, 
 			MethodData roleMethodHandle,
-            FieldData baseFieldHandle,
+            IFieldAccessSpec baseFieldHandle,
             boolean hasSignature,
             boolean isOverride)
 	{
@@ -70,7 +72,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 			IType parentRole,
 			IMethod correspondingJavaElem, 
 			MethodData roleMethodHandle,
-			FieldData baseFieldHandle,
+			IFieldAccessSpec baseFieldHandle,
 			boolean hasSignature,
 			boolean isOverride)
 	{
@@ -86,7 +88,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
             IType parentRole,
             IMethod correspondingJavaElem, 
 			MethodData roleMethodHandle,
-            FieldData baseFieldHandle,
+            IFieldAccessSpec baseFieldHandle,
             boolean hasSignature,
             boolean isOverride,
             boolean addAsChild)
@@ -136,7 +138,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     {
 		if (this._mimicMethodDecl) {
 			
-			MethodData roleMethodHandle = this.getRoleMethodHandle();
+			IMethodSpec roleMethodHandle = this.getRoleMethodHandle();
 			if (roleMethodHandle != null)
 				return roleMethodHandle.getSelector();
 			return "(unknown role method)";
@@ -173,7 +175,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     }
 
     //added for the SourceTypeConverter
-    public FieldData getBaseFieldHandle()
+    public IFieldAccessSpec getBaseFieldHandle()
     {
         return _baseFieldHandle;
     }
@@ -212,7 +214,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
      * @return the first matching IField in the set of types or null if
      * nothing found
      */
-    private IField findField(IType[] types, FieldData fieldHandle)
+    private IField findField(IType[] types, IFieldAccessSpec fieldHandle)
         throws JavaModelException
     {
         // cycle through types...
@@ -254,7 +256,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     	JavaElement.escapeMementoName(buff, this._baseFieldHandle.getFieldType());
     }
     // ==== retreive from memento:
-    public static FieldData createFieldData(MementoTokenizer memento, boolean isSetter) {
+    public static IFieldAccessSpec createFieldData(MementoTokenizer memento, boolean isSetter) {
     	String selector = memento.nextToken();
     	String cur = memento.nextToken();
     	if (cur.charAt(0) == JavaElement.JEM_METHOD)

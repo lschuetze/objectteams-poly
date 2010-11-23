@@ -22,7 +22,6 @@ package org.eclipse.objectteams.otdt.core;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.objectteams.otdt.core.util.FieldData;
 
 /**
  * Specialized form of an IMethodMapping which provides a direct link to
@@ -44,7 +43,7 @@ public interface ICalloutToFieldMapping extends IMethodMapping
      * 
      * @return handle representing the base field spec 
      */
-    public FieldData getBaseFieldHandle();
+    public IFieldAccessSpec getBaseFieldHandle();
     
     /**
      * Is this a callout-override ('=>')?

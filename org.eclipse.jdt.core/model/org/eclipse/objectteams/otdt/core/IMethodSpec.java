@@ -1,0 +1,62 @@
+/**********************************************************************
+ * This file is part of "Object Teams Development Tooling"-Software
+ * 
+ * Copyright 2010 GK Software AG
+ * 
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * $Id$
+ * 
+ * Please visit http://www.eclipse.org/objectteams for updates and contact.
+ * 
+ * Contributors:
+ * 	  Stephan Herrmann - Initial API and implementation
+ **********************************************************************/
+package org.eclipse.objectteams.otdt.core;
+
+import org.eclipse.jdt.core.IMethod;
+
+/**
+ * Represents a method spec in a method mapping (callout/callin) in the extended Java model.
+ * 
+ * @author stephan
+ * @since 0.8.0 (eclipse.org incubation)
+ */
+public interface IMethodSpec {
+
+	/** Answer whether this method spec specifies signatures (otherwise it only consists of the selector. */
+	public boolean hasSignature();
+
+	/** Answer the argument types in the method spec's signature, if specified (see {@link #hasSignature()}). */
+	public String[] getArgumentTypes();
+
+	/** Answer the argument names in the method spec's signature, if specified (see {@link #hasSignature()}). */
+	public String[] getArgumentNames();
+
+	/** Answer the selector by which this method spec refers to a (base or role) method. */
+	public String getSelector();
+
+	/** Answer the return type in the method spec's signature, if specified (see {@link #hasSignature()}). */
+	public String getReturnType();
+
+	/** Similar to {@link IMethod#getSignature()}, but works as a handle only method  (see also {@link #hasSignature()}). */
+	public String getSignature();
+
+	/** Answer whether this method spec actually declares a method (i.e., it's a role method spec in a callout method binding).*/
+	public boolean isDeclaration();
+
+	/** Answer whether the method spec matches base methods with more specific return types than the type specified here (callin only). */
+	public boolean hasCovariantReturn();
+
+	/** Answer the names of type parameters. */
+	public char[][] getTypeParameterNames();
+
+	/** Start position of this element. */
+	public int getSourceStart();
+
+	/** End position of this element. */
+	public int getSourceEnd();
+
+}

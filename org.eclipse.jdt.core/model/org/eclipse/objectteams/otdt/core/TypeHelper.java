@@ -43,8 +43,8 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
+import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
 import org.eclipse.objectteams.otdt.internal.core.OTType;
 
 /**
@@ -181,9 +181,8 @@ public class TypeHelper
                     else
                     {
                     	//TODO(ak): role not present in OTM
-                    	ExceptionHandler.getOTDTCoreExceptionHandler().logException(
-                    		"Role " + roleName + " not present in OTM!", //$NON-NLS-1$ //$NON-NLS-2$
-                    		new Exception("Unexpected model state!")); //$NON-NLS-1$
+                    	Util.log(new Exception("Unexpected model state!"), //$NON-NLS-1$
+                    		"Role " + roleName + " not present in OTM!"); //$NON-NLS-1$ //$NON-NLS-2$
                     }
 					break;
                 }

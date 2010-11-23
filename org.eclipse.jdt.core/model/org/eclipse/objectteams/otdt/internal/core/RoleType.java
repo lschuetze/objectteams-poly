@@ -48,7 +48,6 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
 
 /**
  * IRoleType implementation
@@ -163,9 +162,8 @@ public class RoleType extends OTType implements IRoleType
             catch (Exception ex)
             {
             	// just be sure we get all kind of exceptions
-            	ExceptionHandler.getOTDTCoreExceptionHandler().logException(
-            		MessageFormat.format("Resolving of base class ''{0}'' failed!", new Object[] {_baseClassName}), //$NON-NLS-1$
-            		ex);
+            	Util.log(ex,
+            		MessageFormat.format("Resolving of base class ''{0}'' failed!", new Object[] {_baseClassName})); //$NON-NLS-1$
             }
 
             // when having syntax/compilation errors, we can't ensure to find our baseclass

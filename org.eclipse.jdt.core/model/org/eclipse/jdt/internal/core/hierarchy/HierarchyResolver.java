@@ -68,10 +68,10 @@ import org.eclipse.jdt.internal.compiler.util.Messages;
 import org.eclipse.jdt.internal.core.*;
 import org.eclipse.jdt.internal.core.util.ASTNodeFinder;
 import org.eclipse.jdt.internal.core.util.HandleFactory;
+import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 
@@ -609,7 +609,7 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 				    fullyQualifiedName = TypeHelper.getQualifiedRoleSplitName(focus).toCharArray();
 				}
 				catch (JavaModelException ex) {
-				    ExceptionHandler.getOTDTCoreExceptionHandler().logCoreException("Error getting role-split name of type", ex); //$NON-NLS-1$
+				    Util.log(ex, "Error getting role-split name of type"); //$NON-NLS-1$
 				}
 //carp}
 				setFocusType(CharOperation.splitOn('.', fullyQualifiedName));

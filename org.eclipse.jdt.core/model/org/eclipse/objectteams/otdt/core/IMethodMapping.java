@@ -24,7 +24,6 @@ package org.eclipse.objectteams.otdt.core;
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.objectteams.otdt.core.util.MethodData;
 
 /**
@@ -33,7 +32,7 @@ import org.eclipse.objectteams.otdt.core.util.MethodData;
  * @author jwloka
  * @version $Id: IMethodMapping.java 23416 2010-02-03 19:59:31Z stephan $
  */
-public interface IMethodMapping extends IOTJavaElement, IMember, ISourceReference, IAnnotatable
+public interface IMethodMapping extends IOTJavaElement, IMember, IAnnotatable
 {
 	/**
 	 * Returns the type of mapping e.g. callin Mapping

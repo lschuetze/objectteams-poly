@@ -21,7 +21,7 @@
 package org.eclipse.objectteams.otdt.internal.core;
 
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
-import org.eclipse.objectteams.otdt.core.util.FieldData;
+import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
 import org.eclipse.objectteams.otdt.core.util.MethodData;
 
 
@@ -36,7 +36,7 @@ public class MappingElementInfo
 {
 	private MethodData   _roleMethod;
 	private MethodData[] _baseMethods;
-    private FieldData    _baseField;
+    private IFieldAccessSpec    _baseField;
     private int          _sourceStart;
     private int          _sourceEnd;
 	private int          _declarationSourceStart;
@@ -60,7 +60,7 @@ public class MappingElementInfo
         return _baseMethods;
     }
     
-    public FieldData getBaseField()
+    public IFieldAccessSpec getBaseField()
     {
     	return _baseField;
     }
@@ -110,7 +110,7 @@ public class MappingElementInfo
         _baseMethods = data;
     }
 
-    public void setBaseField(FieldData data)
+    public void setBaseField(IFieldAccessSpec data)
     {
     	_baseField = data;
     }

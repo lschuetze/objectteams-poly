@@ -53,7 +53,7 @@ import org.eclipse.jdt.internal.core.search.BasicSearchEngine;
 import org.eclipse.jdt.internal.core.search.TypeNameMatchRequestorWrapper;
 import org.eclipse.jdt.internal.core.util.ASTNodeFinder;
 import org.eclipse.jdt.internal.core.util.HashSetOfCharArrayArray;
-import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
+import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.internal.codeassist.SelectionNodesFound;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
@@ -1081,7 +1081,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 //{ObjectTeams: in case other exceptions are thrown (due to incomplete / not working OT Code)
 		} catch (Exception ex)
 		{
-			ExceptionHandler.getOTDTCoreExceptionHandler().logException(ex);
+			Util.log(ex);
 //haebor}
 		} finally {
 //{ObjectTeams
@@ -1689,7 +1689,7 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 			}
 		} catch (AbortCompilation e) { // ignore this exception for now since it typically means we cannot find java.lang.Object
 //{ObjectTeams: for debugging reasons only
-		    ExceptionHandler.getOTDTCoreExceptionHandler().logException("Classpath incorrect?", e);    // ignore this exception for now since it typically means we cannot find java.lang.Object //$NON-NLS-1$
+		    Util.log(e, "Classpath incorrect?");    // ignore this exception for now since it typically means we cannot find java.lang.Object //$NON-NLS-1$
 //jwl}
 		} finally {
 			reset(true);

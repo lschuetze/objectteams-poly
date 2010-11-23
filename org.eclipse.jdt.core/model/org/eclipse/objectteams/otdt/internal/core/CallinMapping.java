@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
@@ -109,7 +110,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     	}
     }
     protected void getBaseMethodsForHandle(StringBuffer buff) {
-    	for (MethodData baseMethod : this._baseMethodHandles)
+    	for (IMethodSpec baseMethod : this._baseMethodHandles)
     		getMethodForHandle(baseMethod, buff);
     }    
     // ====
@@ -191,7 +192,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     
     public boolean hasCovariantReturn() {
     	if (this._baseMethodHandles != null)
-    		for (MethodData baseMethod : this._baseMethodHandles) 
+    		for (IMethodSpec baseMethod : this._baseMethodHandles) 
 				if (baseMethod.hasCovariantReturn())
 					return true;
 		return false;

@@ -23,8 +23,8 @@ package org.eclipse.objectteams.otdt.internal.core;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.core.IRoleFileType;
-import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
 
 /**
  * @author gis
@@ -47,7 +47,7 @@ public class RoleFileType extends RoleType implements IRoleFileType
         }
     	catch (JavaModelException ex)
     	{
-    	    ExceptionHandler.getOTDTCoreExceptionHandler().logException(ex);
+    	    Util.log(ex);
     	}
 
     	return null;    	

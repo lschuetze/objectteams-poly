@@ -43,9 +43,9 @@ import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
+import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.core.util.FieldData;
 import org.eclipse.objectteams.otdt.core.util.MethodData;
 import org.eclipse.objectteams.otdt.internal.core.CallinMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
@@ -762,7 +762,7 @@ public abstract class TypeConverter {
         result.compilationResult = compilationResult;
         result.roleMethodSpec = convert(callout.getRoleMethodHandle(), hasSignature);
 
-        FieldData baseFieldHandle = callout.getBaseFieldHandle();
+        IFieldAccessSpec baseFieldHandle = callout.getBaseFieldHandle();
         result.baseMethodSpec = convert(baseFieldHandle, hasSignature);
 
         return result;
@@ -856,7 +856,7 @@ public abstract class TypeConverter {
 		return result;
 	}
 
-    protected MethodSpec convert(FieldData handle, boolean hasSignature)
+    protected MethodSpec convert(IFieldAccessSpec handle, boolean hasSignature)
     {
         //FIXME(gbr) source positions are not set!
         MethodSpec result = null;
