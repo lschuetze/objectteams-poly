@@ -70,7 +70,7 @@ public team class LaunchConfigurationInitializer {
 						setAttribute(OTDebugPlugin.OT_LAUNCH, true);
 					}
 				} catch (CoreException e) {
-					OTDebugPlugin.getExceptionHandler().logException("Error getting a launch configuration attribute", e); //$NON-NLS-1$
+					OTDebugPlugin.logException("Error getting a launch configuration attribute", e); //$NON-NLS-1$
 				}
 				// this role has served its purpose - unregister now:
 				LaunchConfigurationInitializer.this.unregisterRole(this, LaunchConfigWC.class);

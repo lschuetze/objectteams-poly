@@ -85,7 +85,7 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
 			teamHandles =  configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_LIST, teamHandles);	
 			teamsActive = configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_ACTIVE, true);
 		} catch (CoreException ce) {
-		    OTDTUIPlugin.getExceptionHandler().logCoreException("Cannot read team configuration", ce); //$NON-NLS-1$
+		    OTDTUIPlugin.logException("Cannot read team configuration", ce); //$NON-NLS-1$
 		}
 
 		_teamConfig.clearTeamList();
@@ -194,7 +194,7 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
 		try {
 			projectName= config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, "");	 //$NON-NLS-1$
 		} catch (CoreException ce) {
-			OTDTUIPlugin.getExceptionHandler().logCoreException("Unable to retrieve _project from launch configuration", ce); //$NON-NLS-1$
+			OTDTUIPlugin.logException("Unable to retrieve _project from launch configuration", ce); //$NON-NLS-1$
 		}
 		return projectName;
 	}
