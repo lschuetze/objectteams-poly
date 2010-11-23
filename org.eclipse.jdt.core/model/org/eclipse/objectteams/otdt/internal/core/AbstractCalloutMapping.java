@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 /** 
  * Common super-class of callout and callout-to-field. 

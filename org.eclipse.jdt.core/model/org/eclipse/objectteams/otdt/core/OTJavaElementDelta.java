@@ -35,11 +35,10 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
  */
 public class OTJavaElementDelta implements IJavaElementDelta 
 {
-	private IJavaElementDelta _delegate;
-	private Map<IJavaElement,IOTJavaElement>	_otElemMapping;
+	private IJavaElementDelta delegate;
+	private Map<IJavaElement,IOTJavaElement>	otElemMapping;
 
-	public OTJavaElementDelta(IJavaElementDelta delta)
-	{
+	public OTJavaElementDelta(IJavaElementDelta delta) {
 		this(new HashMap<IJavaElement,IOTJavaElement>(), delta);//intentionally empty HashMap!
 	}
 
@@ -48,114 +47,89 @@ public class OTJavaElementDelta implements IJavaElementDelta
 	 * @param delta
 	 */
 	public OTJavaElementDelta(Map<IJavaElement,IOTJavaElement> otElemMapping, IJavaElementDelta delta) {
-		
-		_delegate = delta;
-		_otElemMapping = otElemMapping;
+		this.delegate = delta;
+		this.otElemMapping = otElemMapping;
 	}
 
-	public IJavaElement getElement() 
-	{
-		return maybeTransformElement(_delegate.getElement());
+	public IJavaElement getElement() {
+		return maybeTransformElement(this.delegate.getElement());
 	}
 	
-	public IJavaElementDelta[] getAddedChildren() 
-	{
-		return wrapChildren(_delegate.getAddedChildren());
+	public IJavaElementDelta[] getAddedChildren() {
+		return wrapChildren(this.delegate.getAddedChildren());
 	}
 	
-	public IJavaElementDelta[] getAffectedChildren() 
-	{
-		return wrapChildren(_delegate.getAffectedChildren());
+	public IJavaElementDelta[] getAffectedChildren() {
+		return wrapChildren(this.delegate.getAffectedChildren());
 	}
 	
-	public IJavaElementDelta[] getChangedChildren() 
-	{
-		return wrapChildren(_delegate.getChangedChildren());
+	public IJavaElementDelta[] getChangedChildren() {
+		return wrapChildren(this.delegate.getChangedChildren());
 	}
 	
 	
-	public IJavaElement getMovedFromElement() 
-	{
-		return maybeTransformElement(_delegate.getMovedFromElement());
+	public IJavaElement getMovedFromElement() {
+		return maybeTransformElement(this.delegate.getMovedFromElement());
 	}
 	
-	public IJavaElement getMovedToElement() 
-	{
-		return maybeTransformElement(_delegate.getMovedToElement());
+	public IJavaElement getMovedToElement() {
+		return maybeTransformElement(this.delegate.getMovedToElement());
 	}
 	
-	public IJavaElementDelta[] getRemovedChildren() 
-	{
-		return wrapChildren(_delegate.getRemovedChildren());
+	public IJavaElementDelta[] getRemovedChildren() {
+		return wrapChildren(this.delegate.getRemovedChildren());
 	}
 	
 	public IJavaElementDelta[] getAnnotationDeltas() {
-		return wrapChildren(_delegate.getAnnotationDeltas());
+		return wrapChildren(this.delegate.getAnnotationDeltas());
 	}
 
 //pure delegates	
-	public IResourceDelta[] getResourceDeltas() 
-	{
-		return _delegate.getResourceDeltas();
+	public IResourceDelta[] getResourceDeltas() {
+		return this.delegate.getResourceDeltas();
 	}
 	
-	public String toString() 
-	{
-		return _delegate.toString();
+	public String toString() {
+		return this.delegate.toString();
 	}
 	
-	public int getFlags() 
-	{
-		return _delegate.getFlags();
+	public int getFlags() {
+		return this.delegate.getFlags();
 	}
 	
-	public int getKind() 
-	{
-		return _delegate.getKind();
+	public int getKind() {
+		return this.delegate.getKind();
 	}
 
-	public CompilationUnit getCompilationUnitAST() 
-	{
-		return _delegate.getCompilationUnitAST();
+	public CompilationUnit getCompilationUnitAST() {
+		return this.delegate.getCompilationUnitAST();
 	}
 	
 	
 //end of delegates
 //helpers
-	private OTJavaElementDelta[] wrapChildren(IJavaElementDelta[] deltas)
-	{
-		OTJavaElementDelta[] result = wrapDeltas(deltas);
-		
-		return result;
+	private OTJavaElementDelta[] wrapChildren(IJavaElementDelta[] deltas) {
+		return wrapDeltas(deltas);
 	}
 	
-	private OTJavaElementDelta[] wrapDeltas(IJavaElementDelta[] deltas)
-	{
+	private OTJavaElementDelta[] wrapDeltas(IJavaElementDelta[] deltas) {
 		OTJavaElementDelta[] result = new OTJavaElementDelta[deltas.length];
 		for(int idx = 0; idx < deltas.length; idx++)
-		{
-			result[idx] = new OTJavaElementDelta(_otElemMapping, deltas[idx]);
-		}
+			result[idx] = new OTJavaElementDelta(this.otElemMapping, deltas[idx]);
+
 		return result;
 	}
 	
-	private IJavaElement maybeTransformElement(IJavaElement element)
-	{
-		if(element instanceof IType)
-		{
+	private IJavaElement maybeTransformElement(IJavaElement element) {
+		if(element instanceof IType) {
 			IOTJavaElement otElement = 
 				OTModelManager.getOTElement((IType)element);
-			if(otElement != null)
-			{
-				return (IJavaElement) otElement;
-			}
-			else
-			{
-				IOTJavaElement otElem = _otElemMapping.get(element);
+			if(otElement != null) {
+				return otElement;
+			} else {
+				IOTJavaElement otElem = this.otElemMapping.get(element);
 				if (otElem != null)
-				{
 					return otElem;
-				}
 			}
 		}
 		return element;

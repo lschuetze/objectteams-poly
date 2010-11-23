@@ -110,7 +110,7 @@ public class OTType extends OTJavaElement implements IOTType
 
 	/**
 	 * Inner types are represented (like in the JavaModel) as children. This
-	 * methods filters IOTType children and returns them.
+	 * methods filters IType children and returns them.
 	 */
 	public IType[] getInnerTypes()
 	{

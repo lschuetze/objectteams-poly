@@ -30,7 +30,7 @@ import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 
 /**
@@ -113,8 +113,8 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 		        IJavaElement.METHOD, /* pretending to be a method */
 		        (IType) getCorrespondingJavaElement().getParent(),
 		        getIMethod(),
-		        getRoleMethodHandle(),
-		        getBaseMethodHandle(),
+		        this._roleMethodHandle,
+		        this._baseMethodHandle,
 		        hasSignature(),
 		        isOverride(),
 		        getDeclaredModifiers(),
@@ -213,7 +213,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
     }
     
 	// added for the SourceTypeConverter
-    public MethodData getBaseMethodHandle()
+    public IMethodSpec getBaseMethodHandle()
     {
     	return _baseMethodHandle;
     }

@@ -48,9 +48,9 @@ public class SelectionOnMethodSpec extends MethodSpec
 	}
 
 	@Override
-	public void resolveTypes(CallinCalloutScope scope, boolean isBaseSide) {
-		super.resolveTypes(scope, isBaseSide);
-		this.scope = scope;
+	public void resolveTypes(CallinCalloutScope aScope, boolean isBaseSide) {
+		super.resolveTypes(aScope, isBaseSide);
+		this.scope = aScope;
 	}
 	@Override
     public void resolveFinished()

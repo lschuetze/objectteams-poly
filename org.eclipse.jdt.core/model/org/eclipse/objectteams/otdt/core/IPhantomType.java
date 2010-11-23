@@ -16,22 +16,18 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.core;
 
+import org.eclipse.jdt.core.IType;
+
 /**
- * Represents a field access spec in a callout-to-field mapping in the extended Java model.
- * 
- * @author stephan
+ * Marker interface to distinguish phantom roles from regular types.
+ * A phantom role is a role that is inherited from a super team,
+ * and not overridden in the current team, i.e., the current team
+ * has no source corresponding to the phantom role.
+ *   
  * @since 3.7
  * @noimplement This interface is not intended to be implemented by clients.
  */
-public interface IFieldAccessSpec {
-
-	/** answer the name used for referencing the base field. */
-	public String getSelector();
-
-	/** answer the field type if specified. */
-	public String getFieldType();
-
-	/** answer whether this specifies a setter access (else: getter). */
-	public boolean isSetter();
-
+//TODO: should this extend IRoleType rather than just IType?
+public interface IPhantomType extends IType {
+	// no additional methods at this moment
 }

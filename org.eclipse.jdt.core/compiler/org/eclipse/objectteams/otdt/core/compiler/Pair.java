@@ -33,6 +33,7 @@ public class Pair<T1,T2> {
 		this.second = second;
 	}
 	/** Test for shallow equality with the given other elements. */
+	@SuppressWarnings("hiding")
 	public boolean equals(T1 first, T2 second) {
 		return this.first == first && this.second == second;
 	}

@@ -88,9 +88,9 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
     /**
      * Create a wrapper for an expression that might require lifting.
      *
-     * @param teamExpr     expression suitable as call target for the lift call.
-     * @param expression   expression to be wrapped
-     * @param expectedType what the context expects from this expression
+     * @param teamExpr        expression suitable as call target for the lift call.
+     * @param expression      expression to be wrapped
+     * @param expectedTypeRef what the context expects from this expression
      */
 	public PotentialLiftExpression(
 			Expression    teamExpr,
@@ -198,12 +198,12 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
 
         this.rawExpression = this.expression;
         this.operator = "lift"; // redundant; //$NON-NLS-1$
-        this.expression = genLiftCall(scope, this.expression, providedType, this.expectedType);
+        this.expression = genLiftCall(scope, providedType);
         return this.resolvedType;
     }
 
-	private MessageSend genLiftCall(BlockScope scope, Expression expression, TypeBinding providedType, TypeBinding roleSideType) {
-        MessageSend liftCall = Lifting.liftCall(scope, this.teamExpr, expression, providedType, roleSideType, this.requireReverseOperation);
+	private MessageSend genLiftCall(BlockScope scope, TypeBinding providedType) {
+        MessageSend liftCall = Lifting.liftCall(scope, this.teamExpr, this.expression, providedType, this.expectedType, this.requireReverseOperation);
         liftCall.actualReceiverType = this.teamExpr.resolveType(scope);
       	liftCall.binding = ((ReferenceBinding)this.teamExpr.resolvedType).getMethod(scope, liftCall.selector);
         if (liftCall.binding == null) // can't process (analyze,generate) if lift method is missing

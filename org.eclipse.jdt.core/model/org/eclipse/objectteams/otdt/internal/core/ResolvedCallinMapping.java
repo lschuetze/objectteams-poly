@@ -22,7 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.objectteams.otdt.core.IRoleType;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 public class ResolvedCallinMapping extends CallinMapping {
 	private String uniqueKey;

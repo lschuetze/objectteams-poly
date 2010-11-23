@@ -18,7 +18,7 @@
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.core;
+package org.eclipse.objectteams.otdt.internal.core;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.objectteams.otdt.core.IPhantomType;
 
 /**
  * A PhantomType is a type in the OTTypeHierarchy. It is a place holder
@@ -68,8 +69,7 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
  * @author Michael Krueger (mkr)
  * @version $Id: PhantomType.java 23416 2010-02-03 19:59:31Z stephan $
  */
-// TODO: should this implement IRoleType rather than just IType?
-public class PhantomType implements IType
+public class PhantomType implements IPhantomType
 {
 
     private IType _realType;

@@ -47,11 +47,11 @@ import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.core.util.FieldData;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 import org.eclipse.objectteams.otdt.internal.core.MappingElementInfo;
 import org.eclipse.objectteams.otdt.internal.core.MethodMapping;
 import org.eclipse.objectteams.otdt.internal.core.SourceMethodMappingInfo;
+import org.eclipse.objectteams.otdt.internal.core.util.FieldData;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 /**
  * A requestor for the fuzzy parser, used to compute the children of an ICompilationUnit.

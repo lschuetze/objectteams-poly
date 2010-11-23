@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<component id="org.eclipse.jdt.core" version="2">
+    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.objectteams.otdt.core.PhantomType">
+        <filter comment="type PhantomType was moved to internal package" id="305324134">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.PhantomType"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler">
+        <filter comment="The removed class ExceptionHandler was not intended as public API" id="305324134">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.objectteams.otdt.core.util.FieldData">
+        <filter comment="type FieldData was moved to internal package" id="305324134">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.util.FieldData"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.objectteams.otdt.core.util.MethodData">
+        <filter comment="type MethodData was moved to internal package" id="305324134">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.util.MethodData"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/CompletionOnFieldAccessSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnFieldAccessSpec">
+        <filter comment="class became internal by adding a missing x-internal in the manifest" id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnFieldAccessSpec"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/CompletionOnMethodSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnMethodSpec">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnMethodSpec"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionNodesFound.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionNodesFound">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionNodesFound"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnBaseCallMessageSend.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseCallMessageSend">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseCallMessageSend"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnBaseReference.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseReference">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseReference"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnCallinMapping.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnCallinMapping">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnCallinMapping"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnFieldAccessSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnFieldAccessSpec">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnFieldAccessSpec"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnMethodSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnMethodSpec">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnMethodSpec"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnParameterMapping.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnParameterMapping">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnParameterMapping"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnTSuperMessageSend.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperMessageSend">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperMessageSend"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnTSuperReference.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperReference">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperReference"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/IOTConstants.java" type="org.eclipse.objectteams.otdt.core.compiler.IOTConstants">
+        <filter comment="version constants have been changed to methods to account for evolution" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="OT_COMPILER_VERSION_MIN"/>
+            </message_arguments>
+        </filter>
+        <filter comment="constant changed to method to account for evolution" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="OT_REVISION"/>
+            </message_arguments>
+        </filter>
+        <filter comment="constant changed to method to account for evolution" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="OT_VERSION_MAJOR"/>
+            </message_arguments>
+        </filter>
+        <filter comment="constant changed to method to account for evolution" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="OT_VERSION_MINOR"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/objectteams/otdt/core/ICallinMapping.java" type="org.eclipse.objectteams.otdt.core.ICallinMapping">
+        <filter comment="method sign change, not remove/new." id="405901410">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.ICallinMapping"/>
+                <message_argument value="getBaseMethodHandles()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="method change (sign), not new" id="1211105284">
+            <message_arguments>
+                <message_argument value="getBaseMethodHandles()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/objectteams/otdt/core/ICalloutMapping.java" type="org.eclipse.objectteams.otdt.core.ICalloutMapping">
+        <filter comment="method sign change, not remove/new" id="405901410">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.ICalloutMapping"/>
+                <message_argument value="getBaseMethodHandle()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="method change (sign) not remove/new" id="1211105284">
+            <message_arguments>
+                <message_argument value="getBaseMethodHandle()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/objectteams/otdt/core/ICalloutToFieldMapping.java" type="org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping">
+        <filter comment="method signature was changed due to split into API ifc and internal class" id="405901410">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping"/>
+                <message_argument value="getBaseFieldHandle()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="method is not really new, just a signature change." id="1211105284">
+            <message_arguments>
+                <message_argument value="getBaseFieldHandle()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/objectteams/otdt/core/IMethodMapping.java" type="org.eclipse.objectteams.otdt.core.IMethodMapping">
+        <filter comment="method changed (sign), not removed" id="405901410">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.IMethodMapping"/>
+                <message_argument value="getRoleMethodHandle()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="method changed (sign) not removed" id="1211105284">
+            <message_arguments>
+                <message_argument value="getRoleMethodHandle()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+</component>

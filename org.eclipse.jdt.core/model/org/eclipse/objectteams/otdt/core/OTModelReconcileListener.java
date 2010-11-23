@@ -136,8 +136,6 @@ public class OTModelReconcileListener implements IElementChangedListener
 								// FIXME(SH): fetching into unused locals? WHY? Incomplete implementation??
 								IOTType t1 = OTModelManager.getOTElement(currentType);
 								IOTType t2 = OTModelManager.getOTElement(wcType);
-								System.out
-                                        .println("OTModelReconcileListener.removeAffectedModelElements()");
 							}
 							
 							if (otType != null) // need to update the workingcopy
@@ -146,12 +144,12 @@ public class OTModelReconcileListener implements IElementChangedListener
 							    if (otUnit.isWorkingCopy())
 							    {
 							        otType.setCorrespondingJavaElement(currentType);
-							        System.out.println("Updated: " + otType.toString());
 							    }
 							}
 						}
 					}
 					catch (JavaModelException ignored) {
+						// ignore
 					}
 				}
 			}

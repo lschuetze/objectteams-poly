@@ -50,7 +50,7 @@ public class OTSearchEngine
     // Work around this by using an appropriate SearchRequestor.
     public void search(SearchPattern pattern, IJavaSearchScope scope, SearchRequestor requestor, IProgressMonitor monitor) throws CoreException
     {
-        m_searchEngine.search(
+        this.m_searchEngine.search(
                 pattern,
                 new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() },
                 scope,

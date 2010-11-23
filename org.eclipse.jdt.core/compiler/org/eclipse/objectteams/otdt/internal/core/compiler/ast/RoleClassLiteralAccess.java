@@ -70,12 +70,13 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 
 	/**
 	 * Construct a role class literal from a given class literal.
-	 * @param
+	 * @param orig plain class literal
+	 * @param expressionType pre-computed type of the expression
 	 */
-	public RoleClassLiteralAccess(ClassLiteralAccess orig, TypeBinding methodType) {
+	public RoleClassLiteralAccess(ClassLiteralAccess orig, TypeBinding expressionType) {
 		super(orig.sourceEnd, orig.type);
 		this.constant = orig.constant;
-		generateMessageSend(methodType);
+		generateMessageSend(expressionType);
 	}
 
 	/** 
@@ -85,13 +86,13 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 		super(typeRef.sourceEnd, typeRef);
 	}
 	
-	private void generateMessageSend(TypeBinding methodType) {
+	private void generateMessageSend(TypeBinding expressionType) {
 		AstGenerator gen = new AstGenerator(this.type.sourceStart, this.sourceEnd);
 		ReferenceBinding roleBinding = (ReferenceBinding)this.type.resolvedType;
 		this.teamBinding = roleBinding.enclosingType();
 		if (!roleBinding.isValidBinding()) {
-			this.resolvedType= methodType; // pre-computed type of getclass method
-			return;                        // don't generate illegal message send
+			this.resolvedType= expressionType; // pre-computed type of getclass method
+			return;                            // don't generate illegal message send
 		}
 		Expression receiver;
 		if (RoleTypeBinding.isRoleWithExplicitAnchor(roleBinding)) {

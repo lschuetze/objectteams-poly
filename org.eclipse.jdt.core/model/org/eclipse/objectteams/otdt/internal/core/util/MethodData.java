@@ -18,15 +18,15 @@
  * 		Fraunhofer FIRST - Initial API and implementation
  * 		Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.core.util;
+package org.eclipse.objectteams.otdt.internal.core.util;
 
-import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.core.TypeParameterElementInfo;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 
 
 
@@ -38,23 +38,23 @@ import org.eclipse.jdt.internal.core.TypeParameterElementInfo;
  * @author kaiser
  * @version $Id$
  */
-public class MethodData
+public class MethodData implements IMethodSpec 
 {
     private static final String [] EMPTY_STRING_ARRAY = new String[0];
     
-	private String   _selector;
+	private String   selector;
 	// attention: this field seems to use the constant pool encoding of types:
-    private String[] _argumentsTypes;
-    private String[] _argumentsNames;
+    private String[] argumentsTypes;
+    private String[] argumentsNames;
 	// attention: this field seems to use the constant pool encoding of types:
-    private String   _returnType;
+    private String   returnType;
 
 	static final ITypeParameter[] NO_TYPE_PARAMETERS = new ITypeParameter[0];
     public ITypeParameter[] typeParameters = NO_TYPE_PARAMETERS;
 
  
-    private boolean _isDeclaration = false;
-    private boolean _covariantReturn= false;
+    private boolean isDeclaration = false;
+    private boolean covariantReturn= false;
     
     // FIXME(SH): fill with values:
     private int sourceStart, sourceEnd;
@@ -62,38 +62,38 @@ public class MethodData
     /** Create a long method spec. */
     public MethodData(String selector, String[] types, String[] names, String returnType, boolean isDeclaration)
 	{
-		_selector  = selector;
-		if (_selector == null) // e.g. void foo -> bar; -- missing return-type or name
-			_selector = ""; // FIXME: should this better be dealt during error recovery? //$NON-NLS-1$
+		this.selector  = selector;
+		if (this.selector == null) // e.g. void foo -> bar; -- missing return-type or name
+			this.selector = ""; // FIXME: should this better be dealt during error recovery? //$NON-NLS-1$
 
-		_argumentsTypes = types;
-		_argumentsNames = names;
-		_returnType = returnType;
+		this.argumentsTypes = types;
+		this.argumentsNames = names;
+		this.returnType = returnType;
 		
 		assert types != null: "Long method spec must have types"; //$NON-NLS-1$
 		if (names == null)
-			_argumentsNames = EMPTY_STRING_ARRAY;
+			this.argumentsNames = EMPTY_STRING_ARRAY;
 		
-		_isDeclaration = isDeclaration;
+		this.isDeclaration = isDeclaration;
 	}
     
     public MethodData(String selector, String[] types, String[] names, String returnType, boolean isDeclaration,
     				  boolean covariantReturn) 
     {
     	this(selector, types, names, returnType, isDeclaration);
-    	this._covariantReturn= covariantReturn;
+    	this.covariantReturn= covariantReturn;
     }
     
     /** Create a short method spec (no signature). */
     public MethodData(String selector, boolean isDeclaration)
 	{
-		_selector  = selector;
-		_returnType = null; // TODO(SH): is this OK??
+		this.selector  = selector;
+		this.returnType = null; // TODO(SH): is this OK??
 		
-	    _argumentsTypes = EMPTY_STRING_ARRAY;
-	    _argumentsNames = EMPTY_STRING_ARRAY;
+	    this.argumentsTypes = EMPTY_STRING_ARRAY;
+	    this.argumentsNames = EMPTY_STRING_ARRAY;
 		
-		_isDeclaration = isDeclaration;
+		this.isDeclaration = isDeclaration;
 	}
     /**
      * Constructor for use by ClassFileInfo (for byte-code browsing).
@@ -102,53 +102,76 @@ public class MethodData
      */
     public MethodData(String selector, String signature) {
     	signature = signature.replace('/', '.');
-    	_selector = selector;
-    	_argumentsTypes = Signature.getParameterTypes(signature);
-    	_returnType = Signature.getReturnType(signature);
-    	_argumentsNames = EMPTY_STRING_ARRAY;
+    	this.selector = selector;
+    	this.argumentsTypes = Signature.getParameterTypes(signature);
+    	this.returnType = Signature.getReturnType(signature);
+    	this.argumentsNames = EMPTY_STRING_ARRAY;
     }
 
     public MethodData(String selector, String signature, boolean covariantReturn) {
 		this(selector, signature);
-		this._covariantReturn= covariantReturn;
+		this.covariantReturn= covariantReturn;
 	}
 
-	public boolean isIncomplete()
+	/* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#hasSignature()
+	 */
+	public boolean hasSignature()
 	{
-		return _argumentsTypes == EMPTY_STRING_ARRAY;
+		return this.argumentsTypes != EMPTY_STRING_ARRAY;
 	}
 
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getArgumentTypes()
+	 */
     public String[] getArgumentTypes()
     {
-        return _argumentsTypes;
+        return this.argumentsTypes;
     }
     
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getArgumentNames()
+	 */
     public String[] getArgumentNames()
     {
-    	return _argumentsNames;
+    	return this.argumentsNames;
     }
 
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getSelector()
+	 */
     public String getSelector()
     {
-        return _selector;
+        return this.selector;
     }
     
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getReturnType()
+	 */
     public String getReturnType()
     {
-    	return _returnType;
+    	return this.returnType;
     }
 
-    /** Similar to {@link IMethod#getSignature()}, but works as a handle only method. */
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getSignature()
+	 */
 	public String getSignature() {
-		return Signature.createMethodSignature(this._argumentsTypes, this._returnType);
+		return Signature.createMethodSignature(this.argumentsTypes, this.returnType);
 	}
 	
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#isDeclaration()
+	 */
     public boolean isDeclaration() {
-    	return _isDeclaration;
+    	return this.isDeclaration;
     }
     
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#hasCovariantReturn()
+	 */
     public boolean hasCovariantReturn() {
-    	return this._covariantReturn;
+    	return this.covariantReturn;
     }
     // copied from org.eclipse.jdt.internal.core.SourceMethodElementInfo
     public char[][][] getTypeParameterBounds() {
@@ -164,8 +187,11 @@ public class MethodData
     	}
     	return typeParameterBounds;
     }
-    // copied from org.eclipse.jdt.internal.core.SourceMethodElementInfo
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getTypeParameterNames()
+	 */
     public char[][] getTypeParameterNames() {
+    	// copied from org.eclipse.jdt.internal.core.SourceMethodElementInfo
     	int length = this.typeParameters.length;
     	if (length == 0) return CharOperation.NO_CHAR_CHAR;
     	char[][] typeParameterNames = new char[length][];
@@ -177,14 +203,14 @@ public class MethodData
 
     public String toString()
     {
-    	String signature = _selector + "("; //$NON-NLS-1$
+    	String signature = this.selector + "("; //$NON-NLS-1$
     	
-    	if (_argumentsTypes != null)
+    	if (this.argumentsTypes != null)
     	{
-	    	for (int idx=0; idx < _argumentsTypes.length; idx++)
+	    	for (int idx=0; idx < this.argumentsTypes.length; idx++)
 	    	{
 	    		signature += (idx == 0 ? "" : ", ")  //$NON-NLS-1$ //$NON-NLS-2$
-	    			+ Signature.getSimpleName(Signature.toString(_argumentsTypes[idx]));
+	    			+ Signature.getSimpleName(Signature.toString(this.argumentsTypes[idx]));
 	    	}
     	}
     	signature += ")"; //$NON-NLS-1$
@@ -192,10 +218,16 @@ public class MethodData
     	return signature;
     }
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getSourceStart()
+	 */
 	public int getSourceStart() {
 		return this.sourceStart;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getSourceEnd()
+	 */
 	public int getSourceEnd() {
 		return this.sourceEnd;
 	}

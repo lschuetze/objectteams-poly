@@ -33,12 +33,12 @@ import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 import org.eclipse.objectteams.otdt.internal.core.CallinMapping;
 import org.eclipse.objectteams.otdt.internal.core.CalloutMapping;
 import org.eclipse.objectteams.otdt.internal.core.CalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.internal.core.MethodMapping;
 import org.eclipse.objectteams.otdt.internal.core.OTJavaElement;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 /**
  * Handle for a source type. Info object is a SourceTypeElementInfo.

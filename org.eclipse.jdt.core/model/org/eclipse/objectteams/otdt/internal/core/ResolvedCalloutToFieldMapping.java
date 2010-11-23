@@ -23,7 +23,7 @@ package org.eclipse.objectteams.otdt.internal.core;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 public class ResolvedCalloutToFieldMapping extends CalloutToFieldMapping {
 	private String uniqueKey;

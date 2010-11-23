@@ -28,6 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
  * its base field.
  * 
  * @author brcan
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ICalloutToFieldMapping extends IMethodMapping
 {

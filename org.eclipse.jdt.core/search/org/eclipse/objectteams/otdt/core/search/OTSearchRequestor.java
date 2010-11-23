@@ -39,11 +39,11 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
  */
 public class OTSearchRequestor extends SearchRequestor
 {
-    private ArrayList<IOTType> _otTypes = null;
+    private ArrayList<IOTType> otTypes = null;
     
     public OTSearchRequestor()
     {
-        _otTypes = new ArrayList<IOTType>();
+        this.otTypes = new ArrayList<IOTType>();
     }
 
     public void acceptSearchMatch(SearchMatch match) throws CoreException
@@ -80,12 +80,12 @@ public class OTSearchRequestor extends SearchRequestor
             }
             
             if (otType != null)
-                _otTypes.add(otType);
+                this.otTypes.add(otType);
         }
     }
     
     public IOTType[] getOTTypes()
     {
-        return _otTypes.toArray(new IOTType[(_otTypes.size())]);
+        return this.otTypes.toArray(new IOTType[(this.otTypes.size())]);
     }
 }

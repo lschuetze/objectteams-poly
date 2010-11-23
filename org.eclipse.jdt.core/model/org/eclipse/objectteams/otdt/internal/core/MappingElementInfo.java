@@ -22,7 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core;
 
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 
 /**

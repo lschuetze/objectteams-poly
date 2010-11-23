@@ -18,47 +18,57 @@
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.core.util;
+package org.eclipse.objectteams.otdt.internal.core.util;
 
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
 
 /**
  * @author brcan
  *
  */
-public class FieldData
+public class FieldData implements IFieldAccessSpec
 {
-    private String _selector;
+    private String selector;
     //attention: this field seems to use the constant pool encoding of types
-    private String _fieldType;
+    private String fieldType;
     
-    private boolean _isSetter;
+    private boolean isSetter;
 
     public FieldData(String selector, String fieldType, boolean isSetter)
     {
-        _selector   = selector;
-        _fieldType = fieldType;
-        _isSetter   = isSetter;
+        this.selector   = selector;
+        this.fieldType = fieldType;
+        this.isSetter   = isSetter;
     }
     
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IFieldAccessSpec#getSelector()
+	 */
     public String getSelector()
     {
-        return _selector;
+        return this.selector;
     }
     
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IFieldAccessSpec#getFieldType()
+	 */
     public String getFieldType()
     {
-        return _fieldType;
+        return this.fieldType;
     }
     
+    /* (non-Javadoc)
+	 * @see org.eclipse.objectteams.otdt.core.util.IFieldAccessSpec#isSetter()
+	 */
     public boolean isSetter() 
     {
-    	return _isSetter;
+    	return this.isSetter;
     }
     
     public String toString()
     {
-        return Signature.getSimpleName(Signature.toString(_fieldType)) + " " + _selector; //$NON-NLS-1$
+        return Signature.getSimpleName(Signature.toString(this.fieldType)) + " " + this.selector; //$NON-NLS-1$
     }
 }
 

@@ -36,7 +36,7 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 
 /**
@@ -271,7 +271,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 	}
 	
 	// added for the SourceTypeConverter
-	public MethodData[] getBaseMethodHandles()
+	public IMethodSpec[] getBaseMethodHandles()
 	{
 		return _baseMethodHandles;
 	}

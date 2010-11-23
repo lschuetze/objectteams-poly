@@ -94,7 +94,7 @@ public class GuardPredicateDeclaration extends MethodDeclaration {
 			this.modifiers |= ClassFileConstants.AccStatic;
 	}
 
-	public void updatePredicateExpression(Expression expression, int declarationSourceEnd) {
+	public void updatePredicateExpression(Expression expression, int newDeclarationSourceEnd) {
 		int s = expression.sourceStart;
 		int e = expression.sourceEnd;
 		AstGenerator gen = new AstGenerator(s,e);
@@ -108,7 +108,7 @@ public class GuardPredicateDeclaration extends MethodDeclaration {
 		this.hasParsedStatements = true;
 		this.bodyStart = s;
 		this.bodyEnd = e; // end of expression
-		this.declarationSourceEnd = declarationSourceEnd; // behind bodyEnd
+		this.declarationSourceEnd = newDeclarationSourceEnd; // behind bodyEnd
 	}
 
 	@Override
@@ -131,12 +131,12 @@ public class GuardPredicateDeclaration extends MethodDeclaration {
 	 * If an unresolvable name occurred in a predicate body, check whether this
 	 * might be caused by missing signatures in the method binding.
 	 *
-	 * @param arguments prepared strings from the callin error-handling method.
+	 * @param problemArguments prepared strings from the callin error-handling method.
 	 * @param start
 	 * @param end
 	 * @return true if a specific error has been reported.
 	 */
-	public boolean handleMissingSignature(String[] arguments, int start, int end)
+	public boolean handleMissingSignature(String[] problemArguments, int start, int end)
 	{
 		if (this.scope == null)
 			return false;
@@ -145,7 +145,7 @@ public class GuardPredicateDeclaration extends MethodDeclaration {
 			return false;
 		for (AbstractMethodMappingDeclaration mapping : enclosingType.callinCallouts) {
 			if (mapping.isCallin() && !mapping.hasSignature) {
-				this.scope.problemReporter().predicateHasNoArguments(arguments, start, end);
+				this.scope.problemReporter().predicateHasNoArguments(problemArguments, start, end);
 				return true;
 			}
 		}

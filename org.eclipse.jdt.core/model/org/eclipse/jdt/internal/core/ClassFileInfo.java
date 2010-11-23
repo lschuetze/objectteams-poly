@@ -35,12 +35,12 @@ import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.core.util.FieldData;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 import org.eclipse.objectteams.otdt.internal.core.MappingElementInfo;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CallinMethodMappingsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CalloutMappingsAttribute;
+import org.eclipse.objectteams.otdt.internal.core.util.FieldData;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 
 /**

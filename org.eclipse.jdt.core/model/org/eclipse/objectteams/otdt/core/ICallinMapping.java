@@ -22,7 +22,6 @@ package org.eclipse.objectteams.otdt.core;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 
 
 /**
@@ -31,6 +30,7 @@ import org.eclipse.objectteams.otdt.core.util.MethodData;
  * 
  * @author jwloka
  * @version $Id: ICallinMapping.java 23416 2010-02-03 19:59:31Z stephan $
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ICallinMapping extends IMethodMapping
 {
@@ -64,7 +64,7 @@ public interface ICallinMapping extends IMethodMapping
      * 
      * @return handles representing the base method specs 
      */
-	public MethodData[] getBaseMethodHandles();
+	public IMethodSpec[] getBaseMethodHandles();
 	
 	/**
 	 * Returns whether this callin mapping has a 'callin label'. If false, 

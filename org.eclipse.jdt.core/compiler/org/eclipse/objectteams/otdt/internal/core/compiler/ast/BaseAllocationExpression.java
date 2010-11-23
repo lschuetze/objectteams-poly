@@ -236,30 +236,31 @@ public class BaseAllocationExpression extends Assignment {
     }
     
     private boolean isArgOfOtherCtor(ConstructorDeclaration constructorDecl, BlockScope scope) {
-    	class FoundException extends RuntimeException {}
-    	class NotFoundException extends RuntimeException {}
+    	// two marker exception types:
+    	@SuppressWarnings("serial") class FoundException extends RuntimeException { /*empty*/}
+    	@SuppressWarnings("serial") class NotFoundException extends RuntimeException { /*empty*/ }
     	try {
     		constructorDecl.traverse(new ASTVisitor() {
     			int inCtorCall=0;
     			@Override
-    			public boolean visit(ExplicitConstructorCall ctorCall, BlockScope scope) {
+    			public boolean visit(ExplicitConstructorCall ctorCall, BlockScope aScope) {
     				this.inCtorCall++;
-   					return super.visit(ctorCall, scope);
+   					return super.visit(ctorCall, aScope);
     			}
     			@Override
-    			public void endVisit(ExplicitConstructorCall explicitConstructor, BlockScope scope) {
-    				super.endVisit(explicitConstructor, scope);
+    			public void endVisit(ExplicitConstructorCall explicitConstructor, BlockScope aScope) {
+    				super.endVisit(explicitConstructor, aScope);
     				this.inCtorCall--;
     			}
     			@Override
-    			public boolean visit(Assignment assig, BlockScope scope) {
+    			public boolean visit(Assignment assig, BlockScope aScope) {
     				if (assig == BaseAllocationExpression.this) {
     					if (this.inCtorCall>0)
     						throw new FoundException();
     					else
     						throw new NotFoundException();
     				}
-    				return super.visit(assig, scope);
+    				return super.visit(assig, aScope);
     			}
 			},
 			scope.classScope());

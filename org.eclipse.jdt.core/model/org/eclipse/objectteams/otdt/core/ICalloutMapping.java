@@ -22,7 +22,6 @@ package org.eclipse.objectteams.otdt.core;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 
 
 /**
@@ -31,6 +30,7 @@ import org.eclipse.objectteams.otdt.core.util.MethodData;
  * 
  * @author jwloka
  * @version $Id: ICalloutMapping.java 23416 2010-02-03 19:59:31Z stephan $
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface ICalloutMapping extends IMethodMapping
 {
@@ -45,7 +45,7 @@ public interface ICalloutMapping extends IMethodMapping
      * 
      * @return handle representing the base method spec 
      */
-	public MethodData getBaseMethodHandle();
+	public IMethodSpec getBaseMethodHandle();
 	
     /**
      * Is this a callout-override ('=>')?

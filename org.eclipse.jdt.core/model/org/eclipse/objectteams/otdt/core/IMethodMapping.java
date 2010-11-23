@@ -24,13 +24,13 @@ package org.eclipse.objectteams.otdt.core;
 import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 
 /**
  * OTM Method mapping element
  * 
  * @author jwloka
  * @version $Id: IMethodMapping.java 23416 2010-02-03 19:59:31Z stephan $
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IMethodMapping extends IOTJavaElement, IMember, IAnnotatable
 {
@@ -51,9 +51,9 @@ public interface IMethodMapping extends IOTJavaElement, IMember, IAnnotatable
      * Retrieve a handle for the role method.
      * Used by the SelectionRequestor to find out about the role method spec, 
      * if no role method can be resolved (short-hand callout).
-     * @return 
+     * @return the role-side method spec 
      */
-	public MethodData getRoleMethodHandle();
+	public IMethodSpec getRoleMethodHandle();
     
 	/**
 	 * Returns the start position of the 'name' part of this method mapping.

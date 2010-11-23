@@ -245,13 +245,13 @@ public class WordValueAttribute
 
     public static WordValueAttribute compilerVersionAttribute()
     {
-    	assert(OT_VERSION_MAJOR <= 7);
-    	assert(OT_VERSION_MINOR <= 9);
-    	assert(OT_REVISION <= 31);
+    	assert(OTVersion.getMajor() <= 7);
+    	assert(OTVersion.getMinor() <= 9);
+    	assert(OTVersion.getRevsion() <= 31);
     	return new WordValueAttribute(OT_COMPILER_VERSION,
-    			  (OT_VERSION_MAJOR << 9)
-				+ (OT_VERSION_MINOR << 5)
-				+ (OT_REVISION));
+    			  (OTVersion.getMajor() << 9)
+				+ (OTVersion.getMinor() << 5)
+				+ (OTVersion.getRevsion()));
     }
 
     // ============== INSTANCE FEATURES ===================
@@ -350,7 +350,7 @@ public class WordValueAttribute
         		type.roleModel._compilerVersion = this._value;
         	if (type.isTeam())
         		type.getTeamModel()._compilerVersion = this._value;
-        	if (this._value < IOTConstants.OT_COMPILER_VERSION_MIN)
+        	if (this._value < IOTConstants.OTVersion.getCompilerVersionMin())
         		environment.problemReporter.incompatibleOTJByteCodeVersion(((BinaryTypeBinding)binding).getFileName(), getBytecodeVersionString(this._value));
         }
     }

@@ -22,7 +22,8 @@ import org.eclipse.jdt.core.IMethod;
  * Represents a method spec in a method mapping (callout/callin) in the extended Java model.
  * 
  * @author stephan
- * @since 0.8.0 (eclipse.org incubation)
+ * @since 3.7
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IMethodSpec {
 
@@ -58,5 +59,7 @@ public interface IMethodSpec {
 
 	/** End position of this element. */
 	public int getSourceEnd();
+
+	public char[][][] getTypeParameterBounds();
 
 }

@@ -49,7 +49,7 @@ public class BaseCallTrackingVariable extends LocalDeclaration {
 	private static final char[] NAME = "<baseCallTracker>".toCharArray(); //$NON-NLS-1$
 
 	/**
-	 * @param the callin method to analyze
+	 * @param method the callin method to analyze
 	 */
 	public BaseCallTrackingVariable(MethodDeclaration method) {
 		super(NAME, method.modifiersSourceStart, method.sourceStart);

@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.JavaModelException;
  *
  * @author jwloka
  * @version $Id: IRoleType.java 23417 2010-02-03 20:13:55Z stephan $
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IRoleType extends IOTType
 {
@@ -74,7 +75,7 @@ public interface IRoleType extends IOTType
 	
 	/**
 	 * Returns true if this Role Type is defined in a Role File.
-	 * @return
+	 * @return whether the type is a role file
 	 */
 	public boolean isRoleFile();
 	

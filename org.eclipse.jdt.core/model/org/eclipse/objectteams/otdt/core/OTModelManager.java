@@ -26,17 +26,16 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 import org.eclipse.objectteams.otdt.internal.core.BinaryRoleType;
 import org.eclipse.objectteams.otdt.internal.core.CallinMapping;
 import org.eclipse.objectteams.otdt.internal.core.CalloutMapping;
 import org.eclipse.objectteams.otdt.internal.core.CalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.internal.core.MappingElementInfo;
-import org.eclipse.objectteams.otdt.internal.core.OTJavaElement;
 import org.eclipse.objectteams.otdt.internal.core.OTModel;
 import org.eclipse.objectteams.otdt.internal.core.OTType;
 import org.eclipse.objectteams.otdt.internal.core.RoleFileType;
 import org.eclipse.objectteams.otdt.internal.core.RoleType;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 
 /**
@@ -49,37 +48,37 @@ public class OTModelManager
 {
 	private final static OTModel MAPPING = OTModel.getSharedInstance();
 	
-	private static OTModelManager _singleton;
+	private static OTModelManager singleton;
 
-    private OTModelReconcileListener _reconcileListener;
+    private OTModelReconcileListener reconcileListener;
 	
 	protected OTModelManager()
 	{
-		_singleton = this;
+		singleton = this;
 
-		_reconcileListener = new OTModelReconcileListener();
-		JavaCore.addElementChangedListener(_reconcileListener, ElementChangedEvent.POST_RECONCILE);
+		this.reconcileListener = new OTModelReconcileListener();
+		JavaCore.addElementChangedListener(this.reconcileListener, ElementChangedEvent.POST_RECONCILE);
 	}
 	
 	public static OTModelManager getSharedInstance()
 	{
-		if (_singleton == null)
+		if (singleton == null)
 		{
 			new OTModelManager();
 		}
 		
-		return _singleton;
+		return singleton;
 	}
 	
 	public static void dispose()
 	{
-	    if (_singleton != null)
+	    if (singleton != null)
 	    {
-	        JavaCore.removeElementChangedListener(_singleton._reconcileListener);
+	        JavaCore.removeElementChangedListener(singleton.reconcileListener);
 	        OTModel.dispose();
 	    }
 	    
-	    _singleton = null;
+	    singleton = null;
 	}
 
 	/** Register a type of which we don't yet have the flags. */
@@ -120,7 +119,7 @@ public class OTModelManager
 				} 
 		    	else if (TypeHelper.isTeam(typeDeclFlags))
 				{
-					MAPPING.addOTElement( result = new OTType(OTJavaElement.TEAM, elem, null, typeDeclFlags) );
+					MAPPING.addOTElement( result = new OTType(IOTJavaElement.TEAM, elem, null, typeDeclFlags) );
 				}
 				break;
 		    case IJavaElement.TYPE:

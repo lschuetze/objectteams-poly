@@ -58,7 +58,7 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
+import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
 
 /**
@@ -81,7 +81,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     private int              _sourceEnd;
     private int              _declarationSourceEnd;
     private IMethod          _roleMethod;
-	private MethodData       _roleMethodHandle;
+	protected MethodData     _roleMethodHandle;
 	private boolean          _hasSignature;
 
     public MethodMapping(int        declarationSourceStart,

@@ -255,7 +255,7 @@ public class PrecedenceDeclaration extends ASTNode {
 				if (!precedences[i].hasCommonBaseMethod(precedences[j]))
 					continue;
 
-				LinkedList merged = new LinkedList();
+				LinkedList<CallinCalloutBinding> merged = new LinkedList<CallinCalloutBinding>();
 				CallinCalloutBinding[] p1 = precedences[i].callins(false);
 				CallinCalloutBinding[] p2 = precedences[j].callins(false);
 				if (c3Merge(
@@ -315,7 +315,7 @@ public class PrecedenceDeclaration extends ASTNode {
 	private static boolean c3Merge(
 			CallinCalloutBinding[] p1, int i1,
 			CallinCalloutBinding[] p2, int i2,
-			LinkedList result)
+			LinkedList<CallinCalloutBinding> result)
 	{
 		if (i1 < 0 && i2 < 0) // both lists empty?
 			return true;

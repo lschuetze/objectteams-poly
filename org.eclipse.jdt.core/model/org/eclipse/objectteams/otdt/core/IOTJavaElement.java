@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.IJavaElement;
  *
  * @author jwloka
  * @version $Id: IOTJavaElement.java 23416 2010-02-03 19:59:31Z stephan $
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IOTJavaElement extends IJavaElement
 {

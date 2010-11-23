@@ -67,7 +67,7 @@ public class SelectionOnBaseCallMessageSend extends BaseCallMessageSend
 			}
 		}
 
-		MessageSend wrappee = (MessageSend) this._sendOrig; // _wrappee might have been replaced with an Assignment.
+		MessageSend wrappee = this._sendOrig; // _wrappee might have been replaced with an Assignment.
 
 		// tolerate some error cases
 		if(wrappee.binding == null ||
@@ -115,7 +115,7 @@ public class SelectionOnBaseCallMessageSend extends BaseCallMessageSend
 	 * Looks up methods in the corresponding base class that match the roleMethod
 	 * @param role
 	 * @param roleMethod
-	 * @return
+	 * @return array of matching methods or null.
 	 */
 	private MethodBinding[] findBaseMethodBindings(MemberTypeBinding role, MethodBinding roleMethod)
 	{
@@ -143,11 +143,11 @@ public class SelectionOnBaseCallMessageSend extends BaseCallMessageSend
 	 * Try to find all CallinMethodMappings that reference the given roleMethod
      * @param role Where to look for
      * @param roleMethod Method that should be referenced by a CallinMapping
-     * @return
+     * @return non-null list of matching callin mappings.
      */
     private List<CallinMappingDeclaration> findMappings(MemberTypeBinding role, MethodBinding roleMethod)
     {
-        TypeDeclaration roleDeclaration = (TypeDeclaration)role.model.getAst();
+        TypeDeclaration roleDeclaration = role.model.getAst();
 
         ArrayList<CallinMappingDeclaration> foundMappings = new ArrayList<CallinMappingDeclaration>();
 

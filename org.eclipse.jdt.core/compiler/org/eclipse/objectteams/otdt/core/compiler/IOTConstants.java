@@ -29,11 +29,16 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 @SuppressWarnings("nls")
 public interface IOTConstants
 {
-	// ============ VERSION: ==============
-	public static final int    OT_VERSION_MAJOR = 1;
-    public static final int    OT_VERSION_MINOR = 6;
-    public static final int    OT_REVISION = 0;
-    public static final int    OT_COMPILER_VERSION_MIN = (1<<9)+(4<<5)+1; // byte code incompatibility introduced in internal version 1.4.1 (OTDT 1.4.0M3)
+	/**
+	 * @since 3.7
+	 */
+	public final static class OTVersion {
+		// methods, not constants, so these won't get inlined in any byte code.
+		public static final int  getMajor() { return 1; }
+		public static final int  getMinor() { return 6; }
+		public static final int  getRevsion() { return 0; }
+		public static final int  getCompilerVersionMin() { return (1<<9)+(4<<5)+1; }// byte code incompatibility introduced in internal version 1.4.1 (OTDT 1.4.0M3)
+	}
 
     // These keywords are allowed in std-Java files (even if compiled by the OTDT):
     // (not mentioning situational keywords like replace ...).

@@ -385,8 +385,8 @@ public class TypeModel extends ModelElement {
      */
     public boolean isIncompatibleCompilerVersion() {
     	// require major and minor to match the current compiler, for now.
-		int minVersion =    (IOTConstants.OT_VERSION_MAJOR << 9)
-						  + (IOTConstants.OT_VERSION_MINOR << 5);
+		int minVersion =    (IOTConstants.OTVersion.getMajor() << 9)
+						  + (IOTConstants.OTVersion.getMinor() << 5);
 		return this._compilerVersion < minVersion;
 	}
 

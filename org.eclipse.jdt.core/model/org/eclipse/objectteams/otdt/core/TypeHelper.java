@@ -267,7 +267,7 @@ public class TypeHelper
             {
                 currType = findRoleType(currType, currName);
             }
-			else if (currType == null && teamType.getElementName().equals(currName))
+			else if (teamType.getElementName().equals(currName))
             {
 				currType = teamType;
             }
@@ -287,7 +287,7 @@ public class TypeHelper
      * the given method, in the given team or one of its super teams.
      * @param method
      * @param teamType
-     * @return
+     * @return the first matching method mapping
      * @throws JavaModelException
      */
     //TODO(mkr) compare methods and method mappings w/o signature
@@ -295,16 +295,12 @@ public class TypeHelper
         throws JavaModelException
     {
         if ( (method == null) || (teamType == null) )
-        {
-            return null;
-        }
+			return null;
         
         IType t = OTModelManager.getOTElement(method.getDeclaringType());
         IRoleType role = TypeHelper.getTeamRoleType(teamType, (IRoleType)t);
-        if ( !(role instanceof IRoleType) )
-        {
-            return null;
-        }
+        if (role == null)
+			return null;
         
         String signature = TypeHelper.getMethodSignature(method);
         IRoleType[] roles = getImplicitSuperRoles(role);
@@ -338,7 +334,7 @@ public class TypeHelper
     {
         if (role != null)
         {
-            IType type = (IType)((IRoleType)role).getCorrespondingJavaElement();
+            IType type = (IType)role.getCorrespondingJavaElement();
             return getSuperTypes(type);
         }
         else
@@ -472,7 +468,7 @@ public class TypeHelper
      * If there is a role in the regular supertype hierarchy, the implicit
      * inherited methods are included.
      * @param role
-     * @return
+     * @return non-null list of methods
      * @throws JavaModelException
      */
     public static List<IMethod> getAllRegularInheritedMethods(IRoleType role)
@@ -726,7 +722,7 @@ public class TypeHelper
         return result.toString();
     }
     
-    @SuppressWarnings("unchecked") // uses method.parameters(), which returns a raw List.
+    @SuppressWarnings("rawtypes") // uses method.parameters(), which returns a raw List.
 	public static String getMethodSignature(MethodDeclaration method)
     {
     	StringBuffer result = new StringBuffer();

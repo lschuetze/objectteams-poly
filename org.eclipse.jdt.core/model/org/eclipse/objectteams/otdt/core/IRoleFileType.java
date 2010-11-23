@@ -23,7 +23,9 @@ package org.eclipse.objectteams.otdt.core;
 /**
  * @author gis
  * Just a typisation interface, e.g. to quickly check for a role file via instanceof
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IRoleFileType extends IRoleType
 {
+	// no additional methods
 }

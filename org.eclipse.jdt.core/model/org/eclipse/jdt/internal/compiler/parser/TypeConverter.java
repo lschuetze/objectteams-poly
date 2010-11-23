@@ -45,8 +45,8 @@ import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
+import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.core.util.MethodData;
 import org.eclipse.objectteams.otdt.internal.core.CallinMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
@@ -736,7 +736,7 @@ public abstract class TypeConverter {
     		result.compilationResult = compilationResult;
     		result.roleMethodSpec = convert(callout.getRoleMethodHandle(), hasSignature);
 
-    		MethodData baseHandle = callout.getBaseMethodHandle();
+    		IMethodSpec baseHandle = callout.getBaseMethodHandle();
     		if (baseHandle != null)
     			result.baseMethodSpec = convert(baseHandle, hasSignature);
 
@@ -790,7 +790,7 @@ public abstract class TypeConverter {
 		result.compilationResult = compilationResult;
 		result.roleMethodSpec = convert(callinMapping.getRoleMethodHandle(), hasSignature);
 
-		MethodData[] baseHandles = callinMapping.getBaseMethodHandles();
+		IMethodSpec[] baseHandles = callinMapping.getBaseMethodHandles();
 		int baseCount = baseHandles.length;
 		result.baseMethodSpecs = new MethodSpec[baseCount];
 		for(int idx = 0; idx < baseCount; idx++)
@@ -801,7 +801,7 @@ public abstract class TypeConverter {
 		return result;
 	}
 
-	protected MethodSpec convert(MethodData handle, boolean hasSignature)
+	protected MethodSpec convert(IMethodSpec handle, boolean hasSignature)
 	{
 		//FIXME (haebor) : sourcepositions are not set!! try to find them elsewhere
 
