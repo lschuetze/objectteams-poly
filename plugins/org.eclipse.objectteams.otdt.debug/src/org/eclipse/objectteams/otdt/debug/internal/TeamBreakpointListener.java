@@ -148,7 +148,7 @@ public class TeamBreakpointListener implements IJavaBreakpointListener
 		}
 		catch (Exception ex)
 		{
-	 		OTDebugPlugin.getExceptionHandler().logException("Teammonitor can't read infos from debugTarget anymore. Disconnected?", ex); //$NON-NLS-1$
+	 		OTDebugPlugin.logException("Teammonitor can't read infos from debugTarget anymore. Disconnected?", ex); //$NON-NLS-1$
 			//if something fails, let the debugger go on
 			return IJavaBreakpointListener.DONT_SUSPEND;
 		}

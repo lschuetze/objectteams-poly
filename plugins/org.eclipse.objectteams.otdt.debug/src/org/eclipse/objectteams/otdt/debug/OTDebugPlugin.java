@@ -35,7 +35,6 @@ import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.debug.core.ILaunchesListener2;
 import org.eclipse.jdt.internal.debug.core.JDIDebugPlugin;
-import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
 import org.eclipse.objectteams.otdt.debug.internal.Logger;
 import org.eclipse.objectteams.otdt.debug.internal.OTDebugElementsContainerFactory;
 import org.eclipse.objectteams.otdt.debug.internal.RoleBreakpointListener;
@@ -86,7 +85,7 @@ public class OTDebugPlugin extends Plugin
 	                launches[i].terminate();
                 }
                 catch (DebugException ex) { // only log
-                    OTDebugPlugin.getExceptionHandler().logCoreException("Unable to terminate launch on bundle shutdown", ex); //$NON-NLS-1$
+                    OTDebugPlugin.logException("Unable to terminate launch on bundle shutdown", ex); //$NON-NLS-1$
                 }
             }
 		}
@@ -256,9 +255,8 @@ public class OTDebugPlugin extends Plugin
 		return resourceBundle;
 	}
 
-	public static ExceptionHandler getExceptionHandler()
-	{
-		return new ExceptionHandler(PLUGIN_ID);
+	public static void logException(String message, Throwable exception) {
+		plugin.getLog().log(createErrorStatus(message, exception));
 	}
 
 	public TempFileManager getTempFileManager()
