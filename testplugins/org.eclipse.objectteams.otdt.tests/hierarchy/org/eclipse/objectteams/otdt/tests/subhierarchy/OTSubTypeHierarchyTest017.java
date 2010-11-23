@@ -26,9 +26,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
-import org.eclipse.objectteams.otdt.core.PhantomType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
+import org.eclipse.objectteams.otdt.internal.core.PhantomType;
 import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 
 /**

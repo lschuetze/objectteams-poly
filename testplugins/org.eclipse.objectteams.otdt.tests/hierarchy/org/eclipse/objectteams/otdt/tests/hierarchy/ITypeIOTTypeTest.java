@@ -28,8 +28,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.core.PhantomType;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
+import org.eclipse.objectteams.otdt.internal.core.PhantomType;
 
 /**
  * Testing OTTypeHiearchy with respect to IType vs. IOTType instances as input
