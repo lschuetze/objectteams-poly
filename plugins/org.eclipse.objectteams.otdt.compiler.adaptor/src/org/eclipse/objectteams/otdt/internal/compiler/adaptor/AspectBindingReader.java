@@ -327,7 +327,7 @@ public class AspectBindingReader {
 			// AspectBindingReader is automatically shared via the ResourceProjectAdaptor.OTEquinoxProject
 			// see org.eclipse.objectteams.otdt.internal.compiler.adaptor.AdaptorActivator.JavaCore.setClasspathContainer(..)
 		} catch (CoreException ce) {
-			OTDTPlugin.getExceptionHandler().logException("Failed to reload classpath container for "+project, ce); //$NON-NLS-1$
+			OTDTPlugin.logException("Failed to reload classpath container for "+project, ce); //$NON-NLS-1$
 		}
 	}
 
