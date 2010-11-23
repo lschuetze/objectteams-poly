@@ -119,7 +119,7 @@ public class CopyInheritanceBreakpointManager implements IJavaBreakpointListener
         }
         catch (CoreException ex)
         {
-            OTDebugUIPlugin.getExceptionHandler().logCoreException("Problem with breakpoint handling", ex); //$NON-NLS-1$
+            OTDebugUIPlugin.logException("Problem with breakpoint handling", ex); //$NON-NLS-1$
         }
         
         return IJavaBreakpointListener.DONT_CARE;
@@ -251,7 +251,7 @@ public class CopyInheritanceBreakpointManager implements IJavaBreakpointListener
 			try {
 				newBreakpoint.getMarker().setAttribute(IBreakpoint.ENABLED, Boolean.FALSE);
 			} catch (CoreException ex) {
-				OTDebugUIPlugin.getExceptionHandler().logCoreException("Unable to disable breakpoint", ex); //$NON-NLS-1$
+				OTDebugUIPlugin.logException("Unable to disable breakpoint", ex); //$NON-NLS-1$
 			}
         target.getDebugTarget().breakpointAdded(newBreakpoint);
         
@@ -316,7 +316,7 @@ public class CopyInheritanceBreakpointManager implements IJavaBreakpointListener
 				else
 					copy.delete();
 			} catch (CoreException ex) {
-				OTDebugUIPlugin.getExceptionHandler().logCoreException("Unable to query copied breakpoint", ex); //$NON-NLS-1$
+				OTDebugUIPlugin.logException("Unable to query copied breakpoint", ex); //$NON-NLS-1$
 			}
         }
 		// cleanup if no more copies are active:
@@ -373,13 +373,13 @@ public class CopyInheritanceBreakpointManager implements IJavaBreakpointListener
             catch (InvocationTargetException ex)
             {
                 if (ex.getCause() instanceof CoreException)
-                    OTDebugUIPlugin.getExceptionHandler().logCoreException("Error creating type hiearchy", (CoreException) ex.getCause()); //$NON-NLS-1$
+                    OTDebugUIPlugin.logException("Error creating type hiearchy", (CoreException) ex.getCause()); //$NON-NLS-1$
                 else
-                    OTDebugUIPlugin.getExceptionHandler().logException("Error creating type hiearchy", ex); //$NON-NLS-1$
+                    OTDebugUIPlugin.logException("Error creating type hiearchy", ex); //$NON-NLS-1$
             }
             catch (InterruptedException ex)
             {
-                OTDebugUIPlugin.getExceptionHandler().logException("Error creating type hiearchy", ex); //$NON-NLS-1$
+                OTDebugUIPlugin.logException("Error creating type hiearchy", ex); //$NON-NLS-1$
             }
             
             return _subClasses;

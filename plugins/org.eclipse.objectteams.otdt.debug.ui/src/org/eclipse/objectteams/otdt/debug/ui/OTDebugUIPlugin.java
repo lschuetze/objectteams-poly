@@ -26,12 +26,13 @@ import java.util.ResourceBundle;
 import org.eclipse.core.resources.IResourceChangeEvent;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdapterManager;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.internal.ui.ColorManager;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler;
 import org.eclipse.objectteams.otdt.debug.OTDebugElementsContainer;
 import org.eclipse.objectteams.otdt.debug.TeamInstance;
 import org.eclipse.objectteams.otdt.debug.ui.internal.CopyInheritanceBreakpointManager;
@@ -143,11 +144,11 @@ public class OTDebugUIPlugin extends AbstractUIPlugin
 		return ColorManager.getDefault().getColor(PreferenceConverter.getColor(getDefault().getPreferenceStore(), type));
 	}
 
-	
-	public static ExceptionHandler getExceptionHandler()
-	{
-		return new ExceptionHandler(PLUGIN_ID);
+
+	public static void logException(String message, Throwable exception) {
+		plugin.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, exception));
 	}
+
     
     protected void initializeImageRegistry(ImageRegistry reg)
     {
