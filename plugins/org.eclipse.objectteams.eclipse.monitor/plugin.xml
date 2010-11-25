@@ -11,7 +11,7 @@
             name="OT/Equinox Monitor"
 			icon="icons/monitor.png"
             category="org.eclipse.objectteams.otdt.ui"
-            class="org.eclipse.objectteams.eclipse.monitor.MonitorView"
+            class="org.eclipse.objectteams.eclipse.monitor.internal.MonitorView"
             id="org.eclipse.objectteams.eclipse.monitor.MonitorView">
          <description>
             Presentation of all teams instantiated by OT/Equinox.

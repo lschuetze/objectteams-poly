@@ -14,7 +14,7 @@
  * Contributors:
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.eclipse.monitor;
+package org.eclipse.objectteams.eclipse.monitor.internal;
 
 import org.eclipse.osgi.util.NLS;
 
