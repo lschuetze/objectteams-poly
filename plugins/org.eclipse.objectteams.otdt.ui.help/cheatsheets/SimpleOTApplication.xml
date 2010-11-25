@@ -39,11 +39,11 @@
 			The first thing you will need is an Object Teams project. If you
 			already have an Object Teams project in your workspace that you
 			would like to use, you may skip this step by clicking the
-			"Click to Skip" button. If not, select <b>File-&gt;New-&gt;Project...</b>
+			&quot;Click to Skip&quot; button. If not, select <b>File-&gt;New-&gt;</b>
 			and choose <b>Object Teams Project</b> in the list. Complete the subsequent
-			pages as required. The "New Object Teams Project" wizard will be automatically
-			displayed when you click the "Click to Perform" button.
-			After creating the project, it will appear in the <b>OT Package Explorer</b>
+			pages as required. The &quot;New Object Teams Project&quot; wizard will be automatically
+			displayed when you click the &quot;Click to Perform&quot; button.
+			After creating the project, it will appear in the <b>Package Explorer</b>
 			view. Select the project by clicking it with the mouse, so that the next actions
 			will know that they apply to this project.
 		</description>
@@ -158,14 +158,17 @@
 		href="/org.eclipse.jdt.doc.user/gettingStarted/qs-12.htm"
 		title="Tutorial finished!">
 		<description>
-			Congratulations! You have built your first Object Teams program. Now let's run it!
-			Open the <b>Run-Configuration</b> by choosing in the menubar <b>Run->Run...</b>. 
-			Select <b>New Object Teams Application</b>
-			and click the "New" button at the bottom. Your project's name and main-class should
-			already be in place, otherwise please add them manually. All other settings can keep
-			their defaults, so simply press the <b>Run</b> button and watch the <b>Console</b>
-			view appear, showing the application's output!			
-			That's it, you are now ready for Object Teams development!
+			Congratulations! You have built your first Object Teams program. Now let&apos;s run it!
+			On "MyTeam" (either in the package explorer or in the editor) select from the context menu:
+			<b>Run As-&gt;Java Application</b>.
+			Watch the <b>Console</b> view appear, showing the application&apos;s output!
+			You can later inspect and modify the run configuration by choosing in the menubar
+			<b>Run-&gt;Run-Configurations...</b> and searching the configuration for "MyTeam"
+			under "Java Application". An essential detail you will find in the "JRE" tab of
+			the run configuration dialog: Under the heading <b>Object Teams Runtime</b> there
+			is a checkbox <b>enable OTRE</b> which has to be checked for running OT/J programs
+			(default in Object Teams projects).
+			That&apos;s it, you are now ready for Object Teams development!
 		</description>
 	</item>
 			

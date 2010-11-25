@@ -19,12 +19,16 @@
 <!-- OTDT cheat sheet extension for small OT example -->   
    <extension point="org.eclipse.ui.cheatsheets.cheatSheetContent">
      <cheatsheet
-           category="org.eclipse.objectteams.otdt.ui.java"
+           category="org.eclipse.objectteams"
            contentFile="cheatsheets/SimpleOTApplication.xml"
            id="org.eclipse.objectteams.otdt.ui.help.cheatsheets.SimpleOTApplication"
            name="%cheatsheet.SimpleOTApplication.name">
       <description>%cheatsheet.SimpleOTApplication.desc</description>
      </cheatsheet>
+     <category
+           id="org.eclipse.objectteams"
+           name="Object Teams">
+     </category>
    </extension>
 
 <!-- OTDT help extension-->      
