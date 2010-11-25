@@ -22,17 +22,17 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.DebugException;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.core.Member;
 import org.eclipse.jdt.internal.debug.ui.DebugUIMessages;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 import org.eclipse.objectteams.otdt.debug.ui.OTDebugUIPlugin;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import base org.eclipse.jdt.internal.debug.core.model.JDIReferenceType;
 import base org.eclipse.jdt.internal.debug.core.model.JDIStackFrame;
@@ -290,8 +290,8 @@ public team class PresentationAdaptor
 			if (!(element instanceof ISourceReference))
 				throw new BadLocationException("Element is not an ISourceReference: "+element); //$NON-NLS-1$
 			try {
-				ISourceRange range = (element instanceof Member)
-						? ((Member) element).getNameRange()
+				ISourceRange range = (element instanceof IMember)
+						? ((IMember) element).getNameRange()
 						: ((ISourceReference) element).getSourceRange();
 				
 				return doc.getLineOfOffset(range.getOffset());
