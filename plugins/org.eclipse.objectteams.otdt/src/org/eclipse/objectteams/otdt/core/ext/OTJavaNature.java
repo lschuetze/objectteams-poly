@@ -26,7 +26,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IProjectNature;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.core.ExternalJavaProject;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
 
 
 /**
@@ -35,7 +35,6 @@ import org.eclipse.jdt.internal.core.ExternalJavaProject;
  * @author jwloka
  * @version $Id: OTJavaNature.java 23427 2010-02-03 22:23:59Z stephan $
  */
-@SuppressWarnings("restriction")
 public class OTJavaNature implements IProjectNature
 {
 	private IProject _prj;
@@ -125,7 +124,7 @@ public class OTJavaNature implements IProjectNature
     	try {
 			return project.hasNature(JavaCore.OTJ_NATURE_ID);
 		} catch (CoreException e) {
-			if (ExternalJavaProject.EXTERNAL_PROJECT_NAME.equals(project.getName())) // see JavaProject
+			if (OTModelManager.EXTERNAL_PROJECT_NAME.equals(project.getName())) // see JavaProject
 				return true;
 		}
 		return false;
