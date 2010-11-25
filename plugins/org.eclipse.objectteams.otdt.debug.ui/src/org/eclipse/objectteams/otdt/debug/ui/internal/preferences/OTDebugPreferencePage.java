@@ -49,7 +49,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
-import org.eclipse.ui.internal.Workbench;
+import org.eclipse.ui.PlatformUI;
 
 /**
  * @author gis, stephan
@@ -183,7 +183,7 @@ public class OTDebugPreferencePage extends FieldEditorPreferencePage implements 
     
     private void updateStepFilteringPrefPage()
     {
-        List prefs = Workbench.getInstance().getPreferenceManager().getElements(PreferenceManager.PRE_ORDER);
+        List prefs = PlatformUI.getWorkbench().getPreferenceManager().getElements(PreferenceManager.PRE_ORDER);
 		for (Iterator iter = prefs.iterator(); iter.hasNext();)
         {
             PreferenceNode node = (PreferenceNode) iter.next();
