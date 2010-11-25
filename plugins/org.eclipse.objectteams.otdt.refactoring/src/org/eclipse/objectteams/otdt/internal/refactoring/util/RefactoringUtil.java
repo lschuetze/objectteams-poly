@@ -336,9 +336,9 @@ public class RefactoringUtil implements ITeamConstants {
 		IType declaringType = method.getDeclaringType();
 		InheritedMethodsRequestor requestor = new InheritedMethodsRequestor(declaringType, true, true);
 		OTTypeHierarchyTraverser traverser = new OTTypeHierarchyTraverser(hier, requestor,
-				false/*implicitFirst*/, false/*focusType*/, false/*rootClass*/, pm);
+				false/*implicitFirst*/, false/*focusType*/, false/*rootClass*/);
 
-		traverser.traverse();
+		traverser.traverse(pm);
 		IMethod[] collectedMethods = requestor.getResult();
 
 		for (int idx = collectedMethods.length - 1; idx >= 0; idx--) {
@@ -419,10 +419,9 @@ public class RefactoringUtil implements ITeamConstants {
     			requestor,
 				true/*implicitFirst*/,
 				includeFocusType, 
-				includeRootClass,
-				pm);
+				includeRootClass);
     	
-    	traverser.traverse();
+    	traverser.traverse(pm);
 		return requestor.getResult();
 	}
 
