@@ -391,9 +391,8 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	}
 	
 	// hook method, no specific action
-	@SuppressWarnings("rawtypes")
 	public boolean addClassPathEntry(
-			ArrayList cpEntries, 
+			ArrayList<ClasspathEntry> cpEntries, 
 			String cp,
 			ClasspathManager hostmanager, 
 			BaseData sourcedata,
@@ -722,8 +721,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	public URL postFindResource(String name, BundleClassLoader classLoader, BundleData data) {
 		return null;
 	}
-	@SuppressWarnings("rawtypes")
-	public Enumeration postFindResources(String name, BundleClassLoader classLoader, BundleData data) {
+	public Enumeration<URL> postFindResources(String name, BundleClassLoader classLoader, BundleData data) {
 		return null;
 	}
 	public String preFindLibrary(String name, BundleClassLoader classLoader, BundleData data) {
@@ -732,17 +730,15 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	public URL preFindResource(String name, BundleClassLoader classLoader, BundleData data) {
 		return null;
 	}
-	@SuppressWarnings("rawtypes")
-	public Enumeration preFindResources(String name, BundleClassLoader classLoader, BundleData data) {
+	public Enumeration<URL> preFindResources(String name, BundleClassLoader classLoader, BundleData data) {
 		return null;
 	}
 
 	public void preFindLocalClass(String name, ClasspathManager manager) throws ClassNotFoundException {
 		// noop		
 	}
-	
-	@SuppressWarnings("rawtypes")
-	public synchronized void postFindLocalClass(String name, Class clazz, ClasspathManager manager) throws ClassNotFoundException {
+
+	public synchronized void postFindLocalClass(String name, Class<?> clazz, ClasspathManager manager) throws ClassNotFoundException {
 		// noop
 	}
 
@@ -754,8 +750,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 		// noop		
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public void recordClassDefine(String name, Class clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) 
+	public void recordClassDefine(String name, Class<?> clazz, byte[] classbytes, ClasspathEntry classpathEntry, BundleEntry entry, ClasspathManager manager) 
 	{
 		// is this the first class from a pendingNonLazyActivationBundle?
 		synchronized (this.activatableBundles) {

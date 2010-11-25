@@ -82,22 +82,22 @@ public class OTEquinoxServiceWatcher implements AdaptorHook {
 		catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		ServiceReference ref= context.getServiceReference(PackageAdmin.class.getName());
+		ServiceReference<PackageAdmin> ref= context.getServiceReference(PackageAdmin.class);
 		if (ref!=null)
-			this.hook.connectPackageAdmin((PackageAdmin)context.getService(ref));
+			this.hook.connectPackageAdmin(context.getService(ref));
 
 	}
 
 	private void connectOTEquinoxService (BundleContext context) {
-		ServiceReference ref= context.getServiceReference(IOTEquinoxService.class.getName());
+		ServiceReference<IOTEquinoxService> ref= context.getServiceReference(IOTEquinoxService.class);
 		if (ref!=null)
-			this.hook.connectOTEquinoxService((IOTEquinoxService)context.getService(ref));
+			this.hook.connectOTEquinoxService(context.getService(ref));
 	}	
 
 	private void connectOTTransformerService (BundleContext context) {
-		ServiceReference ref= context.getServiceReference(IOTTransformer.class.getName());
+		ServiceReference<IOTTransformer> ref= context.getServiceReference(IOTTransformer.class);
 		if (ref!=null)
-			this.hook.connectOTTransformerService((IOTTransformer)context.getService(ref));
+			this.hook.connectOTTransformerService(context.getService(ref));
 	}
 	
 	/** 
