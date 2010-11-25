@@ -18,7 +18,7 @@
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.core.ext;
+package org.eclipse.objectteams.otdt.internal.core.ext;
 
 import java.io.File;
 import java.net.URL;
@@ -32,6 +32,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ClasspathVariableInitializer;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.osgi.framework.Bundle;
 
 

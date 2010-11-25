@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.objectteams.otdt.internal.core.ext.OTCoreExtMessages;
+import org.eclipse.objectteams.otdt.internal.core.ext.OTVariableInitializer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -69,6 +71,10 @@ public class OTREContainer implements IClasspathContainer
 
     private IClasspathEntry[] _cpEntries;
 
+    /**
+     * Return a an array of classpath entry representing the OTRE.
+     * @return a singleton array.
+     */
     public IClasspathEntry[] getClasspathEntries()
     {
         if (_cpEntries == null)
@@ -80,28 +86,43 @@ public class OTREContainer implements IClasspathContainer
         return _cpEntries;
     }
 
+    /** Answer the text that describes the OTRE container in the UI. */
     public String getDescription()
     {
         return OTCoreExtMessages.OTREContainer__Description;
     }
 
+    /**
+     * Answer the kind of this classpath container, value = {@link IClasspathContainer#K_APPLICATION}.
+     */
     public int getKind()
     {
     	// don't mark as K_SYSTEM or K_SYSTEM_DEFAULT, which would prevent jdt.debug from adding this to the runtime classpath. 
     	return IClasspathContainer.K_APPLICATION;
     }
 
+    /**
+     * The name of this classpath container as a path, value = "OTRE". 
+     */
     public IPath getPath()
     {
         return OTRE_CONTAINER_PATH;
     }
 
+    /**
+     * Answer the path of the "otre_min.jar" archive, which is placed on the bootclasspath when running OT/J programs.
+     * @return resolved path
+     */
     public static IPath getOtreMinJarPath () {
     	if (OTRE_MIN_JAR_PATH == null)
             OTRE_MIN_JAR_PATH   = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_MIN_JAR_FILENAME); //$NON-NLS-1$
     	return OTRE_MIN_JAR_PATH;
     }
     
+    /**
+     * Answer the path of the "otre_agent.jar" archive, which is passed as a -javaagent to the JVM.
+     * @return resolved path
+     */
     public static IPath getOtreAgentJarPath() {
     	if (OTRE_AGENT_JAR_PATH == null)
             OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$
@@ -140,15 +161,11 @@ public class OTREContainer implements IClasspathContainer
 		}
 	}
 
-	private static boolean isOTREAlreadyInClasspath(IClasspathEntry[] classpath)
-	{
-	    for (int idx = 0; classpath != null && idx < classpath.length; idx++)
-	    {
+	private static boolean isOTREAlreadyInClasspath(IClasspathEntry[] classpath) {
+	    for (int idx = 0; classpath != null && idx < classpath.length; idx++) {
 	        IClasspathEntry entry = classpath[idx];
 	        if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER && entry.getPath().equals(OTRE_CONTAINER_PATH))
-	    	{
-	    		return true;
-	    	}
+				return true;
 	    }
 	    
 	    return false;
@@ -167,35 +184,26 @@ public class OTREContainer implements IClasspathContainer
 		newClasspath[classpath.length] = JavaCore.newContainerEntry(OTRE_CONTAINER_PATH, false);
 	    
 		if (newClasspath[classpath.length] != null)
-		{
 			javaPrj.setRawClasspath( newClasspath, null );
-		}
 		else
-		{
-			Status reason = new Status(
-							IStatus.ERROR, 
-							OTDTPlugin.PLUGIN_ID, 
-							IStatus.OK,
-							OTCoreExtMessages.OTREContainer_otre_not_found, null);
-	    			
-			throw new CoreException( reason );
-		}
+			throw new CoreException( new Status(
+										IStatus.ERROR, 
+										OTDTPlugin.PLUGIN_ID, 
+										IStatus.OK,
+										OTCoreExtMessages.OTREContainer_otre_not_found, 
+										null) );
 	}
 	
 	/** Fetch the location of the bcel bundle into BCEL_PATH. */
 	static void findBCEL(BundleContext context) throws IOException {
-		ServiceReference ref= context.getServiceReference(PackageAdmin.class.getName());
+		ServiceReference<PackageAdmin> ref= (ServiceReference<PackageAdmin>) context.getServiceReference(PackageAdmin.class);
 		if (ref == null)
 			throw new IllegalStateException("Cannot connect to PackageAdmin"); //$NON-NLS-1$
-		PackageAdmin packageAdmin = (PackageAdmin)context.getService(ref);
+		PackageAdmin packageAdmin = context.getService(ref);
 		for (Bundle bundle : packageAdmin.getBundles(BCEL_BUNDLE_NAME, BCEL_VERSION_RANGE)) {			
 			BCEL_PATH = new Path(FileLocator.toFileURL(bundle.getEntry("/")).getFile()); //$NON-NLS-1$
 			return;
 		}
 		throw new RuntimeException("bundle org.apache.bcel not found"); //$NON-NLS-1$
-	}
-
-	public String getResolvedPathString() {
-		return getClasspathEntries()[0].getPath().toOSString();
 	}
 }

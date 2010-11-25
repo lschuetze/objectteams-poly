@@ -108,6 +108,9 @@ public team class OTTypeHierarchies {
 	// === singleton infrastructure: ===
 	
 	private static OTTypeHierarchies instance;
+	/**
+	 * @noreference for use via extension point org.eclipse.objectteams.otequinox.aspectBindings only.
+	 */
 	public OTTypeHierarchies() {
 		instance = this;
 	}
@@ -875,7 +878,7 @@ public team class OTTypeHierarchies {
 	}
 
 	/**
-	 * Configure whether the given hierarchy should consider phantom roles or not.
+	 * API: Configure whether the given hierarchy should consider phantom roles or not.
 	 * Depending on the query used, phantom roles will either be filtered out or replaced with their real origins.
 	 * In order for the phantom modes to be respected, the hierarchy must not be directly consulted but only
 	 * via the fassade methods of this team. 

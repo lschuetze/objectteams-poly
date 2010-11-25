@@ -45,10 +45,7 @@ import org.eclipse.objectteams.otdt.core.hierarchy.TraverseRequestor.HierarchyCo
 // TODO(jsv) use better class name
 public class OTTypeHierarchyTraverser
 {	
-	public static final int TRAVERSE_IMPLICIT_FIRST = 2;
-	public static final int TRAVERSE_EXPLICIT_FIRST = 3;
 
-	
 	private boolean _traverseImplicitFirst;
 	private boolean _includeFocusType;
 	private boolean _includeRootClass;
@@ -58,54 +55,55 @@ public class OTTypeHierarchyTraverser
 	private IProgressMonitor _progressMonitor;
 	private TraverseRequestor _requestor;
 	
-	// TODO(jsv) change constructor 
+	/**
+	 * Create a new hierarchy traverser.
+	 * @param hierarchy	the underlying type hierarchy
+	 * @param requestor a requestor for collecting elements
+	 * @param traverseImplicitFirst	whether to traverse along implicit inheritance first. 
+	 * @param includeFocusType		whether to include the focus type
+	 * @param includeRootClass		whether to include the root classes <code>java.lang.Object</code> and <code>org.objectteams.Team</code>.
+	 */
 	public OTTypeHierarchyTraverser(
 			ITypeHierarchy hierarchy,
 			TraverseRequestor requestor,
 			boolean traverseImplicitFirst,
 			boolean includeFocusType,
-			boolean includeRootClass,
-			IProgressMonitor progressMonitor)
+			boolean includeRootClass)
 	{
 		_hierarchy = hierarchy;
 		_requestor = requestor;
 		_traverseImplicitFirst = traverseImplicitFirst;
 		_includeFocusType = includeFocusType;
 		_includeRootClass = includeRootClass;
-		
-		
-		if (progressMonitor != null)
-		{
-			_progressMonitor = progressMonitor;
-		}
-		else
-		{
-			_progressMonitor = new NullProgressMonitor();
-		}
 	}
 	
-	private void initializeHierarchy() throws JavaModelException
-	{
+	private void initializeHierarchy() throws JavaModelException {
 		if (_hierarchy == null)
 			_hierarchy = _focusType.newSupertypeHierarchy(_progressMonitor);
 	}
 	
-	public void traverse() throws JavaModelException
+	/** 
+	 * Traverse the hierarchy, results will be collected by the requestor.
+	 * @param progressMonitor to report progress, if null a {@link NullProgressMonitor} will be used.
+	 * @throws JavaModelException when any of the java elements could not be accessed.
+	 */
+	public void traverse(IProgressMonitor progressMonitor) throws JavaModelException
 	{
+		if (progressMonitor != null)
+			_progressMonitor = progressMonitor;
+		else
+			_progressMonitor = new NullProgressMonitor();
+		
 		assert _requestor != null : "Use only with valid requestor!"; //$NON-NLS-1$
 		
       	_focusType = _requestor.getFocusType();        
         if (_focusType instanceof IOTType)
-        {
-        	_focusType = (IType)((IOTType)_focusType).getCorrespondingJavaElement();
-        }
+			_focusType = (IType)((IOTType)_focusType).getCorrespondingJavaElement();
 		
 		initializeHierarchy();
 		
 		if (_includeFocusType)
-		{
 			report(_focusType, new HierarchyContext(true,false,false));
-		}
 		
 		IType explicitSuperclass = null;
 		IType[] implicitSuperclasses = null;
@@ -116,8 +114,7 @@ public class OTTypeHierarchyTraverser
 		IType currentType = _focusType;
 		ObjectQueue queue = new ObjectQueue();
 		
-		do
-		{
+		do {
 			explicitSuperclass = OTTypeHierarchies.getInstance().getExplicitSuperclass(_hierarchy, currentType);
 			implicitSuperclasses = OTTypeHierarchies.getInstance().getTSuperTypes(_hierarchy, currentType);
 			superInterface = _hierarchy.getSuperInterfaces(currentType);
@@ -172,8 +169,7 @@ public class OTTypeHierarchyTraverser
 															currentTypeInfo.isBehindExplicitInheritance()));
 				}
 			}
-		} 
-		while (currentTypeInfo != null);
+		} while (currentTypeInfo != null);
 	}
 
 	private void report(IType type, HierarchyContext context) throws JavaModelException
@@ -185,15 +181,11 @@ public class OTTypeHierarchyTraverser
 		_requestor.report(type,context);
 		// report methods
 		for (int idx = 0; idx < type.getMethods().length; idx++)
-		{
 			_requestor.report(type.getMethods()[idx], context);
-		}
 		
 		// report fields 
 		for (int idx = 0; idx < type.getFields().length; idx++)
-		{
 			_requestor.report(type.getFields()[idx],context);
-		}
 		
 		// report callin / callout if possible
 		if (otType != null && otType instanceof IRoleType )
@@ -201,34 +193,27 @@ public class OTTypeHierarchyTraverser
 			IRoleType roleType = (IRoleType)otType;
 			// report callin
 			for (int idx = 0; idx < roleType.getMethodMappings(IRoleType.CALLINS).length; idx++)
-			{
 				_requestor.report((ICallinMapping)roleType.getMethodMappings(IRoleType.CALLINS)[idx],context);
-			}
 			
 			//report callout
 			for (int idx = 0; idx < roleType.getMethodMappings(IRoleType.CALLOUTS).length; idx++)
 			{
 				IMethodMapping mapping = roleType.getMethodMappings(IRoleType.CALLOUTS)[idx];
 				if (mapping instanceof ICalloutToFieldMapping)
-				{
 					_requestor.report((ICalloutToFieldMapping)mapping,context);
-				}
 				else
-				{
 					_requestor.report((ICalloutMapping)mapping,context);
-				}
 			}
 		}
 	}
 }
 
-class AdditionalTypeInfo
-{
+class AdditionalTypeInfo {
 	private IType _type;
 	private boolean _isExplicitSuperclass;
 	private boolean _isBehindExplicitInheritance;
 	
-	public AdditionalTypeInfo(IType type, 
+	AdditionalTypeInfo(IType type, 
 			boolean isExplicitSuperclass, 
 			boolean isBehindExplicitInheritance)
 	{
@@ -237,16 +222,15 @@ class AdditionalTypeInfo
 		this._isExplicitSuperclass = isExplicitSuperclass;
 	}
 	
-	public boolean isExplicitSuperclass(){
+	boolean isExplicitSuperclass() {
 		return _isExplicitSuperclass;
 	}
 	
-	public boolean isBehindExplicitInheritance(){
+	boolean isBehindExplicitInheritance() {
 		return _isBehindExplicitInheritance;
 	}
 	
-	public IType getType()
-	{
+	IType getType() {
 		return _type;
 	}
 	
@@ -259,31 +243,25 @@ class AdditionalTypeInfo
 	}
 }
 
-class ObjectQueue
-{
+class ObjectQueue {
 	private ArrayList<Object> _list;
-	public ObjectQueue()
-	{
+	ObjectQueue() {
 		_list = new ArrayList<Object>();
 	}
 	
-	public void put(Object o)
-	{
+	void put(Object o) {
 		_list.add(o);
 	}
 	
-	public Object take()
-	{
+	Object take() {
 		return _list.size() <= 0 ? null : _list.remove(0);
 	}
 
-	public boolean isEmpty()
-	{
+	boolean isEmpty() {
 		return _list.size() == 0;
 	}
 	
-	public int size()
-	{
+	int size() {
 	    return _list.size();
 	}
 }

@@ -30,15 +30,14 @@ import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
 /**
  * @author svacina
  */
-abstract public class TraverseRequestor
+abstract class TraverseRequestor
 {
-	
 
 	static class HierarchyContext {
 		boolean isFocusType;
 		boolean isExplicitSuperclass;
 		boolean isBehindExplicitInheritance;
-		public HierarchyContext(boolean isFocusType, boolean isExplicitSuperclass, boolean isBehindExplicitInheritance) {
+		HierarchyContext(boolean isFocusType, boolean isExplicitSuperclass, boolean isBehindExplicitInheritance) {
 			super();
 			this.isFocusType = isFocusType;
 			this.isExplicitSuperclass = isExplicitSuperclass;
@@ -49,19 +48,19 @@ abstract public class TraverseRequestor
 	protected IType _focusType = null;
 	
 	
-	public void report(IType type, HierarchyContext context){}
+	void report(IType type, HierarchyContext context) { /* default: empty */ }
 	
-	public void report(IMethod method, HierarchyContext context){}
+	void report(IMethod method, HierarchyContext context) { /* default: empty */ }
 	
-	public void report(ICallinMapping callinMapping, HierarchyContext context){}
+	void report(ICallinMapping callinMapping, HierarchyContext context) { /* default: empty */ }
 	
-	public void report(ICalloutMapping calloutMapping, HierarchyContext context){}
+	void report(ICalloutMapping calloutMapping, HierarchyContext context) { /* default: empty */ }
 	
-	public void report(ICalloutToFieldMapping calloutToFieldMapping, HierarchyContext context){}
+	void report(ICalloutToFieldMapping calloutToFieldMapping, HierarchyContext context) { /* default: empty */ }
 
-	public void report(IField field, HierarchyContext context){}
+	void report(IField field, HierarchyContext context) { /* default: empty */ }
 	
-	public IType getFocusType()
+	IType getFocusType()
 	{
 		return _focusType;		
 	}

@@ -18,12 +18,12 @@
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.core.ext;
+package org.eclipse.objectteams.otdt.internal.core.ext;
 
 import org.eclipse.osgi.util.NLS;
 
 public class OTCoreExtMessages extends NLS {
-	private static final String BUNDLE_NAME = "org.eclipse.objectteams.otdt.core.ext.OTCoreExtMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.objectteams.otdt.internal.core.ext.OTCoreExtMessages"; //$NON-NLS-1$
 
 	public static String OTREContainer__Description;
 

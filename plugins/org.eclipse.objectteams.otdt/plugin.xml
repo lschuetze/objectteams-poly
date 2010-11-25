@@ -40,7 +40,7 @@
    <extension point="org.eclipse.jdt.core.classpathVariableInitializer">
       <classpathVariableInitializer 
          	variable="OTDT_INSTALLDIR" 
-         	class="org.eclipse.objectteams.otdt.core.ext.OTVariableInitializer"/> 
+         	class="org.eclipse.objectteams.otdt.internal.core.ext.OTVariableInitializer"/> 
    </extension>
    
    <extension 
@@ -48,7 +48,7 @@
         id="org.eclipse.objectteams.otdt.otreContainerInitializer">
       <classpathContainerInitializer
 	 		id="OTRE"
-            class="org.eclipse.objectteams.otdt.core.ext.OTREContainerInitializer"/>
+            class="org.eclipse.objectteams.otdt.internal.core.ext.OTREContainerInitializer"/>
    </extension>
    <extension
          point="org.eclipse.objectteams.otequinox.aspectBindings">

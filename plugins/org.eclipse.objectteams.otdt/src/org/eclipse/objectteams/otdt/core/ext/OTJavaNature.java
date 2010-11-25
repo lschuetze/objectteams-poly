@@ -30,6 +30,8 @@ import org.eclipse.jdt.internal.core.ExternalJavaProject;
 
 
 /**
+ * Project nature for OT/J.
+ * 
  * @author jwloka
  * @version $Id: OTJavaNature.java 23427 2010-02-03 22:23:59Z stephan $
  */
@@ -38,6 +40,12 @@ public class OTJavaNature implements IProjectNature
 {
 	private IProject _prj;
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Here: Add the OT/J builder to the project
+	 * </p>
+	 */
     public void configure() throws CoreException
     {
         IProjectDescription projectDescription = _prj.getDescription();
@@ -65,7 +73,13 @@ public class OTJavaNature implements IProjectNature
         projectDescription.setBuildSpec(newBuildCommands);
         _prj.setDescription(projectDescription, null);
     }
-
+    
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Here: Remove the OT/J builder from the project
+	 * </p>
+	 */
     public void deconfigure() throws CoreException
     {
         IProjectDescription description   = _prj.getDescription();
@@ -90,16 +104,23 @@ public class OTJavaNature implements IProjectNature
         _prj.setDescription(description, null);
     }
 
+    /** {@inheritDoc} */
     public IProject getProject()
     {
         return _prj;
     }
 
+    /** {@inheritDoc} */
     public void setProject(IProject value)
     {
         _prj = value;
     }
     
+    /** 
+     * Check if a project has the OT/J nature.
+     * @param project
+     * @return true if the project has the OT/J nature.
+     */
     public static boolean hasOTJavaNature(IProject project) {
     	try {
 			return project.hasNature(JavaCore.OTJ_NATURE_ID);
@@ -110,62 +131,42 @@ public class OTJavaNature implements IProjectNature
 		return false;
     }
 
-	private boolean contains(ICommand[] commands, String builderId)
-    {
+	private boolean contains(ICommand[] commands, String builderId) {
         for (int i = 0; i < commands.length; i++)
-        {
-            if (commands[i].getBuilderName().equals(builderId))
+			if (commands[i].getBuilderName().equals(builderId))
 				return true;
-        }
-
 		return false;
     }
 
-    private ICommand[] replace(
-        ICommand[] sourceCommands, String oldBuilderId, ICommand newCommand)
-    {
+    private ICommand[] replace(ICommand[] sourceCommands, String oldBuilderId, ICommand newCommand) {
         ICommand[] newCommands = new ICommand[sourceCommands.length];
 
         for (int i = 0; i < sourceCommands.length; i++)
-        {
-            if (sourceCommands[i].getBuilderName().equals(oldBuilderId))
-            {
-                newCommands[i] = newCommand;
-            }
-            else
-            {
-                newCommands[i] = sourceCommands[i];
-            }
-        }
+			if (sourceCommands[i].getBuilderName().equals(oldBuilderId))
+				newCommands[i] = newCommand;
+			else
+				newCommands[i] = sourceCommands[i];
 
         return newCommands;
     }
 
-    private ICommand[] insert(ICommand[] sourceCommands, ICommand command)
-    {
+    private ICommand[] insert(ICommand[] sourceCommands, ICommand command) {
         ICommand[] newCommands = new ICommand[sourceCommands.length + 1];
         newCommands[0] = command;
 
         for (int i = 0; i < sourceCommands.length; i++)
-        {
-            newCommands[i + 1] = sourceCommands[i];
-        }
+			newCommands[i + 1] = sourceCommands[i];
 
         return newCommands;
     }
 
-    private ICommand[] remove(ICommand[] sourceCommands, String builderId)
-    {
+    private ICommand[] remove(ICommand[] sourceCommands, String builderId) {
         ICommand[] newCommands     = new ICommand[sourceCommands.length - 1];
         int        newCommandIndex = 0;
 
         for (int i = 0; i < sourceCommands.length; i++)
-        {
-            if (!sourceCommands[i].getBuilderName().equals(builderId))
-            {
-                newCommands[newCommandIndex++] = sourceCommands[i];
-            }
-        }
+			if (!sourceCommands[i].getBuilderName().equals(builderId))
+				newCommands[newCommandIndex++] = sourceCommands[i];
 
         return newCommands;
     }

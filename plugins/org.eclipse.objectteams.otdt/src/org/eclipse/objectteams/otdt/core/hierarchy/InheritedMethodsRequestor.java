@@ -30,6 +30,7 @@ import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
 /**
+ * Strategy for the {@link OTTypeHierarchyTraverser}.
  * @author svacina
  */
 
@@ -39,11 +40,17 @@ public class InheritedMethodsRequestor extends TraverseRequestor
 	private boolean _overwriteCollectedMethods;
 	private boolean _checkVisibility;
 	
-	// TODO (jsv): can this class cope with IOTTypes as well? If not, it should use its correspondingJavaElement()
+	/**
+	 * Create a requestor the will collect inherited methods.
+	 * @param type						the focus type of the traversal
+	 * @param overwriteCollectedMethods if methods with the same signature should overwrite previously collected methods
+	 * @param checkVisibility			if method visibility should be checked.
+	 */
 	public InheritedMethodsRequestor(IType type,
 			boolean overwriteCollectedMethods,
 			boolean checkVisibility)
 	{
+		// TODO (jsv): can this class cope with IOTTypes as well? If not, it should use its correspondingJavaElement()
 		_result = new HashMap<String, IMethod>(); 
 		_focusType = type;
 		_overwriteCollectedMethods = overwriteCollectedMethods;
@@ -51,42 +58,25 @@ public class InheritedMethodsRequestor extends TraverseRequestor
 	}
 
 	@Override
-	public void report(IType type, HierarchyContext context)
-	{
-		boolean checkVisibility;
+	void report(IType type, HierarchyContext context) {
 		
-		try
-		{
-			if (!_checkVisibility)
-			{
+		boolean checkVisibility;
+		try {
+			if (!_checkVisibility) {
 				checkVisibility = false;
-			}
-			else if (type.isInterface())
-		    {
+			} else if (type.isInterface()) {
 		        if (_focusType.isInterface())
-		        {
-		            checkVisibility = false;
-		        }
-		        else
-		        {
-		            return;
-		        }
-		    }
-		    else
-		    {
+					checkVisibility = false;
+				else
+					return;
+		    } else {
 		        if (context.isFocusType)
-		        {
-		            checkVisibility = false;
-		        }
-		        else
-		        {
-		            checkVisibility = context.isExplicitSuperclass || context.isBehindExplicitInheritance;
-		        }
+					checkVisibility = false;
+				else
+					checkVisibility = context.isExplicitSuperclass || context.isBehindExplicitInheritance;
 		    }
 		    writeMethodsToResult(type,checkVisibility);
-		} 
-		catch (JavaModelException e)
-		{
+		} catch (JavaModelException e) {
 			// TODO(jsv)handle exception
 			e.printStackTrace();
 		}
@@ -103,43 +93,24 @@ public class InheritedMethodsRequestor extends TraverseRequestor
         {
 			currMethod = methods[methodIdx];
             if (currMethod.getElementName().startsWith(IOTConstants.OT_DOLLAR))
-            {
-                continue;
-            }
+				continue;
             
             if (currMethod.isConstructor())
-            {
-                continue;
-            }
+				continue;
             // TODO(jsv) check completeness
             if (checkVisibility)
             {
             	// private
             	if (Flags.isPrivate(currMethod.getFlags()))
-            	{
-            		continue;
-            	} 
-            	// public , protected
-            	else if (Flags.isPublic(currMethod.getFlags()) || 
-            			Flags.isProtected(currMethod.getFlags()) )
-            	{
-            		storeMethod(currMethod);
-            	}
-            	// default
-            	else
-            	{
-            		if (type.getPackageFragment().equals(_focusType.getPackageFragment()))
-            		{
-            			storeMethod(currMethod);
-            		}
-            		else
-            		{
-            			continue;
-            		}
-            	}
-            }
-            else
-            {
+					continue;
+				else if (   Flags.isPublic(currMethod.getFlags()) 
+            			 || Flags.isProtected(currMethod.getFlags()) )
+					storeMethod(currMethod);
+				else if (type.getPackageFragment().equals(_focusType.getPackageFragment()))
+					storeMethod(currMethod);
+				else
+					continue;
+            } else {
             	storeMethod(currMethod);
             }
         }
@@ -149,21 +120,19 @@ public class InheritedMethodsRequestor extends TraverseRequestor
 	{
 		String key = TypeHelper.getMethodSignature(method);
 		
-		if (!_overwriteCollectedMethods)
-		{
+		if (!_overwriteCollectedMethods) {
 			if (!_result.containsKey(key))
-			{
 				_result.put(key, method);
-			}
-		}
-		else
-		{
+		} else {
 			_result.put(key, method);
 		}
 	}
 	
-	public IMethod[] getResult()
-	{
+	/** 
+	 * Retrieve the result of the traverse operation.
+	 * @return a non-null array of methods.
+	 */
+	public IMethod[] getResult() {
 		return _result.values().toArray(new IMethod[_result.size()]);	
 	}
 }
