@@ -25,7 +25,6 @@ import org.eclipse.jdt.debug.core.IJavaType;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
 import base org.eclipse.jdt.internal.debug.core.JavaDebugUtils;
-//import base org.eclipse.pde.internal.ui.launcher.PDESourceLookupQuery;
 
 /**
  * This team makes the PDE source lookup aware of role files.
@@ -38,46 +37,19 @@ public team class SourceLookupAdaptor {
 
 	// field stored in the team, because intercepted base method generateSourceName() has static context.
 	Object currentElement;
-	
-//	/** 
-//	 * This role is needed because its base class over-eagerly discards
-//	 * the names of inner classes when looking for the source file. 
-//	 */
-//	protected class PDESourceLookupQuery playedBy PDESourceLookupQuery {
-//		
-//		@SuppressWarnings("decapsulation")
-//		Object getFElement() -> get Object fElement;
-//		
-//		keepElement <- before run;
-//		void keepElement() {
-//			currentElement = getFElement();			
-//		}
-//		
-//		@SuppressWarnings("decapsulation")
-//		String generateSourceName(String qualifiedTypeName) <- replace String generateSourceName(String qualifiedTypeName);
-//
-//		@SuppressWarnings("basecall")
-//		static callin String generateSourceName(String qualifiedTypeName) {
-//			try {
-//				return JavaDebugUtils.getSourceName(currentElement);
-//			} catch (CoreException e) {
-//				OTDebugAdaptorPlugin.getDefault().getLog().log(new Status(Status.ERROR, OTDebugAdaptorPlugin.PLUGIN_ID, "Source lookup failed", e));
-//				return base.generateSourceName(qualifiedTypeName);
-//			}
-//		}
-//	}
-	
+
+	/**
+	 * Fix source lookup for "Open Actual Type" action on a phantom role.
+	 * Note that no JSR045 information is available, because the stackframe doesn't
+	 * know about the actual type. 
+	 */
 	protected class JavaDebugUtils playedBy JavaDebugUtils 
 	{
 		String getSourceName(Object object) -> String getSourceName(Object object);		
-		
-		// FIXME(SH): workaround, problem with overload between callin and inferred callout
-		IType resolveType(String qualifiedName, IJavaElement javaElement) 
-		-> IType resolveType(String qualifiedName, IJavaElement javaElement);
-	
+
 		IType resolveType(IJavaType type) <- replace IType resolveType(IJavaType type);
 
-		@SuppressWarnings({ "basecall", "inferredcallout" })
+		@SuppressWarnings({ "basecall", "inferredcallout", "decapsulation" })
 		static callin IType resolveType(IJavaType type) throws CoreException {
 			// copied from base method:
 	    	IJavaElement element = resolveJavaElement(type, type.getLaunch());
