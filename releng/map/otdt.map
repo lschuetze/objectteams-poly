@@ -3,7 +3,7 @@
 !-- Don't set version numbers for features, otherwise pdebuild would complain about a non-existent Basedir: -- 
 feature@org.eclipse.objectteams.otdt=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.feature
 feature@org.eclipse.objectteams.otdt.core.patch=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.core.patch
-feature@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature,tag=tags/builds/201011100445
+feature@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature
 
 !-- Also don't use version numbers for those plugins that hold the various otre jars: --
 plugin@org.eclipse.jdt.core,3.7.0.v_OTDT_r080_qualifier=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.jdt.core
@@ -18,7 +18,7 @@ fragment@org.eclipse.objectteams.otequinox.hook,0.8.0=SVN,url=file://localhost/s
 fragment@org.eclipse.objectteams.otequinox.sunjvm,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.sunjvm,tag=tags/builds/201011100445
 !the following is also referenced in otdt.ui.help/buildDoc.xml (plugin-name without version):
 plugin@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox,tag=tags/builds/201011100445
-plugin@org.eclipse.objectteams.eclipse.monitor,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.eclipse.monitor,tag=tags/builds/201006211729
+plugin@org.eclipse.objectteams.eclipse.monitor,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.eclipse.monitor
 
 !not currently maintained:
 !plugin@org.eclipse.objectteams.otdt.earlyui=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.earlyui
