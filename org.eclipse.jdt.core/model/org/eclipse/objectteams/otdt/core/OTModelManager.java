@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.core.ExternalJavaProject;
 import org.eclipse.objectteams.otdt.internal.core.BinaryRoleType;
 import org.eclipse.objectteams.otdt.internal.core.CallinMapping;
 import org.eclipse.objectteams.otdt.internal.core.CalloutMapping;
@@ -46,6 +47,13 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
  */
 public class OTModelManager
 {
+	
+	/** 
+	 * Expose this constant from {@link ExternalJavaProject} for use by other OT plugins. 
+	 * @since 3.7
+	 */
+	public static final String EXTERNAL_PROJECT_NAME = ExternalJavaProject.EXTERNAL_PROJECT_NAME;
+
 	private final static OTModel MAPPING = OTModel.getSharedInstance();
 	
 	private static OTModelManager singleton;
