@@ -27,7 +27,7 @@ import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 public class ClasspathUtil {
 
 	// === OT Paths: ===
-	public static final String OTRE_PATH     	 = new OTREContainer().getResolvedPathString();
+	public static final String OTRE_PATH     	 = new OTREContainer().getClasspathEntries()[0].getPath().toOSString();
 	public static final String OTDT_PATH 		 = JavaCore.getClasspathVariable(OTDTPlugin.OTDT_INSTALLDIR).toOSString();
 	public static final String OTRE_MIN_JAR_PATH = getOTDTJarPath("otre_min");
 	public static final String OTAGENT_JAR_PATH  = getOTDTJarPath("otre_agent");
