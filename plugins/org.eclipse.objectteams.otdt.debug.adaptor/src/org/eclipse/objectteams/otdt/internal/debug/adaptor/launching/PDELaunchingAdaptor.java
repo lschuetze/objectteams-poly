@@ -202,7 +202,7 @@ public team class PDELaunchingAdaptor {
 			base when (PDELaunchingAdaptor.this.currentTab != null); // only within the LauncherTab#launcherTabCFlow() (see below)
 
 		void appendOTOption(Composite parent) {
-			PDELaunchingAdaptor.this.currentTab.createOTRESection(parent, false/*useSWTFactory*/);
+			PDELaunchingAdaptor.this.currentTab.createOTRESection(parent);
 		}		
 	}
 	

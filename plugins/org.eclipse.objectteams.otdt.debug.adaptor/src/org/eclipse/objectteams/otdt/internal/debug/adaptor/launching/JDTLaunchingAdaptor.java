@@ -44,7 +44,7 @@ import base org.eclipse.jdt.launching.StandardClasspathProvider;
  * <li>Add BCEL and otre_min to the classpath (role {@link ClasspathExtender})
  * <li>Maintain an OTVMRunnerAdaptor for adapting vm- and program args (role {@link JDTLaunchingAdaptor.AbstractJavaLaunchConfigurationDelegate}).
  * </ul>
- * Role {@link JDTLaunchingAdaptor.JavaLaunchDelegate} only binds the above behavior into Java launches.
+ * Role {@link JDTLaunchingAdaptor.AbstractJavaLaunchConfigurationDelegate} only binds the above behavior into Java launches.
  * See {@link JUnitLaunchingAdaptor.JUnitLaunchConfigurationDelegate} for equal binding to JUnit launches.
  *  
  * @author stephan

@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.debug.internal.ui.SWTFactory; 
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.DebugMessages;
@@ -46,7 +45,6 @@ import org.eclipse.swt.widgets.Group;
  * @author stephan
  * @since 1.2.2
  */
-@SuppressWarnings("restriction")
 public abstract class OTREBlock 
 {
 	protected String enableCheckboxLabel = DebugMessages.OTLaunching_OTRE_checkbox_label; // overidable default
@@ -59,18 +57,13 @@ public abstract class OTREBlock
 	public abstract void updateLaunchConfigurationDialog();
 	
 	// create the "Object Teams Runtime" section:
-	public Group createOTRESection(Composite parent, boolean useSWTFactory) {
-		Group group;
-		if (useSWTFactory) {
-			group = SWTFactory.createGroup(parent, DebugMessages.OTLaunching_OTRE_group_title+':', 1, 1, GridData.FILL_HORIZONTAL);
-		} else {
-			group = new Group(parent, SWT.NONE);
-			group.setText(DebugMessages.OTLaunching_OTRE_group_title);
-			GridLayout layout = new GridLayout();
-			layout.numColumns = 1;
-			group.setLayout(layout);
-			group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		}
+	public Group createOTRESection(Composite parent) {
+		Group group = new Group(parent, SWT.NONE);
+		group.setLayout(new GridLayout(1, false));
+		group.setText(DebugMessages.OTLaunching_OTRE_group_title+':');
+    	GridData gd = new GridData(GridData.FILL_HORIZONTAL);
+		gd.horizontalSpan = 1;
+		group.setLayoutData(gd);
 		
         this._otreToggleButton = createCheckButton(group, this.enableCheckboxLabel); 
         this._otreToggleButton.addSelectionListener(new SelectionAdapter() 

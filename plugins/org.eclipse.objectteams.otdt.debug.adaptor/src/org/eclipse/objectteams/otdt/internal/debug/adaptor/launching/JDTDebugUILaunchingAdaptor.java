@@ -16,7 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.debug.adaptor.launching;
 
-import org.eclipse.jdt.internal.debug.ui.jres.JREsComboBlock;
+import org.eclipse.jdt.internal.debug.ui.jres.JREsComboBlock; // type is accessed only in one parameter mapping
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -61,7 +61,8 @@ public team class JDTDebugUILaunchingAdaptor {
 		Group createOTRESection(Composite parent) <- after void createControl(Composite parent);
 		public Group createOTRESection(Composite parent) {
 			Composite enclosingComposite = (Composite) this.getJREControl();
-			Group group = super.createOTRESection(enclosingComposite, true/*useSWTFactory*/);
+			Group group = super.createOTRESection(enclosingComposite);
+			group.setFont(parent.getFont()); // without this the heading would be bold, what other sections don't have
 			return group;
 		}
 
@@ -91,7 +92,8 @@ public team class JDTDebugUILaunchingAdaptor {
 		public Group createOTRESection(Composite parent) {
 			Composite enclosingComposite = (Composite) this.getControl();
 			createVerticalSpacer(enclosingComposite, 10);
-			Group group = super.createOTRESection(enclosingComposite, true/*useSWTFactory*/);
+			Group group = super.createOTRESection(enclosingComposite);
+			group.setFont(parent.getFont()); // without this the heading would be bold, what other sections don't have
 			return group;
 		}
 
