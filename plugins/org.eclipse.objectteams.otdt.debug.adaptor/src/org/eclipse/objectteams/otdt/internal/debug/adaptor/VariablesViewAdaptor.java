@@ -25,7 +25,6 @@ import org.eclipse.debug.core.model.IDebugElement;
 import org.eclipse.debug.core.model.IValue;
 import org.eclipse.debug.core.model.IVariable;
 import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationContext;
-import org.eclipse.debug.internal.ui.viewers.model.provisional.IViewerUpdate;
 import org.eclipse.debug.ui.IDebugUIConstants;
 import org.eclipse.jdt.debug.core.IJavaFieldVariable;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -52,19 +51,18 @@ public team class VariablesViewAdaptor
 	/** Adapt the content provider for root elements of the variables view. */
 	protected class StackFrameContentProvider playedBy StackFrameContentProvider {
 
-		Object[] getAllChildren(Object parent, IPresentationContext context, IViewerUpdate monitor) 
-			<- replace Object[] getAllChildren(Object parent, IPresentationContext context, IViewerUpdate monitor);
+		getAllChildren <- replace getAllChildren;
 
-		callin Object[] getAllChildren(Object parent, IPresentationContext context, IViewerUpdate monitor) 
+		callin Object[] getAllChildren(Object parent, IPresentationContext context) 
 				throws CoreException 
 		{
-			Object[] rawChildren = base.getAllChildren(parent, context, monitor);
+			Object[] rawChildren = base.getAllChildren(parent, context);
 	        
 			if (!context.getId().equals(IDebugUIConstants.ID_VARIABLE_VIEW))
 	        	return rawChildren;
 	        
 			// is filtering needed?
-        	if (ShowOTInternalVariablesAction.includeOTInternal(context))
+        	if (ShowOTInternalVariablesAction.includeOTInternal(context.getId()))
 				return rawChildren;
 
         	// at this point always filter internals, but toplevel never has statics to filter:
@@ -85,7 +83,7 @@ public team class VariablesViewAdaptor
 			Object[] rawChildren = base.getValueChildren(parent, value, context);
 			
 			// is filtering needed?
-			boolean filterOTInternals = ! ShowOTInternalVariablesAction.includeOTInternal(context);		
+			boolean filterOTInternals = ! ShowOTInternalVariablesAction.includeOTInternal(context.getId());		
 			
 			// TeamView constantly filters statics:
 			boolean filterStatics = context.getId().equals(OTDebugUIPlugin.TEAM_VIEW_ID);

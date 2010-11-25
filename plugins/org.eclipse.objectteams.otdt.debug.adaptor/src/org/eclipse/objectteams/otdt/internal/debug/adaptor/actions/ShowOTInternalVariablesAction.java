@@ -56,9 +56,9 @@ public class ShowOTInternalVariablesAction extends ToggleBooleanPreferenceAction
 		return getCompositeKey();
 	}
 
-	public static boolean includeOTInternal(IPresentationContext context){
+	public static boolean includeOTInternal(String contextId){
 		IPreferenceStore store = OTDebugAdaptorPlugin.getDefault().getPreferenceStore();
-		String key = context.getId() + "." + PreferenceInitializer.PREF_SHOW_OTINTERNAL_VARIABLES; //$NON-NLS-1$
+		String key = contextId + "." + PreferenceInitializer.PREF_SHOW_OTINTERNAL_VARIABLES; //$NON-NLS-1$
 		return store.getBoolean(key);
 	}
 }

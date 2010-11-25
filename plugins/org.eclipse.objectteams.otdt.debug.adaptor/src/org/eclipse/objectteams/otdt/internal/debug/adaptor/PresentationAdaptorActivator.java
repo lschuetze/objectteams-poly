@@ -21,7 +21,7 @@ import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.objectteams.otdt.debug.ui.OTDebugUIPlugin;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.jdt.internal.debug.core.model.JDIStackFrame;
+import org.eclipse.jdt.debug.core.IJavaStackFrame;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jface.text.source.Annotation;
 
@@ -91,8 +91,8 @@ public team class PresentationAdaptorActivator
 			String result;
 			within (adaptor)
 				result = base.getStackFrameText(stackFrame);
-			if (stackFrame instanceof JDIStackFrame)
-				result = adaptor.postProcess((JDIStackFrame)stackFrame, result);
+			if (stackFrame instanceof IJavaStackFrame)
+				result = adaptor.postProcess((IJavaStackFrame)stackFrame, result);
 			return result; 
 		}
 
@@ -100,9 +100,9 @@ public team class PresentationAdaptorActivator
 			base when (LaunchUtils.isOTLaunch(element));
 		@SuppressWarnings("basecall")
 		callin Color getForeground(Object element) {
-			if (element instanceof JDIStackFrame) {
+			if (element instanceof IJavaStackFrame) {
 				PresentationAdaptor adaptor = PresentationAdaptor.getInstance();
-				String colorName= adaptor.getFrameColorName((JDIStackFrame)element);
+				String colorName= adaptor.getFrameColorName((IJavaStackFrame)element);
 				if (colorName != null)
 					return OTDebugUIPlugin.getPreferenceColor(colorName);
 			}

@@ -34,6 +34,7 @@ import org.eclipse.objectteams.otdt.debug.ui.OTDebugUIPlugin;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
+import base org.eclipse.jdt.debug.core.IJavaStackFrame;
 import base org.eclipse.jdt.internal.debug.core.model.JDIReferenceType;
 import base org.eclipse.jdt.internal.debug.core.model.JDIStackFrame;
 import base org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -71,17 +72,22 @@ public team class PresentationAdaptor
 		return instance;
 	}
 	
+	@SuppressWarnings("abstractrelevantrole")
+	protected abstract class AbstractOTJStackFrame playedBy IJavaStackFrame {
+		// store analyzed method kind between calls:
+		protected MethodKind kind= MethodKind.PLAIN;
+		
+		abstract protected boolean isOTSpecialSrc();
+		abstract protected boolean isPurelyGenerated();
+	}
 	@SuppressWarnings("unchecked")
-	protected class OTJStackFrame playedBy JDIStackFrame 
+	protected class OTJStackFrame extends AbstractOTJStackFrame playedBy JDIStackFrame 
 	{
 		// === imports: ===
 		boolean isStatic() -> boolean isStatic();
 		int modifiers() -> com.sun.jdi.Method getUnderlyingMethod()
 			with { result <- result.modifiers() }
 
-		// store analyzed method kind between calls:
-		protected MethodKind kind= MethodKind.PLAIN;
-		
 		// == currently unused: ==
 		boolean isRole;
 		boolean isTeam; 
@@ -306,7 +312,7 @@ public team class PresentationAdaptor
 	 * @param element stackframe
 	 * @return symbolic color name or null.
 	 */
-	public String getFrameColorName(JDIStackFrame as OTJStackFrame element) {
+	public String getFrameColorName(IJavaStackFrame as AbstractOTJStackFrame element) {
 		if (element.isPurelyGenerated())
 			return OTDebugUIPlugin.PREF_OT_GENERATED_CODE_COLOR;
 		if (element.isOTSpecialSrc())
@@ -327,7 +333,7 @@ public team class PresentationAdaptor
 	}
 
 	/** Final embellishment of a label after everything has been analyzed. */
-	public String postProcess(JDIStackFrame as OTJStackFrame stackFrame, String labelText) 
+	public String postProcess(IJavaStackFrame as AbstractOTJStackFrame stackFrame, String labelText) 
 	{
 		if (stackFrame.kind == MethodKind.INITIAL) // this we didn't know when creating the label text			
 			return labelText.replace(DebugUIMessages.JDIModelPresentation_line__76+' '+DebugUIMessages.JDIModelPresentation_not_available, 
