@@ -11,7 +11,7 @@
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  **********************************************************************/
-package org.eclipse.objectteams.otdt.apt;
+package org.eclipse.objectteams.otdt.internal.apt;
 
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.Argument;

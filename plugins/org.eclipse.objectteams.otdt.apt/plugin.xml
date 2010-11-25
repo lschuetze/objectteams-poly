@@ -14,7 +14,7 @@
          </basePlugin>
          <team
                activation="ALL_THREADS"
-               class="org.eclipse.objectteams.otdt.apt.VisitorsAdaptor"
+               class="org.eclipse.objectteams.otdt.internal.apt.VisitorsAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
       </aspectBinding>
@@ -29,7 +29,7 @@
          </basePlugin>
          <team
                activation="ALL_THREADS"
-               class="org.eclipse.objectteams.otdt.apt.VisitorsAdaptor"
+               class="org.eclipse.objectteams.otdt.internal.apt.VisitorsAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
       </aspectBinding>
