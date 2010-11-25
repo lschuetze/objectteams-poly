@@ -41,10 +41,8 @@ import org.eclipse.swt.graphics.RGB;
  */
 public class OTDebugPreferences extends AbstractPreferenceInitializer {
 
-	// preference keys:
-	public final static String OT_GENERATED_CODE_COLOR = "org.eclipse.objectteams.otdt.debug.ui.OtGeneratedCodeColor"; //$NON-NLS-1$
-	public final static String OT_SPECIAL_CODE_COLOR   = "org.eclipse.objectteams.otdt.debug.ui.OtSpecialCodeColor"; //$NON-NLS-1$
-    public static final String DEBUG_FILTERS_ENABLED_BOOL = "prefs.ot.debugfilters.enabled"; //$NON-NLS-1$
+	// preference key:
+    static final String DEBUG_FILTERS_ENABLED_BOOL = "prefs.ot.debugfilters.enabled"; //$NON-NLS-1$
     
     // key is the first constant plugs one of the tokens:
     public static final String DEBUG_CALLIN_STEPPING = "org.eclipse.objectteams.otdt.debug.ui.OtCallinStepping."; // need to append token //$NON-NLS-1$
@@ -65,8 +63,8 @@ public class OTDebugPreferences extends AbstractPreferenceInitializer {
 	public void initializeDefaultPreferences() {
 		IPreferenceStore prefs = OTDebugUIPlugin.getDefault().getPreferenceStore();
 		
-		PreferenceConverter.setDefault(prefs, OTDebugPreferences.OT_GENERATED_CODE_COLOR, new RGB(182, 182, 209));
-		PreferenceConverter.setDefault(prefs, OTDebugPreferences.OT_SPECIAL_CODE_COLOR,   new RGB(24, 152, 16));
+		PreferenceConverter.setDefault(prefs, OTDebugUIPlugin.PREF_OT_GENERATED_CODE_COLOR, new RGB(182, 182, 209));
+		PreferenceConverter.setDefault(prefs, OTDebugUIPlugin.PREF_OT_SPECIAL_CODE_COLOR,   new RGB(24, 152, 16));
 		
 		prefs.setDefault(OTDebugPreferences.DEBUG_FILTERS_ENABLED_BOOL, true);
 		

@@ -63,6 +63,9 @@ public class OTDebugUIPlugin extends AbstractUIPlugin
 	//Resource bundle.
 	private ResourceBundle resourceBundle;
     private CopyInheritanceBreakpointManager _copyInheritanceBPManager;
+	// preference keys:
+	public final static String PREF_OT_GENERATED_CODE_COLOR = "org.eclipse.objectteams.otdt.debug.ui.OtGeneratedCodeColor"; //$NON-NLS-1$
+	public final static String PREF_OT_SPECIAL_CODE_COLOR   = "org.eclipse.objectteams.otdt.debug.ui.OtSpecialCodeColor"; //$NON-NLS-1$
 
 	// TODO: use JDIDebugUIPlugin to contribute to the UI
 	

@@ -23,9 +23,6 @@ package org.eclipse.objectteams.otdt.debug.ui.internal.preferences;
 import static org.eclipse.objectteams.otdt.debug.ui.internal.preferences.OTDebugPreferences.CALLIN_STEPPING_TOKENS;
 import static org.eclipse.objectteams.otdt.debug.ui.internal.preferences.OTDebugPreferences.DEBUG_CALLIN_STEPPING;
 import static org.eclipse.objectteams.otdt.debug.ui.internal.preferences.OTDebugPreferences.DEBUG_FILTERS_ENABLED_BOOL;
-import static org.eclipse.objectteams.otdt.debug.ui.internal.preferences.OTDebugPreferences.OT_GENERATED_CODE_COLOR;
-import static org.eclipse.objectteams.otdt.debug.ui.internal.preferences.OTDebugPreferences.OT_SPECIAL_CODE_COLOR;
-
 import java.util.Iterator;
 import java.util.List;
 
@@ -124,13 +121,13 @@ public class OTDebugPreferencePage extends FieldEditorPreferencePage implements 
 		group.setText(OTDebugPreferencesMessages.OTDebugPreferencePage_stackFrameColoringGroup_label);
 
 		Composite spacer = SWTFactory.createComposite(group, 2, 1, GridData.FILL_HORIZONTAL);
-		fGeneratedCodeColorFieldEditor = new ColorFieldEditor(OT_GENERATED_CODE_COLOR, 
+		fGeneratedCodeColorFieldEditor = new ColorFieldEditor(OTDebugUIPlugin.PREF_OT_GENERATED_CODE_COLOR, 
 															  OTDebugPreferencesMessages.OTDebugPreferencePage_colorGeneratedCode_label, 
 															  spacer);
 		fGeneratedCodeColorFieldEditor.fillIntoGrid(spacer, 2);
 		addField(fGeneratedCodeColorFieldEditor);
 		
-		fSpecialCodeColorFieldEditor = new ColorFieldEditor(OT_SPECIAL_CODE_COLOR, 
+		fSpecialCodeColorFieldEditor = new ColorFieldEditor(OTDebugUIPlugin.PREF_OT_SPECIAL_CODE_COLOR, 
 															OTDebugPreferencesMessages.OTDebugPreferencePage_colorSpecialCode_label, 
 															spacer);
 		fSpecialCodeColorFieldEditor.fillIntoGrid(spacer, 2);
