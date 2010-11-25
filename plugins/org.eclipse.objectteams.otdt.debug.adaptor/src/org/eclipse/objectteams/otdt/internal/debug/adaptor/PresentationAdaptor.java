@@ -32,7 +32,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
-import org.eclipse.objectteams.otdt.debug.ui.internal.preferences.OTDebugPreferences;
+import org.eclipse.objectteams.otdt.debug.ui.OTDebugUIPlugin;
 
 import base org.eclipse.jdt.internal.debug.core.model.JDIReferenceType;
 import base org.eclipse.jdt.internal.debug.core.model.JDIStackFrame;
@@ -308,9 +308,9 @@ public team class PresentationAdaptor
 	 */
 	public String getFrameColorName(JDIStackFrame as OTJStackFrame element) {
 		if (element.isPurelyGenerated())
-			return OTDebugPreferences.OT_GENERATED_CODE_COLOR;
+			return OTDebugUIPlugin.PREF_OT_GENERATED_CODE_COLOR;
 		if (element.isOTSpecialSrc())
-			return OTDebugPreferences.OT_SPECIAL_CODE_COLOR;
+			return OTDebugUIPlugin.PREF_OT_SPECIAL_CODE_COLOR;
 		return null;
 	}
 
