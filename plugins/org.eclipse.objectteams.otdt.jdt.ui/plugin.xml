@@ -165,7 +165,7 @@
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
         <team
-              activation="ALL_THREADS"
+              activation="NONE"
               class="org.eclipse.objectteams.otdt.internal.corext.DOMAdaptor"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
