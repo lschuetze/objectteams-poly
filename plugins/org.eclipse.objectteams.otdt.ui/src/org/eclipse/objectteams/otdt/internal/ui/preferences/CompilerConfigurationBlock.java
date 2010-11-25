@@ -91,35 +91,19 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_PB_BASECALL = getJDTCoreKey(OTDTPlugin.OT_COMPILER_BASE_CALL);
 	private static final Key PREF_PB_BASECLASS_CYCLE = getJDTCoreKey(OTDTPlugin.OT_COMPILER_BASECLASS_CYCLE);
 	private static final Key PREF_PB_UNSAFE_ROLE_INSTANTIATION = getJDTCoreKey(OTDTPlugin.OT_COMPILER_UNSAFE_ROLE_INSTANTIATION);
-
-//	private static final Key PREF_PB_EFFECTLESS_FIELDACCESS = getJDTCoreKey(OTDTPlugin.OT_COMPILER_EFFECTLESS_FIELDACCESS);
 	private static final Key PREF_PB_FRAGILE_CALLIN = getJDTCoreKey(OTDTPlugin.OT_COMPILER_FRAGILE_CALLIN);
-//	private static final Key PREF_PB_UNUSED_PARAMMAP = getJDTCoreKey(OTDTPlugin.OT_COMPILER_UNUSED_PARAMMAP);
-	
 	private static final Key PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY = getJDTCoreKey(OTDTPlugin.OT_COMPILER_POTENTIAL_AMBIGUOUS_PLAYEDBY);
 	private static final Key PREF_PB_ABSTRACT_POTENTIAL_RELEVANT_ROLE = getJDTCoreKey(OTDTPlugin.OT_COMPILER_ABSTRACT_POTENTIAL_RELEVANT_ROLE);
-	
 	private static final Key PREF_PB_DECAPSULATION = getJDTCoreKey(OTDTPlugin.OT_COMPILER_DECAPSULATION);
-	
 	private static final Key PREF_PB_DEPRECATED_PATH_SYNTAX = getJDTCoreKey(OTDTPlugin.OT_COMPILER_DEPRECATED_PATH_SYNTAX);
-
 	private static final Key PREF_PB_BINDING_CONVENTIONS = getJDTCoreKey(OTDTPlugin.OT_COMPILER_BINDING_CONVENTIONS);
-
 	private static final Key PREF_PB_INFERRED_CALLOUT = getJDTCoreKey(OTDTPlugin.OT_COMPILER_INFERRED_CALLOUT);
-	
 	private static final Key PREF_PB_WEAVE_INTO_SYSTEM_CLASS = getJDTCoreKey(OTDTPlugin.OT_COMPILER_WEAVE_INTO_SYSTEM_CLASS);
-	
 	private static final Key PREF_PB_OVERRIDE_FINAL_ROLE = getJDTCoreKey(OTDTPlugin.OT_COMPILER_OVERRIDE_FINAL_ROLE);
-	
 	private static final Key PREF_PB_EXCEPTION_IN_GUARD = getJDTCoreKey(OTDTPlugin.OT_COMPILER_EXCEPTION_IN_GUARD);
-
 	private static final Key PREF_PB_AMBIGUOUS_LOWERING = getJDTCoreKey(OTDTPlugin.OT_COMPILER_AMBIGUOUS_LOWERING);
-
 	private static final Key PREF_PB_ADAPTING_DEPRECATED = getJDTCoreKey(OTDTPlugin.OT_COMPILER_ADAPTING_DEPRECATED);
-
 	private static final Key PREF_PB_IGNORING_ROLE_RETURN = getJDTCoreKey(OTDTPlugin.OT_COMPILER_IGNORING_ROLE_RETURN);
-
-//	private static final Key PREF_PB_INCOMPLETE_BUILD = getJDTCoreKey(OTDTPlugin.OT_COMPILER_INCOMPLETE_BUILD);
 	
 	// feature enablement:
 	private static final Key PREF_OPT_SCOPED_KEYWORDS = getJDTCoreKey(OTDTPlugin.OT_COMPILER_SCOPED_KEYWORDS);
@@ -134,9 +118,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private static final String SETTINGS_SECTION_NAME = null; // ?? see ProblemSeveritiesConfigurationBlock 
 	
-	// would be needed if some controls are enabled/disabled programmatically:
-	// private IStatus fComplianceStatus;
-	// private ArrayList fComplianceControls;
 	private Composite fControlsComposite;
 	private ControlEnableState fBlockEnableState;
 	
@@ -144,10 +125,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		super(context, project, getKeys(), container);
 		
 		fBlockEnableState= null;
-		// currently unused: 
-		//fComplianceControls= new ArrayList();		
-		//ComplianceStatus= new StatusInfo();
-
 	}
 	
 	private static Key[] getKeys() {
@@ -155,10 +132,8 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_BASECALL,
 				PREF_PB_BASECLASS_CYCLE,
 				PREF_PB_UNSAFE_ROLE_INSTANTIATION, 
-//				PREF_PB_EFFECTLESS_FIELDACCESS, 
 				PREF_PB_FRAGILE_CALLIN,
 				PREF_PB_IGNORING_ROLE_RETURN,
-//				PREF_PB_UNUSED_PARAMMAP,
 				PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY, PREF_PB_ABSTRACT_POTENTIAL_RELEVANT_ROLE,
 				PREF_PB_DECAPSULATION,
 				PREF_PB_BINDING_CONVENTIONS,
@@ -169,7 +144,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_OVERRIDE_FINAL_ROLE,
 				PREF_PB_EXCEPTION_IN_GUARD,
 				PREF_PB_AMBIGUOUS_LOWERING,
-//				PREF_PB_INCOMPLETE_BUILD,
 				PREF_OPT_SCOPED_KEYWORDS
 			};
 	}
@@ -245,17 +219,11 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_unsafe_role_instantiation_label;
 		addComboBox(inner, label, PREF_PB_UNSAFE_ROLE_INSTANTIATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
-//		label= OTPreferencesMessages.OTCompilerConfigurationBlock_effectless_fieldaccess_label;
-//		addComboBox(inner, label, PREF_PB_EFFECTLESS_FIELDACCESS, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_fragile_callin_label;
 		addComboBox(inner, label, PREF_PB_FRAGILE_CALLIN, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_ignoring_role_result;
 		addComboBox(inner, label, PREF_PB_IGNORING_ROLE_RETURN, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		//		label= OTPreferencesMessages.OTCompilerConfigurationBlock_unused_parammap_label;
-//		addComboBox(inner, label, PREF_PB_UNUSED_PARAMMAP, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_potential_ambiguous_playedby_label;
 		addComboBox(inner, label, PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY, errorWarningIgnore, errorWarningIgnoreLabels, 0);
@@ -292,9 +260,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_exception_in_guard;
 		addComboBox(inner, label, PREF_PB_EXCEPTION_IN_GUARD, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-//		label= OTPreferencesMessages.OTCompilerConfigurationBlock_incomplete_build_label;
-//		addComboBox(inner, label, PREF_PB_INCOMPLETE_BUILD, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
 		// ---- Feature enablement ----
 		inner = myCreateSection(nColumns, composite, OTPreferencesMessages.OTCompilerFeatureEnablement_description);
