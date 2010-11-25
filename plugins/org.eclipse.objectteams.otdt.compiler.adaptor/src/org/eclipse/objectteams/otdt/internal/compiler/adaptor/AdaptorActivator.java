@@ -291,7 +291,7 @@ public team class AdaptorActivator
 
 		static Team getChecker(ICompilationUnit unitElement) {			
 			try {
-				Project project= ProjectUtil.safeGetOTPluginProject(unitElement);
+				IProject project= ProjectUtil.safeGetOTPluginProject(unitElement);
 				if (project != null) {
 					Team baseChecker= ResourceProjectAdaptor.getDefault().getChecker(project);
 					if (baseChecker != null)

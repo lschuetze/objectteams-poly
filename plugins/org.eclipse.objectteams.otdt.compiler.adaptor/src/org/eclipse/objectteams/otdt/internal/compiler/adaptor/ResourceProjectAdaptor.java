@@ -20,6 +20,7 @@ import org.objectteams.LiftingVetoException;
 import org.objectteams.Team;
 
 import base org.eclipse.core.internal.resources.Project;
+import base org.eclipse.core.resources.IProject;
 
 /**
  * Simple decoration of class Project from org.eclipse.core.resources.
@@ -36,11 +37,15 @@ public team class ResourceProjectAdaptor
 	}
 	public static ResourceProjectAdaptor getDefault() { return instance; }
 	
-	/** Associate an AspectBindingReader and a BaseImportChecker to each OT Plugin project. */
-	protected class OTEquinoxProject playedBy Project
-	{
+	@SuppressWarnings("abstractrelevantrole")
+	protected abstract class AbstractOTEquinoxProject playedBy IProject {
 		protected AspectBindingReader aspectBindingReader;
 		protected BaseImportChecker checker;
+		abstract protected boolean hasAspectDataChanged ();
+	}
+	/** Associate an AspectBindingReader and a BaseImportChecker to each OT Plugin project. */
+	protected class OTEquinoxProject extends AbstractOTEquinoxProject playedBy Project
+	{
 
 		/** 
 		 * Lifting constructor which refuses lifting for non OT-plugin projects,
@@ -67,17 +72,17 @@ public team class ResourceProjectAdaptor
 
 	// ======== API: =========
 	
-	public Team getChecker(Project as OTEquinoxProject project) 
+	public Team getChecker(IProject as AbstractOTEquinoxProject project) 
 			throws LiftingVetoException 
 	{
 		return project.checker;
 	}
-	public AspectBindingReader getAspectBindingReader(Project as OTEquinoxProject project) 
+	public AspectBindingReader getAspectBindingReader(IProject as AbstractOTEquinoxProject project) 
 			throws LiftingVetoException 
 	{
 		return project.aspectBindingReader;
 	}
-	public boolean hasAspectDataChanged(Project as OTEquinoxProject project)  
+	public boolean hasAspectDataChanged(IProject as AbstractOTEquinoxProject project)  
 			throws LiftingVetoException 
 	{
 		return project.hasAspectDataChanged();
