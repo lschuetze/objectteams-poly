@@ -52,6 +52,7 @@ import org.eclipse.ui.texteditor.IEditorStatusLine;
  */
 //{OT_COPY_PASTE: class copied from org.eclipse.jdt.internal.debug.ui.actions.BreakpointLocationVerifierJob
 // modified just to instantiate OTValidBreakpointLocationLocator in favor of ValidBreakpointLocationLocator
+@SuppressWarnings("restriction") // copy&paste adaptation needs access to internals
 public class OTBreakpointLocationVerifierJob extends Job {
 
 	/**

@@ -63,6 +63,7 @@ import org.eclipse.ui.IActionBars;
  * 
  * $Id: TeamView.java 23432 2010-02-03 23:13:42Z stephan $
  */
+@SuppressWarnings("restriction") // team view as variant of variables view needs access to internals
 public class TeamView extends VariablesView implements ILaunchesListener2
 {
 	private static final String ACTION_ACTIVATE_TEAM = "ActivateTeam"; //$NON-NLS-1$

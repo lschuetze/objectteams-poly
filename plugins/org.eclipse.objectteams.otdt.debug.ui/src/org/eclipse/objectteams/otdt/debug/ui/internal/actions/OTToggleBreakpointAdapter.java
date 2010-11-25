@@ -94,6 +94,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 //{OT_COPY_PASTE: class copied from org.eclipse.jdt.internal.debug.ui.actions.ToggleBreakpointAdapter
 // to instantiate OTBreakpointLocationVerifierJob in favor of BreakpointLocationVerifierJob
 // and to access a protected method of ValidBreakpointLocationLocator
+@SuppressWarnings("restriction") // copy&paste adaptation needs access to internals
 public class OTToggleBreakpointAdapter implements IToggleBreakpointsTargetExtension {
 
 	

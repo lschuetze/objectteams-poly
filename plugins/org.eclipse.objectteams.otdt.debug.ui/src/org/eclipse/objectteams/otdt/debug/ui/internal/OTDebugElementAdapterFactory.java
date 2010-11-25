@@ -37,6 +37,7 @@ import org.eclipse.objectteams.otdt.debug.ui.internal.model.TeamInstanceLabelPro
 /** 
  * This factory installs our content/label providers into the TeamView
  */
+@SuppressWarnings("restriction") // team view as variant of variables view needs access to internals
 public class OTDebugElementAdapterFactory implements IAdapterFactory 
 {
 	

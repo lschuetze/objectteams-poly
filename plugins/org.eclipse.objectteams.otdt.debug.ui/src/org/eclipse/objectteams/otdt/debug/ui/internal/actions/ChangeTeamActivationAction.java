@@ -44,6 +44,7 @@ import org.eclipse.objectteams.otdt.debug.ui.views.TeamView;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionProviderAction;
 
+@SuppressWarnings("restriction") // team view as variant of variables view needs access to internals
 public class ChangeTeamActivationAction extends SelectionProviderAction {
 
 	// selectors of methods to invoke:

@@ -26,6 +26,7 @@ import org.eclipse.debug.internal.ui.viewers.model.provisional.IPresentationCont
 import org.eclipse.jface.viewers.TreePath;
 
 /** Label for the root node of the TeamView (which does not have a label). */
+@SuppressWarnings("restriction") // team view as variant of variables view needs access to internals
 public class OTDebugElementsContainerLabelProvider extends ElementLabelProvider {
 
 	@Override

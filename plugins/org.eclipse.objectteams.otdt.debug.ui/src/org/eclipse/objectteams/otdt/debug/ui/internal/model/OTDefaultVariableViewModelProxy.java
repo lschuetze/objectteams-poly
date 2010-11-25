@@ -43,6 +43,7 @@ import org.eclipse.objectteams.otdt.debug.TeamInstance;
  * @author stephan
  * @since 1.1.2
  */
+@SuppressWarnings("restriction") // team view as variant of variables view needs access to internals
 public class OTDefaultVariableViewModelProxy
 	extends AbstractModelProxy
 	implements IOTDebugEventListener

@@ -37,6 +37,7 @@ import org.eclipse.objectteams.otdt.debug.ui.OTDebugImages;
  * @author stephan
  * @since 1.1.2
  */
+@SuppressWarnings("restriction") // team view as variant of variables view needs access to internals
 public class TeamInstanceLabelProvider extends VariableLabelProvider 
 {
 	@Override
