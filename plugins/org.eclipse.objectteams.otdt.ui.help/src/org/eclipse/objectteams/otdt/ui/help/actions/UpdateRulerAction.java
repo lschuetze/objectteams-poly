@@ -30,7 +30,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.objectteams.otdt.ui.IUpdateRulerActionExtender;
-import org.eclipse.objectteams.otdt.ui.Messages;
+import org.eclipse.objectteams.otdt.ui.help.Messages;
 import org.eclipse.objectteams.otdt.ui.help.OTJLDError;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;

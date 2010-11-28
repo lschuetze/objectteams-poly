@@ -28,7 +28,7 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.objectteams.otdt.ui.Messages;
+import org.eclipse.objectteams.otdt.ui.help.Messages;
 import org.eclipse.objectteams.otdt.ui.help.OTHelpPlugin;
 import org.eclipse.objectteams.otdt.ui.help.OTJLDError;
 import org.eclipse.objectteams.otdt.ui.help.OTJLDError.OTURL;
