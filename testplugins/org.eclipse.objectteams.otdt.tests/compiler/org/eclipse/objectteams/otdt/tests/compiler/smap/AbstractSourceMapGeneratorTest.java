@@ -49,7 +49,7 @@ import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
-import org.eclipse.objectteams.otdt.debug.core.breakpoints.IOOTBreakPoints;
+import org.eclipse.objectteams.otdt.debug.internal.breakpoints.IOOTBreakPoints;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
 import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 import org.eclipse.objectteams.otdt.tests.compiler.CustomizedCompiler;
