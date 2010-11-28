@@ -47,20 +47,12 @@ public class SortTeamAction extends Action
 			setText(TeamViewMessages.SortTeamByActivation_0);
 			setImageDescriptor(OTDebugImages.get(OTDebugImages.SORT_TEAMS_BY_ACTIVATION_TIME));
 		}
-
-		if (sortMode == IOTDTDebugPreferenceConstants.TEAMS_BY_ACTIVATION_ORDER)
-		{
-			setText(TeamViewMessages.SortTeamByActivation_1);
-			setImageDescriptor(OTDebugImages.get(OTDebugImages.SORT_TEAMS_BY_ACTIVATION_ORDER));
-		}
-
-		if (sortMode == IOTDTDebugPreferenceConstants.TEAMS_BY_INSTANTIATION)
+		else if (sortMode == IOTDTDebugPreferenceConstants.TEAMS_BY_INSTANTIATION)
 		{
 			setText(TeamViewMessages.SortTeamByInstantiation_0);
 			setImageDescriptor(OTDebugImages.get(OTDebugImages.SORT_TEAMS_BY_INSTANTIATION));
 		}
-
-		if (sortMode == IOTDTDebugPreferenceConstants.TEAMS_BY_NAME)
+		else if (sortMode == IOTDTDebugPreferenceConstants.TEAMS_BY_NAME)
 		{
 			setText(TeamViewMessages.SortTeamByName_0);  
 			setImageDescriptor(OTDebugImages.get(OTDebugImages.SORT_TEAMS_BY_NAME));  

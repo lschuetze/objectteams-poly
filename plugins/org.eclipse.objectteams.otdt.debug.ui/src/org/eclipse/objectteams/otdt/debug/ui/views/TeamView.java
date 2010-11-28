@@ -87,7 +87,7 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 	
 	public String getDefaultSortMode()
 	{
-		return IOTDTDebugPreferenceConstants.TEAMS_BY_ACTIVATION_ORDER;
+		return IOTDTDebugPreferenceConstants.TEAMS_BY_ACTIVATION_TIME;
 	}
 
 	@Override // COPY_AND_PASTE from super, edited:
@@ -185,8 +185,21 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 	
 	public void launchesTerminated(ILaunch[] launches)
 	{
-		//clear TeamView
-		;
+		for (ILaunch launch : launches) {
+			if (launch.isTerminated()) {
+				OTDebugElementsContainer current = (OTDebugElementsContainer)getViewer().getInput();
+				IDebugTarget currentTarget = current.getContext().getDebugTarget();
+				if (launch.getDebugTarget() == currentTarget) { 
+					current.dispose(); // clear all previous team instances
+					getViewer().getControl().getDisplay().asyncExec(new Runnable() {
+						public void run() {
+							getViewer().setInput(null);							
+						}						
+					});
+					return;
+				}
+			}
+		}
 	}
 
 	public void launchesRemoved(ILaunch[] launches) {}
@@ -224,17 +237,15 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 
 	private void createSortActions(IMenuManager viewMenu)
 	{
-		final SortTeamAction sortAction1 = new SortTeamAction(this, IOTDTDebugPreferenceConstants.TEAMS_BY_ACTIVATION_ORDER);
-		final SortTeamAction sortAction2 = new SortTeamAction(this, IOTDTDebugPreferenceConstants.TEAMS_BY_ACTIVATION_TIME);
-		final SortTeamAction sortAction3 = new SortTeamAction(this, IOTDTDebugPreferenceConstants.TEAMS_BY_INSTANTIATION);
-		final SortTeamAction sortAction4 = new SortTeamAction(this, IOTDTDebugPreferenceConstants.TEAMS_BY_NAME);
+		final SortTeamAction sortAction1 = new SortTeamAction(this, IOTDTDebugPreferenceConstants.TEAMS_BY_ACTIVATION_TIME);
+		final SortTeamAction sortAction2 = new SortTeamAction(this, IOTDTDebugPreferenceConstants.TEAMS_BY_INSTANTIATION);
+		final SortTeamAction sortAction3 = new SortTeamAction(this, IOTDTDebugPreferenceConstants.TEAMS_BY_NAME);
 		
 		final MenuManager layoutSubMenu = new MenuManager(TeamViewMessages.TeamView_0);
 		layoutSubMenu.setRemoveAllWhenShown(true);
 		layoutSubMenu.add(sortAction1);
 		layoutSubMenu.add(sortAction2);
 		layoutSubMenu.add(sortAction3);
-		layoutSubMenu.add(sortAction4);
 		viewMenu.add(layoutSubMenu);
 		viewMenu.add(new Separator());
 
@@ -245,7 +256,6 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 				layoutSubMenu.add(sortAction1);
 				layoutSubMenu.add(sortAction2);
 				layoutSubMenu.add(sortAction3);
-				layoutSubMenu.add(sortAction4);
 			}
 		});
 	}

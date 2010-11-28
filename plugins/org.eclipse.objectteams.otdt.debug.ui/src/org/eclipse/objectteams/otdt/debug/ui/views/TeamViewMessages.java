@@ -29,8 +29,6 @@ public class TeamViewMessages extends NLS
 	public static String SortTeamByName_0;
 
 	public static String SortTeamByActivation_0;
-
-	public static String SortTeamByActivation_1;
 	
 	public static String SortTeamByInstantiation_0;
 

@@ -57,10 +57,6 @@ public class OTDefaultVariableViewModelProxy
 		OTDebugPlugin.getDefault().addOTDebugEventListener(this);
 	}
 
-	public void launched(ILaunch launch) {
-		// TODO Auto-generated method stub
-	}
-
 	public void teamInstantiated(TeamInstance newTeam) 
 	{
 		int idx= container.getIndexOfTeamInstance(newTeam);

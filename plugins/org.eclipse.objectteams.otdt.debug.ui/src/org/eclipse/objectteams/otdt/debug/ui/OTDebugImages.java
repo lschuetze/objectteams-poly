@@ -39,9 +39,8 @@ public class OTDebugImages
     public static final String TEAM_ACTIVATED           = "icons/team_act.gif";
     public static final String TEAM_IMPLICIT_ACTIVATED  = "icons/team_act_implicit.gif";
     public static final String TEAM_INACTIVATED         = "icons/team_inact.gif";
-    public static final String SORT_TEAMS_BY_ACTIVATION_TIME = "icons/sort_by_activationtime.gif";
-    public static final String SORT_TEAMS_BY_ACTIVATION_ORDER = "icons/sort_by_activation.gif";
-    public static final String SORT_TEAMS_BY_NAME = "icons/sort_by_name.gif";
+    public static final String SORT_TEAMS_BY_ACTIVATION_TIME = "icons/sort_by_activation.gif";
+    public static final String SORT_TEAMS_BY_NAME 		= "icons/sort_by_name.gif";
     public static final String SORT_TEAMS_BY_INSTANTIATION = "icons/sort_by_instantiation.gif";
     public static final String UPDATE_TEAM_VIEW_ACTION = "icons/refresh.gif";
 
@@ -58,7 +57,6 @@ public class OTDebugImages
         register(TEAM_IMPLICIT_ACTIVATED, bundle, registry);
         register(TEAM_INACTIVATED, bundle, registry);
         register(SORT_TEAMS_BY_ACTIVATION_TIME, bundle, registry);
-        register(SORT_TEAMS_BY_ACTIVATION_ORDER, bundle, registry);
         register(SORT_TEAMS_BY_NAME, bundle, registry);
         register(SORT_TEAMS_BY_INSTANTIATION, bundle, registry);
         register(UPDATE_TEAM_VIEW_ACTION, bundle, registry);
