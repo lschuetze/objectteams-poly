@@ -82,7 +82,7 @@ public class OTLaunchConfigurationTab extends AbstractLaunchConfigurationTab imp
     	List<String> teamHandles = new LinkedList<String>(); 
     	boolean teamsActive = true;
     	try {
-			teamHandles =  configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_LIST, teamHandles);	
+			teamHandles = configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_LIST, teamHandles);	
 			teamsActive = configuration.getAttribute(IOTLaunchConstants.ATTR_TEAMCONFIG_ACTIVE, true);
 		} catch (CoreException ce) {
 		    OTDTUIPlugin.logException("Cannot read team configuration", ce); //$NON-NLS-1$
