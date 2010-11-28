@@ -24,7 +24,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
-import org.eclipse.objectteams.otdt.ui.OTDTUIPluginConstants;
+import org.eclipse.objectteams.otdt.internal.ui.OTDTUIPluginConstants;
 
 
 /**

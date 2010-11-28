@@ -66,6 +66,12 @@ public class ImageManager implements ImageConstants
 
 	private static ImageManager _singleton;
 
+	// icon folders:
+	static final String IMG_PATH    	= "icons/ot/"; //$NON-NLS-1$
+	static final String DEFAULT_PATH	= "default/"; //$NON-NLS-1$
+	static final String HOVER_PATH		= "hover/"; //$NON-NLS-1$
+	static final String DISABLED_PATH	= "disabled/"; //$NON-NLS-1$
+
 	/**
 	 * Avoid multiple instances
 	 */
@@ -91,14 +97,14 @@ public class ImageManager implements ImageConstants
 	 * Add all plugin specific images to given ImageRegistry
 	 * @param reg - ImageRegistry to use 
 	 */
-	public void registerPluginImages(ImageRegistry reg)
+	protected void registerPluginImages(ImageRegistry reg)
 	{
 		ImageDescriptor descr;
 		
 		try
 		{
 			String[] pluginIcons = pluginIcons();
-			URL baseURL = new URL(getInstallLocation(), IMG_PATH);
+			URL baseURL = new URL(getInstallLocation(), ImageManager.IMG_PATH);
 			for (int idx = 0; idx < pluginIcons.length; idx++)
 			{
 				descr = ImageDescriptor.createFromURL(
@@ -110,20 +116,6 @@ public class ImageManager implements ImageConstants
 		{
 			OTDTUIPlugin.logException("Error registering plugin images", ex); //$NON-NLS-1$
 		}
-	}
-
-	private URL getInstallLocation() {
-		return getPlugin().getBundle().getEntry("/"); //$NON-NLS-1$
-	}
-
-	/** Override to specify which plugin we are serving. */
-	protected AbstractUIPlugin getPlugin() {
-		return OTDTUIPlugin.getDefault();
-	}
-	
-	/** Override to specify which icons should be registered. */
-	protected String[] pluginIcons() {
-		return _pluginIcons;
 	}
 
 	/**
@@ -165,10 +157,27 @@ public class ImageManager implements ImageConstants
 		return getPlugin().getImageRegistry().get(imageKey);		
 	}
 
-	
+	/**
+	 * Get image descriptor from this Plugin's ImageRegistry
+	 * @param imageKey - image key from the set returned by pluginIcons().
+	 * @return image descriptor
+	 */	
 	public ImageDescriptor getDescriptor(String imageKey)
 	{
 		return getPlugin().getImageRegistry().getDescriptor(imageKey);
 	}
-
+	
+	private URL getInstallLocation() {
+		return getPlugin().getBundle().getEntry("/"); //$NON-NLS-1$
+	}
+	
+	/** Override to specify which plugin we are serving. */
+	protected AbstractUIPlugin getPlugin() {
+		return OTDTUIPlugin.getDefault();
+	}
+	
+	/** Override to specify which icons should be registered. */
+	protected String[] pluginIcons() {
+		return _pluginIcons;
+	}
 }

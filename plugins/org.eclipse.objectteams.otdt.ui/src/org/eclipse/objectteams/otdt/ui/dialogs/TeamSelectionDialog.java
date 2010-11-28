@@ -105,11 +105,6 @@ public class TeamSelectionDialog extends TwoPaneElementSelector
 	    _searchFilters.add(filter);
 	}
 	
-	public void removeSearchFilter(ISearchFilter filter)
-	{
-	    _searchFilters.remove(filter);
-	}
-	
 	/*
 	 * @see AbstractElementListSelectionDialog#createFilteredList(Composite)
 	 */

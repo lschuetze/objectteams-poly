@@ -35,7 +35,7 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
  * @author kaschja
  * @version $Id: OTTypeSelectionLabelProvider.java 23435 2010-02-04 00:14:38Z stephan $
  */
-public class OTTypeSelectionLabelProvider extends LabelProvider
+class OTTypeSelectionLabelProvider extends LabelProvider
 {
 	private static final Image PKG_ICON = JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKAGE);
 

@@ -14,7 +14,7 @@
  * Contributors:
  * Stephan Herrmann - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.ui.handlers;
+package org.eclipse.objectteams.otdt.internal.ui.handlers;
 
 import java.util.ArrayList;
 import java.util.Iterator;

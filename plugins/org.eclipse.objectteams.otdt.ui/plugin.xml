@@ -291,7 +291,7 @@
          <action
         	   actionID="RulerClick"
                label="openteam"
-               class="org.eclipse.objectteams.otdt.ui.UpdateRulerAction"
+               class="org.eclipse.objectteams.otdt.internal.ui.callinmarkers.UpdateRulerAction"
                id="org.eclipse.objectteams.otdt.ui.actions.UpdateRulerAction">
          </action>
       </editorContribution>
@@ -301,7 +301,7 @@
          <action
         	   actionID="RulerClick"
                label="openteam"
-               class="org.eclipse.objectteams.otdt.ui.UpdateRulerAction"
+               class="org.eclipse.objectteams.otdt.internal.ui.callinmarkers.UpdateRulerAction"
                id="org.eclipse.objectteams.otdt.ui.actions.UpdateRulerAction">
          </action>
       </editorContribution>
@@ -415,7 +415,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.eclipse.objectteams.otdt.ui.handlers.OpenBindingEditorHandler"
+            class="org.eclipse.objectteams.otdt.internal.ui.handlers.OpenBindingEditorHandler"
             commandId="org.eclipse.objectteams.otdt.ui.commands.openBindingEditor">
       </handler>
    </extension>
@@ -457,7 +457,7 @@
    <extension
          point="org.eclipse.ui.handlers">
       <handler
-            class="org.eclipse.objectteams.otdt.ui.handlers.CompareWithBaseMethodHandler"
+            class="org.eclipse.objectteams.otdt.internal.ui.handlers.CompareWithBaseMethodHandler"
             commandId="org.eclipse.objectteams.otdt.ui.commands.compareWithBaseMethod">
       </handler>
    </extension>

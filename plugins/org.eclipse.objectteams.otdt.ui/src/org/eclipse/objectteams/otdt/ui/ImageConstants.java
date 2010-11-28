@@ -30,12 +30,6 @@ package org.eclipse.objectteams.otdt.ui;
 @SuppressWarnings("nls")
 public interface ImageConstants
 {
-	public static final String IMG_PATH                 = "icons/ot/";
-
-	public static final String DEFAULT_PATH				= "default/";
-	public static final String HOVER_PATH				= "hover/";
-	public static final String DISABLED_PATH			= "disabled/";
-
 	// Method binding icons:
     public static final String CALLINBINDING_AFTER_IMG  = "callinbindingafter_obj.gif";
     public static final String CALLINBINDING_BEFORE_IMG = "callinbindingbefore_obj.gif";

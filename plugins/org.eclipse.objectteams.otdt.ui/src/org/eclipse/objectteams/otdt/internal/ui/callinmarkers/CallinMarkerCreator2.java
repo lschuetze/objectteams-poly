@@ -73,7 +73,6 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.search.OTSearchEngine;
 import org.eclipse.objectteams.otdt.internal.ui.preferences.GeneralPreferences;
-import org.eclipse.objectteams.otdt.ui.JavaEditorActivationListener;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;

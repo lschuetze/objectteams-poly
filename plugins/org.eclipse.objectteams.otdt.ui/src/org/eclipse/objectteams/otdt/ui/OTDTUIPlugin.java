@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
+import org.eclipse.objectteams.otdt.internal.ui.OTDTUIPluginConstants;
 import org.eclipse.objectteams.otdt.internal.ui.OTElementAdapterFactory;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarkerCreator2;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.RoleBindingChangedListener;
@@ -66,24 +67,23 @@ public class OTDTUIPlugin extends AbstractUIPlugin implements OTDTUIPluginConsta
         super();
         _singleton = this;
         
-        try
-        {
+        try {
 			_resourceBundle = ResourceBundle.getBundle( RESOURCES_ID );
-		}
-		catch (MissingResourceException ex)
-		{
+		} catch (MissingResourceException ex) {
 			logException("Error initializing resource bundle of OTDT/UI", ex); //$NON-NLS-1$
 			_resourceBundle = null;
 		}
     }
 
-    public static OTDTUIPlugin getDefault()
-    {
+    public static OTDTUIPlugin getDefault() {
         return _singleton;
     }
 
-	public static IWorkbenchPage getActivePage()
-	{
+    /**
+     * Answer the active workbench page
+     * @return active workbench page or null if no workbench window is active.
+     */
+	public static IWorkbenchPage getActivePage() {
 		return getDefault().internalGetActivePage();
 	}
 
@@ -100,32 +100,18 @@ public class OTDTUIPlugin extends AbstractUIPlugin implements OTDTUIPluginConsta
      */
     public static String getResourceString(String key)
     {
-        ResourceBundle bundle = OTDTUIPlugin.getDefault().getResourceBundle();
-        try
-        {
+        ResourceBundle bundle = OTDTUIPlugin.getDefault()._resourceBundle;
+        try {
             return bundle.getString(key);
-        }
-        catch (MissingResourceException ex)
-        {
+        } catch (MissingResourceException ex) {
             return key;
         }
-    }
-
-    public static IWorkspace getWorkspace()
-    {
-        return ResourcesPlugin.getWorkspace();
-    }
-
-    public ResourceBundle getResourceBundle()
-    {
-        return _resourceBundle;
     }
 
     /**
      * Add Object Teams flavoured images to the image registry.
      */
-    protected void initializeImageRegistry(ImageRegistry reg)
-    {
+    protected void initializeImageRegistry(ImageRegistry reg) {
     	ImageManager.getSharedInstance().registerPluginImages(reg);    	
     }
 
@@ -165,7 +151,16 @@ public class OTDTUIPlugin extends AbstractUIPlugin implements OTDTUIPluginConsta
 		_singleton.getLog().log(new Status(IStatus.ERROR, UIPLUGIN_ID, IStatus.OK, message, exception));
 	}
 
-    private void registerAdapter()
+    public static void log(Throwable t) {
+    	_singleton.getLog().log(new Status(IStatus.ERROR, UIPLUGIN_ID, t.getMessage(), t));
+	}
+
+	public static Status createErrorStatus(String message, Throwable exception)
+	{
+	    return new Status(IStatus.ERROR, UIPLUGIN_ID, IStatus.OK, message, exception);
+	}
+
+	private void registerAdapter()
     {
 		_otElementAdapterFactory = new OTElementAdapterFactory();
 		IAdapterManager manager = Platform.getAdapterManager();		
@@ -193,20 +188,14 @@ public class OTDTUIPlugin extends AbstractUIPlugin implements OTDTUIPluginConsta
 		_baseClassChangedListener = null;
     }
 
-	public static Status createErrorStatus(String message, Throwable exception)
-	{
-	    return new Status(IStatus.ERROR, UIPLUGIN_ID, IStatus.OK, message, exception);
-	}
-	
+    /**
+     * @noreference external clients should not call this method, public only for org.eclipse.objectteams.otdt.ui.tests
+     */
 	public CallinMarkerCreator2 getCallinMarkerCreator()
 	{
 	    if (_callinMarkerCreator == null)
 	        _callinMarkerCreator = new CallinMarkerCreator2();
 	    
 	    return _callinMarkerCreator;
-	}
-
-	public static void log(Throwable t) {
-		getDefault().getLog().log(new Status(IStatus.ERROR, UIPLUGIN_ID, t.getMessage(), t));
 	}
 }
