@@ -81,7 +81,7 @@ public class OTPDEUIPlugin extends AbstractUIPlugin {
      */
     protected void initializeImageRegistry(ImageRegistry reg)
     {
-    	ImageManager.getSharedInstance().registerPluginImages(reg);    	
+    	ImageManager.getSharedInstance().registerPluginImages(reg);
     }
 
 

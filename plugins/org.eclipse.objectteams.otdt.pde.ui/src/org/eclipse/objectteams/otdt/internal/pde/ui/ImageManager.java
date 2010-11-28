@@ -16,6 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.pde.ui;
 
+import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 
@@ -55,5 +56,11 @@ public class ImageManager extends org.eclipse.objectteams.otdt.ui.ImageManager {
 	@Override
 	protected String[] pluginIcons() {
 		return new String[]{ OTNewPluginProjectWizard.NEW_OTPDE_PROJECT, PackageExplorerAdaptor.PLUGIN_FORCED_EXPORTS };
+	}
+	
+	// make available within this plugin, too.
+	@Override
+	protected void registerPluginImages(ImageRegistry reg) {
+		super.registerPluginImages(reg);
 	}
 }
