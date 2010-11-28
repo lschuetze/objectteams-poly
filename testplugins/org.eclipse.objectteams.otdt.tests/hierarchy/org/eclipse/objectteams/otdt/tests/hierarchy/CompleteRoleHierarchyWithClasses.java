@@ -350,6 +350,8 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
     {
         ArrayList<IType> expectedList = new ArrayList<IType>();
         expectedList.add(_object);
+        expectedList.add(_class); // when seen from focusType ATeam$R1, R1 indeed has this super class
+        expectedList.add(_superClass);
     
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]);
         IType[] actual = _hierarchy.getAllSuperclasses(_implSuperSuperRole);
@@ -521,6 +523,8 @@ public class CompleteRoleHierarchyWithClasses extends FileBasedModelTest
     {
         ArrayList<IType> expectedList = new ArrayList<IType>();
         expectedList.add(_object);
+        expectedList.add(_class); // when seen from focusType ATeam$R1, R1 indeed has this super class
+        expectedList.add(_superClass);
 
         IType[] expected = expectedList.toArray(new IType[expectedList.size()]); 
         IType[] actual = _hierarchy.getAllSupertypes((IType)_implSuperSuperRole.getCorrespondingJavaElement());
