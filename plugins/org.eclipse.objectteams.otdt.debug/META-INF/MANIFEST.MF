@@ -18,3 +18,4 @@ Export-Package: org.eclipse.objectteams.otdt.debug,
  org.eclipse.objectteams.otdt.debug.internal;x-internal:="true",
  org.eclipse.objectteams.otdt.debug.internal.breakpoints;x-friends:="org.eclipse.objectteams.otdt.tests"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Import-Package: org.objectteams
