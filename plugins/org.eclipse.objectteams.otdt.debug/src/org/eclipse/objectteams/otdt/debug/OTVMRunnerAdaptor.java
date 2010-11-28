@@ -33,14 +33,16 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchManager;
+import org.eclipse.debug.core.model.ILaunchConfigurationDelegate;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.debug.internal.TempFileManager;
 
 
 /**
+ * Instances of this class are capable of providing the necessary command line arguments
+ * for launching a Java application with OT/J support.
  * @author gis
  */
 @SuppressWarnings("nls")
@@ -55,80 +57,28 @@ public class OTVMRunnerAdaptor
 	private String _mode;
 	private ILaunch _launch;
 
-	public void setAdaptationArgs(ILaunchConfiguration configuration, String mode, ILaunch launch) throws CoreException
+	/**
+	 * Store the original arguments as passed to {@link ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String, ILaunch, org.eclipse.core.runtime.IProgressMonitor)}
+	 * @param configuration see first argument of {@link ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String, ILaunch, org.eclipse.core.runtime.IProgressMonitor) launch(..)}
+	 * @param mode see second argument of {@link ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String, ILaunch, org.eclipse.core.runtime.IProgressMonitor) launch(..)}
+	 * @param launch see third argument of {@link ILaunchConfigurationDelegate#launch(ILaunchConfiguration, String, ILaunch, org.eclipse.core.runtime.IProgressMonitor) launch(..)}
+	 */
+	public void setAdaptationArgs(ILaunchConfiguration configuration, String mode, ILaunch launch) 
 	{
 		_launchConfig = configuration;
 		_mode = mode;
 		_launch = launch;
 	}
-	
-	public VMRunnerConfiguration adapt(VMRunnerConfiguration vmRunnerConfig) throws CoreException
-	{
-		adaptVMArgs(vmRunnerConfig);
-		
-		return vmRunnerConfig;
-	}
 
-	protected void cloneRunner(VMRunnerConfiguration vmRunnerConfig, VMRunnerConfiguration newConfig)
-	{
-		// Only main type and class path have to be set in the constructor already
-    	newConfig.setBootClassPath(vmRunnerConfig.getBootClassPath());
-    	newConfig.setEnvironment(vmRunnerConfig.getEnvironment());
-    	newConfig.setProgramArguments(vmRunnerConfig.getProgramArguments());
-    	newConfig.setResumeOnStartup(vmRunnerConfig.isResumeOnStartup());
-    	newConfig.setVMArguments(vmRunnerConfig.getVMArguments());
-    	newConfig.setVMSpecificAttributesMap(vmRunnerConfig.getVMSpecificAttributesMap());
-    	newConfig.setWorkingDirectory(vmRunnerConfig.getWorkingDirectory());
-	}
-
-	protected void adaptVMArgs(VMRunnerConfiguration newConfig) throws CoreException
-    {
-	    List<String> otVMArgs = getOTVMArgs();
-	    String teamConfigArg = generateTeamConfigArgument(_launch, _launchConfig);
-	    if (teamConfigArg != null)
-	    	otVMArgs.add(teamConfigArg);
-	    if (ILaunchManager.DEBUG_MODE.equals(_mode)) 
-	    {
-	    	otVMArgs.add(OT_DEBUG_VMARG);
-	    	
-	    	String callinSteppingVMArg = getCallinSteppingVMArg();
-	    	if (callinSteppingVMArg != null)
-	    		otVMArgs.add(callinSteppingVMArg);
-	    }
-
-	    String[] vmArgs = newConfig.getVMArguments();
-	    if (vmArgs.length > 0)
-	    {
-	    	for (int i = 0; i < vmArgs.length; i++)
-				otVMArgs.add(vmArgs[i]);
-	    }
-	    
-	    String[] newArgs = new String[otVMArgs.size()];
-	    
-	    // new launches need to enclose file paths in quotes (cmdline is one string parsed by ArgumentParser),
-	    // which are removed here (cmdline is array of strings):
-	    for (int i = 0; i<newArgs.length; i++) {
-	    	newArgs[i] = otVMArgs.get(i).replaceAll("\"", "");
-	    }
-	    newConfig.setVMArguments(newArgs);
-    }
-	
 	/**
-	 * API version: given a list of vm arguments add ot-specific vm arguments.
+	 * Given a list of vm arguments add ot-specific vm arguments.
+	 * Uses values stored by {@link #setAdaptationArgs(ILaunchConfiguration, String, ILaunch)}
+	 * to determine the arguments to add.
 	 * 
-	 * @param vmArguments list to be augmented.
+	 * @param vmArguments space separated list of arguments to be augmented.
+	 * @return augmented space separated list of arguments
 	 * @throws CoreException
 	 */
-	public void adaptVMArguments(List vmArguments) throws CoreException 
-	{
-	    vmArguments.addAll(getOTVMArgs());
-	    String teamConfigArg = generateTeamConfigArgument(_launch, _launchConfig);
-	    if (teamConfigArg != null)
-	    	vmArguments.add(teamConfigArg);
-	    if (ILaunchManager.DEBUG_MODE.equals(_mode))
-	    	vmArguments.add(OT_DEBUG_VMARG);
-	}
-
 	public String adaptVMArgumentString(String vmArguments) throws CoreException 
 	{
 		String sep = " ";
@@ -165,10 +115,6 @@ public class OTVMRunnerAdaptor
 		return OT_DEBUG_CALLIN_STEPPING_VMARG+'='+value;
 	}
 
-	protected List<String> getOTVMArgs()
-	{
-        return new ArrayList<String>(getJplisVmargs());
-	}
 	
     /**
 	 * Teams to activate are read from ILaunchConfiguration configuration.

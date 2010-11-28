@@ -44,11 +44,15 @@ import org.eclipse.objectteams.otdt.debug.internal.TempFileManager;
 import org.osgi.framework.BundleContext;
 
 /**
- * The main plugin class to be used in the desktop.
+ * The main plugin class.
  */
 public class OTDebugPlugin extends Plugin 
 {
+	/** ID of this plugin */
 	public static final String PLUGIN_ID = "org.eclipse.objectteams.otdt.debug"; //$NON-NLS-1$
+	/**
+	 * Key of a boolean launch configuration attribute. The value denotes whether a launch is OT/J enabled.
+	 */
 	public static final String OT_LAUNCH = "org.eclipse.objectteams.launch"; //$NON-NLS-1$
     
     private OTDebugElementsContainerFactory _containerFactory;
@@ -69,7 +73,7 @@ public class OTDebugPlugin extends Plugin
                     if (isOTDebugLaunch(launches[i]))
                         _otLaunches.add(launches[i]);
 				}
-				checkOTLaunches(_otLaunches.size());
+				checkRegisterOTDebugSupport(_otLaunches.size());
 			}
 		}
 		
@@ -120,7 +124,7 @@ public class OTDebugPlugin extends Plugin
                 if (isOTDebugLaunch(launch) && !_otLaunches.contains(launch))
                 {
                     _otLaunches.add(launch);
-                    checkOTLaunches(_otLaunches.size());
+                    checkRegisterOTDebugSupport(_otLaunches.size());
                 }
             }
         }
@@ -138,7 +142,7 @@ public class OTDebugPlugin extends Plugin
                 if (isOTDebugLaunch(launch) && _otLaunches.contains(launch))
                 {
                     _otLaunches.remove(launch);
-                    checkOTLaunches(_otLaunches.size());
+                    checkRegisterOTDebugSupport(_otLaunches.size());
                     otLaunchFinished(launch);
                 }
             }
@@ -158,8 +162,6 @@ public class OTDebugPlugin extends Plugin
 	
     //The shared instance.
 	private static OTDebugPlugin plugin;
-	//Resource bundle.
-	private ResourceBundle resourceBundle;
 	
 	private OTDebugLaunchManager _otLaunchManager;
 	private TeamBreakpointListener _otTeamBreakpointListener;
@@ -173,28 +175,6 @@ public class OTDebugPlugin extends Plugin
 	{
 		super();
 		plugin = this;
-		try {
-			resourceBundle = ResourceBundle.getBundle("org.eclipse.objectteams.otdt.debug.OTDebugPluginResources"); //$NON-NLS-1$
-		} catch (MissingResourceException x) {
-			resourceBundle = null;
-		}
-	}
-	
-	public void setCallinSteppingConfig(String config) {
-		this._callinSteppingConfig = config;
-	}
-	public String getCallinSteppingConfig() {
-		return this._callinSteppingConfig;
-	}
-
-	public static Status createErrorStatus(String message)
-	{
-	    return new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, null);
-	}
-	
-	public static Status createErrorStatus(String message, Throwable exception)
-	{
-	    return new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, exception);
 	}
 	
 	/**
@@ -236,30 +216,53 @@ public class OTDebugPlugin extends Plugin
 	}
 
 	/**
-	 * Returns the string from the plugin's resource bundle,
-	 * or 'key' if not found.
+	 * Configure the callin stepping mode. The value will be passed to the VM using
+	 * {@link OTVMRunnerAdaptor#OT_DEBUG_CALLIN_STEPPING_VMARG} and will be interpreted by the OTRE.
+	 * @param config a comma separated list (subset) of these tokens: "role", "recurse", "orig"
 	 */
-	public static String getResourceString(String key) {
-		ResourceBundle bundle = OTDebugPlugin.getDefault().getResourceBundle();
-		try {
-			return (bundle != null) ? bundle.getString(key) : key;
-		} catch (MissingResourceException e) {
-			return key;
-		}
+	public void setCallinSteppingConfig(String config) {
+		this._callinSteppingConfig = config;
+	}
+	/**
+	 * Answer the configured callin stepping mode. The value is suitable for being passed 
+	 * to the VM using {@link OTVMRunnerAdaptor#OT_DEBUG_CALLIN_STEPPING_VMARG}.
+	 * @param config a comma separated list (subset) of these tokens: "role", "recurse", "orig"
+	 */
+	public String getCallinSteppingConfig() {
+		return this._callinSteppingConfig;
 	}
 
 	/**
-	 * Returns the plugin's resource bundle,
+	 * Create an error status marked as originating from this plugin.
+	 * @param message the error message
+	 * @return a status instance
 	 */
-	public ResourceBundle getResourceBundle() {
-		return resourceBundle;
+	public static IStatus createErrorStatus(String message)
+	{
+	    return new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, null);
 	}
 
+	/**
+	 * Create an error status marked as originating from this plugin.
+	 * @param message the error message
+	 * @param exception an exception to associate with the status.
+	 * @return a status instance
+	 */
+	public static IStatus createErrorStatus(String message, Throwable exception)
+	{
+	    return new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, exception);
+	}
+
+	/**
+	 * Log an exception marked as originating from this plugin.
+	 * @param message
+	 * @param exception
+	 */
 	public static void logException(String message, Throwable exception) {
 		plugin.getLog().log(createErrorStatus(message, exception));
 	}
 
-	public TempFileManager getTempFileManager()
+	TempFileManager getTempFileManager()
     {
 	    if (_tempFileManager == null)
 	        _tempFileManager = new TempFileManager();
@@ -267,11 +270,19 @@ public class OTDebugPlugin extends Plugin
         return _tempFileManager;
     }
 
+	/**
+	 * Get the registered debug event listeners.
+	 * @return the stored array of listeners (unprotected)
+	 */
 	public IOTDebugEventListener[] getOTDebugEventListeners()
     {
         return _listeners;
     }
 
+	/**
+	 * Add a listener that will be called when a team-relevant breakpoint was hit.
+	 * @param listener
+	 */
 	public void addOTDebugEventListener(IOTDebugEventListener listener)
 	{
 	    int newLength = _listeners.length + 1;
@@ -280,7 +291,11 @@ public class OTDebugPlugin extends Plugin
 	    newListeners[_listeners.length] = listener;
 	    _listeners = newListeners;
 	}
-	
+
+	/**
+	 * remove the given debug event listener.
+	 * @param listener
+	 */
 	public void removeOTDebugEventListener(IOTDebugEventListener listener)
 	{
 	    int occurrences = 0;
@@ -306,7 +321,7 @@ public class OTDebugPlugin extends Plugin
 	    }
 	}
 	
-	public void checkOTLaunches(int otLaunchCount)
+	private void checkRegisterOTDebugSupport(int otLaunchCount)
 	{
 		// Note: the order seems to be undefined! After finishing a launch, we do not 
 		// immediately get the launchRemoved event. We may first get another launchAdded 

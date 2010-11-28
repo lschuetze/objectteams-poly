@@ -20,15 +20,35 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.debug;
 
-import org.eclipse.debug.core.ILaunch;
+import org.eclipse.objectteams.otdt.debug.internal.TeamBreakpointListener;
 
 /**
+ * This interface defines a protocol between the {@link TeamBreakpointListener} (source)
+ * and the Team Monitor View (in plugin org.eclipse.objectteams.otdt.debug.ui) (sink)
+ * in order to turn events that reflect the instantiation and activation state of teams
+ * into updates of the Team Monitor View.
+ * 
+ * Note that the TeamView directly observes termination of a launch by implementing
+ * ILaunchesListener2 (no need to involve this interface for that). 
+ *  
  * @author gis
  */
 public interface IOTDebugEventListener
 {
-    public void launched(ILaunch launch);
+	/**
+	 * A team instance has been instantiated in the debug target.
+	 * @param newTeam the new team instance
+	 */
     public void teamInstantiated(TeamInstance newTeam);
+    /**
+     * A team instance has been disposed in the debug target (finalize was called).
+     * @param idx position of the element within the viewer, 
+     * 	corresponds also with the order in {@link org.eclipse.objectteams.otdt.debug.OTDebugElementsContainer#_teamInstances}.
+     */
     public void teamDisposed(int idx);
+    /**
+     * The activation state of a team instance has changed.
+     * @param teamInstance the team instance
+     */
     public void activationStateChanged(TeamInstance teamInstance);
 }

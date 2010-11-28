@@ -33,7 +33,7 @@ HEADER="/**********************************************************************
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.debug.core.breakpoints;
+package org.eclipse.objectteams.otdt.debug.internal.breakpoints;
 
 /** 
  *  Do not edit: This interface is auto-generated from org/objectteams/Team.java 
@@ -48,8 +48,8 @@ public interface IOOTBreakPoints
 # INPUT:
 OTRE=$1
 if [ ! -d ${OTRE} ]; then
-	echo "Project root of OTRE not found at ${OTRE}".
-	echo "Perhaps you don't have project OTRE in your workspace?"
+	echo "Project root of org.eclipse.objectteams.runtime not found at ${OTRE}".
+	echo "Perhaps you don't have project org.eclipse.objectteams.runtime in your workspace?"
 	exit
 fi
 TEAM=${OTRE}/src/org/objectteams/Team.java
@@ -59,7 +59,7 @@ if [ ! -f ${TEAM} ]; then
 fi
 
 # OUTPUT:
-OUT=src/org/eclipse/objectteams/otdt/debug/core/breakpoints/IOOTBreakPoints.java
+OUT=src/org/eclipse/objectteams/otdt/debug/internal/breakpoints/IOOTBreakPoints.java
 
 if [ "$2" != "RUN" ]
 then

@@ -38,7 +38,7 @@ import org.eclipse.objectteams.otdt.debug.IOTDebugEventListener;
 import org.eclipse.objectteams.otdt.debug.OTDebugElementsContainer;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.TeamInstance;
-import org.eclipse.objectteams.otdt.debug.core.breakpoints.OOTBreakpoints;
+import org.eclipse.objectteams.otdt.debug.internal.breakpoints.OOTBreakpoints;
 
 public class TeamBreakpointListener implements IJavaBreakpointListener
 {

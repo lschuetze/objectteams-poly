@@ -25,17 +25,16 @@ package org.eclipse.objectteams.otdt.debug;
  * @author resix
  */
 public interface IOTLaunchConstants {
-	public static final String uniquePrefix = "org.eclipse.objectteams.otdt.debug"; //$NON-NLS-1$
 	/**
 	 * Launch configuration attribute key. The value is a list of team names
 	 * to be woven and activated automatically in this objectteams launch configuration.
 	 */
-	public static final String ATTR_TEAMCONFIG_LIST = uniquePrefix + ".TEAMCONFIG_ATTR"; //$NON-NLS-1$
+	public static final String ATTR_TEAMCONFIG_LIST = OTDebugPlugin.PLUGIN_ID + ".TEAMCONFIG_ATTR"; //$NON-NLS-1$
 	
 	/**
 	 * Launch configuration attribute key. The value states, if the teams in the objectteams 
 	 * launch configuration will be actually used while launching.
 	 */
-	public static final String ATTR_TEAMCONFIG_ACTIVE = uniquePrefix + ".TEAMCONFIG_ACTIVE_ATTR"; //$NON-NLS-1$
+	public static final String ATTR_TEAMCONFIG_ACTIVE = OTDebugPlugin.PLUGIN_ID + ".TEAMCONFIG_ACTIVE_ATTR"; //$NON-NLS-1$
 
 }

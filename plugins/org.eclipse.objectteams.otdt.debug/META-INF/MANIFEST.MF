@@ -15,6 +15,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.objectteams.otdt
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.objectteams.otdt.debug,
- org.eclipse.objectteams.otdt.debug.core.breakpoints,
- org.eclipse.objectteams.otdt.debug.internal
+ org.eclipse.objectteams.otdt.debug.internal;x-internal:="true",
+ org.eclipse.objectteams.otdt.debug.internal.breakpoints;x-friends:="org.eclipse.objectteams.otdt.tests"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

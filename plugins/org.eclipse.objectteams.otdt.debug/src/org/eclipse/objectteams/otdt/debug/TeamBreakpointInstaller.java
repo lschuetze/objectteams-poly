@@ -35,23 +35,28 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.debug.core.IJavaDebugTarget;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.debug.core.breakpoints.OOTBreakpoints;
+import org.eclipse.objectteams.otdt.debug.internal.breakpoints.OOTBreakpoints;
 
+/**
+ * This class un/installs support for breakpoints in certain well-known methods in class {@link org.objectteams.Team}.
+ * <p>
+ * This happens in a two-phase model:
+ * <ul>
+ * <li>register a listener that reacts to creation of a java debug target, i.e., an application was launched in debug mode
+ * <li>for each detected new java debug target install the actual breakpoints.
+ * </ul>
+ */
 public class TeamBreakpointInstaller
 {
     private static Hashtable<String, IBreakpoint> OT_BREAKPOINTS = new Hashtable<String, IBreakpoint>(5);
-    public static boolean OOT_BREAKPOINTS_ENABLED = true; 
-    static {
-    	String prop = System.getProperty("ot.oot.breakpoints"); //$NON-NLS-1$
-    	if ("DISABLE".equals(prop))                             //$NON-NLS-1$
-    		OOT_BREAKPOINTS_ENABLED = false;
-    }
 
+    /**
+     * Request breakpoints to be installed once a new launch fires.
+     * @param project used for lookup of org.objectteams.Team, i.e., this class must be in the projects classpath.
+     * @throws CoreException various reasons, like could not find class org.objectteams.Team or could not create a breakpoint.
+     */
     public static void installTeamBreakpoints(IJavaProject project) throws CoreException
-    {
-    	if (!OOT_BREAKPOINTS_ENABLED)
-    		return;
-        
+    {       
         DebugPlugin.getDefault().addDebugEventListener(new IDebugEventSetListener() {
         	// since we want to avoid using the breakpoint manager (thus hiding synthetic breakpoints from the UI),
         	// we have to track creation of the debug target in order to manually install our breakpoints into the target:
@@ -108,10 +113,9 @@ public class TeamBreakpointInstaller
         }
     }
 
+    /** Unregister any previously installed breakpoints, so that the next launch will be without. */
     public static void uninstallTeamBreakpoints() throws CoreException
     {
-    	if (!OOT_BREAKPOINTS_ENABLED)
-    		return;
         OT_BREAKPOINTS.clear();
     }
 }

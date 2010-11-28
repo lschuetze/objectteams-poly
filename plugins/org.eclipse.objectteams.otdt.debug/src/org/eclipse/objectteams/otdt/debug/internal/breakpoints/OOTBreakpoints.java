@@ -18,7 +18,7 @@
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.debug.core.breakpoints;
+package org.eclipse.objectteams.otdt.debug.internal.breakpoints;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ import org.eclipse.jdt.debug.core.IJavaBreakpoint;
 import org.eclipse.jdt.debug.core.JDIDebugModel;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 
-import static org.eclipse.objectteams.otdt.debug.core.breakpoints.IOOTBreakPoints.*;
+import static org.eclipse.objectteams.otdt.debug.internal.breakpoints.IOOTBreakPoints.*;
 
 /**
  * @author ike

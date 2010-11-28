@@ -24,10 +24,21 @@ public interface IOTDTDebugPreferenceConstants
 {
 
 	/**
-	 * The sort mode for teams in Teamview
+	 * <h3>Sort mode for teams in the Team Monitor view.</h3> 
+	 * By this constant the UI advises the {@link OTDebugElementsContainer} to 
+	 * sort team instances by the names of their classes.
 	 */
 	public static final String TEAMS_BY_NAME = "Teams.by.name"; //$NON-NLS-1$
+	/**
+	 * <h3>Sort mode for teams in the Team Monitor view.</h3> 
+	 * By this constant the UI advises the {@link OTDebugElementsContainer} to 
+	 * sort team instances by instantiation time.
+	 */
 	public static final String TEAMS_BY_INSTANTIATION = "Teams.by.instantiation"; //$NON-NLS-1$
+	/**
+	 * <h3>Sort mode for teams in the Team Monitor view.</h3> 
+	 * By this constant the UI advises the {@link OTDebugElementsContainer} to 
+	 * sort team instances by activation time.
+	 */
 	public static final String TEAMS_BY_ACTIVATION_TIME = "Teams.by.activationtime"; //$NON-NLS-1$
-	public static final String TEAMS_BY_ACTIVATION_ORDER = "Teams.by.activationorder"; //$NON-NLS-1$
 }

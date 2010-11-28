@@ -33,7 +33,6 @@ import org.eclipse.debug.core.model.IStackFrame;
 import org.eclipse.jdt.debug.core.IJavaThread;
 import org.eclipse.jdt.debug.core.IJavaVariable;
 import org.eclipse.jdt.internal.debug.core.model.JDIThisVariable;
-import org.eclipse.objectteams.otdt.debug.internal.util.TeamActivationOrderComparator;
 import org.eclipse.objectteams.otdt.debug.internal.util.TeamActivationTimeComparator;
 import org.eclipse.objectteams.otdt.debug.internal.util.TeamInstantiantionComparator;
 import org.eclipse.objectteams.otdt.debug.internal.util.TeamNameComparator;
@@ -53,7 +52,6 @@ import org.eclipse.objectteams.otdt.debug.internal.util.TeamNameComparator;
  * current sorting mode.
  * 
  * @author ike
- * $Id: OTDebugElementsContainer.java 23427 2010-02-03 22:23:59Z stephan $
  */
 public class OTDebugElementsContainer implements IAdaptable
 {
@@ -141,15 +139,11 @@ public class OTDebugElementsContainer implements IAdaptable
 		{
 			Collections.sort(_teamInstances, new TeamActivationTimeComparator());
 		}
-		if(_sortMode.equals(IOTDTDebugPreferenceConstants.TEAMS_BY_ACTIVATION_ORDER))
-		{
-			Collections.sort(_teamInstances, new TeamActivationOrderComparator());
-		}
-		if(_sortMode.equals(IOTDTDebugPreferenceConstants.TEAMS_BY_INSTANTIATION))
+		else if(_sortMode.equals(IOTDTDebugPreferenceConstants.TEAMS_BY_INSTANTIATION))
 		{
 			Collections.sort(_teamInstances, new TeamInstantiantionComparator());
 		}
-		if(_sortMode.equals(IOTDTDebugPreferenceConstants.TEAMS_BY_NAME))
+		else if(_sortMode.equals(IOTDTDebugPreferenceConstants.TEAMS_BY_NAME))
 		{
 			Collections.sort(_teamInstances, new TeamNameComparator());
 		}
