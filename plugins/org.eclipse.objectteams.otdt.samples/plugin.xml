@@ -16,7 +16,7 @@
          <project
                name="OTSample-StopWatch"
                archive="samples/stopwatch.zip"
-               selectReveal="Main.java">
+               selectReveal="src/org/eclipse/objectteams/example/stopwatch/Main.java">
          </project>
          <activity id="org.eclipse.javaDevelopment"/>
          <activity id="org.eclipse.debugging"/>
@@ -34,7 +34,7 @@
          <project
                name="OTSample-Observer"
                archive="samples/observer.zip"
-               selectReveal="pattern/ObserverPattern.java">
+               selectReveal="src/org/eclipse/objectteams/example/observer/pattern/ObserverPattern.java">
          </project>
       </sample>
       <!-- the launchTarget attribute is not specified in the XML schema extension point description, however it is used in the code :-/ -->
@@ -84,7 +84,7 @@
          <project
                name="OTSample-ATM"
                archive="samples/atm.zip"
-               selectReveal="src/Main.java">
+               selectReveal="src/org/eclipse/objectteams/example/atm/Main.java">
          </project>
       </sample>
 
@@ -159,9 +159,17 @@
 <!--  -->
    <extension
          point="org.eclipse.objectteams.otequinox.aspectBindings">
-      <aspectBinding>
-         <team class="org.eclipse.objectteams.otdt.internal.samples.SamplesAdapter" activation="ALL_THREADS"/>
-         <basePlugin id="org.eclipse.pde.ui"/>
+      <aspectBinding
+            icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
+         <basePlugin 
+               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+               id="org.eclipse.pde.ui"/>
+         <team class="org.eclipse.objectteams.otdt.internal.samples.SamplesAdapter"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"
+               activation="ALL_THREADS"/>
+         <team class="org.eclipse.objectteams.otdt.internal.samples.SamplesAdapter.SampleWizardAdapter"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"
+               activation="NONE"/>
       </aspectBinding>
    </extension>
 <!-- -->

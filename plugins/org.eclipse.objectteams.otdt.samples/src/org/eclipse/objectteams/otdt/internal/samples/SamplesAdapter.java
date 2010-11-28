@@ -77,8 +77,6 @@ import base org.eclipse.pde.internal.ui.samples.ShowSampleAction;
 @SuppressWarnings("restriction")
 public team class SamplesAdapter
 {
-	private Map<IConfigurationElement,SampleWizardAdapter> _wizards = new HashMap<IConfigurationElement, SampleWizardAdapter>();
-	
 	boolean _needsAdaptation = false;
 	
 	public boolean isOTSample(String sampleId)
@@ -128,7 +126,7 @@ public team class SamplesAdapter
 		void updateEntries() <- replace void updateEntries();
 	}
 	
-	public class SampleWizardAdapter playedBy SampleWizard
+	protected team class SampleWizardAdapter playedBy SampleWizard
 		when (needsAdaptation())
 	{
 		IProject[] _createdProjects;
@@ -146,11 +144,12 @@ public team class SamplesAdapter
 		
 		callin boolean performFinish()
 		{
-			SamplesAdapter.this._wizards.put(getSelection(), this);
-			boolean result = base.performFinish();
-			SamplesAdapter.this._wizards.remove(getSelection());
-			
-			return result;
+			activate(ALL_THREADS); // base call forks, so a per-thread within() is not sufficient
+			try {
+				return base.performFinish();
+			} finally {
+				deactivate(ALL_THREADS);
+			}
 		}
 		
 		
@@ -273,38 +272,36 @@ public team class SamplesAdapter
 		                                     -> void setSampleEditorNeeded(boolean sampleEditorNeeded);
 		IConfigurationElement getSelection() -> IConfigurationElement getSelection();
 		
-	}
-	
-	public class SampleOperationAdaptor playedBy SampleOperation
-	{
-		void fetchCreatedProjects()
+		public class SampleOperationAdaptor playedBy SampleOperation
 		{
-			IProject[] projects = getCreatedProjects();
-			SampleWizardAdapter wizardAdapter = SamplesAdapter.this._wizards.get(getSample());
-			if (wizardAdapter != null && projects != null)
-				wizardAdapter.setCreatedProjects(projects);
-		}
-		
-		// Original implementation doesn't copy the "launchTarget" attribute from configuration element to manifest file
-		void fixCreatedSampleManifestContent(String projectName, Properties properties) 
-		{
-			final String attr = "launchTarget"; //$NON-NLS-1$
-			writeProperty(properties, attr, getSample().getAttribute(attr));
-		}
-		
-		void fetchCreatedProjects() <- after void run(IProgressMonitor monitor);
-		
-		void fixCreatedSampleManifestContent(String projectName, Properties properties) 
-									<- after void createSampleManifestContent(String projectName, Properties properties);
+			void fetchCreatedProjects()
+			{
+				IProject[] projects = getCreatedProjects();
+				if (projects != null)
+					SampleWizardAdapter.this.setCreatedProjects(projects);
+			}
+			
+			// Original implementation doesn't copy the "launchTarget" attribute from configuration element to manifest file
+			void fixCreatedSampleManifestContent(String projectName, Properties properties)
+			{
+				final String attr = "launchTarget"; //$NON-NLS-1$
+				writeProperty(properties, attr, getSample().getAttribute(attr));
+			}
+			
+			void fetchCreatedProjects() <- after void run(IProgressMonitor monitor);
+			
+			void fixCreatedSampleManifestContent(String projectName, Properties properties)
+										<- after void createSampleManifestContent(String projectName, Properties properties);
 
-		
-		@SuppressWarnings("decapsulation")
-		void writeProperty(Properties properties, String name, String value)
-										  -> void writeProperty(Properties properties, String name, String value);
-		
-		IProject[] getCreatedProjects()   -> IProject[] getCreatedProjects();
-		@SuppressWarnings("decapsulation")
-		IConfigurationElement getSample() -> get IConfigurationElement sample;
+
+			@SuppressWarnings("decapsulation")
+			void writeProperty(Properties properties, String name, String value)
+			-> void writeProperty(Properties properties, String name, String value);
+			
+			IProject[] getCreatedProjects()   -> IProject[] getCreatedProjects();
+			@SuppressWarnings("decapsulation")
+			IConfigurationElement getSample() -> get IConfigurationElement sample;
+		}
 	}
 	
 	/** This role generalizes over unrelated base classes SampleStandbyContent and SampleEditor. */
