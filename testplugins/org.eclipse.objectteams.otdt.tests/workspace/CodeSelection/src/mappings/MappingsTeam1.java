@@ -22,5 +22,7 @@ public team class MappingsTeam1 {
         
         int doubleIt(int in) <- after int bm1(int x) 
         	with { result <- (int)jon } // callin
+        abstract long shortHandJon();
+        shortHandJon -> get jon; // c-t-f shorthand
 	}
 }

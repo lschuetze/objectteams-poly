@@ -288,6 +288,19 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 	               "rm2(int) -> bm1(int) [in R [in MappingsTeam1 [in MappingsTeam1.java [in mappings [in src [in CodeSelection]]]]]]",
 	               elements);
 	}
+	
+	/**
+	 * Select a callout mapping (role method spec)
+	 */
+	public void testCalloutToFieldShorthand() throws JavaModelException
+	{
+	       ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "mappings", "MappingsTeam1.java");
+	       IJavaElement[] elements = codeSelect(cu, "jon; // c-t-f shorthand", "jon");
+	       assertElementsEqual(
+	               "Unexpected elements",
+	               "jon [in B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]]",
+	               elements);
+	}
 
 	/**
 	 * Select argument name inside a callin parameter mapping.
