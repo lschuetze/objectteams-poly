@@ -859,17 +859,9 @@ public abstract class TypeConverter {
     protected MethodSpec convert(IFieldAccessSpec handle, boolean hasSignature)
     {
         //FIXME(gbr) source positions are not set!
-        MethodSpec result = null;
-        if (hasSignature)
-        {
-            TypeReference fieldType = createTypeReference(handle.getFieldType());
-            result = new FieldAccessSpec(
-                    handle.getSelector().toCharArray(), fieldType, 0, handle.isSetter());
-        }
-        else
-        {
-	        result = new FieldAccessSpec(handle.getSelector().toCharArray(), 0, handle.isSetter());
-        }
+        TypeReference fieldType = hasSignature ? createTypeReference(handle.getFieldType()) : null;
+
+        MethodSpec result = new FieldAccessSpec(handle.getSelector().toCharArray(), fieldType, 0, handle.isSetter());
 
         result.sourceStart = 0;
         result.sourceEnd = 0;

@@ -1966,9 +1966,9 @@ private boolean checkRecoveredMethodMapping() {
 
 			MethodSpec baseSpec = null;
 			if (this.modifiers == TerminalTokens.TokenNameset)
-				baseSpec = new CompletionOnFieldAccessSpec(selector, selectorPos, true);
+				baseSpec = new CompletionOnFieldAccessSpec(selector, null, selectorPos, true);
 			else if (this.modifiers == TerminalTokens.TokenNameget)
-				baseSpec = new CompletionOnFieldAccessSpec(selector, selectorPos, false);
+				baseSpec = new CompletionOnFieldAccessSpec(selector, null, selectorPos, false);
 			else
 				baseSpec = new CompletionOnMethodSpec(selector, selectorPos);
 

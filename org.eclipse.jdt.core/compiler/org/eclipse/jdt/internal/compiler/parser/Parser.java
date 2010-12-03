@@ -2596,6 +2596,7 @@ private void copyParamMappingsAndPositions(int paramlength, AbstractMethodMappin
 private void consumeCalloutHeader() {
 	// SHORT:
 	// Note(SH): Modifiersopt is needed to make grammar LALR(1), in real life modifiers must be empty
+	// Note(SH): MethodSpecShort could also be a FieldAccessSpec as determined by CalloutModifier 'get' or 'set'
 	// CalloutBinding        ::= Modifiersopt CalloutBindingLeftShort CalloutModifieropt MethodSpecShort ';'
 	// RecoveryCalloutHeader ::= Modifiersopt CalloutBindingLeftShort CalloutModifieropt MethodSpecShort
 
@@ -2715,8 +2716,12 @@ private void checkCalloutModifier(CalloutMappingDeclaration calloutBinding)
 	if (   this.modifiers == TokenNameget
 		|| this.modifiers == TokenNameset)
 	{
-		// field access short still needs to be assembled from pieces:
-		fieldAccessSpec = new FieldAccessSpec(calloutBinding.baseMethodSpec, this.modifiers);
+		// need to convert MethodSpec to field access short:
+		MethodSpec baseMethodSpec = calloutBinding.baseMethodSpec;
+		fieldAccessSpec = newFieldAccessSpec(baseMethodSpec.selector,
+											 (((long)baseMethodSpec.sourceStart)<<32)+baseMethodSpec.sourceEnd,
+											 null, // no type, since callout-short 
+											 this.modifiers);
 		calloutBinding.baseMethodSpec = fieldAccessSpec;
 		this.modifiers = 0;
 	} else if (calloutBinding.baseMethodSpec instanceof FieldAccessSpec) {

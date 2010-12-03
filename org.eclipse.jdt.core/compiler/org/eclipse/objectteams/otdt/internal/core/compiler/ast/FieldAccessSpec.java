@@ -76,32 +76,18 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
 	 *  in case we had to improve a team anchor. */
 	private TypeBinding fieldType;
 
-	public FieldAccessSpec(char[] name, long nameSourcePositions, boolean isSetter) {
-		super(name, nameSourcePositions);
-		this.calloutModifier = isSetter ? TerminalTokens.TokenNameset : TerminalTokens.TokenNameget;
-	}
-
-	/**
-	 * @param other copy values from this spec
-	 * @param calloutModifier either TokenNameset or TokenNameget
-	 */
-	public FieldAccessSpec(MethodSpec other, int calloutModifier) {
-		super(other.selector, other.sourceStart, other.sourceEnd);
-		this.returnType = other.returnType;
-		this.calloutModifier = calloutModifier;
-	}
 
 	/**
 	 * @param name
-	 * @param type
+	 * @param type may be null if creating a field access spec short
 	 * @param nameSourcePositions (s<<32+e encoded)
 	 * @param calloutModifier either TokenNameset or TokenNameget
 	 */
 	public FieldAccessSpec(char[] name, TypeReference type, long nameSourcePositions, int calloutModifier) {
 		super(name, nameSourcePositions);
 		this.calloutModifier = calloutModifier;
-		if (calloutModifier == TerminalTokens.TokenNameset) {
-			// prepare the argument of a setter for parameter mapping
+		if (calloutModifier == TerminalTokens.TokenNameset && type != null) {
+			// prepare the argument of a setter with signature for parameter mapping
 			// (name is identical to field name)
 			this.arguments = new Argument[] {
 				new Argument(name, nameSourcePositions, type, 0)

@@ -40,11 +40,9 @@ public class CompletionOnFieldAccessSpec extends FieldAccessSpec {
 		super(ident, type, pos, modifiers);
 	}
 
-
-	public CompletionOnFieldAccessSpec(char[] ident, long pos, boolean isSetter) {
-		super(ident, pos, isSetter);
+	public CompletionOnFieldAccessSpec(char[] ident, TypeReference type, long pos, boolean isSetter) {
+		super(ident, type, pos, isSetter);
 	}
-
 
 	@Override
 	public void resolveFeature(ReferenceBinding receiverType, BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing)
