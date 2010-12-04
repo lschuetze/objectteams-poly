@@ -2320,7 +2320,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     }
     // Bug 329374 -  Implicit Lowering of a Role Array as return results in compiler error
     public void test2212_arrayLoweringToBaseclass8() {
-        
+        compileOrder = new String[][] {{"T2212altb8_1.java", "T2212altb8_2.java", "Team2212altb8.java"}, {"T2212altb8Main.java"}};
         runConformTest(
                 new String[] {
             "T2212altb8Main.java",
