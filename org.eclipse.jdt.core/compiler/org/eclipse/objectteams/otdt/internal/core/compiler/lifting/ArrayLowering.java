@@ -35,7 +35,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
  */
 public class ArrayLowering extends ArrayTranslations {
 
-	ArrayLowering(Expression teamExpression) {
+	public ArrayLowering(Expression teamExpression) {
 		this._teamExpr = teamExpression;
 	}
 	

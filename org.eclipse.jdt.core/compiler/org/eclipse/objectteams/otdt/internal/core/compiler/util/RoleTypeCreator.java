@@ -39,6 +39,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.DeclaredLifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.ArrayLowering;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ProblemAnchorBinding;
@@ -52,8 +53,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 
 /**
- * MIGRATION_STATE: Eclipse 3.2
- *
  * This class is a non-instantiate-utility for creating RoleTypeBindings.
  *
  * @author stephan
@@ -727,6 +726,7 @@ public class RoleTypeCreator implements TagBits {
 				method.returnType = roleArrayType;
 		} else {
 			method.returnType = maybeWrapSignatureType(method.returnType, decl.scope, typedExpr, defaultAnchor);
+			checkArrayLoweringForReturn(method, decl.scope);
 		}
 
 	    TypeBinding[] parameters = method.parameters;
@@ -741,6 +741,21 @@ public class RoleTypeCreator implements TagBits {
 	        	argument.binding.type = parameters[i];
 	    }
 	    doingSignatures = false;
+	}
+	private static void checkArrayLoweringForReturn(MethodBinding method, BlockScope scope) {
+		int dimensions = method.returnType.dimensions();
+		if (dimensions == 0)
+			return; // not an array
+		if ((method.declaringClass.isRole() && !method.isPublic()) || method.isPrivate())
+			return; // not visible
+		TypeBinding leafReturn = method.returnType.leafComponentType();
+		if (!leafReturn.isRole())
+			return; // not a role type
+		TypeBinding baseType = ((ReferenceBinding) leafReturn).baseclass();
+		if (baseType == null)
+			return; // not bound
+		baseType = scope.createArrayType(baseType, dimensions);
+		new ArrayLowering(null).ensureTransformMethod(scope, null, method.returnType, baseType, false);
 	}
 
 	/* Wraps either relative to defaultAnchor or unqualified. */
