@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TSuperMessageSend.java 23401 2010-02-02 23:56:05Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -35,16 +34,14 @@ import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
-import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
+import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
@@ -67,18 +64,18 @@ public class TSuperMessageSend extends MessageSend {
 
 	public  TsuperReference tsuperReference;
 
-	private MethodBinding tsuperMethod;
-	private boolean needReturnConversion= false;
-
 	/** Check whether this message send contributes to base call analysis */
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 		flowInfo = super.analyseCode(currentScope, flowContext, flowInfo);
 		if (this.binding.isCallin())
 		{
-			if (!MethodModel.hasCallinFlag(this.tsuperMethod, CALLIN_FLAG_DEFINITELY_MISSING_BASECALL)) { // no contribution if no base call.
+			MethodBinding tsuperMethod = this.binding;
+			if (tsuperMethod.copyInheritanceSrc != null)
+				tsuperMethod = tsuperMethod.copyInheritanceSrc;
+			if (!MethodModel.hasCallinFlag(tsuperMethod, CALLIN_FLAG_DEFINITELY_MISSING_BASECALL)) { // no contribution if no base call.
 				MethodDeclaration callinMethod = (MethodDeclaration)currentScope.methodScope().referenceContext;
 				LocalVariableBinding trackingVariable = callinMethod.baseCallTrackingVariable.binding;
-				if (MethodModel.hasCallinFlag(this.tsuperMethod, CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL)) {
+				if (MethodModel.hasCallinFlag(tsuperMethod, CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL)) {
 					if (   flowInfo.isDefinitelyAssigned(trackingVariable)
 						|| flowInfo.isPotentiallyAssigned(trackingVariable))
 					{
@@ -101,114 +98,103 @@ public class TSuperMessageSend extends MessageSend {
 		return flowInfo;
 	}
 
-	public TypeBinding resolveType (BlockScope scope)
-	{
-
+	@Override
+	protected MethodBinding findMethod(BlockScope scope, TypeBinding[] argumentTypes) {
+		
+		// check: is a tsuper call legal in the current context?
+		
 		AbstractMethodDeclaration context = scope.methodScope().referenceMethod();
-		if (   context != null
-			&& CharOperation.equals(this.selector, context.selector))
+		if (context == null 
+				|| !CharOperation.equals(this.selector, context.selector)
+				|| context.binding.parameters.length != argumentTypes.length) 
 		{
-			// == Prepare marker arg:
-			ReferenceBinding qualType = null;
-			if (this.tsuperReference.qualification != null) {
-				ReferenceBinding tsuperType = (ReferenceBinding)this.tsuperReference.resolveType(scope);
-				if (tsuperType != null)
-					qualType = tsuperType.enclosingType();
-				// proceed even with missing qualType in order to find more errors (treat as unqualified then).
-				// see 1.3.8-otjld-access-to-superrole-7
-			}
-	    	this.arguments = TSuperHelper.addMarkerArgument(
-	    					qualType, this, this.arguments, scope);
-
-	    	if (this.arguments == null && scope.methodScope().referenceMethod().ignoreFurtherInvestigation)
-	    		return null; // various fatal errors in addMarkerArgument.
-
-			super.resolveType(scope);
-
-			// == find and store original tsuper method (as if bypassing its copy)
-			if (   this.binding != null
-				&& this.binding.isValidBinding())
-			{
-				this.tsuperMethod = this.binding.copyInheritanceSrc;
-				if (this.binding.isCallin()) {
-					// restore return type which has been generalized to 'Object':
-					this.resolvedType= MethodModel.getReturnType(this.tsuperMethod);
-					this.needReturnConversion= true;
-				}
-			}
-			return this.resolvedType;
+			scope.problemReporter().tsuperCallsWrongMethod(this);
+			return null;
 		}
-		scope.problemReporter().tsuperCallsWrongMethod(this);
-		return null;
-	}
 
-	protected TypeBinding afterMethodLookup(Scope scope, AnchorMapping mapping, TypeBinding[] argumentTypes, TypeBinding returnType)
+		ReferenceBinding receiverRole;
+		if (!(this.actualReceiverType instanceof ReferenceBinding) 
+				|| !(receiverRole = (ReferenceBinding)this.actualReceiverType).isSourceRole()) 
+		{
+			scope.problemReporter().tsuperOutsideRole(context, this, this.actualReceiverType);
+			return null;
+		}
+
+		ReferenceBinding[] tsuperRoleBindings = receiverRole.roleModel.getTSuperRoleBindings();
+	    if (tsuperRoleBindings.length == 0) {
+	    	scope.problemReporter().tsuperCallWithoutTsuperRole(receiverRole, this);
+	    	return null;
+	    }
+
+	    // context is OK, start searching:
+
+	    this.tsuperReference.resolveType(scope);
+	    // qualified tsuper? => directly search within the designated tsuper role:
+	    if (this.tsuperReference.qualification != null) {
+	    	TypeBinding tsuperRole = this.tsuperReference.resolvedType;
+	    	if (tsuperRole == null || !tsuperRole.isRole())
+	    		return null;
+	    	MethodBinding result = scope.getMethod(tsuperRole, this.selector, argumentTypes, this);
+	    	if (!result.isValidBinding() && ((ProblemMethodBinding)result).declaringClass == null)
+	    		result.declaringClass = (ReferenceBinding) tsuperRole;
+	    	return result;
+	    }
+	    // no qualification => search all tsupers by priority:
+	    MethodBinding bestMatch = null;
+	    for (int i=tsuperRoleBindings.length-1; i>=0; i--) {
+	    	ReferenceBinding tsuperRole = tsuperRoleBindings[i];
+	    	MethodBinding candidate = scope.getMethod(tsuperRole, this.selector, argumentTypes, this);
+	    	if (candidate != null && candidate.isValidBinding()) {
+	    		if (scope.parameterCompatibilityLevel(candidate, argumentTypes) != Scope.COMPATIBLE) {
+	    			scope.problemReporter().tsuperCallsWrongMethod(this);
+	    			return null;
+	    		}
+	    		return candidate;
+	    	}
+	    	if (bestMatch == null || 
+	    			(bestMatch.problemId() == ProblemReasons.NotFound && candidate.problemId() != ProblemReasons.NotFound))
+	    		bestMatch = candidate;
+	    }
+	    if (bestMatch == null)
+	    	bestMatch = new ProblemMethodBinding(this.selector, argumentTypes, ProblemReasons.NotFound);
+	    if (bestMatch.declaringClass == null)
+	    	bestMatch.declaringClass = (ReferenceBinding) this.tsuperReference.resolvedType;
+	    return bestMatch;
+	}
+	
+	@Override
+	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) 
 	{
-		if (this.binding.problemId() == ProblemReasons.NotFound) {
+		// for code gen we need to add the marker arg... 
+		int len = this.binding.parameters.length;
+		TypeBinding[] extendedParameters = new TypeBinding[len+1];
+		System.arraycopy(this.binding.parameters, 0, extendedParameters, 0, len);
+		char[] tSuperMarkName = TSuperHelper.getTSuperMarkName(this.tsuperReference.resolvedType.enclosingType());
+		extendedParameters[len] = currentScope.getType(tSuperMarkName);
+	
+		// ... and find the copied method binding
+		MethodBinding codegenBinding = currentScope.getMethod(this.actualReceiverType, this.selector, extendedParameters, this);
+		
+		if (codegenBinding.problemId() == ProblemReasons.NotFound) {
 			// tsuper.m() may in fact refer to tsuper.super.m().
 			// try to find the method as super.tsuper() instead:
 			ReferenceBinding superRole = ((ReferenceBinding)this.receiver.resolvedType).superclass();
-			if (superRole.isRole()) {
-				// resolving includes evaluation of late attribute CopyInheritancSrc
-				Dependencies.ensureBindingState(superRole, ITranslationStates.STATE_LATE_ATTRIBUTES_EVALUATED);
-				int len = argumentTypes.length;
-				boolean stripMarker = false;
-				MethodBinding alternateMethod = getAlternateMethod(scope, superRole, argumentTypes);
-				if (alternateMethod == null) {
-					TypeBinding[] strippedArgs = new TypeBinding[len - 1];
-					System.arraycopy(argumentTypes, 0, strippedArgs, 0, len-1);
-					alternateMethod = getAlternateMethod(scope, superRole, strippedArgs);
-					stripMarker = true;
-				}
-				if (alternateMethod != null)
-				{
-					this.binding = alternateMethod;
-					if (stripMarker)
-						System.arraycopy(this.arguments, 0, this.arguments = new Expression[len-1], 0, len-1);
-					this.receiver = new SuperReference(this.receiver.sourceStart, this.receiver.sourceEnd);
-					this.receiver.resolvedType = superRole;
-					this.receiver.constant = Constant.NotAConstant;
-					this.actualReceiverType = superRole;
-					return this.binding.returnType; // updated
-				}
-			}
-		}
-		return returnType; // not updated
-	}
-	
-	@Override @SuppressWarnings("hiding")
-	public boolean checkInvocationArguments(BlockScope scope, Expression receiver, TypeBinding receiverType,
-			MethodBinding method, Expression[] arguments, TypeBinding[] argumentTypes, boolean argsContainCast,
-			InvocationSite invocationSite) 
-	{
-		if (arguments != null && argumentTypes.length == arguments.length + 1) {
-			int len = arguments.length;
-			System.arraycopy(argumentTypes, 0, argumentTypes = new TypeBinding[len], 0, len);
-		}
-		return super.checkInvocationArguments(scope, receiver, receiverType, method, arguments, argumentTypes, argsContainCast, invocationSite);
-	}
+			codegenBinding = getAlternateMethod(currentScope, superRole, extendedParameters);
+			if (codegenBinding == null)
+				codegenBinding = getAlternateMethod(currentScope, superRole, this.binding.parameters);
+			if (codegenBinding == null)
+				throw new InternalCompilerError("cannot find real method binding for tsuper call!"); //$NON-NLS-1$
 
-	private MethodBinding getAlternateMethod(
-			Scope scope, ReferenceBinding superRole, TypeBinding[] argumentTypes)
-	{
-		MethodBinding alternateMethod = scope.getMethod(superRole, this.selector, argumentTypes, this);
-		if (alternateMethod.problemId() == ProblemReasons.NotVisible) {
-			return alternateMethod; // want to see this error as IProblem.IndirectTSuperInvisible, cf. ProblemReporter.invalidMethod
+			this.receiver = new SuperReference(this.receiver.sourceStart, this.receiver.sourceEnd);
+			this.receiver.resolvedType = superRole;
+			this.receiver.constant = Constant.NotAConstant;
+			this.actualReceiverType = superRole;
 		}
-		MethodBinding alternateSrc = alternateMethod.copyInheritanceSrc;
-		// TODO(SH): binary verbatim copies (no marker arg) are not recognized as copies!
-		if (   alternateSrc != null
-		    && isRoleOfSuperTeam(alternateSrc.declaringClass, scope))
-			return alternateMethod;
-		return null;
-	}
-
-	@Override
-	public void generateCode(BlockScope currentScope, CodeStream codeStream,
-			boolean valueRequired)
-	{
+			
+		this.binding = codegenBinding;
 		super.generateCode(currentScope, codeStream, valueRequired);
-		if (valueRequired && this.needReturnConversion) {
+		
+		if (valueRequired && this.binding.isCallin()) {
 			if (this.resolvedType != null && this.resolvedType.isValidBinding()) {
 				if (this.resolvedType.isBaseType()) {
 					// something like: ((Integer)result).intValue()
@@ -223,6 +209,38 @@ public class TSuperMessageSend extends MessageSend {
 		}
 	}
 
+	@SuppressWarnings("hiding")
+	@Override
+	public void generateArguments(MethodBinding binding, Expression[] arguments, BlockScope currentScope, CodeStream codeStream) 
+	{
+		super.generateArguments(binding, arguments, currentScope, codeStream);
+		// check if we need to pass the marker arg, too:
+		TypeBinding[] parameters = this.binding.parameters;
+		TypeBinding tsuperMarkerBinding = parameters.length == 0 ? null : parameters[parameters.length-1];
+		if (tsuperMarkerBinding == null || !TSuperHelper.isMarkerInterface(tsuperMarkerBinding))
+			return;
+		codeStream.aconst_null();
+		codeStream.checkcast(tsuperMarkerBinding);
+	}
+
+	private MethodBinding getAlternateMethod(Scope scope, ReferenceBinding superRole, TypeBinding[] argumentTypes)
+	{
+		MethodBinding alternateMethod = scope.getMethod(superRole, this.selector, argumentTypes, this);
+		if (alternateMethod.problemId() == ProblemReasons.NotVisible) {
+			return alternateMethod; // want to see this error as IProblem.IndirectTSuperInvisible, cf. ProblemReporter.invalidMethod
+		}
+		MethodBinding alternateSrc = alternateMethod.copyInheritanceSrc;
+		// TODO(SH): binary verbatim copies (no marker arg) are not recognized as copies!
+		if (   alternateSrc != null
+		    && isRoleOfSuperTeam(alternateSrc.declaringClass, scope))
+			return alternateMethod;
+		return null;
+	}
+
+	protected boolean isAnySuperAccess() {
+		return true;
+	}
+
 	private boolean isRoleOfSuperTeam(ReferenceBinding roleClass, Scope scope) {
 		ReferenceBinding site = scope.enclosingSourceType();
 		if (!site.isRole())
@@ -230,8 +248,14 @@ public class TSuperMessageSend extends MessageSend {
 		return site.enclosingType().superclass().isCompatibleWith(roleClass.enclosingType());
 	}
 
-	protected boolean isAnySuperAccess() {
-		return true;
+	@Override
+	public TypeBinding resolveType(BlockScope scope) {
+		TypeBinding answer = super.resolveType(scope);
+		if (this.binding != null && this.binding.isCallin())
+			// restore return type which has been generalized to 'Object':
+			return this.resolvedType= MethodModel.getReturnType(this.binding);
+	
+		return answer;
 	}
 
 	public StringBuffer printExpression(int indent, StringBuffer output){

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Protections.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -33,6 +32,7 @@ import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
@@ -273,6 +273,13 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
 		ReferenceBinding declaringClass = (ReferenceBinding) binding.getDeclaringClass().getRealClass().erasure();
 		ReferenceBinding invocationType = scope.enclosingSourceType();
 
+		// special privilege for tsuper calls:
+		if (invocationSite instanceof TSuperMessageSend && invocationType.isRole()) {
+			// check all tsupers, but not mixing with explicit supers
+			if (invocationType.roleModel.hasTSuperRole(declaringClass))
+				return true;
+		}
+		
 		if (binding.isProtected()) {
 			// answer true if the invocationType is the declaringClass or they are in the same package
 			// OR the invocationType is a subclass of the declaringClass

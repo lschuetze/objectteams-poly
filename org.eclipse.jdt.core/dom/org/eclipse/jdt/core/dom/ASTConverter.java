@@ -2535,8 +2535,20 @@ class ASTConverter {
             org.eclipse.jdt.core.dom.TSuperMessageSend result = this.ast.newTSuperMessageSend();
             result.setSourceRange(expression.sourceStart, expression.sourceEnd - expression.sourceStart + 1);
 
+
+            SimpleName name = this.ast.newSimpleName(new String(expression.selector));
+            int start = (int)(expression.nameSourcePosition >>> 32);
+            int end = (int)(expression.nameSourcePosition & 0xFFFFFFFF);
+            name.setSourceRange(start, end-start+1);
+
+            if (this.resolveBindings) {
+                recordNodes(name, expression);
+                recordNodes(result, expression);
+            }
+            result.setName(name);
+            // extract optional qualification from tsuperReference:
             org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend send =
-            	(org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend)expression;
+            		(org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend)expression;
             org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference tsuperRef = send.tsuperReference;
             TypeReference typeReference = tsuperRef.qualification;
 			if (typeReference != null) {
@@ -2550,30 +2562,15 @@ class ASTConverter {
             		qualification.setSourceRange(typeReference.sourceStart, typeReference.sourceEnd);
             	}
             	result.setQualification(qualification);
+				if (this.resolveBindings)
+					recordNodes(qualification, send.tsuperReference);
             }
-
-
-            SimpleName name = this.ast.newSimpleName(new String(expression.selector));
-            int start = (int)(expression.nameSourcePosition >>> 32);
-            int end = (int)(expression.nameSourcePosition & 0xFFFFFFFF);
-            name.setSourceRange(start, end-start+1);
-
-            if (this.resolveBindings) {
-                recordNodes(name, expression);
-                recordNodes(result, expression);
-            }
-            result.setName(name);
-
             org.eclipse.jdt.internal.compiler.ast.Expression[] arguments = expression.arguments;
-            if (arguments != null)
-            {
+            if (arguments != null) {
                 int argumentsLength = arguments.length;
-                argumentsLength--; //without marker element
-                for (int idx = 0; idx < argumentsLength; idx++)
-                {
+                for (int idx = 0; idx < argumentsLength; idx++) {
                     Expression argExpr = convert(arguments[idx]);
-                    if (this.resolveBindings)
-                    {
+                    if (this.resolveBindings) {
                         recordNodes(argExpr, arguments[idx]);
                     }
                     result.getArguments().add(argExpr);

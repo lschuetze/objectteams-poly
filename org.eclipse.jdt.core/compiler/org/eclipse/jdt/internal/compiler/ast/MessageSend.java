@@ -635,11 +635,14 @@ public TypeBinding resolveType(BlockScope scope) {
 				new char[][] {IOTConstants.ORG, IOTConstants.OBJECTTEAMS, IOTConstants.ITEAM, IOTConstants.ILOWERABLE},
 				4)))
 		this.selector=IOTConstants._OT_GETBASE;
-// orig:
+/* orig: extracted this block to a new hook:
 	this.binding = this.receiver.isImplicitThis()
 			? scope.getImplicitMethod(this.selector, argumentTypes, this)
 			: scope.getMethod(this.actualReceiverType, this.selector, argumentTypes, this);
-// :giro			
+  :giro */
+	this.binding = findMethod(scope, argumentTypes);
+	if (this.binding == null)
+		return null; // severe error, don't proceed analysing
 	this.selector = realSelector;
 // SH}
 //{ObjectTeams: postprocessing
@@ -920,6 +923,11 @@ public boolean isDecapsulationAllowed(Scope scope) {
 }
 // SH}
 //{ObjectTeams: Hooks around method lookup (using getMethod/getImplicitMethod):
+protected MethodBinding findMethod(BlockScope scope, TypeBinding[] argumentTypes) {
+	return this.receiver.isImplicitThis()
+					? scope.getImplicitMethod(this.selector, argumentTypes, this)
+					: scope.getMethod(this.actualReceiverType, this.selector, argumentTypes, this);
+}
 protected AnchorMapping beforeMethodLookup(
 		TypeBinding[] argumentTypes, Scope scope)
 {

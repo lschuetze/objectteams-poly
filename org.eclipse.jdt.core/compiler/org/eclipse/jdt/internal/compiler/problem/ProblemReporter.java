@@ -3802,49 +3802,7 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 			id = IProblem.UndefinedMethod;
 			ProblemMethodBinding problemMethod = (ProblemMethodBinding) method;
 			if (problemMethod.closestMatch != null) {
-//{ObjectTeams: printing of tsuper message sends:
-					boolean tsuperLookupDone = false;
-					if (TSuperHelper.isTSuper(problemMethod.closestMatch)) {
-						MethodBinding tsuperMethod = problemMethod.closestMatch;
-						if (problemMethod.closestMatch.overriddenTSupers != null) {
-							tsuperMethod = problemMethod.closestMatch.overriddenTSupers[0];
-							tsuperLookupDone = true;
-						}
-						tsuperMethod = new MethodBinding(tsuperMethod, tsuperMethod.declaringClass);
-						tsuperMethod.selector = CharOperation.concat("tsuper.".toCharArray(), tsuperMethod.selector); //$NON-NLS-1$
-						int len = tsuperMethod.parameters.length;
-						System.arraycopy(
-								tsuperMethod.parameters, 0,
-								tsuperMethod.parameters = new TypeBinding[len-1], 0,
-								len -1);
-						problemMethod.closestMatch = tsuperMethod;
-					}
-					if (   method.parameters != null
-						&& method.parameters.length > 0
-						&& TSuperHelper.isMarkerInterface(method.parameters[method.parameters.length-1]))
-					{
-						// cut off last arg (marker):
-						int len = method.parameters.length;
-						System.arraycopy(
-								method.parameters, 0,
-								method.parameters = new TypeBinding[len-1], 0,
-								len -1);
-						// find tsuper version:
-						if (!tsuperLookupDone) {
-							ReferenceBinding declaringClass = problemMethod.closestMatch.declaringClass;
-							if (declaringClass.isRole()) {
-								ReferenceBinding[] tsupers = declaringClass.roleModel.getTSuperRoleBindings();
-								if (tsupers.length > 0) {
-									problemMethod.closestMatch = new MethodBinding(
-											problemMethod.closestMatch,
-											tsupers[0]);
-									// SH: might not be the perfect match, but as long as "diagonal"
-									// tsuper calls are prohibited, the messages seems to be OK.
-								}
-							}
-						}
-					}
-					// reporting of role-cast error:
+//{ObjectTeams: // reporting of role-cast error:
 					if (   CharOperation.prefixEquals(IOTConstants.CAST_PREFIX, method.selector)
 						&& messageSend.arguments != null && messageSend.arguments.length > 0
 						&& problemMethod.closestMatch.parameters.length > 0)
@@ -4085,7 +4043,7 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 //{ObjectTeams: undefined, because not in the interface part?
 	if (id == IProblem.UndefinedMethod) {
 		ReferenceBinding declaringClass = method.declaringClass;
-		if (declaringClass.isRole())
+		if (declaringClass.isRole() && !(messageSend instanceof TSuperMessageSend))
 		{
 			ReferenceBinding roleClass = declaringClass.getRealClass();
 			if (roleClass != null) {
@@ -8676,7 +8634,7 @@ public void roleClassIfcConflict(TypeDeclaration ifcPart) {
 public void tsuperOutsideRole(
         AbstractMethodDeclaration context,
         Statement                 tsuperCall,
-        ReferenceBinding          roleType)
+        TypeBinding               roleType)
 {
     this.referenceContext = context;
     String[] args = new String[] {

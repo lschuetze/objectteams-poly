@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -97,7 +97,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	return null;
 }
 /** find the suitable tsuper role, which is determined as being the first tsuper role
- *  which lies outside the qualifying type.
+ *  which lies inside the superclass of the qualifying type.
  *  TA1
  *    TB1
  * 		R
@@ -108,13 +108,15 @@ public TypeBinding resolveType(BlockScope scope) {
  *      R
  *    TB2
  *      R
- *        TA2.tsuper
- *  tsupers = TA2.TB1.R (inside TA2), TA1.TB2.R (outside TA2 => result TA1.TB2)
+ *        TB2.tsuper
+ *  superTeam = TA2.TB1
+ *  tsupers = TA1.TB2.R (outside TA2.TB1), TA2.TB1.R (inside TA2.TB1) => result TA2.TB1.R
  */
 private ReferenceBinding selectTSuper(ReferenceBinding qualifyingType, ReferenceBinding[] tsupers)
 {
-	for (int i = 0; i < tsupers.length; i++) {
-		if (!contains(qualifyingType, tsupers[i]))
+	ReferenceBinding superTeam = qualifyingType.getRealClass().superclass();
+	for (int i = tsupers.length-1; i >= 0; i--) {
+		if (contains(superTeam, tsupers[i]))
 			return tsupers[i];
 	}
 	return null;
