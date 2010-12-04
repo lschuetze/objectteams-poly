@@ -27,6 +27,7 @@ import junit.framework.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -174,6 +175,36 @@ public class BaseConstructorInvocationTest extends FileBasedDOMTest
     public void testtoString1()
     {
         MethodDeclaration constructor = _role.getMethods()[1];
+        _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
+        
+        String actual = _testObj.toString();
+        String expected = "base(dummy0, dummy1);";
+
+        assertEquals("Base constructor call has wrong naive flat string representation",
+                expected, actual);
+    }
+
+    // check base constructor invocation within a buggy role
+    public void testtoString2() throws JavaModelException
+    {
+        ICompilationUnit _teamClass = getCompilationUnit(
+                getTestProjectDir(),
+                "src",
+                "baseconstructor.teampkg",
+                "Team2.java");
+        
+		ASTParser parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
+        parser.setResolveBindings(true);
+		parser.setProject( getJavaProject(TEST_PROJECT) );
+		parser.setSource(_teamClass);
+		
+        ASTNode root = parser.createAST( new NullProgressMonitor() );
+		CompilationUnit compUnit = (CompilationUnit)root;
+		TypeDeclaration team2Decl = (TypeDeclaration)compUnit.types().get(0);
+
+        TypeDeclaration role2Decl = team2Decl.getTypes()[0];
+        
+        MethodDeclaration constructor = role2Decl.getMethods()[1];
         _testObj = (BaseConstructorInvocation)constructor.getBody().statements().get(0);
         
         String actual = _testObj.toString();

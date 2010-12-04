@@ -28,15 +28,18 @@ import junit.framework.Test;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BaseCallMessageSend;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -264,6 +267,39 @@ public class BaseCallMessageSendTest extends FileBasedDOMTest
         MethodDeclaration method = _role.getMethods()[0];
 
         assertEquals("Body should have exactly one statement", 1, method.getBody().statements().size());
+    }
+    
+
+    // check base call within a buggy role (missing base class)
+    public void testtoString1() throws JavaModelException
+    {
+        ICompilationUnit _teamClass = getCompilationUnit(
+                getTestProjectDir(),
+                "src",
+                "basecall.teampkg",
+                "Team2.java");
+        
+		ASTParser parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
+        parser.setResolveBindings(true);
+		parser.setProject( getJavaProject(TEST_PROJECT) );
+		parser.setSource(_teamClass);
+		
+        ASTNode root = parser.createAST( new NullProgressMonitor() );
+		CompilationUnit compUnit = (CompilationUnit)root;
+		TypeDeclaration teamDecl = (TypeDeclaration)compUnit.types().get(0);
+
+        TypeDeclaration roleDecl = teamDecl.getTypes()[0];
+        
+        MethodDeclaration callinMethod = roleDecl.getMethods()[0];
+        IfStatement statement = (IfStatement) callinMethod.getBody().statements().get(1);
+        Assignment assignment = (Assignment)((ExpressionStatement)statement.getThenStatement()).getExpression();
+        _testObj = (BaseCallMessageSend)assignment.getRightHandSide();
+        
+        String actual = _testObj.toString();
+        String expected = "base.callinMethod(dummy)";
+
+        assertEquals("Base call has wrong naive flat string representation",
+                expected, actual);
     }
     
 }
