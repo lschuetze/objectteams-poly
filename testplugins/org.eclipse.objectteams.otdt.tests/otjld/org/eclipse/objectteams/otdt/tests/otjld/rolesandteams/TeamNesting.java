@@ -679,6 +679,95 @@ public class TeamNesting extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
+            "222.122.");
+    }
+
+    // a role inherits features from all possible super roles within nested teams - super and tsuper tree (note, that some of these are re-bound, so full tree is not possible.
+    // use qualified tsuper to achieve order of old tsuper-precedence (pre 0.8M3)
+    // 1.1.10-otjld-full-inheritance-structure-5
+    public void test1110_fullInheritanceStructure5a() {
+       
+       runConformTest(
+            new String[] {
+		"T1110fis5a.java",
+			    "\n" +
+			    "public class T1110fis5a {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        Team1110fis5a_2 t = new Team1110fis5a_2();\n" +
+			    "        t.test();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team1110fis5a_1.java",
+			    "\n" +
+			    "public team class Team1110fis5a_1 {\n" +
+			    "    public team class Mid1 {\n" +
+			    "        public class R1 {\n" +
+			    "            public void m() {\n" +
+			    "                System.out.print(\"111.\");\n" +
+			    "            }\n" +
+			    "        }\n" +
+			    "        public class R2 extends R1 {\n" +
+			    "            public void m() {\n" +
+			    "                System.out.print(\"112.\");\n" +
+			    "                super.m();\n" +
+			    "            }\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "    public team class Mid2 extends Mid1 {\n" +
+			    "        public class R1 {\n" +
+			    "            public void m() {\n" +
+			    "                System.out.print(\"121.\");\n" +
+			    "            }\n" +
+			    "        }\n" +
+			    "        public class R2 extends R1 {\n" +
+			    "            public void m() {\n" +
+			    "                System.out.print(\"122.\");\n" +
+			    "            }\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team1110fis5a_2.java",
+			    "\n" +
+			    "public team class Team1110fis5a_2 extends Team1110fis5a_1 {\n" +
+			    "    public team class Mid1 {\n" +
+			    "        public class R1 {\n" +
+			    "            public void m() {\n" +
+			    "                System.out.print(\"211.\");\n" +
+			    "            }\n" +
+			    "        }\n" +
+			    "        public class R2 {\n" +
+			    "            public void m() {\n" +
+			    "                System.out.print(\"212.\");\n" +
+			    "                tsuper.m();\n" +
+			    "            }\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "    public team class Mid2 {\n" +
+			    "        public class R1 {\n" +
+			    "            public void m() {\n" +
+			    "                System.out.print(\"221.\");\n" +
+			    "            }\n" +
+			    "        }\n" +
+			    "        public class R2 extends R1 {\n" +
+			    "            public void m() {\n" +
+			    "                System.out.print(\"222.\");\n" +
+			    "                Mid2.tsuper.m();\n" +
+			    "            }\n" +
+			    "        }\n" +
+			    "        protected void test() {\n" +
+			    "            R2 r = new R2();\n" +
+			    "            r.m();\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "    public void test () {\n" +
+			    "        Mid2 m = new Mid2();\n" +
+			    "        m.test();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
             "222.212.112.221.");
     }
 

@@ -476,4 +476,21 @@ public class CodeSelectionTests extends AbstractJavaModelTests
 					"RProtected(String) [in RProtected [in RoleCreation [in RoleCreation.java [in statements [in src [in CodeSelection]]]]]]",
 					elements);
 	}
+	
+	public void testTSuperCall1() throws JavaModelException {
+		ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "statements", "TSuper.java");
+		IJavaElement[] elements = codeSelect(cu, "m(1);", "m");
+		assertElementsEqual(
+					"Unexpected elements",
+					"m(int) [in R1 [in Inner2 [in Mid1 [in TSuper [in TSuper.java [in statements [in src [in CodeSelection]]]]]]]]",
+					elements);
+	}
+	public void testTSuperCall2() throws JavaModelException {
+		ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "statements", "TSuper.java");
+		IJavaElement[] elements = codeSelect(cu, "m(2);", "m");
+		assertElementsEqual(
+					"Unexpected elements",
+					"m(int) [in R1 [in Inner1 [in Mid2 [in TSuper [in TSuper.java [in statements [in src [in CodeSelection]]]]]]]]",
+					elements);
+	}
 }

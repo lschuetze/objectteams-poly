@@ -1677,7 +1677,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     // a role class accesses a method with the same name but different signature of its implicit super role via tsuper
     // 1.3.9-otjld-illegal-tsuper-access-4
     public void test139_illegalTsuperAccess4() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"Team139ita4_1.java",
 			    "\n" +
@@ -1692,6 +1692,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 		"Team139ita4_2.java",
 			    "\n" +
 			    "public team class Team139ita4_2 extends Team139ita4_1 {\n" +
+			    "    @Override\n" +
 			    "    protected class Role139ita4 {\n" +
 			    "        public String getValue(String arg) {\n" +
 			    "            return tsuper.getValue();\n" +
@@ -1700,7 +1701,12 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "not applicable");
+            "----------\n" +
+            "1. ERROR in Team139ita4_2.java (at line 6)\n" +
+            "	return tsuper.getValue();\n" +
+			"	       ^^^^^^^^^^^^^^^^^\n" +
+    		"Illegal tsuper call: can only invoke the method being overridden by the current method (OTJLD 1.3.1(f)).\n" +
+            "----------\n");
     }
 
     // a role class accesses a method of its implicit super role via tsuper within an inner class - missing team keyword
@@ -1764,6 +1770,79 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 			    "    \n"
             },
             "1.3.1(f)");
+    }
+    
+    // a tsuper call is unresolved (requires specific error reporting, setting tsuperMethod to a ProblemMethodBinding)
+    public void test139_illegalTsuperAccess6() {
+        runNegativeTestMatching(
+            new String[] {
+		"Team139ita6_1.java",
+			    "\n" +
+			    "public team class Team139ita6_1 {\n" +
+			    "    protected class Role139ita6 {\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team139ita6_2.java",
+			    "\n" +
+			    "public team class Team139ita6_2 extends Team139ita6_1 {\n" +
+			    "    @Override\n" +
+			    "    protected class Role139ita6 {\n" +
+			    "        callin String getValue(String arg) {\n" +
+			    "            return tsuper.getValue(arg);\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "----------\n" + 
+    		"1. ERROR in Team139ita6_2.java (at line 6)\n" + 
+    		"	return tsuper.getValue(arg);\n" + 
+    		"	              ^^^^^^^^\n" + 
+    		"The method getValue(String) is undefined for the type Team139ita6_1.Role139ita6\n" + 
+    		"----------\n");
+    }
+
+    // a tsuper call in a callin method with generic return type (requries copyInheritanceSrc to be reflected when creating a ParameterizedMethodBinding)
+    public void _test139_tsuperCallWithTypeParameter1() {
+        runConformTest(
+            new String[] {
+		"T139tcwtp1Main.java",
+    			"public class T139tcwtp1Main {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        new Team139tcwtp1_2().activate();\n" +
+			    "        System.out.print(new T139tcwtp1().getValue(\"nv\"));\n" +
+			    "    }\n" +
+			    "}\n",
+		"T139tcwtp1.java",
+		    	"public class T139tcwtp1 {\n" +
+			    "    String getValue(String arg) {\n" +
+			    "        return \"NOTOK\";\n" +
+			    "    }\n" +
+			    "}\n",
+		"Team139tcwtp1_1.java",
+			    "\n" +
+			    "public team class Team139tcwtp1_1 {\n" +
+			    "    protected class Role139tcwtp1<E> {\n" +
+			    "        abstract E val();\n" +
+			    "        callin E getValue(String arg) {\n" +
+			    "            return this.val();\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "}\n",
+		"Team139tcwtp1_2.java",
+			    "\n" +
+			    "public team class Team139tcwtp1_2 extends Team139tcwtp1_1 {\n" +
+			    "    protected class Role139tcwtp1<String> playedBy T139tcwtp1 {\n" +
+			    "        String val() { return \"OK\"; }\n" +
+			    "        getValue <- replace getValue;\n" +
+			    "        callin String getValue(String arg) {\n" +
+			    "            return tsuper.getValue(arg);\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "}\n"
+            },
+            "OK");
     }
 
     // a role class has stronger access rights than its implicit superrole
