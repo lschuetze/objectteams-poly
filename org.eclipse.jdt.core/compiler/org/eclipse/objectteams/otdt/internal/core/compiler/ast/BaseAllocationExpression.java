@@ -208,11 +208,11 @@ public class BaseAllocationExpression extends Assignment {
         	// translate "super(base(args), ...);" as "super(new MyBase(args), ...);"
         	this.expression = allocation; // and ignore the assignment flavor of this node.
         } else {
+        	// needed by ASTConverter:
+        	this.expression = allocation;
         	if (   !enclType.roleModel.hasBaseclassProblem()
         		&& !scope.referenceType().ignoreFurtherInvestigation)
         	{
-	        	// needed by ASTConverter:
-	        	this.expression = allocation;
 
 	    		MethodModel.setCallsBaseCtor(enclCtor);
 

@@ -42,11 +42,6 @@ public abstract class AbstractExpressionWrapper extends Expression implements IP
 {
 	public Expression _wrappee;
 
-	public AbstractExpressionWrapper()
-	{
-		this.constant = Constant.NotAConstant;
-	}
-
     public AbstractExpressionWrapper(Expression wrappee, int sStart, int sEnd)
     {
         super();
