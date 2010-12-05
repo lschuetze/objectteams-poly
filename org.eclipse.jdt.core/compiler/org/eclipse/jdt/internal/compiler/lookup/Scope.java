@@ -1829,7 +1829,7 @@ public abstract class Scope {
 							ReferenceBinding receiverType = classScope.enclosingReceiverType();
 //{ObjectTeams: record when we travel out of a role
 							if (insideRoleType)
-								insideStaticContext = false; // forget about it, we already travelled out of the role
+								insideStaticContext = false; // forget about it, we already traveled out of the role
 							if (insideStaticContext && receiverType.isRole())
 								insideRoleType = true;
 // SH}
@@ -2842,6 +2842,10 @@ public abstract class Scope {
 		ReferenceBinding foundType = null;
 		boolean insideStaticContext = false;
 		boolean insideTypeAnnotation = false;
+//{ObjectTeams: support non static team fields to be accessed from static role context:
+		boolean insideRoleType = false;
+// SH}
+
 		if ((mask & Binding.TYPE) == 0) {
 			Scope next = scope;
 			while ((next = scope.parent) != null)
@@ -2880,6 +2884,13 @@ public abstract class Scope {
 						break;
 					case CLASS_SCOPE :
 						SourceTypeBinding sourceType = ((ClassScope) scope).referenceContext.binding;
+//{ObjectTeams: record when we travel out of a role
+						if (insideRoleType)
+							insideStaticContext = false; // forget about it, we already traveled out of the role
+						if (insideStaticContext && sourceType.isRole())
+							insideRoleType = true;
+// SH}
+
 						if (scope == this && (sourceType.tagBits & TagBits.TypeVariablesAreConnected) == 0) {
 							// type variables take precedence over the source type, ex. class X <X> extends X == class X <Y> extends Y
 							// but not when we step out to the enclosing type
