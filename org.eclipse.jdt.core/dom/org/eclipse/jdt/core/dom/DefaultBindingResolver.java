@@ -997,7 +997,7 @@ class DefaultBindingResolver extends BindingResolver {
         if (node instanceof TSuperMessageSend)
         {
             TSuperMessageSend msgSend = (TSuperMessageSend)node;
-            return this.getMethodBinding(msgSend.binding.copyInheritanceSrc);
+            return this.getMethodBinding(msgSend.binding);
         }
         return null;
     }

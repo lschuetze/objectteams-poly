@@ -25,9 +25,7 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.core.search.BasicSearchEngine;
-import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 
@@ -783,20 +781,7 @@ public int resolveLevel(Binding binding) {
 	return (methodLevel & MATCH_LEVEL_MASK) > (declaringLevel & MATCH_LEVEL_MASK) ? declaringLevel : methodLevel; // return the weaker match
 }
 protected int resolveLevel(MessageSend messageSend) {
-	MethodBinding method = messageSend.binding;
-//{ObjectTeams: tsuper.m look into copyInheritanceSrc:
-	if (messageSend instanceof TSuperMessageSend) {
-		if(method == null) {
-			new InternalCompilerError("tsuper message send not resolved "+messageSend).printStackTrace(); //$NON-NLS-1$
-			return IMPOSSIBLE_MATCH;
-		}			
-		method = method.copyInheritanceSrc;
-		if(method == null) {
-			new InternalCompilerError("tsuper message send has not copyInheritanceSrc "+messageSend).printStackTrace(); //$NON-NLS-1$
-			return IMPOSSIBLE_MATCH;
-		}			
-	}
-// SH}		
+	MethodBinding method = messageSend.binding;		
 	if (method == null) {
 		return INACCURATE_MATCH;
 	}

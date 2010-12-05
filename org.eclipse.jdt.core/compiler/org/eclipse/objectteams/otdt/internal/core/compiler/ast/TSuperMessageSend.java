@@ -191,8 +191,13 @@ public class TSuperMessageSend extends MessageSend {
 			this.actualReceiverType = superRole;
 		}
 			
+		MethodBinding tsuperMethod = this.binding;
 		this.binding = codegenBinding;
-		super.generateCode(currentScope, codeStream, valueRequired);
+		try {
+			super.generateCode(currentScope, codeStream, valueRequired);
+		} finally {
+			this.binding = tsuperMethod;
+		}
 		
 		if (valueRequired && this.binding.isCallin()) {
 			if (this.resolvedType != null && this.resolvedType.isValidBinding()) {
