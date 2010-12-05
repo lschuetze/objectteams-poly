@@ -95,10 +95,8 @@ public class BaseReference extends ThisReference {
 		} else {
 			// ensure 'base' is resolvable even in a static context (which the super implementation cannot)
 			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=331669
-			this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(
-	                scope.enclosingReceiverType(),
-	                scope,
-	                this);
+			this.constant = Constant.NotAConstant;
+			this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(scope, scope.enclosingReceiverType(), this);
 		}
 		return this.resolvedType;
 	}
