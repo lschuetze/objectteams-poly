@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2003, 2008 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -52,9 +52,11 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.core.search.TypeNameRequestor;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -102,6 +104,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
     private Set<IClassFile> m_cachedMarkersForJavaElements = new HashSet<IClassFile>();
     private boolean m_enabled = false;
     protected AnnotationHelper annotationHelper;
+    private boolean isInitialized = false;
 
 	/**
 	 * Typical usage:
@@ -793,7 +796,47 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		}
     }
 
-    protected void schedule(final CallinMarkerJob job, IStatusLineManager statusLine)
+    /** chained scheduling:<ul>
+     *  <li> first wait until the indexes are ready (only on first invocation),
+     *  <li> only then schedule our job.
+     */
+    protected synchronized void schedule(final CallinMarkerJob job, final IStatusLineManager statusLine)
+    {
+    	if (this.isInitialized) {
+    		doSchedule(job, statusLine);
+    		return;
+    	} else {
+    		this.isInitialized = true;
+    		Job waitForIndex = new Job(OTDTUIPlugin.getResourceString("CallinMarkerCreator2.wait_for_index_message")) { //$NON-NLS-1$
+    			@Override
+    			protected IStatus run(IProgressMonitor monitor) {
+    				try {
+    					// dummy query for waiting until the indexes are ready (see AbstractJavaModelTest)
+						new SearchEngine().searchAllTypeNames(
+								null,
+								SearchPattern.R_EXACT_MATCH,
+								"!@$#!@".toCharArray(), //$NON-NLS-1$
+								SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE,
+								IJavaSearchConstants.CLASS,
+								SearchEngine.createWorkspaceScope(),
+								new TypeNameRequestor() {
+									public void acceptType(int modifiers,char[] packageName,char[] simpleTypeName,char[][] enclosingTypeNames,String path) {}
+								},
+								IJavaSearchConstants.WAIT_UNTIL_READY_TO_SEARCH,
+								null);
+					} catch (CoreException e) {
+					} finally {
+						// chaining:
+						doSchedule(job, statusLine);
+					}
+					return Status.OK_STATUS;
+    			}
+    		};
+    		waitForIndex.setPriority(Job.DECORATE);
+    		waitForIndex.schedule(100);
+    	}    	
+    }
+    protected void doSchedule(final CallinMarkerJob job, IStatusLineManager statusLine)
     {
         job.addJobChangeListener(new JobListener(statusLine) {
             protected void jobFinished(int status) {

@@ -23,8 +23,6 @@ package org.eclipse.objectteams.otdt.ui;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IAdapterManager;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
