@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
@@ -276,6 +277,11 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 			}
 		}
 		MethodBinding callinMethod = callinMethodDecl.binding;
+		if (callinMethod == null) {
+			if (callinMethodDecl.ignoreFurtherInvestigation)
+				return;
+			throw new InternalCompilerError("Unresolved method without an error"); //$NON-NLS-1$
+		}
 		// check name match:
 		if (!CharOperation.equals(this._sendOrig.selector, callinMethod.selector))
 			scope.problemReporter().baseCallNotSameMethod(callinMethodDecl, this._sendOrig);
