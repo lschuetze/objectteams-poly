@@ -723,6 +723,25 @@ public class CodeCompletionTest extends CoreTests {
 				0); // should only have one proposal, so accept any to see if there are others
 	}
 	
+	// static case, result ignored - see https://bugs.eclipse.org/bugs/show_bug.cgi?id=331669
+	public void testCompleteBasecall2() throws Exception {
+		createBaseClass("    public static String getBaseText(Object object) {return null;}\n");
+		assertTypeBodyProposal(
+				"        static callin String getText(Object o) {\n"+
+				"        	 base.|\n" +
+				"        	 return \"\";\n" +
+				"        }\n" +
+				"        getText <- replace getBaseText;\n",
+				"", // should only have one proposal, so accept any to see if there are others
+				"        static callin String getText(Object o) {\n"+
+				"        	 base.getText(|o|)\n" +
+				"        	 return \"\";\n" +
+				"        }\n" +
+				"        getText <- replace getBaseText;\n" +
+				"",
+				0); // should only have one proposal, so accept any to see if there are others
+	}
+	
 	public void testCompleteTSuperCall1()  throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
