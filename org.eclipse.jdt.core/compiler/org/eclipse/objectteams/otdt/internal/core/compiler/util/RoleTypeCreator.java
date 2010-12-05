@@ -803,7 +803,7 @@ public class RoleTypeCreator implements TagBits {
 				if (team0 == null || team0.getTeamModel() == null)
 					return; // happens when org.objectteams.Team is missing
 				VariableBinding  anchor0 = team0.getTeamModel().getTThis();
-				RoleTypeBinding  type1   = (RoleTypeBinding)anchor0.getRoleTypeBinding(returnRef, returnRef.dimensions());
+				DependentTypeBinding  type1   = (DependentTypeBinding)anchor0.getRoleTypeBinding(returnRef, returnRef.dimensions());
 				VariableBinding  anchor  = method.declaringClass.getTeamModel().getTThis();
 				method.returnType = type1.maybeInstantiate(anchor, 0);
 				// TODO (SH): check whether this can be generalized to apply for other methods, too.

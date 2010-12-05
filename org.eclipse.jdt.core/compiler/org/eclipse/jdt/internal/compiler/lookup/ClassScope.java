@@ -2090,11 +2090,14 @@ public class ClassScope extends Scope {
 //{ObjectTeams: top level source super-team must be fully loaded/connected:
 		ReferenceBinding superType= sourceType.superclass;
 		if (   superType != null
-			&& superType.isTeam()
-			&& !superType.isBinaryBinding()
-			&& ((SourceTypeBinding) superType).scope != null)
+			&& superType.isTeam()) 
 		{
-			((SourceTypeBinding) superType).scope.connectTypeHierarchy();
+			ReferenceBinding superOriginal = (ReferenceBinding) superType.original();
+			if (!superOriginal.isBinaryBinding()) {
+				ClassScope superScope = ((SourceTypeBinding) superOriginal).scope;
+				if (superScope != null)
+					superScope.connectTypeHierarchy();
+			}
 		}
 // SH}
 		connectMemberTypes();
