@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 /**
  * NEW for OTDT:
@@ -91,8 +92,14 @@ public class BaseReference extends ThisReference {
 			this.constant = Constant.NotAConstant;
 			if (this._wrappee.isTypeReference())
 				this.bits |= Binding.TYPE;
-		} else
-			super.resolveType(scope);
+		} else {
+			// ensure 'base' is resolvable even in a static context (which the super implementation cannot)
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=331669
+			this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(
+	                scope.enclosingReceiverType(),
+	                scope,
+	                this);
+		}
 		return this.resolvedType;
 	}
 
