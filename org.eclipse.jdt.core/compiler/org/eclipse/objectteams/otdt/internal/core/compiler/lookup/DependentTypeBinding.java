@@ -285,6 +285,16 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 		return ((DependentTypeBinding)binding).type.kind() == TYPE_PARAMETER;
 	}
 
+	/** ignoring the type part, check if anchors are provably identical. */
+	public boolean hasEquivalentAnchorTo(TypeBinding otherType) {
+		if (otherType instanceof DependentTypeBinding) {
+			DependentTypeBinding otherRoleType = (DependentTypeBinding)otherType;
+			if (this._teamAnchor.hasSameBestNameAs(otherRoleType._teamAnchor))
+				return true;
+		}
+		return false;
+	}
+
 	@Override
 	public boolean isEquivalentTo(TypeBinding otherType) {
 		if (! (otherType instanceof DependentTypeBinding))
@@ -422,5 +432,4 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 		}
 		return anchorName;
 	}
-
 }

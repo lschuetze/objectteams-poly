@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -875,15 +875,6 @@ public class RoleTypeBinding extends DependentTypeBinding
 			&& CharOperation.equals(otherDep.internalName(), internalName());
 	}
 
-	/** ignoring the role part, check if anchors are provably identical. */
-	public boolean hasEquivalentAnchorTo(TypeBinding otherType) {
-		if (otherType instanceof RoleTypeBinding) {
-			RoleTypeBinding otherRoleType = (RoleTypeBinding)otherType;
-			if (this._teamAnchor.hasSameBestNameAs(otherRoleType._teamAnchor))
-				return true;
-		}
-		return false;
-	}
     // =========== VARIOUS NAMES: =============
 
     public char[] qualifiedSourceName() {

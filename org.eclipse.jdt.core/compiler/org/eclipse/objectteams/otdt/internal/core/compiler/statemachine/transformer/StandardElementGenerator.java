@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -43,6 +43,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.SingleValueA
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.TreeNode;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.TThisBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
@@ -352,7 +353,7 @@ public class StandardElementGenerator {
 	 * @param castType
 	 */
 	public static Expression createRoleInstanceOfCheck(
-			BlockScope scope, InstanceOfExpression expr, ReferenceBinding exprType, RoleTypeBinding castType) {
+			BlockScope scope, InstanceOfExpression expr, ReferenceBinding exprType, DependentTypeBinding castType) {
 
 		AstGenerator gen = new AstGenerator(expr.sourceStart, expr.sourceEnd);
 		Expression teamInstanceComparison;
@@ -457,7 +458,7 @@ public class StandardElementGenerator {
 	 * @param end end of source code position (fake).
 	 * @return a new EqualExpression
 	 */
-	private static EqualExpression createAnchorEqualCheck(BlockScope scope, RoleTypeBinding left, RoleTypeBinding right, int start, int end)
+	private static EqualExpression createAnchorEqualCheck(BlockScope scope, DependentTypeBinding left, DependentTypeBinding right, int start, int end)
 	{
 		AstGenerator gen = new AstGenerator(start,end);
 		Expression exprTeam = createTeamAnchorReference(scope, left, gen);
@@ -473,14 +474,14 @@ public class StandardElementGenerator {
 	 * @param pos faked source code position (encoded start and end).
 	 * @return a new reference
 	 */
-	private static Expression createTeamAnchorReference(BlockScope scope, RoleTypeBinding roleType, AstGenerator gen) {
+	private static Expression createTeamAnchorReference(BlockScope scope, DependentTypeBinding roleType, AstGenerator gen) {
 		Expression teamExpr = createTeamExpression(roleType, gen);
 		teamExpr.resolveType(scope);
 		return teamExpr;
 	}
 
 	/** Create an expression evaluating to the team instance inherent to the given role type. */
-	public static Expression createTeamExpression(RoleTypeBinding roleType, AstGenerator gen)
+	public static Expression createTeamExpression(DependentTypeBinding roleType, AstGenerator gen)
 	{
 		return (roleType._teamAnchor instanceof TThisBinding) ?
 				gen.qualifiedThisReference((ReferenceBinding)roleType._teamAnchor.getResolvedType())

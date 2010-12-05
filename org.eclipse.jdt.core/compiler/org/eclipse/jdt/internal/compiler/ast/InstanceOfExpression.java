@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
@@ -89,10 +89,10 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		{
 			if (TeamModel.isComparableToRole((ReferenceBinding)expressionType, (ReferenceBinding)castType))
 			{
-				if (!(castType instanceof RoleTypeBinding))
+				if (!(castType instanceof DependentTypeBinding))
 					castType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(scope, castType, this);
 
-				RoleTypeBinding roleCastType = (RoleTypeBinding)castType;
+				DependentTypeBinding roleCastType = (DependentTypeBinding)castType;
 				if (roleCastType.hasEquivalentAnchorTo(expressionType))
 					return false;
 				if (! (scope instanceof BlockScope))
