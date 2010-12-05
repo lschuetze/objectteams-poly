@@ -2625,6 +2625,31 @@ public class Java5 extends AbstractOTJLDTest {
             },
             "OK");
     }
+    // a team has a type parameter that is used in a static role method
+    public void testA112_genericTeam2() {
+       
+       runConformTest(
+            new String[] {
+		"TeamA112gt2.java",
+			    "\n" +
+			    "public team class TeamA112gt2<E> {\n" +
+			    "    protected class R {\n" +
+			    "        protected static void test(E e) {\n" +
+			    "            System.out.print(e);\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "    public void test(E e) {\n" +
+			    "        R.test(e);\n" +
+			    "    }\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        TeamA112gt2<String> t = new TeamA112gt2<String>();\n" +
+			    "        t.test(\"OK\");\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "OK");
+    }
 
     // a static method in a role file suppresses an nls warning
     // Bug 321352 -  [compiler][reconciler] reporting of non-externalized string constants in role files 
