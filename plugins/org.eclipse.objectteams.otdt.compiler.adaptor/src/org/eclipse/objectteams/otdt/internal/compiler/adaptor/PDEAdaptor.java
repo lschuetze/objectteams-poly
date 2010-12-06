@@ -219,8 +219,10 @@ public team class PDEAdaptor
 			((AdaptedBaseBundle)data).hasPackageSplit = true;
 		aspectBindingData.hasPackageSplit = true;
 		int len = accessRule.aspectBindingData.length;
-		System.arraycopy(accessRule.aspectBindingData, 0, accessRule.aspectBindingData = new Object[len+1], 0, len);
-		accessRule.aspectBindingData[len] = aspectBindingData;
+		Object[] newAspectBindingData = new Object[len+1];
+		System.arraycopy(accessRule.aspectBindingData, 0, newAspectBindingData, 0, len);
+		newAspectBindingData[len] = aspectBindingData;
+		accessRule.aspectBindingData = newAspectBindingData;
 		return true;
 	}
 
