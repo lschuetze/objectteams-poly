@@ -159,7 +159,7 @@ public class BytecodeTransformer
         ReferenceBinding srcType       = srcMethodBinding.declaringClass;
         RoleModel        srcRole       = srcType.roleModel;
 
-        if (TypeAnalyzer.isSourceTypeWithErrors(srcType)) {
+        if (TypeAnalyzer.isSourceTypeWithErrors(srcType) || MethodModel.hasProblem(srcMethodBinding)) {
        		// broken tsuper role has probably no byte code.
         	dstMethod.binding.bytecodeMissing= true;
        		return;
