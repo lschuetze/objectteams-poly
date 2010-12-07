@@ -33,7 +33,7 @@ public class Java5 extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testA113_suppressWarnings1"};
+//		TESTS_NAMES = new String[] { "testA12_genericRoleFeature14"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1104,6 +1104,74 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    \n"
             },
             "1.2.2(e)");
+    }
+
+    // a role method uses a type parameter of its enclosing team
+    public void testA12_genericRoleFeature13() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf13_2.java",
+    			"public team class TeamA12grf13_2 extends TeamA12grf13_1<String> {\n" +
+    			"   @Override\n" +
+    			"	public class R {\n" +
+    			"        @Override\n" +
+    			"        protected void test(String u) {\n" +
+    			"            System.out.print(u);\n" +
+    			"        }\n" +
+    			"   }\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf13_2().test(\"OK\");\n" +
+    			"   }\n" +
+    			"}\n",
+    	"TeamA12grf13_1.java",
+    			"public team class TeamA12grf13_1<U> {\n" +
+    			"	public class R {\n" +
+    			"        protected void test(U u){}" +
+    			"   }\n" +
+    			"   void test(U u) {\n" +
+    			"       R r = new R();\n" +
+    			"       r.test(u);\n" +
+    			"   }\n" +
+    			"}\n"
+    		},
+    		"OK");
+    }
+
+    // a role method uses a type parameter of its enclosing team - two ways of role creation
+    public void testA12_genericRoleFeature14() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf14_2.java",
+    			"public team class TeamA12grf14_2 extends TeamA12grf14_1<String> {\n" +
+    			"   @Override\n" +
+    			"	public class R {\n" +
+    			"        protected R() { tsuper(); System.out.print(2); }\n" +
+    			"        @Override\n" +
+    			"        protected void test(String u) {\n" +
+    			"            System.out.print(u);\n" +
+    			"        }\n" +
+    			"   }\n" +
+    			"   R foo() { System.out.print(5); return new R();}\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf14_2().test(\"OK\");\n" +
+    			"   }\n" +
+    			"}\n",
+    	"TeamA12grf14_1.java",
+    			"public team class TeamA12grf14_1<U> {\n" +
+    			"	public class R {\n" +
+    			"        protected R() { System.out.print(1); }\n" +
+    			"        protected void test(U u){}" +
+    			"   }\n" +
+    			"   R foo() { System.out.print(4); return new R(); }\n" +
+    			"   void test(U u) {\n" +
+    			"       System.out.print(\"-\"+foo().getClass().getName()+\"-\");\n" +
+    			"       R r = new R();\n" +
+    			"       System.out.print(\"-\"+r.getClass().getName()+\"-\");\n" +
+    			"       r.test(u);\n" +
+    			"   }\n" +
+    			"}\n"
+    		},
+    		"512-TeamA12grf14_2$__OT__R-12-TeamA12grf14_2$__OT__R-OK");
     }
 
     // a parameter of a callout binding requires autoboxing - explicit mapping
