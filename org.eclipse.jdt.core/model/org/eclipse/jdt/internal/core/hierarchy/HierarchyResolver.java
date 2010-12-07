@@ -661,7 +661,7 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 				tsuperClasses = new IType[tsuperBindings.length];
 				arePhantoms = new boolean[tsuperBindings.length];
 				for (int i = 0, t = tsuperBindings.length - 1; t >= 0; i++, t--) { // reverse array so that highest prio will come first
-					tsuperClasses[i] = getHandle(tsuperBindings[t]);
+					tsuperClasses[i] = getHandle((ReferenceBinding) tsuperBindings[t].erasure());
 					arePhantoms[i] = tsuperBindings[t].roleModel.isPurelyCopied();
 				}
 			}
