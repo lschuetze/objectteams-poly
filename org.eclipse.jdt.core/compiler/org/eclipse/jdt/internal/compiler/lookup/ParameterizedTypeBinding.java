@@ -879,7 +879,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 				return this.methods;
 			MethodBinding[] newMethods = new MethodBinding[originalMethods.length];
 			for (int i=0, j=0; i < originalMethods.length; i++) {
-				if (this.methods[j].original() == originalMethods[i])
+				if (j < this.methods.length && this.methods[j].original() == originalMethods[i])
 					newMethods[i] = this.methods[j++];
 				else
 					newMethods[i] = createParameterizedMethod(originalMethods[i]);				
