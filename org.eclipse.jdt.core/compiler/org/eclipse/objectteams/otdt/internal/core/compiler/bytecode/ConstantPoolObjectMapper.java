@@ -67,8 +67,8 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 			MethodBinding srcMethodBinding,
 			MethodBinding dstMethodBinding)
 	{
-		this._srcMethod   = srcMethodBinding;
-		this._dstMethod   = dstMethodBinding;
+		this._srcMethod   = srcMethodBinding.original();
+		this._dstMethod   = dstMethodBinding.original();
 	}
 
 	/**
@@ -114,15 +114,15 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 			case FieldRefTag:
 				return new ConstantPoolObject(
 						FieldRefTag,
-						mapField(this._srcMethod, src_cpo.getFieldRef(), dstTeam)) ;
+						mapField(this._srcMethod, src_cpo.getFieldRef().original(), dstTeam)) ;
 			case MethodRefTag:
 				return new ConstantPoolObject(
 						MethodRefTag,
-						mapMethod(this._srcMethod, src_cpo.getMethodRef(), this._dstMethod, dstTeam, addMarkerArgAllowed));
+						mapMethod(this._srcMethod, src_cpo.getMethodRef().original(), this._dstMethod, dstTeam, addMarkerArgAllowed));
 			case InterfaceMethodRefTag:
 				return new ConstantPoolObject(
 						InterfaceMethodRefTag,
-						mapMethod(this._srcMethod, src_cpo.getMethodRef(), this._dstMethod, dstTeam, addMarkerArgAllowed));
+						mapMethod(this._srcMethod, src_cpo.getMethodRef().original(), this._dstMethod, dstTeam, addMarkerArgAllowed));
 			case ClassTag:
 				return new ConstantPoolObject(
 						ClassTag,
@@ -190,11 +190,13 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 		// if Binding points at Role-Field of Superteamclass, then mapping must be done
 		if(isMappableClass(refTypeBinding))
 		{
+			refTypeBinding = (ReferenceBinding) refTypeBinding.erasure();
 			ReferenceBinding refTeamBinding=getTeam(refTypeBinding);
 			if(refTeamBinding != null)
 			{
 				if(srcTeamBinding != null)
 				{
+					srcTeamBinding = (ReferenceBinding) srcTeamBinding.erasure();
 					TypeBinding newBinding = null;
 					ReferenceBinding currentSrcTeam = srcTeamBinding;
 					ReferenceBinding currentDstTeam = dstTeam;
@@ -202,7 +204,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 						   && currentDstTeam != null) {
 						if(refTeamBinding == currentSrcTeam)	{
 							// mapping the enclosing team which is nested in an outer team?
-							if (typeBinding == refTeamBinding && typeBinding.isRole())
+							if (refTypeBinding == refTeamBinding && refTypeBinding.isRole())
 								newBinding = currentDstTeam;
 							else
 								newBinding = searchRoleClass(refTypeBinding, currentDstTeam);
@@ -360,6 +362,7 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 	{
 		ReferenceBinding refTeamBinding=getTeam(refMethodBinding);
 		if(refTeamBinding!=null){
+			refTeamBinding = (ReferenceBinding) refTeamBinding.erasure();
 			ReferenceBinding srcTeamBinding = getTeam(srcMethod);
 			if(srcTeamBinding!=null){
 				// same team (direct tsuper) or compatible (indirect tsuper)
@@ -564,6 +567,8 @@ public class ConstantPoolObjectMapper implements ClassFileConstants{
 		currentRank++;
 		if (candidate == null || toLookFor == null)
 			return Integer.MAX_VALUE;
+		toLookFor = toLookFor.original();
+		candidate = candidate.original();
 		if (candidate == toLookFor)
 			return currentRank;
 		if (   currentRank > 0 // at top level we search all methods by this name any way.

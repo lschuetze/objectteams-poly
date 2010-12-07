@@ -392,11 +392,12 @@ public class TypeAnchorReference extends TypeReference {
 	private ITeamAnchor findVariable(Scope scope, char[] token, boolean isStaticScope, int start, int end)
 	{
 		ITeamAnchor anchorBinding = null;
-		scopes: while (scope != null) {
-			switch (scope.kind) {
+		Scope currentScope = scope;
+		scopes: while (currentScope != null) {
+			switch (currentScope.kind) {
 			case Scope.METHOD_SCOPE:
 				// check arguments for possible anchor:
-				AbstractMethodDeclaration method = ((MethodScope)scope).referenceMethod();
+				AbstractMethodDeclaration method = ((MethodScope)currentScope).referenceMethod();
 				if (method != null) {
 					Argument[] arguments = method.arguments;
 					if (arguments != null)
@@ -408,10 +409,10 @@ public class TypeAnchorReference extends TypeReference {
 				//$FALL-THROUGH$
 			case Scope.BLOCK_SCOPE:
 			case Scope.BINDING_SCOPE:
-				anchorBinding = scope.findVariable(token);
+				anchorBinding = currentScope.findVariable(token);
 				break;
 			case Scope.CLASS_SCOPE:
-				ReferenceBinding classType = scope.enclosingSourceType();
+				ReferenceBinding classType = currentScope.enclosingSourceType();
 				if (classType.isSynthInterface())
 					classType = classType.getRealClass();
 				anchorBinding = TypeAnalyzer.findField(classType, token, isStaticScope, true);
@@ -421,7 +422,7 @@ public class TypeAnchorReference extends TypeReference {
 			}
 			if (anchorBinding != null)
 				break;
-			scope = scope.parent;
+			currentScope = currentScope.parent;
 		}
 		return checkAnchor(scope, this.anchor, token, start, end, anchorBinding);
 	}

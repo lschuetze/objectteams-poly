@@ -1071,19 +1071,20 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	public static void copySyntheticRoleFieldsAndMethods(TypeDeclaration roleType) {
 		ReferenceBinding[] tsuperRoleBindings = roleType.getRoleModel().getTSuperRoleBindings();
 		for (int i = 0; i < tsuperRoleBindings.length; i++) {
-			if (tsuperRoleBindings[i] instanceof SourceTypeBinding) {
+			TypeBinding tsuperRoleBinding = tsuperRoleBindings[i].erasure();
+			if (tsuperRoleBinding instanceof SourceTypeBinding) {
 				// binary types have their synthetic methods already during regular copy inheritance.
 				// TODO (SH): using RoleModel.addSyntheticMethodMapping would still be required for
 				// full robustness, if several synthetic methods would otherwise conflict.
 				SyntheticMethodBinding[] synthMethods =
-					((SourceTypeBinding)tsuperRoleBindings[i]).syntheticMethods();
+					((SourceTypeBinding)tsuperRoleBinding).syntheticMethods();
 				if (synthMethods != null) {
 					for (int j=0; j<synthMethods.length; j++)
 						copySyntheticMethod(synthMethods[j], roleType, roleType.getRoleModel(), roleType.enclosingType);
 				}
 
 				FieldBinding[] synthFields =
-					((SourceTypeBinding)tsuperRoleBindings[i]).syntheticFields();
+					((SourceTypeBinding)tsuperRoleBinding).syntheticFields();
 				if (synthFields != null) {
 					for (int j = 0; j < synthFields.length; j++)
 						roleType.binding.addCopiedSyntheticFied(synthFields[j]);

@@ -118,6 +118,7 @@ public class StandardElementGenerator {
 				_OT_GETTEAM,
 				Binding.NO_PARAMETERS);
 		if (existingMethod != null && existingMethod.isValidBinding()) {
+			// is already covered by inheritance (copy or extends)
 			if (roleType.isInterface() == existingMethod.isAbstract())
 				return null;
 		}

@@ -608,7 +608,8 @@ public class RoleTypeBinding extends DependentTypeBinding
 	        if ((superClass != null) && (superClass.isDirectRole()))
 	        {
 	        	// 1.a: a confined type "as-is": don't instantiate/strengthen
-	        	if (OTNameUtils.isPredefinedConfined(superClass.compoundName))
+	        	if (   OTNameUtils.isPredefinedConfined(superClass.compoundName)
+	        		|| CharOperation.equals(IOTConstants.OTCONFINED, superClass.sourceName))
 	        		return this._superClass = superClass;
 
 	        	// 1.b: instantiate superclass to the current team anchor:
@@ -761,6 +762,7 @@ public class RoleTypeBinding extends DependentTypeBinding
         if (isRoleType(referenceBinding))
         {
         	RoleTypeBinding rightRole = getRoleTypeBinding(referenceBinding);
+        	ReferenceBinding rightTeam = referenceBinding.enclosingType();
 
         	// compare teams:
         	if (!this._teamAnchor.hasSameBestNameAs(rightRole._teamAnchor))
@@ -771,7 +773,7 @@ public class RoleTypeBinding extends DependentTypeBinding
     		// compensate weakened signature:
     		if (rightRole._staticallyKnownTeam != this._staticallyKnownTeam) {
     			if (TeamModel.areTypesCompatible(
-    					rightRole._staticallyKnownTeam,
+    					rightTeam,
 						this._staticallyKnownTeam))
     			{
     				ReferenceBinding leftStrengthened = this._teamAnchor.getMemberTypeOfType(internalName());
@@ -780,7 +782,7 @@ public class RoleTypeBinding extends DependentTypeBinding
     			}
     			else if (TeamModel.areTypesCompatible(
     					this._staticallyKnownTeam,
-    					rightRole._staticallyKnownTeam))
+    					rightTeam))
     			{
     				rightRole = (RoleTypeBinding)this._teamAnchor.getMemberTypeOfType(rightRole.internalName());
 

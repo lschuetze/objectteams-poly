@@ -533,7 +533,7 @@ private TypeBinding resolveAsRoleCreationExpression(ReferenceBinding typeBinding
 		ReferenceBinding targetEnclosing = roleClass != null
 											? roleClass.enclosingType()
 											: roleModel.getTeamModel().getBinding();
-		while (enclosingType != null && enclosingType != targetEnclosing) {
+		while (enclosingType != null && enclosingType.original() != targetEnclosing) {
 			enclosingType = enclosingType.enclosingType();
 		}
 		if (enclosingType == null) {

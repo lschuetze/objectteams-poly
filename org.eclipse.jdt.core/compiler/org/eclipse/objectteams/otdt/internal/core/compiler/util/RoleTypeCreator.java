@@ -115,10 +115,7 @@ public class RoleTypeCreator implements TagBits {
 
 			// yes, we have a modification
 			LookupEnvironment environment = ((ParameterizedTypeBinding)type).environment;
-			TypeBinding newType = new ParameterizedTypeBinding((ReferenceBinding)type.erasure(),
-															   arguments,
-															   type.enclosingType(),
-															   environment);
+			TypeBinding newType = environment.createParameterizedType((ReferenceBinding) type.erasure(), arguments, type.enclosingType()); 
 			if (dimensions == 0)
 				return newType;
 			else
@@ -959,10 +956,14 @@ public class RoleTypeCreator implements TagBits {
 	            else if (anchorExpr instanceof MessageSend)
 	            {
 	            	TypeBinding receiverLeaf = ((MessageSend)anchorExpr).actualReceiverType.leafComponentType();
-	            	if (RoleTypeBinding.isRoleWithExplicitAnchor(receiverLeaf))
+	            	if (RoleTypeBinding.isRoleWithExplicitAnchor(receiverLeaf)) {
 	            		anchorBinding = ((RoleTypeBinding)receiverLeaf)._teamAnchor;
-	            	else
+	            	} else {
+	            		// regression fix during work on https://bugs.eclipse.org/331877
+	            		if (RoleTypeBinding.isRoleType(anchorExpr.resolvedType))
+	            			return ((DependentTypeBinding)anchorExpr.resolvedType)._teamAnchor;
 	            		return cannotWrapType(roleType, problemReporter, typedNode);
+	            	}
 	            }
 	            else if (anchorExpr instanceof AllocationExpression) 
 	            {

@@ -868,8 +868,25 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#methods()
 	 */
 	public MethodBinding[] methods() {
+//{ObjectTeams: need to check whether 'type' got any methods added since last call:
+/* orig:
 		if ((this.tagBits & TagBits.AreMethodsComplete) != 0)
 			return this.methods;
+  :giro */
+		if ((this.tagBits & TagBits.AreMethodsComplete) != 0) {
+			MethodBinding[] originalMethods = this.type.methods();
+			if (originalMethods.length == this.methods.length)
+				return this.methods;
+			MethodBinding[] newMethods = new MethodBinding[originalMethods.length];
+			for (int i=0, j=0; i < originalMethods.length; i++) {
+				if (this.methods[j].original() == originalMethods[i])
+					newMethods[i] = this.methods[j++];
+				else
+					newMethods[i] = createParameterizedMethod(originalMethods[i]);				
+			}
+			return this.methods = newMethods;
+		}
+// SH}
 
 		try {
 		    MethodBinding[] originalMethods = this.type.methods();

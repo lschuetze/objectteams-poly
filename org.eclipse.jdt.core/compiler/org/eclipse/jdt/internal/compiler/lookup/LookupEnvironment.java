@@ -996,7 +996,10 @@ public ParameterizedMethodBinding createGetClassMethod(TypeBinding receiverType,
 
 public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType) {
 //{ObjectTeams: new overload: support team anchors, too:
-	return createParameterizedType(genericType, typeArguments, null, -1, enclosingType);
+	ITeamAnchor anchor = null;
+	if (DependentTypeBinding.isDependentType(genericType))
+		anchor = ((DependentTypeBinding)genericType)._teamAnchor;
+	return createParameterizedType(genericType, typeArguments, anchor, -1, enclosingType);
 }
 public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType) {
 	if (teamAnchor != null)

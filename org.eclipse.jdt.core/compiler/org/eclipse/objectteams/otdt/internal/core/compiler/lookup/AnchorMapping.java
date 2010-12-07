@@ -233,11 +233,11 @@ public class AnchorMapping {
 	   } else if (paramDependentType._teamAnchor instanceof TThisBinding)
 	   {
 	       // anchored to TThis (must be a real role):
-		   RoleTypeBinding paramRoleType = (RoleTypeBinding)
+		   DependentTypeBinding paramRoleType = (DependentTypeBinding)
 		   			(paramDependentType instanceof WeakenedTypeBinding
 		   			 ? paramDependentType.type
 		   			 : paramDependentType);
-	       ReferenceBinding tthisType = paramRoleType._staticallyKnownTeam;
+	       ReferenceBinding tthisType = paramRoleType.enclosingType();
 	       ReferenceBinding site = scope != null ? scope.enclosingSourceType() : null;
 	       ReferenceBinding roleRef = paramRoleType.getRealType();
 	       // try to get anchor from _receiver:

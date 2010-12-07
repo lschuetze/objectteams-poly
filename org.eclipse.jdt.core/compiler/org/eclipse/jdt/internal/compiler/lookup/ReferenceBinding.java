@@ -1518,6 +1518,9 @@ public final boolean isPublic() {
  * Answer true if the receiver is a static member type (or toplevel)
  */
 public final boolean isStatic() {
+//{ObjectTeams: roles, even their interface part, are not static:
+	if ((this.modifiers & ExtraCompilerModifiers.AccRole) != 0) return false;
+// SH}
 	return (this.modifiers & (ClassFileConstants.AccStatic | ClassFileConstants.AccInterface)) != 0 || (this.tagBits & TagBits.IsNestedType) == 0;
 }
 

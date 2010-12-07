@@ -568,12 +568,13 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 		char[] prefix = TypeConstants.SYNTHETIC_ENCLOSING_INSTANCE_PREFIX;
 		if (CharOperation.prefixEquals(prefix, name))
 		{
-			if (clazz instanceof NestedTypeBinding)
+			TypeBinding original = clazz.original();
+			if (original instanceof NestedTypeBinding)
 			{
-		        if(   clazz.isMemberType()
-		           || clazz.isLocalType())
+		        if(   original.isMemberType()
+		           || original.isLocalType())
 		        {
-                    NestedTypeBinding ntb = (NestedTypeBinding)clazz;
+                    NestedTypeBinding ntb = (NestedTypeBinding)original;
                     SyntheticArgumentBinding[] sab = ntb.syntheticEnclosingInstances();
                     for (int i=0; i<sab.length; i++) {
                         if (CharOperation.equals(name, sab[i].name))

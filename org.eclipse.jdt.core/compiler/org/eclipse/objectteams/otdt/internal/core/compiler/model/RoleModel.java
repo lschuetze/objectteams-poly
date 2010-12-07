@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
@@ -404,7 +405,7 @@ public class RoleModel extends TypeModel
     {
     	if (getByteCode() == null)
     		return -1;
-        Integer offset = this._methodByteCodeOffsets.get(method);
+        Integer offset = this._methodByteCodeOffsets.get(method.original());
         if (offset == null)
         {
             if(!method.bytecodeMissing)
@@ -1038,6 +1039,13 @@ public class RoleModel extends TypeModel
      */
     public void connect(TeamModel teamModel, ReferenceBinding tsuperRole) {
         setTeamModel(teamModel);
+        ReferenceBinding superTeamBinding = teamModel.getBinding().superclass();
+        if (superTeamBinding instanceof ParameterizedTypeBinding && !(tsuperRole instanceof ParameterizedTypeBinding)) {
+        	LookupEnvironment env = Config.getLookupEnvironment();
+        	if (env != null) {
+        		tsuperRole = env.createParameterizedType(tsuperRole, null, superTeamBinding);
+        	}
+        }
         boolean tsuperAlreadyPresent = false;
         for (int i = 0; i < this.numTSuperRoles; i++) {
 			if (this._tsuperRoleBindings[i] == tsuperRole) {
