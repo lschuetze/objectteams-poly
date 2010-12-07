@@ -1274,4 +1274,37 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     		},
     		"caught");
     }
+    // witness for a regression : Method has no byte code: private java.lang.String test(java.lang.String)
+    // 						      thrown from RoleModel.getByteCodeOffset(MethodBinding)
+    public void test0c16_implicitInheritanceRegression1() {
+    	runNegativeTest(
+    		new String[] {
+    	"Team0c16iir1_2.java",
+				"public team class Team0c16iir1_2 extends Team0c16iir1_1<String> {\n" +
+				"   @Override\n" +
+				"	public class R playedBy T0c16iir1 {\n" +
+				"		 test <- before test;\n" +
+				"   }\n" +
+				"}\n",
+    	"Team0c16iir1_1.java",
+    			"public team class Team0c16iir1_1<U> {\n" +
+    			"	public class R {\n" +
+				"        private String test(String u) {\n" +
+				"            return \"O\"+base.test(u);\n" +
+				"        }\n" +
+    			"   }\n" +
+    			"}\n",
+    	"T0c16iir1.java",
+    			"public class T0c16iir1 {\n" +
+    			"   protected String test(String u){ return u;}" +
+    			"}\n"
+    		},
+    		"----------\n" + 
+    		"1. ERROR in Team0c16iir1_1.java (at line 4)\n" + 
+			"	return \"O\"+base.test(u);\n" + 
+			"	           ^^^^^^^^^^^^\n" + 
+			"Cannot use \'base\' in the regular method \'test(java.lang.String)\' (OTJLD 2.6(c)).\n" + 
+			"----------\n");
+    }
+
 }
