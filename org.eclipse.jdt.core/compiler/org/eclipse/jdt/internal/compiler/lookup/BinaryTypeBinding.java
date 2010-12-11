@@ -267,7 +267,12 @@ public BinaryTypeBinding(PackageBinding packageBinding, IBinaryType binaryType, 
 	this.fPackage = packageBinding;
 	this.fileName = binaryType.getFileName();
 
-	char[] typeSignature = environment.globalOptions.originalSourceLevel >= ClassFileConstants.JDK1_5 ? binaryType.getGenericSignature() : null;
+	/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850, even in a 1.4 project, we
+	   must internalize type variables and observe any parameterization of super class
+	   and/or super interfaces in order to be able to detect overriding in the presence
+	   of generics.
+	 */
+	char[] typeSignature = binaryType.getGenericSignature();
 	this.typeVariables = typeSignature != null && typeSignature.length > 0 && typeSignature[0] == '<'
 		? null // is initialized in cachePartsFrom (called from LookupEnvironment.createBinaryTypeFrom())... must set to null so isGenericType() answers true
 		: Binding.NO_TYPE_VARIABLES;
@@ -419,11 +424,14 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 		}
 
 		long sourceLevel = this.environment.globalOptions.originalSourceLevel;
-		char[] typeSignature = null;
-		if (sourceLevel >= ClassFileConstants.JDK1_5) {
-			typeSignature = binaryType.getGenericSignature();
-			this.tagBits |= binaryType.getTagBits();
-		}
+		/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850, even in a 1.4 project, we
+		   must internalize type variables and observe any parameterization of super class
+		   and/or super interfaces in order to be able to detect overriding in the presence
+		   of generics.
+		 */
+		char[] typeSignature = binaryType.getGenericSignature(); // use generic signature even in 1.4
+		this.tagBits |= binaryType.getTagBits();
+		
 		char[][][] missingTypeNames = binaryType.getMissingTypeNames();
 		if (typeSignature == null) {
 //{ObjectTeams: predefined confined types require special treatment
@@ -642,7 +650,12 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 	TypeBinding returnType = null;
 
 	final boolean use15specifics = sourceLevel >= ClassFileConstants.JDK1_5;
-	char[] methodSignature = use15specifics ? method.getGenericSignature() : null;
+	/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850, Since a 1.4 project can have a 1.5
+	   type as a super type and the 1.5 type could be generic, we must internalize usages of type
+	   variables properly in order to be able to apply substitutions and thus be able to detect
+	   overriding in the presence of generics. Seeing the erased form is not good enough.
+	 */
+	char[] methodSignature = method.getGenericSignature(); // always use generic signature, even in 1.4
 	if (methodSignature == null) { // no generics
 		char[] methodDescriptor = method.getMethodDescriptor();   // of the form (I[Ljava/jang/String;)V
 		int numOfParams = 0;
@@ -718,7 +731,7 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 	} else {
 		methodModifiers |= ExtraCompilerModifiers.AccGenericSignature;
 		// MethodTypeSignature = ParameterPart(optional) '(' TypeSignatures ')' return_typeSignature ['^' TypeSignature (optional)]
-		SignatureWrapper wrapper = new SignatureWrapper(methodSignature);
+		SignatureWrapper wrapper = new SignatureWrapper(methodSignature, use15specifics);
 		if (wrapper.signature[wrapper.start] == '<') {
 			// <A::Ljava/lang/annotation/Annotation;>(Ljava/lang/Class<TA;>;)TA;
 			// ParameterPart = '<' ParameterSignature(s) '>'
@@ -852,8 +865,7 @@ private void createMethods(IBinaryMethod[] iMethods, long sourceLevel, char[][][
 	int[] toSkip = null;
 	if (iMethods != null) {
 		total = initialTotal = iMethods.length;
-		boolean keepBridgeMethods = sourceLevel < ClassFileConstants.JDK1_5
-			&& this.environment.globalOptions.originalComplianceLevel >= ClassFileConstants.JDK1_5;
+		boolean keepBridgeMethods = sourceLevel < ClassFileConstants.JDK1_5; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=330347
 		for (int i = total; --i >= 0;) {
 			IBinaryMethod method = iMethods[i];
 			if ((method.getModifiers() & ClassFileConstants.AccSynthetic) != 0) {
@@ -1355,6 +1367,14 @@ public boolean isEquivalentTo(TypeBinding otherType) {
 		case Binding.WILDCARD_TYPE :
 		case Binding.INTERSECTION_TYPE :
 			return ((WildcardBinding) otherType).boundCheck(this);
+		case Binding.PARAMETERIZED_TYPE:
+		/* With the hybrid 1.4/1.5+ projects modes, while establishing type equivalence, we need to
+	       be prepared for a type such as Map appearing in one of three forms: As (a) a ParameterizedTypeBinding 
+	       e.g Map<String, String>, (b) as RawTypeBinding Map#RAW and finally (c) as a BinaryTypeBinding 
+	       When the usage of a type lacks type parameters, whether we land up with the raw form or not depends
+	       on whether the underlying type was "seen to be" a generic type in the particular build environment or
+	       not. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=186565 && https://bugs.eclipse.org/bugs/show_bug.cgi?id=328827 
+		*/ 
 		case Binding.RAW_TYPE :
 			return otherType.erasure() == this;
 	}

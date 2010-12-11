@@ -28,10 +28,12 @@ import org.eclipse.jdt.internal.core.util.Util;
 /* package */ class BinaryMethod extends BinaryMember implements IMethod {
 	/**
 	 * The parameter type signatures of the method - stored locally
-	 * to perform equality test. <code>null</code> indicates no
+	 * to perform equality test. <code>CharOperation.NO_STRINGS</code> indicates no
 	 * parameters.
 	 */
 	protected String[] parameterTypes;
+	protected String [] erasedParamaterTypes; // lazily initialized via call to getErasedParameterTypes
+	
 	/**
 	 * The parameter names for the method.
 	 */
@@ -52,7 +54,7 @@ protected BinaryMethod(JavaElement parent, String name, String[] paramTypes) {
 }
 public boolean equals(Object o) {
 	if (!(o instanceof BinaryMethod)) return false;
-	return super.equals(o) && Util.equalArraysOrNull(this.parameterTypes, ((BinaryMethod)o).parameterTypes);
+	return super.equals(o) && Util.equalArraysOrNull(getErasedParameterTypes(), ((BinaryMethod)o).getErasedParameterTypes());
 }
 public IAnnotation[] getAnnotations() throws JavaModelException {
 	IBinaryMethod info = (IBinaryMethod) getElementInfo();
@@ -220,8 +222,8 @@ public String[] getParameterNames() throws JavaModelException {
 				// ignore
 			}
 			if (timeOut == 0) {
-				// don't try to fetch the values
-				return this.parameterNames = getRawParameterNames(paramCount);
+				// don't try to fetch the values and don't cache either (https://bugs.eclipse.org/bugs/show_bug.cgi?id=329671)
+				return getRawParameterNames(paramCount);
 			}
 			final class ParametersNameCollector {
 				String javadoc;
@@ -302,8 +304,8 @@ public String[] getParameterNames() throws JavaModelException {
 			return this.parameterNames = names;
 		}
 	}
-	// if still no parameter names, produce fake ones
-	return this.parameterNames = getRawParameterNames(paramCount);
+	// If still no parameter names, produce fake ones, but don't cache them (https://bugs.eclipse.org/bugs/show_bug.cgi?id=329671)
+	return getRawParameterNames(paramCount);
 }
 private char[][] splitParameters(char[] parametersSource, int paramCount) {
 	// we have generic types as one of the parameter types
@@ -370,6 +372,25 @@ private char[][] splitParameters(char[] parametersSource, int paramCount) {
  */
 public String[] getParameterTypes() {
 	return this.parameterTypes;
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=299384
+private String [] getErasedParameterTypes() {
+	if (this.erasedParamaterTypes == null) {
+		int paramCount = this.parameterTypes.length;
+		String [] erasedTypes = new String [paramCount];
+		boolean erasureNeeded = false;
+		for (int i = 0; i < paramCount; i++) {
+			String parameterType = this.parameterTypes[i];
+			if ((erasedTypes[i] = Signature.getTypeErasure(parameterType)) != parameterType)
+				erasureNeeded = true;
+		}
+		this.erasedParamaterTypes = erasureNeeded ? erasedTypes : this.parameterTypes;
+	}
+	return this.erasedParamaterTypes;
+}
+private String getErasedParameterType(int index) {
+	return getErasedParameterTypes()[index];
 }
 
 public ITypeParameter getTypeParameter(String typeParameterName) {
@@ -446,7 +467,7 @@ public String getSignature() throws JavaModelException {
 public int hashCode() {
    int hash = super.hashCode();
 	for (int i = 0, length = this.parameterTypes.length; i < length; i++) {
-	    hash = Util.combineHashCodes(hash, this.parameterTypes[i].hashCode());
+	    hash = Util.combineHashCodes(hash, getErasedParameterType(i).hashCode());
 	}
 	return hash;
 }

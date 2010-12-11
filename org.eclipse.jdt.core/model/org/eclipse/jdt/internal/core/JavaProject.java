@@ -1214,12 +1214,10 @@ public class JavaProject
 			IClasspathEntry[] classpath = getRawClasspath();
 			for (int i = 0, length = classpath.length; i < length; i++) {
 				if (classpath[i].equals(entry)) { // entry may need to be resolved
-					// https://bugs.eclipse.org/bugs/show_bug.cgi?id=324367
-					// consider referred projects as per API- IJavaProject#findPackageFragmentRoots
 					return
 						computePackageFragmentRoots(
 							resolveClasspath(new IClasspathEntry[] {entry}),
-							true,
+							false, // don't retrieve exported roots
 							null); /*no reverse map*/
 				}
 			}
@@ -1786,7 +1784,7 @@ public class JavaProject
 		if (resource == null) {
 			// resource doesn't exist in workspace
 			if (path.getFileExtension() != null) {
-				if (!workspaceRoot.getProject(path.lastSegment()).exists()) {
+				if (!workspaceRoot.getProject(path.segment(0)).exists()) {
 					// assume it is an external ZIP archive
 					return getPackageFragmentRoot0(path);
 				} else {

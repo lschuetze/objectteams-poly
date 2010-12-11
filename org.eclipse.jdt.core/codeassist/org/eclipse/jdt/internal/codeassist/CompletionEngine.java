@@ -6197,10 +6197,23 @@ public final class CompletionEngine
 		for (int f = fields.length; --f >=0;) {
 			FieldBinding field = fields[f];
 			FieldDeclaration fieldDeclaration = field.sourceField();
-			if (fieldDeclaration != null && fieldDeclaration.initialization != null) {
-				// We're asking for a proposal inside this field's initialization. So record its id
-				fieldBeingCompletedId = field.id;
-				break;
+			// We maybe asking for a proposal inside this field's initialization. So record its id
+			ASTNode astNode = this.parser.assistNode;
+			if (fieldDeclaration != null && fieldDeclaration.initialization != null && astNode != null) {
+				if (fieldDeclaration.initialization.sourceEnd > 0) {
+					if (fieldDeclaration.initialization.sourceStart <= astNode.sourceStart &&
+						astNode.sourceEnd <= fieldDeclaration.initialization.sourceEnd) {
+						// completion is inside a field initializer
+						fieldBeingCompletedId = field.id;
+						break;
+					}
+				} else { // The sourceEnd may not yet be set
+					CompletionNodeDetector detector = new CompletionNodeDetector(astNode, fieldDeclaration.initialization);
+					if (detector.containsCompletionNode()) {  // completion is inside a field initializer
+						fieldBeingCompletedId = field.id;
+						break;
+					}
+				}
 			}
 		}
 		// Inherited fields which are hidden by subclasses are filtered out
@@ -12159,6 +12172,12 @@ public final class CompletionEngine
 // carp}
 							if (local.isSecret())
 								continue next;
+							
+							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=328674
+							if (local.declaration.initialization != null) {
+								// proposal being asked inside field's initialization. Don't propose this field.
+								continue next;
+							}
 												
 							// don't propose array types in case expression
 							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=195346

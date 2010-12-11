@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.compiler.lookup;
 
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -116,7 +117,13 @@ boolean areReturnTypesCompatible(MethodBinding one, MethodBinding two) {
 	if (areEqualRoleTypes(one.returnType, two.returnType, two.declaringClass, this.environment))
 		return true;
 // SH}
-	return areReturnTypesCompatible0(one, two);
+	if (this.type.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
+		return areReturnTypesCompatible0(one, two);
+	} else {
+//{ObjectTeams: added 3. parameter:
+		return areTypesEqual(one.returnType.erasure(), two.returnType.erasure(), two);
+// SH}
+	}
 }
 //{ObjectTeams: enable role type comparison
 //added 3. parameter:
@@ -126,6 +133,24 @@ boolean areTypesEqual(TypeBinding one, TypeBinding two, MethodBinding methodTwo)
 	if (areEqualRoleTypes(one, two, methodTwo.declaringClass, this.environment))
 		return true;
 // SH}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=329584
+	switch(one.kind()) {
+		case Binding.TYPE:
+			switch (two.kind()) {
+				case Binding.PARAMETERIZED_TYPE:
+				case Binding.RAW_TYPE:
+					if (one == two.erasure())
+						return true;
+			}
+			break;
+		case Binding.RAW_TYPE:
+		case Binding.PARAMETERIZED_TYPE:
+			switch(two.kind()) {
+				case Binding.TYPE:
+					if (one.erasure() == two)
+						return true;
+			}
+	}
 
 	// need to consider X<?> and X<? extends Object> as the same 'type'
 	if (one.isParameterizedType() && two.isParameterizedType())
@@ -468,16 +493,16 @@ void checkMethods() {
 				MethodBinding currentMethod = current[i];
 				MethodBinding[] nonMatchingInherited = null;
 //{ObjectTeams:	temporarily change parameters (relevant for enhanced callin methods)
-				try {
-				  currentMethod.switchToSourceParamters();
-				  // don't analyse faked methods, may not have sourceMethod as required, e.g., for error reporting.
-				  if (MethodModel.isFakedMethod(currentMethod))
-					  continue;
+			  try {
+				currentMethod.switchToSourceParamters();
+				// don't analyse faked methods, may not have sourceMethod as required, e.g., for error reporting.
+				if (MethodModel.isFakedMethod(currentMethod))
+				  continue;
 // orig:
 				for (int j = 0; j < inheritedLength; j++) {
    // {second level change: also switch parameters
-					try {
-					  inherited[j].switchToSourceParamters();
+				  try {
+					inherited[j].switchToSourceParamters();
    // orig:
 					MethodBinding inheritedMethod = computeSubstituteMethod(inherited[j], currentMethod);
      //{third level change: conflicting callin<->non-callin are not treated as overriding:
@@ -502,9 +527,9 @@ void checkMethods() {
 						}
 					}
    // :giro
-					} finally {
-						inherited[j].resetParameters();
-					}
+				  } finally {
+					inherited[j].resetParameters();
+				  }
    // SH}
 				}
 				if (index >= 0) {
@@ -515,9 +540,9 @@ void checkMethods() {
 					while (index >= 0) matchingInherited[index--] = null; // clear the contents of the matching methods
 				}
 // :giro
-				} finally {
-					currentMethod.resetParameters();
-				}
+			  } finally {
+				currentMethod.resetParameters();
+			  }
 // SH}
 			}
 		}

@@ -41,9 +41,7 @@ import org.eclipse.jdt.internal.compiler.ast.*;
 // redundant, for documentation ;-)
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.Initializer;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
-
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.*;
@@ -320,26 +318,27 @@ public class SourceTypeConverter extends TypeConverter {
 		int start = methodInfo.getNameSourceStart();
 		int end = methodInfo.getNameSourceEnd();
 
-		// convert 1.5 specific constructs only if compliance is 1.5 or above
+		/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850, Even when this type is being constructed
+		   on behalf of a 1.4 project we must internalize type variables properly in order to be able to
+		   recognize usages of them in the method signature, to apply substitutions and thus to be able to
+		   detect overriding in the presence of generics. If we simply drop them, when the method signature
+		   refers to the type parameter, we won't know it should be bound to the type parameter and perform
+		   incorrect lookup and may mistakenly end up with missing types
+		 */
 		TypeParameter[] typeParams = null;
-		// Digest type parameters if compliance level of current project or its prerequisite is >= 1.5
-		// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=323633 && https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
-		if (this.has1_5Compliance || this.problemReporter.options.complianceLevel >= ClassFileConstants.JDK1_5) {
-			/* convert type parameters */
-			char[][] typeParameterNames = methodInfo.getTypeParameterNames();
-			if (typeParameterNames != null) {
-				int parameterCount = typeParameterNames.length;
-				if (parameterCount > 0) { // method's type parameters must be null if no type parameter
-					char[][][] typeParameterBounds = methodInfo.getTypeParameterBounds();
-					typeParams = new TypeParameter[parameterCount];
-					for (int i = 0; i < parameterCount; i++) {
+		char[][] typeParameterNames = methodInfo.getTypeParameterNames();
+		if (typeParameterNames != null) {
+			int parameterCount = typeParameterNames.length;
+			if (parameterCount > 0) { // method's type parameters must be null if no type parameter
+				char[][][] typeParameterBounds = methodInfo.getTypeParameterBounds();
+				typeParams = new TypeParameter[parameterCount];
+				for (int i = 0; i < parameterCount; i++) {
 //{ObjectTeams: parameter baseBound (false) added:
 /* orig:
-						typeParams[i] = createTypeParameter(typeParameterNames[i], typeParameterBounds[i], start, end);
+					typeParams[i] = createTypeParameter(typeParameterNames[i], typeParameterBounds[i], start, end);
   :giro */
-						typeParams[i] = createTypeParameter(typeParameterNames[i], typeParameterBounds[i], methodInfo.hasBaseBoundAt(i), start, end);
+					typeParams[i] = createTypeParameter(typeParameterNames[i], typeParameterBounds[i], methodInfo.hasBaseBoundAt(i), start, end);
 // SH}
-					}
 				}
 			}
 		}
@@ -516,32 +515,32 @@ public class SourceTypeConverter extends TypeConverter {
 			/* convert annotations */
 			type.annotations = convertAnnotations(typeHandle);
 		}
-		// Digest type parameters if compliance level of current project or its prerequisite is >= 1.5
-		// See https://bugs.eclipse.org/bugs/show_bug.cgi?id=323633 && https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
-		if (this.has1_5Compliance || this.problemReporter.options.complianceLevel >= ClassFileConstants.JDK1_5) {
-			/* convert type parameters */
-			char[][] typeParameterNames = typeInfo.getTypeParameterNames();
-			if (typeParameterNames.length > 0) {
-				int parameterCount = typeParameterNames.length;
-				char[][][] typeParameterBounds = typeInfo.getTypeParameterBounds();
-				type.typeParameters = new TypeParameter[parameterCount];
-				for (int i = 0; i < parameterCount; i++) {
+		/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850, even in a 1.4 project, we
+		   must internalize type variables and observe any parameterization of super class
+		   and/or super interfaces in order to be able to detect overriding in the presence
+		   of generics.
+		 */
+		char[][] typeParameterNames = typeInfo.getTypeParameterNames();
+		if (typeParameterNames.length > 0) {
+			int parameterCount = typeParameterNames.length;
+			char[][][] typeParameterBounds = typeInfo.getTypeParameterBounds();
+			type.typeParameters = new TypeParameter[parameterCount];
+			for (int i = 0; i < parameterCount; i++) {
 //{ObjectTeams: value parameter / <B base R> (false) ?
-				  if (typeInfo.isValueParameterAt(i))
-					type.typeParameters[i] = createValueParameter(typeParameterNames[i], typeParameterBounds[i][0], start, end);
-				  else
-					  type.typeParameters[i] = createTypeParameter(typeParameterNames[i], typeParameterBounds[i], false, start, end);
+			  if (typeInfo.isValueParameterAt(i))
+				type.typeParameters[i] = createValueParameter(typeParameterNames[i], typeParameterBounds[i][0], start, end);
+			  else
+				type.typeParameters[i] = createTypeParameter(typeParameterNames[i], typeParameterBounds[i], false, start, end);
 /* orig:
-					  type.typeParameters[i] = createTypeParameter(typeParameterNames[i], typeParameterBounds[i], start, end);
+				type.typeParameters[i] = createTypeParameter(typeParameterNames[i], typeParameterBounds[i], start, end);
   :giro */
 // SH}
-				}
 			}
 		}
 
 		/* set superclass and superinterfaces */
 		if (typeInfo.getSuperclassName() != null) {
-			type.superclass = createTypeReference(typeInfo.getSuperclassName(), start, end);
+			type.superclass = createTypeReference(typeInfo.getSuperclassName(), start, end, true /* include generics */);
 			type.superclass.bits |= ASTNode.IsSuperType;
 		}
 		char[][] interfaceNames = typeInfo.getInterfaceNames();
@@ -549,7 +548,7 @@ public class SourceTypeConverter extends TypeConverter {
 		if (interfaceCount > 0) {
 			type.superInterfaces = new TypeReference[interfaceCount];
 			for (int i = 0; i < interfaceCount; i++) {
-				type.superInterfaces[i] = createTypeReference(interfaceNames[i], start, end);
+				type.superInterfaces[i] = createTypeReference(interfaceNames[i], start, end, true /* include generics */);
 				type.superInterfaces[i].bits |= ASTNode.IsSuperType;
 			}
 		}

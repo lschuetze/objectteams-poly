@@ -2076,6 +2076,7 @@ public void finalMethodCannotBeOverridden(MethodBinding currentMethod, MethodBin
 		currentMethod.sourceEnd());
 }
 public void finalVariableBound(TypeVariableBinding typeVariable, TypeReference typeRef) {
+	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return;
 	int severity = computeSeverity(IProblem.FinalBoundForTypeVariable);
 	if (severity == ProblemSeverities.Ignore) return;
 	this.handle(
@@ -7243,6 +7244,12 @@ public void typeHiding(TypeParameter typeParam, Binding hidden) {
 		typeParam.sourceEnd);
 }
 public void typeMismatchError(TypeBinding actualType, TypeBinding expectedType, ASTNode location, ASTNode expectingLocation) {
+	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) { // don't expose type variable names, complain on erased types
+		if (actualType instanceof TypeVariableBinding)
+			actualType = actualType.erasure();
+		if (expectedType instanceof TypeVariableBinding)
+			expectedType = expectedType.erasure();
+	}
 	if (actualType != null && (actualType.tagBits & TagBits.HasMissingType) != 0) { // improve secondary error
 		this.handle(
 				IProblem.UndefinedType,
@@ -7774,6 +7781,9 @@ public void unsafeRawInvocation(ASTNode location, MethodBinding rawMethod) {
     }
 }
 public void unsafeReturnTypeOverride(MethodBinding currentMethod, MethodBinding inheritedMethod, SourceTypeBinding type) {
+	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) {
+		return;
+	}
 	int severity = computeSeverity(IProblem.UnsafeReturnTypeOverride);
 	if (severity == ProblemSeverities.Ignore) return;
 	int start = type.sourceStart();

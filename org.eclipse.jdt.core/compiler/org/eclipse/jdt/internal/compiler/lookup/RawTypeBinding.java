@@ -126,7 +126,7 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 	}
 
     public boolean isEquivalentTo(TypeBinding otherType) {
-		if (this == otherType)
+		if (this == otherType || erasure() == otherType)
 		    return true;
 	    if (otherType == null)
 	        return false;
@@ -145,7 +145,7 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 	}
 
     public boolean isProvablyDistinct(TypeBinding otherType) {
-		if (this == otherType)
+		if (this == otherType || erasure() == otherType) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=329588
 		    return false;
 	    if (otherType == null)
 	        return true;

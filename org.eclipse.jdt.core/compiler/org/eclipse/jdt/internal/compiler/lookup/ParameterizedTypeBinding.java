@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2010 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -821,7 +821,17 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	    	case Binding.RAW_TYPE :
 	            return erasure() == otherType.erasure();
 	    }
-        return false;
+	    /* With the hybrid 1.4/1.5+ projects modes, while establishing type equivalence, we need to
+	       be prepared for a type such as Map appearing in one of three forms: As (a) a ParameterizedTypeBinding 
+	       e.g Map<String, String>, (b) as RawTypeBinding Map#RAW and finally (c) as a BinaryTypeBinding 
+	       When the usage of a type lacks type parameters, whether we land up with the raw form or not depends
+	       on whether the underlying type was "seen to be" a generic type in the particular build environment or
+	       not. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=328827 
+	     */
+	    if (erasure() == otherType) {
+	    	return true;
+	    }
+	    return false;
 	}
 
 	public boolean isHierarchyConnected() {
@@ -1019,17 +1029,28 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 				this.arguments[i] = resolveType;
 				this.tagBits |= resolvedType.tagBits & TagBits.ContainsNestedTypeReferences;
 			}
-			// arity check
-			TypeVariableBinding[] refTypeVariables = resolvedType.typeVariables();
-			if (refTypeVariables == Binding.NO_TYPE_VARIABLES) { // check generic
-				if ((resolvedType.tagBits & TagBits.HasMissingType) == 0) {
-					this.environment.problemReporter.nonGenericTypeCannotBeParameterized(0, null, resolvedType, this.arguments);
-				}
-				return this;
-			} else if (argLength != refTypeVariables.length) { // check arity
-				this.environment.problemReporter.incorrectArityForParameterizedType(null, resolvedType, this.arguments);
-				return this; // cannot reach here as AbortCompilation is thrown
-			}
+			/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=186565, Removed generic check
+			   and arity check since we are dealing with binary types here and the fact that
+			   the compiler produced class files for these types at all is proof positive that
+			   the generic check and the arity check passed in the build environment that produced
+			   these class files. Otherwise we don't handle mixed 1.5 and 1.4 projects correctly.
+			   Just as with bounds check below, incremental build will propagate the change and
+			   detect problems in source.
+			 */
+			
+//			// arity check
+//			TypeVariableBinding[] refTypeVariables = resolvedType.typeVariables();
+//			if (refTypeVariables == Binding.NO_TYPE_VARIABLES) { // check generic
+//				// Below 1.5, we should have already complained about the use of type parameters.
+//				boolean isCompliant15 = this.environment.globalOptions.originalSourceLevel >= ClassFileConstants.JDK1_5;
+//				if (isCompliant15 && (resolvedType.tagBits & TagBits.HasMissingType) == 0) {
+//					this.environment.problemReporter.nonGenericTypeCannotBeParameterized(0, null, resolvedType, this.arguments);
+//				}
+//				return this;
+//			} else if (argLength != refTypeVariables.length) { // check arity
+//				this.environment.problemReporter.incorrectArityForParameterizedType(null, resolvedType, this.arguments);
+//				return this; // cannot reach here as AbortCompilation is thrown
+//			}
 			// check argument type compatibility... REMOVED for now since incremental build will propagate change & detect in source
 //			for (int i = 0; i < argLength; i++) {
 //			    TypeBinding resolvedArgument = this.arguments[i];

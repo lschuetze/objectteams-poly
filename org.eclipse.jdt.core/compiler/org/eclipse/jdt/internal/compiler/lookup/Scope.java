@@ -577,7 +577,7 @@ public abstract class Scope {
 	/**
 	 * Internal use only
 	 * Given a method, returns null if arguments cannot be converted to parameters.
-	 * Will answer a subsituted method in case the method was generic and type inference got triggered;
+	 * Will answer a substituted method in case the method was generic and type inference got triggered;
 	 * in case the method was originally compatible, then simply answer it back.
 	 */
 	protected final MethodBinding computeCompatibleMethod(MethodBinding method, TypeBinding[] arguments, InvocationSite invocationSite) {
@@ -597,7 +597,8 @@ public abstract class Scope {
 			if (!isVarArgs || argLength < paramLength - 1)
 				return null; // incompatible
 
-		if (typeVariables != Binding.NO_TYPE_VARIABLES) { // generic method
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=330435, inference should kick in only at source 1.5+
+		if (typeVariables != Binding.NO_TYPE_VARIABLES && compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) { // generic method
 			TypeBinding[] newArgs = null;
 			for (int i = 0; i < argLength; i++) {
 				TypeBinding param = i < paramLength ? parameters[i] : parameters[paramLength - 1];
@@ -804,8 +805,8 @@ public abstract class Scope {
 	}
 
 	public TypeVariableBinding[] createTypeVariables(TypeParameter[] typeParameters, Binding declaringElement) {
-		// do not construct type variables if source < 1.5
-		if (typeParameters == null || compilerOptions().sourceLevel < ClassFileConstants.JDK1_5)
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850, If they exist at all, process type parameters irrespective of source level.
+		if (typeParameters == null || typeParameters.length == 0)
 			return Binding.NO_TYPE_VARIABLES;
 
 		PackageBinding unitPackage = compilationUnitScope().fPackage;
@@ -3229,13 +3230,21 @@ public abstract class Scope {
 		int oneParamsLength = oneParams.length;
 		int twoParamsLength = twoParams.length;
 		if (oneParamsLength == twoParamsLength) {
+			/* Below 1.5, discard any generics we have left in for the method verifier's benefit, (so it
+			   can detect method overriding properly in the presence of generic super types.) This is so
+			   as to allow us to determine whether we have been handed an acceptable method in 1.4 terms
+			   without all the 1.5isms below kicking in and spoiling the party.
+			   See https://bugs.eclipse.org/bugs/show_bug.cgi?id=331446
+			*/
+			boolean applyErasure =  environment().globalOptions.sourceLevel < ClassFileConstants.JDK1_5;
 			next : for (int i = 0; i < oneParamsLength; i++) {
-				TypeBinding oneParam = oneParams[i];
-				TypeBinding twoParam = twoParams[i];
+				TypeBinding oneParam = applyErasure ? oneParams[i].erasure() : oneParams[i];
+				TypeBinding twoParam = applyErasure ? twoParams[i].erasure() : twoParams[i];
 				if (oneParam == twoParam || oneParam.isCompatibleWith(twoParam)) {
 					if (two.declaringClass.isRawType()) continue next;
 
-					TypeBinding originalTwoParam = two.original().parameters[i].leafComponentType();
+					TypeBinding leafComponentType = two.original().parameters[i].leafComponentType();
+					TypeBinding originalTwoParam = applyErasure ? leafComponentType.erasure() : leafComponentType; 
 					switch (originalTwoParam.kind()) {
 					   	case Binding.TYPE_PARAMETER :
 					   		if (((TypeVariableBinding) originalTwoParam).hasOnlyRawBounds())
@@ -4286,7 +4295,8 @@ public abstract class Scope {
 			for (int i = 0; i < argLength; i++) {
 				TypeBinding param = parameters[i];
 				TypeBinding arg = arguments[i];
-				if (arg != param && !arg.isCompatibleWith(param))
+				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=330445
+				if (arg != param && !arg.isCompatibleWith(param.erasure()))
 					return NOT_COMPATIBLE;
 			}
 //{ObjectTeams: store successful parameters:

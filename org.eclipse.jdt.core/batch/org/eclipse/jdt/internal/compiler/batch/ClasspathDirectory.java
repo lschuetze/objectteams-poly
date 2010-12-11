@@ -206,4 +206,7 @@ public char[] normalizedPath() {
 public String getPath() {
 	return this.path;
 }
+public int getMode() {
+	return this.mode;
+}
 }

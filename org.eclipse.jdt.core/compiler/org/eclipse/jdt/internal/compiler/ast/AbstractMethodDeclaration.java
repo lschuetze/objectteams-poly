@@ -352,49 +352,61 @@ public abstract class AbstractMethodDeclaration
 // SH}
 			return;
 		}
+		boolean restart = false;
+		boolean abort = false;
 		// regular code generation
+		do {
 //{ObjectTeams: callin wrapper for RoFi? -> prepare codeStream for different line ends
-		int[] lineEndsSave = null;
-		if (this.isMappingWrapper == WrapperKind.CALLIN && MethodModel.isCallinForRoFi(this)) {
-			lineEndsSave = classFile.codeStream.lineSeparatorPositions;
-			classFile.codeStream.lineSeparatorPositions = this.compilationResult.getLineSeparatorPositions();
-			// this leverages the fact that a callin wrapper has the compilation result from the role!
-		}
+			int[] lineEndsSave = null;
+			if (this.isMappingWrapper == WrapperKind.CALLIN && MethodModel.isCallinForRoFi(this)) {
+				lineEndsSave = classFile.codeStream.lineSeparatorPositions;
+				classFile.codeStream.lineSeparatorPositions = this.compilationResult.getLineSeparatorPositions();
+				// this leverages the fact that a callin wrapper has the compilation result from the role!
+			}
 // SH}
-		try {
-			problemResetPC = classFile.contentsOffset;
-			this.generateCode(classFile);
-		} catch (AbortMethod e) {
-			// a fatal error was detected during code generation, need to restart code gen if possible
-			if (e.compilationResult == CodeStream.RESTART_IN_WIDE_MODE) {
-				// a branch target required a goto_w, restart code gen in wide mode.
-				try {
+			try {
+				problemResetPC = classFile.contentsOffset;
+				this.generateCode(classFile);
+				restart = false;
+			} catch (AbortMethod e) {
+				// a fatal error was detected during code generation, need to restart code gen if possible
+				if (e.compilationResult == CodeStream.RESTART_IN_WIDE_MODE) {
+					// a branch target required a goto_w, restart code gen in wide mode.
+					if (!restart) {
+						classFile.contentsOffset = problemResetPC;
+						classFile.methodCount--;
+						classFile.codeStream.resetInWideMode(); // request wide mode
+						restart = true;
+					} else {
+						// after restarting in wide mode, code generation failed again
+						// report a problem
+						restart = false;
+						abort = true;
+					}
+				} else if (e.compilationResult == CodeStream.RESTART_CODE_GEN_FOR_UNUSED_LOCALS_MODE) {
 					classFile.contentsOffset = problemResetPC;
 					classFile.methodCount--;
-					classFile.codeStream.resetInWideMode(); // request wide mode
-					this.generateCode(classFile); // restart method generation
-				} catch (AbortMethod e2) {
-					int problemsLength;
-					CategorizedProblem[] problems =
-						this.scope.referenceCompilationUnit().compilationResult.getAllProblems();
-					CategorizedProblem[] problemsCopy = new CategorizedProblem[problemsLength = problems.length];
-					System.arraycopy(problems, 0, problemsCopy, 0, problemsLength);
-					classFile.addProblemMethod(this, this.binding, problemsCopy, problemResetPC);
+					classFile.codeStream.resetForCodeGenUnusedLocals();
+					restart = true;
+				} else {
+					restart = false;
+					abort = true; 
 				}
-			} else {
-				// produce a problem method accounting for this fatal error
-				int problemsLength;
-				CategorizedProblem[] problems =
-					this.scope.referenceCompilationUnit().compilationResult.getAllProblems();
-				CategorizedProblem[] problemsCopy = new CategorizedProblem[problemsLength = problems.length];
-				System.arraycopy(problems, 0, problemsCopy, 0, problemsLength);
-				classFile.addProblemMethod(this, this.binding, problemsCopy, problemResetPC);
-			}
 //{ObjectTeams: resetting from above
-		} finally {
-			if (lineEndsSave != null)
-				classFile.codeStream.lineSeparatorPositions = lineEndsSave;
+			} finally {
+				if (lineEndsSave != null)
+					classFile.codeStream.lineSeparatorPositions = lineEndsSave;
 // SH}
+			}
+		} while (restart);
+		// produce a problem method accounting for this fatal error
+		if (abort) {
+			int problemsLength;
+			CategorizedProblem[] problems =
+				this.scope.referenceCompilationUnit().compilationResult.getAllProblems();
+			CategorizedProblem[] problemsCopy = new CategorizedProblem[problemsLength = problems.length];
+			System.arraycopy(problems, 0, problemsCopy, 0, problemsLength);
+			classFile.addProblemMethod(this, this.binding, problemsCopy, problemResetPC);
 		}
 	}
 
@@ -467,7 +479,7 @@ public abstract class AbstractMethodDeclaration
 // SH}
 			try {
 				classFile.completeCodeAttribute(codeAttributeOffset);
-			} catch (NegativeArraySizeException e) {
+			} catch(NegativeArraySizeException e) {
 				throw new AbortMethod(this.scope.referenceCompilationUnit().compilationResult, null);
 			}
 //{ObjectTeams: record the completed byte code

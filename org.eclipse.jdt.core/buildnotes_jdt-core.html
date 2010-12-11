@@ -40,6 +40,186 @@
 	</td>
   </tr>
 </table>
+<a name="v_B28"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M4 - December 6, 2010 - 3.7.0 M4
+<br>Project org.eclipse.jdt.core v_B28
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B28">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=331872">331872</a>
+[compiler] NPE in Scope.createArrayType when attempting qualified access from type parameter
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=331770">331770</a>
+org.eclipse.jdt.core.tests.model.JavaSearchBugsTests.testBug323514a() is failing in  N20101202-2000
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=331632">331632</a>
+FUP of 323514: Add performance tracking test for scenario
+
+<a name="v_B27"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M4 - December 4, 2010 - 3.7.0 M4
+<br>Project org.eclipse.jdt.core v_B27
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B27">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=324367">324367</a>
+IJavaProject.findPackageFragmentRoots(IClasspathEntry cpe) returns empty list
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=327899">327899</a>
+include the Ant compiler adapter in ecj JAR
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=331446">331446</a>
+[1.4/1.5] Unexpected ambiguous error for 1.4 project
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=323514">323514</a>
+[indexing] The Java Indexer is taking longer to run in eclipse 3.6 when opening projects
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329671">329671</a>
+Regression: arg0,1,2... parameter names are cached
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=305172">305172</a>
+[common navigator] Project Explorer not fully updating with jar classpath container changes.
+
+<a name="v_B26"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M4 - November 30, 2010
+<br>Project org.eclipse.jdt.core v_B26
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B26">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=331271">331271</a>
+[assist] Reconsider assumption to filter not yet declared fields from being proposed
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329663">329663</a>
+[type hierarchy] Interfaces duplicated in type hierarchy on two packages from multiple projects
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=328362">328362</a>
+[formatter] Format regions does not format as expected
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=331120">331120</a>
+Improvements to Signature API
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=299384">299384</a>
+codeSelect does not find declaration of constructor with generic parameter type when referenced from 1.4 code
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329822">329822</a>
+[1.7][compiler] Stackoverflow  error if compiled in 1.7 compliance mode
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=330869">330869</a>
+Bogus error reported for Incompatible operand types Class&lt;capture#2-of ? extends T&gt; and Class&lt;Bug.Bar&gt;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=330845">330845</a>
+[Model] Possible bug in Member class
+
+<a name="v_B25"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M4 - November 23, 2010
+<br>Project org.eclipse.jdt.core v_B25
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B25">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li> Added a new API in org.eclipse.jdt.core.compiler.CharOperation to find if a given character array starts with a given prefix, at the given index. (see details in bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329288">329288</a>):
+<pre>
+    /**
+     * Answers true if the given name, starting from the given index, starts with the given prefix,
+     * false otherwise. isCaseSensitive is used to find out whether or not the comparison should be
+     * case sensitive.
+     * 
+     * 
+     * For example:
+     * 
+     * 1.   prefix = { 'a' , 'B' }
+     *      name = { 'c', 'd', 'a' , 'b', 'b', 'a', 'b', 'a' }
+     *      startIndex = 2
+     *      isCaseSensitive = false
+     *      result => true
+     *
+     * 2.   prefix = { 'a' , 'B' }
+     *      name = { 'c', 'd', 'a' , 'b', 'b', 'a', 'b', 'a' }
+     *      startIndex = 2
+     *      isCaseSensitive = true
+     *      result => false
+     * 
+     *
+     * @param prefix the given prefix
+     * @param name the given name
+     * @param isCaseSensitive to find out whether or not the comparison should be case sensitive
+     * @param startIndex index from which the prefix should be searched in the name
+     * @return true if the given name starts with the given prefix, false otherwise
+     * @throws NullPointerException if the given name is null or if the given prefix is null
+     * @since 3.7
+     */
+     public static final boolean prefixEquals(char[] prefix,	char[] name, boolean isCaseSensitive, int startIndex)
+</pre>
+</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=325481">325481</a>
+[assist] fields declared after a particular field are proposed in its initialization
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329727">329727</a>
+Invalid check in the isConstructor() method of the IMethod implementation.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329288">329288</a>
+Fetching parameter names literally hangs on a class with a lot of methods
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=330435">330435</a>
+[1.4][1.5][compiler] Wrong handling of parameterized methods in 1.4 mode with generified JDK
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=330445">330445</a>
+[1.4][1.5][compiler] Properties doesn't match Map&lt;String, String&gt; in 1.4 compliance mode
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=330347">330347</a>
+[1.4][1.5][compiler] The performance test FullSourceWorkspaceBuildTests#testFullBuildDefault() fails
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329156">329156</a>
+[compiler][APT] Source generated in last round not compiled
+
+<a name="v_B24"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M4 - November 16, 2010
+<br>Project org.eclipse.jdt.core v_B24
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B24">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329998">329998</a>
+[content assist] override method proposal in anonymous class inserts bad stub
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=330081">330081</a>
+[compiler] ArrayIndexOutOfBoundsException when Switched from C/C++ Perspective to Java Perspective
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=328519">328519</a>
+[compiler] local variable cannot be optimized out despite warning &quot;not used&quot;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329709">329709</a>
+[formatter] Formatter fails to format enum with extra semicolon and body
+
+<a name="v_B23"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M4 - November 9, 2010
+<br>Project org.eclipse.jdt.core v_B23
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B23">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329593">329593</a>
+[1.4/1.5] [compiler] incorrect error about incompatible operand
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329588">329588</a>
+[1.4/1.5][compiler] Class cast issue with java.lang.Class and the 1.4/1.5 mixed mode
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329584">329584</a>
+[1.4/1.5][compiler] Compiler is confused about name clashes in 1.4 project
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=328674">328674</a>
+[assist] local being declared proposed inside its initialization
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=329344">329344</a>
+[compiler] Batch compiler should not removed some duplicated entries on the classpath
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=186565">186565</a>
+[1.5][compiler] 1.4/1.5 .class file interaction
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=328689">328689</a>
+[1.4][compiler] &quot;Incompatible conditional operand types Class and Class&quot;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=328775">328775</a>
+[compiler] Compiler fails to warn about invalid cast when using J2SE 1.4 compiler settings
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=328827">328827</a>
+Compiler fails to recognize a Map when using J2SE 1.4 compiler settings
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850">324850</a>
+Compile error claims method is missing but is inherited
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=328969">328969</a>
+[DOM] NPE retrieving a java element for an annotation binding
+
 <a name="v_B22"></a>
 <hr><h1>
 Eclipse Platform Build Notes<br>
