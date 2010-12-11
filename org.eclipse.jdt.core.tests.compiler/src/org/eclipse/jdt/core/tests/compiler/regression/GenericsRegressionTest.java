@@ -45,7 +45,7 @@ public class GenericsRegressionTest extends AbstractComparableTest {
 		return compilerOptions;
 	}
 	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=322531
-	public void test322531a() {
+	public void _test322531a() {
 		this.runNegativeTest(
 			new String[] {
 				"X.java",
@@ -215,7 +215,7 @@ public class GenericsRegressionTest extends AbstractComparableTest {
 			"----------\n");
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=322531
-	public void test322531g() {
+	public void _test322531g() {
 		this.runNegativeTest(
 			new String[] {
 				"X.java",
@@ -240,7 +240,7 @@ public class GenericsRegressionTest extends AbstractComparableTest {
 			"----------\n");
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=322531
-	public void test322531h() {
+	public void _test322531h() {
 		this.runNegativeTest(
 			new String[] {
 				"X.java",
@@ -333,7 +333,7 @@ public class GenericsRegressionTest extends AbstractComparableTest {
 			"----------\n");
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=322531
-	public void test322531j() {
+	public void _test322531j() {
 		this.runNegativeTest(
 			new String[] {
 				"X.java",
@@ -513,5 +513,27 @@ public void test282152e() {
 		"	                          ^\n" + 
 		"Bound mismatch: The type U is not a valid substitute for the bounded parameter <T extends Number> of the type Test<T>\n" + 
 		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=330869
+public void test330869() {
+    this.runConformTest(
+            new String[] {
+                    "X.java",
+                    "public class X {\n" +
+                    "    public <T> T getAdapter(Class<? extends T> adapterType) {\n" +
+                    "        T result = null;\n" +
+                    "        if (adapterType == Foo.class) {\n" +
+                    "        }\n" +
+                    "        else if (adapterType == Bar.class) {\n" +
+                    "        }\n" +
+                    "        return  result;\n" +
+                    "     }\n" +
+                    "     public class Foo {\n" +
+                    "     }\n" +
+                    "     public interface Bar {\n" +
+                    "     }\n" +
+                    "}\n"
+            },
+            ""); // no specific success output string
 }
 }
