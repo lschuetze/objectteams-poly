@@ -1247,7 +1247,25 @@ class DefaultBindingResolver extends BindingResolver {
 			IMethodBinding method = getMethodBinding(memberValuePair.binding);
 			if (method == null) return null;
 			return method.getReturnType();
+//{ObjectTeams: Resolve bindings for OT-specific elements
+		} else if (node instanceof MethodSpec) {
+			if (node instanceof FieldAccessSpec) {
+				FieldAccessSpec fieldAccessSpec = (FieldAccessSpec) node;
+				IVariableBinding variable = getVariableBinding(fieldAccessSpec.resolvedField);
+				if (variable == null) return null;
+				return variable.getType();
+			} else {
+				MethodSpec methodSpec = (MethodSpec)node;
+				IMethodBinding method = getMethodBinding(methodSpec.resolvedMethod);
+				if (method == null) return null;
+				return method.getReturnType();
+			}
+		} else if (node instanceof LiftingTypeReference) {
+			LiftingTypeReference liftingTypeRef = (LiftingTypeReference)node;
+			return getTypeBinding(liftingTypeRef.resolvedType);
+// SH}
 		}
+		
 		return null;
 	}
 
@@ -1521,15 +1539,12 @@ class DefaultBindingResolver extends BindingResolver {
 //{ObjectTeams: Resolve bindings for OT-specific elements
 		else if (node instanceof MethodSpec)
 		{
-			if (!(node instanceof FieldAccessSpec))
-			{
-				MethodSpec methodSpec = (MethodSpec)node;
-				return getMethodBinding(methodSpec.resolvedMethod);
-			}
-			else
-			{
+			if (node instanceof FieldAccessSpec) {
 				FieldAccessSpec fieldAccessSpec = (FieldAccessSpec) node;
 				return getVariableBinding(fieldAccessSpec.resolvedField);
+			} else {
+				MethodSpec methodSpec = (MethodSpec)node;
+				return getMethodBinding(methodSpec.resolvedMethod);
 			}
 		}
 		else if (node instanceof LiftingTypeReference)
