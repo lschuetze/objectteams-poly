@@ -4089,7 +4089,7 @@ public class Java5 extends AbstractOTJLDTest {
     		"2. ERROR in TeamA119nvp2.java (at line 10)\n" + 
     		"	TA119nvp2_1<@t2,Role<@t1>> c = new TA119nvp2_1<@t2,Role<@t1>>();\n" + 
     		"	                ^^^^\n" + 
-    		"Bound mismatch: The type Role<@t1> is not a valid substitute for the bounded parameter <R<@t> extends > of the type TA119nvp2_1<@t2,R<@t>>\n" + 
+    		"Bound mismatch: The type Role<@t1> is not a valid substitute for the value dependent parameter <R<@t>> of the type TA119nvp2_1<@t,R<@t>> (OTJLD 9.2.2)\n" + 
     		"----------\n" + 
     		"3. WARNING in TeamA119nvp2.java (at line 10)\n" + 
     		"	TA119nvp2_1<@t2,Role<@t1>> c = new TA119nvp2_1<@t2,Role<@t1>>();\n" + 
@@ -4099,7 +4099,7 @@ public class Java5 extends AbstractOTJLDTest {
     		"4. ERROR in TeamA119nvp2.java (at line 10)\n" + 
     		"	TA119nvp2_1<@t2,Role<@t1>> c = new TA119nvp2_1<@t2,Role<@t1>>();\n" + 
     		"	                                                   ^^^^\n" + 
-    		"Bound mismatch: The type Role<@t1> is not a valid substitute for the bounded parameter <R<@t> extends > of the type TA119nvp2_1<@t2,R<@t>>\n" + 
+    		"Bound mismatch: The type Role<@t1> is not a valid substitute for the value dependent parameter <R<@t>> of the type TA119nvp2_1<@t,R<@t>> (OTJLD 9.2.2)\n" + 
     		"----------\n");
     }
 
