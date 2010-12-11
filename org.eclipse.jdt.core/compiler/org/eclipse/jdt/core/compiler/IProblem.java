@@ -1691,6 +1691,10 @@ void setSourceStart(int sourceStart);
 	int IncompatibleValueParameter               = DEPENDENT_RELATED +  213; // 9.2.1
 	int TypeHasNoValueParamAt                    = DEPENDENT_RELATED +  214; // 9.2.1
 	int RebindingTypeVariableAnchor				 = DEPENDENT_RELATED +  215; // 9.2.1(a)
+	/**
+	 * @since 3.7
+	 */
+	int ValueTypeArgumentMismatch 				 = DEPENDENT_RELATED +  220; // 9.2.2
 
 //  ==== SYNTAX ====
 	int SYNTAX_RELATED = OTJ_RELATED + 10*OTCHAP;

@@ -1137,11 +1137,6 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 
 //{ObjectTeams: implement new method from Substitution
 	public ITeamAnchor substituteAnchor(ITeamAnchor anchor, int rank) {
-		if (!DependentTypeBinding.isDependentType(this.type)) 
-			return null;
-		DependentTypeBinding dependentType = (DependentTypeBinding)this.type;
-		if (dependentType._matchingVariable == anchor)
-			return dependentType.getAnchor();
 		return null;
 	}
 //SH}

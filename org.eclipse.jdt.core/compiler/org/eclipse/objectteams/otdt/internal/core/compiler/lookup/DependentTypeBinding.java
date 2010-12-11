@@ -239,6 +239,15 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 		this.transferTypeArguments(this.type).collectSubstitutes(scope, actualType, inferenceContext, constraint);
 	}
 	
+
+	// implement new method from Substitution:
+	@Override
+	public ITeamAnchor substituteAnchor(ITeamAnchor anchor, int rank) {
+		if (this._matchingVariable == anchor)
+			return getAnchor();
+		return null;
+	}
+
 	@Override
 	public ReferenceBinding transferTypeArguments(ReferenceBinding other) {
 		if (this.arguments == null) // although subclass of ParameterizedTypeBinding, we don't necessarily have arguments

@@ -1649,9 +1649,23 @@ public char[] readableName() /*java.lang.Object,  p.X<T> */ {
 		readableName = CharOperation.concatWith(this.compoundName, '.');
 	}
 	TypeVariableBinding[] typeVars;
+//{ObjectTeams: include value parameters:
+	SyntheticArgumentBinding[] valueParams = valueParamSynthArgs();
+/* orig:
 	if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES) {
+  :giro */
+	if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES || valueParams != Binding.NO_SYNTH_ARGUMENTS) {
+// orig:		
 	    StringBuffer nameBuffer = new StringBuffer(10);
 	    nameBuffer.append(readableName).append('<');
+// :giro
+	    for (int i = 0; i < valueParams.length; i++) {
+	    	nameBuffer.append('@');
+			nameBuffer.append(valueParams[i].readableName());
+			if (typeVars.length > 0)
+				nameBuffer.append(',');
+		}
+// SH}
 	    for (int i = 0, length = typeVars.length; i < length; i++) {
 	        if (i > 0) nameBuffer.append(',');
 	        nameBuffer.append(typeVars[i].readableName());
@@ -1689,9 +1703,23 @@ public char[] shortReadableName() /*Object*/ {
 		shortReadableName = sourceName(); // OT: was sourceName
 	}
 	TypeVariableBinding[] typeVars;
+//{ObjectTeams: include value parameters:
+	SyntheticArgumentBinding[] valueParams = valueParamSynthArgs();
+/* orig:
 	if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES) {
+  :giro */
+	if ((typeVars = typeVariables()) != Binding.NO_TYPE_VARIABLES || valueParams != Binding.NO_SYNTH_ARGUMENTS) {
+// orig:		
 	    StringBuffer nameBuffer = new StringBuffer(10);
 	    nameBuffer.append(shortReadableName).append('<');
+// :giro
+	    for (int i = 0; i < valueParams.length; i++) {
+	    	nameBuffer.append('@');
+			nameBuffer.append(valueParams[i].shortReadableName());
+			if (typeVars.length > 0)
+				nameBuffer.append(',');
+		}
+// SH}
 	    for (int i = 0, length = typeVars.length; i < length; i++) {
 	        if (i > 0) nameBuffer.append(',');
 	        nameBuffer.append(typeVars[i].shortReadableName());

@@ -7329,6 +7329,9 @@ public void typeMismatchError(TypeBinding typeArgument, TypeVariableBinding type
 		typeParamName = typeParameter.readableName();
 // orig:	
 	this.handle(
+  //{OT
+	  typeParameter.firstBound == null ? IProblem.ValueTypeArgumentMismatch :
+  //TO}
 		IProblem.TypeArgumentMismatch,
 /*		
 		new String[] { new String(typeArgument.readableName()), new String(genericType.readableName()), new String(typeParameter.sourceName), parameterBoundAsString(typeParameter, false) },

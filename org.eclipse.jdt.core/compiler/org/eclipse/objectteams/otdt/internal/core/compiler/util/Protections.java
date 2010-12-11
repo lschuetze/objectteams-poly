@@ -37,9 +37,9 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.ProblemDetail;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.ProblemDetail;
 
 /**
  * Code dealing with modifiers and protection of team/role related elements.
