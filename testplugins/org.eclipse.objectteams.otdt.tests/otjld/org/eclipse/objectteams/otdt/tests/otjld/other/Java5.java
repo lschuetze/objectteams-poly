@@ -4717,4 +4717,17 @@ public class Java5 extends AbstractOTJLDTest {
     		"----------\n");
     }
 
+    public void testA121_genericNestedTeam1() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA121gnt1.java",
+	    	"public team class TeamA121gnt1 {\n" +
+			"    public team class Mid<A1> {\n" +
+			"        protected class Inner<A> {}\n" +
+			"    }\n" +
+			"    public team class Mid2<A2> extends Mid<A2> {\n" +
+			"    }\n" +
+			"}\n"
+    		});
+    }
 }
