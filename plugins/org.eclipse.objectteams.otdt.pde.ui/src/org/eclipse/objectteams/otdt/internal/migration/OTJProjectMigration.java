@@ -16,10 +16,13 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.migration;
 
+import org.eclipse.core.resources.IBuildConfiguration;
 import org.eclipse.core.resources.ICommand;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.objectteams.otdt.internal.pde.ui.OTPDEUIPlugin;
 
@@ -39,7 +42,8 @@ public team class OTJProjectMigration {
 	
 	protected class BuildManager playedBy BuildManager {
 
-		checkBuilder <- before getBuilder;
+		void checkBuilder(IProject project,	ICommand command) 
+		<- before IncrementalProjectBuilder getBuilder(IBuildConfiguration buildConfiguration, ICommand command, int buildSpecIndex, MultiStatus status);
 
 		private void checkBuilder(IProject project,	ICommand command) {
 			// remove old markers:
