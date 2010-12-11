@@ -4910,4 +4910,425 @@ public void testGenericAPIUsageFromA14Project5() throws CoreException {
 			deleteProject(project15);
 	}
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850
+public void testGenericAPIUsageFromA14Project6() throws CoreException {
+	IJavaProject project14 = null;
+	IJavaProject project15 = null;
+	try {
+		project15 = createJavaProject("Reconciler15API", new String[] {"src"}, new String[] {"JCL15_LIB"}, "bin");
+		createFolder("/Reconciler15API/src/p2");
+		createFile(
+				"/Reconciler15API/src/p2/Y.java",
+				"package p2;\n" +
+				"public abstract class Y implements I<Y> {\n" +
+				"    public final Y foo(Object o, J<Y> j) {\n" +
+				"        return null;\n" +
+				"    }\n" +
+				"    public final void bar(Object o, J<Y> j, Y y) {\n" +
+				"    }\n" +
+				"}\n" +
+				"interface I<S> {\n" +
+				"	public S foo(Object o, J<S> j);\n" +
+				"	public void bar(Object o, J<S> j, S s);\n" +
+				"}\n" +
+				"interface J<S> {}\n"
+			);
+		project15.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+		project15.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		project15.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+		
+		project14 = createJavaProject("Reconciler1415", new String[] {"src"}, new String[] {"JCL_LIB"}, "bin");
+		project14.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
+		project14.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+		project14.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
+		
+		IClasspathEntry[] oldClasspath = project14.getRawClasspath();
+		int oldLength = oldClasspath.length;
+		IClasspathEntry[] newClasspath = new IClasspathEntry[oldLength+1];
+		System.arraycopy(oldClasspath, 0, newClasspath, 0, oldLength);
+		newClasspath[oldLength] = JavaCore.newProjectEntry(new Path("/Reconciler15API"));
+		project14.setRawClasspath(newClasspath, null);
+		
+		createFolder("/Reconciler1415/src/p1");
+		String source = 
+			"package p1;\n" +
+			"import p2.Y;\n" +
+			"public class X {\n" + 
+			"   private int unused = 0;\n" +
+			"	public Object foo() {\n" + 
+			"		return new Y() {};\n" + 
+			"	}\n" + 
+			"}";
+
+		createFile(
+			"/Reconciler1415/src/p1/X.java",
+			source
+		);
+		
+		this.workingCopies = new ICompilationUnit[1];
+		char[] sourceChars = source.toCharArray();
+		this.problemRequestor.initialize(sourceChars);
+		this.workingCopies[0] = getCompilationUnit("/Reconciler1415/src/p1/X.java").getWorkingCopy(this.wcOwner, null);
+		assertProblems(
+			"Unexpected problems",
+			"----------\n" + 
+			"1. WARNING in /Reconciler1415/src/p1/X.java (at line 4)\n" + 
+			"	private int unused = 0;\n" + 
+			"	            ^^^^^^\n" + 
+			"The value of the field X.unused is not used\n" + 
+			"----------\n"
+		);
+	} finally {
+		if (project14 != null)
+			deleteProject(project14);
+		if (project15 != null)
+			deleteProject(project15);
+	}
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850
+public void testGenericAPIUsageFromA14Project7() throws CoreException, IOException {
+	IJavaProject project14 = null;
+	IJavaProject project15 = null;
+	try {
+		project15 = createJavaProject("Reconciler15API", new String[] {"src"}, new String[] {"JCL15_LIB"}, "bin");
+		createFolder("/Reconciler15API/src/p2");
+		createFile(
+				"/Reconciler15API/src/p2/Y.java",
+				"package p2;\n" +
+				"import java.util.List;\n" +
+				"public class Y<T> extends List<T> {\n" +
+				"    public static Y<String> getY() {\n" +
+				"        return new Y<String>();\n" +
+				"    }\n" +
+				"}\n"
+			);
+		project15.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+		project15.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		project15.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+		
+		addLibrary(
+				project15,
+				"libList15.jar",
+				"libList15src.zip",
+				new String[] {
+					"java/util/List.java",
+					"package java.util;\n" +
+					"public class List<T> {\n" +
+					"}"
+				},
+				JavaCore.VERSION_1_5
+			);
+
+		project14 = createJavaProject("Reconciler1415", new String[] {"src"}, new String[] {"JCL_LIB"}, "bin");
+		project14.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
+		project14.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+		project14.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
+
+		addLibrary(
+				project14,
+				"libList14.jar",
+				"libList14src.zip",
+				new String[] {
+					"java/util/List.java",
+					"package java.util;\n" +
+					"public class List {\n" +
+					"}"
+				},
+				JavaCore.VERSION_1_4
+			);
+
+		IClasspathEntry[] oldClasspath = project14.getRawClasspath();
+		int oldLength = oldClasspath.length;
+		IClasspathEntry[] newClasspath = new IClasspathEntry[oldLength+1];
+		System.arraycopy(oldClasspath, 0, newClasspath, 0, oldLength);
+		newClasspath[oldLength] = JavaCore.newProjectEntry(new Path("/Reconciler15API"));
+		project14.setRawClasspath(newClasspath, null);
+		
+		createFolder("/Reconciler1415/src/p1");
+		String source = 
+			"package p1;\n" +
+			"import java.util.List;\n" +
+			"import p2.Y;\n" +
+			"public class X {\n" + 
+			"	private static List getList(boolean test) {\n" +
+			"	    if (test)\n" +
+			"	        return new Y();\n" + 
+			"	    else\n" +
+			"		    return Y.getY();\n" + 
+			"   }\n" + 
+			"}";
+
+		createFile(
+			"/Reconciler1415/src/p1/X.java",
+			source
+		);
+		
+		this.workingCopies = new ICompilationUnit[1];
+		char[] sourceChars = source.toCharArray();
+		this.problemRequestor.initialize(sourceChars);
+		this.workingCopies[0] = getCompilationUnit("/Reconciler1415/src/p1/X.java").getWorkingCopy(this.wcOwner, null);
+		assertProblems(
+			"Unexpected problems",
+			"----------\n" + 
+			"1. WARNING in /Reconciler1415/src/p1/X.java (at line 5)\n" + 
+			"	private static List getList(boolean test) {\n" + 
+			"	                    ^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The method getList(boolean) from the type X is never used locally\n" + 
+			"----------\n"
+		);
+	} finally {
+		if (project14 != null)
+			deleteProject(project14);
+		if (project15 != null)
+			deleteProject(project15);
+	}
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850
+public void testGenericAPIUsageFromA14Project8() throws CoreException, IOException {
+	IJavaProject project14 = null;
+	IJavaProject project15 = null;
+	try {
+		project15 = createJavaProject("Reconciler15API", new String[] {"src"}, new String[] {"JCL15_LIB"}, "bin");
+		createFolder("/Reconciler15API/src/p2");
+		createFile(
+				"/Reconciler15API/src/p2/Y.java",
+				"package p2;\n" +
+				"public class Y<T> extends java.util.List<T> {\n" +
+				"    public static Y<String> getY() {\n" +
+				"        return new Y<String>();\n" +
+				"    }\n" +
+				"}\n"
+			);
+		project15.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+		project15.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		project15.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+		
+		addLibrary(
+				project15,
+				"libList15.jar",
+				"libList15src.zip",
+				new String[] {
+					"java/util/List.java",
+					"package java.util;\n" +
+					"public class List<T> {\n" +
+					"}"
+				},
+				JavaCore.VERSION_1_5
+			);
+
+		project14 = createJavaProject("Reconciler1415", new String[] {"src"}, new String[] {"JCL_LIB"}, "bin");
+		project14.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
+		project14.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+		project14.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
+
+		addLibrary(
+				project14,
+				"libList14.jar",
+				"libList14src.zip",
+				new String[] {
+					"java/util/List.java",
+					"package java.util;\n" +
+					"public class List {\n" +
+					"}"
+				},
+				JavaCore.VERSION_1_4
+			);
+
+		IClasspathEntry[] oldClasspath = project14.getRawClasspath();
+		int oldLength = oldClasspath.length;
+		IClasspathEntry[] newClasspath = new IClasspathEntry[oldLength+1];
+		System.arraycopy(oldClasspath, 0, newClasspath, 0, oldLength);
+		newClasspath[oldLength] = JavaCore.newProjectEntry(new Path("/Reconciler15API"));
+		project14.setRawClasspath(newClasspath, null);
+		
+		createFolder("/Reconciler1415/src/p1");
+		String source = 
+			"package p1;\n" +
+			"import p2.Y;\n" +
+			"public class X {\n" + 
+			"	private static java.util.List getList(boolean test) {\n" +
+			"	    if (test)\n" +
+			"	        return new Y();\n" + 
+			"	    else\n" +
+			"		    return Y.getY();\n" + 
+			"   }\n" + 
+			"}";
+
+		createFile(
+			"/Reconciler1415/src/p1/X.java",
+			source
+		);
+		
+		this.workingCopies = new ICompilationUnit[1];
+		char[] sourceChars = source.toCharArray();
+		this.problemRequestor.initialize(sourceChars);
+		this.workingCopies[0] = getCompilationUnit("/Reconciler1415/src/p1/X.java").getWorkingCopy(this.wcOwner, null);
+		assertProblems(
+			"Unexpected problems",
+			"----------\n" + 
+			"1. WARNING in /Reconciler1415/src/p1/X.java (at line 4)\n" + 
+			"	private static java.util.List getList(boolean test) {\n" + 
+			"	                              ^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The method getList(boolean) from the type X is never used locally\n" + 
+			"----------\n"
+		);
+	} finally {
+		if (project14 != null)
+			deleteProject(project14);
+		if (project15 != null)
+			deleteProject(project15);
+	}
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=328775
+public void test14ProjectWith15JRE() throws CoreException, IOException {
+	IJavaProject project14 = null;
+	try {
+		project14 = createJavaProject("Reconciler1415", new String[] {"src"}, new String[] {"JCL15_LIB"}, "bin");
+		project14.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
+		project14.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+		project14.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
+
+		createFolder("/Reconciler1415/src/p1");
+		String source = 
+			"package p1;\n" +
+			"public class X {\n" +
+			"	int a;\n" +
+			"   private Class c = a == 1 ? int.class : long.class;\n" + 
+			"}\n";
+		createFile(
+			"/Reconciler1415/src/p1/X.java",
+			source
+		);
+		
+		this.workingCopies = new ICompilationUnit[1];
+		char[] sourceChars = source.toCharArray();
+		this.problemRequestor.initialize(sourceChars);
+		this.workingCopies[0] = getCompilationUnit("/Reconciler1415/src/p1/X.java").getWorkingCopy(this.wcOwner, null);
+		assertProblems(
+			"Unexpected problems",
+			"----------\n" + 
+			"1. WARNING in /Reconciler1415/src/p1/X.java (at line 4)\n" + 
+			"	private Class c = a == 1 ? int.class : long.class;\n" + 
+			"	              ^\n" + 
+			"The value of the field X.c is not used\n" + 
+			"----------\n"
+		);
+	} finally {
+		if (project14 != null)
+			deleteProject(project14);
+	}
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=329593
+public void testJsr14TargetProjectWith14JRE() throws CoreException, IOException {
+	IJavaProject project14 = null;
+	try {
+		project14 = createJavaProject("Reconciler1415", new String[] {"src"}, new String[] {"JCL_LIB"}, "bin");
+		project14.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+		project14.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		project14.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
+
+		createFolder("/Reconciler1415/src/p1");
+		String source = 
+			"package p1;\n" +
+			"public class X {\n" +
+			"    public void foo() {\n" +
+			"        Class type = null;\n" +
+			"        if (type == byte.class)\n" +
+			"            return;\n" +
+			"    }\n" +
+			"}\n";
+		createFile(
+			"/Reconciler1415/src/p1/X.java",
+			source
+		);
+		
+		this.workingCopies = new ICompilationUnit[1];
+		char[] sourceChars = source.toCharArray();
+		this.problemRequestor.initialize(sourceChars);
+		this.workingCopies[0] = getCompilationUnit("/Reconciler1415/src/p1/X.java").getWorkingCopy(this.wcOwner, null);
+		assertProblems(
+			"Unexpected problems",
+			"----------\n" + 
+			"1. WARNING in /Reconciler1415/src/p1/X.java (at line 6)\n" + 
+			"	return;\n" + 
+			"	^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n"
+
+		);
+	} finally {
+		if (project14 != null)
+			deleteProject(project14);
+	}
+}
+public void testGenericAPIUsageFromA14Project9() throws CoreException {
+	IJavaProject project14 = null;
+	IJavaProject project15 = null;
+	try {
+		project15 = createJavaProject("Reconciler15API", new String[] {"src"}, new String[] {"JCL15_LIB"}, "bin");
+		createFolder("/Reconciler15API/src/p1");
+		createFile(
+				"/Reconciler15API/src/p1/Y.java",
+				"package p1;\n" +
+				"public class Y {\n" +
+				"    static <T> void foo(List<T> expected) {}\n" +
+				"    public static <T> void foo(T expected) {}\n" +
+				"}\n"
+			);
+		createFile(
+				"/Reconciler15API/src/p1/List.java",
+				"package p1;\n" +
+				"public class List<T> {}\n"
+			);
+		project15.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+		project15.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+		project15.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+		
+		project14 = createJavaProject("Reconciler1415", new String[] {"src"}, new String[] {"JCL_LIB"}, "bin");
+		project14.setOption(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_4);
+		project14.setOption(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+		project14.setOption(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_4);
+		
+		IClasspathEntry[] oldClasspath = project14.getRawClasspath();
+		int oldLength = oldClasspath.length;
+		IClasspathEntry[] newClasspath = new IClasspathEntry[oldLength+1];
+		System.arraycopy(oldClasspath, 0, newClasspath, 0, oldLength);
+		newClasspath[oldLength] = JavaCore.newProjectEntry(new Path("/Reconciler15API"));
+		project14.setRawClasspath(newClasspath, null);
+		
+		createFolder("/Reconciler1415/src/p1");
+		String source = 
+			"package p1;\n" +
+			"public class X {\n" +
+			"	private int unused = 0;\n" + 
+			"    X(List l) {\n" +
+			"        Y.foo(l);\n" +
+			"    }\n" +
+			"}\n";
+
+		createFile(
+			"/Reconciler1415/src/p1/X.java",
+			source
+		);
+		
+		this.workingCopies = new ICompilationUnit[1];
+		char[] sourceChars = source.toCharArray();
+		this.problemRequestor.initialize(sourceChars);
+		this.workingCopies[0] = getCompilationUnit("/Reconciler1415/src/p1/X.java").getWorkingCopy(this.wcOwner, null);
+		assertProblems(
+			"Unexpected problems",
+			"----------\n" + 
+			"1. WARNING in /Reconciler1415/src/p1/X.java (at line 3)\n" + 
+			"	private int unused = 0;\n" + 
+			"	            ^^^^^^\n" + 
+			"The value of the field X.unused is not used\n" + 
+			"----------\n"
+		);
+	} finally {
+		if (project14 != null)
+			deleteProject(project14);
+		if (project15 != null)
+			deleteProject(project15);
+	}
+}
 }

@@ -6697,8 +6697,8 @@ public void testCompletionInsideGenericClass() throws JavaModelException {
 	this.wc.codeComplete(cursorLocation, requestor, this.wcOwner);
 
 	assertResults(
-			"CompletionInsideGenericClas[POTENTIAL_METHOD_DECLARATION]{CompletionInsideGenericClas, Ltest.CompletionInsideGenericClass;, ()V, CompletionInsideGenericClas, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED) + "}\n" +
-			"CompletionInsideGenericClass[TYPE_REF]{CompletionInsideGenericClass, test, Ltest.CompletionInsideGenericClass;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_UNQUALIFIED + R_NON_RESTRICTED) + "}",
+			"CompletionInsideGenericClas[POTENTIAL_METHOD_DECLARATION]{CompletionInsideGenericClas, Ltest.CompletionInsideGenericClass<TCompletionInsideGenericClassParameter;>;, ()V, CompletionInsideGenericClas, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_NON_RESTRICTED) + "}\n" +
+			"CompletionInsideGenericClass<CompletionInsideGenericClassParameter>[TYPE_REF]{CompletionInsideGenericClass, test, Ltest.CompletionInsideGenericClass<TCompletionInsideGenericClassParameter;>;, null, null, " + (R_DEFAULT + R_RESOLVED + R_INTERESTING + R_CASE + R_UNQUALIFIED + R_NON_RESTRICTED) + "}",
 			requestor.getResults());
 }
 
@@ -21789,5 +21789,108 @@ public void test312603() throws JavaModelException {
 			"mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, 24}\n" + 
 			"myString[FIELD_REF]{myString, Ltest.X;, Ljava.lang.String;, myString, null, 57}",
 			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=328674
+public void test328674a() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src3/test/X.java",
+			"package test;\n" +
+			"public class X {\n" +
+			"    void foo() {\n" +
+			"    	String myString = \"\";\n" +
+			"    	String myString2 = \"\";\n" +
+			"    	String myString3 = bar(my\n" +
+			"    	String myString4 = \"\";\n" +
+			"	 }\n" +
+			"	 void bar(String s){\n" +
+			"	 }\n" +
+			"}");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+	String str = this.workingCopies[0].getSource();
+	final String completeBehind = "String myString3 = bar(my";
+	int cursorLocation = str.lastIndexOf(completeBehind) +
+	completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor,
+			this.wcOwner);
+
+	assertResults(
+			"MyClass[TYPE_REF]{mypackage.MyClass, mypackage, Lmypackage.MyClass;, null, null, " + (R_NON_STATIC + R_UNQUALIFIED) + "}\n" + 
+			"mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, " + (R_NON_STATIC + R_UNQUALIFIED + R_CASE) + "}\n" + 
+			"myString[LOCAL_VARIABLE_REF]{myString, null, Ljava.lang.String;, myString, null, " + (R_NON_STATIC + R_UNQUALIFIED + R_CASE + R_NON_RESTRICTED + R_EXACT_EXPECTED_TYPE) + "}\n" +
+			"myString2[LOCAL_VARIABLE_REF]{myString2, null, Ljava.lang.String;, myString2, null, " + (R_NON_STATIC + R_UNQUALIFIED + R_CASE + R_NON_RESTRICTED + R_EXACT_EXPECTED_TYPE) + "}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=328674
+public void test328674b() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src3/test/X.java",
+			"package test;\n" +
+			"public class X {\n" +
+			"    void foo() {\n" +
+			"    	String myString = \"\";\n" +
+			"    	String myString1 = \"\";\n" +
+			"    	String myString2 = bar(bar(my\n" +
+			"    	String myString3 = \"\";\n" +
+			"	 }\n" +
+			"	 String bar(String s){\n" +
+			"	 }\n" +
+			"}");
+
+	CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+	String str = this.workingCopies[0].getSource();
+	final String completeBehind = "String myString2 = bar(bar(my";
+	int cursorLocation = str.lastIndexOf(completeBehind) +
+	completeBehind.length();
+	this.workingCopies[0].codeComplete(cursorLocation, requestor,
+			this.wcOwner);
+
+	assertResults(
+			"MyClass[TYPE_REF]{mypackage.MyClass, mypackage, Lmypackage.MyClass;, null, null, " + (R_NON_STATIC + R_UNQUALIFIED) + "}\n" + 
+			"mypackage[PACKAGE_REF]{mypackage, mypackage, null, null, null, " + (R_NON_STATIC + R_UNQUALIFIED + R_CASE) + "}\n" + 
+			"myString[LOCAL_VARIABLE_REF]{myString, null, Ljava.lang.String;, myString, null, " + (R_NON_STATIC + R_UNQUALIFIED + R_CASE + R_NON_RESTRICTED + R_EXACT_EXPECTED_TYPE) + "}\n" +
+			"myString1[LOCAL_VARIABLE_REF]{myString1, null, Ljava.lang.String;, myString1, null, " + (R_NON_STATIC + R_UNQUALIFIED + R_CASE + R_NON_RESTRICTED + R_EXACT_EXPECTED_TYPE) + "}",
+			requestor.getResults());
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=325481
+// To verify that the fix doesnt cause grief when proposing fields in another
+// compilation unit.
+public void test325481b() throws JavaModelException {
+	CompletionTestsRequestor requestor = new CompletionTestsRequestor();
+	Map options = COMPLETION_PROJECT.getOptions(true);
+	Object savedOptionCompliance = options.get(CompilerOptions.OPTION_Compliance);
+	try {
+		options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_5);
+		COMPLETION_PROJECT.setOptions(options);
+		ICompilationUnit cu= getCompilationUnit("Completion", "src3", "test325481", "_Main.java");
+
+		String str = cu.getSource();
+		String completeBehind = "_IAttributeDefinitionDescriptor.";
+		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+		
+		cu.codeComplete(cursorLocation, requestor);
+		int relevance = R_INTERFACE + R_UNQUALIFIED + R_NON_RESTRICTED;
+		assumeEquals(
+				"should have two completions",
+				"element:ADD_CUSTOM_ATTRIBUTES    completion:ADD_CUSTOM_ATTRIBUTES    relevance:" + relevance +"\n" + 
+				"element:ATTRIBUTE    completion:ATTRIBUTE    relevance:" + relevance +"\n" + 
+				"element:BUILT_ATTRIBUTE    completion:BUILT_ATTRIBUTE    relevance:" + relevance +"\n" + 
+				"element:RANKING_ATTRIBUTE    completion:RANKING_ATTRIBUTE    relevance:" + relevance +"\n" + 
+				"element:RANKING_ATTRIBUTE_V2    completion:RANKING_ATTRIBUTE_V2    relevance:" + relevance +"\n" + 
+				"element:REFERENCE_ATTRIBUTE    completion:REFERENCE_ATTRIBUTE    relevance:" + relevance +"\n" + 
+				"element:WORK_ATTRIBUTE    completion:WORK_ATTRIBUTE    relevance:" + relevance +"\n" + 
+				"element:class    completion:class    relevance:" + relevance +"\n" + 
+				"element:this    completion:this    relevance:" + relevance,
+				requestor.getResults());
+	} finally {
+		// Restore compliance settings.
+		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
+		COMPLETION_PROJECT.setOptions(options);	
+	}
 }
 }
