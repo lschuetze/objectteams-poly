@@ -43,7 +43,8 @@ public team class OTJProjectMigration {
 	protected class BuildManager playedBy BuildManager {
 
 		void checkBuilder(IProject project,	ICommand command) 
-		<- before IncrementalProjectBuilder getBuilder(IBuildConfiguration buildConfiguration, ICommand command, int buildSpecIndex, MultiStatus status);
+		<- before IncrementalProjectBuilder getBuilder(IBuildConfiguration buildConfiguration, ICommand command, int buildSpecIndex, MultiStatus status)
+			with { project <- buildConfiguration.getProject(), command <- command }
 
 		private void checkBuilder(IProject project,	ICommand command) {
 			// remove old markers:
