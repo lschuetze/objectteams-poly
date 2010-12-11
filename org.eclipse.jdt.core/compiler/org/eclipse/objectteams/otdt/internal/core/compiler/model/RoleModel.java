@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
+import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
@@ -1353,5 +1354,16 @@ public class RoleModel extends TypeModel
 			}
 		}
 		return null;
+	}
+
+	public static boolean areTypeParametersOfSameRole(TypeVariableBinding one, Binding two) {
+		if (!(two instanceof TypeVariableBinding))
+			return false;
+		Binding declaring1 = one.declaringElement;
+		Binding declaring2 = ((TypeVariableBinding)two).declaringElement;
+		if (   !(declaring1 instanceof ReferenceBinding)
+			|| !(declaring2 instanceof ReferenceBinding))
+			return false;
+		return ((ReferenceBinding)declaring1).getRealType() == ((ReferenceBinding)declaring2).getRealType();
 	}
 }

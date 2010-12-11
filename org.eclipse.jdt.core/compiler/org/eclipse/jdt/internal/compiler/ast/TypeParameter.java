@@ -25,6 +25,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReferen
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ProblemAnchorBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
  * OTDT changes:
@@ -68,6 +69,9 @@ public class TypeParameter extends AbstractVariableDeclaration {
 					&& this.binding != existingType
 					&& existingType.isValidBinding()
 					&& (existingType.kind() != Binding.TYPE_PARAMETER || !staticContext)) {
+//{ObjectTeams: could be equivalent type parameters of class/ifc-parts of the same role:
+			  if (!RoleModel.areTypeParametersOfSameRole(this.binding, existingType))
+// SH}
 				scope.problemReporter().typeHiding(this, existingType);
 			}
 		}

@@ -180,9 +180,9 @@ public static boolean areEqualRoleTypes(TypeBinding one, TypeBinding two, Refere
 		two = array2.leafComponentType();
 	}
 	if (one instanceof WeakenedTypeBinding)
-		one = ((WeakenedTypeBinding)one).getStrongType();
+		one = ((WeakenedTypeBinding)one).weakenedType;
 	if (two instanceof WeakenedTypeBinding)
-		two = ((WeakenedTypeBinding)two).getStrongType();
+		two = ((WeakenedTypeBinding)two).weakenedType;
 	if (one instanceof RoleTypeBinding) {
 		if (two instanceof UnresolvedReferenceBinding)
 		{
@@ -910,6 +910,11 @@ void computeInheritedMethods(ReferenceBinding superclass, ReferenceBinding[] sup
 			MethodBinding[] methods = superType.unResolvedMethods();
 			nextMethod : for (int m = methods.length; --m >= 0;) { // Interface methods are all abstract public
 				MethodBinding inheritedMethod = methods[m];
+//{ObjectTeams:
+				if (   inheritedMethod.original().problemId() == ProblemReasons.NotVisible 
+					&& MethodModel.isRoleMethodInheritedFromNonPublicRegular(inheritedMethod))
+					continue nextMethod;
+// SH}
 				MethodBinding[] existingMethods = (MethodBinding[]) this.inheritedMethods.get(inheritedMethod.selector);
 				if (existingMethods == null) {
 					existingMethods = new MethodBinding[] {inheritedMethod};
