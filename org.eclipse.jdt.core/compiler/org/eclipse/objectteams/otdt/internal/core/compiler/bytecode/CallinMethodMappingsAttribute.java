@@ -524,9 +524,11 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 		ReferenceBinding currentType = roleBinding;
 		char[] roleSignature = mapping._roleSignature;
 		// generics:
-		ReferenceBinding tsuperRoleBinding = findTSuperTypeFromModel(roleBinding.roleModel, superDeclaringType.getBinding());
-		if (tsuperRoleBinding.isParameterizedType())
-			roleSignature = superDeclaringType.substituteSignature((ParameterizedTypeBinding)tsuperRoleBinding, mapping._roleSelector, roleSignature);
+		if (superDeclaringType != null) {
+			ReferenceBinding tsuperRoleBinding = findTSuperTypeFromModel(roleBinding.roleModel, superDeclaringType.getBinding());
+			if (tsuperRoleBinding.isParameterizedType())
+				roleSignature = superDeclaringType.substituteSignature((ParameterizedTypeBinding)tsuperRoleBinding, mapping._roleSelector, roleSignature);
+		}
 		if (result.callinModifier == TerminalTokens.TokenNamereplace) {
 			// ignore generalized return by truncating the signature:
 			int closePos = CharOperation.indexOf(')', roleSignature);

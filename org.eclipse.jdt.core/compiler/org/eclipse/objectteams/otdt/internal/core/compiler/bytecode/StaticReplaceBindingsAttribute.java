@@ -31,6 +31,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDecl
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
 /**
  * MIGRATION_STATE: complete.
@@ -253,7 +254,8 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
 	/**
 	 * Merge two attributes encoding method mappings from different roles of the same team.
 	 */
-	public void merge(ModelElement model, AbstractAttribute superDeclaringType, ModelElement otherModel)
+	@Override
+	public void merge(ModelElement model, AbstractAttribute superDeclaringType, TypeModel sourceDeclaringType)
 	{
 		assert superDeclaringType instanceof StaticReplaceBindingsAttribute;
 		StaticReplaceBindingsAttribute otherSRBA = (StaticReplaceBindingsAttribute)superDeclaringType;
