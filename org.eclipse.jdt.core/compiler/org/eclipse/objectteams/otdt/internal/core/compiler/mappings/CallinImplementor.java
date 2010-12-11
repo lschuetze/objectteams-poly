@@ -165,7 +165,7 @@ public class CallinImplementor extends MethodMappingImplementor
         if (staticReplaces.size() > 0) {
         	CallinMappingDeclaration[] callins = new CallinMappingDeclaration[staticReplaces.size()];
         	staticReplaces.toArray(callins);
-        	this._role.getTeamModel().addOrMergeAttribute(new StaticReplaceBindingsAttribute(callins));
+        	this._role.getTeamModel().addOrMergeAttribute(new StaticReplaceBindingsAttribute(callins), null);
         }
 		return result;
 
@@ -533,12 +533,18 @@ public class CallinImplementor extends MethodMappingImplementor
 				receiver = gen.singleNameReference(ROLE_VAR_NAME);
 				needRoleVar = true;
 	
-				// private receiver needs to be casted to the class.
+				// receiver for private method (doesn't exist in ifc-part) needs to be casted to the class.
+				// Scope.findMethod() takes care of visibility if isMethodMappingWrapper() is detected.
 				if (roleMethodBinding.isPrivate())
 					receiver = gen.castExpression(
 										receiver,
 							            gen.typeReference(roleModel.getClassPartBinding()),
-										CastExpression.RAW);
+										CastExpression.NEED_CLASS);
+					// Note on using NEED_CLASS above:
+					// even if role is ParameterizedTypeBinding Scope.findMethod() must find a RoleTypeBinding
+					// in order to enter the branch that checks isMethodMappingWrapper()
+					// with CastExpression.RAW a RawTypeBinding might occur that is not recognized by Scope.findMethod()
+					// see testA12_genericRoleFeature16f() which reports bogus visibility problem is RAW is used.
 			}
 	
 			//MyRole _OT$role = _OT$liftToMyRole(_OT$base_arg);

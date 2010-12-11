@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TypeModel.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -36,7 +35,9 @@ import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
@@ -56,8 +57,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.smap.LineNumberProvid
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
- * MIGRATION_STATE: complete
- *
  * Generalizes TeamModel and RoleModel
  * @author stephan
  */
@@ -407,6 +406,24 @@ public class TypeModel extends ModelElement {
 		this._typeAnchors.addTypeAnchor(anchor, cpIndex);
 	}
 	/**
+	 * Create a method signature for a method of this type but applying a given substitution.
+	 * @param substitution type binding defining the substitution of type parameters
+	 * @param selector	   method selector, must designate a method of this type
+	 * @param signature	   method signature, together with selector must uniquely designate a method of this type 
+	 * @return	new method signature with type parameter substitutions applied
+	 */
+	public char[] substituteSignature(ParameterizedTypeBinding substitution, char[] selector, char[] signature) {
+		if (this._binding != null) {
+			for (MethodBinding method : this._binding.getMethods(selector)) {
+				if (CharOperation.equals(signature, method.signature())) {
+					MethodBinding substituteMethod = substitution.createParameterizedMethod(method);
+					return substituteMethod.genericSignature();
+				}
+			}					
+		}
+		return signature;
+	}
+	/**
 	 * Some attributes can only be evaluated after translation reaches a specific state
 	 *	at end of FAULT_IN_TYPES:
 	 *	    CallinMethodMappingAttribute, CalloutMethodMappingAttribute
@@ -490,15 +507,15 @@ public class TypeModel extends ModelElement {
 	}
 	/**
 	 * supports CALLIN_METHOD_MAPPINGS_ATTRIBUTE and STATE_REPLACE_BINDINGS_ATTRIBUTE
-	 * @param otherModel
+	 * @param superDeclaringType represents the type from which the attribute is being copied
 	 * @param attributeName
 	 */
-	public void copyAttributeFrom(TypeModel otherModel, char[] attributeName) {
-		if (otherModel._attributes == null)
+	public void copyAttributeFrom(TypeModel superDeclaringType, char[] attributeName) {
+		if (superDeclaringType._attributes == null)
 			return;
-		for (int i = 0; i < otherModel._attributes.length; i++) {
-			if (otherModel._attributes[i].nameEquals(attributeName)) {
-				addOrMergeAttribute(otherModel._attributes[i]);
+		for (int i = 0; i < superDeclaringType._attributes.length; i++) {
+			if (superDeclaringType._attributes[i].nameEquals(attributeName)) {
+				addOrMergeAttribute(superDeclaringType._attributes[i], superDeclaringType);
 				return;
 			}
 		}

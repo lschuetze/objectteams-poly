@@ -127,7 +127,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 	        } else {
 		        if (s != null) {
 			        Expression condition = gen.instanceOfExpression(gen.singleNameReference(LOCAL_BASE_NAME),
-			        												gen.baseclassReference(object.getBaseTypeBinding()));
+			        												gen.baseclassReference(object.getBaseTypeBinding(), true/*erase*/));
 					IfStatement is = gen.ifStatement(condition, s);
 			        if (prevIf == null)
 			        	stmts[1] = is;				// this is the root "if"

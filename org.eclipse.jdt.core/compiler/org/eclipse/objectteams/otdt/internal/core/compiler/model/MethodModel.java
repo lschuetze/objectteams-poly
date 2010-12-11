@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2008 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MethodModel.java 23417 2010-02-03 20:13:55Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -64,15 +63,12 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 /**
  * A fragment of method {@link #toString()} has been copied from 
  * {@link AbstractMethodDeclaration} of the Eclipse JDT. 
- * 
- * MIGRATION_STATE: complete.
  *
  * What: Flag abstract creation methods in non-abstract team
  * Why:  Must forbid their use.
  *       Mediates between CopyInheritance.internalCreateCreationMethod() and MessageSend.resolve().
  *
  * @author stephan
- * @version $Id: MethodModel.java 23417 2010-02-03 20:13:55Z stephan $
  */
 public class MethodModel extends ModelElement {
 
@@ -91,10 +87,19 @@ public class MethodModel extends ModelElement {
         return model;
     }
     public static MethodModel getModel(MethodBinding binding) {
-    	MethodModel model = binding.model;
+    	MethodModel model = model(binding);
     	if (model == null)
     		model = new MethodModel(binding);
     	return model;
+    }
+    // access even through parameterized method but don't create:
+    private static MethodModel model(MethodBinding method) {
+    	if (method.model != null)
+    		return method.model;
+    	MethodBinding original = method.original();
+    	if (original != method)
+    		return original.model;
+    	return null;
     }
     public void linkBinding(MethodBinding binding) {
     	this._binding = binding;
@@ -156,8 +161,9 @@ public class MethodModel extends ModelElement {
 	}
 
 	public static boolean isRoleMethodInheritedFromNonPublicRegular(MethodBinding current) {
-		if (current.model == null) return false;
-		return current.model.problemDetail == ProblemDetail.RoleInheritsNonPublic;
+		MethodModel model = model(current);
+		if (model == null) return false;
+		return model.problemDetail == ProblemDetail.RoleInheritsNonPublic;
 	}
 
 	// TODO(SH): note that role feature bridges are not really faked, since they are actually generated (synthetic?)
@@ -170,13 +176,15 @@ public class MethodModel extends ModelElement {
     public CalloutMappingDeclaration _inferredCallout = null;
 
 	public static boolean isFakedMethod(MethodBinding abstractMethod) {
-		if (abstractMethod.model != null)
-				return abstractMethod.model._fakeKind != FakeKind.NOT_FAKED;
+		MethodModel model = model(abstractMethod);
+		if (model != null)
+				return model._fakeKind != FakeKind.NOT_FAKED;
 		return false;
 	}
 	public static boolean isFakedMethod(MethodBinding abstractMethod, FakeKind fakeKind) {
-		if (abstractMethod.model != null)
-			return abstractMethod.model._fakeKind == fakeKind;
+		MethodModel model = model(abstractMethod);
+		if (model != null)
+			return model._fakeKind == fakeKind;
 		return false;
 	}
 	private MethodModel(AbstractMethodDeclaration decl) {
@@ -240,9 +248,10 @@ public class MethodModel extends ModelElement {
 		getModel(methodDecl).addCallinFlag(flag);
 	}
 	public static boolean hasCallinFlag(MethodBinding method, int flag) {
-		if (method.model == null)
+		MethodModel model = model(method);
+		if (model == null)
 			return false;
-		return (method.model.callinFlags & flag) == flag;
+		return (model.callinFlags & flag) == flag;
 	}
 
 	private boolean isForbiddenCreationMethod = false;
@@ -424,6 +433,9 @@ public class MethodModel extends ModelElement {
 		AbstractMethodDeclaration ast = binding.sourceMethod();
 		if (ast != null)
 			return ast.ignoreFurtherInvestigation;
+		MethodBinding original = binding.original();
+		if (original != binding)
+			return hasProblem(original);
 		return false;
 	}
 	private void setCallsBaseCtor() {
@@ -489,8 +501,9 @@ public class MethodModel extends ModelElement {
 	 * Note: don't call before analyseCode because we may need our tsupers to be analysed, too.
 	 */
 	public static boolean callsBaseCtor(MethodBinding method) {
-		if (method.model != null) {
-			if (method.model._callsBaseCtor)
+		MethodModel model = model(method);
+		if (model != null) {
+			if (model._callsBaseCtor)
 				return true;
 		}
 
@@ -517,8 +530,9 @@ public class MethodModel extends ModelElement {
 	 * @return rewritten modifiers or -1 signaling no change.
 	 */
 	public static int rewriteModifiersForBytecode(MethodBinding methodBinding) {
-		if (methodBinding.model != null)
-			return methodBinding.model.rewriteModifiersForBytecode();
+		MethodModel model = model(methodBinding);
+		if (model != null)
+			return model.rewriteModifiersForBytecode();
 		return -1;
 	}
 
@@ -542,7 +556,7 @@ public class MethodModel extends ModelElement {
 	}
 
 	public static TypeBinding getReturnType(MethodBinding method) {
-		MethodModel model = method.model;
+		MethodModel model = model(method);
 		if (model != null && model._returnType != null)
 			return model._returnType;
 
@@ -679,9 +693,10 @@ public class MethodModel extends ModelElement {
 		return false;
 	}
 	public static CalloutMappingDeclaration getImplementingInferredCallout(MethodBinding binding) {
-		if (binding.model == null)
+		MethodModel model = model(binding);
+		if (model == null)
 			return null;
-		return binding.model._inferredCallout;
+		return model._inferredCallout;
 	}
 
 	public static ReferenceBinding getRoleDeclaringThisMethodMapping(AbstractMethodDeclaration methodDecl) {

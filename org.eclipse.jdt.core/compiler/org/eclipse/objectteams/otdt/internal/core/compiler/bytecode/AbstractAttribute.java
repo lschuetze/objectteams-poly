@@ -38,6 +38,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
 /**
  * MIGRATION_STATE: complete. 2 fixme(generic) remain.
@@ -94,7 +95,7 @@ public abstract class AbstractAttribute
     	return nameEquals(other._name);
     }
 
-    public void merge (ModelElement model, AbstractAttribute other) {
+    public void merge (ModelElement model, AbstractAttribute other, TypeModel superDeclaringType) {
     	throw new InternalCompilerError("Merge not supported for Attribute "+new String(this._name)); //$NON-NLS-1$
     }
 
@@ -110,7 +111,7 @@ public abstract class AbstractAttribute
      * API: Write this attribute to the class file.
      * Need to override in subclasses to do useful stuff.
      *
-     * @param file class file structure to write to.
+     * @param classFile class file structure to write to.
      */
     public void write(ClassFile classFile) {
         this._contents       = classFile.contents;
@@ -120,7 +121,7 @@ public abstract class AbstractAttribute
 
     /** Write the attribute into an allocated array of bytes. */
     public void generate(byte[] target, int offset, ConstantPool constantPool) {
-    	ClassFile dummyClass = new ClassFile() {};
+    	ClassFile dummyClass = new ClassFile() { /* empty body */};
     	dummyClass.contents = target;
     	dummyClass.contentsOffset = offset;
     	dummyClass.constantPool = constantPool;
@@ -294,7 +295,7 @@ public abstract class AbstractAttribute
      * @param fieldBinding
      * @return true if attribute actually matched and was processed.
      */
-    public boolean evaluate(FieldBinding binding) {
+    public boolean evaluate(FieldBinding fieldBinding) {
         // NOOP. Override to do useful things.
         return false;
     }

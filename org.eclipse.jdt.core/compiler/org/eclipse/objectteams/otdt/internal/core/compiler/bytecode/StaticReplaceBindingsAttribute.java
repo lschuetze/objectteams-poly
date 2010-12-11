@@ -233,10 +233,9 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
 	/**
      * Read the attribute from byte code.
      *
-	 * @param info
-	 * @param readOffset
-	 * @param structOffset
-	 * @param constantPoolOffsets
+	 * @param reader				this reader holds the bytes to read
+	 * @param readOffset			offset where to start reading
+	 * @param constantPoolOffsets	constant pool offset to be used during reading 
 	 */
 	public StaticReplaceBindingsAttribute(ClassFileStruct reader, int readOffset, int[] constantPoolOffsets) {
 		super(IOTConstants.STATIC_REPLACE_BINDINGS);
@@ -254,10 +253,10 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
 	/**
 	 * Merge two attributes encoding method mappings from different roles of the same team.
 	 */
-	public void merge(ModelElement model, AbstractAttribute other)
+	public void merge(ModelElement model, AbstractAttribute superDeclaringType, ModelElement otherModel)
 	{
-		assert other instanceof StaticReplaceBindingsAttribute;
-		StaticReplaceBindingsAttribute otherSRBA = (StaticReplaceBindingsAttribute)other;
+		assert superDeclaringType instanceof StaticReplaceBindingsAttribute;
+		StaticReplaceBindingsAttribute otherSRBA = (StaticReplaceBindingsAttribute)superDeclaringType;
 
 		if (otherSRBA._mappings != null) {
 			// adding translated mappings

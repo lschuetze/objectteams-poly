@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -45,6 +46,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
 /**
@@ -147,8 +149,8 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 
 	    /** Compute the name of the file containing the given callin mapping.
 	     *  Do consider packages but no projects or source folders.
-	     * @param decl
-	     * @return
+	     * @param decl the declaration who's declaring file is being requested
+	     * @return non-null source-folder relative file name
 	     */
 	    private char[] getFileName(CallinMappingDeclaration decl) {
 			CompilationUnitDeclaration compilationUnit = decl.scope.referenceCompilationUnit();
@@ -330,10 +332,9 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
     /**
      * Read the attribute from byte code.
      *
-	 * @param info
-	 * @param readOffset
-	 * @param structOffset
-	 * @param constantPoolOffsets
+	 * @param reader				this reader holds the bytes to read
+	 * @param readOffset			offset where to start reading
+	 * @param constantPoolOffsets	constant pool offset to be used during reading 
 	 */
 	public CallinMethodMappingsAttribute(ClassFileStruct reader, int readOffset, int[] constantPoolOffsets) {
 		super(IOTConstants.CALLIN_METHOD_MAPPINGS);
@@ -348,7 +349,8 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 			this._mappings[i] = readMapping();
 	}
 
-	public void merge(ModelElement model, AbstractAttribute other)
+	@Override
+	public void merge(ModelElement model, AbstractAttribute other, TypeModel superDeclaringType)
 	{
 		assert other instanceof CallinMethodMappingsAttribute;
 		assert model instanceof TypeModel;
@@ -368,7 +370,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 			set.put(new String(mapping._mappingName), mapping.cloneForSubrole());
 			this._size += mapping.getSize();
 
-			newBindings.add(createBinding(typeBinding, mapping));
+			newBindings.add(createBinding(typeBinding, mapping, superDeclaringType));
 		}
 
 		// store combined array:
@@ -484,7 +486,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
     		return;
     	CallinCalloutBinding[] callins = new CallinCalloutBinding[this._mappings.length];
     	for (int i = 0; i < this._mappings.length; i++) {
-			callins[i] = createBinding(roleBinding, this._mappings[i]);
+			callins[i] = createBinding(roleBinding, this._mappings[i], null);
 		}
     	if (callins.length > 0)
     		roleBinding.addCallinCallouts(callins);
@@ -492,10 +494,12 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 
     /**
 	 * @param roleBinding
-	 * @param mapping
+     * @param mapping
+     * @param superDeclaringType model of the (t)super type (role/team) that originally declared the method mapping,
+     * 			can be null to signal that the binding is not being copy-inherited.
 	 * @throws InternalCompilerError
 	 */
-	private CallinCalloutBinding createBinding(ReferenceBinding roleBinding, Mapping mapping)
+	private CallinCalloutBinding createBinding(ReferenceBinding roleBinding, Mapping mapping, TypeModel superDeclaringType)
 	{
 		CallinCalloutBinding result = null;
 		CallinCalloutBinding[] callinCallouts = roleBinding.callinCallouts;
@@ -519,6 +523,10 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 
 		ReferenceBinding currentType = roleBinding;
 		char[] roleSignature = mapping._roleSignature;
+		// generics:
+		ReferenceBinding tsuperRoleBinding = findTSuperTypeFromModel(roleBinding.roleModel, superDeclaringType.getBinding());
+		if (tsuperRoleBinding.isParameterizedType())
+			roleSignature = superDeclaringType.substituteSignature((ParameterizedTypeBinding)tsuperRoleBinding, mapping._roleSelector, roleSignature);
 		if (result.callinModifier == TerminalTokens.TokenNamereplace) {
 			// ignore generalized return by truncating the signature:
 			int closePos = CharOperation.indexOf(')', roleSignature);
@@ -568,6 +576,16 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 
 		result.copyInheritanceSrc = findTSuperBinding(mapping._mappingName, roleBinding);
 		return result;
+	}
+
+	private ReferenceBinding findTSuperTypeFromModel(RoleModel model, ReferenceBinding roleBinding) {
+		if (roleBinding == null)
+			return null;
+		for (ReferenceBinding tsuperBinding : model.getTSuperRoleBindings()) {
+			if (tsuperBinding.erasure() == roleBinding)
+				return tsuperBinding;
+		}
+		return null;
 	}
 
 	private CallinCalloutBinding findTSuperBinding(char[] name, ReferenceBinding roleType) {

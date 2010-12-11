@@ -521,7 +521,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 		return gen.ifStatement(
 					gen.instanceOfExpression(
 					    gen.singleNameReference(_OT_ROLE_ARG),
-						gen.singleTypeReference(roleType)
+						gen.typeReference(roleType)
 					),
 					gen.block(new Statement[] {
 						gen.assignment(

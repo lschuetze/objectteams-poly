@@ -7,7 +7,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TypeLevel.java 23417 2010-02-03 20:13:55Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -282,6 +281,8 @@ public class TypeLevel {
 				throw new InternalCompilerError("superinterface not found for " //$NON-NLS-1$
 							+new String(destRole.internalName())+": " //$NON-NLS-1$
 							+new String(srcSuperIfcs[i].readableName()));
+			if (superTeam.isParameterizedType())
+				newSuperIfc = (ReferenceBinding) Scope.substitute((ParameterizedTypeBinding)superTeam, newSuperIfc);
 			newInterfaces.add(newSuperIfc);
 			destRole.scope.compilationUnitScope().recordSuperTypeReference(newSuperIfc);
 		}

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ModelElement.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -29,10 +28,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CallinMethod
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementor;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * @author stephan
- * @version $Id: ModelElement.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class ModelElement {
     /** OT-specific bytecode attributes for this model element. */
@@ -56,7 +52,13 @@ public class ModelElement {
         }
     }
 
-    public void addOrMergeAttribute (AbstractAttribute attr) {
+    /**
+     * Add an attribute possibly merging it with an existing attribute of the same kind.
+     * @param attr
+     * @param superDeclaringType if null we're defining a new attribute, if non-null superDeclaringType 
+     * 		represents the type from which the attribute is being copy-inherited
+     */
+    public void addOrMergeAttribute (AbstractAttribute attr, TypeModel superDeclaringType) {
     	AbstractAttribute existingAttr = null;
     	if (this._attributes != null) {
 	    	for (int i = 0; i < this._attributes.length; i++) {
@@ -75,7 +77,7 @@ public class ModelElement {
     		addAttribute(existingAttr = new CallinMethodMappingsAttribute(new CallinMappingDeclaration[0]));
     	}
 		// this call also creates bindings from the attribute:
-    	existingAttr.merge(this, attr);
+    	existingAttr.merge(this, attr, superDeclaringType);
     	if (attr.nameEquals(IOTConstants.CALLIN_METHOD_MAPPINGS))
     		CallinImplementor.checkCopyCallinBinding((CallinMethodMappingsAttribute)attr, this);
     }
