@@ -1174,6 +1174,154 @@ public class Java5 extends AbstractOTJLDTest {
     		"512-TeamA12grf14_2$__OT__R-12-TeamA12grf14_2$__OT__R-OK");
     }
 
+    // a role method uses a type parameter of its enclosing team in a callin method & binding
+    public void testA12_genericRoleFeature15() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf15_2.java",
+    			"public team class TeamA12grf15_2 extends TeamA12grf15_1<String> {\n" +
+    			"   @Override\n" +
+    			"	public class R playedBy TA12grf15 {\n" +
+    			"        @Override\n" +
+    			"        callin String test(String u) {\n" +
+    			"            return \"O\"+base.test(u);\n" +
+    			"        }\n" +
+    			"		 test <- replace test;\n" +
+    			"   }\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf15_2().activate();\n" +
+    			"       System.out.print(new TA12grf15().test(\"K\"));" +
+    			"   }\n" +
+    			"}\n",
+    	"TeamA12grf15_1.java",
+    			"public team class TeamA12grf15_1<U> {\n" +
+    			"	public class R {\n" +
+    			"        @SuppressWarnings(\"basecall\")\n" +
+    			"        callin U test(U u){ return u; }" +
+    			"   }\n" +
+    			"}\n",
+    	"TA12grf15.java",
+    			"public class TA12grf15 {\n" +
+    			"   protected String test(String u){ return u;}" +
+    			"}\n"
+    		},
+    		"OK");
+    }
+
+
+    // a role method uses a type parameter of its enclosing team, callin to private with inheritance
+    // middle team instantiates parameter
+    public void testA12_genericRoleFeature16() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf16_3.java",
+    			"public team class TeamA12grf16_3 extends TeamA12grf16_2 {\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf16_3().activate();\n" +
+    			"       System.out.print(new TA12grf16().test(\"K\"));" +
+    			"   }\n" +
+    			"}\n",
+    	"TeamA12grf16_2.java",
+				"public team class TeamA12grf16_2 extends TeamA12grf16_1<String> {\n" +
+				"   @Override\n" +
+				"	public class R playedBy TA12grf16 {\n" +
+				"		 test <- before test;\n" +
+				"   }\n" +
+				"}\n",
+    	"TeamA12grf16_1.java",
+    			"public team class TeamA12grf16_1<U> {\n" +
+    			"	public class R {\n" +
+				"        private U test(U u) {\n" +
+				"            System.out.print(\"O\");\n" +
+				"            return u;\n" +
+				"        }\n" +
+    			"   }\n" +
+    			"}\n",
+    	"TA12grf16.java",
+    			"public class TA12grf16 {\n" +
+    			"   protected String test(String u){ return u;}" +
+    			"}\n"
+    		},
+    		"OK");
+    }
+
+    // a role method uses a type parameter of its enclosing team, callin to private with inheritance
+    // subteam has callin binding
+    public void testA12_genericRoleFeature16a() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf16_3.java",
+    			"public team class TeamA12grf16_3 extends TeamA12grf16_2<String> {\n" +
+				"   @Override\n" +
+				"	public class R playedBy TA12grf16 {\n" +
+				"		 test <- before test;\n" +
+				"   }\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf16_3().activate();\n" +
+    			"       System.out.print(new TA12grf16().test(\"K\"));" +
+    			"   }\n" +
+    			"}\n",
+    	"TeamA12grf16_2.java",
+				"public team class TeamA12grf16_2<U> extends TeamA12grf16_1<U> {\n" +
+				"}\n",
+    	"TeamA12grf16_1.java",
+    			"public team class TeamA12grf16_1<U> {\n" +
+    			"	public class R {\n" +
+				"        private U test(U u) {\n" +
+				"            System.out.print(\"O\");\n" +
+				"            return u;\n" +
+				"        }\n" +
+    			"   }\n" +
+    			"}\n",
+    	"TA12grf16.java",
+    			"public class TA12grf16 {\n" +
+    			"   protected String test(String u){ return u;}" +
+    			"}\n"
+    		},
+    		"OK");
+    }
+
+
+    // a role method uses a type parameter of its enclosing team, callin to private with inheritance-
+    // type mismatch in callin binding (U <- String)
+    public void testA12_genericRoleFeature16f() {
+    	runNegativeTest(
+    		new String[] {
+    	"TeamA12grf16_3.java",
+    			"public team class TeamA12grf16_3 extends TeamA12grf16_2<String> {\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf16_3().activate();\n" +
+    			"       System.out.print(new TA12grf16().test(\"K\"));" +
+    			"   }\n" +
+    			"}\n",
+    	"TeamA12grf16_2.java",
+				"public team class TeamA12grf16_2<U> extends TeamA12grf16_1<U> {\n" +
+				"   @Override\n" +
+				"	public class R playedBy TA12grf16 {\n" +
+				"		 test <- before test;\n" +
+				"   }\n" +
+				"}\n",
+    	"TeamA12grf16_1.java",
+    			"public team class TeamA12grf16_1<U> {\n" +
+    			"	public class R {\n" +
+				"        private U test(U u) {\n" +
+				"            return u;\n" +
+				"        }\n" +
+    			"   }\n" +
+    			"}\n",
+    	"TA12grf16.java",
+    			"public class TA12grf16 {\n" +
+    			"   protected String test(String u){ return u;}" +
+    			"}\n"
+    		},
+    		"----------\n" + 
+    		"1. ERROR in TeamA12grf16_2.java (at line 4)\n" + 
+    		"	test <- before test;\n" + 
+    		"	^^^^\n" + 
+    		"Type mismatch: cannot convert from String to U\n" + 
+    		"----------\n");
+    }
+
     // a parameter of a callout binding requires autoboxing - explicit mapping
     // A.1.3-otjld-autoboxing-in-method-mapping-1
     public void testA13_autoboxingInMethodMapping1() {
