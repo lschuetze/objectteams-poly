@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IMethodMappingBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodMappingElement;
+import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.PrecedenceDeclaration;
@@ -146,6 +148,21 @@ public class MethodMappingBindingTest extends FileBasedDOMTest
         
         IMethodBinding actual = _testObj.getRoleMethod();
         IMethodBinding expected = roleMethod.resolveBinding();
+        
+        assertEquals(expected, actual);
+    }
+
+    public void testMethodSpecType()
+    {
+        MethodMappingElement roleMappingElement = _callins[0].getRoleMappingElement();
+
+        // check we have the same method:
+        MethodDeclaration roleMethod = (MethodDeclaration)_methods[1];
+        assertEquals(roleMethod.resolveBinding(), ((MethodSpec)roleMappingElement).resolveBinding());
+        
+        // check the return types:
+        ITypeBinding actual = roleMappingElement.getName().resolveTypeBinding();
+        ITypeBinding expected = roleMethod.resolveBinding().getReturnType();
         
         assertEquals(expected, actual);
     }

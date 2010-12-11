@@ -28,8 +28,16 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.LiftingType;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
+import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
 import org.eclipse.objectteams.otdt.ui.tests.dom.TypeDeclarationFinder;
 
@@ -45,10 +53,13 @@ public class TypeBindingTest extends FileBasedDOMTest
 	private ASTParser _parser;
 	private ICompilationUnit _cuTA;
     private ICompilationUnit _cuTB;
+    private ICompilationUnit _cuMyT;
 
     private RoleTypeDeclaration _roleTAT2R1;
     private RoleTypeDeclaration _roleTBT1R1;
     private RoleTypeDeclaration _roleTBT2R1;
+    
+    private TypeDeclaration _teamMyTeam;
 
     private RoleTypeDeclaration _focus;
     
@@ -81,7 +92,12 @@ public class TypeBindingTest extends FileBasedDOMTest
                 "src",
                 "roleTypeDeclaration.teampkg",
                 "TB.java");
-		
+        _cuMyT = getCompilationUnit(
+                getTestProjectDir(),
+                "src",
+                "roleTypeDeclaration.teampkg",
+                "MyTeam.java");
+        
 		_parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
 		_parser.setProject(super.getJavaProject(TEST_PROJECT));
         _parser.setResolveBindings(true);
@@ -108,6 +124,16 @@ public class TypeBindingTest extends FileBasedDOMTest
         finder.setName("TB.T2.R1");
         compUnit.accept(finder);
         _roleTBT2R1 = (RoleTypeDeclaration)finder.getTypeDeclaration();        
+
+        _parser.setSource(_cuMyT);
+        _parser.setResolveBindings(true);
+        
+        root = _parser.createAST( new NullProgressMonitor() );
+        compUnit = (CompilationUnit) root;
+
+        finder.setName("MyTeam");
+        compUnit.accept(finder);
+        _teamMyTeam = finder.getTypeDeclaration();
 	}
 	
 	public void testInstanceTypes()
@@ -136,5 +162,16 @@ public class TypeBindingTest extends FileBasedDOMTest
         // compare the optimal name, since TAT2R1 has no key
         assertEquals(expected[0].getOptimalName(), actual[0].getOptimalName());
         assertEquals(expected[1].getOptimalName(), actual[1].getOptimalName());
+    }
+    
+    public void testDeclaredLiftingType() {
+    	MethodDeclaration method = (MethodDeclaration) _teamMyTeam.bodyDeclarations().get(3);
+    	SingleVariableDeclaration arg1 = (SingleVariableDeclaration) method.parameters().get(0);
+    	Type type = arg1.getType();
+		ITypeBinding typeBinding = type.resolveBinding();
+    	assertEquals("Wrong type binding for type", "MyClass", typeBinding.getName());
+    	Name typeName = ((LiftingType)type).getName();
+		typeBinding = typeName.resolveTypeBinding();
+    	assertEquals("Wrong type binding for name", "MyClass", typeBinding.getName());
     }
 }

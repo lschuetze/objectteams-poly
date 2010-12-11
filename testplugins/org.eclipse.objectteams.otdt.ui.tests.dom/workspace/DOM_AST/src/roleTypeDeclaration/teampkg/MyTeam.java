@@ -57,5 +57,9 @@ public team class MyTeam
         }
         
         public void doSomething() {}
-    }   
+    }
+	
+	public void teamMethod(MyClass as Role1 arg1) { 
+		arg1.roleMethod1(0);
+	}
 }
