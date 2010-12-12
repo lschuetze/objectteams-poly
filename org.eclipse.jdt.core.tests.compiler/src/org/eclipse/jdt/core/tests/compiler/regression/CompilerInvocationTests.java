@@ -1866,6 +1866,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("AnchorNotFound", SKIP);
         expectedProblemAttributes.put("IncompatibleValueParameter", SKIP);
         expectedProblemAttributes.put("TypeHasNoValueParamAt", SKIP);
+        expectedProblemAttributes.put("ValueTypeArgumentMismatch", SKIP);
         expectedProblemAttributes.put("SYNTAX_RELATED", SKIP);
         expectedProblemAttributes.put("OTKeywordInRegularClass", SKIP);
         expectedProblemAttributes.put("InheritedNameIsOTKeyword", SKIP);
