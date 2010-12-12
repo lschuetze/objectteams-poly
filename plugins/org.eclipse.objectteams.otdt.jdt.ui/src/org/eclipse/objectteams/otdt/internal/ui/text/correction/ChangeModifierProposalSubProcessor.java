@@ -136,7 +136,7 @@ public class ChangeModifierProposalSubProcessor
 		else if (method == null)
 			method = methodDecl.resolveBinding();
 		if (methodDecl==null || method == null)
-			throw new InternalCompilerError("incomplete quickfix implementation"); //$NON-NLS-1$
+			return null;
 		String label = null;
 		String[] values = null;
 		if (modifier == Modifier.OT_CALLIN) {

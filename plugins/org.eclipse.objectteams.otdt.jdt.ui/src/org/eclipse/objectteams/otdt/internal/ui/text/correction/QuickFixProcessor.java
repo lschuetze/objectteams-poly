@@ -237,9 +237,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				callinMapping = (CallinMappingDeclaration)getEnclosingMethodMapping(selectedNode);
 				if (callinMapping != null) {
 					IMethodBinding roleMethod = ((MethodSpec)callinMapping.getRoleMappingElement()).resolveBinding();
-					proposals.add(ChangeModifierProposalSubProcessor
+					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, null, roleMethod, 
-																		 Modifier.OT_CALLIN, true));
+																		 Modifier.OT_CALLIN, true);
+					if (proposal != null) proposals.add(proposal);
 					proposals.add(ChangeModifierProposalSubProcessor
 										.getAddOrChangeCallinModifierProposal(cu, callinMapping));
 				}
@@ -248,41 +249,48 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				callinMapping = (CallinMappingDeclaration)getEnclosingMethodMapping(selectedNode);
 				if (callinMapping != null) {
 					IMethodBinding roleMethod = ((MethodSpec)callinMapping.getRoleMappingElement()).resolveBinding();
-					proposals.add(ChangeModifierProposalSubProcessor
+					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, null, roleMethod, 
-																		 Modifier.OT_CALLIN, false));
+																		 Modifier.OT_CALLIN, false);
+					if (proposal != null) proposals.add(proposal);
 					proposals.add(ChangeModifierProposalSubProcessor
 										.getAddOrChangeCallinModifierProposal(cu, callinMapping));
 				}
 				break;
 			case IProblem.RegularOverridesCallin:
-				if (selectedNode instanceof MethodDeclaration)
-					proposals.add(ChangeModifierProposalSubProcessor
+				if (selectedNode instanceof MethodDeclaration) {
+					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, (MethodDeclaration)selectedNode, null, 
-																  		 Modifier.OT_CALLIN, true));
+																  		 Modifier.OT_CALLIN, true);
+					if (proposal != null) proposals.add(proposal);
+				}
 				break;
 			case IProblem.CallinOverridesRegular:
-				if (selectedNode instanceof MethodDeclaration)
-					proposals.add(ChangeModifierProposalSubProcessor
+				if (selectedNode instanceof MethodDeclaration) {
+					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, (MethodDeclaration)selectedNode, null, 
-																  		 Modifier.OT_CALLIN, false));
+																  		 Modifier.OT_CALLIN, false);
+					if (proposal != null) proposals.add(proposal);
+				}
 				break;
 			case IProblem.CallinIncompatibleStatic:
 				callinMapping = (CallinMappingDeclaration)getEnclosingMethodMapping(selectedNode);
 				if (callinMapping != null) {
 					MethodSpec roleMSpec = (MethodSpec)callinMapping.getRoleMappingElement();
-					proposals.add(ChangeModifierProposalSubProcessor
+					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, null, roleMSpec.resolveBinding(), 
-																  		 Modifier.STATIC, true));
+																  		 Modifier.STATIC, true);
+					if (proposal != null) proposals.add(proposal);
 				}
 				break;
 			case IProblem.ReplaceCallinIncompatibleStatic:
 				callinMapping = (CallinMappingDeclaration)getEnclosingMethodMapping(selectedNode);
 				if (callinMapping != null) {
 					MethodSpec roleMSpec = (MethodSpec)callinMapping.getRoleMappingElement();
-					proposals.add(ChangeModifierProposalSubProcessor
+					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, null, roleMSpec.resolveBinding(),
-																  	 	 Modifier.STATIC, false));
+																  	 	 Modifier.STATIC, false);
+					if (proposal != null) proposals.add(proposal);
 				}
 				break;
 			case IProblem.CallinReplaceKeyWordNotOptional:
