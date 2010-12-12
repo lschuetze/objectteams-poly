@@ -146,7 +146,25 @@
             </message_arguments>
         </filter>
     </resource>
+    <resource path="dom/org/eclipse/jdt/core/dom/IMethodMappingBinding.java" type="org.eclipse.jdt.core.dom.IMethodMappingBinding">
+        <filter comment="@noimplement added between 0.7.1 and 0.8" id="403853384">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.dom.IMethodMappingBinding"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="model/org/eclipse/objectteams/otdt/core/ICallinMapping.java" type="org.eclipse.objectteams.otdt.core.ICallinMapping">
+        <filter comment="@noimplement added after 0.7 but before 0.8" id="403804204">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.ICallinMapping"/>
+                <message_argument value="getBaseMethodHandles()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="@noimplement added between 0.7.1 and 0.8" id="403853384">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.ICallinMapping"/>
+            </message_arguments>
+        </filter>
         <filter comment="method sign change, not remove/new." id="405901410">
             <message_arguments>
                 <message_argument value="org.eclipse.objectteams.otdt.core.ICallinMapping"/>
@@ -160,6 +178,17 @@
         </filter>
     </resource>
     <resource path="model/org/eclipse/objectteams/otdt/core/ICalloutMapping.java" type="org.eclipse.objectteams.otdt.core.ICalloutMapping">
+        <filter comment="@noimplement added after 0.7 but before 0.8" id="403804204">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.ICalloutMapping"/>
+                <message_argument value="getBaseMethodHandle()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="@noimplement added between 0.7.1 and 0.8" id="403853384">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.ICalloutMapping"/>
+            </message_arguments>
+        </filter>
         <filter comment="method sign change, not remove/new" id="405901410">
             <message_arguments>
                 <message_argument value="org.eclipse.objectteams.otdt.core.ICalloutMapping"/>
@@ -173,6 +202,17 @@
         </filter>
     </resource>
     <resource path="model/org/eclipse/objectteams/otdt/core/ICalloutToFieldMapping.java" type="org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping">
+        <filter comment="@noimplement added after 0.7 but before 0.8" id="403804204">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping"/>
+                <message_argument value="getBaseFieldHandle()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="@noimplement added between 0.7.1 and 0.8" id="403853384">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping"/>
+            </message_arguments>
+        </filter>
         <filter comment="method signature was changed due to split into API ifc and internal class" id="405901410">
             <message_arguments>
                 <message_argument value="org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping"/>
@@ -186,6 +226,17 @@
         </filter>
     </resource>
     <resource path="model/org/eclipse/objectteams/otdt/core/IMethodMapping.java" type="org.eclipse.objectteams.otdt.core.IMethodMapping">
+        <filter comment="@noimplement added after 0.7 but before 0.8" id="403804204">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.IMethodMapping"/>
+                <message_argument value="getRoleMethodHandle()"/>
+            </message_arguments>
+        </filter>
+        <filter comment="@noimplement added between 0.7.1 and 0.8" id="403853384">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.IMethodMapping"/>
+            </message_arguments>
+        </filter>
         <filter comment="method changed (sign), not removed" id="405901410">
             <message_arguments>
                 <message_argument value="org.eclipse.objectteams.otdt.core.IMethodMapping"/>
@@ -195,6 +246,54 @@
         <filter comment="method changed (sign) not removed" id="1211105284">
             <message_arguments>
                 <message_argument value="getRoleMethodHandle()"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/objectteams/otdt/core/IOTJavaElement.java" type="org.eclipse.objectteams.otdt.core.IOTJavaElement">
+        <filter comment="@noimplement added between 0.7.1 and 0.8" id="403853384">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.IOTJavaElement"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/objectteams/otdt/core/IOTType.java" type="org.eclipse.objectteams.otdt.core.IOTType">
+        <filter comment="@noimplement added between 0.7.1 and 0.8" id="403853384">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.IOTType"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/objectteams/otdt/core/IRoleFileType.java" type="org.eclipse.objectteams.otdt.core.IRoleFileType">
+        <filter comment="@noimplement added between 0.7.1 and 0.8" id="403853384">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.IRoleFileType"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/objectteams/otdt/core/IRoleType.java" type="org.eclipse.objectteams.otdt.core.IRoleType">
+        <filter comment="@noimplement added between 0.7.1 and 0.8" id="403853384">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.IRoleType"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/objectteams/otdt/core/OTModelManager.java" type="org.eclipse.objectteams.otdt.core.OTModelManager">
+        <filter comment="added @noreference between 0.7.1 and 0.8 to prevent leakage of type MappingElementInfo" id="338944126">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.OTModelManager"/>
+                <message_argument value="addCallinBinding(IType, MappingElementInfo)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="added @noreference between 0.7.1 and 0.8 to prevent leakage of type MappingElementInfo" id="338944126">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.OTModelManager"/>
+                <message_argument value="addCalloutBinding(IType, MappingElementInfo)"/>
+            </message_arguments>
+        </filter>
+        <filter comment="added @noreference between 0.7.1 and 0.8 to prevent leakage of type MappingElementInfo" id="338944126">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.OTModelManager"/>
+                <message_argument value="addCalloutToFieldBinding(IType, MappingElementInfo)"/>
             </message_arguments>
         </filter>
     </resource>
