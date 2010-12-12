@@ -1209,6 +1209,7 @@ public class Java5 extends AbstractOTJLDTest {
     }
 
     // a role method uses a type parameter of its enclosing team in a static callin method & binding
+    // other role is phantom
     public void testA12_genericRoleFeature15s() {
     	runConformTest(
     		new String[] {
@@ -1231,7 +1232,10 @@ public class Java5 extends AbstractOTJLDTest {
     			"public team class TeamA12grf15s_1<U> {\n" +
     			"	public class R {\n" +
     			"        @SuppressWarnings(\"basecall\")\n" +
-    			"        static callin U test(U u){ return u; }\n" +
+    			"        static callin U test(U u){ return new OtherRole().idem(u); }\n" +
+    			"   }\n" +
+    			"   public class OtherRole {\n" +
+    			"        protected U idem(U u) { return u; }\n" +
     			"   }\n" +
     			"}\n",
     	"TA12grf15s.java",
