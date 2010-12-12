@@ -33,7 +33,7 @@ public class Java5 extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testA12_genericRoleFeature14"};
+//		TESTS_NAMES = new String[] { "testA12_genericRoleFeature15"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1197,12 +1197,79 @@ public class Java5 extends AbstractOTJLDTest {
     			"public team class TeamA12grf15_1<U> {\n" +
     			"	public class R {\n" +
     			"        @SuppressWarnings(\"basecall\")\n" +
-    			"        callin U test(U u){ return u; }" +
+    			"        callin U test(U u){ return u; }\n" +
     			"   }\n" +
     			"}\n",
     	"TA12grf15.java",
     			"public class TA12grf15 {\n" +
-    			"   protected String test(String u){ return u;}" +
+    			"   protected String test(String u){ return u;}\n" +
+    			"}\n"
+    		},
+    		"OK");
+    }
+
+    // a role method uses a type parameter of its enclosing team in a static callin method & binding
+    public void testA12_genericRoleFeature15s() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf15s_2.java",
+    			"public team class TeamA12grf15s_2 extends TeamA12grf15s_1<String> {\n" +
+    			"   @Override\n" +
+    			"	public class R playedBy TA12grf15s {\n" +
+//    			"        @Override\n" +
+    			"        static callin String test(String u) {\n" +
+    			"            return \"O\"+base.test(u);\n" +
+    			"        }\n" +
+    			"		 test <- replace test;\n" +
+    			"   }\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf15s_2().activate();\n" +
+    			"       System.out.print(TA12grf15s.test(\"K\"));" +
+    			"   }\n" +
+    			"}\n",
+    	"TeamA12grf15s_1.java",
+    			"public team class TeamA12grf15s_1<U> {\n" +
+    			"	public class R {\n" +
+    			"        @SuppressWarnings(\"basecall\")\n" +
+    			"        static callin U test(U u){ return u; }\n" +
+    			"   }\n" +
+    			"}\n",
+    	"TA12grf15s.java",
+    			"public class TA12grf15s {\n" +
+    			"   static protected String test(String u){ return u;}\n" +
+    			"}\n"
+    		},
+    		"OK");
+    }
+
+    // a role method uses a type parameter of its enclosing team in a inherited static callin method & local binding
+    public void testA12_genericRoleFeature15si() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf15si_2.java",
+    			"public team class TeamA12grf15si_2 extends TeamA12grf15si_1<String> {\n" +
+    			"   @Override\n" +
+    			"	public class R playedBy TA12grf15si {\n" +
+    			"		 test <- replace test;\n" +
+    			"   }\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf15si_2().activate();\n" +
+    			"       System.out.print(TA12grf15si.test(\"K\"));" +
+    			"   }\n" +
+    			"}\n",
+    	"TeamA12grf15si_1.java",
+    			"public team class TeamA12grf15si_1<U> {\n" +
+    			"	public class R {\n" +
+    			"        @SuppressWarnings(\"basecall\")\n" +
+    			"        static callin U test(U u){\n" +
+    			"            System.out.print(\"O\");\n" +
+    			"            return u;\n" +
+    			"        }\n" +
+    			"   }\n" +
+    			"}\n",
+    	"TA12grf15si.java",
+    			"public class TA12grf15si {\n" +
+    			"   static protected String test(String u){ return u;}\n" +
     			"}\n"
     		},
     		"OK");
