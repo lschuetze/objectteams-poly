@@ -131,7 +131,8 @@ public interface TagBits {
 
 //{ObjectTeams:
 	// is parameterized type instantiated via tsuper-link?
-	long IsViewAsTSuper = ASTNode.Bit57L;					// for role type bindings
+	long IsViewedAsTSuper = ASTNode.Bit57L;					// for role type bindings
+	long IsCopyOfParameterized = ASTNode.Bit57L;			// for method bindings
 	
     // is it a wrapped role type?
     long IsWrappedRole = ASTNode.Bit58L;					// for role type bindings

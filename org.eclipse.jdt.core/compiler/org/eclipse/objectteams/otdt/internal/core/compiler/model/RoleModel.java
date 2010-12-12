@@ -1045,7 +1045,7 @@ public class RoleModel extends TypeModel
         	LookupEnvironment env = Config.getLookupEnvironment();
         	if (env != null) {
         		tsuperRole = env.createParameterizedType(tsuperRole, null, superTeamBinding);
-        		tsuperRole.tagBits |= TagBits.IsViewAsTSuper;
+        		tsuperRole.tagBits |= TagBits.IsViewedAsTSuper;
         	}
         }
         boolean tsuperAlreadyPresent = false;

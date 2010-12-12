@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: BytecodeTransformer.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -56,8 +55,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Documentation is in the methods themselves.
  *
  * @author Markus Witte and Stephan Herrmann
@@ -229,6 +226,7 @@ public class BytecodeTransformer
     	int copyInhSrcLineOffsetOffset;
     	// first phase of adjustment (method prefix and attributes except code):
 		copyInhSrcLineOffsetOffset = copyAdjustStructure(
+				classFile,
 				constantPoolOffsets == null 
 				? ConstantPoolSimpleConverter.create(srcRole, srcMethodBinding, methodCode, classFile)
 				: new ConstantPoolSimpleConverter(srcConstantPool, constantPoolOffsets, offset, methodCode, classFile),
@@ -349,13 +347,14 @@ public class BytecodeTransformer
      * @return if a CopyInheritanceSrc Attribute is already present return the offset where the lineOffset is stored, -1 otherwise
      */
     private int copyAdjustStructure(
+    		ClassFile classFile,
     		ConstantPoolSimpleConverter conv,
 			byte[] src, int srcOffset, byte[] dest,
 			MethodBinding dstMethod,
 			int expectedLen)
     {
     	conv.updateName(2); // method name
-    	conv.writeName(4, dstMethod.signature()); // method signature
+    	conv.writeName(4, dstMethod.signature(classFile, classFile.referenceBinding)); // method signature
     	int attributesCount = OTByteCodes.getWord(dest, 6);
 
     	int offset = METHOD_PREFIX_LEN;

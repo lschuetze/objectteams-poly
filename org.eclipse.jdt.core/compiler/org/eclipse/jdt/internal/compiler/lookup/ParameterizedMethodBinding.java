@@ -48,7 +48,7 @@ public class ParameterizedMethodBinding extends MethodBinding {
 /* orig:
 		final boolean isStatic = originalMethod.isStatic(); 
   :giro */
-		final boolean isStatic = originalMethod.isStatic() && (parameterizedDeclaringClass.tagBits & TagBits.IsViewAsTSuper) == 0;
+		final boolean isStatic = originalMethod.isStatic() && (parameterizedDeclaringClass.tagBits & TagBits.IsViewedAsTSuper) == 0;
 // SH}
 		if (length == 0) {
 			this.typeVariables = Binding.NO_TYPE_VARIABLES;

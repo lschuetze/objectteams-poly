@@ -4044,6 +4044,10 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 			methodBinding.signature(this.classFile));
   :giro */
 			methodBinding.signature(this.classFile, declaringClass));
+	// if signature is weakened to conform to tsuper erasure, we need a cast to make the result compatible to the expected type
+	if ((methodBinding.tagBits & TagBits.IsCopyOfParameterized) != 0 &&
+		methodBinding.returnType.erasure() != methodBinding.copyInheritanceSrc.original().returnType.erasure())
+		checkcast(methodBinding.returnType.erasure());
 // SH}
 }
 //{ObjectTeams: misguided callout-to-field accessor?? 

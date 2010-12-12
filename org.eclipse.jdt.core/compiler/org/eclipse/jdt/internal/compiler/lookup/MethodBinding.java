@@ -113,6 +113,8 @@ public class MethodBinding extends Binding implements IProtectable {
 	    			surrogate.copyInheritanceSrc = MethodModel.getModel(tsuperMethod).getBaseCallSurrogate();
     		}
     	}
+    	if (tsuperMethod.declaringClass.isRole() && tsuperMethod instanceof ParameterizedMethodBinding)
+    		this.tagBits |= TagBits.IsCopyOfParameterized;
     }
 
     // set of tsuper methods being overridden by this method
@@ -1422,6 +1424,9 @@ public final char[] signature(ClassFile classFile, TypeBinding constantPoolDecla
 // SH}
 //Note(SH): this method is not used by completion et al, therefor we don't need
 //          the retrenchRoleMethod arg here.
+//{ObjectTeams: for copy of parameterized:
+	MethodBinding tsuperOriginal = (this.tagBits & TagBits.IsCopyOfParameterized) != 0 ? this.copyInheritanceSrc.original() : null;
+// SH}
 	if (this.signature != null) {
 		if ((this.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 			// we need to record inner classes references
@@ -1536,6 +1541,15 @@ public final char[] signature(ClassFile classFile, TypeBinding constantPoolDecla
 				this.tagBits |= TagBits.ContainsNestedTypeReferences;
 				Util.recordNestedType(classFile, leafTargetParameterType);
 			}
+//{ObjectTeams: 'weaken' to that erasure that was used in the tsuper version:
+			if (   tsuperOriginal != null 
+				&& i < tsuperOriginal.parameters.length 
+				&& tsuperOriginal.parameters[i].isTypeVariable() 
+				&& !targetParameters[i].isTypeVariable()) 
+			{
+				targetParameter = tsuperOriginal.parameters[i].erasure();
+			}
+//SH}
 			buffer.append(targetParameter.signature());
 		}
 	}
@@ -1563,6 +1577,11 @@ public final char[] signature(ClassFile classFile, TypeBinding constantPoolDecla
 			this.tagBits |= TagBits.ContainsNestedTypeReferences;
 			Util.recordNestedType(classFile, ret);
 		}
+//{ObjectTeams: 'weaken' to that erasure that was used in the tsuper version:
+	  if (tsuperOriginal != null && tsuperOriginal.returnType.isTypeVariable() && !this.returnType.isTypeVariable())
+		buffer.append(tsuperOriginal.returnType.erasure().signature());
+	  else
+// SH}
 		buffer.append(this.returnType.signature());
 	}
 	int nameLength = buffer.length();
