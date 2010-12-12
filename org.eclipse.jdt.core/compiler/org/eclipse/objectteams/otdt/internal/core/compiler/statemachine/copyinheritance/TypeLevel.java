@@ -149,7 +149,8 @@ public class TypeLevel {
 		// - a binary type
 		// - has passed completeFieldsAndMethods
 		//   (including state final, where the ast-link is removed).
-		if (   srcRole.isBinaryBinding()
+		ReferenceBinding srcErasure = (ReferenceBinding) srcRole.erasure();
+		if (   srcErasure.isBinaryBinding()
 			|| StateHelper.hasState(srcRole, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS))
 		{
 			// directly add to binding only:
@@ -165,7 +166,7 @@ public class TypeLevel {
 		} else {
 			// source roles should avoid calling baseclass().
 			// rather create the reference at AST level:
-			final TypeDeclaration srcDecl= srcRole.roleModel.getAst();
+			final TypeDeclaration srcDecl= srcErasure.roleModel.getAst();
 			if (srcDecl.baseclass != null && destRoleDecl.baseclass == null) {
 				long pos= (((long)destRoleDecl.sourceStart)<<32)+destRoleDecl.sourceEnd;
 				// create a special type reference that uses the original scope for resolving:
