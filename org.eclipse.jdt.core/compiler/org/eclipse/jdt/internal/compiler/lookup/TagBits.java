@@ -130,6 +130,9 @@ public interface TagBits {
 	long HasNonPrivateConstructor = ASTNode.Bit53L;
 
 //{ObjectTeams:
+	// is parameterized type instantiated via tsuper-link?
+	long IsViewAsTSuper = ASTNode.Bit57L;					// for role type bindings
+	
     // is it a wrapped role type?
     long IsWrappedRole = ASTNode.Bit58L;					// for role type bindings
     // have types been wrapped in the signature

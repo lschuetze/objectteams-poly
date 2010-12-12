@@ -44,7 +44,12 @@ public class ParameterizedMethodBinding extends MethodBinding {
 		final TypeVariableBinding[] originalVariables = originalMethod.typeVariables;
 		Substitution substitution = null;
 		final int length = originalVariables.length;
-		final boolean isStatic = originalMethod.isStatic();
+//{ObjectTeams: along the tsuper-link staticness is ignored as methods can still be overridden:
+/* orig:
+		final boolean isStatic = originalMethod.isStatic(); 
+  :giro */
+		final boolean isStatic = originalMethod.isStatic() && (parameterizedDeclaringClass.tagBits & TagBits.IsViewAsTSuper) == 0;
+// SH}
 		if (length == 0) {
 			this.typeVariables = Binding.NO_TYPE_VARIABLES;
 			if (!isStatic) substitution = parameterizedDeclaringClass;
