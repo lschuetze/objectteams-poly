@@ -514,12 +514,12 @@ public class TeamModel extends TypeModel {
 		int dimensions = roleType.dimensions();
 		ReferenceBinding roleRefType = (ReferenceBinding)roleType.leafComponentType();
 		ReferenceBinding roleEnclosing = roleRefType.enclosingType();
-		if (roleEnclosing.isRole() && roleEnclosing != site) {
+		if (roleEnclosing.isRole() && roleEnclosing.erasure() != site.erasure()) {
 			// first strengthen enclosing team if it is nested:
 			ReferenceBinding strengthenedEnclosing = null;
-			if (roleEnclosing.enclosingType() != enclosingTeam.enclosingType())
+			if (roleEnclosing.erasure().enclosingType() != enclosingTeam.erasure().enclosingType())
 				strengthenedEnclosing = (ReferenceBinding)strengthenRoleType(site, roleEnclosing);
-			if (strengthenedEnclosing != null && strengthenedEnclosing != site) {
+			if (strengthenedEnclosing != null && strengthenedEnclosing.erasure() != site.erasure()) {
 				// we indeed found a better site, so start over:
 				return strengthenRoleType(strengthenedEnclosing, roleType);
 			}

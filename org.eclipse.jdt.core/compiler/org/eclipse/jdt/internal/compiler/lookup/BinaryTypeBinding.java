@@ -487,7 +487,8 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 			// attempt to find the superclass if it exists in the cache (otherwise - resolve it when requested)
 			this.superclass = (ReferenceBinding) this.environment.getTypeFromTypeSignature(wrapper, typeVars, this, missingTypeNames);
 //{ObjectTeams: wrapping of type (incl. its arguments)?
-			this.superclass = (ReferenceBinding) RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.superclass, this);
+			if (!TypeAnalyzer.isTopConfined(this.superclass))
+				this.superclass = (ReferenceBinding) RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.superclass, this);
 // SH}
 			this.tagBits |= TagBits.HasUnresolvedSuperclass;
 
