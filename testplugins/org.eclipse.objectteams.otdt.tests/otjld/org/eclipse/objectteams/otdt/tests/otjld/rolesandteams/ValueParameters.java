@@ -965,13 +965,13 @@ public class ValueParameters extends AbstractOTJLDTest {
 			    "        void basePrint() -> void print();\n" +
 			    "    }\n" +
 			    "    protected team class Mid {\n" +
-			    "	protected class RInner playedBy RMid {\n" +
-			    "	    protected void print() {\n" +
-			    "		System.out.print(\"RInner->\");\n" +
-			    "		wrongPrint();\n" +
-			    "	    }\n" +
-			    "            void midPrint() -> void basePrint();\n" +
-			    "	}\n" +
+			    "	 protected class RInner playedBy RMid {\n" +
+			    "	     protected void print() {\n" +
+			    "		     System.out.print(\"RInner->\");\n" +
+			    "		     wrongPrint();\n" +
+			    "	     }\n" +
+			    "        void midPrint() -> void basePrint();\n" +
+			    "	 }\n" +
 			    "        protected void midTest(RMid as RInner r) {\n" +
 			    "            r.print();\n" +
 			    "        }\n" +
@@ -993,14 +993,13 @@ public class ValueParameters extends AbstractOTJLDTest {
 			    "    public R1 getR() {\n" +
 			    "        return new R1();\n" +
 			    "    }\n" +
-			    "}\n" +
-			    "    \n"
+			    "}\n"
             },
             "----------\n" + 
     		"1. ERROR in Team199pt4f_2.java (at line 10)\n" + 
     		"	wrongPrint();\n" + 
     		"	^^^^^^^^^^\n" + 
-    		"The method wrongPrint() is undefined for the type Team199pt4f_2.Mid.RInner\n" + 
+    		"The method wrongPrint() is undefined for the type Team199pt4f_2<@other>.Mid.RInner\n" + 
     		"----------\n");
     }
 
@@ -1056,7 +1055,7 @@ public class ValueParameters extends AbstractOTJLDTest {
     		"2. ERROR in Team199pt4ff_2.java (at line 10)\n" + 
     		"	wrongPrint();\n" + 
     		"	^^^^^^^^^^\n" + 
-    		"The method wrongPrint() is undefined for the type Team199pt4ff_2.Mid.RInner\n" + 
+    		"The method wrongPrint() is undefined for the type Team199pt4ff_2<@other>.Mid.RInner\n" + 
     		"----------\n");
     }
 
