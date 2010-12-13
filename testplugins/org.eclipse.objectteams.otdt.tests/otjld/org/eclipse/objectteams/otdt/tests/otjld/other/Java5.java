@@ -1264,19 +1264,18 @@ public class Java5 extends AbstractOTJLDTest {
     	"TeamA12grf15si_1.java",
     			"public team class TeamA12grf15si_1<U> {\n" +
     			"	public class R {\n" +
-    			"        @SuppressWarnings(\"basecall\")\n" +
     			"        static callin U test(U u){\n" +
     			"            System.out.print(\"O\");\n" +
-    			"            return u;\n" +
+    			"            return base.test(u);\n" +
     			"        }\n" +
     			"   }\n" +
     			"}\n",
     	"TA12grf15si.java",
     			"public class TA12grf15si {\n" +
-    			"   static protected String test(String u){ return u;}\n" +
+    			"   static protected String test(String u){ return u+\"!\";}\n" +
     			"}\n"
     		},
-    		"OK");
+    		"OK!");
     }
 
 
