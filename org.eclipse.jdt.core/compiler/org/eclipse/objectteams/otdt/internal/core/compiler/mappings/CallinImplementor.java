@@ -165,7 +165,7 @@ public class CallinImplementor extends MethodMappingImplementor
         if (staticReplaces.size() > 0) {
         	CallinMappingDeclaration[] callins = new CallinMappingDeclaration[staticReplaces.size()];
         	staticReplaces.toArray(callins);
-        	this._role.getTeamModel().addOrMergeAttribute(new StaticReplaceBindingsAttribute(callins), null);
+        	this._role.getTeamModel().addOrMergeAttribute(new StaticReplaceBindingsAttribute(callins));
         }
 		return result;
 

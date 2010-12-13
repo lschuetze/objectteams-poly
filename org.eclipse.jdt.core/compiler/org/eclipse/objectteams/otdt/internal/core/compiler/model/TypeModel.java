@@ -35,9 +35,7 @@ import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
-import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
-import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
@@ -405,24 +403,7 @@ public class TypeModel extends ModelElement {
 		}
 		this._typeAnchors.addTypeAnchor(anchor, cpIndex);
 	}
-	/**
-	 * Create a method signature for a method of this type but applying a given substitution.
-	 * @param substitution type binding defining the substitution of type parameters
-	 * @param selector	   method selector, must designate a method of this type
-	 * @param signature	   method signature, together with selector must uniquely designate a method of this type 
-	 * @return	new method signature with type parameter substitutions applied
-	 */
-	public char[] substituteSignature(ParameterizedTypeBinding substitution, char[] selector, char[] signature) {
-		if (this._binding != null) {
-			for (MethodBinding method : this._binding.getMethods(selector)) {
-				if (CharOperation.equals(signature, method.signature())) {
-					MethodBinding substituteMethod = substitution.createParameterizedMethod(method);
-					return substituteMethod.genericSignature();
-				}
-			}					
-		}
-		return signature;
-	}
+
 	/**
 	 * Some attributes can only be evaluated after translation reaches a specific state
 	 *	at end of FAULT_IN_TYPES:
@@ -515,7 +496,7 @@ public class TypeModel extends ModelElement {
 			return;
 		for (int i = 0; i < superDeclaringType._attributes.length; i++) {
 			if (superDeclaringType._attributes[i].nameEquals(attributeName)) {
-				addOrMergeAttribute(superDeclaringType._attributes[i], superDeclaringType);
+				addOrMergeAttribute(superDeclaringType._attributes[i]);
 				return;
 			}
 		}

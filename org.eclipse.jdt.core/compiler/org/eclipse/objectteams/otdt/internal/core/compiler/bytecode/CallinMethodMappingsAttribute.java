@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CallinMethodMappingsAttribute.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -33,7 +32,6 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -46,7 +44,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
 /**
@@ -350,7 +347,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 	}
 
 	@Override
-	public void merge(ModelElement model, AbstractAttribute other, TypeModel superDeclaringType)
+	public void merge(ModelElement model, AbstractAttribute other)
 	{
 		assert other instanceof CallinMethodMappingsAttribute;
 		assert model instanceof TypeModel;
@@ -370,7 +367,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 			set.put(new String(mapping._mappingName), mapping.cloneForSubrole());
 			this._size += mapping.getSize();
 
-			newBindings.add(createBinding(typeBinding, mapping, superDeclaringType));
+			newBindings.add(createBinding(typeBinding, mapping));
 		}
 
 		// store combined array:
@@ -486,7 +483,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
     		return;
     	CallinCalloutBinding[] callins = new CallinCalloutBinding[this._mappings.length];
     	for (int i = 0; i < this._mappings.length; i++) {
-			callins[i] = createBinding(roleBinding, this._mappings[i], null);
+			callins[i] = createBinding(roleBinding, this._mappings[i]);
 		}
     	if (callins.length > 0)
     		roleBinding.addCallinCallouts(callins);
@@ -495,11 +492,9 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
     /**
 	 * @param roleBinding
      * @param mapping
-     * @param superDeclaringType model of the (t)super type (role/team) that originally declared the method mapping,
-     * 			can be null to signal that the binding is not being copy-inherited.
-	 * @throws InternalCompilerError
+     * @throws InternalCompilerError
 	 */
-	private CallinCalloutBinding createBinding(ReferenceBinding roleBinding, Mapping mapping, TypeModel superDeclaringType)
+	private CallinCalloutBinding createBinding(ReferenceBinding roleBinding, Mapping mapping)
 	{
 		CallinCalloutBinding result = null;
 		CallinCalloutBinding[] callinCallouts = roleBinding.callinCallouts;
@@ -523,12 +518,6 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 
 		ReferenceBinding currentType = roleBinding;
 		char[] roleSignature = mapping._roleSignature;
-		// generics:
-		if (superDeclaringType != null) {
-			ReferenceBinding tsuperRoleBinding = findTSuperTypeFromModel(roleBinding.roleModel, superDeclaringType.getBinding());
-			if (tsuperRoleBinding.isParameterizedType())
-				roleSignature = superDeclaringType.substituteSignature((ParameterizedTypeBinding)tsuperRoleBinding, mapping._roleSelector, roleSignature);
-		}
 		if (result.callinModifier == TerminalTokens.TokenNamereplace) {
 			// ignore generalized return by truncating the signature:
 			int closePos = CharOperation.indexOf(')', roleSignature);
@@ -542,7 +531,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 			while (currentType2 != null) {
 				MethodBinding[] methods = currentType2.getMethods(mapping._roleSelector);
 				for (int j = 0; j < methods.length; j++) {
-					if (CharOperation.prefixEquals(roleSignature, methods[j].signature(true/*retrench*/)))
+					if (CharOperation.equals(roleSignature, MethodSpec.signature(methods[j])))
 					{
 						result._roleMethodBinding = methods[j];
 						break roleMethod;
@@ -578,16 +567,6 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 
 		result.copyInheritanceSrc = findTSuperBinding(mapping._mappingName, roleBinding);
 		return result;
-	}
-
-	private ReferenceBinding findTSuperTypeFromModel(RoleModel model, ReferenceBinding roleBinding) {
-		if (roleBinding == null)
-			return null;
-		for (ReferenceBinding tsuperBinding : model.getTSuperRoleBindings()) {
-			if (tsuperBinding.erasure() == roleBinding)
-				return tsuperBinding;
-		}
-		return null;
 	}
 
 	private CallinCalloutBinding findTSuperBinding(char[] name, ReferenceBinding roleType) {

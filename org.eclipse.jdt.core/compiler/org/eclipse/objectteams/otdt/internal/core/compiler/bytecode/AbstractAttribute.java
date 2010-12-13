@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: AbstractAttribute.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -38,11 +37,8 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
 /**
- * MIGRATION_STATE: complete. 2 fixme(generic) remain.
- *
  * Abstraction over all OT-specific bytecode attributes.
  *
  * @author stephan
@@ -95,7 +91,7 @@ public abstract class AbstractAttribute
     	return nameEquals(other._name);
     }
 
-    public void merge (ModelElement model, AbstractAttribute other, TypeModel superDeclaringType) {
+    public void merge (ModelElement model, AbstractAttribute other) {
     	throw new InternalCompilerError("Merge not supported for Attribute "+new String(this._name)); //$NON-NLS-1$
     }
 

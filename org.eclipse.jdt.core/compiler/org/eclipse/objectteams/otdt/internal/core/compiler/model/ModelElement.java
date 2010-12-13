@@ -55,10 +55,8 @@ public class ModelElement {
     /**
      * Add an attribute possibly merging it with an existing attribute of the same kind.
      * @param attr
-     * @param superDeclaringType if null we're defining a new attribute, if non-null superDeclaringType 
-     * 		represents the type from which the attribute is being copy-inherited
      */
-    public void addOrMergeAttribute (AbstractAttribute attr, TypeModel superDeclaringType) {
+    public void addOrMergeAttribute (AbstractAttribute attr) {
     	AbstractAttribute existingAttr = null;
     	if (this._attributes != null) {
 	    	for (int i = 0; i < this._attributes.length; i++) {
@@ -77,7 +75,7 @@ public class ModelElement {
     		addAttribute(existingAttr = new CallinMethodMappingsAttribute(new CallinMappingDeclaration[0]));
     	}
 		// this call also creates bindings from the attribute:
-    	existingAttr.merge(this, attr, superDeclaringType);
+    	existingAttr.merge(this, attr);
     	if (attr.nameEquals(IOTConstants.CALLIN_METHOD_MAPPINGS))
     		CallinImplementor.checkCopyCallinBinding((CallinMethodMappingsAttribute)attr, this);
     }

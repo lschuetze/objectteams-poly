@@ -610,18 +610,41 @@ public class MethodSpec extends ASTNode
 
 	/** Like MethodBinding.signature() but use getSourceParamters() instead of enhanced parameters. */
 	public char[] signature() {
+		return signature(this.resolvedMethod);
+	}
+	/**
+	 * This method is used by 
+	 * {@link org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CallinMethodMappingsAttribute CallinMethodMappingsAttribute}
+	 * for decoding a mapping from its bytecode attribute.
+	 * @param method
+	 * @return the bytecode level signature of the given method (yet retrenched)
+	 */
+	public static char[] signature(MethodBinding method) {
+
 		StringBuffer buffer = new StringBuffer();
 		buffer.append('(');
-		// drop any substitutions:
-		MethodBinding resolvedOriginal = this.resolvedMethod.original();
-		TypeBinding[] sourceParameters = resolvedOriginal.getSourceParameters();
-		for (int i = 0; i < sourceParameters.length; i++)
-			buffer.append(sourceParameters[i].signature());
+		// manual retrenching:
+		int offset = method.isCallin() ? MethodSignatureEnhancer.ENHANCING_ARG_LEN : 0;
+		int paramLen = method.parameters.length;	
+		for (int i = offset; i < paramLen; i++) {
+			// 'weaken' to that erasure that was used in the tsuper version:
+			TypeBinding targetParameter = method.getCodeGenType(i);
+			buffer.append(targetParameter.signature());
+		}
 		buffer.append(')');
-		if (this.resolvedMethod.isCallin())
-			buffer.append(MethodModel.getReturnType(resolvedOriginal).signature());
-		else
-			buffer.append(resolvedOriginal.returnType.signature());
+		TypeBinding sourceReturnType = method.isCallin()
+				? MethodModel.getReturnType(method)
+				: method.returnType;
+		// 'weaken' to that erasure that was used in the tsuper version:
+		MethodBinding tsuperOriginal = (method.tagBits & TagBits.IsCopyOfParameterized) != 0 
+				? method.copyInheritanceSrc.original() 
+				: null;
+		TypeBinding returnType = (tsuperOriginal != null && tsuperOriginal.returnType.isTypeVariable() && !sourceReturnType.isTypeVariable())
+			 ? tsuperOriginal.returnType
+			 : sourceReturnType;
+		if (returnType.isTypeVariable() && method instanceof ParameterizedGenericMethodBinding)
+			returnType = ((ParameterizedGenericMethodBinding) method).reverseSubstitute((TypeVariableBinding)returnType);
+		buffer.append(returnType.erasure().signature());
 		int nameLength = buffer.length();
 		char[] signature = new char[nameLength];
 		buffer.getChars(0, nameLength, signature, 0);

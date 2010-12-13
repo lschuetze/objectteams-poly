@@ -113,7 +113,7 @@ public class MethodBinding extends Binding implements IProtectable {
 	    			surrogate.copyInheritanceSrc = MethodModel.getModel(tsuperMethod).getBaseCallSurrogate();
     		}
     	}
-    	if (tsuperMethod.declaringClass.isRole() && tsuperMethod instanceof ParameterizedMethodBinding)
+    	if (tsuperMethod != null && tsuperMethod.declaringClass.isRole() && tsuperMethod instanceof ParameterizedMethodBinding)
     		this.tagBits |= TagBits.IsCopyOfParameterized;
     }
 
@@ -801,6 +801,39 @@ public void resetParameters() {
 		this.generalizedReturnType = null;
 	}
 }
+/**
+ * Get type from this method's signature as it shall be used for code generation.
+ * The purpose is to weaken any parameter substitutions that have been applied
+ * along implicit inheritance.
+ * @param pos either a parameter position or -1 designating the return type.
+ * @return the 'weakened' type at the specified position.
+ */
+public TypeBinding getCodeGenType(int pos) {
+	MethodBinding tsuperOriginal = (this.tagBits & TagBits.IsCopyOfParameterized) != 0 ? this.copyInheritanceSrc.original() : null;
+	TypeBinding currentType, tsuperType;
+	checkTsuper: {
+		if (pos == -1) {
+			currentType = this.returnType;
+			if (tsuperOriginal == null)
+				break checkTsuper;
+			tsuperType = tsuperOriginal.returnType;
+		} else {
+			currentType = this.parameters[pos];
+			if (tsuperOriginal == null || pos >= tsuperOriginal.parameters.length)
+				break checkTsuper;
+			tsuperType = tsuperOriginal.parameters[pos];
+		}
+		if (   tsuperType.isTypeVariable() 
+			&& (((TypeVariableBinding)tsuperType).declaringElement.kind() & Binding.TYPE) != 0 
+			&& !currentType.isTypeVariable())
+			return tsuperType.erasure();
+	}
+	if (   currentType instanceof TypeVariableBinding
+		&& ((TypeVariableBinding)currentType).declaringElement.kind() == Binding.BINDING
+		&& this instanceof ParameterizedGenericMethodBinding)
+		return ((ParameterizedGenericMethodBinding)this).reverseSubstitute((TypeVariableBinding) currentType).erasure();
+	return currentType.erasure();
+}
 //MW+SH}
 
 /* Answer the receiver's constant pool name.
@@ -1424,9 +1457,6 @@ public final char[] signature(ClassFile classFile, TypeBinding constantPoolDecla
 // SH}
 //Note(SH): this method is not used by completion et al, therefor we don't need
 //          the retrenchRoleMethod arg here.
-//{ObjectTeams: for copy of parameterized:
-	MethodBinding tsuperOriginal = (this.tagBits & TagBits.IsCopyOfParameterized) != 0 ? this.copyInheritanceSrc.original() : null;
-// SH}
 	if (this.signature != null) {
 		if ((this.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
 			// we need to record inner classes references
@@ -1542,13 +1572,7 @@ public final char[] signature(ClassFile classFile, TypeBinding constantPoolDecla
 				Util.recordNestedType(classFile, leafTargetParameterType);
 			}
 //{ObjectTeams: 'weaken' to that erasure that was used in the tsuper version:
-			if (   tsuperOriginal != null 
-				&& i < tsuperOriginal.parameters.length 
-				&& tsuperOriginal.parameters[i].isTypeVariable() 
-				&& !targetParameters[i].isTypeVariable()) 
-			{
-				targetParameter = tsuperOriginal.parameters[i].erasure();
-			}
+			targetParameter = getCodeGenType(i);
 //SH}
 			buffer.append(targetParameter.signature());
 		}
@@ -1578,11 +1602,11 @@ public final char[] signature(ClassFile classFile, TypeBinding constantPoolDecla
 			Util.recordNestedType(classFile, ret);
 		}
 //{ObjectTeams: 'weaken' to that erasure that was used in the tsuper version:
-	  if (tsuperOriginal != null && tsuperOriginal.returnType.isTypeVariable() && !this.returnType.isTypeVariable())
-		buffer.append(tsuperOriginal.returnType.erasure().signature());
-	  else
+/* orig:
+		buffer.append(this.returnType.signature()); 
+  :giro */
+		buffer.append(getCodeGenType(-1).signature());
 // SH}
-		buffer.append(this.returnType.signature());
 	}
 	int nameLength = buffer.length();
 	this.signature = new char[nameLength];

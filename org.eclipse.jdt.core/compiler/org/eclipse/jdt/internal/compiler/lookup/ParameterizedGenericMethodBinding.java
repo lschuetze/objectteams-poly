@@ -512,6 +512,18 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 	    return originalVariable;
 	}
 //{ObjectTeams: more substitution:
+	/**
+	 * Check if the given variable was the result of substituting a variable from the original method.
+	 * If so answer the corresponding variable of the original method.
+	 * @param specificVariable a type variable from this method's scope.
+	 * @return either a type variable from the original method or the input specificVariable 
+	 */
+	public TypeVariableBinding reverseSubstitute(TypeVariableBinding specificVariable) {
+		int length = this.typeArguments.length;
+		if (specificVariable.rank < length && this.typeArguments[specificVariable.rank] == specificVariable)
+			return this.originalMethod.typeVariables[specificVariable.rank];
+		return specificVariable;
+	}
 	public ITeamAnchor substituteAnchor(ITeamAnchor anchor, int rank) {
 		TypeBinding typeArgument = this.typeArguments[rank];
 		if (DependentTypeBinding.isDependentType(typeArgument))

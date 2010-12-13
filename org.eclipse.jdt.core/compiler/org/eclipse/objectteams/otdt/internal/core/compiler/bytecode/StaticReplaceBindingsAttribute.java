@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: StaticReplaceBindingsAttribute.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -31,11 +30,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDecl
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Represents the "StaticReplaceBindings" attribute
  *
  * Location:
@@ -255,7 +251,7 @@ public class StaticReplaceBindingsAttribute extends AbstractAttribute {
 	 * Merge two attributes encoding method mappings from different roles of the same team.
 	 */
 	@Override
-	public void merge(ModelElement model, AbstractAttribute superDeclaringType, TypeModel sourceDeclaringType)
+	public void merge(ModelElement model, AbstractAttribute superDeclaringType)
 	{
 		assert superDeclaringType instanceof StaticReplaceBindingsAttribute;
 		StaticReplaceBindingsAttribute otherSRBA = (StaticReplaceBindingsAttribute)superDeclaringType;
