@@ -531,7 +531,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 			while (currentType2 != null) {
 				MethodBinding[] methods = currentType2.getMethods(mapping._roleSelector);
 				for (int j = 0; j < methods.length; j++) {
-					if (CharOperation.equals(roleSignature, MethodSpec.signature(methods[j])))
+					if (CharOperation.prefixEquals(roleSignature, MethodSpec.signature(methods[j])))
 					{
 						result._roleMethodBinding = methods[j];
 						break roleMethod;
