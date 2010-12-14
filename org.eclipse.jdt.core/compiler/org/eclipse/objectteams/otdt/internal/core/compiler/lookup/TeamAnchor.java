@@ -734,7 +734,7 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 		}
     	ReferenceBinding roleEnclosing = roleBinding.enclosingType();
     	if (   roleEnclosing != null
-    		&& roleEnclosing != leafType().getRealClass()) // i.e.: teams differ
+    		&& roleEnclosing.erasure() != leafType().getRealClass()) // i.e.: teams differ
     	{
     		//assert TeamModel.areCompatibleEnclosings(this.leafType(), roleEnclosing);
     		// team of roleBinding is less specific than this anchor => requesting a weakened type
