@@ -171,7 +171,7 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 				if (candidate.parameters.length != baseCallParameters.length)
 					continue;
 				for (int i=0; i<baseCallParameters.length; i++)
-					if (!areTypesEqual(baseCallParameters[i], candidate.parameters[i]))
+					if (!areTypesEqual(baseCallParameters[i].erasure(), candidate.parameters[i]))
 						continue candidates;
 				result = candidate;
 				break;
