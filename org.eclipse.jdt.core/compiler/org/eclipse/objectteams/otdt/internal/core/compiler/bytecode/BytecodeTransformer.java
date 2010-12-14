@@ -354,7 +354,10 @@ public class BytecodeTransformer
 			int expectedLen)
     {
     	conv.updateName(2); // method name
-    	conv.writeName(4, dstMethod.signature(classFile, classFile.referenceBinding)); // method signature
+    	ReferenceBinding declaringClass = classFile.referenceBinding;
+    	if (dstMethod.copyInheritanceSrc != null && dstMethod.isStatic()) // for copied static role methods weaken the synthetic team parameter
+    		declaringClass = dstMethod.copyInheritanceSrc.declaringClass;
+    	conv.writeName(4, dstMethod.signature(classFile, declaringClass)); // method signature
     	int attributesCount = OTByteCodes.getWord(dest, 6);
 
     	int offset = METHOD_PREFIX_LEN;
