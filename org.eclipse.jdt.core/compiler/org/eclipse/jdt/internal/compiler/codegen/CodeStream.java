@@ -4039,12 +4039,8 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 			returnTypeSize, 
 			declaringClass.constantPoolName(), 
 			methodBinding.selector, 
-//{ObjectTeams: static role methods need the updated declaringClass also to compute the signature:
-/* orig:
 			methodBinding.signature(this.classFile));
-  :giro */
-			methodBinding.signature(this.classFile, declaringClass));
-	// if signature is weakened to conform to tsuper erasure, we need a cast to make the result compatible to the expected type
+//{ObjectTeams: if signature is weakened to conform to tsuper erasure, we need a cast to make the result compatible to the expected type
 	if ((methodBinding.tagBits & TagBits.IsCopyOfParameterized) != 0 &&
 		methodBinding.returnType.erasure() != methodBinding.copyInheritanceSrc.original().returnType.erasure())
 		checkcast(methodBinding.returnType.erasure());

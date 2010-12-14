@@ -1449,12 +1449,7 @@ public final char[] signature(boolean retrenchRoleMethod) {
  *
  * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=171184
  */
-//{Object Teams: static role methods need the updated declaringClass also to compute the signature:
-/* orig:
 public final char[] signature(ClassFile classFile) {
-  :giro */
-public final char[] signature(ClassFile classFile, TypeBinding constantPoolDeclaringClass) {
-// SH}
 //Note(SH): this method is not used by completion et al, therefor we don't need
 //          the retrenchRoleMethod arg here.
 	if (this.signature != null) {
@@ -1530,11 +1525,13 @@ public final char[] signature(ClassFile classFile, TypeBinding constantPoolDecla
 // SH}
 	if (needSynthetics) {
 		// take into account the synthetic argument type signatures as well
-//{ObjectTeams: use the updated declaring class here:
-/* orig:
 		ReferenceBinding[] syntheticArgumentTypes = this.declaringClass.syntheticEnclosingInstanceTypes();
-  :giro */
-		ReferenceBinding[] syntheticArgumentTypes = ((ReferenceBinding) constantPoolDeclaringClass).syntheticEnclosingInstanceTypes();
+//{ObjectTeams: manual weakening of synthetic enclosing team arg (last segment only):
+		if (this.copyInheritanceSrc != null && this.isStatic()) {
+			syntheticArgumentTypes = this.copyInheritanceSrc.declaringClass.syntheticEnclosingInstanceTypes();
+			if (syntheticArgumentTypes != null && syntheticArgumentTypes.length > 0 && syntheticArgumentTypes[0].isRole())
+				syntheticArgumentTypes[0] = syntheticArgumentTypes[0].getRealType();
+		}
 // SH}
 		if (syntheticArgumentTypes != null) {
 			for (int i = 0, count = syntheticArgumentTypes.length; i < count; i++) {

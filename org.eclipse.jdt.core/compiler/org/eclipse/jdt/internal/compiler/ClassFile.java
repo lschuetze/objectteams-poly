@@ -2329,12 +2329,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 		if (this.referenceBinding instanceof LocalTypeBinding) {
 			MethodBinding methodBinding = ((LocalTypeBinding) this.referenceBinding).enclosingMethod;
 			if (methodBinding != null) {
-//{ObjectTeams: static role methods need to know the constant pool declaring class:
-/* orig:
 				int enclosingMethodIndex = this.constantPool.literalIndexForNameAndType(methodBinding.selector, methodBinding.signature(this));
-  :giro */
-				int enclosingMethodIndex = this.constantPool.literalIndexForNameAndType(methodBinding.selector, methodBinding.signature(this, this.referenceBinding));
-// SH}
 				methodIndexByte1 = (byte) (enclosingMethodIndex >> 8);
 				methodIndexByte2 = (byte) enclosingMethodIndex;
 			}
@@ -2843,12 +2838,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 		int nameIndex = this.constantPool.literalIndex(methodBinding.selector);
 		this.contents[this.contentsOffset++] = (byte) (nameIndex >> 8);
 		this.contents[this.contentsOffset++] = (byte) nameIndex;
-//{ObjectTeams: static role methods need the constant pool declaring class also to compute the signature:
-/* orig:
 		int descriptorIndex = this.constantPool.literalIndex(methodBinding.signature(this));
-  :giro */
-		int descriptorIndex = this.constantPool.literalIndex(methodBinding.signature(this, this.referenceBinding));
-// SH}
 		this.contents[this.contentsOffset++] = (byte) (descriptorIndex >> 8);
 		this.contents[this.contentsOffset++] = (byte) descriptorIndex;
 	}
