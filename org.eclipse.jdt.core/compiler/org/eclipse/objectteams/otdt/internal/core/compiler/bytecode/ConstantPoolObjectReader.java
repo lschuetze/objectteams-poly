@@ -275,7 +275,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 		char[] name = nameandtype[0];
 		char[] type = nameandtype[1];
 		FieldBinding fb = null;
-		if (!class_rb.isBinaryBinding()) {
+		if (class_rb.erasure() instanceof SourceTypeBinding) {
 			SourceTypeBinding sourceType = (SourceTypeBinding)class_rb.erasure();
 			// can't find synthetics in 'fields'.
 			if (CharOperation.prefixEquals(TypeConstants.SYNTHETIC_OUTER_LOCAL_PREFIX, name))
