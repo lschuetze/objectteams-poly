@@ -1392,6 +1392,29 @@ public class Java5 extends AbstractOTJLDTest {
     		"----------\n");
     }
 
+    // a role does not use the type parameter of its enclosing team, has callin binding
+    public void testA12_genericRoleFeature17() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf17.java",
+    			"public team class TeamA12grf17<U> {\n" +
+    			"	public class R playedBy TA12grf17 {\n" +
+    			"        callin String test(String u){ return base.test(u)+\"K\"; }\n" +
+    			"		 test <- replace test;\n" +
+    			"   }\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf17<String>().activate();\n" +
+    			"       System.out.print(new TA12grf17().test(\"O\"));" +
+    			"   }\n" +
+    			"}\n",
+    	"TA12grf17.java",
+    			"public class TA12grf17 {\n" +
+    			"   protected String test(String u){ return u;}\n" +
+    			"}\n"
+    		},
+    		"OK");
+    }
+
     // a parameter of a callout binding requires autoboxing - explicit mapping
     // A.1.3-otjld-autoboxing-in-method-mapping-1
     public void testA13_autoboxingInMethodMapping1() {
