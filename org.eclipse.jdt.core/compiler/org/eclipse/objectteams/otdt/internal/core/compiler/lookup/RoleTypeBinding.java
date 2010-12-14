@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
@@ -224,6 +225,13 @@ public class RoleTypeBinding extends DependentTypeBinding
             this._staticallyKnownRoleType = this._staticallyKnownTeam.getMemberType(roleType.sourceName);
         if (this._staticallyKnownRoleClass != null)
             this.modifiers = this._staticallyKnownRoleClass.modifiers;
+        // after we might have overwritten the modifiers restore some bits in the vein of ParameterizedTypeBinding:
+        if (this.arguments != null) {
+			this.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
+		} else if (this.enclosingType() != null) {
+			this.modifiers |= (this.enclosingType().modifiers & ExtraCompilerModifiers.AccGenericSignature);
+			this.tagBits |= this.enclosingType().tagBits & (TagBits.HasTypeVariable | TagBits.HasMissingType);
+		}
 
 		// record as known role type at teamAnchor and in our own cache
         registerAnchor();
