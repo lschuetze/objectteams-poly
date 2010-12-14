@@ -156,7 +156,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 		TypeReference roleArrayTypeRef;
 		if (sourceLevel >= ClassFileConstants.JDK1_5) {
 			objectCollectionRef = gen.parameterizedQualifiedTypeReference(
-												COLLECTION, new TypeBinding[] {objectBinding}, true/*deeply generic*/);
+												COLLECTION, new TypeBinding[] {objectBinding});
 			wildcardCollectionRef = gen.parameterizedQualifiedTypeReference(COLLECTION, new TypeReference[] { new Wildcard(Wildcard.UNBOUND) });
 			roleTypeRef= gen.singleTypeReference(T);
 			roleArrayTypeRef= gen.arrayTypeReference(T, 1);
@@ -385,7 +385,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 		return gen.allocation(
 					gen.sourceLevel >= ClassFileConstants.JDK1_5 ?
 							gen.parameterizedQualifiedTypeReference(
-									ARRAY_LIST, new TypeBinding[]{elemBinding}, true/*deeply generic*/) :
+									ARRAY_LIST, new TypeBinding[]{elemBinding}) :
 							gen.qualifiedTypeReference(ARRAY_LIST),
 					null);
 	}

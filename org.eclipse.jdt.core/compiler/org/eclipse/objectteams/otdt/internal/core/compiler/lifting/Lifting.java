@@ -696,17 +696,17 @@ public class Lifting extends SwitchOnBaseTypeGenerator
     {
         return this._gen.method(teamDecl.compilationResult,
   /*modifiers*/	  returnType.modifiers & (AccPublic|AccProtected|AccSynchronized),
-/*return type*/   createRoleTypeReference(returnType),
+/*return type*/   createRoleTypeReference(returnType, false/*classPart*/),
    /*selector*/	  methodName,
   /*arguments*/	  arguments
         );
     }
 
     // type reference may need to be parameterized if role type has type variables
-	private TypeReference createRoleTypeReference(ReferenceBinding roleType) {
+	private TypeReference createRoleTypeReference(ReferenceBinding roleType, boolean useClassPart) {
 		TypeVariableBinding[] typeVariables = roleType.typeVariables();
     	if (typeVariables == Binding.NO_TYPE_VARIABLES)
-    		return this._gen.typeReference(roleType);
+    		return this._gen.singleTypeReference(useClassPart ? roleType.sourceName : roleType.sourceName());
 		TypeReference[] typeParameters = new TypeReference[typeVariables.length];
 		for (int i=0; i<typeVariables.length; i++)
 			typeParameters[i] = this._gen.typeReference(typeVariables[i]);
@@ -727,7 +727,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 	        		// MyRole myRole = null;
 	        		this._gen.localVariable(
 	        				MY_ROLE,
-	        				createRoleTypeReference(roleClassBinding),
+	        				createRoleTypeReference(roleClassBinding, false/*classPart*/),
 							this._gen.nullLiteral()),
 
 
@@ -856,7 +856,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 
 		        // ... new MySubRoleB((MySubBaseB)base)
 		        gen.allocation(
-					createRoleTypeReference(role.getBinding()),
+					createRoleTypeReference(role.getBinding(), true/*classPart*/),
 					new Expression[] {
 		        		// use cast to establish actual type of base object:
 		                gen.castExpression(
@@ -958,7 +958,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 		        		this._gen.singleNameReference(MY_ROLE),
 						this._gen.castExpression(
 								this._gen.singleNameReference(ROLE),
-								createRoleTypeReference(returnType),
+								createRoleTypeReference(returnType, false/*classPart*/),
 								CastExpression.DO_WRAP))
 		        });
     }

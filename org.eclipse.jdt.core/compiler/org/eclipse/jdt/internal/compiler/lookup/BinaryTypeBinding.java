@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: BinaryTypeBinding.java 23405 2010-02-03 17:02:18Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -43,6 +42,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /*
@@ -502,7 +502,9 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 					types.add(this.environment.getTypeFromTypeSignature(wrapper, typeVars, this, missingTypeNames));
   :giro*/
 					TypeBinding type = this.environment.getTypeFromTypeSignature(wrapper, typeVars, this, missingTypeNames);
-					types.add(RoleTypeCreator.maybeWrapUnqualifiedRoleType(type, this));
+					if (!(type instanceof ReferenceBinding && TSuperHelper.isTSubOf(this, (ReferenceBinding) type)))
+						type = RoleTypeCreator.maybeWrapUnqualifiedRoleType(type, this);
+					types.add(type);
 // SH}
 				} while (!wrapper.atEnd());
 				this.superInterfaces = new ReferenceBinding[types.size()];

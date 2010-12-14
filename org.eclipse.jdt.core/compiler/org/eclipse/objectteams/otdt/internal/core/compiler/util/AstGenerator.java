@@ -299,14 +299,19 @@ public class AstGenerator extends AstFactory {
 		return new ParameterizedQualifiedTypeReference(compoundName, typeParameters, dims, poss);
 	}
 
+	/**
+	 * This method is only used for non-role types (incl. type parameters).
+	 * @param compoundName		  name of the main type
+	 * @param lastTypeParameters  bindings representing type parameters
+	 * @return a parameterized qualified type reference
+	 */
 	public QualifiedTypeReference parameterizedQualifiedTypeReference(
 				char[][] compoundName,
-				TypeBinding[] lastTypeParameters,
-				boolean makeDeeplyGeneric)
+				TypeBinding[] lastTypeParameters)
 	{
 		TypeReference[] parameterRefs = new TypeReference[lastTypeParameters.length];
 		for(int i = 0; i < lastTypeParameters.length; i++) {
-			parameterRefs[i] = typeReference(lastTypeParameters[i], makeDeeplyGeneric);
+			parameterRefs[i] = typeReference(lastTypeParameters[i], true/*generic*/);
 		}
 		return parameterizedQualifiedTypeReference(compoundName, parameterRefs);
 	}
@@ -388,6 +393,38 @@ public class AstGenerator extends AstFactory {
 			else
 				return new ArrayTypeReference(variableName, dims, this.pos);
     	} else if (makeGeneric && elementType.isParameterizedType()) {
+    		// this branch currently cannot handle references of this shape: Outer<T>.Inner
+    		// should that be needed at some point the following variant might do:
+/*
+			ParameterizedTypeBinding paramType = (ParameterizedTypeBinding)elementType;
+			char[][] compoundName = paramType.compoundName;
+			char[]tokenString = CharOperation.concatWith(compoundName, '$');
+			compoundName = CharOperation.splitOn('$', tokenString);
+			TypeReference[][] arguments = new TypeReference[compoundName.length][];
+			int argPos = compoundName.length-1;
+			boolean haveArguments = false;			
+			do {
+				TypeBinding[] argumentTypes = paramType.arguments;
+				if (argumentTypes != null) {
+					haveArguments = true;
+					TypeReference[] currentArgs = new TypeReference[argumentTypes.length];
+					arguments[argPos] = currentArgs;
+					for (int i = 0; i < argumentTypes.length; i++) {
+						currentArgs[i] = typeReference(argumentTypes[i]);
+					}
+				}
+				ReferenceBinding enclosing = paramType.enclosingType();
+				argPos--;
+				if (enclosing instanceof ParameterizedTypeBinding)
+					paramType = (ParameterizedTypeBinding) enclosing;
+				else break;
+			} while (argPos >= 0);
+			if (haveArguments) {
+				long[] poss = new long[compoundName.length];
+				Arrays.fill(poss, this.pos);
+				return new ParameterizedQualifiedTypeReference(compoundName, arguments, dims, poss);
+			}
+ */
 			ParameterizedTypeBinding paramType = (ParameterizedTypeBinding)elementType;
 			TypeBinding[] argumentTypes = paramType.arguments;
     		if (argumentTypes != null) {
@@ -1053,11 +1090,13 @@ public class AstGenerator extends AstFactory {
 			ReferenceBinding rootRoleBinding = boundRootRole.getInterfacePartBinding();
 
 			ParameterizedQualifiedTypeReference fieldTypeRef;
+			TypeReference[] typeArguments = new TypeReference[] {
+				baseclassReference(baseTypeBinding, true/*erase*/),
+				singleTypeReference(rootRoleBinding.sourceName())	
+			};
 			fieldTypeRef = (ParameterizedQualifiedTypeReference)parameterizedQualifiedTypeReference(
 								WEAK_HASH_MAP,
-								new ReferenceBinding[] {baseTypeBinding, rootRoleBinding},
-								false/*not deeply generic*/);
-			fieldTypeRef.typeArguments[2][0].setBaseclassDecapsulation(DecapsulationState.REPORTED);
+								typeArguments);
 			return fieldTypeRef;
 	    } else {
 	    	return new QualifiedTypeReference(WEAK_HASH_MAP, new long[]{this.pos,this.pos,this.pos});

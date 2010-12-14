@@ -201,21 +201,21 @@ public class RoleClassLiteralAccess extends ClassLiteralAccess {
 			gen = new AstGenerator(roleDecl.scope.compilerOptions().sourceLevel, roleDecl.sourceStart, roleDecl.sourceEnd);
 		else
 			gen = new AstGenerator(teamDecl.scope.compilerOptions().sourceLevel, teamDecl.sourceStart, teamDecl.sourceEnd);
+		TypeReference[] typeArguments = new TypeReference[] {gen.singleTypeReference(roleBinding.sourceName())};
 		MethodDeclaration method = gen.method(teamDecl.compilationResult,
 				(teamBinding.isRole())
 					? ClassFileConstants.AccPublic // advertized via ifc, must be public
 					: roleBinding.modifiers & AccVisibilityMASK,
 				gen.parameterizedQualifiedTypeReference( // java.lang.Class<R>
 							TypeConstants.JAVA_LANG_CLASS,
-							new TypeBinding[] { roleBinding.getRealType() },
-							true/*deeply generic*/),
+							typeArguments),
 				selector,
 				null);
 		if (teamBinding.isInterface())
 			method.modifiers |= ClassFileConstants.AccAbstract|ExtraCompilerModifiers.AccSemicolonBody;
 		else
 			method.setStatements(new Statement[] {
-				gen.returnStatement(new ClassLiteralAccess(gen.sourceEnd, gen.typeReference(roleBinding), true))
+				gen.returnStatement(new ClassLiteralAccess(gen.sourceEnd, gen.singleTypeReference(roleBinding.sourceName()), true))
 			});
 		AstEdit.addMethod(teamDecl, method);
 		return method.returnType.resolvedType;

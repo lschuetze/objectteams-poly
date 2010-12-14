@@ -333,7 +333,7 @@ public class LiftingEnvironment
 	    // But by declaring the caches public the issue is completely avoided,
 	    // hoping, that no-one maliciously accesses the cache.
 	    
-	    // if base/role are generic, we refer to them via the raw type, suppress that warning:
+	    // if base is generic, we refer to it via the raw type, suppress that warning:
 	    if (usingRawType) {
 		    field.annotations = new Annotation[] {
 		    	gen.singleStringsMemberAnnotation(TypeConstants.JAVA_LANG_SUPPRESSWARNINGS, new char[][]{"rawtypes".toCharArray()}) //$NON-NLS-1$ 
