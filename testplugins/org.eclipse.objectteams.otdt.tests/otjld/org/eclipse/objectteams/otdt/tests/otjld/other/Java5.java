@@ -33,7 +33,7 @@ public class Java5 extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testA12_genericRoleFeature15"};
+//		TESTS_NAMES = new String[] { "testA12_genericRoleFeature18"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1413,6 +1413,85 @@ public class Java5 extends AbstractOTJLDTest {
     			"}\n"
     		},
     		"OK");
+    }
+
+    // a role does not use the type parameter of its enclosing team, has callin binding, copied as phantom role
+    // witness for "The return type is incompatible with TeamA12grf18_1<U>._OT$getClass$ILowerable()"
+    public void testA12_genericRoleFeature18() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf18_2.java",
+    			"public team class TeamA12grf18_2<U> extends TeamA12grf18_1<U> {\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf18_2<String>().activate();\n" +
+    			"       System.out.print(new TA12grf18().test(\"I\"));" +
+    			"   }\n" +
+    			"}\n",
+    	"TeamA12grf18_1.java",
+    			"public team class TeamA12grf18_1<U> {\n" +
+    			"	public class R playedBy TA12grf18 {\n" +
+    			"        callin String test(String u){ return base.test(u)+\"K\"; }\n" +
+    			"		 test <- replace test;\n" +
+    			"   }\n" +
+    			"}\n",
+    	"TA12grf18.java",
+    			"public class TA12grf18 {\n" +
+    			"   protected String test(String u){ return u;}\n" +
+    			"}\n"
+    		});
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf18_2.java",
+    			"public team class TeamA12grf18_2<U> extends TeamA12grf18_1<U> {\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf18_2<String>().activate();\n" +
+    			"       System.out.print(new TA12grf18().test(\"O\"));" +
+    			"   }\n" +
+    			"}\n",
+    		},
+    		"OK",
+    		null,
+    		false/*shouldFlushOutputDirectory*/,
+    		null);
+    }
+
+    // a role does not use the type parameter of its enclosing team, has callin binding, copied as phantom role
+    public void testA12_genericRoleFeature19() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf19_2.java",
+    			"public team class TeamA12grf19_2 extends TeamA12grf19_1<String> {\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf19_2().activate();\n" +
+    			"       System.out.print(new TA12grf19().test(\"I\"));" +
+    			"   }\n" +
+    			"}\n",
+    	"TeamA12grf19_1.java",
+    			"public team class TeamA12grf19_1<U> {\n" +
+    			"	public class R playedBy TA12grf19 {\n" +
+    			"        callin String test(String u){ return base.test(u)+\"K\"; }\n" +
+    			"		 test <- replace test;\n" +
+    			"   }\n" +
+    			"}\n",
+    	"TA12grf19.java",
+    			"public class TA12grf19 {\n" +
+    			"   protected String test(String u){ return u;}\n" +
+    			"}\n"
+    		});
+    	runConformTest(
+    		new String[] {
+    	"TeamA12grf19_2.java",
+    			"public team class TeamA12grf19_2 extends TeamA12grf19_1<String> {\n" +
+    			"   public static void main(String... args) {\n" +
+    			"       new TeamA12grf19_2().activate();\n" +
+    			"       System.out.print(new TA12grf19().test(\"O\"));" +
+    			"   }\n" +
+    			"}\n",
+    		},
+    		"OK",
+    		null,
+    		false/*shouldFlushOutputDirectory*/,
+    		null);
     }
 
     // a parameter of a callout binding requires autoboxing - explicit mapping
