@@ -156,7 +156,7 @@ public class TransformStatementsVisitor
     			}
     		} else if (args != null) {
     			int len = args.length;
-    			if (methodDecl.isStatic()) // chop of premature isSuperAccess flag:
+    			if (isBaseCall && methodDecl.isStatic()) // chop of premature isSuperAccess flag:
     				System.arraycopy(args, 1, args=new Expression[len-1], 0, len-1);
     		}
 			messageSend.arguments = MethodSignatureEnhancer.enhanceArguments(args, messageSend.sourceEnd+1);
