@@ -811,21 +811,6 @@ public class TeamInterfaceImplementation
 			String baseChainMethodName       = genChainMethName(baseMethodName);
 			Type   baseChainReturnType       = object; // ALWAYS
 			Type[] enhancedBaseArgumentTypes = enhanceArgumentTypes(baseMethodArgumentTypes);
-			
-			boolean resultLiftingNecessary   = false;
-
-            // TODO (SH): if both types are ObjectType we should probably use subclassOf() ??
-            // (don't lift if simple polymorphism suffices!)
-            //TODO: if the base method return type is a subtype of the role method return type no lifting has to take place!! is this allowed??
-			//if (!returnTypeCompatible(baseMethodReturnType, returnType) && callinHasReturnValue)
-			if (/*!baseMethodReturnType.equals(object) &&*/ 
-				   !baseMethodReturnType.equals(returnType) 
-				&& !(baseMethodReturnType instanceof BasicType) // requires boxing not lifting
-				&& !(returnType instanceof BasicType)			// requires unboxing not lifting
-				&& callinHasReturnValue)
-			{
-				resultLiftingNecessary = true;
-			}
 
 			// --- load arguments of the new method: ---
 			//     (letters refer to document parameter-passing.odg)
@@ -857,8 +842,7 @@ public class TeamInterfaceImplementation
 										   enhancedBaseArgumentTypes,
 										   invocationKind));
 
-			// FIXME(SH): if this assert holds, remove computing of resultLiftingNecessary above.
-			assert resultLiftingNecessary == ((baseMethod.translationFlags & 1) != 0);
+			boolean resultLiftingNecessary = ((baseMethod.translationFlags & 1) != 0);
 			
 			if (resultLiftingNecessary) { // call the lift-method: 
 				Type[] liftMethodArgs = Type.getArgumentTypes(liftMethodSignature);
