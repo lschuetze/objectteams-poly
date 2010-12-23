@@ -96,15 +96,23 @@ public class JPLISEnhancer implements ClassEnhancer {
 		// SH: no forced class loading within OT/Equinox
 		if(System.getProperty("ot.equinox") != null)
 			return;
+		InputStream is = null;
 		try {
 			String binaryName = className.replace('.', '/');
-			InputStream is = loader.getResourceAsStream(binaryName+".class");
+			is = loader.getResourceAsStream(binaryName+".class");
 			if (is != null) {
 				ClassGen cg = new ClassGen(new ClassParser(is, className).parse());
 				client.checkReadClassAttributes(this, cg, className, cg.getConstantPool());
 			}
 		} catch (IOException ex) {
 			ex.printStackTrace();
+		} finally {
+			if (is != null)
+				try {
+					is.close();
+				} catch (IOException e) {
+					// nothing we can do
+				}
 		}
 	}
 

@@ -145,9 +145,19 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		// tell Repository about the class loader for improved lookupClass()
 		ClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
 		
-		InputStream is  = new ByteArrayInputStream(classfileBuffer);
 		try {
-			JavaClass java_class = new ClassParser(is, className).parse();
+			InputStream is = new ByteArrayInputStream(classfileBuffer);
+			JavaClass java_class;
+			try {
+				java_class = new ClassParser(is, className).parse();
+			} finally {
+				if (is != null)
+					try {
+						is.close();
+					} catch (IOException e) {
+						// nothing we can do
+					}
+			}
 			//Repository.addClass(java_class);
 			ClassGen cg = new ClassGen(java_class);
 			
