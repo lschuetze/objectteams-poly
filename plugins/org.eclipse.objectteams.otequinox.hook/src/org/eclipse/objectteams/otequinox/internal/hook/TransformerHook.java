@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otequinox.internal.hook;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
@@ -194,7 +195,15 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 		String superName = null;
 		InputStream is = resourceLoader.getResourceAsStream(className.replace('.', '/')+".class");
 		if (is != null)
-			superName = this.byteCodeAnalyzer.getSuperclass(is, className); 
+			try {
+				superName = this.byteCodeAnalyzer.getSuperclass(is, className);
+			} finally {
+				try {
+					is.close();
+				} catch (IOException e) {
+					// nothing we can do
+				}
+			}
 		if (superName != null) {
 			if ("java.lang.Thread".equals(superName))
 				return ClassKind.BASE; // ensure TeamActivation will weave the calls to TeamThreadManager

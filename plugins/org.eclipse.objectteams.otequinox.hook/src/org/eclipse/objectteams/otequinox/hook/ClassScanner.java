@@ -17,6 +17,7 @@
 package org.eclipse.objectteams.otequinox.hook;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -74,7 +75,13 @@ public class ClassScanner
 		URL classFile = bundle.getResource(className.replace('.', '/')+".class");
 		if (classFile == null) 
 			throw new ClassNotFoundException(className);
-		Object token = this.transformerService.readOTAttributes(classFile.openStream(), classFile.getFile(), loader);
+		InputStream inputStream = classFile.openStream();
+		Object token;
+		try {
+			token = this.transformerService.readOTAttributes(inputStream, classFile.getFile(), loader);
+		} finally {
+			inputStream.close();
+		}
 		Collection<String> currentBaseNames = this.transformerService.fetchAdaptedBases(token); // destructive read
 		if (currentBaseNames != null) {
 			// store per team:
