@@ -7701,6 +7701,9 @@ public void unsafeRawFieldAssignment(FieldBinding field, TypeBinding expressionT
 }
 public void unsafeRawGenericMethodInvocation(ASTNode location, MethodBinding rawMethod, TypeBinding[] argumentTypes) {
 	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
+//{ObjectTeams: some method calls have no chance to apply all necessary type arguments:
+	if (location instanceof MessageSend && ((MessageSend)location).isPushedOutRoleMethodCall) return;
+// SH}
 	boolean isConstructor = rawMethod.isConstructor();
 	int severity = computeSeverity(isConstructor ? IProblem.UnsafeRawGenericConstructorInvocation : IProblem.UnsafeRawGenericMethodInvocation);
 	if (severity == ProblemSeverities.Ignore) return;
@@ -7822,6 +7825,9 @@ public void unsafeReturnTypeOverride(MethodBinding currentMethod, MethodBinding 
 }
 public void unsafeTypeConversion(Expression expression, TypeBinding expressionType, TypeBinding expectedType) {
 	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) return; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=305259
+//{ObjectTeams: no warnings at generated casts:
+	if (expression instanceof CastExpression && ((CastExpression)expression).isGenerated) return;
+// SH}
 	int severity = computeSeverity(IProblem.UnsafeTypeConversion);
 	if (severity == ProblemSeverities.Ignore) return;
 	this.handle(

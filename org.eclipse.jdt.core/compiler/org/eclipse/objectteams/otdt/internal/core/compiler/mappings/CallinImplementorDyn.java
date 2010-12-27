@@ -384,9 +384,12 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						for (int i=0; i<baseSpec.arguments.length; i++) {
 							Argument baseArg = baseSpec.arguments[i];
 							Expression rawArg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i);
-							Expression init = (baseParams[i].isBaseType())
-									? gen.createUnboxing(rawArg, (BaseTypeBinding)baseParams[i]) // includes intermediate cast to boxed type
-									: gen.castExpression(rawArg, gen.typeReference(baseParams[i]), CastExpression.RAW);
+							Expression init = rawArg;
+							if (baseParams[i].isBaseType()) {
+								init = gen.createUnboxing(rawArg, (BaseTypeBinding)baseParams[i]); // includes intermediate cast to boxed type
+							} else if (!baseParams[i].isTypeVariable()) {
+								init = gen.castExpression(rawArg, gen.typeReference(baseParams[i].erasure()), CastExpression.RAW);
+							}
 							blockStatements[statIdx++] = gen.localVariable(baseArg.name, AstClone.copyTypeReference(baseArg.type), init);
 						}
 					}
@@ -408,7 +411,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								arg = gen.createUnboxing(arg, (BaseTypeBinding)roleParams[i]); // includes intermediate cast to boxed type
 							} else {
 								// Object -> MyBaseClass
-								arg = gen.castExpression(arg, gen.typeReference(baseSpec.resolvedParameters()[i]), CastExpression.DO_WRAP);
+								if (!baseSpec.resolvedParameters()[i].isTypeVariable())
+									arg = gen.castExpression(arg, gen.typeReference(baseSpec.resolvedParameters()[i].erasure()), CastExpression.DO_WRAP);
 								// lift?(MyBaseClass) 
 								arg = gen.potentialLift(gen.thisReference(), arg, roleParams[i], isReplace/*reversible*/);
 							}
