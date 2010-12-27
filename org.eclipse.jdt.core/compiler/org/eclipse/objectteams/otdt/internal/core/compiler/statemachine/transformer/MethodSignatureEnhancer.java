@@ -71,15 +71,15 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
  * @author stephan
  *
  */
+@SuppressWarnings("nls")
 public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, ClassFileConstants
 {
 	
-	private static final char[] OBJECT_SIGNATURE = "Ljava/lang/Object;".toCharArray(); //$NON-NLS-1$
+	private static final char[] OBJECT_SIGNATURE = "Ljava/lang/Object;".toCharArray();
 
 	/**
 	 * Names for arguments in enhanced signature used for passing runtime meta-information to the wrapper/role method.
 	 */
-	@SuppressWarnings("nls")
 	private final static char[][] ENHANCING_ARG_NAMES;
 
 	/** Length of the sublist of enhancing arguments. */
@@ -92,7 +92,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 	static {
 		if (CallinImplementorDyn.DYNAMIC_WEAVING) {
 			ENHANCING_ARG_NAMES = new char[][] {
-					"_OT$base".toCharArray(), 
+					"_OT$baseArg".toCharArray(), 
 					"_OT$teams".toCharArray(), 
 					"_OT$index".toCharArray(),
 					"_OT$callinIds".toCharArray(),
@@ -125,7 +125,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 //{OTDyn: configurable:
 		if (CallinImplementorDyn.DYNAMIC_WEAVING)
 			return new TypeBinding[] {
-				scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3), 	// _OT$base
+				scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3), 	// _OT$baseArg
 				scope.createArrayType(scope.getOrgObjectteamsITeam(), 1),  	// _OT$teams
 				TypeBinding.INT,    	                               	 	// _OT$index
 				scope.createArrayType(TypeBinding.INT, 1),         		 	// _OT$callinIds
@@ -173,7 +173,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 //{OTDyn: configurable:
 			CallinImplementorDyn.DYNAMIC_WEAVING 
 			? new TypeReference[] {
-					gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE),		// _OT$base
+					gen.qualifiedTypeReference(ORG_OBJECTTEAMS_IBOUNDBASE),		// _OT$baseArg
 					gen.qualifiedArrayTypeReference(ORG_OBJECTTEAMS_ITEAM, 1),	// _OT$teams
 					gen.singleTypeReference(TypeConstants.INT),					// _OT$index
 					new ArrayTypeReference(TypeConstants.INT, 1, gen.pos),		// _OT$callinIds
@@ -279,7 +279,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 	 * Prepare for generic handling of return values: all base types are converted to java.lang.Object.
 	 * @param orig
 	 * @param environment for lookup of java.lang.Object
-	 * @return
+	 * @return either a binding for java.lang.Object or the original type 'orig'
 	 */
 	public static TypeBinding getGeneralizedReturnType (TypeBinding orig, LookupEnvironment environment) {
 		if (orig.isBaseType())
@@ -362,7 +362,6 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		return parameters;
 	}
 
-	@SuppressWarnings("nls")
 	public static void beautifyTypesString(StringBuffer types, boolean makeShort) {
 		String typeString = types.toString();
 		String prefix =
