@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
@@ -149,7 +150,14 @@ public class SerializationGenerator {
 				    			gen.singleNameReference(CASTED_ROLE)
 				    		}),
 				    	// ((IBoundBase)base)._OT$addRole(castedRole);
-				    	gen.messageSend(
+				    	// OTDYN: Slightly different methods depending on the weaving strategy:
+				    	CallinImplementorDyn.DYNAMIC_WEAVING 
+				    	 ? gen.messageSend(
+				    		gen.castExpression(gen.singleNameReference(IOTConstants.BASE), 
+				    						   gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE), CastExpression.RAW),
+						    IOTConstants.ADD_REMOVE_ROLE,
+						    new Expression[]{gen.singleNameReference(CASTED_ROLE), gen.booleanLiteral(true)})
+				    	 : gen.messageSend(
 				    		gen.castExpression(gen.singleNameReference(IOTConstants.BASE), 
 				    						   gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE), CastExpression.RAW),
 				    		IOTConstants.ADD_ROLE,
