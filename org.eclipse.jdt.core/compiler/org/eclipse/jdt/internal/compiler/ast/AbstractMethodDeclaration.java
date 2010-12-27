@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
+import java.util.List;
+
 import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.*;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
@@ -25,7 +27,7 @@ import org.eclipse.jdt.internal.compiler.problem.*;
 import org.eclipse.jdt.internal.compiler.parser.*;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorListAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTransformer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
@@ -499,11 +501,15 @@ public abstract class AbstractMethodDeclaration
 		        methodAttributeOffset);
 		boolean shouldRecordTeamMethod = false;
 		if (this.isMappingWrapper._callin()) {
-			AbstractMethodMappingDeclaration mapping = this.model._declaringMapping;
-			if (   mapping != null 
-				&& mapping.isCallin()
-				&& mapping.roleMethodSpec.isPrivate())
-				shouldRecordTeamMethod = true;
+			List<CallinMappingDeclaration> mappings = this.model._declaringMappings;
+			if (mappings != null) {
+				for(CallinMappingDeclaration mapping : mappings) {
+					if (mapping.isCallin() && mapping.roleMethodSpec.isPrivate()) {
+						shouldRecordTeamMethod = true;
+						break;
+					}
+				}
+			}
 		} else if (this.binding.declaringClass.id == IOTConstants.T_OrgObjectTeamsTeam) {
 			if (this.scope.environment().getTeamMethodGenerator().registerSourceMethodBytes(this.binding))
 				shouldRecordTeamMethod = true;

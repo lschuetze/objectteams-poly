@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.mappings;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -388,7 +389,7 @@ public class CallinImplementor extends MethodMappingImplementor
         // TODO(SH): could optimize MethodInfo.maybeRegister()
         //           by marking callin to private role method (only they need copying).
         MethodModel.addCallinFlag(newMethod, IOTConstants.CALLIN_FLAG_WRAPPER);
-        newMethod.model._declaringMapping = callinBindingDeclaration;
+        newMethod.model._declaringMappings = Collections.singletonList(callinBindingDeclaration);
         if (newMethod.hasErrors()) { // problems detected during creation of MethodBinding?
         	// CLOVER: never reached in jacks suite
         	AstEdit.removeMethod(this._role.getTeamModel().getAst(), newMethod.binding); // may be incomplete.

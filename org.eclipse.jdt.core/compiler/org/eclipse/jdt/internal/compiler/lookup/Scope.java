@@ -1365,22 +1365,33 @@ public abstract class Scope {
 		if (   RoleTypeBinding.isRoleWithoutExplicitAnchor(receiverType)
 			|| (receiverType.isRole() && invocationSite.isTypeAccess()))
 		{
-			ReferenceBinding currentIfcType = receiverType.getRealType();
 			ReferenceBinding enclosingType = this.enclosingSourceType(); 
 			if (isMethodMappingWrapper()) {
 				// retrieve the actual enclosing type of the mapping declaration:
-				ReferenceBinding declaringRole = MethodModel.getRoleDeclaringThisMethodMapping(methodScope().referenceMethod());
-				if (declaringRole != null)
-					enclosingType = declaringRole;
-			}
-			while (enclosingType != null) {
-				if (enclosingType.getRealType() == currentIfcType) {
-					receiverType = receiverType.transferTypeArguments(receiverType.getRealClass());
-					break;
+				for (ReferenceBinding declaringRole : MethodModel.getRoleHandledByThisWrapperMethod(methodScope().referenceMethod())) {
+					if (declaringRole != null)
+						enclosingType = declaringRole;
+					receiverType = transferTypeArguments(receiverType, enclosingType, receiverType.getRealClass());
+					MethodBinding method = internalFindMethod(receiverType, selector, argumentTypes, invocationSite, inStaticContext);
+					if (method != null && method.isValidBinding())
+						return method;
 				}
-				enclosingType = enclosingType.enclosingType();
 			}
+			receiverType = transferTypeArguments(receiverType, enclosingType, receiverType.getRealClass());
 		}
+		return internalFindMethod(receiverType, selector, argumentTypes, invocationSite, inStaticContext);
+	}
+	private ReferenceBinding transferTypeArguments(ReferenceBinding receiverType, ReferenceBinding enclosingType, ReferenceBinding other) {
+		ReferenceBinding currentIfcType = receiverType.getRealType();
+		while (enclosingType != null) {
+			if (enclosingType.getRealType() == currentIfcType) {
+				return receiverType.transferTypeArguments(receiverType.getRealClass());
+			}
+			enclosingType = enclosingType.enclosingType();
+		}
+		return receiverType;
+	}
+	private MethodBinding internalFindMethod(ReferenceBinding receiverType, char[] selector, TypeBinding[] argumentTypes, InvocationSite invocationSite, boolean inStaticContext) {
 //SH}
 		ReferenceBinding currentType = receiverType;
 		boolean receiverTypeIsInterface = receiverType.isInterface();

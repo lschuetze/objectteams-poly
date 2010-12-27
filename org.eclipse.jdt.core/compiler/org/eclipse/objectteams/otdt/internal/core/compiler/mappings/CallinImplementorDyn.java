@@ -309,6 +309,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		callMethod.isMappingWrapper = AbstractMethodDeclaration.WrapperKind.CALLIN;
 		
 		AstEdit.addMethod(teamDecl, callMethod);
+
+		MethodModel.addCallinFlag(callMethod, IOTConstants.CALLIN_FLAG_WRAPPER);
+		callMethod.model._declaringMappings = callinDecls;
 		
 		MethodModel.getModel(callMethod).setStatementsGenerator(new AbstractStatementsGenerator() {
 			final char[][] ARG_NAMES = new char[][]{IOTConstants.BASE, TEAMS, INDEX, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};

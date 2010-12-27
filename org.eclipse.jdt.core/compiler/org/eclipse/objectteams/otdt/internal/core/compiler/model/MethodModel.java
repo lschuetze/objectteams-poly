@@ -20,8 +20,10 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.model;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -51,7 +53,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.PlainAttribute;
@@ -111,8 +113,9 @@ public class MethodModel extends ModelElement {
     private boolean    				  _callsBaseCtor    = false; // may be uninitialized before analyseCode
    	public  int                       callinFlags       = 0;
    	public  boolean                   isCallinForRoFi   = false;
-   	// for method generated from a method mapping (currently: callin only):
-   	public  AbstractMethodMappingDeclaration _declaringMapping = null;
+   	// for method generated from one or more method mappings 
+   	// (otredyn implements multiple callins in common wrapper methods)
+   	public  List<CallinMappingDeclaration> _declaringMappings = null;
 
     // for methods residing in a team but belonging to a role store the role type here:
     public TypeDeclaration _sourceDeclaringType = null;
@@ -699,12 +702,19 @@ public class MethodModel extends ModelElement {
 		return model._inferredCallout;
 	}
 
-	public static ReferenceBinding getRoleDeclaringThisMethodMapping(AbstractMethodDeclaration methodDecl) {
-		if (methodDecl.model == null)
-			return null;
-		AbstractMethodMappingDeclaration declaringMapping = methodDecl.model._declaringMapping;
-		if (declaringMapping == null || declaringMapping.scope == null)
-			return null;
-		return declaringMapping.scope.enclosingSourceType();
+	/**
+	 * Answer all roles that have callin mappings which are handled by a given wrapper method
+	 * @param wrapperDecl
+	 * @return a non-null, possibly empty list of role classes
+	 */
+	public static List<ReferenceBinding> getRoleHandledByThisWrapperMethod(AbstractMethodDeclaration wrapperDecl) {
+		if (wrapperDecl.model == null || wrapperDecl.model._declaringMappings == null)
+			return Collections.emptyList();
+		List<ReferenceBinding> handledRoles = new ArrayList<ReferenceBinding>();
+		for (CallinMappingDeclaration mapping : wrapperDecl.model._declaringMappings) {
+			if (mapping.scope != null)
+				handledRoles.add(mapping.scope.enclosingSourceType());
+		}
+		return handledRoles;
 	}
 }
