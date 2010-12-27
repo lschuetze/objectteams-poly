@@ -744,7 +744,7 @@ public class AstGenerator extends AstFactory {
     	if (arguments == null) {
 			allocation.dimensions = new Expression[]{intLiteral(dims)};
 		} else {
-			allocation.dimensions = new Expression[arguments.length];
+			allocation.dimensions = new Expression[dims];
 			allocation.initializer = new ArrayInitializer();
 			allocation.initializer.expressions = arguments;
 		}
