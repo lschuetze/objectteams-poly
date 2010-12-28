@@ -81,6 +81,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeContainerMeth
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObjectMapper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CopyInheritanceSourceAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.InheritedRolesAttribute;
+import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.OTDynCallinBindingsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.OTSpecialAccessAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
@@ -757,7 +758,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    	{
 	            Dependencies.ensureBindingState(superTeam, STATE_CALLINS_TRANSFORMED);
 	    		subTeam.copyAttributeFrom(superTeam.getTeamModel(), IOTConstants.STATIC_REPLACE_BINDINGS);
-	    		//subTeam.copyAttributeFrom(superTeam.getTeamModel(), OTDynCallinBindingsAttribute.ATTRIBUTE_NAME);
+	    		subTeam.copyAttributeFrom(superTeam.getTeamModel(), OTDynCallinBindingsAttribute.ATTRIBUTE_NAME);
 	    		OTSpecialAccessAttribute attrib = (OTSpecialAccessAttribute)superTeam.getTeamModel().getAttribute(IOTConstants.OTSPECIAL_ACCESS);
 	    		if (attrib != null)
 	    			attrib.addFieldAccessesTo(subTeam);

@@ -66,6 +66,9 @@ public class CallinCalloutBinding extends Binding
 
 	// link to the original if copy-inherited:
 	public CallinCalloutBinding copyInheritanceSrc;
+//{OTDyn: management of callin ids across team inheritance:
+	public int callinIdMax = -1;
+// SH}
 
     //@param CALLOUT
     public CallinCalloutBinding(boolean 		 isCalloutOverride,

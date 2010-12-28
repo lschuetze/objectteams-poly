@@ -196,6 +196,12 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		this.mappings = new ArrayList<Mapping>();
 	}
 	
+	private OTDynCallinBindingsAttribute(TeamModel theTeam, List<Mapping> mappings) {
+		super(ATTRIBUTE_NAME, mappings.size(), -1/*variable entry size*/);
+		this.theTeam = theTeam;
+		this.mappings = mappings;
+	}
+	
     /**
      * Read the attribute from byte code.
      *
@@ -355,14 +361,20 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 			createBinding(teamBinding, this.mappings.get(i));
     }
 
+	public void createBindings(TeamModel teamModel)
+	{
+		ReferenceBinding teamBinding = teamModel.getBinding();
+		for (int i = 0; i < this.mappings.size(); i++)
+			createBinding(teamBinding, this.mappings.get(i));
+	}
     /**
-	 * @param roleBinding
-	 * @param mapping
+	 * @param teamBinding where to add created bindings
+	 * @param mapping the mapping to reconstruct
 	 * @throws InternalCompilerError
 	 */
-	private void createBinding(ReferenceBinding teamBinding, Mapping mapping)
+	private static void createBinding(ReferenceBinding teamBinding, Mapping mapping)
 	{
-		ReferenceBinding roleBinding = teamBinding.getMemberType(this.mappings.get(0).roleClassName).getRealClass();
+		ReferenceBinding roleBinding = teamBinding.getMemberType(mapping.roleClassName).getRealClass();
 		CallinCalloutBinding result = null;
 		CallinCalloutBinding[] callinCallouts = roleBinding.callinCallouts;
 		if (callinCallouts != null) {
@@ -407,10 +419,11 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		if (result._roleMethodBinding == null)
 			throw new InternalCompilerError("role method specified in callin mapping does not exist "+mapping); //$NON-NLS-1$
 
-
+		int callinIdMax = 0;
 		mappingBaseMethods:
 		for (int i = 0; i < mappingBaseMethods.length; i++) {
 			BaseMethod bm = mappingBaseMethods[i];
+			callinIdMax = Math.max(callinIdMax, bm.callinID);
 			currentType = roleBinding.baseclass();
 			while (currentType != null) {
 				MethodBinding[] methods = currentType.getMethods(bm.baseMethodName);
@@ -426,13 +439,15 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 			baseMethods[i]= new ProblemMethodBinding(bm.baseMethodName, null, roleBinding.baseclass(), ProblemReasons.NotFound);
 		}
 		result._baseMethods = baseMethods;
+		result.callinIdMax = callinIdMax;
 		mapping.binding = result;
+		teamBinding._teamModel.recordCallinId(callinIdMax);
 
 		result.copyInheritanceSrc = findTSuperBinding(mapping.callinName, roleBinding);
 		roleBinding.addCallinCallouts(new CallinCalloutBinding[]{result});
 	}
 
-	private CallinCalloutBinding findTSuperBinding(char[] name, ReferenceBinding roleType) {
+	private static CallinCalloutBinding findTSuperBinding(char[] name, ReferenceBinding roleType) {
 		ReferenceBinding[] tsuperRoles = roleType.roleModel.getTSuperRoleBindings();
 		for (int i = tsuperRoles.length-1; i >= 0; i--) { // check highest prio first (which comes last in the array)
 			if (tsuperRoles[i].callinCallouts != null)
@@ -445,7 +460,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		return null;
 	}
 
-	private int encodeCallinModifier(char[] modifierName) {
+	private static int encodeCallinModifier(char[] modifierName) {
     	if (CharOperation.equals(modifierName, IOTConstants.NAME_REPLACE))
     		return TerminalTokens.TokenNamereplace;
     	if (CharOperation.equals(modifierName, IOTConstants.NAME_AFTER))
@@ -454,5 +469,36 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
     		return TerminalTokens.TokenNamebefore;
         throw new InternalCompilerError("invalid callin modifier in byte code"); //$NON-NLS-1$
     }
+
+	public int getCallinIdMax() {
+		int max = -1;
+		for (Mapping mapping : this.mappings)
+			for (BaseMethod baseMethod : mapping.baseMethods)
+				max = Math.max(max, baseMethod.callinID);
+		return max;
+	}
+
+	/**
+	 * Get a copy of this attribute with those bindings filtered out,
+	 * that are overridden in the current team.
+	 * @param teamBinding filter the attribute for this (sub)team
+	 * @return a filtered copy of this attribute or null, if no mappings remain after filtering
+	 */
+	public OTDynCallinBindingsAttribute filteredCopy(ReferenceBinding teamBinding) {
+		List<Mapping> filteredMappings = new ArrayList<Mapping>();
+		nextMapping: for (Mapping mapping : this.mappings) {
+			if (mapping.callinName[0] != '<') { // only named callins can be overridden
+				ReferenceBinding roleBinding = teamBinding.getMemberType(mapping.roleClassName).getRealClass();
+				for (CallinCalloutBinding callinCallout : roleBinding.callinCallouts)
+					if (CharOperation.equals(callinCallout.name, mapping.callinName))
+						continue nextMapping;
+			}
+			// not found means not overridden
+			filteredMappings.add(mapping);
+		}
+		if (filteredMappings.size() == 0)
+			return null;
+		return new OTDynCallinBindingsAttribute(teamBinding._teamModel, filteredMappings);
+	}
 
 }

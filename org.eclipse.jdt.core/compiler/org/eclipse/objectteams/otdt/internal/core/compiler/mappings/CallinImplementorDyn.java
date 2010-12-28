@@ -324,14 +324,18 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					? gen.arrayReference(gen.singleNameReference(CALLIN_ID), gen.singleNameReference(INDEX))
 					: gen.singleNameReference(CALLIN_ID);
 				
+				int callinIdCount = teamDecl.getTeamModel().getCallinIdCount();
+				boolean[] handledCallinIds = new boolean[callinIdCount];
 				// one case block per callin mapping:
 				for (CallinMappingDeclaration callinDecl : callinDecls) 
 				{
 					if (callinDecl.ignoreFurtherInvestigation)
 						continue;
 					// one case label per bound base method:
-					for (MethodSpec baseMethodSpec : callinDecl.baseMethodSpecs)
+					for (MethodSpec baseMethodSpec : callinDecl.baseMethodSpecs) {
 						statements.add(gen.caseStatement(gen.intLiteral(baseMethodSpec.callinID)));
+						handledCallinIds[baseMethodSpec.callinID] = true;
+					}
 					
 					
 					MethodSpec baseSpec = callinDecl.baseMethodSpecs[0];  // TODO(SH): check base method multiplicity
@@ -437,8 +441,25 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					statements.add(gen.block(blockStatements));
 				}
 				if (isReplace) { 
+					// callinIds handled by super call:
+					Expression[] callArgs = new Expression[ARG_NAMES.length];
+					for (int idx=0; idx < ARG_NAMES.length; idx++)
+						callArgs[idx] = gen.singleNameReference(ARG_NAMES[idx]);
+					boolean needSuperCall = false;
+					for (int i=0; i < callinIdCount; i++)
+						if (!handledCallinIds[i]) {
+							statements.add(gen.caseStatement(gen.intLiteral(i)));
+							needSuperCall = true;
+						}
+					if (needSuperCall)
+						statements.add(gen.returnStatement(
+											gen.messageSend(
+													gen.superReference(), 
+													OT_CALL_REPLACE, 
+													callArgs)));
+
 					// default: callNext:
-					Expression[] callArgs = new Expression[ARG_NAMES.length+1];
+					callArgs = new Expression[ARG_NAMES.length+1];
 					for (int idx=0; idx < ARG_NAMES.length; idx++)
 						callArgs[idx] = gen.singleNameReference(ARG_NAMES[idx]);
 					callArgs[callArgs.length-1] = gen.nullLiteral(); // baseCallArguments
@@ -520,4 +541,70 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		decl.hasParsedStatements = true;
 		AstEdit.addMethod(teamDecl, decl);
 	}
+
+// FIXME(SH): adjust and enable this copy from CallinImplementor:
+//	/** Callin to private must be copied if role is copy-inherited,
+//	 *  because the static method to access the role method exists only
+//	 *  in the exact role.
+//	 */
+//	public static void checkCopyCallinBinding(OTDynCallinBindingsAttribute attr, ModelElement element) {
+//		if (!(element instanceof RoleModel))
+//			return;
+//		RoleModel roleModel = (RoleModel)element;
+//		TypeDeclaration teamDecl = roleModel.getTeamModel().getAst();
+//		if (teamDecl == null)
+//			return;
+//		List<Mapping> mappings = attr.mappings;
+//		for (OTDynCallinBindingsAttribute.Mapping mapping : mappings)
+//			if (mapping.roleMethodIsPrivate())
+//				copyCallinTo(mapping, teamDecl);
+//
+//	}
+//	private static void copyCallinTo(OTDynCallinBindingsAttribute.Mapping mapping, TypeDeclaration teamDecl)
+//	{
+//		char[][] wrapperNames = mapping.getWrapperNames();
+//		char[][] wrapperSignatures = mapping.getWrapperSignatures();
+//		ReferenceBinding teamBinding = mapping._binding._declaringRoleClass.enclosingType();
+//		if (teamBinding == null || !teamBinding.superclass().isTeam())
+//			return;
+//
+//		// lookup wrapper method in the super-team:
+//		teamBinding = teamBinding.superclass();
+//		for (int i=0; i<wrapperNames.length; i++) {
+//			MethodBinding[] methods = teamBinding.getMethods(wrapperNames[i]);
+//			methods: for (int j = 0; j < methods.length; j++) {
+//				if (CharOperation.equals(wrapperSignatures[i], methods[i].signature()))
+//				{
+//					copyOneCallinTo(methods[i], mapping._binding, teamDecl);
+//					break methods;
+//				}
+//			}
+//		}
+//	}
+//	private static void copyOneCallinTo(MethodBinding method, CallinCalloutBinding callinBinding, TypeDeclaration teamDecl)
+//	{
+//		// cf. CopyInheritance.copyMethod()
+//		AstGenerator gen = new AstGenerator(teamDecl.sourceStart, teamDecl.sourceEnd);
+//		AbstractMethodDeclaration newMethod = AstConverter.createMethod(
+//											method,
+//											teamDecl.binding,
+//											teamDecl.compilationResult,
+//											DecapsulationState.REPORTED,
+//											gen);
+//
+//		AstEdit.addMethod(teamDecl, newMethod);
+//
+//	    MethodBinding origin = (method.copyInheritanceSrc != null) ?
+//									method.copyInheritanceSrc :
+//									method;
+//		newMethod.binding.setCopyInheritanceSrc(origin);
+//	    newMethod.binding.copiedInContext = teamDecl.binding.enclosingType();
+//
+//	    MethodModel newModel = MethodModel.getModel(newMethod);
+//	    newModel.addAttribute(CopyInheritanceSourceAttribute.copyInherSrcAttribute(origin, newModel));
+//    	// copy down some more properties:
+//   		MethodModel.saveReturnType(newMethod.binding, MethodModel.getReturnType(method));
+//
+//	    newMethod.isMappingWrapper = WrapperKind.CALLIN;
+//	}
 }

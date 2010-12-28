@@ -45,7 +45,9 @@ import org.eclipse.objectteams.otdt.core.compiler.Pair;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleFileCache;
+import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BoundClassesHierarchyAttribute;
+import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.OTDynCallinBindingsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.RoleBaseBindingsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
@@ -849,6 +851,25 @@ public class TeamModel extends TypeModel {
 		int callinID = this.nextCallinID++;
 		baseMethodSpec.callinID = callinID;
 		return callinID;
+	}
+	public void recordCallinId(int callinIdMax) {
+		this.nextCallinID = Math.max(this.nextCallinID, callinIdMax+1);
+	}
+	public int getCallinIdCount() {
+		return this.nextCallinID;
+	}
+	@Override
+	public void addOrMergeAttribute(AbstractAttribute attr) {
+		if (attr instanceof OTDynCallinBindingsAttribute) {
+			OTDynCallinBindingsAttribute filteredAttr = ((OTDynCallinBindingsAttribute)attr).filteredCopy(this._binding);
+			if (filteredAttr != null) {
+				super.addOrMergeAttribute(filteredAttr);
+				filteredAttr.createBindings(this);
+			}
+			recordCallinId(((OTDynCallinBindingsAttribute)attr).getCallinIdMax());
+		} else {
+			super.addOrMergeAttribute(attr);
+		}		
 	}
 // SH}
 	public boolean isAmbiguousLifting(ReferenceBinding staticRole, ReferenceBinding baseBinding) {
