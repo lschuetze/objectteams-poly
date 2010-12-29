@@ -232,7 +232,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	            targetArgName,
 	            implementationMethodSpec,
 				methodMapping.isCallout());
-	    return null;
+	    return new AstGenerator(sourceMethodSpec).singleNameReference("<missing>".toCharArray()); //$NON-NLS-1$
 	}
 
 	/**
@@ -329,7 +329,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				// one case block per callin mapping:
 				for (CallinMappingDeclaration callinDecl : callinDecls) 
 				{
-					if (callinDecl.ignoreFurtherInvestigation)
+					if (callinDecl.ignoreFurtherInvestigation || RoleModel.isRoleWithBaseProblem(callinDecl.scope.referenceType()))
 						continue;
 					// one case label per bound base method:
 					for (MethodSpec baseMethodSpec : callinDecl.baseMethodSpecs) {
