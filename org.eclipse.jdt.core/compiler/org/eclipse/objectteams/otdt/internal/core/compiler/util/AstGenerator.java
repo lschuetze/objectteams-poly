@@ -978,6 +978,16 @@ public class AstGenerator extends AstFactory {
 		return stat;
 	}
 
+	public TryStatement tryCatch(Statement[] tryStatements, Argument exceptionArgument, Statement[] catchStatements) {
+		TryStatement stat = new TryStatement();
+		stat.sourceStart = this.sourceStart;
+		stat.sourceEnd   = this.sourceEnd;
+		stat.tryBlock = block(tryStatements);
+		stat.catchArguments = new Argument[] { exceptionArgument };
+		stat.catchBlocks = new Block[] { block(catchStatements) };
+		return stat;
+	}
+
 	/**
 	 * Create a lifting of an expression to an expectedType if expectedType is in deed
 	 * a role type different from the type of expression (deferred decision).
