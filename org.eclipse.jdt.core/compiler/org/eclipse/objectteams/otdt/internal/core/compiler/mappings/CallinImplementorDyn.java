@@ -440,6 +440,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					}
 					statements.add(gen.block(blockStatements));
 				}
+				Statement catchStatement = gen.emptyStatement();
 				if (isReplace) { 
 					// callinIds handled by super call:
 					Expression[] callArgs = new Expression[ARG_NAMES.length];
@@ -469,9 +470,21 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 											gen.qualifiedThisReference(aTeam.getBinding()), 
 											OT_CALL_NEXT, 
 											callArgs)));
+					catchStatement = gen.returnStatement(
+										gen.messageSend(
+											gen.qualifiedThisReference(aTeam.getBinding()), 
+											OT_CALL_NEXT, 
+											callArgs));
 				}
 				switchStat.statements = statements.toArray(new Statement[statements.size()]);
-				methodDecl.statements = new Statement[] { switchStat };
+				methodDecl.statements = new Statement[] {
+							gen.tryCatch(
+								new Statement[] {switchStat},
+								// expected exception is ignored, do nothing (before/after) or proceed to callNext (replace)
+								gen.argument("ex".toCharArray(),  //$NON-NLS-1$
+											 gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_LIFTING_VETO)),
+								new Statement[]{catchStatement})
+						};
 				methodDecl.hasParsedStatements = true;
 				// DEBUGGING:
 				System.out.println("Method added: "+callMethod);
