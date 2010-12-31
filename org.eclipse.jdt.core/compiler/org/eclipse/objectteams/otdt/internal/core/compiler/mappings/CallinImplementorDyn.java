@@ -272,7 +272,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		}
 	}
 
-	private void generateDispatchMethod(char[] methodName, final boolean isReplace, boolean isAfter, final List<CallinMappingDeclaration> callinDecls, final TeamModel aTeam) 
+	private void generateDispatchMethod(char[] methodName, final boolean isReplace, final boolean isAfter, final List<CallinMappingDeclaration> callinDecls, final TeamModel aTeam) 
 	{
 		// FIXME(SH): once we know that Team has empty implementations (and checked cases involving team inheritance)
 		// we probably want to avoid generating empty methods here.
@@ -314,7 +314,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		callMethod.model._declaringMappings = callinDecls;
 		
 		MethodModel.getModel(callMethod).setStatementsGenerator(new AbstractStatementsGenerator() {
-			final char[][] ARG_NAMES = new char[][]{IOTConstants.BASE, TEAMS, INDEX, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
+			final char[][] REPLACE_ARG_NAMES = new char[][]{IOTConstants.BASE, TEAMS, INDEX, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
+			final char[][] BEFORE_ARG_NAMES = new char[][]{IOTConstants.BASE, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
+			final char[][] AFTER_ARG_NAMES = new char[][]{IOTConstants.BASE, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS, _OT_RESULT};
 
 			protected boolean generateStatements(AbstractMethodDeclaration methodDecl) {
 				List<Statement> statements = new ArrayList<Statement>();
@@ -408,7 +410,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					Expression[] callArgs = new Expression [roleParams.length + (isReplace ? MethodSignatureEnhancer.ENHANCING_ARG_LEN : 0)];
 					int idx = 0;
 					if (isReplace)
-						for (char[] argName : ARG_NAMES)
+						for (char[] argName : REPLACE_ARG_NAMES)
 							callArgs[idx++] = gen.singleNameReference(argName);
 
 					for (int i=0; i<roleParams.length; i++) {
@@ -440,29 +442,41 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					}
 					statements.add(gen.block(blockStatements));
 				}
+				boolean needSuperCall = false;
+				// callinIds handled by super call?
+				for (int i=0; i < callinIdCount; i++)
+					if (!handledCallinIds[i]) {
+						statements.add(gen.caseStatement(gen.intLiteral(i)));
+						needSuperCall = true;
+					}
+				if (needSuperCall) {
+					char[]   selector;				char[][] argNames;
+					if (isReplace) {
+						selector = OT_CALL_REPLACE;	argNames = REPLACE_ARG_NAMES;
+					} else if (isAfter) {
+						selector = OT_CALL_AFTER;	argNames = AFTER_ARG_NAMES;
+					} else {
+						selector = OT_CALL_BEFORE;	argNames = BEFORE_ARG_NAMES;
+					}
+					Expression[] superCallArgs = new Expression[argNames.length];
+					for (int idx=0; idx < argNames.length; idx++)
+						superCallArgs[idx] = gen.singleNameReference(argNames[idx]);
+					MessageSend superCall = gen.messageSend(
+							gen.superReference(), 
+							selector, 
+							superCallArgs);
+					if (isReplace)
+						statements.add(gen.returnStatement(superCall));
+					else
+						statements.add(superCall);
+				}
 				Statement catchStatement = gen.emptyStatement();
 				if (isReplace) { 
-					// callinIds handled by super call:
-					Expression[] callArgs = new Expression[ARG_NAMES.length];
-					for (int idx=0; idx < ARG_NAMES.length; idx++)
-						callArgs[idx] = gen.singleNameReference(ARG_NAMES[idx]);
-					boolean needSuperCall = false;
-					for (int i=0; i < callinIdCount; i++)
-						if (!handledCallinIds[i]) {
-							statements.add(gen.caseStatement(gen.intLiteral(i)));
-							needSuperCall = true;
-						}
-					if (needSuperCall)
-						statements.add(gen.returnStatement(
-											gen.messageSend(
-													gen.superReference(), 
-													OT_CALL_REPLACE, 
-													callArgs)));
 
 					// default: callNext:
-					callArgs = new Expression[ARG_NAMES.length+1];
-					for (int idx=0; idx < ARG_NAMES.length; idx++)
-						callArgs[idx] = gen.singleNameReference(ARG_NAMES[idx]);
+					Expression[] callArgs = new Expression[REPLACE_ARG_NAMES.length+1];
+					for (int idx=0; idx < REPLACE_ARG_NAMES.length; idx++)
+						callArgs[idx] = gen.singleNameReference(REPLACE_ARG_NAMES[idx]);
 					callArgs[callArgs.length-1] = gen.nullLiteral(); // baseCallArguments
 					statements.add(gen.caseStatement(null)); // = default
 					statements.add(gen.returnStatement(
