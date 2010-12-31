@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -348,10 +349,13 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					
 					boolean isStaticRoleMethod = callinDecl.getRoleMethod().isStatic();
 					ReferenceBinding roleType = callinDecl.scope.enclosingReceiverType();
+					MethodBinding roleMethodBinding = callinDecl.getRoleMethod();
 
 					
+					boolean needLiftedRoleVar = !isStaticRoleMethod
+											&& roleType.isCompatibleWith(roleMethodBinding.declaringClass);
 					int nStats = isReplace ? 1 : 2; // "return rm();" or "rm(); break;" 
-					if (!isStaticRoleMethod)
+					if (needLiftedRoleVar)
 						nStats++; // local role 
 					if (callinDecl.mappings != null)
 						nStats += baseSpec.arguments.length; // one local per base arg
@@ -368,20 +372,25 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 																			  			  CastExpression.RAW));
 					Expression receiver;
 					if (!isStaticRoleMethod) {
-						// RoleType local$n = this._OT$liftToRoleType((BaseType)base); 
-						char[] roleVar = (LOCAL_ROLE+statements.size()).toCharArray();
-						blockStatements[statIdx++] = gen.localVariable(roleVar, roleType.sourceName(),
-								Lifting.liftCall(callMethod.scope,
-												 gen.thisReference(),
-												 gen.castExpression(gen.singleNameReference(IOTConstants.BASE), gen.typeReference(roleType.baseclass()), CastExpression.RAW),
-												 callMethod.scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3),
-												 roleType,
-												 false,
-												 gen));
-						receiver = gen.singleNameReference(roleVar);
-						// private receiver needs to be casted to the class.
-						if (callinDecl.getRoleMethod().isPrivate())
-							receiver = gen.castExpression(receiver, gen.typeReference(roleType.getRealClass()), CastExpression.RAW);
+						if (needLiftedRoleVar) {
+							// RoleType local$n = this._OT$liftToRoleType((BaseType)base); 
+							char[] roleVar = (LOCAL_ROLE+statements.size()).toCharArray();
+							blockStatements[statIdx++] = gen.localVariable(roleVar, roleType.sourceName(),
+									Lifting.liftCall(callMethod.scope,
+													 gen.thisReference(),
+													 gen.castExpression(gen.singleNameReference(IOTConstants.BASE), gen.typeReference(roleType.baseclass()), CastExpression.RAW),
+													 callMethod.scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3),
+													 roleType,
+													 false,
+													 gen));
+							receiver = gen.singleNameReference(roleVar);
+							// private receiver needs to be casted to the class.
+							if (callinDecl.getRoleMethod().isPrivate())
+								receiver = gen.castExpression(receiver, gen.typeReference(roleType.getRealClass()), CastExpression.RAW);
+						} else {
+							// method is from role's enclosing team
+							receiver = gen.qualifiedThisReference(TeamModel.strengthenEnclosing(teamDecl.binding, roleMethodBinding.declaringClass));
+						}
 					} else {
 						receiver = gen.singleNameReference(callinDecl.getRoleMethod().declaringClass.sourceName());
 					}
