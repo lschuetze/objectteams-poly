@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -911,5 +912,28 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 
 	public boolean hasName() {
 		return this.name != null && this.name[0] != '<';
+	}
+
+	/**
+	 * Answer the name of the role that introduced this callin mapping 
+	 * (support for overriding in otredyn).
+	 */
+	public char[] declaringRoleName() {
+		char[] roleName = this.scope.enclosingSourceType().sourceName();
+		if (this.name == null)
+			return roleName;
+		if (this.name[0] != '<') {
+			ReferenceBinding currentRole = this.scope.enclosingSourceType();
+			while (currentRole != null && currentRole.isRole()) {
+				for (CallinCalloutBinding mapping : currentRole.callinCallouts) {
+					if (CharOperation.equals(this.name, mapping.name)) {
+						roleName = currentRole.sourceName();
+						break;
+					}
+				}
+				currentRole = currentRole.superclass();
+			}
+		}
+		return roleName;
 	}
 }

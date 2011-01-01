@@ -83,14 +83,15 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 	public static final short COVARIANT_BASE_RETURN = 8;
 	
 	private class Mapping {
-		char[] roleClassName, callinName, roleSelector, roleSignature, callinModifier, baseClassName, fileName;
+		char[] roleClassName, declaringRoleName, callinName, roleSelector, roleSignature, callinModifier, baseClassName, fileName;
 		int flags; // STATIC_ROLE_METHOD, INHERITED, COVARIANT_BASE_RETURN
 		int lineNumber, lineOffset;
 		BaseMethod[] baseMethods;
 		public CallinCalloutBinding binding;
-		Mapping(char[] roleClassName, char[] callinName, char[] roleSelector, char[] roleSignature, char[] callinModifer, int flags, char[] baseClassName, int baseMethodCount) 
+		Mapping(char[] roleClassName, char[] declaringRoleName, char[] callinName, char[] roleSelector, char[] roleSignature, char[] callinModifer, int flags, char[] baseClassName, int baseMethodCount) 
 		{
 			this.roleClassName	= roleClassName;
+			this.declaringRoleName = declaringRoleName;
 			this.callinName		= callinName;
 			this.roleSelector	= roleSelector;
 			this.roleSignature 	= roleSignature;
@@ -237,7 +238,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		MethodSpec roleSpec = callinDecl.roleMethodSpec;
 		MethodSpec[] baseMethodSpecs = callinDecl.getBaseMethodSpecs();
 		Mapping mapping = new Mapping(callinDecl.scope.enclosingSourceType().sourceName(), // indeed: simple name
-									  callinDecl.name, roleSpec.selector, roleSpec.signature(),
+									  callinDecl.declaringRoleName(), callinDecl.name, roleSpec.selector, roleSpec.signature(),
 									  callinDecl.getCallinModifier(), flags, 
 									  baseClassName, baseMethodSpecs.length);
 		for (int i=0; i<baseMethodSpecs.length; i++) {
@@ -267,6 +268,8 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		Mapping mapping = this.mappings.get(i);
 		StringBuffer buf = new StringBuffer();
 		buf.append('\t');
+		buf.append(String.valueOf(mapping.declaringRoleName));
+		buf.append('.');
 		buf.append(String.valueOf(mapping.callinName));
 		buf.append(": ");
 		buf.append(String.valueOf(mapping.roleSelector));
@@ -298,7 +301,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 	void writeElementValue(int i) {
 		Mapping mapping = this.mappings.get(i);
 		writeName(mapping.roleClassName);
-		writeName(mapping.callinName);
+		writeName(CharOperation.concat(mapping.declaringRoleName, mapping.callinName, '.'));
 		writeName(mapping.roleSelector);
 		writeName(mapping.roleSignature);
 		writeName(mapping.callinModifier);
@@ -330,7 +333,10 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		int	lineNumber			= consumeShort();
 		int lineOffset			= consumeShort();
 		int baseMethodCount 	= consumeShort();
-		Mapping result = new Mapping(roleClassName, callinName, roleSelector, roleSignature, callinModifer, flags, baseClassName, baseMethodCount); 
+		int pos = CharOperation.lastIndexOf('.', callinName);
+		char[] declaringRoleName = CharOperation.subarray(callinName, pos+1, -1);
+
+		Mapping result = new Mapping(roleClassName, declaringRoleName, callinName, roleSelector, roleSignature, callinModifer, flags, baseClassName, baseMethodCount); 
 		result.setSMAPInfo(fileName, lineNumber, lineOffset);
 		for (int i=0; i<baseMethodCount; i++) {
 			char[] baseMethodName 		= consumeName();
