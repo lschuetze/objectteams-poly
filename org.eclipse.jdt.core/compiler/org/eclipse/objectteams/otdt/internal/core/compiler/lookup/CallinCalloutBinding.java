@@ -299,4 +299,25 @@ public class CallinCalloutBinding extends Binding
 		ReferenceBinding currentType = this._declaringRoleClass;
 		return CharOperation.concat(name, currentType.readableName(), '$');
 	}
+	/**
+	 * Answer the name of the role that introduced this callin mapping 
+	 * (support for overriding in otredyn).
+	 */
+	public ReferenceBinding introducingRoleClass() {
+		ReferenceBinding declaringRole = this._declaringRoleClass;
+		if (this.name == null)
+			return declaringRole;
+		if (this.name[0] != '<') {
+			ReferenceBinding currentRole = declaringRole;
+			while (currentRole != null && currentRole.isRole()) {
+				for (CallinCalloutBinding mapping : currentRole.callinCallouts) {
+					if (CharOperation.equals(this.name, mapping.name)) {
+						declaringRole = currentRole;
+					}
+				}
+				currentRole = currentRole.superclass();
+			}
+		}
+		return declaringRole;
+	}
 }

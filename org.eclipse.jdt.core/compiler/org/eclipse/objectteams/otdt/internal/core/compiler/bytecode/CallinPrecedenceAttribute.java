@@ -71,7 +71,7 @@ public class CallinPrecedenceAttribute extends ListValueAttribute {
 	 */
 	private char[] getQualifiedName(ReferenceBinding site, CallinCalloutBinding callinBinding) {
 		String name = new String(callinBinding.name);
-		ReferenceBinding current = callinBinding._declaringRoleClass;
+		ReferenceBinding current = callinBinding.introducingRoleClass();
 		while (current != null && current != site) {
 			name = new String(current.sourceName())+'.'+name;
 			current = current.enclosingType();
