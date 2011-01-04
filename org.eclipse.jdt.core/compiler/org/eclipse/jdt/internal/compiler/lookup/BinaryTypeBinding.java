@@ -372,7 +372,9 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 		this.typeVariables = Binding.NO_TYPE_VARIABLES;
 		this.superInterfaces = Binding.NO_SUPERINTERFACES;
 
-//{ObjectTeams: enter binary role to its source enclosing
+//{ObjectTeams: one more field to initialize to empty array:
+		this.callinCallouts = Binding.NO_CALLIN_CALLOUT_BINDINGS;
+		// enter binary role to its source enclosing
 		if (   enclosingType() != null
 			&& !this.enclosingType.isBinaryBinding())
 		{
