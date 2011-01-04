@@ -1646,14 +1646,15 @@ void setSourceStart(int sourceStart);
 	int ReplaceCallinIncompatibleStatic 		 = CALLIN_RELATED + 7002; // 4.7(d)
 
 	int UnknownPrecedence                        = CALLIN_RELATED + 8001; // 4.8
-	int PrecedenceInRegularClass                 = CALLIN_RELATED + 8002; // 4.8(a)
-	int AfterCallinInNonAfterPrecedence			 = CALLIN_RELATED + 8003; // 4.8(a)
-	int NonAfterCallinInAfterPrecedence			 = CALLIN_RELATED + 8004; // 4.8(a)
-	int CallinBindingNotFound 					 = CALLIN_RELATED + 8005; // 4.8(b)
-	int IllegalEnclosingForCallinName 			 = CALLIN_RELATED + 8006; // 4.8(b)
-	int IncompatiblePrecedenceListsOther         = CALLIN_RELATED + 8007; // 4.8(d)
-	int IncompatiblePrecedenceListsSymmetric     = CALLIN_RELATED + 8008; // 4.8(d)
-	int PrecedenceForOverriding 				 = CALLIN_RELATED + 8009; // 4.8(e)
+	int IllegalDeepRoleReferenceInPrecedence     = CALLIN_RELATED + 8002; // 4.8
+	int PrecedenceInRegularClass                 = CALLIN_RELATED + 8003; // 4.8(a)
+	int AfterCallinInNonAfterPrecedence			 = CALLIN_RELATED + 8004; // 4.8(a)
+	int NonAfterCallinInAfterPrecedence			 = CALLIN_RELATED + 8005; // 4.8(a)
+	int CallinBindingNotFound 					 = CALLIN_RELATED + 8006; // 4.8(b)
+	int IllegalEnclosingForCallinName 			 = CALLIN_RELATED + 8007; // 4.8(b)
+	int IncompatiblePrecedenceListsOther         = CALLIN_RELATED + 8008; // 4.8(d)
+	int IncompatiblePrecedenceListsSymmetric     = CALLIN_RELATED + 8009; // 4.8(d)
+	int PrecedenceForOverriding 				 = CALLIN_RELATED + 8010; // 4.8(e)
 
 	int CovariantReturnRequiresTypeParameter     = CALLIN_RELATED + 9001; // 4.9.3(c)
 

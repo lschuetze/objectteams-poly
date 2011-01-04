@@ -29,6 +29,8 @@ import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
@@ -86,7 +88,7 @@ public class PrecedenceDeclaration extends ASTNode {
 			if (name instanceof SingleNameReference) {
 				SingleNameReference sref = (SingleNameReference)name;
 				token = sref.token;
-				sref.binding = findCallinInType(type.scope, type.binding, sref.token);
+				sref.binding = findCallinInType(type.scope, type.binding, sref.token, true/*typeAllowed*/);
 			} else {
 				assert name instanceof QualifiedNameReference;
 				QualifiedNameReference qref = (QualifiedNameReference)name;
@@ -99,7 +101,7 @@ public class PrecedenceDeclaration extends ASTNode {
 					}
 				}
 				token = qref.tokens[qref.tokens.length-1];
-				qref.binding = findCallinInType(type.scope, enclosing, token);
+				qref.binding = findCallinInType(type.scope, enclosing, token, false/*typeAllowed*/);
 			}
 			if (name.binding == null) {
 				type.scope.problemReporter().callinBindingNotFound(name, token, enclosing);
@@ -168,17 +170,24 @@ public class PrecedenceDeclaration extends ASTNode {
 	 */
 	private Binding findCallinInType(Scope scope,
 									 ReferenceBinding type,
-									 char[] name)
+									 char[] name,
+									 boolean typeAllowed)
 	{
 		if (type.isRole()) {
 			Binding found = findCallinInRole(type, name);
 			if (found != null)
 				return found;
 		}
+		type = type.getRealClass();
 		if (type.isTeam()) {
 			ReferenceBinding roleBinding = type.getMemberType(name);
-			if (roleBinding != null)
+			if (roleBinding != null) {
+				if (!typeAllowed) {
+					scope.problemReporter().illegalDeepRoleReferenceInPrecedence(this, type, roleBinding);
+					return new ProblemReferenceBinding(name, roleBinding, ProblemReasons.NotVisible);
+				}
 				return roleBinding;
+			}
 			return null;
 		}
 		if (type.isRole())

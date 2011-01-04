@@ -10983,6 +10983,16 @@ public void illegalEnclosingForCallinName(PrecedenceDeclaration precDecl,
 			precDecl.sourceStart,
 			precDecl.sourceEnd);
 }
+public void illegalDeepRoleReferenceInPrecedence(PrecedenceDeclaration precDecl, ReferenceBinding teamBinding, ReferenceBinding roleBinding) {
+	String[] args = new String[] { String.valueOf(teamBinding.readableName()),
+			                       String.valueOf(roleBinding.readableName())};
+	this.handle(
+			IProblem.IllegalDeepRoleReferenceInPrecedence,
+			args,
+			args,
+			precDecl.sourceStart,
+			precDecl.sourceEnd);
+}
 public void incompatiblePrecedenceLists(ASTNode location, TypeDeclaration declaration, PrecedenceBinding prec1, PrecedenceBinding prec2) {
 	String[] args;
 	int problemId;
