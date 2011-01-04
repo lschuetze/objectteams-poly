@@ -4759,6 +4759,48 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			"----------\n");
     }
     
+    // Bug 332893 - Class Precedence not working between Role callin and SubRole callin
+    public void test4127_precedenceDeclaration18 () {
+    	runNegativeTest(
+    		new String[] {
+    			"PrecBug.java",
+    			"public team class PrecBug {\n" + 
+    			"    precedence after RA.RB, RA;\n" + 
+    			"    protected team class RA playedBy A {\n" + 
+    			"        void some(String v) <- after void myMethod2()\n" +
+    			"            with { v <- \"RA\" }\n" + 
+    			"        void some(String v) {\n" +
+    			"            System.out.print(\"some\"+v);\n" + 
+    			"        }\n" + 
+    			"        protected class RB playedBy B {\n" + 
+    			"            void some(String v) <- after void myMethod2()" +
+    			"                with { v <- \"RB\" }\n" + 
+    			"        }\n" + 
+    			"    }\n" +
+    			"    public PrecBug(A as RA a) {\n" +
+    			"        a.activate();\n" +
+    			"    }\n" +
+    			"    public static void main(String... args) {\n" +
+    			"        B b = new B();\n" +
+    			"        new PrecBug(b).activate();\n" +
+    			"        new B().myMethod2();\n" +
+    			"    }\n" + 
+    			"}\n",
+    			"A.java",
+    			"public class A {\n" +
+    			"    void myMethod2() {}\n" +
+    			"}\n",
+    			"B.java",
+    			"public class B extends A {\n" +
+    			"}\n"
+    		}, 
+    		"----------\n" + 
+    		"1. ERROR in PrecBug.java (at line 2)\n" + 
+    		"	precedence after RA.RB, RA;\n" + 
+    		"	                 ^^^^^^^^^^\n" + 
+    		"\'precedence\' declaration can only refer to direct role classes, however PrecBug.RA.RB is a nested role of team PrecBug.RA (OTJLD 4.8).\n" + 
+    		"----------\n");
+    }
     // a regular class has a precedence declaration
     // 4.1.28-otjld-invalid-precedence-declaration-1
     public void test4128_invalidPrecedenceDeclaration1() {
@@ -7506,7 +7548,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    " * @role R\n" +
 			    " */\n" +
 			    "public team class Team4143cttm3 {\n" +
-			    "    void k(String s) {\n" +
+			    "    private void k(String s) {\n" + // extra difficulty: team method is private
 			    "        System.out.print(s);\n" +
 			    "    }\n" +
 			    "    public static void main(String[] args) {\n" +
