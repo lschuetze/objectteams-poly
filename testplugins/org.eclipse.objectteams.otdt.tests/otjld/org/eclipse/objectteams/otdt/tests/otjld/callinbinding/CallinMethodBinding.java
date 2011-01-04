@@ -6273,6 +6273,62 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
             "OK!");
     }
 
+    // multiple different callins from different teams to the same base method - base inheritance
+    // simplified load order: load base before teams.
+    public void test4138_multipleCallin2l() {
+       
+       runConformTest(
+            new String[] {
+		"T4138mc2lMain.java",
+			    "\n" +
+			    "public class T4138mc2lMain {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        T4138mc2l_2 t = new T4138mc2l_2();" +
+			    "        new Team4138mc2l_1().activate();\n" +
+			    "        new Team4138mc2l_2().activate();\n" +
+			    "        t.test();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T4138mc2l_1.java",
+			    "\n" +
+			    "public class T4138mc2l_1 {\n" +
+			    "    public void test() {\n" +
+			    "        System.out.print(\"K\");\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T4138mc2l_2.java",
+			    "\n" +
+			    "public class T4138mc2l_2 extends T4138mc2l_1 {}\n" +
+			    "    \n",
+		"Team4138mc2l_1.java",
+			    "\n" +
+			    "public team class Team4138mc2l_1 {\n" +
+			    "    protected class R playedBy T4138mc2l_1 {\n" +
+			    "        callin void t() {\n" +
+			    "            base.t();\n" +
+			    "            System.out.print(\"!\");\n" +
+			    "        }\n" +
+			    "        t <- replace test;\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team4138mc2l_2.java",
+			    "\n" +
+			    "public team class Team4138mc2l_2 {\n" +
+			    "    protected class R playedBy T4138mc2l_2 {\n" +
+			    "        void u() {\n" +
+			    "            System.out.print(\"O\");\n" +
+			    "        }\n" +
+			    "        u <- before test;\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "OK!");
+    }
+
     // multiple replaces ordered by precedence plus before/after - reported by ofrank
     // 4.1.38-otjld-multiple-callin-3
     public void test4138_multipleCallin3() {
