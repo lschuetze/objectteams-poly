@@ -68,31 +68,35 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 public class CallinImplementorDyn extends MethodMappingImplementor {
 	
 
-	public static boolean DYNAMIC_WEAVING = "dynamic".equals(System.getProperty("ot.weaving")); //$NON-NLS-1$ $NON-NLS-2$
+	public static boolean DYNAMIC_WEAVING = "dynamic".equals(System.getProperty("ot.weaving")); //$NON-NLS-1$ //$NON-NLS-2$
 
 	//_OT$role
 	static final char[] ROLE_VAR_NAME = CharOperation.concat(IOTConstants.OT_DOLLAR_NAME, IOTConstants.ROLE);
 
 	// method names
-	private static final char[] OT_CALL_BEFORE  = "_OT$callBefore".toCharArray(); //$NON-NLS-1$
-	private static final char[] OT_CALL_AFTER   = "_OT$callAfter".toCharArray(); //$NON-NLS-1$
-	private static final char[] OT_CALL_REPLACE = "_OT$callReplace".toCharArray(); //$NON-NLS-1$
+	static final char[] OT_CALL_BEFORE  = "_OT$callBefore".toCharArray(); //$NON-NLS-1$
+	static final char[] OT_CALL_AFTER   = "_OT$callAfter".toCharArray(); //$NON-NLS-1$
+	static final char[] OT_CALL_REPLACE = "_OT$callReplace".toCharArray(); //$NON-NLS-1$
 	// used for base calls:
 	public  static final char[] OT_CALL_NEXT    = "_OT$callNext".toCharArray(); //$NON-NLS-1$
 	
 	// variable names (arguments ...)
-	private static final char[] TEAMS 			= "teams".toCharArray();
-	private static final char[] INDEX			= "index".toCharArray();
-	private static final char[] CALLIN_ID 		= "callinID".toCharArray();
-	private static final char[] BOUND_METHOD_ID = "boundMethodID".toCharArray();
-	private static final char[] ARGUMENTS 		= "arguments".toCharArray();
-	private static final char[] _OT_RESULT		= "_OT$result".toCharArray();
-	private static final char[] RESULT		 	= "result".toCharArray();
-	private static final String LOCAL_ROLE 		= "local$";
+	static final char[] TEAMS 			= "teams".toCharArray(); //$NON-NLS-1$
+	static final char[] INDEX			= "index".toCharArray(); //$NON-NLS-1$
+	static final char[] CALLIN_ID 		= "callinID".toCharArray(); //$NON-NLS-1$
+	static final char[] BOUND_METHOD_ID = "boundMethodID".toCharArray(); //$NON-NLS-1$
+	static final char[] ARGUMENTS 		= "arguments".toCharArray(); //$NON-NLS-1$
+	static final char[] _OT_RESULT		= "_OT$result".toCharArray(); //$NON-NLS-1$
+	static final char[] RESULT		 	= "result".toCharArray(); //$NON-NLS-1$
+	static final String LOCAL_ROLE 		= "local$"; //$NON-NLS-1$
 	
 	// for call next:
-	private static final char[] BASE_CALL_ARGS  = "baseCallArguments".toCharArray();  
+	private static final char[] BASE_CALL_ARGS  = "baseCallArguments".toCharArray();   //$NON-NLS-1$
 
+	// for call{replace,before,after}:
+	static final char[][] REPLACE_ARG_NAMES = new char[][]{IOTConstants.BASE, TEAMS, INDEX, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
+	static final char[][] BEFORE_ARG_NAMES = new char[][]{IOTConstants.BASE, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
+	static final char[][] AFTER_ARG_NAMES = new char[][]{IOTConstants.BASE, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS, _OT_RESULT};
 
 	
 	private RoleModel _role;
@@ -315,9 +319,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		callMethod.model._declaringMappings = callinDecls;
 		
 		MethodModel.getModel(callMethod).setStatementsGenerator(new AbstractStatementsGenerator() {
-			final char[][] REPLACE_ARG_NAMES = new char[][]{IOTConstants.BASE, TEAMS, INDEX, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
-			final char[][] BEFORE_ARG_NAMES = new char[][]{IOTConstants.BASE, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS};
-			final char[][] AFTER_ARG_NAMES = new char[][]{IOTConstants.BASE, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS, _OT_RESULT};
 
 			protected boolean generateStatements(AbstractMethodDeclaration methodDecl) {
 				List<Statement> statements = new ArrayList<Statement>();
