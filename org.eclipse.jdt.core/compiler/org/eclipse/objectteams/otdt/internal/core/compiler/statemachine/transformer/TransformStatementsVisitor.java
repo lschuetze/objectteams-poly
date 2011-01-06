@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseReference;
@@ -145,16 +144,7 @@ public class TransformStatementsVisitor
     	{
     		// argument enhancing within callin methods:
     		Expression[] args = messageSend.arguments;
-    		if (CallinImplementorDyn.DYNAMIC_WEAVING) {
-    			if (isBaseCall) {
-	    			AstGenerator gen = new AstGenerator(messageSend);
-	    			args = new Expression[] {
-	    			              (args != null && args.length > 0)
-	    			              ?  gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, args)
-	    			              :  gen.nullLiteral()
-	    			};
-    			}
-    		} else if (args != null) {
+    		if (args != null) {
     			int len = args.length;
     			if (isBaseCall && methodDecl.isStatic()) // chop of premature isSuperAccess flag:
     				System.arraycopy(args, 1, args=new Expression[len-1], 0, len-1);
@@ -177,7 +167,7 @@ public class TransformStatementsVisitor
     		return false;
     	int sendArgs = messageSend.arguments == null ? 0 : messageSend.arguments.length;
     	sendArgs += MethodSignatureEnhancer.ENHANCING_ARG_LEN;
-    	if (isBaseCall && !CallinImplementorDyn.DYNAMIC_WEAVING)
+    	if (isBaseCall)
     		sendArgs--; // don't count the isSuperAccess flag
     	return sendArgs == callinMethod.arguments.length;
     }

@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
@@ -66,7 +65,7 @@ public class BaseReference extends ThisReference {
 			MethodDeclaration outerCallinMethod,
 			AstGenerator gen)
 	{
-		boolean redirectToTeam = isStatic || CallinImplementorDyn.DYNAMIC_WEAVING; // _OT$callNext is found via MyTeam.this
+		boolean redirectToTeam = isStatic;
 		if (outerCallinMethod != null) {
 			// use "R.this" in order to point to the correct class, direct enclosing is a local class.
 	        ReferenceBinding enclosingRole = outerCallinMethod.binding.declaringClass;
