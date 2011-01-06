@@ -184,6 +184,12 @@ public class AstGenerator extends AstFactory {
 		return result;
 	}
 
+	public Expression baseTypeReference(ReferenceBinding type) {
+		TypeReference result = typeReference(type);
+		result.setBaseclassDecapsulation(DecapsulationState.REPORTED);
+		return result;
+	}
+
     public ResultReference resultReference(
     		SingleNameReference ref, AbstractMethodMappingDeclaration mapping)
     {

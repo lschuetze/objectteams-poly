@@ -50,6 +50,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDec
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
@@ -336,9 +337,12 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 	 *  passing to a sub role's predicate. */
 	private Expression baseReference(char[] baseVarName, ReferenceBinding roleType, AstGenerator gen) {
 		Expression result= gen.singleNameReference(baseVarName);
-		if (   roleType != null
-			&& (roleType.baseclass() != this._currentRole.baseclass()))
-			result= gen.castExpression(result, gen.typeReference(roleType.baseclass()), CastExpression.RAW);
+		if ((   roleType != null
+			 && (roleType.baseclass() != this._currentRole.baseclass()))
+			|| CallinImplementorDyn.DYNAMIC_WEAVING) // under OTREDyn base is passed as IBoundBase => always need to cast.
+		{
+			result= gen.castExpression(result, gen.baseTypeReference(roleType.baseclass()), CastExpression.RAW);
+		}
 		return result;
 	}
 	/* Generate the statement by which evaluation to false is signaled,

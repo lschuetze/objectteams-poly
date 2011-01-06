@@ -391,10 +391,11 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 																			  			  gen.typeReference(baseReturn),
 																			  			  CastExpression.RAW)));
 					Expression receiver;
+					char[] roleVar = null;
 					if (!isStaticRoleMethod) {
 						if (needLiftedRoleVar) {
 							// RoleType local$n = this._OT$liftToRoleType((BaseType)base); 
-							char[] roleVar = (LOCAL_ROLE+statements.size()).toCharArray();
+							roleVar = (LOCAL_ROLE+statements.size()).toCharArray();
 							blockStatements.add(gen.localVariable(roleVar, roleType.sourceName(),
 									Lifting.liftCall(callMethod.scope,
 													 gen.thisReference(),
@@ -445,7 +446,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 
 					for (int i=0; i<roleParams.length; i++) {
 						Expression arg;
+						boolean needCast = false;
 						TypeBinding roleParam = roleParams[i].erasure(); // type vars of callin-decl and role are not in scope :(
+						needCast = roleParam != roleParams[i]; 
 						if (callinDecl.mappings == null) {
 							arg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i);
 							if (roleParam.isBaseType()) {
@@ -458,12 +461,13 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								arg = gen.potentialLift(gen.thisReference(), arg, roleParam, isReplace/*reversible*/);
 							}
 						} else {
-							arg = new PotentialRoleReceiverExpression(
-										getArgument(callinDecl, (MethodDeclaration) methodDecl, callinDecl.getRoleMethod().parameters, i+idx, baseSpec),
-										ROLE_VAR_NAME, 
-										gen.typeReference(roleType.getRealClass()));
+							arg = getArgument(callinDecl, (MethodDeclaration) methodDecl, callinDecl.getRoleMethod().parameters, i+idx, baseSpec);
+							if (needLiftedRoleVar)
+								arg = new PotentialRoleReceiverExpression(arg, roleVar, gen.typeReference(roleType.getRealClass()));
 						}
 		 				char[] localName = (OT_LOCAL+i).toCharArray();
+		 				if (needCast)
+		 					arg = gen.castExpression(arg, gen.typeReference(roleParam), CastExpression.RAW);
 						blockStatements.add(gen.localVariable(localName, roleParam, arg));
 						callArgs[i+idx] = gen.singleNameReference(localName);
 
@@ -479,7 +483,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							gen);
 					if (rolePredicateCheck != null)
 			        	// predicateCheck(_OT$role)
-			        	statements.add(rolePredicateCheck);
+			        	blockStatements.add(rolePredicateCheck);
 
 					// -- assemble the method call:
 					MessageSend roleMethodCall = gen.messageSend(receiver, callinDecl.roleMethodSpec.selector, callArgs);
