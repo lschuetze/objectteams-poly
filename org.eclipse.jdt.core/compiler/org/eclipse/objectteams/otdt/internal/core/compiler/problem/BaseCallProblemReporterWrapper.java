@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
 
 
 /**
@@ -110,11 +109,9 @@ public class BaseCallProblemReporterWrapper extends ProblemReporterWrapper
 		AbstractMethodDeclaration enclosingMethodDecl = ((AbstractMethodDeclaration)this.referenceContext);
 		if (enclosingMethodDecl.ignoreFurtherInvestigation)
 			return; // too probable that our error was caused by not resolving the enclosing method.
-		char[] problemSelector = problemMethod.selector;
-		problemSelector = SyntheticBaseCallSurrogate.stripBaseCallName(problemSelector);
 		if (   problemMethod.closestMatch != null
 			&& CharOperation.equals(
-					problemSelector,
+					this._messageSend.sourceSelector,
 					enclosingMethodDecl.selector))
 		{
 			this._wrappee.baseCallDoesntMatchRoleMethodSignature(this._messageSend);
