@@ -214,7 +214,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 				this.typeAnchors[len] = typeAnchorReference;
 				len = this.typeArguments.length-1;
 				System.arraycopy(this.typeArguments, 1,
-								 this.typeArguments = new TypeReference[len], 0, len);
+								 this.typeArguments = new TypeReference[len], 0, len); // FIXME(SH): reducing this array conflicts with loop condition
 	
 				// note: handling of arrays differs for role and regular types
 				if (len == 0)

@@ -58,6 +58,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
@@ -768,14 +769,16 @@ public TypeBinding resolveType(BlockScope scope) {
 //{ObjectTeams: new check (base.m() within m() ?)
     if (this.receiver instanceof BaseReference)
     {
-        AbstractMethodDeclaration enclosingMethod = scope.methodScope().referenceMethod();
-        if (!enclosingMethod.isCallin())
-        	enclosingMethod = BaseCallMessageSend.getOuterCallinMethod(scope.methodScope());
-        MethodBinding basecallSurrogate = null;
-        if (enclosingMethod.model != null)
-        	basecallSurrogate = enclosingMethod.model.getBaseCallSurrogate();
-        if (this.binding != basecallSurrogate)
-        	scope.problemReporter().baseCallNotSameMethod(enclosingMethod, this);
+    	if (!CallinImplementorDyn.DYNAMIC_WEAVING) { // FIXME(OTDYN): need a new strategy to check this for dyn weaving.
+	        AbstractMethodDeclaration enclosingMethod = scope.methodScope().referenceMethod();
+	        if (!enclosingMethod.isCallin())
+	        	enclosingMethod = BaseCallMessageSend.getOuterCallinMethod(scope.methodScope());
+	        MethodBinding basecallSurrogate = null;
+	        if (enclosingMethod.model != null)
+	        	basecallSurrogate = enclosingMethod.model.getBaseCallSurrogate();
+	        if (this.binding != basecallSurrogate)
+	        	scope.problemReporter().baseCallNotSameMethod(enclosingMethod, this);
+    	}
     }
 // SH}
 	if ((this.binding.tagBits & TagBits.HasMissingType) != 0) {

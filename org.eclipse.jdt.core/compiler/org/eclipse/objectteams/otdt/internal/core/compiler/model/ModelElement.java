@@ -78,6 +78,9 @@ public class ModelElement {
     	existingAttr.merge(this, attr);
     	if (attr.nameEquals(IOTConstants.CALLIN_METHOD_MAPPINGS))
     		CallinImplementor.checkCopyCallinBinding((CallinMethodMappingsAttribute)attr, this);
+// FIXME(SH): enable once CallinImplemtorDyn implements this:
+//    	if (attr.nameEquals(OTDynCallinBindingsAttribute.ATTRIBUTE_NAME))
+//    		CallinImplementorDyn.checkCopyCallinBinding((OTDynCallinBindingsAttribute)attr, this);
     }
 
     /** Find an attribute by its name, return null if not present. */

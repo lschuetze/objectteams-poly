@@ -343,7 +343,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 	public static Expression[] retrenchBasecallArguments(Expression[] arguments, boolean isEnhanced) {
 		if (arguments == null) return null;
 		int len = arguments.length;
-		int discard = 1; // isSuperAccess (unconditionally) // FIXME(OTDYN) must handle super flag?
+		int discard = CallinImplementorDyn.DYNAMIC_WEAVING ? 0 : 1; // isSuperAccess (unconditionally) // FIXME(OTDYN) must handle super flag?
 		if (isEnhanced)  // if TransformStatementsVisitor has modified this node
 			discard += ENHANCING_ARG_LEN;
 		Expression[] result = new Expression[len-discard];

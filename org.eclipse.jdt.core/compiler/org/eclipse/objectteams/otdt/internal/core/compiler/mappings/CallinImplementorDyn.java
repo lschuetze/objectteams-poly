@@ -489,7 +489,11 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					MessageSend roleMethodCall = gen.messageSend(receiver, callinDecl.roleMethodSpec.selector, callArgs);
 					roleMethodCall.isPushedOutRoleMethodCall = true;
 					if (isReplace) {
-						blockStatements.add(gen.returnStatement(roleMethodCall));
+						Expression result = roleMethodCall;
+						if (callinDecl.baseMethodSpecs[0].returnNeedsTranslation) // FIXME(SH): per base method!
+							// lowering:
+							result = gen.messageSend(result, IOTConstants._OT_GETBASE, new Expression[0]);
+						blockStatements.add(gen.returnStatement(result));
 					} else {
 						blockStatements.add(roleMethodCall);
 						blockStatements.add(gen.breakStatement());
@@ -609,6 +613,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		swStat.expression = gen.arrayReference(gen.singleNameReference(CALLIN_ID), gen.singleNameReference(INDEX));
 		List<Statement> swStatements = new ArrayList<Statement>(); 
 		for (CallinMappingDeclaration mapping : callinDecls) {
+			ReferenceBinding roleType = mapping.binding._declaringRoleClass;
 			List<Statement> caseBlockStats = new ArrayList<Statement>();
 			int nLabels = 0;
 			for (MethodSpec baseSpec : mapping.baseMethodSpecs) 
@@ -623,14 +628,30 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						caseBlockStats.add(gen.assignment(gen.arrayReference(gen.singleNameReference(ARGUMENTS), poss[i]-1), // 0 represents result
 														  gen.arrayReference(gen.singleNameReference(BASE_CALL_ARGS), i)));
 			} else if (nRoleArgs > 0) {
-				for (int i=0; i<nRoleArgs; i++) // FIXME(SH): no more args than expected by baseSpec (which determines the array size!)
+				for (int i=0; i<nRoleArgs; i++) {
 					// arguments[i] = baseCallArguments[i]
+					Expression basecallArg = gen.arrayReference(gen.singleNameReference(BASE_CALL_ARGS), i);
+					if (mapping.baseMethodSpecs[0].argNeedsTranslation(i)) { // FIXME(SH): per basemethod!
+						// lowering:
+						basecallArg = gen.castExpression(basecallArg, gen.typeReference(roleType), CastExpression.RAW);
+						basecallArg = gen.messageSend(basecallArg, IOTConstants._OT_GETBASE, new Expression[0]);
+					}
 					caseBlockStats.add(gen.assignment(gen.arrayReference(gen.singleNameReference(ARGUMENTS), i),
-							  		   				  gen.arrayReference(gen.singleNameReference(BASE_CALL_ARGS), i)));
+							  		   				  basecallArg));
+				}
 			}
+			Expression result = gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs);
+			if (mapping.baseMethodSpecs[0].returnNeedsTranslation) { // FIXME(SH): per basemethod!
+				// lifting:
+				result = gen.messageSend(gen.thisReference(), // the team
+										 Lifting.getLiftMethodName(roleType),
+										 new Expression[] {
+											gen.castExpression(result, gen.baseTypeReference(roleType.baseclass()), CastExpression.RAW)
+										 });
+			}
+			caseBlockStats.add(gen.returnStatement(result));
 			if (caseBlockStats.size() > nLabels) { // any action added ?
 				swStatements.addAll(caseBlockStats);
-				swStatements.add(gen.breakStatement());
 			}
 		}
 		if (swStatements.size() == 0)
@@ -639,7 +660,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		swStat.statements = swStatements.toArray(new Statement[swStatements.size()]);
 		decl.statements = new Statement[] {
 			swStat,
-			gen.returnStatement(gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs))
+			gen.returnStatement(gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs)) // delegate with unchanged arguments/return
 		};
 		decl.hasParsedStatements = true;
 		AstEdit.addMethod(teamDecl, decl);
