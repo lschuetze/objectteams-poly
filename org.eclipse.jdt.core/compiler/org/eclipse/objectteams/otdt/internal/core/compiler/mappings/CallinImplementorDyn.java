@@ -387,9 +387,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					if (mayUseResultArgument)
 						// BaseReturnType result = (BaseReturnType)_OT$result;
 						blockStatements.add(gen.localVariable(RESULT, baseReturn, 
-																	   gen.castExpression(gen.singleNameReference(_OT_RESULT),
-																			  			  gen.typeReference(baseReturn),
-																			  			  CastExpression.RAW)));
+															  gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn)));
 					Expression receiver;
 					char[] roleVar = null;
 					if (!isStaticRoleMethod) {
@@ -424,11 +422,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							Argument baseArg = baseSpec.arguments[i];
 							Expression rawArg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i);
 							Expression init = rawArg;
-							if (baseParams[i].isBaseType()) {
-								init = gen.createUnboxing(rawArg, (BaseTypeBinding)baseParams[i]); // includes intermediate cast to boxed type
-							} else if (!baseParams[i].isTypeVariable()) {
-								init = gen.castExpression(rawArg, gen.typeReference(baseParams[i].erasure()), CastExpression.RAW);
-							}
+							if (!baseParams[i].isTypeVariable())
+								init = gen.createCastOrUnboxing(rawArg, baseParams[i]);
 							// add to front so it is already available for the base predicate check:
 							blockStatements.add(i, gen.localVariable(baseArg.name, AstClone.copyTypeReference(baseArg.type), init));
 						}
