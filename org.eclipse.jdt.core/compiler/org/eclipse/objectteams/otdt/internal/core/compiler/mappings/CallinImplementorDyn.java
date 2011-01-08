@@ -49,6 +49,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLiftExpr
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialRoleReceiverExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.OTDynCallinBindingsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lowering;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -487,7 +488,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						Expression result = roleMethodCall;
 						if (callinDecl.baseMethodSpecs[0].returnNeedsTranslation) // FIXME(SH): per base method!
 							// lowering:
-							result = gen.messageSend(result, IOTConstants._OT_GETBASE, new Expression[0]);
+							result = new Lowering().lowerExpression(methodDecl.scope, result, roleType, roleType.baseclass(), gen.thisReference(), true);
 						blockStatements.add(gen.returnStatement(result));
 					} else {
 						blockStatements.add(roleMethodCall);
@@ -530,7 +531,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					Expression[] callArgs = new Expression[REPLACE_ARG_NAMES.length+1];
 					for (int idx=0; idx < REPLACE_ARG_NAMES.length; idx++)
 						callArgs[idx] = gen.singleNameReference(REPLACE_ARG_NAMES[idx]);
-					callArgs[callArgs.length-1] = gen.nullLiteral(); // baseCallArguments
+					callArgs[callArgs.length-1] = gen.nullLiteral(); // no explicit baseCallArguments
 					statements.add(gen.caseStatement(null)); // = default
 					statements.add(gen.returnStatement(
 										gen.messageSend(
@@ -614,35 +615,44 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			for (MethodSpec baseSpec : mapping.baseMethodSpecs) 
 				caseBlockStats.add(gen.caseStatement(gen.intLiteral(baseSpec.getCallinId(aTeam))));
 			int nRoleArgs = mapping.getRoleMethod().getSourceParamLength();
+			List<Statement> repackingStats = new ArrayList<Statement>();
 			if (mapping.positions != null) {
 				int[] poss = mapping.positions;
 				nLabels = caseBlockStats.size();
 				for (int i=0; i<poss.length; i++)
 					// arguments[basepos] = baseCallArguments[i]
-					if (poss[i] > 0)
-						caseBlockStats.add(gen.assignment(gen.arrayReference(gen.singleNameReference(ARGUMENTS), poss[i]-1), // 0 represents result
-														  gen.arrayReference(gen.singleNameReference(BASE_CALL_ARGS), i)));
+					if (poss[i] > 0) {
+						// FIXME(SH): this is cheating: should obtain translation info from actual parameter mapping (see cast in test432_expressionInReplaceParameterMapping11)
+						TypeBinding roleSideParameter = mapping.getRoleMethod().parameters[i+MethodSignatureEnhancer.ENHANCING_ARG_LEN];
+						TypeBinding baseSideParameter = mapping.baseMethodSpecs[0].resolvedParameters()[poss[i]-1]; // FIXME(SH): per basemethod
+						Expression roleSideArgument = gen.arrayReference(gen.singleNameReference(BASE_CALL_ARGS), i);
+						if (roleSideParameter.isRole() && ((ReferenceBinding)roleSideParameter).baseclass().isCompatibleWith(baseSideParameter))
+							roleSideArgument = new Lowering().lowerExpression(mapping.scope, roleSideArgument, roleSideParameter, baseSideParameter, gen.thisReference(), true);
+						repackingStats.add(gen.assignment(gen.arrayReference(gen.singleNameReference(ARGUMENTS), poss[i]-1), // 0 represents result
+														  roleSideArgument));
+					}
 			} else if (nRoleArgs > 0) {
 				for (int i=0; i<nRoleArgs; i++) {
 					// arguments[i] = baseCallArguments[i]
 					Expression basecallArg = gen.arrayReference(gen.singleNameReference(BASE_CALL_ARGS), i);
 					if (mapping.baseMethodSpecs[0].argNeedsTranslation(i)) { // FIXME(SH): per basemethod!
 						// lowering:
-						basecallArg = gen.castExpression(basecallArg, gen.typeReference(roleType), CastExpression.RAW);
-						basecallArg = gen.messageSend(basecallArg, IOTConstants._OT_GETBASE, new Expression[0]);
+						basecallArg = new Lowering().lowerExpression(mapping.scope, basecallArg, roleType, roleType.baseclass(), gen.thisReference(), true); 
 					}
-					caseBlockStats.add(gen.assignment(gen.arrayReference(gen.singleNameReference(ARGUMENTS), i),
+					repackingStats.add(gen.assignment(gen.arrayReference(gen.singleNameReference(ARGUMENTS), i),
 							  		   				  basecallArg));
 				}
 			}
+			caseBlockStats.add(gen.ifStatement(gen.nullCheck(gen.singleNameReference(BASE_CALL_ARGS)),
+											   null,
+											   gen.block(repackingStats.toArray(new Statement[repackingStats.size()]))));
 			Expression result = gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs);
 			if (mapping.baseMethodSpecs[0].returnNeedsTranslation) { // FIXME(SH): per basemethod!
 				// lifting:
-				result = gen.messageSend(gen.thisReference(), // the team
-										 Lifting.getLiftMethodName(roleType),
-										 new Expression[] {
-											gen.castExpression(result, gen.baseTypeReference(roleType.baseclass()), CastExpression.RAW)
-										 });
+				result = Lifting.liftCall(mapping.scope,
+										  gen.thisReference(),
+										  gen.castExpression(result, gen.typeReference(roleType.baseclass()), CastExpression.RAW),
+										  mapping.scope.getJavaLangObject(), roleType, false, gen);
 			}
 			caseBlockStats.add(gen.returnStatement(result));
 			if (caseBlockStats.size() > nLabels) { // any action added ?
