@@ -20,9 +20,6 @@ import java.util.HashSet;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
-import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
@@ -43,7 +40,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBindin
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance.SupertypeObligation;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.Protections;
 
@@ -170,37 +166,11 @@ public class TypeLevel {
 			if (srcDecl.baseclass != null && destRoleDecl.baseclass == null) {
 				long pos= (((long)destRoleDecl.sourceStart)<<32)+destRoleDecl.sourceEnd;
 				// create a special type reference that uses the original scope for resolving:
-				destRoleDecl.baseclass= wrapBasetypeReference(srcDecl.baseclass, srcDecl.scope, pos);
+				destRoleDecl.baseclass= new AstGenerator(pos).alienScopeTypeReference(srcDecl.baseclass, (ClassScope) srcDecl.scope.parent);
 				destRoleDecl.baseclass.setBaseclassDecapsulation(DecapsulationState.REPORTED);
 				destRoleDecl.baseclass.bits |= ASTNode.IsGenerated;
 			}
 		}
-	}
-
-	/**
-	 * Wrap the baseclass reference from a tsuper role to a new type reference
-	 * yet using the original scope for resolving.
-	 */
-	private static TypeReference wrapBasetypeReference(
-							TypeReference original, ClassScope origScope, long pos)
-	{
-		if (original instanceof IAlienScopeTypeReference)
-			origScope = ((IAlienScopeTypeReference)original).getAlienScope();
-		if (origScope.parent.kind == Scope.CLASS_SCOPE)
-			origScope = (ClassScope)origScope.parent;
-
-		if (original instanceof ParameterizedSingleTypeReference) {
-			ParameterizedSingleTypeReference pstRef = (ParameterizedSingleTypeReference) original;
-			TypeReference[] typeArguments = AstClone.copyTypeArguments(original, pos, pstRef.typeArguments);
-			return new AlienScopeParameterizedSingleTypeReference(pstRef.token, typeArguments, pstRef.dimensions, pos, origScope);
-		} else if (original instanceof SingleTypeReference) {
-			SingleTypeReference singleTypeRef = (SingleTypeReference) original;
-			return new AlienScopeSingleTypeReference(singleTypeRef.token, pos, origScope);
-		} else if (original instanceof QualifiedTypeReference) {
-			QualifiedTypeReference qTypeRef= (QualifiedTypeReference)original;
-			return new AlienScopeQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, origScope);
-		}
-		throw new InternalCompilerError("Unexpected base type reference: "+original); //$NON-NLS-1$
 	}
 
 	/**

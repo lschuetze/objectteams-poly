@@ -14,7 +14,7 @@
  * Contributors:
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance;
+package org.eclipse.objectteams.otdt.internal.core.compiler.util;
 
 import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -33,20 +34,20 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
  * @author stephan
  * @since 1.2.1 (before that the implementing classes were anonymous classes)
  */
-interface IAlienScopeTypeReference {
-	ClassScope getAlienScope();
+public interface IAlienScopeTypeReference {
+	Scope getAlienScope();
 }
 
 	// ===== And now for some implementing classes: =====
 
 	class AlienScopeSingleTypeReference extends SingleTypeReference implements IAlienScopeTypeReference
 	{
-		ClassScope alienScope;
-		public AlienScopeSingleTypeReference(char[] source, long pos, ClassScope alienScope) {
+		Scope alienScope;
+		public AlienScopeSingleTypeReference(char[] source, long pos, Scope alienScope) {
 			super(source, pos);
 			this.alienScope = alienScope;
 		}
-		public ClassScope getAlienScope() { return this.alienScope; }
+		public Scope getAlienScope() { return this.alienScope; }
 		@Override
 		public TypeBinding checkResolveUsingBaseImportScope(Scope scope) {
 			return super.checkResolveUsingBaseImportScope(this.alienScope);
@@ -60,19 +61,24 @@ interface IAlienScopeTypeReference {
 				return result;
 			// remove problem binding if any:
 			this.resolvedType = null;
-			return super.resolveType(this.alienScope);
+			return super.resolveType(this.alienScope.classScope());
+		}
+		@Override
+		public TypeBinding resolveType(BlockScope scope, boolean checkBounds) {
+			// this variant for use within callin wrappers:
+			return super.resolveType((BlockScope) this.alienScope, checkBounds);
 		}
 	}
 
 	// exactly like AlienScopeSingleTypeReference, but different super class
 	class AlienScopeParameterizedSingleTypeReference extends ParameterizedSingleTypeReference implements IAlienScopeTypeReference
 	{
-		ClassScope alienScope;
-		public AlienScopeParameterizedSingleTypeReference(char[] source, TypeReference[] typeArguments, int dimensions, long pos, ClassScope alienScope) {
+		Scope alienScope;
+		public AlienScopeParameterizedSingleTypeReference(char[] source, TypeReference[] typeArguments, int dimensions, long pos, Scope alienScope) {
 			super(source, typeArguments, dimensions, pos);
 			this.alienScope = alienScope;
 		}
-		public ClassScope getAlienScope() { return this.alienScope; }
+		public Scope getAlienScope() { return this.alienScope; }
 		@Override
 		public TypeBinding checkResolveUsingBaseImportScope(Scope scope) {
 			// `scope` may be stronger then `alienScope`, try it first:
@@ -93,18 +99,24 @@ interface IAlienScopeTypeReference {
 				return result;
 			// remove problem binding if any:
 			this.resolvedType = null;
-			return super.resolveType(this.alienScope);
+			return super.resolveType(this.alienScope.classScope());
+		}
+		@Override
+		public TypeBinding resolveType(BlockScope scope, boolean checkBounds) {
+			// this variant for use within callin wrappers:
+			return super.resolveType((BlockScope) this.alienScope, checkBounds);
 		}
 	}
 	
 	class AlienScopeQualifiedTypeReference extends QualifiedTypeReference implements IAlienScopeTypeReference
 	{
-		ClassScope alienScope;
-		public AlienScopeQualifiedTypeReference(char[][] sources, long[] poss, ClassScope alienScope) {
+		Scope alienScope;
+		public AlienScopeQualifiedTypeReference(char[][] sources, long[] poss, Scope alienScope) {
 			super(sources, poss);
 			this.alienScope = alienScope;
+			this.isGenerated = true; // allow qualified reference to role
 		}
-		public ClassScope getAlienScope() { return this.alienScope; }
+		public Scope getAlienScope() { return this.alienScope; }
 		@Override
 		public TypeBinding checkResolveUsingBaseImportScope(Scope scope) {
 			return super.checkResolveUsingBaseImportScope(this.alienScope);
@@ -122,7 +134,12 @@ interface IAlienScopeTypeReference {
 			this.resolvedType = null;
 			if (cp != null)
 				referenceContext.compilationResult.rollBack(cp);
-			return super.resolveType(this.alienScope);
+			return super.resolveType(this.alienScope.classScope());
+		}
+		@Override
+		public TypeBinding resolveType(BlockScope scope, boolean checkBounds) {
+			// this variant for use within callin wrappers:
+			return super.resolveType((BlockScope) this.alienScope, checkBounds);
 		}
 		@Override
 		protected void reportDeprecatedPathSyntax(Scope scope) {

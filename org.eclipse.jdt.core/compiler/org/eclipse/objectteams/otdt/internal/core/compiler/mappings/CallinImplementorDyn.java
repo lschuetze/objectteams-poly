@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
+import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.Pair;
@@ -334,7 +335,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					: gen.singleNameReference(CALLIN_ID);
 				
 				int callinIdCount = teamDecl.getTeamModel().getCallinIdCount();
-				boolean[] handledCallinIds = new boolean[callinIdCount];
+				boolean[] handledCallinIds = new boolean[callinIdCount]; // callinIds not handled here will be handled using a super-call.
 				// one case block per callin mapping:
 				for (CallinMappingDeclaration callinDecl : callinDecls) 
 				{
@@ -424,9 +425,19 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							Expression rawArg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i);
 							Expression init = rawArg;
 							if (!baseParams[i].isTypeVariable())
-								init = gen.createCastOrUnboxing(rawArg, baseParams[i]);
-							// add to front so it is already available for the base predicate check:
-							blockStatements.add(i, gen.localVariable(baseArg.name, AstClone.copyTypeReference(baseArg.type), init));
+								init = gen.createCastOrUnboxing(rawArg, baseParams[i], callinDecl.scope);
+							if (hasBasePredicate) {
+								// add to front so it is already available for the base predicate check:
+								blockStatements.add(i, gen.localVariable(baseArg.name, AstClone.copyTypeReference(baseArg.type), init));
+							} else {
+								// otherwise give it a chance for expressions/types that depend on the role instance
+								blockStatements.add(gen.localVariable(baseArg.name,
+																	  gen.alienScopeTypeReference(baseArg.type, callinDecl.scope), 
+																	  new PotentialRoleReceiverExpression(
+																			  init,
+																			  roleVar,
+																			  gen.typeReference(roleType))));
+							}
 						}
 					}
 					
@@ -443,8 +454,16 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					for (int i=0; i<roleParams.length; i++) {
 						Expression arg;
 						boolean needCast = false;
-						TypeBinding roleParam = roleParams[i].erasure(); // type vars of callin-decl and role are not in scope :(
-						needCast = roleParam != roleParams[i]; 
+						TypeBinding roleParam = roleParams[i];
+						if (roleParam.isTypeVariable()) {
+							needCast = true;
+							TypeVariableBinding tvb = (TypeVariableBinding) roleParam;
+							if (tvb.declaringElement instanceof MethodBinding) {
+								if (((MethodBinding)tvb.declaringElement).declaringClass == roleType)
+									// don't use type variable of target method, see test4140_callinReplaceCompatibility10s()
+									roleParam = roleParam.erasure();
+							}
+						}
 						if (callinDecl.mappings == null) {
 							arg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i);
 							if (roleParam.isBaseType()) {
@@ -462,9 +481,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								arg = new PotentialRoleReceiverExpression(arg, roleVar, gen.typeReference(roleType.getRealClass()));
 						}
 		 				char[] localName = (OT_LOCAL+i).toCharArray();
+		 				TypeReference roleParamType = gen.typeReference(roleParam);
 		 				if (needCast)
-		 					arg = gen.castExpression(arg, gen.typeReference(roleParam), CastExpression.RAW);
-						blockStatements.add(gen.localVariable(localName, roleParam, arg));
+		 					arg = gen.castExpression(arg, gen.alienScopeTypeReference(roleParamType, callinDecl.scope), CastExpression.RAW);
+						blockStatements.add(gen.localVariable(localName, gen.alienScopeTypeReference(roleParamType, callinDecl.scope), arg));
 						callArgs[i+idx] = gen.singleNameReference(localName);
 
 					}

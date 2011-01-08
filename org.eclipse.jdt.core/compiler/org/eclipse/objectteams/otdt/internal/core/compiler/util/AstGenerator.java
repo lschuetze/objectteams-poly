@@ -1160,6 +1160,12 @@ public class AstGenerator extends AstFactory {
 		else
 			return castExpression(expression, typeReference(expectedType), CastExpression.RAW);
 	}
+	public Expression createCastOrUnboxing(Expression expression, TypeBinding expectedType, Scope originalScope) {
+		if (expectedType.isBaseType())
+			return createUnboxing(expression, (BaseTypeBinding)expectedType);
+		else
+			return castExpression(expression, alienScopeTypeReference(typeReference(expectedType), originalScope), CastExpression.RAW);
+	}
 	
 	// ========= Method Mappings: =========
 	public CalloutMappingDeclaration calloutMappingDeclaration(
@@ -1231,6 +1237,32 @@ public class AstGenerator extends AstFactory {
 	
 	public MarkerAnnotation markerAnnotation(char[][] compoundName) {
 		return new MarkerAnnotation(qualifiedTypeReference(compoundName), this.sourceStart);
+	}
+
+	/**
+	 * Wrap the baseclass reference from a tsuper role to a new type reference
+	 * yet using the original scope for resolving.
+	 * Also used for type references in callin wrappers
+	 */
+	public TypeReference alienScopeTypeReference(TypeReference original, Scope origScope)
+	{
+		if (original instanceof IAlienScopeTypeReference)
+			origScope = ((IAlienScopeTypeReference)original).getAlienScope();
+//		if (origScope.parent.kind == Scope.CLASS_SCOPE)
+//			origScope = (ClassScope)origScope.parent;
+	
+		if (original instanceof ParameterizedSingleTypeReference) {
+			ParameterizedSingleTypeReference pstRef = (ParameterizedSingleTypeReference) original;
+			TypeReference[] typeArguments = AstClone.copyTypeArguments(original, this.pos, pstRef.typeArguments);
+			return new AlienScopeParameterizedSingleTypeReference(pstRef.token, typeArguments, pstRef.dimensions, this.pos, origScope);
+		} else if (original instanceof SingleTypeReference) {
+			SingleTypeReference singleTypeRef = (SingleTypeReference) original;
+			return new AlienScopeSingleTypeReference(singleTypeRef.token, this.pos, origScope);
+		} else if (original instanceof QualifiedTypeReference) {
+			QualifiedTypeReference qTypeRef= (QualifiedTypeReference)original;
+			return new AlienScopeQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, origScope);
+		}
+		throw new InternalCompilerError("Unexpected type reference: "+original); //$NON-NLS-1$
 	}
 
 }

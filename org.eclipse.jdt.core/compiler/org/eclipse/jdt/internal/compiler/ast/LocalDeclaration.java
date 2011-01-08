@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.IAlienScopeTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 /**
@@ -195,7 +196,12 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 // SH}
 
 //{ObjectTeams: wrap declared type
-		variableType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(variableType, scope, this);
+		{
+			Scope typeScope = scope;
+			if (this.type instanceof IAlienScopeTypeReference)
+				typeScope = ((IAlienScopeTypeReference)this.type).getAlienScope();
+			variableType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(variableType, typeScope, this);
+		}
 // SH}
 		checkModifiers();
 		if (variableType != null) {
