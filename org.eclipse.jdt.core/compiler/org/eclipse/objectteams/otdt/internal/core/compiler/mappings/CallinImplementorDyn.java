@@ -74,6 +74,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 
 	public static boolean DYNAMIC_WEAVING = "dynamic".equals(System.getProperty("ot.weaving")); //$NON-NLS-1$ //$NON-NLS-2$
 
+
 	//_OT$role
 	static final char[] ROLE_VAR_NAME = CharOperation.concat(IOTConstants.OT_DOLLAR_NAME, IOTConstants.ROLE);
 
@@ -82,7 +83,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	static final char[] OT_CALL_AFTER   = "_OT$callAfter".toCharArray(); //$NON-NLS-1$
 	static final char[] OT_CALL_REPLACE = "_OT$callReplace".toCharArray(); //$NON-NLS-1$
 	// used for base calls:
-	public  static final char[] OT_CALL_NEXT    = "_OT$callNext".toCharArray(); //$NON-NLS-1$
+	public static final char[] OT_CALL_NEXT     = "_OT$callNext".toCharArray(); //$NON-NLS-1$
+	// for decapsulation:
+	public static final char[] OT_ACCESS 		= "_OT$access".toCharArray(); //$NON-NLS-1$
+	public static final char[] OT_ACCESS_STATIC = "_OT$accessStatic".toCharArray(); //$NON-NLS-1$
 	
 	// variable names (arguments ...)
 	static final char[] TEAMS 			= "teams".toCharArray(); //$NON-NLS-1$
@@ -399,7 +403,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							blockStatements.add(gen.localVariable(roleVar, roleType.sourceName(),
 									Lifting.liftCall(callMethod.scope,
 													 gen.thisReference(),
-													 gen.castExpression(gen.singleNameReference(IOTConstants.BASE), gen.typeReference(roleType.baseclass()), CastExpression.RAW),
+													 gen.castExpression(gen.singleNameReference(IOTConstants.BASE), gen.baseTypeReference(roleType.baseclass()), CastExpression.RAW),
 													 callMethod.scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3),
 													 roleType,
 													 false,

@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
@@ -55,21 +56,34 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 	private static final int DECAPSULATION_METHOD_ACCESS= 1;
 	private static final int CALLOUT_FIELD_ACCESS = 2;
 	private static final int SUPER_METHOD_ACCESS = 3;
+	// OTREDyn has one more field in the attribute, use disjoint kinds:
+	private static final int DYN_DECAPSULATION_METHOD_ACCESS= 4;
+	private static final int DYN_CALLOUT_FIELD_ACCESS = 5;
+	private static final int DYN_SUPER_METHOD_ACCESS = 6;
+	private static final int M_SIZE = CallinImplementorDyn.DYNAMIC_WEAVING ? 8 : 6;
 
+	int nextAccessId = 0;
+	
 	/** Descriptor for a decapsulated base-method. */
 	private class DecapsulatedMethodDesc {
 		ReferenceBinding boundBaseclass;
 		MethodBinding method;
+		private int accessId;
 		DecapsulatedMethodDesc(ReferenceBinding boundBaseclass, MethodBinding method) {
 			this.boundBaseclass = boundBaseclass;
 			this.method = method;
 			if (CopyInheritance.isCreator(method))
 				// creator is declared in the enclosing team
 				this.boundBaseclass = this.boundBaseclass.enclosingType();
+			if (CallinImplementorDyn.DYNAMIC_WEAVING)
+				this.accessId = nextAccessId++;
 		}
 
 		void write() {
-			writeByte((byte)DECAPSULATION_METHOD_ACCESS);
+			if (CallinImplementorDyn.DYNAMIC_WEAVING)
+				writeByte((byte)DYN_DECAPSULATION_METHOD_ACCESS);
+			else
+				writeByte((byte)DECAPSULATION_METHOD_ACCESS);
 			if (this.method.isConstructor()) { // no accessor method, old style attribute
 				writeName(this.method.declaringClass.attributeName());
 				writeName(this.method.selector);
@@ -85,6 +99,8 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 				writeName(this.boundBaseclass.attributeName()); // where to weave into
 				writeName(encodedName);
 				writeName(this.method.signature());
+				if (CallinImplementorDyn.DYNAMIC_WEAVING)
+					writeUnsignedShort(this.accessId);
 			}
 		}
 
@@ -185,8 +201,10 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		this._site = site;
 	}
 
-	public void addDecapsulatedMethodAccess(ReferenceBinding boundBaseclass, MethodBinding method) {
+	public int addDecapsulatedMethodAccess(ReferenceBinding boundBaseclass, MethodBinding method) {
+		int accessId = this.nextAccessId;
 		this._decapsulatedMethods.add(new DecapsulatedMethodDesc(boundBaseclass, method));
+		return accessId;
 	}
 
 	public void addCalloutFieldAccess(FieldBinding field, ReferenceBinding targetClass, int calloutModifier) {
@@ -222,10 +240,10 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
         super.write(classFile);
 
         int attributeSize  = 4; // initially empty, except for two counts
-		attributeSize += this._decapsulatedMethods.size() * 7; // 1 byte kind, 3 names
-		attributeSize += this._calloutToFields.size() * 8;     // 1 byte kind, 1 byte flags, 3 names
-		attributeSize += this._superMethods.size() * 9;        // 1 byte kind, 4 names
-		attributeSize += this._adaptedBaseclasses.size() * 3;  // 1 name + 1 byte flag
+		attributeSize += this._decapsulatedMethods.size() * (1+M_SIZE); // 1 byte kind, 3 names (+1 short for otredyn)
+		attributeSize += this._calloutToFields.size() * 8;     			// 1 byte kind, 1 byte flags, 3 names
+		attributeSize += this._superMethods.size() * 9;        			// 1 byte kind, 4 names
+		attributeSize += this._adaptedBaseclasses.size() * 3;  			// 1 name + 1 byte flag
 
         if (this._contentsOffset + 6 + attributeSize >= this._contents.length)
         	this._contents = classFile.getResizedContents(6 + attributeSize);
@@ -283,6 +301,9 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 	private void readElement() {
 		int kind = consumeByte();
 		switch(kind) {
+		case DYN_DECAPSULATION_METHOD_ACCESS:
+			this._readOffset += 2; // extra id
+				//$FALL-THROUGH$
 		case DECAPSULATION_METHOD_ACCESS:
 			this._readOffset += 6;
 			break;

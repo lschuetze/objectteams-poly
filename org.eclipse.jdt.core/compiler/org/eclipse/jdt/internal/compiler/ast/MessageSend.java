@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
+import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
@@ -63,6 +64,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImple
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 /**
@@ -714,10 +716,27 @@ public TypeBinding resolveType(BlockScope scope) {
 			this.binding = ((ProblemMethodBinding)this.binding).closestMatch;
 			if (!this.binding.declaringClass.isRole()) { // access via interface is possible anyway, no access wrapper needed.
 				// instruct the OTRE to generate an accessor method:
-				scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
+				int accessId = scope.enclosingSourceType().roleModel.addInaccessibleBaseMethod(this.binding);
 				// pretend that accessor method were already there:
 				this.binding = new MethodBinding(this.binding, this.binding.declaringClass.getRealClass());
-				this.binding.selector = CharOperation.concat(IOTConstants.OT_DECAPS, this.selector);
+				if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+					MethodModel.recordMethodAccessId(this.binding, accessId);
+					if (this.binding.isStatic())
+						this.binding.selector = CallinImplementorDyn.OT_ACCESS_STATIC;
+					else
+						this.binding.selector = CallinImplementorDyn.OT_ACCESS;
+					TypeBinding originalReturnType = this.binding.returnType;
+					if (originalReturnType.id != TypeIds.T_void) {
+						if (originalReturnType.isBaseType()) {
+							this.valueCast = scope.getType(AstGenerator.boxTypeName((BaseTypeBinding) originalReturnType), 3);
+							computeConversion(scope, this.valueCast, originalReturnType);
+						} else {
+							this.valueCast = originalReturnType;
+						}
+					}
+				} else {
+					this.binding.selector = CharOperation.concat(IOTConstants.OT_DECAPS, this.selector);
+				}
 			}
 			this.isDecapsulation = true;
 			scope.problemReporter().decapsulation(this, scope);

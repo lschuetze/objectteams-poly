@@ -19,6 +19,8 @@ import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 
 /**
@@ -165,15 +167,49 @@ public void generateArguments(MethodBinding binding, Expression[] arguments, Blo
 			codeStream.newArray(codeGenVarArgsType); // create a mono-dimensional array
 		}
 	} else if (arguments != null) { // standard generation for method arguments
+//{ObjectTeams: decapsulation under OTREDyn requires packing into an array etc.:
+		if (   CharOperation.equals(CallinImplementorDyn.OT_ACCESS, binding.selector)
+			|| CharOperation.equals(CallinImplementorDyn.OT_ACCESS_STATIC, binding.selector)) 
+		{
+			SourceTypeBinding roleType = currentScope.enclosingSourceType();
+			// adjust the target method binding
+			binding.parameters = new TypeBinding[] {
+											TypeBinding.INT,
+											TypeBinding.INT,
+											currentScope.createArrayType(currentScope.getJavaLangObject(), 1),
+											currentScope.getOrgObjectteamsITeam() 
+									};
+			binding.returnType = currentScope.getJavaLangObject();
+			// accessId:
+			codeStream.generateInlinedValue(MethodModel.getMethodAccessId(binding));
+			// opkind (not used for method access):
+			codeStream.iconst_0();
+			// pack original arguments into a new Object[]
+			codeStream.generateInlinedValue(arguments.length);
+			codeStream.anewarray(currentScope.getJavaLangObject());
+			for (int i = 0, max = arguments.length; i < max; i++) {
+				codeStream.dup();
+				codeStream.generateInlinedValue(i);
+				arguments[i].generateCode(currentScope, codeStream, true);
+				if (arguments[i].resolvedType.isBaseType())
+					codeStream.generateBoxingConversion(arguments[i].resolvedType.id);
+				codeStream.aastore();
+			}
+			// pass enclosing team:
+			Object[] path = currentScope.getEmulationPath(roleType.enclosingType(), true, false);
+			codeStream.generateOuterAccess(path, null, roleType.enclosingType(), currentScope);
+			return;
+		}
+// SH}
 		for (int i = 0, max = arguments.length; i < max; i++)
 //{ObjectTeams: check for need for role-ifc to plain-class cast:
 		{
 // orig:
 			arguments[i].generateCode(currentScope, codeStream, true);
+// :giro
 			TypeBinding requiredType = checkRoleToPlainCast(arguments[i].resolvedType, binding.original().parameters[i]);
 			if (requiredType != null)
 				codeStream.checkcast(requiredType);
-// :giro
 		}
 // SH}
 	}

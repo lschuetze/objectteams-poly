@@ -128,6 +128,9 @@ public class MethodModel extends ModelElement {
     // offset between byte code line number and source code line number
     public int _lineOffset;
 
+    // this id is used by OTREDyn to select decapsulated method:
+    private int _accessId;
+
 	// for a callin method record all exceptions declared by bound base methods:
     public Set<ReferenceBinding> _baseExceptions;
     public void addBaseExceptions(ReferenceBinding[] exceptions) {
@@ -716,5 +719,23 @@ public class MethodModel extends ModelElement {
 				handledRoles.add(mapping.scope.enclosingSourceType());
 		}
 		return handledRoles;
+	}
+	/**
+	 * Record an accessId as used by OTREDyn to select a decapsulated method within _OT$access.
+	 * This assumes that different teams decapsulating the same base method keep distinct
+	 * method bindings for the loadtime-generated target method.
+	 * @param method
+	 * @param accessId
+	 */
+	public static void recordMethodAccessId(MethodBinding method, int accessId) {
+		getModel(method)._accessId = accessId;
+	}
+	/**
+	 * Retrieve the accessId previously recorded using {@link #recordByteCode(ClassFile, int)}.
+	 * @param method
+	 * @return the accessId
+	 */
+	public static int getMethodAccessId(MethodBinding method) {
+		return getModel(method)._accessId;
 	}
 }

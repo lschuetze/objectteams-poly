@@ -1120,11 +1120,11 @@ public class RoleModel extends TypeModel
      * Record that the given method is only accessible using decapsulation.
 	 * @param binding
 	 */
-	public void addInaccessibleBaseMethod(MethodBinding binding) {
+	public int addInaccessibleBaseMethod(MethodBinding binding) {
 		// push out to the team to ensure early evaluation by the OTRE:
 		OTSpecialAccessAttribute specialAccess = getTeamModel().getSpecialAccessAttribute();
-		specialAccess.addDecapsulatedMethodAccess(this._binding.baseclass(), binding);
 		specialAccess.addAdaptedBaseClass(binding.declaringClass);
+		return specialAccess.addDecapsulatedMethodAccess(this._binding.baseclass(), binding);
 	}
 
 	/**
