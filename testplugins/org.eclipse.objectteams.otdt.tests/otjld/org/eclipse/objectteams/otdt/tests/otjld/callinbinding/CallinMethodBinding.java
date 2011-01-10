@@ -6493,6 +6493,45 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
             "OK");
     }
 
+    // a callin binding intercepts a method that has an override with covariant return - static type is super-base - no plus used
+    public void test4139_callinBindingWithPlus1a() {
+       
+       runConformTest(
+            new String[] {
+		"Team4139cbwp1a.java",
+			    "\n" +
+			    "public team class Team4139cbwp1a {\n" +
+			    "    protected class R playedBy T4139cbwp1a_1 {\n" +
+			    "        void k() { System.out.print(\"O\"); }\n" +
+			    "        void k() <- after T4139cbwp1a_1 getOther();\n" +
+			    "    }\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        new Team4139cbwp1a().activate();\n" +
+			    "        T4139cbwp1a_1 b = new T4139cbwp1a_2();\n" +
+			    "        b = b.getOther();\n" +
+			    "        b.test();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T4139cbwp1a_1.java",
+			    "\n" +
+			    "public class T4139cbwp1a_1 {\n" +
+			    "    T4139cbwp1a_1 getOther() { return this; }\n" +
+			    "    void test() { System.out.print(\"X\"); }\n" +
+			    "}\n" +
+			    "    \n",
+		"T4139cbwp1a_2.java",
+			    "\n" +
+			    "public class T4139cbwp1a_2 extends T4139cbwp1a_1 {\n" +
+			    "    @Override\n" +
+			    "    T4139cbwp1a_2 getOther() { return this; }\n" +
+			    "    void test() { System.out.print(\"K\"); }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "K");
+    }
+
     // a callin binding intercepts a method that has an override with covariant return - static type is sub-base
     // 4.1.39-otjld-callin-binding-with-plus-2
     public void test4139_callinBindingWithPlus2() {
