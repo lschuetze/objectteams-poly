@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileStruct;
@@ -289,13 +288,6 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		}
 		buf.append('\n');
 		return buf.toString();
-	}
-
-	@Override
-	public void write(ClassFile classFile) {
-		super.write(classFile);
-		// DEBUGGING:
-		System.out.println("Wrote "+this);
 	}
 	
 	void writeElementValue(int i) {
