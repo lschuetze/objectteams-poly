@@ -78,7 +78,8 @@ public class BaseReference extends ThisReference {
 		} else if (redirectToTeam) {
 			// use MyTeam.this:
 	        ReferenceBinding receiverType = enclosingType.enclosingType();
-	        this._wrappee = gen.qualifiedThisReference(receiverType);
+	        if (receiverType != null) // null happens when callin method is not inside a role
+	        	this._wrappee = gen.qualifiedThisReference(receiverType);
 		}
 		return enclosingType;
 	}
