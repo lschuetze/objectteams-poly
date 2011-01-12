@@ -540,7 +540,8 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	public void checkResultMapping() {
 		// for replace callins, a "result" mapping is not allowed,
 		// unless an expected result is otherwise missing.
-
+		if (this.mappings == null)
+			return;
 		for (MethodSpec baseSpec : this.baseMethodSpecs) {
 			for (int i = 0; i < this.mappings.length; i++) {
 				if (CharOperation.equals(this.mappings[i].ident.token, IOTConstants.RESULT))

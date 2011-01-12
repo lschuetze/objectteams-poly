@@ -68,16 +68,14 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLowerExpression;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrivateRoleMethodCall;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ResultReference;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.TThisBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
@@ -570,38 +568,10 @@ public class CalloutImplementor extends MethodMappingImplementor
     		// generated message send refers to public bridge, report decapsulation now:
     		calloutDecl.scope.problemReporter().decapsulation(calloutDecl.baseMethodSpec, baseType, calloutDecl.scope);
 
-    		final boolean isCalloutToField = calloutDecl.isCalloutToField();
-	    	messageSend = new MessageSend() {
-	    		@Override
-	    		public void generateCode(org.eclipse.jdt.internal.compiler.lookup.BlockScope currentScope, org.eclipse.jdt.internal.compiler.codegen.CodeStream codeStream, boolean valueRequired) {
-	    			// manually redirect to synth bridge:
-	    			// new receiver is the anchor denoting the base role's enclosing team instance:
-	    			TypeAnchorReference syntheticReceiver = gen.typeAnchorReference(((RoleTypeBinding)this.actualReceiverType)._teamAnchor);
-	    			syntheticReceiver.isExpression = true;
-	    			syntheticReceiver.resolve(currentScope);
-	    			if (isCalloutToField)
-	    				// for c-t-f this receiver *replaces* the original receiver,
-	    				// role instance additionally exists as a visible method argument
-	    				this.receiver = syntheticReceiver;
-	    			else
-	    				// for method callout *add* the team instance to the front of pushes
-	    				// original role instance receiver will become the first implicit argument
-	    				syntheticReceiver.generateCode(currentScope, codeStream, true/*valueRequired*/);
-	    			
-	    			// directly use the accessor and its declaring class for the invoke instruction:
-	    			this.binding = this.syntheticAccessor;
-	    			this.actualReceiverType = this.syntheticAccessor.declaringClass;
-	    			this.syntheticAccessor = null;
-	    			super.generateCode(currentScope, codeStream, valueRequired);
-	    		}
-	    	};
-	    	MethodBinding targetMethod = calloutDecl.baseMethodSpec.resolvedMethod;
-	    	messageSend.syntheticAccessor = SyntheticRoleBridgeMethodBinding.findOuterAccessor(calloutDecl.scope, baseType, targetMethod);
-	    	messageSend.receiver = receiver;
-	    	messageSend.selector = selector;
-	    	messageSend.arguments = arguments;
-	    	messageSend.sourceStart = sStart;
-	    	messageSend.sourceEnd = sEnd;
+    		boolean isCalloutToField = calloutDecl.isCalloutToField();
+    		MethodBinding targetMethod = calloutDecl.baseMethodSpec.resolvedMethod;
+	    	messageSend = new PrivateRoleMethodCall(receiver, selector, arguments, isCalloutToField, 
+	    											calloutDecl.scope, baseType, targetMethod, gen);
     	} else {
     		if (calloutDecl.baseMethodSpec.isStatic() || calloutDecl.isCalloutToField())
     			// we thought we should use an instance

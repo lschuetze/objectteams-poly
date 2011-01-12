@@ -20,10 +20,15 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.mappings;
 
+import static org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants.STEP_OVER_LINENUMBER;
+import static org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants.STEP_OVER_SOURCEPOSITION_END;
+import static org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants.STEP_OVER_SOURCEPOSITION_START;
+
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
@@ -34,6 +39,7 @@ import org.eclipse.jdt.internal.compiler.ast.ArrayReference;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.EqualExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.OperatorIds;
@@ -44,7 +50,6 @@ import org.eclipse.jdt.internal.compiler.ast.TryStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
-import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
@@ -72,8 +77,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CallinParamM
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CopyInheritanceSourceAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.StaticReplaceBindingsAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
-import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config.NotConfiguredException;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.ArrayLifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
@@ -83,7 +88,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.ModelElement;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
-import org.eclipse.objectteams.otdt.internal.core.compiler.smap.LineNumberProvider;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SourcePosition;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.StepOverSourcePosition;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.AbstractStatementsGenerator;
@@ -95,10 +99,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
-
-import static org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants.STEP_OVER_LINENUMBER;
-import static org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants.STEP_OVER_SOURCEPOSITION_END;
-import static org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants.STEP_OVER_SOURCEPOSITION_START;
 
 /**
  * After method mappings have been resolved on the signature level create the
@@ -439,7 +439,6 @@ public class CallinImplementor extends MethodMappingImplementor
 		PredicateGenerator predGen = new PredicateGenerator(
 											roleModel.getBinding(),
 											callinBindingDeclaration.isReplaceCallin());
-		LineNumberProvider lineNumberprovider = roleModel.getLineNumberProvider();
 
 		char[] roleTypeName = roleModel.getInterfaceAst().name;
 
@@ -468,29 +467,7 @@ public class CallinImplementor extends MethodMappingImplementor
 
 		// ------------- support for reflective function isExecutingCallin():
 		// boolean oldIsExecutingCallin = _OT$setExecutingCallin();
-		MessageSend resetFlag = null;
-		
-		// use a separate gen for stepOver, so we don't have to switch back/forth its positions:
-		AstGenerator stepOverGen = new AstGenerator(STEP_OVER_SOURCEPOSITION_START, STEP_OVER_SOURCEPOSITION_END);
-		{
-			// mark as step_over:
-			lineNumberprovider.addLineInfo(roleModel.getBinding(), STEP_OVER_LINENUMBER, -1);
-			// ignore line number returned by addLineInfo but use the corresponding source position
-
-			statements.add(stepOverGen.localVariable(
-					OLD_IS_EXECUTING,
-					TypeBinding.BOOLEAN,
-					stepOverGen.messageSend(
-							stepOverGen.thisReference(),
-							IOTConstants.SET_EXECUTING_CALLIN,
-							new Expression[]{ stepOverGen.booleanLiteral(true) })));
-
-			// _OT$setExecutingCallin(oldIsExecutingCallin); (to be inserted below)
-			resetFlag = stepOverGen.messageSend(
-					stepOverGen.thisReference(),
-					IOTConstants.SET_EXECUTING_CALLIN,
-					new Expression[] { stepOverGen.singleNameReference(OLD_IS_EXECUTING)} );
-		}
+		MessageSend resetFlag = setExecutingCallin(roleModel, statements);
 
 		// -------------- call receiver & arguments --------------
 		//_OT$role.myRoleMethod(_OT$param0, ...);
@@ -594,6 +571,8 @@ public class CallinImplementor extends MethodMappingImplementor
 		MessageSend roleMessageSend = gen.messageSend(receiver, roleMethodName, messageSendArguments);
 		roleMessageSend.isPushedOutRoleMethodCall = true;
 
+		// debugging should skip the return statement.
+		AstGenerator stepOverGen = new AstGenerator(STEP_OVER_SOURCEPOSITION_START, STEP_OVER_SOURCEPOSITION_END);
 		// ---------------- store or ignore the result:
 		if (   callinBindingDeclaration.isReplaceCallin())
 		{
@@ -669,7 +648,6 @@ public class CallinImplementor extends MethodMappingImplementor
 				statements.add(genResultNotProvidedCheck(
 						roleTypeName, roleMethodBinding, baseTypeBinding, baseMethodSpec, gen));
 			}
-			// debugging should skip the return statement.
 			// ------------- possibly convert using result mapping
 			if (   callinBindingDeclaration.mappings != null
 				&& callinBindingDeclaration.isResultMapped)
@@ -706,6 +684,33 @@ public class CallinImplementor extends MethodMappingImplementor
         }
 
 		return true;
+	}
+	/**
+	 * Create a call to _OT$setIsExecutingCallin()
+	 * @param roleModel		the role holding the current callin mapping
+	 * @param statements 	where to add the call
+	 * @return an expression for resetting the flag.
+	 */
+	public static MessageSend setExecutingCallin(RoleModel roleModel, List<Statement> statements) {
+		// use a separate gen for stepOver, so we don't have to switch back/forth its positions:
+		AstGenerator stepOverGen = new AstGenerator(STEP_OVER_SOURCEPOSITION_START, STEP_OVER_SOURCEPOSITION_END);
+		// mark as step_over:
+		roleModel.getLineNumberProvider().addLineInfo(roleModel.getBinding(), STEP_OVER_LINENUMBER, -1);
+		// ignore line number returned by addLineInfo but use the corresponding source position
+
+		statements.add(stepOverGen.localVariable(
+				OLD_IS_EXECUTING,
+				TypeBinding.BOOLEAN,
+				stepOverGen.messageSend(
+						stepOverGen.thisReference(),
+						IOTConstants.SET_EXECUTING_CALLIN,
+						new Expression[]{ stepOverGen.booleanLiteral(true) })));
+
+		// _OT$setExecutingCallin(oldIsExecutingCallin); (to be inserted below)
+		return stepOverGen.messageSend(
+				stepOverGen.thisReference(),
+				IOTConstants.SET_EXECUTING_CALLIN,
+				new Expression[] { stepOverGen.singleNameReference(OLD_IS_EXECUTING)} );
 	}
 	private Statement createLiftedRoleVar(CallinMappingDeclaration 	callinBindingDeclaration, 
 										  RoleModel 				roleModel,

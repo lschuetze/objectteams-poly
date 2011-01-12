@@ -1256,11 +1256,21 @@ public class AstGenerator extends AstFactory {
 			TypeReference[] typeArguments = AstClone.copyTypeArguments(original, this.pos, pstRef.typeArguments);
 			return new AlienScopeParameterizedSingleTypeReference(pstRef.token, typeArguments, pstRef.dimensions, this.pos, origScope);
 		} else if (original instanceof SingleTypeReference) {
-			SingleTypeReference singleTypeRef = (SingleTypeReference) original;
-			return new AlienScopeSingleTypeReference(singleTypeRef.token, this.pos, origScope);
+			if (original instanceof ArrayTypeReference && original.dimensions() > 0) { // could be parameterized type reference
+				ArrayTypeReference singleTypeRef = (ArrayTypeReference) original;
+				return new AlienScopeArrayTypeReference(singleTypeRef.token, this.pos, singleTypeRef.dimensions, origScope);				
+			} else {
+				SingleTypeReference singleTypeRef = (SingleTypeReference) original;
+				return new AlienScopeSingleTypeReference(singleTypeRef.token, this.pos, origScope);
+			}
 		} else if (original instanceof QualifiedTypeReference) {
-			QualifiedTypeReference qTypeRef= (QualifiedTypeReference)original;
-			return new AlienScopeQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, origScope);
+			if (original instanceof ArrayQualifiedTypeReference && original.dimensions() > 0) { // could be parameterized type reference
+				ArrayQualifiedTypeReference qTypeRef= (ArrayQualifiedTypeReference)original;
+				return new AlienScopeArrayQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, qTypeRef.dimensions(), origScope);				
+			} else {
+				QualifiedTypeReference qTypeRef= (QualifiedTypeReference)original;
+				return new AlienScopeQualifiedTypeReference(qTypeRef.tokens, qTypeRef.sourcePositions, origScope);
+			}
 		}
 		throw new InternalCompilerError("Unexpected type reference: "+original); //$NON-NLS-1$
 	}

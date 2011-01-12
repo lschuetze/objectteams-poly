@@ -368,6 +368,7 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 	MethodBinding codegenBinding = this.binding.original();
 	if (this.binding.isPrivate()
 //{ObjectTeams:
+		&& this.syntheticAccessor == null // may be pre-set by CallinImplementorDyn
 		&& !this.isDecapsulation)
 // SH}
 	{

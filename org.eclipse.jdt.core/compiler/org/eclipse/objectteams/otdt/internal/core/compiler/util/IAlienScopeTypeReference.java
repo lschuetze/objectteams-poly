@@ -17,6 +17,8 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.util;
 
 import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
+import org.eclipse.jdt.internal.compiler.ast.ArrayQualifiedTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.ArrayTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
@@ -45,6 +47,36 @@ public interface IAlienScopeTypeReference {
 		Scope alienScope;
 		public AlienScopeSingleTypeReference(char[] source, long pos, Scope alienScope) {
 			super(source, pos);
+			this.alienScope = alienScope;
+		}
+		public Scope getAlienScope() { return this.alienScope; }
+		@Override
+		public TypeBinding checkResolveUsingBaseImportScope(Scope scope) {
+			return super.checkResolveUsingBaseImportScope(this.alienScope);
+		}
+		@Override
+		public TypeBinding resolveType(ClassScope scope) {
+			// `scope` may be stronger then `alienScope`, try it first:
+			// (see 1.1.27-otjld-constructor-of-nested-team-2)
+			TypeBinding result= super.resolveType(scope);
+			if (result != null && result.isValidBinding())
+				return result;
+			// remove problem binding if any:
+			this.resolvedType = null;
+			return super.resolveType(this.alienScope.classScope());
+		}
+		@Override
+		public TypeBinding resolveType(BlockScope scope, boolean checkBounds) {
+			// this variant for use within callin wrappers:
+			return super.resolveType((BlockScope) this.alienScope, checkBounds);
+		}
+	}
+
+	class AlienScopeArrayTypeReference extends ArrayTypeReference implements IAlienScopeTypeReference
+	{
+		Scope alienScope;
+		public AlienScopeArrayTypeReference(char[] source, long pos, int dim, Scope alienScope) {
+			super(source, dim, pos);
 			this.alienScope = alienScope;
 		}
 		public Scope getAlienScope() { return this.alienScope; }
@@ -113,6 +145,46 @@ public interface IAlienScopeTypeReference {
 		Scope alienScope;
 		public AlienScopeQualifiedTypeReference(char[][] sources, long[] poss, Scope alienScope) {
 			super(sources, poss);
+			this.alienScope = alienScope;
+			this.isGenerated = true; // allow qualified reference to role
+		}
+		public Scope getAlienScope() { return this.alienScope; }
+		@Override
+		public TypeBinding checkResolveUsingBaseImportScope(Scope scope) {
+			return super.checkResolveUsingBaseImportScope(this.alienScope);
+		}
+		@Override
+		public TypeBinding resolveType(ClassScope scope) {
+			TypeDeclaration referenceContext = scope.referenceContext;
+			CheckPoint cp = null;
+			if (referenceContext != null)
+				cp = referenceContext.compilationResult().getCheckPoint(referenceContext);
+			TypeBinding result= super.resolveType(scope);
+			if (result != null && result.isValidBinding())
+				return result;
+			// reset:
+			this.resolvedType = null;
+			if (cp != null)
+				referenceContext.compilationResult.rollBack(cp);
+			return super.resolveType(this.alienScope.classScope());
+		}
+		@Override
+		public TypeBinding resolveType(BlockScope scope, boolean checkBounds) {
+			// this variant for use within callin wrappers:
+			return super.resolveType((BlockScope) this.alienScope, checkBounds);
+		}
+		@Override
+		protected void reportDeprecatedPathSyntax(Scope scope) {
+			// no-op, simply suppress this warning.
+		}
+	}
+	
+	
+	class AlienScopeArrayQualifiedTypeReference extends ArrayQualifiedTypeReference implements IAlienScopeTypeReference
+	{
+		Scope alienScope;
+		public AlienScopeArrayQualifiedTypeReference(char[][] sources, long[] poss, int dim, Scope alienScope) {
+			super(sources, dim, poss);
 			this.alienScope = alienScope;
 			this.isGenerated = true; // allow qualified reference to role
 		}

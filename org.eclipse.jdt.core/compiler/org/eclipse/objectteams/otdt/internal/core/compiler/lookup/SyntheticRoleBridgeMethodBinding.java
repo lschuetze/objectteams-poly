@@ -117,16 +117,10 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 					break;
 			}
 		}
-		switch (this.purpose) {
-			case RoleMethodBridgeInner :
-				// call the private role method
-				codeStream.invoke(Opcodes.OPC_invokespecial, this.targetMethod, null);
-				break;
-			case RoleMethodBridgeOuter :
-				// call the static role method bridge:
-				codeStream.invoke(Opcodes.OPC_invokestatic, this.targetMethod, null);
-				break;
-		}
+		if (this.targetMethod.isStatic())
+			codeStream.invoke(Opcodes.OPC_invokestatic, this.targetMethod, null);
+		else
+			codeStream.invoke(Opcodes.OPC_invokespecial, this.targetMethod, null); // non-static private role method
 		switch (this.targetMethod.returnType.id) {
 			case TypeIds.T_void :
 				codeStream.return_();
