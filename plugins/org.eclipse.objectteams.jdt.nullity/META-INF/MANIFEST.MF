@@ -1,0 +1,13 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: JDT Null Annotation Checker
+Bundle-SymbolicName: org.eclipse.objectteams.jdt.nullity;singleton:=true
+Bundle-Version: 0.7.0.qualifier
+Bundle-Activator: org.eclipse.objectteams.internal.jdt.nullity.Activator
+Bundle-Vendor: Eclipse Object Teams Project
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.objectteams.otequinox,
+ org.eclipse.jdt.core;bundle-version="3.7.0"
+Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Bundle-ActivationPolicy: lazy
+Export-Package: org.eclipse.objectteams.internal.jdt.nullity;x-friends:="org.eclipse.objectteams.jdt.nullity.tests"
