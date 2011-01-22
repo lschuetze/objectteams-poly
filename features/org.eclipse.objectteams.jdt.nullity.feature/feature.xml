@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.objectteams.jdt.nullity.feature"
+      label="%featureName"
+      version="0.7.0.qualifier"
+      provider-name="%providerName"
+      plugin="org.eclipse.objectteams.jdt.nullity">
+
+   <description url="http://wiki.eclipse.org/JDT_Core/Null_Analysis#Actual_Stragegy_in_the_JDT">
+      Early access feature that hooks annotation based null analysis into the JDT compiler.
+   </description>
+
+   <copyright>
+      Copyright Stephan Herrmann
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <url>
+      <update label="Object Teams contributed plugins" url="http://download.eclipse.org/objectteams/updates/contrib"/>
+   </url>
+
+   <plugin
+         id="org.eclipse.objectteams.jdt.nullity"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
