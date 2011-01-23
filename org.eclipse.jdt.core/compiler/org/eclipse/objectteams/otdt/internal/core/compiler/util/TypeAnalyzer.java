@@ -264,11 +264,11 @@ public class TypeAnalyzer  {
 
             char[][] tname1 = compoundNameOfReferenceType((ReferenceBinding)tsuperType, true, true);
             char[][] tname2 = compoundNameOfReferenceType((ReferenceBinding)currentType, true, true);
-            if (CharOperation.equals(tname1, tname2) && (tsuperType != currentType))
-                throw new InternalCompilerError("different bindings for the same type??"+currentType+':'+tsuperType); //$NON-NLS-1$
-
-            if (CharOperation.equals(tname1,tname2))
-                return true;
+            if (CharOperation.equals(tname1, tname2)) { 
+            	if (tsuperType != currentType && tsuperType.isValidBinding()) // don't complain about different missing types
+                	throw new InternalCompilerError("different bindings for the same type??"+currentType+':'+tsuperType); //$NON-NLS-1$
+            	return true;
+            }
             if  (matchKind == EXACT_MATCH_ONLY)
             {
                 return false;
