@@ -187,16 +187,19 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 	{
 		for (ILaunch launch : launches) {
 			if (launch.isTerminated()) {
-				OTDebugElementsContainer current = (OTDebugElementsContainer)getViewer().getInput();
-				IDebugTarget currentTarget = current.getContext().getDebugTarget();
-				if (launch.getDebugTarget() == currentTarget) { 
-					current.dispose(); // clear all previous team instances
-					getViewer().getControl().getDisplay().asyncExec(new Runnable() {
-						public void run() {
-							getViewer().setInput(null);							
-						}						
-					});
-					return;
+				Object input = getViewer().getInput();
+				if (input instanceof OTDebugElementsContainer) {
+					OTDebugElementsContainer current = (OTDebugElementsContainer)input;
+					IDebugTarget currentTarget = current.getContext().getDebugTarget();
+					if (launch.getDebugTarget() == currentTarget) { 
+						current.dispose(); // clear all previous team instances
+						getViewer().getControl().getDisplay().asyncExec(new Runnable() {
+							public void run() {
+								getViewer().setInput(null);							
+							}						
+						});
+						return;
+					}
 				}
 			}
 		}
