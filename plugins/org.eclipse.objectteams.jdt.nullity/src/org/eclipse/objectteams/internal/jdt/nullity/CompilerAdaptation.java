@@ -11,6 +11,7 @@
 package org.eclipse.objectteams.internal.jdt.nullity;
 
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -65,6 +66,8 @@ import base org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import base org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import base org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import base org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
+import base org.eclipse.jdt.internal.core.JavaProject;
+import base org.eclipse.jdt.internal.core.JavaModelManager;
 
 /**
  * This team class adds the implementation from
@@ -119,29 +122,8 @@ public team class CompilerAdaptation {
 		Expression getExpression() -> get Expression initialization;
 	}
 	
-	/** Infrastructure for context dependend hooking into null analysis. */
-	protected team class AnalyseContext playedBy Statement {
-		
-		callin FlowInfo analyseCode() { // void return breaks _OT$result passing!
-			within (this)	// temporarily activate this team to enable callin in nested role (ContextualExpression)
-				return base.analyseCode();
-		}
-		
-		@SuppressWarnings({ "abstractrelevantrole", "bindingconventions" })
-		protected abstract class ContextualExpression playedBy Expression {
-
-			int nullStatus(FlowInfo flowInfo) -> int nullStatus(FlowInfo flowInfo);
-
-			void analyseNull(BlockScope currentScope, FlowInfo flowInfo)
-			<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo)
-				with { currentScope <- currentScope, flowInfo <- result }
-			
-			abstract void analyseNull(BlockScope currentScope, FlowInfo flowInfo);
-		}
-	}
-	
 	/** Analyse argument expressions as part of a MessageSend, check against method parameter annotation. */
-	protected team class MessageSend extends AnalyseContext playedBy MessageSend {
+	protected class MessageSend playedBy MessageSend {
 
 		Expression[] getArguments() -> get Expression[] arguments;
 		MethodBinding getBinding() -> get MethodBinding binding;
@@ -162,33 +144,25 @@ public team class CompilerAdaptation {
 			return base.nullStatus(flowInfo);
 		}
 		
-		// helper to recover some lost information:
-		public int findArgumentIndex(Expression argumentExpression) {
-			Expression[] arguments = this.getArguments();
-			for (int i=0; i<arguments.length; i++)
-				if (arguments[i] == argumentExpression)
-					return i;
-			return -1;
-		}
-		
-		FlowInfo analyseCode() <- replace FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
+		void analyseArguments(BlockScope currentScope, FlowInfo flowInfo) 
+		<- before FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo)
+			with { currentScope <- currentScope, flowInfo <- flowInfo }
 
-		@SuppressWarnings("bindingconventions")
-		protected class ContextualExpression  {
-
-			void analyseNull(BlockScope currentScope, FlowInfo flowInfo) {
-				// compare actual null-status against parameter annotations of the called method:
-				int nullStatus = nullStatus(flowInfo);
-				MethodBinding methodBinding = MessageSend.this.getBinding();
-				if (   nullStatus != FlowInfo.NON_NULL 
-					&& methodBinding.parameterNonNullness != null)
-				{
-					int i = MessageSend.this.findArgumentIndex(this);
-					if (i != -1) { // is it an argument (vs. receiver)?
+		void analyseArguments(BlockScope currentScope, FlowInfo flowInfo) {
+			// compare actual null-status against parameter annotations of the called method:
+			MethodBinding methodBinding = getBinding();
+			Expression[] arguments = getArguments();
+			if (arguments != null) {
+				int length = arguments.length;
+				for (int i = 0; i < length; i++) {
+					int nullStatus = arguments[i].nullStatus(flowInfo); // slight loss of precision: should also use the null info from the receiver.
+					if (   nullStatus != FlowInfo.NON_NULL 
+						&& methodBinding.parameterNonNullness != null)
+					{
 						if (methodBinding.parameterNonNullness[i].booleanValue()) // if @NonNull is required
 						{
 							char[][] annotationName = currentScope.environment().getNonNullAnnotationName();
-							currentScope.problemReporter().possiblyNullToNonNullParameter(this, nullStatus, annotationName[annotationName.length-1]);
+							currentScope.problemReporter().possiblyNullToNonNullParameter(arguments[i], nullStatus, annotationName[annotationName.length-1]);
 						}
 					}
 				}
@@ -197,20 +171,19 @@ public team class CompilerAdaptation {
 	}
 	
 	/** Analyse the expression within a return statement, check against method return annotation. */
-	protected team class ReturnStatement extends AnalyseContext playedBy ReturnStatement {
+	protected class ReturnStatement playedBy ReturnStatement {
 
-		int getSourceStart() -> get int sourceStart;
-
-		int getSourceEnd() -> get int sourceEnd;
+		Expression getExpression() 	-> get Expression expression;
+		int getSourceStart() 		-> get int sourceStart;
+		int getSourceEnd() 			-> get int sourceEnd;
 		
-		
-		FlowInfo analyseCode() <- replace FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
+		void analyseNull(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) <- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
 
-		@SuppressWarnings("bindingconventions")
-		protected class ContextualExpression {
-
-			void analyseNull(BlockScope currentScope, FlowInfo flowInfo) {
-				int nullStatus = nullStatus(flowInfo);
+		void analyseNull(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
+			Expression expression = getExpression();
+			if (expression != null) {
+				flowInfo = expression.analyseCode(currentScope, flowContext, flowInfo); // may cause some issues to be reported twice :(
+				int nullStatus = expression.nullStatus(flowInfo);
 				if (nullStatus != FlowInfo.NON_NULL) {
 					// if we can't prove non-null check against declared null-ness of the enclosing method:
 					long tagBits;
@@ -221,12 +194,11 @@ public team class CompilerAdaptation {
 					}
 					if ((tagBits & TagBits.AnnotationNonNull) != 0) {
 						char[][] annotationName = currentScope.environment().getNonNullAnnotationName();
-						// FIXME(SH): problem in the OT/J compiler: broken lowering of ReturnStatement.this
-						currentScope.problemReporter().possiblyNullFromNonNullMethod(ReturnStatement.this, nullStatus, 
-																					 annotationName[annotationName.length-1]);
+						currentScope.problemReporter().possiblyNullFromNonNullMethod(this, nullStatus, 
+								annotationName[annotationName.length-1]);
 					}
 				}
-			}			
+			}
 		}
 	}
 
@@ -271,7 +243,7 @@ public team class CompilerAdaptation {
 			}
 			base.resolveArgumentNullAnnotations();
 			Argument[] arguments = this.getArguments();
-			if (arguments != null) {
+			if (arguments != null && binding != null) {
 				for (int i = 0, length = arguments.length; i < length; i++) {
 					Argument argument = arguments[i];
 					// transfer nullness info from the argument to the method:
@@ -443,6 +415,8 @@ public team class CompilerAdaptation {
 									| TagBits.AnnotationForMethod | TagBits.AnnotationForParameter 
 									| TagBits.AnnotationForLocalVariable ;
 			this.id = typeId;
+			// experiment with providing a file name that the Java model can recognize as emulated:
+			// this.fileName = CharOperation.concat(new char[]{'&'}, CharOperation.concatWith(compoundName, '/'));
 		}
 		
 		void scanForNullAnnotation(IBinaryMethod method, MethodBinding methodBinding) 
@@ -899,6 +873,29 @@ public team class CompilerAdaptation {
 					this.emulateNullAnnotationTypes = false;
 				}
 			}
+		}
+	}
+	protected class JavaModelManager playedBy JavaModelManager {
+		JavaModelManager getJavaModelManager() 	-> JavaModelManager getJavaModelManager();
+		@SuppressWarnings({ "decapsulation", "rawtypes" })
+		protected HashSet getOptionNames() 		-> get HashSet optionNames;		
+	}
+	@SuppressWarnings({"rawtypes","unchecked"})
+	protected class JavaProject playedBy JavaProject {
+
+		void fillOptionNames() <- before Map getOptions(boolean inheritJavaCoreOptions);
+
+		private void fillOptionNames() {
+			JavaModelManager javaModelManager = JavaModelManager.getJavaModelManager();
+			HashSet optionNames = javaModelManager.getOptionNames();
+			if (optionNames.contains(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes))
+				return;
+			optionNames.add(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes);
+			optionNames.add(NullCompilerOptions.OPTION_NonNullAnnotationName);
+			optionNames.add(NullCompilerOptions.OPTION_NullableAnnotationName);
+			optionNames.add(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo);
+			optionNames.add(NullCompilerOptions.OPTION_ReportNullContractViolation);
+			optionNames.add(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation);
 		}
 	}
 }
