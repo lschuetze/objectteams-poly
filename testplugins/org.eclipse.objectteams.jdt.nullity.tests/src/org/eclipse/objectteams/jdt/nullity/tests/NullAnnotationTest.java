@@ -921,4 +921,65 @@ public void test_illegal_annotation_001() {
 		"The annotation @NonNull is disallowed for this location\n" + 
 		"----------\n");	
 }
+public void test_default_nullness_001() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NULLABLE);
+	runNegativeTest(
+		true/*shouldFlushOutputDirectory*/,
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    @NonNull Object getObject(Object o) {\n" +
+			"        return o;\n" + // illegal due to default @Nullable of parameter
+			"    }\n" +
+			"}\n",
+
+		},
+		null/*classLibs*/,
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 4)\n" + 
+		"	return o;\n" + 
+		"	^^^^^^^^^\n" + 
+		"Null contract violation: return value can be null but method is declared as @NonNull.\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+public void test_default_nullness_002() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	runNegativeTest(
+		true/*shouldFlushOutputDirectory*/,
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    Object getObject(@Nullable Object o) {\n" +
+			"        return new Object();\n" +
+			"    }\n" +
+			"}\n",
+			"Y.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Y extends X {\n" +
+			"    @Override\n" +
+			"    @Nullable Object getObject(Object o) {\n" + // don't complain of parameter: inherited has precedence over default
+			"        return o;\n" +
+			"    }\n" +
+			"}\n",
+		},
+		null/*classLibs*/,
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in Y.java (at line 4)\n" + 
+		"	@Nullable Object getObject(Object o) {\n" + 
+		"	                 ^^^^^^^^^^^^^^^^^^^\n" + 
+		"Cannot relax null contract for method return, inherited method from X is declared as @NonNull.\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
 }
