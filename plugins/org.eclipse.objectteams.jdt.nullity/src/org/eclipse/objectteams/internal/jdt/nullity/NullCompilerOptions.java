@@ -17,6 +17,15 @@ import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 /** Additional constants for {@link CompilerOptions}. */
 @SuppressWarnings("restriction")
 public interface NullCompilerOptions {
+	// copies from orig:
+	public static final String ENABLED = "enabled"; //$NON-NLS-1$
+	public static final String DISABLED = "disabled"; //$NON-NLS-1$
+
+
+	// new:
+	public static final String NONNULL = "nonnull"; //$NON-NLS-1$
+	public static final String NULLABLE = "nullable"; //$NON-NLS-1$
+
 	public static final String OPTION_ReportNullContractViolation = "org.eclipse.jdt.core.compiler.problem.nullContractViolation";  //$NON-NLS-1$
 	public static final String OPTION_ReportPotentialNullContractViolation = "org.eclipse.jdt.core.compiler.problem.potentialNullContractViolation";  //$NON-NLS-1$
 	public static final String OPTION_ReportNullContractInsufficientInfo = "org.eclipse.jdt.core.compiler.problem.nullContractInsufficientInfo";  //$NON-NLS-1$
@@ -25,6 +34,9 @@ public interface NullCompilerOptions {
 	public static final String OPTION_NonNullAnnotationName = "org.eclipse.jdt.core.compiler.annotation.nonnull"; //$NON-NLS-1$
 	public static final String OPTION_EmulateNullAnnotationTypes = "org.eclipse.jdt.core.compiler.annotation.emulate"; //$NON-NLS-1$
 	
+	public static final String OPTION_NullnessDefault = "org.eclipse.jdt.core.compiler.annotation.nulldefault";  //$NON-NLS-1$
+	
+
 	public static final int NullContractViolation = IrritantSet.GROUP2 | ASTNode.Bit7;
 	public static final int PotentialNullContractViolation = IrritantSet.GROUP2 | ASTNode.Bit8;
 	public static final int NullContractInsufficientInfo = IrritantSet.GROUP2 | ASTNode.Bit9;

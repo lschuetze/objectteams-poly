@@ -177,7 +177,8 @@ public team class CompilerAdaptation {
 		int getSourceStart() 		-> get int sourceStart;
 		int getSourceEnd() 			-> get int sourceEnd;
 		
-		void analyseNull(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) <- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
+		void analyseNull(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) 
+		<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
 
 		void analyseNull(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 			Expression expression = getExpression();
@@ -226,6 +227,7 @@ public team class CompilerAdaptation {
 	
 	protected class AbstractMethodDeclaration playedBy AbstractMethodDeclaration {
 
+		BlockScope getScope()      -> get MethodScope scope;
 		Argument[] getArguments()  -> get Argument[] arguments;
 		MethodBinding getBinding() -> get MethodBinding binding;
 		void bindArguments()       -> void bindArguments();
@@ -262,15 +264,18 @@ public team class CompilerAdaptation {
 			with { info <- info }
 
 		private void analyseArgumentNullity(FlowInfo info) {
+			MethodBinding binding = getBinding();
 			Argument[] arguments = this.getArguments();
-			if (arguments != null) {
+			if (arguments != null && binding.parameterNonNullness != null) {
 				for (int i = 0, count = arguments.length; i < count; i++) {
 					// leverage null-info from parameter annotations:
-					long argumentTagBits = arguments[i].binding.tagBits;
-					if ((argumentTagBits & TagBits.AnnotationNullable) != 0)
-						info.markPotentiallyNullBit(arguments[i].binding);
-					else if ((argumentTagBits & TagBits.AnnotationNonNull) != 0)
-						info.markAsDefinitelyNonNull(arguments[i].binding);
+					Boolean nonNullNess = binding.parameterNonNullness[i];
+					if (nonNullNess != null) {
+						if (nonNullNess)
+							info.markAsDefinitelyNonNull(arguments[i].binding);
+						else
+							info.markPotentiallyNullBit(arguments[i].binding);
+					}
 				}
 			}
 		}
@@ -291,6 +296,19 @@ public team class CompilerAdaptation {
 		boolean isStatic() 						-> boolean isStatic();
 		boolean isValidBinding() 				-> boolean isValidBinding();
 		AbstractMethodDeclaration sourceMethod()-> AbstractMethodDeclaration sourceMethod();
+
+		/** After method verifier has finished, fill in missing nullness values from the default. */
+		protected void fillInDefaultNullness(long defaultNullness) {
+			if (this.parameterNonNullness == null)
+				this.parameterNonNullness = new Boolean[getParameters().length];
+			Boolean value = Boolean.valueOf(defaultNullness == TagBits.AnnotationNonNull);
+			for (int i = 0; i < this.parameterNonNullness.length; i++) {
+				if (this.parameterNonNullness[i] == null)
+					this.parameterNonNullness[i] = value;
+			}
+			if ((getTagBits() & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) == 0)
+				addTagBit(defaultNullness);
+		}
 	}
 
 	/** Transfer inherited null contracts and check compatibility. */
@@ -302,6 +320,8 @@ public team class CompilerAdaptation {
 				with  {  result 			<- type.scope.problemReporter() }
 		AbstractMethodDeclaration[] getMethodDeclarations() -> get SourceTypeBinding type
 				with { 	result 				<- type.scope.referenceContext.methods }
+		MethodBinding[] getMethodBindings() -> get SourceTypeBinding type
+				with { 	result 				<- type.methods() }
 
 		
 		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length)
@@ -310,7 +330,7 @@ public team class CompilerAdaptation {
 
 		void bindMethodArguments() <- after void computeMethods();
 
-		
+		void fillInDefaultNullNess() <- after void checkMethods();
 		
 		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length) {
 			for (int i = length; --i >= 0;)
@@ -322,6 +342,15 @@ public team class CompilerAdaptation {
 			long inheritedBits = inheritedMethod.getTagBits();
 			long currentBits = currentMethod.getTagBits();
 			LookupEnvironment environment = this.getEnvironment();
+			
+			if ((inheritedBits & TagBits.HasBoundArguments) == 0) {
+				ReferenceBinding supertype = inheritedMethod.getDeclaringClass();
+				if (!((ReferenceBinding) supertype.erasure()).isBinaryBinding()) {
+					AbstractMethodDeclaration sourceMethod = inheritedMethod.sourceMethod();
+					if (sourceMethod != null)
+						sourceMethod.bindArguments();
+				}
+			}
 			
 			// return type:
 			if ((inheritedBits & TagBits.AnnotationNonNull) != 0) {
@@ -367,6 +396,8 @@ public team class CompilerAdaptation {
 					}
 				}
 			} else if (currentMethod.parameterNonNullness != null) {
+  // Temporary tweak:
+//			  if (!((ReferenceBinding) inheritedMethod.getDeclaringClass().erasure()).isBinaryBinding()) // WORKAROUND WHILE PLAYING WITH DEFAULTS
 				// super method has no annotations but current has
 				for (int i = 0; i < currentMethod.parameterNonNullness.length; i++) {
 					if (currentMethod.parameterNonNullness[i] == Boolean.TRUE) { // tightening from unconstrained to @NonNull
@@ -385,6 +416,17 @@ public team class CompilerAdaptation {
 			if (methodDeclarations != null)
 				for (AbstractMethodDeclaration methodDecl : methodDeclarations)
 					methodDecl.bindArguments();
+		}
+		
+		void fillInDefaultNullNess() {
+			long defaultNullNess = getEnvironment().getGlobalOptions().defaultNonNullness;
+			if (defaultNullNess != 0) {
+				MethodBinding[] methodBindings = getMethodBindings();
+				if (methodBindings != null) {
+					for (MethodBinding methodBinding : methodBindings)
+						methodBinding.fillInDefaultNullness(defaultNullNess);
+				}
+			}
 		}
 	}
 
@@ -789,10 +831,6 @@ public team class CompilerAdaptation {
 	@SuppressWarnings("rawtypes")
 	protected class CompilerOptions implements org.eclipse.objectteams.internal.jdt.nullity.NullCompilerOptions playedBy CompilerOptions 
 	{
-		// copies from orig:
-		public static final String ENABLED = "enabled"; //$NON-NLS-1$
-		public static final String DISABLED = "disabled"; //$NON-NLS-1$
-
 
 		@SuppressWarnings("decapsulation")
 		void updateSeverity(int irritant, Object severityString) 	-> void updateSeverity(int irritant, Object severityString);
@@ -806,6 +844,8 @@ public team class CompilerAdaptation {
 		/** Should null annotation types be emulated by synthetic bindings? */
 		public boolean emulateNullAnnotationTypes;
 		
+		public long defaultNonNullness; // 0 or TagBits#AnnotationNullable or TagBits#AnnotationNonNull
+
 		String optionKeyFromIrritant(int irritant) <- replace String optionKeyFromIrritant(int irritant);
 		@SuppressWarnings("basecall")
 		static callin String optionKeyFromIrritant(int irritant) {
@@ -848,6 +888,12 @@ public team class CompilerAdaptation {
 				optionsMap.put(OPTION_NonNullAnnotationName, String.valueOf(compoundName));
 			}
 			optionsMap.put(OPTION_EmulateNullAnnotationTypes, this.emulateNullAnnotationTypes ? ENABLED : DISABLED);
+			if (this.defaultNonNullness == TagBits.AnnotationNullable)
+				optionsMap.put(OPTION_NullnessDefault, NULLABLE);
+			else if (this.defaultNonNullness == TagBits.AnnotationNonNull)
+				optionsMap.put(OPTION_NullnessDefault, NONNULL);
+			else
+				optionsMap.remove(OPTION_NullnessDefault);
 		}
 		void set(Map optionsMap) <- before void set(Map optionsMap);
 		private void set(Map optionsMap) {
@@ -865,14 +911,28 @@ public team class CompilerAdaptation {
 				if (ENABLED.equals(optionValue)) {
 					this.emulateNullAnnotationTypes = true;
 					// ensure that we actually have annotation names to emulate:
-					if (this.nullableAnnotationName == null)
-						this.nullableAnnotationName = DEFAULT_NULLABLE_ANNOTATION_NAME;
-					if (this.nonNullAnnotationName == null)
-						this.nonNullAnnotationName = DEFAULT_NONNULL_ANNOTATION_NAME;
+					ensureNullAnnotationNames();
 				} else if (DISABLED.equals(optionValue)) {
 					this.emulateNullAnnotationTypes = false;
 				}
 			}
+			if ((optionValue = optionsMap.get(OPTION_NullnessDefault)) != null) {
+				if (NULLABLE.equals(optionValue)) {
+					defaultNonNullness = TagBits.AnnotationNullable;
+					ensureNullAnnotationNames();
+				} else if (NONNULL.equals(optionValue)) {
+					defaultNonNullness = TagBits.AnnotationNonNull;
+					ensureNullAnnotationNames();
+				} else {
+					defaultNonNullness = 0;
+				}
+			}
+		}
+		private void ensureNullAnnotationNames() {
+			if (this.nullableAnnotationName == null)
+				this.nullableAnnotationName = DEFAULT_NULLABLE_ANNOTATION_NAME;
+			if (this.nonNullAnnotationName == null)
+				this.nonNullAnnotationName = DEFAULT_NONNULL_ANNOTATION_NAME;
 		}
 	}
 	protected class JavaModelManager playedBy JavaModelManager {
@@ -896,6 +956,7 @@ public team class CompilerAdaptation {
 			optionNames.add(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo);
 			optionNames.add(NullCompilerOptions.OPTION_ReportNullContractViolation);
 			optionNames.add(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation);
+			optionNames.add(NullCompilerOptions.OPTION_NullnessDefault);
 		}
 	}
 }
