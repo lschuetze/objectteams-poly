@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2011 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -107,6 +107,15 @@ public class OTDTPlugin extends Plugin
 	 * @category CompilerOptionID
 	 */	
 	public static final String OT_COMPILER_DECAPSULATION = PLUGIN_ID + ".compiler.problem.decapsulation"; //$NON-NLS-1$
+	/** 
+	 * Compiler option ID: Reporting field write decapsulation.
+	 * <dl>
+	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"warning"</code></dd>
+	 * </dl>
+	 * @category CompilerOptionID
+	 */	
+	public static final String OT_COMPILER_DECAPSULATION_WRITE = PLUGIN_ID + ".compiler.problem.decapsulation_write"; //$NON-NLS-1$
 	/** 
 	 * Compiler option ID: Reporting violations of binding conventions, notably the rule that 
 	 * types after the playedBy keyword should be imported with the base modifier.
