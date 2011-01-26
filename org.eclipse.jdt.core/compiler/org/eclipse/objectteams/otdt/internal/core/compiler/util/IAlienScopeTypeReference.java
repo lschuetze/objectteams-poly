@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2008 Technical University Berlin, Germany.
+ * Copyright 2008, 2011 Technical University Berlin, Germany.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -58,11 +58,17 @@ public interface IAlienScopeTypeReference {
 		public TypeBinding resolveType(ClassScope scope) {
 			// `scope` may be stronger then `alienScope`, try it first:
 			// (see 1.1.27-otjld-constructor-of-nested-team-2)
+			TypeDeclaration referenceContext = scope.referenceContext;
+			CheckPoint cp = null;
+			if (referenceContext != null)
+				cp = referenceContext.compilationResult().getCheckPoint(referenceContext);
 			TypeBinding result= super.resolveType(scope);
 			if (result != null && result.isValidBinding())
 				return result;
 			// remove problem binding if any:
 			this.resolvedType = null;
+			if (cp != null)
+				referenceContext.compilationResult.rollBack(cp);
 			return super.resolveType(this.alienScope.classScope());
 		}
 		@Override
@@ -88,11 +94,17 @@ public interface IAlienScopeTypeReference {
 		public TypeBinding resolveType(ClassScope scope) {
 			// `scope` may be stronger then `alienScope`, try it first:
 			// (see 1.1.27-otjld-constructor-of-nested-team-2)
+			TypeDeclaration referenceContext = scope.referenceContext;
+			CheckPoint cp = null;
+			if (referenceContext != null)
+				cp = referenceContext.compilationResult().getCheckPoint(referenceContext);
 			TypeBinding result= super.resolveType(scope);
 			if (result != null && result.isValidBinding())
 				return result;
 			// remove problem binding if any:
 			this.resolvedType = null;
+			if (cp != null)
+				referenceContext.compilationResult.rollBack(cp);
 			return super.resolveType(this.alienScope.classScope());
 		}
 		@Override
@@ -126,11 +138,17 @@ public interface IAlienScopeTypeReference {
 		public TypeBinding resolveType(ClassScope scope) {
 			// `scope` may be stronger then `alienScope`, try it first:
 			// (see 1.1.27-otjld-constructor-of-nested-team-2)
+			TypeDeclaration referenceContext = scope.referenceContext;
+			CheckPoint cp = null;
+			if (referenceContext != null)
+				cp = referenceContext.compilationResult().getCheckPoint(referenceContext);
 			TypeBinding result= super.resolveType(scope);
 			if (result != null && result.isValidBinding())
 				return result;
 			// remove problem binding if any:
 			this.resolvedType = null;
+			if (cp != null)
+				referenceContext.compilationResult.rollBack(cp);
 			return super.resolveType(this.alienScope.classScope());
 		}
 		@Override
