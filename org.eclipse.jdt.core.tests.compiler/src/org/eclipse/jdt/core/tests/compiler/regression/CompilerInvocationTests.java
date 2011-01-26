@@ -1774,6 +1774,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("CalloutGetIncompatibleFieldType", SKIP);
         expectedProblemAttributes.put("CalloutSetIncompatibleFieldType", SKIP);
         expectedProblemAttributes.put("DecapsulationField", SKIP);
+        expectedProblemAttributes.put("DecapsulationFieldWrite", SKIP);
         expectedProblemAttributes.put("FieldCalloutOverrides", SKIP);
         expectedProblemAttributes.put("FieldCalloutOverridesCallout", SKIP);
         expectedProblemAttributes.put("UsingCalloutToFieldForAssignment", SKIP);
@@ -2030,6 +2031,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("CalloutGetIncompatibleFieldType", SKIP);
         expectedProblemAttributes.put("CalloutSetIncompatibleFieldType", SKIP);
         expectedProblemAttributes.put("DecapsulationField", SKIP);
+        expectedProblemAttributes.put("DecapsulationFieldWrite", SKIP);
         expectedProblemAttributes.put("FieldCalloutOverrides", SKIP);
         expectedProblemAttributes.put("FieldCalloutOverridesCallout", SKIP);
         expectedProblemAttributes.put("UsingCalloutToFieldForAssignment", SKIP);

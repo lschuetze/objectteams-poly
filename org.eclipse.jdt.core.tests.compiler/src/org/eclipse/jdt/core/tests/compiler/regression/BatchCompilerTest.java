@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1943,6 +1943,7 @@ public void test012b(){
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.baseclass_cycle\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.binding_conventions\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.decapsulation\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.decapsulation_write\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.definite_ambiguity\" value=\"error\"/>\n" +
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.deprecated_path_syntax\" value=\"warning\"/>\n" +			
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.exception_in_guard\" value=\"error\"/>\n" + 
