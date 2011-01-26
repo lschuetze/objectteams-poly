@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 IT Service Omikron GmbH and others.
+ * Copyright 2004, 2011 IT Service Omikron GmbH and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -21,6 +21,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 public class OverridingAccessRestrictions extends AbstractOTJLDTest {
@@ -1456,7 +1457,9 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
     // a callout to field causes decapsulation: watch for the warning
     // 7.4.8-otjld-field-decapsulation-1
     public void test748_fieldDecapsulation1() {
-        runTestExpectingWarnings(
+    	Map customOptions = getCompilerOptions();
+    	customOptions.put(CompilerOptions.OPTION_ReportDecapsulationWrite, CompilerOptions.ERROR);
+        runNegativeTest(
             new String[] {
 		"T748fd1.java",
 			    "\n" +
@@ -1470,6 +1473,7 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
 			    "public team class Team748fd1 {\n" +
 			    "    protected class R playedBy T748fd1 {\n" +
 			    "        int steal() -> get int secret;\n" +
+			    "        void setSecret(int val) -> set int secret;\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n"
@@ -1478,8 +1482,16 @@ public class OverridingAccessRestrictions extends AbstractOTJLDTest {
 			"1. WARNING in Team748fd1.java (at line 4)\n" +
 			"	int steal() -> get int secret;\n" +
 			"	                       ^^^^^^\n" +
-			"Access restriction of field secret in type T748fd1 is overridden by this binding (OTJLD 3.5(e)).\n" +
-			"----------\n");
+			"Access restriction of private field secret in type T748fd1 is overridden by this binding (OTJLD 3.5(e)).\n" +
+            "----------\n" +
+			"2. ERROR in Team748fd1.java (at line 5)\n" +
+			"	void setSecret(int val) -> set int secret;\n" +
+			"	                                   ^^^^^^\n" +
+			"Write access to the private field secret in type T748fd1 overrides access restriction (OTJLD 3.5(e)).\n" +
+			"----------\n",
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            customOptions);
     }
 
     // a callout to field causes decapsulation: watch for the effect
