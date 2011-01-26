@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010 Stephan Herrmann
+ * Copyright 2010, 2011 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -3037,6 +3037,35 @@ public class Java5 extends AbstractOTJLDTest {
 			    "    \n"
             },
             "OK");
+    }
+    
+    // Bug 332795 - [compiler][generics] import issues with inherited playedBy binding inside parameterized team
+    public void testA112_genericTeam3() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA112gt3_2.java",
+    			"public team class TeamA112gt3_2 extends TeamA112gt3_1<String> {\n" +
+    			"    @Override protected class R {}\n" +
+    			"    void test() {\n" +
+    			"		 new R().print();\n" +
+    			"    }\n" +
+    			"    public static void main(String... args) {\n" +
+    			"        new TeamA112gt3_2().test();\n" +
+    			"    }\n" +
+    			"}\n",
+    	"TeamA112gt3_1.java",
+    			"import mypack.B1;\n" +
+    			"public team class TeamA112gt3_1<U> {\n" +
+    			"	protected class R playedBy B1 {\n" +
+    			"        protected R () { base(); }\n" +
+    			"        protected void print() { System.out.print(\"OK\"); }\n" +
+    			"   }\n" +
+    			"}\n",
+    	"mypack/B1.java",
+    			"package mypack;\n" +
+    			"public class B1 {}\n"
+    		},
+    		"OK");
     }
 
     // a static method in a role file suppresses an nls warning
