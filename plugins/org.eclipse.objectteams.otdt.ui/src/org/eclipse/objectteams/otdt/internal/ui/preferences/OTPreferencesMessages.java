@@ -1,10 +1,10 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2005, 2009 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2005, 2011 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany, and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -64,6 +64,7 @@ public class OTPreferencesMessages {
 	public static String OTCompilerConfigurationBlock_ambiguous_lowering_label;
 	public static String OTCompilerConfigurationBlock_abstract_potential_relevant_role_label;
 	public static String OTCompilerConfigurationBlock_decapsulation_label;
+	public static String OTCompilerConfigurationBlock_decapsulation_write_label;
 	public static String OTCompilerConfigurationBlock_bindingconventions_label;
 	public static String OTCompilerConfigurationBlock_deprecated_path_syntax_label;
 	public static String OTCompilerConfigurationBlock_inferred_callout_label;

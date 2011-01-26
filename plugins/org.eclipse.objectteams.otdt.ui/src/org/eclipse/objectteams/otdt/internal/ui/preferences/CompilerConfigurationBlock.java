@@ -1,10 +1,10 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2005, 2009 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2005, 2011 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany, and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -95,6 +95,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY = getJDTCoreKey(OTDTPlugin.OT_COMPILER_POTENTIAL_AMBIGUOUS_PLAYEDBY);
 	private static final Key PREF_PB_ABSTRACT_POTENTIAL_RELEVANT_ROLE = getJDTCoreKey(OTDTPlugin.OT_COMPILER_ABSTRACT_POTENTIAL_RELEVANT_ROLE);
 	private static final Key PREF_PB_DECAPSULATION = getJDTCoreKey(OTDTPlugin.OT_COMPILER_DECAPSULATION);
+	private static final Key PREF_PB_DECAPSULATION_WRITE = getJDTCoreKey(OTDTPlugin.OT_COMPILER_DECAPSULATION_WRITE);
 	private static final Key PREF_PB_DEPRECATED_PATH_SYNTAX = getJDTCoreKey(OTDTPlugin.OT_COMPILER_DEPRECATED_PATH_SYNTAX);
 	private static final Key PREF_PB_BINDING_CONVENTIONS = getJDTCoreKey(OTDTPlugin.OT_COMPILER_BINDING_CONVENTIONS);
 	private static final Key PREF_PB_INFERRED_CALLOUT = getJDTCoreKey(OTDTPlugin.OT_COMPILER_INFERRED_CALLOUT);
@@ -136,6 +137,7 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_IGNORING_ROLE_RETURN,
 				PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY, PREF_PB_ABSTRACT_POTENTIAL_RELEVANT_ROLE,
 				PREF_PB_DECAPSULATION,
+				PREF_PB_DECAPSULATION_WRITE,
 				PREF_PB_BINDING_CONVENTIONS,
 				PREF_PB_DEPRECATED_PATH_SYNTAX,
 				PREF_PB_INFERRED_CALLOUT,
@@ -239,6 +241,9 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_decapsulation_label;
 		addComboBox(inner, label, PREF_PB_DECAPSULATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
+
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_decapsulation_write_label;
+		addComboBox(inner, label, PREF_PB_DECAPSULATION_WRITE, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_bindingconventions_label;
 		addComboBox(inner, label, PREF_PB_BINDING_CONVENTIONS, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
