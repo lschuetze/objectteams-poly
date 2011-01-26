@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1570,12 +1570,13 @@ void setSourceStart(int sourceStart);
 	int CalloutGetIncompatibleFieldType			 = CALLOUT_RELATED + 5006; // 3.5(b)
 	int CalloutSetIncompatibleFieldType			 = CALLOUT_RELATED + 5007; // 3.5(b)
 	int DecapsulationField                       = CALLOUT_RELATED + 5008; // 3.5(e)
-	int FieldCalloutOverrides 					 = CALLOUT_RELATED + 5009; // 3.5(g)
-	int FieldCalloutOverridesCallout 			 = CALLOUT_RELATED + 5010; // 3.5(g)
+	int DecapsulationFieldWrite                  = CALLOUT_RELATED + 5009; // 3.5(e)
+	int FieldCalloutOverrides 					 = CALLOUT_RELATED + 5010; // 3.5(g)
+	int FieldCalloutOverridesCallout 			 = CALLOUT_RELATED + 5011; // 3.5(g)
 
-	int UsingCalloutToFieldForAssignment         = CALLOUT_RELATED + 5011; // 3.5(h)
-	int UsingCalloutToFieldForFieldRead          = CALLOUT_RELATED + 5012; // 3.5(h)
-	int UsingInferredCalloutToFieldForMessageSend= CALLOUT_RELATED + 5013; // 3.5(h)
+	int UsingCalloutToFieldForAssignment         = CALLOUT_RELATED + 5012; // 3.5(h)
+	int UsingCalloutToFieldForFieldRead          = CALLOUT_RELATED + 5013; // 3.5(h)
+	int UsingInferredCalloutToFieldForMessageSend= CALLOUT_RELATED + 5014; // 3.5(h)
 
 
 //  ==== CALLIN ====

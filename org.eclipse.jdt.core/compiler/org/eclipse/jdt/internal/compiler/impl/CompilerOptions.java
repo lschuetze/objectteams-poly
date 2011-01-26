@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -164,6 +164,8 @@ public class CompilerOptions {
 
 	public static final String OPTION_ReportDecapsulation =
 		"org.eclipse.objectteams.otdt.compiler.problem.decapsulation"; //$NON-NLS-1$
+	public static final String OPTION_ReportDecapsulationWrite =
+		"org.eclipse.objectteams.otdt.compiler.problem.decapsulation_write"; //$NON-NLS-1$
 
 	public static final String OPTION_ReportBindingConventions =
 		"org.eclipse.objectteams.otdt.compiler.problem.binding_conventions"; //$NON-NLS-1$
@@ -319,18 +321,19 @@ public class CompilerOptions {
 	public static final int PotentialAmbiguousPlayedBy= 	 OTJFlag | ASTNode.Bit4;
 	public static final int AbstractPotentialRelevantRole =  OTJFlag | ASTNode.Bit5;
 	public static final int Decapsulation = 				 OTJFlag | ASTNode.Bit6;
-	public static final int BindingConventions= 			 OTJFlag | ASTNode.Bit7;
-	public static final int AddingInferredCallout=			 OTJFlag | ASTNode.Bit8;
-	public static final int DeprecatedPathSyntax= 			 OTJFlag | ASTNode.Bit9;
-	public static final int WeaveIntoSystemClass=			 OTJFlag | ASTNode.Bit10;
-	public static final int DangerousCallin= 				 OTJFlag | ASTNode.Bit11;
-	public static final int OverridingFinalRole=             OTJFlag | ASTNode.Bit12;
-	public static final int ExceptionInGuard=				 OTJFlag | ASTNode.Bit13;
-	public static final int AmbiguousLowering=				 OTJFlag | ASTNode.Bit14;
-	public static final int AdaptingDeprecated=              OTJFlag | ASTNode.Bit15;
-	public static final int IgnoringRoleReturn=			     OTJFlag | ASTNode.Bit16;
-	public static final int DefiniteBindingAmbiguity=		 OTJFlag | ASTNode.Bit17;
-	public static final int BaseclassCycle=				     OTJFlag | ASTNode.Bit18;
+	public static final int DecapsulationWrite =			 OTJFlag | ASTNode.Bit7;
+	public static final int BindingConventions= 			 OTJFlag | ASTNode.Bit8;
+	public static final int AddingInferredCallout=			 OTJFlag | ASTNode.Bit9;
+	public static final int DeprecatedPathSyntax= 			 OTJFlag | ASTNode.Bit10;
+	public static final int WeaveIntoSystemClass=			 OTJFlag | ASTNode.Bit11;
+	public static final int DangerousCallin= 				 OTJFlag | ASTNode.Bit12;
+	public static final int OverridingFinalRole=             OTJFlag | ASTNode.Bit13;
+	public static final int ExceptionInGuard=				 OTJFlag | ASTNode.Bit14;
+	public static final int AmbiguousLowering=				 OTJFlag | ASTNode.Bit15;
+	public static final int AdaptingDeprecated=              OTJFlag | ASTNode.Bit16;
+	public static final int IgnoringRoleReturn=			     OTJFlag | ASTNode.Bit17;
+	public static final int DefiniteBindingAmbiguity=		 OTJFlag | ASTNode.Bit18;
+	public static final int BaseclassCycle=				     OTJFlag | ASTNode.Bit19;
 // SH}
 
 
@@ -680,6 +683,8 @@ public class CompilerOptions {
 				return OPTION_ReportAbstractPotentialRelevantRole;
 			case Decapsulation :
 				return OPTION_ReportDecapsulation;
+			case DecapsulationWrite :
+				return OPTION_ReportDecapsulationWrite;
 			case BindingConventions :
 				return OPTION_ReportBindingConventions;
 			case AddingInferredCallout :
@@ -846,6 +851,7 @@ public class CompilerOptions {
 			OPTION_ReportDefiniteBindingAmbiguity,
 			OPTION_ReportAbstractPotentialRelevantRole,
 			OPTION_ReportDecapsulation,
+			OPTION_ReportDecapsulationWrite,
 			OPTION_ReportDeprecatedPathSyntax,
 			OPTION_ReportBindingConventions,
 			OPTION_ReportInferredCallout,
@@ -939,6 +945,7 @@ public class CompilerOptions {
 			case AbstractPotentialRelevantRole :
 				return "abstractrelevantrole"; //$NON-NLS-1$
 			case Decapsulation :
+			case DecapsulationWrite :
 				return "decapsulation"; //$NON-NLS-1$
 			case BindingConventions :
 				return "bindingconventions"; //$NON-NLS-1$
@@ -1215,6 +1222,7 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportAbstractPotentialRelevantRole, getSeverityString(AbstractPotentialRelevantRole));
 
 		optionsMap.put(OPTION_ReportDecapsulation, getSeverityString(Decapsulation));
+		optionsMap.put(OPTION_ReportDecapsulationWrite, getSeverityString(DecapsulationWrite));
 		optionsMap.put(OPTION_ReportDeprecatedPathSyntax, getSeverityString(DeprecatedPathSyntax));
 
 		optionsMap.put(OPTION_ReportBindingConventions, getSeverityString(BindingConventions));
@@ -1660,6 +1668,7 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportAbstractPotentialRelevantRole)) != null) updateSeverity(AbstractPotentialRelevantRole, optionValue);
 
 		if ((optionValue = optionsMap.get(OPTION_ReportDecapsulation)) != null) updateSeverity(Decapsulation, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportDecapsulationWrite)) != null) updateSeverity(DecapsulationWrite, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportDeprecatedPathSyntax)) != null) updateSeverity(DeprecatedPathSyntax, optionValue);
 
 		if ((optionValue = optionsMap.get(OPTION_ReportBindingConventions)) != null) updateSeverity(BindingConventions, optionValue);
@@ -1915,6 +1924,7 @@ public class CompilerOptions {
 		buf.append("\n\t- report if an abstract role is potentially relevant : ").append(getSeverityString(AbstractPotentialRelevantRole)); //$NON-NLS-1$
 
 		buf.append("\n\t- report decapsulation (overriding of access restrictions) : ").append(getSeverityString(Decapsulation)); //$NON-NLS-1$
+		buf.append("\n\t- report decapsulation (overriding of access restrictions - field write) : ").append(getSeverityString(DecapsulationWrite)); //$NON-NLS-1$
 		buf.append("\n\t- report deprecated path syntax for externalized roles : ").append(getSeverityString(DeprecatedPathSyntax)); //$NON-NLS-1$
 
 

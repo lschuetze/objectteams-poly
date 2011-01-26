@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -84,7 +84,7 @@ public class IrritantSet {
 	public static final IrritantSet ABSTRACT_POTENTIAL_RELEVANT_ROLE = new IrritantSet(
             CompilerOptions.AbstractPotentialRelevantRole);
 	public static final IrritantSet DECAPSULATION = new IrritantSet(
-            CompilerOptions.Decapsulation);
+            CompilerOptions.Decapsulation | CompilerOptions.DecapsulationWrite);
 	public static final IrritantSet BINDING_CONVENTIONS = new IrritantSet(
             CompilerOptions.BindingConventions);
 	public static final IrritantSet ADDING_INFERRED_CALLOUT = new IrritantSet(
@@ -127,6 +127,7 @@ public class IrritantSet {
 				| CompilerOptions.PotentialAmbiguousPlayedBy
 				| CompilerOptions.AbstractPotentialRelevantRole
 				| CompilerOptions.Decapsulation
+				| CompilerOptions.DecapsulationWrite
 				| CompilerOptions.DeprecatedPathSyntax
 				| CompilerOptions.WeaveIntoSystemClass
 				| CompilerOptions.DangerousCallin

@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2011 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -271,7 +271,7 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
 	void checkDecapsulation(ReferenceBinding baseClass, Scope scope) {
 		baseClass= baseClass.getRealClass(); // fields are in the class!
 		if (!this.resolvedField.canBeSeenBy(baseClass, this, scope))
-   			scope.problemReporter().decapsulation(this, baseClass, scope);
+   			scope.problemReporter().decapsulation(this, baseClass, scope, isSetter());
 	}
 
 	public boolean checkBaseReturnType(CallinCalloutScope scope, int bindDir)

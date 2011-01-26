@@ -138,6 +138,20 @@
         <filter id="388194388">
             <message_arguments>
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="FieldCalloutOverrides"/>
+                <message_argument value="1305009"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="FieldCalloutOverridesCallout"/>
+                <message_argument value="1305010"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
                 <message_argument value="IllegalEnclosingForCallinName"/>
                 <message_argument value="1408006"/>
             </message_arguments>
@@ -175,6 +189,32 @@
                 <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
                 <message_argument value="PrecedenceInRegularClass"/>
                 <message_argument value="1408002"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="UsingCalloutToFieldForAssignment"/>
+                <message_argument value="1305011"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="UsingCalloutToFieldForFieldRead"/>
+                <message_argument value="1305012"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="UsingInferredCalloutToFieldForMessageSend"/>
+                <message_argument value="1305013"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="DecapsulationFieldWrite"/>
             </message_arguments>
         </filter>
         <filter id="1211105284">

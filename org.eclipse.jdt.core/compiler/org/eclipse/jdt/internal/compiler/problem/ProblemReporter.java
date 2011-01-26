@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -519,7 +519,9 @@ public static int getIrritant(int problemID) {
 		case IProblem.AdaptedPluginAccess: // not a real error but shouldn't disturb processing
 		case IProblem.BaseSuperCallDecapsulation:
 			return CompilerOptions.Decapsulation;
-
+		case IProblem.DecapsulationFieldWrite:
+			return CompilerOptions.DecapsulationWrite;
+			
 		case IProblem.RegularlyImportedBaseclass:
 		case IProblem.IllegalBaseImport:
 		case IProblem.IllegalBaseImportNoAspectBinding:
@@ -669,6 +671,7 @@ public static int getProblemCategory(int severity, int problemID) {
 			case CompilerOptions.AmbiguousLowering:
 				return CategorizedProblem.CAT_CODE_STYLE;
 			case CompilerOptions.Decapsulation:
+			case CompilerOptions.DecapsulationWrite:
 			case CompilerOptions.OverridingFinalRole:
 				return CategorizedProblem.CAT_RESTRICTION;
 			case CompilerOptions.BindingConventions:
@@ -10117,8 +10120,44 @@ public void decapsulation(MessageSend send, Scope scope) {
 	}
 	decapsulation(send.selector, send.binding.declaringClass, send, IProblem.Decapsulation, scope);
 }
-public void decapsulation(FieldAccessSpec spec, ReferenceBinding baseType, Scope scope) {
-	decapsulation(spec.resolvedField.readableName(), baseType, spec, IProblem.DecapsulationField, scope);
+public void decapsulation(FieldAccessSpec spec, ReferenceBinding baseType, Scope scope, boolean isSetter) {
+	int problemID = isSetter ? IProblem.DecapsulationFieldWrite : IProblem.DecapsulationField;
+	int start= spec.sourceStart;
+	int end  = spec.sourceEnd;
+	String level = this.options.decapsulation;
+	String[] args = null;
+	if (level == CompilerOptions.REPORT_NONE)
+		return;
+	if (   (level == CompilerOptions.REPORT_CLASS)
+		&& !scope.referenceCompilationUnit().isWarningSuppressedAt(
+				IProblem.Decapsulation, start, end, null)) // handle suppressed warning below
+	{
+		this.referenceContext = scope.classScope().referenceContext;
+		start = ((TypeDeclaration)this.referenceContext).sourceStart;
+		end   = ((TypeDeclaration)this.referenceContext).sourceEnd;
+		this.handle(
+				IProblem.DecapsulationShort,
+				NoArgument,
+				NoArgument,
+				start,
+				end);
+	} else { // REPORT_BINDING - or warning suppressed at the binding
+		// need to report suppressed warning to avoid "Unnessary SuppressWarnings"
+		FieldBinding resolvedField = spec.resolvedField;
+		StringBuffer accVisString = new StringBuffer();
+		ASTNode.printModifiers(resolvedField.modifiers & ExtraCompilerModifiers.AccVisibilityMASK, accVisString);
+		args = new String[] {
+				new String(resolvedField.readableName()),
+				new String(baseType.readableName()),
+				accVisString.toString()
+		};
+		this.handle(
+				problemID,
+				args,
+				args,
+				start,
+				end);
+	}
 }
 public void decapsulation(QualifiedNameReference ref, FieldBinding field, Scope scope) {
 	decapsulation(field.name, field.declaringClass, ref, IProblem.DecapsulationFieldReference, scope);
