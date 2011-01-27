@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,7 +8,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bugs 325755, 320170 and 292478   
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for 
+ *     						bugs 325755, 320170, 292478 and 332637   
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -98,16 +99,25 @@ public class UnconditionalFlowInfo extends FlowInfo {
 	public int[] nullStatusChangedInAssert; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=303448
 
 public FlowInfo addInitializationsFrom(FlowInfo inits) {
+	return addInfoFrom(inits, true);
+}
+public FlowInfo addNullInfoFrom(FlowInfo inits) {
+	return addInfoFrom(inits, false);
+}
+private FlowInfo addInfoFrom(FlowInfo inits, boolean handleInits) {
 	if (this == DEAD_END)
 		return this;
 	if (inits == DEAD_END)
 		return this;
 	UnconditionalFlowInfo otherInits = inits.unconditionalInits();
 
-	// union of definitely assigned variables,
-	this.definiteInits |= otherInits.definiteInits;
-	// union of potentially set ones
-	this.potentialInits |= otherInits.potentialInits;
+	if (handleInits) {
+		// union of definitely assigned variables,
+		this.definiteInits |= otherInits.definiteInits;
+		// union of potentially set ones
+		this.potentialInits |= otherInits.potentialInits;
+	}
+	
 	// combine null information
 	boolean thisHadNulls = (this.tagBits & NULL_FLAG_MASK) != 0,
 		otherHasNulls = (otherInits.tagBits & NULL_FLAG_MASK) != 0;
@@ -229,14 +239,17 @@ public FlowInfo addInitializationsFrom(FlowInfo inits) {
 			}
 		}
 		int i;
-		// manage definite assignment info
-		for (i = 0; i < mergeLimit; i++) {
-			this.extra[0][i] |= otherInits.extra[0][i];
-			this.extra[1][i] |= otherInits.extra[1][i];
-		}
-		for (; i < copyLimit; i++) {
-			this.extra[0][i] = otherInits.extra[0][i];
-			this.extra[1][i] = otherInits.extra[1][i];
+		if (handleInits) {
+			// manage definite assignment info
+			for (i = 0; i < mergeLimit; i++) {
+				this.extra[0][i] |= otherInits.extra[0][i];
+				this.extra[1][i] |= otherInits.extra[1][i];
+			}
+			for (; i < copyLimit; i++) {
+				this.extra[0][i] = otherInits.extra[0][i];
+				this.extra[1][i] = otherInits.extra[1][i];
+			
+			}
 		}
 		// tweak limits for nulls
 		if (!thisHadNulls) {
@@ -1005,7 +1018,7 @@ final public boolean isProtectedNull(LocalVariableBinding local) {
  * @return <code>true</code> if the check passes (does not return
  *    if the check fails)
  */
-private static boolean isTrue(boolean expression, String message) {
+protected static boolean isTrue(boolean expression, String message) {
 	if (!expression)
 		throw new AssertionFailedException("assertion failed: " + message); //$NON-NLS-1$
 	return expression;
@@ -1376,8 +1389,13 @@ public void resetNullInfo(LocalVariableBinding local) {
             this.nullBit4 &= mask;
         } else {
     		// use extra vector
-    		int vectorIndex ;
-    		this.extra[2][vectorIndex = (position / BitCacheSize) - 1]
+    		int vectorIndex = (position / BitCacheSize) - 1;
+    		if (this.extra == null || vectorIndex >= this.extra[2].length) {
+    			// in case we attempt to reset the null info of a variable that has not been encountered
+    			// before and for which no null bits exist.
+    			return;
+    		}
+    		this.extra[2][vectorIndex]
     		    &= (mask = ~(1L << (position % BitCacheSize)));
     		this.extra[3][vectorIndex] &= mask;
     		this.extra[4][vectorIndex] &= mask;
@@ -1409,6 +1427,23 @@ public void markPotentiallyUnknownBit(LocalVariableBinding local) {
         } else {
     		// use extra vector
     		int vectorIndex = (position / BitCacheSize) - 1;
+    		if (this.extra == null) {
+				int length = vectorIndex + 1;
+				this.extra = new long[extraLength][];
+				for (int j = 0; j < extraLength; j++) {
+					this.extra[j] = new long[length];
+				}
+			}
+			else {
+				int oldLength; // might need to grow the arrays
+				if (vectorIndex >= (oldLength = this.extra[0].length)) {
+					for (int j = 0; j < extraLength; j++) {
+						System.arraycopy(this.extra[j], 0,
+							(this.extra[j] = new long[vectorIndex + 1]), 0,
+							oldLength);
+					}
+				}
+			}
     		mask = 1L << (position % BitCacheSize);
     		isTrue((this.extra[2][vectorIndex] & mask) == 0, "Adding 'unknown' mark in unexpected state"); //$NON-NLS-1$
     		this.extra[5][vectorIndex] |= mask;
@@ -1439,6 +1474,23 @@ public void markPotentiallyNullBit(LocalVariableBinding local) {
         } else {
     		// use extra vector
     		int vectorIndex = (position / BitCacheSize) - 1;
+    		if (this.extra == null) {
+				int length = vectorIndex + 1;
+				this.extra = new long[extraLength][];
+				for (int j = 0; j < extraLength; j++) {
+					this.extra[j] = new long[length];
+				}
+			}
+			else {
+				int oldLength; // might need to grow the arrays
+				if (vectorIndex >= (oldLength = this.extra[0].length)) {
+					for (int j = 0; j < extraLength; j++) {
+						System.arraycopy(this.extra[j], 0,
+							(this.extra[j] = new long[vectorIndex + 1]), 0,
+							oldLength);
+					}
+				}
+			}
     		mask = 1L << (position % BitCacheSize);
     		this.extra[3][vectorIndex] |= mask;
     		isTrue((this.extra[2][vectorIndex] & mask) == 0, "Adding 'potentially null' mark in unexpected state"); //$NON-NLS-1$
@@ -1469,6 +1521,23 @@ public void markPotentiallyNonNullBit(LocalVariableBinding local) {
         } else {
     		// use extra vector
     		int vectorIndex  = (position / BitCacheSize) - 1;
+    		if (this.extra == null) {
+				int length = vectorIndex + 1;
+				this.extra = new long[extraLength][];
+				for (int j = 0; j < extraLength; j++) {
+					this.extra[j] = new long[length];
+				}
+			}
+			else {
+				int oldLength; // might need to grow the arrays
+				if (vectorIndex >= (oldLength = this.extra[0].length)) {
+					for (int j = 0; j < extraLength; j++) {
+						System.arraycopy(this.extra[j], 0,
+							(this.extra[j] = new long[vectorIndex + 1]), 0,
+							oldLength);
+					}
+				}
+			}
     		mask = 1L << (position % BitCacheSize);
     		isTrue((this.extra[2][vectorIndex] & mask) == 0, "Adding 'potentially non-null' mark in unexpected state"); //$NON-NLS-1$
     		this.extra[4][vectorIndex] |= mask;

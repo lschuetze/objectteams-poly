@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for bug 335093 - [compiler][null] minimal hook for future null annotation support
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -66,6 +67,11 @@ public abstract FlowInfo analyseCode(BlockScope currentScope, FlowContext flowCo
 	public static final int COMPLAINED_FAKE_REACHABLE = 1;
 	public static final int COMPLAINED_UNREACHABLE = 2;
 	
+/** Empty hook for checking null status against declaration using null annotations, once this will be supported. */
+protected int checkAgainstNullAnnotation(BlockScope currentScope, LocalVariableBinding local, int nullStatus) {
+	return nullStatus;
+}
+
 /**
  * INTERNAL USE ONLY.
  * This is used to redirect inter-statements jumps.

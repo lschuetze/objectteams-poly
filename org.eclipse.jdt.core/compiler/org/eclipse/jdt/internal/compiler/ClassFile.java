@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -912,6 +912,9 @@ public class ClassFile implements TypeConstants, TypeIds {
 					case SyntheticMethodBinding.SwitchTable :
 						// generate a method info to define the switch table synthetic method
 						addSyntheticSwitchTable(syntheticMethod);
+						break;
+					case SyntheticMethodBinding.TooManyEnumsConstants :
+						addSyntheticEnumInitializationMethod(syntheticMethod);
 				}
 			}
 		}
@@ -1007,6 +1010,29 @@ public class ClassFile implements TypeConstants, TypeIds {
 		this.contents[methodAttributeOffset] = (byte) attributeNumber;
 	}
 
+	public void addSyntheticEnumInitializationMethod(SyntheticMethodBinding methodBinding) {
+		generateMethodInfoHeader(methodBinding);
+		int methodAttributeOffset = this.contentsOffset;
+		// this will add exception attribute, synthetic attribute, deprecated attribute,...
+		int attributeNumber = generateMethodInfoAttributes(methodBinding);
+		// Code attribute
+		int codeAttributeOffset = this.contentsOffset;
+		attributeNumber++; // add code attribute
+		generateCodeAttributeHeader();
+		this.codeStream.init(this);
+		this.codeStream.generateSyntheticBodyForEnumInitializationMethod(methodBinding);
+		completeCodeAttributeForSyntheticMethod(
+			methodBinding,
+			codeAttributeOffset,
+			((SourceTypeBinding) methodBinding.declaringClass)
+				.scope
+				.referenceCompilationUnit()
+				.compilationResult
+				.getLineSeparatorPositions());
+		// update the number of attributes
+		this.contents[methodAttributeOffset++] = (byte) (attributeNumber >> 8);
+		this.contents[methodAttributeOffset] = (byte) attributeNumber;
+	}
 	/**
 	 * INTERNAL USE-ONLY
 	 * Generate the byte for a problem method info that correspond to a synthetic method that
@@ -3994,28 +4020,39 @@ public class ClassFile implements TypeConstants, TypeIds {
 		if (aType.isInterface()) {
 			superclassNameIndex = this.constantPool.literalIndexForType(ConstantPool.JavaLangObjectConstantPoolName);
 		} else {
-			superclassNameIndex =
-				(aType.superclass == null ? 0 : this.constantPool.literalIndexForType(aType.superclass));
+			if (aType.superclass != null) {
+				 if ((aType.superclass.tagBits & TagBits.HasMissingType) != 0) {
+						superclassNameIndex = this.constantPool.literalIndexForType(ConstantPool.JavaLangObjectConstantPoolName);
+				 } else {
+						superclassNameIndex = this.constantPool.literalIndexForType(aType.superclass);
+				 }
+			} else {
+				superclassNameIndex = 0;
 //{ObjectTeams: when compiler o.o.Team.__OT__Confined re-insert Object as superclass:
-			if (   superclassNameIndex == 0
-				&& CharOperation.equals(aType.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED))
-			{
-				superclassNameIndex = this.constantPool.literalIndexForType(ConstantPool.JavaLangObjectConstantPoolName);
-			}
+				if (CharOperation.equals(aType.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_OTCONFINED))
+					superclassNameIndex = this.constantPool.literalIndexForType(ConstantPool.JavaLangObjectConstantPoolName);
 // SH}
-
+			}
 		}
 		this.contents[this.contentsOffset++] = (byte) (superclassNameIndex >> 8);
 		this.contents[this.contentsOffset++] = (byte) superclassNameIndex;
 		ReferenceBinding[] superInterfacesBinding = aType.superInterfaces();
 		int interfacesCount = superInterfacesBinding.length;
-		this.contents[this.contentsOffset++] = (byte) (interfacesCount >> 8);
-		this.contents[this.contentsOffset++] = (byte) interfacesCount;
+		int interfacesCountPosition = this.contentsOffset;
+		this.contentsOffset += 2;
+		int interfaceCounter = 0;
 		for (int i = 0; i < interfacesCount; i++) {
-			int interfaceIndex = this.constantPool.literalIndexForType(superInterfacesBinding[i]);
+			ReferenceBinding binding = superInterfacesBinding[i];
+			if ((binding.tagBits & TagBits.HasMissingType) != 0) {
+				continue;
+			}
+			interfaceCounter++;
+			int interfaceIndex = this.constantPool.literalIndexForType(binding);
 			this.contents[this.contentsOffset++] = (byte) (interfaceIndex >> 8);
 			this.contents[this.contentsOffset++] = (byte) interfaceIndex;
 		}
+		this.contents[interfacesCountPosition++] = (byte) (interfaceCounter >> 8);
+		this.contents[interfacesCountPosition] = (byte) interfaceCounter;
 		this.creatingProblemType = createProblemType;
 
 		// retrieve the enclosing one guaranteed to be the one matching the propagated flow info

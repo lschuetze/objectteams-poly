@@ -651,7 +651,9 @@ public TypeBinding resolveType(BlockScope scope) {
 //{ObjectTeams: getAllRoles requires an unchecked cast (T[]), don't report:
 					  if (!scope.isGeneratedScope())
 // SH}
-						scope.problemReporter().unsafeCast(this, scope);
+						if (scope.compilerOptions().reportUnavoidableGenericTypeProblems || !this.expression.forcedToBeRaw(scope.referenceContext())) {
+							scope.problemReporter().unsafeCast(this, scope);
+						}
 					} else {
 						if (castType.isRawType() && scope.compilerOptions().getSeverity(CompilerOptions.RawTypeReference) != ProblemSeverities.Ignore){
 							scope.problemReporter().rawTypeReference(this.type, castType);

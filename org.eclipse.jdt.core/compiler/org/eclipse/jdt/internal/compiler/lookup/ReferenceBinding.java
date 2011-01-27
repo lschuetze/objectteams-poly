@@ -333,6 +333,10 @@ public MethodBinding[] availableMethods() {
 	return methods();
 }
 
+public FieldBinding[] unResolvedFields() {
+	return Binding.NO_FIELDS;
+}
+
 /**
  * Answer true if the receiver can be instantiated
  */

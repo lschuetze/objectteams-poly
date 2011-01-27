@@ -913,6 +913,22 @@ public final class JavaCore extends Plugin {
 	 */
 	public static final String COMPILER_PB_RAW_TYPE_REFERENCE = PLUGIN_ID + ".compiler.problem.rawTypeReference"; //$NON-NLS-1$
 	/**
+	 * Compiler option ID: Reporting of Unavoidable Generic Type Problems.
+	 * <p> When enabled, the compiler will issue an error or warning even when it detects a generic type problem
+	 *     that could not have been avoided by the programmer. As an example, a type may be forced to use raw types
+	 *     in its method signatures and return types because the methods it overrides from a super type are declared to
+	 *     use raw types in the first place.  
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.unavoidableGenericTypeProblems"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "enabled", "disabled" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"enabled"</code></dd>
+	 * </dl>
+	 * @since 3.7
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_UNAVOIDABLE_GENERIC_TYPE_PROBLEMS = PLUGIN_ID + ".compiler.problem.unavoidableGenericTypeProblems"; //$NON-NLS-1$
+
+	/**
 	 * Compiler option ID: Reporting final Bound for Type Parameter.
 	 * <p>When enabled, the compiler will issue an error or a warning whenever a generic type parameter is associated with a
 	 *    bound corresponding to a final type; since final types cannot be further extended, the parameter is pretty useless.
@@ -1331,6 +1347,33 @@ public final class JavaCore extends Plugin {
 	 * @category CompilerOptionID
 	 */
 	public static final String COMPILER_PB_PARAMETER_ASSIGNMENT = PLUGIN_ID + ".compiler.problem.parameterAssignment"; //$NON-NLS-1$
+	/**
+	 * Compiler option ID: Reporting a method that qualifies as static, but not declared static.
+	 * <p>When enabled, the compiler will issue an error or a warning if a method has
+	 *    not been declared as <code>static</code>, even though it qualifies as one.
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.reportMethodCanBeStatic"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"ignore"</code></dd>
+	 * </dl>
+	 * @since 3.7
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_MISSING_STATIC_ON_METHOD = PLUGIN_ID + ".compiler.problem.reportMethodCanBeStatic"; //$NON-NLS-1$
+	/**
+	 * Compiler option ID: Reporting a method that may qualify as static, but not declared static.
+	 * <p>When enabled, the compiler will issue an error or a warning if a method has
+	 *    not been declared as <code>static</code>, even though it may qualify as one,
+	 *    when another method doesn't override it.
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.reportMethodCanBePotentiallyStatic"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"ignore"</code></dd>
+	 * </dl>
+	 * @since 3.7
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD = PLUGIN_ID + ".compiler.problem.reportMethodCanBePotentiallyStatic"; //$NON-NLS-1$
 	/**
 	 * Compiler option ID: Setting Source Compatibility Mode.
 	 * <p>Specify whether which source level compatibility is used. From 1.4 on, <code>'assert'</code> is a keyword

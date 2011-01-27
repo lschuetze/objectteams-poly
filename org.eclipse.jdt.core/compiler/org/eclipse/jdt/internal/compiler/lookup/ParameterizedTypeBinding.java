@@ -1288,4 +1288,8 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		}
 		return Binding.NO_TYPE_VARIABLES;
 	}
+	
+	public FieldBinding[] unResolvedFields() {
+		return this.fields;
+	}
 }

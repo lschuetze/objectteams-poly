@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Ray V. (voidstar@gmail.com) - Contribution for bug 282988
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -76,7 +77,6 @@ public class Scribe implements IJavaDocTagConstants {
 	public int indentationLevel;
 	public int lastNumberOfNewLines;
 	private boolean preserveLineBreakIndentation = false;
-	boolean formatBrace;
 	public int line;
 
 	private int[] lineEnds;
@@ -107,6 +107,23 @@ public class Scribe implements IJavaDocTagConstants {
 	/** empty lines*/
 	private final boolean indentEmptyLines;
 	int blank_lines_between_import_groups = -1;
+
+	// Preserve empty lines constants
+	public static final int DO_NOT_PRESERVE_EMPTY_LINES = -1;
+	public static final int PRESERVE_EMPTY_LINES_KEEP_LAST_NEW_LINES_INDENTATION = 1;
+	public static final int PRESERVE_EMPTY_LINES_IN_FORMAT_LEFT_CURLY_BRACE = 2;
+	public static final int PRESERVE_EMPTY_LINES_IN_STRING_LITERAL_CONCATENATION = 3;
+	public static final int PRESERVE_EMPTY_LINES_IN_CLOSING_ARRAY_INITIALIZER = 4;
+	public static final int PRESERVE_EMPTY_LINES_IN_FORMAT_OPENING_BRACE = 5;
+	public static final int PRESERVE_EMPTY_LINES_IN_BINARY_EXPRESSION = 6;
+	public static final int PRESERVE_EMPTY_LINES_IN_EQUALITY_EXPRESSION = 7;
+	public static final int PRESERVE_EMPTY_LINES_BEFORE_ELSE = 8;
+	public static final int PRESERVE_EMPTY_LINES_IN_SWITCH_CASE = 9;
+	public static final int PRESERVE_EMPTY_LINES_AT_END_OF_METHOD_DECLARATION = 10;
+	public static final int PRESERVE_EMPTY_LINES_AT_END_OF_BLOCK = 11;
+	final static int PRESERVE_EMPTY_LINES_DO_NOT_USE_ANY_INDENTATION = -1;
+	final static int PRESERVE_EMPTY_LINES_USE_CURRENT_INDENTATION = 0;
+	final static int PRESERVE_EMPTY_LINES_USE_TEMPORARY_INDENTATION = 1;
 
 	/** disabling */
 	boolean editsEnabled;
@@ -461,15 +478,17 @@ public class Scribe implements IJavaDocTagConstants {
     			if (edit.length == 0) {
     				int nrLength = 0;
     				int rLength = edit.replacement.length();
-    				int ch = edit.replacement.charAt(nrLength);
-    				loop: while (nrLength < rLength) {
-	    				switch (ch) {
-	    					case ' ':
-	    					case '\t':
-	    						nrLength++;
-	    						break;
-	    					default:
-	    						break loop;
+    				if (nrLength < rLength) {
+	    				int ch = edit.replacement.charAt(nrLength);
+	    				loop: while (nrLength < rLength) {
+		    				switch (ch) {
+		    					case ' ':
+		    					case '\t':
+		    						nrLength++;
+		    						break;
+		    					default:
+		    						break loop;
+		    				}
 	    				}
     				}
     				if (nrLength > 0) {
@@ -691,10 +710,6 @@ public class Scribe implements IJavaDocTagConstants {
 		return createAlignment(kind, mode, Alignment.R_INNERMOST, count, sourceRestart);
 	}
 
-	public Alignment createAlignment(int kind, int mode, int count, int sourceRestart, boolean adjust){
-		return createAlignment(kind, mode, Alignment.R_INNERMOST, count, sourceRestart, adjust);
-	}
-
 	public Alignment createAlignment(int kind, int mode, int tieBreakRule, int count, int sourceRestart){
 		return createAlignment(kind, mode, tieBreakRule, count, sourceRestart, this.formatter.preferences.continuation_indentation, false);
 	}
@@ -705,6 +720,22 @@ public class Scribe implements IJavaDocTagConstants {
 
 	public Alignment createAlignment(int kind, int mode, int tieBreakRule, int count, int sourceRestart, int continuationIndent, boolean adjust){
 		Alignment alignment = new Alignment(kind, mode, tieBreakRule, this, count, sourceRestart, continuationIndent);
+		// specific break indentation for message arguments inside binary expressions
+		if ((this.currentAlignment == null && this.formatter.expressionsDepth >= 0) ||
+			(this.currentAlignment != null && this.currentAlignment.kind == Alignment.BINARY_EXPRESSION &&
+				(this.formatter.expressionsPos & CodeFormatterVisitor.EXPRESSIONS_POS_MASK) == CodeFormatterVisitor.EXPRESSIONS_POS_BETWEEN_TWO)) {
+			switch (kind) {
+				case Alignment.CONDITIONAL_EXPRESSION:
+				case Alignment.MESSAGE_ARGUMENTS:
+				case Alignment.MESSAGE_SEND:
+					if (this.formatter.lastBinaryExpressionAlignmentBreakIndentation == alignment.breakIndentationLevel) {
+						alignment.breakIndentationLevel += this.indentationSize;
+						alignment.shiftBreakIndentationLevel += this.indentationSize;
+						this.formatter.lastBinaryExpressionAlignmentBreakIndentation = 0;
+					}
+					break;
+			}
+		}
 		// adjust break indentation
 		if (adjust && this.memberAlignment != null) {
 			Alignment current = this.memberAlignment;
@@ -798,6 +829,9 @@ public class Scribe implements IJavaDocTagConstants {
 		this.formatter.lastLocalDeclarationSourceStart = alignment.location.lastLocalDeclarationSourceStart;
 		if (discardAlignment){
 			this.currentAlignment = alignment.enclosing;
+			if (this.currentAlignment == null) {
+				this.formatter.lastBinaryExpressionAlignmentBreakIndentation = 0;
+			}
 		}
 	}
 
@@ -1013,6 +1047,7 @@ public class Scribe implements IJavaDocTagConstants {
 				for (int i = 0; i < linesNumber; i++) {
 					printIndentationIfNecessary(this.tempBuffer);
 					this.tempBuffer.append(this.lineSeparator);
+					this.column = 1;
 				}
 				emptyLines = this.tempBuffer.toString();
 			} else {
@@ -1029,6 +1064,7 @@ public class Scribe implements IJavaDocTagConstants {
 				for (int i = 0; i < linesNumber; i++) {
 					printIndentationIfNecessary(this.tempBuffer);
 					this.tempBuffer.append(this.lineSeparator);
+					this.column = 1;
 				}
 				emptyLines = this.tempBuffer.toString();
 			} else {
@@ -1050,6 +1086,7 @@ public class Scribe implements IJavaDocTagConstants {
 				for (int i = 0; i < realNewLineNumber; i++) {
 					printIndentationIfNecessary(this.tempBuffer);
 					this.tempBuffer.append(this.lineSeparator);
+					this.column = 1;
 				}
 				emptyLines = this.tempBuffer.toString();
 			} else {
@@ -1143,107 +1180,128 @@ public class Scribe implements IJavaDocTagConstants {
 	/*
 	 * Preserve empty lines depending on given count and preferences.
 	 */
-	private String getPreserveEmptyLines(int count) {
+	private String getPreserveEmptyLines(int count, int emptyLinesRules) {
 		if (count == 0) {
-			// preserve line breaks in wrapping if specified
-			// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=198074
-			if (this.currentAlignment != null && !this.formatter.preferences.join_wrapped_lines) {
-				// Insert a new line only if it has not been already done before
-				// (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=283476)
-				// or when there's no direct member alignment
-				// (additional fix for bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=286601)
-				if (this.lastNumberOfNewLines == 0 || this.memberAlignment == null || this.memberAlignment.location.inputOffset < this.currentAlignment.location.inputOffset) {
-					
-					// Debug
-					if (DefaultCodeFormatter.DEBUG) {
-						System.out.println("Preserve empty lines:"); //$NON-NLS-1$
-						System.out.println(" - indentation level = "+this.indentationLevel); //$NON-NLS-1$
-						System.out.println(" - current alignment: "); //$NON-NLS-1$
-						System.out.print(this.currentAlignment.toString(new StringBuffer(), 1));
-						if (this.memberAlignment != null) {
-							System.out.println(" - member alignment: "); //$NON-NLS-1$
-							System.out.print(this.memberAlignment.toString(new StringBuffer(), 1));
-						}
+			int currentIndentationLevel = this.indentationLevel;
+			int useAlignmentBreakIndentation = useAlignmentBreakIndentation(emptyLinesRules);
+			switch (useAlignmentBreakIndentation) {
+				case PRESERVE_EMPTY_LINES_DO_NOT_USE_ANY_INDENTATION:
+					return Util.EMPTY_STRING;
+				default:
+					// Return the new indented line
+					StringBuffer buffer = new StringBuffer(getNewLine());
+					printIndentationIfNecessary(buffer);
+					if (useAlignmentBreakIndentation == PRESERVE_EMPTY_LINES_USE_TEMPORARY_INDENTATION) {
+						this.indentationLevel = currentIndentationLevel;
 					}
-
-					// Reset indentation level to the location output
-					this.indentationLevel = this.currentAlignment.location.outputIndentationLevel;
-
-					// Create new line
-					this.tempBuffer.setLength(0);
-					this.tempBuffer.append(getNewLine());
-					
-					// Look for current indentation
-					int currentIndentation = getCurrentIndentation(this.scanner.currentPosition);
-					
-					// Determine whether the alignment indentation can be used or not
-					// So far, the best algorithm is to use it when
-					// 1. this is not the opening brace of a local declaration assignment
-					// 2. this is not the first opening brace
-					//     or this is an array initializer alignment 
-					//     or this is an binary expression alignment
-					// 3. the indentation level is below the alignment break indentation
-					int currentTokenStartPosition = this.scanner.currentPosition;
-					int nextToken = -1;
-					try {
-						nextToken = this.scanner.getNextToken();
-					} catch (InvalidInputException e) {
-						// skip
-					}
-					this.scanner.resetTo(currentTokenStartPosition, this.scannerEndPosition - 1);
-					boolean canUseAlignmentIndentation = (nextToken != TerminalTokens.TokenNameLBRACE || this.currentAlignment.kind != Alignment.LOCAL_DECLARATION_ASSIGNMENT);
-					if (canUseAlignmentIndentation &&
-							(!this.formatBrace ||
-									this.currentAlignment.kind == Alignment.ARRAY_INITIALIZER ||
-									this.currentAlignment.kind == Alignment.BINARY_EXPRESSION) &&
-							this.indentationLevel < this.currentAlignment.breakIndentationLevel) {
-						this.indentationLevel = this.currentAlignment.breakIndentationLevel;
-					}
-					
-					// Use the current indentation if over the computed indentation
-					if (this.indentationLevel < currentIndentation) {
-						this.indentationLevel = currentIndentation;
-					}
-					
-					// Debug
-					if (DefaultCodeFormatter.DEBUG) {
-						System.out.println(" - format brace = "+this.formatBrace); //$NON-NLS-1$
-						System.out.println(" - current column = "+(currentIndentation+1)); //$NON-NLS-1$
-						System.out.println(" - current position = "+this.scanner.currentPosition); //$NON-NLS-1$
-						System.out.print(" - current line = "); //$NON-NLS-1$
-						int linePtr = Arrays.binarySearch(this.lineEnds, this.scanner.currentPosition);
-						if (linePtr < 0) {
-							linePtr = -linePtr - 1;
-						}
-						int i = getLineEnd(linePtr)+1;
-						char[] source = this.scanner.source;
-						int sourceLength = source.length;
-						while (i < sourceLength && source[i] != '\r') {
-							System.out.print(source[i++]);
-						}
-						System.out.println();
-						System.out.println(" - indentation level = "+this.indentationLevel); //$NON-NLS-1$
-						System.out.println();
-					}
-					
-					// Set the flag to indicate that a specific indentation is currently in used
-					this.preserveLineBreakIndentation = true;
-					
-					// Print the computed indentation in the buffer
-					printIndentationIfNecessary(this.tempBuffer);
-					return this.tempBuffer.toString();
-				}
+					return buffer.toString();
 			}
-			return Util.EMPTY_STRING;
 		}
 		if (this.blank_lines_between_import_groups >= 0) {
+			useAlignmentBreakIndentation(emptyLinesRules);
 			return getEmptyLines(this.blank_lines_between_import_groups);
 		}
 		if (this.formatter.preferences.number_of_empty_lines_to_preserve != 0) {
+			useAlignmentBreakIndentation(emptyLinesRules);
 			int linesToPreserve = Math.min(count, this.formatter.preferences.number_of_empty_lines_to_preserve);
 			return getEmptyLines(linesToPreserve);
 		}
 		return getNewLine();
+	}
+	private int useAlignmentBreakIndentation(int emptyLinesRules) {
+		// preserve line breaks in wrapping if specified
+		// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=198074
+		boolean specificEmptyLinesRule = emptyLinesRules != PRESERVE_EMPTY_LINES_KEEP_LAST_NEW_LINES_INDENTATION;
+		if ((this.currentAlignment != null || specificEmptyLinesRule) && !this.formatter.preferences.join_wrapped_lines) {
+			// insert a new line only if it has not been already done before
+			// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=283476
+			if (this.lastNumberOfNewLines == 0 || specificEmptyLinesRule || this.formatter.arrayInitializersDepth >= 0) {
+				
+				// Do not use alignment break indentation in specific circumstances
+				boolean useAlignmentBreakIndentation;
+				boolean useAlignmentShiftBreakIndentation = false;
+				boolean useLastBinaryExpressionAlignmentBreakIndentation = false;
+				switch (emptyLinesRules) {
+					case DO_NOT_PRESERVE_EMPTY_LINES:
+					case PRESERVE_EMPTY_LINES_IN_SWITCH_CASE:
+					case PRESERVE_EMPTY_LINES_AT_END_OF_METHOD_DECLARATION:
+					case PRESERVE_EMPTY_LINES_AT_END_OF_BLOCK:
+						return PRESERVE_EMPTY_LINES_DO_NOT_USE_ANY_INDENTATION;
+					case PRESERVE_EMPTY_LINES_IN_BINARY_EXPRESSION:
+						useAlignmentBreakIndentation = true;
+						if ((this.formatter.expressionsPos & CodeFormatterVisitor.EXPRESSIONS_POS_MASK) == CodeFormatterVisitor.EXPRESSIONS_POS_BETWEEN_TWO) {
+							// we're just before the left expression, try to use the last
+							// binary expression break indentation if any
+							useLastBinaryExpressionAlignmentBreakIndentation = true;
+						}
+						break;
+					case PRESERVE_EMPTY_LINES_IN_EQUALITY_EXPRESSION:
+						useAlignmentShiftBreakIndentation = this.currentAlignment == null || this.currentAlignment.kind == Alignment.BINARY_EXPRESSION;
+						useAlignmentBreakIndentation = !useAlignmentShiftBreakIndentation;
+						break;
+					case PRESERVE_EMPTY_LINES_IN_FORMAT_OPENING_BRACE:
+						useAlignmentBreakIndentation = this.formatter.arrayInitializersDepth <= 1
+							&& this.currentAlignment != null
+							&& this.currentAlignment.kind == Alignment.ARRAY_INITIALIZER;
+						break;
+					case PRESERVE_EMPTY_LINES_IN_FORMAT_LEFT_CURLY_BRACE:
+						useAlignmentBreakIndentation = false;
+						break;
+					default:
+						if ((emptyLinesRules & 0xFFFF) == PRESERVE_EMPTY_LINES_IN_CLOSING_ARRAY_INITIALIZER && this.scanner.currentCharacter == '}' ) {
+							// last array initializer closing brace
+							this.indentationLevel = emptyLinesRules >> 16;
+							this.preserveLineBreakIndentation = true;
+							return PRESERVE_EMPTY_LINES_USE_CURRENT_INDENTATION;
+						}
+						useAlignmentBreakIndentation = true;
+						break;
+				}
+
+				// If there's an alignment try to align on its break indentation level
+				Alignment alignment = this.currentAlignment;
+				if (alignment == null) {
+					if (useLastBinaryExpressionAlignmentBreakIndentation) {
+						if (this.indentationLevel < this.formatter.lastBinaryExpressionAlignmentBreakIndentation) {
+							this.indentationLevel = this.formatter.lastBinaryExpressionAlignmentBreakIndentation;
+						}
+					}
+					if (useAlignmentShiftBreakIndentation && this.memberAlignment != null) {
+						if (this.indentationLevel < this.memberAlignment.shiftBreakIndentationLevel) {
+							this.indentationLevel = this.memberAlignment.shiftBreakIndentationLevel;
+						}
+					}
+				} else {
+					// Use the member alignment break indentation level when
+					// it's closer from the wrapped line than the current alignment
+					if (this.memberAlignment != null && this.memberAlignment.location.inputOffset > alignment.location.inputOffset) {
+						alignment = this.memberAlignment;
+					}
+
+					// Use the break indentation level if possible...
+					if (useLastBinaryExpressionAlignmentBreakIndentation) {
+						if (this.indentationLevel < this.formatter.lastBinaryExpressionAlignmentBreakIndentation) {
+							this.indentationLevel = this.formatter.lastBinaryExpressionAlignmentBreakIndentation;
+						}
+					}
+					if (useAlignmentBreakIndentation) {
+						if (this.indentationLevel < alignment.breakIndentationLevel) {
+							this.indentationLevel = alignment.breakIndentationLevel;
+						}
+					} else if (useAlignmentShiftBreakIndentation) {
+						if (this.indentationLevel < alignment.shiftBreakIndentationLevel) {
+							this.indentationLevel = alignment.shiftBreakIndentationLevel;
+						}
+					}
+				}
+				this.preserveLineBreakIndentation = true;
+				if (useLastBinaryExpressionAlignmentBreakIndentation || useAlignmentShiftBreakIndentation) {
+					return PRESERVE_EMPTY_LINES_USE_TEMPORARY_INDENTATION;
+				}
+				return PRESERVE_EMPTY_LINES_USE_CURRENT_INDENTATION;
+			}
+		}
+		return PRESERVE_EMPTY_LINES_DO_NOT_USE_ANY_INDENTATION;
 	}
 
 	public TextEdit getRootEdit() {
@@ -1450,6 +1508,11 @@ public class Scribe implements IJavaDocTagConstants {
 	public void indent() {
 		this.indentationLevel += this.indentationSize;
 		this.numberOfIndentations++;
+	}
+
+	void setIndentation(int level, int n) {
+		this.indentationLevel = level + n * this.indentationSize;
+		this.numberOfIndentations = this.indentationLevel / this.indentationSize;
 	}
 
 	private void initializeScanner(long sourceLevel, DefaultCodeFormatterOptions preferences) {
@@ -2350,13 +2413,21 @@ public class Scribe implements IJavaDocTagConstants {
 	}
 
 	void printComment() {
-		printComment(CodeFormatter.K_UNKNOWN, NO_TRAILING_COMMENT);
+		printComment(CodeFormatter.K_UNKNOWN, NO_TRAILING_COMMENT, PRESERVE_EMPTY_LINES_KEEP_LAST_NEW_LINES_INDENTATION);
+	}
+
+	void printComment(int emptyLinesRules) {
+		printComment(CodeFormatter.K_UNKNOWN, NO_TRAILING_COMMENT, emptyLinesRules);
+	}
+
+	void printComment(int kind, int trailing) {
+		printComment(kind, trailing, PRESERVE_EMPTY_LINES_KEEP_LAST_NEW_LINES_INDENTATION);
 	}
 
 	/*
 	 * Main method to print and format comments (javadoc, block and single line comments)
 	 */
-	void printComment(int kind, int trailing) {
+	void printComment(int kind, int trailing, int emptyLinesRules) {
 		final boolean rejectLineComment = kind  == CodeFormatter.K_MULTI_LINE_COMMENT || kind == CodeFormatter.K_JAVA_DOC;
 		final boolean rejectBlockComment = kind  == CodeFormatter.K_SINGLE_LINE_COMMENT || kind  == CodeFormatter.K_JAVA_DOC;
 		final boolean rejectJavadocComment = kind  == CodeFormatter.K_SINGLE_LINE_COMMENT || kind  == CodeFormatter.K_MULTI_LINE_COMMENT;
@@ -2470,12 +2541,18 @@ public class Scribe implements IJavaDocTagConstants {
 						} else {
 							if (lines == 0) {
 								hasWhitespaces = true;
-								addDeleteEdit(tokenStartPosition, whitespacesEndPosition);
+								if (hasLineComment && emptyLinesRules != PRESERVE_EMPTY_LINES_KEEP_LAST_NEW_LINES_INDENTATION) {
+									addReplaceEdit(tokenStartPosition, whitespacesEndPosition, getPreserveEmptyLines(0, emptyLinesRules));
+								} else {
+									addDeleteEdit(tokenStartPosition, whitespacesEndPosition);
+								}
 							} else if (hasLineComment) {
+								useAlignmentBreakIndentation(emptyLinesRules);
 								currentTokenStartPosition = tokenStartPosition;
 								preserveEmptyLines(lines, currentTokenStartPosition);
 								addDeleteEdit(currentTokenStartPosition, whitespacesEndPosition);
 							} else if (hasComment) {
+								useAlignmentBreakIndentation(emptyLinesRules);
 								if (lines == 1) {
 									this.printNewLine(tokenStartPosition);
 								} else {
@@ -2483,8 +2560,9 @@ public class Scribe implements IJavaDocTagConstants {
 								}
 								addDeleteEdit(tokenStartPosition, whitespacesEndPosition);
 							} else if (lines != 0 && (!this.formatter.preferences.join_wrapped_lines || this.formatter.preferences.number_of_empty_lines_to_preserve != 0 || this.blank_lines_between_import_groups > 0)) {
-								addReplaceEdit(tokenStartPosition, whitespacesEndPosition, getPreserveEmptyLines(lines-1));
+								addReplaceEdit(tokenStartPosition, whitespacesEndPosition, getPreserveEmptyLines(lines-1, emptyLinesRules));
 							} else {
+								useAlignmentBreakIndentation(emptyLinesRules);
 								addDeleteEdit(tokenStartPosition, whitespacesEndPosition);
 							}
 						}
@@ -2718,6 +2796,7 @@ public class Scribe implements IJavaDocTagConstants {
 					}
 				} else {
 					if (this.currentAlignment != null && this.currentAlignment.kind == Alignment.ARRAY_INITIALIZER &&
+						this.currentAlignment.fragmentCount > 0 &&
 						this.indentationLevel < this.currentAlignment.breakIndentationLevel &&
 						this.lastLineComment.lines > 0)
 					{
@@ -2741,7 +2820,11 @@ public class Scribe implements IJavaDocTagConstants {
 		
 		// Add pending space if necessary
     	if (this.pendingSpace) {
-    		addInsertEdit(currentTokenStartPosition, " "); //$NON-NLS-1$
+    		if (this.formatter.preferences.comment_preserve_white_space_between_code_and_line_comments) {
+    			addInsertEdit(currentTokenStartPosition, new String(this.lastLineComment.leadingSpaces));
+    		} else {
+    			addInsertEdit(currentTokenStartPosition, " "); //$NON-NLS-1$
+    		}
     	}
     	this.needSpace = false;
     	this.pendingSpace = false;
@@ -2787,6 +2870,13 @@ public class Scribe implements IJavaDocTagConstants {
     			}
     		} else if (this.currentAlignment.couldBreak() && this.currentAlignment.wasSplit) {
     			this.currentAlignment.performFragmentEffect();
+    		}
+    		if (this.currentAlignment.kind == Alignment.BINARY_EXPRESSION &&
+    			this.currentAlignment.enclosing != null &&
+    			this.currentAlignment.enclosing.kind == Alignment.BINARY_EXPRESSION &&
+    			this.indentationLevel < this.currentAlignment.breakIndentationLevel)
+    		{
+    			this.indentationLevel = this.currentAlignment.breakIndentationLevel;
     		}
     	}
     	this.scanner.resetTo(currentTokenEndPosition, this.scannerEndPosition - 1);
@@ -4810,31 +4900,20 @@ public class Scribe implements IJavaDocTagConstants {
 	}
 
 	public void printNextToken(int expectedTokenType, boolean considerSpaceIfAny) {
+		printNextToken(expectedTokenType, considerSpaceIfAny, PRESERVE_EMPTY_LINES_KEEP_LAST_NEW_LINES_INDENTATION);
+	}
+
+	public void printNextToken(int expectedTokenType, boolean considerSpaceIfAny, int emptyLineRules) {
 		// Set brace flag, it's useful for the scribe while preserving line breaks
-		switch (expectedTokenType) {
-			case TerminalTokens.TokenNameRBRACE:
-			case TerminalTokens.TokenNameLBRACE:
-				this.formatBrace = true;
-		}
+		printComment(CodeFormatter.K_UNKNOWN, NO_TRAILING_COMMENT, emptyLineRules);
 		try {
-			printComment(CodeFormatter.K_UNKNOWN, NO_TRAILING_COMMENT);
-			try {
-				this.currentToken = this.scanner.getNextToken();
-				if (expectedTokenType != this.currentToken) {
-					throw new AbortFormatting("unexpected token type, expecting:"+expectedTokenType+", actual:"+this.currentToken);//$NON-NLS-1$//$NON-NLS-2$
-				}
-				print(this.scanner.currentPosition - this.scanner.startPosition, considerSpaceIfAny);
-			} catch (InvalidInputException e) {
-				throw new AbortFormatting(e);
+			this.currentToken = this.scanner.getNextToken();
+			if (expectedTokenType != this.currentToken) {
+				throw new AbortFormatting("unexpected token type, expecting:"+expectedTokenType+", actual:"+this.currentToken);//$NON-NLS-1$//$NON-NLS-2$
 			}
-		}
-		finally {
-			// Flush brace flag
-			switch (expectedTokenType) {
-				case TerminalTokens.TokenNameRBRACE:
-				case TerminalTokens.TokenNameLBRACE:
-					this.formatBrace = false;
-			}
+			print(this.scanner.currentPosition - this.scanner.startPosition, considerSpaceIfAny);
+		} catch (InvalidInputException e) {
+			throw new AbortFormatting(e);
 		}
 	}
 

@@ -381,7 +381,9 @@ public class DefaultCodeFormatter extends CodeFormatter {
 			optionsMap.put(CompilerOptions.OPTION_ReportUnusedParameterWhenOverridingConcrete, CompilerOptions.DISABLED); 
 			optionsMap.put(CompilerOptions.OPTION_ReportSpecialParameterHidingField, CompilerOptions.DISABLED); 
 			optionsMap.put(CompilerOptions.OPTION_MaxProblemPerUnit, String.valueOf(100));
-			optionsMap.put(CompilerOptions.OPTION_InlineJsr, CompilerOptions.DISABLED); 
+			optionsMap.put(CompilerOptions.OPTION_InlineJsr, CompilerOptions.DISABLED);
+			optionsMap.put(CompilerOptions.OPTION_ReportMethodCanBeStatic, CompilerOptions.IGNORE);
+			optionsMap.put(CompilerOptions.OPTION_ReportMethodCanBePotentiallyStatic, CompilerOptions.IGNORE);
 			this.defaultCompilerOptions = optionsMap;
 		}
 		Object sourceOption = this.options.get(CompilerOptions.OPTION_Source);

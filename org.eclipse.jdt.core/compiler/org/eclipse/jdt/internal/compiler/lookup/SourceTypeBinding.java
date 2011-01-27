@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -705,6 +705,18 @@ public SyntheticMethodBinding addSyntheticMethodForSwitchEnum(TypeBinding enumBi
 	}
 	return accessMethod;
 }
+public SyntheticMethodBinding addSyntheticMethodForEnumInitialization(int begin, int end) {
+	if (this.synthetics == null)
+		this.synthetics = new HashMap[MAX_SYNTHETICS];
+	if (this.synthetics[SourceTypeBinding.METHOD_EMUL] == null)
+		this.synthetics[SourceTypeBinding.METHOD_EMUL] = new HashMap(5);
+
+	SyntheticMethodBinding accessMethod = new SyntheticMethodBinding(this, begin, end);
+	SyntheticMethodBinding[] accessors = new SyntheticMethodBinding[2]; 
+	this.synthetics[SourceTypeBinding.METHOD_EMUL].put(accessMethod.selector, accessors);
+	accessors[0] = accessMethod;
+	return accessMethod;
+}
 /* Add a new synthetic access method for access to <targetMethod>.
  * Must distinguish access method used for super access from others (need to use invokespecial bytecode)
 	Answer the new method or the existing method if one already existed.
@@ -932,7 +944,12 @@ public char[] computeUniqueKey(boolean isLeaf) {
 		start = CharOperation.lastIndexOf('/', uniqueKey) + 1;
 		if (start == 0)
 			start = 1; // start after L
-		end = CharOperation.indexOf('$', uniqueKey, start);
+		if (this.isMemberType()) {
+			end = CharOperation.indexOf('$', uniqueKey, start);
+		} else {
+			// '$' is part of the type name
+			end = -1;
+		}
 		if (end == -1)
 			end = CharOperation.indexOf('<', uniqueKey, start);
 		if (end == -1)
@@ -1977,7 +1994,7 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 		if (count < size)
 			System.arraycopy(method.thrownExceptions, 0, method.thrownExceptions = new ReferenceBinding[count], 0, count);
 	}
-
+	final boolean reportUnavoidableGenericTypeProblems = this.scope.compilerOptions().reportUnavoidableGenericTypeProblems;
 	boolean foundArgProblem = false;
 	Argument[] arguments = methodDecl.arguments;
 	if (arguments != null) {
@@ -1988,6 +2005,12 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 			Argument arg = arguments[i];
 			if (arg.annotations != null) {
 				method.tagBits |= TagBits.HasParameterAnnotations;
+			}
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=322817
+			boolean deferRawTypeCheck = !reportUnavoidableGenericTypeProblems && (arg.type.bits & ASTNode.IgnoreRawTypeCheck) == 0;
+			TypeBinding parameterType;
+			if (deferRawTypeCheck) {
+				arg.type.bits |= ASTNode.IgnoreRawTypeCheck;
 			}
 //{ObjectTeams: update special argument:
 			// first arg (base) in base predicates:
@@ -2012,13 +2035,19 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 			}
 			DecapsulationState previousDecapsulation = arg.type.getBaseclassDecapsulation();
 			// check if this argument was checked early as a type anchor for another argument:
-			TypeBinding parameterType = 
-				 (anchorFlags[i] && arg.type.resolvedType.isValidBinding()) ? 
-						 				arg.type.resolvedType :
+			try {
+				parameterType = 
+					 (anchorFlags[i] && arg.type.resolvedType.isValidBinding()) ? 
+				 				arg.type.resolvedType :
+					 			arg.type.resolveType(methodDecl.scope, true /* check bounds*/);
 // orig:
-//			TypeBinding parameterType = arg.type.resolveType(methodDecl.scope, true /* check bounds*/);
+//				parameterType = arg.type.resolveType(methodDecl.scope, true /* check bounds*/); 
+			} finally {
+				if (deferRawTypeCheck) { 
+					arg.type.bits &= ~ASTNode.IgnoreRawTypeCheck;
+				}
+			}
 // :giro
-						 				arg.type.resolveType(methodDecl.scope, true /* check bounds*/);
 			// try anchored types (var.Type arg):
             if (   (parameterType == null || parameterType instanceof MissingTypeBinding)
             	&& !(arg.type instanceof LiftingTypeReference))
@@ -2087,7 +2116,19 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 //{ObjectTeams: option to roll back problems:
 			CheckPoint cp = this.scope.referenceContext.compilationResult.getCheckPoint(methodDecl);
 //	 SH}
-			TypeBinding methodType = returnType.resolveType(methodDecl.scope, true /* check bounds*/);
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=322817
+			boolean deferRawTypeCheck = !reportUnavoidableGenericTypeProblems && (returnType.bits & ASTNode.IgnoreRawTypeCheck) == 0;
+			TypeBinding methodType;
+			if (deferRawTypeCheck) {
+				returnType.bits |= ASTNode.IgnoreRawTypeCheck;
+			}
+			try {
+				methodType = returnType.resolveType(methodDecl.scope, true /* check bounds*/);
+			} finally {
+				if (deferRawTypeCheck) { 
+					returnType.bits &= ~ASTNode.IgnoreRawTypeCheck;
+				}
+			}
 //{ObjectTeams: might need a method parameter as type anchor:
 			if (   arguments != null
 				&& (   methodType == null
@@ -2405,7 +2446,6 @@ public ReferenceBinding superclass() {
 public ReferenceBinding[] superInterfaces() {
 	return this.superInterfaces;
 }
-
 public SyntheticMethodBinding[] syntheticMethods() {
 //{ObjectTeams: two different kinds of synthetics:
 /* orig:

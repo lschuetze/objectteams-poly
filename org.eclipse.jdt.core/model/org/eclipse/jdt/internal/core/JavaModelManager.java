@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IPreferencesService;
-import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences.PreferenceChangeEvent;
 import org.eclipse.jdt.core.*;
@@ -1531,7 +1530,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		}
 		public void removed(IEclipsePreferences.NodeChangeEvent event) {
 			if (event.getChild() == JavaModelManager.this.preferencesLookup[PREF_INSTANCE]) {
-				JavaModelManager.this.preferencesLookup[PREF_INSTANCE] = ((IScopeContext) new InstanceScope()).getNode(JavaCore.PLUGIN_ID);
+				JavaModelManager.this.preferencesLookup[PREF_INSTANCE] = InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 				JavaModelManager.this.preferencesLookup[PREF_INSTANCE].addPreferenceChangeListener(new EclipsePreferencesListener());
 			}
 		}
@@ -1542,7 +1541,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		}
 		public void removed(IEclipsePreferences.NodeChangeEvent event) {
 			if (event.getChild() == JavaModelManager.this.preferencesLookup[PREF_DEFAULT]) {
-				JavaModelManager.this.preferencesLookup[PREF_DEFAULT] = ((IScopeContext) new DefaultScope()).getNode(JavaCore.PLUGIN_ID);
+				JavaModelManager.this.preferencesLookup[PREF_DEFAULT] = DefaultScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 			}
 		}
 	};
@@ -2955,8 +2954,8 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	public void initializePreferences() {
 
 		// Create lookups
-		this.preferencesLookup[PREF_INSTANCE] = ((IScopeContext) new InstanceScope()).getNode(JavaCore.PLUGIN_ID);
-		this.preferencesLookup[PREF_DEFAULT] = ((IScopeContext) new DefaultScope()).getNode(JavaCore.PLUGIN_ID);
+		this.preferencesLookup[PREF_INSTANCE] = InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
+		this.preferencesLookup[PREF_DEFAULT] = DefaultScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 
 		// Listen to instance preferences node removal from parent in order to refresh stored one
 		this.instanceNodeListener = new IEclipsePreferences.INodeChangeListener() {
@@ -2965,7 +2964,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 			}
 			public void removed(IEclipsePreferences.NodeChangeEvent event) {
 				if (event.getChild() == JavaModelManager.this.preferencesLookup[PREF_INSTANCE]) {
-					JavaModelManager.this.preferencesLookup[PREF_INSTANCE] = ((IScopeContext) new InstanceScope()).getNode(JavaCore.PLUGIN_ID);
+					JavaModelManager.this.preferencesLookup[PREF_INSTANCE] = InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 					JavaModelManager.this.preferencesLookup[PREF_INSTANCE].addPreferenceChangeListener(new EclipsePreferencesListener());
 				}
 			}
@@ -2980,7 +2979,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 			}
 			public void removed(IEclipsePreferences.NodeChangeEvent event) {
 				if (event.getChild() == JavaModelManager.this.preferencesLookup[PREF_DEFAULT]) {
-					JavaModelManager.this.preferencesLookup[PREF_DEFAULT] = ((IScopeContext) new DefaultScope()).getNode(JavaCore.PLUGIN_ID);
+					JavaModelManager.this.preferencesLookup[PREF_DEFAULT] = DefaultScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 				}
 			}
 		};
@@ -3971,38 +3970,23 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		}
 
 		void save(ISaveContext context) throws IOException, JavaModelException {
-			IProject project = context.getProject();
-			if (project == null) { // save all projects if none specified (snapshot or full save)
-				saveProjects(getJavaModel().getJavaProjects());
-			}
-			else {
-				saveProjects(new IJavaProject[] {JavaCore.create(project)});
-			}
+			saveProjects(getJavaModel().getJavaProjects());
+			// remove variables that should not be saved
+			HashMap varsToSave = null;
+			Iterator iterator = JavaModelManager.this.variables.entrySet().iterator();
+			IEclipsePreferences defaultPreferences = getDefaultPreferences();
+			while (iterator.hasNext()) {
+				Map.Entry entry = (Map.Entry) iterator.next();
+				String varName = (String) entry.getKey();
+				if (defaultPreferences.get(CP_VARIABLE_PREFERENCES_PREFIX + varName, null) != null // don't save classpath variables from the default preferences as there is no delta if they are removed
+						|| CP_ENTRY_IGNORE_PATH.equals(entry.getValue())) {
 
-			switch (context.getKind()) {
-				case ISaveContext.FULL_SAVE :
-					// TODO (eric) - investigate after 3.3 if variables should be saved for a SNAPSHOT
-				case ISaveContext.SNAPSHOT :
-					// remove variables that should not be saved
-					HashMap varsToSave = null;
-					Iterator iterator = JavaModelManager.this.variables.entrySet().iterator();
-					IEclipsePreferences defaultPreferences = getDefaultPreferences();
-					while (iterator.hasNext()) {
-						Map.Entry entry = (Map.Entry) iterator.next();
-						String varName = (String) entry.getKey();
-						if (defaultPreferences.get(CP_VARIABLE_PREFERENCES_PREFIX + varName, null) != null // don't save classpath variables from the default preferences as there is no delta if they are removed
-								|| CP_ENTRY_IGNORE_PATH.equals(entry.getValue())) {
-
-							if (varsToSave == null)
-								varsToSave = new HashMap(JavaModelManager.this.variables);
-							varsToSave.remove(varName);
-						}
-					}
-					saveVariables(varsToSave != null ? varsToSave : JavaModelManager.this.variables);
-					break;
-				default :
-					// do nothing
+					if (varsToSave == null)
+						varsToSave = new HashMap(JavaModelManager.this.variables);
+					varsToSave.remove(varName);
+				}
 			}
+			saveVariables(varsToSave != null ? varsToSave : JavaModelManager.this.variables);
 		}
 
 		private void saveAccessRule(ClasspathAccessRule rule) throws IOException {
@@ -4835,7 +4819,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 					JavaModelManager.this.optionsCache = null;
 				}
 			};
-			new InstanceScope().getNode(JavaCore.PLUGIN_ID).addPreferenceChangeListener(this.propertyListener);
+			InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID).addPreferenceChangeListener(this.propertyListener);
 			
 			// listen for encoding changes (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=255501 )
 			this.resourcesPropertyListener = new IEclipsePreferences.IPreferenceChangeListener() {
@@ -4846,7 +4830,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 				}
 			};
 			String resourcesPluginId = ResourcesPlugin.getPlugin().getBundle().getSymbolicName();
-			new InstanceScope().getNode(resourcesPluginId).addPreferenceChangeListener(this.resourcesPropertyListener);
+			InstanceScope.INSTANCE.getNode(resourcesPluginId).addPreferenceChangeListener(this.resourcesPropertyListener);
 
 			// Listen to content-type changes
 			 Platform.getContentTypeManager().addContentTypeChangeListener(this);
@@ -4918,7 +4902,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	}
 
 	public void shutdown () {
-		IEclipsePreferences preferences = new InstanceScope().getNode(JavaCore.PLUGIN_ID);
+		IEclipsePreferences preferences = InstanceScope.INSTANCE.getNode(JavaCore.PLUGIN_ID);
 		try {
 			preferences.flush();
 		} catch (BackingStoreException e) {
@@ -4944,7 +4928,7 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		this.preferencesLookup[PREF_INSTANCE].removePreferenceChangeListener(this.instancePreferencesListener);
 		this.preferencesLookup[PREF_INSTANCE] = null;
 		String resourcesPluginId = ResourcesPlugin.getPlugin().getBundle().getSymbolicName();
-		new InstanceScope().getNode(resourcesPluginId).removePreferenceChangeListener(this.resourcesPropertyListener);
+		InstanceScope.INSTANCE.getNode(resourcesPluginId).removePreferenceChangeListener(this.resourcesPropertyListener);
 
 		// wait for the initialization job to finish
 		try {

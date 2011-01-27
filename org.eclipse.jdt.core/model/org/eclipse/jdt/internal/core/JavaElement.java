@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,10 +15,13 @@ import java.io.BufferedInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.UnknownHostException;
@@ -796,6 +799,27 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		try {
 			URL docUrl = new URL(docUrlValue);
 			URLConnection connection = docUrl.openConnection();
+			Class[] parameterTypes = new Class[]{int.class};
+			Integer timeoutVal = new Integer(10000);
+			// set the connect and read timeouts using reflection since these methods are not available in java 1.4
+			Class URLClass = connection.getClass();
+			try {
+				Method connectTimeoutMethod = URLClass.getDeclaredMethod("setConnectTimeout", parameterTypes); //$NON-NLS-1$
+				Method readTimeoutMethod = URLClass.getDeclaredMethod("setReadTimeout", parameterTypes); //$NON-NLS-1$
+				connectTimeoutMethod.invoke(connection, new Object[]{timeoutVal});
+				readTimeoutMethod.invoke(connection, new Object[]{timeoutVal});
+			} catch (SecurityException e) {
+				// ignore
+			} catch (IllegalArgumentException e) {
+				// ignore
+			} catch (NoSuchMethodException e) {
+				// ignore
+			} catch (IllegalAccessException e) {
+				// ignore
+			} catch (InvocationTargetException e) {
+				// ignore
+			}
+			
 			if (connection instanceof JarURLConnection) {
 				connection2 = (JarURLConnection) connection;
 				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=156307
@@ -844,6 +868,8 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 					return new String(contents);
 				}
 			}
+		} catch (SocketTimeoutException e) {
+			throw new JavaModelException(new JavaModelStatus(IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC_TIMEOUT, this));
 		} catch (MalformedURLException e) {
 			throw new JavaModelException(new JavaModelStatus(IJavaModelStatusConstants.CANNOT_RETRIEVE_ATTACHED_JAVADOC, this));
 		} catch (FileNotFoundException e) {

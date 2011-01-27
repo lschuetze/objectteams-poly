@@ -1,10 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MethodLocator.java 23404 2010-02-03 14:10:22Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -16,13 +15,42 @@ package org.eclipse.jdt.internal.core.search.matching;
 import java.util.HashMap;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.*;
-import org.eclipse.jdt.core.*;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.core.search.*;
-import org.eclipse.jdt.internal.compiler.ast.*;
+import org.eclipse.jdt.core.search.MethodDeclarationMatch;
+import org.eclipse.jdt.core.search.MethodReferenceMatch;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
+import org.eclipse.jdt.internal.compiler.ast.Argument;
+import org.eclipse.jdt.internal.compiler.ast.ImportReference;
+import org.eclipse.jdt.internal.compiler.ast.MemberValuePair;
+import org.eclipse.jdt.internal.compiler.ast.MessageSend;
+import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.SingleMemberAnnotation;
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.env.IBinaryType;
-import org.eclipse.jdt.internal.compiler.lookup.*;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
+import org.eclipse.jdt.internal.compiler.lookup.MemberTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.core.search.BasicSearchEngine;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
@@ -126,7 +154,7 @@ private boolean isTypeInSuperDeclaringTypeNames(char[][] typeName) {
 	return false;
 }
 /**
- * Returns whether the code gen will use an invoke virtual for 
+ * Returns whether the code gen will use an invoke virtual for
  * this message send or not.
  * {ObjectTeams:
  * 		Also private methods in roles invoked via 'this' are virtual message sends in a sense.
@@ -170,7 +198,7 @@ public int match(MethodDeclaration node, MatchingNodeSet nodeSet) {
 
 	// Verify method name
 	if (!matchesName(this.pattern.selector, node.selector)) return IMPOSSIBLE_MATCH;
-	
+
 	// Verify parameters types
 	boolean resolve = this.pattern.mustResolve;
 	if (this.pattern.parameterSimpleNames != null) {
@@ -432,7 +460,7 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, IJa
 		if (accuracy != SearchMatch.A_ACCURATE) return;
 
 		// element that references the method must be included in the enclosing element
-		DeclarationOfReferencedMethodsPattern declPattern = (DeclarationOfReferencedMethodsPattern) this.pattern; 
+		DeclarationOfReferencedMethodsPattern declPattern = (DeclarationOfReferencedMethodsPattern) this.pattern;
 		while (element != null && !declPattern.enclosingElement.equals(element))
 			element = element.getParent();
 		if (element != null) {
@@ -644,9 +672,9 @@ protected void reportDeclaration(MethodBinding methodBinding, MatchLocator locat
 			parameterTypes[i] = typeName;
 		}
 		method = locator.createBinaryMethodHandle(type, methodBinding.selector, parameterTypes);
-	if (method == null || knownMethods.addIfNotIncluded(method) == null) return;
-
-	IResource resource = type.getResource();
+		if (method == null || knownMethods.addIfNotIncluded(method) == null) return;
+	
+		IResource resource = type.getResource();
 		if (resource == null)
 			resource = type.getJavaProject().getProject();
 		IBinaryType info = locator.getBinaryInfo((org.eclipse.jdt.internal.core.ClassFile)type.getClassFile(), resource);
@@ -656,13 +684,13 @@ protected void reportDeclaration(MethodBinding methodBinding, MatchLocator locat
 
 	// When source is available, report match if method is found in the declaring type
 	IResource resource = type.getResource();
-		if (declaringClass instanceof ParameterizedTypeBinding)
-			declaringClass = ((ParameterizedTypeBinding) declaringClass).genericType();
-		ClassScope scope = ((SourceTypeBinding) declaringClass).scope;
-		if (scope != null) {
-			TypeDeclaration typeDecl = scope.referenceContext;
+	if (declaringClass instanceof ParameterizedTypeBinding)
+		declaringClass = ((ParameterizedTypeBinding) declaringClass).genericType();
+	ClassScope scope = ((SourceTypeBinding) declaringClass).scope;
+	if (scope != null) {
+		TypeDeclaration typeDecl = scope.referenceContext;
 		AbstractMethodDeclaration methodDecl = typeDecl.declarationOf(methodBinding.original());
-			if (methodDecl != null) {
+		if (methodDecl != null) {
 			// Create method handle from method declaration
 			String methodName = new String(methodBinding.selector);
 			Argument[] arguments = methodDecl.arguments;
@@ -768,20 +796,19 @@ public int resolveLevel(Binding binding) {
 	}
 
 	// declaring type
-	char[] qualifiedPattern = qualifiedPattern(this.pattern.declaringSimpleName, this.pattern.declaringQualification);
-	if (qualifiedPattern == null) return methodLevel; // since any declaring class will do
+	if (this.pattern.declaringSimpleName == null && this.pattern.declaringQualification == null) return methodLevel; // since any declaring class will do
 
 	boolean subType = !method.isStatic() && !method.isPrivate();
 	if (subType && this.pattern.declaringQualification != null && method.declaringClass != null && method.declaringClass.fPackage != null) {
 		subType = CharOperation.compareWith(this.pattern.declaringQualification, method.declaringClass.fPackage.shortReadableName()) == 0;
 	}
 	int declaringLevel = subType
-		? resolveLevelAsSubtype(qualifiedPattern, method.declaringClass, null)
-		: resolveLevelForType(qualifiedPattern, method.declaringClass);
+		? resolveLevelAsSubtype(this.pattern.declaringSimpleName, this.pattern.declaringQualification, method.declaringClass, null)
+		: resolveLevelForType(this.pattern.declaringSimpleName, this.pattern.declaringQualification, method.declaringClass);
 	return (methodLevel & MATCH_LEVEL_MASK) > (declaringLevel & MATCH_LEVEL_MASK) ? declaringLevel : methodLevel; // return the weaker match
 }
 protected int resolveLevel(MessageSend messageSend) {
-	MethodBinding method = messageSend.binding;		
+	MethodBinding method = messageSend.binding;
 	if (method == null) {
 		return INACCURATE_MATCH;
 	}
@@ -795,7 +822,7 @@ protected int resolveLevel(MessageSend messageSend) {
 		}
 		return IMPOSSIBLE_MATCH;
 	}
-	
+
 	int methodLevel = matchMethod(method, false);
 	if (methodLevel == IMPOSSIBLE_MATCH) {
 		if (method != method.original()) methodLevel = matchMethod(method.original(), false);
@@ -804,13 +831,12 @@ protected int resolveLevel(MessageSend messageSend) {
 	}
 
 	// receiver type
-	char[] qualifiedPattern = qualifiedPattern(this.pattern.declaringSimpleName, this.pattern.declaringQualification);
-	if (qualifiedPattern == null) return methodLevel; // since any declaring class will do
+	if (this.pattern.declaringSimpleName == null && this.pattern.declaringQualification == null) return methodLevel; // since any declaring class will do
 
 	int declaringLevel;
 	if (isVirtualInvoke(method, messageSend) && (messageSend.actualReceiverType instanceof ReferenceBinding)) {
 		ReferenceBinding methodReceiverType = (ReferenceBinding) messageSend.actualReceiverType;
-		declaringLevel = resolveLevelAsSubtype(qualifiedPattern, methodReceiverType, method.parameters);
+		declaringLevel = resolveLevelAsSubtype(this.pattern.declaringSimpleName, this.pattern.declaringQualification, methodReceiverType, method.parameters);
 		if (declaringLevel == IMPOSSIBLE_MATCH) {
 			if (method.declaringClass == null || this.allSuperDeclaringTypeNames == null) {
 				declaringLevel = INACCURATE_MATCH;
@@ -826,7 +852,7 @@ protected int resolveLevel(MessageSend messageSend) {
 			return declaringLevel;
 		}
 	} else {
-		declaringLevel = resolveLevelForType(qualifiedPattern, method.declaringClass);
+		declaringLevel = resolveLevelForType(this.pattern.declaringSimpleName, this.pattern.declaringQualification, method.declaringClass);
 	}
 	return (methodLevel & MATCH_LEVEL_MASK) > (declaringLevel & MATCH_LEVEL_MASK) ? declaringLevel : methodLevel; // return the weaker match
 }
@@ -838,10 +864,10 @@ protected int resolveLevel(MessageSend messageSend) {
  * Returns INACCURATE_MATCH if resolve fails
  * Returns IMPOSSIBLE_MATCH if it doesn't.
  */
-protected int resolveLevelAsSubtype(char[] qualifiedPattern, ReferenceBinding type, TypeBinding[] argumentTypes) {
+protected int resolveLevelAsSubtype(char[] simplePattern, char[] qualifiedPattern, ReferenceBinding type, TypeBinding[] argumentTypes) {
 	if (type == null) return INACCURATE_MATCH;
 
-	int level = resolveLevelForType(qualifiedPattern, type);
+	int level = resolveLevelForType(simplePattern, qualifiedPattern, type);
 //{ObjectTeams: perform deferred checking of tsub/tsuper:	
 	if (level != IMPOSSIBLE_MATCH) {
 		char[] typeName= type.getRealType().readableName();
@@ -858,7 +884,7 @@ protected int resolveLevelAsSubtype(char[] qualifiedPattern, ReferenceBinding ty
 
 	// matches superclass
 	if (!type.isInterface() && !CharOperation.equals(type.compoundName, TypeConstants.JAVA_LANG_OBJECT)) {
-		level = resolveLevelAsSubtype(qualifiedPattern, type.superclass(), argumentTypes);
+		level = resolveLevelAsSubtype(simplePattern, qualifiedPattern, type.superclass(), argumentTypes);
 		if (level != IMPOSSIBLE_MATCH) {
 			if (argumentTypes != null) {
 				// need to verify if method may be overridden
@@ -883,7 +909,7 @@ protected int resolveLevelAsSubtype(char[] qualifiedPattern, ReferenceBinding ty
 	if (type.roleModel != null) {
 		ReferenceBinding[] tsuperTypes = roleModel.getTSuperRoleBindings();
 		for (int t = tsuperTypes.length-1; t>=0; t--) { // check highest prio first (which comes last in the array)
-			level = resolveLevelAsSubtype(qualifiedPattern, tsuperTypes[t], argumentTypes);
+			level = resolveLevelAsSubtype(simplePattern, qualifiedPattern, tsuperTypes[t], argumentTypes);
   // OT_COPY_PASTE from above "matches superclass":			
 			if (level != IMPOSSIBLE_MATCH) {
 				if (argumentTypes != null) {
@@ -928,7 +954,7 @@ protected int resolveLevelAsSubtype(char[] qualifiedPattern, ReferenceBinding ty
 	ReferenceBinding[] interfaces = type.superInterfaces();
 	if (interfaces == null) return INACCURATE_MATCH;
 	for (int i = 0; i < interfaces.length; i++) {
-		level = resolveLevelAsSubtype(qualifiedPattern, interfaces[i], null);
+		level = resolveLevelAsSubtype(simplePattern, qualifiedPattern, interfaces[i], null);
 		if (level != IMPOSSIBLE_MATCH) {
 			if (!type.isAbstract() && !type.isInterface()) { // if concrete class, then method is overridden
 				level |= OVERRIDDEN_METHOD_FLAVOR;
@@ -972,7 +998,7 @@ private boolean resolveLevelAsSuperInvocation(ReferenceBinding type, TypeBinding
 
 	// If the given type is an interface then a common super interface may be found
 	// in a parallel branch of the super hierarchy, so we need to verify all super interfaces.
-	// If it's a class then there's only one possible branch for the hierarchy and 
+	// If it's a class then there's only one possible branch for the hierarchy and
 	// this branch has been already verified by the test above
 	if (type.isInterface()) {
 		ReferenceBinding[] interfaces = type.superInterfaces();

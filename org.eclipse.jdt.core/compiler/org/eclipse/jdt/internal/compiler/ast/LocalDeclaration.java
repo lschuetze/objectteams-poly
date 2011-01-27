@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -8,9 +8,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for 
+ *     						bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     						bug 292478 - Report potentially null across variable assignment
+ *     						bug 335093 - [compiler][null] minimal hook for future null annotation support
  *     Fraunhofer FIRST - extended API and implementation
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
- *     												and bug 292478 - Report potentially null across variable assignment
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
@@ -79,6 +81,30 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE) == 0) {
 		this.bits |= ASTNode.IsLocalDeclarationReachable; // only set if actually reached
 	}
+	if (this.binding != null && this.type.resolvedType instanceof TypeVariableBinding) {
+		MethodScope methodScope= this.binding.declaringScope.methodScope();
+		AbstractMethodDeclaration methodDeclaration = methodScope.referenceMethod();
+		if (methodDeclaration != null && ((methodDeclaration.bits & ASTNode.CanBeStatic) != 0) && methodDeclaration.binding != null) {
+			TypeVariableBinding[] typeVariables = methodDeclaration.binding.typeVariables();
+			if (typeVariables == Binding.NO_TYPE_VARIABLES) {
+				// Method declares no type variables.
+				currentScope.resetEnclosingMethodStaticFlag();
+			} else {
+				// to check whether the resolved type for this is declared by enclosing method as a type variable
+				boolean usesEnclosingTypeVar = false; 
+				for (int i = 0; i < typeVariables.length ; i ++) {
+					if (typeVariables[i] == this.type.resolvedType){
+						usesEnclosingTypeVar = true;
+						break;
+					}
+				}
+				if (!usesEnclosingTypeVar) {
+					// uses a type variable not declared by enclosing method
+					currentScope.resetEnclosingMethodStaticFlag();
+				}
+			}
+		}
+	}
 //{ObjectTeams: pretend place holder is used:
 	if (this.isPlaceHolder)
 		this.binding.useFlag = LocalVariableBinding.USED;
@@ -100,6 +126,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		this.bits &= ~FirstAssignmentToLocal;  // int i = (i = 0);
 	}
 	flowInfo.markAsDefinitelyAssigned(this.binding);
+	nullStatus = checkAgainstNullAnnotation(currentScope, this.binding, nullStatus);		
 	if ((this.binding.type.tagBits & TagBits.IsBaseType) == 0) {
 		flowInfo.markNullStatus(this.binding, nullStatus);
 		// no need to inform enclosing try block since its locals won't get

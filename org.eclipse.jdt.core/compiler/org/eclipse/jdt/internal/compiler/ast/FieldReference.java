@@ -155,6 +155,17 @@ public FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowConte
 			currentScope.problemReporter().cannotAssignToFinalField(this.binding, this);
 		}
 	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=318682
+	if (!this.binding.isStatic()) {
+		if (this.receiver.isThis()) {
+			currentScope.resetEnclosingMethodStaticFlag();
+		}
+	} else if (this.receiver.isThis()) {
+		if ((this.receiver.bits & ASTNode.IsImplicitThis) == 0) {
+			// explicit this, not allowed in static context
+			currentScope.resetEnclosingMethodStaticFlag();
+		}
+	}
 	return flowInfo;
 }
 
@@ -167,6 +178,16 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	this.receiver.analyseCode(currentScope, flowContext, flowInfo, nonStatic);
 	if (nonStatic) {
 		this.receiver.checkNPE(currentScope, flowContext, flowInfo);
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=318682
+		if (this.receiver.isThis()) {
+			currentScope.resetEnclosingMethodStaticFlag();
+		}
+	} else if (this.receiver.isThis()) {
+		if ((this.receiver.bits & ASTNode.IsImplicitThis) == 0) {
+			// explicit this receiver, not allowed in static context
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=318682
+			currentScope.resetEnclosingMethodStaticFlag();
+		}
 	}
 
 	if (valueRequired || currentScope.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4) {

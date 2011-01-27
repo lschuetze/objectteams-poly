@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CompilerOptions.java 23401 2010-02-02 23:56:05Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -97,6 +96,7 @@ public class CompilerOptions {
 	public static final String OPTION_ReportUnusedDeclaredThrownExceptionIncludeDocCommentReference = "org.eclipse.jdt.core.compiler.problem.unusedDeclaredThrownExceptionIncludeDocCommentReference"; //$NON-NLS-1$
 	public static final String OPTION_ReportUnusedDeclaredThrownExceptionExemptExceptionAndThrowable = "org.eclipse.jdt.core.compiler.problem.unusedDeclaredThrownExceptionExemptExceptionAndThrowable"; //$NON-NLS-1$
 	public static final String OPTION_ReportUnqualifiedFieldAccess = "org.eclipse.jdt.core.compiler.problem.unqualifiedFieldAccess"; //$NON-NLS-1$
+	public static final String OPTION_ReportUnavoidableGenericTypeProblems = "org.eclipse.jdt.core.compiler.problem.unavoidableGenericTypeProblems"; //$NON-NLS-1$
 	public static final String OPTION_ReportUncheckedTypeOperation = "org.eclipse.jdt.core.compiler.problem.uncheckedTypeOperation"; //$NON-NLS-1$
 	public static final String OPTION_ReportRawTypeReference =  "org.eclipse.jdt.core.compiler.problem.rawTypeReference"; //$NON-NLS-1$
 	public static final String OPTION_ReportFinalParameterBound = "org.eclipse.jdt.core.compiler.problem.finalParameterBound"; //$NON-NLS-1$
@@ -143,6 +143,8 @@ public class CompilerOptions {
 	public static final String OPTION_ReportTasks = "org.eclipse.jdt.core.compiler.problem.tasks"; //$NON-NLS-1$
 	public static final String OPTION_ReportUnusedObjectAllocation = "org.eclipse.jdt.core.compiler.problem.unusedObjectAllocation";  //$NON-NLS-1$
 	public static final String OPTION_IncludeNullInfoFromAsserts = "org.eclipse.jdt.core.compiler.problem.includeNullInfoFromAsserts";  //$NON-NLS-1$
+	public static final String OPTION_ReportMethodCanBeStatic = "org.eclipse.jdt.core.compiler.problem.reportMethodCanBeStatic";  //$NON-NLS-1$
+	public static final String OPTION_ReportMethodCanBePotentiallyStatic = "org.eclipse.jdt.core.compiler.problem.reportMethodCanBePotentiallyStatic";  //$NON-NLS-1$
 
 //{ObjectTeams: sync with constants in OTDTPlugin:
 	public static final String OPTION_ReportNotExactlyOneBasecall =
@@ -207,11 +209,6 @@ public class CompilerOptions {
 	public static final String REPORT_BINDING = "report binding"; //$NON-NLS-1$
 	public static final String REPORT_NONE = "report none"; //$NON-NLS-1$
 // SH}
-	// Backward compatibility
-	public static final String OPTION_ReportInvalidAnnotation = "org.eclipse.jdt.core.compiler.problem.invalidAnnotation"; //$NON-NLS-1$
-	public static final String OPTION_ReportMissingAnnotation = "org.eclipse.jdt.core.compiler.problem.missingAnnotation"; //$NON-NLS-1$
-	public static final String OPTION_ReportMissingJavadoc = "org.eclipse.jdt.core.compiler.problem.missingJavadoc"; //$NON-NLS-1$
-
 	/**
 	 * Possible values for configurable options
 	 */
@@ -312,6 +309,8 @@ public class CompilerOptions {
 	public static final int DeadCode = IrritantSet.GROUP2 | ASTNode.Bit2;
 	public static final int Tasks = IrritantSet.GROUP2 | ASTNode.Bit3;
 	public static final int UnusedObjectAllocation = IrritantSet.GROUP2 | ASTNode.Bit4;
+	public static final int MethodCanBeStatic = IrritantSet.GROUP2 | ASTNode.Bit5;
+	public static final int MethodCanBePotentiallyStatic = IrritantSet.GROUP2 | ASTNode.Bit6;
 
 //{ObjectTeams: OT/J specific problems/irritants:
 	public static final int OTJFlag = IrritantSet.GROUP3;
@@ -335,7 +334,6 @@ public class CompilerOptions {
 	public static final int DefiniteBindingAmbiguity=		 OTJFlag | ASTNode.Bit18;
 	public static final int BaseclassCycle=				     OTJFlag | ASTNode.Bit19;
 // SH}
-
 
 	// Severity level for handlers
 	/** 
@@ -455,6 +453,8 @@ public class CompilerOptions {
 	public boolean ignoreMethodBodies;
 	/** Raise null related warnings for variables tainted inside an assert statement (java 1.4 and above)*/
 	public boolean includeNullInfoFromAsserts;
+	/** Controls whether forced generic type problems get reported  */
+	public boolean reportUnavoidableGenericTypeProblems;
 
 //{ObjectTeams: other configurable options of OT/J:
 	// verbosity of reporting decapsulation:
@@ -482,6 +482,7 @@ public class CompilerOptions {
 		"rawtypes", //$NON-NLS-1$
 		"serial", //$NON-NLS-1$
 		"static-access", //$NON-NLS-1$
+		"static-method", //$NON-NLS-1$
 		"super", //$NON-NLS-1$
 		"synthetic-access", //$NON-NLS-1$
 		"unchecked", //$NON-NLS-1$
@@ -666,6 +667,10 @@ public class CompilerOptions {
 				return OPTION_ReportDeadCode;
 			case UnusedObjectAllocation:
 				return OPTION_ReportUnusedObjectAllocation;
+			case MethodCanBeStatic :
+				return OPTION_ReportMethodCanBeStatic;
+			case MethodCanBePotentiallyStatic :
+				return OPTION_ReportMethodCanBePotentiallyStatic;
 //{ObjectTeams:
 			case NotExactlyOneBasecall :
 				return OPTION_ReportNotExactlyOneBasecall;
@@ -783,65 +788,93 @@ public class CompilerOptions {
 	/**
 	 * Return all warning option names for use as keys in compiler options maps.
 	 * @return all warning option names
-	 * TODO (maxime) revise for ensuring completeness
 	 */
 	public static String[] warningOptionNames() {
 		String[] result = {
 			OPTION_ReportAnnotationSuperInterface,
 			OPTION_ReportAssertIdentifier,
 			OPTION_ReportAutoboxing,
+			OPTION_ReportComparingIdentical,
 			OPTION_ReportDeadCode,
+			OPTION_ReportDeadCodeInTrivialIfStatement,
 			OPTION_ReportDeprecation,
+			OPTION_ReportDeprecationInDeprecatedCode,
+			OPTION_ReportDeprecationWhenOverridingDeprecatedMethod,
 			OPTION_ReportDiscouragedReference,
 			OPTION_ReportEmptyStatement,
 			OPTION_ReportEnumIdentifier,
 			OPTION_ReportFallthroughCase,
 			OPTION_ReportFieldHiding,
-			OPTION_ReportFinalParameterBound,
 			OPTION_ReportFinallyBlockNotCompletingNormally,
+			OPTION_ReportFinalParameterBound,
 			OPTION_ReportForbiddenReference,
 			OPTION_ReportHiddenCatchBlock,
 			OPTION_ReportIncompatibleNonInheritedInterfaceMethod,
 			OPTION_ReportIncompleteEnumSwitch,
 			OPTION_ReportIndirectStaticAccess,
 			OPTION_ReportInvalidJavadoc,
+			OPTION_ReportInvalidJavadocTags,
+			OPTION_ReportInvalidJavadocTagsDeprecatedRef,
+			OPTION_ReportInvalidJavadocTagsNotVisibleRef,
+			OPTION_ReportInvalidJavadocTagsVisibility,
 			OPTION_ReportLocalVariableHiding,
+			OPTION_ReportMethodCanBePotentiallyStatic,
+			OPTION_ReportMethodCanBeStatic,
 			OPTION_ReportMethodWithConstructorName,
 			OPTION_ReportMissingDeprecatedAnnotation,
+			OPTION_ReportMissingHashCodeMethod,
 			OPTION_ReportMissingJavadocComments,
+			OPTION_ReportMissingJavadocCommentsOverriding,
+			OPTION_ReportMissingJavadocCommentsVisibility,
 			OPTION_ReportMissingJavadocTagDescription,
 			OPTION_ReportMissingJavadocTags,
+			OPTION_ReportMissingJavadocTagsMethodTypeParameters,
+			OPTION_ReportMissingJavadocTagsOverriding,
+			OPTION_ReportMissingJavadocTagsVisibility,
 			OPTION_ReportMissingOverrideAnnotation,
+			OPTION_ReportMissingOverrideAnnotationForInterfaceMethodImplementation,
 			OPTION_ReportMissingSerialVersion,
+			OPTION_ReportMissingSynchronizedOnInheritedMethod,
 			OPTION_ReportNoEffectAssignment,
 			OPTION_ReportNoImplicitStringConversion,
 			OPTION_ReportNonExternalizedStringLiteral,
 			OPTION_ReportNonStaticAccessToStatic,
 			OPTION_ReportNullReference,
-			OPTION_ReportPotentialNullReference,
-			OPTION_ReportRedundantNullCheck,
-			OPTION_ReportRedundantSuperinterface,
+			OPTION_ReportOverridingMethodWithoutSuperInvocation,
 			OPTION_ReportOverridingPackageDefaultMethod,
 			OPTION_ReportParameterAssignment,
 			OPTION_ReportPossibleAccidentalBooleanAssignment,
+			OPTION_ReportPotentialNullReference,
+			OPTION_ReportRawTypeReference,
+			OPTION_ReportRedundantNullCheck,
+			OPTION_ReportRedundantSuperinterface,
+			OPTION_ReportSpecialParameterHidingField,
 			OPTION_ReportSyntheticAccessEmulation,
+			OPTION_ReportTasks,
 			OPTION_ReportTypeParameterHiding,
+			OPTION_ReportUnavoidableGenericTypeProblems,
 			OPTION_ReportUncheckedTypeOperation,
 			OPTION_ReportUndocumentedEmptyBlock,
+			OPTION_ReportUnhandledWarningToken,
 			OPTION_ReportUnnecessaryElse,
 			OPTION_ReportUnnecessaryTypeCheck,
 			OPTION_ReportUnqualifiedFieldAccess,
 			OPTION_ReportUnusedDeclaredThrownException,
+			OPTION_ReportUnusedDeclaredThrownExceptionExemptExceptionAndThrowable,
+			OPTION_ReportUnusedDeclaredThrownExceptionIncludeDocCommentReference,
+			OPTION_ReportUnusedDeclaredThrownExceptionWhenOverriding,
 			OPTION_ReportUnusedImport,
+			OPTION_ReportUnusedLabel,
 			OPTION_ReportUnusedLocal,
 			OPTION_ReportUnusedObjectAllocation,
 			OPTION_ReportUnusedParameter,
+			OPTION_ReportUnusedParameterIncludeDocCommentReference,
+			OPTION_ReportUnusedParameterWhenImplementingAbstract,
+			OPTION_ReportUnusedParameterWhenOverridingConcrete,
 			OPTION_ReportUnusedPrivateMember,
-			OPTION_ReportVarargsArgumentNeedCast,
-			OPTION_ReportUnhandledWarningToken,
-			OPTION_ReportUnusedWarningToken,
-			OPTION_ReportOverridingMethodWithoutSuperInvocation,
 			OPTION_ReportUnusedTypeArgumentsForMethodInvocation,
+			OPTION_ReportUnusedWarningToken,
+			OPTION_ReportVarargsArgumentNeedCast,
 //{ObjectTeams:
 			OPTION_ReportNotExactlyOneBasecall,
 			OPTION_ReportBaseclassCycle,
@@ -929,6 +962,9 @@ public class CompilerOptions {
 				return "fallthrough"; //$NON-NLS-1$
 			case OverridingMethodWithoutSuperInvocation :
 				return "super"; //$NON-NLS-1$
+			case MethodCanBeStatic :
+			case MethodCanBePotentiallyStatic :
+				return "static-method"; //$NON-NLS-1$
 //{ObjectTeams:
 			case NotExactlyOneBasecall :
 				return "basecall"; //$NON-NLS-1$
@@ -1025,6 +1061,8 @@ public class CompilerOptions {
 					return IrritantSet.SERIAL;
 				if ("static-access".equals(warningToken)) //$NON-NLS-1$
 					return IrritantSet.STATIC_ACCESS;
+				if ("static-method".equals(warningToken)) //$NON-NLS-1$
+					return IrritantSet.STATIC_METHOD;
 				if ("synthetic-access".equals(warningToken)) //$NON-NLS-1$
 					return IrritantSet.SYNTHETIC_ACCESS;
 				if ("super".equals(warningToken)) { //$NON-NLS-1$
@@ -1099,6 +1137,7 @@ public class CompilerOptions {
 		return null;
 	}
 
+	
 //{ObjectTeams: be nice:
 	@SuppressWarnings("unchecked")
 // SH}
@@ -1158,6 +1197,7 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportUnusedDeclaredThrownExceptionIncludeDocCommentReference, this.reportUnusedDeclaredThrownExceptionIncludeDocCommentReference ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_ReportUnusedDeclaredThrownExceptionExemptExceptionAndThrowable, this.reportUnusedDeclaredThrownExceptionExemptExceptionAndThrowable ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_ReportUnqualifiedFieldAccess, getSeverityString(UnqualifiedFieldAccess));
+		optionsMap.put(OPTION_ReportUnavoidableGenericTypeProblems, this.reportUnavoidableGenericTypeProblems ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_ReportUncheckedTypeOperation, getSeverityString(UncheckedTypeOperation));
 		optionsMap.put(OPTION_ReportRawTypeReference, getSeverityString(RawTypeReference));
 		optionsMap.put(OPTION_ReportFinalParameterBound, getSeverityString(FinalParameterBound));
@@ -1208,6 +1248,8 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportTasks, getSeverityString(Tasks));
 		optionsMap.put(OPTION_ReportUnusedObjectAllocation, getSeverityString(UnusedObjectAllocation));
 		optionsMap.put(OPTION_IncludeNullInfoFromAsserts, this.includeNullInfoFromAsserts ? ENABLED : DISABLED);
+		optionsMap.put(OPTION_ReportMethodCanBeStatic, getSeverityString(MethodCanBeStatic));
+		optionsMap.put(OPTION_ReportMethodCanBePotentiallyStatic, getSeverityString(MethodCanBePotentiallyStatic));
 //{ObjectTeams:
 		optionsMap.put(OPTION_Decapsulation, this.decapsulation);
 
@@ -1328,6 +1370,8 @@ public class CompilerOptions {
 		
 		// constructor/setter parameter hiding
 		this.reportSpecialParameterHidingField = false;
+
+		this.reportUnavoidableGenericTypeProblems = true;
 
 		// check javadoc comments tags
 		this.reportInvalidJavadocTagsVisibility = ClassFileConstants.AccPublic;
@@ -1510,6 +1554,13 @@ public class CompilerOptions {
 				this.reportSpecialParameterHidingField = false;
 			}
 		}
+		if ((optionValue = optionsMap.get(OPTION_ReportUnavoidableGenericTypeProblems)) != null) {
+			if (ENABLED.equals(optionValue)) {
+				this.reportUnavoidableGenericTypeProblems = true;
+			} else if (DISABLED.equals(optionValue)) {
+				this.reportUnavoidableGenericTypeProblems = false;
+			}
+		}
 		if ((optionValue = optionsMap.get(OPTION_ReportDeadCodeInTrivialIfStatement )) != null) {
 			if (ENABLED.equals(optionValue)) {
 				this.reportDeadCodeInTrivialIfStatement = true;
@@ -1656,6 +1707,8 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportDeadCode)) != null) updateSeverity(DeadCode, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportTasks)) != null) updateSeverity(Tasks, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportUnusedObjectAllocation)) != null) updateSeverity(UnusedObjectAllocation, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportMethodCanBeStatic)) != null) updateSeverity(MethodCanBeStatic, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportMethodCanBePotentiallyStatic)) != null) updateSeverity(MethodCanBePotentiallyStatic, optionValue);
 //{ObjectTeams:
 		if ((optionValue = optionsMap.get(OPTION_ReportNotExactlyOneBasecall)) != null) updateSeverity(NotExactlyOneBasecall, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportBaseclassCycle)) != null) updateSeverity(BaseclassCycle, optionValue);
@@ -1877,6 +1930,7 @@ public class CompilerOptions {
 		buf.append("\n\t- report unused parameter include doc comment reference : ").append(this.reportUnusedParameterIncludeDocCommentReference ? ENABLED : DISABLED); //$NON-NLS-1$
 		buf.append("\n\t- report constructor/setter parameter hiding existing field : ").append(this.reportSpecialParameterHidingField ? ENABLED : DISABLED); //$NON-NLS-1$
 		buf.append("\n\t- inline JSR bytecode : ").append(this.inlineJsrBytecode ? ENABLED : DISABLED); //$NON-NLS-1$
+		buf.append("\n\t- report unavoidable generic type problems : ").append(this.reportUnavoidableGenericTypeProblems ? ENABLED : DISABLED); //$NON-NLS-1$
 		buf.append("\n\t- unsafe type operation: ").append(getSeverityString(UncheckedTypeOperation)); //$NON-NLS-1$
 		buf.append("\n\t- unsafe raw type: ").append(getSeverityString(RawTypeReference)); //$NON-NLS-1$
 		buf.append("\n\t- final bound for type parameter: ").append(getSeverityString(FinalParameterBound)); //$NON-NLS-1$
@@ -1912,6 +1966,8 @@ public class CompilerOptions {
 		buf.append("\n\t- dead code in trivial if statement: ").append(this.reportDeadCodeInTrivialIfStatement ? ENABLED : DISABLED); //$NON-NLS-1$
 		buf.append("\n\t- tasks severity: ").append(getSeverityString(Tasks)); //$NON-NLS-1$
 		buf.append("\n\t- unused object allocation: ").append(getSeverityString(UnusedObjectAllocation)); //$NON-NLS-1$
+		buf.append("\n\t- method can be static: ").append(getSeverityString(MethodCanBeStatic)); //$NON-NLS-1$
+		buf.append("\n\t- method can be potentially static: ").append(getSeverityString(MethodCanBePotentiallyStatic)); //$NON-NLS-1$
 //{ObjectTeams
 		buf.append("\n\t- decapsulation : ").append(this.decapsulation); //$NON-NLS-1$
 		buf.append("\n\t- report if not exactly one basecall in callin method : ").append(getSeverityString(NotExactlyOneBasecall)); //$NON-NLS-1$

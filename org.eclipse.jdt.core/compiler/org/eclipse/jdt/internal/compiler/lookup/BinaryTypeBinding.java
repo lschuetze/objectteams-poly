@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -336,6 +336,31 @@ public FieldBinding[] availableFields() {
 	return availableFields;
 }
 
+private TypeVariableBinding[] addMethodTypeVariables(TypeVariableBinding[] methodTypeVars) {
+	if (this.typeVariables == null || this.typeVariables == Binding.NO_TYPE_VARIABLES) {
+		return methodTypeVars;
+	} 
+	if (methodTypeVars == null || methodTypeVars == Binding.NO_TYPE_VARIABLES) {
+		return this.typeVariables;
+	}
+	// uniq-merge both the arrays
+	int total = this.typeVariables.length + methodTypeVars.length;
+	TypeVariableBinding[] combinedTypeVars = new TypeVariableBinding[total];
+	System.arraycopy(this.typeVariables, 0, combinedTypeVars, 0, this.typeVariables.length);
+	int size = this.typeVariables.length;
+	loop: for (int i = 0, len = methodTypeVars.length; i < len; i++) {
+		for (int j = this.typeVariables.length -1 ; j >= 0; j--) {
+			if (CharOperation.equals(methodTypeVars[i].sourceName, this.typeVariables[j].sourceName))
+				continue loop;
+		}
+		combinedTypeVars[size++] = methodTypeVars[i];
+	}
+	if (size != total) {
+		System.arraycopy(combinedTypeVars, 0, combinedTypeVars = new TypeVariableBinding[size], 0, size);
+	}
+	return combinedTypeVars;
+}
+
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding#availableMethods()
  */
@@ -435,7 +460,29 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 		this.tagBits |= binaryType.getTagBits();
 		
 		char[][][] missingTypeNames = binaryType.getMissingTypeNames();
-		if (typeSignature == null) {
+		SignatureWrapper wrapper = null;
+		if (typeSignature != null) {
+			// ClassSignature = ParameterPart(optional) super_TypeSignature interface_signature
+			wrapper = new SignatureWrapper(typeSignature);
+			if (wrapper.signature[wrapper.start] == '<') {
+				// ParameterPart = '<' ParameterSignature(s) '>'
+				wrapper.start++; // skip '<'
+				this.typeVariables = createTypeVariables(wrapper, true, missingTypeNames);
+				wrapper.start++; // skip '>'
+				this.tagBits |=  TagBits.HasUnresolvedTypeVariables;
+				this.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
+			}
+		}
+		TypeVariableBinding[] typeVars = Binding.NO_TYPE_VARIABLES;
+		char[] methodDescriptor = binaryType.getEnclosingMethod();
+		if (methodDescriptor != null) {
+			MethodBinding enclosingMethod = findMethod(methodDescriptor, missingTypeNames);
+			if (enclosingMethod != null) {
+				typeVars = enclosingMethod.typeVariables;
+				this.typeVariables = addMethodTypeVariables(typeVars);			
+			}
+		}
+		if (typeSignature == null)  {
 //{ObjectTeams: predefined confined types require special treatment
 		  // 1. add the synthetic flag which is missing from the class file:
 		  if (CharOperation.equals(this.compoundName, IOTConstants.ORG_OBJECTTEAMS_TEAM_CONFINED))
@@ -467,25 +514,6 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 				}
 			}
 		} else {
-			// ClassSignature = ParameterPart(optional) super_TypeSignature interface_signature
-			SignatureWrapper wrapper = new SignatureWrapper(typeSignature);
-			if (wrapper.signature[wrapper.start] == '<') {
-				// ParameterPart = '<' ParameterSignature(s) '>'
-				wrapper.start++; // skip '<'
-				this.typeVariables = createTypeVariables(wrapper, true, missingTypeNames);
-				wrapper.start++; // skip '>'
-				this.tagBits |=  TagBits.HasUnresolvedTypeVariables;
-				this.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
-			}
-			TypeVariableBinding[] typeVars = Binding.NO_TYPE_VARIABLES;
-			char[] methodDescriptor = binaryType.getEnclosingMethod();
-			if (methodDescriptor != null) {
-				MethodBinding enclosingMethod = findMethod(methodDescriptor, missingTypeNames);
-				if (enclosingMethod != null) {
-					typeVars = enclosingMethod.typeVariables;
-				}
-			}
-
 			// attempt to find the superclass if it exists in the cache (otherwise - resolve it when requested)
 			this.superclass = (ReferenceBinding) this.environment.getTypeFromTypeSignature(wrapper, typeVars, this, missingTypeNames);
 //{ObjectTeams: wrapping of type (incl. its arguments)?
@@ -1336,7 +1364,13 @@ private void initializeTypeVariable(TypeVariableBinding variable, TypeVariableBi
 	if (wrapper.signature[wrapper.start] == ':') {
 		type = this.environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null);
 	} else {
-		type = (ReferenceBinding) this.environment.getTypeFromTypeSignature(wrapper, existingVariables, this, missingTypeNames);
+		TypeBinding typeFromTypeSignature = this.environment.getTypeFromTypeSignature(wrapper, existingVariables, this, missingTypeNames);
+		if (typeFromTypeSignature instanceof ReferenceBinding) {
+			type = (ReferenceBinding) typeFromTypeSignature;
+		} else {
+			// this should only happen if the signature is corrupted (332423)
+			type = this.environment.getResolvedType(TypeConstants.JAVA_LANG_OBJECT, null);
+		}
 		firstBound = type;
 	}
 
@@ -1422,6 +1456,10 @@ public MethodBinding[] methods() {
 		resolveTypesFor(this.methods[i]);
 	this.tagBits |= TagBits.AreMethodsComplete;
 	return this.methods;
+}
+
+public FieldBinding[] unResolvedFields() {
+	return this.fields;
 }
 private FieldBinding resolveTypeFor(FieldBinding field) {
 	if ((field.modifiers & ExtraCompilerModifiers.AccUnresolved) == 0)

@@ -268,4 +268,8 @@ public class LocalVariableBinding extends VariableBinding {
 		}
 		return s;
 	}
+
+	public boolean isParameter() {
+		return ((this.tagBits & TagBits.IsArgument) != 0);
+	}
 }

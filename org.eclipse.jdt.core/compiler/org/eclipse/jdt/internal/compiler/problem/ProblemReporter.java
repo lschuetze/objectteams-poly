@@ -474,6 +474,12 @@ public static int getIrritant(int problemID) {
 
 		case IProblem.UnusedObjectAllocation:
 			return CompilerOptions.UnusedObjectAllocation;
+			
+		case IProblem.MethodCanBeStatic:
+			return CompilerOptions.MethodCanBeStatic;
+			
+		case IProblem.MethodCanBePotentiallyStatic:
+			return CompilerOptions.MethodCanBePotentiallyStatic;
 //{ObjectTeams:
 		case IProblem.DeprecatedBaseclass:
 		case IProblem.CallinToDeprecated:
@@ -594,6 +600,8 @@ public static int getProblemCategory(int severity, int problemID) {
 			case CompilerOptions.MissingOverrideAnnotation :
 			case CompilerOptions.MissingDeprecatedAnnotation :
 			case CompilerOptions.ParameterAssignment :
+			case CompilerOptions.MethodCanBeStatic :
+			case CompilerOptions.MethodCanBePotentiallyStatic :
 				return CategorizedProblem.CAT_CODE_STYLE;
 
 			case CompilerOptions.MaskedCatchBlock :
@@ -5605,6 +5613,48 @@ public void methodWithConstructorName(MethodDeclaration methodDecl) {
 		methodDecl.sourceEnd);
 }
 
+public void methodCanBeDeclaredStatic(MethodDeclaration methodDecl) {
+	int severity = computeSeverity(IProblem.MethodCanBeStatic);
+	if (severity == ProblemSeverities.Ignore) return;
+	MethodBinding method = methodDecl.binding;
+	this.handle(
+			IProblem.MethodCanBeStatic,
+		new String[] {
+			new String(method.declaringClass.readableName()),
+			new String(method.selector),
+			typesAsString(method.isVarargs(), method.parameters, false)
+		 },
+		new String[] {
+			new String(method.declaringClass.shortReadableName()),
+			new String(method.selector),
+			typesAsString(method.isVarargs(), method.parameters, true)
+		 },
+		severity,
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+
+public void methodCanBePotentiallyDeclaredStatic(MethodDeclaration methodDecl) {
+	int severity = computeSeverity(IProblem.MethodCanBePotentiallyStatic);
+	if (severity == ProblemSeverities.Ignore) return;
+	MethodBinding method = methodDecl.binding;
+	this.handle(
+			IProblem.MethodCanBePotentiallyStatic,
+		new String[] {
+			new String(method.declaringClass.readableName()),
+			new String(method.selector),
+			typesAsString(method.isVarargs(), method.parameters, false)
+		 },
+		new String[] {
+			new String(method.declaringClass.shortReadableName()),
+			new String(method.selector),
+			typesAsString(method.isVarargs(), method.parameters, true)
+		 },
+		severity,
+		methodDecl.sourceStart,
+		methodDecl.sourceEnd);
+}
+
 public void missingDeprecatedAnnotationForField(FieldDeclaration field) {
 	int severity = computeSeverity(IProblem.FieldMissingDeprecatedAnnotation);
 	if (severity == ProblemSeverities.Ignore) return;
@@ -7833,6 +7883,9 @@ public void unsafeTypeConversion(Expression expression, TypeBinding expressionTy
 // SH}
 	int severity = computeSeverity(IProblem.UnsafeTypeConversion);
 	if (severity == ProblemSeverities.Ignore) return;
+	if (!this.options.reportUnavoidableGenericTypeProblems && expression.forcedToBeRaw(this.referenceContext)) {
+		return;
+	}
 	this.handle(
 		IProblem.UnsafeTypeConversion,
 		new String[] { new String(expressionType.readableName()), new String(expectedType.readableName()), new String(expectedType.erasure().readableName()) },

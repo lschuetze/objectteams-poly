@@ -1727,25 +1727,14 @@ public boolean compile(String[] argv) {
 		if (this.systemExitWhenFinished) {
 			this.logger.flush();
 			this.logger.close();
-//{ObjectTeams: changed to recognizable error code (was -1)
-/* orig:
-			System.exit(this.globalErrorsCount > 0 ? -1 : 0); 
-  :giro*/
-			System.exit(this.globalErrorsCount > 0 ? this.logger._errorCode : 0);
-// SH}				
-
+			System.exit(this.globalErrorsCount > 0 ? -1 : 0);
 		}
 	} catch (IllegalArgumentException e) {
 		this.logger.logException(e);
 		if (this.systemExitWhenFinished) {
 			this.logger.flush();
 			this.logger.close();
-//{ObjectTeams: changed to recognizable error code
-/* orig:
-			System.exit(-1); 
-  :giro */
-			System.exit(-2);
-// SH}				
+			System.exit(-1);
 		}
 		return false;
 	} catch (RuntimeException e) { // internal compiler failure
@@ -3322,6 +3311,10 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 					CompilerOptions.OPTION_ReportMissingOverrideAnnotationForInterfaceMethodImplementation,
 					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
+			} else if (token.equals("all-static-method")) { //$NON-NLS-1$
+				setSeverity(CompilerOptions.OPTION_ReportMethodCanBeStatic, severity, isEnabling);
+				setSeverity(CompilerOptions.OPTION_ReportMethodCanBePotentiallyStatic, severity, isEnabling);
+				return;
 //{ObjectTeams:
 			} else if (token.equals("ambiguousbinding")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportPotentialAmbiguousPlayedby, severity, isEnabling);
@@ -3618,6 +3611,9 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 			} else if (token.equals("super")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportOverridingMethodWithoutSuperInvocation, severity, isEnabling);
 				return;
+			} else if (token.equals("static-method")) { //$NON-NLS-1$
+				setSeverity(CompilerOptions.OPTION_ReportMethodCanBeStatic, severity, isEnabling);
+				return;
 			}
 			break;
 		case 't' :
@@ -3688,6 +3684,11 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				return;
 			} else if (token.equals("unusedTypeArgs")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedTypeArgumentsForMethodInvocation, severity, isEnabling);
+				return;
+			} else if (token.equals("unavoidableGenericProblems")) { //$NON-NLS-1$
+				this.options.put(
+					CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems,
+					isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
 				return;
 			}
 			break;
