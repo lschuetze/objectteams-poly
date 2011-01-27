@@ -3393,6 +3393,27 @@ public class Java5 extends AbstractOTJLDTest {
             },
             "OK");
     }
+    
+    // Bug 332801 - [compiler][generics] instantiating a generic role cannot be type-checked
+    public void testA114_genericRole7() {
+    	runConformTest(
+    		new String[] {
+    	"Canonicalization.java",
+    			"public team class Canonicalization {\n" + 
+    			"  protected class Cache<K,V> {\n" +
+    			"      protected V getV(K k, V v1, V v2) { return v1; }\n" +
+    			"  }\n" + 
+    			"  Cache<Integer,String> stringCache = new Cache<Integer, String>();\n" +
+    			"  void test() {\n" +
+    			"      System.out.print(stringCache.getV(2, \"OK\", \"NOTOK\"));\n" +
+    			"  }\n" + 
+    			"  public static void main(String... args) {\n" +
+    			"     new Canonicalization().test();\n" +
+    			"  }\n" + 
+    			"}\n"
+    		},
+    		"OK");
+    }
 
     // a decapsulating expression in a base guard requires a generic cast, witness for NPE since 3.4.2
     // A.1.15-otjld-generic-cast-in-baseaccess-1
