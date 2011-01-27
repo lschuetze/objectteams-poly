@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -555,6 +555,12 @@ private TypeBinding resolveAsRoleCreationExpression(ReferenceBinding typeBinding
 		return null;
 
 	this.resolvedType = this.roleCreatorCall.resolveType(scope);
+	if (typeBinding.isParameterizedType()) {
+		this.resolvedType =	 scope.environment().createParameterizedType(
+								 (ReferenceBinding)this.resolvedType,
+								 ((ParameterizedTypeBinding)typeBinding).arguments,
+								 this.resolvedType.enclosingType());
+	}
 
 	// UI needs to find the method in this.binding:
 	MethodBinding origBinding = this.roleCreatorCall.binding;

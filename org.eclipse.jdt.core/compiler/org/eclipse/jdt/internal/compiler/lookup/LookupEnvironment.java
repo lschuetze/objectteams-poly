@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1005,8 +1005,11 @@ public ParameterizedTypeBinding createParameterizedType(ReferenceBinding generic
 	return createParameterizedType(genericType, typeArguments, anchor, valueParamPosition, enclosingType);
 }
 public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType) {
-	if (teamAnchor != null)
+	if (teamAnchor != null) {
 		genericType = genericType.getRealType();
+		if (genericType.isParameterizedType())
+			genericType = (ReferenceBinding) genericType.erasure();
+	}
 // SH}
 	// cached info is array of already created parameterized types for this type
 	ParameterizedTypeBinding[] cachedInfo = (ParameterizedTypeBinding[])this.uniqueParameterizedTypeBindings.get(genericType);
