@@ -53,6 +53,7 @@ import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.TypeIds;
 import base org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.Annotation;
 import base org.eclipse.jdt.internal.compiler.ast.Assignment;
+import base org.eclipse.jdt.internal.compiler.ast.EqualExpression;
 import base org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import base org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
@@ -132,15 +133,9 @@ public team class CompilerAdaptation {
 
 		@SuppressWarnings("basecall")
 		callin int nullStatus(FlowInfo flowInfo) {
-			MethodBinding binding = this.getBinding();
-			if (binding.isValidBinding()) {
-				// try to retrieve null status of this message send from an annotation of the called method:
-				long tagBits = binding.getTagBits();
-				if ((tagBits & TagBits.AnnotationNonNull) != 0)
-					return FlowInfo.NON_NULL;
-				if ((tagBits & TagBits.AnnotationNullable) != 0)
-					return FlowInfo.POTENTIALLY_NULL;
-			}
+			int status = getNullStatus();
+			if (status != FlowInfo.UNKNOWN)
+				return status;
 			return base.nullStatus(flowInfo);
 		}
 		
@@ -168,6 +163,61 @@ public team class CompilerAdaptation {
 				}
 			}
 		}
+
+		checkNPE <- after checkNPE;
+		/** Detect and signal directly dereferencing a nullable message send result. */
+		void checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
+			if (getNullStatus() == FlowInfo.POTENTIALLY_NULL)
+				scope.problemReporter().messageSendPotentialNullReference(getBinding(), this);
+		}
+		
+		protected int getNullStatus() {
+			MethodBinding binding = this.getBinding();
+			if (binding.isValidBinding()) {
+				// try to retrieve null status of this message send from an annotation of the called method:
+				long tagBits = binding.getTagBits();
+				if ((tagBits & TagBits.AnnotationNonNull) != 0)
+					return FlowInfo.NON_NULL;
+				if ((tagBits & TagBits.AnnotationNullable) != 0)
+					return FlowInfo.POTENTIALLY_NULL;
+			}
+			return FlowInfo.UNKNOWN;
+		}
+	}
+	
+	protected class EqualExpression playedBy EqualExpression {
+		
+		MessageSend getLeftMessage() 		 -> get Expression left
+			with { result					 <- (left instanceof MessageSend) ? (MessageSend) left : null }
+		int getLeftNullStatus(FlowInfo info) -> get Expression left
+			with { result					 <- left.nullStatus(info) }
+		MessageSend getRightMessage() 		 -> get Expression right
+			with { result					 <- (right instanceof MessageSend) ? (MessageSend) right : null }
+		int getRightNullStatus(FlowInfo info)-> get Expression right
+			with { result					 <- right.nullStatus(info) }
+		
+		
+		checkNullComparison <- before checkNullComparison;
+
+		/** Detect and signal when comparing a non-null message send against null. */
+		void checkNullComparison(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo,
+				FlowInfo initsWhenTrue, FlowInfo initsWhenFalse) 
+		{
+			MessageSend leftMessage = getLeftMessage();
+			if (   leftMessage != null 
+				&& leftMessage.getNullStatus() == FlowInfo.NON_NULL
+				&& getRightNullStatus(flowInfo) == FlowInfo.NULL) 
+			{
+				scope.problemReporter().messageSendRedundantCheckOnNonNull(leftMessage.getBinding(), leftMessage);
+			}
+			MessageSend rightMessage = getRightMessage();
+			if (   rightMessage != null 
+				&& rightMessage.getNullStatus() == FlowInfo.NON_NULL 
+				&& getLeftNullStatus(flowInfo) == FlowInfo.NULL) 
+			{
+				scope.problemReporter().messageSendRedundantCheckOnNonNull(rightMessage.getBinding(), rightMessage);
+			}
+		}		
 	}
 	
 	/** Analyse the expression within a return statement, check against method return annotation. */
@@ -296,6 +346,7 @@ public team class CompilerAdaptation {
 		boolean isStatic() 						-> boolean isStatic();
 		boolean isValidBinding() 				-> boolean isValidBinding();
 		AbstractMethodDeclaration sourceMethod()-> AbstractMethodDeclaration sourceMethod();
+		char[] readableName() 					-> char[] readableName();
 
 		/** After method verifier has finished, fill in missing nullness values from the default. */
 		protected void fillInDefaultNullness(long defaultNullness) {
@@ -333,6 +384,7 @@ public team class CompilerAdaptation {
 		void fillInDefaultNullNess() <- after void checkMethods();
 		
 		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length) {
+			// TODO: change traversal: process all methods at once!
 			for (int i = length; --i >= 0;)
 				if (!currentMethod.isStatic() && !methods[i].isStatic())
 					checkNullContractInheritance(currentMethod, methods[i]);
@@ -698,6 +750,10 @@ public team class CompilerAdaptation {
 				case IProblem.NonNullParameterInsufficientInfo:
 				case IProblem.NonNullReturnInsufficientInfo:
 					return CompilerOptions.NullContractInsufficientInfo;
+				case IProblem.PotentialNullMessageSendReference:
+					return org.eclipse.jdt.internal.compiler.impl.CompilerOptions.PotentialNullReference;
+				case IProblem.RedundantNullCheckOnNonNullMessageSend:
+					return org.eclipse.jdt.internal.compiler.impl.CompilerOptions.RedundantNullCheck;
 			}
 			return 0;
 		}
@@ -771,8 +827,27 @@ public team class CompilerAdaptation {
 				new String[] { new String(declaringClass.readableName()), CharOperation.toString(nonNullAnnotationName)},
 				new String[] { new String(declaringClass.shortReadableName()), new String(nonNullAnnotationName[nonNullAnnotationName.length-1])},
 				methodDecl.sourceStart, 
-				methodDecl.sourceEnd);	
-		}								
+				methodDecl.sourceEnd);
+		}
+		public void messageSendPotentialNullReference(MethodBinding method, ASTNode location) {
+			String[] arguments = new String[] {new String(method.readableName())};
+			this.handle(
+				IProblem.PotentialNullMessageSendReference,
+				arguments,
+				arguments,
+				location.sourceStart,
+				location.sourceEnd);
+		}
+		public void messageSendRedundantCheckOnNonNull(MethodBinding method, ASTNode location) {
+			String[] arguments = new String[] {new String(method.readableName())  };
+			this.handle(
+				IProblem.RedundantNullCheckOnNonNullMessageSend,
+				arguments,
+				arguments,
+				location.sourceStart,
+				location.sourceEnd);
+		}
+
 		public void missingNullAnnotationType(char[][] nullAnnotationName) {
 			String[] args = { new String(CharOperation.concatWith(nullAnnotationName, '.')) };
 			this.handle(IProblem.MissingNullAnnotationType, args, args, 0, 0);	

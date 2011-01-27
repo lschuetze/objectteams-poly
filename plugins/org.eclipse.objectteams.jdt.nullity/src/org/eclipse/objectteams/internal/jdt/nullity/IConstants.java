@@ -63,5 +63,9 @@ public interface IConstants {
 		int IllegalRedefinitionToNonNullParameter = MethodRelated + 892;
 		/** @since 3.7 */
 		int IllegalDefinitionToNonNullParameter = MethodRelated + 893;
+		/** @since 3.7 */
+		int PotentialNullMessageSendReference = Internal + 894;
+		/** @since 3.7 */
+		int RedundantNullCheckOnNonNullMessageSend = 895;
 	}
 }
