@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -47,7 +47,7 @@ public class ASTConverter15Test extends ConverterTestSetup {
 	}
 
 	static {
-//		TESTS_NUMBERS = new int[] { 345, 346 };
+//		TESTS_NUMBERS = new int[] { 348 };
 //		TESTS_RANGE = new int[] { 325, -1 };
 //		TESTS_NAMES = new String[] {"test0204"};
 	}
@@ -3967,7 +3967,7 @@ public class ASTConverter15Test extends ConverterTestSetup {
         Statement statement = (Statement) statements.get(0);
         assertEquals("Not a constructor invocation", ASTNode.CONSTRUCTOR_INVOCATION, statement.getNodeType());
         ConstructorInvocation constructorInvocation = (ConstructorInvocation) statement;
-        checkSourceRange(constructorInvocation, "x.<String> this();", source);
+        checkSourceRange(constructorInvocation, "x.<String> this();", source, true/*expectMalformed*/);
         assertTrue("Node is not malformed", isMalformed(constructorInvocation));
     }
 
@@ -9669,7 +9669,7 @@ public class ASTConverter15Test extends ConverterTestSetup {
 		assertTrue("Not a recovered binding", binding3.isRecovered());
 		final IJavaElement javaElement = binding3.getJavaElement();
 		assertNotNull("No java element", javaElement);
-		assertEquals("Not a compilation unit", IJavaElement.COMPILATION_UNIT, javaElement.getElementType());
+		assertEquals("Not a compilation unit", IJavaElement.TYPE, javaElement.getElementType());
 		assertNotNull("No parent", javaElement.getParent());
 	}
 
@@ -11156,4 +11156,110 @@ public class ASTConverter15Test extends ConverterTestSetup {
 		assertEquals("Wrong constant value", "a", constantValue);
 	}
 
+	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=333360
+	 */
+	public void test0347() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter15/src/test0347/X.java", true/*resolve*/);
+		String contents =
+				"package test0347;\n" + 
+				"public class X implements One</*start*/Outer<Integer>.Inner<Double>[]/*end*/> {\n" + 
+				"}\n" + 
+				"interface One<T> {}\n" + 
+				"class Outer<T> {\n" + 
+				"	public class Inner<S> {}\n" + 
+				"}";
+		ArrayType type = (ArrayType) buildAST(
+				contents,
+				this.workingCopy);
+		assertNotNull("No annotation", type);
+		ITypeBinding binding = type.resolveBinding();
+		assertNotNull("No binding", binding);
+		assertEquals("Wrong qualified name", "test0347.Outer<java.lang.Integer>.Inner<java.lang.Double>[]", binding.getQualifiedName());
+		Type componentType = type.getComponentType();
+		binding = componentType.resolveBinding();
+		assertNotNull("No binding", binding);
+		assertEquals("Wrong qualified name", "test0347.Outer<java.lang.Integer>.Inner<java.lang.Double>", binding.getQualifiedName());
+		assertTrue("Not parameterized", componentType.isParameterizedType());
+		ParameterizedType parameterizedType = (ParameterizedType) componentType;
+		Type type2 = parameterizedType.getType();
+		assertTrue("Not qualified", type2.isQualifiedType());
+		QualifiedType qualifiedType = (QualifiedType) type2;
+		binding = qualifiedType.resolveBinding();
+		assertNotNull("No binding", binding);
+		assertEquals("Wrong qualified name", "test0347.Outer<java.lang.Integer>.Inner<java.lang.Double>", binding.getQualifiedName());
+		Type qualifier = qualifiedType.getQualifier();
+		assertTrue("Not parameterized", qualifier.isParameterizedType());
+		binding = qualifier.resolveBinding();
+		assertNotNull("No binding", binding);
+		assertEquals("Wrong qualified name", "test0347.Outer<java.lang.Integer>", binding.getQualifiedName());
+		parameterizedType = (ParameterizedType) qualifier;
+		type2 = parameterizedType.getType();
+		assertTrue("Not simple type", type2.isSimpleType());
+		binding = type2.resolveBinding();
+		assertNotNull("No binding", binding);
+		assertEquals("Wrong qualified name", "test0347.Outer<java.lang.Integer>", binding.getQualifiedName());
+	}
+	// issues with annotation default values
+	public void _test0348() throws JavaModelException {
+		ICompilationUnit sourceUnit = getCompilationUnit("Converter15" , "src", "test0348", "AnnotatedInterfaceWithStringDefault.java"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		IType type = sourceUnit.getType("AnnotatedInterfaceWithStringDefault");//$NON-NLS-1$
+		//ICompilationUnit sourceUnit2 = getCompilationUnit("Converter15" , "src", "test0348", "TestAnnotationWithStringDefault.java"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		//IType type2 = sourceUnit2.getType("TestAnnotationWithStringDefault");//$NON-NLS-1$
+
+		assertNotNull("Should not be null", type);
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setProject(type.getJavaProject());
+		IBinding[] bindings= parser.createBindings(new IJavaElement[] { type }, null);
+		if (bindings.length == 1 && bindings[0] instanceof ITypeBinding) {
+			ITypeBinding typeBinding= (ITypeBinding) bindings[0];
+			IAnnotationBinding[] annotations = typeBinding.getAnnotations();
+			for (int i = 0, max = annotations.length; i < max; i++) {
+				IAnnotationBinding annotation = annotations[i];
+				IMemberValuePairBinding[] allMemberValuePairs = annotation.getAllMemberValuePairs();
+				for (int j = 0, max2 = allMemberValuePairs.length; j < max2; j++) {
+					IMemberValuePairBinding memberValuePair = allMemberValuePairs[j];
+					Object defaultValue = memberValuePair.getValue();
+					System.out.println(defaultValue);
+					assertNotNull("no default value", defaultValue);
+				}
+			}
+		}
+	}
+	
+	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=334119
+	 * Ensures that dollar in a type name is not confused as the starting of member type
+	 */
+	public void test0349() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter15/src/p/X$Y.java", true/*resolve*/);
+		ASTNode node = buildAST(
+			"package p;\n" +
+			"/*start*/public class X$Y {\n" +
+			"}/*end*/",
+			this.workingCopy,
+			false);
+		IBinding binding = ((TypeDeclaration) node).resolveBinding();
+		assertBindingKeyEquals(
+				"Lp/X$Y;",	// should not be Lp/X$Y-X$Y;
+			binding.getKey());
+	}
+	
+	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=334119
+	 * Ensures that dollar in a type name is not confused as the starting of member type
+	 */
+	public void test0348b() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter15/src/p/X$.java", true/*resolve*/);
+		ASTNode node = buildAST(
+			"package p;\n" +
+			"/*start*/public class X$ {\n" +
+			"}/*end*/",
+			this.workingCopy,
+			false);
+		IBinding binding = ((TypeDeclaration) node).resolveBinding();
+		assertBindingKeyEquals(
+				"Lp/X$;",	// should not be Lp/X$~X$;
+			binding.getKey());
+	}
 }
