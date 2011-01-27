@@ -46,7 +46,7 @@
 		<!--set the compiler and compiler arguments-->
 		<!--the default compiler is set to the one used by eclipse rel. eng. -->
 		<loadproperties srcfile="${OTScriptDir}/compiler.${component.short}.properties" />
-
+<echo message="javacSource=${javacSource}" />
 		<!--this property required as of Eclipse 3.0 stream builds > 20031126 -->
 		<property name="buildingOSGi" value="true" />
 

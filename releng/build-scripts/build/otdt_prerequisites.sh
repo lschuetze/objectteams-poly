@@ -31,8 +31,8 @@ ANT_HOME=/shared/common/apache-ant-1.7.1/
 PATH=${ANT_HOME}/bin:${PATH}
 
 # EXPORT: additional arguments to pass to Ant:
-#ANT_PROFILE="-verbose"
-ANT_PROFILE=""
+ANT_PROFILE="-verbose"
+#ANT_PROFILE=""
 
 # EXPORT: Nice-level for the Ant process:
 NICE="10"
@@ -48,11 +48,11 @@ fi
 
 # VERSIONS:
 # Eclipse SKD build identifier:
-EVERSION=3.7M3
+EVERSION=3.7M4
 # Architecture (as used by OSGi):
 ARCH=`arch`
 # used only locally:
-DROP=${BASEDIR}/drops/S-3.7M3-201010281441
+DROP=${BASEDIR}/drops/S-3.7M4-201012081300
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
@@ -61,4 +61,4 @@ ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
 ECLIPSE_TESTLIB_ZIP=${DROP}/eclipse-test-framework-${EVERSION}.zip
 
 # EXPORT: where to find previously published plugins&features:
-PUBLISHED_UPDATES=${HOME}/downloads/objectteams/updates/ot0.7
+PUBLISHED_UPDATES=${HOME}/downloads/objectteams/updates/ot0.8
