@@ -1096,6 +1096,7 @@ private MethodBinding findMethod(char[] methodDescriptor, char[][][] missingType
 					continue loop;
 				}
 			}
+			return currentMethod;
 		}
 	}
 	return null;
@@ -1457,10 +1458,6 @@ public MethodBinding[] methods() {
 	this.tagBits |= TagBits.AreMethodsComplete;
 	return this.methods;
 }
-
-public FieldBinding[] unResolvedFields() {
-	return this.fields;
-}
 private FieldBinding resolveTypeFor(FieldBinding field) {
 	if ((field.modifiers & ExtraCompilerModifiers.AccUnresolved) == 0)
 		return field;
@@ -1704,6 +1701,10 @@ public String toString() {
 }
 MethodBinding[] unResolvedMethods() { // for the MethodVerifier so it doesn't resolve types
 	return this.methods;
+}
+
+public FieldBinding[] unResolvedFields() {
+	return this.fields;
 }
 //{ObjectTeams: for use by TypeModel:
 public ReferenceBinding[] unresolvedMemberTypes() {
