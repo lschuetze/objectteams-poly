@@ -2641,7 +2641,7 @@ protected void runNegativeTest(
 //    JavacTestOptions.SKIP /* skip javac tests */);
 //    JavacTestOptions.DEFAULT /* default javac test options */);
 //    javacTestOptions /* javac test options */);
-void runNegativeTest(
+protected void runNegativeTest(
 	// test directory preparation
 	boolean shouldFlushOutputDirectory,
 	String[] testFiles,

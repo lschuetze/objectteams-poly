@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2010 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,7 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bugs 325755, 133125, 292478, 319201 and 320170
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
+ *     			bugs 325755, 133125, 292478, 319201, 320170 and 332637
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -5741,7 +5742,7 @@ public void test0553_try_catch() {
 
 // null analysis - try/catch
 public void test0554_try_catch() {
-	this.runConformTest(
+	this.runNegativeTest(
 		new String[] {
 			"X.java",
 			"public class X {\n" +
@@ -5765,14 +5766,18 @@ public void test0554_try_catch() {
 			"    throw new LocalException();\n" +
 			"  }\n" +
 			"}\n"},
-		""
-		// conservative flow analysis suppresses the warning
-//		"----------\n" +
-//		"1. ERROR in X.java (at line 10)\n" +
-//		"	if (o != null) {\n" +
-//		"	    ^\n" +
-//		"Redundant null check: The variable o can only be null at this location\n" +
-//		"----------\n"
+		"----------\n" +
+		"1. ERROR in X.java (at line 10)\n" +
+		"	if (o != null) {\n" +
+		"	    ^\n" +
+		"Null comparison always yields false: The variable o can only be null at this location\n" +
+		"----------\n" +
+		"2. WARNING in X.java (at line 10)\n" +
+		"	if (o != null) {\n" +
+		"    }\n" +
+		"	               ^^^^^^^\n" +
+		"Dead code\n" +
+		"----------\n"
 	);
 }
 
@@ -5891,9 +5896,7 @@ public void test0558_try_catch() {
 		"1. ERROR in X.java (at line 13)\n" +
 		"	o.toString();\n" +
 		"	^\n" +
-//		"Null pointer access: The variable o can only be null at this location\n" +
-		"Potential null pointer access: The variable o may be null at this location\n" +
-		// conservative flow analysis softens the error
+		"Null pointer access: The variable o can only be null at this location\n" +
 		"----------\n",
 	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -5928,9 +5931,7 @@ public void test0559_try_catch() {
 		"1. ERROR in X.java (at line 12)\n" +
 		"	o.toString();\n" +
 		"	^\n" +
-//		"Null pointer access: The variable o can only be null at this location\n" +
-		"Potential null pointer access: The variable o may be null at this location\n" +
-		// conservative flow analysis softens the error
+		"Null pointer access: The variable o can only be null at this location\n" +
 		"----------\n",
 	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -13671,5 +13672,164 @@ public void testBug325755b() {
 			"	}\n" + 
 			"}"},
 		"null220");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=332637 
+// Dead Code detection removing code that isn't dead
+public void testBug332637() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	this.runConformTest(
+		new String[] {
+			"DeadCodeExample.java",
+			"public class DeadCodeExample {\n" + 
+			"\n" + 
+			"	private class CanceledException extends Exception {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private interface ProgressMonitor {\n" + 
+			"		boolean isCanceled();\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private void checkForCancellation(ProgressMonitor monitor)\n" + 
+			"			throws CanceledException {\n" + 
+			"		if (monitor.isCanceled()) {\n" + 
+			"			throw new CanceledException();\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private int run() {\n" + 
+			"\n" + 
+			"		ProgressMonitor monitor = new ProgressMonitor() {\n" + 
+			"			private int i = 0;\n" + 
+			"\n" + 
+			"			public boolean isCanceled() {\n" + 
+			"				return (++i == 5);\n" + 
+			"			}\n" + 
+			"		};\n" + 
+			"\n" + 
+			"		Integer number = null;\n" + 
+			"\n" + 
+			"		try {\n" + 
+			"			checkForCancellation(monitor);\n" + 
+			"\n" + 
+			"			number = Integer.valueOf(0);\n" + 
+			"\n" + 
+			"			for (String s : new String[10]) {\n" + 
+			"				checkForCancellation(monitor);\n" + 
+			"				number++;\n" + 
+			"			}\n" + 
+			"			return 0;\n" + 
+			"		} catch (CanceledException e) {\n" + 
+			"			System.out.println(\"Canceled after \" + number\n" + 
+			"				+ \" times through the loop\");\n" + 
+			"			if (number != null) {\n" + 
+			"				System.out.println(\"number = \" + number);\n" + 
+			"			}\n" + 
+			"			return -1;\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		System.out.println(new DeadCodeExample().run());\n" + 
+			"	}\n" + 
+			"}\n"				
+		},
+		"Canceled after 3 times through the loop\n" + 
+		"number = 3\n" + 
+		"-1");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=332637 
+// Dead Code detection removing code that isn't dead
+public void testBug332637b() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	this.runConformTest(
+		new String[] {
+			"DeadCodeExample.java",
+			"public class DeadCodeExample {\n" + 
+			"\n" + 
+			"	private class CanceledException extends Exception {\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private interface ProgressMonitor {\n" + 
+			"		boolean isCanceled();\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private void checkForCancellation(ProgressMonitor monitor)\n" + 
+			"			throws CanceledException {\n" + 
+			"		if (monitor.isCanceled()) {\n" + 
+			"			throw new CanceledException();\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private int run() {\n" + 
+			"\n" + 
+			"		ProgressMonitor monitor = new ProgressMonitor() {\n" + 
+			"			private int i = 0;\n" + 
+			"\n" + 
+			"			public boolean isCanceled() {\n" + 
+			"				return (++i == 5);\n" + 
+			"			}\n" + 
+			"		};\n" + 
+			"\n" + 
+			"		Integer number = null;\n" + 
+			"\n" + 
+			"		try {\n" + 
+			"			checkForCancellation(monitor);\n" + 
+			"\n" + 
+			"			number = Integer.valueOf(0);\n" + 
+			"\n" + 
+			"			for (String s : new String[10]) {\n" + 
+			"				checkForCancellation(monitor);\n" + 
+			"				number++;\n" + 
+			"			}\n" + 
+			"			return 0;\n" + 
+			"		} catch (CanceledException e) {\n" + 
+			"			System.out.println(\"Canceled after \" + number\n" + 
+			"				+ \" times through the loop\");\n" + 
+			"			if (number != null) {\n" + 
+			"				System.out.println(\"number = \" + number);\n" + 
+			"			}\n" + 
+			"			return -1;\n" + 
+			"		} finally {\n" +
+			"			System.out.println(\"Done\");\n" +
+			"		}\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		System.out.println(new DeadCodeExample().run());\n" + 
+			"	}\n" + 
+			"}\n"				
+		},
+		"Canceled after 3 times through the loop\n" + 
+		"number = 3\n" + 
+		"Done\n" + 
+		"-1");
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=333089 
+// null analysis -- to make sure no AIOOBE or NPE is thrown while calling UnconditionalFlowInfo.markNullStatus(..)
+public void testBug333089() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static void foo(Object s1) {\n" + 
+	        "    int i00, i01, i02, i03, i04, i05, i06, i07, i08, i09;\n" +
+	        "    int i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;\n" +
+	        "    int i20, i21, i22, i23, i24, i25, i26, i27, i28, i29;\n" +
+	        "    int i30, i31, i32, i33, i34, i35, i36, i37, i38, i39;\n" +
+	        "    int i40, i41, i42, i43, i44, i45, i46, i47, i48, i49;\n" +
+	        "    int i50, i51, i52, i53, i54, i55, i56, i57, i58, i59;\n" +
+	        "    int i60, i61, i62, i63, i64, i65, i66, i67, i68, i69;\n" +
+			"	 Object local1;\n" + 
+			"	 if (s1 == null){}\n" + 
+			"	 try {" +
+			"		local1 = s1;\n" +
+			"	 } finally {\n" +
+			"	 }\n" + 
+			"	}\n" + 
+			"}"},
+		"");
 }
 }
