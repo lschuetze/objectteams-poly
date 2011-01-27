@@ -3020,7 +3020,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			"1. WARNING in TeamB11sh67.java (at line 6)\n" +
 			"	int getSecret() -> get int secret; // <- decapsulation warning was masked by above @SuppressWarnings\n" +
 			"	                           ^^^^^^\n" +
-			"Access restriction of field secret in type TB11sh67 is overridden by this binding (OTJLD 3.5(e)).\n" +
+			"Access restriction of private field secret in type TB11sh67 is overridden by this binding (OTJLD 3.5(e)).\n" +
 			"----------\n",
             customOptions);
     }
@@ -3074,7 +3074,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		"3. WARNING in TeamB11sh68.java (at line 7)\n" + 
     		"	int getSecret() -> get int secret; // <- decapsulation warning was masked by above @SuppressWarnings\n" + 
     		"	                           ^^^^^^\n" + 
-    		"Access restriction of field secret in type TB11sh68 is overridden by this binding (OTJLD 3.5(e)).\n" + 
+    		"Access restriction of private field secret in type TB11sh68 is overridden by this binding (OTJLD 3.5(e)).\n" + 
     		"----------\n",
     		customOptions);
     }
