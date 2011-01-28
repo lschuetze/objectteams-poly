@@ -19,10 +19,10 @@ package org.eclipse.objectteams.otdt.tests.otjld.roleplaying;
 
 import java.util.Map;
 
+import junit.framework.Test;
+
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
-
-import junit.framework.Test;
 
 @SuppressWarnings("unchecked")
 public class LiftingAndLowering extends AbstractOTJLDTest {
@@ -738,6 +738,66 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     			"		}\n" +
     			"	}\n" +
     			"}\n",
+    		},
+    		"OK");
+    }
+    
+    // Bug 335628 - [compiler] lowering in array initializer
+    public void test221_loweringToBaseclass17 () {
+    	runConformTest(
+    		new String[] {
+    	"Team221ltb17.java",
+    			"public team class Team221ltb17 {\n" + 
+    			"	protected class R playedBy T221ltb17 {\n" + 
+    			"		protected R() { base(); }\n" + 
+    			"	}\n" + 
+    			"	void test() {\n" + 
+    			"		R r = new R();\n" + 
+    			"		T221ltb17[] bases = new T221ltb17[] { r };\n" + 
+    			"		for (int i = 0; i < bases.length; i++) {\n" + 
+    			"			bases[i].print();\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"	public static void main(String[] args) {\n" + 
+    			"		new Team221ltb17().test();\n" + 
+    			"	}\n" + 
+    			"}\n",
+    	"T221ltb17.java",
+		    	"public class T221ltb17 {\n" + 
+		    	"	public void print() {\n" + 
+		    	"		System.out.println(\"OK\");\n" + 
+		    	"	}\n" +
+		    	"}\n"
+    		},
+    		"OK");
+    }
+    
+    // Bug 335628 - [compiler] lowering in array initializer
+    public void test221_loweringToBaseclass18 () {
+    	runConformTest(
+    		new String[] {
+    	"Team221ltb18.java",
+    			"public team class Team221ltb18 {\n" + 
+    			"	protected class R playedBy T221ltb18 {\n" + 
+    			"		protected R() { base(); }\n" + 
+    			"	}\n" + 
+    			"	void test() {\n" + 
+    			"		R r = new R();\n" + 
+    			"		T221ltb18[][] bases = new T221ltb18[][] { { r } };\n" + 
+    			"		for (int i = 0; i < bases.length; i++)\n" + 
+    			"			for (int k = 0; k < bases[i].length; k++)\n" + 
+    			"				bases[i][k].print();\n" + 
+    			"	}\n" + 
+    			"	public static void main(String[] args) {\n" + 
+    			"		new Team221ltb18().test();\n" + 
+    			"	}\n" + 
+    			"}\n",
+    	"T221ltb18.java",
+		    	"public class T221ltb18 {\n" + 
+		    	"	public void print() {\n" + 
+		    	"		System.out.println(\"OK\");\n" + 
+		    	"	}\n" +
+		    	"}\n"
     		},
     		"OK");
     }
