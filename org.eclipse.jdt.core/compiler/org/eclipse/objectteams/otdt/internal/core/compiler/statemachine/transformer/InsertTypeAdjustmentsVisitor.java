@@ -25,6 +25,7 @@ import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
+import org.eclipse.jdt.internal.compiler.ast.ArrayInitializer;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.EqualExpression;
@@ -169,6 +170,16 @@ public class InsertTypeAdjustmentsVisitor extends ASTVisitor {
                         params[i]);
             }
         }
+    }
+
+    @Override
+    public void endVisit(ArrayInitializer arrayInitializer, BlockScope scope) {
+    	Expression[] expressions = arrayInitializer.expressions;
+		if (expressions != null) {
+    		TypeBinding leafType = arrayInitializer.binding.elementsType();
+    		for (int i = 0; i < expressions.length; i++)
+				expressions[i] = maybeWrap(scope, expressions[i], leafType);
+    	}    	
     }
 
     public void endVisit(ReturnStatement returnStatement, BlockScope scope) {
