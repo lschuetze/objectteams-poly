@@ -3,21 +3,21 @@
 !-- Don't set version numbers for features, otherwise pdebuild would complain about a non-existent Basedir: -- 
 feature@org.eclipse.objectteams.otdt=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.feature
 feature@org.eclipse.objectteams.otdt.core.patch=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.core.patch
-feature@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature,tag=tags/builds/201012150343
+feature@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature
 
 !-- Also don't use version numbers for those plugins that hold the various otre jars: --
 plugin@org.eclipse.jdt.core,3.7.0.v_OTDT_r080_qualifier=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.jdt.core
-plugin@org.eclipse.objectteams.otdt=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt,tag=tags/builds/201012150343
+plugin@org.eclipse.objectteams.otdt=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt
 plugin@org.eclipse.objectteams.otdt.debug,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug,tag=tags/builds/201012150343
-plugin@org.eclipse.objectteams.otdt.debug.ui,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug.ui,tag=tags/builds/201012150343
-plugin@org.eclipse.objectteams.otdt.ui,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.ui,tag=tags/builds/201012150343
+plugin@org.eclipse.objectteams.otdt.debug.ui,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug.ui
+plugin@org.eclipse.objectteams.otdt.ui,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.ui
 plugin@org.eclipse.objectteams.otdt.metrics,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.metrics
 
-plugin@org.eclipse.objectteams.runtime=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.runtime,tag=tags/builds/201012150343
-fragment@org.eclipse.objectteams.otequinox.hook,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.hook,tag=tags/builds/201012150343
+plugin@org.eclipse.objectteams.runtime=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.runtime
+fragment@org.eclipse.objectteams.otequinox.hook,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.hook
 fragment@org.eclipse.objectteams.otequinox.sunjvm,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.sunjvm,tag=tags/builds/201011100445
 !the following is also referenced in otdt.ui.help/buildDoc.xml (plugin-name without version):
-plugin@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox,tag=tags/builds/201011100445
+plugin@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox
 plugin@org.eclipse.objectteams.eclipse.monitor,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.eclipse.monitor,tag=tags/builds/201012150343
 
 !not currently maintained:
@@ -36,7 +36,7 @@ plugin@org.eclipse.objectteams.otdt.pde.ui,0.7.0=SVN,url=file://localhost/svnroo
 plugin@org.eclipse.objectteams.otdt.samples,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.samples,tag=tags/builds/201012150343
 
 !** Consume BCEL from Orbit: **!
-plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20100519200754/repository
+plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20110124210048/repository
 ! existing files on build.eclipse.org:
 !/home/data/httpd/download.eclipse.org/tools/orbit/downloads/drops/S20100308015149/drops/bundles/org.apache.bcel_5.2.0.v200803061811.jar
 !/home/data/httpd/download.eclipse.org/tools/orbit/downloads/drops/S20100519200754/repository/plugins/org.apache.bcel_5.2.0.v201005080400.jar
