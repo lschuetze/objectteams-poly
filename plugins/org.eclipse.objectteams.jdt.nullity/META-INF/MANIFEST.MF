@@ -8,7 +8,12 @@ Bundle-Vendor: Eclipse Object Teams Project
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.objectteams.otequinox,
  org.eclipse.jdt.core;bundle-version="3.7.0",
- org.eclipse.core.resources;bundle-version="3.7.0"
+ org.eclipse.core.resources;bundle-version="3.7.0",
+ org.eclipse.jdt.ui;bundle-version="3.7.0",
+ org.eclipse.swt;bundle-version="3.7.0",
+ org.eclipse.ltk.core.refactoring;bundle-version="3.5.200",
+ org.eclipse.jface.text;bundle-version="3.7.0",
+ org.eclipse.jdt.core.manipulation;bundle-version="1.3.0"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.objectteams.internal.jdt.nullity;x-friends:="org.eclipse.objectteams.jdt.nullity.tests"
