@@ -199,14 +199,23 @@ public class OTDTPlugin extends Plugin
 	 */	
 	public static final String OT_COMPILER_DEPRECATED_PATH_SYNTAX = PLUGIN_ID + ".compiler.problem.deprecated_path_syntax"; //$NON-NLS-1$;
 	/** 
-	 * Compiler option ID: Enabling scoped detection of keywords.
+	 * Compiler option ID: Reporting callout to field without any effect nor result.
 	 * <dl>
 	 * <dt>Possible values:</dt><dd><code>{ "enabled", "disabled" }</code></dd>
 	 * <dt>Default:</dt><dd><code>"enabled"</code></dd>
 	 * </dl>
 	 * @category CompilerOptionID
 	 */	
-	public static final String OT_COMPILER_SCOPED_KEYWORDS = PLUGIN_ID + ".compiler.option.scoped_keywords"; //$NON-NLS-1$
+	public static final String OT_COMPILER_EFFECTLESS_FIELD_ACCESS = PLUGIN_ID + ".compiler.problem.effectless_fieldaccess";
+	/** 
+	 * Compiler option ID: Reporting unused parameter mappings.
+	 * <dl>
+	 * <dt>Possible values:</dt><dd><code>{ "enabled", "disabled" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"enabled"</code></dd>
+	 * </dl>
+	 * @category CompilerOptionID
+	 */	
+	public static final String OT_COMPILER_UNUSED_PARAMMAP =  PLUGIN_ID + ".compiler.problem.unused_parammap";
 
 
     private static OTDTPlugin _singleton = null;
