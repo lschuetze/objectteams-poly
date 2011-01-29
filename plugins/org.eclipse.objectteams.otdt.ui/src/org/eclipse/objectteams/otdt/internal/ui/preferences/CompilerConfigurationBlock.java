@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 import org.eclipse.jface.dialogs.ControlEnableState;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.layout.PixelConverter;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Font;
@@ -42,7 +43,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 /**
- * Partly copied from org.eclipse.jdt.internal.ui.preferences.CompilerConfigurationBlock.
+ * Partly copied from org.eclipse.jdt.internal.ui.preferences.ProblemSeveritiesConfigurationBlock.
  * 
  * This class defines all configurable options of the OT/J compiler.
  * + private static final Key PREF_PB_
@@ -105,22 +106,23 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_PB_AMBIGUOUS_LOWERING = getJDTCoreKey(OTDTPlugin.OT_COMPILER_AMBIGUOUS_LOWERING);
 	private static final Key PREF_PB_ADAPTING_DEPRECATED = getJDTCoreKey(OTDTPlugin.OT_COMPILER_ADAPTING_DEPRECATED);
 	private static final Key PREF_PB_IGNORING_ROLE_RETURN = getJDTCoreKey(OTDTPlugin.OT_COMPILER_IGNORING_ROLE_RETURN);
-	
-	// feature enablement:
-	private static final Key PREF_OPT_SCOPED_KEYWORDS = getJDTCoreKey(OTDTPlugin.OT_COMPILER_SCOPED_KEYWORDS);
+	private static final Key PREF_PB_EFFECTLESS_FIELD_ACCESS = getJDTCoreKey(OTDTPlugin.OT_COMPILER_EFFECTLESS_FIELD_ACCESS);
+	private static final Key PREF_PB_UNUSED_PARAMMAP = getJDTCoreKey(OTDTPlugin.OT_COMPILER_UNUSED_PARAMMAP);
 
 	// values
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
 	private static final String IGNORE= JavaCore.IGNORE;
 
-	private static final String ENABLED= JavaCore.ENABLED;
-	private static final String DISABLED= JavaCore.DISABLED;
+//	private static final String ENABLED= JavaCore.ENABLED;
+//	private static final String DISABLED= JavaCore.DISABLED;
 	
-	private static final String SETTINGS_SECTION_NAME = null; // ?? see ProblemSeveritiesConfigurationBlock 
+	private static final String SETTINGS_SECTION_NAME = "OTJCompilerConfigurationBlock"; //$NON-NLS-1$
 	
 	private Composite fControlsComposite;
 	private ControlEnableState fBlockEnableState;
+	private FilteredPreferenceTree fFilteredPrefTree;
+	private PixelConverter fPixelConverter;
 	
 	public CompilerConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
@@ -132,8 +134,10 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 		return new Key[] {
 				PREF_PB_BASECALL,
 				PREF_PB_BASECLASS_CYCLE,
-				PREF_PB_UNSAFE_ROLE_INSTANTIATION, 
+				PREF_PB_UNSAFE_ROLE_INSTANTIATION,
+				PREF_PB_EFFECTLESS_FIELD_ACCESS,
 				PREF_PB_FRAGILE_CALLIN,
+				PREF_PB_UNUSED_PARAMMAP,
 				PREF_PB_IGNORING_ROLE_RETURN,
 				PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY, PREF_PB_ABSTRACT_POTENTIAL_RELEVANT_ROLE,
 				PREF_PB_DECAPSULATION,
@@ -146,7 +150,6 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_PB_OVERRIDE_FINAL_ROLE,
 				PREF_PB_EXCEPTION_IN_GUARD,
 				PREF_PB_AMBIGUOUS_LOWERING,
-				PREF_OPT_SCOPED_KEYWORDS
 			};
 	}
 	
@@ -154,13 +157,24 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 	 * @see org.eclipse.jface.preference.PreferencePage#createContents(Composite)
 	 */
 	protected Control createContents(Composite parent) {
+		fPixelConverter= new PixelConverter(parent);
 		setShell(parent.getShell());
 		
-		Composite complianceComposite= createCompilerPreferenceTabContent(parent);
+		Composite mainComp= new Composite(parent, SWT.NONE);
+		mainComp.setFont(parent.getFont());
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		mainComp.setLayout(layout);
 		
+		Composite commonComposite= createCompilerPreferenceTabContent(mainComp);
+		GridData gridData= new GridData(SWT.FILL, SWT.FILL, true, true);
+		gridData.heightHint= fPixelConverter.convertHeightInCharsToPixels(20);
+		commonComposite.setLayoutData(gridData);
+
 		validateSettings(null, null, null);
 	
-		return complianceComposite;
+		return mainComp;
 	}
 	
 	public void enablePreferenceContent(boolean enable) {
@@ -188,107 +202,156 @@ public class CompilerConfigurationBlock extends OptionsConfigurationBlock {
 			PreferencesMessages.ProblemSeveritiesConfigurationBlock_ignore
 		};
 
-		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
+//		String[] enabledDisabled= new String[] { ENABLED, DISABLED };
 
 	
 		// widget layout mainly copied from ProblemSeveritiesConfigurationBlock:
+		fFilteredPrefTree= new FilteredPreferenceTree(this, folder, OTPreferencesMessages.OTCompilerConfigurationBlock_common_description);
+		final ScrolledPageContent sc1= fFilteredPrefTree.getScrolledPageContent();
+
 		int nColumns= 3;
-		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
 		
 		Composite composite= sc1.getBody();
 		GridLayout layout= new GridLayout(nColumns, false);
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		composite.setLayout(layout);
-		
-		Label description= new Label(composite, SWT.LEFT | SWT.WRAP);
-		description.setFont(description.getFont());
-		description.setText(OTPreferencesMessages.OTCompilerConfiguration_common_description); 
-		description.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, true, false, nColumns - 1, 1));
-		
-		Composite inner;
+
+		int indentStep=  fPixelConverter.convertWidthInCharsToPixels(1);
+
+		int defaultIndent= indentStep * 0;
+//		int extraIndent= indentStep * 3;
 		String label;
-		
-		// --- Problem configuration ---
-		inner = myCreateSection(nColumns, composite, OTPreferencesMessages.OTCompilerProblemConfiguration_description);
+		ExpandableComposite excomposite;
+		Composite inner;
+		PreferenceTreeNode section;
+//		PreferenceTreeNode node; // for node with subnodes
+		Key twistieKey;
 		
 		label= OTPreferencesMessages.OTCompilerProblemConfiguration_otjld_ref_description;
-		addLabel(inner, nColumns, label, SWT.ITALIC);
+		addLabel(composite, nColumns, label, SWT.ITALIC);
+
+		// --- decapsulation and related:
+
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_section_decapsulation;
+		twistieKey= OptionsConfigurationBlock.getLocalKey("CompilerConfigurationBlock_section_decapsulation"); //$NON-NLS-1$
+		section= fFilteredPrefTree.addExpandableComposite(composite, label, nColumns, twistieKey, null, false);
+		excomposite= getExpandableComposite(twistieKey);
 		
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_not_exactly_one_basecall_label;
-		addComboBox(inner, label, PREF_PB_BASECALL, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
+		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
 		
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_unsafe_role_instantiation_label;
-		addComboBox(inner, label, PREF_PB_UNSAFE_ROLE_INSTANTIATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_fragile_callin_label;
-		addComboBox(inner, label, PREF_PB_FRAGILE_CALLIN, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_ignoring_role_result;
-		addComboBox(inner, label, PREF_PB_IGNORING_ROLE_RETURN, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_potential_ambiguous_playedby_label;
-		addComboBox(inner, label, PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY, errorWarningIgnore, errorWarningIgnoreLabels, 0);
-		
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_baseclass_cycle_label;
-		addComboBox(inner, label, PREF_PB_BASECLASS_CYCLE, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_ambiguous_lowering_label;
-		addComboBox(inner, label, PREF_PB_AMBIGUOUS_LOWERING, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_abstract_potential_relevant_role_label;
-		addComboBox(inner, label, PREF_PB_ABSTRACT_POTENTIAL_RELEVANT_ROLE, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
 
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_decapsulation_label;
-		addComboBox(inner, label, PREF_PB_DECAPSULATION, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_DECAPSULATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
 
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_decapsulation_write_label;
-		addComboBox(inner, label, PREF_PB_DECAPSULATION_WRITE, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_bindingconventions_label;
-		addComboBox(inner, label, PREF_PB_BINDING_CONVENTIONS, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_deprecated_path_syntax_label;
-		addComboBox(inner, label, PREF_PB_DEPRECATED_PATH_SYNTAX, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_inferred_callout_label;
-		addComboBox(inner, label, PREF_PB_INFERRED_CALLOUT, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_adapting_deprecated_label;
-		addComboBox(inner, label, PREF_PB_ADAPTING_DEPRECATED, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_binding_to_system_class;
-		addComboBox(inner, label, PREF_PB_WEAVE_INTO_SYSTEM_CLASS, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_DECAPSULATION_WRITE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
 
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_override_final_role;
-		addComboBox(inner, label, PREF_PB_OVERRIDE_FINAL_ROLE, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_OVERRIDE_FINAL_ROLE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_adapting_deprecated_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_ADAPTING_DEPRECATED, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_binding_to_system_class;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_WEAVE_INTO_SYSTEM_CLASS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+
+		// --- unsafe code 
 		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_section_unsafe;
+		twistieKey= OptionsConfigurationBlock.getLocalKey("CompilerConfigurationBlock_section_unsafe"); //$NON-NLS-1$
+		section= fFilteredPrefTree.addExpandableComposite(composite, label, nColumns, twistieKey, null, false);
+		excomposite= getExpandableComposite(twistieKey);
+		
+		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_fragile_callin_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_FRAGILE_CALLIN, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_unsafe_role_instantiation_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNSAFE_ROLE_INSTANTIATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_abstract_potential_relevant_role_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_ABSTRACT_POTENTIAL_RELEVANT_ROLE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_baseclass_cycle_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_BASECLASS_CYCLE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_potential_ambiguous_playedby_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_POTENTIAL_AMBIGUOUS_PLAYEDBY, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);
+		
+		// --- programming problems
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_section_programming_problems;
+		twistieKey= OptionsConfigurationBlock.getLocalKey("CompilerConfigurationBlock_section_programming_problems"); //$NON-NLS-1$
+		section= fFilteredPrefTree.addExpandableComposite(composite, label, nColumns, twistieKey, null, false);
+		excomposite= getExpandableComposite(twistieKey);
+		
+		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_effectless_fieldaccess_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_EFFECTLESS_FIELD_ACCESS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_ignoring_role_result;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_IGNORING_ROLE_RETURN, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_unused_parammap_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_UNUSED_PARAMMAP, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_ambiguous_lowering_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_AMBIGUOUS_LOWERING, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+		
+		// --- control flow 
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_section_control_flow;
+		twistieKey= OptionsConfigurationBlock.getLocalKey("CompilerConfigurationBlock_section_control_flow"); //$NON-NLS-1$
+		section= fFilteredPrefTree.addExpandableComposite(composite, label, nColumns, twistieKey, null, false);
+		excomposite= getExpandableComposite(twistieKey);
+		
+		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
+		
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_not_exactly_one_basecall_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_BASECALL, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+
 		label= OTPreferencesMessages.OTCompilerConfigurationBlock_exception_in_guard;
-		addComboBox(inner, label, PREF_PB_EXCEPTION_IN_GUARD, errorWarningIgnore, errorWarningIgnoreLabels, 0);			
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_EXCEPTION_IN_GUARD, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
 
-		// ---- Feature enablement ----
-		inner = myCreateSection(nColumns, composite, OTPreferencesMessages.OTCompilerFeatureEnablement_description);
-
-		label= OTPreferencesMessages.OTCompilerConfigurationBlock_opt_scoped_keywords;
-		addCheckBox(inner, label, PREF_OPT_SCOPED_KEYWORDS, enabledDisabled, 0);
+		// --- code style
 		
-		// not sure whether this works
-		IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_SECTION_NAME);
-		restoreSectionExpansionStates(section);
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_section_code_style;
+		twistieKey= OptionsConfigurationBlock.getLocalKey("CompilerConfigurationBlock_section_2"); //$NON-NLS-1$
+		section= fFilteredPrefTree.addExpandableComposite(composite, label, nColumns, twistieKey, null, false);
+		excomposite= getExpandableComposite(twistieKey);
+		
+		inner= createInnerComposite(excomposite, nColumns, composite.getFont());
+
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_bindingconventions_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_BINDING_CONVENTIONS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+		
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_inferred_callout_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_INFERRED_CALLOUT, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+
+		label= OTPreferencesMessages.OTCompilerConfigurationBlock_deprecated_path_syntax_label;
+		fFilteredPrefTree.addComboBox(inner, label, PREF_PB_DEPRECATED_PATH_SYNTAX, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent, section);			
+
+		IDialogSettings settingsSection= JavaPlugin.getDefault().getDialogSettings().getSection(SETTINGS_SECTION_NAME);
+		restoreSectionExpansionStates(settingsSection);
+
 
 		// store in this field in order to support enabling/disabling via enablePreferenceContent()
-		fControlsComposite = composite;
-		return composite;
+		fControlsComposite = sc1;
+		
+		return sc1;
 	}
-
-	private Composite myCreateSection(int nColumns, Composite composite, String label) {
-		ExpandableComposite excomposite = createStyleSection(composite, label, nColumns);
+	private Composite createInnerComposite(ExpandableComposite excomposite, int nColumns, Font font) {
 		Composite inner= new Composite(excomposite, SWT.NONE);
-		inner.setFont(composite.getFont());
+		inner.setFont(font);
 		inner.setLayout(new GridLayout(nColumns, false));
 		excomposite.setClient(inner);
 		return inner;
 	}
+	
 
 	private void addLabel(Composite composite, int nColumns, String descriptionText, int fontStyle) 
 	{
