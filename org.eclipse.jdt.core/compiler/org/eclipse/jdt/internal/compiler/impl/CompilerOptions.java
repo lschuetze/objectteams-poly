@@ -154,9 +154,13 @@ public class CompilerOptions {
 	public static final String OPTION_ReportUnsafeRoleInstantiation   =
 		"org.eclipse.objectteams.otdt.compiler.problem.unsafe_role_instantiation"; //$NON-NLS-1$
 
+	public static final String OPTION_ReportEffectlessFieldaccess =  
+		"org.eclipse.objectteams.otdt.compiler.problem.effectless_fieldaccess"; //$NON-NLS-1$ 
 	public static final String OPTION_ReportFragileCallin =
 		"org.eclipse.objectteams.otdt.compiler.problem.fragile_callin"; //$NON-NLS-1$
-
+    public static final String OPTION_ReportUnusedParammap =  
+    	"org.eclipse.objectteams.otdt.compiler.problem.unused_parammap"; //$NON-NLS-1$ 
+    	  
 	public static final String OPTION_ReportPotentialAmbiguousPlayedby =
 		"org.eclipse.objectteams.otdt.compiler.problem.potential_ambiguous_playedby"; //$NON-NLS-1$
 	public static final String OPTION_ReportDefiniteBindingAmbiguity=
@@ -333,6 +337,8 @@ public class CompilerOptions {
 	public static final int IgnoringRoleReturn=			     OTJFlag | ASTNode.Bit17;
 	public static final int DefiniteBindingAmbiguity=		 OTJFlag | ASTNode.Bit18;
 	public static final int BaseclassCycle=				     OTJFlag | ASTNode.Bit19;
+	public static final int EffectlessFieldaccess= 			 OTJFlag | ASTNode.Bit20; 
+	public static final int UnusedParammap= 				 OTJFlag | ASTNode.Bit21; 
 // SH}
 
 	// Severity level for handlers
@@ -678,8 +684,12 @@ public class CompilerOptions {
 				return OPTION_ReportBaseclassCycle;
 			case UnsafeRoleInstantiation :
 				return OPTION_ReportUnsafeRoleInstantiation;
+			case EffectlessFieldaccess :
+				return OPTION_ReportEffectlessFieldaccess;
 			case FragileCallin :
 				return OPTION_ReportFragileCallin;
+			case UnusedParammap :
+				return OPTION_ReportUnusedParammap;
 			case PotentialAmbiguousPlayedBy :
 				return OPTION_ReportPotentialAmbiguousPlayedby;
 			case DefiniteBindingAmbiguity:
@@ -879,7 +889,9 @@ public class CompilerOptions {
 			OPTION_ReportNotExactlyOneBasecall,
 			OPTION_ReportBaseclassCycle,
 			OPTION_ReportUnsafeRoleInstantiation,
+			OPTION_ReportEffectlessFieldaccess,
 			OPTION_ReportFragileCallin,
+			OPTION_ReportUnusedParammap,
 			OPTION_ReportPotentialAmbiguousPlayedby,
 			OPTION_ReportDefiniteBindingAmbiguity,
 			OPTION_ReportAbstractPotentialRelevantRole,
@@ -972,8 +984,10 @@ public class CompilerOptions {
 				return "baseclasscycle";  //$NON-NLS-1$
 			case UnsafeRoleInstantiation :
 				return "roleinstantiation";  //$NON-NLS-1$
+//			case EffectlessFieldaccess : // no reason to suppress
 			case FragileCallin :
 				return "fragilecallin";  //$NON-NLS-1$
+//			case UnusedParammap : // no reason to suppress
 			case PotentialAmbiguousPlayedBy :
 				return "ambiguousbinding"; //$NON-NLS-1$
 			case DefiniteBindingAmbiguity :
@@ -1257,7 +1271,9 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportBaseclassCycle, getSeverityString(BaseclassCycle));
 		optionsMap.put(OPTION_ReportUnsafeRoleInstantiation, getSeverityString(UnsafeRoleInstantiation));
 
+		optionsMap.put(OPTION_ReportEffectlessFieldaccess, getSeverityString(EffectlessFieldaccess));
 		optionsMap.put(OPTION_ReportFragileCallin, getSeverityString(FragileCallin));
+		optionsMap.put(OPTION_ReportUnusedParammap, getSeverityString(UnusedParammap));
 
 		optionsMap.put(OPTION_ReportPotentialAmbiguousPlayedby, getSeverityString(PotentialAmbiguousPlayedBy));
 		optionsMap.put(OPTION_ReportDefiniteBindingAmbiguity, getSeverityString(DefiniteBindingAmbiguity));
@@ -1714,7 +1730,9 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportBaseclassCycle)) != null) updateSeverity(BaseclassCycle, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportUnsafeRoleInstantiation)) != null) updateSeverity(UnsafeRoleInstantiation, optionValue);
 
+		if ((optionValue = optionsMap.get(OPTION_ReportEffectlessFieldaccess)) != null) updateSeverity(EffectlessFieldaccess, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportFragileCallin)) != null) updateSeverity(FragileCallin, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportUnusedParammap)) != null) updateSeverity(UnusedParammap, optionValue);
 
 		if ((optionValue = optionsMap.get(OPTION_ReportPotentialAmbiguousPlayedby)) != null) updateSeverity(PotentialAmbiguousPlayedBy, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportDefiniteBindingAmbiguity)) != null) updateSeverity(DefiniteBindingAmbiguity, optionValue);
@@ -1973,7 +1991,9 @@ public class CompilerOptions {
 		buf.append("\n\t- report if not exactly one basecall in callin method : ").append(getSeverityString(NotExactlyOneBasecall)); //$NON-NLS-1$
 		buf.append("\n\t- report baseclass cycle (playedBy enclosing): ").append(getSeverityString(BaseclassCycle)); //$NON-NLS-1$
 
+		buf.append("\n\t- report if callout to field has no effect : ").append(getSeverityString(EffectlessFieldaccess)); //$NON-NLS-1$
 		buf.append("\n\t- report if callin is fragile (possibly no result) : ").append(getSeverityString(FragileCallin)); //$NON-NLS-1$
+		buf.append("\n\t- report if parameter mapping is not used : ").append(getSeverityString(UnusedParammap)); //$NON-NLS-1$
 		buf.append("\n\t- report if role instantiation is unsafe : ").append(getSeverityString(UnsafeRoleInstantiation)); //$NON-NLS-1$
 
 		buf.append("\n\t- report if role-base bindings are potentially ambiguous : ").append(getSeverityString(PotentialAmbiguousPlayedBy)); //$NON-NLS-1$

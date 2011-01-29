@@ -498,10 +498,16 @@ public static int getIrritant(int problemID) {
 		case IProblem.RoleConstructorHiddenByLiftingConstructor:
 			return CompilerOptions.UnsafeRoleInstantiation;
 
+		case IProblem.FieldAccessHasNoEffect:
+			return CompilerOptions.EffectlessFieldaccess;
+			
 		case IProblem.FragileCallinBindingReferenceType:
 		case IProblem.FragileCallinBindingBaseType:
 			return CompilerOptions.FragileCallin;
 
+		case IProblem.UnusedParamMap:
+			return CompilerOptions.UnusedParammap;
+			
 		case IProblem.RoleBindingPotentiallyAmbiguous:
 			return CompilerOptions.PotentialAmbiguousPlayedBy;
 		case IProblem.CallinDespiteBindingAmbiguity:
@@ -692,6 +698,8 @@ public static int getProblemCategory(int severity, int problemID) {
 			case CompilerOptions.WeaveIntoSystemClass:
 			case CompilerOptions.DangerousCallin:
 			case CompilerOptions.IgnoringRoleReturn:
+			case CompilerOptions.EffectlessFieldaccess:
+			case CompilerOptions.UnusedParammap:
 				return CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM;
 			case CompilerOptions.AdaptingDeprecated :
 				return CategorizedProblem.CAT_DEPRECATION;
@@ -10057,7 +10065,6 @@ public void unusedParamMap(
             IProblem.UnusedParamMap,
             args,
             args,
-            ProblemSeverities.Warning,
             mapping.sourceStart,
             mapping.sourceEnd);
 }
@@ -10403,7 +10410,6 @@ public void fieldAccessHasNoEffect(MethodSpec roleMethodSpec, FieldAccessSpec fi
 			IProblem.FieldAccessHasNoEffect,
 			args,
 			args,
-			ProblemSeverities.Warning,
 			roleMethodSpec.declarationSourceStart,
 			fieldSpec.declarationSourceEnd);
 }

@@ -124,7 +124,9 @@ public class IrritantSet {
 				| CompilerOptions.NotExactlyOneBasecall
 				| CompilerOptions.BaseclassCycle
 				| CompilerOptions.UnsafeRoleInstantiation
+				| CompilerOptions.EffectlessFieldaccess
 				| CompilerOptions.FragileCallin
+				| CompilerOptions.UnusedParammap
 				| CompilerOptions.PotentialAmbiguousPlayedBy
 				| CompilerOptions.AbstractPotentialRelevantRole
 				| CompilerOptions.Decapsulation
