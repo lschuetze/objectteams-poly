@@ -1950,14 +1950,16 @@ public void test012b(){
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.decapsulation\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.decapsulation_write\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.definite_ambiguity\" value=\"error\"/>\n" +
-            "		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.deprecated_path_syntax\" value=\"warning\"/>\n" +			
+            "		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.deprecated_path_syntax\" value=\"warning\"/>\n" +
+            "		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.effectless_fieldaccess\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.exception_in_guard\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.fragile_callin\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.ignoring_role_return\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.inferred_callout\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.override_final_role\" value=\"error\"/>\n" +
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.potential_ambiguous_playedby\" value=\"warning\"/>\n" + 
-			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.unsafe_role_instantiation\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.unsafe_role_instantiation\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.unused_parammap\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.weave_into_system_class\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.core.compiler.problem.decapsulation\" value=\"report binding\"/>\n" + 
 // SH}
