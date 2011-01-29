@@ -621,7 +621,7 @@ public abstract class TypeCreator
 		}
 	}
 	
-	private StubTypeContext getSuperClassStubTypeContext() throws CoreException {
+	protected StubTypeContext getSuperClassStubTypeContext() throws CoreException {
 		if (fSuperClassStubTypeContext == null) {
 			String typeName;
 			if (_typeInfo.getCurrentType() != null) {
@@ -667,7 +667,7 @@ public abstract class TypeCreator
 	}
 
 	
-	private StubTypeContext getSuperInterfacesStubTypeContext() throws CoreException {
+	protected StubTypeContext getSuperInterfacesStubTypeContext() throws CoreException {
 		if (fSuperInterfaceStubTypeContext == null) {
 			String typeName;
 			if (_typeInfo != null) {

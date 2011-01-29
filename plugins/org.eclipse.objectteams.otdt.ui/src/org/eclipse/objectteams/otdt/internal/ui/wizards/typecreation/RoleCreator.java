@@ -23,7 +23,10 @@ package org.eclipse.objectteams.otdt.internal.ui.wizards.typecreation;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.objectteams.otdt.internal.ui.OTDTUIPluginConstants;
 
 
@@ -51,19 +54,34 @@ public class RoleCreator extends TypeCreator
 		writeBaseClass(buf, imports.fImportsRewrite);
 	}
 
-	private void writeBaseClass(StringBuffer buf, ImportRewrite imports)
+	private void writeBaseClass(StringBuffer buf, ImportRewrite imports) throws CoreException
 	{
-	    if ( !(getTypeInfo() instanceof RoleTypeInfo) )
+	    TypeInfo typeInfo = getTypeInfo();
+		if ( !(typeInfo instanceof RoleTypeInfo) )
 			return;
 	    
-	    RoleTypeInfo typeInfo = (RoleTypeInfo) getTypeInfo();
-	    String baseName = typeInfo.getBaseTypeName();
-		
-		if (baseName != null && baseName.trim().length() > 0 )
-		{
-			buf.append(" playedBy "); //$NON-NLS-1$
-			buf.append(imports.addImportBase(baseName));
-		}
+	    RoleTypeInfo roleTypeInfo = (RoleTypeInfo) typeInfo;
+	    String baseName = roleTypeInfo.getBaseTypeName();
+
+	    if (baseName != null && baseName.trim().length() > 0 )
+	    {
+	    	buf.append(" playedBy "); //$NON-NLS-1$
+			ITypeBinding binding= null;
+			IType currentType = roleTypeInfo.getCurrentType();
+			if (currentType != null) { // try to resolve it like a superclass:
+				binding= TypeContextChecker.resolveSuperClass(baseName, currentType, getSuperClassStubTypeContext());
+				if (binding == null) {// but could also be an interface:
+					binding= TypeContextChecker.resolveSuperInterfaces(new String[]{baseName}, currentType, getSuperInterfacesStubTypeContext())[0];
+				}
+			}
+			if (binding != null) {
+				buf.append(imports.addImport(binding));
+				imports.setImportBase(binding);
+			} else {
+				buf.append(imports.addImportBase(baseName));
+			}
+
+	    }
 	}
 
 
