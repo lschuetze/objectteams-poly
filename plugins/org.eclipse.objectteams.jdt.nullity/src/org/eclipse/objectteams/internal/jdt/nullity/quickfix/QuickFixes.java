@@ -71,6 +71,7 @@ public team class QuickFixes {
 			case DefiniteNullFromNonNullMethod:
 			case PotentialNullFromNonNullMethod:
 			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 					return true;
 			default:
 				return base.hasCorrections(cu, problemId);
@@ -93,6 +94,7 @@ public team class QuickFixes {
 				addNullableAnnotationInSignatureProposal(context, problem, proposals);
 				break;			
 			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 				if (isComplainingAboutArgument(context, problem))
 					addNullableAnnotationInSignatureProposal(context, problem, proposals);
 				break;
@@ -112,7 +114,7 @@ public team class QuickFixes {
 				options.put(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
 			if (problem.getProblemId() == PotentialNullFromNonNullMethod)
 				options.put(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
-			if (problem.getProblemId() == IProblem.NonNullLocalVariableComparisonYieldsFalse)
+			if (mayIndicateParameterNullcheck(problem.getProblemId()))
 				options.put(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, this), 15, image, context);
 			proposals.add(proposal);
@@ -170,7 +172,7 @@ public team class QuickFixes {
 			for (int i= 0; i < problems.length; i++) {
 				if (   (addDefinitelyMissingReturnAnnotations && (problems[i].getID() == DefiniteNullFromNonNullMethod))
 					|| (addPotentiallyMissingReturnAnnotations && (problems[i].getID() == PotentialNullFromNonNullMethod))
-					|| (addDefinitelyMissingParamAnnotations && (problems[i].getID() == IProblem.NonNullLocalVariableComparisonYieldsFalse)))
+					|| (addDefinitelyMissingParamAnnotations && mayIndicateParameterNullcheck(problems[i].getID())))
 				locations[i]= new ProblemLocation(problems[i]);
 			}
 		}
@@ -221,7 +223,7 @@ public team class QuickFixes {
 		MethodDeclaration declaration= (MethodDeclaration) declaringNode;
 		
 		RewriteOperations.SignatureAnnotationRewriteOperation result = null;
-		if (problem.getProblemId() == IProblem.NonNullLocalVariableComparisonYieldsFalse) {
+		if (mayIndicateParameterNullcheck(problem.getProblemId())) {
 			if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
 				IBinding binding = ((SimpleName)selectedNode).resolveBinding();
 				if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isParameter())
@@ -245,7 +247,12 @@ public team class QuickFixes {
 	}
 
 	static boolean isMissingNullableAnnotationProblem(int id) {
-		return id == DefiniteNullFromNonNullMethod || id == PotentialNullFromNonNullMethod || id == IProblem.NonNullLocalVariableComparisonYieldsFalse;
+		return id == DefiniteNullFromNonNullMethod || id == PotentialNullFromNonNullMethod 
+				|| mayIndicateParameterNullcheck(id);
+	}
+	
+	static boolean mayIndicateParameterNullcheck(int problemId) {
+		return problemId == IProblem.NonNullLocalVariableComparisonYieldsFalse || problemId == IProblem.RedundantNullCheckOnNonNullLocalVariable;
 	}
 	
 	static boolean hasExplicitNullnessAnnotation(ICompilationUnit compilationUnit, int offset) {

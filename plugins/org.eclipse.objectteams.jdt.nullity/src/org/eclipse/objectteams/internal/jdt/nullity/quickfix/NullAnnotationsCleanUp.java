@@ -148,7 +148,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			if (   isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) 
 				&& (   ((id == DefiniteNullFromNonNullMethod) && isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE))
 					|| ((id == PotentialNullFromNonNullMethod) && isEnabled(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE))
-					|| ((id == IProblem.NonNullLocalVariableComparisonYieldsFalse) && isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE)))) 
+					|| (QuickFixes.mayIndicateParameterNullcheck(id) && isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE)))) 
 			{
 				// FIXME search specifically: return param (which??)
 //				if (QuickFixes.hasExplicitNullnessAnnotation(compilationUnit, problem.getOffset()))
@@ -177,7 +177,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			int id= problems[i].getID();
 			if (   (addDefinitelyMissingReturnNullable && id == DefiniteNullFromNonNullMethod)
 				|| (addPotentiallyMissingReturnNullable && id == PotentialNullFromNonNullMethod)
-				|| (addDefinitelyMissingParamNullable && id == IProblem.NonNullLocalVariableComparisonYieldsFalse))
+				|| (addDefinitelyMissingParamNullable && QuickFixes.mayIndicateParameterNullcheck(id)))
 				if (!QuickFixes.hasExplicitNullnessAnnotation((ICompilationUnit) compilationUnit.getJavaElement(), problems[i].getSourceStart()))
 					result++;
 		}
