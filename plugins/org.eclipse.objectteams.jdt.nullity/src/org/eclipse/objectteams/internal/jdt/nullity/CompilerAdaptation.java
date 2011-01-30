@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.flow.InitializationFlowContext;
+import org.eclipse.jdt.internal.compiler.flow.UnconditionalFlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -321,6 +322,13 @@ public team class CompilerAdaptation {
 					// leverage null-info from parameter annotations:
 					Boolean nonNullNess = binding.parameterNonNullness[i];
 					if (nonNullNess != null) {
+						// FIXME(SH): workaround for missing array growing in markAsDefinitelyNonNull/markPotentiallyNullBit:
+						int id = arguments[i].binding.id; 
+						if (info instanceof UnconditionalFlowInfo)
+							id += ((UnconditionalFlowInfo)info).maxFieldCount;
+						if (id >= UnconditionalFlowInfo.BitCacheSize)
+							info.markAsDefinitelyAssigned(arguments[i].binding);
+						// End workaround
 						if (nonNullNess)
 							info.markAsDefinitelyNonNull(arguments[i].binding);
 						else
