@@ -10,20 +10,30 @@
  *******************************************************************************/
 package org.eclipse.objectteams.internal.jdt.nullity.quickfix;
 
+import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
@@ -38,7 +48,6 @@ import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.objectteams.internal.jdt.nullity.NullCompilerOptions;
-import org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem;
 import org.eclipse.swt.graphics.Image;
 
 import base org.eclipse.jdt.internal.ui.text.correction.QuickFixProcessor;
@@ -59,8 +68,9 @@ public team class QuickFixes {
 		@SuppressWarnings("basecall")
 		callin boolean hasCorrections(ICompilationUnit cu, int problemId) {
 			switch (problemId) {
-			case IProblem.DefiniteNullFromNonNullMethod:
-			case IProblem.PotentialNullFromNonNullMethod:
+			case DefiniteNullFromNonNullMethod:
+			case PotentialNullFromNonNullMethod:
+			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 					return true;
 			default:
 				return base.hasCorrections(cu, problemId);
@@ -78,30 +88,55 @@ public team class QuickFixes {
 				return;
 			}
 			switch (id) {
-			case IProblem.DefiniteNullFromNonNullMethod:
-				addNullableAnnotationProposal(context, problem, proposals);
+			case DefiniteNullFromNonNullMethod:
+			case PotentialNullFromNonNullMethod:
+				addNullableAnnotationInSignatureProposal(context, problem, proposals);
 				break;			
+			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+				if (isComplainingAboutArgument(context, problem))
+					addNullableAnnotationInSignatureProposal(context, problem, proposals);
+				break;
 			}			
 		}		
 	}
 		
 	@SuppressWarnings("unchecked")
-	void addNullableAnnotationProposal(IInvocationContext context, IProblemLocation problem, @SuppressWarnings("rawtypes") Collection proposals) {
-		IProposableFix fix= createNullableFix(context.getASTRoot(), problem);
+	void addNullableAnnotationInSignatureProposal(IInvocationContext context, IProblemLocation problem, @SuppressWarnings("rawtypes") Collection proposals) {
+		IProposableFix fix= createNullableInSignatureFix(context.getASTRoot(), problem);
 		
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map<String, String> options= new Hashtable<String, String>();
 			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
-			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS_NULLABLE, CleanUpOptions.TRUE);
+			if (problem.getProblemId() == DefiniteNullFromNonNullMethod)
+				options.put(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
+			if (problem.getProblemId() == PotentialNullFromNonNullMethod)
+				options.put(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
+			if (problem.getProblemId() == IProblem.NonNullLocalVariableComparisonYieldsFalse)
+				options.put(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, this), 15, image, context);
 			proposals.add(proposal);
 		}		
 	}
+	
+	boolean isComplainingAboutArgument(IInvocationContext context, IProblemLocation problem) {
 
-	CompilationUnitRewriteOperationsFix createNullableFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+		CompilationUnit astRoot= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
+
+		if (!(selectedNode instanceof SimpleName)) {
+			return false;
+		}
+		SimpleName nameNode= (SimpleName) selectedNode;
+		IBinding binding = nameNode.resolveBinding();
+		if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding) binding).isParameter())
+			return true;
+		return false;
+	}
+
+	CompilationUnitRewriteOperationsFix createNullableInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		String nullableAnnotationName = getNullableAnnotationName(compilationUnit.getJavaElement(), false);
-		AnnotationRewriteOperation operation = createAddNullableOperation(compilationUnit, problem, nullableAnnotationName);
+		CompilationUnitRewriteOperation operation = createAddNullableOperation(compilationUnit, problem, nullableAnnotationName, null);
 		if (operation == null)
 			return null;
 		
@@ -113,13 +148,18 @@ public team class QuickFixes {
 														new CompilationUnitRewriteOperation[] {operation});
 	}
 
-	ICleanUpFix createCleanUp(CompilationUnit compilationUnit, boolean addNullableAnnotations, IProblemLocation[] locations) {
+	ICleanUpFix createCleanUp(CompilationUnit compilationUnit, 
+								boolean addDefinitelyMissingReturnAnnotations, 
+								boolean addPotentiallyMissingReturnAnnotations, 
+								boolean addDefinitelyMissingParamAnnotations, 
+								IProblemLocation[] locations) 
+	{
 		
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
 		
-		if (!addNullableAnnotations)
+		if (! (addDefinitelyMissingReturnAnnotations || addPotentiallyMissingReturnAnnotations || addDefinitelyMissingParamAnnotations))
 			return null;
 		
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
@@ -128,6 +168,9 @@ public team class QuickFixes {
 			org.eclipse.jdt.core.compiler.IProblem[] problems= compilationUnit.getProblems();
 			locations= new IProblemLocation[problems.length];
 			for (int i= 0; i < problems.length; i++) {
+				if (   (addDefinitelyMissingReturnAnnotations && (problems[i].getID() == DefiniteNullFromNonNullMethod))
+					|| (addPotentiallyMissingReturnAnnotations && (problems[i].getID() == PotentialNullFromNonNullMethod))
+					|| (addDefinitelyMissingParamAnnotations && (problems[i].getID() == IProblem.NonNullLocalVariableComparisonYieldsFalse)))
 				locations[i]= new ProblemLocation(problems[i]);
 			}
 		}
@@ -144,23 +187,24 @@ public team class QuickFixes {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void createAddNullableAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List result) {
 		String nullableAnnotationName = getNullableAnnotationName(compilationUnit.getJavaElement(), false);
+		Set<String> handledPositions = new HashSet<String>();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
-			
-			CompilationUnitRewriteOperation fix = createAddNullableOperation(compilationUnit, problem, nullableAnnotationName);
+			if (problem == null) continue; // problem was filtered out by createCleanUp()
+			CompilationUnitRewriteOperation fix = createAddNullableOperation(compilationUnit, problem, nullableAnnotationName, handledPositions);
 			if (fix != null)
 				result.add(fix);
 		}
 	}
 	
-	AnnotationRewriteOperation createAddNullableOperation(CompilationUnit compilationUnit,
-			IProblemLocation problem, String nullableAnnotationName) 
+	CompilationUnitRewriteOperation createAddNullableOperation(CompilationUnit compilationUnit,
+			IProblemLocation problem, String nullableAnnotationName, Set<String> handledPositions) 
 	{
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
 		
-		if (!isMissingNullableAnnotationProblem(problem.getProblemId()))
+		if (!isMissingNullableAnnotationProblem(problem.getProblemId())) // TODO is this obsolete?
 			return null;
 		
 		if (hasExplicitNullnessAnnotation(cu, problem.getOffset()))
@@ -171,12 +215,28 @@ public team class QuickFixes {
 			return null;
 			
 		ASTNode declaringNode= getDeclaringNode(selectedNode);
-		if (!(declaringNode instanceof BodyDeclaration))
+		if (!(declaringNode instanceof MethodDeclaration))
 			return null;
 		
-		BodyDeclaration declaration= (BodyDeclaration) declaringNode;
+		MethodDeclaration declaration= (MethodDeclaration) declaringNode;
 		
-		return new AnnotationRewriteOperation(declaration, nullableAnnotationName);
+		RewriteOperations.SignatureAnnotationRewriteOperation result = null;
+		if (problem.getProblemId() == IProblem.NonNullLocalVariableComparisonYieldsFalse) {
+			if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+				IBinding binding = ((SimpleName)selectedNode).resolveBinding();
+				if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isParameter())
+					result = new RewriteOperations.ParameterAnnotationRewriteOperation(declaration, nullableAnnotationName, ((SimpleName) selectedNode).getIdentifier());
+			}
+		} else {
+			result = new RewriteOperations.ReturnAnnotationRewriteOperation(declaration, nullableAnnotationName);
+		}
+		
+		if (handledPositions != null && result != null) {
+			if (handledPositions.contains(result.getKey()))
+				return null;
+			handledPositions.add(result.getKey());
+		}
+		return result;
 	}
 
 	/** The relevant declaring node of a return statement is the enclosing method. */
@@ -184,11 +244,11 @@ public team class QuickFixes {
 		return ASTNodes.getParent(selectedNode, ASTNode.METHOD_DECLARATION);
 	}
 
-	boolean isMissingNullableAnnotationProblem(int id) {
-		return id == IProblem.DefiniteNullFromNonNullMethod || id == IProblem.PotentialNullFromNonNullMethod;
+	static boolean isMissingNullableAnnotationProblem(int id) {
+		return id == DefiniteNullFromNonNullMethod || id == PotentialNullFromNonNullMethod || id == IProblem.NonNullLocalVariableComparisonYieldsFalse;
 	}
 	
-	boolean hasExplicitNullnessAnnotation(ICompilationUnit compilationUnit, int offset) {
+	static boolean hasExplicitNullnessAnnotation(ICompilationUnit compilationUnit, int offset) {
 		try {
 			IJavaElement problemElement = compilationUnit.getElementAt(offset);
 			if (problemElement.getElementType() == IJavaElement.METHOD) {
@@ -207,7 +267,7 @@ public team class QuickFixes {
 		return false;
 	}
 
-	String getNullableAnnotationName(IJavaElement compilationUnit, boolean makeSimple) {
+	static String getNullableAnnotationName(IJavaElement compilationUnit, boolean makeSimple) {
 		String qualifiedName = compilationUnit.getJavaProject().getOption(NullCompilerOptions.OPTION_NullableAnnotationName, true);
 		int lastDot;
 		if (makeSimple && qualifiedName != null && (lastDot = qualifiedName.lastIndexOf('.')) != -1)
@@ -215,7 +275,7 @@ public team class QuickFixes {
 		return qualifiedName;
 	}
 
-	String getNonNullAnnotationName(ICompilationUnit compilationUnit, boolean makeSimple) {
+	static String getNonNullAnnotationName(ICompilationUnit compilationUnit, boolean makeSimple) {
 		String qualifiedName = compilationUnit.getJavaProject().getOption(NullCompilerOptions.OPTION_NonNullAnnotationName, true);
 		int lastDot;
 		if (makeSimple && qualifiedName != null && (lastDot = qualifiedName.lastIndexOf('.')) != -1)

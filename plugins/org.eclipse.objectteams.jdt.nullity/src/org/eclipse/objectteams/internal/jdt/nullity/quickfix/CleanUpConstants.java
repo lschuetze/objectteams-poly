@@ -14,6 +14,8 @@ package org.eclipse.objectteams.internal.jdt.nullity.quickfix;
 public class CleanUpConstants extends org.eclipse.jdt.internal.corext.fix.CleanUpConstants {
 
 	// option name for NullAnnotationsCleanUp:
-	public static final String ADD_MISSING_ANNOTATIONS_NULLABLE = "cleanup.add_missing_nullable_annotations"; //$NON-NLS-1$
+	public static final String ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE = "cleanup.add_definitely_missing_nullable_return_annotation"; //$NON-NLS-1$
+	public static final String ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE = "cleanup.add_potentially_missing_nullable_return_annotation"; //$NON-NLS-1$
+	public static final String ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE = "cleanup.add_definitely_missing_nullable_param_annotation"; //$NON-NLS-1$
 
 }
