@@ -148,12 +148,12 @@ public team class CompilerAdaptation {
 			// compare actual null-status against parameter annotations of the called method:
 			MethodBinding methodBinding = getBinding();
 			Expression[] arguments = getArguments();
-			if (arguments != null) {
+			if (arguments != null && methodBinding.parameterNonNullness != null) {
 				int length = arguments.length;
 				for (int i = 0; i < length; i++) {
 					int nullStatus = arguments[i].nullStatus(flowInfo); // slight loss of precision: should also use the null info from the receiver.
 					if (   nullStatus != FlowInfo.NON_NULL 
-						&& methodBinding.parameterNonNullness != null)
+						&& methodBinding.parameterNonNullness[i] != null)
 					{
 						if (methodBinding.parameterNonNullness[i].booleanValue()) // if @NonNull is required
 						{
