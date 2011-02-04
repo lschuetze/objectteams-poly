@@ -18,10 +18,10 @@ package org.eclipse.objectteams.otdt.tests.otjld.api;
 
 import java.util.Map;
 
+import junit.framework.Test;
+
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
-
-import junit.framework.Test;
 
 public class Reflection extends AbstractOTJLDTest {
 	
@@ -1616,5 +1616,38 @@ public class Reflection extends AbstractOTJLDTest {
         		"}"
              },
              "");
+    }
+    // Bug 336152 - [compiler] incompatible cast error if "Object" is hidden by an import 
+    public void test927_getAllRoles6() {
+    	runConformTest(
+    		new String[] {
+    	"Team927gar6.java",
+    			"import t927gar6.Object;\n" + 
+    			"\n" + 
+    			"public team class Team927gar6 {\n" + 
+    			"	protected class R playedBy Object {\n" + 
+    			"		protected R() { base(); }\n" + 
+    			"		toString => toString;\n" + 
+    			"		\n" + 
+    			"	}\n" + 
+    			"	public static void main(String[] args) {\n" + 
+    			"		Team927gar6 t = new Team927gar6();\n" + 
+    			"		t.test();\n" + 
+    			"	}\n" + 
+    			"	private void test() {\n" + 
+    			"		System.out.println(new R().toString());\n" + 
+    			"	}\n" + 
+    			"}\n",
+    	"t927gar6/Object.java",
+    			"package t927gar6;\n" + 
+    			"\n" + 
+    			"public class Object {\n" + 
+    			"	@Override\n" + 
+    			"	public String toString() {\n" + 
+    			"		return \"OK\";\n" + 
+    			"	}\n" + 
+    			"}\n"
+    		},
+    		"OK");
     }
 }
