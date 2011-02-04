@@ -33,7 +33,7 @@ public class Java5 extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testA12_genericRoleFeature18"};
+		TESTS_NAMES = new String[] { "testA120_enumInTeam3"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -4900,7 +4900,7 @@ public class Java5 extends AbstractOTJLDTest {
     		new String[] {
     	"TeamA120eit1.java",
     		"public team class TeamA120eit1 {\n" +
-    		"	enum Values { V1, V2 };\n" +
+    		"	protected enum Values { V1, V2 };\n" +
     		"	public static void main(String[] args) {\n" +
     		"		for (Values v : Values.values())\n" +
     		"			System.out.print(v);\n" +
@@ -4916,7 +4916,7 @@ public class Java5 extends AbstractOTJLDTest {
     		new String[] {
     	"TeamA120eit2.java",
     		"public team class TeamA120eit2 {\n" +
-    		"	enum Values { V1, V2 };\n" +
+    		"	public enum Values { V1, V2 };\n" +
     		"	protected class R playedBy B base when(unfinished.) {}\n" +
     		"	public static void main(String[] args) {\n" +
     		"		for (Values v : Values.values())\n" +
@@ -4937,6 +4937,26 @@ public class Java5 extends AbstractOTJLDTest {
     		"	                                                 ^\n" + 
     		"Syntax error on token \".\", delete this token\n" + 
     		"----------\n");
+    }
+
+    // A team contains an enum - with team inheritance
+    // Bug 336395 - [compiler] enum inside team class may cause NPE
+    public void testA120_enumInTeam3() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA120eit1_2.java",
+	    		"public team class TeamA120eit1_2 extends TeamA120eit1_1 {\n" +
+	    		"	public static void main(String[] args) {\n" +
+	    		"		for (Values v : Values.values())\n" +
+	    		"			System.out.print(v);\n" +
+	    		"	}\n" +
+	    		"}",
+    	"TeamA120eit1_1.java",
+	    		"public team class TeamA120eit1_1 {\n" +
+	    		"	protected enum Values { V1, V2 };\n" +
+	    		"}"
+    		},
+    		"V1V2");
     }
 
     public void testA121_genericNestedTeam1() {
