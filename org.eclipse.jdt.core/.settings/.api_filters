@@ -224,6 +224,12 @@
         </filter>
     </resource>
     <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/IOTConstants.java" type="org.eclipse.objectteams.otdt.core.compiler.IOTConstants">
+        <filter id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="OBJECT"/>
+            </message_arguments>
+        </filter>
         <filter comment="version constants have been changed to methods to account for evolution" id="405864542">
             <message_arguments>
                 <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>

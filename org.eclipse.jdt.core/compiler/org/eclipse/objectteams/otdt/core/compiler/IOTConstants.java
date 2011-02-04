@@ -271,7 +271,6 @@ public interface IOTConstants
 	public static final char[] MY_ROLE = "myRole".toCharArray();
 	public static final char[] _CLASS_CAST_EXCEPTION_ = "ClassCastException".toCharArray();
 	public static final char[] CLASS_CAST_EXCEPTION = "classCastException".toCharArray();
-	public static final char[] OBJECT = "Object".toCharArray();
 	public static final char[] OT_TRANSFORM_ARRAY = (OT_DOLLAR+"transformArray").toCharArray();
 
 	// internal API function of o.o.Team:

@@ -720,11 +720,11 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 					new EqualExpression(
 						gen.castExpression(
 							gen.singleNameReference(CLASS_ARG),
-							gen.singleNameReference(OBJECT), CastExpression.RAW
+							gen.qualifiedNameReference(TypeConstants.JAVA_LANG_OBJECT), CastExpression.RAW
 						),
 						gen.castExpression(
 							gen.classLiteralAccess(gen.singleTypeReference(roleType)),
-							gen.singleNameReference(OBJECT), CastExpression.RAW
+							gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), CastExpression.RAW
 						),
 						OperatorIds.EQUAL_EQUAL
 					),
@@ -758,7 +758,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 		 */
 		TypeReference arrayList= gen.parameterizedQualifiedTypeReference(
 				ARRAY_LIST,
-				new TypeReference[] { gen.singleTypeReference(OBJECT) }
+				new TypeReference[] { gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT) }
 		);
 		char[] loopVariable = "o".toCharArray(); //$NON-NLS-1$
 		return gen.block(new Statement[] {
@@ -779,7 +779,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 							)
 						),
 						gen.foreach(
-							gen.localVariable(loopVariable, OBJECT, null),
+							gen.localVariable(loopVariable, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), null),
 							gen.singleNameReference(VALUES),
 							gen.ifStatement(
 								gen.messageSend(gen.singleNameReference(CLASS_ARG), IS_INSTANCE,
@@ -804,7 +804,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 							    					),
 							    					(gen.sourceLevel >= ClassFileConstants.JDK1_5)
 							    						? gen.arrayTypeReference(T, 1)
-							    						: gen.arrayTypeReference(OBJECT, 1),
+							    						: gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1),
 							    					CastExpression.RAW
 							    				)
 					    	                }
