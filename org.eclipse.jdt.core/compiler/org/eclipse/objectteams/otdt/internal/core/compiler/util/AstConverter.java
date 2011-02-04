@@ -353,7 +353,7 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
         	AstEdit.addMemberTypeDeclaration(enclosingTypeDecl, nestedType);
         }
 
-        if (tsuperRole != null && tsuperRole.roleModel.isRoleFile()) {
+        if (tsuperRole != null && tsuperRole.roleModel != null && tsuperRole.roleModel.isRoleFile()) {
         	// for role copied from a role file create an enclosing CUD to allow for
         	// late role catch-up of this phantom role.
         	ProblemReporter reporter = enclosingTypeDecl.scope.problemReporter();

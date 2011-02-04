@@ -807,12 +807,22 @@ public class TeamModel extends TypeModel {
 	 */
 	public ReferenceBinding[] getKnownRoles() {
 		ReferenceBinding[] members = this._binding.memberTypes();
-		if (this.knownRoleFiles == null)
-			return members;
 		HashSet<String> roleNames = new HashSet<String>();
 		for (int i = 0; i < members.length; i++) {
-			if (!RoleFileCache.isRoFiCache(members[i]))
+			if (!RoleFileCache.isRoFiCache(members[i]) && !members[i].isEnum())
 				roleNames.add(new String(members[i].internalName()));
+		}
+		if (this.knownRoleFiles == null) {
+			if (roleNames.size() == members.length) // nothing filtered?
+				return members;
+			// faster to re-iterate the array than performing the lookup below:
+			ReferenceBinding[] result = new ReferenceBinding[roleNames.size()];
+			int j=0;
+			for (int i = 0; i < members.length; i++) {
+				if (!RoleFileCache.isRoFiCache(members[i]) && !members[i].isEnum())
+					result[j++] = members[i];
+			}
+			return result;
 		}
 		char[][] roleFileNames = this.knownRoleFiles.getNames();
 		for (int i = 0; i < roleFileNames.length; i++) {

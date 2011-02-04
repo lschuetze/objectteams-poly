@@ -1521,7 +1521,7 @@ private ReferenceBinding checkCopyLateRoleFile(TeamModel teamModel, char[] name)
 		&& !OTNameUtils.isTSuperMarkerInterface(name))
 	{
 		ReferenceBinding tsuperRole = superTeam.getMemberType(name);
-		if (   tsuperRole != null && tsuperRole.isValidBinding()
+		if (   tsuperRole != null && tsuperRole.isRole() && tsuperRole.isValidBinding()
 			&& !tsuperRole.isLocalType())
 		{
 			return CopyInheritance.copyLateRole(teamModel.getAst(), tsuperRole);
