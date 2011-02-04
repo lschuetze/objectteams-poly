@@ -51,8 +51,6 @@ public class OTPreferencesMessages {
 	
 	public static String OTCompilerConfigurationBlock_common_description;
 	public static String OTCompilerProblemConfiguration_otjld_ref_description;
-	public static String OTCompilerFeatureEnablement_description;
-	
 
 	public static String OTCompilerConfigurationBlock_section_decapsulation;
 	
