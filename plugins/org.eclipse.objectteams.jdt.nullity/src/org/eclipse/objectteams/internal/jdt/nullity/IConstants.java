@@ -25,12 +25,16 @@ public interface IConstants {
 		 // the following two should be added to TagBits.AllStandardAnnotationsMask:
 		long AnnotationNullable = ASTNode.Bit54L;
 		long AnnotationNonNull = ASTNode.Bit55L;
+		long AnnotationNullableByDefault = ASTNode.Bit56L;
+		long AnnotationNonNullByDefault = ASTNode.Bit57L;
 	}
 	
 	/** Additional constants for {@link org.eclipse.jdt.internal.compiler.lookup.TypeIds}. */
 	static interface TypeIds {
 		final int T_ConfiguredAnnotationNullable = 60;
 		final int T_ConfiguredAnnotationNonNull = 61;
+		final int T_ConfiguredAnnotationNullableByDefault = 62;
+		final int T_ConfiguredAnnotationNonNullByDefault = 63;
 	}
 
 	/** Additional constants for {@link org.eclipse.jdt.core.compiler.IProblem}. */

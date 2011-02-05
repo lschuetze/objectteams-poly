@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.flow.InitializationFlowContext;
 import org.eclipse.jdt.internal.compiler.flow.UnconditionalFlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
+import org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.ImportBinding;
@@ -40,7 +41,6 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
-import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
@@ -66,6 +66,7 @@ import base org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import base org.eclipse.jdt.internal.compiler.lookup.MethodVerifier15;
 import base org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import base org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
+import base org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import base org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import base org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import base org.eclipse.jdt.internal.core.JavaProject;
@@ -271,6 +272,12 @@ public team class CompilerAdaptation {
 			case TypeIds.T_ConfiguredAnnotationNonNull :
 				tagBits |= TagBits.AnnotationNonNull;
 				break;
+			case TypeIds.T_ConfiguredAnnotationNullableByDefault :
+				tagBits |= TagBits.AnnotationNullableByDefault;
+				break;
+			case TypeIds.T_ConfiguredAnnotationNonNullByDefault :
+				tagBits |= TagBits.AnnotationNonNullByDefault;
+				break;
 			}
 			return tagBits;
 		}
@@ -375,8 +382,7 @@ public team class CompilerAdaptation {
 	protected class MethodVerifier15 playedBy MethodVerifier15 {
 
 		LookupEnvironment getEnvironment() 	-> get LookupEnvironment environment;
-		ProblemReporter problemReporter() 	-> get SourceTypeBinding type
-				with  {  result 			<- type.scope.problemReporter() }
+		SourceTypeBinding getType() 		-> get SourceTypeBinding type;
 		AbstractMethodDeclaration[] getMethodDeclarations() -> get SourceTypeBinding type
 				with { 	result 				<- type.scope.referenceContext.methods }
 		MethodBinding[] getMethodBindings() -> get SourceTypeBinding type
@@ -416,7 +422,7 @@ public team class CompilerAdaptation {
 			if ((inheritedBits & TagBits.AnnotationNonNull) != 0) {
 				if ((currentBits & TagBits.AnnotationNullable) != 0) {
 					AbstractMethodDeclaration methodDecl = currentMethod.sourceMethod();
-					problemReporter().illegalRedefinitionToNullableReturn(methodDecl, inheritedMethod.getDeclaringClass(), 
+					getType().problemReporter().illegalRedefinitionToNullableReturn(methodDecl, inheritedMethod.getDeclaringClass(), 
 																		environment.getNonNullAnnotationName());
 				}
 			}
@@ -437,7 +443,7 @@ public team class CompilerAdaptation {
 					Boolean inheritedNonNullNess = inheritedMethod.parameterNonNullness[i];
 					if (inheritedNonNullNess != Boolean.TRUE) { 	 				 // super parameter is not restricted to @NonNull
 						if (currentMethod.parameterNonNullness[i] == Boolean.TRUE) { // current parameter is restricted to @NonNull
-							problemReporter().illegalRedefinitionToNonNullParameter(
+							getType().problemReporter().illegalRedefinitionToNonNullParameter(
 																currentArguments[i],
 																inheritedMethod.getDeclaringClass(),
 																inheritedNonNullNess == null
@@ -461,7 +467,7 @@ public team class CompilerAdaptation {
 				// super method has no annotations but current has
 				for (int i = 0; i < currentMethod.parameterNonNullness.length; i++) {
 					if (currentMethod.parameterNonNullness[i] == Boolean.TRUE) { // tightening from unconstrained to @NonNull
-						problemReporter().illegalRedefinitionToNonNullParameter(
+						getType().problemReporter().illegalRedefinitionToNonNullParameter(
 																		currentArguments[i],
 																		inheritedMethod.getDeclaringClass(),
 																		null);
@@ -479,7 +485,14 @@ public team class CompilerAdaptation {
 		}
 		
 		void fillInDefaultNullNess() {
-			long defaultNullNess = getEnvironment().getGlobalOptions().defaultNonNullness;
+			SourceTypeBinding type = getType();
+			long defaultNullNess = 0;
+			while (defaultNullNess == 0 && type != null) {
+				defaultNullNess = type.defaultNullNess;
+				type = type.enclosingType();
+			}
+			if (defaultNullNess == 0)
+				defaultNullNess = getEnvironment().getGlobalOptions().defaultNonNullness;
 			if (defaultNullNess != 0) {
 				MethodBinding[] methodBindings = getMethodBindings();
 				if (methodBindings != null) {
@@ -490,6 +503,27 @@ public team class CompilerAdaptation {
 		}
 	}
 
+	protected class SourceTypeBinding playedBy SourceTypeBinding {
+		ProblemReporter problemReporter() 	-> get ClassScope scope
+					with {  result 			<- scope.problemReporter() } 
+
+		SourceTypeBinding enclosingType() 	-> ReferenceBinding enclosingType()
+					with { result 			<- (SourceTypeBinding)result }
+		
+		protected long defaultNullNess;
+
+		evaluateNullAnnotations <- after getAnnotationTagBits;
+
+		@SuppressWarnings("inferredcallout")
+		private void evaluateNullAnnotations() {
+			long tagBits = this.tagBits;
+			if ((tagBits & IConstants.TagBits.AnnotationNullableByDefault) != 0)
+				this.defaultNullNess = IConstants.TagBits.AnnotationNullable;
+			else if ((tagBits & IConstants.TagBits.AnnotationNonNullByDefault) != 0)
+				this.defaultNullNess = IConstants.TagBits.AnnotationNonNull;
+		}
+	}
+	
 	/** Retrieve null annotations from binary methods. */
 	protected class BinaryTypeBinding playedBy BinaryTypeBinding {
 		@SuppressWarnings("decapsulation")
@@ -510,12 +544,16 @@ public team class CompilerAdaptation {
 			this.superInterfaces = Binding.NO_SUPERINTERFACES;
 			this.fPackage = packageBinding;
 			this.typeVariables = Binding.NO_TYPE_VARIABLES;
+			long applicableFor = 0;
+			if (typeId == TypeIds.T_ConfiguredAnnotationNullable || typeId == TypeIds.T_ConfiguredAnnotationNonNull)
+				applicableFor = TagBits.AnnotationForMethod | TagBits.AnnotationForParameter | TagBits.AnnotationForLocalVariable;
+			else if (typeId == TypeIds.T_ConfiguredAnnotationNullable || typeId == TypeIds.T_ConfiguredAnnotationNonNull)
+				applicableFor = TagBits.AnnotationForPackage | TagBits.AnnotationForType;
 			this.tagBits = TagBits.AreFieldsComplete | TagBits.AreFieldsSorted 
 									| TagBits.AreMethodsComplete | TagBits.AreMethodsSorted 
 									| TagBits.HasNoMemberTypes | TagBits.TypeVariablesAreConnected
 									| TagBits.AnnotationClassRetention 
-									| TagBits.AnnotationForMethod | TagBits.AnnotationForParameter 
-									| TagBits.AnnotationForLocalVariable ;
+									| applicableFor;
 			this.id = typeId;
 			// experiment with providing a file name that the Java model can recognize as emulated:
 			// this.fileName = CharOperation.concat(new char[]{'&'}, CharOperation.concatWith(compoundName, '/'));
@@ -603,6 +641,12 @@ public team class CompilerAdaptation {
 			compoundName = getNonNullAnnotationName();
 			if (compoundName != null)
 				setupNullAnnotationPackage(compoundName, TypeIds.T_ConfiguredAnnotationNonNull);
+			compoundName = getNullableByDefaultAnnotationName();
+			if (compoundName != null)
+				setupNullAnnotationPackage(compoundName, TypeIds.T_ConfiguredAnnotationNullableByDefault);
+			compoundName = getNonNullByDefaultAnnotationName();
+			if (compoundName != null)
+				setupNullAnnotationPackage(compoundName, TypeIds.T_ConfiguredAnnotationNonNullByDefault);
 		}
 		
 		/** 
@@ -629,8 +673,12 @@ public team class CompilerAdaptation {
 			}
 			if (typeId == TypeIds.T_ConfiguredAnnotationNullable)
 				packageBinding.nullableName = simpleTypeName;
-			else
+			else if (typeId == TypeIds.T_ConfiguredAnnotationNonNull)
 				packageBinding.nonNullName = simpleTypeName;
+			else if (typeId == TypeIds.T_ConfiguredAnnotationNullableByDefault)
+				packageBinding.nullableByDefaultName = simpleTypeName;
+			else if (typeId == TypeIds.T_ConfiguredAnnotationNonNullByDefault)
+				packageBinding.nonNullByDefaultName = simpleTypeName;
 		}
 
 		CompilerOptions getGlobalOptions() -> get CompilerOptions globalOptions;
@@ -641,6 +689,14 @@ public team class CompilerAdaptation {
 
 		public char[][] getNonNullAnnotationName() {
 			return getGlobalOptions().nonNullAnnotationName;
+		}
+
+		public char[][] getNullableByDefaultAnnotationName() {
+			return getGlobalOptions().nullableByDefaultAnnotationName;
+		}
+
+		public char[][] getNonNullByDefaultAnnotationName() {
+			return getGlobalOptions().nonNullByDefaultAnnotationName;
 		}
 	}
 
@@ -654,10 +710,12 @@ public team class CompilerAdaptation {
 		
 		protected char[] nullableName = null;
 		protected char[] nonNullName = null;
+		protected char[] nullableByDefaultName;
+		protected char[] nonNullByDefaultName;
 		protected boolean shouldEmulate = false;
 
 		void setupNullAnnotationType(ReferenceBinding type) <- after void addType(ReferenceBinding type)
-			when (this.nullableName != null || this.nullableName != null);
+			when (this.nullableName != null || this.nonNullName != null || this.nullableByDefaultName != null || this.nonNullByDefaultName != null);
 
 		void setupNullAnnotationType(ReferenceBinding type) {
 			int id = 0;
@@ -665,6 +723,10 @@ public team class CompilerAdaptation {
 				id = TypeIds.T_ConfiguredAnnotationNullable;
 			else if (CharOperation.equals(this.nonNullName, type.sourceName))
 				id = TypeIds.T_ConfiguredAnnotationNonNull;
+			else if (CharOperation.equals(this.nullableByDefaultName, type.sourceName))
+				id = TypeIds.T_ConfiguredAnnotationNullableByDefault;
+			else if (CharOperation.equals(this.nonNullByDefaultName, type.sourceName))
+				id = TypeIds.T_ConfiguredAnnotationNonNullByDefault;
 			else 
 				return;
 			
@@ -916,11 +978,16 @@ public team class CompilerAdaptation {
 		void updateSeverity(int irritant, Object severityString) 	-> void updateSeverity(int irritant, Object severityString);
 		String getSeverityString(int irritant) 						-> String getSeverityString(int irritant);
 		
-
+		public boolean isAnnotationBasedNullAnalysisEnabled;
+		
 		/** Fully qualified name of annotation to use as marker for nullable types. */
 		public char[][] nullableAnnotationName;
 		/** Fully qualified name of annotation to use as marker for nonnull types. */
 		public char[][] nonNullAnnotationName;
+		/** Fully qualified name of annotation to use as marker for default nullable. */
+		public char[][] nullableByDefaultAnnotationName;
+		/** Fully qualified name of annotation to use as marker for default nonnull. */
+		public char[][] nonNullByDefaultAnnotationName;
 		/** Should null annotation types be emulated by synthetic bindings? */
 		public boolean emulateNullAnnotationTypes;
 		
@@ -956,55 +1023,81 @@ public team class CompilerAdaptation {
 			with {optionsMap <- result}
 		@SuppressWarnings("unchecked")
 		private void getMap(Map optionsMap) {
-			optionsMap.put(OPTION_ReportNullContractViolation, getSeverityString(NullContractViolation));
-			optionsMap.put(OPTION_ReportPotentialNullContractViolation, getSeverityString(PotentialNullContractViolation));
-			optionsMap.put(OPTION_ReportNullContractInsufficientInfo, getSeverityString(NullContractInsufficientInfo));
-			if (this.nullableAnnotationName != null) {
-				char[] compoundName = CharOperation.concatWith(this.nullableAnnotationName, '.');
-				optionsMap.put(OPTION_NullableAnnotationName, String.valueOf(compoundName));
+			optionsMap.put(OPTION_AnnotationBasedNullAnalysis, this.isAnnotationBasedNullAnalysisEnabled ? ENABLED : DISABLED);
+			if (this.isAnnotationBasedNullAnalysisEnabled) {
+				optionsMap.put(OPTION_ReportNullContractViolation, getSeverityString(NullContractViolation));
+				optionsMap.put(OPTION_ReportPotentialNullContractViolation, getSeverityString(PotentialNullContractViolation));
+				optionsMap.put(OPTION_ReportNullContractInsufficientInfo, getSeverityString(NullContractInsufficientInfo));
+				if (this.nullableAnnotationName != null) {
+					char[] compoundName = CharOperation.concatWith(this.nullableAnnotationName, '.');
+					optionsMap.put(OPTION_NullableAnnotationName, String.valueOf(compoundName));
+				}
+				if (this.nonNullAnnotationName != null) {
+					char[] compoundName = CharOperation.concatWith(this.nonNullAnnotationName, '.');
+					optionsMap.put(OPTION_NonNullAnnotationName, String.valueOf(compoundName));
+				}
+				if (this.nullableByDefaultAnnotationName != null) {
+					char[] compoundName = CharOperation.concatWith(this.nullableByDefaultAnnotationName, '.');
+					optionsMap.put(OPTION_NullableByDefaultAnnotationName, String.valueOf(compoundName));
+				}
+				if (this.nonNullByDefaultAnnotationName != null) {
+					char[] compoundName = CharOperation.concatWith(this.nonNullByDefaultAnnotationName, '.');
+					optionsMap.put(OPTION_NonNullByDefaultAnnotationName, String.valueOf(compoundName));
+				}
+				optionsMap.put(OPTION_EmulateNullAnnotationTypes, this.emulateNullAnnotationTypes ? ENABLED : DISABLED);
+				if (this.defaultNonNullness == TagBits.AnnotationNullable)
+					optionsMap.put(OPTION_NullnessDefault, NULLABLE);
+				else if (this.defaultNonNullness == TagBits.AnnotationNonNull)
+					optionsMap.put(OPTION_NullnessDefault, NONNULL);
+				else
+					optionsMap.remove(OPTION_NullnessDefault);
 			}
-			if (this.nonNullAnnotationName != null) {
-				char[] compoundName = CharOperation.concatWith(this.nonNullAnnotationName, '.');
-				optionsMap.put(OPTION_NonNullAnnotationName, String.valueOf(compoundName));
-			}
-			optionsMap.put(OPTION_EmulateNullAnnotationTypes, this.emulateNullAnnotationTypes ? ENABLED : DISABLED);
-			if (this.defaultNonNullness == TagBits.AnnotationNullable)
-				optionsMap.put(OPTION_NullnessDefault, NULLABLE);
-			else if (this.defaultNonNullness == TagBits.AnnotationNonNull)
-				optionsMap.put(OPTION_NullnessDefault, NONNULL);
-			else
-				optionsMap.remove(OPTION_NullnessDefault);
 		}
 		void set(Map optionsMap) <- before void set(Map optionsMap);
 		private void set(Map optionsMap) {
 			Object optionValue;
-			if ((optionValue = optionsMap.get(OPTION_ReportNullContractViolation)) != null) updateSeverity(NullContractViolation, optionValue);
-			if ((optionValue = optionsMap.get(OPTION_ReportPotentialNullContractViolation)) != null) updateSeverity(PotentialNullContractViolation, optionValue);
-			if ((optionValue = optionsMap.get(OPTION_ReportNullContractInsufficientInfo)) != null) updateSeverity(NullContractInsufficientInfo, optionValue);
-			if ((optionValue = optionsMap.get(OPTION_NullableAnnotationName)) != null) {
-				this.nullableAnnotationName = CharOperation.splitAndTrimOn('.', ((String)optionValue).toCharArray());
-			}
-			if ((optionValue = optionsMap.get(OPTION_NonNullAnnotationName)) != null) {
-				this.nonNullAnnotationName = CharOperation.splitAndTrimOn('.', ((String)optionValue).toCharArray());
-			}
-			if ((optionValue = optionsMap.get(OPTION_EmulateNullAnnotationTypes)) != null) {
+			if ((optionValue = optionsMap.get(OPTION_AnnotationBasedNullAnalysis)) != null) {
 				if (ENABLED.equals(optionValue)) {
-					this.emulateNullAnnotationTypes = true;
-					// ensure that we actually have annotation names to emulate:
+					this.isAnnotationBasedNullAnalysisEnabled = true;
+					// ensure that we actually have annotation names to use:
 					ensureNullAnnotationNames();
 				} else if (DISABLED.equals(optionValue)) {
-					this.emulateNullAnnotationTypes = false;
+					this.isAnnotationBasedNullAnalysisEnabled = false;
 				}
 			}
-			if ((optionValue = optionsMap.get(OPTION_NullnessDefault)) != null) {
-				if (NULLABLE.equals(optionValue)) {
-					defaultNonNullness = TagBits.AnnotationNullable;
-					ensureNullAnnotationNames();
-				} else if (NONNULL.equals(optionValue)) {
-					defaultNonNullness = TagBits.AnnotationNonNull;
-					ensureNullAnnotationNames();
-				} else {
-					defaultNonNullness = 0;
+			if (this.isAnnotationBasedNullAnalysisEnabled) {
+				if ((optionValue = optionsMap.get(OPTION_ReportNullContractViolation)) != null) updateSeverity(NullContractViolation, optionValue);
+				if ((optionValue = optionsMap.get(OPTION_ReportPotentialNullContractViolation)) != null) updateSeverity(PotentialNullContractViolation, optionValue);
+				if ((optionValue = optionsMap.get(OPTION_ReportNullContractInsufficientInfo)) != null) updateSeverity(NullContractInsufficientInfo, optionValue);
+				if ((optionValue = optionsMap.get(OPTION_NullableAnnotationName)) != null) {
+					this.nullableAnnotationName = CharOperation.splitAndTrimOn('.', ((String)optionValue).toCharArray());
+				}
+				if ((optionValue = optionsMap.get(OPTION_NonNullAnnotationName)) != null) {
+					this.nonNullAnnotationName = CharOperation.splitAndTrimOn('.', ((String)optionValue).toCharArray());
+				}
+				if ((optionValue = optionsMap.get(OPTION_NullableByDefaultAnnotationName)) != null) {
+					this.nullableByDefaultAnnotationName = CharOperation.splitAndTrimOn('.', ((String)optionValue).toCharArray());
+				}
+				if ((optionValue = optionsMap.get(OPTION_NonNullByDefaultAnnotationName)) != null) {
+					this.nonNullByDefaultAnnotationName = CharOperation.splitAndTrimOn('.', ((String)optionValue).toCharArray());
+				}
+				if ((optionValue = optionsMap.get(OPTION_EmulateNullAnnotationTypes)) != null) {
+					if (ENABLED.equals(optionValue)) {
+						this.emulateNullAnnotationTypes = true;
+					} else if (DISABLED.equals(optionValue)) {
+						this.emulateNullAnnotationTypes = false;
+					}
+				}
+				if ((optionValue = optionsMap.get(OPTION_NullnessDefault)) != null) {
+					if (NULLABLE.equals(optionValue)) {
+						defaultNonNullness = TagBits.AnnotationNullable;
+						ensureNullAnnotationNames();
+					} else if (NONNULL.equals(optionValue)) {
+						defaultNonNullness = TagBits.AnnotationNonNull;
+						ensureNullAnnotationNames();
+					} else {
+						defaultNonNullness = 0;
+					}
 				}
 			}
 		}
@@ -1013,6 +1106,10 @@ public team class CompilerAdaptation {
 				this.nullableAnnotationName = NullCompilerOptions.DEFAULT_NULLABLE_ANNOTATION_NAME;
 			if (this.nonNullAnnotationName == null)
 				this.nonNullAnnotationName = NullCompilerOptions.DEFAULT_NONNULL_ANNOTATION_NAME;
+			if (this.nullableByDefaultAnnotationName == null)
+				this.nullableByDefaultAnnotationName = NullCompilerOptions.DEFAULT_NULLABLEBYDEFAULT_ANNOTATION_NAME;
+			if (this.nonNullByDefaultAnnotationName == null)
+				this.nonNullByDefaultAnnotationName = NullCompilerOptions.DEFAULT_NONNULLBYDEFAULT_ANNOTATION_NAME;
 		}
 	}
 	protected class JavaModelManager playedBy JavaModelManager {
@@ -1028,8 +1125,9 @@ public team class CompilerAdaptation {
 		private void fillOptionNames() {
 			JavaModelManager javaModelManager = JavaModelManager.getJavaModelManager();
 			HashSet optionNames = javaModelManager.getOptionNames();
-			if (optionNames.contains(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes))
+			if (optionNames.contains(NullCompilerOptions.OPTION_AnnotationBasedNullAnalysis))
 				return;
+			optionNames.add(NullCompilerOptions.OPTION_AnnotationBasedNullAnalysis);
 			optionNames.add(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes);
 			optionNames.add(NullCompilerOptions.OPTION_NonNullAnnotationName);
 			optionNames.add(NullCompilerOptions.OPTION_NullableAnnotationName);

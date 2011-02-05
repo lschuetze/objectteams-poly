@@ -31,8 +31,11 @@ public interface NullCompilerOptions {
 	public static final String OPTION_ReportPotentialNullContractViolation = "org.eclipse.jdt.core.compiler.problem.potentialNullContractViolation";  //$NON-NLS-1$
 	public static final String OPTION_ReportNullContractInsufficientInfo = "org.eclipse.jdt.core.compiler.problem.nullContractInsufficientInfo";  //$NON-NLS-1$
 
+	public static final String OPTION_AnnotationBasedNullAnalysis = "org.eclipse.jdt.core.compiler.annotation.nullanalysis"; //$NON-NLS-1$
 	public static final String OPTION_NullableAnnotationName = "org.eclipse.jdt.core.compiler.annotation.nullable"; //$NON-NLS-1$
 	public static final String OPTION_NonNullAnnotationName = "org.eclipse.jdt.core.compiler.annotation.nonnull"; //$NON-NLS-1$
+	public static final String OPTION_NullableByDefaultAnnotationName = "org.eclipse.jdt.core.compiler.annotation.nullablebydefault"; //$NON-NLS-1$
+	public static final String OPTION_NonNullByDefaultAnnotationName = "org.eclipse.jdt.core.compiler.annotation.nonnullbydefault"; //$NON-NLS-1$
 	public static final String OPTION_EmulateNullAnnotationTypes = "org.eclipse.jdt.core.compiler.annotation.emulate"; //$NON-NLS-1$
 	
 	public static final String OPTION_NullnessDefault = "org.eclipse.jdt.core.compiler.annotation.nulldefault";  //$NON-NLS-1$
@@ -44,4 +47,6 @@ public interface NullCompilerOptions {
 
 	static final char[][] DEFAULT_NONNULL_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.NonNull".toCharArray()); //$NON-NLS-1$
 	static final char[][] DEFAULT_NULLABLE_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.Nullable".toCharArray()); //$NON-NLS-1$
+	static final char[][] DEFAULT_NONNULLBYDEFAULT_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.NonNullByDefault".toCharArray()); //$NON-NLS-1$
+	static final char[][] DEFAULT_NULLABLEBYDEFAULT_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.NullableByDefault".toCharArray()); //$NON-NLS-1$
 }
