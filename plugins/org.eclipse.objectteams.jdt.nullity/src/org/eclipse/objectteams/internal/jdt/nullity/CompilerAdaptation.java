@@ -907,9 +907,6 @@ public team class CompilerAdaptation {
 	}
 
 	// ================================== Compiler Options: ==================================
-	// pushed out from role CompilerOptions:
-	private static final char[][] DEFAULT_NONNULL_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.NonNull".toCharArray()); //$NON-NLS-1$
-	private static final char[][] DEFAULT_NULLABLE_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.Nullable".toCharArray()); //$NON-NLS-1$
 
 	@SuppressWarnings("rawtypes")
 	protected class CompilerOptions implements org.eclipse.objectteams.internal.jdt.nullity.NullCompilerOptions playedBy CompilerOptions 
@@ -1013,9 +1010,9 @@ public team class CompilerAdaptation {
 		}
 		private void ensureNullAnnotationNames() {
 			if (this.nullableAnnotationName == null)
-				this.nullableAnnotationName = DEFAULT_NULLABLE_ANNOTATION_NAME;
+				this.nullableAnnotationName = NullCompilerOptions.DEFAULT_NULLABLE_ANNOTATION_NAME;
 			if (this.nonNullAnnotationName == null)
-				this.nonNullAnnotationName = DEFAULT_NONNULL_ANNOTATION_NAME;
+				this.nonNullAnnotationName = NullCompilerOptions.DEFAULT_NONNULL_ANNOTATION_NAME;
 		}
 	}
 	protected class JavaModelManager playedBy JavaModelManager {

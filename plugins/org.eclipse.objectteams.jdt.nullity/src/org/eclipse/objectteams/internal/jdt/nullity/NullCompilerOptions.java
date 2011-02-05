@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.objectteams.internal.jdt.nullity;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
@@ -40,4 +41,7 @@ public interface NullCompilerOptions {
 	public static final int NullContractViolation = IrritantSet.GROUP2 | ASTNode.Bit7;
 	public static final int PotentialNullContractViolation = IrritantSet.GROUP2 | ASTNode.Bit8;
 	public static final int NullContractInsufficientInfo = IrritantSet.GROUP2 | ASTNode.Bit9;
+
+	static final char[][] DEFAULT_NONNULL_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.NonNull".toCharArray()); //$NON-NLS-1$
+	static final char[][] DEFAULT_NULLABLE_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.Nullable".toCharArray()); //$NON-NLS-1$
 }
