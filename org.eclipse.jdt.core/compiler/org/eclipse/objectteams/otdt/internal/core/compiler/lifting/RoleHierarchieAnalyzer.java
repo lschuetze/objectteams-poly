@@ -114,15 +114,12 @@ public class RoleHierarchieAnalyzer
                         && !role.getBinding().isInterface())
                 		// public role classes could be instantiated from any part of the program,
                 		// Force the team to be abstract, too:
-                        this._problemReporter.abstractRelevantRole(
-                                role.getAst(), teamModel.getBinding());
+                        this._problemReporter.abstractRelevantRole(role, teamModel);
                     else if (role.getBaseTypeBinding().isAbstract())
                     	// if base is abstract, too, we could be lucky, just warn:
-                        this._problemReporter.abstractPotentiallyRelevantRole(
-                                role.getAst(), teamModel.getBinding());
+                        this._problemReporter.abstractPotentiallyRelevantRole(role, teamModel);
                     else
-                        this._problemReporter.abstractRelevantRole(
-                                role.getAst(), teamModel.getBinding());
+                        this._problemReporter.abstractRelevantRole(role, teamModel);
                 }
                 irrelevant.add(role);
             }

@@ -9480,37 +9480,39 @@ public void instantiatingSupercededRole(AllocationExpression expression, Referen
 			expression.sourceEnd);
 }
 // -- 2.5 --
-public void abstractPotentiallyRelevantRole(TypeDeclaration roleDeclaration, ReferenceBinding teamBinding) {
-    this.referenceContext = roleDeclaration;
-    teamBinding.tagBits |= TagBits.HasAbstractRelevantRole;
+public void abstractPotentiallyRelevantRole(RoleModel role, TeamModel teamModel) {
+	TypeDeclaration typeDecl = role.getAst();
+	if (typeDecl == null)
+		typeDecl = teamModel.getAst();
+    this.referenceContext = typeDecl;    
+    teamModel.getBinding().tagBits |= TagBits.HasAbstractRelevantRole;
     String[] args = new String[] {
-        new String(teamBinding.sourceName()),
-        roleDeclaration.binding == null
-	    ? new String(roleDeclaration.name)
-	    : new String(roleDeclaration.binding.sourceName())
+        new String(teamModel.getBinding().sourceName()),
+        new String(role.getName())
     };
     this.handle(
         IProblem.AbstractPotentiallyRelevantRole,
         args,
         args,
-        roleDeclaration.sourceStart,
-        roleDeclaration.sourceEnd);
+        typeDecl.sourceStart,
+        typeDecl.sourceEnd);
 }
-public void abstractRelevantRole(TypeDeclaration roleDecl, ReferenceBinding teamBinding) {
-	roleDecl.binding.tagBits |= TagBits.HasLiftingProblem;
-    this.referenceContext = roleDecl;
+public void abstractRelevantRole(RoleModel role, TeamModel teamModel) {
+	role.getBinding().tagBits |= TagBits.HasLiftingProblem;
+	TypeDeclaration typeDecl = role.getAst();
+	if (typeDecl == null)
+		typeDecl = teamModel.getAst();
+    this.referenceContext = typeDecl;    
     String[] args = new String[] {
-        new String(teamBinding.sourceName()),
-        roleDecl.binding == null
-		    ? new String(roleDecl.name)
-		    : new String(roleDecl.binding.sourceName())
+        new String(teamModel.getBinding().sourceName()),
+		    new String(role.getBinding().sourceName())
     };
     this.handle(
         IProblem.AbstractRelevantRole,
         args,
         args,
-        roleDecl.sourceStart,
-        roleDecl.sourceEnd);
+        typeDecl.sourceStart,
+        typeDecl.sourceEnd);
 }
 public void abstractRoleIsRelevant(Expression creation, TypeBinding roleBinding) {
 	roleBinding.tagBits |= TagBits.HasLiftingProblem;
