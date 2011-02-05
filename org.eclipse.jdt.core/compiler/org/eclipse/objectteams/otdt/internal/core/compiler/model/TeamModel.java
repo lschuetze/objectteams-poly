@@ -819,7 +819,7 @@ public class TeamModel extends TypeModel {
 			ReferenceBinding[] result = new ReferenceBinding[roleNames.size()];
 			int j=0;
 			for (int i = 0; i < members.length; i++) {
-				if (!RoleFileCache.isRoFiCache(members[i]) && !members[i].isEnum())
+				if (roleNames.remove(new String(members[i].internalName()))) // this also avoids duplicates in result
 					result[j++] = members[i];
 			}
 			return result;
