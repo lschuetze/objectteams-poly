@@ -29,7 +29,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_annotation_emulation_002" };
+//		TESTS_NAMES = new String[] { "test_default_nullness" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -47,7 +47,7 @@ static boolean setNullRelatedOptions = true;
 protected Map getCompilerOptions() {
     Map defaultOptions = super.getCompilerOptions();
     if (setNullRelatedOptions) {
-	    defaultOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+    	defaultOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
 	    defaultOptions.put(CompilerOptions.OPTION_ReportPotentialNullReference, CompilerOptions.ERROR);
 	    defaultOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.ERROR);
 		defaultOptions.put(CompilerOptions.OPTION_ReportRawTypeReference, CompilerOptions.IGNORE);
@@ -56,6 +56,7 @@ protected Map getCompilerOptions() {
 		defaultOptions.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotationForInterfaceMethodImplementation, CompilerOptions.DISABLED);
 
 		// enable null annotations:
+		defaultOptions.put(NullCompilerOptions.OPTION_AnnotationBasedNullAnalysis, CompilerOptions.ENABLED);
 		defaultOptions.put(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes, CompilerOptions.ENABLED);
 		// leave other new options at these defaults:
 //		defaultOptions.put(CompilerOptions.OPTION_ReportNullContractViolation, CompilerOptions.ERROR);
@@ -1062,6 +1063,41 @@ public void test_default_nullness_002() {
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in Y.java (at line 4)\n" + 
+		"	@Nullable Object getObject(Object o) {\n" + 
+		"	                 ^^^^^^^^^^^^^^^^^^^\n" + 
+		"Cannot relax null contract for method return, inherited method from X is declared as @NonNull\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+public void test_default_nullness_003() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	runNegativeTest(
+		true/*shouldFlushOutputDirectory*/,
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class X {\n" +
+			"    Object getObject(@Nullable Object o) {\n" +
+			"        return new Object();\n" +
+			"    }\n" +
+			"}\n",
+			"Y.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y extends X {\n" +
+			"    @Override\n" +
+			"    @Nullable Object getObject(Object o) {\n" + // don't complain of parameter: inherited has precedence over default
+			"        return o;\n" +
+			"    }\n" +
+			"}\n",
+		},
+		null/*classLibs*/,
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in Y.java (at line 5)\n" + 
 		"	@Nullable Object getObject(Object o) {\n" + 
 		"	                 ^^^^^^^^^^^^^^^^^^^\n" + 
 		"Cannot relax null contract for method return, inherited method from X is declared as @NonNull\n" + 
