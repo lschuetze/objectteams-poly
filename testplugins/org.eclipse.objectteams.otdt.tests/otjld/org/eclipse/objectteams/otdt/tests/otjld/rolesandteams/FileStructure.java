@@ -1552,7 +1552,8 @@ public class FileStructure extends AbstractOTJLDTest {
     // empty classes - 4 levels - missing 'team' at level 3
     // 1.5.17-otjld-nested-role-file-5
     public void test1517_nestedRoleFile5() {
-        runNegativeTestMatching(
+    	String convertedOutputPath = new String(OUTPUT_DIR+'/').replace('/', '\\');
+        runNegativeTest(
             new String[] {
 		"p/Team1517nrf5/Mid1517nrf5/R1517nrf5/Deep1517nrf5.java",
 			    "\n" +
@@ -1575,7 +1576,38 @@ public class FileStructure extends AbstractOTJLDTest {
 			    "protected class R1517nrf5 {}\n" +
 			    "    \n"
             },
-            "1.5(a,b)");
+            "----------\n" + 
+            "1. ERROR in "+convertedOutputPath+"p\\Team1517nrf5\\Mid1517nrf5.java (at line 3)\n" + 
+            "	public team class Mid1517nrf5 {}\n" + 
+            "    \n" + 
+            "	                            ^^^^^^^^^\n" + 
+            "The return type is incompatible with Team1517nrf5.Mid1517nrf5.R1517nrf5()\n" + 
+            "----------\n" + 
+            "----------\n" + 
+            "1. ERROR in "+convertedOutputPath+"p\\Team1517nrf5\\Mid1517nrf5\\R1517nrf5.java (at line 3)\n" + 
+            "	protected class R1517nrf5 {}\n" + 
+            "	                ^^^^^^^^^\n" + 
+            "Missing anchor (team instance) for role type p.Team1517nrf5.Mid1517nrf5.R1517nrf5 outside its team context (OTJLD 1.2.2(b)).\n" + 
+            "----------\n" + 
+            // this is the main error message, the others are mostly caused by compilation order issues:
+            "----------\n" + 
+            "1. ERROR in p\\Team1517nrf5\\Mid1517nrf5\\R1517nrf5\\Deep1517nrf5.java (at line 3)\n" + 
+            "	protected class Deep1517nrf5 {}\n" + 
+            "	                ^^^^^^^^^^^^\n" + 
+            "Member types not allowed in regular roles. Mark class p.Team1517nrf5.Mid1517nrf5.R1517nrf5 as a team if Deep1517nrf5 should be its role (OTJLD 1.5(a,b)). \n" + 
+            "----------\n" + 
+            "----------\n" + 
+            "1. ERROR in p\\Team1517nrf5.java (at line 3)\n" + 
+            "	public team class Team1517nrf5 {}\n" + 
+            "	                  ^^^^^^^^^^^^\n" + 
+            "The type Team1517nrf5 is already defined\n" + 
+            "----------\n" + 
+            "----------\n" + 
+            "1. ERROR in p\\Team1517nrf5\\Mid1517nrf5.java (at line 3)\n" + 
+            "	public team class Mid1517nrf5 {}\n" + 
+            "	                  ^^^^^^^^^^^\n" + 
+            "Duplicate nested type Mid1517nrf5\n" + 
+            "----------\n");
     }
 
     // empty classes - 4 levels : OK
