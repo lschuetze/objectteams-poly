@@ -34,7 +34,7 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test3113_calloutToStatic1"};
+//		TESTS_NAMES = new String[] { "test3113_calloutToStatic"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1951,6 +1951,123 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
             },
             "OK");
     }
+    
+    // missing abstract modifier for role with abstract static method
+    public void test3113_calloutToStatic2() {
+        runNegativeTest(
+             new String[] {
+ 		"Team3113cts2.java",
+ 			    "\n" +
+ 			    "public team class Team3113cts2 {\n" +
+ 			    "	protected class R3113cts2 {\n" +
+ 			    "		protected abstract static String getV();\n" +
+ 			    "	}\n" +
+ 			    "	public void test() {\n" +
+ 			    "		System.out.print(R3113cts2.getV());\n" +
+ 			    "	}\n" +
+ 			    "}\n"
+             },
+             "----------\n" + 
+     		 "1. ERROR in Team3113cts2.java (at line 3)\n" + 
+     		 "	protected class R3113cts2 {\n" + 
+     		 "	                ^^^^^^^^^\n" + 
+     		 "The type R3113cts2 must be an abstract class to define abstract methods\n" + 
+             "----------\n" + 
+     		 "2. ERROR in Team3113cts2.java (at line 4)\n" + 
+     		 "	protected abstract static String getV();\n" + 
+     		 "	                                 ^^^^^^\n" + 
+     		 "The abstract method getV in type R3113cts2 can only be defined by an abstract class\n" + 
+     		 "----------\n");
+     }
+    
+    // abstract static method bound by callout in implicit sub-role
+    // Bug 336394 - [compiler] ClassFormatError caused by abstract static method 
+    public void test3113_calloutToStatic3() {
+        runConformTest(
+             new String[] {
+ 		"T3113cts3Main.java",
+ 			    "\n" +
+ 			    "public class T3113cts3Main {\n" +
+ 			    "	public static void main(String[] args) {\n" +
+ 			    "		Team3113cts3_1 t = new Team3113cts3_2();\n" +
+ 			    "		t.test();\n" +
+ 			    "	}\n" +
+ 			    "}\n" +
+ 			    "	\n",
+ 		"T3113cts3.java",
+ 			    "\n" +
+ 			    "public class T3113cts3 {\n" +
+ 			    "	public static String getValue() {\n" +
+ 			    "		return \"OK\";\n" +
+ 			    "	}\n" +
+ 			    "}\n" +
+ 			    "	\n",
+ 		"Team3113cts3_1.java",
+ 			    "\n" +
+ 			    "public team class Team3113cts3_1 {\n" +
+ 			    "	protected abstract class R3113cts3 {\n" +
+ 			    "		protected abstract static String getV();\n" +
+ 			    "	}\n" +
+ 			    "	public void test() {\n" +
+ 			    "		System.out.print(R3113cts3.getV());\n" + // illegal call unless we copy this team method to subteams
+ 			    "	}\n" +
+ 			    "}\n",
+ 		"Team3113cts3_2.java",
+ 			    "\n" +
+ 			    "public team class Team3113cts3_2 extends Team3113cts3_1 {\n" +
+ 			    "	protected class R3113cts3 playedBy T3113cts3 {\n" +
+			    "		getV -> getValue;\n" +
+ 			    "	}\n" +
+ 			    "}\n"
+             },
+             "OK");
+     }
+    
+    // abstract static method bound by callout in implicit sub-role
+    // Bug 336394 - [compiler] ClassFormatError caused by abstract static method 
+    public void test3113_calloutToStatic4() {
+        runConformTest(
+             new String[] {
+ 		"T3113cts4Main.java",
+ 			    "\n" +
+ 			    "public class T3113cts4Main {\n" +
+ 			    "	public static void main(String[] args) {\n" +
+ 			    "		Team3113cts4_1 t = new Team3113cts4_2();\n" +
+ 			    "		t.test();\n" +
+ 			    "	}\n" +
+ 			    "}\n" +
+ 			    "	\n",
+ 		"T3113cts4.java",
+ 			    "\n" +
+ 			    "public class T3113cts4 {\n" +
+ 			    "	public static String getValue() {\n" +
+ 			    "		return \"OK\";\n" +
+ 			    "	}\n" +
+ 			    "}\n" +
+ 			    "	\n",
+ 		"Team3113cts4_1.java",
+ 			    "\n" +
+ 			    "public team class Team3113cts4_1 {\n" +
+ 			    "	protected abstract class R3113cts4_1 {\n" +
+ 			    "		protected abstract static String getV();\n" +
+ 			    "	}\n" +
+ 			    "	protected class R3113cts4_2 {\n" +
+ 			    "       protected String test() { return R3113cts4_1.getV(); }\n" + // static role method called from a role instance
+ 			    "	}\n" +
+ 			    "	public void test() {\n" +
+ 			    "		System.out.print(new R3113cts4_2().test());\n" +
+ 			    "	}\n" +
+ 			    "}\n",
+ 		"Team3113cts4_2.java",
+ 			    "\n" +
+ 			    "public team class Team3113cts4_2 extends Team3113cts4_1 {\n" +
+ 			    "	protected class R3113cts4_1 playedBy T3113cts4 {\n" +
+			    "		getV -> getValue;\n" +
+ 			    "	}\n" +
+ 			    "}\n"
+             },
+             "OK");
+     }
 
     // A callout binding creates a role method
     // 3.1.14-otjld-callout-without-role-method-1
