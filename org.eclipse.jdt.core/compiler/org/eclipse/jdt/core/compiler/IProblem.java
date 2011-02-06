@@ -1766,6 +1766,8 @@ void setSourceStart(int sourceStart);
 
 	int CallinBindingToInterface				 = LIMITATIONS + 	 30;
 	
+	int AbstractStaticMethodCalled 				 = LIMITATIONS +     31; // actually a sign of corrupt byte code
+	
 // ==== EXPERIMENTAL: ====
 	int EXPERIMENTAL = OTJ_RELATED + 12*OTCHAP;
 	int MigrateNonRole 							 = EXPERIMENTAL +     1;

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -420,6 +420,14 @@ public abstract class AbstractMethodDeclaration
 //{ObjectTeams: write OT-specific byte code attributes
         if (this.model != null)
             attributeNumber += this.model.writeAttributes(classFile);
+        // special body for abstract static:
+        int abstractStatic = ClassFileConstants.AccAbstract | ClassFileConstants.AccStatic;
+        if (   (this.binding.modifiers & abstractStatic) == abstractStatic
+        	&& !this.binding.declaringClass.isInterface()) 
+        {
+    		// Code attribute
+    		attributeNumber += generateAbstractStaticRoleMethodCode(classFile);
+        } else
 // SH}
 		if ((!this.binding.isNative()) && (!this.binding.isAbstract())) {
 			int codeAttributeOffset = classFile.contentsOffset;
@@ -493,7 +501,21 @@ public abstract class AbstractMethodDeclaration
 		}
 		classFile.completeMethodInfo(this.binding, methodAttributeOffset, attributeNumber);
 	}
-//{ObjectTeams: recording byte code
+//{ObjectTeams: uninvokable method:
+	private int generateAbstractStaticRoleMethodCode(ClassFile classFile) {
+		int codeAttributeOffset = classFile.contentsOffset;
+		classFile.generateCodeAttributeHeader();
+		CodeStream codeStream = classFile.codeStream;
+		codeStream.reset(this, classFile);
+		String errorMessage = this.scope.problemReporter().problemFactory.getLocalizedMessage(IProblem.AbstractStaticMethodCalled, 
+										new String[]{new String(this.binding.readableName())});
+		codeStream.generateCodeAttributeForProblemMethod(errorMessage);
+		int[] startLineIndexes = this.compilationResult.getLineSeparatorPositions();
+		int problemLine = Util.getLineNumber(this.sourceStart, startLineIndexes, 0, startLineIndexes.length-1);
+		classFile.completeCodeAttributeForProblemMethod(this, this.binding, codeAttributeOffset, startLineIndexes, problemLine);
+		return 1; // one attribute: Code.
+	}
+// recording byte code
 	public void maybeRecordByteCode(ClassFile classFile, int methodAttributeOffset) {
 		RoleModel.maybeRecordByteCode(
 		        this,
@@ -517,8 +539,7 @@ public abstract class AbstractMethodDeclaration
 		if (shouldRecordTeamMethod)
 			MethodModel.getModel(this).recordByteCode(classFile, methodAttributeOffset);
 	}
-// SH}	
-//{ObjectTeams: new hook
+// new hook:
 	/**
 	 * Hook for adding statements just before the final return.
 	 * Used for field initialization by RoleInitializationMethod.

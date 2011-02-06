@@ -137,7 +137,7 @@ public class AstEdit {
     		TypeDeclaration classTypeDeclaration,
             AbstractMethodDeclaration methodDeclaration)
     {
-    	addMethod(classTypeDeclaration, methodDeclaration, false /*not synthetic*/, false/*addToFront*/);
+    	addMethod(classTypeDeclaration, methodDeclaration, false /*not synthetic*/, false/*addToFront*/, null/*copyInheritanceSrc*/);
     }
 
     /**
@@ -180,16 +180,18 @@ public class AstEdit {
 	 * @param methodDeclaration
 	 * @param wasSynthetic was the method copied from a synthetic method?
 	 * @param addToFront should the method be added to the front of 'methods'?
+	 * @param copyInheritanceSrc tsuper method from which this method is copied
  	 */
 	public static void addMethod(
             TypeDeclaration classTypeDeclaration,
             AbstractMethodDeclaration methodDeclaration,
 			boolean wasSynthetic,
-			boolean addToFront)
+			boolean addToFront, 
+			MethodBinding copyInheritanceSrc)
     {
         boolean modifiersAdjusted = addMethodDeclOnly(classTypeDeclaration, methodDeclaration, addToFront);
 		if (classTypeDeclaration.binding != null) {
-			classTypeDeclaration.binding.resolveGeneratedMethod(methodDeclaration, wasSynthetic);
+			classTypeDeclaration.binding.resolveGeneratedMethod(methodDeclaration, wasSynthetic, copyInheritanceSrc);
 			if (modifiersAdjusted)
 				methodDeclaration.binding.tagBits |= TagBits.ClearPrivateModifier;
 		}
@@ -388,7 +390,7 @@ public class AstEdit {
 		// before the method using this type gets its byte code copied.
 		// (for the local type's ctor MethodBinding.signature() must not be called before
 		//  synthetic outer locals are in place, which happens during TypeDeclaration.generateCode)
-		addMethod(enclosingTypeDecl, wrapper, false/*wasSynthetic*/, true/*addToFront*/);
+		addMethod(enclosingTypeDecl, wrapper, false/*wasSynthetic*/, true/*addToFront*/, null/*copyInheritanceSrc*/);
 	}
 
 

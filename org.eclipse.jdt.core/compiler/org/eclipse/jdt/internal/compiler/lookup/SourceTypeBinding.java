@@ -2183,14 +2183,18 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 
 	method.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
 //{ObjectTeams: need role method bridges?
+	int abstractStatic = ClassFileConstants.AccAbstract | ClassFileConstants.AccStatic;
 	if (   isRole() 
-		&& ((method.modifiers & ClassFileConstants.AccPrivate) != 0) 
+		&& (   (method.modifiers & ClassFileConstants.AccPrivate) != 0
+			|| ((method.modifiers & abstractStatic) == abstractStatic) && !method.declaringClass.isInterface())
 		&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, method.selector)
-		&& !methodDecl.isConstructor()) 
+		&& !methodDecl.isConstructor())
 	{
 		ReferenceBinding originalRole = this;
 		if (method.copyInheritanceSrc != null)
 			originalRole = method.copyInheritanceSrc.declaringClass;
+		else if (method.overriddenTSupers != null)
+			originalRole = method.overriddenTSupers[0].declaringClass;
 		MethodBinding inner = addSyntheticRoleMethodBridge(this, originalRole, method, SyntheticMethodBinding.RoleMethodBridgeInner);
 		((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
 	}
@@ -2321,11 +2325,13 @@ public MethodBinding resolveGeneratedMethod(MethodBinding mb) {
  * Create and link binding for a generated method.
  * @param methodDeclaration
  * @param wasSynthetic
+ * @param copyInheritanceSrc
  */
-public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, boolean wasSynthetic) {
-    if (this.scope != null)
-    	this.scope.createMethod(methodDeclaration);
-    else {
+public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, boolean wasSynthetic, MethodBinding copyInheritanceSrc) {
+    if (this.scope != null) {
+		MethodBinding binding = this.scope.createMethod(methodDeclaration);
+		binding.setCopyInheritanceSrc(copyInheritanceSrc);
+	} else {
     	// in STATE_FINAL we can only fake this method:
     	// (this way, dependent classes can already be fully translated).
     	// TODO (SH): should this be reported as an error -> trigger recompilation?
@@ -2336,6 +2342,7 @@ public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, 
 					methodDeclaration.selector,
 					null, null, null,
 					this);
+		binding.setCopyInheritanceSrc(copyInheritanceSrc);
     	methodDeclaration.binding = binding;
     	resolveTypesFor(binding);
     	return;

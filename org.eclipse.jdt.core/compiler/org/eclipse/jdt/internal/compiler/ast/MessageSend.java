@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,6 +58,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationS
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
@@ -287,9 +288,26 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 		}
 	}
 	codeStream.recordPositionsFrom(pc, this.sourceStart);
-//{ObjectTeams: calling a static role method requiring an enclosing team instance?
+//{ObjectTeams: various synthetic arguments for static role methods:
+	// role method bridge needs role arg (null)
+	if (   this.syntheticAccessor instanceof SyntheticRoleBridgeMethodBinding 
+		&& !this.syntheticAccessor.isStatic() // non-static accessor ...
+		&& this.binding.isStatic())  		  // towards static role method
+	{
+		codeStream.aload_0();   	// receiver: team instance
+		codeStream.aconst_null(); 	// arg: no role instance
+		codeStream.iconst_0(); 		// arg: dummy 
+		codeStream.aload_0();		// arg: team instance
+		// directly use the accessor and its declaring class for the invoke instruction:
+		this.binding = this.syntheticAccessor;
+		this.actualReceiverType = this.syntheticAccessor.declaringClass;
+		this.syntheticAccessor = null;
+		codegenBinding = this.binding;
+		isStatic = false;
+	}
+	// requiring an enclosing team instance?
 	// cf. AbstractQualifiedAllocationExpression.generateCode()
-	if (codegenBinding.needsSyntheticEnclosingTeamInstance())
+	else if (codegenBinding.needsSyntheticEnclosingTeamInstance())
 	{
 		codeStream.iconst_0(); // dummy
 		codeStream.generateSyntheticEnclosingInstanceValues(
@@ -421,6 +439,13 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 			return;
 		}
 	}
+//{ObjectTeams: emulate access to abstract static:
+	if (TeamModel.isTeamAccessingAbstractStaticRoleMethod(currentScope.enclosingSourceType(), codegenBinding))
+	{
+		this.syntheticAccessor = SyntheticRoleBridgeMethodBinding.findOuterAccessor(currentScope, codegenBinding.declaringClass, codegenBinding);
+		currentScope.problemReporter().needToEmulateMethodAccess(codegenBinding, this);
+	}
+// SH}
 }
 public int nullStatus(FlowInfo flowInfo) {
 	return FlowInfo.UNKNOWN;

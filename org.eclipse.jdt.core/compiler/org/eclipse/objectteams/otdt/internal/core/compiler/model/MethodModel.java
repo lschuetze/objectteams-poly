@@ -548,11 +548,19 @@ public class MethodModel extends ModelElement {
 				if (   attr.nameEquals(IOTConstants.MODIFIERS_NAME)
 					|| attr.nameEquals(IOTConstants.ROLECLASS_METHOD_MODIFIERS_NAME))
 				{
-			    	int MASK = ExtraCompilerModifiers.AccVisibilityMASK;
-			    	if (this._binding.declaringClass.isSynthInterface())
-			    		 MASK |= ClassFileConstants.AccStatic;
-
 					int flags = this._binding.modifiers;
+
+					int MASK = ExtraCompilerModifiers.AccVisibilityMASK;
+			    	if (this._binding.declaringClass.isSynthInterface()) {
+			    		// ifc part: no static methods allowed:
+						MASK |= ClassFileConstants.AccStatic;
+					} else {
+						// class part: no abstract static methods allowed, remove abstract.
+						int abstractStatic = ClassFileConstants.AccAbstract|ClassFileConstants.AccStatic;
+						if ((flags & abstractStatic) == abstractStatic)
+							MASK |= ClassFileConstants.AccAbstract;
+			    	}
+
 					flags &= ~MASK;
 					flags |= ClassFileConstants.AccPublic;
 					return flags;

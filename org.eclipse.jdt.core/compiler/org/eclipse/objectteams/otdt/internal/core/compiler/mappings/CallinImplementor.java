@@ -1180,12 +1180,11 @@ public class CallinImplementor extends MethodMappingImplementor
 											DecapsulationState.REPORTED,
 											gen);
 
-		AstEdit.addMethod(teamDecl, newMethod);
-
-	    MethodBinding origin = (method.copyInheritanceSrc != null) ?
+		MethodBinding origin = (method.copyInheritanceSrc != null) ?
 									method.copyInheritanceSrc :
 									method;
-		newMethod.binding.setCopyInheritanceSrc(origin);
+		AstEdit.addMethod(teamDecl, newMethod, false /*not synthetic*/, false/*addToFront*/, origin);
+
 	    newMethod.binding.copiedInContext = teamDecl.binding.enclosingType();
 
 	    MethodModel newModel = MethodModel.getModel(newMethod);

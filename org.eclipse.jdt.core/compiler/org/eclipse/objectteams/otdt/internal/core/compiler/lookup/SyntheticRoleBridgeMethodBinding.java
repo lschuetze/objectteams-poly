@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
@@ -55,10 +56,10 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 				len = targetMethod.parameters.length;
 				int offset = targetMethod.isStatic()?2:0;
 				this.parameters = new TypeBinding[len+1+offset];
-				this.parameters[0] = declaringRole.getRealType();
+				this.parameters[0] = originalRole.getRealType();
 				if (offset > 0) {
 					this.parameters[1] = TypeBinding.INT;				// dummy int
-					this.parameters[2] = declaringRole.enclosingType(); // team arg
+					this.parameters[2] = originalRole.enclosingType(); // team arg
 				}
 				System.arraycopy(targetMethod.parameters, 0, this.parameters, 1+offset, len);
 				// correction: this bridge is static:
@@ -160,6 +161,8 @@ public class SyntheticRoleBridgeMethodBinding extends SyntheticOTMethodBinding {
 
 	public static MethodBinding findOuterAccessor(Scope scope, ReferenceBinding roleType, MethodBinding targetMethod) {
 		ReferenceBinding roleClass = roleType.getRealClass();
+		if (targetMethod.declaringClass.isSynthInterface())
+			targetMethod = MethodModel.getClassPartMethod(targetMethod);
 		if (roleClass instanceof SourceTypeBinding)
 			return ((SourceTypeBinding)roleClass).findOuterRoleMethodSyntheticAccessor(targetMethod);
 		// for binary type find it in the team's regular methods:

@@ -24,6 +24,7 @@ import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccA
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccFinal;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPrivate;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPublic;
+import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccStatic;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccSynthetic;
 import static org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers.AccSemicolonBody;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.OT_DELIM_LEN;
@@ -221,7 +222,8 @@ public class RoleSplitter
                 if (!methods[i].isConstructor()) {
                 	// modifiers of public and private methods are not changed
                 	// (privates are not touched by role splitting)
-                	if ((methods[i].modifiers & (AccPublic|AccPrivate)) == 0)
+                	if (   (methods[i].modifiers & (AccPublic|AccPrivate)) == 0
+                		|| (methods[i].modifiers & (AccAbstract|AccStatic)) == (AccAbstract|AccStatic))
                 	{
                 		MethodModel.getModel(methods[i]).storeModifiers(methods[i].modifiers);
                 	}
@@ -380,7 +382,7 @@ public class RoleSplitter
                     	wasSynthetic = true;
                     	newmethod.modifiers &= ~AccSynthetic;
                     }
-                    AstEdit.addMethod(roleIfcDecl, newmethod, wasSynthetic, false);
+                    AstEdit.addMethod(roleIfcDecl, newmethod, wasSynthetic, false, null/*copyInheritanceSrc*/);
                     if (newmethod.binding != null) {
                     	newmethod.binding.tagBits |= TagBits.ClearPrivateModifier;
                     	newmethod.binding.copyInheritanceSrc = m;

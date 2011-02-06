@@ -932,7 +932,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	        	// it would invoke the wrong super().
 	        	ConstructorDeclaration ctor =
 	        		targetRoleDecl.createDefaultConstructor(true, true);
-	       		targetRoleDecl.binding.resolveGeneratedMethod(ctor, false);
+	       		targetRoleDecl.binding.resolveGeneratedMethod(ctor, false, origin);
 	        	return;
 	        }
 	    	else if (targetRoleDecl.getRoleModel()._refinesExtends)
@@ -1025,7 +1025,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		    }
 	    }
 
-    	AstEdit.addMethod(targetRoleDecl, newMethodDecl, wasSynthetic, false/*addToFront*/);
+    	AstEdit.addMethod(targetRoleDecl, newMethodDecl, wasSynthetic, false/*addToFront*/, origin);
     	if (method.isPrivate()) {
     		newMethodDecl.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed; // don't warn unused copied method
     		MethodBinding synthBinding = SyntheticRoleBridgeMethodBinding.findOuterAccessor(targetRoleDecl.scope, targetRoleDecl.binding, newMethodDecl.binding);
@@ -1033,7 +1033,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     			synthBinding.parameters[0] = srcRole.getRealType(); // manual weakening of bridge to copy-inherited method
     	}
 
-	    newMethodDecl.binding.setCopyInheritanceSrc(origin);
 	    newMethodDecl.binding.copiedInContext = tgtTeam.enclosingType();
 	    MethodModel newModel = MethodModel.getModel(newMethodDecl);
 	    newModel.addAttribute(CopyInheritanceSourceAttribute.copyInherSrcAttribute(origin, newModel));

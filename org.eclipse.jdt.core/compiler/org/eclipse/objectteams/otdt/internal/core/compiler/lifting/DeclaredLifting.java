@@ -508,13 +508,12 @@ public class DeclaredLifting implements IOTConstants {
 
 		newCtor.isTSuper = true; // ??
 		newCtor.isCopied = true;
-		AstEdit.addMethod(teamDecl, newCtor);  // incl. resolve
+		AstEdit.addMethod(teamDecl, newCtor, false /*not synthetic*/, false/*addToFront*/, superTeamCtor);  // incl. resolve
 	    MethodModel model = MethodModel.getModel(newCtor); // already connect binding.
 	    if (needsLifting)
 	    	model.liftedParams = superTeamCtor.parameters; // instructions for BytecodeTransformer
 	    if (adjustedSelfcall != null)
 	    	model.adjustSelfcall(selfcall, adjustedSelfcall); // be it only strengthening
-	    newCtor.binding.setCopyInheritanceSrc(superTeamCtor);
 	    newCtor.binding.copiedInContext = teamDecl.binding;
 	    newCtor.sourceMethodBinding = superTeamCtor;
 

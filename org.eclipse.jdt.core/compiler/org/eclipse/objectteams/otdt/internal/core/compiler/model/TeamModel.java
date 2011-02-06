@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -442,6 +443,12 @@ public class TeamModel extends TypeModel {
 	    if (areTypesCompatible(teamCandidate, roleOuter))
 	    	return l;
 		return 0;
+	}
+	public static boolean isTeamAccessingAbstractStaticRoleMethod(ReferenceBinding type, MethodBinding method) {
+		int abstractStatic = ClassFileConstants.AccAbstract | ClassFileConstants.AccStatic;
+		if ((method.modifiers & abstractStatic) != abstractStatic)
+			return false;
+		return isTeamContainingRole(type, method.declaringClass);
 	}
 	public static boolean areTypesCompatible(ReferenceBinding type1, ReferenceBinding type2)
 	{
