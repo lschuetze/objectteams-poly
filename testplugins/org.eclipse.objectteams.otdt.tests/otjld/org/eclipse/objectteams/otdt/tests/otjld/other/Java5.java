@@ -33,7 +33,7 @@ public class Java5 extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-		TESTS_NAMES = new String[] { "testA120_enumInTeam3"};
+//		TESTS_NAMES = new String[] { "testA12_genericRoleFeature16f"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
