@@ -29,7 +29,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_default_nullness" };
+		TESTS_NAMES = new String[] { "test_default_nullness_003a" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -406,7 +406,7 @@ public void test_parameter_contract_inheritance_005() {
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
 		"	@Nullable Object getObject() { return null; }\n" + 
-		"	                 ^^^^^^^^^^^\n" + 
+		"	          ^^^^^^\n" + 
 		"Cannot relax null contract for method return, inherited method from Lib is declared as @NonNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
@@ -775,6 +775,39 @@ public void test_nonnull_return_009() {
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
+// a result from a nullable method is assigned and checked for null (from local): not redundant
+// see also Bug 336428 - [compiler][null] bogus warning "redundant null check" in condition of do {} while() loop
+public void test_nonnull_return_010() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.ERROR);
+	runNegativeTest(
+		true /* flushOutputDirectory*/,
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    @Nullable X getX() {\n" +
+			"        return new X();\n" +
+			"    }\n" +
+			"    void test() {\n" +
+			"        X left = this;\n" +
+			"        do {\n" +
+			"            if (left == null) \n" +
+			"	   	         throw new RuntimeException();\n" +
+			"        } while ((left = left.getX()) != null);\n" +
+			"    }\n" +
+			"}\n"
+		},
+		null/*classLibs*/,
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 9)\n" + 
+		"	if (left == null) \n" + 
+		"	    ^^^^\n" + 
+		"Null comparison always yields false: The variable left cannot be null at this location\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
 // mixed use of fully qualified name / explicit import
 public void test_annotation_import_001() {
 	Map customOptions = getCompilerOptions();
@@ -1064,7 +1097,7 @@ public void test_default_nullness_002() {
 		"----------\n" + 
 		"1. ERROR in Y.java (at line 4)\n" + 
 		"	@Nullable Object getObject(Object o) {\n" + 
-		"	                 ^^^^^^^^^^^^^^^^^^^\n" + 
+		"	          ^^^^^^\n" + 
 		"Cannot relax null contract for method return, inherited method from X is declared as @NonNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
@@ -1076,31 +1109,91 @@ public void test_default_nullness_003() {
 	runNegativeTest(
 		true/*shouldFlushOutputDirectory*/,
 		new String[] {
-			"X.java",
+	"p1/X.java",
+			"package p1;\n" +
 			"import org.eclipse.jdt.annotation.*;\n" +
 			"@NonNullByDefault\n" +
 			"public class X {\n" +
-			"    Object getObject(@Nullable Object o) {\n" +
+			"    protected Object getObject(@Nullable Object o) {\n" +
 			"        return new Object();\n" +
 			"    }\n" +
 			"}\n",
-			"Y.java",
+	"p2/package-info.java",
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
+			"package p2;\n",
+	"p2/Y.java",
+			"package p2;\n" +
 			"import org.eclipse.jdt.annotation.*;\n" +
-			"@NonNullByDefault\n" +
-			"public class Y extends X {\n" +
+			"public class Y extends p1.X {\n" +
 			"    @Override\n" +
-			"    @Nullable Object getObject(Object o) {\n" + // don't complain of parameter: inherited has precedence over default
+			"    protected @Nullable Object getObject(Object o) {\n" + // don't complain of parameter: inherited has precedence over default
+			"        bar(o);\n" +
 			"        return o;\n" +
 			"    }\n" +
-			"}\n",
+			"	 void bar(Object o2) { }\n" + // parameter is nonnull per package default
+			"}\n"
 		},
 		null/*classLibs*/,
 		customOptions,
 		"----------\n" + 
-		"1. ERROR in Y.java (at line 5)\n" + 
-		"	@Nullable Object getObject(Object o) {\n" + 
-		"	                 ^^^^^^^^^^^^^^^^^^^\n" + 
+		"1. ERROR in p2\\Y.java (at line 5)\n" + 
+		"	protected @Nullable Object getObject(Object o) {\n" + 
+		"	                    ^^^^^^\n" + 
 		"Cannot relax null contract for method return, inherited method from X is declared as @NonNull\n" + 
+		"----------\n" + 
+		"2. ERROR in p2\\Y.java (at line 6)\n" + 
+		"	bar(o);\n" + 
+		"	    ^\n" + 
+		"Null contract violation: potentially passing null to a parameter declared as @NonNull\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+public void test_default_nullness_003a() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	runConformTest(
+		new String[] {
+	"p1/X.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class X {\n" +
+			"    protected Object getObject(@Nullable Object o) {\n" +
+			"        return new Object();\n" +
+			"    }\n" +
+			"	 protected void bar(Object o2) { }\n" + // parameter is nonnull per type default
+			"}\n"});
+	// check if default is visible from X.class.
+	runNegativeTest(
+		false/*shouldFlushOutputDirectory*/,
+		new String[] {
+	"p2/package-info.java",
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
+			"package p2;\n",
+	"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Y extends p1.X {\n" +
+			"    @Override\n" +
+			"    protected @Nullable Object getObject(Object o) {\n" + // can't override inherited default nonnull 
+			"        bar(o);\n" + // parameter is nonnull in super class's .class file
+			"        return o;\n" +
+			"    }\n" +
+			"}\n"
+		},
+		null/*classLibs*/,
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in p2\\Y.java (at line 5)\n" + 
+		"	protected @Nullable Object getObject(Object o) {\n" + 
+		"	                    ^^^^^^\n" + 
+		"Cannot relax null contract for method return, inherited method from X is declared as @NonNull\n" + 
+		"----------\n" + 
+		"2. ERROR in p2\\Y.java (at line 6)\n" + 
+		"	bar(o);\n" + 
+		"	    ^\n" + 
+		"Null contract violation: potentially passing null to a parameter declared as @NonNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
