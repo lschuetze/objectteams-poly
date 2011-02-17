@@ -24,6 +24,12 @@ public class FixMessages extends NLS {
 
 	public static String QuickFixes_declare_method_return_nullable;
 
+
+	public static String QuickFixes_declare_overridden_parameter_as_nonnull;
+
+
+	public static String QuickFixes_declare_overridden_return_as_nullable;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, FixMessages.class);

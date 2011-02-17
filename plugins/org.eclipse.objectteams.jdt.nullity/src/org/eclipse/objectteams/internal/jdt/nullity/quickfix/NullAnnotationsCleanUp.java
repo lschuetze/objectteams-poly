@@ -144,7 +144,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
 		
-		if (QuickFixes.isMissingNullableAnnotationProblem(id)) {
+		if (QuickFixes.isMissingNullAnnotationProblem(id)) {
 			if (   isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) 
 				&& (   ((id == DefiniteNullFromNonNullMethod) && isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE))
 					|| ((id == PotentialNullFromNonNullMethod) && isEnabled(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE))
@@ -178,7 +178,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 			if (   (addDefinitelyMissingReturnNullable && id == DefiniteNullFromNonNullMethod)
 				|| (addPotentiallyMissingReturnNullable && id == PotentialNullFromNonNullMethod)
 				|| (addDefinitelyMissingParamNullable && QuickFixes.mayIndicateParameterNullcheck(id)))
-				if (!QuickFixes.hasExplicitNullnessAnnotation((ICompilationUnit) compilationUnit.getJavaElement(), problems[i].getSourceStart()))
+				if (!QuickFixes.hasExplicitNullAnnotation((ICompilationUnit) compilationUnit.getJavaElement(), problems[i].getSourceStart()))
 					result++;
 		}
 		return result;

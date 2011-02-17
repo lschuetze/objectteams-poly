@@ -10,23 +10,41 @@
  *******************************************************************************/
 package org.eclipse.objectteams.internal.jdt.nullity.quickfix;
 
+import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.*;
+
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
@@ -39,6 +57,7 @@ public class RewriteOperations {
 		CompilationUnit fUnit;
 		
 		protected String fKey;
+		protected String fMessage; 
 		
 		/** A globally unique key that identifies the position being annotated (for avoiding double annotations). */
 		public String getKey() { return this.fKey; }
@@ -76,6 +95,10 @@ public class RewriteOperations {
 			}
 			return true;
 		}
+
+		public String getMessage() {
+			return fMessage;
+		}
 	}
 	
 	/**
@@ -83,17 +106,17 @@ public class RewriteOperations {
 	 * 
 	 * Crafted after the lead of Java50Fix.AnnotationRewriteOperation
 	 * @author stephan
-	 *
 	 */
 	static class ReturnAnnotationRewriteOperation extends SignatureAnnotationRewriteOperation {
 
 		private final BodyDeclaration fBodyDeclaration;
 
-		public ReturnAnnotationRewriteOperation(CompilationUnit unit,
-												MethodDeclaration method,
-												String annotationToAdd,
-												String annotationToRemove,
-												boolean allowRemove)
+		ReturnAnnotationRewriteOperation(CompilationUnit unit,
+										 MethodDeclaration method,
+										 String annotationToAdd,
+										 String annotationToRemove,
+										 boolean allowRemove,
+										 String message)
 		{
 			fUnit = unit;
 			fKey= method.resolveBinding().getKey()+"<return>"; //$NON-NLS-1$
@@ -101,13 +124,13 @@ public class RewriteOperations {
 			fAnnotationToAdd= annotationToAdd;
 			fAnnotationToRemove= annotationToRemove;
 			fAllowRemove= allowRemove;
+			fMessage = message;
 		}
 
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel model) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
-			TextEditGroup group= createTextEditGroup(Messages.format(FixMessages.QuickFixes_declare_method_return_nullable, 
-													 BasicElementLabels.getJavaElementName(fAnnotationToAdd)), cuRewrite);
+			TextEditGroup group= createTextEditGroup(fMessage, cuRewrite);
 			if (!checkExisting(fBodyDeclaration.modifiers(), listRewrite, group))
 				return;
 			Annotation newAnnotation= ast.newMarkerAnnotation();
@@ -122,18 +145,20 @@ public class RewriteOperations {
 
 		private SingleVariableDeclaration fArgument;
 
-		public ParameterAnnotationRewriteOperation(CompilationUnit unit,
-												   MethodDeclaration method,
-												   String annotationToAdd,
-												   String annotationToRemove,
-												   String paramName,
-												   boolean allowRemove)
+		ParameterAnnotationRewriteOperation(CompilationUnit unit,
+											MethodDeclaration method,
+											String annotationToAdd,
+											String annotationToRemove,
+											String paramName,
+											boolean allowRemove,
+											String message)
 		{
 			fUnit= unit;
 			fKey= method.resolveBinding().getKey();
 			fAnnotationToAdd= annotationToAdd;
 			fAnnotationToRemove= annotationToRemove;
 			fAllowRemove= allowRemove;
+			fMessage = message;
 			for (Object param : method.parameters()) {
 				SingleVariableDeclaration argument = (SingleVariableDeclaration) param;
 				if (argument.getName().getIdentifier().equals(paramName)) {
@@ -146,12 +171,13 @@ public class RewriteOperations {
 			throw new RuntimeException("Argument "+paramName+" not found in method "+method.getName().getIdentifier()); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 
-		public ParameterAnnotationRewriteOperation(CompilationUnit unit,
-												   MethodDeclaration method,
-												   String annotationToAdd,
-												   String annotationToRemove,
-												   int paramIdx,
-												   boolean allowRemove)
+		ParameterAnnotationRewriteOperation(CompilationUnit unit,
+											MethodDeclaration method,
+											String annotationToAdd,
+											String annotationToRemove,
+											int paramIdx,
+											boolean allowRemove,
+											String message)
 		{
 			fUnit= unit;
 			fKey= method.resolveBinding().getKey();
@@ -160,13 +186,13 @@ public class RewriteOperations {
 			fAllowRemove= allowRemove;
 			fArgument = (SingleVariableDeclaration) method.parameters().get(paramIdx);
 			fKey += fArgument.getName().getIdentifier();
+			fMessage = message;
 		}
 
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, LinkedProposalModel linkedModel) throws CoreException {
 			AST ast= cuRewrite.getRoot().getAST();
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fArgument, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
-			TextEditGroup group= createTextEditGroup(Messages.format(FixMessages.QuickFixes_declare_method_parameter_nullable, 
-													 BasicElementLabels.getJavaElementName(fAnnotationToAdd)), cuRewrite);
+			TextEditGroup group= createTextEditGroup(fMessage, cuRewrite);
 			if (!checkExisting(fArgument.modifiers(), listRewrite, group))
 				return;
 			Annotation newAnnotation= ast.newMarkerAnnotation();
@@ -175,5 +201,221 @@ public class RewriteOperations {
 			newAnnotation.setTypeName(ast.newName(resolvableName));
 			listRewrite.insertLast(newAnnotation, group); // null annotation is last modifier, directly preceding the return type
 		}
+	}
+
+	// Entry for QuickFixes:
+	public static SignatureAnnotationRewriteOperation createAddAnnotationOperation(CompilationUnit compilationUnit, 
+																				   IProblemLocation problem, 
+																				   String annotationToAdd, 
+																				   String annotationToRemove, 
+																				   Set<String> handledPositions,
+																				   boolean thisUnitOnly, 
+																				   boolean allowRemove) 
+	{
+		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
+		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
+			return null;
+				
+		switch (problem.getProblemId()) {
+		case DefiniteNullToNonNullParameter:
+		case PotentialNullToNonNullParameter:
+		case IllegalRedefinitionToNullableReturn:
+		case IllegalDefinitionToNonNullParameter:
+		case IllegalRedefinitionToNonNullParameter:
+			// these affect another method
+			break;
+		default:
+			// if this method has annotations, don't change'em
+			if (QuickFixes.hasExplicitNullAnnotation(cu, problem.getOffset()))
+				return null;
+		}
+		
+		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+		if (selectedNode == null)
+			return null;
+			
+		SignatureAnnotationRewriteOperation result = null;
+		ASTNode declaringNode= getDeclaringNode(selectedNode);
+		String message = null;
+		String annotationNameLabel = annotationToAdd; 
+		int lastDot = annotationToAdd.lastIndexOf('.');
+		if (lastDot != -1)
+			annotationNameLabel = annotationToAdd.substring(lastDot+1);
+		annotationNameLabel = BasicElementLabels.getJavaElementName(annotationNameLabel);
+	
+		if (selectedNode.getParent() instanceof MethodInvocation) {
+			// DefiniteNullToNonNullParameter || PotentialNullToNonNullParameter
+			MethodInvocation methodInvocation = (MethodInvocation)selectedNode.getParent();
+			int paramIdx = methodInvocation.arguments().indexOf(selectedNode);
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			compilationUnit = findCUForMethod(compilationUnit, cu, methodBinding);
+			if (compilationUnit == null)
+				return null;
+			ASTNode methodDecl = compilationUnit.findDeclaringNode(methodBinding.getKey());
+			if (methodDecl == null)
+				return null;
+			message = Messages.format(FixMessages.QuickFixes_declare_method_parameter_nullable, annotationNameLabel);
+			result = new ParameterAnnotationRewriteOperation(compilationUnit,
+														     (MethodDeclaration) methodDecl,
+														     annotationToAdd,
+														     annotationToRemove,
+														     paramIdx,
+														     allowRemove,
+														     message);
+		} else if (declaringNode instanceof MethodDeclaration) {
+			
+			// complaint is in signature of this method
+			
+			MethodDeclaration declaration= (MethodDeclaration) declaringNode;
+			
+			switch (problem.getProblemId()) {
+				case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+				case IProblem.RedundantNullCheckOnNonNullLocalVariable:
+					// statements suggest changing parameters:
+					if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+						IBinding binding = ((SimpleName)selectedNode).resolveBinding();
+						if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isParameter()) {
+							message = Messages.format(FixMessages.QuickFixes_declare_method_parameter_nullable, annotationNameLabel);
+							result = new ParameterAnnotationRewriteOperation(compilationUnit,
+																							   declaration,
+																							   annotationToAdd,
+																							   annotationToRemove,
+																							   ((SimpleName) selectedNode).getIdentifier(),
+																							   allowRemove,
+																							   message);
+						}
+					}
+					break;
+				case IllegalDefinitionToNonNullParameter:
+				case IllegalRedefinitionToNonNullParameter:
+					result = createChangeOverriddenParameterOperation(compilationUnit, cu, declaration, selectedNode, allowRemove,
+																	  annotationToAdd, annotationToRemove, annotationNameLabel);
+					break;
+				case IllegalRedefinitionToNullableReturn:
+					result = createChangeOverriddenReturnOperation(compilationUnit, cu, declaration, allowRemove,
+																   annotationToAdd, annotationToRemove, annotationNameLabel);
+					break;
+				case DefiniteNullFromNonNullMethod:
+				case PotentialNullFromNonNullMethod:
+					message = Messages.format(FixMessages.QuickFixes_declare_method_parameter_nullable, annotationNameLabel);
+					result = new ReturnAnnotationRewriteOperation(compilationUnit,
+																				    declaration,
+																				    annotationToAdd,
+																				    annotationToRemove,
+																				    allowRemove,
+																				    message);
+					break;
+			}
+			
+		}
+		if (handledPositions != null && result != null) {
+			if (handledPositions.contains(result.getKey()))
+				return null;
+			handledPositions.add(result.getKey());
+		}
+		return result;
+	}
+
+	static SignatureAnnotationRewriteOperation createChangeOverriddenParameterOperation(CompilationUnit compilationUnit,
+																						ICompilationUnit cu,
+																						MethodDeclaration declaration,
+																						ASTNode selectedNode,
+																						boolean allowRemove,
+																						String annotationToAdd,
+																						String annotationToRemove,
+																						String annotationNameLabel)
+	{
+		SignatureAnnotationRewriteOperation result;
+		String message;
+		IMethodBinding methodDeclBinding= declaration.resolveBinding();
+		if (methodDeclBinding == null)
+			return null;
+		
+		IMethodBinding overridden= Bindings.findOverriddenMethod(methodDeclBinding, false);
+		if (overridden == null)
+			return null;
+		compilationUnit = findCUForMethod(compilationUnit, cu, overridden);
+		if (compilationUnit == null)
+			return null;
+		ASTNode methodDecl = compilationUnit.findDeclaringNode(overridden.getKey());
+		if (methodDecl == null)
+			return null;
+		declaration = (MethodDeclaration) methodDecl;
+		message = Messages.format(FixMessages.QuickFixes_declare_overridden_parameter_as_nonnull, 
+				                  new String[] {
+									annotationNameLabel,
+									BasicElementLabels.getJavaElementName(overridden.getDeclaringClass().getName())
+								  });
+		result = new ParameterAnnotationRewriteOperation(compilationUnit,
+													     declaration,
+													     annotationToAdd,
+													     annotationToRemove,
+													     ((SimpleName) selectedNode).getIdentifier(),
+													     allowRemove,
+													     message);
+		return result;
+	}
+
+	static SignatureAnnotationRewriteOperation createChangeOverriddenReturnOperation(CompilationUnit compilationUnit,
+																					 ICompilationUnit cu,
+																					 MethodDeclaration declaration,
+																					 boolean allowRemove,
+																					 String annotationToAdd,
+																					 String annotationToRemove,
+																					 String annotationNameLabel) 
+	{
+		SignatureAnnotationRewriteOperation result;
+		String message;
+		IMethodBinding methodDeclBinding= declaration.resolveBinding();
+		if (methodDeclBinding == null)
+			return null;
+		
+		IMethodBinding overridden= Bindings.findOverriddenMethod(methodDeclBinding, false);
+		if (overridden == null)
+			return null;
+		compilationUnit = findCUForMethod(compilationUnit, cu, overridden);
+		if (compilationUnit == null)
+			return null;
+		ASTNode methodDecl = compilationUnit.findDeclaringNode(overridden.getKey());
+		if (methodDecl == null)
+			return null;
+		declaration = (MethodDeclaration) methodDecl;
+		message = Messages.format(FixMessages.QuickFixes_declare_overridden_return_as_nullable, 
+				                  new String[] {
+									annotationNameLabel,
+									BasicElementLabels.getJavaElementName(overridden.getDeclaringClass().getName())
+								  });
+		result = new ReturnAnnotationRewriteOperation(compilationUnit,
+												      declaration,
+												      annotationToAdd,
+												      annotationToRemove,
+												      allowRemove,
+												      message);
+		return result;
+	}
+
+	static CompilationUnit findCUForMethod(CompilationUnit compilationUnit, ICompilationUnit cu, IMethodBinding methodBinding) 
+	{
+		ASTNode methodDecl= compilationUnit.findDeclaringNode(methodBinding.getMethodDeclaration());
+		if (methodDecl == null) {
+			// is methodDecl defined in another CU?
+			ITypeBinding declaringTypeDecl= methodBinding.getDeclaringClass().getTypeDeclaration();
+			if (declaringTypeDecl.isFromSource()) {
+				ICompilationUnit targetCU = null;
+				try {
+					targetCU = ASTResolving.findCompilationUnitForBinding(cu, compilationUnit, declaringTypeDecl);
+				} catch (JavaModelException e) { /* can't do better */ }
+				if (targetCU != null) {
+					return ASTResolving.createQuickFixAST(targetCU, null);
+				}
+			}
+			return null;
+		}
+		return compilationUnit;
+	}
+
+	/** The relevant declaring node of a return statement is the enclosing method. */
+	static ASTNode getDeclaringNode(ASTNode selectedNode) {
+		return ASTNodes.getParent(selectedNode, ASTNode.METHOD_DECLARATION);
 	}
 }
