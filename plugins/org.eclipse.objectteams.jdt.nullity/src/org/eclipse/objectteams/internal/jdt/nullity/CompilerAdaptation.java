@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.objectteams.internal.jdt.nullity;
 
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Locale;
@@ -21,9 +22,13 @@ import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
 import org.eclipse.jdt.internal.compiler.ast.MemberValuePair;
+import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
@@ -52,7 +57,6 @@ import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.TagBits;
 import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.TypeIds;
 
 import base org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
-import base org.eclipse.jdt.internal.compiler.ast.Annotation;
 import base org.eclipse.jdt.internal.compiler.ast.Assignment;
 import base org.eclipse.jdt.internal.compiler.ast.EqualExpression;
 import base org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
@@ -257,7 +261,8 @@ public team class CompilerAdaptation {
 
 	// ======================= Method level annotations ============================
 
-	protected class Annotation playedBy Annotation {
+	@SuppressWarnings("bindingconventions")
+	protected class StandardAnnotation playedBy Annotation {
 
 		@SuppressWarnings("decapsulation")
 		detectStandardAnnotation <- replace detectStandardAnnotation;
@@ -285,10 +290,14 @@ public team class CompilerAdaptation {
 	
 	protected class AbstractMethodDeclaration playedBy AbstractMethodDeclaration {
 
-		BlockScope getScope()      -> get MethodScope scope;
-		Argument[] getArguments()  -> get Argument[] arguments;
-		MethodBinding getBinding() -> get MethodBinding binding;
-		void bindArguments()       -> void bindArguments();
+		int sourceEnd() 						-> int sourceEnd();
+		int sourceStart() 						-> int sourceStart();
+		BlockScope getScope()      				-> get MethodScope scope;
+		Argument[] getArguments()  				-> get Argument[] arguments;
+		Annotation[] getAnnotations()			-> get Annotation[] annotations;
+		void setAnnotations(Annotation[] annot)	-> set Annotation[] annotations;
+		MethodBinding getBinding() 				-> get MethodBinding binding;
+		void bindArguments()       				-> void bindArguments();
 		
 		
 		void resolveArgumentNullAnnotations() <- replace void bindArguments();
@@ -330,6 +339,7 @@ public team class CompilerAdaptation {
 					Boolean nonNullNess = binding.parameterNonNullness[i];
 					if (nonNullNess != null) {
 						// FIXME(SH): workaround for missing array growing in markAsDefinitelyNonNull/markPotentiallyNullBit:
+						// see also Bug 247564 - [compiler][null] Detecting null field reference (our issues is fixed in proposed attachments)
 						int id = arguments[i].binding.id; 
 						if (info instanceof UnconditionalFlowInfo)
 							id += ((UnconditionalFlowInfo)info).maxFieldCount;
@@ -343,6 +353,40 @@ public team class CompilerAdaptation {
 					}
 				}
 			}
+		}
+		/** 
+		 * Metarialize a null annotation that has been added from the current default,
+		 * in order to ensure that this annotation will be generated into the .class file, too.
+		 */
+		public void addNullnessAnnotation(long defaultNullness, ReferenceBinding annotationBinding) {
+			Annotation[] annotations = getAnnotations();
+			setAnnotations(addAnnotation(annotations, annotationBinding));
+		}
+		/** 
+		 * Metarialize a null parameter annotation that has been added from the current default,
+		 * in order to ensure that this annotation will be generated into the .class file, too.
+		 */
+		public void addParameterNullnessAnnotation(int i, long defaultNullness, ReferenceBinding annotationBinding) {
+			Argument argument = getArguments()[i];
+			Annotation[] annotations = argument.annotations;
+			argument.annotations = addAnnotation(annotations, annotationBinding);
+		}
+
+		Annotation[] addAnnotation(Annotation[] annotations, ReferenceBinding annotationBinding) {
+			int sourceStart = this.sourceStart();
+			long pos = ((long)sourceStart<<32) + this.sourceEnd();
+			long[] poss = new long[annotationBinding.compoundName.length];
+			Arrays.fill(poss, pos);
+			MarkerAnnotation annotation = new MarkerAnnotation(new QualifiedTypeReference(annotationBinding.compoundName, poss), sourceStart);
+			annotation.resolvedType = annotationBinding;
+			if (annotations == null) {
+				annotations = new Annotation[] {annotation};
+			} else {
+				int len = annotations.length;
+				System.arraycopy(annotations, 0, annotations=new Annotation[len+1], 1, len);
+				annotations[0] = annotation;
+			}
+			return annotations;
 		}
 	}
 
@@ -363,17 +407,28 @@ public team class CompilerAdaptation {
 		AbstractMethodDeclaration sourceMethod()-> AbstractMethodDeclaration sourceMethod();
 		char[] readableName() 					-> char[] readableName();
 
-		/** After method verifier has finished, fill in missing nullness values from the default. */
-		protected void fillInDefaultNullness(long defaultNullness) {
+		/** After method verifier has finished, fill in missing nullness values from the applicable default. */
+		protected void fillInDefaultNullness(long defaultNullness, TypeBinding annotationBinding) {
 			if (this.parameterNonNullness == null)
 				this.parameterNonNullness = new Boolean[getParameters().length];
 			Boolean value = Boolean.valueOf(defaultNullness == TagBits.AnnotationNonNull);
+			AbstractMethodDeclaration sourceMethod = sourceMethod();
 			for (int i = 0; i < this.parameterNonNullness.length; i++) {
-				if (this.parameterNonNullness[i] == null)
+				boolean added = false;
+				if (this.parameterNonNullness[i] == null) {
+					added = true;
 					this.parameterNonNullness[i] = value;
+					if (sourceMethod != null)
+						sourceMethod.addParameterNullnessAnnotation(i, defaultNullness, (ReferenceBinding)annotationBinding);
+				}
+				if (added)
+					addTagBit(TagBits.HasParameterAnnotations);
 			}
-			if ((getTagBits() & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) == 0)
+			if ((getTagBits() & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) == 0) {
 				addTagBit(defaultNullness);
+				if (sourceMethod != null)
+					sourceMethod.addNullnessAnnotation(defaultNullness, (ReferenceBinding)annotationBinding);
+			}
 		}
 	}
 
@@ -395,7 +450,7 @@ public team class CompilerAdaptation {
 
 		void bindMethodArguments() <- after void computeMethods();
 
-		void fillInDefaultNullNess() <- after void checkMethods();
+		void fillInDefaultNullness() <- after void checkMethods();
 		
 		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length) {
 			// TODO: change traversal: process all methods at once!
@@ -484,43 +539,68 @@ public team class CompilerAdaptation {
 					methodDecl.bindArguments();
 		}
 		
-		void fillInDefaultNullNess() {
+		/** 
+		 * after checkMethods has passed down inherited nullness info,
+		 * now fill in missing annotations from a default setting from an enclosing scope.
+		 */
+		void fillInDefaultNullness() {
+			// find the applicable default inside->out:
 			SourceTypeBinding type = getType();
 			long defaultNullNess = 0;
-			while (defaultNullNess == 0 && type != null) {
-				defaultNullNess = type.defaultNullNess;
-				type = type.enclosingType();
+			SourceTypeBinding currentType = type;
+			while (currentType != null) {
+				defaultNullNess = currentType.defaultNullness;
+				if (defaultNullNess != 0)
+					break;
+				currentType = currentType.enclosingType();
 			}
-			if (defaultNullNess == 0)
-				defaultNullNess = getEnvironment().getGlobalOptions().defaultNonNullness;
+			if (defaultNullNess == 0) {
+				defaultNullNess = type.getPackage().defaultNullness;
+				if (defaultNullNess == 0)
+					defaultNullNess = getEnvironment().getGlobalOptions().defaultNonNullness;
+			}
+			
+			// apply this default to all methods:
 			if (defaultNullNess != 0) {
+				TypeBinding annotationBinding = getEnvironment().getNullAnnotationBinding(defaultNullNess);
 				MethodBinding[] methodBindings = getMethodBindings();
 				if (methodBindings != null) {
 					for (MethodBinding methodBinding : methodBindings)
-						methodBinding.fillInDefaultNullness(defaultNullNess);
+						methodBinding.fillInDefaultNullness(defaultNullNess, annotationBinding);
 				}
 			}
 		}
 	}
 
 	protected class SourceTypeBinding playedBy SourceTypeBinding {
+		PackageBinding getPackage() 		-> PackageBinding getPackage();
+
 		ProblemReporter problemReporter() 	-> get ClassScope scope
 					with {  result 			<- scope.problemReporter() } 
 
 		SourceTypeBinding enclosingType() 	-> ReferenceBinding enclosingType()
 					with { result 			<- (SourceTypeBinding)result }
 		
-		protected long defaultNullNess;
+		protected long defaultNullness;
 
 		evaluateNullAnnotations <- after getAnnotationTagBits;
 
 		@SuppressWarnings("inferredcallout")
 		private void evaluateNullAnnotations() {
+			// transfer nullness info from tagBits to defaultNullness 
 			long tagBits = this.tagBits;
+			long nullness = 0;
 			if ((tagBits & IConstants.TagBits.AnnotationNullableByDefault) != 0)
-				this.defaultNullNess = IConstants.TagBits.AnnotationNullable;
+				nullness = IConstants.TagBits.AnnotationNullable;
 			else if ((tagBits & IConstants.TagBits.AnnotationNonNullByDefault) != 0)
-				this.defaultNullNess = IConstants.TagBits.AnnotationNonNull;
+				nullness = IConstants.TagBits.AnnotationNonNull;
+			if (nullness != 0) {
+				if (this.sourceName == TypeConstants.PACKAGE_INFO_NAME) {
+					getPackage().setDefaultNullnesss(nullness);
+				} else {
+					this.defaultNullness = nullness;
+				}
+			}
 		}
 	}
 	
@@ -698,6 +778,13 @@ public team class CompilerAdaptation {
 		public char[][] getNonNullByDefaultAnnotationName() {
 			return getGlobalOptions().nonNullByDefaultAnnotationName;
 		}
+		public TypeBinding getNullAnnotationBinding(long annotationTagBit) {
+			if (annotationTagBit == TagBits.AnnotationNonNull)
+				return getType(getNonNullAnnotationName());
+			if (annotationTagBit == TagBits.AnnotationNullable)
+				return getType(getNullableAnnotationName());
+			return null;
+		}
 	}
 
 	/** The package holding the configured null annotation types detects and marks these annotation types. */
@@ -713,6 +800,7 @@ public team class CompilerAdaptation {
 		protected char[] nullableByDefaultName;
 		protected char[] nonNullByDefaultName;
 		protected boolean shouldEmulate = false;
+		protected long defaultNullness;
 
 		void setupNullAnnotationType(ReferenceBinding type) <- after void addType(ReferenceBinding type)
 			when (this.nullableName != null || this.nonNullName != null || this.nullableByDefaultName != null || this.nonNullByDefaultName != null);
@@ -735,7 +823,10 @@ public team class CompilerAdaptation {
 				getEnvironment().getProblemReporter().conflictingTypeEmulation(type.compoundName);
 			else
 				type.id = id;	// ensure annotations of this type are detected as standard annotations.
-		}		
+		}
+		public void setDefaultNullnesss(long nullness) {
+			this.defaultNullness = nullness;
+		}
 	}
 
 	/** Intermediate role to provide access to environment and problemReporter as roles, too. */
@@ -891,13 +982,16 @@ public team class CompilerAdaptation {
 					argument.sourceEnd);
 			}
 		}
-		public void illegalRedefinitionToNullableReturn(org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration methodDecl, ReferenceBinding declaringClass, char[][] nonNullAnnotationName) {
+		public void illegalRedefinitionToNullableReturn(org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration abstractMethodDecl,
+														ReferenceBinding declaringClass, char[][] nonNullAnnotationName) 
+		{
+			MethodDeclaration methodDecl = (MethodDeclaration) abstractMethodDecl;
 			this.handle(
 				IProblem.IllegalRedefinitionToNullableReturn, 
 				new String[] { new String(declaringClass.readableName()), CharOperation.toString(nonNullAnnotationName)},
 				new String[] { new String(declaringClass.shortReadableName()), new String(nonNullAnnotationName[nonNullAnnotationName.length-1])},
-				methodDecl.sourceStart, 
-				methodDecl.sourceEnd);
+				methodDecl.returnType.sourceStart, 
+				methodDecl.returnType.sourceEnd);
 		}
 		public void messageSendPotentialNullReference(MethodBinding method, ASTNode location) {
 			String[] arguments = new String[] {new String(method.readableName())};
