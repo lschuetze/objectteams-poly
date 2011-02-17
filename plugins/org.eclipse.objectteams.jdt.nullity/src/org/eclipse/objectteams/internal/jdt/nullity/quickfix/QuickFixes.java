@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -28,11 +27,13 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
@@ -70,6 +72,8 @@ public team class QuickFixes {
 			switch (problemId) {
 			case DefiniteNullFromNonNullMethod:
 			case PotentialNullFromNonNullMethod:
+			case DefiniteNullToNonNullParameter:
+			case PotentialNullToNonNullParameter:
 			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 					return true;
@@ -91,6 +95,8 @@ public team class QuickFixes {
 			switch (id) {
 			case DefiniteNullFromNonNullMethod:
 			case PotentialNullFromNonNullMethod:
+			case DefiniteNullToNonNullParameter:
+			case PotentialNullToNonNullParameter:
 				addNullableAnnotationInSignatureProposal(context, problem, proposals);
 				break;			
 			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
@@ -116,6 +122,8 @@ public team class QuickFixes {
 				options.put(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
 			if (mayIndicateParameterNullcheck(problem.getProblemId()))
 				options.put(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
+			if (problem.getProblemId() == DefiniteNullToNonNullParameter)
+				options.put(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, this), 15, image, context);
 			proposals.add(proposal);
 		}		
@@ -138,15 +146,30 @@ public team class QuickFixes {
 
 	CompilationUnitRewriteOperationsFix createNullableInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		String nullableAnnotationName = getNullableAnnotationName(compilationUnit.getJavaElement(), false);
-		CompilationUnitRewriteOperation operation = createAddNullableOperation(compilationUnit, problem, nullableAnnotationName, null);
+		String nonNullAnnotationName = getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
+		RewriteOperations.SignatureAnnotationRewriteOperation operation = createAddNullableOperation(
+				compilationUnit, problem, nullableAnnotationName, nonNullAnnotationName, null, false, true);
 		if (operation == null)
 			return null;
 		
 		int lastDot = nullableAnnotationName.lastIndexOf('.');
 		if (lastDot != -1)
 			nullableAnnotationName = nullableAnnotationName.substring(lastDot+1);
-		return new CompilationUnitRewriteOperationsFix(Messages.format(FixMessages.Generic_add_missing_annotation, nullableAnnotationName),
-														compilationUnit, 
+		String messageTemplate = null;
+		switch (problem.getProblemId()) {
+		case DefiniteNullFromNonNullMethod:
+		case PotentialNullFromNonNullMethod:
+			messageTemplate = FixMessages.QuickFixes_declare_method_return_nullable;
+			break;
+		case DefiniteNullToNonNullParameter:
+		case PotentialNullToNonNullParameter:
+		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
+			messageTemplate = FixMessages.QuickFixes_declare_method_parameter_nullable;
+			break;
+		}
+		return new CompilationUnitRewriteOperationsFix(Messages.format(messageTemplate, nullableAnnotationName),
+														operation.getCompilationUnit(), 
 														new CompilationUnitRewriteOperation[] {operation});
 	}
 
@@ -189,18 +212,21 @@ public team class QuickFixes {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	void createAddNullableAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List result) {
 		String nullableAnnotationName = getNullableAnnotationName(compilationUnit.getJavaElement(), false);
+		String nonNullAnnotationName = getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
 		Set<String> handledPositions = new HashSet<String>();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 			if (problem == null) continue; // problem was filtered out by createCleanUp()
-			CompilationUnitRewriteOperation fix = createAddNullableOperation(compilationUnit, problem, nullableAnnotationName, handledPositions);
+			CompilationUnitRewriteOperation fix = createAddNullableOperation(
+						compilationUnit, problem, nullableAnnotationName, nonNullAnnotationName, handledPositions, true, false);
 			if (fix != null)
 				result.add(fix);
 		}
 	}
 	
-	CompilationUnitRewriteOperation createAddNullableOperation(CompilationUnit compilationUnit,
-			IProblemLocation problem, String nullableAnnotationName, Set<String> handledPositions) 
+	RewriteOperations.SignatureAnnotationRewriteOperation createAddNullableOperation(CompilationUnit compilationUnit,
+			IProblemLocation problem, String nullableAnnotationName, String nonNullAnnotationName, Set<String> handledPositions,
+			boolean thisUnitOnly, boolean allowRemove) 
 	{
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
@@ -216,23 +242,59 @@ public team class QuickFixes {
 		if (selectedNode == null)
 			return null;
 			
-		ASTNode declaringNode= getDeclaringNode(selectedNode);
-		if (!(declaringNode instanceof MethodDeclaration))
-			return null;
-		
-		MethodDeclaration declaration= (MethodDeclaration) declaringNode;
-		
 		RewriteOperations.SignatureAnnotationRewriteOperation result = null;
-		if (mayIndicateParameterNullcheck(problem.getProblemId())) {
-			if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
-				IBinding binding = ((SimpleName)selectedNode).resolveBinding();
-				if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isParameter())
-					result = new RewriteOperations.ParameterAnnotationRewriteOperation(declaration, nullableAnnotationName, ((SimpleName) selectedNode).getIdentifier());
+		ASTNode declaringNode= getDeclaringNode(selectedNode);
+		if (selectedNode.getParent() instanceof MethodInvocation) {
+			// check problem ID!
+			MethodInvocation methodInvocation = (MethodInvocation)selectedNode.getParent();
+			int paramIdx = methodInvocation.arguments().indexOf(selectedNode);
+			IMethodBinding methodBinding = methodInvocation.resolveMethodBinding();
+			ASTNode methodDecl= compilationUnit.findDeclaringNode(methodBinding.getMethodDeclaration());
+			if (methodDecl == null) {
+				// is methodDecl defined in another CU?
+				ITypeBinding declaringTypeDecl= methodBinding.getDeclaringClass().getTypeDeclaration();
+				if (declaringTypeDecl.isFromSource()) {
+					ICompilationUnit targetCU = null;
+					try {
+						targetCU = ASTResolving.findCompilationUnitForBinding(cu, compilationUnit, declaringTypeDecl);
+					} catch (JavaModelException e) { /* can't do better */ }
+					if (targetCU != null) {
+						compilationUnit = ASTResolving.createQuickFixAST(targetCU, null);
+						methodDecl= compilationUnit.findDeclaringNode(methodBinding.getKey());
+					}
+				}
 			}
-		} else {
-			result = new RewriteOperations.ReturnAnnotationRewriteOperation(declaration, nullableAnnotationName);
-		}
+			if (methodDecl != null)
+				result = new RewriteOperations.ParameterAnnotationRewriteOperation(compilationUnit,
+																				   (MethodDeclaration) methodDecl,
+																				   nullableAnnotationName,
+																				   nonNullAnnotationName,
+																				   paramIdx,
+																				   allowRemove);
+		} else if (declaringNode instanceof MethodDeclaration) {
 		
+			MethodDeclaration declaration= (MethodDeclaration) declaringNode;
+			
+			if (mayIndicateParameterNullcheck(problem.getProblemId())) {
+				if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+					IBinding binding = ((SimpleName)selectedNode).resolveBinding();
+					if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isParameter())
+						result = new RewriteOperations.ParameterAnnotationRewriteOperation(compilationUnit,
+																						   declaration,
+																						   nullableAnnotationName,
+																						   nonNullAnnotationName,
+																						   ((SimpleName) selectedNode).getIdentifier(),
+																						   allowRemove);
+				}
+			} else {
+				result = new RewriteOperations.ReturnAnnotationRewriteOperation(compilationUnit,
+																				declaration,
+																				nullableAnnotationName,
+																				nonNullAnnotationName,
+																				allowRemove);
+			}
+			
+		}
 		if (handledPositions != null && result != null) {
 			if (handledPositions.contains(result.getKey()))
 				return null;
@@ -248,6 +310,7 @@ public team class QuickFixes {
 
 	static boolean isMissingNullableAnnotationProblem(int id) {
 		return id == DefiniteNullFromNonNullMethod || id == PotentialNullFromNonNullMethod 
+				|| id == DefiniteNullToNonNullParameter || id == PotentialNullToNonNullParameter
 				|| mayIndicateParameterNullcheck(id);
 	}
 	
@@ -274,16 +337,16 @@ public team class QuickFixes {
 		return false;
 	}
 
-	static String getNullableAnnotationName(IJavaElement compilationUnit, boolean makeSimple) {
-		String qualifiedName = compilationUnit.getJavaProject().getOption(NullCompilerOptions.OPTION_NullableAnnotationName, true);
+	static String getNullableAnnotationName(IJavaElement javaElement, boolean makeSimple) {
+		String qualifiedName = javaElement.getJavaProject().getOption(NullCompilerOptions.OPTION_NullableAnnotationName, true);
 		int lastDot;
 		if (makeSimple && qualifiedName != null && (lastDot = qualifiedName.lastIndexOf('.')) != -1)
 			return qualifiedName.substring(lastDot+1);
 		return qualifiedName;
 	}
 
-	static String getNonNullAnnotationName(ICompilationUnit compilationUnit, boolean makeSimple) {
-		String qualifiedName = compilationUnit.getJavaProject().getOption(NullCompilerOptions.OPTION_NonNullAnnotationName, true);
+	static String getNonNullAnnotationName(IJavaElement javaElement, boolean makeSimple) {
+		String qualifiedName = javaElement.getJavaProject().getOption(NullCompilerOptions.OPTION_NonNullAnnotationName, true);
 		int lastDot;
 		if (makeSimple && qualifiedName != null && (lastDot = qualifiedName.lastIndexOf('.')) != -1)
 			return qualifiedName.substring(lastDot+1);

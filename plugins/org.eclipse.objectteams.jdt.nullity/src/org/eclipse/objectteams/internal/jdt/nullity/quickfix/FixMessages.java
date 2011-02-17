@@ -15,12 +15,15 @@ import org.eclipse.osgi.util.NLS;
 public class FixMessages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.objectteams.internal.jdt.nullity.quickfix.FixMessages"; //$NON-NLS-1$
 	
-	public static String Generic_add_missing_annotation;
 	
 	public static String NullAnnotationsCleanUp_add_nullable_annotation;
 	
 	public static String QuickFixes_add_annotation_change_name;
 	
+	public static String QuickFixes_declare_method_parameter_nullable;
+
+	public static String QuickFixes_declare_method_return_nullable;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, FixMessages.class);
