@@ -297,7 +297,7 @@ public class RewriteOperations {
 					break;
 				case DefiniteNullFromNonNullMethod:
 				case PotentialNullFromNonNullMethod:
-					message = Messages.format(FixMessages.QuickFixes_declare_method_parameter_nullable, annotationNameLabel);
+					message = Messages.format(FixMessages.QuickFixes_declare_method_return_nullable, annotationNameLabel);
 					result = new ReturnAnnotationRewriteOperation(compilationUnit,
 																				    declaration,
 																				    annotationToAdd,
