@@ -3,5 +3,8 @@
    <feature url="features/org.eclipse.objectteams.jdt.nullity.feature_0.7.0.qualifier.jar" id="org.eclipse.objectteams.jdt.nullity.feature" version="0.7.0.qualifier">
       <category name="org.eclipse.objectteams.jdt.enhancements"/>
    </feature>
+   <feature url="features/org.eclipse.objectteams.jdt.nullity.feature_0.7.1.qualifier.jar" id="org.eclipse.objectteams.jdt.nullity.feature" version="0.7.1.qualifier">
+      <category name="org.eclipse.objectteams.jdt.enhancements"/>
+   </feature>
    <category-def name="org.eclipse.objectteams.jdt.enhancements" label="JDT Enhancements"/>
 </site>
