@@ -29,7 +29,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-		TESTS_NAMES = new String[] { "test_default_nullness_003a" };
+//		TESTS_NAMES = new String[] { "test_default_nullness_003a" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -1163,14 +1163,15 @@ public void test_default_nullness_003a() {
 			"        return new Object();\n" +
 			"    }\n" +
 			"	 protected void bar(Object o2) { }\n" + // parameter is nonnull per type default
-			"}\n"});
+			"}\n",
+	"p2/package-info.java",
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
+			"package p2;\n",
+			});
 	// check if default is visible from X.class.
 	runNegativeTest(
 		false/*shouldFlushOutputDirectory*/,
 		new String[] {
-	"p2/package-info.java",
-			"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
-			"package p2;\n",
 	"p2/Y.java",
 			"package p2;\n" +
 			"import org.eclipse.jdt.annotation.*;\n" +
@@ -1178,8 +1179,10 @@ public void test_default_nullness_003a() {
 			"    @Override\n" +
 			"    protected @Nullable Object getObject(Object o) {\n" + // can't override inherited default nonnull 
 			"        bar(o);\n" + // parameter is nonnull in super class's .class file
+			"        accept(o);\n" + // check conflict of nullable o (inherited) and nonnull a (package default)
 			"        return o;\n" +
 			"    }\n" +
+			"    void accept(Object a) {}\n" + // governed by package level default
 			"}\n"
 		},
 		null/*classLibs*/,
@@ -1193,6 +1196,11 @@ public void test_default_nullness_003a() {
 		"2. ERROR in p2\\Y.java (at line 6)\n" + 
 		"	bar(o);\n" + 
 		"	    ^\n" + 
+		"Null contract violation: potentially passing null to a parameter declared as @NonNull\n" + 
+		"----------\n" + 
+		"3. ERROR in p2\\Y.java (at line 7)\n" + 
+		"	accept(o);\n" + 
+		"	       ^\n" + 
 		"Null contract violation: potentially passing null to a parameter declared as @NonNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
