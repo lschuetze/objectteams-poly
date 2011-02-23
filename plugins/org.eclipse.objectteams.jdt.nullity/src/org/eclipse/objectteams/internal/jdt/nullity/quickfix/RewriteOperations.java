@@ -199,7 +199,7 @@ public class RewriteOperations {
 			ImportRewrite importRewrite = cuRewrite.getImportRewrite();
 			String resolvableName = importRewrite.addImport(fAnnotationToAdd);
 			newAnnotation.setTypeName(ast.newName(resolvableName));
-			listRewrite.insertLast(newAnnotation, group); // null annotation is last modifier, directly preceding the return type
+			listRewrite.insertLast(newAnnotation, group); // null annotation is last modifier, directly preceding the type
 		}
 	}
 

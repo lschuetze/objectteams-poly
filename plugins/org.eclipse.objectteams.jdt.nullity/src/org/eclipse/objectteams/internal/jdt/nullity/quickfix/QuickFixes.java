@@ -10,7 +10,13 @@
  *******************************************************************************/
 package org.eclipse.objectteams.internal.jdt.nullity.quickfix;
 
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.*;
+import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.DefiniteNullFromNonNullMethod;
+import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.DefiniteNullToNonNullParameter;
+import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.IllegalDefinitionToNonNullParameter;
+import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.IllegalRedefinitionToNonNullParameter;
+import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.IllegalRedefinitionToNullableReturn;
+import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.PotentialNullFromNonNullMethod;
+import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.PotentialNullToNonNullParameter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,11 +26,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.jdt.core.IAnnotation;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -41,68 +45,75 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionPropos
 import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.objectteams.internal.jdt.nullity.NullCompilerOptions;
 import org.eclipse.swt.graphics.Image;
 
-import base org.eclipse.jdt.internal.ui.text.correction.QuickFixProcessor;
-
 /**
  * Quickfixes for null-annotation related problems.
- * Hooks into JDT/UI's QuickFixProcessor.
  * 
  * @author stephan
  */
 @SuppressWarnings("restriction")
-public team class QuickFixes {
+public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcessor {
 
-	protected class Processor playedBy QuickFixProcessor {
-
-		hasCorrections <- replace hasCorrections;
-
-		@SuppressWarnings("basecall")
-		callin boolean hasCorrections(ICompilationUnit cu, int problemId) {
-			switch (problemId) {
-			case DefiniteNullFromNonNullMethod:
-			case PotentialNullFromNonNullMethod:
-			case DefiniteNullToNonNullParameter:
-			case PotentialNullToNonNullParameter:
-			case IllegalRedefinitionToNullableReturn:
-			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
-			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
-					return true;
-			default:
-				return base.hasCorrections(cu, problemId);
-			}
+	public boolean hasCorrections(ICompilationUnit cu, int problemId) {
+		switch (problemId) {
+		case DefiniteNullFromNonNullMethod:
+		case PotentialNullFromNonNullMethod:
+		case DefiniteNullToNonNullParameter:
+		case PotentialNullToNonNullParameter:
+		case IllegalRedefinitionToNullableReturn:
+		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
+				return true;
+		default:
+			return false;
+		}
+	}
+	
+	/* (non-Javadoc)
+	 * @see IAssistProcessor#getCorrections(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
+	 */
+	public IJavaCompletionProposal[] getCorrections(IInvocationContext context, IProblemLocation[] locations) throws CoreException {
+		if (locations == null || locations.length == 0) {
+			return null;
 		}
 
-		process <- after process;
-
-		/**
-		 * Add our proposals to the list assembled by the base class.
-		 */
-		void process(IInvocationContext context, IProblemLocation problem, @SuppressWarnings("rawtypes") Collection proposals) {
-			int id= problem.getProblemId();
-			if (id == 0) { // no proposals for none-problem locations
-				return;
+		HashSet<Integer> handledProblems= new HashSet<Integer>(locations.length);
+		ArrayList<IJavaCompletionProposal> resultingCollections= new ArrayList<IJavaCompletionProposal>();
+		for (int i= 0; i < locations.length; i++) {
+			IProblemLocation curr= locations[i];
+			Integer id= new Integer(curr.getProblemId());
+			if (handledProblems.add(id)) {
+				process(context, curr, resultingCollections);
 			}
-			switch (id) {
-			case DefiniteNullFromNonNullMethod:
-			case PotentialNullFromNonNullMethod:
-			case DefiniteNullToNonNullParameter:
-			case PotentialNullToNonNullParameter:
-			case IllegalRedefinitionToNullableReturn:
-			case IllegalDefinitionToNonNullParameter:
-			case IllegalRedefinitionToNonNullParameter:
+		}
+		return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
+	}
+
+	void process(IInvocationContext context, IProblemLocation problem, Collection<IJavaCompletionProposal> proposals) {
+		int id= problem.getProblemId();
+		if (id == 0) { // no proposals for none-problem locations
+			return;
+		}
+		switch (id) {
+		case DefiniteNullFromNonNullMethod:
+		case PotentialNullFromNonNullMethod:
+		case DefiniteNullToNonNullParameter:
+		case PotentialNullToNonNullParameter:
+		case IllegalRedefinitionToNullableReturn:
+		case IllegalDefinitionToNonNullParameter:
+		case IllegalRedefinitionToNonNullParameter:
+			addNullAnnotationInSignatureProposal(context, problem, proposals);
+			break;
+		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
+			if (isComplainingAboutArgument(context, problem))
 				addNullAnnotationInSignatureProposal(context, problem, proposals);
-				break;			
-			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
-			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
-				if (isComplainingAboutArgument(context, problem))
-					addNullAnnotationInSignatureProposal(context, problem, proposals);
-				break;
-			}			
-		}		
+			break;
+		}
 	}
 		
 	@SuppressWarnings("unchecked")
@@ -250,21 +261,23 @@ public team class QuickFixes {
 	}
 	
 	public static boolean hasExplicitNullAnnotation(ICompilationUnit compilationUnit, int offset) {
-		try {
-			IJavaElement problemElement = compilationUnit.getElementAt(offset);
-			if (problemElement.getElementType() == IJavaElement.METHOD) {
-				IMethod method = (IMethod) problemElement;
-				String nullable = getNullableAnnotationName(compilationUnit, true);
-				String nonnull = getNonNullAnnotationName(compilationUnit, true);
-				for (IAnnotation annotation : method.getAnnotations()) {
-					if (   annotation.getElementName().equals(nonnull)
-						|| annotation.getElementName().equals(nullable))
-						return true;
-				}
-			}
-		} catch (JavaModelException jme) {
-			/* nop */
-		}
+// FIXME(SH): check for existing annotations disabled due to lack of precision:
+//		      should distinguish what is actually annotated (return? param? which?)
+//		try {
+//			IJavaElement problemElement = compilationUnit.getElementAt(offset);
+//			if (problemElement.getElementType() == IJavaElement.METHOD) {
+//				IMethod method = (IMethod) problemElement;
+//				String nullable = getNullableAnnotationName(compilationUnit, true);
+//				String nonnull = getNonNullAnnotationName(compilationUnit, true);
+//				for (IAnnotation annotation : method.getAnnotations()) {
+//					if (   annotation.getElementName().equals(nonnull)
+//						|| annotation.getElementName().equals(nullable))
+//						return true;
+//				}
+//			}
+//		} catch (JavaModelException jme) {
+//			/* nop */
+//		}
 		return false;
 	}
 
