@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
+import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.flow.InitializationFlowContext;
@@ -355,7 +356,7 @@ public team class CompilerAdaptation {
 			}
 		}
 		/** 
-		 * Metarialize a null annotation that has been added from the current default,
+		 * Materialize a null annotation that has been added from the current default,
 		 * in order to ensure that this annotation will be generated into the .class file, too.
 		 */
 		public void addNullnessAnnotation(long defaultNullness, ReferenceBinding annotationBinding) {
@@ -572,8 +573,18 @@ public team class CompilerAdaptation {
 		}
 	}
 
-	protected class SourceTypeBinding playedBy SourceTypeBinding {
+	@SuppressWarnings("bindingconventions")
+	protected class TaggableTypeBinding playedBy TypeBinding {
+		long getTagBits() 					 	-> get long tagBits;
+		public void addTagBit(long bit) 	 	-> set long tagBits 
+			with { bit | getTagBits() 			-> tagBits }
+	}
+	
+	protected class SourceTypeBinding extends TaggableTypeBinding playedBy SourceTypeBinding {
+
 		PackageBinding getPackage() 		-> PackageBinding getPackage();
+
+		long getAnnotationTagBits() 		-> long getAnnotationTagBits();
 
 		ProblemReporter problemReporter() 	-> get ClassScope scope
 					with {  result 			<- scope.problemReporter() } 
@@ -583,31 +594,43 @@ public team class CompilerAdaptation {
 		
 		protected long defaultNullness;
 
-		evaluateNullAnnotations <- after getAnnotationTagBits;
+		evaluateNullAnnotations 			<- after getAnnotationTagBits;
+		
+		triggerNullAnnotationInit 			<- after initializeDeprecatedAnnotationTagBits
+			base when (CharOperation.equals(base.sourceName, TypeConstants.PACKAGE_INFO_NAME));
 
 		@SuppressWarnings("inferredcallout")
-		private void evaluateNullAnnotations() {
+		void evaluateNullAnnotations() {
 			// transfer nullness info from tagBits to defaultNullness 
-			long tagBits = this.tagBits;
+			long tagBits = getTagBits();
 			long nullness = 0;
 			if ((tagBits & IConstants.TagBits.AnnotationNullableByDefault) != 0)
 				nullness = IConstants.TagBits.AnnotationNullable;
 			else if ((tagBits & IConstants.TagBits.AnnotationNonNullByDefault) != 0)
 				nullness = IConstants.TagBits.AnnotationNonNull;
 			if (nullness != 0) {
-				if (this.sourceName == TypeConstants.PACKAGE_INFO_NAME) {
-					getPackage().setDefaultNullnesss(nullness);
+				if (CharOperation.equals(this.sourceName, TypeConstants.PACKAGE_INFO_NAME)) {
+					getPackage().setDefaultNullness(nullness);
 				} else {
 					this.defaultNullness = nullness;
 				}
 			}
 		}
+		
+		void triggerNullAnnotationInit() {
+			getAnnotationTagBits(); // this will in turn trigger our callin
+		}
 	}
 	
 	/** Retrieve null annotations from binary methods. */
-	protected class BinaryTypeBinding playedBy BinaryTypeBinding {
+	protected class BinaryTypeBinding extends TaggableTypeBinding playedBy BinaryTypeBinding {
+
 		@SuppressWarnings("decapsulation")
-		LookupEnvironment getEnvironment() -> get LookupEnvironment environment;
+		LookupEnvironment getEnvironment() 	-> get LookupEnvironment environment;
+
+		PackageBinding getPackage() 		-> PackageBinding getPackage();
+				
+		char[] sourceName() 				-> char[] sourceName();
 
 		/** Constructor for emulated annotation type. */
 		@SuppressWarnings({ "inferredcallout", "decapsulation" })
@@ -639,11 +662,11 @@ public team class CompilerAdaptation {
 			// this.fileName = CharOperation.concat(new char[]{'&'}, CharOperation.concatWith(compoundName, '/'));
 		}
 		
-		void scanForNullAnnotation(IBinaryMethod method, MethodBinding methodBinding) 
+		void scanMethodForNullAnnotation(IBinaryMethod method, MethodBinding methodBinding) 
 		<- after MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[][][] missingTypeNames)
 			with { method <- method, methodBinding <- result }
 		
-		void scanForNullAnnotation(IBinaryMethod method, MethodBinding methodBinding) {
+		void scanMethodForNullAnnotation(IBinaryMethod method, MethodBinding methodBinding) {
 			LookupEnvironment environment = this.getEnvironment();
 			char[][] nullableAnnotationName = environment.getNullableAnnotationName();
 			char[][] nonNullAnnotationName = environment.getNonNullAnnotationName();
@@ -694,6 +717,45 @@ public team class CompilerAdaptation {
 				}
 			}
 		}
+
+		scanTypeForNullAnnotation <- after cachePartsFrom;
+
+		void scanTypeForNullAnnotation(IBinaryType binaryType) {
+			LookupEnvironment environment = this.getEnvironment();
+			char[][] nullableByDefaultAnnotationName = environment.getNullableByDefaultAnnotationName();
+			char[][] nonNullByDefaultAnnotationName = environment.getNonNullByDefaultAnnotationName();
+			if (nullableByDefaultAnnotationName == null || nonNullByDefaultAnnotationName == null)
+				return; // not configured to use null annotations
+
+			IBinaryAnnotation[] annotations = binaryType.getAnnotations();
+			if (annotations != null) {
+				long annotationBit = 0L;
+				long defaultNullness = 0L;
+				for (int i = 0; i < annotations.length; i++) {
+					char[] annotationTypeName = annotations[i].getTypeName();
+					if (annotationTypeName[0] != 'L')
+						continue;
+					char[][] typeName = CharOperation.splitOn('/', annotationTypeName, 1, annotationTypeName.length-1); // cut of leading 'L' and trailing ';'
+					if (CharOperation.equals(typeName, nonNullByDefaultAnnotationName)) {
+						annotationBit = TagBits.AnnotationNonNullByDefault;
+						defaultNullness = TagBits.AnnotationNonNull;
+						break;
+					}
+					if (CharOperation.equals(typeName, nullableByDefaultAnnotationName)) {
+						annotationBit = TagBits.AnnotationNullableByDefault;
+						defaultNullness = TagBits.AnnotationNullable;
+						break;
+					}
+				}
+				if (annotationBit != 0L) {
+					addTagBit(annotationBit);
+					if (CharOperation.equals(this.sourceName(), TypeConstants.PACKAGE_INFO_NAME))
+						this.getPackage().setDefaultNullness(defaultNullness);
+				}
+			}
+		}
+		
+		
 	}
 
 	// ========================== Configuration of null annotation types =========================
@@ -824,7 +886,7 @@ public team class CompilerAdaptation {
 			else
 				type.id = id;	// ensure annotations of this type are detected as standard annotations.
 		}
-		public void setDefaultNullnesss(long nullness) {
+		public void setDefaultNullness(long nullness) {
 			this.defaultNullness = nullness;
 		}
 	}
@@ -1225,6 +1287,8 @@ public team class CompilerAdaptation {
 			optionNames.add(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes);
 			optionNames.add(NullCompilerOptions.OPTION_NonNullAnnotationName);
 			optionNames.add(NullCompilerOptions.OPTION_NullableAnnotationName);
+			optionNames.add(NullCompilerOptions.OPTION_NonNullByDefaultAnnotationName);
+			optionNames.add(NullCompilerOptions.OPTION_NullableByDefaultAnnotationName);
 			optionNames.add(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo);
 			optionNames.add(NullCompilerOptions.OPTION_ReportNullContractViolation);
 			optionNames.add(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation);
