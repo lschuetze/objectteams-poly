@@ -12,7 +12,9 @@ package org.eclipse.objectteams.internal.jdt.nullity;
 
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -1087,6 +1089,7 @@ public team class CompilerAdaptation {
 				ProblemSeverities.Error | ProblemSeverities.Abort | ProblemSeverities.Fatal, // not configurable
 				0, 0);	
 		}
+		// NOTE: adaptation of toString() omitted
 	}
 	
 	/** Supply more error messages. */
@@ -1170,11 +1173,20 @@ public team class CompilerAdaptation {
 			case NullContractViolation :
 			case PotentialNullContractViolation :
 			case NullContractInsufficientInfo :
-				return "null"; //$NON-NLS-1$
+				return "nullcontract"; //$NON-NLS-1$
 			default:
 				return base.warningTokenFromIrritant(irritant);
 			}
 		}
+
+		warningTokenToIrritants <- replace warningTokenToIrritants;
+		@SuppressWarnings("basecall")
+		static callin IrritantSet warningTokenToIrritants(String string) {
+			if ("nullcontract".equals(string)) //$NON-NLS-1$
+				return new IrritantSet(NullContractViolation).set(PotentialNullContractViolation).set(NullContractInsufficientInfo);
+			return base.warningTokenToIrritants(string);
+		}
+
 		void getMap(Map optionsMap) <- after Map getMap()
 			with {optionsMap <- result}
 		@SuppressWarnings("unchecked")
@@ -1271,7 +1283,8 @@ public team class CompilerAdaptation {
 	protected class JavaModelManager playedBy JavaModelManager {
 		JavaModelManager getJavaModelManager() 	-> JavaModelManager getJavaModelManager();
 		@SuppressWarnings({ "decapsulation", "rawtypes" })
-		protected HashSet getOptionNames() 		-> get HashSet optionNames;		
+		protected HashSet getOptionNames() 		-> get HashSet optionNames;
+		void setOptions(Hashtable newOptions) 	-> void setOptions(Hashtable newOptions);
 	}
 	@SuppressWarnings({"rawtypes","unchecked"})
 	protected class JavaProject playedBy JavaProject {
@@ -1293,6 +1306,13 @@ public team class CompilerAdaptation {
 			optionNames.add(NullCompilerOptions.OPTION_ReportNullContractViolation);
 			optionNames.add(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation);
 			optionNames.add(NullCompilerOptions.OPTION_NullnessDefault);
+			// also fill default names:
+			Hashtable defaultNames = new Hashtable();
+			defaultNames.put(NullCompilerOptions.OPTION_NullableAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NULLABLE_ANNOTATION_NAME, '.')));
+			defaultNames.put(NullCompilerOptions.OPTION_NonNullAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NONNULL_ANNOTATION_NAME, '.')));
+			defaultNames.put(NullCompilerOptions.OPTION_NullableByDefaultAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NULLABLEBYDEFAULT_ANNOTATION_NAME, '.')));
+			defaultNames.put(NullCompilerOptions.OPTION_NonNullByDefaultAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NONNULLBYDEFAULT_ANNOTATION_NAME, '.')));
+			javaModelManager.setOptions(defaultNames);
 		}
 	}
 }
