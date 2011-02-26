@@ -10,8 +10,7 @@
  *******************************************************************************/
 package org.eclipse.objectteams.internal.jdt.nullity.quickfix;
 
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.DefiniteNullFromNonNullMethod;
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.PotentialNullFromNonNullMethod;
+import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.*;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -41,29 +40,22 @@ import org.eclipse.objectteams.internal.jdt.nullity.NullCompilerOptions;
 public class NullAnnotationsCleanUp extends AbstractMultiFix {
 
 	private QuickFixes master;
+	private int handledProblemID;
 
-	public NullAnnotationsCleanUp(Map<String, String> options, QuickFixes quickFixes) {
+	public NullAnnotationsCleanUp(Map<String, String> options, QuickFixes quickFixes, int handledProblemID) {
 		super(options);
 		this.master = quickFixes;
+		this.handledProblemID = handledProblemID;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public CleanUpRequirements getRequirements() {
-		boolean requireAST= requireAST();
-		Map requiredOptions= requireAST ? getRequiredOptions() : null;
-		return new CleanUpRequirements(requireAST, false, false, requiredOptions);
+		Map requiredOptions= getRequiredOptions();
+		return new CleanUpRequirements(true, false, false, requiredOptions);
 	}
 
-	private boolean requireAST() {
-		boolean addAnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
-
-		return addAnotations && 
-			(   isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE)
-			 || isEnabled(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE)
-			 || isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE));
-	}
 
 	/**
 	 * {@inheritDoc}
@@ -78,28 +70,19 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-
-		boolean addAnnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
-		boolean addDefintelyMissingReturnNullable = isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE);
-		boolean addPotentiallyMissingReturnNullable = isEnabled(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE);
-		boolean addDefintelyMissingParamNullable = isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE);
-		return this.master.createCleanUp(compilationUnit, 
-											addAnnotations && addDefintelyMissingReturnNullable, 
-											addAnnotations && addPotentiallyMissingReturnNullable, 
-											addAnnotations && addDefintelyMissingParamNullable, 
-											problems);
+		ArrayList<IProblemLocation> filteredLocations = new ArrayList<IProblemLocation>();
+		for (int i = 0; i < problems.length; i++) {
+			if (problems[i].getProblemId() == this.handledProblemID)
+				filteredLocations.add(problems[i]);
+		}
+		return this.master.createCleanUp(compilationUnit, filteredLocations.toArray(new IProblemLocation[filteredLocations.size()]), this.handledProblemID);
 	}
 
 	private Map getRequiredOptions() {
 		Map result= new Hashtable();
-		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && 
-			(   isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE)
-			 || isEnabled(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE)
-			 || isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE))) 
-		{
-			result.put(NullCompilerOptions.OPTION_ReportNullContractViolation, JavaCore.WARNING);
-			result.put(CompilerOptions.OPTION_ReportRedundantNullCheck, JavaCore.WARNING);
-		}
+		// TODO(SH): might set depending on this.handledProblemID, not sure about the benefit
+		result.put(NullCompilerOptions.OPTION_ReportNullContractViolation, JavaCore.WARNING);
+		result.put(CompilerOptions.OPTION_ReportRedundantNullCheck, JavaCore.WARNING);
 		return result;
 	}
 
@@ -108,12 +91,18 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	 */
 	public String[] getStepDescriptions() {
 		List result= new ArrayList();
-		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) && 
-			(   isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE)
-			 || isEnabled(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE)
-			 || isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE))) 
-		{
+		switch (this.handledProblemID) {
+		case DefiniteNullToNonNullParameter:
+		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
+		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
+		case DefiniteNullFromNonNullMethod:
+		case PotentialNullFromNonNullMethod:
 			result.add(FixMessages.NullAnnotationsCleanUp_add_nullable_annotation);
+			break;
+		case IllegalDefinitionToNonNullParameter:
+		case IllegalRedefinitionToNonNullParameter:
+			result.add(FixMessages.NullAnnotationsCleanUp_add_nonnull_annotation);
+			break;	
 		}
 		return (String[])result.toArray(new String[result.size()]);
 	}
@@ -122,20 +111,8 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	 * {@inheritDoc}
 	 */
 	public String getPreview() {
-		StringBuffer buf= new StringBuffer();
-
-		buf.append("class E {\n"); //$NON-NLS-1$
-		if (isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) &&
-			(   isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE)
-			 || isEnabled(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE)
-			 || isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE))) 
-		{
-			buf.append("    @Nullable\n"); //$NON-NLS-1$
-		}
-		buf.append("    public Object foo() { return null; }\n"); //$NON-NLS-1$
-		buf.append("}\n"); //$NON-NLS-1$
-
-		return buf.toString();
+		// not used when not provided as a true cleanup(?)
+		return "No preview available"; //$NON-NLS-1$
 	}
 
 	/**
@@ -144,17 +121,11 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	public boolean canFix(ICompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
 		
-		if (QuickFixes.isMissingNullAnnotationProblem(id)) {
-			if (   isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS) 
-				&& (   ((id == DefiniteNullFromNonNullMethod) && isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE))
-					|| ((id == PotentialNullFromNonNullMethod) && isEnabled(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE))
-					|| (QuickFixes.mayIndicateParameterNullcheck(id) && isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE)))) 
-			{
-				// FIXME search specifically: return param (which??)
-//				if (QuickFixes.hasExplicitNullnessAnnotation(compilationUnit, problem.getOffset()))
-//					return false;
-				return true;
-			}			
+		if (id == this.handledProblemID) {
+			// FIXME search specifically: return param (which??)
+//			if (QuickFixes.hasExplicitNullnessAnnotation(compilationUnit, problem.getOffset()))
+//				return false;
+			return true;			
 		}
 
 		return false;
@@ -167,19 +138,14 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	public int computeNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		
-		boolean addAnnotations= isEnabled(CleanUpConstants.ADD_MISSING_ANNOTATIONS);
-		boolean addDefinitelyMissingReturnNullable= addAnnotations && isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE);
-		boolean addPotentiallyMissingReturnNullable= addAnnotations && isEnabled(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE);
-		boolean addDefinitelyMissingParamNullable= addAnnotations && isEnabled(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE);
-		
 		IProblem[] problems= compilationUnit.getProblems();
 		for (int i= 0; i < problems.length; i++) {
 			int id= problems[i].getID();
-			if (   (addDefinitelyMissingReturnNullable && id == DefiniteNullFromNonNullMethod)
-				|| (addPotentiallyMissingReturnNullable && id == PotentialNullFromNonNullMethod)
-				|| (addDefinitelyMissingParamNullable && QuickFixes.mayIndicateParameterNullcheck(id)))
-				if (!QuickFixes.hasExplicitNullAnnotation((ICompilationUnit) compilationUnit.getJavaElement(), problems[i].getSourceStart()))
+			if (id == this.handledProblemID) {
+				// FIXME search specifically: return param (which??)
+//				if (!QuickFixes.hasExplicitNullnessAnnotation(compilationUnit, problems[i].getSourceStart()))
 					result++;
+			}
 		}
 		return result;
 	}

@@ -37,12 +37,10 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
-import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.FixCorrectionProposal;
-import org.eclipse.jdt.ui.cleanup.CleanUpOptions;
 import org.eclipse.jdt.ui.cleanup.ICleanUpFix;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -57,6 +55,16 @@ import org.eclipse.swt.graphics.Image;
  */
 @SuppressWarnings("restriction")
 public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcessor {
+
+	/** Small adaptation just to make available the 'compilationUnit' passed at instantiation time. */
+	static class MyCURewriteOperationsFix extends CompilationUnitRewriteOperationsFix {
+		CompilationUnit cu;
+		public MyCURewriteOperationsFix(String name, CompilationUnit compilationUnit, CompilationUnitRewriteOperation[] operations) 
+		{
+			super(name, compilationUnit, operations);
+			this.cu = compilationUnit;
+		}
+	}
 
 	public boolean hasCorrections(ICompilationUnit cu, int problemId) {
 		switch (problemId) {
@@ -119,30 +127,38 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 	@SuppressWarnings("unchecked")
 	void addNullAnnotationInSignatureProposal(IInvocationContext context, IProblemLocation problem, @SuppressWarnings("rawtypes") Collection proposals)
 	{
-		IProposableFix fix= createNullAnnotationInSignatureFix(context.getASTRoot(), problem);
+		MyCURewriteOperationsFix fix= createNullAnnotationInSignatureFix(context.getASTRoot(), problem);
 		
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			Map<String, String> options= new Hashtable<String, String>();
-			options.put(CleanUpConstants.ADD_MISSING_ANNOTATIONS, CleanUpOptions.TRUE);
-			switch (problem.getProblemId()) {
-			case DefiniteNullFromNonNullMethod:
-			case IllegalRedefinitionToNullableReturn:
-				options.put(CleanUpConstants.ADD_DEFINITELY_MISSING_RETURN_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
-				break;
-			case PotentialNullFromNonNullMethod:
-				options.put(CleanUpConstants.ADD_POTENTIALLY_MISSING_RETURN_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
-				break;
-			case IProblem.NonNullLocalVariableComparisonYieldsFalse:
-			case IProblem.RedundantNullCheckOnNonNullLocalVariable:
-			    // may indicate a parameter null-check
-			case DefiniteNullToNonNullParameter:
-			case IllegalDefinitionToNonNullParameter:
-			case IllegalRedefinitionToNonNullParameter:
-				options.put(CleanUpConstants.ADD_DEFINITELY_MISSING_PARAMETER_ANNOTATION_NULLABLE, CleanUpOptions.TRUE);
-				break;
+			if (fix.cu != context.getASTRoot()) {
+				// workaround: adjust the unit to operate on, depending on the findings of RewriteOperations.createAddAnnotationOperation(..)
+				final CompilationUnit cu = fix.cu;
+				final IInvocationContext originalContext = context;
+				context = new IInvocationContext() {
+					public int getSelectionOffset() {
+						return originalContext.getSelectionOffset();
+					}					
+					public int getSelectionLength() {
+						return originalContext.getSelectionLength();
+					}
+					public ASTNode getCoveringNode() {
+						return originalContext.getCoveringNode();
+					}					
+					public ASTNode getCoveredNode() {
+						return originalContext.getCoveredNode();
+					}					
+					public ICompilationUnit getCompilationUnit() {
+						return (ICompilationUnit) cu.getJavaElement();
+					}
+					
+					public CompilationUnit getASTRoot() {
+						return cu;
+					}
+				};
 			}
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, this), 15, image, context);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, this, problem.getProblemId()), 15, image, context);
 			proposals.add(proposal);
 		}		
 	}
@@ -162,7 +178,7 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		return false;
 	}
 
-	CompilationUnitRewriteOperationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem)
+	MyCURewriteOperationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem)
 	{
 		String nullableAnnotationName = getNullableAnnotationName(compilationUnit.getJavaElement(), false);
 		String nonNullAnnotationName = getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
@@ -178,30 +194,24 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		// all others propose to add @Nullable
 		}
 		
+		// when performing one change at a time we can actually modify another CU than the current one:
 		RewriteOperations.SignatureAnnotationRewriteOperation operation = 
 			RewriteOperations.createAddAnnotationOperation(
 				compilationUnit, problem, annotationToAdd, annotationToRemove, null, false/*thisUnitOnly*/, true/*allowRemove*/);
 		if (operation == null)
 			return null;
 		
-		return new CompilationUnitRewriteOperationsFix(operation.getMessage(),
-													   operation.getCompilationUnit(), 
-													   new CompilationUnitRewriteOperation[] {operation});
+		return new MyCURewriteOperationsFix(operation.getMessage(),
+											operation.getCompilationUnit(), // note that this uses the findings from createAddAnnotationOperation(..)
+											new RewriteOperations.SignatureAnnotationRewriteOperation[] {operation});
 	}
 
 	// Entry for NullAnnotationsCleanup:
-	public ICleanUpFix createCleanUp(CompilationUnit compilationUnit, 
-									 boolean addDefinitelyMissingReturnAnnotations, 
-									 boolean addPotentiallyMissingReturnAnnotations, 
-									 boolean addDefinitelyMissingParamAnnotations, 
-									 IProblemLocation[] locations) 
+	public ICleanUpFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] locations, int problemID)
 	{
 		
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
-			return null;
-		
-		if (! (addDefinitelyMissingReturnAnnotations || addPotentiallyMissingReturnAnnotations || addDefinitelyMissingParamAnnotations))
 			return null;
 		
 		List<CompilationUnitRewriteOperation> operations= new ArrayList<CompilationUnitRewriteOperation>();
@@ -210,10 +220,8 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 			org.eclipse.jdt.core.compiler.IProblem[] problems= compilationUnit.getProblems();
 			locations= new IProblemLocation[problems.length];
 			for (int i= 0; i < problems.length; i++) {
-				if (   (addDefinitelyMissingReturnAnnotations && (problems[i].getID() == DefiniteNullFromNonNullMethod))
-					|| (addPotentiallyMissingReturnAnnotations && (problems[i].getID() == PotentialNullFromNonNullMethod))
-					|| (addDefinitelyMissingParamAnnotations && mayIndicateParameterNullcheck(problems[i].getID())))
-				locations[i]= new ProblemLocation(problems[i]);
+				if (problems[i].getID() == problemID)
+					locations[i]= new ProblemLocation(problems[i]);
 			}
 		}
 		
@@ -223,7 +231,7 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 			return null;
 		
 		CompilationUnitRewriteOperation[] operationsArray= operations.toArray(new CompilationUnitRewriteOperation[operations.size()]);
-		return new CompilationUnitRewriteOperationsFix(FixMessages.QuickFixes_add_annotation_change_name, compilationUnit, operationsArray);
+		return new MyCURewriteOperationsFix(FixMessages.QuickFixes_add_annotation_change_name, compilationUnit, operationsArray);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -242,8 +250,9 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 				annotationToAdd = nonNullAnnotationName;
 				annotationToRemove = nullableAnnotationName;
 			}
+			// when performing multiple changes we can only modify the one CU that the CleanUp infrastructure provides to the operation.
 			CompilationUnitRewriteOperation fix = RewriteOperations.createAddAnnotationOperation(
-						compilationUnit, problem, annotationToAdd, annotationToRemove, handledPositions, true, false);
+						compilationUnit, problem, annotationToAdd, annotationToRemove, handledPositions, true/*thisUnitOnly*/, false);
 			if (fix != null)
 				result.add(fix);
 		}

@@ -17,6 +17,7 @@ public class FixMessages extends NLS {
 	
 	
 	public static String NullAnnotationsCleanUp_add_nullable_annotation;
+	public static String NullAnnotationsCleanUp_add_nonnull_annotation;
 	
 	public static String QuickFixes_add_annotation_change_name;
 	

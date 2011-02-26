@@ -251,6 +251,8 @@ public class RewriteOperations {
 			compilationUnit = findCUForMethod(compilationUnit, cu, methodBinding);
 			if (compilationUnit == null)
 				return null;
+			if (thisUnitOnly && !compilationUnit.getJavaElement().equals(cu))
+				return null;
 			ASTNode methodDecl = compilationUnit.findDeclaringNode(methodBinding.getKey());
 			if (methodDecl == null)
 				return null;
