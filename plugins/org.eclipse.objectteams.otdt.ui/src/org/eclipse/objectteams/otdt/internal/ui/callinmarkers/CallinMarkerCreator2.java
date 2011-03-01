@@ -76,6 +76,7 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.search.OTSearchEngine;
 import org.eclipse.objectteams.otdt.internal.ui.preferences.GeneralPreferences;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
@@ -304,9 +305,8 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 	            return;
             
 	        monitor.beginTask(
-	                MessageFormat.format(
-	                        OTDTUIPlugin.getResourceString("CallinMarkerCreator2.updating_for_resource_message"),  //$NON-NLS-1$
-	                        new Object[] { target.getName() }), 62);
+	                NLS.bind(OTDTUIPlugin.getResourceString("CallinMarkerCreator2.updating_for_resource_message"),  //$NON-NLS-1$
+	                         new Object[] { target.getName() }), 62);
 	        
 		    target.removeCallinMarkers();
 		    monitor.worked(2);
@@ -364,9 +364,8 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 	    try 
 	    {
 	        monitor.beginTask(
-	                MessageFormat.format(
-	                        OTDTUIPlugin.getResourceString("CallinMarkerCreator2.updating_for_method_message"),  //$NON-NLS-1$
-	                        new Object[] { member.getElementName() }), 45);
+	                NLS.bind(OTDTUIPlugin.getResourceString("CallinMarkerCreator2.updating_for_method_message"),  //$NON-NLS-1$
+	                         new Object[] { member.getElementName() }), 45);
 	        
 	        IResource resource = member.getResource();
 			if (resource != null) // only called when base class changed -> source only.

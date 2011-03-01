@@ -20,7 +20,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.bindingeditor;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -77,6 +76,7 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.ui.ImageConstants;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -1373,7 +1373,7 @@ public class BindingConfiguration extends Composite
 	private void applyPressed() 
 	{
 		if (_selectedRole.isRoleFile()) {
-			openErrorDialog(MessageFormat.format(
+			openErrorDialog(NLS.bind(
 									Messages.BindingConfiguration_error_cant_edit_rolefile,
 									_selectedRole.getName().getIdentifier(),
 									_selectedRole.getName().getIdentifier()));
@@ -1387,7 +1387,7 @@ public class BindingConfiguration extends Composite
 			if (currentRole.isRoleFile()) {
 				if (this._bindingEditor.isRootTeam(currentRole))
 					break;
-				openErrorDialog(MessageFormat.format(
+				openErrorDialog(NLS.bind(
 						Messages.BindingConfiguration_error_cant_edit_rolefile_nested,
 						new Object[]{_selectedRole.getName().getIdentifier(),
 						currentRole.getName().getIdentifier(),

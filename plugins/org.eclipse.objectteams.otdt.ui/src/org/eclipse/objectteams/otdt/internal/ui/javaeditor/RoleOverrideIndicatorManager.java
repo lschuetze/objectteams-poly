@@ -12,7 +12,6 @@
  *******************************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.javaeditor;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -21,7 +20,6 @@ import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -31,7 +29,6 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSelectAnnotationRulerAction;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
@@ -39,13 +36,13 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.SharedASTProvider;
-
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationModelExtension;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * Manages the override indicators for the given Java element and annotation model.
@@ -173,7 +170,7 @@ public class RoleOverrideIndicatorManager implements IJavaReconcilingListener {
 						ITypeBinding definingType= definingRole.getDeclaringClass();
 						String qualifiedRoleName= definingType.getQualifiedName() + "." + binding.getName(); //$NON-NLS-1$
 
-						String text= MessageFormat.format(OTJavaEditorMessages.RoleOverrideIndicator_overrides, new Object[] {BasicElementLabels.getJavaElementName(qualifiedRoleName)});
+						String text= NLS.bind(OTJavaEditorMessages.RoleOverrideIndicator_overrides, new Object[] {BasicElementLabels.getJavaElementName(qualifiedRoleName)});
 
 						SimpleName name= node.getName();
 						Position position= new Position(name.getStartPosition(), name.getLength());

@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
+import org.eclipse.objectteams.otdt.internal.ui.OTDTUIMessages;
 import org.eclipse.jdt.internal.core.hierarchy.TypeHierarchy;
 
 
@@ -151,7 +152,7 @@ public abstract class AbstractMarkable {
 	 * @throws JavaModelException
 	 */
 	Set<IType> getSubTypes(Set<IType> types, IProgressMonitor monitor) throws JavaModelException {
-		monitor.beginTask("base class hierarchy", types.size());
+		monitor.beginTask(OTDTUIMessages.AbstractMarkable_baseClassHierarchy_progress, types.size());
 
 		IJavaSearchScope workspaceScope = SearchEngine.createWorkspaceScope();
 		Set<IType> subTypes = new HashSet<IType>(13);
