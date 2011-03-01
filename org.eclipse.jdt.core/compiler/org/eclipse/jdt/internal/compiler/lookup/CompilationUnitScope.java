@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -122,13 +122,8 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
   try {
 // SH}
 	if (this.currentPackageName == CharOperation.NO_CHAR_CHAR) {
-		if ((this.fPackage = this.environment.defaultPackage) == null) {
-			problemReporter().mustSpecifyPackage(this.referenceContext);
-//{ObjectTeams: mark error:
-			hasPackageError = true;
-// SH}
-			return;
-		}
+		// environment default package is never null
+		this.fPackage = this.environment.defaultPackage;
 	} else {
 //{ObjectTeams: ROFI consider team packages, different creation time, different conflict rule
 	  if (   this.referenceContext.currentPackage != null
@@ -174,8 +169,11 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 				&&  this.referenceContext.imports == null)
 				return;
 // orig:
-			if (this.referenceContext.currentPackage != null)
+			if (this.referenceContext.currentPackage != null) {
 				problemReporter().packageCollidesWithType(this.referenceContext); // only report when the unit has a package statement
+			}
+			// ensure fPackage is not null
+			this.fPackage = this.environment.defaultPackage;
 /* OT:  */	hasPackageError = true;
 			return;
 		} else if (this.referenceContext.isPackageInfo()) {
@@ -777,7 +775,7 @@ private Binding findImport(char[][] compoundName, int length) {
 
 	ReferenceBinding type;
 	if (binding == null) {
-		if (this.environment.defaultPackage == null || compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4)
+		if (compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4)
 			return new ProblemReferenceBinding(CharOperation.subarray(compoundName, 0, i), null, ProblemReasons.NotFound);
 		type = findType(compoundName[0], this.environment.defaultPackage, this.environment.defaultPackage);
 		if (type == null || !type.isValidBinding())
@@ -806,7 +804,7 @@ private Binding findSingleImport(char[][] compoundName, int mask, boolean findSt
 	if (compoundName.length == 1) {
 		// findType records the reference
 		// the name cannot be a package
-		if (this.environment.defaultPackage == null || compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4)
+		if (compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4)
 			return new ProblemReferenceBinding(compoundName, null, ProblemReasons.NotFound);
 		ReferenceBinding typeBinding = findType(compoundName[0], this.environment.defaultPackage, this.fPackage);
 		if (typeBinding == null)

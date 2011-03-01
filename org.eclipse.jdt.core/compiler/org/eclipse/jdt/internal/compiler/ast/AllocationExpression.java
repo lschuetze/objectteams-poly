@@ -100,6 +100,11 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			flowInfo.unconditionalCopy(),
 			currentScope);
 	}
+	if (this.binding.declaringClass.isMemberType() && !this.binding.declaringClass.isStatic()) {
+		// allocating a non-static member type without an enclosing instance of parent type
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335845
+		currentScope.resetEnclosingMethodStaticFlag();
+	}
 	manageEnclosingInstanceAccessIfNecessary(currentScope, flowInfo);
 	manageSyntheticAccessIfNecessary(currentScope, flowInfo);
 

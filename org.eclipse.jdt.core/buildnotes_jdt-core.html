@@ -41,6 +41,108 @@
 	</td>
   </tr>
 </table>
+<a name="v_B38"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M6 - February 22, 2011 - 3.7.0 M6
+<br>Project org.eclipse.jdt.core v_B38
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B38">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>Added a new API to ease the retrieval of method parameter's annotations (see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=334783">334783</a> for details):
+<pre>
+/**
+ * Returns the parameters of this method.
+ * An empty array is returned, if the method has no parameters.
+ * For binary types, associated source is used to retrieve the name range,
+ * source range and the flags.
+ * These local variables can be used to retrieve the parameter annotations.
+ * 
+ * @return the parameters of this method
+ * @throws JavaModelException if this element does not exist or if an
+ *      exception occurs while accessing its corresponding resource.
+ * @since 3.7
+ */
+ILocalVariable[] getParameters() throws JavaModelException;
+</pre>
+</li>
+</ul>
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=334783">334783</a>
+[API] Add new API to ease the retrieval of the parameter annotations for an IMethod
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=336046">336046</a>
+Source attachment not recovered when importing Projects
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=313870">313870</a>
+Wrong warnings on Java.Compiler.Errors/Warnings &quot;Redundant null check&quot;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=337275">337275</a>
+Incorrect/outdated javadoc for org.eclipse.jdt.core.dom.Expression
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=337093">337093</a>
+[compiler][generics] Javac-warning on vararg missing in Eclipse
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=336648">336648</a>
+wrong compiler problem &quot;The value of the local variable xxx is not used&quot;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=336934">336934</a>
+[compiler] NPE in Scope.getTypeOrPackage
+
+<a name="v_B37"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M6 - February 15, 2011
+<br>Project org.eclipse.jdt.core v_B37
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B37">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>Adding a new token "javadoc" for @suppressWarnings to remove all warnings related to javadoc.</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=335751">335751</a>
+[1.7][compiler] Cycle inheritance in type arguments is not detected
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=335309">335309</a>
+[formatter] FUP of bug 332843: add regression test
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=334622">334622</a>
+Eclipse compiler allows access to private fields for typed variables
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=274737">274737</a>
+Relative Classpath entries should not be resolved relative to the workspace
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=179566">179566</a>
+[compiler] Support of @SuppressWarnings for JavaDoc Warnings
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=336821">336821</a>
+Javadoc reference to constructor does not work without parameter list
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=331138">331138</a>
+ASTRewrite#replace(..) does not consider the TargetSourceRangeComputer
+
+<a name="v_B36"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.7M6 - February 8, 2011
+<br>Project org.eclipse.jdt.core v_B36
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_B36">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>All JDT/Core projects (tests included) have been set to force strict compatibility between the JRE used for the project
+and the BREE defined for the project.</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=336544">336544</a>
+[regression][compiler] Source flagged as dead code incorrectly.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=189459">189459</a>
+[1.6][compiler] Doc comment support should not be systematically activated while processing annotations
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=332838">332838</a>
+Bogus potential null pointer access warning (regression; works with 3.6)
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=334377">334377</a>
+[1.5][compiler] Invalid 'type mismatch' error in conditional expression (if-else construct behaves correct)
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=335780">335780</a>
+Compiler says a method can be potentially static but this method contains 'this'
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=310747">310747</a>
+[content assist] Irrelevant proposals while completing inside array initializer.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=335845">335845</a>
+[compiler] compiler wrongly suggests to add a static qualifier to a method
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=335602">335602</a>
+[search] Java indexing thread can index data outside of workspace
+
 <a name="v_B35"></a>
 <hr><h1>
 Eclipse Platform Build Notes<br>

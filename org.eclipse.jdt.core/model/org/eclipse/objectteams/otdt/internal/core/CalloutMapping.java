@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core;
 
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -268,5 +269,11 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 			}
 		}
 	    return getIMethod().getExceptionTypes();
+	}
+
+	public ILocalVariable[] getParameters() throws JavaModelException {
+		// TODO Auto-generated method stub
+		// see Bug 338593 - [otmodel] Add new API to ease the retrieval of the parameter annotations for an IMethodMapping
+		return null;
 	}
 }

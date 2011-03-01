@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ImportReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 
 /*
  * Part of the source element parser responsible for building the output. It
@@ -107,8 +108,17 @@ public interface ISourceElementRequestor {
 		public int declaringTypeModifiers;
 		public int extraFlags;
 		public AbstractMethodDeclaration node;
+		public ParameterInfo[] parameterInfos;
 	}
 
+	public static class ParameterInfo {
+		public int modifiers;
+		public int declarationStart;
+		public int declarationEnd;
+		public int nameSourceStart;
+		public int nameSourceEnd;
+		public char[] name;
+	}
 	public static class FieldInfo {
 		public int declarationStart;
 		public int modifiers;
@@ -210,6 +220,7 @@ public interface ISourceElementRequestor {
 		public char[][] parameterTypes;
 		public char[][] parameterNames;
 		public TypeParameterInfo[] typeParameters;
+		public MethodSpec node;
 	}
 	public abstract static class MappingInfo {
 		public int declarationSourceStart, sourceStart;

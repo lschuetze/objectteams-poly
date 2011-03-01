@@ -2347,6 +2347,29 @@ public void hierarchyCircularity(SourceTypeBinding sourceType, ReferenceBinding 
 			end);
 }
 
+public void hierarchyCircularity(TypeVariableBinding type, ReferenceBinding superType, TypeReference reference) {
+	int start = 0;
+	int end = 0;
+
+	start = reference.sourceStart;
+	end = reference.sourceEnd;
+
+	if (type == superType)
+		this.handle(
+			IProblem.HierarchyCircularitySelfReference,
+			new String[] {new String(type.readableName()) },
+			new String[] {new String(type.shortReadableName()) },
+			start,
+			end);
+	else
+		this.handle(
+			IProblem.HierarchyCircularity,
+			new String[] {new String(type.readableName()), new String(superType.readableName())},
+			new String[] {new String(type.shortReadableName()), new String(superType.shortReadableName())},
+			start,
+			end);
+}
+
 public void hierarchyHasProblems(SourceTypeBinding type) {
 //{ObjectTeams: ignore some internal types:
 	if (type.isRole()) {
@@ -5865,15 +5888,6 @@ public void mustDefineDimensionsOrInitializer(ArrayAllocationExpression expressi
 		NoArgument,
 		expression.sourceStart,
 		expression.sourceEnd);
-}
-public void mustSpecifyPackage(CompilationUnitDeclaration compUnitDecl) {
-	String[] arguments = new String[] {new String(compUnitDecl.getFileName())};
-	this.handle(
-		IProblem.MustSpecifyPackage,
-		arguments,
-		arguments,
-		compUnitDecl.sourceStart,
-		compUnitDecl.sourceStart + 1);
 }
 public void mustUseAStaticMethod(MessageSend messageSend, MethodBinding method) {
 	this.handle(

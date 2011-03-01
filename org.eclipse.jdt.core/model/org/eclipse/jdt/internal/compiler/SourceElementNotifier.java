@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2010 IBM Corporation and others.
+ * Copyright (c) 2008, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,7 @@ import java.util.Map;
 
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ISourceElementRequestor.ParameterInfo;
 import org.eclipse.jdt.internal.compiler.ISourceElementRequestor.TypeParameterInfo;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
@@ -118,16 +119,27 @@ public SourceElementNotifier(ISourceElementRequestor requestor, boolean reportLo
 	this.superTypeNames = new char[4][];
 	this.nestedTypeIndex = 0;
 }
-protected char[][][] getArguments(Argument[] arguments) {
+protected Object[][] getArgumentInfos(Argument[] arguments) {
 	int argumentLength = arguments.length;
 	char[][] argumentTypes = new char[argumentLength][];
 	char[][] argumentNames = new char[argumentLength][];
+	ParameterInfo[] parameterInfos = new ParameterInfo[argumentLength];
 	for (int i = 0; i < argumentLength; i++) {
-		argumentTypes[i] = CharOperation.concatWith(arguments[i].type.getParameterizedTypeName(), '.');
-		argumentNames[i] = arguments[i].name;
+		Argument argument = arguments[i];
+		argumentTypes[i] = CharOperation.concatWith(argument.type.getParameterizedTypeName(), '.');
+		char[] name = argument.name;
+		argumentNames[i] = name;
+		ParameterInfo parameterInfo = new ParameterInfo();
+		parameterInfo.declarationStart = argument.declarationSourceStart;
+		parameterInfo.declarationEnd = argument.declarationSourceEnd;
+		parameterInfo.nameSourceStart = argument.sourceStart;
+		parameterInfo.nameSourceEnd = argument.sourceEnd;
+		parameterInfo.modifiers = argument.modifiers;
+		parameterInfo.name = name;
+		parameterInfos[i] = parameterInfo;
 	}
 
-	return new char[][][] {argumentTypes, argumentNames};
+	return new Object[][] { parameterInfos, new char[][][] { argumentTypes, argumentNames } };
 }
 protected char[][] getInterfaceNames(TypeDeclaration typeDeclaration) {
 	char[][] interfaceNames = null;
@@ -283,10 +295,12 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 	Argument[] arguments = MethodSignatureEnhancer.getSourceArguments(methodDeclaration);
 	boolean [] baseclassFlags = null;
 // SH}
+	ParameterInfo[] parameterInfos = null; 
 	if (arguments != null) {
-		char[][][] argumentTypesAndNames = getArguments(arguments);
-		argumentTypes = argumentTypesAndNames[0];
-		argumentNames = argumentTypesAndNames[1];
+		Object[][] argumentInfos = getArgumentInfos(arguments);
+		parameterInfos = (ParameterInfo[]) argumentInfos[0];
+		argumentTypes = (char[][]) argumentInfos[1][0];
+		argumentNames = (char[][]) argumentInfos[1][1];
 
 		isVarArgs = arguments[arguments.length-1].isVarArgs();
 
@@ -325,6 +339,7 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 // SH}
 			methodInfo.exceptionTypes = thrownExceptionTypes;
 			methodInfo.typeParameters = getTypeParameterInfos(methodDeclaration.typeParameters());
+			methodInfo.parameterInfos = parameterInfos;
 			methodInfo.categories = (char[][]) this.nodesToCategories.get(methodDeclaration);
 			methodInfo.annotations = methodDeclaration.annotations;
 			methodInfo.declaringPackageName = currentPackage == null ? CharOperation.NO_CHAR : CharOperation.concatWith(currentPackage.tokens, '.');
@@ -393,6 +408,7 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 // SH}
 		methodInfo.exceptionTypes = thrownExceptionTypes;
 		methodInfo.typeParameters = getTypeParameterInfos(methodDeclaration.typeParameters());
+		methodInfo.parameterInfos = parameterInfos;
 		methodInfo.categories = (char[][]) this.nodesToCategories.get(methodDeclaration);
 		methodInfo.annotations = methodDeclaration.annotations;
 		methodInfo.node = methodDeclaration;

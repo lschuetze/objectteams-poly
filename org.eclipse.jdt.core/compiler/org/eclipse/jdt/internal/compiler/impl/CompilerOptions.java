@@ -482,6 +482,7 @@ public class CompilerOptions {
 		"finally", //$NON-NLS-1$
 		"hiding", //$NON-NLS-1$
 		"incomplete-switch", //$NON-NLS-1$
+		"javadoc", //$NON-NLS-1$
 		"nls", //$NON-NLS-1$
 		"null", //$NON-NLS-1$
 		"restriction", //$NON-NLS-1$
@@ -977,6 +978,10 @@ public class CompilerOptions {
 			case MethodCanBeStatic :
 			case MethodCanBePotentiallyStatic :
 				return "static-method"; //$NON-NLS-1$
+			case InvalidJavadoc :
+			case MissingJavadocComments :
+			case MissingJavadocTags:
+				return "javadoc"; //$NON-NLS-1$				
 //{ObjectTeams:
 			case NotExactlyOneBasecall :
 				return "basecall"; //$NON-NLS-1$
@@ -1057,6 +1062,10 @@ public class CompilerOptions {
 			case 'i' :
 				if ("incomplete-switch".equals(warningToken)) //$NON-NLS-1$
 					return IrritantSet.INCOMPLETE_SWITCH;
+				break;
+			case 'j' :
+				if ("javadoc".equals(warningToken)) //$NON-NLS-1$
+					return IrritantSet.JAVADOC;
 				break;
 			case 'n' :
 				if ("nls".equals(warningToken)) //$NON-NLS-1$
@@ -1878,7 +1887,6 @@ public class CompilerOptions {
 			if (ENABLED.equals(optionValue)) {
 				this.processAnnotations = true;
 				this.storeAnnotations = true; // annotation processing requires annotation to be stored
-				this.docCommentSupport = true;  // annotation processing requires javadoc processing
 			} else if (DISABLED.equals(optionValue)) {
 				this.processAnnotations = false;
 				this.storeAnnotations = false;

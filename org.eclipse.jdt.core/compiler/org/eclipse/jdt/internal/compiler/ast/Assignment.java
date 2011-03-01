@@ -76,6 +76,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	if ((this.expression.implicitConversion & TypeIds.UNBOXING) != 0) {
 		this.expression.checkNPE(currentScope, flowContext, flowInfo);
 	}
+	flowInfo = ((Reference) this.lhs)
+		.analyseAssignment(currentScope, flowContext, flowInfo, this, false)
+		.unconditionalInits();
 	int nullStatus = this.expression.nullStatus(flowInfo);
 	if (local != null && (local.type.tagBits & TagBits.IsBaseType) == 0) {
 		if (nullStatus == FlowInfo.NULL) {
@@ -83,9 +86,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				FlowContext.CAN_ONLY_NULL | FlowContext.IN_ASSIGNMENT, flowInfo);
 		}
 	}
-	flowInfo = ((Reference) this.lhs)
-		.analyseAssignment(currentScope, flowContext, flowInfo, this, false)
-		.unconditionalInits();
 	nullStatus = checkAgainstNullAnnotation(currentScope, local, nullStatus);
 	if (local != null && (local.type.tagBits & TagBits.IsBaseType) == 0) {
 		flowInfo.markNullStatus(local, nullStatus);

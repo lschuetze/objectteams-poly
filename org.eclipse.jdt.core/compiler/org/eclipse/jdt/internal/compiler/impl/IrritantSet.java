@@ -69,7 +69,8 @@ public class IrritantSet {
 	public static final IrritantSet UNCHECKED = new IrritantSet(CompilerOptions.UncheckedTypeOperation);
 	public static final IrritantSet UNQUALIFIED_FIELD_ACCESS = new IrritantSet(CompilerOptions.UnqualifiedFieldAccess);
 
-	public static final IrritantSet COMPILER_DEFAULT_ERRORS = new IrritantSet(0); // no optional error by default
+	public static final IrritantSet JAVADOC = new IrritantSet(CompilerOptions.InvalidJavadoc);
+	public static final IrritantSet COMPILER_DEFAULT_ERRORS = new IrritantSet(0); // no optional error by default	
 	public static final IrritantSet COMPILER_DEFAULT_WARNINGS = new IrritantSet(0); // see static initializer below
 //{ObjectTeams: new irritants:
 	public static final IrritantSet NOT_EXACTLY_ONE_BASECALL = new IrritantSet(
@@ -201,6 +202,10 @@ public class IrritantSet {
 		if (suppressRawWhenUnchecked != null && "true".equalsIgnoreCase(suppressRawWhenUnchecked)) { //$NON-NLS-1$
 			UNCHECKED.set(CompilerOptions.RawTypeReference);
 		}
+		
+		JAVADOC
+			.set(CompilerOptions.MissingJavadocComments)
+			.set(CompilerOptions.MissingJavadocTags);
 	}
 
 	// Internal state
