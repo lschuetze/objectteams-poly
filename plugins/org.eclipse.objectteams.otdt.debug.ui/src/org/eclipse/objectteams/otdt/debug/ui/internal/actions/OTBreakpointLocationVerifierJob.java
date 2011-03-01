@@ -41,6 +41,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.TextSelection;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
@@ -230,7 +231,7 @@ public class OTBreakpointLocationVerifierJob extends Job {
 				if (breakpointExist) {
 					if (differentLineNumber) {
 						// There is already a breakpoint on the valid line.
-						report(MessageFormat.format(ActionMessages.BreakpointLocationVerifierJob_0, new Object[]{Integer.toString(lineNumber)}));
+						report(NLS.bind(ActionMessages.BreakpointLocationVerifierJob_0, new Object[]{Integer.toString(lineNumber)}));
 						return new Status(IStatus.OK, JDIDebugUIPlugin.getUniqueIdentifier(), IStatus.ERROR, ActionMessages.BreakpointLocationVerifierJob_not_valid_location, null); 
 					}
 					// There is already a breakpoint on the valid line, but it's also the requested line.
@@ -245,7 +246,7 @@ public class OTBreakpointLocationVerifierJob extends Job {
 				if (breakpointExist) {
 					// there is already a breakpoint on the valid line.
 					DebugPlugin.getDefault().getBreakpointManager().removeBreakpoint(fBreakpoint, true);
-					report(MessageFormat.format(ActionMessages.BreakpointLocationVerifierJob_0, new Object[]{Integer.toString(lineNumber)})); 
+					report(NLS.bind(ActionMessages.BreakpointLocationVerifierJob_0, new Object[]{Integer.toString(lineNumber)})); 
 					return new Status(IStatus.OK, JDIDebugUIPlugin.getUniqueIdentifier(), IStatus.ERROR, ActionMessages.BreakpointLocationVerifierJob_not_valid_location, null); 
 				}
 				replaceBreakpoint(lineNumber, typeName);
