@@ -26,11 +26,6 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodMappingElement;
 import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.ParameterMapping;
@@ -39,21 +34,21 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.objectteams.otdt.internal.refactoring.RefactoringMessages;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.text.edits.TextEditGroup;
 
 import base org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
-import base org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor.OccurrenceUpdate;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor.DeclarationUpdate;
+import base org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor.OccurrenceUpdate;
 
 /**
  * OT/J adaptations for the "Change Signature" Refactoring.
@@ -109,14 +104,14 @@ public team class ChangeSignatureAdaptor {
 			boolean hasAdditions = !getAddedInfos().isEmpty();
 			if (!isSrcSide && hasAdditions) {
 				if (node.getParent().getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
-					refResult.merge(RefactoringStatus.createInfoStatus("Adding arguments at the role side of a callin binding is not fully supported. Please manually update transitive references."));
+					refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_callinRoleArgAddIncomplete_info));
 				else
-					refResult.merge(RefactoringStatus.createInfoStatus("Adding arguments at the base side of a callout binding is not fully supported. Please manually update transitive references."));
+					refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_calloutBaseArgAddIncomplete_info));
 			} else if (isSrcSide && hasDelections) {
 				if (node.getParent().getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
-					refResult.merge(RefactoringStatus.createInfoStatus("Deleting arguments at the base side of a callin binding is not fully supported. Please manually update transitive references."));
+					refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_callinBaseArgDeleteIncomplete_info));
 				else
-					refResult.merge(RefactoringStatus.createInfoStatus("Deleting arguments at the role side of a callout binding is not fully supported. Please manually update transitive references."));
+					refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_calloutRoleArgDeleteIncomplete_info));
 			}
 		}
 		
@@ -195,7 +190,7 @@ public team class ChangeSignatureAdaptor {
 						Object[] keys= new String[]{ BasicElementLabels.getJavaElementName(paramDecl.getName().getIdentifier()),
 								BasicElementLabels.getJavaElementName(fMethodSpec.getName().getIdentifier()),
 								BasicElementLabels.getJavaElementName(typeName)};
-						String msg= Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_parameter_used, keys);
+						String msg= NLS.bind(RefactoringCoreMessages.ChangeSignatureRefactoring_parameter_used, keys);
 						fResult.addError(msg, context);
 					}
 				}
@@ -220,7 +215,7 @@ public team class ChangeSignatureAdaptor {
 					return;
 				AbstractMethodMappingDeclaration mapping = (AbstractMethodMappingDeclaration) this.fMethodSpec.getParent();
 				if (mapping.hasParameterMapping()) {
-					fResult.merge(RefactoringStatus.createWarningStatus("Cannot update existing parameter mapping"));
+					fResult.merge(RefactoringStatus.createWarningStatus(RefactoringMessages.ChangeSignatureAdaptor_cannotUpdateParameterMapping_warning));
 					return;
 				}
 				// collect these pieces of information:
@@ -234,7 +229,7 @@ public team class ChangeSignatureAdaptor {
 					if (isRoleSide) {
 						List baseMappingElements = ((CallinMappingDeclaration)mapping).getBaseMappingElements();
 						if (baseMappingElements.size() > 1) {
-							fResult.merge(RefactoringStatus.createWarningStatus("Need to create parameter mapping, which however is not yet implemented for callin to multiple bases"));
+							fResult.merge(RefactoringStatus.createWarningStatus(RefactoringMessages.ChangeSignatureAdaptor_cannotCreateParamMap_MultiCallin_warning));
 							return;
 						}
 						otherSideArguments = ((MethodSpec)baseMappingElements.get(0)).parameters();
@@ -248,7 +243,7 @@ public team class ChangeSignatureAdaptor {
 					if (isRoleSide) {
 						MethodMappingElement baseMappingElement = ((CalloutMappingDeclaration)mapping).getBaseMappingElement();
 						if (baseMappingElement.getNodeType() == ASTNode.FIELD_ACCESS_SPEC) {
-							fResult.merge(RefactoringStatus.createWarningStatus("Need to create parameter mapping, which however is not yet implemented for callout-to-field"));
+							fResult.merge(RefactoringStatus.createWarningStatus(RefactoringMessages.ChangeSignatureAdaptor_cannotCreateParamMap_CTF_warning));
 							return;
 						}
 						otherSideArguments = ((MethodSpec)baseMappingElement).parameters();

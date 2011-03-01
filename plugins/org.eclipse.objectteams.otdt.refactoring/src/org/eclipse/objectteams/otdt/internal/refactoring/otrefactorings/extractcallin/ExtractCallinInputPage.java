@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.IRoleType;
+import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.OTRefactoringMessages;
 
 public class ExtractCallinInputPage extends UserInputWizardPage {
 
@@ -61,13 +62,13 @@ public class ExtractCallinInputPage extends UserInputWizardPage {
 		result.setLayout(layout);
 
 		Label label = new Label(result, SWT.NONE);
-		label.setText("&Role method name:");
+		label.setText(OTRefactoringMessages.ExtractCallinInputPage_roleMethod_label);
 
 		fNameField = createNameField(result);
 		
 		// Role Selection
 		label = new Label(result, SWT.NONE);
-		label.setText("&Target role:");
+		label.setText(OTRefactoringMessages.ExtractCallinInputPage_targetRole_label);
 
 		Composite composite = new Composite(result, SWT.NONE);
 		
@@ -94,7 +95,7 @@ public class ExtractCallinInputPage extends UserInputWizardPage {
 
 		fReferenceButton = new Button(result, SWT.CHECK);
 		fReferenceButton.setEnabled(true);
-		fReferenceButton.setText("&Delete extracted base method");
+		fReferenceButton.setText(OTRefactoringMessages.ExtractCallinInputPage_deleteBaseMethod_checkbox);
 		fReferenceButton.addSelectionListener(new SelectionAdapter() {
 			
 		@Override
@@ -149,11 +150,11 @@ public class ExtractCallinInputPage extends UserInputWizardPage {
 		data.verticalIndent = 2;
 		fExtractMode.setLayoutData(data);
 		fExtractMode.setLayout(new GridLayout());
-		fExtractMode.setText("Extract Mode");
+		fExtractMode.setText(OTRefactoringMessages.ExtractCallinInputPage_extractMode_group);
 
 		fReplaceRadio = new Button(fExtractMode, SWT.RADIO);
 		fReplaceRadio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fReplaceRadio.setText("R&eplace");
+		fReplaceRadio.setText(OTRefactoringMessages.ExtractCallinInputPage_modeReplace_label);
 		fReplaceRadio.setSelection(true);
 		fRefactoring.setMappingKind(ICallinMapping.KIND_REPLACE);
 		fReplaceRadio.addSelectionListener(new SelectionAdapter() {
@@ -169,7 +170,7 @@ public class ExtractCallinInputPage extends UserInputWizardPage {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalIndent = convertWidthInCharsToPixels(3);
 		fRemove.setLayoutData(data);
-		fRemove.setText("&Copy base method code");
+		fRemove.setText(OTRefactoringMessages.ExtractCallinInputPage_copyBaseMethod_checkbox);
 		fRemove.setSelection(fRefactoring.isCopyBaseMethod());
 		fRemove.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
@@ -180,7 +181,7 @@ public class ExtractCallinInputPage extends UserInputWizardPage {
 
 		fBeforeRadio = new Button(fExtractMode, SWT.RADIO);
 		fBeforeRadio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fBeforeRadio.setText("&Before");
+		fBeforeRadio.setText(OTRefactoringMessages.ExtractCallinInputPage_modeBefore_label);
 		fBeforeRadio.setSelection(false);
 		fBeforeRadio.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
@@ -194,7 +195,7 @@ public class ExtractCallinInputPage extends UserInputWizardPage {
 
 		fAfterRadio = new Button(fExtractMode, SWT.RADIO);
 		fAfterRadio.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fAfterRadio.setText("&After");
+		fAfterRadio.setText(OTRefactoringMessages.ExtractCallinInputPage_modeAfter_label);
 		fAfterRadio.setSelection(false);
 		fAfterRadio.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {

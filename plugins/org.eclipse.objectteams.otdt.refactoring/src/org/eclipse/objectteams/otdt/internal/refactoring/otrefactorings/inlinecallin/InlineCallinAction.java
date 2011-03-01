@@ -21,10 +21,11 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.AbstractCallinRefactoringAction;
+import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.OTRefactoringMessages;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 
 /**
  * Action classes for the inline callin refactoring:
@@ -66,14 +67,16 @@ public class InlineCallinAction extends AbstractCallinRefactoringAction implemen
 					new RefactoringWizardOpenOperation(
 							new InlineCallinWizard(
 									new InlineCallinRefactoring((IMethod)fJavaElement), 
-									"Inline Callin"
+									OTRefactoringMessages.InlineCallin_inlineCallin_name
 							)
-					).run(fWindow.getShell(), "Inline Callin");
+					).run(fWindow.getShell(), OTRefactoringMessages.InlineCallin_inlineCallin_name);
 				} catch (InterruptedException exception) {
 					// Do nothing
 				}
 			} else {
-				MessageDialog.openInformation(null, "Inline Callin", "Operation unavailable on the current selection. Select a callin-bound role method or a callin method binding");
+				MessageDialog.openInformation(null, 
+											  OTRefactoringMessages.InlineCallin_inlineCallin_name, 
+											  OTRefactoringMessages.InlineCallin_notAvailableOnSelection_error);
 			}		
 		}
 	}
@@ -82,7 +85,7 @@ public class InlineCallinAction extends AbstractCallinRefactoringAction implemen
 	// =========== Start InlineCallinAction ===========
 	
 	public InlineCallinAction () {
-		super("Inline Callin ...", "Inline a callin-bound role meth.");
+		super(OTRefactoringMessages.InlineCallin_inlineCallin_commandName, OTRefactoringMessages.InlineCallin_inlineCallin_tooltip);
 	}
 
 	protected CallinRefactoringActionCommon createRefactoringActionCommon(IWorkbenchWindow window) {

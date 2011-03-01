@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.ResolvedSourceMethod;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor.MemberActionInfo;
-import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
@@ -37,9 +36,11 @@ import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.core.IPhantomType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
+import org.eclipse.objectteams.otdt.internal.refactoring.RefactoringMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IAmbuguityMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IOverloadingMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
+import org.eclipse.osgi.util.NLS;
 
 import base org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
 
@@ -53,14 +54,12 @@ public team class PushDownAdaptor {
 	@SuppressWarnings("decapsulation") // base class is final
 	protected class PushDownRefactoringProcessor playedBy PushDownRefactoringProcessor {
 		
-		MemberActionInfo[] getAbstractDeclarationInfos() -> MemberActionInfo[] getAbstractDeclarationInfos();
 		// callouts
-		IType[] getAbstractDestinations(IProgressMonitor arg0) -> IType[] getAbstractDestinations(IProgressMonitor arg0);
-		IMember[] getMembersToMove() -> IMember[] getMembersToMove();
-		IType getDeclaringType() -> IType getDeclaringType();
+		MemberActionInfo[] getAbstractDeclarationInfos() 				 -> MemberActionInfo[] getAbstractDeclarationInfos();
+		IType[] getAbstractDestinations(IProgressMonitor arg0) 			 -> IType[] getAbstractDestinations(IProgressMonitor arg0);
+		IMember[] getMembersToMove()									 -> IMember[] getMembersToMove();
+		IType getDeclaringType()										 -> IType getDeclaringType();
 		ITypeHierarchy getHierarchyOfDeclaringClass(IProgressMonitor pm) -> ITypeHierarchy getHierarchyOfDeclaringClass(IProgressMonitor pm);
-
-		private ITypeHierarchy fDeclaringTypeHierachy;
 		
 		private void checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, RefactoringStatus status) throws CoreException {
 			
@@ -89,7 +88,7 @@ public team class PushDownAdaptor {
 			ArrayList<IType> subTypes = new ArrayList<IType>();
 			subTypes.addAll(Arrays.asList(hier.getSubtypes(getDeclaringType())));
 			
-			pm.beginTask("Checking Shadowing", subTypes.size());
+			pm.beginTask(RefactoringMessages.PushDownAdaptor_checkShadowing_progress, subTypes.size());
 			pm.subTask(""); //$NON-NLS-1$
 			
 			for (int i = 0; i < getMembersToMove().length; i++) {
@@ -108,8 +107,8 @@ public team class PushDownAdaptor {
 								IField shadowingField = RefactoringUtil.fieldIsShadowedInType(field.getElementName(), field.getTypeSignature(), implicitSuperType);
 								if(shadowingField != null){
 									
-									String msg = Messages.format("The pushed down field ''{0}'' would be shadowed in ''{1}''.", new String[] { field.getElementName(),
-											implicitSuperType.getFullyQualifiedName('.') });
+									String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_shadowing_error, 
+														  new String[] { field.getElementName(), implicitSuperType.getFullyQualifiedName('.') });
 									status.addError(msg, JavaStatusContext.create(shadowingField));
 									
 								}
@@ -177,16 +176,16 @@ public team class PushDownAdaptor {
 					if (element instanceof ICalloutMapping) {
 						ICalloutMapping mapping = (ICalloutMapping) element;
 						if(mapping.getBoundBaseMethod().equals(member)){
-							String msg = Messages.format("The pushed down method ''{0}'' is referenced in a callout method binding in ''{1}'' and will not be visible after refactoring.",
+							String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_referencedByCallout_error,
 									new String[] { member.getElementName(), mapping.getDeclaringType().getFullyQualifiedName('.') });
 							status.addError(msg, JavaStatusContext.create(mapping));
 						} else if(mapping.getRoleMethod() != null && mapping.getRoleMethod().equals(member)){
-							String msg = Messages.format("The pushed down method ''{0}'' is bound in a callout method binding in ''{1}''.",
+							String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_boundAsCallout_error,
 									new String[] { member.getElementName(), mapping.getDeclaringType().getFullyQualifiedName('.') });
 							status.addError(msg, JavaStatusContext.create(mapping));
 						}else{
 							// TODO find a better way to analyze references in parameter mappings
-							String msg = Messages.format("The pushed down member ''{0}'' is referenced in a callout parameter mapping in ''{1}'' and will not be visible after refactoring.",
+							String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_referencedByCalloutParamMap_error,
 									new String[] { member.getElementName(), mapping.getDeclaringType().getFullyQualifiedName('.') });
 							status.addError(msg, JavaStatusContext.create(mapping));
 						}
@@ -194,16 +193,16 @@ public team class PushDownAdaptor {
 					if (element instanceof ICalloutToFieldMapping) {
 						ICalloutToFieldMapping mapping = (ICalloutToFieldMapping) element;
 						if(mapping.getBoundBaseField().equals(member)){
-							String msg = Messages.format("The pushed down field ''{0}'' is referenced in a callout to field binding in ''{1}'' and will not be visible after refactoring.",
+							String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_referencedByCTF_error,
 									new String[] { member.getElementName(), mapping.getDeclaringType().getFullyQualifiedName('.') });
 							status.addError(msg, JavaStatusContext.create(mapping));
 						} else if(mapping.getRoleMethod() != null && mapping.getRoleMethod().equals(member)){
-							String msg = Messages.format("The pushed down method ''{0}'' is bound in a callout to field binding in ''{1}''.",
+							String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_boundAsCTF_error,
 									new String[] { member.getElementName(), mapping.getDeclaringType().getFullyQualifiedName('.') });
 							status.addError(msg, JavaStatusContext.create(mapping));
 						}else{
 							// TODO find a better way to analyze references in parameter mappings
-							String msg = Messages.format("The pushed down member ''{0}'' is referenced in a callout to field value mapping in ''{1}'' and will not be visible after refactoring.",
+							String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_referencedByCTFParamMap_error,
 									new String[] { member.getElementName(), mapping.getDeclaringType().getFullyQualifiedName('.') });
 							status.addError(msg, JavaStatusContext.create(mapping));
 						}
@@ -213,7 +212,7 @@ public team class PushDownAdaptor {
 						boolean baseMethodFound = false;
 						for (int j = 0; j < mapping.getBoundBaseMethods().length; j++) {
 							if(mapping.getBoundBaseMethods()[i].equals(member)){
-								String msg = Messages.format("The pushed down method ''{0}'' is referenced in a callin method binding in ''{1}'' and will not be visible after refactoring.",
+								String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_referencedByCallin_error,
 										new String[] { member.getElementName(), mapping.getDeclaringType().getFullyQualifiedName('.') });
 								status.addError(msg, JavaStatusContext.create(mapping));
 								baseMethodFound = true;
@@ -226,12 +225,12 @@ public team class PushDownAdaptor {
 						}
 						
 						if(mapping.getRoleMethod().equals(member)){
-							String msg = Messages.format("The pushed down method ''{0}'' is bound in a callin method binding in ''{1}'' and will not be visible after refactoring.",
+							String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_boundInCallin_error,
 									new String[] { member.getElementName(), mapping.getDeclaringType().getFullyQualifiedName('.') });
 							status.addError(msg, JavaStatusContext.create(mapping));
 						} else {
 							// TODO find a better way to analyze references in parameter mappings
-							String msg = Messages.format("The pushed down member ''{0}'' is referenced in a callin parameter mapping in ''{1}'' and will not be visible after refactoring.",
+							String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_referencedInCallinParamMap_error,
 									new String[] { member.getElementName(), mapping.getDeclaringType().getFullyQualifiedName('.') });
 							status.addError(msg, JavaStatusContext.create(mapping));
 						}
@@ -241,7 +240,7 @@ public team class PushDownAdaptor {
 						ResolvedSourceMethod method = (ResolvedSourceMethod) element;
 						// References in the declaring type are checked by the base
 						if(!method.getDeclaringType().equals(getDeclaringType())){
-							String msg = Messages.format("Pushed down member ''{0}'' is referenced by ''{1}''.",
+							String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_referencedByMethod_error,
 									new String[] { member.getElementName(), method.getDeclaringType().getFullyQualifiedName('.') });
 							status.addError(msg, JavaStatusContext.create(method));
 						}
@@ -271,7 +270,7 @@ public team class PushDownAdaptor {
 			for (int i = 0; i < subTypes.length; i++) {
 				IType subType = subTypes[i];
 				if(subType instanceof IPhantomType){
-					String msg = Messages.format("An implicit sub role of ''{0}'' is a phantom role, therefore the pushed down members cannot be moved to ''{1}''.", new String[] { getDeclaringType().getFullyQualifiedName('.'), subType.getFullyQualifiedName('.') });
+					String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_phantomRoleConflict_error, new String[] { getDeclaringType().getFullyQualifiedName('.'), subType.getFullyQualifiedName('.') });
 					status.addError(msg, JavaStatusContext.create(subType));
 				}
 			}
@@ -299,7 +298,7 @@ public team class PushDownAdaptor {
 				ITypeHierarchy hierarchy = type.newSupertypeHierarchy(pm);
 				IType[] superRoles = OTTypeHierarchies.getInstance().getTSuperTypes(hierarchy, type);
 				
-				pm.beginTask("Checking Overriding", superRoles.length);
+				pm.beginTask(RefactoringMessages.PushDownAdaptor_overriding_progress, superRoles.length);
 				pm.subTask(""); //$NON-NLS-1$
 				
 				for (int i = 0; i < superRoles.length; i++) {
@@ -312,7 +311,9 @@ public team class PushDownAdaptor {
 								IMethod pushedDownMethod = (IMethod) membersToPushDown[j];
 								IMethod overriddenMethod = superRole.getMethod(pushedDownMethod.getElementName(), pushedDownMethod.getParameterTypes());
 								if(overriddenMethod.exists()){
-									String msg = Messages.format("The pushed down method ''{0}'' would override the implicitly inherited method ''{1}''.", new String[] { pushedDownMethod.getElementName(), overriddenMethod.getDeclaringType().getFullyQualifiedName('.') + "." + overriddenMethod.getElementName()});
+									String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_overridingImplicitlyInherited_error, 
+													pushedDownMethod.getElementName(), 
+													overriddenMethod.getDeclaringType().getFullyQualifiedName('.') + '.' + overriddenMethod.getElementName());
 									status.addError(msg, JavaStatusContext.create(overriddenMethod));
 								}
 							}
@@ -339,13 +340,13 @@ public team class PushDownAdaptor {
 							new IAmbuguityMessageCreator() {
 
 						public String createAmbiguousMethodSpecifierMsg() {
-							return "Refactoring cannot be performed! There would be an ambiguous method specifier in a method binding after moving!";
+							return RefactoringMessages.PushDownAdaptor_ambiguousMethodSpec_error;
 						}
 
 					}, new IOverloadingMessageCreator() {
 
 						public String createOverloadingMessage() {
-							String msg = Messages.format("The pushed down method ''{0}'' would be overloaded after refactoring.", new String[] { method.getElementName()});
+							String msg = NLS.bind(RefactoringMessages.PushDownAdaptor_overloading_error, new String[] { method.getElementName()});
 							return msg;
 						}
 
@@ -359,7 +360,7 @@ public team class PushDownAdaptor {
 			
 			IType[] subtypes = getAbstractDestinations(pm);
 			
-			pm.beginTask("Checking Overloading", subtypes.length);
+			pm.beginTask(RefactoringMessages.PushDownAdaptor_overloading_progress, subtypes.length);
 			pm.subTask(""); //$NON-NLS-1$
 			
 			RefactoringStatus status = new RefactoringStatus();

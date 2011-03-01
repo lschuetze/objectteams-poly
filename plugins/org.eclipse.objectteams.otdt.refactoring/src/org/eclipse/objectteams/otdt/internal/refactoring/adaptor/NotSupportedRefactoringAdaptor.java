@@ -4,15 +4,16 @@
 package org.eclipse.objectteams.otdt.internal.refactoring.adaptor;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ITypeRoot;
 import org.eclipse.jdt.core.refactoring.descriptors.ExtractClassDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 
 import base org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import base org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
@@ -36,7 +37,7 @@ public team class NotSupportedRefactoringAdaptor {
 		IJavaProject getProject() -> IJavaProject getProject();
 		
 		private void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) when(!status.hasFatalError()) {
-			status.merge(RefactoringUtil.checkForExistingRoles("Introduce Indirection", getProject(),pm));
+			status.merge(RefactoringUtil.checkForExistingRoles(RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection_name, getProject(),pm));
 		}
 
 		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) <- after RefactoringStatus checkFinalConditions(
@@ -51,7 +52,7 @@ public team class NotSupportedRefactoringAdaptor {
 		ITypeRoot getFInitialTypeRoot() -> get ITypeRoot fInitialTypeRoot;
 
 		private void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) when(!status.hasFatalError()) {
-			status.merge(RefactoringUtil.checkForExistingRoles("Inline Method", getFInitialTypeRoot().getJavaProject(), pm));
+			status.merge(RefactoringUtil.checkForExistingRoles(RefactoringCoreMessages.InlineMethodRefactoring_name, getFInitialTypeRoot().getJavaProject(), pm));
 		}
 
 		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) <- after RefactoringStatus checkFinalConditions(IProgressMonitor pm) with {
@@ -65,7 +66,7 @@ public team class NotSupportedRefactoringAdaptor {
 		IField getFField() -> get IField fField;
 
 		private void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) when(!status.hasFatalError()) {
-			status.merge(RefactoringUtil.checkForExistingRoles("Inline Constant", getFField().getJavaProject(), pm));
+			status.merge(RefactoringUtil.checkForExistingRoles(RefactoringCoreMessages.InlineConstantRefactoring_name, getFField().getJavaProject(), pm));
 		}
 
 		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) <- after RefactoringStatus checkFinalConditions(IProgressMonitor pm) with {
@@ -79,7 +80,7 @@ public team class NotSupportedRefactoringAdaptor {
 		ExtractClassDescriptor getFDescriptor() -> get ExtractClassDescriptor fDescriptor;
 
 		private void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) when(!status.hasFatalError()) {
-			status.merge(RefactoringUtil.checkForExistingRoles("Extract Class", getFDescriptor().getType().getJavaProject(), pm));
+			status.merge(RefactoringUtil.checkForExistingRoles(RefactoringCoreMessages.ExtractClassRefactoring_refactoring_name, getFDescriptor().getType().getJavaProject(), pm));
 		}
 
 		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) <- after RefactoringStatus checkFinalConditions(IProgressMonitor pm) with {
@@ -96,7 +97,7 @@ public team class NotSupportedRefactoringAdaptor {
 	
 	protected class IntroduceParameterObjectProcessor extends ChangeSignatureProcessor playedBy IntroduceParameterObjectProcessor {
 		protected void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) when(!status.hasFatalError()) {
-			status.merge(RefactoringUtil.checkForExistingRoles("Introduce Parameter Object", getFMethod().getJavaProject(), pm));
+			status.merge(RefactoringUtil.checkForExistingRoles(RefactoringCoreMessages.IntroduceParameterObjectRefactoring_refactoring_name, getFMethod().getJavaProject(), pm));
 		}
 		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) <- after RefactoringStatus checkFinalConditions(IProgressMonitor pm,
 				CheckConditionsContext context) with {
@@ -110,7 +111,7 @@ public team class NotSupportedRefactoringAdaptor {
 		ICompilationUnit getFCu() -> get ICompilationUnit fCu;
 
 		private void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) when(!status.hasFatalError()) {
-			status.merge(RefactoringUtil.checkForExistingRoles("Change Type", getFCu().getJavaProject(), pm));
+			status.merge(RefactoringUtil.checkForExistingRoles(RefactoringCoreMessages.ChangeTypeRefactoring_name, getFCu().getJavaProject(), pm));
 		}
 
 		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus status) <- after RefactoringStatus checkFinalConditions(IProgressMonitor pm) with {

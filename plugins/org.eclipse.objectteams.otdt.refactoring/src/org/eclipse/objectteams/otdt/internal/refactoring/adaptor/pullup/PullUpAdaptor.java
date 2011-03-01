@@ -1,6 +1,5 @@
 package org.eclipse.objectteams.otdt.internal.refactoring.adaptor.pullup;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +27,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -41,9 +39,11 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.internal.core.RoleType;
+import org.eclipse.objectteams.otdt.internal.refactoring.RefactoringMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IAmbuguityMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IOverloadingMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
+import org.eclipse.osgi.util.NLS;
 
 import base org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 
@@ -101,7 +101,7 @@ public team class PullUpAdaptor {
 			// remove the subtypes of the declaring type
 			implicitSubRoles.removeAll(Arrays.asList(OTTypeHierarchies.getInstance().getAllTSubTypes(hier, getDeclaringType())));
 			
-			pm.beginTask("Checking Shadowing", implicitSubRoles.size());
+			pm.beginTask(RefactoringMessages.PullUpAdaptor_checkShadowing_progress, implicitSubRoles.size());
 			pm.subTask(""); //$NON-NLS-1$
 			
 			for (int i = 0; i < getFMembersToMove().length; i++) {
@@ -116,8 +116,9 @@ public team class PullUpAdaptor {
 							membersToDelete.addAll(Arrays.asList(getMembersToDelete(pm)));
 							// do not indicate shadowing by deleted fields as an error
 							if(!membersToDelete.contains(shadowingField)) {
-								String msg = Messages.format("The pulled up field ''{0}'' would be shadowed in ''{1}''.", new String[] { field.getElementName(),
-										type.getFullyQualifiedName('.') });
+								String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_fieldShadowing_error, 
+													  field.getElementName(), 
+													  type.getFullyQualifiedName('.'));
 								status.addFatalError(msg, JavaStatusContext.create(shadowingField));
 							}
 							
@@ -144,7 +145,7 @@ public team class PullUpAdaptor {
 					IMethod method = (IMethod)element;
 					// callin methods can only be moved to roles
 					if(Flags.isCallin(method.getFlags()) && !TypeHelper.isRole(getDestinationType().getFlags())){
-						String msg = Messages.format("The callin method ''{0}'' can only be moved to a role (OTJLD �4.2.(d)).", new String[] { method.getElementName() });
+						String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_callinMethodToNonRole_error, method.getElementName());
 						status.addFatalError(msg, JavaStatusContext.create(method));
 					}
 				}
@@ -164,13 +165,13 @@ public team class PullUpAdaptor {
 							new IAmbuguityMessageCreator() {
 
 						public String createAmbiguousMethodSpecifierMsg() {
-							return "Refactoring cannot be performed! There would be an ambiguous method specifier in a method binding after moving!";
+							return RefactoringMessages.PullUpAdaptor_ambiguousMethodSpec_error;
 						}
 
 					}, new IOverloadingMessageCreator() {
 
 						public String createOverloadingMessage() {
-							String msg = Messages.format("The pulled up method ''{0}'' would be overloaded after refactoring.", new String[] { method.getElementName()});
+							String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_overloading_error, method.getElementName());
 							return msg;
 						}
 
@@ -185,7 +186,7 @@ public team class PullUpAdaptor {
 			ITypeHierarchy destinationTypeHierarchy = getDestinationTypeHierarchy(pm);
 			IType[] subtypes = destinationTypeHierarchy.getAllSubtypes(getDestinationType());
 			
-			pm.beginTask("Checking Overloading", subtypes.length + 1);
+			pm.beginTask(RefactoringMessages.PullUpAdaptor_checkOverloading_progress, subtypes.length + 1);
 			pm.subTask(""); //$NON-NLS-1$
 			
 			RefactoringStatus status = new RefactoringStatus();
@@ -227,7 +228,7 @@ public team class PullUpAdaptor {
 			// remove the subtypes of the declaring type
 			allSubTypes.removeAll(Arrays.asList(hier.getAllSubtypes(getDeclaringType())));
 			
-			pm.beginTask("Checking Overriding", allSubTypes.size());
+			pm.beginTask(RefactoringMessages.PullUpAdaptor_checkOverriding_progress, allSubTypes.size());
 			pm.subTask(""); //$NON-NLS-1$
 			
 			for (int i = 0; i < getFMembersToMove().length; i++) {
@@ -244,8 +245,9 @@ public team class PullUpAdaptor {
 							membersToDelete.addAll(Arrays.asList(getMembersToDelete(pm)));
 							// do not indicate overriding for deleted/moved methods as an error
 							if(!membersToMove.contains(overridingMethod) && !membersToDelete.contains(overridingMethod)) {
-								String msg = Messages.format("The pulled up method ''{0}'' would be overridden in ''{1}''.", new String[] { method.getElementName(),
-										type.getFullyQualifiedName('.') });
+								String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_overriding_error,
+													  method.getElementName(),
+													  type.getFullyQualifiedName('.'));
 								status.addError(msg, JavaStatusContext.create(overridingMethod));
 							}
 							
@@ -350,8 +352,9 @@ public team class PullUpAdaptor {
 		 */
 		private void addAspectBindingWarning(IMember member, RefactoringStatus status,IMethodMapping mapping){
 			status.addEntry(new RefactoringStatusEntry(RefactoringStatus.WARNING,
-					MessageFormat.format("Pulled up member ''{0}'' is referenced in an aspect binding by ''{1}''",
-							new Object[]{member.getElementName(), mapping.getDeclaringType().getFullyQualifiedName()})));
+					NLS.bind(RefactoringMessages.PullUpAdaptor_referencedByMethodBinding_error,
+							 member.getElementName(), 
+							 mapping.getDeclaringType().getFullyQualifiedName())));
 		
 		}
 		

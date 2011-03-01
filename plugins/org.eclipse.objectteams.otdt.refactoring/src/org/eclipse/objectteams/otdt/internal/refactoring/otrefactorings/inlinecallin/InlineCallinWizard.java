@@ -1,6 +1,7 @@
 package org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.inlinecallin;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.OTRefactoringMessages;
 
 public class InlineCallinWizard extends RefactoringWizard {
 
@@ -11,6 +12,6 @@ public class InlineCallinWizard extends RefactoringWizard {
 
 	@Override
 	protected void addUserInputPages() {
-		addPage(new InlineCallinInputPage("InlineCallinInputPage"));
+		addPage(new InlineCallinInputPage(OTRefactoringMessages.InlineCallinWizard_inlineCallinInput_pageName));
 	}
 }

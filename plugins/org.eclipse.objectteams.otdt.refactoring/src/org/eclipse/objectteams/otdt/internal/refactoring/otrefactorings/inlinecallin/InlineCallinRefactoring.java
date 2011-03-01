@@ -1,6 +1,5 @@
 package org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.inlinecallin;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -51,6 +50,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.ParameterMapping;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.ReturnStatement;
@@ -60,7 +60,6 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
@@ -76,16 +75,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
@@ -94,7 +89,12 @@ import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.rename.BaseCallFinder;
+import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.OTRefactoringMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
 public class InlineCallinRefactoring extends Refactoring {
@@ -178,7 +178,7 @@ public class InlineCallinRefactoring extends Refactoring {
 
 	@Override
 	public String getName() {
-		return "Inline Callin";
+		return OTRefactoringMessages.InlineCallin_inlineCallin_name;
 	}
 
 	public void setRoleMethodName(String name) {
@@ -202,23 +202,23 @@ public class InlineCallinRefactoring extends Refactoring {
 		RefactoringStatus status= new RefactoringStatus();
 		
 		try {
-			monitor.beginTask("Checking preconditions...", 1);
+			monitor.beginTask(OTRefactoringMessages.InlineCallinRefactoring_preconditions_progress, 1);
 			if (fRoleMethod == null){
-				status.merge(RefactoringStatus.createFatalErrorStatus("Method has not been specified."));
+				status.merge(RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.InlineCallinRefactoring_noMethod_error));
 			}else if (!fRoleMethod.exists()){
-				status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Method ''{0}'' does not exist.", new Object[] { fRoleMethod
+				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_inexistentMethod_error, new Object[] { fRoleMethod
 						.getElementName() })));
 			}else if (fRoleMethod.isBinary()){
-				status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Method ''{0}'' is declared in a binary class file.", new Object[] { fRoleMethod
+				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_binaryMethod_error, new Object[] { fRoleMethod
 						.getElementName() })));
 			}else if (fRoleMethod.isReadOnly()){
-				status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Method ''{0}'' is declared in a read-only class file.", new Object[] { fRoleMethod
+				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_readOnlyMethod_error, new Object[] { fRoleMethod
 						.getElementName() })));
 			}else if (!fRoleMethod.getCompilationUnit().isStructureKnown()){
-					status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Compilation unit ''{0}'' contains compile errors.",
+					status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_compileErrors_error,
 							new Object[] { fRoleMethod.getCompilationUnit().getElementName() })));
 			} else if (!RefactoringUtil.isRoleMethod(fRoleMethod)) {
-				status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("The selected method ''{0}'' is not declared in a role.",
+				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_notInsideRole_error,
 						new Object[] { fRoleMethod.getElementName() })));
 			}else{ 
 					status.merge(initialize(monitor));
@@ -243,15 +243,15 @@ public class InlineCallinRefactoring extends Refactoring {
 		
 		try {
 			IType baseType = ((IRoleType) OTModelManager.getOTElement(fRoleMethod.getDeclaringType())).getBaseClass();
-			if (baseType.isBinary()) {
-				status.merge(RefactoringStatus.createFatalErrorStatus("Base class "+baseType.getElementName()+" is a binary type, cannot modify."));
-				return status;
-			}
-			if(baseType.isReadOnly()){
-				status.merge(RefactoringStatus.createFatalErrorStatus("Base class "+baseType.getElementName()+" is read-only, cannot modify."));
-				return status;
-			}
 			if (baseType != null) {
+				if (baseType.isBinary()) {
+					status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_binaryBase_error, baseType.getElementName())));
+					return status;
+				}
+				if(baseType.isReadOnly()){
+					status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_readOnlyBase_error, baseType.getElementName())));
+					return status;
+				}
 				fBaseType = baseType;
 				fBaseCUnit = baseType.getCompilationUnit();
 
@@ -262,7 +262,7 @@ public class InlineCallinRefactoring extends Refactoring {
 				fBaseImportRewriter = StubUtility.createImportRewrite(fRootBase, true);
 				fBaseAST = fRootBase.getAST();
 			} else {
-				status.merge(RefactoringStatus.createFatalErrorStatus("The declaring role class is not bound to a base class."));
+				status.merge(RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.InlineCallinRefactoring_unboundRole_error));
 			}
 		} catch (JavaModelException e) {
 			status.merge(createCouldNotParseStatus());
@@ -282,8 +282,8 @@ public class InlineCallinRefactoring extends Refactoring {
 		}
 
 		if (fBoundCallinMappings.size() == 0) {
-			status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format(
-					"The selected method ''{0}'' is not bound on the left hand side of a callin method binding.", new Object[] { fRoleMethod
+			status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(
+					OTRefactoringMessages.InlineCallinRefactoring_unboundMethod_error, new Object[] { fRoleMethod
 							.getElementName() })));
 		}
 		
@@ -296,7 +296,7 @@ public class InlineCallinRefactoring extends Refactoring {
 				}
 				fCallinBaseMethodInfos = infos.toArray(new CallinBaseMethodInfo[infos.size()]);
 			} catch (JavaModelException e) {
-				status.merge(RefactoringStatus.createFatalErrorStatus("Could not parse the method mappings."));
+				status.merge(RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.InlineCallinRefactoring_unparseableMethodMapping_error));
 			}
 		}
 		return status;
@@ -354,15 +354,13 @@ public class InlineCallinRefactoring extends Refactoring {
 						continue;
 					}
 				} else {
-					status.addError(Messages.format("The Role Method ''{0}'' is bound in a callin binding and cannot be inlined.", new String[] { fRoleMethod
-							.getElementName() }));
+					status.addError(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_methodBoundByOtherCallin_error, fRoleMethod.getElementName()));
 					continue;
 				}
 			}
 			
 			if (element instanceof ICalloutMapping) {
-				status.addError(Messages.format("The Role Method ''{0}'' is bound in a callout binding and cannot be inlined.", new String[] { fRoleMethod
-						.getElementName() }));
+				status.addError(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_methodIsCallout_error, fRoleMethod.getElementName()));
 				continue;
 			}
 			
@@ -370,12 +368,11 @@ public class InlineCallinRefactoring extends Refactoring {
 				if (element instanceof IMember) {
 					// try to create context informations for the search result
 					IMember referencingMember = (IMember) element;
-					String msg = Messages.format("The Role Method ''{0}'' is referenced by ''{1}'' and cannot be deleted.", new String[] {
-							fRoleMethod.getElementName(), JavaElementLabels.getTextLabel(referencingMember, JavaElementLabels.ALL_FULLY_QUALIFIED) });
+					String msg = NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_methodIsUsedBy_error,
+							fRoleMethod.getElementName(), JavaElementLabels.getTextLabel(referencingMember, JavaElementLabels.ALL_FULLY_QUALIFIED));
 					status.addError(msg, JavaStatusContext.create(referencingMember));
 				} else {
-					status.addError(Messages.format("The Role Method ''{0}'' is referenced and cannot be deleted.",
-							new String[] { fRoleMethod.getElementName() }));
+					status.addError(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_methodIsUsed_error, fRoleMethod.getElementName()));
 				}
 			}
 		}
@@ -386,10 +383,10 @@ public class InlineCallinRefactoring extends Refactoring {
 		RefactoringStatus result = new RefactoringStatus();
 	
 		if (name == null)
-			return RefactoringStatus.createFatalErrorStatus("No new role method name specified.");
+			return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.InlineCallinRefactoring_missingNewMethodName_error);
 	
 		if ("".equals(name)) //$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus("New role method name cannot be empty.");
+			return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.InlineCallinRefactoring_emptyMethodName_error);
 	
 		IJavaProject javaProject = this.fRoleType.getJavaProject();
 		String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);
@@ -413,7 +410,7 @@ public class InlineCallinRefactoring extends Refactoring {
 	private RefactoringStatus checkIfMethodExists() {
 		try {
 			if (methodWithNameExists(fBaseType, fRoleMethodName)){
-				return RefactoringStatus.createErrorStatus(MessageFormat.format("A method with the same name already exists.", fRoleMethodName));
+				return RefactoringStatus.createErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_methodNameClash_error, fRoleMethodName));
 			}
 		} catch (JavaModelException exception) {
 			return createCouldNotParseStatus();
@@ -429,7 +426,7 @@ public class InlineCallinRefactoring extends Refactoring {
 		for (int i = 0; i < referencedMethods.length; i++) {
 			IMethod referencedMethod = referencedMethods[i];
 			if (referencedMethod.getDeclaringType().equals(fRoleType)) {
-				status.merge(RefactoringStatus.createErrorStatus(MessageFormat.format("The method to inline ''{0}'' references the role method ''{1}''.",
+				status.merge(RefactoringStatus.createErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_methodUsesRoleMethod_error,
 						fRoleMethodName, referencedMethod)));
 			}
 		}
@@ -439,7 +436,7 @@ public class InlineCallinRefactoring extends Refactoring {
 		for (int i = 0; i < referencedFileds.length; i++) {
 			IField referencedFiled = referencedFileds[i];
 			if (referencedFiled.getDeclaringType().equals(fRoleType)) {
-				status.merge(RefactoringStatus.createErrorStatus(MessageFormat.format("The method to inline ''{0}'' references the role field ''{1}''.",
+				status.merge(RefactoringStatus.createErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_methodUsesRoleField_error,
 						fRoleMethodName, referencedFiled)));
 			}
 		}
@@ -456,7 +453,7 @@ public class InlineCallinRefactoring extends Refactoring {
 	RefactoringStatus checkBaseMethods() {
 		RefactoringStatus status = new RefactoringStatus();
 		if (fTargetBaseMethods == null || fTargetBaseMethods.length == 0) {
-			status.merge(RefactoringStatus.createFatalErrorStatus("No base method selected."));
+			status.merge(RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.InlineCallinRefactoring_missingBaseMethod_error));
 		}
 		return status;
 	}
@@ -471,12 +468,12 @@ public class InlineCallinRefactoring extends Refactoring {
 	}
 
 	private RefactoringStatus createCouldNotParseStatus() {
-		return RefactoringStatus.createFatalErrorStatus("Could not parse the declaring type.");
+		return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.InlineCallinRefactoring_unparseableType_error);
 	}
 
 	@Override
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		pm.beginTask("Creating Change", fCallinBaseMethodInfos.length + 2);
+		pm.beginTask(OTRefactoringMessages.InlineCallinRefactoring_creatingChange_progress, fCallinBaseMethodInfos.length + 2);
 		inlineCallin(pm);
 		Change change = new CompositeChange(getName(), new TextFileChange[] { fBaseTextFileChange, fRoleTextFileChange });
 		pm.done();
@@ -557,20 +554,20 @@ public class InlineCallinRefactoring extends Refactoring {
 		MultiTextEdit baseMultiEdit = new MultiTextEdit();
 		baseMultiEdit.addChild(fBaseRewrite.rewriteAST());
 		fBaseTextFileChange = new TextFileChange(fBaseCUnit.getElementName(), (IFile) fBaseCUnit.getResource());
-		fBaseTextFileChange.setTextType("java");
+		fBaseTextFileChange.setTextType("java"); //$NON-NLS-1$
 		fBaseTextFileChange.setEdit(baseMultiEdit);
 			
 		if (fBaseImportRewriter.hasRecordedChanges()) {
 			TextEdit edit = fBaseImportRewriter.rewriteImports(null);
 			baseMultiEdit.addChild(edit);
-			fBaseTextFileChange.addTextEditGroup(new TextEditGroup("Organize Imports", new TextEdit[] { edit }));
+			fBaseTextFileChange.addTextEditGroup(new TextEditGroup(OTRefactoringMessages.OTRefactoring_organizeImports_editName, new TextEdit[] { edit }));
 		}
 
 		// create the text change for the role
 		MultiTextEdit roleMultiEdit = new MultiTextEdit();
 		roleMultiEdit.addChild(fRoleRewrite.rewriteAST());
 		fRoleTextFileChange = new TextFileChange(fRoleCUnit.getElementName(), (IFile) fRoleCUnit.getResource());
-		fRoleTextFileChange.setTextType("java");
+		fRoleTextFileChange.setTextType("java"); //$NON-NLS-1$
 		fRoleTextFileChange.setEdit(roleMultiEdit);
 	}
 
@@ -1406,7 +1403,7 @@ public class InlineCallinRefactoring extends Refactoring {
 	}
 
 	private String generateResultVarName(CallinBaseMethodInfo baseMethodInfo) throws JavaModelException {
-		String name = "baseResult";
+		String name = "baseResult"; //$NON-NLS-1$
 		List<String> paramNames = Arrays.asList(baseMethodInfo.getMethod().getParameterNames());
 		return generateVarName(name, paramNames);
 	}
@@ -1436,10 +1433,10 @@ public class InlineCallinRefactoring extends Refactoring {
 
 	private void generateBaseMethodNames(CallinBaseMethodInfo[] baseMethodInfos) throws JavaModelException {
 		for (int i = 0; i < baseMethodInfos.length; i++) {
-			String newBaseName = "base_" + fTargetBaseMethods[i].getMethod().getElementName();
+			String newBaseName = "base_" + fTargetBaseMethods[i].getMethod().getElementName(); //$NON-NLS-1$
 			int j = 2;
 			while (methodWithNameExists(fBaseType, newBaseName)) {
-				newBaseName = "base_" + fTargetBaseMethods[i].getMethod().getElementName() + j;
+				newBaseName = "base_" + fTargetBaseMethods[i].getMethod().getElementName() + j; //$NON-NLS-1$
 				j++;
 			}
 			baseMethodInfos[i].setNewMethodName(newBaseName);
@@ -1451,7 +1448,7 @@ public class InlineCallinRefactoring extends Refactoring {
 		List<String> localVarNames = new ArrayList<String>();
 		localVarNames.addAll(localVarNamesInRoleMethod());
 		localVarNames.addAll(Arrays.asList(fRoleMethod.getParameterNames()));
-		String tunneledName = generateVarName("tunneled" + upperCasedName, localVarNames);
+		String tunneledName = generateVarName("tunneled" + upperCasedName, localVarNames); //$NON-NLS-1$
 		return tunneledName;
 	}
 

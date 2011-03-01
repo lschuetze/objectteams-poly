@@ -7,6 +7,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.objectteams.otdt.internal.refactoring.RefactoringMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IAmbuguityMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IOverloadingMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
@@ -32,8 +33,8 @@ public team class MoveInstanceMethodAdaptor {
 
 		void checkFinalConditions(IProgressMonitor pm, RefactoringStatus result) throws CoreException {
 			if(!result.hasFatalError())
-				result.merge(RefactoringUtil.checkForExistingRoles("Move Instance Method", getFMethod().getJavaProject(), pm));
-			pm.beginTask("Checking Overloading", 1);
+				result.merge(RefactoringUtil.checkForExistingRoles(RefactoringMessages.MoveInstanceMethodAdaptor_moveInstanceMethod_name, getFMethod().getJavaProject(), pm));
+			pm.beginTask(RefactoringMessages.MoveInstanceMethodAdaptor_checkOverloading_progress, 1);
 			pm.subTask(""); //$NON-NLS-1$
 			result.merge(checkOverloadingAndAmbiguity(pm));
 			pm.worked(1);
@@ -54,13 +55,13 @@ public team class MoveInstanceMethodAdaptor {
 					new IAmbuguityMessageCreator() {
 
 						public String createAmbiguousMethodSpecifierMsg() {
-							return "Refactoring cannot be performed! There would be an ambiguous method specifier in a method binding after moving!";
+							return RefactoringMessages.MoveInstanceMethodAdaptor_ambiguousMethodSpec_error;
 						}
 
 					}, new IOverloadingMessageCreator() {
 
 						public String createOverloadingMessage() {
-							return "Moved method will be overloaded after refactoring!";
+							return RefactoringMessages.MoveInstanceMethodAdaptor_overloading_error;
 						}
 
 					}, pm);

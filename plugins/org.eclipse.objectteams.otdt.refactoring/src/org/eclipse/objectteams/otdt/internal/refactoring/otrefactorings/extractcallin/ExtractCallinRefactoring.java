@@ -1,6 +1,5 @@
 package org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.extractcallin;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -38,10 +37,12 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodBindingOperator;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.ParameterMapping;
@@ -50,7 +51,6 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTNodeCreator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -62,14 +62,15 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
-import org.eclipse.text.edits.MultiTextEdit;
-import org.eclipse.text.edits.TextEdit;
-import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.internal.core.AbstractCalloutMapping;
-import org.eclipse.objectteams.otdt.internal.core.CalloutMapping;
+import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.OTRefactoringMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 @SuppressWarnings("restriction")
 public class ExtractCallinRefactoring extends Refactoring {
@@ -186,26 +187,26 @@ public class ExtractCallinRefactoring extends Refactoring {
 	public RefactoringStatus checkInitialConditions(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		RefactoringStatus status= new RefactoringStatus();
 		try {
-			monitor.beginTask("Checking preconditions...", 1);
+			monitor.beginTask(OTRefactoringMessages.ExtractCallinRefactoring_preconditions_progress, 1);
 			if (fBaseMethod == null) {
-				status.merge(RefactoringStatus.createFatalErrorStatus("Method has not been specified."));
+				status.merge(RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.ExtractCallinRefactoring_unspecifiedMethod_error));
 			} else if (!fBaseMethod.exists()) {
-				status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Method ''{0}'' does not exist.", new Object[] { fBaseMethod
+				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_inexistentMethod_error, new Object[] { fBaseMethod
 						.getElementName() })));
 			}else if (fBaseMethod.isBinary()){
-				status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Method ''{0}'' is declared in a binary class file.", new Object[] { fBaseMethod
+				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_baseMethodBinary_error, new Object[] { fBaseMethod
 						.getElementName() })));
 			}else if (fBaseMethod.isReadOnly()){
-				status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Method ''{0}'' is declared in a read-only class file.", new Object[] { fBaseMethod
+				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_baseMethodReadOnly_error, new Object[] { fBaseMethod
 						.getElementName() })));
 			} else if (!fBaseMethod.getCompilationUnit().isStructureKnown()) {
-					status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Compilation unit ''{0}'' contains compile errors.",
+					status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_compileErrors_error,
 							new Object[] { fBaseMethod.getCompilationUnit().getElementName() })));
 			} else if (Flags.isAbstract(fBaseMethod.getFlags())){
-				status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Method ''{0}'' is abstract, cannot extract.", new Object[] { fBaseMethod
+				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_baseMethodAbstract_error, new Object[] { fBaseMethod
 						.getElementName() })));
 			} else if (fBaseMethod instanceof AbstractCalloutMapping){
-				status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Method ''{0}'' is an callout method and cannot be extracted.", new Object[] { fBaseMethod
+				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_baseMethodCallout_error, new Object[] { fBaseMethod
 						.getElementName() })));
 			}else{ 
 					status.merge(initialize(monitor));
@@ -233,7 +234,7 @@ public class ExtractCallinRefactoring extends Refactoring {
 				
 				fBoundRoles = findCandidateRoles();
 			if (fBoundRoles.size() == 0) {
-				status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("The declaring type ''{0}'' is not bound by a role.",
+				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_unboundRole_error,
 						new Object[] { fBaseType.getElementName() })));
 			}
 			
@@ -253,15 +254,15 @@ public class ExtractCallinRefactoring extends Refactoring {
 		RefactoringStatus status = new RefactoringStatus();
 
 		if (fRoleType == null) {
-			status.merge(RefactoringStatus.createFatalErrorStatus("No target role selected."));
+			status.merge(RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.ExtractCallinRefactoring_roleUnspecified_error));
 		}else if (!fRoleType.exists()) {
-			status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Type ''{0}'' does not exist.", new Object[] { fRoleType
+			status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_roleInexistent_error, new Object[] { fRoleType
 					.getElementName() })));
 		}else if (fRoleType.isBinary()){
-			status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Type ''{0}'' is declared in a binary class file.", new Object[] { fRoleType
+			status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_roleBinary_error, new Object[] { fRoleType
 					.getElementName() })));
 		}else if (fRoleType.isReadOnly()){
-			status.merge(RefactoringStatus.createFatalErrorStatus(MessageFormat.format("Type ''{0}'' is declared in a read-only file.", new Object[] { fRoleType
+			status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_roleReadOnly_error, new Object[] { fRoleType
 					.getElementName() })));
 		}
 		
@@ -285,16 +286,16 @@ public class ExtractCallinRefactoring extends Refactoring {
 
 	private RefactoringStatus checkCallinKind() throws JavaModelException {
 		if (fMappingKind == 0) {
-			return RefactoringStatus.createFatalErrorStatus("Callin kind has not been specified.");
+			return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.ExtractCallinRefactoring_callinKindUnspecified_error);
 		}
 		if (fMappingKind == ICallinMapping.KIND_BEFORE && !isExtractBeforeAvailable()) {
-			return RefactoringStatus.createFatalErrorStatus("The first statement in the base method must be a method invocation to extract a before callin.");
+			return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.ExtractCallinRefactoring_callToExtractNotFound_Before_error);
 		}
 		if (fMappingKind == ICallinMapping.KIND_AFTER && !isExtractAfterAvailable()) {
-			return RefactoringStatus.createFatalErrorStatus("The last statement in the base method must be a method invocation to extract an after callin.");
+			return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.ExtractCallinRefactoring_callToExtractNotFound_After_error);
 		}
 		if (fMappingKind != ICallinMapping.KIND_REPLACE && fMappingKind != ICallinMapping.KIND_BEFORE && fMappingKind != ICallinMapping.KIND_AFTER) {
-			return RefactoringStatus.createFatalErrorStatus("Invalid callin kind.");
+			return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.ExtractCallinRefactoring_callinKindInvalid_error);
 		}
 		return new RefactoringStatus();
 	}
@@ -308,7 +309,7 @@ public class ExtractCallinRefactoring extends Refactoring {
 
 	@Override
 	public String getName() {
-		return "Extract Callin";
+		return OTRefactoringMessages.ExtractCallin_extractCallin_name;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -380,21 +381,21 @@ public class ExtractCallinRefactoring extends Refactoring {
 		MultiTextEdit baseMultiEdit = new MultiTextEdit();
 		baseMultiEdit.addChild(fBaseRewrite.rewriteAST());
 		fBaseTextFileChange = new TextFileChange(fBaseCUnit.getElementName(), (IFile) fBaseCUnit.getResource());
-		fBaseTextFileChange.setTextType("java");
+		fBaseTextFileChange.setTextType("java"); //$NON-NLS-1$
 		fBaseTextFileChange.setEdit(baseMultiEdit);
 		
 		// create the text change for the role
 		MultiTextEdit roleMultiEdit = new MultiTextEdit();
 		roleMultiEdit.addChild(fRoleRewrite.rewriteAST());
 		fRoleTextFileChange = new TextFileChange(fRoleCUnit.getElementName(), (IFile) fRoleCUnit.getResource());
-		fRoleTextFileChange.setTextType("java");
+		fRoleTextFileChange.setTextType("java"); //$NON-NLS-1$
 		fRoleTextFileChange.setEdit(roleMultiEdit);
 		
 		// Update imports
 		if (fRoleImportRewriter.hasRecordedChanges()) {
 			TextEdit edit = fRoleImportRewriter.rewriteImports(null);
 			roleMultiEdit.addChild(edit);
-			fRoleTextFileChange.addTextEditGroup(new TextEditGroup("Update Imports", new TextEdit[] { edit }));
+			fRoleTextFileChange.addTextEditGroup(new TextEditGroup(OTRefactoringMessages.OTRefactoring_organizeImports_editName, new TextEdit[] { edit }));
 		}
 	}
 	
@@ -458,9 +459,8 @@ public class ExtractCallinRefactoring extends Refactoring {
 	private CallinMappingDeclaration createMethodMapping() throws JavaModelException {
 		CallinMappingDeclaration mapping = fRoleAST.newCallinMappingDeclaration();
 
-		Modifier callinModifier = createCallinModifier();
-
-		mapping.setCallinModifier(callinModifier);
+		
+		mapping.setBindingOperator(createCallinBindingOp());
 		
 		IMethodBinding roleMethodBinding = RefactoringUtil.methodToDeclaration(fExtractedBaseMethod, fRootBase).resolveBinding();
 		MethodSpec roleMethodSpec = createMethodSpec(fRoleAST, fRoleImportRewriter, roleMethodBinding, fExtractedBaseMethod.getParameterNames());
@@ -481,7 +481,7 @@ public class ExtractCallinRefactoring extends Refactoring {
 				
 				parameterMapping.setIdentifier(fRoleAST.newSimpleName(varDecl.getName().getIdentifier()));
 				parameterMapping.setExpression(expr);
-				parameterMapping.setDirection("<-");
+				parameterMapping.setDirection("<-"); //$NON-NLS-1$
 				mapping.getParameterMappings().add(parameterMapping);
 			}
 		}
@@ -511,17 +511,22 @@ public class ExtractCallinRefactoring extends Refactoring {
 		return false;
 	}
 
-	private Modifier createCallinModifier() {
+	private MethodBindingOperator createCallinBindingOp() {
+		ModifierKeyword keyword;
 		switch (fMappingKind) {
 		case ICallinMapping.KIND_BEFORE:
-			return fRoleAST.newModifier(ModifierKeyword.BEFORE_KEYWORD);
+			keyword = ModifierKeyword.BEFORE_KEYWORD;
+			break;
 		case ICallinMapping.KIND_AFTER:
-			return fRoleAST.newModifier(ModifierKeyword.AFTER_KEYWORD);
+			keyword = ModifierKeyword.AFTER_KEYWORD;
+			break;
 		case ICallinMapping.KIND_REPLACE:
-			return fRoleAST.newModifier(ModifierKeyword.REPLACE_KEYWORD);
+			keyword = ModifierKeyword.REPLACE_KEYWORD;
+			break;
 		default:
 			return null;
 		}
+		return fRoleAST.newMethodBindingOperator(keyword, MethodBindingOperator.KIND_CALLIN);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -678,16 +683,16 @@ public class ExtractCallinRefactoring extends Refactoring {
 	private RefactoringStatus checkIfMethodExists() {
 		try {
 			if (methodWithNameExists(fRoleType, fRoleMethodName)) {
-				return RefactoringStatus.createErrorStatus(MessageFormat.format("A method with the same name already exists.", fRoleMethodName));
+				return RefactoringStatus.createErrorStatus(NLS.bind(OTRefactoringMessages.ExtractCallinRefactoring_methodNameClash, fRoleMethodName));
 			}
 		} catch (JavaModelException exception) {
-			return RefactoringStatus.createFatalErrorStatus("Could not perform the search for binding role types.");
+			return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.ExtractCallinRefactoring_bindingSearchFailed_error);
 		}
 		return new RefactoringStatus();
 	}
 	
 	private RefactoringStatus createCouldNotParseStatus() {
-		return RefactoringStatus.createFatalErrorStatus("Could not parse the declaring type.");
+		return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.ExtractCallinRefactoring_unparseableType_error);
 	}
 
 	private boolean methodWithNameExists(IType type, String methodName) throws JavaModelException {
@@ -748,10 +753,10 @@ public class ExtractCallinRefactoring extends Refactoring {
 		RefactoringStatus result = new RefactoringStatus();
 
 		if (name == null)
-			return RefactoringStatus.createFatalErrorStatus("No new role method name specified.");
+			return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.ExtractCallinRefactoring_roleMethodUnspecified_error);
 
 		if ("".equals(name)) //$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus("New role method name cannot be empty.");
+			return RefactoringStatus.createFatalErrorStatus(OTRefactoringMessages.ExtractCallinRefactoring_roleMethodNameEmpty_error);
 
 		IJavaProject javaProject = this.fRoleType.getJavaProject();
 		String sourceLevel= javaProject.getOption(JavaCore.COMPILER_SOURCE, true);

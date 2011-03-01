@@ -5,6 +5,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizardOpenOperation;
 import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.AbstractCallinRefactoringAction;
+import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.OTRefactoringMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.AbstractCallinRefactoringAction.SelectionDispatchAction;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
@@ -47,21 +48,21 @@ public class ExtractCallinAction extends AbstractCallinRefactoringAction impleme
 					new RefactoringWizardOpenOperation(
 							new ExtractCallinWizard(
 									new ExtractCallinRefactoring((IMethod)fJavaElement), 
-									"Extract Callin"
+									OTRefactoringMessages.ExtractCallin_extractCallin_name
 							)
-					).run(fWindow.getShell(), "Extract Callin");
+					).run(fWindow.getShell(), OTRefactoringMessages.ExtractCallin_extractCallin_name);
 				} catch (InterruptedException exception) {
 					// Do nothing
 				}
 			} else {
-				MessageDialog.openInformation(null, "Extract Callin", "Operation unavailable on the current selection. Select a callin-bound role method or a callin method binding");
+				MessageDialog.openInformation(null, OTRefactoringMessages.ExtractCallin_extractCallin_name, OTRefactoringMessages.ExtractCallin_notAvailableOnSelection_error);
 			}		
 		}
 	}
 
 	// =========== Start ExtractCallinAction ===========
 	public ExtractCallinAction() {
-		super("Extract Callin ...", "Extract a callin binding and method.");
+		super(OTRefactoringMessages.ExtractCallin_extractCallin_commandName, OTRefactoringMessages.ExtractCallin_extractCallin_tooltip);
 	}
 	
 	protected CallinRefactoringActionCommon createRefactoringActionCommon(IWorkbenchWindow window) {

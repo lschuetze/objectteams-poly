@@ -3,7 +3,6 @@
  */
 package org.eclipse.objectteams.otdt.internal.refactoring.adaptor;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,7 +25,6 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationRefactoringChange;
@@ -35,20 +33,21 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IPhantomType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
+import org.eclipse.objectteams.otdt.internal.refactoring.RefactoringMessages;
+import org.eclipse.osgi.util.NLS;
+import org.eclipse.text.edits.ReplaceEdit;
 
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 
@@ -295,7 +294,7 @@ public team class RenameTypeAdaptor {
 		}
 
 		private void addTypeDeclarationUpdate(TextChangeManager manager, IType type) throws CoreException {
-			String name = RefactoringCoreMessages.RenameTypeRefactoring_update;
+			String name = RefactoringMessages.RenameTypeAdaptor_addType_editName;
 			int typeNameLength = type.getElementName().length();
 			ICompilationUnit cu = type.getCompilationUnit();
 			TextChangeCompatibility.addTextEdit(manager.get(cu), name, new ReplaceEdit(type.getNameRange().getOffset(), typeNameLength, getNewElementName()));
@@ -304,7 +303,7 @@ public team class RenameTypeAdaptor {
 		}
 		
 		private void createChanges(IProgressMonitor pm) throws JavaModelException, CoreException{
-			pm.beginTask("Create changes for implicit type declarations", fImplicitRelatedTypes.length);
+			pm.beginTask(RefactoringMessages.RenameTypeAdaptor_changeImplicitTypes_progress, fImplicitRelatedTypes.length);
 			pm.subTask(""); //$NON-NLS-1$
 			if(fTypeToRenameIsRole){
 				for (int i = 0; i < fImplicitRelatedTypes.length; i++) {
@@ -341,7 +340,9 @@ public team class RenameTypeAdaptor {
 				// a role directory exists
 				if(fRoleDirectory != null){
 					// rename the directory to the new team name
-					RenamePackageChange renameRoleFolderChange= new RenamePackageChange( fRoleDirectory, typeToRename.getPackageFragment().getElementName() + "." + getNewElementName(),  false);
+					RenamePackageChange renameRoleFolderChange= new RenamePackageChange( fRoleDirectory, 
+																		typeToRename.getPackageFragment().getElementName() + '.' + getNewElementName(),
+																		false);
 					((DynamicValidationRefactoringChange)jdtChange).add(renameRoleFolderChange);
 				}	
 			}
@@ -393,8 +394,7 @@ public team class RenameTypeAdaptor {
 					for (int j = 0; j < roles.length; j++) {
 						IType role = roles[j];
 						if(role.getElementName().equals(getNewElementName())){
-							String msg = Messages.format("A role type named ''{0}'' exists in ''{1}'' and would shadow the renamed type (OTJLD §1.4(a)).", new String[] { getNewElementName(),
-									type.getFullyQualifiedName('.') });
+							String msg = NLS.bind(RefactoringMessages.RenameTypeAdaptor_roleShadowing_error, getNewElementName(), type.getFullyQualifiedName('.'));
 							jdtStatus.addError(msg, JavaStatusContext.create(role));
 						}
 					}
@@ -442,7 +442,7 @@ public team class RenameTypeAdaptor {
 				|| newRoleName.equals(ICONFINED)
 				|| newRoleName.equals(ILOWERABLE))
 			{
-				status.addFatalError(RefactoringCoreMessages.RenameTypeRefactoring_choose_another_name);
+				status.addFatalError(NLS.bind(RefactoringMessages.RenameTypeAdaptor_predefinedRoleName_error, newRoleName));
 			}
 			return status;
 		}
@@ -459,7 +459,7 @@ public team class RenameTypeAdaptor {
 			IOTType otElement = OTModelManager.getOTElement(getFType());
 			IOTType enclosingTeam = ((IRoleType)otElement).getTeam();
 			
-			pm.beginTask("Check Overriding", 1);
+			pm.beginTask(RefactoringMessages.RenameTypeAdaptor_overriding_progress, 1);
 			pm.subTask(""); //$NON-NLS-1$
 			RefactoringStatus status = new RefactoringStatus();
 			try{
@@ -468,8 +468,7 @@ public team class RenameTypeAdaptor {
 				for (int i = 0; i < roles.length; i++) {
 					IType currRole = roles[i];
 					if(currRole.getElementName().equals(getNewElementName())){
-						String msg = Messages.format("The renamed role type would override the inherited role type ''{0}''.",
-								new String[] { currRole.getFullyQualifiedName('.') });
+						String msg = NLS.bind(RefactoringMessages.RenameTypeAdaptor_overriding_error, currRole.getFullyQualifiedName('.'));
 						status.addError(msg, JavaStatusContext.create(currRole));
 						return status;
 					}
@@ -485,8 +484,7 @@ public team class RenameTypeAdaptor {
 					for (int j = 0; j < declaredRoles.length; j++) {
 						IType currRole = declaredRoles[j];
 						if(currRole.getElementName().equals(getNewElementName())){
-							String msg = Messages.format("The renamed role type would be overridden by role type ''{0}''.",
-									new String[] { currRole.getFullyQualifiedName('.') });
+							String msg = NLS.bind(RefactoringMessages.RenameTypeAdaptor_overridden_error, currRole.getFullyQualifiedName('.'));
 							status.addError(msg, JavaStatusContext.create(currRole));
 							return status;
 						}
@@ -509,8 +507,11 @@ public team class RenameTypeAdaptor {
 		private RefactoringStatus checkForConflictingRoleDirectoryName(IPackageFragment roleDirectory) throws JavaModelException {
 			IJavaElement[] packages= ((IPackageFragmentRoot)roleDirectory.getParent()).getChildren();
 			for (int i = 0;  i < packages.length; i++) {
-				if(packages[i].getElementName().equals(getFType().getPackageFragment().getElementName() + "." + getNewElementName())){
-					String msg = MessageFormat.format("The new team name ''{0}'' collides with the package ''{1}'', therefore a renaming of the role directory ''{2}'' is impossible.", new Object[]{getFType().getElementName(), packages[i].getElementName(), roleDirectory.getElementName()});
+				if(packages[i].getElementName().equals(getFType().getPackageFragment().getElementName() + '.' + getNewElementName())) {
+					String msg = NLS.bind(RefactoringMessages.RenameTypeAdaptor_teamCollidesWithPackage_error, 
+										  new String[] { getFType().getElementName(), 
+										  				 packages[i].getElementName(), 
+										  				 roleDirectory.getElementName()});
 					return RefactoringStatus.createErrorStatus(msg);
 				}
 			}
@@ -545,8 +546,8 @@ public team class RenameTypeAdaptor {
 				for (int j = 0; j < nestedRoles.length; j++) {
 					IType role = nestedRoles[j];
 					if(role.getElementName().equals(getNewElementName())){
-						String msg = Messages.format("The role type ''{0}'' would shadow the renamed type (OTJLD §1.4(a))."
-								, new String[] { BasicElementLabels.getJavaElementName(role.getFullyQualifiedName('.')) });
+						String msg = NLS.bind(RefactoringMessages.RenameTypeAdaptor_shadowedByRole_error,
+											  BasicElementLabels.getJavaElementName(role.getFullyQualifiedName('.')));
 						status.addError(msg, JavaStatusContext.create(role));
 					}
 				}
@@ -563,8 +564,8 @@ public team class RenameTypeAdaptor {
 					}
 					IType role = outerRoles[i];
 					if(role.getElementName().equals(getNewElementName())){
-						String msg = Messages.format("The renamed role type would shadow the visible type ''{0}'' (OTJLD §1.4(a))."
-								, new String[] { BasicElementLabels.getJavaElementName(role.getFullyQualifiedName('.')) });
+						String msg = NLS.bind(RefactoringMessages.RenameTypeAdaptor_shadowExistingType_error,
+											  BasicElementLabels.getJavaElementName(role.getFullyQualifiedName('.')));
 						status.addError(msg, JavaStatusContext.create(role));
 					}
 				}
@@ -587,8 +588,9 @@ public team class RenameTypeAdaptor {
 				if(otElement instanceof IRoleType){
 					IRoleType role = (IRoleType) otElement;
 					if(role.getElementName().equals(getNewElementName())){
-						String msg = Messages.format(RefactoringCoreMessages.RenameTypeRefactoring_member_type_exists, new String[] { getNewElementLabel(),
-								BasicElementLabels.getJavaElementName(role.getTeam().getFullyQualifiedName('.')) });
+						String msg = NLS.bind(RefactoringMessages.RenameTypeAdaptor_newTypeConflic_error,
+											  getNewElementLabel(),
+											  BasicElementLabels.getJavaElementName(role.getTeam().getFullyQualifiedName('.')));
 						status.addError(msg, JavaStatusContext.create(role));
 					}
 				}
@@ -635,7 +637,7 @@ public team class RenameTypeAdaptor {
 					String name = packages[i].getElementName();
 					String fragmentName = fragment.getElementName();
 					// role directory found
-					if(name.equals(fragmentName + "." + enclosingTeam.getElementName())){
+					if(name.equals(fragmentName + '.' + enclosingTeam.getElementName())){
 						return (IPackageFragment)packages[i];
 					}
 				}

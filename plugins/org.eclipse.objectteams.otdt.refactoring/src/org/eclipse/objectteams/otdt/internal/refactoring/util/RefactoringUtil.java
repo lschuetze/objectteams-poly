@@ -39,8 +39,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
@@ -58,8 +56,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodMappingElement;
 import org.eclipse.jdt.core.dom.MethodSpec;
-import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -70,13 +68,11 @@ import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
-import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -93,6 +89,8 @@ import org.eclipse.objectteams.otdt.core.search.OTSearchRequestor;
 import org.eclipse.objectteams.otdt.internal.refactoring.OTRefactoringPlugin;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.OTRefactoringCoreMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.base.OTRefactoringStatusCodes;
+import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.OTRefactoringMessages;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * This utility class is a part of the OT/J refactoring adaptation. It contains
@@ -750,7 +748,7 @@ public class RefactoringUtil implements ITeamConstants {
 	 * @param newMethodName
 	 *            the name of the refactored method
 	 * @param oldMethodName
-	 *            the old name of the refactored method
+	 *            the old name of the refactored method (can be null)
 	 * @param focusType
 	 *            the regarded type
 	 * @param roleTypes
@@ -809,7 +807,7 @@ public class RefactoringUtil implements ITeamConstants {
 	 * @param newMethodName
 	 *            the name of the refactored method
 	 * @param oldMethodName
-	 *            the old name of the refactored method
+	 *            the old name of the refactored method (can be null)
 	 * @param superTypes
 	 *            the super types of the focus type
 	 * @param msgCreator a message creator object to provide refactoring specific error messages
@@ -920,7 +918,7 @@ public class RefactoringUtil implements ITeamConstants {
 			IRoleType roleType = (IRoleType) OTModelManager.getOTElement(focusType);
 			result.merge(RefactoringUtil.checkOverloadingAndAmbiguityForRole(result, newMethodName, newParamTypes, roleType, ambigutiyMsgCreator, overloadingMsgCreator,
 					pm));
-			result.merge(RefactoringUtil.checkAmbiguityForBasePresentInFocusTypeSuperhierarchy(newMethodName, "", superTypes, ambigutiyMsgCreator, roleType));
+			result.merge(RefactoringUtil.checkAmbiguityForBasePresentInFocusTypeSuperhierarchy(newMethodName, null, superTypes, ambigutiyMsgCreator, roleType));
 		}
 		// if the focus type is an unbound regular class,
 		// check for overloading methods in this class and its supertypes
@@ -934,7 +932,7 @@ public class RefactoringUtil implements ITeamConstants {
 		// check for overloading methods in this base class and its supertypes,
 		// and for ambiguity in method bindings of bound role classes
 		else if (baseTypes.contains(focusType)) {
-			result.merge(RefactoringUtil.checkOverloadingAndAmbiguityForBase(result, newMethodName, "", newParamTypes, focusType, roleTypes,
+			result.merge(RefactoringUtil.checkOverloadingAndAmbiguityForBase(result, newMethodName, null, newParamTypes, focusType, roleTypes,
 					ambigutiyMsgCreator, overloadingMsgCreator, pm));
 		}
 		// if the focus type has subtypes,
@@ -957,14 +955,14 @@ public class RefactoringUtil implements ITeamConstants {
 						// check also ambiguous base method specs
 						if (baseClass != null && baseClass.equals(focusType)) {
 							roleList.add(roleType);
-							result.merge(RefactoringUtil.checkForAmbiguousBaseMethodSpecs(roleList, newMethodName, "", ambigutiyMsgCreator));
+							result.merge(RefactoringUtil.checkForAmbiguousBaseMethodSpecs(roleList, newMethodName, null, ambigutiyMsgCreator));
 						}
 						// else if base class of role type is a direct or
 						// indirect
 						// superclass of focus type, check also ambiguous base
 						// method specs
 						else {
-							result.merge(RefactoringUtil.checkAmbiguityForBasePresentInFocusTypeSuperhierarchy(newMethodName, "", superTypes, ambigutiyMsgCreator,
+							result.merge(RefactoringUtil.checkAmbiguityForBasePresentInFocusTypeSuperhierarchy(newMethodName, null, superTypes, ambigutiyMsgCreator,
 									roleType));
 						}
 					}
@@ -983,7 +981,7 @@ public class RefactoringUtil implements ITeamConstants {
 				// supertypes
 				// and for ambiguity in method bindings of bound role classes
 				else if (baseTypes.contains(subType)) {
-					result.merge(RefactoringUtil.checkOverloadingAndAmbiguityForBase(result, newMethodName, "", newParamTypes, subType, roleTypes, ambigutiyMsgCreator,
+					result.merge(RefactoringUtil.checkOverloadingAndAmbiguityForBase(result, newMethodName, null, newParamTypes, subType, roleTypes, ambigutiyMsgCreator,
 							overloadingMsgCreator, pm));
 				}
 			}
@@ -1334,7 +1332,7 @@ public class RefactoringUtil implements ITeamConstants {
 	}
 
 	public static RefactoringStatus createNotYetFullyOTAwareMsg(String refactoringName) {
-		return RefactoringStatus.createInfoStatus(Messages.format("The ''{0}'' Refactoring is not yet fully OT-aware!", new Object[] { refactoringName }));
+		return RefactoringStatus.createInfoStatus(NLS.bind(OTRefactoringMessages.RefactoringUtil_notFullyOTAware_info, refactoringName ));
 	}
 
 	@SuppressWarnings("rawtypes")

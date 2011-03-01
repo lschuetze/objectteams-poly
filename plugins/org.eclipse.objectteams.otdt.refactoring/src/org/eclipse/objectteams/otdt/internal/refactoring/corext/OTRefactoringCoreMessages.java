@@ -20,9 +20,10 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.refactoring.corext;
 
-import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
+import org.eclipse.osgi.util.NLS;
 
 /**
  * This utility class is a part of the OT/J refactoring adaptation.
@@ -58,7 +59,7 @@ public class OTRefactoringCoreMessages
 	{
 		try
 		{
-			return MessageFormat.format(_resourceBundle.getString(key), new Object[] { arg });
+			return NLS.bind(_resourceBundle.getString(key), new Object[] { arg });
 		}
 		catch (MissingResourceException e)
 		{
@@ -70,7 +71,7 @@ public class OTRefactoringCoreMessages
 	{
 		try
 		{
-			return MessageFormat.format(_resourceBundle.getString(key), args);
+			return NLS.bind(_resourceBundle.getString(key), args);
 		}
 		catch (MissingResourceException e)
 		{

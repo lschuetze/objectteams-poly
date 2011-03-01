@@ -149,7 +149,7 @@ public team class CorextAdaptor
 		ASTNode getDestination() -> get ASTNode fDestination;
 		String getMethodName() -> String getMethodName();
 		
-		@SuppressWarnings("unchecked")
+		@SuppressWarnings({ "unchecked", "rawtypes" })
 		List<ParameterInfo> getParameterInfos() -> List getParameterInfos();
 	}
 	

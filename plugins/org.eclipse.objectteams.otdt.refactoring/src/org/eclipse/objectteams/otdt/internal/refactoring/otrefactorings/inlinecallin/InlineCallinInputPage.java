@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
+import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.OTRefactoringMessages;
 
 @SuppressWarnings("restriction")
 public class InlineCallinInputPage extends UserInputWizardPage {
@@ -62,7 +63,7 @@ public class InlineCallinInputPage extends UserInputWizardPage {
 		result.setLayout(layout);
 
 		Label label = new Label(result, SWT.NONE);
-		label.setText("&Inlined method name:");
+		label.setText(OTRefactoringMessages.InlineCallinInputPage_methodName_lable);
 
 		fNameField = createNameField(result);
 
@@ -71,7 +72,7 @@ public class InlineCallinInputPage extends UserInputWizardPage {
 		
 		fReferenceButton = new Button(result, SWT.CHECK);
 		fReferenceButton.setEnabled(false);
-		fReferenceButton.setText("&Delete role method");
+		fReferenceButton.setText(OTRefactoringMessages.InlineCallinInputPage_deleteMethod_button);
 		GridData data = new GridData(GridData.FILL_HORIZONTAL);
 		data.horizontalSpan = 2;
 		data.verticalIndent = 2;
@@ -158,7 +159,7 @@ public class InlineCallinInputPage extends UserInputWizardPage {
 
 	protected void createMemberTableLabel(final Composite parent) {
 		fLabel = new Label(parent, SWT.NONE);
-		fLabel.setText("&Select the bound base methods:");
+		fLabel.setText(OTRefactoringMessages.InlineCallinInputPage_baseMethod_label);
 		final GridData data = new GridData();
 		data.horizontalSpan = 2;
 		fLabel.setLayoutData(data);
@@ -196,10 +197,10 @@ public class InlineCallinInputPage extends UserInputWizardPage {
 		table.setLayout(tableLayout);
 
 		final TableColumn column0 = new TableColumn(table, SWT.NONE);
-		column0.setText("Base Method");
+		column0.setText(OTRefactoringMessages.InlineCallinInputPage_basemethod_columnLabel);
 
 		final TableColumn column1 = new TableColumn(table, SWT.NONE);
-		column1.setText("Callin Kind");
+		column1.setText(OTRefactoringMessages.InlineCallinInputPage_callinKind_columnLabel);
 
 		fTableViewer = new CheckboxTableViewer(table);
 		fTableViewer.setUseHashlookup(true);
@@ -223,9 +224,9 @@ public class InlineCallinInputPage extends UserInputWizardPage {
 
 	private static class BaseMethodInfoLabelProvider extends LabelProvider implements ITableLabelProvider {
 
-		private static final String BEFORE_LABEL = "Before";
-		private static final String AFTER_LABEL = "After";
-		private static final String REPLACE_LABEL = "Replace";
+		private static final String BEFORE_LABEL = OTRefactoringMessages.InlineCallinInputPage_kindBefore_label;
+		private static final String AFTER_LABEL = OTRefactoringMessages.InlineCallinInputPage_kindAfter_label;
+		private static final String REPLACE_LABEL = OTRefactoringMessages.InlineCallinInputPage_kindReplace_label;
 		
 		private static final int CALLIN_KIND_COLUMN = 1;
 		private static final int METHOD_COLUMN = 0;

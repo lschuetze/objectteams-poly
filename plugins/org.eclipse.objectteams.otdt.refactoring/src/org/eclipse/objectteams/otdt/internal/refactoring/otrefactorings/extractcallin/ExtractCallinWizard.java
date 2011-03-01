@@ -1,6 +1,7 @@
 package org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.extractcallin;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.OTRefactoringMessages;
 
 public class ExtractCallinWizard extends RefactoringWizard {
 
@@ -11,6 +12,6 @@ public class ExtractCallinWizard extends RefactoringWizard {
 
 	@Override
 	protected void addUserInputPages() {
-		addPage(new ExtractCallinInputPage("ExtractCallinInputPage"));
+		addPage(new ExtractCallinInputPage(OTRefactoringMessages.ExtractCallinWizard_extractCallinInput_pageName));
 	}
 }
