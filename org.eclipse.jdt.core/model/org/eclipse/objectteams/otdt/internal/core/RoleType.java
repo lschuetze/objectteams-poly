@@ -20,7 +20,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -48,6 +47,7 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * IRoleType implementation
@@ -163,7 +163,7 @@ public class RoleType extends OTType implements IRoleType
             {
             	// just be sure we get all kind of exceptions
             	Util.log(ex,
-            		MessageFormat.format("Resolving of base class ''{0}'' failed!", new Object[] {_baseClassName})); //$NON-NLS-1$
+            		NLS.bind("Resolving of base class ''{0}'' failed!", new Object[] {_baseClassName})); //$NON-NLS-1$
             }
 
             // when having syntax/compilation errors, we can't ensure to find our baseclass
@@ -173,7 +173,7 @@ public class RoleType extends OTType implements IRoleType
             			IStatus.WARNING, 
 						JavaCore.PLUGIN_ID, 
 						IStatus.OK, 
-            			MessageFormat.format("Base class for role {0} not found.",  //$NON-NLS-1$
+            			NLS.bind("Base class for role {0} not found.",  //$NON-NLS-1$
 							new Object[] { getTypeQualifiedName('.') }),
 						jex
             			);

@@ -24,7 +24,6 @@ import static org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants.STEP_OVE
 import static org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants.STEP_OVER_SOURCEPOSITION_END;
 import static org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants.STEP_OVER_SOURCEPOSITION_START;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -99,6 +98,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
+import org.eclipse.osgi.util.NLS;
 
 /**
  * After method mappings have been resolved on the signature level create the
@@ -1076,7 +1076,7 @@ public class CallinImplementor extends MethodMappingImplementor
 	 */
 	private Statement genResultNotProvidedCheck(char[] roleName, MethodBinding roleMethodBinding, TypeBinding baseTypeBinding, MethodSpec baseMethodSpec, AstGenerator gen) {
 
-		String errMsg = MessageFormat.format(
+		String errMsg = NLS.bind(
 				"(team: {0}, role: {1}, method {2})\n"+ //$NON-NLS-1$
 				"Base call to {3}.{4} is missing",  //$NON-NLS-1$
 				new Object[] {
