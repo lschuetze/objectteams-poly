@@ -20,7 +20,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.debug.adaptor.launching;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -43,6 +42,12 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
+import org.eclipse.objectteams.otdt.core.IOTType;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
+import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
+import org.eclipse.objectteams.otdt.ui.dialogs.ISearchFilter;
+import org.eclipse.objectteams.otdt.ui.dialogs.TeamSelectionDialog;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -54,11 +59,6 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.objectteams.otdt.core.IOTType;
-import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
-import org.eclipse.objectteams.otdt.ui.dialogs.ISearchFilter;
-import org.eclipse.objectteams.otdt.ui.dialogs.TeamSelectionDialog;
 
 /**
  * Configuration data for the "Team Activation" tab.
@@ -253,8 +253,7 @@ public class TeamConfig extends Composite
     	        MessageDialog.openError(
     	                getShell(), 
     	                OTDTUIPlugin.getResourceString("TeamConfig.error_adding_team_title"),  //$NON-NLS-1$
-    	                MessageFormat.format(
-    	                        OTDTUIPlugin.getResourceString("TeamConfig.error_adding_team_message"), new Object[] { chosenTeam.getFullyQualifiedName() })); //$NON-NLS-1$
+    	                NLS.bind(OTDTUIPlugin.getResourceString("TeamConfig.error_adding_team_message"), new Object[] { chosenTeam.getFullyQualifiedName() })); //$NON-NLS-1$
     	    }
     	}
     }
