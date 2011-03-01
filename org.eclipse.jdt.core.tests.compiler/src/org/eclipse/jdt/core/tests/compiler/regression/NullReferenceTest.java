@@ -13832,4 +13832,197 @@ public void testBug333089() {
 			"}"},
 		"");
 }
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=332838
+// Null info of assert statements should not affect flow info
+// when CompilerOptions.OPTION_IncludeNullInfoFromAsserts is disabled.
+public void testBug332838() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_5) {
+		Map compilerOptions = getCompilerOptions();
+		compilerOptions.put(CompilerOptions.OPTION_IncludeNullInfoFromAsserts, CompilerOptions.DISABLED);
+		this.runNegativeTest(
+			new String[] {
+				"Info.java",
+				"public class Info {\n" +
+				"	public void test(Info[] infos) {\n" +
+				"		for (final Info info : infos) {\n " +
+				"			if (info != null) {\n" +
+				"				assert info.checkSomething();\n" +
+				"		 		info.doSomething();\n" +	// no warning
+				"			}\n" +
+				"		 }\n" +
+				"		for (final Info info : infos) {\n " +
+				"			if (info == null) {\n" +
+				"				assert info.checkSomething();\n" +
+				"		 		info.doSomething();\n" +	// warn NPE, not pot. NPE
+				"			}\n" +
+				"		 }\n" +
+				"	}\n" +
+				"	void doSomething()  {}\n" +
+				"	boolean checkSomething() {return true;}\n" +
+				"}\n"},
+			"----------\n" + 
+			"1. ERROR in Info.java (at line 11)\n" + 
+			"	assert info.checkSomething();\n" + 
+			"	       ^^^^\n" + 
+			"Null pointer access: The variable info can only be null at this location\n" + 
+			"----------\n" + 
+			"2. ERROR in Info.java (at line 12)\n" + 
+			"	info.doSomething();\n" + 
+			"	^^^^\n" + 
+			"Null pointer access: The variable info can only be null at this location\n" + 
+			"----------\n",
+			null,
+			true,
+			compilerOptions);
+	}
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=336544
+public void testBug336544() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		Integer i1 = getInt();\n" + 
+			"		Integer i2 = i1 == null ? null : i1;\n" + 
+			"		if (i2 != null) {\n" + 
+			"			System.out.println(\"SUCCESS\");\n" + 
+			"			return;\n" + 
+			"		}\n" + 
+			"		System.out.println(\"FAILURE\");\n" + 
+			"	}\n" +
+			"	private static Integer getInt() {\n" + 
+			"		return new Integer(0);\n" + 
+			"	}\n" + 
+			"}"
+		},
+		"SUCCESS");
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=336544
+public void testBug336544_2() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		Integer i1 = null;\n" + 
+			"		Integer i2 = (i1 = getInt()) == null ? null : i1;\n" + 
+			"		if (i2 != null) {\n" + 
+			"			System.out.println(\"SUCCESS\");\n" + 
+			"			return;\n" + 
+			"		}\n" + 
+			"		System.out.println(\"FAILURE\");\n" + 
+			"	}\n" +
+			"	private static Integer getInt() {\n" + 
+			"		return new Integer(0);\n" + 
+			"	}\n" + 
+			"}"
+		},
+		"SUCCESS");
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=336544
+public void testBug336544_3() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		Integer i1 = null;\n" + 
+			"		Integer i2;\n" +
+			"		i2 = (i1 = getInt()) == null ? null : i1;\n" + 
+			"		if (i2 != null) {\n" + 
+			"			System.out.println(\"SUCCESS\");\n" + 
+			"			return;\n" + 
+			"		}\n" + 
+			"		System.out.println(\"FAILURE\");\n" + 
+			"	}\n" +
+			"	private static Integer getInt() {\n" + 
+			"		return new Integer(0);\n" + 
+			"	}\n" + 
+			"}"
+		},
+		"SUCCESS");
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=313870
+public void testBug313870() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" +
+			"		String s = \"\";\n" +
+			"		for (int i = 0; i < 2; i++) {\n" +
+            "			if (i != 0) { \n" +
+            "    			s = test();\n" +
+            "			}\n" +
+            "			if (s == null) {\n" +
+            "    			System.out.println(\"null\");\n" +
+            "			}\n" +
+            "		}\n" + 
+			"	}\n" + 
+			"	public static String test() {\n" +
+            "		return null;\n" +
+			"	}\n" + 
+			"}"
+		},
+		"null");
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=313870
+public void testBug313870b() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.BufferedReader;\n" +
+			"import java.io.IOException;\n" +
+			"public class X {\n" + 
+			"	public void main(BufferedReader bufReader) throws IOException {\n" +
+			"		String line = \"\";\n" +
+			"		boolean doRead = false;\n" +
+			"		while (true) {\n" +
+            "			if (doRead) { \n" +
+            "    		   line = bufReader.readLine();\n" +
+            "			}\n" +
+            "			if (line == null) {\n" +
+            "    			return;\n" +
+            "			}\n" +
+            "			doRead = true;\n" +
+            "		}\n" +
+			"	}\n" + 
+			"}"
+		},
+		"");
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=313870
+public void testBug313870c() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.File;\n" +
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" +
+			"		boolean sometimes = (System.currentTimeMillis() & 1L) != 0L;\n" +
+			"		File file = new File(\"myfile\");\n" +
+			"		for (int i = 0; i < 2; i++) {\n" +
+            "			if (sometimes) { \n" +
+            "    		 	file = getNewFile();\n" +
+            "			}\n" +
+            "			if (file == null) { \n" +
+            "    			System.out.println(\"\");\n" +
+            "			}\n" +
+            "		}\n" +
+			"	}\n" +
+			"	private static File getNewFile() {\n" +
+			"		return null;\n" +
+			"	}\n" + 
+			"}"
+		},
+		"");
+}
 }
