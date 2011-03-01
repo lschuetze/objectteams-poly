@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.pde.core.plugin.IPluginBase;
 import org.eclipse.pde.core.plugin.IPluginImport;
 import org.eclipse.pde.core.plugin.IPluginReference;
@@ -96,7 +97,10 @@ public class ToggleOTSupportAction implements IObjectActionDelegate {
 			}
 		}
 		catch (CoreException e) {
-			ErrorDialog.openError(shell, "Project Configuration Error", "Error Configuring Project " + project.getName() + ".", e.getStatus());
+			ErrorDialog.openError(shell, 
+								  OTPDEUIMessages.ToggleOTSupportAction_configurationError_title, 
+								  NLS.bind(OTPDEUIMessages.ToggleOTSupportAction_configurationError_message, project.getName()), 
+								  e.getStatus());
 			OTPDEUIPlugin.getDefault().getLog().log(OTPDEUIPlugin.createErrorStatus("Project configuration error", e)); //$NON-NLS-1$
 		}
 	}

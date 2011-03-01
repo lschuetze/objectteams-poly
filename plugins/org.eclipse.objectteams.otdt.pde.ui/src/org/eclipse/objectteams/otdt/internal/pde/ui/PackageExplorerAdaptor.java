@@ -252,7 +252,7 @@ public team class PackageExplorerAdaptor
 				return new StyledString(AspectBindingsRootNode.ASPECT_BINDINGS_NAME);
 			
 			if (element instanceof BasePluginNode)
-				return new StyledString("Base Plugin "+((BasePluginNode)element).basePlugin);
+				return new StyledString(OTPDEUIMessages.PackageExplorerAdaptor_basePlugin_name+' '+((BasePluginNode)element).basePlugin);
 			
 			if (element instanceof TeamNode)
 				return new StyledString(((TeamNode)element).teamName);

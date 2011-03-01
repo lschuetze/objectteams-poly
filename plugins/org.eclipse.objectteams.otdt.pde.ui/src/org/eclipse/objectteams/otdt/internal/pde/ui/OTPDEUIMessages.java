@@ -23,6 +23,9 @@ public class OTPDEUIMessages extends NLS
 	private static final String BUNDLE_NAME = OTPDEUIMessages.class.getName();
 
 
+	public static String AspectBindingsTreeNode_aspectBindings_name;
+
+
 	public static String NewOTPProjectWizard_title;
 	public static String NewOTPProjectWizard_MainPage_title;
 	
@@ -31,9 +34,17 @@ public class OTPDEUIMessages extends NLS
 	public static String OTNewPluginProjectWizard_CantAddOTSpecifics;
 	public static String OTNewPluginProjectWizard_ProjectCreationError;
 
+
+	public static String PackageExplorerAdaptor_basePlugin_name;
+
 	public static String Validation_MissingActivationPolicy_error;
 	public static String Resolution_AddBundleActivationPolicy_label;
 	
+	public static String ToggleOTSupportAction_configurationError_message;
+
+
+	public static String ToggleOTSupportAction_configurationError_title;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, OTPDEUIMessages.class);
 	}

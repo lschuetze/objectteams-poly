@@ -41,7 +41,7 @@ public abstract class AspectBindingsTreeNode {
 
 	class AspectBindingsRootNode extends AspectBindingsTreeNode
 	{
-		static final String ASPECT_BINDINGS_NAME = "OT/Equinox Aspect Bindings";
+		static final String ASPECT_BINDINGS_NAME = OTPDEUIMessages.AspectBindingsTreeNode_aspectBindings_name;
 		protected IPluginModelBase pluginModel;
 		public AspectBindingsRootNode(IJavaProject javaProject, IPluginModelBase pluginModel) {
 			this.javaProject = javaProject;
