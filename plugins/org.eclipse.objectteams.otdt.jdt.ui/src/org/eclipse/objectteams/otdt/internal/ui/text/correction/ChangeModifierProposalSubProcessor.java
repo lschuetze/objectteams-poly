@@ -47,7 +47,6 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorre
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.ui.ImageConstants;
 import org.eclipse.objectteams.otdt.ui.ImageManager;
 

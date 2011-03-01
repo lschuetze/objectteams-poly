@@ -82,6 +82,7 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.ui.ImageConstants;
 import org.eclipse.objectteams.otdt.ui.ImageManager;
+import org.eclipse.osgi.util.NLS;
 
 import base org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import base org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
@@ -360,9 +361,8 @@ public team class CompletionAdaptor
 				message = org.eclipse.objectteams.otdt.internal.ui.Messages.Completion_callout_to_field_label;
 				break;
 			}
-			nameBuffer.append(Messages.format(
-					message,
-					new String(createTypeDisplayName(proposal.getDeclarationSignature()))));
+			nameBuffer.append(NLS.bind(message,
+									   new String(createTypeDisplayName(proposal.getDeclarationSignature()))));
 			
 			return nameBuffer;
 		}
@@ -371,7 +371,7 @@ public team class CompletionAdaptor
 			StyledString nameBuffer= new StyledString();
 			nameBuffer.append(createJavadocSimpleProposalLabel(proposal));
 			nameBuffer.append(" - "); //$NON-NLS-1$
-			nameBuffer.append(Messages.format(
+			nameBuffer.append(NLS.bind(
 							  org.eclipse.objectteams.otdt.internal.ui.Messages.Completion_callout_to_field_label,
 							  new String(createTypeDisplayName(proposal.getDeclarationSignature()))));			
 			return nameBuffer;

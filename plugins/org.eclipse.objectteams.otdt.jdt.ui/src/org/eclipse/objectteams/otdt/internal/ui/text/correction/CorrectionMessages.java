@@ -70,6 +70,10 @@ public class CorrectionMessages extends NLS {
 
 	public static String OTQuickfix_add_missing_role_tag;
 	
+	public static String QuickAssistProcessor_addMethodBindingSignatures_label;
+	public static String QuickAssistProcessor_addSignature_editName;
+	public static String QuickAssistProcessor_removeMethodBindingSignatures_label;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CorrectionMessages.class);
 	}

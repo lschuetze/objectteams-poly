@@ -61,7 +61,6 @@ import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IProposableFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
-import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
@@ -82,6 +81,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.ui.text.correction.MappingProposalSubProcessor;
 import org.eclipse.objectteams.otdt.internal.ui.text.correction.TypeProposalSubProcessor;
 import org.eclipse.objectteams.otdt.internal.ui.util.Images;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.graphics.Image;
 
 import base org.eclipse.jdt.internal.corext.fix.Java50Fix;
@@ -183,9 +183,9 @@ public team class OTQuickFixes  {
 				// other cases are already handled by the original method.
 				return base.addSuppressWarningsProposal(cu, node, warningToken, relevance, proposals);
 			}
-			String label= Messages.format(
-								CorrectionMessages.SuppressWarningsSubProcessor_suppress_warnings_label, 
-								new String[] { warningToken, name });
+			String label= NLS.bind(CorrectionMessages.SuppressWarningsSubProcessor_suppress_warnings_label, 
+								   warningToken, 
+								   name);
 			
 			// instantiate a role wrapping an invisible class 
 			// and immediately lower the object using a public base type:

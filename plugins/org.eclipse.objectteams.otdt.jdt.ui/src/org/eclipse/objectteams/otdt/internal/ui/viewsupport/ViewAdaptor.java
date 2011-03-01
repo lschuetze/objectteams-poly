@@ -17,7 +17,6 @@
  *******************************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.viewsupport;
 
-import java.text.MessageFormat;
 import java.util.StringTokenizer;
 
 import org.eclipse.jdt.core.Flags;
@@ -52,6 +51,7 @@ import org.eclipse.objectteams.otdt.internal.core.OTJavaElement;
 import org.eclipse.objectteams.otdt.internal.core.OTType;
 import org.eclipse.objectteams.otdt.internal.ui.Messages;
 import org.eclipse.objectteams.otdt.ui.ImageManager;
+import org.eclipse.osgi.util.NLS;
 
 
 
@@ -391,7 +391,7 @@ public team class ViewAdaptor extends JFaceDecapsulator
 				});
 				// append explanation:
 				offset = buffer.length();
-				String qualifier = MessageFormat.format(Messages.ViewAdaptor_guard_predicate_postfix,
+				String qualifier = NLS.bind(Messages.ViewAdaptor_guard_predicate_postfix,
 					    			new Object[]{guardedElement});
 				buffer.append(qualifier);
 				buffer.setStyle(offset, qualifier.length(), StyledString.QUALIFIER_STYLER);

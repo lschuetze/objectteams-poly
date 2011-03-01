@@ -140,7 +140,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				}
 			}
 			
-			String label= "Remove signatures from method binding";
+			String label= CorrectionMessages.QuickAssistProcessor_removeMethodBindingSignatures_label;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image);
 			resultingCollections.add(proposal);
@@ -210,13 +210,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			final AST ast= mapping.getAST();
 			final ASTRewrite rewrite= ASTRewrite.create(ast);
 			
-			String label= "Add signatures to method binding";
+			String label= CorrectionMessages.QuickAssistProcessor_addMethodBindingSignatures_label;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
 			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image) {
 				@Override
 				protected ASTRewrite getRewrite() throws CoreException 
 				{
-					TextEditGroup editGroup = new TextEditGroup("Add Signatures");
+					TextEditGroup editGroup = new TextEditGroup(CorrectionMessages.QuickAssistProcessor_addSignature_editName);
 					ImportRewrite imports = createImportRewrite((CompilationUnit) ASTNodes.getParent(mapping, ASTNode.COMPILATION_UNIT));
 					// role method:
 					IMethodBinding roleMethod = mapping.resolveBinding().getRoleMethod();
