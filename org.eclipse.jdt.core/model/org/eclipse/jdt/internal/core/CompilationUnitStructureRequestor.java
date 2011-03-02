@@ -58,6 +58,7 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.internal.core.MappingElementInfo;
 import org.eclipse.objectteams.otdt.internal.core.MethodMapping;
 import org.eclipse.objectteams.otdt.internal.core.SourceMethodMappingInfo;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 import org.eclipse.objectteams.otdt.internal.core.util.FieldData;
 import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 
@@ -460,7 +461,13 @@ private SourceMethodElementInfo createMethodInfo(MethodInfo methodInfo, SourceMe
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=334783
 	// Process the parameter annotations from the arguments
 	if (methodInfo.node != null && methodInfo.node.arguments != null) {
-		info.arguments = acceptMethodParameters(methodInfo.node.arguments, handle, methodInfo);
+//{ObjectTeams: don't expose enhancement args:
+/* orig:
+		info.arguments = acceptMethodParameters(methodInfo.node.arguments, handle, methodInfo); 
+  :giro */
+		Argument[] sourceArguments = MethodSignatureEnhancer.getSourceArguments(methodInfo.node);
+		info.arguments = acceptMethodParameters(sourceArguments, handle, methodInfo);
+// SH}
 	}
 	return info;
 }
