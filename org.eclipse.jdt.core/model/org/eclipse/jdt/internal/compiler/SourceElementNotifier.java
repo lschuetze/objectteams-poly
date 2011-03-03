@@ -452,6 +452,7 @@ private char[] returnTypeName(MethodSpec spec) {
 				ISourceElementRequestor.MethodSpecInfo roleInfo= new ISourceElementRequestor.MethodSpecInfo();
 				boolean isDeclaration = false;
 				if (callout.roleMethodSpec != null) {
+					roleInfo.node = callout.roleMethodSpec;
 					roleInfo.parameterTypes= argumentTypes(callout.roleMethodSpec);
 					roleInfo.parameterNames= argumentNames(callout.roleMethodSpec);
 					roleInfo.selector= callout.roleMethodSpec.selector;
@@ -499,6 +500,7 @@ private char[] returnTypeName(MethodSpec spec) {
 
     				// base method spec:
     				ISourceElementRequestor.MethodSpecInfo baseInfo= new ISourceElementRequestor.MethodSpecInfo();
+    				baseInfo.node = callout.baseMethodSpec;
     				baseInfo.selector= baseSelector;
     				baseInfo.returnType= baseReturnTypeName;
     				baseInfo.parameterTypes= argumentTypes(callout.baseMethodSpec);
@@ -520,6 +522,7 @@ private char[] returnTypeName(MethodSpec spec) {
 				info.hasSignature= callinDecl.hasSignature;
 
 				ISourceElementRequestor.MethodSpecInfo roleInfo= new ISourceElementRequestor.MethodSpecInfo();
+				roleInfo.node = callinDecl.roleMethodSpec;
 				roleInfo.selector= callinDecl.roleMethodSpec.selector;
 				roleInfo.returnType= returnTypeName(callinDecl.roleMethodSpec);
 				roleInfo.parameterTypes= argumentTypes(callinDecl.roleMethodSpec);
@@ -531,8 +534,9 @@ private char[] returnTypeName(MethodSpec spec) {
 				ISourceElementRequestor.MethodSpecInfo[] baseInfos= new ISourceElementRequestor.MethodSpecInfo[baseSpecsLength];
 				for (int idx=0; idx < baseSpecsLength; idx++)
 				{
+					MethodSpec spec = callinDecl.baseMethodSpecs[idx];
 					baseInfos[idx]= new ISourceElementRequestor.MethodSpecInfo();
-				    MethodSpec spec = callinDecl.baseMethodSpecs[idx];
+				    baseInfos[idx].node = spec;
 					baseInfos[idx].selector= spec.selector;
 					if (callinDecl.hasSignature) {
 						int argListLength = spec.arguments == null ? 0: spec.arguments.length;

@@ -251,7 +251,8 @@ public interface ISourceElementRequestor {
 	void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd);
 	public void enterCalloutMapping(CalloutInfo info);
 	public void enterCalloutToFieldMapping(CalloutToFieldInfo info);
-	public void enterCallinMapping(CallinInfo info);	public void exitCalloutMapping(int sourceEnd, int declarationSourceEnd);
+	public void enterCallinMapping(CallinInfo info);
+	public void exitCalloutMapping(int sourceEnd, int declarationSourceEnd);
 	public void exitCalloutToFieldMapping(int sourceEnd, int declarationSourceEnd);
 	public void exitCallinMapping(int sourceEnd, int declarationSourceEnd);
 //ak, jwl, gbr}
