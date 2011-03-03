@@ -75,27 +75,31 @@ public team class RenameTypeAdaptor {
 		private JavaModelException fCachedException;
 		
 		// ======= callouts =======
-		LinkedHashMap getFPreloadedElementToName() -> get LinkedHashMap fPreloadedElementToName;
-		void setFPreloadedElementToName(LinkedHashMap preloadedElementToName) -> set LinkedHashMap fPreloadedElementToName;
-		IType getFType() -> get IType fType;
-		void setFType(IType type) -> set IType fType;
-		String getNewElementLabel() -> String getNewElementLabel();
-		TextChangeManager getFChangeManager() -> get TextChangeManager fChangeManager;
-		SearchResultGroup[]  getFReferences() -> get SearchResultGroup[]  fReferences;
-		void setFReferences(SearchResultGroup[] fReferences) -> set SearchResultGroup[]  fReferences;
-		String getNewElementName() -> String getNewElementName();	
-		boolean getUpdateSimilarDeclarations() -> boolean getUpdateSimilarDeclarations();
-		int getFRenamingStrategy() -> get int fRenamingStrategy;
-		int getFCachedRenamingStrategy() -> get int fCachedRenamingStrategy;
-		boolean getFCachedRenameSimilarElements() -> get boolean fCachedRenameSimilarElements;
-		RefactoringStatus getFCachedRefactoringStatus() -> get RefactoringStatus fCachedRefactoringStatus;
-		String getFCachedNewName() -> get String fCachedNewName;
-		void setFPreloadedElementToNameDefault(LinkedHashMap fPreloadedElementToNameDefault) -> set LinkedHashMap fPreloadedElementToNameDefault;
-		LinkedHashMap getFPreloadedElementToNameDefault() -> get LinkedHashMap fPreloadedElementToNameDefault;
-		void setFPreloadedElementToSelection(Map fPreloadedElementToSelection) -> set Map fPreloadedElementToSelection;
-		Map getFPreloadedElementToSelection() -> get Map fPreloadedElementToSelection;
-		void setFFinalSimilarElementToName(Map fFinalSimilarElementToName) -> set Map fFinalSimilarElementToName;
-		Map getFFinalSimilarElementToName() -> get Map fFinalSimilarElementToName;
+		LinkedHashMap<IJavaElement,String>  getFPreloadedElementToName() 		-> get LinkedHashMap<IJavaElement,String>  fPreloadedElementToName;
+		void setFPreloadedElementToName(LinkedHashMap<IJavaElement,String>  preloadedElementToName)
+																				-> set LinkedHashMap<IJavaElement,String>  fPreloadedElementToName;
+		IType getFType() 														-> get IType fType;
+		void setFType(IType type) 												-> set IType fType;
+		String getNewElementLabel() 											-> String getNewElementLabel();
+		TextChangeManager getFChangeManager() 									-> get TextChangeManager fChangeManager;
+		SearchResultGroup[]  getFReferences() 									-> get SearchResultGroup[]  fReferences;
+		void setFReferences(SearchResultGroup[] fReferences) 					-> set SearchResultGroup[]  fReferences;
+		String getNewElementName() 												-> String getNewElementName();
+		boolean getUpdateSimilarDeclarations() 									-> boolean getUpdateSimilarDeclarations();
+		int getFRenamingStrategy() 												-> get int fRenamingStrategy;
+		int getFCachedRenamingStrategy() 										-> get int fCachedRenamingStrategy;
+		boolean getFCachedRenameSimilarElements() 								-> get boolean fCachedRenameSimilarElements;
+		RefactoringStatus getFCachedRefactoringStatus() 						-> get RefactoringStatus fCachedRefactoringStatus;
+		String getFCachedNewName() 												-> get String fCachedNewName;
+		void setFPreloadedElementToNameDefault(LinkedHashMap<IJavaElement,String> fPreloadedElementToNameDefault)
+																				-> set LinkedHashMap<IJavaElement,String> fPreloadedElementToNameDefault;
+		LinkedHashMap getFPreloadedElementToNameDefault() 						-> get LinkedHashMap fPreloadedElementToNameDefault;
+		void setFPreloadedElementToSelection(Map<IJavaElement,Boolean> fPreloadedElementToSelection)
+																				-> set Map<IJavaElement,Boolean> fPreloadedElementToSelection;
+		Map getFPreloadedElementToSelection() 									-> get Map fPreloadedElementToSelection;
+		void setFFinalSimilarElementToName(Map<IJavaElement,String> fFinalSimilarElementToName)
+																				-> set Map<IJavaElement,String> fFinalSimilarElementToName;
+		Map getFFinalSimilarElementToName() 									-> get Map fFinalSimilarElementToName;
 		
 		
 		callin RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException{
@@ -679,7 +683,7 @@ public team class RenameTypeAdaptor {
 				ArrayList<IType> roles = new ArrayList<IType>();
 				roles.addAll(Arrays.asList(TypeHelper.getAllRoleTypes(enclosingTeam)));
 				for (Iterator<IType> iterator = roles.iterator(); iterator.hasNext();) {
-					IType roleType = (IType) iterator.next();
+					IType roleType = iterator.next();
 					result.addAll(Arrays.asList(getAllRoles(roleType)));
 				}
 				result.addAll(roles);

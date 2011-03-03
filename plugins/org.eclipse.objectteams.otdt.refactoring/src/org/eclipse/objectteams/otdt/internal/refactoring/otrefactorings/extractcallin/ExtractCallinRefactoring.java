@@ -312,7 +312,6 @@ public class ExtractCallinRefactoring extends Refactoring {
 		return OTRefactoringMessages.ExtractCallin_extractCallin_name;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void extractCallin() throws CoreException {
 		fBaseRewrite = ASTRewrite.create(fBaseAST);
 		fRoleRewrite = ASTRewrite.create(fRoleAST);
@@ -399,7 +398,6 @@ public class ExtractCallinRefactoring extends Refactoring {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private MethodDeclaration extractCallinMethod() throws JavaModelException {
 		// copy the extracted callin to the role
 		MethodDeclaration extractedCallinMethodDeclaration = RefactoringUtil.methodToDeclaration(fExtractedBaseMethod, fRootBase);
@@ -455,7 +453,6 @@ public class ExtractCallinRefactoring extends Refactoring {
 		fRoleRewrite.getListRewrite(declaration, descriptor).insertLast(callinMapping, null);
 	}
 
-	@SuppressWarnings("unchecked")
 	private CallinMappingDeclaration createMethodMapping() throws JavaModelException {
 		CallinMappingDeclaration mapping = fRoleAST.newCallinMappingDeclaration();
 
@@ -529,7 +526,6 @@ public class ExtractCallinRefactoring extends Refactoring {
 		return fRoleAST.newMethodBindingOperator(keyword, MethodBindingOperator.KIND_CALLIN);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void addCallinModifier(ASTRewrite astRewrite, MethodDeclaration methodDeclaration) {
 		Modifier callinModifier = fRoleAST.newModifier(ModifierKeyword.CALLIN_KEYWORD);
 
@@ -567,7 +563,6 @@ public class ExtractCallinRefactoring extends Refactoring {
 	 * @param methodDeclaration
 	 *            the method declaration to be changed
 	 */
-	@SuppressWarnings("unchecked")
 	private void changeToPrivateVisibility(ASTRewrite astRewrite, MethodDeclaration methodDeclaration) {
 		Modifier privateVisibility = methodDeclaration.getAST().newModifier(ModifierKeyword.PRIVATE_KEYWORD);
 		
@@ -595,7 +590,6 @@ public class ExtractCallinRefactoring extends Refactoring {
 		astRewrite.getListRewrite(methodDeclaration, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(privateVisibility, null);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void copyInvocationParameters(BaseCallMessageSend baseCall, IMethod method) throws JavaModelException {
 		String[] names = method.getParameterNames();
 		for (String element : names)
@@ -615,7 +609,6 @@ public class ExtractCallinRefactoring extends Refactoring {
 	 *            the offset to begin to copy
 	 * @throws JavaModelException
 	 */
-	@SuppressWarnings("unchecked")
 	private void appendInvocationParameters(BaseCallMessageSend baseCall, IMethod method, int offset) throws JavaModelException {
 		String[] names = method.getParameterNames();
 
@@ -704,7 +697,6 @@ public class ExtractCallinRefactoring extends Refactoring {
 		return false;
 	}
 
-	@SuppressWarnings("unchecked")
 	public boolean isExtractBeforeAvailable() {
 		List<Statement> statements = fBaseMethodDeclaration.getBody().statements();
 		if (statements.isEmpty()) {
@@ -726,7 +718,6 @@ public class ExtractCallinRefactoring extends Refactoring {
 		return false;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public boolean isExtractAfterAvailable() {
 		List<Statement> statements = fBaseMethodDeclaration.getBody().statements();
 		if (statements.isEmpty()) {

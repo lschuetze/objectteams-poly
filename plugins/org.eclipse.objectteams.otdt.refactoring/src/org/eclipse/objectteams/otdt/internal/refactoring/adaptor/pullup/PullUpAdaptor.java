@@ -56,19 +56,20 @@ public team class PullUpAdaptor {
 
 	public class PullUpRefactoringProcessorRole playedBy PullUpRefactoringProcessor {
 		
-		@SuppressWarnings("rawtypes")
-		void setFCachedSkippedSuperTypes(Set fCachedSkippedSuperTypes) -> set Set fCachedSkippedSuperTypes;
-		@SuppressWarnings("rawtypes")
-		Set getFCachedSkippedSuperTypes() -> get Set fCachedSkippedSuperTypes;
-		IMember[] getMembersToDelete(IProgressMonitor monitor) -> IMember[] getMembersToDelete(IProgressMonitor monitor);
-		IMethod[] getFDeletedMethods() -> get IMethod[] fDeletedMethods;
-		IMember[] getFMembersToMove() -> get IMember[] fMembersToMove;
+		// callouts (fields):
+		void setFCachedSkippedSuperTypes(Set<IType> fCachedSkippedSuperTypes) 
+																-> set Set<IType> fCachedSkippedSuperTypes;
+		Set<IType> getFCachedSkippedSuperTypes() 				-> get Set<IType> fCachedSkippedSuperTypes;
+		IMember[] getMembersToDelete(IProgressMonitor monitor) 	-> IMember[] getMembersToDelete(IProgressMonitor monitor);
+		IMethod[] getFDeletedMethods() 							-> get IMethod[] fDeletedMethods;
+		IMember[] getFMembersToMove() 							-> get IMember[] fMembersToMove;
 
-		// callouts
-		IType getDestinationType() -> IType getDestinationType();
-		IMember[] getMembersToMove() -> IMember[] getMembersToMove();
-		IType getDeclaringType() -> IType getDeclaringType();
-		ITypeHierarchy getDestinationTypeHierarchy(IProgressMonitor pm) -> ITypeHierarchy getDestinationTypeHierarchy(IProgressMonitor pm);
+		// callouts (methods):
+		IType getDestinationType() 								-> IType getDestinationType();
+		IMember[] getMembersToMove() 							-> IMember[] getMembersToMove();
+		IType getDeclaringType() 								-> IType getDeclaringType();
+		ITypeHierarchy getDestinationTypeHierarchy(IProgressMonitor pm)
+																-> ITypeHierarchy getDestinationTypeHierarchy(IProgressMonitor pm);
 		
 		private void checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, RefactoringStatus status) throws CoreException {
 			

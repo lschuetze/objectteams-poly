@@ -480,7 +480,6 @@ public class InlineCallinRefactoring extends Refactoring {
 		return change;
 	}
 
-	@SuppressWarnings("unchecked")
 	private void inlineCallin(IProgressMonitor pm) throws CoreException {
 		fBaseRewrite = ASTRewrite.create(fBaseAST);
 		fRoleRewrite = ASTRewrite.create(fRoleAST);
@@ -612,7 +611,6 @@ public class InlineCallinRefactoring extends Refactoring {
 	 * @return the method body
 	 * @throws JavaModelException
 	 */
-	@SuppressWarnings("unchecked")
 	private Block createMethodBody(CallinBaseMethodInfo baseMethodInfo) throws JavaModelException {
 		Block block = fBaseAST.newBlock();
 		List<Statement> statements = block.statements();
@@ -640,7 +638,6 @@ public class InlineCallinRefactoring extends Refactoring {
 	 *            the rewrite that notes the changes
 	 * @throws JavaModelException
 	 */
-	@SuppressWarnings("unchecked")
 	private void adjustMethodMappings() throws JavaModelException {
 	
 		// create a map that gathers multiple methods for the same callin mapping
@@ -711,7 +708,6 @@ public class InlineCallinRefactoring extends Refactoring {
 	}
 
 
-	@SuppressWarnings("unchecked")
 	private boolean hasResultParameterMapping(ICallinMapping callinMapping) throws JavaModelException {
 		if (!hasParameterMapping(callinMapping)) {
 			return false;
@@ -763,7 +759,6 @@ public class InlineCallinRefactoring extends Refactoring {
 		return method.getReturnType().equals(Character.toString(Signature.C_VOID));
 	}
 
-	@SuppressWarnings("unchecked")
 	private void copyRoleParameterMappingsToInvocation(MethodInvocation invocation, CallinMappingDeclaration callinMappingDecl,
 			CallinBaseMethodInfo baseMethodInfo)
 			throws JavaModelException {	
@@ -808,7 +803,6 @@ public class InlineCallinRefactoring extends Refactoring {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void copyBaseParameterMappingsToInvocation(MethodInvocation invocation, CallinMappingDeclaration callinMappingDecl,
 			CallinBaseMethodInfo baseMethodInfo) throws JavaModelException {
 		MethodSpec roleMethodSpec = (MethodSpec) callinMappingDecl.getRoleMappingElement();
@@ -900,7 +894,6 @@ public class InlineCallinRefactoring extends Refactoring {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private Set<String> findTunneledParameters(CallinBaseMethodInfo baseMethodInfo)
 			throws JavaModelException {
 		// try to reuse cached result
@@ -957,7 +950,6 @@ public class InlineCallinRefactoring extends Refactoring {
 		copyInvocationParameters(invocation, parameterNames, parameterNames.length);		
 	}
 	// this variant allows to cut off unneeded parameters (only for before/after callins):
-	@SuppressWarnings("unchecked")
 	private void copyInvocationParameters(MethodInvocation invocation, String[] names, int n) throws JavaModelException {
 		for (int i=0; i<n; i++)
 			invocation.arguments().add(fBaseAST.newSimpleName(names[i]));
@@ -1034,7 +1026,6 @@ public class InlineCallinRefactoring extends Refactoring {
 	 * @param methodDeclaration
 	 *            the method declaration to be changed
 	 */
-	@SuppressWarnings("unchecked")
 	private void changeToPrivateVisibility(ASTRewrite astRewrite, MethodDeclaration methodDeclaration) {
 		Modifier privateVisibility = methodDeclaration.getAST().newModifier(ModifierKeyword.PRIVATE_KEYWORD);
 		
@@ -1075,7 +1066,6 @@ public class InlineCallinRefactoring extends Refactoring {
 	 *            the method declaration node of the role method
 	 * @throws JavaModelException
 	 */
-	@SuppressWarnings("unchecked")
 	private void handleCallinMethod(ASTRewrite astRewrite, CallinBaseMethodInfo baseMethodInfo, MethodDeclaration methodDeclaration)
 			throws JavaModelException {
 		List<Statement> statements = methodDeclaration.getBody().statements();
@@ -1145,7 +1135,6 @@ public class InlineCallinRefactoring extends Refactoring {
 	 *            the method declaration to remove the callin modifier from
 	 * @return true if a callin modifier was removed - otherwise false
 	 */
-	@SuppressWarnings("unchecked")
 	private boolean removeCallinFlag(MethodDeclaration methodDeclaration) {
 		List<IExtendedModifier> modifiers = methodDeclaration.modifiers();
 	
@@ -1327,7 +1316,6 @@ public class InlineCallinRefactoring extends Refactoring {
 	 *            the offset to start
 	 * @throws JavaModelException
 	 */
-	@SuppressWarnings("unchecked")
 	private void appendParameterDeclarations(MethodDeclaration roleMethodDeclaration, IMethod baseMethod, int offset) throws JavaModelException {
 		MethodDeclaration baseMethodDecl = RefactoringUtil.methodToDeclaration(baseMethod, fRootBase);
 		List<SingleVariableDeclaration> baseParamDeclarations = baseMethodDecl.parameters();
@@ -1344,7 +1332,6 @@ public class InlineCallinRefactoring extends Refactoring {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void appendTunneledParameterDeclarations(CallinBaseMethodInfo baseMethodInfo, MethodDeclaration copyOfRoleMethodDeclaration)
 			throws JavaModelException {
 		// append tunneled parameters to roleMethodSignature
@@ -1377,7 +1364,6 @@ public class InlineCallinRefactoring extends Refactoring {
 	 *            the offset to begin to copy
 	 * @throws JavaModelException
 	 */
-	@SuppressWarnings("unchecked")
 	private void appendInvocationParameters(MethodInvocation invocation, IMethod method, int offset) throws JavaModelException {
 		String[] names = method.getParameterNames();
 		
@@ -1461,7 +1447,6 @@ public class InlineCallinRefactoring extends Refactoring {
 		return localVars;
 	}
 
-	@SuppressWarnings("unchecked")
 	private MethodSpec findBaseMethodSpec(CallinMappingDeclaration callinMappingDecl, IMethod baseMethod) {
 		MethodSpec baseMethodSpec = null;
 		List<MethodSpec> methodSpecs = callinMappingDecl.getBaseMappingElements();

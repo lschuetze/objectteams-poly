@@ -149,8 +149,7 @@ public team class CorextAdaptor
 		ASTNode getDestination() -> get ASTNode fDestination;
 		String getMethodName() -> String getMethodName();
 		
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		List<ParameterInfo> getParameterInfos() -> List getParameterInfos();
+		List<ParameterInfo> getParameterInfos() -> List<ParameterInfo> getParameterInfos();
 	}
 	
 	protected class RefactoringScopeFactory playedBy RefactoringScopeFactory {
@@ -184,7 +183,7 @@ public team class CorextAdaptor
 		boolean isSelected(ASTNode node) -> boolean isSelected(ASTNode node);
 				
 		boolean visit(BaseCallMessageSend node) <- replace boolean visit(BaseCallMessageSend node);
-	    @SuppressWarnings({ "basecall", "unchecked" }) // unchecked: List getBaseMappingElements()
+	    @SuppressWarnings("basecall")
 		callin boolean visit(BaseCallMessageSend node) 
 	    {
 			if (!isSelected(node))

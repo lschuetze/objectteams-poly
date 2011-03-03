@@ -533,7 +533,6 @@ public class RefactoringUtil implements ITeamConstants {
 		return readableActualMethodParamTypes;
 	}
 
-	@SuppressWarnings("unchecked")
 	// List getBaseMappingElements()
 	public static RefactoringStatus checkForAmbiguousBaseMethodSpecs(ArrayList<IRoleType> boundRoleTypes, String newMethodName, String oldMethodName, IAmbuguityMessageCreator msgCreator)
 			throws JavaModelException {

@@ -255,8 +255,7 @@ public team class RenameAdaptor
 	  
 		IMethod getOriginalMethod()  	  -> IMethod getOriginalMethod();
 		String  getNewElementName()       -> String  getNewElementName();
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Set<IMethod> getMethodsToRename() -> Set     getMethodsToRename();
+		Set<IMethod> getMethodsToRename() -> Set<IMethod> getMethodsToRename();
 		IMethod getMethod() 		      -> IMethod getMethod();
 	}
 	
