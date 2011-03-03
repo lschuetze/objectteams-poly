@@ -105,7 +105,7 @@ public class ExtractMethodTestSetup extends TestSetup
 
 	protected void tearDown() throws Exception
 	{
-		RefactoringTest.performDummySearch(_javaProject);
+		JavaProjectHelper.performDummySearch(_javaProject);
 		JavaProjectHelper.delete(_javaProject);
 	}
 	
