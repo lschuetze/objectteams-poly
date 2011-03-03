@@ -184,7 +184,7 @@ public class AstGenerator extends AstFactory {
 		return result;
 	}
 
-	public Expression baseTypeReference(ReferenceBinding type) {
+	public TypeReference baseTypeReference(ReferenceBinding type) {
 		TypeReference result = typeReference(type);
 		result.setBaseclassDecapsulation(DecapsulationState.REPORTED);
 		return result;
@@ -798,7 +798,7 @@ public class AstGenerator extends AstFactory {
 		return call;
 	}
 
-	public CastExpression castExpression(Expression expression, Expression type, int kind)
+	public CastExpression castExpression(Expression expression, TypeReference type, int kind)
 	{
         CastExpression cast = new CastExpression(
                 expression,
@@ -823,13 +823,13 @@ public class AstGenerator extends AstFactory {
 	{
 	    if (expr instanceof ThisReference)
 	        return null; // never useful to cast 'this'!
-	    Expression typeExpr = typeReference(type);
-	    typeExpr.sourceStart = this.sourceStart;
-	    typeExpr.sourceEnd   = this.sourceEnd;
-	    typeExpr.resolvedType = type;
+	    TypeReference typeRef = typeReference(type);
+	    typeRef.sourceStart = this.sourceStart;
+	    typeRef.sourceEnd   = this.sourceEnd;
+	    typeRef.resolvedType = type;
 
-	    CastExpression cast = new CastExpression(expr, typeExpr, kind);
-		typeExpr.resolvedType =
+	    CastExpression cast = new CastExpression(expr, typeRef, kind);
+		typeRef.resolvedType =
 		    cast.resolvedType = type;
 	    cast.constant = Constant.NotAConstant;
 	    cast.tagAsNeedCheckCast();

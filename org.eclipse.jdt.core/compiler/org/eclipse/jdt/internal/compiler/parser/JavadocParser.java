@@ -569,6 +569,10 @@ public class JavadocParser extends AbstractCommentParser {
 							if (this.reportProblems) {
 								recordInheritedPosition((((long) this.tagSourceStart) << 32) + this.tagSourceEnd);
 							}
+							if (this.inlineTagStarted) {
+								// parse a 'valid' inheritDoc tag
+								parseInheritDocTag();
+							}
 							break;
 						default:
 							valid = false;
@@ -707,6 +711,10 @@ public class JavadocParser extends AbstractCommentParser {
 			}
 		}
 		return valid;
+	}
+
+	protected void parseInheritDocTag() {
+		// do nothing
 	}
 
 	/*

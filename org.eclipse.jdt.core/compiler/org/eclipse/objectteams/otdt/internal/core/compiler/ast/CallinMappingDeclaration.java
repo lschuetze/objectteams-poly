@@ -733,15 +733,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 
 		// the reverse of a cast expression is implicit widening, thus allow these
 		if (currentExpression instanceof CastExpression) {
-			CastExpression castExpression = (CastExpression)currentExpression;
-			if (castExpression.type instanceof SingleNameReference) {
-				// special case: SingleNameReference does not support base-import scope,
-				// replace with SingleTypeReference:
-				SingleNameReference type = (SingleNameReference)castExpression.type;
-				AstGenerator gen = new AstGenerator(type.sourceStart, type.sourceEnd);
-				castExpression.type = gen.baseTypeReference(type.token);
-			}
-			currentExpression = (castExpression).expression;
+			currentExpression = ((CastExpression)currentExpression).expression;
 		}
 
 		if (currentExpression instanceof SingleNameReference) {

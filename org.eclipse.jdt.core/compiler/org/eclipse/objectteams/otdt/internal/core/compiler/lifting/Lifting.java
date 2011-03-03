@@ -446,7 +446,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 			// here an (unnecessary) cast to j.l.Object prevents a warning re OTJLD 2.2(f):
 			roleExpression = gen.castExpression(
 								roleExpression, 
-								gen.qualifiedNameReference(TypeConstants.JAVA_LANG_OBJECT), 
+								gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 
 								CastExpression.RAW);
 		}
 		statements[1] =

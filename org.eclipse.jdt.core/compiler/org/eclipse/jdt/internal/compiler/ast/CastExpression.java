@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,7 +69,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 public class CastExpression extends Expression {
 
 	public Expression expression;
-	public Expression type;
+	public TypeReference type;
 	public TypeBinding expectedType; // when assignment conversion to a given expected type: String s = (String) t;
 
 //{ObjectTeams: the following flags are set depending on the kind parameter of the constructor
@@ -103,7 +103,7 @@ public class CastExpression extends Expression {
 	 * @param type
 	 * @param kind directs the kind of translation, see DO_WRAP, NEED_CLASS, RAW above.
 	 */
-	public CastExpression (Expression expression, Expression type, int kind)
+	public CastExpression (Expression expression, TypeReference type, int kind)
 	{
 		this(expression, type);
 		this.sourceStart = type.sourceStart;
@@ -133,7 +133,7 @@ public class CastExpression extends Expression {
 	}
 // SH}
 //expression.implicitConversion holds the cast for baseType casting
-public CastExpression(Expression expression, Expression type) {
+public CastExpression(Expression expression, TypeReference type) {
 	this.expression = expression;
 	this.type = type;
 	type.bits |= ASTNode.IgnoreRawTypeCheck; // no need to worry about raw type usage
@@ -576,112 +576,103 @@ public TypeBinding resolveType(BlockScope scope) {
 	this.constant = Constant.NotAConstant;
 	this.implicitConversion = TypeIds.T_undefined;
 
-	if ((this.type instanceof TypeReference) || (this.type instanceof NameReference)
-			&& ((this.type.bits & ASTNode.ParenthesizedMASK) >> ASTNode.ParenthesizedSHIFT) == 0) { // no extra parenthesis around type: ((A))exp
-
-		boolean exprContainCast = false;
+	boolean exprContainCast = false;
 
 //{ObjectTeams: after resolving allow for a few conversions
 /* orig:
-		TypeBinding castType = this.resolvedType = this.type.resolveType(scope);
+	TypeBinding castType = this.resolvedType = this.type.resolveType(scope);
   :giro */
-		this.resolvedType = this.type.resolveType(scope);
+	this.resolvedType = this.type.resolveType(scope);
 
-		// wrap role types, if client required this:
-		if (this.wrapRoleType) {
-			// only try to wrap valid roles except for marker interfaces:
-			if (   this.resolvedType != null
-			    && this.resolvedType.leafComponentType().isRole()
-			    && !TSuperHelper.isMarkerInterface(this.resolvedType))
+	// wrap role types, if client required this:
+	if (this.wrapRoleType) {
+		// only try to wrap valid roles except for marker interfaces:
+		if (   this.resolvedType != null
+		    && this.resolvedType.leafComponentType().isRole()
+		    && !TSuperHelper.isMarkerInterface(this.resolvedType))
+		{
+			this.type.resolvedType =
+				this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(scope, this.resolvedType, this);
+			// check success:
+			if (   this.resolvedType == null
+				|| !RoleTypeBinding.isRoleType(this.resolvedType.leafComponentType()))
 			{
-				this.type.resolvedType =
-					this.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(scope, this.resolvedType, this);
-				// check success:
-				if (   this.resolvedType == null
-					|| !RoleTypeBinding.isRoleType(this.resolvedType.leafComponentType()))
-				{
-					// Although it is a role, wrapping failed. Error is already reported (hopefully).
-					assert scope.referenceCompilationUnit().compilationResult().hasErrors();
-					return null;
-				}
+				// Although it is a role, wrapping failed. Error is already reported (hopefully).
+				assert scope.referenceCompilationUnit().compilationResult().hasErrors();
+				return null;
 			}
 		}
-		else if (   this.requireRoleClass
-				 && this.resolvedType != null)
-		{
-			// for role field access we need the class part:
-			ReferenceBinding refType = (ReferenceBinding)this.resolvedType.leafComponentType();
-			assert(refType.isRole());
-			TypeBinding classPart = refType.roleModel.getClassPartBinding();
-			assert(classPart != null);
-			if (this.resolvedType.isArrayType())
-				classPart = new ArrayBinding(classPart, this.resolvedType.dimensions(), scope.environment());
-			this.resolvedType = classPart;
-			this.type.resolvedType = classPart;
-		}
+	}
+	else if (   this.requireRoleClass
+			 && this.resolvedType != null)
+	{
+		// for role field access we need the class part:
+		ReferenceBinding refType = (ReferenceBinding)this.resolvedType.leafComponentType();
+		assert(refType.isRole());
+		TypeBinding classPart = refType.roleModel.getClassPartBinding();
+		assert(classPart != null);
+		if (this.resolvedType.isArrayType())
+			classPart = new ArrayBinding(classPart, this.resolvedType.dimensions(), scope.environment());
+		this.resolvedType = classPart;
+		this.type.resolvedType = classPart;
+	}
 /*orig*/TypeBinding castType = this.resolvedType;
 // SH}
-		//expression.setExpectedType(this.resolvedType); // needed in case of generic method invocation
-		if (this.expression instanceof CastExpression) {
-			this.expression.bits |= ASTNode.DisableUnnecessaryCastCheck;
-			exprContainCast = true;
-		}
-		TypeBinding expressionType = this.expression.resolveType(scope);
-//{ObjectTeams: de-wrap tthis-expressiontType if this statement was generated:
-		if (expressionType instanceof WeakenedTypeBinding)
-			expressionType = ((WeakenedTypeBinding)expressionType).weakenedType; // pessimistic
-		else if (shouldUnwrapExpressionType(expressionType))
-			expressionType = ((ReferenceBinding)expressionType).getRealType();
-		if (this.isGenerated) {
-			// use stronger anchor if statement was generated:
-			if (   RoleTypeBinding.isRoleWithoutExplicitAnchor(castType)
-				&& RoleTypeBinding.isRoleWithExplicitAnchor(expressionType)
-				&& ((ReferenceBinding)castType).getRealType() == ((ReferenceBinding)expressionType).getRealType())
-			{
-				this.resolvedType = castType = expressionType;
-			}
-		}
-// SH}
-		if (castType != null) {
-			if (expressionType != null) {
-				boolean isLegal = checkCastTypesCompatibility(scope, castType, expressionType, this.expression);
-				if (isLegal) {
-					this.expression.computeConversion(scope, castType, expressionType);
-					if ((this.bits & ASTNode.UnsafeCast) != 0) { // unsafe cast
-//{ObjectTeams: getAllRoles requires an unchecked cast (T[]), don't report:
-					  if (!scope.isGeneratedScope())
-// SH}
-						if (scope.compilerOptions().reportUnavoidableGenericTypeProblems || !this.expression.forcedToBeRaw(scope.referenceContext())) {
-							scope.problemReporter().unsafeCast(this, scope);
-						}
-					} else {
-						if (castType.isRawType() && scope.compilerOptions().getSeverity(CompilerOptions.RawTypeReference) != ProblemSeverities.Ignore){
-							scope.problemReporter().rawTypeReference(this.type, castType);
-						}
-						if ((this.bits & (ASTNode.UnnecessaryCast|ASTNode.DisableUnnecessaryCastCheck)) == ASTNode.UnnecessaryCast) { // unnecessary cast
-							if (!isIndirectlyUsed()) // used for generic type inference or boxing ?
-								scope.problemReporter().unnecessaryCast(this);
-						}
-					}
-				} else { // illegal cast
-					if ((castType.tagBits & TagBits.HasMissingType) == 0) { // no complaint if secondary error
-						scope.problemReporter().typeCastError(this, castType, expressionType);
-					}
-					this.bits |= ASTNode.DisableUnnecessaryCastCheck; // disable further secondary diagnosis
-				}
-			}
-			this.resolvedType = castType.capture(scope, this.sourceEnd);
-			if (exprContainCast) {
-				checkNeedForCastCast(scope, this);
-			}
-		}
-		return this.resolvedType;
-	} else { // expression as a cast
-		TypeBinding expressionType = this.expression.resolveType(scope);
-		if (expressionType == null) return null;
-		scope.problemReporter().invalidTypeReference(this.type);
-		return null;
+	//expression.setExpectedType(this.resolvedType); // needed in case of generic method invocation
+	if (this.expression instanceof CastExpression) {
+		this.expression.bits |= ASTNode.DisableUnnecessaryCastCheck;
+		exprContainCast = true;
 	}
+	TypeBinding expressionType = this.expression.resolveType(scope);
+//{ObjectTeams: de-wrap tthis-expressiontType if this statement was generated:
+	if (expressionType instanceof WeakenedTypeBinding)
+		expressionType = ((WeakenedTypeBinding)expressionType).weakenedType; // pessimistic
+	else if (shouldUnwrapExpressionType(expressionType))
+		expressionType = ((ReferenceBinding)expressionType).getRealType();
+	if (this.isGenerated) {
+		// use stronger anchor if statement was generated:
+		if (   RoleTypeBinding.isRoleWithoutExplicitAnchor(castType)
+			&& RoleTypeBinding.isRoleWithExplicitAnchor(expressionType)
+			&& ((ReferenceBinding)castType).getRealType() == ((ReferenceBinding)expressionType).getRealType())
+		{
+			this.resolvedType = castType = expressionType;
+		}
+	}
+// SH}
+	if (castType != null) {
+		if (expressionType != null) {
+			boolean isLegal = checkCastTypesCompatibility(scope, castType, expressionType, this.expression);
+			if (isLegal) {
+				this.expression.computeConversion(scope, castType, expressionType);
+				if ((this.bits & ASTNode.UnsafeCast) != 0) { // unsafe cast
+//{ObjectTeams: getAllRoles requires an unchecked cast (T[]), don't report:
+				  if (!scope.isGeneratedScope())
+// SH}
+					if (scope.compilerOptions().reportUnavoidableGenericTypeProblems || !this.expression.forcedToBeRaw(scope.referenceContext())) {
+						scope.problemReporter().unsafeCast(this, scope);
+					}
+				} else {
+					if (castType.isRawType() && scope.compilerOptions().getSeverity(CompilerOptions.RawTypeReference) != ProblemSeverities.Ignore){
+						scope.problemReporter().rawTypeReference(this.type, castType);
+					}
+					if ((this.bits & (ASTNode.UnnecessaryCast|ASTNode.DisableUnnecessaryCastCheck)) == ASTNode.UnnecessaryCast) { // unnecessary cast
+						if (!isIndirectlyUsed()) // used for generic type inference or boxing ?
+							scope.problemReporter().unnecessaryCast(this);
+					}
+				}
+			} else { // illegal cast
+				if ((castType.tagBits & TagBits.HasMissingType) == 0) { // no complaint if secondary error
+					scope.problemReporter().typeCastError(this, castType, expressionType);
+				}
+				this.bits |= ASTNode.DisableUnnecessaryCastCheck; // disable further secondary diagnosis
+			}
+		}
+		this.resolvedType = castType.capture(scope, this.sourceEnd);
+		if (exprContainCast) {
+			checkNeedForCastCast(scope, this);
+		}
+	}
+	return this.resolvedType;
 }
 //{ObjectTeams:	avoid comparing wrapped expression type with non-wrapped resolvedType when appropriate.
 private boolean shouldUnwrapExpressionType(TypeBinding expressionType) {

@@ -9,7 +9,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - Contribution for bug 239066
- *     Stephan Herrmann  - Contribution for bug 236385
+ *     Stephan Herrmann  - Contributions for 
+ *     						bug 236385 - [compiler] Warn for potential programming problem if an object is created but not used
+ *     						bug 338303 - Warning about Redundant assignment conflicts with definite assignment
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -4384,14 +4386,6 @@ public void invalidTypeForCollectionTarget14(Expression expression) {
 			expression.sourceStart,
 			expression.sourceEnd);
 }
-public void invalidTypeReference(Expression expression) {
-	this.handle(
-		IProblem.InvalidTypeExpression,
-		NoArgument,
-		NoArgument,
-		expression.sourceStart,
-		expression.sourceEnd);
-}
 public void invalidTypeToSynchronize(Expression expression, TypeBinding type) {
 	this.handle(
 		IProblem.InvalidTypeToSynchronized,
@@ -5574,6 +5568,8 @@ public void localVariableRedundantCheckOnNull(LocalVariableBinding local, ASTNod
 }
 
 public void localVariableRedundantNullAssignment(LocalVariableBinding local, ASTNode location) {
+	if ((location.bits & ASTNode.FirstAssignmentToLocal) != 0) // https://bugs.eclipse.org/338303 - Warning about Redundant assignment conflicts with definite assignment
+		return;
 	int severity = computeSeverity(IProblem.RedundantLocalVariableNullAssignment);
 	if (severity == ProblemSeverities.Ignore) return;
 	String[] arguments = new String[] {new String(local.name)  };

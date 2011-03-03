@@ -691,7 +691,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 		if (gen.sourceLevel >= ClassFileConstants.JDK1_5)
 			messageSendGet= gen.castExpression(
 								messageSendGet,
-								gen.singleNameReference(T),
+								gen.singleTypeReference(T),
 								CastExpression.RAW
 							);
 		return gen.ifStatement(
@@ -720,7 +720,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 					new EqualExpression(
 						gen.castExpression(
 							gen.singleNameReference(CLASS_ARG),
-							gen.qualifiedNameReference(TypeConstants.JAVA_LANG_OBJECT), CastExpression.RAW
+							gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), CastExpression.RAW
 						),
 						gen.castExpression(
 							gen.classLiteralAccess(gen.singleTypeReference(roleType)),
