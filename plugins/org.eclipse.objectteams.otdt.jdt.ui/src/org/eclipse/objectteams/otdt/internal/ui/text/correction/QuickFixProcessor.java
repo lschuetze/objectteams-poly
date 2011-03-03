@@ -50,6 +50,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -125,7 +126,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 	}
 
 	public IJavaCompletionProposal[] getCorrections(IInvocationContext context,
-													IProblemLocation[] locations)
+										   IProblemLocation[] locations)
 			throws CoreException 
 	{
 		if (locations == null || locations.length == 0) {
@@ -133,7 +134,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 		}
 
 		HashSet<Integer> handledProblems= new HashSet<Integer>(locations.length);
-		ArrayList<IJavaCompletionProposal> resultingCollections= new ArrayList<IJavaCompletionProposal>();
+		ArrayList<ICommandAccess> resultingCollections= new ArrayList<ICommandAccess>();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation curr= locations[i];
 			Integer id= new Integer(curr.getProblemId());
@@ -145,7 +146,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 
 	}
 	
-	private void process(IInvocationContext context, IProblemLocation problem, Collection<IJavaCompletionProposal> proposals) throws CoreException {
+	private void process(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) throws CoreException {
 		int id= problem.getProblemId();
 		if (id == 0) { // no proposals for none-problem locations
 			return;
@@ -163,7 +164,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 		} catch (ClassCastException cce) { /* just no success */ }
 		CallinMappingDeclaration callinMapping;
 		CalloutMappingDeclaration calloutMapping;
-		IJavaCompletionProposal javaProposal= null;
+		ICommandAccess javaProposal= null;
 		try {
 			switch (id) {
 // imports:		
@@ -237,7 +238,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				callinMapping = (CallinMappingDeclaration)getEnclosingMethodMapping(selectedNode);
 				if (callinMapping != null) {
 					IMethodBinding roleMethod = ((MethodSpec)callinMapping.getRoleMappingElement()).resolveBinding();
-					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
+					ICommandAccess proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, null, roleMethod, 
 																		 Modifier.OT_CALLIN, true);
 					if (proposal != null) proposals.add(proposal);
@@ -249,7 +250,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				callinMapping = (CallinMappingDeclaration)getEnclosingMethodMapping(selectedNode);
 				if (callinMapping != null) {
 					IMethodBinding roleMethod = ((MethodSpec)callinMapping.getRoleMappingElement()).resolveBinding();
-					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
+					ICommandAccess proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, null, roleMethod, 
 																		 Modifier.OT_CALLIN, false);
 					if (proposal != null) proposals.add(proposal);
@@ -259,7 +260,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.RegularOverridesCallin:
 				if (selectedNode instanceof MethodDeclaration) {
-					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
+					ICommandAccess proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, (MethodDeclaration)selectedNode, null, 
 																  		 Modifier.OT_CALLIN, true);
 					if (proposal != null) proposals.add(proposal);
@@ -267,7 +268,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.CallinOverridesRegular:
 				if (selectedNode instanceof MethodDeclaration) {
-					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
+					ICommandAccess proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, (MethodDeclaration)selectedNode, null, 
 																  		 Modifier.OT_CALLIN, false);
 					if (proposal != null) proposals.add(proposal);
@@ -277,7 +278,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				callinMapping = (CallinMappingDeclaration)getEnclosingMethodMapping(selectedNode);
 				if (callinMapping != null) {
 					MethodSpec roleMSpec = (MethodSpec)callinMapping.getRoleMappingElement();
-					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
+					ICommandAccess proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, null, roleMSpec.resolveBinding(), 
 																  		 Modifier.STATIC, true);
 					if (proposal != null) proposals.add(proposal);
@@ -287,7 +288,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				callinMapping = (CallinMappingDeclaration)getEnclosingMethodMapping(selectedNode);
 				if (callinMapping != null) {
 					MethodSpec roleMSpec = (MethodSpec)callinMapping.getRoleMappingElement();
-					IJavaCompletionProposal proposal = ChangeModifierProposalSubProcessor
+					ICommandAccess proposal = ChangeModifierProposalSubProcessor
 										.getChangeMethodModifierProposal(context, null, roleMSpec.resolveBinding(),
 																  	 	 Modifier.STATIC, false);
 					if (proposal != null) proposals.add(proposal);
@@ -302,7 +303,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UnknownPrecedence:
 				if (enclosingType != null) {
-					IJavaCompletionProposal proposal;
+					ICommandAccess proposal;
 					PrecedenceProposalSubProcessor processor = new PrecedenceProposalSubProcessor(cu, enclosingType);
 					proposal = processor.getAddBindingPrecedenceProposal((TypeDeclaration)enclosingType, problem.getProblemArguments());
 					if (proposal != null)

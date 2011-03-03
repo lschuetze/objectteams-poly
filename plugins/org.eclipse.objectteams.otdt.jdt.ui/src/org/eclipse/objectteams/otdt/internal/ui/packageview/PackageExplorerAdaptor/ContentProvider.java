@@ -245,10 +245,10 @@ protected class ContentProvider playedBy PackageExplorerContentProvider
                 .getAdapter(IWorkbenchAdapter.class);
 	}
 
-	@SuppressWarnings({ "decapsulation", "rawtypes"/*Collection*/ })
+	@SuppressWarnings("decapsulation")
 	void findTeamCU(Object root)
 	<- replace
-	void postRefresh(Object root, int relation, Object affectedElement, Collection runnables)
+	void postRefresh(Object root, int relation, Object affectedElement, Collection<Runnable> runnables)
 		when (_hideRolePackages);
 
 	callin void findTeamCU(Object element) {

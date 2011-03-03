@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
@@ -58,12 +59,12 @@ public team class CorrectionAdaptor {
 		/** This callin adjusts the compilation unit, when a new method should be inserted
 		 *  into the outer type: which for a role file is NOT within the current CU.
 		 */	
-		@SuppressWarnings({ "decapsulation", "rawtypes" })
-		void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection proposals)
-		<- replace void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection proposals);
+		@SuppressWarnings("decapsulation")
+		void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List<Expression> arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection<ICommandAccess> proposals)
+		<- replace void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List<Expression> arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection<ICommandAccess> proposals);
 		
-		@SuppressWarnings({ "basecall", "rawtypes", "unchecked" })
-		callin static void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection proposals) 
+		@SuppressWarnings("basecall")
+		callin static void addNewMethodProposals(ICompilationUnit cu, CompilationUnit astRoot, Expression sender, List<Expression> arguments, boolean isSuperInvocation, ASTNode invocationNode, String methodName, Collection<ICommandAccess> proposals) 
 				throws JavaModelException 
 		{
 			// OT_COPY_PASTE:
@@ -119,13 +120,12 @@ public team class CorrectionAdaptor {
 			}
 		}
 
-		@SuppressWarnings("rawtypes")
-		void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) 
-			<- after void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection proposals);
+		void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) 
+			<- after void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals);
 		
 		/* Copied from base method and adapted for tsuper ctor calls. */
 		@SuppressWarnings({"rawtypes","unchecked"})
-		static void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection proposals)
+		static void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals)
 				throws CoreException
 		{
 			ICompilationUnit cu= context.getCompilationUnit();
@@ -196,11 +196,11 @@ public team class CorrectionAdaptor {
 		}
 		
 		
-		@SuppressWarnings({ "rawtypes", "decapsulation" })
-		ITypeBinding[] getParameterTypes(List args) -> ITypeBinding[] getParameterTypes(List args);
+		@SuppressWarnings("decapsulation")
+		ITypeBinding[] getParameterTypes(List<Expression> args) -> ITypeBinding[] getParameterTypes(List<Expression> args);
 
-		@SuppressWarnings({ "rawtypes", "decapsulation" })
-		void addParameterMissmatchProposals(IInvocationContext arg0, IProblemLocation arg1, List arg2, ASTNode arg3, List arg4, Collection arg5) 
-			-> void addParameterMissmatchProposals(IInvocationContext arg0, IProblemLocation arg1, List arg2, ASTNode arg3, List arg4, Collection arg5);
+		@SuppressWarnings("decapsulation")
+		void addParameterMissmatchProposals(IInvocationContext arg0, IProblemLocation arg1, List<IMethodBinding> arg2, ASTNode arg3, List<Expression> arg4, Collection<ICommandAccess> arg5) 
+			-> void addParameterMissmatchProposals(IInvocationContext arg0, IProblemLocation arg1, List<IMethodBinding> arg2, ASTNode arg3, List<Expression> arg4, Collection<ICommandAccess> arg5);
 	}
 }

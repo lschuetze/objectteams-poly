@@ -468,7 +468,7 @@ public team class CompletionAdaptor
 	 * <li>Insert a base class argument if the role is bound.
 	 * </ul> 
 	 */
-	protected class MethodDeclarationCompletionProposal implements ILowerable playedBy MethodDeclarationCompletionProposal
+	protected class MethodDeclarationCompletionProposal playedBy MethodDeclarationCompletionProposal
 	{
 		// --- callout import ---
 		boolean hasMethod(IMethod[] arg0, String arg1) -> boolean hasMethod(IMethod[] arg0, String arg1);
@@ -476,16 +476,15 @@ public team class CompletionAdaptor
 		void setStyledDisplayString(StyledString arg0) -> void setStyledDisplayString(StyledString arg0);
 		
 		// --- static part ---
-		@SuppressWarnings("rawtypes")
 		void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, 
-							   Set suggestedMethods, Collection resultCollection) 
+							   Set<String> suggestedMethods, Collection<IJavaCompletionProposal> resultCollection) 
 		<- replace 
 		void evaluateProposals(IType type, String prefix, int offset, int length, int relevance,
-		 					   Set suggestedMethods, Collection resultCollection);
+		 					   Set<String> suggestedMethods, Collection<IJavaCompletionProposal> resultCollection);
 
-		@SuppressWarnings({ "unchecked", "basecall", "rawtypes" })
+		@SuppressWarnings("basecall")
 		static callin void evaluateProposals(IType type, String prefix, int offset, int length, int relevance, 
-											 Set suggestedMethods, Collection result) 
+											 Set<String> suggestedMethods, Collection<IJavaCompletionProposal> result) 
 				 throws CoreException
 		{
 			IOTType ottype = OTModelManager.getOTElement(type);
@@ -505,13 +504,11 @@ public team class CompletionAdaptor
 									 ? hasBoundRoleCtor(methods, typeName, baseClassName)   //different check for existence of lifting ctor
 									 : hasMethod(methods, constructorName);
 				if (constructorName.length() > 0 && constructorName.startsWith(prefix) && !hasMethod && suggestedMethods.add(constructorName))
-					result.add(new MethodDeclarationCompletionProposal(type, constructorName, baseClassName, null, offset, length, relevance + 500)
-									.lower());
+					result.add(new MethodDeclarationCompletionProposal(type, constructorName, baseClassName, null, offset, length, relevance + 500));
 			}
 			if (prefix.length() > 0 && !"main".equals(prefix) && !hasMethod(methods, prefix) && suggestedMethods.add(prefix)) { //$NON-NLS-1$
 				if (!JavaConventionsUtil.validateMethodName(prefix, type).matches(IStatus.ERROR))
-					result.add(new MethodDeclarationCompletionProposal(type, prefix, null, Signature.SIG_VOID, offset, length, relevance)
-									.lower());
+					result.add(new MethodDeclarationCompletionProposal(type, prefix, null, Signature.SIG_VOID, offset, length, relevance));
 			}
 		}
 		private static boolean hasBoundRoleCtor(IMethod[] methods, String roleName, String baseName) {

@@ -41,11 +41,11 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ModifierChangeCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.objectteams.otdt.ui.ImageConstants;
 import org.eclipse.objectteams.otdt.ui.ImageManager;
@@ -107,7 +107,7 @@ public class ChangeModifierProposalSubProcessor
 		throw new IllegalArgumentException("team without team modifier?");		 //$NON-NLS-1$
 	}
 
-	static IJavaCompletionProposal getChangeRoleVisibilityProposal(
+	static ICommandAccess getChangeRoleVisibilityProposal(
 			ICompilationUnit cu, RoleTypeDeclaration roleType, int modifier) 
 	{
 		return new ModifierChangeCorrectionProposal(
@@ -124,11 +124,11 @@ public class ChangeModifierProposalSubProcessor
 						JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));		
 	}
 
-	static IJavaCompletionProposal getChangeMethodModifierProposal(IInvocationContext context, 
-																   MethodDeclaration  methodDecl, 
-																   IMethodBinding 	  method, 
-																   int 				  modifier, 
-																   boolean 			  isAdding) 
+	static ICommandAccess getChangeMethodModifierProposal(IInvocationContext context, 
+														  MethodDeclaration  methodDecl, 
+														  IMethodBinding 	  method, 
+														  int 				  modifier, 
+														  boolean 			  isAdding) 
 	{
 		if (methodDecl == null)
 			methodDecl = (MethodDeclaration)context.getASTRoot().findDeclaringNode(method);
@@ -161,7 +161,7 @@ public class ChangeModifierProposalSubProcessor
 
 	final static String KEY_CALLIN_MODIFIER = "callin_modifier"; //$NON-NLS-1$
 	
-	public static IJavaCompletionProposal getAddOrChangeCallinModifierProposal(
+	public static ICommandAccess getAddOrChangeCallinModifierProposal(
 								ICompilationUnit         cu,
 								CallinMappingDeclaration callinMapping) 
 	{
@@ -196,7 +196,7 @@ public class ChangeModifierProposalSubProcessor
 		return proposal;
 	}
 
-	public static IJavaCompletionProposal getChangeCalloutKindProposal(ICompilationUnit cu, CalloutMappingDeclaration calloutMapping, boolean toOverride) 
+	public static ICommandAccess getChangeCalloutKindProposal(ICompilationUnit cu, CalloutMappingDeclaration calloutMapping, boolean toOverride) 
 	{
 		AST ast = calloutMapping.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);

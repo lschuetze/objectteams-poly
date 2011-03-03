@@ -42,8 +42,8 @@ import org.eclipse.jdt.core.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.jface.text.link.LinkedPosition;
 import org.eclipse.objectteams.otdt.internal.ui.assist.LinkedModeAdaptor;
@@ -148,7 +148,7 @@ public class PrecedenceProposalSubProcessor {
 	 * 			elements 1 and 3 contain names of callin bindings.
 	 * @return
 	 */
-	IJavaCompletionProposal getAddBindingPrecedenceProposal(TypeDeclaration roleType, 
+	ICommandAccess getAddBindingPrecedenceProposal(TypeDeclaration roleType, 
 											 				String[] problemArguments) 
 	{
 		this.ast = focusNode.getAST();
@@ -207,8 +207,8 @@ public class PrecedenceProposalSubProcessor {
 	 * 			elements 1 and 3 contain names of callin bindings.
 	 * @return
 	 */
-	IJavaCompletionProposal getAddBindingPrecedenceToTeamProposal(TypeDeclaration teamType, 
-																  String[] problemArguments) 
+	ICommandAccess getAddBindingPrecedenceToTeamProposal(TypeDeclaration teamType, 
+														 String[] problemArguments) 
 	{
 
 		String callin1 = problemArguments[1];
@@ -235,8 +235,8 @@ public class PrecedenceProposalSubProcessor {
 	 * @param problemArguments elements 0 and 2 contain the names of two roles
 	 * @return the new proposal
 	 */
-	IJavaCompletionProposal getAddRolePrecedenceToTeamProposal(TypeDeclaration teamType, 
-															   String[] problemArguments) 
+	ICommandAccess getAddRolePrecedenceToTeamProposal(TypeDeclaration teamType, 
+													  String[] problemArguments) 
 	{
 		if (problemArguments[0].equals(problemArguments[2]))
 			return null; // same role, can't use role to discriminate

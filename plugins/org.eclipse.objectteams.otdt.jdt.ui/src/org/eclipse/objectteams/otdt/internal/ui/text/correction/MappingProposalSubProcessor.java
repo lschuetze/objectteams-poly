@@ -59,11 +59,11 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.UnresolvedElementsSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -84,7 +84,7 @@ public class MappingProposalSubProcessor {
 	public static final String FAKETHIS = "$fakethis$"; //$NON-NLS-1$
 
 	@SuppressWarnings("unchecked") // arguments.add()
-	static IJavaCompletionProposal getChangeAssignmentToCalloutCallProposal(
+	static ICommandAccess getChangeAssignmentToCalloutCallProposal(
 				ICompilationUnit cu, 
 				TypeDeclaration  enclosingType,
 				ASTNode 	     selectedNode)
@@ -115,7 +115,7 @@ public class MappingProposalSubProcessor {
 		makeReplacement(rewrite, assignment, send);
 		
 		// try to also materialize the inferred callout (using the same rewrite as to combine modifications):
-		IJavaCompletionProposal proposal = getMaterializeInferredCalloutToFieldProposal(cu, rewrite, selectedNode, enclosingType, InferenceKind.FIELDSET);
+		ICommandAccess proposal = getMaterializeInferredCalloutToFieldProposal(cu, rewrite, selectedNode, enclosingType, InferenceKind.FIELDSET);
 		if (proposal != null)
 			return proposal;
 		
@@ -128,7 +128,7 @@ public class MappingProposalSubProcessor {
 				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 	}
 	
-	static IJavaCompletionProposal getChangeFieldReadToCalloutCallProposal(
+	static ICommandAccess getChangeFieldReadToCalloutCallProposal(
 				ICompilationUnit cu, 
 				TypeDeclaration  enclosingType,
 				ASTNode 		 selectedNode) 
@@ -152,7 +152,7 @@ public class MappingProposalSubProcessor {
 		makeReplacement(rewrite, selectedNode, send);
 		
 		// try to also materialize the inferred callout (using the same rewrite as to combine modifications):
-		IJavaCompletionProposal proposal = getMaterializeInferredCalloutToFieldProposal(cu, rewrite, selectedNode, enclosingType, InferenceKind.FIELDGET);
+		ICommandAccess proposal = getMaterializeInferredCalloutToFieldProposal(cu, rewrite, selectedNode, enclosingType, InferenceKind.FIELDGET);
 		if (proposal != null)
 			return proposal;
 		
@@ -408,9 +408,9 @@ public class MappingProposalSubProcessor {
 	}
 
 	@SuppressWarnings("unchecked") // handling AST-Lists 
-	public static IJavaCompletionProposal addTypeParameterToCallin(ICompilationUnit cu, 
-																   ASTNode selectedNode,
-																   TypeDeclaration enclosingType) 
+	public static ICommandAccess addTypeParameterToCallin(ICompilationUnit cu, 
+													      ASTNode selectedNode,
+													      TypeDeclaration enclosingType) 
 	{
 		final String TYPE_VAR_NAME = "E"; //$NON-NLS-1$
 		

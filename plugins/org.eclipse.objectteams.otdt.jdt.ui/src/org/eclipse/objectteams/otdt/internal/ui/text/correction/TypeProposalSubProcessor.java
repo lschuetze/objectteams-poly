@@ -49,6 +49,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddImportCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
@@ -285,7 +286,7 @@ public class TypeProposalSubProcessor {
 	 * @return the proposal or null
 	 * @throws JavaModelException exception in one of the various model operations
 	 */
-	public static IJavaCompletionProposal getMakeImportBase(ASTNode selectedNode, ICompilationUnit cu) 
+	public static ICommandAccess getMakeImportBase(ASTNode selectedNode, ICompilationUnit cu) 
 			throws JavaModelException
 	{
 	
@@ -336,7 +337,7 @@ public class TypeProposalSubProcessor {
 	 * @return the proposal or null
 	 * @throws JavaModelException exception in one of the various model operations
 	 */
-	public static IJavaCompletionProposal getImportBaseclass(ASTNode selectedNode, ICompilationUnit cu) throws JavaModelException 
+	public static ICommandAccess getImportBaseclass(ASTNode selectedNode, ICompilationUnit cu) throws JavaModelException 
 	{
 		if (selectedNode.getNodeType() != ASTNode.QUALIFIED_NAME) 
 			return null;

@@ -133,16 +133,16 @@ public team class CallHierarchyAdaptor
 	abstract protected class MethodMappingWrapper playedBy MethodWrapper
 	{ 	
 		doFindChildren <- replace doFindChildren;
-		@SuppressWarnings({ "basecall", "unchecked", "rawtypes" })
+		@SuppressWarnings("basecall")
 		callin void doFindChildren(IProgressMonitor progressMonitor) {
 			IMember member = getMember();
 			IMember[] children = null;
 			if (   member.getElementType() == IOTJavaElement.CALLIN_MAPPING
 				|| member.getElementType() == IOTJavaElement.CALLOUT_MAPPING) 
 			{
-				Map existingResults = lookupMethod(getMethodCall());
+				Map<String,MethodCall> existingResults = lookupMethod(getMethodCall());
 		        if (existingResults != null && !existingResults.isEmpty()) {
-		        	Map newElements = new HashMap();
+		        	Map<String,MethodCall> newElements = new HashMap<String,MethodCall>();
 		        	setElementMap(newElements);
 		            newElements.putAll(existingResults);
 		            return; // successfully done
@@ -192,17 +192,15 @@ public team class CallHierarchyAdaptor
 		}
 		
 		// callouts:
-		@SuppressWarnings("rawtypes")
-		void setElementMap(Map map)                -> set Map fElements;
-		@SuppressWarnings({ "rawtypes", "unchecked" })
-		Map<String, MethodCall> getFElements() 	   -> get Map fElements;
-		void setMethodCall(MethodCall methodCall)  -> set MethodCall fMethodCall;
-		void initCalls()                           -> void initCalls();
-		IMember getMember()                        -> IMember getMember();
-		MethodCall getMethodCall()                 -> MethodCall getMethodCall();
-		@SuppressWarnings("rawtypes")
-		Map lookupMethod(MethodCall methodCall)    -> Map lookupMethod(MethodCall methodCall);
-		void addCallToCache(MethodCall methodCall) -> void addCallToCache(MethodCall methodCall);
+		void setElementMap(Map<String,MethodCall> map)	-> set Map<String,MethodCall> fElements;
+		Map<String, MethodCall> getFElements() 	   		-> get Map<String,MethodCall> fElements;
+		void setMethodCall(MethodCall methodCall)  		-> set MethodCall fMethodCall;
+		void initCalls()                      		    -> void initCalls();
+		IMember getMember()                        		-> IMember getMember();
+		MethodCall getMethodCall()                 		-> MethodCall getMethodCall();
+		Map<String,MethodCall> lookupMethod(MethodCall methodCall)
+														-> Map<String,MethodCall> lookupMethod(MethodCall methodCall);
+		void addCallToCache(MethodCall methodCall) 		-> void addCallToCache(MethodCall methodCall);
 	}
 	
 	/**

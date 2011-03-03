@@ -43,10 +43,10 @@ protected class StubUtility2 playedBy StubUtility2
 	List createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, MethodDeclaration decl) 
 		-> List createParameters(IJavaProject project, ImportRewrite imports, ImportRewriteContext context, AST ast, IMethodBinding binding, MethodDeclaration decl);
 
-	void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet visited, ArrayList allMethods, IPackageBinding currPack, ArrayList toImplement) 
-		-> void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet visited, ArrayList allMethods, IPackageBinding currPack, ArrayList toImplement);
-	IMethodBinding findMethodBinding(IMethodBinding method, List allMethods) 
-		-> IMethodBinding findMethodBinding(IMethodBinding method, List allMethods);
+	void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet<ITypeBinding> visited, ArrayList<IMethodBinding> allMethods, IPackageBinding currPack, ArrayList<IMethodBinding> toImplement) 
+		-> void findUnimplementedInterfaceMethods(ITypeBinding typeBinding, HashSet<ITypeBinding> visited, ArrayList<IMethodBinding> allMethods, IPackageBinding currPack, ArrayList<IMethodBinding> toImplement);
+	IMethodBinding findMethodBinding(IMethodBinding method, List<IMethodBinding> allMethods) 
+		-> IMethodBinding findMethodBinding(IMethodBinding method, List<IMethodBinding> allMethods);
 	
 	/** 
 	 * This callin adds treatment of implicit inheritance including phantom roles

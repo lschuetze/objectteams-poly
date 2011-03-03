@@ -129,7 +129,6 @@ public team class TypeHierarchyViewAdaptor
 		@SuppressWarnings("decapsulation")
 		ITypeHierarchy getHierarchy() -> ITypeHierarchy getHierarchy();
 	
-		@SuppressWarnings("unchecked")
 		getTypesInHierarchy <- replace getTypesInHierarchy;
 		
 		@SuppressWarnings("basecall")

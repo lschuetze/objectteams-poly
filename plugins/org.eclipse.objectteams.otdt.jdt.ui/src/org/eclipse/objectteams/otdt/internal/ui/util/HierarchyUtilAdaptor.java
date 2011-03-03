@@ -79,13 +79,11 @@ public team class HierarchyUtilAdaptor
 			}
 		}
 
-		@SuppressWarnings({ "rawtypes", "decapsulation" })
-		void compileCandidates(List resultlist, List elements) <- before IStatus compileCandidates(List resultlist, List elements);
+		void compileCandidates(List<IJavaElement> resultlist, List<IJavaElement> elements) <- before IStatus compileCandidates(List<IJavaElement> resultlist, List<IJavaElement> elements);
 
-		@SuppressWarnings({ "rawtypes", "unchecked" }) // parameter are raw lists
-		static void compileCandidates(List resultlist, List elements) {
-			for (Iterator iter= elements.iterator(); iter.hasNext();) {
-				IJavaElement elem= (IJavaElement)iter.next();
+		static void compileCandidates(List<IJavaElement> resultlist, List<IJavaElement> elements) {
+			for (Iterator<IJavaElement> iter= elements.iterator(); iter.hasNext();) {
+				IJavaElement elem= iter.next();
 				switch (elem.getElementType()) {
 					case IOTJavaElement.CALLIN_MAPPING:
 					case IOTJavaElement.CALLOUT_MAPPING:

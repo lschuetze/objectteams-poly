@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages;
+import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.AddImportCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
@@ -128,15 +129,13 @@ public team class OTQuickFixes  {
 	 */
 	protected class QuickFixProcessor playedBy QuickFixProcessor 
 	{
-		@SuppressWarnings("rawtypes")
-		void filterNulls(Collection proposals)
-		<-  after void process(IInvocationContext context, IProblemLocation problem, Collection proposals)
+		void filterNulls(Collection<ICommandAccess> proposals)
+		<-  after void process(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals)
 			with { proposals <- proposals }
 
-		@SuppressWarnings("rawtypes")
-		void filterNulls(Collection proposals) {
+		void filterNulls(Collection<ICommandAccess> proposals) {
 			if ((proposals instanceof List)) {
-				List list = (List)proposals;
+				List<ICommandAccess> list = (List<ICommandAccess>)proposals;
 				for (int i=list.size()-1; i>=0; i--)
 					if (list.get(i) == null)
 						list.remove(i);
@@ -154,7 +153,7 @@ public team class OTQuickFixes  {
 													   ASTNode node, 
 													   String warningToken, 
 													   int relevance, 
-													   Collection<ASTRewriteCorrectionProposal> proposals) 
+													   Collection<ICommandAccess> proposals) 
 		{
 			// adding one case block to the front of the original method:
 			ChildListPropertyDescriptor property= null;
@@ -196,7 +195,7 @@ public team class OTQuickFixes  {
 			return 0; // not affecting a local variable
 		}
 		
-		@SuppressWarnings({ "unchecked", "decapsulation" }) // base-side arg "proposals" is not generic 
+		@SuppressWarnings("decapsulation") // base-side arg "proposals" is not generic 
 		addSuppressWarningsProposal <- replace addSuppressWarningsProposalIfPossible; 
 	}
 	
@@ -249,9 +248,9 @@ public team class OTQuickFixes  {
 		@SuppressWarnings("decapsulation")
 		createTypeRefChangeProposal <- replace createTypeRefChangeProposal;
 		
-		@SuppressWarnings({ "rawtypes", "decapsulation" }) // Collection
+		@SuppressWarnings("decapsulation") // Collection
 		void addMissingCastParentsProposal(ICompilationUnit cu, MethodInvocation invocationNode) 
-			<- replace void addMissingCastParentsProposal(ICompilationUnit cu, MethodInvocation invocationNode, Collection proposals);
+			<- replace void addMissingCastParentsProposal(ICompilationUnit cu, MethodInvocation invocationNode, Collection<ICommandAccess> proposals);
 
 		@SuppressWarnings("basecall")
 		static callin void addMissingCastParentsProposal(ICompilationUnit cu, MethodInvocation invocationNode) {
@@ -308,8 +307,8 @@ public team class OTQuickFixes  {
 		@SuppressWarnings("decapsulation")
 		protected String getKEY_TYPE()                				-> get String KEY_TYPE;
 
-		@SuppressWarnings({ "rawtypes", "decapsulation" })
-		protected void setFArguments(List fArguments) 				-> set List fArguments;
+		@SuppressWarnings("decapsulation")
+		protected void setFArguments(List<Expression> fArguments) 	-> set List<Expression> fArguments;
 
 		ImportRewrite getImportRewrite()                           	-> ImportRewrite getImportRewrite();
 		ImportRewrite createImportRewrite(CompilationUnit astRoot) 	-> ImportRewrite createImportRewrite(CompilationUnit astRoot);
