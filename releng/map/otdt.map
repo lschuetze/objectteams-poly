@@ -62,7 +62,7 @@ plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring,0.7.0=SVN,url=file://lo
 !-- .. but from original CVS:
 plugin@org.eclipse.jdt.core.tests.builder=v_B39,/cvsroot/eclipse,
 plugin@org.eclipse.jdt.debug.tests=v20110207,/cvsroot/eclipse,
-plugin@org.eclipse.jdt.ui.tests.refactoring=v20110301-0800,/cvsroot/eclipse,
+plugin@org.eclipse.jdt.ui.tests.refactoring=v20110301-0545,/cvsroot/eclipse,
 plugin@org.eclipse.jdt.ui.tests=v20110301-0800,/cvsroot/eclipse,
 !-- the following are required by jdt.ui.tests: --
 plugin@org.eclipse.jdt.text.tests=v20110301-0545,/cvsroot/eclipse,
