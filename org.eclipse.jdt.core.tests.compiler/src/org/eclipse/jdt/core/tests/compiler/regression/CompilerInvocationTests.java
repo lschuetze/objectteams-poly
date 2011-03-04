@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2010 IBM Corporation and others.
+ * Copyright (c) 2006, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -948,6 +948,7 @@ public void _test011_problem_categories() {
         expectedProblemAttributes.put("DangerousCallinBinding", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         expectedProblemAttributes.put("UnexpectedAnnotationStructure", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         expectedProblemAttributes.put("IncompatibleOTJByteCodeVersion", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
+        expectedProblemAttributes.put("AbstractStaticMethodCalled", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 //SH}
 		StringBuffer failures = new StringBuffer();
 		StringBuffer correctResult = new StringBuffer(70000);
@@ -2179,6 +2180,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("UnexpectedAnnotationStructure", SKIP);
         expectedProblemAttributes.put("IncompatibleOTJByteCodeVersion", SKIP);
         expectedProblemAttributes.put("CallinBindingToInterface", SKIP);
+        expectedProblemAttributes.put("AbstractStaticMethodCalled", SKIP);
         expectedProblemAttributes.put("EXPERIMENTAL", SKIP);
         expectedProblemAttributes.put("MigrateNonRole", SKIP);
         expectedProblemAttributes.put("MigrateWithinNonFinalTeam", SKIP);
