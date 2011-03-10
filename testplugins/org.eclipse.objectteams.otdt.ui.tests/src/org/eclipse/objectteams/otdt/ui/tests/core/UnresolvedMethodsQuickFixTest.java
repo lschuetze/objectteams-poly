@@ -624,25 +624,20 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		assertEqualString(preview, buf.toString());
 	}
 
-/* some orig tests for use in OT-variants:	
-	
-	public void testClassInstanceCreation() throws Exception {
+	// Bug 339520 - [quickfix] creating a role constructor via quickfix creates ';' instead of body
+	public void testRoleInstanceCreation1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E {\n");
+		buf.append("public team class E {\n");
+		buf.append("    public class A {\n");
+		buf.append("    }\n");
 		buf.append("    public void foo(int i) {\n");
 		buf.append("        A a= new A(i);\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class A {\n");
-		buf.append("}\n");
-		pack1.createCompilationUnit("A.java", buf.toString(), false, null);
-		
 		CompilationUnit astRoot= getASTRoot(cu1);
 		ArrayList proposals= collectCorrections(cu1, astRoot);
 		assertNumberOfProposals(proposals, 2);
@@ -653,10 +648,15 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class A {\n");
+		buf.append("public team class E {\n");
+		buf.append("    public class A {\n");
 		buf.append("\n");
-		buf.append("    public A(int i) {\n");
-		buf.append("    }\n");		
+		buf.append("        public A(int i) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo(int i) {\n");
+		buf.append("        A a= new A(i);\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();	
 
@@ -665,7 +665,9 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E {\n");
+		buf.append("public team class E {\n");
+		buf.append("    public class A {\n");
+		buf.append("    }\n");
 		buf.append("    public void foo(int i) {\n");
 		buf.append("        A a= new A();\n");
 		buf.append("    }\n");
@@ -675,58 +677,8 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
 	}
 
-	public void testClassInstanceCreation2() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int i) {\n");
-		buf.append("        A a= new A(\"test\");\n");
-		buf.append("    }\n");
-		buf.append("    class A {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		ICompilationUnit cu1=pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-		
-		CompilationUnit astRoot= getASTRoot(cu1);
-		ArrayList proposals= collectCorrections(cu1, astRoot);
-		assertNumberOfProposals(proposals, 2);
-		assertCorrectLabels(proposals);
-
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview1= getPreviewContent(proposal);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int i) {\n");
-		buf.append("        A a= new A(\"test\");\n");
-		buf.append("    }\n");
-		buf.append("    class A {\n");
-		buf.append("\n");
-		buf.append("        public A(String string) {\n");
-		buf.append("        }\n");		
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected1= buf.toString();	
-
-		proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview2= getPreviewContent(proposal);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class E {\n");
-		buf.append("    public void foo(int i) {\n");
-		buf.append("        A a= new A();\n");
-		buf.append("    }\n");
-		buf.append("    class A {\n");
-		buf.append("    }\n");
-		buf.append("}\n");
-		String expected2= buf.toString();
-		
-		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
-	}
-	
+/* some orig tests for use in OT-variants:
+ * 	
 	
 	public void testConstructorInvocation() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
