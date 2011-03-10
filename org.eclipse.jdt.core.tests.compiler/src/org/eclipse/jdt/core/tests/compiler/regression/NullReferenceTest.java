@@ -15,6 +15,8 @@
  *     						bug 320170 - [compiler] [null] Whitebox issues in null analysis
  *     						bug 332637 - Dead Code detection removing code that isn't dead
  *     						bug 338303 - Warning about Redundant assignment conflicts with definite assignment
+ *     						bug 336428 - [compiler][null] bogus warning "redundant null check" in condition of do {} while() loop
+ * 							bug 324178 - [null] ConditionalExpression.nullStatus(..) doesn't take into account the analysis of condition itself
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -42,7 +44,7 @@ public NullReferenceTest(String name) {
 // Only the highest compliance level is run; add the VM argument
 // -Dcompliance=1.4 (for example) to lower it if needed
 static {
-//		TESTS_NAMES = new String[] { "testBug325229" };
+//		TESTS_NAMES = new String[] { "testBug339250" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -11780,10 +11782,16 @@ public void testBug304416() throws Exception {
 		"     2  aconst_null\n" + 
 		"     3  astore_2 [s2]\n" + 
 		"     4  aload_1 [s]\n" + 
-		"     5  ifnull 12\n" + 
+		"     5  ifnull 26\n" + 
 		"     8  aload_2 [s2]\n" + 
-		"     9  ifnull 12\n" + 
-		"    12  return\n";
+		"     9  ifnull 26\n" + 
+		"    12  getstatic java.lang.System.out : java.io.PrintStream [16]\n" + 
+		"    15  aload_1 [s]\n" + 
+		"    16  invokevirtual java.io.PrintStream.println(java.lang.String) : void [22]\n" + 
+		"    19  getstatic java.lang.System.out : java.io.PrintStream [16]\n" + 
+		"    22  aload_2 [s2]\n" + 
+		"    23  invokevirtual java.io.PrintStream.println(java.lang.String) : void [22]\n" + 
+		"    26  return\n";
 	checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput);
 }
 
@@ -13839,6 +13847,149 @@ public void testBug333089() {
 		"");
 }
 
+// Bug 336428 - [compiler][null] bogus warning "redundant null check" in condition of do {} while() loop
+// original issue
+public void testBug336428() {
+	this.runConformTest(
+		new String[] {
+	"DoWhileBug.java",
+			"public class DoWhileBug {\n" + 
+			"	void test(boolean b1, Object o1) {\n" + 
+			"		Object o2 = new Object();\n" + 
+			"		do {\n" +
+			"           if (b1)\n" + 
+			"				o1 = null;\n" + 
+			"		} while ((o2 = o1) != null);\n" + 
+			"	}\n" + 
+			"}"	
+		},
+		"");
+}
+// Bug 336428 - [compiler][null] bogus warning "redundant null check" in condition of do {} while() loop
+// hitting the same implementation branch from within the loop
+// information from unknown o1 is not propagated into the loop, analysis currently believes o2 is def null.
+public void _testBug336428a() {
+	this.runConformTest(
+		new String[] {
+	"DoWhileBug.java",
+			"public class DoWhileBug {\n" + 
+			"	void test(boolean b1, Object o1) {\n" + 
+			"		Object o2 = null;\n" + 
+			"		do {\n" +
+			"           if (b1)\n" + 
+			"				o1 = null;\n" +
+			"           if ((o2 = o1) != null)\n" +
+			"               break;\n" +
+			"		} while (true);\n" + 
+			"	}\n" + 
+			"}"	
+		},
+		"");
+}
+
+// Bug 336428 - [compiler][null] bogus warning "redundant null check" in condition of do {} while() loop
+// in this variant the analysis believes o2 is def unknown and doesn't even consider raising a warning.
+public void _testBug336428b() {
+	this.runNegativeTest(
+		new String[] {
+	"DoWhileBug.java",
+			"public class DoWhileBug {\n" + 
+			"	void test(boolean b1) {\n" + 
+			"		Object o1 = null;\n" + 
+			"		Object o2 = null;\n" + 
+			"		do {\n" +
+			"           if ((o2 = o1) == null) break;\n" +
+			"		} while (true);\n" + 
+			"	}\n" + 
+			"}"	
+		},
+		"----------\n" + 
+		"1. ERROR in DoWhileBug.java (at line 6)\n" + 
+		"	if ((o2 = o1) == null) break;\n" + 
+		"	    ^^^^^^^^^\n" + 
+		"Redundant null check: The variable o2 can only be null at this location\n" + 
+		"----------\n");
+}
+
+// Bug 336428 - [compiler][null] bogus warning "redundant null check" in condition of do {} while() loop
+// in this case considering o1 as unknown is correct
+public void testBug336428c() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_5) {
+		this.runConformTest(
+			new String[] {
+		"DoWhileBug.java",
+				"public class DoWhileBug {\n" + 
+				"	void test(boolean b1, Object o1) {\n" + 
+				"		Object o2 = null;\n" + 
+				"		do {\n" +
+				"           if ((o2 = o1) == null) break;\n" +
+				"		} while (true);\n" + 
+				"	}\n" + 
+				"}"	
+			},
+			"");
+	}
+}
+
+// Bug 336428 - [compiler][null] bogus warning "redundant null check" in condition of do {} while() loop
+// one more if-statement triggers the expected warnings
+public void testBug336428d() {
+	this.runNegativeTest(
+		new String[] {
+	"DoWhileBug.java",
+			"public class DoWhileBug {\n" + 
+			"	void test(boolean b1) {\n" + 
+			"		Object o1 = null;\n" + 
+			"		Object o2 = null;\n" + 
+			"		do {\n" +
+			"           if (b1)\n" + 
+			"				o1 = null;\n" +
+			"           if ((o2 = o1) == null) break;\n" +
+			"		} while (true);\n" + 
+			"	}\n" + 
+			"}"	
+		},
+		"----------\n" + 
+		"1. ERROR in DoWhileBug.java (at line 7)\n" + 
+		"	o1 = null;\n" + 
+		"	^^\n" + 
+		"Redundant assignment: The variable o1 can only be null at this location\n" + 
+		"----------\n" + 
+		"2. ERROR in DoWhileBug.java (at line 8)\n" + 
+		"	if ((o2 = o1) == null) break;\n" + 
+		"	    ^^^^^^^^^\n" + 
+		"Redundant null check: The variable o2 can only be null at this location\n" + 
+		"----------\n");
+}
+
+// Bug 336428 - [compiler][null] bogus warning "redundant null check" in condition of do {} while() loop
+// same analysis, but assert instead of if suppresses the warning
+public void testBug336428e() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_5) {
+		this.runNegativeTest(
+			new String[] {
+		"DoWhileBug.java",
+				"public class DoWhileBug {\n" + 
+				"	void test(boolean b1) {\n" + 
+				"		Object o1 = null;\n" + 
+				"		Object o2 = null;\n" + 
+				"		do {\n" +
+				"           if (b1)\n" + 
+				"				o1 = null;\n" +
+				"           assert (o2 = o1) == null : \"bug\";\n" +
+				"		} while (true);\n" + 
+				"	}\n" + 
+				"}"	
+			},
+			"----------\n" + 
+			"1. ERROR in DoWhileBug.java (at line 7)\n" + 
+			"	o1 = null;\n" + 
+			"	^^\n" + 
+			"Redundant assignment: The variable o1 can only be null at this location\n" + 
+			"----------\n");
+	}
+}
+
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=332838
 // Null info of assert statements should not affect flow info
 // when CompilerOptions.OPTION_IncludeNullInfoFromAsserts is disabled.
@@ -14059,5 +14210,324 @@ public void testBug338303() {
 			"}\n"
 		},
 		"");
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=338234
+public void testBug338234() {
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"   static int foo() {\n" + 
+			"        Object o = null;\n" +
+			"		 int i = 0;\n" + 
+			"        label: {\n" + 
+			"            if (o == null)\n" + 
+			"                break label;\n" +
+			"			 i++;" + 
+			"        }\n" + 
+			"         if (i != 0) {\n" + 
+			"            System.out.println(i);\n" + 
+			"        }\n" + 
+			"        return 0;\n" + 
+			"    }\n" + 
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 6)\n" + 
+		"	if (o == null)\n" + 
+		"	    ^\n" + 
+		"Redundant null check: The variable o can only be null at this location\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 8)\n" + 
+		"	i++;        }\n" + 
+		"	^^^\n" + 
+		"Dead code\n" + 
+		"----------\n");
+}
+// Bug 324178 - [null] ConditionalExpression.nullStatus(..) doesn't take into account the analysis of condition itself
+public void testBug324178() {
+	this.runConformTest(
+		new String[] {
+			"Bug324178.java",
+			"public class Bug324178 {\n" +
+			"    boolean b;\n" +
+			"    void foo(Object u) {\n" +
+			"    if (u == null) {}\n" +
+			"        Object o = (u == null) ? new Object() : u;\n" +
+			"        o.toString();   // Incorrect potential NPE\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"");
+}
+
+// Bug 324178 - [null] ConditionalExpression.nullStatus(..) doesn't take into account the analysis of condition itself
+public void testBug324178a() {
+	this.runConformTest(
+		new String[] {
+			"Bug324178.java",
+			"public class Bug324178 {\n" +
+			"    boolean b;\n" +
+			"    void foo(Boolean u) {\n" +
+			"    if (u == null) {}\n" +
+			"        Boolean o;\n" +
+			"        o = (u == null) ? Boolean.TRUE : u;\n" +
+			"        o.toString();   // Incorrect potential NPE\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=326950
+public void testBug326950a() throws Exception {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.WARNING);
+	options.put(CompilerOptions.OPTION_ReportPotentialNullReference, CompilerOptions.WARNING);
+	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		String s = null;\n" +
+			"		if (s == null) {\n" + 
+			"			System.out.println(\"SUCCESS\");\n" + 
+			"		} else {\n" +
+			"			System.out.println(\"Dead code, but don't optimize me out\");\n" +
+			"		}\n" + 
+			"	}\n" + 
+			"}",
+		},
+		"SUCCESS",
+		null,
+		true,
+		null,
+		options,
+		null);
+	String expectedOutput =
+		"  public static void main(java.lang.String[] args);\n" + 
+		"     0  aconst_null\n" + 
+		"     1  astore_1 [s]\n" + 
+		"     2  aload_1 [s]\n" + 
+		"     3  ifnonnull 17\n" + 
+		"     6  getstatic java.lang.System.out : java.io.PrintStream [16]\n" + 
+		"     9  ldc <String \"SUCCESS\"> [22]\n" + 
+		"    11  invokevirtual java.io.PrintStream.println(java.lang.String) : void [24]\n" + 
+		"    14  goto 25\n" + 
+		"    17  getstatic java.lang.System.out : java.io.PrintStream [16]\n" + 
+		"    20  ldc <String \"Dead code, but don\'t optimize me out\"> [30]\n" + 
+		"    22  invokevirtual java.io.PrintStream.println(java.lang.String) : void [24]\n" + 
+		"    25  return\n";
+	checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=326950
+// Code marked dead due to if(false), etc. can be optimized out
+public void testBug326950b() throws Exception {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.WARNING);
+	options.put(CompilerOptions.OPTION_ReportPotentialNullReference, CompilerOptions.WARNING);
+	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" +
+			"		int i = 0;\n" + 
+			"		if (false) {\n" + 
+			"			System.out.println(\"Deadcode and you can optimize me out\");\n" + 
+			"		}\n" +
+			"		if (true) {\n" +
+			"			i++;\n" +
+			"		} else {\n" +
+			"			System.out.println(\"Deadcode and you can optimize me out\");\n" +
+			"		}\n" +
+			"	}\n" + 
+			"}",
+		},
+		"",
+		null,
+		true,
+		null,
+		options,
+		null);
+	String expectedOutput =
+		"  public static void main(java.lang.String[] args);\n" + 
+		"    0  iconst_0\n" + 
+		"    1  istore_1 [i]\n" + 
+		"    2  iinc 1 1 [i]\n" + 
+		"    5  return\n";
+	checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=326950
+// Free return should be generated for a method even if it ends with dead code
+public void testBug326950c() throws Exception {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.WARNING);
+	options.put(CompilerOptions.OPTION_ReportPotentialNullReference, CompilerOptions.WARNING);
+	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public void foo(String[] args) {\n" + 
+			"		String s = \"\";\n" +
+			"		int i = 0;\n" +
+			"		if (s != null) {\n" + 
+			"			return;\n" + 
+			"		}\n" +
+			"		i++;\n" +
+			"	}\n" + 
+			"}",
+		},
+		"",
+		null,
+		true,
+		null,
+		options,
+		null);
+	String expectedOutput =
+		"  public void foo(java.lang.String[] args);\n" + 
+		"     0  ldc <String \"\"> [16]\n" + 
+		"     2  astore_2 [s]\n" + 
+		"     3  iconst_0\n" + 
+		"     4  istore_3 [i]\n" + 
+		"     5  aload_2 [s]\n" + 
+		"     6  ifnull 10\n" + 
+		"     9  return\n" + 
+		"    10  iinc 3 1 [i]\n" + 
+		"    13  return\n";
+	checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=326950
+// Free return should be generated for a constructor even if it ends with dead code
+public void testBug326950d() throws Exception {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.WARNING);
+	options.put(CompilerOptions.OPTION_ReportPotentialNullReference, CompilerOptions.WARNING);
+	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	X() {\n" + 
+			"		String s = \"\";\n" +
+			"		int i = 0;\n" +
+			"		if (s != null) {\n" + 
+			"			return;\n" + 
+			"		}\n" +
+			"		i++;\n" +
+			"	}\n" + 
+			"}",
+		},
+		"",
+		null,
+		true,
+		null,
+		options,
+		null);
+	String expectedOutput =
+		"  X();\n" + 
+		"     0  aload_0 [this]\n" + 
+		"     1  invokespecial java.lang.Object() [8]\n" + 
+		"     4  ldc <String \"\"> [10]\n" + 
+		"     6  astore_1 [s]\n" + 
+		"     7  iconst_0\n" + 
+		"     8  istore_2 [i]\n" + 
+		"     9  aload_1 [s]\n" + 
+		"    10  ifnull 14\n" + 
+		"    13  return\n" + 
+		"    14  iinc 2 1 [i]\n" + 
+		"    17  return\n";
+	checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=339250
+// Check code gen
+public void testBug339250() throws Exception {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.WARNING);
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		String s = null;\n" +
+			"		s += \"correctly\";\n" +
+			"		if (s != null) {\n" + 	// s cannot be null
+			"			System.out.println(\"It works \" + s);\n" + 
+			"		}\n" +
+			"	}\n" + 
+			"}",
+		},
+		"It works nullcorrectly",
+		null,
+		true,
+		null,
+		options,
+		null);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=339250
+// Check that the redundant null check warning is correctly produced
+public void testBug339250a() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		String s = null;\n" +
+			"		s += \"correctly\";\n" +
+			"		if (s != null) {\n" + 	// s cannot be null
+			"			System.out.println(\"It works \" + s);\n" + 
+			"		}\n" +
+			"	}\n" + 
+			"}",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	if (s != null) {\n" + 
+		"	    ^\n" + 
+		"Redundant null check: The variable s cannot be null at this location\n" + 
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=339250
+// Check that the redundant null check warning is correctly produced
+public void testBug339250b() throws Exception {
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" + 
+			"	public static void main(String[] args) {\n" + 
+			"		String s = null;\n" +
+			"		s += null;\n" +
+			"		if (s != null) {\n" + 	// s is definitely not null
+			"			System.out.println(\"It works \" + s);\n" + 
+			"	    }\n" + 
+			"		s = null;\n" +
+			"		if (s != null) {\n" + 	// s is definitely null
+			"			System.out.println(\"Fails \" + s);\n" + 
+			"	    } else {\n" + 
+			"			System.out.println(\"Works second time too \" + s);\n" +
+			"       }\n" + 
+			"	}\n" + 
+			"}",
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	if (s != null) {\n" + 
+		"	    ^\n" + 
+		"Redundant null check: The variable s cannot be null at this location\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 9)\n" + 
+		"	if (s != null) {\n" + 
+		"	    ^\n" + 
+		"Null comparison always yields false: The variable s can only be null at this location\n" + 
+		"----------\n" + 
+		"3. WARNING in X.java (at line 9)\n" + 
+		"	if (s != null) {\n" + 
+		"			System.out.println(\"Fails \" + s);\n" + 
+		"	    } else {\n" + 
+		"	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Dead code\n" + 
+		"----------\n");
 }
 }

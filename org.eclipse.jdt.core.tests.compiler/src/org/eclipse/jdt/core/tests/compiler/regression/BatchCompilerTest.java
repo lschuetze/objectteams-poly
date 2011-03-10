@@ -1720,7 +1720,6 @@ public void test012b(){
         "                           maskedCatchBlock\n" +
         "      includeAssertNull    raise null warnings for variables\n" + 
         "                           that got tainted in an assert expression\n" + 
-        "      incomplete-switch    same as enumSwitch\n" +
         "      indirectStatic       indirect reference to static member\n" +
 //OT:
         "      inferredcallout    + a callout binding has to be inferred (OTJLD 3.1(j))\n" +
@@ -1758,6 +1757,8 @@ public void test012b(){
         "      syntheticAccess      synthetic access for innerclass\n" +
         "      tasks(<tags separated by |>) tasks identified by tags inside comments\n" +
         "      typeHiding         + type parameter hiding another type\n" +
+        "      unavoidableGenericProblems + ignore unavoidable type safety problems\n" +
+        "                                   due to raw APIs\n" + 
         "      unchecked          + unchecked type operation\n" +
         "      unnecessaryElse      unnecessary else clause\n" +
         "      unqualifiedField     unqualified reference to field\n" +
