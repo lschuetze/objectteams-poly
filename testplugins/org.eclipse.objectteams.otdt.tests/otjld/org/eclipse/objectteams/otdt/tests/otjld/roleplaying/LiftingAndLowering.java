@@ -34,7 +34,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test2215_arrayLifting"};
+//		TESTS_NAMES = new String[] { "test2237_instantiationPolicy"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -5240,4 +5240,119 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
             customOptions,
             null/*no custom requestor*/);
     }
+    public void test2237_instantiationPolicy1() {
+    	runConformTest(
+        	true/*flushOutputDir*/,
+    		new String[] {
+		"Team2237ip1.java",
+				"import static org.objectteams.InstantiationPolicy.*;\n" +
+				"import org.objectteams.Instantiation;\n" +
+				"public team class Team2237ip1 {\n" +
+				"    @Instantiation(ALWAYS)\n" +
+				"    protected class R playedBy T2237ip1 {\n" +
+				"        protected void test() -> void test();\n" +
+				"		 equals => equals;\n" +
+				"        hashCode => hashCode;\n" +
+				"    }\n" +
+				"    public void test(T2237ip1 as R o) {\n" +
+				"        o.test();\n" +
+				"    }\n" +
+				"    public static void main(String... args) {\n" +
+				"        Team2237ip1 t = new Team2237ip1();\n" +
+				"        T2237ip1 b = new T2237ip1();\n" +
+				"        t.test(b);\n" +
+				"        t.test(b);\n" +
+				"        System.out.print(t.getAllRoles().length);\n" +
+				"    }\n" +
+				"}\n",  
+    	"T2237ip1.java",
+    			"public class T2237ip1 {\n" +
+    			"    void test() { System.out.print(\"OK\"); }\n" +
+    			"}\n",
+    		},
+    		"", // explicitly check no warnings
+    		"OKOK0",
+    		"",
+    		null/*no excuce*/);
+    }
+    public void test2237_instantiationPolicy2() {
+    	runConformTest(
+    		true/*flushOutputDir*/,
+    		new String[] {
+		"Team2237ip2.java",
+				"import static org.objectteams.InstantiationPolicy.*;\n" +
+				"import org.objectteams.Instantiation;\n" +
+				"public team class Team2237ip2 {\n" +
+				"    @Instantiation(ONDEMAND)\n" +
+				"    protected class R playedBy T2237ip2 {\n" +
+				"        protected void test() -> void test();\n" +
+				"    }\n" +
+				"    public void test(T2237ip2 as R o) {\n" +
+				"        o.test();\n" +
+				"    }\n" +
+				"    public static void main(String... args) {\n" +
+				"        Team2237ip2 t = new Team2237ip2();\n" +
+				"        T2237ip2 b = new T2237ip2();\n" +
+				"        t.test(b);\n" +
+				"        t.test(b);\n" +
+				"        System.out.print(t.getAllRoles().length);\n" +
+				"    }\n" +
+				"}\n",  
+    	"T2237ip2.java",
+    			"public class T2237ip2 {\n" +
+    			"    void test() { System.out.print(\"OK\"); }\n" +
+    			"}\n",
+    		},
+    		"",
+    		"OKOK1",
+    		"",
+    		null/*no excuce*/);
+    }
+
+    public void test2237_instantiationPolicy3() {
+    	runNegativeTest(
+    		new String[] {
+		"NotATeam2237ip3.java",
+				"import static org.objectteams.InstantiationPolicy.*;\n" +
+				"import org.objectteams.Instantiation;\n" +
+				"public class NotATeam2237ip3 {\n" +
+				"    @Instantiation(ONDEMAND)\n" +
+				"    protected class R {\n" +
+				"    }\n" +
+				"}\n",  
+    		},
+    		"----------\n" + 
+    		"1. ERROR in NotATeam2237ip3.java (at line 4)\n" + 
+    		"	@Instantiation(ONDEMAND)\n" + 
+    		"	^^^^^^^^^^^^^^\n" + 
+    		"Annotation \'@Instantiation\' can only be applied to role classes (OTJLD 2.3.1(d)).\n" + 
+    		"----------\n");
+    }
+    
+    public void test2237_instantiationPolicy4() {
+    	runNegativeTest(
+    		new String[] {
+		"Team2237ip4.java",
+				"import static org.objectteams.InstantiationPolicy.*;\n" +
+				"import org.objectteams.Instantiation;\n" +
+				"public team class Team2237ip4 {\n" +
+				"    @Instantiation(ALWAYS)\n" +
+				"    protected class R {\n" +
+				"        int val = 0;\n" +
+				"    }\n" +
+				"}\n",  
+    		},
+    		"----------\n" + 
+    		"1. WARNING in Team2237ip4.java (at line 5)\n" + 
+    		"	protected class R {\n" + 
+    		"	                ^\n" + 
+    		"Roles with InstantiationPolicy \'ALWAYS\' should define equals() and hashCode() methods (OTJLD 2.3.1(d)).\n" + 
+    		"----------\n" + 
+    		"2. WARNING in Team2237ip4.java (at line 6)\n" + 
+    		"	int val = 0;\n" + 
+    		"	    ^^^\n" + 
+    		"Fields are discouraged in roles with InstantiationPolicy \'ALWAYS\' (OTJLD 2.3.1(d)).\n" + 
+    		"----------\n");
+    }
+
 }
