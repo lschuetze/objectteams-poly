@@ -25,10 +25,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.TSuperConstructorInvocation;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -121,11 +125,11 @@ public team class CorrectionAdaptor {
 		}
 
 		void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals) 
-			<- after void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals);
+			<- replace void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals);
 		
-		/* Copied from base method and adapted for tsuper ctor calls. */
-		@SuppressWarnings({"rawtypes","unchecked"})
-		static void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals)
+		/* Copied from base method and adapted for tsuper ctor calls and role constructors. */
+		@SuppressWarnings({"unchecked", "basecall"})
+		static callin void getConstructorProposals(IInvocationContext context, IProblemLocation problem, Collection<ICommandAccess> proposals)
 				throws CoreException
 		{
 			ICompilationUnit cu= context.getCompilationUnit();
@@ -137,13 +141,32 @@ public team class CorrectionAdaptor {
 			}
 	
 			ITypeBinding targetBinding= null;
-			List arguments= null;
-/*{ObjectTeams: not used: orig:
+			List<Expression> arguments= null;
 			IMethodBinding recursiveConstructor= null;
-   SH} */
 	
 			int type= selectedNode.getNodeType();
-			if (type == ASTNode.TSUPER_CONSTRUCTOR_INVOCATION) {
+			if (type == ASTNode.CLASS_INSTANCE_CREATION) {
+				ClassInstanceCreation creation= (ClassInstanceCreation) selectedNode;
+
+				IBinding binding= creation.getType().resolveBinding();
+				if (binding instanceof ITypeBinding) {
+					targetBinding= (ITypeBinding) binding;
+					arguments= creation.arguments();
+				}
+			} else if (type == ASTNode.SUPER_CONSTRUCTOR_INVOCATION) {
+				ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
+				if (typeBinding != null && !typeBinding.isAnonymous()) {
+					targetBinding= typeBinding.getSuperclass();
+					arguments= ((SuperConstructorInvocation) selectedNode).arguments();
+				}
+			} else if (type == ASTNode.CONSTRUCTOR_INVOCATION) {
+				ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
+				if (typeBinding != null && !typeBinding.isAnonymous()) {
+					targetBinding= typeBinding;
+					arguments= ((ConstructorInvocation) selectedNode).arguments();
+					recursiveConstructor= ASTResolving.findParentMethodDeclaration(selectedNode).resolveBinding();
+				}
+			} else if (type == ASTNode.TSUPER_CONSTRUCTOR_INVOCATION) {
 				ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
 				if (typeBinding != null && !typeBinding.isAnonymous()) {
 //{ObjectTeams: different super class computation:
@@ -159,16 +182,15 @@ public team class CorrectionAdaptor {
 			if (targetBinding == null) {
 				return;
 			}
+//{ObjectTeams: instantiation requires the class:
+			if (targetBinding.isRole() && targetBinding.isInterface())
+				targetBinding = targetBinding.getClassPart();
+// SH}
 			IMethodBinding[] methods= targetBinding.getDeclaredMethods();
-			ArrayList similarElements= new ArrayList();
+			ArrayList<IMethodBinding> similarElements= new ArrayList<IMethodBinding>();
 			for (int i= 0; i < methods.length; i++) {
 				IMethodBinding curr= methods[i];
-//{ObjectTeams: not using recursiveConstructor:
-/* orig:
 				if (curr.isConstructor() && recursiveConstructor != curr) {
-  :giro */
-				if (curr.isConstructor()) {
-// SH}
 					similarElements.add(curr); // similar elements can contain a implicit default constructor
 				}
 			}
