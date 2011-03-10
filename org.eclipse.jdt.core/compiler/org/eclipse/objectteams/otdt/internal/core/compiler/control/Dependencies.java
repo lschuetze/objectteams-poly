@@ -41,6 +41,8 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -50,6 +52,7 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleClassLiteralAccess;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleInitializationMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.DeclaredLifting;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting.InstantiationPolicy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.LiftingEnvironment;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.OTClassScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementor;
@@ -1648,6 +1651,8 @@ public class Dependencies implements ITranslationStates {
 		CalloutImplementor.transformCallouts(clazz);
 		if (resolver != null)
 			resolver.resolve(false/*doCallout*/); // callins last so all methods incl. callout are already in place
+		
+		checkMissingMethods(subRole, subRoleDecl.scope);
 
         clazz.setState(STATE_METHODS_CREATED);
         return true;
@@ -1770,6 +1775,28 @@ public class Dependencies implements ITranslationStates {
 		return null;
 	}
 
+	// detail of STATE_METHODS_CREATED (can only check this after callouts have been transformed):
+	private static void checkMissingMethods(ReferenceBinding roleBinding, ClassScope scope) {
+		if (roleBinding.isClass() && ((roleBinding.tagBits & TagBits.AnnotationInstantiation) != 0)) {
+			InstantiationPolicy instantiationPolicy = RoleModel.getInstantiationPolicy(roleBinding);
+			if (!instantiationPolicy.isAlways())
+				return;
+			boolean missing = false;
+			MethodBinding equals = roleBinding.getExactMethod(TypeConstants.EQUALS, 
+															  new TypeBinding[] {scope.getJavaLangObject()}, scope.compilationUnitScope());
+			if (equals == null || !equals.isValidBinding() || equals.declaringClass != roleBinding) {
+				missing = true;
+			} else {
+				MethodBinding hashCode = roleBinding.getExactMethod(TypeConstants.HASHCODE, 
+						  										  	Binding.NO_PARAMETERS, scope.compilationUnitScope());
+				if (hashCode == null || !hashCode.isValidBinding() || hashCode.declaringClass != roleBinding)
+					missing = true;
+			}
+			if (missing) {
+				scope.problemReporter().missingEqualsHashCodeWithInstantation(scope.referenceContext, instantiationPolicy);
+			}
+		}
+	}
 
 	/* **** STATE_TYPES_ADJUSTED (OT/J) ****
 	 * - wrap types in signatures using RoleTypeBinding

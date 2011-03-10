@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -539,6 +539,8 @@ public void computeId() {
 					this.id = IOTConstants.T_OrgObjectTeamsTeam;
 				else if(CharOperation.equals(IOTConstants.IBOUNDBASE, this.compoundName[2]))
 					this.id = IOTConstants.T_OrgObjectTeamsIBoundBase;
+				else if(CharOperation.equals(IOTConstants.INSTANTIATION, this.compoundName[2]))
+					this.id = IOTConstants.T_OrgObjectTeamsInstantiation;
 				return;
 			}
 // SH}

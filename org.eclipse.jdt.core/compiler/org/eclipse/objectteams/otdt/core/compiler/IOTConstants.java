@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 
 /**
  * @author stephan
- * @version $Id: IOTConstants.java 23483 2010-02-05 20:26:47Z stephan $
+ * @noimplement This interface is not intended to be implemented by clients.
  */
 @SuppressWarnings("nls")
 public interface IOTConstants
@@ -222,7 +222,16 @@ public interface IOTConstants
 
 	public static final char[][] ROLE_CAST_EXCEPTION 			  = {ORG, OBJECTTEAMS,
 																	 "RoleCastException".toCharArray()};
-
+	/** 
+	 * @since 3.7 (OT 0.8)
+	 */
+	public static final char[] INSTANTIATION = "Instantiation".toCharArray();
+	/** 
+	 * @since 3.7 (OT 0.8)
+	 */
+	public static final char[][] ORG_OBJECTTEAMS_INSTANTIATION = {ORG, OBJECTTEAMS,
+		 															 INSTANTIATION};
+	
 	public static final char[][] ILLEGAL_ROLE_CREATION_EXCEPTION = {ORG, OBJECTTEAMS,
 		 															 "IllegalRoleCreationException".toCharArray()};
 	public static final char[][] ORG_OBJECTTEAMS_ITEAMMIGRATABLE = {ORG, OBJECTTEAMS,
@@ -239,9 +248,13 @@ public interface IOTConstants
 																	"OTREInternalError".toCharArray()};
 
 	// Type IDs (cf. type TypeIds)
-	public static final int T_OrgObjectTeamsITeam      = 64;
-	public static final int T_OrgObjectTeamsTeam       = 65;
-	public static final int T_OrgObjectTeamsIBoundBase = 66;
+	public static final int T_OrgObjectTeamsITeam      = 100;
+	public static final int T_OrgObjectTeamsTeam       = 101;
+	public static final int T_OrgObjectTeamsIBoundBase = 102;
+	/**
+	 * @since 3.7 (OT 0.8)
+	 */
+	public static final int T_OrgObjectTeamsInstantiation = 103;
 
     // special identifiers:
 	public static final char[] RESULT = "result".toCharArray();

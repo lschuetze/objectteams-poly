@@ -36,10 +36,12 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFormatException;
+import org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
+import org.eclipse.jdt.internal.compiler.lookup.ElementValuePair;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -64,6 +66,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAtt
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting.InstantiationPolicy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleFieldAccess;
@@ -1355,6 +1359,26 @@ public class RoleModel extends TypeModel
 			}
 		}
 		return null;
+	}
+
+	public static Lifting.InstantiationPolicy getInstantiationPolicy(ReferenceBinding roleClassBinding) {
+		if ((roleClassBinding.getAnnotationTagBits() & TagBits.AnnotationInstantiation) != 0) {
+			for (AnnotationBinding annotation : roleClassBinding.getAnnotations()) {
+				if (annotation.getAnnotationType().id == IOTConstants.T_OrgObjectTeamsInstantiation) {
+					for (ElementValuePair pair : annotation.getElementValuePairs()) {
+						if (pair.value instanceof FieldBinding) {
+							String name = String.valueOf(((FieldBinding) pair.value).name);
+							try {
+								return InstantiationPolicy.valueOf(name);
+							} catch (IllegalArgumentException iae) {
+								return InstantiationPolicy.ERROR;
+							}
+						}
+					}
+				}
+			}
+		}
+		return InstantiationPolicy.ONDEMAND; // default
 	}
 
 	public static boolean areTypeParametersOfSameRole(TypeVariableBinding one, Binding two) {

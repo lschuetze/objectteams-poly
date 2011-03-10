@@ -229,6 +229,27 @@
         </filter>
     </resource>
     <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/IOTConstants.java" type="org.eclipse.objectteams.otdt.core.compiler.IOTConstants">
+        <filter comment="Create some room between JDT/Core and OTDT." id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsIBoundBase"/>
+                <message_argument value="66"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Create some room between JDT/Core and OTDT." id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsITeam"/>
+                <message_argument value="64"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Create some room between JDT/Core and OTDT." id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsTeam"/>
+                <message_argument value="65"/>
+            </message_arguments>
+        </filter>
         <filter id="405864542">
             <message_arguments>
                 <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>

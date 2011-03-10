@@ -1481,6 +1481,13 @@ void setSourceStart(int sourceStart);
 	int NoDefaultCtorInBoundRole                 = ROLE_RELATED + 3101; // 2.3.1(b)
 	int MissingEmptyCtorForLiftingCtor           = ROLE_RELATED + 3102; // 2.3.1(c)
 	int ExplicitSuperInLiftConstructor           = ROLE_RELATED + 3103; // 2.3.1(c)
+	/** @since 3.7 (OT 0.8) */
+	int InstantiationAnnotationInNonRole		 = ROLE_RELATED + 3104; // 2.3.1(d)
+	/** @since 3.7 (OT 0.8) */
+	int FieldInRoleWithInstantiationPolicy		 = ROLE_RELATED + 3105; // 2.3.1(d)
+	/** @since 3.7 (OT 0.8) */
+	int MissingEqualsHashCodeWithInstantation	 = ROLE_RELATED + 3106; // 2.3.1(d)
+
 	int DeclaredLiftingInStaticMethod            = ROLE_RELATED + 3201; // 2.3.2(a)
 	int QualifiedLiftingType 					 = ROLE_RELATED + 3202; // 2.3.2(a)
 	int LiftingTypeNotAllowedHere 				 = ROLE_RELATED + 3203; // 2.3.2(a)

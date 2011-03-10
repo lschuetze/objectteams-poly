@@ -142,6 +142,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ResultReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting.InstantiationPolicy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
@@ -9204,6 +9205,53 @@ public void explicitSuperInLiftConstructor(
         NoArgument,
         constructor.constructorCall.sourceStart,
         constructor.constructorCall.sourceEnd);
+}
+public void instantiationAnnotationInNonRole(TypeDeclaration typeDecl) {
+	int start=0, end=0;
+	String[] args = {new String(IOTConstants.INSTANTIATION)};
+	for (int i = 0; i < typeDecl.annotations.length; i++) {
+		Annotation annotation = typeDecl.annotations[i];
+		if (annotation.resolvedType.id == IOTConstants.T_OrgObjectTeamsInstantiation) {
+			start = annotation.sourceStart;
+			end   = annotation.sourceEnd;
+		}
+	}
+	this.handle(IProblem.InstantiationAnnotationInNonRole, args, args, start, end);
+}
+public void fieldInRoleWithInstantiationPolicy(ReferenceBinding typeBinding, FieldBinding fieldBinding) {
+	if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, fieldBinding.name))
+		return; // don't complain against generated fields
+	InstantiationPolicy instantiationPolicy = RoleModel.getInstantiationPolicy(typeBinding);
+	int problemId = 0;
+	int severity = 0;
+	switch (instantiationPolicy) {
+		case ONDEMAND: break; // no problem
+		case ALWAYS: 
+			problemId = IProblem.FieldInRoleWithInstantiationPolicy;
+			severity = ProblemSeverities.Warning;
+			break;
+		default:
+	}
+	if (problemId != 0) {
+		int start = 0, end = 0;
+		FieldDeclaration decl = fieldBinding.sourceField();
+		if (decl != null) {
+			start = decl.sourceStart;
+			end = decl.sourceEnd;
+		}
+		String[] args = { instantiationPolicy.name() };
+		handle(problemId, args, args, severity, start, end);
+	}
+}
+public void missingEqualsHashCodeWithInstantation(TypeDeclaration decl, InstantiationPolicy instantiationPolicy) {
+	String[] args = { instantiationPolicy.name() };
+	handle(
+		IProblem.MissingEqualsHashCodeWithInstantation,
+		args,
+		args,
+		ProblemSeverities.Warning,
+		decl.sourceStart,
+		decl.sourceEnd);
 }
 public void declaredLiftingInStaticMethod(AbstractMethodDeclaration method, Argument argument) {
 	String[] args = new String[] {new String(argument.name) };

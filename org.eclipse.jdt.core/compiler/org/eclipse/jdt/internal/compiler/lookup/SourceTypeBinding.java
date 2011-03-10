@@ -1014,8 +1014,13 @@ public FieldBinding[] fields() {
 		for (int i = 0, length = this.fields.length; i < length; i++) {
  */
 		for (int i = 0; i < this.fields.length; i++) {
-//SH}
-//{ObjectTeams: after compilation is finished we have no scope, can't resolve any better
+// check discouraged field in @Instantation(ALWAYS) roles:
+		  if (   this.scope != null 
+			  && (this.tagBits & TagBits.AnnotationInstantiation) != 0 
+			  && !this.fields[i].isStatic())
+			  this.scope.problemReporter().fieldInRoleWithInstantiationPolicy(this, this.fields[i]);
+			  
+// after compilation is finished we have no scope, can't resolve any better
 //   		    resolveTypeFor would NPE!
 		  int length = this.fields.length;
 		  if (   this.model!=null
@@ -1109,6 +1114,11 @@ public long getAnnotationTagBits() {
 		}
 		if ((this.tagBits & TagBits.AnnotationDeprecated) != 0)
 			this.modifiers |= ClassFileConstants.AccDeprecated;
+//{ObjectTeams: @Instantation can only be applied to role classes		
+		if (   (this.tagBits & TagBits.AnnotationInstantiation) != 0
+			&& (!isRole() || isInterface()))
+			this.scope.problemReporter().instantiationAnnotationInNonRole(typeDecl);
+// SH}
 	}
 	return this.tagBits;
 }

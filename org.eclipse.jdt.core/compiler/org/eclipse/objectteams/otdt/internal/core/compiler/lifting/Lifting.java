@@ -114,6 +114,12 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 public class Lifting extends SwitchOnBaseTypeGenerator
 					 implements TypeIds, ClassFileConstants, ExtraCompilerModifiers
 {
+	
+	public static enum InstantiationPolicy { NEVER, ONDEMAND, SINGLETON, ALWAYS, ERROR;
+		public boolean isAlways() { return this == ALWAYS; }
+		public boolean isOndemand() { return this == ONDEMAND; }
+	}
+	
     private RoleModel _boundRootRoleModel = null;
     private AstGenerator _gen = null;
 	private long _sourceLevel;
@@ -381,23 +387,28 @@ public class Lifting extends SwitchOnBaseTypeGenerator
     {
         liftToConstructorDeclaration.constructorCall =
         		gen.explicitConstructorCall(ExplicitConstructorCall.Super);
-    	Statement[] statements = new Statement[4];
+        boolean useRoleCache = RoleModel.getInstantiationPolicy(roleType.binding).isOndemand();
+    	Statement[] statements = new Statement[useRoleCache ? 4 : 2];
         // _OT$base = <baseArgName>;
         SingleNameReference lhs = gen.singleNameReference(_OT_BASE);
         statements[0] = gen.assignment(lhs, gen.singleNameReference(baseArgName));
 
-    	Statement[] regStats = genRoleRegistrationStatements(
-    								  this._boundRootRoleModel.getAst().scope,
-    								  this._boundRootRoleModel,
-    								  baseClassBinding,
-    								  liftToConstructorDeclaration,
-    								  gen);
-    	System.arraycopy(regStats, 0, statements, 1, regStats.length);
+        int idx = 1;
+		if (useRoleCache) {
+	    	Statement[] regStats = genRoleRegistrationStatements(
+	    								  this._boundRootRoleModel.getAst().scope,
+	    								  this._boundRootRoleModel,
+	    								  baseClassBinding,
+	    								  liftToConstructorDeclaration,
+	    								  gen);
+	    	System.arraycopy(regStats, 0, statements, idx, regStats.length);
+	    	idx += 2;
+        }
 
         // after initializing _OT$base and storing in the cache we are ready to execute field initializers:
 
         // this._OT$InitFields();
-    	statements[3] = RoleInitializationMethod.genInvokeInitMethod(
+    	statements[idx] = RoleInitializationMethod.genInvokeInitMethod(
 									    					gen.thisReference(),
 									    					roleType.binding,
 									    					gen);
@@ -737,12 +748,14 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 					// conditional generation (see below)
 					maybeCreateTeamMemberCheck(baseClassBinding),
 
+					(RoleModel.getInstantiationPolicy(roleClassBinding).isOndemand()) 
 					// if(!_OT$team_param._OT$cache_OT$RootRole.containsKey(base))
-					createRoleExistentCheck(
+					? createRoleExistentCheck(
 		                roleClassBinding,
 		                baseClassBinding,
 		                teamBinding,
-		                caseObjects),
+		                caseObjects)
+		            : createCreationCascade(roleClassBinding, teamBinding, caseObjects),
 
 					// return ...
 					createReturnStatement(roleClassBinding)
@@ -809,17 +822,12 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         		// (!_OT$team_param._OT$cache_OT$RootRole.containsKey(base))
         		createRoleExistentCheck(baseType),
 				// (then:)
-				this._gen.block(
-					// (create a role of the best matching type:)
-					new Statement[] {
-					caseObjects.length > 0 
-						? createSwitchStatement(teamType, returnType, caseObjects, this._gen)
-						: genLiftingFailedException(BASE, returnType, this._gen)}),
+				createCreationCascade(returnType, teamType, caseObjects),
 				// (else: return existing role)
 				createElseBlock(returnType, teamType));
     }
 
-    private UnaryExpression createRoleExistentCheck(
+	private UnaryExpression createRoleExistentCheck(
         ReferenceBinding baseType)
     {
         // !_OT$team_param._OT$cache_OT$RootRole.containsKey(base)
@@ -833,7 +841,16 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         		OperatorIds.NOT);
     }
 
-    /*
+    private Block createCreationCascade(ReferenceBinding roleType, ReferenceBinding teamType, RoleModel[] caseObjects) {
+		return this._gen.block(
+			// (create a role of the best matching type:)
+			new Statement[] {
+			caseObjects.length > 0 
+				? createSwitchStatement(teamType, roleType, caseObjects, this._gen)
+				: genLiftingFailedException(BASE, roleType, this._gen)});
+	}
+
+	/*
 	 * see SwitchOnBaseTypeGenerator.createCaseStatement(RoleModel,AstGenerator).
 	 */
 	protected Statement createCaseStatement(RoleModel role, AstGenerator gen)

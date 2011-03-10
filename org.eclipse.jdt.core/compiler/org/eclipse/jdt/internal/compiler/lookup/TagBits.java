@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -125,7 +125,14 @@ public interface TagBits {
 	long AnnotationInherited = ASTNode.Bit49L;
 	long AnnotationOverride = ASTNode.Bit50L;
 	long AnnotationSuppressWarnings = ASTNode.Bit51L;
-	long AllStandardAnnotationsMask = AnnotationTargetMASK | AnnotationRetentionMASK | AnnotationDeprecated | AnnotationDocumented | AnnotationInherited |  AnnotationOverride | AnnotationSuppressWarnings;
+//{ObjectTeams: one more standard annotation:
+	long AnnotationInstantiation = ASTNode.Bit21;
+// SH}
+	long AllStandardAnnotationsMask = AnnotationTargetMASK | AnnotationRetentionMASK | AnnotationDeprecated | AnnotationDocumented | AnnotationInherited |  AnnotationOverride | AnnotationSuppressWarnings
+//{ObjectTeams: one more standard annotation:
+										| AnnotationInstantiation
+// SH}
+	;
 
 	long DefaultValueResolved = ASTNode.Bit52L;
 
