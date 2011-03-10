@@ -1956,6 +1956,9 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("NoDefaultCtorInBoundRole", SKIP);
         expectedProblemAttributes.put("MissingEmptyCtorForLiftingCtor", SKIP);
         expectedProblemAttributes.put("ExplicitSuperInLiftConstructor", SKIP);
+        expectedProblemAttributes.put("InstantiationAnnotationInNonRole", SKIP);
+        expectedProblemAttributes.put("FieldInRoleWithInstantiationPolicy", SKIP);
+        expectedProblemAttributes.put("MissingEqualsHashCodeWithInstantation", SKIP);
         expectedProblemAttributes.put("DeclaredLiftingInStaticMethod", SKIP);
         expectedProblemAttributes.put("QualifiedLiftingType", SKIP);
         expectedProblemAttributes.put("LiftingTypeNotAllowedHere", SKIP);
