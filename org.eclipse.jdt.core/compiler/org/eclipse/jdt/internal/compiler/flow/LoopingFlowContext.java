@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - contribution for Bug 336428 - [compiler][null] bogus warning "redundant null check" in condition of do {} while() loop
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.flow;
 
@@ -384,42 +385,42 @@ public void recordBreakTo(FlowContext targetContext) {
 }
 
 public void recordContinueFrom(FlowContext innerFlowContext, FlowInfo flowInfo) {
-	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE) == 0)	{
-	if ((this.initsOnContinue.tagBits & FlowInfo.UNREACHABLE) == 0) {
-		this.initsOnContinue = this.initsOnContinue.
-			mergedWith(flowInfo.unconditionalInitsWithoutSideEffect());
-	}
-	else {
-		this.initsOnContinue = flowInfo.unconditionalCopy();
-	}
-	FlowContext inner = innerFlowContext;
-	while (inner != this && !(inner instanceof LoopingFlowContext)) {
-		inner = inner.parent;
-	}
-	if (inner == this) {
-		this.upstreamNullFlowInfo.
+	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) == 0)	{
+		if ((this.initsOnContinue.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) == 0) {
+			this.initsOnContinue = this.initsOnContinue.
+					mergedWith(flowInfo.unconditionalInitsWithoutSideEffect());
+		}
+		else {
+			this.initsOnContinue = flowInfo.unconditionalCopy();
+		}
+		FlowContext inner = innerFlowContext;
+		while (inner != this && !(inner instanceof LoopingFlowContext)) {
+			inner = inner.parent;
+		}
+		if (inner == this) {
+			this.upstreamNullFlowInfo.
 			addPotentialNullInfoFrom(
-				flowInfo.unconditionalInitsWithoutSideEffect());
-	}
-	else {
-		int length = 0;
-		if (this.innerFlowContexts == null) {
-			this.innerFlowContexts = new LoopingFlowContext[5];
-			this.innerFlowInfos = new UnconditionalFlowInfo[5];
+					flowInfo.unconditionalInitsWithoutSideEffect());
 		}
-		else if (this.innerFlowContextsCount ==
-				(length = this.innerFlowContexts.length) - 1) {
-			System.arraycopy(this.innerFlowContexts, 0,
-				(this.innerFlowContexts = new LoopingFlowContext[length + 5]),
-				0, length);
-			System.arraycopy(this.innerFlowInfos, 0,
-				(this.innerFlowInfos= new UnconditionalFlowInfo[length + 5]),
-				0, length);
+		else {
+			int length = 0;
+			if (this.innerFlowContexts == null) {
+				this.innerFlowContexts = new LoopingFlowContext[5];
+				this.innerFlowInfos = new UnconditionalFlowInfo[5];
+			}
+			else if (this.innerFlowContextsCount ==
+					(length = this.innerFlowContexts.length) - 1) {
+				System.arraycopy(this.innerFlowContexts, 0,
+						(this.innerFlowContexts = new LoopingFlowContext[length + 5]),
+						0, length);
+				System.arraycopy(this.innerFlowInfos, 0,
+						(this.innerFlowInfos= new UnconditionalFlowInfo[length + 5]),
+						0, length);
+			}
+			this.innerFlowContexts[this.innerFlowContextsCount] = (LoopingFlowContext) inner;
+			this.innerFlowInfos[this.innerFlowContextsCount++] =
+					flowInfo.unconditionalInitsWithoutSideEffect();
 		}
-		this.innerFlowContexts[this.innerFlowContextsCount] = (LoopingFlowContext) inner;
-		this.innerFlowInfos[this.innerFlowContextsCount++] =
-			flowInfo.unconditionalInitsWithoutSideEffect();
-	}
 	}
 }
 
@@ -493,14 +494,14 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 						scope.problemReporter().localVariableRedundantCheckOnNonNull(local, reference);
 					}
 					if (!flowInfo.isMarkedAsNullOrNonNullInAssertExpression(local)) {
-						flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE);
+						flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 					}
 				} else {
 					if ((this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) == 0) {
 						scope.problemReporter().localVariableNonNullComparedToNull(local, reference);
 					}
 					if (!flowInfo.isMarkedAsNullOrNonNullInAssertExpression(local)) {
-						flowInfo.initsWhenTrue().setReachMode(FlowInfo.UNREACHABLE);
+						flowInfo.initsWhenTrue().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 					}
 				}
 			} else if (flowInfo.isDefinitelyNull(local)) {
@@ -509,14 +510,14 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 						scope.problemReporter().localVariableRedundantCheckOnNull(local, reference);
 					}
 					if (!flowInfo.isMarkedAsNullOrNonNullInAssertExpression(local)) {
-						flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE);
+						flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 					}
 				} else {
 					if ((this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) == 0) {
 						scope.problemReporter().localVariableNullComparedToNonNull(local, reference);
 					}
 					if (!flowInfo.isMarkedAsNullOrNonNullInAssertExpression(local)) {
-						flowInfo.initsWhenTrue().setReachMode(FlowInfo.UNREACHABLE);
+						flowInfo.initsWhenTrue().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 					}
 				}
 			} else if (this.upstreamNullFlowInfo.isDefinitelyNonNull(local) && !flowInfo.isPotentiallyNull(local) && !flowInfo.isPotentiallyUnknown(local)) {    
@@ -525,11 +526,18 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 				if ((this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) == 0) {
 					recordNullReference(local, reference, checkType);
 				}
-			} else if (! flowInfo.cannotBeDefinitelyNullOrNonNull(local)) {
-				if (flowInfo.isPotentiallyNonNull(local)) {
-					recordNullReference(local, reference, CAN_ONLY_NON_NULL | checkType & CONTEXT_MASK);
-				} else {
-					if ((this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) == 0) {
+			} else if (flowInfo.cannotBeDefinitelyNullOrNonNull(local)) {
+				return; // no reason to complain, since there is definitely some uncertainty making the comparison relevant.
+			} else {
+				if ((this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) == 0) {
+					// note: pot non-null & pot null is already captured by cannotBeDefinitelyNullOrNonNull()
+					if (flowInfo.isPotentiallyNonNull(local)) {
+						// knowing 'local' can be non-null, we're only interested in seeing whether it can *only* be non-null 
+						recordNullReference(local, reference, CAN_ONLY_NON_NULL | checkType & CONTEXT_MASK);
+					} else if (flowInfo.isPotentiallyNull(local)) {
+						// knowing 'local' can be null, we're only interested in seeing whether it can *only* be null
+						recordNullReference(local, reference, CAN_ONLY_NULL | checkType & CONTEXT_MASK);
+					} else {
 						recordNullReference(local, reference, checkType);
 					}
 				}
@@ -554,7 +562,7 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 							scope.problemReporter().localVariableRedundantCheckOnNull(local, reference);
 						}
 						if (!flowInfo.isMarkedAsNullOrNonNullInAssertExpression(local)) {
-							flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE);
+							flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 						}
 						return;
 					case FlowContext.IN_COMPARISON_NON_NULL:
@@ -566,7 +574,7 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 							scope.problemReporter().localVariableNullComparedToNonNull(local, reference);
 						}
 						if (!flowInfo.isMarkedAsNullOrNonNullInAssertExpression(local)) {
-							flowInfo.initsWhenTrue().setReachMode(FlowInfo.UNREACHABLE);
+							flowInfo.initsWhenTrue().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 						}
 						return;
 					case FlowContext.IN_ASSIGNMENT:

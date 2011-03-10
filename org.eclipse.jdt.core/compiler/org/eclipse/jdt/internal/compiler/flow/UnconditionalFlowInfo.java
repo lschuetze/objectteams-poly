@@ -742,7 +742,7 @@ final private boolean isDefinitelyAssigned(int position) {
 final public boolean isDefinitelyAssigned(FieldBinding field) {
 	// Mirrored in CodeStream.isDefinitelyAssigned(..)
 	// do not want to complain in unreachable code
-	if ((this.tagBits & UNREACHABLE) != 0) {
+	if ((this.tagBits & UNREACHABLE_OR_DEAD) != 0) {
 		return true;
 	}
 //{ObjectTeams: if it is copied don't require definite assignment again
@@ -754,7 +754,7 @@ final public boolean isDefinitelyAssigned(FieldBinding field) {
 
 final public boolean isDefinitelyAssigned(LocalVariableBinding local) {
 	// do not want to complain in unreachable code if local declared in reachable code
-	if ((this.tagBits & UNREACHABLE) != 0 && (local.declaration.bits & ASTNode.IsLocalDeclarationReachable) != 0) {
+	if ((this.tagBits & UNREACHABLE_OR_DEAD) != 0 && (local.declaration.bits & ASTNode.IsLocalDeclarationReachable) != 0) {
 		return true;
 	}
 	return isDefinitelyAssigned(local.id + this.maxFieldCount);
@@ -1551,7 +1551,7 @@ public void markPotentiallyNonNullBit(LocalVariableBinding local) {
 }
 
 public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
-	if ((otherInits.tagBits & UNREACHABLE) != 0 && this != DEAD_END) {
+	if ((otherInits.tagBits & UNREACHABLE_OR_DEAD) != 0 && this != DEAD_END) {
 		if (COVERAGE_TEST_FLAG) {
 			if(CoverageTestId == 28) {
 				throw new AssertionFailedException("COVERAGE 28"); //$NON-NLS-1$
@@ -1560,7 +1560,7 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
 		combineNullStatusChangeInAssertInfo(otherInits);
 		return this;
 	}
-	if ((this.tagBits & UNREACHABLE) != 0) {
+	if ((this.tagBits & UNREACHABLE_OR_DEAD) != 0) {
 		if (COVERAGE_TEST_FLAG) {
 			if(CoverageTestId == 29) {
 				throw new AssertionFailedException("COVERAGE 29"); //$NON-NLS-1$
@@ -1585,7 +1585,17 @@ public UnconditionalFlowInfo mergedWith(UnconditionalFlowInfo otherInits) {
 		na1, na2, na3, na4,
 		nb1, nb2, nb3, nb4,
 		b1, b2, b3, b4;
-	if (thisHadNulls) {
+	if ((otherInits.tagBits & FlowInfo.UNREACHABLE_BY_NULLANALYSIS) != 0) {
+		otherHasNulls = false; // skip merging, otherInits is unreachable by null analysis
+	} else if ((this.tagBits & FlowInfo.UNREACHABLE_BY_NULLANALYSIS) != 0) { // directly copy if this is unreachable by null analysis
+		this.nullBit1 = otherInits.nullBit1;
+		this.nullBit2 = otherInits.nullBit2;
+		this.nullBit3 = otherInits.nullBit3;
+		this.nullBit4 = otherInits.nullBit4;
+		thisHadNulls = false;
+		thisHasNulls = otherHasNulls;
+		this.tagBits = otherInits.tagBits;
+	} else if (thisHadNulls) {
     	if (otherHasNulls) {
     		this.nullBit1 = (a2 = this.nullBit2) & (a3 = this.nullBit3)
     							& (a4 = this.nullBit4) & (b1 = otherInits.nullBit1)
@@ -1880,6 +1890,8 @@ public FlowInfo setReachMode(int reachMode) {
 	}	
 	if (reachMode == REACHABLE ) {
 		this.tagBits &= ~UNREACHABLE;
+	} else if (reachMode == UNREACHABLE_BY_NULLANALYSIS ) {
+		this.tagBits |= UNREACHABLE_BY_NULLANALYSIS;	// do not interfere with definite assignment analysis
 	} else {
 		if ((this.tagBits & UNREACHABLE) == 0) {
 			// reset optional inits when becoming unreachable
@@ -1892,7 +1904,7 @@ public FlowInfo setReachMode(int reachMode) {
 				}
 			}
 		}
-		this.tagBits |= UNREACHABLE;
+		this.tagBits |= reachMode;
 	}
 	return this;
 }

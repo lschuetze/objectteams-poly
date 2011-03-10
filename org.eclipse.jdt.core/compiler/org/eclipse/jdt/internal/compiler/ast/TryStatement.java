@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -116,7 +116,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			tryInfo = flowInfo;
 		} else {
 			tryInfo = this.tryBlock.analyseCode(currentScope, handlingContext, flowInfo.copy());
-			if ((tryInfo.tagBits & FlowInfo.UNREACHABLE) != 0)
+			if ((tryInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0)
 				this.bits |= ASTNode.IsTryBlockExiting;
 		}
 
@@ -165,7 +165,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				ifTrue: [catchInits addPotentialInitializationsFrom: tryInits]."
 				*/
 				if (this.tryBlock.statements == null) {
-					catchInfo.setReachMode(FlowInfo.UNREACHABLE);
+					catchInfo.setReachMode(FlowInfo.UNREACHABLE_OR_DEAD);
 				}
 				catchInfo =
 					this.catchBlocks[i].analyseCode(
@@ -174,7 +174,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 						catchInfo);
 				this.catchExitInitStateIndexes[i] = currentScope.methodScope().recordInitializationStates(catchInfo);
 				this.catchExits[i] =
-					(catchInfo.tagBits & FlowInfo.UNREACHABLE) != 0;
+					(catchInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0;
 				tryInfo = tryInfo.mergedWith(catchInfo.unconditionalInits());
 			}
 		}
@@ -225,7 +225,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			tryInfo = flowInfo;
 		} else {
 			tryInfo = this.tryBlock.analyseCode(currentScope, handlingContext, flowInfo.copy());
-			if ((tryInfo.tagBits & FlowInfo.UNREACHABLE) != 0)
+			if ((tryInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0)
 				this.bits |= ASTNode.IsTryBlockExiting;
 		}
 
@@ -274,7 +274,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				ifTrue: [catchInits addPotentialInitializationsFrom: tryInits]."
 				*/
 				if (this.tryBlock.statements == null) {
-					catchInfo.setReachMode(FlowInfo.UNREACHABLE);
+					catchInfo.setReachMode(FlowInfo.UNREACHABLE_OR_DEAD);
 				}
 				catchInfo =
 					this.catchBlocks[i].analyseCode(
@@ -283,7 +283,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 						catchInfo);
 				this.catchExitInitStateIndexes[i] = currentScope.methodScope().recordInitializationStates(catchInfo);
 				this.catchExits[i] =
-					(catchInfo.tagBits & FlowInfo.UNREACHABLE) != 0;
+					(catchInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0;
 				tryInfo = tryInfo.mergedWith(catchInfo.unconditionalInits());
 			}
 		}
