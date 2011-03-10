@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -782,7 +782,7 @@ public interface ITypeBinding extends IBinding {
 	 * (which must then be the interface part ;-)
 	 *
 	 * @param other
-	 * @return
+	 * @return the classpart binding of the given role or null
 	 */
 	public boolean isClassPartOf(ITypeBinding other);
 
@@ -797,6 +797,12 @@ public interface ITypeBinding extends IBinding {
 	public ITypeBinding getIfcPart();
 
 	/**
+	 * For a role class returns the corresponding class part.
+	 * @since 3.7 (OT 0.8)
+	 */
+	public ITypeBinding getClassPart();
+
+	/**
 	 * Returns the type binding for the baseclass of the type represented
 	 * by this class binding.
 	 * @return the baseclass of the class represented by this type binding,
@@ -808,10 +814,10 @@ public interface ITypeBinding extends IBinding {
 	 * Returns the name of this type as getQualifiedName() would do,
 	 * but respect anchored types.
 	 *
-	 * @return
+	 * @return a name representation the respects anchored type.
 	 */
 	public String getOptimalName();
-//km}
+//km+SH}
 
 //{ObjectTeams: tsuper types for roles via role model:
     /**

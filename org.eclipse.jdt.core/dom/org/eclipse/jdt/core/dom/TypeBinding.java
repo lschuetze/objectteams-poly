@@ -857,8 +857,8 @@ class TypeBinding implements ITypeBinding {
 
 //{ObjectTeams: uniform handling of regular types names and anchored role type names:
 		public String getOptimalName() {
-			if (binding instanceof ReferenceBinding)
-				return new String(((ReferenceBinding)binding).optimalName());
+			if (this.binding instanceof ReferenceBinding)
+				return new String(((ReferenceBinding)this.binding).optimalName());
 			return getQualifiedName();
 		}
 //	 SH}
@@ -870,9 +870,9 @@ class TypeBinding implements ITypeBinding {
 	        {
 	            return null;
 	        }
-	        if (binding instanceof ReferenceBinding)
+	        if (this.binding instanceof ReferenceBinding)
 	        {
-	            RoleModel roleModel = ((ReferenceBinding)binding).roleModel;
+	            RoleModel roleModel = ((ReferenceBinding)this.binding).roleModel;
 	            ReferenceBinding[] tsuperRefs = roleModel.getTSuperRoleBindings();
 	            int length = tsuperRefs.length;
 	            ITypeBinding[] superRoles = new ITypeBinding[length];
@@ -1259,6 +1259,20 @@ class TypeBinding implements ITypeBinding {
 		if (this.binding == null || !this.binding.isRole())
 			return false;
 		return ((ReferenceBinding)this.binding).isSynthInterface();
+	}
+	/*
+	 * @see ITypeBinding#getClassPart()
+	 */
+	public ITypeBinding getClassPart() {
+	    if (!isInterface())
+			return this;
+	    if (!isRole())
+	    	return null;
+	    ReferenceBinding roleBinding = (ReferenceBinding) this.binding;
+	    ReferenceBinding classPart = roleBinding.getRealClass();
+	    if (classPart == null)
+			return null;
+	    return this.resolver.getTypeBinding(classPart);
 	}
 	/*
 	 * @see ITypeBinding#getIfcPart()

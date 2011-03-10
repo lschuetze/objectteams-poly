@@ -573,6 +573,11 @@ class RecoveredTypeBinding implements ITypeBinding {
 			return this;
 		return null;
 	}
+	public ITypeBinding getClassPart() {
+		if (!isInterface())
+			return this;
+		return null;
+	}
 	public ITypeBinding getBaseClass() {
 		return null;
 	}
