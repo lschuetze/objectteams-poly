@@ -3063,13 +3063,13 @@ public class ReportedBugs extends AbstractOTJLDTest {
             "----------\n" + 
     		"1. WARNING in TeamB11sh68.java (at line 2)\n" + 
     		"	@SuppressWarnings({\"unused\",\"basecall\",\"restriction\"}) // last one is unnecessary\n" + 
+    		"	                            ^^^^^^^^^^\n" + 
+    		"Unnecessary @SuppressWarnings(\"basecall\")\n" + 
+    		"----------\n" + 
+    		"2. WARNING in TeamB11sh68.java (at line 2)\n" + 
+    		"	@SuppressWarnings({\"unused\",\"basecall\",\"restriction\"}) // last one is unnecessary\n" + 
     		"	                                       ^^^^^^^^^^^^^\n" + 
     		"Unnecessary @SuppressWarnings(\"restriction\")\n" + 
-    		"----------\n" + 
-    		"2. WARNING in TeamB11sh68.java (at line 5)\n" + 
-    		"	@SuppressWarnings(\"basecall\") // unnesserary\n" + 
-    		"	                  ^^^^^^^^^^\n" + 
-    		"Unnecessary @SuppressWarnings(\"basecall\")\n" + 
     		"----------\n" + 
     		"3. WARNING in TeamB11sh68.java (at line 7)\n" + 
     		"	int getSecret() -> get int secret; // <- decapsulation warning was masked by above @SuppressWarnings\n" + 
