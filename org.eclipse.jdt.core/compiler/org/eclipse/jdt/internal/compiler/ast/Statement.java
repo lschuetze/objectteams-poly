@@ -83,8 +83,9 @@ public void branchChainTo(BranchLabel label) {
 // Report an error if necessary (if even more unreachable than previously reported
 // complaintLevel = 0 if was reachable up until now, 1 if fake reachable (deadcode), 2 if fatal unreachable (error)
 public int complainIfUnreachable(FlowInfo flowInfo, BlockScope scope, int previousComplaintLevel) {
-	if ((flowInfo.reachMode() & FlowInfo.UNREACHABLE_OR_DEAD) != 0) {
-		this.bits &= ~ASTNode.IsReachable;
+	if ((flowInfo.reachMode() & FlowInfo.UNREACHABLE) != 0) {
+		if ((flowInfo.reachMode() & FlowInfo.UNREACHABLE_OR_DEAD) != 0)
+			this.bits &= ~ASTNode.IsReachable;
 //{ObjectTeams: ignore generated "return _OT$result" (generateCode will also ignore this statement):
 		boolean shouldReport = true;
 		if (this instanceof ReturnStatement) {
