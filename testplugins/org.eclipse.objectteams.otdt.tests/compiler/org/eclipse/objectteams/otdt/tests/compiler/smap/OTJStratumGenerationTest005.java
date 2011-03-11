@@ -195,13 +195,12 @@ public class OTJStratumGenerationTest005 extends AbstractSourceMapGeneratorTest
     {
     	SmapStratum stratum_role2 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
     
-    	FileInfo fileinfo = stratum_role2.getOrCreateFileInfo("Team.java", "org/objectteams/Team.java");
+    	FileInfo fileInfo = stratum_role2.getOrCreateFileInfo("Team.java", "org/objectteams/Team.java");
     	LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,11);
-    	fileinfo.addLineInfo(lineInfo1);
+    	fileInfo.addLineInfo(lineInfo1);
     
-        FileInfo fileInfo1 = stratum_role2.getOrCreateFileInfo("SuperTeam.java", "callout/SuperTeam.java");
         LineInfo lineInfo2 = new LineInfo(2,10);
-        fileInfo1.addLineInfo(lineInfo2);
+        fileInfo.addLineInfo(lineInfo2);
         
         FileInfo fileInfo2 = stratum_role2.getOrCreateFileInfo("SubTeam.java", "callout/SubTeam.java");
         LineInfo lineInfo3 = new LineInfo(1,1);

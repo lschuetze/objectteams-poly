@@ -172,14 +172,12 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
     	SmapStratum stratum_role = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
     	
     	FileInfo fileInfo_role0 = stratum_role.getOrCreateFileInfo("Team.java", "org/objectteams/Team.java");
+    	
     	LineInfo lineInfo1_role0 = new LineInfo(OT_CONFINED_GET_TEAM_LINE, 25); // mapped line of _OT$getTeam() to synthetic line 25
-        
     	fileInfo_role0.addLineInfo(lineInfo1_role0);
         
-        FileInfo fileInfo_role1 = stratum_role.getOrCreateFileInfo("SuperSuperTeam.java", "copyInheritance/SuperSuperTeam.java");
-        LineInfo lineInfo1_role1 = new LineInfo(2,24); // default ctor at team position (2) mapped to synthetic line 25
-        
-        fileInfo_role1.addLineInfo(lineInfo1_role1);
+        LineInfo lineInfo1_role1 = new LineInfo(2,24); // default ctor at team position (2) mapped to synthetic line 24
+        fileInfo_role0.addLineInfo(lineInfo1_role1);
         
         // no contribution from SuperTeam$__OT__Confined
         

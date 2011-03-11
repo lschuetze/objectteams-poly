@@ -135,9 +135,8 @@ public class OTJStratumGenerationTest003 extends AbstractSourceMapGeneratorTest
         LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,22); // getTeam mapped to synthetic line 22
         fileInfo.addLineInfo(lineInfo1);
     	
-        FileInfo fileInfo1 = stratum_role.getOrCreateFileInfo("SuperTeam.java", "roleFileAndCopyInh/SuperTeam.java");
         LineInfo lineInfo2 = new LineInfo(3,21); // class position to first synthetic line 21
-        fileInfo1.addLineInfo(lineInfo2);
+        fileInfo.addLineInfo(lineInfo2);
         
         FileInfo fileInfo2 = stratum_role.getOrCreateFileInfo("SubTeam.java", "roleFileAndCopyInh/SubTeam.java");
         LineInfo lineInfo3 = new LineInfo(1,1); // all lines of SubTeam unmapped
