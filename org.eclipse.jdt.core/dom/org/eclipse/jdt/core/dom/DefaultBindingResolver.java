@@ -1867,21 +1867,23 @@ class DefaultBindingResolver extends BindingResolver {
 				AST ast = variable.ast;
 				SingleVariableDeclaration realVariable = (SingleVariableDeclaration)variable;
 				LocalDeclaration fakedArgument = ((LiftingTypeReference)abstractVariableDeclaration.type).fakedArgument;
-				IVariableBinding fakedBinding = getVariableBinding(fakedArgument.binding, variable);
-				
-				// fake the internal local with role type, while avoiding the internal variable name (_OT$<arg>)
-				SingleVariableDeclaration fakedVariable = ast.newSingleVariableDeclaration();
-				fakedVariable.setName((SimpleName) variable.getName().clone(ast));
-				Type roleType = ((LiftingType)realVariable.getType()).getRoleType();
-				fakedVariable.setType((Type) roleType.clone(ast));
-				List modifiers = realVariable.modifiers();
-				for(Object mod : modifiers)
-					fakedVariable.modifiers().add(((Modifier)mod).clone(ast));
-				
-				this.bindingsToAstNodes.put(fakedBinding, fakedVariable);
-				key = fakedBinding.getKey();
-				if (key != null)
-					this.bindingTables.bindingKeysToBindings.put(key, fakedBinding);
+				if (fakedArgument != null) {
+					IVariableBinding fakedBinding = getVariableBinding(fakedArgument.binding, variable);
+					
+					// fake the internal local with role type, while avoiding the internal variable name (_OT$<arg>)
+					SingleVariableDeclaration fakedVariable = ast.newSingleVariableDeclaration();
+					fakedVariable.setName((SimpleName) variable.getName().clone(ast));
+					Type roleType = ((LiftingType)realVariable.getType()).getRoleType();
+					fakedVariable.setType((Type) roleType.clone(ast));
+					List modifiers = realVariable.modifiers();
+					for(Object mod : modifiers)
+						fakedVariable.modifiers().add(((Modifier)mod).clone(ast));
+					
+					this.bindingsToAstNodes.put(fakedBinding, fakedVariable);
+					key = fakedBinding.getKey();
+					if (key != null)
+						this.bindingTables.bindingKeysToBindings.put(key, fakedBinding);
+				}
 			}
 // SH}
 			return variableBinding;
