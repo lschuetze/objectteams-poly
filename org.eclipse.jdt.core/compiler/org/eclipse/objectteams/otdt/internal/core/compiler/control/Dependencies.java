@@ -1652,7 +1652,8 @@ public class Dependencies implements ITranslationStates {
 		if (resolver != null)
 			resolver.resolve(false/*doCallout*/); // callins last so all methods incl. callout are already in place
 		
-		checkMissingMethods(subRole, subRoleDecl.scope);
+		if (subRoleDecl != null)
+			checkMissingMethods(subRole, subRoleDecl.scope);
 
         clazz.setState(STATE_METHODS_CREATED);
         return true;
