@@ -683,6 +683,10 @@ public TypeBinding resolveType(BlockScope scope) {
 				fieldBinding = ((FieldAccessSpec)callout.baseMethodSpec).resolvedField;
 				this.binding = fieldBinding;
 				setDepth(fieldBinding.isStatic() ? 1 : 0); // static c-t-f needs to pass the enclosing team
+				if (((FieldAccessSpec)callout.baseMethodSpec).isSetter())
+					this.resolvedType = callout.roleMethodSpec.resolvedParameters()[0];
+				else
+					this.resolvedType = callout.roleMethodSpec.resolvedType();
 			}
 		}
 	  if (!fieldBinding.isValidBinding()) { // might have been corrected by callout inference
@@ -760,6 +764,10 @@ public TypeBinding resolveType(BlockScope scope) {
 	}
 	TypeBinding fieldType = fieldBinding.type;
 	if (fieldType != null) {
+//{ObjectTeams: use pre-computed type for inferred callout-to-field:
+		if (this.resolvedType != null)
+			fieldType = this.resolvedType;
+// SH}
 		if ((this.bits & ASTNode.IsStrictlyAssigned) == 0) {
 			fieldType = fieldType.capture(scope, this.sourceEnd);	// perform capture conversion if read access
 		}
