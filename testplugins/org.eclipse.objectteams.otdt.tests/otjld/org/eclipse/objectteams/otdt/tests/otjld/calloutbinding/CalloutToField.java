@@ -3333,7 +3333,50 @@ public class CalloutToField extends AbstractOTJLDTest {
             customOptions,
             null/*no custom requestor*/);
     }
-    
+
+    // an inferred callout to field has to apply lifting
+    // like before but field reference (this.me)
+    // Bug 339807 - [compiler] inferred callout to field doesn't support lifting
+    public void test3320_inferredCalloutToField15f() {
+       Map customOptions = getCompilerOptions();
+       customOptions.put(CompilerOptions.OPTION_ReportInferredCallout, CompilerOptions.WARNING);
+       
+       runConformTest(
+            new String[] {
+		"Team3320ictf15f.java",
+			    "\n" +
+			    "public team class Team3320ictf15f {\n" +
+			    "    @SuppressWarnings(\"inferredcallout\")\n" +
+			    "    protected class R playedBy T3320ictf15f {\n" +
+			    "        protected R() { base(); }\n" +
+			    "        protected void test() {\n" +
+			    "            R other = this.me;\n" +
+			    "            other.print();\n" +
+			    "        }\n" +
+			    "        void print() { System.out.print(\"OK\"); }\n" +
+			    "    }\n" +
+			    "    public void test() {\n" +
+			    "        new R().test();\n" +
+			    "    }\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        new Team3320ictf15f().test();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T3320ictf15f.java",
+			    "\n" +
+			    "public class T3320ictf15f {\n" +
+			    "    public T3320ictf15f me = this;\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "OK",
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
+    }
 
     // an assignment is inferred to use a declared callout to field - compound assignment to field reference
     public void test3320_inferredCalloutToField16() {
