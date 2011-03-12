@@ -41,6 +41,7 @@ public class OTJLDError
     private static final Pattern SUBSECTION_PATTERN = Pattern.compile("(.*)\\s*\\(\\s*(.*)\\s*\\).*");
     public static final String URL_PATH = "guide/otjld/xdef/";
     private static final String IMAGES_URL_PATH = "guide/otjld/images/"; // just for initialization
+    private static final String CSS_URL_PATH = "guide/otjld/css/"; // just for initialization
     
     static boolean contentInitialized = false;
     
@@ -87,6 +88,7 @@ public class OTJLDError
             		// need to touch the directories whose content we need extracted:
             		FileLocator.toFileURL(OTHelpPlugin.getDefault().getBundle().getEntry(OTJLDError.URL_PATH));
             		FileLocator.toFileURL(OTHelpPlugin.getDefault().getBundle().getEntry(OTJLDError.IMAGES_URL_PATH));
+            		FileLocator.toFileURL(OTHelpPlugin.getDefault().getBundle().getEntry(OTJLDError.CSS_URL_PATH));
             		contentInitialized = true;
             	}
                 result = FileLocator.toFileURL(m_url).toString();
