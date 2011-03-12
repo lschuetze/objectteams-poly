@@ -59,6 +59,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTran
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.OTClassScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
@@ -232,7 +233,16 @@ public class DeclaredLifting implements IOTConstants {
 				receiverTeam = gen.qualifiedThisReference(teamBinding);
 			if (roleRef.baseclass() == null) {
 				// static adjustment (OTJLD 2.3.2(a)):
-				ReferenceBinding baseType = (ReferenceBinding)scope.getType(ltr.baseTokens, ltr.baseTokens.length);
+				ReferenceBinding baseType = null;
+				if (scope.classScope() instanceof OTClassScope) {
+					// try base scope first:
+					Scope baseScope = ((OTClassScope) scope.classScope()).getBaseImportScope();
+					if (baseScope != null)
+						baseType = (ReferenceBinding) baseScope.getType(ltr.baseTokens, ltr.baseTokens.length);
+				} 
+				if (baseType == null || !baseType.isValidBinding())
+					// fall back to normal scope:
+					baseType = (ReferenceBinding)scope.getType(ltr.baseTokens, ltr.baseTokens.length);
 				roleRef = (ReferenceBinding)TeamModel.getRoleToLiftTo(scope, baseType, roleRef, true, ltr);
 				if (baseType.isTypeVariable() && roleRef == null)
 					roleRef = (ReferenceBinding)roleType; // fall back to the declared type
