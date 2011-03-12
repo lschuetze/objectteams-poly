@@ -1052,4 +1052,41 @@ public class DeclaredLifting extends AbstractOTJLDTest {
             },
             "OK");
     }
+    
+    // Lifting to an unbound super role
+    // Bug 339801 - [compiler] declared lifting cannot resolve base imported base type
+    public void test6111_declaredLiftingToSuper1() {
+    	runConformTest(
+    		new String[] {
+    	"p1/T6111dlts1Main.java",
+    			"package p1;" +
+    			"import p2.Team6111dlts1;\n" +
+    			"public class T6111dlts1Main {\n" +
+    			"    public static void main(String... args) {\n" +
+    			"        new Team6111dlts1().test(new T6111dlts1_1());\n" +
+    			"    }\n" +
+    			"}\n",
+    	"p2/Team6111dlts1.java",
+    			"package p2;\n" +
+    			"import base p1.T6111dlts1_1;\n" +
+    			"@SuppressWarnings(\"decapsulation\")\n" +
+    			"public team class Team6111dlts1 {\n" +
+    			"    protected abstract class R0 {\n" +
+    			"        protected abstract void test();\n" +
+    			"    }\n" +
+    			"    protected class R1 extends R0 playedBy T6111dlts1_1 {\n" +
+    			"        test -> test;" +
+    			"    }\n" +
+    			"    public void test(T6111dlts1_1 as R0 r) {\n" +
+    			"        r.test();\n" +
+    			"    }\n" +
+    			"}\n",
+    	"p1/T6111dlts1_1.java",
+    			"package p1;\n" +
+    			"class T6111dlts1_1 {\n" +
+    			"    void test() { System.out.print(\"OK\"); }\n" +
+    			"}\n",
+    		},
+    		"OK");
+    }
 }
