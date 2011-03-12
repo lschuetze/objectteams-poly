@@ -11,6 +11,8 @@ public class RefactoringMessages extends NLS {
 	public static String ChangeSignatureAdaptor_cannotCreateParamMap_CTF_warning;
 	public static String ChangeSignatureAdaptor_cannotCreateParamMap_MultiCallin_warning;
 	public static String ChangeSignatureAdaptor_cannotUpdateParameterMapping_warning;
+	public static String ExtractInterfaceAdaptor_createAsRole_checkbox;
+	public static String ExtractInterfaceAdaptor_createInterface_changeName;
 	public static String MoveInstanceMethodAdaptor_ambiguousMethodSpec_error;
 	public static String MoveInstanceMethodAdaptor_checkOverloading_progress;
 	public static String MoveInstanceMethodAdaptor_moveInstanceMethod_name;
