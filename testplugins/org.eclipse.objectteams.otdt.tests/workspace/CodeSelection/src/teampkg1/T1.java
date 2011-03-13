@@ -6,5 +6,8 @@ public team class T1
 {
     public class R1 playedBy B1
     {
+    	protected R1() {
+    		base();
+    	}
     }
 }

@@ -88,6 +88,16 @@ public class CodeSelectionTests extends AbstractJavaModelTests
                 "B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]",
                 elements);
     }
+    // testing base constructor invocation:
+    public void testBaseclass1b() throws JavaModelException
+    {
+        ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "teampkg1", "T1.java");
+        IJavaElement[] elements = codeSelect(cu, "base();", "base");
+        assertElementsEqual(
+                "Unexpected elements",
+                "B1() [in B1 [in B1.java [in basepkg [in src [in CodeSelection]]]]]",
+                elements);
+    }
     
     public void testBaseclass2() throws JavaModelException
     {
