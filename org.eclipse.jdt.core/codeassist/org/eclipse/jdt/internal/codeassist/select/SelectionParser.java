@@ -44,6 +44,8 @@ import org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnMethodSpec;
 import org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnParameterMapping;
 import org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperReference;
+import org.eclipse.objectteams.otdt.internal.codeassist.select.SelectionOnBaseAllocationExpression;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
@@ -1522,6 +1524,10 @@ protected void updateRecoveryState() {
 		BaseCallMessageSend baseCall = new SelectionOnBaseCallMessageSend(send, baseEndPosition);
 		this.assistNode = baseCall;
 		return baseCall;
+	}
+	@Override
+	protected BaseAllocationExpression newBaseAllocationExpression(int start, int end) {
+		return new SelectionOnBaseAllocationExpression(start, end);
 	}
 	@Override
 	protected void consumeCallinLabel() {

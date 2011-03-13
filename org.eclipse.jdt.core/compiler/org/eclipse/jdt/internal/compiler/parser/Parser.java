@@ -4588,7 +4588,7 @@ private void consumeExplicitConstructorInvocationBase(int flag) {
     int end   = this.intStack[this.intPtr--];
 
 	// code basically taken from classInstanceCreation:
-	BaseAllocationExpression alloc = new BaseAllocationExpression(start, end);
+	BaseAllocationExpression alloc = newBaseAllocationExpression(start, end);
 
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
@@ -4618,6 +4618,9 @@ private void consumeExplicitConstructorInvocationBase(int flag) {
 	}
 
 	pushOnExpressionStack(alloc);
+}
+protected BaseAllocationExpression newBaseAllocationExpression(int start, int end) {
+	return new BaseAllocationExpression(start, end);
 }
 // SH}
 
