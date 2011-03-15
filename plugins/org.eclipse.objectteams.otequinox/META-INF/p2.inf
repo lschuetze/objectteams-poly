@@ -1,5 +1,5 @@
 instructions.install = \
-	addProgramProperty(propName:osgi.hook.configurators.include,propValue:org.eclipse.objectteams.otequinox.hook.HookConfigurator); \
+	setProgramProperty(propName:osgi.hook.configurators.include,propValue:org.eclipse.objectteams.otequinox.hook.HookConfigurator); \
 	setProgramProperty(propName:osgi.classloader.singleThreadLoads,propValue:false); \
 	setProgramProperty(propName:osgi.classloader.lock,propValue:classname); \
 	setProgramProperty(propName:ot.equinox,propValue:1);
