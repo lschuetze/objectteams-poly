@@ -1920,6 +1920,7 @@ private boolean checkRecoveredMethod() {
 private boolean checkRecoveredMethodMapping() {
 	// code partly copied from checkRecoveredMethod():
 	if (this.currentElement instanceof RecoveredMethodMapping){
+		RecoveredMethodMapping recoveredMethodMapping = (RecoveredMethodMapping)this.currentElement;
 		/* check if current awaiting identifier is the completion identifier */
 		char[] selector= null;
 		long selectorPos= 0L;
@@ -1935,6 +1936,15 @@ private boolean checkRecoveredMethodMapping() {
 				// awaiting an empty identifier (code inspired by CompletionScanner#getCurrentIdentifierSource).
 				selector= CompletionScanner.EmptyCompletionIdentifier;
 			} else {
+				// detect beginning of (incomplete) guard predicate:
+				if (this.currentToken == TerminalTokens.TokenNamebase) {
+					recoveredMethodMapping.foundBase = true;
+				} else if (this.currentToken == TerminalTokens.TokenNamewhen) {
+					consumeForceNoDiet();
+					// inside a base guard "base" is an identifier:
+					if (recoveredMethodMapping.foundBase)
+						consumeForceBaseIsIdentifier();
+				}
 				return false; // orig (no empty identifier found)
 			}
 		}
@@ -1946,7 +1956,6 @@ private boolean checkRecoveredMethodMapping() {
 				== this.scanner.getLineNumber(((CompletionScanner)this.scanner).completedIdentifierStart)){
 			return false;
 		}
- 		RecoveredMethodMapping recoveredMethodMapping = (RecoveredMethodMapping)this.currentElement;
 		/* only consider if inside method mapping header */
 		if (!recoveredMethodMapping.foundOpeningBrace
 			&& this.lastIgnoredToken == -1) {
@@ -2218,12 +2227,12 @@ private GuardPredicateDeclaration completeGuardKeywords(int ptr, CompilationResu
 
 	// store this type ref into a faked guard predicate:
 	GuardPredicateDeclaration result = new GuardPredicateDeclaration(cResult,
-												   "<CompleteOnGuard>".toCharArray(),
+												   "<CompleteOnGuard>".toCharArray(), //$NON-NLS-1$
 												   false,
 												   completionOnKeyword.sourceStart,
 												   completionOnKeyword.sourceEnd);
-	result.arguments = new Argument[]{new Argument("arg".toCharArray(), 0, completionOnKeyword, 0)};
-	result.tagAsHavingErrors(); // mark that we have not statements
+	result.arguments = new Argument[]{new Argument("arg".toCharArray(), 0, completionOnKeyword, 0)}; //$NON-NLS-1$
+	result.tagAsHavingErrors(); // mark that we have no statements
 
 	this.assistNode = completionOnKeyword;
 	this.lastCheckPoint = completionOnKeyword.sourceEnd + 1;
@@ -4398,9 +4407,9 @@ public MethodDeclaration convertToMethodDeclaration(ConstructorDeclaration c, Co
 public ImportReference createAssistImportReference(char[][] tokens, long[] positions, int mod){
 	return new CompletionOnImportReference(tokens, positions, mod);
 }
-//{ObjectTeams: modifiers added
-public ImportReference createAssistPackageReference(char[][] tokens, long[] positions, int modifiers){
-	return new CompletionOnPackageReference(tokens, positions, modifiers);
+//{ObjectTeams: packageModifiers added
+public ImportReference createAssistPackageReference(char[][] tokens, long[] positions, int packageModifiers){
+	return new CompletionOnPackageReference(tokens, positions, packageModifiers);
 // SH}
 }
 public NameReference createQualifiedAssistNameReference(char[][] previousIdentifiers, char[] assistName, long[] positions){

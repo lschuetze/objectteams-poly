@@ -4728,7 +4728,7 @@ protected void consumeFieldSpecLong() {
     // callout modifier is kept unprocessed in this.modifiers (see consumeCalloutHeaderLong/consumeCalloutBindingShort)
 }
 
-private void consumeForceBaseIsIdentifier() {
+protected void consumeForceBaseIsIdentifier() {
     // within the following expression, "base" is not a keyword!
 	// (side effect forced directly from the grammar, see also consumeRestoreBaseKeyword)
     this.scanner.forceBaseIsIdentifier();

@@ -23,11 +23,14 @@ package org.eclipse.jdt.internal.compiler.parser;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.Block;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
@@ -52,6 +55,8 @@ public class RecoveredMethodMapping extends RecoveredElement implements Terminal
 	// yet unused structure of base method specs by their method declaration:
 	public RecoveredMethod[] baseMethods;
 	int baseMethodCount = 0;
+
+	public boolean foundBase = false; // for completion on base guard of recovered callin binding
 
 public RecoveredMethodMapping(AbstractMethodMappingDeclaration methodMapping, RecoveredElement parent, int bracketBalance, Parser parser){
 	super(parent, bracketBalance, parser);
@@ -94,10 +99,22 @@ public RecoveredElement add(Statement statement, int bracketBalanceValue)
 	// adding a statement to a method mapping is interpreted as adding a guard predicate:
 	GuardPredicateDeclaration predicate= new GuardPredicateDeclaration(
 						this.methodMappingDeclaration.compilationResult,
-						IOTConstants.PREDICATE_METHOD_NAME,
-						/*base*/false,
+						this.foundBase ? IOTConstants.BASE_PREDICATE_PREFIX : IOTConstants.PREDICATE_METHOD_NAME,
+						this.foundBase,
 						statement.sourceStart-5, // guess position of "when"
 						statement.sourceStart-1);// -- " --
+	if (this.foundBase) {
+		// generate base argument (cf. Parser.consumePredicate):
+		// type of this argument will be set in SourceTypeBinding.resolveTypesFor
+		// (needs baseclass to be resolved, which might be inherited from super-role).
+		long poss = ((long)statement.sourceStart<<32)+statement.sourceStart+1;
+		Argument targetArg = new Argument(
+				IOTConstants.BASE,
+				poss,
+				new SingleTypeReference("_OT$unknownBaseType".toCharArray(), poss),  //$NON-NLS-1$
+				ClassFileConstants.AccFinal);
+		predicate.arguments = new Argument[] {targetArg};
+	}
 	predicate.returnType= gen.typeReference(TypeBinding.BOOLEAN);
 
 	// create a suitable return statement:
@@ -217,13 +234,13 @@ public AbstractMethodMappingDeclaration updatedMethodMappingDeclaration(int body
 	if (this.baseMethodCount > existingCount) {
 		if (this.methodMappingDeclaration.isCallout()) {
 			CalloutMappingDeclaration callout= (CalloutMappingDeclaration)this.methodMappingDeclaration;
-			callout.baseMethodSpec= new MethodSpec((MethodDeclaration) this.baseMethods[0].methodDeclaration);
+			callout.baseMethodSpec= new MethodSpec(this.baseMethods[0].methodDeclaration);
 		} else {
 			CallinMappingDeclaration callinMapping= (CallinMappingDeclaration)this.methodMappingDeclaration;
 			callinMapping.baseMethodSpecs= new MethodSpec[this.baseMethodCount];
 			for (int i=0; i<this.baseMethodCount; i++)
 				callinMapping.baseMethodSpecs[i]=
-					new MethodSpec((MethodDeclaration)this.baseMethods[i].methodDeclaration);
+					new MethodSpec(this.baseMethods[i].methodDeclaration);
 		}
 	}
 
@@ -327,9 +344,9 @@ public void updateSourceEndIfNecessary(int braceStart, int braceEnd){
 			this.methodMappingDeclaration.bodyEnd  = braceStart - 1;
 		}
 	}
-	MethodSpec[] baseMethods = this.methodMappingDeclaration.getBaseMethodSpecs();
-	if (baseMethods != null && baseMethods.length == 1) {
-		MethodSpec baseMethod = baseMethods[0];
+	MethodSpec[] baseMethodSpecs = this.methodMappingDeclaration.getBaseMethodSpecs();
+	if (baseMethodSpecs != null && baseMethodSpecs.length == 1) {
+		MethodSpec baseMethod = baseMethodSpecs[0];
 		if (baseMethod.sourceStart >= braceStart) {
 			// next declaration claims what we erroneously read as a base method spec
 			int start = baseMethod.sourceStart-1;
