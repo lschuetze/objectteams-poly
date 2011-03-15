@@ -956,7 +956,7 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n",
 				0, false);
 	}
-	public void testBaseGuard3() throws Exception {
+	public void testGuard3() throws Exception {
 		createBaseClass("test2", "AClass", "public boolean check() { return false; }");
 		assertTypeBodyProposal(
 				"protected class ARole playedBy AClass {\n" +
@@ -968,7 +968,7 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n",
 				0, false);
 	}
-	public void testBaseGuard4() throws Exception {
+	public void testGuard4() throws Exception {
 		createBaseClass("test2", "AClass", "public String check() { return false; }");
 		assertTypeBodyProposal(
 				"protected class ARole playedBy AClass {\n" +
@@ -980,7 +980,63 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n",
 				0, false);
 	}
+
+	// inside guard of short method binding
+	// Bug 340083 - [assist] cannot complete inside a binding guard
+	public void testGuard5() throws Exception {
+		fBeforeImports = "import base test2.AClass;";
+		fAfterImports = "import base test2.AClass;";
+		createBaseClass("test2", "AClass", "public String check() { return \"false\"; }");
+		assertTypeBodyProposal(
+				"protected class ARole playedBy AClass {\n" +
+				"    boolean flag;\n" +
+				"    toString <- after check when(f|); \n" +
+				"}\n",
+				"fla",
+				"protected class ARole playedBy AClass {\n" +
+				"    boolean flag;\n" +
+				"    toString <- after check when(flag|); \n" +
+				"}\n",
+				0, false);
+	}
+
+	// inside guard of short method binding, field reference
+	// Bug 340083 - [assist] cannot complete inside a binding guard
+	public void testGuard6() throws Exception {
+		fBeforeImports = "import base test2.AClass;";
+		fAfterImports = "import base test2.AClass;";
+		createBaseClass("test2", "AClass", "public String check() { return \"false\"; }");
+		assertTypeBodyProposal(
+				"protected class ARole playedBy AClass {\n" +
+				"    boolean flag;\n" +
+				"    toString <- after check when(this.f|); \n" +
+				"}\n",
+				"fla",
+				"protected class ARole playedBy AClass {\n" +
+				"    boolean flag;\n" +
+				"    toString <- after check when(this.flag|); \n" +
+				"}\n",
+				0, false);
+	}
 	
+	// inside base guard of short method binding, field reference
+	// Bug 340083 - [assist] cannot complete inside a binding guard
+	public void testGuard7() throws Exception {
+		fBeforeImports = "import base test2.AClass;";
+		fAfterImports = "import base test2.AClass;";
+		createBaseClass("test2", "AClass", "public String check() { return \"false\"; }\n public boolean flig;\n");
+		assertTypeBodyProposal(
+				"protected class ARole playedBy AClass {\n" +
+				"    boolean flag;\n" +
+				"    toString <- after check base when(base.f|); \n" +
+				"}\n",
+				"fl",
+				"protected class ARole playedBy AClass {\n" +
+				"    boolean flag;\n" +
+				"    toString <- after check base when(base.flig|); \n" +
+				"}\n",
+				0, false);
+	}
 	
 	public void testRoleTag1() throws Exception {
 		IPackageFragment teamPkg = CompletionTestSetup.getTestPackage("MyTeam");
