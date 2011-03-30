@@ -1,0 +1,9 @@
+#!/bin/sh
+
+PDEBUILD=eclipse/plugins/org.eclipse.pde.build_.*/about.html
+LAUNCHER=eclipse/plugins/org.eclipse.equinox.launcher_
+JDTFEATURE=eclipse/features/org.eclipse.jdt_.*/feature.xml
+JDTCORE=eclipse/plugins/org.eclipse.jdt.core_
+
+tar tzvf $1 | egrep "${PDEBUILD}|${LAUNCHER}|${JDTCORE}|${JDTFEATURE}"
+

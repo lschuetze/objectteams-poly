@@ -22,13 +22,22 @@ fi
 
 # Analyze the version number of the JDT feature as needed for patching content.xml later:
 JDTFEATURE=`ls -d ${BASE}/testrun/build-root/eclipse/features/org.eclipse.jdt_*`
-JDTVERSION=`echo ${JDTFEATURE} | cut -d '_' -f 2`
+if echo $JDTFEATURE | grep "\.r"
+then
+	JDTVERSION="`echo ${JDTFEATURE} | cut -d '_' -f 2`_`echo ${JDTFEATURE} | cut -d '_' -f 3`"
+else
+	JDTVERSION=`echo ${JDTFEATURE} | cut -d '_' -f 2`
+fi
 JDTVERSIONA=`echo ${JDTVERSION} | cut -d '-' -f 1`
 JDTVERSIONB=`echo ${JDTVERSION} | cut -d '-' -f 2`
 JDTVERSIONB2=`expr $JDTVERSIONB + 1`
 JDTVERSIONB2=`printf "%04d" ${JDTVERSIONB2}`
-echo "JDT feature is ${JDTVERSIONA}-${JDTVERSIONB}"
-if [ ! -r ${BASE}/testrun/build-root/eclipse/features/org.eclipse.jdt_${JDTVERSIONA}-${JDTVERSIONB}-* ]
+JDTVERSION=${JDTVERSIONA}-${JDTVERSIONB}
+JDTVERSIONNEXT=${JDTVERSIONA}-${JDTVERSIONB2}
+#JDTVERSION=${JDTVERSIONA}
+#JDTVERSIONNEXT=3.7.0.v20110122
+echo "JDT feature is ${JDTVERSION}"
+if [ ! -r ${BASE}/testrun/build-root/eclipse/features/org.eclipse.jdt_${JDTVERSION}-* ]
 then
     echo "JDT feature not correctly found in ${BASE}/testrun/build-root/eclipse/features"
     exit 2
@@ -96,7 +105,7 @@ echo "====Step 3: pack jars ===="
 for dir in ${LOCATION}/features ${LOCATION}/plugins
 do
         find ${dir} -type f -name \*.jar -exec \
-                java -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
+                ${JAVA5}/bin/java -jar ${JARPROCESSOR} -verbose -pack -outputDir ${dir} {} \;
 done
 
 
@@ -113,8 +122,8 @@ ls -ltr *\.*
 
 echo "====Step 5: patch content for feature inclusion version range===="
 mv content.xml content.xml-orig
-xsltproc  -o content.xml --stringparam version ${JDTVERSIONA}-${JDTVERSIONB} \
-    --stringparam versionnext ${JDTVERSIONA}-${JDTVERSIONB2} \
+xsltproc  -o content.xml --stringparam version ${JDTVERSION} \
+    --stringparam versionnext ${JDTVERSIONNEXT} \
     ../build/patch-content-xml.xsl content.xml-orig
 ls -ltr *\.*
 
