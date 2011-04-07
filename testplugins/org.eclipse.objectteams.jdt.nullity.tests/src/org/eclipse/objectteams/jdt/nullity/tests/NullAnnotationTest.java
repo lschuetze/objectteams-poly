@@ -141,13 +141,20 @@ public void test_nonnull_parameter_002() {
 			  "}\n"},
 	    "OK");
 }
-// passing null to nonnull parameter 
+// passing null to nonnull parameter - many fields in enclosing class
 public void test_nonnull_parameter_003() {
 	runNegativeTest(
 		new String[] {
 			"X.java",
 			  "import org.eclipse.jdt.annotation.*;\n" +
 			  "public class X {\n" +
+			  "    int i00, i01, i02, i03, i04, i05, i06, i07, i08, i09;" +
+			  "    int i10, i11, i12, i13, i14, i15, i16, i17, i18, i19;" +
+			  "    int i20, i21, i22, i23, i24, i25, i26, i27, i28, i29;" +
+			  "    int i30, i31, i32, i33, i34, i35, i36, i37, i38, i39;" +
+			  "    int i40, i41, i42, i43, i44, i45, i46, i47, i48, i49;" +
+			  "    int i50, i51, i52, i53, i54, i55, i56, i57, i58, i59;" +
+			  "    int i60, i61, i62, i63, i64, i65, i66, i67, i68, i69;" +
 			  "    void foo(@NonNull Object o) {\n" +
 			  "        System.out.print(o.toString());\n" +
 			  "    }\n" +
