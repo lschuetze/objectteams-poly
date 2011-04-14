@@ -97,25 +97,30 @@ public RecoveredElement add(Statement statement, int bracketBalanceValue)
 	AstGenerator gen= new AstGenerator(statement.sourceStart, statement.sourceEnd);
 
 	// adding a statement to a method mapping is interpreted as adding a guard predicate:
-	GuardPredicateDeclaration predicate= new GuardPredicateDeclaration(
+	GuardPredicateDeclaration predicate= null;
+	if (this.methodMappingDeclaration instanceof CallinMappingDeclaration)
+		predicate = ((CallinMappingDeclaration) this.methodMappingDeclaration).predicate;
+	if (predicate == null) {
+		predicate =	new GuardPredicateDeclaration(
 						this.methodMappingDeclaration.compilationResult,
 						this.foundBase ? IOTConstants.BASE_PREDICATE_PREFIX : IOTConstants.PREDICATE_METHOD_NAME,
 						this.foundBase,
 						statement.sourceStart-5, // guess position of "when"
 						statement.sourceStart-1);// -- " --
-	if (this.foundBase) {
-		// generate base argument (cf. Parser.consumePredicate):
-		// type of this argument will be set in SourceTypeBinding.resolveTypesFor
-		// (needs baseclass to be resolved, which might be inherited from super-role).
-		long poss = ((long)statement.sourceStart<<32)+statement.sourceStart+1;
-		Argument targetArg = new Argument(
-				IOTConstants.BASE,
-				poss,
-				new SingleTypeReference("_OT$unknownBaseType".toCharArray(), poss),  //$NON-NLS-1$
-				ClassFileConstants.AccFinal);
-		predicate.arguments = new Argument[] {targetArg};
+		if (this.foundBase) {
+			// generate base argument (cf. Parser.consumePredicate):
+			// type of this argument will be set in SourceTypeBinding.resolveTypesFor
+			// (needs baseclass to be resolved, which might be inherited from super-role).
+			long poss = ((long)statement.sourceStart<<32)+statement.sourceStart+1;
+			Argument targetArg = new Argument(
+					IOTConstants.BASE,
+					poss,
+					new SingleTypeReference("_OT$unknownBaseType".toCharArray(), poss),  //$NON-NLS-1$
+					ClassFileConstants.AccFinal);
+			predicate.arguments = new Argument[] {targetArg};
+		}
+		predicate.returnType= gen.typeReference(TypeBinding.BOOLEAN);
 	}
-	predicate.returnType= gen.typeReference(TypeBinding.BOOLEAN);
 
 	// create a suitable return statement:
 	if (statement instanceof FieldDeclaration)
