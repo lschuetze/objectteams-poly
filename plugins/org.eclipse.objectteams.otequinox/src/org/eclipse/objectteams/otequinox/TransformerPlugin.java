@@ -188,7 +188,7 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 			IS_OTDT |= KNOWN_OTDT_ASPECTS.contains(aspectBundleId);
 			Bundle[] aspectBundles = packageAdmin.getBundles(aspectBundleId, null);
 			if (aspectBundles == null || aspectBundles.length == 0 || (aspectBundles[0].getState() < Bundle.RESOLVED)) {
-				log(ILogger.INFO, "aspect bundle "+aspectBundleId+" is not resolved - not loading aspectBindings.");
+				log(ILogger.ERROR, "aspect bundle "+aspectBundleId+" is not resolved - not loading aspectBindings.");
 				continue;
 			}
 			
