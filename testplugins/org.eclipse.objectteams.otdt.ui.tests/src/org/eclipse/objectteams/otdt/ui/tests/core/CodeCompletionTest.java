@@ -1037,7 +1037,26 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n",
 				0, false);
 	}
-	
+
+	// see https://bugs.eclipse.org/340103 - [assist] FUP of bug 340083
+	// inside base guard of method binding with signatures, field reference
+	public void testGuard8() throws Exception {
+		fBeforeImports = "import base test2.AClass;";
+		fAfterImports = "import base test2.AClass;";
+		createBaseClass("test2", "AClass", "public String check() { return \"false\"; }\n public boolean flig;\n");
+		assertTypeBodyProposal(
+				"protected class ARole playedBy AClass {\n" +
+				"    boolean flag;\n" +
+				"    String toString() <- after String check() base when(base.f|); \n" +
+				"}\n",
+				"fl",
+				"protected class ARole playedBy AClass {\n" +
+				"    boolean flag;\n" +
+				"    String toString() <- after String check() base when(base.flig|); \n" +
+				"}\n",
+				0, false);
+	}
+
 	public void testRoleTag1() throws Exception {
 		IPackageFragment teamPkg = CompletionTestSetup.getTestPackage("MyTeam");
 		teamPkg.createCompilationUnit("MyRole.java", 
