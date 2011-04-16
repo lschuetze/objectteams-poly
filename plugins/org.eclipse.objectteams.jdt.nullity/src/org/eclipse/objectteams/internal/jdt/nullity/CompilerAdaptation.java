@@ -54,6 +54,8 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfInt;
+import org.objectteams.Instantiation;
+import org.objectteams.InstantiationPolicy;
 
 import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem;
 import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.TagBits;
@@ -102,6 +104,7 @@ public team class CompilerAdaptation {
 	// ======================= Statement level analysis ============================
 	
 	@SuppressWarnings("abstractrelevantrole")
+	@Instantiation(InstantiationPolicy.ALWAYS)
 	protected abstract class Statement playedBy Statement {
 		abstract Expression getExpression();
 		
@@ -123,16 +126,19 @@ public team class CompilerAdaptation {
 		}
 		
 	}
+	@Instantiation(InstantiationPolicy.ALWAYS)
 	protected class Assignment extends Statement playedBy Assignment {
 		/** Wire required method of super class. */
 		Expression getExpression() -> get Expression expression;		
 	}
+	@Instantiation(InstantiationPolicy.ALWAYS)
 	protected class LocalDeclaration extends Statement playedBy LocalDeclaration {
 		/** Wire required method of super class. */
 		Expression getExpression() -> get Expression initialization;
 	}
 	
 	/** Analyse argument expressions as part of a MessageSend, check against method parameter annotation. */
+	@Instantiation(InstantiationPolicy.ALWAYS)
 	protected class MessageSend playedBy MessageSend {
 
 		Expression[] getArguments() -> get Expression[] arguments;
@@ -194,6 +200,7 @@ public team class CompilerAdaptation {
 		}
 	}
 	
+	@Instantiation(InstantiationPolicy.ALWAYS)
 	protected class EqualExpression playedBy EqualExpression {
 		
 		MessageSend getLeftMessage() 		 -> get Expression left
@@ -230,6 +237,7 @@ public team class CompilerAdaptation {
 	}
 	
 	/** Analyse the expression within a return statement, check against method return annotation. */
+	@Instantiation(InstantiationPolicy.ALWAYS)
 	protected class ReturnStatement playedBy ReturnStatement {
 
 		Expression getExpression() 	-> get Expression expression;
@@ -265,6 +273,7 @@ public team class CompilerAdaptation {
 	// ======================= Method level annotations ============================
 
 	@SuppressWarnings("bindingconventions")
+	@Instantiation(InstantiationPolicy.ALWAYS)
 	protected class StandardAnnotation playedBy Annotation {
 
 		@SuppressWarnings("decapsulation")
