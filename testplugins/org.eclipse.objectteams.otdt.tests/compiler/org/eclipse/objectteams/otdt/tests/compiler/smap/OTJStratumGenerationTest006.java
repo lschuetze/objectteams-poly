@@ -92,8 +92,8 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
 
     	SmapStratum stratum_role1 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
         FileInfo fileInfo_role1 = stratum_role1.getOrCreateFileInfo("SuperTeam.java", "calloutOverride/SuperTeam.java");
-        LineInfo lineInfo1_role1 = new LineInfo(1,1);
-        lineInfo1_role1.setRepeatCount(16);
+        LineInfo lineInfo1_role1 = new LineInfo(4,4); // RoleA is l4-15
+        lineInfo1_role1.setRepeatCount(12);
         LineInfo lineInfo1_role2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo1_role3 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
 
@@ -122,12 +122,11 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
         SmapStratum stratum_role2 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
         
     	FileInfo fileinfo = stratum_role2.getOrCreateFileInfo("Team.java", "org/objectteams/Team.java");
-    	LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,17);
+    	LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,3);
     	fileinfo.addLineInfo(lineInfo1);
         
         FileInfo fileinfo2 = stratum_role2.getOrCreateFileInfo("SuperTeam.java", "calloutOverride/SuperTeam.java");
-        LineInfo lineInfo2 = new LineInfo(1,1);
-        lineInfo2.setRepeatCount(16);
+        LineInfo lineInfo2 = new LineInfo(2,2); // team header
         LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo4 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
         fileinfo2.addLineInfo(lineInfo2);
@@ -160,10 +159,10 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
 
     	SmapStratum stratum_role1 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
         FileInfo fileInfo1 = stratum_role1.getOrCreateFileInfo("SuperTeam.java", "calloutOverride/SuperTeam.java");
-        LineInfo lineInfo1 = new LineInfo(4,15);
-        LineInfo lineInfo2 = new LineInfo(8,18);
+        LineInfo lineInfo1 = new LineInfo(4,8);
+        LineInfo lineInfo2 = new LineInfo(8,11);
         lineInfo2.setRepeatCount(2);
-        LineInfo lineInfo3 = new LineInfo(13,16);
+        LineInfo lineInfo3 = new LineInfo(13,9);
         lineInfo3.setRepeatCount(2);
         
         fileInfo1.addLineInfo(lineInfo1);
@@ -171,8 +170,8 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
         fileInfo1.addLineInfo(lineInfo3);
 
         FileInfo fileInfo2 = stratum_role1.getOrCreateFileInfo("SubTeam.java", "calloutOverride/SubTeam.java");
-        LineInfo lineInfo4 = new LineInfo(1,1);
-        lineInfo4.setRepeatCount(14);
+        LineInfo lineInfo4 = new LineInfo(4,4); // RoleA is l4-7
+        lineInfo4.setRepeatCount(4);
         LineInfo lineInfo7 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo8 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
 
@@ -202,15 +201,14 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
         SmapStratum stratum_role2 = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
     
 		FileInfo fileInfo = stratum_role2.getOrCreateFileInfo("Team.java", "org/objectteams/Team.java");
-		LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,16);
+		LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,4);
 		fileInfo.addLineInfo(lineInfo1);
     
-        LineInfo lineInfo2 = new LineInfo(2,15);
+        LineInfo lineInfo2 = new LineInfo(2,3);
         fileInfo.addLineInfo(lineInfo2);
 		
 		FileInfo fileInfo3 = stratum_role2.getOrCreateFileInfo("SubTeam.java", "calloutOverride/SubTeam.java");
-        LineInfo lineInfo3 = new LineInfo(1,1);
-        lineInfo3.setRepeatCount(14);
+        LineInfo lineInfo3 = new LineInfo(2,2); // team header
         LineInfo lineInfo5 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo6 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
         fileInfo3.addLineInfo(lineInfo3);

@@ -132,15 +132,14 @@ public class OTJStratumGenerationTest003 extends AbstractSourceMapGeneratorTest
         SmapStratum stratum_role = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
 
         FileInfo fileInfo = stratum_role.getOrCreateFileInfo("Team.java", "org/objectteams/Team.java");
-        LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,22); // getTeam mapped to synthetic line 22
+        LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,7); // getTeam mapped to synthetic line 7
         fileInfo.addLineInfo(lineInfo1);
     	
-        LineInfo lineInfo2 = new LineInfo(3,21); // class position to first synthetic line 21
+        LineInfo lineInfo2 = new LineInfo(3,6); // class position to first synthetic line 6
         fileInfo.addLineInfo(lineInfo2);
         
         FileInfo fileInfo2 = stratum_role.getOrCreateFileInfo("SubTeam.java", "roleFileAndCopyInh/SubTeam.java");
-        LineInfo lineInfo3 = new LineInfo(1,1); // all lines of SubTeam unmapped
-        lineInfo3.setRepeatCount(20);
+        LineInfo lineInfo3 = new LineInfo(5,5); // only team header line of SubTeam (unmapped)
         LineInfo lineInfo5 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo6 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
         fileInfo2.addLineInfo(lineInfo3);

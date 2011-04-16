@@ -108,8 +108,8 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
                 ISMAPConstants.OTJ_STRATUM_NAME);
         FileInfo fileInfo_role1 = stratum_role1.getOrCreateFileInfo(
                 enclTypeSourceName, _packagePath + "/" + enclTypeSourceName);
-        LineInfo lineInfo1_role1 = new LineInfo(1, 1);
-        lineInfo1_role1.setRepeatCount(15);
+        LineInfo lineInfo1_role1 = new LineInfo(4, 4);
+        lineInfo1_role1.setRepeatCount(11);
         LineInfo lineInfo1_role2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo1_role3 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
 
@@ -176,8 +176,8 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
                 ISMAPConstants.OTJ_STRATUM_NAME);
         FileInfo fileInfo_role1 = stratum_role1.getOrCreateFileInfo(
                 enclTypeSourceName, _packagePath + "/" + enclTypeSourceName);
-        LineInfo lineInfo1_role1 = new LineInfo(1, 1);
-        lineInfo1_role1.setRepeatCount(13);
+        LineInfo lineInfo1_role1 = new LineInfo(4, 4);
+        lineInfo1_role1.setRepeatCount(9);
         LineInfo lineInfo1_role2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo1_role3 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
 

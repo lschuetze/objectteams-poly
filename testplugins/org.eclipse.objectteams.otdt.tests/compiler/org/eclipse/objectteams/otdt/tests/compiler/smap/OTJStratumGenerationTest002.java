@@ -93,10 +93,10 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
         // class position is used by ctor, initFields and getTeam
 
         FileInfo fileInfo1 = stratum_role.getOrCreateFileInfo("SuperTeam.java", "copyInheritance/SuperTeam.java");
-        LineInfo lineInfo1_role1 = new LineInfo(4,25); // (c) class position (4) mapped to synthetic line 25
-        LineInfo lineInfo2_role1 = new LineInfo(11,26); // (d) roleMethod0 (11..) mapped to synthetic lines 26-28
+        LineInfo lineInfo1_role1 = new LineInfo(4,12); // (c) class position (4) mapped to synthetic line 12
+        LineInfo lineInfo2_role1 = new LineInfo(11,13); // (d) roleMethod0 (11..) mapped to synthetic lines 13-15
         lineInfo2_role1.setRepeatCount(3);
-        LineInfo lineInfo3_role1 = new LineInfo(8,35); // (g) method roleMethod2 (8..) mapped to synthetic lines 35-36 
+        LineInfo lineInfo3_role1 = new LineInfo(8,22); // (g) method roleMethod2 (8..) mapped to synthetic lines 22-23 
         lineInfo3_role1.setRepeatCount(2);
         
         fileInfo1.addLineInfo(lineInfo1_role1);
@@ -104,11 +104,11 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
         fileInfo1.addLineInfo(lineInfo3_role1);
         
         FileInfo fileInfo0 = stratum_role.getOrCreateFileInfo("SuperSuperTeam.java", "copyInheritance/SuperSuperTeam.java");
-        LineInfo lineInfo1_role0 = new LineInfo(4,24); // (b) class position (4) mapped to synthetic line 24
-        LineInfo lineInfo2_role0 = new LineInfo(8,29); // (e) method roleMethod0 (8..) mapped to synthetic lines 29-30  
+        LineInfo lineInfo1_role0 = new LineInfo(4,11); // (b) class position (4) mapped to synthetic line 11
+        LineInfo lineInfo2_role0 = new LineInfo(8,16); // (e) method roleMethod0 (8..) mapped to synthetic lines 16-17  
         lineInfo2_role0.setRepeatCount(2);
-        LineInfo lineInfo3_role0 = new LineInfo(12,31); // (f) method roleMethod1 (12,14,15) mapped to synthetic lines 31,33,34
-        lineInfo3_role0.setRepeatCount(4); // repeat 4 although line numbers have a "hole" at comment line 32
+        LineInfo lineInfo3_role0 = new LineInfo(12,18); // (f) method roleMethod1 (12,14,15) mapped to synthetic lines 18,20,21
+        lineInfo3_role0.setRepeatCount(4); // repeat 4 although line numbers have a "hole" at comment line 19
         
         fileInfo0.addLineInfo(lineInfo1_role0);
         fileInfo0.addLineInfo(lineInfo2_role0);
@@ -118,8 +118,8 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
         
         FileInfo fileInfo2 = stratum_role.getOrCreateFileInfo("SubTeam.java", "copyInheritance/SubTeam.java");
         
-        LineInfo lineInfo1_role2 = new LineInfo(1,1); // (a) all original lines from SubTeam
-        lineInfo1_role2.setRepeatCount(23);
+        LineInfo lineInfo1_role2 = new LineInfo(5,5); // (a) all original lines from SubTeam.RoleA
+        lineInfo1_role2.setRepeatCount(6);
         LineInfo lineInfo2_role2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
         LineInfo lineInfo3_role2 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
         
@@ -130,10 +130,10 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
         stratum_role.optimize();
         
         HashMap<String, int[]> expectedMethodLineNumbers = new HashMap<String, int[]>();
-        expectedMethodLineNumbers.put("copyInheritance.SubTeam$__OT__RoleA.roleMethod0(LcopyInheritance/SubTeam$TSuper__OT__SuperTeam;)V", new int[]{26,27,28});
-        expectedMethodLineNumbers.put("copyInheritance.SubTeam$__OT__RoleA.roleMethod0(LcopyInheritance/SuperTeam$TSuper__OT__SuperSuperTeam;)V", new int[]{29,30});
-        expectedMethodLineNumbers.put("copyInheritance.SubTeam$__OT__RoleA.roleMethod1()V", new int[]{31,33,34});
-        expectedMethodLineNumbers.put("copyInheritance.SubTeam$__OT__RoleA.roleMethod2()V", new int[]{35,36});
+        expectedMethodLineNumbers.put("copyInheritance.SubTeam$__OT__RoleA.roleMethod0(LcopyInheritance/SubTeam$TSuper__OT__SuperTeam;)V", new int[]{13,14,15});
+        expectedMethodLineNumbers.put("copyInheritance.SubTeam$__OT__RoleA.roleMethod0(LcopyInheritance/SuperTeam$TSuper__OT__SuperSuperTeam;)V", new int[]{16,17});
+        expectedMethodLineNumbers.put("copyInheritance.SubTeam$__OT__RoleA.roleMethod1()V", new int[]{18,20,21});
+        expectedMethodLineNumbers.put("copyInheritance.SubTeam$__OT__RoleA.roleMethod2()V", new int[]{22,23});
         
         TYPENAME = "__OT__RoleA";
         _enclosingTypename= "SubTeam";
@@ -173,17 +173,16 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
     	
     	FileInfo fileInfo_role0 = stratum_role.getOrCreateFileInfo("Team.java", "org/objectteams/Team.java");
     	
-    	LineInfo lineInfo1_role0 = new LineInfo(OT_CONFINED_GET_TEAM_LINE, 25); // mapped line of _OT$getTeam() to synthetic line 25
+    	LineInfo lineInfo1_role0 = new LineInfo(OT_CONFINED_GET_TEAM_LINE, 5); // mapped line of _OT$getTeam() to synthetic line 5
     	fileInfo_role0.addLineInfo(lineInfo1_role0);
         
-        LineInfo lineInfo1_role1 = new LineInfo(2,24); // default ctor at team position (2) mapped to synthetic line 24
+        LineInfo lineInfo1_role1 = new LineInfo(2,4); // default ctor at team position (2) mapped to synthetic line 4
         fileInfo_role0.addLineInfo(lineInfo1_role1);
         
         // no contribution from SuperTeam$__OT__Confined
         
         FileInfo fileInfo_role3 = stratum_role.getOrCreateFileInfo("SubTeam.java", "copyInheritance/SubTeam.java");
-        LineInfo lineInfo3_role3 = new LineInfo(1,1);
-        lineInfo3_role3.setRepeatCount(23);				// all 23 lines of SubTeam.java unmapped
+        LineInfo lineInfo3_role3 = new LineInfo(3,3); // only header of SubTeam mapped
         LineInfo lineInfo5_role3 = new LineInfo(65533,65533);
         lineInfo5_role3.setRepeatCount(2);
         
@@ -198,7 +197,7 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
         expectedStrata.put(TYPENAME, strata_role_confined);
         
         HashMap<String, int[]> expectedMethodLineNumbers = new HashMap<String, int[]>();
-        expectedMethodLineNumbers.put("copyInheritance.SubTeam$__OT__Confined._OT$getTeam()Lorg/objectteams/ITeam;", new int[]{25});
+        expectedMethodLineNumbers.put("copyInheritance.SubTeam$__OT__Confined._OT$getTeam()Lorg/objectteams/ITeam;", new int[]{5});
 
         try
         {
@@ -214,15 +213,14 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
     	SmapStratum stratum_role = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
         
         FileInfo fileInfo0 = stratum_role.getOrCreateFileInfo("SuperTeam2.java", "copyInheritance/SuperTeam2.java");
-        LineInfo lineInfo1_role0 = new LineInfo(6,7); // class position (6) mapped to synthetic line 7
+        LineInfo lineInfo1_role0 = new LineInfo(6,4); // class position (6) mapped to synthetic line 4
         fileInfo0.addLineInfo(lineInfo1_role0);
-        LineInfo lineInfo2_role0 = new LineInfo(8,8); // method (8) mapped to synthetic line 8..
+        LineInfo lineInfo2_role0 = new LineInfo(8,5); // method (8) mapped to synthetic line 5..
         lineInfo2_role0.setRepeatCount(5);
         fileInfo0.addLineInfo(lineInfo2_role0);
         
         FileInfo fileInfo1 = stratum_role.getOrCreateFileInfo("SubTeam2.java", "copyInheritance/SubTeam2.java");
-        LineInfo lineInfo1_role1 = new LineInfo(1,1); // all 6 lines unmapped
-        lineInfo1_role1.setRepeatCount(6);
+        LineInfo lineInfo1_role1 = new LineInfo(3,3); // only team header mapped
         fileInfo1.addLineInfo(lineInfo1_role1);
         
         LineInfo lineInfo2_role1 = new LineInfo(65533,65533);
