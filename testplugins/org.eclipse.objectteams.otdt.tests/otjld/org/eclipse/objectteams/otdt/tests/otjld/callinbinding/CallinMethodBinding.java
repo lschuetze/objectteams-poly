@@ -34,7 +34,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test4125_resultInMethodSpec3"};
+//		TESTS_NAMES = new String[] { "test4127_precedenceDeclaration19"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -4801,6 +4801,48 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		"\'precedence\' declaration can only refer to direct role classes, however PrecBug.RA.RB is a nested role of team PrecBug.RA (OTJLD 4.8).\n" + 
     		"----------\n");
     }
+    
+    // Bug 335777 - [compiler] don't flag missing precedence if different enclosing teams
+    public void test4127_precedenceDeclaration19 () {
+    	runConformTest(
+    		new String[] {
+    			"PrecBug19.java",
+    			"public team class PrecBug19 {\n" + 
+    			"    protected team class RA playedBy A {\n" + 
+    			"        void some(String v) <- before void myMethod2()\n" +
+    			"            with { v <- \"RA\" }\n" + 
+    			"        void some(String v) <- after void myMethod2()\n" +
+    			"            with { v <- \"RA\" }\n" + 
+    			"        void some(String v) {\n" +
+    			"            System.out.print(\"some\"+v);\n" + 
+    			"        }\n" + 
+    			"        protected class RB playedBy B {\n" + 
+    			"            void some(String v) <- before void myMethod2()" +
+    			"                with { v <- \"RB\" }\n" +
+				"            void some(String v) <- after void myMethod2()" +
+    			"                with { v <- \"RB\" }\n" +
+    			"        }\n" + 
+    			"    }\n" +
+    			"    public PrecBug19(A as RA a) {\n" +
+    			"        a.activate();\n" +
+    			"    }\n" +
+    			"    public static void main(String... args) {\n" +
+    			"        B b = new B();\n" +
+    			"        new PrecBug19(b).activate();\n" +
+    			"        new B().myMethod2();\n" +
+    			"    }\n" + 
+    			"}\n",
+    			"A.java",
+    			"public class A {\n" +
+    			"    void myMethod2() { System.out.print(\"-\"); }\n" +
+    			"}\n",
+    			"B.java",
+    			"public class B extends A {\n" +
+    			"}\n"
+    		}, 
+    		"someRAsomeRB-someRBsomeRA");
+    }
+
     // a regular class has a precedence declaration
     // 4.1.28-otjld-invalid-precedence-declaration-1
     public void test4128_invalidPrecedenceDeclaration1() {
