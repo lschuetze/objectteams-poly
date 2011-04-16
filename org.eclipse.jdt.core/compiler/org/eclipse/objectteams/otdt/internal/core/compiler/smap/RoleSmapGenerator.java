@@ -28,6 +28,7 @@ import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ImportReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 
 /** Generates smap for a RoleType. *
@@ -155,7 +156,11 @@ public class RoleSmapGenerator extends TeamSmapGenerator
         }
 
         FileInfo fileInfo = stratum.getOrCreateFileInfo(sourceName, absoluteSourceName);
-        for (int idx = 1; idx <= provider.getSourceEndLineNumber(); idx++)
+        int[] lineSeparatorPositions = this._type.compilationResult.lineSeparatorPositions;
+		int startLine = lineSeparatorPositions == null 
+					? 1
+					: Util.getLineNumber(this._type.sourceStart, lineSeparatorPositions, 0, lineSeparatorPositions.length-1);
+        for (int idx = startLine; idx <= provider.getSourceEndLineNumber(); idx++)
         {
             if (!lineInfoReminder.existsLineInfoFor(idx))
             {

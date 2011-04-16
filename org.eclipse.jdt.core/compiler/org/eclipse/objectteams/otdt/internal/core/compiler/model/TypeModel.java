@@ -41,6 +41,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
+import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.CPTypeAnchorAttribute;
@@ -65,7 +66,7 @@ public class TypeModel extends ModelElement {
         this._ast = ast;
     	int[] lineSeparatorPositions = ast.compilationResult.lineSeparatorPositions;
     	if (lineSeparatorPositions != null) {
-    		this._maxLineNumber = lineSeparatorPositions.length+1;
+    		this._maxLineNumber = Util.getLineNumber(ast.declarationSourceEnd, lineSeparatorPositions, 0, lineSeparatorPositions.length-1);
     	} else if (   !ast.isConverted
     		 	   && !ast.isGenerated
 				   && Dependencies.needMethodBodies(ast))
