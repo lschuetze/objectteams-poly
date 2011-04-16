@@ -2687,13 +2687,8 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in TeamB11sh61.java (at line 19)\n" + 
-    		"	askClose <- replace close;\n" + 
-    		"	^^^^^^^^\n" + 
-    		"\'replace\' callin bindings TeamB11sh61.Level1.Dirty.<TeamB11sh61:19,24> and TeamB11sh61.Level1.Dirty.ClosePending.<TeamB11sh61:34,32> refer to the same base method; must declare precedence of these bindings (OTJLD 4.8).\n" + 
     		"----------\n" + 
-    		"2. ERROR in TeamB11sh61.java (at line 51)\n" + 
+    		"1. ERROR in TeamB11sh61.java (at line 51)\n" + 
     		"	precedence Dirty, ClosePending;\n" + 
     		"	                  ^^^^^^^^^^^^\n" + 
     		"Callin binding ClosePending not found in type TeamB11sh61.Level1 (OTJLD 4.8(b)).\n" + 
