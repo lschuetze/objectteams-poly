@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.core.search.BasicSearchEngine;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 
@@ -168,6 +169,7 @@ protected boolean isVirtualInvoke(MethodBinding method, MessageSend messageSend)
 			    !method.isPrivate()
 // :giro	
 		     || (method.declaringClass.isRole() && messageSend.receiver.isImplicitThis()))
+		    && !(messageSend instanceof TSuperMessageSend) // similar to "super" but for codegen it's a "this"
 //jsv}
 			&& !messageSend.isSuperAccess();
 }

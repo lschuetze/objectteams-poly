@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -27,6 +27,7 @@ import org.eclipse.jdt.internal.compiler.problem.*;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfObjectToInt;
 import org.eclipse.jdt.internal.core.util.CommentRecorderParser;
 import org.eclipse.jdt.internal.core.util.Messages;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 
 /**
@@ -540,6 +541,45 @@ protected void consumeMethodInvocationSuperWithTypeArguments() {
 			(int)(messageSend.nameSourcePosition >>> 32));
 	}
 }
+//{ObjectTeams: tsuper.method() & base.method()
+private void handleMessageSend(MessageSend messageSend) {
+	Expression[] args = messageSend.arguments;
+	if (this.reportReferenceInfo) {
+		this.requestor.acceptMethodReference(
+			messageSend.selector,
+			args == null ? 0 : args.length,
+			(int)(messageSend.nameSourcePosition >>> 32));
+	}
+}
+protected void consumeMethodInvocationTSuper(int kind) {
+	// MethodInvocation ::= 'tsuper' '.' 'Identifier' '(' ArgumentListopt ')'
+	// => kind = UNQUALIFIED
+	// MethodInvocation ::= Name '.' 'tsuper' '.' 'Identifier' '(' ArgumentListopt ')'
+	// => kind = QUALIFIED
+	super.consumeMethodInvocationTSuper(kind);
+	handleMessageSend((MessageSend) this.expressionStack[this.expressionPtr]);
+}
+protected void consumeMethodInvocationTSuperWithTypeArguments(int kind) {
+	// MethodInvocation ::= 'tsuper' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
+	// => kind = UNQUALIFIED
+	// MethodInvocation ::= Name '.' 'tsuper' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
+	// => kind = QUALIFIED
+	super.consumeMethodInvocationTSuperWithTypeArguments(kind);
+	handleMessageSend((MessageSend) this.expressionStack[this.expressionPtr]);
+}
+protected void consumeMethodInvocationBase(boolean isSuperAccess) {
+	// MethodInvocation ::= 'base' '.' 'Identifier' '(' ArgumentListopt ')'
+	// MethodInvocation ::= 'base' '.' 'super' '.' 'Identifier' '(' ArgumentListopt ')'
+	super.consumeMethodInvocationBase(isSuperAccess);
+	handleMessageSend(((BaseCallMessageSend) this.expressionStack[this.expressionPtr]).getMessageSend());
+}
+protected void consumeMethodInvocationBaseWithTypeArguments(boolean isSuperAccess) {
+	// MethodInvocation ::= 'base' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
+	// MethodInvocation ::= 'base' '.' 'super' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
+	super.consumeMethodInvocationBaseWithTypeArguments(isSuperAccess);
+	handleMessageSend(((BaseCallMessageSend) this.expressionStack[this.expressionPtr]).getMessageSend());
+}
+//SH}
 protected void consumeNormalAnnotation() {
 	super.consumeNormalAnnotation();
 	Annotation annotation = (Annotation)this.expressionStack[this.expressionPtr];

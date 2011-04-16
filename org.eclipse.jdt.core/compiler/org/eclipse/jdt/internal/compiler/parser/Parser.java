@@ -5689,7 +5689,7 @@ protected void consumeMethodHeaderThrowsClause() {
 protected BaseCallMessageSend convertToBaseCallMessageSend(MessageSend send, int baseEndPosition) {
 	return new BaseCallMessageSend(send, baseEndPosition);
 }
-private void consumeMethodInvocationBase(boolean isSuperAccess) {
+protected void consumeMethodInvocationBase(boolean isSuperAccess) {
 	// MethodInvocation ::= 'base' '.' 'Identifier' '(' ArgumentListopt ')'
 	// MethodInvocation ::= 'base' '.' 'super' '.' 'Identifier' '(' ArgumentListopt ')'
 
@@ -5707,7 +5707,7 @@ private void consumeMethodInvocationBase(boolean isSuperAccess) {
 
 	pushOnExpressionStack(baseCallMsgSend);
 }
-private void consumeMethodInvocationBaseWithTypeArguments(boolean isSuperAccess) {
+protected void consumeMethodInvocationBaseWithTypeArguments(boolean isSuperAccess) {
 	// MethodInvocation ::= 'base' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
 	// MethodInvocation ::= 'base' '.' 'super' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
 
@@ -5866,7 +5866,7 @@ protected void consumeMethodInvocationTSuper(int kind) {
 
     pushOnExpressionStack(m);
 }
-private void consumeMethodInvocationTSuperWithTypeArguments(int kind) {
+protected void consumeMethodInvocationTSuperWithTypeArguments(int kind) {
 	// MethodInvocation ::= 'tsuper' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
 	// => kind = UNQUALIFIED
 	// MethodInvocation ::= Name '.' 'tsuper' '.' OnlyTypeArguments 'Identifier' '(' ArgumentListopt ')'
