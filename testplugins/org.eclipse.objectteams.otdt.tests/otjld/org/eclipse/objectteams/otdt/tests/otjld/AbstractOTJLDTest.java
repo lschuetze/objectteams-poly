@@ -268,6 +268,25 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			// javac options
 			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);	
 	}
+	/** Additional entry for tests expecting a compiler warning and run. */
+	protected void runTestExpectingWarnings(String[] files, String expectedWarnings, String expectedOutput) {
+    	Map options = getCompilerOptions();
+		runConformTest(
+	 		// test directory preparation
+			true/*flushOutputDirectory*/,
+			files,
+			// compiler options
+			null /* no class libraries */,
+			options /* custom options - happen to be the default not changed by the test suite */,
+			// compiler results
+			expectedWarnings,
+			// runtime results
+			expectedOutput,
+			null /* do not check error string */,
+			// javac options
+			JavacTestOptions.Excuse.EclipseHasSomeMoreWarnings /* javac test options */);	
+	}
+
 	protected void myWriteFiles(String[] testFiles) {
 		// force the directory to comply with the infrastructure from AbstractRegressionTest:
 		String testName = null;

@@ -33,7 +33,7 @@ public class Java5 extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testA12_genericRoleFeature16f"};
+//		TESTS_NAMES = new String[] { "testA112_genericTeam3"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -3040,8 +3040,9 @@ public class Java5 extends AbstractOTJLDTest {
     }
     
     // Bug 332795 - [compiler][generics] import issues with inherited playedBy binding inside parameterized team
+    // Bug 335774 - [compiler] don't flag "bindingconventions" against import in superteam
     public void testA112_genericTeam3() {
-    	runConformTest(
+    	runTestExpectingWarnings(
     		new String[] {
     	"TeamA112gt3_2.java",
     			"public team class TeamA112gt3_2 extends TeamA112gt3_1<String> {\n" +
@@ -3065,6 +3066,12 @@ public class Java5 extends AbstractOTJLDTest {
     			"package mypack;\n" +
     			"public class B1 {}\n"
     		},
+    		"----------\n" + 
+    		"1. WARNING in TeamA112gt3_1.java (at line 3)\n" + 
+    		"	protected class R playedBy B1 {\n" + 
+    		"	                           ^^\n" + 
+    		"It is recommended that base class B1 be imported with the modifier \"base\" (OTJLD 2.1.2(d)).\n" + 
+    		"----------\n",
     		"OK");
     }
 
