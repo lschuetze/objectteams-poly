@@ -65,12 +65,12 @@ public class PrecedenceBinding extends Binding {
 	}
 
 	/** Constructor for binding merged by C3: */
-	public  PrecedenceBinding(LinkedList bindingNames) {
+	public  PrecedenceBinding(LinkedList<CallinCalloutBinding> bindingNames) {
 		int len = bindingNames.size();
 		this.elements = new Binding[len];
 		int i=0;
-		for (Iterator iter = bindingNames.iterator(); iter.hasNext();) {
-			this.elements[i++] = (Binding)iter.next();
+		for (Iterator<CallinCalloutBinding> iter = bindingNames.iterator(); iter.hasNext();) {
+			this.elements[i++] = iter.next();
 		}
 	}
 
@@ -241,7 +241,7 @@ public class PrecedenceBinding extends Binding {
 
 	/**
      * flatten class-based precedence and return array of callins.
-	 * @param eliminateOverrides should overriding bindings be eliminated?
+	 * @param shallEliminateOverrides should overriding bindings be eliminated?
 	 * 		These are not regulated by precedence, since only one may apply at a time.
 	 * @return non-null array
 	 */
