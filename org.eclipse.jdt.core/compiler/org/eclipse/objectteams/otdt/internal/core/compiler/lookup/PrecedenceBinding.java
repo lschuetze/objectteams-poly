@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 
 /**
  * NEW for OTDT.
@@ -227,13 +228,13 @@ public class PrecedenceBinding extends Binding {
 						return false;
 				}
 			}
+			ReferenceBinding role1 = callin1._declaringRoleClass;
+			ReferenceBinding role2 = callin2._declaringRoleClass;
 			if (CharOperation.equals(callin1.name, callin2.name)) {
-				ReferenceBinding role1 = callin1._declaringRoleClass;
-				ReferenceBinding role2 = callin2._declaringRoleClass;
 				if (role1.isCompatibleWith(role2) || role2.isCompatibleWith(role1))
 					return false; // callin overriding
 			}
-			return true;
+			return TeamModel.areCompatibleEnclosings(role1.enclosingType(), role2.enclosingType());
 		}
 		return false;
 	}
