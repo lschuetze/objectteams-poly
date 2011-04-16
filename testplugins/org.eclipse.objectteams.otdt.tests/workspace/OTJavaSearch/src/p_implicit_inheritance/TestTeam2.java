@@ -6,6 +6,7 @@ public team class TestTeam2 extends TestTeam1
     {
         public void roleMethod()
         {
+        	tsuper.roleMethod();
         }
         
         public void roleMethod2()

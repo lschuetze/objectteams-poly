@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2011 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -923,6 +923,34 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		
 		assertSearchResults("Search for role method decl which overrides an implicit inherited method. fq name",
 				"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod() [roleMethod]",
+				resultCollector);
+	}
+	
+	/**
+	 * Search for:<br>
+	 *  - method references<br>
+	 * Search pattern:<br>
+	 *  - combined method pattern
+	 * 	- fully qualified name<br>
+	 * Searched element:<br>
+	 * 	- all references to a role method which is overridden in a tsub role<br> 
+	 * Expected search result:<br>
+	 *	- reference:
+	 *		TSuperMessageSend in body of method TestTeam2.TestRole1.roleMethod()<br>
+	 */
+	//see Bug 332790 - [search] search doesn't find tsuper method calls
+	public void test031a() throws CoreException
+	{
+		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
+		search(
+				"p_implicit_inheritance.TestTeam1.TestRole1.roleMethod()", 
+				METHOD, 
+				REFERENCES,
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				resultCollector);
+		
+		assertSearchResults("Search for role method decl which overrides an implicit inherited method. fq name",
+				"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod() [roleMethod()]",
 				resultCollector);
 	}
 	
