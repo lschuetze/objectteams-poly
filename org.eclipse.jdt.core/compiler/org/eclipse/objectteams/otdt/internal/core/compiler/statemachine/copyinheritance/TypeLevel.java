@@ -166,7 +166,7 @@ public class TypeLevel {
 			if (srcDecl.baseclass != null && destRoleDecl.baseclass == null) {
 				long pos= (((long)destRoleDecl.sourceStart)<<32)+destRoleDecl.sourceEnd;
 				// create a special type reference that uses the original scope for resolving:
-				destRoleDecl.baseclass= new AstGenerator(pos).alienScopeTypeReference(srcDecl.baseclass, (ClassScope) srcDecl.scope.parent);
+				destRoleDecl.baseclass= new AstGenerator(pos).alienScopeTypeReference(srcDecl.baseclass, srcDecl.scope.parent);
 				destRoleDecl.baseclass.setBaseclassDecapsulation(DecapsulationState.REPORTED);
 				destRoleDecl.baseclass.bits |= ASTNode.IsGenerated;
 			}
