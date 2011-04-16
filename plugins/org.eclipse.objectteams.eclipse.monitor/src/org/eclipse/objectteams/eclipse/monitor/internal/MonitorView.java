@@ -149,6 +149,8 @@ public class MonitorView extends ViewPart {
 		Job job = new Job(MonitorMessages.job_name_refresh) {
 			protected IStatus run(IProgressMonitor monitor) {
 				// need asyncExec to call GUI code from a non-GUI thread:
+				if (display.isDisposed())
+					return Status.CANCEL_STATUS;
 				display.asyncExec(new Runnable() {
 					public void run() {
 						refreshTableData();
