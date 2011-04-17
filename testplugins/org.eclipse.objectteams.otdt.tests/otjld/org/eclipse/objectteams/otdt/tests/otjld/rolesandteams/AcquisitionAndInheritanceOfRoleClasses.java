@@ -34,7 +34,7 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test139_illegalTsuperAccess5f" };
+//		TESTS_NAMES = new String[] { "test139_illegalTsuperAccess7" };
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1800,6 +1800,35 @@ public class AcquisitionAndInheritanceOfRoleClasses extends AbstractOTJLDTest {
     		"	return tsuper.getValue(arg);\n" + 
     		"	              ^^^^^^^^\n" + 
     		"The method getValue(String) is undefined for the type Team139ita6_1.Role139ita6\n" + 
+    		"----------\n");
+    }
+    
+    // Bug 343079 - [compiler] internal compiler error when trying to invoke an abstract method as tsuper
+    public void test139_illegalTsuperAccess7() {
+    	runNegativeTest(
+    		new String[] {
+    	"Team139ita7_1.java",
+    			"public team class Team139ita7_1 {\n" +
+    			"    public abstract class R {\n" +
+    			"        abstract void rm();\n" +
+    			"    }\n" +
+    			"}\n",
+    	"Team139ita7_2.java",
+    			"public team class Team139ita7_2 extends Team139ita7_1 {\n" +
+    			"    @Override\n" +
+    			"    public class R {\n" +
+    			"        @Override\n" +
+    			"        void rm() {\n" +
+    			"            tsuper.rm();\n" +
+    			"        }\n" +
+    			"    }\n" +
+    			"}\n",
+    		},
+    		"----------\n" + 
+    		"1. ERROR in Team139ita7_2.java (at line 6)\n" + 
+    		"	tsuper.rm();\n" + 
+    		"	^^^^^^^^^^^\n" + 
+    		"Cannot directly invoke the abstract method rm() for the type Team139ita7_1.R\n" + 
     		"----------\n");
     }
 
