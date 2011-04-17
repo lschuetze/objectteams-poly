@@ -874,7 +874,12 @@ public TypeBinding resolveType(BlockScope scope) {
 
 	//-------message send that are known to fail at compile time-----------
 	if (this.binding.isAbstract()) {
+//{ObjectTeams: also treat tsuper as super:
+/* orig:
 		if (this.receiver.isSuper()) {
+  :giro */
+		if (isAnySuperAccess()) {
+// SH}
 			scope.problemReporter().cannotDireclyInvokeAbstractMethod(this, this.binding);
 		}
 		// abstract private methods cannot occur nor abstract static............
