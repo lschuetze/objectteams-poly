@@ -1932,6 +1932,11 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 	return null; // should never reach this point
 }
 public MethodBinding resolveTypesFor(MethodBinding method) {
+//{ObjectTeams: overload with one more parameter:
+	return resolveTypesFor(method, false);
+}
+public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic) {
+// SH}
 	if ((method.modifiers & ExtraCompilerModifiers.AccUnresolved) == 0)
 		return method;
 //{ObjectTeams:  in state final we lost the scope, cannot use code below any more.
@@ -2184,9 +2189,13 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 				typeParameters[i].binding = null;
 		return null;
 	}
-//{ObjectTeams: all types in resolved signatures may require wrapping:
-	if (this.isRole() || this.isTeam())
-		RoleTypeCreator.wrapTypesInMethodDeclSignature(method, methodDecl);
+//{ObjectTeams: all types in resolved signatures of non-synthetic methods may require wrapping:
+	if (fromSynthetic) {
+		 method.modifiers |= ClassFileConstants.AccSynthetic;
+	} else {
+		if (this.isRole() || this.isTeam())
+			RoleTypeCreator.wrapTypesInMethodDeclSignature(method, methodDecl);
+	}
 // SH}
 	if (foundReturnTypeProblem)
 		return method; // but its still unresolved with a null return type & is still connected to its method declaration
@@ -2370,16 +2379,7 @@ public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, 
 // FIXME(SH): does this improve robustness?
 //		if ((this.tagBits & TagBits.AreMethodsComplete) != 0)
 //		{
-			if (resolveTypesFor(resolvedMethod) != null)
-		    {
-		    	if (!wasSynthetic)
-		    		RoleTypeCreator.wrapTypesInMethodDeclSignature(
-		    				resolvedMethod,
-							methodDeclaration);
-		    	else
-		    		resolvedMethod.modifiers |= ClassFileConstants.AccSynthetic;
-
-		    } else {
+			if (resolveTypesFor(resolvedMethod, wasSynthetic) == null) {
 		    	// other parts may rely on finding generated methods, give back a binding:
 		    	if (methodDeclaration.binding == null) {
 		    		methodDeclaration.binding = new ProblemMethodBinding(
