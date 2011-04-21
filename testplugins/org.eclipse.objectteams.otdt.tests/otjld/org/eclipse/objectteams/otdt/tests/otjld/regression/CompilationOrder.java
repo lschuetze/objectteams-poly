@@ -147,4 +147,39 @@ public class CompilationOrder extends AbstractOTJLDTest {
     		},
     		"OK");
     }
+    // Bug 343594 - [compiler] VerifierError when synthetic accessor is copied during incremental build
+    public void testB22_synthAccessorCopiedFromBinary1() {
+    	compileOrder = new String[][] {{"TeamB22sacfb1_1.java"}, {"TeamB22sacfb1_2.java"}};
+    	runConformTest(
+    		new String[] {
+	    	"TeamB22sacfb1_2.java",
+	    		"public team class TeamB22sacfb1_2 extends TeamB22sacfb1_1 {\n" +
+	    		"    protected team class Mid {\n" +
+	    		"        protected void test() {\n" +
+	    		"            new R().foo();\n" +
+	    		"        }\n" +
+	    		"    }\n" +
+	    		"    void run() {\n" +
+	    		"        new Mid().test();\n" +
+	    		"    }\n" +
+	    		"    public static void main(String... args) {\n" +
+	    		"        new TeamB22sacfb1_2().run();\n" +
+	    		"    }\n" +
+	    		"}\n",
+	    	"TeamB22sacfb1_1.java",
+    			"public team class TeamB22sacfb1_1 {\n" +
+    			"    protected team class Mid {\n" +
+    			"        protected class R {\n" +
+    			"            protected void foo() {\n" +
+    			"                TeamB22sacfb1_1.this.huray();\n" +
+    			"            }\n" +
+    			"        }\n" +
+    			"    }\n" +
+    			"    void huray() {\n" +
+    			"        System.out.print(\"OK\");" +
+    			"    }\n" +
+    			"}\n"
+    		},
+    		"OK");
+    }
 }
