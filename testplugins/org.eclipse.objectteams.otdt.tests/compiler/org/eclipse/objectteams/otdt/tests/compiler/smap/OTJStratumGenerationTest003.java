@@ -138,13 +138,11 @@ public class OTJStratumGenerationTest003 extends AbstractSourceMapGeneratorTest
         LineInfo lineInfo2 = new LineInfo(3,6); // class position to first synthetic line 6
         fileInfo.addLineInfo(lineInfo2);
         
-        FileInfo fileInfo2 = stratum_role.getOrCreateFileInfo("SubTeam.java", "roleFileAndCopyInh/SubTeam.java");
-        LineInfo lineInfo3 = new LineInfo(5,5); // only team header line of SubTeam (unmapped)
-        LineInfo lineInfo5 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
-        LineInfo lineInfo6 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
-        fileInfo2.addLineInfo(lineInfo3);
-        fileInfo2.addLineInfo(lineInfo5);
-        fileInfo2.addLineInfo(lineInfo6);
+        // SubTeam$RoleA has no code, special line-nos are added to the previous fileInfo:
+        LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
+        LineInfo lineInfo4 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
+        fileInfo.addLineInfo(lineInfo3);
+        fileInfo.addLineInfo(lineInfo4);
         
         stratum_role.optimize();
         

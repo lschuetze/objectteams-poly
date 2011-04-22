@@ -181,13 +181,10 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
         
         // no contribution from SuperTeam$__OT__Confined
         
-        FileInfo fileInfo_role3 = stratum_role.getOrCreateFileInfo("SubTeam.java", "copyInheritance/SubTeam.java");
-        LineInfo lineInfo3_role3 = new LineInfo(3,3); // only header of SubTeam mapped
-        LineInfo lineInfo5_role3 = new LineInfo(65533,65533);
-        lineInfo5_role3.setRepeatCount(2);
+        LineInfo lineInfo_role2 = new LineInfo(65533,65533);
+        lineInfo_role2.setRepeatCount(2);
         
-        fileInfo_role3.addLineInfo(lineInfo3_role3);
-        fileInfo_role3.addLineInfo(lineInfo5_role3);
+        fileInfo_role0.addLineInfo(lineInfo_role2);;
         
         TYPENAME = "__OT__Confined";
         _enclosingTypename= "SubTeam";
@@ -219,14 +216,10 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
         lineInfo2_role0.setRepeatCount(5);
         fileInfo0.addLineInfo(lineInfo2_role0);
         
-        FileInfo fileInfo1 = stratum_role.getOrCreateFileInfo("SubTeam2.java", "copyInheritance/SubTeam2.java");
-        LineInfo lineInfo1_role1 = new LineInfo(3,3); // only team header mapped
-        fileInfo1.addLineInfo(lineInfo1_role1);
-        
         LineInfo lineInfo2_role1 = new LineInfo(65533,65533);
         lineInfo2_role1.setRepeatCount(2);
         
-        fileInfo1.addLineInfo(lineInfo2_role1);
+        fileInfo0.addLineInfo(lineInfo2_role1);
 
      
         TYPENAME = "__OT__R";

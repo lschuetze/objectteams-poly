@@ -122,13 +122,10 @@ public class OTJStratumGenerationTest004 extends AbstractSourceMapGeneratorTest
         LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,4);
         fileInfo1.addLineInfo(lineInfo1);
         
-        FileInfo fileInfo2 = stratum_role2.getOrCreateFileInfo("TeamA.java", "roleAndTeam/TeamA.java");
-        LineInfo lineInfo2 = new LineInfo(3,3); // team header
-        LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
-        LineInfo lineInfo4 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
-        fileInfo2.addLineInfo(lineInfo2);
-        fileInfo2.addLineInfo(lineInfo3);
-        fileInfo2.addLineInfo(lineInfo4);
+        LineInfo lineInfo2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
+        LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
+        fileInfo1.addLineInfo(lineInfo2);
+        fileInfo1.addLineInfo(lineInfo3);
         
         stratum_role2.optimize();
         

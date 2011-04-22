@@ -125,13 +125,10 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
     	LineInfo lineInfo1 = new LineInfo(OT_CONFINED_GET_TEAM_LINE,3);
     	fileinfo.addLineInfo(lineInfo1);
         
-        FileInfo fileinfo2 = stratum_role2.getOrCreateFileInfo("SuperTeam.java", "calloutOverride/SuperTeam.java");
-        LineInfo lineInfo2 = new LineInfo(2,2); // team header
-        LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
-        LineInfo lineInfo4 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
-        fileinfo2.addLineInfo(lineInfo2);
-        fileinfo2.addLineInfo(lineInfo3);
-        fileinfo2.addLineInfo(lineInfo4);
+        LineInfo lineInfo2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
+        LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
+        fileinfo.addLineInfo(lineInfo2);
+        fileinfo.addLineInfo(lineInfo3);
         
         stratum_role2.optimize();
         
@@ -207,13 +204,10 @@ public class OTJStratumGenerationTest006 extends AbstractSourceMapGeneratorTest
         LineInfo lineInfo2 = new LineInfo(2,3);
         fileInfo.addLineInfo(lineInfo2);
 		
-		FileInfo fileInfo3 = stratum_role2.getOrCreateFileInfo("SubTeam.java", "calloutOverride/SubTeam.java");
-        LineInfo lineInfo3 = new LineInfo(2,2); // team header
-        LineInfo lineInfo5 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
-        LineInfo lineInfo6 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
-        fileInfo3.addLineInfo(lineInfo3);
-        fileInfo3.addLineInfo(lineInfo5);
-        fileInfo3.addLineInfo(lineInfo6);
+        LineInfo lineInfo3 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
+        LineInfo lineInfo4 = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER,ISMAPConstants.STEP_OVER_LINENUMBER);
+        fileInfo.addLineInfo(lineInfo3);
+        fileInfo.addLineInfo(lineInfo4);
         
         stratum_role2.optimize();
         

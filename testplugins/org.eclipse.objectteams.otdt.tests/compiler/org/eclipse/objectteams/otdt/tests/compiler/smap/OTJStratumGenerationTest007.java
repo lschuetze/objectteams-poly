@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.FileInfo;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.LineInfo;
-import org.eclipse.objectteams.otdt.internal.core.compiler.smap.LineInfoReminder;
+import org.eclipse.objectteams.otdt.internal.core.compiler.smap.LineInfoCollector;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.RoleSmapGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
 
@@ -260,7 +260,7 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
                 {
                     rolefileSmapGenerator.addStratum("OTJ");
                     SmapStratum stratum = (SmapStratum)rolefileSmapGenerator.getStrata().get(0);
-                    rolefileSmapGenerator.generatePartialOTJSmap(stratum, new LineInfoReminder());
+                    rolefileSmapGenerator.generatePartialOTJSmap(stratum, new LineInfoCollector());
                 }
                 else
                 {
