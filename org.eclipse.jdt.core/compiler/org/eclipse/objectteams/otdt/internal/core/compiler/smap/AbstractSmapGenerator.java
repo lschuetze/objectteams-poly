@@ -38,6 +38,8 @@ public abstract class AbstractSmapGenerator
     protected TypeDeclaration _type;
     protected List <SmapStratum>_strata;
 	private String _defaultStratum;
+	
+	private static String DEFAULT_PACKAGE=""; //$NON-NLS-1$
 
     public AbstractSmapGenerator(TypeDeclaration type)
     {
@@ -120,13 +122,10 @@ public abstract class AbstractSmapGenerator
 	    if (pkgName != null &&  pkgName.length() > 0)
 	        return pkgName + ISMAPConstants.OTJ_PATH_DELIMITER;
 	
-	    return null;
+	    return DEFAULT_PACKAGE;
 	}
 
 	protected String getAbsoluteSourcePath(String packagePath, String sourceName) {
-	    if (packagePath == null)
-	        return null;
-	
 	    return packagePath + sourceName;
 	}
 }
