@@ -334,4 +334,8 @@ public class FileInfo
 		return optimizedListOfSimilarLineInfos;
 	}
 
+	protected boolean isEqualTo(String fileName, String absoluteFileName) {
+		return this._fileName.equals(fileName) && this._absoluteFileName.equals(absoluteFileName);
+	}
+
 }

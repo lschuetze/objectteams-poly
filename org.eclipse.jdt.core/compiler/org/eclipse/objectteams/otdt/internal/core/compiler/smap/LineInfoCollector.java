@@ -23,14 +23,14 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.smap;
 import java.util.Collection;
 import java.util.Vector;
 
-/** Reminds all existing lineinfos. Needed for mapping linenumbers on itself.
+/** Collects all unmapped and mapped lineinfos in use within a stratum.
  * @author ike
  */
-public class LineInfoReminder
+public class LineInfoCollector
 {
     private Vector <LineInfo>_lineInfos;
 
-    public LineInfoReminder()
+    public LineInfoCollector()
     {
         this._lineInfos = new Vector<LineInfo>();
     }

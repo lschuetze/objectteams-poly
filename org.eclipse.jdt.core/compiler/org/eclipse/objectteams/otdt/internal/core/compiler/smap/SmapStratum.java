@@ -84,7 +84,7 @@ public class SmapStratum
             {
                 return fileInfo;
             }
-            if (fileInfo.getFileName().equals(fileName))
+            if (fileInfo.isEqualTo(fileName, absoluteFileName))
             {
                 return fileInfo;
             }
@@ -92,7 +92,7 @@ public class SmapStratum
         return null;
     }
 
-    private int getNextFileId()
+	private int getNextFileId()
     {
         this._actualfileId++;
         return this._actualfileId;

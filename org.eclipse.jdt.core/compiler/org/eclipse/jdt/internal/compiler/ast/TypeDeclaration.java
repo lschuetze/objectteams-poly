@@ -1081,15 +1081,15 @@ private char[] getSMAP() {
 
 protected AbstractSmapGenerator createSmapGenerator()
 {
-    AbstractSmapGenerator generator = null;
+    if (isRole())
+        return new RoleSmapGenerator(this);
 
-    if (isRole() && !isTeam())
-        generator = new RoleSmapGenerator(this);
+    if (isTeam())
+        return new TeamSmapGenerator(this);
 
-    if (isTeam() && !isRole())
-        generator = new TeamSmapGenerator(this);
-
-    return generator;
+    // NOTE: currently no special treatment for nested team (team&role)
+    
+    return null;
 }
 //ike}
 

@@ -33,7 +33,7 @@ import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 
 /** Generates smap for a RoleType. *
  * @author ike */
-public class RoleSmapGenerator extends TeamSmapGenerator
+public class RoleSmapGenerator extends AbstractSmapGenerator
 {
 
     public RoleSmapGenerator(TypeDeclaration type)
@@ -58,20 +58,20 @@ public class RoleSmapGenerator extends TeamSmapGenerator
 
     private char[] generateOTJSmap(SmapStratum stratum)
     {
-        LineInfoReminder lineInfoReminder = new LineInfoReminder();
+        LineInfoCollector lineInfoCollector = new LineInfoCollector();
 
         //faster generation, if role is just roleFile
-        if (generatePartialOTJSmap(stratum, lineInfoReminder))
+        if (generatePartialOTJSmap(stratum, lineInfoCollector))
         {
             return getSMAP().toCharArray();
         }
 
-        fillSmap(stratum, lineInfoReminder);
+        fillSmap(stratum, lineInfoCollector);
 
         return getSMAP().toCharArray();
     }
 
-	public boolean generatePartialOTJSmap(SmapStratum stratum, LineInfoReminder lineInfoReminder)
+	public boolean generatePartialOTJSmap(SmapStratum stratum, LineInfoCollector lineInfoCollector)
     {
         LineNumberProvider provider = this._type.getRoleModel().getLineNumberProvider();
 
@@ -95,11 +95,11 @@ public class RoleSmapGenerator extends TeamSmapGenerator
 
                 LineInfo stepOverLineInfo = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER, ISMAPConstants.STEP_OVER_LINENUMBER);
                 fileInfo.addLineInfo(stepOverLineInfo);
-                lineInfoReminder.storeLineInfo(stepOverLineInfo);
+                lineInfoCollector.storeLineInfo(stepOverLineInfo);
 
                 LineInfo stepIntoLineInfo = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER, ISMAPConstants.STEP_INTO_LINENUMBER);
                 fileInfo.addLineInfo(stepIntoLineInfo);
-                lineInfoReminder.storeLineInfo(stepIntoLineInfo);
+                lineInfoCollector.storeLineInfo(stepIntoLineInfo);
 
                 isCompleted = true;
 
@@ -121,14 +121,19 @@ public class RoleSmapGenerator extends TeamSmapGenerator
             }
             else
             {
-                ReferenceBinding outerTypebinding = copySrc.enclosingType();
-                sourceName = getSourceNameFromRefBinding(outerTypebinding) + ISMAPConstants.OTJ_JAVA_ENDING;
-                absoluteSourceName = getAbsoluteSourcePath(getPackagePathFromRefBinding(outerTypebinding), sourceName);
+            	ReferenceBinding toplevelType = copySrc, currentBinding = copySrc;
+            	while ((currentBinding = currentBinding.enclosingType()) != null) {
+					toplevelType = currentBinding;
+					if (isCopySrcRoleFile(toplevelType))
+						break;
+				}
+                sourceName = getSourceNameFromRefBinding(toplevelType) + ISMAPConstants.OTJ_JAVA_ENDING;
+                absoluteSourceName = getAbsoluteSourcePath(getPackagePathFromRefBinding(toplevelType), sourceName);
             }
 
             FileInfo fileInfo = stratum.getOrCreateFileInfo(sourceName, absoluteSourceName);
             fileInfo.addLineInfo(lineInfos);
-            lineInfoReminder.storeLineInfos(lineInfos);
+            lineInfoCollector.storeLineInfos(lineInfos);
         }
 
         return isCompleted;
@@ -139,54 +144,63 @@ public class RoleSmapGenerator extends TeamSmapGenerator
 	 * are added, too.
 	 *
 	 */
-    private void fillSmap(SmapStratum stratum, LineInfoReminder lineInfoReminder)
+    private void fillSmap(SmapStratum stratum, LineInfoCollector lineInfoCollector)
     {
         LineNumberProvider provider = this._type.getRoleModel().getLineNumberProvider();
-    	String sourceName;
-    	String absoluteSourceName;
-        if (this._type.isRoleFile())
-        {
-            sourceName = getSourceNameFromRoleTypeDecl(this._type) + ISMAPConstants.OTJ_JAVA_ENDING;
-            absoluteSourceName = getAbsoluteSourcePath(getPackagePathFromRoleTypeDecl(this._type), sourceName);
-        }
-        else
-        {
-        	sourceName = getRootEnclosingTypeNameFromTypeDecl(this._type) + ISMAPConstants.OTJ_JAVA_ENDING;
-        	absoluteSourceName = getAbsoluteSourcePath(getPackagePathFromTypeDecl(this._type), sourceName);
+        FileInfo fileInfo;
+        
+        List<FileInfo> knownFileInfos = stratum.getFileInfos();
+        if (this._type.isPurelyCopied && !knownFileInfos.isEmpty()) {
+			fileInfo = knownFileInfos.get(0); // current type has no source, add special lines to existing fileInfo
+		} else {
+	    	String sourceName;
+	    	String absoluteSourceName;
+	        if (this._type.isRoleFile())
+	        {
+	            sourceName = getSourceNameFromRoleTypeDecl(this._type) + ISMAPConstants.OTJ_JAVA_ENDING;
+	            absoluteSourceName = getAbsoluteSourcePath(getPackagePathFromRoleTypeDecl(this._type), sourceName);
+	        }
+	        else
+	        {
+	        	sourceName = getRootEnclosingTypeNameFromTypeDecl(this._type) + ISMAPConstants.OTJ_JAVA_ENDING;
+	        	absoluteSourceName = getAbsoluteSourcePath(getPackagePathFromTypeDecl(this._type), sourceName);
+	        }
+	
+	        fileInfo = stratum.getOrCreateFileInfo(sourceName, absoluteSourceName);
+	        int[] lineSeparatorPositions = this._type.compilationResult.lineSeparatorPositions;
+			int startLine = lineSeparatorPositions == null 
+						? 1
+						: Util.getLineNumber(this._type.sourceStart, lineSeparatorPositions, 0, lineSeparatorPositions.length-1);
+	        for (int idx = startLine; idx <= provider.getSourceEndLineNumber(); idx++)
+	        {
+	            if (!lineInfoCollector.existsLineInfoFor(idx))
+	            {
+	            	LineInfo newLineInfo = new LineInfo(idx,idx);
+	            	fileInfo.addLineInfo(newLineInfo);
+	                lineInfoCollector.storeLineInfo(newLineInfo);
+	            }
+	        }
         }
 
-        FileInfo fileInfo = stratum.getOrCreateFileInfo(sourceName, absoluteSourceName);
-        int[] lineSeparatorPositions = this._type.compilationResult.lineSeparatorPositions;
-		int startLine = lineSeparatorPositions == null 
-					? 1
-					: Util.getLineNumber(this._type.sourceStart, lineSeparatorPositions, 0, lineSeparatorPositions.length-1);
-        for (int idx = startLine; idx <= provider.getSourceEndLineNumber(); idx++)
-        {
-            if (!lineInfoReminder.existsLineInfoFor(idx))
-            {
-            	LineInfo newLineInfo = new LineInfo(idx,idx);
-            	fileInfo.addLineInfo(newLineInfo);
-                lineInfoReminder.storeLineInfo(newLineInfo);
-            }
-        }
-
-        if (!lineInfoReminder.existsLineInfoFor(ISMAPConstants.STEP_OVER_LINENUMBER))
+        if (!lineInfoCollector.existsLineInfoFor(ISMAPConstants.STEP_OVER_LINENUMBER))
         {
             LineInfo stepOverLineInfo = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER, ISMAPConstants.STEP_OVER_LINENUMBER);
             fileInfo.addLineInfo(stepOverLineInfo);
-            lineInfoReminder.storeLineInfo(stepOverLineInfo);
+            lineInfoCollector.storeLineInfo(stepOverLineInfo);
         }
 
-        if (!lineInfoReminder.existsLineInfoFor(ISMAPConstants.STEP_INTO_LINENUMBER))
+        if (!lineInfoCollector.existsLineInfoFor(ISMAPConstants.STEP_INTO_LINENUMBER))
         {
         	LineInfo stepIntoLineInfo = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER, ISMAPConstants.STEP_INTO_LINENUMBER);
         	fileInfo.addLineInfo(stepIntoLineInfo);
-        	lineInfoReminder.storeLineInfo(stepIntoLineInfo);
+        	lineInfoCollector.storeLineInfo(stepIntoLineInfo);
         }
     }
 
-    private boolean isCopySrcRoleFile(ReferenceBinding copySrc)
+    boolean isCopySrcRoleFile(ReferenceBinding copySrc)
     {
+    	if (copySrc.roleModel == null)
+    		return false; // assumably not a role
         TypeDeclaration typeDecl = copySrc.roleModel.getClassPartAst();
         if (typeDecl != null)
         {
@@ -198,7 +212,7 @@ public class RoleSmapGenerator extends TeamSmapGenerator
 
     protected String getSourceNameFromRefBinding(ReferenceBinding binding)
     {
-        return String.valueOf(binding.sourceName);
+        return String.valueOf(binding.sourceName());
     }
 
     protected String getRootEnclosingTypeNameFromTypeDecl(TypeDeclaration type)

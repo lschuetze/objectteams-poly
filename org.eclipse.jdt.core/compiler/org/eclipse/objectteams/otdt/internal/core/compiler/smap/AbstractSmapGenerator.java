@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 
 /**
@@ -104,5 +106,27 @@ public abstract class AbstractSmapGenerator
 	public void setDefaultStratum(String defaultStratum)
 	{
 		this._defaultStratum = defaultStratum;
+	}
+
+	protected String getPackagePathFromRefBinding(ReferenceBinding toplevelBinding) {
+	    PackageBinding pkgBinding = null;
+	    if (toplevelBinding.enclosingType() != null)
+	    	pkgBinding = toplevelBinding.enclosingType().teamPackage;
+	    if (pkgBinding == null)
+	    	pkgBinding = toplevelBinding.getPackage();
+	    String pkgName = String.valueOf(pkgBinding.readableName());
+	    pkgName = pkgName.replace('.',ISMAPConstants.OTJ_PATH_DELIMITER_CHAR);
+	
+	    if (pkgName != null &&  pkgName.length() > 0)
+	        return pkgName + ISMAPConstants.OTJ_PATH_DELIMITER;
+	
+	    return null;
+	}
+
+	protected String getAbsoluteSourcePath(String packagePath, String sourceName) {
+	    if (packagePath == null)
+	        return null;
+	
+	    return packagePath + sourceName;
 	}
 }
