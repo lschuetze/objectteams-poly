@@ -931,6 +931,19 @@ public class RoleModel extends TypeModel
 		return candidate;
 	}
 
+	public RoleModel getCopyInheritanceSource() {
+		if (!isPurelyCopied())
+			return this;
+		for (int i = 0; i < this._tsuperRoleBindings.length; i++) {
+			if (this._tsuperRoleBindings[i] != null) {
+				RoleModel model = this._tsuperRoleBindings[i].roleModel.getCopyInheritanceSource();
+				if (model != null)
+					return model;
+			}
+		}
+		throw new InternalCompilerError("Unable to find real tsuper role of phantom role "+this);
+	}
+
 	/**
 	 * Store the known sub roles (including this) as determined by RoleHierarchyAnalyzer.analyze().
 	 *

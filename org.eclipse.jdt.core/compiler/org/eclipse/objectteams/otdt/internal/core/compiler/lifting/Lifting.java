@@ -23,6 +23,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.codegen.BranchLabel;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
@@ -38,7 +39,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
-import org.eclipse.jdt.internal.compiler.codegen.BranchLabel;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleInitializationMethod;
@@ -252,7 +252,9 @@ public class Lifting extends SwitchOnBaseTypeGenerator
             ((roleType.binding.tagBits & TagBits.HierarchyHasProblems) != 0))
             return null; // assume base class could not be resolved.
 
-        AstGenerator gen = new AstGenerator(roleType.sourceStart, roleType.sourceEnd);
+        AstGenerator gen = existingConstructor == null
+        			? new AstGenerator(roleType)
+        			: new AstGenerator(existingConstructor);
         // public MyRole(MyBase base)
         ConstructorDeclaration generatedConstructor =
             gen.constructor(teamTypeDeclaration.compilationResult,

@@ -110,6 +110,20 @@ public abstract class AbstractSmapGenerator
 		this._defaultStratum = defaultStratum;
 	}
 
+	/** Find the nearest enclosing type (possibly type itself) that is a toplevel type in any compilation unit. */
+	protected ReferenceBinding getCUType(ReferenceBinding type) {
+		ReferenceBinding currentType = type;
+		ReferenceBinding enclosingType = type.enclosingType();
+		while (true) {
+			if (currentType.roleModel != null && currentType.roleModel.isRoleFile())
+				return currentType;	// found a role file
+			enclosingType = currentType.enclosingType();
+			if (enclosingType == null)
+				return currentType; // found a true toplevel type
+			currentType = enclosingType;
+		}
+	}
+
 	protected String getPackagePathFromRefBinding(ReferenceBinding toplevelBinding) {
 	    PackageBinding pkgBinding = null;
 	    if (toplevelBinding.enclosingType() != null)
@@ -124,8 +138,10 @@ public abstract class AbstractSmapGenerator
 	
 	    return DEFAULT_PACKAGE;
 	}
-
-	protected String getAbsoluteSourcePath(String packagePath, String sourceName) {
-	    return packagePath + sourceName;
+	
+	protected FileInfo getOrCreateFileInfoForType(SmapStratum stratum, ReferenceBinding typeBinding) {
+		String sourceName = String.valueOf(typeBinding.sourceName()) + ISMAPConstants.OTJ_JAVA_ENDING;
+		String absoluteSourceName = getPackagePathFromRefBinding(typeBinding) + sourceName;
+		return stratum.getOrCreateFileInfo(sourceName, absoluteSourceName);
 	}
 }

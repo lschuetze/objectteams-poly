@@ -19,6 +19,7 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
+import org.eclipse.jdt.internal.compiler.util.Util;
 
 /**
  * OTDT changes:
@@ -62,6 +63,20 @@ public class SyntheticMethodBinding extends MethodBinding {
 
 	public int sourceStart = 0; // start position of the matching declaration
 	public int index; // used for sorting access methods in the class file
+
+//{ObjectTeams: explicit handling of line number:
+	public int lineNumber = -1;
+	protected void retrieveLineNumber(SourceTypeBinding sourceType) {
+		int[] lineEnds = sourceType.scope.referenceContext.compilationResult.lineSeparatorPositions;
+		if (lineEnds != null) // not all scanner record lineEnds
+			this.lineNumber = Util.getLineNumber(this.sourceStart, lineEnds, 0, lineEnds.length-1);
+	}
+	public int getLineNumber() {
+		if (this.copyInheritanceSrc != null)
+			return ((SyntheticMethodBinding)this.copyInheritanceSrc).getLineNumber();
+		return this.lineNumber;
+	}
+// SH}
 
 //{ObjectTeams: for creation from binary binding:
 	public SyntheticMethodBinding(MethodBinding fakedMethod, int purpose) {
@@ -195,6 +210,9 @@ public class SyntheticMethodBinding extends MethodBinding {
 			for (int i = 0, max = fieldDecls.length; i < max; i++) {
 				if (fieldDecls[i].binding == targetField) {
 					this.sourceStart = fieldDecls[i].sourceStart;
+//{ObjectTeams: lineNumber:
+					retrieveLineNumber(declaringSourceType);
+// SH}
 					return;
 				}
 			}
@@ -217,6 +235,9 @@ public class SyntheticMethodBinding extends MethodBinding {
 		// We now at this point - per construction - it is for sure an enclosing instance, we are going to
 		// show the target field type declaration location.
 		this.sourceStart = declaringSourceType.scope.referenceContext.sourceStart; // use the target declaring class name position instead
+//{ObjectTeams: lineNumber:
+		retrieveLineNumber(declaringSourceType);
+//SH}
 	}
 
 //{ObjectTeams: hook for SyntheticRoleFieldAccess
@@ -291,6 +312,9 @@ public class SyntheticMethodBinding extends MethodBinding {
 		// We now at this point - per construction - it is for sure an enclosing instance, we are going to
 		// show the target field type declaration location.
 		this.sourceStart = declaringSourceType.scope.referenceContext.sourceStart; // use the target declaring class name position instead
+//{ObjectTeams: lineNumber:
+		retrieveLineNumber(declaringSourceType);
+// SH}
 	}
 
 	public SyntheticMethodBinding(MethodBinding targetMethod, boolean isSuperAccess, ReferenceBinding declaringClass) {
@@ -300,6 +324,9 @@ public class SyntheticMethodBinding extends MethodBinding {
 		} else {
 			initializeMethodAccessor(targetMethod, isSuperAccess, declaringClass);
 		}
+//{ObjectTeams: lineNumber:
+		retrieveLineNumber((SourceTypeBinding)declaringClass);
+// SH}
 	}
 
 	/**

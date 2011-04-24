@@ -79,6 +79,8 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 		// the synthetic methods of a class will be sorted according to a per-class index, find the index now: 
 		SyntheticMethodBinding[] knownAccessMethods = declaringClass.syntheticMethods();
 		this.index = knownAccessMethods == null ? 0 : knownAccessMethods.length;
+		this.sourceStart = declaringClass.scope.referenceContext.sourceStart;
+		retrieveLineNumber(declaringClass);
 	}
 
 	/** Directly generate the instruction for this method's body (no AST available). */

@@ -1854,7 +1854,14 @@ public class ClassFile implements TypeConstants, TypeIds {
 		this.contentsOffset = localContentsOffset;
 		// first we handle the linenumber attribute
 		if ((this.produceAttributes & ClassFileConstants.ATTR_LINES) != 0) {
+//{ObjectTeams: synthetics have their linenumber stored already:
+/* orig:
 			int lineNumber = Util.getLineNumber(binding.sourceStart, startLineIndexes, 0, startLineIndexes.length-1);
+  :giro */
+			int lineNumber = binding.getLineNumber();
+			if (lineNumber == -1)
+				lineNumber = Util.getLineNumber(binding.sourceStart, startLineIndexes, 0, startLineIndexes.length-1);
+// SH}
 			attributesNumber += generateLineNumberAttribute(lineNumber);
 		}
 		// then we do the local variable attribute

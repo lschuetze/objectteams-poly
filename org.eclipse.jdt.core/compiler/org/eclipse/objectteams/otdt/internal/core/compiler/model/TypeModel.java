@@ -520,6 +520,14 @@ public class TypeModel extends ModelElement {
 	        this._lineNumberProvider = new LineNumberProvider(this._binding, this._maxLineNumber);
 	    return this._lineNumberProvider;
 	}
+	
+	public static LineNumberProvider getLineNumberProvider(TypeDeclaration type) {
+		if (type.isRole())
+			return type.getRoleModel().getLineNumberProvider();
+		if (type.isTeam())
+			return type.getTeamModel().getLineNumberProvider();
+		return type.getModel().getLineNumberProvider();
+	}
 
 	public static boolean isConverted(ReferenceBinding declaringClass) {
 		TypeDeclaration result;

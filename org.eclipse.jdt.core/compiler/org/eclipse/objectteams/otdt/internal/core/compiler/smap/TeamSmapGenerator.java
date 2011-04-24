@@ -64,26 +64,19 @@ public class TeamSmapGenerator extends AbstractSmapGenerator
     private char[] generateOTJSmap(SmapStratum stratum)
     {
     	LineInfoCollector lineInfoCollector = new LineInfoCollector();
-
         LineNumberProvider provider = this._type.getTeamModel().getLineNumberProvider();
-
-        String sourceName = new String();
-        String absoluteSourceName = new String();
 
         Set<ReferenceBinding> copySources = provider.getLineInfos().keySet();
         if (copySources.isEmpty())
         	return null;
-		for (Iterator<ReferenceBinding> copySourcesIter = copySources.iterator(); copySourcesIter.hasNext();)
+
+        for (Iterator<ReferenceBinding> copySourcesIter = copySources.iterator(); copySourcesIter.hasNext();)
         {
             ReferenceBinding copySrc = copySourcesIter.next();
             List <LineInfo> lineInfos = provider.getLineInfosForType(copySrc);
 
             // simple enclosingType() is enough, since we know its not a nested team (currently handled by RoleSmapGenerator)
-            ReferenceBinding outerTypebinding = copySrc.enclosingType(); 
-            sourceName = String.valueOf(outerTypebinding.sourceName) + ISMAPConstants.OTJ_JAVA_ENDING;
-            absoluteSourceName = getAbsoluteSourcePath(getPackagePathFromRefBinding(outerTypebinding), sourceName);
-
-            FileInfo fileInfo = stratum.getOrCreateFileInfo(sourceName, absoluteSourceName);
+            FileInfo fileInfo = getOrCreateFileInfoForType(stratum, copySrc.enclosingType());
             fileInfo.addLineInfo(lineInfos);
             lineInfoCollector.storeLineInfos(lineInfos);
         }

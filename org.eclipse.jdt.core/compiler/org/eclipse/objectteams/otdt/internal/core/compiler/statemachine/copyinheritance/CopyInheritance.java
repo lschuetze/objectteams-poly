@@ -98,6 +98,9 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBi
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.smap.LineInfo;
+import org.eclipse.objectteams.otdt.internal.core.compiler.smap.LineNumberProvider;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReflectionGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReplaceSingleNameVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.SerializationGenerator;
@@ -1221,6 +1224,18 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
     			return null; // not copied but generated anew
     		default:
     			tgtTypeDecl.scope.problemReporter().abortDueToInternalError("Synthetic methods only partially supported"); //$NON-NLS-1$
+    			return null;
+    		}
+    	}
+    	if (dstMethod instanceof SyntheticMethodBinding) {
+    		int lineNumber = srcMethod.getLineNumber();
+    		if (lineNumber > -1) { // accessor to synth field has no line
+	    		MethodBinding copySrc = srcMethod.copyInheritanceSrc;
+	    		if (copySrc == null) copySrc = srcMethod;
+	    		SyntheticMethodBinding synthMethod = (SyntheticMethodBinding) dstMethod;
+	    		LineNumberProvider lineNoProvider = TypeModel.getLineNumberProvider(tgtTypeDecl);
+				LineInfo lineInfo = lineNoProvider.addLineInfo(copySrc.declaringClass, lineNumber, 1);
+				synthMethod.lineNumber = lineInfo.getOutputStartLine();
     		}
     	}
     	return dstMethod;
