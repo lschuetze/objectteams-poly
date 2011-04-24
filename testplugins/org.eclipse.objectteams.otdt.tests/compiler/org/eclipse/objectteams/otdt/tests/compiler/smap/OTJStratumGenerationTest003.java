@@ -26,12 +26,9 @@ import java.util.List;
 import junit.framework.Test;
 
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.FileInfo;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.LineInfo;
-import org.eclipse.objectteams.otdt.internal.core.compiler.smap.RoleSmapGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
 
 /**
@@ -43,7 +40,6 @@ public class OTJStratumGenerationTest003 extends AbstractSourceMapGeneratorTest
 	private org.eclipse.jdt.core.ICompilationUnit _team1; 
 	private org.eclipse.jdt.core.ICompilationUnit _team2;
 	private org.eclipse.jdt.core.ICompilationUnit _role;
-    private String _enclosingTypename;
 	private String _packagePath;
 	
     public OTJStratumGenerationTest003(String name)
@@ -54,12 +50,6 @@ public class OTJStratumGenerationTest003 extends AbstractSourceMapGeneratorTest
     public static Test suite()
     {
         return new Suite(OTJStratumGenerationTest003.class);
-    }
-    
-    public void setUpSuite() throws Exception
-    {
-        setTestProjectDir("JSR-045");
-        super.setUpSuite();
     }
     
     protected void setUp() throws Exception
@@ -160,37 +150,6 @@ public class OTJStratumGenerationTest003 extends AbstractSourceMapGeneratorTest
         catch (JavaModelException e)
         {
             fail(e.getMessage());
-        }
-    }
-    
-    public void callback(CompilationUnitDeclaration cuDecl)
-    {
-        String cuDeclName = String.valueOf(cuDecl.getMainTypeName());
-        if (!_enclosingTypename.equals(cuDeclName))
-            return;
-        
-        
-        TypeDeclaration typeDecl = cuDecl.types[0];
-        
-        assertNotNull("TypeDeclaration should not be null.", typeDecl);
-        
-        assertTrue("Membertypes of TypeDeclaration should be greater than 0.", typeDecl.memberTypes.length > 0);
-        
-        TypeDeclaration [] members = typeDecl.memberTypes;
-        for (int idx = 0; idx < members.length; idx++)
-        {
-            TypeDeclaration decl = members[idx];
-            String typeName = String.valueOf(decl.name);
-            
-            if (decl.isRole() && !decl.isInterface() && typeName.equals(TYPENAME))
-            {
-                RoleSmapGenerator roleSmapGenerator = new RoleSmapGenerator(decl);
-                roleSmapGenerator.addStratum("OTJ");
-                roleSmapGenerator.generate();
-                List actualStrata = roleSmapGenerator.getStrata();
-                
-                assertEquals("Strata of type \"" + typeName + "\" should be equal.\n", expectedStrata.get(typeName).toString(), actualStrata.toString());
-            }
         }
     }
 }

@@ -21,6 +21,7 @@
 package org.eclipse.objectteams.otdt.tests.compiler.smap;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -30,6 +31,7 @@ import java.util.Map;
 import junit.framework.Test;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -42,6 +44,7 @@ import org.eclipse.jdt.internal.compiler.SourceElementParser;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.ImportReference;
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.batch.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.batch.FileSystem;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -50,6 +53,7 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 import org.eclipse.objectteams.otdt.debug.internal.breakpoints.IOOTBreakPoints;
+import org.eclipse.objectteams.otdt.internal.core.compiler.smap.RoleSmapGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
 import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
 import org.eclipse.objectteams.otdt.tests.compiler.CustomizedCompiler;
@@ -62,8 +66,6 @@ import org.eclipse.objectteams.otdt.tests.otmodel.FileBasedModelTest;
 public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest implements ICallbackClient, ISourceElementRequestor
 {
     
-	protected String PROJECT_DIR;
-    
 	public static final String COMPLIANCE_1_3 = "1.3";
 	public static final String COMPLIANCE_1_4 = "1.4";
 	public static final String COMPLIANCE_1_5 = "1.5";
@@ -73,7 +75,8 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 	protected Hashtable <String, List<SmapStratum>>expectedStrata;
     
 	protected String TYPENAME;
-	
+	protected String _enclosingTypename;
+
 	public static boolean optimizeStringLiterals = false;
 	public static long sourceLevel = ClassFileConstants.JDK1_5; //$NON-NLS-1$
 
@@ -87,7 +90,8 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
         super(testName);
     }
 
-    public static Test suite()
+    @SuppressWarnings("unused") // dead code inside
+	public static Test suite()
     {
         if (true)
         {
@@ -97,7 +101,12 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
             .getName());
         return suite;
     }
-    
+
+	public void setUpSuite() throws Exception {
+	    setTestProjectDir("JSR-045");
+	    super.setUpSuite();
+	}
+	
     protected void setUp() throws Exception
     {
         super.setUp();
@@ -105,7 +114,7 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
     }
 
     protected INameEnvironment getNameEnvironment(final String[] testFiles,
-            String[] classPaths)
+            String[] classPaths) throws IOException
     {
         this.classpaths = classPaths == null ? getDefaultClassPaths() : classPaths;
         return new InMemoryNameEnvironment(testFiles, getClassLibs());
@@ -161,9 +170,13 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
         return new CompilerOptions(options);
     }
 
-    protected String[] getDefaultClassPaths()
+    protected String[] getDefaultClassPaths() throws IOException
     {
-        return Util.concatWithClassLibs(ClasspathUtil.OTRE_PATH, false);
+		return Util.concatWithClassLibs(new String[]{
+					getWorkspaceRoot().getLocation().toFile().getCanonicalPath()+'/'+getTestProjectDir()+"/src",
+					ClasspathUtil.OTRE_PATH
+				},
+				false);
     }
 
     protected IErrorHandlingPolicy getErrorHandlingPolicy()
@@ -206,9 +219,10 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
     							   String outputPath) 
     		throws JavaModelException
     {
+		CompilerOptions options =  getCompilerOptions();
         SourceElementParser parser = new SourceElementParser(this,
                 new DefaultProblemFactory(Locale.getDefault()),
-                new CompilerOptions(), false, false);
+                options, false, false);
         ICompilationUnit [] cUnits = new ICompilationUnit[units.length];
         
         for (int idx = 0; idx < units.length; idx++)
@@ -225,8 +239,16 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
             CompilationUnitDeclaration cuDecl = parser.parseCompilationUnit(
                     unit_sourceUnit, true, null);
             
-            if (cuDecl.hasErrors())
-               return false;
+            if (cuDecl.hasErrors()) {
+            	// approximated error reporting:
+            	String expectedErrorlog = "Filename : L/JSR-045/src/"+unit_fileName+"\n" +
+            							  "COMPILED type(s) "+"to be filled in\n" +
+            							  "No REUSED BINARY type\n" +
+            							  "No PROBLEM";
+                String actualErrorlog = cuDecl.compilationResult().toString();
+                assertEquals("COMPILATION FAILED. Errorlog should be empty.", expectedErrorlog, actualErrorlog);
+                return false;
+            }
             
             cUnits[idx] = unit_sourceUnit;
         } 
@@ -243,16 +265,19 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
         	if (!outDir.exists())
         		outDir.mkdir();
         }
-        
-		CompilerOptions options =  getCompilerOptions();
 
-		CustomizedCompiler batchCompiler = new CustomizedCompiler(
-        		getNameEnvironment( new String[] {}, classPaths), 
-        		getErrorHandlingPolicy(),
-        		options,
-                requestor,
-                getProblemFactory()
-                );
+		CustomizedCompiler batchCompiler;
+		try {
+			batchCompiler = new CustomizedCompiler(
+					getNameEnvironment( new String[] {}, classPaths),
+					getErrorHandlingPolicy(),
+					options,
+					requestor,
+					getProblemFactory()
+					);
+		} catch (IOException ioex) {
+			throw new JavaModelException(ioex, IJavaModelStatusConstants.INVALID_CLASSPATH);
+		}
         
         batchCompiler.addCallBack(this);
         
@@ -273,9 +298,7 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
         
         return !hasErrors;
     }
-    
-    public abstract void callback(CompilationUnitDeclaration cuDecl);
-    
+       
     public void acceptConstructorReference(char[] typeName, int argCount, int sourcePosition)
     {
     }
@@ -464,5 +487,35 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
 			boolean onDemand, int modifiers) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public void callback(CompilationUnitDeclaration cuDecl) {
+	    String cuDeclName = String.valueOf(cuDecl.getMainTypeName());
+	    if (!_enclosingTypename.equals(cuDeclName))
+	        return;
+	    
+	    
+	    TypeDeclaration typeDecl = cuDecl.types[0];
+	    
+	    assertNotNull("TypeDeclaration should not be null.", typeDecl);
+	    
+	    assertTrue("Membertypes of TypeDeclaration should be greater than 0.", typeDecl.memberTypes.length > 0);
+	    
+	    TypeDeclaration [] members = typeDecl.memberTypes;
+	    for (int idx = 0; idx < members.length; idx++)
+	    {
+	        TypeDeclaration decl = members[idx];
+	        String typeName = String.valueOf(decl.name);
+	        
+	        if (decl.isRole() && !decl.isInterface() && typeName.equals(TYPENAME))
+	        {
+	            RoleSmapGenerator rolefileSmapGenerator = new RoleSmapGenerator(decl);
+	            rolefileSmapGenerator.addStratum("OTJ");
+	            rolefileSmapGenerator.generate();
+	            List actualStrata = rolefileSmapGenerator.getStrata();
+	            
+	            assertEquals("Strata of type \"" + typeName + "\" should be equal.\n", expectedStrata.get(typeName).toString(), actualStrata.toString());
+	        }
+	    }
 	}
 }

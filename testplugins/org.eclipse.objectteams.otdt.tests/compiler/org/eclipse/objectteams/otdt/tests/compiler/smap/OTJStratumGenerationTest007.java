@@ -66,12 +66,6 @@ public class OTJStratumGenerationTest007 extends AbstractSourceMapGeneratorTest
         return new Suite(OTJStratumGenerationTest007.class);
     }
 
-    public void setUpSuite() throws Exception
-    {
-        setTestProjectDir("JSR-045");
-        super.setUpSuite();
-    }
-
     protected void setUp() throws Exception
     {
         super.setUp();

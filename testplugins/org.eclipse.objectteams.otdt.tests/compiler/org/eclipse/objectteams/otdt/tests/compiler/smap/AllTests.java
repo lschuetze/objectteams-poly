@@ -41,6 +41,7 @@ public class AllTests {
         suite.addTestSuite(BaseClassSmapGenerationMethodTest.class);
         suite.addTest(OTJStratumGenerationTest004.suite());
         suite.addTest(OTJStratumGenerationTest001.suite());
+        suite.addTest(OTJStratumFlightbonusTest.suite());
         //$JUnit-END$
         return suite;
     }

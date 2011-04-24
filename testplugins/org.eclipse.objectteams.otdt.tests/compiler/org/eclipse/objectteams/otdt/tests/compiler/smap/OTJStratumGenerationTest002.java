@@ -28,12 +28,9 @@ import junit.framework.Test;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.FileInfo;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.LineInfo;
-import org.eclipse.objectteams.otdt.internal.core.compiler.smap.RoleSmapGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
 
 /**
@@ -45,7 +42,6 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
 	private org.eclipse.jdt.core.ICompilationUnit _subTeam; 
 	private org.eclipse.jdt.core.ICompilationUnit _superTeam;
 	private org.eclipse.jdt.core.ICompilationUnit _superSuperTeam;
-    private String _enclosingTypename;
 	
     public OTJStratumGenerationTest002(String name)
     {
@@ -55,12 +51,6 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
     public static Test suite()
     {
         return new Suite(OTJStratumGenerationTest002.class);
-    }
-    
-    public void setUpSuite() throws Exception
-    {
-        setTestProjectDir("JSR-045");
-        super.setUpSuite();
     }
     
     protected void setUp() throws Exception
@@ -161,10 +151,10 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
             			    classPaths,			 // needed for retrieving class files from previous phase
             			    null/*outputPath*/);
         }
-        catch (JavaModelException e)
+        catch (Exception e)
         {
             fail(e.getMessage());
-        }
+		}
     }
     
     public void testSimpleCopyInheritanceSmapConfined()
@@ -252,35 +242,6 @@ public class OTJStratumGenerationTest002 extends AbstractSourceMapGeneratorTest
         catch (JavaModelException e)
         {
             fail(e.getMessage());
-        }
-    }
-    public void callback(CompilationUnitDeclaration cuDecl)
-    {
-        String cuDeclName = String.valueOf(cuDecl.getMainTypeName());
-        if (!_enclosingTypename.equals(cuDeclName))
-            return;
-        
-        TypeDeclaration typeDecl = cuDecl.types[0];
-        
-        assertNotNull("TypeDeclaration should not be null.", typeDecl);
-        
-        assertTrue("Membertypes of TypeDeclaration should be greater than 0.", typeDecl.memberTypes.length > 0);
-        
-        TypeDeclaration [] members = typeDecl.memberTypes;
-        for (int idx = 0; idx < members.length; idx++)
-        {
-            TypeDeclaration decl = members[idx];
-            String typeName = String.valueOf(decl.name);
-            
-            if (decl.isRole() && !decl.isInterface() && typeName.equals(TYPENAME))
-            {
-                RoleSmapGenerator rolefileSmapGenerator = new RoleSmapGenerator(decl);
-                rolefileSmapGenerator.addStratum("OTJ");
-                rolefileSmapGenerator.generate();
-                List actualStrata = rolefileSmapGenerator.getStrata();
-                // note: using assert(String,String,String) helps debugging, since this one supports visual compare
-                assertEquals("Strata of type \"" + typeName + "\" should be equal.\n", expectedStrata.get(typeName).toString(), actualStrata.toString());
-            }
         }
     }
 
