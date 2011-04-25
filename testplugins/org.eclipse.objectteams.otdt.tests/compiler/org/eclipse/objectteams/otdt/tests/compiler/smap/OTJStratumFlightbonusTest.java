@@ -135,7 +135,9 @@ public class OTJStratumFlightbonusTest extends AbstractSourceMapGeneratorTest {
 
         try
         {
-            parseAndCompile(new org.eclipse.jdt.core.ICompilationUnit[]{roleFile});
+        	// use this if you want to inspect the generated classes:
+        	// parseAndCompile(new org.eclipse.jdt.core.ICompilationUnit[]{roleFile}, null, null, "/tmp/bin");
+        	parseAndCompile(new org.eclipse.jdt.core.ICompilationUnit[]{roleFile});
         }
         catch (JavaModelException e)
         {
