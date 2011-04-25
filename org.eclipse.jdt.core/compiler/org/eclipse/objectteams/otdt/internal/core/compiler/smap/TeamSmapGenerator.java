@@ -61,6 +61,8 @@ public class TeamSmapGenerator extends AbstractSmapGenerator
 
     // current reasons why team re-maps source positions:
     // - TeamMethodGenerator copies methods from o.o.Team to application team.
+    // - callin wrapper from role file
+    // - liftTo methods for RoFis
     private char[] generateOTJSmap(SmapStratum stratum)
     {
     	LineInfoCollector lineInfoCollector = new LineInfoCollector();
@@ -75,11 +77,23 @@ public class TeamSmapGenerator extends AbstractSmapGenerator
             ReferenceBinding copySrc = copySourcesIter.next();
             List <LineInfo> lineInfos = provider.getLineInfosForType(copySrc);
 
-            // simple enclosingType() is enough, since we know its not a nested team (currently handled by RoleSmapGenerator)
-            FileInfo fileInfo = getOrCreateFileInfoForType(stratum, copySrc.enclosingType());
+            FileInfo fileInfo = getOrCreateFileInfoForType(stratum, copySrc);
             fileInfo.addLineInfo(lineInfos);
             lineInfoCollector.storeLineInfos(lineInfos);
         }
+        FileInfo teamFile = getOrCreateFileInfoForType(stratum, this._type.binding);
+        LineInfo lineInfo = new LineInfo(1, 1);
+        lineInfo.setRepeatCount(provider.getSourceEndLineNumber());
+        teamFile.addLineInfo(lineInfo);
+
+        LineInfo stepOverLineInfo = new LineInfo(ISMAPConstants.STEP_OVER_LINENUMBER, ISMAPConstants.STEP_OVER_LINENUMBER);
+        teamFile.addLineInfo(stepOverLineInfo);
+        lineInfoCollector.storeLineInfo(stepOverLineInfo);
+
+        LineInfo stepIntoLineInfo = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER, ISMAPConstants.STEP_INTO_LINENUMBER);
+        teamFile.addLineInfo(stepIntoLineInfo);
+        lineInfoCollector.storeLineInfo(stepIntoLineInfo);
+
 
         return getSMAP().toCharArray();
     }

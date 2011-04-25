@@ -243,6 +243,8 @@ public class AstGenerator extends AstFactory {
 				value,
 				nullLiteral(),
 				OperatorIds.EQUAL_EQUAL);
+		result.sourceStart = this.sourceStart;
+		result.sourceEnd = this.sourceEnd;
 		result.constant = Constant.NotAConstant;
 		return result;
 	}
@@ -924,6 +926,8 @@ public class AstGenerator extends AstFactory {
 		if (stmt1 instanceof LocalDeclaration) explicitDeclarations++;
 		if (stmt2 instanceof LocalDeclaration) explicitDeclarations++;
 		Block result = new Block(explicitDeclarations);
+		result.sourceStart = this.sourceStart;
+		result.sourceEnd = this.sourceEnd;
 		result.statements = new Statement[] { stmt1, stmt2 };
 		return result;
 	}
@@ -936,6 +940,8 @@ public class AstGenerator extends AstFactory {
 					explicitDeclarations++;
 
 		Block result = new Block(explicitDeclarations);
+		result.sourceStart = this.sourceStart;
+		result.sourceEnd = this.sourceEnd;
 		result.statements = stmts;
 		return result;
 	}

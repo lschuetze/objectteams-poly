@@ -603,7 +603,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         TreeNode boundRootRoleNode = roleNode.getTopmostBoundParent(true);
         if (boundRootRoleNode == null) return;
 
-        RoleModel roleModel = roleNode.getTreeObject();
+        final RoleModel roleModel = roleNode.getTreeObject();
 
         TypeDeclaration typeDecl = roleModel.getAst(); // only for positions
         if (typeDecl == null)
@@ -669,7 +669,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 		      				return createLiftToMethodStatements(
 						                    newMethod,
 						                    teamBinding,
-						                    roleClassBinding,
+						                    roleModel,
 						                    baseClassBinding,
 						                    caseObjects);
 	      				} finally {
@@ -729,11 +729,20 @@ public class Lifting extends SwitchOnBaseTypeGenerator
     private boolean createLiftToMethodStatements(
         MethodDeclaration liftToMethodDeclaration,
         ReferenceBinding teamBinding,
-        ReferenceBinding roleClassBinding,
+        RoleModel		 roleModel,
         ReferenceBinding baseClassBinding,
         RoleModel[] caseObjects)
     {
-        liftToMethodDeclaration.setStatements(
+    	ReferenceBinding roleClassBinding = roleModel.getBinding();
+
+    	if (this._boundRootRoleModel.isRoleFile()) {
+			this._gen = MethodModel.setupSourcePositionMapping(liftToMethodDeclaration, 
+															   teamBinding._teamModel.getAst(),
+															   roleModel, 
+															   this._gen);
+		}
+
+    	liftToMethodDeclaration.setStatements(
         	new Statement[] {
 	        	this._gen.synchronizedStatement(createCacheFieldRef(), new Statement[] {
 
@@ -833,14 +842,14 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         ReferenceBinding baseType)
     {
         // !_OT$team_param._OT$cache_OT$RootRole.containsKey(base)
-        return new UnaryExpression(
+        return this._gen.setPos(new UnaryExpression(
         		this._gen.messageSend(
 		        		createCacheFieldRef(),
 						CONTAINS_KEY,
 						new Expression[] {
 		        				this._gen.singleNameReference(BASE),
 		        		}),
-        		OperatorIds.NOT);
+        		OperatorIds.NOT));
     }
 
     private Block createCreationCascade(ReferenceBinding roleType, ReferenceBinding teamType, RoleModel[] caseObjects) {
@@ -928,6 +937,8 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         // try { myRole = (MyRole)role }
         // catch (ClassCastException ex) { throw new WrongRoleException ( ... ); }
         TryStatement tryStatement = new TryStatement();
+        tryStatement.sourceStart = this._gen.sourceStart;
+        tryStatement.sourceEnd = this._gen.sourceEnd;
         tryStatement.tryBlock = createTryCastBlock(returnType);
         createCatchClassCastExceptionBlock(returnType, teamType, tryStatement);
 
@@ -959,7 +970,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
     {
         // _OT$team_param._OT$cache_OT$RootRole
         return this._gen.fieldReference(
-    				ThisReference.implicitThis(),
+    				this._gen.setPos(ThisReference.implicitThis()),
 					LiftingEnvironment.getCacheName(this._boundRootRoleModel));
     }
 

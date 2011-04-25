@@ -358,14 +358,6 @@ public abstract class AbstractMethodDeclaration
 		boolean abort = false;
 		// regular code generation
 		do {
-//{ObjectTeams: callin wrapper for RoFi? -> prepare codeStream for different line ends
-			int[] lineEndsSave = null;
-			if (this.isMappingWrapper == WrapperKind.CALLIN && MethodModel.isCallinForRoFi(this)) {
-				lineEndsSave = classFile.codeStream.lineSeparatorPositions;
-				classFile.codeStream.lineSeparatorPositions = this.compilationResult.getLineSeparatorPositions();
-				// this leverages the fact that a callin wrapper has the compilation result from the role!
-			}
-// SH}
 			try {
 				problemResetPC = classFile.contentsOffset;
 				this.generateCode(classFile);
@@ -394,11 +386,6 @@ public abstract class AbstractMethodDeclaration
 					restart = false;
 					abort = true; 
 				}
-//{ObjectTeams: resetting from above
-			} finally {
-				if (lineEndsSave != null)
-					classFile.codeStream.lineSeparatorPositions = lineEndsSave;
-// SH}
 			}
 		} while (restart);
 		// produce a problem method accounting for this fatal error

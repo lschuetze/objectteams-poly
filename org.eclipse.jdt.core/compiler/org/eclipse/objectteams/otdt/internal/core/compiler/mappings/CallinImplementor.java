@@ -234,6 +234,7 @@ public class CallinImplementor extends MethodMappingImplementor
 			final MethodBinding            roleMethodBinding,
 			final MethodSpec               baseMethodSpec)
 	{
+		TypeDeclaration teamDecl = this._role.getTeamModel().getAst();
 
 		final AstGenerator gen = new AstGenerator(
 				callinBindingDeclaration.roleMethodSpec.sourceStart,
@@ -369,7 +370,7 @@ public class CallinImplementor extends MethodMappingImplementor
 		int modifiers = ClassFileConstants.AccPublic;
 		if (callinBindingDeclaration.isReplaceCallin())
 			modifiers |= ExtraCompilerModifiers.AccCallin;
-		MethodDeclaration newMethod = gen.method(callinBindingDeclaration.compilationResult,
+		MethodDeclaration newMethod = gen.method(teamDecl.compilationResult,
 					modifiers,
 					wrapperReturnType,
 					newMethodName,
@@ -378,13 +379,11 @@ public class CallinImplementor extends MethodMappingImplementor
 		newMethod.isMappingWrapper = WrapperKind.CALLIN;
 		newMethod.returnType.setBaseclassDecapsulation(DecapsulationState.REPORTED);
 		newMethod.typeParameters= typeParams;
-		if (this._role.isRoleFile())
-			MethodModel.getModel(newMethod).isCallinForRoFi = true;
 		
 		gen.maybeAddTypeParametersToMethod(baseTypeBinding, newMethod);
 
 		// -----   add and build and link the method -----
-		AstEdit.addMethod(this._role.getTeamModel().getAst(), newMethod);
+		AstEdit.addMethod(teamDecl, newMethod);
         callinBindingDeclaration.setWrapper(baseMethodSpec, newMethod);
         // TODO(SH): could optimize MethodInfo.maybeRegister()
         //           by marking callin to private role method (only they need copying).
@@ -392,7 +391,7 @@ public class CallinImplementor extends MethodMappingImplementor
         newMethod.model._declaringMappings = Collections.singletonList(callinBindingDeclaration);
         if (newMethod.hasErrors()) { // problems detected during creation of MethodBinding?
         	// CLOVER: never reached in jacks suite
-        	AstEdit.removeMethod(this._role.getTeamModel().getAst(), newMethod.binding); // may be incomplete.
+        	AstEdit.removeMethod(teamDecl, newMethod.binding); // may be incomplete.
         	return;
         }
         setBaseArgBestName(newMethod, baseArgument);
@@ -435,6 +434,15 @@ public class CallinImplementor extends MethodMappingImplementor
 	{
 		if (callinBindingDeclaration.mappings == AbstractMethodMappingDeclaration.PENDING_MAPPINGS)
 			return false; // cannot proceed, required info is not parsed.
+
+		if (this._role.isRoleFile()) {
+			this.synthGen = MethodModel.setupSourcePositionMapping(callinWrapperDecl,
+																   this._role.getTeamModel().getAst(), 
+													   			   this._role,
+													   			   null);
+			if (this.synthGen != null)
+				gen = this.synthGen;
+		}
 
 		PredicateGenerator predGen = new PredicateGenerator(
 											roleModel.getBinding(),

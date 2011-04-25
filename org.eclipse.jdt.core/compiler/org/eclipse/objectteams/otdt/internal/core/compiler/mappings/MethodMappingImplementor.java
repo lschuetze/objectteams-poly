@@ -66,6 +66,9 @@ public abstract class MethodMappingImplementor {
 	// discriminate callout/in by this flag:
 	int bindingDirection;
 
+	// use this if source positions must be mapped between roleFile and enclosing team:
+	protected AstGenerator synthGen;
+
 	/**
 	 * Make arguments for message send which implements a callout or a callin wrapper.
 	 * For a callout mapping this method is used only if signatures are given
@@ -315,7 +318,9 @@ public abstract class MethodMappingImplementor {
 	 * @return an argument reference
 	 */
 	Expression genSimpleArgExpr(char[] argName, MethodSpec targetMethodSpec) {
-		AstGenerator gen = new AstGenerator(targetMethodSpec.sourceStart, targetMethodSpec.sourceEnd);
+		AstGenerator gen = this.synthGen != null
+					? this.synthGen
+					: new AstGenerator(targetMethodSpec.sourceStart, targetMethodSpec.sourceEnd);
 		return gen.singleNameReference(argName);
 	}
 	protected TypeParameter[] getTypeParameters(boolean hasSignature, MethodBinding rrrBinding, MethodSpec roleMethodSpec,

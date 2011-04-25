@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -95,6 +95,8 @@ public class CompilationResult {
 	public boolean checkSecondaryTypes = false; // check for secondary types which were created after the initial buildTypeBindings call
 
 //{ObjectTeams: separate handling of teams and their roles:
+	/** mark the end of real source when adding synthetic positions for SMAP support */
+	public int sourceEndPos = Integer.MAX_VALUE;
 	// ROFI mark role files:
 	public int roleFileDepth = 0;
 	public String stripTeamPackagesFromPath(String packagePathName) {
@@ -531,6 +533,26 @@ public ClassFile findClassFile(ReferenceBinding typeBinding) {
 			return classFile;
 	}
 	return null;
+}
+/**
+ * Given a synthetic line number assign a unique synthetic source position.
+ * @param syntheticLineNumber
+ * @return a fresh source position that uniquely maps to the given synthetic line number
+ */
+public int requestSyntheticSourcePosition(int syntheticLineNumber) {
+	int oldEndPos = this.lineSeparatorPositions[this.lineSeparatorPositions.length-1];
+	if (this.sourceEndPos == Integer.MAX_VALUE)
+		this.sourceEndPos = oldEndPos;
+	int oldLen = this.lineSeparatorPositions.length;
+	assert oldLen < syntheticLineNumber : "Synthetic line numbers must be higher than existing ones."; //$NON-NLS-1$
+	int newStartPos = oldEndPos;
+	System.arraycopy(this.lineSeparatorPositions, 0, 
+					 this.lineSeparatorPositions = new int[syntheticLineNumber], 0, oldLen);
+	for (int i=oldLen; i<syntheticLineNumber; i++) {
+		newStartPos += 2;
+		this.lineSeparatorPositions[i] = newStartPos;
+	}
+	return newStartPos-1; // just before the last line end
 }
 // SH}
 }

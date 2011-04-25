@@ -52,13 +52,17 @@ public class LineNumberProvider
         this._sourceToLineInfos = new Hashtable<ReferenceBinding, Vector<LineInfo>>();
     }
 
-    public int getRemappedLineNumberValue(ReferenceBinding copySrc, Integer line, int repeatCount)
+    public LineInfo getRemappedLineNumber(ReferenceBinding copySrc, List<LineInfo> lineInfos, Integer inputStartLine, int repeatCount)
     {
     	HashMap<Integer, Integer> srcRemapped = this.remapped.get(copySrc);
     	if (srcRemapped != null) {
-    		Integer exist = srcRemapped.get(line);
+    		Integer exist = srcRemapped.get(inputStartLine);
     		if (exist != null)
-    			return exist;
+	    		for (LineInfo lineInfo : lineInfos)
+					if (   lineInfo.getOutputStartLine() == exist
+						&& lineInfo.getRepeatCount() >= repeatCount)
+						return lineInfo;
+	    	// either not registered yet or with too small an extent
     	} else {
     		srcRemapped = new HashMap<Integer, Integer>();
     		this.remapped.put(copySrc, srcRemapped);
@@ -67,9 +71,16 @@ public class LineNumberProvider
         this._currentEndLineNumber = remappedLineNumber;
         if (repeatCount > 1)
         	this._currentEndLineNumber += (repeatCount - 1);
-        srcRemapped.put(line, remappedLineNumber);
+        srcRemapped.put(inputStartLine, remappedLineNumber);
 
-        return remappedLineNumber;
+        LineInfo lineInfo = new LineInfo(inputStartLine, remappedLineNumber);
+
+        if (repeatCount > -1)
+        	lineInfo.setRepeatCount(repeatCount);
+        // TODO(SH): is outputLineIncrement relevant here?
+
+        lineInfos.add(lineInfo);
+        return lineInfo;
     }
 
     /**
@@ -81,12 +92,18 @@ public class LineNumberProvider
      */
     public LineInfo addLineInfo(ReferenceBinding copySrc, int inputStartLine, int repeatCount)
     {
+    	if (!this._sourceToLineInfos.containsKey(copySrc))
+    		this._sourceToLineInfos.put(copySrc, new Vector<LineInfo>());
+    	
+    	List <LineInfo>lineInfos = this._sourceToLineInfos.get(copySrc);
+
     	int outputStartLine;
     	if (copySrc != this._referenceBinding && inputStartLine < ISMAPConstants.STEP_INTO_LINENUMBER)
     		// map "foreign" lines to numbers above the current file's max:
-    		outputStartLine = getRemappedLineNumberValue(copySrc, inputStartLine, repeatCount);
-    	else
-    		outputStartLine = inputStartLine;
+    		return getRemappedLineNumber(copySrc, lineInfos, inputStartLine, repeatCount);
+
+    	// not yet mapped, create an identity mapping:
+    	outputStartLine = inputStartLine;
 
         LineInfo lineInfo = new LineInfo(inputStartLine, outputStartLine);
 
@@ -94,10 +111,6 @@ public class LineNumberProvider
         	lineInfo.setRepeatCount(repeatCount);
         // TODO(SH): is outputLineIncrement relevant here?
 
-        if (!this._sourceToLineInfos.containsKey(copySrc))
-            this._sourceToLineInfos.put(copySrc, new Vector<LineInfo>());
-
-        List <LineInfo>lineInfos = this._sourceToLineInfos.get(copySrc);
         lineInfos.add(lineInfo);
         return lineInfo;
     }

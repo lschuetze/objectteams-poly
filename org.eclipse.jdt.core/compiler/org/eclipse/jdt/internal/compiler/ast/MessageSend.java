@@ -287,7 +287,6 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 			codeStream.checkcast(this.actualReceiverType);
 		}
 	}
-	codeStream.recordPositionsFrom(pc, this.sourceStart);
 //{ObjectTeams: various synthetic arguments for static role methods:
 	// role method bridge needs role arg (null)
 	if (   this.syntheticAccessor instanceof SyntheticRoleBridgeMethodBinding 
@@ -317,6 +316,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 				this);
 	}
 // SH}
+	codeStream.recordPositionsFrom(pc, this.sourceStart);
 	// generate arguments
 	generateArguments(this.binding, this.arguments, currentScope, codeStream);
 	pc = codeStream.position;
@@ -443,7 +443,8 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 	if (TeamModel.isTeamAccessingAbstractStaticRoleMethod(currentScope.enclosingSourceType(), codegenBinding))
 	{
 		this.syntheticAccessor = SyntheticRoleBridgeMethodBinding.findOuterAccessor(currentScope, codegenBinding.declaringClass, codegenBinding);
-		currentScope.problemReporter().needToEmulateMethodAccess(codegenBinding, this);
+		if (!currentScope.isGeneratedScope())
+			currentScope.problemReporter().needToEmulateMethodAccess(codegenBinding, this);
 	}
 // SH}
 }
