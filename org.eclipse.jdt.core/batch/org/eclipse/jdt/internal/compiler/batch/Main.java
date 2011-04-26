@@ -600,38 +600,51 @@ public class Main implements ProblemSeverities, SuffixConstants {
 
 		private void logExtraProblem(CategorizedProblem problem, int localErrorCount, int globalErrorCount) {
 			char[] originatingFileName = problem.getOriginatingFileName();
-			String fileName =
-				originatingFileName == null
-				? this.main.bind("requestor.noFileNameSpecified")//$NON-NLS-1$
-				: new String(originatingFileName);
-			if ((this.tagBits & Logger.EMACS) != 0) {
-				String result = fileName
-						+ ":" //$NON-NLS-1$
-						+ problem.getSourceLineNumber()
-						+ ": " //$NON-NLS-1$
-						+ (problem.isError() ? this.main.bind("output.emacs.error") : this.main.bind("output.emacs.warning")) //$NON-NLS-1$ //$NON-NLS-2$
-						+ ": " //$NON-NLS-1$
-						+ problem.getMessage();
-				this.printlnErr(result);
-				final String errorReportSource = errorReportSource(problem, null, this.tagBits);
-				this.printlnErr(errorReportSource);
+			if (originatingFileName == null) {
+				// simplified message output
+				if (problem.isError()) {
+					printErr(this.main.bind(
+								"requestor.extraerror", //$NON-NLS-1$
+								Integer.toString(globalErrorCount)));
+				} else {
+					// warning / mandatory warning / other
+					printErr(this.main.bind(
+							"requestor.extrawarning", //$NON-NLS-1$
+							Integer.toString(globalErrorCount)));
+				}
+				printErr(" "); //$NON-NLS-1$
+				this.printlnErr(problem.getMessage());
 			} else {
-				if (localErrorCount == 0) {
+				String fileName = new String(originatingFileName);
+				if ((this.tagBits & Logger.EMACS) != 0) {
+					String result = fileName
+							+ ":" //$NON-NLS-1$
+							+ problem.getSourceLineNumber()
+							+ ": " //$NON-NLS-1$
+							+ (problem.isError() ? this.main.bind("output.emacs.error") : this.main.bind("output.emacs.warning")) //$NON-NLS-1$ //$NON-NLS-2$
+							+ ": " //$NON-NLS-1$
+							+ problem.getMessage();
+					this.printlnErr(result);
+					final String errorReportSource = errorReportSource(problem, null, this.tagBits);
+					this.printlnErr(errorReportSource);
+				} else {
+					if (localErrorCount == 0) {
+						this.printlnErr("----------"); //$NON-NLS-1$
+					}
+					printErr(problem.isError() ?
+							this.main.bind(
+									"requestor.error", //$NON-NLS-1$
+									Integer.toString(globalErrorCount),
+									new String(fileName))
+									: this.main.bind(
+											"requestor.warning", //$NON-NLS-1$
+											Integer.toString(globalErrorCount),
+											new String(fileName)));
+					final String errorReportSource = errorReportSource(problem, null, 0);
+					this.printlnErr(errorReportSource);
+					this.printlnErr(problem.getMessage());
 					this.printlnErr("----------"); //$NON-NLS-1$
 				}
-				printErr(problem.isError() ?
-						this.main.bind(
-								"requestor.error", //$NON-NLS-1$
-								Integer.toString(globalErrorCount),
-								new String(fileName))
-								: this.main.bind(
-										"requestor.warning", //$NON-NLS-1$
-										Integer.toString(globalErrorCount),
-										new String(fileName)));
-				final String errorReportSource = errorReportSource(problem, null, 0);
-				this.printlnErr(errorReportSource);
-				this.printlnErr(problem.getMessage());
-				this.printlnErr("----------"); //$NON-NLS-1$
 			}
 		}
 
@@ -1384,7 +1397,7 @@ public class Main implements ProblemSeverities, SuffixConstants {
 
 	private PrintWriter err;
 
-	ArrayList extraProblems;
+	protected ArrayList extraProblems;
 	public final static String bundleName = "org.eclipse.jdt.internal.compiler.batch.messages"; //$NON-NLS-1$
 	// two uses: recognize 'none' in options; code the singleton none
 	// for the '-d none' option (wherever it may be found)
@@ -3897,7 +3910,7 @@ public void performCompilation() {
 	}
 
 	if (this.extraProblems != null) {
-		this.logger.loggingExtraProblems(this);
+		loggingExtraProblems();
 		this.extraProblems = null;
 	}
 	if (this.compilerStats != null) {
@@ -3907,6 +3920,9 @@ public void performCompilation() {
 
 	// cleanup
 	environment.cleanup();
+}
+protected void loggingExtraProblems() {
+	this.logger.loggingExtraProblems(this);
 }
 public void printUsage() {
 	printUsage("misc.usage"); //$NON-NLS-1$

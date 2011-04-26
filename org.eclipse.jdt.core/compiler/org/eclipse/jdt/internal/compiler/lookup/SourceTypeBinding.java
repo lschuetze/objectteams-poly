@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 328281 - visibility leaks not detected when analyzing unused field in private class
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -1058,6 +1059,21 @@ public FieldBinding[] fields() {
 	this.tagBits |= TagBits.AreFieldsComplete;
 	return this.fields;
 }
+
+public void tagIndirectlyAccessibleMembers() {
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=328281
+	for (int i = 0; i < this.fields.length; i++) {
+		if (!this.fields[i].isPrivate())
+			this.fields[i].modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
+	}
+	for (int i = 0; i < this.memberTypes.length; i++) {
+		if (!this.memberTypes[i].isPrivate())
+			this.memberTypes[i].modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
+	}
+	if (this.superclass.isPrivate()) 
+		if (this.superclass instanceof SourceTypeBinding)  // should always be true because private super type can only be accessed in same CU
+			((SourceTypeBinding) this.superclass).tagIndirectlyAccessibleMembers();
+}
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#genericTypeSignature()
  */
@@ -2022,7 +2038,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 				method.tagBits |= TagBits.HasParameterAnnotations;
 			}
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=322817
-			boolean deferRawTypeCheck = !reportUnavoidableGenericTypeProblems && (arg.type.bits & ASTNode.IgnoreRawTypeCheck) == 0;
+			boolean deferRawTypeCheck = !reportUnavoidableGenericTypeProblems && !method.isConstructor() && (arg.type.bits & ASTNode.IgnoreRawTypeCheck) == 0;
 			TypeBinding parameterType;
 			if (deferRawTypeCheck) {
 				arg.type.bits |= ASTNode.IgnoreRawTypeCheck;

@@ -4,10 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ConstructorDeclaration.java 23404 2010-02-03 14:10:22Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for Bug 343713 - [compiler] bogus line number in constructor of inner class in 1.5 compliance
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -532,6 +532,7 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 
 		if (needFieldInitializations && preInitSyntheticFields){
 			generateSyntheticFieldInitializationsIfNecessary(this.scope, codeStream, declaringClass);
+			codeStream.recordPositionsFrom(0, this.bodyStart);
 		}
 		// generate constructor call
 		if (this.constructorCall != null) {

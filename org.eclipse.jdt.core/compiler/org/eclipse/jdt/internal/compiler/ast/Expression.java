@@ -14,16 +14,37 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
-import java.util.*;
+
+import java.util.ArrayList;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
-import org.eclipse.jdt.internal.compiler.impl.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
-import org.eclipse.jdt.internal.compiler.codegen.*;
-import org.eclipse.jdt.internal.compiler.flow.*;
-import org.eclipse.jdt.internal.compiler.lookup.*;
-import org.eclipse.jdt.internal.compiler.problem.*;
+import org.eclipse.jdt.internal.compiler.codegen.BranchLabel;
+import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
+import org.eclipse.jdt.internal.compiler.flow.FlowContext;
+import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
+import org.eclipse.jdt.internal.compiler.impl.Constant;
+import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
+import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
+import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
+import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TagBits;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
+import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
+import org.eclipse.jdt.internal.compiler.lookup.WildcardBinding;
+import org.eclipse.jdt.internal.compiler.problem.ShouldNotImplement;
 import org.eclipse.jdt.internal.compiler.util.Messages;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
@@ -506,8 +527,13 @@ public final boolean checkCastTypesCompatibility(
 							if (use15specifics) {
 								checkUnsafeCast(scope, castType, expressionType, null /*no match*/, true);
 								// ensure there is no collision between both interfaces: i.e. I1 extends List<String>, I2 extends List<Object>
-								if (interfaceType.hasIncompatibleSuperType((ReferenceBinding)castType))
+								if (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
+									if (interfaceType.hasIncompatibleSuperType((ReferenceBinding) castType)) {
+										return false;
+									}
+								} else if (!castType.isRawType() && interfaceType.hasIncompatibleSuperType((ReferenceBinding) castType)) {
 									return false;
+								}
 							} else {
 								// pre1.5 semantics - no covariance allowed (even if 1.5 compliant, but 1.4 source)
 								// look at original methods rather than the parameterized variants at 1.4 to detect
@@ -553,7 +579,11 @@ public final boolean checkCastTypesCompatibility(
 							if (use15specifics) {
 								checkUnsafeCast(scope, castType, expressionType, null /*no match*/, true);
 								// ensure there is no collision between both interfaces: i.e. I1 extends List<String>, I2 extends List<Object>
-								if (((ReferenceBinding)castType).hasIncompatibleSuperType((ReferenceBinding) expressionType)) {
+								if (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
+									if (((ReferenceBinding)castType).hasIncompatibleSuperType((ReferenceBinding) expressionType)) {
+										return false;
+									}
+								} else if (!castType.isRawType() && ((ReferenceBinding)castType).hasIncompatibleSuperType((ReferenceBinding) expressionType)) {
 									return false;
 								}
 							}
@@ -606,8 +636,13 @@ public final boolean checkCastTypesCompatibility(
 							if (use15specifics) {
 								checkUnsafeCast(scope, castType, expressionType, null /*no match*/, true);
 								// ensure there is no collision between both interfaces: i.e. I1 extends List<String>, I2 extends List<Object>
-								if (refExprType.hasIncompatibleSuperType((ReferenceBinding) castType))
+								if (scope.compilerOptions().complianceLevel < ClassFileConstants.JDK1_7) {
+									if (refExprType.hasIncompatibleSuperType((ReferenceBinding) castType)) {
+										return false;
+									}
+								} else if (!castType.isRawType() && refExprType.hasIncompatibleSuperType((ReferenceBinding) castType)) {
 									return false;
+								}
 							}
 							return true;
 						} else {
@@ -1131,13 +1166,28 @@ public TypeBinding resolveTypeExpecting(BlockScope scope, TypeBinding expectedTy
 /**
  * Returns true if the receiver is forced to be of raw type either to satisfy the contract imposed
  * by a super type or because it *is* raw and the current type has no control over it (i.e the rawness
- * originates from some other file.
+ * originates from some other file.)
  */
 public boolean forcedToBeRaw(ReferenceContext referenceContext) {
 	if (this instanceof NameReference) {
 		final Binding receiverBinding = ((NameReference) this).binding;
 		if (receiverBinding.isParameter() && (((LocalVariableBinding) receiverBinding).tagBits & TagBits.ForcedToBeRawType) != 0) {
 			return true;  // parameter is forced to be raw since super method uses raw types.
+		} else if (receiverBinding instanceof FieldBinding) {
+			FieldBinding field = (FieldBinding) receiverBinding;
+			if (field.type.isRawType()) {
+				if (referenceContext instanceof AbstractMethodDeclaration) {
+					AbstractMethodDeclaration methodDecl = (AbstractMethodDeclaration) referenceContext;
+					if (field.declaringClass != methodDecl.binding.declaringClass) { // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
+						return true;
+					}
+				} else if (referenceContext instanceof TypeDeclaration) {
+					TypeDeclaration type = (TypeDeclaration) referenceContext;
+					if (field.declaringClass != type.binding) { // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
+						return true;
+					}
+				}
+			}
 		}
 	} else if (this instanceof MessageSend) {
 		if (!CharOperation.equals(((MessageSend) this).binding.declaringClass.getFileName(),
@@ -1145,8 +1195,27 @@ public boolean forcedToBeRaw(ReferenceContext referenceContext) {
 			return true;
 		}
 	} else if (this instanceof FieldReference) {
-		if (!CharOperation.equals(((FieldReference) this).binding.declaringClass.getFileName(),
+		FieldBinding field = ((FieldReference) this).binding;
+		if (!CharOperation.equals(field.declaringClass.getFileName(),
 				referenceContext.compilationResult().getFileName())) { // problem is rooted elsewhere
+			return true;
+		}
+		if (field.type.isRawType()) {
+			if (referenceContext instanceof AbstractMethodDeclaration) {
+				AbstractMethodDeclaration methodDecl = (AbstractMethodDeclaration) referenceContext;
+				if (field.declaringClass != methodDecl.binding.declaringClass) { // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
+					return true;
+				}
+			} else if (referenceContext instanceof TypeDeclaration) {
+				TypeDeclaration type = (TypeDeclaration) referenceContext;
+				if (field.declaringClass != type.binding) { // inherited raw field, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962
+					return true;
+				}
+			}
+		}
+	} else if (this instanceof ConditionalExpression) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=337751
+		ConditionalExpression ternary = (ConditionalExpression) this;
+		if (ternary.valueIfTrue.forcedToBeRaw(referenceContext) || ternary.valueIfFalse.forcedToBeRaw(referenceContext)) {
 			return true;
 		}
 	}

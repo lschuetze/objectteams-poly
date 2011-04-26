@@ -2905,6 +2905,64 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 		this.listLength++;
 	}
 }
+protected void consumeCatchFormalParameter(boolean isVarArgs) {
+	if (this.indexOfAssistIdentifier() < 0) {
+		super.consumeCatchFormalParameter(isVarArgs);
+		if (this.pendingAnnotation != null) {
+			this.pendingAnnotation.potentialAnnotatedNode = this.astStack[this.astPtr];
+			this.pendingAnnotation = null;
+		}
+	} else {
+
+		this.identifierLengthPtr--;
+		char[] identifierName = this.identifierStack[this.identifierPtr];
+		long namePositions = this.identifierPositionStack[this.identifierPtr--];
+		int extendedDimensions = this.intStack[this.intPtr--];
+		int endOfEllipsis = 0;
+		if (isVarArgs) {
+			endOfEllipsis = this.intStack[this.intPtr--];
+		}
+		int firstDimensions = this.intStack[this.intPtr--];
+		final int typeDimensions = firstDimensions + extendedDimensions;
+		TypeReference type = getTypeReference(typeDimensions);
+		if (isVarArgs) {
+			type = copyDims(type, typeDimensions + 1);
+			if (extendedDimensions == 0) {
+				type.sourceEnd = endOfEllipsis;
+			}
+			type.bits |= ASTNode.IsVarArgs; // set isVarArgs
+		}
+		this.intPtr -= 2;
+		CompletionOnArgumentName arg =
+			new CompletionOnArgumentName(
+				identifierName,
+				namePositions,
+				type,
+				this.intStack[this.intPtr + 1] & ~ClassFileConstants.AccDeprecated); // modifiers
+		arg.bits &= ~ASTNode.IsArgument;
+		// consume annotations
+		int length;
+		if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+			System.arraycopy(
+				this.expressionStack,
+				(this.expressionPtr -= length) + 1,
+				arg.annotations = new Annotation[length],
+				0,
+				length);
+		}
+
+		arg.isCatchArgument = topKnownElementKind(COMPLETION_OR_ASSIST_PARSER) == K_BETWEEN_CATCH_AND_RIGHT_PAREN;
+		pushOnAstStack(arg);
+
+		this.assistNode = arg;
+		this.lastCheckPoint = (int) namePositions;
+		this.isOrphanCompletionNode = true;
+
+		/* if incomplete method header, listLength counter will not have been reset,
+			indicating that some arguments are available on the stack */
+		this.listLength++;
+	}
+}
 protected void consumeStatementFor() {
 	super.consumeStatementFor();
 
@@ -5082,6 +5140,18 @@ public void recoveryExitFromVariable() {
 		if(oldElement != this.currentElement) {
 			popElement(K_LOCAL_INITIALIZER_DELIMITER);
 		}
+	} else if(this.currentElement != null && this.currentElement instanceof RecoveredField) {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292087
+		// To make sure the array initializer is popped when the focus is shifted to the parent
+		// in case we're restarting recovery inside an array initializer
+		RecoveredElement oldElement = this.currentElement;
+		super.recoveryExitFromVariable();	
+		if(oldElement != this.currentElement) {	
+			if(topKnownElementKind(COMPLETION_OR_ASSIST_PARSER) == K_ARRAY_INITIALIZER) {	
+				popElement(K_ARRAY_INITIALIZER);	
+				popElement(K_FIELD_INITIALIZER_DELIMITER);	
+			} 	
+		}
 	} else {
 		super.recoveryExitFromVariable();
 	}
@@ -5165,6 +5235,15 @@ private boolean stackHasInstanceOfExpression(Object[] stackToSearch, int startIn
 		indexInstanceOf--;
 	}
 	return false;
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292087
+protected boolean isInsideArrayInitializer(){
+	int i = this.elementPtr;
+	if (i > -1 && this.elementKindStack[i] == K_ARRAY_INITIALIZER) {
+		return true;
+	}
+	return false;	
 }
 /*
  * Reset internal state after completion is over

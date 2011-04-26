@@ -38,6 +38,7 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 
@@ -140,6 +141,12 @@ public class ExternalFoldersManager {
 
 	public IFolder createLinkFolder(IPath externalFolderPath, boolean refreshIfExistAlready, IProgressMonitor monitor) throws CoreException {
 		IProject externalFoldersProject = createExternalFoldersProject(monitor); // run outside synchronized as this can create a resource
+		return createLinkFolder(externalFolderPath, refreshIfExistAlready, externalFoldersProject, monitor);
+	}
+
+	private IFolder createLinkFolder(IPath externalFolderPath, boolean refreshIfExistAlready,
+									IProject externalFoldersProject, IProgressMonitor monitor) throws CoreException {
+		
 		IFolder result = addFolder(externalFolderPath, externalFoldersProject, false);
 		if (!result.exists())
 			result.createLink(externalFolderPath, IResource.ALLOW_MISSING_LOCAL, monitor);
@@ -148,6 +155,28 @@ public class ExternalFoldersManager {
 		return result;
 	}
 
+	public void createPendingFolders(IProgressMonitor monitor) throws JavaModelException{
+		if (this.pendingFolders == null || this.pendingFolders.isEmpty()) return;
+		
+		IProject externalFoldersProject = null;
+		try {
+			externalFoldersProject = createExternalFoldersProject(monitor);
+		}
+		catch(CoreException e) {
+			throw new JavaModelException(e);
+		}
+		Iterator iterator = this.pendingFolders.iterator();
+		while (iterator.hasNext()) {
+			Object folderPath = iterator.next();
+			try {
+				createLinkFolder((IPath) folderPath, false, externalFoldersProject, monitor);
+			} catch (CoreException e) {
+				Util.log(e, "Error while creating a link for external folder :" + folderPath); //$NON-NLS-1$
+			}
+		}
+		this.pendingFolders.clear();
+	}
+	
 	public void cleanUp(IProgressMonitor monitor) throws CoreException {
 		ArrayList toDelete = getFoldersToCleanUp(monitor);
 		if (toDelete == null)
@@ -193,7 +222,7 @@ public class ExternalFoldersManager {
 	public IProject getExternalFoldersProject() {
 		return ResourcesPlugin.getWorkspace().getRoot().getProject(EXTERNAL_PROJECT_NAME);
 	}
-	private IProject createExternalFoldersProject(IProgressMonitor monitor) throws CoreException {
+	public IProject createExternalFoldersProject(IProgressMonitor monitor) throws CoreException {
 		IProject project = getExternalFoldersProject();
 		if (!project.isAccessible()) {
 			if (!project.exists()) {

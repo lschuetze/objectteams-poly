@@ -4,10 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ClassScope.java 23405 2010-02-03 17:02:18Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 328281 - visibility leaks not detected when analyzing unused field in private class
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -298,6 +298,9 @@ public class ClassScope extends Scope {
 // Markus Witte}
 
 		SourceTypeBinding sourceType = this.referenceContext.binding;
+		if (!sourceType.isPrivate() && sourceType.superclass instanceof SourceTypeBinding && sourceType.superclass.isPrivate())
+			((SourceTypeBinding) sourceType.superclass).tagIndirectlyAccessibleMembers();
+
 		if (sourceType.isMemberType() && !sourceType.isLocalType())
 			 ((MemberTypeBinding) sourceType).checkSyntheticArgsAndFields();
 
