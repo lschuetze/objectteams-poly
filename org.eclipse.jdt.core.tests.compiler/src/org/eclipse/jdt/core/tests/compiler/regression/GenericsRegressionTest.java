@@ -15,6 +15,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 
@@ -1349,5 +1350,437 @@ public void test334121() {
 			"	                         ^\n" + 
 			"Cycle detected: the type A cannot extend/implement itself or one of its own member types\n" + 
 			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=337751 
+public void test337751() {
+	Map compilerOptions14 = getCompilerOptions();
+	compilerOptions14.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
+	compilerOptions14.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+	compilerOptions14.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
+	this.runConformTest(
+		new String[] {
+			"Project.java",
+			"import java.util.Map;\n" +
+			"public class Project {\n" +
+			"    public Map getOptions(boolean b) {\n" +
+			"        return null;\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"",
+		null,
+		true,
+		null,
+		compilerOptions14,
+		null);
+	
+	Map compilerOptions15 = getCompilerOptions();
+	compilerOptions15.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems, CompilerOptions.ENABLED);
+	this.runNegativeTest(
+		new String[] {
+			"Y.java",
+			"import java.util.Map;\n" +
+			"public class Y {\n" +
+			"    void foo(Project project) {\n" +
+			"        Map<String, String> options=\n" +
+			"                        project != null ? project.getOptions(true) : null;\n" +
+			"        options = project.getOptions(true);\n" +
+			"        options = project == null ? null : project.getOptions(true);\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in Y.java (at line 5)\n" + 
+		"	project != null ? project.getOptions(true) : null;\n" + 
+		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The expression of type Map needs unchecked conversion to conform to Map<String,String>\n" + 
+		"----------\n" + 
+		"2. WARNING in Y.java (at line 6)\n" + 
+		"	options = project.getOptions(true);\n" + 
+		"	          ^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The expression of type Map needs unchecked conversion to conform to Map<String,String>\n" + 
+		"----------\n" + 
+		"3. WARNING in Y.java (at line 7)\n" + 
+		"	options = project == null ? null : project.getOptions(true);\n" + 
+		"	          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The expression of type Map needs unchecked conversion to conform to Map<String,String>\n" + 
+		"----------\n",
+		null,
+		false,
+		compilerOptions15,
+		null);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=337751 
+public void test337751a() {
+	Map compilerOptions14 = getCompilerOptions();
+	compilerOptions14.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
+	compilerOptions14.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+	compilerOptions14.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
+	this.runConformTest(
+		new String[] {
+			"Project.java",
+			"import java.util.Map;\n" +
+			"public class Project {\n" +
+			"    public Map getOptions(boolean b) {\n" +
+			"        return null;\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"",
+		null,
+		true,
+		null,
+		compilerOptions14,
+		null);
+	
+	Map compilerOptions15 = getCompilerOptions();
+	compilerOptions15.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems, CompilerOptions.DISABLED);
+	this.runNegativeTest(
+		new String[] {
+			"Y.java",
+			"import java.util.Map;\n" +
+			"public class Y {\n" +
+			"    void foo(Project project) {\n" +
+			"        Map<String, String> options=\n" +
+			"                        project != null ? project.getOptions(true) : null;\n" +
+			"        options = project.getOptions(true);\n" +
+			"        options = project == null ? null : project.getOptions(true);\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"",
+		null,
+		false,
+		compilerOptions15,
+		null);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962 
+public void test337962() {
+	Map compilerOptions15 = getCompilerOptions();
+	compilerOptions15.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems, CompilerOptions.ENABLED);
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.List;\n" +
+			"import java.util.ArrayList;\n" +
+			"class Super {\n" +
+			"    protected List fList;\n" +
+			"}\n" +
+			"public class X extends Super {\n" +
+			"    protected List fSubList; // raw type warning (good)\n" +
+			"    {\n" +
+			"        fSubList = new ArrayList();\n " +
+			"        fList.add(null); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        super.fList.add(null); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        fSubList.add(null); // type safety warning (good, should not be hidden)\n" +
+			"    }\n" +
+			"    void foo(String s) {\n" +
+			"        fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        super.fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        fSubList.add(s); // type safety warning (good, should not be hidden)\n" +
+			"    }\n" +
+			"    X(String s) {\n" +
+			"        fSubList = new ArrayList();\n " +
+			"        fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        super.fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        fSubList.add(s); // type safety warning (good, should not be hidden)\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 4)\n" + 
+		"	protected List fList;\n" + 
+		"	          ^^^^\n" + 
+		"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 7)\n" + 
+		"	protected List fSubList; // raw type warning (good)\n" + 
+		"	          ^^^^\n" + 
+		"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"3. WARNING in X.java (at line 9)\n" + 
+		"	fSubList = new ArrayList();\n" + 
+		"	               ^^^^^^^^^\n" + 
+		"ArrayList is a raw type. References to generic type ArrayList<E> should be parameterized\n" + 
+		"----------\n" + 
+		"4. WARNING in X.java (at line 10)\n" + 
+		"	fList.add(null); // type safety warning (TODO: bad, should be hidden)\n" + 
+		"	^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"5. WARNING in X.java (at line 11)\n" + 
+		"	super.fList.add(null); // type safety warning (TODO: bad, should be hidden)\n" + 
+		"	^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"6. WARNING in X.java (at line 12)\n" + 
+		"	fSubList.add(null); // type safety warning (good, should not be hidden)\n" + 
+		"	^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"7. WARNING in X.java (at line 15)\n" + 
+		"	fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" + 
+		"	^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"8. WARNING in X.java (at line 16)\n" + 
+		"	super.fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" + 
+		"	^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"9. WARNING in X.java (at line 17)\n" + 
+		"	fSubList.add(s); // type safety warning (good, should not be hidden)\n" + 
+		"	^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"10. WARNING in X.java (at line 20)\n" + 
+		"	fSubList = new ArrayList();\n" + 
+		"	               ^^^^^^^^^\n" + 
+		"ArrayList is a raw type. References to generic type ArrayList<E> should be parameterized\n" + 
+		"----------\n" + 
+		"11. WARNING in X.java (at line 21)\n" + 
+		"	fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" + 
+		"	^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"12. WARNING in X.java (at line 22)\n" + 
+		"	super.fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" + 
+		"	^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"13. WARNING in X.java (at line 23)\n" + 
+		"	fSubList.add(s); // type safety warning (good, should not be hidden)\n" + 
+		"	^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n",
+		null,
+		false,
+		compilerOptions15,
+		null);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=337962 
+public void test337962b() {
+	Map compilerOptions15 = getCompilerOptions();
+	compilerOptions15.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems, CompilerOptions.DISABLED);
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.List;\n" +
+			"import java.util.ArrayList;\n" +
+			"class Super {\n" +
+			"    protected List fList;\n" +
+			"}\n" +
+			"public class X extends Super {\n" +
+			"    protected List fSubList; // raw type warning (good)\n" +
+			"    {\n" +
+			"        fSubList = new ArrayList();\n " +
+			"        fList.add(null); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        super.fList.add(null); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        fSubList.add(null); // type safety warning (good, should not be hidden)\n" +
+			"    }\n" +
+			"    void foo(String s) {\n" +
+			"        fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        super.fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        fSubList.add(s); // type safety warning (good, should not be hidden)\n" +
+			"    }\n" +
+			"    X(String s) {\n" +
+			"        fSubList = new ArrayList();\n " +
+			"        fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        super.fList.add(s); // type safety warning (TODO: bad, should be hidden)\n" +
+			"        fSubList.add(s); // type safety warning (good, should not be hidden)\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 4)\n" + 
+		"	protected List fList;\n" + 
+		"	          ^^^^\n" + 
+		"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 7)\n" + 
+		"	protected List fSubList; // raw type warning (good)\n" + 
+		"	          ^^^^\n" + 
+		"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"3. WARNING in X.java (at line 9)\n" + 
+		"	fSubList = new ArrayList();\n" + 
+		"	               ^^^^^^^^^\n" + 
+		"ArrayList is a raw type. References to generic type ArrayList<E> should be parameterized\n" + 
+		"----------\n" + 
+		"4. WARNING in X.java (at line 12)\n" + 
+		"	fSubList.add(null); // type safety warning (good, should not be hidden)\n" + 
+		"	^^^^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"5. WARNING in X.java (at line 17)\n" + 
+		"	fSubList.add(s); // type safety warning (good, should not be hidden)\n" + 
+		"	^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n" + 
+		"6. WARNING in X.java (at line 20)\n" + 
+		"	fSubList = new ArrayList();\n" + 
+		"	               ^^^^^^^^^\n" + 
+		"ArrayList is a raw type. References to generic type ArrayList<E> should be parameterized\n" + 
+		"----------\n" + 
+		"7. WARNING in X.java (at line 23)\n" + 
+		"	fSubList.add(s); // type safety warning (good, should not be hidden)\n" + 
+		"	^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method add(Object) belongs to the raw type List. References to generic type List<E> should be parameterized\n" + 
+		"----------\n",
+		null,
+		false,
+		compilerOptions15,
+		null);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=338011 
+public void test338011() {
+	Map compilerOptions15 = getCompilerOptions();
+	compilerOptions15.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems, CompilerOptions.DISABLED);
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.*;\n" +
+			"public class X extends A {\n" +
+			"    public X(Map m) { // should warn about raw type m\n" +
+			"        super(m);\n" +
+			"        m.put(\"one\", 1); // warns about raw method invocation (good)\n" +
+			"    }\n" +
+			"    public X(Map<String, Integer> m, boolean b) {\n" +
+			"        super(m); // shows that parametrizing the parameter type is no problem \n" +
+			"        new A(m);\n" +
+			"        m.put(\"one\", 1);\n" +
+			"    }\n" +
+			"}\n" +
+			"class A {\n" +
+			"    public A (Map m) {\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 3)\n" + 
+		"	public X(Map m) { // should warn about raw type m\n" + 
+		"	         ^^^\n" + 
+		"Map is a raw type. References to generic type Map<K,V> should be parameterized\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 5)\n" + 
+		"	m.put(\"one\", 1); // warns about raw method invocation (good)\n" + 
+		"	^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method put(Object, Object) belongs to the raw type Map. References to generic type Map<K,V> should be parameterized\n" + 
+		"----------\n" + 
+		"3. WARNING in X.java (at line 14)\n" + 
+		"	public A (Map m) {\n" + 
+		"	          ^^^\n" + 
+		"Map is a raw type. References to generic type Map<K,V> should be parameterized\n" + 
+		"----------\n",
+		null,
+		false,
+		compilerOptions15,
+		null);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=338011 
+public void test338011b() {
+	Map compilerOptions15 = getCompilerOptions();
+	compilerOptions15.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+	compilerOptions15.put(CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems, CompilerOptions.ENABLED);
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"import java.util.*;\n" +
+			"public class X extends A {\n" +
+			"    public X(Map m) { // should warn about raw type m\n" +
+			"        super(m);\n" +
+			"        m.put(\"one\", 1); // warns about raw method invocation (good)\n" +
+			"    }\n" +
+			"    public X(Map<String, Integer> m, boolean b) {\n" +
+			"        super(m); // shows that parametrizing the parameter type is no problem \n" +
+			"        new A(m);\n" +
+			"        m.put(\"one\", 1);\n" +
+			"    }\n" +
+			"}\n" +
+			"class A {\n" +
+			"    public A (Map m) {\n" +
+			"    }\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 3)\n" + 
+		"	public X(Map m) { // should warn about raw type m\n" + 
+		"	         ^^^\n" + 
+		"Map is a raw type. References to generic type Map<K,V> should be parameterized\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 5)\n" + 
+		"	m.put(\"one\", 1); // warns about raw method invocation (good)\n" + 
+		"	^^^^^^^^^^^^^^^\n" + 
+		"Type safety: The method put(Object, Object) belongs to the raw type Map. References to generic type Map<K,V> should be parameterized\n" + 
+		"----------\n" + 
+		"3. WARNING in X.java (at line 14)\n" + 
+		"	public A (Map m) {\n" + 
+		"	          ^^^\n" + 
+		"Map is a raw type. References to generic type Map<K,V> should be parameterized\n" + 
+		"----------\n",
+		null,
+		false,
+		compilerOptions15,
+		null);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=334493 
+public void test334493() {
+ this.runNegativeTest(
+     new String[] {
+         "X.java",
+         "interface Super<P> {}\n" +
+         "class Y<C> implements Super<Integer>{}\n" +
+         "interface II extends Super<Double>{}\n" +
+         "class S<A> extends Y<Byte> {}\n" +
+         "interface T<B> extends II{}\n" +
+         "public class X {\n" +
+         "    public static void main(String argv[]) {\n" +
+         "        S<Integer> s = null;\n" +
+         "        T<Integer> t = null;\n" +
+         "        t = (T) s;          //casting to raw type, no error\n" +
+         "        System.out.println(t);\n" +
+         "    }\n" +
+         "}\n"
+     },
+     this.complianceLevel < ClassFileConstants.JDK1_7 ?
+		"----------\n" + 
+		"1. ERROR in X.java (at line 10)\n" + 
+		"	t = (T) s;          //casting to raw type, no error\n" + 
+		"	    ^^^^^\n" + 
+		"Cannot cast from S<Integer> to T\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 10)\n" + 
+		"	t = (T) s;          //casting to raw type, no error\n" + 
+		"	    ^^^^^\n" + 
+		"Type safety: The expression of type T needs unchecked conversion to conform to T<Integer>\n" + 
+		"----------\n" : 
+				"----------\n" + 
+				"1. WARNING in X.java (at line 10)\n" + 
+				"	t = (T) s;          //casting to raw type, no error\n" + 
+				"	    ^^^^^\n" + 
+				"Type safety: The expression of type T needs unchecked conversion to conform to T<Integer>\n" + 
+				"----------\n" + 
+				"2. WARNING in X.java (at line 10)\n" + 
+				"	t = (T) s;          //casting to raw type, no error\n" + 
+				"	     ^\n" + 
+				"T is a raw type. References to generic type T<B> should be parameterized\n" + 
+				"----------\n");
 }
 }
