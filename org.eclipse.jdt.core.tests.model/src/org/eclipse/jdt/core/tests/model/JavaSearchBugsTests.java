@@ -34,8 +34,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.content.IContentType;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.IPreferencesService;
 import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathContainer;
@@ -105,6 +103,9 @@ public JavaSearchBugsTests(String name) {
 	this.endChar = "";
 }
 public static Test suite() {
+	if (TESTS_PREFIX != null || TESTS_NAMES != null || TESTS_NUMBERS!=null || TESTS_RANGE !=null) {
+		return buildModelTestSuite(JavaSearchBugsTests.class);
+	}
 	// hack to guarantee the test order
 	TestSuite suite = new Suite(JavaSearchBugsTests.class.getName());
 	suite.addTest(new JavaSearchBugsTests("testBug41018"));
@@ -702,6 +703,7 @@ public static Test suite() {
 	suite.addTest(new JavaSearchBugsTests("testBug324189c"));
 	suite.addTest(new JavaSearchBugsTests("testBug324189d"));
 	suite.addTest(new JavaSearchBugsTests("testBug324189e"));
+	suite.addTest(new JavaSearchBugsTests("testBug339891"));
 	return suite;
 }
 class TestCollector extends JavaSearchResultCollector {
@@ -11613,7 +11615,6 @@ public void testBug286379c() throws CoreException {
 	System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
 	System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
 	System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
-	printPreference();
 	System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 	
 	IContentType javaContentType = Platform.getContentTypeManager().getContentType(JavaCore.JAVA_SOURCE_CONTENT_TYPE);
@@ -11662,7 +11663,6 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
-		printPreference();
 		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 		// Restart to let the indexes to be refreshed
 		simulateExit();
@@ -11672,7 +11672,6 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
-		printPreference();
 		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 		waitUntilIndexesReady();
 
@@ -11698,7 +11697,6 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
-		printPreference();
 		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 		// Restarting should update the index file to remove the references of any .torem files
 		simulateExit();
@@ -11708,7 +11706,6 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
-		printPreference();
 		waitUntilIndexesReady();
 
 		// Search for the new type with new extension
@@ -11725,7 +11722,6 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Task tags:           " + JavaCore.getOption(JavaCore.COMPILER_TASK_TAGS));
 		System.out.println("		+ Task priorities:     " + JavaCore.getOption(JavaCore.COMPILER_TASK_PRIORITIES));
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
-		printPreference();
 		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 	} finally {
 		getWorkspace().removeResourceChangeListener(changeListener);
@@ -11738,16 +11734,9 @@ public void testBug286379c() throws CoreException {
 		System.out.println("		+ Forbidden reference: " + JavaCore.getOption(JavaCore.COMPILER_PB_FORBIDDEN_REFERENCE));
 		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getOptions()).toString(), 2));
 		System.out.println("	- Default Options at test end:");
-		printPreference();
 		System.out.println(Util.indentString(new CompilerOptions(JavaCore.getDefaultOptions()).toString(), 2));
+		JavaModelManager.DEBUG_302850 = false;
 	}
-}
-private void printPreference() {
-	IPreferencesService service;
-	IEclipsePreferences[] lookups;
-	service = Platform.getPreferencesService();
-	lookups = new IEclipsePreferences[] { JavaModelManager.getJavaModelManager().getInstancePreferences(), JavaModelManager.getJavaModelManager().getDefaultPreferences()};
-	System.out.println("       + Task tags from preferences: "+service.get(JavaCore.COMPILER_TASK_TAGS, null, lookups));
 }
 
 /**
@@ -13475,5 +13464,32 @@ public void testBug324189e() throws CoreException {
 	);
 	search("A.run()", METHOD, DECLARATIONS);
 	assertSearchResults("src/b324189/A.java void b324189.A.run() [run] EXACT_MATCH");
+}
+/**
+ * @bug 339891: NPE when searching for method (with '*' wildcard character)
+ * @test Search for Worker.run() should not return results like TestWorker
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=339891"
+ */
+public void testBug339891() throws CoreException {
+	try {
+		IJavaProject project = createJavaProject("P");
+		createFile("/P/Ref.java",
+			"public class Ref{\n"+
+			" public void foo() {}\n"+
+			"}\n"+
+			"}\n");
+		createFile("/P/Test.java",
+			"public class Test{\n"+
+				" public void foo(Ref ref) {" +
+				"   ref.foo();\n"+
+				"}\n" +
+				"}\n");
+		waitUntilIndexesReady();
+		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[]{project}, IJavaSearchScope.SOURCES);
+		search("Ref.*", METHOD, REFERENCES, EXACT_RULE, scope, this.resultCollector);
+		assertSearchResults("Test.java void Test.foo(Ref) [foo()] EXACT_MATCH");
+	} finally {
+		deleteProject("P");
+	}
 }
 }

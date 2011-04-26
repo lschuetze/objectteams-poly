@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,7 @@ import java.io.IOException;
 import junit.framework.Test;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -198,6 +199,20 @@ public void testCatchArgumentType2() throws JavaModelException {
 		"Y1 [in X1 [in X1.java [in <default> [in src [in Resolve]]]]]",
 		elements
 	);
+}
+/**
+ * bugs http://dev.eclipse.org/bugs/show_bug.cgi?id=342054
+ */
+public void testCatchArgumentType3() throws JavaModelException {
+	ICompilationUnit cu = getCompilationUnit("Resolve", "src", "", "ResolveCatchArgumentType1.java");
+	IJavaElement[] elements = codeSelect(cu, "exception", "exception");
+	assertElementsEqual(
+		"Unexpected elements",
+		"exception [in foo() [in ResolveCatchArgumentType1 [in ResolveCatchArgumentType1.java [in <default> [in src [in Resolve]]]]]]",
+		elements
+	);
+	assertFalse("Not a parameter", ((ILocalVariable) elements[0]).isParameter());
+	assertEquals("Wrong flags", Flags.AccFinal, ((ILocalVariable) elements[0]).getFlags());
 }
 /**
  * Resolve the class 'X' (field type).
@@ -1361,6 +1376,29 @@ public void testMethodDeclarationInInterface() throws JavaModelException {
 			"foo() [in QI [in QI.class [in <default> [in jj.jar [in Resolve]]]]]",
 			elements
 	);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=342054
+public void testMethodParameter() throws JavaModelException {
+	this.workingCopies = new ICompilationUnit[1];
+	this.workingCopies[0] = getWorkingCopy(
+		"/Resolve/src/test/Test.java",
+		"package test;"+
+		"public class Test {\n" +
+		"	void foo(int x) {\n" +
+		"	}\n" +
+		"}");
+
+	String str = this.workingCopies[0].getSource();
+	int start = str.lastIndexOf("x");
+	int length = "x".length();
+	IJavaElement[] elements =  this.workingCopies[0].codeSelect(start, length, this.wcOwner);
+
+	assertElementsEqual(
+			"Unexpected elements",
+			"x [in foo(int) [in Test [in [Working copy] Test.java [in test [in src [in Resolve]]]]]]",
+			elements
+		);
+	assertTrue("Not a parameter", ((ILocalVariable)elements[0]).isParameter());
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=142303
 public void testMethodInAnonymous1() throws JavaModelException {

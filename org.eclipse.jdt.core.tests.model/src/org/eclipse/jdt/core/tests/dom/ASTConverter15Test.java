@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for Bug 342671 - ClassCastException: org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ArrayBinding
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.dom;
 
@@ -47,7 +48,7 @@ public class ASTConverter15Test extends ConverterTestSetup {
 	}
 
 	static {
-//		TESTS_NUMBERS = new int[] { 348 };
+//		TESTS_NUMBERS = new int[] { 351, 352 };
 //		TESTS_RANGE = new int[] { 325, -1 };
 //		TESTS_NAMES = new String[] {"test0204"};
 	}
@@ -4739,7 +4740,7 @@ public class ASTConverter15Test extends ConverterTestSetup {
     	assertNotNull("No node", node);
     	assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
     	CompilationUnit compilationUnit = (CompilationUnit) node;
-        final String expectedErrors = "The member enum E cannot be local";
+        final String expectedErrors = "The member enum E can only be defined inside a top-level class or interface";
     	assertProblemsSize(compilationUnit, 1, expectedErrors);
 		node = getASTNode(compilationUnit, 0, 0, 0);
    		assertEquals("Not a type declaration statement", ASTNode.TYPE_DECLARATION_STATEMENT, node.getNodeType());
@@ -11261,5 +11262,59 @@ public class ASTConverter15Test extends ConverterTestSetup {
 		assertBindingKeyEquals(
 				"Lp/X$;",	// should not be Lp/X$~X$;
 			binding.getKey());
+	}
+
+	public void test0350() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter15/src/X.java", true/*resolve*/);
+		CompilationUnit unit = (CompilationUnit) buildAST(
+			"public class X {\n" + 
+			"	<T> T combine(T t1, T t2) {\n" + 
+			"		boolean b = true;\n" + 
+			"		return b ? t1 : t2; \n" + 
+			"	}\n" + 
+			"	void test(String s, Integer i) { \n" + 
+			"		combine(s, i); \n" + 
+			"	}\n" + 
+			"}",
+			this.workingCopy,
+			true,
+			true,
+			true);
+		ExpressionStatement statement = (ExpressionStatement) getASTNode(unit, 0, 1, 0);
+		ITypeBinding binding = ((MethodInvocation) statement.getExpression()).resolveTypeBinding();
+		assertTrue("Should be seen as a wildcard (really an intersection type)", binding.isWildcardType());
+		assertNull("should be null", binding.getGenericTypeOfWildcardType());
+	}
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=342671
+	public void test0351() throws JavaModelException {
+		ICompilationUnit sourceUnit = getCompilationUnit("Converter15" , "src", "test0351", "X.java"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		ASTNode result = runJLS3Conversion(sourceUnit, true, true);
+		assertTrue("Not a compilation unit", result.getNodeType() == ASTNode.COMPILATION_UNIT);
+		CompilationUnit unit = (CompilationUnit) result;
+		MethodDeclaration methodDeclaration = (MethodDeclaration) getASTNode(unit, 0, 0);
+		ITypeBinding typeBinding = methodDeclaration.getReturnType2().resolveBinding();
+		assertEquals("Wrong fully qualified name", "test0351.I1[]", typeBinding.getQualifiedName());
+	}
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=342671
+	// witness situation mentioned in comment 18 of said bug.
+	public void test0351a() throws JavaModelException {
+		ICompilationUnit sourceUnit = getCompilationUnit("Converter15" , "src", "test0351", "X.java"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		ASTNode result = runJLS3Conversion(sourceUnit, true, true);
+		assertTrue("Not a compilation unit", result.getNodeType() == ASTNode.COMPILATION_UNIT);
+		CompilationUnit unit = (CompilationUnit) result;
+		MethodDeclaration methodDeclaration = (MethodDeclaration) getASTNode(unit, 0, 0);
+		Type componentType = ((ArrayType)methodDeclaration.getReturnType2()).getComponentType();
+		ITypeBinding typeBinding = componentType.resolveBinding();
+		assertEquals("Wrong fully qualified name", "test0351.I1", typeBinding.getQualifiedName());
+	}
+	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=342671
+	public void test0352() throws JavaModelException {
+		ICompilationUnit sourceUnit = getCompilationUnit("Converter15" , "src", "test0352", "X.java"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+		ASTNode result = runJLS3Conversion(sourceUnit, true, true);
+		assertTrue("Not a compilation unit", result.getNodeType() == ASTNode.COMPILATION_UNIT);
+		CompilationUnit unit = (CompilationUnit) result;
+		MethodDeclaration methodDeclaration = (MethodDeclaration) getASTNode(unit, 0, 0);
+		ITypeBinding typeBinding = methodDeclaration.getReturnType2().resolveBinding();
+		assertEquals("Wrong fully qualified name", "test0352.I1[]", typeBinding.getQualifiedName());
 	}
 }
