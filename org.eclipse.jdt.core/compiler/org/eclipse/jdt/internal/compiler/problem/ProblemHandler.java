@@ -222,7 +222,7 @@ private void protectedHandle(
 		}
 	}
 	// SMAP-related position mapping may produce positions outside the file, crop them now:
-	if (problemStartPosition > unitResult.sourceEndPos) {
+	if (unitResult != null && problemStartPosition > unitResult.sourceEndPos) {
 		problemStartPosition = 0;
 		problemEndPosition = 0;
 	}

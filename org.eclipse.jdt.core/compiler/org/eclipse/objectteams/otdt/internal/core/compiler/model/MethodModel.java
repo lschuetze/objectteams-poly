@@ -773,6 +773,8 @@ public class MethodModel extends ModelElement {
 														  RoleModel sourceRoleModel,
 														  AstGenerator defaultGen) 
 	{
+		if (sourceRoleModel.getAst() == null)
+			return defaultGen; // don't have more detailed source positions
 		MethodModel model = methodDecl.getModel();
 		AstGenerator gen = model.getSynthPosGen(hostTypeDecl, 
 											    sourceRoleModel.getBinding(),
