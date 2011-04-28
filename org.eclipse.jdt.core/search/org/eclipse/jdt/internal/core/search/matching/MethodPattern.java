@@ -475,5 +475,14 @@ public int resolveLevelForType(String typeName, int declaringLevel) {
 	}
 	return PatternLocator.IMPOSSIBLE_MATCH;
 }
+
+public char[] getDeclaringQualification() {
+	if (this.declaringQualification != null)
+		return this.declaringQualification;
+	// if a declaringRoleClass was stored use it instead:
+	if (this.declaringRoleClass != null)
+		return ((IType) this.declaringRoleClass.getParent()).getFullyQualifiedName().toCharArray();
+	return null;
+}
 // SH}
 }

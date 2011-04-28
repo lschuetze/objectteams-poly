@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IRoleType;
@@ -50,7 +51,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	    {
 	        System.err.println("Warning, only part of the OTJavaMethodSearchTest are being executed!");
 			Suite suite = new Suite(OTJavaMethodSearchTests.class.getName());
-			suite.addTest(new OTJavaMethodSearchTests("test325297"));
+			suite.addTest(new OTJavaMethodSearchTests("test031b"));
 			return suite;
 	    }
 	    
@@ -949,8 +950,69 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
 				resultCollector);
 		
-		assertSearchResults("Search for role method decl which overrides an implicit inherited method. fq name",
+		assertSearchResults("Search for role method decl which is overridden in a tsub role. fq name",
 				"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod() [roleMethod()]",
+				resultCollector);
+	}
+
+	/**
+	 * Search for:<br>
+	 *  - method references<br>
+	 * Search pattern:<br>
+	 *  - combined method pattern
+	 * 	- fully qualified name<br>
+	 * Searched element:<br>
+	 * 	- all references to a role method which is overridden in a tsub role<br> 
+	 * Expected search result:<br>
+	 *	- reference:
+	 *		TSuperMessageSend in body of method TestTeam2.TestRole1.roleMethod()<br>
+	 */
+	//see Bug 332790 - [search] search doesn't find tsuper method calls
+	public void test031b() throws CoreException
+	{
+		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
+		// same as before but using a model-based pattern rather than a String-based one:
+		IType roleType = this.javaProject.findType("p_implicit_inheritance.TestTeam1.TestRole1");
+		IMethod roleMethod = roleType.getMethod("roleMethod", new String[0]);
+		search(
+				roleMethod, 
+				REFERENCES, 
+				SearchPattern.R_EXACT_MATCH|SearchPattern.R_CASE_SENSITIVE,
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				resultCollector);
+		
+		assertSearchResults("Search for role method decl which is overridden in a tsub role. fq name",
+				"src/p_implicit_inheritance/TestTeam2.java void p_implicit_inheritance.TestTeam2$TestRole1.roleMethod() [roleMethod()]",
+				resultCollector);
+	}
+
+	/**
+	 * Search for:<br>
+	 *  - method references<br>
+	 * Search pattern:<br>
+	 *  - combined method pattern
+	 * 	- fully qualified name<br>
+	 * Searched element:<br>
+	 * 	- all references to a role method which overriddes in a tsuper method<br> 
+	 * Expected search result:<br>
+	 *	- reference:
+	 *		Nothing, specifically *not* the TSuperMessageSend in it's own body<br>
+	 */
+	//see Bug 332790 - [search] search doesn't find tsuper method calls
+	public void test031c() throws CoreException
+	{
+		JavaSearchResultCollector resultCollector = new JavaSearchResultCollector();
+		IType roleType = this.javaProject.findType("p_implicit_inheritance.TestTeam2.TestRole1");
+		IMethod roleMethod = roleType.getMethod("roleMethod", new String[0]);
+		search(
+				roleMethod, 
+				REFERENCES, 
+				SearchPattern.R_EXACT_MATCH|SearchPattern.R_CASE_SENSITIVE,
+				getJavaSearchScopeFromPackage("p_implicit_inheritance"), 
+				resultCollector);
+		
+		assertSearchResults("Search for role method decl which overrides an implicit inherited method. fq name",
+				"",
 				resultCollector);
 	}
 	

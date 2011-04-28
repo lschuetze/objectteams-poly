@@ -854,7 +854,13 @@ protected int resolveLevel(MessageSend messageSend) {
 			return declaringLevel;
 		}
 	} else {
-		declaringLevel = resolveLevelForType(this.pattern.declaringSimpleName, this.pattern.declaringQualification, method.declaringClass);
+//{ObjectTeams: try harder to use a declaring qualification to lock down to this exact role:
+/* orig:
+		declaringLevel = resolveLevelForType(this.pattern.declaringSimpleName, this.pattern.declaringQualification, method.declaringClass); 
+  :giro */
+		char[] patternDeclaringQualification = this.pattern.getDeclaringQualification();
+		declaringLevel = resolveLevelForType(this.pattern.declaringSimpleName, patternDeclaringQualification, method.declaringClass);
+// SH}
 	}
 	return (methodLevel & MATCH_LEVEL_MASK) > (declaringLevel & MATCH_LEVEL_MASK) ? declaringLevel : methodLevel; // return the weaker match
 }
