@@ -73,7 +73,6 @@ Project Leader:
       <import plugin="org.eclipse.text"/>
       <import plugin="org.eclipse.jdt.launching"/>
       <import plugin="org.eclipse.debug.core"/>
-      <import plugin="org.eclipse.update.core"/>
    </requires>
 
    <plugin
