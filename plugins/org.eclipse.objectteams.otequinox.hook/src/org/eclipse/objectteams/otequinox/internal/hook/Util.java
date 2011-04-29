@@ -88,7 +88,10 @@ public class Util
 												"org.eclipse.ecf.filetransfer",
 												"org.eclipse.ecf.provider.filetransfer",
 												"org.eclipse.ecf.provider.filetransfer.httpclient",
-												"org.apache.commons.httpclient"
+												"org.apache.commons.httpclient",
+												// for Eclipse 4.x:
+												"org.eclipse.swt",
+												"org.eclipse.e4.ui.css.swt.theme"
 				})
 				PLATFORM_BUNDLES.add(bundle);
 		}
