@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Stack;
 import java.util.StringTokenizer;
+import java.util.zip.CRC32;
 
 import org.eclipse.osgi.baseadaptor.BaseAdaptor;
 import org.eclipse.osgi.baseadaptor.BaseData;
@@ -117,6 +118,9 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 
 	// another non-transformable bundle:
 	private static final String ASM_PLUGIN_ID = "org.objectweb.asm";
+	
+	// this one requires hot-fixing:
+	private static final String BCEL_PLUGIN_ID = "org.apache.bcel";
 
 	// specific action may be required when this class is loaded:
 	private static final String ORG_OBJECTTEAMS_TEAM = "org.objectteams.Team";
@@ -309,6 +313,8 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 				return classbytes; // don't transform the adaptor ;-)
 			if (ASM_PLUGIN_ID.equals(bundle.getSymbolicName())) // name comparison since multiple instances of this bundle could exist
 				return classbytes; // don't transform ASM
+			if (BCEL_PLUGIN_ID.equals(bundle.getSymbolicName()))
+				return fixBCEL(name, classbytes);
 					
 // SH: extra safety against recursion (see Trac #173)
 			if (name.equals(previousClassName)) {
@@ -381,6 +387,24 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 		}
 		finally {
 			this.currentlyProcessedClassName.set(previousClassName);
+		}
+		return classbytes;
+	}
+
+	private byte[] fixBCEL(String name, byte[] classbytes) {
+		if ("org.apache.bcel.generic.InstructionHandle".equals(name)) {
+			CRC32 crc32 = new CRC32();
+			crc32.update(classbytes);
+			long crc = crc32.getValue();
+			if (   classbytes.length == 0x1623	// identify original class
+				&& crc == 0x42132087			// --""--
+				&& classbytes[0xF00] == 0x18) {	// modifiers of method getInstructionHandle at "static final" 
+				classbytes[0xF00] = 0x38; 		// add "synchronized"
+				this.logger.log(Util.INFO, "hot-patched a bug in class org.apache.bcel.generic.InstructionHandle\n"+
+										"\tsee https://bugs.eclipse.org/bugs/show_bug.cgi?id=344350");
+			} else {
+				this.logger.log(Util.WARNING, "Class org.apache.bcel.generic.InstructionHandle needs a hot-patch but has unexpected byte code.");
+			}
 		}
 		return classbytes;
 	}
