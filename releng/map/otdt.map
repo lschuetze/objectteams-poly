@@ -14,7 +14,7 @@ plugin@org.eclipse.objectteams.otdt.ui,0.8.0=SVN,url=file://localhost/svnroot/to
 plugin@org.eclipse.objectteams.otdt.metrics,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.metrics,tag=tags/builds/201101290806
 
 plugin@org.eclipse.objectteams.runtime=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.runtime
-fragment@org.eclipse.objectteams.otequinox.hook,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.hook,tag=tags/builds/201101290806
+fragment@org.eclipse.objectteams.otequinox.hook,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.hook
 fragment@org.eclipse.objectteams.otequinox.sunjvm,0.8.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox.sunjvm,tag=tags/builds/201011100445
 !the following is also referenced in otdt.ui.help/buildDoc.xml (plugin-name without version):
 plugin@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otequinox
