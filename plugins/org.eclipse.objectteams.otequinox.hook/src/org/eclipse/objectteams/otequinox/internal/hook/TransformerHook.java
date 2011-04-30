@@ -396,10 +396,10 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 			CRC32 crc32 = new CRC32();
 			crc32.update(classbytes);
 			long crc = crc32.getValue();
-			if (   classbytes.length == 0x1623	// identify original class
-				&& crc == 0x42132087			// --""--
-				&& classbytes[0xF00] == 0x18) {	// modifiers of method getInstructionHandle at "static final" 
-				classbytes[0xF00] = 0x38; 		// add "synchronized"
+			if (   classbytes.length == 0x1623				// identify original class
+				&& (crc == 0x42132087 || crc == 0xdb1b9859)	// --""-- (I've seen two versions of this class file, semantically equivalent though)
+				&& classbytes[0xF00] == 0x18) {				// modifiers of method getInstructionHandle at "static final" 
+				classbytes[0xF00] = 0x38; 					// add "synchronized"
 				this.logger.log(Util.INFO, "hot-patched a bug in class org.apache.bcel.generic.InstructionHandle\n"+
 										"\tsee https://bugs.eclipse.org/bugs/show_bug.cgi?id=344350");
 			} else {
