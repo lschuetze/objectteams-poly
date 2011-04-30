@@ -92,7 +92,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			ProtectionDomain protectionDomain, byte[] classfileBuffer)
 			throws IllegalClassFormatException
 	{
-		if (warmedUp)
+		if (warmedUp || loader == null)
 			return internalTransform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
 		synchronized (loader) {
 			try {
