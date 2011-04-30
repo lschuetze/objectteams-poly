@@ -68,7 +68,7 @@ plugin@org.eclipse.jdt.ui.tests.refactoring=v20110427-1800,/cvsroot/eclipse,
 plugin@org.eclipse.jdt.text.tests=v20110427-0800,/cvsroot/eclipse,
 plugin@org.eclipse.jface.text.tests=v20110329-0800,/cvsroot/eclipse
 plugin@org.eclipse.text.tests=v20110412-0800,/cvsroot/eclipse
-plugin@org.eclipse.core.filebuffers.tests=v20110124-0100,/cvsroot/eclipse
+plugin@org.eclipse.core.filebuffers.tests=v20100824-0800,/cvsroot/eclipse
 
 !-- not compiled but taken from org.eclipse.test:
 !plugin@org.eclipse.test.performance=v20101027,/cvsroot/eclipse,
