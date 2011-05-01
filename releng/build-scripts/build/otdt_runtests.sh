@@ -165,6 +165,8 @@ elif test "$X11" = "XVNC"; then
 		DISPLAY=$VNC_DISPLAY
 		export DISPLAY
 		exec $CMD < /dev/null > ${OT_SUITE_LOG} 2>&1  && { cleanup; } || { notifyTestRunFailure; }
+		echo "Cleaning up after successful run..."
+		/bin/rm -rf ${OT_TESTSUITE_DIR}/build-root/eclipse
 else
         echo "##### You don't have xvfb nor vnc, the GUI tests will appear on your display... ####"
         echo "Running $CMD"
