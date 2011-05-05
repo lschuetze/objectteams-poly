@@ -14,7 +14,7 @@
  * Contributors:
  * 		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.ui.help;
+package org.eclipse.objectteams.otdt.internal.ui.help;
 
 import org.eclipse.osgi.util.NLS;
 

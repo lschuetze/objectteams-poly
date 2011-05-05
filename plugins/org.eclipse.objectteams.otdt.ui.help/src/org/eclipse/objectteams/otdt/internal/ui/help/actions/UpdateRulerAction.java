@@ -29,9 +29,9 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.objectteams.otdt.internal.ui.help.Messages;
+import org.eclipse.objectteams.otdt.internal.ui.help.OTJLDError;
 import org.eclipse.objectteams.otdt.ui.IUpdateRulerActionExtender;
-import org.eclipse.objectteams.otdt.ui.help.Messages;
-import org.eclipse.objectteams.otdt.ui.help.OTJLDError;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 

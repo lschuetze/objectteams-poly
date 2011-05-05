@@ -18,7 +18,7 @@
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.ui.help;
+package org.eclipse.objectteams.otdt.internal.ui.help;
 
 import java.io.IOException;
 import java.net.URL;
@@ -28,6 +28,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.objectteams.otdt.internal.ui.help.views.OTJLDView;
+import org.eclipse.objectteams.otdt.ui.help.OTHelpPlugin;
 
 
 /**

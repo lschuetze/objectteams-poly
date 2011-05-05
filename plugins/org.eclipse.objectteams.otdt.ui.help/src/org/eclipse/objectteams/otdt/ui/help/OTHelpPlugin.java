@@ -71,6 +71,7 @@ public class OTHelpPlugin extends AbstractUIPlugin {
 		plugin.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, IStatus.OK, message, exception));
 	}
 	
+	/** Returns the icon representing the OTJLD. */
 	public static ImageDescriptor getOTJLDImage() {
 		return imageDescriptorFromPlugin(PLUGIN_ID, ICON_OTJLD);
 	}

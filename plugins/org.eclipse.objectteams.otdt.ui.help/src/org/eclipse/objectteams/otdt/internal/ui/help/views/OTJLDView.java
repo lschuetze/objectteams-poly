@@ -16,7 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.help.views;
 
-import org.eclipse.objectteams.otdt.ui.help.OTJLDError;
+import org.eclipse.objectteams.otdt.internal.ui.help.OTJLDError;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.browser.IWorkbenchBrowserSupport;
 import org.eclipse.ui.internal.browser.BrowserViewer;
