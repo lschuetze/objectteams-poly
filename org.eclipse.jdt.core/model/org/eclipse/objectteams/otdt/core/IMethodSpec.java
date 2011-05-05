@@ -17,6 +17,7 @@
 package org.eclipse.objectteams.otdt.core;
 
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ITypeParameter;
 
 /**
  * Represents a method spec in a method mapping (callout/callin) in the extended Java model.
@@ -51,15 +52,12 @@ public interface IMethodSpec {
 	/** Answer whether the method spec matches base methods with more specific return types than the type specified here (callin only). */
 	public boolean hasCovariantReturn();
 
-	/** Answer the names of type parameters. */
-	public char[][] getTypeParameterNames();
+	/** Answer the type parameters. */
+	public ITypeParameter[] getTypeParameters();
 
 	/** Start position of this element. */
 	public int getSourceStart();
 
 	/** End position of this element. */
 	public int getSourceEnd();
-
-	public char[][][] getTypeParameterBounds();
-
 }

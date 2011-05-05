@@ -21,11 +21,8 @@
 package org.eclipse.objectteams.otdt.internal.core.util;
 
 import org.eclipse.jdt.core.ITypeParameter;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.core.JavaElement;
-import org.eclipse.jdt.internal.core.TypeParameterElementInfo;
 import org.eclipse.objectteams.otdt.core.IMethodSpec;
 
 
@@ -173,30 +170,20 @@ public class MethodData implements IMethodSpec
     public boolean hasCovariantReturn() {
     	return this.covariantReturn;
     }
-    // copied from org.eclipse.jdt.internal.core.SourceMethodElementInfo
-    public char[][][] getTypeParameterBounds() {
-    	int length = this.typeParameters.length;
-    	char[][][] typeParameterBounds = new char[length][][];
-    	for (int i = 0; i < length; i++) {
-    		try {
-    			TypeParameterElementInfo info = (TypeParameterElementInfo) ((JavaElement)this.typeParameters[i]).getElementInfo();
-    			typeParameterBounds[i] = info.bounds;
-    		} catch (JavaModelException e) {
-    			// type parameter does not exist: ignore
-    		}
-    	}
-    	return typeParameterBounds;
+    
+    public ITypeParameter[] getTypeParameters() {
+    	return this.typeParameters;
     }
     /* (non-Javadoc)
 	 * @see org.eclipse.objectteams.otdt.core.util.IMethodSpec#getTypeParameterNames()
 	 */
-    public char[][] getTypeParameterNames() {
+    public String[] getTypeParameterNames() {
     	// copied from org.eclipse.jdt.internal.core.SourceMethodElementInfo
     	int length = this.typeParameters.length;
-    	if (length == 0) return CharOperation.NO_CHAR_CHAR;
-    	char[][] typeParameterNames = new char[length][];
+    	if (length == 0) return CharOperation.NO_STRINGS;
+    	String[] typeParameterNames = new String[length];
     	for (int i = 0; i < length; i++) {
-    		typeParameterNames[i] = this.typeParameters[i].getElementName().toCharArray();
+    		typeParameterNames[i] = this.typeParameters[i].getElementName();
     	}
     	return typeParameterNames;
     }

@@ -17,6 +17,8 @@ package org.eclipse.jdt.internal.compiler.parser;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
@@ -729,9 +731,10 @@ public abstract class TypeConverter {
 	 * @param methodMapping
 	 * @param compilationResult
 	 * @return
+	 * @throws JavaModelException 
 	 */
 	protected AbstractMethodMappingDeclaration convertCallout(
-			IMethodMapping methodMapping, CompilationResult compilationResult)
+			IMethodMapping methodMapping, CompilationResult compilationResult) throws JavaModelException
 	{
         if (methodMapping instanceof ICalloutToFieldMapping)
         {
@@ -764,7 +767,7 @@ public abstract class TypeConverter {
 
     protected AbstractMethodMappingDeclaration convertCalloutToField(
             IMethodMapping methodMapping,
-            CompilationResult compilationResult)
+            CompilationResult compilationResult) throws JavaModelException
     {
         ICalloutToFieldMapping callout = (ICalloutToFieldMapping)methodMapping;
         boolean hasSignature = callout.hasSignature();
@@ -789,9 +792,10 @@ public abstract class TypeConverter {
 	/**
 	 * @param methodMapping
 	 * @param compilationResult
+	 * @throws JavaModelException 
 	 */
 	protected CallinMappingDeclaration convertCallin(
-			IMethodMapping methodMapping, CompilationResult compilationResult)
+			IMethodMapping methodMapping, CompilationResult compilationResult) throws JavaModelException
 	{
 		ICallinMapping callinMapping = (ICallinMapping)methodMapping;
 		boolean hasSignature = callinMapping.hasSignature();
@@ -819,7 +823,7 @@ public abstract class TypeConverter {
 		return result;
 	}
 
-	protected MethodSpec convert(IMethodSpec handle, boolean hasSignature)
+	protected MethodSpec convert(IMethodSpec handle, boolean hasSignature) throws JavaModelException
 	{
 		//FIXME (haebor) : sourcepositions are not set!! try to find them elsewhere
 
@@ -858,19 +862,33 @@ public abstract class TypeConverter {
 				result.returnType = createTypeReference(returnType);
 
 			/* convert type parameters (see convert(SourceMethod,..)) */
-			char[][] typeParameterNames = handle.getTypeParameterNames();
-			if (typeParameterNames != null) {
-				int parameterCount = typeParameterNames.length;
+			ITypeParameter[] typeParameters= handle.getTypeParameters();
+			if (typeParameters != null) {
+				int parameterCount = typeParameters.length;
 				if (parameterCount > 0) { // method's type parameters must be null if no type parameter
-					char[][][] typeParameterBounds = handle.getTypeParameterBounds();
 					TypeParameter[] typeParams = new TypeParameter[parameterCount];
 					for (int i = 0; i < parameterCount; i++) {
-						typeParams[i] = createTypeParameter(typeParameterNames[i], typeParameterBounds[i], false/*baseBound*/, start, end);
+						char[][] typeParameterBounds = stringArrayToCharArray(typeParameters[i].getBounds());
+						typeParams[i] = createTypeParameter(typeParameters[i].getElementName().toCharArray(), typeParameterBounds, false/*baseBound*/, start, end);
 					}
 					result.typeParameters= typeParams;
 				}
 			}
 		}
+		return result;
+	}
+	// helper temporarily copied from BinaryTypeConverter:
+	private static char[][] stringArrayToCharArray(String[] strings) {
+		if (strings == null) return null;
+
+		int length = strings.length;
+		if (length == 0) return CharOperation.NO_CHAR_CHAR;
+
+		char[][] result = new char [length][];
+		for (int i = 0; i < length; i++) {
+			result[i] = strings[i].toCharArray();
+		}
+
 		return result;
 	}
 

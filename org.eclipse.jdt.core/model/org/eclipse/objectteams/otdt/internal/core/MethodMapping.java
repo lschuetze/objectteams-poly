@@ -352,6 +352,8 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 			if (otType != null && otType.isRole()) {
 				for (IMethodMapping mapping : ((IRoleType)otType).getMethodMappings(IRoleType.CALLOUTS)) {
 					AbstractCalloutMapping tmpMethod = (AbstractCalloutMapping)mapping;
+					if (tmpMethod == this)
+						continue; // callout fakes its own role method, but don't take it for real here!
 					// check for equal method name and signature            	
 					String selector = tmpMethod.getCorrespondingJavaElement().getElementName();
 					if (isEqualMethod(methodHandle, tmpMethod, selector))
