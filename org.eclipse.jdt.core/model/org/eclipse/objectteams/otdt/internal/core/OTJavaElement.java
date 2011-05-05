@@ -57,9 +57,9 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
     public static final char OTEM_METHODMAPPING = '`';
     public static final String METHODMAPPING = Character.toString(OTEM_METHODMAPPING);
 
-	private int          _type;
-	private List<IJavaElement>         _children;
-	private IJavaElement _correspondingJavaElem;
+	private int          type;
+	private List<IJavaElement>         children;
+	private IJavaElement correspondingJavaElem;
 	
 	public OTJavaElement(int type, IJavaElement correspondingJavaElem, IJavaElement parent)
 	{
@@ -72,9 +72,9 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	public OTJavaElement(int type, IJavaElement correspondingJavaElem, IJavaElement parent, boolean addAsChild)
 	{
 		super((JavaElement) parent);
-		_type     = type;
-		_correspondingJavaElem = correspondingJavaElem;
-		_children = new ArrayList<IJavaElement>();
+		this.type     = type;
+		this.correspondingJavaElem = correspondingJavaElem;
+		this.children = new ArrayList<IJavaElement>();
 
 		if (addAsChild && parent instanceof OTJavaElement)
 			((OTJavaElement)parent).addChild(this);
@@ -82,25 +82,25 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 
 	public boolean hasChildren()
 	{
-	    return _children.size() > 0;
+	    return this.children.size() > 0;
 	}
 	
 	public IJavaElement[] getChildren()
 	{
-		if (this._children.isEmpty() && this._correspondingJavaElem instanceof IType)
+		if (this.children.isEmpty() && this.correspondingJavaElem instanceof IType)
 			// fetch children from the java element (on first access):
 			try {
-				for (IJavaElement child : ((IType)this._correspondingJavaElem).getChildren())
-					this._children.add(child);
+				for (IJavaElement child : ((IType)this.correspondingJavaElem).getChildren())
+					this.children.add(child);
 			} catch (JavaModelException e) { /* noop */ }
-		return _children.toArray( new IJavaElement[_children.size()] );
+		return this.children.toArray( new IJavaElement[this.children.size()] );
 	}
 	
 	public void addChild(IOTJavaElement child)
 	{
 		if (child != null)
 		{
-			_children.add(child);
+			this.children.add(child);
 		}
 	}
 
@@ -124,7 +124,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 
 	public int getElementType()
 	{
-		return _type;
+		return this.type;
 	}
 	
 	/**
@@ -144,7 +144,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 		OTJavaElement other = (OTJavaElement)obj;
 		
 		return getParent().equals(other.getParent())
-                && (_type == other._type)
+                && (this.type == other.type)
                 && getCorrespondingJavaElement().equals(other.getCorrespondingJavaElement());
 	}
 	
@@ -157,9 +157,9 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	 * override this method.
 	 */
 	public int hashCode() {
-		IJavaElement parent = this.getParent();
-		if (parent == null) return super.hashCode();
-		return Util.combineHashCodes(getElementName().hashCode(), parent.hashCode());
+		IJavaElement myParent = this.getParent();
+		if (myParent == null) return super.hashCode();
+		return Util.combineHashCodes(getElementName().hashCode(), myParent.hashCode());
 	}
 
     @SuppressWarnings("nls")
@@ -170,7 +170,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	
     public IJavaElement getCorrespondingJavaElement()
     {
-        return _correspondingJavaElem;
+        return this.correspondingJavaElem;
     }
     
 	public OTJavaElement resolved(Binding binding) {
@@ -179,19 +179,19 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 
     public void setCorrespondingJavaElement(IJavaElement javaElem)
     {
-        _correspondingJavaElem = javaElem;
+        this.correspondingJavaElem = javaElem;
     }
 
 // delegated IJavaElement methods
     public boolean exists()
     {
-        return _correspondingJavaElem.exists();
+        return this.correspondingJavaElem.exists();
     }
 
     @Override
     public void close() throws JavaModelException {
     	super.close();
-    	((JavaElement) this._correspondingJavaElem).close();
+    	((JavaElement) this.correspondingJavaElem).close();
     }
     
     public IJavaElement getAncestor(int ancestorType)
@@ -203,7 +203,7 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 			element= element.getParent();
 		}
 		// delegate to the java part:
-        return _correspondingJavaElem.getAncestor(ancestorType);
+        return this.correspondingJavaElem.getAncestor(ancestorType);
     }
 
     public IResource getCorrespondingResource() throws JavaModelException
@@ -215,65 +215,65 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 
     public String getHandleIdentifier()
     {
-        return _correspondingJavaElem.getHandleIdentifier();
+        return this.correspondingJavaElem.getHandleIdentifier();
     }
 
     public IJavaModel getJavaModel()
     {
-        return _correspondingJavaElem.getJavaModel();
+        return this.correspondingJavaElem.getJavaModel();
     }
 
     public IJavaProject getJavaProject()
     {
-        return _correspondingJavaElem.getJavaProject();
+        return this.correspondingJavaElem.getJavaProject();
     }
 
     public IOpenable getOpenable()
     {
-        return _correspondingJavaElem.getOpenable();
+        return this.correspondingJavaElem.getOpenable();
     }
 
     public IPath getPath()
     {
-        return _correspondingJavaElem.getPath();
+        return this.correspondingJavaElem.getPath();
     }
 
     public IJavaElement getPrimaryElement()
     {
-        return _correspondingJavaElem.getPrimaryElement();
+        return this.correspondingJavaElem.getPrimaryElement();
     }
 
     public IResource getResource()
     {
-        return _correspondingJavaElem.getResource();
+        return this.correspondingJavaElem.getResource();
     }
 
     public ISchedulingRule getSchedulingRule()
     {
-        return _correspondingJavaElem.getSchedulingRule();
+        return this.correspondingJavaElem.getSchedulingRule();
     }
 
     public IResource getUnderlyingResource() throws JavaModelException
     {
-        return _correspondingJavaElem.getUnderlyingResource();
+        return this.correspondingJavaElem.getUnderlyingResource();
     }
 
     public boolean isReadOnly()
     {
-        return _correspondingJavaElem.isReadOnly();
+        return this.correspondingJavaElem.isReadOnly();
     }
 
     public boolean isStructureKnown() throws JavaModelException
     {
-        return _correspondingJavaElem.isStructureKnown();
+        return this.correspondingJavaElem.isStructureKnown();
     }
     
-	@Override @SuppressWarnings("unchecked")
+	@Override @SuppressWarnings("rawtypes")
     public Object getAdapter(Class adapter)
     {
     	Object result = super.getAdapter(adapter);
     	if (result == null)
-    		result = _correspondingJavaElem.getAdapter(adapter);
+    		result = this.correspondingJavaElem.getAdapter(adapter);
     	
     	return result;
     }
