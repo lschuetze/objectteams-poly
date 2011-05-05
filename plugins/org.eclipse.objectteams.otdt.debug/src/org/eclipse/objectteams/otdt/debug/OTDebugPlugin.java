@@ -20,8 +20,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.debug;
 
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.CoreException;
@@ -45,6 +43,8 @@ import org.osgi.framework.BundleContext;
 
 /**
  * The main plugin class.
+ * @noinstantiate clients are not supposed to instantiate this class.
+ * @noextend clients are not supposed to extend this class.
  */
 public class OTDebugPlugin extends Plugin 
 {

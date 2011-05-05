@@ -52,6 +52,8 @@ import org.eclipse.objectteams.otdt.debug.internal.util.TeamNameComparator;
  * current sorting mode.
  * 
  * @author ike
+ * @noinstantiate clients are not supposed to instantiate this class.
+ * @noextend clients are not supposed to extend this class.
  */
 public class OTDebugElementsContainer implements IAdaptable
 {
