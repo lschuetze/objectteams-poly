@@ -410,8 +410,8 @@ public class CallinMappingTest extends FileBasedModelTest
         assertEquals("roleMethod6() <- baseMethod6() <T>", mapping.getElementName());
         assertEquals(IOTJavaElement.CALLIN_MAPPING, mapping.getMappingKind());
         assertTrue(mapping.getRoleMethod().getTypeParameters().length == 1);
-        assertEquals(new String(mapping.getRoleMethodHandle().getTypeParameterNames()[0]), "T");
-        assertEquals(CharOperation.toString(mapping.getRoleMethodHandle().getTypeParameterBounds()[0]), "Object");
+        assertEquals(mapping.getRoleMethodHandle().getTypeParameters()[0].getElementName(), "T");
+        assertEquals(mapping.getRoleMethodHandle().getTypeParameters()[0].getBounds()[0], "Object");
         
         ICallinMapping callinMapping = (ICallinMapping) mapping;
         IMethod[] boundBaseMethods = callinMapping.getBoundBaseMethods();
