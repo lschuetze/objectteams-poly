@@ -27,6 +27,19 @@ import java.io.InputStream;
  */
 public interface IByteCodeAnalyzer {
 
-	String getSuperclass(InputStream is, String className);
-	String getSuperclass(byte[] bytes, String className);
+	/** 
+	 * Fetch the superclass name of a given class.
+	 * @param classStream stream providing the class bytes
+	 * @param className fully qualified name of the class
+	 * @return fully qualified ('.'-separated) name of the class' superclass or null if an exception occurred.
+	 */
+	String getSuperclass(InputStream classStream, String className);
+	
+	/** 
+	 * Fetch the superclass name of a given class.
+	 * @param classBytes array of class bytes
+	 * @param className fully qualified name of the class
+	 * @return fully qualified ('.'-separated) name of the class' superclass or null if an exception occurred.
+	 */
+	String getSuperclass(byte[] classBytes, String className);
 }

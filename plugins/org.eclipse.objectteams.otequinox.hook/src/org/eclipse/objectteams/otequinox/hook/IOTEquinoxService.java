@@ -25,5 +25,6 @@ package org.eclipse.objectteams.otequinox.hook;
  * @since OTDT 1.1.4
  */
 public interface IOTEquinoxService extends IAspectRegistry, ITeamLoader {
+	/** Retrieve a strategy for light-weight analysis of class bytes. */
 	IByteCodeAnalyzer getByteCodeAnalyzer();
 }
