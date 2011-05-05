@@ -11,3 +11,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.objectteams.otequinox
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
+Export-Package: org.eclipse.objectteams.eclipse.monitor.internal;x-internal:=true
