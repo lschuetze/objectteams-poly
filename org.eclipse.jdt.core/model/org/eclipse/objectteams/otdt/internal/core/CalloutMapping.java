@@ -41,10 +41,10 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
  */
 public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMapping
 {
-	private boolean    _isOverride;
-	private IMethod    _baseMethod;
-	private MethodData _baseMethodHandle; // Note: may be null!
-	private int		   _declaredModifiers;
+	private boolean    isOverride;
+	private IMethod    baseMethod;
+	private MethodData baseMethodHandle; // Note: may be null!
+	private int		   declaredModifiers;
 	
     public CalloutMapping(int        declarationSourceStart,
     					  int        sourceStart,
@@ -77,9 +77,9 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	{
 		super(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, elementType, corrJavaMethod, parentRole, roleMethodHandle, hasSignature);
 
-		this._isOverride = isOverride;
-		this._baseMethodHandle = baseMethodHandle;
-		this._declaredModifiers = declaredModifiers;
+		this.isOverride = isOverride;
+		this.baseMethodHandle = baseMethodHandle;
+		this.declaredModifiers = declaredModifiers;
 	}
 
     protected CalloutMapping(
@@ -99,9 +99,9 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	{
 		super(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, elementType, corrJavaMethod, parentRole, roleMethodHandle, hasSignature, addAsChild);
 
-		this._isOverride = isOverride;
-		this._baseMethodHandle = baseMethodHandle;
-		this._declaredModifiers = declarationSourceEnd;
+		this.isOverride = isOverride;
+		this.baseMethodHandle = baseMethodHandle;
+		this.declaredModifiers = declarationSourceEnd;
 	}
 
     public IMethodMapping createStealthMethodMapping()
@@ -114,37 +114,36 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 		        IJavaElement.METHOD, /* pretending to be a method */
 		        (IType) getCorrespondingJavaElement().getParent(),
 		        getIMethod(),
-		        this._roleMethodHandle,
-		        this._baseMethodHandle,
+		        this.roleMethodHandle,
+		        this.baseMethodHandle,
 		        hasSignature(),
 		        isOverride(),
 		        getDeclaredModifiers(),
 		        false // don't add as child!
 		);
-		result._mimicMethodDecl = true;
-        result._originalMethodMapping = this;
+		result.mimicMethodDecl = true;
+        result.originalMethodMapping = this;
         return result;
     }
 
     public boolean isOverride() {
-    	return this._isOverride;
+    	return this.isOverride;
     }
     
 	@SuppressWarnings("nls")
 	public String getElementName()
 	{
-		if (this._mimicMethodDecl) {
+		if (this.mimicMethodDecl) {
 			
-			IMethodSpec roleMethodHandle = this.getRoleMethodHandle();
-			if (roleMethodHandle != null)
-				return roleMethodHandle.getSelector();
+			if (this.roleMethodHandle != null)
+				return this.roleMethodHandle.getSelector();
 			return "(unknown role method)"; //$NON-NLS-1$
 		}		
 		
 		StringBuffer name = new StringBuffer(super.getElementName());
 		name.append(" -> ");
 	    
-		if (_baseMethodHandle == null)
+		if (this.baseMethodHandle == null)
 		{
 			name.append("(unknown)");
 		}
@@ -152,11 +151,11 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 		{
 			if (hasSignature())
 			{
-				name.append(_baseMethodHandle.toString());
+				name.append(this.baseMethodHandle.toString());
 			}
 			else
 			{
-				name.append(_baseMethodHandle.getSelector());
+				name.append(this.baseMethodHandle.getSelector());
 			}
 		}
 	    
@@ -169,18 +168,18 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	}	
 		
 	public int getDeclaredModifiers() {
-		return this._declaredModifiers;
+		return this.declaredModifiers;
 	}
 
 	public IMethod getBoundBaseMethod() throws JavaModelException
 	{
 		// TODO (carp/jwl): does reconciling throw away the cached _baseMethod or will this stay forever?
-		if (_baseMethod == null)
+		if (this.baseMethod == null)
 		{
-            _baseMethod = findBaseMethod();
+            this.baseMethod = findBaseMethod();
 		}
 		
-		return _baseMethod;
+		return this.baseMethod;
 	}
 
 	public boolean equals(Object obj)
@@ -204,31 +203,31 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	 */
     private IMethod findBaseMethod() throws JavaModelException
     {
-    	if (_baseMethodHandle == null)
+    	if (this.baseMethodHandle == null)
     		return null;
     	
     	IType   baseClass   = ((IRoleType)getParent()).getBaseClass();
 		IType[] typeParents = TypeHelper.getSuperTypes(baseClass);
     	    	
-    	return findMethod(typeParents, _baseMethodHandle);
+    	return findMethod(typeParents, this.baseMethodHandle);
     }
     
 	// added for the SourceTypeConverter
     public IMethodSpec getBaseMethodHandle()
     {
-    	return _baseMethodHandle;
+    	return this.baseMethodHandle;
     }
     // ==== memento generation: ====
     @Override
     protected char getMappingKindChar() {
-    	if (this._isOverride)
+    	if (this.isOverride)
     		return 'O';
     	return 'o';
     }
     @Override
     protected void getBaseMethodsForHandle(StringBuffer buff) {
-    	if (this._baseMethodHandle != null) // as documented, _baseMethodHandle can be null: no base methods to encode
-    		getMethodForHandle(this._baseMethodHandle, buff);
+    	if (this.baseMethodHandle != null) // as documented, _baseMethodHandle can be null: no base methods to encode
+    		getMethodForHandle(this.baseMethodHandle, buff);
     }
     // ====
     	
@@ -244,23 +243,22 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 			        (IType) getParent(), 
 			    	getIMethod(),
 			        getRoleMethodHandle(),
-			        _baseMethodHandle, 
+			        this.baseMethodHandle, 
 			        hasSignature(), 
 			        isOverride(),
 			        getDeclaredModifiers(),
 					new String(uniqueKey));
 		
 		if(isStealthMethodMapping())
-			resolvedHandle._originalMethodMapping = _originalMethodMapping;
+			resolvedHandle.originalMethodMapping = this.originalMethodMapping;
 		
 		return resolvedHandle;
 	}
 
 	public String[] getExceptionTypes() throws JavaModelException
 	{
-		IMethodSpec roleMethodHandle = getRoleMethodHandle();
-		if (   roleMethodHandle != null
-			&& roleMethodHandle.hasSignature())
+		if (   this.roleMethodHandle != null
+			&& this.roleMethodHandle.hasSignature())
 		{
 			try {
 				return getIMethod().getExceptionTypes();

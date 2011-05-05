@@ -46,10 +46,10 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
  */
 public class CallinMapping extends MethodMapping implements ICallinMapping
 {
-	private int          _callinKind;
+	private int          callinKind;
 
-	private MethodData[] _baseMethodHandles;
-	private String       _name;
+	private MethodData[] baseMethodHandles;
+	private String       name;
 	
 
 	public CallinMapping(
@@ -90,27 +90,27 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
         	  CALLIN_MAPPING, corrJavaMeth, parent, 
         	  roleMethodHandle, 
         	  hasSignature, addAsChild);
-        _name              = new String(name); 
-        _callinKind        = callinKind;
-		_baseMethodHandles = baseMethodHandles;        
+        this.name              = new String(name); 
+        this.callinKind        = callinKind;
+		this.baseMethodHandles = baseMethodHandles;        
     }
 
     // ==== memento generation: ====
     @Override
     protected void getNameForHandle(StringBuffer buff) {
-   		JavaElement.escapeMementoName(buff, this._name);
+   		JavaElement.escapeMementoName(buff, this.name);
    		buff.append(OTJavaElement.OTEM_METHODMAPPING);
     }
     protected char getMappingKindChar() {
-    	switch (this._callinKind) {
+    	switch (this.callinKind) {
     	case ICallinMapping.KIND_AFTER:   return 'a';
     	case ICallinMapping.KIND_BEFORE:  return 'b';
     	case ICallinMapping.KIND_REPLACE: return 'r';
-    	default: throw new InternalCompilerError("Unexpected callin kind");
+    	default: throw new InternalCompilerError("Unexpected callin kind"); //$NON-NLS-1$
     	}
     }
     protected void getBaseMethodsForHandle(StringBuffer buff) {
-    	for (IMethodSpec baseMethod : this._baseMethodHandles)
+    	for (IMethodSpec baseMethod : this.baseMethodHandles)
     		getMethodForHandle(baseMethod, buff);
     }    
     // ====
@@ -118,7 +118,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     @Override
     protected String getSourceName() {
     	if (hasName())
-    		return _name;
+    		return this.name;
     	return super.getSourceName();
     }
     
@@ -126,55 +126,55 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     @SuppressWarnings("nls")
 	public String getElementName()
 	{
-		StringBuffer name = new StringBuffer(super.getElementName());
-		name.append(" <- ");
+		StringBuffer elementName = new StringBuffer(super.getElementName());
+		elementName.append(" <- ");
 		
-		if (_baseMethodHandles.length > 1)
+		if (this.baseMethodHandles.length > 1)
 		{
-		    name.append("{");
+		    elementName.append("{");
 		}
-		for (int idx = 0; idx < _baseMethodHandles.length; idx++)
+		for (int idx = 0; idx < this.baseMethodHandles.length; idx++)
         {
 			if (idx != 0)
 			{
-				name.append(",");
+				elementName.append(",");
 			}
 			if (hasSignature())
 			{
-			    name.append(_baseMethodHandles[idx].toString());
+			    elementName.append(this.baseMethodHandles[idx].toString());
 			}
 			else
 			{
-			    name.append(_baseMethodHandles[idx].getSelector());
+			    elementName.append(this.baseMethodHandles[idx].getSelector());
 			}
         }
-		if (_baseMethodHandles.length > 1)
+		if (this.baseMethodHandles.length > 1)
 		{
-		    name.append("}");
+		    elementName.append("}");
 		}
 		ITypeParameter[] typeParameters = this.getRoleMethodHandle().typeParameters;
 		if (typeParameters.length > 0)
 		{
-			name.append(" <");
+			elementName.append(" <");
 			for (int i = 0; i < typeParameters.length; i++) {
-				name.append(typeParameters[i].getElementName());
+				elementName.append(typeParameters[i].getElementName());
 				if (i+1<typeParameters.length)
-					name.append(", ");
+					elementName.append(", ");
 			}
-			name.append(">");
+			elementName.append(">");
 		}
-		return name.toString();
+		return elementName.toString();
 	}
 	
 	/**
 	 * @return Does this mapping have a name (aka callin label) in the source code?
 	 */
 	public boolean hasName() {
-		return _name != null && !_name.startsWith("<"); // generated names start with '<'. //$NON-NLS-1$
+		return this.name != null && !this.name.startsWith("<"); // generated names start with '<'. //$NON-NLS-1$
 	}
 	
 	public String getName() {
-		return _name;
+		return this.name;
 	}
 
     public int getMappingKind()
@@ -187,12 +187,12 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
      */
     public int getCallinKind()
     {
-        return _callinKind;
+        return this.callinKind;
     }
     
     public boolean hasCovariantReturn() {
-    	if (this._baseMethodHandles != null)
-    		for (IMethodSpec baseMethod : this._baseMethodHandles) 
+    	if (this.baseMethodHandles != null)
+    		for (IMethodSpec baseMethod : this.baseMethodHandles) 
 				if (baseMethod.hasCovariantReturn())
 					return true;
 		return false;
@@ -211,14 +211,14 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 		}
 
 		CallinMapping other = (CallinMapping)obj;
-		if (   (this._name.charAt(0) != '<' && other._name.charAt(0) != '<')
-			&& !this._name.equals(other._name)) // require only source level names to be equal, not generated ones
+		if (   (this.name.charAt(0) != '<' && other.name.charAt(0) != '<')
+			&& !this.name.equals(other.name)) // require only source level names to be equal, not generated ones
 			return false;
 		if (!super.equals(obj))
 			return false;
-		if (this._name.equals(other._name)) // if names are equal ignore changes in callin kind
+		if (this.name.equals(other.name)) // if names are equal ignore changes in callin kind
 			return true;
-		return this._callinKind == other._callinKind;
+		return this.callinKind == other.callinKind;
     }
     
     @Override
@@ -253,9 +253,9 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 		}
 		List<IMethod> baseMethods = new LinkedList<IMethod>();
 
-		for (int idx = 0; idx < _baseMethodHandles.length; idx++)
+		for (int idx = 0; idx < this.baseMethodHandles.length; idx++)
         {
-            IMethod baseMethod = findMethod(typeParents, _baseMethodHandles[idx]);
+            IMethod baseMethod = findMethod(typeParents, this.baseMethodHandles[idx]);
 			
 			// TODO(jwl): A warning from the compiler should be given to the developer, elsewhere!
 			// TODO(jwl): Do we really want an inconsistant OT model??
@@ -267,13 +267,13 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 			}			
         }
     	    	
-		return (IMethod[])baseMethods.toArray(new IMethod[baseMethods.size()]);
+		return baseMethods.toArray(new IMethod[baseMethods.size()]);
 	}
 	
 	// added for the SourceTypeConverter
 	public IMethodSpec[] getBaseMethodHandles()
 	{
-		return _baseMethodHandles;
+		return this.baseMethodHandles;
 	}
 
 	/**
@@ -317,10 +317,10 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 			    	getDeclarationSourceEnd(),
 			        (IRoleType) getParent(), 
 			    	getIMethod(),
-			        _name.toCharArray(),
-			        _callinKind,
+			        this.name.toCharArray(),
+			        this.callinKind,
 			        getRoleMethodHandle(),
-			        _baseMethodHandles, 
+			        this.baseMethodHandles, 
 			        hasSignature(), 					
 					new String(uniqueKey));
 		

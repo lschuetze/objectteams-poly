@@ -38,8 +38,8 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
  */
 public abstract class AbstractCalloutMapping extends MethodMapping implements IMethod {
 
-	protected boolean         _mimicMethodDecl = false;
-    protected IMethodMapping  _originalMethodMapping; // only for stealth method mappings
+	protected boolean         mimicMethodDecl = false;
+    protected IMethodMapping  originalMethodMapping; // only for stealth method mappings
 
 	public AbstractCalloutMapping(int declarationSourceStart, 
 								  int sourceStart, 
@@ -84,7 +84,7 @@ public abstract class AbstractCalloutMapping extends MethodMapping implements IM
     public IMethodMapping getOriginalMethodMapping()
     {
         if (isStealthMethodMapping())
-	        return _originalMethodMapping;
+	        return this.originalMethodMapping;
         return this;
     }
 

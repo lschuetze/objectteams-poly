@@ -32,7 +32,6 @@ import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
-import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.internal.core.util.FieldData;
@@ -45,9 +44,9 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
  */
 public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICalloutToFieldMapping
 {
-	private boolean   _isOverride;
-    private IField    _baseField;
-    private IFieldAccessSpec _baseFieldHandle;
+	private boolean   isOverride;
+    private IField    baseField;
+    private IFieldAccessSpec baseFieldHandle;
 
 	public CalloutToFieldMapping(
             int declarationSourceStart,
@@ -105,8 +104,8 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
                 hasSignature,
                 addAsChild);
         
-		_isOverride      = isOverride;
-        _baseFieldHandle = baseFieldHandle;
+		this.isOverride      = isOverride;
+        this.baseFieldHandle = baseFieldHandle;
 	}
     
     public IMethodMapping createStealthMethodMapping()
@@ -125,23 +124,22 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
                 isOverride(),
                 false // don't add as child!
         );
-		result._mimicMethodDecl = true;
-        result._originalMethodMapping = this;
+		result.mimicMethodDecl = true;
+        result.originalMethodMapping = this;
         return result;
     }
     
     public boolean isOverride() {
-    	return this._isOverride;
+    	return this.isOverride;
     }
     
     @SuppressWarnings("nls")
 	public String getElementName()
     {
-		if (this._mimicMethodDecl) {
+		if (this.mimicMethodDecl) {
 			
-			IMethodSpec roleMethodHandle = this.getRoleMethodHandle();
-			if (roleMethodHandle != null)
-				return roleMethodHandle.getSelector();
+			if (this.roleMethodHandle != null)
+				return this.roleMethodHandle.getSelector();
 			return "(unknown role method)";
 		}		
 
@@ -150,11 +148,11 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
         
         if (hasSignature())
         {
-            name.append(_baseFieldHandle.toString());
+            name.append(this.baseFieldHandle.toString());
         }
         else
         {
-            name.append(_baseFieldHandle.getSelector());
+            name.append(this.baseFieldHandle.getSelector());
         }
         
         return name.toString();
@@ -167,18 +165,18 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 
 	public IField getBoundBaseField() throws JavaModelException
 	{
-        if (_baseField == null)
+        if (this.baseField == null)
         {
-            _baseField = findBaseField();
+            this.baseField = findBaseField();
         }
         
-        return _baseField;
+        return this.baseField;
     }
 
     //added for the SourceTypeConverter
     public IFieldAccessSpec getBaseFieldHandle()
     {
-        return _baseFieldHandle;
+        return this.baseFieldHandle;
     }
 
     public boolean equals(Object obj)
@@ -205,7 +203,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
         IType   baseClass   = ((IRoleType)getParent()).getBaseClass();
         IType[] typeParents = TypeHelper.getSuperTypes(baseClass);
                 
-        return findField(typeParents, _baseFieldHandle);
+        return findField(typeParents, this.baseFieldHandle);
     }
     
     /**
@@ -240,21 +238,21 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     // ==== memento generation: ====
     @Override
     protected char getMappingKindChar() {
-    	if (this._baseFieldHandle.isSetter()) {
-	    	if (this._isOverride)
+    	if (this.baseFieldHandle.isSetter()) {
+	    	if (this.isOverride)
 	    		return 'S';
 	    	return 's';
     	} else {
-	    	if (this._isOverride)
+	    	if (this.isOverride)
 	    		return 'G';
 	    	return 'g';
     	}
     }
     @Override
     protected void getBaseMethodsForHandle(StringBuffer buff) {
-    	JavaElement.escapeMementoName(buff, this._baseFieldHandle.getSelector());
+    	JavaElement.escapeMementoName(buff, this.baseFieldHandle.getSelector());
     	buff.append(JavaElement.JEM_METHOD);
-    	JavaElement.escapeMementoName(buff, this._baseFieldHandle.getFieldType());
+    	JavaElement.escapeMementoName(buff, this.baseFieldHandle.getFieldType());
     }
     // ==== retreive from memento:
     public static IFieldAccessSpec createFieldData(MementoTokenizer memento, boolean isSetter) {
@@ -288,13 +286,13 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 			        (IType) getParent(), 
 			    	getIMethod(),
 			        getRoleMethodHandle(),
-			        _baseFieldHandle, 
+			        this.baseFieldHandle, 
 			        hasSignature(), 		
 			        isOverride(),
 			        new String(uniqueKey));
 
 		if(isStealthMethodMapping())
-			resolvedHandle._originalMethodMapping = _originalMethodMapping;
+			resolvedHandle.originalMethodMapping = this.originalMethodMapping;
 		
 		return resolvedHandle;
 	}
