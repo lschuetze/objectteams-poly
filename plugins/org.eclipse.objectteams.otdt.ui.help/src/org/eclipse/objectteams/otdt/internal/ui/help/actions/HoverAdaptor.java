@@ -14,7 +14,7 @@
  * Contributors:
  * 		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.ui.help.actions;
+package org.eclipse.objectteams.otdt.internal.ui.help.actions;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;

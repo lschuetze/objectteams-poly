@@ -27,7 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.FileLocator;
-import org.eclipse.objectteams.otdt.ui.help.views.OTJLDView;
+import org.eclipse.objectteams.otdt.internal.ui.help.views.OTJLDView;
 
 
 /**

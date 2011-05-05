@@ -34,7 +34,7 @@ public class OTHelpPlugin extends AbstractUIPlugin {
 	private static OTHelpPlugin plugin;
 	
 	public static final String PLUGIN_ID = "org.eclipse.objectteams.otdt.ui.help"; //$NON-NLS-1$
-	public static final String OTJLD_VIEW = "org.eclipse.objectteams.otdt.ui.help.views.OTJLDView"; //$NON-NLS-1$
+	public static final String OTJLD_VIEW = "org.eclipse.objectteams.otdt.internal.ui.help.views.OTJLDView"; //$NON-NLS-1$
 		
 	private static final String ICON_OTJLD = "icons/ot_paragraph.gif"; //$NON-NLS-1$
 

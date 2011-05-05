@@ -6,9 +6,9 @@ Bundle-Version: 0.8.0.qualifier
 Bundle-Activator: org.eclipse.objectteams.otdt.ui.help.OTHelpPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Export-Package: org.eclipse.objectteams.otdt.ui.help,
- org.eclipse.objectteams.otdt.ui.help.actions,
- org.eclipse.objectteams.otdt.ui.help.views
+Export-Package: org.eclipse.objectteams.otdt.internal.ui.help.actions;x-internal:=true,
+ org.eclipse.objectteams.otdt.internal.ui.help.views;x-internal:=true,
+ org.eclipse.objectteams.otdt.ui.help
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.objectteams.otdt.ui,

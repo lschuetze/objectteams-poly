@@ -18,7 +18,7 @@
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.ui.help.actions;
+package org.eclipse.objectteams.otdt.internal.ui.help.actions;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.runtime.CoreException;
@@ -28,11 +28,11 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.objectteams.otdt.internal.ui.help.views.OTJLDView;
 import org.eclipse.objectteams.otdt.ui.help.Messages;
 import org.eclipse.objectteams.otdt.ui.help.OTHelpPlugin;
 import org.eclipse.objectteams.otdt.ui.help.OTJLDError;
 import org.eclipse.objectteams.otdt.ui.help.OTJLDError.OTURL;
-import org.eclipse.objectteams.otdt.ui.help.views.OTJLDView;
 import org.eclipse.ui.IViewActionDelegate;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;

@@ -14,7 +14,7 @@
  * Contributors:
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.ui.help.views;
+package org.eclipse.objectteams.otdt.internal.ui.help.views;
 
 import org.eclipse.objectteams.otdt.ui.help.OTJLDError;
 import org.eclipse.swt.widgets.Composite;
