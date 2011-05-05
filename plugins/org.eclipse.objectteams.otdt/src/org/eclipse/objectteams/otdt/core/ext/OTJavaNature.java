@@ -34,6 +34,7 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
  * 
  * @author jwloka
  * @version $Id: OTJavaNature.java 23427 2010-02-03 22:23:59Z stephan $
+ * @noinstantiate clients are not supposed to instantiate this class.
  */
 public class OTJavaNature implements IProjectNature
 {

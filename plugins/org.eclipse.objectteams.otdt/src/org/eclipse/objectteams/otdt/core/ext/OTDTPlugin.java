@@ -35,6 +35,8 @@ import org.osgi.framework.BundleContext;
  * The main plugin class to be used in the desktop.
  * 
  * @author jwloka
+ * @noinstantiate clients are not supposed to instantiate this class.
+ * @noextend clients are not supposed to extend this class.
  */
 public class OTDTPlugin extends Plugin
 {
