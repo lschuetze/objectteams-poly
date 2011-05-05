@@ -80,10 +80,7 @@ public class ASMByteCodeAnalyzer implements IByteCodeAnalyzer {
 	private Map<String, ClassInformation> classInformationMap = new HashMap<String, ClassInformation>();
 
 	/** 
-	 * Fetch the superclass name of a given class.
-	 * @param classStream stream providing the class bytes
-	 * @param className fully qualified name of the class
-	 * @return fully qualified ('.'-separated) name of the class' superclass or null if an exception occurred.
+	 * {@inheritDoc}
 	 */
 	public String getSuperclass(InputStream classStream, String className) {
 		try {
@@ -95,10 +92,7 @@ public class ASMByteCodeAnalyzer implements IByteCodeAnalyzer {
 	}
 	
 	/** 
-	 * Fetch the superclass name of a given class.
-	 * @param classStream stream providing the class bytes
-	 * @param className fully qualified name of the class
-	 * @return fully qualified ('.'-separated) name of the class' superclass or null if an exception occurred.
+	 * {@inheritDoc}
 	 */
 	public String getSuperclass(byte[] classBytes, String className) {
 		try {
