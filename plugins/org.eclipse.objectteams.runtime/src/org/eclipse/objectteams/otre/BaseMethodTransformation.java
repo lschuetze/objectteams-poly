@@ -1105,6 +1105,7 @@ public class BaseMethodTransformation
 	 *  in a given list.
 	 *  The switch block is furthermore wrapped in a try-catch block.
 	 *  Herein all {@link org.objectteams.LiftingVetoException LiftingVetoException}
+	 *  and {@link org.objectteams.LiftingFailedException LiftingFailedException}
 	 *  are caught, and possibly reported (if Dot.log.lift ist set).
 	 * @param methodBindings hash map of team names to 'MethodBinding' lists
 	 * @param mg method being generated.
@@ -1218,6 +1219,7 @@ public class BaseMethodTransformation
 			createRecursiveCall(il, mg, ot_result, 1, 0, mb.getBaseMethodName(), mb.getBaseMethodSignature(), firstLine);
 
 		mg.addExceptionHandler(il.getStart(), endTry, hdlr, liftingVeto);
+		mg.addExceptionHandler(il.getStart(), endTry, hdlr, liftingFailed);
 
 		InstructionHandle nop = il.append(new NOP());
 		skipHdlr.setTarget(nop);
@@ -1537,6 +1539,7 @@ public class BaseMethodTransformation
 			createRecursiveCall(addition, mg, ot_result, 0, 1, mb.getBaseMethodName(), mb.getBaseMethodSignature(), firstLine);
 			// =====================================
 			mg.addExceptionHandler(addition.getStart(), endTry, hdlr, liftingVeto);
+			mg.addExceptionHandler(addition.getStart(), endTry, hdlr, liftingFailed);
 			
 			InstructionHandle nop = addition.append(new NOP());
 			skipHdlr.setTarget(nop);

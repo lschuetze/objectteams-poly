@@ -20,7 +20,7 @@ package org.objectteams;
  * This exception signals that lifting failed due to unresolved
  * binding ambiguity.
  */
-public class LiftingFailedException extends RuntimeException {
+public class LiftingFailedException extends Exception {
 	/**
 	 * 
 	 */
