@@ -513,10 +513,13 @@ public static int getIrritant(int problemID) {
 			
 		case IProblem.RoleBindingPotentiallyAmbiguous:
 			return CompilerOptions.PotentialAmbiguousPlayedBy;
-		case IProblem.CallinDespiteBindingAmbiguity:
-			return CompilerOptions.DefiniteBindingAmbiguity;
 		case IProblem.AbstractPotentiallyRelevantRole:
 			return CompilerOptions.AbstractPotentialRelevantRole;
+		case IProblem.DefiniteLiftingAmbiguity:
+			return CompilerOptions.DefiniteBindingAmbiguity;
+		case IProblem.CallinDespiteBindingAmbiguity:
+		case IProblem.AmbiguousLiftingMayBreakClients:
+			return CompilerOptions.HiddenLiftingProblem;
 
 		case IProblem.MissingOverrideAnnotationForRole:
 			return CompilerOptions.MissingOverrideAnnotation;
@@ -684,6 +687,7 @@ public static int getProblemCategory(int severity, int problemID) {
 			case CompilerOptions.FragileCallin:
 			case CompilerOptions.PotentialAmbiguousPlayedBy:
 			case CompilerOptions.AbstractPotentialRelevantRole:
+			case CompilerOptions.HiddenLiftingProblem:
 			case CompilerOptions.ExceptionInGuard:
 			case CompilerOptions.AmbiguousLowering:
 				return CategorizedProblem.CAT_CODE_STYLE;
@@ -9427,6 +9431,18 @@ public void definiteLiftingAmbiguity(TypeBinding provided, TypeBinding required,
 			args,
 			location.sourceStart,
 			location.sourceEnd);
+}
+public void ambiguousLiftingMayBreakClients(TypeBinding roleType) {
+	String[] args = new String[]{
+		new String(roleType.readableName())
+	};
+	TypeDeclaration location = (TypeDeclaration) this.referenceContext;
+	this.handle(
+		IProblem.AmbiguousLiftingMayBreakClients,
+		args,
+		args,
+		location.sourceStart,
+		location.sourceEnd);
 }
 // -- 2.4 --
 public void qualifiedUseOfLiftingConstructor (MethodBinding ctor, Expression allocation)

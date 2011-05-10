@@ -180,7 +180,7 @@ public class LiftingTypeReference extends TypeReference {
 	    	// already reported (?)
 	    } else {
 	    	// static adjustment (OTJLD 2.3.2(a)):
-	    	roleRefType = (ReferenceBinding)TeamModel.getRoleToLiftTo(scope, baseType, roleRefType, true, this);
+	    	roleRefType = (ReferenceBinding)TeamModel.getRoleToLiftTo(scope, baseType, roleRefType, true, this, null/*callinDecl*/);
 		    if (roleRefType == null)
 		    	roleRefType = (ReferenceBinding)roleType; // revert unsuccessful adjustment
 		    if (    roleRefType.baseclass() == null

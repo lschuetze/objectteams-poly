@@ -39,11 +39,13 @@ import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.Pair;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleFileCache;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
@@ -641,6 +643,8 @@ public class TeamModel extends TypeModel {
 	 * @param provided
 	 * @param required
 	 * @param doAdjust should the adjusted role be returned (as opposed to just the strengthened)?
+	 * @param location where to report errors against
+	 * @param callinDecl set if lifting is required from a callin mapping
 	 * @return an exact role or null
 	 */
 	public static TypeBinding getRoleToLiftTo (
@@ -648,7 +652,8 @@ public class TeamModel extends TypeModel {
 			TypeBinding provided,
 			TypeBinding required,
 			boolean doAdjust,
-			ASTNode location)
+			ASTNode location,
+			CallinMappingDeclaration callinDecl)
 	{
 		ReferenceBinding requiredRef = null;
 		if (   required.isArrayType()
@@ -664,10 +669,14 @@ public class TeamModel extends TypeModel {
 			TeamModel enclosingTeam = requiredRef.enclosingType().getTeamModel();
 			if (enclosingTeam != null && !provided.leafComponentType().isBaseType()) {
 				for (Pair<ReferenceBinding,ReferenceBinding> ambig : enclosingTeam.ambigousLifting)
-					if (ambig.equals((ReferenceBinding)provided.leafComponentType(), requiredRef))
+					if (ambig.equals((ReferenceBinding)provided.leafComponentType(), requiredRef.getRealClass()))
 					{
-						scope.problemReporter().definiteLiftingAmbiguity(provided, required, location);
-						return null;
+						if (callinDecl != null) {
+							callinDecl.addRoleBindingAmbiguity(requiredRef);
+						} else {
+							scope.problemReporter().definiteLiftingAmbiguity(provided, required, location);
+							return null;
+						}
 					}
 			}
 
@@ -892,6 +901,15 @@ public class TeamModel extends TypeModel {
 	public boolean isAmbiguousLifting(ReferenceBinding staticRole, ReferenceBinding baseBinding) {
 		for (Pair<ReferenceBinding, ReferenceBinding> pair : this.ambigousLifting) {
 			if (pair.first == baseBinding && pair.second == staticRole)
+				return true;
+		}
+		return false;
+	}
+	public boolean canLiftingFail(ReferenceBinding role) {
+		if ((this._binding.tagBits & TagBits.HasAbstractRelevantRole) != 0)
+			return true;
+		for (Pair<ReferenceBinding, ReferenceBinding> pair : this.ambigousLifting) {
+			if (role.getRealClass().isCompatibleWith(pair.second) && pair.first.isCompatibleWith(role.baseclass()))
 				return true;
 		}
 		return false;

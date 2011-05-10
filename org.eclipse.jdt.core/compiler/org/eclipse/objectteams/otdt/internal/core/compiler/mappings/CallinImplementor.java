@@ -382,6 +382,11 @@ public class CallinImplementor extends MethodMappingImplementor
 		
 		gen.maybeAddTypeParametersToMethod(baseTypeBinding, newMethod);
 
+		if (teamDecl.getTeamModel().canLiftingFail(this._role.getBinding()))
+			callinBindingDeclaration.addRoleBindingAmbiguity(this._role.getBinding());
+		if (callinBindingDeclaration.rolesWithBindingAmbiguity != null)
+			declareLiftingFailedException(callinBindingDeclaration, newMethod, gen);
+
 		// -----   add and build and link the method -----
 		AstEdit.addMethod(teamDecl, newMethod);
         callinBindingDeclaration.setWrapper(baseMethodSpec, newMethod);
@@ -417,6 +422,26 @@ public class CallinImplementor extends MethodMappingImplementor
 							gen);
 			}
         });
+	}
+	/** Declare to throw LiftingFailedException and report problem for each role in callinBindingDeclaration#rolesWithBindingAmbiguity */
+	protected void declareLiftingFailedException(CallinMappingDeclaration callinBindingDeclaration,
+												 MethodDeclaration wrapperMethod,
+												 AstGenerator gen) 
+	{
+		TypeReference liftingFailed = gen.qualifiedTypeReference(new char[][] {
+				IOTConstants.ORG, IOTConstants.OBJECTTEAMS,
+				IOTConstants.LIFTING_FAILED_EXCEPTION
+		});
+		if (wrapperMethod.thrownExceptions != null) {
+			int len = wrapperMethod.thrownExceptions.length;
+			System.arraycopy(wrapperMethod.thrownExceptions, 0, wrapperMethod.thrownExceptions = new TypeReference[len+1], 1, len);
+			wrapperMethod.thrownExceptions[0] = liftingFailed;
+		} else {
+			wrapperMethod.thrownExceptions = new TypeReference[] {liftingFailed};
+		}
+		// and report the problem(s)
+		for (ReferenceBinding roleTypeBinding : callinBindingDeclaration.rolesWithBindingAmbiguity)
+			this._roleScope.problemReporter().callinDespiteBindingAmbiguity(roleTypeBinding, callinBindingDeclaration);
 	}
 	/** Generate the statements for a callin wrapper method.
 	 *

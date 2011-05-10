@@ -3463,6 +3463,11 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				setSeverity(CompilerOptions.OPTION_ReportFieldHiding, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportTypeParameterHiding, severity, isEnabling);
 				return;
+//{ObjectTeams:
+			} else if (token.equals("hiddenLiftingProblem")) { //$NON-NLS-1$
+				setSeverity(CompilerOptions.OPTION_ReportHiddenLiftingProblem, severity, isEnabling);
+				return;
+// SH}
 			} else if (token.equals("hashCode")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportMissingHashCodeMethod, severity, isEnabling);
 				return;

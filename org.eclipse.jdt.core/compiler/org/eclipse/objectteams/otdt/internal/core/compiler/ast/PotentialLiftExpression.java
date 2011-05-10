@@ -153,7 +153,7 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
 			if (   expectedBase == null							// roleType is assigned unless incompatibilityFound, in which case we return above
 	        	|| !baseType.isCompatibleWith(expectedBase))
 	        {
-	        	TypeBinding adjustedRole = TeamModel.getRoleToLiftTo(scope, baseType, roleType, true, this.expression);
+	        	TypeBinding adjustedRole = TeamModel.getRoleToLiftTo(scope, baseType, roleType, true, this.expression, null/*callinDecl*/);
 	        	if (adjustedRole != null) {
 	        		this.expectedType = adjustedRole;
 	        	} else {

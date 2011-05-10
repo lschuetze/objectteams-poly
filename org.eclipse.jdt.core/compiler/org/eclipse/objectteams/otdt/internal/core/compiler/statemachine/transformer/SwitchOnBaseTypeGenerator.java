@@ -80,7 +80,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 			RoleModel[]      caseObjects,
 			AstGenerator     gen)
 	{
-		boolean hasBindingAmbiguity = teamType.getTeamModel().ambigousLifting.size() > 0;
+		boolean hasBindingAmbiguity = teamType.getTeamModel().canLiftingFail(staticRoleType);//teamType.getTeamModel().ambigousLifting.size() > 0;
 		if (caseObjects.length == 1 && ((teamType.tagBits & TagBits.HasAbstractRelevantRole) == 0) && !hasBindingAmbiguity) {
 			// avoid instanceof alltogether.
 			return createCaseStatement(caseObjects[0], gen);

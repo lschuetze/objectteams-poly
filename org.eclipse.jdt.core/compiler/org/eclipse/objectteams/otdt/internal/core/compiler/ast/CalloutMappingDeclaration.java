@@ -177,7 +177,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 				{
 					this.roleMethodSpec.returnType.resolvedType = roleReturn;
 				} else {
-					TypeBinding roleToLiftTo = TeamModel.getRoleToLiftTo(this.scope, baseReturn, roleReturn, false, methodSpec);
+					TypeBinding roleToLiftTo = TeamModel.getRoleToLiftTo(this.scope, baseReturn, roleReturn, false, methodSpec, null/*callinDecl*/);
 					if (roleToLiftTo != null)
 					{
 						// success by translation
@@ -223,7 +223,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
                     this.roleMethodSpec.returnType.resolvedType = requiredType; // need a valid type here
 				return; // OK => done
 			} else {
-				TypeBinding roleToLiftTo = TeamModel.getRoleToLiftTo(this.scope, providedType, requiredType, false, fieldSpec);
+				TypeBinding roleToLiftTo = TeamModel.getRoleToLiftTo(this.scope, providedType, requiredType, false, fieldSpec, null/*callinDecl*/);
 				if (roleToLiftTo != null)
 				{
 					// success by translation

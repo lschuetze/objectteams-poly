@@ -362,6 +362,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 			optionsMap.put(CompilerOptions.OPTION_ReportUnsafeRoleInstantiation, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportFragileCallin, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportPotentialAmbiguousPlayedby, CompilerOptions.IGNORE);
+			optionsMap.put(CompilerOptions.OPTION_ReportHiddenCatchBlock, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportAbstractPotentialRelevantRole, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportDecapsulation, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportDecapsulationWrite, CompilerOptions.IGNORE);

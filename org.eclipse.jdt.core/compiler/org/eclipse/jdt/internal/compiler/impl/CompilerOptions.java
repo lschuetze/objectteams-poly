@@ -167,6 +167,8 @@ public class CompilerOptions {
 		"org.eclipse.objectteams.otdt.compiler.problem.definite_ambiguity"; //$NON-NLS-1$
 	public static final String OPTION_ReportAbstractPotentialRelevantRole =
 		"org.eclipse.objectteams.otdt.compiler.problem.abstract_potential_relevant_role"; //$NON-NLS-1$
+	public static final String OPTION_ReportHiddenLiftingProblem =
+		"org.eclipse.objectteams.otdt.compiler.problem.hidden_lifting_problem";  //$NON-NLS-1$
 
 	public static final String OPTION_ReportDecapsulation =
 		"org.eclipse.objectteams.otdt.compiler.problem.decapsulation"; //$NON-NLS-1$
@@ -338,7 +340,8 @@ public class CompilerOptions {
 	public static final int DefiniteBindingAmbiguity=		 OTJFlag | ASTNode.Bit18;
 	public static final int BaseclassCycle=				     OTJFlag | ASTNode.Bit19;
 	public static final int EffectlessFieldaccess= 			 OTJFlag | ASTNode.Bit20; 
-	public static final int UnusedParammap= 				 OTJFlag | ASTNode.Bit21; 
+	public static final int UnusedParammap= 				 OTJFlag | ASTNode.Bit21;
+	public static final int HiddenLiftingProblem=      		 OTJFlag | ASTNode.Bit22;
 // SH}
 
 	// Severity level for handlers
@@ -697,6 +700,8 @@ public class CompilerOptions {
 				return OPTION_ReportDefiniteBindingAmbiguity;
 			case AbstractPotentialRelevantRole :
 				return OPTION_ReportAbstractPotentialRelevantRole;
+			case HiddenLiftingProblem :
+				return OPTION_ReportHiddenLiftingProblem;
 			case Decapsulation :
 				return OPTION_ReportDecapsulation;
 			case DecapsulationWrite :
@@ -896,6 +901,7 @@ public class CompilerOptions {
 			OPTION_ReportPotentialAmbiguousPlayedby,
 			OPTION_ReportDefiniteBindingAmbiguity,
 			OPTION_ReportAbstractPotentialRelevantRole,
+			OPTION_ReportHiddenLiftingProblem,
 			OPTION_ReportDecapsulation,
 			OPTION_ReportDecapsulationWrite,
 			OPTION_ReportDeprecatedPathSyntax,
@@ -999,6 +1005,8 @@ public class CompilerOptions {
 				return "def-bind-ambiguity"; //$NON-NLS-1$
 			case AbstractPotentialRelevantRole :
 				return "abstractrelevantrole"; //$NON-NLS-1$
+			case HiddenLiftingProblem :
+				return "hidden-lifting-problem"; //$NON-NLS-1$
 			case Decapsulation :
 			case DecapsulationWrite :
 				return "decapsulation"; //$NON-NLS-1$
@@ -1138,6 +1146,10 @@ public class CompilerOptions {
 		case 'f' :
 			if ("fragilecallin".equals(warningToken)) //$NON-NLS-1$
 				return IrritantSet.FRAGILE_CALLIN;
+			break;
+		case 'h' :
+			if ("hidden-lifting-problem".equals(warningToken)) //$NON-NLS-1$
+				return IrritantSet.HIDDEN_LIFTING_PROBLEM;
 			break;
 		case 'i' :
 			if ("inferredcallout".equals(warningToken)) //$NON-NLS-1$
@@ -1287,6 +1299,7 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportPotentialAmbiguousPlayedby, getSeverityString(PotentialAmbiguousPlayedBy));
 		optionsMap.put(OPTION_ReportDefiniteBindingAmbiguity, getSeverityString(DefiniteBindingAmbiguity));
 		optionsMap.put(OPTION_ReportAbstractPotentialRelevantRole, getSeverityString(AbstractPotentialRelevantRole));
+		optionsMap.put(OPTION_ReportHiddenLiftingProblem, getSeverityString(HiddenLiftingProblem));
 
 		optionsMap.put(OPTION_ReportDecapsulation, getSeverityString(Decapsulation));
 		optionsMap.put(OPTION_ReportDecapsulationWrite, getSeverityString(DecapsulationWrite));
@@ -1746,6 +1759,7 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportPotentialAmbiguousPlayedby)) != null) updateSeverity(PotentialAmbiguousPlayedBy, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportDefiniteBindingAmbiguity)) != null) updateSeverity(DefiniteBindingAmbiguity, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportAbstractPotentialRelevantRole)) != null) updateSeverity(AbstractPotentialRelevantRole, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportHiddenLiftingProblem)) != null) updateSeverity(HiddenLiftingProblem, optionValue);
 
 		if ((optionValue = optionsMap.get(OPTION_ReportDecapsulation)) != null) updateSeverity(Decapsulation, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportDecapsulationWrite)) != null) updateSeverity(DecapsulationWrite, optionValue);
@@ -2006,6 +2020,7 @@ public class CompilerOptions {
 
 		buf.append("\n\t- report if role-base bindings are potentially ambiguous : ").append(getSeverityString(PotentialAmbiguousPlayedBy)); //$NON-NLS-1$
 		buf.append("\n\t- report if an abstract role is potentially relevant : ").append(getSeverityString(AbstractPotentialRelevantRole)); //$NON-NLS-1$
+		buf.append("\n\t- report if binding ambiguity may cause lifting to fail in unexpected locations : ").append(getSeverityString(HiddenLiftingProblem));  //$NON-NLS-1$
 
 		buf.append("\n\t- report decapsulation (overriding of access restrictions) : ").append(getSeverityString(Decapsulation)); //$NON-NLS-1$
 		buf.append("\n\t- report decapsulation (overriding of access restrictions - field write) : ").append(getSeverityString(DecapsulationWrite)); //$NON-NLS-1$

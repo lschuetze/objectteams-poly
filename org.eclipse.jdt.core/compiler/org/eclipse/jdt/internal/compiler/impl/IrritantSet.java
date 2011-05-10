@@ -85,6 +85,8 @@ public class IrritantSet {
             CompilerOptions.PotentialAmbiguousPlayedBy);
 	public static final IrritantSet ABSTRACT_POTENTIAL_RELEVANT_ROLE = new IrritantSet(
             CompilerOptions.AbstractPotentialRelevantRole);
+	public static final IrritantSet HIDDEN_LIFTING_PROBLEM = new IrritantSet(
+            CompilerOptions.HiddenLiftingProblem);
 	public static final IrritantSet DECAPSULATION = new IrritantSet(
             CompilerOptions.Decapsulation | CompilerOptions.DecapsulationWrite);
 	public static final IrritantSet BINDING_CONVENTIONS = new IrritantSet(
@@ -117,7 +119,8 @@ public class IrritantSet {
 				 | CompilerOptions.ExceptionInGuard
 				 | CompilerOptions.OverridingFinalRole
 				 | CompilerOptions.AdaptingDeprecated
-				 | CompilerOptions.DefiniteBindingAmbiguity);
+				 | CompilerOptions.DefiniteBindingAmbiguity
+				 | CompilerOptions.HiddenLiftingProblem);
 // SH}
 		COMPILER_DEFAULT_WARNINGS
 //{ObjectTeams: default to warning (group 3):

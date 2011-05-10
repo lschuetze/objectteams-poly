@@ -1501,6 +1501,7 @@ void setSourceStart(int sourceStart);
 
 	int RoleBindingPotentiallyAmbiguous          = ROLE_RELATED + 3401; // 2.3.4(a)
 	int DefiniteLiftingAmbiguity 				 = ROLE_RELATED + 3402; // 2.3.4(b)
+	int AmbiguousLiftingMayBreakClients			 = ROLE_RELATED + 3403; // 2.3.XXX
 
 	int QualifiedUseOfLiftingConstructor         = ROLE_RELATED + 4101; // 2.4.1(a)
 	int LiftCtorArgNotAllocation                 = ROLE_RELATED + 4102; // 2.4.1(c)

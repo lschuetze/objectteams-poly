@@ -29,6 +29,9 @@ import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLA
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLAG_DEFINITELY_MISSING_BASECALL;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
@@ -85,6 +88,10 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
     public char[] name;
 
 	public MethodSpec[] baseMethodSpecs;
+
+	/** collect all roles (enclosing role plus role method arguments) for which lifting may fail at runtime. */
+	public Set<ReferenceBinding> rolesWithBindingAmbiguity;
+
     public MethodSpec[] getBaseMethodSpecs () {
     	return this.baseMethodSpecs;
     }
@@ -323,10 +330,13 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 									roleToLiftTo = roleRef;
 								}
 							}
+							ReferenceBinding enclosingTeam = this.scope.enclosingSourceType().enclosingType();
+							if (enclosingTeam.getTeamModel().canLiftingFail(roleRef))
+								addRoleBindingAmbiguity(roleRef);
 						}
 					} else {
 						// this uses OTJLD 2.3.3(a) adaptation which is not reversible, ie., not usable for replace:
-						roleToLiftTo = TeamModel.getRoleToLiftTo(this.scope, baseParam, roleParam, false, location);
+						roleToLiftTo = TeamModel.getRoleToLiftTo(this.scope, baseParam, roleParam, false, location, this);
 					}
 					if (roleToLiftTo != null)
 					{
@@ -375,6 +385,11 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			}
 		}
 		return true; // unused in the callin case
+	}
+	public void addRoleBindingAmbiguity(ReferenceBinding roleRef) {
+		if (this.rolesWithBindingAmbiguity == null)
+			this.rolesWithBindingAmbiguity = new HashSet<ReferenceBinding>();
+		this.rolesWithBindingAmbiguity.add(roleRef);
 	}
 	protected void checkReturnCompatibility(MethodSpec methodSpec)
 	{

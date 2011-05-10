@@ -681,6 +681,14 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 	        }
 
 	        if (needToAdd) {
+	        	if (teamBinding.getTeamModel().canLiftingFail(roleClassBinding)) {
+	        		liftToMethodDeclaration.thrownExceptions = new TypeReference[] {
+        				this._gen.qualifiedTypeReference(new char[][] {
+        						ORG, OBJECTTEAMS,
+        						LIFTING_FAILED_EXCEPTION
+        				})
+	        		};
+	        	}
 	        	if (teamTypeDeclaration.isRole()) {
 	        		TypeDeclaration interfaceAst = teamTypeDeclaration.getRoleModel().getInterfaceAst();
 	        		if (interfaceAst != null) {
