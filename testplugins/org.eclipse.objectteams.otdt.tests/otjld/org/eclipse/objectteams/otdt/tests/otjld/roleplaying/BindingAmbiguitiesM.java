@@ -55,7 +55,7 @@ public class BindingAmbiguitiesM extends AbstractOTJLDTest {
          runConformTest(
               new String[] {
   		"Team73Mab1.java",
-  			    "\n" +
+  			    "import org.objectteams.LiftingFailedException;\n" +
   			    "@SuppressWarnings(\"ambiguousbinding\")\n" +
   			    "public team class Team73Mab1 {\n" +
   			    "    precedence R2_R, R1_R;\n" +
@@ -75,8 +75,8 @@ public class BindingAmbiguitiesM extends AbstractOTJLDTest {
   			    "    {\n" +
   			    "    }\n" +
   			    "    \n" +
-  			    "    Team73Mab1 (T73Mab1 as R1_R o) {}\n" +
-  			    "    public static void main(String[] args) {\n" +
+  			    "    Team73Mab1 (T73Mab1 as R1_R o) throws LiftingFailedException {}\n" +
+  			    "    public static void main(String[] args) throws LiftingFailedException {\n" +
   			    "        T73Mab1 o = new T73Mab1();\n" +
   			    "        Team73Mab1 t = new Team73Mab1(o);\n" +
   			    "        t.activate();\n" +

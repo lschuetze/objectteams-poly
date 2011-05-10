@@ -34,7 +34,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test2237_instantiationPolicy"};
+//		TESTS_NAMES = new String[] { "test2232_liftingToAbstractRole1"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -4898,17 +4898,17 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
        runConformTest(
             new String[] {
 		"Team2232ltar1.java",
-			    "\n" +
+			    "import org.objectteams.LiftingFailedException;\n" +
 			    "@SuppressWarnings(\"abstractrelevantrole\")\n" +
 			    "public team class Team2232ltar1 {\n" +
 			    "    protected abstract class R1 playedBy T2232ltar1_1 {\n" +
 			    "        void test() -> void test();\n" +
 			    "    }\n" +
 			    "    protected class R2 extends R1 playedBy T2232ltar1_2 { }\n" +
-			    "    Team2232ltar1(T2232ltar1_1 as R1 r) {\n" +
+			    "    Team2232ltar1(T2232ltar1_1 as R1 r) throws LiftingFailedException {\n" +
 			    "        r.test();\n" +
 			    "    }\n" +
-			    "    public static void main(String[] args) {\n" +
+			    "    public static void main(String[] args) throws LiftingFailedException {\n" +
 			    "        new Team2232ltar1(new T2232ltar1_2());\n" +
 			    "    }\n" +
 			    "}\n" +

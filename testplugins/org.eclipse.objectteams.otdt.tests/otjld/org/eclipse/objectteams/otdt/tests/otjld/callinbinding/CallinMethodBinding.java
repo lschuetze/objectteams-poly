@@ -34,7 +34,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test4127_precedenceDeclaration19"};
+//		TESTS_NAMES = new String[] { "test726_callinWithHiddenLiftingProblem4"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1311,15 +1311,17 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role class callin-binds to a not-accessible inherited base method - corrected
     // 4.1.5-otjld-nonexisting-base-method-3i
     public void test415_nonexistingBaseMethod3i() {
-       
+        Map options = getCompilerOptions();
+        options.put(CompilerOptions.OPTION_ReportHiddenLiftingProblem, CompilerOptions.WARNING);
        runConformTest(
             new String[] {
 		"Team415nbm3i.java",
-			    "\n" +
+			    "import org.objectteams.LiftingFailedException;\n" +
 			    "public team class Team415nbm3i {\n" +
 			    "    @SuppressWarnings(\"abstractrelevantrole\")\n" +
 			    "    protected abstract class Role415nbm3i_1 playedBy T415nbm3i_1 {\n" +
 			    "        public abstract void test();\n" +
+			    "    	 @SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "        void test() <- before void test(String arg);\n" +
 			    "    }\n" +
 			    "    public class Role415nbm3i_2 extends Role415nbm3i_1 playedBy T415nbm3i_2 {\n" +
@@ -1353,7 +1355,12 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "OK");
+            "OK",
+            null/*classLibs*/,
+            true/*shouldFlush*/,
+            null/*vmArguments*/,
+            options,
+            null/*requester*/);
     }
 
     // a role class callin-binds to a not-accessible base method
@@ -5080,17 +5087,17 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
        runConformTest(
             new String[] {
 		"Team4131ilba2.java",
-			    "\n" +
+			    "import org.objectteams.LiftingFailedException;\n" +
 			    "public team class Team4131ilba2 {\n" +
 			    "	protected class R0 playedBy T4131ilba2_1 {\n" +
 			    "	}\n" +
 			    "	protected class R1 extends R0 playedBy T4131ilba2_2 {}\n" +
 			    "	protected class R2 extends R0 playedBy T4131ilba2_2 {}\n" +
-			    "	Team4131ilba2 (T4131ilba2_1 as R0 o) {}\n" +
+			    "	Team4131ilba2 (T4131ilba2_1 as R0 o) throws LiftingFailedException {}\n" +
 			    "	public static void main(String[] args) {\n" +
 			    "		try {\n" +
 			    "			new Team4131ilba2(new T4131ilba2_2());\n" +
-			    "		} catch (org.objectteams.LiftingFailedException e) {\n" +
+			    "		} catch (LiftingFailedException e) {\n" +
 			    "			System.out.print(\"OK\");\n" +
 			    "		}\n" +
 			    "	}\n" +
@@ -7922,5 +7929,167 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		"	^\n" + 
     		"The abstract method test in type Role725cbam2_2 can only be defined by an abstract class\n" + 
     		"----------\n");
+    }
+    // Bug 337413 - [otjld][compiler] consider changing LiftingFailedException to a checked exception
+    // need to declare LiftingFailedException but luckily the program still works :)
+    public void test726_callinWithHiddenLiftingProblem1() {
+        Map options = getCompilerOptions();
+        options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+        options.put(CompilerOptions.OPTION_ReportUnsafeRoleInstantiation, CompilerOptions.IGNORE); // see new R2(b);
+    	runConformTest(
+    		new String[] {
+    	"Team726cwhlp1.java",
+    			"@SuppressWarnings(\"ambiguousbinding\")\n" +
+    			"public team class Team726cwhlp1 {\n" +
+    			"   protected abstract class R0 playedBy T726cwhlp1 {\n" +
+    			"		@SuppressWarnings(\"hidden-lifting-problem\")\n" +
+    			"		bar <- after foo;\n" +
+    			"		abstract void bar();\n" +
+    			"	}\n" +
+    			"	protected class R1 extends R0 {\n" +
+    			"		void bar() { System.out.print(\"NOTOK\"); }\n" +
+    			"	}\n" +
+    			"	protected class R2 extends R0 {\n" +
+    			"		void bar() {\n" +
+    			"			System.out.print(\"OK\");\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"   void doLift(T726cwhlp1 as R2 r) throws org.objectteams.LiftingFailedException {}\n" +
+    			"	public static void main(String[] args) throws org.objectteams.LiftingFailedException {\n" +
+    			"		Team726cwhlp1 t = new Team726cwhlp1();\n" +
+    			"		t.activate();\n" +
+    			"		T726cwhlp1 b = new T726cwhlp1();\n" +
+    			"		t.doLift(b);\n" +
+    			"		b.foo();\n" +
+    			"	}\n" +
+    			"}\n",
+    	"T726cwhlp1.java",
+    			"public class T726cwhlp1 {\n" +
+    			"	public void foo() { }\n" +
+    			"}\n"
+    		},
+    		"OK",
+            null/*classLibs*/,
+            true/*shouldFlush*/,
+            null/*vmArguments*/,
+            options,
+            null/*requester*/);
+    }
+    // Bug 337413 - [otjld][compiler] consider changing LiftingFailedException to a checked exception
+    // callin doesn't fire due to LiftingFailedException behind the scenes (call target lifting)
+    public void test726_callinWithHiddenLiftingProblem2() {
+        Map options = getCompilerOptions();
+        options.put(CompilerOptions.OPTION_ReportHiddenLiftingProblem, CompilerOptions.WARNING);
+    	runConformTest(
+    		new String[] {
+    	"Team726cwhlp2.java",
+    			"@SuppressWarnings(\"ambiguousbinding\")\n" +
+    			"public team class Team726cwhlp2 {\n" +
+    			"   protected class R0 playedBy T726cwhlp2 {\n" +
+    			"		@SuppressWarnings(\"hidden-lifting-problem\")\n" +
+    			"		bar <- after foo;\n" +
+    			"		void bar() {\n" +
+    			"			System.out.print(\"OK\");\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"	protected class R1 extends R0 {}\n" +
+    			"	protected class R2 extends R0 {}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		Team726cwhlp2 t = new Team726cwhlp2();\n" +
+    			"		t.activate();\n" +
+    			"		T726cwhlp2 b = new T726cwhlp2();\n" +
+    			"		b.foo();\n" +
+    			"	}\n" +
+    			"}\n",
+    	"T726cwhlp2.java",
+    			"public class T726cwhlp2 {\n" +
+    			"	public void foo() { }\n" +
+    			"}\n"
+    		},
+    		"",
+            null/*classLibs*/,
+            true/*shouldFlush*/,
+            null/*vmArguments*/,
+            options,
+            null/*requester*/);
+    }
+    // Bug 337413 - [otjld][compiler] consider changing LiftingFailedException to a checked exception
+    // callin doesn't fire due to LiftingFailedException behind the scenes (arg lifting in after-callin)
+    public void test726_callinWithHiddenLiftingProblem3() {
+        Map options = getCompilerOptions();
+        options.put(CompilerOptions.OPTION_ReportHiddenLiftingProblem, CompilerOptions.WARNING);
+    	runConformTest(
+    		new String[] {
+    	"Team726cwhlp3.java",
+    			"@SuppressWarnings(\"ambiguousbinding\")\n" +
+    			"public team class Team726cwhlp3 {\n" +
+    			"	protected class ROK playedBy T726cwhlp3 {\n" +
+    			"		@SuppressWarnings(\"hidden-lifting-problem\")\n" +
+    			"		bar <- after foo;\n" + // argument lifting going bad
+    			"		void bar(R0 r) {\n" +
+    			"			System.out.print(\"OK\");\n" +
+    			"		}\n" +
+    			"   }\n" +
+    			"   protected class R0 playedBy T726cwhlp3 {}\n" +
+    			"	protected class R1 extends R0 {}\n" +
+    			"	protected class R2 extends R0 {}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		Team726cwhlp3 t = new Team726cwhlp3();\n" +
+    			"		t.activate();\n" +
+    			"		T726cwhlp3 b = new T726cwhlp3();\n" +
+    			"		b.foo(b);\n" +
+    			"	}\n" +
+    			"}\n",
+    	"T726cwhlp3.java",
+    			"public class T726cwhlp3 {\n" +
+    			"	public void foo(T726cwhlp3 b) { }\n" +
+    			"}\n"
+    		},
+    		"",
+            null/*classLibs*/,
+            true/*shouldFlush*/,
+            null/*vmArguments*/,
+            options,
+            null/*requester*/);
+    }
+    // Bug 337413 - [otjld][compiler] consider changing LiftingFailedException to a checked exception
+    // callin doesn't fire due to LiftingFailedException behind the scenes (arg lifting in replace-callin)
+    public void test726_callinWithHiddenLiftingProblem4() {
+        Map options = getCompilerOptions();
+        options.put(CompilerOptions.OPTION_ReportHiddenLiftingProblem, CompilerOptions.WARNING);
+    	runConformTest(
+    		new String[] {
+    	"Team726cwhlp4.java",
+    			"@SuppressWarnings(\"ambiguousbinding\")\n" +
+    			"public team class Team726cwhlp4 {\n" +
+    			"	protected class ROK playedBy T726cwhlp4 {\n" +
+    			"		@SuppressWarnings(\"hidden-lifting-problem\")\n" +
+    			"		bar <- replace foo;\n" + // argument lifting going bad
+    			"       @SuppressWarnings(\"basecall\")\n" +
+    			"		callin void bar(R0 r) {\n" +
+    			"			System.out.print(\"NOK\");\n" +
+    			"		}\n" +
+    			"   }\n" +
+    			"   protected class R0 playedBy T726cwhlp4 {}\n" +
+    			"	protected class R1 extends R0 {}\n" +
+    			"	protected class R2 extends R0 {}\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		Team726cwhlp4 t = new Team726cwhlp4();\n" +
+    			"		t.activate();\n" +
+    			"		T726cwhlp4 b = new T726cwhlp4();\n" +
+    			"		b.foo(b);\n" +
+    			"	}\n" +
+    			"}\n",
+    	"T726cwhlp4.java",
+    			"public class T726cwhlp4 {\n" +
+    			"	public void foo(T726cwhlp4 b) { System.out.print(\"OK\"); }\n" +
+    			"}\n"
+    		},
+    		"OK",
+            null/*classLibs*/,
+            true/*shouldFlush*/,
+            null/*vmArguments*/,
+            options,
+            null/*requester*/);
     }
 }

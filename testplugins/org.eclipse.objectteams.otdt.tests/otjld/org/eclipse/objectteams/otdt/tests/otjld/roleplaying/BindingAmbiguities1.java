@@ -24,6 +24,7 @@ import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
 import junit.framework.Test;
 
+@SuppressWarnings("unchecked")
 public class BindingAmbiguities1 extends AbstractOTJLDTest {
 
      public BindingAmbiguities1(String name) {
@@ -33,7 +34,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
      // Static initializer to specify tests subset using TESTS_* static variables
      // All specified tests which does not belong to the class are skipped...
      static {
-//        TESTS_NAMES = new String { ""};
+//        TESTS_NAMES = new String[] { "test731_ambiguousBinding1"};
 //        TESTS_NUMBERS = new int { 1459 };
 //        TESTS_RANGE = new int { 1097, -1 };
      }
@@ -75,7 +76,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n",
 		"Team731ab1_3.java",
-			    "\n" +
+			    "@SuppressWarnings(\"hidden-lifting-problem\")\n" + // this team introduces the binding ambiguity (incompatible override of liftTo methods)
 			    "public team class Team731ab1_3 extends Team731ab1_2 {\n" +
 			    "    public class Role731ab1_4 extends Role731ab1_1 playedBy T731ab1_3 {\n" +
 			    "        public String toString() {\n" +
@@ -169,7 +170,10 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-2
      public void test731_ambiguousBinding2() {
-        
+         Map options = getCompilerOptions();
+         options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+         options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
+
         runConformTest(
              new String[] {
  		"T731ab2Main.java",
@@ -220,7 +224,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n",
 		"Team731ab2_3.java",
-			    "\n" +
+			    "@SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "public team class Team731ab2_3 extends Team731ab2_2 {\n" +
 			    "    public class Role731ab2_4 extends Role731ab2_1 playedBy T731ab2_3 {\n" +
 			    "        public String toString() {\n" +
@@ -275,13 +279,20 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-             "Team731ab2_2.Role731ab2_2");
+             "Team731ab2_2.Role731ab2_2",
+             null/*classLibs*/,
+             true/*shouldFlush*/,
+             null/*vmArguments*/,
+             options,
+             null/*requester*/);
      }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-3
      public void test731_ambiguousBinding3() {
-        
+        Map options = getCompilerOptions();
+        options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+        options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
         runConformTest(
              new String[] {
  		"T731ab3Main.java",
@@ -356,7 +367,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n",
 		"Team731ab3_3.java",
-			    "\n" +
+			    "@SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "public team class Team731ab3_3 extends Team731ab3_2 {\n" +
 			    "    public class Role731ab3_4 extends Role731ab3_1 playedBy T731ab3_3 {\n" +
 			    "        public String toString() {\n" +
@@ -387,13 +398,20 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-             "Team731ab3_3.Role731ab3_2");
+             "Team731ab3_3.Role731ab3_2",
+             null/*classLibs*/,
+             true/*shouldFlush*/,
+             null/*vmArguments*/,
+             options,
+             null/*requester*/);
      }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-4
      public void test731_ambiguousBinding4() {
-        
+         Map options = getCompilerOptions();
+         options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+         options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
         runConformTest(
              new String[] {
  		"T731ab4Main.java",
@@ -476,7 +494,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n",
 		"Team731ab4_3.java",
-			    "\n" +
+			    "@SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "public team class Team731ab4_3 extends Team731ab4_2 {\n" +
 			    "    public class Role731ab4_4 extends Role731ab4_1 playedBy T731ab4_3 {\n" +
 			    "        public String toString() {\n" +
@@ -499,13 +517,20 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-             "Team731ab4_4.Role731ab4_2");
+             "Team731ab4_4.Role731ab4_2",
+             null/*classLibs*/,
+             true/*shouldFlush*/,
+             null/*vmArguments*/,
+             options,
+             null/*requester*/);
      }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-5
      public void test731_ambiguousBinding5() {
-        
+         Map options = getCompilerOptions();
+         options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+         options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
         runConformTest(
              new String[] {
  		"T731ab5Main.java",
@@ -528,7 +553,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n",
 		"Team731ab5_3.java",
-			    "\n" +
+			    "@SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "public team class Team731ab5_3 extends Team731ab5_2 {\n" +
 			    "    public class Role731ab5_4 extends Role731ab5_1 playedBy T731ab5_3 {\n" +
 			    "        public String toString() {\n" +
@@ -611,13 +636,20 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-             "Team731ab5_1.Role731ab5_2");
+             "Team731ab5_1.Role731ab5_2",
+             null/*classLibs*/,
+             true/*shouldFlush*/,
+             null/*vmArguments*/,
+             options,
+             null/*requester*/);
      }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-6
      public void test731_ambiguousBinding6() {
-        
+         Map options = getCompilerOptions();
+         options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+         options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
         runConformTest(
              new String[] {
  		"T731ab6Main.java",
@@ -668,7 +700,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n",
 		"Team731ab6_3.java",
-			    "\n" +
+			    "@SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "public team class Team731ab6_3 extends Team731ab6_2 {\n" +
 			    "    public class Role731ab6_4 extends Role731ab6_1 playedBy T731ab6_3 {\n" +
 			    "        public String toString() {\n" +
@@ -723,14 +755,21 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
              },
-             "Team731ab6_2.Role731ab6_3");
+             "Team731ab6_2.Role731ab6_3",
+             null/*classLibs*/,
+             true/*shouldFlush*/,
+             null/*vmArguments*/,
+             options,
+             null/*requester*/);
      }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-7
      // see Bug 327334 -  [compiler] generated lift methods fail to detect some lifting ambiguities
      public void test731_ambiguousBinding7() {
-        
+         Map options = getCompilerOptions();
+         options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+         options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
         runConformTest(
              new String[] {
  		"T731ab7Main.java",
@@ -775,7 +814,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "        return \"Team731ab7_1\";\n" +
 			    "    }\n" +
 			    "\n" +
-			    "    public String t1(T731ab7_1 as Role731ab7_1 obj) {\n" +
+			    "    public String t1(T731ab7_1 as Role731ab7_1 obj) throws org.objectteams.LiftingFailedException {\n" +
 			    "        return obj.toString();\n" +
 			    "    }\n" +
 			    "}\n" +
@@ -809,7 +848,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n",
 		"Team731ab7_3.java",
-			    "\n" +
+			    "@SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "public team class Team731ab7_3 extends Team731ab7_2 {\n" +
 			    "    public class Role731ab7_4 extends Role731ab7_1 playedBy T731ab7_3 {\n" +
 			    "        public String toString() {\n" +
@@ -819,6 +858,9 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "\n" +
 			    "    public String toString() {\n" +
 			    "        return \"Team731ab7_3\";\n" +
+			    "    }\n" +
+			    "    public String t1(T731ab7_1 as Role731ab7_1 obj) throws org.objectteams.LiftingFailedException {\n" +
+			    "        return super.t1(obj);\n" +
 			    "    }\n" +
 			    "\n" +
 			    "}\n" +
@@ -842,14 +884,21 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
              },
              "org.objectteams.LiftingFailedException: \n" + 
      		 "Failed to lift \'T731ab7_3\' of class T731ab7_3 to type \'Role731ab7_1\'\n" + 
-     		 "(See OT/J definition para. 2.3.4(c)).");
+     		 "(See OT/J definition para. 2.3.4(c)).",
+     		null/*classLibs*/,
+            true/*shouldFlush*/,
+            null/*vmArguments*/,
+            options,
+            null/*requester*/);
      }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // 7.3.1-otjld_g-ambiguous-binding-8
      // see Bug 327334 -  [compiler] generated lift methods fail to detect some lifting ambiguities
      public void test731_ambiguousBinding8() {
-        
+         Map options = getCompilerOptions();
+         options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+         options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
         runConformTest(
              new String[] {
  		"T731ab8Main.java",
@@ -902,7 +951,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "        return \"Team731ab8_1\";\n" +
 			    "    }\n" +
 			    "\n" +
-			    "    public String t1(T731ab8_1 as Role731ab8_1 obj) {\n" +
+			    "    public String t1(T731ab8_1 as Role731ab8_1 obj) throws org.objectteams.LiftingFailedException  {\n" +
 			    "        return obj.toString();\n" +
 			    "    }\n" +
 			    "}\n" +
@@ -936,7 +985,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n",
 		"Team731ab8_3.java",
-			    "\n" +
+			    "@SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "public team class Team731ab8_3 extends Team731ab8_2 {\n" +
 			    "    public class Role731ab8_4 extends Role731ab8_1 playedBy T731ab8_3 {\n" +
 			    "        public String toString() {\n" +
@@ -961,14 +1010,21 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
              },
              "org.objectteams.LiftingFailedException: \n" + 
      		 "Failed to lift \'T731ab8_3\' of class T731ab8_3 to type \'Role731ab8_1\'\n" + 
-     		 "(See OT/J definition para. 2.3.4(c)).");
+     		 "(See OT/J definition para. 2.3.4(c)).",
+     		null/*classLibs*/,
+            true/*shouldFlush*/,
+            null/*vmArguments*/,
+            options,
+            null/*requester*/);
      }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
      // manual addition: subtype T4 (OK) of base T2 which also has an ambiguous sub type T3
      // see Bug 327334 -  [compiler] generated lift methods fail to detect some lifting ambiguities
      public void test731_ambiguousBinding9() {
-        
+         Map options = getCompilerOptions();
+         options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+         options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
         runConformTest(
              new String[] {
  		"T731ab9Main.java",
@@ -980,7 +1036,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "\n" +
 			    "        try {\n" +
 			    "            System.out.print(t.t1(o));\n" +
-			    "        } catch (org.objectteams.LiftingFailedException ex) {\n" +
+			    "        } catch (Exception ex) {\n" +
 			    "            System.out.print(ex.toString());\n" +
 			    "        }\n" +
 			    "    }\n" +
@@ -1046,7 +1102,7 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n",
 		"Team731ab9_3.java",
-			    "\n" +
+			    "@SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "public team class Team731ab9_3 extends Team731ab9_2 {\n" +
 			    "    public class Role731ab9_4 extends Role731ab9_1 playedBy T731ab9_3 {\n" +
 			    "        public String toString() {\n" +
@@ -1077,7 +1133,12 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "\n"
              },
-             "Team731ab9_3.Role731ab9_2");
+             "Team731ab9_3.Role731ab9_2",
+             null/*classLibs*/,
+             true/*shouldFlush*/,
+             null/*vmArguments*/,
+             options,
+             null/*requester*/);
      }
 
 }

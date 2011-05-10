@@ -51,6 +51,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
      protected Map getCompilerOptions() {
     	 Map options = super.getCompilerOptions();
     	 options.put(CompilerOptions.OPTION_ReportAbstractPotentialRelevantRole, CompilerOptions.IGNORE);
+    	 options.put(CompilerOptions.OPTION_ReportHiddenLiftingProblem, CompilerOptions.IGNORE);
     	 return options;
     }
 
@@ -63,7 +64,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
  		"T732ab1Main.java",
 			    "\n" +
 			    "public class T732ab1Main {\n" +
-			    "    public static void main(String[] args) {\n" +
+			    "    public static void main(String[] args) throws org.objectteams.LiftingFailedException {\n" +
 			    "        Team732ab1_1 t = new Team732ab1_1();\n" +
 			    "        T732ab1_2    o = new T732ab1_2();\n" +
 			    "\n" +
@@ -157,7 +158,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "        return \"Team732ab1_1\";\n" +
 			    "    }\n" +
 			    "\n" +
-			    "    public String t1(T732ab1_2 as Role732ab1_1 obj) {\n" +
+			    "    public String t1(T732ab1_2 as Role732ab1_1 obj) throws org.objectteams.LiftingFailedException {\n" +
 			    "        return obj.toString();\n" +
 			    "    }\n" +
 			    "}\n" +
@@ -175,7 +176,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
  		"T732ab2Main.java",
 			    "\n" +
 			    "public class T732ab2Main {\n" +
-			    "    public static void main(String[] args) {\n" +
+			    "    public static void main(String[] args) throws org.objectteams.LiftingFailedException {\n" +
 			    "        Team732ab2_1 t = new Team732ab2_2();\n" +
 			    "        T732ab2_2    o = new T732ab2_2();\n" +
 			    "\n" +
@@ -210,7 +211,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "        return \"Team732ab2_1\";\n" +
 			    "    }\n" +
 			    "\n" +
-			    "    public String t1(T732ab2_2 as Role732ab2_1 obj) {\n" +
+			    "    public String t1(T732ab2_2 as Role732ab2_1 obj) throws org.objectteams.LiftingFailedException {\n" +
 			    "        return obj.toString();\n" +
 			    "    }\n" +
 			    "}\n" +
@@ -287,7 +288,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
  		"T732ab3Main.java",
 			    "\n" +
 			    "public class T732ab3Main {\n" +
-			    "    public static void main(String[] args) {\n" +
+			    "    public static void main(String[] args) throws org.objectteams.LiftingFailedException {\n" +
 			    "        Team732ab3_1 t = new Team732ab3_3();\n" +
 			    "        T732ab3_2    o = new T732ab3_2();\n" +
 			    "\n" +
@@ -330,7 +331,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "        return \"Team732ab3_1\";\n" +
 			    "    }\n" +
 			    "\n" +
-			    "    public String t1(T732ab3_2 as Role732ab3_1 obj) {\n" +
+			    "    public String t1(T732ab3_2 as Role732ab3_1 obj) throws org.objectteams.LiftingFailedException {\n" +
 			    "        return obj.toString();\n" +
 			    "    }\n" +
 			    "}\n" +
@@ -399,7 +400,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
  		"T732ab4Main.java",
 			    "\n" +
 			    "public class T732ab4Main {\n" +
-			    "    public static void main(String[] args) {\n" +
+			    "    public static void main(String[] args) throws org.objectteams.LiftingFailedException {\n" +
 			    "        Team732ab4_1 t = new Team732ab4_4();\n" +
 			    "        T732ab4_2    o = new T732ab4_2();\n" +
 			    "\n" +
@@ -465,7 +466,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "        return \"Team732ab4_1\";\n" +
 			    "    }\n" +
 			    "\n" +
-			    "    public String t1(T732ab4_2 as Role732ab4_1 obj) {\n" +
+			    "    public String t1(T732ab4_2 as Role732ab4_1 obj) throws org.objectteams.LiftingFailedException {\n" +
 			    "        return obj.toString();\n" +
 			    "    }\n" +
 			    "}\n" +
@@ -511,7 +512,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
  		"T732ab5Main.java",
 			    "\n" +
 			    "public class T732ab5Main {\n" +
-			    "    public static void main(String[] args) {\n" +
+			    "    public static void main(String[] args) throws org.objectteams.LiftingFailedException {\n" +
 			    "        Team732ab5_1 t = new Team732ab5_1();\n" +
 			    "        T732ab5_2    o = new T732ab5_3();\n" +
 			    "\n" +
@@ -605,7 +606,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "        return \"Team732ab5_1\";\n" +
 			    "    }\n" +
 			    "\n" +
-			    "    public String t1(T732ab5_2 as Role732ab5_1 obj) {\n" +
+			    "    public String t1(T732ab5_2 as Role732ab5_1 obj) throws org.objectteams.LiftingFailedException {\n" +
 			    "        return obj.toString();\n" +
 			    "    }\n" +
 			    "}\n" +
@@ -623,7 +624,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
  		"T732ab6Main.java",
 			    "\n" +
 			    "public class T732ab6Main {\n" +
-			    "    public static void main(String[] args) {\n" +
+			    "    public static void main(String[] args) throws org.objectteams.LiftingFailedException {\n" +
 			    "        Team732ab6_1 t = new Team732ab6_2();\n" +
 			    "        T732ab6_2    o = new T732ab6_3();\n" +
 			    "\n" +
@@ -658,7 +659,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "        return \"Team732ab6_1\";\n" +
 			    "    }\n" +
 			    "\n" +
-			    "    public String t1(T732ab6_2 as Role732ab6_1 obj) {\n" +
+			    "    public String t1(T732ab6_2 as Role732ab6_1 obj) throws org.objectteams.LiftingFailedException {\n" +
 			    "        return obj.toString();\n" +
 			    "    }\n" +
 			    "}\n" +
@@ -782,7 +783,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "        return \"Team732ab7_1\";\n" +
 			    "    }\n" +
 			    "\n" +
-			    "    public String t1(T732ab7_2 as Role732ab7_1 obj) {\n" +
+			    "    public String t1(T732ab7_2 as Role732ab7_1 obj) throws org.objectteams.LiftingFailedException {\n" +
 			    "        return obj.toString();\n" +
 			    "    }\n" +
 			    "}\n" +
@@ -923,7 +924,7 @@ public class BindingAmbiguities2 extends AbstractOTJLDTest {
 			    "        return \"Team732ab8_1\";\n" +
 			    "    }\n" +
 			    "\n" +
-			    "    public String t1(T732ab8_2 as Role732ab8_1 obj) {\n" +
+			    "    public String t1(T732ab8_2 as Role732ab8_1 obj) throws org.objectteams.LiftingFailedException {\n" +
 			    "        return obj.toString();\n" +
 			    "    }\n" +
 			    "}\n" +
