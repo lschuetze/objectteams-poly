@@ -888,6 +888,8 @@ public void _test011_problem_categories() {
         expectedProblemAttributes.put("NonPublicFieldOfExternalizedRole", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
         expectedProblemAttributes.put("ExternalizedCallToNonPublicMethod", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 
+        expectedProblemAttributes.put("AmbiguousLiftingMayBreakClients", new ProblemAttributes(CategorizedProblem.CAT_CODE_STYLE));
+
         expectedProblemAttributes.put("BaseCallOutsideMethod", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
         // general method binding related issues:
         expectedProblemAttributes.put("CalloutMappingInNonRole", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
@@ -1711,6 +1713,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("GenericMethodTypeArgumentMismatchRoleBound", SKIP);
         expectedProblemAttributes.put("RoleBindingPotentiallyAmbiguous", SKIP);
         expectedProblemAttributes.put("DefiniteLiftingAmbiguity", SKIP);
+        expectedProblemAttributes.put("AmbiguousLiftingMayBreakClients", SKIP);
         expectedProblemAttributes.put("QualifiedUseOfLiftingConstructor", SKIP);
         expectedProblemAttributes.put("LiftCtorArgNotAllocation", SKIP);
         expectedProblemAttributes.put("BaseCtorInWrongMethod", SKIP);
