@@ -139,19 +139,10 @@ public team class OTTypeHierarchies {
 		// === "Imports" (callout) from plain TypeHierarchy: ===
 		
 		@SuppressWarnings("decapsulation") IType getFocusType() 	-> get IType focusType;
-		ConnectedType unsafeGetSuperclass(IType type) 				-> IType getSuperclass(IType type);
+		ConnectedType getSuperclass(IType type) 					-> IType getSuperclass(IType type);
 		IType[] getSuperInterfaces(IType type) 						-> IType[] getSuperInterfaces(IType type);
 		IType[] getAllSuperInterfaces(IType type) 					-> IType[] getAllSuperInterfaces(IType type);
-		
-		ConnectedType getSuperclass(IType type) {
-			try {
-				return unsafeGetSuperclass(type);
-			} catch (LiftingFailedException lfe) {
-				JavaCore.getJavaCore().getLog().log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, "Lifting unexpectedly failed", lfe));
-				return null;
-			}
-		}
-		
+				
 		// === Adapt TypeHierarchy (callin bindings): ===
 
 		precedence unwrapping, filtering1, superlinearize; // order: outer callins unwrap and filter, inner callin performs computation
