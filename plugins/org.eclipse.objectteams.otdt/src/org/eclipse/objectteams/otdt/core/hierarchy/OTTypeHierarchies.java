@@ -24,6 +24,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.env.IGenericType;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -35,6 +36,7 @@ import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 
 // both base type and directly used:
 import org.eclipse.jdt.core.IType;
+import org.objectteams.LiftingFailedException;
 
 import base org.eclipse.jdt.core.ITypeHierarchy;
 import base org.eclipse.jdt.internal.core.BinaryType;
@@ -141,15 +143,25 @@ public team class OTTypeHierarchies {
 	/** 
 	 * The stateful part of this team, implemented as a nested team.
 	 */
+	@SuppressWarnings("hidden-lifting-problem") // several locations where lifting to ConnectedType could theoretically fail
 	protected team class OTTypeHierarchyImpl extends OTTypeHierarchy playedBy TypeHierarchy 
 	{
 		// === "Imports" (callout) from plain TypeHierarchy: ===
 		
 		@SuppressWarnings("decapsulation") IType getFocusType() 	-> get IType focusType;
-		ConnectedType getSuperclass(IType type) 					-> IType getSuperclass(IType type);
+		abstract ConnectedType unsafeGetSuperclass(IType type) throws LiftingFailedException; // could theoretically fail because ConnnectedType is abstract 
+		ConnectedType unsafeGetSuperclass(IType type) 				-> IType getSuperclass(IType type);
 		IType[] getSuperInterfaces(IType type) 						-> IType[] getSuperInterfaces(IType type);
 		IType[] getAllSuperInterfaces(IType type) 					-> IType[] getAllSuperInterfaces(IType type);
 		
+		ConnectedType getSuperclass(IType type) {
+			try {
+				return unsafeGetSuperclass(type);
+			} catch (LiftingFailedException lfe) {
+				JavaCore.getJavaCore().getLog().log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, "Lifting unexpectedly failed", lfe));
+				return null;
+			}
+		}
 		
 		// === Adapt TypeHierarchy (callin bindings): ===
 
