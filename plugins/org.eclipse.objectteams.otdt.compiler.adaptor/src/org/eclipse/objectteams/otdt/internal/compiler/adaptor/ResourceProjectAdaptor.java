@@ -16,6 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.compiler.adaptor;
 
+import org.eclipse.objectteams.otdt.compiler.adaptor.CompilerAdaptorPlugin;
 import org.objectteams.LiftingVetoException;
 import org.objectteams.Team;
 
@@ -36,12 +37,18 @@ public team class ResourceProjectAdaptor
 		instance= this;
 	}
 	public static ResourceProjectAdaptor getDefault() { return instance; }
-	
-	@SuppressWarnings("abstractrelevantrole")
-	protected abstract class AbstractOTEquinoxProject playedBy IProject {
+
+	protected class AbstractOTEquinoxProject playedBy IProject {
 		protected AspectBindingReader aspectBindingReader;
 		protected BaseImportChecker checker;
-		abstract protected boolean hasAspectDataChanged ();
+		public String toString() => String toString();
+		protected boolean hasAspectDataChanged () {
+			// instead of marking this method and role abstract actually catch 
+			// when lifting ends up here rather than in OTEquinoxProject as intended:
+			String message = "Failed to create role for project "+this.toString();
+			CompilerAdaptorPlugin.logException(message, new RuntimeException(message));
+			return false; 
+		}
 	}
 	/** Associate an AspectBindingReader and a BaseImportChecker to each OT Plugin project. */
 	protected class OTEquinoxProject extends AbstractOTEquinoxProject playedBy Project
@@ -73,17 +80,17 @@ public team class ResourceProjectAdaptor
 	// ======== API: =========
 	
 	public Team getChecker(IProject as AbstractOTEquinoxProject project) 
-			throws LiftingVetoException 
+			throws LiftingVetoException
 	{
 		return project.checker;
 	}
 	public AspectBindingReader getAspectBindingReader(IProject as AbstractOTEquinoxProject project) 
-			throws LiftingVetoException 
+			throws LiftingVetoException
 	{
 		return project.aspectBindingReader;
 	}
 	public boolean hasAspectDataChanged(IProject as AbstractOTEquinoxProject project)  
-			throws LiftingVetoException 
+			throws LiftingVetoException
 	{
 		return project.hasAspectDataChanged();
 	}

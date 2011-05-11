@@ -14,3 +14,4 @@ Require-Bundle: org.eclipse.jdt.core;bundle-version="[3.7.0.v_OTDT_r080,3.7.0.v_
 Export-Package: org.eclipse.objectteams.otdt.internal.compiler.adaptor;x-friends:="org.eclipse.objectteams.otdt.test.builder"
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
+Bundle-Activator: org.eclipse.objectteams.otdt.compiler.adaptor.CompilerAdaptorPlugin
