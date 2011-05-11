@@ -72,13 +72,20 @@ public team class PresentationAdaptor
 		return instance;
 	}
 	
-	@SuppressWarnings("abstractrelevantrole")
-	protected abstract class AbstractOTJStackFrame playedBy IJavaStackFrame {
+	protected class AbstractOTJStackFrame playedBy IJavaStackFrame {
 		// store analyzed method kind between calls:
 		protected MethodKind kind= MethodKind.PLAIN;
 		
-		abstract protected boolean isOTSpecialSrc();
-		abstract protected boolean isPurelyGenerated();
+		protected boolean isOTSpecialSrc() {
+			OTDebugAdaptorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDebugAdaptorPlugin.PLUGIN_ID, "Failed to create specific role for "+this.toString()));
+			return false;
+		}
+		protected boolean isPurelyGenerated() {
+			OTDebugAdaptorPlugin.getDefault().getLog().log(new Status(IStatus.ERROR, OTDebugAdaptorPlugin.PLUGIN_ID, "Failed to create specific role for "+this.toString()));
+			return false;
+		}
+		
+		public String toString() => String toString();
 	}
 	@SuppressWarnings("unchecked")
 	protected class OTJStackFrame extends AbstractOTJStackFrame playedBy JDIStackFrame 
