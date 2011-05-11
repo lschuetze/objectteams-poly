@@ -123,33 +123,22 @@ public team class OTTypeHierarchies {
 	 * This role serves as a lift target for API parameters of type ITypeHierarchy.
 	 * All details are found in subclass {@link OTTypeHierarchyImpl}. 
 	 */
-	@SuppressWarnings("abstractrelevantrole")
-	protected abstract team class OTTypeHierarchy playedBy ITypeHierarchy 
+	protected team class OTTypeHierarchy playedBy ITypeHierarchy 
 	{		
 		/** Should the hierarchy show phantom roles? */
 		protected boolean phantomMode;
-
-		protected abstract IType[] getAllSuperInterfaces(IType type);
-		protected abstract IType[] getAllTSuperTypes(IType type);
-		protected abstract IType[] getDirectTSupers(IType type) throws JavaModelException;
-
-		protected abstract IType getPlainSuperclass(IType type) throws JavaModelException;
 		
-		protected abstract IType[] getAllTSubTypes(IType type);
-		protected abstract IType[] getSuperInterfaces(IType type);
-		protected abstract IType[] getTypesInTraditionalHierarchy(IType type);
+		// otherwise empty type, need to cast before use.
 	}
 
 	/** 
 	 * The stateful part of this team, implemented as a nested team.
 	 */
-	@SuppressWarnings("hidden-lifting-problem") // several locations where lifting to ConnectedType could theoretically fail
 	protected team class OTTypeHierarchyImpl extends OTTypeHierarchy playedBy TypeHierarchy 
 	{
 		// === "Imports" (callout) from plain TypeHierarchy: ===
 		
 		@SuppressWarnings("decapsulation") IType getFocusType() 	-> get IType focusType;
-		abstract ConnectedType unsafeGetSuperclass(IType type) throws LiftingFailedException; // could theoretically fail because ConnnectedType is abstract 
 		ConnectedType unsafeGetSuperclass(IType type) 				-> IType getSuperclass(IType type);
 		IType[] getSuperInterfaces(IType type) 						-> IType[] getSuperInterfaces(IType type);
 		IType[] getAllSuperInterfaces(IType type) 					-> IType[] getAllSuperInterfaces(IType type);
@@ -221,8 +210,7 @@ public team class OTTypeHierarchies {
 		 * This role adds to ITypes the capability of connecting to all direct and indirect tsuper types,
 		 * which includes linearization of all super types (implicit & explicit). 
 		 */
-		@SuppressWarnings("abstractrelevantrole")
-		protected abstract class ConnectedType  playedBy IType 
+		protected class ConnectedType playedBy IType 
 		{
 			ConnectedType getParent() -> IJavaElement getParent() 
 				with { result <- (IType)result } // TODO(SH): make safer, consider role files
@@ -733,11 +721,12 @@ public team class OTTypeHierarchies {
 
 		@SuppressWarnings("basecall")
 		callin IType[] getTypesToSearchForRoles(OTTypeHierarchy hierarchy, int which) throws JavaModelException {
+			OTTypeHierarchyImpl impl = (OTTypeHierarchyImpl) hierarchy;
 	        switch (which) {
 	        	case IOTType.EXPLICITLY_INHERITED:
-	        	    return new IType[] { hierarchy.getPlainSuperclass(this.getCorrespondingJavaElement()) };
+	        	    return new IType[] { impl.getPlainSuperclass(this.getCorrespondingJavaElement()) };
 	    	    case IOTType.IMPLICTLY_INHERITED:
-	        	    return hierarchy.getAllTSuperTypes(this);
+	        	    return impl.getAllTSuperTypes(this);
 	        	default:
 	        		return base.getTypesToSearchForRoles(hierarchy, which);
 	        }
@@ -757,7 +746,7 @@ public team class OTTypeHierarchies {
 	 */
 	public IType[] getAllTSuperTypes(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
-		return otHierarchy.getAllTSuperTypes(type);
+		return ((OTTypeHierarchyImpl) otHierarchy).getAllTSuperTypes(type);
 	}
 	
 	/**
@@ -771,7 +760,7 @@ public team class OTTypeHierarchies {
 	 */
 	public IType[] getTSuperTypes(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
-		return otHierarchy.getDirectTSupers(type);
+		return ((OTTypeHierarchyImpl) otHierarchy).getDirectTSupers(type);
 	}
 	
 	/**
@@ -786,7 +775,7 @@ public team class OTTypeHierarchies {
 	public IType[] getSuperclasses(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
 		// have superclass (otherwise type == java.lang.Object?)
-		IType superclass = otHierarchy.getPlainSuperclass(type);
+		IType superclass = ((OTTypeHierarchyImpl) otHierarchy).getPlainSuperclass(type);
 		if (superclass == null)
 			return NO_TYPE;
 		
@@ -814,7 +803,7 @@ public team class OTTypeHierarchies {
 	public IType getExplicitSuperclass(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
 		// have superclass (otherwise type == java.lang.Object?)
-		return otHierarchy.getPlainSuperclass(type);
+		return ((OTTypeHierarchyImpl) otHierarchy).getPlainSuperclass(type);
 	}
 
 	/**
@@ -828,16 +817,17 @@ public team class OTTypeHierarchies {
 	 */
 	public IType[] getSuperInterfaces(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
-		IType[] superinterfaces = otHierarchy.getSuperInterfaces(type);
+		OTTypeHierarchyImpl impl = (OTTypeHierarchyImpl) otHierarchy;
+		IType[] superinterfaces = impl.getSuperInterfaces(type);
 		if (!OTModelManager.isRole(type))
 			return superinterfaces;
 		Set<IType> all = new HashSet<IType>();
 		for (IType iType : superinterfaces)
 			all.add(iType);
-		for (IType tsuperinterface : otHierarchy.getDirectTSupers(type)) {
+		for (IType tsuperinterface : impl.getDirectTSupers(type)) {
 			if (type.isInterface()) // otherwise just traverse tsuper to find more super interfaces
 				all.add(tsuperinterface);
-			for (IType tsupersuper : otHierarchy.getSuperInterfaces(tsuperinterface))
+			for (IType tsupersuper : impl.getSuperInterfaces(tsuperinterface))
 				all.add(tsupersuper);
 		}
 		return all.toArray(new IType[all.size()]);
@@ -852,15 +842,16 @@ public team class OTTypeHierarchies {
 	 * @throws JavaModelException If the tsuper linearization is corrupt
 	 */
 	public IType[] getAllSuperInterfaces(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) throws JavaModelException {
+		OTTypeHierarchyImpl impl = (OTTypeHierarchyImpl) otHierarchy;
 		if (!OTModelManager.isRole(type))
-			return otHierarchy.getAllSuperInterfaces(type);
+			return impl.getAllSuperInterfaces(type);
 		if (type instanceof IOTType) type = (IType) ((IOTType)type).getCorrespondingJavaElement();
 		Set<IType> all = new HashSet<IType>();
-		getAllSuperInterfaces2(otHierarchy, type, all);
+		getAllSuperInterfaces2(impl, type, all);
 		return all.toArray(new IType[all.size()]);
 	}
 	// recursive helper for above
-	private void getAllSuperInterfaces2(OTTypeHierarchy otHierarchy, IType seed, Set<IType> collected) throws JavaModelException {
+	private void getAllSuperInterfaces2(OTTypeHierarchyImpl otHierarchy, IType seed, Set<IType> collected) throws JavaModelException {
 		for (IType tsuperinterface : otHierarchy.getAllTSuperTypes(seed)) {
 			if (seed.isInterface()) { // otherwise just traverse tsuper to find more super interfaces
 				collected.add(tsuperinterface);
@@ -881,12 +872,12 @@ public team class OTTypeHierarchies {
 	 * @return the tsub types
 	 */
 	public IType[] getAllTSubTypes(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) {
-		return otHierarchy.getAllTSubTypes(type);
+		return ((OTTypeHierarchyImpl) otHierarchy).getAllTSubTypes(type);
 	}
 	
 	/** Special API for the TypeHierarchyViewAdaptor regarding traditional hierarchy mode. */
 	public IType[] getTypesInTraditionalHierarchy(ITypeHierarchy as OTTypeHierarchy otHierarchy, IType type) {
-		return otHierarchy.getTypesInTraditionalHierarchy(type);
+		return ((OTTypeHierarchyImpl) otHierarchy).getTypesInTraditionalHierarchy(type);
 	}
 
 	/**
