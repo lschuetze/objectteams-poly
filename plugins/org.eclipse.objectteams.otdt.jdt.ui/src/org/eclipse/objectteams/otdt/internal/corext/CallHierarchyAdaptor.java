@@ -132,6 +132,7 @@ public team class CallHierarchyAdaptor
 	@SuppressWarnings("abstractrelevantrole") // MethodWrapper is abstract, both sub classes are bound individually
 	abstract protected class MethodMappingWrapper playedBy MethodWrapper
 	{ 	
+		@SuppressWarnings("hidden-lifting-problem") // abstract role could potentially throw LiftingFailedException
 		doFindChildren <- replace doFindChildren;
 		@SuppressWarnings("basecall")
 		callin void doFindChildren(IProgressMonitor progressMonitor) {

@@ -287,6 +287,7 @@ public team class OTQuickFixes  {
 	@SuppressWarnings("abstractrelevantrole")
 	protected abstract class AbstractMethodCompletionProposal playedBy AbstractMethodCorrectionProposal 
 	{
+		@SuppressWarnings("hidden-lifting-problem") // abstract role could potentially throw LiftingFailedException
 		void updateRewrite(ASTRewrite rewrite) <- before MethodDeclaration getStub(ASTRewrite rewrite, ASTNode t)
 			base when (OTQuickFixes.this.hasRole(base, AbstractMethodCompletionProposal.class));
 		abstract void updateRewrite(ASTRewrite rewrite);
