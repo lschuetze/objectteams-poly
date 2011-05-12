@@ -63,7 +63,7 @@ public class BindingAmbiguitiesM extends AbstractOTJLDTest {
   			    "    protected abstract class R playedBy T73Mab1 {\n" +
   			    "        @SuppressWarnings(\"basecall\")\n" +
   			    "        callin void foo() { System.out.print(getClass().getName()); }\n" +
-  			    "		 @SuppressWarnings(\"def-bind-ambiguity\")\n" +
+  			    "		 @SuppressWarnings(\"hidden-lifting-problem\")\n" +
   			    "        foo <- replace test; // lifting not recommended\n" +
   			    "    }\n" +
   			    "    protected class R1_R extends R\n" +
@@ -105,13 +105,13 @@ public class BindingAmbiguitiesM extends AbstractOTJLDTest {
      @SuppressWarnings("unchecked")
      public void test73M_ambiguousBinding2() {
          Map options = getCompilerOptions();
-         options.put(CompilerOptions.OPTION_ReportDefiniteBindingAmbiguity, CompilerOptions.WARNING);
+         options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
 
          runConformTest(
               new String[] {
   		"Team73Mab2.java",
   			    "\n" +
-  			    "@SuppressWarnings({\"ambiguousbinding\", \"def-bind-ambiguity\"})\n" +
+  			    "@SuppressWarnings({\"ambiguousbinding\", \"hidden-lifting-problem\"})\n" +
   			    "public team class Team73Mab2 {\n" +
   			    "    protected abstract class R playedBy T73Mab2_1 {\n" +
   			    "        @SuppressWarnings(\"basecall\")\n" +

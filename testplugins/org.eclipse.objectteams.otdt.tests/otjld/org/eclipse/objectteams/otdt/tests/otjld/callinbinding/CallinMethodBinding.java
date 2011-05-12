@@ -5063,7 +5063,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		"----------\n");
     }
 
-    // a definite binding ambiguity is reported
+    // a definite binding ambiguity is reported (as the need to handle LiftingFailedException)
     // 4.1.31-otjld-illegal-lifting-binding-ambiguity-2d
     public void test4131_illegalLiftingBindingAmbiguity2d() {
         runNegativeTestMatching(
@@ -5077,11 +5077,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "	protected class R2 extends R0 {}\n" +
 			    "	Team4131ilba2d (T4131ilba2d as R0 o) {}\n" +
 			    "	public static void main(String[] args) {\n" +
-			    "		try {\n" +
-			    "			new Team4131ilba2d(new T4131ilba2d());\n" +
-			    "		} catch (org.objectteams.LiftingFailedException e) {\n" +
-			    "			System.out.print(\"OK\");\n" +
-			    "		}\n" +
+			    "		new Team4131ilba2d(new T4131ilba2d());\n" +
 			    "	}\n" +
 			    "}	\n" +
 			    "	\n",
@@ -5092,7 +5088,17 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "2.3.4(b)");
+            "----------\n" + 
+    		"1. WARNING in Team4131ilba2d.java (at line 2)\n" + 
+    		"	public team class Team4131ilba2d {\n" + 
+    		"	                  ^^^^^^^^^^^^^^\n" + 
+    		"Potential ambiguity in role binding. The base \'T4131ilba2d\' is bound to the following roles: Team4131ilba2d.R1,Team4131ilba2d.R2 (OTJLD 2.3.4(a)).\n" + 
+    		"----------\n" + 
+    		"2. ERROR in Team4131ilba2d.java (at line 7)\n" + 
+    		"	Team4131ilba2d (T4131ilba2d as R0 o) {}\n" + 
+    		"	                ^^^^^^^^^^^^^^^^^\n" + 
+    		"Unhandled exception type LiftingFailedException, caused by an unsafe lifting translation (OTJLD 2.3.5).\n" + 
+    		"----------\n");
     }
 
     // a team uses declared lifting despite a binding ambiguity -> runtime exception
