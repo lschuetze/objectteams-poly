@@ -1716,6 +1716,9 @@ public void test012b(){
         "      fragilecallin      + replace callin not providing expected result\n" +
         "                           (OTJLD 4.3(e))\n" + 
         "      hashCode              missing hashCode() method when overriding equals()\n" + 
+//OT:
+		"      hiddenLiftingProblem + a lifting that is not directly visible in source\n" + 
+		"                             code could fail at runtime (OTJLD 2.3.5)\n" +
         "      hiding               macro for fieldHiding, localHiding, typeHiding and\n" +
         "                           maskedCatchBlock\n" +
         "      includeAssertNull    raise null warnings for variables\n" + 
@@ -1955,6 +1958,7 @@ public void test012b(){
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.effectless_fieldaccess\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.exception_in_guard\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.fragile_callin\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.hidden_lifting_problem\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.ignoring_role_return\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.inferred_callout\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.override_final_role\" value=\"error\"/>\n" +

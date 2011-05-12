@@ -1794,6 +1794,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("CallinMappingInNonRole", SKIP);
         expectedProblemAttributes.put("CallinMappingInUnboundRole", SKIP);
         expectedProblemAttributes.put("CallinDespiteBindingAmbiguity", SKIP);
+        expectedProblemAttributes.put("CallinDespiteAbstractRole", SKIP);
         expectedProblemAttributes.put("UnresolvedCallinMethodSpec", SKIP);
         expectedProblemAttributes.put("AmbiguousCallinMethodSpec", SKIP);
         expectedProblemAttributes.put("DifferentReturnInCallinMethodSpec", SKIP);
@@ -2054,6 +2055,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("CallinMappingInNonRole", SKIP);
         expectedProblemAttributes.put("CallinMappingInUnboundRole", SKIP);
         expectedProblemAttributes.put("CallinDespiteBindingAmbiguity", SKIP);
+        expectedProblemAttributes.put("CallinDespiteAbstractRole", SKIP);
         expectedProblemAttributes.put("UnresolvedCallinMethodSpec", SKIP);
         expectedProblemAttributes.put("AmbiguousCallinMethodSpec", SKIP);
         expectedProblemAttributes.put("DifferentReturnInCallinMethodSpec", SKIP);
