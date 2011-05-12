@@ -21,6 +21,7 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.BranchLabel;
@@ -650,6 +651,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 	        	needToAdd = true;
 	        }
 
+	        final int problemId = teamBinding.getTeamModel().canLiftingFail(roleClassBinding);
 	        if (   caseObjects.length == 0
 	        	&& teamBinding.isAbstract())
 	        {
@@ -671,7 +673,8 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 						                    teamBinding,
 						                    roleModel,
 						                    baseClassBinding,
-						                    caseObjects);
+						                    caseObjects,
+						                    problemId);
 	      				} finally {
 	      					Lifting.this._gen = null;
 	      					Lifting.this._boundRootRoleModel = null;
@@ -681,12 +684,9 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 	        }
 
 	        if (needToAdd) {
-	        	if (teamBinding.getTeamModel().canLiftingFail(roleClassBinding)) {
+				if (problemId != 0) {
 	        		liftToMethodDeclaration.thrownExceptions = new TypeReference[] {
-        				this._gen.qualifiedTypeReference(new char[][] {
-        						ORG, OBJECTTEAMS,
-        						LIFTING_FAILED_EXCEPTION
-        				})
+        				this._gen.qualifiedTypeReference(O_O_LIFTING_FAILED_EXCEPTION)
 	        		};
 	        	}
 	        	if (teamTypeDeclaration.isRole()) {
@@ -736,10 +736,11 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 
     private boolean createLiftToMethodStatements(
         MethodDeclaration liftToMethodDeclaration,
-        ReferenceBinding teamBinding,
-        RoleModel		 roleModel,
-        ReferenceBinding baseClassBinding,
-        RoleModel[] caseObjects)
+        ReferenceBinding  teamBinding,
+        RoleModel		  roleModel,
+        ReferenceBinding  baseClassBinding,
+        RoleModel[] 	  caseObjects,
+        int 			  problemId)
     {
     	ReferenceBinding roleClassBinding = roleModel.getBinding();
 
@@ -773,8 +774,9 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 		                roleClassBinding,
 		                baseClassBinding,
 		                teamBinding,
-		                caseObjects)
-		            : createCreationCascade(roleClassBinding, teamBinding, caseObjects),
+		                caseObjects,
+		                problemId)
+		            : createCreationCascade(roleClassBinding, teamBinding, caseObjects, problemId),
 
 					// return ...
 					createReturnStatement(roleClassBinding)
@@ -834,14 +836,15 @@ public class Lifting extends SwitchOnBaseTypeGenerator
             ReferenceBinding returnType,
             ReferenceBinding baseType,
             ReferenceBinding teamType,
-            RoleModel[]      caseObjects)
+            RoleModel[]      caseObjects,
+            int				 problemId)
     {
     	// if
         return this._gen.ifStatement(
         		// (!_OT$team_param._OT$cache_OT$RootRole.containsKey(base))
         		createRoleExistentCheck(baseType),
 				// (then:)
-				createCreationCascade(returnType, teamType, caseObjects),
+				createCreationCascade(returnType, teamType, caseObjects, problemId),
 				// (else: return existing role)
 				createElseBlock(returnType, teamType));
     }
@@ -860,13 +863,13 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         		OperatorIds.NOT));
     }
 
-    private Block createCreationCascade(ReferenceBinding roleType, ReferenceBinding teamType, RoleModel[] caseObjects) {
+    private Block createCreationCascade(ReferenceBinding roleType, ReferenceBinding teamType, RoleModel[] caseObjects, int problemId) {
 		return this._gen.block(
 			// (create a role of the best matching type:)
 			new Statement[] {
 			caseObjects.length > 0 
-				? createSwitchStatement(teamType, roleType, caseObjects, this._gen)
-				: genLiftingFailedException(BASE, roleType, this._gen)});
+				? createSwitchStatement(teamType, roleType, caseObjects, problemId, this._gen)
+				: genLiftingFailedException(BASE, roleType, problemId, this._gen)});
 	}
 
 	/*
@@ -905,30 +908,29 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 
 	@Override
 	protected Statement createStatementForAmbiguousBase(AstGenerator gen) {
-		return genLiftingFailedException(BASE, this._boundRootRoleModel.getBinding(), gen);
+		return genLiftingFailedException(BASE, this._boundRootRoleModel.getBinding(), IProblem.CallinDespiteBindingAmbiguity, gen);
 	}
 
     /*
 	 * see SwitchOnBaseTypeGenerator.createDefaultStatement(ReferenceBinding,AstGenerator).
 	 */
-	protected Statement createDefaultStatement(ReferenceBinding roleType, AstGenerator gen)
+	protected Statement createDefaultStatement(ReferenceBinding roleType, int problemId, AstGenerator gen)
 	{
         /*
          * default:
          *     throw new LiftingFailedException(base, "MyRole");
          */
-        return genLiftingFailedException(BASE, roleType, gen);
+        return genLiftingFailedException(BASE, roleType, problemId, gen);
 	}
 
-	public static ThrowStatement genLiftingFailedException(char[] baseVarName, ReferenceBinding roleType, AstGenerator gen) {
+	public static ThrowStatement genLiftingFailedException(char[] baseVarName, ReferenceBinding roleType, int problemId, AstGenerator gen) {
 		// throw new LiftingFailedException(base, "MyRole");
 		return
 			gen.throwStatement(
 				gen.allocation(
-					gen.qualifiedTypeReference(new char[][] {
-			                ORG, OBJECTTEAMS,
-			                LIFTING_FAILED_EXCEPTION
-			            }),
+					((problemId == 0)
+					? gen.qualifiedTypeReference(SOFT_LIFTING_FAILED_EXCEPTION) // runtime should never reach this branch
+					: gen.qualifiedTypeReference(O_O_LIFTING_FAILED_EXCEPTION)),
 					new Expression[] {
 			            gen.singleNameReference(baseVarName),
 			            gen.stringLiteral(roleType.sourceName())

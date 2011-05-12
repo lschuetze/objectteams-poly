@@ -210,6 +210,8 @@ public interface IOTConstants
 	public static final char[][] ORG_OBJECTTEAMS_TEAM_OTCONFINED = {ORG, OBJECTTEAMS, TEAM_OTCONFINED};
 
 	public static final char[] LIFTING_FAILED_EXCEPTION = "LiftingFailedException".toCharArray();
+	public static final char[][] O_O_LIFTING_FAILED_EXCEPTION = {ORG, OBJECTTEAMS, LIFTING_FAILED_EXCEPTION};
+	public static final char[][] SOFT_LIFTING_FAILED_EXCEPTION = {ORG, OBJECTTEAMS, "SoftLiftingFailedException".toCharArray()};
 	public static final char[] WRONG_ROLE_EXCEPTION = "WrongRoleException".toCharArray();
 	public static final char[] DUPLICATE_ROLE_EXCEPTION = "DuplicateRoleException".toCharArray();
 	public static final char[][] ORG_OBJECTTEAMS_DUPLICATE_ROLE = {ORG, OBJECTTEAMS, DUPLICATE_ROLE_EXCEPTION};
@@ -294,4 +296,5 @@ public interface IOTConstants
 	public static final char[] QUERY_MODULE_SUFFIX = "_Queries__OT__".toCharArray();
 	// decapsulation accessor prefix:
 	public static final char[] OT_DECAPS = "_OT$decaps$".toCharArray();
+
 }

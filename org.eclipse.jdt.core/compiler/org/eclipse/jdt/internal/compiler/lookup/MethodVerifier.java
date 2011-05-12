@@ -448,7 +448,7 @@ void checkExceptions(MethodBinding newMethod, MethodBinding inheritedMethod) {
 					&& (newException.tagBits & TagBits.HasMissingType) == 0) {
 //{ObjectTeams: special case: override may introduce LiftingFailedException in liftTo method:
 			  if (   CharOperation.prefixEquals(IOTConstants._OT_LIFT_TO, newMethod.selector)
-				  && CharOperation.equals(newException.compoundName, new char[][]{IOTConstants.ORG, IOTConstants.OBJECTTEAMS, IOTConstants.LIFTING_FAILED_EXCEPTION}))
+				  && CharOperation.equals(newException.compoundName, IOTConstants.O_O_LIFTING_FAILED_EXCEPTION))
 				this.problemReporter().ambiguousLiftingMayBreakClients(newMethod.returnType);
 			  else
 // SH}

@@ -27,6 +27,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ClassFile;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
@@ -672,7 +673,7 @@ public class TeamModel extends TypeModel {
 					if (ambig.equals((ReferenceBinding)provided.leafComponentType(), requiredRef.getRealClass()))
 					{
 						if (callinDecl != null) {
-							callinDecl.addRoleBindingAmbiguity(requiredRef);
+							callinDecl.addRoleLiftingProblem(requiredRef, IProblem.CallinDespiteBindingAmbiguity);
 						} else {
 							scope.problemReporter().definiteLiftingAmbiguity(provided, required, location);
 							return null;
@@ -905,13 +906,18 @@ public class TeamModel extends TypeModel {
 		}
 		return false;
 	}
-	public boolean canLiftingFail(ReferenceBinding role) {
+	/**
+	 * Can lifting to the given role potentially fail at runtime?
+	 * @param role role to lift to.
+	 * @return the IProblem value to be used when reporting hidden-lifting-problem against a callin binding or 0.
+	 */
+	public int canLiftingFail(ReferenceBinding role) {
 		if ((this._binding.tagBits & TagBits.HasAbstractRelevantRole) != 0 && role.isAbstract())
-			return true;
+			return IProblem.CallinDespiteAbstractRole;
 		for (Pair<ReferenceBinding, ReferenceBinding> pair : this.ambigousLifting) {
 			if (role.getRealClass().isCompatibleWith(pair.second) && pair.first.isCompatibleWith(role.baseclass()))
-				return true;
+				return IProblem.CallinDespiteBindingAmbiguity;
 		}
-		return false;
+		return 0;
 	}
 }

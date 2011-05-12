@@ -224,7 +224,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 							switchStat = genSingleBasePredicateCheck(teamType, roleType, gen);
 						else
 							switchStat = createSwitchStatement(
-								teamType, roleType, roleType.roleModel.getSubRoles(), gen);
+								teamType, roleType, roleType.roleModel.getSubRoles(), 0/*problemId*/, gen);
 
 					} finally {
 						this._callinMapping = null;
@@ -442,7 +442,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 	/**
 	 * If a team level base predicate exists, this is the default for unmatched base objects.
 	 */
-	protected Statement createDefaultStatement(ReferenceBinding staticRoleType, AstGenerator gen)
+	protected Statement createDefaultStatement(ReferenceBinding staticRoleType, int problemId, AstGenerator gen)
 	{
 		if (staticRoleType.isAbstract()) {
 			// has not generated a case statement, do this instead of travelling out:

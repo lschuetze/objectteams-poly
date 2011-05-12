@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer;
 
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.IfStatement;
@@ -58,10 +59,11 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
      * Hook into createSwitchStatement(), which should create a default branch, if needed.
      *
 	 * @param staticRoleType expected role type.
+	 * @param problemId 	 signal if lifting may fail at runtime
 	 * @param gen            use for AST-generation
 	 * @return           the generated statement or null
 	 */
-	protected abstract Statement createDefaultStatement(ReferenceBinding staticRoleType, AstGenerator gen);
+	protected abstract Statement createDefaultStatement(ReferenceBinding staticRoleType, int problemId, AstGenerator gen);
 
 	/**
 	 * Create the instanceof cascade based on a given base object.
@@ -78,9 +80,10 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 			ReferenceBinding teamType,
 			ReferenceBinding staticRoleType,
 			RoleModel[]      caseObjects,
+			int 			 problemId,
 			AstGenerator     gen)
 	{
-		boolean hasBindingAmbiguity = teamType.getTeamModel().canLiftingFail(staticRoleType);//teamType.getTeamModel().ambigousLifting.size() > 0;
+		boolean hasBindingAmbiguity = (teamType.getTeamModel().canLiftingFail(staticRoleType) == IProblem.CallinDespiteBindingAmbiguity);
 		if (caseObjects.length == 1 && ((teamType.tagBits & TagBits.HasAbstractRelevantRole) == 0) && !hasBindingAmbiguity) {
 			// avoid instanceof alltogether.
 			return createCaseStatement(caseObjects[0], gen);
@@ -142,7 +145,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 	     * else
 	     * 	<default action>
 	     */
-	    prevIf.elseStatement = createDefaultStatement(staticRoleType, gen);
+	    prevIf.elseStatement = createDefaultStatement(staticRoleType, 0/*problemId*/, gen);
 
 	    return gen.block(stmts);
 	}

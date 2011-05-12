@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
@@ -135,8 +136,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 
 		if (this._role._hasBindingAmbiguity) {
 			for (int i = 0; i < methodMappings.length; i++) {
-				this._roleScope.problemReporter().callinDespiteBindingAmbiguity(
-									this._role.getBinding(), methodMappings[i]);
+				this._roleScope.problemReporter().callinDespiteLiftingProblem(
+									this._role.getBinding(),
+									IProblem.CallinDespiteBindingAmbiguity,
+									methodMappings[i]);
 				methodMappings[i].tagAsHavingErrors();
 			}
 			return;

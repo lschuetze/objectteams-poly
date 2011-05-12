@@ -28,8 +28,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
@@ -140,8 +142,10 @@ public class CallinImplementor extends MethodMappingImplementor
 
 		if (this._role._hasBindingAmbiguity) {
 			for (int i = 0; i < methodMappings.length; i++)
-				this._roleScope.problemReporter().callinDespiteBindingAmbiguity(
-									this._role.getBinding(), methodMappings[i]);
+				this._roleScope.problemReporter().callinDespiteLiftingProblem(
+									this._role.getBinding(),
+									IProblem.CallinDespiteBindingAmbiguity,
+									methodMappings[i]);
 		}
 		boolean result = true;
         CallinMappingDeclaration[] callinMappings = new CallinMappingDeclaration[methodMappings.length];
@@ -382,9 +386,10 @@ public class CallinImplementor extends MethodMappingImplementor
 		
 		gen.maybeAddTypeParametersToMethod(baseTypeBinding, newMethod);
 
-		if (teamDecl.getTeamModel().canLiftingFail(this._role.getBinding()))
-			callinBindingDeclaration.addRoleBindingAmbiguity(this._role.getBinding());
-		if (callinBindingDeclaration.rolesWithBindingAmbiguity != null)
+		int iProblem = teamDecl.getTeamModel().canLiftingFail(this._role.getBinding());
+		if (iProblem != 0)
+			callinBindingDeclaration.addRoleLiftingProblem(this._role.getBinding(), iProblem);
+		if (callinBindingDeclaration.rolesWithLiftingProblem != null)
 			declareLiftingFailedException(callinBindingDeclaration, newMethod, gen);
 
 		// -----   add and build and link the method -----
@@ -428,14 +433,11 @@ public class CallinImplementor extends MethodMappingImplementor
 												 MethodDeclaration wrapperMethod,
 												 AstGenerator gen) 
 	{
-		TypeReference liftingFailed = gen.qualifiedTypeReference(new char[][] {
-				IOTConstants.ORG, IOTConstants.OBJECTTEAMS,
-				IOTConstants.LIFTING_FAILED_EXCEPTION
-		});
+		TypeReference liftingFailed = gen.qualifiedTypeReference(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION);
 		AstEdit.addException(wrapperMethod, liftingFailed, false/*resolve*/);
 		// and report the problem(s)
-		for (ReferenceBinding roleTypeBinding : callinBindingDeclaration.rolesWithBindingAmbiguity)
-			this._roleScope.problemReporter().callinDespiteBindingAmbiguity(roleTypeBinding, callinBindingDeclaration);
+		for (Map.Entry<ReferenceBinding, Integer> entry : callinBindingDeclaration.rolesWithLiftingProblem.entrySet())
+			this._roleScope.problemReporter().callinDespiteLiftingProblem(entry.getKey(), entry.getValue(), callinBindingDeclaration);
 	}
 	/** Generate the statements for a callin wrapper method.
 	 *

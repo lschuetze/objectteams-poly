@@ -54,7 +54,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLiftExpression;
-import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeContainerMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTransformer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
@@ -403,7 +402,7 @@ public class DeclaredLifting implements IOTConstants {
 	 * In a subteam where the role is bound, the role parameter has to be replaced
 	 * with the bound base class (signature & selfcall).
 	 *
-	 * @param teamDecl      this is where everything happens
+	 * @param scope		    scope of location triggering this copy operation
 	 * @param superTeamCtor constructor to be copied
 	 * @param providedArgs  this are the types of arguments passed by the ExplicitConstructorCall
 	 * @param needsLifting  has the context (initiating constructor decl) declared lifting?
@@ -533,8 +532,8 @@ public class DeclaredLifting implements IOTConstants {
 	/**
 	 * A constructor being copied contains a self call which might require
 	 * transitive copying of more team constructors.
-	 * @param teamDecl
-	 * @param selfcall
+	 * @param scope 	   scope of the location triggering this copy operation
+	 * @param selfcall	   
 	 * @param providedArgs arguments provided to the selfcall
 	 * @param needsLifting has the context required lifting of any args? pass this info down.
 	 * @param gen
@@ -677,8 +676,9 @@ public class DeclaredLifting implements IOTConstants {
 	 * This method generates a lift method suitable for lifting an argument typed to a base-bounded type variable (B base R).
 	 * The generated method will be added to the team type and resolved if suitable (team already in state >= resolving).
 	 * @param teamDecl
+	 * @param ref
 	 * @param roleType
-	 * @param gen
+	 * @param needMethodBody
 	 */
 	public static void genLiftDynamicMethod(TypeDeclaration teamDecl, ASTNode ref, TypeBinding roleType, boolean needMethodBody)
 	{
@@ -698,16 +698,21 @@ public class DeclaredLifting implements IOTConstants {
 													   roleType.erasure(),
 													   dynamicLiftingSelector,
 													   new Argument[] {
-															gen.argument(IOTConstants.BASE, gen.qualifiedTypeReference(TypeContainerMethod.JAVA_LANG_OBJECT))
+															gen.argument(IOTConstants.BASE, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT))
 													   });
 	
 			dynLiftMeth.statements = new Statement[] { gen.emptyStatement() }; // to be replaced below
-	
+			int problemId = teamDecl.getTeamModel().canLiftingFail((ReferenceBinding) roleType.erasure());
+			if (problemId != 0)
+				AstEdit.addException(dynLiftMeth, 
+									 gen.qualifiedTypeReference(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION), 
+									 false/*resolve*/);
+			
 			dynLiftMeth.hasParsedStatements = true;
 			AstEdit.addMethod(teamDecl, dynLiftMeth);
 			dynLiftMeth.binding.returnType = ((ReferenceBinding)roleType).getRealType().erasure(); // force erased type after signature resolve
 			if (needMethodBody) {
-				dynLiftMeth.statements[0] = DeclaredLifting.generateDynamicSwitch(dynLiftMeth.scope, (ReferenceBinding)roleType, gen);
+				dynLiftMeth.statements[0] = DeclaredLifting.generateDynamicSwitch(dynLiftMeth.scope, (ReferenceBinding)roleType, problemId, gen);
 				if (StateMemento.hasMethodResolveStarted(teamDecl.binding))
 					dynLiftMeth.statements[0].resolve(dynLiftMeth.scope);
 			}
@@ -720,7 +725,7 @@ public class DeclaredLifting implements IOTConstants {
 	}
 
 	/* Generate the if-cascade for dynamic lifting depending on the argument's dynamic type. */
-	static Statement generateDynamicSwitch(BlockScope scope, ReferenceBinding roleType, AstGenerator gen) {
+	static Statement generateDynamicSwitch(BlockScope scope, ReferenceBinding roleType, int problemId, AstGenerator gen) {
 		ReferenceBinding[] boundDescendants = roleType.roleModel.getBoundDescendants();
 		if (boundDescendants.length == 0)
 			return gen.throwStatement(
@@ -774,7 +779,7 @@ public class DeclaredLifting implements IOTConstants {
 			current = newIf;
 		}
 		// final branch:
-		current.elseStatement = Lifting.genLiftingFailedException(IOTConstants.BASE, roleType, gen);
+		current.elseStatement = Lifting.genLiftingFailedException(IOTConstants.BASE, roleType, problemId, gen);
 		return ifStat;
 	}
 }

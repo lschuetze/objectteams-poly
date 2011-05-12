@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
 import org.eclipse.jdt.internal.compiler.IProblemFactory;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
@@ -520,6 +521,7 @@ public static int getIrritant(int problemID) {
 		case IProblem.DefiniteLiftingAmbiguity:
 			return CompilerOptions.DefiniteBindingAmbiguity;
 		case IProblem.CallinDespiteBindingAmbiguity:
+		case IProblem.CallinDespiteAbstractRole:
 		case IProblem.AmbiguousLiftingMayBreakClients:
 			return CompilerOptions.HiddenLiftingProblem;
 
@@ -7509,18 +7511,19 @@ public void unhandledException(TypeBinding exceptionType, ASTNode location) {
 		checkedExceptionInGuard(exceptionType, location);
 		return;
 	} else if (this.referenceContext instanceof MethodDeclaration 
-			   && ((MethodDeclaration)this.referenceContext).isAnyCallin()) 
+			   && ((MethodDeclaration)this.referenceContext).isMappingWrapper == WrapperKind.CALLIN) 
 	{
-		// declare it now instead of reporting the error:
+		// problem occurs in parameter mapping, declare exception now instead of reporting the error:
 		MethodDeclaration wrapperMethod = (MethodDeclaration) this.referenceContext;
 		AstGenerator gen = new AstGenerator(wrapperMethod);
-		TypeReference liftingFailed = gen.qualifiedTypeReference(new char[][] {
-				IOTConstants.ORG, IOTConstants.OBJECTTEAMS,
-				IOTConstants.LIFTING_FAILED_EXCEPTION
-		});
+		TypeReference liftingFailed = gen.qualifiedTypeReference(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION);
 		AstEdit.addException(wrapperMethod, liftingFailed, true/*resolve*/);
-		if (location instanceof Expression)
-			callinDespiteBindingAmbiguity((ReferenceBinding) ((Expression)location).resolvedType, location);
+		// however, the callin mapping itself should be flagged:
+		if (location instanceof Expression) {
+			ReferenceBinding roleType = (ReferenceBinding) ((Expression)location).resolvedType;
+			TeamModel teamModel = wrapperMethod.binding.declaringClass.getTeamModel();
+			callinDespiteLiftingProblem(roleType, teamModel.canLiftingFail(roleType), location);
+		}
 		return;
 	}
 // SH}
@@ -10590,13 +10593,14 @@ public void inferredUseOfCalloutToField(boolean isSetter, Expression location, c
 }
 // ====== CALLIN ======
 // -- 4.1 --
-public void callinDespiteBindingAmbiguity(
+public void callinDespiteLiftingProblem(
 		ReferenceBinding binding,
+		int problemId, // either CallinDespiteBindingAmbiguity or CallinDespiteAbstractRole
 		ASTNode location)
 {
 	String[] args = new String[] { new String(binding.readableName()) };
 	this.handle(
-			IProblem.CallinDespiteBindingAmbiguity,
+			problemId,
 			args,
 			args,
 			location.sourceStart,

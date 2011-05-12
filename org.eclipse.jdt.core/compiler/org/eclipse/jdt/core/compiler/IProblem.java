@@ -1598,13 +1598,15 @@ void setSourceStart(int sourceStart);
 	int CallinMappingInNonRole                   = CALLIN_RELATED + 1001; // 4.1(b)
 	int CallinMappingInUnboundRole               = CALLIN_RELATED + 1002; // 4.1(b)
 	int CallinDespiteBindingAmbiguity 			 = CALLIN_RELATED + 1003; // 4.1(b)
-	int UnresolvedCallinMethodSpec 				 = CALLIN_RELATED + 1004; // 4.1(c)
-	int AmbiguousCallinMethodSpec                = CALLIN_RELATED + 1005; // 4.1(c)
-	int DifferentReturnInCallinMethodSpec        = CALLIN_RELATED + 1006; // 4.1(c)
-	int DifferentParamInCallinMethodSpec 	     = CALLIN_RELATED + 1007; // 4.1(c)
-	int DuplicateCallinName 					 = CALLIN_RELATED + 1008; // 4.1(e)
-	int CallinToInheritedFinal 					 = CALLIN_RELATED + 1009; // 4.1(f)
-	int CallinUndeclaredException                = CALLIN_RELATED + 1010; // 4.1(g)
+	/** @since 3.7.0 OTDT 2.0.0 */
+	int CallinDespiteAbstractRole				 = CALLIN_RELATED + 1004; // 4.1(b) // XXX
+	int UnresolvedCallinMethodSpec 				 = CALLIN_RELATED + 1005; // 4.1(c)
+	int AmbiguousCallinMethodSpec                = CALLIN_RELATED + 1006; // 4.1(c)
+	int DifferentReturnInCallinMethodSpec        = CALLIN_RELATED + 1007; // 4.1(c)
+	int DifferentParamInCallinMethodSpec 	     = CALLIN_RELATED + 1008; // 4.1(c)
+	int DuplicateCallinName 					 = CALLIN_RELATED + 1009; // 4.1(e)
+	int CallinToInheritedFinal 					 = CALLIN_RELATED + 1010; // 4.1(f)
+	int CallinUndeclaredException                = CALLIN_RELATED + 1011; // 4.1(g)
 
 	int CallinToDeprecated						 = CALLIN_RELATED + 1099; // no OTJLD
 	

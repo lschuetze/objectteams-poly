@@ -29,8 +29,8 @@ import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLA
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLAG_DEFINITELY_MISSING_BASECALL;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
@@ -89,8 +89,11 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 
 	public MethodSpec[] baseMethodSpecs;
 
-	/** collect all roles (enclosing role plus role method arguments) for which lifting may fail at runtime. */
-	public Set<ReferenceBinding> rolesWithBindingAmbiguity;
+	/**
+	 * Collect all roles (enclosing role plus role method arguments) for which lifting may fail at runtime.
+	 * RHS in the mapping is the problemId to be used when reporting problem in callin mapping.
+	 */
+	public Map<ReferenceBinding, Integer> rolesWithLiftingProblem;
 
     public MethodSpec[] getBaseMethodSpecs () {
     	return this.baseMethodSpecs;
@@ -331,8 +334,9 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 								}
 							}
 							ReferenceBinding enclosingTeam = this.scope.enclosingSourceType().enclosingType();
-							if (enclosingTeam.getTeamModel().canLiftingFail(roleRef))
-								addRoleBindingAmbiguity(roleRef);
+							int iProblem = enclosingTeam.getTeamModel().canLiftingFail(roleRef);
+							if (iProblem > 0)
+								addRoleLiftingProblem(roleRef, iProblem);
 						}
 					} else {
 						// this uses OTJLD 2.3.3(a) adaptation which is not reversible, ie., not usable for replace:
@@ -386,10 +390,10 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		}
 		return true; // unused in the callin case
 	}
-	public void addRoleBindingAmbiguity(ReferenceBinding roleRef) {
-		if (this.rolesWithBindingAmbiguity == null)
-			this.rolesWithBindingAmbiguity = new HashSet<ReferenceBinding>();
-		this.rolesWithBindingAmbiguity.add(roleRef);
+	public void addRoleLiftingProblem(ReferenceBinding roleRef, int iProblem) {
+		if (this.rolesWithLiftingProblem == null)
+			this.rolesWithLiftingProblem = new HashMap<ReferenceBinding,Integer>();
+		this.rolesWithLiftingProblem.put(roleRef, iProblem);
 	}
 	protected void checkReturnCompatibility(MethodSpec methodSpec)
 	{
