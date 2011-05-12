@@ -5025,7 +5025,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a role defines a callin binding despite a binding ambiguity
     // 4.1.31-otjld-illegal-lifting-binding-ambiguity-1
     public void test4131_illegalLiftingBindingAmbiguity1() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"Team4131ilba1.java",
 			    "\n" +
@@ -5045,7 +5045,22 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "4.1(b)");
+            "----------\n" + 
+    		"1. WARNING in Team4131ilba1.java (at line 2)\n" + 
+    		"	public team class Team4131ilba1 {\n" + 
+    		"	                  ^^^^^^^^^^^^^\n" + 
+    		"Potential ambiguity in role binding. The base \'T4131ilba1\' is bound to the following roles: Team4131ilba1.R1,Team4131ilba1.R2 (OTJLD 2.3.4(a)).\n" + 
+    		"----------\n" + 
+    		"2. ERROR in Team4131ilba1.java (at line 5)\n" + 
+    		"	rm <- after test;\n" + 
+    		"	^^\n" + 
+    		"Unsafe callin mapping, because lifting to role Team4131ilba1.R0 may fail due to a reported binding ambiguity (OTJLD 2.3.5(c)).\n" + 
+    		"----------\n" + 
+    		"3. ERROR in Team4131ilba1.java (at line 5)\n" + 
+    		"	rm <- after test;\n" + 
+    		"	^^\n" + 
+    		"Unsafe callin mapping, because lifting to role Team4131ilba1.R0 may fail due to a reported binding ambiguity (OTJLD 2.3.5(c)).\n" + 
+    		"----------\n");
     }
 
     // a definite binding ambiguity is reported
