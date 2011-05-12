@@ -103,6 +103,7 @@ public team class CallHierarchyAdaptor
 	 */
 	protected class ContentProvider playedBy CallHierarchyContentProvider
 	{
+		@SuppressWarnings("hidden-lifting-problem") // lifting 'wrapper' could theoretically fail
 		boolean hasChildren(MethodMappingWrapper wrapper) <- replace boolean hasChildren(Object element)
 		base when (element instanceof MethodWrapper)
 		with { wrapper <- (MethodWrapper)element }
