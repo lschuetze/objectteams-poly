@@ -94,7 +94,7 @@ public interface OTConstants {
     // required compiler revision in the 1.5 (=0.7) stream:
     public static final int    OT15_REVISION = 0;
 
-    // required compiler revision in the 1.6 (=0.8) stream:
+    // required compiler revision in the 1.6 (=0.8/2.0) stream:
     public static final int    OT16_REVISION = 0;
 
     // ------------------------------------------
