@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.objectteams.otdt"
       label="%featureName"
-      version="0.8.0.qualifier"
+      version="2.0.0.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.objectteams.otdt"
       image="OTDT-110.png">
@@ -58,101 +58,94 @@ Project Leader:
    </license>
 
    <url>
-      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/0.8"/>
-      <discovery label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/0.8"/>
+      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/2.0"/>
+      <discovery label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/2.0"/>
    </url>
 
    <includes
          id="org.eclipse.objectteams.otdt.core.patch"
-         version="0.8.0.qualifier"/>
+         version="2.0.0.qualifier"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt"
-         download-size="189"
-         install-size="228"
+         download-size="73"
+         install-size="110"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.debug"
-         download-size="39"
-         install-size="39"
+         download-size="18"
+         install-size="44"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.debug.ui"
-         download-size="84"
-         install-size="84"
+         download-size="45"
+         install-size="96"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.ui"
-         download-size="285"
-         install-size="285"
+         download-size="120"
+         install-size="314"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.ui.help"
-         download-size="778"
-         install-size="3180"
+         download-size="3200"
+         install-size="3719"
          version="0.0.0"
          unpack="false"/>
 
-   <!--plugin
-         id="org.eclipse.objectteams.otdt.metrics"
-         download-size="123"
-         install-size="123"
-         version="0.0.0"
-         unpack="false"/-->
-         
    <plugin
          id="org.eclipse.objectteams.otdt.jdt.ui"
-         download-size="427"
-         install-size="427"
+         download-size="365"
+         install-size="687"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.compiler.adaptor"
-         download-size="146"
-         install-size="146"
+         download-size="114"
+         install-size="211"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.debug.adaptor"
-         download-size="10"
-         install-size="10"
+         download-size="121"
+         install-size="262"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.pde.ui"
-         download-size="16"
-         install-size="16"
+         download-size="98"
+         install-size="183"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.refactoring"
-         download-size="77"
-         install-size="77"
+         download-size="205"
+         install-size="409"
          version="0.0.0"
          unpack="false"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.samples"
-         download-size="398"
-         install-size="752"
+         download-size="376"
+         install-size="438"
          version="0.0.0"/>
 
    <plugin
          id="org.eclipse.objectteams.otdt.apt"
-         download-size="15"
-         install-size="15"
+         download-size="12"
+         install-size="18"
          version="0.0.0"
          unpack="false"/>
 
