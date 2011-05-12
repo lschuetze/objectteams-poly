@@ -432,13 +432,7 @@ public class CallinImplementor extends MethodMappingImplementor
 				IOTConstants.ORG, IOTConstants.OBJECTTEAMS,
 				IOTConstants.LIFTING_FAILED_EXCEPTION
 		});
-		if (wrapperMethod.thrownExceptions != null) {
-			int len = wrapperMethod.thrownExceptions.length;
-			System.arraycopy(wrapperMethod.thrownExceptions, 0, wrapperMethod.thrownExceptions = new TypeReference[len+1], 1, len);
-			wrapperMethod.thrownExceptions[0] = liftingFailed;
-		} else {
-			wrapperMethod.thrownExceptions = new TypeReference[] {liftingFailed};
-		}
+		AstEdit.addException(wrapperMethod, liftingFailed, false/*resolve*/);
 		// and report the problem(s)
 		for (ReferenceBinding roleTypeBinding : callinBindingDeclaration.rolesWithBindingAmbiguity)
 			this._roleScope.problemReporter().callinDespiteBindingAmbiguity(roleTypeBinding, callinBindingDeclaration);

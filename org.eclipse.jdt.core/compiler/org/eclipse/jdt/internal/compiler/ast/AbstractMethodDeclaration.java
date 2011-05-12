@@ -158,7 +158,7 @@ public abstract class AbstractMethodDeclaration
 	public boolean isCalloutWrapper() {
     	return this.isMappingWrapper.callout();
     }
-    /** Callin method or replace callin wrapper */
+    /** Callin method or callin wrapper */
     public boolean isAnyCallin() {
     	return (this.modifiers & ExtraCompilerModifiers.AccCallin) != 0;
     }

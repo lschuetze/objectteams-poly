@@ -515,6 +515,24 @@ public class AstEdit {
 	    addImplementsReference(roleClassDecl, implementsRef);
 	}
 
-
-
+	public static void addException(MethodDeclaration methodDecl, TypeReference exceptionRef, boolean resolve) 
+	{
+		if (methodDecl.thrownExceptions != null) {
+			int len = methodDecl.thrownExceptions.length;
+			System.arraycopy(methodDecl.thrownExceptions, 0, methodDecl.thrownExceptions = new TypeReference[len+1], 1, len);
+			methodDecl.thrownExceptions[0] = exceptionRef;
+		} else {
+			methodDecl.thrownExceptions = new TypeReference[] {exceptionRef};
+		}
+		if (resolve) {
+			ReferenceBinding excType = (ReferenceBinding) exceptionRef.resolveType(methodDecl.scope);
+			if (methodDecl.binding.thrownExceptions != null) {
+				int len = methodDecl.binding.thrownExceptions.length;
+				System.arraycopy(methodDecl.binding.thrownExceptions, 0, methodDecl.binding.thrownExceptions = new ReferenceBinding[len+1], 1, len);
+				methodDecl.binding.thrownExceptions[0] = excType;
+			} else {
+				methodDecl.binding.thrownExceptions = new ReferenceBinding[] {excType};
+			}
+		}
+	}
 }

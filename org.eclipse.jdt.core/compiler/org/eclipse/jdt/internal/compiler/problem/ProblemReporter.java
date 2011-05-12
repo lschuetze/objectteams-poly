@@ -154,6 +154,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.Protections;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
@@ -7506,6 +7508,20 @@ public void unhandledException(TypeBinding exceptionType, ASTNode location) {
 	if (this.referenceContext instanceof GuardPredicateDeclaration) {
 		checkedExceptionInGuard(exceptionType, location);
 		return;
+	} else if (this.referenceContext instanceof MethodDeclaration 
+			   && ((MethodDeclaration)this.referenceContext).isAnyCallin()) 
+	{
+		// declare it now instead of reporting the error:
+		MethodDeclaration wrapperMethod = (MethodDeclaration) this.referenceContext;
+		AstGenerator gen = new AstGenerator(wrapperMethod);
+		TypeReference liftingFailed = gen.qualifiedTypeReference(new char[][] {
+				IOTConstants.ORG, IOTConstants.OBJECTTEAMS,
+				IOTConstants.LIFTING_FAILED_EXCEPTION
+		});
+		AstEdit.addException(wrapperMethod, liftingFailed, true/*resolve*/);
+		if (location instanceof Expression)
+			callinDespiteBindingAmbiguity((ReferenceBinding) ((Expression)location).resolvedType, location);
+		return;
 	}
 // SH}
 
@@ -7527,6 +7543,7 @@ public void unhandledException(TypeBinding exceptionType, ASTNode location) {
 		location.sourceStart,
 		location.sourceEnd);
 }
+
 public void unhandledWarningToken(Expression token) {
 	String[] arguments = new String[] { token.constant.stringValue() };
 	this.handle(
@@ -10575,15 +10592,15 @@ public void inferredUseOfCalloutToField(boolean isSetter, Expression location, c
 // -- 4.1 --
 public void callinDespiteBindingAmbiguity(
 		ReferenceBinding binding,
-		AbstractMethodMappingDeclaration methodMapping)
+		ASTNode location)
 {
 	String[] args = new String[] { new String(binding.readableName()) };
 	this.handle(
 			IProblem.CallinDespiteBindingAmbiguity,
 			args,
 			args,
-			methodMapping.sourceStart,
-			methodMapping.sourceEnd);
+			location.sourceStart,
+			location.sourceEnd);
 }
 public void duplicateCallinName(CallinMappingDeclaration callinMapping) {
 	String[] args = { String.valueOf(callinMapping.name) };
