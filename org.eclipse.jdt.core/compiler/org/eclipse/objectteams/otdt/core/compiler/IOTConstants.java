@@ -225,11 +225,11 @@ public interface IOTConstants
 	public static final char[][] ROLE_CAST_EXCEPTION 			  = {ORG, OBJECTTEAMS,
 																	 "RoleCastException".toCharArray()};
 	/** 
-	 * @since 3.7 (OT 0.8)
+	 * @since 3.7 (OT 2.0)
 	 */
 	public static final char[] INSTANTIATION = "Instantiation".toCharArray();
 	/** 
-	 * @since 3.7 (OT 0.8)
+	 * @since 3.7 (OT 2.0)
 	 */
 	public static final char[][] ORG_OBJECTTEAMS_INSTANTIATION = {ORG, OBJECTTEAMS,
 		 															 INSTANTIATION};
@@ -254,7 +254,7 @@ public interface IOTConstants
 	public static final int T_OrgObjectTeamsTeam       = 101;
 	public static final int T_OrgObjectTeamsIBoundBase = 102;
 	/**
-	 * @since 3.7 (OT 0.8)
+	 * @since 3.7 (OT 2.0)
 	 */
 	public static final int T_OrgObjectTeamsInstantiation = 103;
 

@@ -797,7 +797,7 @@ public interface ITypeBinding extends IBinding {
 
 	/**
 	 * For a role class returns the corresponding class part.
-	 * @since 3.7 (OT 0.8)
+	 * @since 3.7 (OT 2.0)
 	 */
 	public ITypeBinding getClassPart();
 

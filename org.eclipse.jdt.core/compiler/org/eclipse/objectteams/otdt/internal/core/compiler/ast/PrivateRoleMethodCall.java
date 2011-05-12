@@ -33,9 +33,9 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
  * A message send to a private role method requiring redirection via a pair of bridge methods.
  * Directly hooks into generateCode to achieve the necessary modifications.
  * 
- * (Before 3.7/0.8 this was an anonymous class inside CalloutImplementor).
+ * (Before 3.7 (OT 2.0) this was an anonymous class inside CalloutImplementor).
  * @author stephan
- * @since 3.7
+ * @since 3.7 OT 2.0
  */
 public class PrivateRoleMethodCall extends MessageSend {
 	private boolean isCalloutToField;

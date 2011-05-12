@@ -26,7 +26,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExp
  * base constructor, which is found via this.expression (an AllocationExpression).
  * 
  * @author stephan
- * @since 0.8 (from eclipse.org).
+ * @since 2.0 (from eclipse.org).
  */
 public class SelectionOnBaseAllocationExpression extends BaseAllocationExpression {
 
