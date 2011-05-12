@@ -565,7 +565,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
         runConformTest(
             new String[] {
 		"Team213bti2.java",
-			    "\n" +
+			    "import org.objectteams.LiftingFailedException;\n" +
 			    "public team class Team213bti2 {\n" +
 			    "    protected abstract class Role213bti2_0 playedBy I213bti2 {\n" +
 			    "        public abstract String getValue();\n" +
@@ -573,10 +573,10 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "    public class Role213bti2_1 extends Role213bti2_0 playedBy T213bti2 {\n" +
 			    "        String getValue() -> String getValueInternal();\n" +
 			    "    }\n" +
-			    "    public String getValue(I213bti2 as Role213bti2_0 obj) {\n" +
+			    "    public String getValue(I213bti2 as Role213bti2_0 obj) throws LiftingFailedException {\n" +
 			    "        return obj.getValue();\n" +
 			    "    }\n" +
-			    "    public static void main(String... args) {\n" +
+			    "    public static void main(String... args) throws LiftingFailedException {\n" +
 			    "        Team213bti2 t = new Team213bti2();\n" +
 			    "        String v = t.getValue(new T213bti2());\n" +
 			    "        System.out.println(v);\n" +

@@ -23,6 +23,7 @@ import junit.framework.Test;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
+@SuppressWarnings("unchecked")
 public class Reflection extends AbstractOTJLDTest {
 	
 	public Reflection(String name) {
@@ -242,11 +243,12 @@ public class Reflection extends AbstractOTJLDTest {
     // hasRole is called from guard predicate, multiple bound roles with common supertype, class selected, see Trac #109
     // 9.2.1-otjld-has-role-method-5c2
     public void test921_hasRoleMethod5c2() {
-       
+        Map customOptions = getCompilerOptions();
+        customOptions.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
        runConformTest(
             new String[] {
 		"Team921hrm5c2.java",
-			    "\n" +
+			    "import org.objectteams.LiftingFailedException;\n" +
 			    "@SuppressWarnings(\"ambiguousbinding\")\n" +
 			    "public team class Team921hrm5c2 {\n" +
 			    "    precedence R2_R, R1_R;\n" +
@@ -259,16 +261,18 @@ public class Reflection extends AbstractOTJLDTest {
 			    "    protected class R1_R extends R\n" +
 			    "        base when (Team921hrm5c2.this.hasRole(base, R1_R.class))\n" +
 			    "    {\n" +
+			    "		 @SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "        foo <- replace test;\n" +
 			    "    }\n" +
 			    "    protected class R2_R extends R\n" +
 			    "        base when (Team921hrm5c2.this.hasRole(base, R2_R.class))\n" +
 			    "    {\n" +
+			    "		 @SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "        foo <- replace test;\n" +
 			    "    }\n" +
 			    "    \n" +
-			    "    Team921hrm5c2 (T921hrm5c2 as R1_R o) {}\n" +
-			    "    public static void main(String[] args) {\n" +
+			    "    Team921hrm5c2 (T921hrm5c2 as R1_R o) throws LiftingFailedException {}\n" +
+			    "    public static void main(String[] args) throws LiftingFailedException {\n" +
 			    "        T921hrm5c2 o = new T921hrm5c2();\n" +
 			    "        Team921hrm5c2 t = new Team921hrm5c2(o);\n" +
 			    "        t.activate();\n" +
@@ -283,7 +287,12 @@ public class Reflection extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "Team921hrm5c2$__OT__R1_R");
+            "Team921hrm5c2$__OT__R1_R",
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
     }
 
     // hasRole is called, multiple bound roles in one hierarchy

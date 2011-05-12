@@ -8064,7 +8064,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     			"public team class Team726cwhlp4 {\n" +
     			"	protected class ROK playedBy T726cwhlp4 {\n" +
     			"		@SuppressWarnings(\"hidden-lifting-problem\")\n" +
-    			"		bar <- replace foo;\n" + // argument lifting going bad
+    			"		mycallin: bar <- replace foo;\n" + // argument lifting going bad
     			"       @SuppressWarnings(\"basecall\")\n" +
     			"		callin void bar(R0 r) {\n" +
     			"			System.out.print(\"NOK\");\n" +
