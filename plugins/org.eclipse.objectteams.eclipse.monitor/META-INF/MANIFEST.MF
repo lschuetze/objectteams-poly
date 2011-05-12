@@ -2,13 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.eclipse.monitor;singleton:=true
-Bundle-Version: 0.8.0.qualifier
+Bundle-Version: 2.0.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Activator: org.eclipse.objectteams.eclipse.monitor.internal.Activator
 Bundle-Localization: plugin
-Require-Bundle: org.eclipse.ui,
- org.eclipse.core.runtime,
- org.eclipse.objectteams.otequinox
+Require-Bundle: org.eclipse.ui;bundle-version="[3.7.0,4.0.0)",
+ org.eclipse.core.runtime;bundle-version="[3.7.0,4.0.0)",
+ org.eclipse.objectteams.otequinox;bundle-version="[2.0.0,3.0.0)"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Export-Package: org.eclipse.objectteams.eclipse.monitor.internal;x-internal:=true
