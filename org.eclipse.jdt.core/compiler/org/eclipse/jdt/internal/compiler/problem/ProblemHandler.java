@@ -210,7 +210,7 @@ private void protectedHandle(
 		case IProblem.OverridingPlayedBy:
 		case IProblem.BaseclassIsRoleOfTheSameTeam:
 		case IProblem.RoleBindingPotentiallyAmbiguous:
-		case IProblem.DefiniteLiftingAmbiguity:
+		case IProblem.AmbiguousLiftingMayBreakClients:
 		case IProblem.AbstractPotentiallyRelevantRole:
 		case IProblem.AbstractRelevantRole:
 			break;

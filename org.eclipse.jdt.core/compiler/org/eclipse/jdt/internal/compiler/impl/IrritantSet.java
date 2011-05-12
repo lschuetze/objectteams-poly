@@ -109,8 +109,6 @@ public class IrritantSet {
             CompilerOptions.AdaptingDeprecated);
 	public static final IrritantSet IGNORING_ROLE_RETURN = new IrritantSet(
 			CompilerOptions.IgnoringRoleReturn);
-	public static final IrritantSet DEFINITE_BINDING_AMBIGUITY = new IrritantSet(
-			CompilerOptions.DefiniteBindingAmbiguity);
 // SH}
 	static {
 //{ObjectTeams: default to error:
@@ -119,7 +117,6 @@ public class IrritantSet {
 				 | CompilerOptions.ExceptionInGuard
 				 | CompilerOptions.OverridingFinalRole
 				 | CompilerOptions.AdaptingDeprecated
-				 | CompilerOptions.DefiniteBindingAmbiguity
 				 | CompilerOptions.HiddenLiftingProblem);
 // SH}
 		COMPILER_DEFAULT_WARNINGS

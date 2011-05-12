@@ -782,7 +782,7 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 				continue;
 			if (TSuperHelper.isMarkerInterface(param))
 				return null;
-			TypeBinding roleType = TeamModel.getRoleToLiftTo(scope, arg, param, false, /*location*/provided[i], null/*callinDecl*/);
+			TypeBinding roleType = TeamModel.getRoleToLiftTo(scope, arg, param, false, /*location*/provided[i]);
 			if (roleType == null)
 				return null;
 			// FIXME(SH): should roleType be stored in adjustedArgtypes??

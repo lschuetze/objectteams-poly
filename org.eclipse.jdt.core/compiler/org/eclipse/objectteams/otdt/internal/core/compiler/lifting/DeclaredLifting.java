@@ -242,7 +242,7 @@ public class DeclaredLifting implements IOTConstants {
 				if (baseType == null || !baseType.isValidBinding())
 					// fall back to normal scope:
 					baseType = (ReferenceBinding)scope.getType(ltr.baseTokens, ltr.baseTokens.length);
-				roleRef = (ReferenceBinding)TeamModel.getRoleToLiftTo(scope, baseType, roleRef, true, ltr, null/*callinDecl*/);
+				roleRef = (ReferenceBinding)TeamModel.getRoleToLiftTo(scope, baseType, roleRef, true, ltr);
 				if (baseType.isTypeVariable() && roleRef == null)
 					roleRef = (ReferenceBinding)roleType; // fall back to the declared type
 			}
@@ -559,7 +559,7 @@ public class DeclaredLifting implements IOTConstants {
 					continue;
 				hasProblematicArg = true;
 				TypeBinding roleType = TeamModel.getRoleToLiftTo(
-						scope, providedArgs[i], parameters[i], true, scope.referenceType().superclass, null/*callinDecl*/);
+						scope, providedArgs[i], parameters[i], true, scope.referenceType().superclass);
 				if (roleType != null)
 				{
 					// compatibility only through lifting, need to copy the constructor for this selfcall

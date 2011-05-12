@@ -518,8 +518,6 @@ public static int getIrritant(int problemID) {
 			return CompilerOptions.PotentialAmbiguousPlayedBy;
 		case IProblem.AbstractPotentiallyRelevantRole:
 			return CompilerOptions.AbstractPotentialRelevantRole;
-		case IProblem.DefiniteLiftingAmbiguity:
-			return CompilerOptions.DefiniteBindingAmbiguity;
 		case IProblem.CallinDespiteBindingAmbiguity:
 		case IProblem.CallinDespiteAbstractRole:
 		case IProblem.AmbiguousLiftingMayBreakClients:
@@ -691,7 +689,6 @@ public static int getProblemCategory(int severity, int problemID) {
 			case CompilerOptions.FragileCallin:
 			case CompilerOptions.PotentialAmbiguousPlayedBy:
 			case CompilerOptions.AbstractPotentialRelevantRole:
-			case CompilerOptions.HiddenLiftingProblem:
 			case CompilerOptions.ExceptionInGuard:
 			case CompilerOptions.AmbiguousLowering:
 				return CategorizedProblem.CAT_CODE_STYLE;
@@ -705,7 +702,7 @@ public static int getProblemCategory(int severity, int problemID) {
 				return CategorizedProblem.CAT_CODE_STYLE;
 			case CompilerOptions.DeprecatedPathSyntax:
 				return CategorizedProblem.CAT_CODE_STYLE;
-			case CompilerOptions.DefiniteBindingAmbiguity:
+			case CompilerOptions.HiddenLiftingProblem:
 			case CompilerOptions.WeaveIntoSystemClass:
 			case CompilerOptions.DangerousCallin:
 			case CompilerOptions.IgnoringRoleReturn:
@@ -7525,6 +7522,17 @@ public void unhandledException(TypeBinding exceptionType, ASTNode location) {
 			callinDespiteLiftingProblem(roleType, teamModel.canLiftingFail(roleType), location);
 		}
 		return;
+	} else if (   exceptionType instanceof ReferenceBinding 
+			   && CharOperation.equals(((ReferenceBinding)exceptionType).compoundName, IOTConstants.O_O_LIFTING_FAILED_EXCEPTION)) 
+	{
+		// add a specific link into the OTJLD to an otherwise normal error message:
+		this.handle(
+			IProblem.UnhandledLiftingFailedException,
+			new String[] {new String(exceptionType.readableName())},
+			new String[] {new String(exceptionType.shortReadableName())},
+			location.sourceStart,
+			location.sourceEnd);
+		return;
 	}
 // SH}
 
@@ -9438,19 +9446,6 @@ public void potentiallyAmbiguousRoleBinding(TypeDeclaration teamDecl, Set<RoleMo
 	    msgArgs,
 		teamDecl.sourceStart,
 		teamDecl.sourceEnd);
-}
-public void definiteLiftingAmbiguity(TypeBinding provided, TypeBinding required, ASTNode location)
-{
-	String[] args = new String[]{
-		new String(provided.readableName()),
-		new String(required.readableName())
-	};
-	this.handle(
-			IProblem.DefiniteLiftingAmbiguity,
-			args,
-			args,
-			location.sourceStart,
-			location.sourceEnd);
 }
 public void ambiguousLiftingMayBreakClients(TypeBinding roleType) {
 	String[] args = new String[]{

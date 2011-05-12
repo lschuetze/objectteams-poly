@@ -333,14 +333,10 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 									roleToLiftTo = roleRef;
 								}
 							}
-							ReferenceBinding enclosingTeam = this.scope.enclosingSourceType().enclosingType();
-							int iProblem = enclosingTeam.getTeamModel().canLiftingFail(roleRef);
-							if (iProblem > 0)
-								addRoleLiftingProblem(roleRef, iProblem);
 						}
 					} else {
 						// this uses OTJLD 2.3.3(a) adaptation which is not reversible, ie., not usable for replace:
-						roleToLiftTo = TeamModel.getRoleToLiftTo(this.scope, baseParam, roleParam, false, location, this);
+						roleToLiftTo = TeamModel.getRoleToLiftTo(this.scope, baseParam, roleParam, false, location);
 					}
 					if (roleToLiftTo != null)
 					{
@@ -348,6 +344,13 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 						methodSpec.argNeedsTranslation[j] = true;
 						this.roleMethodSpec.argNeedsTranslation[j] = true;
 						this.roleMethodSpec.parameters[j] = roleToLiftTo; // this applies to all bindings
+						
+						// still need to check for ambiguity/abstract role:
+						ReferenceBinding enclosingTeam = this.scope.enclosingSourceType().enclosingType();
+						int iProblem = enclosingTeam.getTeamModel().canLiftingFail((ReferenceBinding)roleToLiftTo.leafComponentType());
+						if (iProblem > 0)
+							addRoleLiftingProblem((ReferenceBinding)roleToLiftTo.leafComponentType(), iProblem);
+
 						continue;
 					}
 					// check auto(un)boxing:

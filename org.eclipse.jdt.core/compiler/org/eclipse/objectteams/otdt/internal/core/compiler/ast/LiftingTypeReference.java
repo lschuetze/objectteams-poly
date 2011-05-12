@@ -28,8 +28,6 @@
  */
 package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 
-import java.util.HashSet;
-
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.ArrayTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.CharLiteral;
@@ -169,18 +167,12 @@ public class LiftingTypeReference extends TypeReference {
 	    if (baseType.isTypeVariable() && ((TypeVariableBinding)baseType).roletype != null) {
 	    	// resolving "<B base R> as R":
 	    	roleRefType = ((TypeVariableBinding)baseType).roletype;
-	    	// check ambiguity:
-	    	HashSet<ReferenceBinding> mappedBases = new HashSet<ReferenceBinding>();
-	    	for(ReferenceBinding boundRole : roleRefType.roleModel.getBoundDescendants())
-	    		if (mappedBases.contains(boundRole.baseclass()))
-	    			scope.problemReporter().definiteLiftingAmbiguity(baseType, roleRefType, this);
-	    		else
-	    			mappedBases.add(boundRole.baseclass());
+	    	// ambiguity is handled by _OT$lift_dynamic which may or may not declare LiftingFailedException
 	    } else if ((baseType.tagBits & TagBits.HierarchyHasProblems) != 0) {
 	    	// already reported (?)
 	    } else {
 	    	// static adjustment (OTJLD 2.3.2(a)):
-	    	roleRefType = (ReferenceBinding)TeamModel.getRoleToLiftTo(scope, baseType, roleRefType, true, this, null/*callinDecl*/);
+	    	roleRefType = (ReferenceBinding)TeamModel.getRoleToLiftTo(scope, baseType, roleRefType, true, this);
 		    if (roleRefType == null)
 		    	roleRefType = (ReferenceBinding)roleType; // revert unsuccessful adjustment
 		    if (    roleRefType.baseclass() == null

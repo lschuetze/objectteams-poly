@@ -163,8 +163,6 @@ public class CompilerOptions {
     	  
 	public static final String OPTION_ReportPotentialAmbiguousPlayedby =
 		"org.eclipse.objectteams.otdt.compiler.problem.potential_ambiguous_playedby"; //$NON-NLS-1$
-	public static final String OPTION_ReportDefiniteBindingAmbiguity=
-		"org.eclipse.objectteams.otdt.compiler.problem.definite_ambiguity"; //$NON-NLS-1$
 	public static final String OPTION_ReportAbstractPotentialRelevantRole =
 		"org.eclipse.objectteams.otdt.compiler.problem.abstract_potential_relevant_role"; //$NON-NLS-1$
 	public static final String OPTION_ReportHiddenLiftingProblem =
@@ -337,11 +335,10 @@ public class CompilerOptions {
 	public static final int AmbiguousLowering=				 OTJFlag | ASTNode.Bit15;
 	public static final int AdaptingDeprecated=              OTJFlag | ASTNode.Bit16;
 	public static final int IgnoringRoleReturn=			     OTJFlag | ASTNode.Bit17;
-	public static final int DefiniteBindingAmbiguity=		 OTJFlag | ASTNode.Bit18;
-	public static final int BaseclassCycle=				     OTJFlag | ASTNode.Bit19;
-	public static final int EffectlessFieldaccess= 			 OTJFlag | ASTNode.Bit20; 
-	public static final int UnusedParammap= 				 OTJFlag | ASTNode.Bit21;
-	public static final int HiddenLiftingProblem=      		 OTJFlag | ASTNode.Bit22;
+	public static final int BaseclassCycle=				     OTJFlag | ASTNode.Bit18;
+	public static final int EffectlessFieldaccess= 			 OTJFlag | ASTNode.Bit19; 
+	public static final int UnusedParammap= 				 OTJFlag | ASTNode.Bit20;
+	public static final int HiddenLiftingProblem=      		 OTJFlag | ASTNode.Bit21;
 // SH}
 
 	// Severity level for handlers
@@ -504,7 +501,6 @@ public class CompilerOptions {
 		"roleinstantiation",    //$NON-NLS-1$
 		"fragilecallin",        //$NON-NLS-1$
 		"ambiguousbinding",     //$NON-NLS-1$
-		"def-bind-ambiguity",   //$NON-NLS-1$
 		"abstractrelevantrole", //$NON-NLS-1$
 		"hidden-lifting-problem",//$NON-NLS-1$
 		"decapsulation",        //$NON-NLS-1$
@@ -697,8 +693,6 @@ public class CompilerOptions {
 				return OPTION_ReportUnusedParammap;
 			case PotentialAmbiguousPlayedBy :
 				return OPTION_ReportPotentialAmbiguousPlayedby;
-			case DefiniteBindingAmbiguity:
-				return OPTION_ReportDefiniteBindingAmbiguity;
 			case AbstractPotentialRelevantRole :
 				return OPTION_ReportAbstractPotentialRelevantRole;
 			case HiddenLiftingProblem :
@@ -900,7 +894,6 @@ public class CompilerOptions {
 			OPTION_ReportFragileCallin,
 			OPTION_ReportUnusedParammap,
 			OPTION_ReportPotentialAmbiguousPlayedby,
-			OPTION_ReportDefiniteBindingAmbiguity,
 			OPTION_ReportAbstractPotentialRelevantRole,
 			OPTION_ReportHiddenLiftingProblem,
 			OPTION_ReportDecapsulation,
@@ -1002,8 +995,6 @@ public class CompilerOptions {
 //			case UnusedParammap : // no reason to suppress
 			case PotentialAmbiguousPlayedBy :
 				return "ambiguousbinding"; //$NON-NLS-1$
-			case DefiniteBindingAmbiguity :
-				return "def-bind-ambiguity"; //$NON-NLS-1$
 			case AbstractPotentialRelevantRole :
 				return "abstractrelevantrole"; //$NON-NLS-1$
 			case HiddenLiftingProblem :
@@ -1137,8 +1128,6 @@ public class CompilerOptions {
 				return IrritantSet.DECAPSULATION;
 			if ("dangerouscallin".equals(warningToken)) //$NON-NLS-1$
 				return IrritantSet.DANGEROUS_CALLIN;
-			if ("def-bind-ambiguity".equals(warningToken)) //$NON-NLS-1$
-				return IrritantSet.DEFINITE_BINDING_AMBIGUITY;
 			break;
 		case 'e' :
 			if ("exceptioninguard".equals(warningToken)) //$NON-NLS-1$
@@ -1298,7 +1287,6 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportUnusedParammap, getSeverityString(UnusedParammap));
 
 		optionsMap.put(OPTION_ReportPotentialAmbiguousPlayedby, getSeverityString(PotentialAmbiguousPlayedBy));
-		optionsMap.put(OPTION_ReportDefiniteBindingAmbiguity, getSeverityString(DefiniteBindingAmbiguity));
 		optionsMap.put(OPTION_ReportAbstractPotentialRelevantRole, getSeverityString(AbstractPotentialRelevantRole));
 		optionsMap.put(OPTION_ReportHiddenLiftingProblem, getSeverityString(HiddenLiftingProblem));
 
@@ -1758,7 +1746,6 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportUnusedParammap)) != null) updateSeverity(UnusedParammap, optionValue);
 
 		if ((optionValue = optionsMap.get(OPTION_ReportPotentialAmbiguousPlayedby)) != null) updateSeverity(PotentialAmbiguousPlayedBy, optionValue);
-		if ((optionValue = optionsMap.get(OPTION_ReportDefiniteBindingAmbiguity)) != null) updateSeverity(DefiniteBindingAmbiguity, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportAbstractPotentialRelevantRole)) != null) updateSeverity(AbstractPotentialRelevantRole, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportHiddenLiftingProblem)) != null) updateSeverity(HiddenLiftingProblem, optionValue);
 

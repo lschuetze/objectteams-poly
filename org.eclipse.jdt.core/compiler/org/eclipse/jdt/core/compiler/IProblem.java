@@ -1500,8 +1500,10 @@ void setSourceStart(int sourceStart);
 	int GenericMethodTypeArgumentMismatchRoleBound=ROLE_RELATED + 3210; // 2.3.2(e)
 
 	int RoleBindingPotentiallyAmbiguous          = ROLE_RELATED + 3401; // 2.3.4(a)
-	int DefiniteLiftingAmbiguity 				 = ROLE_RELATED + 3402; // 2.3.4(b)
-	int AmbiguousLiftingMayBreakClients			 = ROLE_RELATED + 3403; // 2.3.5(d)
+	/** @since 3.7 OT 2.0 */
+	int AmbiguousLiftingMayBreakClients			 = ROLE_RELATED + 3402; // 2.3.5(d)
+	/** @since 3.7 OT 2.0 */
+	int UnhandledLiftingFailedException			 = ROLE_RELATED + 3403; // 2.3.5
 
 	int QualifiedUseOfLiftingConstructor         = ROLE_RELATED + 4101; // 2.4.1(a)
 	int LiftCtorArgNotAllocation                 = ROLE_RELATED + 4102; // 2.4.1(c)

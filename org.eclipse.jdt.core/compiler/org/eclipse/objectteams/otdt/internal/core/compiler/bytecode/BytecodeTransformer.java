@@ -692,8 +692,7 @@ public class BytecodeTransformer
 												mDecl.binding.parameters[arg-1],
 												role,
 												true,
-												mDecl.arguments[arg-1],
-												null/*callinDecl*/);
+												mDecl.arguments[arg-1]);
 		// find the method:
 		char[] liftName = Lifting.getLiftMethodName(role);
 		MethodBinding[] lifters = dstClassFile.referenceBinding.getMethods(liftName);
