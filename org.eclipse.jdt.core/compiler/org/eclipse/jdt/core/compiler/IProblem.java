@@ -1501,7 +1501,7 @@ void setSourceStart(int sourceStart);
 
 	int RoleBindingPotentiallyAmbiguous          = ROLE_RELATED + 3401; // 2.3.4(a)
 	int DefiniteLiftingAmbiguity 				 = ROLE_RELATED + 3402; // 2.3.4(b)
-	int AmbiguousLiftingMayBreakClients			 = ROLE_RELATED + 3403; // 2.3.XXX
+	int AmbiguousLiftingMayBreakClients			 = ROLE_RELATED + 3403; // 2.3.5(d)
 
 	int QualifiedUseOfLiftingConstructor         = ROLE_RELATED + 4101; // 2.4.1(a)
 	int LiftCtorArgNotAllocation                 = ROLE_RELATED + 4102; // 2.4.1(c)
@@ -1597,9 +1597,9 @@ void setSourceStart(int sourceStart);
 	int CALLIN_RELATED = OTJ_RELATED + 4*OTCHAP;
 	int CallinMappingInNonRole                   = CALLIN_RELATED + 1001; // 4.1(b)
 	int CallinMappingInUnboundRole               = CALLIN_RELATED + 1002; // 4.1(b)
-	int CallinDespiteBindingAmbiguity 			 = CALLIN_RELATED + 1003; // 4.1(b)
+	int CallinDespiteBindingAmbiguity 			 = CALLIN_RELATED + 1003; // 2.3.5(c)
 	/** @since 3.7.0 OTDT 2.0.0 */
-	int CallinDespiteAbstractRole				 = CALLIN_RELATED + 1004; // 4.1(b) // XXX
+	int CallinDespiteAbstractRole				 = CALLIN_RELATED + 1004; // 2.3.5(c)
 	int UnresolvedCallinMethodSpec 				 = CALLIN_RELATED + 1005; // 4.1(c)
 	int AmbiguousCallinMethodSpec                = CALLIN_RELATED + 1006; // 4.1(c)
 	int DifferentReturnInCallinMethodSpec        = CALLIN_RELATED + 1007; // 4.1(c)

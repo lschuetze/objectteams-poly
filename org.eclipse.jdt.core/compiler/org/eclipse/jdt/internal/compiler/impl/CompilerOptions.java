@@ -506,6 +506,7 @@ public class CompilerOptions {
 		"ambiguousbinding",     //$NON-NLS-1$
 		"def-bind-ambiguity",   //$NON-NLS-1$
 		"abstractrelevantrole", //$NON-NLS-1$
+		"hidden-lifting-problem",//$NON-NLS-1$
 		"decapsulation",        //$NON-NLS-1$
 		"bindingconventions",   //$NON-NLS-1$
 		"roletypesyntax",       //$NON-NLS-1$
