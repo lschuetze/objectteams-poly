@@ -906,7 +906,7 @@ public class TeamModel extends TypeModel {
 		return false;
 	}
 	public boolean canLiftingFail(ReferenceBinding role) {
-		if ((this._binding.tagBits & TagBits.HasAbstractRelevantRole) != 0)
+		if ((this._binding.tagBits & TagBits.HasAbstractRelevantRole) != 0 && role.isAbstract())
 			return true;
 		for (Pair<ReferenceBinding, ReferenceBinding> pair : this.ambigousLifting) {
 			if (role.getRealClass().isCompatibleWith(pair.second) && pair.first.isCompatibleWith(role.baseclass()))
