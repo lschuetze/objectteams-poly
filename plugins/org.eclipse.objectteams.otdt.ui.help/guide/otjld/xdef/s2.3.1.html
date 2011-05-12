@@ -108,13 +108,13 @@
                   <dd>Roles with this instantiation policy are never instantiated by lifting.
                      	 				Such roles cannot define non-static fields. 
                      	 				Otherwise this optimization is fully transparent, specifically callout bindings will refer to the correct base instance.<br />
-                     	 				As of version 0.8 M6 the OT/J compiler does not implement this strategy.
+                     	 				As of version 2.0 the OT/J compiler does not implement this strategy.
                   </dd>
                   <dt>SINGLETON</dt>
                   <dd>Roles declaring this strategy will be instantiated at most once per team. Subsequent lifting requests in the same team
                      	 				will always answer the same role instance. Such roles may receive triggers from callin bindings, but cannot define
                      	 				callout bindings.<br />
-                     	 				As of version 0.8 M6 the OT/J compiler does not implement this strategy.
+                     	 				As of version 2.0 the OT/J compiler does not implement this strategy.
                   </dd>
                </dl>
             </div>
