@@ -1953,7 +1953,6 @@ public void test012b(){
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.binding_conventions\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.decapsulation\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.decapsulation_write\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.definite_ambiguity\" value=\"error\"/>\n" +
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.deprecated_path_syntax\" value=\"warning\"/>\n" +
             "		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.effectless_fieldaccess\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.objectteams.otdt.compiler.problem.exception_in_guard\" value=\"error\"/>\n" + 
