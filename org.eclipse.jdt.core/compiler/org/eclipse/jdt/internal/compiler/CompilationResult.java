@@ -76,8 +76,8 @@ public class CompilationResult {
 	public int problemCount;
 	public int taskCount;
 	public ICompilationUnit compilationUnit;
-	public Map problemsMap;
-	public Set firstErrors;
+	private Map problemsMap;
+	private Set firstErrors;
 	private int maxProblemPerUnit;
 	public char[][][] qualifiedReferences;
 	public char[][] simpleNameReferences;
@@ -93,6 +93,7 @@ public class CompilationResult {
 	public boolean hasSyntaxError = false;
 	public char[][] packageName;
 	public boolean checkSecondaryTypes = false; // check for secondary types which were created after the initial buildTypeBindings call
+	private int numberOfErrors;
 
 //{ObjectTeams: separate handling of teams and their roles:
 	/** mark the end of real source when adding synthetic positions for SMAP support */
@@ -159,6 +160,7 @@ public CompilationResult(ICompilationUnit compilationUnit, int unitIndex, int to
 public static class CheckPoint {
 	CategorizedProblem[] problems;
 	int count;
+	int numberOfErrors;
 	ReferenceContext context;
 	boolean ignoreFurtherInvestigation;
 }
@@ -170,8 +172,9 @@ public CheckPoint getCheckPoint(ReferenceContext referenceContext) {
 						 result.problems= new CategorizedProblem[len], 0,
 						 len);
 	}
-	result.count    = this.problemCount;
-	result.context = referenceContext;
+	result.count   		  = this.problemCount;
+	result.numberOfErrors = this.numberOfErrors;
+	result.context		  = referenceContext;
 	result.ignoreFurtherInvestigation = referenceContext.hasErrors();
 	return result;
 }
@@ -179,8 +182,9 @@ public void rollBack(CheckPoint cp) {
 	for (int i = cp.count; i < this.problemCount; i++) {
 		this.problemsMap.remove(this.problems[i]);
 	}
-	this.problems     = cp.problems;
-	this.problemCount = cp.count;
+	this.problems       = cp.problems;
+	this.problemCount   = cp.count;
+	this.numberOfErrors = cp.numberOfErrors;
 	if (!cp.ignoreFurtherInvestigation)
 		cp.context.resetErrorFlag();
 }
@@ -365,12 +369,7 @@ public CategorizedProblem[] getTasks() {
 }
 
 public boolean hasErrors() {
-	if (this.problems != null)
-		for (int i = 0; i < this.problemCount; i++) {
-			if (this.problems[i].isError())
-				return true;
-		}
-	return false;
+	return this.numberOfErrors != 0;
 }
 
 public boolean hasProblems() {
@@ -440,8 +439,12 @@ public void record(CategorizedProblem newProblem, ReferenceContext referenceCont
 		if (newProblem.isError() && !referenceContext.hasErrors()) this.firstErrors.add(newProblem);
 		this.problemsMap.put(newProblem, referenceContext);
 	}
-	if ((newProblem.getID() & IProblem.Syntax) != 0 && newProblem.isError())
-		this.hasSyntaxError = true;
+	if (newProblem.isError()) {
+		this.numberOfErrors++;
+		if ((newProblem.getID() & IProblem.Syntax) != 0) {
+			this.hasSyntaxError = true;
+		}
+	}
 }
 
 /**
@@ -463,7 +466,14 @@ private void recordTask(CategorizedProblem newProblem) {
 	}
 	this.tasks[this.taskCount++] = newProblem;
 }
-
+public void removeProblem(CategorizedProblem problem) {
+	if (this.problemsMap != null) this.problemsMap.remove(problem);
+	if (this.firstErrors != null) this.firstErrors.remove(problem);
+	if (problem.isError()) {
+		this.numberOfErrors--;
+	}
+	this.problemCount--;
+}
 public CompilationResult tagAsAccepted(){
 	this.hasBeenAccepted = true;
 	this.problemsMap = null; // flush
@@ -473,18 +483,16 @@ public CompilationResult tagAsAccepted(){
 
 //{ObjectTeams: some problems might have been reported overeagerly, filter them now:
 public void recheckProblems(IrritantSet[] foundIrritants) {
-	if (this.problemCount == 0) return;
-	CategorizedProblem[] checkedProblems = new CategorizedProblem[this.problemCount];
+	int allProblemCount = this.problemCount;
+	if (allProblemCount == 0) return;
 	int j = 0;
-	for (int i = 0; i < this.problemCount; i++)
+	for (int i = 0; i < allProblemCount; i++)
 		if (   (this.problems[i] instanceof DefaultProblem)
 			&& ((DefaultProblem)this.problems[i]).shouldBeReported(foundIrritants)) // pass foundIrritants so the effective suppressions can be recorded
-			checkedProblems[j++] = this.problems[i];
+			this.problems[j++] = this.problems[i]; // move remaining problems to front, not handled by removeProblem
 		else
-			this.problemsMap.remove(this.problems[i]);
-	if (j < this.problems.length)
-		System.arraycopy(checkedProblems, 0, this.problems = new CategorizedProblem[j], 0, j);
-	this.problemCount = j;
+			this.removeProblem(this.problems[i]);
+	// don't bother with shrinking this.problems, will be done by getProblems()
 }
 // SH}
 
