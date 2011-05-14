@@ -129,7 +129,8 @@ public class Lifting extends SwitchOnBaseTypeGenerator
     // ==== GENERAL API: names of liftTo methods: ====
 
     public static boolean isLiftToMethod (MethodBinding method) {
-		return CharOperation.prefixEquals(IOTConstants._OT_LIFT_TO, method.selector);
+		return    CharOperation.prefixEquals(IOTConstants._OT_LIFT_TO, method.selector)
+			   || CharOperation.prefixEquals(DeclaredLifting.OT_LIFT_DYNAMIC, method.selector);
 	}
 
 	public static char[] getLiftMethodName(TypeBinding roleType) {
@@ -589,7 +590,17 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         }
     */
 
-    /**
+    public static boolean isUnsafeLiftCall(TypeBinding exceptionType, ASTNode location) {
+		if (!(exceptionType instanceof ReferenceBinding)) // oops?
+			return false;
+		if (!CharOperation.equals(((ReferenceBinding)exceptionType).compoundName, IOTConstants.O_O_LIFTING_FAILED_EXCEPTION))
+			return false;
+		if (!(location instanceof MessageSend))
+			return false;
+		return isLiftToMethod(((MessageSend)location).binding);
+	}
+
+	/**
      * Create a liftTo method an add it to the team, including creation of bindings.
      *
      * @param teamTypeDeclaration type to add the lift method to.

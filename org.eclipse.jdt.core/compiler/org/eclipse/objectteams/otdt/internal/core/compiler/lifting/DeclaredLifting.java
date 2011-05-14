@@ -20,11 +20,13 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
@@ -703,6 +705,19 @@ public class DeclaredLifting implements IOTConstants {
 	
 			dynLiftMeth.statements = new Statement[] { gen.emptyStatement() }; // to be replaced below
 			int problemId = teamDecl.getTeamModel().canLiftingFail((ReferenceBinding) roleType.erasure());
+			if (problemId == 0) {
+				// look harder, in "<B base R>" the role R could be unbound
+				// yet otherwise unrelated sub-roles could bind to the same base B'
+				HashSet<ReferenceBinding> mappedBases = new HashSet<ReferenceBinding>();
+				for(ReferenceBinding boundRole : ((ReferenceBinding)roleType).roleModel.getBoundDescendants())
+					if (mappedBases.contains(boundRole.baseclass())) {
+						problemId = IProblem.CallinDespiteBindingAmbiguity;
+						break;
+					} else {
+						mappedBases.add(boundRole.baseclass());
+					}
+			}
+
 			if (problemId != 0)
 				AstEdit.addException(dynLiftMeth, 
 									 gen.qualifiedTypeReference(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION), 

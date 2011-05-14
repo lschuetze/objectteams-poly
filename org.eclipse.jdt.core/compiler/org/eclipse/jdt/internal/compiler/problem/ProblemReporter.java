@@ -143,6 +143,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ResultReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting.InstantiationPolicy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
@@ -7522,8 +7523,7 @@ public void unhandledException(TypeBinding exceptionType, ASTNode location) {
 			callinDespiteLiftingProblem(roleType, teamModel.canLiftingFail(roleType), location);
 		}
 		return;
-	} else if (   exceptionType instanceof ReferenceBinding 
-			   && CharOperation.equals(((ReferenceBinding)exceptionType).compoundName, IOTConstants.O_O_LIFTING_FAILED_EXCEPTION)) 
+	} else if (Lifting.isUnsafeLiftCall(exceptionType, location)) 
 	{
 		// add a specific link into the OTJLD to an otherwise normal error message:
 		this.handle(
