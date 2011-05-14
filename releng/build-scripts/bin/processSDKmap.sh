@@ -50,7 +50,7 @@ for p in org.eclipse.jdt.core.tests.builder \
 do
 	qual=`grep $p= $infile | sed -e "s|^.*=\(.*\),kmoir@dev.eclipse.org.*$|\1|"`
 	r=`echo $p | tr "." "_"`
-	echo $p=${p}_${!r},${qual}
+	echo $p=${p}_${!r}.${qual}
 done
 echo "==================================="
 
