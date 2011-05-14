@@ -353,11 +353,13 @@ public class Predicates extends AbstractOTJLDTest {
     // a super role has a binding base guard, a sub role has a base guard at class level
     // 9.1.1-otjld-class-predicate-7
     public void test911_classPredicate7() {
-       
+        Map customOptions = getCompilerOptions();
+        customOptions.put(CompilerOptions.OPTION_ReportHiddenLiftingProblem, CompilerOptions.IGNORE);
+
        runConformTest(
             new String[] {
 		"Team911cp7.java",
-			    "\n" +
+			    "import org.objectteams.LiftingFailedException;\n" +
 			    "@SuppressWarnings(\"abstractrelevantrole\")\n" +
 			    "public team class Team911cp7 {\n" +
 			    "    protected abstract class R1 playedBy T911cp7_1 {\n" +
@@ -376,8 +378,8 @@ public class Predicates extends AbstractOTJLDTest {
 			    "        }\n" +
 			    "        rm2 <- before test;\n" +
 			    "    }\n" +
-			    "    void register(T911cp7_1 as R1 o) {}\n" +
-			    "    public static void main(String[] args) {\n" +
+			    "    void register(T911cp7_1 as R1 o) throws LiftingFailedException {}\n" +
+			    "    public static void main(String[] args) throws LiftingFailedException {\n" +
 			    "        Team911cp7 t=new Team911cp7();\n" +
 			    "        t.activate();\n" +
 			    "        T911cp7_2 b= new T911cp7_2();\n" +
@@ -404,21 +406,29 @@ public class Predicates extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "Base2rm2Base2rm1");
+            "Base2rm2Base2rm1",
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
     }
 
     // a super role has a binding base guard, a sub role has a base guard at class level - non-adapted sub-role
     // 9.1.1-otjld-class-predicate-8
     public void test911_classPredicate8() {
-       
+        Map customOptions = getCompilerOptions();
+        customOptions.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+
        runConformTest(
             new String[] {
 		"Team911cp8.java",
-			    "\n" +
+			    "import org.objectteams.LiftingFailedException;\n" +
 			    "@SuppressWarnings(\"abstractrelevantrole\")\n" +
 			    "public team class Team911cp8 {\n" +
 			    "    protected abstract class R1 playedBy T911cp8_1 {\n" +
 			    "        abstract void rm1();\n" +
+			    "        @SuppressWarnings(\"hidden-lifting-problem\")\n" +
 			    "        rm1 <- after test\n" +
 			    "        base when (Team911cp8.this.hasRole(base, R1.class));\n" +
 			    "    }\n" +
@@ -433,7 +443,7 @@ public class Predicates extends AbstractOTJLDTest {
 			    "        }\n" +
 			    "        rm2 <- before test;\n" +
 			    "    }\n" +
-			    "    void register(T911cp8_1 as R1 o) {}\n" +
+			    "    void register(T911cp8_1 as R1 o) throws LiftingFailedException {}\n" +
 			    "    public static void main(String[] args) {\n" +
 			    "        Team911cp8 t=new Team911cp8();\n" +
 			    "        t.activate();\n" +
@@ -442,8 +452,9 @@ public class Predicates extends AbstractOTJLDTest {
 			    "        try {\n" +
 			    "            t.register(b);\n" +
 			    "        } catch (org.objectteams.LiftingFailedException lfe) {\n" +
-			    "            System.out.print(\"notLifted\");\n" +
+			    "            System.out.print(\".notLifted.\");\n" +
 			    "        }\n" +
+			    "        b.test();\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n",
@@ -467,12 +478,17 @@ public class Predicates extends AbstractOTJLDTest {
 			    "\n" +
 			    "public class T911cp8_3 extends T911cp8_1 {\n" +
 			    "    public void test() {\n" +
-			    "        System.out.print(\"Base3.\");\n" +
+			    "        System.out.print(\"Base3\");\n" +
 			    "    }\n" +
 			    "}\n" +
 			    "    \n"
             },
-            "Base3.notLifted");
+            "Base3.notLifted.Base3",
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/);
     }
     
     // a role class has a base predicate using base in the expression

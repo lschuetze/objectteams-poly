@@ -5097,7 +5097,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		"2. ERROR in Team4131ilba2d.java (at line 7)\n" + 
     		"	Team4131ilba2d (T4131ilba2d as R0 o) {}\n" + 
     		"	                ^^^^^^^^^^^^^^^^^\n" + 
-    		"Unhandled exception type LiftingFailedException, caused by an unsafe lifting translation (OTJLD 2.3.5).\n" + 
+    		"Unhandled exception type LiftingFailedException, caused by an unsafe lifting request (OTJLD 2.3.5).\n" + 
     		"----------\n");
     }
 

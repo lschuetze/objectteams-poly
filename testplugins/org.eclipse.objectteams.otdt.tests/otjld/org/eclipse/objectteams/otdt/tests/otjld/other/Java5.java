@@ -2449,7 +2449,7 @@ public class Java5 extends AbstractOTJLDTest {
             "Base1Base2");
     }
 
-    // a method has a type parameterized constrained by "base" - bound is not a role
+    // a method has a type parameter constrained by "base" - bound is not a role
     // A.1.9-otjld-basetype-parameter-2
     public void testA19_basetypeParameter2() {
         runNegativeTestMatching(
@@ -2469,10 +2469,10 @@ public class Java5 extends AbstractOTJLDTest {
             "2.3.2(e)");
     }
 
-    // a method has a type parameterized constrained by "base" - ambiguous lifting
+    // a method has a type parameter constrained by "base" - ambiguous lifting
     // A.1.9-otjld-basetype-parameter-3
     public void testA19_basetypeParameter3() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"TeamA19bp3.java",
 			    "\n" +
@@ -2500,10 +2500,57 @@ public class Java5 extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "2.3.4(b)");
+            "----------\n" + 
+    		"1. ERROR in TeamA19bp3.java (at line 12)\n" + 
+    		"	public <B base Role0> void test(B as Role0 o) {\n" + 
+    		"	                                ^^^^^^^^^^\n" + 
+    		"Unhandled exception type LiftingFailedException, caused by an unsafe lifting request (OTJLD 2.3.5).\n" + 
+    		"----------\n");
     }
 
-    // a method has a type parameterized constrained by "base" - incompatible invocation
+    // a method has a type parameter constrained by "base" - ambiguous lifting
+    // make sure secondary occurrences of LiftingFailedException are reported w/o OTJLD reference.
+    public void testA19_basetypeParameter3a() {
+        runNegativeTest(
+            new String[] {
+		"TeamA19bp3a.java",
+			    "import org.objectteams.LiftingFailedException;\n" +
+			    "public team class TeamA19bp3a {\n" +
+			    "    protected abstract class Role0 {\n" +
+			    "        protected abstract void print();\n" +
+			    "    }\n" +
+			    "    protected class Role1 extends Role0 playedBy TA19bp3a {\n" +
+			    "        print -> print1;\n" +
+			    "    }\n" +
+			    "    protected class Role2 extends Role0 playedBy TA19bp3a {\n" +
+			    "        print -> print1;\n" +
+			    "    }\n" +
+			    "    public <B base Role0> void test(B as Role0 o) throws LiftingFailedException {\n" +
+			    "        o.print();\n" +
+			    "    }\n" +
+			    "    public void client(TA19bp3a b) {\n" +
+			    "        test(b);\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"TA19bp3a.java",
+			    "\n" +
+			    "public class TA19bp3a {\n" +
+			    "    void print1() {\n" +
+			    "        System.out.print(\"Base1\");\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "----------\n" + 
+    		"1. ERROR in TeamA19bp3a.java (at line 16)\n" + 
+    		"	test(b);\n" + 
+    		"	^^^^^^^\n" + 
+    		"Unhandled exception type LiftingFailedException\n" + 
+    		"----------\n");
+    }
+
+    // a method has a type parameter constrained by "base" - incompatible invocation
     // A.1.9-otjld-basetype-parameter-4
     public void testA19_basetypeParameter4() {
         runNegativeTestMatching(
@@ -2554,7 +2601,7 @@ public class Java5 extends AbstractOTJLDTest {
     		"----------\n");
     }
 
-    // a method has a type parameterized constrained by "base" - nested team
+    // a method has a type parameter constrained by "base" - nested team
     // A.1.9-otjld-basetype-parameter-5
     public void testA19_basetypeParameter5() {
        
@@ -2606,7 +2653,7 @@ public class Java5 extends AbstractOTJLDTest {
             "Base1Base2");
     }
 
-    // a method has a type parameterized constrained by "base" - some inheritance used
+    // a method has a type parameter constrained by "base" - some inheritance used
     // A.1.9-otjld-basetype-parameter-6
     public void testA19_basetypeParameter6() {
        
@@ -2667,7 +2714,7 @@ public class Java5 extends AbstractOTJLDTest {
             "Base1Base2aBase1");
     }
 
-    // a method has a type parameterized constrained by "base" , using the type variable
+    // a method has a type parameter constrained by "base" , using the type variable
     // A.1.9-otjld-basetype-parameter-7
     public void testA19_basetypeParameter7() {
        
@@ -2727,7 +2774,7 @@ public class Java5 extends AbstractOTJLDTest {
             "base1:Role1:Base1-base2:Role2:Base2");
     }
 
-    // a method has a type parameterized constrained by "base" - deferred lifting
+    // a method has a type parameter constrained by "base" - deferred lifting
     // A.1.9-otjld-basetype-parameter-8
     public void testA19_basetypeParameter8() {
        
@@ -2780,7 +2827,7 @@ public class Java5 extends AbstractOTJLDTest {
             "Base1Base2");
     }
 
-    // a method has a type parameterized constrained by "base" - team inheritance involved
+    // a method has a type parameter constrained by "base" - team inheritance involved
     // A.1.9-otjld-basetype-parameter-9
     public void testA19_basetypeParameter9() {
        
