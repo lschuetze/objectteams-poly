@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
+import org.eclipse.jdt.internal.ui.text.correction.LocalCorrectionsSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -120,6 +121,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			return true;
 // javadoc:
 		case IProblem.JavadocMissingRoleTag:
+// new IProblem for same real problem:
+		case IProblem.UnhandledLiftingFailedException:
 			return true;
 		}
 		return false;
@@ -393,6 +396,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			// javadoc:
 			case IProblem.JavadocMissingRoleTag:
 				javaProposal= JavadocProposalSubProcessor.addRoleTag(cu, problem.getProblemArguments(), (TypeDeclaration)enclosingType);
+				break;
+			// new IProblem for same real problem:
+			case IProblem.UnhandledLiftingFailedException:
+				LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(context, problem, proposals);
 				break;
 			}
 		} catch (ClassCastException cce) { /* could not find an expected node */ }
