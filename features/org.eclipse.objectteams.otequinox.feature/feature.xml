@@ -22,7 +22,7 @@ Author: Stephan Herrmann.
 
    <url>
       <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/2.0"/>
-      <discovery label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/2.0"/>
+      <discovery label="Orbit Repository" url="http://download.eclipse.org/tools/orbit/downloads/drops/R20100519200754/repository"/>
    </url>
 
    <plugin
@@ -40,12 +40,12 @@ Author: Stephan Herrmann.
          version="0.0.0"
          unpack="false"/>
 
-   <plugin
+   <!--plugin
          id="org.apache.bcel"
          download-size="0"
          install-size="0"
          version="0.0.0"
-         unpack="false"/>
+         unpack="false"/-->
 
    <plugin
          id="org.eclipse.objectteams.otequinox"
