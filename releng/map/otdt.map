@@ -40,9 +40,6 @@ plugin@org.eclipse.objectteams.otdt.samples,2.0.0=SVN,url=file://localhost/svnro
 
 !** Consume BCEL from Orbit: **!
 plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20110124210048/repository
-! existing files on build.eclipse.org:
-!/home/data/httpd/download.eclipse.org/tools/orbit/downloads/drops/S20100308015149/drops/bundles/org.apache.bcel_5.2.0.v200803061811.jar
-!/home/data/httpd/download.eclipse.org/tools/orbit/downloads/drops/S20100519200754/repository/plugins/org.apache.bcel_5.2.0.v201005080400.jar
 
 !***************  OTDT Test CONTRIBUTION  ******************************************************** 
 
