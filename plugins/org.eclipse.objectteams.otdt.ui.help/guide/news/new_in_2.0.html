@@ -159,6 +159,42 @@
    		</p>
     </td>
   </tr>
+   <tr>
+    <td><p align="right"><b>Dealing with lifting problems</b><br>
+        <span class="since">since&nbsp;2.0RC1</span><br>
+        <a class="buglink" title="consider changing LiftingFailedException to a checked exception" href="https://bugs.eclipse.org/337413">337413</a></p></td>
+    <td><p>Whenever lifting fails (due to a role binding ambiguity or an abstract relevant role) a <code>LiftingFailedException</code> is thrown
+    		from the Object Teams runtime. This exception has now been changed to a checked exception to alert clients of problematic code
+    		of the chance of failure. The consequences are defined in the new section
+			<a class="otjldlink" href="http://www.objectteams.org/def/1.3/s2.html#s2.3.5">OTJLD &sect;2.3.5</a>.			
+   		</p>
+   		<p>The compiler now has two general ways to signal lifting problems:
+   			<ul>
+   			<li>Unhandled exception LiftingFailedException</code></li>
+   			<li>Unsafe callin mapping, because lifting to role {0} may fail due to ...</li>
+   			</ul>
+   			<strong>If none of these messages are given, lifting can be assumed to be safe.</strong> 
+   		</p>
+   		<p>Application code with lifting problems may choose from different strategies:
+   			<ul>
+   			<li>Avoid abstractness for bound roles:
+   				<ul><li>Add method bodies which log the problem.<br/>
+   					Benefit: unexpected situations will actually be detected.</li>
+   				<li>Remove abstract methods and require clients to cast to a specific role type.<br/>
+  					Benefit: client is now clearly repsonsible for dealing with potential <code>ClassCastException</code>
+  					in cases where lifting produces an unexpected result.</li>
+  				</ul></li>
+  			<li>Team methods with declared lifting may choose to declare <code>LiftingFailedException</code><br/>
+  					Benefit: client is alerted of the chance of failure, must handle unexpected situations.</li>
+			<li>Callin bindings with unsafe lifting may in special situations pass through using
+				<code>@SuppressWarnings("hidden-lifting-problem")</code><br/>
+					Benefit owner of the role has to explicitly assert that s/he is aware of the chance that
+					the callin binding will not fire due to a lifting problem.</li>
+			<li>Revise the role hierarchy to avoid abstract relevant roles and potential binding ambiguities.</li>
+			</ul>  					
+   		</p>
+    </td>
+  </tr>
   <tr><td colspan="2" id="compiler"><h2>Compiler</h2></td></tr>
   <tr>
     <td><p align="right"><b>Severity of write decapsulation</b><br>
