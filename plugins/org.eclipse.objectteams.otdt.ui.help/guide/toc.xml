@@ -34,6 +34,11 @@
 			<topic label="Team monitor view" href="guide/teammonitor.html"/>
 			<topic label="Stepping through OT/J code" href="guide/stepping.html"/>
 		</topic>
+		<topic label="What's new" href="guide/whatsnew.html">
+			<topic label="OTDT 2.0 New&amp;Noteworthy" href="guide/news/new_in_2.0.html"/>
+			<topic label="OTDT 0.7.1 New&amp;Noteworthy" href="guide/news/new_in_0.7.1.html"/>
+			<topic label="OTDT 0.7 New&amp;Noteworthy" href="guide/news/new_in_0.7.html"/>
+		</topic>
 	</topic>
 	<topic label="Object Teams Language Definition" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/index.html">
 		<topic label="Teams and Roles" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/s1.html"/>

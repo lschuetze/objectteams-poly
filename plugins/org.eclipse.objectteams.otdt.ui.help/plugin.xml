@@ -16,6 +16,12 @@
          content="intro/tutorialsExtensionContentOT.xml"/>
    </extension>
 
+   <extension point="org.eclipse.ui.intro.configExtension">
+      <configExtension
+         configId="org.eclipse.ui.intro.universalConfig"
+         content="intro/whatsnewExtensionContent.xml"/>
+   </extension>
+
 <!-- OTDT cheat sheet extension for small OT example -->   
    <extension point="org.eclipse.ui.cheatsheets.cheatSheetContent">
      <cheatsheet
