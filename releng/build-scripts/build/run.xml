@@ -122,6 +122,12 @@ should test be run (true|false)?
 		<antcall target="createOTDTEclipse"/>
 	</target>
 
+	<target name="ot-compiler-build" depends="setupProperties,checkOS" description="build only the compiler (for debugging the build)">
+		<echo message="Starting BuildProcess in ${build.root.dir}"/>
+		<antcall target="verifyAntInstall"/>
+		<antcall target="createOTCompilerEclipse"/>
+	</target>
+
 	<target name="ot-junit-run" depends="setupProperties,checkOS" description="Run tests without building">
 		<echo message="Starting Testrun ${test.root.dir}"/>
 		<antcall target="runAllTests" />
@@ -206,6 +212,7 @@ should test be run (true|false)?
 	            <arg value="-Dbuilder=${builder-otcompiler}"/>
 	            <arg value="-D${installmode}=true"/> <!-- <- obsolete? -->
 		    	<arg value="-Dcomponent.short=OT-Compiler"/>
+			<arg value="-DotdtUpdatesDir=${otdtUpdatesDir}"/>
 	            <arg value="-Dconfigs=*,*,*"/>
 	            <arg value="-Dbaseos=${os}"/>
 	            <arg value="-Dbasews=${ws}"/>
@@ -214,7 +221,7 @@ should test be run (true|false)?
 	            <arg value="-Dtest.eclipseDir=${test.eclipseDir}"/>
 	            <arg value="-DmapVersionTag=${mapVersionTag}"/>
 	            <arg value="-DpathToMapFile=${pathToMapFile}"/>
-		    	<arg value="-DmapFileName=ot-compiler.map"/>
+		    	<arg value="-DmapFileName=otdt.map"/>
 		    	<arg value="-Dsvn.repository.url=${svn.repository.url}"/>
 	            <arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 	            <arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
@@ -222,6 +229,11 @@ should test be run (true|false)?
 	            <jvmarg value="${vm.args}"/>
 	            <jvmarg value="${vm.args2}"/>
         </java>
+        <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
+            <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
+            <property name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
+            <property name="targetEclipseDir" value="${baseLocation}"/>
+        </ant>
 		<!-- At this point a zip file containing the new jdt.core-plugin exists in 
 		     ${build.root.dir}/org.eclipse.objectteams.otdt-${buildId}.zip
 		     which has already been installed into ${baseLocation} as to replace the 

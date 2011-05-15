@@ -27,7 +27,7 @@
 
 		<ant antfile="${genericTargets}" target="${target}" >
 			<property name="type" value="feature" />
-			<property name="id" value="org.eclipse.objectteams.otdt" />
+			<property name="id" value="org.eclipse.objectteams.otdt.core.patch" />
 		</ant>
 	</target>
 
@@ -37,11 +37,16 @@
 	<!-- ${assembleScriptName}) but may also add pre and post processing -->
 	<!-- Add one target for each root element and each configuration -->
 	<!-- ===================================================================== -->
-	<target name="assemble.org.eclipse.objectteams.otdt">
-		<ant antfile="${assembleScriptName}" dir="${buildDirectory}">
-			<property name="zipargs" value="" />
-		</ant>
+	<target name="assemble.org.eclipse.objectteams.otdt.core.patch.group.group.group">
+		<echo message="Skipping zip assembly"/>
 	</target>
+
+	<property name="assemble.org.eclipse.objectteams.otdt.core.patch.p2" value="true" />
+ 	<target   name="assemble.org.eclipse.objectteams.otdt.core.patch.p2">
+        <ant antfile="${assembleScriptName}" dir="${buildDirectory}">
+			<property name="p2.build.repo" value="file://${otdtUpdatesDir}"/>
+		</ant>
+ 	</target>
 
 	<!-- ===================================================================== -->
 	<!-- Check out map files from correct repository -->
@@ -76,9 +81,6 @@
 	<!-- Steps to do after fetching the build elements -->
 	<!-- ===================================================================== -->
 	<target name="postFetch">
-		<property name="meta.dir" value="${buildDirectory}/plugins/org.eclipse.jdt.core/META-INF"/>
-		<echo message="### Use Bootstrap_MANIFEST.MF in ${meta.dir} ###" />
-		<move file="${meta.dir}/Bootstrap_MANIFEST.MF" tofile="${meta.dir}/MANIFEST.MF" overwrite="yes" />
 	</target>
 
 	<!-- ===================================================================== -->
@@ -123,10 +125,6 @@
 	<!-- Steps to do after the build is done. -->
 	<!-- ===================================================================== -->
 	<target name="postBuild">
-		<copy file="${buildDirectory}/${buildLabel}/org.eclipse.objectteams.otdt-${buildId}.zip" tofile="${build.root.dir}/org.eclipse.objectteams.otdt-${buildId}.zip" />
-
-		<echo message="### Insert OT Compiler in ${baseLocation} ###"/>
-		<unzip src="${build.root.dir}/org.eclipse.objectteams.otdt-${buildId}.zip" dest="${baseLocation}"/>
 	</target>
 
 	<!-- ===================================================================== -->
