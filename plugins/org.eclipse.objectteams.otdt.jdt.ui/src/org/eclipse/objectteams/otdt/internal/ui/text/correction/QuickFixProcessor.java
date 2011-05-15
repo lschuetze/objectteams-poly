@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -47,18 +48,21 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.ICommandAccess;
-import org.eclipse.jdt.internal.ui.text.correction.LocalCorrectionsSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.ModifierCorrectionSubProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.ChangeMethodSignatureProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickFixProcessor;
 import org.eclipse.objectteams.otdt.internal.ui.assist.OTQuickFixes;
+import org.eclipse.swt.graphics.Image;
 
 /**
  * Processor for OT/J-specific quickfixes, which mostly delegates to specific sub-processors:
@@ -399,7 +403,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			// new IProblem for same real problem:
 			case IProblem.UnhandledLiftingFailedException:
-				LocalCorrectionsSubProcessor.addUncaughtExceptionProposals(context, problem, proposals);
+				addUncaughtExceptionProposal(context, problem, selectedNode, proposals);
 				break;
 			}
 		} catch (ClassCastException cce) { /* could not find an expected node */ }
@@ -520,5 +524,51 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			depth++;
 		}
 		return ""; //$NON-NLS-1$
+	}
+
+	private void addUncaughtExceptionProposal(IInvocationContext context, IProblemLocation problem, ASTNode selectedNode, Collection<ICommandAccess> proposals) 
+	{
+		// essentially the trailing block of 
+		// org.eclipse.jdt.internal.ui.text.correction.LocalCorrectionsSubProcessor.addUncaughtExceptionProposals()
+		while (selectedNode != null && !(selectedNode instanceof MethodDeclaration)) {
+			selectedNode= selectedNode.getParent();
+		}
+		if (selectedNode == null) {
+			return;
+		}
+
+		MethodDeclaration methodDecl= (MethodDeclaration) selectedNode;
+		
+		ICompilationUnit cu= context.getCompilationUnit();
+		CompilationUnit astRoot= context.getASTRoot();
+		
+		IMethodBinding binding= methodDecl.resolveBinding();
+		boolean isApplicable= (binding != null);
+		if (isApplicable) {
+			IMethodBinding overriddenMethod= Bindings.findOverriddenMethod(binding, true);
+			if (overriddenMethod != null ) {
+				isApplicable= overriddenMethod.getDeclaringClass().isFromSource();
+			}
+		}
+		if (isApplicable) {
+			ITypeBinding uncaughtException = astRoot.getAST().resolveWellKnownType("org.objectteams.LiftingFailedException"); //$NON-NLS-1$
+			ChangeMethodSignatureProposal.ChangeDescription[] desc = {new ChangeMethodSignatureProposal.InsertDescription(uncaughtException, "")}; //$NON-NLS-1$
+
+			String label= org.eclipse.jdt.internal.ui.text.correction.CorrectionMessages.LocalCorrectionsSubProcessor_addthrows_description;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
+
+			ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, cu, astRoot, binding, null, desc, 8, image);
+			addExceptionTypeLinkProposals(proposal, uncaughtException, proposal.getExceptionTypeGroupId(1));
+			proposal.setCommandId("org.eclipse.objectteams.otdt.jdt.ui.correction.addThrowsDecl"); //$NON-NLS-1$
+			proposals.add(proposal);
+		}
+	}
+
+	private static void addExceptionTypeLinkProposals(LinkedCorrectionProposal proposal, ITypeBinding exc, String key) {
+		// all super classes except Object
+		while (exc != null && !"java.lang.Object".equals(exc.getQualifiedName())) { //$NON-NLS-1$
+			proposal.addLinkedPositionProposal(key, exc);
+			exc= exc.getSuperclass();
+		}
 	}
 }
