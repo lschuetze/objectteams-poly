@@ -95,11 +95,12 @@ should test be run (true|false)?
 
 	<target name="INFO">
 		<echo>Usage:
-	ant -f run.xml ot-junit-all   ->    runs OTDT Build and Testprocess
-	ant -f run.xml ot-junit-otdt  ->    runs OTDT Build and Testprocess excluding jdt tests
-	ant -f run.xml ot-junit-build ->    runs just OTDT Buildprocess
-	ant -f run.xml ot-junit-run   ->    runs just OTDT Tests w/o TestSetup
-	</echo>
+	ant -f run.xml ot-junit-all   	 ->		runs OTDT Build and Testprocess
+	ant -f run.xml ot-junit-otdt  	 ->		runs OTDT Build and Testprocess excluding jdt tests
+	ant -f run.xml ot-junit-build 	 ->		runs just OTDT Buildprocess
+	ant -f run.xml ot-compiler-build ->		just build the compiler
+	ant -f run.xml ot-junit-run   	 ->		runs just OTDT Tests w/o TestSetup
+		</echo>
 	</target>
 
 	<target name="ot-junit-all" depends="setupProperties,checkOS" description="Build all and run all tests.">
@@ -212,7 +213,7 @@ should test be run (true|false)?
 	            <arg value="-Dbuilder=${builder-otcompiler}"/>
 	            <arg value="-D${installmode}=true"/> <!-- <- obsolete? -->
 		    	<arg value="-Dcomponent.short=OT-Compiler"/>
-			<arg value="-DotdtUpdatesDir=${otdtUpdatesDir}"/>
+				<arg value="-DotdtUpdatesDir=${otdtUpdatesDir}"/>
 	            <arg value="-Dconfigs=*,*,*"/>
 	            <arg value="-Dbaseos=${os}"/>
 	            <arg value="-Dbasews=${ws}"/>
@@ -229,16 +230,12 @@ should test be run (true|false)?
 	            <jvmarg value="${vm.args}"/>
 	            <jvmarg value="${vm.args2}"/>
         </java>
+		<!-- Now we should have an update site with the patch feature, time to install it into base: -->
         <ant antfile="${OTScriptDir}/p2helper.xml" target="installFeature" dir="${baseLocation}">
             <property name="feature" value="org.eclipse.objectteams.otdt.core.patch.feature.group"/>
             <property name="sourceUpdatesDir" value="${otdtUpdatesDir}"/>
             <property name="targetEclipseDir" value="${baseLocation}"/>
         </ant>
-		<!-- At this point a zip file containing the new jdt.core-plugin exists in 
-		     ${build.root.dir}/org.eclipse.objectteams.otdt-${buildId}.zip
-		     which has already been installed into ${baseLocation} as to replace the 
-		     original plugin jar of exact same name (see OT-Compiler/customTargets.xml#postBuild)..
-		  -->
     </target>
 
 	<!-- ==== BUILD STAGE 2: ==== -->
