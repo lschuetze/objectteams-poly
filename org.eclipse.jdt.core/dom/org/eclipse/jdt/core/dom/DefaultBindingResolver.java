@@ -67,6 +67,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseAllocationExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
@@ -1955,6 +1956,11 @@ class DefaultBindingResolver extends BindingResolver {
 			} else if ("java.lang.AssertionError".equals(name)) { //$NON-NLS-1$
 				typeBinding = this.getTypeBinding(this.scope.getType(TypeConstants.JAVA_LANG_ASSERTIONERROR, 3));
 			}
+//{ObjectTeams: opportunistically adding a few types we need (e.g., for QuickFixes):
+			if ("org.objectteams.LiftingFailedException".equals(name)) { //$NON-NLS-1$
+				typeBinding = this.getTypeBinding(this.scope.getType(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION, 3));
+			}
+// SH}
 		} catch (AbortCompilation e) {
 			// ignore missing types
 		}
