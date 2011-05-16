@@ -30,17 +30,16 @@ import org.eclipse.jdt.internal.formatter.align.Alignment;
  */
 
 public class DefaultCodeFormatterOptions {
-	
 	public static final int TAB = 1;
 	public static final int SPACE = 2;
 	public static final int MIXED = 4;
-	
+
 	public static DefaultCodeFormatterOptions getDefaultSettings() {
 		DefaultCodeFormatterOptions options = new DefaultCodeFormatterOptions();
 		options.setDefaultSettings();
 		return options;
 	}
-	
+
 	public static DefaultCodeFormatterOptions getEclipseDefaultSettings() {
 		DefaultCodeFormatterOptions options = new DefaultCodeFormatterOptions();
 		options.setEclipseDefaultSettings();
@@ -80,9 +79,9 @@ public class DefaultCodeFormatterOptions {
 	public int alignment_for_superinterfaces_in_type_declaration;
 	public int alignment_for_throws_clause_in_constructor_declaration;
 	public int alignment_for_throws_clause_in_method_declaration;
-	
+
 	public boolean align_type_members_on_columns;
-	
+
 	public String brace_position_for_annotation_type_declaration;
 	public String brace_position_for_anonymous_type_declaration;
 	public String brace_position_for_array_initializer;
@@ -94,10 +93,10 @@ public class DefaultCodeFormatterOptions {
 	public String brace_position_for_method_declaration;
 	public String brace_position_for_type_declaration;
 	public String brace_position_for_switch;
-	
+
 	public int continuation_indentation;
 	public int continuation_indentation_for_array_initializer;
-	
+
 	public int blank_lines_after_imports;
 	public int blank_lines_after_package;
 	public int blank_lines_before_field;
@@ -110,7 +109,7 @@ public class DefaultCodeFormatterOptions {
 	public int blank_lines_between_import_groups;
 	public int blank_lines_between_type_declarations;
 	public int blank_lines_at_beginning_of_method_body;
-	
+
 	public boolean comment_clear_blank_lines_in_javadoc_comment;
 	public boolean comment_clear_blank_lines_in_block_comment;
 	public boolean comment_new_lines_at_block_boundaries;
@@ -163,7 +162,7 @@ public class DefaultCodeFormatterOptions {
 	public boolean insert_new_line_before_while_in_do_statement;
 	public boolean insert_new_line_in_empty_anonymous_type_declaration;
 	public boolean insert_new_line_in_empty_block;
-	public boolean insert_new_line_in_empty_annotation_declaration;	
+	public boolean insert_new_line_in_empty_annotation_declaration;
 	public boolean insert_new_line_in_empty_enum_constant;
 	public boolean insert_new_line_in_empty_enum_declaration;
 	public boolean insert_new_line_in_empty_method_body;
@@ -344,7 +343,7 @@ public class DefaultCodeFormatterOptions {
 
 	public int initial_indentation_level;
 	public String line_separator;
-	
+
 	private DefaultCodeFormatterOptions() {
 		// cannot be instantiated
 	}
