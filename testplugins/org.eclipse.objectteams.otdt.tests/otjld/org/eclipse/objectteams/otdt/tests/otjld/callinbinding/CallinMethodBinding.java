@@ -5054,12 +5054,12 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		"2. ERROR in Team4131ilba1.java (at line 5)\n" + 
     		"	rm <- after test;\n" + 
     		"	^^\n" + 
-    		"Unsafe callin mapping, because lifting to role Team4131ilba1.R0 may fail due to a reported binding ambiguity (OTJLD 2.3.5(c)).\n" + 
+    		"Unsafe callin binding, because lifting to role Team4131ilba1.R0 may fail due to a reported binding ambiguity (OTJLD 2.3.5(c)).\n" + 
     		"----------\n" + 
     		"3. ERROR in Team4131ilba1.java (at line 5)\n" + 
     		"	rm <- after test;\n" + 
     		"	^^\n" + 
-    		"Unsafe callin mapping, because lifting to role Team4131ilba1.R0 may fail due to a reported binding ambiguity (OTJLD 2.3.5(c)).\n" + 
+    		"Unsafe callin binding, because lifting to role Team4131ilba1.R0 may fail due to a reported binding ambiguity (OTJLD 2.3.5(c)).\n" + 
     		"----------\n");
     }
 
