@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ASTRewriteFlattener.java 23214 2010-01-07 19:51:00Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation

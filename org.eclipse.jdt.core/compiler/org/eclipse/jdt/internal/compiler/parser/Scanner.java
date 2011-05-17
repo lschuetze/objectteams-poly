@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Scanner.java 23290 2010-01-22 18:20:54Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation

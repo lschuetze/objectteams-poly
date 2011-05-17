@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ASTParser.java 23401 2010-02-02 23:56:05Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation

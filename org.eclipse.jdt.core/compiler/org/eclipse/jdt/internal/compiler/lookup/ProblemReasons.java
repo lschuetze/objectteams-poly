@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ProblemReasons.java 19873 2009-04-13 16:51:05Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
