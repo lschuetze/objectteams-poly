@@ -4,14 +4,14 @@
 		id="org.eclipse.objectteams.otdt"
 		name="Object Teams introduction"
 		alt-style="css/swt-intro.properties"
-		style="css/overview.css"
+		style="css/welcome.css"
 		path="overview/@">
 
 		<group id="content-group" style-id="content-group">
 			<link 
 				style-id="content-link" 
 				label="Object Teams introduction"
-				url="http://org.eclipse.ui.intro/showHelpTopic?id=//org.eclipse.objectteams.otdt.ui.help/ot.html"
+				url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.objectteams.otdt.ui.help/ot.html"
 				id="ot-overview">
 				<text>Learn about Object Teams and the OTDT</text>
 			</link>

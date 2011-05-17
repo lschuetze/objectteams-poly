@@ -4,7 +4,7 @@
   <extensionContent id="org.eclipse.pde" 
   					name="OT Tutorial Extension" 
   					alt-style="css/swt-intro.properties" 
-  					style="css/tutorials.css" 
+  					style="css/welcome.css" 
   					path="tutorials/@">
 	<group label="Object Teams Development" id="ot" style-id="content-group">
       <link url="http://org.eclipse.ui.intro/showStandby?partId=org.eclipse.platform.cheatsheet&amp;input=org.eclipse.objectteams.otdt.ui.help.cheatsheets.SimpleOTApplication"

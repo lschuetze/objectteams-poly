@@ -4,15 +4,15 @@
 		id="org.eclipse.objectteams.otdt.whatsnew"
 		name="Object Teams News"
 		alt-style="css/swt-intro.properties"
-		style="css/overview.css"
+		style="css/welcome.css"
 		path="whatsnew/@">
 
 		<group id="content-group" style-id="content-group">
 			<link 
 				style-id="content-link" 
 				label="Object Teams News"
-				url="http://org.eclipse.ui.intro/showHelpTopic?id=//org.eclipse.objectteams.otdt.ui.help/guide/whatsnew.html"
-				id="ot-overview">
+				url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.objectteams.otdt.ui.help/guide/whatsnew.html"
+				id="ot-news">
 				<text>Find out about significant changes made to the Object Teams Development Tooling</text>
 			</link>
     	</group>
