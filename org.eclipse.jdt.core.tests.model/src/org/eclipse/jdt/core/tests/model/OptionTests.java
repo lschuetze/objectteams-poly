@@ -43,6 +43,7 @@ public OptionTests(String name) {
 	super(name);
 }
 static {
+//	TESTS_NAMES = new String[] {"testBug324987_Project02"};
 //		TESTS_NUMBERS = new int[] { 125360 };
 //		TESTS_RANGE = new int[] { 4, -1 };
 }
@@ -747,8 +748,8 @@ public void testBug324987_Project02() throws CoreException {
 		// Verify that obsolete preference is not stored
 		assertNull(
 				"Unexpected value for formatter deprecated option 'org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_member'", 
-				project.getEclipsePreferences().get(obsoleteOption, null));
 		// Verify that project obsolete option is well retrieved
+				project.getEclipsePreferences().get(obsoleteOption, null));
 		assertEquals(
 				"Unexpected value for formatter deprecated option 'org.eclipse.jdt.core.formatter.insert_new_line_after_annotation_on_member'", 
 				JavaCore.INSERT,
