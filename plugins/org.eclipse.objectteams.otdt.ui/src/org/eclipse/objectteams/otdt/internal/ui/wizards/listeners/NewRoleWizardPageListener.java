@@ -345,16 +345,23 @@ public class NewRoleWizardPageListener extends NewTypeWizardPageListener
         if (baseclassName.length() == 0) 
             return StatusInfo.OK_STATUS; // a Role without a playedBy relation is just fine
 
-        // TODO(SH): check conventions only if base class doesn't exist!
-        // ERRORS:
-        IStatus validJava = JavaConventions.validateJavaTypeName(baseclassName);
-        if (validJava.getSeverity() == IStatus.ERROR) 
-            return new StatusInfo(IStatus.ERROR,
-            		Messages.format(org.eclipse.jdt.internal.ui.wizards.NewWizardMessages.NewTypeWizardPage_error_InvalidTypeName, 
-       				validJava.getMessage())); 
+        IType enclosingType = getObservedPage().getEnclosingType();
+        String[][] baseType = null;
+        try {
+        	if (enclosingType != null)
+        		baseType = enclosingType.resolveType(baseclassName);
+		} catch (JavaModelException e) { /* nop */ }
+        IStatus validJava = StatusInfo.OK_STATUS;
+        if (baseType == null) { // check valid base class name only if base class doesn't yet exist
+	        // ERRORS:
+	        validJava = JavaConventions.validateJavaTypeName(baseclassName);
+	        if (validJava.getSeverity() == IStatus.ERROR) 
+	            return new StatusInfo(IStatus.ERROR,
+	            		Messages.format(org.eclipse.jdt.internal.ui.wizards.NewWizardMessages.NewTypeWizardPage_error_InvalidTypeName, 
+	       				validJava.getMessage()));
+        }
         
         // check shadowing (ERROR):
-        IType enclosingType = getObservedPage().getEnclosingType();
         IStatus status = validateBaseClassName(enclosingType, baseclassName);
         if (!status.isOK())
         	return status;
