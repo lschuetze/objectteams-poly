@@ -13,7 +13,7 @@ plugin@org.eclipse.objectteams.otdt=SVN,url=file://localhost/svnroot/tools/org.e
 
 plugin@org.eclipse.objectteams.otdt.debug,2.0.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug,tag=tags/builds/201105161939
 plugin@org.eclipse.objectteams.otdt.debug.ui,2.0.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug.ui,tag=tags/builds/201105161939
-plugin@org.eclipse.objectteams.otdt.ui,2.0.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.ui,tag=tags/builds/201105161939
+plugin@org.eclipse.objectteams.otdt.ui,2.0.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.ui
 plugin@org.eclipse.objectteams.otdt.metrics,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.metrics,tag=tags/builds/201101290806
 
 plugin@org.eclipse.objectteams.runtime=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.runtime,tag=tags/builds/201105161939
