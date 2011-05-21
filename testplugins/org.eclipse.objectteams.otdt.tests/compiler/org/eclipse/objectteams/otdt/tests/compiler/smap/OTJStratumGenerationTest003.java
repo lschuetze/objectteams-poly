@@ -25,11 +25,15 @@ import java.util.List;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.FileInfo;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.LineInfo;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SmapStratum;
+import org.eclipse.objectteams.otdt.internal.core.compiler.smap.TeamSmapGenerator;
 
 /**
  * @author ike
@@ -42,6 +46,10 @@ public class OTJStratumGenerationTest003 extends AbstractSourceMapGeneratorTest
 	private org.eclipse.jdt.core.ICompilationUnit _role;
 	private String _packagePath;
 	
+	static {
+//		TESTS_NAMES = new String[] { "testSmapGeneration3" };
+	}
+	
     public OTJStratumGenerationTest003(String name)
     {
         super(name);
@@ -49,7 +57,7 @@ public class OTJStratumGenerationTest003 extends AbstractSourceMapGeneratorTest
 
     public static Test suite()
     {
-        return new Suite(OTJStratumGenerationTest003.class);
+    	return buildModelTestSuite(OTJStratumGenerationTest003.class);
     }
     
     protected void setUp() throws Exception
@@ -152,4 +160,99 @@ public class OTJStratumGenerationTest003 extends AbstractSourceMapGeneratorTest
             fail(e.getMessage());
         }
     }
+
+    public void testSmapGeneration3()
+    {
+        TYPENAME = "SubTeam";
+        String subPackage = "bug316601";
+        _enclosingTypename = null;
+        
+        String teamSourceName = "SubTeam.java";
+        String role2SourceName = "Role2.java";
+        
+        SmapStratum stratum_subteam = new SmapStratum(ISMAPConstants.OTJ_STRATUM_NAME);
+        
+		FileInfo fileInfo2 = stratum_subteam.getOrCreateFileInfo(
+        		role2SourceName, _packagePath + '/' + subPackage + '/' + TYPENAME + '/' + role2SourceName);
+        
+        LineInfo lineInfo3 = new LineInfo(3,17);  // Role2 header (3) mapped to synthetic line 17 (for lifting)
+        
+        fileInfo2.addLineInfo(lineInfo3);
+        
+        
+        FileInfo fileInfo1 = stratum_subteam.getOrCreateFileInfo(
+        		teamSourceName, _packagePath + '/' + subPackage + '/' + teamSourceName);
+        
+        LineInfo lineInfo1 = new LineInfo(1,1);  // 16 lines of subteam verbatim
+        lineInfo1.setRepeatCount(16);
+        LineInfo lineInfo2 = new LineInfo(ISMAPConstants.STEP_INTO_LINENUMBER,ISMAPConstants.STEP_INTO_LINENUMBER);
+        lineInfo2.setRepeatCount(2);
+        
+        fileInfo1.addLineInfo(lineInfo1);
+        fileInfo1.addLineInfo(lineInfo2);
+        stratum_subteam.optimize();
+        
+        List<SmapStratum> strata_role1 = new ArrayList<SmapStratum>();
+        strata_role1.add(stratum_subteam);
+        
+        expectedStrata.put(TYPENAME, strata_role1);
+
+        try
+        {
+            ICompilationUnit superTeam = getCompilationUnit(
+                    getTestProjectDir(),
+                    "src",
+                    _packagePath+'.'+subPackage,
+                    "SuperTeam.java");
+            
+            ICompilationUnit superRole1 = getCompilationUnit(
+                    getTestProjectDir(),
+                    "src",
+                    _packagePath+'.'+subPackage+'.'+"SuperTeam",
+                    "Role1.java");
+            
+            ICompilationUnit subTeam = getCompilationUnit(
+                    getTestProjectDir(),
+                    "src",
+                    _packagePath+'.'+subPackage,
+                    "SubTeam.java");
+            
+            ICompilationUnit subRole2 = getCompilationUnit(
+                    getTestProjectDir(),
+                    "src",
+                    _packagePath+'.'+subPackage+'.'+"SubTeam",
+                    role2SourceName);
+
+            parseAndCompile(new org.eclipse.jdt.core.ICompilationUnit[]{superTeam, superRole1, subTeam, subRole2});
+        }
+        catch (JavaModelException e)
+        {
+            fail(e.getMessage());
+        }
+    }
+    
+	public void callback(CompilationUnitDeclaration cuDecl) {
+		if (_enclosingTypename != null) {
+			super.callback(cuDecl);
+			return;
+		}
+		// testing the team itself 
+	    String cuDeclName = String.valueOf(cuDecl.getMainTypeName());
+	    if (!TYPENAME.equals(cuDeclName))
+	        return;
+	    
+	    
+	    TypeDeclaration typeDecl = cuDecl.types[0];
+	    
+	    assertNotNull("TypeDeclaration should not be null.", typeDecl);
+
+	    assertTrue("TypeDeclaration should be a team.", typeDecl.isTeam());
+
+	    TeamSmapGenerator teamSmapGenerator = new TeamSmapGenerator(typeDecl);
+        teamSmapGenerator.addStratum("OTJ");
+        teamSmapGenerator.generate();
+        List actualStrata = teamSmapGenerator.getStrata();
+        
+        assertEquals("Strata of type \"" + TYPENAME + "\" should be equal.\n", expectedStrata.get(TYPENAME).toString(), actualStrata.toString());
+	}
 }

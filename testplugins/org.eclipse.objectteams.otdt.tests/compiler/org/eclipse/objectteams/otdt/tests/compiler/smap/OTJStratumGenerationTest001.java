@@ -50,7 +50,7 @@ public class OTJStratumGenerationTest001 extends AbstractSourceMapGeneratorTest
 
     public static Test suite()
     {
-        return new Suite(OTJStratumGenerationTest001.class);
+        return buildModelTestSuite(OTJStratumGenerationTest001.class);
     }
     
     protected void setUp() throws Exception
