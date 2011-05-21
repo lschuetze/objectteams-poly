@@ -41,9 +41,9 @@ public class OTModel
 {
 	private static OTModel _singleton;
 	
-	private OTTypeMapping _data = new OTTypeMapping();
+	private OTTypeMapping data = new OTTypeMapping();
 	
-	private WeakHashSet /*<IType>*/ _unopenedTypes = new WeakHashSet();
+	private WeakHashSet /*<IType>*/ unopenedTypes = new WeakHashSet();
 	
 	protected OTModel()
 	{
@@ -66,7 +66,7 @@ public class OTModel
 	
 	/** Register a type of which we don't yet have the flags. */
 	public void addUnopenedType(IType type) {
-		_unopenedTypes.add(type);
+		this.unopenedTypes.add(type);
 	}
 	
 	/**
@@ -76,7 +76,7 @@ public class OTModel
 	{
 		if (otType != null)
 		{
-			_data.put((IType)otType.getCorrespondingJavaElement(), otType);
+			this.data.put((IType)otType.getCorrespondingJavaElement(), otType);
 		}
 	}
 
@@ -85,7 +85,7 @@ public class OTModel
 	 */	
 	public boolean hasOTElementFor(IType type)
 	{
-		return _data.contains(type);
+		return this.data.contains(type);
 	}
 
 	/**
@@ -97,13 +97,12 @@ public class OTModel
 	 */	
 	public IOTType getOTElement(IType type)
 	{
-		IOTType result = _data.get(type);
+		IOTType result = this.data.get(type);
 		if (result != null)
 			return result;
 		// and now for on-demand opening (triggered, e.g., by getFlags()):
-		if (type != null && type.isBinary() && this._unopenedTypes.contains(type)) 
+		if (type != null && type.isBinary() && (this.unopenedTypes.remove(type) != null)) 
 		{
-			this._unopenedTypes.remove(type);			
 			try {
 				return OTModelManager.getSharedInstance().addType(type, type.getFlags(), null, null, false);
 			} catch (JavaModelException e) {
@@ -124,15 +123,15 @@ public class OTModel
 	 */	
 	public void removeOTElement(IType type, boolean hasChanged)
 	{
-		if ((type != null) && (_data.contains(type)))
+		if ((type != null) && (this.data.contains(type)))
 		{
 			if (hasChanged)
 			{
-                _data.removeChangedElement(type);
+                this.data.removeChangedElement(type);
 			}
 			else
 			{
-				_data.remove(type);
+				this.data.remove(type);
 			}
 		}
 	}
