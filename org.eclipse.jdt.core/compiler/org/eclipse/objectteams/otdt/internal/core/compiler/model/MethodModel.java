@@ -773,12 +773,13 @@ public class MethodModel extends ModelElement {
 														  RoleModel sourceRoleModel,
 														  AstGenerator defaultGen) 
 	{
-		if (sourceRoleModel.getAst() == null)
+		TypeDeclaration sourceRoleDecl = sourceRoleModel.getAst();
+		if (sourceRoleDecl == null || sourceRoleDecl.isPurelyCopied)
 			return defaultGen; // don't have more detailed source positions
 		MethodModel model = methodDecl.getModel();
 		AstGenerator gen = model.getSynthPosGen(hostTypeDecl, 
 											    sourceRoleModel.getBinding(),
-											    sourceRoleModel.getAst().compilationResult, 
+											    sourceRoleDecl.compilationResult, 
 											    methodDecl.sourceStart);
 		if (gen != null) {
 			// re-position the method, these positions will be used by codeGen for generating line numbers:
