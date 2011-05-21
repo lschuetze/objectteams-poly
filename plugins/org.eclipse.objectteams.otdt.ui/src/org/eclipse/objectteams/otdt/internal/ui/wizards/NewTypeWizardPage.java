@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
@@ -76,6 +77,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.ui.wizards.NewContainerWizardPage;
 import org.eclipse.jface.contentassist.SubjectControlContentAssistant;
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.ISelection;
@@ -99,6 +101,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.contentassist.ContentAssistHandler;
 
 /**
@@ -778,6 +781,33 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
         IJavaElement jelem = getInitialJavaElement(selection);
         initContainerPage(jelem);
         initTypePage(jelem);
+    }
+    
+    @Override
+    protected IJavaElement getInitialJavaElement(IStructuredSelection structuredSelection) {
+    	IJavaElement element = super.getInitialJavaElement(structuredSelection);
+    	if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
+    		// try to improve:
+    		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
+    		if (window != null) {
+    			ISelection selection= window.getSelectionService().getSelection();
+    			if (selection instanceof ITextSelection) {
+    				ITextSelection textSelection = (ITextSelection) selection;
+    				try {
+						IJavaElement selected = ((ICompilationUnit)element).getElementAt(textSelection.getOffset());
+						if (selected != null) {
+							selected = selected.getAncestor(IJavaElement.TYPE);
+							if (selected != null) {
+								if (((IType)selected).isLocal())
+									selected = ((IType)selected).getDeclaringType();
+								return selected;
+							}
+						}
+					} catch (JavaModelException e) { /* nop */ }
+    			}
+    		}
+    	}
+		return element;
     }
 
 	/**
