@@ -198,10 +198,24 @@ public class NewRoleWizardPageListener extends NewTypeWizardPageListener
 		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { root.getJavaProject() });
 	
 		FilteredTypesSelectionDialog dialog = new FilteredTypesSelectionDialog(getObservedPage().getShell(), 
-															 false,
-		                                                     getObservedPage().getWizard().getContainer(),
-		                                                     scope,
-		                                                     IJavaSearchConstants.TYPE);
+																			   false,
+																			   getObservedPage().getWizard().getContainer(),
+																			   scope,
+																			   IJavaSearchConstants.TYPE)
+		{
+			IStatus status; // duplicate private field
+			@Override protected void updateStatus(IStatus status) {
+				this.status = status;
+				super.updateStatus(status);
+			}
+			@Override
+			protected void okPressed() {
+				// super version is too strict, replace warning with OK in order to pass
+				if (status.getCode() == IStatus.WARNING) 
+					updateStatus(StatusInfo.OK_STATUS);
+				super.okPressed();
+			}
+		};
 		dialog.setTitle(OTNewWizardMessages.NewRoleWizardPage_BaseclassDialog_title); 
 		dialog.setMessage(OTNewWizardMessages.NewRoleWizardPage_BaseclassDialog_message);
 		dialog.setInitialPattern( ((NewRoleWizardPage)getObservedPage()).getBaseClassName());
@@ -331,6 +345,7 @@ public class NewRoleWizardPageListener extends NewTypeWizardPageListener
         if (baseclassName.length() == 0) 
             return StatusInfo.OK_STATUS; // a Role without a playedBy relation is just fine
 
+        // TODO(SH): check conventions only if base class doesn't exist!
         // ERRORS:
         IStatus validJava = JavaConventions.validateJavaTypeName(baseclassName);
         if (validJava.getSeverity() == IStatus.ERROR) 
@@ -354,12 +369,13 @@ public class NewRoleWizardPageListener extends NewTypeWizardPageListener
     }
 
 	IStatus validateBaseClassName(IType enclosingType, String name) {
+		IStatus warning = null;
 		while (enclosingType != null) {
-			if (name.equals(enclosingType.getElementName())) {
-				return new StatusInfo(StatusInfo.ERROR,
-					Messages.format(
-						OTNewWizardMessages.NewRole_base_class_equals_enclosing, 
-						name));
+			if (name.equals(enclosingType.getElementName()) && warning == null) {
+				warning = new StatusInfo(StatusInfo.WARNING,
+						Messages.format(
+							OTNewWizardMessages.NewRole_base_class_equals_enclosing,
+							new Object[] {name, getObservedPage().getTypeName()}));
 			}
 			try {
 				for (IJavaElement member : enclosingType.getChildren()) {
@@ -373,7 +389,7 @@ public class NewRoleWizardPageListener extends NewTypeWizardPageListener
 			} catch (JavaModelException e) { /* nop */ }					
 			enclosingType = enclosingType.getDeclaringType();
 		}
-		return StatusInfo.OK_STATUS;
+		return warning != null ? warning : StatusInfo.OK_STATUS;
 	} 
 
 }
