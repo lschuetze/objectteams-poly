@@ -66,7 +66,9 @@ public class OTModel
 	
 	/** Register a type of which we don't yet have the flags. */
 	public void addUnopenedType(IType type) {
-		this.unopenedTypes.add(type);
+		synchronized (this.unopenedTypes) {
+			this.unopenedTypes.add(type);
+		}
 	}
 	
 	/**
@@ -101,12 +103,17 @@ public class OTModel
 		if (result != null)
 			return result;
 		// and now for on-demand opening (triggered, e.g., by getFlags()):
-		if (type != null && type.isBinary() && (this.unopenedTypes.remove(type) != null)) 
-		{
-			try {
-				return OTModelManager.getSharedInstance().addType(type, type.getFlags(), null, null, false);
-			} catch (JavaModelException e) {
-				// silently ignore: no success.
+		if (type != null && type.isBinary()) {
+			boolean found = false;
+			synchronized (this.unopenedTypes) {
+				found = (this.unopenedTypes.remove(type) != null);
+			}
+			if (found) {
+				try {
+					return OTModelManager.getSharedInstance().addType(type, type.getFlags(), null, null, false);
+				} catch (JavaModelException e) {
+					// silently ignore: no success.
+				}
 			}
 		}
 		return null;
