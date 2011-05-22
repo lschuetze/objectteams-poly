@@ -80,6 +80,7 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.ui.OTDTUIPluginConstants;
+import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
@@ -159,53 +160,61 @@ public abstract class TypeCreator
 			String lineDelimiter= null;	
 			boolean needsSave = false;
 
-			// first setup the CU of the enclosing team:
+			// first try to setup the CU of the enclosing team:
 			IType enclosingType = getEnclosingType();
 
-			ICompilationUnit teamCU = enclosingType.getCompilationUnit();
-
-			needsSave= !teamCU.isWorkingCopy();
-			teamCU.becomeWorkingCopy(new SubProgressMonitor(monitor, 1)); // cu is now for sure (primary) a working copy
-			createdWorkingCopy= teamCU;
-			
-			CompilationUnit teamAST= createASTForImports(teamCU);
+			ICompilationUnit teamCU = null;
+			CompilationUnit teamAST = null;
 			Set<String> existingImports= null;
+		
+			CompilationUnit newAST= null;
 
-			CompilationUnit rofiAST= null;
+			if (enclosingType != null) {
+				teamCU = enclosingType.getCompilationUnit();
+				needsSave= !teamCU.isWorkingCopy();
+				teamCU.becomeWorkingCopy(new SubProgressMonitor(monitor, 1)); // cu is now for sure (primary) a working copy
+				createdWorkingCopy= teamCU;
+
+				teamAST= createASTForImports(teamCU);
+			} else {
+				// sanity check (suppose we are creating a team, which never is "inlined"):
+				if (_typeInfo.isInlineType())
+					throw new CoreException(new Status(IStatus.ERROR, OTDTUIPlugin.UIPLUGIN_ID, "missing enclosing type for inline type"));
+			}
 			
 			if (!_typeInfo.isInlineType()) 
 			{
-				// Need one more CU: the RoFi:
+				// Need one more CU: either team or RoFi:
 				
 				lineDelimiter= StubUtility.getLineDelimiterUsed(pack.getJavaProject());
 										
-				ICompilationUnit rofiCU= pack.createCompilationUnit(_typeInfo.getTypeName() + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$ //$NON-NLS-2$
+				ICompilationUnit newCU= pack.createCompilationUnit(_typeInfo.getTypeName() + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$ //$NON-NLS-2$
 				// create a working copy with a new owner
 				needsSave= true;
-				rofiCU.becomeWorkingCopy(new SubProgressMonitor(monitor, 1)); // cu is now a (primary) working copy
-				createdWorkingCopy= rofiCU;
+				newCU.becomeWorkingCopy(new SubProgressMonitor(monitor, 1)); // cu is now a (primary) working copy
+				createdWorkingCopy= newCU;
 				
-				IBuffer buffer= rofiCU.getBuffer();
+				IBuffer buffer= newCU.getBuffer();
 				
-				String cuContent= constructCUContent(rofiCU, constructSimpleTypeStub(), lineDelimiter);
+				String cuContent= constructCUContent(newCU, constructSimpleTypeStub(), lineDelimiter);
 				buffer.setContents(cuContent);
 
-				rofiAST= createASTForImports(rofiCU);
-				existingImports= getExistingImports(rofiAST);
-				imports= new ImportsManager(rofiAST, teamAST);
+				newAST= createASTForImports(newCU);
+				existingImports= getExistingImports(newAST);
+				imports= (teamAST != null) ? new ImportsManager(newAST, teamAST) : new ImportsManager(newAST);
 
 				// add an import that will be removed again. Having this import solves 14661
 				imports.addImport(JavaModelUtil.concatenateName(pack.getElementName(), _typeInfo.getTypeName()));
 				
-				String typeContent= constructTypeStub(rofiCU, imports, lineDelimiter);
+				String typeContent= constructTypeStub(newCU, imports, lineDelimiter);
 				
-				AbstractTypeDeclaration typeNode= (AbstractTypeDeclaration) rofiAST.types().get(0);
+				AbstractTypeDeclaration typeNode= (AbstractTypeDeclaration) newAST.types().get(0);
 				int start= ((ASTNode) typeNode.modifiers().get(0)).getStartPosition();
 				int end= typeNode.getStartPosition() + typeNode.getLength();
 				
 				buffer.replace(start, end - start, typeContent);
 				
-				createdType= rofiCU.getType(_typeInfo.getTypeName());
+				createdType= newCU.getType(_typeInfo.getTypeName());
 			}
 			else
 			{
