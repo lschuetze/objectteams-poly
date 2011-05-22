@@ -51,7 +51,9 @@ public class RoleCreator extends TypeCreator
 	protected void writeInheritanceRelations(ImportsManager imports, StringBuffer buf) throws CoreException
 	{
         super.writeInheritanceRelations(imports, buf);
-		writeBaseClass(buf, imports.fImportsRewrite);
+        // where to write base imports to:
+		ImportRewrite importsRewrite = getTypeInfo().isInlineType() ? imports.fImportsRewrite : imports.fTeamImportsRewrite;
+		writeBaseClass(buf, importsRewrite);
 	}
 
 	private void writeBaseClass(StringBuffer buf, ImportRewrite imports) throws CoreException
@@ -68,8 +70,8 @@ public class RoleCreator extends TypeCreator
 	    	buf.append(" playedBy "); //$NON-NLS-1$
 			ITypeBinding binding= null;
 			IType currentType = roleTypeInfo.getCurrentType();
-			if (currentType != null) { // try to resolve it like a superclass:
-				binding= TypeContextChecker.resolveSuperClass(baseName, currentType, getSuperClassStubTypeContext());
+			if (currentType != null) { // try to resolve it similar to a superclass:
+				binding= TypeContextChecker.resolveSuperClass(baseName, currentType, getBaseTypeStubTypeContext());
 				if (binding == null) {// but could also be an interface:
 					binding= TypeContextChecker.resolveSuperInterfaces(new String[]{baseName}, currentType, getSuperInterfacesStubTypeContext())[0];
 				}

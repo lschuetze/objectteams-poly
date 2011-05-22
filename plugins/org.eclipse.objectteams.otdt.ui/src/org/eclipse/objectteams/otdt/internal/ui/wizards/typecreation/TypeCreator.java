@@ -158,62 +158,62 @@ public abstract class TypeCreator
 
 			String lineDelimiter= null;	
 			boolean needsSave = false;
+
+			// first setup the CU of the enclosing team:
+			IType enclosingType = getEnclosingType();
+
+			ICompilationUnit teamCU = enclosingType.getCompilationUnit();
+
+			needsSave= !teamCU.isWorkingCopy();
+			teamCU.becomeWorkingCopy(new SubProgressMonitor(monitor, 1)); // cu is now for sure (primary) a working copy
+			createdWorkingCopy= teamCU;
 			
-			Set<String> existingImports;
+			CompilationUnit teamAST= createASTForImports(teamCU);
+			Set<String> existingImports= null;
+
+			CompilationUnit rofiAST= null;
 			
 			if (!_typeInfo.isInlineType()) 
 			{
+				// Need one more CU: the RoFi:
+				
 				lineDelimiter= StubUtility.getLineDelimiterUsed(pack.getJavaProject());
 										
-				ICompilationUnit parentCU= pack.createCompilationUnit(_typeInfo.getTypeName() + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$ //$NON-NLS-2$
+				ICompilationUnit rofiCU= pack.createCompilationUnit(_typeInfo.getTypeName() + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$ //$NON-NLS-2$
 				// create a working copy with a new owner
 				needsSave= true;
-				parentCU.becomeWorkingCopy(new SubProgressMonitor(monitor, 1)); // cu is now a (primary) working copy
-				createdWorkingCopy= parentCU;
+				rofiCU.becomeWorkingCopy(new SubProgressMonitor(monitor, 1)); // cu is now a (primary) working copy
+				createdWorkingCopy= rofiCU;
 				
-				IBuffer buffer= parentCU.getBuffer();
+				IBuffer buffer= rofiCU.getBuffer();
 				
-				String cuContent= constructCUContent(parentCU, constructSimpleTypeStub(), lineDelimiter);
+				String cuContent= constructCUContent(rofiCU, constructSimpleTypeStub(), lineDelimiter);
 				buffer.setContents(cuContent);
 
-				CompilationUnit astRoot= createASTForImports(parentCU);
-				existingImports= getExistingImports(astRoot);
-							
-				imports= new ImportsManager(astRoot);
+				rofiAST= createASTForImports(rofiCU);
+				existingImports= getExistingImports(rofiAST);
+				imports= new ImportsManager(rofiAST, teamAST);
 
 				// add an import that will be removed again. Having this import solves 14661
 				imports.addImport(JavaModelUtil.concatenateName(pack.getElementName(), _typeInfo.getTypeName()));
 				
-				String typeContent= constructTypeStub(parentCU, imports, lineDelimiter);
+				String typeContent= constructTypeStub(rofiCU, imports, lineDelimiter);
 				
-				AbstractTypeDeclaration typeNode= (AbstractTypeDeclaration) astRoot.types().get(0);
+				AbstractTypeDeclaration typeNode= (AbstractTypeDeclaration) rofiAST.types().get(0);
 				int start= ((ASTNode) typeNode.modifiers().get(0)).getStartPosition();
 				int end= typeNode.getStartPosition() + typeNode.getLength();
 				
 				buffer.replace(start, end - start, typeContent);
 				
-				createdType= parentCU.getType(_typeInfo.getTypeName());
-//{OTDTUI: help the compiler by saving the unit
-//				createdWorkingCopy.commitWorkingCopy(true, monitor);
-//				createdWorkingCopy.save(monitor, true);
-//carp}
+				createdType= rofiCU.getType(_typeInfo.getTypeName());
 			}
 			else
 			{
-				IType enclosingType = getEnclosingType();
-
-				ICompilationUnit parentCU = enclosingType.getCompilationUnit();
-
-				needsSave= !parentCU.isWorkingCopy();
-				parentCU.becomeWorkingCopy(new SubProgressMonitor(monitor, 1)); // cu is now for sure (primary) a working copy
-				createdWorkingCopy= parentCU;
-				
-				CompilationUnit astRoot= createASTForImports(parentCU);
-				imports= new ImportsManager(astRoot);
-				existingImports= getExistingImports(astRoot);
+				imports= new ImportsManager(teamAST);
+				existingImports= getExistingImports(teamAST);
 
 				// add imports that will be removed again. Having the imports solves 14661
-				IType[] topLevelTypes= parentCU.getTypes();
+				IType[] topLevelTypes= teamCU.getTypes();
 				for (int i= 0; i < topLevelTypes.length; i++) {
 					imports.addImport(topLevelTypes[i].getFullyQualifiedName('.'));
 				}
@@ -223,14 +223,14 @@ public abstract class TypeCreator
 
 				if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS)) 
 				{
-					String comment= getTypeComment(parentCU, lineDelimiter);
+					String comment= getTypeComment(teamCU, lineDelimiter);
 					if (comment != null) 
 					{
 						content.append(comment);
 						content.append(lineDelimiter);
 					}
 				}
-				content.append(constructTypeStub(parentCU, imports, lineDelimiter));
+				content.append(constructTypeStub(teamCU, imports, lineDelimiter));
 				IJavaElement[] elems= enclosingType.getChildren();
 				IJavaElement sibling= elems.length > 0 ? elems[0] : null;
 				
@@ -262,10 +262,17 @@ public abstract class TypeCreator
 			imports.create(false, new SubProgressMonitor(monitor, 1));
 				
 			JavaModelUtil.reconcile(cu);
-			
+			// save the team of a rofi if needed:
+			if (imports.fHasAddedBaseImportsForRofi) {
+				teamCU.commitWorkingCopy(true, monitor);
+				teamCU.save(monitor, true);
+			}
+
 			if (monitor.isCanceled()) {
 				throw new InterruptedException();
 			}
+			
+			// ---- create methods: -----
 			
 			// set up again
 			CompilationUnit astRoot= createASTForImports(imports.getCompilationUnit());
@@ -290,6 +297,7 @@ public abstract class TypeCreator
 			buf.replace(range.getOffset(), range.getLength(), formattedContent);
 			
 			
+			// ----- file comment for role files: -----
 			if (!_typeInfo.isInlineType()) {
 				String fileComment= getFileComment(cu);
 				if (fileComment != null && fileComment.length() > 0) {
@@ -305,12 +313,6 @@ public abstract class TypeCreator
 			
 
 			setCreatedType(createdType);			
-			
-//			if (createdWorkingCopy != null) {
-//				fCreatedType= (IType) createdType.getPrimaryElement();
-//			} else {
-//				fCreatedType= createdType;
-//			}
 		}
 		finally 
 		{
@@ -636,6 +638,41 @@ public abstract class TypeCreator
 	
 	}
 
+	protected StubTypeContext getBaseTypeStubTypeContext() throws CoreException {
+		if (fSuperClassStubTypeContext == null) {
+			String typeName;
+			if (_typeInfo.getCurrentType() != null) {
+				typeName= _typeInfo.getTypeName();
+			} else {
+				typeName= JavaTypeCompletionProcessor.DUMMY_CLASS_NAME;
+			}
+			// may want to check if base type is an interface, but so far constant 'false' below seems to work OK
+			fSuperClassStubTypeContext= createBaseTypeStubTypeContext(typeName, false, getEnclosingType(), getPackageFragment());
+		}
+		return fSuperClassStubTypeContext;
+	}
+
+	// cf. TypeContextChecker.createSupertypeStubTypeContext
+	private StubTypeContext createBaseTypeStubTypeContext(String typeName, boolean isInterface, IType enclosingType, IPackageFragment packageFragment) {
+		if (enclosingType == null) {
+			JavaPlugin.log(new IllegalArgumentException("Missing enclosing type")); //$NON-NLS-1$
+			return new StubTypeContext(null, null, null);
+		} else {
+			// notes:
+			// + when resolving mypack.base.MyBase we have to cope with a 'base' package fragment,
+			//   that in the final source will be handled using a base import, but here we have
+			//   to include this with FQN in the class declaration, which implies:
+			//   - do not use a team so the scanner will see 'base' as an identifier 
+			ICompilationUnit cu= enclosingType.getCompilationUnit();
+			StringBuffer teamString = new StringBuffer();
+			teamString.append("package ").append(packageFragment.getElementName()).append(";\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			teamString.append("public class ").append(enclosingType.getElementName()).append(" {}\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			
+			String prolog= "class " + typeName + (isInterface ? " implements " : " extends "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			String epilog= " {} "; //$NON-NLS-1$
+			return new StubTypeContext(cu, teamString.toString() + prolog, epilog);
+		}
+	}
 
 	private void writeSuperInterfaces(StringBuffer buf, ImportsManager imports) throws CoreException 
 	{
@@ -927,10 +964,17 @@ public abstract class TypeCreator
 	public static class ImportsManager 
 	{
  		ImportRewrite fImportsRewrite;
+		ImportRewrite fTeamImportsRewrite;		// a Rofi creates its base imports here into the team CU
+		boolean fHasAddedBaseImportsForRofi;	// whether a base import has been added using fTeamImportsRewrite
 		
 		/* package */ ImportsManager(CompilationUnit astRoot) throws CoreException {
 			fImportsRewrite= StubUtility.createImportRewrite(astRoot, true);
-		} 		
+		}
+
+		/* package */ ImportsManager(CompilationUnit astRoot, CompilationUnit teamAST) throws CoreException {
+			fImportsRewrite= StubUtility.createImportRewrite(astRoot, true);
+			fTeamImportsRewrite= StubUtility.createImportRewrite(teamAST, true);
+		}
  		
 		/* package */ ImportsManager(ICompilationUnit createdWorkingCopy) throws CoreException {
 			fImportsRewrite= StubUtility.createImportRewrite(createdWorkingCopy, true);
@@ -971,6 +1015,12 @@ public abstract class TypeCreator
 		/* package */ void create(boolean needsSave, IProgressMonitor monitor) throws CoreException {
 			TextEdit edit= fImportsRewrite.rewriteImports(monitor);
 			JavaModelUtil.applyEdit(fImportsRewrite.getCompilationUnit(), edit, needsSave, null);
+
+			if (fTeamImportsRewrite != null) {
+				edit= fTeamImportsRewrite.rewriteImports(monitor);
+				fHasAddedBaseImportsForRofi = edit.hasChildren();
+				JavaModelUtil.applyEdit(fTeamImportsRewrite.getCompilationUnit(), edit, needsSave, null);
+			}
 		}
 		
 		/* package */ void removeImport(String qualifiedName) {
