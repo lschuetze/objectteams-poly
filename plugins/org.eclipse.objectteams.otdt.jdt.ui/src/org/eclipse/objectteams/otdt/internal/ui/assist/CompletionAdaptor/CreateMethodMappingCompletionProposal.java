@@ -231,7 +231,7 @@ protected team class CreateMethodMappingCompletionProposal extends MethodMapping
 		for (int i= 0; i<params.size(); i++)
 			addLiftingProposalGroup(rewrite, ROLEPARAM_KEY+i, roles, 
 							        ((SingleVariableDeclaration)params.get(i)).getType(), paramTypes[i]);
-		addLiftingProposalGroup(rewrite, ROLEPARAM_KEY+"return", roles,  //$NON-NLS-1$
+		addLiftingProposalGroup(rewrite, ROLEMETHODRETURN_KEY, roles, // add to existing group (already includes "void" if base has non-void return)
 									roleSpec.getReturnType2(), methodBinding.getReturnType());
 	}
 	/**
