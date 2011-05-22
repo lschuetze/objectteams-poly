@@ -23,15 +23,22 @@ import java.util.List;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.LiftingType;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
@@ -173,15 +180,7 @@ public team class BaseImportRewriting
 				if (type instanceof RoleTypeDeclaration) {
 					Type baseClassType = ((RoleTypeDeclaration)type).getBaseClassType();
 					if (baseClassType != null) {
-						SimpleName baseName = null;
-						if (baseClassType.isSimpleType()) {
-							Name name = ((SimpleType) baseClassType).getName();
-							baseName =  (name.isSimpleName())
-							? (SimpleName)name
-									: ((QualifiedName)name).getName();
-						} else if (baseClassType.isQualifiedType()) {
-							baseName = ((QualifiedType) baseClassType).getName();
-						}
+						SimpleName baseName = getSimpleTypeName(baseClassType);
 						if (baseName != null)
 							rewrite.baseNames.add(baseName.getIdentifier());
 					}
@@ -189,6 +188,9 @@ public team class BaseImportRewriting
 				for (Object decl : type.bodyDeclarations())
 					if (decl instanceof RoleTypeDeclaration)
 						rememberBasesForBaseImport(rewrite, (TypeDeclaration)decl); // recurse
+					else if (type.isTeam() && decl instanceof MethodDeclaration)
+						rememberBasesForBaseImport(rewrite, (MethodDeclaration)decl); // search for declared lifting
+						
 				// also fetch role files:
 				org.eclipse.jdt.core.dom.ASTNode enclosing = type.getParent();
 				if (enclosing instanceof CompilationUnit)
@@ -196,6 +198,36 @@ public team class BaseImportRewriting
 			} catch (Exception javaModelException){
 				// nop
 			}
+		}
+		
+		static void rememberBasesForBaseImport(ImportRewriteAdaptor rewrite, MethodDeclaration methodDecl) {
+			for (Object param : methodDecl.parameters()) {
+				if (param instanceof SingleVariableDeclaration) {
+					Type type = ((SingleVariableDeclaration) param).getType();
+					if (type instanceof LiftingType) {
+						SimpleName baseName = getSimpleTypeName(((LiftingType) type).getBaseType());
+						if (baseName != null)
+							rewrite.baseNames.add(baseName.getIdentifier());
+					}
+				}					
+			}			
+		}
+		
+		static SimpleName getSimpleTypeName(Type type) {
+			if (type instanceof ParameterizedType)
+				type = ((ParameterizedType) type).getType();
+			if (type instanceof ArrayType)
+				type = ((ArrayType) type).getComponentType();
+			if (type.isSimpleType()) {
+				Name name = ((SimpleType) type).getName();
+				if (name.isSimpleName())
+					return (SimpleName)name;
+				else
+					return ((QualifiedName)name).getName();
+			} else if (type.isQualifiedType()) {
+				return ((QualifiedType) type).getName();
+			}
+			return null;
 		}
 		
 		// === Instance level methods and method bindings:
