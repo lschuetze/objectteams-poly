@@ -28,6 +28,7 @@ import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.DebugMessages;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.OTDebugAdaptorPlugin;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
@@ -64,6 +65,17 @@ public abstract class OTREBlock
     	GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan = 1;
 		group.setLayoutData(gd);
+
+		adoptAncestorFont: {
+			// different base classes have different strategies for setting the font.
+			// unify by applying the font from the ancestor CTabFolder:
+			while (!(parent instanceof CTabFolder)) {
+				if (parent == null)
+					break adoptAncestorFont;
+				parent = parent.getParent();
+			}			
+			group.setFont(parent.getFont());
+		}
 		
         this._otreToggleButton = createCheckButton(group, this.enableCheckboxLabel); 
         this._otreToggleButton.addSelectionListener(new SelectionAdapter() 
