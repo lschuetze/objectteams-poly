@@ -115,7 +115,7 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
         setTestProjectDir(PROJECT_DIR);
         
         super.setUpSuite();
-        
+        waitUntilIndexesReady();
 		
 		String pkg = "test001";
 
