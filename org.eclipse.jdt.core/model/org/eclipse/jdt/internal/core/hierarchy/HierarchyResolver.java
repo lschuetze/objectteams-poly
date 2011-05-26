@@ -508,6 +508,9 @@ private boolean isPurelyCopiedRole(ReferenceBinding typeBinding) {
  * Remembers all type bindings defined in the given parsed unit, adding local/anonymous types if specified.
  */
 private void rememberAllTypes(CompilationUnitDeclaration parsedUnit, org.eclipse.jdt.core.ICompilationUnit cu, boolean includeLocalTypes) {
+	// FIXME(SH): debug, remove when done:
+	System.out.println("rememberAllTypes: "+new String(parsedUnit.getFileName()));
+	//
 	TypeDeclaration[] types = parsedUnit.types;
 	if (types != null) {
 		for (int i = 0, length = types.length; i < length; i++) {
