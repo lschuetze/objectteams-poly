@@ -231,12 +231,10 @@ public class LiftingEnvironment
                 roleModel.getBaseTypeBinding().isInterface());
         // TODO(SH): move to STATE_FULL_LIFTING: (?)
         // Analysis may detect errors and prepares for liftmethod generation.
-        if (needMethodBodies) {
-			RoleHierarchieAnalyzer analyzer =
-			    new RoleHierarchieAnalyzer(this._teamType, this._problemReporter);
-	        if (!roleModel.getBinding().isHierarchyInconsistent())
-	        	result = analyzer.analyze(node);
-        }
+		RoleHierarchieAnalyzer analyzer =
+		    new RoleHierarchieAnalyzer(this._teamType, this._problemReporter);
+        if (!roleModel.getBinding().isHierarchyInconsistent())
+        	result = analyzer.analyze(node);
 
 		// specific elements for the role only if not binary:
         if (!roleModel.getBinding().isBinaryBinding()) {
