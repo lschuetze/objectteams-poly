@@ -1,9 +1,9 @@
 !***************  OTDT CONTRIBUTION  ******************************************************** 
 
 !-- Don't set version numbers for features, otherwise pdebuild would complain about a non-existent Basedir: -- 
-feature@org.eclipse.objectteams.otdt=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.feature,tag=tags/builds/201105240906
-feature@org.eclipse.objectteams.otdt.core.patch=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.core.patch,tag=tags/builds/201105240906
-feature@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature,tag=tags/builds/201105240906
+feature@org.eclipse.objectteams.otdt=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.feature
+feature@org.eclipse.objectteams.otdt.core.patch=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otdt.core.patch
+feature@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature
 
 !-- Also don't use version numbers for those plugins that hold the various otre jars: --
 plugin@org.eclipse.jdt.core,3.7.0.v_OTDT_r200_qualifier=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.jdt.core,tag=tags/builds/201105240906
