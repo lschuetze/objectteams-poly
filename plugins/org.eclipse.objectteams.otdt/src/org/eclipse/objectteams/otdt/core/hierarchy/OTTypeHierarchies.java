@@ -80,6 +80,8 @@ import base org.eclipse.objectteams.otdt.internal.core.PhantomType;
 @SuppressWarnings("restriction")
 public team class OTTypeHierarchies {
 	
+	public static boolean DEBUG = false;
+
 	/** How does a given type relate to the focus type? */
 	enum FocusRelation {
 		/** a type is a subtype of the focus type. */
@@ -396,7 +398,7 @@ public team class OTTypeHierarchies {
 			@Override
 			public boolean equals(Object other) {
 				if (other instanceof ConnectedType) {
-					return baseEquals((ConnectedType) other); // TODO(SH): bogus warning re unnecessary cast
+					return baseEquals((ConnectedType) other);
 				} else if (other instanceof IType) {
 					return baseEquals((IType)other);
 				}
@@ -407,7 +409,38 @@ public team class OTTypeHierarchies {
 			hashCode => hashCode;
 
 			// for debugging:
-			toString => toString;
+			@Override
+			public String toString() {
+				return toString("");
+			}
+			String toString(String indent) {
+				StringBuffer buf = new StringBuffer();
+				buf.append(indent);
+				buf.append(getClass().getSimpleName()).append(" ").append(baseToString());
+				buf.append("\n").append(indent);
+				if (isPhantom) buf.append("phantom ");
+				if (isInterface) buf.append("interface ");
+				if (focusRelation != null) buf.append(focusRelation.toString());
+				buf.append("\n").append(indent);
+				if (this.tsuperChainRoot != null && this.tsuperChainRoot != this) {
+					buf.append("chain root: ").append(this.tsuperChainRoot.toString(indent+"\t"));
+					buf.append("\n").append(indent);
+				}					
+				if (this.allTSupersLinearized != null) {
+					buf.append("linearized:\n");
+					for(ConnectedType other : this.allTSupersLinearized)
+						if (!other.isPhantom)
+							buf.append(other.toString(indent+"\t"));
+				}
+				if (directTSupers != null && directTSupers.length != 0) {
+					buf.append("tsupers:\n");
+					for (ConnectedType tsuperType : directTSupers)
+						buf.append(tsuperType.toString(indent+"\t"));
+				}
+				buf.append("\n");
+				return buf.toString();
+			}
+			String baseToString() -> String toString();
 
 		}
 		// binding source variant of IType
@@ -467,6 +500,8 @@ public team class OTTypeHierarchies {
 				// and remember the type-tsub link:
 				tsuperclassHandles[i].addTSubType(connectedType);
 			}
+			if (DEBUG)
+				System.out.println(connectedType);
 		}
 
 		
