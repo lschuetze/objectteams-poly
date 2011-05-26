@@ -729,6 +729,8 @@ public team class OTTypeHierarchies {
 		private void connectTSupers(ReferenceBinding focusType, ReferenceBinding typeBinding, IGenericType type, IType typeHandle, boolean isPhantom, 
 									IType superclassHandle, IType[] tsuperclassHandles, boolean[] arePhantoms, IType[] superinterfaceHandles) 
 		{
+			if (DEBUG)
+				System.out.println("OTHierarchyBuilder.connectTSupers "+typeBinding);
 			if (typeHandle != null && tsuperclassHandles!= null) {
 				FocusRelation focusRelation = FocusRelation.compute(focusType, typeBinding);
 				getHierarchy().connectTSupers(typeHandle, isPhantom, typeBinding.isInterface(), tsuperclassHandles, arePhantoms, focusRelation);
