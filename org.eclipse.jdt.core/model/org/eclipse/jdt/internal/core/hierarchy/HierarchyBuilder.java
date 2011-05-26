@@ -131,6 +131,8 @@ public abstract class HierarchyBuilder {
 			boolean[] arePhantoms,
 			IType[] superinterfaceHandles) 
 	{
+		// FIXME(SH): remove after debugging
+		System.out.println("hookableConnect "+(typeBinding != null ? typeBinding.debugName() : "null"));
 		connect(type, typeHandle, superclassHandle, superinterfaceHandles);
 	}
 	/**

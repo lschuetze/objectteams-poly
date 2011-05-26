@@ -622,7 +622,16 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 
 	int objectIndex = -1;
 	IProgressMonitor progressMonitor = this.builder.hierarchy.progressMonitor;
+	// FIXME(SH): removed after debug/before release
+	System.out.println("reportHierarchy "+this.typeIndex);
+	System.out.println("focusType: "+(this.focusType != null ? this.focusType.debugName() : "null"));
+	//
 	for (int current = this.typeIndex; current >= 0; current--) {
+		// FIXME(SH): removed after debug/before release
+		System.out.println("reportHierarchy #"+current);
+		System.out.println((this.typeBindings[current] != null ? this.typeBindings[current].debugName() : "null"));
+		//
+
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			throw new OperationCanceledException();
 		
