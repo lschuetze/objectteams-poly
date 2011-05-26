@@ -1377,4 +1377,70 @@ public class OTReconcilerTests extends ReconcilerTests {
     	}
     }
 
+    // cf. Bug 337413 - [otjld][compiler] consider changing LiftingFailedException to a checked exception
+    // error AmbiguousLiftingMayBreakClients was not shown in the editor.
+    public void testSubTeamIntroducesBindingAmbiguity() throws CoreException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+			String baseSourceString =	
+				"public class Base {\n" +
+				"}\n";
+			this.createFile(
+				"/P/Base.java",
+	    		baseSourceString);
+			String superTeamSourceString =	
+				"public team class SuperTeam {\n" +
+				"     protected class R0 playedBy Base {}\n" + 
+				"     protected class R1 extends R0 {}\n" + 
+				"     public void foo(Base as R0 bar) {}\n" +
+				"}\n";
+			this.createFile(
+				"/P/SuperTeam.java",
+    			superTeamSourceString);
+			String subTeamSourceString =	
+				"public team class SubTeam extends SuperTeam {\n" +
+				"     protected class R2 extends R0 {}\n" +
+				"}\n";
+			this.createFile(
+				"/P/SubTeam.java",
+    			subTeamSourceString);
+			
+
+			char[] subTeamSourceChars = subTeamSourceString.toCharArray();
+			this.problemRequestor.initialize(subTeamSourceChars);
+			
+			getCompilationUnit("/P/SubTeam.java").getWorkingCopy(this.wcOwner, null);
+			
+			assertProblems(
+				"Unexpected problems",
+				"----------\n" + 
+				"1. WARNING in /P/SubTeam.java (at line 1)\n" + 
+				"	public team class SubTeam extends SuperTeam {\n" + 
+				"	                  ^^^^^^^\n" + 
+				"Potential ambiguity in role binding. The base \'Base\' is bound to the following roles: SubTeam.R1,SubTeam.R2 (OTJLD 2.3.4(a)).\n" + 
+				"----------\n" + 
+				"2. ERROR in /P/SubTeam.java (at line 1)\n" + 
+				"	public team class SubTeam extends SuperTeam {\n" + 
+				"	                  ^^^^^^^\n" + 
+				"Team introduces binding ambiguity for role R0<@tthis[SubTeam]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
+				"----------\n" + 
+				"3. ERROR in /P/SubTeam.java (at line 1)\n" + 
+				"	public team class SubTeam extends SuperTeam {\n" + 
+				"	                  ^^^^^^^\n" + 
+				"Team introduces binding ambiguity for role R1<@tthis[SubTeam]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
+				"----------\n");
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
+
 }
