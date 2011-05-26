@@ -826,10 +826,13 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 		dependenciesSetup = true;
 //carp}
 
+		// FIXME(SH): debug, remove when done
+		System.out.println("HierarchyResolver.resolve: "+openablesLength);
 		for (int i = 0; i < openablesLength; i++) {
 			Openable openable = openables[i];
 			if (openable instanceof org.eclipse.jdt.core.ICompilationUnit) {
 				org.eclipse.jdt.core.ICompilationUnit cu = (org.eclipse.jdt.core.ICompilationUnit)openable;
+				System.out.println("HierarchyResolver.resolve: #"+i+" "+cu.getPath());
 
 				// contains a potential subtype as a local or anonymous type?
 				boolean containsLocalType = false;
