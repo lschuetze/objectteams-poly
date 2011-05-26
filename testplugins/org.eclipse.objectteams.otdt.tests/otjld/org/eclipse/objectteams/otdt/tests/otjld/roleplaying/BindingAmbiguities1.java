@@ -1019,6 +1019,122 @@ public class BindingAmbiguities1 extends AbstractOTJLDTest {
      }
 
      // smart-lifting of a base object to a role object results in an ambiguous binding
+     // Bug 330002 - Wrong linearization of tsuper calls in diamond inheritance
+     // as previous but check that error is correctly reported.
+     public void test731_ambiguousBinding8e() {
+         Map options = getCompilerOptions();
+         options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotation, CompilerOptions.DISABLED);
+        runNegativeTest(
+             new String[] {
+		"T731ab8e_3.java",
+			    "\n" +
+			    "public class T731ab8e_3 extends T731ab8e_2 {\n" +
+			    "    public String toString() {\n" +
+			    "        return \"T731ab8e_3\";\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team731ab8e_1.java",
+			    "\n" +
+			    "public team class Team731ab8e_1 {\n" +
+			    "    public class Role731ab8e_1 playedBy T731ab8e_1 {\n" +
+			    "        public String toString() {\n" +
+			    "            return Team731ab8e_1.this.toString() + \".Role731ab8e_1\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public class Role731ab8e_2 extends Role731ab8e_1 playedBy T731ab8e_2 {\n" +
+			    "        public String toString() {\n" +
+			    "            return Team731ab8e_1.this.toString() + \".Role731ab8e_2\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public String toString() {\n" +
+			    "        return \"Team731ab8e_1\";\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public String t1(T731ab8e_1 as Role731ab8e_1 obj) throws org.objectteams.LiftingFailedException  {\n" +
+			    "        return obj.toString();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team731ab8e_2.java",
+			    "\n" +
+			    "public team class Team731ab8e_2 extends Team731ab8e_1 {\n" +
+			    "    public class Role731ab8e_1 {\n" +
+			    "        public String toString() {\n" +
+			    "            return Team731ab8e_2.this.toString() + \".Role731ab8e_1\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "    public class Role731ab8e_3 extends Role731ab8e_2 playedBy T731ab8e_3 {\n" +
+			    "        public String toString() {\n" +
+			    "            return Team731ab8e_2.this.toString() + \".Role731ab8e_3\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public String toString() {\n" +
+			    "        return \"Team731ab8e_2\";\n" +
+			    "    }\n" +
+			    "\n" +
+			    "}\n" +
+			    "    \n",
+		"T731ab8e_1.java",
+			    "\n" +
+			    "public abstract class T731ab8e_1 {\n" +
+			    "    public String toString() {\n" +
+			    "        return \"T731ab8e_1\";\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team731ab8e_3.java",
+			    "public team class Team731ab8e_3 extends Team731ab8e_2 {\n" +
+			    "    public class Role731ab8e_4 extends Role731ab8e_1 playedBy T731ab8e_3 {\n" +
+			    "        public String toString() {\n" +
+			    "            return Team731ab8e_3.this.toString() + \".Role731ab8e_4\";\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "\n" +
+			    "    public String toString() {\n" +
+			    "        return \"Team731ab8e_3\";\n" +
+			    "    }\n" +
+			    "\n" +
+			    "}\n" +
+			    "    \n",
+		"T731ab8e_2.java",
+			    "\n" +
+			    "public class T731ab8e_2 extends T731ab8e_1 {\n" +
+			    "    public String toString() {\n" +
+			    "        return \"T731ab8e_2\";\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+             },
+     		"----------\n" + 
+			"1. WARNING in Team731ab8e_3.java (at line 1)\n" + 
+			"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
+			"	                  ^^^^^^^^^^^^^\n" + 
+			"Potential ambiguity in role binding. The base \'T731ab8e_3\' is bound to the following roles: Team731ab8e_3.Role731ab8e_3,Team731ab8e_3.Role731ab8e_4 (OTJLD 2.3.4(a)).\n" + 
+			"----------\n" + 
+			"2. ERROR in Team731ab8e_3.java (at line 1)\n" + 
+			"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
+			"	                  ^^^^^^^^^^^^^\n" + 
+			"Team introduces binding ambiguity for role Role731ab8e_1<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
+			"----------\n" + 
+			"3. ERROR in Team731ab8e_3.java (at line 1)\n" + 
+			"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
+			"	                  ^^^^^^^^^^^^^\n" + 
+			"Team introduces binding ambiguity for role Role731ab8e_2<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
+			"----------\n" + 
+			"4. ERROR in Team731ab8e_3.java (at line 1)\n" + 
+			"	public team class Team731ab8e_3 extends Team731ab8e_2 {\n" + 
+			"	                  ^^^^^^^^^^^^^\n" + 
+			"Team introduces binding ambiguity for role Role731ab8e_3<@tthis[Team731ab8e_3]>, which may break clients of the super team (OTJLD 2.3.5(d)).\n" + 
+			"----------\n",
+     		null/*classLibs*/,
+            true/*shouldFlush*/,
+            options);
+     }
+     // smart-lifting of a base object to a role object results in an ambiguous binding
      // manual addition: subtype T4 (OK) of base T2 which also has an ambiguous sub type T3
      // see Bug 327334 -  [compiler] generated lift methods fail to detect some lifting ambiguities
      public void test731_ambiguousBinding9() {
