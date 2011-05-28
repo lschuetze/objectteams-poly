@@ -508,9 +508,6 @@ private boolean isPurelyCopiedRole(ReferenceBinding typeBinding) {
  * Remembers all type bindings defined in the given parsed unit, adding local/anonymous types if specified.
  */
 private void rememberAllTypes(CompilationUnitDeclaration parsedUnit, org.eclipse.jdt.core.ICompilationUnit cu, boolean includeLocalTypes) {
-	// FIXME(SH): debug, remove when done:
-	System.out.println("rememberAllTypes: "+new String(parsedUnit.getFileName()));
-	//
 	TypeDeclaration[] types = parsedUnit.types;
 	if (types != null) {
 		for (int i = 0, length = types.length; i < length; i++) {
@@ -625,16 +622,7 @@ private void reportHierarchy(IType focus, TypeDeclaration focusLocalType, Refere
 
 	int objectIndex = -1;
 	IProgressMonitor progressMonitor = this.builder.hierarchy.progressMonitor;
-	// FIXME(SH): removed after debug/before release
-	System.out.println("reportHierarchy "+this.typeIndex);
-	System.out.println("focusType: "+(this.focusType != null ? this.focusType.debugName() : "null"));
-	//
 	for (int current = this.typeIndex; current >= 0; current--) {
-		// FIXME(SH): removed after debug/before release
-		System.out.println("reportHierarchy #"+current);
-		System.out.println((this.typeBindings[current] != null ? this.typeBindings[current].debugName() : "null"));
-		//
-
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			throw new OperationCanceledException();
 		
@@ -826,13 +814,10 @@ public void resolve(Openable[] openables, HashSet localTypes, IProgressMonitor m
 		dependenciesSetup = true;
 //carp}
 
-		// FIXME(SH): debug, remove when done
-		System.out.println("HierarchyResolver.resolve: "+openablesLength);
 		for (int i = 0; i < openablesLength; i++) {
 			Openable openable = openables[i];
 			if (openable instanceof org.eclipse.jdt.core.ICompilationUnit) {
 				org.eclipse.jdt.core.ICompilationUnit cu = (org.eclipse.jdt.core.ICompilationUnit)openable;
-				System.out.println("HierarchyResolver.resolve: #"+i+" "+cu.getPath());
 
 				// contains a potential subtype as a local or anonymous type?
 				boolean containsLocalType = false;
