@@ -143,7 +143,7 @@ public abstract class TypeCreator
 
 		monitor.beginTask(NewWizardMessages.NewTypeWizardPage_operationdesc, 10); 
 		
-		ICompilationUnit createdWorkingCopy= null;
+		List<ICompilationUnit> createdWorkingCopies= new ArrayList<ICompilationUnit>();
 		
 		try
 		{
@@ -170,10 +170,11 @@ public abstract class TypeCreator
 			CompilationUnit newAST= null;
 
 			if (enclosingType != null) {
+				// if we have an enclosing type, we may indeed not to write to it (RoFi may add imports to enclosing team)
 				teamCU = enclosingType.getCompilationUnit();
 				needsSave= !teamCU.isWorkingCopy();
 				teamCU.becomeWorkingCopy(new SubProgressMonitor(monitor, 1)); // cu is now for sure (primary) a working copy
-				createdWorkingCopy= teamCU;
+				createdWorkingCopies.add(teamCU);
 
 				teamAST= createASTForImports(teamCU);
 			} else {
@@ -192,7 +193,7 @@ public abstract class TypeCreator
 				// create a working copy with a new owner
 				needsSave= true;
 				newCU.becomeWorkingCopy(new SubProgressMonitor(monitor, 1)); // cu is now a (primary) working copy
-				createdWorkingCopy= newCU;
+				createdWorkingCopies.add(newCU);
 				
 				IBuffer buffer= newCU.getBuffer();
 				
@@ -325,10 +326,8 @@ public abstract class TypeCreator
 		}
 		finally 
 		{
-			if (createdWorkingCopy != null) 
-			{
-				createdWorkingCopy.discardWorkingCopy();
-			}
+			for (ICompilationUnit wc : createdWorkingCopies)
+				wc.discardWorkingCopy();
 			monitor.done();
 		}
 		
