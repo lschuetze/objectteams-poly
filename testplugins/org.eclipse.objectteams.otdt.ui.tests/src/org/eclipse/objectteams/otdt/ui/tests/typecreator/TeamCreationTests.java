@@ -28,12 +28,13 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.internal.ui.wizards.typecreation.TeamCreator;
@@ -80,6 +81,19 @@ public class TeamCreationTests extends FileBasedUITest
     {
         super.setUp();
         _teamCreator = new TeamCreator();
+    }
+    
+    @Override
+    protected void tearDown() throws Exception {
+    	ICompilationUnit[] primaryWCs = JavaModelManager.getJavaModelManager().getWorkingCopies(DefaultWorkingCopyOwner.PRIMARY, false);
+    	try {
+    		assertEquals("All working copies should be discarded", 0, primaryWCs == null ? 0 : primaryWCs.length);
+    	} finally { 
+    		if (primaryWCs != null)
+    			for (int i = 0; i < primaryWCs.length; i++)
+    				primaryWCs[i].discardWorkingCopy();
+    		super.tearDown();
+    	}
     }
 
 //    /**

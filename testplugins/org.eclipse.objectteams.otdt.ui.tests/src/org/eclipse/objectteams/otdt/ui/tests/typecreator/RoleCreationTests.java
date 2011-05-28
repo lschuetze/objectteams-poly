@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
+import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
@@ -81,6 +83,18 @@ public class RoleCreationTests extends FileBasedUITest
         _roleCreator = new RoleCreator();
     }
     
+    @Override
+    protected void tearDown() throws Exception {
+    	ICompilationUnit[] primaryWCs = JavaModelManager.getJavaModelManager().getWorkingCopies(DefaultWorkingCopyOwner.PRIMARY, false);
+    	try {
+    		assertEquals("All working copies should be discarded", 0, primaryWCs == null ? 0 : primaryWCs.length);
+    	} finally { 
+    		if (primaryWCs != null)
+    			for (int i = 0; i < primaryWCs.length; i++)
+    				primaryWCs[i].discardWorkingCopy();
+    		super.tearDown();
+    	}
+    }
 //	  /**
 //	  * only for debug purposes
 //	  * if created directory is not deleted after a test run
