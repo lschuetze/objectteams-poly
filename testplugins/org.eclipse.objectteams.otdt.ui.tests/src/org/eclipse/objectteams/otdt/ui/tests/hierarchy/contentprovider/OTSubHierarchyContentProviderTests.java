@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.typehierarchy.SubTypeHierarchyViewer;
 import org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyLifeCycle;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.ui.tests.FileBasedUITest;
 
 /**
@@ -113,8 +112,6 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
     
     public void setUpSuite() throws Exception
     {
-    	OTTypeHierarchies.DEBUG = true;
-    	
         setTestProjectDir(PROJECT_DIR);
         
         super.setUpSuite();
@@ -288,12 +285,6 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
         _testObject = 
             new SubTypeHierarchyViewer.SubTypeHierarchyContentProvider(
                     _lifeCycle);
-    }
-    
-    @Override
-    public void tearDownSuite() throws Exception {
-    	super.tearDownSuite();
-    	OTTypeHierarchies.DEBUG = false;
     }
 
     public void testHierarchyCreated()
