@@ -106,12 +106,23 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			ProtectionDomain protectionDomain, byte[] classfileBuffer)
 			throws IllegalClassFormatException
 	{
-		if (   className.startsWith("org/eclipse/objectteams/otre")
-			|| className.startsWith("org/apache/bcel")
-			|| className.equals("java/util/LinkedHashMap$KeyIterator")) // saw class loading circularity caused by accessing this class
-		{
-			// skip OTRE and BCEL classes
-			return null;
+		switch(className.charAt(0)) {
+		case 'o':
+			if (   className.startsWith("org/eclipse/objectteams/otre")
+				|| className.startsWith("org/apache/bcel"))
+				// skip OTRE and BCEL classes
+				return null;
+			break;
+		case 's':
+			if (className.startsWith("sun/misc"))
+				// skip, I saw a mysterious deadlock involving sun.misc.Cleaner
+				return null;
+			break;
+		case 'j':
+			if (className.equals("java/util/LinkedHashMap$KeyIterator")) 
+				// skip, I saw class loading circularity caused by accessing this class
+				return null;
+			break;
 		}
 		if (classBeingRedefined != null) {
 			System.out.println("Redefinition!");
