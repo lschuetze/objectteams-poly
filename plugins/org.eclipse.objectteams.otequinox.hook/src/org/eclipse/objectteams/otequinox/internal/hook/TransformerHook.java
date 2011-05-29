@@ -401,14 +401,38 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 				detail+="\n\tlength="+classbytes.length;	// identify original class
 			if (crc != 0x42132087 && crc != 0xdb1b9859L)	// --""-- (I've seen two versions of this class file, semantically equivalent though)
 				detail+="\n\tcrc="+crc;
-			if (classbytes[0xF00] != 0x18)
-				detail+="\n\tmodifiers="+classbytes[0xF00];	// modifiers of method getInstructionHandle at "static final"
+			if (classbytes[0x0F00] != 0x18)
+				detail+="\n\tmodifiers of getInstructionHandle="+classbytes[0xF00];	// modifiers of method getInstructionHandle at "static final"
+			if (classbytes[0x105C] != 0x04)
+				detail+="\n\tmodifiers of addHandle="+classbytes[0x105C];			// modifiers of method getHandle at "protected"
 			if (detail.length() == 0) {
-				classbytes[0xF00] = 0x38; 					// add "synchronized"
+				classbytes[0x0F00] |= 0x20; 				// add "synchronized"
+				classbytes[0x105C] |= 0x20; 				// add "synchronized"
 				this.logger.log(Util.INFO, "hot-patched a bug in class org.apache.bcel.generic.InstructionHandle\n"+
 										"\tsee https://bugs.eclipse.org/bugs/show_bug.cgi?id=344350");
 			} else {
 				this.logger.log(Util.WARNING, "Class org.apache.bcel.generic.InstructionHandle needs a hot-patch but has unexpected byte code:"+detail);
+			}
+		} else if ("org.apache.bcel.generic.BranchHandle".equals(name)) {
+			CRC32 crc32 = new CRC32();
+			crc32.update(classbytes);
+			long crc = crc32.getValue();
+			String detail = "";
+			if (classbytes.length != 0x09F1)
+				detail+="\n\tlength="+classbytes.length;	// identify original class
+			if (crc != 0xd3c37c19L && crc != 0x74bee71eL)	// --""-- (I've seen two versions of this class file, semantically equivalent though)
+				detail+="\n\tcrc="+crc;
+			if (classbytes[0x067E] != 0x18)
+				detail+="\n\tmodifiers of getBranchHandle="+classbytes[0x067E];	// modifiers of method getBranchHandle at "static final"
+			if (classbytes[0x06F8] != 0x04)
+				detail+="\n\tmodifiers of addHandle="+classbytes[0x06F8];		// modifiers of method getHandle at "protected"
+			if (detail.length() == 0) {
+				classbytes[0x067E] |= 0x20; 				// add "synchronized"
+				classbytes[0x06F8] |= 0x20; 				// add "synchronized"
+				this.logger.log(Util.INFO, "hot-patched a bug in class org.apache.bcel.generic.BranchHandle\n"+
+										"\tsee https://bugs.eclipse.org/bugs/show_bug.cgi?id=344350");
+			} else {
+				this.logger.log(Util.WARNING, "Class org.apache.bcel.generic.BranchHandle needs a hot-patch but has unexpected byte code:"+detail);
 			}
 		}
 		return classbytes;
