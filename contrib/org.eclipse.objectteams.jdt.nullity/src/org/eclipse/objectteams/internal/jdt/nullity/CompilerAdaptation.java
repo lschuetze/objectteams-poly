@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
@@ -1292,10 +1293,15 @@ public team class CompilerAdaptation {
 	}
 	@SuppressWarnings("rawtypes")
 	protected class JavaModelManager playedBy JavaModelManager {
-		JavaModelManager getJavaModelManager() 	-> JavaModelManager getJavaModelManager();
+		JavaModelManager getJavaModelManager() 			-> JavaModelManager getJavaModelManager();
 		@SuppressWarnings("decapsulation")
-		protected HashSet getOptionNames() 		-> get HashSet optionNames;
-		void setOptions(Hashtable newOptions) 	-> void setOptions(Hashtable newOptions);
+		protected HashSet getOptionNames() 			 	-> get HashSet optionNames;
+		IEclipsePreferences getInstancePreferences() 	-> IEclipsePreferences getInstancePreferences();
+		void internalStorePreference(String key, String value, IEclipsePreferences pref)
+														-> boolean storePreference(String key, String value, IEclipsePreferences pref);
+		public void storePreference(String key, String value) {
+			internalStorePreference(key, value, getInstancePreferences());
+		}
 	}
 	@SuppressWarnings({"rawtypes","unchecked"})
 	protected class JavaProject playedBy JavaProject {
@@ -1317,13 +1323,12 @@ public team class CompilerAdaptation {
 			optionNames.add(NullCompilerOptions.OPTION_ReportNullContractViolation);
 			optionNames.add(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation);
 			optionNames.add(NullCompilerOptions.OPTION_NullnessDefault);
-			// also fill default names:
-			Hashtable defaultNames = new Hashtable();
-			defaultNames.put(NullCompilerOptions.OPTION_NullableAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NULLABLE_ANNOTATION_NAME, '.')));
-			defaultNames.put(NullCompilerOptions.OPTION_NonNullAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NONNULL_ANNOTATION_NAME, '.')));
-			defaultNames.put(NullCompilerOptions.OPTION_NullableByDefaultAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NULLABLEBYDEFAULT_ANNOTATION_NAME, '.')));
-			defaultNames.put(NullCompilerOptions.OPTION_NonNullByDefaultAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NONNULLBYDEFAULT_ANNOTATION_NAME, '.')));
-			javaModelManager.setOptions(defaultNames);
+			// also add to the instance preferences:
+			javaModelManager.storePreference(NullCompilerOptions.OPTION_NullableAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NULLABLE_ANNOTATION_NAME, '.')));
+			javaModelManager.storePreference(NullCompilerOptions.OPTION_NullableAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NULLABLE_ANNOTATION_NAME, '.')));
+			javaModelManager.storePreference(NullCompilerOptions.OPTION_NonNullAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NONNULL_ANNOTATION_NAME, '.')));
+			javaModelManager.storePreference(NullCompilerOptions.OPTION_NullableByDefaultAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NULLABLEBYDEFAULT_ANNOTATION_NAME, '.')));
+			javaModelManager.storePreference(NullCompilerOptions.OPTION_NonNullByDefaultAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NONNULLBYDEFAULT_ANNOTATION_NAME, '.')));
 		}
 	}
 }
