@@ -36,7 +36,7 @@ plugin@org.eclipse.objectteams.otdt.compiler.adaptor,2.0.0=SVN,url=file://localh
 plugin@org.eclipse.objectteams.otdt.debug.adaptor,2.0.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor,tag=tags/builds/201105240906
 plugin@org.eclipse.objectteams.otdt.refactoring,2.0.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.refactoring,tag=tags/builds/201105161939
 plugin@org.eclipse.objectteams.otdt.pde.ui,2.0.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.pde.ui,tag=tags/builds/201105161939
-plugin@org.eclipse.objectteams.otdt.samples,2.0.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.samples,tag=tags/builds/201105161939
+plugin@org.eclipse.objectteams.otdt.samples,2.0.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt.samples
 
 !** Consume BCEL from Orbit: **!
 plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/S20110124210048/repository
