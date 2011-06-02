@@ -103,13 +103,14 @@ public team class CompilerAdaptation {
 
 	// ======================= Statement level analysis ============================
 	
-	@SuppressWarnings("abstractrelevantrole")
+	@SuppressWarnings({"abstractrelevantrole", "hidden-lifting-problem"}) // due to abstractness of this role failed lifting could theoretically block callin triggers
 	@Instantiation(InstantiationPolicy.ALWAYS)
 	protected abstract class Statement playedBy Statement {
 		abstract Expression getExpression();
 		
 		// use custom hook from JDT/Core (https://bugs.eclipse.org/335093)
 		checkAgainstNullAnnotation <- replace checkAgainstNullAnnotation;
+
 		/** Check assignment to local with null annotation. */
 		@SuppressWarnings("basecall")
 		callin int checkAgainstNullAnnotation(BlockScope currentScope, LocalVariableBinding local,int nullStatus)
@@ -1289,9 +1290,10 @@ public team class CompilerAdaptation {
 				this.nonNullByDefaultAnnotationName = NullCompilerOptions.DEFAULT_NONNULLBYDEFAULT_ANNOTATION_NAME;
 		}
 	}
+	@SuppressWarnings("rawtypes")
 	protected class JavaModelManager playedBy JavaModelManager {
 		JavaModelManager getJavaModelManager() 	-> JavaModelManager getJavaModelManager();
-		@SuppressWarnings({ "decapsulation", "rawtypes" })
+		@SuppressWarnings("decapsulation")
 		protected HashSet getOptionNames() 		-> get HashSet optionNames;
 		void setOptions(Hashtable newOptions) 	-> void setOptions(Hashtable newOptions);
 	}
