@@ -34,8 +34,9 @@ JDTVERSIONB2=`expr $JDTVERSIONB + 1`
 JDTVERSIONB2=`printf "%04d" ${JDTVERSIONB2}`
 JDTVERSION=${JDTVERSIONA}-${JDTVERSIONB}
 JDTVERSIONNEXT=${JDTVERSIONA}-${JDTVERSIONB2}
+# hardcode when unable to compute
 #JDTVERSION=${JDTVERSIONA}
-#JDTVERSIONNEXT=3.7.0.v20110122
+#JDTVERSIONNEXT=3.7.0.v20110332
 echo "JDT feature is ${JDTVERSION}"
 if [ ! -r ${BASE}/testrun/build-root/eclipse/features/org.eclipse.jdt_${JDTVERSION}-* ]
 then
