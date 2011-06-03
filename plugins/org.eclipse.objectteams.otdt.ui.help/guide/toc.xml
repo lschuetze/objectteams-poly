@@ -20,6 +20,7 @@
 			<topic label="Refactoring Object Teams programs" href="guide/refactoring.html"/>
 		</topic>
 		<topic label="Object Teams structural/navigational views" href="guide/views.html">
+			<topic label="Binding Editor" href="guide/bindingeditor.html"/>
 			<topic label="OT/J package explorer" href="guide/packageexplorer.html"/>
 			<topic label="OT/J outline" href="guide/outline.html"/>
 			<topic label="OT/J type hierarchy" href="guide/typehierarchy.html"/>
