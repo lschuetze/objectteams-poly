@@ -446,51 +446,40 @@ public class AddTypeBindingDialog extends FilteredTypesSelectionDialog
         return types;
     }
 	
-	protected void computeResult()
-	{
-// CRIPPLE (3.5) migration
-//		TypeNameMatch ref = getSelectedTypes()[0];
-//
-//		IType type= ref.getType();			
-//		if (type == null)
-//		{
-//			// not a class file or compilation unit
-//			String title= JavaUIMessages.TypeSelectionDialog_errorTitle;
-//			String message= Messages.format(JavaUIMessages.TypeSelectionDialog_dialogMessage, type.getElementName());
-//			MessageDialog.openError(getShell(), title, message);
-//			setResult(null);
-//		}
-//		else
-//		{
-//			List<IType> result= new ArrayList<IType>(1);
-//			result.add(type);
-//			setResult(result);
-//		}
-	}
-	
 	protected void okPressed()
 	{
-        if (_rolList.isEmpty() || getResult()[0] == null)
-        {
-	        checkOkButton();
-            String title = Messages.format(
-            		OTDTUIPlugin.getResourceString("BindingEditor.generic_error_in_dialog"), //$NON-NLS-1$
-            		OTDTUIPlugin.getResourceString("BindingEditor.AddconnectorDialog.title"));   //$NON-NLS-1$
-	        String message = OTDTUIPlugin.getResourceString("BindingEditor.AddTypeBindingDialog.missing_class"); //$NON-NLS-1$
-            MessageDialog.openError(getShell(), title, message);
+		String message = null;
+        if (_rolList.isEmpty()) {
+        	message = OTDTUIPlugin.getResourceString("BindingEditor.AddTypeBindingDialog.no_roles"); //$NON-NLS-1$;
+        } else {
+        	Object[] roleSelection = _rolList.getSelection();
+        	if (roleSelection.length == 0) {
+        		message = OTDTUIPlugin.getResourceString("BindingEditor.AddTypeBindingDialog.no_role_selected"); //$NON-NLS-1$            		
+        	} else {
+
+        		computeResult();
+
+	            IType firstBaseResult = (IType) super.getFirstResult();
+	            if (firstBaseResult == null) {
+	            	message = OTDTUIPlugin.getResourceString("BindingEditor.AddTypeBindingDialog.no_base_selected"); //$NON-NLS-1$
+	            } else {
+
+					_baseType = firstBaseResult;
+		            _baseTypeName = _baseType.getFullyQualifiedName();
+					_roleType     = (IType)roleSelection[0];
+		            _roleTypeName = _roleType.getFullyQualifiedName(); 
+		                
+		            setReturnCode(OK);
+		            close();
+		            return;
+            	}
+            }
         }
-        else
-        {
-            computeResult();
-            
-            _baseType = (IType) super.getFirstResult();
-            _baseTypeName = _baseType.getFullyQualifiedName();
-            _roleType     = (IType)_rolList.getSelection()[0];
-            _roleTypeName = _roleType.getFullyQualifiedName(); 
-                
-            setReturnCode(OK);
-            close();
-        }
+        checkOkButton();
+        String title = Messages.format(
+        		OTDTUIPlugin.getResourceString("BindingEditor.generic_error_in_dialog"), //$NON-NLS-1$
+        		OTDTUIPlugin.getResourceString("BindingEditor.AddconnectorDialog.title"));   //$NON-NLS-1$
+        MessageDialog.openError(getShell(), title, message);
 	} 
 	
 	public IType getBaseType()
