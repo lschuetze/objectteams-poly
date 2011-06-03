@@ -25,8 +25,6 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Attribute without a value.
  * Uses:
  *    CallsBaseConstructor

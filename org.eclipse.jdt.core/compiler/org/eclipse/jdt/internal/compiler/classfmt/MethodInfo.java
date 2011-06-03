@@ -41,8 +41,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
- * MIGRATION_STATE: 3.3
- *
  * OTDT changes:
  *
  * What: register the class byte code and this methods offset, if needed.

@@ -40,8 +40,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Keep a list of all type anchors of one method signature
  * in order to make them persistent in class files.
  * Later when reading the byte code, anchored types are restored from this list.

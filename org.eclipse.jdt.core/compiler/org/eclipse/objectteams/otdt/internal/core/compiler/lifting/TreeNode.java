@@ -27,8 +27,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 
 /**
- * MIGRATION_STATE: complete
- *
  * @author mac
  *
  */

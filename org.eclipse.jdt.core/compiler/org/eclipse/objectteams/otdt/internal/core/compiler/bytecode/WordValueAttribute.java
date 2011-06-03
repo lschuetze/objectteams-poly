@@ -44,8 +44,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Bytecode attributes with exactly one (fixed-length) value (word=2bytes).
  * Currently handled:
  * <ul>

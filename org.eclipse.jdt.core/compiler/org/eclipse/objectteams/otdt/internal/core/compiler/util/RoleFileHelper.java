@@ -38,8 +38,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationS
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 
 /**
- * MIGRATION_STATE: 3.3
- *
  * Some functions for treating role files.
  * Linking role files with their enclosing team involves the following:
  * <ul>

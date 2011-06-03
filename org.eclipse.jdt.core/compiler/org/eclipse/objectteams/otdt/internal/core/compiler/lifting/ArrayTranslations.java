@@ -38,9 +38,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
 /**
- * MIGRATION_STATE: complete, 2 fixmes remain.
- * moved here from org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.
- *
  * This class handles the common part of array lifting and lowering.
  *
  * @author stephan

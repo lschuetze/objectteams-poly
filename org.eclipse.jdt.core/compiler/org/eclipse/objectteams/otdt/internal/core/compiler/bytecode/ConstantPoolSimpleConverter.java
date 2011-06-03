@@ -27,8 +27,6 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Simplified conversion of byte code attributes.
  *
  * @author stephan

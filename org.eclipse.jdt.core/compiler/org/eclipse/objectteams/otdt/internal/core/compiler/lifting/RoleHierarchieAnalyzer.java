@@ -36,8 +36,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * step 3 (hierarchie analysis) of smart lifting algorithm
  * step 3 = step 4 + step 5
  * @author brcan ,kaschja

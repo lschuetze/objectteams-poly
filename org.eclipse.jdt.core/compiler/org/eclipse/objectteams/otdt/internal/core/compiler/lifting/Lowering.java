@@ -36,9 +36,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
 /**
- * MIGRATION_STATE: complete, fixmes remain.
- * moved here from org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.
- *
  * Helper that generates the lowering statements necessary for the callout compiler-feature.
  *
  * Nested classes PushingExpression and PopExpression are used to store a value on

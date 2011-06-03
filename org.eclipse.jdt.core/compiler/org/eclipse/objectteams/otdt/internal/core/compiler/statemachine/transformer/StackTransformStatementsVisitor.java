@@ -30,8 +30,6 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * This class provides stack based management of expressiones/statements to
  * be replaced while traversing an AST.
  * @author stephan

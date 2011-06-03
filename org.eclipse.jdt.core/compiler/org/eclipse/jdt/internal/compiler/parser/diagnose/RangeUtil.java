@@ -22,8 +22,6 @@ import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 
 /**
- * MIGRATION_STATE: 3.3
- *
  * OTDT changes:
  * What: Support callin/callouts.
  *

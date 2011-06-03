@@ -56,8 +56,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
- * MIGRATION_STATE: complete
- *
  * Creates the following reflective functions:
  * + boolean  hasRole(Object _OT$base_arg)
  * + boolean  hasRole(Object _OT$base_arg, Class class_arg)

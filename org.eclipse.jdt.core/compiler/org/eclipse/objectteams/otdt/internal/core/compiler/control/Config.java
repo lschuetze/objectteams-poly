@@ -38,8 +38,6 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Instances of this class are used to store some global data while
  * the compiler is invoked from arbitrary clients.
  * Threadsafety is obtained by storing one Config for each client

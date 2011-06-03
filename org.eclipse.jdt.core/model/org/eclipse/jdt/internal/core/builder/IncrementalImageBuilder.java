@@ -32,8 +32,6 @@ import java.net.URI;
 import java.util.*;
 
 /**
- * MIGRATION_STATE: 3.3.2
- *
  * <h4>OTDT changes:</h4>
  * <dl>
  * <dt>What:<dd> handle role files

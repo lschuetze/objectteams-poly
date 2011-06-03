@@ -37,8 +37,6 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.ProblemDetail;
 
 /**
- * MIGRATION_STATE: complete
- *
  * @author Markus Witte
  * @version $Id: ConstantPoolObject.java 23416 2010-02-03 19:59:31Z stephan $
  */

@@ -29,8 +29,6 @@ import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 
 /**
- * MIGRATION_STATUS: 3.3
- * 
  * OTDT changes:
  * What: allow batch compiler to force mode == SOURCE
  * Why:  getTeamOfRoleFile may require a source team.

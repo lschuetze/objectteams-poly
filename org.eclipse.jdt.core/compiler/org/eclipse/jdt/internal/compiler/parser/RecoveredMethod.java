@@ -40,8 +40,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
 /**
- * MIGRATION_STATE: 3.4
- *
  * Internal method structure for parsing recovery
  */
 

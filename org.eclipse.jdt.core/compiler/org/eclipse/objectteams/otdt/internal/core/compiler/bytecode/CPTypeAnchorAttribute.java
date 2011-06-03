@@ -32,8 +32,6 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * List of Class_info entries in the constant pool, which represent an anchored type.
  * This attribute stores the anchor (encoded as a path, currently just readableName()).
  * Possibly the anchor is not even needed, just the fact, that the Class_info is an

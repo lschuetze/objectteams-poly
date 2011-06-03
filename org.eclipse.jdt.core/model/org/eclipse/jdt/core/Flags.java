@@ -19,8 +19,6 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 
 /**
- * OTDT_MIGRATION_STATE: complete.
- *
  * OTDT changes:
  * What: flags added for team, role, callin
  *

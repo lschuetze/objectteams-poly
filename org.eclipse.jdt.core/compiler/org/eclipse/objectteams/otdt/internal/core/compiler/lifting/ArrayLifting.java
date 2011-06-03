@@ -26,9 +26,6 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 /**
- * MIGRATION_STATE: complete.
- * moved here from org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.
- *
  * @author stephan
  * @version $Id: ArrayLifting.java 23416 2010-02-03 19:59:31Z stephan $
  */

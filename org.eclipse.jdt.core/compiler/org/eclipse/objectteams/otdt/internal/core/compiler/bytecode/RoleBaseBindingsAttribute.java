@@ -28,8 +28,6 @@ import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Represents the "CallinRoleBaseBindings" attribute.
  * List of pairs (rolename x basename).
  * Records the bound roles of one team.

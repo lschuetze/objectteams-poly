@@ -16,8 +16,6 @@ package org.eclipse.jdt.internal.compiler.classfmt;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 
 /**
- * MIGRATION_STATE: 3.3
- *
  * OTDT changes:
  * What: more constants: team, valueParam
  */

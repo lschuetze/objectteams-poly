@@ -28,8 +28,6 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.smap.SourcePosition;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Super class of different AST factories:
  * @see AstGenerator
  *

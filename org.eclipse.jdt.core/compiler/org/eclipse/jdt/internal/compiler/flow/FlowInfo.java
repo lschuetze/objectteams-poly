@@ -23,8 +23,6 @@ import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallTrackingVariable;
 
 /**
- * MIGRATION_STATE: 3.3
- *
  * OTDT changes
  *
  * What: Allow public query isDefinitelyAssigned() for base-call tracking variables.

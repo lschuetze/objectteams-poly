@@ -27,8 +27,6 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Attached to a synthetic class <team>$RoFi__OT__, this attribute lists all
  * known roles stored in role files.
  *

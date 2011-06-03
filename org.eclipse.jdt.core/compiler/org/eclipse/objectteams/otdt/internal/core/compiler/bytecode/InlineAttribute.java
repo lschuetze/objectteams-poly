@@ -25,8 +25,6 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * This class implements byte code attributes which store a given byte array
  * inline (ie., without indirection using the constant pool).
  *

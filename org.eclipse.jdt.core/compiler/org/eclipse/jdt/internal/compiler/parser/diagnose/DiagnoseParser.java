@@ -24,8 +24,6 @@ import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.jdt.internal.compiler.util.Util;
 
 /**
- * MIGRATION_STATE: 3.4
- *
  * OTDT changes:
  * What: Switch modes for 'base': Keyword vs. Identifier.
  * How:  Use LexStream.{forceBaseIsIdentifier,restoreBaseKeyword}()

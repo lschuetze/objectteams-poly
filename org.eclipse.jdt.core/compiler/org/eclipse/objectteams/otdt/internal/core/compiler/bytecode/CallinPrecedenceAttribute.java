@@ -33,8 +33,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutB
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.PrecedenceBinding;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * TODO Description of this attribute
  *
  * @author stephan

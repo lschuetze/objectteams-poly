@@ -46,8 +46,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 
 /**
- * MIGRATION_STATE: E 3.2 RC1a.
- *
  * Utility class for adding or removing elements to/from arrays within the AST.
  *
  * @author Markus Witte

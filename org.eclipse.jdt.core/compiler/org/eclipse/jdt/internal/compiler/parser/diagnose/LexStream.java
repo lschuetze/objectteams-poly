@@ -20,8 +20,6 @@ import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.compiler.util.Util;
 
 /**
- * MIGRATION_STATE: 3.3
- *
  * OTDT changes:
  * What: support our stateful scanner.
  *

@@ -26,8 +26,6 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * An integer list encoding the parameter postitions of a callin replace binding.
  * See AbstractMethodMappingDeclaration.recordPosition for explanation and an example.
  *

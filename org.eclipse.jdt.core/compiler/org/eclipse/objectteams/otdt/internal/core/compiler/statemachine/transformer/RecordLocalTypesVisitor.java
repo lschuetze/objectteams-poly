@@ -36,8 +36,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
 
 /**
- * MIGRATION_STATE: E3.2RC1a.
- *
  * Sole purpose of this visitor: Link local types to role models.
  *
  * @author stephan

@@ -30,8 +30,6 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Represents the "ReferencedTeams" attribute by which dependencies
  * among classes are stored in the byte code, such that the OTRE
  * can load teams before their base classes.

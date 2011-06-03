@@ -49,8 +49,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinhe
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * @author Markus Witte
  * @version $Id: ConstantPoolObjectMapper.java 23416 2010-02-03 19:59:31Z stephan $
  */

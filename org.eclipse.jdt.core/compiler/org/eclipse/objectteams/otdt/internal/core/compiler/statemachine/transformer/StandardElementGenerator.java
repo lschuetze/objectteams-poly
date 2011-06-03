@@ -59,8 +59,6 @@ import static org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers.*;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.*;
 
 /**
- * MIGRATION_STATE: complete
- *
  * This class inserts standard elements into role and team classes.
  *
  * For bound and unbound roles:

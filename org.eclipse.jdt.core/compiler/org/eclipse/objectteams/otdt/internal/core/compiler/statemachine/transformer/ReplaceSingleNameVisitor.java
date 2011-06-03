@@ -29,8 +29,6 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Replace a given expression for all occurrences of a given SingleNameReference
  * @author stephan
  */

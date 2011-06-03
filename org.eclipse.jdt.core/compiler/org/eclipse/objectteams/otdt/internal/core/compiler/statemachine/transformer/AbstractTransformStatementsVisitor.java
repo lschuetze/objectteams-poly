@@ -109,8 +109,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
 
 
 /**
- * MIGRATION_STATE: 3.4
- *
  * A visitor which is able to replace expressions/statements within statements.
  * Subclasses just need to request replacement by calling <code>enterExpression</code>.
  * This class will then take care of performing the change in the parent of the

@@ -41,7 +41,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
 /**
- * MIGRATION_STATE: new, not yet: paramter mappings
+ * TODO(SH): handle paramter mappings
  *
  * NEW for OTDT.
  * started from COPY&PASTE from RecoveredMethod

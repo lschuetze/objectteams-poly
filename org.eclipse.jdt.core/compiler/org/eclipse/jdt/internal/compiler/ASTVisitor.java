@@ -28,8 +28,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
 /**
  * A visitor for iterating through the parse tree.
  *
- * MIGRATION_STATE: 3.3
- *
  * OTDT changes:
  * What:
  * + add visit methods for these new AST nodes:

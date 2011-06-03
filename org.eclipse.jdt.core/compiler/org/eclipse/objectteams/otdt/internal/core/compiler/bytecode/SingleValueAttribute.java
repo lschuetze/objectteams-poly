@@ -33,8 +33,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 
 
 /**
- * MIGRATION_STATE: complete, 1 fixme(generic) remains.
- *
  * Bytecode attributes with exactly one (fixed-length) value (string).
  * Currently handled:
  * <ul>

@@ -27,8 +27,6 @@ import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 
 
 /**
- * MIGRATION_STATE: complete.
- *
  * Bytecode attributes with a uniform list of values.
  * Currently handled (by sub-classes):
  * <ul>

@@ -29,8 +29,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.SingleValueA
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAttribute;
 
 /**
- * MIGRATION_STATE: 3.3
- *
  * OTDT changes:
  * What: additional setter for accessFlags.
  *

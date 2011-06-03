@@ -15,8 +15,6 @@ package org.eclipse.jdt.core.dom;
 
 
 /**
- * MIGRATION_STATE: 3.4
- *
  * <h4>OTDT changes:</h4>
  * <dl>
  * <dt>What:<dd> new lookup functions for teams and roles.
