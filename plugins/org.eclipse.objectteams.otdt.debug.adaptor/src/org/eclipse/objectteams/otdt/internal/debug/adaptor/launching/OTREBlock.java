@@ -19,6 +19,7 @@ package org.eclipse.objectteams.otdt.internal.debug.adaptor.launching;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -112,7 +113,7 @@ public abstract class OTREBlock
 	boolean hasOTJProject(ILaunchConfiguration config) {
 		try {
 			String projectName = config.getAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, (String)null);
-			if (projectName != null) {
+			if (projectName != null && new Path("").isValidSegment(projectName)) {
 				IProject project = ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
 				if (project != null && project.hasNature(JavaCore.OTJ_NATURE_ID))
 					return true;
