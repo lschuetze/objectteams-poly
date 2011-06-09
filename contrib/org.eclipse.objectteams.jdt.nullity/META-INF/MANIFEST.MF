@@ -1,6 +1,6 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: JDT Null Annotation Checker
+Bundle-Name: JDT Null Annotation Checker (Early Access)
 Bundle-SymbolicName: org.eclipse.objectteams.jdt.nullity;singleton:=true
 Bundle-Version: 0.7.1.qualifier
 Bundle-Activator: org.eclipse.objectteams.internal.jdt.nullity.Activator
