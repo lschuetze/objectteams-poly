@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.objectteams.internal.jdt.nullity.quickfix;
 
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.DefiniteNullFromNonNullMethod;
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.DefiniteNullToNonNullParameter;
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.IllegalDefinitionToNonNullParameter;
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.IllegalRedefinitionToNonNullParameter;
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.IllegalRedefinitionToNullableReturn;
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.PotentialNullFromNonNullMethod;
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.PotentialNullToNonNullParameter;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.DefiniteNullFromNonNullMethod;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.DefiniteNullToNonNullParameter;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.IllegalDefinitionToNonNullParameter;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.IllegalRedefinitionToNonNullParameter;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.IllegalRedefinitionToNullableReturn;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.PotentialNullFromNonNullMethod;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.PotentialNullToNonNullParameter;
 
 import java.util.ArrayList;
 import java.util.Collection;

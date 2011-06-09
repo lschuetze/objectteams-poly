@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.objectteams.internal.jdt.nullity.quickfix;
 
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem.*;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.*;
 
 import java.util.List;
 import java.util.Set;

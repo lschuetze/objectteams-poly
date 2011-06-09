@@ -58,9 +58,9 @@ import org.eclipse.jdt.internal.compiler.util.HashtableOfInt;
 import org.objectteams.Instantiation;
 import org.objectteams.InstantiationPolicy;
 
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.IProblem;
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.TagBits;
-import static org.eclipse.objectteams.internal.jdt.nullity.IConstants.TypeIds;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.TagBits;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.TypeIds;
 
 import base org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.Assignment;
@@ -558,31 +558,55 @@ public team class CompilerAdaptation {
 		 * now fill in missing annotations from a default setting from an enclosing scope.
 		 */
 		void fillInDefaultNullness() {
-			// find the applicable default inside->out:
-			SourceTypeBinding type = getType();
-			long defaultNullNess = 0;
-			SourceTypeBinding currentType = type;
-			while (currentType != null) {
-				defaultNullNess = currentType.defaultNullness;
-				if (defaultNullNess != 0)
-					break;
-				currentType = currentType.enclosingType();
-			}
-			if (defaultNullNess == 0) {
-				defaultNullNess = type.getPackage().defaultNullness;
-				if (defaultNullNess == 0)
-					defaultNullNess = getEnvironment().getGlobalOptions().defaultNonNullness;
-			}
-			
+			TypeBinding annotationBinding = findDefaultNullness();
 			// apply this default to all methods:
-			if (defaultNullNess != 0) {
-				TypeBinding annotationBinding = getEnvironment().getNullAnnotationBinding(defaultNullNess);
+			if (annotationBinding != null) {
+				long defaultNullness = Constants.getNullnessTagbit(annotationBinding);
 				MethodBinding[] methodBindings = getMethodBindings();
 				if (methodBindings != null) {
 					for (MethodBinding methodBinding : methodBindings)
-						methodBinding.fillInDefaultNullness(defaultNullNess, annotationBinding);
+						methodBinding.fillInDefaultNullness(defaultNullness, annotationBinding);
 				}
 			}
+		}
+	
+		TypeBinding findDefaultNullness() {
+			// find the applicable default inside->out:
+
+			// type
+			SourceTypeBinding type = getType();
+			SourceTypeBinding currentType = type;
+			TypeBinding annotationBinding = null;
+			while (currentType != null) {
+				annotationBinding = currentType.nullnessDefaultAnnotation;
+				if (annotationBinding != null)
+					return annotationBinding;
+				currentType = currentType.enclosingType();
+			}
+			
+			// package
+			annotationBinding = type.getPackage().nullnessDefaultAnnotation;
+			if (annotationBinding != null)
+				return annotationBinding;
+			
+			// global
+			long defaultNullness = getEnvironment().getGlobalOptions().defaultNonNullness;
+			if (defaultNullness != 0) {
+				annotationBinding = getEnvironment().getNullAnnotationBinding(defaultNullness);
+				if (annotationBinding != null)
+					return annotationBinding;
+				
+				// on this branch default was not defined using an annotation, thus annotation type can still be missing
+				if (defaultNullness == TagBits.AnnotationNonNull)
+					type.problemReporter().missingNullAnnotationType(getEnvironment().getNonNullAnnotationName());
+				else if (defaultNullness == TagBits.AnnotationNullable)
+					type.problemReporter().missingNullAnnotationType(getEnvironment().getNullableAnnotationName());
+				else
+					type.problemReporter().abortDueToInternalError("Illegal default nullness value: "+defaultNullness); //$NON-NLS-1$
+				// reset default to avoid duplicate errors:
+				getEnvironment().getGlobalOptions().defaultNonNullness = 0;
+			}
+			return null;
 		}
 	}
 
@@ -597,41 +621,35 @@ public team class CompilerAdaptation {
 
 		PackageBinding getPackage() 		-> PackageBinding getPackage();
 
-		long getAnnotationTagBits() 		-> long getAnnotationTagBits();
-
 		ProblemReporter problemReporter() 	-> get ClassScope scope
 					with {  result 			<- scope.problemReporter() } 
 
 		SourceTypeBinding enclosingType() 	-> ReferenceBinding enclosingType()
 					with { result 			<- (SourceTypeBinding)result }
 		
-		protected long defaultNullness;
+		protected TypeBinding nullnessDefaultAnnotation;
 
+		/** initialize a normal type */
 		evaluateNullAnnotations 			<- after getAnnotationTagBits;
 		
-		triggerNullAnnotationInit 			<- after initializeDeprecatedAnnotationTagBits
+		/** initialize a package-info.java */
+		evaluateNullAnnotations 			<- after initializeDeprecatedAnnotationTagBits
 			base when (CharOperation.equals(base.sourceName, TypeConstants.PACKAGE_INFO_NAME));
 
 		@SuppressWarnings("inferredcallout")
 		void evaluateNullAnnotations() {
-			// transfer nullness info from tagBits to defaultNullness 
-			long tagBits = getTagBits();
-			long nullness = 0;
-			if ((tagBits & IConstants.TagBits.AnnotationNullableByDefault) != 0)
-				nullness = IConstants.TagBits.AnnotationNullable;
-			else if ((tagBits & IConstants.TagBits.AnnotationNonNullByDefault) != 0)
-				nullness = IConstants.TagBits.AnnotationNonNull;
-			if (nullness != 0) {
+			// transfer nullness info from tagBits to this.nullnessDefaultAnnotation 
+			long tagBit = Constants.applyDefaultNullnessTagbit(getTagBits());
+			if (tagBit == 0)
+				return;
+			TypeBinding nullnessDefaultAnnotation = getPackage().getEnvironment().getNullAnnotationBinding(tagBit);
+			if (nullnessDefaultAnnotation != null) {
 				if (CharOperation.equals(this.sourceName, TypeConstants.PACKAGE_INFO_NAME)) {
-					getPackage().setDefaultNullness(nullness);
+					getPackage().nullnessDefaultAnnotation = nullnessDefaultAnnotation;
 				} else {
-					this.defaultNullness = nullness;
+					this.nullnessDefaultAnnotation = nullnessDefaultAnnotation;
 				}
 			}
-		}
-		
-		void triggerNullAnnotationInit() {
-			getAnnotationTagBits(); // this will in turn trigger our callin
 		}
 	}
 	
@@ -743,7 +761,7 @@ public team class CompilerAdaptation {
 			IBinaryAnnotation[] annotations = binaryType.getAnnotations();
 			if (annotations != null) {
 				long annotationBit = 0L;
-				long defaultNullness = 0L;
+				TypeBinding defaultNullness = null;
 				for (int i = 0; i < annotations.length; i++) {
 					char[] annotationTypeName = annotations[i].getTypeName();
 					if (annotationTypeName[0] != 'L')
@@ -751,19 +769,19 @@ public team class CompilerAdaptation {
 					char[][] typeName = CharOperation.splitOn('/', annotationTypeName, 1, annotationTypeName.length-1); // cut of leading 'L' and trailing ';'
 					if (CharOperation.equals(typeName, nonNullByDefaultAnnotationName)) {
 						annotationBit = TagBits.AnnotationNonNullByDefault;
-						defaultNullness = TagBits.AnnotationNonNull;
+						defaultNullness = getEnvironment().getNullAnnotationBinding(TagBits.AnnotationNonNull);
 						break;
 					}
 					if (CharOperation.equals(typeName, nullableByDefaultAnnotationName)) {
 						annotationBit = TagBits.AnnotationNullableByDefault;
-						defaultNullness = TagBits.AnnotationNullable;
+						defaultNullness = getEnvironment().getNullAnnotationBinding(TagBits.AnnotationNullable);
 						break;
 					}
 				}
 				if (annotationBit != 0L) {
 					addTagBit(annotationBit);
 					if (CharOperation.equals(this.sourceName(), TypeConstants.PACKAGE_INFO_NAME))
-						this.getPackage().setDefaultNullness(defaultNullness);
+						this.getPackage().nullnessDefaultAnnotation = defaultNullness;
 				}
 			}
 		}
@@ -872,10 +890,11 @@ public team class CompilerAdaptation {
 		
 		protected char[] nullableName = null;
 		protected char[] nonNullName = null;
-		protected char[] nullableByDefaultName;
-		protected char[] nonNullByDefaultName;
+		protected char[] nullableByDefaultName = null;
+		protected char[] nonNullByDefaultName = null;
 		protected boolean shouldEmulate = false;
-		protected long defaultNullness;
+		
+		protected TypeBinding nullnessDefaultAnnotation;
 
 		void setupNullAnnotationType(ReferenceBinding type) <- after void addType(ReferenceBinding type)
 			when (this.nullableName != null || this.nonNullName != null || this.nullableByDefaultName != null || this.nonNullByDefaultName != null);
@@ -898,9 +917,6 @@ public team class CompilerAdaptation {
 				getEnvironment().getProblemReporter().conflictingTypeEmulation(type.compoundName);
 			else
 				type.id = id;	// ensure annotations of this type are detected as standard annotations.
-		}
-		public void setDefaultNullness(long nullness) {
-			this.defaultNullness = nullness;
 		}
 	}
 

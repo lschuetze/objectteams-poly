@@ -15,9 +15,10 @@ import static org.eclipse.jdt.core.compiler.IProblem.Internal;
 import static org.eclipse.jdt.core.compiler.IProblem.MethodRelated;
 
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 @SuppressWarnings("restriction")
-public interface IConstants {
+public class Constants {
 
 	/** Additional constants for {@link org.eclipse.jdt.internal.compiler.lookup.TagBits}. */
 	static interface TagBits extends org.eclipse.jdt.internal.compiler.lookup.TagBits {
@@ -38,7 +39,7 @@ public interface IConstants {
 	}
 
 	/** Additional constants for {@link org.eclipse.jdt.core.compiler.IProblem}. */
-	static interface IProblem {
+	public static interface IProblem {
 		/** @since 3.7 */
 		int DefiniteNullFromNonNullMethod = MethodRelated + 880;
 		/** @since 3.7 */
@@ -71,5 +72,32 @@ public interface IConstants {
 		int PotentialNullMessageSendReference = Internal + 894;
 		/** @since 3.7 */
 		int RedundantNullCheckOnNonNullMessageSend = 895;
+	}
+	
+	/** Translate from a nullness annotation to the corresponding tag bit or 0L. */
+	public static long getNullnessTagbit(TypeBinding nullnessAnnotation) {
+		switch (nullnessAnnotation.id) {
+		case TypeIds.T_ConfiguredAnnotationNonNull : 
+			return TagBits.AnnotationNonNull;
+		case TypeIds.T_ConfiguredAnnotationNullable : 
+			return TagBits.AnnotationNullable;
+		default: 
+			return 0L;
+		}
+	}
+	
+	/** 
+	 * Translate from a nullness default (like <code>@NonNullByDefault</code>)
+	 * to the corresponding concrete nullness (like <code>@NonNull</code>),
+	 * both sides being represented by their tag bit.
+	 * @param defaultTagbit given set of tag bits
+	 * @return one of {@link TagBits#AnnotationNonNull}, {@link TagBits#AnnotationNullable} or 0L.
+	 */
+	public static long applyDefaultNullnessTagbit(long defaultTagbit) {
+		if ((defaultTagbit & TagBits.AnnotationNonNullByDefault) != 0L)
+			return TagBits.AnnotationNonNull;
+		if ((defaultTagbit & TagBits.AnnotationNullableByDefault) != 0L)
+			return TagBits.AnnotationNullable;
+		return 0L;
 	}
 }
