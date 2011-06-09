@@ -961,6 +961,39 @@ public void test_annotation_import_006() {
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
+// using nullness defaulting to nonnull, missing annotation types
+public void test_annotation_import_007() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_NullableAnnotationName, "org.foo.MayBeNull");
+	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.MustNotBeNull");
+	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	customOptions.put(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes, CompilerOptions.DISABLED);
+	runNegativeTest(
+		true/*shouldFlushOutputDirectory*/,
+		new String[] {
+			"Lib.java",
+			"public class Lib {\n" +
+			"    Object getObject() { return new Object(); }\n" +
+			"}\n",
+			"X.java",
+			"public class X {\n" +
+			"    Object getObject(Lib l) {\n" +
+			"        return l.getObject();\n" +
+			"    }\n" +
+			"}\n"
+		},
+		null/*classLibs*/,
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in Lib.java (at line 1)\n" + 
+		"	public class Lib {\n" + 
+		"	^\n" + 
+		"Buildpath problem: the type org.foo.MustNotBeNull which is configured as a null annotation type cannot be resolved\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
 // emulation names conflict with existing types, DISABLED because we can't test the AbortCompilation exception.
 public void _test_annotation_emulation_001() {
 	Map customOptions = getCompilerOptions();
