@@ -4,7 +4,7 @@
 	
 	<groupId>org.eclipse</groupId>
 	<artifactId>objectteams-parent-pom</artifactId>
-	<version>2.0.0</version>
+	<version>2.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	
 	<name>Object Teams parent pom</name>
@@ -107,9 +107,9 @@
     </properties>
 
 	<scm>
-	    <connection>scm:svn:svn+ssh://dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/tags/mvn-releases/objectteams-parent-pom-2.0.0</connection>
-	    <developerConnection>scm:svn:svn+ssh://dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/tags/mvn-releases/objectteams-parent-pom-2.0.0</developerConnection>
-	    <url>scm:svn:svn+ssh://dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/tags/mvn-releases/objectteams-parent-pom-2.0.0</url>
+	    <connection>scm:svn:svn://dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/trunk/maven/infrastructure/parent-pom</connection>
+	    <developerConnection>scm:svn:svn+ssh://sherrmann@dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/trunk/maven/infrastructure/parent-pom</developerConnection>
+	    <url>http://dev.eclipse.org/viewcvs/index.cgi/trunk/maven/infrastructure/parent-pom?root=TOOLS_OBJECTTEAMS</url>
 	</scm>
 	
 	<reporting>
