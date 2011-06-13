@@ -51,7 +51,7 @@ Using the Object Teams Parent POM
   [org.eclipse:objectteams-runtime] the Object Teams runtime repackaged from the <<<org.eclipse.objectteams.runtime>>> OSGi bundle.
   
   [org.eclipse:objectteams-otre-agent] the Java agent that hooks the Object Teams runtime into the JVM (repackaged from file <<<otre_agent.jar>>>
-  from the <<<org.eclipse.objectteams.runtime>>> project).
+  from the <<<org.eclipse.objectteams.otdt>>> project).
   
   [org.eclipse:objectteams-otj-compiler] a compatible replacement for <<<org.sonatype.tycho:org.eclipse.jdt.core>>> that enables the 
   <<<org.sonatype.tycho:tycho-compiler-jdt>>> plugin to compile OT/J sources.
