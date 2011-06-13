@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
+import org.eclipse.jdt.internal.compiler.util.Messages;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.Pair;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
@@ -100,7 +101,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
-import org.eclipse.osgi.util.NLS;
 
 /**
  * After method mappings have been resolved on the signature level create the
@@ -1106,7 +1106,7 @@ public class CallinImplementor extends MethodMappingImplementor
 	 */
 	private Statement genResultNotProvidedCheck(char[] roleName, MethodBinding roleMethodBinding, TypeBinding baseTypeBinding, MethodSpec baseMethodSpec, AstGenerator gen) {
 
-		String errMsg = NLS.bind(
+		String errMsg = Messages.bind(
 				"(team: {0}, role: {1}, method {2})\n"+ //$NON-NLS-1$
 				"Base call to {3}.{4} is missing",  //$NON-NLS-1$
 				new Object[] {
