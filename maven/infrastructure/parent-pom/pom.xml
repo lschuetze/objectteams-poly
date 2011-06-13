@@ -54,7 +54,7 @@
 	
 	<issueManagement>
 		<system>Bugzilla</system>
-		<url>http://bugs.eclipse.org/</url>
+		<url>http://bugs.eclipse.org/bugs</url>
 	</issueManagement>
     
     <repositories>
