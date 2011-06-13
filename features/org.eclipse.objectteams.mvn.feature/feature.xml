@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.objectteams.mvn.feature"
+      label="%featureName"
+      version="1.0.0.qualifier"
+      provider-name="%providerName"
+      plugin="org.eclipse.objectteams.mvn">
+
+   <description url="http://www.example.com/description">
+      This feature integrates support for Object Teams into the m2e plug-in
+to the end that Maven managend OT/J projects can be easily created
+and developed within Eclipse.
+   </description>
+
+   <copyright>
+      Copyright (c) 2011 GK Software AG and others.
+Author: Stephan Herrmann
+   </copyright>
+
+   <license url="%licenseURL">
+      %license
+   </license>
+
+   <url>
+      <update label="Object Teams Contributions" url="http://download.eclipse.org/objectteams/updates/contrib"/>
+   </url>
+
+   <plugin
+         id="org.eclipse.objectteams.mvn"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+</feature>
