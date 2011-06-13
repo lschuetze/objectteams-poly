@@ -786,7 +786,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
     @Override
     protected IJavaElement getInitialJavaElement(IStructuredSelection structuredSelection) {
     	IJavaElement element = super.getInitialJavaElement(structuredSelection);
-    	if (element.getElementType() == IJavaElement.COMPILATION_UNIT) {
+    	if (element != null && element.getElementType() == IJavaElement.COMPILATION_UNIT) {
     		// try to improve:
     		IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
     		if (window != null) {
