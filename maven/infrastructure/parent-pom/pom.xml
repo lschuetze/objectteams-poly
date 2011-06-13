@@ -107,9 +107,11 @@
     </properties>
 
 	<scm>
-	    <connection>scm:svn:svn://dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/trunk/maven/infrastructure/parent-pom</connection>
-	    <developerConnection>scm:svn:svn+ssh://sherrmann@dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/trunk/maven/infrastructure/parent-pom</developerConnection>
-	    <url>http://dev.eclipse.org/viewcvs/index.cgi/trunk/maven/infrastructure/parent-pom?root=TOOLS_OBJECTTEAMS</url>
+		<!--  WTF: release will "improve" the connection to using svn+ssh and advertize this for anonymous access !@#!%$ -->
+	    <connection>scm:svn:svn://dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/${project-repository-path}</connection>
+	    <developerConnection>scm:svn:svn+ssh://${username}@dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/${project-repository-path}</developerConnection>
+		<!--  WTF: release will "improve" the connection to using svn+ssh and advertize this for web access !@#!%$ -->
+	    <url>http://dev.eclipse.org/viewcvs/index.cgi/${project-repository-path}?root=TOOLS_OBJECTTEAMS</url>
 	</scm>
 	
 	<reporting>
