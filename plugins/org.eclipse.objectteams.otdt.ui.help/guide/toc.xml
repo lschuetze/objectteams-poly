@@ -41,21 +41,21 @@
 			<topic label="OTDT 0.7 New&amp;Noteworthy" href="guide/news/new_in_0.7.html"/>
 		</topic>
 	</topic>
-	<topic label="Object Teams Language Definition" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/index.html">
-		<topic label="Teams and Roles" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/s1.html"/>
-		<topic label="Role Binding" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/s2.html"/>
-		<topic label="Callout Binding" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/s3.html"/>
-		<topic label="Callin Binding" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/s4.html"/>
-		<topic label="Team Activation" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/s5.html"/>
-		<topic label="Object Teams API" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/s6.html"/>
-		<topic label="Role Encapsulation" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/s7.html"/>
-		<topic label="Value Dependent Classes" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/s9.html"/>
-		<topic label="OT/J Syntax" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/sA.html"/>
-		<topic label="Changes between versions" href="/org.eclipse.objectteams.otdt.ui.help/guide/otjld/def/sB.html"/>
+	<topic label="Object Teams Language Definition" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/index.html">
+		<topic label="Teams and Roles" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/s1.html"/>
+		<topic label="Role Binding" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/s2.html"/>
+		<topic label="Callout Binding" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/s3.html"/>
+		<topic label="Callin Binding" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/s4.html"/>
+		<topic label="Team Activation" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/s5.html"/>
+		<topic label="Object Teams API" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/s6.html"/>
+		<topic label="Role Encapsulation" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/s7.html"/>
+		<topic label="Value Dependent Classes" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/s9.html"/>
+		<topic label="OT/J Syntax" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/sA.html"/>
+		<topic label="Changes between versions" href="/org.eclipse.objectteams.otdt.doc/guide/otjld/def/sB.html"/>
 	</topic>
 	<topic label="OT/Equinox Extension Points Reference">
-	 	<topic label="org.eclipse.objectteams.otequinox.aspectBindings" href="/org.eclipse.objectteams.otdt.ui.help/reference/extension-points/org_eclipse_objectteams_otequinox_aspectBindings.html"/>
-	 	<topic label="org.eclipse.objectteams.otequinox.aspectBindingNegotiators" href="/org.eclipse.objectteams.otdt.ui.help/reference/extension-points/org_eclipse_objectteams_otequinox_aspectBindingNegotiators.html"/>
-	 	<topic label="org.eclipse.objectteams.otequinox.liftingParticipant" href="/org.eclipse.objectteams.otdt.ui.help/reference/extension-points/org_eclipse_objectteams_otequinox_liftingParticipant.html"/>
+	 	<topic label="org.eclipse.objectteams.otequinox.aspectBindings" href="/org.eclipse.objectteams.otdt.doc/reference/extension-points/org_eclipse_objectteams_otequinox_aspectBindings.html"/>
+	 	<topic label="org.eclipse.objectteams.otequinox.aspectBindingNegotiators" href="/org.eclipse.objectteams.otdt.doc/reference/extension-points/org_eclipse_objectteams_otequinox_aspectBindingNegotiators.html"/>
+	 	<topic label="org.eclipse.objectteams.otequinox.liftingParticipant" href="/org.eclipse.objectteams.otdt.doc/reference/extension-points/org_eclipse_objectteams_otequinox_liftingParticipant.html"/>
 	</topic>
 </toc>
