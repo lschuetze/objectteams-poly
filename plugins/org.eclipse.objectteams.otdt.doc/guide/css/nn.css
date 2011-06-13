@@ -1,0 +1,87 @@
+/* Styles for New&Noteworthy documents */
+
+td {border-top: solid thin black;}
+td.noborder {border-top: none;}
+tr {vertical-align: top;}
+.since {
+    font-size:8pt; font-weight:bold;
+    padding-left:3px; padding-right:3px;
+    line-height:40px;
+    text-align:right;
+    color:#000040; background-color:#e0e0e0;
+}
+.since2 {
+    font-size:8pt; font-weight:bold;
+    padding-left:3px; padding-right:3px;
+    text-align:right;
+    color:#000040; background-color:#e0e0e0;
+}
+.since-inline {
+    font-size:8pt; font-weight:bold;
+    padding-left:3px; padding-right:3px;
+    text-align:right;
+    color:#000040; background-color:#e0e0e0;
+}
+a.buglink {
+    background-image:url(../images/bug.gif);
+    padding-left:20px;
+    font-size:9pt;
+    background-repeat:no-repeat;
+    background-position:left;
+    color:#000060;
+    font-weight:normal;
+}
+a.buglink2 {
+    font-size:9pt;
+    color:#000060;
+    font-weight:normal;
+}
+a.otjldlink {
+    background-image:url(../images/otdt/ot_paragraph.png);
+    padding-left:20px;
+    font-size:9pt;
+    background-repeat:no-repeat;
+    background-position:left;
+    color:#000060;
+    font-weight:normal;
+}
+img { margin-top:5px; }
+div.listing {
+    font-family:courier,monospace;
+    margin-left:10pt;
+    padding:5px;
+    background-color:white
+}
+div.listbox {
+    padding:2px;
+    margin-right:50px;
+    background-color:#b0b0b0; 
+}
+pre, code {
+	font-family:courier,monospace;
+	font-style:normal;
+}
+.annotation {
+	color:#707070;
+}
+.comment {
+	color:rgb(63,127,95);
+}
+td.h3 {
+    margin-left:120px;
+    font-size:13pt;
+    font-weight:bold;
+}
+div.navigation {
+ /*border-top: solid thin black;*/
+ text-align:center;
+ font-size:11pt; font-weight:bold;
+ margin:20px;
+}
+.ui { background-color:#e0e0e0; padding:2px; }
+
+div.hover {
+	background-color:#F9F6B8;
+	border: 1px solid #c4c295;
+	margin:-3px;padding:3px;
+}

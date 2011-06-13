@@ -1,0 +1,62 @@
+@CHARSET "UTF-8";
+/* from OT-Homepage, referenced from New&Noteworthy pages */
+
+#contentbox
+{
+    position:absolute;top:35px;left:480px;
+    background-color:#D0D0D0;
+    padding:1px;
+}
+
+#contentinner
+{
+	background-color:#def4fe;
+	margin:0px;
+	padding:4px;
+}
+
+#contentinner li
+{
+	padding-top: 0px;
+	padding-bottom: 0px; 
+	margin-bottom: 2px;
+	white-space: nowrap;
+}
+
+#widecolumn
+{
+	background: transparent;
+	float: left;
+	margin-right: 20px;
+	width: 640px;
+}
+
+#widecolumn ul, #widecolumn ol
+{
+	margin-left: 20px;
+	padding-bottom: 10px;
+}
+
+
+/* Addition for OT: */
+ul.novaArrow { margin:0px !important;}
+.novaArrow li {
+    background-image:url("/eclipse.org-common/themes/Nova/images/homeitemBullet.png");
+    background-repeat:no-repeat;
+    background-position:0px 0px;
+    padding-left:20px !important;
+    list-style-image: none !important;
+}
+
+code.keyword {
+        color: #7F0055;
+        font-weight: bold;
+}
+
+dt {
+	font-weight: bold;
+}
+
+dd {
+	margin-left: 30px;
+}
