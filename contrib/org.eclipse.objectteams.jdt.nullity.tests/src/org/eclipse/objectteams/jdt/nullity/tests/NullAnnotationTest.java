@@ -29,7 +29,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_default_nullness_003a" };
+//		TESTS_NAMES = new String[] { "test_nonnull_parameter_006" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -230,6 +230,28 @@ public void test_nonnull_parameter_005() {
 		"	            ^\n" + 
 		"Potential null contract violation: insufficient nullness information regarding a value that is passed to a parameter declared as @NonNull\n" + 
 		"----------\n",
+		"",/* expected output */
+		"",/* expected error */
+	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// a ternary non-null expression is passed to a nonnull parameter
+public void test_nonnull_parameter_006() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runConformTest(
+		false /* flush output directory */,
+		new String[] {
+			"X.java",
+			  "import org.eclipse.jdt.annotation.*;\n" +
+			  "public class X {\n" +
+			  "    	void m1(@NonNull String a) {}\n" + 
+			  "		void m2(@Nullable String b) {\n" + 
+			  "			m1(b == null ? \"\" : b);\n" + 
+			  "		}\n" +
+			  "}\n"},
+		null /* no class libraries */,
+		customOptions,
+		"",  /* compiler output */
 		"",/* expected output */
 		"",/* expected error */
 	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
