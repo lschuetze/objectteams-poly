@@ -157,7 +157,7 @@ public team class CompilerAdaptation {
 		}
 		
 		void analyseArguments(BlockScope currentScope, FlowInfo flowInfo) 
-		<- before FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo)
+		<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo)
 			with { currentScope <- currentScope, flowInfo <- flowInfo }
 
 		void analyseArguments(BlockScope currentScope, FlowInfo flowInfo) {
