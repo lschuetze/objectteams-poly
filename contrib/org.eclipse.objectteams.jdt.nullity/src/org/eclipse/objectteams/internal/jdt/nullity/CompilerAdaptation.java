@@ -352,14 +352,6 @@ public team class CompilerAdaptation {
 					// leverage null-info from parameter annotations:
 					Boolean nonNullNess = binding.parameterNonNullness[i];
 					if (nonNullNess != null) {
-						// FIXME(SH): workaround for missing array growing in markAsDefinitelyNonNull/markPotentiallyNullBit:
-						// see also Bug 247564 - [compiler][null] Detecting null field reference (our issues is fixed in proposed attachments)
-						int id = arguments[i].binding.id; 
-						if (info instanceof UnconditionalFlowInfo)
-							id += ((UnconditionalFlowInfo)info).maxFieldCount;
-						if (id >= UnconditionalFlowInfo.BitCacheSize)
-							info.markAsDefinitelyAssigned(arguments[i].binding);
-						// End workaround
 						if (nonNullNess)
 							info.markAsDefinitelyNonNull(arguments[i].binding);
 						else
