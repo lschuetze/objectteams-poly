@@ -946,6 +946,34 @@ public class Reflection extends AbstractOTJLDTest {
             null/*no custom requestor*/);
     }
 
+    // getRole(Object) called
+    // Bug 351317 - Error in (redundant) cast of anchored type
+    public void test923_getRoleMethod4() {
+       
+       runConformTest(
+            new String[] {
+		"Team923grm4.java",
+			    "\n" +
+			    "public team class Team923grm4 {\n" +
+			    "    public class R playedBy T923grm4 {\n" +
+			    "        public String toString() { return \"OK\"; }\n" +
+			    "    }\n" +
+			    "    Team923grm4(T923grm4 as R o) {}\n" +
+			    "    public static void main (String[] args0) {\n" +
+			    "        T923grm4 o = new T923grm4();\n" +
+			    "        final Team923grm4 t = new Team923grm4(o);\n" +
+			    "        R<@t> r = (R<@t>) t.getRole(o, R<@t>.class);\n" + 
+			    "        System.out.print(r);\n" +
+			    "    }\n" +
+			    "}    \n" +
+			    "    \n",
+		"T923grm4.java",
+			    "\n" +
+			    "public class T923grm4 {}\n"
+            },
+            "OK");
+    }
+
     // a replace callin tests the reflective function isExecutingCallin
     // 9.2.4-otjld-is-executing-callin-called-1
     public void test924_isExecutingCallinCalled1() {
