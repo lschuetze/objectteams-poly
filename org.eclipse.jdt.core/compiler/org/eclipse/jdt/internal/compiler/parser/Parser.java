@@ -6745,6 +6745,9 @@ protected void consumeRoleClassLiteral() {
 									0, // dims
 									(((long)typeExpr.sourceStart)<<32)+typeExpr.sourceEnd);
 	RoleClassLiteralAccess literal = new RoleClassLiteralAccess(typeRef);
+	this.intPtr--; // discard start of '.class'
+	literal.sourceEnd = this.intStack[this.intPtr--];
+	this.intPtr--; // discard start of type arguments ('<')
 	pushOnExpressionStack(literal);
 }
 // SH}
