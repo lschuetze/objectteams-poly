@@ -132,6 +132,13 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 		return    CharOperation.prefixEquals(IOTConstants._OT_LIFT_TO, method.selector)
 			   || CharOperation.prefixEquals(DeclaredLifting.OT_LIFT_DYNAMIC, method.selector);
 	}
+    public static boolean isLiftToMethodCall (Expression expr) {
+    	if (!(expr instanceof MessageSend))
+    		return false;
+    	char[] selector = ((MessageSend)expr).selector;
+		return    CharOperation.prefixEquals(IOTConstants._OT_LIFT_TO, selector)
+			   || CharOperation.prefixEquals(DeclaredLifting.OT_LIFT_DYNAMIC, selector);
+	}
 
 	public static char[] getLiftMethodName(TypeBinding roleType) {
 	    // TODO (SH) if roleType is not bound search for bound child role.

@@ -141,9 +141,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 									this._role.getBinding(),
 									IProblem.CallinDespiteBindingAmbiguity,
 									methodMappings[i]);
-				methodMappings[i].tagAsHavingErrors();
 			}
-			return;
 		}
         CallinMappingDeclaration[] callinMappings = new CallinMappingDeclaration[methodMappings.length];
         int num = 0;
@@ -411,14 +409,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					if (!isStaticRoleMethod) {
 						if (needLiftedRoleVar) {
 
-							int iProblem = teamDecl.getTeamModel().canLiftingFail(roleType);
-							if (iProblem != 0) {
-								callinDecl.addRoleLiftingProblem(roleType, iProblem);
-								canLiftingFail = true;
-								// and report the problem(s)
-								for (Map.Entry<ReferenceBinding, Integer> entry : callinDecl.rolesWithLiftingProblem.entrySet())
-									callinDecl.scope.problemReporter().callinDespiteLiftingProblem(entry.getKey(), entry.getValue(), callinDecl);
-							}
+							canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, roleType);
 
 							roleVar = (LOCAL_ROLE+statements.size()).toCharArray();
 							blockStatements.add(gen.localVariable(roleVar, roleType.sourceName(),				//   RoleType local$n = this._OT$liftToRoleType((BaseType)base);
@@ -504,6 +495,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 														 CastExpression.DO_WRAP);
 								// lift?(MyBaseClass) 
 								arg = gen.potentialLift(gen.thisReference(), arg, roleParam, isReplace/*reversible*/);
+								canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, (ReferenceBinding)roleParam);
 							}
 						} else {
 							arg = getArgument(callinDecl, 														//    prepare:  <mappedArg<n>>
@@ -511,6 +503,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 											  callinDecl.getRoleMethod().parameters, 
 											  i+idx,
 											  baseSpec);
+							if (Lifting.isLiftToMethodCall(arg))
+								canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, roleType);
 							if (needLiftedRoleVar)
 								arg = new PotentialRoleReceiverExpression(arg, roleVar, gen.typeReference(roleType.getRealClass()));
 						}
@@ -578,14 +572,13 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					}
 					blockStatements.add(gen.tryFinally(messageSendStatements, new Statement[]{resetFlag}));		//   try { roleMessageSend(); } finally { _OT$setExecutingCallin(_OT$oldIsExecutingCallin); } 
 					statements.add(gen.block(blockStatements.toArray(new Statement[blockStatements.size()])));
+					// collectively report the problem(s)
+					if (canLiftingFail)
+						for (Map.Entry<ReferenceBinding, Integer> entry : callinDecl.rolesWithLiftingProblem.entrySet())
+							callinDecl.scope.problemReporter().callinDespiteLiftingProblem(entry.getKey(), entry.getValue(), callinDecl);
 				}
 				
 				gen.retargetFrom(teamDecl);
-				if (canLiftingFail) {
-					TypeReference liftingFailed = gen.qualifiedTypeReference(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION);
-					AstEdit.addException(methodDecl, liftingFailed, false/*resolve*/);
-				}
-
 				
 				boolean needSuperCall = false;
 				// callinIds handled by super call?
@@ -616,7 +609,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						statements.add(superCall);																//    super._OT$callBefore/After(..);
 				}
 
-				// individual catch statements for LiftingVetoException and LiftingFailedException
 				Statement catchStatement1 = gen.emptyStatement();
 				Statement catchStatement2 = gen.emptyStatement();
 				if (isReplace) { 
@@ -811,5 +803,14 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		};
 		decl.hasParsedStatements = true;
 		AstEdit.addMethod(teamDecl, decl);
+	}
+
+	boolean checkLiftingProblem(TypeDeclaration teamDecl, CallinMappingDeclaration callinDecl, ReferenceBinding roleType) {
+		int iProblem = teamDecl.getTeamModel().canLiftingFail(roleType);
+		if (iProblem != 0) {
+			callinDecl.addRoleLiftingProblem(roleType, iProblem);
+			return true;
+		}
+		return false;
 	}
 }
