@@ -513,7 +513,7 @@ public class AstEdit {
 	    addImplementsReference(roleClassDecl, implementsRef);
 	}
 
-	public static void addException(MethodDeclaration methodDecl, TypeReference exceptionRef, boolean resolve) 
+	public static void addException(AbstractMethodDeclaration methodDecl, TypeReference exceptionRef, boolean resolve) 
 	{
 		if (methodDecl.thrownExceptions != null) {
 			int len = methodDecl.thrownExceptions.length;

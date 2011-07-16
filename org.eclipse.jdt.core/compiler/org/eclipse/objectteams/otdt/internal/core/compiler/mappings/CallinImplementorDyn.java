@@ -19,6 +19,7 @@ import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccP
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -347,6 +348,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				int callinIdCount = teamDecl.getTeamModel().getCallinIdCount();
 				// callinIds not handled here will be handled using a super-call.
 				boolean[] handledCallinIds = new boolean[callinIdCount];
+				// do we need to catch LiftingFailedException?
+				boolean canLiftingFail = false;
 				// one case block per callin mapping:
 				for (CallinMappingDeclaration callinDecl : callinDecls) 
 				{
@@ -407,6 +410,16 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					char[] roleVar = null;
 					if (!isStaticRoleMethod) {
 						if (needLiftedRoleVar) {
+
+							int iProblem = teamDecl.getTeamModel().canLiftingFail(roleType);
+							if (iProblem != 0) {
+								callinDecl.addRoleLiftingProblem(roleType, iProblem);
+								canLiftingFail = true;
+								// and report the problem(s)
+								for (Map.Entry<ReferenceBinding, Integer> entry : callinDecl.rolesWithLiftingProblem.entrySet())
+									callinDecl.scope.problemReporter().callinDespiteLiftingProblem(entry.getKey(), entry.getValue(), callinDecl);
+							}
+
 							roleVar = (LOCAL_ROLE+statements.size()).toCharArray();
 							blockStatements.add(gen.localVariable(roleVar, roleType.sourceName(),				//   RoleType local$n = this._OT$liftToRoleType((BaseType)base);
 									Lifting.liftCall(callMethod.scope,
@@ -568,6 +581,11 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				}
 				
 				gen.retargetFrom(teamDecl);
+				if (canLiftingFail) {
+					TypeReference liftingFailed = gen.qualifiedTypeReference(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION);
+					AstEdit.addException(methodDecl, liftingFailed, false/*resolve*/);
+				}
+
 				
 				boolean needSuperCall = false;
 				// callinIds handled by super call?
@@ -598,7 +616,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						statements.add(superCall);																//    super._OT$callBefore/After(..);
 				}
 
-				Statement catchStatement = gen.emptyStatement();
+				// individual catch statements for LiftingVetoException and LiftingFailedException
+				Statement catchStatement1 = gen.emptyStatement();
+				Statement catchStatement2 = gen.emptyStatement();
 				if (isReplace) { 
 
 					// default: callNext:
@@ -612,7 +632,12 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 											gen.qualifiedThisReference(aTeam.getBinding()), 
 											OT_CALL_NEXT, 
 											callArgs)));
-					catchStatement = gen.returnStatement(
+					catchStatement1 = gen.returnStatement(
+										gen.messageSend(
+											gen.qualifiedThisReference(aTeam.getBinding()), 
+											OT_CALL_NEXT, 
+											callArgs));
+					catchStatement2 = gen.returnStatement(
 										gen.messageSend(
 											gen.qualifiedThisReference(aTeam.getBinding()), 
 											OT_CALL_NEXT, 
@@ -621,13 +646,29 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				
 				// ==== overall assembly: ====
 				switchStat.statements = statements.toArray(new Statement[statements.size()]);
+				Argument[] exceptionArguments;
+				Statement[][] exceptionStatementss;
+				if (canLiftingFail) {
+					exceptionArguments = new Argument[] {
+						gen.argument("ex".toCharArray(),  //$NON-NLS-1$
+									 gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_LIFTING_VETO)),
+						gen.argument("ex".toCharArray(),  //$NON-NLS-1$
+								 gen.qualifiedTypeReference(IOTConstants.O_O_LIFTING_FAILED_EXCEPTION))
+					};
+					exceptionStatementss = new Statement[][]{{catchStatement1},{catchStatement2}};
+				} else {
+					exceptionArguments = new Argument[] {
+							gen.argument("ex".toCharArray(),  //$NON-NLS-1$
+										 gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_LIFTING_VETO))
+					};
+					exceptionStatementss = new Statement[][]{{catchStatement1}};				
+				}				
 				methodDecl.statements = new Statement[] {
 							gen.tryCatch(
 								new Statement[] {switchStat},
 								// expected exception is ignored, do nothing (before/after) or proceed to callNext (replace)
-								gen.argument("ex".toCharArray(),  //$NON-NLS-1$
-											 gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_LIFTING_VETO)),
-								new Statement[]{catchStatement})
+								exceptionArguments,
+								exceptionStatementss)
 						};
 				methodDecl.hasParsedStatements = true;
 				return true;
