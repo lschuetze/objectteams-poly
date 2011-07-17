@@ -483,19 +483,25 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						}
 						if (callinDecl.mappings == null) {
 							arg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i);					//    prepare: somePreparation(arguments[i])
+							TypeBinding baseArgType = baseSpec.resolvedParameters()[i];
 							if (roleParam.isBaseType()) {
 								// this includes intermediate cast to boxed type:
 								arg = gen.createUnboxing(arg, (BaseTypeBinding)roleParam);
+							} else if (baseArgType.isBaseType()) {
+								// Object -> BoxingType
+								arg = gen.castExpression(arg,
+														 gen.qualifiedTypeReference(AstGenerator.boxTypeName((BaseTypeBinding) baseArgType)),
+														 CastExpression.RAW);
 							} else {
 								// Object -> MyBaseClass
 								arg = gen.castExpression(arg,
 														 gen.alienScopeTypeReference(
-																gen.typeReference(baseSpec.resolvedParameters()[i]),
+																gen.typeReference(baseArgType),
 																callinDecl.scope),
 														 CastExpression.DO_WRAP);
 								// lift?(MyBaseClass) 
 								arg = gen.potentialLift(gen.thisReference(), arg, roleParam, isReplace/*reversible*/);
-								canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, (ReferenceBinding)roleParam);
+								canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, (ReferenceBinding)roleParam.leafComponentType());
 							}
 						} else {
 							arg = getArgument(callinDecl, 														//    prepare:  <mappedArg<n>>
