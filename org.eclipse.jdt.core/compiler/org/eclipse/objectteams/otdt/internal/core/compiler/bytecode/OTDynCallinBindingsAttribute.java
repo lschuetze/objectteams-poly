@@ -1,13 +1,12 @@
 /** 
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009, 2010 Stephan Herrmann
+ * Copyright 2009, 2011 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -86,7 +85,6 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		int flags; // STATIC_ROLE_METHOD, INHERITED, COVARIANT_BASE_RETURN
 		int lineNumber, lineOffset;
 		BaseMethod[] baseMethods;
-		public CallinCalloutBinding binding;
 		Mapping(char[] roleClassName, char[] declaringRoleName, char[] callinName, char[] roleSelector, char[] roleSignature, char[] callinModifer, int flags, char[] baseClassName, int baseMethodCount) 
 		{
 			this.roleClassName	= roleClassName;
@@ -99,8 +97,8 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 			this.baseClassName 	= baseClassName;
 			this.baseMethods	= new BaseMethod[baseMethodCount];
 		}
-		void addBaseMethod(int i, char[] baseMethodName, char[] baseMethodSignature, int callinID, int baseFlags, int translationFlags) {
-			this.baseMethods[i] = new BaseMethod(baseMethodName, baseMethodSignature, callinID, baseFlags, translationFlags);
+		void addBaseMethod(int i, char[] baseMethodName, char[] baseMethodSignature, char[] declaringBaseClassName, int callinID, int baseFlags, int translationFlags) {
+			this.baseMethods[i] = new BaseMethod(baseMethodName, baseMethodSignature, declaringBaseClassName, callinID, baseFlags, translationFlags);
 		}
 		public BaseMethod[] getBaseMethods() {
 			return this.baseMethods;
@@ -109,7 +107,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 			int s = 21; // 7 names (roleClassName callinName roleSelector roleSignature callinModifier baseClassName fileName)
 						// + 1 byte (flags) 3 shorts (lineNumber lineOffset baseMethodCount)
 			for (int i = 0; i < this.baseMethods.length; i++)
-				s += 11; // 2 names, 1 int (callinID) 1 byte (baseFlags) 1 short (translationFlags)
+				s += 13; // 3 names, 1 int (callinID) 1 byte (baseFlags) 1 short (translationFlags)
 			return s;
 		}
 		/**
@@ -175,11 +173,12 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 	private class BaseMethod {
     	static final int CALLIN = 1;
     	static final int STATIC = 2;
-		char[] baseMethodName, baseMethodSignature;
+		char[] baseMethodName, baseMethodSignature, declaringBaseClassName;
 		int callinID, baseFlags, translationFlags;
-		BaseMethod(char[] baseMethodName, char[] baseMethodSignature, int callinID, int baseFlags, int translationFlags) {
+		BaseMethod(char[] baseMethodName, char[] baseMethodSignature, char[] declaringBaseClassName, int callinID, int baseFlags, int translationFlags) {
 			this.baseMethodName 		= baseMethodName;
 			this.baseMethodSignature 	= baseMethodSignature;
+			this.declaringBaseClassName = declaringBaseClassName;
 			this.callinID 				= callinID;
 			this.baseFlags 				= baseFlags;
 			this.translationFlags 		= translationFlags;
@@ -247,7 +246,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 				baseFlags |= BaseMethod.STATIC;
 			if (baseSpec.isStatic())
 				baseFlags |= BaseMethod.CALLIN;
-			mapping.addBaseMethod(i, baseSpec.selector, baseSpec.signature(), baseSpec.getCallinId(theTeam), baseFlags, baseSpec.getTranslationFlags());
+			mapping.addBaseMethod(i, baseSpec.selector, baseSpec.signature(), baseSpec.resolvedMethod.declaringClass.constantPoolName(), baseSpec.getCallinId(theTeam), baseFlags, baseSpec.getTranslationFlags());
 		}
 		mapping.setSMAPinfo(callinDecl);
 		this.mappings.add(mapping);
@@ -280,6 +279,8 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		BaseMethod[] baseMethods = mapping.getBaseMethods();
 		for (int j = 0; j < baseMethods.length; j++) {
 			buf.append("\n\t\t");
+			buf.append(String.valueOf(baseMethods[j].declaringBaseClassName));
+			buf.append('.');
 			buf.append(String.valueOf(baseMethods[j].baseMethodName));
 			buf.append(String.valueOf(baseMethods[j].baseMethodSignature));
 			buf.append('{');
@@ -307,6 +308,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		for (int j = 0; j < baseMethods.length; j++) {
 			writeName(baseMethods[j].baseMethodName);
 			writeName(baseMethods[j].baseMethodSignature);
+			writeName(baseMethods[j].declaringBaseClassName);
 			writeInt(baseMethods[j].callinID);
 			writeByte((byte)baseMethods[j].baseFlags);
 			writeUnsignedShort(baseMethods[j].translationFlags);
@@ -333,10 +335,11 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		for (int i=0; i<baseMethodCount; i++) {
 			char[] baseMethodName 		= consumeName();
 			char[] baseMethodSignature 	= consumeName();
+			char[] declaringBaseClass   = consumeName();
 			int callinID				= consumeInt();
 			int baseFlags				= consumeByte();
 			int translationFlags		= consumeShort();
-			result.addBaseMethod(i, baseMethodName, baseMethodSignature, callinID, baseFlags, translationFlags);
+			result.addBaseMethod(i, baseMethodName, baseMethodSignature, declaringBaseClass, callinID, baseFlags, translationFlags);
 		}
 		return result;
 	}
@@ -438,7 +441,6 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		}
 		result._baseMethods = baseMethods;
 		result.callinIdMax = callinIdMax;
-		mapping.binding = result;
 		teamBinding._teamModel.recordCallinId(callinIdMax);
 
 		result.copyInheritanceSrc = findTSuperBinding(mapping.callinName, roleBinding);
