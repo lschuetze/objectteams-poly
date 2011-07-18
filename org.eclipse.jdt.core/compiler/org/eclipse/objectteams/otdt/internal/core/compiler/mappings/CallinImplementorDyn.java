@@ -89,7 +89,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	static final char[] OT_CALL_AFTER   = "_OT$callAfter".toCharArray(); //$NON-NLS-1$
 	static final char[] OT_CALL_REPLACE = "_OT$callReplace".toCharArray(); //$NON-NLS-1$
 	// used for base calls:
-	public static final char[] OT_CALL_NEXT     = "_OT$callNext".toCharArray(); //$NON-NLS-1$
+	public static final char[] OT_CALL_NEXT        = "_OT$callNext".toCharArray(); //$NON-NLS-1$
+	//  - both the team version (II[Object;) and the base version (I[Object;)
+	public static final char[] OT_CALL_ORIG_STATIC = "_OT$callOrigStatic".toCharArray(); //$NON-NLS-1$
+	
 	// for decapsulation:
 	public static final char[] OT_ACCESS 		= "_OT$access".toCharArray(); //$NON-NLS-1$
 	public static final char[] OT_ACCESS_STATIC = "_OT$accessStatic".toCharArray(); //$NON-NLS-1$
@@ -268,6 +271,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		List<CallinMappingDeclaration> replaceMappings = new ArrayList<CallinMappingDeclaration>();
 		List<CallinMappingDeclaration> afterMappings = new ArrayList<CallinMappingDeclaration>();
 		
+		boolean hasReplaceStatic = false;
 		for (RoleModel role : aTeam.getRoles(false)) {
 			TypeDeclaration roleDecl = role.getAst(); // FIXME(SH): this breaks incremental compilation: all roles must be present as AST!!
 			if (roleDecl == null) continue; // FIXME(SH): check if this is OK
@@ -277,8 +281,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						CallinMappingDeclaration callinDecl = (CallinMappingDeclaration) mappingDecl;
 						switch (callinDecl.callinModifier) {
 							case TerminalTokens.TokenNamebefore: 	beforeMappings.add(callinDecl); 	break;
-							case TerminalTokens.TokenNamereplace: 	replaceMappings.add(callinDecl); 	break;
 							case TerminalTokens.TokenNameafter: 	afterMappings.add(callinDecl); 		break;
+							case TerminalTokens.TokenNamereplace: 	replaceMappings.add(callinDecl);
+																	hasReplaceStatic |= callinDecl.isStaticReplace();
+																	break;
 						}
 					}
 				}
@@ -291,6 +297,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		if (replaceMappings.size() > 0) {
 			generateDispatchMethod(OT_CALL_REPLACE, true,  false, replaceMappings, aTeam);
 			generateCallNext(replaceMappings, aTeam);
+			if (hasReplaceStatic)
+				generateCallOrigStatic(replaceMappings, aTeam);
 		}
 	}
 
@@ -815,6 +823,57 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		decl.statements = new Statement[] {
 			swStat,
 			gen.returnStatement(gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs)) // delegate with unchanged arguments/return
+		};
+		decl.hasParsedStatements = true;
+		AstEdit.addMethod(teamDecl, decl);
+	}
+
+	private void generateCallOrigStatic(List<CallinMappingDeclaration> callinDecls, TeamModel aTeam) {
+		// public Object _OT$callOrigStatic(int callinId, int boundMethodId, Object[] args)
+		// this team method delegates to the corresponding _OT$callOrigStatic(int,Object[])
+		// of the appropriate base classes.
+		final TypeDeclaration teamDecl = aTeam.getAst();
+		if (teamDecl == null) return;
+		final AstGenerator gen = new AstGenerator(teamDecl);
+		Argument[] args = new Argument[] {
+				gen.argument(CALLIN_ID, 		gen.typeReference(TypeBinding.INT)),
+				gen.argument(BOUND_METHOD_ID, 	gen.typeReference(TypeBinding.INT)),
+				gen.argument(ARGUMENTS, 		gen.qualifiedArrayTypeReference(TypeConstants.JAVA_LANG_OBJECT, 1))
+		};
+		Expression[] passThroughArgs = new Expression[] {
+				gen.singleNameReference(BOUND_METHOD_ID),
+				gen.singleNameReference(ARGUMENTS)
+		};
+		MethodDeclaration decl = gen.method(teamDecl.compilationResult,
+											AccPublic,
+											gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT),
+											OT_CALL_ORIG_STATIC,
+											args);
+		
+		SwitchStatement swStat = new SwitchStatement();
+		swStat.expression = gen.singleNameReference(CALLIN_ID);											// switch(callinId) { ...
+		List<Statement> swStatements = new ArrayList<Statement>(); 
+		for (CallinMappingDeclaration mapping : callinDecls) {
+			for (MethodSpec baseSpec : mapping.baseMethodSpecs) {
+				MethodBinding baseMethod = baseSpec.resolvedMethod;
+				if (baseMethod.isStatic()) {
+					swStatements.add(gen.caseStatement(gen.intLiteral(baseSpec.getCallinId(aTeam))));			// case baseSpecCallinId:
+					Expression result = gen.fakeMessageSend(gen.baseNameReference(baseMethod.declaringClass),	// 		return BaseClass._OT$callOrigStatic(boundMethodId, args);
+															OT_CALL_ORIG_STATIC, 
+															passThroughArgs,
+															baseMethod.declaringClass,
+															mapping.scope.getJavaLangObject());
+					swStatements.add(gen.returnStatement(result));
+				}
+			}
+		}																								// } // end-switch
+		if (swStatements.size() == 0)
+			return; // don't add useless method
+		
+		swStat.statements = swStatements.toArray(new Statement[swStatements.size()]);
+		decl.statements = new Statement[] {
+			swStat,
+			gen.returnStatement(gen.nullLiteral()) // shouldn't happen
 		};
 		decl.hasParsedStatements = true;
 		AstEdit.addMethod(teamDecl, decl);

@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
+import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -34,11 +35,13 @@ import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
+import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
@@ -721,6 +724,33 @@ public class AstGenerator extends AstFactory {
 			@Override
 			public TypeBinding resolveType(BlockScope scope) {
 				super.resolveType(scope);
+				return this.resolvedType = resolvedReturn;
+			}
+		};
+		messageSend.sourceStart = this.sourceStart;
+		messageSend.sourceEnd   = this.sourceEnd;
+		messageSend.statementEnd = this.sourceEnd;
+		messageSend.nameSourcePosition = this.pos;
+		messageSend.receiver = receiver;
+		messageSend.selector = selector;
+		messageSend.arguments = parameters;
+		messageSend.constant = Constant.NotAConstant;
+		return messageSend;
+	}
+
+	/** Create a message send to a method that will be created by the otre. */
+	public MessageSend fakeMessageSend(Expression receiver, char[] selector, Expression[] parameters, 
+									   final ReferenceBinding receiverType, final TypeBinding resolvedReturn) 
+	{
+		MessageSend messageSend = new MessageSend() {
+			@Override
+			public TypeBinding resolveType(BlockScope scope) {
+				ReferenceContext referenceContext = scope.referenceContext();
+				CheckPoint cp = referenceContext.compilationResult().getCheckPoint(referenceContext);
+				super.resolveType(scope);
+				referenceContext.compilationResult().rollBack(cp);
+				this.binding = new MethodBinding(ClassFileConstants.AccStatic|ClassFileConstants.AccPublic, this.selector, 
+												 resolvedReturn, this.binding.parameters, Binding.NO_EXCEPTIONS, receiverType);
 				return this.resolvedType = resolvedReturn;
 			}
 		};
