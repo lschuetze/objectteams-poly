@@ -29,6 +29,7 @@ import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.SwitchStatement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
@@ -512,8 +513,13 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 											  baseSpec);
 							if (Lifting.isLiftToMethodCall(arg))
 								canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, roleType);
+							boolean isBaseReference = arg instanceof SingleNameReference 
+													  && CharOperation.equals(((SingleNameReference)arg).token, IOTConstants.BASE);
 							if (needLiftedRoleVar)
 								arg = new PotentialRoleReceiverExpression(arg, roleVar, gen.typeReference(roleType.getRealClass()));
+							// mapped expression may require casting: "base" reference has static type IBoundBase
+							if (isBaseReference)
+								arg = gen.castExpression(arg, gen.typeReference(roleParam), CastExpression.RAW);
 						}
 		 				char[] localName = (OT_LOCAL+i).toCharArray();											//    RoleParamType _OT$local$n = preparedArg<n>;
 		 				TypeReference roleParamType = gen.typeReference(roleParam);
@@ -565,7 +571,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 														gen.typeReference(roleType.getRealClass()));
 							messageSendStatements = new Statement[] {
 								callinDecl.resultVar =
-									gen.localVariable(IOTConstants.RESULT, baseReturn, result), 				//   result = role.roleMethod(args);
+									gen.localVariable(IOTConstants.RESULT, baseReturn, 							//   result = (Type)role.roleMethod(args);
+													  gen.castExpression(result, gen.typeReference(baseReturn), CastExpression.RAW)),
+													  // cast because role return might be generalized
 									gen.returnStatement(mappedResult) 											//   return mappedResult(result);
 							};
 						} else {
