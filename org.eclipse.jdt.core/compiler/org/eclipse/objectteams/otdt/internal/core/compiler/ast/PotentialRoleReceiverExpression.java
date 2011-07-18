@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2009 Stephan Herrmann.
+ * Copyright 2009, 2011 Stephan Herrmann.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -91,8 +91,10 @@ public class PotentialRoleReceiverExpression extends Expression {
 		
 		// try normal:
 		this.resolvedType = this.expression.resolveType(scope);
-		if (this.resolvedType != null && this.resolvedType.isValidBinding())
+		if (this.resolvedType != null && this.resolvedType.isValidBinding()) {
+			this.constant = this.expression.constant;
 			return this.resolvedType;
+		}
 		
 		// try alternative:
 		TypeBinding altResult = null;
@@ -126,9 +128,11 @@ public class PotentialRoleReceiverExpression extends Expression {
 		// evaluate results:
 		if (altResult != null && altResult.isValidBinding()) {
 			compilationResult.rollBack(cp);
+			this.constant = this.altExpression.constant;
 			return this.resolvedType = altResult;
 		}
 		this.altExpression = null; // discard unsuccessful indirection
+		this.constant = this.expression.constant;
 		return this.resolvedType;
 	}
 	
