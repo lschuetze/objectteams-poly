@@ -220,6 +220,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			}
 			if (sourceMethodSpec.hasSignature) {
 				if (sourceMethodSpec.argNeedsTranslation(srcIdx)) {
+					mappedArgExpr.tagReportedBaseclassDecapsulation();
 					return Lifting.liftCall(methodMapping.scope,
 											receiver != null ? receiver : ThisReference.implicitThis(),
 											mappedArgExpr,
