@@ -36,10 +36,11 @@ public class ArrayLifting extends ArrayTranslations {
 			BlockScope  scope,
 			Expression  teamExpr,
 			Expression  expression,
+			TypeBinding providedType, 
 			TypeBinding requiredType)
 	{
 		this._teamExpr = teamExpr;
-		return (MessageSend)translateArray(scope, expression, expression.resolvedType, requiredType, /*isLifting*/true);
+		return (MessageSend)translateArray(scope, expression, providedType, requiredType, /*isLifting*/true);
 	}
 
 	/* implement hook. */

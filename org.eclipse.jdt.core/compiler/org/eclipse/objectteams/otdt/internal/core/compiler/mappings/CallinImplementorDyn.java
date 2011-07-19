@@ -562,9 +562,11 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 					Statement[] messageSendStatements;
 					if (isReplace) {
 						Expression result = roleMethodCall;
-						if (callinDecl.baseMethodSpecs[0].returnNeedsTranslation) // FIXME(SH): per base method!
+						if (callinDecl.baseMethodSpecs[0].returnNeedsTranslation) {// FIXME(SH): per base method!
 							// lowering:
-							result = new Lowering().lowerExpression(methodDecl.scope, result, roleType, roleType.baseclass(), gen.thisReference(), true);
+							TypeBinding[]/*role,base*/ returnTypes = getReturnTypes(callinDecl, 0);
+							result = new Lowering().lowerExpression(methodDecl.scope, result, returnTypes[0], returnTypes[1], gen.thisReference(), true);
+						}
 						// possibly convert using result mapping
 						callinDecl.checkResultMapping();
 						if (   callinDecl.mappings != null
@@ -743,7 +745,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		swStat.expression = gen.arrayReference(gen.singleNameReference(CALLIN_ID), gen.singleNameReference(INDEX));	// switch(callinId[index]) { ...
 		List<Statement> swStatements = new ArrayList<Statement>(); 
 		for (CallinMappingDeclaration mapping : callinDecls) {
-			ReferenceBinding roleType = mapping.binding._declaringRoleClass;
 			List<Statement> caseBlockStats = new ArrayList<Statement>();
 			int nLabels = 0;
 			for (MethodSpec baseSpec : mapping.baseMethodSpecs) 
@@ -800,13 +801,14 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			Expression result = gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs);						//    return cast+lift?(super._OT$callNext(..));
 			if (mapping.baseMethodSpecs[0].returnNeedsTranslation) { // FIXME(SH): per basemethod!
 				// lifting:
+				TypeBinding[]/*role,base*/ returnTypes = getReturnTypes(mapping, 0);
 				result = Lifting.liftCall(mapping.scope,
 										  gen.thisReference(),
 										  gen.castExpression(result,
-												  			 gen.typeReference(roleType.baseclass()),
+												  			 gen.typeReference(returnTypes[1]),
 												  			 CastExpression.RAW),
-										  mapping.scope.getJavaLangObject(),
-										  roleType,
+										  returnTypes[1],
+										  returnTypes[0],
 										  false,
 										  gen);
 			}
@@ -826,6 +828,14 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		};
 		decl.hasParsedStatements = true;
 		AstEdit.addMethod(teamDecl, decl);
+	}
+
+	private TypeBinding[] getReturnTypes(CallinMappingDeclaration mapping, int i) {
+		TypeBinding baseReturn = mapping.baseMethodSpecs[i].resolvedType();
+		TypeBinding roleReturn = mapping.roleMethodSpec.resolvedType();
+		if (roleReturn.isTypeVariable())
+			roleReturn = ((TypeVariableBinding)roleReturn).firstBound;
+		return new TypeBinding[]{roleReturn, baseReturn};
 	}
 
 	private void generateCallOrigStatic(List<CallinMappingDeclaration> callinDecls, TeamModel aTeam) {

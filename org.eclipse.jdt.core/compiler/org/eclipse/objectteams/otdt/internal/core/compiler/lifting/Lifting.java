@@ -195,7 +195,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 			}
 
 			ArrayLifting arrayLifting = new ArrayLifting();
-			return arrayLifting.liftArray(scope, teamExpr, unliftedExpr, expectedRole);
+			return arrayLifting.liftArray(scope, teamExpr, unliftedExpr, providedType, expectedRole);
 		}
 	    // TODO (SH): record necessity of array lifting if binding.isArrayType()
 		MessageSend send = gen.messageSend(
