@@ -257,7 +257,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	            targetArgName,
 	            implementationMethodSpec,
 				methodMapping.isCallout());
-	    return new AstGenerator(sourceMethodSpec).singleNameReference("<missing>".toCharArray()); //$NON-NLS-1$
+	    return null;
 	}
 
 	/**
@@ -479,6 +479,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						// prepare parameter mappings:
 						callinDecl.traverse(new ReplaceResultReferenceVisitor(callinDecl), callinDecl.scope.classScope());
 	
+						boolean hasArgError = false;
 						for (int i=0; i<roleParams.length; i++) {
 							Expression arg;
 							TypeBinding roleParam = roleParams[i];
@@ -518,6 +519,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 												  callinDecl.getRoleMethod().parameters, 
 												  i+idx,
 												  baseSpec);
+								if (arg == null) {
+									hasArgError = true;
+									continue; // keep going to find problems with other args, too.
+								}
 								if (Lifting.isLiftToMethodCall(arg))
 									canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, roleType);
 								boolean isBaseReference = arg instanceof SingleNameReference 
@@ -542,6 +547,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							callArgs[i+idx] = gen.singleNameReference(localName);									//    prepare: ... _OT$local$ ...
 	
 						}
+						if (hasArgError)
+							continue;
+
 						// -- role side predicate:
 						Expression[] predicateArgs = maybeAddResultReference(callinDecl, callArgs, _OT_RESULT, gen);
 				        Statement rolePredicateCheck = predGen.createPredicateCheck(								//    if (!when(callArgs)) throw new LiftingVetoException();
