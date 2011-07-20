@@ -676,6 +676,7 @@ public class CallinImplementor extends MethodMappingImplementor
 			if (isReturnBoxed && !callinBindingDeclaration.isResultMapped)
 			{
 				statements.add(genResultNotProvidedCheck(
+						this._role.getTeamModel().getBinding().sourceName(),
 						roleTypeName, roleMethodBinding, baseTypeBinding, baseMethodSpec, gen));
 			}
 			// ------------- possibly convert using result mapping
@@ -1104,13 +1105,13 @@ public class CallinImplementor extends MethodMappingImplementor
 	 * @param gen
 	 * @return the assembled iff statement
 	 */
-	private Statement genResultNotProvidedCheck(char[] roleName, MethodBinding roleMethodBinding, TypeBinding baseTypeBinding, MethodSpec baseMethodSpec, AstGenerator gen) {
+	public static Statement genResultNotProvidedCheck(char[] teamName, char[] roleName, MethodBinding roleMethodBinding, TypeBinding baseTypeBinding, MethodSpec baseMethodSpec, AstGenerator gen) {
 
 		String errMsg = Messages.bind(
 				"(team: {0}, role: {1}, method {2})\n"+ //$NON-NLS-1$
 				"Base call to {3}.{4} is missing",  //$NON-NLS-1$
 				new Object[] {
-				   new String(this._role.getTeamModel().getBinding().sourceName()),
+				   new String(teamName),
 				   new String(roleName),
 				   new String(roleMethodBinding.readableName()),
 				   new String(baseTypeBinding.readableName()),
