@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -148,11 +149,21 @@ public class TransformStatementsVisitor
     		if (CallinImplementorDyn.DYNAMIC_WEAVING) {
     			if (isBaseCall) {
 	    			AstGenerator gen = new AstGenerator(messageSend);
-	    			args = new Expression[] {
-	    			              (args != null && args.length > 0)
-	    			              ?  gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, args)
-	    			              :  gen.nullLiteral()
-	    			};
+	    			if (args == null || args.length == 0) {
+	    				args = new Expression[] { gen.nullLiteral() };
+	    			} else {
+	    				Expression[] boxedArgs = new Expression[args.length];
+	    				for (int i = 0; i < args.length; i++) {
+	    					TypeBinding argType = methodDecl.arguments[i+MethodSignatureEnhancer.ENHANCING_ARG_LEN].binding.type;
+							if (argType.isBaseType())
+	    						boxedArgs[i] = gen.createBoxing(args[i], (BaseTypeBinding) argType);
+							else
+								boxedArgs[i] = args[i];
+	    				}
+	    				args = new Expression[] {
+	    					gen.arrayAllocation(gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_OBJECT), 1, boxedArgs)
+	    				};	
+	    			}
     			}
     		} else if (args != null) {
     			int len = args.length;
