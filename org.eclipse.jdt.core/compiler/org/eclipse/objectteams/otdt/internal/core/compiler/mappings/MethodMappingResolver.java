@@ -34,6 +34,8 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 
@@ -163,13 +165,18 @@ public class MethodMappingResolver
 
 		calloutMappingDeclaration.binding._roleMethodBinding = roleMethodBinding;
 		if (this.resolveBaseMethods) {
-			if (   calloutMappingDeclaration.baseMethodSpec != null
-				&& calloutMappingDeclaration.baseMethodSpec.resolvedMethod != null)
-			{
-				calloutMappingDeclaration.binding._baseMethods = new MethodBinding[]{calloutMappingDeclaration.baseMethodSpec.resolvedMethod};
-			} else {
-				calloutMappingDeclaration.binding._baseMethods = Binding.NO_METHODS;
-				calloutMappingDeclaration.tagAsHavingErrors();
+			MethodSpec baseMethodSpec = calloutMappingDeclaration.baseMethodSpec;
+			if ( baseMethodSpec != null) {				
+				if (baseMethodSpec.resolvedMethod != null) {
+					calloutMappingDeclaration.binding._baseMethods = new MethodBinding[]{baseMethodSpec.resolvedMethod};
+				} else if (   baseMethodSpec instanceof FieldAccessSpec
+						   && ((FieldAccessSpec)baseMethodSpec).resolvedField != null) 
+				{
+					calloutMappingDeclaration.binding._baseField = ((FieldAccessSpec)baseMethodSpec).resolvedField;
+				} else {
+					calloutMappingDeclaration.binding._baseMethods = Binding.NO_METHODS;
+					calloutMappingDeclaration.tagAsHavingErrors();
+				}
 			}
 		}
 		if (   roleMethodBinding != null 

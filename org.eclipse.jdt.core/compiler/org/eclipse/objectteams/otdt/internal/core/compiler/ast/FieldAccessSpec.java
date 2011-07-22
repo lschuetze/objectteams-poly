@@ -149,27 +149,37 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
    					(ReferenceBinding)fieldLeafType, resolvedType().dimensions());
    		}
 
-   		// find accessor method which might have been generated already.
-		char[] accessorSelector = getSelector();
-		MethodBinding result = null;
-		if (!this.resolvedField.isPrivate()) // don't reuse accessor to private field from super-base (see Trac #232)
-			result = baseType.getMethod(scope, accessorSelector);
-		// NOTE: could be optimized if type has no such method but exact type already has.
-		//       but the the OTRE would need to be informed..
+   		if (   !baseType.isRole()
+   			&& this.calloutModifier == TerminalTokens.TokenNameget
+   			&& this.resolvedField.canBeSeenBy(scope.enclosingReceiverType(), this, scope)) 
+   		{
+   			// no accessor method needed, signal this fact by NOT setting selector to accessorSelector 
+   			// and not setting resolvedMethod below
+   			this.parameters = Binding.NO_PARAMETERS;
+   			return;
+   		} else {
+	   		// find accessor method which might have been generated already.
+			char[] accessorSelector = getSelector();
+			MethodBinding result = null;
+			if (!this.resolvedField.isPrivate()) // don't reuse accessor to private field from super-base (see Trac #232)
+				result = baseType.getMethod(scope, accessorSelector);
+			// NOTE: could be optimized if type has no such method but exact type already has.
+			//       but the the OTRE would need to be informed..
 
-		if (   result == null
-		    || !isMethodCompatible(result))
-		{
-			// record this field access for Attribute generation:
-			RoleModel roleModel = scope.enclosingSourceType().roleModel;
-			ReferenceBinding targetClass =  roleModel.addAccessedBaseField(this.resolvedField, this.calloutModifier);
+			if (   result == null
+			    || !isMethodCompatible(result))
+			{
+				// record this field access for Attribute generation:
+				RoleModel roleModel = scope.enclosingSourceType().roleModel;
+				ReferenceBinding targetClass =  roleModel.addAccessedBaseField(this.resolvedField, this.calloutModifier);
 
-			// create accessor method:
-			result = createMethod(targetClass, accessorSelector);
-			baseType.addMethod(result);
-		}
-		this.selector = accessorSelector;
-		this.resolvedMethod = result;
+				// create accessor method:
+				result = createMethod(targetClass, accessorSelector);
+				baseType.addMethod(result);
+			}
+			this.selector = accessorSelector;
+			this.resolvedMethod = result;
+   		}
 		this.parameters = this.resolvedMethod.getSourceParameters();
     }
 
@@ -243,6 +253,8 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
      * (only staticness of the method makes it look differently.)
      */
     public TypeBinding[] resolvedParameters() {
+    	if (this.resolvedMethod == null)
+    		return this.parameters; // empty; FIXME(SH): handle "set" access
     	TypeBinding[] methodParams = super.resolvedParameters();
     	if (this.resolvedField.isStatic())
     		return methodParams; // no base argument when accessing a static field
@@ -276,13 +288,21 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
 
 	public boolean checkBaseReturnType(CallinCalloutScope scope, int bindDir)
 	{
-		TypeBinding accessorReturnType = (this.calloutModifier  == TerminalTokens.TokenNameget) ?
-				(this.returnType != null ? this.returnType.resolvedType : null):
-				TypeBinding.VOID;
-		if (!TypeAnalyzer.isSameType(scope.enclosingSourceType(), accessorReturnType, this.resolvedMethod.returnType))
+		TypeBinding accessorReturnType;
+		TypeBinding baseReturnType;
+		if (this.calloutModifier  == TerminalTokens.TokenNameget) {
+			accessorReturnType = this.returnType != null ? this.returnType.resolvedType : null;
+			baseReturnType = this.resolvedField.type;
+		} else {
+			accessorReturnType = TypeBinding.VOID;
+			if (this.resolvedMethod != null)
+				baseReturnType = this.resolvedMethod.returnType;
+			else
+				baseReturnType = TypeBinding.VOID;
+		}
+		if (!TypeAnalyzer.isSameType(scope.enclosingSourceType(), accessorReturnType, baseReturnType))
 		{
-			// copied from MethodSpec, but may not be needed:
-			if (RoleTypeCreator.isCompatibleViaBaseAnchor(scope, accessorReturnType, this.returnType.resolvedType, bindDir))
+			if (RoleTypeCreator.isCompatibleViaBaseAnchor(scope, baseReturnType, accessorReturnType, bindDir))
 				return true;
 
 			scope.problemReporter().differentTypeInFieldSpec(this);

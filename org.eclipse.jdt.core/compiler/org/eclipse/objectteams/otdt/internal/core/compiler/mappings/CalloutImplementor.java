@@ -551,45 +551,54 @@ public class CalloutImplementor extends MethodMappingImplementor
 
         char[] selector = calloutDecl.baseMethodSpec.selector;
         ReferenceBinding baseType = this._role.getBaseTypeBinding();
-		Expression receiver = new CastExpression(
+		Expression receiver = gen.castExpression(
 							gen.baseNameReference(IOTConstants._OT_BASE),
 							gen.baseclassReference(baseType),
 							CastExpression.DO_WRAP);
 
-		MessageSend messageSend;
-    	if (calloutDecl.baseMethodSpec.isPrivate() && baseType.isRole()) {
-    		// tricky case: callout to a private role method (base-side)
-    		// requires the indirection via two wrapper methods (privateBridgeMethod)
-
-    		// compensate weakening:
-    		if (baseType instanceof WeakenedTypeBinding)
-    			baseType = ((WeakenedTypeBinding)baseType).getStrongType();
-
-    		// generated message send refers to public bridge, report decapsulation now:
-    		calloutDecl.scope.problemReporter().decapsulation(calloutDecl.baseMethodSpec, baseType, calloutDecl.scope);
-
-    		boolean isCalloutToField = calloutDecl.isCalloutToField();
-    		MethodBinding targetMethod = calloutDecl.baseMethodSpec.resolvedMethod;
-	    	messageSend = new PrivateRoleMethodCall(receiver, selector, arguments, isCalloutToField, 
-	    											calloutDecl.scope, baseType, targetMethod, gen);
-    	} else {
-    		if (calloutDecl.baseMethodSpec.isStatic() || calloutDecl.isCalloutToField())
-    			// we thought we should use an instance
-    			// but callout-to-static and normal c-t-f is sent to the base *class*
-    			receiver = gen.baseNameReference(baseType.getRealClass());
-
-    		messageSend = gen.messageSend(receiver, selector, arguments);
+		Expression baseAccess = null;
+		if (calloutDecl.isCalloutToField()) {
+			FieldAccessSpec fieldSpec = (FieldAccessSpec) calloutDecl.baseMethodSpec;
+			if (fieldSpec.resolvedMethod == null) {
+				// not using a decapsulation accessor but direct field access:
+				baseAccess = gen.qualifiedNameReference(new char[][] {
+						IOTConstants._OT_BASE,
+						fieldSpec.getFieldName()
+				});
+			}
+		} 
+		if (baseAccess == null) {
+			if (calloutDecl.baseMethodSpec.isPrivate() && baseType.isRole()) {
+	    		// tricky case: callout to a private role method (base-side)
+	    		// requires the indirection via two wrapper methods (privateBridgeMethod)
+	
+	    		// compensate weakening:
+	    		if (baseType instanceof WeakenedTypeBinding)
+	    			baseType = ((WeakenedTypeBinding)baseType).getStrongType();
+	
+	    		// generated message send refers to public bridge, report decapsulation now:
+	    		calloutDecl.scope.problemReporter().decapsulation(calloutDecl.baseMethodSpec, baseType, calloutDecl.scope);
+	
+	    		boolean isCalloutToField = calloutDecl.isCalloutToField();
+	    		MethodBinding targetMethod = calloutDecl.baseMethodSpec.resolvedMethod;
+		    	baseAccess = new PrivateRoleMethodCall(receiver, selector, arguments, isCalloutToField,
+		    										   calloutDecl.scope, baseType, targetMethod, gen);
+	    	} else {
+	    		if (calloutDecl.baseMethodSpec.isStatic() || calloutDecl.isCalloutToField())
+	    			// we thought we should use an instance
+	    			// but callout-to-static and normal c-t-f is sent to the base *class*
+	    			receiver = gen.baseNameReference(baseType.getRealClass());
+	
+	    		baseAccess = gen.messageSend(receiver, selector, arguments);
+	    	}
     	}
-        // TODO(SH): create receiver via gen, too.
-        messageSend.receiver.sourceStart = sStart;
-        messageSend.receiver.sourceEnd   = sEnd;
 
         boolean success = true;
         ArrayList<Statement> statements = new ArrayList<Statement>(3);
         if(returnType == TypeBinding.VOID)
 		{
        		// just the method call
-        	statements.add(messageSend);
+        	statements.add(baseAccess);
 
         	// generate empty return statement so that it gets a proper source position
         	statements.add(gen.returnStatement(null));
@@ -601,7 +610,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 						gen.returnStatement(
 								gen.potentialLift(
 										null,     // use default receiver
-										messageSend,
+										baseAccess,
 										returnType,
 										false))); // no reversing required
 			}
@@ -610,7 +619,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 				// return result with parameter mapping
 				success = transformCalloutMethodBodyResultMapping(
 					statements,
-					messageSend,
+					baseAccess,
 					calloutDecl,
 					roleMethodDeclaration);
 			}
@@ -1283,7 +1292,11 @@ public class CalloutImplementor extends MethodMappingImplementor
 		callout.resolveMethodSpecs(roleClass.getRoleModel(), baseclass, true);
 		
 		calloutBinding.inferred= isSetter ? InferenceKind.FIELDSET : InferenceKind.FIELDGET;
-		calloutBinding._baseMethods = new MethodBinding[] {callout.baseMethodSpec.resolvedMethod};
+		if (callout.baseMethodSpec.resolvedMethod != null) {			
+			calloutBinding._baseMethods = new MethodBinding[] {callout.baseMethodSpec.resolvedMethod};
+		} else {
+			calloutBinding._baseField = ((FieldAccessSpec)callout.baseMethodSpec).resolvedField;
+		}
 		roleClass.binding.addCallinCallouts(new CallinCalloutBinding[]{calloutBinding});
 
 		// translate to method declaration:

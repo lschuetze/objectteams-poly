@@ -357,7 +357,7 @@ public class MethodSpec extends ASTNode
     /** Answer parameters of the resolved method (source visible ones only). */
     public TypeBinding[] resolvedParameters() {
     	// parameters are first choice, because these might be instantiated parameters
-    	if (this.parameters == null || this.parameters == Binding.NO_PARAMETERS)
+    	if ((this.parameters == null || this.parameters == Binding.NO_PARAMETERS) && this.resolvedMethod != null)
     		this.parameters = this.resolvedMethod.getSourceParameters();
 
     	return this.parameters;

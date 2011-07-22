@@ -23,6 +23,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.lookup;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -53,6 +54,7 @@ public class CallinCalloutBinding extends Binding
     public MethodBinding    _roleMethodBinding;
     public ReferenceBinding _declaringRoleClass;
     public MethodBinding[]  _baseMethods = Binding.NO_METHODS;
+    public FieldBinding 	_baseField;
     public int              type;
     public int              callinModifier;  // TerminalTokens: before,after,replace
     public int              calloutModifier; // TerminalTokens: get or set
@@ -203,6 +205,8 @@ public class CallinCalloutBinding extends Binding
     		for (MethodBinding method : this._baseMethods)
     			if (!method.isValidBinding())
     				return method.problemId();
+    	if (this._baseField != null)
+    		return this._baseField.problemId();
     	return ProblemReasons.NoError;
     }
 
