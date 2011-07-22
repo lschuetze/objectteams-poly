@@ -4309,6 +4309,87 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		"----------\n");
     }
     
+    // Bug 350318 - [compiler] Erroneous name clash error in @Override methods
+    // originally reported by André Lehmann
+    public void testB11_sh95() {
+    	compileOrder = new String[][] { {"Visitor.java"}, {"Caller.java"}};
+    	Map options = getCompilerOptions();
+    	options.put(CompilerOptions.OPTION_ReportMissingOverrideAnnotationForInterfaceMethodImplementation, CompilerOptions.DISABLED);
+        runTestExpectingWarnings(
+            new String[] {
+		"Caller.java",
+			    "\n" + 
+			    "public class Caller {\n" + 
+			    "	private static class VisitorImpl extends VisitorAdapter<Object> {\n" + 
+			    "		\n" + 
+			    "		@Override\n" + 
+			    "		public Parameter1 visit(Long r, Object a) {\n" + 
+			    "			return null;\n" + 
+			    "		}\n" + 
+			    "		\n" + 
+			    "		@Override\n" + 
+			    "		public Parameter1 visit(Integer r, Object a) {\n" + 
+			    "			return null;\n" + 
+			    "		}\n" + 
+			    "		\n" + 
+			    "		@Override\n" + 
+			    "		public Parameter1 visit(Number r, Object a) {\n" + 
+			    "			return null;\n" + 
+			    "		}\n" + 
+			    "	}\n" + 
+			    "\n" + 
+			    "	private void accept(Visitor<Parameter1, Parameter2> v) {\n" + 
+			    "		v.visit(1, new Parameter2());\n" + 
+			    "	}\n" + 
+			    "	\n" + 
+			    "	public void start() {\n" + 
+			    "	}\n" + 
+			    "}\n",
+		"Visitor.java",
+			    "public interface Visitor<R, A> {\n" + 
+			    "\n" + 
+			    "	R visit(Long r, A a);\n" + 
+			    "\n" + 
+			    "	R visit(Integer r, A a);\n" + 
+			    "\n" + 
+			    "	R visit(Number r, A a);\n" + 
+			    "}\n" + 
+			    "class Parameter1 {\n" + 
+			    "	\n" + 
+			    "}\n" + 
+			    "class Parameter2 {\n" + 
+			    "	\n" + 
+			    "}\n" +
+			    "abstract class VisitorAdapter<A> implements Visitor<Parameter1, A> {\n" + 
+			    "\n" + 
+			    "	public Parameter1 visit(Long r, A a) {\n" + 
+			    "		return null;\n" + 
+			    "	}\n" + 
+			    "\n" + 
+			    "	public Parameter1 visit(Integer r, A a) {\n" + 
+			    "		return null;\n" + 
+			    "	}\n" + 
+			    "\n" + 
+			    "	public Parameter1 visit(Number r, A a) {\n" + 
+			    "		return null;\n" + 
+			    "	}\n" + 
+			    "	\n" + 
+			    "}\n"
+            },
+            "----------\n" + 
+    		"1. WARNING in Caller.java (at line 3)\n" + 
+    		"	private static class VisitorImpl extends VisitorAdapter<Object> {\n" + 
+    		"	                     ^^^^^^^^^^^\n" + 
+    		"The type Caller.VisitorImpl is never used locally\n" + 
+    		"----------\n" + 
+    		"2. WARNING in Caller.java (at line 21)\n" + 
+    		"	private void accept(Visitor<Parameter1, Parameter2> v) {\n" + 
+    		"	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+    		"The method accept(Visitor<Parameter1,Parameter2>) from the type Caller is never used locally\n" + 
+    		"----------\n",
+    		options);
+    }
+
     // reported by Christine Hundt
     // B.1.1-otjld-ju-1
     public void testB11_ju1() {
