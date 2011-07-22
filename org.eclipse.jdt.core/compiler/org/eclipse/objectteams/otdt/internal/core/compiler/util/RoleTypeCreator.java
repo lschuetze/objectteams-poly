@@ -100,8 +100,10 @@ public class RoleTypeCreator implements TagBits {
 					&& arg instanceof ReferenceBinding
 					&& !arg.isTypeVariable())
 					arguments[i] = updateArg((ReferenceBinding)arg);
+				else
+					arguments[i] = arg;
 
-				// must avoid nulls in arguments:
+				// must avoid nulls in arguments (no longer observed in otjld-tests):
 				if (arguments[i] == null) {
 					arguments[i] = new ProblemReferenceBinding(arg.internalName(),
 									   (arg instanceof ReferenceBinding) ? (ReferenceBinding)arg: null,
