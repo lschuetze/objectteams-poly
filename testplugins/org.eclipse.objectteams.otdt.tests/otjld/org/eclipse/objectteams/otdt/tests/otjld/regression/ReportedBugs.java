@@ -38,7 +38,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testB11_sh62"};
+//		TESTS_NAMES = new String[] { "testB11_sh75"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -3354,8 +3354,65 @@ public class ReportedBugs extends AbstractOTJLDTest {
             },
             true/*expectingCompilerErrors*/,
             "----------\n" + 
-			"1. ERROR in TeamB11sh75_1.java (at line 4)\n" + 
-			"	String mismatch() -> get String id;\n" + 
+    		"1. ERROR in TeamB11sh75_1.java (at line 4)\n" + 
+    		"	String mismatch() -> get String id;\n" + 
+    		"	                         ^^^^^^\n" + 
+    		"Field specifier \'id\' resolves to type int whereas type java.lang.String is specified (OTJLD 3.5(a)).\n" + 
+    		"----------\n",
+            "OK",
+            ""/*expectedErrorOutput*/,
+            true/*forceExecution*/,
+            null/*classLibraries*/,
+            true/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/,
+            customOptions,
+            null/*no custom requestor*/,
+            true/*skipJavac*/);
+    }
+
+    // buggy callout should not create a CalloutMappingsAttribute-part - witness for ICE in CalloutMappingsAttribute.evaluateLateAttribute
+    // B.1.1-otjld-sh-75
+    public void testB11_sh75a() {
+       Map customOptions = getCompilerOptions();
+       
+       runTest(
+            new String[] {
+		"TeamB11sh75a_2.java",
+			    "\n" +
+			    "public team class TeamB11sh75a_2 extends TeamB11sh75a_1 {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        final TeamB11sh75a_1 t = new TeamB11sh75a_1();\n" +
+			    "        R<@t> r = t.getR();\n" +
+			    "        r.test();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"TB11sh75a.java",
+			    "\n" +
+			    "public class TB11sh75a {\n" +
+			    "    int id;\n" +
+			    "}\n" +
+			    "    \n",
+		"TeamB11sh75a_1.java",
+			    "\n" +
+			    "public team class TeamB11sh75a_1 {\n" +
+			    "    public class R playedBy TB11sh75a {\n" +
+			    "        String mismatch() -> get int id;\n" +
+			    "        toString => toString;\n" +
+			    "        public void test() {\n" +
+			    "            System.out.print(\"OK\");\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "    public R getR() {\n" +
+			    "        return new R(new TB11sh75a());\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            true/*expectingCompilerErrors*/,
+            "----------\n" + 
+			"1. ERROR in TeamB11sh75a_1.java (at line 4)\n" + 
+			"	String mismatch() -> get int id;\n" + 
 			"	^^^^^^^^^^^^^^^^^\n" + 
 			"When binding field id via callout to role method mismatch():\n" + 
 			"Incompatible types: can\'t convert int to java.lang.String (OTJLD 3.5(b)).\n" + 
