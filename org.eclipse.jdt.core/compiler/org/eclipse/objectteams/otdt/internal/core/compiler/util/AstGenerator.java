@@ -150,6 +150,18 @@ public class AstGenerator extends AstFactory {
 		char[][] tokens = CharOperation.splitOn('.', type.readableName());
 		return qualifiedNameReference(tokens);
 	}
+	public QualifiedNameReference qualifiedNameReference(FieldBinding field) {
+		char[][] qualifiedName;
+		if (field.isStatic()) {
+			char[][] baseClassName = TypeAnalyzer.compoundNameOfReferenceType(field.declaringClass, true, false);
+			int len = baseClassName.length;
+			System.arraycopy(baseClassName, 0, qualifiedName = new char[len+1][], 0, len);
+			qualifiedName[len] = field.name;
+		} else {
+			qualifiedName = new char[][] {IOTConstants._OT_BASE, field.name };
+		}
+		return qualifiedNameReference(qualifiedName);
+	}
 	public NameReference nameReference (ReferenceBinding type) {
 	    char[] typeName = "void".toCharArray(); //$NON-NLS-1$
 	    char [][] qname = TypeAnalyzer.compoundNameOfReferenceType(type, true, true);

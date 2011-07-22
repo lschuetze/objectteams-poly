@@ -561,10 +561,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 			FieldAccessSpec fieldSpec = (FieldAccessSpec) calloutDecl.baseMethodSpec;
 			if (fieldSpec.resolvedMethod == null) {
 				// not using a decapsulation accessor but direct field access:
-				baseAccess = gen.qualifiedNameReference(new char[][] {
-						IOTConstants._OT_BASE,
-						fieldSpec.getFieldName()
-				});
+				baseAccess = gen.qualifiedNameReference(fieldSpec.resolvedField);
 			}
 		} 
 		if (baseAccess == null) {
