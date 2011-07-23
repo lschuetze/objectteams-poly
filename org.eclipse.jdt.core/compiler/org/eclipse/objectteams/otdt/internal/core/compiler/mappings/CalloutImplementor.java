@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.NameReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
@@ -557,41 +558,57 @@ public class CalloutImplementor extends MethodMappingImplementor
 							CastExpression.DO_WRAP);
 
 		Expression baseAccess = null;
-		if (calloutDecl.isCalloutToField()) {
-			FieldAccessSpec fieldSpec = (FieldAccessSpec) calloutDecl.baseMethodSpec;
-			if (fieldSpec.resolvedMethod == null) {
-				// not using a decapsulation accessor but direct field access:
-				if (fieldSpec.resolvedField.isStatic())
-					baseAccess = gen.qualifiedNameReference(fieldSpec.resolvedField);
-				else
-					baseAccess = gen.qualifiedNameReference(new char[][] {IOTConstants._OT_BASE, fieldSpec.resolvedField.name });
-			}
-		} 
-		if (baseAccess == null) {
-			if (calloutDecl.baseMethodSpec.isPrivate() && baseType.isRole()) {
-	    		// tricky case: callout to a private role method (base-side)
-	    		// requires the indirection via two wrapper methods (privateBridgeMethod)
-	
-	    		// compensate weakening:
-	    		if (baseType instanceof WeakenedTypeBinding)
-	    			baseType = ((WeakenedTypeBinding)baseType).getStrongType();
-	
-	    		// generated message send refers to public bridge, report decapsulation now:
-	    		calloutDecl.scope.problemReporter().decapsulation(calloutDecl.baseMethodSpec, baseType, calloutDecl.scope);
-	
-	    		boolean isCalloutToField = calloutDecl.isCalloutToField();
-	    		MethodBinding targetMethod = calloutDecl.baseMethodSpec.resolvedMethod;
-		    	baseAccess = new PrivateRoleMethodCall(receiver, selector, arguments, isCalloutToField,
-		    										   calloutDecl.scope, baseType, targetMethod, gen);
-	    	} else {
-	    		if (calloutDecl.baseMethodSpec.isStatic() || calloutDecl.isCalloutToField())
-	    			// we thought we should use an instance
-	    			// but callout-to-static and decapsulating c-t-f (non-role-base) is sent to the base *class*
-	    			receiver = gen.baseNameReference(baseType.getRealClass());
-	
-	    		baseAccess = gen.messageSend(receiver, selector, arguments);
-	    	}
-    	}
+		if (calloutDecl.baseMethodSpec.isPrivate() && baseType.isRole()) {
+    		// tricky case: callout to a private role method (base-side)
+    		// requires the indirection via two wrapper methods (privateBridgeMethod)
+
+    		// compensate weakening:
+    		if (baseType instanceof WeakenedTypeBinding)
+    			baseType = ((WeakenedTypeBinding)baseType).getStrongType();
+
+    		// generated message send refers to public bridge, report decapsulation now:
+    		calloutDecl.scope.problemReporter().decapsulation(calloutDecl.baseMethodSpec, baseType, calloutDecl.scope);
+
+    		boolean isCalloutToField = calloutDecl.isCalloutToField();
+    		MethodBinding targetMethod = calloutDecl.baseMethodSpec.resolvedMethod;
+	    	baseAccess = new PrivateRoleMethodCall(receiver, selector, arguments, isCalloutToField,
+	    										   calloutDecl.scope, baseType, targetMethod, gen);
+    	} else {
+    		if (calloutDecl.baseMethodSpec.isStatic())
+    			// we thought we should use an instance
+    			// but callout-to-static is sent to the base *class*
+    			receiver = gen.baseNameReference(baseType.getRealClass());
+    		switch (calloutDecl.baseMethodSpec.implementationStrategy) {
+				case DIRECT:
+					if (calloutDecl.isCalloutToField()) {
+						// not using a decapsulation accessor but direct field access:
+						FieldAccessSpec fieldSpec = (FieldAccessSpec) calloutDecl.baseMethodSpec;
+						FieldBinding baseField = fieldSpec.resolvedField;
+						if (baseField.isStatic())
+							baseAccess = gen.qualifiedNameReference(baseField);
+						else
+							baseAccess = gen.qualifiedNameReference(new char[][] {IOTConstants._OT_BASE, baseField.name });
+						if (fieldSpec.isSetter()) {
+							int pos = fieldSpec.isStatic() ? 0 : 1;
+							baseAccess = gen.assignment((NameReference)baseAccess, arguments[pos]);
+							returnType = TypeBinding.VOID; // signal that no result processing is necessary
+						}
+					} else {
+		    			baseAccess = gen.messageSend(receiver, selector, arguments);
+					}
+					break;
+				case DECAPS_WRAPPER:
+					if (!calloutDecl.baseMethodSpec.isStatic() && calloutDecl.isCalloutToField())
+						// we thought we should use an instance
+						// but decapsulating c-t-f (non-role-base) is sent to the base *class*
+						receiver = gen.baseNameReference(baseType.getRealClass());
+		    		baseAccess = gen.messageSend(receiver, selector, arguments);
+		    		break;
+				case DYN_ACCESS:
+					baseAccess = CalloutImplementorDyn.baseAccessExpression(calloutDecl.scope, this._role, baseType, receiver, calloutDecl.baseMethodSpec, arguments, gen);
+					break;
+    		}			
+		}	 
 
         boolean success = true;
         ArrayList<Statement> statements = new ArrayList<Statement>(3);
@@ -644,24 +661,21 @@ public class CalloutImplementor extends MethodMappingImplementor
 				MethodSpec baseMethodSpec)
     {
         assert (!methodMapping.hasSignature);
-        TypeBinding[] baseParams = baseMethodSpec.resolvedMethod.parameters;
         Argument[]    roleArgs   = roleMethodDecl.arguments;
 
         MethodSpec roleMethodSpec = methodMapping.roleMethodSpec;
 		AstGenerator gen = new AstGenerator(roleMethodSpec.sourceStart, roleMethodSpec.sourceEnd);
         int minArguments;
-
         Expression[] arguments = null;
 		int offset=0;
         if (baseMethodSpec instanceof FieldAccessSpec) {
         	// field access is mapped to static method with additional first parameter _OT$base:
-        	minArguments = baseParams.length; // exactly those needed by base.
-        	arguments = new Expression[minArguments];
-        	// how many of these arguments pass a value (rather than a base target instance)
-        	int valueArgCount = ((FieldAccessSpec)baseMethodSpec).isSetter() ? 1 : 0;
-        	if (minArguments > valueArgCount) { // otherwise accessing a static field: no value argument
-	        	// TODO(SH): generalize this and the corresponding statement in
-	        	//           makeWrapperCallArguments().
+        	if (((FieldAccessSpec) baseMethodSpec).isSetter())
+				minArguments = 1;
+			else
+				minArguments = 0;
+        	if (!baseMethodSpec.isStatic()) {
+        		arguments = new Expression[minArguments+1];
 	        	// cast needed against weakened _OT$base reference
         		//   and if base is a role, to go to the class type (FIXME)
 	        	gen.retargetFrom(baseMethodSpec);
@@ -670,22 +684,28 @@ public class CalloutImplementor extends MethodMappingImplementor
 						gen.baseclassReference(this._role.getBaseTypeBinding().getRealClass()),
 						this._role.getBaseTypeBinding().isRole() ? CastExpression.NEED_CLASS : CastExpression.RAW); // FIXME(SH): change to RAW and let OTRE do the cast?
 	    		gen.retargetFrom(roleMethodSpec);
-	    		minArguments--; // one is already provided.
 	    		offset = 1;
+        	} else {
+        		arguments = new Expression[minArguments];
         	}
+        	if (((FieldAccessSpec) baseMethodSpec).isSetter())
+        		arguments[offset] = new PotentialLowerExpression(
+						gen.singleNameReference(roleArgs[0].name),
+						adjustBaseSideType(baseMethodSpec.resolvedType()));
+        	return arguments;
         } else {
+        	TypeBinding[] baseParams =  baseMethodSpec.resolvedMethod.parameters;
             minArguments = Math.min(baseParams.length, (roleArgs != null) ? roleArgs.length : 0); // (minArguments > 0) => (roleArgs != null)
             assert(minArguments == baseParams.length);
         	arguments = new Expression[minArguments];
+        	for(int i=0; i<minArguments; i++)
+        	{
+        		arguments[i+offset] = new PotentialLowerExpression(
+        				gen.singleNameReference(roleArgs[i].name),
+        				adjustBaseSideType(baseParams[i+offset]));
+        	}
+        	return arguments;
         }
-
-        for(int i=0; i<minArguments; i++)
-        {
-			arguments[i+offset] = new PotentialLowerExpression(
-										gen.singleNameReference(roleArgs[i].name),
-										adjustBaseSideType(baseParams[i+offset]));
-        }
-        return arguments;
     }
 
     private boolean transformCalloutMethodBodyResultMapping(

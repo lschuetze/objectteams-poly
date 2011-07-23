@@ -517,7 +517,7 @@ public abstract class AbstractMethodMappingDeclaration
 	protected abstract void checkThrownExceptions (MethodSpec methodSpec);
 
 	protected void checkThrownExceptions(MethodBinding provided, MethodBinding expected) {
-		if (provided.thrownExceptions != null) {
+		if (provided != null && provided.thrownExceptions != null) {
 			if (expected.thrownExceptions != null) {
 				outer: for (int i = 0; i < provided.thrownExceptions.length; i++) {
 					ReferenceBinding thrown = provided.thrownExceptions[i];

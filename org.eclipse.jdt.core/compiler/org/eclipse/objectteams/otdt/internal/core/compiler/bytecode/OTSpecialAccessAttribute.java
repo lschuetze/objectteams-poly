@@ -61,6 +61,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 	private static final int DYN_CALLOUT_FIELD_ACCESS = 5;
 	private static final int DYN_SUPER_METHOD_ACCESS = 6;
 	private static final int M_SIZE = CallinImplementorDyn.DYNAMIC_WEAVING ? 8 : 6;
+	private static final int F_SIZE = CallinImplementorDyn.DYNAMIC_WEAVING ? 8 : 7;
 
 	int nextAccessId = 0;
 	
@@ -120,6 +121,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		FieldBinding field;
 		ReferenceBinding targetClass;
 		int flags; // use the above constants
+		private int accessId;
 		CalloutToFieldDesc(FieldBinding field, ReferenceBinding targetClass, int calloutModifier)
 		{
 			this.field = field;
@@ -128,7 +130,8 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 							CALLOUT_GET_FIELD : CALLOUT_SET_FIELD;
 			if (field.isStatic())
 				this.flags |= CALLOUT_STATIC_FIELD;
-
+			if (CallinImplementorDyn.DYNAMIC_WEAVING)
+				this.accessId = nextAccessId++;
 		}
 
 		public int calloutModifier() {
@@ -138,7 +141,12 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 		}
 
 		void write() {
-			writeByte((byte)CALLOUT_FIELD_ACCESS);
+			if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+				writeByte((byte)DYN_CALLOUT_FIELD_ACCESS);
+				writeByte((byte)this.accessId);
+			} else {
+				writeByte((byte)CALLOUT_FIELD_ACCESS);
+			}
 			writeByte((byte)this.flags);
 			writeName(this.targetClass.attributeName());
 			writeName(this.field.name);
@@ -241,7 +249,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 
         int attributeSize  = 4; // initially empty, except for two counts
 		attributeSize += this._decapsulatedMethods.size() * (1+M_SIZE); // 1 byte kind, 3 names (+1 short for otredyn)
-		attributeSize += this._calloutToFields.size() * 8;     			// 1 byte kind, 1 byte flags, 3 names
+		attributeSize += this._calloutToFields.size() * (1+F_SIZE);		// 1 byte kind, 1 byte flags, 3 names (+1 byte for otredyn) 
 		attributeSize += this._superMethods.size() * 9;        			// 1 byte kind, 4 names
 		attributeSize += this._adaptedBaseclasses.size() * 3;  			// 1 name + 1 byte flag
 

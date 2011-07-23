@@ -28,7 +28,6 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
-import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemFieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
@@ -41,6 +40,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
@@ -68,7 +68,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * @author stephan
  * @version $Id: FieldAccessSpec.java 23401 2010-02-02 23:56:05Z stephan $
  */
-public class FieldAccessSpec extends MethodSpec implements InvocationSite {
+public class FieldAccessSpec extends MethodSpec {
 
 	public int calloutModifier; // either TokenNameget or TokenNameset (from TerminalTokens).
 	public FieldBinding resolvedField; // the field in the corresponding base class
@@ -150,36 +150,41 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
    		}
 
    		if (   !baseType.isRole()
-   			&& this.calloutModifier == TerminalTokens.TokenNameget
-   			&& this.resolvedField.canBeSeenBy(scope.enclosingReceiverType(), this, scope)) 
+   			&& this.resolvedField.canBeSeenBy(scope.enclosingReceiverType().baseclass(), this, scope)) 
    		{
-   			// no accessor method needed, signal this fact by NOT setting selector to accessorSelector 
-   			// and not setting resolvedMethod below
-   			this.parameters = Binding.NO_PARAMETERS;
+   			// no accessor method needed
+   			this.implementationStrategy = ImplementationStrategy.DIRECT;
+   			if (!this.isSetter())
+   				this.parameters = Binding.NO_PARAMETERS;
+   			else
+   				this.parameters = new TypeBinding[] { this.fieldType };
    			return;
-   		} else {
-	   		// find accessor method which might have been generated already.
-			char[] accessorSelector = getSelector();
-			MethodBinding result = null;
-			if (!this.resolvedField.isPrivate()) // don't reuse accessor to private field from super-base (see Trac #232)
-				result = baseType.getMethod(scope, accessorSelector);
-			// NOTE: could be optimized if type has no such method but exact type already has.
-			//       but the the OTRE would need to be informed..
-
-			if (   result == null
-			    || !isMethodCompatible(result))
-			{
-				// record this field access for Attribute generation:
-				RoleModel roleModel = scope.enclosingSourceType().roleModel;
-				ReferenceBinding targetClass =  roleModel.addAccessedBaseField(this.resolvedField, this.calloutModifier);
-
-				// create accessor method:
-				result = createMethod(targetClass, accessorSelector);
-				baseType.addMethod(result);
-			}
-			this.selector = accessorSelector;
-			this.resolvedMethod = result;
    		}
+
+		this.implementationStrategy = CallinImplementorDyn.DYNAMIC_WEAVING 
+				? ImplementationStrategy.DYN_ACCESS : ImplementationStrategy.DECAPS_WRAPPER;
+
+   		// find accessor method which might have been generated already.
+		char[] accessorSelector = getSelector();
+		MethodBinding result = null;
+		if (!this.resolvedField.isPrivate()) // don't reuse accessor to private field from super-base (see Trac #232)
+			result = baseType.getMethod(scope, accessorSelector);
+		// NOTE: could be optimized if type has no such method but exact type already has.
+		//       but the the OTRE would need to be informed..
+
+		if (   result == null
+		    || !isMethodCompatible(result))
+		{
+			// record this field access for Attribute generation:
+			RoleModel roleModel = scope.enclosingSourceType().roleModel;
+			ReferenceBinding targetClass =  roleModel.addAccessedBaseField(this.resolvedField, this.calloutModifier);
+
+			// create accessor method:
+			result = createMethod(targetClass, accessorSelector);
+			baseType.addMethod(result);
+		}
+		this.selector = accessorSelector;
+		this.resolvedMethod = result;
 		this.parameters = this.resolvedMethod.getSourceParameters();
     }
 
@@ -281,9 +286,8 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
 
 	@Override
 	void checkDecapsulation(ReferenceBinding baseClass, Scope scope) {
-		baseClass= baseClass.getRealClass(); // fields are in the class!
-		if (!this.resolvedField.canBeSeenBy(baseClass, this, scope))
-   			scope.problemReporter().decapsulation(this, baseClass, scope, isSetter());
+		if (this.implementationStrategy != ImplementationStrategy.DIRECT)
+			scope.problemReporter().decapsulation(this, baseClass, scope, isSetter());
 	}
 
 	public boolean checkBaseReturnType(CallinCalloutScope scope, int bindDir)
@@ -319,7 +323,13 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
 		int argumentPosition = 0; // safer against AIOOBE
 		if (this.resolvedField != null && !this.resolvedField.isStatic())
 			argumentPosition = 1;
-		TypeBinding accessorParamType = this.resolvedMethod.parameters[argumentPosition];
+		TypeBinding accessorParamType = null;
+		if (this.resolvedMethod != null)
+			accessorParamType = this.resolvedMethod.parameters[argumentPosition];
+		else if (this.hasSignature)
+			accessorParamType = this.arguments[0].type.resolvedType;
+		else
+			return true; // nothing to check
 		ReferenceBinding baseclass = scope.enclosingReceiverType().baseclass();
 		if (baseclass != null && baseclass.isTeam() && accessorParamType.isRole())
 			accessorParamType = TeamModel.strengthenRoleType(baseclass, accessorParamType);
@@ -370,33 +380,19 @@ public class FieldAccessSpec extends MethodSpec implements InvocationSite {
 		return output;
 	}
 
-	// implement InvocationSite
-	public TypeBinding[] genericTypeArguments() {
-		return null;
-	}
-	public boolean isSuperAccess() {
-		return false;
-	}
+	// implement InvocationSite (override method from MethodSpec):
 	public boolean isTypeAccess() {
 		return this.resolvedField != null && this.resolvedField.isStatic();
 	}
-	public void setActualReceiverType(ReferenceBinding receiverType) {
-		// ignored
+
+	public boolean canBeeSeenBy(ReferenceBinding receiverType, Scope scope) {
+		if (this.resolvedField == null)
+			return false;
+		return this.resolvedField.canBeSeenBy(receiverType, this, scope);
 	}
 
-	public void setDepth(int depth) {
-		// ignored
+	public void createAccessAttribute(RoleModel roleModel) {		
+		roleModel.addAccessedBaseField(this.resolvedField, this.calloutModifier);
 	}
 
-	public void setFieldIndex(int depth) {
-		// ignored
-	}
-
-	/**
-	 * Used for generic method resolving, however, FieldAccessSpec is not an invocationSite used for invoking generic methods.
-	 * (we implement InvocationSite only for visibility checking).
-	 */
-	public TypeBinding expectedType() {
-		return null;
-	}
 }
