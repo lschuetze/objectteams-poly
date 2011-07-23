@@ -33,7 +33,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test332_calloutGet13sc"};
+//		TESTS_NAMES = new String[] { "test3319_calloutToArrayField1f"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1262,6 +1262,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "			setValue();\n" +
 			    "			System.out.print(getMore());\n" +
 			    "		}\n" +
+			    "       @SuppressWarnings(\"decapsulation\")\n" +
 			    "		setValue -> set value;\n" +
 			    "		getMore -> getMore;\n" +
 			    "	}\n" +
@@ -1283,7 +1284,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "	\n"
             },
             "----------\n" + 
-    		"1. ERROR in Team332cs6.java (at line 10)\n" + 
+    		"1. ERROR in Team332cs6.java (at line 11)\n" + 
     		"	setValue -> set value;\n" + 
     		"	^^^^^^^^\n" + 
     		"Cannot bind role method setValue() to field value:\n" + 
@@ -2184,6 +2185,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "\n" +
 			    "public team class Team3315ctfo4 {\n" +
 			    "	protected class R1 playedBy T3315ctfo4 {\n" +
+			    "       @SuppressWarnings(\"decapsulation\")\n" +
 			    "		void setIt(String v) -> set String wrong;\n" +
 			    "	}\n" +
 			    "	protected class R2 extends R1 {\n" +
@@ -2200,7 +2202,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "	\n"
             },
             "----------\n" + 
-    		"1. ERROR in Team3315ctfo4.java (at line 7)\n" + 
+    		"1. ERROR in Team3315ctfo4.java (at line 8)\n" + 
     		"	void setIt(String v) -> set String right;\n" + 
     		"	^^^^^^^^^^^^^^^^^^^^\n" + 
     		"Callout binding conflicts with inherited callout binding from class Team3315ctfo4.R1. Use \'=>\' if you want to override it (OTJLD 3.5(g)).\n" + 
