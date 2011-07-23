@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
@@ -843,7 +844,7 @@ public TypeBinding getOtherFieldBindings(BlockScope scope) {
 	setDepth(firstDepth);
 	type = (this.otherBindings[otherBindingsLength - 1]).type;
 //{ObjectTeams: resolve with anchor path:
-	if (!scope.isGeneratedScope()) {
+	if (!scope.isGeneratedScope() || CharOperation.equals(IOTConstants._OT_BASE, this.tokens[0])) {
 		final BlockScope theScope = scope; 
 		type = RoleTypeCreator.deepSubstitute(type, scope.environment(), 
 			new IDependentTypeSubstitution() {
