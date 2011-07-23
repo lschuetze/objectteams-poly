@@ -586,7 +586,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 	    	} else {
 	    		if (calloutDecl.baseMethodSpec.isStatic() || calloutDecl.isCalloutToField())
 	    			// we thought we should use an instance
-	    			// but callout-to-static and normal c-t-f is sent to the base *class*
+	    			// but callout-to-static and decapsulating c-t-f (non-role-base) is sent to the base *class*
 	    			receiver = gen.baseNameReference(baseType.getRealClass());
 	
 	    		baseAccess = gen.messageSend(receiver, selector, arguments);
