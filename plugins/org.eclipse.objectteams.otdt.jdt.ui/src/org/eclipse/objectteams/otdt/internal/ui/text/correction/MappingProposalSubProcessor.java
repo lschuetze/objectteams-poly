@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.FieldAccessSpec;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IMethodMappingBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodSpec;
@@ -343,7 +344,8 @@ public class MappingProposalSubProcessor {
 	{
 		CalloutMappingDeclaration callout = ast.newCalloutMappingDeclaration();
 		String[] argNames = mapping.getBaseArgumentNames(); // possibly adjusted for fieldset
-		IMethodBinding baseMethod = mapping.getBaseMethods()[0];
+		IMethodBinding[] baseMethods = mapping.getBaseMethods();
+		IMethodBinding baseMethod = baseMethods.length > 0 ? baseMethods[0] : null;
 		switch (kind) {
 		case INTERFACE:
 		case SELFCALL:
@@ -352,10 +354,18 @@ public class MappingProposalSubProcessor {
 			break;
 		case FIELDSET:
 			{
-				String baseMethodName = baseMethod.getName();
-				int pos= baseMethodName.lastIndexOf('$');
-				String fieldName= baseMethodName.substring(pos+1);
-				ITypeBinding fieldType= baseMethod.getParameterTypes()[1];
+				String fieldName;
+				ITypeBinding fieldType;
+				if (baseMethod != null) {
+					String baseMethodName = baseMethod.getName();
+					int pos= baseMethodName.lastIndexOf('$');
+					fieldName= baseMethodName.substring(pos+1);
+					fieldType= baseMethod.getParameterTypes()[1];
+				} else {
+					IVariableBinding baseField = mapping.getBaseField();
+					fieldName= baseField.getName();
+					fieldType= baseField.getType();
+				}
 				callout.setBaseMappingElement(createFieldSpec(ast, imports, fieldName, fieldType));
 				callout.bindingOperator().setBindingModifier(Modifier.OT_SET_CALLOUT);
 				argNames= new String[] { fieldName };
@@ -363,10 +373,18 @@ public class MappingProposalSubProcessor {
 			}
 		case FIELDGET:
 			{
-				String baseMethodName = baseMethod.getName();
-				int pos= baseMethodName.lastIndexOf('$');
-				String fieldName= baseMethodName.substring(pos+1);
-				ITypeBinding fieldType= baseMethod.getReturnType();
+				String fieldName;
+				ITypeBinding fieldType;
+				if (baseMethod != null) {
+					String baseMethodName = baseMethod.getName();
+					int pos= baseMethodName.lastIndexOf('$');
+					fieldName= baseMethodName.substring(pos+1);
+					fieldType= baseMethod.getReturnType();
+				} else {
+					IVariableBinding baseField = mapping.getBaseField();
+					fieldName= baseField.getName();
+					fieldType= baseField.getType();
+				}
 				callout.setBaseMappingElement(createFieldSpec(ast, imports, fieldName, fieldType));
 				callout.bindingOperator().setBindingModifier(Modifier.OT_GET_CALLOUT);
 				break;
