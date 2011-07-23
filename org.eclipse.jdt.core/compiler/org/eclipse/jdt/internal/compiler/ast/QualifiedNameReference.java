@@ -844,7 +844,9 @@ public TypeBinding getOtherFieldBindings(BlockScope scope) {
 	setDepth(firstDepth);
 	type = (this.otherBindings[otherBindingsLength - 1]).type;
 //{ObjectTeams: resolve with anchor path:
-	if (!scope.isGeneratedScope() || CharOperation.equals(IOTConstants._OT_BASE, this.tokens[0])) {
+	if (   !scope.isGeneratedScope() 									// wrapping types breaks cast methods for nested roles (see http://trac.objectteams.org/ot/changeset/5348)
+		|| CharOperation.equals(IOTConstants._OT_BASE, this.tokens[0])) // direct callout-set-to-field needs wrapping (see test3317_multipleCalloutToSameField2)
+	{
 		final BlockScope theScope = scope; 
 		type = RoleTypeCreator.deepSubstitute(type, scope.environment(), 
 			new IDependentTypeSubstitution() {
