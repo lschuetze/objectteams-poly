@@ -150,17 +150,25 @@ public class AstGenerator extends AstFactory {
 		char[][] tokens = CharOperation.splitOn('.', type.readableName());
 		return qualifiedNameReference(tokens);
 	}
+	/**
+	 * Qualified reference to a static field.
+	 * @param field a static field
+	 * @return a resolved qualified reference to the given field.
+	 */
 	public QualifiedNameReference qualifiedNameReference(FieldBinding field) {
-		char[][] qualifiedName;
-		if (field.isStatic()) {
-			char[][] baseClassName = TypeAnalyzer.compoundNameOfReferenceType(field.declaringClass, true, false);
-			int len = baseClassName.length;
-			System.arraycopy(baseClassName, 0, qualifiedName = new char[len+1][], 0, len);
-			qualifiedName[len] = field.name;
-		} else {
-			qualifiedName = new char[][] {IOTConstants._OT_BASE, field.name };
-		}
-		return qualifiedNameReference(qualifiedName);
+		char[][] className = TypeAnalyzer.compoundNameOfReferenceType(field.declaringClass, true, false);
+		int len = className.length;
+		char[][] qualifiedName = new char[len+1][];
+		System.arraycopy(className, 0, qualifiedName, 0, len);
+		qualifiedName[len] = field.name;
+		QualifiedNameReference qualifiedNameReference = qualifiedNameReference(qualifiedName);
+		qualifiedNameReference.binding = field;
+		qualifiedNameReference.actualReceiverType = field.declaringClass;
+		qualifiedNameReference.resolvedType = field.type;
+		qualifiedNameReference.bits &= ~ASTNode.RestrictiveFlagMASK;
+		qualifiedNameReference.bits |= Binding.FIELD;
+		qualifiedNameReference.constant = Constant.NotAConstant;
+		return qualifiedNameReference;
 	}
 	public NameReference nameReference (ReferenceBinding type) {
 	    char[] typeName = "void".toCharArray(); //$NON-NLS-1$
