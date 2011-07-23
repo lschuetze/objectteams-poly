@@ -33,7 +33,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test332_calloutGet13sv"};
+//		TESTS_NAMES = new String[] { "test332_calloutGet13sc"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -774,8 +774,38 @@ public class CalloutToField extends AbstractOTJLDTest {
             "OK");
     }
 
+    // a getter callout to a static field uses only a binding with signatures, field is visible, but class is not
+    public void test332_calloutGet13sc() {
+       
+       runConformTest(
+            new String[] {
+		"p2/Team332cg13sc.java",
+			    "package p2;\n" +
+			    "import base p1.T332cg13sc;\n" +
+			    "public team class Team332cg13sc {\n" +
+			    "    @SuppressWarnings(\"decapsulation\")\n" +
+			    "    protected class R playedBy T332cg13sc {\n" +
+			    "        String getOk() -> get String ok;\n" +
+			    "    }\n" +
+			    "    Team332cg13sc() {\n" +
+			    "        System.out.print(R.getOk());\n" +
+			    "    }\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        new Team332cg13sc();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"p1/T332cg13sc.java",
+			    "package p1;\n" +
+			    "class T332cg13sc {\n" +
+			    "    public static String ok = \"OK\";\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "OK");
+    }
+
     // a getter callout to a static field uses only a binding with signatures, field is visible
-    // 3.3.2-otjld-callout-get-13s
     public void test332_calloutGet13sv() {
        
        runConformTest(
