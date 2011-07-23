@@ -23,6 +23,7 @@ package org.eclipse.jdt.core.dom;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
+import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.objectteams.otdt.core.compiler.InferenceKind;
@@ -43,6 +44,7 @@ class MethodMappingBinding implements IMethodMappingBinding
     private ITypeBinding _baseClass;
     private IMethodBinding _roleMethod;
     private IMethodBinding[] _baseMethods;
+    private IVariableBinding _baseField;
 
 	MethodMappingBinding(
             BindingResolver resolver,
@@ -125,6 +127,18 @@ class MethodMappingBinding implements IMethodMappingBinding
         }
 
         return _baseMethods;
+    }
+    
+    public IVariableBinding getBaseField()
+    {
+        if (_baseField == null)
+        {
+        	FieldBinding fieldBinding = this._binding._baseField;
+			if (fieldBinding == null)
+        		return null;
+			this._baseField = _resolver.getVariableBinding(fieldBinding);
+        }
+        return _baseField;
     }
 
     public String[] getBaseArgumentNames() {

@@ -48,6 +48,8 @@ public interface IMethodMappingBinding extends IBinding
 
     public IMethodBinding[] getBaseMethods();
 
+    public IVariableBinding getBaseField();
+
     public String[] getBaseArgumentNames();
 
     /**

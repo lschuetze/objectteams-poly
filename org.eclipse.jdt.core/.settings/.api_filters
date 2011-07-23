@@ -281,13 +281,6 @@
             </message_arguments>
         </filter>
     </resource>
-    <resource path="dom/org/eclipse/jdt/core/dom/IMethodMappingBinding.java" type="org.eclipse.jdt.core.dom.IMethodMappingBinding">
-        <filter comment="@noimplement added between 0.7.1 and 0.8" id="403853384">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.dom.IMethodMappingBinding"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="model/org/eclipse/objectteams/otdt/core/ICallinMapping.java" type="org.eclipse.objectteams.otdt.core.ICallinMapping">
         <filter comment="@noimplement added after 0.7 but before 0.8" id="403804204">
             <message_arguments>
