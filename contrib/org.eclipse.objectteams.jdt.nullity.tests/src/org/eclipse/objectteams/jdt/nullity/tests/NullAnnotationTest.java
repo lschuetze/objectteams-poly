@@ -210,7 +210,7 @@ public void test_nonnull_parameter_003() {
 		"1. ERROR in X.java (at line 7)\n" + 
 		"	foo(null);\n" + 
 		"	    ^^^^\n" + 
-		"Null contract violation: passing null to a parameter declared as @NonNull\n" + 
+		"Type mismatch: passing null to a parameter declared as @NonNull\n" + 
 		"----------\n",
 		LIBS,
 		true /* shouldFlush*/);
@@ -246,7 +246,7 @@ public void test_nonnull_parameter_004() {
 		"1. ERROR in X.java (at line 5)\n" + 
 		"	l.setObject(o);\n" + 
 		"	            ^\n" + 
-		"Null contract violation: potentially passing null to a parameter declared as @NonNull\n" + 
+		"Type mismatch: potentially passing null to a parameter declared as @NonNull\n" + 
 		"----------\n",
 		"",/* expected output */
 		"",/* expected error */
@@ -281,7 +281,7 @@ public void test_nonnull_parameter_005() {
 		"1. WARNING in X.java (at line 3)\n" + 
 		"	l.setObject(o);\n" + 
 		"	            ^\n" + 
-		"Potential null contract violation: insufficient nullness information regarding a value that is passed to a parameter declared as @NonNull\n" + 
+		"Potential type mismatch: insufficient nullness information regarding a value that is passed to a parameter declared as @NonNull\n" + 
 		"----------\n",
 		"",/* expected output */
 		"",/* expected error */
@@ -328,26 +328,26 @@ public void test_nonnull_local_001() {
 		"1. ERROR in X.java (at line 4)\n" + 
 		"	@NonNull Object o1 = b ? null : new Object();\n" + 
 		"	                     ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"Null contract violation: potentially assigning null to local variable o1, which is declared as @NonNull\n" + 
+		"Type mismatch: potentially assigning null to local variable o1, which is declared as @NonNull\n" + 
 		"----------\n" + 
 		"2. ERROR in X.java (at line 6)\n" + 
 		"	o2 = null;\n" + 
 		"	     ^^^^\n" + 
-		"Null contract violation: assigning null to local variable o2, which is declared as @NonNull\n" + 
+		"Type mismatch: assigning null to local variable o2, which is declared as @NonNull\n" + 
 		"----------\n" + 
 		"3. WARNING in X.java (at line 7)\n" + 
 		"	@NonNull Object o3 = p;\n" + 
 		"	                     ^\n" + 
-		"Potential null contract violation: insufficient nullness information regarding a value that is assigned to local variable o3, which is declared as @NonNull\n" + 
+		"Potential type mismatch: insufficient nullness information regarding a value that is assigned to local variable o3, which is declared as @NonNull\n" + 
 		"----------\n",
 		LIBS,
 		true /* shouldFlush*/);
 }
 
-// a method tries to tighten the null contract, super declares parameter o as @Nullable
+// a method tries to tighten the type specification, super declares parameter o as @Nullable
 // other parameters: s is redefined from not constrained to @Nullable which is OK
 //                   third is redefined from not constrained to @NonNull which is bad, too
-public void test_parameter_contract_inheritance_001() {
+public void test_parameter_specification_inheritance_001() {
 	runConformTest(
 		new String[] {
 			"Lib.java",
@@ -376,18 +376,18 @@ public void test_parameter_contract_inheritance_001() {
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
 		"	void foo(@Nullable String s, @NonNull Object o, @NonNull Object third) { System.out.print(o.toString()); }\n" + 
-		"	                                             ^\n" + 
-		"Cannot tighten null contract for parameter o, inherited method from Lib declares this parameter as @Nullable\n" + 
+		"	                             ^^^^^^^^^^^^^^^\n" + 
+		"Illegal redefinition of parameter o, inherited method from Lib declares this parameter as @Nullable\n" + 
 		"----------\n" + 
 		"2. ERROR in X.java (at line 4)\n" + 
 		"	void foo(@Nullable String s, @NonNull Object o, @NonNull Object third) { System.out.print(o.toString()); }\n" + 
-		"	                                                                ^^^^^\n" + 
-		"Cannot tighten null contract for parameter third, inherited method from Lib does not constrain this parameter\n" + 
+		"	                                                ^^^^^^^^^^^^^^^\n" + 
+		"Illegal redefinition of parameter third, inherited method from Lib does not constrain this parameter\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 // a method body fails to handle the inherited null contract, super declares parameter as @Nullable
-public void test_parameter_contract_inheritance_002() {
+public void test_parameter_specification_inheritance_002() {
 	runConformTest(
 		new String[] {
 			"Lib.java",
@@ -424,7 +424,7 @@ public void test_parameter_contract_inheritance_002() {
 }
 // a method relaxes the parameter null contract, super interface declares parameter o as @NonNull
 // other (first) parameter just repeats the inherited @NonNull
-public void test_parameter_contract_inheritance_003() {
+public void test_parameter_specification_inheritance_003() {
 	runConformTest(
 		new String[] {
 			"IX.java",
@@ -446,7 +446,7 @@ public void test_parameter_contract_inheritance_003() {
 }
 // a method adds a @NonNull annotation, super interface has no null annotation
 // changing other from unconstrained to @Nullable is OK
-public void test_parameter_contract_inheritance_004() {
+public void test_parameter_specification_inheritance_004() {
 	runConformTest(
 		new String[] {
 			"IX.java",
@@ -469,13 +469,13 @@ public void test_parameter_contract_inheritance_004() {
 		"----------\n" + 
 		"1. ERROR in X.java (at line 3)\n" + 
 		"	public void foo(@NonNull Object o, @Nullable Object other) { System.out.print(o.toString()); }\n" + 
-		"	                                ^\n" + 
-		"Cannot tighten null contract for parameter o, inherited method from IX does not constrain this parameter\n" + 
+		"	                ^^^^^^^^^^^^^^^\n" + 
+		"Illegal redefinition of parameter o, inherited method from IX does not constrain this parameter\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 // a method tries to relax the null contract, super declares @NonNull return
-public void test_parameter_contract_inheritance_005() {
+public void test_parameter_specification_inheritance_005() {
 	runConformTest(
 		new String[] {
 			"Lib.java",
@@ -504,14 +504,14 @@ public void test_parameter_contract_inheritance_005() {
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
 		"	@Nullable Object getObject() { return null; }\n" + 
-		"	          ^^^^^^\n" + 
-		"Cannot relax null contract for method return, inherited method from Lib is declared as @NonNull\n" + 
+		"	^^^^^^^^^^^^^^^^\n" + 
+		"The return type is incompatible with the @NonNull return from Lib.getObject()\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 
 // super has no contraint for return, sub method confirms the null contract as @Nullable 
-public void test_parameter_contract_inheritance_006() {
+public void test_parameter_specification_inheritance_006() {
 	runConformTest(
 		new String[] {
 			"Lib.java",
@@ -536,7 +536,7 @@ public void test_parameter_contract_inheritance_006() {
 		null/*compilerRequestor*/);
 }
 // a method body violates the inherited null contract, super declares @NonNull return
-public void test_parameter_contract_inheritance_007() {
+public void test_parameter_specification_inheritance_007() {
 	runConformTest(
 		new String[] {
 			"Lib.java",
@@ -565,12 +565,12 @@ public void test_parameter_contract_inheritance_007() {
 		"1. ERROR in X.java (at line 3)\n" + 
 		"	Object getObject() { return null; }\n" + 
 		"	                     ^^^^^^^^^^^^\n" + 
-		"Null contract violation: returning null from a method declared as @NonNull\n" + 
+		"Type mismatch: returning null from a method declared as @NonNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 // a client potentially violates the inherited null contract, super interface declares @NonNull parameter
-public void test_parameter_contract_inheritance_008() {
+public void test_parameter_specification_inheritance_008() {
 	Map options = getCompilerOptions();
 	options.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
 	runConformTest(
@@ -606,12 +606,12 @@ public void test_parameter_contract_inheritance_008() {
 		"1. ERROR in M.java (at line 3)\n" + 
 		"	x.printObject(o);\n" + 
 		"	              ^\n" + 
-		"Potential null contract violation: insufficient nullness information regarding a value that is passed to a parameter declared as @NonNull\n" + 
+		"Potential type mismatch: insufficient nullness information regarding a value that is passed to a parameter declared as @NonNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 // a static method has a more relaxed null contract than a like method in the super class, but no overriding.
-public void test_parameter_contract_inheritance_009() {
+public void test_parameter_specification_inheritance_009() {
 	runConformTest(
 		new String[] {
 			"Lib.java",
@@ -735,7 +735,7 @@ public void test_nonnull_return_003() {
 			"public class X {\n" +
 			"    @NonNull Object getObject(boolean b) {\n" +
 			"        if (b)\n" +
-			"            return null;\n" + // definite contract violation despite enclosing "if"
+			"            return null;\n" + // definite specification violation despite enclosing "if"
 			"        return new Object();\n" +
 			"    }\n" +
 			"}\n"
@@ -744,7 +744,7 @@ public void test_nonnull_return_003() {
 		"1. ERROR in X.java (at line 5)\n" + 
 		"	return null;\n" + 
 		"	^^^^^^^^^^^^\n" + 
-		"Null contract violation: returning null from a method declared as @NonNull\n" + 
+		"Type mismatch: returning null from a method declared as @NonNull\n" + 
 		"----------\n",
 		LIBS,
 		true /* shouldFlush*/);
@@ -765,7 +765,7 @@ public void test_nonnull_return_004() {
 		"1. ERROR in X.java (at line 4)\n" + 
 		"	return o;\n" + 
 		"	^^^^^^^^^\n" + 
-		"Null contract violation: return value can be null but method is declared as @NonNull\n" + 
+		"Type mismatch: return value can be null but method is declared as @NonNull\n" + 
 		"----------\n",
 	    LIBS,
 	    false/*shouldFlush*/);
@@ -807,7 +807,7 @@ public void test_nonnull_return_006() {
 		"1. WARNING in X.java (at line 4)\n" + 
 		"	return o;\n" + 
 		"	^^^^^^^^^\n" + 
-		"Potential null contract violation: insufficient nullness information regarding return value while the method is declared as @NonNull\n" + 
+		"Potential type mismatch: insufficient nullness information regarding return value while the method is declared as @NonNull\n" + 
 		"----------\n",
 	    LIBS,
 	    false/*shouldFlush*/);
@@ -1040,8 +1040,8 @@ public void test_annotation_import_005() {
 		"1. ERROR in X.java (at line 4)\n" + 
 		"	return l.getObject();\n" + 
 		"	^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"Potential null contract violation: insufficient nullness information regarding return value while the method is declared as @MustNotBeNull\n" +
-//		"Potential null contract violation: insufficient nullness information for checking return value against declaration as @MustNotBeNull.\n" + 
+		"Potential type mismatch: insufficient nullness information regarding return value while the method is declared as @MustNotBeNull\n" +
+//		"Potential type mismatch: insufficient nullness information for checking return value against declaration as @MustNotBeNull.\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -1183,7 +1183,7 @@ public void test_annotation_emulation_002() {
 		"1. ERROR in X.java (at line 4)\n" + 
 		"	return l.getObject();\n" + 
 		"	^^^^^^^^^^^^^^^^^^^^^\n" + 
-		"Null contract violation: return value can be null but method is declared as @MustNotBeNull\n" + 
+		"Type mismatch: return value can be null but method is declared as @MustNotBeNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -1229,7 +1229,7 @@ public void test_default_nullness_001() {
 		"1. ERROR in X.java (at line 4)\n" + 
 		"	return o;\n" + 
 		"	^^^^^^^^^\n" + 
-		"Null contract violation: return value can be null but method is declared as @NonNull\n" + 
+		"Type mismatch: return value can be null but method is declared as @NonNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -1262,8 +1262,8 @@ public void test_default_nullness_002() {
 		"----------\n" + 
 		"1. ERROR in Y.java (at line 4)\n" + 
 		"	@Nullable Object getObject(Object o) {\n" + 
-		"	          ^^^^^^\n" + 
-		"Cannot relax null contract for method return, inherited method from X is declared as @NonNull\n" + 
+		"	^^^^^^^^^^^^^^^^\n" + 
+		"The return type is incompatible with the @NonNull return from X.getObject(Object)\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -1303,13 +1303,13 @@ public void test_default_nullness_003() {
 		"----------\n" + 
 		"1. ERROR in p2\\Y.java (at line 5)\n" + 
 		"	protected @Nullable Object getObject(Object o) {\n" + 
-		"	                    ^^^^^^\n" + 
-		"Cannot relax null contract for method return, inherited method from X is declared as @NonNull\n" + 
+		"	          ^^^^^^^^^^^^^^^^\n" + 
+		"The return type is incompatible with the @NonNull return from X.getObject(Object)\n" + 
 		"----------\n" + 
 		"2. ERROR in p2\\Y.java (at line 6)\n" + 
 		"	bar(o);\n" + 
 		"	    ^\n" + 
-		"Null contract violation: potentially passing null to a parameter declared as @NonNull\n" + 
+		"Type mismatch: potentially passing null to a parameter declared as @NonNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -1359,18 +1359,18 @@ public void test_default_nullness_003a() {
 		"----------\n" + 
 		"1. ERROR in p2\\Y.java (at line 5)\n" + 
 		"	protected @Nullable Object getObject(Object o) {\n" + 
-		"	                    ^^^^^^\n" + 
-		"Cannot relax null contract for method return, inherited method from X is declared as @NonNull\n" + 
+		"	          ^^^^^^^^^^^^^^^^\n" + 
+		"The return type is incompatible with the @NonNull return from X.getObject(Object)\n" + 
 		"----------\n" + 
 		"2. ERROR in p2\\Y.java (at line 6)\n" + 
 		"	bar(o);\n" + 
 		"	    ^\n" + 
-		"Null contract violation: potentially passing null to a parameter declared as @NonNull\n" + 
+		"Type mismatch: potentially passing null to a parameter declared as @NonNull\n" + 
 		"----------\n" + 
 		"3. ERROR in p2\\Y.java (at line 7)\n" + 
 		"	accept(o);\n" + 
 		"	       ^\n" + 
-		"Null contract violation: potentially passing null to a parameter declared as @NonNull\n" + 
+		"Type mismatch: potentially passing null to a parameter declared as @NonNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
