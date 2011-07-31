@@ -67,9 +67,11 @@ public class Constants {
 		/** @since 3.7 */
 		int IllegalDefinitionToNonNullParameter = MethodRelated + 892;
 		/** @since 3.7 */
-		int PotentialNullMessageSendReference = Internal + 893;
+		int ParameterLackingNonNullAnnotation = 893;
 		/** @since 3.7 */
-		int RedundantNullCheckOnNonNullMessageSend = 894;
+		int PotentialNullMessageSendReference = Internal + 894;
+		/** @since 3.7 */
+		int RedundantNullCheckOnNonNullMessageSend = 895;
 	}
 	
 	/** Translate from a nullness annotation to the corresponding tag bit or 0L. */

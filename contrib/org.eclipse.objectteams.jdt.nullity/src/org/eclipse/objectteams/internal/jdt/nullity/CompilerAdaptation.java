@@ -482,45 +482,42 @@ public team class CompilerAdaptation {
 			
 			// return type:
 			if ((inheritedBits & TagBits.AnnotationNonNull) != 0) {
-				if ((currentBits & TagBits.AnnotationNullable) != 0) {
+				long currentNullBits = currentBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable);
+				if (currentNullBits != TagBits.AnnotationNonNull) {				
 					AbstractMethodDeclaration methodDecl = currentMethod.sourceMethod();
-					getType().problemReporter().illegalReturnRedefinition(methodDecl, inheritedMethod, 
-																		environment.getNonNullAnnotationName());
+					getType().problemReporter().illegalReturnRedefinition(methodDecl, inheritedMethod,
+																environment.getNonNullAnnotationName());
 				}
 			}
-			if ((currentBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) == 0)
-				currentMethod.addTagBit(inheritedBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable));
 
 			// parameters:
 			Argument[] currentArguments = currentMethod.sourceMethod().getArguments();
 			if (inheritedMethod.parameterNonNullness != null) {
-				// inherited method has null-annotations, check and possibly transfer:
-				
-				// prepare for transferring (contract inheritance):
-				if (currentMethod.parameterNonNullness == null)
-					currentMethod.parameterNonNullness = new Boolean[currentMethod.getParameters().length];
-				
+				// inherited method has null-annotations, check compatibility:
+
 				for (int i = 0; i < inheritedMethod.parameterNonNullness.length; i++) {
 					
 					Boolean inheritedNonNullNess = inheritedMethod.parameterNonNullness[i];
-					if (inheritedNonNullNess != Boolean.TRUE) { 	 				 // super parameter is not restricted to @NonNull
-						if (currentMethod.parameterNonNullness[i] == Boolean.TRUE) { // current parameter is restricted to @NonNull
+					Boolean currentNonNullNess = (currentMethod.parameterNonNullness == null)
+												? null : currentMethod.parameterNonNullness[i];
+					if (inheritedNonNullNess != null) {				// super has a null annotation
+						if (currentNonNullNess == null) {			// current parameter lacks null annotation
+							getType().problemReporter().parameterLackingNonNullAnnotation(
+									currentArguments[i],
+									inheritedMethod.getDeclaringClass(),
+									environment.getNullableAnnotationName());
+							continue;
+						}						
+					}
+					if (inheritedNonNullNess != Boolean.TRUE) {		// super parameter is not restricted to @NonNull
+						if (currentNonNullNess == Boolean.TRUE) { 	// current parameter is restricted to @NonNull
 							getType().problemReporter().illegalRedefinitionToNonNullParameter(
 																currentArguments[i],
 																inheritedMethod.getDeclaringClass(),
 																inheritedNonNullNess == null
 																? null
 																: environment.getNullableAnnotationName());
-							continue;
 						} 
-					}
-					
-					if (currentMethod.parameterNonNullness[i] == null && inheritedNonNullNess != null) {
-						// inherit this annotation as the current method has no annotation:
-						currentMethod.parameterNonNullness[i] = inheritedNonNullNess;
-						VariableBinding argumentBinding = currentArguments[i].binding;
-						argumentBinding.tagBits |= inheritedNonNullNess.booleanValue()
-														? TagBits.AnnotationNonNull : TagBits.AnnotationNullable;
 					}
 				}
 			} else if (currentMethod.parameterNonNullness != null) {
@@ -1022,6 +1019,14 @@ public team class CompilerAdaptation {
 					sourceStart,
 					argument.type.sourceEnd);
 			}
+		}
+		public void parameterLackingNonNullAnnotation(Argument argument, ReferenceBinding declaringClass, char[][] inheritedAnnotationName) {
+			this.handle(
+				IProblem.ParameterLackingNonNullAnnotation, 
+				new String[] { new String(argument.name), new String(declaringClass.readableName()), CharOperation.toString(inheritedAnnotationName)},
+				new String[] { new String(argument.name), new String(declaringClass.shortReadableName()), new String(inheritedAnnotationName[inheritedAnnotationName.length-1])},
+				argument.type.sourceStart,
+				argument.type.sourceEnd);
 		}
 		public void illegalReturnRedefinition(org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration abstractMethodDecl,
 											  MethodBinding inheritedMethod, char[][] nonNullAnnotationName) 
