@@ -654,36 +654,6 @@ public team class CompilerAdaptation {
 		PackageBinding getPackage() 		-> PackageBinding getPackage();
 				
 		char[] sourceName() 				-> char[] sourceName();
-
-		/** Constructor for emulated annotation type. */
-		@SuppressWarnings({ "inferredcallout", "decapsulation" })
-		protected BinaryTypeBinding(char[][] compoundName, ReferenceBinding superclass, org.eclipse.jdt.internal.compiler.lookup.PackageBinding packageBinding, int typeId) 
-		{
-			base();
-			this.compoundName = compoundName;
-			this.sourceName = compoundName[compoundName.length-1];
-			this.modifiers = ClassFileConstants.AccAnnotation | ClassFileConstants.AccPublic;
-			this.fields = Binding.NO_FIELDS;
-			this.methods = Binding.NO_METHODS;
-			this.memberTypes = Binding.NO_MEMBER_TYPES;
-			this.superclass = superclass;
-			this.superInterfaces = Binding.NO_SUPERINTERFACES;
-			this.fPackage = packageBinding;
-			this.typeVariables = Binding.NO_TYPE_VARIABLES;
-			long applicableFor = 0;
-			if (typeId == TypeIds.T_ConfiguredAnnotationNullable || typeId == TypeIds.T_ConfiguredAnnotationNonNull)
-				applicableFor = TagBits.AnnotationForMethod | TagBits.AnnotationForParameter | TagBits.AnnotationForLocalVariable;
-			else if (typeId == TypeIds.T_ConfiguredAnnotationNullable || typeId == TypeIds.T_ConfiguredAnnotationNonNull)
-				applicableFor = TagBits.AnnotationForPackage | TagBits.AnnotationForType;
-			this.tagBits = TagBits.AreFieldsComplete | TagBits.AreFieldsSorted 
-									| TagBits.AreMethodsComplete | TagBits.AreMethodsSorted 
-									| TagBits.HasNoMemberTypes | TagBits.TypeVariablesAreConnected
-									| TagBits.AnnotationClassRetention 
-									| applicableFor;
-			this.id = typeId;
-			// experiment with providing a file name that the Java model can recognize as emulated:
-			// this.fileName = CharOperation.concat(new char[]{'&'}, CharOperation.concatWith(compoundName, '/'));
-		}
 		
 		void scanMethodForNullAnnotation(IBinaryMethod method, MethodBinding methodBinding) 
 		<- after MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[][][] missingTypeNames)
@@ -786,7 +756,6 @@ public team class CompilerAdaptation {
 	/** Initiate setup of configured null annotation types. */
 	protected class LookupEnvironment playedBy LookupEnvironment {
 
-		ProblemReporter getProblemReporter() 				-> get ProblemReporter problemReporter;
 		ReferenceBinding getType(char[][] compoundName) 	-> ReferenceBinding getType(char[][] compoundName);
 		PackageBinding createPackage(char[][] compoundName) -> PackageBinding createPackage(char[][] compoundName);
 
@@ -823,19 +792,6 @@ public team class CompilerAdaptation {
 			char[][] packageName = CharOperation.subarray(typeName, 0, typeName.length-1);
 			PackageBinding packageBinding = createPackage(packageName);
 			char[] simpleTypeName = typeName[typeName.length-1];
-			if (getGlobalOptions().emulateNullAnnotationTypes) {
-				// before adding an emulated type, check if type this type already exists:
-				ReferenceBinding existingType = packageBinding.getType(simpleTypeName);
-				if (existingType != null && existingType.isValidBinding())
-					getProblemReporter().conflictingTypeEmulation(typeName);
-				else
-					packageBinding.addType(new BinaryTypeBinding(
-												typeName,
-												getType(TypeConstants.JAVA_LANG_OBJECT),
-												packageBinding,
-												typeId));
-				packageBinding.shouldEmulate = true;
-			}
 			if (typeId == TypeIds.T_ConfiguredAnnotationNullable)
 				packageBinding.nullableName = simpleTypeName;
 			else if (typeId == TypeIds.T_ConfiguredAnnotationNonNull)
@@ -873,19 +829,15 @@ public team class CompilerAdaptation {
 	}
 
 	/** The package holding the configured null annotation types detects and marks these annotation types. */
-	@SuppressWarnings("decapsulation")
 	protected class PackageBinding playedBy PackageBinding {
 
 		LookupEnvironment getEnvironment() 				-> get LookupEnvironment environment;
-		protected ReferenceBinding getType(char[] name) -> ReferenceBinding getType(char[] name);
-		protected void addType(ReferenceBinding element)-> void addType(ReferenceBinding element);
-		
+
 		protected char[] nullableName = null;
 		protected char[] nonNullName = null;
 		protected char[] nullableByDefaultName = null;
 		protected char[] nonNullByDefaultName = null;
-		protected boolean shouldEmulate = false;
-		
+
 		protected TypeBinding nullnessDefaultAnnotation;
 
 		void setupNullAnnotationType(ReferenceBinding type) <- after void addType(ReferenceBinding type)
@@ -904,11 +856,7 @@ public team class CompilerAdaptation {
 			else 
 				return;
 			
-			// we're adding a null annotation type to this package:			
-			if (this.shouldEmulate) // unfortunately here we don't have any source to report the error against.
-				getEnvironment().getProblemReporter().conflictingTypeEmulation(type.compoundName);
-			else
-				type.id = id;	// ensure annotations of this type are detected as standard annotations.
+			type.id = id;	// ensure annotations of this type are detected as standard annotations.
 		}
 	}
 
@@ -961,7 +909,6 @@ public team class CompilerAdaptation {
 				}
 				// categorize fatal problems per ID
 				switch (problemID) {
-					case IProblem.ConflictingTypeEmulation :
 					case IProblem.MissingNullAnnotationType :
 						return CategorizedProblem.CAT_BUILDPATH;
 				}
@@ -1099,15 +1046,6 @@ public team class CompilerAdaptation {
 			String[] args = { new String(CharOperation.concatWith(nullAnnotationName, '.')) };
 			this.handle(IProblem.MissingNullAnnotationType, args, args, 0, 0);	
 		}
-		public void conflictingTypeEmulation(char[][] compoundName) {
-			String[] arguments = new String[] {CharOperation.toString(compoundName)};
-			this.handle(
-				IProblem.ConflictingTypeEmulation,
-				arguments,
-				arguments,
-				ProblemSeverities.Error | ProblemSeverities.Abort | ProblemSeverities.Fatal, // not configurable
-				0, 0);	
-		}
 		// NOTE: adaptation of toString() omitted
 	}
 	
@@ -1166,9 +1104,7 @@ public team class CompilerAdaptation {
 		public char[][] nullableByDefaultAnnotationName;
 		/** Fully qualified name of annotation to use as marker for default nonnull. */
 		public char[][] nonNullByDefaultAnnotationName;
-		/** Should null annotation types be emulated by synthetic bindings? */
-		public boolean emulateNullAnnotationTypes;
-		
+
 		public long defaultNonNullness; // 0 or TagBits#AnnotationNullable or TagBits#AnnotationNonNull
 
 		String optionKeyFromIrritant(int irritant) <- replace String optionKeyFromIrritant(int irritant);
@@ -1231,7 +1167,6 @@ public team class CompilerAdaptation {
 					char[] compoundName = CharOperation.concatWith(this.nonNullByDefaultAnnotationName, '.');
 					optionsMap.put(OPTION_NonNullByDefaultAnnotationName, String.valueOf(compoundName));
 				}
-				optionsMap.put(OPTION_EmulateNullAnnotationTypes, this.emulateNullAnnotationTypes ? ENABLED : DISABLED);
 				if (this.defaultNonNullness == TagBits.AnnotationNullable)
 					optionsMap.put(OPTION_NullnessDefault, NULLABLE);
 				else if (this.defaultNonNullness == TagBits.AnnotationNonNull)
@@ -1267,13 +1202,6 @@ public team class CompilerAdaptation {
 				}
 				if ((optionValue = optionsMap.get(OPTION_NonNullByDefaultAnnotationName)) != null) {
 					this.nonNullByDefaultAnnotationName = CharOperation.splitAndTrimOn('.', ((String)optionValue).toCharArray());
-				}
-				if ((optionValue = optionsMap.get(OPTION_EmulateNullAnnotationTypes)) != null) {
-					if (ENABLED.equals(optionValue)) {
-						this.emulateNullAnnotationTypes = true;
-					} else if (DISABLED.equals(optionValue)) {
-						this.emulateNullAnnotationTypes = false;
-					}
 				}
 				if ((optionValue = optionsMap.get(OPTION_NullnessDefault)) != null) {
 					if (NULLABLE.equals(optionValue)) {
@@ -1322,7 +1250,6 @@ public team class CompilerAdaptation {
 			if (optionNames.contains(NullCompilerOptions.OPTION_AnnotationBasedNullAnalysis))
 				return;
 			optionNames.add(NullCompilerOptions.OPTION_AnnotationBasedNullAnalysis);
-			optionNames.add(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes);
 			optionNames.add(NullCompilerOptions.OPTION_NonNullAnnotationName);
 			optionNames.add(NullCompilerOptions.OPTION_NullableAnnotationName);
 			optionNames.add(NullCompilerOptions.OPTION_NonNullByDefaultAnnotationName);

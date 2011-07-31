@@ -59,19 +59,17 @@ public class Constants {
 		/** @since 3.7 */
 		int NonNullLocalInsufficientInfo = Internal + 888;
 		/** @since 3.7 */
-		int ConflictingTypeEmulation = ImportRelated + 889;
+		int MissingNullAnnotationType = ImportRelated + 889;
 		/** @since 3.7 */
-		int MissingNullAnnotationType = ImportRelated + 890;
+		int IllegalRedefinitionToNullableReturn = MethodRelated + 890;
 		/** @since 3.7 */
-		int IllegalRedefinitionToNullableReturn = MethodRelated + 891;
+		int IllegalRedefinitionToNonNullParameter = MethodRelated + 891;
 		/** @since 3.7 */
-		int IllegalRedefinitionToNonNullParameter = MethodRelated + 892;
+		int IllegalDefinitionToNonNullParameter = MethodRelated + 892;
 		/** @since 3.7 */
-		int IllegalDefinitionToNonNullParameter = MethodRelated + 893;
+		int PotentialNullMessageSendReference = Internal + 893;
 		/** @since 3.7 */
-		int PotentialNullMessageSendReference = Internal + 894;
-		/** @since 3.7 */
-		int RedundantNullCheckOnNonNullMessageSend = 895;
+		int RedundantNullCheckOnNonNullMessageSend = 894;
 	}
 	
 	/** Translate from a nullness annotation to the corresponding tag bit or 0L. */

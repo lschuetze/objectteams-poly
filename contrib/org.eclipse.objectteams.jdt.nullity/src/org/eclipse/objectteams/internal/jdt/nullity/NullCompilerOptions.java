@@ -36,8 +36,7 @@ public interface NullCompilerOptions {
 	public static final String OPTION_NonNullAnnotationName = "org.eclipse.jdt.core.compiler.annotation.nonnull"; //$NON-NLS-1$
 	public static final String OPTION_NullableByDefaultAnnotationName = "org.eclipse.jdt.core.compiler.annotation.nullablebydefault"; //$NON-NLS-1$
 	public static final String OPTION_NonNullByDefaultAnnotationName = "org.eclipse.jdt.core.compiler.annotation.nonnullbydefault"; //$NON-NLS-1$
-	public static final String OPTION_EmulateNullAnnotationTypes = "org.eclipse.jdt.core.compiler.annotation.emulate"; //$NON-NLS-1$
-	
+
 	public static final String OPTION_NullnessDefault = "org.eclipse.jdt.core.compiler.annotation.nulldefault";  //$NON-NLS-1$
 	
 
