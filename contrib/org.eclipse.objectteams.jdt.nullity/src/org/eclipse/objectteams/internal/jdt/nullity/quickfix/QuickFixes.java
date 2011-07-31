@@ -14,7 +14,7 @@ import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.De
 import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.DefiniteNullToNonNullParameter;
 import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.IllegalDefinitionToNonNullParameter;
 import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.IllegalRedefinitionToNonNullParameter;
-import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.IllegalRedefinitionToNullableReturn;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.IllegalReturnNullityRedefinition;
 import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.PotentialNullFromNonNullMethod;
 import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.PotentialNullToNonNullParameter;
 
@@ -72,7 +72,7 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		case PotentialNullFromNonNullMethod:
 		case DefiniteNullToNonNullParameter:
 		case PotentialNullToNonNullParameter:
-		case IllegalRedefinitionToNullableReturn:
+		case IllegalReturnNullityRedefinition:
 		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 				return true;
@@ -111,7 +111,7 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		case PotentialNullFromNonNullMethod:
 		case DefiniteNullToNonNullParameter:
 		case PotentialNullToNonNullParameter:
-		case IllegalRedefinitionToNullableReturn:
+		case IllegalReturnNullityRedefinition:
 		case IllegalDefinitionToNonNullParameter:
 		case IllegalRedefinitionToNonNullParameter:
 			addNullAnnotationInSignatureProposal(context, problem, proposals);
@@ -261,7 +261,7 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 	public static boolean isMissingNullAnnotationProblem(int id) {
 		return id == DefiniteNullFromNonNullMethod || id == PotentialNullFromNonNullMethod 
 				|| id == DefiniteNullToNonNullParameter || id == PotentialNullToNonNullParameter
-				|| id == IllegalRedefinitionToNullableReturn
+				|| id == IllegalReturnNullityRedefinition
 				|| mayIndicateParameterNullcheck(id);
 	}
 	

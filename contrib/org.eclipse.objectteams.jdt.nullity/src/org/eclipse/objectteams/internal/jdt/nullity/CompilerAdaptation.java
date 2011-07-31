@@ -484,7 +484,7 @@ public team class CompilerAdaptation {
 			if ((inheritedBits & TagBits.AnnotationNonNull) != 0) {
 				if ((currentBits & TagBits.AnnotationNullable) != 0) {
 					AbstractMethodDeclaration methodDecl = currentMethod.sourceMethod();
-					getType().problemReporter().illegalRedefinitionToNullableReturn(methodDecl, inheritedMethod, 
+					getType().problemReporter().illegalReturnRedefinition(methodDecl, inheritedMethod, 
 																		environment.getNonNullAnnotationName());
 				}
 			}
@@ -524,8 +524,6 @@ public team class CompilerAdaptation {
 					}
 				}
 			} else if (currentMethod.parameterNonNullness != null) {
-  // Temporary tweak:
-//			  if (!((ReferenceBinding) inheritedMethod.getDeclaringClass().erasure()).isBinaryBinding()) // WORKAROUND WHILE PLAYING WITH DEFAULTS
 				// super method has no annotations but current has
 				for (int i = 0; i < currentMethod.parameterNonNullness.length; i++) {
 					if (currentMethod.parameterNonNullness[i] == Boolean.TRUE) { // tightening from unconstrained to @NonNull
@@ -930,7 +928,7 @@ public team class CompilerAdaptation {
 				case IProblem.DefiniteNullFromNonNullMethod:
 				case IProblem.DefiniteNullToNonNullLocal:
 				case IProblem.DefiniteNullToNonNullParameter:
-				case IProblem.IllegalRedefinitionToNullableReturn:
+				case IProblem.IllegalReturnNullityRedefinition:
 				case IProblem.IllegalRedefinitionToNonNullParameter:
 				case IProblem.IllegalDefinitionToNonNullParameter:
 					return CompilerOptions.NullContractViolation;
@@ -1025,8 +1023,8 @@ public team class CompilerAdaptation {
 					argument.type.sourceEnd);
 			}
 		}
-		public void illegalRedefinitionToNullableReturn(org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration abstractMethodDecl,
-														MethodBinding inheritedMethod, char[][] nonNullAnnotationName) 
+		public void illegalReturnRedefinition(org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration abstractMethodDecl,
+											  MethodBinding inheritedMethod, char[][] nonNullAnnotationName) 
 		{
 			MethodDeclaration methodDecl = (MethodDeclaration) abstractMethodDecl;
 			StringBuffer methodSignature = new StringBuffer();
@@ -1050,7 +1048,7 @@ public team class CompilerAdaptation {
 				}
 			}
 			this.handle(
-				IProblem.IllegalRedefinitionToNullableReturn, 
+				IProblem.IllegalReturnNullityRedefinition, 
 				new String[] { methodSignature.toString(), CharOperation.toString(nonNullAnnotationName)},
 				new String[] { shortSignature.toString(), new String(nonNullAnnotationName[nonNullAnnotationName.length-1])},
 				sourceStart, 

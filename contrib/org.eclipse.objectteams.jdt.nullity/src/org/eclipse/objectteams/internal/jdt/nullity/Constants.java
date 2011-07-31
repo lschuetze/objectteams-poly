@@ -61,7 +61,7 @@ public class Constants {
 		/** @since 3.7 */
 		int MissingNullAnnotationType = ImportRelated + 889;
 		/** @since 3.7 */
-		int IllegalRedefinitionToNullableReturn = MethodRelated + 890;
+		int IllegalReturnNullityRedefinition = MethodRelated + 890;
 		/** @since 3.7 */
 		int IllegalRedefinitionToNonNullParameter = MethodRelated + 891;
 		/** @since 3.7 */

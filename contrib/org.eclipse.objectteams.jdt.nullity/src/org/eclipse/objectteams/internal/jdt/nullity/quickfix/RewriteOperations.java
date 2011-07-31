@@ -219,7 +219,7 @@ public class RewriteOperations {
 		switch (problem.getProblemId()) {
 		case DefiniteNullToNonNullParameter:
 		case PotentialNullToNonNullParameter:
-		case IllegalRedefinitionToNullableReturn:
+		case IllegalReturnNullityRedefinition:
 		case IllegalDefinitionToNonNullParameter:
 		case IllegalRedefinitionToNonNullParameter:
 			// these affect another method
@@ -293,7 +293,7 @@ public class RewriteOperations {
 					result = createChangeOverriddenParameterOperation(compilationUnit, cu, declaration, selectedNode, allowRemove,
 																	  annotationToAdd, annotationToRemove, annotationNameLabel);
 					break;
-				case IllegalRedefinitionToNullableReturn:
+				case IllegalReturnNullityRedefinition:
 					result = createChangeOverriddenReturnOperation(compilationUnit, cu, declaration, allowRemove,
 																   annotationToAdd, annotationToRemove, annotationNameLabel);
 					break;

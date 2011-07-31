@@ -40,9 +40,9 @@ public interface NullCompilerOptions {
 	public static final String OPTION_NullnessDefault = "org.eclipse.jdt.core.compiler.annotation.nulldefault";  //$NON-NLS-1$
 	
 
-	public static final int NullContractViolation = IrritantSet.GROUP2 | ASTNode.Bit7;
-	public static final int PotentialNullContractViolation = IrritantSet.GROUP2 | ASTNode.Bit8;
-	public static final int NullContractInsufficientInfo = IrritantSet.GROUP2 | ASTNode.Bit9;
+	public static final int NullContractViolation = IrritantSet.GROUP2 | ASTNode.Bit8;
+	public static final int PotentialNullContractViolation = IrritantSet.GROUP2 | ASTNode.Bit9;
+	public static final int NullContractInsufficientInfo = IrritantSet.GROUP2 | ASTNode.Bit10;
 
 	static final char[][] DEFAULT_NONNULL_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.NonNull".toCharArray()); //$NON-NLS-1$
 	static final char[][] DEFAULT_NULLABLE_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.Nullable".toCharArray()); //$NON-NLS-1$
