@@ -11,16 +11,41 @@
 package org.eclipse.objectteams.jdt.nullity.tests;
 
 
+import java.net.URL;
 import java.util.Map;
 
 import junit.framework.Test;
 
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.tests.compiler.regression.AbstractComparableTest;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.internal.jdt.nullity.NullCompilerOptions;
 
 @SuppressWarnings({ "unchecked", "rawtypes", "restriction" })
 public class NullAnnotationTest extends AbstractComparableTest {
+
+// class libraries including our default null annotation types:
+String[] LIBS;
+
+// names and content of custom annotations used in a few tests:
+private static final String CUSTOM_NONNULL_NAME = "org/foo/NonNull.java";
+private static final String CUSTOM_NONNULL_CONTENT = 
+	"package org.foo;\n" +
+	"import static java.lang.annotation.ElementType.*;\n" + 
+	"import java.lang.annotation.*;\n" + 
+	"@Retention(RetentionPolicy.CLASS)\n" + 
+	"@Target({METHOD,PARAMETER,LOCAL_VARIABLE})\n" + 
+	"public @interface NonNull {\n" + 
+	"}\n";
+private static final String CUSTOM_NULLABLE_NAME = "org/foo/Nullable.java";
+private static final String CUSTOM_NULLABLE_CONTENT = "package org.foo;\n" +
+	"import static java.lang.annotation.ElementType.*;\n" + 
+	"import java.lang.annotation.*;\n" +
+	"@Retention(RetentionPolicy.CLASS)\n" + 
+	"@Target({METHOD,PARAMETER,LOCAL_VARIABLE})\n" + 
+	"public @interface Nullable {\n" + 
+	"}\n";
 
 public NullAnnotationTest(String name) {
 	super(name);
@@ -42,6 +67,18 @@ public static Class testClass() {
 	return NullAnnotationTest.class;
 }
 
+@Override
+protected void setUp() throws Exception {
+	super.setUp();
+	if (LIBS == null) {
+		String[] defaultLibs = getDefaultClassPaths();
+		int len = defaultLibs.length;
+		LIBS = new String[len+1];
+		System.arraycopy(defaultLibs, 0, LIBS, 0, len);
+		URL libEntry = Platform.getBundle("org.eclipse.objectteams.jdt.nullity.tests").getEntry("/lib/nullAnnotations.jar");
+		LIBS[len] = FileLocator.toFileURL(libEntry).getPath();
+	}
+}
 // Conditionally augment problem detection settings
 static boolean setNullRelatedOptions = true;
 protected Map getCompilerOptions() {
@@ -57,7 +94,6 @@ protected Map getCompilerOptions() {
 
 		// enable null annotations:
 		defaultOptions.put(NullCompilerOptions.OPTION_AnnotationBasedNullAnalysis, CompilerOptions.ENABLED);
-		defaultOptions.put(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes, CompilerOptions.ENABLED);
 		// leave other new options at these defaults:
 //		defaultOptions.put(CompilerOptions.OPTION_ReportNullContractViolation, CompilerOptions.ERROR);
 //		defaultOptions.put(CompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
@@ -85,7 +121,8 @@ public void test_nullable_paramter_001() {
 		"	                 ^\n" + 
 		"Potential null pointer access: The variable o may be null at this location\n" + 
 		"----------\n",
-	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+		LIBS,
+		true /* shouldFlush*/);
 }
 
 // a null value is passed to a nullable argument
@@ -102,7 +139,10 @@ public void test_nullable_paramter_002() {
 			  "        foo(null);\n" +
 			  "    }\n" +
 			  "}\n"},
-	    "");
+	    "",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 }
 
 // a non-null argument is checked for null
@@ -123,7 +163,8 @@ public void test_nonnull_parameter_001() {
 		"	    ^\n" + 
 		"Redundant null check: The variable o cannot be null at this location\n" + 
 		"----------\n",
-	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+		LIBS,
+		true /* shouldFlush*/);
 }
 // a non-null argument is dereferenced without a check
 public void test_nonnull_parameter_002() {
@@ -139,7 +180,10 @@ public void test_nonnull_parameter_002() {
 			  "        new X().foo(\"OK\");\n" +
 			  "    }\n" +
 			  "}\n"},
-	    "OK");
+	    "OK",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 }
 // passing null to nonnull parameter - many fields in enclosing class
 public void test_nonnull_parameter_003() {
@@ -168,7 +212,8 @@ public void test_nonnull_parameter_003() {
 		"	    ^^^^\n" + 
 		"Null contract violation: passing null to a parameter declared as @NonNull\n" + 
 		"----------\n",
-	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+		LIBS,
+		true /* shouldFlush*/);
 }
 // passing potential null to nonnull parameter - target method is consumed from .class
 public void test_nonnull_parameter_004() {
@@ -179,7 +224,11 @@ public void test_nonnull_parameter_004() {
 				"public class Lib {\n" +
 				"    void setObject(@NonNull Object o) { }\n" +
 				"}\n"
-			});
+			},
+			"",
+		    LIBS,
+		    false/*shouldFlush*/,
+		    null/*vmArgs*/);
 	runNegativeTest(
 		false /* flush output directory */,
 		new String[] {
@@ -191,7 +240,7 @@ public void test_nonnull_parameter_004() {
 			  "        l.setObject(o);\n" +
 			  "    }\n" +
 			  "}\n"},
-		null /* no class libraries */,
+		LIBS,
 		null /* no custom options */,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 5)\n" + 
@@ -212,7 +261,11 @@ public void test_nonnull_parameter_005() {
 				"public class Lib {\n" +
 				"    void setObject(@NonNull Object o) { }\n" +
 				"}\n"
-			});
+			},
+			"",
+		    LIBS,
+		    false/*shouldFlush*/,
+		    null/*vmArgs*/);
 	runConformTest(
 		false /* flush output directory */,
 		new String[] {
@@ -222,7 +275,7 @@ public void test_nonnull_parameter_005() {
 			  "        l.setObject(o);\n" +
 			  "    }\n" +
 			  "}\n"},
-		null /* no class libraries */,
+		LIBS,
 		null /* no custom options */,
 		"----------\n" + 
 		"1. WARNING in X.java (at line 3)\n" + 
@@ -249,7 +302,7 @@ public void test_nonnull_parameter_006() {
 			  "			m1(b == null ? \"\" : b);\n" + 
 			  "		}\n" +
 			  "}\n"},
-		null /* no class libraries */,
+		LIBS,
 		customOptions,
 		"",  /* compiler output */
 		"",/* expected output */
@@ -287,7 +340,8 @@ public void test_nonnull_local_001() {
 		"	                     ^\n" + 
 		"Potential null contract violation: insufficient nullness information regarding a value that is assigned to local variable o3, which is declared as @NonNull\n" + 
 		"----------\n",
-	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+		LIBS,
+		true /* shouldFlush*/);
 }
 
 // a method tries to tighten the null contract, super declares parameter o as @Nullable
@@ -301,7 +355,11 @@ public void test_parameter_contract_inheritance_001() {
 			"public class Lib {\n" +
 			"    void foo(String s, @Nullable Object o, Object third) { }\n" +
 			"}\n"
-		});
+		},
+		"",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 	runNegativeTest(
 		false /* flush output directory */,
 		new String[] {
@@ -313,7 +371,7 @@ public void test_parameter_contract_inheritance_001() {
 			"}\n"
 		},
 		// compiler options
-		null /* no class libraries */,
+		LIBS,
 		null /* no custom options */,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
@@ -337,7 +395,11 @@ public void test_parameter_contract_inheritance_002() {
 			"public class Lib {\n" +
 			"    void foo(@Nullable Object o) { }\n" +
 			"}\n"
-		});
+		},
+		"",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 	runNegativeTest(
 		false /* flush output directory */,
 		new String[] {
@@ -350,7 +412,7 @@ public void test_parameter_contract_inheritance_002() {
 			"}\n"
 		},
 		// compiler options
-		null /* no class libraries */,
+		LIBS,
 		null /* no custom options */,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
@@ -377,7 +439,10 @@ public void test_parameter_contract_inheritance_003() {
 			"    void bar() { foo(\"OK\", null); }\n" +
 			"}\n"
 		},
-		"");
+		"",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 }
 // a method adds a @NonNull annotation, super interface has no null annotation
 // changing other from unconstrained to @Nullable is OK
@@ -399,7 +464,7 @@ public void test_parameter_contract_inheritance_004() {
 			"}\n"
 		},
 		// compiler options
-		null /* no class libraries */,
+		LIBS,
 		null /* no custom options */,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 3)\n" + 
@@ -418,7 +483,11 @@ public void test_parameter_contract_inheritance_005() {
 			"public class Lib {\n" +
 			"    @NonNull Object getObject() { return new Object(); }\n" +
 			"}\n"
-		});
+		},
+		"",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 	runNegativeTest(
 		false /* flush output directory */,
 		new String[] {
@@ -430,7 +499,7 @@ public void test_parameter_contract_inheritance_005() {
 			"}\n"
 		},
 		// compiler options
-		null /* no class libraries */,
+		LIBS,
 		null /* no custom options */,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
@@ -460,7 +529,7 @@ public void test_parameter_contract_inheritance_006() {
 			"}\n"
 		},
 		"",
-		null/*classLibs*/,
+		LIBS,
 		false /* flush output directory */,
 		null/*vmArguments*/,
 		null/*customOptions*/,
@@ -475,7 +544,11 @@ public void test_parameter_contract_inheritance_007() {
 			"public class Lib {\n" +
 			"    @NonNull Object getObject() { return new Object(); }\n" +
 			"}\n"
-		});
+		},
+		"",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 	runNegativeTest(
 		false /* flush output directory */,
 		new String[] {
@@ -486,7 +559,7 @@ public void test_parameter_contract_inheritance_007() {
 			"}\n"
 		},
 		// compiler options
-		null /* no class libraries */,
+		LIBS,
 		null /* no custom options */,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 3)\n" + 
@@ -507,7 +580,11 @@ public void test_parameter_contract_inheritance_008() {
 			"public interface IX {\n" +
 			"    void printObject(@NonNull Object o);\n" +
 			"}\n"
-		});
+		},
+		"",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 	runNegativeTest(
 		false /* flush output directory */,
 		new String[] {
@@ -523,7 +600,7 @@ public void test_parameter_contract_inheritance_008() {
 			"}\n"
 		},
 		// compiler options
-		null /* no class libraries */,
+		LIBS,
 		options,
 		"----------\n" + 
 		"1. ERROR in M.java (at line 3)\n" + 
@@ -548,7 +625,10 @@ public void test_parameter_contract_inheritance_009() {
 			"    @Nullable static Object getObject() { return null; }\n" +
 			"}\n"
 		},
-		"");
+		"",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 }
 // a nullable return value is dereferenced without a check
 public void test_nullable_return_001() {
@@ -570,7 +650,8 @@ public void test_nullable_return_001() {
 		"	                 ^\n" + 
 		"Potential null pointer access: The variable o may be null at this location\n" + 
 		"----------\n",
-		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+	    LIBS,
+	    false/*shouldFlush*/);
 }
 // a nullable return value is dereferenced without a check, method is read from .class file
 public void test_nullable_return_002() {
@@ -581,7 +662,11 @@ public void test_nullable_return_002() {
 			"public class Lib {\n" +
 			"    @Nullable Object getObject() { return null; }\n" +
 			"}\n"
-		});
+		},
+		"",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 	runNegativeTest(
 		false /* flush output directory */,
 		new String[] {
@@ -594,7 +679,7 @@ public void test_nullable_return_002() {
 			"}\n"
 		},
 		// compiler options
-		null /* no class libraries */,
+		LIBS,
 		null /* no custom options */,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
@@ -613,7 +698,11 @@ public void test_nonnull_return_001() {
 			"public class Lib {\n" +
 			"    @NonNull Object getObject() { return new Object(); }\n" +
 			"}\n"
-		});
+		},
+		"",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 	runNegativeTest(
 		false /* flush output directory */,
 		new String[] {
@@ -627,7 +716,7 @@ public void test_nonnull_return_001() {
 			"}\n"
 		},
 		// compiler options
-		null /* no class libraries */,
+		LIBS,
 		null /* no custom options */,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
@@ -657,7 +746,8 @@ public void test_nonnull_return_003() {
 		"	^^^^^^^^^^^^\n" + 
 		"Null contract violation: returning null from a method declared as @NonNull\n" + 
 		"----------\n",
-		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+		LIBS,
+		true /* shouldFlush*/);
 }
 // a non-null method potentially returns null
 public void test_nonnull_return_004() {
@@ -676,7 +766,9 @@ public void test_nonnull_return_004() {
 		"	return o;\n" + 
 		"	^^^^^^^^^\n" + 
 		"Null contract violation: return value can be null but method is declared as @NonNull\n" + 
-		"----------\n");
+		"----------\n",
+	    LIBS,
+	    false/*shouldFlush*/);
 }
 // a non-null method returns its non-null argument
 public void test_nonnull_return_005() {
@@ -693,7 +785,7 @@ public void test_nonnull_return_005() {
 			"}\n"
 		},
 		"",
-		null/*classLibs*/,
+		LIBS,
 		true/*shouldFlushOutputDirectory*/,
 		null/*vmArguments*/,
 		customOptions,
@@ -716,7 +808,9 @@ public void test_nonnull_return_006() {
 		"	return o;\n" + 
 		"	^^^^^^^^^\n" + 
 		"Potential null contract violation: insufficient nullness information regarding return value while the method is declared as @NonNull\n" + 
-		"----------\n");
+		"----------\n",
+	    LIBS,
+	    false/*shouldFlush*/);
 }
 // a result from a nullable method is directly dereferenced
 public void test_nonnull_return_007() {
@@ -738,7 +832,10 @@ public void test_nonnull_return_007() {
 		"	getObject().toString();\n" + 
 		"	^^^^^^^^^^^\n" + 
 		"Potential null pointer access: The method getObject() may return null\n" + 
-		"----------\n");
+		"----------\n",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
 }
 // a result from a nonnull method is directly checked for null: redundant
 public void test_nonnull_return_008() {
@@ -759,7 +856,7 @@ public void test_nonnull_return_008() {
 			"    }\n" +
 			"}\n"
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 7)\n" + 
@@ -789,7 +886,7 @@ public void test_nonnull_return_009() {
 			"    }\n" +
 			"}\n"
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 8)\n" + 
@@ -827,7 +924,7 @@ public void test_nonnull_return_010() {
 			"    }\n" +
 			"}\n"
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 9)\n" + 
@@ -845,6 +942,10 @@ public void test_annotation_import_001() {
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.NonNull");
 	runConformTest(
 		new String[] {
+			CUSTOM_NULLABLE_NAME,
+			CUSTOM_NULLABLE_CONTENT,
+			CUSTOM_NONNULL_NAME,
+			CUSTOM_NONNULL_CONTENT,
 			"Lib.java",
 			"public class Lib {\n" +
 			"    @org.foo.NonNull Object getObject() { return new Object(); }\n" + 	// FQN
@@ -858,7 +959,7 @@ public void test_annotation_import_001() {
 			"}\n"
 		},
 		"",
-		null/*classLibs*/,
+		LIBS,
 		true/*shouldFlushOutputDirectory*/,
 		null/*vmArguments*/,
 		customOptions,
@@ -873,6 +974,10 @@ public void test_annotation_import_002() {
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.NonNull");
 	runConformTest(
 		new String[] {
+			CUSTOM_NULLABLE_NAME,
+			CUSTOM_NULLABLE_CONTENT,
+			CUSTOM_NONNULL_NAME,
+			CUSTOM_NONNULL_CONTENT,
 			"Lib.java",
 			"import org.foo.NonNull;\n" +
 			"public class Lib {\n" +
@@ -888,7 +993,7 @@ public void test_annotation_import_002() {
 			"}\n"
 		},
 		"",
-		null/*classLibs*/,
+		LIBS,
 		true/*shouldFlushOutputDirectory*/,
 		null/*vmArguments*/,
 		customOptions,
@@ -901,7 +1006,6 @@ public void test_annotation_import_005() {
 	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NullableAnnotationName, "org.foo.MayBeNull");
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.MustNotBeNull");
-	customOptions.put(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes, CompilerOptions.DISABLED);
 	runNegativeTest(
 		true/*shouldFlushOutputDirectory*/,
 		new String[] {
@@ -930,7 +1034,7 @@ public void test_annotation_import_005() {
 			"}\n",
 			
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
@@ -948,7 +1052,6 @@ public void test_annotation_import_006() {
 	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NullableAnnotationName, "org.foo.MayBeNull");
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.MustNotBeNull");
-	customOptions.put(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes, CompilerOptions.DISABLED);
 	runNegativeTest(
 		true/*shouldFlushOutputDirectory*/,
 		new String[] {
@@ -963,7 +1066,7 @@ public void test_annotation_import_006() {
 			"    }\n" +
 			"}\n"
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" +
 		"1. ERROR in X.java (at line 2)\n" + 
@@ -991,7 +1094,6 @@ public void test_annotation_import_007() {
 	customOptions.put(NullCompilerOptions.OPTION_NullableAnnotationName, "org.foo.MayBeNull");
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.MustNotBeNull");
 	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
-	customOptions.put(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes, CompilerOptions.DISABLED);
 	runNegativeTest(
 		true/*shouldFlushOutputDirectory*/,
 		new String[] {
@@ -1006,7 +1108,7 @@ public void test_annotation_import_007() {
 			"    }\n" +
 			"}\n"
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in Lib.java (at line 1)\n" + 
@@ -1030,7 +1132,7 @@ public void _test_annotation_emulation_001() {
 			"public class Lib {\n" +
 			"}\n",
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in libpack\\Lib.java (at line 0)\n" + 
@@ -1047,7 +1149,6 @@ public void test_annotation_emulation_002() {
 	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NullableAnnotationName, "org.foo.MayBeNull");
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.MustNotBeNull");
-	customOptions.put(NullCompilerOptions.OPTION_EmulateNullAnnotationTypes, CompilerOptions.DISABLED);
 	runNegativeTest(
 		true/*shouldFlushOutputDirectory*/,
 		new String[] {
@@ -1076,7 +1177,7 @@ public void test_annotation_emulation_002() {
 			"}\n",
 
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
@@ -1101,7 +1202,9 @@ public void test_illegal_annotation_001() {
 		"	@NonNull public class X {\n" + 
 		"	^^^^^^^^\n" + 
 		"The annotation @NonNull is disallowed for this location\n" + 
-		"----------\n");	
+		"----------\n",
+		LIBS,
+		false/*shouldFlush*/);	
 }
 public void test_default_nullness_001() {
 	Map customOptions = getCompilerOptions();
@@ -1120,7 +1223,7 @@ public void test_default_nullness_001() {
 			"}\n",
 
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in X.java (at line 4)\n" + 
@@ -1154,7 +1257,7 @@ public void test_default_nullness_002() {
 			"    }\n" +
 			"}\n",
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in Y.java (at line 4)\n" + 
@@ -1195,7 +1298,7 @@ public void test_default_nullness_003() {
 			"	 void bar(Object o2) { }\n" + // parameter is nonnull per package default
 			"}\n"
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in p2\\Y.java (at line 5)\n" + 
@@ -1229,7 +1332,11 @@ public void test_default_nullness_003a() {
 	"p2/package-info.java",
 			"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
 			"package p2;\n",
-			});
+			},
+			"",
+		    LIBS,
+		    false/*shouldFlush*/,
+		    null/*vmArgs*/);
 	// check if default is visible from X.class.
 	runNegativeTest(
 		false/*shouldFlushOutputDirectory*/,
@@ -1247,7 +1354,7 @@ public void test_default_nullness_003a() {
 			"    void accept(Object a) {}\n" + // governed by package level default
 			"}\n"
 		},
-		null/*classLibs*/,
+		LIBS,
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in p2\\Y.java (at line 5)\n" + 
