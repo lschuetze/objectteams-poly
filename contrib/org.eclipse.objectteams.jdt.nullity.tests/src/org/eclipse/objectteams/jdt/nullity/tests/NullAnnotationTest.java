@@ -386,7 +386,7 @@ public void test_parameter_specification_inheritance_001() {
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
-// a method body fails to handle the inherited null contract, super declares parameter as @Nullable
+// a method body fails to redeclare the inherited null annotation, super declares parameter as @Nullable
 public void test_parameter_specification_inheritance_002() {
 	runConformTest(
 		new String[] {
@@ -415,10 +415,10 @@ public void test_parameter_specification_inheritance_002() {
 		LIBS,
 		null /* no custom options */,
 		"----------\n" + 
-		"1. ERROR in X.java (at line 4)\n" + 
-		"	System.out.print(o.toString());\n" + 
-		"	                 ^\n" + 
-		"Potential null pointer access: The variable o may be null at this location\n" + 
+		"1. ERROR in X.java (at line 3)\n" + 
+		"	void foo(Object o) {\n" + 
+		"	         ^^^^^^\n" + 
+		"Missing null annotation: inherited method from Lib declares this parameter as @Nullable\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -535,7 +535,7 @@ public void test_parameter_specification_inheritance_006() {
 		null/*customOptions*/,
 		null/*compilerRequestor*/);
 }
-// a method body violates the inherited null contract, super declares @NonNull return
+// a method body violates the inherited null contract, super declares @NonNull return, missing redeclaration
 public void test_parameter_specification_inheritance_007() {
 	runConformTest(
 		new String[] {
@@ -564,7 +564,42 @@ public void test_parameter_specification_inheritance_007() {
 		"----------\n" + 
 		"1. ERROR in X.java (at line 3)\n" + 
 		"	Object getObject() { return null; }\n" + 
-		"	                     ^^^^^^^^^^^^\n" + 
+		"	^^^^^^\n" + 
+		"The return type is incompatible with the @NonNull return from Lib.getObject()\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+//a method body violates the inherited null contract, super declares @NonNull return
+public void test_parameter_specification_inheritance_007a() {
+	runConformTest(
+		new String[] {
+			"Lib.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Lib {\n" +
+			"    @NonNull Object getObject() { return new Object(); }\n" +
+			"}\n"
+		},
+		"",
+	    LIBS,
+	    false/*shouldFlush*/,
+	    null/*vmArgs*/);
+	runNegativeTest(
+		false /* flush output directory */,
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X extends Lib {\n" +
+			"    @Override\n" +
+			"    @NonNull Object getObject() { return null; }\n" +
+			"}\n"
+		},
+		// compiler options
+		LIBS,
+		null /* no custom options */,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 4)\n" + 
+		"	@NonNull Object getObject() { return null; }\n" + 
+		"	                              ^^^^^^^^^^^^\n" + 
 		"Type mismatch: returning null from a method declared as @NonNull\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
@@ -594,7 +629,7 @@ public void test_parameter_specification_inheritance_008() {
 			"}\n",
 			"M.java",
 			"public class M{\n" +
-			"    void foo(X x, Object o) {\n" +
+			"    void foo(IX x, Object o) {\n" +
 			"        x.printObject(o);\n" +
 			"    }\n" +
 			"}\n"
@@ -602,6 +637,14 @@ public void test_parameter_specification_inheritance_008() {
 		// compiler options
 		LIBS,
 		options,
+		"----------\n" + 
+		// additional error:
+		"1. ERROR in X.java (at line 2)\n" + 
+		"	public void printObject(Object o) { System.out.print(o.toString()); }\n" + 
+		"	                        ^^^^^^\n" + 
+		"Missing null annotation: inherited method from IX declares this parameter as @Nullable\n" + 
+		"----------\n" +
+		// main error:
 		"----------\n" + 
 		"1. ERROR in M.java (at line 3)\n" + 
 		"	x.printObject(o);\n" + 
@@ -1259,11 +1302,18 @@ public void test_default_nullness_002() {
 		},
 		LIBS,
 		customOptions,
+		// main error:
 		"----------\n" + 
 		"1. ERROR in Y.java (at line 4)\n" + 
 		"	@Nullable Object getObject(Object o) {\n" + 
 		"	^^^^^^^^^^^^^^^^\n" + 
 		"The return type is incompatible with the @NonNull return from X.getObject(Object)\n" + 
+		"----------\n" +
+		// additional error:
+		"2. ERROR in Y.java (at line 4)\n" + 
+		"	@Nullable Object getObject(Object o) {\n" + 
+		"	                           ^^^^^^\n" + 
+		"Missing null annotation: inherited method from X declares this parameter as @Nullable\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -1291,7 +1341,7 @@ public void test_default_nullness_003() {
 			"import org.eclipse.jdt.annotation.*;\n" +
 			"public class Y extends p1.X {\n" +
 			"    @Override\n" +
-			"    protected @Nullable Object getObject(Object o) {\n" + // don't complain of parameter: inherited has precedence over default
+			"    protected @Nullable Object getObject(@Nullable Object o) {\n" +
 			"        bar(o);\n" +
 			"        return o;\n" +
 			"    }\n" +
@@ -1302,7 +1352,7 @@ public void test_default_nullness_003() {
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in p2\\Y.java (at line 5)\n" + 
-		"	protected @Nullable Object getObject(Object o) {\n" + 
+		"	protected @Nullable Object getObject(@Nullable Object o) {\n" + 
 		"	          ^^^^^^^^^^^^^^^^\n" + 
 		"The return type is incompatible with the @NonNull return from X.getObject(Object)\n" + 
 		"----------\n" + 
@@ -1346,9 +1396,9 @@ public void test_default_nullness_003a() {
 			"import org.eclipse.jdt.annotation.*;\n" +
 			"public class Y extends p1.X {\n" +
 			"    @Override\n" +
-			"    protected @Nullable Object getObject(Object o) {\n" + // can't override inherited default nonnull 
+			"    protected @Nullable Object getObject(@Nullable Object o) {\n" + // can't override inherited default nonnull 
 			"        bar(o);\n" + // parameter is nonnull in super class's .class file
-			"        accept(o);\n" + // check conflict of nullable o (inherited) and nonnull a (package default)
+			"        accept(o);\n" +
 			"        return o;\n" +
 			"    }\n" +
 			"    void accept(Object a) {}\n" + // governed by package level default
@@ -1358,7 +1408,7 @@ public void test_default_nullness_003a() {
 		customOptions,
 		"----------\n" + 
 		"1. ERROR in p2\\Y.java (at line 5)\n" + 
-		"	protected @Nullable Object getObject(Object o) {\n" + 
+		"	protected @Nullable Object getObject(@Nullable Object o) {\n" + 
 		"	          ^^^^^^^^^^^^^^^^\n" + 
 		"The return type is incompatible with the @NonNull return from X.getObject(Object)\n" + 
 		"----------\n" + 
