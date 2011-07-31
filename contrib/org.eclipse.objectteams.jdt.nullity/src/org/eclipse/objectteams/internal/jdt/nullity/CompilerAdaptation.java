@@ -412,6 +412,7 @@ public team class CompilerAdaptation {
 		boolean isValidBinding() 				-> boolean isValidBinding();
 		AbstractMethodDeclaration sourceMethod()-> AbstractMethodDeclaration sourceMethod();
 		char[] readableName() 					-> char[] readableName();
+		char[] shortReadableName() 				-> char[] shortReadableName();
 
 		/** After method verifier has finished, fill in missing nullness values from the applicable default. */
 		protected void fillInDefaultNullness(long defaultNullness, TypeBinding annotationBinding) {
@@ -483,7 +484,7 @@ public team class CompilerAdaptation {
 			if ((inheritedBits & TagBits.AnnotationNonNull) != 0) {
 				if ((currentBits & TagBits.AnnotationNullable) != 0) {
 					AbstractMethodDeclaration methodDecl = currentMethod.sourceMethod();
-					getType().problemReporter().illegalRedefinitionToNullableReturn(methodDecl, inheritedMethod.getDeclaringClass(), 
+					getType().problemReporter().illegalRedefinitionToNullableReturn(methodDecl, inheritedMethod, 
 																		environment.getNonNullAnnotationName());
 				}
 			}
@@ -995,32 +996,64 @@ public team class CompilerAdaptation {
 				argument.sourceEnd);
 		}
 		public void illegalRedefinitionToNonNullParameter(Argument argument, ReferenceBinding declaringClass, char[][] inheritedAnnotationName) {
+			int sourceStart = argument.type.sourceStart;
+			if (argument.annotations != null) {
+				for (int i=0; i<argument.annotations.length; i++) {
+					Annotation annotation = argument.annotations[i];
+					if (   annotation.resolvedType.id == TypeIds.T_ConfiguredAnnotationNullable
+						|| annotation.resolvedType.id == TypeIds.T_ConfiguredAnnotationNonNull) 
+					{
+						sourceStart = annotation.sourceStart;
+						break;
+					}
+				}
+			}
 			if (inheritedAnnotationName == null) {
 				this.handle(
 					IProblem.IllegalDefinitionToNonNullParameter, 
 					new String[] { new String(argument.name), new String(declaringClass.readableName()) },
 					new String[] { new String(argument.name), new String(declaringClass.shortReadableName()) },
-					argument.sourceStart, 
-					argument.sourceEnd);
+					sourceStart,
+					argument.type.sourceEnd);
 				
 			} else {
 				this.handle(
 					IProblem.IllegalRedefinitionToNonNullParameter, 
 					new String[] { new String(argument.name), new String(declaringClass.readableName()), CharOperation.toString(inheritedAnnotationName)},
 					new String[] { new String(argument.name), new String(declaringClass.shortReadableName()), new String(inheritedAnnotationName[inheritedAnnotationName.length-1])},
-					argument.sourceStart, 
-					argument.sourceEnd);
+					sourceStart,
+					argument.type.sourceEnd);
 			}
 		}
 		public void illegalRedefinitionToNullableReturn(org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration abstractMethodDecl,
-														ReferenceBinding declaringClass, char[][] nonNullAnnotationName) 
+														MethodBinding inheritedMethod, char[][] nonNullAnnotationName) 
 		{
 			MethodDeclaration methodDecl = (MethodDeclaration) abstractMethodDecl;
+			StringBuffer methodSignature = new StringBuffer();
+			methodSignature
+				.append(inheritedMethod.getDeclaringClass().readableName())
+				.append('.')
+				.append(inheritedMethod.readableName());
+
+			StringBuffer shortSignature = new StringBuffer();
+			shortSignature
+				.append(inheritedMethod.getDeclaringClass().shortReadableName())
+				.append('.')
+				.append(inheritedMethod.shortReadableName());
+			int sourceStart = methodDecl.returnType.sourceStart;
+			if (methodDecl.annotations != null) {
+				for (int i=0; i<methodDecl.annotations.length; i++) {
+					if (methodDecl.annotations[i].resolvedType.id == TypeIds.T_ConfiguredAnnotationNullable) {
+						sourceStart = methodDecl.annotations[i].sourceStart;
+						break;
+					}
+				}
+			}
 			this.handle(
 				IProblem.IllegalRedefinitionToNullableReturn, 
-				new String[] { new String(declaringClass.readableName()), CharOperation.toString(nonNullAnnotationName)},
-				new String[] { new String(declaringClass.shortReadableName()), new String(nonNullAnnotationName[nonNullAnnotationName.length-1])},
-				methodDecl.returnType.sourceStart, 
+				new String[] { methodSignature.toString(), CharOperation.toString(nonNullAnnotationName)},
+				new String[] { shortSignature.toString(), new String(nonNullAnnotationName[nonNullAnnotationName.length-1])},
+				sourceStart, 
 				methodDecl.returnType.sourceEnd);
 		}
 		public void messageSendPotentialNullReference(MethodBinding method, ASTNode location) {
