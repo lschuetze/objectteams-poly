@@ -3776,7 +3776,12 @@ protected void consumeUnionType() {
 }
 protected void consumeUnionTypeAsClassType() {
 	// UnionType ::= Type
+//{ObjectTeams: support LiftingTypeReference in catch:
+/* orig:
 	pushOnAstStack(getTypeReference(this.intStack[this.intPtr--]));
+  :giro */
+	pushOnAstStack(getTypeReference(this.intStack[this.intPtr--], true/*liftingTypeAllowed*/));
+// SH}
 }
 protected void consumeEmptyAnnotationTypeMemberDeclarationsopt() {
 	// AnnotationTypeMemberDeclarationsopt ::= $empty
@@ -11289,17 +11294,21 @@ protected Expression getTypeReference(Expression exp) {
 	return exp;
 }
 protected TypeReference getTypeReference(int dim) {
-	/* build a Reference on a variable that may be qualified or not
-	 This variable is a type reference and dim will be its dimensions*/
-
-//{ObjectTeams: illegal lifting type reference?
+//{ObjectTeams: wrap to introduce 2nd parameter
+	return getTypeReference(dim, false);  
+}
+protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 	if (this.astPtr > -1 && this.astStack[this.astPtr] instanceof LiftingTypeReference) {
 		LiftingTypeReference ltr = completeLiftingTypeReference(dim);
+		if (liftingTypeAllowed)
+			return ltr;
 		if(!this.statementRecoveryActivated) // during recovery this is likely to be a follow-up error.
 			problemReporter().syntaxErrorIllegalDeclaredLifting(this.referenceContext, ltr);
 		return ltr.baseReference; // don't surface illegal LTR
 	}
 // SH}
+	/* build a Reference on a variable that may be qualified or not
+	 This variable is a type reference and dim will be its dimensions*/
 
 	TypeReference ref;
 	int length = this.identifierLengthStack[this.identifierLengthPtr--];

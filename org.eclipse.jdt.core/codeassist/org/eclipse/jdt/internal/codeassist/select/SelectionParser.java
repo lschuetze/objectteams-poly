@@ -312,7 +312,12 @@ protected void consumeCatchFormalParameter() {
 		super.consumeCatchFormalParameter();
 		if((!this.diet || this.dietInt != 0) && this.astPtr > -1) {
 			Argument argument = (Argument) this.astStack[this.astPtr];
+//{ObjectTeams: consider lifting type
+/* orig:
 			if(argument.type == this.assistNode) {
+  :giro */
+			if (hasAssistNode(argument.type)) {
+// SH}
 				this.isOrphanCompletionNode = true;
 				this.restartRecovery	= true;	// force to restart in recovery mode
 				this.lastIgnoredToken = -1;

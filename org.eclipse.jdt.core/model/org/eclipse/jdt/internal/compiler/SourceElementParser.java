@@ -865,10 +865,15 @@ public TypeReference getTypeReference(int dim) {
 	 * This variable is a type reference and dim will be its dimensions
 	 */
 
-//{ObjectTeams: lifting type reference?
+//{ObjectTeams: wrap to introduce 2nd parameter
+	return getTypeReference(dim, false);  
+}
+protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 	if (this.astPtr > -1 && this.astStack[this.astPtr] instanceof LiftingTypeReference) {
 		LiftingTypeReference ltr = completeLiftingTypeReference(dim);
-		if(!this.statementRecoveryActivated) // during recovery this is likely to be a follow-up error.
+		if (liftingTypeAllowed)
+			return ltr;
+		if(!this.statementRecoveryActivated)// during recovery this is likely to be a follow-up error.
 			problemReporter().syntaxErrorIllegalDeclaredLifting(this.referenceContext, ltr);
 		return ltr.baseReference; // don't surface illegal LTR
 	}
