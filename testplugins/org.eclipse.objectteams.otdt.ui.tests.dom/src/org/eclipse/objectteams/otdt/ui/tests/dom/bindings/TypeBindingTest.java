@@ -22,19 +22,19 @@ package org.eclipse.objectteams.otdt.ui.tests.dom.bindings;
 
 import junit.framework.Test;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.LiftingType;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -173,5 +173,32 @@ public class TypeBindingTest extends FileBasedDOMTest
     	Name typeName = ((LiftingType)type).getName();
 		typeBinding = typeName.resolveTypeBinding();
     	assertEquals("Wrong type binding for name", "MyClass", typeBinding.getName());
+    }
+
+	// Bug 352605 - Eclipse is reporting "Could not retrieve superclass" every few minutes
+    public void testBug352605() throws CoreException {
+		ASTParser parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
+		parser.setProject(getJavaProject(TEST_PROJECT));
+        parser.setResolveBindings(true);
+        parser.setUnitName("C");
+		parser.setSource(("public class C {\n" +
+				"public bug352605.Sub f;\n" +
+				"}\n").toCharArray());
+		
+		ASTNode root = parser.createAST( new NullProgressMonitor() );
+		CompilationUnit compUnit = (CompilationUnit) root;
+        
+		TypeDeclaration type = (TypeDeclaration) compUnit.types().get(0);
+		FieldDeclaration field = (FieldDeclaration) type.bodyDeclarations().get(0);
+		Type fieldType = field.getType();
+		ITypeBinding typeBinding = fieldType.resolveBinding();
+		assertNotNull("Field type binding should be non-null", typeBinding);
+		assertFalse("typeBinding should be from class file", typeBinding.isFromSource());
+		typeBinding = typeBinding.getSuperclass();
+		assertNotNull("super class should be non-null", typeBinding);
+		assertTrue("typeBinding should be from source", typeBinding.isFromSource());
+		typeBinding = typeBinding.getSuperclass();
+		assertNotNull("2nd super class should be non-null", typeBinding);
+		assertTrue("2nd super class should be Object", typeBinding.getQualifiedName().equals("java.lang.Object"));
     }
 }
