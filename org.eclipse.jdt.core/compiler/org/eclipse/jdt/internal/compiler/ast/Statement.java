@@ -210,11 +210,12 @@ public void generateArguments(MethodBinding binding, Expression[] arguments, Blo
 		for (int i = 0, max = arguments.length; i < max; i++)
 //{ObjectTeams: check for need for role-ifc to plain-class cast:
 		{
+			TypeBinding[] originalParameters = binding.original().parameters;
 // orig:
 			arguments[i].generateCode(currentScope, codeStream, true);
 // :giro
-			if (!binding.isPolymorphic() && !binding.isVarargs()) {
-				TypeBinding requiredType = checkRoleToPlainCast(arguments[i].resolvedType, binding.original().parameters[i]);
+			if (i < originalParameters.length) { // consider varargs
+				TypeBinding requiredType = checkRoleToPlainCast(arguments[i].resolvedType, originalParameters[i]);
 				if (requiredType != null)
 					codeStream.checkcast(requiredType);
 			}
