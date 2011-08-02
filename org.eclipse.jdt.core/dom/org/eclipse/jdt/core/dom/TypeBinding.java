@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.compiler.util.SuffixConstants;
 import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.core.PackageFragment;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
@@ -534,7 +535,20 @@ class TypeBinding implements ITypeBinding {
 		ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 		ReferenceBinding[] internalInterfaces = null;
 		try {
+//{ObjectTeams: protect with minimally configured Dependencies:
+// see Bug 352605 - Eclipse is reporting "Could not retrieve superclass" every few minutes
+		  Config cfg = null;
+		  if (!Dependencies.isSetup())
+			cfg = Dependencies.setup(this, null, this.resolver.lookupEnvironment(), false, false, false, false, false, true);
+		  try {
+// orig:
 			internalInterfaces = referenceBinding.superInterfaces();
+// :giro
+		  } finally {
+			if (cfg != null)
+				Dependencies.release(this);
+		  }
+// SH}	
 		} catch (RuntimeException e) {
 			/* in case a method cannot be resolvable due to missing jars on the classpath
 			 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=57871
@@ -902,7 +916,20 @@ class TypeBinding implements ITypeBinding {
 		}
 		ReferenceBinding superclass = null;
 		try {
+//{ObjectTeams: protect with minimally configured Dependencies:
+// see Bug 352605 - Eclipse is reporting "Could not retrieve superclass" every few minutes
+		  Config cfg = null;
+		  if (!Dependencies.isSetup())
+			cfg = Dependencies.setup(this, null, this.resolver.lookupEnvironment(), false, false, false, false, false, true);
+		  try {
+// orig:
 			superclass = ((ReferenceBinding)this.binding).superclass();
+// :giro
+		  } finally {
+			if (cfg != null)
+				Dependencies.release(this);
+		  }
+// SH}
 		} catch (RuntimeException e) {
 			/* in case a method cannot be resolvable due to missing jars on the classpath
 			 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=57871
@@ -1294,11 +1321,19 @@ class TypeBinding implements ITypeBinding {
 	    if (! this.binding.isRole())
 			return null;
 	    ReferenceBinding roleBinding = (ReferenceBinding) this.binding;
-	    ReferenceBinding baseclass = roleBinding.baseclass();
-	    if (baseclass == null) {
-			return null;
-		}
-	    return this.resolver.getTypeBinding(baseclass);
+	    Config cfg = null;
+	    if (!Dependencies.isSetup())
+	    	cfg = Dependencies.setup(this, null, this.resolver.lookupEnvironment(), false, false, false, false, false, true);
+	    try {
+		    ReferenceBinding baseclass = roleBinding.baseclass();
+		    if (baseclass == null) {
+				return null;
+			}
+		    return this.resolver.getTypeBinding(baseclass);
+	    } finally {
+	    	if (cfg != null)
+	    		Dependencies.release(this);
+	    }
 	}
 //	ira+SH}
 
