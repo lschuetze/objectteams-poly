@@ -4,8 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ParameterizedSingleTypeReference.java 23405 2010-02-03 17:02:18Z stephan $
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for Bug 342671 - ClassCastException: org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ArrayBinding
@@ -342,6 +341,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			return this.resolvedType;
 // SH}
 
+		final boolean isDiamond = (this.bits & ASTNode.IsDiamond) != 0;
 		TypeVariableBinding[] typeVariables = currentOriginal.typeVariables();
 		if (typeVariables == Binding.NO_TYPE_VARIABLES) { // non generic invoked with arguments
 			boolean isCompliant15 = scope.compilerOptions().originalSourceLevel >= ClassFileConstants.JDK1_5;
@@ -359,9 +359,11 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 				return this.resolvedType = currentType;
 			}
 			// if missing generic type, and compliance >= 1.5, then will rebuild a parameterized binding
-		} else if (argLength != typeVariables.length) { // check arity
-			scope.problemReporter().incorrectArityForParameterizedType(this, currentType, argTypes);
-			return null;
+		} else if (argLength != typeVariables.length) {
+			if (!isDiamond) { // check arity, IsDiamond never set for 1.6-
+				scope.problemReporter().incorrectArityForParameterizedType(this, currentType, argTypes);
+				return null;
+			} 
 		} else if (!currentType.isStatic()) {
 			ReferenceBinding actualEnclosing = currentType.enclosingType();
 			if (actualEnclosing != null && actualEnclosing.isRawType()){
@@ -372,11 +374,13 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		}
 
     	ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, enclosingType);
-		// check argument type compatibility
-		if (checkBounds) // otherwise will do it in Scope.connectTypeVariables() or generic method resolution
-			parameterizedType.boundCheck(scope, this.typeArguments);
-		else
-			scope.deferBoundCheck(this);
+		// check argument type compatibility for non <> cases - <> case needs no bounds check, we will scream foul if needed during inference.
+    	if (!isDiamond) {
+    		if (checkBounds) // otherwise will do it in Scope.connectTypeVariables() or generic method resolution
+    			parameterizedType.boundCheck(scope, this.typeArguments);
+    		else
+    			scope.deferBoundCheck(this);
+    	}
 		if (isTypeUseDeprecated(parameterizedType, scope))
 			reportDeprecatedType(parameterizedType, scope);
 
@@ -397,27 +401,25 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 	public StringBuffer printExpression(int indent, StringBuffer output){
 		output.append(this.token);
 		output.append("<"); //$NON-NLS-1$
-		int max = this.typeArguments.length - 1;
+		int length = this.typeArguments.length;
 //{ObjectTeams: value parameters:
 		if (this.typeAnchors != null) {
 			int anchorLen = this.typeAnchors.length;
 			for (int i = 0; i < anchorLen; i++) {
 				this.typeAnchors[i].print(0, output);
-				if (i+1 < anchorLen || max >= 0)
+				if (i+1 < anchorLen || length > 0)
 					output.append(", "); //$NON-NLS-1$
 			}
 		}
-	  // after filtering out value parameters, an empty array may remain:
-	  if (max >= 0) {
-// orig:
-		for (int i= 0; i < max; i++) {
-			this.typeArguments[i].print(0, output);
-			output.append(", ");//$NON-NLS-1$
-		}
-		this.typeArguments[max].print(0, output);
-// :giro
-	  }
 // SH}
+		if (length > 0) {
+			int max = length - 1;
+			for (int i= 0; i < max; i++) {
+				this.typeArguments[i].print(0, output);
+				output.append(", ");//$NON-NLS-1$
+			}
+			this.typeArguments[max].print(0, output);
+		}
 		output.append(">"); //$NON-NLS-1$
 		if ((this.bits & IsVarArgs) != 0) {
 			for (int i= 0 ; i < this.dimensions - 1; i++) {

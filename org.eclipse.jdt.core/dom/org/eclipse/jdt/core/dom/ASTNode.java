@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -762,6 +762,14 @@ public abstract class ASTNode {
 	 */
 	public static final int MODIFIER = 83;
 
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>UnionType</code>.
+	 * @see UnionType
+	 * @since 3.7.1
+	 */
+	public static final int UNION_TYPE = 84;
+
 //{ObjectTeams: required OT specific node type constants added
 
 	/**
@@ -769,93 +777,93 @@ public abstract class ASTNode {
 	 * <code>MethodSpec</code>.
 	 * @see MethodSpec
 	 */
-	public static final int METHOD_SPEC = 84;
+	public static final int METHOD_SPEC = 85;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CallinMappingDeclaration</code>.
 	 * @see CallinMappingDeclaration
 	 */
-	public static final int CALLIN_MAPPING_DECLARATION = 85;
+	public static final int CALLIN_MAPPING_DECLARATION = 86;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CalloutMappingDeclaration</code>.
 	 * @see CalloutMappingDeclaration
 	 */
-	public static final int CALLOUT_MAPPING_DECLARATION = 86;
+	public static final int CALLOUT_MAPPING_DECLARATION = 87;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>LiftingType</code>.
 	 * @see LiftingType
 	 */
-	public static final int LIFTING_TYPE = 87;
+	public static final int LIFTING_TYPE = 88;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>WithinStatement</code>.
 	 * @see WithinStatement
 	 */
-	public static final int WITHIN_STATEMENT = 88;
+	public static final int WITHIN_STATEMENT = 89;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>BaseConstructorMessageSend</code>.
 	 * @see BaseConstructorMessageSend
 	 */
-	public static final int BASE_CONSTRUCTOR_INVOCATION = 89;
+	public static final int BASE_CONSTRUCTOR_INVOCATION = 90;
 
     /**
      * Node type constant indicating a node of type
      * <code>ParameterMapping</code>.
      * @see ParameterMapping
      */
-    public static final int PARAMETER_MAPPING = 90;
+    public static final int PARAMETER_MAPPING = 91;
 
     /**
      * Node type constant indicating a node of type
      * <code>BaseCallMessageSend</code>.
      * @see BaseCallMessageSend
      */
-     public static final int BASE_CALL_MESSAGE_SEND = 91;
+     public static final int BASE_CALL_MESSAGE_SEND = 92;
 
      /**
  	 * Node type constant indicating a node of type
  	 * <code>FieldAccessSpec</code>.
  	 * @see FieldAccessSpec
  	 */
- 	public static final int FIELD_ACCESS_SPEC = 92;
+ 	public static final int FIELD_ACCESS_SPEC = 93;
 
     /**
      * Node type constant indicating a node of type
      * <code>RoleTypeDelaration</code>.
      * @see RoleTypeDelaration
      */
-    public static final int ROLE_TYPE_DECLARATION = 93;
+    public static final int ROLE_TYPE_DECLARATION = 94;
 
     /**
      * Node type constant indicating a node of type
      * <code>TSuperCallMessageSend</code>.
      * @see TSuperCallMessageSend
      */
-     public static final int TSUPER_MESSAGE_SEND = 94;
+     public static final int TSUPER_MESSAGE_SEND = 95;
 
      /**
       * Node type constant indicating a node of type
       * <code>TSuperCallMessageSend</code>.
       * @see TSuperCallMessageSend
       */
-      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 95;
+      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 96;
 
-      public static final int TYPE_ANCHOR = 96;
+      public static final int TYPE_ANCHOR = 97;
 
-      public static final int PRECEDENCE_DECLARATION = 97;
+      public static final int PRECEDENCE_DECLARATION = 98;
 
-      public static final int GUARD_PREDICATE_DECLARATION = 98;
+      public static final int GUARD_PREDICATE_DECLARATION = 99;
 
       /** @since 1.3.1 */
-      public static final int METHOD_BINDING_OPERATOR = 99;
+      public static final int METHOD_BINDING_OPERATOR = 100;
 //gbr}
 
 	/**
@@ -912,6 +920,8 @@ public abstract class ASTNode {
 				return ConstructorInvocation.class;
 			case CONTINUE_STATEMENT :
 				return ContinueStatement.class;
+			case UNION_TYPE :
+				return UnionType.class;
 			case DO_STATEMENT :
 				return DoStatement.class;
 			case EMPTY_STATEMENT :
@@ -1898,7 +1908,10 @@ public abstract class ASTNode {
 	/**
      * Checks that this AST operation is not used when
      * building JLS2 level ASTs.
-
+     * <p>
+     * Use this method to prevent access to new properties that have been added in JLS3.
+     * </p>
+     * 
      * @exception UnsupportedOperationException
 	 * @since 3.0
      */
@@ -1909,9 +1922,28 @@ public abstract class ASTNode {
 	}
 
 	/**
+     * Checks that this AST operation is not used when
+     * building JLS2 or JLS3 level ASTs.
+     * <p>
+     * Use this method to prevent access to new properties that have been added in JLS4.
+     * </p>
+     * 
+	 * @exception UnsupportedOperationException
+	 * @since 3.7
+	 */
+	final void unsupportedIn2_3() {
+		if (this.ast.apiLevel <= AST.JLS3) {
+			throw new UnsupportedOperationException("Operation only supported in JLS4 AST"); //$NON-NLS-1$
+		}
+	}
+	
+	/**
      * Checks that this AST operation is only used when
      * building JLS2 level ASTs.
-
+     * <p>
+     * Use this method to prevent access to deprecated properties (deprecated in JLS3).
+     * </p>
+     * 
      * @exception UnsupportedOperationException
 	 * @since 3.0
      */

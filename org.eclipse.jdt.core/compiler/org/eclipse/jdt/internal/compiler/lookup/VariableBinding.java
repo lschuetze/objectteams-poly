@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -71,6 +71,11 @@ public abstract class VariableBinding
 	public final boolean isFinal() {
 		return (this.modifiers & ClassFileConstants.AccFinal) != 0;
 	}
+	
+	public final boolean isEffectivelyFinal() {
+		return (this.tagBits & TagBits.IsEffectivelyFinal) != 0;
+	}
+	
 	public char[] readableName() {
 //{ObjectTeams: pretty printing for generated names:
 	if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, this.name))

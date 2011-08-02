@@ -272,7 +272,7 @@ public class AstGenerator extends AstFactory {
 		return result;
 	}
 	public IntLiteral intLiteral(int val) {
-		IntLiteral result = new IntLiteral(String.valueOf(val).toCharArray(), this.sourceStart, this.sourceEnd, val);
+		IntLiteral result = IntLiteral.buildIntLiteral(String.valueOf(val).toCharArray(), this.sourceStart, this.sourceEnd);
 		return result;
 	}
 	public Literal booleanLiteral(boolean val) {

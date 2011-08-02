@@ -613,7 +613,7 @@ class ASTConverter {
 					returnType.setSourceRange(methodDeclaration.sourceStart, 0);
 					methodDecl.internalSetReturnType(returnType);
 					break;
-				case AST.JLS3 :
+				default :
 					methodDecl.setReturnType2(null);
 			}
 		} else if (methodDeclaration instanceof org.eclipse.jdt.internal.compiler.ast.MethodDeclaration) {
@@ -630,7 +630,9 @@ class ASTConverter {
 				// no return type for a method that is not a constructor
 				methodDecl.setFlags(methodDecl.getFlags() | ASTNode.MALFORMED);
 				switch(this.ast.apiLevel) {
-					case AST.JLS3 :
+					case AST.JLS2_INTERNAL :
+						break;
+					default :
 						methodDecl.setReturnType2(null);
 				}
 			}
@@ -738,7 +740,7 @@ class ASTConverter {
 				case AST.JLS2_INTERNAL :
 					methodDecl.setFlags(methodDecl.getFlags() | ASTNode.MALFORMED);
 					break;
-				case AST.JLS3 :
+				default :
 					for (int i = 0, max = typeParameters.length; i < max; i++) {
 						methodDecl.typeParameters().add(convert(typeParameters[i]));
 					}
@@ -765,7 +767,7 @@ class ASTConverter {
 				case AST.JLS2_INTERNAL :
 					classInstanceCreation.setFlags(classInstanceCreation.getFlags() | ASTNode.MALFORMED);
 					break;
-				case AST.JLS3 :
+				default :
 					for (int i = 0, max = expression.typeArguments.length; i < max; i++) {
 						classInstanceCreation.typeArguments().add(convertType(expression.typeArguments[i]));
 					}
@@ -775,7 +777,7 @@ class ASTConverter {
 			case AST.JLS2_INTERNAL :
 				classInstanceCreation.internalSetName(convert(expression.type));
 				break;
-			case AST.JLS3 :
+			default :
 				classInstanceCreation.setType(convertType(expression.type));
 		}
 		classInstanceCreation.setSourceRange(expression.sourceStart, expression.sourceEnd - expression.sourceStart + 1);
@@ -969,7 +971,7 @@ class ASTConverter {
 				case AST.JLS2_INTERNAL :
 					variableDecl.setFlags(variableDecl.getFlags() | ASTNode.MALFORMED);
 					break;
-				case AST.JLS3 :
+				default :
 					variableDecl.setVarargs(true);
 			}
 		}
@@ -1652,7 +1654,7 @@ class ASTConverter {
 					case AST.JLS2_INTERNAL :
 						superConstructorInvocation.setFlags(superConstructorInvocation.getFlags() | ASTNode.MALFORMED);
 						break;
-					case AST.JLS3 :
+					default :
 						for (int i = 0, max = statement.typeArguments.length; i < max; i++) {
 							superConstructorInvocation.typeArguments().add(convertType(statement.typeArguments[i]));
 						}
@@ -1677,7 +1679,7 @@ class ASTConverter {
 					case AST.JLS2_INTERNAL :
 						constructorInvocation.setFlags(constructorInvocation.getFlags() | ASTNode.MALFORMED);
 						break;
-					case AST.JLS3 :
+					default :
 						for (int i = 0, max = statement.typeArguments.length; i < max; i++) {
 							constructorInvocation.typeArguments().add(convertType(statement.typeArguments[i]));
 						}
@@ -1910,7 +1912,7 @@ class ASTConverter {
 		switch(this.ast.apiLevel) {
 			case AST.JLS2_INTERNAL :
 				return createFakeEmptyStatement(statement);
-			case AST.JLS3 :
+			default :
 				EnhancedForStatement enhancedForStatement = new EnhancedForStatement(this.ast);
 				enhancedForStatement.setParameter(convertToSingleVariableDeclaration(statement.elementVariable));
 				org.eclipse.jdt.internal.compiler.ast.Expression collection = statement.collection;
@@ -1923,8 +1925,6 @@ class ASTConverter {
 				int end = statement.sourceEnd;
 				enhancedForStatement.setSourceRange(start, end - start + 1);
 				return enhancedForStatement;
-			default:
-				return createFakeEmptyStatement(statement);
 		}
 	}
 
@@ -2058,7 +2058,11 @@ class ASTConverter {
 	}
 
 	public void convert(org.eclipse.jdt.internal.compiler.ast.Javadoc javadoc, PackageDeclaration packageDeclaration) {
-		if (this.ast.apiLevel == AST.JLS3 && packageDeclaration.getJavadoc() == null) {
+		switch(this.ast.apiLevel) {
+			case AST.JLS2_INTERNAL :
+				return;
+		}
+		if (packageDeclaration.getJavadoc() == null) {
 			if (javadoc != null) {
 				if (this.commentMapper == null || !this.commentMapper.hasSameTable(this.commentsTable)) {
 					this.commentMapper = new DefaultCommentMapper(this.commentsTable);
@@ -2222,7 +2226,7 @@ class ASTConverter {
 					case AST.JLS2_INTERNAL :
 						superMethodInvocation.setFlags(superMethodInvocation.getFlags() | ASTNode.MALFORMED);
 						break;
-					case AST.JLS3 :
+					default :
 						for (int i = 0, max = typeArguments.length; i < max; i++) {
 							superMethodInvocation.typeArguments().add(convertType(typeArguments[i]));
 						}
@@ -2280,7 +2284,7 @@ class ASTConverter {
 					case AST.JLS2_INTERNAL :
 						methodInvocation.setFlags(methodInvocation.getFlags() | ASTNode.MALFORMED);
 						break;
-					case AST.JLS3 :
+					default :
 						for (int i = 0, max = typeArguments.length; i < max; i++) {
 							methodInvocation.typeArguments().add(convertType(typeArguments[i]));
 						}
@@ -2516,7 +2520,7 @@ class ASTConverter {
 			case AST.JLS2_INTERNAL :
 				classInstanceCreation.internalSetName(convert(allocation.type));
 				break;
-			case AST.JLS3 :
+			default :
 				classInstanceCreation.setType(convertType(allocation.type));
 		}
 		org.eclipse.jdt.internal.compiler.ast.Expression[] arguments = allocation.arguments;
@@ -2535,7 +2539,7 @@ class ASTConverter {
 				case AST.JLS2_INTERNAL :
 					classInstanceCreation.setFlags(classInstanceCreation.getFlags() | ASTNode.MALFORMED);
 					break;
-				case AST.JLS3 :
+				default :
 					for (int i = 0, max = allocation.typeArguments.length; i < max; i++) {
 						classInstanceCreation.typeArguments().add(convertType(allocation.typeArguments[i]));
 					}
@@ -2730,7 +2734,7 @@ class ASTConverter {
 					TypeDeclaration typeDecl = typeDeclarationStatement.internalGetTypeDeclaration();
 					typeDeclarationStatement.setSourceRange(typeDecl.getStartPosition(), typeDecl.getLength());
 					break;
-				case AST.JLS3 :
+				default :
 					AbstractTypeDeclaration typeDeclAST3 = typeDeclarationStatement.getDeclaration();
 					typeDeclarationStatement.setSourceRange(typeDeclAST3.getStartPosition(), typeDeclAST3.getLength());
 					break;
@@ -2836,7 +2840,26 @@ class ASTConverter {
 	public TryStatement convert(org.eclipse.jdt.internal.compiler.ast.TryStatement statement) {
 		final TryStatement tryStatement = new TryStatement(this.ast);
 		tryStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
-
+		LocalDeclaration[] localDeclarations = statement.resources;
+		int resourcesLength = localDeclarations.length;
+		if (resourcesLength > 0) {
+			switch(this.ast.apiLevel) {
+				case AST.JLS2_INTERNAL :
+				case AST.JLS3 :
+					// convert it to a simple try statement tagged as MALFORMED
+					tryStatement.setFlags(tryStatement.getFlags() | ASTNode.MALFORMED);
+					break;
+				default:
+					for (int i = 0; i < resourcesLength; i++) {
+						LocalDeclaration localDeclaration = localDeclarations[i];
+						VariableDeclarationExpression variableDeclarationExpression = convertToVariableDeclarationExpression(localDeclaration);
+						int start = variableDeclarationExpression.getStartPosition();
+						int end = localDeclaration.declarationEnd;
+						variableDeclarationExpression.setSourceRange(start, end - start + 1);
+						tryStatement.resources().add(variableDeclarationExpression);
+					}
+			}
+		}
 		tryStatement.setBody(convert(statement.tryBlock));
 		org.eclipse.jdt.internal.compiler.ast.Argument[] catchArguments = statement.catchArguments;
 		if (catchArguments != null) {
@@ -2906,7 +2929,7 @@ class ASTConverter {
 				case AST.JLS2_INTERNAL :
 					typeDecl.internalSetSuperclass(convert(typeDeclaration.superclass));
 					break;
-				case AST.JLS3 :
+				default :
 					typeDecl.setSuperclassType(convertType(typeDeclaration.superclass));
 					break;
 			}
@@ -2920,7 +2943,7 @@ class ASTConverter {
 						typeDecl.internalSuperInterfaces().add(convert(superInterfaces[index]));
 					}
 					break;
-				case AST.JLS3 :
+				default :
 					for (int index = 0, length = superInterfaces.length; index < length; index++) {
 						typeDecl.superInterfaceTypes().add(convertType(superInterfaces[index]));
 					}
@@ -2932,7 +2955,7 @@ class ASTConverter {
 				case AST.JLS2_INTERNAL :
 					typeDecl.setFlags(typeDecl.getFlags() | ASTNode.MALFORMED);
 					break;
-				case AST.JLS3 :
+				default :
 					for (int index = 0, length = typeParameters.length; index < length; index++) {
 						typeDecl.typeParameters().add(convert(typeParameters[index]));
 					}
@@ -3089,7 +3112,7 @@ class ASTConverter {
 				case AST.JLS2_INTERNAL :
 					importDeclaration.setFlags(importDeclaration.getFlags() | ASTNode.MALFORMED);
 					break;
-				case AST.JLS3 :
+				default :
 					if (modifiers == ClassFileConstants.AccStatic) {
 						importDeclaration.setStatic(true);
 //{ObjectTeams: base imports:
@@ -3134,7 +3157,7 @@ class ASTConverter {
 				case AST.JLS2_INTERNAL :
 					packageDeclaration.setFlags(packageDeclaration.getFlags() & ASTNode.MALFORMED);
 					break;
-				case AST.JLS3 :
+				default :
 					for (int i = 0, max = annotations.length; i < max; i++) {
 						packageDeclaration.annotations().add(convert(annotations[i]));
 					}
@@ -3419,7 +3442,7 @@ class ASTConverter {
 							this.recordNodes(simpleName, typeReference);
 						}
 						break;
-					case AST.JLS3 :
+					default :
 						simpleType = new SimpleType(this.ast);
 						simpleType.setName(simpleName);
 						simpleType.setSourceRange(simpleName.getStartPosition(), simpleName.getLength());
@@ -3498,28 +3521,28 @@ class ASTConverter {
 				sourceStart = (int)(positions[0]>>>32);
 				switch(this.ast.apiLevel) {
 					case AST.JLS2_INTERNAL : {
-							char[][] name = ((org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) typeReference).getTypeName();
-							int nameLength = name.length;
-							sourceStart = (int)(positions[0]>>>32);
-							length = (int)(positions[nameLength - 1] & 0xFFFFFFFF) - sourceStart + 1;
-							Name qualifiedName = this.setQualifiedNameNameAndSourceRanges(name, positions, typeReference);
-							final SimpleType simpleType = new SimpleType(this.ast);
-							simpleType.setName(qualifiedName);
-							simpleType.setSourceRange(sourceStart, length);
-							type = simpleType;
-						}
-						break;
-					case AST.JLS3 :
+						char[][] name = ((org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) typeReference).getTypeName();
+						int nameLength = name.length;
+						sourceStart = (int)(positions[0]>>>32);
+						length = (int)(positions[nameLength - 1] & 0xFFFFFFFF) - sourceStart + 1;
+						Name qualifiedName = this.setQualifiedNameNameAndSourceRanges(name, positions, typeReference);
+						final SimpleType simpleType = new SimpleType(this.ast);
+						simpleType.setName(qualifiedName);
+						simpleType.setSourceRange(sourceStart, length);
+						type = simpleType;
+					}
+					break;
+					default :
 						if (typeArguments != null) {
 							int numberOfEnclosingType = 0;
-                            int startingIndex = 0;
-                            int endingIndex = 0;
+							int startingIndex = 0;
+							int endingIndex = 0;
 							for (int i = 0, max = typeArguments.length; i < max; i++) {
 								if (typeArguments[i] != null) {
 									numberOfEnclosingType++;
 								} else if (numberOfEnclosingType == 0) {
-                                    endingIndex++;
-                                }
+									endingIndex++;
+								}
 							}
 							Name name = null;
 							if (endingIndex - startingIndex == 0) {
@@ -3532,7 +3555,7 @@ class ASTConverter {
 								simpleName.index = 1;
 								name = simpleName;
 								if (this.resolveBindings) {
-		 							recordNodes(simpleName, typeReference);
+									recordNodes(simpleName, typeReference);
 								}
 							} else {
 								name = this.setQualifiedNameNameAndSourceRanges(tokens, positions, endingIndex, typeReference);
@@ -3544,10 +3567,10 @@ class ASTConverter {
 							simpleType.setSourceRange(start, end - start + 1);
 							ParameterizedType parameterizedType = new ParameterizedType(this.ast);
 							parameterizedType.setType(simpleType);
-                            if (this.resolveBindings) {
-                                recordNodes(simpleType, typeReference);
-                                recordNodes(parameterizedType, typeReference);
-                            }
+							if (this.resolveBindings) {
+								recordNodes(simpleType, typeReference);
+								recordNodes(parameterizedType, typeReference);
+							}
 							start = simpleType.getStartPosition();
 							end = start + simpleType.getLength() - 1;
 							for (int i = 0, max = typeArguments[endingIndex].length; i < max; i++) {
@@ -3573,22 +3596,22 @@ class ASTConverter {
 								QualifiedType qualifiedType = new QualifiedType(this.ast);
 								qualifiedType.setQualifier(currentType);
 								qualifiedType.setName(simpleName);
-                                if (this.resolveBindings) {
-                                    recordNodes(simpleName, typeReference);
-                                    recordNodes(qualifiedType, typeReference);
-                                }
+								if (this.resolveBindings) {
+									recordNodes(simpleName, typeReference);
+									recordNodes(qualifiedType, typeReference);
+								}
 								start = currentType.getStartPosition();
 								end = simpleName.getStartPosition() + simpleName.getLength() - 1;
 								qualifiedType.setSourceRange(start, end - start + 1);
 								indexOfEnclosingType++;
 								if (typeArguments[startingIndex] != null) {
-	                               	qualifiedType.index = indexOfEnclosingType;
+									qualifiedType.index = indexOfEnclosingType;
 									ParameterizedType parameterizedType2 = new ParameterizedType(this.ast);
 									parameterizedType2.setType(qualifiedType);
- 									parameterizedType2.index = indexOfEnclosingType;
-                                   if (this.resolveBindings) {
-                                        recordNodes(parameterizedType2, typeReference);
-                                    }
+									parameterizedType2.index = indexOfEnclosingType;
+									if (this.resolveBindings) {
+										recordNodes(parameterizedType2, typeReference);
+									}
 									for (int i = 0, max = typeArguments[startingIndex].length; i < max; i++) {
 										final Type type2 = convertType(typeArguments[startingIndex][i]);
 										parameterizedType2.typeArguments().add(type2);
@@ -3600,7 +3623,7 @@ class ASTConverter {
 									currentType = parameterizedType2;
 								} else {
 									currentType = qualifiedType;
-                               		qualifiedType.index = indexOfEnclosingType;
+									qualifiedType.index = indexOfEnclosingType;
 								}
 								startingIndex++;
 							}
@@ -3611,7 +3634,7 @@ class ASTConverter {
 							length -= sourceStart;
 						}
 				}
-			} else {
+			} else if (typeReference instanceof org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) {
 				char[][] name = ((org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) typeReference).getTypeName();
 //{ObjectTeams: revert anchored types like in MyTeam.this._OT$base.R => base.R
 				org.eclipse.jdt.internal.compiler.lookup.TypeBinding typeBinding =
@@ -3638,6 +3661,34 @@ class ASTConverter {
 				simpleType.setName(qualifiedName);
 				type = simpleType;
 				type.setSourceRange(sourceStart, length);
+			} else {
+				TypeReference[] typeReferences = ((org.eclipse.jdt.internal.compiler.ast.UnionTypeReference) typeReference).typeReferences;
+				switch(this.ast.apiLevel) {
+					case AST.JLS2_INTERNAL :
+					case AST.JLS3 :
+						// recovery
+						type = this.convertType(typeReferences[0]);
+						int start = typeReference.sourceStart;
+						int endPosition = typeReference.sourceEnd;
+						length = endPosition - start + 1;
+						type.setSourceRange(start, length);
+						type.setFlags(type.getFlags() | ASTNode.MALFORMED);
+						break;
+					default:
+						// union type reference
+						final UnionType unionType = new UnionType(this.ast);
+						for (int i = 0, max = typeReferences.length; i < max; i++) {
+							unionType.types().add(this.convertType(typeReferences[i]));
+						}
+						type = unionType;
+						List types = unionType.types();
+						int size = types.size();
+						start = ((Type) types.get(0)).getStartPosition();
+						Type lastType = (Type) types.get(size - 1);
+						endPosition = lastType.getStartPosition() + lastType.getLength();
+						length = endPosition - start; /* + 1 - 1 == 0 */
+						type.setSourceRange(start, length);
+				}
 			}
 
 			length = typeReference.sourceEnd - sourceStart + 1;
@@ -3664,6 +3715,28 @@ class ASTConverter {
 		}
 		if (this.resolveBindings) {
 			this.recordNodes(type, typeReference);
+		}
+		boolean sawDiamond = false;
+		if (typeReference instanceof ParameterizedSingleTypeReference) {
+			ParameterizedSingleTypeReference pstr = (ParameterizedSingleTypeReference) typeReference;
+			if (pstr.typeArguments == TypeReference.NO_TYPE_ARGUMENTS) {
+				sawDiamond = true;
+			}
+		} else if (typeReference instanceof ParameterizedQualifiedTypeReference) {
+			ParameterizedQualifiedTypeReference pqtr = (ParameterizedQualifiedTypeReference) typeReference;
+			for (int i = 0, len = pqtr.typeArguments.length; i < len; i++) {
+				if (pqtr.typeArguments[i] == TypeReference.NO_TYPE_ARGUMENTS) {
+					sawDiamond = true;
+					break;
+				}
+			}
+		} 
+		if (sawDiamond) {
+			switch(this.ast.apiLevel) {
+				case AST.JLS2_INTERNAL :
+				case AST.JLS3 :
+					type.setFlags(type.getFlags() | ASTNode.MALFORMED);
+			}
 		}
 		return type;
 	}
@@ -4066,7 +4139,6 @@ class ASTConverter {
 						if (expression instanceof org.eclipse.jdt.internal.compiler.ast.TypeReference) {
 							typeRef = (org.eclipse.jdt.internal.compiler.ast.TypeReference) expression;
 						}
-						// TODO (frederic) remove following line to fix bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=62650
 						recordNodes(name, compilerNode);
 					}
 					// record name and qualifier
@@ -4084,7 +4156,9 @@ class ASTConverter {
 						if (expression instanceof JavadocArgumentExpression) {
 							JavadocArgumentExpression argExpr = (JavadocArgumentExpression) expression;
 							org.eclipse.jdt.internal.compiler.ast.TypeReference typeRef = argExpr.argument.type;
-							if (this.ast.apiLevel >= AST.JLS3) param.setVarargs(argExpr.argument.isVarArgs());
+							if (this.ast.apiLevel >= AST.JLS3) {
+								param.setVarargs(argExpr.argument.isVarArgs());
+							}
 							recordNodes(param.getType(), typeRef);
 							if (param.getType().isSimpleType()) {
 								recordName(((SimpleType)param.getType()).getName(), typeRef);
@@ -4232,7 +4306,7 @@ class ASTConverter {
 
 	/**
 	 * This method is used to retrieve the end position of the block.
-	 * @return int the dimension found, -1 if none
+	 * @return the dimension found, -1 if none
 	 */
 	protected int retrieveClosingAngleBracketPosition(int start) {
 		this.scanner.resetTo(start, this.compilationUnitSourceLength);
@@ -4243,6 +4317,9 @@ class ASTConverter {
 				switch(token) {
 					case TerminalTokens.TokenNameGREATER:
 						return this.scanner.currentPosition - 1;
+					case TerminalTokens.TokenNameLESS:
+						// TokenNameLESS can only be found if the current type has a diamond, start is located before the '<'
+						continue;
 					default:
 						return start;
 				}
@@ -4794,7 +4871,7 @@ class ASTConverter {
 					enumConstantDeclaration.setFlags(enumConstantDeclaration.getFlags() | ASTNode.MALFORMED);
 				}
 				break;
-			case AST.JLS3 :
+			default :
 				this.scanner.resetTo(fieldDeclaration.declarationSourceStart, fieldDeclaration.sourceStart);
 				this.setModifiers(enumConstantDeclaration, fieldDeclaration.annotations, fieldDeclaration.sourceStart);
 		}
@@ -4812,7 +4889,7 @@ class ASTConverter {
 					fieldDeclaration.setFlags(fieldDeclaration.getFlags() | ASTNode.MALFORMED);
 				}
 				break;
-			case AST.JLS3 :
+			default :
 				this.scanner.resetTo(fieldDecl.declarationSourceStart, fieldDecl.sourceStart);
 				this.setModifiers(fieldDeclaration, fieldDecl.annotations, fieldDecl.sourceStart);
 		}
@@ -4830,7 +4907,7 @@ class ASTConverter {
 					initializer.setFlags(initializer.getFlags() | ASTNode.MALFORMED);
 				}
 				break;
-			case AST.JLS3 :
+			default :
 				this.scanner.resetTo(oldInitializer.declarationSourceStart, oldInitializer.bodyStart);
 				this.setModifiers(initializer, oldInitializer.annotations, oldInitializer.bodyStart);
 		}
@@ -4847,7 +4924,7 @@ class ASTConverter {
 					methodDecl.setFlags(methodDecl.getFlags() | ASTNode.MALFORMED);
 				}
 				break;
-			case AST.JLS3 :
+			default :
 				this.scanner.resetTo(methodDeclaration.declarationSourceStart, methodDeclaration.sourceStart);
 				this.setModifiers(methodDecl, methodDeclaration.annotations, methodDeclaration.sourceStart);
 		}
@@ -4865,7 +4942,7 @@ class ASTConverter {
 					variableDecl.setFlags(variableDecl.getFlags() | ASTNode.MALFORMED);
 				}
 				break;
-			case AST.JLS3 :
+			default :
 				this.scanner.resetTo(argument.declarationSourceStart, argument.sourceStart);
 				org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations = argument.annotations;
 				int indexInAnnotations = 0;
@@ -4940,7 +5017,7 @@ class ASTConverter {
 				variableDecl.setFlags(variableDecl.getFlags() | ASTNode.MALFORMED);
 			}
 			break;
-		case AST.JLS3 :
+		default :
 			this.scanner.resetTo(localDeclaration.declarationSourceStart, localDeclaration.sourceStart);
 			org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations = localDeclaration.annotations;
 			int indexInAnnotations = 0;
@@ -5022,7 +5099,7 @@ class ASTConverter {
 					typeDecl.setFlags(typeDecl.getFlags() | ASTNode.MALFORMED);
 				}
 				break;
-			case AST.JLS3 :
+			default :
 				this.scanner.resetTo(typeDeclaration.declarationSourceStart, typeDeclaration.sourceStart);
 				this.setModifiers(typeDecl, typeDeclaration.annotations, typeDeclaration.sourceStart);
 		}
@@ -5042,7 +5119,7 @@ class ASTConverter {
 					variableDeclarationExpression.setFlags(variableDeclarationExpression.getFlags() | ASTNode.MALFORMED);
 				}
 				break;
-			case AST.JLS3 :
+			default :
 				this.scanner.resetTo(localDeclaration.declarationSourceStart, localDeclaration.sourceStart);
 				org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations = localDeclaration.annotations;
 				int indexInAnnotations = 0;
@@ -5123,7 +5200,7 @@ class ASTConverter {
 					variableDeclarationStatement.setFlags(variableDeclarationStatement.getFlags() | ASTNode.MALFORMED);
 				}
 				break;
-			case AST.JLS3 :
+			default :
 				this.scanner.resetTo(localDeclaration.declarationSourceStart, localDeclaration.sourceStart);
 				org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations = localDeclaration.annotations;
 				int indexInAnnotations = 0;
@@ -5382,7 +5459,7 @@ class ASTConverter {
 						case AST.JLS2_INTERNAL :
 							methodDeclaration.internalSetReturnType(elementType);
 							break;
-						case AST.JLS3 :
+						default :
 							methodDeclaration.setReturnType2(elementType);
 						break;
 					}
@@ -5403,7 +5480,7 @@ class ASTConverter {
 						case AST.JLS2_INTERNAL :
 							methodDeclaration.internalSetReturnType(subarrayType);
 							break;
-						case AST.JLS3 :
+						default :
 							methodDeclaration.setReturnType2(subarrayType);
 						break;
 					}
@@ -5414,7 +5491,7 @@ class ASTConverter {
 					case AST.JLS2_INTERNAL :
 						methodDeclaration.internalSetReturnType(type);
 						break;
-					case AST.JLS3 :
+					default :
 						methodDeclaration.setReturnType2(type);
 					break;
 				}
@@ -5424,7 +5501,7 @@ class ASTConverter {
 				case AST.JLS2_INTERNAL :
 					methodDeclaration.internalSetReturnType(type);
 					break;
-				case AST.JLS3 :
+				default :
 					methodDeclaration.setReturnType2(type);
 				break;
 			}

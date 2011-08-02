@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -107,12 +107,8 @@ protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 				length);
 		}
 		alloc.type = getTypeReference(0);
-
-		length = this.genericsLengthStack[this.genericsLengthPtr--];
-		this.genericsPtr -= length;
-		System.arraycopy(this.genericsStack, this.genericsPtr + 1, alloc.typeArguments = new TypeReference[length], 0, length);
-		this.intPtr--;
-
+		checkForDiamond(alloc.type);
+		
 		//the default constructor with the correct number of argument
 		//will be created and added by the TC (see createsInternalConstructorWithBinding)
 		alloc.sourceStart = this.intStack[this.intPtr--];
@@ -541,8 +537,8 @@ protected void consumeStatementThrow() {
 	/* recovery */
 	recordLastStatementIfNeeded();
 }
-protected void consumeStatementTry(boolean arg_0) {
-	super.consumeStatementTry(arg_0);
+protected void consumeStatementTry(boolean arg_0, boolean arg_1) {
+	super.consumeStatementTry(arg_0, arg_1);
 	/* recovery */
 	recordLastStatementIfNeeded();
 }

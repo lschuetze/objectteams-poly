@@ -4,8 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: QualifiedAllocationExpression.java 23405 2010-02-03 17:02:18Z stephan $
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
@@ -26,6 +25,7 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
@@ -379,6 +379,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		}
 
 		// resolve type arguments (for generic constructor call)
+		final boolean isDiamond = this.type != null && (this.type.bits & ASTNode.IsDiamond) != 0;
 		if (this.typeArguments != null) {
 			int length = this.typeArguments.length;
 			boolean argHasError = scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_5;
@@ -391,6 +392,10 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				if (argHasError && typeReference instanceof Wildcard) {
 					scope.problemReporter().illegalUsageOfWildcard(typeReference);
 				}
+			}
+			if (isDiamond) {
+				scope.problemReporter().diamondNotWithExplicitTypeArguments(this.typeArguments);
+				return null;
 			}
 			if (argHasError) {
 				if (this.arguments != null) { // still attempt to resolve arguments
@@ -421,6 +426,13 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 
 		// limit of fault-tolerance
 		if (hasError) {
+			/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=345359, if arguments have errors, completely bail out in the <> case.
+			   No meaningful type resolution is possible since inference of the elided types is fully tied to argument types. Do
+			   not return the partially resolved type.
+			 */
+			if (isDiamond) {
+				return null; // not the partially cooked this.resolvedType
+			}
 //{ObjectTeams: prevent a faulty anonymous type from being processed!
 			if (this.anonymousType != null)
 				this.anonymousType.tagAsHavingErrors();
@@ -466,6 +478,14 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 			if (!receiverType.canBeInstantiated()) {
 				scope.problemReporter().cannotInstantiate(this.type, receiverType);
 				return this.resolvedType = receiverType;
+			}
+			if (isDiamond) {
+				TypeBinding [] inferredTypes = inferElidedTypes(((ParameterizedTypeBinding) receiverType).genericType(), receiverType.enclosingType(), argumentTypes, scope);
+				if (inferredTypes == null) {
+					scope.problemReporter().cannotInferElidedTypes(this);
+					return this.resolvedType = null;
+				}
+				receiverType = this.type.resolvedType = scope.environment().createParameterizedType(((ParameterizedTypeBinding) receiverType).genericType(), inferredTypes, ((ParameterizedTypeBinding) receiverType).enclosingType());
 			}
 			ReferenceBinding allocationType = (ReferenceBinding) receiverType;
 //{ObjectTeams: setup context for constructor lookup:
@@ -518,6 +538,9 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 			if ((this.binding.tagBits & TagBits.HasMissingType) != 0) {
 				scope.problemReporter().missingTypeInConstructor(this, this.binding);
 			}
+			if (!isDiamond && receiverType.isParameterizedTypeWithActualArguments()) {
+		 		checkTypeArgumentRedundancy((ParameterizedTypeBinding)receiverType, receiverType.enclosingType(), argumentTypes , scope);
+		 	}
 			// The enclosing instance must be compatible with the innermost enclosing type
 			ReferenceBinding expectedType = this.binding.declaringClass.enclosingType();
 			if (expectedType != enclosingInstanceType) // must call before computeConversion() and typeMismatchError()
@@ -535,6 +558,11 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 			}
 			scope.problemReporter().typeMismatchError(enclosingInstanceType, expectedType, this.enclosingInstance, null);
 			return this.resolvedType = receiverType;
+		} else {
+			if (isDiamond) {
+				scope.problemReporter().diamondNotWithAnoymousClasses(this.type);
+				return null;
+			}	
 		}
 		ReferenceBinding superType = (ReferenceBinding) receiverType;
 		if (superType.isTypeVariable()) {

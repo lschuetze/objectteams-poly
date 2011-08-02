@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,11 +28,12 @@ public interface ProblemReasons {
 	final int ParameterizedMethodTypeMismatch = 12; // for generic method
 	final int TypeArgumentsForRawGenericMethod = 13; // for generic method
 	final int InvalidTypeForStaticImport = 14;
+	final int InvalidTypeForAutoManagedResource = 15;
 //{ObjectTeams;
-    final int NoTeamContext = 15;
-    final int AnchorNotFinal = 16;
-    final int AnchorNotATeam = 17;
-    final int AnchorNotFound = 18;
-    final int ProblemAlreadyReported = 19;
+    final int NoTeamContext = 20;
+    final int AnchorNotFinal = 21;
+    final int AnchorNotATeam = 22;
+    final int AnchorNotFound = 23;
+    final int ProblemAlreadyReported = 24;
 // SH}
 }

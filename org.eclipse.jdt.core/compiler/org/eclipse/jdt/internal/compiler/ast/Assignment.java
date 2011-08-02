@@ -4,8 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Assignment.java 23405 2010-02-03 17:02:18Z stephan $
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Genady Beriozkin - added support for reporting assignment with no effect
@@ -174,6 +173,10 @@ public TypeBinding resolveType(BlockScope scope) {
 	this.expression.setExpectedType(lhsType); // needed in case of generic method invocation
 	if (lhsType != null) {
 		this.resolvedType = lhsType.capture(scope, this.sourceEnd);
+	}
+	LocalVariableBinding localVariableBinding = this.lhs.localVariableBinding();
+	if (localVariableBinding != null) {
+		localVariableBinding.tagBits &= ~TagBits.IsEffectivelyFinal;
 	}
 	TypeBinding rhsType = this.expression.resolveType(scope);
 	if (lhsType == null || rhsType == null) {

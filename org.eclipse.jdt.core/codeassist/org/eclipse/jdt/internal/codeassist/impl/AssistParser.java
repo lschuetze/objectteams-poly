@@ -4,8 +4,7 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: AssistParser.java 23404 2010-02-03 14:10:22Z stephan $
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -1039,9 +1038,14 @@ protected TypeReference getAssistTypeReferenceForGenericType(int dim, int identi
 	/* no need to take action if not inside completed identifiers */
 	if (/*(indexOfAssistIdentifier()) < 0 ||*/ (identifierLength == 1 && numberOfIdentifiers == 1)) {
 		int currentTypeArgumentsLength = this.genericsLengthStack[this.genericsLengthPtr--];
-		TypeReference[] typeArguments = new TypeReference[currentTypeArgumentsLength];
-		this.genericsPtr -= currentTypeArgumentsLength;
-		System.arraycopy(this.genericsStack, this.genericsPtr + 1, typeArguments, 0, currentTypeArgumentsLength);
+		TypeReference[] typeArguments;
+		if (currentTypeArgumentsLength > -1) {
+			typeArguments = new TypeReference[currentTypeArgumentsLength];
+			this.genericsPtr -= currentTypeArgumentsLength;
+			System.arraycopy(this.genericsStack, this.genericsPtr + 1, typeArguments, 0, currentTypeArgumentsLength);
+		} else {
+			typeArguments = TypeReference.NO_TYPE_ARGUMENTS;
+		}
 		long[] positions = new long[identifierLength];
 		System.arraycopy(
 			this.identifierPositionStack,
@@ -1069,7 +1073,7 @@ protected TypeReference getAssistTypeReferenceForGenericType(int dim, int identi
 	int currentIdentifiersLength = identifierLength;
 	while (index > 0) {
 		int currentTypeArgumentsLength = this.genericsLengthStack[this.genericsLengthPtr--];
-		if (currentTypeArgumentsLength != 0) {
+		if (currentTypeArgumentsLength > 0) {
 			this.genericsPtr -= currentTypeArgumentsLength;
 			System.arraycopy(this.genericsStack, this.genericsPtr + 1, typeArguments[index - 1] = new TypeReference[currentTypeArgumentsLength], 0, currentTypeArgumentsLength);
 		}

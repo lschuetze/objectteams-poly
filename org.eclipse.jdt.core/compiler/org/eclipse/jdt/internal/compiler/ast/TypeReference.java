@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -39,6 +39,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  * @version $Id: TypeReference.java 23404 2010-02-03 14:10:22Z stephan $
  */
 public abstract class TypeReference extends Expression {
+
+	public static final TypeReference[] NO_TYPE_ARGUMENTS = new TypeReference[0];
 
 //{ObjectTeams: for baseclass decapsulation (implement interface from Expression):
 private DecapsulationState baseclassDecapsulation = DecapsulationState.NONE;

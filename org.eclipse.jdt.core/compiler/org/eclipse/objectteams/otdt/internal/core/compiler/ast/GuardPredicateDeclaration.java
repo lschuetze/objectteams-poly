@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.flow.ExceptionHandlingFlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
+import org.eclipse.jdt.internal.compiler.flow.UnconditionalFlowInfo;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.BaseScopeMarker;
@@ -164,7 +165,12 @@ public class GuardPredicateDeclaration extends MethodDeclaration {
 							Binding.NO_EXCEPTIONS, // treat all exceptions as undeclared, want to see the error/warning
 							null, // initializationParent
 							this.scope,
-							flowInfo.unconditionalInits());
+							flowInfo.unconditionalInits()) {
+					@Override
+					public UnconditionalFlowInfo initsOnException(int index) {
+						return new UnconditionalFlowInfo(); // empty, avoid AIOOBE in super method (empty array initsOnExceptions)
+					}
+				};
 			}
 		};
 		result.sourceStart = this.sourceStart;

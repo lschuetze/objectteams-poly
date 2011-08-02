@@ -264,7 +264,7 @@ public abstract class ArrayTranslations {
 		char[] name = generateArrayIndexName(currentDimension);
 
 		LocalDeclaration initializer = new LocalDeclaration(name,0,0);
-		initializer.initialization = new IntLiteral("0".toCharArray(),0,0); //$NON-NLS-1$
+		initializer.initialization = IntLiteral.buildIntLiteral("0".toCharArray(),0,0); //$NON-NLS-1$
 		initializer.type = new SingleTypeReference(TypeConstants.INT, 0);
 		init[0] = initializer;
 

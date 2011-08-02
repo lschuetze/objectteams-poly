@@ -234,8 +234,8 @@ public class LiftingTypeReference extends TypeReference {
 	            case TypeIds.T_char   : nullValue = new CharLiteral  (tok,start, end); break;
 	            case TypeIds.T_double : nullValue = new DoubleLiteral(tok,start, end); break;
 	            case TypeIds.T_float  : nullValue = new FloatLiteral (tok,start, end); break;
-	            case TypeIds.T_int    : nullValue = new IntLiteral   (tok,start, end); break;
-	            case TypeIds.T_long   : nullValue = new LongLiteral  (tok,start, end); break;
+	            case TypeIds.T_int    : nullValue = IntLiteral.buildIntLiteral(tok,start, end); break;
+	            case TypeIds.T_long   : nullValue = LongLiteral.buildLongLiteral(tok,start, end); break;
 	            }
 	        } else {
 	            nullValue = new NullLiteral(start, end);

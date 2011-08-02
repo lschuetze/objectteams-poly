@@ -145,6 +145,7 @@ public class CompilerOptions {
 	public static final String OPTION_IncludeNullInfoFromAsserts = "org.eclipse.jdt.core.compiler.problem.includeNullInfoFromAsserts";  //$NON-NLS-1$
 	public static final String OPTION_ReportMethodCanBeStatic = "org.eclipse.jdt.core.compiler.problem.reportMethodCanBeStatic";  //$NON-NLS-1$
 	public static final String OPTION_ReportMethodCanBePotentiallyStatic = "org.eclipse.jdt.core.compiler.problem.reportMethodCanBePotentiallyStatic";  //$NON-NLS-1$
+	public static final String OPTION_ReportRedundantSpecificationOfTypeArguments =  "org.eclipse.jdt.core.compiler.problem.redundantSpecificationOfTypeArguments"; //$NON-NLS-1$
 
 //{ObjectTeams: sync with constants in OTDTPlugin:
 	public static final String OPTION_ReportNotExactlyOneBasecall =
@@ -315,6 +316,7 @@ public class CompilerOptions {
 	public static final int UnusedObjectAllocation = IrritantSet.GROUP2 | ASTNode.Bit4;
 	public static final int MethodCanBeStatic = IrritantSet.GROUP2 | ASTNode.Bit5;
 	public static final int MethodCanBePotentiallyStatic = IrritantSet.GROUP2 | ASTNode.Bit6;
+	public static final int RedundantSpecificationOfTypeArguments = IrritantSet.GROUP2 | ASTNode.Bit7;
 
 //{ObjectTeams: OT/J specific problems/irritants:
 	public static final int OTJFlag = IrritantSet.GROUP3;
@@ -678,6 +680,8 @@ public class CompilerOptions {
 				return OPTION_ReportMethodCanBeStatic;
 			case MethodCanBePotentiallyStatic :
 				return OPTION_ReportMethodCanBePotentiallyStatic;
+			case RedundantSpecificationOfTypeArguments :
+				return OPTION_ReportRedundantSpecificationOfTypeArguments;
 //{ObjectTeams:
 			case NotExactlyOneBasecall :
 				return OPTION_ReportNotExactlyOneBasecall;
@@ -859,6 +863,7 @@ public class CompilerOptions {
 			OPTION_ReportRawTypeReference,
 			OPTION_ReportRedundantNullCheck,
 			OPTION_ReportRedundantSuperinterface,
+			OPTION_ReportRedundantSpecificationOfTypeArguments,
 			OPTION_ReportSpecialParameterHidingField,
 			OPTION_ReportSyntheticAccessEmulation,
 			OPTION_ReportTasks,
@@ -963,6 +968,7 @@ public class CompilerOptions {
 			case UnusedDeclaredThrownException :
 			case DeadCode :
 			case UnusedObjectAllocation :
+			case RedundantSpecificationOfTypeArguments :
 				return "unused"; //$NON-NLS-1$
 			case DiscouragedReference :
 			case ForbiddenReference :
@@ -1275,6 +1281,7 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_IncludeNullInfoFromAsserts, this.includeNullInfoFromAsserts ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_ReportMethodCanBeStatic, getSeverityString(MethodCanBeStatic));
 		optionsMap.put(OPTION_ReportMethodCanBePotentiallyStatic, getSeverityString(MethodCanBePotentiallyStatic));
+		optionsMap.put(OPTION_ReportRedundantSpecificationOfTypeArguments, getSeverityString(RedundantSpecificationOfTypeArguments));
 //{ObjectTeams:
 		optionsMap.put(OPTION_Decapsulation, this.decapsulation);
 
@@ -1736,6 +1743,7 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportUnusedObjectAllocation)) != null) updateSeverity(UnusedObjectAllocation, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportMethodCanBeStatic)) != null) updateSeverity(MethodCanBeStatic, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportMethodCanBePotentiallyStatic)) != null) updateSeverity(MethodCanBePotentiallyStatic, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportRedundantSpecificationOfTypeArguments)) != null) updateSeverity(RedundantSpecificationOfTypeArguments, optionValue);
 //{ObjectTeams:
 		if ((optionValue = optionsMap.get(OPTION_ReportNotExactlyOneBasecall)) != null) updateSeverity(NotExactlyOneBasecall, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportBaseclassCycle)) != null) updateSeverity(BaseclassCycle, optionValue);
@@ -1996,6 +2004,7 @@ public class CompilerOptions {
 		buf.append("\n\t- unused object allocation: ").append(getSeverityString(UnusedObjectAllocation)); //$NON-NLS-1$
 		buf.append("\n\t- method can be static: ").append(getSeverityString(MethodCanBeStatic)); //$NON-NLS-1$
 		buf.append("\n\t- method can be potentially static: ").append(getSeverityString(MethodCanBePotentiallyStatic)); //$NON-NLS-1$
+		buf.append("\n\t- redundant specification of type arguments: ").append(getSeverityString(RedundantSpecificationOfTypeArguments)); //$NON-NLS-1$
 //{ObjectTeams
 		buf.append("\n\t- decapsulation : ").append(this.decapsulation); //$NON-NLS-1$
 		buf.append("\n\t- report if not exactly one basecall in callin method : ").append(getSeverityString(NotExactlyOneBasecall)); //$NON-NLS-1$

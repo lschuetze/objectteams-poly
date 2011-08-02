@@ -2133,6 +2133,21 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 		}
 	}
 
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=337799
+	if (this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_7) {
+		if ((method.tagBits & TagBits.AnnotationSafeVarargs) != 0) {
+			if (!method.isVarargs()) {
+				methodDecl.scope.problemReporter().safeVarargsOnFixedArityMethod(method);
+			} else if (!method.isStatic() && !method.isFinal() && !method.isConstructor()) {
+				methodDecl.scope.problemReporter().safeVarargsOnNonFinalInstanceMethod(method);
+			}
+		} else if (method.parameters != null && method.parameters.length > 0 && method.isVarargs()) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=337795
+			if (!method.parameters[method.parameters.length - 1].isReifiable()) {
+				methodDecl.scope.problemReporter().possibleHeapPollutionFromVararg(methodDecl.arguments[methodDecl.arguments.length - 1]);
+			}
+		}
+	}
+
 	boolean foundReturnTypeProblem = false;
 	if (!method.isConstructor()) {
 		TypeReference returnType = methodDecl instanceof MethodDeclaration
