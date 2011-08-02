@@ -6,7 +6,7 @@ feature@org.eclipse.objectteams.otdt.core.patch=SVN,url=file://localhost/svnroot
 feature@org.eclipse.objectteams.otequinox=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=features/org.eclipse.objectteams.otequinox.feature,tag=tags/builds/201106070730
 
 !-- Also don't use version numbers for those plugins that hold the various otre jars: --
-plugin@org.eclipse.jdt.core,3.7.0.v_OTDT_r201_qualifier=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.jdt.core
+plugin@org.eclipse.jdt.core,3.7.1.v_OTDT_r201_qualifier=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.jdt.core
 
 !next plug-in don't specify version so that org.eclipse.objectteams.runtime/customBuildCallbacks.xml will find the plug-in directory:
 plugin@org.eclipse.objectteams.otdt=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams,path=plugins/org.eclipse.objectteams.otdt,tag=tags/builds/201106070730
@@ -46,7 +46,7 @@ plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400
 
 feature@org.eclipse.objectteams.otdt-tests=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=features/org.eclipse.objectteams.otdt.feature/unit-tests-feature
 
-plugin@org.eclipse.jdt.core.tests.compiler,3.4.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.compiler
+plugin@org.eclipse.jdt.core.tests.compiler=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.compiler
 plugin@org.eclipse.jdt.core.tests.model,3.4.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.jdt.core.tests.model
 plugin@org.eclipse.objectteams.otdt.tests,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.tests
 plugin@org.eclipse.objectteams.otdt.ui.tests.dom,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.dom
