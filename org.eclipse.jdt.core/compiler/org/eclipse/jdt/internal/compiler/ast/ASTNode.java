@@ -236,7 +236,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 //{ObjectTeams: more bits:
 	public static final int IsRoleType = Bit14; 		//  for <B base R>
 	public static final int IsAllocationType = Bit18; 	// for new T(); for detecting new path.R();
-	public static final int IsGeneratedWithProblem = Bit20;
+	public static final int IsGeneratedWithProblem = Bit22;
 // SH}
 
 	// for array initializer
