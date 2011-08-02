@@ -347,11 +347,6 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     		"	int doSomethingOther(int r1) -> int doSomething(int b1) wrong\n" + 
     		"	                                                        ^^^^^\n" + 
     		"Syntax error on token \"wrong\", delete this token\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team321ciwmp6.java (at line 13)\n" + 
-    		"	result <- 2 * base.someField\n" + 
-    		"	              ^^^^^\n" + 
-    		"Syntax error on token(s), misplaced construct(s)\n" + 
     		"----------\n");
     }
 
