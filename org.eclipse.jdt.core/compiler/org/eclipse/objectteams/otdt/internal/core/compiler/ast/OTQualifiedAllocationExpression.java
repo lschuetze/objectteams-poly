@@ -22,12 +22,14 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
+import org.eclipse.jdt.internal.compiler.CompilationResult;
+import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression.AbstractQualifiedAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.NameReference;
+import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression.AbstractQualifiedAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
@@ -112,6 +114,8 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	{
 	    this.constant = Constant.NotAConstant;
 
+	    CompilationResult compilationResult = scope.referenceContext().compilationResult();
+		CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
 	    if (this.anonymousType == null && this.creatorCall == null) { // no double processing
 	        if (this.enclosingInstance == null) // special case during code assist
 	            return super.resolveType(scope);
@@ -170,6 +174,9 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	        }
 	    }
 	    if (this.creatorCall == null) {
+	    	// if resolve failed above roll back, because it will be analyzed again during the super call:
+	    	if (this.enclosingInstance != null && this.enclosingInstance.resolvedType == null)
+	    		compilationResult.rollBack(cp);
 	        this.resolvedType = super.resolveType(scope);
 	        // if enclosing is a role request a cast to the class part as required by the inner constructor
 	        if (this.enclosingInstance != null) {
