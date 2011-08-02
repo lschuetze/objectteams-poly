@@ -336,10 +336,6 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			if (((ClassScope) scope).detectHierarchyCycle(currentOriginal, this))
 				return null;
 		}
-//{ObjectTeams: already done?
-		if (argLength == 0)
-			return this.resolvedType;
-// SH}
 
 		final boolean isDiamond = (this.bits & ASTNode.IsDiamond) != 0;
 		TypeVariableBinding[] typeVariables = currentOriginal.typeVariables();
@@ -372,6 +368,10 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 				return null;
 			}
 		}
+//{ObjectTeams: already done?
+		if (!isDiamond && argLength == 0)
+			return this.resolvedType;
+// SH}
 
     	ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, enclosingType);
 		// check argument type compatibility for non <> cases - <> case needs no bounds check, we will scream foul if needed during inference.
