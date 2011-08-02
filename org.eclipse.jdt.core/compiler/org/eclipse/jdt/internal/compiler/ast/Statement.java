@@ -213,9 +213,11 @@ public void generateArguments(MethodBinding binding, Expression[] arguments, Blo
 // orig:
 			arguments[i].generateCode(currentScope, codeStream, true);
 // :giro
-			TypeBinding requiredType = checkRoleToPlainCast(arguments[i].resolvedType, binding.original().parameters[i]);
-			if (requiredType != null)
-				codeStream.checkcast(requiredType);
+			if (!binding.isPolymorphic() && !binding.isVarargs()) {
+				TypeBinding requiredType = checkRoleToPlainCast(arguments[i].resolvedType, binding.original().parameters[i]);
+				if (requiredType != null)
+					codeStream.checkcast(requiredType);
+			}
 		}
 // SH}
 	}
