@@ -5674,7 +5674,7 @@ class ASTConverter {
 
 				}
 				break;
-			case AST.JLS3:
+			default :
 				this.setModifiers(roleTypeDecl, typeDeclaration);
 
 				if (   typeDeclaration.baseclass != null
@@ -5732,7 +5732,7 @@ class ASTConverter {
 			   			= typeDeclaration.enclosingType;
 			   teamClassName = this.ast.newSimpleName(new String(teamDecl.name));
 			   teamClassName.setSourceRange(teamDecl.sourceStart, teamDecl.sourceEnd - teamDecl.sourceStart + 1);
-			   if(this.ast.apiLevel == AST.JLS3){
+			   if(this.ast.apiLevel >= AST.JLS3){
 				   SimpleType teamType = this.ast.newSimpleType(teamClassName);
 				   teamType.setSourceRange(teamClassName.getStartPosition(), teamClassName.getLength());
 				   roleTypeDecl.setTeamClassType(teamType);
@@ -5869,7 +5869,7 @@ class ASTConverter {
 					mappingDecl.setFlags(mappingDecl.getFlags() | ASTNode.MALFORMED);
 				}
 				break;
-			case AST.JLS3 :
+			default :
 				this.scanner.resetTo(mappingDeclaration.declarationSourceStart, mappingDeclaration.sourceStart);
 				this.setModifiers(mappingDecl, mappingDeclaration.annotations, mappingDeclaration.sourceStart);
 		}
@@ -6257,7 +6257,7 @@ public BaseConstructorInvocation convert(
 			org.eclipse.jdt.internal.compiler.ast.TypeReference typeReference = methodSpec.returnType;
 			if (typeReference != null) {
 				Type returnType = convertType(typeReference);
-				if(result.getAST().apiLevel() == AST.JLS3)
+				if(result.getAST().apiLevel() >= AST.JLS3)
 					result.setReturnType2(returnType);
 				else
 					result.setReturnType(returnType);
@@ -6273,7 +6273,7 @@ public BaseConstructorInvocation convert(
 
 			org.eclipse.jdt.internal.compiler.ast.TypeParameter[] typeParameters = methodSpec.typeParameters;
 			if (typeParameters != null)
-				if (this.ast.apiLevel == AST.JLS3)
+				if (this.ast.apiLevel >= AST.JLS3)
 					for (int i = 0, max = typeParameters.length; i < max; i++)
 						result.typeParameters().add(convert(typeParameters[i]));
 		}

@@ -1718,7 +1718,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			pos= rewriteNodeList(node, superInterfaceProperty, pos, keyword, ", "); //$NON-NLS-1$
 		}
 //{ObjectTeams: predicate
-        if (apiLevel ==  AST.JLS3) {
+        if (apiLevel >=  AST.JLS3) {
 	        RewriteEvent predicateEvent= getEvent(node, TypeDeclaration.GUARD_PROPERTY);
 	        int changeKind = rewriteGuardPredicate(predicateEvent, pos);
 	        if (changeKind == RewriteEvent.UNCHANGED)
@@ -3784,7 +3784,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		int pos = rewriteJavadoc(node, RoleTypeDeclaration.JAVADOC_PROPERTY);
 
 		// modifier
-		if(apiLevel == AST.JLS3)
+		if(apiLevel >= AST.JLS3)
 			pos = rewriteModifiers2(node, RoleTypeDeclaration.MODIFIERS2_PROPERTY, pos);
 		else
 			rewriteModifiers(node, RoleTypeDeclaration.MODIFIERS_PROPERTY, pos);
@@ -3935,7 +3935,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
         }
 
 		// predicate
-        if (apiLevel ==  AST.JLS3) {
+        if (apiLevel >=  AST.JLS3) {
 	        RewriteEvent predicateEvent= getEvent(node, RoleTypeDeclaration.GUARD_PROPERTY);
 	        changeKind = rewriteGuardPredicate(predicateEvent, pos);
 	        if (changeKind == RewriteEvent.UNCHANGED)
@@ -4297,7 +4297,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 
 		int pos= node.getStartPosition();
 		// type parameters
-		if (node.getAST().apiLevel() == AST.JLS3)
+		if (node.getAST().apiLevel() >= AST.JLS3)
 			pos= rewriteOptionalTypeParameters(node, MethodSpec.TYPE_PARAMETERS_PROPERTY, pos, String.valueOf(' '), true, pos != node.getStartPosition());
 
 		// return type
