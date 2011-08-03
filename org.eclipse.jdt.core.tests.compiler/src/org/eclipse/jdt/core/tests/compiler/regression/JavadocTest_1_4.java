@@ -112,7 +112,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"2. ERROR in X.java (at line 5)\r\n" +
 				"	public class X<E> {}\r\n" +
 				"	               ^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -135,7 +135,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"2. ERROR in X.java (at line 5)\r\n" +
 				"	public class X<E extends RuntimeException> {}\r\n" +
 				"	               ^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 
 		);
@@ -171,7 +171,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"4. ERROR in X.java (at line 7)\r\n" +
 				"	public class X<T, U, V> {}\r\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -212,7 +212,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"2. ERROR in X.java (at line 5)\n" +
 				"	public class X<E, F> {}\n" +
 				"	               ^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -247,7 +247,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"4. ERROR in X.java (at line 7)\n" +
 				"	public class X<T> {}\n" +
 				"	               ^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -294,7 +294,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"6. ERROR in X.java (at line 9)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -329,7 +329,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"4. ERROR in X.java (at line 7)\r\n" +
 				"	public class X<T, U, V> {}\r\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -376,7 +376,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"6. ERROR in X.java (at line 9)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -393,7 +393,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"1. ERROR in X.java (at line 4)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -416,7 +416,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"2. ERROR in X.java (at line 5)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -439,7 +439,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"2. ERROR in X.java (at line 5)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -468,7 +468,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"3. ERROR in X.java (at line 6)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -497,7 +497,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"3. ERROR in X.java (at line 6)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -526,7 +526,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"3. ERROR in X.java (at line 6)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -549,7 +549,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"2. ERROR in X.java (at line 5)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -596,7 +596,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"6. ERROR in X.java (at line 9)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -631,7 +631,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"4. ERROR in X.java (at line 7)\n" +
 				"	public class X<T, U, V> {}\n" +
 				"	               ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -761,7 +761,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"2. ERROR in X.java (at line 6)\r\n" +
 				"	public <E> void foo() {}\r\n" +
 				"	        ^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -788,7 +788,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"2. ERROR in X.java (at line 8)\r\n" +
 				"	public <E extends RuntimeException> void foo(int val, Object obj) {}\r\n" +
 				"	        ^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -827,7 +827,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"4. ERROR in X.java (at line 10)\r\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\r\n" +
 				"	        ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -874,7 +874,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"2. ERROR in X.java (at line 6)\n" +
 				"	public <E, F> void foo(int val, Object obj) {}\n" +
 				"	        ^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n" +
 				"3. ERROR in X.java (at line 6)\n" +
 				"	public <E, F> void foo(int val, Object obj) {}\n" +
@@ -933,7 +933,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"6. ERROR in X.java (at line 10)\n" +
 				"	public <T> void foo(int val, Object obj) {}\n" +
 				"	        ^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n" +
 				"7. ERROR in X.java (at line 10)\n" +
 				"	public <T> void foo(int val, Object obj) {}\n" +
@@ -994,7 +994,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"6. ERROR in X.java (at line 12)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
 				"	        ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -1033,7 +1033,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"4. ERROR in X.java (at line 10)\r\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\r\n" +
 				"	        ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -1052,7 +1052,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"1. ERROR in X.java (at line 5)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
 				"	        ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n" +
 				"2. ERROR in X.java (at line 5)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
@@ -1088,7 +1088,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"2. ERROR in X.java (at line 7)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
 				"	        ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n" +
 				"3. ERROR in X.java (at line 7)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
@@ -1125,7 +1125,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"3. ERROR in X.java (at line 8)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
 				"	        ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n" +
 				"4. ERROR in X.java (at line 8)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
@@ -1192,7 +1192,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"8. ERROR in X.java (at line 13)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
 				"	        ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n" +
 				"9. ERROR in X.java (at line 13)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
@@ -1234,7 +1234,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"4. ERROR in X.java (at line 8)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
 				"	        ^^^^^^^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n" +
 				"5. ERROR in X.java (at line 8)\n" +
 				"	public <T, U, V> void foo(int val, Object obj) {}\n" +
@@ -1324,7 +1324,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"4. ERROR in X.java (at line 10)\n" + 
 			"	public <T, U, V extends Exceptions> void foo(int val, Object obj) {}\n" + 
 			"	        ^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"5. ERROR in X.java (at line 10)\n" + 
 			"	public <T, U, V extends Exceptions> void foo(int val, Object obj) {}\n" + 
@@ -1376,7 +1376,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"6. ERROR in X.java (at line 9)\n" +
 				"	public class X<E> {}\n" +
 				"	               ^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -1423,7 +1423,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"6. ERROR in X.java (at line 9)\n" +
 				"	public class X<E> {}\n" +
 				"	               ^\n" +
-				"Syntax error, type parameters are only available if source level is 1.5\n" +
+				"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 				"----------\n"
 		);
 	}
@@ -1469,12 +1469,12 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"2. ERROR in X.java (at line 5)\n" + 
 			"	public class X extends G<Exception> {\n" + 
 			"	                         ^^^^^^^^^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"3. ERROR in X.java (at line 8)\n" + 
 			"	class G<E extends Exception> {\n" + 
 			"	        ^^^^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n");
 	}
 
@@ -1508,17 +1508,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in X.java (at line 2)\n" + 
 			"	public static <T extends Comparable< ? super T>> int compareTo(final Object first, final Object firstPrime,  final Class<T> type) throws ClassCastException\n" + 
 			"	               ^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"2. ERROR in X.java (at line 2)\n" + 
 			"	public static <T extends Comparable< ? super T>> int compareTo(final Object first, final Object firstPrime,  final Class<T> type) throws ClassCastException\n" + 
 			"	                                                                                                                         ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"3. ERROR in X.java (at line 6)\n" + 
 			"	public static <X extends Comparable< ? super X>> int compareTo(final X first, final X firstPrime)\n" + 
 			"	               ^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"4. WARNING in X.java (at line 6)\n" + 
 			"	public static <X extends Comparable< ? super X>> int compareTo(final X first, final X firstPrime)\n" + 
@@ -1591,17 +1591,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"5. ERROR in Test.java (at line 11)\n" + 
 			"	public class Test<T> {\n" + 
 			"	                  ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"6. ERROR in Test.java (at line 18)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	          ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"7. ERROR in Test.java (at line 18)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	                                         ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n");
 	}
 	public void testBug83127b() {
@@ -1649,17 +1649,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"3. ERROR in Test.java (at line 11)\n" + 
 			"	public class Test<T>{\n" + 
 			"	                  ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"4. ERROR in Test.java (at line 18)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	          ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"5. ERROR in Test.java (at line 18)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	                                         ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n");
 	}
 	public void testBug83127c() {
@@ -1704,17 +1704,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"3. ERROR in Test.java (at line 8)\n" + 
 			"	public class Test<T>{\n" + 
 			"	                  ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"4. ERROR in Test.java (at line 15)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	          ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"5. ERROR in Test.java (at line 15)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	                                         ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n");
 	}
 	public void testBug83127d() {
@@ -1754,7 +1754,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in Unrelated1.java (at line 1)\n" + 
 			"	public class Unrelated1<E extends Number> {\n" + 
 			"	                        ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"----------\n" + 
 			"1. ERROR in Test.java (at line 2)\n" + 
@@ -1770,17 +1770,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"3. ERROR in Test.java (at line 8)\n" + 
 			"	public class Test<T>{\n" + 
 			"	                  ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"4. ERROR in Test.java (at line 15)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	          ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"5. ERROR in Test.java (at line 15)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	                                         ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n");
 	}
 	public void testBug83127e() {
@@ -1820,7 +1820,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in Unrelated1.java (at line 1)\n" + 
 			"	public class Unrelated1<E extends Number> {\n" + 
 			"	                        ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"----------\n" + 
 			"1. ERROR in Test.java (at line 2)\n" + 
@@ -1836,17 +1836,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"3. ERROR in Test.java (at line 9)\n" + 
 			"	public class Test<T>{\n" + 
 			"	                  ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"4. ERROR in Test.java (at line 15)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	          ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"5. ERROR in Test.java (at line 15)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	                                         ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n");
 	}
 	public void testBug83127f() {
@@ -1885,23 +1885,23 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in Unrelated1.java (at line 1)\n" + 
 			"	public class Unrelated1<E extends Number> {\n" + 
 			"	                        ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"----------\n" + 
 			"1. ERROR in Test.java (at line 8)\n" + 
 			"	public class Test<T>{\n" + 
 			"	                  ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"2. ERROR in Test.java (at line 14)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	          ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"3. ERROR in Test.java (at line 14)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	                                         ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n");
 	}
 	public void testBug83127g() {
@@ -1942,7 +1942,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in Unrelated1.java (at line 1)\n" + 
 			"	public class Unrelated1<E extends Number> {\n" + 
 			"	                        ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"----------\n" + 
 			"1. ERROR in Test.java (at line 2)\n" + 
@@ -1958,17 +1958,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"3. ERROR in Test.java (at line 9)\n" + 
 			"	public class Test<T>{\n" + 
 			"	                  ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"4. ERROR in Test.java (at line 16)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	          ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"5. ERROR in Test.java (at line 16)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	                                         ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n");
 	}
 	public void testBug83127h() {
@@ -2009,7 +2009,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in Unrelated2.java (at line 1)\n" + 
 			"	public interface Unrelated2<E> {\n" + 
 			"	                            ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"----------\n" + 
 			"1. ERROR in Test.java (at line 2)\n" + 
@@ -2020,17 +2020,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"2. ERROR in Test.java (at line 10)\n" + 
 			"	public class Test<T>{\n" + 
 			"	                  ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"3. ERROR in Test.java (at line 17)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	          ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"4. ERROR in Test.java (at line 17)\n" + 
 			"	class Sub<E extends Number> extends Test<E> {\n" + 
 			"	                                         ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n");
 	}
 
@@ -2064,17 +2064,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in Test.java (at line 3)\r\n" +
 			"	public void foo(int a, int... args) {}\r\n" +
 			"	                       ^^^^^^^^^^^\n" +
-			"Syntax error, varargs are only available if source level is 1.5\n" +
+			"Syntax error, varargs are only available if source level is 1.5 or greater\n" +
 			"----------\n" +
 			"2. ERROR in Test.java (at line 4)\r\n" +
 			"	public void foo(String... args) {}\r\n" +
 			"	                ^^^^^^^^^^^^^^\n" +
-			"Syntax error, varargs are only available if source level is 1.5\n" +
+			"Syntax error, varargs are only available if source level is 1.5 or greater\n" +
 			"----------\n" +
 			"3. ERROR in Test.java (at line 5)\r\n" +
 			"	public void foo(Exception str, boolean... args) {}\r\n" +
 			"	                               ^^^^^^^^^^^^^^^\n" +
-			"Syntax error, varargs are only available if source level is 1.5\n" +
+			"Syntax error, varargs are only available if source level is 1.5 or greater\n" +
 			"----------\n"
 		);
 	}
@@ -2105,17 +2105,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in Test.java (at line 3)\n" +
 			"	public void foo(int a, int... args) {}\n" +
 			"	                       ^^^^^^^^^^^\n" +
-			"Syntax error, varargs are only available if source level is 1.5\n" +
+			"Syntax error, varargs are only available if source level is 1.5 or greater\n" +
 			"----------\n" +
 			"2. ERROR in Test.java (at line 4)\n" +
 			"	public void foo(String... args) {}\n" +
 			"	                ^^^^^^^^^^^^^^\n" +
-			"Syntax error, varargs are only available if source level is 1.5\n" +
+			"Syntax error, varargs are only available if source level is 1.5 or greater\n" +
 			"----------\n" +
 			"3. ERROR in Test.java (at line 5)\n" +
 			"	public void foo(Exception str, boolean... args) {}\n" +
 			"	                               ^^^^^^^^^^^^^^^\n" +
-			"Syntax error, varargs are only available if source level is 1.5\n" +
+			"Syntax error, varargs are only available if source level is 1.5 or greater\n" +
 			"----------\n" +
 			"----------\n" +
 			"1. ERROR in Invalid.java (at line 2)\n" +
@@ -2461,17 +2461,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in test\\X.java (at line 8)\n" + 
 			"	public <T> G<T> foo(Class<T> stuffClass) {\n" + 
 			"	        ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"2. ERROR in test\\X.java (at line 8)\n" + 
 			"	public <T> G<T> foo(Class<T> stuffClass) {\n" + 
 			"	             ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"3. ERROR in test\\X.java (at line 8)\n" + 
 			"	public <T> G<T> foo(Class<T> stuffClass) {\n" + 
 			"	                          ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"4. ERROR in test\\X.java (at line 15)\n" + 
 			"	* @param <T>\n" + 
@@ -2481,17 +2481,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"5. ERROR in test\\X.java (at line 19)\n" + 
 			"	public <T extends Object> G<T> foo(Class<T> stuffClass);\n" + 
 			"	        ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"6. ERROR in test\\X.java (at line 19)\n" + 
 			"	public <T extends Object> G<T> foo(Class<T> stuffClass);\n" + 
 			"	                            ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"7. ERROR in test\\X.java (at line 19)\n" + 
 			"	public <T extends Object> G<T> foo(Class<T> stuffClass);\n" + 
 			"	                                         ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"8. ERROR in test\\X.java (at line 22)\n" + 
 			"	* @param <T>\n" + 
@@ -2501,7 +2501,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"9. ERROR in test\\X.java (at line 24)\n" + 
 			"	class G<T> {}\n" + 
 			"	        ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n"
 		);
 	}
@@ -2554,12 +2554,12 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"2. ERROR in test\\X.java (at line 9)\n" + 
 			"	public <T> X(Class<T> classT) {\n" + 
 			"	        ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"3. ERROR in test\\X.java (at line 9)\n" + 
 			"	public <T> X(Class<T> classT) {\n" + 
 			"	                   ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"4. ERROR in test\\X.java (at line 12)\n" + 
 			"	* @param <T>\n" + 
@@ -2569,27 +2569,27 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"5. ERROR in test\\X.java (at line 16)\n" + 
 			"	public <T> Class<T> foo(Class<T> classT) {\n" + 
 			"	        ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"6. ERROR in test\\X.java (at line 16)\n" + 
 			"	public <T> Class<T> foo(Class<T> classT) {\n" + 
 			"	                 ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"7. ERROR in test\\X.java (at line 16)\n" + 
 			"	public <T> Class<T> foo(Class<T> classT) {\n" + 
 			"	                              ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"8. ERROR in test\\X.java (at line 25)\n" + 
 			"	public <T> Y(Class<T> classT) {\n" + 
 			"	        ^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"9. ERROR in test\\X.java (at line 25)\n" + 
 			"	public <T> Y(Class<T> classT) {\n" + 
 			"	                   ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"10. ERROR in test\\X.java (at line 25)\n" + 
 			"	public <T> Y(Class<T> classT) {\n" + 
@@ -2599,17 +2599,17 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"11. ERROR in test\\X.java (at line 32)\n" + 
 			"	public <T extends Object> Class<T> foo(Class<T> stuffClass) {\n" + 
 			"	        ^^^^^^^^^^^^^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"12. ERROR in test\\X.java (at line 32)\n" + 
 			"	public <T extends Object> Class<T> foo(Class<T> stuffClass) {\n" + 
 			"	                                ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"13. ERROR in test\\X.java (at line 32)\n" + 
 			"	public <T extends Object> Class<T> foo(Class<T> stuffClass) {\n" + 
 			"	                                             ^\n" + 
-			"Syntax error, parameterized types are only available if source level is 1.5\n" + 
+			"Syntax error, parameterized types are only available if source level is 1.5 or greater\n" + 
 			"----------\n"
 		);
 	}
@@ -3204,7 +3204,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in X.java (at line 1)\n" +
 			"	public class X<T, F> {\n" +
 			"	               ^^^^\n" +
-			"Syntax error, type parameters are only available if source level is 1.5\n" +
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 			"----------\n" +
 			"2. ERROR in X.java (at line 4)\n" +
 			"	* @param <T>  \n" +
@@ -3219,7 +3219,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"4. ERROR in X.java (at line 7)\n" +
 			"	static class Entry<L, R> {\n" +
 			"	                   ^^^^\n" +
-			"Syntax error, type parameters are only available if source level is 1.5\n" +
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 			"----------\n"
 		);
 	}
@@ -3242,7 +3242,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in X.java (at line 1)\n" + 
 			"	public class X<T, F> {\n" + 
 			"	               ^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"2. ERROR in X.java (at line 4)\n" + 
 			"	* @see T Variable \n" + 
@@ -3257,7 +3257,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"4. ERROR in X.java (at line 7)\n" + 
 			"	static class Entry<L, R> {\n" + 
 			"	                   ^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n"
 		);
 	}
@@ -3280,7 +3280,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in X.java (at line 1)\n" +
 			"	public class X<T, F> {\n" +
 			"	               ^^^^\n" +
-			"Syntax error, type parameters are only available if source level is 1.5\n" +
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 			"----------\n" +
 			"2. ERROR in X.java (at line 4)\n" +
 			"	* @param <T>  \n" +
@@ -3295,7 +3295,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"4. ERROR in X.java (at line 7)\n" +
 			"	class Entry<L, R> {\n" +
 			"	            ^^^^\n" +
-			"Syntax error, type parameters are only available if source level is 1.5\n" +
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 			"----------\n"
 		);
 	}
@@ -3318,7 +3318,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in X.java (at line 1)\n" + 
 			"	public class X<T, F> {\n" + 
 			"	               ^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n" + 
 			"2. ERROR in X.java (at line 4)\n" + 
 			"	* @see T Variable \n" + 
@@ -3333,7 +3333,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"4. ERROR in X.java (at line 7)\n" + 
 			"	class Entry<L, R> {\n" + 
 			"	            ^^^^\n" + 
-			"Syntax error, type parameters are only available if source level is 1.5\n" + 
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" + 
 			"----------\n"
 		);
 	}
@@ -3399,7 +3399,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in Test.java (at line 6)\n" +
 			"	public class Test<T> {\n" +
 			"	                  ^\n" +
-			"Syntax error, type parameters are only available if source level is 1.5\n" +
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 			"----------\n");
 	}
 
@@ -3735,7 +3735,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 			"1. ERROR in TestClass.java (at line 1)\r\n" +
 			"	class TestClass<T> {\r\n" +
 			"	                ^\n" +
-			"Syntax error, type parameters are only available if source level is 1.5\n" +
+			"Syntax error, type parameters are only available if source level is 1.5 or greater\n" +
 			"----------\n"
 		);
 	}
