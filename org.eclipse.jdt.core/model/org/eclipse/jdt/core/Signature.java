@@ -645,6 +645,14 @@ private static int appendClassTypeSignature(char[] string, int start, boolean fu
 				}
 				break;
 			 case C_DOLLAR :
+//{ObjectTeams: remove _OT$ prefix:
+				if(buffer.toString().endsWith("_OT")) { //$NON-NLS-1$
+					int len = buffer.length();
+					buffer.delete(len-3, len);
+					removePackageQualifiers = false; // see below
+					break;
+				}
+//SH}
 			 	innerTypeStart = buffer.length();
 			 	inAnonymousType = false;
 			 	if (resolved) {
