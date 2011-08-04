@@ -15,7 +15,6 @@
 package org.eclipse.jdt.core.dom;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.jdt.core.WorkingCopyOwner;
@@ -1884,21 +1883,15 @@ class DefaultBindingResolver extends BindingResolver {
 				SingleVariableDeclaration realVariable = (SingleVariableDeclaration)variable;
 				LocalDeclaration fakedArgument = ((LiftingTypeReference)abstractVariableDeclaration.type).fakedArgument;
 				if (fakedArgument != null) {
-					IVariableBinding fakedBinding = getVariableBinding(fakedArgument.binding, variable);
-					
 					// fake the internal local with role type, while avoiding the internal variable name (_OT$<arg>)
-					SingleVariableDeclaration fakedVariable = ast.newSingleVariableDeclaration();
-					fakedVariable.setName((SimpleName) variable.getName().clone(ast));
-					Type roleType = ((LiftingType)realVariable.getType()).getRoleType();
-					fakedVariable.setType((Type) roleType.clone(ast));
-					List modifiers = realVariable.modifiers();
-					for(Object mod : modifiers)
-						fakedVariable.modifiers().add(((Modifier)mod).clone(ast));
-					
-					this.bindingsToAstNodes.put(fakedBinding, fakedVariable);
-					key = fakedBinding.getKey();
-					if (key != null)
-						this.bindingTables.bindingKeysToBindings.put(key, fakedBinding);
+					SingleVariableDeclaration fakedVariable = realVariable.newFakedRoleVariable((LiftingType) realVariable.getType());
+					if (fakedVariable != null) { // else a faked variable has already been registered
+						IVariableBinding fakedBinding = getVariableBinding(fakedArgument.binding, variable);
+						this.bindingsToAstNodes.put(fakedBinding, fakedVariable);
+						key = fakedBinding.getKey();
+						if (key != null)
+							this.bindingTables.bindingKeysToBindings.put(key, fakedBinding);
+					}
 				}
 			}
 // SH}

@@ -1969,7 +1969,12 @@ public abstract class ASTNode {
 	 * @see #getParent
 	 * @since 3.0
 	 */
+//{ObjectTeams: make overridable:
+/* orig:
 	final void setParent(ASTNode parent, StructuralPropertyDescriptor property) {
+  :giro */
+	void setParent(ASTNode parent, StructuralPropertyDescriptor property) {
+// SH}
 		this.ast.modifying();
 		this.parent = parent;
 		this.location = property;

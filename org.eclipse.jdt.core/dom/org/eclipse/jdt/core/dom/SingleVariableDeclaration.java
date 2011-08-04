@@ -191,6 +191,32 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 */
 	private Expression optionalInitializer = null;
 
+//{ObjectTeams: emulation for declared lifting:
+	private SingleVariableDeclaration fakedRoleVariable;
+	public static final ChildPropertyDescriptor FAKED_ROLE_VARIABLE = 
+			new ChildPropertyDescriptor(SingleVariableDeclaration.class, "fakedRoleVariable", SingleVariableDeclaration.class, OPTIONAL, NO_CYCLE_RISK); //$NON-NLS-1$
+
+	@SuppressWarnings("unchecked")
+	SingleVariableDeclaration newFakedRoleVariable(LiftingType liftingType) {
+		if (this.fakedRoleVariable != null)
+			return null;
+		this.fakedRoleVariable = this.ast.newSingleVariableDeclaration();
+		this.fakedRoleVariable.setName((SimpleName) getName().clone(this.ast));
+		Type roleType = liftingType.getRoleType();
+		this.fakedRoleVariable.setType((Type) roleType.clone(this.ast));
+		for(Object mod : this.modifiers)
+			this.fakedRoleVariable.modifiers().add(((Modifier)mod).clone(this.ast));
+		return this.fakedRoleVariable;
+	}
+	@Override
+	void setParent(ASTNode parent, StructuralPropertyDescriptor property) {
+		// we might have one more node that needs a parent:
+		super.setParent(parent, property);
+		if (this.fakedRoleVariable != null)
+			this.fakedRoleVariable.setParent(this, FAKED_ROLE_VARIABLE);
+	}
+// SH}
+
 	/**
 	 * Creates a new AST node for a variable declaration owned by the given
 	 * AST. By default, the variable declaration has: no modifiers, an
