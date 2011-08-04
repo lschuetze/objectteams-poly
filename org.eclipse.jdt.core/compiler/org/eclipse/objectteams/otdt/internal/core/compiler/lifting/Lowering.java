@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2009 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2011 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -20,13 +20,14 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 
-import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.*;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
-import org.eclipse.jdt.internal.compiler.flow.FlowContext;
-import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
+import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -83,7 +84,17 @@ public class Lowering implements IOTConstants {
         // this assertion needed for pushing/casting using unchecked one-byte opcodes.
         assert expressionType == null || expressionType.leafComponentType() instanceof ReferenceBinding;
 
-    	PushingExpression provider = new PushingExpression(expression);
+    	LocalVariableBinding localVar = null;
+    	Expression unloweredExpression = expression;
+    	if (needNullCheck) {
+        	localVar = makeNewLocal(scope, unloweredType, sourceStart, sourceEnd);
+        	SingleNameReference varRef = gen.singleNameReference(localVar.name);
+        	varRef.binding = localVar;
+        	varRef.bits = Binding.LOCAL;
+        	varRef.constant = Constant.NotAConstant;
+        	varRef.resolvedType = unloweredType;
+			unloweredExpression = varRef;
+    	}
 
         if(unloweredType.isArrayType())
 		{
@@ -91,9 +102,7 @@ public class Lowering implements IOTConstants {
 			ArrayLowering trans = new ArrayLowering(teamExpression);
 			loweringExpr =  trans.lowerArray(
 								scope,
-								needNullCheck ?
-										new PopExpression(expressionType, unloweredType, provider) :
-										expression,
+								unloweredExpression,
 								unloweredType,
 								requiredType);
 		}
@@ -105,9 +114,7 @@ public class Lowering implements IOTConstants {
             if (needMethod) {
             	// (3) translation using _OT$.getBase() method:
 				MessageSend callLower = gen.messageSend(
-                		needNullCheck ?
-                				new PopExpression(expressionType, unloweredType, provider) :
-                				expression,
+						unloweredExpression,
                 		IOTConstants._OT_GETBASE,
 						new Expression[0]);
 
@@ -127,24 +134,18 @@ public class Lowering implements IOTConstants {
                 FieldReference invokeBaseOnRole =
                     new FieldReference(IOTConstants._OT_BASE, (((long)sourceStart) << 32) + sourceEnd);
                 ReferenceBinding roleClass = roleType.roleModel.getClassPartBinding();
-
-                if (needNullCheck) {
-                    invokeBaseOnRole.receiver  =
-							new PopExpression(expressionType, roleClass, provider); // this includes the cast.
+                TypeReference classRef = gen.typeReference(roleClass);
+                if (classRef != null) {
+                	// field access needs cast to the role-class.
+                	// FIXME(SH): use synthetic role field accessor instead!
+                	CastExpression unloweredExpr;
+                    unloweredExpr = new CastExpression(unloweredExpression, classRef, CastExpression.NEED_CLASS);
+                    unloweredExpr.constant     = Constant.NotAConstant;
+                    unloweredExpr.resolvedType = roleClass;
+					unloweredExpr.bits        |= ASTNode.GenerateCheckcast;
+	                invokeBaseOnRole.receiver  = unloweredExpr;
                 } else {
-	                TypeReference classRef = gen.typeReference(roleClass);
-	                if (classRef != null) {
-	                	// field access needs cast to the role-class.
-	                	// FIXME(SH): use synthetic role field accessor instead!
-	                	CastExpression unloweredExpr;
-	                    unloweredExpr = new CastExpression(expression, classRef, CastExpression.NEED_CLASS);
-	                    unloweredExpr.constant     = Constant.NotAConstant;
-	                    unloweredExpr.resolvedType = roleClass;
-						unloweredExpr.bits        |= ASTNode.GenerateCheckcast;
-		                invokeBaseOnRole.receiver  = unloweredExpr;
-	                } else {
-	                	invokeBaseOnRole.receiver  = expression;
-	                }
+                	invokeBaseOnRole.receiver  = unloweredExpression;
                 }
 
                 invokeBaseOnRole.actualReceiverType = roleClass;
@@ -159,177 +160,70 @@ public class Lowering implements IOTConstants {
             }
 		}
         if (needNullCheck) {
-        	// ((expression)<pushed> == null) ? (RequiredType)<pop> : lower(<pop>).
-			loweringExpr = new LoweringConditional(
-					expression,
-					gen.nullCheck(provider),
-					new PopExpression(expressionType, requiredType, provider), // casted null instead of lowering
-					loweringExpr); // contains a PopExpression as receiver
+        	// ((local = (expression)) == null) ? (RequiredType)local : lower(local));
+			SingleNameReference lhs = gen.singleNameReference(localVar.name);
+			lhs.binding = localVar;
+			lhs.resolvedType = unloweredType;
+			lhs.bits = Binding.LOCAL|ASTNode.FirstAssignmentToLocal;
+			Assignment assignment = gen.assignment(lhs, expression);
+			assignment.constant = Constant.NotAConstant;
+			loweringExpr = new CheckedLoweringExpression(expression, gen.nullCheck(assignment), gen.nullLiteral(), loweringExpr, localVar);
 			loweringExpr.constant = Constant.NotAConstant;
 			loweringExpr.resolvedType = requiredType;
         }
         return loweringExpr;
 	}
 	
-	/**
-     * Special conditional expression that redirects code-gen (bypass all push/pop business) if no value is required.
-     */
-	class LoweringConditional extends ConditionalExpression {
-		private Expression origExpression;
-		LoweringConditional (Expression origExpression, Expression condition, Expression valueIfTrue, Expression valueIfFalse)
-		{
-			super(condition, valueIfTrue, valueIfFalse);
-			this.origExpression = origExpression;
-		}
-		
-		public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
-			if (!valueRequired) 
-				// avoid fiddling with the stack for unused values, only create the side-effects of expression:
-				origExpression.generateCode(currentScope, codeStream, valueRequired);
-			else
-				super.generateCode(currentScope, codeStream, valueRequired);
-		}	
+	LocalVariableBinding makeNewLocal(BlockScope scope, TypeBinding variableType, int sourceStart, int sourceEnd) {
+		char[] name = ("_OT$lowered"+sourceStart).toCharArray(); //$NON-NLS-1$
+		LocalVariableBinding varBinding = new LocalVariableBinding(name,
+																   variableType,
+																   ClassFileConstants.AccFinal|ExtraCompilerModifiers.AccBlankFinal,
+																   false);
+		varBinding.declaration = new LocalDeclaration(name, sourceStart, sourceEnd); // needed for BlockScope.computeLocalVariablePositions() -> CodeStream.record()
+		scope.addLocalVariable(varBinding);
+		varBinding.setConstant(Constant.NotAConstant);
+		varBinding.useFlag = LocalVariableBinding.USED;
+		return varBinding;
 	}
 	
+	/** A conditional expression that checks for null before performing the actual lowering. */
+	static class CheckedLoweringExpression extends ConditionalExpression {
+		
+		private final LocalVariableBinding localVar;
+		Expression origExpression;
+
+		CheckedLoweringExpression(Expression origExpression,
+								  Expression condition,
+								  Expression valueIfTrue,
+								  Expression valueIfFalse,
+								  LocalVariableBinding localVar)
+		{
+			super(condition, valueIfTrue, valueIfFalse);
+			this.localVar = localVar;
+			this.origExpression = origExpression;
+		}
+
+		@Override
+		public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
+			codeStream.addVisibleLocalVariable(this.localVar);
+			super.generateCode(currentScope, codeStream, valueRequired);
+		}
+	}
+
 	public static boolean isLoweringConditional(Expression expr) {
-		return expr instanceof LoweringConditional;
+		return expr instanceof CheckedLoweringExpression;
 	}
 
 	/**
-	 * A wrapper for an expression that needs to be duplicated on the stack for later reuse.
-	 */
-	class PushingExpression extends Expression {
-		// the wrapped expression
-		Expression expression;
-		// stack level where this value resides (even after consuming this expression).
-		int stackDepth = -1;
-
-		/**
-		 * @param expression real expression to wrap.
-		 */
-		PushingExpression (Expression expression) {
-			this.expression = expression;
-			this.constant = Constant.NotAConstant;
-			this.sourceStart = expression.sourceStart;
-			this.sourceEnd   = expression.sourceEnd;
-		}
-		/** Simply forward. */
-		public void traverse(ASTVisitor visitor, BlockScope scope) {
-		    this.expression.traverse(visitor, scope);
-		}
-
-		/** Simply forward. */
-		public FlowInfo analyseCode(BlockScope  currentScope, FlowContext flowContext, FlowInfo    flowInfo) {
-		    return this.expression.analyseCode(currentScope, flowContext, flowInfo);
-		}
-
-		/** Simply forward. */
-		public TypeBinding resolveType(BlockScope scope) {
-			if (this.constant == null)
-				this.constant = Constant.NotAConstant;
-			return this.resolvedType = this.expression.resolveType(scope);
-		}
-
-		/** Forward and duplicate. */
-		public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired)
-		{
-			this.expression.generateCode(currentScope, codeStream, valueRequired);
-
-			this.stackDepth = codeStream.stackDepth; // remember stack level
-
-			// The following line is the actual purpose of this class:
-			codeStream.dup();
-		}
-
-		/** Mainly forward. */
-		@SuppressWarnings("nls")
-		public StringBuffer printExpression(int indent, StringBuffer output) {
-			output.append("(");
-			this.expression.printExpression(indent, output);
-			output.append(")<pushed>");
-			return output;
-		}
-
-	}
-
-	/** A placeholder for a value that is not computed but already exists on the stack.
-	 *  Only a type cast might be needed to reuse that value.
-	 *  However, the needed value might be burried by another value,
-	 *  in that case retrieve it using a swap bytecode.
-	 */
-	static class PopExpression extends Expression {
-
-		// a previously pushed null may need to be re-interpreted by a cast:
-		private boolean castRequired;
-
-		// the expression that has produced (dup-ed) the value of this expression.
-		PushingExpression provider;
-
-		/**
-		 * @param pushedType This type was pushed before.
-		 * @param popType    This type is needed now.
-		 * @param provider   The expression that has produced (dup-ed) the value of this expression.
-		 */
-		PopExpression (TypeBinding pushedType, TypeBinding popType, PushingExpression provider)
-		{
-			this.resolvedType = popType;
-			if (popType == null)
-				this.resolvedType = pushedType;
-			else
-				this.castRequired = pushedType != popType;
-			this.provider = provider;
-			this.sourceStart = provider.sourceStart;
-			this.sourceEnd = provider.sourceEnd;
-			this.constant = Constant.NotAConstant;
-		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.compiler.ast.Expression#printExpression(int, java.lang.StringBuffer)
-		 */
-		@SuppressWarnings("nls")
-		public StringBuffer printExpression(int indent, StringBuffer output) {
-			output.append("<pop>");
-			return output;
-		}
-		public TypeBinding resolveType(BlockScope scope) {
-			return this.resolvedType;
-		}
-
-		public void generateCode(
-				BlockScope currentScope,
-				CodeStream codeStream,
-				boolean valueRequired)
-		{
-			// don't create a value, operand is already on stack.
-
-			// just look where exactly the value resides:
-			if (this.provider.stackDepth + 1 == codeStream.stackDepth) // maximum difference is 1.
-			{
-				// value is burried, swap now:
-				codeStream.swap();
-			} else {
-				assert this.provider.stackDepth == codeStream.stackDepth; // value is already in position.
-			}
-
-			if (this.castRequired) // might only need to be casted.
-				codeStream.checkcast(this.resolvedType);
-		}
-	}
-
-	public static boolean isPopExpression (Expression expression) {
-		return expression instanceof PopExpression;
-	}
-
-	/**
-	 * Extract the actual value, considering wrapping by PushingExpression/PopExpression.
+	 * Extract the actual value, considering wrapping by CheckedLoweringExpression.
 	 *
 	 * @param expression
 	 * @return the actual value to be lowered
 	 */
 	public static Expression unwrapExpression(Expression expression) {
-		if (expression instanceof PushingExpression)
-			return ((PushingExpression)expression).expression;
-		if (expression instanceof PopExpression)
-			return ((PopExpression)expression).provider.expression;
+		if (expression instanceof CheckedLoweringExpression)
+			return ((CheckedLoweringExpression)expression).origExpression;
 		return null;
 	}
 }

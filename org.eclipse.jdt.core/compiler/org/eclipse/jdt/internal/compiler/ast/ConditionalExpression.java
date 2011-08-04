@@ -23,7 +23,6 @@ import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lowering;
 
 /**
  * OTDT changes:
@@ -232,9 +231,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 				codeStream.updateLastRecordedEndPC(currentScope, position);
 				// Tune codestream stack size
 				if (valueRequired) {
-//{ObjectTeams: these don't really produce bytes on the stack:
-				  if (! Lowering.isPopExpression(this.valueIfTrue))
-// SH}
 					switch(this.resolvedType.id) {
 						case TypeIds.T_long :
 						case TypeIds.T_double :
