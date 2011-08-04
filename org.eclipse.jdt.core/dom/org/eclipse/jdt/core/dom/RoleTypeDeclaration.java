@@ -322,8 +322,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
         super(ast);
         if (ast.apiLevel == AST.JLS2) {
             this.superInterfaceNames = new ASTNode.NodeList(SUPER_INTERFACES_PROPERTY);
-        }
-        if (ast.apiLevel >= AST.JLS3) {
+        } else {
             this.typeParameters = new ASTNode.NodeList(TYPE_PARAMETERS_PROPERTY);
             this.superInterfaceTypes = new ASTNode.NodeList(SUPER_INTERFACE_TYPES_PROPERTY);
         }
@@ -677,8 +676,7 @@ public class RoleTypeDeclaration extends TypeDeclaration {
                 acceptChild(visitor, getBaseClass());
                 acceptChildren(visitor, this.superInterfaceNames);
                 acceptChildren(visitor, this.bodyDeclarations);
-            }
-            if (this.ast.apiLevel >= AST.JLS3) {
+            } else {
                 acceptChild(visitor, getJavadoc());
                 acceptChildren(visitor, this.modifiers);
                 acceptChild(visitor, getName());

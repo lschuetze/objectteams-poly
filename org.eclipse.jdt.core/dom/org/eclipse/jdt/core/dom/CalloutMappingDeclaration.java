@@ -183,7 +183,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	 */
 	public static List propertyDescriptors(int apiLevel)
 	{
-		if(apiLevel == AST.JLS3)
+		if(apiLevel >= AST.JLS3)
 			return PROPERTY_DESCRIPTORS_3_0;
 		else
 			return PROPERTY_DESCRIPTORS_2_0;
