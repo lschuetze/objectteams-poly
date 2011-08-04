@@ -214,7 +214,7 @@ public void generateArguments(MethodBinding binding, Expression[] arguments, Blo
 // orig:
 			arguments[i].generateCode(currentScope, codeStream, true);
 // :giro
-			if (i < originalParameters.length) { // consider varargs
+			if (i < originalParameters.length) { // consider polymorphic signatures
 				TypeBinding requiredType = checkRoleToPlainCast(arguments[i].resolvedType, originalParameters[i]);
 				if (requiredType != null)
 					codeStream.checkcast(requiredType);
