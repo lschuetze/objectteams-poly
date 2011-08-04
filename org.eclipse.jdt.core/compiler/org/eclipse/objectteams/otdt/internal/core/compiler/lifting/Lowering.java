@@ -20,13 +20,20 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 
-import org.eclipse.jdt.internal.compiler.ast.*;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.Assignment;
+import org.eclipse.jdt.internal.compiler.ast.CastExpression;
+import org.eclipse.jdt.internal.compiler.ast.ConditionalExpression;
+import org.eclipse.jdt.internal.compiler.ast.Expression;
+import org.eclipse.jdt.internal.compiler.ast.FieldReference;
+import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.MessageSend;
+import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
-import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -175,11 +182,8 @@ public class Lowering implements IOTConstants {
 	}
 	
 	LocalVariableBinding makeNewLocal(BlockScope scope, TypeBinding variableType, int sourceStart, int sourceEnd) {
-		char[] name = ("_OT$lowered"+sourceStart).toCharArray(); //$NON-NLS-1$
-		LocalVariableBinding varBinding = new LocalVariableBinding(name,
-																   variableType,
-																   ClassFileConstants.AccFinal|ExtraCompilerModifiers.AccBlankFinal,
-																   false);
+		char[] name = ("_OT$unlowered$"+sourceStart).toCharArray(); //$NON-NLS-1$
+		LocalVariableBinding varBinding = new LocalVariableBinding(name, variableType, 0, false);
 		varBinding.declaration = new LocalDeclaration(name, sourceStart, sourceEnd); // needed for BlockScope.computeLocalVariablePositions() -> CodeStream.record()
 		scope.addLocalVariable(varBinding);
 		varBinding.setConstant(Constant.NotAConstant);
