@@ -22,6 +22,7 @@ import org.apache.bcel.*;
 
 import java.util.*;
 
+import org.eclipse.objectteams.otre.jplis.JPLISEnhancer;
 import org.eclipse.objectteams.otre.util.*;
 
 /**
@@ -120,6 +121,7 @@ public class TeamInterfaceImplementation
 
 		Method newClinit = mg.getMethod();
 		cg.replaceMethod(clinitMethod, newClinit);
+    	JPLISEnhancer.requireClassFileVersionLessThan51(cg);
 
 		il.dispose(); // Reuse instruction handles
 	}
@@ -270,6 +272,7 @@ public class TeamInterfaceImplementation
 
 		Method newMethod = mg.getMethod();
 		cg.replaceMethod(method, newMethod);
+    	JPLISEnhancer.requireClassFileVersionLessThan51(cg);
 		il.dispose(); // Reuse instruction handles	
 	}
 
@@ -464,7 +467,8 @@ public class TeamInterfaceImplementation
 			Method m = methods[i];
 			if (candidateForImplicitActivation(m, cg, cpg)) {
                 if(logging) printLogMessage("Adding implicit activation to " + m.getName());
-				cg.replaceMethod(m, genImplicitActivation(m, cg.getClassName(), cpg, false)); 
+				cg.replaceMethod(m, genImplicitActivation(m, cg.getClassName(), cpg, false));
+		    	JPLISEnhancer.requireClassFileVersionLessThan51(cg);
 			}
 		}
 	}

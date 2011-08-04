@@ -21,6 +21,7 @@ import java.util.HashSet;
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.*;
 import org.apache.bcel.*;
+import org.eclipse.objectteams.otre.jplis.JPLISEnhancer;
 
 import static org.eclipse.objectteams.otre.ObjectTeamsTransformation.newMethodGen;
 
@@ -144,6 +145,7 @@ public class ThreadActivation
         mg.setMaxLocals();
         Method generatedMethod = mg.getMethod();
         cg.replaceMethod(runMethode, generatedMethod);
+    	JPLISEnhancer.requireClassFileVersionLessThan51(cg);
         threadActivation.dispose();
         il.dispose();
 	}
@@ -176,6 +178,7 @@ public class ThreadActivation
 		mg.setMaxStack();
 	    mg.setMaxLocals();
 	    cg.replaceMethod(initMethod, mg.getMethod());
+    	JPLISEnhancer.requireClassFileVersionLessThan51(cg);
 	    il.dispose();
 	}
 }

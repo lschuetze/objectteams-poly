@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.objectteams.otre.jplis.JPLISEnhancer;
 import org.eclipse.objectteams.otre.util.AnnotationHelper;
 import org.eclipse.objectteams.otre.util.AttributeReadingGuard;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
@@ -742,6 +743,7 @@ public abstract class ObjectTeamsTransformation
     	mainMethod.setMaxLocals();
     	
     	cg.replaceMethod(main, mainMethod.getMethod());
+    	JPLISEnhancer.requireClassFileVersionLessThan51(cg);
     }
 
 	/**
@@ -1485,6 +1487,7 @@ public abstract class ObjectTeamsTransformation
 		copyAndAdjustLineNumbers(mg, newConstructor, addedCodeLength, startOfAddedCode);
 		
 		cg.replaceMethod(m, newConstructor.getMethod());
+    	JPLISEnhancer.requireClassFileVersionLessThan51(cg);
 	}
 
 	/** 

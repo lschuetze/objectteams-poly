@@ -22,6 +22,7 @@ import org.apache.bcel.*;
 
 import java.util.*;
 
+import org.eclipse.objectteams.otre.jplis.JPLISEnhancer;
 import org.eclipse.objectteams.otre.util.*;
 
 /**
@@ -93,6 +94,7 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
             
     		if (candidateForImplicitActivation(m, cg, cpg)) { // TODO: check the other preconditions, like not abstact etc. 
     			cg.replaceMethod(m, genImplicitActivation(m, class_name, cpg, true));
+    	    	JPLISEnhancer.requireClassFileVersionLessThan51(cg);
     		}
     		
     		if (!isCallin(m, cg))

@@ -67,6 +67,7 @@ public class JPLISEnhancer implements ClassEnhancer {
 							   + " to class " + cg.getClassName())
 						.printStackTrace();
 		cg.addMethod(m);
+		requireClassFileVersionLessThan51(cg);
 	}
 
 	public void addOrReplaceMethod(Method method, ClassGen cg) {
@@ -75,6 +76,15 @@ public class JPLISEnhancer implements ClassEnhancer {
 			addMethod(method, cg);
 		else
 			cg.replaceMethod(existingMethod, method);
+		requireClassFileVersionLessThan51(cg);
+	}
+
+	public static void requireClassFileVersionLessThan51(ClassGen cg) {
+		// added methods would be invalid without a stackmap attribute,
+		// work around this by setting the class file to 50.0 (Java6),
+		// where the old verifier is still supported as a fallback.
+		if (cg.getMajor() >= 51)
+			cg.setMajor(50);
 	}
 	
 	/* (non-Javadoc)

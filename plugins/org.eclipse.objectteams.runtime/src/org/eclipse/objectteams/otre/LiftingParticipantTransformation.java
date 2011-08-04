@@ -41,6 +41,7 @@ import org.apache.bcel.generic.NOP;
 import org.apache.bcel.generic.ObjectType;
 import org.apache.bcel.generic.POP;
 import org.apache.bcel.generic.Type;
+import org.eclipse.objectteams.otre.jplis.JPLISEnhancer;
 
 /**
  * If the property ot.lifting.participant is set transform all lift methods and insert 
@@ -98,6 +99,7 @@ public class LiftingParticipantTransformation extends ObjectTeamsTransformation 
     			continue;
     		
 			cg.replaceMethod(m, m = weaveLiftingParticipant(m, class_name, cpg));
+	    	JPLISEnhancer.requireClassFileVersionLessThan51(cg);
     	}
 	}
 
