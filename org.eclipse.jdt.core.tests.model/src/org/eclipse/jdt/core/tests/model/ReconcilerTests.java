@@ -774,40 +774,6 @@ public void testAnnotations5() throws JavaModelException {
 			annotation.discardWorkingCopy();
 	}
 }
-
-/*
- * Bug 337868 - [compiler][model] incomplete support for package-info.java when using SearchableEnvironment
- * Ensures that an annotated package-info.java doesn't confuse the reconciler.
- */
-public void testAnnotations6() throws CoreException {
-
-	createFolder("/Reconciler15/src/p1");
-
-	createFile("/Reconciler15/src/p1/package-info.java", "@java.lang.Deprecated package p1;");
-	createFile("/Reconciler15/src/p1/C.java",
-			"package p1;\n" +
-			"public class C {\n" +
-			"  static class Y extends C {}\n" +
-			"}"
-	);
-	ICompilationUnit myWC = getCompilationUnit("/Reconciler15/src/p1/C.java").getWorkingCopy(this.wcOwner, null);
-	org.eclipse.jdt.core.dom.CompilationUnit unit = myWC.reconcile(AST.JLS3, true, this.wcOwner, null);
-	assertProblems(
-			"Unexpected problems",
-			"----------\n" + 
-			"----------\n" + 
-			"----------\n" + 
-			"----------\n"
-	);
-	assertASTNodeEquals(
-			"Unexpected ast",
-			"package p1;\n" + 
-			"public class C {\n" + 
-			"static class Y extends C {\n" + 
-			"  }\n" + 
-			"}\n",
-			unit);
-}
 /*
  * Ensures that the AST broadcasted during a reconcile operation is correct.
  * (case of a working copy being reconciled with changes, creating AST and no problem detection)

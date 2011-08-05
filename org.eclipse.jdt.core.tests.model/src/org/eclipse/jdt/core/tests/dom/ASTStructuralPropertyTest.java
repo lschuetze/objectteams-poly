@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2009 IBM Corporation and others.
+ * Copyright (c) 2004, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -336,18 +336,17 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 			if (nodeClass != null) {
 				try {
 					ASTNode node = this.ast.createInstance(nodeClass);
-					if (this.ast.apiLevel() == AST.JLS2) {
 //{ObjectTeams: adpated for new OT-specific ASTNodes
-/* orig:
+					if ((nodeType >= 85) && (nodeType <= 100)) {
+						// good: OT node
+					} else
+// SH}
+					if (this.ast.apiLevel() == AST.JLS2) {
 						assertTrue((nodeType >= 1) && (nodeType <= 69));
-  :giro */
-						assertTrue(((nodeType >= 1) && (nodeType <= 69)) || ((nodeType >= 84) && (nodeType <= 99)));
-					} else {
-/* orig:
+					} else if (this.ast.apiLevel() == AST.JLS3) {
 						assertTrue((nodeType >= 1) && (nodeType <= 83));
-  :giro */
-						assertTrue(((nodeType >= 1) && (nodeType <= 83)) || ((nodeType >= 84) && (nodeType <= 99)));
-// jwl}
+					} else if (this.ast.apiLevel() == AST.JLS4) {
+						assertTrue((nodeType >= 1) && (nodeType <= 84));
 					}
 					assertTrue(node.getNodeType() == nodeType);
 					//ASTNode node2 = ast.createInstance(nodeType);
@@ -355,8 +354,10 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 				} catch (RuntimeException e) {
 					if (this.ast.apiLevel() == AST.JLS2) {
 						assertTrue((nodeType < 1) || (nodeType > 69));
-					} else {
+					} else if (this.ast.apiLevel() == AST.JLS3) {
 						assertTrue((nodeType < 1) || (nodeType > 83));
+					} else if (this.ast.apiLevel() == AST.JLS4) {
+						assertTrue((nodeType < 1) || (nodeType > 84));
 					}
 				}
 			}
@@ -364,10 +365,18 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 	}
 
 	public void testNodeClassForType() {
+//{ObjectTeams: larger range:
+/* orig:
 		Set classes = new HashSet(100);
 		// make sure node types are contiguous starting at 0
 		int hi = 0;
-		for (int nodeType = 1; nodeType < 100; nodeType++) {
+		for (int nodeType = 1; nodeType < 100; nodeType++) { 
+  :giro */
+		Set classes = new HashSet(120);
+		// make sure node types are contiguous starting at 0
+		int hi = 0;
+		for (int nodeType = 1; nodeType < 120; nodeType++) {
+// SH}
 			try {
 				Class nodeClass = ASTNode.nodeClassForType(nodeType);
 				assertTrue(ASTNode.class.isAssignableFrom(nodeClass));
@@ -382,9 +391,9 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 		}
 // {ObjectTeams: adapted for OT specific ASTNodes		
 /* orig:
-		assertTrue(hi == 83); // last known one
+		assertTrue(hi == 84); // last known one
   :giro */
-		assertTrue(hi == 99); // last known one
+		assertTrue(hi == 100); // last known one
 // jwl}		
 		assertTrue(classes.size() == hi); // all classes are distinct
 	}
