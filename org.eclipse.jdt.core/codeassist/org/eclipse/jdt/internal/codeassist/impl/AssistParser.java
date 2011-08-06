@@ -982,12 +982,20 @@ protected void flushElementStack() {
  * Build specific type reference nodes in case the cursor is located inside the type reference
  */
 protected TypeReference getTypeReference(int dim) {
-
+//{ObjectTeams: wrap to introduce 2nd parameter
+	return getTypeReference(dim, false);  
+}
+protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
+// orig:
 	int index;
 
 	/* no need to take action if not inside completed identifiers */
 	if ((index = indexOfAssistIdentifier(true)) < 0) {
+/*
 		return super.getTypeReference(dim);
+ :giro */
+		return super.getTypeReference(dim, liftingTypeAllowed);
+// SH}
 	}
 	int length = this.identifierLengthStack[this.identifierLengthPtr];
 	TypeReference reference;
