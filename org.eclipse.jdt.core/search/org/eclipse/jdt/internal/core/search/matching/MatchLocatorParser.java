@@ -866,7 +866,15 @@ protected TypeReference copyDims(TypeReference typeRef, int dim) {
 	return result;
 }
 protected TypeReference getTypeReference(int dim) {
+//{ObjectTeams: wrap to introduce 2nd parameter
+	return getTypeReference(dim, false);  
+}
+protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
+/*orig:
 	TypeReference typeRef = super.getTypeReference(dim);
+ :giro */
+	TypeReference typeRef = super.getTypeReference(dim, liftingTypeAllowed);
+// SH}
 	if (this.patternFineGrain == 0) {
 		this.patternLocator.match(typeRef, this.nodeSet); // NB: Don't check container since type reference can happen anywhere
 	}
