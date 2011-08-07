@@ -400,6 +400,18 @@ public TypeDeclaration(CompilationResult compilationResult){
  *	We cause the compilation task to abort to a given extent.
  */
 public void abort(int abortLevel, CategorizedProblem problem) {
+//{ObjectTeams: also mark in the state that we're done:
+	switch (abortLevel) {
+		case AbortCompilation :
+		case AbortCompilationUnit :
+			StateHelper.setStateRecursive(this.scope.referenceCompilationUnit(), ITranslationStates.STATE_FINAL, false);
+			break;
+		case AbortMethod:
+			break;
+		default :
+			StateHelper.setStateRecursive(this, ITranslationStates.STATE_FINAL, false);
+	}
+// SH}
 	switch (abortLevel) {
 		case AbortCompilation :
 			throw new AbortCompilation(this.compilationResult, problem);

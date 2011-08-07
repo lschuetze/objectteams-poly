@@ -170,7 +170,7 @@ public class StateHelper
 	 * make sure to reach all models of all types.
 	 * @param markRoleUnit TODO
 	 */
-	static void setStateRecursive(TypeDeclaration decl, int state, boolean markRoleUnit)
+	public static void setStateRecursive(TypeDeclaration decl, int state, boolean markRoleUnit)
 	{
 	    TypeModel model;
 	    boolean processed = false;
