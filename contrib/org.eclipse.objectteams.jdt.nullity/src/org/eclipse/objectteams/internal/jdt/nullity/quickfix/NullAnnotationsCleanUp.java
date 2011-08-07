@@ -70,12 +70,16 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	protected ICleanUpFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
+		IProblemLocation[] locations = null;
 		ArrayList<IProblemLocation> filteredLocations = new ArrayList<IProblemLocation>();
-		for (int i = 0; i < problems.length; i++) {
-			if (problems[i].getProblemId() == this.handledProblemID)
-				filteredLocations.add(problems[i]);
+		if (problems != null) {
+			for (int i = 0; i < problems.length; i++) {
+				if (problems[i].getProblemId() == this.handledProblemID)
+					filteredLocations.add(problems[i]);
+			}
+			locations = filteredLocations.toArray(new IProblemLocation[filteredLocations.size()]);
 		}
-		return this.master.createCleanUp(compilationUnit, filteredLocations.toArray(new IProblemLocation[filteredLocations.size()]), this.handledProblemID);
+		return this.master.createCleanUp(compilationUnit, locations, this.handledProblemID);
 	}
 
 	private Map getRequiredOptions() {
@@ -92,15 +96,16 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	public String[] getStepDescriptions() {
 		List result= new ArrayList();
 		switch (this.handledProblemID) {
-		case DefiniteNullToNonNullParameter:
 		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
-		case DefiniteNullFromNonNullMethod:
-		case PotentialNullFromNonNullMethod:
+		case RequiredNonNullButProvidedNull:
+		case RequiredNonNullButProvidedPotentialNull:
+		case RequiredNonNullButProvidedUnknown:
 			result.add(FixMessages.NullAnnotationsCleanUp_add_nullable_annotation);
 			break;
 		case IllegalDefinitionToNonNullParameter:
 		case IllegalRedefinitionToNonNullParameter:
+		case ParameterLackingNonNullAnnotation:
 			result.add(FixMessages.NullAnnotationsCleanUp_add_nonnull_annotation);
 			break;	
 		}

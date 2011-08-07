@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -217,11 +218,9 @@ public class RewriteOperations {
 			return null;
 				
 		switch (problem.getProblemId()) {
-		case DefiniteNullToNonNullParameter:
-		case PotentialNullToNonNullParameter:
-		case IllegalReturnNullityRedefinition:
+//		case IllegalReturnNullityRedefinition:
 		case IllegalDefinitionToNonNullParameter:
-		case IllegalRedefinitionToNonNullParameter:
+//		case IllegalRedefinitionToNonNullParameter:
 			// these affect another method
 			break;
 		default:
@@ -256,7 +255,7 @@ public class RewriteOperations {
 			ASTNode methodDecl = compilationUnit.findDeclaringNode(methodBinding.getKey());
 			if (methodDecl == null)
 				return null;
-			message = Messages.format(FixMessages.QuickFixes_declare_method_parameter_nullable, annotationNameLabel);
+			message = Messages.format(FixMessages.QuickFixes_declare_method_parameter_nullness, annotationNameLabel);
 			result = new ParameterAnnotationRewriteOperation(compilationUnit,
 														     (MethodDeclaration) methodDecl,
 														     annotationToAdd,
@@ -271,20 +270,21 @@ public class RewriteOperations {
 			MethodDeclaration declaration= (MethodDeclaration) declaringNode;
 			
 			switch (problem.getProblemId()) {
+				case ParameterLackingNonNullAnnotation:
 				case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 				case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 					// statements suggest changing parameters:
-					if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
-						IBinding binding = ((SimpleName)selectedNode).resolveBinding();
-						if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isParameter()) {
-							message = Messages.format(FixMessages.QuickFixes_declare_method_parameter_nullable, annotationNameLabel);
+					if (declaration.getNodeType() == ASTNode.METHOD_DECLARATION) {
+						String paramName = findAffectedParameterName(selectedNode);
+						if (paramName != null) {
+							message = Messages.format(FixMessages.QuickFixes_declare_method_parameter_nullness, annotationNameLabel);
 							result = new ParameterAnnotationRewriteOperation(compilationUnit,
-																							   declaration,
-																							   annotationToAdd,
-																							   annotationToRemove,
-																							   ((SimpleName) selectedNode).getIdentifier(),
-																							   allowRemove,
-																							   message);
+																		   declaration,
+																		   annotationToAdd,
+																		   annotationToRemove,
+																		   paramName,
+																		   allowRemove,
+																		   message);
 						}
 					}
 					break;
@@ -293,12 +293,13 @@ public class RewriteOperations {
 					result = createChangeOverriddenParameterOperation(compilationUnit, cu, declaration, selectedNode, allowRemove,
 																	  annotationToAdd, annotationToRemove, annotationNameLabel);
 					break;
-				case IllegalReturnNullityRedefinition:
-					result = createChangeOverriddenReturnOperation(compilationUnit, cu, declaration, allowRemove,
-																   annotationToAdd, annotationToRemove, annotationNameLabel);
-					break;
-				case DefiniteNullFromNonNullMethod:
-				case PotentialNullFromNonNullMethod:
+// TODO: how do we know which method to change (this or super)?
+//				case IllegalReturnNullityRedefinition:
+//					result = createChangeOverriddenReturnOperation(compilationUnit, cu, declaration, allowRemove,
+//																   annotationToAdd, annotationToRemove, annotationNameLabel);
+//					break;
+				case RequiredNonNullButProvidedNull:
+				case RequiredNonNullButProvidedPotentialNull:
 					message = Messages.format(FixMessages.QuickFixes_declare_method_return_nullable, annotationNameLabel);
 					result = new ReturnAnnotationRewriteOperation(compilationUnit,
 																				    declaration,
@@ -348,14 +349,27 @@ public class RewriteOperations {
 									annotationNameLabel,
 									BasicElementLabels.getJavaElementName(overridden.getDeclaringClass().getName())
 								  });
+		String paramName = findAffectedParameterName(selectedNode);
 		result = new ParameterAnnotationRewriteOperation(compilationUnit,
 													     declaration,
 													     annotationToAdd,
 													     annotationToRemove,
-													     ((SimpleName) selectedNode).getIdentifier(),
+													     paramName,
 													     allowRemove,
 													     message);
 		return result;
+	}
+	
+	static String findAffectedParameterName(ASTNode selectedNode) {
+		VariableDeclaration argDecl = (VariableDeclaration) ASTNodes.getParent(selectedNode, VariableDeclaration.class);
+		if (argDecl != null)
+			return argDecl.getName().getIdentifier();
+		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME) {
+			IBinding binding = ((SimpleName)selectedNode).resolveBinding();
+			if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding)binding).isParameter())
+				return ((SimpleName)selectedNode).getIdentifier();
+		}
+		return null;
 	}
 
 	static SignatureAnnotationRewriteOperation createChangeOverriddenReturnOperation(CompilationUnit compilationUnit,

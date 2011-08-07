@@ -13,6 +13,7 @@ package org.eclipse.objectteams.internal.jdt.nullity;
 import static org.eclipse.jdt.core.compiler.IProblem.ImportRelated;
 import static org.eclipse.jdt.core.compiler.IProblem.Internal;
 import static org.eclipse.jdt.core.compiler.IProblem.MethodRelated;
+import static org.eclipse.jdt.core.compiler.IProblem.TypeRelated;
 
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -41,37 +42,25 @@ public class Constants {
 	/** Additional constants for {@link org.eclipse.jdt.core.compiler.IProblem}. */
 	public static interface IProblem {
 		/** @since 3.7 */
-		int DefiniteNullFromNonNullMethod = MethodRelated + 910;
+		int RequiredNonNullButProvidedNull = TypeRelated + 910;
 		/** @since 3.7 */
-		int PotentialNullFromNonNullMethod = MethodRelated + 911;
+		int RequiredNonNullButProvidedPotentialNull = TypeRelated + 911;
 		/** @since 3.7 */
-		int NonNullReturnInsufficientInfo = MethodRelated + 912;
+		int RequiredNonNullButProvidedUnknown = TypeRelated + 912;
 		/** @since 3.7 */
-		int DefiniteNullToNonNullParameter = MethodRelated + 913;
+		int MissingNullAnnotationType = ImportRelated + 913;
 		/** @since 3.7 */
-		int PotentialNullToNonNullParameter = MethodRelated + 914;
+		int IllegalReturnNullityRedefinition = MethodRelated + 914;
 		/** @since 3.7 */
-		int NonNullParameterInsufficientInfo = MethodRelated + 915;
+		int IllegalRedefinitionToNonNullParameter = MethodRelated + 915;
 		/** @since 3.7 */
-		int DefiniteNullToNonNullLocal = Internal + 916;
+		int IllegalDefinitionToNonNullParameter = MethodRelated + 916;
 		/** @since 3.7 */
-		int PotentialNullToNonNullLocal = Internal + 917;
+		int ParameterLackingNonNullAnnotation = MethodRelated + 917;
 		/** @since 3.7 */
-		int NonNullLocalInsufficientInfo = Internal + 918;
+		int PotentialNullMessageSendReference = Internal + 918;
 		/** @since 3.7 */
-		int MissingNullAnnotationType = ImportRelated + 919;
-		/** @since 3.7 */
-		int IllegalReturnNullityRedefinition = MethodRelated + 920;
-		/** @since 3.7 */
-		int IllegalRedefinitionToNonNullParameter = MethodRelated + 921;
-		/** @since 3.7 */
-		int IllegalDefinitionToNonNullParameter = MethodRelated + 922;
-		/** @since 3.7 */
-		int ParameterLackingNonNullAnnotation = 923;
-		/** @since 3.7 */
-		int PotentialNullMessageSendReference = Internal + 924;
-		/** @since 3.7 */
-		int RedundantNullCheckOnNonNullMessageSend = 925;
+		int RedundantNullCheckOnNonNullMessageSend = Internal + 919;
 	}
 	
 	/** Translate from a nullness annotation to the corresponding tag bit or 0L. */

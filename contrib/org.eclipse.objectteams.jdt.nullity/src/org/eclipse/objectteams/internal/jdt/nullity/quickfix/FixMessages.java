@@ -21,7 +21,7 @@ public class FixMessages extends NLS {
 	
 	public static String QuickFixes_add_annotation_change_name;
 	
-	public static String QuickFixes_declare_method_parameter_nullable;
+	public static String QuickFixes_declare_method_parameter_nullness;
 
 	public static String QuickFixes_declare_method_return_nullable;
 
