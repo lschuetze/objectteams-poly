@@ -673,6 +673,43 @@ public void test_parameter_specification_inheritance_009() {
 	    false/*shouldFlush*/,
 	    null/*vmArgs*/);
 }
+// class default is nonnull, method and its super both use the default
+public void test_parameter_specification_inheritance_010() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runConformTest(
+		new String[] {
+	"p1/X.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class X {\n" +
+			"    protected String getString(String s) {\n" +
+			"        if (Character.isLowerCase(s.charAt(0)))\n" +
+			"	        return getString(s);\n" +
+			"	     return s;\n" +
+			"    }\n" +
+			"}\n",
+	"p1/Y.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y extends X {\n" +
+			"    @Override\n" +
+			"    protected String getString(String s) {\n" +
+			"	     return super.getString(s);\n" +
+			"    }\n" +
+			"}\n",
+		},
+		"",
+		LIBS,
+		true/*shouldFlushOutputDirectory*/,
+		null/*vmArguments*/,
+		customOptions,
+		null/*compilerRequestor*/);
+}
+
 // a nullable return value is dereferenced without a check
 public void test_nullable_return_001() {
 	runNegativeTest(
@@ -1043,6 +1080,7 @@ public void test_annotation_import_002() {
 		null/*compilerRequestor*/);
 }
 // explicit import of existing annotation types
+// using a Lib without null specifications
 public void test_annotation_import_005() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
@@ -1121,11 +1159,6 @@ public void test_annotation_import_006() {
 		"	@MustNotBeNull Object getObject(@MustNotBeNull Lib l) {\n" + 
 		"	                                 ^^^^^^^^^^^^^\n" + 
 		"MustNotBeNull cannot be resolved to a type\n" + 
-// TODO(SH): may want to report more specific error: 
-//		"1. ERROR in Lib.java (at line 0)\n" + 
-//		"	public class Lib {\n" + 
-//		"	^\n" + 
-//		"Buildpath problem: the type org.foo.MayBeNull which is configured as a null annotation type cannot be resolved.\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -1313,7 +1346,7 @@ public void test_default_nullness_002() {
 		"2. ERROR in Y.java (at line 4)\n" + 
 		"	@Nullable Object getObject(Object o) {\n" + 
 		"	                           ^^^^^^\n" + 
-		"Missing null annotation: inherited method from X declares this parameter as @Nullable\n" + 
+		"Illegal redefinition of parameter o, inherited method from X declares this parameter as @Nullable\n" + 
 		"----------\n",
 		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
