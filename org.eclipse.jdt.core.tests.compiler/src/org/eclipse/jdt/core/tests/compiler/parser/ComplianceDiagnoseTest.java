@@ -1887,7 +1887,12 @@ public void test0041() {
 		"----------\n" +
 		"1. ERROR in X.java (at line 2)\n" +
 		"	Z <Y1, for Y2> var;\n" +
-		"	  ^^^^^^^^^^^^\n" +
+//{ObjectTeams: slightly different error range:
+/* orig:
+  		"	  ^^^^^^^^^^^^\n" +
+  :giro */
+  		"	   ^^^^^^^^^^\n" +
+// SH}
 		"Syntax error on tokens, delete these tokens\n" +
 		"----------\n";
 	String expected14ProblemLog =
