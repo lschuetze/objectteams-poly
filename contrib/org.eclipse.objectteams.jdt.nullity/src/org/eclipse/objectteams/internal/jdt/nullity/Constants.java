@@ -24,54 +24,54 @@ public class Constants {
 	static interface TagBits extends org.eclipse.jdt.internal.compiler.lookup.TagBits {
 		long HasBoundArguments = ASTNode.Bit13; // for method bindings to avoid duplicate invocation of bindArguments()
 		 // the following two should be added to TagBits.AllStandardAnnotationsMask:
-		long AnnotationNullable = ASTNode.Bit54L;
-		long AnnotationNonNull = ASTNode.Bit55L;
-		long AnnotationNullableByDefault = ASTNode.Bit56L;
-		long AnnotationNonNullByDefault = ASTNode.Bit57L;
+		long AnnotationNullable = ASTNode.Bit56L;
+		long AnnotationNonNull = ASTNode.Bit57L;
+		long AnnotationNullableByDefault = ASTNode.Bit58L;
+		long AnnotationNonNullByDefault = ASTNode.Bit59L;
 	}
 	
 	/** Additional constants for {@link org.eclipse.jdt.internal.compiler.lookup.TypeIds}. */
 	static interface TypeIds {
-		final int T_ConfiguredAnnotationNullable = 60;
-		final int T_ConfiguredAnnotationNonNull = 61;
-		final int T_ConfiguredAnnotationNullableByDefault = 62;
-		final int T_ConfiguredAnnotationNonNullByDefault = 63;
+		final int T_ConfiguredAnnotationNullable = 63;
+		final int T_ConfiguredAnnotationNonNull = 64;
+		final int T_ConfiguredAnnotationNullableByDefault = 65;
+		final int T_ConfiguredAnnotationNonNullByDefault = 66;
 	}
 
 	/** Additional constants for {@link org.eclipse.jdt.core.compiler.IProblem}. */
 	public static interface IProblem {
 		/** @since 3.7 */
-		int DefiniteNullFromNonNullMethod = MethodRelated + 880;
+		int DefiniteNullFromNonNullMethod = MethodRelated + 910;
 		/** @since 3.7 */
-		int PotentialNullFromNonNullMethod = MethodRelated + 881;
+		int PotentialNullFromNonNullMethod = MethodRelated + 911;
 		/** @since 3.7 */
-		int NonNullReturnInsufficientInfo = MethodRelated + 882;
+		int NonNullReturnInsufficientInfo = MethodRelated + 912;
 		/** @since 3.7 */
-		int DefiniteNullToNonNullParameter = MethodRelated + 883;
+		int DefiniteNullToNonNullParameter = MethodRelated + 913;
 		/** @since 3.7 */
-		int PotentialNullToNonNullParameter = MethodRelated + 884;
+		int PotentialNullToNonNullParameter = MethodRelated + 914;
 		/** @since 3.7 */
-		int NonNullParameterInsufficientInfo = MethodRelated + 885;
+		int NonNullParameterInsufficientInfo = MethodRelated + 915;
 		/** @since 3.7 */
-		int DefiniteNullToNonNullLocal = Internal + 886;
+		int DefiniteNullToNonNullLocal = Internal + 916;
 		/** @since 3.7 */
-		int PotentialNullToNonNullLocal = Internal + 887;
+		int PotentialNullToNonNullLocal = Internal + 917;
 		/** @since 3.7 */
-		int NonNullLocalInsufficientInfo = Internal + 888;
+		int NonNullLocalInsufficientInfo = Internal + 918;
 		/** @since 3.7 */
-		int MissingNullAnnotationType = ImportRelated + 889;
+		int MissingNullAnnotationType = ImportRelated + 919;
 		/** @since 3.7 */
-		int IllegalReturnNullityRedefinition = MethodRelated + 890;
+		int IllegalReturnNullityRedefinition = MethodRelated + 920;
 		/** @since 3.7 */
-		int IllegalRedefinitionToNonNullParameter = MethodRelated + 891;
+		int IllegalRedefinitionToNonNullParameter = MethodRelated + 921;
 		/** @since 3.7 */
-		int IllegalDefinitionToNonNullParameter = MethodRelated + 892;
+		int IllegalDefinitionToNonNullParameter = MethodRelated + 922;
 		/** @since 3.7 */
-		int ParameterLackingNonNullAnnotation = 893;
+		int ParameterLackingNonNullAnnotation = 923;
 		/** @since 3.7 */
-		int PotentialNullMessageSendReference = Internal + 894;
+		int PotentialNullMessageSendReference = Internal + 924;
 		/** @since 3.7 */
-		int RedundantNullCheckOnNonNullMessageSend = 895;
+		int RedundantNullCheckOnNonNullMessageSend = 925;
 	}
 	
 	/** Translate from a nullness annotation to the corresponding tag bit or 0L. */
