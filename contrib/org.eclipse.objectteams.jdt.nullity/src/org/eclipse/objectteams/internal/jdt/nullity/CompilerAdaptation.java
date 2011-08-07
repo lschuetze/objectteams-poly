@@ -366,21 +366,21 @@ public team class CompilerAdaptation {
 		 */
 		public void addNullnessAnnotation(long defaultNullness, ReferenceBinding annotationBinding) {
 			Annotation[] annotations = getAnnotations();
-			setAnnotations(addAnnotation(annotations, annotationBinding));
+			setAnnotations(addAnnotation(this, annotations, annotationBinding));
 		}
 		/** 
-		 * Metarialize a null parameter annotation that has been added from the current default,
+		 * Materialize a null parameter annotation that has been added from the current default,
 		 * in order to ensure that this annotation will be generated into the .class file, too.
 		 */
 		public void addParameterNullnessAnnotation(int i, long defaultNullness, ReferenceBinding annotationBinding) {
 			Argument argument = getArguments()[i];
 			Annotation[] annotations = argument.annotations;
-			argument.annotations = addAnnotation(annotations, annotationBinding);
+			argument.annotations = addAnnotation(argument.type, annotations, annotationBinding);
 		}
 
-		Annotation[] addAnnotation(Annotation[] annotations, ReferenceBinding annotationBinding) {
-			int sourceStart = this.sourceStart();
-			long pos = ((long)sourceStart<<32) + this.sourceEnd();
+		Annotation[] addAnnotation(ASTNode location, Annotation[] annotations, ReferenceBinding annotationBinding) {
+			int sourceStart = location.sourceStart();
+			long pos = ((long)sourceStart<<32) + location.sourceEnd();
 			long[] poss = new long[annotationBinding.compoundName.length];
 			Arrays.fill(poss, pos);
 			MarkerAnnotation annotation = new MarkerAnnotation(new QualifiedTypeReference(annotationBinding.compoundName, poss), sourceStart);
@@ -457,7 +457,7 @@ public team class CompilerAdaptation {
 
 		void bindMethodArguments() <- after void computeMethods();
 
-		void fillInDefaultNullness() <- after void checkMethods();
+		void fillInDefaultNullness() <- before void checkMethods();
 		
 		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length) {
 			// TODO: change traversal: process all methods at once!
@@ -542,8 +542,7 @@ public team class CompilerAdaptation {
 		}
 		
 		/** 
-		 * after checkMethods has passed down inherited nullness info,
-		 * now fill in missing annotations from a default setting from an enclosing scope.
+		 * fill in missing annotations from a default setting from an enclosing scope.
 		 */
 		void fillInDefaultNullness() {
 			TypeBinding annotationBinding = findDefaultNullness();
