@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -211,30 +212,55 @@ public class RewriteOperations {
 																				   String annotationToRemove, 
 																				   Set<String> handledPositions,
 																				   boolean thisUnitOnly, 
+																				   boolean allowRemove,
+																				   boolean modifyOverridden) 
+	{
+		SignatureAnnotationRewriteOperation result = modifyOverridden
+			? createAddAnnotationToOverriddenOperation(compilationUnit, problem, annotationToAdd, annotationToRemove,
+															handledPositions, thisUnitOnly, allowRemove)
+			: createAddAnnotationOperation(compilationUnit, problem, annotationToAdd, annotationToRemove, 
+															handledPositions, thisUnitOnly, allowRemove);
+		if (handledPositions != null && result != null) {
+			if (handledPositions.contains(result.getKey()))
+				return null;
+			handledPositions.add(result.getKey());
+		}
+		return result;
+	}
+	static SignatureAnnotationRewriteOperation createAddAnnotationOperation(CompilationUnit compilationUnit, 
+																				   IProblemLocation problem, 
+																				   String annotationToAdd, 
+																				   String annotationToRemove, 
+																				   Set<String> handledPositions,
+																				   boolean thisUnitOnly, 
 																				   boolean allowRemove) 
 	{
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
+
+		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+		if (selectedNode == null)
+			return null;
+		
+		ASTNode declaringNode= getDeclaringNode(selectedNode);
 				
 		switch (problem.getProblemId()) {
-//		case IllegalReturnNullityRedefinition:
 		case IllegalDefinitionToNonNullParameter:
 //		case IllegalRedefinitionToNonNullParameter:
 			// these affect another method
 			break;
+		case IllegalReturnNullityRedefinition:
+			if (declaringNode == null)
+				declaringNode = selectedNode;
+			break; // do propose changes even if we already have an annotation
 		default:
 			// if this method has annotations, don't change'em
 			if (QuickFixes.hasExplicitNullAnnotation(cu, problem.getOffset()))
 				return null;
 		}
 		
-		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
-		if (selectedNode == null)
-			return null;
-			
 		SignatureAnnotationRewriteOperation result = null;
-		ASTNode declaringNode= getDeclaringNode(selectedNode);
 		String message = null;
 		String annotationNameLabel = annotationToAdd; 
 		int lastDot = annotationToAdd.lastIndexOf('.');
@@ -288,35 +314,78 @@ public class RewriteOperations {
 						}
 					}
 					break;
-				case IllegalDefinitionToNonNullParameter:
-				case IllegalRedefinitionToNonNullParameter:
-					result = createChangeOverriddenParameterOperation(compilationUnit, cu, declaration, selectedNode, allowRemove,
-																	  annotationToAdd, annotationToRemove, annotationNameLabel);
-					break;
-// TODO: how do we know which method to change (this or super)?
-//				case IllegalReturnNullityRedefinition:
-//					result = createChangeOverriddenReturnOperation(compilationUnit, cu, declaration, allowRemove,
-//																   annotationToAdd, annotationToRemove, annotationNameLabel);
-//					break;
+				case IllegalReturnNullityRedefinition:
 				case RequiredNonNullButProvidedNull:
 				case RequiredNonNullButProvidedPotentialNull:
-					message = Messages.format(FixMessages.QuickFixes_declare_method_return_nullable, annotationNameLabel);
+					message = Messages.format(FixMessages.QuickFixes_declare_method_return_nullness, annotationNameLabel);
 					result = new ReturnAnnotationRewriteOperation(compilationUnit,
-																				    declaration,
-																				    annotationToAdd,
-																				    annotationToRemove,
-																				    allowRemove,
-																				    message);
+																    declaration,
+																    annotationToAdd,
+																    annotationToRemove,
+																    allowRemove,
+																    message);
 					break;
 			}
 			
 		}
-		if (handledPositions != null && result != null) {
-			if (handledPositions.contains(result.getKey()))
-				return null;
-			handledPositions.add(result.getKey());
-		}
 		return result;
+	}
+	static SignatureAnnotationRewriteOperation createAddAnnotationToOverriddenOperation(CompilationUnit compilationUnit, 
+																							   IProblemLocation problem, 
+																							   String annotationToAdd, 
+																							   String annotationToRemove, 
+																							   Set<String> handledPositions,
+																							   boolean thisUnitOnly, 
+																							   boolean allowRemove) 
+	{
+		ICompilationUnit cu = (ICompilationUnit) compilationUnit.getJavaElement();
+		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
+			return null;
+
+		ASTNode selectedNode = problem.getCoveringNode(compilationUnit);
+		if (selectedNode == null)
+			return null;
+
+		ASTNode declaringNode = getDeclaringNode(selectedNode);
+
+		switch (problem.getProblemId()) {
+		case IllegalDefinitionToNonNullParameter:
+		case IllegalRedefinitionToNonNullParameter:
+			break;
+		case IllegalReturnNullityRedefinition:
+			if (declaringNode == null)
+				declaringNode = selectedNode;
+			break;
+		default:
+			return null;
+		}
+
+		String annotationNameLabel = annotationToAdd;
+		int lastDot = annotationToAdd.lastIndexOf('.');
+		if (lastDot != -1)
+			annotationNameLabel = annotationToAdd.substring(lastDot + 1);
+		annotationNameLabel = BasicElementLabels.getJavaElementName(annotationNameLabel);
+
+		if (declaringNode instanceof MethodDeclaration) {
+
+			// complaint is in signature of this method
+
+			MethodDeclaration declaration = (MethodDeclaration) declaringNode;
+
+			switch (problem.getProblemId()) {
+			case IllegalDefinitionToNonNullParameter:
+			case IllegalRedefinitionToNonNullParameter:
+				return createChangeOverriddenParameterOperation(compilationUnit, cu, declaration, selectedNode,
+						allowRemove, annotationToAdd, annotationToRemove, annotationNameLabel);
+			case IllegalReturnNullityRedefinition:
+				if (hasNullAnnotation(declaration)) { // don't adjust super if local has no explicit annotation (?)
+					return createChangeOverriddenReturnOperation(compilationUnit, cu, declaration, allowRemove,
+							annotationToAdd, annotationToRemove, annotationNameLabel);
+				}
+			}
+
+		}
+		return null;
 	}
 
 	static SignatureAnnotationRewriteOperation createChangeOverriddenParameterOperation(CompilationUnit compilationUnit,
@@ -371,6 +440,27 @@ public class RewriteOperations {
 		}
 		return null;
 	}
+	
+	static boolean hasNullAnnotation(MethodDeclaration decl) {
+		List modifiers = decl.modifiers();
+		String nonnull = QuickFixes.getNonNullAnnotationName(decl.resolveBinding().getJavaElement(), false);
+		String nullable = QuickFixes.getNullableAnnotationName(decl.resolveBinding().getJavaElement(), false);
+		for (Object mod : modifiers) {
+			if (mod instanceof Annotation) {
+				Name annotationName = ((Annotation) mod).getTypeName();
+				String fullyQualifiedName = annotationName.getFullyQualifiedName();
+				if (annotationName.isSimpleName() 
+						? nonnull.endsWith(fullyQualifiedName) 
+						: fullyQualifiedName.equals(nonnull))
+					return true;
+				if (annotationName.isSimpleName() 
+						? nullable.endsWith(fullyQualifiedName) 
+						: fullyQualifiedName.equals(nullable))
+					return true;
+			}
+		}
+		return false;
+	}
 
 	static SignatureAnnotationRewriteOperation createChangeOverriddenReturnOperation(CompilationUnit compilationUnit,
 																					 ICompilationUnit cu,
@@ -396,6 +486,9 @@ public class RewriteOperations {
 		if (methodDecl == null)
 			return null;
 		declaration = (MethodDeclaration) methodDecl;
+// TODO(SH): decide whether we want to propose overwriting existing annotations in super
+//		if (hasNullAnnotation(declaration)) // if overridden has explicit declaration don't propose to change it
+//			return null;
 		message = Messages.format(FixMessages.QuickFixes_declare_overridden_return_as_nullable, 
 				                  new String[] {
 									annotationNameLabel,

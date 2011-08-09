@@ -29,6 +29,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -116,7 +117,8 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		case IllegalDefinitionToNonNullParameter:
 		case IllegalRedefinitionToNonNullParameter:
 		case ParameterLackingNonNullAnnotation:
-			addNullAnnotationInSignatureProposal(context, problem, proposals);
+			addNullAnnotationInSignatureProposal(context, problem, proposals, false);
+			addNullAnnotationInSignatureProposal(context, problem, proposals, true);
 			break;
 		case RequiredNonNullButProvidedNull:
 		case RequiredNonNullButProvidedPotentialNull:
@@ -125,15 +127,18 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 			if (isComplainingAboutArgument(selectedNode)
 				|| isComplainingAboutReturn(selectedNode))
-				addNullAnnotationInSignatureProposal(context, problem, proposals);
+				addNullAnnotationInSignatureProposal(context, problem, proposals, false);
 			break;
 		}
 	}
 		
 	@SuppressWarnings("unchecked")
-	void addNullAnnotationInSignatureProposal(IInvocationContext context, IProblemLocation problem, @SuppressWarnings("rawtypes") Collection proposals)
+	void addNullAnnotationInSignatureProposal(IInvocationContext context,
+											  IProblemLocation problem,
+											  @SuppressWarnings("rawtypes") Collection proposals,
+											  boolean modifyOverridden)
 	{
-		MyCURewriteOperationsFix fix= createNullAnnotationInSignatureFix(context.getASTRoot(), problem);
+		MyCURewriteOperationsFix fix= createNullAnnotationInSignatureFix(context.getASTRoot(), problem, modifyOverridden);
 		
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -184,7 +189,7 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		return selectedNode.getParent().getNodeType() == ASTNode.RETURN_STATEMENT;
 	}
 
-	MyCURewriteOperationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem)
+	MyCURewriteOperationsFix createNullAnnotationInSignatureFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean modifyOverridden)
 	{
 		String nullableAnnotationName = getNullableAnnotationName(compilationUnit.getJavaElement(), false);
 		String nonNullAnnotationName = getNonNullAnnotationName(compilationUnit.getJavaElement(), false);
@@ -195,8 +200,11 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		case IllegalDefinitionToNonNullParameter:
 		case IllegalRedefinitionToNonNullParameter:
 		case ParameterLackingNonNullAnnotation:
-			annotationToAdd = nonNullAnnotationName;
-			annotationToRemove = nullableAnnotationName;
+		case IllegalReturnNullityRedefinition:
+			if (!modifyOverridden) {
+				annotationToAdd = nonNullAnnotationName;
+				annotationToRemove = nullableAnnotationName;
+			}
 			break;
 		// all others propose to add @Nullable
 		}
@@ -204,7 +212,8 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		// when performing one change at a time we can actually modify another CU than the current one:
 		RewriteOperations.SignatureAnnotationRewriteOperation operation = 
 			RewriteOperations.createAddAnnotationOperation(
-				compilationUnit, problem, annotationToAdd, annotationToRemove, null, false/*thisUnitOnly*/, true/*allowRemove*/);
+				compilationUnit, problem, annotationToAdd, annotationToRemove, null,
+				false/*thisUnitOnly*/, true/*allowRemove*/, modifyOverridden);
 		if (operation == null)
 			return null;
 		
@@ -255,13 +264,15 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 			case IllegalDefinitionToNonNullParameter:
 			case IllegalRedefinitionToNonNullParameter:
 			case ParameterLackingNonNullAnnotation:
+			case IllegalReturnNullityRedefinition:
 				annotationToAdd = nonNullAnnotationName;
 				annotationToRemove = nullableAnnotationName;
 				// all others propose to add @Nullable
 			}
 			// when performing multiple changes we can only modify the one CU that the CleanUp infrastructure provides to the operation.
 			CompilationUnitRewriteOperation fix = RewriteOperations.createAddAnnotationOperation(
-						compilationUnit, problem, annotationToAdd, annotationToRemove, handledPositions, true/*thisUnitOnly*/, false);
+						compilationUnit, problem, annotationToAdd, annotationToRemove,
+						handledPositions, true/*thisUnitOnly*/, false/*allowRemove*/, false/*modifyOverridden*/);
 			if (fix != null)
 				result.add(fix);
 		}

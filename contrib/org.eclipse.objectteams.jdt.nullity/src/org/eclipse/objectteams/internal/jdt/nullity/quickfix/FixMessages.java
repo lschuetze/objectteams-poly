@@ -23,7 +23,7 @@ public class FixMessages extends NLS {
 	
 	public static String QuickFixes_declare_method_parameter_nullness;
 
-	public static String QuickFixes_declare_method_return_nullable;
+	public static String QuickFixes_declare_method_return_nullness;
 
 
 	public static String QuickFixes_declare_overridden_parameter_as_nonnull;
