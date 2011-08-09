@@ -497,8 +497,14 @@ public class CallinImplementor extends MethodMappingImplementor
 
 		// ------------- support for reflective function isExecutingCallin():
 		// boolean oldIsExecutingCallin = _OT$setExecutingCallin();
+        // try { ... main dispatching statements ... }
+        // finally { resetFlag }
 		MessageSend resetFlag = setExecutingCallin(roleModel, statements);
 
+		// from here on all statements go into the try block - with "finally { resetFlag(); }"
+        ArrayList<Statement> tryStatements = new ArrayList<Statement>();
+
+		
 		// -------------- call receiver & arguments --------------
 		//_OT$role.myRoleMethod(_OT$param0, ...);
 		// or:
@@ -517,7 +523,7 @@ public class CallinImplementor extends MethodMappingImplementor
         	return false;
         }
         // pack unmapped arguments (positions are set by above makeWrapperCallArguments):
-        packUnmappedArgs(baseMethodSpec, callinBindingDeclaration, callinWrapperDecl, statements, gen);
+        packUnmappedArgs(baseMethodSpec, callinBindingDeclaration, callinWrapperDecl, tryStatements, gen);
 
 		// for role-side predicate
         Expression[] predicateArgs = null;
@@ -557,7 +563,7 @@ public class CallinImplementor extends MethodMappingImplementor
 	
 			//MyRole _OT$role = _OT$liftToMyRole(_OT$base_arg);
 			if (needRoleVar)
-				statements.add(createLiftedRoleVar(callinBindingDeclaration, roleModel, baseTypeBinding, otBaseArg, gen));
+				tryStatements.add(createLiftedRoleVar(callinBindingDeclaration, roleModel, baseTypeBinding, otBaseArg, gen));
 
 			// store mapped arguments in local variables to use for predicate check
 			// and wrapper call.
@@ -566,7 +572,7 @@ public class CallinImplementor extends MethodMappingImplementor
 			Expression[] newArgs = new Expression[plainLen];
 			for (int i = offset; i < messageSendArguments.length; i++) {
  				char[] localName = (OT_LOCAL+i).toCharArray();
-				statements.add(gen.localVariable(
+ 				tryStatements.add(gen.localVariable(
  						localName,
 						roleParameters[i-offset],
  						new PotentialRoleReceiverExpression(messageSendArguments[i], ROLE_VAR_NAME, gen.typeReference(roleModel.getClassPartBinding()))));
@@ -595,7 +601,7 @@ public class CallinImplementor extends MethodMappingImplementor
 				gen);
 		if (predicateCheck != null)
         	// predicateCheck(_OT$role)
-        	statements.add(predicateCheck);
+			tryStatements.add(predicateCheck);
 
 		// ------------- the role message send:
 		MessageSend roleMessageSend = gen.messageSend(receiver, roleMethodName, messageSendArguments);
@@ -642,12 +648,35 @@ public class CallinImplementor extends MethodMappingImplementor
 			callinBindingDeclaration.resultVar = gen.localVariable(
 											IOTConstants.OT_RESULT, wrapperReturnType, null);
 			callinBindingDeclaration.resultVar.type.setBaseclassDecapsulation(DecapsulationState.REPORTED);
-			statements.add(callinBindingDeclaration.resultVar);
-			Statement roleMessageSendStatement = gen.assignment(
-											gen.singleNameReference(IOTConstants.OT_RESULT),
-											roleMessageSendExpression);
+			tryStatements.add(callinBindingDeclaration.resultVar);
+			tryStatements.add(gen.assignment(
+									gen.singleNameReference(IOTConstants.OT_RESULT),
+									roleMessageSendExpression));
+			
+			// ResultNotProvidedException?
+			if (isReturnBoxed && !callinBindingDeclaration.isResultMapped)
+			{
+				tryStatements.add(genResultNotProvidedCheck(
+						this._role.getTeamModel().getBinding().sourceName(),
+						roleTypeName, roleMethodBinding, baseTypeBinding, baseMethodSpec, gen));
+			}
+			// ------------- possibly convert using result mapping
+			if (   callinBindingDeclaration.mappings != null
+					&& callinBindingDeclaration.isResultMapped)
+			{
+				tryStatements.add(
+						stepOverGen.returnStatement(
+								new PotentialRoleReceiverExpression(
+										callinBindingDeclaration.getResultExpression(baseMethodSpec, isReturnBoxed, stepOverGen),
+										ROLE_VAR_NAME,
+										gen.typeReference(roleModel.getClassPartBinding()))));
+			} else {
+				tryStatements.add(
+						stepOverGen.returnStatement(stepOverGen.singleNameReference(IOTConstants.OT_RESULT)));
+			}
+			
 			TryStatement tryFinally = gen.tryFinally(
-								new Statement[] {roleMessageSendStatement},
+								tryStatements.toArray(new Statement[tryStatements.size()]),
 								new Statement[] {resetFlag});
 // for debugging:
 //			tryFinally.catchArguments = new Argument[] {
@@ -672,35 +701,15 @@ public class CallinImplementor extends MethodMappingImplementor
 //			};
 			statements.add(tryFinally);
 
-			// ResultNotProvidedException?
-			if (isReturnBoxed && !callinBindingDeclaration.isResultMapped)
-			{
-				statements.add(genResultNotProvidedCheck(
-						this._role.getTeamModel().getBinding().sourceName(),
-						roleTypeName, roleMethodBinding, baseTypeBinding, baseMethodSpec, gen));
-			}
-			// ------------- possibly convert using result mapping
-			if (   callinBindingDeclaration.mappings != null
-				&& callinBindingDeclaration.isResultMapped)
-			{
-				statements.add(
-					stepOverGen.returnStatement(
-							new PotentialRoleReceiverExpression(
-									callinBindingDeclaration.getResultExpression(baseMethodSpec, isReturnBoxed, stepOverGen),
-									ROLE_VAR_NAME,
-									gen.typeReference(roleModel.getClassPartBinding()))));
-			} else {
-				statements.add(
-					stepOverGen.returnStatement(stepOverGen.singleNameReference(IOTConstants.OT_RESULT)));
-			}
 		} else {
 			// try {
 			//    _OT$role.myRoleMethod(_OT$param0);
 			// finally {
 			//     _OT$setExecutingCallin(oldIsExecutingCallin);
 			// }
+			tryStatements.add(roleMessageSend);
 			statements.add(gen.tryFinally(
-					new Statement[] {roleMessageSend},
+					tryStatements.toArray(new Statement[tryStatements.size()]),
 					new Statement[] {resetFlag}));
 			statements.add(stepOverGen.returnStatement(null)); // empty return to ensure step-over in the end
 		}
