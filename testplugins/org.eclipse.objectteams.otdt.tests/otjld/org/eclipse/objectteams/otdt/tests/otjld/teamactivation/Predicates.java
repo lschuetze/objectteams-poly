@@ -2652,6 +2652,50 @@ public class Predicates extends AbstractOTJLDTest {
     		"----------\n");
     }
 
+    // Bug 354244 - Role-side callin guard predicate interferes with Team.isExecutingCallin()
+    public void test914_bindingPredicate22() {
+
+        runConformTest(
+             new String[] {
+ 		"T914bp22Main.java",
+ 			    "\n" +
+ 			    "public class T914bp22Main {\n" +
+ 			    "	public static void main(String[] args) {\n" +
+ 			    "		Team914bp22 t = new Team914bp22();\n" +
+ 			    "		T914bp22 o = new T914bp22();\n" +
+ 			    "		t.activate();\n" +
+ 			    "		o.test(1);\n" +
+ 			    "       if (t.isExecutingCallin())\n" +
+ 			    "           throw new Error(\"Flag not reset\");\n" +
+ 			    "	}\n" +
+ 			    "}\n" +
+ 			    "	\n",
+ 		"T914bp22.java",
+ 			    "\n" +
+ 			    "public class T914bp22 {\n" +
+ 			    "        public void test(int value) {\n" +
+ 			    "            System.out.print(\"OK\");\n" +
+ 			    "        }\n" +
+ 			    "}    \n" +
+ 			    "    \n",
+ 		"Team914bp22.java",
+ 			    "\n" +
+ 			    "public team class Team914bp22 {\n" +
+ 			    "	public int code = 0;\n" +
+ 			    "	protected class Role1 playedBy T914bp22 \n" +
+ 			    "	{\n" +
+ 			    "		void print(int value) {\n" +
+ 			    "			System.out.print(\"NOT\");\n" +
+ 			    "		}\n" +
+ 			    "		void print(int value) <- before void test(int value)\n" +
+ 			    "		    when (Team914bp22.this.code == value);\n" +
+ 			    "	}\n" +
+ 			    "}	\n" +
+ 			    "	\n"
+             },
+             "OK");
+    }
+
 
     // a role method has a guard predicate
     // 9.1.5-otjld-method-predicate-1
