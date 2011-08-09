@@ -106,7 +106,9 @@ public team class CompilerAdaptation {
 	
 	@SuppressWarnings({"abstractrelevantrole", "hidden-lifting-problem"}) // due to abstractness of this role failed lifting could theoretically block callin triggers
 	@Instantiation(InstantiationPolicy.ALWAYS)
-	protected abstract class Statement playedBy Statement {
+	protected abstract class Statement playedBy Statement
+		base when (reentranceExpression.get() != base)
+	{
 		abstract Expression getExpression();
 		
 		// use custom hook from JDT/Core (https://bugs.eclipse.org/335093)
@@ -141,7 +143,9 @@ public team class CompilerAdaptation {
 	
 	/** Analyse argument expressions as part of a MessageSend, check against method parameter annotation. */
 	@Instantiation(InstantiationPolicy.ALWAYS)
-	protected class MessageSend playedBy MessageSend {
+	protected class MessageSend playedBy MessageSend
+		base when (reentranceExpression.get() != base)
+	{
 
 		Expression[] getArguments() -> get Expression[] arguments;
 		MethodBinding getBinding() -> get MethodBinding binding;
@@ -158,6 +162,7 @@ public team class CompilerAdaptation {
 		
 		void analyseArguments(BlockScope currentScope, FlowInfo flowInfo) 
 		<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo)
+//			base when (!isExecutingCallin()) // victim of  https://bugs.eclipse.org/35424
 			with { currentScope <- currentScope, flowInfo <- flowInfo }
 
 		void analyseArguments(BlockScope currentScope, FlowInfo flowInfo) {
@@ -203,7 +208,9 @@ public team class CompilerAdaptation {
 	}
 	
 	@Instantiation(InstantiationPolicy.ALWAYS)
-	protected class EqualExpression playedBy EqualExpression {
+	protected class EqualExpression playedBy EqualExpression 
+		base when (reentranceExpression.get() != base)
+	{
 		
 		MessageSend getLeftMessage() 		 -> get Expression left
 			with { result					 <- (left instanceof MessageSend) ? (MessageSend) left : null }
@@ -238,6 +245,8 @@ public team class CompilerAdaptation {
 		}		
 	}
 	
+	ThreadLocal<Expression> reentranceExpression = new ThreadLocal<Expression>();
+	
 	/** Analyse the expression within a return statement, check against method return annotation. */
 	@Instantiation(InstantiationPolicy.ALWAYS)
 	protected class ReturnStatement playedBy ReturnStatement {
@@ -252,7 +261,13 @@ public team class CompilerAdaptation {
 		void analyseNull(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 			Expression expression = getExpression();
 			if (expression != null) {
-				flowInfo = expression.analyseCode(currentScope, flowContext, flowInfo); // may cause some issues to be reported twice :(
+				// can't use deactivate()&activate() due to https://bugs.eclipse.org/354268
+				reentranceExpression.set(expression);
+				try {
+					flowInfo = expression.analyseCode(currentScope, flowContext, flowInfo); // may cause some issues to be reported twice :(
+				} finally {
+					reentranceExpression.set(null);
+				}
 				int nullStatus = expression.nullStatus(flowInfo);
 				if (nullStatus != FlowInfo.NON_NULL) {
 					// if we can't prove non-null check against declared null-ness of the enclosing method:
