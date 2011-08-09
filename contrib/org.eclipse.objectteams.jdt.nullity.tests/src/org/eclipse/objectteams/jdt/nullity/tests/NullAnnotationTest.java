@@ -54,7 +54,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_nonnull_return_004" };
+//		TESTS_NAMES = new String[] { "test_parameter_specification_inheritance_011" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -697,6 +697,43 @@ public void test_parameter_specification_inheritance_010() {
 		},
 		customOptions,
 		"");
+}
+// class default is nonnull, method and its super both use the default, super-call passes null
+public void test_parameter_specification_inheritance_011() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runNegativeTestWithLibs(
+		new String[] {
+	"p1/X.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class X {\n" +
+			"    protected String getString(String s) {\n" +
+			"        if (Character.isLowerCase(s.charAt(0)))\n" +
+			"	        return getString(s);\n" +
+			"	     return s;\n" +
+			"    }\n" +
+			"}\n",
+	"p1/Y.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y extends X {\n" +
+			"    @Override\n" +
+			"    protected String getString(String s) {\n" +
+			"	     return super.getString(null);\n" +
+			"    }\n" +
+			"}\n",
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in p1\\Y.java (at line 7)\n" + 
+		"	return super.getString(null);\n" + 
+		"	                       ^^^^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value is null\n" + 
+		"----------\n");
 }
 
 // a nullable return value is dereferenced without a check
