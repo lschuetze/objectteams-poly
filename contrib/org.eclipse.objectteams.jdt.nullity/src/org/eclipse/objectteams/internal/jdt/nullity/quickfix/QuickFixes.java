@@ -169,7 +169,8 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 					}
 				};
 			}
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, this, problem.getProblemId()), 15, image, context);
+			int relevance = modifyOverridden ? 15 : 20; // TODO(SH): insert suitable values, just raise local change above change in overridden method
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new NullAnnotationsCleanUp(options, this, problem.getProblemId()), relevance, image, context);
 			proposals.add(proposal);
 		}		
 	}
