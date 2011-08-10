@@ -297,6 +297,7 @@ public class RewriteOperations {
 			
 			switch (problem.getProblemId()) {
 				case ParameterLackingNonNullAnnotation:
+				case IllegalDefinitionToNonNullParameter:
 				case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 				case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 					// statements suggest changing parameters:
@@ -317,6 +318,7 @@ public class RewriteOperations {
 				case IllegalReturnNullityRedefinition:
 				case RequiredNonNullButProvidedNull:
 				case RequiredNonNullButProvidedPotentialNull:
+				case RequiredNonNullButProvidedUnknown:
 					message = Messages.format(FixMessages.QuickFixes_declare_method_return_nullness, annotationNameLabel);
 					result = new ReturnAnnotationRewriteOperation(compilationUnit,
 																    declaration,
