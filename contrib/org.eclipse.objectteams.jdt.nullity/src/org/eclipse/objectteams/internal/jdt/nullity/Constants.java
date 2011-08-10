@@ -31,6 +31,10 @@ public class Constants {
 		long AnnotationNonNullByDefault = ASTNode.Bit59L;
 	}
 	
+	// ASTNode:
+	// for annotation reference:
+	public static final int IsSynthetic = ASTNode.Bit7;
+	
 	/** Additional constants for {@link org.eclipse.jdt.internal.compiler.lookup.TypeIds}. */
 	static interface TypeIds {
 		final int T_ConfiguredAnnotationNullable = 63;

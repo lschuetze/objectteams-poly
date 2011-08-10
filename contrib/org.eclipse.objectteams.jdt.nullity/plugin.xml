@@ -14,6 +14,11 @@
                class="org.eclipse.objectteams.internal.jdt.nullity.CompilerAdaptation"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
+         <team
+               activation="ALL_THREADS"
+               class="org.eclipse.objectteams.internal.jdt.nullity.DOMAdaptation"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
       </aspectBinding>
    </extension>
    <extension

@@ -419,6 +419,7 @@ public team class CompilerAdaptation {
 			MarkerAnnotation annotation = new MarkerAnnotation(new QualifiedTypeReference(annotationBinding.compoundName, poss), sourceStart);
 			annotation.declarationSourceEnd = location.sourceEnd;
 			annotation.resolvedType = annotationBinding;
+			annotation.bits = Constants.IsSynthetic; // later use ASTNode.IsSynthetic; // prevent from conversion to DOM AST
 			if (annotations == null) {
 				annotations = new Annotation[] {annotation};
 			} else {
