@@ -522,7 +522,10 @@ public team class CompilerAdaptation {
 				this.parameterNonNullness = new Boolean[getParameters().length];
 			Boolean value = Boolean.valueOf(defaultNullness == TagBits.AnnotationNonNull);
 			AbstractMethodDeclaration sourceMethod = sourceMethod();
+			TypeBinding[] parameters = getParameters();
 			for (int i = 0; i < this.parameterNonNullness.length; i++) {
+				if (parameters[i].isBaseType())
+					continue;
 				boolean added = false;
 				if (this.parameterNonNullness[i] == null) {
 					added = true;
