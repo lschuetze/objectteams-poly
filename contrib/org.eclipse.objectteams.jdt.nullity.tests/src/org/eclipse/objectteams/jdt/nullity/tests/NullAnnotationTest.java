@@ -1067,6 +1067,27 @@ public void _test_nonnull_return_012() {
 		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
 		"----------\n");
 }
+// don't apply any default annotations to return void
+public void test_nonnull_return_013() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runConformTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class X {\n" +
+			"    void getObject() {}\n" +
+			"}\n",
+			"Y.java",
+			"public class Y extends X {\n" +
+			"    @Override\n" +
+			"    void getObject() {}\n" + // don't complain, void takes no (default) annotation
+			"}\n"
+		},
+		customOptions,
+		"");
+}
 // mixed use of fully qualified name / explicit import
 public void test_annotation_import_001() {
 	Map customOptions = getCompilerOptions();
