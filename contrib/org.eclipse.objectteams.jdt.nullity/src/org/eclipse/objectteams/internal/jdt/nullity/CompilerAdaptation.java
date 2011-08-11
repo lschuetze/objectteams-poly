@@ -32,6 +32,9 @@ import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
 import org.eclipse.jdt.internal.compiler.ast.MemberValuePair;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.SubRoutineStatement;
+import org.eclipse.jdt.internal.compiler.ast.SynchronizedStatement;
+import org.eclipse.jdt.internal.compiler.ast.TryStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
@@ -40,6 +43,7 @@ import org.eclipse.jdt.internal.compiler.env.IBinaryType;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.flow.InitializationFlowContext;
+import org.eclipse.jdt.internal.compiler.flow.InsideSubRoutineFlowContext;
 import org.eclipse.jdt.internal.compiler.flow.UnconditionalFlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 import org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding;
@@ -106,9 +110,7 @@ public team class CompilerAdaptation {
 	
 	@SuppressWarnings({"abstractrelevantrole", "hidden-lifting-problem"}) // due to abstractness of this role failed lifting could theoretically block callin triggers
 	@Instantiation(InstantiationPolicy.ALWAYS)
-	protected abstract class Statement playedBy Statement
-		base when (reentranceExpression.get() != base)
-	{
+	protected abstract class Statement playedBy Statement {
 		abstract Expression getExpression();
 		
 		// use custom hook from JDT/Core (https://bugs.eclipse.org/335093)
@@ -143,9 +145,7 @@ public team class CompilerAdaptation {
 	
 	/** Analyse argument expressions as part of a MessageSend, check against method parameter annotation. */
 	@Instantiation(InstantiationPolicy.ALWAYS)
-	protected class MessageSend playedBy MessageSend
-		base when (reentranceExpression.get() != base)
-	{
+	protected class MessageSend playedBy MessageSend {
 
 		Expression[] getArguments() -> get Expression[] arguments;
 		MethodBinding getBinding() -> get MethodBinding binding;
@@ -162,7 +162,6 @@ public team class CompilerAdaptation {
 		
 		void analyseArguments(BlockScope currentScope, FlowInfo flowInfo) 
 		<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo)
-//			base when (!isExecutingCallin()) // victim of  https://bugs.eclipse.org/35424
 			with { currentScope <- currentScope, flowInfo <- flowInfo }
 
 		void analyseArguments(BlockScope currentScope, FlowInfo flowInfo) {
@@ -208,9 +207,7 @@ public team class CompilerAdaptation {
 	}
 	
 	@Instantiation(InstantiationPolicy.ALWAYS)
-	protected class EqualExpression playedBy EqualExpression 
-		base when (reentranceExpression.get() != base)
-	{
+	protected class EqualExpression playedBy EqualExpression {
 		
 		MessageSend getLeftMessage() 		 -> get Expression left
 			with { result					 <- (left instanceof MessageSend) ? (MessageSend) left : null }
@@ -245,44 +242,117 @@ public team class CompilerAdaptation {
 		}		
 	}
 	
-	ThreadLocal<Expression> reentranceExpression = new ThreadLocal<Expression>();
+	@SuppressWarnings("bindingconventions")
+	protected class NodeWithBits playedBy ASTNode {
+		int getBits() 							-> get int bits;
+		public void addBit(int bit) 	 		-> set int bits 
+			with { bit | getBits() 				-> bits }
+
+	}
 	
 	/** Analyse the expression within a return statement, check against method return annotation. */
 	@Instantiation(InstantiationPolicy.ALWAYS)
-	protected class ReturnStatement playedBy ReturnStatement {
+	protected class ReturnStatement extends NodeWithBits playedBy ReturnStatement {
 
 		Expression getExpression() 	-> get Expression expression;
 		int getSourceStart() 		-> get int sourceStart;
 		int getSourceEnd() 			-> get int sourceEnd;
-		
-		void analyseNull(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) 
-		<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
 
-		void analyseNull(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
-			Expression expression = getExpression();
-			if (expression != null) {
-				// can't use deactivate()&activate() due to https://bugs.eclipse.org/354268
-				reentranceExpression.set(expression);
-				try {
-					flowInfo = expression.analyseCode(currentScope, flowContext, flowInfo); // may cause some issues to be reported twice :(
-				} finally {
-					reentranceExpression.set(null);
+		FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) 
+		<- replace FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
+
+		
+		@SuppressWarnings({ "inferredcallout", "basecall", "decapsulation" })
+		callin FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
+			if (this.expression != null) {
+				// workaround for Bug 354480 - VerifyError due to bogus lowering in inferred callout-to-field
+				org.eclipse.jdt.internal.compiler.lookup.BlockScope blockScope = currentScope;
+				flowInfo = this.expression.analyseCode(blockScope, flowContext, flowInfo);
+				if ((this.expression.implicitConversion & org.eclipse.jdt.internal.compiler.lookup.TypeIds.UNBOXING) != 0) {
+					this.expression.checkNPE(blockScope, flowContext, flowInfo);
 				}
-				int nullStatus = expression.nullStatus(flowInfo);
-				if (nullStatus != FlowInfo.NON_NULL) {
-					// if we can't prove non-null check against declared null-ness of the enclosing method:
-					long tagBits;
-					org.eclipse.jdt.internal.compiler.lookup.MethodBinding methodBinding;
-					try {
-						methodBinding = currentScope.methodScope().referenceMethod().binding;
-						tagBits = methodBinding.tagBits;
-					} catch (NullPointerException npe) {
-						return;
+				checkAgainstNullAnnotation(currentScope, this.expression.nullStatus(flowInfo));
+			}
+			this.initStateIndex =
+				currentScope.methodScope().recordInitializationStates(flowInfo);
+			// compute the return sequence (running the finally blocks)
+			FlowContext traversedContext = flowContext;
+			int subCount = 0;
+			boolean saveValueNeeded = false;
+			boolean hasValueToSave = needValueStore();
+			do {
+				SubRoutineStatement sub;
+				if ((sub = traversedContext.subroutine()) != null) {
+					if (this.subroutines == null){
+						this.subroutines = new SubRoutineStatement[5];
 					}
-					if ((tagBits & TagBits.AnnotationNonNull) != 0) {
-						char[][] annotationName = currentScope.environment().getNonNullAnnotationName();
-						currentScope.problemReporter().nullityMismatch(expression, methodBinding.returnType, nullStatus, annotationName);
+					if (subCount == this.subroutines.length) {
+						System.arraycopy(this.subroutines, 0, (this.subroutines = new SubRoutineStatement[subCount*2]), 0, subCount); // grow
 					}
+					this.subroutines[subCount++] = sub;
+					if (sub.isSubRoutineEscaping()) {
+						saveValueNeeded = false;
+						addBit(ASTNode.IsAnySubRoutineEscaping);
+						break;
+					}
+				}
+				traversedContext.recordReturnFrom(flowInfo.unconditionalInits());
+
+				if (traversedContext instanceof InsideSubRoutineFlowContext) {
+					ASTNode node = traversedContext.associatedNode;
+					if (node instanceof SynchronizedStatement) {
+						addBit(ASTNode.IsSynchronized);
+					} else if (node instanceof TryStatement) {
+						TryStatement tryStatement = (TryStatement) node;
+						flowInfo.addInitializationsFrom(tryStatement.subRoutineInits); // collect inits
+						if (hasValueToSave) {
+							if (this.saveValueVariable == null){ // closest subroutine secret variable is used
+								prepareSaveValueLocation(tryStatement);
+							}
+							saveValueNeeded = true;
+							this.initStateIndex =
+								currentScope.methodScope().recordInitializationStates(flowInfo);
+						}
+					}
+				} else if (traversedContext instanceof InitializationFlowContext) {
+						currentScope.problemReporter().cannotReturnInInitializer(this);
+						return FlowInfo.DEAD_END;
+				}
+			} while ((traversedContext = traversedContext.parent) != null);
+
+			// resize subroutines
+			if ((this.subroutines != null) && (subCount != this.subroutines.length)) {
+				System.arraycopy(this.subroutines, 0, (this.subroutines = new SubRoutineStatement[subCount]), 0, subCount);
+			}
+
+			// secret local variable for return value (note that this can only occur in a real method)
+			if (saveValueNeeded) {
+				if (this.saveValueVariable != null) {
+					this.saveValueVariable.useFlag = LocalVariableBinding.USED;
+				}
+			} else {
+				this.saveValueVariable = null;
+				if (((getBits() & ASTNode.IsSynchronized) == 0) && this.expression != null && this.expression.resolvedType == TypeBinding.BOOLEAN) {
+					this.expression.bits |= ASTNode.IsReturnedValue;
+				}
+			}
+			return FlowInfo.DEAD_END;
+		}	
+		
+		void checkAgainstNullAnnotation(BlockScope scope, int nullStatus) {
+			if (nullStatus != FlowInfo.NON_NULL) {
+				// if we can't prove non-null check against declared null-ness of the enclosing method:
+				long tagBits;
+				org.eclipse.jdt.internal.compiler.lookup.MethodBinding methodBinding;
+				try {
+					methodBinding = scope.methodScope().referenceMethod().binding;
+					tagBits = methodBinding.tagBits;
+				} catch (NullPointerException npe) {
+					return;
+				}
+				if ((tagBits & TagBits.AnnotationNonNull) != 0) {
+					char[][] annotationName = scope.environment().getNonNullAnnotationName();
+					scope.problemReporter().nullityMismatch(getExpression(), methodBinding.returnType, nullStatus, annotationName);
 				}
 			}
 		}
@@ -318,7 +388,7 @@ public team class CompilerAdaptation {
 		}
 	}
 	
-	protected class AbstractMethodDeclaration playedBy AbstractMethodDeclaration {
+	protected class AbstractMethodDeclaration extends NodeWithBits playedBy AbstractMethodDeclaration {
 
 		int sourceEnd() 						-> int sourceEnd();
 		int sourceStart() 						-> int sourceStart();
@@ -330,18 +400,13 @@ public team class CompilerAdaptation {
 		void doBindArguments()       			-> void bindArguments();
 		
 		
-		void guardedBindArguments() 			<- replace void bindArguments()
-//			base when (!isExecutingCallin())
-		;
+		void guardedBindArguments() 			<- replace void bindArguments();
 		@SuppressWarnings("basecall")
 		callin void guardedBindArguments() {
 			// See also comments #45, #49 and #75 in bug 186342
-			MethodBinding binding = getBinding();
-			if (binding != null) {
-				if ((binding.getTagBits() & TagBits.HasBoundArguments) != 0) // avoid double execution
-					return;
-				binding.addTagBit(TagBits.HasBoundArguments);
-			}
+			if ((getBits() & Constants.HasBoundArguments) != 0) // avoid double execution
+				return;
+			addBit(Constants.HasBoundArguments);
 			base.guardedBindArguments();
 		}
 		
@@ -349,9 +414,9 @@ public team class CompilerAdaptation {
 			MethodBinding binding = getBinding();
 			if (binding == null)
 				return;
-			if ((binding.getTagBits() & TagBits.HasBoundArguments) == 0) { // avoid double execution
+			if ((getBits() & Constants.HasBoundArguments) == 0) { // avoid double execution
 				doBindArguments();
-				binding.addTagBit(TagBits.HasBoundArguments);
+				addBit(Constants.HasBoundArguments);
 			}
 			Argument[] arguments = this.getArguments();
 			if (arguments != null && binding != null) {
@@ -627,7 +692,8 @@ public team class CompilerAdaptation {
 			if (method.getParameters() != Binding.NO_PARAMETERS) {
 				computeAnnotations();
 				AbstractMethodDeclaration methodDecl = method.sourceMethod();
-				methodDecl.bindArguments();
+				if (methodDecl != null)
+					methodDecl.bindArguments();
 			}			
 		}
 		void callBindArguments(MethodBinding method) <- after MethodBinding resolveTypesFor(MethodBinding method);
@@ -892,6 +958,7 @@ public team class CompilerAdaptation {
 		
 		void abortDueToInternalError(String errorMessage) -> void abortDueToInternalError(String errorMessage);
 		
+		void cannotReturnInInitializer(ASTNode location) -> void cannotReturnInInitializer(ASTNode location);
 		
 		getProblemCategory <- replace getProblemCategory;
 		

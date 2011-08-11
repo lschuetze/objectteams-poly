@@ -23,7 +23,6 @@ public class Constants {
 
 	/** Additional constants for {@link org.eclipse.jdt.internal.compiler.lookup.TagBits}. */
 	static interface TagBits extends org.eclipse.jdt.internal.compiler.lookup.TagBits {
-		long HasBoundArguments = ASTNode.Bit13; // for method bindings to avoid duplicate invocation of bindArguments()
 		 // the following two should be added to TagBits.AllStandardAnnotationsMask:
 		long AnnotationNullable = ASTNode.Bit56L;
 		long AnnotationNonNull = ASTNode.Bit57L;
@@ -34,6 +33,8 @@ public class Constants {
 	// ASTNode:
 	// for annotation reference:
 	public static final int IsSynthetic = ASTNode.Bit7;
+	// for method declaration to avoid duplicate invocation of bindArguments()
+	public static final int HasBoundArguments = ASTNode.Bit10; 
 	
 	/** Additional constants for {@link org.eclipse.jdt.internal.compiler.lookup.TypeIds}. */
 	static interface TypeIds {
