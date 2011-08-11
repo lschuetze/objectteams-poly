@@ -434,7 +434,9 @@ public class RewriteOperations {
 	}
 	
 	static String findAffectedParameterName(ASTNode selectedNode) {
-		VariableDeclaration argDecl = (VariableDeclaration) ASTNodes.getParent(selectedNode, VariableDeclaration.class);
+		VariableDeclaration argDecl = selectedNode instanceof VariableDeclaration
+				? (VariableDeclaration) selectedNode
+				: (VariableDeclaration) ASTNodes.getParent(selectedNode, VariableDeclaration.class);
 		if (argDecl != null)
 			return argDecl.getName().getIdentifier();
 		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME) {
