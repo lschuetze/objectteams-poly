@@ -501,6 +501,7 @@ public team class CompilerAdaptation {
 		/** Store nullness information from annotation (incl. inherited contracts). */
 		public Boolean[] parameterNonNullness;  // TRUE means @NonNull declared, FALSE means @Nullable declared, null means nothing declared
 
+		TypeBinding getReturnType() 			-> get TypeBinding returnType;
 		ReferenceBinding getDeclaringClass() 	-> get ReferenceBinding declaringClass;
 		SourceTypeBinding getDeclaringSourceType()	-> get ReferenceBinding declaringClass
 			with { result 						<- (SourceTypeBinding)declaringClass }
@@ -517,11 +518,11 @@ public team class CompilerAdaptation {
 
 		/** After method verifier has finished, fill in missing nullness values from the applicable default. */
 		protected void fillInDefaultNullness(long defaultNullness, TypeBinding annotationBinding) {
+			TypeBinding[] parameters = getParameters();
 			if (this.parameterNonNullness == null)
-				this.parameterNonNullness = new Boolean[getParameters().length];
+				this.parameterNonNullness = new Boolean[parameters.length];
 			Boolean value = Boolean.valueOf(defaultNullness == TagBits.AnnotationNonNull);
 			AbstractMethodDeclaration sourceMethod = sourceMethod();
-			TypeBinding[] parameters = getParameters();
 			for (int i = 0; i < this.parameterNonNullness.length; i++) {
 				if (parameters[i].isBaseType())
 					continue;
@@ -535,7 +536,9 @@ public team class CompilerAdaptation {
 				if (added)
 					addTagBit(TagBits.HasParameterAnnotations);
 			}
-			if ((getTagBits() & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) == 0) {
+			if (   !getReturnType().isBaseType()
+				&& (getTagBits() & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) == 0)
+			{
 				addTagBit(defaultNullness);
 				if (sourceMethod != null)
 					sourceMethod.addNullnessAnnotation(defaultNullness, (ReferenceBinding)annotationBinding);
