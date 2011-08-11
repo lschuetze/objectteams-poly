@@ -638,7 +638,7 @@ public void test_parameter_specification_inheritance_008() {
 		"1. ERROR in X.java (at line 2)\n" + 
 		"	public void printObject(Object o) { System.out.print(o.toString()); }\n" + 
 		"	                        ^^^^^^\n" + 
-		"Missing null annotation: inherited method from IX declares this parameter as @Nullable\n" + 
+		"Missing null annotation: inherited method from IX declares this parameter as @NonNull\n" + 
 		"----------\n" +
 		// main error:
 		"----------\n" + 
@@ -1007,6 +1007,66 @@ public void test_nonnull_return_010() {
 		"Null comparison always yields false: The variable left cannot be null at this location\n" + 
 		"----------\n");
 }
+// a non-null method returns a checked-for null value, but that branch is dead code
+public void test_nonnull_return_011() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class X {\n" +
+			"    Object getObject(Object dubious) {\n" +
+			"        if (dubious == null)\n" + // redundant
+			"            return dubious;\n" + // definitely null, but not reported inside dead code
+			"        return new Object();\n" +
+			"    }\n" +
+			"}\n"
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	if (dubious == null)\n" + 
+		"	    ^^^^^^^\n" + 
+		"Null comparison always yields false: The variable dubious cannot be null at this location\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 6)\n" + 
+		"	return dubious;\n" + 
+		"	^^^^^^^^^^^^^^^\n" + 
+		"Dead code\n" + 
+		"----------\n");
+}
+// a non-null method returns a definite null from a conditional expression
+// requires the fix for Bug 354554 - [null] conditional with redundant condition yields weak error message
+// TODO(SH): ENABLE!
+public void _test_nonnull_return_012() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class X {\n" +
+			"    Object getObject(Object dubious) {\n" +
+			"        return dubious == null ? dubious : null;\n" +
+			"    }\n" +
+			"}\n"
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	return dubious == null ? dubious : null;\n" + 
+		"	       ^^^^^^^\n" + 
+		"Null comparison always yields false: The variable dubious cannot be null at this location\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 5)\n" + 
+		"	return dubious == null ? dubious : null;\n" + 
+		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"----------\n");
+}
 // mixed use of fully qualified name / explicit import
 public void test_annotation_import_001() {
 	Map customOptions = getCompilerOptions();
@@ -1171,8 +1231,8 @@ public void test_annotation_import_007() {
 		LIBS,
 		customOptions,
 		"----------\n" + 
-		"1. ERROR in X.java (at line 1)\n" + 
-		"	public class X {\n" + 
+		"1. ERROR in Lib.java (at line 1)\n" + 
+		"	public class Lib {\n" + 
 		"	^\n" + 
 		"Buildpath problem: the type org.foo.MustNotBeNull which is configured as a null annotation type cannot be resolved\n" + 
 		"----------\n",
@@ -1390,5 +1450,97 @@ public void test_default_nullness_004() {
 		},
 		customOptions,
 		"");
+}
+// package default is non-null
+// see also Bug 354536 - compiling package-info.java still depends on the order of compilation units
+public void test_default_nullness_005() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.NonNull");
+	runNegativeTestWithLibs(
+		new String[] {
+	"p1/X.java",
+			"package p1;\n" +
+			"public class X {\n" +
+			"    class Inner {" +
+			"        protected Object getObject(String s) {\n" +
+			"            return null;\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n",
+	"p1/package-info.java",
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
+			"package p1;\n",
+	CUSTOM_NONNULL_NAME,
+			CUSTOM_NONNULL_CONTENT
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in p1\\X.java (at line 4)\n" + 
+		"	return null;\n" + 
+		"	       ^^^^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"----------\n");
+}
+// package default is non-null, package-info.java read before the annotation type
+// compile order: beginToCompile(X.Inner) triggers reading of package-info.java before the annotation type was read
+public void test_default_nullness_006() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.NonNull");
+	runNegativeTestWithLibs(
+		new String[] {
+	"p1/package-info.java",
+			"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
+			"package p1;\n",
+	"p1/X.java",
+			"package p1;\n" +
+			"public class X {\n" +
+			"    class Inner {" +
+			"        protected Object getObject(String s) {\n" +
+			"            return null;\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n",
+	CUSTOM_NONNULL_NAME,
+			CUSTOM_NONNULL_CONTENT
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in p1\\X.java (at line 4)\n" + 
+		"	return null;\n" + 
+		"	       ^^^^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"----------\n");
+}
+// global default nonnull, but return may be null 
+public void test_default_nullness_007() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    @Nullable Object dangerous() {\n" +
+			"        return null;\n" + 
+			"    }\n" +
+			"    Object broken() {\n" +
+			"        return dangerous();\n" +
+			"    }\n" +
+			"}\n",
+
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" + 
+		"	return dangerous();\n" + 
+		"	       ^^^^^^^^^^^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value can be null\n" + 
+		"----------\n");
 }
 }
