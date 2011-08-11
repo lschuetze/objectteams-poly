@@ -1362,4 +1362,33 @@ public void test_default_nullness_003a() {
 		"Type mismatch: required \'@NonNull Object\' but the provided value can be null\n" + 
 		"----------\n");
 }
+// don't apply type-level default to non-reference type
+public void test_default_nullness_004() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	runConformTestWithLibs(
+		new String[] {
+	"p1/X.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class X {\n" +
+			"    protected Object getObject(boolean o) {\n" +
+			"        return new Object();\n" +
+			"    }\n" +
+			"}\n",
+	"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Y extends p1.X {\n" +
+			"    @Override\n" +
+			"    protected @NonNull Object getObject(boolean o) {\n" +
+			"        return o ? this : new Object();\n" +
+			"    }\n" +
+			"}\n"
+		},
+		customOptions,
+		"");
+}
 }
