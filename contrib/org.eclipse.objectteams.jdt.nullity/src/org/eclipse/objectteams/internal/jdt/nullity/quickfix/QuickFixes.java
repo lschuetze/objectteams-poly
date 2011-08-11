@@ -17,6 +17,7 @@ import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.Il
 import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.IllegalRedefinitionToNonNullParameter;
 import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.IllegalReturnNullityRedefinition;
 import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.ParameterLackingNonNullAnnotation;
+import static org.eclipse.objectteams.internal.jdt.nullity.Constants.IProblem.ParameterLackingNullableAnnotation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -29,13 +30,14 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix;
 import org.eclipse.jdt.internal.corext.fix.CompilationUnitRewriteOperationsFix.CompilationUnitRewriteOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -76,6 +78,7 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		case IllegalRedefinitionToNonNullParameter:
 		case IllegalDefinitionToNonNullParameter:
 		case ParameterLackingNonNullAnnotation:
+		case ParameterLackingNullableAnnotation:
 		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 				return true;
@@ -116,13 +119,14 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		case IllegalReturnNullityRedefinition:
 		case IllegalDefinitionToNonNullParameter:
 		case IllegalRedefinitionToNonNullParameter:
-		case ParameterLackingNonNullAnnotation:
 			addNullAnnotationInSignatureProposal(context, problem, proposals, false);
 			addNullAnnotationInSignatureProposal(context, problem, proposals, true);
 			break;
 		case RequiredNonNullButProvidedNull:
 		case RequiredNonNullButProvidedPotentialNull:
 		case RequiredNonNullButProvidedUnknown:
+		case ParameterLackingNonNullAnnotation:
+		case ParameterLackingNullableAnnotation:
 		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 			if (isComplainingAboutArgument(selectedNode)
@@ -183,6 +187,11 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		IBinding binding = nameNode.resolveBinding();
 		if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding) binding).isParameter())
 			return true;
+		VariableDeclaration argDecl = (VariableDeclaration) ASTNodes.getParent(selectedNode, VariableDeclaration.class);
+		if (argDecl != null)
+			binding = argDecl.resolveBinding();
+		if (binding.getKind() == IBinding.VARIABLE && ((IVariableBinding) binding).isParameter())
+			return true;
 		return false;
 	}
 	
@@ -200,6 +209,12 @@ public class QuickFixes implements org.eclipse.jdt.ui.text.java.IQuickFixProcess
 		switch (problem.getProblemId()) {
 		case IllegalDefinitionToNonNullParameter:
 		case IllegalRedefinitionToNonNullParameter:
+		// case ParameterLackingNullableAnnotation: // never proposed with modifyOverridden
+			if (modifyOverridden) {
+				annotationToAdd = nonNullAnnotationName;
+				annotationToRemove = nullableAnnotationName;
+			}
+			break;
 		case ParameterLackingNonNullAnnotation:
 		case IllegalReturnNullityRedefinition:
 			if (!modifyOverridden) {

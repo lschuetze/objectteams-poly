@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
+import org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.compiler.util.HashtableOfInt;
@@ -114,6 +115,8 @@ public team class CompilerAdaptation {
 		abstract Expression getExpression();
 		
 		// use custom hook from JDT/Core (https://bugs.eclipse.org/335093)
+		// TODO(SH): should calls to this method be guarded by "if (flowInfo.reachMode() == FlowInfo.REACHABLE)"?
+		//           otherwise we'll proceed with incomplete information (normal null analysis avoids dead code).
 		checkAgainstNullAnnotation <- replace checkAgainstNullAnnotation;
 
 		/** Check assignment to local with null annotation. */
@@ -271,7 +274,8 @@ public team class CompilerAdaptation {
 				if ((this.expression.implicitConversion & org.eclipse.jdt.internal.compiler.lookup.TypeIds.UNBOXING) != 0) {
 					this.expression.checkNPE(blockScope, flowContext, flowInfo);
 				}
-				checkAgainstNullAnnotation(currentScope, this.expression.nullStatus(flowInfo));
+				if (flowInfo.reachMode() == FlowInfo.REACHABLE)
+					checkAgainstNullAnnotation(currentScope, this.expression.nullStatus(flowInfo));
 			}
 			this.initStateIndex =
 				currentScope.methodScope().recordInitializationStates(flowInfo);
@@ -429,11 +433,6 @@ public team class CompilerAdaptation {
 						binding.parameterNonNullness[i] = Boolean.valueOf((argument.binding.tagBits & TagBits.AnnotationNonNull) != 0);
 					}
 				}
-			}
-			TypeBinding annotationBinding = findDefaultNullness(binding.getDeclaringSourceType(), getScope().environment());
-			if (annotationBinding != null) {
-				long defaultNullness = Constants.getNullnessTagbit(annotationBinding);
-				binding.fillInDefaultNullness(defaultNullness, annotationBinding);
 			}
 		}
 
@@ -594,10 +593,20 @@ public team class CompilerAdaptation {
 												? null : currentMethod.parameterNonNullness[i];
 					if (inheritedNonNullNess != null) {				// super has a null annotation
 						if (currentNonNullNess == null) {			// current parameter lacks null annotation
+							boolean needNonNull = false;
+							char[][] annotationName;
+							if (inheritedNonNullNess == Boolean.TRUE) {
+								needNonNull = true;
+								annotationName = environment.getNonNullAnnotationName();
+							} else {
+								annotationName = environment.getNullableAnnotationName();
+							}
+								
 							getType().problemReporter().parameterLackingNonNullAnnotation(
 									currentArguments[i],
 									inheritedMethod.getDeclaringClass(),
-									environment.getNullableAnnotationName());
+									needNonNull,
+									annotationName);
 							continue;
 						}						
 					}
@@ -632,14 +641,14 @@ public team class CompilerAdaptation {
 		SourceTypeBinding currentType = type;
 		TypeBinding annotationBinding = null;
 		while (currentType != null) {
-			annotationBinding = currentType.nullnessDefaultAnnotation;
+			annotationBinding = currentType.getNullnessDefaultAnnotation();
 			if (annotationBinding != null)
 				return annotationBinding;
 			currentType = currentType.enclosingType();
 		}
 		
 		// package
-		annotationBinding = type.getPackage().nullnessDefaultAnnotation;
+		annotationBinding = type.getPackage().getNullnessDefaultAnnotation();
 		if (annotationBinding != null)
 			return annotationBinding;
 		
@@ -680,34 +689,55 @@ public team class CompilerAdaptation {
 		SourceTypeBinding enclosingType() 	-> ReferenceBinding enclosingType()
 					with { result 			<- (SourceTypeBinding)result }
 		
-		void computeAnnotations()			-> long getAnnotationTagBits();
+		long computeTypeAnnotationTagBits()	-> long getAnnotationTagBits();
 		
-		protected TypeBinding nullnessDefaultAnnotation;
+		private TypeBinding nullnessDefaultAnnotation;
+		private int nullnessDefaultInitialized = 0; // 0: nothing; 1: type; 2: package
 
 		/** initialize a normal type */
-		evaluateNullAnnotations 			<- after getAnnotationTagBits;
-		
+		void evaluateNullAnnotations(long tagBits)	<- after long getAnnotationTagBits()
+			with { tagBits <- result }
+
 		/** initialize a package-info.java */
-		evaluateNullAnnotations 			<- after initializeDeprecatedAnnotationTagBits
+		readAndEvaluateAnnotations 			<- after initializeDeprecatedAnnotationTagBits
 			base when (CharOperation.equals(base.sourceName, TypeConstants.PACKAGE_INFO_NAME));
 
-		private void callBindArguments(MethodBinding method) {
-			if (method.getParameters() != Binding.NO_PARAMETERS) {
-				computeAnnotations();
-				AbstractMethodDeclaration methodDecl = method.sourceMethod();
-				if (methodDecl != null)
-					methodDecl.bindArguments();
-			}			
-		}
 		void callBindArguments(MethodBinding method) <- after MethodBinding resolveTypesFor(MethodBinding method);
+
+		private void callBindArguments(MethodBinding method) {
+			switch (this.nullnessDefaultInitialized) {
+			case 0:
+				computeTypeAnnotationTagBits();
+				//$FALL-THROUGH$
+			case 1:
+				getPackage().computeAnnotations();
+				this.nullnessDefaultInitialized = 2;
+			}
+			AbstractMethodDeclaration methodDecl = method.sourceMethod();
+			if (methodDecl != null) {
+				if (method.getParameters() != Binding.NO_PARAMETERS)
+					methodDecl.bindArguments();
+				TypeBinding annotationBinding = findDefaultNullness(method.getDeclaringSourceType(), methodDecl.getScope().environment());
+				if (annotationBinding != null) {
+					long defaultNullness = Constants.getNullnessTagbit(annotationBinding);
+					method.fillInDefaultNullness(defaultNullness, annotationBinding);
+				}
+			}
+		}
 		
+		void readAndEvaluateAnnotations() {
+			computeTypeAnnotationTagBits();
+		}
 		@SuppressWarnings("inferredcallout")
-		void evaluateNullAnnotations() {
+		void evaluateNullAnnotations(long tagBits) {
+			if (this.nullnessDefaultInitialized > 0)
+				return;
+			this.nullnessDefaultInitialized = 1;
 			// transfer nullness info from tagBits to this.nullnessDefaultAnnotation 
-			long tagBit = Constants.applyDefaultNullnessTagbit(getTagBits());
+			long tagBit = Constants.applyDefaultNullnessTagbit(tagBits);
 			if (tagBit == 0)
 				return;
-			TypeBinding nullnessDefaultAnnotation = getPackage().getEnvironment().getNullAnnotationBinding(tagBit);
+			TypeBinding nullnessDefaultAnnotation = getPackage().getEnvironment().getUnresolvedNullAnnotationBinding(tagBit);
 			if (nullnessDefaultAnnotation != null) {
 				if (CharOperation.equals(this.sourceName, TypeConstants.PACKAGE_INFO_NAME)) {
 					getPackage().nullnessDefaultAnnotation = nullnessDefaultAnnotation;
@@ -715,6 +745,13 @@ public team class CompilerAdaptation {
 					this.nullnessDefaultAnnotation = nullnessDefaultAnnotation;
 				}
 			}
+		}
+		public TypeBinding getNullnessDefaultAnnotation() {
+			if (this.nullnessDefaultAnnotation instanceof UnresolvedReferenceBinding)
+				return this.nullnessDefaultAnnotation =
+						org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding.resolveType(this.nullnessDefaultAnnotation, 
+									getPackage().getEnvironment(), false);
+			return this.nullnessDefaultAnnotation;
 		}
 	}
 	
@@ -804,12 +841,12 @@ public team class CompilerAdaptation {
 					char[][] typeName = CharOperation.splitOn('/', annotationTypeName, 1, annotationTypeName.length-1); // cut of leading 'L' and trailing ';'
 					if (CharOperation.equals(typeName, nonNullByDefaultAnnotationName)) {
 						annotationBit = TagBits.AnnotationNonNullByDefault;
-						defaultNullness = getEnvironment().getNullAnnotationBinding(TagBits.AnnotationNonNull);
+						defaultNullness = getEnvironment().getUnresolvedNullAnnotationBinding(TagBits.AnnotationNonNull);
 						break;
 					}
 					if (CharOperation.equals(typeName, nullableByDefaultAnnotationName)) {
 						annotationBit = TagBits.AnnotationNullableByDefault;
-						defaultNullness = getEnvironment().getNullAnnotationBinding(TagBits.AnnotationNullable);
+						defaultNullness = getEnvironment().getUnresolvedNullAnnotationBinding(TagBits.AnnotationNullable);
 						break;
 					}
 				}
@@ -829,6 +866,9 @@ public team class CompilerAdaptation {
 	/** Initiate setup of configured null annotation types. */
 	protected class LookupEnvironment playedBy LookupEnvironment {
 
+		@SuppressWarnings("decapsulation")
+		TypeBinding getTypeFromCompoundName(char[][] compoundName, boolean isParameterized, boolean wasMissingType) 
+		-> ReferenceBinding getTypeFromCompoundName(char[][] compoundName, boolean isParameterized, boolean wasMissingType);
 		ReferenceBinding getType(char[][] compoundName) 	-> ReferenceBinding getType(char[][] compoundName);
 		PackageBinding createPackage(char[][] compoundName) -> PackageBinding createPackage(char[][] compoundName);
 
@@ -899,12 +939,20 @@ public team class CompilerAdaptation {
 				return getType(getNullableAnnotationName());
 			return null;
 		}
+		public TypeBinding getUnresolvedNullAnnotationBinding(long annotationTagBit) {
+			if (annotationTagBit == TagBits.AnnotationNonNull)
+				return getTypeFromCompoundName(getNonNullAnnotationName(), false, false);
+			if (annotationTagBit == TagBits.AnnotationNullable)
+				return getTypeFromCompoundName(getNullableAnnotationName(), false, false);
+			return null;
+		}
 	}
 
 	/** The package holding the configured null annotation types detects and marks these annotation types. */
 	protected class PackageBinding playedBy PackageBinding {
 
 		LookupEnvironment getEnvironment() 				-> get LookupEnvironment environment;
+		void computeAnnotations()						-> boolean isViewedAsDeprecated();
 
 		protected char[] nullableName = null;
 		protected char[] nonNullName = null;
@@ -930,6 +978,13 @@ public team class CompilerAdaptation {
 				return;
 			
 			type.id = id;	// ensure annotations of this type are detected as standard annotations.
+		}
+
+		public TypeBinding getNullnessDefaultAnnotation() {
+			if (this.nullnessDefaultAnnotation instanceof UnresolvedReferenceBinding)
+				return this.nullnessDefaultAnnotation =
+						org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding.resolveType(this.nullnessDefaultAnnotation, getEnvironment(), false);
+			return this.nullnessDefaultAnnotation;
 		}
 	}
 
@@ -1068,9 +1123,9 @@ public team class CompilerAdaptation {
 					argument.type.sourceEnd);
 			}
 		}
-		public void parameterLackingNonNullAnnotation(Argument argument, ReferenceBinding declaringClass, char[][] inheritedAnnotationName) {
+		public void parameterLackingNonNullAnnotation(Argument argument, ReferenceBinding declaringClass, boolean needNonNull, char[][] inheritedAnnotationName) {
 			this.handle(
-				IProblem.ParameterLackingNonNullAnnotation, 
+				needNonNull ? IProblem.ParameterLackingNonNullAnnotation : IProblem.ParameterLackingNullableAnnotation, 
 				new String[] { new String(argument.name), new String(declaringClass.readableName()), CharOperation.toString(inheritedAnnotationName)},
 				new String[] { new String(argument.name), new String(declaringClass.shortReadableName()), new String(inheritedAnnotationName[inheritedAnnotationName.length-1])},
 				argument.type.sourceStart,

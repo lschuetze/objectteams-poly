@@ -101,6 +101,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 		case RequiredNonNullButProvidedNull:
 		case RequiredNonNullButProvidedPotentialNull:
 		case RequiredNonNullButProvidedUnknown:
+		case ParameterLackingNullableAnnotation:
 			result.add(FixMessages.NullAnnotationsCleanUp_add_nullable_annotation);
 			break;
 		case IllegalDefinitionToNonNullParameter:

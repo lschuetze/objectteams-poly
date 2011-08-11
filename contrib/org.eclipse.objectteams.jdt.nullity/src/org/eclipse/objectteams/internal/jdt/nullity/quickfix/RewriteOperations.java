@@ -297,7 +297,9 @@ public class RewriteOperations {
 			
 			switch (problem.getProblemId()) {
 				case ParameterLackingNonNullAnnotation:
+				case ParameterLackingNullableAnnotation:
 				case IllegalDefinitionToNonNullParameter:
+				case IllegalRedefinitionToNonNullParameter:
 				case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 				case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 					// statements suggest changing parameters:

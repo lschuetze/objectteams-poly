@@ -63,9 +63,11 @@ public class Constants {
 		/** @since 3.7 */
 		int ParameterLackingNonNullAnnotation = MethodRelated + 917;
 		/** @since 3.7 */
-		int PotentialNullMessageSendReference = Internal + 918;
+		int ParameterLackingNullableAnnotation = MethodRelated + 918;
 		/** @since 3.7 */
-		int RedundantNullCheckOnNonNullMessageSend = Internal + 919;
+		int PotentialNullMessageSendReference = Internal + 919;
+		/** @since 3.7 */
+		int RedundantNullCheckOnNonNullMessageSend = Internal + 920;
 	}
 	
 	/** Translate from a nullness annotation to the corresponding tag bit or 0L. */
