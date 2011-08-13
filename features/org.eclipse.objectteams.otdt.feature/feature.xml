@@ -102,6 +102,13 @@ Project Leader:
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.objectteams.otdt.doc"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.objectteams.otdt.jdt.ui"
          download-size="365"
          install-size="687"
