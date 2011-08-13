@@ -66,49 +66,42 @@ boolean areParametersEqual(MethodBinding one, MethodBinding two) {
 	int length = oneArgs.length;
 	if (length != twoArgs.length) return false;
 
-	if (one.declaringClass.isInterface()) {
-		for (int i = 0; i < length; i++)
+	
+	// methods with raw parameters are considered equal to inherited methods
+	// with parameterized parameters for backwards compatibility, need a more complex check
+	int i;
+	foundRAW: for (i = 0; i < length; i++) {
 //{ObjectTeams: added 3. argument:
-			if (!areTypesEqual(oneArgs[i], twoArgs[i], two))
+		if (!areTypesEqual(oneArgs[i], twoArgs[i], two)) {
 // SH}
-				return false;
-	} else {
-		// methods with raw parameters are considered equal to inherited methods
-		// with parameterized parameters for backwards compatibility, need a more complex check
-		int i;
-		foundRAW: for (i = 0; i < length; i++) {
-//{ObjectTeams: added 3. argument:
-			if (!areTypesEqual(oneArgs[i], twoArgs[i], two)) {
-// SH}
-				if (oneArgs[i].leafComponentType().isRawType()) {
-					if (oneArgs[i].dimensions() == twoArgs[i].dimensions() && oneArgs[i].leafComponentType().isEquivalentTo(twoArgs[i].leafComponentType())) {
-						// raw mode does not apply if the method defines its own type variables
-						if (one.typeVariables != Binding.NO_TYPE_VARIABLES)
+			if (oneArgs[i].leafComponentType().isRawType()) {
+				if (oneArgs[i].dimensions() == twoArgs[i].dimensions() && oneArgs[i].leafComponentType().isEquivalentTo(twoArgs[i].leafComponentType())) {
+					// raw mode does not apply if the method defines its own type variables
+					if (one.typeVariables != Binding.NO_TYPE_VARIABLES)
+						return false;
+					// one parameter type is raw, hence all parameters types must be raw or non generic
+					// otherwise we have a mismatch check backwards
+					for (int j = 0; j < i; j++)
+						if (oneArgs[j].leafComponentType().isParameterizedTypeWithActualArguments())
 							return false;
-						// one parameter type is raw, hence all parameters types must be raw or non generic
-						// otherwise we have a mismatch check backwards
-						for (int j = 0; j < i; j++)
-							if (oneArgs[j].leafComponentType().isParameterizedTypeWithActualArguments())
-								return false;
-						// switch to all raw mode
-						break foundRAW;
-					}
+					// switch to all raw mode
+					break foundRAW;
 				}
-				return false;
 			}
+			return false;
 		}
-		// all raw mode for remaining parameters (if any)
-		for (i++; i < length; i++) {
+	}
+	// all raw mode for remaining parameters (if any)
+	for (i++; i < length; i++) {
 //{ObjectTeams: added 3. argument:
-			if (!areTypesEqual(oneArgs[i], twoArgs[i], two)) {
+		if (!areTypesEqual(oneArgs[i], twoArgs[i], two)) {
 // SH}
-				if (oneArgs[i].leafComponentType().isRawType())
-					if (oneArgs[i].dimensions() == twoArgs[i].dimensions() && oneArgs[i].leafComponentType().isEquivalentTo(twoArgs[i].leafComponentType()))
-						continue;
-				return false;
-			} else if (oneArgs[i].leafComponentType().isParameterizedTypeWithActualArguments()) {
-				return false; // no remaining parameter can be a Parameterized type (if one has been converted then all RAW types must be converted)
-			}
+			if (oneArgs[i].leafComponentType().isRawType())
+				if (oneArgs[i].dimensions() == twoArgs[i].dimensions() && oneArgs[i].leafComponentType().isEquivalentTo(twoArgs[i].leafComponentType()))
+					continue;
+			return false;
+		} else if (oneArgs[i].leafComponentType().isParameterizedTypeWithActualArguments()) {
+			return false; // no remaining parameter can be a Parameterized type (if one has been converted then all RAW types must be converted)
 		}
 	}
 	return true;
