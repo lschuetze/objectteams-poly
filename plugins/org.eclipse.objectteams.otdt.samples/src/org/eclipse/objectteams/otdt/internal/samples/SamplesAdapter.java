@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.objectteams.otdt.ui.help.OTHelpPlugin;
 import org.eclipse.pde.internal.ui.PDEPlugin;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.widgets.Display;
@@ -214,7 +215,7 @@ public team class SamplesAdapter
  					NullProgressMonitor npm = new NullProgressMonitor();
  					
  					// fetch path to help plugin hosting images/ and guide/otjld/def/:
- 					Bundle helpBundle = OTSamplesPlugin.getDefault().getHelpPlugin();
+ 					Bundle helpBundle = OTHelpPlugin.getDocPlugin();
  					String absPath = FileLocator.toFileURL(helpBundle.getEntry("/")).toString();  //$NON-NLS-1$
  					String baseTag = "<base href=\""+absPath+"\">\n"; //$NON-NLS-1$ //$NON-NLS-2$
  					
