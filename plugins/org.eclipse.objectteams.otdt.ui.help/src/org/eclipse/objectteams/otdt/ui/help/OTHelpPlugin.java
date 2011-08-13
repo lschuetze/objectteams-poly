@@ -24,19 +24,29 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.osgi.service.packageadmin.PackageAdmin;
 
 /**
  * The main plugin class to be used in the desktop.
  */
+@SuppressWarnings("deprecation") // package admin is still recommended for this particular purpose
 public class OTHelpPlugin extends AbstractUIPlugin {
 	//The shared instance.
 	private static OTHelpPlugin plugin;
 	
+	/** this plugin: */
 	public static final String PLUGIN_ID = "org.eclipse.objectteams.otdt.ui.help"; //$NON-NLS-1$
+	/** companion bundle (code-less): */
+	public static final String OT_DOC_BUNDLE = "org.eclipse.objectteams.otdt.doc"; //$NON-NLS-1$
 	public static final String OTJLD_VIEW = "org.eclipse.objectteams.otdt.ui.help.views.OTJLDView"; //$NON-NLS-1$
 		
 	private static final String ICON_OTJLD = "icons/ot_paragraph.gif"; //$NON-NLS-1$
+
+
+	private static BundleContext fContext;
 
 	/**
 	 * The constructor.
@@ -50,6 +60,7 @@ public class OTHelpPlugin extends AbstractUIPlugin {
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
 		plugin = this;
+		fContext = context;
 	}
 
 	/**
@@ -57,6 +68,7 @@ public class OTHelpPlugin extends AbstractUIPlugin {
 	 */
 	public void stop(BundleContext context) throws Exception {
 		plugin = null;
+		fContext = null;
 		super.stop(context);
 	}
 
@@ -65,6 +77,15 @@ public class OTHelpPlugin extends AbstractUIPlugin {
 	 */
 	public static OTHelpPlugin getDefault() {
 		return plugin;
+	}
+
+	/** Get the Bundle representation of org.eclipse.objectteams.otdt.doc, which has no implementation of its own. */
+	public static Bundle getDocPlugin() {
+		ServiceReference<PackageAdmin> ref= (ServiceReference<PackageAdmin>) fContext.getServiceReference(PackageAdmin.class);
+		if (ref == null)
+			throw new IllegalStateException("Cannot connect to PackageAdmin"); //$NON-NLS-1$
+		PackageAdmin packageAdmin = fContext.getService(ref);
+		return packageAdmin.getBundles(OT_DOC_BUNDLE, null)[0];
 	}
 
 	public static void logException(String message, Throwable exception) {

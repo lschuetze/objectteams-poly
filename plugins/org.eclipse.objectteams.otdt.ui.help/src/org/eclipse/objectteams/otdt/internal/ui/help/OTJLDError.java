@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.objectteams.otdt.internal.ui.help.views.OTJLDView;
 import org.eclipse.objectteams.otdt.ui.help.OTHelpPlugin;
+import org.osgi.framework.Bundle;
 
 
 /**
@@ -87,9 +88,10 @@ public class OTJLDError
             {
             	if (!contentInitialized) {
             		// need to touch the directories whose content we need extracted:
-            		FileLocator.toFileURL(OTHelpPlugin.getDefault().getBundle().getEntry(OTJLDError.URL_PATH));
-            		FileLocator.toFileURL(OTHelpPlugin.getDefault().getBundle().getEntry(OTJLDError.IMAGES_URL_PATH));
-            		FileLocator.toFileURL(OTHelpPlugin.getDefault().getBundle().getEntry(OTJLDError.CSS_URL_PATH));
+            		Bundle docPlugin = OTHelpPlugin.getDocPlugin();
+					FileLocator.toFileURL(docPlugin.getEntry(OTJLDError.URL_PATH));
+            		FileLocator.toFileURL(docPlugin.getEntry(OTJLDError.IMAGES_URL_PATH));
+            		FileLocator.toFileURL(docPlugin.getEntry(OTJLDError.CSS_URL_PATH));
             		contentInitialized = true;
             	}
                 result = FileLocator.toFileURL(m_url).toString();
@@ -105,7 +107,7 @@ public class OTJLDError
 
         private String getHelpSystemURL()
         {
-            return "/" + OTHelpPlugin.PLUGIN_ID + m_url.getPath() + m_anchor;
+            return "/" + OTHelpPlugin.OT_DOC_BUNDLE + m_url.getPath() + m_anchor;
         }
         
     }
@@ -171,7 +173,7 @@ public class OTJLDError
 	        
 			String file = URL_PATH + "s" + variablePart + ".html";
 	        
-	        url = OTHelpPlugin.getDefault().getBundle().getEntry(file);
+	        url = OTHelpPlugin.getDocPlugin().getEntry(file);
 	        
 	        // in case an exact matching file is not found, use the parent section:
 	        int lastDot = variablePart.lastIndexOf('.');
@@ -191,7 +193,7 @@ public class OTJLDError
     }
 
     public static OTURL getHomepageURL() {
-    	return new OTURL(OTHelpPlugin.getDefault().getBundle().getEntry(getHome()));
+    	return new OTURL(OTHelpPlugin.getDocPlugin().getEntry(getHome()));
     }
     
     public static boolean isOTJProblem(String text) {
