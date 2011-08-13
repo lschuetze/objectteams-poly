@@ -1137,6 +1137,80 @@ public class TeamNesting extends AbstractOTJLDTest {
             },
             "OK");
     }
+    
+    // Bug 330002 - Wrong linearization of tsuper calls in diamond inheritance
+    public void _test1114_tsuperInNested3() {
+    	runConformTest(
+    		new String[] {
+    	"T1114tin3Main.java",
+    			"public class T1114tin3Main {\n" +
+    			"    public static void main(String[] args) {\n" +
+    			"        new Team1114tin3_1().test();\n" +
+    			"    }\n" +
+    			"}\n",
+    	"Team1114tin3_0.java",
+    			"public team class Team1114tin3_0 {\n" + 
+    			"    protected abstract team class TeamA {\n" + 
+    			"        protected abstract class R {\n" + 
+    			"            protected void print() { System.out.println(\"topR\"); }\n" + 
+    			"        }\n" + 
+    			"        public void test() {\n" + 
+    			"            System.out.println(\"topT\");\n" + 
+    			"            new R().print();\n" + 
+    			"        }\n" + 
+    			"    }\n" + 
+    			"\n" + 
+    			"    protected team class TeamB extends TeamA {\n" + 
+    			"        protected class R {\n" + 
+    			"            protected void print() {\n" + 
+    			"                System.out.println(\"0B\");\n" + 
+    			"                tsuper.print();\n" + 
+    			"            }\n" + 
+    			"        }\n" + 
+    			"        public void test() {\n" + 
+    			"            System.out.println(\"TeamB\");\n" + 
+    			"            super.test();\n" + 
+    			"        }\n" + 
+    			"    }\n" + 
+    			"}",
+    	"Team1114tin3_1.java",
+    			"public team class Team1114tin3_1 extends Team1114tin3_0 {\n" + 
+    			"    @Override\n" + 
+    			"    protected team class TeamA {\n" + 
+    			"        @Override\n" + 
+    			"        protected class R {\n" + 
+    			"            @Override\n" + 
+    			"            protected void print() {\n" + 
+    			"                System.out.println(\"1A\");\n" + 
+    			"                tsuper.print();\n" + 
+    			"            }\n" + 
+    			"        }\n" + 
+    			"        @Override\n" + 
+    			"        public void test() {\n" + 
+    			"            System.out.println(\"TeamA\");\n" + 
+    			"            tsuper.test();\n" + 
+    			"        }\n" + 
+    			"    }\n" + 
+    			"    protected team class TeamB {\n" + 
+    			"        protected class R {\n" + 
+    			"            protected void print() {\n" + 
+    			"                System.out.println(\"bottomB\");\n" + 
+    			"                tsuper.print();\n" + 
+    			"            }\n" + 
+    			"        }\n" + 
+    			"    }\n" + 
+    			"    void test() {\n" + 
+    			"        new TeamB().test();\n" + 
+    			"    }\n" + 
+    			"}"
+    		},
+    		"TeamB\n" +
+    		"TeamA\n" +
+    		"topT\n" +
+    		"0B\n" +
+    		"1A\n" +
+    		"topR\n");
+    }
 
     // a nested team extends a toplevel team, role signature contains role
     // 1.1.15-otjld-nested-team-extends-regular-team-1
