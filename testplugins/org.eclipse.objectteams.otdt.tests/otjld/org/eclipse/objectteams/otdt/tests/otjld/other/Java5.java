@@ -7,7 +7,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -4998,19 +4997,48 @@ public class Java5 extends AbstractOTJLDTest {
     public void testA120_enumInTeam3() {
     	runConformTest(
     		new String[] {
-    	"TeamA120eit1_2.java",
-	    		"public team class TeamA120eit1_2 extends TeamA120eit1_1 {\n" +
+    	"TeamA120eit3_2.java",
+	    		"public team class TeamA120eit3_2 extends TeamA120eit3_1 {\n" +
 	    		"	public static void main(String[] args) {\n" +
 	    		"		for (Values v : Values.values())\n" +
 	    		"			System.out.print(v);\n" +
 	    		"	}\n" +
 	    		"}",
-    	"TeamA120eit1_1.java",
-	    		"public team class TeamA120eit1_1 {\n" +
+    	"TeamA120eit3_1.java",
+	    		"public team class TeamA120eit3_1 {\n" +
 	    		"	protected enum Values { V1, V2 };\n" +
 	    		"}"
     		},
     		"V1V2");
+    }
+
+    // A team contains an enum - with team inheritance - incremental compilation
+    // Bug 348570 - [compiler] missing team anchor reported against enum
+    public void testA120_enumInTeam4() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA120eit4_1.java",
+	    		"public team class TeamA120eit4_1 {\n" +
+	    		"	protected enum Values { V1, V2 };\n" +
+	    		"}"
+    		},
+    		"");
+    	runConformTest(
+    		new String[] {
+    	"TeamA120eit4_2.java",
+	    		"public team class TeamA120eit4_2 extends TeamA120eit4_1 {\n" +
+	    		"	public static void main(String[] args) {\n" +
+	    		"		for (Values v : Values.values())\n" +
+	    		"			System.out.print(v);\n" +
+	    		"	}\n" +
+	    		"}"
+    		},
+    		"V1V2",
+            null/*classLibs*/,
+            false/*shouldFlush*/,
+            null/*vmArgs*/,
+            null/*customOptions*/,
+            null/*requestor*/);
     }
 
     public void testA121_genericNestedTeam1() {
