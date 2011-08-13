@@ -38,10 +38,6 @@
    </extension>
 
 <!-- OTDT help extension-->      
-   <extension point="org.eclipse.help.toc">
-     <toc file="guide/toc.xml" primary="true"/>
-   </extension>
-
    <extension
          point="org.eclipse.ui.views">
       <view

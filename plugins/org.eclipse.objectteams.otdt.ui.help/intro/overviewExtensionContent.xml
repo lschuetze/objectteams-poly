@@ -11,7 +11,7 @@
 			<link 
 				style-id="content-link" 
 				label="Object Teams introduction"
-				url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.objectteams.otdt.ui.help/ot.html"
+				url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.objectteams.otdt.doc/ot.html"
 				id="ot-overview">
 				<text>Learn about Object Teams and the OTDT</text>
 			</link>

@@ -11,7 +11,7 @@
 			<link 
 				style-id="content-link" 
 				label="Object Teams News"
-				url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.objectteams.otdt.ui.help/guide/whatsnew.html"
+				url="http://org.eclipse.ui.intro/showHelpTopic?id=/org.eclipse.objectteams.otdt.doc/guide/whatsnew.html"
 				id="ot-news">
 				<text>Find out about significant changes made to the Object Teams Development Tooling</text>
 			</link>
