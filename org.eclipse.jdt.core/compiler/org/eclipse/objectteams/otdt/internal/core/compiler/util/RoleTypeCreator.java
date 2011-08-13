@@ -161,7 +161,7 @@ public class RoleTypeCreator implements TagBits {
 		typeToWrap     = typeToWrap.leafComponentType();
 
 		// easy problems first:
-        if (!(typeToWrap instanceof ReferenceBinding))
+        if (!(typeToWrap instanceof ReferenceBinding) || typeToWrap.isEnum())
             return originalType;
         ReferenceBinding refBinding = (ReferenceBinding)typeToWrap;
 
@@ -307,7 +307,8 @@ public class RoleTypeCreator implements TagBits {
 		TypeBinding returnType = send.binding.returnType;
 
 		if (   returnType == null
-			|| !(returnType.leafComponentType() instanceof ReferenceBinding))
+			|| !(returnType.leafComponentType() instanceof ReferenceBinding)
+			|| returnType.leafComponentType().isEnum())
 	    	return returnType;
 
 		int dimensions = returnType.dimensions();
@@ -582,7 +583,7 @@ public class RoleTypeCreator implements TagBits {
 				arguments = ((ParameterizedTypeBinding)typeToWrap).arguments;
 
 			// easy problems first:
-	        if (!(typeToWrap instanceof ReferenceBinding))
+	        if (!(typeToWrap instanceof ReferenceBinding) || typeToWrap.isEnum())
 	            return originalType;
 	        
 	        if (typeToWrap instanceof UnresolvedReferenceBinding) {
