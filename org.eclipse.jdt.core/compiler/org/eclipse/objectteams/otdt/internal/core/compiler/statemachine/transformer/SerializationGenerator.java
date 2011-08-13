@@ -115,9 +115,16 @@ public class SerializationGenerator {
 			// FIXME(SH): unclear if needed after allowing generated qualified role type referneces:
 			TypeReference cacheTypeRef = caches[i].type; // robustness, but with wrong source position
 			
-			if (! (caches[i].type.resolvedType instanceof ParameterizedTypeBinding)
-				|| ((ParameterizedTypeBinding)cacheTypeRef.resolvedType).arguments.length != 2)
+			if (!  cacheTypeRef.resolvedType.isParameterizedType()
+				|| ((ParameterizedTypeBinding)cacheTypeRef.resolvedType).arguments.length != 2) 
+			{
+				if (teamType.scope.environment().globalOptions.complianceLevel < ClassFileConstants.JDK1_5) {
+					restoreMethod.statements = new Statement[] { gen.emptyStatement() };
+					restoreMethod.tagAsHavingErrors();
+					return; // incompatible compliance level, assume errors have been reported.
+				}
 				throw new InternalCompilerError("Unexpected resolved cache type "+cacheTypeRef.resolvedType); //$NON-NLS-1$
+			}
 	
 			// reconstruct a type reference from the resolved cache type
 			ParameterizedTypeBinding oldBinding = (ParameterizedTypeBinding)cacheTypeRef.resolvedType;
