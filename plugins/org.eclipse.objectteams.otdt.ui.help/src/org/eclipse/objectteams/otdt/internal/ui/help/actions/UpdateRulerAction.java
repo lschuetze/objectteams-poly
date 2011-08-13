@@ -41,6 +41,7 @@ import org.eclipse.ui.IWorkbenchActionConstants;
  * @author stephan
  * @since 0.7.0 (Incubation at Eclipse.org)
  */
+@SuppressWarnings("restriction") // uses internal type IJavaAnnotation
 public class UpdateRulerAction implements IUpdateRulerActionExtender {
 	
 	public void menuAboutToShow(IMenuManager contextMenu, IDocument document, IEditorPart editor, int line) 
@@ -73,7 +74,6 @@ public class UpdateRulerAction implements IUpdateRulerActionExtender {
 		}
 	}
 
-	@SuppressWarnings("restriction") // IJavaAnnotation is internal
 	private boolean isOTJProblem(Annotation annot) {
 		if (!( annot instanceof IJavaAnnotation))
 			return false;
