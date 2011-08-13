@@ -109,7 +109,8 @@ public abstract class NewTypeCreationWizard  extends NewElementWizard
 	    NewTypeWizardPage page = getPage();	    
 	    TypeInfo typeInfo = createTypeInfo();
 	    
-	    typeInfo.setEnclosingTypeName(page.getEnclosingTypeName());
+	    if (page.isEnclosingTypeSelected())
+	    	typeInfo.setEnclosingTypeName(page.getEnclosingTypeName());
 	    typeInfo.setSuperClassName(page.getSuperTypeName());
 	    typeInfo.setSuperInterfacesNames(page.getSuperInterfaces());
 	    typeInfo.setModifier(page.getModifiers());
@@ -117,15 +118,18 @@ public abstract class NewTypeCreationWizard  extends NewElementWizard
 	    
 	    if (page instanceof NewTeamWizardPage)
 	    {
-	        IType enclosingType = page.getEnclosingType();
-	        if ( (enclosingType != null) && enclosingType.exists() )
-	        {
-	            IOTType enclosingOTType = OTModelManager.getOTElement(enclosingType);
-	            if (enclosingOTType != null)
-	            {
-	                typeInfo.setIsRole(true);
-	            }
-	        }
+	    	if (page.isEnclosingTypeSelected())
+	    	{
+		        IType enclosingType = page.getEnclosingType();
+		        if ( (enclosingType != null) && enclosingType.exists() )
+		        {
+		            IOTType enclosingOTType = OTModelManager.getOTElement(enclosingType);
+		            if (enclosingOTType != null)
+		            {
+		                typeInfo.setIsRole(true);
+		            }
+		        }
+	    	}
 	    }
 	    else // if (page instanceof NewRoleWizardPage)
 	    {
