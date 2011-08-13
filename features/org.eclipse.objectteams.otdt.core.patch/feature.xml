@@ -55,7 +55,7 @@ Project Leader:
    </license>
 
    <url>
-      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/2.0"/>
+      <update label="Object Teams Updates" url="http://download.eclipse.org/objectteams/updates/2.1"/>
    </url>
 
    <requires>
