@@ -692,7 +692,6 @@ public class BindingConfiguration extends Composite
 		toggleApplyButton();
 	}
 
-	@SuppressWarnings("unchecked") // DOM list _selectedCallinDecl.getBaseMappingElements()
 	public void setCallinMapping(ASTNode selectedNode, IType teamType)
 	{
 		if ( !(selectedNode instanceof CallinMappingDeclaration))
@@ -1096,7 +1095,6 @@ public class BindingConfiguration extends Composite
 		}
 	}
 	
-	@SuppressWarnings("unchecked") // DOM list _selectedCallinDecl.getBaseMappingElements()
 	private boolean createCallinMapping(AST ast, IMethod roleIMethod, IMember[] baseMethods, int modifier, boolean signatureFlag)
 	{
 		// can only bind methods in callin:
@@ -1369,7 +1367,6 @@ public class BindingConfiguration extends Composite
 		_curTeam = teamType;
 	}
 	
-	@SuppressWarnings("unchecked") // DOM lists
 	private void applyPressed() 
 	{
 		if (_selectedRole.isRoleFile()) {

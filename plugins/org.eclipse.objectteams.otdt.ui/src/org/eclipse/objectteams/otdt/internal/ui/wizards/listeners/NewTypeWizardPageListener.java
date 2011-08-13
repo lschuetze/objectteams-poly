@@ -72,7 +72,7 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
  */
 public abstract class NewTypeWizardPageListener implements IStringButtonAdapter,
                                                            IDialogFieldListener,
-                                                           IListAdapter
+                                                           IListAdapter<Object>
 {
 	protected static final int CONTAINER       = 1;
 	protected static final int PACKAGE         = 2;

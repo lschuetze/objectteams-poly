@@ -20,7 +20,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.ui.callinmarkers;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;

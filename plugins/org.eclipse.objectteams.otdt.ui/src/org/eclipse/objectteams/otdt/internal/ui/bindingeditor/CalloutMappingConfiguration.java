@@ -379,7 +379,6 @@ public class CalloutMappingConfiguration extends Group
         _paraListViewer.refresh();
     }
     
-    @SuppressWarnings("unchecked") // AST does not use generics :(
 	protected void updateParameterMapping(String identifier, String expr)
     {
         ParameterMapping paraMap = null;

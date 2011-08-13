@@ -103,7 +103,6 @@ public abstract class NewTypeCreationWizard  extends NewElementWizard
 	}
 	
 	
-	@SuppressWarnings("unchecked") // raw list page.getSuperInterfaces()
 	protected TypeInfo setTypeData(TypeCreator creator)
 	{
 	    NewTypeWizardPage page = getPage();	    
@@ -143,6 +142,7 @@ public abstract class NewTypeCreationWizard  extends NewElementWizard
         typeInfo.setCreateAbstractInheritedMethods(page.isCreateInheritedSelected());
 	    
 	    creator.setTypeInfo(typeInfo);
+	    creator.setAddComments(page.isAddComments());
 	    return typeInfo;
 	}
 	

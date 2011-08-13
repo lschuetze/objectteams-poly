@@ -135,7 +135,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 	private SelectionButtonDialogFieldGroup _otherModifierButtons;
 	private StringButtonDialogField 		_superTypeDialogField;
 	private StringDialogField 			    _typeNameDialogField;
-	private ListDialogField 				_superInterfacesDialogField; 
+	private ListDialogField<Object> 		_superInterfacesDialogField; 
 	private SelectionButtonDialogFieldGroup _methodStubsButtons;
 	private SelectionButtonDialogFieldGroup _bindingEditorButtons;
 	private SelectionButtonDialogField		_inlineSelectionDialogField;
@@ -264,10 +264,10 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
         return result;
     }
 
-    protected ListDialogField createSuperInterfacesDialogField(IListAdapter listlistener,
+    protected ListDialogField<Object> createSuperInterfacesDialogField(IListAdapter<Object> listlistener,
     														   IDialogFieldListener fieldlistener)
     {
-		ListDialogField result = null;
+		ListDialogField<Object> result = null;
 		
         String[] buttonNames = new String[] 
         {
@@ -276,7 +276,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
         	/* 2 */ NewWizardMessages.NewTypeWizardPage_interfaces_remove
         }; 
         
-		result = new ListDialogField(listlistener, buttonNames, new InterfacesListLabelProvider());		
+		result = new ListDialogField<Object>(listlistener, buttonNames, new InterfacesListLabelProvider());		
 		result.setDialogFieldListener(fieldlistener);
 		
         String interfaceLabel = NewWizardMessages.NewTypeWizardPage_interfaces_class_label;
@@ -832,7 +832,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 			initPackageAndEnclosingType(elem);
 		}			
 		setTypeName(""); //$NON-NLS-1$
-		setSuperInterfaces(new ArrayList(5));
+		setSuperInterfaces(new ArrayList<Object>(5));
 		setAddComments(StubUtility.doAddComments(project), true); // from project or workspace
 	}
 	
@@ -1054,7 +1054,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 	 * @param interfacesNames a list of super interface. The method requires that
 	 * the list's elements are of type <code>String</code>
 	 */	
-	public void setSuperInterfaces(List interfacesNames)
+	public void setSuperInterfaces(List<Object> interfacesNames)
 	{
 		_superInterfacesDialogField.setElements(interfacesNames);
 		_superInterfacesDialogField.setEnabled(true);
@@ -1153,7 +1153,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 		return _inlineSelectionDialogField;
 	}	
 	
-	public ListDialogField getSuperInterfacesDialogField()
+	public ListDialogField<Object> getSuperInterfacesDialogField()
 	{
 		return _superInterfacesDialogField;
 	}	
@@ -1215,11 +1215,10 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 	 * @return a list of chosen super interfaces. The list's elements
 	 * are of type <code>String</code>
 	 */
-	@SuppressWarnings("unchecked") // ListDialogField uses raw List
-	public List getSuperInterfaces() {
-		List interfaces= _superInterfacesDialogField.getElements();
-		ArrayList result= new ArrayList(interfaces.size());
-		for (Iterator iter= interfaces.iterator(); iter.hasNext();) {
+	public List<String> getSuperInterfaces() {
+		List<Object> interfaces= _superInterfacesDialogField.getElements();
+		ArrayList<String> result= new ArrayList<String>(interfaces.size());
+		for (Iterator<Object> iter= interfaces.iterator(); iter.hasNext();) {
 			InterfaceWrapper wrapper= (InterfaceWrapper) iter.next();
 			result.add(wrapper.interfaceName);
 		}
@@ -1241,7 +1240,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 		_superInterfacesDialogField.enableButton(0, root != null);
 						
 		if (root != null) {
-			List elements= _superInterfacesDialogField.getElements();
+			List<Object> elements= _superInterfacesDialogField.getElements();
 			int nElements= elements.size();
 			for (int i= 0; i < nElements; i++) {
 				String intfname= ((InterfaceWrapper) elements.get(i)).interfaceName;
@@ -1267,9 +1266,8 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 	 * @param canBeModified if <code>true</code> the super interface field is
 	 * editable; otherwise it is read-only.
 	 */	
-	@SuppressWarnings("unchecked") // we are called with a raw List
 	public void setSuperInterfaces(List interfacesNames, boolean canBeModified) {
-		ArrayList interfaces= new ArrayList(interfacesNames.size());
+		ArrayList<Object> interfaces= new ArrayList<Object>(interfacesNames.size());
 		for (Iterator iter= interfacesNames.iterator(); iter.hasNext();) {
 			interfaces.add(new InterfaceWrapper((String) iter.next()));
 		}

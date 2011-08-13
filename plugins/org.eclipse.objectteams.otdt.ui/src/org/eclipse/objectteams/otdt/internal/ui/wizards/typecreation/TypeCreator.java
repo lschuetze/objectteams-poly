@@ -96,11 +96,14 @@ public abstract class TypeCreator
 
     private TypeInfo _typeInfo;
     
-	private IType  _createdType;
+    private boolean _addComments;
+
+    private IType  _createdType;
 	private String _defaultSupertypeName;
 
 	private StubTypeContext fSuperClassStubTypeContext;
 	private StubTypeContext fSuperInterfaceStubTypeContext; // FIXME(SH): use it!?! (see writeSuperClass / writeSuperInterfaces)
+
 
 	
 	public TypeCreator()
@@ -118,7 +121,10 @@ public abstract class TypeCreator
 	{
 	    return _typeInfo;
 	}
-	
+
+	public void setAddComments(boolean addComments) {
+		this._addComments = addComments;
+	}
 	
 	/**
 	 * Hook method. Gets called by Constructor.
@@ -178,9 +184,9 @@ public abstract class TypeCreator
 
 				teamAST= createASTForImports(teamCU);
 			} else {
-				// sanity check (suppose we are creating a team, which never is "inlined"):
+				// sanity check (suppose we are creating a top-level team since enclosingType is null)
 				if (_typeInfo.isInlineType())
-					throw new CoreException(new Status(IStatus.ERROR, OTDTUIPlugin.UIPLUGIN_ID, "missing enclosing type for inline type"));
+					throw new CoreException(new Status(IStatus.ERROR, OTDTUIPlugin.UIPLUGIN_ID, "missing enclosing type for inline type")); //$NON-NLS-1$
 			}
 			
 			if (!_typeInfo.isInlineType()) 
@@ -388,11 +394,10 @@ public abstract class TypeCreator
      * @since 3.1
 	 */		
 	protected String getFileComment(ICompilationUnit parentCU, String lineDelimiter) throws CoreException {
-		if (true /*isAddComments()*/) {
+		if (this._addComments) {
 			return CodeGeneration.getFileComment(parentCU, lineDelimiter);
 		}
 		return null;
-		
 	}
 	
 	/**
@@ -926,8 +931,7 @@ public abstract class TypeCreator
 			handleIds.add(typeMethods[index].getHandleIdentifier());
 		ArrayList<IMethod> newMethods= new ArrayList<IMethod>();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
-// TODO: addComments has to be set in _typeInfo		
-		settings.createComments= true;
+		settings.createComments= this._addComments;
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setResolveBindings(true);
 		parser.setSource(cu);
@@ -936,15 +940,13 @@ public abstract class TypeCreator
 		if (binding != null) {
 			if (_typeInfo.isCreateAbstractInheritedMethods()) {
 				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(unit, binding, null, -1, false, true, false);
-// TODO: addComments (parameter) has to be set in _typeInfo			
-				operation.setCreateComments(true);
+				operation.setCreateComments(this._addComments);
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}
 			if (_typeInfo.isCreateConstructor()) {
 				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(unit, binding, null, -1, false, true, false);
-// TODO: addComments (parameter) has to be set in _typeInfo			
-				operation.setCreateComments(true);
+				operation.setCreateComments(this._addComments);
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}
@@ -1040,5 +1042,4 @@ public abstract class TypeCreator
 		}
 		
 	}
-
 }

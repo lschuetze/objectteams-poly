@@ -424,7 +424,6 @@ public class BindingEditor extends Composite
         addConnBtn.setText(Messages.BindingEditor_add_type_binding_button);
         addConnBtn.addSelectionListener( new SelectionAdapter() 
         {
-        	@SuppressWarnings("unchecked")
         	public void widgetSelected(SelectionEvent evt) 
         	{
                 IType roleClass = null;
