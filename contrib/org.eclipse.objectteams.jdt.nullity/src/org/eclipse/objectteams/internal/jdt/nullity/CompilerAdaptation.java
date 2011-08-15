@@ -394,38 +394,26 @@ public team class CompilerAdaptation {
 	
 	protected class AbstractMethodDeclaration extends NodeWithBits playedBy AbstractMethodDeclaration {
 
-		int sourceEnd() 						-> int sourceEnd();
-		int sourceStart() 						-> int sourceStart();
 		BlockScope getScope()      				-> get MethodScope scope;
 		Argument[] getArguments()  				-> get Argument[] arguments;
 		Annotation[] getAnnotations()			-> get Annotation[] annotations;
 		void setAnnotations(Annotation[] annot)	-> set Annotation[] annotations;
 		MethodBinding getBinding() 				-> get MethodBinding binding;
-		void doBindArguments()       			-> void bindArguments();
 		
-		
-		void guardedBindArguments() 			<- replace void bindArguments();
-		@SuppressWarnings("basecall")
-		callin void guardedBindArguments() {
-			// See also comments #45, #49 and #75 in bug 186342
-			if ((getBits() & Constants.HasBoundArguments) != 0) // avoid double execution
-				return;
-			addBit(Constants.HasBoundArguments);
-			base.guardedBindArguments();
-		}
-		
-		public void bindArguments() {
+		public void createArgumentBindingsWithAnnotations() {
 			MethodBinding binding = getBinding();
 			if (binding == null)
 				return;
-			if ((getBits() & Constants.HasBoundArguments) == 0) { // avoid double execution
-				doBindArguments();
-				addBit(Constants.HasBoundArguments);
-			}
+			BlockScope scope = getScope();
 			Argument[] arguments = this.getArguments();
 			if (arguments != null && binding != null) {
 				for (int i = 0, length = arguments.length; i < length; i++) {
 					Argument argument = arguments[i];
+					// the following three lines are copied from Argument.bind()
+					// luckily both are protected against double-execution.
+					if (argument.binding == null)
+						argument.binding = new LocalVariableBinding(argument, null, argument.modifiers, true);
+					ASTNode.resolveAnnotations(scope, argument.annotations, argument.binding);
 					// transfer nullness info from the argument to the method:
 					if ((argument.binding.tagBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) != 0) {
 						if (binding.parameterNonNullness == null)
@@ -719,7 +707,7 @@ public team class CompilerAdaptation {
 			AbstractMethodDeclaration methodDecl = method.sourceMethod();
 			if (methodDecl != null) {
 				if (method.getParameters() != Binding.NO_PARAMETERS)
-					methodDecl.bindArguments();
+					methodDecl.createArgumentBindingsWithAnnotations();
 				TypeBinding annotationBinding = findDefaultNullness(method.getDeclaringSourceType(), methodDecl.getScope().environment());
 				if (annotationBinding != null) {
 					long defaultNullness = Constants.getNullnessTagbit(annotationBinding);

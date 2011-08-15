@@ -37,8 +37,6 @@ public class Constants {
 	// ASTNode:
 	// for annotation reference:
 	public static final int IsSynthetic = ASTNode.Bit7;
-	// for method declaration to avoid duplicate invocation of bindArguments()
-	public static final int HasBoundArguments = ASTNode.Bit10; 
 	
 	/** Additional constants for {@link org.eclipse.jdt.internal.compiler.lookup.TypeIds}. */
 	static interface TypeIds {
