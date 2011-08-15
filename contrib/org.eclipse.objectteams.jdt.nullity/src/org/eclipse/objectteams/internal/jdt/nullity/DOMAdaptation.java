@@ -33,7 +33,7 @@ import base org.eclipse.jdt.core.dom.ASTConverter;
 @SuppressWarnings({ "decapsulation", "restriction" })
 public team class DOMAdaptation {
 	
-	int [] translation = new int[1024];
+	int [] translation = null;
 
 	@SuppressWarnings("nls")
 	public void initVersion() {
