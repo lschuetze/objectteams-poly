@@ -24,10 +24,14 @@ public class Constants {
 	/** Additional constants for {@link org.eclipse.jdt.internal.compiler.lookup.TagBits}. */
 	static interface TagBits extends org.eclipse.jdt.internal.compiler.lookup.TagBits {
 		 // the following two should be added to TagBits.AllStandardAnnotationsMask:
-		long AnnotationNullable = ASTNode.Bit56L;
-		long AnnotationNonNull = ASTNode.Bit57L;
-		long AnnotationNullableByDefault = ASTNode.Bit58L;
-		long AnnotationNonNullByDefault = ASTNode.Bit59L;
+		
+		// values are selected so they don't conflict with existing TagBits neither in JDT 3.8M1 nor OTDT 2.1M1
+		// MethodBinding or LocalVariableBinding (argument):
+		long AnnotationNullable = ASTNode.Bit59L;
+		long AnnotationNonNull = ASTNode.Bit60L;
+		// PackageBinding or TypeBinding:
+		long AnnotationNullableByDefault = ASTNode.Bit52L;
+		long AnnotationNonNullByDefault = ASTNode.Bit53L;
 	}
 	
 	// ASTNode:
