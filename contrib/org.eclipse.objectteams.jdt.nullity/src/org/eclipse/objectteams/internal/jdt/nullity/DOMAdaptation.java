@@ -10,12 +10,18 @@
  *******************************************************************************/
 package org.eclipse.objectteams.internal.jdt.nullity;
 
+import java.lang.reflect.Field;
+import java.util.Locale;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
+import org.eclipse.jdt.internal.compiler.batch.Main;
 
 import base org.eclipse.jdt.core.dom.ASTConverter;
 
@@ -27,55 +33,101 @@ import base org.eclipse.jdt.core.dom.ASTConverter;
 @SuppressWarnings({ "decapsulation", "restriction" })
 public team class DOMAdaptation {
 	
+	int [] translation = new int[1024];
+
+	@SuppressWarnings("nls")
+	public void initVersion() {
+		if (this.translation == null) {
+			this.translation = new int[1024];
+			ResourceBundle bundle = Main.ResourceBundleFactory.getBundle(Locale.getDefault());
+			try {
+				String otVersion = bundle.getString("otdtc.version");
+				if (otVersion.contains("2.0.0"))
+					initTranslation(TerminalTokens_OT200.class);
+				else if (otVersion.contains("2.0.1"))
+					initTranslation(TerminalTokens_OT201.class);
+				else if (otVersion.contains("2.1.0 M1"))
+					initTranslation(TerminalTokens_OT21M1.class);
+			} catch (MissingResourceException mre) {
+				String version = bundle.getString("compiler.version");
+				if (version.contains("3.7.0"))
+					initTranslation(TerminalTokens_R370.class);
+				else if (version.contains("3.7.1"))
+					initTranslation(TerminalTokens_B74R37x.class);
+				else if (version.contains("3.8.0 M1"))
+					initTranslation(TerminalTokens_R38M1.class);
+			}
+		}
+	}
+	void initTranslation(Class<?> terminalTokensClass) {
+		for (Field field :terminalTokensClass.getDeclaredFields()) {
+			try {
+				int thisValue = field.getInt(null);
+				int ot21m1Value = TerminalTokens_OT21M1.class.getField(field.getName()).getInt(null);
+				this.translation[thisValue] = ot21m1Value;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	protected class Converter playedBy ASTConverter {
+		
 		
 		void setModifiers(BodyDeclaration bodyDeclaration, org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations, int modifiersEnd)
 		<- replace void setModifiers(BodyDeclaration bodyDeclaration, org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations, int modifiersEnd);
 		
-		@SuppressWarnings({ "inferredcallout", "basecall" })
+		@SuppressWarnings({ "basecall", "inferredcallout" })
 		callin void setModifiers(BodyDeclaration bodyDeclaration, org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations, int modifiersEnd) {
 			this.scanner.tokenizeWhiteSpace = false;
 			try {
 				int token;
 				int indexInAnnotations = 0;
+//{Modification:
+				initVersion();
+				while ((token = translation[this.scanner.getNextToken()]) != TerminalTokens_OT21M1.TokenNameEOF) {
+/* orig:
 				while ((token = this.scanner.getNextToken()) != TerminalTokens.TokenNameEOF) {
+  */
 					IExtendedModifier modifier = null;
+//  :giro 
 		switchToken:
+// SH}
 					switch(token) {
-						case TerminalTokens.TokenNameabstract:
+						case TerminalTokens_OT21M1.TokenNameabstract:
 							modifier = createModifier(Modifier.ModifierKeyword.ABSTRACT_KEYWORD);
 							break;
-						case TerminalTokens.TokenNamepublic:
+						case TerminalTokens_OT21M1.TokenNamepublic:
 							modifier = createModifier(Modifier.ModifierKeyword.PUBLIC_KEYWORD);
 							break;
-						case TerminalTokens.TokenNamestatic:
+						case TerminalTokens_OT21M1.TokenNamestatic:
 							modifier = createModifier(Modifier.ModifierKeyword.STATIC_KEYWORD);
 							break;
-						case TerminalTokens.TokenNameprotected:
+						case TerminalTokens_OT21M1.TokenNameprotected:
 							modifier = createModifier(Modifier.ModifierKeyword.PROTECTED_KEYWORD);
 							break;
-						case TerminalTokens.TokenNameprivate:
+						case TerminalTokens_OT21M1.TokenNameprivate:
 							modifier = createModifier(Modifier.ModifierKeyword.PRIVATE_KEYWORD);
 							break;
-						case TerminalTokens.TokenNamefinal:
+						case TerminalTokens_OT21M1.TokenNamefinal:
 							modifier = createModifier(Modifier.ModifierKeyword.FINAL_KEYWORD);
 							break;
-						case TerminalTokens.TokenNamenative:
+						case TerminalTokens_OT21M1.TokenNamenative:
 							modifier = createModifier(Modifier.ModifierKeyword.NATIVE_KEYWORD);
 							break;
-						case TerminalTokens.TokenNamesynchronized:
+						case TerminalTokens_OT21M1.TokenNamesynchronized:
 							modifier = createModifier(Modifier.ModifierKeyword.SYNCHRONIZED_KEYWORD);
 							break;
-						case TerminalTokens.TokenNametransient:
+						case TerminalTokens_OT21M1.TokenNametransient:
 							modifier = createModifier(Modifier.ModifierKeyword.TRANSIENT_KEYWORD);
 							break;
-						case TerminalTokens.TokenNamevolatile:
+						case TerminalTokens_OT21M1.TokenNamevolatile:
 							modifier = createModifier(Modifier.ModifierKeyword.VOLATILE_KEYWORD);
 							break;
-						case TerminalTokens.TokenNamestrictfp:
+						case TerminalTokens_OT21M1.TokenNamestrictfp:
 							modifier = createModifier(Modifier.ModifierKeyword.STRICTFP_KEYWORD);
 							break;
-						case TerminalTokens.TokenNameAT :
+						case TerminalTokens_OT21M1.TokenNameAT :
 							// we have an annotation
 							if (annotations != null && indexInAnnotations < annotations.length) {
 //{Modification: skip synthetic annotations
@@ -93,9 +145,9 @@ public team class DOMAdaptation {
 								this.scanner.resetTo(annotation.declarationSourceEnd + 1, modifiersEnd);
 							}
 							break;
-						case TerminalTokens.TokenNameCOMMENT_BLOCK :
-						case TerminalTokens.TokenNameCOMMENT_LINE :
-						case TerminalTokens.TokenNameCOMMENT_JAVADOC :
+						case TerminalTokens_OT21M1.TokenNameCOMMENT_BLOCK :
+						case TerminalTokens_OT21M1.TokenNameCOMMENT_LINE :
+						case TerminalTokens_OT21M1.TokenNameCOMMENT_JAVADOC :
 							break;
 						default :
 							// there is some syntax errors in source code
