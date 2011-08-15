@@ -9,5 +9,9 @@
    <feature url="features/org.eclipse.objectteams.jdt.nullity.feature_0.8.0.qualifier.jar" id="org.eclipse.objectteams.jdt.nullity.feature" version="0.8.0.qualifier">
       <category name="org.eclipse.objectteams.jdt.enhancements"/>
    </feature>
-   <category-def name="org.eclipse.objectteams.jdt.enhancements" label="JDT Enhancements"/>
+   <category-def name="org.eclipse.objectteams.jdt.enhancements" label="JDT Enhancements">
+     <description>
+         Enhancements for the JDT developed using Object Teams.
+      </description>
+    </category-def>
 </site>
