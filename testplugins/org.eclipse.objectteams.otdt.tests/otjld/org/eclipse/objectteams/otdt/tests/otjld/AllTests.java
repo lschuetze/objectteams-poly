@@ -30,6 +30,7 @@ import org.eclipse.objectteams.otdt.tests.otjld.liftlower.DeclaredLifting;
 import org.eclipse.objectteams.otdt.tests.otjld.other.AccessModifiers;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Exceptions;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Java5;
+import org.eclipse.objectteams.otdt.tests.otjld.other.Java7;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Misc;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Modifiers;
 import org.eclipse.objectteams.otdt.tests.otjld.regression.CompilationOrder;
@@ -128,6 +129,7 @@ public class AllTests {
 		/*7.1*/suite.addTest(Modifiers.suite());
 		/*7.5*/suite.addTest(Exceptions.suite());
 		/*A.1*/suite.addTest(Java5.suite());
+		/*A.2*/suite.addTest(Java7.suite());
 		/*0.m*/suite.addTest(Misc.suite());
 		
 		// regression:
