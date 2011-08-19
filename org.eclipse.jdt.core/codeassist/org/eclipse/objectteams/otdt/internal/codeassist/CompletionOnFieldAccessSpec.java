@@ -23,6 +23,7 @@ package org.eclipse.objectteams.otdt.internal.codeassist;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionNodeFound;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
@@ -45,7 +46,7 @@ public class CompletionOnFieldAccessSpec extends FieldAccessSpec {
 	}
 
 	@Override
-	public void resolveFeature(ReferenceBinding receiverType, BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing)
+	public MethodBinding resolveFeature(ReferenceBinding receiverType, BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing)
 	{
 		throw new CompletionNodeFound(this, receiverType, scope);
 	}

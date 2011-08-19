@@ -106,7 +106,8 @@ public class FieldAccessSpec extends MethodSpec {
 	}
 
 	@Override
-	public void resolveFeature(ReferenceBinding baseType, BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing)
+	// if an access method is needed, return that accessor, else null
+	public MethodBinding resolveFeature(ReferenceBinding baseType, BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing)
     {
     	// find field in type or superclass:
 		this.resolvedField = TypeAnalyzer.findField(baseType, this.selector, /*don't check static*/false, /*outer*/false);
@@ -114,7 +115,7 @@ public class FieldAccessSpec extends MethodSpec {
 			this.resolvedField = new ProblemFieldBinding(baseType, this.selector, ProblemReasons.NotFound);
 			// Note: if more resilience is desired, try to set resolvedField.resolvedType and proceed
    		if (!this.resolvedField.isValidBinding())
-   			return;
+   			return null;
 
 		this.fieldType = resolvedType(); // may be improved below
 
@@ -158,7 +159,7 @@ public class FieldAccessSpec extends MethodSpec {
    				this.parameters = Binding.NO_PARAMETERS;
    			else
    				this.parameters = new TypeBinding[] { this.fieldType };
-   			return;
+   			return null;
    		}
 
 		this.implementationStrategy = CallinImplementorDyn.DYNAMIC_WEAVING 
@@ -186,6 +187,7 @@ public class FieldAccessSpec extends MethodSpec {
 		this.selector = accessorSelector;
 		this.resolvedMethod = result;
 		this.parameters = this.resolvedMethod.getSourceParameters();
+		return this.resolvedMethod;
     }
 
 	private boolean isMethodCompatible(MethodBinding result) {

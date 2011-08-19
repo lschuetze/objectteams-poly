@@ -23,6 +23,7 @@ package org.eclipse.objectteams.otdt.internal.codeassist;
 import org.eclipse.jdt.internal.codeassist.complete.CompletionNodeFound;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
+import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutScope;
@@ -46,7 +47,7 @@ public class CompletionOnMethodSpec extends MethodSpec {
 
 
 	@Override
-	public void resolveFeature(ReferenceBinding receiverType, BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing)
+	public MethodBinding resolveFeature(ReferenceBinding receiverType, BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing)
 	{
 		throw new CompletionNodeFound(this, receiverType, scope);
 	}

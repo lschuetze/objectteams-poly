@@ -274,8 +274,9 @@ public class MethodSpec extends ASTNode implements InvocationSite
 	 * @param callinExpected whether this method spec is the LHS of a replace callin.
 	 * @param isBaseSide     whether this method spec is the RHS (any binding kind)
 	 * @param allowEnclosing whether a method may be found in an enclosing type of receiverType
+	 * @return the resolved method (may be problem method) or null
 	 */
-    public void resolveFeature (ReferenceBinding receiverType, BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing) {
+    public MethodBinding resolveFeature (ReferenceBinding receiverType, BlockScope scope, boolean callinExpected, boolean isBaseSide, boolean allowEnclosing) {
     	// getRealClass() is used, because decapsulation needs to find private methods,
     	// which for roles are found only in the class part.
    		ReferenceBinding receiverClass = receiverType.getRealClass();
@@ -325,6 +326,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
    		}
 		if (this.resolvedMethod != null && !this.resolvedMethod.isValidBinding() && this.resolvedMethod.declaringClass == null)
 			this.resolvedMethod.declaringClass = receiverClass; // needed for computeUniqueKey (via CallinCalloutBinding.computeUniqueKey)
+		return this.resolvedMethod;
 	}
 
     /**
