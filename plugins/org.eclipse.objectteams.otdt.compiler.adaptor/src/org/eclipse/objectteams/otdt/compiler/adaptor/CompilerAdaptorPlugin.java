@@ -27,11 +27,13 @@ public class CompilerAdaptorPlugin extends Plugin {
 	private static CompilerAdaptorPlugin instance;
 
 	public void start(BundleContext context) throws Exception {
+		super.start(context);
 		instance = this;
 	}
 
 	public void stop(BundleContext context) throws Exception {
-		// empty
+		super.stop(context);
+		instance = null;
 	}
 	
 	public static void logException(String message, Exception ex) {

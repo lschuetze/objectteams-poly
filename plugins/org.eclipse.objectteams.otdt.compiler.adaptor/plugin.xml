@@ -37,6 +37,16 @@
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"
                superclass="org.eclipse.objectteams.otdt.internal.compiler.adaptor.CompilationThreadWatcher">
          </team>
+         <team
+               activation="ALL_THREADS"
+               class="org.eclipse.objectteams.otdt.internal.compiler.adaptor.CheckUniqueCallinCapture"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
+         <team
+               activation="NONE"
+               class="org.eclipse.objectteams.otdt.internal.compiler.adaptor.CheckUniqueCallinCapture.Batch"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
       </aspectBinding>
       <aspectBinding
             icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
