@@ -161,15 +161,6 @@ public class BaseMethodTransformation
     			continue; // don't touch bridge methods
     		
     		String method_name = m.getName();
-				
-    		if (CallinBindingManager.isBoundBaseClass(class_name) 
-    				&& (CallinBindingManager.hasBoundBaseParent(class_name) != BoundSuperKind.CLASS) 
-    				&& method_name.equals(Constants.CONSTRUCTOR_NAME)) 
-    		{
-    			addToConstructor(m, getInitializedRoleSet(cg.getClassName(), false), cg, cpg);
-    			continue;
-    		}
-			                
     		String method_signature = m.getSignature();
 
     		if (state.interfaceTransformedClasses.contains(class_name)) {
