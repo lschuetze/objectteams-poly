@@ -140,6 +140,7 @@ public class GC extends AbstractOTJLDTest {
 			    "        }\n" +
 			    "        int baseI() -> get int i;\n" +
 			    "    }\n" +
+			    "    static Object keepBase, keepRole;\n" +
 			    "    public static void main(String[] args) {\n" +
 			    "        final Team252gcr1 t = new Team252gcr1();\n" +
 			    "        t.activate();\n" +
@@ -157,8 +158,8 @@ public class GC extends AbstractOTJLDTest {
 			    "        bs[42].print();\n" +
 			    "        \n" +
 			    "        // null out most and expect most to be gone:\n" +
-			    "        Object keepBase = bs[42]; // unused local..\n" +
-			    "        Object keepRole = rs[0];\n" +
+			    "        keepBase = bs[42];\n" +
+			    "        keepRole = rs[0];\n" +
 			    "        rs = null;\n" +
 			    "        bs = null;        \n" +
 			    "        System.gc();\n" +
