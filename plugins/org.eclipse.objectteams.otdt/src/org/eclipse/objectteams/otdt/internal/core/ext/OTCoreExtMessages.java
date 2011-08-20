@@ -28,6 +28,9 @@ public class OTCoreExtMessages extends NLS {
 	public static String OTREContainer__Description;
 
 	public static String OTREContainer_otre_not_found;
+
+	public static String AbstractMarkable_baseClassHierarchy_progress;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, OTCoreExtMessages.class);
