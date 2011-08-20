@@ -36,6 +36,8 @@ import org.eclipse.jdt.internal.core.builder.SourceFile;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.compiler.adaptor.CompilerAdaptorPlugin;
+import org.eclipse.objectteams.otdt.core.ext.IMarkableJavaElement;
+import org.eclipse.objectteams.otdt.core.ext.MarkableFactory;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 
 import base org.eclipse.jdt.internal.core.builder.BatchImageBuilder;
@@ -113,17 +115,22 @@ public team class CheckUniqueCallinCapture {
 			try {
 				String qualifiedClassName = String.valueOf(methodBinding.declaringClass.readableName());
 				IType type = this.getJavaBuilder().getJavaProject().findType(qualifiedClassName);
-				IResource resource = type.getResource();
-				IMarker marker = resource.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
+				if (type == null)
+					return;
+				IMarkableJavaElement markable = MarkableFactory.createMarkable(type);
+				IMarker marker = markable.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
 				String message = Messages.bind(OTMessages.CheckUniqueCallinCapture_warning_multipleCallinsToBaseMethod, 
 											   String.valueOf(methodBinding.shortReadableName()));
 				int severity = IMarker.SEVERITY_WARNING;
 				int start = 0, end = 0;
-				if (!methodBinding.declaringClass.isBinaryBinding()) {
-					IMethod method = findMethod(type, methodBinding);
-					ISourceRange range = method.getNameRange();
-					start = range.getOffset();
-					end = start+range.getLength();
+				IMethod method = findMethod(type, methodBinding);
+				if (method != null) {
+					marker.setAttribute(IMarkableJavaElement.ATT_DETAIL_ID, method.getHandleIdentifier());
+					ISourceRange nameRange = method.getNameRange();
+			    	if (nameRange.getOffset() >= 0 && nameRange.getLength() >= 0) {
+						start = nameRange.getOffset();
+						end = start+nameRange.getLength();
+			    	}
 				}
 				marker.setAttributes(
 						new String[] {IMarker.MESSAGE, IMarker.SEVERITY, 	  IMarker.CHAR_START, IMarker.CHAR_END, IMarker.SOURCE_ID},
