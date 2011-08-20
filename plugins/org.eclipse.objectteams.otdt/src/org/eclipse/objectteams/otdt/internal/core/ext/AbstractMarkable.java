@@ -125,7 +125,7 @@ public abstract class AbstractMarkable implements IMarkableJavaElement {
 		for (IType type: types) {
 			TypeHierarchy hier = new TypeHierarchy(type, null, workspaceScope, true);
 			hier.refresh(monitor);
-			for(IType subType : hier.getSubtypes(type))
+			for(IType subType : hier.getAllSubtypes(type))
 				subTypes.add(subType);
 			monitor.worked(1);
 		}
