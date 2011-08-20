@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.ui.views.markers.MarkerViewUtil;
 
 /**
  * Implement markable protocol for IClassFile elements.
@@ -133,7 +134,9 @@ public class JavaElementMarkable extends AbstractMarkable {
 	public IMarker createMarker(String id) throws CoreException {
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
 		IMarker marker = root.createMarker(id);
-		((JavaCore)JavaCore.getPlugin()).configureJavaElementMarker(marker, this.fJavaElement);
+		JavaCore.getJavaCore().configureJavaElementMarker(marker, this.fJavaElement);
+		marker.setAttribute(MarkerViewUtil.NAME_ATTRIBUTE, getName());
+		marker.setAttribute(MarkerViewUtil.PATH_ATTRIBUTE, this.fJavaElement.getPath().toString());
 		return marker;
 	}
 

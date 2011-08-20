@@ -38,6 +38,9 @@ import org.eclipse.jdt.core.JavaModelException;
  */
 public interface IMarkableJavaElement {
 
+	/** Constant used for markers referring to a detail inside a classfile. */
+	public static final String ATT_DETAIL_ID = "org.eclipse.objectteams.otdt.JavaModelManager.detailHandleID";
+
 	/** Name of this markable for use in the UI. */
 	String getName();
 
