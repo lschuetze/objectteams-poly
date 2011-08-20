@@ -45,6 +45,7 @@ import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.IJobChangeListener;
 import org.eclipse.core.runtime.jobs.JobChangeAdapter;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -57,11 +58,11 @@ import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
+import org.eclipse.objectteams.otdt.core.ext.MarkableFactory;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.AnnotationHelper;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarker;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarkerCreator2;
 import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.CallinMarkerJob;
-import org.eclipse.objectteams.otdt.internal.ui.callinmarkers.ResourceMarkable;
 import org.eclipse.objectteams.otdt.ui.tests.FileBasedUITest;
 
 public class CallinMarkerTests extends FileBasedUITest
@@ -157,6 +158,8 @@ public class CallinMarkerTests extends FileBasedUITest
     		this._creator.setEnabled(false);
     		this._creator = null;
     	}
+    	_baseType = null;
+    	_baseResource = null;
     }
     
     void createNonJavaPrj(String projectName) throws IOException, CoreException {
@@ -213,11 +216,15 @@ public class CallinMarkerTests extends FileBasedUITest
     {
     	_creator.reset();
     	// this already triggers activeJavaEditorChanged, if project is a java project:
-    	IEditorPart activeEditor = JavaUI.openInEditor(_baseType.getCompilationUnit());
+    	IJavaElement element = (_baseType != null)
+    		? _baseType.getCompilationUnit()
+    		: JavaCore.create(resource);
+
+		IEditorPart activeEditor = JavaUI.openInEditor(element);
     	if (!this._creator.isFinished() && !this._creator.hasJob()) {
     		// explicitly trigger in non-java projects
     		 _creator.initialize(activeEditor);
-    		_creator.updateCallinMarkers(new ResourceMarkable(resource), null);
+    		_creator.updateCallinMarkers(MarkableFactory.createMarkable(resource), null);
     	}
         try {
 	        while (!_creator.isFinished())
