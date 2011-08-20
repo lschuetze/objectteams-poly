@@ -41,6 +41,9 @@ public interface IMarkableJavaElement {
 	/** Constant used for markers referring to a detail inside a classfile. */
 	public static final String ATT_DETAIL_ID = "org.eclipse.objectteams.otdt.JavaModelManager.detailHandleID";
 
+	/** Id of markers denoting problems that are detected only during a full or clean build. */
+	public static final String GLOBAL_PROBLEM_ID = "org.eclipse.objectteams.otdt.globalProblem";
+
 	/** Name of this markable for use in the UI. */
 	String getName();
 

@@ -65,4 +65,15 @@
          </team>
       </aspectBinding>
    </extension>
+   <extension
+         id="globalProblem"
+         name="Global Analysis Problem"
+         point="org.eclipse.core.resources.markers">
+      <super
+            type="org.eclipse.jdt.core.problem">
+      </super>
+      <persistent
+            value="true">
+      </persistent>
+   </extension>
 </plugin>
