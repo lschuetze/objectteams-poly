@@ -19,9 +19,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
@@ -118,7 +116,7 @@ public team class CheckUniqueCallinCapture {
 				if (type == null)
 					return;
 				IMarkableJavaElement markable = MarkableFactory.createMarkable(type);
-				IMarker marker = markable.createMarker(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
+				IMarker marker = markable.createMarker(IMarkableJavaElement.GLOBAL_PROBLEM_ID);
 				String message = Messages.bind(OTMessages.CheckUniqueCallinCapture_warning_multipleCallinsToBaseMethod, 
 											   String.valueOf(methodBinding.shortReadableName()));
 				int severity = IMarker.SEVERITY_WARNING;

@@ -71,6 +71,11 @@
                class="org.eclipse.objectteams.otdt.internal.compiler.adaptor.ResourceProjectAdaptor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
+         <team
+               activation="ALL_THREADS"
+               class="org.eclipse.objectteams.otdt.internal.compiler.adaptor.ProblemCleaner"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
       </aspectBinding>
    </extension>
 
