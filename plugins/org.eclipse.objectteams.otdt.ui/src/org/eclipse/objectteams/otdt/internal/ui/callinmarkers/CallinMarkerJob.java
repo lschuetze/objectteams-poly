@@ -25,7 +25,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.objectteams.otdt.core.ext.IMarkableJavaElement;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 
 /**
@@ -34,17 +35,17 @@ import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 public abstract class CallinMarkerJob extends org.eclipse.core.runtime.jobs.Job
 {
     private final IResource _resource;
-    private final IClassFile _javaElement;
+    private final IJavaElement _javaElement; // an IClassFile
     
-    public CallinMarkerJob(final AbstractMarkable target)
+    public CallinMarkerJob(final IMarkableJavaElement target)
     {
         super(OTDTUIPlugin.getResourceString("CallinMarkerJob.job_title")); //$NON-NLS-1$
-        if (target instanceof ResourceMarkable) {
-	        this._resource = ((ResourceMarkable)target).fResource;
-	        this._javaElement= null;
-        } else {
+        if (target.isBinary()) {
         	this._resource = null;
-        	this._javaElement= ((JavaElementMarkable)target).fJavaElement;
+        	this._javaElement= target.getJavaElement();
+        } else {
+        	this._resource = target.getResource();
+	        this._javaElement= null;
         }
         // markerRule is normally null, but let's play by the rules:
         IResource resource = target.getResource();
@@ -75,7 +76,7 @@ public abstract class CallinMarkerJob extends org.eclipse.core.runtime.jobs.Job
         return this._resource;
     }
     
-    public final IClassFile getJavaElement() 
+    public final IJavaElement getJavaElement() 
     {
         return this._javaElement;
     }

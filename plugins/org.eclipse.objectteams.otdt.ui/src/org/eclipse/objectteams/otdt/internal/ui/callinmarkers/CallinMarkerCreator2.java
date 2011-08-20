@@ -72,6 +72,8 @@ import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
+import org.eclipse.objectteams.otdt.core.ext.IMarkableJavaElement;
+import org.eclipse.objectteams.otdt.core.ext.MarkableFactory;
 import org.eclipse.objectteams.otdt.core.search.OTSearchEngine;
 import org.eclipse.objectteams.otdt.internal.ui.preferences.GeneralPreferences;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
@@ -101,7 +103,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 	protected CallinMarkerJob _currentJob;
 	private Map<IJavaElement,IType> m_cachedBaseForRole = new HashMap<IJavaElement,IType>();
     private Set<IResource> m_cachedMarkersForResources = new HashSet<IResource>();
-    private Set<IClassFile> m_cachedMarkersForJavaElements = new HashSet<IClassFile>();
+    private Set<IJavaElement> m_cachedMarkersForJavaElements = new HashSet<IJavaElement>();
     private boolean m_enabled = false;
     protected AnnotationHelper annotationHelper;
     private boolean isInitialized = false;
@@ -158,7 +160,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
         if (!isCached(member.getResource()) && !isCreatingMarkersFor(member.getResource()))
             return;
         
-        final AbstractMarkable target = new ResourceMarkable(member.getResource());
+        final IMarkableJavaElement target = MarkableFactory.createMarkable(member.getResource());
         CallinMarkerJob job = new CallinMarkerJob(target) {
             protected void updateMarkers(IProgressMonitor monitor) throws Exception {
                 updateCallinMarker(target, member, monitor);
@@ -187,19 +189,10 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		}
 	}
 	public void invalidateBase(IJavaElement baseClass) {
-		
-		IClassFile baseClassFile = (IClassFile) baseClass.getAncestor(IJavaElement.CLASS_FILE);
-		if (baseClassFile != null)
-			invalidateBaseMarkable(new JavaElementMarkable(baseClassFile));
-		else
-			invalidateBaseMarkable(new ResourceMarkable(baseClass.getResource()));
-	}
-
-	/** API for {@link RoleBindingChangedListener}. */
-	public void invalidateBaseMarkable(AbstractMarkable baseMarkable) {
+		IMarkableJavaElement baseMarkable = MarkableFactory.createMarkable(baseClass);
 		IEditorPart editor = (IEditorPart) this.fActiveEditor;
-		if (baseMarkable instanceof JavaElementMarkable) {
-			IClassFile baseJavaElement = ((JavaElementMarkable)baseMarkable).getJavaElement();
+		if (baseMarkable.isBinary()) {
+			IJavaElement baseJavaElement = baseMarkable.getJavaElement();
 			this.m_cachedMarkersForJavaElements.remove(baseJavaElement);
 			if (this.fActiveEditor != null && this.fActiveEditor instanceof IEditorPart) {
 				if (editor.getEditorInput() instanceof IClassFileEditorInput) {
@@ -221,7 +214,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		}
 	}
 
-	private void updateForBaseMarkable(AbstractMarkable baseMarkable,
+	private void updateForBaseMarkable(IMarkableJavaElement baseMarkable,
 			IEditorPart editor) {
 		IStatusLineManager statusLine = editor.getEditorSite().getActionBars().getStatusLineManager();
 		updateCallinMarkers(baseMarkable, statusLine);
@@ -248,17 +241,17 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		this.fActiveEditor = editor;
 		this.annotationHelper = new AnnotationHelper(targetEditor, editorInput);
 		
-		AbstractMarkable target= null;
+		IMarkableJavaElement target= null;
 		if ((editorInput instanceof IFileEditorInput)) { 			// source file
 			IResource resource = ((IFileEditorInput)editorInput).getFile();
 			if (resource == null || isCached(resource) || isCreatingMarkersFor(resource))
 				return; // already has markers -- skip it
-			target = new ResourceMarkable(resource);
+			target = MarkableFactory.createMarkable(resource);
 		} else if (editorInput instanceof IClassFileEditorInput) {	// binary java element
 			IClassFile element = ((IClassFileEditorInput) editorInput).getClassFile();
 			if (element == null || isCached(element) || isCreatingMarkersFor(element))
 				return; // already has markers -- skip it
-			target = new JavaElementMarkable(element);
+			target = MarkableFactory.createMarkable(element);
 		} else {
 			return; // unexpected editor input
 		}
@@ -277,7 +270,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
      * @param resource the resource in where to look for bound base methods
      * @param statusLine a status line where errors can be displayed or null if you don't want error messages
      */
-    public void updateCallinMarkers(final AbstractMarkable target, IStatusLineManager statusLine)
+    public void updateCallinMarkers(final IMarkableJavaElement target, IStatusLineManager statusLine)
     {
 		CallinMarkerJob job = new CallinMarkerJob(target) {
 			protected void updateMarkers(IProgressMonitor monitor) throws Exception {
@@ -296,7 +289,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
      * @param monitor
      * @throws CoreException thrown when one of the many searches and or lookups failed.
      */
-    private void updateCallinMarkers(final AbstractMarkable target, IProgressMonitor monitor) throws CoreException
+    private void updateCallinMarkers(final IMarkableJavaElement target, IProgressMonitor monitor) throws CoreException
 	{
         try 
         {
@@ -307,7 +300,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 	                NLS.bind(OTDTUIPlugin.getResourceString("CallinMarkerCreator2.updating_for_resource_message"),  //$NON-NLS-1$
 	                         new Object[] { target.getName() }), 62);
 	        
-		    target.removeCallinMarkers();
+		    target.removeMarkers(CallinMarker.CALLIN_MARKER_IDS);
 		    monitor.worked(2);
 	    
 		    // ==== role bindings: ====
@@ -357,7 +350,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		return allRoleTypes;
 	}
 	
-    private void updateCallinMarker(AbstractMarkable target, IMember member, IProgressMonitor monitor) throws CoreException
+    private void updateCallinMarker(IMarkableJavaElement target, IMember member, IProgressMonitor monitor) throws CoreException
 	{
     	// TODO(SH): in this scenario a search for all callins mentioning method should be faster.
 	    try 
@@ -396,7 +389,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 	    }
 	}
 
-	private void updateMethodMarkers(AbstractMarkable target, IMember[] allRoleTypes, Collection<IMember> memberSet, IProgressMonitor monitor) 
+	private void updateMethodMarkers(IMarkableJavaElement target, IMember[] allRoleTypes, Collection<IMember> memberSet, IProgressMonitor monitor) 
 	{
 		try {
 			monitor.beginTask(null, 40);
@@ -445,7 +438,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
     {
         return m_cachedMarkersForResources.contains(resource);
     }
-    private boolean isCached(IClassFile element)
+    private boolean isCached(IJavaElement element)
     {
     	return m_cachedMarkersForJavaElements.contains(element);
     }
@@ -454,7 +447,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
     {
         m_cachedMarkersForResources.add(resource);
     }
-    private void setCached(final IClassFile element)
+    private void setCached(final IJavaElement element)
     {
     	m_cachedMarkersForJavaElements.add(element);
     }
@@ -463,7 +456,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
     {
         m_cachedMarkersForResources.remove(resource);
     }
-    private void removeFromCache(final IClassFile element)
+    private void removeFromCache(final IJavaElement element)
     {
         m_cachedMarkersForJavaElements.remove(element);
     }
@@ -704,7 +697,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 	 * @param markerKind  what kind of marker should be created?
 	 * @param monitor
 	 */
-    private <M extends IMember> void createMarkersFor(final AbstractMarkable target, final Map<IMember, Set<M>> bindingMap, final String markerKind, MySubProgressMonitor monitor)
+    private <M extends IMember> void createMarkersFor(final IMarkableJavaElement target, final Map<IMember, Set<M>> bindingMap, final String markerKind, MySubProgressMonitor monitor)
     {
         if (bindingMap == null) {
             monitor.doneNothing();
@@ -849,7 +842,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
                     	else
                     		removeFromCache(resource);
                     else {
-                    	IClassFile element = job.getJavaElement();
+                    	IJavaElement element = job.getJavaElement();
                     	if (status == IStatus.OK)
                     		setCached(element);
                     	else

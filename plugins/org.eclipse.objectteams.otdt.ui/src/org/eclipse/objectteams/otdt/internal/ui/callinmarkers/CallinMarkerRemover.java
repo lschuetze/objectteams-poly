@@ -23,13 +23,9 @@ package org.eclipse.objectteams.otdt.internal.ui.callinmarkers;
 import org.eclipse.core.internal.resources.ResourceException;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 
@@ -38,13 +34,6 @@ import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
  */
 public class CallinMarkerRemover
 {
-    public static void removeCallinMarkers(IResource resource) throws CoreException
-    {
-    	for (String id : new String[] { CallinMarker.PLAYEDBY_ID, CallinMarker.CALLIN_ID, CallinMarker.CALLOUT_ID} )
-			if (resource.exists())
-				resource.deleteMarkers(id, true, IResource.DEPTH_INFINITE);
-    }
-    
 	public static void removeCallinMarker(IMember member, IResource resource)
     {
         // we need to pass the resource, as the method might already be removed and hence would
@@ -92,21 +81,4 @@ public class CallinMarkerRemover
         }
         return null;
     }
-    
-
-    public static void removeCallinMarkers(IClassFile element) throws CoreException
-    {
-		if (element.exists())
-		{
-			IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-			IMarker[] allMarkers = CallinMarker.getAllBindingMarkers(root);
-			
-			for (IMarker marker : allMarkers)
-				if (JavaCore.isReferencedBy(element, marker))
-					marker.delete();
-    	}
-    }
-    
-
-    
 }

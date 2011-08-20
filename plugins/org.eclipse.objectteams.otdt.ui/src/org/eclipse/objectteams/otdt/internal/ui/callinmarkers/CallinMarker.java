@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.objectteams.otdt.core.ext.IMarkableJavaElement;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 
 /**
@@ -42,6 +43,7 @@ public class CallinMarker
     public static final String PLAYEDBY_ID        = "org.eclipse.objectteams.otdt.ui.playedByMarker"; //$NON-NLS-1$
     public static final String ATTR_BASE_ELEMENT  = "org.eclipse.objectteams.otdt.ui.markerAttr.BaseElement"; //$NON-NLS-1$
     public static final String ATTR_ROLE_ELEMENTS = "org.eclipse.objectteams.otdt.ui.markerAttr.RoleElements"; //$NON-NLS-1$
+	public static final String[] CALLIN_MARKER_IDS = { PLAYEDBY_ID, CALLIN_ID, CALLOUT_ID };
 
     private Map<String, Object> _attribs = new HashMap<String, Object>(11);
     private String id;
@@ -99,7 +101,7 @@ public class CallinMarker
      * @throws CoreException thrown when a marker operation failed.
      */
     @SuppressWarnings("unchecked") // IMarker.getAttributes() yields raw type
-	public void create(AbstractMarkable target) throws CoreException
+	public void create(IMarkableJavaElement target) throws CoreException
     {
 		IMarker marker = target.createMarker(this.id);
 		Map markerAttributes = marker.getAttributes();

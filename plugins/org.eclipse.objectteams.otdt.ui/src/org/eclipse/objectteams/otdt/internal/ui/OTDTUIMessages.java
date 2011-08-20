@@ -20,7 +20,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class OTDTUIMessages extends NLS {
 	private static final String BUNDLE_NAME = "org.eclipse.objectteams.otdt.internal.ui.OTDTUIMessages"; //$NON-NLS-1$
-	public static String AbstractMarkable_baseClassHierarchy_progress;
 	public static String CompareWithBaseMethodAction_errorTitle;
 	public static String CompareWithBaseMethodAction_ambiguousBindingsError;
 	public static String CompareWithBaseMethodAction_multipleBaseMethodsError;
