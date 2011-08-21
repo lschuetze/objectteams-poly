@@ -12,6 +12,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.codeassist.select.SelectionNodeFound;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
@@ -22,6 +23,7 @@ import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.FakeKind;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 
@@ -315,6 +317,16 @@ protected void reportInvalidType(Scope scope) {
 	if (scope.isFakeMethod(FakeKind.ROLE_FEATURE_BRIDGE)) {
 		scope.referenceContext().tagAsHavingErrors();
 		return;
+	}
+	// did we misread an OT keyword as a type reference (during syntax recovery)?
+	if (!scope.environment().globalOptions.isPureJava) {
+		char[] token = getLastToken();
+        for (int j = 0; j < IOTConstants.OT_KEYWORDS.length; j++) {
+			if (CharOperation.equals(token, IOTConstants.OT_KEYWORDS[j])) {
+				if (scope.referenceContext().compilationResult().hasErrors())
+					return; // assume this is a secondary error
+			}
+		}
 	}
 // SH}
 	scope.problemReporter().invalidType(this, this.resolvedType);
