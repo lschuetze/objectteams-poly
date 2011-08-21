@@ -382,6 +382,36 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
             "OK");
     }
 
+    // Bug 355311 - error regarding abstract method in non-abstract role may be displayed at position 0
+    public void test0c4_copyAbstractMethod3() {
+       
+       runNegativeTest(
+            new String[] {
+		"Team0c4cam3_1.java",
+			    "\n" +
+			    "public team class Team0c4cam3_1 {\n" +
+			    "	public abstract class Role {\n" +
+			    "		abstract String getVal();\n" +
+			    "	}\n" +
+			    "}\n" +
+			    "	\n",
+		"Team0c4cam3_2.java",
+			    "\n" +
+			    "public team class Team0c4cam3_2 extends Team0c4cam3_1 {\n" +
+			    "   @Override\n" +
+			    "	public class Role {\n" +
+			    "	}\n" +
+			    "}\n" +
+			    "	\n"
+            },
+            "----------\n" + 
+    		"1. ERROR in Team0c4cam3_2.java (at line 4)\n" + 
+    		"	public class Role {\n" + 
+    		"	             ^^^^\n" + 
+    		"The abstract method getVal in type Role can only be defined by an abstract class\n" + 
+    		"----------\n");
+    }
+
     // a role implicitely inherits a constructor  - changed between compiles - buggy tsuper-tsuper
     // 0.c.5-otjld-changes-between-compiles-1
     public void test0c5_changesBetweenCompiles1() {
