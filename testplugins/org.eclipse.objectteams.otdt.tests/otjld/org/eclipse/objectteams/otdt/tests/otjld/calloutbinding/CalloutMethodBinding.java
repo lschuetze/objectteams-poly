@@ -427,6 +427,64 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
             },
             "OK");
     }
+    // Bug 355314 - abstract method error may be masked by callout binding
+    public void test311_abstractCalloutBinding8() {
+        
+        runNegativeTest(
+             new String[] {
+ 		"T311acb1Main.java",
+ 			    "\n" +
+ 			    "public class T311acb1Main {\n" +
+ 			    "    public static void main(String[] args) {\n" +
+ 			    "        Team311acb2 t = new Team311acb2();\n" +
+ 			    "        T311acb1_1  o = new T311acb1_1();\n" +
+ 			    "\n" +
+ 			    "        System.out.print(t.getValue(o));\n" +
+ 			    "    }\n" +
+ 			    "}\n" +
+ 			    "    \n",
+ 		"T311acb1_1.java",
+ 			    "\n" +
+ 			    "public class T311acb1_1 {\n" +
+ 			    "    public String getValue() {\n" +
+ 			    "        return getValueInternal();\n" +
+ 			    "    }\n" +
+ 			    "    public String getValueInternal() {\n" +
+ 			    "        return \"OK\";\n" +
+ 			    "    }\n" +
+ 			    "}\n" +
+ 			    "    \n",
+	    "Team311acb2.java",
+ 			    "\n" +
+ 			    "public team class Team311acb2 extends Team311acb1 {\n" +
+ 			    "    @Override\n" +
+ 			    "    public class Role311acb1 playedBy T311acb1_1 {\n" +
+ 			    "        getValue -> getValue;\n" +
+ 			    "    }\n" +
+ 			    "\n" +
+ 			    "    public String getValue(T311acb1_1 as Role311acb1 obj) {\n" +
+ 			    "        return obj.getValueInternal();\n" +
+ 			    "    }\n" +
+ 			    "}\n",
+ 		"Team311acb1.java",
+ 			    "\n" +
+ 			    "public abstract team class Team311acb1 {\n" +
+ 			    "\n" +
+ 			    "    public abstract class Role311acb1 {\n" +
+ 			    "        public abstract String getValue();\n" +
+ 			    "        public abstract String getValueInternal();\n" +
+ 			    "    }\n" +
+ 			    "\n" +
+ 			    "}\n",
+             },
+            "----------\n" + 
+			"1. ERROR in Team311acb2.java (at line 1)\n" + 
+			"	\n" + 
+			"public team class Team311acb2 extends Team311acb1 {\n" + 
+			"	^\n" + 
+			"The abstract method getValueInternal in type Role311acb1 can only be defined by an abstract class\n" + 
+			"----------\n");
+     }
 
     // an abstract role method is callout-bound via -> and the signature to a method but the parameter names are missing
     // 3.1.2-otjld-missing-parameter-names-1
