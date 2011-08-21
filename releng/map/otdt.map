@@ -54,6 +54,10 @@ plugin@org.eclipse.objectteams.otdt.ui.tests.dom,0.7.0=SVN,url=file://localhost/
 plugin@org.eclipse.objectteams.otdt.debug.tests,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.debug.tests
 plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.refactoring
 
+!** OT/J Test Plugins **!
+plugin@org.eclipse.objectteams.otdt.test.builder,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.test.builder
+plugin@org.eclipse.objectteams.otdt.ui.tests,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.ui.tests
+
 !-- Tests fetched from original CVS (some are required indirectly by jdt.ui.tests): --
 !   (these lines are generated from SDK map file using processSDKmap.sh)
 plugin@org.eclipse.jdt.core.tests.builder=v_C03,/cvsroot/eclipse
@@ -65,7 +69,3 @@ plugin@org.eclipse.jface.text.tests=v20110505-0800,/cvsroot/eclipse
 plugin@org.eclipse.text.tests=v20110505-0800,/cvsroot/eclipse
 plugin@org.eclipse.core.filebuffers.tests=v20110505-0800,/cvsroot/eclipse
 
-
-!** OT/J Test Plugins **!
-plugin@org.eclipse.objectteams.otdt.test.builder,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.test.builder
-plugin@org.eclipse.objectteams.otdt.ui.tests,0.7.0=SVN,url=file://localhost/svnroot/tools/org.eclipse.objectteams/,path=testplugins/org.eclipse.objectteams.otdt.ui.tests
