@@ -63,8 +63,9 @@ public class Syntax extends AbstractOTJLDTest {
 
     // a class that is not a role class has a playedBy construct
     // 8.1.1-otjld-non-roleclass-with-playedby-2
+    // see also Bug 354976 - better reporting of playedBy inside plain class
     public void test811_nonRoleclassWithPlayedby2() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"T811nrwp2_2.java",
 			    "\n" +
@@ -77,7 +78,12 @@ public class Syntax extends AbstractOTJLDTest {
 			    "public class T811nrwp2_1 {}\n" +
 			    "    \n"
             },
-            "A.0.1");
+            "----------\n" +
+            "1. ERROR in T811nrwp2_2.java (at line 3)\n" +
+            "	public class Inner811nrwp2_2 playedBy T811nrwp2_1 {}\n" +
+            "	                             ^^^^^^^^\n" +
+            "Object Teams keyword not enabled in this scope (OTJLD A.0.1).\n" +
+            "----------\n");
     }
 
     // a class that is not a role class has a playedBy construct
