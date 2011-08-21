@@ -15,7 +15,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.compiler.adaptor;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
@@ -28,6 +30,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.builder.SourceFile;
@@ -65,7 +68,7 @@ public team class CheckUniqueCallinCapture {
 		@SuppressWarnings("decapsulation")
 		JavaBuilder getJavaBuilder() -> get JavaBuilder javaBuilder;
 
-		Set<MethodBinding> baseMethods;
+		Map<MethodBinding,ReferenceBinding> baseMethods; // maps base methods to a team declaring a callin
 		Set<MethodBinding> duplicates;
 
 		void compile(SourceFile[] units) <- replace void compile(SourceFile[] units);
@@ -73,7 +76,7 @@ public team class CheckUniqueCallinCapture {
 		callin void compile(SourceFile[] units) {
 			try {
 				// clean init:
-				this.baseMethods = new HashSet<MethodBinding>();
+				this.baseMethods = new HashMap<MethodBinding,ReferenceBinding>();
 				this.duplicates = new HashSet<MethodBinding>();
 				// activate for this compilation batch:
 				within(this)
@@ -93,20 +96,27 @@ public team class CheckUniqueCallinCapture {
 		 */
 		protected class BaseMethodResolver playedBy MethodSpec {
 
-			void resolvedBaseMethod(MethodBinding resolvedMethod)
+			void resolvedBaseMethod(MethodBinding resolvedMethod, Scope scope)
 			<- after
 			MethodBinding resolveFeature(ReferenceBinding receiverType,
 										 BlockScope scope, boolean callinExpected,
 										 boolean isBaseSide, boolean allowEnclosing)
 				base when (isBaseSide && base.isDeclaration && !(base instanceof FieldAccessSpec))
-				with { resolvedMethod <- result}
+				with { resolvedMethod <- result, scope <- scope}
 
-			void resolvedBaseMethod(MethodBinding resolvedMethod) {
-				if (baseMethods.contains(resolvedMethod))
-					duplicates.add(resolvedMethod);
-				else
-					baseMethods.add(resolvedMethod);
-			}			
+			void resolvedBaseMethod(MethodBinding resolvedMethod, Scope scope) {
+				ReferenceBinding previousTeam = baseMethods.get(resolvedMethod);
+				if (previousTeam != null) {
+					if (previousTeam != getTeam(scope))
+						duplicates.add(resolvedMethod);
+				} else {
+					baseMethods.put(resolvedMethod, getTeam(scope));
+				}
+			}
+			ReferenceBinding getTeam(Scope scope) {
+				ReferenceBinding role = scope.enclosingSourceType();
+				return (role != null) ? role.enclosingType() : null;
+			}
 		}
 		/** Report one affected base method. */
 		void reportDuplicateCallinCapture(MethodBinding methodBinding) {
