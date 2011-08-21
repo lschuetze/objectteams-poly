@@ -32,5 +32,15 @@ public enum InferenceKind {
 	/** Callout inferred from a reading field access (via 'this'). */
 	FIELDGET, 
 	/** Callout inferred from a writing field access (via 'this'). */
-	FIELDSET 
+	FIELDSET;
+
+	/** 
+	 * Some inferred callouts generate private methods that are not advertised in the interface,
+	 * Answer if this callout binding is advertised in the interface. 
+	 */
+	public boolean isAdvertisedInInterface() {
+		if (this == NONE || this == INTERFACE)
+			return true;
+		return false;
+	}
 }

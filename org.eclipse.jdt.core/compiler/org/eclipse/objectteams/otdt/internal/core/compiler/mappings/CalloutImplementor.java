@@ -461,7 +461,7 @@ public class CalloutImplementor extends MethodMappingImplementor
 		{
 			if ((modifiers & AccPrivate) != 0) { // don't advertize in ifc
 				// FIXME(SH): need to generate bridge methdods?
-			} else if (calloutBindingDeclaration.binding.inferred == InferenceKind.NONE) { // only if actually advertised in the ifc-part
+			} else if (calloutBindingDeclaration.binding.inferred.isAdvertisedInInterface()) { // only if actually advertised in the ifc-part
 				// generated callout method must be public in the classPart.
 				// access control is done only via the interface part.
 				MethodModel.getModel(newMethod).storeModifiers(newMethod.modifiers);
