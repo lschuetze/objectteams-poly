@@ -175,6 +175,7 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
             }
 			abstractMethodDeclaration = methodDeclaration;
 		}
+		gen.setMethodPositions(abstractMethodDeclaration);
 
 		abstractMethodDeclaration.modifiers = methodBinding.modifiers & ~ClassFileConstants.AccSynthetic;
 		if (methodBinding.isAbstract())
