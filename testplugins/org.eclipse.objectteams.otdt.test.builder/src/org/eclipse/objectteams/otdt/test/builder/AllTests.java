@@ -32,6 +32,7 @@ public class AllTests {
 		suite.addTest(IncrementalTests.suite());
 		suite.addTest(CompilationOrderTests.suite());
 		suite.addTest(OTEquinoxBuilderTests.suite());
+		suite.addTest(MultipleCallinsWarningTest.suite());
 		//$JUnit-END$
 		return suite;
 	}
