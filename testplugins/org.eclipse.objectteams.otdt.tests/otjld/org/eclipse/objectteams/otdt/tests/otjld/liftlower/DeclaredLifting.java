@@ -1089,4 +1089,96 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     		},
     		"OK");
     }
+
+    // Bug 355441 - illegal bytecode for team constructor with declared lifting and field access
+    public void _test6112_declaredLiftingInConstructor1() {
+       runConformTest(
+            new String[] {
+		"T6112dlic1Main.java",
+			    "\n" +
+			    "public class T6112dlic1Main {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        T6112dlic1      o = new T6112dlic1();\n" +
+			    "        Team6112dlic1_2 t = new Team6112dlic1_2(o);\n" +
+			    "\n" +
+			    "        System.out.print(t.getValue());\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T6112dlic1.java",
+			    "\n" +
+			    "public class T6112dlic1 {}\n" +
+			    "    \n",
+		"Team6112dlic1_1.java",
+			    "\n" +
+			    "public team class Team6112dlic1_1 {\n" +
+			    "    Role6112dlic1_1 r;\n" +
+			    "    public Team6112dlic1_1(Role6112dlic1_1 obj) {\n" +
+			    "        this.r = obj;\n" +
+			    "    }\n" +
+			    "    public class Role6112dlic1_1 playedBy T6112dlic1 {\n" +
+			    "        public String value = \"OK\";\n" +
+			    "    }\n" +
+			    "    public String getValue() {\n" +
+			    "        return this.r.value;" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team6112dlic1_2.java",
+			    "\n" +
+			    "public team class Team6112dlic1_2 extends Team6112dlic1_1 {\n" +
+			    "    public Team6112dlic1_2(T6112dlic1 as Role6112dlic1_1 obj) {\n" +
+			    "        super(obj);\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "OK");
+    }
+
+    // Bug 355441 - illegal bytecode for team constructor with declared lifting and field access
+    public void _test6112_declaredLiftingInConstructor2() {
+       runConformTest(
+            new String[] {
+		"T6112dlic2Main.java",
+			    "\n" +
+			    "public class T6112dlic2Main {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        T6112dlic2      o = new T6112dlic2();\n" +
+			    "        Team6112dlic2_2 t = new Team6112dlic2_2(o);\n" +
+			    "\n" +
+			    "        System.out.print(t.getValue());\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T6112dlic2.java",
+			    "\n" +
+			    "public class T6112dlic2 {}\n" +
+			    "    \n",
+		"Team6112dlic2_1.java",
+			    "\n" +
+			    "public team class Team6112dlic2_1 {\n" +
+			    "    private Role6112dlic2_1 r;\n" +
+			    "    public Team6112dlic2_1(Role6112dlic2_1 obj) {\n" +
+			    "        this.r = obj;\n" +
+			    "    }\n" +
+			    "    public class Role6112dlic2_1 playedBy T6112dlic2 {\n" +
+			    "        public String value = \"OK\";\n" +
+			    "    }\n" +
+			    "    public String getValue() {\n" +
+			    "        return this.r.value;" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team6112dlic2_2.java",
+			    "\n" +
+			    "public team class Team6112dlic2_2 extends Team6112dlic2_1 {\n" +
+			    "    public Team6112dlic2_2(T6112dlic2 as Role6112dlic2_1 obj) {\n" +
+			    "        super(obj);\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "OK");
+    }
 }
