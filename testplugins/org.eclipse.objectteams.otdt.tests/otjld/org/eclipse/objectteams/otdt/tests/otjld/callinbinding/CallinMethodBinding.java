@@ -7796,7 +7796,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binding binds to an abstract method though the team is not marked abstract
     // 7.2.4-otjld-callin-bound-abstract-method-2
     public void test724_callinBoundAbstractMethod2() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"Team724cbam2_2.java",
 			    "\n" +
@@ -7821,10 +7821,9 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "    \n"
             },
             "----------\n" + 
-    		"1. ERROR in Team724cbam2_2.java (at line 1)\n" + 
-    		"	\n" + 
-    		"public team class Team724cbam2_2 extends Team724cbam2_1 {\n" + 
-    		"	^\n" + 
+    		"1. ERROR in Team724cbam2_2.java (at line 4)\n" + 
+    		"	public class Role724cbam2 playedBy T724cbam2 {\n" + 
+    		"	             ^^^^^^^^^^^^\n" + 
     		"The abstract method test in type Role724cbam2 can only be defined by an abstract class\n" + 
     		"----------\n");
     }
@@ -7832,18 +7831,18 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // a callin binding binds to an abstract method where the explicit superclass has a concrete implementation, and the team is not marked abstract
     // 7.2.5-otjld-callin-bound-abstract-method-1
     public void test725_callinBoundAbstractMethod1() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"Team725cbam1_2.java",
 			    "\n" +
 			    "public team class Team725cbam1_2 extends Team725cbam1_1 {\n" +
-			    "    @Override\n" +
 			    "    public class Role725cbam1_1 playedBy T725cbam1 {\n" +
 			    "        callin void test() {\n" +
 			    "            base.test();\n" +
 			    "        }\n" +
 			    "    }\n" +
 			    "\n" +
+			    "    @Override\n" +
 			    "    public class Role725cbam1_2 extends Role725cbam1_1 playedBy T725cbam1 {\n" +
 			    "        test <- replace test;\n" +
 			    "    }\n" +
@@ -7865,10 +7864,9 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "    \n"
             },
             "----------\n" + 
-    		"1. ERROR in Team725cbam1_2.java (at line 1)\n" + 
-    		"	\n" + 
-    		"public team class Team725cbam1_2 extends Team725cbam1_1 {\n" + 
-    		"	^\n" + 
+    		"1. ERROR in Team725cbam1_2.java (at line 10)\n" + 
+    		"	public class Role725cbam1_2 extends Role725cbam1_1 playedBy T725cbam1 {\n" + 
+    		"	             ^^^^^^^^^^^^^^\n" + 
     		"The abstract method test in type Role725cbam1_2 can only be defined by an abstract class\n" + 
     		"----------\n");
     }
@@ -7944,10 +7942,9 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			    "    \n"
             },
             "----------\n" + 
-    		"1. ERROR in Team725cbam2_2.java (at line 1)\n" + 
-    		"	\n" + 
-    		"public team class Team725cbam2_2 extends Team725cbam2_1 {\n" + 
-    		"	^\n" + 
+    		"1. ERROR in Team725cbam2_2.java (at line 4)\n" + 
+    		"	public class Role725cbam2_2 extends Role725cbam2_1 {}\n" + 
+    		"	             ^^^^^^^^^^^^^^\n" + 
     		"The abstract method test in type Role725cbam2_2 can only be defined by an abstract class\n" + 
     		"----------\n");
     }
