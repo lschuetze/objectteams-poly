@@ -40,6 +40,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Item;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IViewSite;
@@ -213,7 +214,14 @@ public team class PackageExplorerAdaptor {
 			}
 			base.add(parent, child);
 		}
-		
+
+		// avoid object schizophrenia in StructuredViewer.elementMap:
+		void unwrapOTType(Object element) <- replace void associate(Object element, Item item)
+				base when (element instanceof IOTType); 
+
+		callin void unwrapOTType(Object element) {
+			base.unwrapOTType(((IOTType)element).getCorrespondingJavaElement());
+		}
 	}
 	
 	protected class LabelProvider playedBy PackageExplorerLabelProvider {

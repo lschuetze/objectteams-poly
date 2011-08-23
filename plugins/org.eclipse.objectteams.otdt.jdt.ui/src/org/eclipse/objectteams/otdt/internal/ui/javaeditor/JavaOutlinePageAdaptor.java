@@ -25,7 +25,11 @@ import base org.eclipse.jdt.internal.ui.javaeditor.JavaOutlinePage.JavaOutlineVi
 import base org.eclipse.jdt.internal.ui.javaeditor.JavaOutlinePage.ChildrenProvider;
 
 /**
- * The only purpose: filter generated elements from the outline page.
+ * Purpose:
+ * <ul>
+ * <li>filter generated elements from the outline page.
+ * <li>avoid object schizophrenia in StructuredViewer.elementMap
+ * </ul>
  *  
  * @author stephan
  */
