@@ -42,6 +42,7 @@ import org.eclipse.objectteams.otre.StaticSliceBaseTransformation;
 import org.eclipse.objectteams.otre.SubBoundBaseMethodRedefinition;
 import org.eclipse.objectteams.otre.TeamInterfaceImplementation;
 import org.eclipse.objectteams.otre.ThreadActivation;
+import org.eclipse.objectteams.otre.bcel.DietClassLoaderRepository;
 import org.eclipse.objectteams.otre.util.AttributeReadingGuard;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
 
@@ -154,7 +155,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			= new ThreadActivation();
 				
 		// tell Repository about the class loader for improved lookupClass()
-		ClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
+		DietClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
 		
 		try {
 			InputStream is = new ByteArrayInputStream(classfileBuffer);
@@ -260,7 +261,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		ClassParser   cp  = new ClassParser(file, fileName);
 		ClassGen      cg  = new ClassGen(cp.parse());
 		JPLISEnhancer jpe = new JPLISEnhancer(cg, /*loader (unused)*/null);
-		ClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
+		DietClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
 		try {
 			setFirstTransformation(new ObjectTeamsTransformation(loader, null) {});
 			firstTransformation.checkReadClassAttributes(jpe, cg, cg.getClassName(), cg.getConstantPool());

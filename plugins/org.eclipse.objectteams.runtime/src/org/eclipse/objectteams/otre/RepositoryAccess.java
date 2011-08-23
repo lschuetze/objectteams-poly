@@ -21,7 +21,7 @@ import java.util.HashMap;
 import org.apache.bcel.Repository;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.generic.ObjectType;
-import org.apache.bcel.util.ClassLoaderRepository;
+import org.eclipse.objectteams.otre.bcel.DietClassLoaderRepository;
 
 /** 
  * Provides a classloader aware access to one or more class repositories.
@@ -32,45 +32,54 @@ import org.apache.bcel.util.ClassLoaderRepository;
 public class RepositoryAccess {
 
 	/** One class repository per class loader. */
-	private static HashMap<ClassLoader,ClassLoaderRepository> repositories = new HashMap<ClassLoader,ClassLoaderRepository>();
+	private static HashMap<ClassLoader,DietClassLoaderRepository> repositories = new HashMap<ClassLoader,DietClassLoaderRepository>();
 	/** One current repository per thread. */
-	private static ThreadLocal<ClassLoaderRepository> currentRepository = new ThreadLocal<ClassLoaderRepository>();
+	private static ThreadLocal<DietClassLoaderRepository> currentRepository = new ThreadLocal<DietClassLoaderRepository>();
 	 
 	/** 
 	 * Setup a repository for the given class loader and make it the current repository for the current thread.
 	 * @param loader class loader, may be null
 	 * @return the previously active class repository for this thread
 	 */
-	public static synchronized ClassLoaderRepository setClassLoader(ClassLoader loader) {
-		ClassLoaderRepository clr = null;
+	public static synchronized DietClassLoaderRepository setClassLoader(ClassLoader loader) {
+		DietClassLoaderRepository clr = null;
 		if (loader != null) { // avoid creating ClassLoaderRepository with null loader
 			clr = repositories.get(loader);
 			if (clr == null)
-				repositories.put(loader, clr = new ClassLoaderRepository(loader));
+				repositories.put(loader, clr = new DietClassLoaderRepository(loader));
 		}
-		ClassLoaderRepository prev = currentRepository.get();
+		DietClassLoaderRepository prev = currentRepository.get();
 		currentRepository.set(clr);
 		return prev;
 	}
 	 
 	/** Reset the class repository for the current thread. */
-	public static synchronized void resetRepository(ClassLoaderRepository repository) {
+	public static synchronized void resetRepository(DietClassLoaderRepository repository) {
 		currentRepository.set(repository);
 	}
 	 
 	public static JavaClass lookupClass(String className)
 	 		throws ClassNotFoundException 
 	{
-		ClassLoaderRepository clr = currentRepository.get();
+		DietClassLoaderRepository clr = currentRepository.get();
 		if (clr != null)
 			return clr.loadClass(className);
+		return Repository.lookupClass(className);
+	}
+	 
+	public static JavaClass lookupClassFully(String className)
+	 		throws ClassNotFoundException 
+	{
+		DietClassLoaderRepository clr = currentRepository.get();
+		if (clr != null)
+			return clr.loadClassFully(className);
 		return Repository.lookupClass(className);
 	}
 
 	public static JavaClass[] getSuperClasses(String className) 
 			throws ClassNotFoundException 
 	{
-		 ClassLoaderRepository clr = currentRepository.get();
+		 DietClassLoaderRepository clr = currentRepository.get();
 		 JavaClass jc;
 		 if (clr != null)
 			 jc = clr.loadClass(className);
@@ -82,7 +91,7 @@ public class RepositoryAccess {
 	public static boolean implementationOf(String className, String ifcName) 
 			throws ClassNotFoundException 
 	{
-		ClassLoaderRepository clr = currentRepository.get();
+		DietClassLoaderRepository clr = currentRepository.get();
 		JavaClass jc, ifc;
 		if (clr != null) {
 			jc = clr.loadClass(className);
@@ -111,7 +120,7 @@ public class RepositoryAccess {
 	protected static boolean instanceOf(String subClassName, String superClassName) 
 			throws ClassNotFoundException 
 	{
-		ClassLoaderRepository clr = currentRepository.get();
+		DietClassLoaderRepository clr = currentRepository.get();
 		JavaClass subJClass, superJClass;
 		if (clr != null) {
 			subJClass = clr.loadClass(subClassName);
