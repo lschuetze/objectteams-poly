@@ -181,6 +181,11 @@
               class="org.eclipse.objectteams.otdt.internal.ui.viewsupport.MarkerViewAdaptor"
               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
         </team>
+        <team
+              activation="NONE"
+              class="org.eclipse.objectteams.otdt.internal.ui.viewsupport.MarkerViewAdaptor.MarkersViewLifeCycle.MarkersView"
+              icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+        </team>
      </aspectBinding>
    </extension>
    <extension
