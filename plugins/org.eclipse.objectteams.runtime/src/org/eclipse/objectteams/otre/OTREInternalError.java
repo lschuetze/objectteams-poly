@@ -27,7 +27,7 @@ public class OTREInternalError extends Error {
 	private static final long serialVersionUID = 1L;
 	private static final String _bugmsg = 
         "An error occurred in the Object Teams runtime environment.\n"+
-        "We would appreciate if you send a bug report to bugs@ObjectTeams.org.\n"+
+        "We would appreciate if you submit a bug report at https://bugs.eclipse.org/bugs/enter_bug.cgi?product=Objectteams.\n"+
         "Please include your program (if possible) and the following diagnostic\n"+
         "in your report. -- Thank you. The OT/J developers\n";
     /**
