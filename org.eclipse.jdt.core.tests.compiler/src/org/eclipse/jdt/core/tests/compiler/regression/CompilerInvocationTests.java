@@ -681,6 +681,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("MethodMustOverride", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("MethodMustOverrideOrImplement", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("MethodNameClash", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
+		expectedProblemAttributes.put("MethodNameClashHidden", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("MethodReducesVisibility", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("MethodRequiresBody", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("MethodReturnsVoid", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
@@ -1429,6 +1430,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("MethodMustOverride", SKIP);
 		expectedProblemAttributes.put("MethodMustOverrideOrImplement", SKIP);
 		expectedProblemAttributes.put("MethodNameClash", SKIP);
+		expectedProblemAttributes.put("MethodNameClashHidden", SKIP);
 		expectedProblemAttributes.put("MethodReducesVisibility", SKIP);
 		expectedProblemAttributes.put("MethodRequiresBody", SKIP);
 		expectedProblemAttributes.put("MethodReturnsVoid", SKIP);
