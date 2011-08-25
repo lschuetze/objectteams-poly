@@ -237,7 +237,7 @@ void checkForBridgeMethod(MethodBinding currentMethod, MethodBinding inheritedMe
 			final MethodBinding thisMethod = current[i];
 			if (thisMethod.areParameterErasuresEqual(bridge) && thisMethod.returnType.erasure() == bridge.returnType.erasure()) {
 				// use inherited method for problem reporting.
-				problemReporter(thisMethod).methodNameClash(thisMethod, inheritedMethod.declaringClass.isRawType() ? inheritedMethod : inheritedMethod.original());
+				problemReporter(thisMethod).methodNameClash(thisMethod, inheritedMethod.declaringClass.isRawType() ? inheritedMethod : inheritedMethod.original(), ProblemSeverities.Error);
 				return;	
 			}
 		}
@@ -276,7 +276,13 @@ void checkForNameClash(MethodBinding currentMethod, MethodBinding inheritedMetho
 	//		class A implements I<Integer> { public void test(Integer i) {} }
 	//		class B extends A { public void test(Comparable i) {} }
 
-	if (inheritedMethod.isStatic()) return;
+	if (inheritedMethod.isStatic() || currentMethod.isStatic()) {
+		MethodBinding original = inheritedMethod.original(); // can be the same as inherited
+		if (this.type.scope.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_7 && currentMethod.areParameterErasuresEqual(original)) {
+			problemReporter(currentMethod).methodNameClashHidden(currentMethod, inheritedMethod.declaringClass.isRawType() ? inheritedMethod : original);
+		}
+		return; // no chance of bridge method's clashing
+	}
 
 	if (!detectNameClash(currentMethod, inheritedMethod, false)) { // check up the hierarchy for skipped inherited methods
 		TypeBinding[] currentParams = currentMethod.parameters;
@@ -838,6 +844,13 @@ boolean detectNameClash(MethodBinding current, MethodBinding inherited, boolean 
 	MethodBinding original = methodToCheck.original(); // can be the same as inherited
 	if (!current.areParameterErasuresEqual(original))
 		return false;
+	int severity = ProblemSeverities.Error;
+	if (this.environment.globalOptions.complianceLevel == ClassFileConstants.JDK1_6) {
+		// for 1.6 return types also need to be checked
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317719
+		if (current.returnType.erasure() != original.returnType.erasure())
+			severity = ProblemSeverities.Warning;
+	}
 	if (!treatAsSynthetic) {
 		// For a user method, see if current class overrides the inherited method. If it does,
 		// then any grievance we may have ought to be against the current class's method and
@@ -861,7 +874,8 @@ boolean detectNameClash(MethodBinding current, MethodBinding inherited, boolean 
 	if (!current.areParameterErasuresEqual(original))
 		return false;
 	original = inherited.original();  // For error reporting use, inherited.original()
-	problemReporter(current).methodNameClash(current, inherited.declaringClass.isRawType() ? inherited : original);
+	problemReporter(current).methodNameClash(current, inherited.declaringClass.isRawType() ? inherited : original, severity);
+	if (severity == ProblemSeverities.Warning) return false;
 	return true;
 }
 public boolean doesMethodOverride(MethodBinding method, MethodBinding inheritedMethod) {

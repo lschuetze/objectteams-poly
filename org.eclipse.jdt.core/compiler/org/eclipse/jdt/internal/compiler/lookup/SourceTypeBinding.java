@@ -34,8 +34,9 @@ import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
-import org.eclipse.jdt.internal.compiler.util.Util;
+import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
+import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
@@ -1759,13 +1760,16 @@ public MethodBinding[] methods() {
 // SH}
 
 		// find & report collision cases
-		boolean complyTo15 = this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5;
+		boolean complyTo15OrAbove = this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5;
+		boolean compliance16 = this.scope.compilerOptions().complianceLevel == ClassFileConstants.JDK1_6;
+		
 //{ObjectTeams: this.methods may have changed size, use the appropriate length:
 /* orig:
 		for (int i = 0, length = this.methods.length; i < length; i++) {
   :giro */
 		for (int i = 0, length = resolvedMethods.length; i < length; i++) {
 // SH}
+			int severity = ProblemSeverities.Error;
 			MethodBinding method = resolvedMethods[i];
 			if (method == null)
 				continue;
@@ -1778,11 +1782,78 @@ public MethodBinding[] methods() {
 				if (!CharOperation.equals(selector, method2.selector))
 					break nextSibling; // methods with same selector are contiguous
 
-				if (complyTo15 ? !method.areParameterErasuresEqual(method2) : !method.areParametersEqual(method2))
-					continue nextSibling; // otherwise duplicates / name clash
+				if (complyTo15OrAbove) {
+					if (method.areParameterErasuresEqual(method2)) {
+						// we now ignore return types in 1.7 when detecting duplicates, just as we did before 1.5 
+						// Only in 1.6, we have to make sure even return types are different
+						// https://bugs.eclipse.org/bugs/show_bug.cgi?id=317719
+						if (compliance16 && method.returnType != null && method2.returnType != null) {
+							if (method.returnType.erasure() != method2.returnType.erasure()) {
+								// check to see if the erasure of either method is equal to the other
+								// if not, then change severity to WARNING
+								TypeBinding[] params1 = method.parameters;
+								TypeBinding[] params2 = method2.parameters;
+								int pLength = params1.length;
+								TypeVariableBinding[] vars = method.typeVariables;
+								TypeVariableBinding[] vars2 = method2.typeVariables;
+								boolean equalTypeVars = vars == vars2;
+								MethodBinding subMethod = method2;
+								if (!equalTypeVars) {
+									MethodBinding temp = method.computeSubstitutedMethod(method2, this.scope.environment());
+									if (temp != null) {
+										equalTypeVars = true;
+										subMethod = temp;
+									}
+								}
+								boolean equalParams = method.areParametersEqual(subMethod);
+								if (equalParams && equalTypeVars) {
+									// duplicates regardless of return types
+								} else if (vars != Binding.NO_TYPE_VARIABLES && vars2 != Binding.NO_TYPE_VARIABLES) {
+									// both have type arguments. Erasure of signature of one cannot be equal to signature of other
+									severity = ProblemSeverities.Warning;
+								} else if (pLength > 0) {
+									int index = pLength;
+									// is erasure of signature of m2 same as signature of m1?
+									for (; --index >= 0;) {
+										if (params1[index] != params2[index].erasure())
+											break;
+										if (params1[index] == params2[index]) {
+											TypeBinding type = params1[index].leafComponentType();
+											if (type instanceof SourceTypeBinding && type.typeVariables() != Binding.NO_TYPE_VARIABLES) {
+												index = pLength; // handle comparing identical source types like X<T>... its erasure is itself BUT we need to answer false
+												break;
+											}
+										}
+									}
+									if (index >= 0 && index < pLength) {
+										// is erasure of signature of m1 same as signature of m2?
+										for (index = pLength; --index >= 0;)
+											if (params1[index].erasure() != params2[index])
+												break;
+										
+									}
+									if (index >= 0) {
+										// erasure of neither is equal to signature of other
+										severity = ProblemSeverities.Warning;
+									}
+								} else if (pLength != 0){
+									severity = ProblemSeverities.Warning;
+								} // pLength = 0 automatically makes erasure of arguments one equal to arguments of other.
+							}
+							// else return types also equal. All conditions satisfied
+							// to give error in 1.6 compliance as well.
+						}
+					} else {
+						continue nextSibling;
+					}
+				} else if (!method.areParametersEqual(method2)) {
+					// prior to 1.5, parameters identical meant a collision case
+					continue nextSibling;
+				}
+				// otherwise duplicates / name clash
 				boolean isEnumSpecialMethod = isEnum() && (CharOperation.equals(selector,TypeConstants.VALUEOF) || CharOperation.equals(selector,TypeConstants.VALUES));
 				// report duplicate
-				boolean removeMethod2 = true;
+				boolean removeMethod2 = (severity == ProblemSeverities.Error) ? true : false; // do not remove if in 1.6 and just a warning given
 				if (methodDecl == null) {
 					methodDecl = method.sourceMethod(); // cannot be retrieved after binding is lost & may still be null if method is special
 					if (methodDecl != null && methodDecl.binding != null) { // ensure its a valid user defined method
@@ -1792,7 +1863,7 @@ public MethodBinding[] methods() {
 							// remove user defined methods & keep the synthetic
 							removeMethod = true;
 						} else {
-							this.scope.problemReporter().duplicateMethodInType(this, methodDecl, method.areParametersEqual(method2));
+							this.scope.problemReporter().duplicateMethodInType(this, methodDecl, method.areParametersEqual(method2), severity);
 						}
 						if (removeMethod) {
 							removeMethod2 = false;
@@ -1811,7 +1882,7 @@ public MethodBinding[] methods() {
 						this.scope.problemReporter().duplicateEnumSpecialMethod(this, method2Decl);
 						removeMethod2 = true;
 					} else {
-						this.scope.problemReporter().duplicateMethodInType(this, method2Decl, method.areParametersEqual(method2));
+						this.scope.problemReporter().duplicateMethodInType(this, method2Decl, method.areParametersEqual(method2), severity);
 					}
 					if (removeMethod2) {
 						method2Decl.binding = null;
