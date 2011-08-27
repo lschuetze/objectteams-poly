@@ -10724,7 +10724,7 @@ public final class CompletionEngine
 		Set<String> knownRoles = new HashSet<String>();
 		// pre-load existing roles:
 		for (ReferenceBinding existingRole : enclosingType.memberTypes())
-			if (!existingRole.roleModel.isPurelyCopied())
+			if (existingRole.roleModel != null && !existingRole.roleModel.isPurelyCopied()) // null if member is enum
 				knownRoles.add(String.valueOf(existingRole.internalName()));
 		// search direct super team:
 		findOverridableRolesFrom(superTeam, knownRoles);
