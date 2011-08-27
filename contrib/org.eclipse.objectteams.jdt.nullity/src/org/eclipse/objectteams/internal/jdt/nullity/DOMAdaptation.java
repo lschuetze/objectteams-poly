@@ -32,7 +32,11 @@ import base org.eclipse.jdt.core.dom.ASTConverter;
  */
 @SuppressWarnings({ "decapsulation", "restriction" })
 public team class DOMAdaptation {
-	
+
+	// copies from OT-version of org.eclipse.jdt.core.dom.Modifier:
+	public static final int OT_CALLIN = 0x80000000;
+	public static final int OT_TEAM = 0x8000;
+
 	int [] translation = null;
 
 	@SuppressWarnings("nls")
@@ -112,6 +116,14 @@ public team class DOMAdaptation {
 						case TerminalTokens_OT21M1.TokenNamefinal:
 							modifier = createModifier(Modifier.ModifierKeyword.FINAL_KEYWORD);
 							break;
+	//{ObjectTeams: callin team
+						case TerminalTokens_OT21M1.TokenNamecallin:
+							modifier = createModifier(Modifier.ModifierKeyword.fromFlagValue(OT_CALLIN));
+							break;
+						case TerminalTokens_OT21M1.TokenNameteam:
+							modifier = createModifier(Modifier.ModifierKeyword.fromFlagValue(OT_TEAM));
+							break;
+	// SH}
 						case TerminalTokens_OT21M1.TokenNamenative:
 							modifier = createModifier(Modifier.ModifierKeyword.NATIVE_KEYWORD);
 							break;
