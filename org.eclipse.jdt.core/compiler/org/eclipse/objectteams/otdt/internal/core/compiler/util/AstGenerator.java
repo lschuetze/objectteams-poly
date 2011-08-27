@@ -269,6 +269,7 @@ public class AstGenerator extends AstFactory {
 		result.sourceStart = this.sourceStart;
 		result.sourceEnd = this.sourceEnd;
 		result.constant = Constant.NotAConstant;
+		result.bits |= ASTNode.IsGenerated;
 		return result;
 	}
 	public IntLiteral intLiteral(int val) {

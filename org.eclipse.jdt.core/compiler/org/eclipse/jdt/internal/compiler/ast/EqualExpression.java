@@ -127,8 +127,11 @@ public class EqualExpression extends BinaryExpression {
 			result = FlowInfo.conditional(result.copy(), result.copy());
 			// TODO (maxime) check, reintroduced copy
 		}
-	  checkNullComparison(currentScope, flowContext, result, result.initsWhenTrue(), result.initsWhenFalse());
-	  return result;
+//{ObjectTeams: no warnings/errors for generated (null-)checks:
+	  if ((this.bits & IsGenerated) == 0)
+// SH}
+		checkNullComparison(currentScope, flowContext, result, result.initsWhenTrue(), result.initsWhenFalse());
+		return result;
 	}
 
 	public final void computeConstant(TypeBinding leftType, TypeBinding rightType) {

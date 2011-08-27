@@ -21,6 +21,7 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
 import org.eclipse.jdt.internal.compiler.ast.CastExpression;
 import org.eclipse.jdt.internal.compiler.ast.ConditionalExpression;
@@ -29,6 +30,7 @@ import org.eclipse.jdt.internal.compiler.ast.FieldReference;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
+import org.eclipse.jdt.internal.compiler.ast.ThisReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
@@ -93,6 +95,8 @@ public class Lowering implements IOTConstants {
 
     	LocalVariableBinding localVar = null;
     	Expression unloweredExpression = expression;
+    	if (expression instanceof ThisReference || expression instanceof AllocationExpression)
+    		needNullCheck = false;
     	if (needNullCheck) {
         	localVar = makeNewLocal(scope, unloweredType, sourceStart, sourceEnd);
         	SingleNameReference varRef = gen.singleNameReference(localVar.name);
