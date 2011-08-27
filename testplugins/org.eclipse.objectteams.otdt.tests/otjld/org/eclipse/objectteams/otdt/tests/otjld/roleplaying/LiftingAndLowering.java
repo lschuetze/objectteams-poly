@@ -802,6 +802,85 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		"OK");
     }
 
+    // Bug 355253 - warnings regarding synthetic variables _OT$unlowerd$123
+    // syntactically known to be non-null
+    public void test221_loweringToBaseclass19 () {
+    	Map options = getCompilerOptions();
+    	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.ERROR);
+    	runConformTest(
+    		true /* flushOutputDir*/,
+    		new String[] {
+    	"Team221ltb19.java",
+    			"public team class Team221ltb19 {\n" + 
+    			"	protected class R playedBy T221ltb19 {\n" + 
+    			"		protected R() { base(); }\n" +
+    			"       protected void test() {\n" +
+    			"           T221ltb19.accept(this);\n" +
+    			"       }\n" + 
+    			"	}\n" + 
+    			"	T221ltb19 aBase;\n" + 
+    			"	void test() {\n" + 
+    			"		new R().test();\n" + 
+    			"	}\n" + 
+    			"	public static void main(String[] args) {\n" + 
+    			"		new Team221ltb19().test();\n" + 
+    			"	}\n" + 
+    			"}\n",
+    	"T221ltb19.java",
+		    	"public class T221ltb19 {\n" + 
+		    	"	public static void accept(T221ltb19 inst) {\n" + 
+		    	"		System.out.println(\"OK\");\n" + 
+		    	"	}\n" +
+		    	"}\n"
+    		},
+    		null, // libs
+    		options,
+    		"", // compiler log
+    		"OK",
+    		"",
+    		JavacTestOptions.EclipseJustification.EclipseWarningConfiguredAsError);
+    }
+
+    // Bug 355253 - warnings regarding synthetic variables _OT$unlowerd$123
+    // known to be non-null by analysis
+    public void test221_loweringToBaseclass20 () {
+    	Map options = getCompilerOptions();
+    	options.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.ERROR);
+    	runConformTest(
+    		true /* flushOutputDir*/,
+    		new String[] {
+    	"Team221ltb20.java",
+    			"public team class Team221ltb20 {\n" + 
+    			"	protected class R playedBy T221ltb20 {\n" + 
+    			"		protected R() { base(); }\n" +
+    			"       protected void test() {\n" +
+    			"           R r = this;" +
+    			"           T221ltb20.accept(r);\n" +
+    			"       }\n" + 
+    			"	}\n" + 
+    			"	T221ltb20 aBase;\n" + 
+    			"	void test() {\n" + 
+    			"		new R().test();\n" + 
+    			"	}\n" + 
+    			"	public static void main(String[] args) {\n" + 
+    			"		new Team221ltb20().test();\n" + 
+    			"	}\n" + 
+    			"}\n",
+    	"T221ltb20.java",
+		    	"public class T221ltb20 {\n" + 
+		    	"	public static void accept(T221ltb20 inst) {\n" + 
+		    	"		System.out.println(\"OK\");\n" + 
+		    	"	}\n" +
+		    	"}\n"
+    		},
+    		null, // libs
+    		options,
+    		"", // compiler log
+    		"OK",
+    		"",
+    		JavacTestOptions.EclipseJustification.EclipseWarningConfiguredAsError);
+    }
+
     // a role is lowered to a class that is not its base class
     // 2.2.2-otjld-lowering-to-non-baseclass-1
     public void test222_loweringToNonBaseclass1() {
