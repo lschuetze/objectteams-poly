@@ -3,10 +3,10 @@
 <head>
     <link rel=stylesheet type="text/css" href="../css/style.css">
     <link rel=stylesheet type="text/css" href="../css/nn.css">
-	<title>OTDT 2.0.0 - New and Noteworthy</title>
+	<title>OTDT 2.0 - New and Noteworthy</title>
 </head>
 <body>
-<h1>OTDT 2.0.0 - New and Noteworthy</h1>
+<h1>OTDT 2.0 - New and Noteworthy</h1>
 <div class="navigation"><i>Changes since the 0.7.1 Release</i></div>
 <div style="width:40%; padding:2px;background-color:#707070;"><div style="text-align:justify;background-color:#def4fe;padding:3px;">
 Note, that milestones towards the 2.0.0 release where named 0.8.0M<i>x</i>.
@@ -98,8 +98,17 @@ The switch in version numbers has been made between 0.8.0M7 and 2.0.0 RC1 in pre
   <tr><td colspan="2" id="api"><h2>API</h2></td></tr>
 -->
   </tr>  <tr><td colspan="2" id="language"><h2>Language</h2></td></tr>
+  <tr>
+    <td><p align="right"><b>Java 7 support</b><br>
+        <span class="since">since&nbsp;2.0.1RC1</span><br>
+        <a class="buglink" title="Upgrade to Java7" href="https://bugs.eclipse.org/353894">353894</a></p></td>
+    <td><p>Starting with 2.0.1 RC1 OT/J has been integrated with Java 7, i.e., the OT/J compiler also supports all 
+    		<a href="http://www.eclipse.org/jdt/ui/r3_8/Java7news/whats-new-java-7.html">new features introduced in Java 7</a>.
+    	</p>
+    </td>
+  </tr>
    <tr>
-    <td><p align="right"><b>Precedence among tsupers</b><br>
+    <td id="bug326969"><p align="right"><b>Precedence among tsupers</b><br>
         <span class="since">since&nbsp;0.8.0M3</span><br>
         <a class="buglink" title="[compiler] implement changed precedence among different tsupers" href="https://bugs.eclipse.org/326969">326969</a></p></td>
     <td><p>
@@ -150,7 +159,7 @@ The switch in version numbers has been made between 0.8.0M7 and 2.0.0 RC1 in pre
     </td>
   </tr>
    <tr>
-    <td><p align="right"><b>Avoid role cache</b><br>
+    <td id="bug338582"><p align="right"><b>Avoid role cache</b><br>
         <span class="since">since&nbsp;0.8.0M6</span><br>
         <a class="buglink" title="consider optimization by avoiding the role cache" href="https://bugs.eclipse.org/338582">338582</a></p></td>
     <td><p>
@@ -203,7 +212,7 @@ The switch in version numbers has been made between 0.8.0M7 and 2.0.0 RC1 in pre
   <tr>
     <td><p align="right"><b>Severity of write decapsulation</b><br>
         <span class="since">since&nbsp;0.8.0M5</span><br>
-        <a class="buglink" title="separate tuning of severity of decapsulation in "set" callout-to-field" href="https://bugs.eclipse.org/335523">335523</a></p></td>
+        <a class="buglink" title="separate tuning of severity of decapsulation in &quot;set&quot; callout-to-field" href="https://bugs.eclipse.org/335523">335523</a></p></td>
     <td><p>When a role uses a callout <code class="keyword">set</code> to field with decapsulation this may be considered more severe
     	   than a corresponding <code class="keyword">get</code> access. Therefor, the compiler now supports separate configurability for both
     	   kinds of problems.

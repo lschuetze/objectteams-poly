@@ -12,8 +12,11 @@
 			<topic label="OT/J syntax highlighting" href="guide/syntaxhighlight.html"/>
 			<topic label="OT/J content/code assist" href="guide/contentassist.html">
 				<topic label="OT/J code completion" href="guide/completion.html"/>
-				<topic label="OT/J quick fixes" href="guide/quickfix.html"/>
+				<topic href="guide/quickfix.html" label="OT/J quick fixes">
+    </topic>
 				<topic label="OT/J quick assists" href="guide/quickassist.html"/>
+    <topic href="guide/assist/addRemoveSignatures.html" label="Add/Remove signature of method binding">
+    </topic>
 			</topic>
 			<topic label="Binding markers" href="guide/callinmarker.html"/>
 			<topic label="Comparing bound methods" href="guide/methodcompare.html"/>

@@ -1,0 +1,93 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <link rel=stylesheet type="text/css" href="../css/style.css">
+    <link rel=stylesheet type="text/css" href="../css/nn.css">
+	<title>OTDT 2.1 - New and Noteworthy</title>
+</head>
+<body>
+<h1>OTDT 2.1 - New and Noteworthy</h1>
+<div class="navigation"><i>Status: 2.1 M2</i></div>
+<div class="navigation">On this page:
+<!--a href="#metrics">&bull; Metrics Plug-in</a-->
+<!--a href="#configuration">&bull; Configuration</a-->
+<!--a href="#views">&bull; Views/Dialogs</a--> 
+<a href="#assist">&bull; Content Assist</a>  
+<!--a href="#refactor">&bull; Refactoring</a-->  
+<!--a href="#formatting">&bull; Formatting</a-->
+<!--a href="#debug">&bull; Run/Debug</a-->
+<a href="#language">&bull; Language</a>
+<!--a href="#api">&bull; API</a-->
+<a href="#compiler">&bull; Compiler</a>
+<a href="#otre">&bull; Runtime</a>  
+<!--a href="#otequinox">&bull; OT/Equinox</a-->
+</div>
+<table cellpadding="10" cellspacing="0" width="100%">
+  <colgroup>
+  <col width="20%">
+  <col width="80%">
+  </colgroup>
+  <tbody>
+<!--
+  <tr><td colspan="2" id="NAME"><h2>HEADING</h2></td></tr>
+  <tr>
+    <td><p align="right"><b>DESC</b><br>
+        <span class="since">since&nbsp;0.7.1</span><br>
+        <a class="buglink" title="TITLE" href="https://bugs.eclipse.org/308029">308029</a></p></td>
+    <td><p>
+    		
+    	</p>
+    	<p><img alt="TEXT" src="../images/screenshots/NN07/.png"></p>
+    	<p></p>
+    </td>
+  </tr>
+  <div class="listbox"><div class="listing"><pre><code class="keyword">public team class</code> <font color="blue">MyTeam</font> {
+}</pre></div></div>
+  <tr><td colspan="2" id="views"><h2>Views & Dialogs</h2></td></tr>
+-->
+  <tr><td colspan="2" id="assist"><h2>Content assist</h2></td></tr>
+  <tr>
+    <td><p align="right"><b>Add signatures to method binding</b><br>
+        <span class="since">since&nbsp;2.1M2</span><br>
+        <a class="buglink" title="[assist] make the add signatures assist smarter vis-a-vis ambiguous method bindings" href="https://bugs.eclipse.org/355274">355274</a></p></td>
+    <td><p>The existing quick assist "Add signatures to method binding" has been improved 
+    		so that it can be used on a a signature-less method binding even if it fails to resolve its base method(s).
+     		In case the base class has more than one method of the name mentioned in the method binding,
+     		all matching base methods are collected, the best match is inserted into the editor
+     		and other matches are offered as alternatives in linked mode.
+    	</p>
+    	<p>
+    		So, if before invoking the assist you have:
+    	</p>
+    	<p><img alt="Ambiguous base method" src="../images/screenshots/NN21/AmbiguousBaseMethod.png"></p>
+    	<p>you may invoke the assist as a quickfix (e.g., from the error hover), producing this change:</p>
+    	<p><img alt="Add signatures quick assist" src="../images/screenshots/NN21/AddSignaturesAssist.png"></p>
+    	<p>where you may select the suitable base method from a list.</p>
+    	<p><strong>Hint:</strong> If a method binding has an incorrect signature you may first remove signatures (using a quick assist)
+    	   and then let this new assist insert correct signatures.</p>
+    </td>
+  </tr>
+<!--
+  <tr><td colspan="2" id="refactor"><h2>Refactoring</h2></td></tr>
+-->
+  <tr><td colspan="2" id="language"><h2>Language</h2></td></tr>
+  <tr>
+    <td><p align="right"><b>Java 7 support</b><br>
+        <span class="since">since&nbsp;2.1M1</span><br>
+        <a class="buglink" title="Upgrade to Java7" href="https://bugs.eclipse.org/353894">353894</a></p></td>
+    <td><p>Starting with 2.1 M1, OT/J has been integrated with Java 7, i.e., the OT/J compiler also supports all 
+    		<a href="http://www.eclipse.org/jdt/ui/r3_8/Java7news/whats-new-java-7.html">new features introduced in Java 7</a>.
+    	</p>
+    </td>
+  </tr>
+<!--
+  <tr><td colspan="2" id="debug"><h2>Run / Debug</h2></td></tr>
+  <tr><td colspan="2" id="api"><h2>API</h2></td></tr>
+-->
+  <tr><td colspan="2" id="compiler"><h2>Compiler</h2></td></tr>
+  <tr><td></td><td>Bug 314610 - Produce warning when two roles capture the same method at the same time</td></tr>
+
+  <tr><td colspan="2" id="otre"><h2>Object Teams Runtime Environment</h2></td></tr>
+  <tr><td><strong>TODO: [otre] avoid performance penalty due to eager creation of _OT$roleSet</strong></td><td>[otre] class RepositoryAccess is wasting memory</td></tr>
+</table>
+</body>
