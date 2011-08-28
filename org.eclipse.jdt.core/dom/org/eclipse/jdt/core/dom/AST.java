@@ -1781,6 +1781,15 @@ public final class AST {
 		return result;
 	}
 
+//{ObjectTeams: create a fake method node that knows its parent but not vice versa:
+	public MethodDeclaration newFakedMethodDeclaration(TypeDeclaration declaringType) {
+		MethodDeclaration result = new MethodDeclaration(this);
+		result.setConstructor(false);
+		result.setParent(declaringType, declaringType.getBodyDeclarationsProperty());
+		return result;
+	}	
+// SH}
+
 	/**
 	 * Creates an unparented method invocation expression node owned by this
 	 * AST. By default, the name of the method is unspecified (but legal)
