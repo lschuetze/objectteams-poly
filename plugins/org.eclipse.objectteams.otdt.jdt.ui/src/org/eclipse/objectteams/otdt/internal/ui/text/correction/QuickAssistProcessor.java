@@ -23,27 +23,20 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldAccessSpec;
 import org.eclipse.jdt.core.dom.GuardPredicateDeclaration;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodMappingElement;
 import org.eclipse.jdt.core.dom.MethodSpec;
-import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -52,10 +45,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
-import org.eclipse.objectteams.otdt.internal.ui.util.OTStubUtility;
-import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.text.edits.TextEditGroup;
 
 /**
  * OT/J specific quick assists.
@@ -64,6 +54,8 @@ import org.eclipse.text.edits.TextEditGroup;
 @SuppressWarnings("restriction")
 public class QuickAssistProcessor implements IQuickAssistProcessor {
 
+	enum Errors { NONE, EXPECTED, UNEXPECTED }
+	
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null)
@@ -96,12 +88,14 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		ASTNode coveringNode= context.getCoveringNode();
 		if (coveringNode != null) {
 			ArrayList<ASTRewriteCorrectionProposal> resultingCollections= new ArrayList<ASTRewriteCorrectionProposal>();
-			boolean noErrorsAtLocation= noErrorsAtLocation(locations);
+			Errors matchedErrorsAtLocation= matchErrorsAtLocation(locations, 
+											new int[]{IProblem.AmbiguousCallinMethodSpec, IProblem.AmbiguousCalloutMethodSpec});
 
 			// quick assists that show up also if there is an error/warning
 			getRemoveMethodMappingSignaturesProposal(context.getCompilationUnit(), coveringNode, resultingCollections);
-			if (noErrorsAtLocation) {
-				getAddMethodMappingSignaturesProposal(context.getCompilationUnit(), coveringNode, resultingCollections);
+			if (matchedErrorsAtLocation != Errors.UNEXPECTED) {
+				int relevance = matchedErrorsAtLocation == Errors.NONE ? 1 : 10;
+				getAddMethodMappingSignaturesProposal(context.getCompilationUnit(), coveringNode, relevance, resultingCollections);
 			}
 			return resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -201,135 +195,47 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 
 	/* Proposals for adding signatures to method mappings. */
-	private void getAddMethodMappingSignaturesProposal(final ICompilationUnit cu,
+	private void getAddMethodMappingSignaturesProposal(ICompilationUnit cu,
 			  										   ASTNode coveringNode,
+												       int relevance, 
 												       ArrayList<ASTRewriteCorrectionProposal> resultingCollections) 
 	{
 		final AbstractMethodMappingDeclaration mapping = getMethodMapping(coveringNode);
-		if (mapping != null && !mapping.hasSignature()) {
-			final AST ast= mapping.getAST();
-			final ASTRewrite rewrite= ASTRewrite.create(ast);
-			
-			String label= CorrectionMessages.QuickAssistProcessor_addMethodBindingSignatures_label;
-			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 1, image) {
-				@Override
-				protected ASTRewrite getRewrite() throws CoreException 
-				{
-					TextEditGroup editGroup = new TextEditGroup(CorrectionMessages.QuickAssistProcessor_addSignature_editName);
-					ImportRewrite imports = createImportRewrite((CompilationUnit) ASTNodes.getParent(mapping, ASTNode.COMPILATION_UNIT));
-					// role method:
-					IMethodBinding roleMethod = mapping.resolveBinding().getRoleMethod();
-					MethodSpec newSpec = OTStubUtility.createMethodSpec(cu, rewrite, imports, roleMethod, true);
-					convertTypeParameters(ast, roleMethod, newSpec);
-					rewrite.set(mapping, mapping.getRoleElementProperty(), newSpec, editGroup);
-					
-					// base method(s):
-					if (mapping.getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
-						addSignatureToCallinBases(cu, rewrite, imports, (CallinMappingDeclaration) mapping, editGroup);
-					else
-						addSignatureToCalloutBase(cu, rewrite, imports, (CalloutMappingDeclaration) mapping, editGroup);
-					return rewrite;
-				}
-
-				@SuppressWarnings("unchecked")
-				private void convertTypeParameters(final AST ast, IMethodBinding roleMethod, MethodSpec destMethodSpec) 
-				{
-					for (ITypeBinding typeParameter : roleMethod.getTypeParameters()) {
-						TypeParameter newTypeParameter = ast.newTypeParameter();
-						newTypeParameter.setName(ast.newSimpleName(typeParameter.getName()));
-						for (ITypeBinding typeBound : typeParameter.getTypeBounds())
-							newTypeParameter.typeBounds().add(convertType(ast, typeBound));
-						destMethodSpec.typeParameters().add(newTypeParameter);
-					}
-				}
-			};
-			resultingCollections.add(proposal);
+		if (mapping != null && !mapping.hasSignature()) {			
+			resultingCollections.add(new AddMethodMappingSignaturesProposal(cu, mapping, relevance));
 		}		
 	}
 
-	// helper: add signatures to all base specs of a callin mapping:
-	private void addSignatureToCallinBases(ICompilationUnit cu,
-										   ASTRewrite rewrite, ImportRewrite imports,
-										   CallinMappingDeclaration mapping, 
-										   TextEditGroup editGroup) 
-	{
-		@SuppressWarnings("rawtypes")
-		List oldBaseSpecs = mapping.getBaseMappingElements();
-		ListRewrite baseMethods = rewrite.getListRewrite(mapping, CallinMappingDeclaration.BASE_MAPPING_ELEMENTS_PROPERTY);
-		int i=0;
-		for (IMethodBinding baseMethod : mapping.resolveBinding().getBaseMethods()) {
-			try {
-				MethodSpec newSpec = OTStubUtility.createMethodSpec(cu, rewrite, imports, baseMethod, true);
-				baseMethods.replace((ASTNode) oldBaseSpecs.get(i), newSpec, editGroup);
-			} catch (CoreException e) {
-				OTDTUIPlugin.log(e);
-			} finally {
-				i++;
-			}
-		}		
-	}
 
-	// helper: add signature to a callout base spec (method or field)
-	private void addSignatureToCalloutBase(ICompilationUnit cu,
-										   ASTRewrite rewrite, 
-										   ImportRewrite imports,
-										   CalloutMappingDeclaration mapping, 
-										   TextEditGroup editGroup) 
-	{
-		MethodMappingElement baseElement;
-		try {
-			if (mapping.bindingOperator().isCalloutToField()) {
-				IVariableBinding baseField = ((FieldAccessSpec)mapping.getBaseMappingElement()).resolveBinding();
-				baseElement = OTStubUtility.createFieldSpec(mapping.getAST(), imports, baseField, true);
-			} else {
-				IMethodBinding baseMethod = mapping.resolveBinding().getBaseMethods()[0];
-				baseElement = OTStubUtility.createMethodSpec(cu, rewrite, imports, baseMethod, true);
-			}
-			rewrite.set(mapping, CalloutMappingDeclaration.BASE_MAPPING_ELEMENT_PROPERTY, baseElement, editGroup);
-		} catch (CoreException e) {
-			OTDTUIPlugin.log(e);
-		}
-	}
-
-	AbstractMethodMappingDeclaration getMethodMapping (ASTNode coveringNode) {
+	private AbstractMethodMappingDeclaration getMethodMapping (ASTNode coveringNode) {
 		if (coveringNode instanceof AbstractMethodMappingDeclaration)
 			return (AbstractMethodMappingDeclaration) coveringNode;
 		return (AbstractMethodMappingDeclaration) ASTNodes.getParent(coveringNode, AbstractMethodMappingDeclaration.class);
 	}
 
-	@SuppressWarnings("unchecked")
-	private Type convertType(AST ast, ITypeBinding typeBinding) {
-		if (typeBinding.isTypeVariable())
-			return ast.newSimpleType(ast.newSimpleName(typeBinding.getName()));
-		String typeName = typeBinding.getErasure().getQualifiedName();
-		Type type = (typeName.indexOf('.') > -1)
-			? ast.newSimpleType(ast.newName(typeName))
-			: ast.newSimpleType(ast.newSimpleName(typeName));
-		ITypeBinding[] typeArguments = typeBinding.getTypeArguments();
-		if (typeArguments.length > 0) {
-			ParameterizedType parameterizedType = ast.newParameterizedType(type);
-			for (ITypeBinding bound : typeArguments)
-				parameterizedType.typeArguments().add(convertType(ast, bound));
-			return parameterizedType;
-		}
-		return type;
-	}
 
-	static boolean noErrorsAtLocation(IProblemLocation[] locations) {
+	private Errors matchErrorsAtLocation(IProblemLocation[] locations, int[] expectedProblemIds) {
+		boolean hasMatch = false;
 		if (locations != null) {
-			for (int i= 0; i < locations.length; i++) {
+			locations: for (int i= 0; i < locations.length; i++) {
 				IProblemLocation location= locations[i];
 				if (location.isError()) {
+					int problemId = location.getProblemId();
+					if (expectedProblemIds != null)
+						for (int j = 0; j < expectedProblemIds.length; j++)
+							if (expectedProblemIds[j] == problemId) {
+								hasMatch = true;
+								continue locations;
+							}
 					if (IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER.equals(location.getMarkerType())
-							&& JavaCore.getOptionForConfigurableSeverity(location.getProblemId()) != null) {
+							&& JavaCore.getOptionForConfigurableSeverity(problemId) != null) {
 						// continue (only drop out for severe (non-optional) errors)
 					} else {
-						return false;
+						return Errors.UNEXPECTED;
 					}
 				}
 			}
 		}
-		return true;
+		return hasMatch ? Errors.EXPECTED : Errors.NONE;
 	}
 }
