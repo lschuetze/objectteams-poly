@@ -95,6 +95,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 		case IProblem.DifferentParamInCallinMethodSpec:
 		case IProblem.UnresolvedCallinMethodSpec:
 		case IProblem.UnresolvedCalloutMethodSpec:
+		case IProblem.AmbiguousCallinMethodSpec:
+		case IProblem.AmbiguousCalloutMethodSpec:
 // callout:
 		case IProblem.RegularCalloutOverrides:
 		case IProblem.AbstractMethodBoundAsOverride:
@@ -228,6 +230,11 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 																			 context,
 																			 problem,
 																			 proposals);
+				MappingProposalSubProcessor.getRemoveMethodMappingSignaturesProposal(cu, selectedNode, 10, proposals);
+				break;
+			case IProblem.AmbiguousCallinMethodSpec:
+			case IProblem.AmbiguousCalloutMethodSpec:
+				MappingProposalSubProcessor.getAddMethodMappingSignaturesProposal(cu, selectedNode, 10, proposals);
 				break;
 // callout related:
 			case IProblem.RegularCalloutOverrides:

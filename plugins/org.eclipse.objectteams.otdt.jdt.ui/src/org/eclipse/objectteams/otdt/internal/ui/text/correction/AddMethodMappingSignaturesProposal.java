@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010 Stephan Herrmann.
+ * Copyright 2010, 2011 Stephan Herrmann.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -16,9 +16,13 @@
 package org.eclipse.objectteams.otdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -96,7 +100,7 @@ public class AddMethodMappingSignaturesProposal extends LinkedCorrectionProposal
 			ImportRewrite imports,
 			CallinMappingDeclaration mapping, 
 			TextEditGroup editGroup, 
-			IMethodBinding roleMethod) 
+			IMethodBinding roleMethod) throws CoreException 
 	{
 		@SuppressWarnings("unchecked")
 		List<MethodSpec> oldBaseSpecs = mapping.getBaseMappingElements();
@@ -122,7 +126,11 @@ public class AddMethodMappingSignaturesProposal extends LinkedCorrectionProposal
 				// search matching base methods:
 				List<IMethodBinding> matchingBaseMethods = new ArrayList<IMethodBinding>();
 				guessBaseMethod(role.resolveBinding(), oldBaseSpec.getName().getIdentifier(), roleParameters, true, matchingBaseMethods);
-				if (matchingBaseMethods.size() > 0) try {
+				if (matchingBaseMethods.size() == 0)
+					throw new CoreException(new Status(IStatus.ERROR, 
+													   "org.eclipse.objectteams.otdt.jdt.ui",  //$NON-NLS-1$
+													   "Could not find a matching base method")); //$NON-NLS-1$
+				try {
 					MethodSpec newSpec = OTStubUtility.createMethodSpec(cu, rewrite, imports, matchingBaseMethods.get(0), true);
 					baseMethodsRewrite.replace(oldBaseSpecs.get(i), newSpec, editGroup);
 					// do we have alternatives to propose?
@@ -187,26 +195,42 @@ public class AddMethodMappingSignaturesProposal extends LinkedCorrectionProposal
 
 	private void guessBaseMethod(ITypeBinding roleType, String selector, ITypeBinding[] roleParameters, boolean isCallin, List<IMethodBinding> result) 
 	{	
+		Set<String> foundSignatures = new HashSet<String>();
 		ITypeBinding baseClass = roleType.getBaseClass();
-		if (baseClass == null)
-			return;
-		baseMethods: 
-		for (IMethodBinding baseMethod : baseClass.getDeclaredMethods()) {
-			if (!baseMethod.getName().equals(selector))
-				continue;
-			ITypeBinding[] baseParameters = baseMethod.getParameterTypes();
-			int provided = isCallin ? baseParameters.length : roleParameters.length;
-			int consumed = isCallin ? roleParameters.length : baseParameters.length;
-			if (provided < consumed)
-				continue;
-			for(int i=0; i<consumed; i++)
-				if (!isCompatible(roleParameters[i], baseParameters[i], isCallin))
-					continue baseMethods;
-			if (baseParameters.length == roleParameters.length)
-				result.add(0, baseMethod); // same number of parameters is considered our best guess
-			else
-				result.add(baseMethod);
+		while (baseClass != null) {
+			baseMethods:
+			for (IMethodBinding baseMethod : baseClass.getDeclaredMethods()) {
+				if (!baseMethod.getName().equals(selector))
+					continue;
+				ITypeBinding[] baseParameters = baseMethod.getParameterTypes();
+				String signature = makeSignatureKey(baseParameters);
+				if (!foundSignatures.add(signature))
+					continue;
+				int provided = isCallin ? baseParameters.length : roleParameters.length;
+				int consumed = isCallin ? roleParameters.length : baseParameters.length;
+				if (provided < consumed)
+					continue;
+				for(int i=0; i<consumed; i++)
+					if (!isCompatible(roleParameters[i], baseParameters[i], isCallin))
+						continue baseMethods;
+				if (baseParameters.length == roleParameters.length)
+					result.add(0, baseMethod); // same number of parameters is considered our best guess
+				else
+					result.add(baseMethod);
+			}
+			baseClass = baseClass.getSuperclass();
 		}
+	}
+
+	// simple string repr of a method signature, just for use as a key in a set.
+	private String makeSignatureKey(ITypeBinding[] baseParameters) {
+		StringBuffer buf = new StringBuffer();
+		for (int i=0; i<baseParameters.length; i++) {
+			if (i > 0)
+				buf.append(',');
+			buf.append(baseParameters[i].getQualifiedName());
+		}
+		return buf.toString();
 	}
 
 	private boolean isCompatible(ITypeBinding roleSideType, ITypeBinding baseSideType, boolean isCallin) {

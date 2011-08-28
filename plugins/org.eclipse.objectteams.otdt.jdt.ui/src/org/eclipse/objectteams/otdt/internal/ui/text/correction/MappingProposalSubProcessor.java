@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
@@ -35,6 +37,7 @@ import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldAccessSpec;
+import org.eclipse.jdt.core.dom.GuardPredicateDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IMethodMappingBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -66,12 +69,12 @@ import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectio
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewMethodCorrectionProposal;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
-import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.InferenceKind;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.core.compiler.Pair;
 import org.eclipse.objectteams.otdt.internal.ui.assist.OTQuickFixes;
+import org.eclipse.text.edits.TextEditGroup;
 
 /**
  * Quick-fix proposals for method mappings.
@@ -506,22 +509,12 @@ public class MappingProposalSubProcessor {
 														Collection proposals) 
 			throws CoreException 
 	{
-		// Note: this completion proposal needs to modify the ast in order to 
+		// Note: this completion proposal needs to create new ast nodes in order to 
 		// provide a MethodInvocation serving as a template for the proposal.
+		// While these nodes point to the existing enclosingType as their parent,
+		// the "real" ast has no reference to the faked nodes.
 		AST ast= selectedNode.getAST();
 		
-		// left-over from previous attempt?
-		if (selectedNode instanceof MethodDeclaration) {
-			MethodDeclaration method= (MethodDeclaration)selectedNode;
-			if (method.getName().getIdentifier().equals(FAKED_METHOD)) {
-				// yes, remove it:
-				int flags= enclosingType.getFlags();
-				if ((flags & ASTNode.PROTECT) != 0)
-					enclosingType.setFlags(flags & ~ASTNode.PROTECT);
-				enclosingType.bodyDeclarations().remove(method);
-				selectedNode= problem.getCoveringNode(context.getASTRoot());
-			}
-		} 
 		while (selectedNode.getNodeType() != ASTNode.METHOD_SPEC) {
 			selectedNode = selectedNode.getParent();
 			if (selectedNode == null)
@@ -530,8 +523,8 @@ public class MappingProposalSubProcessor {
 		
 		MethodSpec methodSpec= (MethodSpec)selectedNode;
 		// construct a faked problem location:
-		// a new method:
-		MethodDeclaration fakeMethod= ast.newMethodDeclaration();
+		// a new method, with unidirectional linkage to its 'parent':
+		MethodDeclaration fakeMethod= ast.newFakedMethodDeclaration(enclosingType);
 		fakeMethod.setName(ast.newSimpleName(FAKED_METHOD));
 		{
 			ASTNode mapping= methodSpec.getParent();
@@ -567,11 +560,6 @@ public class MappingProposalSubProcessor {
 		// assemble and add to type:
 		fakeMethod.setBody(ast.newBlock());
 		fakeMethod.getBody().statements().add(ast.newExpressionStatement(invoc));
-		int flags= enclosingType.getFlags();
-		if ((flags & ASTNode.PROTECT) != 0)
-			enclosingType.setFlags(flags & ~ASTNode.PROTECT);
-		enclosingType.bodyDeclarations().add(fakeMethod);
-		enclosingType.setFlags(flags);
 		
 		// wrap the problem:
 		IProblemLocation newProblem= new IProblemLocation() {
@@ -617,4 +605,68 @@ public class MappingProposalSubProcessor {
 		buf.append(tail);
 		return buf.toString();
 	}
+
+	/** Proposals for adding signatures to method mappings. */
+	public static void getAddMethodMappingSignaturesProposal(ICompilationUnit cu,
+				  										     ASTNode coveringNode,
+				  										     int relevance, 
+				  										     Collection<ICommandAccess> resultingCollections) 
+	{
+		AbstractMethodMappingDeclaration mapping = getMethodMapping(coveringNode);
+		if (mapping != null && !mapping.hasSignature())
+			resultingCollections.add(new AddMethodMappingSignaturesProposal(cu, mapping, relevance));		
+	}
+
+	/** Proposals for removing signatures from method mappings. */
+	public static void getRemoveMethodMappingSignaturesProposal(ICompilationUnit cu,
+			  										      		ASTNode coveringNode,
+			  										      		int relevance, 
+			  										      		Collection<ICommandAccess> resultingCollections) 
+	{
+		AbstractMethodMappingDeclaration mapping = getMethodMapping(coveringNode);
+		if (mapping != null && mapping.hasSignature()) {
+			if (mapping.getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
+				if (predicateUsesMethodSpecArgument((CallinMappingDeclaration) mapping))
+					return; // don't propose to remove signatures, since an arg is used in the predicate
+			resultingCollections.add(new RemoveMethodMappingSignaturesProposal(cu, mapping, relevance));
+		}
+	}
+
+	private static AbstractMethodMappingDeclaration getMethodMapping (ASTNode coveringNode) {
+		if (coveringNode instanceof AbstractMethodMappingDeclaration)
+			return (AbstractMethodMappingDeclaration) coveringNode;
+		return (AbstractMethodMappingDeclaration) ASTNodes.getParent(coveringNode, AbstractMethodMappingDeclaration.class);
+	}
+
+	// helper: detect whether a guard predicate uses an argument of the corresponding method spec.
+	private static boolean predicateUsesMethodSpecArgument(CallinMappingDeclaration callinMapping) 
+	{
+		GuardPredicateDeclaration predicate = callinMapping.getGuardPredicate();
+		if (predicate == null)
+			return false;
+		final List<String> argNames = new ArrayList<String>();
+		if (predicate.isBase())
+			for (Object baseMethodObject : callinMapping.getBaseMappingElements()) 
+				for (Object baseArgObj : ((MethodSpec)baseMethodObject).parameters())
+					argNames.add(((SingleVariableDeclaration) baseArgObj).getName().getIdentifier());
+		else
+			for (Object roleArgObj : ((MethodSpec)callinMapping.getRoleMappingElement()).parameters())
+				argNames.add(((SingleVariableDeclaration) roleArgObj).getName().getIdentifier());
+		
+		try {
+			predicate.getExpression().accept(new ASTVisitor() {
+				@Override
+				public boolean visit(SimpleName node) {
+					for (String argName : argNames)
+						if (argName.equals(node.getIdentifier()))
+							throw new RuntimeException();
+					return false;
+				}
+			});
+		} catch (RuntimeException re) {
+			return true; 
+		}
+		return false;
+	}
+	
 }
