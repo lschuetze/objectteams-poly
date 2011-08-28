@@ -1103,6 +1103,10 @@ class TypeBinding implements ITypeBinding {
 	 * @see ITypeBinding#isAssignmentCompatible(ITypeBinding)
 	 */
 	public boolean isAssignmentCompatible(ITypeBinding type) {
+//{ObjectTeams: prepare for calling into the compiler (isCompatibleWith(..)) 
+		// save and reset flags:
+    	Config oldConfig = Config.createOrResetConfig(this);
+// orig:
 		try {
 			if (this == type) return true;
 			if (!(type instanceof TypeBinding)) return false;
@@ -1114,6 +1118,11 @@ class TypeBinding implements ITypeBinding {
 			// don't surface internal exception to clients
 			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=143013
 			return false;
+// :giro
+		} finally {
+			// restore on any exit:
+	    	Config.removeOrRestore(oldConfig, this);
+// SH}
 		}
 	}
 

@@ -1717,7 +1717,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 					TypeParameter t = (TypeParameter) it.next();
 					t.accept(this);
 					if (it.hasNext()) {
-						this.buffer.append(",");//$NON-NLS-1$
+						this.buffer.append(", ");//$NON-NLS-1$
 					}
 				}
 				this.buffer.append("> ");//$NON-NLS-1$
@@ -1737,7 +1737,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 				var.accept(this);
 				if (iter.hasNext())
 				{
-					buffer.append(",");
+					buffer.append(", ");
 				}
 			}
 			buffer.append(")");
