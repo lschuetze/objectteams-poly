@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 
 /**
@@ -432,5 +433,107 @@ public class CallinQuickFixTest extends OTQuickFixTest {
 		expectedProposals[0] = buf.toString();
 
 		assertExpectedExistInProposals(proposals, expectedProposals);
+	}
+
+	// Bug 355274 -  [assist] make the add signatures assist smarter vis-a-vis ambiguous method bindings
+	public void testAddSignatures3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B1 {\n");
+		buf.append("    public void foo(String val) {};\n");
+		buf.append("    public void foo() {};\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
+
+		buf = new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy B1 {\n");
+		buf.append("        void foo() {\n");
+		buf.append("        	System.out.print(\"OK\");\n");
+		buf.append("		}\n");
+		buf.append("		foo <- after foo;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("foo <- after");
+		AssistContext context= getCorrectionContext(cuteam, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String[] expectedProposals = new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy B1 {\n");
+		buf.append("        void foo() {\n");
+		buf.append("        	System.out.print(\"OK\");\n");
+		buf.append("		}\n");
+		buf.append("		void foo() <- after void foo();\n"); // added signatures, using best match
+		buf.append("    }\n");
+		buf.append("}\n");
+		expectedProposals[0] = buf.toString();
+
+		assertExpectedExistInProposals(proposals, expectedProposals);
+		
+		
+		String[] alternatives = {"void foo()", "void foo(String val)"};
+		assertChoices((ICompletionProposal) proposals.get(0), "basemethod", alternatives);
+	}
+
+	// Bug 355274 -  [assist] make the add signatures assist smarter vis-a-vis ambiguous method bindings
+	// type conversions involved
+	public void testAddSignatures4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B1 {\n");
+		buf.append("    public void foo(B1 b, Integer val) {};\n");
+		buf.append("    public void foo(B1 b, Object val) {};\n"); // no match, can't convert from Object to Number
+		buf.append("    public void foo(B1 b, Integer val, int x) {};\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("B1.java", buf.toString(), false, null);
+
+		buf = new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy B1 {\n");
+		buf.append("        void bar(R r, Number n) {\n");
+		buf.append("        	System.out.print(\"OK\");\n");
+		buf.append("		}\n");
+		buf.append("		bar <- after foo;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cuteam = pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		int offset= buf.toString().indexOf("bar <- after");
+		AssistContext context= getCorrectionContext(cuteam, offset, 0);
+		List proposals= collectAssists(context, false);
+
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+
+		String[] expectedProposals = new String[1];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");	
+		buf.append("public team class T1 {\n");
+		buf.append("    protected class R playedBy B1 {\n");
+		buf.append("        void bar(R r, Number n) {\n");
+		buf.append("        	System.out.print(\"OK\");\n");
+		buf.append("		}\n");
+		buf.append("		void bar(R r, Number n) <- after void foo(B1 b, Integer val);\n"); // added signatures
+		buf.append("    }\n");
+		buf.append("}\n");
+		expectedProposals[0] = buf.toString();
+
+		assertExpectedExistInProposals(proposals, expectedProposals);
+		
+		
+		String[] alternatives = {"void foo(B1 b, Integer val)", "void foo(B1 b, Integer val, int x)"};
+		assertChoices((ICompletionProposal) proposals.get(0), "basemethod", alternatives);
 	}
 }

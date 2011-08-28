@@ -31,9 +31,14 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.core.ext.OTJavaNature;
 import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
@@ -100,4 +105,18 @@ public class OTQuickFixTest extends QuickFixTest {
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
+	
+	protected void assertChoices(ICompletionProposal proposal, String linkedGroup, String[] expected) {
+		assertTrue("Not a LinkedCorrectionProposal", proposal instanceof LinkedCorrectionProposal);
+		LinkedCorrectionProposal linkedProposal = (LinkedCorrectionProposal)proposal;
+		
+		LinkedProposalModel linkedProposalModel = new ProposalAdaptor().getLinkedProposalModel(linkedProposal);
+		LinkedProposalPositionGroup positionGroup = linkedProposalModel.getPositionGroup(linkedGroup, false);
+		Proposal[] choices = positionGroup.getProposals();
+		assertEquals("Not same number of choices", expected.length, choices.length);
+		for (int i=0; i<choices.length; i++) {
+			assertEquals("Unexpected choice", expected[i], choices[i].getDisplayString());
+		}
+	}
+
 }
