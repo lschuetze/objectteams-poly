@@ -27,7 +27,7 @@ import base org.eclipse.m2e.jdt.internal.AbstractJavaProjectConfigurator;
 
 /**
  * When configuring a Java project from its maven pom, check if it's an OT/J project,
- * which we detect by seeing a <code><flavor>otj</flavor></code> element in the
+ * which we detect by seeing a <code>&lt;flavor&gt;otj&lt;/flavor&gt;</code> element in the
  * compiler configuration. When an OT/J project is detected add the OTJavaNature
  * and update builders accordingly.
  * 
