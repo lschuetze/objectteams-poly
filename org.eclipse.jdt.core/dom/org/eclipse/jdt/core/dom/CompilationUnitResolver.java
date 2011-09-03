@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -66,7 +66,6 @@ import org.eclipse.jdt.internal.core.SourceTypeElementInfo;
 import org.eclipse.jdt.internal.core.util.BindingKeyResolver;
 import org.eclipse.jdt.internal.core.util.CommentRecorderParser;
 import org.eclipse.jdt.internal.core.util.DOMFinder;
-import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 
@@ -1155,13 +1154,19 @@ class CompilationUnitResolver extends Compiler {
 				// build and record parsed units
 				this.parseThreshold = 0; // will request a full parse
 				beginToCompile(new org.eclipse.jdt.internal.compiler.env.ICompilationUnit[] { sourceUnit });
-				// process all units (some more could be injected in the loop by the lookup environment)
-//{ObjectTeams: due to role files the unit corresponding to sourceUnit need not be in position 0:
-/* orig:
-				unit = this.unitsToProcess[0];
-  :giro */
-				unit = findCorrespondingUnit(this.unitsToProcess, sourceUnit);
-// SH}
+				// find the right unit from what was injected via accept(ICompilationUnit,..):
+//{ObjectTeams: also due to role files the unit corresponding to sourceUnit need not be in position 0.  SH}
+				for (int i=0, max = this.totalUnits; i < max; i++) {
+					CompilationUnitDeclaration currentCompilationUnitDeclaration = this.unitsToProcess[i];
+					if (currentCompilationUnitDeclaration != null
+							&& currentCompilationUnitDeclaration.compilationResult.compilationUnit == sourceUnit) {
+						unit = currentCompilationUnitDeclaration;
+						break;
+					}
+				}
+				if (unit == null) {
+					unit = this.unitsToProcess[0]; // fall back to old behavior
+				}
 			} else {
 				// initial type binding creation
 				this.lookupEnvironment.buildTypeBindings(unit, null /*no access restriction*/);
@@ -1266,20 +1271,6 @@ class CompilationUnitResolver extends Compiler {
 			// this.reset();
 		}
 	}
-//{ObjectTeams: helper for above: a parsed unit need not be the first in declarations,
-//              because a role file might have fetched its team.
-//              So search through the array!
-	private CompilationUnitDeclaration findCorrespondingUnit(
-			CompilationUnitDeclaration[] declarations,
-			org.eclipse.jdt.internal.compiler.env.ICompilationUnit sourceUnit)
-	{
-		for(CompilationUnitDeclaration cud : declarations) {
-			if (CharOperation.equals(sourceUnit.getFileName(), cud.getFileName()))
-				return cud;
-		}
-		throw new InternalCompilerError("parsed unit not found in units: "+new String(sourceUnit.getFileName())); //$NON-NLS-1$
-	}
-// SH}
 
 	/*
 	 * Internal API used to resolve a given compilation unit. Can run a subset of the compilation process

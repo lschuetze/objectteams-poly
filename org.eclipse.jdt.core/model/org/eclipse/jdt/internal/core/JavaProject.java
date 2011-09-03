@@ -7,7 +7,9 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - inconsistent initialization of classpath container backed by external class folder, see https://bugs.eclipse.org/320618
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
+ *     						Bug 320618 - inconsistent initialization of classpath container backed by external class folder
+ *     						Bug 346010 - [model] strange initialization dependency in OptionTests
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.core;
@@ -2980,7 +2982,7 @@ public class JavaProject
 	public void setOption(String optionName, String optionValue) {
 		// Store option value
 		IEclipsePreferences projectPreferences = getEclipsePreferences();
-		boolean modified = JavaModelManager.getJavaModelManager().storePreference(optionName, optionValue, projectPreferences);
+		boolean modified = JavaModelManager.getJavaModelManager().storePreference(optionName, optionValue, projectPreferences, null);
 
 		// Write changes
 		if (modified) {
@@ -3009,7 +3011,7 @@ public class JavaProject
 					Map.Entry entry = (Map.Entry) entries.next();
 					String key = (String) entry.getKey();
 					String value = (String) entry.getValue();
-					javaModelManager.storePreference(key, value, projectPreferences);
+					javaModelManager.storePreference(key, value, projectPreferences, newOptions);
 				}
 
 				// reset to default all options not in new map
