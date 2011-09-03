@@ -1237,6 +1237,9 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 			}
 		}
 	}
+//{ObjectTeams: RoFi with incomplete method bodies don't analyze:
+  if (this.compilationUnit == null || this.compilationUnit.parseMethodBodies)
+// SH}
 	if (this.methods != null) {
 		UnconditionalFlowInfo outerInfo = flowInfo.unconditionalFieldLessCopy();
 		FlowInfo constructorInfo = nonStaticFieldInfo.unconditionalInits().discardNonFieldInitializations().addInitializationsFrom(outerInfo);

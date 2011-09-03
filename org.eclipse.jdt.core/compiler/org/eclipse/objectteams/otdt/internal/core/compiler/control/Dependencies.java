@@ -1632,7 +1632,7 @@ public class Dependencies implements ITranslationStates {
 
         // 4. cast and getClass methods (independent of the source/binary difference):
         if (   subRole.isInterface()
-        		&& (subRoleDecl == null || needMethodBodies(subRoleDecl)))
+        		&& (subRoleDecl == null || needMethodBodies(subRoleDecl) || subRoleDecl.isRoleFile()))
         {
         	TypeDeclaration sourceType = subRoleDecl != null ? subRoleDecl : teamType;
         	TypeDeclaration classPart = clazz.getClassPartAst();
