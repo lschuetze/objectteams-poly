@@ -1377,6 +1377,60 @@ public class OTReconcilerTests extends ReconcilerTests {
     	}
     }
 
+	
+    // Bug 351520 - Undefined getClass() for role in seperate role file
+    public void testClassLiteralForRoFi() throws CoreException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+			this.createFolder("/P/MyTeam");
+			String roleSourceString =	
+				"team package MyTeam;\n" +
+				"public class Role {\n" +
+				"	void foo() {\n" +
+				"		String val= \"OK\";\n" +
+				"	}\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam/Role.java",
+	    			roleSourceString);
+			
+			String teamSourceString =
+				"public team class  MyTeam {\n" +
+				"	final MyTeam other = new MyTeam();\n" +
+				"   Class c = Role<@other>.class;\n" +
+				"}\n";
+			this.createFile(
+				"/P/MyTeam.java",
+	    			teamSourceString);
+
+			char[] teamSourceChars = teamSourceString.toCharArray();
+			this.problemRequestor.initialize(teamSourceChars);
+			
+			getCompilationUnit("/P/MyTeam.java").getWorkingCopy(this.wcOwner, null);
+			
+			assertProblems(
+				"Unexpected problems",
+				"----------\n" + 
+				"1. WARNING in /P/MyTeam.java (at line 3)\n" + 
+				"	Class c = Role<@other>.class;\n" + 
+				"	^^^^^\n" + 
+				"Class is a raw type. References to generic type Class<T> should be parameterized\n" + 
+				"----------\n");
+
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
+
     // cf. Bug 337413 - [otjld][compiler] consider changing LiftingFailedException to a checked exception
     // error AmbiguousLiftingMayBreakClients was not shown in the editor.
     public void testSubTeamIntroducesBindingAmbiguity() throws CoreException {
