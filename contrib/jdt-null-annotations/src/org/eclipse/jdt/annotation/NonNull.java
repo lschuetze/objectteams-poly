@@ -27,17 +27,19 @@ import java.lang.annotation.*;
  * annotation can never have the value <code>null</code> at runtime.
  * <p>
  * This has two consequences:
- * <ul>
- * <li>An attempt to bind a <code>null</code> value to the entity is a compile time error.
- *     Diagnostics issued by the compiler should distinguish three situations:
- *     <ul>
- *     <li>Nullness of the value can be statically determined.</li>
- *     <li>Nullness can not definitely be determined, because different code branches yield different results.</li>
- *     <li>Nullness can not be determined, because other program elements are involved for which
- *         null annotations are lacking.</li>
- *     </ul></li>
+ * <ol>
  * <li>Dereferencing the entity is safe, i.e., no <code>NullPointerException</code> can occur at runtime.</li>
- * </ul>
+ * <li>An attempt to bind a <code>null</code> value to the entity is a compile time error.</li>
+ * </ol>
+ * For the second case diagnostics issued by the compiler should distinguish three situations:
+ * <ol>
+ * <li>Nullness of the value can be statically determined, the entity is definitely bound from either of:
+ *     <ul><li>the value <code>null</code>, or</li>
+ *         <li>an entity with a {@link Nullable @Nullable} type.</li></ul></li>
+ * <li>Nullness can not definitely be determined, because different code branches yield different results.</li>
+ * <li>Nullness can not be determined, because other program elements are involved for which
+ *     null annotations are lacking.</li>
+ * </ol>
  * </p>
  * @author stephan
  */

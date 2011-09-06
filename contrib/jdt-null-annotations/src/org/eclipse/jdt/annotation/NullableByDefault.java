@@ -24,19 +24,16 @@ import java.lang.annotation.*;
  * <p>
  * This annotation can be applied to a package or a type in order to define that
  * all contained entities for which a null annotation is otherwise lacking
- * should be considered as @{@link Nullable}.
+ * should be considered as {@link Nullable @Nullable}.
  * <dl>
  * <dt>Interaction with inheritance</dt>
- * <dd>This annotation has lower precedence than null contract inheritance,
- * i.e., for a method with no explicit null annotations first inheritance
- * from the super-method (overridden or implemented) are considered.
- * Only if that search yields no null annotation the default defined using
- * <code>@NullableByDefault</code> is applied.</dd>
+ * <dd>The rules regarding inheritance are applied <em>after</em> the applicable default
+ *     has been applied to all types lacking an annotation.</dd>
  * <dt>Nested defaults</dt>
  * <dd>If a <code>@NullableByDefault</code>
- * annotation is used within the scope of a <code>@NonNullByDefault</code>
- * annotation the inner most annotation defines the default applicable at 
- * any given position.</dd>
+ * annotation is used within the scope of a {@link NonNullByDefault @NonNullByDefault}
+ * annotation (or a project wide default setting) the inner most annotation defines the
+ * default applicable at any given position.</dd>
  * </dl>
  * Note that for applying an annotation to a package a file by the name
  * <code>package-info.java</code> is used.
