@@ -52,6 +52,8 @@ public team class DOMAdaptation {
 					initTranslation(TerminalTokens_OT201.class);
 				else if (otVersion.contains("2.1.0 M1"))
 					initTranslation(TerminalTokens_OT21M1.class);
+				else if (otVersion.contains("2.1.0 M2"))
+					initTranslation(TerminalTokens_OT21M1.class);
 			} catch (MissingResourceException mre) {
 				String version = bundle.getString("compiler.version");
 				if (version.contains("3.7.0"))
@@ -59,6 +61,8 @@ public team class DOMAdaptation {
 				else if (version.contains("3.7.1"))
 					initTranslation(TerminalTokens_B74R37x.class);
 				else if (version.contains("3.8.0 M1"))
+					initTranslation(TerminalTokens_R38M1.class);
+				else if (version.contains("3.8.0 M2"))
 					initTranslation(TerminalTokens_R38M1.class);
 			}
 		}

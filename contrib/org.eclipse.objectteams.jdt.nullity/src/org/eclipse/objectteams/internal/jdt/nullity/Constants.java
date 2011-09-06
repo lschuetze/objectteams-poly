@@ -40,10 +40,10 @@ public class Constants {
 	
 	/** Additional constants for {@link org.eclipse.jdt.internal.compiler.lookup.TypeIds}. */
 	static interface TypeIds {
-		final int T_ConfiguredAnnotationNullable = 63;
-		final int T_ConfiguredAnnotationNonNull = 64;
-		final int T_ConfiguredAnnotationNullableByDefault = 65;
-		final int T_ConfiguredAnnotationNonNullByDefault = 66;
+		final int T_ConfiguredAnnotationNullable = 80;
+		final int T_ConfiguredAnnotationNonNull = 81;
+		final int T_ConfiguredAnnotationNullableByDefault = 82;
+		final int T_ConfiguredAnnotationNonNullByDefault = 83;
 	}
 
 	/** Additional constants for {@link org.eclipse.jdt.core.compiler.IProblem}. */

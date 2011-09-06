@@ -1363,10 +1363,8 @@ public team class CompilerAdaptation {
 		@SuppressWarnings("decapsulation")
 		protected HashSet getOptionNames() 			 	-> get HashSet optionNames;
 		IEclipsePreferences getInstancePreferences() 	-> IEclipsePreferences getInstancePreferences();
-		void internalStorePreference(String key, String value, IEclipsePreferences pref)
-														-> boolean storePreference(String key, String value, IEclipsePreferences pref);
-		public void storePreference(String key, String value) {
-			internalStorePreference(key, value, getInstancePreferences());
+		public void storePreference(String key, char[][] value) {
+			getInstancePreferences().put(key, String.valueOf(CharOperation.concatWith(value, '.')));
 		}
 	}
 	@SuppressWarnings({"rawtypes","unchecked"})
@@ -1389,11 +1387,11 @@ public team class CompilerAdaptation {
 			optionNames.add(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation);
 			optionNames.add(NullCompilerOptions.OPTION_NullnessDefault);
 			// also add to the instance preferences:
-			javaModelManager.storePreference(NullCompilerOptions.OPTION_NullableAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NULLABLE_ANNOTATION_NAME, '.')));
-			javaModelManager.storePreference(NullCompilerOptions.OPTION_NullableAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NULLABLE_ANNOTATION_NAME, '.')));
-			javaModelManager.storePreference(NullCompilerOptions.OPTION_NonNullAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NONNULL_ANNOTATION_NAME, '.')));
-			javaModelManager.storePreference(NullCompilerOptions.OPTION_NullableByDefaultAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NULLABLEBYDEFAULT_ANNOTATION_NAME, '.')));
-			javaModelManager.storePreference(NullCompilerOptions.OPTION_NonNullByDefaultAnnotationName, String.valueOf(CharOperation.concatWith(NullCompilerOptions.DEFAULT_NONNULLBYDEFAULT_ANNOTATION_NAME, '.')));
+			javaModelManager.storePreference(NullCompilerOptions.OPTION_NullableAnnotationName, NullCompilerOptions.DEFAULT_NULLABLE_ANNOTATION_NAME);
+			javaModelManager.storePreference(NullCompilerOptions.OPTION_NullableAnnotationName, NullCompilerOptions.DEFAULT_NULLABLE_ANNOTATION_NAME);
+			javaModelManager.storePreference(NullCompilerOptions.OPTION_NonNullAnnotationName, NullCompilerOptions.DEFAULT_NONNULL_ANNOTATION_NAME);
+			javaModelManager.storePreference(NullCompilerOptions.OPTION_NullableByDefaultAnnotationName, NullCompilerOptions.DEFAULT_NULLABLEBYDEFAULT_ANNOTATION_NAME);
+			javaModelManager.storePreference(NullCompilerOptions.OPTION_NonNullByDefaultAnnotationName, NullCompilerOptions.DEFAULT_NONNULLBYDEFAULT_ANNOTATION_NAME);
 		}
 	}
 }
