@@ -28,7 +28,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
-import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IOTType;
@@ -98,7 +97,7 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     // ==== memento generation: ====
     @Override
     protected void getNameForHandle(StringBuffer buff) {
-   		JavaElement.escapeMementoName(buff, this.name);
+   		escapeMementoName(buff, this.name);
    		buff.append(OTJavaElement.OTEM_METHODMAPPING);
     }
     protected char getMappingKindChar() {

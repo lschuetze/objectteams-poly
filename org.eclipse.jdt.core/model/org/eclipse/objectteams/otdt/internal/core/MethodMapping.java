@@ -159,14 +159,14 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
     abstract protected void getBaseMethodsForHandle(StringBuffer buff);
 	
     protected void getMethodForHandle(IMethodSpec method, StringBuffer buff) {
-    	JavaElement.escapeMementoName(buff, method.getSelector());
+    	escapeMementoName(buff, method.getSelector());
     	if (this.hasSignature) {
     		for (String argType : method.getArgumentTypes()) {
     			buff.append(JavaElement.JEM_METHOD);
-    			JavaElement.escapeMementoName(buff, argType);
+    			escapeMementoName(buff, argType);
     		}
     		buff.append(JavaElement.JEM_METHOD);
-    		JavaElement.escapeMementoName(buff, method.getReturnType());
+    		escapeMementoName(buff, method.getReturnType());
     	}
     	buff.append(OTJavaElement.OTEM_METHODMAPPING);
     }

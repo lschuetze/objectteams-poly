@@ -250,9 +250,9 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     }
     @Override
     protected void getBaseMethodsForHandle(StringBuffer buff) {
-    	JavaElement.escapeMementoName(buff, this.baseFieldHandle.getSelector());
+    	escapeMementoName(buff, this.baseFieldHandle.getSelector());
     	buff.append(JavaElement.JEM_METHOD);
-    	JavaElement.escapeMementoName(buff, this.baseFieldHandle.getFieldType());
+    	escapeMementoName(buff, this.baseFieldHandle.getFieldType());
     }
     // ==== retreive from memento:
     public static IFieldAccessSpec createFieldData(MementoTokenizer memento, boolean isSetter) {
