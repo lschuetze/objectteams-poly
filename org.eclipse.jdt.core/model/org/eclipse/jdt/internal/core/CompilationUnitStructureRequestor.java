@@ -593,10 +593,10 @@ private SourceTypeElementInfo createTypeInfo(TypeInfo typeInfo, SourceType handl
 	}
 	return info;
 }
-//{ObjectTeams: relax type of parameter parentInfo,  because MethodData is not JavaElementInfo
-/* orig:
 protected void acceptTypeParameter(TypeParameterInfo typeParameterInfo, JavaElementInfo parentInfo) {
-  :giro */
+//{ObjectTeams: relax type of parameter parentInfo,  because MethodData is not JavaElementInfo
+	acceptTypeParameter(typeParameterInfo, (Object)parentInfo);
+}
 protected void acceptTypeParameter(TypeParameterInfo typeParameterInfo, Object parentInfo) {
 // SH}
 	JavaElement parentHandle = (JavaElement) this.handleStack.peek();
