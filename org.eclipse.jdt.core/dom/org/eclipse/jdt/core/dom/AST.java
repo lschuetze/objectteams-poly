@@ -1099,7 +1099,6 @@ public final class AST {
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
-	 * <li>a cycle in would be created</li>
 	 * </ul>
 	 */
 	public ArrayType newArrayType(Type componentType) {
@@ -1110,28 +1109,26 @@ public final class AST {
 
 	/**
 	 * Creates and returns a new unparented array type node with the given
-	 * element type and number of dimensions.
+	 * element type and number of (additional) dimensions.
 	 * <p>
 	 * Note that if the element type passed in is an array type, the
 	 * element type of the result will not be the same as what was passed in.
 	 * </p>
 	 *
-	 * @param elementType the element type (never an array type)
+	 * @param elementType the element type (can be an array type)
 	 * @param dimensions the number of dimensions, a positive number
 	 * @return a new unparented array type node
 	 * @exception IllegalArgumentException if:
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
-	 * <li>a cycle in would be created</li>
 	 * <li>the element type is null</li>
-	 * <li>the element type is an array type</li>
 	 * <li>the number of dimensions is lower than 1</li>
 	 * <li>the number of dimensions is greater than 1000</li>
 	 * </ul>
 	 */
 	public ArrayType newArrayType(Type elementType, int dimensions) {
-		if (elementType == null || elementType.isArrayType()) {
+		if (elementType == null) {
 			throw new IllegalArgumentException();
 		}
 		if (dimensions < 1 || dimensions > 1000) {
@@ -1481,7 +1478,6 @@ public final class AST {
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
-	 * <li>a cycle in would be created</li>
 	 * </ul>
 	 */
 	public ExpressionStatement newExpressionStatement(Expression expression) {
@@ -1521,7 +1517,6 @@ public final class AST {
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
-	 * <li>a cycle in would be created</li>
 	 * <li>the given fragment is null</li>
 	 * </ul>
 	 */
@@ -2487,7 +2482,6 @@ public final class AST {
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
-	 * <li>a cycle in would be created</li>
 	 * </ul>
 	 * @since 3.0
 	 */
@@ -2518,7 +2512,6 @@ public final class AST {
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
-	 * <li>a cycle in would be created</li>
 	 * </ul>
 	 */
 	public TypeDeclarationStatement
@@ -2571,9 +2564,7 @@ public final class AST {
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
-	 * <li>a cycle in would be created</li>
 	 * <li>the given fragment is null</li>
-	 * <li>a cycle in would be created</li>
 	 * </ul>
 	 */
 	public VariableDeclarationExpression
@@ -2618,7 +2609,6 @@ public final class AST {
 	 * <ul>
 	 * <li>the node belongs to a different AST</li>
 	 * <li>the node already has a parent</li>
-	 * <li>a cycle in would be created</li>
 	 * <li>the variable declaration fragment is null</li>
 	 * </ul>
 	 */

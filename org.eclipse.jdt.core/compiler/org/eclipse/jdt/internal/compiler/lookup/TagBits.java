@@ -133,12 +133,17 @@ public interface TagBits {
 	long AnnotationSafeVarargs = ASTNode.Bit52L;
 	/** @since 3.7 - java 7 MethodHandle.invokeExact(..)/invokeGeneric(..)*/
 	long AnnotationPolymorphicSignature = ASTNode.Bit53L;
+	/** @since 3.8 */
+	long AnnotationPreDestroy = ASTNode.Bit54L;
+	/** @since 3.8 */
+	long AnnotationPostConstruct = ASTNode.Bit55L;
 
 //{ObjectTeams: one more standard annotation:
 	long AnnotationInstantiation = ASTNode.Bit21;
 // SH}
 
-	long AllStandardAnnotationsMask = AnnotationTargetMASK
+	long AllStandardAnnotationsMask =
+				  AnnotationTargetMASK
 				| AnnotationRetentionMASK
 				| AnnotationDeprecated
 				| AnnotationDocumented
@@ -149,17 +154,18 @@ public interface TagBits {
 				| AnnotationInstantiation
 // SH}
 				| AnnotationSafeVarargs
-				| AnnotationPolymorphicSignature;
+				| AnnotationPolymorphicSignature
+				| AnnotationPostConstruct
+				| AnnotationPreDestroy;
 
-	long DefaultValueResolved = ASTNode.Bit54L;
+	long DefaultValueResolved = ASTNode.Bit56L;
 
 	// set when type contains non-private constructor(s)
-	long HasNonPrivateConstructor = ASTNode.Bit55L;
+	long HasNonPrivateConstructor = ASTNode.Bit57L;
 
 //{ObjectTeams:
 	// is parameterized type instantiated via tsuper-link?
-	long IsViewedAsTSuper = ASTNode.Bit57L;					// for role type bindings
-	long IsCopyOfParameterized = ASTNode.Bit57L;			// for method bindings
+	long IsViewedAsTSuper = ASTNode.Bit56L;					// for role type bindings
 	
     // is it a wrapped role type?
     long IsWrappedRole = ASTNode.Bit58L;					// for role type bindings
@@ -170,6 +176,7 @@ public interface TagBits {
     
     // is it a dependent type?
     long IsDependentType = ASTNode.Bit59L;					// for type bindings
+    long IsCopyOfParameterized = ASTNode.Bit59L;			// for method bindings
 
     // had the baseclass field/playedBy problems?
     long BaseclassHasProblems = ASTNode.Bit60L;				// for type bindings (role)

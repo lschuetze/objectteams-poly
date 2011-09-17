@@ -179,6 +179,12 @@ public abstract class Annotation extends Expression {
 				tagBits |= TagBits.AnnotationInstantiation;
 				break;
 // SH}
+			case TypeIds.T_JavaxAnnotationPostConstruct :
+				tagBits |= TagBits.AnnotationPostConstruct;
+				break;
+			case TypeIds.T_JavaxAnnotationPreDestroy :
+				tagBits |= TagBits.AnnotationPreDestroy;
+				break;
 		}
 		return tagBits;
 	}

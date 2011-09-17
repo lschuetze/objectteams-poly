@@ -1047,6 +1047,8 @@ public ReferenceBinding setFocusType(char[][] compoundName) {
 					char[][] memberTypeNames = CharOperation.splitOn('$', typeName, firstDollar+1, typeName.length);
 					for (int i = 0; i < memberTypeNames.length; i++) {
 						this.focusType = this.focusType.getMemberType(memberTypeNames[i]);
+						if (this.focusType == null)
+							return null;
 					}
 				}
 			}

@@ -589,13 +589,13 @@ public int getNextToken() throws InvalidInputException {
 									while (this.source[this.currentPosition] == 'u') {
 										this.currentPosition++;
 									}
-									if ((c1 = ScannerHelper.getNumericValue(this.source[this.currentPosition++])) > 15
+									if ((c1 = ScannerHelper.getHexadecimalValue(this.source[this.currentPosition++])) > 15
 										|| c1 < 0
-										|| (c2 = ScannerHelper.getNumericValue(this.source[this.currentPosition++])) > 15
+										|| (c2 = ScannerHelper.getHexadecimalValue(this.source[this.currentPosition++])) > 15
 										|| c2 < 0
-										|| (c3 = ScannerHelper.getNumericValue(this.source[this.currentPosition++])) > 15
+										|| (c3 = ScannerHelper.getHexadecimalValue(this.source[this.currentPosition++])) > 15
 										|| c3 < 0
-										|| (c4 = ScannerHelper.getNumericValue(this.source[this.currentPosition++])) > 15
+										|| (c4 = ScannerHelper.getHexadecimalValue(this.source[this.currentPosition++])) > 15
 										|| c4 < 0) {
 										throw new InvalidInputException(INVALID_UNICODE_ESCAPE);
 									} else {
@@ -622,13 +622,13 @@ public int getNextToken() throws InvalidInputException {
 										while (this.source[this.currentPosition] == 'u') {
 											this.currentPosition++;
 										}
-										if ((c1 = ScannerHelper.getNumericValue(this.source[this.currentPosition++])) > 15
+										if ((c1 = ScannerHelper.getHexadecimalValue(this.source[this.currentPosition++])) > 15
 											|| c1 < 0
-											|| (c2 = ScannerHelper.getNumericValue(this.source[this.currentPosition++])) > 15
+											|| (c2 = ScannerHelper.getHexadecimalValue(this.source[this.currentPosition++])) > 15
 											|| c2 < 0
-											|| (c3 = ScannerHelper.getNumericValue(this.source[this.currentPosition++])) > 15
+											|| (c3 = ScannerHelper.getHexadecimalValue(this.source[this.currentPosition++])) > 15
 											|| c3 < 0
-											|| (c4 = ScannerHelper.getNumericValue(this.source[this.currentPosition++])) > 15
+											|| (c4 = ScannerHelper.getHexadecimalValue(this.source[this.currentPosition++])) > 15
 											|| c4 < 0) {
 											throw new InvalidInputException(INVALID_UNICODE_ESCAPE);
 										} else {
@@ -660,13 +660,13 @@ public int getNextToken() throws InvalidInputException {
 										}
 										//-------------unicode traitement ------------
 										int c1 = 0, c2 = 0, c3 = 0, c4 = 0;
-										if ((c1 = ScannerHelper.getNumericValue(this.source[index++])) > 15
+										if ((c1 = ScannerHelper.getHexadecimalValue(this.source[index++])) > 15
 											|| c1 < 0
-											|| (c2 = ScannerHelper.getNumericValue(this.source[index++])) > 15
+											|| (c2 = ScannerHelper.getHexadecimalValue(this.source[index++])) > 15
 											|| c2 < 0
-											|| (c3 = ScannerHelper.getNumericValue(this.source[index++])) > 15
+											|| (c3 = ScannerHelper.getHexadecimalValue(this.source[index++])) > 15
 											|| c3 < 0
-											|| (c4 = ScannerHelper.getNumericValue(this.source[index++])) > 15
+											|| (c4 = ScannerHelper.getHexadecimalValue(this.source[index++])) > 15
 											|| c4 < 0) {
 											this.currentPosition = index;
 											throw new InvalidInputException(INVALID_UNICODE_ESCAPE);
