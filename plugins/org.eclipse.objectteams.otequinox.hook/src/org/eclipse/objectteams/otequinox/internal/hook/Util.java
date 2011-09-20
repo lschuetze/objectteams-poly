@@ -91,7 +91,8 @@ public class Util
 												"org.apache.commons.httpclient",
 												// for Eclipse 4.x:
 												"org.eclipse.swt",
-												"org.eclipse.e4.ui.css.swt.theme"
+												"org.eclipse.e4.ui.css.swt.theme",
+												"org.eclipse.core.contenttype"
 				})
 				PLATFORM_BUNDLES.add(bundle);
 		}
