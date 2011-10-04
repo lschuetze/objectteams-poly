@@ -18,13 +18,15 @@ package org.eclipse.objectteams.otdt.ui.tests.core;
 
 import java.util.ArrayList;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.NewCUUsingWizardProposal;
-
-import junit.framework.Test;
-import junit.framework.TestSuite;
 
 /**
  * Testing whether standard Java quickfixes work in OT/J code, too.
@@ -39,7 +41,6 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		super(name);
 	}
 
-	@SuppressWarnings("unchecked")
 	public static Test allTests() {
 		return setUpTest(new TestSuite(THIS));
 	}
@@ -148,4 +149,127 @@ public class JavaQuickFixTests extends OTQuickFixTest {
 		fail("Expected proposal not found");
 	}
 	
+	// Bug 348574 - [quickfix] implement abstract methods from tsuper
+	public void testAddAbstractMethods1() throws CoreException {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T2 extends T1 {\n");
+		buf.append("  protected class R {\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1=pack1.createCompilationUnit("T2.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("  abstract protected class R {\n");
+		buf.append("      abstract void foo() {}\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList proposals1= collectCorrections(cu1, astRoot, 2, 0);
+		assertNumberOfProposals(proposals1, 0);
+		ArrayList proposals2= collectCorrections(cu1, astRoot, 2, 1);
+		assertNumberOfProposals(proposals2, 2);
+		assertCorrectLabels(proposals1);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals2.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T2 extends T1 {\n");
+		buf.append("  protected class R {\n");
+		buf.append("\n");
+		buf.append("    /* (non-Javadoc)\n"); 
+		buf.append("     * @see test1.T1.R#foo()\n"); 
+		buf.append("     */\n");
+		buf.append("    @Override\n");
+		buf.append("    void foo() {\n");
+		buf.append("        // TODO Auto-generated method stub\n"); 
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();	
+
+
+		proposal= (CUCorrectionProposal) proposals2.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T2 extends T1 {\n");
+		buf.append("  protected abstract class R {\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();		
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
+
+	// Bug 348574 - [quickfix] implement abstract methods from tsuper
+	// abstract static method
+	public void testAddAbstractMethods2() throws CoreException {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T2 extends T1 {\n");
+		buf.append("  protected class R {\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1=pack1.createCompilationUnit("T2.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T1 {\n");
+		buf.append("  abstract protected class R {\n");
+		buf.append("      abstract static void foo() {}\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("T1.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList proposals1= collectCorrections(cu1, astRoot, 2, 0);
+		assertNumberOfProposals(proposals1, 0);
+		ArrayList proposals2= collectCorrections(cu1, astRoot, 2, 1);
+		assertNumberOfProposals(proposals2, 2);
+		assertCorrectLabels(proposals1);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals2.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T2 extends T1 {\n");
+		buf.append("  protected class R {\n");
+		buf.append("\n");
+		buf.append("    /* (non-Javadoc)\n"); 
+		buf.append("     * @see test1.T1.R#foo()\n"); 
+		buf.append("     */\n");
+		buf.append("    static void foo() {\n");
+		buf.append("        // TODO Auto-generated method stub\n"); 
+		buf.append("        \n");
+		buf.append("    }\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();	
+
+
+		proposal= (CUCorrectionProposal) proposals2.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public team class T2 extends T1 {\n");
+		buf.append("  protected abstract class R {\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();		
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });		
+	}
 }
