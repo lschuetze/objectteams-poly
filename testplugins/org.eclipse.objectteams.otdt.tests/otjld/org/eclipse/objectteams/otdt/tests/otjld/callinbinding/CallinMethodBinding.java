@@ -7825,6 +7825,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		"	public class Role724cbam2 playedBy T724cbam2 {\n" + 
     		"	             ^^^^^^^^^^^^\n" + 
     		"The abstract method test in type Role724cbam2 can only be defined by an abstract class\n" + 
+    		"----------\n" +
+    		"2. ERROR in Team724cbam2_2.java (at line 4)\n" +
+    		"	public class Role724cbam2 playedBy T724cbam2 {\n" +
+    		"	             ^^^^^^^^^^^^\n" +
+    		"The type Team724cbam2_2.Role724cbam2 must implement the inherited abstract method Team724cbam2_2.Role724cbam2.test()\n" + 
     		"----------\n");
     }
 
@@ -7868,6 +7873,11 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     		"	public class Role725cbam1_2 extends Role725cbam1_1 playedBy T725cbam1 {\n" + 
     		"	             ^^^^^^^^^^^^^^\n" + 
     		"The abstract method test in type Role725cbam1_2 can only be defined by an abstract class\n" + 
+    		"----------\n" +
+    		"2. ERROR in Team725cbam1_2.java (at line 10)\n" + 
+    		"	public class Role725cbam1_2 extends Role725cbam1_1 playedBy T725cbam1 {\n" + 
+    		"	             ^^^^^^^^^^^^^^\n" + 
+    		"The type Team725cbam1_2.Role725cbam1_2 must implement the inherited abstract method Team725cbam1_2.Role725cbam1_2.test()\n" + 
     		"----------\n");
     }
 

@@ -536,6 +536,11 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
 			"	public class Role311acb8a playedBy T311acb8a_1 {\n" + 
 			"	             ^^^^^^^^^^^^\n" + 
 			"The abstract method getValueInternal in type Role311acb8a can only be defined by an abstract class\n" + 
+			"----------\n" +
+			"2. ERROR in Team311acb8a_2.java (at line 4)\n" + 
+			"	public class Role311acb8a playedBy T311acb8a_1 {\n" + 
+			"	             ^^^^^^^^^^^^\n" + 
+			"The type Team311acb8a_2.Role311acb8a must implement the inherited abstract method Team311acb8a_2.Role311acb8a.getValueInternal()\n" + 
 			"----------\n");
      }
 
