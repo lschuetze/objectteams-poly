@@ -409,6 +409,11 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     		"	public class Role {\n" + 
     		"	             ^^^^\n" + 
     		"The abstract method getVal in type Role can only be defined by an abstract class\n" + 
+    		"----------\n" +
+    		"2. ERROR in Team0c4cam3_2.java (at line 4)\n" + 
+    		"	public class Role {\n" + 
+    		"	             ^^^^\n" + 
+    		"The type Team0c4cam3_2.Role must implement the inherited abstract method Team0c4cam3_2.Role.getVal()\n" + 
     		"----------\n");
     }
 

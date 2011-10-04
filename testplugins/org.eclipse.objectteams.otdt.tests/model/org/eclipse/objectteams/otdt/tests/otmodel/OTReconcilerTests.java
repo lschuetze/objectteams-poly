@@ -1496,5 +1496,70 @@ public class OTReconcilerTests extends ReconcilerTests {
     		deleteProject("P");
     	}
     }
+    
+    public void testBug348574a() throws CoreException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+
+			String superTeamSourceString =	
+				"public team class SuperTeam {\n" +
+				"     protected abstract class R0 {\n" +
+				"         abstract void foo();" +
+				"         abstract static void fooStatic();" +
+				"     }\n" + 
+				"}\n";
+			this.createFile(
+				"/P/SuperTeam.java",
+    			superTeamSourceString);
+			
+			String subTeamSourceString =	
+				"public team class SubTeam extends SuperTeam {\n" +
+				"     protected class R0 {}\n" +
+				"}\n";
+			this.createFile(
+				"/P/SubTeam.java",
+    			subTeamSourceString);
+			
+
+			char[] subTeamSourceChars = subTeamSourceString.toCharArray();
+			this.problemRequestor.initialize(subTeamSourceChars);
+			
+			getCompilationUnit("/P/SubTeam.java").getWorkingCopy(this.wcOwner, null);
+			
+			assertProblems(
+				"Unexpected problems",
+				"----------\n" + 
+				"1. ERROR in /P/SubTeam.java (at line 2)\n" + 
+				"	protected class R0 {}\n" + 
+				"	                ^^\n" + 
+				"The abstract method foo in type R0 can only be defined by an abstract class\n" + 
+				"----------\n" + 
+				"2. ERROR in /P/SubTeam.java (at line 2)\n" + 
+				"	protected class R0 {}\n" + 
+				"	                ^^\n" + 
+				"The type SubTeam.R0 must implement the inherited abstract method SubTeam.R0.foo()\n" + 
+				"----------\n" + 
+				"3. ERROR in /P/SubTeam.java (at line 2)\n" + 
+				"	protected class R0 {}\n" + 
+				"	                ^^\n" + 
+				"The abstract method fooStatic in type R0 can only be defined by an abstract class\n" + 
+				"----------\n" + 
+				"4. ERROR in /P/SubTeam.java (at line 2)\n" + 
+				"	protected class R0 {}\n" + 
+				"	                ^^\n" + 
+				"The type SubTeam.R0 must implement the inherited abstract method SubTeam.R0.fooStatic()\n" + 
+				"----------\n");
+    	} finally {
+    		deleteProject("P");
+    	}    	
+    }
 
 }
