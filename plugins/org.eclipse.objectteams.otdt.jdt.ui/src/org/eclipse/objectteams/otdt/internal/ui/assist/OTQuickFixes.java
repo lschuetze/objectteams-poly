@@ -581,7 +581,17 @@ public team class OTQuickFixes  {
 				return Modifier.PUBLIC;
 			}
 			return vis;
-		}	
+		}
+		protectedRun <- replace addAbstractMethodProposals;
+
+		@SuppressWarnings("basecall")
+		static callin void protectedRun() {
+			try {
+				base.protectedRun();
+			} catch (ClassCastException cce) {
+				// this one is excepted, base method may try to located abstract method but finds RoleTypeDeclaration
+			}
+		}
 	}
 	
 	/** Interpret some flags with knowledge of OT/J: */
