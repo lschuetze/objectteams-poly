@@ -417,6 +417,33 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     		"----------\n");
     }
 
+    // Bug 359894 - [compiler] support @Override for static role methods
+    public void test0c4_copyAbstractMethod4() {
+       
+       runConformTest(
+            new String[] {
+		"Team0c4cam4_1.java",
+			    "\n" +
+			    "public team class Team0c4cam4_1 {\n" +
+			    "	public abstract class Role {\n" +
+			    "		abstract static String getVal();\n" +
+			    "	}\n" +
+			    "}\n" +
+			    "	\n",
+		"Team0c4cam4_2.java",
+			    "\n" +
+			    "public team class Team0c4cam4_2 extends Team0c4cam4_1 {\n" +
+			    "   @Override\n" +
+			    "	public class Role {\n" +
+			    "       @Override\n" +
+			    "       static String getVal() { return null; }\n" +
+			    "	}\n" +
+			    "}\n" +
+			    "	\n"
+            },
+            "");
+    }
+
     // a role implicitely inherits a constructor  - changed between compiles - buggy tsuper-tsuper
     // 0.c.5-otjld-changes-between-compiles-1
     public void test0c5_changesBetweenCompiles1() {
