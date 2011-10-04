@@ -280,6 +280,10 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 				if (complianceLevel >= ClassFileConstants.JDK1_6
 						&& ((bindingModifiers & (ClassFileConstants.AccStatic|ExtraCompilerModifiers.AccImplementing)) == ExtraCompilerModifiers.AccImplementing))
 					break checkOverride;
+//{ObjectTeams: static method overriding implicitly inherited? (excluded during above check)
+				if (this.binding.overriddenTSupers != null)
+					break checkOverride;
+// SH}
 				// claims to override, and doesn't actually do so
 				this.scope.problemReporter().methodMustOverride(this, complianceLevel);
 			} else {
