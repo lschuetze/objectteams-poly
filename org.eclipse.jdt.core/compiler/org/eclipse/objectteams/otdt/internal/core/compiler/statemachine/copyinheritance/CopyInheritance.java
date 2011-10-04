@@ -52,6 +52,7 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKi
 import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
+import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
@@ -73,6 +74,7 @@ import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
+import org.eclipse.jdt.internal.compiler.problem.IProblemRechecker;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
@@ -1005,7 +1007,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    }
 	    AstGenerator gen = new AstGenerator(targetRoleDecl.sourceStart, targetRoleDecl.sourceEnd);
 	    gen.replaceableEnclosingClass = tgtTeam;
-	    AbstractMethodDeclaration newMethodDecl =
+	    final AbstractMethodDeclaration newMethodDecl =
 	    		AstConverter.createMethod(method, site, targetRoleDecl.compilationResult, DecapsulationState.REPORTED, gen);
 
 	    if (methodFound != null)
@@ -1064,6 +1066,16 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			    {
 			    	MethodModel.getModel(newMethodDecl).storeModifiers(newMethodDecl.modifiers);
 			    }
+	    	}
+	    	// more checking: abstract method in non-abstract class?
+	    	if (newMethodDecl.isAbstract() && (targetRoleDecl.modifiers & ClassFileConstants.AccAbstract) == 0) {
+	    		targetRoleDecl.scope.problemReporter()
+	    			.setRechecker(new IProblemRechecker() {	public boolean shouldBeReported(IrritantSet[] foundIrritants) {
+						if (newMethodDecl.isAbstract()) // implemented by callout?
+							return true;
+						return false; // false alarm
+					}})
+					.abstractMethodMustBeImplemented(targetRoleDecl.binding, newMethodDecl.binding);
 	    	}
 	    }
 	}
