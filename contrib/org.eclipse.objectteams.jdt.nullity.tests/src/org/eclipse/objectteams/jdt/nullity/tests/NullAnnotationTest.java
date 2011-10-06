@@ -54,7 +54,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_parameter_specification_inheritance_011" };
+//		TESTS_NAMES = new String[] { "test_nonnull_var_in_constrol_structure" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -1562,6 +1562,144 @@ public void test_default_nullness_007() {
 		"	return dangerous();\n" + 
 		"	       ^^^^^^^^^^^\n" + 
 		"Type mismatch: required \'@NonNull Object\' but the provided value can be null\n" + 
+		"----------\n");
+}
+// a nonnull variable is dereferenced in a loop
+public void test_nonnull_var_in_constrol_structure_1() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    void print4(@NonNull String s) {\n" +
+			"        for (int i=0; i<4; i++)\n" +
+			"             print(s);\n" + 
+			"    }\n" +
+			"    void print5(@Nullable String s) {\n" +
+			"        for (int i=0; i<5; i++)\n" +
+			"             print(s);\n" + 
+			"    }\n" +
+			"    void print6(boolean b) {\n" +
+			"        String s = b ? null : \"\";\n" +
+			"        for (int i=0; i<5; i++)\n" +
+			"             print(s);\n" + 
+			"    }\n" +
+			"    void print(@NonNull String s) {\n" +
+			"        System.out.print(s);\n" +
+			"    }\n" +
+			"}\n",
+
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 9)\n" + 
+		"	print(s);\n" + 
+		"	      ^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 14)\n" + 
+		"	print(s);\n" + 
+		"	      ^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n");
+}
+// a nonnull variable is dereferenced in a finally block
+public void test_nonnull_var_in_constrol_structure_2() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    void print4(@NonNull String s) {\n" +
+			"        try { /*empty*/ } finally {\n" +
+			"             print(s);\n" +
+			"        }\n" + 
+			"    }\n" +
+			"    void print5(@Nullable String s) {\n" +
+			"        try { /*empty*/ } finally {\n" +
+			"             print(s);\n" +
+			"        }\n" + 
+			"    }\n" +
+			"    void print6(boolean b) {\n" +
+			"        String s = b ? null : \"\";\n" +
+			"        try { /*empty*/ } finally {\n" +
+			"             print(s);\n" +
+			"        }\n" + 
+			"    }\n" +
+			"    void print(@NonNull String s) {\n" +
+			"        System.out.print(s);\n" +
+			"    }\n" +
+			"}\n",
+
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 10)\n" + 
+		"	print(s);\n" + 
+		"	      ^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 16)\n" + 
+		"	print(s);\n" + 
+		"	      ^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n");
+}
+// a nonnull variable is dereferenced in a finally block inside a loop
+public void test_nonnull_var_in_constrol_structure_3() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    void print4(@NonNull String s) {\n" +
+			"        for (int i=0; i<4; i++)\n" +
+			"            try { /*empty*/ } finally {\n" +
+			"                 print(s);\n" +
+			"            }\n" + 
+			"    }\n" +
+			"    void print5(@Nullable String s) {\n" +
+			"        for (int i=0; i<5; i++)\n" +
+			"            try { /*empty*/ } finally {\n" +
+			"                 print(s);\n" +
+			"            }\n" + 
+			"    }\n" +
+			"    void print6(boolean b) {\n" +
+			"        String s = b ? null : \"\";\n" +
+			"        for (int i=0; i<4; i++)\n" +
+			"            try { /*empty*/ } finally {\n" +
+			"                 print(s);\n" +
+			"            }\n" + 
+			"    }\n" +
+			"    void print(@NonNull String s) {\n" +
+			"        System.out.print(s);\n" +
+			"    }\n" +
+			"}\n",
+
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 12)\n" + 
+		"	print(s);\n" + 
+		"	      ^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 19)\n" + 
+		"	print(s);\n" + 
+		"	      ^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
 		"----------\n");
 }
 }
