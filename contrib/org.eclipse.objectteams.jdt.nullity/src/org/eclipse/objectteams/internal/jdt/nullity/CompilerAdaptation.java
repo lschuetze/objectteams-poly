@@ -71,6 +71,7 @@ import base org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.Assignment;
 import base org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.EqualExpression;
+import base org.eclipse.jdt.internal.compiler.ast.ExplicitConstructorCall;
 import base org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import base org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
@@ -150,26 +151,11 @@ public team class CompilerAdaptation {
 		Expression getExpression() -> get Expression initialization;
 	}
 	
-	/** Analyse argument expressions as part of a MessageSend, check against method parameter annotation. */
-	@Instantiation(InstantiationPolicy.ALWAYS)
-	protected class MessageSend playedBy MessageSend {
-
-		Expression[] getArguments() -> get Expression[] arguments;
-		MethodBinding getBinding() -> get MethodBinding binding;
-
-		nullStatus <- replace nullStatus;
-
-		@SuppressWarnings("basecall")
-		callin int nullStatus(FlowInfo flowInfo) {
-			int status = getNullStatus();
-			if (status != FlowInfo.UNKNOWN)
-				return status;
-			return base.nullStatus(flowInfo);
-		}
+	protected abstract class MessageSendish {
 		
-		void analyseArguments(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) 
-		<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
-
+		protected abstract Expression[] getArguments();
+		protected abstract MethodBinding getBinding();
+		
 		void analyseArguments(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 			// compare actual null-status against parameter annotations of the called method:
 			MethodBinding methodBinding = getBinding();
@@ -187,7 +173,7 @@ public team class CompilerAdaptation {
 							char[][] annotationName = currentScope.environment().getNonNullAnnotationName();
 							LocalVariableBinding local = arguments[i].localVariableBinding();
 							if (local != null) {
-								do {
+								 while (flowContext != null) {
 									// some flow contexts implement deferred checking, should we participate in that?
 									if (flowContext instanceof org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext) {
 										// cf. decision structure inside FinallyFlowContext.recordUsingNullReference(..)
@@ -207,7 +193,7 @@ public team class CompilerAdaptation {
 										continue argumentLoop;
 									}
 									flowContext = flowContext.parent;
-								} while (flowContext != null);
+								}
 							}							
 							// other cases report immediately
 							currentScope.problemReporter().nullityMismatch(arguments[i], methodBinding.getParameters()[i], nullStatus, annotationName);
@@ -216,6 +202,27 @@ public team class CompilerAdaptation {
 				}
 			}
 		}
+	}
+	
+	/** Analyse argument expressions as part of a MessageSend, check against method parameter annotation. */
+	@Instantiation(InstantiationPolicy.ALWAYS)
+	protected class MessageSend extends MessageSendish playedBy MessageSend {
+
+		Expression[] getArguments() -> get Expression[] arguments;
+		MethodBinding getBinding() -> get MethodBinding binding;
+
+		nullStatus <- replace nullStatus;
+
+		@SuppressWarnings("basecall")
+		callin int nullStatus(FlowInfo flowInfo) {
+			int status = getNullStatus();
+			if (status != FlowInfo.UNKNOWN)
+				return status;
+			return base.nullStatus(flowInfo);
+		}
+		
+		void analyseArguments(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) 
+		<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
 
 		checkNPE <- after checkNPE;
 		/** Detect and signal directly dereferencing a nullable message send result. */
@@ -236,6 +243,16 @@ public team class CompilerAdaptation {
 			}
 			return FlowInfo.UNKNOWN;
 		}
+	}
+	protected class ExplicitConstructorCall extends MessageSendish playedBy ExplicitConstructorCall {
+
+		Expression[] getArguments() -> get Expression[] arguments;
+		MethodBinding getBinding() -> get MethodBinding binding;
+		
+		
+		void analyseArguments(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) 
+		<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
+
 	}
 	
 	@Instantiation(InstantiationPolicy.ALWAYS)
@@ -563,7 +580,9 @@ public team class CompilerAdaptation {
 				if (added)
 					addTagBit(TagBits.HasParameterAnnotations);
 			}
-			if (   !getReturnType().isBaseType()
+			TypeBinding returnType = getReturnType();
+			if (   returnType != null
+				&& !returnType.isBaseType()
 				&& (getTagBits() & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) == 0)
 			{
 				addTagBit(defaultNullness);
@@ -943,6 +962,11 @@ public team class CompilerAdaptation {
 				packageBinding.nullableByDefaultName = simpleTypeName;
 			else if (typeId == TypeIds.T_ConfiguredAnnotationNonNullByDefault)
 				packageBinding.nonNullByDefaultName = simpleTypeName;
+		}
+		
+		reset <- after reset;
+		void reset() {
+			this.packageInitialized = false;
 		}
 
 		CompilerOptions getGlobalOptions() -> get CompilerOptions globalOptions;
