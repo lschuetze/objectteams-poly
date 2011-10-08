@@ -30,8 +30,8 @@ import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
 import org.eclipse.jdt.internal.compiler.ast.MemberValuePair;
-import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.SubRoutineStatement;
 import org.eclipse.jdt.internal.compiler.ast.SynchronizedStatement;
 import org.eclipse.jdt.internal.compiler.ast.TryStatement;
@@ -69,9 +69,11 @@ import static org.eclipse.objectteams.internal.jdt.nullity.Constants.TypeIds;
 
 import base org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.Assignment;
+import base org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.EqualExpression;
 import base org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.MessageSend;
+import base org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import base org.eclipse.jdt.internal.compiler.ast.Statement;
 import base org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext;
@@ -174,6 +176,7 @@ public team class CompilerAdaptation {
 			Expression[] arguments = getArguments();
 			if (arguments != null && methodBinding.parameterNonNullness != null) {
 				int length = arguments.length;
+				argumentLoop:
 				for (int i = 0; i < length; i++) {
 					int nullStatus = arguments[i].nullStatus(flowInfo); // slight loss of precision: should also use the null info from the receiver.
 					if (   nullStatus != FlowInfo.NON_NULL 
@@ -184,24 +187,27 @@ public team class CompilerAdaptation {
 							char[][] annotationName = currentScope.environment().getNonNullAnnotationName();
 							LocalVariableBinding local = arguments[i].localVariableBinding();
 							if (local != null) {
-								// some flow contexts implement deferred checking, should we participate in that?
-								if (flowContext instanceof org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext) {
-									// cf. decision structure inside FinallyFlowContext.recordUsingNullReference(..)
-									if (nullStatus == FlowInfo.UNKNOWN ||
-											((flowContext.tagBits & FlowContext.DEFER_NULL_DIAGNOSTIC) != 0 && nullStatus != FlowInfo.NULL)) 
-									{
-										// deferred reporting
-										recordNullReference((org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext)flowContext,
-													arguments[i], methodBinding.getParameters()[i], ConditionalFlowContext.ASSIGN_TO_NONNULL);										
-										continue;
+								do {
+									// some flow contexts implement deferred checking, should we participate in that?
+									if (flowContext instanceof org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext) {
+										// cf. decision structure inside FinallyFlowContext.recordUsingNullReference(..)
+										if (nullStatus == FlowInfo.UNKNOWN ||
+												((flowContext.tagBits & FlowContext.DEFER_NULL_DIAGNOSTIC) != 0 && nullStatus != FlowInfo.NULL)) 
+										{
+											// deferred reporting
+											recordNullReference((org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext)flowContext,
+														arguments[i], methodBinding.getParameters()[i], ConditionalFlowContext.ASSIGN_TO_NONNULL);										
+											continue argumentLoop;
+										}
 									}
-								}
-								else if (flowContext instanceof org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext) {
-									// deferred reporting
-									recordNullReference((org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext)flowContext,
-												arguments[i], methodBinding.getParameters()[i], ConditionalFlowContext.ASSIGN_TO_NONNULL);
-									continue;
-								}
+									else if (flowContext instanceof org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext) {
+										// deferred reporting
+										recordNullReference((org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext)flowContext,
+													arguments[i], methodBinding.getParameters()[i], ConditionalFlowContext.ASSIGN_TO_NONNULL);
+										continue argumentLoop;
+									}
+									flowContext = flowContext.parent;
+								} while (flowContext != null);
 							}							
 							// other cases report immediately
 							currentScope.problemReporter().nullityMismatch(arguments[i], methodBinding.getParameters()[i], nullStatus, annotationName);
@@ -447,12 +453,7 @@ public team class CompilerAdaptation {
 			}
 		}
 
-		/** Feed null status from parameter annotation into the analysis of the method's body. */
-		void analyseArgumentNullity(FlowInfo info)
-		<- before void analyseCode(ClassScope classScope, InitializationFlowContext initializationContext, FlowInfo info)
-			with { info <- info }
-
-		private void analyseArgumentNullity(FlowInfo info) {
+		void analyseArgumentNullity(FlowInfo info) {
 			MethodBinding binding = getBinding();
 			Argument[] arguments = this.getArguments();
 			if (arguments != null && binding.parameterNonNullness != null) {
@@ -504,6 +505,21 @@ public team class CompilerAdaptation {
 			}
 			return annotations;
 		}
+	}
+	protected class MethodDeclaration extends AbstractMethodDeclaration playedBy MethodDeclaration {
+
+		TypeReference getReturnType() -> get TypeReference returnType; 
+		/** Feed null status from parameter annotation into the analysis of the method's body. */
+		void analyseArgumentNullity(FlowInfo info)
+		<- before void analyseCode(ClassScope classScope, FlowContext initializationContext, FlowInfo info)
+			with { info <- info }
+
+	}
+	protected class ConstructorDeclaration extends AbstractMethodDeclaration playedBy ConstructorDeclaration {
+		/** Feed null status from parameter annotation into the analysis of the method's body. */
+		void analyseArgumentNullity(FlowInfo info)
+		<- before void analyseCode(ClassScope classScope, InitializationFlowContext initializationContext, FlowInfo info, int reachMode)
+			with { info <- info }
 	}
 
 	/** Add a field to store parameter nullness information. */
@@ -1271,7 +1287,7 @@ public team class CompilerAdaptation {
 				argument.type.sourceStart,
 				argument.type.sourceEnd);
 		}
-		public void illegalReturnRedefinition(org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration abstractMethodDecl,
+		public void illegalReturnRedefinition(AbstractMethodDeclaration abstractMethodDecl,
 											  MethodBinding inheritedMethod, char[][] nonNullAnnotationName) 
 		{
 			MethodDeclaration methodDecl = (MethodDeclaration) abstractMethodDecl;
@@ -1286,11 +1302,12 @@ public team class CompilerAdaptation {
 				.append(inheritedMethod.getDeclaringClass().shortReadableName())
 				.append('.')
 				.append(inheritedMethod.shortReadableName());
-			int sourceStart = methodDecl.returnType.sourceStart;
-			if (methodDecl.annotations != null) {
-				for (int i=0; i<methodDecl.annotations.length; i++) {
-					if (methodDecl.annotations[i].resolvedType.id == TypeIds.T_ConfiguredAnnotationNullable) {
-						sourceStart = methodDecl.annotations[i].sourceStart;
+			int sourceStart = methodDecl.getReturnType().sourceStart;
+			Annotation[] annotations = methodDecl.getAnnotations();
+			if (annotations != null) {
+				for (int i=0; i<annotations.length; i++) {
+					if (annotations[i].resolvedType.id == TypeIds.T_ConfiguredAnnotationNullable) {
+						sourceStart = annotations[i].sourceStart;
 						break;
 					}
 				}
@@ -1300,7 +1317,7 @@ public team class CompilerAdaptation {
 				new String[] { methodSignature.toString(), CharOperation.toString(nonNullAnnotationName)},
 				new String[] { shortSignature.toString(), new String(nonNullAnnotationName[nonNullAnnotationName.length-1])},
 				sourceStart, 
-				methodDecl.returnType.sourceEnd);
+				methodDecl.getReturnType().sourceEnd);
 		}
 		public void messageSendPotentialNullReference(MethodBinding method, ASTNode location) {
 			String[] arguments = new String[] {new String(method.readableName())};
