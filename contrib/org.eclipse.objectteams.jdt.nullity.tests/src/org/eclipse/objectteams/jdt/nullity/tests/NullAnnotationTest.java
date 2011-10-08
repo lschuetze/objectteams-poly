@@ -54,7 +54,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_nonnull_var_in_constrol_structure" };
+//		TESTS_NAMES = new String[] { "test_nesting_1" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -1699,6 +1699,62 @@ public void test_nonnull_var_in_constrol_structure_3() {
 		"2. ERROR in X.java (at line 19)\n" + 
 		"	print(s);\n" + 
 		"	      ^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n");
+}
+//a nonnull variable is dereferenced method of a nested type
+public void test_nesting_1() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class X {\n" +
+			"    void print4(final String s1) {\n" +
+			"        for (int i=0; i<3; i++)\n" +
+			"            new Runnable() {\n" +
+			"                public void run() {\n" +
+			"                     print(s1);\n" +
+			"                }\n" +
+			"            }.run();\n" + 
+			"    }\n" +
+			"    void print8(final @Nullable String s2) {\n" +
+			"        for (int i=0; i<3; i++)\n" +
+			"            new Runnable() {\n" +
+			"                public void run() {\n" +
+			"                     print(s2);\n" +
+			"                }\n" +
+			"            }.run();\n" + 
+			"    }\n" +
+			"    void print16(boolean b) {\n" +
+			"        final String s3 = b ? null : \"\";\n" +
+			"        for (int i=0; i<3; i++)\n" +
+			"            new Runnable() {\n" +
+			"                public void run() {\n" +
+			"                     print(s3);\n" +
+			"                }\n" +
+			"            }.run();\n" + 
+			"    }\n" +
+			"    void print(String s) {\n" +
+			"        System.out.print(s);\n" +
+			"    }\n" +
+			"}\n",
+
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 16)\n" + 
+		"	print(s2);\n" + 
+		"	      ^^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 25)\n" + 
+		"	print(s3);\n" + 
+		"	      ^^\n" + 
 		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
 		"----------\n");
 }
