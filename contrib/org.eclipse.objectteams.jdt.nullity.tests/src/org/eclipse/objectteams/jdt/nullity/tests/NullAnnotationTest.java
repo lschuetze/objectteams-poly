@@ -54,7 +54,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_nesting_1" };
+//		TESTS_NAMES = new String[] { "test_nonnull_parameter_007" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -338,7 +338,34 @@ public void test_nonnull_parameter_006() {
 		customOptions,
 		""  /* compiler output */);
 }
-
+// nullable value passed to a non-null parameter in a super-call
+public void test_nonnull_parameter_007() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runNegativeTestWithLibs(
+		new String[] {
+			"XSub.java",
+			  "import org.eclipse.jdt.annotation.*;\n" +
+			  "public class XSub extends XSuper {\n" +
+			  "    	XSub(@Nullable String b) {\n" + 
+			  "			super(b);\n" + 
+			  "		}\n" +
+			  "}\n",
+			"XSuper.java",
+			  "import org.eclipse.jdt.annotation.*;\n" +
+			  "public class XSuper {\n" +
+			  "    	XSuper(@NonNull String b) {\n" + 
+			  "		}\n" +
+			  "}\n"
+		},		
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in XSub.java (at line 4)\n" + 
+		"	super(b);\n" + 
+		"	      ^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n");
+}
 // assigning potential null to a nonnull local variable
 public void test_nonnull_local_001() {
 	runNegativeTest(
@@ -1735,7 +1762,7 @@ public void test_nesting_1() {
 			"        for (int i=0; i<3; i++)\n" +
 			"            new Runnable() {\n" +
 			"                public void run() {\n" +
-			"                     print(s3);\n" +
+			"                     @NonNull String s3R = s3;\n" +
 			"                }\n" +
 			"            }.run();\n" + 
 			"    }\n" +
@@ -1753,8 +1780,8 @@ public void test_nesting_1() {
 		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
 		"----------\n" + 
 		"2. ERROR in X.java (at line 25)\n" + 
-		"	print(s3);\n" + 
-		"	      ^^\n" + 
+		"	@NonNull String s3R = s3;\n" + 
+		"	                      ^^\n" + 
 		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
 		"----------\n");
 }
