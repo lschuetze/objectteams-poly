@@ -366,6 +366,52 @@ public void test_nonnull_parameter_007() {
 		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
 		"----------\n");
 }
+// a nullable value is passed to a non-null parameter in an allocation expression
+public void test_nonnull_parameter_008() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			  "import org.eclipse.jdt.annotation.*;\n" +
+			  "public class X {\n" +
+			  "    	X(@NonNull String a) {}\n" + 
+			  "		static X create(@Nullable String b) {\n" + 
+			  "			return new X(b);\n" + 
+			  "		}\n" +
+			  "}\n"},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 5)\n" + 
+		"	return new X(b);\n" + 
+		"	             ^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n"  /* compiler output */);
+}
+// a nullable value is passed to a non-null parameter in a qualified allocation expression
+public void test_nonnull_parameter_009() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			  "import org.eclipse.jdt.annotation.*;\n" +
+			  "public class X {\n" +
+			  "    class Local {\n" +
+			  "    	   Local(@NonNull String a) {}\n" +
+			  "    }\n" + 
+			  "	   Local create(@Nullable String b) {\n" + 
+			  "	       return this.new Local(b);\n" + 
+			  "    }\n" +
+			  "}\n"},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" + 
+		"	return this.new Local(b);\n" + 
+		"	                      ^\n" + 
+		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n"  /* compiler output */);
+}
 // assigning potential null to a nonnull local variable
 public void test_nonnull_local_001() {
 	runNegativeTest(
