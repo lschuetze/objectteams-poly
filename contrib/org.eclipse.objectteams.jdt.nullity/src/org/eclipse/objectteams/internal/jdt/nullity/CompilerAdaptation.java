@@ -68,6 +68,7 @@ import static org.eclipse.objectteams.internal.jdt.nullity.Constants.TagBits;
 import static org.eclipse.objectteams.internal.jdt.nullity.Constants.TypeIds;
 
 import base org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import base org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
 import base org.eclipse.jdt.internal.compiler.ast.Assignment;
 import base org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
 import base org.eclipse.jdt.internal.compiler.ast.EqualExpression;
@@ -136,8 +137,8 @@ public team class CompilerAdaptation {
 				&& (local.tagBits & TagBits.AnnotationNonNull) != 0 
 				&& nullStatus != FlowInfo.NON_NULL)
 			{
-				recordNullityMismatch(currentScope, flowContext, getExpression(), local.type, 
-						nullStatus, currentScope.environment().getNonNullAnnotationName());
+				recordNullityMismatch0(flowContext, currentScope, getExpression(), nullStatus, 
+						local.type, ConditionalFlowContext.ASSIGN_TO_NONNULL);
 				nullStatus=FlowInfo.NON_NULL;
 			}
 			return nullStatus;
@@ -157,6 +158,7 @@ public team class CompilerAdaptation {
 		<- before FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
 	}
 	
+	/** Abstraction over o.m(a), this(a), super(a), new C(a), t.new C(a). */
 	protected abstract class MessageSendish {
 		
 		protected abstract Expression[] getArguments();
@@ -167,48 +169,19 @@ public team class CompilerAdaptation {
 			MethodBinding methodBinding = getBinding();
 			Expression[] arguments = getArguments();
 			if (arguments != null && methodBinding.parameterNonNullness != null) {
-				char[][] annotationName = currentScope.environment().getNonNullAnnotationName();
 				for (int i = 0; i < arguments.length; i++) {
 					if (methodBinding.parameterNonNullness[i] == Boolean.TRUE) { 
 						TypeBinding expectedType = methodBinding.getParameters()[i];
 						Expression argument = arguments[i];
 						int nullStatus = argument.nullStatus(flowInfo); // slight loss of precision: should also use the null info from the receiver.
 						if (nullStatus != FlowInfo.NON_NULL) // if required non-null is not provided
-							recordNullityMismatch(currentScope, flowContext, argument, expectedType, nullStatus, annotationName);
+							recordNullityMismatch0(flowContext, currentScope, argument, nullStatus, expectedType, ConditionalFlowContext.ASSIGN_TO_NONNULL);
 					}
 				}
 			}
 		}
 	}
-	
-	void recordNullityMismatch(BlockScope currentScope, FlowContext flowContext, Expression expression, TypeBinding expectedType, int nullStatus, char[][] annotationName) {
-		if (expression.localVariableBinding() != null) { // flowContext cannot yet handle non-localvar expressions (e.g., fields)
-			while (flowContext != null) {
-				// some flow contexts implement deferred checking, should we participate in that?
-				if (flowContext instanceof org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext) {
-					// cf. decision structure inside FinallyFlowContext.recordUsingNullReference(..)
-					if (nullStatus == FlowInfo.UNKNOWN ||
-							((flowContext.tagBits & FlowContext.DEFER_NULL_DIAGNOSTIC) != 0 && nullStatus != FlowInfo.NULL)) 
-					{
-						// deferred reporting
-						recordNullReference((org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext)flowContext,
-									expression, expectedType, ConditionalFlowContext.ASSIGN_TO_NONNULL);										
-						return;
-					}
-				}
-				else if (flowContext instanceof org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext) {
-					// deferred reporting
-					recordNullReference((org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext)flowContext,
-								expression, expectedType, ConditionalFlowContext.ASSIGN_TO_NONNULL);
-					return;
-				}
-				flowContext = flowContext.parent;
-			}
-		}			
-		// other cases report immediately
-		currentScope.problemReporter().nullityMismatch(expression, expectedType, nullStatus, annotationName);
-	}
-	
+
 	/** Analyse argument expressions as part of a MessageSend, check against method parameter annotation. */
 	@Instantiation(InstantiationPolicy.ALWAYS)
 	protected class MessageSend extends MessageSendish playedBy MessageSend {
@@ -249,12 +222,24 @@ public team class CompilerAdaptation {
 			return FlowInfo.UNKNOWN;
 		}
 	}
+
 	protected class ExplicitConstructorCall extends MessageSendish playedBy ExplicitConstructorCall {
 
 		Expression[] getArguments() -> get Expression[] arguments;
 		MethodBinding getBinding() -> get MethodBinding binding;
 		
 		
+		void analyseArguments(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) 
+		<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
+
+	}
+
+	protected class AllocationExpression extends MessageSendish playedBy AllocationExpression {
+
+		Expression[] getArguments() -> get Expression[] arguments;
+		MethodBinding getBinding() -> get MethodBinding binding;
+		
+		// Note: this also applies to QualifiedAllocationExpression
 		void analyseArguments(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) 
 		<- after FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo);
 
@@ -1056,11 +1041,37 @@ public team class CompilerAdaptation {
 
 	// ---- Handling sub-classes of FlowContext that perform deferred null checking: ----
 	
-	public <B base ConditionalFlowContext> void recordNullReference(B as ConditionalFlowContext flowContext,
-							Expression expression, TypeBinding expectedType, int checkType) 
+	void recordNullityMismatch0(FlowContext flowContext, BlockScope currentScope, Expression expression, int nullStatus, TypeBinding expectedType, int checkType) {
+		// std. impl to go into class FlowContext:
+		if (expression.localVariableBinding() != null) { // flowContext cannot yet handle non-localvar expressions (e.g., fields)
+			// find the inner-most flowContext that might need deferred handling:
+			while (flowContext != null) {
+				// some flow contexts implement deferred checking, should we participate in that?
+				if (flowContext instanceof org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext) {
+					// deferred reporting?
+					if (recordNullityMismatch1((org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext)flowContext,
+								currentScope, expression, nullStatus, expectedType, ConditionalFlowContext.ASSIGN_TO_NONNULL))										
+					return;
+				}
+				else if (flowContext instanceof org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext) {
+					// deferred reporting
+					if (recordNullityMismatch1((org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext)flowContext,
+								currentScope, expression, nullStatus, expectedType, ConditionalFlowContext.ASSIGN_TO_NONNULL))
+					return;
+				}
+				flowContext = flowContext.parent;
+			}
+		}			
+		// no reason to defer, so report now:
+		char[][] annotationName = currentScope.environment().getNonNullAnnotationName();
+		currentScope.problemReporter().nullityMismatch(expression, expectedType, nullStatus, annotationName);
+		// Note: in the plain Java impl, all remaining FlowContext classes must handle ASSIGN_TO_NULL by directly calling this problemReporter method.
+	}
+	
+	<B base ConditionalFlowContext> boolean recordNullityMismatch1(B as ConditionalFlowContext flowContext,
+							BlockScope scope, Expression expression, int nullStatus, TypeBinding expectedType, int checkType) 
 	{
-		flowContext.recordExpectedType(expectedType);
-		flowContext.recordNullReference(expression.localVariableBinding(), expression, checkType);
+		return flowContext.recordNullityMismatch2(expression, nullStatus, expectedType, checkType);
 	}
 	protected abstract class ConditionalFlowContext {
 		// new constant for checkTypes:
@@ -1102,19 +1113,13 @@ public team class CompilerAdaptation {
 		void complainOnNullTypeError(BlockScope scope, FlowInfo callerFlowInfo) {
 			FlowInfo flowInfo = getFlowInfo(callerFlowInfo);
 			if ((getTagBits() & FlowContext.DEFER_NULL_DIAGNOSTIC) != 0) {
+				LocalVariableBinding[] locals = getNullLocals();
 				for (int i = 0; i < getNullCount(); i++) {
 					int nullCheckType = getNullCheckTypes()[i];
 					if (nullCheckType == ASSIGN_TO_NONNULL) {
 						FlowContext parent = getParent();
-						if (parent instanceof org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext) {
-							CompilerAdaptation.this.recordNullReference((org.eclipse.jdt.internal.compiler.flow.LoopingFlowContext)parent, 
-									getNullReferences()[i], this.expectedTypes[i], nullCheckType);
-							continue;
-						} else if (parent instanceof org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext) {
-							CompilerAdaptation.this.recordNullReference((org.eclipse.jdt.internal.compiler.flow.FinallyFlowContext)parent, 
-									getNullReferences()[i], this.expectedTypes[i], nullCheckType);
-							continue;
-						}
+						CompilerAdaptation.this.recordNullityMismatch0(parent, 
+								scope, getNullReferences()[i], flowInfo.nullStatus(locals[i]), this.expectedTypes[i], nullCheckType);
 					} else {
 						getParent().recordUsingNullReference(scope, getNullLocals()[i],
 								getNullReferences()[i],	nullCheckType, flowInfo);
@@ -1136,6 +1141,7 @@ public team class CompilerAdaptation {
 				}
 			}
 		}
+		protected abstract boolean recordNullityMismatch2(Expression expression, int nullStatus, TypeBinding expectedType, int checkType);
 	}
 	/** Straight-forward binding of implementation role to concrete base class. */
 	protected class FinallyFlowContext extends ConditionalFlowContext playedBy FinallyFlowContext {
@@ -1155,6 +1161,17 @@ public team class CompilerAdaptation {
 		void complainOnNullTypeError(BlockScope scope, FlowInfo callerFlowInfo)
 		<- after void complainOnDeferredChecks(FlowInfo flowInfo, BlockScope scope)
 			with { scope <- scope, callerFlowInfo <- flowInfo }
+		
+		protected boolean recordNullityMismatch2(Expression expression, int nullStatus, TypeBinding expectedType, int checkType) {
+			// cf. decision structure inside FinallyFlowContext.recordUsingNullReference(..)
+			if (nullStatus == FlowInfo.UNKNOWN ||
+					((getTagBits() & FlowContext.DEFER_NULL_DIAGNOSTIC) != 0 && nullStatus != FlowInfo.NULL)) {
+				recordExpectedType(expectedType);
+				recordNullReference(expression.localVariableBinding(), expression, checkType);
+				return true;
+			}
+			return false;
+		}
 	}
 	/** Straight-forward binding of implementation role to concrete base class. */
 	protected class LoopingFlowContext extends ConditionalFlowContext playedBy LoopingFlowContext {
@@ -1178,6 +1195,12 @@ public team class CompilerAdaptation {
 		
 		// here the recorded data is evaluated:
 		complainOnNullTypeError <- after complainOnDeferredNullChecks;
+
+		protected boolean recordNullityMismatch2(Expression expression, int nullStatus, TypeBinding expectedType, int checkType) {
+			recordExpectedType(expectedType);
+			recordNullReference(expression.localVariableBinding(), expression, checkType);
+			return true;
+		}
 	}
 
 	// ======================= Problem reporting ==================================
