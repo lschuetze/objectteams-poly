@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.compiler.flow.InitializationFlowContext;
 import org.eclipse.jdt.internal.compiler.flow.InsideSubRoutineFlowContext;
 import org.eclipse.jdt.internal.compiler.flow.UnconditionalFlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
+import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.AnnotationBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -598,6 +599,11 @@ public team class CompilerAdaptation {
 		<- after
 		void checkAgainstInheritedMethods(MethodBinding currentMethod, MethodBinding[] methods, int length, MethodBinding[] allInheritedMethods);
 
+		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length)
+		<- after
+		void checkConcreteInheritedMethod(MethodBinding concreteMethod, MethodBinding[] abstractMethods)
+			with { currentMethod <- concreteMethod, methods <- abstractMethods, length <- abstractMethods.length }
+
 		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length) {
 			// TODO: change traversal: process all methods at once!
 			for (int i = length; --i >= 0;)
@@ -609,23 +615,31 @@ public team class CompilerAdaptation {
 			long inheritedBits = inheritedMethod.getTagBits();
 			long currentBits = currentMethod.getTagBits();
 			LookupEnvironment environment = this.getEnvironment();
+			AbstractMethodDeclaration srcMethod = null;
+			if (getType().isSame(currentMethod.getDeclaringClass())) // is currentMethod from the current type?
+				srcMethod = currentMethod.sourceMethod();
 
 			// return type:
 			if ((inheritedBits & TagBits.AnnotationNonNull) != 0) {
 				long currentNullBits = currentBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable);
-				if (currentNullBits != TagBits.AnnotationNonNull) {				
-					AbstractMethodDeclaration methodDecl = currentMethod.sourceMethod();
-					getType().problemReporter().illegalReturnRedefinition(methodDecl, inheritedMethod,
-																environment.getNonNullAnnotationName());
+				if (currentNullBits != TagBits.AnnotationNonNull) {
+					if (srcMethod != null) {
+						getType().problemReporter().illegalReturnRedefinition(srcMethod, inheritedMethod,
+																	environment.getNonNullAnnotationName());
+					} else {
+						getType().problemReporter().cannotImplementIncompatibleNullness(currentMethod, inheritedMethod);
+						return;
+					}
 				}
 			}
 
 			// parameters:
-			Argument[] currentArguments = currentMethod.sourceMethod().getArguments();
+			Argument[] currentArguments = srcMethod == null ? null : srcMethod.getArguments();
 			if (inheritedMethod.parameterNonNullness != null) {
 				// inherited method has null-annotations, check compatibility:
 
 				for (int i = 0; i < inheritedMethod.parameterNonNullness.length; i++) {
+					Argument currentArgument = currentArguments == null ? null : currentArguments[i];
 					
 					Boolean inheritedNonNullNess = inheritedMethod.parameterNonNullness[i];
 					Boolean currentNonNullNess = (currentMethod.parameterNonNullness == null)
@@ -640,23 +654,30 @@ public team class CompilerAdaptation {
 							} else {
 								annotationName = environment.getNullableAnnotationName();
 							}
-								
-							getType().problemReporter().parameterLackingNonNullAnnotation(
-									currentArguments[i],
-									inheritedMethod.getDeclaringClass(),
-									needNonNull,
-									annotationName);
-							continue;
+							if (currentArgument != null) {
+								getType().problemReporter().parameterLackingNonNullAnnotation(
+										currentArgument,
+										inheritedMethod.getDeclaringClass(),
+										needNonNull,
+										annotationName);
+								continue;
+							} else {
+								getType().problemReporter().cannotImplementIncompatibleNullness(currentMethod, inheritedMethod);
+								break;
+							}
 						}						
 					}
 					if (inheritedNonNullNess != Boolean.TRUE) {		// super parameter is not restricted to @NonNull
 						if (currentNonNullNess == Boolean.TRUE) { 	// current parameter is restricted to @NonNull
-							getType().problemReporter().illegalRedefinitionToNonNullParameter(
-																currentArguments[i],
+							if (currentArgument != null)
+								getType().problemReporter().illegalRedefinitionToNonNullParameter(
+																currentArgument,
 																inheritedMethod.getDeclaringClass(),
 																inheritedNonNullNess == null
 																? null
 																: environment.getNullableAnnotationName());
+							else
+								getType().problemReporter().cannotImplementIncompatibleNullness(currentMethod, inheritedMethod);
 						} 
 					}
 				}
@@ -664,10 +685,15 @@ public team class CompilerAdaptation {
 				// super method has no annotations but current has
 				for (int i = 0; i < currentMethod.parameterNonNullness.length; i++) {
 					if (currentMethod.parameterNonNullness[i] == Boolean.TRUE) { // tightening from unconstrained to @NonNull
-						getType().problemReporter().illegalRedefinitionToNonNullParameter(
-																		currentArguments[i],
-																		inheritedMethod.getDeclaringClass(),
-																		null);
+						if (currentArguments != null) {
+							getType().problemReporter().illegalRedefinitionToNonNullParameter(
+																			currentArguments[i],
+																			inheritedMethod.getDeclaringClass(),
+																			null);
+						} else {
+							getType().problemReporter().cannotImplementIncompatibleNullness(currentMethod, inheritedMethod);
+							break;
+						}
 					}
 				}
 			}
@@ -729,6 +755,8 @@ public team class CompilerAdaptation {
 					with { result 			<- (SourceTypeBinding)result }
 		
 		long computeTypeAnnotationTagBits()	-> long getAnnotationTagBits();
+		
+		boolean isSame(Object other) 		-> boolean equals(Object other);
 		
 		private TypeBinding nullnessDefaultAnnotation;
 		private int nullnessDefaultInitialized = 0; // 0: nothing; 1: type; 2: package
@@ -1211,6 +1239,8 @@ public team class CompilerAdaptation {
 	 */
 	protected class ProblemReporter playedBy ProblemReporter {
 
+		ReferenceContext getReferenceContext() -> get ReferenceContext referenceContext;
+		
 		@SuppressWarnings("decapsulation")
 		void handle(int problemId, String[] problemArguments, String[] messageArguments, int severity,
 				int problemStartPosition, int problemEndPosition)
@@ -1393,6 +1423,31 @@ public team class CompilerAdaptation {
 		public void missingNullAnnotationType(char[][] nullAnnotationName) {
 			String[] args = { new String(CharOperation.concatWith(nullAnnotationName, '.')) };
 			this.handle(IProblem.MissingNullAnnotationType, args, args, 0, 0);	
+		}
+
+		public void cannotImplementIncompatibleNullness(MethodBinding currentMethod, MethodBinding inheritedMethod) {
+			ReferenceContext ctx = getReferenceContext();
+			int sourceStart = 0, sourceEnd = 0;
+			if (ctx instanceof TypeDeclaration) {
+				sourceStart = ((TypeDeclaration) ctx).sourceStart;
+				sourceEnd =   ((TypeDeclaration) ctx).sourceEnd;
+			}
+			String[] problemArguments = {
+					new String(currentMethod.readableName()),
+					new String(currentMethod.getDeclaringClass().readableName()),
+					new String(inheritedMethod.getDeclaringClass().readableName())
+				};
+			String[] messageArguments = {
+					new String(currentMethod.shortReadableName()),
+					new String(currentMethod.getDeclaringClass().shortReadableName()),
+					new String(inheritedMethod.getDeclaringClass().shortReadableName())
+				};
+			this.handle(
+					IProblem.CannotImplementIncompatibleNullness,
+					problemArguments,
+					messageArguments,
+					sourceStart,
+					sourceEnd);
 		}
 		// NOTE: adaptation of toString() omitted
 	}

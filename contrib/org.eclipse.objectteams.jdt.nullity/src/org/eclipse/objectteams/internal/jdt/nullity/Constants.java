@@ -70,6 +70,8 @@ public class Constants {
 		int PotentialNullMessageSendReference = Internal + 919;
 		/** @since 3.7 */
 		int RedundantNullCheckOnNonNullMessageSend = Internal + 920;
+		/** @since 3.7 */
+		int CannotImplementIncompatibleNullness = Internal + 921;
 	}
 	
 	/** Translate from a nullness annotation to the corresponding tag bit or 0L. */
