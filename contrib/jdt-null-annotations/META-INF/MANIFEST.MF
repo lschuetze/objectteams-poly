@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Annotations for Enhanced Null Analysis
 Bundle-SymbolicName: org.eclipse.jdt.annotation.null
-Bundle-Version: 1.0.0.qualifier
+Bundle-Version: 0.9.0.qualifier
 Export-Package: org.eclipse.jdt.annotation
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-Vendor: Stephan Herrmann
