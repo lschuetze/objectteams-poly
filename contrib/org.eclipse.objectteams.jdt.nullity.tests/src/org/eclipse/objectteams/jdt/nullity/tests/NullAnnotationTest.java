@@ -808,7 +808,166 @@ public void test_parameter_specification_inheritance_011() {
 		"Type mismatch: required \'@NonNull String\' but the provided value is null\n" + 
 		"----------\n");
 }
-
+// methods from two super types have different null contracts.
+// sub-class merges both using the weakest common contract 
+public void test_parameter_specification_inheritance_012() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runConformTestWithLibs(
+		new String[] {
+	"p1/X.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    public @Nullable String getString(String s1, @Nullable String s2, @NonNull String s3) {\n" +
+			"	     return s1;\n" +
+			"    }\n" +
+			"}\n",
+	"p1/IY.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public interface IY {\n" +
+			"    @NonNull String getString(@NonNull String s1, @NonNull String s2, @Nullable String s3);\n" +
+			"}\n",
+	"p1/Y.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Y extends X implements IY {\n" +
+			"    @Override\n" +
+			"    public @NonNull String getString(@Nullable String s1, @Nullable String s2, @Nullable String s3) {\n" +
+			"	     return \"\";\n" +
+			"    }\n" +
+			"}\n",
+		},
+		customOptions,
+		"");
+}
+// methods from two super types have different null contracts.
+// sub-class overrides this method in non-conforming ways 
+public void test_parameter_specification_inheritance_013() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runNegativeTestWithLibs(
+		new String[] {
+	"p1/X.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    public @Nullable String getString(String s1, @Nullable String s2, @NonNull String s3) {\n" +
+			"	     return s1;\n" +
+			"    }\n" +
+			"}\n",
+	"p1/IY.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public interface IY {\n" +
+			"    @NonNull String getString(@NonNull String s1, @NonNull String s2, @Nullable String s3);\n" +
+			"}\n",
+	"p1/Y.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Y extends X implements IY {\n" +
+			"    @Override\n" +
+			"    public @Nullable String getString(String s1, @NonNull String s2, @NonNull String s3) {\n" +
+			"	     return \"\";\n" +
+			"    }\n" +
+			"}\n",
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in p1\\Y.java (at line 5)\n" + 
+		"	public @Nullable String getString(String s1, @NonNull String s2, @NonNull String s3) {\n" + 
+		"	       ^^^^^^^^^^^^^^^^\n" + 
+		"The return type is incompatible with the @NonNull return from IY.getString(String, String, String)\n" + 
+		"----------\n" + 
+		"2. ERROR in p1\\Y.java (at line 5)\n" + 
+		"	public @Nullable String getString(String s1, @NonNull String s2, @NonNull String s3) {\n" + 
+		"	                                  ^^^^^^\n" + 
+		"Missing null annotation: inherited method from IY declares this parameter as @NonNull\n" + 
+		"----------\n" + 
+		"3. ERROR in p1\\Y.java (at line 5)\n" + 
+		"	public @Nullable String getString(String s1, @NonNull String s2, @NonNull String s3) {\n" + 
+		"	                                             ^^^^^^^^^^^^^^^\n" + 
+		"Illegal redefinition of parameter s2, inherited method from X declares this parameter as @Nullable\n" + 
+		"----------\n" + 
+		"4. ERROR in p1\\Y.java (at line 5)\n" + 
+		"	public @Nullable String getString(String s1, @NonNull String s2, @NonNull String s3) {\n" + 
+		"	                                                                 ^^^^^^^^^^^^^^^\n" + 
+		"Illegal redefinition of parameter s3, inherited method from IY declares this parameter as @Nullable\n" + 
+		"----------\n");
+}
+// methods from two super types have different null contracts.
+// sub-class does not override, but should to bridge the incompatibility
+public void test_parameter_specification_inheritance_014() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	runNegativeTestWithLibs(
+		new String[] {
+	"p1/IY.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public interface IY {\n" +
+			"    public @NonNull String getString1(String s);\n" +
+			"    public @NonNull String getString2(String s);\n" +
+			"    public String getString3(@Nullable String s);\n" +
+			"    public @NonNull String getString4(@Nullable String s);\n" +
+			"    public @NonNull String getString5(@Nullable String s);\n" +
+			"    public @Nullable String getString6(@NonNull String s);\n" +
+			"}\n",
+	"p1/X.java",
+			"package p1;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    public @Nullable String getString1(String s) {\n" + // incomp. return
+			"	     return s;\n" +
+			"    }\n" +
+			"    public String getString2(String s) {\n" +			 // incomp. return
+			"	     return s;\n" +
+			"    }\n" +
+			"    public String getString3(String s) {\n" +			 // incomp. arg
+			"	     return \"\";\n" +
+			"    }\n" +
+			"    public @NonNull String getString4(@Nullable String s) {\n" +
+			"	     return \"\";\n" +
+			"    }\n" +
+			"    public @NonNull String getString5(@NonNull String s) {\n" + // incomp. arg
+			"	     return s;\n" +
+			"    }\n" +
+			"    public @NonNull String getString6(@Nullable String s) {\n" +
+			"	     return \"\";\n" +
+			"    }\n" +
+			"}\n",
+	"p1/Y.java",
+			"package p1;\n" +
+			"public class Y extends X implements IY {\n" +
+			"}\n",
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in p1\\Y.java (at line 2)\n" + 
+		"	public class Y extends X implements IY {\n" + 
+		"	             ^\n" + 
+		"The method getString1(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints. \n" + 
+		"----------\n" + 
+		"2. ERROR in p1\\Y.java (at line 2)\n" + 
+		"	public class Y extends X implements IY {\n" + 
+		"	             ^\n" + 
+		"The method getString2(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints. \n" + 
+		"----------\n" + 
+		"3. ERROR in p1\\Y.java (at line 2)\n" + 
+		"	public class Y extends X implements IY {\n" + 
+		"	             ^\n" + 
+		"The method getString5(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints. \n" + 
+		"----------\n" + 
+		"4. ERROR in p1\\Y.java (at line 2)\n" + 
+		"	public class Y extends X implements IY {\n" + 
+		"	             ^\n" + 
+		"The method getString3(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints. \n" + 
+		"----------\n");
+}
 // a nullable return value is dereferenced without a check
 public void test_nullable_return_001() {
 	runNegativeTestWithLibs(
