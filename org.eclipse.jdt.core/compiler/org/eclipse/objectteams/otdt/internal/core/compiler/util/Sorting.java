@@ -41,9 +41,10 @@ public class Sorting {
 	public static void sortMemberTypes(SourceTypeBinding enclosing) {
 		int len = enclosing.memberTypes.length;
 
-		ReferenceBinding[] unsorted = enclosing.memberTypes;
-
+		ReferenceBinding[] unsorted = new ReferenceBinding[len];
 		ReferenceBinding[] sorted = new ReferenceBinding[len];
+		System.arraycopy(enclosing.memberTypes, 0, unsorted, 0, len);
+		
 		int o = 0;
 		for(int i=0; i<len; i++)
 			o = sort(enclosing, unsorted, i, sorted, o);
