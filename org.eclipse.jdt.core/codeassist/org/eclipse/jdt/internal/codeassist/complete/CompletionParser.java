@@ -4327,7 +4327,8 @@ protected void consumeTypeValueParameter() {
 		TypeParameter param = (TypeParameter)this.genericsStack[this.genericsPtr];
 		if (param.type instanceof SingleTypeReference) {
 			SingleTypeReference str = (SingleTypeReference)param.type;
-			if (CharOperation.prefixEquals(str.token, "extends".toCharArray())) { //$NON-NLS-1$
+			if (   CharOperation.prefixEquals(str.token, "extends".toCharArray()) //$NON-NLS-1$
+				|| CharOperation.prefixEquals(str.token, "base".toCharArray())) { //$NON-NLS-1$
 				consumeTypeParameter1();
 				return;
 			}
