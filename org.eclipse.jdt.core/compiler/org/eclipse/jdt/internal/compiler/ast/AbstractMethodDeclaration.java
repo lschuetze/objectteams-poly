@@ -16,8 +16,6 @@ import java.util.List;
 
 import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.*;
-import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
-import org.eclipse.jdt.internal.compiler.flow.InitializationFlowContext;
 import org.eclipse.jdt.internal.compiler.impl.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
@@ -210,8 +208,6 @@ public abstract class AbstractMethodDeclaration
 				throw new AbortMethod(this.compilationResult, problem);
 		}
 	}
-
-	public abstract void analyseCode(ClassScope classScope, InitializationFlowContext initializationContext, FlowInfo info);
 
 	/**
 	 * Bind and add argument's binding into the scope of the method

@@ -8,6 +8,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -21,8 +22,8 @@ import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.flow.ExceptionHandlingFlowContext;
+import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
-import org.eclipse.jdt.internal.compiler.flow.InitializationFlowContext;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
@@ -77,7 +78,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 		super(compilationResult);
 	}
 
-	public void analyseCode(ClassScope classScope, InitializationFlowContext initializationContext, FlowInfo flowInfo) {
+	public void analyseCode(ClassScope classScope, FlowContext flowContext, FlowInfo flowInfo) {
 		// starting of the code analysis for methods
 		if (this.ignoreFurtherInvestigation)
 			return;
@@ -121,7 +122,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 
 			ExceptionHandlingFlowContext methodContext =
 				new ExceptionHandlingFlowContext(
-					initializationContext,
+					flowContext,
 					this,
 					this.binding.thrownExceptions,
 					null,
@@ -150,7 +151,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 				int complaintLevel = (flowInfo.reachMode() & FlowInfo.UNREACHABLE) == 0 ? Statement.NOT_COMPLAINED : Statement.COMPLAINED_FAKE_REACHABLE;
 				for (int i = 0, count = this.statements.length; i < count; i++) {
 					Statement stat = this.statements[i];
-					if ((complaintLevel = stat.complainIfUnreachable(flowInfo, this.scope, complaintLevel)) < Statement.COMPLAINED_UNREACHABLE) {
+					if ((complaintLevel = stat.complainIfUnreachable(flowInfo, this.scope, complaintLevel, true)) < Statement.COMPLAINED_UNREACHABLE) {
 						flowInfo = stat.analyseCode(this.scope, methodContext, flowInfo);
 					}
 				}
@@ -187,6 +188,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 				}
 					
 			}
+			this.scope.checkUnclosedCloseables(flowInfo, null/*don't report against a specific location*/, null);
 		} catch (AbortMethod e) {
 			this.ignoreFurtherInvestigation = true;
 		}

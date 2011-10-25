@@ -2719,6 +2719,40 @@ public abstract class Scope {
 		return new ProblemReferenceBinding(compoundName, null /* no closest match since search for pkg*/, ProblemReasons.NotFound);
 	}
 
+	/* Answer the package from the compoundName or null if it begins with a type.
+	* Intended to be used while resolving a package name only.
+	* 
+	* Internal use only
+	*/
+	public final Binding getOnlyPackage(char[][] compoundName) {
+ 		compilationUnitScope().recordQualifiedReference(compoundName);
+		Binding binding = getTypeOrPackage(compoundName[0], Binding.PACKAGE, true);
+		if (binding == null || !binding.isValidBinding()) {
+			char[][] qName = new char[][] { compoundName[0] };
+			return new ProblemReferenceBinding(qName, null /* no closest match since search for pkg*/, ProblemReasons.NotFound);
+		}
+		if (!(binding instanceof PackageBinding)) {
+			return null; // compoundName does not start with a package
+		}
+
+		int currentIndex = 1, length = compoundName.length;
+		PackageBinding packageBinding = (PackageBinding) binding;
+		while (currentIndex < length) {
+			binding = packageBinding.getPackage(compoundName[currentIndex++]);
+			if (binding == null) {
+				return new ProblemReferenceBinding(CharOperation.subarray(compoundName, 0, currentIndex), null /* no closest match since search for pkg*/, ProblemReasons.NotFound);
+			}
+			if (!binding.isValidBinding()) {
+				return new ProblemReferenceBinding(
+					CharOperation.subarray(compoundName, 0, currentIndex),
+					binding instanceof ReferenceBinding ? (ReferenceBinding)((ReferenceBinding)binding).closestMatch() : null,
+					binding.problemId());
+			}
+			packageBinding = (PackageBinding) binding;
+		}
+		return packageBinding;
+	}
+
 	/* Answer the type binding that corresponds the given name, starting the lookup in the receiver.
 	* The name provided is a simple source name (e.g., "Object" , "Point", ...)
 	*/
@@ -3064,7 +3098,53 @@ public abstract class Scope {
 					}
 				}
 			}
-
+			// walk single static imports. A type found here will shadow types with same name in other CU's, or types coming
+			// from on-demand imports. JLS 7.5.3
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=318401
+			if (imports != null) {
+				ReferenceBinding type = null;
+				nextImport : for (int i = 0, length = imports.length; i < length; i++) {
+					ImportBinding importBinding = imports[i];
+					if (importBinding.isStatic()) {
+						ReferenceBinding temp = null;
+						if (CharOperation.equals(importBinding.compoundName[importBinding.compoundName.length - 1], name)) {
+							Binding resolvedImport = importBinding.resolvedImport;
+							if (resolvedImport == null) continue nextImport;
+							if (resolvedImport instanceof MethodBinding || resolvedImport instanceof FieldBinding) {
+								// check to see if there are also member types with the same name
+								// must find the importRef's type again since the method/field can be from an inherited type
+								// see StaticImportTest#test084 for more clarity
+								char[][] importName = importBinding.reference.tokens;
+								TypeBinding referencedType = getType(importName, importName.length - 1);
+								if (referencedType != null && referencedType instanceof ReferenceBinding) {
+									temp = findMemberType(name, (ReferenceBinding) referencedType);
+								}
+							}
+							if (temp != null && temp.isStatic() && temp != type) {
+								if (temp.isValidBinding()) {
+									if (!temp.canBeSeenBy(unitScope.fPackage)) {
+										// Answer error binding - type is not visible
+										foundType = new ProblemReferenceBinding(new char[][]{name}, type, ProblemReasons.NotVisible);
+									} else {
+										ImportReference importReference = importBinding.reference;
+										if (importReference != null) {
+											importReference.bits |= ASTNode.Used;
+										}
+										type = temp;
+									}
+								} else if (foundType == null) {
+									foundType = temp;
+								}
+							}
+						}
+					}
+				}
+				if (type != null) {
+					if (typeOrPackageCache != null)
+						typeOrPackageCache.put(name, type);
+					return type;
+				}
+			}
 			// check if the name is in the current package, skip it if its a sub-package
 			PackageBinding currentPackage = unitScope.fPackage;
 			unitScope.recordReference(currentPackage.compoundName, name);
@@ -3409,7 +3489,7 @@ public abstract class Scope {
 		// test that the enclosingType is not part of the compilation unit
 		SourceTypeBinding[] topLevelTypes = ((CompilationUnitScope) unitScope).topLevelTypes;
 		for (int i = topLevelTypes.length; --i >= 0;)
-			if (topLevelTypes[i] == enclosingType)
+			if (topLevelTypes[i] == enclosingType.original())
 				return true;
 		return false;
 	}

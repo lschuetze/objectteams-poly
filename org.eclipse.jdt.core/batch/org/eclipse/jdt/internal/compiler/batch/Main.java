@@ -10,8 +10,10 @@
  *     Tom Tromey - Contribution for bug 125961
  *     Tom Tromey - Contribution for bug 159641
  *     Benjamin Muskalla - Contribution for bug 239066
- *     Stephan Herrmann  - Contribution for bug 236385
- *     Stephan Herrmann  - Contribution for bug 295551
+ *     Stephan Herrmann  - Contributions for 
+ *     							bug 236385 - [compiler] Warn for potential programming problem if an object is created but not used
+ *     							bug 295551 - Add option to automatically promote all warnings to errors
+ *     							bug 359721 - [options] add command line option for new warning token "resource"
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -2243,7 +2245,7 @@ public void configure(String[] argv) {
 						this.bind("configure.invalidDebugOption", debugOption)); //$NON-NLS-1$
 				}
 				if (currentArg.startsWith("-nowarn")) { //$NON-NLS-1$
-					disableWarnings();
+					disableAll(ProblemSeverities.Warning);
 					mode = DEFAULT;
 					continue;
 				}
@@ -2252,7 +2254,7 @@ public void configure(String[] argv) {
 					String warningOption = currentArg;
 					int length = currentArg.length();
 					if (length == 10 && warningOption.equals("-warn:" + NONE)) { //$NON-NLS-1$
-						disableWarnings();
+						disableAll(ProblemSeverities.Warning);
 						continue;
 					}
 					if (length <= 6) {
@@ -2260,23 +2262,20 @@ public void configure(String[] argv) {
 							this.bind("configure.invalidWarningConfiguration", warningOption)); //$NON-NLS-1$
 					}
 					int warnTokenStart;
-					boolean isEnabling, allowPlusOrMinus;
+					boolean isEnabling;
 					switch (warningOption.charAt(6)) {
 						case '+' :
 							warnTokenStart = 7;
 							isEnabling = true;
-							allowPlusOrMinus = true;
 							break;
 						case '-' :
 							warnTokenStart = 7;
 							isEnabling = false; // specified warnings are disabled
-							allowPlusOrMinus = true;
 							break;
 						default:
-							disableWarnings();
+							disableAll(ProblemSeverities.Warning);
 							warnTokenStart = 6;
 							isEnabling = true;
-							allowPlusOrMinus = false;
 					}
 
 					StringTokenizer tokenizer =
@@ -2292,22 +2291,12 @@ public void configure(String[] argv) {
 						tokenCounter++;
 						switch(token.charAt(0)) {
 							case '+' :
-								if (allowPlusOrMinus) {
-									isEnabling = true;
-									token = token.substring(1);
-								} else {
-									throw new IllegalArgumentException(
-											this.bind("configure.invalidUsageOfPlusOption", token)); //$NON-NLS-1$
-								}
+								isEnabling = true;
+								token = token.substring(1);
 								break;
 							case '-' :
-								if (allowPlusOrMinus) {
-									isEnabling = false;
-									token = token.substring(1);
-								} else {
-									throw new IllegalArgumentException(
-											this.bind("configure.invalidUsageOfMinusOption", token)); //$NON-NLS-1$
-								}
+								isEnabling = false;
+								token = token.substring(1);
 						}
 						handleWarningToken(token, isEnabling);
 					}
@@ -2326,23 +2315,20 @@ public void configure(String[] argv) {
 							this.bind("configure.invalidErrorConfiguration", errorOption)); //$NON-NLS-1$
 					}
 					int errorTokenStart;
-					boolean isEnabling, allowPlusOrMinus;
+					boolean isEnabling;
 					switch (errorOption.charAt(5)) {
 						case '+' :
 							errorTokenStart = 6;
 							isEnabling = true;
-							allowPlusOrMinus = true;
 							break;
 						case '-' :
 							errorTokenStart = 6;
 							isEnabling = false; // specified errors are disabled
-							allowPlusOrMinus = true;
 							break;
 						default:
-							disableErrors();
+							disableAll(ProblemSeverities.Error);
 							errorTokenStart = 5;
 							isEnabling = true;
-							allowPlusOrMinus = false;
 					}
 
 					StringTokenizer tokenizer =
@@ -2354,22 +2340,12 @@ public void configure(String[] argv) {
 						tokenCounter++;
 						switch(token.charAt(0)) {
 							case '+' :
-								if (allowPlusOrMinus) {
-									isEnabling = true;
-									token = token.substring(1);
-								} else {
-									throw new IllegalArgumentException(
-											this.bind("configure.invalidUsageOfPlusOption", token)); //$NON-NLS-1$
-								}
+								isEnabling = true;
+								token = token.substring(1);
 								break;
 							case '-' :
-								if (allowPlusOrMinus) {
-									isEnabling = false;
-									token = token.substring(1);
-								} else {
-									throw new IllegalArgumentException(
-											this.bind("configure.invalidUsageOfMinusOption", token)); //$NON-NLS-1$
-								}
+								isEnabling = false;
+								token = token.substring(1);
 								break;
 						}
 						handleErrorToken(token, isEnabling);
@@ -2901,7 +2877,16 @@ private void initializeWarnings(String propertiesFile) {
 // SH}
 	}
 }
-protected void disableWarnings() {
+protected void enableAll(int severity) {
+	String newValue = null;
+	switch(severity) {
+		case ProblemSeverities.Error :
+			newValue = CompilerOptions.ERROR;
+			break;
+		case ProblemSeverities.Warning :
+			newValue = CompilerOptions.WARNING;
+			break;
+	}
 	Object[] entries = this.options.entrySet().toArray();
 	for (int i = 0, max = entries.length; i < max; i++) {
 		Map.Entry entry = (Map.Entry) entries[i];
@@ -2909,13 +2894,22 @@ protected void disableWarnings() {
 			continue;
 		if (!(entry.getValue() instanceof String))
 			continue;
-		if (((String) entry.getValue()).equals(CompilerOptions.WARNING)) {
-			this.options.put(entry.getKey(), CompilerOptions.IGNORE);
+		if (((String) entry.getValue()).equals(CompilerOptions.IGNORE)) {
+			this.options.put(entry.getKey(), newValue);
 		}
 	}
 	this.options.put(CompilerOptions.OPTION_TaskTags, Util.EMPTY_STRING);
 }
-protected void disableErrors() {
+protected void disableAll(int severity) {
+	String checkedValue = null;
+	switch(severity) {
+		case ProblemSeverities.Error :
+			checkedValue = CompilerOptions.ERROR;
+			break;
+		case ProblemSeverities.Warning :
+			checkedValue = CompilerOptions.WARNING;
+			break;
+	}
 	Object[] entries = this.options.entrySet().toArray();
 	for (int i = 0, max = entries.length; i < max; i++) {
 		Map.Entry entry = (Map.Entry) entries[i];
@@ -2923,7 +2917,7 @@ protected void disableErrors() {
 			continue;
 		if (!(entry.getValue() instanceof String))
 			continue;
-		if (((String) entry.getValue()).equals(CompilerOptions.ERROR)) {
+		if (((String) entry.getValue()).equals(checkedValue)) {
 			this.options.put(entry.getKey(), CompilerOptions.IGNORE);
 		}
 	}
@@ -3334,6 +3328,13 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				setSeverity(CompilerOptions.OPTION_ReportMethodCanBeStatic, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportMethodCanBePotentiallyStatic, severity, isEnabling);
 				return;
+			} else if (token.equals("all")) { //$NON-NLS-1$
+				if (isEnabling) {
+					enableAll(severity);
+				} else {
+					disableAll(severity);
+				}
+				return;
 //{ObjectTeams:
 			} else if (token.equals("ambiguousbinding")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportPotentialAmbiguousPlayedby, severity, isEnabling);
@@ -3577,6 +3578,11 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				return;
 			} else if (/*token.equals("intfRedundant") ||*/ token.equals("redundantSuperinterface")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportRedundantSuperinterface, severity, isEnabling);
+				return;
+			} else if (token.equals("resource")) { //$NON-NLS-1$
+				setSeverity(CompilerOptions.OPTION_ReportUnclosedCloseable, severity, isEnabling);
+				setSeverity(CompilerOptions.OPTION_ReportPotentiallyUnclosedCloseable, severity, isEnabling);
+				setSeverity(CompilerOptions.OPTION_ReportExplicitlyClosedAutoCloseable, severity, isEnabling);
 				return;
 //{ObjectTeams:
 			} else if (token.equals("roleinstantiation")) { //$NON-NLS-1$

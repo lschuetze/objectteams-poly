@@ -7,7 +7,9 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contribution for Bug 343713 - [compiler] bogus line number in constructor of inner class in 1.5 compliance
+ *     Stephan Herrmann - Contributions for 
+ *     							bug 343713 - [compiler] bogus line number in constructor of inner class in 1.5 compliance
+ *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -79,18 +81,9 @@ public class ConstructorDeclaration extends AbstractMethodDeclaration {
 public ConstructorDeclaration(CompilationResult compilationResult){
 	super(compilationResult);
 }
-
-/**
- * @see org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration#analyseCode(org.eclipse.jdt.internal.compiler.lookup.ClassScope, org.eclipse.jdt.internal.compiler.flow.InitializationFlowContext, org.eclipse.jdt.internal.compiler.flow.FlowInfo)
- * @deprecated use instead {@link #analyseCode(ClassScope, InitializationFlowContext, FlowInfo, int)}
- */
-public void analyseCode(ClassScope classScope, InitializationFlowContext initializerFlowContext, FlowInfo flowInfo) {
-	analyseCode(classScope, initializerFlowContext, flowInfo, FlowInfo.REACHABLE);
-}
-
 /**
  * The flowInfo corresponds to non-static field initialization infos. It may be unreachable (155423), but still the explicit constructor call must be
- * analysed as reachable, since it will be generated in the end.
+ * analyzed as reachable, since it will be generated in the end.
  */
 public void analyseCode(ClassScope classScope, InitializationFlowContext initializerFlowContext, FlowInfo flowInfo, int initialReachMode) {
 	if (this.ignoreFurtherInvestigation)
@@ -130,7 +123,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
     	// force called constructor to be analyzed:
     	MethodBinding selfCall = this.constructorCall.binding;
     	if (selfCall.declaringClass == this.binding.declaringClass)
-    		selfCall.sourceMethod().analyseCode(classScope, initializerFlowContext, flowInfo.copy());
+    		((ConstructorDeclaration)selfCall.sourceMethod()).analyseCode(classScope, initializerFlowContext, flowInfo.copy(), flowInfo.reachMode());
 
         boolean calledHere = MethodModel.callsBaseCtor(this.binding);
         boolean calledIndirectly = MethodModel.callsBaseCtor(selfCall);
@@ -276,7 +269,7 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 			int complaintLevel = (nonStaticFieldInfoReachMode & FlowInfo.UNREACHABLE) == 0 ? Statement.NOT_COMPLAINED : Statement.COMPLAINED_FAKE_REACHABLE;
 			for (int i = 0, count = this.statements.length; i < count; i++) {
 				Statement stat = this.statements[i];
-				if ((complaintLevel = stat.complainIfUnreachable(flowInfo, this.scope, complaintLevel)) < Statement.COMPLAINED_UNREACHABLE) {
+				if ((complaintLevel = stat.complainIfUnreachable(flowInfo, this.scope, complaintLevel, true)) < Statement.COMPLAINED_UNREACHABLE) {
 					flowInfo = stat.analyseCode(this.scope, constructorContext, flowInfo);
 				}
 			}
@@ -663,6 +656,7 @@ public boolean isRecursive(ArrayList visited) {
 
 	ConstructorDeclaration targetConstructor =
 		((ConstructorDeclaration)this.scope.referenceType().declarationOf(this.constructorCall.binding.original()));
+	if (targetConstructor == null) return false; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=358762
 	if (this == targetConstructor) return true; // direct case
 
 	if (visited == null) { // lazy allocation

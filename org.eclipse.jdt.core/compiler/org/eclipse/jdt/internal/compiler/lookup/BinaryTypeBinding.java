@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -1356,6 +1357,18 @@ public TypeVariableBinding getTypeVariable(char[] variableName) {
 	variable.resolve();
 	return variable;
 }
+public boolean hasTypeBit(int bit) {
+	// ensure hierarchy is resolved, which will propagate bits down to us
+	boolean wasToleratingMissingTypeProcessingAnnotations = this.environment.mayTolerateMissingType;
+	this.environment.mayTolerateMissingType = true;
+	try {
+		superclass();
+		superInterfaces();
+	} finally {
+		this.environment.mayTolerateMissingType = wasToleratingMissingTypeProcessingAnnotations;
+	}
+	return (this.typeBits & bit) != 0;
+}
 private void initializeTypeVariable(TypeVariableBinding variable, TypeVariableBinding[] existingVariables, SignatureWrapper wrapper, char[][][] missingTypeNames) {
 	// ParameterSignature = Identifier ':' TypeSignature
 	//   or Identifier ':' TypeSignature(optional) InterfaceBound(s)
@@ -1561,8 +1574,20 @@ public ReferenceBinding superclass() {
 	// finish resolving the type
 	this.superclass = (ReferenceBinding) resolveType(this.superclass, this.environment, true /* raw conversion */);
 	this.tagBits &= ~TagBits.HasUnresolvedSuperclass;
-	if (this.superclass.problemId() == ProblemReasons.NotFound)
+	if (this.superclass.problemId() == ProblemReasons.NotFound) {
 		this.tagBits |= TagBits.HierarchyHasProblems; // propagate type inconsistency
+	} else {
+		// make super-type resolving recursive for propagating typeBits downwards
+		boolean wasToleratingMissingTypeProcessingAnnotations = this.environment.mayTolerateMissingType;
+		this.environment.mayTolerateMissingType = true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=360164
+		try {
+			this.superclass.superclass();
+			this.superclass.superInterfaces();
+		} finally {
+			this.environment.mayTolerateMissingType = wasToleratingMissingTypeProcessingAnnotations;
+		}
+	}
+	this.typeBits |= this.superclass.typeBits;
 	return this.superclass;
 }
 //{ObjectTeams:
@@ -1589,8 +1614,20 @@ public ReferenceBinding[] superInterfaces() {
 
 	for (int i = this.superInterfaces.length; --i >= 0;) {
 		this.superInterfaces[i] = (ReferenceBinding) resolveType(this.superInterfaces[i], this.environment, true /* raw conversion */);
-		if (this.superInterfaces[i].problemId() == ProblemReasons.NotFound)
+		if (this.superInterfaces[i].problemId() == ProblemReasons.NotFound) {
 			this.tagBits |= TagBits.HierarchyHasProblems; // propagate type inconsistency
+		} else {
+			// make super-type resolving recursive for propagating typeBits downwards
+			boolean wasToleratingMissingTypeProcessingAnnotations = this.environment.mayTolerateMissingType;
+			this.environment.mayTolerateMissingType = true; // https://bugs.eclipse.org/bugs/show_bug.cgi?id=360164
+			try {
+				this.superInterfaces[i].superclass();
+				this.superInterfaces[i].superInterfaces();
+			} finally {
+				this.environment.mayTolerateMissingType = wasToleratingMissingTypeProcessingAnnotations;
+			}	
+		}
+		this.typeBits |= this.superInterfaces[i].typeBits;
 	}
 	this.tagBits &= ~TagBits.HasUnresolvedSuperinterfaces;
 	return this.superInterfaces;

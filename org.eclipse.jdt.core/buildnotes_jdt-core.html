@@ -42,6 +42,393 @@
 	</td>
   </tr>
 </table>
+<a name="v_C18"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - October 25, 2011 - 3.8.0 M3
+<br>Project org.eclipse.jdt.core v_C18
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_C18">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+
+<a name="v_C17"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - October 20, 2011
+<br>Project org.eclipse.jdt.core v_C17
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_C17">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>Added a new API OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=287164">287164</a> for details):
+<pre>
+/**
+ * Status constant indicating that the default or specific output folder is overlapping
+ * with another source location.
+ * @since 3.8 
+ */
+public static final int OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE = 1013;
+</pre>
+</li>
+
+<li>Added a new option CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE to report an output location overlapping another source location(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=287164">287164</a> for details):
+<pre>
+/**
+ * Core option ID: Reporting an output location overlapping another source location.
+ * Indicate the severity of the problem reported when a source entry's output location overlaps another
+ * source entry.
+ * 
+ * Option id:"org.eclipse.jdt.core.classpath.outputOverlappingAnotherSource"
+ * Possible values:{ "error", "warning", "ignore" }
+ * Default:"error"
+ * 
+ * @since 3.8
+ */
+public static final String CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE = PLUGIN_ID + ".classpath.outputOverlappingAnotherSource";
+</pre>
+</li>
+</ul>
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=287164">287164</a>
+Report build path error if source folder has other source folder as output folder
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359721">359721</a>
+[options] add command line option for new warning token &quot;resource&quot;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=343480">343480</a>
+[compiler] Incorrect/confusing error message on inner class static field declaration
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=318401">318401</a>
+FUP of 317858: Clarify eclipse compiler behavior on imports &amp; shadowing
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=360317">360317</a>
+[compiler] report switch over enum in 1.4- mode
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=360164">360164</a>
+Compile error in XSDImpl
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359727">359727</a>
+[1.7][doc] Update doc for new resource leak warnings
+
+<a name="v_C16"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - October 18, 2011
+<br>Project org.eclipse.jdt.core v_C16
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_C16">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>Added a new API IBootstrapMethodsEntry to describe the bootstrap method table entry(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a> for details):
+<pre>
+/**
+ * Description of a bootstrap method table entry as specified in the JVM specifications.
+ *
+ * This interface may be implemented by clients.
+ *
+ * @since 3.8
+ */
+public interface IBootstrapMethodsEntry;
+</pre>
+</li>
+
+<li>Added a new API IBootstrapMethodsAttribute to describe the bootstrap method attribute(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a> for details):
+<pre>
+/**
+ * Description of a bootstrap methods attribute as described in the JVM specifications.
+ *
+ * This interface may be implemented by clients.
+ *
+ * @since 3.8
+ */
+public interface IBootstrapMethodsAttribute
+</pre>
+</li>
+
+<li>Added a new API in IBootstrapMethodsAttribute to obtain the number of bootstrap methods of this entry(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a> for details):
+<pre>
+/**
+ * Answer back the number of bootstrap methods of this entry as specified in
+ * the JVM specifications.
+ *
+ * @return the number of bootstrap methods of this entry as specified in
+ * the JVM specifications
+ */
+int getBootstrapMethodsLength();
+</pre>
+</li>
+
+<li>Added a new API in IBootstrapMethodsAttribute to obtain the bootstrap methods table of this entry(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a> for details):
+<pre>
+/**
+ * Answer back the bootstrap methods table of this entry as specified in
+ * the JVM specifications. Answer an empty array if none.
+ *
+ * @return the bootstrap methods table of this entry as specified in
+ * the JVM specifications. Answer an empty array if none
+ */
+IBootstrapMethodsEntry[] getBootstrapMethods();
+</pre>
+</li>
+
+<li>Added IConstantPoolEntry2 to describe the new constant pool entry from Java 7 onwards(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a> for details):
+<pre>
+/**
+ * Description of the new constant pool entry as described in the JVM specifications
+ * added for Java 7 support.
+ * Its contents is initialized according to its kind.
+ *
+ * This interface may be implemented by clients.
+ *
+ * @since 3.8
+ */
+public interface IConstantPoolEntry2
+</pre>
+</li>
+
+<li>Added new API in IConstantPoolEntry2 to return the descriptor index for MethodType entry(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a> for details):
+<pre>
+/**
+ * Returns the descriptor index. This value is set only when decoding a MethodType entry.
+ * The value is unspecified otherwise. The corresponding UTF8 value can be retrieved by using
+ * {@link #getMethodDescriptor()}.
+ *
+ * @return the descriptor index. This value is set only when decoding a MethodType entry.
+ * @see IConstantPoolConstant#CONSTANT_MethodType
+ */
+int getDescriptorIndex();
+</pre>
+</li>
+
+<li>Added new API in IConstantPoolEntry2 to return the reference kind for MethodHandle entry(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a> for details):
+<pre>
+/**
+ * Returns the reference kind. This value is set only when decoding a MethodHandle entry.
+ * The value is unspecified otherwise.
+ *
+ * @return the reference kind. This value is set only when decoding a MethodHandle entry.
+ * @see IConstantPoolConstant#CONSTANT_MethodHandle
+ */
+int getReferenceKind();
+</pre>
+</li>
+
+<li>Added new API in IConstantPoolEntry2 to return the reference index for MethodHandle entry(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a> for details):
+<pre>
+/**
+ * Returns the reference index. This value is set only when decoding a MethodHandle entry.
+ * The value is unspecified otherwise.
+ *
+ * @return the reference kind. This value is set only when decoding a MethodHandle entry.
+ * @see IConstantPoolConstant#CONSTANT_MethodHandle
+ */
+int getReferenceIndex();
+</pre>
+</li>
+
+<li>Added new API in IConstantPoolEntry2 to return the bootstrap method attribute index(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a> for details):
+<pre>
+/**
+ * Returns the bootstrap method attribute index. This value is set only when decoding a InvokeDynamic entry.
+ * The value is unspecified otherwise.
+ *
+ * @return the reference kind. This value is set only when decoding a MethodHandle entry.
+ * @see IConstantPoolConstant#CONSTANT_InvokeDynamic
+ */
+int getBootstrapMethodAttributeIndex();
+</pre>
+</li>
+
+<li>Added new API in IByteCodeVisitor(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a> for details):
+<pre>
+	/**
+	 * @since 3.8
+	 */
+	void _invokedynamic(
+			int pc,
+			int index,
+			IConstantPoolEntry invokeDynamic);
+</pre>
+<p>
+This has been added in place of the deprecated API
+<pre>
+	void _invokedynamic(
+			int pc,
+			int index,
+			IConstantPoolEntry nameEntry,
+			IConstantPoolEntry descriptorEntry);
+</pre>
+</li>
+</ul>
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359943">359943</a>
+invokedynamic in generated class file is not correctly recognized by the eclipse compiler
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=360644">360644</a>
+Scope.isDefinedInSameUnit(ReferenceBinding) fails for a ParameterizedTypeBinding
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=358762">358762</a>
+NPE in JDT compiler
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=360328">360328</a>
+[compiler][null] detect null problems in nested code (local class inside a loop)
+
+<a name="v_C15"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - October 11, 2011
+<br>Project org.eclipse.jdt.core v_C15
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_C15">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=350285">350285</a>
+ASTRewrite destroys formatting on CatchClause#setBody(copyTarget)
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=353474">353474</a>
+type converters should include more annotations
+
+<a name="v_C14"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - October 5, 2011
+<br>Project org.eclipse.jdt.core v_C14
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_C14">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=354181">354181</a>
+migrate jdt.core to git
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359831">359831</a>
+Fix messages for &quot;new warning for missing try-with-resources&quot;
+
+<a name="v_C13"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - October 3, 2011
+<br>Project org.eclipse.jdt.core v_C13
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_C13">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>New Javacore option org.eclipse.jdt.core.JavaCore.COMPILER_PB_UNCLOSED_CLOSEABLE to raise a warning or error
+  when a resource of type Closeable or AutoCloseable is not closed locally.  
+(see details in bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=349326">349326</a>):
+<pre>
+	/**
+	 * Compiler option ID: Reporting a resource that is not closed properly.
+	 *
+	 * When enabled, the compiler will issue an error or a warning if
+	 * a local variable holds a value of type <code>java.lang.AutoCloseable</code> (compliance>=1.7) 
+	 * or a value of type <code>java.io.Closeable</code> (compliance<=1.6) and if
+	 * flow analysis shows that the method <code>close()</code> is not invoked locally on that value.
+	 * 
+	 * Option id: <code>"org.eclipse.jdt.core.compiler.problem.reportUnclosedCloseable"</code>
+	 * Possible values: <code>{ "error", "warning", "ignore" }</code>
+	 * Default: <code>"warning"</code>
+	 *
+	 * @since 3.8
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_UNCLOSED_CLOSEABLE = PLUGIN_ID + ".compiler.problem.unclosedCloseable"; //$NON-NLS-1$
+</pre>
+</li>
+<li>New Javacore option org.eclipse.jdt.core.JavaCore.COMPILER_PB_POTENTIALLY_UNCLOSED_CLOSEABLE to raise a warning or error
+  when a resource of type Closeable or AutoCloseable is not definitely closed locally.
+(see details in bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=349326">349326</a>):
+<pre>
+	/**
+	 * Compiler option ID: Reporting a resource that may not be closed properly.
+	 * 
+	 * When enabled, the compiler will issue an error or a warning if
+	 * a local variable holds a value of type <code>java.lang.AutoCloseable</code> (compliance>=1.7) 
+	 * or a value of type <code>java.io.Closeable</code> (compliance<=1.6) and if
+	 * flow analysis shows that the method <code>close()</code> is 
+	 * not invoked locally on that value for all execution paths.
+	 * 
+	 * Option id: <code>"org.eclipse.jdt.core.compiler.problem.reportPotentiallyUnclosedCloseable"</code>
+	 * Possible values: <code>{ "error", "warning", "ignore" }</code>
+	 * Default: <code>"ignore"</code>
+	 * 
+	 * @since 3.8
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_POTENTIALLY_UNCLOSED_CLOSEABLE = PLUGIN_ID + ".compiler.problem.potentiallyUnclosedCloseable"; //$NON-NLS-1$
+</pre>
+</li>
+<li>New Javacore option org.eclipse.jdt.core.JavaCore.COMPILER_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE to raise a warning or error
+  when a resource of type AutoCloseable is closed explicitly rather than using a try-with-resources block.
+(see details in bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=349326">349326</a>):
+<pre>
+	/**
+	 * Compiler option ID: Reporting a resource that is not managed by try-with-resources.
+	 * 
+	 * When enabled, the compiler will issue an error or a warning if a local variable 
+	 * holds a value of type <code>java.lang.AutoCloseable</code>, and if the method
+	 * <code>close()</code> is explicitly invoked on that resource, but the resource is
+	 * not managed by a try-with-resources block.
+	 * 
+	 * Option id: <code>"org.eclipse.jdt.core.compiler.problem.reportPotentiallyUnclosedCloseable"</code>
+	 * Possible values: <code>{ "error", "warning", "ignore" }</code>
+	 * Default: <code>"ignore"</code>
+	 * 
+	 * @since 3.8
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE = PLUGIN_ID + ".compiler.problem.explicitlyClosedAutoCloseable"; //$NON-NLS-1$
+</pre>
+</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359495">359495</a>
+[1.7][compiler] VerifyError in try-finally block with lock encompassing for-each block and unlock in finally clause
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=161129">161129</a>
+[batch][compiler] Add -warn:all to report all warnings
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359646">359646</a>
+Formatter fails silently if Java source contains 0x8000000000000000L
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=256796">256796</a>
+[compiler] dead code detection: &quot;if (DEBUG) return;&quot; should also be trivial IF stmt
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359334">359334</a>
+Analysis for resource leak warnings does not consider exceptions as method exit points
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=359362">359362</a>
+FUP of bug 349326: Resource leak on non-Closeable resource.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=348186">348186</a>
+[compiler] Improve wording for the warning for masked/hidden catch block
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=355838">355838</a>
+[compiler] ecj compiles the code that javac6 rejects
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=349326">349326</a>
+[1.7] new warning for missing try-with-resources
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=354502">354502</a>
+Incorrect Compiler Warning: &quot;Method can be declared as static&quot;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=241834">241834</a>
+[search] ClassCastException during move class refactoring
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=358827">358827</a>
+[1.7] exception analysis for t-w-r spoils null analysis
+
+<a name="v_C12"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - September 23, 2011
+<br>Project org.eclipse.jdt.core v_C12
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_C12">cvs</a>).
+<h2>What's new in this drop</h2>
+<ul>
+<li>Tagging to prepare for the git migration</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+
+<a name="v_C11"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - September 20, 2011
+<br>Project org.eclipse.jdt.core v_C11
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_C11">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=357110">357110</a>
+Problem with inner classes referenced from jars or class folders: &quot;The type ... cannot be resolved&quot;
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=357471">357471</a>
+ASTParser cannot resolve binding of PackageDeclaration if class name is equal to the first segment of the package name
+
 <a name="v_C10"></a>
 <hr><h1>
 Eclipse Platform Build Notes<br>
@@ -66,7 +453,7 @@ Eclipse SDK 3.8.0 - September 9, 2011
 
 <h3>Problem Reports Fixed</h3>
 <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=354332">354332</a>
-DeltaProcessor exhibits O(N&and;2) behavior
+DeltaProcessor exhibits O(N^2) behavior
 <br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=355605">355605</a>
 NPE in HierarchyResolver
 <br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=347396">347396</a>
@@ -244,7 +631,7 @@ Eclipse SDK 3.8.0 - July 27, 2011
 <li>Added a new API in CompletionProposal to tell whether it diamond operator can be used (see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=351444">351444</a> for details):
 <pre>
 /** 
- * Returns whether it is safe to use the '<>' (diamond) operator in place of explicitly specifying
+ * Returns whether it is safe to use the '&lt;&gt;' (diamond) operator in place of explicitly specifying
  * type arguments for this proposal. 
  * 
  * This is only relevant for source level 1.7 or greater.
@@ -263,7 +650,7 @@ usage of type arguments when diamond operator can be used instead. (see details 
 	/**
 	 * Compiler option ID: Reporting redundant specification of type arguments in class instance creation expressions.
 	 * When enabled, the compiler will issue an error or a warning if type arguments are used in a class instance creation,
-	 * when the '<>' operator can be used instead.
+	 * when the '&lt;&gt;' operator can be used instead.
 	 *
 	 * This option only has an effect if the compiler compliance is 1.7 or greater.
 	 * 

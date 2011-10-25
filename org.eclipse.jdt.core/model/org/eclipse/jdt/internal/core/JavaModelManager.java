@@ -11,6 +11,7 @@
  *                                                           before its contents
  *                                                           (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=102422)
  *     Stephan Herrmann - Contribution for Bug 346010 - [model] strange initialization dependency in OptionTests
+ *     Terry Parker <tparker@google.com> - DeltaProcessor misses state changes in archive files, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=357425
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.core;
@@ -1487,7 +1488,8 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 					propertyName.equals(JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS) ||
 					propertyName.equals(JavaCore.CORE_INCOMPLETE_CLASSPATH) ||
 					propertyName.equals(JavaCore.CORE_CIRCULAR_CLASSPATH) ||
-					propertyName.equals(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL)) {
+					propertyName.equals(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL) ||
+					propertyName.equals(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE)) {
 					JavaModelManager manager = JavaModelManager.getJavaModelManager();
 					IJavaModel model = manager.getJavaModel();
 					IJavaProject[] projects;
@@ -2254,7 +2256,8 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 		defaultOptionsMap.put(JavaCore.CORE_JAVA_BUILD_ORDER, JavaCore.IGNORE);
 		defaultOptionsMap.put(JavaCore.CORE_INCOMPLETE_CLASSPATH, JavaCore.ERROR);
 		defaultOptionsMap.put(JavaCore.CORE_CIRCULAR_CLASSPATH, JavaCore.ERROR);
-		defaultOptionsMap.put(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL, JavaCore.IGNORE);
+		defaultOptionsMap.put(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL, JavaCore.IGNORE); 
+		defaultOptionsMap.put(JavaCore.CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE, JavaCore.ERROR);
 		defaultOptionsMap.put(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS, JavaCore.ENABLED);
 		defaultOptionsMap.put(JavaCore.CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS, JavaCore.ENABLED);
 
@@ -3090,6 +3093,12 @@ public class JavaModelManager implements ISaveParticipant, IContentTypeChangeLis
 	
 	public boolean isInvalidArchive(IPath path) {
 		return this.invalidArchives != null && this.invalidArchives.contains(path);
+	}
+
+	public void removeFromInvalidArchiveCache(IPath path) {
+		if (this.invalidArchives != null) {
+			this.invalidArchives.remove(path);
+		}
 	}
 
 	public void setClasspathBeingResolved(IJavaProject project, boolean classpathIsResolved) {

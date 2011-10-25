@@ -84,6 +84,10 @@
  *     Benjamin Muskalla - added COMPILER_PB_MISSING_SYNCHRONIZED_ON_INHERITED_METHOD
  *     Stephan Herrmann  - added COMPILER_PB_UNUSED_OBJECT_ALLOCATION
  *     Stephan Herrmann  - added COMPILER_PB_SUPPRESS_OPTIONAL_ERRORS
+ *     Stephan Herrmann  - added the following constants:
+ *     								COMPILER_PB_UNCLOSED_CLOSEABLE,
+ *     								COMPILER_PB_POTENTIALLY_UNCLOSED_CLOSEABLE
+ *     								COMPILER_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE
  *
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
@@ -1375,6 +1379,52 @@ public final class JavaCore extends Plugin {
 	 */
 	public static final String COMPILER_PB_POTENTIALLY_MISSING_STATIC_ON_METHOD = PLUGIN_ID + ".compiler.problem.reportMethodCanBePotentiallyStatic"; //$NON-NLS-1$
 	/**
+	 * Compiler option ID: Reporting a resource that is not closed properly.
+	 * <p>When enabled, the compiler will issue an error or a warning if
+	 *    a local variable holds a value of type <code>java.lang.AutoCloseable</code> (compliance>=1.7) 
+	 *    or a value of type <code>java.io.Closeable</code> (compliance<=1.6) and if
+	 *    flow analysis shows that the method <code>close()</code> is not invoked locally on that value.
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.reportUnclosedCloseable"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"warning"</code></dd>
+	 * </dl>
+	 * @since 3.8
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_UNCLOSED_CLOSEABLE = PLUGIN_ID + ".compiler.problem.unclosedCloseable"; //$NON-NLS-1$
+	/**
+	 * Compiler option ID: Reporting a resource that may not be closed properly.
+	 * <p>When enabled, the compiler will issue an error or a warning if
+	 *    a local variable holds a value of type <code>java.lang.AutoCloseable</code> (compliance>=1.7) 
+	 *    or a value of type <code>java.io.Closeable</code> (compliance<=1.6) and if
+	 *    flow analysis shows that the method <code>close()</code> is 
+	 *    not invoked locally on that value for all execution paths.
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.reportPotentiallyUnclosedCloseable"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"ignore"</code></dd>
+	 * </dl>
+	 * @since 3.8
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_POTENTIALLY_UNCLOSED_CLOSEABLE = PLUGIN_ID + ".compiler.problem.potentiallyUnclosedCloseable"; //$NON-NLS-1$
+	/**
+	 * Compiler option ID: Reporting a resource that is not managed by try-with-resources.
+	 * <p>When enabled, the compiler will issue an error or a warning if a local variable 
+	 * 	  holds a value of type <code>java.lang.AutoCloseable</code>, and if the method
+	 *    <code>close()</code> is explicitly invoked on that resource, but the resource is
+	 *    not managed by a try-with-resources block.
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.reportPotentiallyUnclosedCloseable"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"ignore"</code></dd>
+	 * </dl>
+	 * @since 3.8
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_EXPLICITLY_CLOSED_AUTOCLOSEABLE = PLUGIN_ID + ".compiler.problem.explicitlyClosedAutoCloseable"; //$NON-NLS-1$
+	/**
 	 * Compiler option ID: Setting Source Compatibility Mode.
 	 * <p>Specify whether which source level compatibility is used. From 1.4 on, <code>'assert'</code> is a keyword
 	 *    reserved for assertion support. Also note, than when toggling to 1.4 mode, the target VM
@@ -1846,6 +1896,19 @@ public final class JavaCore extends Plugin {
 	 * @category CoreOptionID
 	 */
 	public static final String CORE_ENABLE_CLASSPATH_MULTIPLE_OUTPUT_LOCATIONS = PLUGIN_ID + ".classpath.multipleOutputLocations"; //$NON-NLS-1$
+	/**
+	 * Core option ID: Reporting an output location overlapping another source location.
+	 * <p> Indicate the severity of the problem reported when a source entry's output location overlaps another
+	 * source entry. </p>
+	 * 
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.classpath.outputOverlappingAnotherSource"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"error"</code></dd>
+	 * </dl>
+	 * @since 3.6.4
+	 */
+	public static final String CORE_OUTPUT_LOCATION_OVERLAPPING_ANOTHER_SOURCE = PLUGIN_ID + ".classpath.outputOverlappingAnotherSource";  //$NON-NLS-1$
 	/**
 	 * Core option ID: Set the timeout value for retrieving the method's parameter names from javadoc.
 	 * <p>Timeout in milliseconds to retrieve the method's parameter names from javadoc.
@@ -3714,6 +3777,7 @@ public final class JavaCore extends Plugin {
 							try {
 								if (JavaBuilder.DEBUG)
 									System.out.println("Touching " + project.getElementName()); //$NON-NLS-1$
+								new ClasspathValidation((JavaProject) project).validate(); // https://bugs.eclipse.org/bugs/show_bug.cgi?id=287164
 								project.getProject().touch(progressMonitor2);
 							} catch (CoreException e) {
 								// could not touch this project: ignore

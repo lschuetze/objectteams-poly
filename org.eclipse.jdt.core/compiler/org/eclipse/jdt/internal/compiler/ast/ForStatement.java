@@ -7,7 +7,9 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     Stephan Herrmann - Contributions for 
+ *     							bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
@@ -139,7 +141,7 @@ public class ForStatement extends Statement {
 						actionInfo.setReachMode(FlowInfo.UNREACHABLE_OR_DEAD);
 					}
 				}
-			if (this.action.complainIfUnreachable(actionInfo, this.scope, initialComplaintLevel) < Statement.COMPLAINED_UNREACHABLE) {
+			if (this.action.complainIfUnreachable(actionInfo, this.scope, initialComplaintLevel, true) < Statement.COMPLAINED_UNREACHABLE) {
 				actionInfo = this.action.analyseCode(this.scope, loopingContext, actionInfo).unconditionalInits();
 			}
 
@@ -216,6 +218,17 @@ public class ForStatement extends Statement {
 				exitBranch,
 				isConditionOptimizedFalse,
 				!isConditionTrue /*for(;;){}while(true); unreachable(); */);
+		// Variables initialized only for the purpose of the for loop can be removed for further flow info
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=359495
+		if (this.initializations != null) {
+			for (int i = 0; i < this.initializations.length; i++) {
+				Statement init = this.initializations[i];
+				if (init instanceof LocalDeclaration) {
+					LocalVariableBinding binding = ((LocalDeclaration) init).binding;
+					mergedInfo.resetAssignmentInfo(binding);
+				}
+			}
+		}
 		this.mergedInitStateIndex = currentScope.methodScope().recordInitializationStates(mergedInfo);
 		return mergedInfo;
 	}

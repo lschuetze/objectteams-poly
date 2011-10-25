@@ -7,7 +7,9 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     Stephan Herrmann - Contributions for 
+ *     							bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -84,12 +86,13 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		// No need if the whole if-else construct itself lies in unreachable code
 		this.bits |= ASTNode.IsElseStatementUnreachable;
 	}
+	boolean reportDeadCodeForKnownPattern = !isKnowDeadCodePattern(this.condition) || currentScope.compilerOptions().reportDeadCodeInTrivialIfStatement;
 	if (this.thenStatement != null) {
 		// Save info for code gen
 		this.thenInitStateIndex = currentScope.methodScope().recordInitializationStates(thenFlowInfo);
 		if (isConditionOptimizedFalse || ((this.bits & ASTNode.IsThenStatementUnreachable) != 0)) {
-			if (!isKnowDeadCodePattern(this.condition) || currentScope.compilerOptions().reportDeadCodeInTrivialIfStatement) {
-				this.thenStatement.complainIfUnreachable(thenFlowInfo, currentScope, initialComplaintLevel);
+			if (reportDeadCodeForKnownPattern) {
+				this.thenStatement.complainIfUnreachable(thenFlowInfo, currentScope, initialComplaintLevel, false);
 			} else {
 				// its a known coding pattern which should be tolerated by dead code analysis
 				// according to isKnowDeadCodePattern()
@@ -117,8 +120,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		// Save info for code gen
 		this.elseInitStateIndex = currentScope.methodScope().recordInitializationStates(elseFlowInfo);
 		if (isConditionOptimizedTrue || ((this.bits & ASTNode.IsElseStatementUnreachable) != 0)) {
-			if (!isKnowDeadCodePattern(this.condition) || currentScope.compilerOptions().reportDeadCodeInTrivialIfStatement) {
-				this.elseStatement.complainIfUnreachable(elseFlowInfo, currentScope, initialComplaintLevel);
+			if (reportDeadCodeForKnownPattern) {
+				this.elseStatement.complainIfUnreachable(elseFlowInfo, currentScope, initialComplaintLevel, false);
 			} else {
 				// its a known coding pattern which should be tolerated by dead code analysis
 				// according to isKnowDeadCodePattern()
@@ -127,6 +130,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		}
 		elseFlowInfo = this.elseStatement.analyseCode(currentScope, flowContext, elseFlowInfo);
 	}
+	// process AutoCloseable resources closed in only one branch:
+	currentScope.correlateTrackingVarsIfElse(thenFlowInfo, elseFlowInfo);
 	// merge THEN & ELSE initializations
 	FlowInfo mergedInfo = FlowInfo.mergedOptimizedBranchesIfElse(
 		thenFlowInfo,
@@ -135,7 +140,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		isConditionOptimizedFalse,
 		true /*if(true){ return; }  fake-reachable(); */,
 		flowInfo,
-		this);
+		this,
+		reportDeadCodeForKnownPattern);
 	this.mergedInitStateIndex = currentScope.methodScope().recordInitializationStates(mergedInfo);
 	return mergedInfo;
 }

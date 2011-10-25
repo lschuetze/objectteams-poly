@@ -12,6 +12,7 @@
  *     						bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
  *     						bug 292478 - Report potentially null across variable assignment
  *     						bug 335093 - [compiler][null] minimal hook for future null annotation support
+ *     						bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -120,6 +121,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		this.initialization
 			.analyseCode(currentScope, flowContext, flowInfo)
 			.unconditionalInits();
+	FakedTrackingVariable.handleResourceAssignment(flowInfo, this, this.initialization, this.binding, null);
 	int nullStatus = this.initialization.nullStatus(flowInfo);
 	if (!flowInfo.isDefinitelyAssigned(this.binding)){// for local variable debug attributes
 		this.bits |= FirstAssignmentToLocal;

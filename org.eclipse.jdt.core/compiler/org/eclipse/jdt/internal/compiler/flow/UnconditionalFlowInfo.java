@@ -14,6 +14,7 @@
  *     						bug 292478 - Report potentially null across variable assignment
  *     						bug 332637 - Dead Code detection removing code that isn't dead
  *     						bug 341499 - [compiler][null] allocate extra bits in all methods of UnconditionalFlowInfo
+ *     						bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -785,7 +786,7 @@ final public boolean isDefinitelyNonNull(LocalVariableBinding local) {
 	}
 	int vectorIndex;
 	if ((vectorIndex = (position / BitCacheSize) - 1)
-			>= this.extra[0].length) {
+			>= this.extra[2].length) {
 		return false; // if not enough room in vector, then not initialized
 	}
 	return ((this.extra[2][vectorIndex] & this.extra[4][vectorIndex]
@@ -812,7 +813,7 @@ final public boolean isDefinitelyNull(LocalVariableBinding local) {
 	}
 	int vectorIndex;
 	if ((vectorIndex = (position / BitCacheSize) - 1) >=
-			this.extra[0].length) {
+			this.extra[2].length) {
 		return false; // if not enough room in vector, then not initialized
 	}
 	return ((this.extra[2][vectorIndex] & this.extra[3][vectorIndex]
@@ -837,7 +838,7 @@ final public boolean isDefinitelyUnknown(LocalVariableBinding local) {
 	}
 	int vectorIndex;
 	if ((vectorIndex = (position / BitCacheSize) - 1) >=
-			this.extra[0].length) {
+			this.extra[2].length) {
 		return false; // if not enough room in vector, then not initialized
 	}
 	return ((this.extra[2][vectorIndex] & this.extra[5][vectorIndex]
@@ -904,7 +905,7 @@ final public boolean isPotentiallyNonNull(LocalVariableBinding local) {
 	}
 	int vectorIndex;
 	if ((vectorIndex = (position / BitCacheSize) - 1) >=
-			this.extra[0].length) {
+			this.extra[2].length) {
 		return false; // if not enough room in vector, then not initialized
 	}
 	return ((this.extra[4][vectorIndex]
@@ -930,7 +931,7 @@ final public boolean isPotentiallyNull(LocalVariableBinding local) {
 	}
 	int vectorIndex;
 	if ((vectorIndex = (position / BitCacheSize) - 1) >=
-			this.extra[0].length) {
+			this.extra[2].length) {
 		return false; // if not enough room in vector, then not initialized
 	}
 	return ((this.extra[3][vectorIndex]
@@ -956,7 +957,7 @@ final public boolean isPotentiallyUnknown(LocalVariableBinding local) {
 	}
 	int vectorIndex;
 	if ((vectorIndex = (position / BitCacheSize) - 1) >=
-			this.extra[0].length) {
+			this.extra[2].length) {
 		return false; // if not enough room in vector, then not initialized
 	}
 	return (this.extra[5][vectorIndex]
@@ -2149,6 +2150,30 @@ private void combineNullStatusChangeInAssertInfo(UnconditionalFlowInfo otherInit
 			}
 		} else if (otherInits.nullStatusChangedInAssert != null) {
 			this.nullStatusChangedInAssert = otherInits.nullStatusChangedInAssert;
+		}
+	}
+}
+
+public void resetAssignmentInfo(LocalVariableBinding local) {
+	resetAssignmentInfo(local.id + this.maxFieldCount);
+}
+
+public void resetAssignmentInfo(int position) {
+	if (this != DEAD_END) {
+		// position is zero-based
+		if (position < BitCacheSize) {
+			// use bits
+			long mask;
+			this.definiteInits &= (mask = ~(1L << position));
+			this.potentialInits &= mask;
+		} else {
+			// use extra vector
+			int vectorIndex = (position / BitCacheSize) - 1;
+			if (this.extra == null || vectorIndex >= this.extra[0].length) return;	// variable doesnt exist in flow info
+			long mask;
+			this.extra[0][vectorIndex] &=
+				(mask = ~(1L << (position % BitCacheSize)));
+			this.extra[1][vectorIndex] &= mask;
 		}
 	}
 }

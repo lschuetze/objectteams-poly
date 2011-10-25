@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,9 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for
+ *     							bug 349326 - [1.7] new warning for missing try-with-resources
+ *     							bug 359362 - FUP of bug 349326: Resource leak on non-Closeable resource
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
@@ -58,6 +61,7 @@ public class WildcardBinding extends ReferenceBinding {
 		if (bound instanceof UnresolvedReferenceBinding)
 			((UnresolvedReferenceBinding) bound).addWrapper(this, environment);
 		this.tagBits |=  TagBits.HasUnresolvedTypeVariables; // cleared in resolve()
+		this.typeBits = TypeIds.BitUninitialized;
 	}
 
 //{ObjectTeams: role wrapping?
@@ -432,6 +436,20 @@ public class WildcardBinding extends ReferenceBinding {
 
 	public int hashCode() {
 		return this.genericType.hashCode();
+	}
+
+	public boolean hasTypeBit(int bit) {
+		if (this.typeBits == TypeIds.BitUninitialized) {
+			// initialize from upper bounds
+			this.typeBits = 0;
+			if (this.superclass != null && this.superclass.hasTypeBit(~TypeIds.BitUninitialized))
+				this.typeBits |= this.superclass.typeBits;
+			if (this.superInterfaces != null)
+				for (int i = 0, l = this.superInterfaces.length; i < l; i++)
+					if (this.superInterfaces[i].hasTypeBit(~TypeIds.BitUninitialized))
+						this.typeBits |= this.superInterfaces[i].typeBits;
+		}
+		return (this.typeBits & bit) != 0;
 	}
 
 	void initialize(ReferenceBinding someGenericType, TypeBinding someBound, TypeBinding[] someOtherBounds) {

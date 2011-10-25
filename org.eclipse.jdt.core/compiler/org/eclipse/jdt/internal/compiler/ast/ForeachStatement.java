@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for bug 349326 - [1.7] new warning for missing try-with-resources
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
@@ -112,13 +113,13 @@ public class ForeachStatement extends Statement {
 		if (!(this.action == null || (this.action.isEmptyBlock()
 				&& currentScope.compilerOptions().complianceLevel <= ClassFileConstants.JDK1_3))) {
 
-			if (this.action.complainIfUnreachable(actionInfo, this.scope, initialComplaintLevel) < Statement.COMPLAINED_UNREACHABLE) {
+			if (this.action.complainIfUnreachable(actionInfo, this.scope, initialComplaintLevel, true) < Statement.COMPLAINED_UNREACHABLE) {
 				actionInfo = this.action.analyseCode(this.scope, loopingContext, actionInfo).unconditionalCopy();
 			}
 
 			// code generation can be optimized when no need to continue in the loop
 			exitBranch = flowInfo.unconditionalCopy().
-			addInitializationsFrom(condInfo.initsWhenFalse());
+					addNullInfoFrom(condInfo.initsWhenFalse());
 			// TODO (maxime) no need to test when false: can optimize (same for action being unreachable above)
 			if ((actionInfo.tagBits & loopingContext.initsOnContinue.tagBits &
 					FlowInfo.UNREACHABLE_OR_DEAD) != 0) {

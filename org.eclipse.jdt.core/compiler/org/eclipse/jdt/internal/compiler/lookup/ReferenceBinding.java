@@ -7,6 +7,7 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -90,7 +91,11 @@ abstract public class ReferenceBinding extends AbstractOTReferenceBinding {
 
 	private SimpleLookupTable compatibleCache;
 
-	public static final ReferenceBinding LUB_GENERIC = new ReferenceBinding() { /* used for lub computation */};
+	int typeBits; // additional bits characterizing this type
+
+	public static final ReferenceBinding LUB_GENERIC = new ReferenceBinding() { /* used for lub computation */
+		public boolean hasTypeBit(int bit) { return false; }
+	};
 
 	private static final Comparator FIELD_COMPARATOR = new Comparator() {
 		public int compare(Object o1, Object o2) {
@@ -570,6 +575,10 @@ public void computeId() {
 					case 'i' :
 						if (CharOperation.equals(packageName, TypeConstants.IO)) {
 							switch (typeName[0]) {
+								case 'C' :
+									if (CharOperation.equals(typeName, TypeConstants.JAVA_IO_CLOSEABLE[2]))
+										this.typeBits |= TypeIds.BitCloseable; // don't assign id, only typeBit (for analysis of resource leaks) 
+									return;
 								case 'E' :
 									if (CharOperation.equals(typeName, TypeConstants.JAVA_IO_EXTERNALIZABLE[2]))
 										this.id = TypeIds.T_JavaIoExternalizable;
@@ -616,8 +625,10 @@ public void computeId() {
 				case 'A' :
 					switch(typeName.length) {
 						case 13 :
-							if (CharOperation.equals(typeName, TypeConstants.JAVA_LANG_AUTOCLOSEABLE[2]))
+							if (CharOperation.equals(typeName, TypeConstants.JAVA_LANG_AUTOCLOSEABLE[2])) {
 								this.id = TypeIds.T_JavaLangAutoCloseable;
+								this.typeBits |= TypeIds.BitAutoCloseable; 
+							}
 							return;
 						case 14:
 							if (CharOperation.equals(typeName, TypeConstants.JAVA_LANG_ASSERTIONERROR[2]))
@@ -1026,6 +1037,8 @@ public FieldBinding getField(char[] fieldName, boolean needResolve) {
 public char[] getFileName() {
 	return this.fileName;
 }
+/** Answer an additional bit characterizing this type, like {@link TypeIds#BitAutoCloseable}. */
+abstract public boolean hasTypeBit(int bit);
 
 public ReferenceBinding getMemberType(char[] typeName) {
 	ReferenceBinding[] memberTypes = memberTypes();

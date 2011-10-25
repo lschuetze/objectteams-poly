@@ -7,7 +7,10 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     Stephan Herrmann - Contributions for 
+ *     							bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     							bug 349326 - [1.7] new warning for missing try-with-resources
+ *     							bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
@@ -41,14 +44,23 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	// lookup the label, this should answer the returnContext
 
+	MethodScope methodScope = currentScope.methodScope();
 	if (this.expression != null) {
 		flowInfo = this.expression.analyseCode(currentScope, flowContext, flowInfo);
 		if ((this.expression.implicitConversion & TypeIds.UNBOXING) != 0) {
 			this.expression.checkNPE(currentScope, flowContext, flowInfo);
 		}
+		FakedTrackingVariable trackingVariable = FakedTrackingVariable.getCloseTrackingVariable(this.expression);
+		if (trackingVariable != null) {
+			if (methodScope != trackingVariable.methodScope)
+				trackingVariable.markClosedInNestedMethod();
+			// don't report issues concerning this local, since by returning
+			// the method passes the responsibility to the caller:
+			currentScope.removeTrackingVar(trackingVariable);
+		}
 	}
 	this.initStateIndex =
-		currentScope.methodScope().recordInitializationStates(flowInfo);
+		methodScope.recordInitializationStates(flowInfo);
 	// compute the return sequence (running the finally blocks)
 	FlowContext traversedContext = flowContext;
 	int subCount = 0;
@@ -85,14 +97,14 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 					}
 					saveValueNeeded = true;
 					this.initStateIndex =
-						currentScope.methodScope().recordInitializationStates(flowInfo);
+						methodScope.recordInitializationStates(flowInfo);
 				}
 			}
 		} else if (traversedContext instanceof InitializationFlowContext) {
 				currentScope.problemReporter().cannotReturnInInitializer(this);
 				return FlowInfo.DEAD_END;
 		}
-	} while ((traversedContext = traversedContext.parent) != null);
+	} while ((traversedContext = traversedContext.getLocalParent()) != null);
 
 	// resize subroutines
 	if ((this.subroutines != null) && (subCount != this.subroutines.length)) {
@@ -110,6 +122,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			this.expression.bits |= ASTNode.IsReturnedValue;
 		}
 	}
+	currentScope.checkUnclosedCloseables(flowInfo, this, currentScope);
 	return FlowInfo.DEAD_END;
 }
 

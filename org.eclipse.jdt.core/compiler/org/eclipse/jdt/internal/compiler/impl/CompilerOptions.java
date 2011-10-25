@@ -8,8 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - Contribution for bug 239066
- *     Stephan Herrmann  - Contribution for bug 236385
- *     Stephan Herrmann  - Contribution for bug 295551
+ *     Stephan Herrmann  - Contributions for
+ *     							bug 236385 - [compiler] Warn for potential programming problem if an object is created but not used
+ *     							bug 295551 - Add option to automatically promote all warnings to errors
+ *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -146,6 +148,9 @@ public class CompilerOptions {
 	public static final String OPTION_ReportMethodCanBeStatic = "org.eclipse.jdt.core.compiler.problem.reportMethodCanBeStatic";  //$NON-NLS-1$
 	public static final String OPTION_ReportMethodCanBePotentiallyStatic = "org.eclipse.jdt.core.compiler.problem.reportMethodCanBePotentiallyStatic";  //$NON-NLS-1$
 	public static final String OPTION_ReportRedundantSpecificationOfTypeArguments =  "org.eclipse.jdt.core.compiler.problem.redundantSpecificationOfTypeArguments"; //$NON-NLS-1$
+	public static final String OPTION_ReportUnclosedCloseable = "org.eclipse.jdt.core.compiler.problem.unclosedCloseable"; //$NON-NLS-1$
+	public static final String OPTION_ReportPotentiallyUnclosedCloseable = "org.eclipse.jdt.core.compiler.problem.potentiallyUnclosedCloseable"; //$NON-NLS-1$
+	public static final String OPTION_ReportExplicitlyClosedAutoCloseable = "org.eclipse.jdt.core.compiler.problem.explicitlyClosedAutoCloseable"; //$NON-NLS-1$
 
 //{ObjectTeams: sync with constants in OTDTPlugin:
 	public static final String OPTION_ReportNotExactlyOneBasecall =
@@ -317,6 +322,10 @@ public class CompilerOptions {
 	public static final int MethodCanBeStatic = IrritantSet.GROUP2 | ASTNode.Bit5;
 	public static final int MethodCanBePotentiallyStatic = IrritantSet.GROUP2 | ASTNode.Bit6;
 	public static final int RedundantSpecificationOfTypeArguments = IrritantSet.GROUP2 | ASTNode.Bit7;
+	// bits 8-10 reserved for https://bugs.eclipse.org/bugs/show_bug.cgi?id=186342
+	public static final int UnclosedCloseable = IrritantSet.GROUP2 | ASTNode.Bit11;
+	public static final int PotentiallyUnclosedCloseable = IrritantSet.GROUP2 | ASTNode.Bit12;
+	public static final int ExplicitlyClosedAutoCloseable = IrritantSet.GROUP2 | ASTNode.Bit13;
 
 //{ObjectTeams: OT/J specific problems/irritants:
 	public static final int OTJFlag = IrritantSet.GROUP3;
@@ -487,8 +496,9 @@ public class CompilerOptions {
 		"javadoc", //$NON-NLS-1$
 		"nls", //$NON-NLS-1$
 		"null", //$NON-NLS-1$
-		"restriction", //$NON-NLS-1$
 		"rawtypes", //$NON-NLS-1$
+		"resource", //$NON-NLS-1$
+		"restriction", //$NON-NLS-1$		
 		"serial", //$NON-NLS-1$
 		"static-access", //$NON-NLS-1$
 		"static-method", //$NON-NLS-1$
@@ -682,6 +692,12 @@ public class CompilerOptions {
 				return OPTION_ReportMethodCanBePotentiallyStatic;
 			case RedundantSpecificationOfTypeArguments :
 				return OPTION_ReportRedundantSpecificationOfTypeArguments;
+			case UnclosedCloseable :
+				return OPTION_ReportUnclosedCloseable;
+			case PotentiallyUnclosedCloseable :
+				return OPTION_ReportPotentiallyUnclosedCloseable;
+			case ExplicitlyClosedAutoCloseable :
+				return OPTION_ReportExplicitlyClosedAutoCloseable;
 //{ObjectTeams:
 			case NotExactlyOneBasecall :
 				return OPTION_ReportNotExactlyOneBasecall;
@@ -891,6 +907,9 @@ public class CompilerOptions {
 			OPTION_ReportUnusedTypeArgumentsForMethodInvocation,
 			OPTION_ReportUnusedWarningToken,
 			OPTION_ReportVarargsArgumentNeedCast,
+			OPTION_ReportUnclosedCloseable,
+			OPTION_ReportPotentiallyUnclosedCloseable,
+			OPTION_ReportExplicitlyClosedAutoCloseable,
 //{ObjectTeams:
 			OPTION_ReportNotExactlyOneBasecall,
 			OPTION_ReportBaseclassCycle,
@@ -984,6 +1003,10 @@ public class CompilerOptions {
 			case MethodCanBeStatic :
 			case MethodCanBePotentiallyStatic :
 				return "static-method"; //$NON-NLS-1$
+			case PotentiallyUnclosedCloseable:
+			case UnclosedCloseable:
+			case ExplicitlyClosedAutoCloseable:
+				return "resource"; //$NON-NLS-1$
 			case InvalidJavadoc :
 			case MissingJavadocComments :
 			case MissingJavadocTags:
@@ -1082,6 +1105,8 @@ public class CompilerOptions {
 			case 'r' :
 				if ("rawtypes".equals(warningToken)) //$NON-NLS-1$
 					return IrritantSet.RAW;
+				if ("resource".equals(warningToken)) //$NON-NLS-1$
+					return IrritantSet.RESOURCE;
 				if ("restriction".equals(warningToken)) //$NON-NLS-1$
 					return IrritantSet.RESTRICTION;
 				break;
@@ -1282,6 +1307,9 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportMethodCanBeStatic, getSeverityString(MethodCanBeStatic));
 		optionsMap.put(OPTION_ReportMethodCanBePotentiallyStatic, getSeverityString(MethodCanBePotentiallyStatic));
 		optionsMap.put(OPTION_ReportRedundantSpecificationOfTypeArguments, getSeverityString(RedundantSpecificationOfTypeArguments));
+		optionsMap.put(OPTION_ReportUnclosedCloseable, getSeverityString(UnclosedCloseable));
+		optionsMap.put(OPTION_ReportPotentiallyUnclosedCloseable, getSeverityString(PotentiallyUnclosedCloseable));
+		optionsMap.put(OPTION_ReportExplicitlyClosedAutoCloseable, getSeverityString(ExplicitlyClosedAutoCloseable));
 //{ObjectTeams:
 		optionsMap.put(OPTION_Decapsulation, this.decapsulation);
 
@@ -1744,6 +1772,9 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportMethodCanBeStatic)) != null) updateSeverity(MethodCanBeStatic, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportMethodCanBePotentiallyStatic)) != null) updateSeverity(MethodCanBePotentiallyStatic, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportRedundantSpecificationOfTypeArguments)) != null) updateSeverity(RedundantSpecificationOfTypeArguments, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportUnclosedCloseable)) != null) updateSeverity(UnclosedCloseable, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportPotentiallyUnclosedCloseable)) != null) updateSeverity(PotentiallyUnclosedCloseable, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportExplicitlyClosedAutoCloseable)) != null) updateSeverity(ExplicitlyClosedAutoCloseable, optionValue);
 //{ObjectTeams:
 		if ((optionValue = optionsMap.get(OPTION_ReportNotExactlyOneBasecall)) != null) updateSeverity(NotExactlyOneBasecall, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportBaseclassCycle)) != null) updateSeverity(BaseclassCycle, optionValue);
@@ -2005,6 +2036,9 @@ public class CompilerOptions {
 		buf.append("\n\t- method can be static: ").append(getSeverityString(MethodCanBeStatic)); //$NON-NLS-1$
 		buf.append("\n\t- method can be potentially static: ").append(getSeverityString(MethodCanBePotentiallyStatic)); //$NON-NLS-1$
 		buf.append("\n\t- redundant specification of type arguments: ").append(getSeverityString(RedundantSpecificationOfTypeArguments)); //$NON-NLS-1$
+		buf.append("\n\t- resource is not closed: ").append(getSeverityString(UnclosedCloseable)); //$NON-NLS-1$
+		buf.append("\n\t- resource may not be closed: ").append(getSeverityString(PotentiallyUnclosedCloseable)); //$NON-NLS-1$
+		buf.append("\n\t- resource should be handled by try-with-resources: ").append(getSeverityString(ExplicitlyClosedAutoCloseable)); //$NON-NLS-1$
 //{ObjectTeams
 		buf.append("\n\t- decapsulation : ").append(this.decapsulation); //$NON-NLS-1$
 		buf.append("\n\t- report if not exactly one basecall in callin method : ").append(getSeverityString(NotExactlyOneBasecall)); //$NON-NLS-1$

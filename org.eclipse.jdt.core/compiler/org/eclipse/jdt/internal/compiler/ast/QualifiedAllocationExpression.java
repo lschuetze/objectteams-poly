@@ -7,7 +7,9 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contribution for bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     Stephan Herrmann - Contributions for
+ *     							bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *******************************************************************************/
@@ -128,6 +130,11 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		// analyse the enclosing instance
 		if (this.enclosingInstance != null) {
 			flowInfo = this.enclosingInstance.analyseCode(currentScope, flowContext, flowInfo);
+		} else {
+			if (this.binding.declaringClass.superclass().isMemberType() && !this.binding.declaringClass.superclass().isStatic()) {
+				// creating an anonymous type of a non-static member type without an enclosing instance of parent type
+				currentScope.resetEnclosingMethodStaticFlag();
+			}
 		}
 
 		// check captured variables are initialized in current context (26134)
@@ -141,6 +148,8 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		// process arguments
 		if (this.arguments != null) {
 			for (int i = 0, count = this.arguments.length; i < count; i++) {
+				// if argument is an AutoCloseable insert info that it *may* be closed (by the target method, i.e.)
+				flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.arguments[i], flowInfo);
 				flowInfo = this.arguments[i].analyseCode(currentScope, flowContext, flowInfo);
 				if ((this.arguments[i].implicitConversion & TypeIds.UNBOXING) != 0) {
 					this.arguments[i].checkNPE(currentScope, flowContext, flowInfo);

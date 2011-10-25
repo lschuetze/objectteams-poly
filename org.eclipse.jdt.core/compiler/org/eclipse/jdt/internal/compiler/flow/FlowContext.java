@@ -7,13 +7,15 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for bug 358827 - [1.7] exception analysis for t-w-r spoils null analysis
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.flow;
 
 import java.util.ArrayList;
+
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.LabeledStatement;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
@@ -197,14 +199,16 @@ public void checkExceptionHandlers(TypeBinding raisedException, ASTNode location
 
 		traversedContext.recordReturnFrom(flowInfo.unconditionalInits());
 
-		if (traversedContext instanceof InsideSubRoutineFlowContext) {
-			ASTNode node = traversedContext.associatedNode;
-			if (node instanceof TryStatement) {
-				TryStatement tryStatement = (TryStatement) node;
-				flowInfo.addInitializationsFrom(tryStatement.subRoutineInits); // collect inits
+		if (!isExceptionOnAutoClose) {
+			if (traversedContext instanceof InsideSubRoutineFlowContext) {
+				ASTNode node = traversedContext.associatedNode;
+				if (node instanceof TryStatement) {
+					TryStatement tryStatement = (TryStatement) node;
+					flowInfo.addInitializationsFrom(tryStatement.subRoutineInits); // collect inits
+				}
 			}
 		}
-		traversedContext = traversedContext.parent;
+		traversedContext = traversedContext.getLocalParent();
 	}
 	// if reaches this point, then there are some remaining unhandled exception types.
 	if (isExceptionOnAutoClose) {
@@ -350,7 +354,7 @@ public void checkExceptionHandlers(TypeBinding[] raisedExceptions, ASTNode locat
 				flowInfo.addInitializationsFrom(tryStatement.subRoutineInits); // collect inits
 			}
 		}
-		traversedContext = traversedContext.parent;
+		traversedContext = traversedContext.getLocalParent();
 	}
 	// if reaches this point, then there are some remaining unhandled exception types.
 	nextReport: for (int i = 0; i < raisedCount; i++) {
@@ -382,9 +386,9 @@ public FlowInfo getInitsForFinalBlankInitializationCheck(TypeBinding declaringTy
 			current = initializationContext.initializationParent;
 		} else if (current instanceof ExceptionHandlingFlowContext) {
 			ExceptionHandlingFlowContext exceptionContext = (ExceptionHandlingFlowContext) current;
-			current = exceptionContext.initializationParent == null ? exceptionContext.parent : exceptionContext.initializationParent;
+			current = exceptionContext.initializationParent == null ? exceptionContext.getLocalParent() : exceptionContext.initializationParent;
 		} else {
-			current = current.parent;
+			current = current.getLocalParent();
 		}
 	} while (current != null);
 	// not found
@@ -408,7 +412,7 @@ public FlowContext getTargetContextForBreakLabel(char[] labelName) {
 				return current;
 			return lastNonReturningSubRoutine;
 		}
-		current = current.parent;
+		current = current.getLocalParent();
 	}
 	// not found
 	return null;
@@ -445,7 +449,7 @@ public FlowContext getTargetContextForContinueLabel(char[] labelName) {
 			// label is found, but not a continuable location
 			return FlowContext.NotContinuableContext;
 		}
-		current = current.parent;
+		current = current.getLocalParent();
 	}
 	// not found
 	return null;
@@ -464,7 +468,7 @@ public FlowContext getTargetContextForDefaultBreak() {
 			if (lastNonReturningSubRoutine == null) return current;
 			return lastNonReturningSubRoutine;
 		}
-		current = current.parent;
+		current = current.getLocalParent();
 	}
 	// not found
 	return null;
@@ -484,10 +488,20 @@ public FlowContext getTargetContextForDefaultContinue() {
 				return current;
 			return lastNonReturningSubRoutine;
 		}
-		current = current.parent;
+		current = current.getLocalParent();
 	}
 	// not found
 	return null;
+}
+
+/** 
+ * Answer the parent flow context but be careful not to cross the boundary of a nested type,
+ * or null if no such parent exists. 
+ */
+public FlowContext getLocalParent() {
+	if (this.associatedNode instanceof AbstractMethodDeclaration || this.associatedNode instanceof TypeDeclaration)
+		return null;
+	return this.parent;
 }
 
 public String individualToString() {
@@ -567,7 +581,7 @@ public void recordSettingFinal(VariableBinding variable, Reference finalReferenc
 		if (!context.recordFinalAssignment(variable, finalReference)) {
 			break; // no need to keep going
 		}
-		context = context.parent;
+		context = context.getLocalParent();
 	}
 	}
 }
