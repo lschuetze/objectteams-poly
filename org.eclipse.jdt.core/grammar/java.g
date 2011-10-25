@@ -2936,9 +2936,9 @@ RecoveryCallinBindingLeftLong ::= RecoveryMethodSpecLong '<-'
 /:$readableName CallinBindingLeft:/
 
 -- Note(SH): Modifiersopt is needed to make grammar LALR(1), in real life modifiers must be empty
-RecoveryCallinHeader ::= Modifiersopt CallinBindingLeftShort CallinModifier BaseMethodSpecsShort
+RecoveryCallinHeader ::= Modifiersopt CallinBindingLeftShort CallinModifier BaseMethodSpecsShort Predicateopt
 /.$putCase consumeCallinHeader(); $break ./
-RecoveryCallinHeader ::= Modifiersopt CallinLabel Modifiersopt CallinBindingLeftShort CallinModifier BaseMethodSpecsShort
+RecoveryCallinHeader ::= Modifiersopt CallinLabel Modifiersopt CallinBindingLeftShort CallinModifier BaseMethodSpecsShort Predicateopt
 /.$putCase consumeCallinHeader(); $break ./
 /:$readableName CallinBindingShort:/
 

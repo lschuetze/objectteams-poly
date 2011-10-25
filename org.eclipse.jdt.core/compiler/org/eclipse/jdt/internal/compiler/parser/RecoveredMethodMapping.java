@@ -183,6 +183,24 @@ public RecoveredElement add(AbstractMethodDeclaration methodDeclaration, int bra
 		return element;
 	return this;
 }
+public void addMethodSpec(MethodSpec methodSpec) {
+	if (this.foundOpeningBrace)
+		return; // TODO(SH): may try to convert this to a parameter mapping?
+	if (this.methodMappingDeclaration.isCallout()) {
+		((CalloutMappingDeclaration)this.methodMappingDeclaration).baseMethodSpec = methodSpec;
+	} else {
+		CallinMappingDeclaration mapping = (CallinMappingDeclaration) this.methodMappingDeclaration;
+		if (this.baseMethodCount == 0) {
+			mapping.baseMethodSpecs = new MethodSpec[] { methodSpec };
+			this.baseMethodCount++;
+		} else {
+			System.arraycopy(mapping.baseMethodSpecs, 0,
+							 mapping.baseMethodSpecs = new MethodSpec[this.baseMethodCount+1], 0,
+							 this.baseMethodCount);
+			mapping.baseMethodSpecs[this.baseMethodCount++] = methodSpec;
+		}
+	}
+}
 @Override
 public RecoveredElement add(AbstractMethodMappingDeclaration methodMapping, int bracketBalanceValue)
 {

@@ -2467,6 +2467,8 @@ private int lookaheadAfterCallinHeader(int speclength, CallinMappingDeclaration 
 		case TokenNameSEMICOLON:
 		case TokenNameCOMMA:
 		case TokenNamewith:
+		case TokenNamebase:
+		case TokenNamewhen:
 			// syntax is OK, proceed as normal.
 			break;
 		default:
@@ -6172,6 +6174,17 @@ protected void consumeMethodSpecShort() {
 	this.identifierLengthPtr--; 							   // dito (constantly length 1)
 	methodSpec.hasSignature = false;
 	pushOnAstStack(methodSpec);
+	if (this.currentElement instanceof RecoveredMethodMapping) {
+		switch (this.currentToken) {
+		case TokenNameSEMICOLON:
+		case TokenNameCOMMA:
+		case TokenNamewith:
+		case TokenNamebase:
+		case TokenNamewhen:
+			// syntax says this method spec belongs to the current method mapping, add it now:
+			((RecoveredMethodMapping)this.currentElement).addMethodSpec(methodSpec);
+		}
+	}
 }
 // SH}
 protected void consumeModifiers() {
