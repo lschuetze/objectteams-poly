@@ -1157,6 +1157,75 @@ public class CodeCompletionTest extends CoreTests {
 		assertProposal("", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
 	}
 
+	// Bug 362003 - [assist] completion is broken after <B base R> after a base guard
+	public void testCreateMethod2() throws Exception {
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		pkg.createCompilationUnit("BaseClass.java", 
+				"package test1.p1;\n" +
+				"public class BaseClass {\n" +
+				"    public void blub() {}\n" +
+				"}\n",
+				true, null);
+		
+		StringBuffer subTeamContent = new StringBuffer(); 
+		subTeamContent.append("package test1;\n");
+		subTeamContent.append("import base test1.p1.BaseClass;\n");
+		subTeamContent.append("public team class Completion_testCreateMethod2 {\n");
+		subTeamContent.append("    protected class Role0 {\n");
+		subTeamContent.append("        void foo() {}\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("    protected class Role1 extends Role0 {\n");
+		subTeamContent.append("        String val;\n");
+		subTeamContent.append("        void bar1() {}\n");
+		subTeamContent.append("          \n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("    protected class Role2 extends Role0 {\n");
+		subTeamContent.append("        void bar() {}\n");
+		subTeamContent.append("        bar <- after blub\n");
+		subTeamContent.append("        		base when(4 == 5);\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("    <B base Role0> void takeIt(B as Role0 o) {\n");
+		subTeamContent.append("        System.out.print(o);\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("}");
+		
+		StringBuffer expectedContent = new StringBuffer(); 
+		expectedContent.append("package test1;\n");
+		expectedContent.append("import base test1.p1.BaseClass;\n");
+		expectedContent.append("public team class Completion_testCreateMethod2 {\n");
+		expectedContent.append("    protected class Role0 {\n");
+		expectedContent.append("        void foo() {}\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("    protected class Role1 extends Role0 {\n");
+		expectedContent.append("        String val;\n");
+		expectedContent.append("        void bar1() {}\n");
+		expectedContent.append("          /* (non-Javadoc)\n");
+		expectedContent.append("         * @see test1.Completion_testCreateMethod2.Role0#foo()\n");
+		expectedContent.append("         */\n");
+		expectedContent.append("        @Override\n");
+		expectedContent.append("        void foo() {\n");
+		expectedContent.append("            //TODO\n");
+		expectedContent.append("            super.foo();\n");
+		expectedContent.append("        }\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("    protected class Role2 extends Role0 {\n");
+		expectedContent.append("        void bar() {}\n");
+		expectedContent.append("        bar <- after blub\n");
+		expectedContent.append("        		base when(4 == 5);\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("    <B base Role0> void takeIt(B as Role0 o) {\n");
+		expectedContent.append("        System.out.print(o);\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("}");
+
+		String completeAfter = "          ";
+		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
+		int posAfter = expectedContent.indexOf("super.foo()");
+		posAfter = expectedContent.indexOf("}", posAfter)+1;
+		
+		assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
+	}
+
 	// override role, simple case
 	public void testOverrideRole1() throws Exception {
 		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
