@@ -292,7 +292,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			}
 			currentType = currentType.enclosingType();
 		}
-		TypeBinding otherType2 = scope.compilationUnitScope().getType(internalName);
+		TypeBinding otherType2 = (TypeBinding) scope.compilationUnitScope().getTypeOrPackage(internalName, Binding.TYPE, false);
 		if (otherType2 != null && otherType2.isValidBinding())
 			scope.problemReporter().roleShadowsVisibleType(memberDecl, otherType2);
 	}
