@@ -160,7 +160,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 				this.bits &= ~ASTNode.CanBeStatic;
 			}
 //{ObjectTeams: check for missing or duplicate base call:
-			analyzeBaseCalls(flowInfo.mergedWith(methodContext.initsOnReturn));
+			analyzeBaseCalls(flowInfo.copy().mergedWith(methodContext.initsOnReturn));
 // SH}
 			// check for missing returning path
 			TypeBinding returnTypeBinding = this.binding.returnType;
