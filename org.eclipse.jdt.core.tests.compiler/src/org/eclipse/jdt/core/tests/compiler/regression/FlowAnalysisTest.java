@@ -7,7 +7,10 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contribution for bug 236385
+ *     Stephan Herrmann - Contributions for
+ *     							bug 236385 - [compiler] Warn for potential programming problem if an object is created but not used
+ *      						bug 349326 - [1.7] new warning for missing try-with-resources
+ *      						bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -28,6 +31,7 @@ import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 
 public class FlowAnalysisTest extends AbstractRegressionTest {
 static {
+//	TESTS_NAMES = new String[] { "testLocalClassInInitializer1" };
 //	TESTS_NUMBERS = new int[] { 69 };
 }
 public FlowAnalysisTest(String name) {
@@ -2359,6 +2363,132 @@ public void testBug338234d() {
 		"	^\n" + 
 		"The local variable i may not have been initialized\n" + 
 		"----------\n");
+}
+// Bug 349326 - [1.7] new warning for missing try-with-resources
+// variant < 1.7 using Closeable: not closed
+public void testCloseable1() {
+	this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"import java.io.File;\n" + 
+				"import java.io.FileReader;\n" + 
+				"import java.io.IOException;\n" + 
+				"public class X {\n" +
+				"    void foo() throws IOException {\n" +
+				"        File file = new File(\"somefile\");\n" + 
+				"        FileReader fileReader = new FileReader(file); // not closed\n" + 
+				"        char[] in = new char[50];\n" + 
+				"        fileReader.read(in);\n" + 
+				"    }\n" + 
+				"}\n"
+			}, 
+			"----------\n" + 
+			"1. WARNING in X.java (at line 7)\n" + 
+			"	FileReader fileReader = new FileReader(file); // not closed\n" + 
+			"	           ^^^^^^^^^^\n" + 
+			"Resource leak: 'fileReader' is never closed\n" + 
+			"----------\n");	
+}
+// Bug 349326 - [1.7] new warning for missing try-with-resources
+// variant < 1.7 using Closeable: resource is closed, cannot suggest try-with-resources < 1.7
+public void testCloseable2() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"import java.io.File;\n" + 
+				"import java.io.FileReader;\n" + 
+				"import java.io.IOException;\n" + 
+				"public class X {\n" +
+				"    void foo() throws IOException {\n" +
+				"        File file = new File(\"somefile\");\n" + 
+				"        FileReader fileReader = new FileReader(file); // not closed\n" + 
+				"        char[] in = new char[50];\n" + 
+				"        fileReader.read(in);\n" +
+				"        fileReader.close();\n" + 
+				"    }\n" + 
+				"}\n"
+			}, 
+			"");	
+}
+// Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
+// return/break/continue inside anonymous class inside try-catch inside initializer
+public void testLocalClassInInitializer1() {
+	this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"    static {\n" +
+				"        final int i=4;\n" +
+				"        try {\n" +
+				"            Runnable runner = new Runnable() {\n" +
+				"                public void run() {\n" +
+				"                    switch (i) {" +
+				"                        case 4: break;\n" +
+				"                    }\n" +
+				"                    int j = i;\n" +
+				"                    while (j++ < 10) {\n" +
+				"                        if (j == 2) continue;\n" +
+				"                        if (j == 4) break;\n" +
+				"                        if (j == 6) return;\n" +
+				"                    }\n" +
+				"                }\n" +
+				"            };\n" +
+				"        } catch (RuntimeException re) {}\n" +
+				"    }\n" +
+				"}\n"
+			}, 
+			"");
+}
+// Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
+// break/continue illegally inside anonymous class inside loop (loop is out of scope for break/continue)
+public void testLocalClassInInitializer2() {
+	this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"    void f () {\n" +
+				"        while (true) {\n" +
+				"            class Inner1 {\n" +
+				"                { if (true) break; }\n" +
+				"            }\n" +
+				"            new Inner1();\n" +
+				"        }\n" +
+				"    } \n" +
+				"    void g () {\n" +
+				"        outer: for (int i=1;true;i++) {\n" +
+				"            class Inner2 {\n" +
+				"                int j = 3;\n" +
+				"                void foo () {\n" +
+				"                  if (2 == j) continue outer;\n" +
+				"                  else continue;\n" +
+				"                }\n" +
+				"            }\n" +
+				"            new Inner2().foo();\n" +
+				"        }\n" +
+				"    } \n" +
+				"}\n"
+			}, 
+			"----------\n" + 
+			"1. ERROR in X.java (at line 5)\n" + 
+			"	{ if (true) break; }\n" + 
+			"	            ^^^^^^\n" + 
+			"break cannot be used outside of a loop or a switch\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 11)\n" + 
+			"	outer: for (int i=1;true;i++) {\n" + 
+			"	^^^^^\n" + 
+			"The label outer is never explicitly referenced\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 15)\n" + 
+			"	if (2 == j) continue outer;\n" + 
+			"	            ^^^^^^^^^^^^^^^\n" + 
+			"The label outer is missing\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 16)\n" + 
+			"	else continue;\n" + 
+			"	     ^^^^^^^^^\n" + 
+			"continue cannot be used outside of a loop\n" + 
+			"----------\n");
 }
 public static Class testClass() {
 	return FlowAnalysisTest.class;

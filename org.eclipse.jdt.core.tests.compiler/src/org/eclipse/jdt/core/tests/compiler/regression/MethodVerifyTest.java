@@ -11238,25 +11238,7 @@ public void test199() {
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=285088
 public void test200() {
-	Map options = getCompilerOptions();
-	String compliance = (String) options.get(JavaCore.COMPILER_COMPLIANCE);
-	String errorMessage = compliance == JavaCore.VERSION_1_6 ?
-			"----------\n" + 
-			"1. WARNING in X.java (at line 3)\n" + 
-			"	int foo(Collection bar) { return 0; }\n" + 
-			"	    ^^^^^^^^^^^^^^^^^^^\n" + 
-			"Method foo(Collection) has the same erasure foo(Collection<E>) as another method in type X\n" + 
-			"----------\n" + 
-			"2. WARNING in X.java (at line 3)\n" + 
-			"	int foo(Collection bar) { return 0; }\n" + 
-			"	        ^^^^^^^^^^\n" + 
-			"Collection is a raw type. References to generic type Collection<E> should be parameterized\n" + 
-			"----------\n" + 
-			"3. WARNING in X.java (at line 4)\n" + 
-			"	double foo(Collection<String> bar) {return 0; }\n" + 
-			"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Method foo(Collection<String>) has the same erasure foo(Collection<E>) as another method in type X\n" + 
-			"----------\n" :
+	String errorMessage =
 				"----------\n" + 
 				"1. ERROR in X.java (at line 3)\n" + 
 				"	int foo(Collection bar) { return 0; }\n" + 
@@ -13439,7 +13421,7 @@ public void testBug317719h() throws Exception {
 	String output = this.complianceLevel == ClassFileConstants.JDK1_6 ?
 			"----------\n" + 
 			"1. WARNING in Test.java (at line 3)\n" + 
-			"	public class Test<Key, Value> extends LinkedHashMap<Key, Collection<Value>> {\n" + 
+			"	public class Test<Key, Value> extends HashMap<Key, Collection<Value>> {\n" + 
 			"	             ^^^^\n" + 
 			"The serializable class Test does not declare a static final serialVersionUID field of type long\n" + 
 			"----------\n" + 
@@ -13451,7 +13433,7 @@ public void testBug317719h() throws Exception {
 			"3. WARNING in Test.java (at line 5)\n" + 
 			"	public Collection<Value> get(Key k) { return null; }\n" + 
 			"	                         ^^^^^^^^^^\n" + 
-			"Name clash: The method get(Key) of type Test<Key,Value> has the same erasure as get(Object) of type LinkedHashMap<K,V> but does not override it\n" + 
+			"Name clash: The method get(Key) of type Test<Key,Value> has the same erasure as get(Object) of type HashMap<K,V> but does not override it\n" + 
 			"----------\n" + 
 			"4. ERROR in Test.java (at line 6)\n" + 
 			"	Zork z;\n" + 
@@ -13460,7 +13442,7 @@ public void testBug317719h() throws Exception {
 			"----------\n":
 				"----------\n" + 
 				"1. WARNING in Test.java (at line 3)\n" + 
-				"	public class Test<Key, Value> extends LinkedHashMap<Key, Collection<Value>> {\n" + 
+				"	public class Test<Key, Value> extends HashMap<Key, Collection<Value>> {\n" + 
 				"	             ^^^^\n" + 
 				"The serializable class Test does not declare a static final serialVersionUID field of type long\n" + 
 				"----------\n" + 
@@ -13472,7 +13454,7 @@ public void testBug317719h() throws Exception {
 				"3. ERROR in Test.java (at line 5)\n" + 
 				"	public Collection<Value> get(Key k) { return null; }\n" + 
 				"	                         ^^^^^^^^^^\n" + 
-				"Name clash: The method get(Key) of type Test<Key,Value> has the same erasure as get(Object) of type LinkedHashMap<K,V> but does not override it\n" + 
+				"Name clash: The method get(Key) of type Test<Key,Value> has the same erasure as get(Object) of type HashMap<K,V> but does not override it\n" + 
 				"----------\n" + 
 				"4. ERROR in Test.java (at line 6)\n" + 
 				"	Zork z;\n" + 
@@ -13483,8 +13465,8 @@ public void testBug317719h() throws Exception {
 		new String[] {
 			"Test.java",
 			"import java.util.Collection;\n" +
-			"import java.util.LinkedHashMap;\n" +
-			"public class Test<Key, Value> extends LinkedHashMap<Key, Collection<Value>> {\n" +
+			"import java.util.HashMap;\n" +
+			"public class Test<Key, Value> extends HashMap<Key, Collection<Value>> {\n" +
 			"    public Collection<Value> put(Key k, Value v) { return null; }\n" +
 			"	 public Collection<Value> get(Key k) { return null; }\n" +
 			"	 Zork z;\n" +
@@ -13511,5 +13493,51 @@ public void test345949a() throws Exception {
 		"	                   ^^^^^^^^^^^^^^^^^\n" + 
 		"Name clash: The method foo(A<Integer>) of type Sub has the same erasure as foo(A<Number>) of type Super but does not hide it\n" + 
 		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=355838
+public void testBug355838() throws Exception {
+	String output = 		
+			"----------\n" + 
+			"1. ERROR in ErasureBug.java (at line 4)\n" + 
+			"	public String output(List<String> integers) {\n" + 
+			"	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Method output(List<String>) has the same erasure output(List<E>) as another method in type ErasureBug\n" + 
+			"----------\n" + 
+			"2. ERROR in ErasureBug.java (at line 7)\n" + 
+			"	public String output(List doubles) {\n" + 
+			"	              ^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Method output(List) has the same erasure output(List<E>) as another method in type ErasureBug\n" + 
+			"----------\n" + 
+			"3. WARNING in ErasureBug.java (at line 7)\n" + 
+			"	public String output(List doubles) {\n" + 
+			"	                     ^^^^\n" + 
+			"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+			"----------\n" + 
+			"4. WARNING in ErasureBug.java (at line 10)\n" + 
+			"	public static void main(String[] args) { new ErasureBug().output(new ArrayList()); }\n" + 
+			"	                                                                 ^^^^^^^^^^^^^^^\n" + 
+			"Type safety: The expression of type ArrayList needs unchecked conversion to conform to List<String>\n" + 
+			"----------\n" + 
+			"5. WARNING in ErasureBug.java (at line 10)\n" + 
+			"	public static void main(String[] args) { new ErasureBug().output(new ArrayList()); }\n" + 
+			"	                                                                     ^^^^^^^^^\n" + 
+			"ArrayList is a raw type. References to generic type ArrayList<E> should be parameterized\n" + 
+			"----------\n";
+	this.runNegativeTest(
+		new String[] {
+			"ErasureBug.java",
+			"import java.util.ArrayList;\n" +
+			"import java.util.List;\n" +
+			"public class ErasureBug {\n" +
+			"    public String output(List<String> integers) {\n" +
+			"		return \"1\";\n" +
+			"	 }\n" +
+			"    public String output(List doubles) {\n" +
+			"		return \"2\";\n" +
+			"	 }\n" +
+			"	 public static void main(String[] args) { new ErasureBug().output(new ArrayList()); }\n" +
+			"}\n"
+		},
+		output);
 }
 }

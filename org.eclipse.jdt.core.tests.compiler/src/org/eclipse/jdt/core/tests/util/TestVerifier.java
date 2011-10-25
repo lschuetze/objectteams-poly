@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -348,7 +348,7 @@ private String getVerifyTestsCode() {
 		"	this.socket.setTcpNoDelay(true);\n" +
 		"	server.close();\n" +
 		"\n" +
-		"	DataInputStream in = new DataInputStream(this.socket.getInputStream());\n" +
+		"	final DataInputStream in = new DataInputStream(this.socket.getInputStream());\n" +
 		"	final DataOutputStream out = new DataOutputStream(this.socket.getOutputStream());\n" +
 		"	while (true) {\n" +
 		"		final String className = in.readUTF();\n" +

@@ -18,6 +18,9 @@
  *     						bug 336428 - [compiler][null] bogus warning "redundant null check" in condition of do {} while() loop
  * 							bug 324178 - [null] ConditionalExpression.nullStatus(..) doesn't take into account the analysis of condition itself
  * 							bug 354554 - [null] conditional with redundant condition yields weak error message
+ * 							bug 358827 - [1.7] exception analysis for t-w-r spoils null analysis
+ * 							bug 349326 - [1.7] new warning for missing try-with-resources
+ * 							bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -45,7 +48,7 @@ public NullReferenceTest(String name) {
 // Only the highest compliance level is run; add the VM argument
 // -Dcompliance=1.4 (for example) to lower it if needed
 static {
-//		TESTS_NAMES = new String[] { "testBug348379" };
+//		TESTS_NAMES = new String[] { "testBug360328" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -6031,12 +6034,17 @@ public void test0562_try_catch_unchecked_exception() {
 			"    }\n" +
 			"  }\n" +
 			"}\n"},
-		"----------\n" +
-		"1. ERROR in X.java (at line 8)\n" +
-		"	o.toString();\n" +
-		"	^\n" +
-		"Potential null pointer access: The variable o may be null at this location\n" +
-		"----------\n",
+			"----------\n" +
+			"1. WARNING in X.java (at line 6)\n" +
+			"	o = new LineNumberReader(new FileReader(\"dummy\"));\n" +
+			"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+			"Resource leak: 'o' is never closed\n" +
+			"----------\n" +
+			"2. ERROR in X.java (at line 8)\n" +
+			"	o.toString();\n" +
+			"	^\n" +
+			"Potential null pointer access: The variable o may be null at this location\n" +
+			"----------\n",
 	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 
@@ -14945,5 +14953,449 @@ public void testBug354554b() {
 		"	            ^\n" + 
 		"Redundant null check: The variable u cannot be null at this location\n" + 
 		"----------\n");
+}
+// Bug 358827 - [1.7] exception analysis for t-w-r spoils null analysis
+public void test358827() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_7) {
+		this.runNegativeTest(
+				new String[] {
+					"Bug358827.java",
+					"import java.io.FileReader;\n" +
+					"public class Bug358827 {\n" +
+					"	Object foo2() throws Exception {\n" + 
+					"		String o = null;\n" + 
+					"		try (FileReader rf = new FileReader(\"file\")){\n" + 
+					"			o = o.toUpperCase();\n" + 
+					"		} finally {\n" + 
+					"			o = \"OK\";\n" + 
+					"		}\n" + 
+					"		return o;\n" + 
+					"	}\n" + 
+					"}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in Bug358827.java (at line 6)\n" + 
+				"	o = o.toUpperCase();\n" + 
+				"	    ^\n" + 
+				"Null pointer access: The variable o can only be null at this location\n" + 
+				"----------\n");
+	}
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=256796
+public void testBug256796() {
+	Map compilerOptions = getCompilerOptions();
+	compilerOptions.put(CompilerOptions.OPTION_ReportUnnecessaryElse, CompilerOptions.IGNORE);
+	compilerOptions.put(CompilerOptions.OPTION_ReportDeadCode, CompilerOptions.WARNING);
+	compilerOptions.put(CompilerOptions.OPTION_ReportDeadCodeInTrivialIfStatement, CompilerOptions.DISABLED);
+	this.runNegativeTest(
+			new String[] {
+				"Bug.java",
+				"public class Bug {\n" +
+				"	private static final boolean TRUE = true;\n" +
+				"   private static final boolean FALSE = false;\n" +
+				"	void foo() throws Exception {\n" + 
+				"		if (TRUE) return;\n" +
+				"		else System.out.println(\"\");\n" +
+				"		System.out.println(\"\");\n" + 		// not dead code
+				"		if (TRUE) throw new Exception();\n" +
+				"		else System.out.println(\"\");\n" +
+				"		System.out.println(\"\");\n" + 		// not dead code
+				"		if (TRUE) return;\n" +
+				"		System.out.println(\"\");\n" + 		// not dead code
+				"		if (FALSE) System.out.println(\"\");\n" +
+				"		else return;\n" +
+				"		System.out.println(\"\");\n" + 		// not dead code
+				"		if (FALSE) return;\n" +
+				"		System.out.println(\"\");\n" + 		// not dead code
+				"		if (false) return;\n" +				// dead code
+				"		System.out.println(\"\");\n" + 		
+				"		if (true) return;\n" +
+				"		System.out.println(\"\");\n" + 		// dead code
+				"	}\n" + 
+				"}\n"
+			},
+			"----------\n" + 
+			"1. WARNING in Bug.java (at line 18)\n" + 
+			"	if (false) return;\n" + 
+			"	           ^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n" + 
+			"2. WARNING in Bug.java (at line 21)\n" + 
+			"	System.out.println(\"\");\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n",
+			null,
+			true,
+			compilerOptions);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=256796
+public void testBug256796a() {
+	Map compilerOptions = getCompilerOptions();
+	compilerOptions.put(CompilerOptions.OPTION_ReportUnnecessaryElse, CompilerOptions.IGNORE);
+	compilerOptions.put(CompilerOptions.OPTION_ReportDeadCode, CompilerOptions.WARNING);
+	compilerOptions.put(CompilerOptions.OPTION_ReportDeadCodeInTrivialIfStatement, CompilerOptions.ENABLED);
+	this.runNegativeTest(
+			new String[] {
+				"Bug.java",
+				"public class Bug {\n" +
+				"	private static final boolean TRUE = true;\n" +
+				"   private static final boolean FALSE = false;\n" +
+				"	void foo() throws Exception {\n" + 
+				"		if (TRUE) return;\n" +
+				"		else System.out.println(\"\");\n" +
+				"		System.out.println(\"\");\n" + 		// dead code
+				"	}\n" +
+				"   void foo2() {\n" +
+				"		if (TRUE) return;\n" +
+				"		System.out.println(\"\");\n" + 		// dead code
+				"	}\n" +
+				"	void foo3() throws Exception {\n" + 
+				"		if (TRUE) throw new Exception();\n" +
+				"		else System.out.println(\"\");\n" + // dead code
+				"		System.out.println(\"\");\n" + 		// dead code
+				"	}\n" + 
+				"	void foo4() throws Exception {\n" + 
+				"		if (FALSE) System.out.println(\"\");\n" +
+				"		else return;\n" +
+				"		System.out.println(\"\");\n" + 		// dead code
+				"	}\n" + 
+				"	void foo5() throws Exception {\n" + 
+				"		if (FALSE) return;\n" +				// dead code
+				"		System.out.println(\"\");\n" + 		
+				"	}\n" +
+				"	void foo6() throws Exception {\n" + 
+				"		if (false) return;\n" +				// dead code
+				"		System.out.println(\"\");\n" + 		
+				"		if (true) return;\n" +
+				"		System.out.println(\"\");\n" + 		// dead code
+				"	}\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. WARNING in Bug.java (at line 6)\n" + 
+			"	else System.out.println(\"\");\n" + 
+			"	     ^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n" + 
+			"2. WARNING in Bug.java (at line 7)\n" + 
+			"	System.out.println(\"\");\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n" + 
+			"3. WARNING in Bug.java (at line 11)\n" + 
+			"	System.out.println(\"\");\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n" + 
+			"4. WARNING in Bug.java (at line 15)\n" + 
+			"	else System.out.println(\"\");\n" + 
+			"	     ^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n" + 
+			"5. WARNING in Bug.java (at line 16)\n" + 
+			"	System.out.println(\"\");\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n" + 
+			"6. WARNING in Bug.java (at line 19)\n" + 
+			"	if (FALSE) System.out.println(\"\");\n" + 
+			"	           ^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n" + 
+			"7. WARNING in Bug.java (at line 21)\n" + 
+			"	System.out.println(\"\");\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n" + 
+			"8. WARNING in Bug.java (at line 24)\n" + 
+			"	if (FALSE) return;\n" + 
+			"	           ^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n" + 
+			"9. WARNING in Bug.java (at line 28)\n" + 
+			"	if (false) return;\n" + 
+			"	           ^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n" + 
+			"10. WARNING in Bug.java (at line 31)\n" + 
+			"	System.out.println(\"\");\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Dead code\n" + 
+			"----------\n",
+			null,
+			true,
+			compilerOptions);
+}
+// Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
+public void testBug360328() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.ERROR);
+	runNegativeTest(
+		true, /* flushOutputDir */
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"    void print4() {\n" +
+			"        final String s1 = \"\";\n" +
+			"        for (int i=0; i<4; i++)\n" +
+			"            new Runnable() {\n" +
+			"                public void run() {\n" +
+			"                     if (s1 != null)\n" +
+			"                         s1.toString();\n" +
+			"                }\n" +
+			"            }.run();\n" +
+			"    }\n" +
+			"    void print16(boolean b) {\n" +
+			"        final String s3 = b ? null : \"\";\n" +
+			"        for (int i=0; i<16; i++)\n" +
+			"            new Runnable() {\n" +
+			"                public void run() {\n" +
+			"                     s3.toString();\n" +
+			"                }\n" +
+			"            }.run();\n" +
+			"    }\n" +
+			"    void print23() {\n" +
+			"        final String s23 = null;\n" +
+			"        for (int i=0; i<23; i++)\n" +
+			"            new Runnable() {\n" +
+			"                public void run() {\n" +
+			"                     s23.toString();\n" +
+			"                }\n" +
+			"            }.run();\n" +
+			"    }\n" +
+			"}\n",
+
+		},
+		null, /* classLibs */
+		customOptions,
+		"----------\n" +
+		"1. ERROR in X.java (at line 7)\n" +
+		"	if (s1 != null)\n" +
+		"	    ^^\n" +
+		"Redundant null check: The variable s1 cannot be null at this location\n" +
+		"----------\n" +
+		"2. ERROR in X.java (at line 17)\n" +
+		"	s3.toString();\n" +
+		"	^^\n" +
+		"Potential null pointer access: The variable s3 may be null at this location\n" +
+		"----------\n" +
+		"3. ERROR in X.java (at line 26)\n" +
+		"	s23.toString();\n" +
+		"	^^^\n" +
+		"Null pointer access: The variable s23 can only be null at this location\n" +
+		"----------\n",
+		"",/* expected output */
+		"",/* expected error */
+	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
+// constructors
+public void testBug360328b() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.ERROR);
+	runNegativeTest(
+		true, /* flushOutputDir */
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"    void print4() {\n" +
+			"        final String s1 = \"\";\n" +
+			"        for (int i=0; i<4; i++) {\n" +
+			"            class R {\n" +
+			"                public R() {\n" +
+			"                     if (s1 != null)\n" +
+			"                         s1.toString();\n" +
+			"                }\n" +
+			"            };\n" +
+			"            new R();\n" +
+			"        }\n" +
+			"    }\n" +
+			"    void print16(boolean b) {\n" +
+			"        final String s3 = b ? null : \"\";\n" +
+			"        int i=0; while (i++<16) {\n" +
+			"            class R {\n" +
+			"                public R() {\n" +
+			"                     s3.toString();\n" +
+			"                }\n" +
+			"            };\n" +
+			"            new R();\n" +
+			"        };\n" +
+			"    }\n" +
+			"    void print23() {\n" +
+			"        final String s23 = null;\n" +
+			"        for (int i=0; i<23; i++) {\n" +
+			"            class R {\n" +
+			"                public R() {\n" +
+			"                     s23.toString();\n" +
+			"                }\n" +
+			"            };\n" +
+			"            new R();\n" +
+			"        };\n" +
+			"    }\n" +
+			"}\n",
+
+		},
+		null, /* classLibs */
+		customOptions,
+		"----------\n" +
+		"1. ERROR in X.java (at line 7)\n" +
+		"	if (s1 != null)\n" +
+		"	    ^^\n" +
+		"Redundant null check: The variable s1 cannot be null at this location\n" +
+		"----------\n" +
+		"2. ERROR in X.java (at line 19)\n" +
+		"	s3.toString();\n" +
+		"	^^\n" +
+		"Potential null pointer access: The variable s3 may be null at this location\n" +
+		"----------\n" +
+		"3. ERROR in X.java (at line 30)\n" +
+		"	s23.toString();\n" +
+		"	^^^\n" +
+		"Null pointer access: The variable s23 can only be null at this location\n" +
+		"----------\n",
+		"",/* expected output */
+		"",/* expected error */
+	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
+// initializers
+public void testBug360328c() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.IGNORE);
+	runNegativeTest(
+		true, /* flushOutputDir */
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"    void print4() {\n" +
+			"        final String s1 = \"\";\n" +
+			"        for (int i=0; i<4; i++) {\n" +
+			"            class R {\n" +
+			"                String s1R;\n" +
+			"                {\n" +
+			"                    if (s1 != null)\n" +
+			"                         s1R = s1;\n" +
+			"                }\n" +
+			"            };\n" +
+			"            new R();\n" +
+			"        }\n" +
+			"    }\n" +
+			"    void print16(boolean b) {\n" +
+			"        final String s3 = b ? null : \"\";\n" +
+			"        for (int i=0; i<16; i++) {\n" +
+			"            class R {\n" +
+			"                String s3R = s3.toString();\n" +
+			"            };\n" +
+			"            new R();\n" +
+			"        };\n" +
+			"    }\n" +
+			"    void print23() {\n" +
+			"        final String s23 = null;\n" +
+			"        for (int i=0; i<23; i++) {\n" +
+			"            class R {\n" +
+			"                String s23R;\n" +
+			"                {\n" +
+			"                     s23R = s23.toString();\n" +
+			"                }\n" +
+			"            };\n" +
+			"            new R();\n" +
+			"        };\n" +
+			"    }\n" +
+			"}\n",
+
+		},
+		null, /* classLibs */
+		customOptions,
+		"----------\n" +
+		"1. ERROR in X.java (at line 8)\n" +
+		"	if (s1 != null)\n" +
+		"	    ^^\n" +
+		"Redundant null check: The variable s1 cannot be null at this location\n" +
+		"----------\n" +
+		"2. ERROR in X.java (at line 19)\n" +
+		"	String s3R = s3.toString();\n" +
+		"	             ^^\n" +
+		"Potential null pointer access: The variable s3 may be null at this location\n" +
+		"----------\n" +
+		"3. ERROR in X.java (at line 30)\n" +
+		"	s23R = s23.toString();\n" +
+		"	       ^^^\n" +
+		"Null pointer access: The variable s23 can only be null at this location\n" +
+		"----------\n",
+		"",/* expected output */
+		"",/* expected error */
+	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
+// try-finally instead of loop
+public void testBug360328d() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_ReportRedundantNullCheck, CompilerOptions.ERROR);
+	runNegativeTest(
+		true, /* flushOutputDir */
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"    void print4() {\n" +
+			"        final String s1 = \"\";\n" +
+			"        try { } finally {\n" +
+			"            new Runnable() {\n" +
+			"                public void run() {\n" +
+			"                     if (s1 != null)\n" +
+			"                         s1.toString();\n" +
+			"                }\n" +
+			"            }.run();\n" +
+			"        }\n" +
+			"    }\n" +
+			"    void print16(boolean b) {\n" +
+			"        final String s3 = b ? null : \"\";\n" +
+			"        try { } finally {\n" +
+			"            new Runnable() {\n" +
+			"                public void run() {\n" +
+			"                     s3.toString();\n" +
+			"                }\n" +
+			"            }.run();\n" +
+			"        }\n" +
+			"    }\n" +
+			"    void print23() {\n" +
+			"        final String s23 = null;\n" +
+			"        try { } finally {\n" +
+			"            new Runnable() {\n" +
+			"                public void run() {\n" +
+			"                     s23.toString();\n" +
+			"                }\n" +
+			"            }.run();\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n",
+
+		},
+		null, /* classLibs */
+		customOptions,
+		"----------\n" +
+		"1. ERROR in X.java (at line 7)\n" +
+		"	if (s1 != null)\n" +
+		"	    ^^\n" +
+		"Redundant null check: The variable s1 cannot be null at this location\n" +
+		"----------\n" +
+		"2. ERROR in X.java (at line 18)\n" +
+		"	s3.toString();\n" +
+		"	^^\n" +
+		"Potential null pointer access: The variable s3 may be null at this location\n" +
+		"----------\n" +
+		"3. ERROR in X.java (at line 28)\n" +
+		"	s23.toString();\n" +
+		"	^^^\n" +
+		"Null pointer access: The variable s23 can only be null at this location\n" +
+		"----------\n",
+		"",/* expected output */
+		"",/* expected error */
+	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 }

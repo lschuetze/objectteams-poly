@@ -8,9 +8,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - Contribution for bug 239066
- *     Stephan Herrmann  - Contribution for bug 236385
- *     Stephan Herrmann  - Contribution for bug 295551
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 185682 - Increment/decrement operators mark local variables as read
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
+ *     							bug 236385 - [compiler] Warn for potential programming problem if an object is created but not used
+ *     							bug 295551 - Add option to automatically promote all warnings to errors
+ *     							bug 185682 - Increment/decrement operators mark local variables as read
+ *     							bug 349326 - [1.7] new warning for missing try-with-resources
+ *     							bug 359721 - [options] add command line option for new warning token "resource"
  *     Technical University Berlin - adapted for Object Teams
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
@@ -1669,6 +1672,7 @@ public void test012b(){
 //OT (2x):
         "      abstractrelevantrole + abstract relevant role (OTJLD 2.5(b))\n" +
         "      adaptDeprecated    + adapting a deprecated type/method\n" +
+        "      all                  enable all warnings\n" + 
         "      allDeadCode          dead code including trivial if(DEBUG) check\n" +
         "      allDeprecation       deprecation including inside deprecated code\n" +
         "      allJavadoc           invalid or missing javadoc\n" +
@@ -1740,6 +1744,7 @@ public void test012b(){
         "      paramAssign          assignment to a parameter\n" +
         "      pkgDefaultMethod   + attempt to override package-default method\n" +
         "      raw                + usage of raw type\n" +
+        "      resource           + (pot.) unsafe usage of resource of type Closeable\n" + 
 //OT:
         "      roleinstantiation  + unsafe instantiation of a role\n" +
         "                           (OTJLD 2.4.1(c), 2.4.3)\n" + 
@@ -1861,6 +1866,7 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.discouragedReference\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.emptyStatement\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.enumIdentifier\" value=\"warning\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.explicitlyClosedAutoCloseable\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.fallthroughCase\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.fatalOptionalError\" value=\"disabled\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.fieldHiding\" value=\"ignore\"/>\n" +
@@ -1902,6 +1908,7 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.parameterAssignment\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.possibleAccidentalBooleanAssignment\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.potentialNullReference\" value=\"ignore\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.potentiallyUnclosedCloseable\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.rawTypeReference\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.redundantNullCheck\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.redundantSpecificationOfTypeArguments\" value=\"ignore\"/>\n" + 
@@ -1917,6 +1924,7 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.typeParameterHiding\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unavoidableGenericTypeProblems\" value=\"enabled\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.uncheckedTypeOperation\" value=\"warning\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unclosedCloseable\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.undocumentedEmptyBlock\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unhandledWarningToken\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.unnecessaryElse\" value=\"ignore\"/>\n" +
@@ -6942,7 +6950,7 @@ public void test174_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 13)\n" +
 		"	} catch (E1 e1) {\n" +
 		"	         ^^\n" +
-		"Unreachable catch block for E1. Only more specific exceptions are thrown and handled by previous catch block(s).\n" +
+		"Unreachable catch block for E1. Only more specific exceptions are thrown and they are handled by previous catch block(s).\n" +
 		"----------\n" +
 		"3 problems (3 warnings)",
 		true);
@@ -7010,7 +7018,7 @@ public void test175_warn_options() {
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 13)\n" +
 		"	} catch (E1 e1) {\n" +
 		"	         ^^\n" +
-		"Unreachable catch block for E1. Only more specific exceptions are thrown and handled by previous catch block(s).\n" +
+		"Unreachable catch block for E1. Only more specific exceptions are thrown and they are handled by previous catch block(s).\n" +
 		"----------\n" +
 		"4 problems (4 warnings)",
 		true);
@@ -7145,7 +7153,7 @@ public void test178_warn_options() {
 		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 13)\n" +
 		"	} catch (E1 e1) {\n" +
 		"	         ^^\n" +
-		"Unreachable catch block for E1. Only more specific exceptions are thrown and handled by previous catch block(s).\n" +
+		"Unreachable catch block for E1. Only more specific exceptions are thrown and they are handled by previous catch block(s).\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
 		true);
@@ -7245,7 +7253,7 @@ public void test180_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 13)\n" +
 		"	} catch (E1 e1) {\n" +
 		"	         ^^\n" +
-		"Unreachable catch block for E1. Only more specific exceptions are thrown and handled by previous catch block(s).\n" +
+		"Unreachable catch block for E1. Only more specific exceptions are thrown and they are handled by previous catch block(s).\n" +
 		"----------\n" +
 		"3 problems (3 warnings)",
 		true);
@@ -7300,7 +7308,7 @@ public void test181_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 13)\n" +
 		"	} catch (E1 e1) {\n" +
 		"	         ^^\n" +
-		"Unreachable catch block for E1. Only more specific exceptions are thrown and handled by previous catch block(s).\n" +
+		"Unreachable catch block for E1. Only more specific exceptions are thrown and they are handled by previous catch block(s).\n" +
 		"----------\n" +
 		"3 problems (3 warnings)",
 		true);
@@ -7410,7 +7418,7 @@ public void test183_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 13)\n" +
 		"	} catch (E1 e1) {\n" +
 		"	         ^^\n" +
-		"Unreachable catch block for E1. Only more specific exceptions are thrown and handled by previous catch block(s).\n" +
+		"Unreachable catch block for E1. Only more specific exceptions are thrown and they are handled by previous catch block(s).\n" +
 		"----------\n" +
 		"3 problems (3 warnings)",
 		true);
@@ -8578,48 +8586,6 @@ public void test213_warn_options() {
 		"The value of the parameter i is not used\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
-		true);
-}
-// https://bugs.eclipse.org/bugs/show_bug.cgi?id=210518
-// variant
-public void test214_warn_options() {
-	// same source as 153, skip default checks
-	this.runNegativeTest(
-		new String[] {
-			"X.java",
-			"public class X {\n" +
-			"	public static void foo() {\n" +
-			"     String s = null;\n" +
-			"     s.toString();\n" +
-			"     String u;\n" +
-			"   }\n" +
-			"}",
-		},
-		"\"" + OUTPUT_DIR +  File.separator + "X.java\""
-		+ " -warn:null,-unused -proc:none -d \"" + OUTPUT_DIR + "\"",
-		"",
-		"usage of \'-\' for \'-unused\' is illegal there\n",
-		true);
-}
-// https://bugs.eclipse.org/bugs/show_bug.cgi?id=210518
-// variant
-public void test215_warn_options() {
-	// same source as 153, skip default checks
-	this.runNegativeTest(
-		new String[] {
-			"X.java",
-			"public class X {\n" +
-			"	public static void foo() {\n" +
-			"     String s = null;\n" +
-			"     s.toString();\n" +
-			"     String u;\n" +
-			"   }\n" +
-			"}",
-		},
-		"\"" + OUTPUT_DIR +  File.separator + "X.java\""
-		+ " -warn:null,+unused -proc:none -d \"" + OUTPUT_DIR + "\"",
-		"",
-		"usage of \'+\' for \'+unused\' is illegal there\n",
 		true);
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=211588
@@ -11468,24 +11434,6 @@ public void test294(){
 		true);
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=280784
-public void test295(){
-	this.runNegativeTest(
-		new String[] {
-			"src/X.java",
-			"public class X {\n" +
-			"}",
-		},
-		"\"" + OUTPUT_DIR +  File.separator + "src/X.java\""
-		+ " -cp \"" + LIB_DIR + "\""
-		+ " -sourcepath \"" + OUTPUT_DIR +  File.separator + "src\""
-		+ " -1.5 -g -preserveAllLocals"
-		+ " -proceedOnError -referenceInfo -err:raw,+discouraged"
-		+ " -d \"" + OUTPUT_DIR + File.separator + "bin\" ",
-		"",
-		"usage of \'+\' for \'+discouraged\' is illegal there\n",
-		true);
-}
-//https://bugs.eclipse.org/bugs/show_bug.cgi?id=280784
 public void test296(){
 	this.runNegativeTest(
 		new String[] {
@@ -12363,6 +12311,55 @@ public void testReportingUnavoidableGenericProblems2() {
 		"Zork cannot be resolved to a type\n" + 
 		"----------\n" + 
 		"3 problems (1 error, 2 warnings)",
+		true);
+}
+//-warn option - regression tests
+public void test0308_warn_options() {
+	// check the option introduced in bug 359721
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.FileReader;\n" +
+			"public class X {\n" +
+			"  void foo() throws java.io.IOException {\n" +
+			"      FileReader r = new FileReader(\"f1\");\n" +
+			"      char[] cs = new char[1024];\n" +
+			"	   r.read(cs);\n" +
+			"  }\n" +
+			"}\n"
+		},
+		"\"" + OUTPUT_DIR +  File.separator + "X.java\""
+		+ " -warn:-resource -1.7 -d \"" + OUTPUT_DIR + "\"",
+		"",
+		"",
+		true);
+}
+//-warn option - regression tests
+public void test0309_warn_options() {
+	// check the option introduced in bug 359721
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.FileReader;\n" +
+			"public class X {\n" +
+			"  void foo(boolean b) throws java.io.IOException {\n" +
+			"      FileReader r = new FileReader(\"f1\");\n" +
+			"      char[] cs = new char[1024];\n" +
+			"	   r.read(cs);\n" +
+			"      if (b) r.close();\n" +
+			"  }\n" +
+			"}\n"
+		},
+		"\"" + OUTPUT_DIR +  File.separator + "X.java\""
+		+ " -warn:+resource -1.7 -d \"" + OUTPUT_DIR + "\"",
+		"",
+		"----------\n" + 
+		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 4)\n" + 
+		"	FileReader r = new FileReader(\"f1\");\n" + 
+		"	           ^\n" + 
+		"Potential resource leak: \'r\' may not be closed\n" + 
+		"----------\n" + 
+		"1 problem (1 warning)",
 		true);
 }
 }

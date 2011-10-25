@@ -7076,4 +7076,116 @@ public void test124b() {
 		compilerOptions /* custom options */
 	);
 }
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=354502
+// Anonymous class instantiation of a non-static member type, method can't be static
+public void test354502() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	Map compilerOptions = getCompilerOptions();
+	compilerOptions.put(CompilerOptions.OPTION_ReportMethodCanBeStatic, CompilerOptions.ERROR);
+	compilerOptions.put(CompilerOptions.OPTION_ReportMethodCanBePotentiallyStatic, CompilerOptions.ERROR);
+	compilerOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.IGNORE);
+	this.runNegativeTest(
+		new String[] {
+				"X.java", 
+				"public class X {\n" +
+				"   public abstract class Abstract{}\n" +
+				"   public static abstract class Abstract2{}\n" +
+				"	private void method1() {\n" + 	// don't warn
+				"		new Abstract() {};\n" +
+				"	}\n" +
+				"	private void method2() {\n" + 	// warn
+				"		new Abstract2() {};\n" +
+				"	}\n" +
+				"}"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" + 
+		"	private void method2() {\n" + 
+		"	             ^^^^^^^^^\n" + 
+		"The method method2() from the type X can be declared as static\n" + 
+		"----------\n",
+		null /* no extra class libraries */,
+		true /* flush output directory */,
+		compilerOptions /* custom options */
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=360164
+public void test360164() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+	this.runConformTest(
+			new String[] {
+					"p/B.java", 
+					"package p;\n" +
+					"\n" +
+					"public abstract class B<K,V> {\n" +
+					"	 protected abstract V foo(K element);\n" +
+					"}\n",
+					"p/C.java", 
+					"package p;\n" +
+					"public class C {\n" +
+					"}\n",
+					"p/D.java", 
+					"package p;\n" +
+					"public class D extends E {\n" +
+					"}\n",
+					"p/E.java", 
+					"package p;\n" +
+					"public abstract class E implements I {\n" +
+					"}\n",
+					"p/I.java", 
+					"package p;\n" +
+					"public interface I {\n" +
+					"}\n",
+					"p/X.java", 
+					"package p;\n" +
+					"public class X {\n" +
+					"	private final class A extends B<C,D>{\n" +
+					"		@Override\n" +
+					"		protected D foo(C c) {\n" +
+					"			return null;\n" +
+					"		}\n" +
+					"   }\n" +
+					"}\n",
+			},
+			"");
+
+	// delete binary file I (i.e. simulate removing it from classpath for subsequent compile)
+	Util.delete(new File(OUTPUT_DIR, "p" + File.separator + "I.class"));
+
+	runNegativeTest(
+		// test directory preparation
+		false /* do not flush output directory */,
+		new String[] { /* test files */
+				"p/X.java", 
+				"package p;\n" +
+				"public class X {\n" +
+				"	private final class A extends B<C,D>{\n" +
+				"		@Override\n" +
+				"		protected D foo(C c) {\n" +
+				"            Zork z;\n" +
+				"			return null;\n" +
+				"		}\n" +
+				"   }\n" +
+				"}\n",
+		},
+		// compiler options
+		null /* no class libraries */,
+		null /* no custom options */,
+		// compiler results 
+		"----------\n" + 
+		"1. WARNING in p\\X.java (at line 3)\n" + 
+		"	private final class A extends B<C,D>{\n" + 
+		"	                    ^\n" + 
+		"The type X.A is never used locally\n" + 
+		"----------\n" + 
+		"2. ERROR in p\\X.java (at line 6)\n" + 
+		"	Zork z;\n" + 
+		"	^^^^\n" + 
+		"Zork cannot be resolved to a type\n" + 
+		"----------\n",
+		// javac options
+		JavacTestOptions.SKIP_UNTIL_FRAMEWORK_FIX /* javac test options */);
+}
 }
