@@ -1144,19 +1144,22 @@ public team class CompilerAdaptation {
 				LocalVariableBinding[] locals = getNullLocals();
 				for (int i = 0; i < getNullCount(); i++) {
 					int nullCheckType = getNullCheckTypes()[i];
+					Expression reference = getNullReferences()[i];
+					if (reference == null) continue; // may have been nulled out by our base method
 					if (nullCheckType == ASSIGN_TO_NONNULL) {
 						FlowContext parent = getParent();
 						CompilerAdaptation.this.recordNullityMismatch0(parent, 
 								scope, getNullReferences()[i], flowInfo.nullStatus(locals[i]), this.expectedTypes[i], nullCheckType);
 					} else {
 						getParent().recordUsingNullReference(scope, getNullLocals()[i],
-								getNullReferences()[i],	nullCheckType, flowInfo);
+								reference, nullCheckType, flowInfo);
 					}
 				}
 			} else {
 				// check inconsistent null checks on outermost looping context
 				for (int i = 0; i < getNullCount(); i++) {
 					Expression expression = getNullReferences()[i];
+					if (expression == null) continue; // may have been nulled out by our base method
 					// final local variable
 					LocalVariableBinding local = getNullLocals()[i];
 					if ((getNullCheckTypes()[i] & ASSIGN_TO_NONNULL) != 0) {
