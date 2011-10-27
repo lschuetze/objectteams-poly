@@ -182,9 +182,10 @@ should test be run (true|false)?
 		<untar compression="gzip" src="${eclipse-app.tgz}" dest="${build.root.dir}"/>
 	</target>
 	
-	<target name="AddPluginsToEclipse" description="Add svn.pde.build plugin to the base Eclipse">
+	<target name="AddPluginsToEclipse" description="Add svn.pde.build and git.pde.build plugins to the base Eclipse">
 		<mkdir dir="${baseLocation}/dropins/plugins"/>
 		<copy file="${OTScriptDir}/lib/${svn.pde.build}" todir="${baseLocation}/dropins/plugins" />
+		<copy file="${OTScriptDir}/lib/${git.pde.build}" todir="${baseLocation}/dropins/plugins" />
 	</target>
 
 	<!-- ==== BUILDING AND RUNNING: ==== -->
