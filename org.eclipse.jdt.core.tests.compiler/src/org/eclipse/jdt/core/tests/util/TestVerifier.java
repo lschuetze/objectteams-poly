@@ -119,7 +119,7 @@ private void compileVerifyTests(String verifierDir) {
 	}
 	String fileName = dir + File.separator + simpleName + ".java";
 	Util.writeToFile(getVerifyTestsCode(), fileName);
-	BatchCompiler.compile("\"" + fileName + "\" -d \"" + verifierDir + "\" -classpath \"" + Util.getJavaClassLibsAsString() + "\"", new PrintWriter(System.out), new PrintWriter(System.err), null/*progress*/);
+	BatchCompiler.compile("\"" + fileName + "\" -d \"" + verifierDir + "\" -classpath \"" + Util.getJavaClassLibsAsString() + "\" -warn:-resource", new PrintWriter(System.out), new PrintWriter(System.err), null/*progress*/);
 }
 public void execute(String className, String[] classpaths) {
 	this.outputBuffer = new StringBuffer();
