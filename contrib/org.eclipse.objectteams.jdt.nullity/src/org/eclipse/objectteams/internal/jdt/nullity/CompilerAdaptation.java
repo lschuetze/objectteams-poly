@@ -304,6 +304,7 @@ public team class CompilerAdaptation {
 		
 		@SuppressWarnings({ "inferredcallout", "basecall", "decapsulation" })
 		callin FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
+			MethodScope methodScope = currentScope.methodScope();
 			if (this.expression != null) {
 				// workaround for Bug 354480 - VerifyError due to bogus lowering in inferred callout-to-field
 				org.eclipse.jdt.internal.compiler.lookup.BlockScope blockScope = currentScope;
@@ -313,9 +314,22 @@ public team class CompilerAdaptation {
 				}
 				if (flowInfo.reachMode() == FlowInfo.REACHABLE)
 					checkAgainstNullAnnotation(currentScope, this.expression.nullStatus(flowInfo));
+				try {
+					Compatibility compatibility = new Compatibility();
+					IFakedTrackingVariable trackingVariable = compatibility.getCloseTrackingVariable(this.expression);
+					if (trackingVariable != null) {
+						if (methodScope != trackingVariable.methodScope())
+							trackingVariable.markClosedInNestedMethod();
+						// don't report issues concerning this local, since by returning
+						// the method passes the responsibility to the caller:
+						compatibility.removeTrackingVar(currentScope, trackingVariable);
+					}
+				} catch (Throwable e) {
+					// nop, compatibility with older JDT/Core versions
+				}
 			}
 			this.initStateIndex =
-				currentScope.methodScope().recordInitializationStates(flowInfo);
+				methodScope.recordInitializationStates(flowInfo);
 			// compute the return sequence (running the finally blocks)
 			FlowContext traversedContext = flowContext;
 			int subCount = 0;
@@ -352,14 +366,14 @@ public team class CompilerAdaptation {
 							}
 							saveValueNeeded = true;
 							this.initStateIndex =
-								currentScope.methodScope().recordInitializationStates(flowInfo);
+								methodScope.recordInitializationStates(flowInfo);
 						}
 					}
 				} else if (traversedContext instanceof InitializationFlowContext) {
 						currentScope.problemReporter().cannotReturnInInitializer(this);
 						return FlowInfo.DEAD_END;
 				}
-			} while ((traversedContext = traversedContext.parent) != null);
+			} while ((traversedContext = getLocalParent(traversedContext)) != null);
 
 			// resize subroutines
 			if ((this.subroutines != null) && (subCount != this.subroutines.length)) {
@@ -377,8 +391,18 @@ public team class CompilerAdaptation {
 					this.expression.bits |= ASTNode.IsReturnedValue;
 				}
 			}
+			try {
+				currentScope.checkUnclosedCloseables(flowInfo, this, currentScope);
+			} catch (Throwable e) {
+				// nop, compatibility with older JDT/Core versions.
+			}
 			return FlowInfo.DEAD_END;
-		}	
+		}
+		FlowContext getLocalParent(FlowContext flowContext) {
+			if (flowContext.associatedNode instanceof org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration || flowContext.associatedNode instanceof TypeDeclaration)
+				return null;
+			return flowContext.parent;
+		}
 		
 		void checkAgainstNullAnnotation(BlockScope scope, int nullStatus) {
 			if (nullStatus != FlowInfo.NON_NULL) {
@@ -520,6 +544,10 @@ public team class CompilerAdaptation {
 		/** Feed null status from parameter annotation into the analysis of the method's body. */
 		void analyseArgumentNullity(FlowInfo info)
 		<- before void analyseCode(ClassScope classScope, FlowContext initializationContext, FlowInfo info)
+			with { info <- info }
+		// compatibility<=  3.8M2
+		void analyseArgumentNullity(FlowInfo info)
+		<- before void analyseCode(ClassScope classScope, InitializationFlowContext initializationContext, FlowInfo info)
 			with { info <- info }
 
 	}
@@ -1065,6 +1093,9 @@ public team class CompilerAdaptation {
 		ProblemReporter problemReporter() 	-> ProblemReporter problemReporter();
 		MethodScope methodScope() 			-> MethodScope methodScope();
 		LookupEnvironment environment() 	-> LookupEnvironment environment();
+		// method introduced in 3.8M3:
+		void checkUnclosedCloseables(FlowInfo flowInfo, ASTNode location, BlockScope locationScope) 
+		-> void checkUnclosedCloseables(FlowInfo flowInfo, ASTNode location, BlockScope locationScope);
 	}
 
 	// ---- Handling sub-classes of FlowContext that perform deferred null checking: ----

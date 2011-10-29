@@ -19,6 +19,11 @@
                class="org.eclipse.objectteams.internal.jdt.nullity.DOMAdaptation"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
+         <team
+               activation="NONE"
+               class="org.eclipse.objectteams.internal.jdt.nullity.Compatibility"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
       </aspectBinding>
    </extension>
    <extension
