@@ -54,7 +54,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_nonnull_parameter_007" };
+//		TESTS_NAMES = new String[] { "test_constructor_with_nested_class" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -1989,5 +1989,24 @@ public void test_nesting_1() {
 		"	                      ^^\n" + 
 		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
 		"----------\n");
+}
+// Test a regression incurred to the OT/J based implementation
+// by the fix in Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
+public void test_constructor_with_nested_class() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"    final Object o1;\n" +
+			"    final Object o2;\n" +
+			"    public X() {\n" +
+			"         this.o1 = new Object() {\n" +
+			"             public String toString() { return \"O1\"; }\n" +
+			"         };\n" +
+			"         this.o2 = new Object();" +
+			"    }\n" +
+			"}\n"
+		},
+		"");
 }
 }
