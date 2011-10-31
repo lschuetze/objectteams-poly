@@ -176,7 +176,6 @@ public interface TagBits {
     
     // is it a dependent type?
     long IsDependentType = ASTNode.Bit59L;					// for type bindings
-    long IsCopyOfParameterized = ASTNode.Bit59L;			// for method bindings
 
     // had the baseclass field/playedBy problems?
     long BaseclassHasProblems = ASTNode.Bit60L;				// for type bindings (role)
@@ -185,6 +184,7 @@ public interface TagBits {
     long HasLiftingProblem = ASTNode.Bit61L;    			// for type bindings (role class)
     // parameter/return incompatibility btw base-role?
     long HasMappingIncompatibility = ASTNode.Bit61L; 		// for method mapping bindings
+    long IsCopyOfParameterized = ASTNode.Bit61L;			// for method bindings
 
     // can lifting fail due to role abstractness?
     long HasAbstractRelevantRole = ASTNode.Bit62L;			// for type bindings (team)
