@@ -515,8 +515,10 @@ public team class CompilerAdaptation {
 		 */
 		public void addParameterNullnessAnnotation(int i, long defaultNullness, ReferenceBinding annotationBinding) {
 			Argument argument = getArguments()[i];
-			Annotation[] annotations = argument.annotations;
-			argument.annotations = addAnnotation(argument.type, annotations, annotationBinding);
+			if (argument.type != null) { // null happens for constructors of anonymous classes
+				Annotation[] annotations = argument.annotations;
+				argument.annotations = addAnnotation(argument.type, annotations, annotationBinding);
+			}
 		}
 
 		Annotation[] addAnnotation(ASTNode location, Annotation[] annotations, ReferenceBinding annotationBinding) {
