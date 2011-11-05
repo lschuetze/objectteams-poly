@@ -110,13 +110,13 @@ public team class CompilerAdaptation {
 	
 	public CompilerAdaptation () {
 		// add more irritants to IrritantSet:
-		IrritantSet.COMPILER_DEFAULT_ERRORS.set( NullCompilerOptions.NullContractViolation
-				 							    |NullCompilerOptions.PotentialNullContractViolation);
-		IrritantSet.COMPILER_DEFAULT_WARNINGS.set(NullCompilerOptions.NullContractInsufficientInfo
+		IrritantSet.COMPILER_DEFAULT_ERRORS.set( NullCompilerOptions.NullSpecViolation
+				 							    |NullCompilerOptions.PotentialNullSpecViolation);
+		IrritantSet.COMPILER_DEFAULT_WARNINGS.set(NullCompilerOptions.NullSpecInsufficientInfo
 												|NullCompilerOptions.RedundantNullAnnotation);
-		IrritantSet.NULL.set( NullCompilerOptions.NullContractViolation
-							 |NullCompilerOptions.PotentialNullContractViolation
-							 |NullCompilerOptions.NullContractInsufficientInfo
+		IrritantSet.NULL.set( NullCompilerOptions.NullSpecViolation
+							 |NullCompilerOptions.PotentialNullSpecViolation
+							 |NullCompilerOptions.NullSpecInsufficientInfo
 							 |NullCompilerOptions.RedundantNullAnnotation);
 	}
 
@@ -570,7 +570,7 @@ public team class CompilerAdaptation {
 	/** Add a field to store parameter nullness information. */
 	protected class MethodBinding playedBy MethodBinding {
 
-		/** Store nullness information from annotation (incl. inherited contracts). */
+		/** Store nullness information from annotation (incl. applicable default). */
 		public Boolean[] parameterNonNullness;  // TRUE means @NonNull declared, FALSE means @Nullable declared, null means nothing declared
 
 		TypeBinding getReturnType() 			-> get TypeBinding returnType;
@@ -623,7 +623,7 @@ public team class CompilerAdaptation {
 		}
 	}
 
-	/** Transfer inherited null contracts and check compatibility. */
+	/** Check compatibility of inherited null-specifications. */
 	@SuppressWarnings("decapsulation")
 	protected class MethodVerifier15 playedBy MethodVerifier15 {
 
@@ -635,23 +635,23 @@ public team class CompilerAdaptation {
 				with { 	result 				<- type.methods() }
 
 		
-		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length)
+		void checkNullSpecInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length)
 		<- after
 		void checkAgainstInheritedMethods(MethodBinding currentMethod, MethodBinding[] methods, int length, MethodBinding[] allInheritedMethods);
 
-		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length)
+		void checkNullSpecInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length)
 		<- after
 		void checkConcreteInheritedMethod(MethodBinding concreteMethod, MethodBinding[] abstractMethods)
 			with { currentMethod <- concreteMethod, methods <- abstractMethods, length <- abstractMethods.length }
 
-		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length) {
+		void checkNullSpecInheritance(MethodBinding currentMethod, MethodBinding[] methods, int length) {
 			// TODO: change traversal: process all methods at once!
 			for (int i = length; --i >= 0;)
 				if (!currentMethod.isStatic() && !methods[i].isStatic())
-					checkNullContractInheritance(currentMethod, methods[i]);
+					checkNullSpecInheritance(currentMethod, methods[i]);
 		}
 		
-		void checkNullContractInheritance(MethodBinding currentMethod, MethodBinding inheritedMethod) {
+		void checkNullSpecInheritance(MethodBinding currentMethod, MethodBinding inheritedMethod) {
 			long inheritedBits = inheritedMethod.getTagBits();
 			long currentBits = currentMethod.getTagBits();
 			LookupEnvironment environment = this.getEnvironment();
@@ -1330,9 +1330,9 @@ public team class CompilerAdaptation {
 					break categorizeOnIrritant;
 				int irritant = getIrritant(problemID);
 				switch (irritant) {
-				case CompilerOptions.NullContractViolation :
-				case CompilerOptions.PotentialNullContractViolation :
-				case CompilerOptions.NullContractInsufficientInfo :
+				case CompilerOptions.NullSpecViolation :
+				case CompilerOptions.PotentialNullSpecViolation :
+				case CompilerOptions.NullSpecInsufficientInfo :
 					return CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM;
 				}
 				// categorize fatal problems per ID
@@ -1359,11 +1359,11 @@ public team class CompilerAdaptation {
 				case IProblem.IllegalReturnNullityRedefinition:
 				case IProblem.IllegalRedefinitionToNonNullParameter:
 				case IProblem.IllegalDefinitionToNonNullParameter:
-					return CompilerOptions.NullContractViolation;
+					return CompilerOptions.NullSpecViolation;
 				case IProblem.RequiredNonNullButProvidedPotentialNull:
-					return CompilerOptions.PotentialNullContractViolation;
+					return CompilerOptions.PotentialNullSpecViolation;
 				case IProblem.RequiredNonNullButProvidedUnknown:
-					return CompilerOptions.NullContractInsufficientInfo;
+					return CompilerOptions.NullSpecInsufficientInfo;
 				case IProblem.NullAnnotationIsRedundant:
 					return CompilerOptions.RedundantNullAnnotation;
 				case IProblem.PotentialNullMessageSendReference:
@@ -1605,12 +1605,12 @@ public team class CompilerAdaptation {
 		@SuppressWarnings("basecall")
 		static callin String optionKeyFromIrritant(int irritant) {
 			switch(irritant) {
-			case NullContractViolation :
-				return OPTION_ReportNullContractViolation;
-			case PotentialNullContractViolation :
-				return OPTION_ReportPotentialNullContractViolation;
-			case NullContractInsufficientInfo :
-				return OPTION_ReportNullContractInsufficientInfo;
+			case NullSpecViolation :
+				return OPTION_ReportNullSpecViolation;
+			case PotentialNullSpecViolation :
+				return OPTION_ReportPotentialNullSpecViolation;
+			case NullSpecInsufficientInfo :
+				return OPTION_ReportNullSpecInsufficientInfo;
 			case RedundantNullAnnotation :
 				return OPTION_ReportRedundantNullAnnotation;
 			default:
@@ -1621,9 +1621,9 @@ public team class CompilerAdaptation {
 		@SuppressWarnings("basecall")
 		static callin String warningTokenFromIrritant(int irritant) {
 			switch(irritant) {
-			case NullContractViolation :
-			case PotentialNullContractViolation :
-			case NullContractInsufficientInfo :
+			case NullSpecViolation :
+			case PotentialNullSpecViolation :
+			case NullSpecInsufficientInfo :
 			case RedundantNullAnnotation :
 				return "null"; //$NON-NLS-1$
 			default:
@@ -1637,9 +1637,9 @@ public team class CompilerAdaptation {
 		private void getMap(Map optionsMap) {
 			optionsMap.put(OPTION_AnnotationBasedNullAnalysis, this.isAnnotationBasedNullAnalysisEnabled ? ENABLED : DISABLED);
 			if (this.isAnnotationBasedNullAnalysisEnabled) {
-				optionsMap.put(OPTION_ReportNullContractViolation, getSeverityString(NullContractViolation));
-				optionsMap.put(OPTION_ReportPotentialNullContractViolation, getSeverityString(PotentialNullContractViolation));
-				optionsMap.put(OPTION_ReportNullContractInsufficientInfo, getSeverityString(NullContractInsufficientInfo));
+				optionsMap.put(OPTION_ReportNullSpecViolation, getSeverityString(NullSpecViolation));
+				optionsMap.put(OPTION_ReportPotentialNullSpecViolation, getSeverityString(PotentialNullSpecViolation));
+				optionsMap.put(OPTION_ReportNullSpecInsufficientInfo, getSeverityString(NullSpecInsufficientInfo));
 				optionsMap.put(OPTION_ReportRedundantNullAnnotation, getSeverityString(RedundantNullAnnotation));
 				if (this.nullableAnnotationName != null) {
 					char[] compoundName = CharOperation.concatWith(this.nullableAnnotationName, '.');
@@ -1672,9 +1672,9 @@ public team class CompilerAdaptation {
 				}
 			}
 			if (this.isAnnotationBasedNullAnalysisEnabled) {
-				if ((optionValue = optionsMap.get(OPTION_ReportNullContractViolation)) != null) updateSeverity(NullContractViolation, optionValue);
-				if ((optionValue = optionsMap.get(OPTION_ReportPotentialNullContractViolation)) != null) updateSeverity(PotentialNullContractViolation, optionValue);
-				if ((optionValue = optionsMap.get(OPTION_ReportNullContractInsufficientInfo)) != null) updateSeverity(NullContractInsufficientInfo, optionValue);
+				if ((optionValue = optionsMap.get(OPTION_ReportNullSpecViolation)) != null) updateSeverity(NullSpecViolation, optionValue);
+				if ((optionValue = optionsMap.get(OPTION_ReportPotentialNullSpecViolation)) != null) updateSeverity(PotentialNullSpecViolation, optionValue);
+				if ((optionValue = optionsMap.get(OPTION_ReportNullSpecInsufficientInfo)) != null) updateSeverity(NullSpecInsufficientInfo, optionValue);
 				if ((optionValue = optionsMap.get(OPTION_ReportRedundantNullAnnotation)) != null) updateSeverity(RedundantNullAnnotation, optionValue);
 				if ((optionValue = optionsMap.get(OPTION_NullableAnnotationName)) != null) {
 					this.nullableAnnotationName = CharOperation.splitAndTrimOn('.', ((String)optionValue).toCharArray());
@@ -1728,9 +1728,9 @@ public team class CompilerAdaptation {
 			optionNames.add(NullCompilerOptions.OPTION_NonNullAnnotationName);
 			optionNames.add(NullCompilerOptions.OPTION_NullableAnnotationName);
 			optionNames.add(NullCompilerOptions.OPTION_NonNullByDefaultAnnotationName);
-			optionNames.add(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo);
-			optionNames.add(NullCompilerOptions.OPTION_ReportNullContractViolation);
-			optionNames.add(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation);
+			optionNames.add(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo);
+			optionNames.add(NullCompilerOptions.OPTION_ReportNullSpecViolation);
+			optionNames.add(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation);
 			optionNames.add(NullCompilerOptions.OPTION_ReportRedundantNullAnnotation);
 			optionNames.add(NullCompilerOptions.OPTION_NonNullIsDefault);
 			// also add to the instance preferences:

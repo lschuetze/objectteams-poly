@@ -24,9 +24,9 @@ public interface NullCompilerOptions {
 
 
 	// new:
-	public static final String OPTION_ReportNullContractViolation = "org.eclipse.jdt.core.compiler.problem.nullContractViolation";  //$NON-NLS-1$
-	public static final String OPTION_ReportPotentialNullContractViolation = "org.eclipse.jdt.core.compiler.problem.potentialNullContractViolation";  //$NON-NLS-1$
-	public static final String OPTION_ReportNullContractInsufficientInfo = "org.eclipse.jdt.core.compiler.problem.nullContractInsufficientInfo";  //$NON-NLS-1$
+	public static final String OPTION_ReportNullSpecViolation = "org.eclipse.jdt.core.compiler.problem.nullSpecViolation";  //$NON-NLS-1$
+	public static final String OPTION_ReportPotentialNullSpecViolation = "org.eclipse.jdt.core.compiler.problem.potentialNullSpecViolation";  //$NON-NLS-1$
+	public static final String OPTION_ReportNullSpecInsufficientInfo = "org.eclipse.jdt.core.compiler.problem.nullSpecInsufficientInfo";  //$NON-NLS-1$
 	public static final String OPTION_ReportRedundantNullAnnotation = "org.eclipse.jdt.core.compiler.problem.redundantNullAnnotation";  //$NON-NLS-1$
 
 	public static final String OPTION_AnnotationBasedNullAnalysis = "org.eclipse.jdt.core.compiler.annotation.nullanalysis"; //$NON-NLS-1$
@@ -37,9 +37,9 @@ public interface NullCompilerOptions {
 	public static final String OPTION_NonNullIsDefault = "org.eclipse.jdt.core.compiler.annotation.nonnullisdefault";  //$NON-NLS-1$
 	
 
-	public static final int NullContractViolation = IrritantSet.GROUP2 | ASTNode.Bit8;
-	public static final int PotentialNullContractViolation = IrritantSet.GROUP2 | ASTNode.Bit9;
-	public static final int NullContractInsufficientInfo = IrritantSet.GROUP2 | ASTNode.Bit10;
+	public static final int NullSpecViolation = IrritantSet.GROUP2 | ASTNode.Bit8;
+	public static final int PotentialNullSpecViolation = IrritantSet.GROUP2 | ASTNode.Bit9;
+	public static final int NullSpecInsufficientInfo = IrritantSet.GROUP2 | ASTNode.Bit10;
 	public static final int RedundantNullAnnotation = IrritantSet.GROUP2 | ASTNode.Bit14;
 	
 	static final char[][] DEFAULT_NONNULL_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.NonNull".toCharArray()); //$NON-NLS-1$

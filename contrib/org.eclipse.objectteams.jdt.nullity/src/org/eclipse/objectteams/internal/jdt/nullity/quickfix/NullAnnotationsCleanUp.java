@@ -85,7 +85,7 @@ public class NullAnnotationsCleanUp extends AbstractMultiFix {
 	private Map getRequiredOptions() {
 		Map result= new Hashtable();
 		// TODO(SH): might set depending on this.handledProblemID, not sure about the benefit
-		result.put(NullCompilerOptions.OPTION_ReportNullContractViolation, JavaCore.WARNING);
+		result.put(NullCompilerOptions.OPTION_ReportNullSpecViolation, JavaCore.WARNING);
 		result.put(CompilerOptions.OPTION_ReportRedundantNullCheck, JavaCore.WARNING);
 		return result;
 	}
