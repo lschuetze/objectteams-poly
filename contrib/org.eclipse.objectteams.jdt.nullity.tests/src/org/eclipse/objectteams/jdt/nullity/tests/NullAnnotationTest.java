@@ -95,9 +95,10 @@ protected Map getCompilerOptions() {
 		// enable null annotations:
 		defaultOptions.put(NullCompilerOptions.OPTION_AnnotationBasedNullAnalysis, CompilerOptions.ENABLED);
 		// leave other new options at these defaults:
-//		defaultOptions.put(CompilerOptions.OPTION_ReportNullContractViolation, CompilerOptions.ERROR);
-//		defaultOptions.put(CompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
-//		defaultOptions.put(CompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.WARNING);
+//		defaultOptions.put(CompilerOptions.OPTION_ReportNullSpecViolation, CompilerOptions.ERROR);
+//		defaultOptions.put(CompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
+//		defaultOptions.put(CompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.WARNING);
+//		defaultOptions.put(CompilerOptions.OPTION_ReportRedundantNullAnnotation, CompilerOptions.WARNING);
 		
 //		defaultOptions.put(CompilerOptions.OPTION_NullableAnnotationName, "org.eclipse.jdt.annotation.Nullable");
 //		defaultOptions.put(CompilerOptions.OPTION_NonNullAnnotationName, "org.eclipse.jdt.annotation.NonNull");
@@ -323,7 +324,7 @@ public void test_nonnull_parameter_005() {
 // a ternary non-null expression is passed to a nonnull parameter
 public void test_nonnull_parameter_006() {
 	Map customOptions = getCompilerOptions();
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runConformTestWithLibs(
 		new String[] {
 			"X.java",
@@ -340,7 +341,7 @@ public void test_nonnull_parameter_006() {
 // nullable value passed to a non-null parameter in a super-call
 public void test_nonnull_parameter_007() {
 	Map customOptions = getCompilerOptions();
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runNegativeTestWithLibs(
 		new String[] {
 			"XSub.java",
@@ -368,7 +369,7 @@ public void test_nonnull_parameter_007() {
 // a nullable value is passed to a non-null parameter in an allocation expression
 public void test_nonnull_parameter_008() {
 	Map customOptions = getCompilerOptions();
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
@@ -390,7 +391,7 @@ public void test_nonnull_parameter_008() {
 // a nullable value is passed to a non-null parameter in a qualified allocation expression
 public void test_nonnull_parameter_009() {
 	Map customOptions = getCompilerOptions();
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
@@ -564,7 +565,7 @@ public void test_parameter_specification_inheritance_004() {
 		"Illegal redefinition of parameter o, inherited method from IX does not constrain this parameter\n" + 
 		"----------\n");
 }
-// a method tries to relax the null contract, super declares @NonNull return
+// a method tries to relax the inherited null specification, super declares @NonNull return
 public void test_parameter_specification_inheritance_005() {
 	runConformTestWithLibs(
 		new String[] {
@@ -595,7 +596,7 @@ public void test_parameter_specification_inheritance_005() {
 		"----------\n");
 }
 
-// super has no constraint for return, sub method confirms the null contract as @Nullable 
+// super has no constraint for return, sub method confirms the null specification as @Nullable 
 public void test_parameter_specification_inheritance_006() {
 	runConformTest(
 		new String[] {
@@ -679,7 +680,7 @@ public void test_parameter_specification_inheritance_007a() {
 // a client potentially violates the inherited null specification, super interface declares @NonNull parameter
 public void test_parameter_specification_inheritance_008() {
 	Map options = getCompilerOptions();
-	options.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	options.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runConformTestWithLibs(
 		new String[] {
 			"IX.java",
@@ -720,7 +721,7 @@ public void test_parameter_specification_inheritance_008() {
 		"Potential type mismatch: required \'@NonNull Object\' but nullness of the provided value is unknown\n" + 
 		"----------\n");
 }
-// a static method has a more relaxed null contract than a like method in the super class, but no overriding.
+// a static method has a more relaxed null specification than a like method in the super class, but no overriding.
 public void test_parameter_specification_inheritance_009() {
 	runConformTestWithLibs(
 		new String[] {
@@ -742,7 +743,7 @@ public void test_parameter_specification_inheritance_009() {
 public void test_parameter_specification_inheritance_010() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runConformTestWithLibs(
 		new String[] {
 	"p1/X.java",
@@ -774,7 +775,7 @@ public void test_parameter_specification_inheritance_010() {
 public void test_parameter_specification_inheritance_011() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runNegativeTestWithLibs(
 		new String[] {
 	"p1/X.java",
@@ -807,12 +808,12 @@ public void test_parameter_specification_inheritance_011() {
 		"Type mismatch: required \'@NonNull String\' but the provided value is null\n" + 
 		"----------\n");
 }
-// methods from two super types have different null contracts.
-// sub-class merges both using the weakest common contract 
+// methods from two super types have different null specifications.
+// sub-class merges both using the weakest common specification
 public void test_parameter_specification_inheritance_012() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runConformTestWithLibs(
 		new String[] {
 	"p1/X.java",
@@ -842,12 +843,12 @@ public void test_parameter_specification_inheritance_012() {
 		customOptions,
 		"");
 }
-// methods from two super types have different null contracts.
+// methods from two super types have different null specifications.
 // sub-class overrides this method in non-conforming ways 
 public void test_parameter_specification_inheritance_013() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runNegativeTestWithLibs(
 		new String[] {
 	"p1/X.java",
@@ -897,12 +898,12 @@ public void test_parameter_specification_inheritance_013() {
 		"Illegal redefinition of parameter s3, inherited method from IY declares this parameter as @Nullable\n" + 
 		"----------\n");
 }
-// methods from two super types have different null contracts.
+// methods from two super types have different null specifications.
 // sub-class does not override, but should to bridge the incompatibility
 public void test_parameter_specification_inheritance_014() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runNegativeTestWithLibs(
 		new String[] {
 	"p1/IY.java",
@@ -1241,7 +1242,7 @@ public void test_nonnull_return_010() {
 // a non-null method returns a checked-for null value, but that branch is dead code
 public void test_nonnull_return_011() {
 	Map customOptions = getCompilerOptions();
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
@@ -1273,7 +1274,7 @@ public void test_nonnull_return_011() {
 // TODO(SH): ENABLE!
 public void _test_nonnull_return_012() {
 	Map customOptions = getCompilerOptions();
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
@@ -1301,7 +1302,7 @@ public void _test_nonnull_return_012() {
 // don't apply any default annotations to return void
 public void test_nonnull_return_013() {
 	Map customOptions = getCompilerOptions();
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	runConformTestWithLibs(
 		new String[] {
 			"X.java",
@@ -1399,7 +1400,7 @@ public void test_annotation_import_002() {
 public void test_annotation_import_005() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NullableAnnotationName, "org.foo.MayBeNull");
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.MustNotBeNull");
 	runNegativeTest(
@@ -1444,7 +1445,7 @@ public void test_annotation_import_005() {
 public void test_annotation_import_006() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NullableAnnotationName, "org.foo.MayBeNull");
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.MustNotBeNull");
 	runNegativeTest(
@@ -1480,7 +1481,7 @@ public void test_annotation_import_006() {
 public void test_annotation_import_007() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportNullSpecInsufficientInfo, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NullableAnnotationName, "org.foo.MayBeNull");
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.MustNotBeNull");
 	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
@@ -1552,7 +1553,7 @@ public void test_illegal_annotation_002() {
 public void test_default_nullness_002() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTestWithLibs(
 		new String[] {
@@ -1591,7 +1592,7 @@ public void test_default_nullness_002() {
 public void test_default_nullness_003() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	runNegativeTestWithLibs(
 		new String[] {
 	"p1/X.java",
@@ -1635,7 +1636,7 @@ public void test_default_nullness_003() {
 public void test_default_nullness_003a() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	runConformTestWithLibs(
 		new String[] {
 	"p1/X.java",
@@ -1693,7 +1694,7 @@ public void test_default_nullness_003a() {
 public void test_default_nullness_004() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	runConformTestWithLibs(
 		new String[] {
 	"p1/X.java",
@@ -1723,7 +1724,7 @@ public void test_default_nullness_004() {
 public void test_default_nullness_005() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.NonNull");
 	runNegativeTestWithLibs(
 		new String[] {
@@ -1755,7 +1756,7 @@ public void test_default_nullness_005() {
 public void test_default_nullness_006() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.NonNull");
 	runNegativeTestWithLibs(
 		new String[] {
@@ -1786,7 +1787,7 @@ public void test_default_nullness_006() {
 public void test_default_nullness_007() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTestWithLibs(
 		new String[] {
@@ -1815,7 +1816,7 @@ public void test_default_nullness_007() {
 public void test_default_nullness_008() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	runConformTestWithLibs(
 		new String[] {
 	"p1/X.java",
@@ -1847,7 +1848,7 @@ public void test_default_nullness_008() {
 public void test_default_nullness_009() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	runNegativeTestWithLibs(
 		new String[] {
 	"p1/X.java",
@@ -1891,7 +1892,7 @@ public void test_default_nullness_009() {
 public void test_default_nullness_010() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	runConformTestWithLibs(
 		new String[] {
 	"p2/Y.java",
@@ -1921,7 +1922,7 @@ public void test_default_nullness_010() {
 public void test_nonnull_var_in_constrol_structure_1() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTestWithLibs(
 		new String[] {
@@ -1974,7 +1975,7 @@ public void test_nonnull_var_in_constrol_structure_1() {
 public void test_nonnull_var_in_constrol_structure_2() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTestWithLibs(
 		new String[] {
@@ -2020,7 +2021,7 @@ public void test_nonnull_var_in_constrol_structure_2() {
 public void test_nonnull_var_in_constrol_structure_3() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	customOptions.put(NullCompilerOptions.OPTION_ReportRedundantNullAnnotation, CompilerOptions.IGNORE);
 	runNegativeTestWithLibs(
@@ -2070,7 +2071,7 @@ public void test_nonnull_var_in_constrol_structure_3() {
 public void test_nesting_1() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullSpecViolation, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTestWithLibs(
 		new String[] {
