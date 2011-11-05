@@ -995,16 +995,16 @@ public team class CompilerAdaptation {
 		ReferenceBinding getType(char[][] compoundName) 	-> ReferenceBinding getType(char[][] compoundName);
 		PackageBinding createPackage(char[][] compoundName) -> PackageBinding createPackage(char[][] compoundName);
 
-		boolean packageInitialized = false;
+		boolean nullAnnotationsInitialized = false;
 		
 		/** The first time a package is requested initialize the null annotation type package. */
-		void initNullAnnotationPackage()
+		void initNullAnnotationPackages()
 					<- before PackageBinding getTopLevelPackage(char[] name),
 							  PackageBinding createPackage(char[][] compoundName)
-			when (!this.packageInitialized);
+			when (!this.nullAnnotationsInitialized);
 
-		private void initNullAnnotationPackage() {
-			this.packageInitialized = true;
+		private void initNullAnnotationPackages() {
+			this.nullAnnotationsInitialized = true;
 			char[][] compoundName = getNullableAnnotationName();
 			if (compoundName != null)
 				setupNullAnnotationPackage(compoundName, TypeIds.T_ConfiguredAnnotationNullable);
@@ -1039,7 +1039,7 @@ public team class CompilerAdaptation {
 		
 		reset <- after reset;
 		void reset() {
-			this.packageInitialized = false;
+			this.nullAnnotationsInitialized = false;
 		}
 
 		CompilerOptions getGlobalOptions() -> get CompilerOptions globalOptions;
