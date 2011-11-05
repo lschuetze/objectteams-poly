@@ -56,7 +56,7 @@ public class NullAnnotationModelTests extends ReconcilerTests {
 			// Resources creation
 			IJavaProject p = createJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB", ANNOTATION_LIB}, "bin", "1.5");
 			p.setOption(NullCompilerOptions.OPTION_AnnotationBasedNullAnalysis, JavaCore.ENABLED);
-			p.setOption(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+			p.setOption(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	
 			this.createFolder("/P/p1");
 			String c1SourceString =	
@@ -109,7 +109,7 @@ public class NullAnnotationModelTests extends ReconcilerTests {
 											   new String[] {"JCL15_LIB", ANNOTATION_LIB, testJarPath("example.jar")}, 
 											   "bin", "1.5");
 			p.setOption(NullCompilerOptions.OPTION_AnnotationBasedNullAnalysis, JavaCore.ENABLED);
-			p.setOption(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+			p.setOption(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 		
 			// example.jar contains p1/C1.java just like testConvertedSourceType1()
 			

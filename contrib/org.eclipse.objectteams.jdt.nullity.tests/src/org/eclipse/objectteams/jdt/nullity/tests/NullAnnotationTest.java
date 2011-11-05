@@ -54,7 +54,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_constructor_with_nested_class" };
+//		TESTS_NAMES = new String[] { "test_nonnull_var_in_constrol_structure_3" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -118,8 +118,7 @@ void runNegativeTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFi
 			LIBS,
 			customOptions,
 			expectedErrorLog,
-			"",/* expected output */
-			"",/* expected error */
+			// runtime options
 		    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 void runNegativeTestWithLibs(String[] testFiles, Map customOptions, String expectedErrorLog) {
@@ -950,22 +949,22 @@ public void test_parameter_specification_inheritance_014() {
 		"1. ERROR in p1\\Y.java (at line 2)\n" + 
 		"	public class Y extends X implements IY {\n" + 
 		"	             ^\n" + 
-		"The method getString1(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints. \n" + 
+		"The method getString1(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints\n" + 
 		"----------\n" + 
 		"2. ERROR in p1\\Y.java (at line 2)\n" + 
 		"	public class Y extends X implements IY {\n" + 
 		"	             ^\n" + 
-		"The method getString2(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints. \n" + 
+		"The method getString2(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints\n" + 
 		"----------\n" + 
 		"3. ERROR in p1\\Y.java (at line 2)\n" + 
 		"	public class Y extends X implements IY {\n" + 
 		"	             ^\n" + 
-		"The method getString5(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints. \n" + 
+		"The method getString5(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints\n" + 
 		"----------\n" + 
 		"4. ERROR in p1\\Y.java (at line 2)\n" + 
 		"	public class Y extends X implements IY {\n" + 
 		"	             ^\n" + 
-		"The method getString3(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints. \n" + 
+		"The method getString3(String) from class X cannot implement the corresponding method from type IY due to incompatible nullness constraints\n" + 
 		"----------\n");
 }
 // a nullable return value is dereferenced without a check
@@ -1320,6 +1319,24 @@ public void test_nonnull_return_013() {
 		customOptions,
 		"");
 }
+//suppress an error regarding null-spec violation
+public void test_suppress_001() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
+	runConformTestWithLibs(
+			new String[] {
+				"X.java",
+				"import org.eclipse.jdt.annotation.*;\n" +
+				"public class X {\n" +
+				"    @SuppressWarnings(\"null\")\n" +
+				"    @NonNull Object getObject(@Nullable Object o) {\n" +
+				"        return o;\n" + // 'o' is only potentially null
+				"    }\n" +
+				"}\n"
+			},
+			customOptions,
+			"");	
+}
 // mixed use of fully qualified name / explicit import
 public void test_annotation_import_001() {
 	Map customOptions = getCompilerOptions();
@@ -1466,7 +1483,7 @@ public void test_annotation_import_007() {
 	customOptions.put(NullCompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_NullableAnnotationName, "org.foo.MayBeNull");
 	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "org.foo.MustNotBeNull");
-	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTest(
 		true/*shouldFlushOutputDirectory*/,
 		new String[] {
@@ -1508,38 +1525,35 @@ public void test_illegal_annotation_001() {
 		"The annotation @NonNull is disallowed for this location\n" + 
 		"----------\n",
 		LIBS,
-		false/*shouldFlush*/);	
+		false/*shouldFlush*/);
 }
+// this test has been removed:
 // setting default to nullable, default applies to a parameter
-public void test_default_nullness_001() {
+// public void test_default_nullness_001()
+
+// a null annotation is illegally defined by its simple name
+public void test_illegal_annotation_002() {
 	Map customOptions = getCompilerOptions();
-	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NULLABLE);
+	customOptions.put(NullCompilerOptions.OPTION_NonNullAnnotationName, "NichtNull");
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
-			"import org.eclipse.jdt.annotation.*;\n" +
 			"public class X {\n" +
-			"    @NonNull Object getObject(Object o) {\n" +
-			"        return o;\n" + // illegal due to default @Nullable of parameter
-			"    }\n" +
-			"}\n",
-
+			"}\n"
 		},
 		customOptions,
 		"----------\n" + 
-		"1. ERROR in X.java (at line 4)\n" + 
-		"	return o;\n" + 
-		"	       ^\n" + 
-		"Type mismatch: required \'@NonNull Object\' but the provided value can be null\n" + 
+		"1. ERROR in X.java (at line 0)\n" + 
+		"	public class X {\n" + 
+		"	^\n" + 
+		"Cannot use the unqualified name \'NichtNull\' as an annotation name for null specification\n" + 
 		"----------\n");
 }
 public void test_default_nullness_002() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
@@ -1773,7 +1787,7 @@ public void test_default_nullness_007() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
@@ -1796,12 +1810,119 @@ public void test_default_nullness_007() {
 		"Type mismatch: required \'@NonNull Object\' but the provided value can be null\n" + 
 		"----------\n");
 }
+
+// cancel type level default to comply with super specification
+public void test_default_nullness_008() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	runConformTestWithLibs(
+		new String[] {
+	"p1/X.java",
+			"package p1;\n" +
+			"public class X {\n" +
+			"    protected Object getObject(Object o) {\n" +
+			"        return new Object();\n" +
+			"    }\n" +
+			"}\n",
+	"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y extends p1.X {\n" +
+			"    @Override\n" +
+			"    @NonNullByDefault(false)\n" +
+			"    protected Object getObject(Object o) {\n" +
+			"        if (o.toString().length() == 0)\n" + // dereference without a warning
+			"	        return null;\n" + // return null without a warning
+			"        return o.toString();\n" +
+			"    }\n" +
+			"}\n"
+		},
+		customOptions,
+		"");
+}
+
+// cancel outer type level default to comply with super specification
+public void test_default_nullness_009() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	runNegativeTestWithLibs(
+		new String[] {
+	"p1/X.java",
+			"package p1;\n" +
+			"public class X {\n" +
+			"    protected Object getObject(Object o) {\n" +
+			"        return new Object();\n" +
+			"    }\n" +
+			"}\n",
+	"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y { \n" +
+			"    @NonNullByDefault(false)\n" +
+			"    static class Z extends p1.X {\n" +
+			"        @Override\n" +
+			"        protected Object getObject(Object o) {\n" +
+			"            if (o.toString().length() == 0) {\n" +
+			"                o = null;\n" + // assign null without a warning
+			"                bar(o); // error: arg is declared @NonNull\n" +
+			"	             return null;\n" +
+			"            }\n" +
+			"            return o.toString();\n" +
+			"        }\n" +
+			"        String bar(@NonNull Object o) {\n" +
+			"            return getObject(o).toString();" +
+			"        }\n" +
+			"    }\n" +
+			"}\n"
+		},
+		customOptions,
+		"----------\n" +
+		"1. ERROR in p2\\Y.java (at line 11)\n" + 
+		"	bar(o); // error: arg is declared @NonNull\n" +
+		"	    ^\n" +
+		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" +
+		"----------\n");
+}
+// non-null declarations are redundant within a default scope.
+public void test_default_nullness_010() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
+	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
+	runConformTestWithLibs(
+		new String[] {
+	"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y {\n" +
+			"    protected @NonNull Object getObject(@NonNull Object o) {\n" +
+			"        return o;\n" +
+			"    }\n" +
+			"}\n"
+		},
+		customOptions,
+		"----------\n" + 
+		"1. WARNING in p2\\Y.java (at line 5)\n" + 
+		"	protected @NonNull Object getObject(@NonNull Object o) {\n" + 
+		"	          ^^^^^^^^^^^^^^^\n" + 
+		"The nullness annotation is redundant with a default that applies to this location\n" + 
+		"----------\n" + 
+		"2. WARNING in p2\\Y.java (at line 5)\n" + 
+		"	protected @NonNull Object getObject(@NonNull Object o) {\n" + 
+		"	                                    ^^^^^^^^^^^^^^^^^\n" + 
+		"The nullness annotation is redundant with a default that applies to this location\n" + 
+		"----------\n");
+}
 // a nonnull variable is dereferenced in a loop
 public void test_nonnull_var_in_constrol_structure_1() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
@@ -1828,15 +1949,25 @@ public void test_nonnull_var_in_constrol_structure_1() {
 		},
 		customOptions,
 		"----------\n" + 
-		"1. ERROR in X.java (at line 9)\n" + 
+		"1. WARNING in X.java (at line 3)\n" + 
+		"	void print4(@NonNull String s) {\n" + 
+		"	            ^^^^^^^^^^^^^^^^^\n" + 
+		"The nullness annotation is redundant with a default that applies to this location\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 9)\n" + 
 		"	print(s);\n" + 
 		"	      ^\n" + 
 		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
 		"----------\n" + 
-		"2. ERROR in X.java (at line 14)\n" + 
+		"3. ERROR in X.java (at line 14)\n" + 
 		"	print(s);\n" + 
 		"	      ^\n" + 
 		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
+		"----------\n" + 
+		"4. WARNING in X.java (at line 16)\n" + 
+		"	void print(@NonNull String s) {\n" + 
+		"	           ^^^^^^^^^^^^^^^^^\n" + 
+		"The nullness annotation is redundant with a default that applies to this location\n" + 
 		"----------\n");
 }
 // a nonnull variable is dereferenced in a finally block
@@ -1844,13 +1975,13 @@ public void test_nonnull_var_in_constrol_structure_2() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
 			"import org.eclipse.jdt.annotation.*;\n" +
 			"public class X {\n" +
-			"    void print4(@NonNull String s) {\n" +
+			"    void print4(String s) {\n" +
 			"        try { /*empty*/ } finally {\n" +
 			"             print(s);\n" +
 			"        }\n" + 
@@ -1866,7 +1997,7 @@ public void test_nonnull_var_in_constrol_structure_2() {
 			"             print(s);\n" +
 			"        }\n" + 
 			"    }\n" +
-			"    void print(@NonNull String s) {\n" +
+			"    void print(String s) {\n" +
 			"        System.out.print(s);\n" +
 			"    }\n" +
 			"}\n",
@@ -1890,7 +2021,8 @@ public void test_nonnull_var_in_constrol_structure_3() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
+	customOptions.put(NullCompilerOptions.OPTION_ReportRedundantNullAnnotation, CompilerOptions.IGNORE);
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",
@@ -1934,12 +2066,12 @@ public void test_nonnull_var_in_constrol_structure_3() {
 		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" + 
 		"----------\n");
 }
-//a nonnull variable is dereferenced method of a nested type
+// a nonnull variable is dereferenced method of a nested type
 public void test_nesting_1() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(CompilerOptions.OPTION_ReportNullReference, CompilerOptions.ERROR);
 	customOptions.put(NullCompilerOptions.OPTION_ReportPotentialNullContractViolation, CompilerOptions.ERROR);
-	customOptions.put(NullCompilerOptions.OPTION_NullnessDefault, NullCompilerOptions.NONNULL);
+	customOptions.put(NullCompilerOptions.OPTION_NonNullIsDefault, NullCompilerOptions.ENABLED);
 	runNegativeTestWithLibs(
 		new String[] {
 			"X.java",

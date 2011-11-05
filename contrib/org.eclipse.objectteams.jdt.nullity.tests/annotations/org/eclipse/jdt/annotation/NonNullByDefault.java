@@ -36,7 +36,7 @@ import java.lang.annotation.*;
  * @author stephan
  */
 @Retention(RetentionPolicy.CLASS)
-@Target({PACKAGE,TYPE})
+@Target({PACKAGE,TYPE,METHOD,CONSTRUCTOR})
 public @interface NonNullByDefault {
-
+	boolean value() default true;
 }
