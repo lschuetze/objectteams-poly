@@ -78,18 +78,6 @@ public class Constants {
 		/** @since 3.7 */
 		int NullAnnotationIsRedundant = MethodRelated + 923;
 	}
-	
-	/** Translate from a nullness annotation to the corresponding tag bit or 0L. */
-	public static long getNullnessTagbit(TypeBinding nullnessAnnotation) {
-		switch (nullnessAnnotation.id) {
-		case TypeIds.T_ConfiguredAnnotationNonNull : 
-			return TagBits.AnnotationNonNull;
-		case TypeIds.T_ConfiguredAnnotationNullable : 
-			return TagBits.AnnotationNullable;
-		default: 
-			return 0L;
-		}
-	}
 
 	/**
 	 * This faked annotation type binding marks types with unspecified nullness.
