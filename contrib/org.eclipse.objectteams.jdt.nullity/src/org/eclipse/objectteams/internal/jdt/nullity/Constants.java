@@ -16,6 +16,7 @@ import static org.eclipse.jdt.core.compiler.IProblem.MethodRelated;
 import static org.eclipse.jdt.core.compiler.IProblem.TypeRelated;
 
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 
 @SuppressWarnings("restriction")
@@ -25,25 +26,25 @@ public class Constants {
 	static interface TagBits extends org.eclipse.jdt.internal.compiler.lookup.TagBits {
 		 // the following two should be added to TagBits.AllStandardAnnotationsMask:
 		
-		// values are selected so they don't conflict with existing TagBits neither in JDT 3.8M1 nor OTDT 2.1M1
 		// MethodBinding or LocalVariableBinding (argument):
 		long AnnotationNullable = ASTNode.Bit59L;
 		long AnnotationNonNull = ASTNode.Bit60L;
-		// PackageBinding or TypeBinding:
-		long AnnotationNullableByDefault = ASTNode.Bit52L;
-		long AnnotationNonNullByDefault = ASTNode.Bit53L;
+		// PackageBinding or TypeBinding or MethodBinding:
+		long AnnotationNullUnspecifiedByDefault = ASTNode.Bit61L;
+		long AnnotationNonNullByDefault = ASTNode.Bit62L;
 	}
 	
 	// ASTNode:
 	// for annotation reference:
 	public static final int IsSynthetic = ASTNode.Bit7;
+	// for method declaration to avoid duplicate invocation of bindArguments()
+	public static final int HasBoundArguments = ASTNode.Bit10; 
 	
 	/** Additional constants for {@link org.eclipse.jdt.internal.compiler.lookup.TypeIds}. */
 	static interface TypeIds {
 		final int T_ConfiguredAnnotationNullable = 80;
 		final int T_ConfiguredAnnotationNonNull = 81;
-		final int T_ConfiguredAnnotationNullableByDefault = 82;
-		final int T_ConfiguredAnnotationNonNullByDefault = 83;
+		final int T_ConfiguredAnnotationNonNullByDefault = 82;
 	}
 
 	/** Additional constants for {@link org.eclipse.jdt.core.compiler.IProblem}. */
@@ -72,6 +73,10 @@ public class Constants {
 		int RedundantNullCheckOnNonNullMessageSend = Internal + 920;
 		/** @since 3.7 */
 		int CannotImplementIncompatibleNullness = Internal + 921;
+		/** @since 3.7 */
+		int NullAnnotationNameMustBeQualified = Internal + 922;
+		/** @since 3.7 */
+		int NullAnnotationIsRedundant = MethodRelated + 923;
 	}
 	
 	/** Translate from a nullness annotation to the corresponding tag bit or 0L. */
@@ -85,19 +90,15 @@ public class Constants {
 			return 0L;
 		}
 	}
-	
-	/** 
-	 * Translate from a nullness default (like <code>@NonNullByDefault</code>)
-	 * to the corresponding concrete nullness (like <code>@NonNull</code>),
-	 * both sides being represented by their tag bit.
-	 * @param defaultTagbit given set of tag bits
-	 * @return one of {@link TagBits#AnnotationNonNull}, {@link TagBits#AnnotationNullable} or 0L.
+
+	/**
+	 * This faked annotation type binding marks types with unspecified nullness.
+	 * For use in {@link PackageBinding#nullnessDefaultAnnotation} and {@link SourceTypeBinding#nullnessDefaultAnnotation} 
 	 */
-	public static long applyDefaultNullnessTagbit(long defaultTagbit) {
-		if ((defaultTagbit & TagBits.AnnotationNonNullByDefault) != 0L)
-			return TagBits.AnnotationNonNull;
-		if ((defaultTagbit & TagBits.AnnotationNullableByDefault) != 0L)
-			return TagBits.AnnotationNullable;
-		return 0L;
-	}
+	final static ReferenceBinding NULL_UNSPECIFIED = new ReferenceBinding() {
+		public boolean hasTypeBit(int bit) {
+			return false;
+		} 
+		/* faked type binding */ 
+	};
 }
