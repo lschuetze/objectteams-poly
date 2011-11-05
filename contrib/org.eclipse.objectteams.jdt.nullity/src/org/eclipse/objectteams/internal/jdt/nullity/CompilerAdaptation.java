@@ -1085,13 +1085,12 @@ public team class CompilerAdaptation {
 
 		protected char[] nullableName = null;
 		protected char[] nonNullName = null;
-		protected char[] nullableByDefaultName = null;
 		protected char[] nonNullByDefaultName = null;
 
 		protected TypeBinding nullnessDefaultAnnotation;
 
 		void setupNullAnnotationType(ReferenceBinding type) <- after void addType(ReferenceBinding type)
-			when (this.nullableName != null || this.nonNullName != null || this.nullableByDefaultName != null || this.nonNullByDefaultName != null);
+			when (this.nullableName != null || this.nonNullName != null || this.nonNullByDefaultName != null);
 
 		void setupNullAnnotationType(ReferenceBinding type) {
 			int id = 0;
@@ -1582,6 +1581,7 @@ public team class CompilerAdaptation {
 
 	// ================================== Compiler Options: ==================================
 
+	// DONE
 	@SuppressWarnings("rawtypes")
 	protected class CompilerOptions implements org.eclipse.objectteams.internal.jdt.nullity.NullCompilerOptions playedBy CompilerOptions 
 	{
