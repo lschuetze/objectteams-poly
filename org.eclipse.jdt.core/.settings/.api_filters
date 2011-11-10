@@ -1,5 +1,109 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <component id="org.eclipse.jdt.core" version="2">
+    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler">
+        <filter comment="The removed class ExceptionHandler was not intended as public API" id="305324134">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.objectteams.otdt.core.util.FieldData">
+        <filter comment="type FieldData was moved to internal package" id="305324134">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.util.FieldData"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.objectteams.otdt.core.util.MethodData">
+        <filter comment="type MethodData was moved to internal package" id="305324134">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.util.MethodData"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/CompletionOnFieldAccessSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnFieldAccessSpec">
+        <filter comment="class became internal by adding a missing x-internal in the manifest" id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnFieldAccessSpec"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/CompletionOnMethodSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnMethodSpec">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnMethodSpec"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionNodesFound.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionNodesFound">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionNodesFound"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnBaseCallMessageSend.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseCallMessageSend">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseCallMessageSend"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnBaseReference.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseReference">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseReference"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnCallinMapping.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnCallinMapping">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnCallinMapping"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnFieldAccessSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnFieldAccessSpec">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnFieldAccessSpec"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnParameterMapping.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnParameterMapping">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnParameterMapping"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnTSuperMessageSend.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperMessageSend">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperMessageSend"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnTSuperReference.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperReference">
+        <filter id="305365105">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperReference"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
+            </message_arguments>
+        </filter>
+    </resource>
     <resource path="compiler/org/eclipse/jdt/core/compiler/CharOperation.java" type="org.eclipse.jdt.core.compiler.CharOperation">
         <filter comment="new APIs added for Java7 support post 3.7.0" id="1142947843">
             <message_arguments>
@@ -9,6 +113,97 @@
         </filter>
     </resource>
     <resource path="compiler/org/eclipse/jdt/core/compiler/IProblem.java" type="org.eclipse.jdt.core.compiler.IProblem">
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="AfterCallinInNonAfterPrecedence"/>
+                <message_argument value="1408003"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="CallinBindingNotFound"/>
+                <message_argument value="1408005"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="FieldCalloutOverrides"/>
+                <message_argument value="1305009"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="FieldCalloutOverridesCallout"/>
+                <message_argument value="1305010"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="IllegalEnclosingForCallinName"/>
+                <message_argument value="1408006"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="IncompatiblePrecedenceListsOther"/>
+                <message_argument value="1408007"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="IncompatiblePrecedenceListsSymmetric"/>
+                <message_argument value="1408008"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="NonAfterCallinInAfterPrecedence"/>
+                <message_argument value="1408004"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="PrecedenceForOverriding"/>
+                <message_argument value="1408009"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="PrecedenceInRegularClass"/>
+                <message_argument value="1408002"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="UsingCalloutToFieldForAssignment"/>
+                <message_argument value="1305011"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="UsingCalloutToFieldForFieldRead"/>
+                <message_argument value="1305012"/>
+            </message_arguments>
+        </filter>
+        <filter id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
+                <message_argument value="UsingInferredCalloutToFieldForMessageSend"/>
+                <message_argument value="1305013"/>
+            </message_arguments>
+        </filter>
         <filter comment="new APIs added for Java7 support post 3.7.0" id="1210056707">
             <message_arguments>
                 <message_argument value="3.7.1"/>
@@ -151,6 +346,74 @@
             <message_arguments>
                 <message_argument value="3.7.1"/>
                 <message_argument value="UnhandledExceptionOnAutoClose"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="AbstractStaticMethodCalled"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="DecapsulationFieldWrite"/>
+            </message_arguments>
+        </filter>
+        <filter id="1211105284">
+            <message_arguments>
+                <message_argument value="IllegalDeepRoleReferenceInPrecedence"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/IOTConstants.java" type="org.eclipse.objectteams.otdt.core.compiler.IOTConstants">
+        <filter comment="Create some room between JDT/Core and OTDT." id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsIBoundBase"/>
+                <message_argument value="66"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Create some room between JDT/Core and OTDT." id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsITeam"/>
+                <message_argument value="64"/>
+            </message_arguments>
+        </filter>
+        <filter comment="Create some room between JDT/Core and OTDT." id="388194388">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="T_OrgObjectTeamsTeam"/>
+                <message_argument value="65"/>
+            </message_arguments>
+        </filter>
+        <filter id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="OBJECT"/>
+            </message_arguments>
+        </filter>
+        <filter comment="version constants have been changed to methods to account for evolution" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="OT_COMPILER_VERSION_MIN"/>
+            </message_arguments>
+        </filter>
+        <filter comment="constant changed to method to account for evolution" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="OT_REVISION"/>
+            </message_arguments>
+        </filter>
+        <filter comment="constant changed to method to account for evolution" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="OT_VERSION_MAJOR"/>
+            </message_arguments>
+        </filter>
+        <filter comment="constant changed to method to account for evolution" id="405864542">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
+                <message_argument value="OT_VERSION_MINOR"/>
             </message_arguments>
         </filter>
     </resource>
@@ -356,287 +619,6 @@
             </message_arguments>
         </filter>
     </resource>
-   <resource path="model/org/eclipse/objectteams/otdt/internal/core/PhantomType.java" type="org.eclipse.objectteams.otdt.core.PhantomType">
-        <filter comment="type PhantomType was moved to internal package" id="305324134">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.PhantomType"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler">
-        <filter comment="The removed class ExceptionHandler was not intended as public API" id="305324134">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.exceptions.ExceptionHandler"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.objectteams.otdt.core.util.FieldData">
-        <filter comment="type FieldData was moved to internal package" id="305324134">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.util.FieldData"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="META-INF/MANIFEST.MF" type="org.eclipse.objectteams.otdt.core.util.MethodData">
-        <filter comment="type MethodData was moved to internal package" id="305324134">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.util.MethodData"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/CompletionOnFieldAccessSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnFieldAccessSpec">
-        <filter comment="class became internal by adding a missing x-internal in the manifest" id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnFieldAccessSpec"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/CompletionOnMethodSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnMethodSpec">
-        <filter id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.CompletionOnMethodSpec"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionNodesFound.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionNodesFound">
-        <filter id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionNodesFound"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnBaseCallMessageSend.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseCallMessageSend">
-        <filter id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseCallMessageSend"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnBaseReference.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseReference">
-        <filter id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnBaseReference"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnCallinMapping.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnCallinMapping">
-        <filter id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnCallinMapping"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnFieldAccessSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnFieldAccessSpec">
-        <filter id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnFieldAccessSpec"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnMethodSpec.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnMethodSpec">
-        <filter id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnMethodSpec"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnParameterMapping.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnParameterMapping">
-        <filter id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnParameterMapping"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnTSuperMessageSend.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperMessageSend">
-        <filter id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperMessageSend"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="codeassist/org/eclipse/objectteams/otdt/internal/codeassist/SelectionOnTSuperReference.java" type="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperReference">
-        <filter id="305365105">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.internal.codeassist.SelectionOnTSuperReference"/>
-                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="compiler/org/eclipse/jdt/core/compiler/IProblem.java" type="org.eclipse.jdt.core.compiler.IProblem">
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="AfterCallinInNonAfterPrecedence"/>
-                <message_argument value="1408003"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="CallinBindingNotFound"/>
-                <message_argument value="1408005"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="FieldCalloutOverrides"/>
-                <message_argument value="1305009"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="FieldCalloutOverridesCallout"/>
-                <message_argument value="1305010"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="IllegalEnclosingForCallinName"/>
-                <message_argument value="1408006"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="IncompatiblePrecedenceListsOther"/>
-                <message_argument value="1408007"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="IncompatiblePrecedenceListsSymmetric"/>
-                <message_argument value="1408008"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="NonAfterCallinInAfterPrecedence"/>
-                <message_argument value="1408004"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="PrecedenceForOverriding"/>
-                <message_argument value="1408009"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="PrecedenceInRegularClass"/>
-                <message_argument value="1408002"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="UsingCalloutToFieldForAssignment"/>
-                <message_argument value="1305011"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="UsingCalloutToFieldForFieldRead"/>
-                <message_argument value="1305012"/>
-            </message_arguments>
-        </filter>
-        <filter id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.jdt.core.compiler.IProblem"/>
-                <message_argument value="UsingInferredCalloutToFieldForMessageSend"/>
-                <message_argument value="1305013"/>
-            </message_arguments>
-        </filter>
-        <filter id="1211105284">
-            <message_arguments>
-                <message_argument value="AbstractStaticMethodCalled"/>
-            </message_arguments>
-        </filter>
-        <filter id="1211105284">
-            <message_arguments>
-                <message_argument value="DecapsulationFieldWrite"/>
-            </message_arguments>
-        </filter>
-        <filter id="1211105284">
-            <message_arguments>
-                <message_argument value="IllegalDeepRoleReferenceInPrecedence"/>
-            </message_arguments>
-        </filter>
-    </resource>
-    <resource path="compiler/org/eclipse/objectteams/otdt/core/compiler/IOTConstants.java" type="org.eclipse.objectteams.otdt.core.compiler.IOTConstants">
-        <filter comment="Create some room between JDT/Core and OTDT." id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="T_OrgObjectTeamsIBoundBase"/>
-                <message_argument value="66"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Create some room between JDT/Core and OTDT." id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="T_OrgObjectTeamsITeam"/>
-                <message_argument value="64"/>
-            </message_arguments>
-        </filter>
-        <filter comment="Create some room between JDT/Core and OTDT." id="388194388">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="T_OrgObjectTeamsTeam"/>
-                <message_argument value="65"/>
-            </message_arguments>
-        </filter>
-        <filter id="405864542">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="OBJECT"/>
-            </message_arguments>
-        </filter>
-        <filter comment="version constants have been changed to methods to account for evolution" id="405864542">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="OT_COMPILER_VERSION_MIN"/>
-            </message_arguments>
-        </filter>
-        <filter comment="constant changed to method to account for evolution" id="405864542">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="OT_REVISION"/>
-            </message_arguments>
-        </filter>
-        <filter comment="constant changed to method to account for evolution" id="405864542">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="OT_VERSION_MAJOR"/>
-            </message_arguments>
-        </filter>
-        <filter comment="constant changed to method to account for evolution" id="405864542">
-            <message_arguments>
-                <message_argument value="org.eclipse.objectteams.otdt.core.compiler.IOTConstants"/>
-                <message_argument value="OT_VERSION_MINOR"/>
-            </message_arguments>
-        </filter>
-    </resource>
     <resource path="model/org/eclipse/objectteams/otdt/core/ICallinMapping.java" type="org.eclipse.objectteams.otdt.core.ICallinMapping">
         <filter comment="@noimplement added after 0.7 but before 0.8" id="403804204">
             <message_arguments>
@@ -778,6 +760,14 @@
             <message_arguments>
                 <message_argument value="org.eclipse.objectteams.otdt.core.OTModelManager"/>
                 <message_argument value="addCalloutToFieldBinding(IType, MappingElementInfo)"/>
+            </message_arguments>
+        </filter>
+    </resource>
+    <resource path="model/org/eclipse/objectteams/otdt/internal/core/PhantomType.java" type="org.eclipse.objectteams.otdt.core.PhantomType">
+        <filter comment="type PhantomType was moved to internal package" id="305324134">
+            <message_arguments>
+                <message_argument value="org.eclipse.objectteams.otdt.core.PhantomType"/>
+                <message_argument value="org.eclipse.jdt.core_3.7.0"/>
             </message_arguments>
         </filter>
     </resource>
