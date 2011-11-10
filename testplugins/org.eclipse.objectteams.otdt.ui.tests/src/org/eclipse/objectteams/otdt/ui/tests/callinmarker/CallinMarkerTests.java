@@ -455,7 +455,7 @@ public class CallinMarkerTests extends FileBasedUITest
 	        assertEquals("Unexpeted number of log entries", 1, myLogListener.status.size());
 	        assertEquals("Unexpected Log", 
 	        			 "Status ERROR: org.eclipse.ui code=0 " +
-	        			 "Unable to create editor ID org.eclipse.jdt.ui.ClassFileEditor: " +
+	        			 "Unable to create editor ID org.eclipse.jdt.ui.ClassFileEditorNoSource: " +
 	        			 "The class file is not on the classpath " +
 	        			 "org.eclipse.core.runtime.CoreException: The class file is not on the classpath", 
 	        			 myLogListener.status.get(0).toString());
