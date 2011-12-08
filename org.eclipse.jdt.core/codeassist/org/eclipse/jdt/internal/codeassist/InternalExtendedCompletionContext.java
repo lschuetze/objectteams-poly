@@ -79,6 +79,7 @@ public class InternalExtendedCompletionContext {
 	private LookupEnvironment lookupEnvironment;
 	private Scope assistScope;
 	private ASTNode assistNode;
+	private ASTNode assistNodeParent;
 	private WorkingCopyOwner owner;
 
 	private CompletionParser parser;
@@ -101,6 +102,7 @@ public class InternalExtendedCompletionContext {
 			LookupEnvironment lookupEnvironment,
 			Scope assistScope,
 			ASTNode assistNode,
+			ASTNode assistNodeParent,
 			WorkingCopyOwner owner,
 			CompletionParser parser) {
 		this.completionContext = completionContext;
@@ -109,6 +111,7 @@ public class InternalExtendedCompletionContext {
 		this.lookupEnvironment = lookupEnvironment;
 		this.assistScope = assistScope;
 		this.assistNode = assistNode;
+		this.assistNodeParent = assistNodeParent;
 		this.owner = owner;
 		this.parser = parser;
 	}
@@ -943,5 +946,41 @@ public class InternalExtendedCompletionContext {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * @see InternalCompletionContext#getCompletionNode()
+	 */
+	public ASTNode getCompletionNode() {
+		return this.assistNode;
+	}
+	
+	/**
+	 * @see InternalCompletionContext#getCompletionNodeParent()
+	 */
+	public ASTNode getCompletionNodeParent() {
+		// TODO Auto-generated method stub
+		return this.assistNodeParent;
+	}
+	
+	public ObjectVector getVisibleLocalVariables() {
+		if (!this.hasComputedVisibleElementBindings) {
+			computeVisibleElementBindings();
+		}
+		return this.visibleLocalVariables;
+	}
+	
+	public ObjectVector getVisibleFields() {
+		if (!this.hasComputedVisibleElementBindings) {
+			computeVisibleElementBindings();
+		}
+		return this.visibleFields;
+	}
+	
+	public ObjectVector getVisibleMethods() {
+		if (!this.hasComputedVisibleElementBindings) {
+			computeVisibleElementBindings();
+		}
+		return this.visibleMethods;
 	}
 }

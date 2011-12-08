@@ -191,9 +191,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 // SH}
 			// 26903, need extra cast to store null in array local var
 			if (this.binding.type.isArrayType()
-				&& (this.initialization.resolvedType == TypeBinding.NULL	// arrayLoc = null
-					|| ((this.initialization instanceof CastExpression)	// arrayLoc = (type[])null
-						&& (((CastExpression)this.initialization).innermostCastedExpression().resolvedType == TypeBinding.NULL)))){
+				&& ((this.initialization instanceof CastExpression)	// arrayLoc = (type[])null
+						&& (((CastExpression)this.initialization).innermostCastedExpression().resolvedType == TypeBinding.NULL))){
 				codeStream.checkcast(this.binding.type);
 			}
 			codeStream.store(this.binding, false);

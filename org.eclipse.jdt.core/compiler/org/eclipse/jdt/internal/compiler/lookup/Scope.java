@@ -601,6 +601,15 @@ public abstract class Scope {
 	 * in case the method was originally compatible, then simply answer it back.
 	 */
 	protected final MethodBinding computeCompatibleMethod(MethodBinding method, TypeBinding[] arguments, InvocationSite invocationSite) {
+		return computeCompatibleMethod(method, arguments, invocationSite, false);
+	}	
+	/**
+	 * Internal use only
+	 * Given a method, returns null if arguments cannot be converted to parameters.
+	 * Will answer a substituted method in case the method was generic and type inference got triggered;
+	 * in case the method was originally compatible, then simply answer it back.
+	 */
+	protected final MethodBinding computeCompatibleMethod(MethodBinding method, TypeBinding[] arguments, InvocationSite invocationSite, boolean tiebreakingVarargsMethods) {
 		TypeBinding[] genericTypeArguments = invocationSite.genericTypeArguments();
 		TypeBinding[] parameters = method.parameters;
 		TypeVariableBinding[] typeVariables = method.typeVariables;
@@ -645,14 +654,26 @@ public abstract class Scope {
 			}
 		}
 
-		if (parameterCompatibilityLevel(method, arguments) > NOT_COMPATIBLE) {
+		int compatibilityLevel;
+		if ((compatibilityLevel = parameterCompatibilityLevel(method, arguments, tiebreakingVarargsMethods)) > NOT_COMPATIBLE) {
+			if (compatibilityLevel == VARARGS_COMPATIBLE) {
+				TypeBinding varargsElementType = method.parameters[method.parameters.length - 1].leafComponentType();
+				if (varargsElementType instanceof ReferenceBinding) {
+					if (!((ReferenceBinding) varargsElementType).canBeSeenBy(this)) {
+						return new ProblemMethodBinding(method, method.selector, genericTypeArguments, ProblemReasons.VarargsElementTypeNotVisible);
+					}
+				}
+			}
 			if ((method.tagBits & TagBits.AnnotationPolymorphicSignature) != 0) {
 				// generate polymorphic method
 				return this.environment().createPolymorphicMethod(method, arguments);
 			}
 			return method;
 		}
-		if (genericTypeArguments != null)
+		// if method is generic and type arguments have been supplied, only then answer a problem 
+		// of ParameterizedMethodTypeMismatch, else a non-generic method was invoked using type arguments
+		// in which case this problem category will be bogus
+		if (genericTypeArguments != null && typeVariables != Binding.NO_TYPE_VARIABLES)
 			return new ProblemMethodBinding(method, method.selector, arguments, ProblemReasons.ParameterizedMethodTypeMismatch);
 		return null; // incompatible
 	}
@@ -3358,6 +3379,7 @@ public abstract class Scope {
 		return null;
 	}
 
+	// Tie break IS running to determine the most specific method binding.
 	protected boolean isAcceptableMethod(MethodBinding one, MethodBinding two) {
 		TypeBinding[] oneParams = one.parameters;
 		TypeBinding[] twoParams = two.parameters;
@@ -3404,8 +3426,9 @@ public abstract class Scope {
 					}
 				} else {
 					if (i == oneParamsLength - 1 && one.isVarargs() && two.isVarargs()) {
+						TypeBinding oType = ((ArrayBinding) oneParam).elementsType();
 						TypeBinding eType = ((ArrayBinding) twoParam).elementsType();
-						if (oneParam == eType || oneParam.isCompatibleWith(eType))
+						if (oType == eType || oType.isCompatibleWith(eType))
 							return true; // special case to choose between 2 varargs methods when the last arg is Object[]
 					}
 					return false;
@@ -3415,17 +3438,12 @@ public abstract class Scope {
 		}
 
 		if (one.isVarargs() && two.isVarargs()) {
-			if (oneParamsLength > twoParamsLength) {
-				// special case when autoboxing makes (int, int...) better than (Object...) but not (int...) or (Integer, int...)
-				if (((ArrayBinding) twoParams[twoParamsLength - 1]).elementsType().id != TypeIds.T_JavaLangObject)
-					return false;
-			}
 			// check that each parameter before the vararg parameters are compatible (no autoboxing allowed here)
 			for (int i = (oneParamsLength > twoParamsLength ? twoParamsLength : oneParamsLength) - 2; i >= 0; i--)
 				if (oneParams[i] != twoParams[i] && !oneParams[i].isCompatibleWith(twoParams[i]))
 					return false;
-			if (parameterCompatibilityLevel(one, twoParams) == NOT_COMPATIBLE
-					&& parameterCompatibilityLevel(two, oneParams) == VARARGS_COMPATIBLE)
+			if (parameterCompatibilityLevel(one, twoParams, true) == NOT_COMPATIBLE
+					&& parameterCompatibilityLevel(two, oneParams, true) == VARARGS_COMPATIBLE)
 				return true;
 		}
 		return false;
@@ -3460,6 +3478,7 @@ public abstract class Scope {
 	/* Answer true if the scope is nested inside a given method declaration
 	*/
 	public final boolean isDefinedInMethod(MethodBinding method) {
+		method = method.original(); // https://bugs.eclipse.org/bugs/show_bug.cgi?id=350738
 		Scope scope = this;
 		do {
 			if (scope instanceof MethodScope) {
@@ -4243,7 +4262,7 @@ public abstract class Scope {
 							methodToTest = pNext.originalMethod;
 						}
 					}
-					MethodBinding acceptable = computeCompatibleMethod(methodToTest, tiebreakMethod.parameters, tieBreakInvocationSite);
+					MethodBinding acceptable = computeCompatibleMethod(methodToTest, tiebreakMethod.parameters, tieBreakInvocationSite, level == VARARGS_COMPATIBLE);
 					/* There are 4 choices to consider with current & next :
 					 foo(B) & foo(A) where B extends A
 					 1. the 2 methods are equal (both accept each others parameters) -> want to continue
@@ -4415,6 +4434,9 @@ public abstract class Scope {
 	}
 
 	public int parameterCompatibilityLevel(MethodBinding method, TypeBinding[] arguments) {
+		return parameterCompatibilityLevel(method, arguments, false);
+	}	
+	public int parameterCompatibilityLevel(MethodBinding method, TypeBinding[] arguments, boolean tiebreakingVarargsMethods) {
 		TypeBinding[] parameters = method.parameters;
 		int paramLength = parameters.length;
 		int argLength = arguments.length;
@@ -4448,11 +4470,14 @@ public abstract class Scope {
 				TypeBinding param = parameters[lastIndex]; // is an ArrayBinding by definition
 				TypeBinding arg = arguments[lastIndex];
 				if (param != arg) {
-					level = parameterCompatibilityLevel(arg, param, env);
+					level = parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods);
 					if (level == NOT_COMPATIBLE) {
 						// expect X[], is it called with X
 						param = ((ArrayBinding) param).elementsType();
-						if (parameterCompatibilityLevel(arg, param, env) == NOT_COMPATIBLE)
+						if (tiebreakingVarargsMethods) {
+							arg = ((ArrayBinding) arg).elementsType();
+						}
+						if (parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods) == NOT_COMPATIBLE)
 							return NOT_COMPATIBLE;
 						level = VARARGS_COMPATIBLE; // varargs support needed
 					}
@@ -4461,8 +4486,8 @@ public abstract class Scope {
 				if (paramLength < argLength) { // all remaining argument types must be compatible with the elementsType of varArgType
 					TypeBinding param = ((ArrayBinding) parameters[lastIndex]).elementsType();
 					for (int i = lastIndex; i < argLength; i++) {
-						TypeBinding arg = arguments[i];
-						if (param != arg && parameterCompatibilityLevel(arg, param, env) == NOT_COMPATIBLE)
+						TypeBinding arg = (tiebreakingVarargsMethods && (i == (argLength - 1))) ? ((ArrayBinding)arguments[i]).elementsType() : arguments[i];
+						if (param != arg && parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods) == NOT_COMPATIBLE)
 							return NOT_COMPATIBLE;
 					}
 				}  else if (lastIndex != argLength) { // can call foo(int i, X ... x) with foo(1) but NOT foo();
@@ -4476,9 +4501,9 @@ public abstract class Scope {
 		// now compare standard arguments from 0 to lastIndex
 		for (int i = 0; i < lastIndex; i++) {
 			TypeBinding param = parameters[i];
-			TypeBinding arg = arguments[i];
+			TypeBinding arg = (tiebreakingVarargsMethods && (i == (argLength - 1))) ? ((ArrayBinding)arguments[i]).elementsType() : arguments[i];
 			if (arg != param) {
-				int newLevel = parameterCompatibilityLevel(arg, param, env);
+				int newLevel = parameterCompatibilityLevel(arg, param, env, tiebreakingVarargsMethods);
 				if (newLevel == NOT_COMPATIBLE)
 					return NOT_COMPATIBLE;
 				if (newLevel > level)
@@ -4491,10 +4516,19 @@ public abstract class Scope {
 		return level;
 	}
 
-	private int parameterCompatibilityLevel(TypeBinding arg, TypeBinding param, LookupEnvironment env) {
+	private int parameterCompatibilityLevel(TypeBinding arg, TypeBinding param, LookupEnvironment env, boolean tieBreakingVarargsMethods) {
 		// only called if env.options.sourceLevel >= ClassFileConstants.JDK1_5
 		if (arg.isCompatibleWith(param))
 			return COMPATIBLE;
+		if (tieBreakingVarargsMethods) {
+			/* 15.12.2.5 Choosing the Most Specific Method, ... One variable arity member method named m is more specific than
+			   another variable arity member method of the same name if either ... Only subtypes relationship should be used.
+			   Actually this is true even for fixed arity methods, but in practice is not an issue since we run the algorithm
+			   multiple times for each compatibility level.
+			   https://bugs.eclipse.org/bugs/show_bug.cgi?id=346038, https://bugs.eclipse.org/bugs/show_bug.cgi?id=346039.
+			*/
+			return NOT_COMPATIBLE;
+		}
 		if (arg.isBaseType() != param.isBaseType()) {
 			TypeBinding convertedType = env.computeBoxingType(arg);
 			if (convertedType == param || convertedType.isCompatibleWith(param))

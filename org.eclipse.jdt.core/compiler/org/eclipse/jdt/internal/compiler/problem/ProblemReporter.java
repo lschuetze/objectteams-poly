@@ -3565,6 +3565,27 @@ public void invalidConstructor(Statement statement, MethodBinding targetConstruc
 				sourceStart,
 				sourceEnd);
 			return;
+		case ProblemReasons.VarargsElementTypeNotVisible :
+			problemConstructor = (ProblemMethodBinding) targetConstructor;
+			shownConstructor = problemConstructor.closestMatch;
+			TypeBinding varargsElementType = shownConstructor.parameters[shownConstructor.parameters.length - 1].leafComponentType();
+			this.handle(
+				IProblem.VarargsElementTypeNotVisibleForConstructor,
+				new String[] {
+						new String(shownConstructor.declaringClass.sourceName()),
+						typesAsString(shownConstructor, false),
+						new String(shownConstructor.declaringClass.readableName()),
+						new String(varargsElementType.readableName())
+				},
+				new String[] {
+						new String(shownConstructor.declaringClass.sourceName()),
+						typesAsString(shownConstructor, true),
+						new String(shownConstructor.declaringClass.shortReadableName()),
+						new String(varargsElementType.shortReadableName())
+				},
+				sourceStart,
+				sourceEnd);
+			return;
 		case ProblemReasons.NoError : // 0
 		default :
 			needImplementation(statement); // want to fail to see why we were here...
@@ -5258,6 +5279,29 @@ public void javadocInvalidMethod(MessageSend messageSend, MethodBinding method, 
 				        new String(shownMethod.declaringClass.shortReadableName()),
 				        typesAsString(method, true) },
 				severity,
+				(int) (messageSend.nameSourcePosition >>> 32),
+				(int) messageSend.nameSourcePosition);
+			return;
+		case ProblemReasons.VarargsElementTypeNotVisible: // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346042
+			problemMethod = (ProblemMethodBinding) method;
+			if (problemMethod.closestMatch != null) {
+			    shownMethod = problemMethod.closestMatch.original();
+		    }
+			TypeBinding varargsElementType = shownMethod.parameters[shownMethod.parameters.length - 1].leafComponentType();
+			this.handle(
+				IProblem.VarargsElementTypeNotVisible,
+				new String[] {
+				        new String(shownMethod.selector),
+				        typesAsString(shownMethod, false),
+				        new String(shownMethod.declaringClass.readableName()),
+				        new String(varargsElementType.readableName())
+				},
+				new String[] {
+				        new String(shownMethod.selector),
+				        typesAsString(shownMethod, true),
+				        new String(shownMethod.declaringClass.shortReadableName()),
+				        new String(varargsElementType.shortReadableName())
+				},
 				(int) (messageSend.nameSourcePosition >>> 32),
 				(int) messageSend.nameSourcePosition);
 			return;

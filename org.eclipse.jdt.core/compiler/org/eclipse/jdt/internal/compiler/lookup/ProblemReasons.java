@@ -29,6 +29,7 @@ public interface ProblemReasons {
 	final int TypeArgumentsForRawGenericMethod = 13; // for generic method
 	final int InvalidTypeForStaticImport = 14;
 	final int InvalidTypeForAutoManagedResource = 15;
+	final int VarargsElementTypeNotVisible = 16;
 //{ObjectTeams;
     final int NoTeamContext = 20;
     final int AnchorNotFinal = 21;
