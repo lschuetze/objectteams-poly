@@ -9,6 +9,7 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for bug 186342 - [compiler][null] Using annotations for null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.parser;
 

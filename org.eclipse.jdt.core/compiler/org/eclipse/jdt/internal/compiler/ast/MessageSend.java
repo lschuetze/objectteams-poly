@@ -9,11 +9,12 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Nick Teryaev - fix for bug (https://bugs.eclipse.org/bugs/show_bug.cgi?id=40752)
- *     Stephan Herrmann - Contributions for
- *     	 						bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
- *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contributions for
+ *								bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *								bug 349326 - [1.7] new warning for missing try-with-resources
+ *								bug 186342 - [compiler][null] Using annotations for null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -186,6 +187,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.arguments[i], flowInfo);
 			flowInfo = this.arguments[i].analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
 		}
+		analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
 	}
 	ReferenceBinding[] thrownExceptions;
 	if ((thrownExceptions = this.binding.thrownExceptions) != Binding.NO_EXCEPTIONS) {
@@ -388,6 +390,11 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	}
 	codeStream.recordPositionsFrom(pc, (int)(this.nameSourcePosition >>> 32)); // highlight selector
 }
+public void checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
+	super.checkNPE(scope, flowContext, flowInfo);
+	if ((nullStatus(flowInfo) & FlowInfo.POTENTIALLY_NULL) != 0)
+		scope.problemReporter().messageSendPotentialNullReference(this.binding, this);
+}
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.InvocationSite#genericTypeArguments()
  */
@@ -467,9 +474,16 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 // SH}
 }
 public int nullStatus(FlowInfo flowInfo) {
+	if (this.binding.isValidBinding()) {
+		// try to retrieve null status of this message send from an annotation of the called method:
+		long tagBits = this.binding.tagBits;
+		if ((tagBits & TagBits.AnnotationNonNull) != 0)
+			return FlowInfo.NON_NULL;
+		if ((tagBits & TagBits.AnnotationNullable) != 0)
+			return FlowInfo.POTENTIALLY_NULL | FlowInfo.POTENTIALLY_NON_NULL;
+	}
 	return FlowInfo.UNKNOWN;
 }
-
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#postConversionType(Scope)
  */

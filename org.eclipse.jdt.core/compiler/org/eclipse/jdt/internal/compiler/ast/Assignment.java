@@ -4,17 +4,18 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Genady Beriozkin - added support for reporting assignment with no effect
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for 
+ *     Fraunhofer FIRST - extended API and implementation
+ *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
  * 							bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
  * 							bug 292478 - Report potentially null across variable assignment
  *     						bug 335093 - [compiler][null] minimal hook for future null annotation support
  *     						bug 349326 - [1.7] new warning for missing try-with-resources
- *     Fraunhofer FIRST - extended API and implementation
- *     Technical University Berlin - extended API and implementation
+ *							bug 186342 - [compiler][null] Using annotations for null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -96,7 +97,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				FlowContext.CAN_ONLY_NULL | FlowContext.IN_ASSIGNMENT, flowInfo);
 		}
 	}
-	nullStatus = checkAgainstNullAnnotation(currentScope, local, nullStatus);
+	nullStatus = checkAssignmentAgainstNullAnnotation(currentScope, flowContext, local, nullStatus, this.expression);
 	if (local != null && (local.type.tagBits & TagBits.IsBaseType) == 0) {
 		flowInfo.markNullStatus(local, nullStatus);
 		if (flowContext.initsOnFinally != null)

@@ -453,6 +453,8 @@ public void test013() {
 }
 // Test for unhandled exceptions
 public void test014() {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportUnclosedCloseable, CompilerOptions.WARNING);
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -504,7 +506,8 @@ public void test014() {
 		"	class WeirdException extends Throwable {}\n" + 
 		"	      ^^^^^^^^^^^^^^\n" + 
 		"The serializable class WeirdException does not declare a static final serialVersionUID field of type long\n" + 
-		"----------\n");
+		"----------\n",
+		null, true, options);
 }
 // Resource nullness tests
 public void test015() {
@@ -533,6 +536,8 @@ public void test015() {
 }
 // Dead code tests, resource nullness, unhandled exception tests
 public void test016() {
+	Map options = getCompilerOptions();
+	options.put(CompilerOptions.OPTION_ReportUnclosedCloseable, CompilerOptions.WARNING);
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -582,7 +587,10 @@ public void test016() {
 		"	class WeirdException extends Throwable {}\n" + 
 		"	      ^^^^^^^^^^^^^^\n" + 
 		"The serializable class WeirdException does not declare a static final serialVersionUID field of type long\n" + 
-		"----------\n");
+		"----------\n",
+		null,
+		true,
+		options);
 }
 // Dead code tests
 public void test017() {
@@ -5175,6 +5183,48 @@ public void test056throw5() {
 		null,
 		true,
 		options);	
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=361053
+public void test057() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"public class X implements AutoCloseable {\n" +
+			"	@Override\n" +
+			"	public void close() throws Exception {\n" +
+			"		throw new Exception();\n" +
+			"	}\n" +
+			"	public static void main(String[] args) {\n" +
+			"		final boolean foo;\n" +
+			"		try (X a = new X(); X b = new X()) {\n" +
+			"			foo = true;\n" +
+			"		} catch (final Exception exception) {\n" +
+			"			return;\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n"
+		},  "");	
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=364008
+public void test058() {
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.ByteArrayOutputStream;\n" +
+			"import java.io.FileOutputStream;\n" +
+			"import java.io.IOException;\n" +
+			"\n" +
+			"public class X {\n" +
+			"\n" +
+			"  public static void main(final String[] args) throws IOException {\n" +
+			"    byte[] data;\n" +
+			"    try (final ByteArrayOutputStream os = new ByteArrayOutputStream();\n" +
+			"         final FileOutputStream out = new FileOutputStream(\"test.dat\")) {\n" +
+			"      data = os.toByteArray();\n" +
+			"    }\n" +
+			"  }\n" +
+			"}\n"
+		},  "");	
 }
 public static Class testClass() {
 	return TryWithResourcesStatementTest.class;

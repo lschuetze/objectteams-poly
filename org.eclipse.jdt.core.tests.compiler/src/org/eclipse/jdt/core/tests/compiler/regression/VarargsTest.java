@@ -777,7 +777,7 @@ public class VarargsTest extends AbstractComparableTest {
 	}
 
 	public void test015() { // check behaviour of Scope.mostSpecificMethodBinding()
-		this.runConformTest(
+		this.runNegativeTest(
 			new String[] {
 				"X.java",
 				"public class X {\n" +
@@ -790,7 +790,12 @@ public class VarargsTest extends AbstractComparableTest {
 				"	public static void count(int[] array, int[] ... values) { System.out.print(2); }\n" +
 				"}\n",
 			},
-			"1"
+			"----------\n" + 
+			"1. ERROR in X.java (at line 3)\n" + 
+			"	Y.count(new int[0]);\n" + 
+			"	  ^^^^^\n" + 
+			"The method count(int[], int[]) is ambiguous for the type Y\n" + 
+			"----------\n"
 		);
 	}
 
@@ -1232,7 +1237,7 @@ public class VarargsTest extends AbstractComparableTest {
 	}
 	//https://bugs.eclipse.org/bugs/show_bug.cgi?id=102631
 	public void test033() {
-		this.runConformTest(
+		this.runNegativeTest(
 			new String[] {
 				"X.java",
 				"public class X {\n" +
@@ -1246,7 +1251,17 @@ public class VarargsTest extends AbstractComparableTest {
 				"	}\n" +
 				"}\n",
 			},
-			"112");
+			"----------\n" + 
+			"1. ERROR in X.java (at line 6)\n" + 
+			"	x.a(true);\n" + 
+			"	  ^\n" + 
+			"The method a(boolean, Object[]) is ambiguous for the type X\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 7)\n" + 
+			"	x.a(true, \"foobar\");\n" + 
+			"	  ^\n" + 
+			"The method a(boolean, Object[]) is ambiguous for the type X\n" + 
+			"----------\n");
 		this.runNegativeTest(
 			new String[] {
 				"X.java",
@@ -2754,6 +2769,245 @@ public class VarargsTest extends AbstractComparableTest {
 			"	classes = X.asList2(String.class, Boolean.class);\n" + 
 			"	          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 			"Type safety: A generic array of Class<? extends Object&Serializable&Comparable<?>> is created for a varargs parameter\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=346042
+	public void test069() throws Exception {
+		if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+		this.runNegativeTest(
+			new String[] {
+				"p1/B.java",
+				"package p1;\n" +
+				"class A {\n" +
+				"}\n" +
+				"public class B extends A {\n" +
+				" public void foo(A... args) {\n" +
+				" }\n" +
+				"}\n",
+				"p2/C.java",
+				"package p2;\n" +
+				"import p1.B;\n" +
+				"public class C {\n" +
+				"\n" +
+				" public static final void main(String[] args) {\n" +
+				"   (new B()).foo(new B(), new B());\n" +
+				" }\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in p2\\C.java (at line 6)\n" + 
+			"	(new B()).foo(new B(), new B());\n" + 
+			"	          ^^^\n" + 
+			"The method foo(A...) of type B is not applicable as the formal varargs element type A is not accessible here\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=346038
+	public void test070() throws Exception {
+		if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+		this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"        public static void foo(int ...i) {}\n" +
+				"        public static void foo(double...d) {}\n" +
+				"        public static void main(String[] args) {\n" +
+				"            foo(1, 2, 3);\n" +
+				"            System.out.println (\"Done\");\n" +
+				"        }\n" +
+				"}\n"
+			},
+			"Done");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=346038
+	public void test070a() throws Exception {
+		if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+		this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"        public static <T> void foo(int ...i) {}\n" +
+				"        public static <T> void foo(double...d) {}\n" +
+				"        public static void main(String[] args) {\n" +
+				"            foo(1, 2, 3);\n" +
+				"            System.out.println (\"Done\");\n" +
+				"        }\n" +
+				"}\n"
+			},
+			"Done");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=346038
+	public void test070b() throws Exception {
+		if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+		this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"        public static void foo(int ...i) {}\n" +
+				"        public static void foo(double d1, double...d) {}\n" +
+				"        public static void main(String[] args) {\n" +
+				"            foo(1, 2, 3);     // foo NOT flagged ambiguous\n" +
+				"        }\n" +
+				"}\n" 
+			},
+			"");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=346038
+	public void test070c() { // check behaviour of Scope.mostSpecificMethodBinding()
+		this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"    public static void main(String[] s) {\n" +
+				"        count(1);\n" +
+				"        count(1, 1);\n" +
+				"        count(1, 1, 1);\n" +
+				"    }\n" +
+				"    public static void count(int ... values) {}\n" +
+				"    public static void count(int i, int ... values) {}\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 3)\n" + 
+			"	count(1);\n" + 
+			"	^^^^^\n" + 
+			"The method count(int[]) is ambiguous for the type X\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 4)\n" + 
+			"	count(1, 1);\n" + 
+			"	^^^^^\n" + 
+			"The method count(int[]) is ambiguous for the type X\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 5)\n" + 
+			"	count(1, 1, 1);\n" + 
+			"	^^^^^\n" + 
+			"The method count(int[]) is ambiguous for the type X\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=346038
+	public void test070d() { // check behaviour of Scope.mostSpecificMethodBinding()
+		this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"	void b(boolean b, Object... o) {}\n" +
+				"	void b(Boolean... o) {}\n" +
+				"	void c(boolean b, boolean b2, Object... o) {}\n" +
+				"	void c(Boolean b, Object... o) {}\n" +
+				"	public static void main(String[] args) {\n" +
+				"		X x = new X();\n" +
+				"		x.b(true);\n" +
+				"		x.b(true, false);\n" +
+				"	}\n" +
+				"}\n",
+			},
+			"----------\n" +
+			"1. ERROR in X.java (at line 8)\r\n" +
+			"	x.b(true);\r\n" +
+			"	  ^\n" +
+			"The method b(boolean, Object[]) is ambiguous for the type X\n" +
+			"----------\n" +
+			"2. ERROR in X.java (at line 9)\r\n" +
+			"	x.b(true, false);\r\n" +
+			"	  ^\n" +
+			"The method b(boolean, Object[]) is ambiguous for the type X\n" +
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=346039
+	public void test071() { // check behaviour of Scope.mostSpecificMethodBinding()
+		this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X implements IClass{\n" +
+				"    X(IClass c, X t, IType... args) {\n" +
+				"	     System.out.println (\"1\");\n" +
+				"    }\n" +
+				"    X(IClass c, IType... args) {\n" +
+				"	    System.out.println (\"2\");\n" +
+				"    }\n" +
+				"    public static void main(String args[]) {\n" +
+				"        IClass c = null;\n" +
+				"        X t = null;\n" +
+				"        X t2 = new X(c, t);     // incorrectly flagged ambiguous\n" +
+				"    }\n" +
+				"}\n" +
+				"interface IType{}\n" +
+				"interface IClass extends IType{}\n"
+			},
+			"1");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=364672
+	public void test072() {
+		this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" + 
+				"	private class Z {}\n" + 
+				"	public void foo() {\n" + 
+				"			Z[] zs = null;\n" + 
+				"			Y.bar(zs, new Z());\n" + 
+				"	}\n" + 
+				"	public static void main(String[] args) {}\n" + 
+				"}",
+				"Y.java",
+				"public class Y {\n" + 
+				"	public native static <T> void bar(T[] t, T t1, T... t2);\n" + 
+				"}"
+			},
+			"");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=364672
+	public void test073() {
+		this.runConformTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" + 
+				"	public static final String CONSTANT = \"\";\n" + 
+				"	private static class A {\n" + 
+				"		A(String s, String s2, String s3, A... a) {}\n" + 
+				"	}\n" + 
+				"	private static class B extends A {\n" + 
+				"		B(String s, String s2) {\n" + 
+				"			super(s, s2, CONSTANT);\n" + 
+				"		}\n" + 
+				"	}\n" + 
+				"	private static void foo(Object o, A ... a) {\n" + 
+				"	}\n" + 
+				"	private static B bar() {\n" + 
+				"		return null;\n" + 
+				"	}\n" + 
+				"	public static void main(String[] args) {\n" + 
+				"		Object o = null;\n" + 
+				"		foo(o, bar(), bar());\n" + 
+				"	}\n" + 
+				"}"
+			},
+			"");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=364672
+	public void test074() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+				"p1/B.java",
+				"package p1;\n" +
+				"class A {}\n" +
+				"public class B extends A {\n" +
+				" public B(A... args) {}\n" +
+				" public B() {}\n" +
+				"}\n",
+				"p2/C.java",
+				"package p2;\n" +
+				"import p1.B;\n" +
+				"public class C {\n" +
+				"	public static final void main(String[] args) {\n" +
+				"		new B(new B(), new B());\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in p2\\C.java (at line 5)\n" + 
+			"	new B(new B(), new B());\n" + 
+			"	^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"The constructor B(A...) of type B is not applicable as the formal varargs element type A is not accessible here\n" + 
 			"----------\n");
 	}
 }

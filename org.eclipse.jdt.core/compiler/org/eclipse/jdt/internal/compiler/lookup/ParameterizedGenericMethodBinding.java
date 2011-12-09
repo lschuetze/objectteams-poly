@@ -8,6 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for bug 186342 - [compiler][null] Using annotations for null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -330,6 +331,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 	    									? originalMethod.returnType // no substitution if original was static
 	    									: Scope.substitute(rawType, originalMethod.returnType));
 	    this.wasInferred = false; // not resulting from method invocation inferrence
+	    this.parameterNonNullness = originalMethod.parameterNonNullness;
 	}
 
     /**
@@ -379,6 +381,7 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 	    this.model= originalMethod.model;
 // SH}
 	    this.wasInferred = true;// resulting from method invocation inferrence
+	    this.parameterNonNullness = originalMethod.parameterNonNullness;
 	}
 
 	/*

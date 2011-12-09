@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,6 +10,7 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for bug 186342 - [compiler][null] Using annotations for null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.classfmt;
 
@@ -366,6 +367,9 @@ public int getModifiers() {
 }
 public IBinaryAnnotation[] getParameterAnnotations(int index) {
 	return null;
+}
+public int getNumParameterAnnotations() {
+	return 0;
 }
 /**
  * Answer the name of the method.

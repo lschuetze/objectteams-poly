@@ -4,14 +4,15 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Fraunhofer FIRST - extended API and implementation
+ *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
  *     							bug 185682 - Increment/decrement operators mark local variables as read
  *     							bug 349326 - [1.7] new warning for missing try-with-resources
- *     Fraunhofer FIRST - extended API and implementation
- *     Technical University Berlin - extended API and implementation
+ *								bug 186342 - [compiler][null] Using annotations for null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -178,7 +179,7 @@ public class LocalVariableBinding extends VariableBinding {
 					annotations = new AnnotationBinding[length];
 					for (int i = 0; i < length; i++)
 						annotations[i] = new AnnotationBinding(annotationNodes[i]);
-					setAnnotations(annotations);
+					setAnnotations(annotations, this.declaringScope);
 				}
 			}
 		}
@@ -235,10 +236,12 @@ public class LocalVariableBinding extends VariableBinding {
 		this.initializationCount++;
 	}
 
-	public void setAnnotations(AnnotationBinding[] annotations) {
-		if (this.declaringScope == null) return;
-
-		SourceTypeBinding sourceType = this.declaringScope.enclosingSourceType();
+	public void setAnnotations(AnnotationBinding[] annotations, Scope scope) {
+		// note: we don's use this.declaringScope because we might be called before Scope.addLocalVariable(this)
+		//       which is where this.declaringScope is set.
+		if (scope == null)
+			return;
+		SourceTypeBinding sourceType = scope.enclosingSourceType();
 		if (sourceType != null)
 			sourceType.storeAnnotations(this, annotations);
 	}

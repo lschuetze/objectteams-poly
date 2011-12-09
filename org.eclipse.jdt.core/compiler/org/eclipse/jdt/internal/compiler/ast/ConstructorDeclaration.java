@@ -7,11 +7,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contributions for 
- *     							bug 343713 - [compiler] bogus line number in constructor of inner class in 1.5 compliance
- *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contributions for
+ *     							bug 343713 - [compiler] bogus line number in constructor of inner class in 1.5 compliance
+ *     							bug 349326 - [1.7] new warning for missing try-with-resources
+ *								bug 186342 - [compiler][null] Using annotations for null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -238,12 +239,8 @@ public void analyseCode(ClassScope classScope, InitializationFlowContext initial
 			}
 		}
 
-		// tag parameters as being set
-		if (this.arguments != null) {
-			for (int i = 0, count = this.arguments.length; i < count; i++) {
-				flowInfo.markAsDefinitelyAssigned(this.arguments[i].binding);
-			}
-		}
+		// nullity and mark as assigned
+		analyseArguments(flowInfo);
 
 		// propagate to constructor call
 		if (this.constructorCall != null) {

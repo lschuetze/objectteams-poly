@@ -7,12 +7,13 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contributions for 
+ *     Fraunhofer FIRST - extended API and implementation
+ *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contributions for
  *     						bug 236385 - [compiler] Warn for potential programming problem if an object is created but not used
  *     						bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
  *     						bug 349326 - [1.7] new warning for missing try-with-resources
- *     Fraunhofer FIRST - extended API and implementation
- *     Technical University Berlin - extended API and implementation
+ * 							bug 186342 - [compiler][null] Using annotations for null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -92,6 +93,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				this.arguments[i].checkNPE(currentScope, flowContext, flowInfo);
 			}
 		}
+		analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
 	}
 	// record some dependency information for exception types
 	ReferenceBinding[] thrownExceptions;

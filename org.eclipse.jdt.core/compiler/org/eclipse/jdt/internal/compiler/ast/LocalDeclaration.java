@@ -8,13 +8,14 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for 
- *     						bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
- *     						bug 292478 - Report potentially null across variable assignment
- *     						bug 335093 - [compiler][null] minimal hook for future null annotation support
- *     						bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
+ *							bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
+ *							bug 292478 - Report potentially null across variable assignment
+ *							bug 335093 - [compiler][null] minimal hook for future null annotation support
+ *							bug 349326 - [1.7] new warning for missing try-with-resources
+ *							bug 186342 - [compiler][null] Using annotations for null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -129,7 +130,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		this.bits &= ~FirstAssignmentToLocal;  // int i = (i = 0);
 	}
 	flowInfo.markAsDefinitelyAssigned(this.binding);
-	nullStatus = checkAgainstNullAnnotation(currentScope, this.binding, nullStatus);		
+	nullStatus = checkAssignmentAgainstNullAnnotation(currentScope, flowContext, this.binding, nullStatus, this.initialization);
 	if ((this.binding.type.tagBits & TagBits.IsBaseType) == 0) {
 		flowInfo.markNullStatus(this.binding, nullStatus);
 		// no need to inform enclosing try block since its locals won't get
@@ -335,6 +336,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		}
 		// only resolve annotation at the end, for constant to be positioned before (96991)
 		resolveAnnotations(scope, this.annotations, this.binding);
+		scope.validateNullAnnotation(this.binding.tagBits, this.type, this.annotations);
 	}
 
 	public void traverse(ASTVisitor visitor, BlockScope scope) {

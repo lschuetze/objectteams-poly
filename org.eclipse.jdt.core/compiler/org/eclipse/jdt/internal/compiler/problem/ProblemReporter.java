@@ -9,12 +9,13 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - Contribution for bug 239066
- *     Stephan Herrmann  - Contributions for 
- *     						bug 236385 - 
- *     						bug 338303 - Warning about Redundant assignment conflicts with definite assignment
- *     						bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann  - Contributions for
+ *	     						bug 236385 - [compiler] Warn for potential programming problem if an object is created but not used
+ *  	   						bug 338303 - Warning about Redundant assignment conflicts with definite assignment
+ *								bug 349326 - [1.7] new warning for missing try-with-resources
+ *								bug 186342 - [compiler][null] Using annotations for null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
 
@@ -95,6 +96,7 @@ import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.AccessRestriction;
 import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
+import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
@@ -348,6 +350,7 @@ public static int getIrritant(int problemID) {
 			return CompilerOptions.NullReference;
 
 		case IProblem.PotentialNullLocalVariableReference:
+		case IProblem.PotentialNullMessageSendReference:
 			return CompilerOptions.PotentialNullReference;
 
 		case IProblem.RedundantLocalVariableNullAssignment:
@@ -356,7 +359,24 @@ public static int getIrritant(int problemID) {
 		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 		case IProblem.NullLocalVariableComparisonYieldsFalse:
 		case IProblem.NullLocalVariableInstanceofYieldsFalse:
+		case IProblem.RedundantNullCheckOnNonNullMessageSend:
 			return CompilerOptions.RedundantNullCheck;
+
+		case IProblem.RequiredNonNullButProvidedNull:
+		case IProblem.IllegalReturnNullityRedefinition:
+		case IProblem.IllegalRedefinitionToNonNullParameter:
+		case IProblem.IllegalDefinitionToNonNullParameter:
+		case IProblem.ParameterLackingNonNullAnnotation:
+		case IProblem.ParameterLackingNullableAnnotation:
+		case IProblem.CannotImplementIncompatibleNullness:
+			return CompilerOptions.NullSpecViolation;
+
+		case IProblem.RequiredNonNullButProvidedPotentialNull:
+			return CompilerOptions.PotentialNullSpecViolation;
+		case IProblem.RequiredNonNullButProvidedUnknown:
+			return CompilerOptions.NullSpecInsufficientInfo;
+		case IProblem.RedundantNullAnnotation:
+			return CompilerOptions.RedundantNullAnnotation;
 
 		case IProblem.BoxingConversion :
 		case IProblem.UnboxingConversion :
@@ -731,6 +751,13 @@ public static int getProblemCategory(int severity, int problemID) {
 			case CompilerOptions.AdaptingDeprecated :
 				return CategorizedProblem.CAT_DEPRECATION;
 // SH}
+			case CompilerOptions.NullSpecViolation :
+			case CompilerOptions.PotentialNullSpecViolation :
+			case CompilerOptions.NullSpecInsufficientInfo :
+				return CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM;
+			case CompilerOptions.RedundantNullAnnotation :
+				return CategorizedProblem.CAT_UNNECESSARY_CODE;
+
 			default:
 				break categorizeOnIrritant;
 		}
@@ -739,6 +766,7 @@ public static int getProblemCategory(int severity, int problemID) {
 	switch (problemID) {
 		case IProblem.IsClassPathCorrect :
 		case IProblem.CorruptedSignature :
+		case IProblem.MissingNullAnnotationType :
 			return CategorizedProblem.CAT_BUILDPATH;
 //{ObjectTeams:
 		case IProblem.BaseImportFromSplitPackage :
@@ -4235,6 +4263,29 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 		case ProblemReasons.ProblemAlreadyReported:
 			return; // don't report again.
 // SH}
+		case ProblemReasons.VarargsElementTypeNotVisible: // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346042
+			problemMethod = (ProblemMethodBinding) method;
+			if (problemMethod.closestMatch != null) {
+				shownMethod = problemMethod.closestMatch.original();
+			}
+			TypeBinding varargsElementType = shownMethod.parameters[shownMethod.parameters.length - 1].leafComponentType();
+			this.handle(
+					IProblem.VarargsElementTypeNotVisible,
+					new String[] {
+							new String(shownMethod.selector),
+							typesAsString(shownMethod, false),
+							new String(shownMethod.declaringClass.readableName()),
+							new String(varargsElementType.readableName())
+					},
+					new String[] {
+							new String(shownMethod.selector),
+							typesAsString(shownMethod, true),
+							new String(shownMethod.declaringClass.shortReadableName()),
+							new String(varargsElementType.shortReadableName())
+					},
+					(int) (messageSend.nameSourcePosition >>> 32),
+					(int) messageSend.nameSourcePosition);
+             return;
 		case ProblemReasons.NoError : // 0
 		default :
 			needImplementation(messageSend); // want to fail to see why we were here...
@@ -12336,5 +12387,176 @@ public void migrateToWrongBase(Expression expression, TypeBinding providedType, 
 					  String.valueOf(roleType.sourceName()),
 					  String.valueOf(baseclass.readableName()) };
 	this.handle(IProblem.MigrateToWrongBase, args, args, expression.sourceStart, expression.sourceEnd);
+}
+
+public void nullityMismatch(Expression expression, TypeBinding requiredType, int nullStatus, char[][] annotationName) {
+	int problemId = IProblem.RequiredNonNullButProvidedUnknown;
+	if ((nullStatus & FlowInfo.NULL) != 0)
+		problemId = IProblem.RequiredNonNullButProvidedNull;
+	if ((nullStatus & FlowInfo.POTENTIALLY_NULL) != 0)
+		problemId = IProblem.RequiredNonNullButProvidedPotentialNull;
+	String[] arguments = new String[] {
+			String.valueOf(CharOperation.concatWith(annotationName, '.')),
+			String.valueOf(requiredType.readableName())
+	};
+	String[] argumentsShort = new String[] {
+			String.valueOf(annotationName[annotationName.length-1]),
+			String.valueOf(requiredType.shortReadableName())
+	};
+	this.handle(
+		problemId,
+		arguments,
+		argumentsShort,
+		expression.sourceStart,
+		expression.sourceEnd);
+}
+public void illegalRedefinitionToNonNullParameter(Argument argument, ReferenceBinding declaringClass, char[][] inheritedAnnotationName) {
+	int sourceStart = argument.type.sourceStart;
+	if (argument.annotations != null) {
+		for (int i=0; i<argument.annotations.length; i++) {
+			Annotation annotation = argument.annotations[i];
+			if (   annotation.resolvedType.id == TypeIds.T_ConfiguredAnnotationNullable
+				|| annotation.resolvedType.id == TypeIds.T_ConfiguredAnnotationNonNull)
+			{
+				sourceStart = annotation.sourceStart;
+				break;
+			}
+		}
+	}
+	if (inheritedAnnotationName == null) {
+		this.handle(
+			IProblem.IllegalDefinitionToNonNullParameter, 
+			new String[] { new String(argument.name), new String(declaringClass.readableName()) },
+			new String[] { new String(argument.name), new String(declaringClass.shortReadableName()) },
+			sourceStart,
+			argument.type.sourceEnd);
+	} else {
+		this.handle(
+			IProblem.IllegalRedefinitionToNonNullParameter, 
+			new String[] { new String(argument.name), new String(declaringClass.readableName()), CharOperation.toString(inheritedAnnotationName)},
+			new String[] { new String(argument.name), new String(declaringClass.shortReadableName()), new String(inheritedAnnotationName[inheritedAnnotationName.length-1])},
+			sourceStart,
+			argument.type.sourceEnd);
+	}
+}
+public void parameterLackingNonNullAnnotation(Argument argument, ReferenceBinding declaringClass, boolean needNonNull, char[][] inheritedAnnotationName) {
+	this.handle(
+		needNonNull ? IProblem.ParameterLackingNonNullAnnotation : IProblem.ParameterLackingNullableAnnotation, 
+		new String[] { new String(argument.name), new String(declaringClass.readableName()), CharOperation.toString(inheritedAnnotationName)},
+		new String[] { new String(argument.name), new String(declaringClass.shortReadableName()), new String(inheritedAnnotationName[inheritedAnnotationName.length-1])},
+		argument.type.sourceStart,
+		argument.type.sourceEnd);
+}
+public void illegalReturnRedefinition(AbstractMethodDeclaration abstractMethodDecl,
+									  MethodBinding inheritedMethod, char[][] nonNullAnnotationName)
+{
+	MethodDeclaration methodDecl = (MethodDeclaration) abstractMethodDecl;
+	StringBuffer methodSignature = new StringBuffer();
+	methodSignature
+		.append(inheritedMethod.declaringClass.readableName())
+		.append('.')
+		.append(inheritedMethod.readableName());
+
+	StringBuffer shortSignature = new StringBuffer();
+	shortSignature
+		.append(inheritedMethod.declaringClass.shortReadableName())
+		.append('.')
+		.append(inheritedMethod.shortReadableName());
+	int sourceStart = methodDecl.returnType.sourceStart;
+	Annotation[] annotations = methodDecl.annotations;
+	sourceStart = findAnnotationSourceStart(annotations, sourceStart, TypeIds.T_ConfiguredAnnotationNullable);
+	this.handle(
+		IProblem.IllegalReturnNullityRedefinition, 
+		new String[] { methodSignature.toString(), CharOperation.toString(nonNullAnnotationName)},
+		new String[] { shortSignature.toString(), new String(nonNullAnnotationName[nonNullAnnotationName.length-1])},
+		sourceStart,
+		methodDecl.returnType.sourceEnd);
+}
+public void messageSendPotentialNullReference(MethodBinding method, ASTNode location) {
+	String[] arguments = new String[] {new String(method.readableName())};
+	this.handle(
+		IProblem.PotentialNullMessageSendReference,
+		arguments,
+		arguments,
+		location.sourceStart,
+		location.sourceEnd);
+}
+public void messageSendRedundantCheckOnNonNull(MethodBinding method, ASTNode location) {
+	String[] arguments = new String[] {new String(method.readableName())  };
+	this.handle(
+		IProblem.RedundantNullCheckOnNonNullMessageSend,
+		arguments,
+		arguments,
+		location.sourceStart,
+		location.sourceEnd);
+}
+
+public void missingNullAnnotationType(char[][] nullAnnotationName) {
+	String[] args = { new String(CharOperation.concatWith(nullAnnotationName, '.')) };
+	this.handle(IProblem.MissingNullAnnotationType, args, args, 0, 0);
+}
+
+public void cannotImplementIncompatibleNullness(MethodBinding currentMethod, MethodBinding inheritedMethod) {
+	int sourceStart = 0, sourceEnd = 0;
+	if (this.referenceContext instanceof TypeDeclaration) {
+		sourceStart = ((TypeDeclaration) this.referenceContext).sourceStart;
+		sourceEnd =   ((TypeDeclaration) this.referenceContext).sourceEnd;
+	}
+	String[] problemArguments = {
+			new String(currentMethod.readableName()),
+			new String(currentMethod.declaringClass.readableName()),
+			new String(inheritedMethod.declaringClass.readableName())
+		};
+	String[] messageArguments = {
+			new String(currentMethod.shortReadableName()),
+			new String(currentMethod.declaringClass.shortReadableName()),
+			new String(inheritedMethod.declaringClass.shortReadableName())
+		};
+	this.handle(
+			IProblem.CannotImplementIncompatibleNullness,
+			problemArguments,
+			messageArguments,
+			sourceStart,
+			sourceEnd);
+}
+
+public void nullAnnotationIsRedundant(AbstractMethodDeclaration sourceMethod, int i) {
+	int sourceStart, sourceEnd;
+	if (i == -1) {
+		MethodDeclaration methodDecl = (MethodDeclaration) sourceMethod;
+		sourceStart = findAnnotationSourceStart(methodDecl.annotations, methodDecl.returnType.sourceStart, TypeIds.T_ConfiguredAnnotationNonNull);
+		sourceEnd = methodDecl.returnType.sourceEnd;
+	} else {
+		Argument arg = sourceMethod.arguments[i];
+		sourceStart = arg.declarationSourceStart;
+		sourceEnd = arg.sourceEnd;
+	}
+	this.handle(IProblem.RedundantNullAnnotation, ProblemHandler.NoArgument, ProblemHandler.NoArgument, sourceStart, sourceEnd);
+}
+
+public void illegalAnnotationForBaseType(TypeReference type, Annotation[] annotations, char[] annotationName, long nullAnnotationTagBit)
+{
+	int typeId = (nullAnnotationTagBit == TagBits.AnnotationNullable) 
+			? TypeIds.T_ConfiguredAnnotationNullable : TypeIds.T_ConfiguredAnnotationNonNull;
+	String[] args = new String[] { new String(annotationName), new String(type.getLastToken()) };
+	this.handle(IProblem.IllegalAnnotationForBaseType,
+			args,
+			args,
+			findAnnotationSourceStart(annotations, type.sourceStart, typeId),
+			type.sourceEnd);
+}
+
+private int findAnnotationSourceStart(Annotation[] annotations, int startFallback, int typeId) {
+	int sourceStart = startFallback;
+	if (annotations != null) {
+		// should have a @NonNull/@Nullable annotation, search for it:
+		for (int j=0; j<annotations.length; j++) {
+			if (annotations[j].resolvedType != null && annotations[j].resolvedType.id == typeId) {
+				sourceStart = annotations[j].sourceStart;
+				break;
+			}
+		}
+	}
+	return sourceStart;
 }
 }
