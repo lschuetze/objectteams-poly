@@ -164,38 +164,24 @@ public interface TagBits {
 	long HasNonPrivateConstructor = ASTNode.Bit57L;
 
 //{ObjectTeams:
-	// is parameterized type instantiated via tsuper-link?
-	long IsViewedAsTSuper = ASTNode.Bit56L;					// for role type bindings
-	
-    // is it a wrapped role type?
-    long IsWrappedRole = ASTNode.Bit58L;					// for role type bindings
-    // have types been wrapped in the signature
-    long HasWrappedSignature = ASTNode.Bit58L;				// for method bindings    
-    // "new SomeTeam()" expression, unmatchable anchor
-    long IsFreshTeamInstance = ASTNode.Bit58L; 				// for LocalVariableBinding
+
+	// is it a wrapped role type?
+    long IsWrappedRole = ASTNode.Bit62L;					// for role type bindings
     
     // is it a dependent type?
-    long IsDependentType = ASTNode.Bit59L;					// for type bindings
-
-    // had the baseclass field/playedBy problems?
-    long BaseclassHasProblems = ASTNode.Bit60L;				// for type bindings (role)
-    
-    // several issues making lifting impossible
-    long HasLiftingProblem = ASTNode.Bit61L;    			// for type bindings (role class)
-    // parameter/return incompatibility btw base-role?
-    long HasMappingIncompatibility = ASTNode.Bit61L; 		// for method mapping bindings
-    long IsCopyOfParameterized = ASTNode.Bit61L;			// for method bindings
-
-    // can lifting fail due to role abstractness?
-    long HasAbstractRelevantRole = ASTNode.Bit62L;			// for type bindings (team)
+    long IsDependentType = ASTNode.Bit63L;					// for type bindings
     // is a _OT$base field faked to compensate for weakening?
-    long IsFakedField = ASTNode.Bit62L;						// for field binding
-
-    // details of completeTypeBindings:
-    long BeginCopyRoles = ASTNode.Bit63L;					// for type binding (team)
+    long IsFakedField = ASTNode.Bit63L;						// for field binding
+    // have types been wrapped in the signature
+    long HasWrappedSignature = ASTNode.Bit63L;				// for method bindings    
+    // "new SomeTeam()" expression, unmatchable anchor
+    long IsFreshTeamInstance = ASTNode.Bit63L; 				// for LocalVariableBinding
 
     // did a nested team require correction of team/role flags?
     long HasClassKindProblem = ASTNode.Bit64L;				// for type binding (team&role)
+    // parameter/return incompatibility btw base-role?
+    long HasMappingIncompatibility = ASTNode.Bit64L; 		// for method mapping bindings
+    long IsCopyOfParameterized = ASTNode.Bit64L;			// for method bindings
     // is a role field needing a cast to the role class:
     long IsRoleClassField = ASTNode.Bit64L;					// for field binding (role)
     

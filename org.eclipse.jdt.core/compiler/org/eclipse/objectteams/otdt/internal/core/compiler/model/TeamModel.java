@@ -40,7 +40,6 @@ import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
@@ -76,6 +75,14 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  */
 public class TeamModel extends TypeModel {
 
+	// constants for bits in tagBits:
+
+    // can lifting fail due to role abstractness?
+    public static final int HasAbstractRelevantRole = ASTNode.Bit20;
+    
+    // details of completeTypeBindings:
+    public static final int BeginCopyRoles = ASTNode.Bit21;
+
 
 	/** The Marker interface created for this Team (_TSuper__OT__TeamName); */
 	public TypeDeclaration markerInterface;
@@ -93,6 +100,9 @@ public class TeamModel extends TypeModel {
 
     /* a synthetic class for storing known role files */
     private RoleFileCache knownRoleFiles = null;
+
+    /** Collection of various flags. */
+    public int tagBits = 0;
 
     /* While loading a role file no further role file may pass the former role in translation. */
     public boolean _blockCatchup = false;
@@ -320,6 +330,16 @@ public class TeamModel extends TypeModel {
 				return classPart.isTeam();
 		}
 		return false;
+	}
+
+    public static void setTagBit(ReferenceBinding teamBinding, int tagBit) {
+		teamBinding.getTeamModel().tagBits |= tagBit;		
+	}
+
+	public static boolean hasTagBit(ReferenceBinding typeBinding, int tagBit) {
+		if (typeBinding._teamModel == null)
+			return false;
+		return (typeBinding._teamModel.tagBits & tagBit) != 0;
 	}
 
     protected String getKindString()
@@ -894,7 +914,7 @@ public class TeamModel extends TypeModel {
 	 * @return the IProblem value to be used when reporting hidden-lifting-problem against a callin binding or 0.
 	 */
 	public int canLiftingFail(ReferenceBinding role) {
-		if ((this._binding.tagBits & TagBits.HasAbstractRelevantRole) != 0 && role.isAbstract())
+		if ((this.tagBits & HasAbstractRelevantRole) != 0 && role.isAbstract())
 			return IProblem.CallinDespiteAbstractRole;
 		for (Pair<ReferenceBinding, ReferenceBinding> pair : this.ambigousLifting) {
 			if (role.getRealClass().isCompatibleWith(pair.second) && pair.first.isCompatibleWith(role.baseclass()))

@@ -36,7 +36,6 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
@@ -697,7 +696,7 @@ public class BytecodeTransformer
 		char[] liftName = Lifting.getLiftMethodName(role);
 		MethodBinding[] lifters = dstClassFile.referenceBinding.getMethods(liftName);
 		if (lifters.length != 1) {
-			assert (role.getRealClass().tagBits & TagBits.HasLiftingProblem) != 0 : "must have lift method unless lifting problem was detected"; //$NON-NLS-1$
+			assert RoleModel.hasTagBit(role.getRealClass(), RoleModel.HasLiftingProblem) : "must have lift method unless lifting problem was detected"; //$NON-NLS-1$
 			return null;
 		}
 		// wrap it:

@@ -183,9 +183,9 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	 * Also connect roles with OT-specific links.
      */
 	public static void copyRoles(SourceTypeBinding teamBinding) {
-		if ((teamBinding.tagBits & TagBits.BeginCopyRoles) != 0)
+		if (TeamModel.hasTagBit(teamBinding, TeamModel.BeginCopyRoles))
 			return;
-		teamBinding.tagBits |= TagBits.BeginCopyRoles;
+		TeamModel.setTagBit(teamBinding, TeamModel.BeginCopyRoles);
 
 		TeamModel teamModel= teamBinding.getTeamModel();
 		ReferenceBinding superTeam= teamBinding.superclass;
@@ -668,10 +668,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		    	}
 		    }
 
-		    if (superRole.roleModel.hasBaseclassProblem())
-		    {
-		        subRoleDecl.binding.tagBits |= TagBits.BaseclassHasProblems;
-		    }
+		    superRole.roleModel.hasBaseclassProblem(); // just trigger propagation from super-role to current
 	//		if (subRoleBinding != null && subRoleBinding.isBinaryBinding())
 	//			subRoleDecl.scope.problemReporter().mismatchingRoleParts(subRoleBinding, subRoleDecl);
 		    return subRoleDecl;

@@ -1927,9 +1927,9 @@ public void duplicateNestedType(TypeDeclaration typeDecl, int sourceStart, int s
 	if (typeDecl.isRole()) {
 		RoleModel roleModel = typeDecl.getRoleModel();
 		if (roleModel.getClassPartBinding() != null)
-			roleModel.getClassPartBinding().tagBits |= TagBits.BaseclassHasProblems;
+			RoleModel.setTagBit(roleModel.getClassPartBinding(), RoleModel.BaseclassHasProblems);
 		if (roleModel.getInterfacePartBinding() != null)
-			roleModel.getInterfacePartBinding().tagBits |= TagBits.BaseclassHasProblems;
+			RoleModel.setTagBit(roleModel.getInterfacePartBinding(), RoleModel.BaseclassHasProblems);
 	}
 // SH}
 	this.handle(
@@ -9451,7 +9451,7 @@ public void overridesPlayedBy (TypeDeclaration role, TypeBinding origBase)
     msgArgs[0] = new String(((ReferenceBinding)role.binding).sourceName());
     msgArgs[1] = role.baseclass.toString();
     msgArgs[2] = new String(origBase.shortReadableName());
-    role.binding.tagBits |= TagBits.BaseclassHasProblems;
+    RoleModel.setTagBit(role.binding, RoleModel.BaseclassHasProblems);
     this.handle(
         IProblem.OverridingPlayedBy,
         NoArgument,
@@ -9634,7 +9634,7 @@ public void missingEmptyCtorForLiftingCtor(
         TypeDeclaration roleDecl,
         ReferenceBinding parent)
 {
-	roleDecl.binding.tagBits |= TagBits.HasLiftingProblem;
+	RoleModel.setTagBit(roleDecl.binding, RoleModel.HasLiftingProblem);
     String[] arguments = new String[] {new String(parent.sourceName())};
     this.handle(
         IProblem.MissingEmptyCtorForLiftingCtor,
@@ -9991,7 +9991,7 @@ public void abstractPotentiallyRelevantRole(RoleModel role, TeamModel teamModel)
 	if (typeDecl == null)
 		typeDecl = teamModel.getAst();
     this.referenceContext = typeDecl;    
-    teamModel.getBinding().tagBits |= TagBits.HasAbstractRelevantRole;
+    teamModel.tagBits |= TeamModel.HasAbstractRelevantRole;
     String[] args = new String[] {
         new String(teamModel.getBinding().sourceName()),
         new String(role.getName())
@@ -10004,7 +10004,7 @@ public void abstractPotentiallyRelevantRole(RoleModel role, TeamModel teamModel)
         typeDecl.sourceEnd);
 }
 public void abstractRelevantRole(RoleModel role, TeamModel teamModel) {
-	role.getBinding().tagBits |= TagBits.HasLiftingProblem;
+	RoleModel.setTagBit(role.getBinding(), RoleModel.HasLiftingProblem);
 	TypeDeclaration typeDecl = role.getAst();
 	if (typeDecl == null)
 		typeDecl = teamModel.getAst();
@@ -10020,10 +10020,10 @@ public void abstractRelevantRole(RoleModel role, TeamModel teamModel) {
         typeDecl.sourceStart,
         typeDecl.sourceEnd);
 }
-public void abstractRoleIsRelevant(Expression creation, TypeBinding roleBinding) {
-	roleBinding.tagBits |= TagBits.HasLiftingProblem;
+public void abstractRoleIsRelevant(Expression creation, ReferenceBinding roleBinding) {
+	RoleModel.setTagBit(roleBinding, RoleModel.HasLiftingProblem);
     String[] args = new String[] {
-    	new String(((ReferenceBinding)roleBinding).enclosingType().sourceName),
+    	new String(roleBinding.enclosingType().sourceName),
         new String(roleBinding.sourceName())
     };
     this.handle(

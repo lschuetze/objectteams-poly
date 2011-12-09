@@ -570,7 +570,7 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 				}
 				// no matching role init method should mean we had errors.
 				assert    TypeModel.isIgnoreFurtherInvestigation(classScope.referenceContext)
-				       || (declaringClass.tagBits & TagBits.BaseclassHasProblems) != 0
+				       || RoleModel.hasTagBit(declaringClass, RoleModel.BaseclassHasProblems)
 				       || declaringClass.isTeam(); // might be the "turning constructor" of a nested team (see 2.1.11-otjld-*-1f)
 		  }
 // SH}

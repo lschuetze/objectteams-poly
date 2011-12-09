@@ -643,7 +643,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 	        final ReferenceBinding roleClassBinding   = roleModel.getBinding();
 	        final ReferenceBinding baseClassBinding   = roleClassBinding.baseclass();
 
-	        if ((roleClassBinding.tagBits & TagBits.HasLiftingProblem) != 0) {
+	        if (RoleModel.hasTagBit(roleClassBinding, RoleModel.HasLiftingProblem)) {
 	        	this._boundRootRoleModel = null;
 	        	this._gen = null;
 	        	return; // lift method won't work

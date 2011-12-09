@@ -21,6 +21,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 
 /**
@@ -122,7 +123,7 @@ public ReferenceBinding baseclass() {
             if (!Dependencies.ensureRoleState(this.roleModel, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS))
             {
             	this.scope.problemReporter().searchingBaseclassTooEarly(this);
-            	this.tagBits |= TagBits.BaseclassHasProblems;
+            	RoleModel.setTagBit(this, RoleModel.BaseclassHasProblems);
             	this.baseclass = ProblemBaseClass;
             	return null;
             }
@@ -228,7 +229,7 @@ public void checkRefineBaseFromSuperInterfaces()
 	                            this.baseclass,
 	                            superIfc.baseclass); // raw field access!
 	            if (this.baseclass == ProblemBaseClass)
-	            	this.tagBits |= TagBits.BaseclassHasProblems;
+	            	RoleModel.setTagBit(this, RoleModel.BaseclassHasProblems);
 	            // detect situation of OTJLD 2.4.3:
 	            if (   this.superclass != null
 	            	&& this.superclass.isRole()
@@ -271,9 +272,9 @@ private ReferenceBinding checkRefineBase(
     }
     classScope.problemReporter().incompatibleBaseclasses(
     							classScope.referenceContext, sStart, sEnd, current, next);
-    this.tagBits |= TagBits.BaseclassHasProblems;
+	RoleModel.setTagBit(this, RoleModel.BaseclassHasProblems);
     if (isSynthInterface())
-    	this.roleModel.getClassPartBinding().tagBits |= TagBits.BaseclassHasProblems;
+    	RoleModel.setTagBit(this.roleModel.getClassPartBinding(), RoleModel.BaseclassHasProblems);
     return ProblemBaseClass;
 }
 //SH}

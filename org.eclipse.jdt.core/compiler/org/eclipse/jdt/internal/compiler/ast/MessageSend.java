@@ -931,7 +931,7 @@ public TypeBinding resolveType(BlockScope scope) {
 			&& this.binding.model.isForbiddenCreationMethod())
 	{
 		scope.problemReporter().abstractRoleIsRelevant(
-				this, this.binding.returnType);
+				this, (ReferenceBinding)this.binding.returnType);
 	}
 // SH}
 	// from 1.5 source level on, array#clone() returns the array type (but binding still shows Object)

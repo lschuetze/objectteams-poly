@@ -56,6 +56,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
@@ -175,8 +176,8 @@ public class LiftingTypeReference extends TypeReference {
 	    	roleRefType = (ReferenceBinding)TeamModel.getRoleToLiftTo(scope, baseType, roleRefType, true, this);
 		    if (roleRefType == null)
 		    	roleRefType = (ReferenceBinding)roleType; // revert unsuccessful adjustment
-		    if (    roleRefType.baseclass() == null
-		    	|| (roleRefType.tagBits & TagBits.BaseclassHasProblems) != 0)
+		    if (   roleRefType.baseclass() == null
+		    	|| RoleModel.hasTagBit(roleRefType, RoleModel.BaseclassHasProblems))
 		    {
 		        scope.problemReporter().roleNotBoundCantLift(
 		                scope.referenceType(), this.roleReference, roleType);

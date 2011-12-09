@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.compiler.lookup;
 
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 
 /**
  * Binding denoting a method after type parameter substitutions got performed.
@@ -48,7 +49,7 @@ public class ParameterizedMethodBinding extends MethodBinding {
 /* orig:
 		final boolean isStatic = originalMethod.isStatic(); 
   :giro */
-		final boolean isStatic = originalMethod.isStatic() && (parameterizedDeclaringClass.tagBits & TagBits.IsViewedAsTSuper) == 0;
+		final boolean isStatic = originalMethod.isStatic() && !RoleModel.hasTagBit(parameterizedDeclaringClass, RoleModel.IsViewedAsTSuper);
 // SH}
 		if (length == 0) {
 			this.typeVariables = Binding.NO_TYPE_VARIABLES;

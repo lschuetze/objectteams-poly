@@ -1722,7 +1722,7 @@ public class ClassScope extends Scope {
 						   || baseclass.enclosingType() == sourceType.enclosingType().superclass())
 						{
 							problemReporter().baseclassIsRoleOfTheSameTeam(sourceType, this.referenceContext.baseclass, baseclass);
-							sourceType.tagBits |= TagBits.BaseclassHasProblems;
+							RoleModel.setTagBit(sourceType, RoleModel.BaseclassHasProblems);
 							this.referenceContext.pushDownBindingProblem();
 							return false;
 						}
@@ -1750,7 +1750,7 @@ public class ClassScope extends Scope {
 						problemReporter().baseclassMustBeAClass(sourceType, this.referenceContext.baseclass, baseclass);
 				}
 				if ((baseclass.tagBits & TagBits.HierarchyHasProblems) != 0)
-					sourceType.tagBits |= TagBits.BaseclassHasProblems;
+					RoleModel.setTagBit(sourceType, RoleModel.BaseclassHasProblems);
 				if (!baseclass.isValidBinding() && baseclass instanceof ProblemReferenceBinding) {
 					TypeBinding match= ((ProblemReferenceBinding)baseclass).closestMatch();
 					if (match instanceof ReferenceBinding) {
@@ -1788,7 +1788,7 @@ public class ClassScope extends Scope {
 			// trap for selection/completion only after checking base.R things:
 			this.referenceContext.baseclass.aboutToResolve(this);
         }
-		sourceType.tagBits |= TagBits.BaseclassHasProblems;
+		RoleModel.setTagBit(sourceType, RoleModel.BaseclassHasProblems);
         // give at least some legal base class:
 		sourceType.baseclass = getJavaLangObject();
 		if ((sourceType.baseclass.tagBits & TagBits.BeginHierarchyCheck) == 0)

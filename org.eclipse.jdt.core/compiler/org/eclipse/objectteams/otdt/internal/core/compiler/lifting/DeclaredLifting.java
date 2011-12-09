@@ -63,6 +63,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.OTClassScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReplaceSingleNameVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
@@ -226,7 +227,8 @@ public class DeclaredLifting implements IOTConstants {
 		Expression liftCall = null;
 		if (   roleRef.isValidBinding()
 			&& roleRef.isRole()
-			&& (roleRef.tagBits & (TagBits.HierarchyHasProblems | TagBits.BaseclassHasProblems)) == 0)
+			&& (roleRef.tagBits & TagBits.HierarchyHasProblems) == 0
+			&& !RoleModel.hasTagBit(roleRef, RoleModel.BaseclassHasProblems))
 		{
 			Expression receiverTeam = ThisReference.implicitThis();
 			ReferenceBinding teamBinding = roleRef.enclosingType();

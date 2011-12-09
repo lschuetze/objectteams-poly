@@ -26,10 +26,10 @@ import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.IfStatement;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.Sorting;
 
@@ -84,7 +84,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 			AstGenerator     gen)
 	{
 		boolean hasBindingAmbiguity = (teamType.getTeamModel().canLiftingFail(staticRoleType) == IProblem.CallinDespiteBindingAmbiguity);
-		if (caseObjects.length == 1 && ((teamType.tagBits & TagBits.HasAbstractRelevantRole) == 0) && !hasBindingAmbiguity) {
+		if (caseObjects.length == 1 && !TeamModel.hasTagBit(teamType, TeamModel.HasAbstractRelevantRole) && !hasBindingAmbiguity) {
 			// avoid instanceof alltogether.
 			return createCaseStatement(caseObjects[0], gen);
 		}

@@ -202,7 +202,7 @@ public abstract class OTQualifiedAllocationExpression extends AbstractQualifiedA
 	        	if (((ReferenceBinding)this.resolvedType).isAbstract())
 	        	{
 	        		if (!((ReferenceBinding)enclosingInstance().resolvedType).isAbstract())
-	        			scope.problemReporter().abstractRoleIsRelevant(this, this.creatorCall.resolvedType);
+	        			scope.problemReporter().abstractRoleIsRelevant(this, (ReferenceBinding) this.creatorCall.resolvedType);
 	        	}
 	        	if (this.resolvedType.isValidBinding()) {
 	        		// FIXME(SH): remove cast unwrapping

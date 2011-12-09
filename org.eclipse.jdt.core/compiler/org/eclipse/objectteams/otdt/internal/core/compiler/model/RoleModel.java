@@ -32,6 +32,7 @@ import java.util.LinkedList;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFile;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileReader;
@@ -94,6 +95,15 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  */
 public class RoleModel extends TypeModel
 {
+	// Flag constants for tagBits:
+	// is parameterized type instantiated via tsuper-link?
+	public static final int IsViewedAsTSuper = ASTNode.Bit1;
+	
+    // had the baseclass field/playedBy problems?
+    public static final int BaseclassHasProblems = ASTNode.Bit2;
+    
+    // several issues making lifting impossible
+    public static final int HasLiftingProblem = ASTNode.Bit3;
 
 
 	// ========== Byte code related fields: ======================
@@ -148,6 +158,9 @@ public class RoleModel extends TypeModel
 
     /** bound roles store here the topmost bound (super)role, which determines the cache to use: */
     public RoleModel _boundRootRole = null;
+
+    /** Collection of various flags. */
+    public int tagBits = 0;
 
     /** will this role declare an abstract lower method? */
     public boolean _abstractLower = false;
@@ -302,6 +315,17 @@ public class RoleModel extends TypeModel
 			if (ifc.roleModel.getClassPartBinding() == clazz)
 				return true;
 		return false;
+	}
+	
+
+    public static void setTagBit(ReferenceBinding role, int tagBit) {
+		role.roleModel.tagBits |= tagBit;		
+	}
+
+	public static boolean hasTagBit(ReferenceBinding typeBinding, int tagBit) {
+		if (typeBinding.roleModel == null)
+			return false;
+		return (typeBinding.roleModel.tagBits & tagBit) != 0;
 	}
 
     // ================= Byte code related methods =========================
@@ -841,9 +865,9 @@ public class RoleModel extends TypeModel
     }
 
     public boolean hasBaseclassProblem() {
-    	ReferenceBinding binding = (this._classBinding != null) ? this._classBinding : this._binding;
-    	if ((binding.tagBits & TagBits.BaseclassHasProblems) != 0)
+    	if ((this.tagBits & BaseclassHasProblems) != 0)
     		return true;
+    	ReferenceBinding binding = (this._classBinding != null) ? this._classBinding : this._binding;
     	if (binding.superclass() != null) {
     		ReferenceBinding superclass = binding.superclass();
     		if (   (   superclass.isRole()
@@ -851,7 +875,7 @@ public class RoleModel extends TypeModel
     			|| (   (superclass.roleModel != null)
     		        && (superclass.roleModel.hasBaseclassProblem())))
     		{
-    			binding.tagBits |= TagBits.BaseclassHasProblems;
+    			this.tagBits |= BaseclassHasProblems;
     			return true;
     		}
     	}
@@ -1062,7 +1086,7 @@ public class RoleModel extends TypeModel
         	LookupEnvironment env = Config.getLookupEnvironment();
         	if (env != null) {
         		tsuperRole = env.createParameterizedType(tsuperRole, null, superTeamBinding);
-        		tsuperRole.tagBits |= TagBits.IsViewedAsTSuper;
+        		RoleModel.setTagBit(tsuperRole, RoleModel.IsViewedAsTSuper);
         	}
         }
         boolean tsuperAlreadyPresent = false;
@@ -1089,12 +1113,12 @@ public class RoleModel extends TypeModel
         this._state.inititalize(ITranslationStates.STATE_ROLES_SPLIT);
     }
 
-    protected String getKindString() {
+	protected String getKindString() {
         return "Role"; //$NON-NLS-1$
     }
 
 	/**
-	 * @param method
+	 * @param srcMethod
 	 * @param dstMethod
 	 */
 	public void addSyntheticMethodMapping(MethodBinding srcMethod, MethodBinding dstMethod) {
