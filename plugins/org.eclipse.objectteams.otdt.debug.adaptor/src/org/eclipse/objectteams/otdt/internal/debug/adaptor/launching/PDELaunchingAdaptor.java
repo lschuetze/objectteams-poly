@@ -16,8 +16,11 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.debug.adaptor.launching;
 
+import java.util.Map;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -28,12 +31,15 @@ import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.TeamBreakpointInstaller;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.DebugMessages;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.OTDebugAdaptorPlugin;
+import org.eclipse.pde.core.plugin.ISharedPluginModel;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import base org.eclipse.pde.internal.ui.launcher.JREBlock;
 import base org.eclipse.pde.ui.launcher.AbstractLauncherTab;
 import base org.eclipse.pde.launching.AbstractPDELaunchConfiguration;
+import base org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
+import base org.eclipse.pde.launching.EquinoxLaunchConfiguration;
 import base org.eclipse.pde.launching.JUnitLaunchConfigurationDelegate;
 
 /**
@@ -48,25 +54,38 @@ public team class PDELaunchingAdaptor {
 	/** Mediating between LauncherTab and JREBlock: */
 	LauncherTab currentTab = null;
 	
-	static final String OSGI_EXTENSIONS       = "-Dosgi.framework.extensions=org.eclipse.objectteams.otequinox.hook"; //$NON-NLS-1$
+	static final String OSGI_EXTENSIONS       = "-Dosgi.framework.extensions=reference:file:"; //$NON-NLS-1$
+	static final String OTEQUINOX_HOOK 		  = "org.eclipse.objectteams.otequinox.hook";
 	static final String HOOK_CONFIGURATOR     = "-Dosgi.hook.configurators.include=org.eclipse.objectteams.otequinox.hook.HookConfigurator";//$NON-NLS-1$
 	static final String CLASSLOADER_LOCKING   = "-Dosgi.classloader.lock=classname"; //$NON-NLS-1$
 	static final String ENABLE_OTEQUINOX      = "-Dot.equinox=1"; //$NON-NLS-1$     // this also causes the WORKAROUND_REPOSITORY flag being set to true in OTRE.
 	static final String DISABLE_OTEQUINOX     = "-Dot.equinox=false"; //$NON-NLS-1$ // prevents TransformerHook installation and start of TransformerPlugin
 	static final String OT_DEBUG_VMARG        = "-Dot.debug"; //$NON-NLS-1$
-	static final String[] OT_VM_ARGS          = { OSGI_EXTENSIONS, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX };
-	static final String[] OT_VM_DEBUG_ARGS    = { OSGI_EXTENSIONS, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX, OT_DEBUG_VMARG };
+	// slot [0] to be filled in from the launch config:
+	static final String[] OT_VM_ARGS          = { null, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX };
+	static final String[] OT_VM_DEBUG_ARGS    = { null, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX, OT_DEBUG_VMARG };
 	static final String[] VM_ARGS          = { CLASSLOADER_LOCKING, DISABLE_OTEQUINOX };
 	static final String[] VM_DEBUG_ARGS    = { CLASSLOADER_LOCKING, DISABLE_OTEQUINOX, OT_DEBUG_VMARG };
 
-	/** 
-	 * Extend pre-built vm arguments with OT/Equinox specifics (depending on run/debug mode).
-	 */
-	static String[] extendVMArguments(String[] args, String mode) {
+	
+	static String[] getOTArgs(ISharedPluginModel hookModel, String mode) {
 		String[] otArgs = OT_VM_ARGS;
 		if (mode != null && mode.equals(ILaunchManager.DEBUG_MODE))
 			otArgs = OT_VM_DEBUG_ARGS;
-	
+		if (hookModel == null) {
+			OTDebugAdaptorPlugin.logError("Required fragment "+OTEQUINOX_HOOK+" not found");
+			return null;
+		}
+		otArgs[0] = OSGI_EXTENSIONS+hookModel.getInstallLocation();
+		return otArgs;
+	}
+	/** 
+	 * Extend pre-built vm arguments with OT/Equinox specifics (depending on run/debug mode).
+	 */
+	static String[] extendVMArguments(String[] args, ISharedPluginModel hookModel, String mode) {
+		String[] otArgs = getOTArgs(hookModel, mode);
+		if (otArgs == null)
+			return args;
 		if (args == null || args.length == 0)
 			return otArgs;
 	
@@ -82,12 +101,12 @@ public team class PDELaunchingAdaptor {
 		return combinedArgs;		
 	}
 	/* alternate version for single string signature. */
-	static String extendVMArguments(String args, String mode) {
-		String otArgs;
-		if (mode != null && mode.equals(ILaunchManager.DEBUG_MODE))
-			otArgs = Util.concatWith(OT_VM_DEBUG_ARGS, ' ');
-		else
-			otArgs = Util.concatWith(OT_VM_ARGS, ' ');
+	static String extendVMArguments(String args, ISharedPluginModel hookModel, String mode) {
+		String[] otArgss = getOTArgs(hookModel, mode);
+		if (otArgss == null)
+			return args;
+						
+		String otArgs = Util.concatWith(otArgss, ' ');
 	
 		if (args == null || args.length() == 0)
 			return otArgs;
@@ -154,8 +173,11 @@ public team class PDELaunchingAdaptor {
 	 */
 	protected class Launcher extends AbstractLauncher playedBy AbstractPDELaunchConfiguration 
 	{	
+
 		@SuppressWarnings("decapsulation")
 		getProjectsForProblemSearch -> getProjectsForProblemSearch;
+		
+		ISharedPluginModel getBundle(String id) { return null; }
 		
 		// Extend VM arguments:
 		String[] extendVMArguments(ILaunchConfiguration config) <- replace String[] getVMArguments(ILaunchConfiguration config);
@@ -163,7 +185,7 @@ public team class PDELaunchingAdaptor {
 		{
 			String[] args = base.extendVMArguments(config);
 			if (isOTLaunch(config))
-				return PDELaunchingAdaptor.extendVMArguments(args, this.mode);
+				return PDELaunchingAdaptor.extendVMArguments(args, getBundle(OTEQUINOX_HOOK), this.mode);
 			else
 				return PDELaunchingAdaptor.addDisableOTEquinoxArgument(args);
 		}
@@ -171,12 +193,26 @@ public team class PDELaunchingAdaptor {
 		// install breakpoints and record launch mode (run/debug):
 		prepareLaunch <- before launch;
 	}
-	
+	protected class EclipseLauncher extends Launcher playedBy EclipseApplicationLaunchConfiguration {
+		@SuppressWarnings({ "decapsulation", "rawtypes" })
+		protected ISharedPluginModel getBundle(String id) => get Map fAllBundles
+				with { result <- (ISharedPluginModel)result.get(id) }
+	}
+	protected class EquinoxLauncher extends Launcher playedBy EquinoxLaunchConfiguration {
+		@SuppressWarnings({ "decapsulation", "rawtypes" })
+		protected ISharedPluginModel getBundle(String id) => get Map fAllBundles
+				with { result <- (ISharedPluginModel)result.get(id) }
+	}
+
 	/** Unfortunately JUnit launches are slightly different (and not related by inheritance) */
 	protected class JUnitLauncher extends AbstractLauncher playedBy JUnitLaunchConfigurationDelegate 
 	{
 		@SuppressWarnings("decapsulation")
 		getProjectsForProblemSearch -> getProjectsForProblemSearch;
+
+		@SuppressWarnings({ "decapsulation", "rawtypes" })
+		protected ISharedPluginModel getBundle(String id) => get Map fAllBundles
+				with { result <- (ISharedPluginModel)result.get(id) }
 		
 		// Extend VM arguments:
 		String extendVMArgument(ILaunchConfiguration config) <- replace String getVMArguments(ILaunchConfiguration config);
@@ -184,7 +220,7 @@ public team class PDELaunchingAdaptor {
 		{
 			String result = base.extendVMArgument(config);
 			if (isOTLaunch(config))
-				return PDELaunchingAdaptor.extendVMArguments(result, this.mode);
+				return PDELaunchingAdaptor.extendVMArguments(result, getBundle(OTEQUINOX_HOOK), this.mode);
 			else
 				return result+' '+DISABLE_OTEQUINOX;
 		}

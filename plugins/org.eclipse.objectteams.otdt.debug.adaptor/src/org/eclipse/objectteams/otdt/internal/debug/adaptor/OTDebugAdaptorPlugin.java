@@ -16,6 +16,8 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.debug.adaptor;
 
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /** This Activator enables the debug adaptor to manage preferences of its own.
@@ -35,5 +37,9 @@ public class OTDebugAdaptorPlugin extends AbstractUIPlugin {
 
 	public static AbstractUIPlugin getDefault() {
 		return instance; 
+	}
+	
+	public static void logError(String msg) {
+		instance.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, msg));
 	}
 }
