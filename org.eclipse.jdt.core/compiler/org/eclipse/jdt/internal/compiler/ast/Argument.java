@@ -54,7 +54,14 @@ public class Argument extends LocalDeclaration {
 		if (this.binding == null) {
 			// for default constructors and fake implementation of abstract methods 
 			this.binding = new LocalVariableBinding(this, typeBinding, this.modifiers, true);
+//{ObjectTeams: NPE occurred in Java5.testA119_nestedValueParameter8() ff.
+/* orig:
+//	    When we are called from RoleTypeCreator.resolveTypeAnchoredToArgument(AbstractMethodDeclaration, int)
+//		we reach here, before resolveTypesFor has had a chance to set the binding's type.
 		} else if (!this.binding.type.isValidBinding()) {
+  :giro */
+		} else if (this.binding.type != null && !this.binding.type.isValidBinding()) {
+// SH}
 			AbstractMethodDeclaration methodDecl = scope.referenceMethod();
 			if (methodDecl != null) {
 				MethodBinding methodBinding = methodDecl.binding;
