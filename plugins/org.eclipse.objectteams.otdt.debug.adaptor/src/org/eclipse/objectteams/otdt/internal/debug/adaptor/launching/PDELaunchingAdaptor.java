@@ -20,7 +20,6 @@ import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.debug.core.ILaunchConfiguration;
 import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
@@ -36,11 +35,11 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 
 import base org.eclipse.pde.internal.ui.launcher.JREBlock;
-import base org.eclipse.pde.ui.launcher.AbstractLauncherTab;
 import base org.eclipse.pde.launching.AbstractPDELaunchConfiguration;
 import base org.eclipse.pde.launching.EclipseApplicationLaunchConfiguration;
 import base org.eclipse.pde.launching.EquinoxLaunchConfiguration;
 import base org.eclipse.pde.launching.JUnitLaunchConfigurationDelegate;
+import base org.eclipse.pde.ui.launcher.AbstractLauncherTab;
 
 /**
  * This team adapts all Eclipse and OSGi launches (Launcher) and launch configurations (JREBlock and LauncherTab).
@@ -67,7 +66,7 @@ public team class PDELaunchingAdaptor {
 	static final String[] VM_ARGS          = { CLASSLOADER_LOCKING, DISABLE_OTEQUINOX };
 	static final String[] VM_DEBUG_ARGS    = { CLASSLOADER_LOCKING, DISABLE_OTEQUINOX, OT_DEBUG_VMARG };
 
-	
+	/** select proper set of arguments for an OT-launch, insert otequinox.hook using it's actual install location. */
 	static String[] getOTArgs(ISharedPluginModel hookModel, String mode) {
 		String[] otArgs = OT_VM_ARGS;
 		if (mode != null && mode.equals(ILaunchManager.DEBUG_MODE))
@@ -193,11 +192,13 @@ public team class PDELaunchingAdaptor {
 		// install breakpoints and record launch mode (run/debug):
 		prepareLaunch <- before launch;
 	}
+	// provide access to field fAllBundles required by the super-role:
 	protected class EclipseLauncher extends Launcher playedBy EclipseApplicationLaunchConfiguration {
 		@SuppressWarnings({ "decapsulation", "rawtypes" })
 		protected ISharedPluginModel getBundle(String id) => get Map fAllBundles
 				with { result <- (ISharedPluginModel)result.get(id) }
 	}
+	// provide access to field fAllBundles required by the super-role:
 	protected class EquinoxLauncher extends Launcher playedBy EquinoxLaunchConfiguration {
 		@SuppressWarnings({ "decapsulation", "rawtypes" })
 		protected ISharedPluginModel getBundle(String id) => get Map fAllBundles
