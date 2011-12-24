@@ -1726,6 +1726,8 @@ public class ClassScope extends Scope {
 						   || baseclass.enclosingType() == sourceType.enclosingType().superclass())
 						{
 							problemReporter().baseclassIsRoleOfTheSameTeam(sourceType, this.referenceContext.baseclass, baseclass);
+							sourceType.baseclass = null;
+							baseclassRef.resolvedType = null;
 							RoleModel.setTagBit(sourceType, RoleModel.BaseclassHasProblems);
 							this.referenceContext.pushDownBindingProblem();
 							return false;
