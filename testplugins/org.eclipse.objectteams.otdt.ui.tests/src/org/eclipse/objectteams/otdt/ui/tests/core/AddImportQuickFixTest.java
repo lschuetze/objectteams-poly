@@ -29,12 +29,14 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.internal.Workbench;
 
@@ -168,6 +170,55 @@ public class AddImportQuickFixTest extends OTQuickFixTest {
 		// so that tearDown can delete files without asking the user:
 		Workbench.getInstance().getActiveWorkbenchWindow().getActivePage().closeAllEditors(false);
 	}
+
+    // Bug 348076 - [assist][rewrite] changing import to import base not working when package name contains "base"
+    public void testChangeImportToBaseImport1() throws Exception
+    {
+        IPackageFragmentRoot sourceFolder = JavaProjectHelper
+                .addSourceContainer(this.fJProject1, "src");
+
+        IPackageFragment basePkg = sourceFolder.createPackageFragment(
+                "bug348076.base",
+                false,
+                null);
+        StringBuffer buf = new StringBuffer();
+        buf.append("package bug348076.base;\n");
+        buf.append("public class B1 {\n");
+        buf.append("}\n");
+        basePkg.createCompilationUnit("B1.java", buf.toString(), false, null);
+
+        IPackageFragment teamPkg = sourceFolder.createPackageFragment(
+                "teamPkg",
+                false,
+                null);
+        buf = new StringBuffer();
+        buf.append("package teamPkg;\n");
+        buf.append("import bug348076.base.B1;\n");
+        buf.append("public team class T1 {\n");
+        buf.append("    public class R1 playedBy B1 {\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        ICompilationUnit cu = teamPkg.createCompilationUnit("T1.java", buf
+                .toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview= getPreviewContent(proposal);
+
+
+        buf = new StringBuffer();
+        buf.append("package teamPkg;\n");
+        buf.append("import base bug348076.base.B1;\n");
+        buf.append("public team class T1 {\n");
+        buf.append("    public class R1 playedBy B1 {\n");
+        buf.append("    }\n");
+        buf.append("}\n");
+        assertEqualString(preview, buf.toString());
+    }
 
 	/* Adding a base import to a team on behalf of a role file. */
 	public void testAddBaseImportForRofi1() throws Exception {

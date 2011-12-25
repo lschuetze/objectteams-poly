@@ -871,8 +871,10 @@ public final class ImportRewriteAnalyzer {
 						if (currDecl.isBase()) {
 							int endPos = offset+region.getLength();
 							int importPos = findInBuffer(buffer, "import", offset, endPos); //$NON-NLS-1$
-							int basePos = findInBuffer(buffer, "base", importPos, endPos); //$NON-NLS-1$
-							if (basePos == -1) // "base" not yet set
+							int p=importPos+6;
+							while(p<endPos-4 && Character.isWhitespace(buffer.getChar(p))) p++;
+							if (p>=endPos-4 || ! "base".equals(buffer.getText(p, 4))) //$NON-NLS-1$
+								// "base" not yet set
 								resEdit.addChild(new InsertEdit(importPos+"import ".length(), "base ")); //$NON-NLS-1$ //$NON-NLS-2$
 						}
 // SH}
