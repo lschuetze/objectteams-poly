@@ -1,4 +1,8 @@
 /*/bin/
+/plugins/*/bin/
+/testplugins/*/bin/
+/othersrc/otdt-examples/*/bin/
+/testplugins/*/jplis_dump/
 *~
 *.rej
 *.bak
