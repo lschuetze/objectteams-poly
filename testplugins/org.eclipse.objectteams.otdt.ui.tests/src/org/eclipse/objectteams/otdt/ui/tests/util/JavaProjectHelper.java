@@ -110,7 +110,7 @@ public class JavaProjectHelper extends org.eclipse.jdt.testplugin.JavaProjectHel
         return jproject;
     }
 
-	private static void addNatureToProject(IProject proj, String natureId, IProgressMonitor monitor) throws CoreException {
+	public static void addNatureToProject(IProject proj, String natureId, IProgressMonitor monitor) throws CoreException {
 		IProjectDescription description = proj.getDescription();
 		String[] prevNatures= description.getNatureIds();
 		String[] newNatures= new String[prevNatures.length + 1];

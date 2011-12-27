@@ -210,7 +210,13 @@ public final class ImportRewrite {
 			for (int i= 0; i < imports.size(); i++) {
 				ImportDeclaration curr= (ImportDeclaration) imports.get(i);
 				StringBuffer buf= new StringBuffer();
+//{ObjectTeams: also consider base:
+/* orig:
 				buf.append(curr.isStatic() ? STATIC_PREFIX : NORMAL_PREFIX).append(curr.getName().getFullyQualifiedName());
+  :giro */
+				char prefix = curr.isStatic() ? STATIC_PREFIX : (curr.isBase() ? BASE_PREFIX : NORMAL_PREFIX);
+				buf.append(prefix).append(curr.getName().getFullyQualifiedName());
+// SH}
 				if (curr.isOnDemand()) {
 					if (buf.length() > 1)
 						buf.append('.');

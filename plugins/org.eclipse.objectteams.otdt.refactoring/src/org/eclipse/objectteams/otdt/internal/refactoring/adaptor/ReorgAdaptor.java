@@ -20,17 +20,31 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.refactoring.adaptor;
 
+import java.util.Collection;
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import base org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
@@ -38,11 +52,13 @@ import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.OTRefactoringCoreMessages;
+import org.eclipse.objectteams.otdt.internal.ui.assist.BaseImportRewriting;
 
 import base org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory.SubCuElementReorgPolicy;
 import base org.eclipse.jdt.internal.corext.refactoring.reorg.ReadOnlyResourceFinder;
 import base org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import base org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
 
 /**
  * The team adapts classes from corext.refactoring.{reorg,structure}.
@@ -195,5 +211,66 @@ public team class ReorgAdaptor
 
 		// createNameArguments now uses JavaElementLabels.getElementLabel()
 		// nothing to adapt in ReorgUtils.
+	}
+
+	/** 
+	 * When reorg updates a CU's imports, activate additional analysis
+	 * for creating base imports if needed. 
+	 */
+	protected class ImportRewriteUtil playedBy ImportRewriteUtil {
+
+		void addImports(CompilationUnitRewrite rewrite, ImportRewriteContext context)
+		<- replace
+		void addImports(CompilationUnitRewrite rewrite,
+				ImportRewriteContext context, ASTNode node,
+				Map<Name, String> typeImports, Map<Name, String> staticImports,
+				Collection<IBinding> excludeBindings, boolean declarations);
+
+		static callin void addImports(CompilationUnitRewrite rewrite, ImportRewriteContext context) {
+			within (new BaseImporting(rewrite))
+				base.addImports(rewrite, context);
+		}
+	}
+	/**
+	 * Mediate between {@link org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector}
+	 * and our {@link BaseImportRewriting} (from <code>org.eclipse.objectteams.otdt.jdt.ui</code>).
+	 * This team is activated only temporarily when reorg is adding imports.
+	 *
+	 * @since 2.1
+	 */
+	protected team class BaseImporting {
+
+		ImportRewrite rewrite;
+
+		public BaseImporting(CompilationUnitRewrite rewrite) {
+			this.rewrite = rewrite.getImportRewrite();
+		}
+
+		protected class BaseImportReferencesCollector playedBy ImportReferencesCollector {
+
+			void typeRefFound(Name node) <- after void typeRefFound(Name node);
+
+			private void typeRefFound(Name node) {
+				SimpleName name = (node instanceof QualifiedName)
+						? ((QualifiedName)node).getName()
+						: (SimpleName)node;
+				String baseName = name.getIdentifier();
+				// find this type's location in parent:
+				ASTNode parent = node.getParent();
+				StructuralPropertyDescriptor location = node.getLocationInParent();
+				while (parent instanceof Type) {
+					location = parent.getLocationInParent();
+					parent = parent.getParent();
+				}
+				// if its the reference in a playedBy clause ...
+				@SuppressWarnings("deprecation")
+				StructuralPropertyDescriptor baseClassProperty = (node.getAST().apiLevel() == AST.JLS2) 
+						? RoleTypeDeclaration.BASECLASS_PROPERTY
+						: RoleTypeDeclaration.BASECLASS_TYPE_PROPERTY;
+				if (location == baseClassProperty)
+					// ... let BaseImportRewriting know that it may need a base import:
+					BaseImportRewriting.instance().markForBaseImport(rewrite, baseName);
+			}		
+		}
 	}
 }

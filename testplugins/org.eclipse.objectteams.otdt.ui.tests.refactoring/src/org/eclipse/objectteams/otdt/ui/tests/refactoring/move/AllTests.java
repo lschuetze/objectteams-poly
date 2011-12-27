@@ -44,6 +44,7 @@ public class AllTests
 
         suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveInstanceMethodTests.suite());
         suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveStaticMethodTests.suite());
+        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveRoleTests.suite());
         
         return suite;
     }

@@ -241,20 +241,36 @@ public team class BaseImportRewriting
 		
 		/** Final entry (output): conditionally change import entry from NORMAL to BASE. */
 		@SuppressWarnings("basecall")
-		callin void addEntry(String entry) {
+		callin void adaptEntry1(String entry) {
+			String adapted = doAdaptEntry(entry);
+			if (adapted != null)
+				base.adaptEntry1(adapted);
+		}
+		/** Final entry (output): conditionally change import entry from NORMAL to BASE. */
+		@SuppressWarnings("basecall")
+		callin boolean adaptEntry2(String entry) {
+			String adapted = doAdaptEntry(entry);
+			if (adapted != null)
+				return base.adaptEntry2(adapted);
+			return false;
+		}
+		adaptEntry1 <- replace addEntry
+			base when (hasRole(base, ImportRewriteAdaptor.class));
+		adaptEntry2 <- replace removeEntry
+			base when (hasRole(base, ImportRewriteAdaptor.class));
+		
+		String doAdaptEntry (String entry) {
 			if (entry.charAt(0) == getNormalChar()) {
 				String[] names = entry.split("\\."); //$NON-NLS-1$
 				if (needsBaseImport || baseNames.contains(names[names.length-1])) {
 					if (cuIsRoFi)
-						return; // don't propose to add a base import to a role file
+						return null; // don't propose to add a base import to a role file
 					else
 						entry = getBaseChar()+entry.substring(1);
 				}
 			}
-			base.addEntry(entry);
+			return entry;
 		}
-		addEntry <- replace addEntry
-			base when (hasRole(base, ImportRewriteAdaptor.class));
 		
 		// this callin tells the ImportRewrite not to consider local declarations as a conflict,
 		// if we already know that we need a base import
@@ -312,4 +328,16 @@ public team class BaseImportRewriting
 			rewrite.needsBaseImport = engine.assistNodeIsBaseclass;
 	}
 	
+	/**
+	 * API for org.eclipse.objectteams.otdt.internal.refactoring.adaptor.BaseImporting:
+	 * Mark the given simple name as requiring a base import.
+	 * @param imports the rewrite in use
+	 * @param baseName the simple name of a base class.
+	 */
+	public void markForBaseImport(ImportRewrite as ImportRewriteAdaptor imports, String baseName) {
+		if (imports.baseNames == null)
+			imports.baseNames = new HashSet<String>();
+		imports.baseNames.add(baseName);
+	}
+
 }
