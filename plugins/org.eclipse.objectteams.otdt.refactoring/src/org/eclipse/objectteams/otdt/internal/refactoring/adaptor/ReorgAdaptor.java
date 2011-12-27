@@ -248,7 +248,8 @@ public team class ReorgAdaptor
 
 		protected class BaseImportReferencesCollector playedBy ImportReferencesCollector {
 
-			void typeRefFound(Name node) <- after void typeRefFound(Name node);
+			void typeRefFound(Name node) <- after void typeRefFound(Name node)
+				base when (node != null);
 
 			private void typeRefFound(Name node) {
 				SimpleName name = (node instanceof QualifiedName)
