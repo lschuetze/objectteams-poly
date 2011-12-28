@@ -67,17 +67,6 @@ public abstract class OTREBlock
 		gd.horizontalSpan = 1;
 		group.setLayoutData(gd);
 
-		adoptAncestorFont: {
-			// different base classes have different strategies for setting the font.
-			// unify by applying the font from the ancestor CTabFolder:
-			while (!(parent instanceof CTabFolder)) {
-				if (parent == null)
-					break adoptAncestorFont;
-				parent = parent.getParent();
-			}			
-			group.setFont(parent.getFont());
-		}
-		
         this._otreToggleButton = createCheckButton(group, this.enableCheckboxLabel); 
         this._otreToggleButton.addSelectionListener(new SelectionAdapter() 
 	        {
@@ -87,7 +76,20 @@ public abstract class OTREBlock
 	                updateLaunchConfigurationDialog();
 	            }
 	        });
-        
+
+		adoptAncestorFont: {
+			// different base classes have different strategies for setting the font.
+			// unify by applying the font from the ancestor CTabFolder:
+			while (!(parent instanceof CTabFolder)) {
+				if (parent == null)
+					break adoptAncestorFont;
+				parent = parent.getParent();
+			}
+			// leave the group's font as it is (some dialogs use bold for the title)
+			// but apply the parent's font to the check box:
+			this._otreToggleButton.setFont(parent.getFont());
+		}
+		
         return group;
 	}
 	
