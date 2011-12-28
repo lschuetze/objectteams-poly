@@ -1014,6 +1014,25 @@ protected void consumeSingleStaticImportDeclarationName() {
 		false,
 		ClassFileConstants.AccStatic);
 }
+//{ObjectTeams:
+protected void consumeSingleBaseImportDeclarationName() {
+	// SingleBaseImportDeclarationName ::= 'import' 'base' Name
+
+	/* persisting javadoc positions */
+	pushOnIntArrayStack(getJavaDocPositions());
+
+	super.consumeSingleBaseImportDeclarationName();
+	ImportReference importReference = (ImportReference) this.astStack[this.astPtr];
+	this.requestor.acceptImport(
+		importReference.declarationSourceStart,
+		importReference.declarationSourceEnd,
+		this.intArrayStack[this.intArrayPtr--],
+		CharOperation.concatWith(importReference.getImportName(), '.'),
+		importReference.sourceStart,
+		false,
+		ClassFileConstants.AccDefault);
+}
+// SH}
 /*
  *
  * INTERNAL USE-ONLY

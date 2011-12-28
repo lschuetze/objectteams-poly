@@ -25,6 +25,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
@@ -459,5 +460,27 @@ public class RenameTypeTests extends RefactoringTest
 	public void _testShadowedNameRoleFile4() throws Exception {
 		performRenameRefactoring_failing(new String[] { "RT", "T1", "T2" }, "R1", "R2", true);
 	}
-		
+	
+	public void testRenameBaseClass1() throws Exception {
+		IPackageFragment packB = getRoot().createPackageFragment("b", true, null);
+		ICompilationUnit cuB = packB.createCompilationUnit("B.java", "package b;public class B {}", true, null);
+		ICompilationUnit cu1= getPackageP().createCompilationUnit("T1.java", "package p;import base b.B;team class T1{void foo(){}protected class Role playedBy B{}}", false, new NullProgressMonitor());
+		try {
+			IType baseType = cuB.getTypes()[0];
+
+			RenameRefactoring refactoring = createRefactoring(baseType, "B1");
+	        RenameTypeProcessor renameTypeProcessor = (RenameTypeProcessor)_processor;
+	        renameTypeProcessor.setUpdateReferences(true);
+	        renameTypeProcessor.setUpdateTextualMatches(false);
+			RefactoringStatus result = performRefactoring(refactoring);
+			assertEquals("was supposed to pass", null, result);
+	
+			// expect that base import has been updated in cu1:
+			String expectedSource1= "package p;import base b.B1;team class T1{void foo(){}protected class Role playedBy B1{}}";
+			assertEqualLines("source compare failed", expectedSource1, cu1.getSource());
+			
+		} finally {
+			performDummySearch();
+		}
+	}
 }

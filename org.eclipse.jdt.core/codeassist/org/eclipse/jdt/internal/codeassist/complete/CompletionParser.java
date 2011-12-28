@@ -3559,6 +3559,13 @@ protected void consumeSingleStaticImportDeclarationName() {
 	super.consumeSingleStaticImportDeclarationName();
 	this.pendingAnnotation = null; // the pending annotation cannot be attached to next nodes
 }
+//{ObjectTeams:
+@Override
+protected void consumeSingleBaseImportDeclarationName() {
+	super.consumeSingleBaseImportDeclarationName();
+	this.pendingAnnotation = null; // the pending annotation cannot be attached to next nodes
+}
+// SH}
 protected void consumeSingleTypeImportDeclarationName() {
 	super.consumeSingleTypeImportDeclarationName();
 	this.pendingAnnotation = null; // the pending annotation cannot be attached to next nodes

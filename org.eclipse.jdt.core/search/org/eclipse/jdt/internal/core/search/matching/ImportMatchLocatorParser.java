@@ -38,6 +38,15 @@ protected void consumeSingleStaticImportDeclarationName() {
 		this.patternLocator.match(this.astStack[this.astPtr], this.nodeSet);
 	}
 }
+//{ObjectTeams:
+@Override
+protected void consumeSingleBaseImportDeclarationName() {
+	super.consumeSingleBaseImportDeclarationName();
+	if (this.reportImportMatch) {
+		this.patternLocator.match(this.astStack[this.astPtr], this.nodeSet);
+	}
+}
+// SH}
 protected void consumeSingleTypeImportDeclarationName() {
 	super.consumeSingleTypeImportDeclarationName();
 	if (this.reportImportMatch) {
