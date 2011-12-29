@@ -16,6 +16,7 @@ package org.eclipse.objectteams.otdt.internal.ui.wizards.typecreation;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -679,12 +680,26 @@ public abstract class TypeCreator
 			ICompilationUnit cu= enclosingType.getCompilationUnit();
 			StringBuffer teamString = new StringBuffer();
 			teamString.append("package ").append(packageFragment.getElementName()).append(";\n"); //$NON-NLS-1$ //$NON-NLS-2$
-			teamString.append("public class ").append(enclosingType.getElementName()).append(" {}\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			teamString.append("public"); //$NON-NLS-1$
+			int levels = writeClassHeader(enclosingType, teamString);
+			for (int i = 0; i < levels; i++)
+				teamString.append('}');
+			//class ").append(enclosingType.getElementName()).append(" {}\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			String prolog= "class " + typeName + (isInterface ? " implements " : " extends "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			String epilog= " {} "; //$NON-NLS-1$
 			return new StubTypeContext(cu, teamString.toString() + prolog, epilog);
 		}
+	}
+	
+	private int writeClassHeader(IType type, StringBuffer buf) {
+		IJavaElement parent = type.getParent();
+		int nestingLevels = 1;
+		if (parent instanceof IType) {
+			nestingLevels += writeClassHeader((IType) parent, buf);
+		}
+		buf.append(" class ").append(type.getElementName()).append(" {"); //$NON-NLS-1$ //$NON-NLS-2$
+		return nestingLevels;
 	}
 
 	private void writeSuperInterfaces(StringBuffer buf, ImportsManager imports) throws CoreException 

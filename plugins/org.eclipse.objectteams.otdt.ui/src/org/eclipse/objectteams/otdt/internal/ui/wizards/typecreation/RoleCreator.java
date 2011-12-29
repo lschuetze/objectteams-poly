@@ -23,10 +23,12 @@ package org.eclipse.objectteams.otdt.internal.ui.wizards.typecreation;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
+import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.internal.ui.OTDTUIPluginConstants;
 
 
@@ -77,13 +79,34 @@ public class RoleCreator extends TypeCreator
 				}
 			}
 			if (binding != null) {
-				buf.append(imports.addImport(binding));
-				imports.setImportBase(binding);
+				if (hasCommonEnclosingTeam(currentType, binding)) {
+					// no importing
+					buf.append(binding.getName());				
+				} else {
+					buf.append(imports.addImport(binding));
+					imports.setImportBase(binding);
+				}
 			} else {
 				buf.append(imports.addImportBase(baseName));
 			}
 
 	    }
+	}
+
+
+	private boolean hasCommonEnclosingTeam(IType type, ITypeBinding binding) {
+		IJavaElement currentElement = type;
+		while ((currentElement = currentElement.getParent()) instanceof IType) {
+			IType currentType = (IType) currentElement;
+			if (OTModelManager.isTeam(currentType)) {
+				ITypeBinding currentBinding = binding;
+				while ((currentBinding = currentBinding.getDeclaringClass()) != null) {
+					if (currentBinding.getQualifiedName().equals(currentType.getFullyQualifiedName('.')))
+						return true;
+				}
+			}
+		}
+		return false;
 	}
 
 
