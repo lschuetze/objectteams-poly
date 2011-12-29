@@ -684,7 +684,6 @@ public abstract class TypeCreator
 			int levels = writeClassHeader(enclosingType, teamString);
 			for (int i = 0; i < levels; i++)
 				teamString.append('}');
-			//class ").append(enclosingType.getElementName()).append(" {}\n"); //$NON-NLS-1$ //$NON-NLS-2$
 			
 			String prolog= "class " + typeName + (isInterface ? " implements " : " extends "); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 			String epilog= " {} "; //$NON-NLS-1$
