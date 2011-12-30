@@ -90,7 +90,8 @@ public class OTVariableInitializer extends ClasspathVariableInitializer
 	{
 		try 
 		{
-			URL installDirectory = getBundle(bundleName).getEntry("/"); //$NON-NLS-1$
+			Bundle bundle = getBundle(bundleName);
+			URL installDirectory = bundle.getEntry("/"); //$NON-NLS-1$
 
 			// On Windows, the next line leads to something like "/C:/Programme/Eclipse/plugins/my.plugin
 			// If we simply make an org.eclipse.core.runtime.Path out of it, the leading '/' makes the
@@ -98,9 +99,11 @@ public class OTVariableInitializer extends ClasspathVariableInitializer
 			// properly.
 			String path = FileLocator.toFileURL(installDirectory).getPath();
 			File f = new File(path + optionalRelativeDir);
-			if (!f.exists())
-				f = new File(path); // proceed with only "path"
-			return f.getPath();
+			if (f.exists())
+				return f.getPath();
+			// relative file not found, use the bundle file itself:
+			File bundleFile = FileLocator.getBundleFile(bundle);
+			return bundleFile.getAbsolutePath();
 		}
 		catch (Exception ex)
 		{
