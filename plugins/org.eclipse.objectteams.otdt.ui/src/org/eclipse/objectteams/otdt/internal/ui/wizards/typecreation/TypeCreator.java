@@ -493,7 +493,7 @@ public abstract class TypeCreator
         	    {
 					throw new Exception("The enclosing type " //$NON-NLS-1$
 					                    + _typeInfo.getEnclosingTypeName()
-					                    + "or its compilation unit does not exist."); //$NON-NLS-1$
+					                    + " or its compilation unit does not exist."); //$NON-NLS-1$
         	    }
         	    
         	    if (!JavaModelUtil.isEditable(enclosingType.getCompilationUnit()))

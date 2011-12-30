@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.internal.core.DefaultWorkingCopyOwner;
 import org.eclipse.jdt.internal.core.JavaModelManager;
 import org.eclipse.objectteams.otdt.core.IOTType;
@@ -64,7 +65,7 @@ public class RoleCreationTests extends FileBasedUITest
         if (false)
         {
             Suite suite = new Suite(RoleCreationTests.class.getName());
-            suite.addTest(new RoleCreationTests("testRoleCreation_WithExplicitSuperClassAndInheritedMethod_FromSameTeam"));
+            suite.addTest(new RoleCreationTests("testDeeplyNestedPlayedByEnclosing1"));
             return suite;
         }
         Suite suite = new Suite(RoleCreationTests.class);
@@ -907,4 +908,46 @@ public class RoleCreationTests extends FileBasedUITest
 		assertNotNull(method);
 		assertTrue(method.exists());
 	}
+
+    // Bug 348085 - [rewrite] creating Internal Role pattern at deep nesting creates bogus base import for role
+    public void testDeeplyNestedPlayedByEnclosing1() throws CoreException, InterruptedException {
+		IPackageFragmentRoot pkgFragRoot = getPackageFragmentRoot(getTestProjectDir(), SRC_FOLDER_NAME);
+		IPackageFragment     pkgFrag     = getPackageFragment(getTestProjectDir(), SRC_FOLDER_NAME, "teampkg");
+		assertNotNull(pkgFragRoot);
+		assertNotNull(pkgFrag);
+
+		ICompilationUnit cu1 = pkgFrag.createCompilationUnit("Outer.java", "package teampkg;\n" +
+				"team class Outer { \n" +
+				"    protedted team class Mid {\n" +
+				"        protected team class Inner {\n" +
+				"        }\n" +
+				"    }\n" +
+				"}", false, new NullProgressMonitor());
+		
+		RoleTypeInfo typeInfo = new RoleTypeInfo("XInner", pkgFragRoot, pkgFrag);
+		typeInfo.setEnclosingTypeName("teampkg.Outer.Mid.Inner");
+		typeInfo.setInline(true);
+		typeInfo.setCreateAbstractInheritedMethods(false);
+		typeInfo.setCurrentType(pkgFrag.getCompilationUnit("Outer.java")
+								.getType("Mid").getType("Inner").getType("XInner"));
+		
+		assertNotNull(_roleCreator);
+		_roleCreator.setTypeInfo(typeInfo);
+		_roleCreator.createType(new NullProgressMonitor());
+
+		cu1.reconcile(AST.JLS3, true, wcOwner, null);
+		String result = cu1.getBuffer().getContents();
+		String expectedCU = "package teampkg;\n" +
+				"team class Outer { \n" +
+				"    protedted team class Mid {\n" +
+				"        protected team class Inner {\n" +
+				"\n" +
+				"			public class XInner {\n" +
+				"\n" +
+				"			}\n" +
+				"        }\n" +
+				"    }\n" +
+				"}";
+		assertEquals("Unexpected CU content", expectedCU, result);
+    }
 }
