@@ -16,6 +16,8 @@
  **********************************************************************/
 package org.eclipse.objectteams.otre;
 
+import java.util.HashMap;
+
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.*;
 import org.apache.bcel.*;
@@ -50,6 +52,8 @@ public class StaticSliceBaseTransformation
 
 	public StaticSliceBaseTransformation(ClassLoader loader, SharedState state) { super(loader, state); }
 	
+	private HashMap<String,String> rejectReasons = new HashMap<String, String>();
+	
 	public void doTransformCode(ClassGen cg) {
 		if (cg.isInterface())
 			return; // can't add implementation
@@ -66,6 +70,9 @@ public class StaticSliceBaseTransformation
 		if (CallinBindingManager.hasBoundBaseParent(class_name) == BoundSuperKind.CLASS)
 			return; // team infrastructure already has been added to a super class
 
+		String reason = this.rejectReasons.get(class_name);
+		if (reason != null)
+			new IllegalStateException(reason).printStackTrace();
         ConstantPoolGen cpg = cg.getConstantPool();
 		factory = new InstructionFactory(cpg);
 		addStaticInitializations(cg, cpg); 
@@ -76,25 +83,37 @@ public class StaticSliceBaseTransformation
 	 * @param cg
 	 */
 	public void doTransformInterface(ClassEnhancer ce, ClassGen cg) {
+	  try {
 		String class_name = cg.getClassName();
 		ConstantPoolGen cpg = cg.getConstantPool();
 		
 		checkReadClassAttributes(ce, cg, class_name, cpg);
 		
-		if (cg.isInterface())
+		if (cg.isInterface()) {
+			this.rejectReasons.put(class_name, "is interface");
 			return; // can't add implementation
-		if (state.interfaceTransformedClasses.contains(class_name))
+		}
+		if (state.interfaceTransformedClasses.contains(class_name)) {
+			if (!this.rejectReasons.containsKey(class_name))
+				this.rejectReasons.put(class_name, "already transformend?");
 			return; // class has already been transformed by this transformer
+		}
 		// IMPLICIT_INHERITANCE
 		if (!CallinBindingManager.isBoundBaseClass(class_name)
-		/*&& !CallinBindingManager.containsBoundBaseInterface(cg.getInterfaceNames())*/)
+		/*&& !CallinBindingManager.containsBoundBaseInterface(cg.getInterfaceNames())*/) {
+			this.rejectReasons.put(class_name, "not bound base class");
+			if ("org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleFileCache".equals(class_name))
+				new IllegalStateException("RoleFileCache is not recognized as bound base").printStackTrace();
 			return; //only (base-)classes with callin bindings need this addition
+		}
 		/*// this only works if teams are only added at the root bound base class
 		if (CallinBindingManager.isBoundBaseClass(cg.getSuperclassName()))
 		continue; // team infrastructur already added by super class
 		*/
-		if (CallinBindingManager.hasBoundBaseParent(class_name) == BoundSuperKind.CLASS)
+		if (CallinBindingManager.hasBoundBaseParent(class_name) == BoundSuperKind.CLASS) {
+			this.rejectReasons.put(class_name, "hasBoundBaseParent");
 			return; // team infrastructure already has been added to a super class
+		}
 		if(logging) printLogMessage("StaticSliceBaseTransformer transforms "+ class_name);
 		
 		if(CallinBindingManager.isRole(class_name)) {
@@ -130,6 +149,7 @@ public class StaticSliceBaseTransformation
 		if (clinit != null || TeamIdDispenser.clinitAdded(class_name, loader)) {
 			// the clinit-Method only has to be extended by the code transformation of this transformer
 			state.interfaceTransformedClasses.add(class_name);
+			this.rejectReasons.put(class_name, "already has clinit? "+(clinit==null ? "no" : clinit.toString()));
 			return;
 		}
 
@@ -151,6 +171,13 @@ public class StaticSliceBaseTransformation
 /***********************************************************************************************************/
 		il.dispose();
 		state.interfaceTransformedClasses.add(class_name);
+	  } catch (RuntimeException re) {
+		  re.printStackTrace();
+		  throw re;
+	  } catch (Error err) {
+		  err.printStackTrace();
+		  throw err;
+	  }
     }
 
 	/* Code to be generated:
