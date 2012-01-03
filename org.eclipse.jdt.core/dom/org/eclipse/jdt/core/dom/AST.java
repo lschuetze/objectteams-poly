@@ -97,7 +97,7 @@ import org.eclipse.text.edits.TextEdit;
  * @since 2.0
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked","rawtypes"})
 public final class AST {
 	/**
 	 * new Class[] {AST.class}
@@ -1006,16 +1006,16 @@ public final class AST {
 	/** This method creates a new dom-AST SimpleName that can be resolved to the same type as the provided <code>type</code>.
 	 *  the binding be of kind VARIABLE. */
 	public SimpleName newResolvedVariableName(String name, Type type) {
-		DefaultBindingResolver resolver = (DefaultBindingResolver)this.resolver;
+		DefaultBindingResolver defaultResolver = (DefaultBindingResolver)this.resolver;
 		org.eclipse.jdt.internal.compiler.ast.Expression givenCompilerNode =
-				(org.eclipse.jdt.internal.compiler.ast.Expression)resolver.newAstToOldAst.get(type);
+				(org.eclipse.jdt.internal.compiler.ast.Expression)defaultResolver.newAstToOldAst.get(type);
 		long pos = ((long)givenCompilerNode.sourceStart << 32) + givenCompilerNode.sourceEnd;
 		return createMappedVariableNode(name, givenCompilerNode.resolvedType, pos);
 	}
 	public SimpleName newResolvedVariableName(String name, TypeDeclaration type) {
-		DefaultBindingResolver resolver = (DefaultBindingResolver)this.resolver;
+		DefaultBindingResolver defaultResolver = (DefaultBindingResolver)this.resolver;
 		org.eclipse.jdt.internal.compiler.ast.TypeDeclaration givenCompilerNode =
-				(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration)resolver.newAstToOldAst.get(type);
+				(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration)defaultResolver.newAstToOldAst.get(type);
 		long pos = ((long)givenCompilerNode.sourceStart << 32) + givenCompilerNode.sourceEnd;
 		return createMappedVariableNode(name, givenCompilerNode.binding, pos);
 	}
@@ -1777,6 +1777,9 @@ public final class AST {
 	}
 
 //{ObjectTeams: create a fake method node that knows its parent but not vice versa:
+	/**
+	 * @since 3.8
+	 */
 	public MethodDeclaration newFakedMethodDeclaration(TypeDeclaration declaringType) {
 		MethodDeclaration result = new MethodDeclaration(this);
 		result.setConstructor(false);
