@@ -71,7 +71,7 @@ public class StaticSliceBaseTransformation
 			return; // team infrastructure already has been added to a super class
 
 		String reason = this.rejectReasons.get(class_name);
-		if (reason != null)
+		if (reason != null && !"already has clinit? static void <clinit>()".equals(reason))
 			new IllegalStateException(reason).printStackTrace();
         ConstantPoolGen cpg = cg.getConstantPool();
 		factory = new InstructionFactory(cpg);
