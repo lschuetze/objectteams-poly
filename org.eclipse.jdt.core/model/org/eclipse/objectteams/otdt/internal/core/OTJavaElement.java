@@ -87,13 +87,15 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	
 	public IJavaElement[] getChildren()
 	{
-		if (this.children.isEmpty() && this.correspondingJavaElem instanceof IType)
-			// fetch children from the java element (on first access):
-			try {
-				for (IJavaElement child : ((IType)this.correspondingJavaElem).getChildren())
-					this.children.add(child);
-			} catch (JavaModelException e) { /* noop */ }
-		return this.children.toArray( new IJavaElement[this.children.size()] );
+		synchronized(this.children) {
+			if (this.children.isEmpty() && this.correspondingJavaElem instanceof IType)
+				// fetch children from the java element (on first access):
+				try {
+					for (IJavaElement child : ((IType)this.correspondingJavaElem).getChildren())
+						this.children.add(child);
+				} catch (JavaModelException e) { /* noop */ }
+			return this.children.toArray( new IJavaElement[this.children.size()] );
+		}
 	}
 	
 	public void addChild(IOTJavaElement child)
