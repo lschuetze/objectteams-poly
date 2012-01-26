@@ -437,19 +437,26 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 		if (shouldPatch) {
 			Bundle transformer = this.packageAdmin.getBundles(TRANSFORMER_HOOK_ID, null)[0];
 			URL entry = transformer.getEntry(BCEL_PATH_DIR+name+".class");
-			byte[] newBytes;
+			InputStream stream = null;
 			try {
-				InputStream stream = entry.openStream();
+				stream = entry.openStream();
 				int len = stream.available();
-				newBytes = new byte[len];
+				byte[] newBytes = new byte[len];
 				stream.read(newBytes);
+				this.logger.log(Util.INFO, "hot-patched a bug in class "+name+"\n"+
+						"\tsee https://bugs.eclipse.org/bugs/show_bug.cgi?id=344350");
+				return newBytes;
 			} catch (IOException e) {
 				this.logger.log(e, "Failed to hot-patch bcel class "+name);
 				return classbytes;
+			} finally {
+				if (stream != null)
+					try {
+						stream.close();
+					} catch (IOException e) {
+						// ignore
+					}
 			}
-			this.logger.log(Util.INFO, "hot-patched a bug in class "+name+"\n"+
-					"\tsee https://bugs.eclipse.org/bugs/show_bug.cgi?id=344350");
-			return newBytes;
 		}
 		return classbytes;
 	}
