@@ -122,7 +122,7 @@ public class InstructionHandle implements java.io.Serializable {
 
     /** Factory method.
      */
-    static final InstructionHandle getInstructionHandle( Instruction i ) {
+    synchronized static final InstructionHandle getInstructionHandle( Instruction i ) {
         if (ih_list == null) {
             return new InstructionHandle(i);
         } else {
@@ -170,8 +170,10 @@ public class InstructionHandle implements java.io.Serializable {
     /** Overridden in BranchHandle
      */
     protected void addHandle() {
-        next = ih_list;
-        ih_list = this;
+    	synchronized (InstructionHandle.class) {			
+    		next = ih_list;
+    		ih_list = this;
+		}
     }
 
 

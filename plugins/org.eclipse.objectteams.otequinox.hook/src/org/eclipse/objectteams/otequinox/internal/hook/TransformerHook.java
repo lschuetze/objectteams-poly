@@ -113,6 +113,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	// As an OSGI extension bundle, we can't depend on the transformer plugin, so we have to hardcode this
 	public static final String  TRANSFORMER_PLUGIN_ID           = "org.eclipse.objectteams.otequinox";
 	
+	private static final String TRANSFORMER_HOOK_ID           = "org.eclipse.objectteams.otequinox.hook";
 	private static final String WORKSPACE_INITIALIZER_PLUGIN_ID = "org.eclipse.objectteams.otdt.earlyui";
 	private static final String OTDT_QUALIFIER = "OTDT";
 
@@ -121,6 +122,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	
 	// this one requires hot-fixing:
 	private static final String BCEL_PLUGIN_ID = "org.apache.bcel";
+	private static final String BCEL_PATH_DIR = "bcelpatch/";
 
 	// specific action may be required when this class is loaded:
 	private static final String ORG_OBJECTTEAMS_TEAM = "org.objectteams.Team";
@@ -130,6 +132,8 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 
 	
 	private static final HashSet<String> WEAVE_BUNDLES = new HashSet<String>();
+
+	
 	static {
 		String value = System.getProperty("otequinox.weave");
 		if (value != null && value.length() > 0) {
@@ -392,6 +396,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	}
 
 	private byte[] fixBCEL(String name, byte[] classbytes) {
+		boolean shouldPatch = false;
 		if ("org.apache.bcel.generic.InstructionHandle".equals(name)) {
 			CRC32 crc32 = new CRC32();
 			crc32.update(classbytes);
@@ -406,10 +411,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 			if (classbytes[0x105C] != 0x04)
 				detail+="\n\tmodifiers of addHandle="+classbytes[0x105C];			// modifiers of method getHandle at "protected"
 			if (detail.length() == 0) {
-				classbytes[0x0F00] |= 0x20; 				// add "synchronized"
-				classbytes[0x105C] |= 0x20; 				// add "synchronized"
-				this.logger.log(Util.INFO, "hot-patched a bug in class org.apache.bcel.generic.InstructionHandle\n"+
-										"\tsee https://bugs.eclipse.org/bugs/show_bug.cgi?id=344350");
+				shouldPatch = true;
 			} else {
 				this.logger.log(Util.WARNING, "Class org.apache.bcel.generic.InstructionHandle needs a hot-patch but has unexpected byte code:"+detail);
 			}
@@ -427,13 +429,27 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 			if (classbytes[0x06F8] != 0x04)
 				detail+="\n\tmodifiers of addHandle="+classbytes[0x06F8];		// modifiers of method getHandle at "protected"
 			if (detail.length() == 0) {
-				classbytes[0x067E] |= 0x20; 				// add "synchronized"
-				classbytes[0x06F8] |= 0x20; 				// add "synchronized"
-				this.logger.log(Util.INFO, "hot-patched a bug in class org.apache.bcel.generic.BranchHandle\n"+
-										"\tsee https://bugs.eclipse.org/bugs/show_bug.cgi?id=344350");
+				shouldPatch = true;
 			} else {
 				this.logger.log(Util.WARNING, "Class org.apache.bcel.generic.BranchHandle needs a hot-patch but has unexpected byte code:"+detail);
 			}
+		}
+		if (shouldPatch) {
+			Bundle transformer = this.packageAdmin.getBundles(TRANSFORMER_HOOK_ID, null)[0];
+			URL entry = transformer.getEntry(BCEL_PATH_DIR+name+".class");
+			byte[] newBytes;
+			try {
+				InputStream stream = entry.openStream();
+				int len = stream.available();
+				newBytes = new byte[len];
+				stream.read(newBytes);
+			} catch (IOException e) {
+				this.logger.log(e, "Failed to hot-patch bcel class "+name);
+				return classbytes;
+			}
+			this.logger.log(Util.INFO, "hot-patched a bug in class "+name+"\n"+
+					"\tsee https://bugs.eclipse.org/bugs/show_bug.cgi?id=344350");
+			return newBytes;
 		}
 		return classbytes;
 	}

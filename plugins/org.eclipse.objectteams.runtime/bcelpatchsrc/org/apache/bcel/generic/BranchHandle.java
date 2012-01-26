@@ -61,7 +61,7 @@ public final class BranchHandle extends InstructionHandle {
     private static BranchHandle bh_list = null; // List of reusable handles
 
 
-    static final BranchHandle getBranchHandle( BranchInstruction i ) {
+    synchronized static final BranchHandle getBranchHandle( BranchInstruction i ) {
         if (bh_list == null) {
             return new BranchHandle(i);
         }
@@ -75,8 +75,10 @@ public final class BranchHandle extends InstructionHandle {
     /** Handle adds itself to the list of resuable handles.
      */
     protected void addHandle() {
-        next = bh_list;
-        bh_list = this;
+    	synchronized (BranchHandle.class) {
+    		next = bh_list;
+    		bh_list = this;			
+		}
     }
 
 
