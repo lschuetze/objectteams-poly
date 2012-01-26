@@ -436,7 +436,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 		}
 		if (shouldPatch) {
 			Bundle transformer = this.packageAdmin.getBundles(TRANSFORMER_HOOK_ID, null)[0];
-			URL entry = transformer.getEntry(BCEL_PATH_DIR+name+".class");
+			URL entry = transformer.getEntry(BCEL_PATH_DIR+name+".patch");
 			InputStream stream = null;
 			try {
 				stream = entry.openStream();
