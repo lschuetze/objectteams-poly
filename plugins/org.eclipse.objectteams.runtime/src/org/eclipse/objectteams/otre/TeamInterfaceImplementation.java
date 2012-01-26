@@ -46,8 +46,8 @@ public class TeamInterfaceImplementation
 	extends ObjectTeamsTransformation {
 
 
-	public TeamInterfaceImplementation(ClassLoader loader, SharedState state) {
-		super(loader, state);
+	public TeamInterfaceImplementation(ClassLoader loader) {
+		super(loader);
 	}
 
 	/**
@@ -170,10 +170,6 @@ public class TeamInterfaceImplementation
 
 		checkReadClassAttributes(ce, cg, class_name, cpg);
 
-		if (state.interfaceTransformedClasses.contains(class_name)) {
-			return; // class has already been transformed by this transformer
-		}
-
 		if (!classNeedsTeamExtensions(cg)) {
 			return;
 		}
@@ -253,7 +249,6 @@ public class TeamInterfaceImplementation
 		/** *************************************************************************** */
 
 		il.dispose();
-		state.interfaceTransformedClasses.add(class_name);
 	}
 	
 	/**
@@ -291,7 +286,7 @@ public class TeamInterfaceImplementation
 		 * same this. This is done via 'TeamIdDispenser.clinitAdded(class_name)'.
 		 */
 		Method existingClinit = cg.containsMethod(Constants.STATIC_INITIALIZER_NAME, "()V");
-		if (existingClinit == null &&  !TeamIdDispenser.clinitAdded(class_name, loader)) {
+		if (existingClinit == null) {
 			// otherwise the clinit-Method already exists and only has to be extended
 			// by the code transformation of this transformer
 			InstructionList il = new InstructionList();

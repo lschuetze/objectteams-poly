@@ -38,7 +38,7 @@ import org.eclipse.objectteams.otre.util.*;
 public class SubBoundBaseMethodRedefinition 
 	extends ObjectTeamsTransformation {
 
-	public SubBoundBaseMethodRedefinition(ClassLoader loader, SharedState state) { super(loader, state); }
+	public SubBoundBaseMethodRedefinition(ClassLoader loader) { super(loader); }
 
 	/**
 	 * Main entry for this transformer.
@@ -51,10 +51,6 @@ public class SubBoundBaseMethodRedefinition
 
 		checkReadClassAttributes(ce, cg, class_name, cpg);
 
-		// if class is already transformed by this transformer
-		if (state.interfaceTransformedClasses.contains(class_name)) {
-			return;
-		}
 
 		List<MethodBinding> mbsForClass = CallinBindingManager
 				.getMethodBindingsForBaseClass(class_name);
@@ -65,7 +61,6 @@ public class SubBoundBaseMethodRedefinition
 		List<MethodBinding> inheritedBoundMethods = getInheritedBoundMethods(mbsForClass, cg);
 		
 		addSubBoundMethodRedefinitions(inheritedBoundMethods, ce, cg);
-		state.interfaceTransformedClasses.add(class_name);
 	}
 
 	/**

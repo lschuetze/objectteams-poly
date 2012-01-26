@@ -50,10 +50,10 @@ public class StaticSliceBaseTransformation
 	static final String _OT_ACTIVE_TEAMS=    "_OT$activeTeams";   //$NON-NLS-1$
 	static final String _OT_ACTIVE_TEAM_IDS= "_OT$activeTeamIDs"; //$NON-NLS-1$
 
-	public StaticSliceBaseTransformation(ClassLoader loader, SharedState state) { super(loader, state); }
+	public StaticSliceBaseTransformation(ClassLoader loader) { super(loader); }
 	
 	private HashMap<String,String> rejectReasons = new HashMap<String, String>();
-	
+
 	public void doTransformCode(ClassGen cg) {
 		if (cg.isInterface())
 			return; // can't add implementation
@@ -75,7 +75,7 @@ public class StaticSliceBaseTransformation
 			new IllegalStateException(reason).printStackTrace();
         ConstantPoolGen cpg = cg.getConstantPool();
 		factory = new InstructionFactory(cpg);
-		addStaticInitializations(cg, cpg); 
+		addStaticInitializations(cg, cpg);
      }
 
 	/**
@@ -92,11 +92,6 @@ public class StaticSliceBaseTransformation
 		if (cg.isInterface()) {
 			this.rejectReasons.put(class_name, "is interface");
 			return; // can't add implementation
-		}
-		if (state.interfaceTransformedClasses.contains(class_name)) {
-			if (!this.rejectReasons.containsKey(class_name))
-				this.rejectReasons.put(class_name, "already transformend?");
-			return; // class has already been transformed by this transformer
 		}
 		// IMPLICIT_INHERITANCE
 		if (!CallinBindingManager.isBoundBaseClass(class_name)
@@ -146,9 +141,8 @@ public class StaticSliceBaseTransformation
 		 */
 		Method clinit = cg.containsMethod(Constants.STATIC_INITIALIZER_NAME, "()V");
          
-		if (clinit != null || TeamIdDispenser.clinitAdded(class_name, loader)) {
+		if (clinit != null) {
 			// the clinit-Method only has to be extended by the code transformation of this transformer
-			state.interfaceTransformedClasses.add(class_name);
 			this.rejectReasons.put(class_name, "already has clinit? "+(clinit==null ? "no" : clinit.toString()));
 			return;
 		}
@@ -170,7 +164,6 @@ public class StaticSliceBaseTransformation
 
 /***********************************************************************************************************/
 		il.dispose();
-		state.interfaceTransformedClasses.add(class_name);
 	  } catch (RuntimeException re) {
 		  re.printStackTrace();
 		  throw re;

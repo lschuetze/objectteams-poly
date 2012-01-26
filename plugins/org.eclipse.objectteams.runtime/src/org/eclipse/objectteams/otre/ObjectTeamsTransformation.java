@@ -89,31 +89,16 @@ public abstract class ObjectTeamsTransformation
     static String genChainMethName(String methName) {
         return "_OT$" + methName + "$chain";
     }
-
-    static ArrayList<ObjectTeamsTransformation> reentrentTransformations = new ArrayList<ObjectTeamsTransformation>();
-    
+   
     /** Common factory for all tranformers.
 	 *	To be initialized once we get a class for transformation. */
 	InstructionFactory factory;
-
-    /** State shared among all instances that work for the same class loader. */
-    public static class SharedState {
-    	/** ArrayList of classes whose interfaces have already been transformed by this transformer/classloader combo. */
-    	ArrayList<String> interfaceTransformedClasses = new ArrayList<String>();
-    }
-    /** Reference to the shared state of transformers. */
-    final SharedState state;
-
-    SharedState state() {
-    	return state;
-    }
-    
+   
     /** Which class loader are we working for? */
     protected ClassLoader loader;
 
-	public ObjectTeamsTransformation(ClassLoader loader, SharedState state) {
+	public ObjectTeamsTransformation(ClassLoader loader) {
 		this.loader = loader;
-		this.state = state;
 	}
 
 	// ------------------------------------------
@@ -1048,11 +1033,6 @@ public abstract class ObjectTeamsTransformation
                 				printLogMessage("**** Callout bound field: " + accessMode+(isStaticField?" static ":" ")
                 							    + names[2]+ " " + names[1]);
                 			CallinBindingManager.addCalloutBoundFileds(names[0], names[1], names[2], accessMode, isStaticField);
-
-                			synchronized(reentrentTransformations) {
-	                			for (ObjectTeamsTransformation transformation : reentrentTransformations) 
-	            					transformation.state.interfaceTransformedClasses.remove(names[0]);
-                			}
                 			
                 			break;
                 		case 3: // SuperMethodAccess

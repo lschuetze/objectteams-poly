@@ -18,14 +18,10 @@ package org.eclipse.objectteams.otre.util;
 import java.util.*;
 
 public class TeamIdDispenser {
-
-	private static Map<ClassLoader, TeamIdDispenser> instances = new HashMap<ClassLoader, TeamIdDispenser>();
-    private static TeamIdDispenser defaultInstance = new TeamIdDispenser();
-    
+  
     static int lastDispensedId = 0;
     private static HashMap<String, Integer> teamIDs = new HashMap<String, Integer>();
 
-//    @SuppressWarnings("unchecked")
 	private static int produceNextTeamId(String team_name) {
         lastDispensedId++;
         Integer teamId = Integer.valueOf(lastDispensedId);
@@ -33,37 +29,11 @@ public class TeamIdDispenser {
         return lastDispensedId;
     }
 
-    public static int getTeamId(String class_name) {
+    synchronized public static int getTeamId(String class_name) {
         Integer teamId = teamIDs.get(class_name);
         if (teamId != null)
         	// the team <class_name> already has a team-id assigned
         	return teamId.intValue();
 		else return produceNextTeamId(class_name);
     }
-    
-    // Data shared among different transformers of the same class loader:
-    // REFACTOR: move the following to a better place:
-    private ArrayList<String> clinitAddedClasses = new ArrayList<String>();
-    public static boolean clinitAdded(String class_name, ClassLoader loader) {
-    	TeamIdDispenser instance = getInstanceForLoader(loader);
-    	if (instance.clinitAddedClasses.contains(class_name))
-    		return true;
-		
-    	instance.clinitAddedClasses.add(class_name);
-		return false;	
-    }
-    
-	/**
-	 * Since actual data are stored in an instance, static methods need to retrieve the appropriate
-     * instance regarding the given class loader.
-	 */
-	private static TeamIdDispenser getInstanceForLoader(ClassLoader loader) {
-		if (loader == null)
-			return defaultInstance;
-		
-		TeamIdDispenser instance = instances.get(loader);
-		if (instance == null)
-			instances.put(loader, instance = new TeamIdDispenser());
-		return instance;
-	}
 }

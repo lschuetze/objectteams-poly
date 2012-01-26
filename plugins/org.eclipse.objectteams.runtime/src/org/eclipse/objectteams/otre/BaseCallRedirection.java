@@ -58,8 +58,8 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 		public InstructionHandle snd() {return _ih2; }
 	}
 
-    public BaseCallRedirection(ClassLoader loader, SharedState state) {
-    	super(loader, state);
+    public BaseCallRedirection(ClassLoader loader) {
+    	super(loader);
     }
     
     /**
@@ -69,10 +69,6 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
     public void doTransformInterface(ClassEnhancer ce, ClassGen cg) {
     	factory = new InstructionFactory(cg);
     	String class_name = cg.getClassName();
-
-    	if (state.interfaceTransformedClasses.contains(class_name)) {
-    		return; //already transformed!
-    	}
 
         ConstantPoolGen cpg = cg.getConstantPool();
     	checkReadClassAttributes(ce, cg, class_name, cpg);
@@ -137,7 +133,6 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
     		}
     		
     	}
-    	state.interfaceTransformedClasses.add(class_name);
     }
 
 	/**

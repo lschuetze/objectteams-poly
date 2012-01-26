@@ -50,39 +50,22 @@ public class Decapsulation
 	
 //	HashSet modifiedPackages = new HashSet();
 
-	public static class SharedState extends ObjectTeamsTransformation.SharedState {
-		private HashSet<String/*callout accessed fields*/> generatedFieldCalloutAccessors = new HashSet<String>();
-		private HashSet<String/*super-accessed methods (sign)*/> generatedSuperAccessors  = new HashSet<String>();
-	}
-	@Override
-	SharedState state() {
-		return (SharedState)this.state;
-	}
-   
-    public Decapsulation(ClassLoader loader, SharedState state) {
-    	super(loader, state);
-    	// FIXME(SH): can we ever release this transformer and its state?
-    	synchronized(ObjectTeamsTransformation.reentrentTransformations) {
-    		ObjectTeamsTransformation.reentrentTransformations.add(this);
-    	}
+	private HashSet<String/*callout accessed fields*/> generatedFieldCalloutAccessors = new HashSet<String>();
+	private HashSet<String/*super-accessed methods (sign)*/> generatedSuperAccessors  = new HashSet<String>();
+	
+    public Decapsulation(ClassLoader loader) {
+    	super(loader);
     }
 
 	/**
 	 * Main entry for this transformer.
 	 */
-//	@SuppressWarnings("unchecked")
 	public void doTransformInterface(ClassEnhancer ce, ClassGen cg) {		
 		String          class_name = cg.getClassName();
 		ConstantPoolGen cpg        = cg.getConstantPool();
-		
-		// if class is already transformed by this transformer
-		if (state.interfaceTransformedClasses.contains(class_name))
-			return;
 
 		checkReadClassAttributes(ce, cg, class_name, cpg);
-            
-        // next step starts to transform, so record this class now.
-		state.interfaceTransformedClasses.add(class_name);
+
 
 		generateFieldAccessForCallout(ce, cg, class_name, cpg);
 		
@@ -133,6 +116,7 @@ public class Decapsulation
 			}
 		}
 	}
+
 	class DecapsulationDescriptor {
 		short invokeKind;
 		String targetClass;
@@ -213,7 +197,7 @@ public class Decapsulation
 	private void generateFieldAccessForCallout(ClassEnhancer ce, ClassGen cg, String class_name, ConstantPoolGen cpg) {
 		InstructionFactory factory = null;
 		
-		HashSet<String> addedAccessMethods = state().generatedFieldCalloutAccessors;
+		HashSet<String> addedAccessMethods = this.generatedFieldCalloutAccessors;
 
 		List<FieldDescriptor> getter = CallinBindingManager.getCalloutGetFields(class_name);
 		if (getter != null) {
@@ -350,7 +334,7 @@ public class Decapsulation
 	private void generateSuperAccessors(ClassEnhancer ce, ClassGen cg, String class_name, ConstantPoolGen cpg) {
 		InstructionFactory factory = null;
 		
-		HashSet<String> addedAccessMethods = state().generatedSuperAccessors;
+		HashSet<String> addedAccessMethods = this.generatedSuperAccessors;
 
 		List<SuperMethodDescriptor> methods = CallinBindingManager.getSuperAccesses(class_name);
 		if (methods != null) {

@@ -30,7 +30,6 @@ import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
-import org.eclipse.objectteams.otre.util.CallinBindingManager.BoundSuperKind;
 import org.eclipse.objectteams.otre.util.DebugUtil;
 import org.eclipse.objectteams.otre.util.ListValueHashMap;
 import org.eclipse.objectteams.otre.util.MethodBinding;
@@ -133,6 +132,8 @@ public class BaseMethodTransformation
 
 	private final static int NORESULT = -1;
 
+	private boolean classNeedsTransformation = false;
+
 	// methods awaiting statements as an initial wrapper:
     private HashSet<String/*methodName*/> pendingInitialWrappers;
     // methods awaiting a super call to an existing initial wrapper:
@@ -140,8 +141,8 @@ public class BaseMethodTransformation
 
 	public boolean useReflection = false;
 
-	public BaseMethodTransformation(ClassLoader loader, SharedState state) {
-		super(loader, state);
+	public BaseMethodTransformation(ClassLoader loader) {
+		super(loader);
 	}
 	/**
 	 *  The code transformer only replaces the original code with
@@ -163,7 +164,7 @@ public class BaseMethodTransformation
     		String method_name = m.getName();
     		String method_signature = m.getSignature();
 
-    		if (state.interfaceTransformedClasses.contains(class_name)) {
+    		if (this.classNeedsTransformation) {
     			if (pendingInitialWrappers.contains(method_name + '.' + method_signature))
     				cg.replaceMethod(m, m = generateInitialWrapper(m, class_name, cg.getMajor(), cpg));
     			else if (pendingSuperDelegationWrappers.contains(method_name + '.' + method_signature))
@@ -425,7 +426,7 @@ public class BaseMethodTransformation
                 if (logging) printLogMessage("No method binding (direct or inherited) found for " //$NON-NLS-1$
                             + method_name);
     	}
-    	state.interfaceTransformedClasses.add(class_name);
+    	this.classNeedsTransformation = true;
     }
     
     private int findFirstLineNumber(Method m) {

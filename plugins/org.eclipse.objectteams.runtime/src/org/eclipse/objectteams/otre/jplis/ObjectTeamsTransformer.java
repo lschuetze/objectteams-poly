@@ -23,14 +23,11 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.generic.ClassGen;
-import org.apache.bcel.util.ClassLoaderRepository;
 import org.eclipse.objectteams.otre.BaseCallRedirection;
 import org.eclipse.objectteams.otre.BaseMethodTransformation;
 import org.eclipse.objectteams.otre.Decapsulation;
@@ -66,20 +63,6 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		TeamInterfaceImplementation.class,
 		ThreadActivation.class
 	};
-	
-	/**
-	 * One instance of this class is used per class loader to ensure disjoint scopes.
-	 */
-	static class StateGroup {
-		ObjectTeamsTransformation.SharedState bcrState = new ObjectTeamsTransformation.SharedState();
-		ObjectTeamsTransformation.SharedState bmtState = new ObjectTeamsTransformation.SharedState();
-		Decapsulation.SharedState 			  decState = new Decapsulation.SharedState();
-		ObjectTeamsTransformation.SharedState lptState = new ObjectTeamsTransformation.SharedState();
-		ObjectTeamsTransformation.SharedState ssbtState = new ObjectTeamsTransformation.SharedState();
-		ObjectTeamsTransformation.SharedState sbbmrState = new ObjectTeamsTransformation.SharedState();
-		ObjectTeamsTransformation.SharedState tiiState = new ObjectTeamsTransformation.SharedState();
-	}
-	static Map<ClassLoader, StateGroup> states = new HashMap<ClassLoader, StateGroup>();
 
 	static boolean warmedUp = false;
 	/*
@@ -130,29 +113,17 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			return null;
 		}
 		
-		// state sharing among transformers:
-		StateGroup states = ObjectTeamsTransformer.states.get(loader);
-		if (states == null)
-			ObjectTeamsTransformer.states.put(loader, states = new StateGroup());
 		//
 		// One fresh instance of each transformer for a given class:
 		//
-		BaseCallRedirection baseCallRedirection 
-			= new BaseCallRedirection(				loader,	states.bcrState);
-		BaseMethodTransformation baseMethodTransformation 
-			= new BaseMethodTransformation(			loader,	states.bmtState);
-		Decapsulation decapsulation 
-			= new Decapsulation(					loader,	states.decState);
-		LiftingParticipantTransformation liftingParticipantTransformation 
-			= new LiftingParticipantTransformation(	loader, states.lptState);
-		StaticSliceBaseTransformation staticSliceBaseTransformation
-			= new StaticSliceBaseTransformation(	loader, states.ssbtState);
-		SubBoundBaseMethodRedefinition subBoundBaseMethodRedefinition 
-			= new SubBoundBaseMethodRedefinition(	loader,	states.sbbmrState);
-		TeamInterfaceImplementation teamInterfaceImplementation 
-			= new TeamInterfaceImplementation(		loader, states.tiiState);
-		ThreadActivation threadActivation 
-			= new ThreadActivation();
+		BaseCallRedirection 				baseCallRedirection 				= new BaseCallRedirection(loader);
+		BaseMethodTransformation 			baseMethodTransformation 			= new BaseMethodTransformation(loader);
+		Decapsulation 						decapsulation 						= new Decapsulation(loader);
+		LiftingParticipantTransformation 	liftingParticipantTransformation	= new LiftingParticipantTransformation(loader);
+		StaticSliceBaseTransformation 		staticSliceBaseTransformation 		= new StaticSliceBaseTransformation(loader);
+		SubBoundBaseMethodRedefinition 		subBoundBaseMethodRedefinition 		= new SubBoundBaseMethodRedefinition(loader);
+		TeamInterfaceImplementation 		teamInterfaceImplementation 		= new TeamInterfaceImplementation(loader);
+		ThreadActivation 					threadActivation					= new ThreadActivation();
 				
 		// tell Repository about the class loader for improved lookupClass()
 		DietClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
@@ -263,7 +234,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		JPLISEnhancer jpe = new JPLISEnhancer(cg, /*loader (unused)*/null);
 		DietClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
 		try {
-			setFirstTransformation(new ObjectTeamsTransformation(loader, null) {});
+			setFirstTransformation(new ObjectTeamsTransformation(loader) {});
 			firstTransformation.checkReadClassAttributes(jpe, cg, cg.getClassName(), cg.getConstantPool());
 		} finally {
 			RepositoryAccess.resetRepository(prevRepository);
