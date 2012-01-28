@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,13 +7,14 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Fraunhofer FIRST - extended API and implementation
+ *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contributions for
  *     							bug 332637 - Dead Code detection removing code that isn't dead
  *     							bug 358827 - [1.7] exception analysis for t-w-r spoils null analysis
  *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *     							bug 359334 - Analysis for resource leak warnings does not consider exceptions as method exit points
- *     Fraunhofer FIRST - extended API and implementation
- *     Technical University Berlin - extended API and implementation
+ *								bug 358903 - Filter practically unimportant resource leak warnings
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -148,7 +149,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			if (resourceBinding.closeTracker != null) {
 				// this was false alarm, we don't need to track the resource
 				this.tryBlock.scope.removeTrackingVar(resourceBinding.closeTracker);
-				resourceBinding.closeTracker = null;
+				// keep the tracking variable in the resourceBinding in order to prevent creating a new one while analyzing the try block
 			}
 			TypeBinding type = resourceBinding.type;
 			if (type != null && type.isValidBinding()) {
@@ -290,7 +291,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			if (resourceBinding.closeTracker != null) {
 				// this was false alarm, we don't need to track the resource
 				this.tryBlock.scope.removeTrackingVar(resourceBinding.closeTracker);
-				resourceBinding.closeTracker = null;
+				// keep the tracking variable in the resourceBinding in order to prevent creating a new one while analyzing the try block
 			} 
 			TypeBinding type = resourceBinding.type;
 			if (type != null && type.isValidBinding()) {
@@ -938,9 +939,6 @@ public boolean generateSubRoutineInvocation(BlockScope currentScope, CodeStream 
 	if (finallyMode == FINALLY_INLINE) {
 		if (isStackMapFrameCodeStream) {
 			((StackMapFrameCodeStream) codeStream).pushStateIndex(stateIndex);
-		}
-		if (secretLocal != null) {
-			codeStream.addVariable(secretLocal);
 		}
 		// cannot use jsr bytecode, then simply inline the subroutine
 		// inside try block, ensure to deactivate all catch block exception handlers while inlining finally block

@@ -42,11 +42,288 @@
 	</td>
   </tr>
 </table>
+<a name="v_C33"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - %date% - 3.8.0 M5
+<br>
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=369595">369595</a>
+Javadoc fixes for IClasspathAttribute.SOURCE_ATTACHMENT_ENCODING
+
+<a name="v_C32"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - January 24, 2012
+<br>
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=366829">366829</a>
+Batch compiler option and SuppressWarnings token for Overriding a Synchronized Method with a Non-synchronized Method
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=369381">369381</a>
+[null][compiler] 'Adding potential null mark in unexpected state' assertion while compiling
+
+<a name="v_C31"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - January 22, 2012
+<br>
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=369251">369251</a>
+Starved worker threads
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365208">365208</a>
+[compiler][batch] command line options for annotation based null analysis
+
+<a name="v_C30"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - January 20, 2012
+<br>
+<h2>What's new in this drop</h2>
+<ul>
+<li>New constant for the name of the encoding to be used for source attachments in IClasspathAttribute (see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=361356">361356</a> for details)
+<pre>
+	/**
+	 * Constant for the name of the encoding to be used for source attachments.
+	 *
+	 * &lt;p&gt;The value of this attribute has to be a string representation of a valid encoding. The encoding
+	 * for a source attachment is determined in the following order:  &lt;/p&gt;
+	 *
+	 * &lt;ul&gt;
+	 * &lt;li&gt; Encoding explicitly set on the source file (java or zip), i.e. <code>org.eclipse.core.resources.IFile#getCharset(false)</code> &lt;/li&gt;
+	 * &lt;li&gt; Encoding set on the corresponding classpath entry &lt;/li&gt;
+	 * &lt;li&gt; If the source attachment is a member of the project, then the project's default charSet&lt;/li&gt;
+	 * &lt;li&gt; Workspace default charSet &lt;/li&gt;
+	 * &lt;/ul&gt;
+	 *
+	 * @since 3.8
+	 */
+	String SOURCE_ATTACHMENT_ENCODING = "source_encoding";
+</pre>
+</li>
+<li> New JavaCore option to control null analysis for fields
+<pre>
+	/**
+	 * Compiler option ID: Raise null related errors or warnings on fields.
+	 *
+	 * When enabled, the compiler will flag all null related errors or warnings that have been enabled by the user
+	 * on fields, in addition to local variables.
+	 * When disabled, the compiler will not flag null related errors or warnings on fields.
+	 * 
+	 * Option id:<code>"org.eclipse.jdt.core.compiler.problem.includeFieldsInNullAnalysis"</code>
+	 * Possible values:<code>{ "enabled", "disabled" }</code>
+	 * Default:<code>"disabled"</code>
+	 * 
+	 * @since 3.8
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_INCLUDE_FIELDS_IN_NULL_ANALYSIS = PLUGIN_ID + ".compiler.problem.includeFieldsInNullAnalysis";
+</pre>
+</li>
+<li> New IProblems for messages relating to null analysis for fields
+<pre>
+ 	/** @since 3.8*/
+	int NullFieldReference = Internal + FieldRelated + 670;
+	/** @since 3.8*/
+	int PotentialNullFieldReference = Internal + FieldRelated + 671;
+	/** @since 3.8*/
+	int RedundantNullCheckOnNullField = Internal + FieldRelated + 672;
+	/** @since 3.8*/
+	int NullFieldComparisonYieldsFalse = Internal + FieldRelated + 673;
+	/** @since 3.8*/
+	int RedundantNullCheckOnNonNullField = Internal + FieldRelated + 674;
+	/** @since 3.8*/
+	int NonNullFieldComparisonYieldsFalse = Internal + FieldRelated + 675;
+	/** @since 3.8*/
+	int RedundantFieldNullAssignment = Internal + FieldRelated + 676;
+	/** @since 3.8*/
+	int NullFieldInstanceofYieldsFalse = Internal + FieldRelated + 677;
+</pre>
+</li>
+<li> New IProblems for messages relating to contradictory or redundant null annotations
+<pre>
+	/** @since 3.8 */
+	int RedundantNullDefaultAnnotation = Internal + 925;
+	/** @since 3.8 */
+	int RedundantNullDefaultAnnotationPackage = Internal + 926;
+	/** @since 3.8 */
+	int RedundantNullDefaultAnnotationType = Internal + 927;
+	/** @since 3.8 */
+	int RedundantNullDefaultAnnotationMethod = Internal + 928;
+	/** @since 3.8 */
+	int ContradictoryNullAnnotations = Internal + 929;
+</pre>
+</li>
+</ul>
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=361356">361356</a>
+Allow to specify encoding for source attachments
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365582">365582</a>
+FUP of bug 361938: Other error code pattern
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365662">365662</a>
+[compiler][null] warn on contradictory and redundant null annotations
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=247564">247564</a>
+[compiler][null] Detecting null field reference
+
+<a name="v_C29"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - January 17, 2012
+<br>
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=368842">368842</a>
+test failure because test case refers to java.util.Objects
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=368709">368709</a>
+Endless loop in FakedTrackingVariable.markPassedToOutside
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=361407">361407</a>
+Resource leak warning when resource is assigned to a field outside of constructor
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=362331">362331</a>
+Resource leak not detected when closeable not assigned to variable
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=362332">362332</a>
+Only report potential leak when closeable not created in the local scope
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=360908">360908</a>
+Avoid resource leak warning when the underlying/chained resource is closed explicitly
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=361073">361073</a>
+Avoid resource leak warning when the top level resource is closed explicitly
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=358903">358903</a>
+Filter practically unimportant resource leak warnings
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365387">365387</a>
+[compiler][null] bug 186342: Issues to follow up post review and verification.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365519">365519</a>
+editorial cleanup after bug 186342 and bug 365387
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=368435">368435</a>
+[compiler] NPE while compile a method with unused local
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=361963">361963</a>
+Stack overflow when trying to code complete a generic list
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365437">365437</a>
+Private methods tagged with @Inject should not be flagged with unused warning
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=366131">366131</a>
+[1.5][compiler] New generics compile error in Indigo SR1 for code that compiles in earlier Eclipse and javac
+
+<a name="v_C28"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - January 10, 2012
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=367023">367023</a>
+Error in JDT Core during AST creation
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=354229">354229</a>
+[compiler][1.7] Name clash error not being reported by ecj.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=367879">367879</a>
+Incorrect &quot;Potential null pointer access&quot; warning on statement after try-with-resources within try-finally
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=366999">366999</a>
+VerifyError: Inconsistent stackmap frames
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=346175">346175</a>
+@SuppressWarnings should clear all errors including fatal optional errors
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=366544">366544</a>
+[index] Test testUseIndexInternalJarAfterRestart failed on Mac and Linux
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=302850">302850</a>
+13 failures in JavaModel tests for the N20100214-2000 Mac OS X - Cocoa test machine
+
+<a name="v_C27"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - January 3, 2012 - 3.8.0 M5
+<br>
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=367566">367566</a>
+In try-with-resources statement close() method of resource is not called
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=364890">364890</a>
+BinaryTypeBinding should use char constants from Util
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365992">365992</a>
+[builder] [null] Change of nullness for a parameter doesn't trigger a build for the files that call the method
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=367203">367203</a>
+[compiler][null] detect assigning null to nonnull argument
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=367154">367154</a>
+[compiler][null]  Problem in propagating null defaults.
+
+<a name="v_C26"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - December 20, 2011
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=362711">362711</a>
+possibly incorrect JDT POST_CHANGE event fired when a file is replaced
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365835">365835</a>
+[compiler][null] inconsistent error reporting.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365836">365836</a>
+[compiler][null] Incomplete propagation of null defaults.
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365983">365983</a>
+[compiler][null] AIOOB with null annotation analysis and varargs
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=366003">366003</a>
+CCE in ASTNode.resolveAnnotations(ASTNode.java:639)
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=366829">366829</a>
+Batch compiler option and SuppressWarnings token for Overriding a Synchronized Method with a Non-synchronized Method
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=364450">364450</a>
+Dubious class path error triggers a full rebuild
+
+<a name="v_C25"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - December 13, 2011
+<h2>What's new in this drop</h2>
+<ul>
+<li>New constant for the name of index location class path attribute in IClasspathAttribute(see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=356620">356620</a> for details)
+<pre>
+   /**
+     * Constant for the name of the index location attribute.
+     * 
+     * The value for this attribute has to be the string representation of a URL.
+     * It should point to an existing index file in a folder or a jar. The URL can also be of platform protocol.
+     * 
+     * @since 3.8
+     */
+     String INDEX_LOCATION_ATTRIBUTE_NAME = "index_location"; 
+</pre>
+</li>
+<li>New API org.eclipse.jdt.core.index.JavaIndexer.generateIndexForJar to generate the index file for a given jar
+<pre>
+   /**
+     * Generates the index file for the specified jar.
+     *
+     * @param pathToJar The full path to the jar that needs to be indexed
+     * @param pathToIndexFile The full path to the index file that needs to be generated
+     * @throws IOException if the jar is not found or could not write into the index file
+     * @since 3.8
+     */
+     public static void generateIndexForJar(String pathToJar, String pathToIndexFile) throws IOException;
+</pre>
+</li>
+<li> New application org.eclipse.jdt.core.JavaIndexer to generate index file for the given jar
+</li>
+<li> New ant task eclipse.buildJarIndex to generate the index file for the given jar </li>
+</ul>
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=356620">356620</a>
+Make it possible to provide indexes for defined libraries
+
 <a name="v_C24"></a>
 <hr><h1>
 Eclipse Platform Build Notes<br>
 Java development tools core</h1>
-Eclipse SDK 3.8.0 - December 5, 2011
+Eclipse SDK 3.8.0 - December 5, 2011 - 3.8.1 M4
 
 <h2>What's new in this drop</h2>
 
@@ -58,7 +335,7 @@ set resource leak diagnostic to &quot;ignore&quot; until bug 358903 is fixed
 <hr><h1>
 Eclipse Platform Build Notes<br>
 Java development tools core</h1>
-Eclipse SDK 3.8.0 - December 2, 2011
+Eclipse SDK 3.8.0
 <h2>What's new in this drop</h2>
 <ul>
 <li>New Javacore option org.eclipse.jdt.core.JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS (see bug <a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=186342">186342</a> for details):
@@ -388,8 +665,6 @@ java.lang.VerifyError on try-with-resources
 [1.5][compiler] ecj vs. javac differ for varargs overloading
 <br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=362279">362279</a>
 ecj vs. javac differ for automatic boxing of implicitly converted types
-<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=343060">343060</a>
-Method.getMethods() returns different methods (compared to standard compiler) for public/non-public inheritance hierarchies
 <br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=362591">362591</a>
 VerifyError: Inconsistent stackmap frames
 
@@ -955,7 +1230,6 @@ Eclipse SDK 3.8.0 - August 9, 2011
  * Returns the binding key of the declaring type of the element represented by this binding key. If the binding key
  * does not represent a member or if the member doesn't have a declaring type, returns <code>null</code>.
  * 
- * <p>
  * Note that only binding keys for references to methods and fields
  * are fully supported. The binding keys for declarations will not have type parameters.
  * 

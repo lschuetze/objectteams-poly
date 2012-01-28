@@ -1,15 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2011 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: RecoveredType.java 23404 2010-02-03 14:10:22Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for Bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639)
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.parser;
 
@@ -866,6 +866,25 @@ public void updateSourceEndIfNecessary(int start, int end){
 		this.bodyEnd = 0;
 		this.typeDeclaration.declarationSourceEnd = end;
 		this.typeDeclaration.bodyEnd = end;
+	}
+}
+public void annotationsConsumed(Annotation[] consumedAnnotations) {
+	RecoveredAnnotation[] keep = new RecoveredAnnotation[this.pendingAnnotationCount];
+	int numKeep = 0;
+	int pendingCount = this.pendingAnnotationCount;
+	int consumedLength = consumedAnnotations.length;
+	outerLoop:
+	for (int i = 0; i < pendingCount; i++) {
+		Annotation pendingAnnotationAST = this.pendingAnnotations[i].annotation;
+		for (int j = 0; j < consumedLength; j++) {
+			if (consumedAnnotations[j] == pendingAnnotationAST)
+				continue outerLoop;
+		}
+		keep[numKeep++] = this.pendingAnnotations[i];
+	}
+	if (numKeep != this.pendingAnnotationCount) {
+		this.pendingAnnotations = keep;
+		this.pendingAnnotationCount = numKeep;
 	}
 }
 //{ObjectTeams: remove an unwanted method:

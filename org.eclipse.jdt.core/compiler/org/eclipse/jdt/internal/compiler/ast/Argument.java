@@ -9,7 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
- *     Stephan Herrmann - Contribution for bug 186342 - [compiler][null] Using annotations for null checking
+ *     Stephan Herrmann - Contributions for
+ *								bug 186342 - [compiler][null] Using annotations for null checking
+ *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -53,7 +55,7 @@ public class Argument extends LocalDeclaration {
 	public void createBinding(MethodScope scope, TypeBinding typeBinding) {
 		if (this.binding == null) {
 			// for default constructors and fake implementation of abstract methods 
-			this.binding = new LocalVariableBinding(this, typeBinding, this.modifiers, true);
+			this.binding = new LocalVariableBinding(this, typeBinding, this.modifiers, true /*isArgument*/);
 //{ObjectTeams: NPE occurred in Java5.testA119_nestedValueParameter8() ff.
 /* orig:
 //	    When we are called from RoleTypeCreator.resolveTypeAnchoredToArgument(AbstractMethodDeclaration, int)
@@ -116,7 +118,6 @@ public class Argument extends LocalDeclaration {
 			}
 		}
 		scope.addLocalVariable(this.binding);
-		//true stand for argument instead of just local
 		this.binding.useFlag = used ? LocalVariableBinding.USED : LocalVariableBinding.UNUSED;
 	}
 

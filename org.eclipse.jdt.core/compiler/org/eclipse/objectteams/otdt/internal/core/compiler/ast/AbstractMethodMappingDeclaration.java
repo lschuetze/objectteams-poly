@@ -135,6 +135,13 @@ public abstract class AbstractMethodMappingDeclaration
 	 */
 	public abstract boolean canAccessInvisibleBase ();
 
+	public CompilationUnitDeclaration getCompilationUnitDeclaration() {
+		if (this.scope != null) {
+			return this.scope.compilationUnitScope().referenceContext;
+		}
+		return null;
+	}
+
 	/**
 	 * @return resolved binding from role-method-spec, or null if unresolved
 	 */

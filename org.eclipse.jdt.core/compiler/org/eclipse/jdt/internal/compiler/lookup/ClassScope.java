@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,13 +7,14 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Fraunhofer FIRST - extended API and implementation
+ *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for 
  *     						Bug 328281 - visibility leaks not detected when analyzing unused field in private class
  *     						Bug 300576 - NPE Computing type hierarchy when compliance doesn't match libraries
  *     						Bug 354536 - compiling package-info.java still depends on the order of compilation units
  *     						Bug 349326 - [1.7] new warning for missing try-with-resources
- *     Fraunhofer FIRST - extended API and implementation
- *     Technical University Berlin - extended API and implementation
+ *     						Bug 358903 - Filter practically unimportant resource leak warnings
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -138,7 +139,6 @@ public class ClassScope extends Scope {
 	public TypeDeclaration referenceContext;
 	public TypeReference superTypeReference;
 	java.util.ArrayList deferredBoundChecks;
-
 	public ClassScope(Scope parent, TypeDeclaration context) {
 		super(Scope.CLASS_SCOPE, parent);
 		this.referenceContext = context;
@@ -179,6 +179,7 @@ public class ClassScope extends Scope {
 				}
 			}
 		}
+		this.referenceContext.binding.cumulativeFieldCount += outerMostMethodScope().analysisIndex;
 		connectMemberTypes();
 		buildFieldsAndMethods();
 //{ObjectTeams: catchup also in OT-specific process (see class comment concerning local types in Dependencies):
@@ -270,6 +271,7 @@ public class ClassScope extends Scope {
 		// remove duplicate fields
 		if (count != fieldBindings.length)
 			System.arraycopy(fieldBindings, 0, fieldBindings = new FieldBinding[count], 0, count);
+		sourceType.cumulativeFieldCount += count;
 		sourceType.tagBits &= ~(TagBits.AreFieldsSorted|TagBits.AreFieldsComplete); // in case some static imports reached already into this type
 		sourceType.setFields(fieldBindings);
 	}
@@ -410,6 +412,7 @@ public class ClassScope extends Scope {
 			checkParameterizedTypeBounds();
 			checkParameterizedSuperTypeCollisions();
 		}
+		this.referenceContext.binding.cumulativeFieldCount += outerMostMethodScope().analysisIndex;
 		buildFieldsAndMethods();
 //{ObjectTeams: catchup also in OT-specific process (see class comment concerning local types in Dependencies).
 	  if (this.referenceContext.isRole()) {
@@ -1573,7 +1576,10 @@ public class ClassScope extends Scope {
 			} else {
 				// only want to reach here when no errors are reported
 				sourceType.superclass = superclass;
-				sourceType.typeBits |= superclass.typeBits;
+				sourceType.typeBits |= (superclass.typeBits & TypeIds.InheritableBits);
+				// further analysis against white lists for the unlikely case we are compiling java.io.*:
+				if ((sourceType.typeBits & (TypeIds.BitAutoCloseable|TypeIds.BitCloseable)) != 0)
+					sourceType.typeBits |= sourceType.applyCloseableWhitelists();
 				return true;
 			}
 		}
@@ -2047,7 +2053,7 @@ public class ClassScope extends Scope {
 				noProblems &= superInterfaceRef.resolvedType.isValidBinding();
 			}
 			// only want to reach here when no errors are reported
-			sourceType.typeBits |= superInterface.typeBits;
+			sourceType.typeBits |= (superInterface.typeBits & TypeIds.InheritableBits);
 			interfaceBindings[count++] = superInterface;
 		}
 		// hold onto all correctly resolved superinterfaces

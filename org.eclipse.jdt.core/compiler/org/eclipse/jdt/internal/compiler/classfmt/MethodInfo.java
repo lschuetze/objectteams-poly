@@ -368,7 +368,7 @@ public int getModifiers() {
 public IBinaryAnnotation[] getParameterAnnotations(int index) {
 	return null;
 }
-public int getNumParameterAnnotations() {
+public int getAnnotatedParametersCount() {
 	return 0;
 }
 /**

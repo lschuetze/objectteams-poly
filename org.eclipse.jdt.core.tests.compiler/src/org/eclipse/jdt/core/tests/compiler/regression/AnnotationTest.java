@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,8 +7,10 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann  - Contribution for bug 295551
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 185682 - Increment/decrement operators mark local variables as read
+ *     Stephan Herrmann  - Contributions for
+ *								bug 295551 - Add option to automatically promote all warnings to error
+ *								bug 185682 - Increment/decrement operators mark local variables as read
+ *								bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639)
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -45,7 +47,7 @@ public class AnnotationTest extends AbstractComparableTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which do not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test293" };
+//		TESTS_NAMES = new String[] { "testBug365437" };
 //		TESTS_NUMBERS = new int[] { 297 };
 //		TESTS_RANGE = new int[] { 294, -1 };
 	}
@@ -9847,5 +9849,672 @@ public void test297() {
 			null,
 			true,
 			customOptions);
+}
+// Bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639) 
+// many syntax errors fixed, does not trigger CCE 
+public void testBug366003() {
+	runNegativeTest(
+		new String[] {
+			"snippet/Bug366003.java",
+			"package snippet;\n" +
+			"public class Bug366003 {\n" + 
+			"    public void foo(@NonNull Object o1) {\n" + 
+			"        System.out.println(o1.toString()); // OK: o1 cannot be null\n" +
+			"    }         \n" + 
+			"    @NonNull Object bar(@Nullable String s1) {\n" +
+			"        foo(null); // cannot pass null argument\n" +
+			"        @NonNull String s= null; // cannot assign null value\n" +
+			"        @NonNull String t= s1; // cannot assign potentially null value\n" + 
+			"        return null; // cannot return null value\n" +
+			"    }\n" + 
+			"}\n" + 
+			"org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+			""
+		},
+		"----------\n" + 
+		"1. ERROR in snippet\\Bug366003.java (at line 3)\n" + 
+		"	public void foo(@NonNull Object o1) {\n" + 
+		"	                 ^^^^^^^\n" + 
+		"NonNull cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"2. ERROR in snippet\\Bug366003.java (at line 6)\n" + 
+		"	@NonNull Object bar(@Nullable String s1) {\n" + 
+		"	 ^^^^^^^\n" + 
+		"NonNull cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"3. ERROR in snippet\\Bug366003.java (at line 6)\n" + 
+		"	@NonNull Object bar(@Nullable String s1) {\n" + 
+		"	                     ^^^^^^^^\n" + 
+		"Nullable cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"4. ERROR in snippet\\Bug366003.java (at line 8)\n" + 
+		"	@NonNull String s= null; // cannot assign null value\n" + 
+		"	 ^^^^^^^\n" + 
+		"NonNull cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"5. ERROR in snippet\\Bug366003.java (at line 9)\n" + 
+		"	@NonNull String t= s1; // cannot assign potentially null value\n" + 
+		"	 ^^^^^^^\n" + 
+		"NonNull cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"6. ERROR in snippet\\Bug366003.java (at line 12)\n" + 
+		"	}\n" + 
+		"	^\n" + 
+		"Syntax error on token \"}\", delete this token\n" + 
+		"----------\n" + 
+		"7. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	^^^^^^^^^^^^^^^^\n" + 
+		"Syntax error on tokens, delete these tokens\n" + 
+		"----------\n" + 
+		"8. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	            ^^^^\n" + 
+		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" + 
+		"----------\n" + 
+		"9. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	            ^^^^\n" + 
+		"Syntax error, insert \"EnumBody\" to complete EnumDeclaration\n" + 
+		"----------\n" + 
+		"10. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	            ^^^^\n" + 
+		"Syntax error, insert \"}\" to complete ClassBody\n" + 
+		"----------\n" + 
+		"11. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Return type for the method is missing\n" + 
+		"----------\n" + 
+		"12. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	                       ^^^^^^^\n" + 
+		"NonNull cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"13. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	                                                      ^^^^^^^^\n" + 
+		"Nullable cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"14. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	                                                                           ^\n" + 
+		"Syntax error, insert \";\" to complete ConstructorDeclaration\n" + 
+		"----------\n");
+}
+// Bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639) 
+// code is garbage, triggers CCE 
+public void testBug366003b() {
+	runNegativeTest(
+		new String[] {
+			"snippet/Bug366003.java",
+			"package snippet;\n" +
+			"public class Bug366003 {\n" +
+			"    public void foo(@Blah Object o1) {        \n" +
+			"System.out.println(o1.toString()); // OK: o1 cannot be null     }         \n" +
+			"@Blah Object bar(@BlahBlah String s1) {         foo(null); // cannot pass\n" +
+			"null argument         @Blah String s= null; // cannot assign null value     \n" +
+			"    @Blah String t= s1; // cannot assign potentially null value         \n" +
+			"return null; // cannot return null value     }\n" +
+			"}\n" +
+			"\n" +
+			"org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" +
+			""
+		},
+		"----------\n" + 
+		"1. ERROR in snippet\\Bug366003.java (at line 3)\n" + 
+		"	public void foo(@Blah Object o1) {        \n" + 
+		"	                 ^^^^\n" + 
+		"Blah cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"2. ERROR in snippet\\Bug366003.java (at line 4)\n" + 
+		"	System.out.println(o1.toString()); // OK: o1 cannot be null     }         \n" + 
+		"	                                 ^\n" + 
+		"Syntax error, insert \"}\" to complete MethodBody\n" + 
+		"----------\n" + 
+		"3. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"	@Blah Object bar(@BlahBlah String s1) {         foo(null); // cannot pass\n" + 
+		"	 ^^^^\n" + 
+		"Blah cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"4. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"	@Blah Object bar(@BlahBlah String s1) {         foo(null); // cannot pass\n" + 
+		"	                  ^^^^^^^^\n" + 
+		"BlahBlah cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"5. ERROR in snippet\\Bug366003.java (at line 6)\n" + 
+		"	null argument         @Blah String s= null; // cannot assign null value     \n" + 
+		"	^^^^\n" + 
+		"Syntax error on token \"null\", @ expected\n" + 
+		"----------\n" + 
+		"6. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	^^^^^^^^^^^^^^^^\n" + 
+		"Syntax error on tokens, delete these tokens\n" + 
+		"----------\n" + 
+		"7. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	            ^^^^\n" + 
+		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" + 
+		"----------\n" + 
+		"8. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	            ^^^^\n" + 
+		"Syntax error, insert \"EnumBody\" to complete EnumDeclaration\n" + 
+		"----------\n" + 
+		"9. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	            ^^^^\n" + 
+		"Syntax error, insert \"}\" to complete ClassBody\n" + 
+		"----------\n" + 
+		"10. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Return type for the method is missing\n" + 
+		"----------\n" + 
+		"11. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	                       ^^^^^^^\n" + 
+		"NonNull cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"12. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	                                                      ^^^^^^^^\n" + 
+		"Nullable cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"13. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	                                                                           ^\n" + 
+		"Syntax error, insert \";\" to complete ConstructorDeclaration\n" + 
+		"----------\n");
+}
+// Bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639) 
+// minimal syntax error to trigger CCE 
+public void testBug366003c() {
+	runNegativeTest(
+		new String[] {
+			"snippet/Bug366003.java",
+			"package snippet;\n" +
+			"public class Bug366003 {\n" +
+			"    void foo(Object o1) {\n" + 
+			"    }\n" + 
+			"org.User(@Bla String a)"
+		},
+		"----------\n" + 
+		"1. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"	org.User(@Bla String a)\n" + 
+		"	^^^\n" + 
+		"Syntax error on token \"org\", delete this token\n" + 
+		"----------\n" + 
+		"2. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"	org.User(@Bla String a)\n" + 
+		"	^^^\n" + 
+		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" + 
+		"----------\n" + 
+		"3. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"	org.User(@Bla String a)\n" + 
+		"	^^^\n" + 
+		"Syntax error, insert \"EnumBody\" to complete EnumDeclaration\n" + 
+		"----------\n" + 
+		"4. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"	org.User(@Bla String a)\n" + 
+		"	^^^\n" + 
+		"Syntax error, insert \"}\" to complete ClassBody\n" + 
+		"----------\n" + 
+		"5. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"	org.User(@Bla String a)\n" + 
+		"	    ^^^^^^^^^^^^^^^^^^^\n" + 
+		"Return type for the method is missing\n" + 
+		"----------\n" + 
+		"6. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"	org.User(@Bla String a)\n" + 
+		"	          ^^^\n" + 
+		"Bla cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"7. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"	org.User(@Bla String a)\n" + 
+		"	                      ^\n" + 
+		"Syntax error, insert \";\" to complete ConstructorDeclaration\n" + 
+		"----------\n");
+}
+// unfinished attempt to trigger the same CCE via catch formal parameters
+public void testBug366003d() {
+	runNegativeTest(
+		new String[] {
+			"snippet/Bug366003.java",
+			"package snippet; \n" +
+			"public class Bug366003 {\n" +
+			"	void foo() {\n" +
+			"		try {\n" +
+			"			System.out.println(\"\");\n" +
+			"		} catch (Exeption eFirst) {\n" +
+			"			e } catch (@Blah Exception eSecond) {\n" +
+			"			e }\n" +
+			"	}\n" +
+			"}\n"
+		},
+		"----------\n" +
+		"1. ERROR in snippet\\Bug366003.java (at line 7)\n" +
+		"	e } catch (@Blah Exception eSecond) {\n" +
+		"	^\n" +
+		"Syntax error, insert \"AssignmentOperator Expression\" to complete Assignment\n" +
+		"----------\n" +
+		"2. ERROR in snippet\\Bug366003.java (at line 7)\n" +
+		"	e } catch (@Blah Exception eSecond) {\n" +
+		"	^\n" +
+		"Syntax error, insert \";\" to complete BlockStatements\n" +
+		"----------\n" +
+		"3. ERROR in snippet\\Bug366003.java (at line 8)\n" +
+		"	e }\n" +
+		"	^\n" +
+		"Syntax error, insert \"AssignmentOperator Expression\" to complete Expression\n" +
+		"----------\n" +
+		"4. ERROR in snippet\\Bug366003.java (at line 8)\n" +
+		"	e }\n" +
+		"	^\n" +
+		"Syntax error, insert \";\" to complete BlockStatements\n" +
+		"----------\n");
+}
+public void testBug366003e() {
+	runNegativeTest(
+		new String[] {
+			"snippet/Bug366003.java",
+			"package snippet;\n" +
+			"public class Bug366003 {\n" +
+			"        void foo(Object o1){}\n" +
+			"        @Blah org.User(@Bla String str){}\n" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in snippet\\Bug366003.java (at line 4)\n" + 
+		"	@Blah org.User(@Bla String str){}\n" + 
+		"	 ^^^^\n" + 
+		"Blah cannot be resolved to a type\n" + 
+		"----------\n" + 
+		"2. ERROR in snippet\\Bug366003.java (at line 4)\n" + 
+		"	@Blah org.User(@Bla String str){}\n" + 
+		"	          ^^^^\n" + 
+		"Syntax error on token \"User\", Identifier expected after this token\n" + 
+		"----------\n" + 
+		"3. ERROR in snippet\\Bug366003.java (at line 4)\n" + 
+		"	@Blah org.User(@Bla String str){}\n" + 
+		"	          ^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Return type for the method is missing\n" + 
+		"----------\n" + 
+		"4. ERROR in snippet\\Bug366003.java (at line 4)\n" + 
+		"	@Blah org.User(@Bla String str){}\n" + 
+		"	                ^^^\n" + 
+		"Bla cannot be resolved to a type\n" +
+		"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=365437
+public void testBug365437a() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	String testFiles [] = new String[] {
+			"p/A.java",
+			"package p;\n" +
+			"import p1.*;\n" +
+			"public class A {\n" +
+			"	@p1.PreDestroy\n" +
+			"	private void foo1(){}\n" +
+			"	@PreDestroy\n" +
+			"	private void foo2(){}\n" +
+			"	@SuppressWarnings(\"null\")\n" +
+			"	@PostConstruct\n" +
+			"	private void foo1a(){}\n" +
+			"	@PostConstruct\n" +
+			"	private void foo2a(){}\n" +
+			"	@Deprecated" +
+			"	private void foo3(){}" +
+			"}\n",
+			"p1/PreDestroy.java",
+			"package p1;\n" +
+			"public @interface PreDestroy{}",
+			"p1/PostConstruct.java",
+			"package p1;\n" +
+			"public @interface PostConstruct{}"
+			};
+	String expectedErrorString = 
+			"----------\n" + 
+			"1. WARNING in p\\A.java (at line 8)\n" + 
+			"	@SuppressWarnings(\"null\")\n" + 
+			"	                  ^^^^^^\n" + 
+			"Unnecessary @SuppressWarnings(\"null\")\n" + 
+			"----------\n" + 
+			"2. ERROR in p\\A.java (at line 13)\n" + 
+			"	@Deprecated	private void foo3(){}}\n" + 
+			"	           	             ^^^^^^\n" + 
+			"The method foo3() from the type A is never used locally\n" + 
+			"----------\n";
+	runNegativeTest(
+			true,
+			testFiles,
+			null, 
+			customOptions,
+			expectedErrorString,
+			JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=365437
+public void testBug365437b() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_AnnotationBasedNullAnalysis, CompilerOptions.ENABLED);
+	customOptions.put(CompilerOptions.OPTION_NonNullAnnotationName, "p.NonNull");
+	String testFiles [] = new String[] {
+			"A.java",
+			"import javax.annotation.*;\n" +
+			"public class A {\n" +
+			"	@javax.annotation.PreDestroy\n" +
+			"	private void foo1(){}\n" +
+			"	@PreDestroy\n" +
+			"	private void foo2(){}\n" +
+			"	@javax.annotation.Resource\n" +
+			"	private void foo1a(){}\n" +
+			"	@Resource\n" +
+			"	@p.NonNull\n" +
+			"	private Object foo2a(){ return new Object();}\n" +
+			"	@javax.annotation.PostConstruct\n" +
+			"	@Deprecated\n" +
+			"	private void foo3(){}\n" +
+			"	@p.NonNull\n" +
+			"	private Object foo3a(){ return new Object();}\n" +
+			"}\n",
+			"p/NonNull.java",
+			"package p;\n" +
+			"import static java.lang.annotation.ElementType.*;\n" +
+			"import java.lang.annotation.*;\n" +
+			"@Target({TYPE, METHOD,PARAMETER,LOCAL_VARIABLE})\n" +
+			"public @interface NonNull {\n" +
+			"}"
+			};
+	String expectedErrorString = 
+			"----------\n" + 
+			"1. ERROR in A.java (at line 16)\n" + 
+			"	private Object foo3a(){ return new Object();}\n" + 
+			"	               ^^^^^^^\n" + 
+			"The method foo3a() from the type A is never used locally\n" + 
+			"----------\n";
+	runNegativeTest(
+			true,
+			testFiles,
+			null, 
+			customOptions,
+			expectedErrorString,
+			JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=365437
+// @SafeVarargs
+public void testBug365437c() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_7) return;
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	String testFiles [] = new String[] {
+			"p/A.java",
+			"package p;\n" +
+			"import p1.*;\n" +
+			"public class A {\n" +
+			"	@p1.PreDestroy\n" +
+			"	private void foo1(){}\n" +
+			"	@PreDestroy\n" +
+			"	private void foo2(){}\n" +
+			"	@SuppressWarnings(\"null\")\n" +
+			"	@PostConstruct\n" +
+			"	private void foo1a(){}\n" +
+			"	@PostConstruct\n" +
+			"	private void foo2a(){}\n" +
+			"	@SafeVarargs" +
+			"	private final void foo3(Object... o){}" +
+			"}\n",
+			"p1/PreDestroy.java",
+			"package p1;\n" +
+			"public @interface PreDestroy{}",
+			"p1/PostConstruct.java",
+			"package p1;\n" +
+			"public @interface PostConstruct{}"
+			};
+	String expectedErrorString = 
+			"----------\n" + 
+			"1. WARNING in p\\A.java (at line 8)\n" + 
+			"	@SuppressWarnings(\"null\")\n" + 
+			"	                  ^^^^^^\n" + 
+			"Unnecessary @SuppressWarnings(\"null\")\n" + 
+			"----------\n" + 
+			"2. ERROR in p\\A.java (at line 13)\n" + 
+			"	@SafeVarargs	private final void foo3(Object... o){}}\n" + 
+			"	            	                   ^^^^^^^^^^^^^^^^^\n" + 
+			"The method foo3(Object...) from the type A is never used locally\n" + 
+			"----------\n";
+	runNegativeTest(
+			true,
+			testFiles,
+			null, 
+			customOptions,
+			expectedErrorString,
+			JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=365437
+// unused constructor
+public void testBug365437d() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_AnnotationBasedNullAnalysis, CompilerOptions.ENABLED);
+	customOptions.put(CompilerOptions.OPTION_NonNullAnnotationName, "p.NonNull");
+	this.runNegativeTest(
+		true,
+		new String[] {
+			"Example.java",
+			"class Example {\n" +
+			"  @p.Annot\n" +
+			"  private Example() {\n" +
+			"  }\n" +
+			"  public Example(int i) {\n" +
+			"  }\n" +
+			"}\n" +
+			"class E1 {\n" +
+			"	 @Deprecated\n" +
+			"    private E1() {}\n" +
+			"    public E1(long l) {}\n" +
+			"}\n" +
+			"class E2 {\n" +
+			"	 @SuppressWarnings(\"null\")\n" +
+			"    private E2() {}\n" +
+			"    public E2(long l) {}\n" +
+			"}\n" +
+			"class E3 {\n" +
+			"	 @p.NonNull\n" +
+			"    private E3() {}\n" +
+			"    public E3(long l) {}\n" +
+			"}\n" +
+			"class E4 {\n" +
+			"	 @Deprecated\n" +
+			"	 @p.Annot\n" +
+			"    private E4() {}\n" +
+			"    public E4(long l) {}\n" +
+			"}\n",
+			"p/NonNull.java",
+			"package p;\n" +
+			"import static java.lang.annotation.ElementType.*;\n" +
+			"import java.lang.annotation.*;\n" +
+			"@Target({TYPE, METHOD,PARAMETER,CONSTRUCTOR})\n" +
+			"public @interface NonNull {\n" +
+			"}",
+			"p/Annot.java",
+			"package p;\n" +
+			"import static java.lang.annotation.ElementType.*;\n" +
+			"import java.lang.annotation.*;\n" +
+			"@Target({TYPE, METHOD,PARAMETER,LOCAL_VARIABLE, CONSTRUCTOR})\n" +
+			"public @interface Annot {\n" +
+			"}"
+		},
+		null, customOptions,
+		"----------\n" + 
+		"1. ERROR in Example.java (at line 10)\n" + 
+		"	private E1() {}\n" + 
+		"	        ^^^^\n" + 
+		"The constructor E1() is never used locally\n" + 
+		"----------\n" + 
+		"2. WARNING in Example.java (at line 14)\n" + 
+		"	@SuppressWarnings(\"null\")\n" + 
+		"	                  ^^^^^^\n" + 
+		"Unnecessary @SuppressWarnings(\"null\")\n" + 
+		"----------\n" + 
+		"3. ERROR in Example.java (at line 15)\n" + 
+		"	private E2() {}\n" + 
+		"	        ^^^^\n" + 
+		"The constructor E2() is never used locally\n" + 
+		"----------\n" + 
+		"4. ERROR in Example.java (at line 20)\n" + 
+		"	private E3() {}\n" + 
+		"	        ^^^^\n" + 
+		"The constructor E3() is never used locally\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=365437
+// unused field
+public void testBug365437e() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_AnnotationBasedNullAnalysis, CompilerOptions.ENABLED);
+	customOptions.put(CompilerOptions.OPTION_NonNullAnnotationName, "p.NonNull");
+	this.runNegativeTest(
+		true,
+		new String[] {
+			"Example.java",
+			"class Example {\n" +
+			"  @p.Annot\n" +
+			"  private int Ex;\n" +
+			"}\n" +
+			"class E1 {\n" +
+			"	 @Deprecated\n" +
+			"    private int E1;\n" +
+			"}\n" +
+			"class E2 {\n" +
+			"	 @SuppressWarnings(\"null\")\n" +
+			"    private int E2;\n" +
+			"}\n" +
+			"class E3 {\n" +
+			"	 @p.NonNull\n" +
+			"    private int E3;\n" +
+			"}\n" +
+			"class E4 {\n" +
+			"	 @Deprecated\n" +
+			"	 @p.Annot\n" +
+			"    private int E4;\n" +
+			"}\n",
+			"p/NonNull.java",
+			"package p;\n" +
+			"import static java.lang.annotation.ElementType.*;\n" +
+			"import java.lang.annotation.*;\n" +
+			"@Target({TYPE, METHOD,PARAMETER,LOCAL_VARIABLE, FIELD})\n" +
+			"public @interface NonNull {\n" +
+			"}",
+			"p/Annot.java",
+			"package p;\n" +
+			"import static java.lang.annotation.ElementType.*;\n" +
+			"import java.lang.annotation.*;\n" +
+			"@Target({TYPE, METHOD,PARAMETER,LOCAL_VARIABLE, FIELD})\n" +
+			"public @interface Annot {\n" +
+			"}"
+		},
+		null, customOptions,
+		"----------\n" + 
+		"1. ERROR in Example.java (at line 7)\n" + 
+		"	private int E1;\n" + 
+		"	            ^^\n" + 
+		"The value of the field E1.E1 is not used\n" + 
+		"----------\n" + 
+		"2. WARNING in Example.java (at line 10)\n" + 
+		"	@SuppressWarnings(\"null\")\n" + 
+		"	                  ^^^^^^\n" + 
+		"Unnecessary @SuppressWarnings(\"null\")\n" + 
+		"----------\n" + 
+		"3. ERROR in Example.java (at line 11)\n" + 
+		"	private int E2;\n" + 
+		"	            ^^\n" + 
+		"The value of the field E2.E2 is not used\n" + 
+		"----------\n" + 
+		"4. ERROR in Example.java (at line 15)\n" + 
+		"	private int E3;\n" + 
+		"	            ^^\n" + 
+		"The value of the field E3.E3 is not used\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=365437
+// unused type
+public void testBug365437f() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_ReportUnusedPrivateMember, CompilerOptions.ERROR);
+	customOptions.put(CompilerOptions.OPTION_AnnotationBasedNullAnalysis, CompilerOptions.ENABLED);
+	customOptions.put(CompilerOptions.OPTION_NonNullAnnotationName, "p.NonNull");
+	this.runNegativeTest(
+		true,
+		new String[] {
+			"Example.java",
+			"class Example {\n" +
+			"  @p.Annot\n" +
+			"  private class Ex{}\n" +
+			"}\n" +
+			"class E1 {\n" +
+			"	 @Deprecated\n" +
+			"    private class E11{}\n" +
+			"}\n" +
+			"class E2 {\n" +
+			"	 @SuppressWarnings(\"null\")\n" +
+			"    private class E22{}\n" +
+			"}\n" +
+			"class E3 {\n" +
+			"	 @p.NonNull\n" +
+			"    private class E33{}\n" +
+			"}\n" +
+			"class E4 {\n" +
+			"	 @Deprecated\n" +
+			"	 @p.Annot\n" +
+			"    private class E44{}\n" +
+			"}\n",
+			"p/NonNull.java",
+			"package p;\n" +
+			"import static java.lang.annotation.ElementType.*;\n" +
+			"import java.lang.annotation.*;\n" +
+			"@Target({TYPE, METHOD,PARAMETER,LOCAL_VARIABLE})\n" +
+			"public @interface NonNull {\n" +
+			"}",
+			"p/Annot.java",
+			"package p;\n" +
+			"import static java.lang.annotation.ElementType.*;\n" +
+			"import java.lang.annotation.*;\n" +
+			"@Target({TYPE, METHOD,PARAMETER,LOCAL_VARIABLE, CONSTRUCTOR})\n" +
+			"public @interface Annot {\n" +
+			"}"
+		},
+		null, customOptions,
+		"----------\n" + 
+		"1. ERROR in Example.java (at line 7)\n" + 
+		"	private class E11{}\n" + 
+		"	              ^^^\n" + 
+		"The type E1.E11 is never used locally\n" + 
+		"----------\n" + 
+		"2. WARNING in Example.java (at line 10)\n" + 
+		"	@SuppressWarnings(\"null\")\n" + 
+		"	                  ^^^^^^\n" + 
+		"Unnecessary @SuppressWarnings(\"null\")\n" + 
+		"----------\n" + 
+		"3. ERROR in Example.java (at line 11)\n" + 
+		"	private class E22{}\n" + 
+		"	              ^^^\n" + 
+		"The type E2.E22 is never used locally\n" + 
+		"----------\n" + 
+		"4. ERROR in Example.java (at line 15)\n" + 
+		"	private class E33{}\n" + 
+		"	              ^^^\n" + 
+		"The type E3.E33 is never used locally\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 }

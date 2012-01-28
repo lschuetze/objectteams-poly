@@ -19,6 +19,7 @@ import junit.framework.Test;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 
 // see bug 186342 - [compiler][null] Using annotations for null checking
 public class NullAnnotationTest extends AbstractComparableTest {
@@ -52,7 +53,7 @@ public NullAnnotationTest(String name) {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 static {
-//		TESTS_NAMES = new String[] { "test_assignment_expression_1" };
+//		TESTS_NAMES = new String[] { "test_redundant_annotation_" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -548,6 +549,183 @@ public void test_nonnull_parameter_013() {
 		"	l.callMe(null);\n" + 
 		"	         ^^^^\n" + 
 		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"----------\n");
+}
+// non-null varargs (message send)
+public void test_nonnull_parameter_015() {
+	if (this.complianceLevel > ClassFileConstants.JDK1_7) {
+		fail("Reminder: should check if JSR 308 mandates a change in handling vararg elements (see bug 365983).");
+		return;
+	}
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    void foo(@NonNull Object ... o) {\n" +
+			"        if (o != null)\n" +
+			"              System.out.print(o.toString());\n" +
+			"    }\n" +
+			"    void foo2(int i, @NonNull Object ... o) {\n" +
+			"        if (o.length > 0 && o[0] != null)\n" +
+			"              System.out.print(o[0].toString());\n" +
+			"    }\n" +
+			"    void bar() {\n" +
+			"        foo((Object)null);\n" +		// unchecked: single plain argument
+			"        Object[] objs = null;\n" +
+			"        foo(objs);\n" +				// error
+			"        foo(this, null);\n" +			// unchecked: multiple plain arguments
+			"        foo2(2, (Object)null);\n" +    // unchecked: single plain argument
+			"        foo2(2, null, this);\n" +      // unchecked: multiple plain arguments
+			"        foo2(2, null);\n" +  			// error
+			"    }\n" +
+			"}\n"},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 4)\n" + 
+			"	if (o != null)\n" + 
+			"	    ^\n" + 
+			"Redundant null check: The variable o cannot be null at this location\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 14)\n" + 
+			"	foo(objs);\n" + 
+			"	    ^^^^\n" + 
+			"Type mismatch: required \'@NonNull Object[]\' but the provided value is null\n" + 
+			"----------\n" + 
+			"3. WARNING in X.java (at line 18)\n" + 
+			"	foo2(2, null);\n" + 
+			"	^^^^^^^^^^^^^\n" + 
+			"The argument of type null should explicitly be cast to Object[] for the invocation of the varargs method foo2(int, Object...) from type X. It could alternatively be cast to Object for a varargs invocation\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 18)\n" + 
+			"	foo2(2, null);\n" + 
+			"	        ^^^^\n" + 
+			"Type mismatch: required \'@NonNull Object[]\' but the provided value is null\n" + 
+			"----------\n",
+		this.LIBS,
+		true /* shouldFlush*/);
+}
+// non-null varargs (allocation and explicit constructor calls)
+public void test_nonnull_parameter_016() {
+	if (this.complianceLevel > ClassFileConstants.JDK1_7) {
+		fail("Reminder: should check if JSR 308 mandates a change in handling vararg elements (see bug 365983).");
+		return;
+	}
+	runNegativeTest(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class X {\n" +
+			"    X(@NonNull Object ... o) {\n" +
+			"        if (o != null)\n" +
+			"              System.out.print(o.toString());\n" +
+			"    }\n" +
+			"    class Y extends X {\n" +
+			"        Y(int i, @NonNull Object ... o) {\n" +
+			"        	super(i, (Object)null);\n" +
+			"        }\n" +
+			"        Y(char c, @NonNull Object ... o) {\n" +
+			"        	this(1, new Object(), null);\n" +
+			"        }\n" +
+			"    }\n" +
+			"    void bar() {\n" +
+			"        new X((Object[])null);\n" +
+			"        new X(this, null);\n" +
+			"        X x = new X(null, this);\n" +
+			"        x.new Y(2, (Object)null);\n" +
+			"        this.new Y(2, null, this);\n" +
+			"        this.new Y(2, (Object[])null);\n" +
+			"    }\n" +
+			"}\n"},
+			"----------\n" +
+			"1. ERROR in X.java (at line 4)\n" +
+			"	if (o != null)\n" +
+			"	    ^\n" +
+			"Redundant null check: The variable o cannot be null at this location\n" +
+			"----------\n" +
+			"2. ERROR in X.java (at line 16)\n" +
+			"	new X((Object[])null);\n" +
+			"	      ^^^^^^^^^^^^^^\n" +
+			"Type mismatch: required \'@NonNull Object[]\' but the provided value is null\n" +
+			"----------\n" +
+			"3. ERROR in X.java (at line 21)\n" +
+			"	this.new Y(2, (Object[])null);\n" +
+			"	              ^^^^^^^^^^^^^^\n" +
+			"Type mismatch: required \'@NonNull Object[]\' but the provided value is null\n" +
+			"----------\n",
+		this.LIBS,
+		true /* shouldFlush*/);
+}
+// Bug 367203 - [compiler][null] detect assigning null to nonnull argument
+public void test_nonnull_argument_001() {
+	runNegativeTestWithLibs(
+			new String[] {
+				"ShowNPE2.java",
+				"import org.eclipse.jdt.annotation.NonNullByDefault;\n" + 
+				"@NonNullByDefault\n" + 
+				"public class ShowNPE2 {\n" + 
+				"     public Object foo(Object o1, final boolean b) {\n" + 
+				"         o1 = null;   // expect NPE error\n" + 
+				"         System.out.println(o1.toString());   \n" + 
+				"         return null;  // expect NPE error\n" + 
+				"    }\n" + 
+				"}"
+			},
+			"----------\n" + 
+			"1. ERROR in ShowNPE2.java (at line 5)\n" + 
+			"	o1 = null;   // expect NPE error\n" + 
+			"	     ^^^^\n" + 
+			"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+			"----------\n" + 
+			"2. ERROR in ShowNPE2.java (at line 7)\n" + 
+			"	return null;  // expect NPE error\n" + 
+			"	       ^^^^\n" + 
+			"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+			"----------\n");
+}
+// Bug 367203 - [compiler][null] detect assigning null to nonnull argument
+public void test_nonnull_argument_002() {
+	runNegativeTestWithLibs(
+			new String[] {
+				"ShowNPE2.java",
+				"import org.eclipse.jdt.annotation.NonNullByDefault;\n" + 
+				"@NonNullByDefault\n" + 
+				"public class ShowNPE2 {\n" + 
+				"    public Object foo(Object o1, final boolean b) {\n" + 
+				"        bar(o1); // expecting no problem\n" + 
+				"        return null;  // expect NPE error\n" + 
+				"    }\n" +
+				"    void bar(Object o2) {}\n" + 
+				"}"
+			},
+			"----------\n" + 
+			"1. ERROR in ShowNPE2.java (at line 6)\n" + 
+			"	return null;  // expect NPE error\n" + 
+			"	       ^^^^\n" + 
+			"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+			"----------\n");
+}
+// a method of a local class has a non-null parameter, client passes potential null (msg send)
+public void test_nonnull_parameter_014() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"B.java",
+			"class B {\n" +
+			"    void bar () {\n" +
+			"        class Local {\n" +
+			"            void callMe(@org.eclipse.jdt.annotation.NonNull Object o){\n" +
+			"            }\n" +
+			"        }\n" +
+			"        Local l = new Local();\n" +
+			"        l.callMe(getNull());\n" +
+			"    }\n" +
+			"    @org.eclipse.jdt.annotation.Nullable Object getNull() { return null; }" +
+			"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in B.java (at line 8)\n" + 
+		"	l.callMe(getNull());\n" + 
+		"	         ^^^^^^^^^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value can be null\n" + 
 		"----------\n");
 }
 // assigning potential null to a nonnull local variable
@@ -1513,6 +1691,39 @@ public void test_nonnull_return_013() {
 		customOptions,
 		"");
 }
+// bug 365835: [compiler][null] inconsistent error reporting.
+public void test_nonnull_return_014() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.NonNull;\n" + 
+			"\n" + 
+			"public class X {\n" + 
+			"	@NonNull\n" + 
+			"	public Object foo(Object x, int y) {\n" + 
+			"		@NonNull Object local;\n" + 
+			"		while (true) {\n" + 
+			"			if (y == 4) {\n" + 
+			"				local = x;  // error\n" + 
+			"				return x;   // only a warning.\n" + 
+			"			}\n" + 
+			"			x = null;\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"}"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 9)\n" + 
+		"	local = x;  // error\n" + 
+		"	        ^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value can be null\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 10)\n" + 
+		"	return x;   // only a warning.\n" + 
+		"	       ^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value can be null\n" + 
+		"----------\n");
+}
 //suppress an error regarding null-spec violation
 public void test_suppress_001() {
 	Map customOptions = getCompilerOptions();
@@ -2326,8 +2537,421 @@ public void test_default_nullness_011() {
 		"	new C(null);\n" + 
 		"	      ^^^^\n" + 
 		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"----------\n" + 
+		"----------\n" + 
+		"1. WARNING in p1\\C.java (at line 2)\n" + 
+		"	@org.eclipse.jdt.annotation.NonNullByDefault\n" + 
+		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+		"Nullness default is redundant with a default specified for the enclosing package p1\n" + 
 		"----------\n");
 }
+// Bug 365836 - [compiler][null] Incomplete propagation of null defaults.
+public void test_default_nullness_012() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" + 
+			"import org.eclipse.jdt.annotation.Nullable;\n" + 
+			"\n" + 
+			"public class X {\n" + 
+			"    @NonNullByDefault \n" + 
+			"    public void foo(@Nullable String [] args) {\n" + 
+			"        class local {\n" + 
+			"            void zoo(Object o) {\n" + 
+			"            }\n" + 
+			"        };\n" + 
+			"        new local().zoo(null); // defaults applying from foo\n" + 
+			"    }\n" + 
+			"}"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 11)\n" + 
+		"	new local().zoo(null); // defaults applying from foo\n" + 
+		"	                ^^^^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"----------\n");
+}
+// Bug 365836 - [compiler][null] Incomplete propagation of null defaults.
+public void test_default_nullness_013() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" + 
+			"import org.eclipse.jdt.annotation.Nullable;\n" + 
+			"\n" +
+			"@SuppressWarnings(\"unused\")\n" +
+			"public class X {\n" + 
+			"    @NonNullByDefault \n" + 
+			"    public void foo(@Nullable String [] args) {\n" + 
+			"        class local {\n" +
+			"            class Deeply {\n" + 
+			"                Object zoo() {\n" +
+			"                    return null; // defaults applying from foo\n" +
+			"                }\n" + 
+			"            }\n" + 
+			"        };\n" + 
+			"    }\n" + 
+			"}"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 11)\n" + 
+		"	return null; // defaults applying from foo\n" + 
+		"	       ^^^^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"----------\n");
+}
+// bug 367154 - [compiler][null] Problem in propagating null defaults.
+public void test_default_nullness_014() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" + 
+			"import org.eclipse.jdt.annotation.Nullable;\n" + 
+			"\n" + 
+			"@SuppressWarnings(\"unused\")\n" + 
+			"public class X {\n" + 
+			"\n" + 
+			"    public void foo(@Nullable String [] args) {\n" + 
+			"        @NonNullByDefault\n" + 
+			"        class local {\n" + 
+			"            class Deeply {\n" + 
+			"                Object zoo() {\n" + 
+			"                    return null;  // expect error here\n" + 
+			"                }\n" + 
+			"            }\n" + 
+			"        };\n" + 
+			"    }\n" + 
+			"}"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 12)\n" + 
+		"	return null;  // expect error here\n" + 
+		"	       ^^^^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"----------\n");
+}
+// bug 367154 - [compiler][null] Problem in propagating null defaults.
+// initializer involved
+public void test_default_nullness_015() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"X.java",
+			"import org.eclipse.jdt.annotation.NonNullByDefault;\n" + 
+			"import org.eclipse.jdt.annotation.Nullable;\n" + 
+			"\n" + 
+			"@SuppressWarnings(\"unused\")\n" + 
+			"@NonNullByDefault\n" + 
+			"public class X {\n" + 
+			"    {\n" + 
+			"        class local {\n" + 
+			"            class Deeply {\n" + 
+			"                Object zoo() {\n" + 
+			"                    return null;  // expect error here\n" + 
+			"                }\n" + 
+			"            }\n" + 
+			"        };\n" + 
+			"    }\n" + 
+			"}"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 11)\n" + 
+		"	return null;  // expect error here\n" + 
+		"	       ^^^^\n" + 
+		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"----------\n");
+}
+
+// redundant default annotations - class vs. inner class
+public void test_redundant_annotation_01() {
+	Map customOptions = getCompilerOptions();
+//	customOptions.put(CompilerOptions.OPTION_ReportPotentialNullSpecViolation, JavaCore.ERROR);
+	runConformTestWithLibs(
+		new String[] {
+			"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y {\n" +
+			"    @NonNullByDefault class Inner {\n" +
+			"        @NonNullByDefault class DeepInner {}\n" +
+			"    }\n" +
+			"    class Inner2 {\n" +
+			"        @NonNullByDefault class DeepInner2 {\n" +
+			"        }\n" +
+			"        void foo() {\n" +
+			"            @SuppressWarnings(\"unused\") @NonNullByDefault class Local {}\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"@NonNullByDefault class V {}\n",
+			"p3/package-info.java",
+			"@org.eclipse.jdt.annotation.NonNullByDefault package p3;\n",
+			"p3/Z.java",
+			"package p3;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Z {\n" +
+			"}\n" +
+			"class X {\n" +
+			"    @NonNullByDefault class Inner {}\n" +
+			"    class Inner2 {\n" +
+			"        @NonNullByDefault class DeepInner {}\n" +
+			"    }\n" +
+			"}\n"
+		},
+		customOptions,
+		"----------\n" + 
+		"1. WARNING in p2\\Y.java (at line 5)\n" +
+		"	@NonNullByDefault class Inner {\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing type Y\n" +
+		"----------\n" +
+		"2. WARNING in p2\\Y.java (at line 6)\n" +
+		"	@NonNullByDefault class DeepInner {}\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing type Y.Inner\n" +
+		"----------\n" +
+		"3. WARNING in p2\\Y.java (at line 9)\n" +
+		"	@NonNullByDefault class DeepInner2 {\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing type Y\n" +
+		"----------\n" +
+		"4. WARNING in p2\\Y.java (at line 12)\n" +
+		"	@SuppressWarnings(\"unused\") @NonNullByDefault class Local {}\n" +
+		"	                            ^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing type Y\n" +
+		"----------\n" +
+		"----------\n" +
+		"1. WARNING in p3\\Z.java (at line 3)\n" +
+		"	@NonNullByDefault\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing package p3\n" +
+		"----------\n" +
+		"2. WARNING in p3\\Z.java (at line 7)\n" +
+		"	@NonNullByDefault class Inner {}\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing package p3\n" +
+		"----------\n" +
+		"3. WARNING in p3\\Z.java (at line 9)\n" +
+		"	@NonNullByDefault class DeepInner {}\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing package p3\n" +
+		"----------\n");
+}
+
+// redundant default annotations - class vs. method
+public void test_redundant_annotation_02() {
+	Map customOptions = getCompilerOptions();
+	runConformTestWithLibs(
+		new String[] {
+			"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y {\n" +
+			"    @NonNullByDefault void foo() {}\n" +
+			"}\n" +
+			"class Z {\n" +
+			"    @NonNullByDefault void bar() {\n" +
+			"         @NonNullByDefault @SuppressWarnings(\"unused\") class Zork {\n" +
+			"             @NonNullByDefault void fubar() {}\n" +
+			"         }\n" +
+			"    }\n" +
+			"    @NonNullByDefault void zink() {\n" +
+			"         @SuppressWarnings(\"unused\") class Bork {\n" +
+			"             @NonNullByDefault void jubar() {}\n" +
+			"         }\n" +
+			"    }\n" +
+			"}\n"
+		},
+		customOptions,
+		"----------\n" +
+		"1. WARNING in p2\\Y.java (at line 5)\n" +
+		"	@NonNullByDefault void foo() {}\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing type Y\n" +
+		"----------\n" +
+		"2. WARNING in p2\\Y.java (at line 9)\n" +
+		"	@NonNullByDefault @SuppressWarnings(\"unused\") class Zork {\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing method bar()\n" +
+		"----------\n" +
+		"3. WARNING in p2\\Y.java (at line 10)\n" +
+		"	@NonNullByDefault void fubar() {}\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing type Zork\n" +
+		"----------\n" +
+		"4. WARNING in p2\\Y.java (at line 15)\n" +
+		"	@NonNullByDefault void jubar() {}\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing method zink()\n" +
+		"----------\n");
+}
+
+//redundant default annotations - class vs. method - generics
+public void test_redundant_annotation_02g() {
+	Map customOptions = getCompilerOptions();
+	runConformTestWithLibs(
+		new String[] {
+			"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y<TY> {\n" +
+			"    @NonNullByDefault <TF> void foo(TF arg) {}\n" +
+			"}\n" +
+			"class Z {\n" +
+			"    @NonNullByDefault <TB> void bar() {\n" +
+			"         @NonNullByDefault @SuppressWarnings(\"unused\") class Zork {\n" +
+			"             @NonNullByDefault void fubar(TB arg) {}\n" +
+			"         }\n" +
+			"    }\n" +
+			"}\n"
+		},
+		customOptions,
+		"----------\n" + 
+		"1. WARNING in p2\\Y.java (at line 5)\n" + 
+		"	@NonNullByDefault <TF> void foo(TF arg) {}\n" + 
+		"	^^^^^^^^^^^^^^^^^\n" + 
+		"Nullness default is redundant with a default specified for the enclosing type Y<TY>\n" + 
+		"----------\n" + 
+		"2. WARNING in p2\\Y.java (at line 9)\n" + 
+		"	@NonNullByDefault @SuppressWarnings(\"unused\") class Zork {\n" + 
+		"	^^^^^^^^^^^^^^^^^\n" + 
+		"Nullness default is redundant with a default specified for the enclosing method bar()\n" + 
+		"----------\n" + 
+		"3. WARNING in p2\\Y.java (at line 10)\n" + 
+		"	@NonNullByDefault void fubar(TB arg) {}\n" + 
+		"	^^^^^^^^^^^^^^^^^\n" + 
+		"Nullness default is redundant with a default specified for the enclosing type Zork\n" + 
+		"----------\n");
+}
+
+// redundant default annotations - package / class / method vs global default
+public void test_redundant_annotation_03() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(JavaCore.COMPILER_NONNULL_IS_DEFAULT, JavaCore.ENABLED);
+	runConformTestWithLibs(
+		new String[] {
+			"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y {\n" +
+			"    @NonNullByDefault void foo() {}\n" +
+			"}\n" +
+			"class Z {\n" +
+			"    @NonNullByDefault void bar() {}\n" +
+			"}\n",
+			"p3/package-info.java",
+			"@org.eclipse.jdt.annotation.NonNullByDefault package p3;\n"
+		},
+		customOptions,
+		"----------\n" + 
+		"1. WARNING in p2\\Y.java (at line 3)\n" +
+		"	@NonNullByDefault\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with the global default\n" +
+		"----------\n" +
+		"2. WARNING in p2\\Y.java (at line 5)\n" +
+		"	@NonNullByDefault void foo() {}\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with a default specified for the enclosing type Y\n" +
+		"----------\n" +
+		"3. WARNING in p2\\Y.java (at line 8)\n" +
+		"	@NonNullByDefault void bar() {}\n" +
+		"	^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with the global default\n" +
+		"----------\n" +
+		"----------\n" +
+		"1. WARNING in p3\\package-info.java (at line 1)\n" +
+		"	@org.eclipse.jdt.annotation.NonNullByDefault package p3;\n" +
+		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" +
+		"Nullness default is redundant with the global default\n" +
+		"----------\n");
+}
+
+// redundant default annotations - class vs. inner class
+// ensure that disabling null annotations also disables this diagnostic
+public void test_redundant_annotation_04() {
+	Map customOptions = getCompilerOptions();
+	customOptions.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.DISABLED);
+	runConformTestWithLibs(
+		new String[] {
+			"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Y {\n" +
+			"    @NonNullByDefault class Inner {\n" +
+			"        @NonNullByDefault class DeepInner {}\n" +
+			"    }\n" +
+			"    class Inner2 {\n" +
+			"        @NonNullByDefault class DeepInner2 {\n" +
+			"        }\n" +
+			"        @NonNullByDefault void foo(@Nullable @NonNull Object arg) {\n" +
+			"            @NonNullByDefault class Local {}\n" +
+			"        }\n" +
+			"    }\n" +
+			"}\n" +
+			"@NonNullByDefault class V {}\n",
+			"p3/package-info.java",
+			"@org.eclipse.jdt.annotation.NonNullByDefault package p3;\n",
+			"p3/Z.java",
+			"package p3;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" +
+			"public class Z {\n" +
+			"}\n" +
+			"class X {\n" +
+			"    @NonNullByDefault class Inner {}\n" +
+			"    class Inner2 {\n" +
+			"        @NonNullByDefault class DeepInner {}\n" +
+			"    }\n" +
+			"}\n"
+		},
+		customOptions,
+		"");
+}
+
+// contradictory null annotations
+public void test_contradictory_annotations_01() {
+	Map customOptions = getCompilerOptions();
+	runNegativeTestWithLibs(
+		new String[] {
+			"p2/Y.java",
+			"package p2;\n" +
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"public class Y {\n" +
+			"    void foo(@NonNull @Nullable Object o) {}\n" +
+			"    @Nullable @NonNull Object bar() {\n" +
+			"        @NonNull @Nullable Object o = null;\n" +
+			"        return o;\n" +
+			"    }\n" +
+			"}\n" +
+			"class Z {\n" +
+			"    @NonNullByDefault void bar() {}\n" +
+			"}\n"
+		},
+		customOptions,
+		"----------\n" + 
+		"1. ERROR in p2\\Y.java (at line 4)\n" + 
+		"	void foo(@NonNull @Nullable Object o) {}\n" + 
+		"	                  ^^^^^^^^^\n" + 
+		"Contradictory null specification; only one of @NonNull and @Nullable can be specified at any location\n" + 
+		"----------\n" + 
+		"2. ERROR in p2\\Y.java (at line 5)\n" + 
+		"	@Nullable @NonNull Object bar() {\n" + 
+		"	          ^^^^^^^^\n" + 
+		"Contradictory null specification; only one of @NonNull and @Nullable can be specified at any location\n" + 
+		"----------\n" + 
+		"3. ERROR in p2\\Y.java (at line 6)\n" + 
+		"	@NonNull @Nullable Object o = null;\n" + 
+		"	         ^^^^^^^^^\n" + 
+		"Contradictory null specification; only one of @NonNull and @Nullable can be specified at any location\n" + 
+		"----------\n");
+}
+
 // a nonnull variable is dereferenced in a loop
 public void test_nonnull_var_in_constrol_structure_1() {
 	Map customOptions = getCompilerOptions();
@@ -2589,7 +3213,7 @@ public void test_assignment_expression_1() {
 		customOptions,
 		"");	
 }
-// a nonnull variable is dereferenced method of a nested type
+// a nonnull variable is dereferenced in a method of a nested type
 public void test_nesting_1() {
 	Map customOptions = getCompilerOptions();
 //	customOptions.put(CompilerOptions.OPTION_ReportPotentialNullSpecViolation, JavaCore.ERROR);
@@ -2598,7 +3222,6 @@ public void test_nesting_1() {
 		new String[] {
 			"X.java",
 			"import org.eclipse.jdt.annotation.*;\n" +
-			"@NonNullByDefault\n" +
 			"public class X {\n" +
 			"    void print4(final String s1) {\n" +
 			"        for (int i=0; i<3; i++)\n" +
@@ -2633,12 +3256,12 @@ public void test_nesting_1() {
 		},
 		customOptions,
 		"----------\n" +
-		"1. ERROR in X.java (at line 16)\n" +
+		"1. ERROR in X.java (at line 15)\n" +
 		"	print(s2);\n" +
 		"	      ^^\n" +
 		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" +
 		"----------\n" +
-		"2. ERROR in X.java (at line 25)\n" +
+		"2. ERROR in X.java (at line 24)\n" +
 		"	@NonNull String s3R = s3;\n" +
 		"	                      ^^\n" +
 		"Type mismatch: required \'@NonNull String\' but the provided value can be null\n" +

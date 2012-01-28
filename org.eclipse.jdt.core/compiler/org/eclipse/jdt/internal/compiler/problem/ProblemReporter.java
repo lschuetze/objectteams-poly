@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,8 @@
  *  	   						bug 338303 - Warning about Redundant assignment conflicts with definite assignment
  *								bug 349326 - [1.7] new warning for missing try-with-resources
  *								bug 186342 - [compiler][null] Using annotations for null checking
+ *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
+ *								bug 365662 - [compiler][null] warn on contradictory and redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
 
@@ -107,6 +109,7 @@ import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.LocalVariableBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MemberTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
@@ -347,18 +350,26 @@ public static int getIrritant(int problemID) {
 			return CompilerOptions.VarargsArgumentNeedCast;
 
 		case IProblem.NullLocalVariableReference:
+		case IProblem.NullFieldReference:
 			return CompilerOptions.NullReference;
 
 		case IProblem.PotentialNullLocalVariableReference:
 		case IProblem.PotentialNullMessageSendReference:
+		case IProblem.PotentialNullFieldReference:
 			return CompilerOptions.PotentialNullReference;
 
 		case IProblem.RedundantLocalVariableNullAssignment:
+		case IProblem.RedundantFieldNullAssignment:
 		case IProblem.RedundantNullCheckOnNonNullLocalVariable:
 		case IProblem.RedundantNullCheckOnNullLocalVariable:
 		case IProblem.NonNullLocalVariableComparisonYieldsFalse:
 		case IProblem.NullLocalVariableComparisonYieldsFalse:
 		case IProblem.NullLocalVariableInstanceofYieldsFalse:
+		case IProblem.NullFieldInstanceofYieldsFalse:
+		case IProblem.RedundantNullCheckOnNonNullField:
+		case IProblem.RedundantNullCheckOnNullField:
+		case IProblem.NonNullFieldComparisonYieldsFalse:
+		case IProblem.NullFieldComparisonYieldsFalse:
 		case IProblem.RedundantNullCheckOnNonNullMessageSend:
 			return CompilerOptions.RedundantNullCheck;
 
@@ -376,6 +387,10 @@ public static int getIrritant(int problemID) {
 		case IProblem.RequiredNonNullButProvidedUnknown:
 			return CompilerOptions.NullSpecInsufficientInfo;
 		case IProblem.RedundantNullAnnotation:
+		case IProblem.RedundantNullDefaultAnnotation:
+		case IProblem.RedundantNullDefaultAnnotationPackage:
+		case IProblem.RedundantNullDefaultAnnotationType:
+		case IProblem.RedundantNullDefaultAnnotationMethod:
 			return CompilerOptions.RedundantNullAnnotation;
 
 		case IProblem.BoxingConversion :
@@ -4266,26 +4281,26 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 		case ProblemReasons.VarargsElementTypeNotVisible: // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346042
 			problemMethod = (ProblemMethodBinding) method;
 			if (problemMethod.closestMatch != null) {
-				shownMethod = problemMethod.closestMatch.original();
-			}
+			    shownMethod = problemMethod.closestMatch.original();
+		    }
 			TypeBinding varargsElementType = shownMethod.parameters[shownMethod.parameters.length - 1].leafComponentType();
 			this.handle(
-					IProblem.VarargsElementTypeNotVisible,
-					new String[] {
-							new String(shownMethod.selector),
-							typesAsString(shownMethod, false),
-							new String(shownMethod.declaringClass.readableName()),
-							new String(varargsElementType.readableName())
-					},
-					new String[] {
-							new String(shownMethod.selector),
-							typesAsString(shownMethod, true),
-							new String(shownMethod.declaringClass.shortReadableName()),
-							new String(varargsElementType.shortReadableName())
-					},
-					(int) (messageSend.nameSourcePosition >>> 32),
-					(int) messageSend.nameSourcePosition);
-             return;
+				IProblem.VarargsElementTypeNotVisible,
+				new String[] {
+				        new String(shownMethod.selector),
+				        typesAsString(shownMethod, false),
+				        new String(shownMethod.declaringClass.readableName()),
+				        new String(varargsElementType.readableName())
+				},
+				new String[] {
+				        new String(shownMethod.selector),
+				        typesAsString(shownMethod, true),
+				        new String(shownMethod.declaringClass.shortReadableName()),
+				        new String(varargsElementType.shortReadableName())
+				},
+				(int) (messageSend.nameSourcePosition >>> 32),
+				(int) messageSend.nameSourcePosition);
+			return;
 		case ProblemReasons.NoError : // 0
 		default :
 			needImplementation(messageSend); // want to fail to see why we were here...
@@ -5333,29 +5348,6 @@ public void javadocInvalidMethod(MessageSend messageSend, MethodBinding method, 
 				(int) (messageSend.nameSourcePosition >>> 32),
 				(int) messageSend.nameSourcePosition);
 			return;
-		case ProblemReasons.VarargsElementTypeNotVisible: // https://bugs.eclipse.org/bugs/show_bug.cgi?id=346042
-			problemMethod = (ProblemMethodBinding) method;
-			if (problemMethod.closestMatch != null) {
-			    shownMethod = problemMethod.closestMatch.original();
-		    }
-			TypeBinding varargsElementType = shownMethod.parameters[shownMethod.parameters.length - 1].leafComponentType();
-			this.handle(
-				IProblem.VarargsElementTypeNotVisible,
-				new String[] {
-				        new String(shownMethod.selector),
-				        typesAsString(shownMethod, false),
-				        new String(shownMethod.declaringClass.readableName()),
-				        new String(varargsElementType.readableName())
-				},
-				new String[] {
-				        new String(shownMethod.selector),
-				        typesAsString(shownMethod, true),
-				        new String(shownMethod.declaringClass.shortReadableName()),
-				        new String(varargsElementType.shortReadableName())
-				},
-				(int) (messageSend.nameSourcePosition >>> 32),
-				(int) messageSend.nameSourcePosition);
-			return;
 		case ProblemReasons.NoError : // 0
 		default :
 			needImplementation(messageSend); // want to fail to see why we were here...
@@ -5679,49 +5671,73 @@ public void localVariableHiding(LocalDeclaration local, Binding hiddenVariable, 
 	}
 }
 
-public void localVariableNonNullComparedToNull(LocalVariableBinding local, ASTNode location) {
-	int severity = computeSeverity(IProblem.NonNullLocalVariableComparisonYieldsFalse);
+public void variableNonNullComparedToNull(VariableBinding variable, ASTNode location) {
+	int problem;
+	if (variable instanceof FieldBinding) {
+		problem = IProblem.NonNullFieldComparisonYieldsFalse;
+	} else {
+		problem = IProblem.NonNullLocalVariableComparisonYieldsFalse;
+	}
+	int severity = computeSeverity(problem);
 	if (severity == ProblemSeverities.Ignore) return;
-	String[] arguments = new String[] {new String(local.name)  };
+	String[] arguments = new String[] {new String(variable.name)  };
 	this.handle(
-		IProblem.NonNullLocalVariableComparisonYieldsFalse,
+		problem,
 		arguments,
 		arguments,
 		severity,
-		nodeSourceStart(local, location),
-		nodeSourceEnd(local, location));
+		nodeSourceStart(variable, location),
+		nodeSourceEnd(variable, location));
 }
 
-public void localVariableNullComparedToNonNull(LocalVariableBinding local, ASTNode location) {
-	int severity = computeSeverity(IProblem.NullLocalVariableComparisonYieldsFalse);
+public void variableNullComparedToNonNull(VariableBinding variable, ASTNode location) {
+	int problem;
+	if (variable instanceof FieldBinding) {
+		problem = IProblem.NullFieldComparisonYieldsFalse;
+	} else {
+		problem = IProblem.NullLocalVariableComparisonYieldsFalse;
+	}
+	int severity = computeSeverity(problem);
 	if (severity == ProblemSeverities.Ignore) return;
-	String[] arguments = new String[] {new String(local.name)  };
+	String[] arguments = new String[] {new String(variable.name)  };
 	this.handle(
-		IProblem.NullLocalVariableComparisonYieldsFalse,
+		problem,
 		arguments,
 		arguments,
 		severity,
-		nodeSourceStart(local, location),
-		nodeSourceEnd(local, location));
+		nodeSourceStart(variable, location),
+		nodeSourceEnd(variable, location));
 }
 
-public void localVariableNullInstanceof(LocalVariableBinding local, ASTNode location) {
-	int severity = computeSeverity(IProblem.NullLocalVariableInstanceofYieldsFalse);
+public void variableNullInstanceof(VariableBinding variable, ASTNode location) {
+	int problem;
+	if (variable instanceof FieldBinding) {
+		problem = IProblem.NullFieldInstanceofYieldsFalse;
+	} else {
+		problem = IProblem.NullLocalVariableInstanceofYieldsFalse;
+	}
+	int severity = computeSeverity(problem);
 	if (severity == ProblemSeverities.Ignore) return;
-	String[] arguments = new String[] {new String(local.name)  };
+	String[] arguments = new String[] {new String(variable.name)  };
 	this.handle(
-		IProblem.NullLocalVariableInstanceofYieldsFalse,
+		problem,
 		arguments,
 		arguments,
 		severity,
-		nodeSourceStart(local, location),
-		nodeSourceEnd(local, location));
+		nodeSourceStart(variable, location),
+		nodeSourceEnd(variable, location));
 }
 
-public void localVariableNullReference(LocalVariableBinding local, ASTNode location) {
-	int severity = computeSeverity(IProblem.NullLocalVariableReference);
+public void variableNullReference(VariableBinding variable, ASTNode location) {
+	int problem;
+	if (variable instanceof FieldBinding) {
+		problem = IProblem.NullFieldReference;
+	} else {
+		problem = IProblem.NullLocalVariableReference;
+	}
+	int severity = computeSeverity(problem);
 	if (severity == ProblemSeverities.Ignore) return;
-	String[] arguments = new String[] {new String(local.name)  };
+	String[] arguments = new String[] {new String(variable.name)  };
 //{ObjectTeams: synthetic local variabel (in within statement)?
 	if (location instanceof WithinStatement.SubstitutedReference) {
 		WithinStatement.SubstitutedReference nameRef = (WithinStatement.SubstitutedReference) location;
@@ -5731,18 +5747,24 @@ public void localVariableNullReference(LocalVariableBinding local, ASTNode locat
 	}
 // SH}
 	this.handle(
-		IProblem.NullLocalVariableReference,
+		problem,
 		arguments,
 		arguments,
 		severity,
-		nodeSourceStart(local, location),
-		nodeSourceEnd(local, location));
+		nodeSourceStart(variable, location),
+		nodeSourceEnd(variable, location));
 }
 
-public void localVariablePotentialNullReference(LocalVariableBinding local, ASTNode location) {
-	int severity = computeSeverity(IProblem.PotentialNullLocalVariableReference);
+public void variablePotentialNullReference(VariableBinding variable, ASTNode location) {
+	int problem;
+	if (variable instanceof FieldBinding) {
+		problem = IProblem.PotentialNullFieldReference;
+	} else {
+		problem = IProblem.PotentialNullLocalVariableReference;
+	}
+	int severity = computeSeverity(problem);
 	if (severity == ProblemSeverities.Ignore) return;
-	String[] arguments = new String[] {new String(local.name)};
+	String[] arguments = new String[] {new String(variable.name)};
 //{ObjectTeams: synthetic local variabel (in within statement)?
 	if (location instanceof WithinStatement.SubstitutedReference) {
 		WithinStatement.SubstitutedReference nameRef = (WithinStatement.SubstitutedReference) location;
@@ -5752,53 +5774,71 @@ public void localVariablePotentialNullReference(LocalVariableBinding local, ASTN
 	}
 // SH}
 	this.handle(
-		IProblem.PotentialNullLocalVariableReference,
+		problem,
 		arguments,
 		arguments,
 		severity,
-		nodeSourceStart(local, location),
-		nodeSourceEnd(local, location));
+		nodeSourceStart(variable, location),
+		nodeSourceEnd(variable, location));
 }
 
-public void localVariableRedundantCheckOnNonNull(LocalVariableBinding local, ASTNode location) {
-	int severity = computeSeverity(IProblem.RedundantNullCheckOnNonNullLocalVariable);
+public void variableRedundantCheckOnNonNull(VariableBinding variable, ASTNode location) {
+	int problem;
+	if (variable instanceof FieldBinding) {
+		problem = IProblem.RedundantNullCheckOnNonNullField;
+	} else {
+		problem = IProblem.RedundantNullCheckOnNonNullLocalVariable;
+	}
+	int severity = computeSeverity(problem);
 	if (severity == ProblemSeverities.Ignore) return;
-	String[] arguments = new String[] {new String(local.name)  };
+	String[] arguments = new String[] {new String(variable.name)  };
 	this.handle(
-		IProblem.RedundantNullCheckOnNonNullLocalVariable,
+		problem,
 		arguments,
 		arguments,
 		severity,
-		nodeSourceStart(local, location),
-		nodeSourceEnd(local, location));
+		nodeSourceStart(variable, location),
+		nodeSourceEnd(variable, location));
 }
 
-public void localVariableRedundantCheckOnNull(LocalVariableBinding local, ASTNode location) {
-	int severity = computeSeverity(IProblem.RedundantNullCheckOnNullLocalVariable);
+public void variableRedundantCheckOnNull (VariableBinding variable, ASTNode location) {
+	int problem;
+	if (variable instanceof FieldBinding) {
+		problem = IProblem.RedundantNullCheckOnNullField;
+	} else {
+		problem = IProblem.RedundantNullCheckOnNullLocalVariable;
+	}
+	int severity = computeSeverity(problem);
 	if (severity == ProblemSeverities.Ignore) return;
-	String[] arguments = new String[] {new String(local.name)  };
+	String[] arguments = new String[] {new String(variable.name)  };
 	this.handle(
-		IProblem.RedundantNullCheckOnNullLocalVariable,
+		problem,
 		arguments,
 		arguments,
 		severity,
-		nodeSourceStart(local, location),
-		nodeSourceEnd(local, location));
+		nodeSourceStart(variable, location),
+		nodeSourceEnd(variable, location));
 }
 
-public void localVariableRedundantNullAssignment(LocalVariableBinding local, ASTNode location) {
+public void variableRedundantNullAssignment (VariableBinding variable, ASTNode location) {
 	if ((location.bits & ASTNode.FirstAssignmentToLocal) != 0) // https://bugs.eclipse.org/338303 - Warning about Redundant assignment conflicts with definite assignment
 		return;
-	int severity = computeSeverity(IProblem.RedundantLocalVariableNullAssignment);
+	int problem;
+	if (variable instanceof FieldBinding) {
+		problem = IProblem.RedundantFieldNullAssignment;
+	} else {
+		problem = IProblem.RedundantLocalVariableNullAssignment;
+	}
+	int severity = computeSeverity(problem);
 	if (severity == ProblemSeverities.Ignore) return;
-	String[] arguments = new String[] {new String(local.name)  };
+	String[] arguments = new String[] {new String(variable.name)  };
 	this.handle(
-		IProblem.RedundantLocalVariableNullAssignment,
+		problem,
 		arguments,
 		arguments,
 		severity,
-		nodeSourceStart(local, location),
-		nodeSourceEnd(local, location));
+		nodeSourceStart(variable, location),
+		nodeSourceEnd(variable, location));
 }
 
 public void methodMustOverride(AbstractMethodDeclaration method, long complianceLevel) {
@@ -7734,6 +7774,7 @@ private String typesAsString(TypeBinding[] types, boolean makeShort) {
 // SH}
 	return buffer.toString();
 }
+
 public void undefinedAnnotationValue(TypeBinding annotationType, MemberValuePair memberValuePair) {
 	if (isRecoveredName(memberValuePair.name)) return;
 	String name = 	new String(memberValuePair.name);
@@ -7843,7 +7884,7 @@ public void unhandledException(TypeBinding exceptionType, ASTNode location) {
 		new String[] {new String(exceptionType.readableName())},
 		new String[] {new String(exceptionType.shortReadableName())},
 		location.sourceStart,
-		location.sourceEnd);
+		sourceEnd);
 }
 public void unhandledExceptionFromAutoClose (TypeBinding exceptionType, ASTNode location) {
 	LocalVariableBinding localBinding = ((LocalDeclaration)location).binding;
@@ -8205,51 +8246,6 @@ public void unsafeRawInvocation(ASTNode location, MethodBinding rawMethod) {
 			location.sourceEnd);
     }
 }
-public void potentiallyUnclosedCloseable(FakedTrackingVariable trackVar, ASTNode location) {
-	String[] args = { String.valueOf(trackVar.name) };
-	if (location == null) {
-		this.handle(
-			IProblem.PotentiallyUnclosedCloseable,
-			args,
-			args,
-			trackVar.sourceStart,
-			trackVar.sourceEnd);
-	} else {
-		this.handle(
-			IProblem.PotentiallyUnclosedCloseableAtExit,
-			args,
-			args,
-			location.sourceStart,
-			location.sourceEnd);
-	}
-}
-public void unclosedCloseable(FakedTrackingVariable trackVar, ASTNode location) {
-	String[] args = { String.valueOf(trackVar.name) };
-	if (location == null) {
-		this.handle(
-			IProblem.UnclosedCloseable,
-			args,
-			args,
-			trackVar.sourceStart,
-			trackVar.sourceEnd);
-	} else {
-		this.handle(
-			IProblem.UnclosedCloseableAtExit,
-			args,
-			args,
-			location.sourceStart,
-			location.sourceEnd);
-	}
-}
-public void explicitlyClosedAutoCloseable(FakedTrackingVariable trackVar) {
-	String[] args = { String.valueOf(trackVar.name) };
-	this.handle(
-		IProblem.ExplicitlyClosedAutoCloseable,
-		args,
-		args,
-		trackVar.sourceStart,
-		trackVar.sourceEnd);	
-}
 public void unsafeReturnTypeOverride(MethodBinding currentMethod, MethodBinding inheritedMethod, SourceTypeBinding type) {
 	if (this.options.sourceLevel < ClassFileConstants.JDK1_5) {
 		return;
@@ -8405,7 +8401,9 @@ public void unusedPrivateConstructor(ConstructorDeclaration constructorDecl) {
 
 	int severity = computeSeverity(IProblem.UnusedPrivateConstructor);
 	if (severity == ProblemSeverities.Ignore) return;
-
+	
+	if (excludeDueToAnnotation(constructorDecl.annotations)) return;
+	
 	MethodBinding constructor = constructorDecl.binding;
 	this.handle(
 			IProblem.UnusedPrivateConstructor,
@@ -8451,6 +8449,7 @@ public void unusedPrivateField(FieldDeclaration fieldDecl) {
 			}
 		}
 	}
+	if (excludeDueToAnnotation(fieldDecl.annotations)) return;
 	this.handle(
 			IProblem.UnusedPrivateField,
 		new String[] {
@@ -8504,10 +8503,8 @@ public void unusedPrivateMethod(AbstractMethodDeclaration methodDecl) {
 			&& CharOperation.equals(method.selector, TypeConstants.WRITEREPLACE)) {
 		return;
 	}
-	if ((method.tagBits & (TagBits.AnnotationPostConstruct | TagBits.AnnotationPreDestroy)) != 0) {
-		// PostConstruct and PreDestroy method are ignored
-		return;
-	}
+	if (excludeDueToAnnotation(methodDecl.annotations)) return;
+	
 	this.handle(
 			IProblem.UnusedPrivateMethod,
 		new String[] {
@@ -8524,6 +8521,39 @@ public void unusedPrivateMethod(AbstractMethodDeclaration methodDecl) {
 		methodDecl.sourceStart,
 		methodDecl.sourceEnd);
 }
+
+/**
+ * Returns true if a private member should not be warned as unused if
+ * annotated with a non-standard annotation.
+ * https://bugs.eclipse.org/bugs/show_bug.cgi?id=365437
+ */
+private boolean excludeDueToAnnotation(Annotation[] annotations) {
+	int annotationsLen = 0;
+	if (annotations != null) {
+		annotationsLen = annotations.length;
+	} else {
+		return false;
+	}
+	if (annotationsLen == 0) return false;
+	for (int i = 0; i < annotationsLen; i++) {
+		TypeBinding resolvedType = annotations[i].resolvedType;
+		if (resolvedType != null) {
+			switch (resolvedType.id) {
+				case TypeIds.T_JavaLangSuppressWarnings:
+				case TypeIds.T_JavaLangDeprecated:
+				case TypeIds.T_JavaLangSafeVarargs:
+				case TypeIds.T_ConfiguredAnnotationNonNull:
+				case TypeIds.T_ConfiguredAnnotationNullable:
+				case TypeIds.T_ConfiguredAnnotationNonNullByDefault:
+					break;
+				default:
+					// non-standard annotation found, don't warn
+					return true;
+			}
+		}
+	}
+	return false;
+}
 public void unusedPrivateType(TypeDeclaration typeDecl) {
 //{ObjectTeams: don't bother with copied nor tsuper marker interface:
 	// TODO(SH): could this diagnostic actually be used to remove marker interfaces before codegen??
@@ -8532,7 +8562,7 @@ public void unusedPrivateType(TypeDeclaration typeDecl) {
 // SH}
 	int severity = computeSeverity(IProblem.UnusedPrivateType);
 	if (severity == ProblemSeverities.Ignore) return;
-
+	if (excludeDueToAnnotation(typeDecl.annotations)) return;
 	ReferenceBinding type = typeDecl.binding;
 	this.handle(
 			IProblem.UnusedPrivateType,
@@ -8844,6 +8874,52 @@ public void redundantSpecificationOfTypeArguments(ASTNode location, TypeBinding[
 			location.sourceEnd);
     }
 }
+public void potentiallyUnclosedCloseable(FakedTrackingVariable trackVar, ASTNode location) {
+	String[] args = { String.valueOf(trackVar.name) };
+	if (location == null) {
+		this.handle(
+			IProblem.PotentiallyUnclosedCloseable,
+			args,
+			args,
+			trackVar.sourceStart,
+			trackVar.sourceEnd);
+	} else {
+		this.handle(
+			IProblem.PotentiallyUnclosedCloseableAtExit,
+			args,
+			args,
+			location.sourceStart,
+			location.sourceEnd);
+	}
+}
+public void unclosedCloseable(FakedTrackingVariable trackVar, ASTNode location) {
+	String[] args = { String.valueOf(trackVar.name) };
+	if (location == null) {
+		this.handle(
+			IProblem.UnclosedCloseable,
+			args,
+			args,
+			trackVar.sourceStart,
+			trackVar.sourceEnd);
+	} else {
+		this.handle(
+			IProblem.UnclosedCloseableAtExit,
+			args,
+			args,
+			location.sourceStart,
+			location.sourceEnd);
+	}
+}
+public void explicitlyClosedAutoCloseable(FakedTrackingVariable trackVar) {
+	String[] args = { String.valueOf(trackVar.name) };
+	this.handle(
+		IProblem.ExplicitlyClosedAutoCloseable,
+		args,
+		args,
+		trackVar.sourceStart,
+		trackVar.sourceEnd);	
+}
+
 //{ObjectTeams:
 /** This class is used for sorting which we do to make messages more deterministic. */
 private final class CharArrayComparator implements Comparator<char[]> {
@@ -12388,6 +12464,7 @@ public void migrateToWrongBase(Expression expression, TypeBinding providedType, 
 					  String.valueOf(baseclass.readableName()) };
 	this.handle(IProblem.MigrateToWrongBase, args, args, expression.sourceStart, expression.sourceEnd);
 }
+// SH}
 
 public void nullityMismatch(Expression expression, TypeBinding requiredType, int nullStatus, char[][] annotationName) {
 	int problemId = IProblem.RequiredNonNullButProvidedUnknown;
@@ -12439,7 +12516,7 @@ public void illegalRedefinitionToNonNullParameter(Argument argument, ReferenceBi
 			argument.type.sourceEnd);
 	}
 }
-public void parameterLackingNonNullAnnotation(Argument argument, ReferenceBinding declaringClass, boolean needNonNull, char[][] inheritedAnnotationName) {
+public void parameterLackingNullAnnotation(Argument argument, ReferenceBinding declaringClass, boolean needNonNull, char[][] inheritedAnnotationName) {
 	this.handle(
 		needNonNull ? IProblem.ParameterLackingNonNullAnnotation : IProblem.ParameterLackingNullableAnnotation, 
 		new String[] { new String(argument.name), new String(declaringClass.readableName()), CharOperation.toString(inheritedAnnotationName)},
@@ -12464,7 +12541,10 @@ public void illegalReturnRedefinition(AbstractMethodDeclaration abstractMethodDe
 		.append(inheritedMethod.shortReadableName());
 	int sourceStart = methodDecl.returnType.sourceStart;
 	Annotation[] annotations = methodDecl.annotations;
-	sourceStart = findAnnotationSourceStart(annotations, sourceStart, TypeIds.T_ConfiguredAnnotationNullable);
+	Annotation annotation = findAnnotation(annotations, TypeIds.T_ConfiguredAnnotationNullable);
+	if (annotation != null) {
+		sourceStart = annotation.sourceStart;
+	}
 	this.handle(
 		IProblem.IllegalReturnNullityRedefinition, 
 		new String[] { methodSignature.toString(), CharOperation.toString(nonNullAnnotationName)},
@@ -12524,7 +12604,8 @@ public void nullAnnotationIsRedundant(AbstractMethodDeclaration sourceMethod, in
 	int sourceStart, sourceEnd;
 	if (i == -1) {
 		MethodDeclaration methodDecl = (MethodDeclaration) sourceMethod;
-		sourceStart = findAnnotationSourceStart(methodDecl.annotations, methodDecl.returnType.sourceStart, TypeIds.T_ConfiguredAnnotationNonNull);
+		Annotation annotation = findAnnotation(methodDecl.annotations, TypeIds.T_ConfiguredAnnotationNonNull);
+		sourceStart = annotation != null ? annotation.sourceStart : methodDecl.returnType.sourceStart;
 		sourceEnd = methodDecl.returnType.sourceEnd;
 	} else {
 		Argument arg = sourceMethod.arguments[i];
@@ -12534,29 +12615,66 @@ public void nullAnnotationIsRedundant(AbstractMethodDeclaration sourceMethod, in
 	this.handle(IProblem.RedundantNullAnnotation, ProblemHandler.NoArgument, ProblemHandler.NoArgument, sourceStart, sourceEnd);
 }
 
+public void nullDefaultAnnotationIsRedundant(ASTNode location, Annotation[] annotations, Binding outer) {
+	Annotation annotation = findAnnotation(annotations, TypeIds.T_ConfiguredAnnotationNonNullByDefault);
+	int start = annotation != null ? annotation.sourceStart : location.sourceStart;
+	int end = annotation != null ? annotation.sourceEnd : location.sourceStart;
+	String[] args = NoArgument;
+	String[] shortArgs = NoArgument;
+	if (outer != null) {
+		args = new String[] { new String(outer.readableName()) };
+		shortArgs = new String[] { new String(outer.shortReadableName()) };
+	}
+	int problemId = IProblem.RedundantNullDefaultAnnotation;
+	if (outer instanceof PackageBinding) {
+		problemId = IProblem.RedundantNullDefaultAnnotationPackage;
+	} else if (outer instanceof ReferenceBinding) {
+		problemId = IProblem.RedundantNullDefaultAnnotationType;
+	} else if (outer instanceof MethodBinding) {
+		problemId = IProblem.RedundantNullDefaultAnnotationMethod;
+	}
+	this.handle(problemId, args, shortArgs, start, end);
+}
+
+public void contradictoryNullAnnotations(Annotation annotation) {
+	// when this error is triggered we can safely assume that both annotations have been configured
+	char[][] nonNullAnnotationName = this.options.nonNullAnnotationName;
+	char[][] nullableAnnotationName = this.options.nullableAnnotationName;
+	String[] arguments = {
+		new String(CharOperation.concatWith(nonNullAnnotationName, '.')),
+		new String(CharOperation.concatWith(nullableAnnotationName, '.'))
+	};
+	String[] shortArguments = {
+			new String(nonNullAnnotationName[nonNullAnnotationName.length-1]),
+			new String(nullableAnnotationName[nullableAnnotationName.length-1])
+		};
+	this.handle(IProblem.ContradictoryNullAnnotations, arguments, shortArguments, annotation.sourceStart, annotation.sourceEnd);
+}
+
 public void illegalAnnotationForBaseType(TypeReference type, Annotation[] annotations, char[] annotationName, long nullAnnotationTagBit)
 {
 	int typeId = (nullAnnotationTagBit == TagBits.AnnotationNullable) 
 			? TypeIds.T_ConfiguredAnnotationNullable : TypeIds.T_ConfiguredAnnotationNonNull;
 	String[] args = new String[] { new String(annotationName), new String(type.getLastToken()) };
+	Annotation annotation = findAnnotation(annotations, typeId);
+	int start = annotation != null ? annotation.sourceStart : type.sourceStart;
 	this.handle(IProblem.IllegalAnnotationForBaseType,
 			args,
 			args,
-			findAnnotationSourceStart(annotations, type.sourceStart, typeId),
+			start,
 			type.sourceEnd);
 }
 
-private int findAnnotationSourceStart(Annotation[] annotations, int startFallback, int typeId) {
-	int sourceStart = startFallback;
+private Annotation findAnnotation(Annotation[] annotations, int typeId) {
 	if (annotations != null) {
 		// should have a @NonNull/@Nullable annotation, search for it:
-		for (int j=0; j<annotations.length; j++) {
+		int length = annotations.length;
+		for (int j=0; j<length; j++) {
 			if (annotations[j].resolvedType != null && annotations[j].resolvedType.id == typeId) {
-				sourceStart = annotations[j].sourceStart;
-				break;
+				return annotations[j];
 			}
 		}
 	}
-	return sourceStart;
+	return null;
 }
 }

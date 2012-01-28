@@ -349,6 +349,9 @@ protected void consumeCatchFormalParameter() {
 				arg.annotations = new Annotation[length],
 				0,
 				length);
+			RecoveredType currentRecoveryType = this.currentRecoveryType();
+			if (currentRecoveryType != null)
+				currentRecoveryType.annotationsConsumed(arg.annotations);
 		}
 
 		pushOnAstStack(arg);

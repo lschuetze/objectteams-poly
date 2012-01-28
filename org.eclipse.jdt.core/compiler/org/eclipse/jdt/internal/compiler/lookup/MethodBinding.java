@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,11 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
- *     Stephan Herrmann - Contribution for bug 186342 - [compiler][null] Using annotations for null checking
+ *     Stephan Herrmann - Contributions for
+ *								bug 186342 - [compiler][null] Using annotations for null checking
+ *								bug 367203 - [compiler][null] detect assigning null to nonnull argument
+ *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
+ *								bug 365662 - [compiler][null] warn on contradictory and redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -857,28 +861,32 @@ protected void fillInDefaultNonNullness(TypeBinding annotationBinding) {
 	if (this.parameterNonNullness == null)
 		this.parameterNonNullness = new Boolean[this.parameters.length];
 	AbstractMethodDeclaration sourceMethod = sourceMethod();
-	for (int i = 0; i < this.parameterNonNullness.length; i++) {
+	boolean added = false;
+	int length = this.parameterNonNullness.length;
+	for (int i = 0; i < length; i++) {
 		if (this.parameters[i].isBaseType())
 			continue;
-		boolean added = false;
 		if (this.parameterNonNullness[i] == null) {
 			added = true;
 			this.parameterNonNullness[i] = Boolean.TRUE;
-			if (sourceMethod != null)
-				sourceMethod.addParameterNonNullAnnotation(i, (ReferenceBinding)annotationBinding);
+			if (sourceMethod != null) {
+				Argument argument = sourceMethod.arguments[i];
+				sourceMethod.addParameterNonNullAnnotation(argument, (ReferenceBinding)annotationBinding);
+				argument.binding.tagBits |= TagBits.AnnotationNonNull;
+			}
 		} else if (this.parameterNonNullness[i].booleanValue()) {
 			sourceMethod.scope.problemReporter().nullAnnotationIsRedundant(sourceMethod, i);
 		}
-		if (added)
-			this.tagBits |= TagBits.HasParameterAnnotations;
 	}
+	if (added)
+		this.tagBits |= TagBits.HasParameterAnnotations;
 	if (   this.returnType != null
 		&& !this.returnType.isBaseType()
 		&& (this.tagBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) == 0)
 	{
 		this.tagBits |= TagBits.AnnotationNonNull;
 		if (sourceMethod != null)
-			sourceMethod.addNullnessAnnotation((ReferenceBinding)annotationBinding);
+			sourceMethod.addNonNullAnnotation((ReferenceBinding)annotationBinding);
 	} else if ((this.tagBits & TagBits.AnnotationNonNull) != 0) {
 		sourceMethod.scope.problemReporter().nullAnnotationIsRedundant(sourceMethod, -1/*signifies method return*/);
 	}
@@ -995,6 +1003,13 @@ public long getAnnotationTagBits() {
 			AbstractMethodDeclaration methodDecl = typeDecl.declarationOf(originalMethod);
 			if (methodDecl != null)
 				ASTNode.resolveAnnotations(methodDecl.scope, methodDecl.annotations, originalMethod);
+			long nullDefaultBits = this.tagBits & (TagBits.AnnotationNonNullByDefault|TagBits.AnnotationNullUnspecifiedByDefault);
+			if (nullDefaultBits != 0 && this.declaringClass instanceof SourceTypeBinding) {
+				SourceTypeBinding declaringSourceType = (SourceTypeBinding) this.declaringClass;
+				if (declaringSourceType.checkRedundantNullnessDefaultOne(methodDecl, methodDecl.annotations, nullDefaultBits)) {
+					declaringSourceType.checkRedundantNullnessDefaultRecurse(methodDecl, methodDecl.annotations, nullDefaultBits);
+				}
+			}
 		}
 	}
 	return originalMethod.tagBits;

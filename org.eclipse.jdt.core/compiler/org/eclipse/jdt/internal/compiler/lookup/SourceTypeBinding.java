@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -13,6 +13,9 @@
  *								bug 328281 - visibility leaks not detected when analyzing unused field in private class
  *								bug 349326 - [1.7] new warning for missing try-with-resources
  *								bug 186342 - [compiler][null] Using annotations for null checking
+ *								bug 365836 - [compiler][null] Incomplete propagation of null defaults.
+ *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
+ *								bug 365662 - [compiler][null] warn on contradictory and redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -27,6 +30,7 @@ import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AbstractVariableDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
@@ -103,6 +107,8 @@ public class SourceTypeBinding extends ReferenceBinding {
 // SH}
 
 	public ClassScope scope;
+	public int fieldAnalysisOffset;		// an offset for ids of fields of this class (id to be used for flow analysis) 
+	public int cumulativeFieldCount;   // cumulative field count from all enclosing types, used to build unique field id's for member types.
 
 	// Synthetics are separated into 4 categories: methods, super methods, fields, class literals and bridge methods
 	// if a new category is added, also increment MAX_SYNTHETICS
@@ -152,6 +158,7 @@ public SourceTypeBinding(char[][] compoundName, PackageBinding fPackage, ClassSc
 // SH}
 	this.sourceName = scope.referenceContext.name;
 	this.scope = scope;
+	this.cumulativeFieldCount = 0;
 //{ObjectTeams: ROFI create a package binding for our role files (if any):
 	maybeSetTeamPackage(compoundName, fPackage, scope.environment());
 // SH}
@@ -2225,7 +2232,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 				arg.binding.type = parameterType; // only add this missing info
 			  else
 // SH}
-				arg.binding = new LocalVariableBinding(arg, parameterType, arg.modifiers, true);
+				arg.binding = new LocalVariableBinding(arg, parameterType, arg.modifiers, true /*isArgument*/);
 			}
 		}
 		// only assign parameters if no problems are found
@@ -2367,13 +2374,13 @@ private void createArgumentBindings(MethodBinding method) {
 	if (methodDecl != null) {
 		if (method.parameters != Binding.NO_PARAMETERS)
 			methodDecl.createArgumentBindings();
-		TypeBinding annotationBinding = findDefaultNullness(method, methodDecl.scope.environment());
+		TypeBinding annotationBinding = findDefaultNullness(methodDecl.scope, methodDecl.scope.environment());
 		if (annotationBinding != null && annotationBinding.id == TypeIds.T_ConfiguredAnnotationNonNull)
 			method.fillInDefaultNonNullness(annotationBinding);
 	}
 }
 private void evaluateNullAnnotations(long annotationTagBits) {
-	if (this.nullnessDefaultInitialized > 0)
+	if (this.nullnessDefaultInitialized > 0 || !this.scope.compilerOptions().isAnnotationBasedNullAnalysisEnabled)
 		return;
 	this.nullnessDefaultInitialized = 1;
 	// transfer nullness info from tagBits to this.nullnessDefaultAnnotation
@@ -2382,11 +2389,47 @@ private void evaluateNullAnnotations(long annotationTagBits) {
 	if (defaultAnnotation != null) {
 		if (CharOperation.equals(this.sourceName, TypeConstants.PACKAGE_INFO_NAME)) {
 			getPackage().nullnessDefaultAnnotation = defaultAnnotation;
+			long globalDefault = this.scope.compilerOptions().defaultNonNullness;
+			if (globalDefault == TagBits.AnnotationNonNull && (annotationTagBits & TagBits.AnnotationNonNullByDefault) != 0) {
+				TypeDeclaration typeDecl = this.scope.referenceContext;
+				this.scope.problemReporter().nullDefaultAnnotationIsRedundant(typeDecl, typeDecl.annotations, null);
+			}
 		} else {
 			this.nullnessDefaultAnnotation = defaultAnnotation;
+			TypeDeclaration typeDecl = this.scope.referenceContext;
+			long nullDefaultBits = annotationTagBits & (TagBits.AnnotationNullUnspecifiedByDefault|TagBits.AnnotationNonNullByDefault);
+			checkRedundantNullnessDefaultRecurse(typeDecl, typeDecl.annotations, nullDefaultBits);
 		}
 	}
 }
+
+protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation[] annotations, long annotationTagBits) {
+	if (this.fPackage.nullnessDefaultAnnotation != null) {
+		if ((this.fPackage.nullnessDefaultAnnotation.id == TypeIds.T_ConfiguredAnnotationNonNull
+				&& ((annotationTagBits & TagBits.AnnotationNonNullByDefault) != 0))) {
+			this.scope.problemReporter().nullDefaultAnnotationIsRedundant(location, annotations, this.fPackage);
+		}
+		return;
+	}
+	long globalDefault = this.scope.compilerOptions().defaultNonNullness;
+	if (globalDefault == TagBits.AnnotationNonNull && annotationTagBits == TagBits.AnnotationNonNullByDefault) {
+		this.scope.problemReporter().nullDefaultAnnotationIsRedundant(location, annotations, null);
+	}
+}
+
+// return: should caller continue searching?
+protected boolean checkRedundantNullnessDefaultOne(ASTNode location, Annotation[] annotations, long annotationTagBits) {
+	TypeBinding thisDefault = this.nullnessDefaultAnnotation;
+	if (thisDefault != null) {
+		if (thisDefault.id == TypeIds.T_ConfiguredAnnotationNonNull
+			&& ((annotationTagBits & TagBits.AnnotationNonNullByDefault) != 0)) {
+			this.scope.problemReporter().nullDefaultAnnotationIsRedundant(location, annotations, this);
+		}
+		return false; // different default means inner default is not redundant -> we're done
+	}
+	return true;
+}
+
 private TypeBinding getNullnessDefaultAnnotation() {
 	if (this.nullnessDefaultAnnotation instanceof UnresolvedReferenceBinding)
 		this.nullnessDefaultAnnotation = this.scope.environment().getNullAnnotationResolved(this.nullnessDefaultAnnotation, this.scope);
@@ -2399,29 +2442,42 @@ private TypeBinding getNullnessDefaultAnnotation() {
  * <li>the synthetic type {@link ReferenceBinding#NULL_UNSPECIFIED} if a default from outer scope has been canceled</li>
  * <li>null if no default has been defined</li>
  * </ul>
+ * @param currentScope where to start search for lexically enclosing default
+ * @param environment gateway to options and configured annotation types
  */
-private TypeBinding findDefaultNullness(MethodBinding methodBinding, LookupEnvironment environment) {
+private TypeBinding findDefaultNullness(Scope currentScope, LookupEnvironment environment) {
 	// find the applicable default inside->out:
 
-	// method
-	TypeBinding annotationBinding = environment.getNullAnnotationBindingFromDefault(methodBinding.tagBits, true/*resolve*/);
-	if (annotationBinding != null)
-		return annotationBinding;
-
-	// type
-	ReferenceBinding type = methodBinding.declaringClass;
-	ReferenceBinding currentType = type;
-	while (currentType instanceof SourceTypeBinding) {
-		annotationBinding = ((SourceTypeBinding) currentType).getNullnessDefaultAnnotation();
-		if (annotationBinding != null)
-			return annotationBinding;
-		currentType = currentType.enclosingType();
+	SourceTypeBinding currentType = null;
+	TypeBinding annotationBinding;
+	while (currentScope != null) {
+		switch (currentScope.kind) {
+			case Scope.METHOD_SCOPE:
+				AbstractMethodDeclaration referenceMethod = ((MethodScope)currentScope).referenceMethod();
+				if (referenceMethod != null && referenceMethod.binding != null) {
+					annotationBinding = environment.getNullAnnotationBindingFromDefault(referenceMethod.binding.tagBits, true/*resolve*/);
+					if (annotationBinding != null)
+						return annotationBinding;
+				}
+				break;
+			case Scope.CLASS_SCOPE:
+				currentType = ((ClassScope)currentScope).referenceContext.binding;
+				if (currentType != null) {
+					annotationBinding = currentType.getNullnessDefaultAnnotation();
+					if (annotationBinding != null)
+						return annotationBinding;
+				}
+				break;
+		}
+		currentScope = currentScope.parent;
 	}
 
 	// package
-	annotationBinding = type.getPackage().getNullnessDefaultAnnotation(this.scope);
-	if (annotationBinding != null)
-		return annotationBinding;
+	if (currentType != null) {
+		annotationBinding = currentType.getPackage().getNullnessDefaultAnnotation(this.scope);
+		if (annotationBinding != null)
+			return annotationBinding;
+	}
 
 	// global
 	long defaultNullness = environment.globalOptions.defaultNonNullness;

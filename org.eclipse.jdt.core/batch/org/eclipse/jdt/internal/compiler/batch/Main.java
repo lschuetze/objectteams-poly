@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,13 @@
  *     Tom Tromey - Contribution for bug 125961
  *     Tom Tromey - Contribution for bug 159641
  *     Benjamin Muskalla - Contribution for bug 239066
+ *     Fraunhofer FIRST - extended API and implementation
+ *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann  - Contributions for 
  *     							bug 236385 - [compiler] Warn for potential programming problem if an object is created but not used
  *     							bug 295551 - Add option to automatically promote all warnings to errors
  *     							bug 359721 - [options] add command line option for new warning token "resource"
- *     Fraunhofer FIRST - extended API and implementation
- *     Technical University Berlin - extended API and implementation
+ *								bug 365208 - [compiler][batch] command line options for annotation based null analysis
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.batch;
 
@@ -2451,6 +2452,10 @@ public void configure(String[] argv) {
 					mode = INSIDE_WARNINGS_PROPERTIES;
 					continue;
 				}
+				if (currentArg.equals("-nonNullByDefault")) { //$NON-NLS-1$
+					this.options.put(CompilerOptions.OPTION_NonNullIsDefault, CompilerOptions.ENABLED);
+					continue;
+				}
 				break;
 			case INSIDE_TARGET :
 				if (this.didSpecifyTarget) {
@@ -3544,7 +3549,42 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 					setSeverity(CompilerOptions.OPTION_ReportRedundantNullCheck, ProblemSeverities.Ignore, isEnabling);
 				}
 				return;
+			} else if (token.equals("nullFields")) { //$NON-NLS-1$
+				this.options.put(
+						CompilerOptions.OPTION_IncludeFieldsInNullAnalysis,
+						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
+				return;
+			} else if (token.startsWith("nullAnnot")) { //$NON-NLS-1$
+				String annotationNames = Util.EMPTY_STRING;
+				int start = token.indexOf('(');
+				int end = token.indexOf(')');
+				String nonNullAnnotName = null, nullableAnnotName = null, nonNullByDefaultAnnotName = null;
+				if (isEnabling && start >= 0 && end >= 0 && start < end){
+					annotationNames = token.substring(start+1, end).trim();
+					int separator1 = annotationNames.indexOf('|');
+					if (separator1 == -1) throw new IllegalArgumentException(this.bind("configure.invalidNullAnnot", token)); //$NON-NLS-1$
+					nullableAnnotName = annotationNames.substring(0, separator1).trim();
+					if (nullableAnnotName.length() == 0) throw new IllegalArgumentException(this.bind("configure.invalidNullAnnot", token)); //$NON-NLS-1$
+					int separator2 = annotationNames.indexOf('|', separator1 + 1);
+					if (separator2 == -1) throw new IllegalArgumentException(this.bind("configure.invalidNullAnnot", token)); //$NON-NLS-1$
+					nonNullAnnotName = annotationNames.substring(separator1 + 1, separator2).trim();
+					if (nonNullAnnotName.length() == 0) throw new IllegalArgumentException(this.bind("configure.invalidNullAnnot", token)); //$NON-NLS-1$
+					nonNullByDefaultAnnotName = annotationNames.substring(separator2 + 1).trim();
+					if (nonNullByDefaultAnnotName.length() == 0) throw new IllegalArgumentException(this.bind("configure.invalidNullAnnot", token)); //$NON-NLS-1$
+					this.options.put(CompilerOptions.OPTION_NullableAnnotationName, nullableAnnotName);
+					this.options.put(CompilerOptions.OPTION_NonNullAnnotationName, nonNullAnnotName);
+					this.options.put(CompilerOptions.OPTION_NonNullByDefaultAnnotationName, nonNullByDefaultAnnotName);
+				}
+				this.options.put(
+						CompilerOptions.OPTION_AnnotationBasedNullAnalysis,
+						isEnabling ? CompilerOptions.ENABLED : CompilerOptions.DISABLED);
+				setSeverity(CompilerOptions.OPTION_ReportNullSpecViolation, severity, isEnabling);
+				setSeverity(CompilerOptions.OPTION_ReportPotentialNullSpecViolation, severity, isEnabling);
+				setSeverity(CompilerOptions.OPTION_ReportNullSpecInsufficientInfo, severity, isEnabling);
+				setSeverity(CompilerOptions.OPTION_ReportRedundantNullAnnotation, severity, isEnabling);
+				return;
 			}
+			
 			break;
 		case 'o' :
 			if (token.equals("over-sync") /*|| token.equals("syncOverride")*/) { //$NON-NLS-1$ 

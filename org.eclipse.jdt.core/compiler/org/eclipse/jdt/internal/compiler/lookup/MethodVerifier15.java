@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -10,12 +10,13 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
- *     Stephan Herrmann - Contribution for bug 186342 - [compiler][null] Using annotations for null checking
+ *     Stephan Herrmann - Contributions for
+ *								bug 186342 - [compiler][null] Using annotations for null checking
+ *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
 
-import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
@@ -186,7 +187,7 @@ boolean canSkipInheritedMethods(MethodBinding one, MethodBinding two) {
 }
 void checkConcreteInheritedMethod(MethodBinding concreteMethod, MethodBinding[] abstractMethods) {
 	super.checkConcreteInheritedMethod(concreteMethod, abstractMethods);
-
+	boolean analyseNullAnnotations = this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled;
 	for (int i = 0, l = abstractMethods.length; i < l; i++) {
 		MethodBinding abstractMethod = abstractMethods[i];
 		if (concreteMethod.isVarargs() != abstractMethod.isVarargs())
@@ -207,7 +208,7 @@ void checkConcreteInheritedMethod(MethodBinding concreteMethod, MethodBinding[] 
 				|| this.type.superclass.erasure().findSuperTypeOriginatingFrom(originalInherited.declaringClass) == null)
 					this.type.addSyntheticBridgeMethod(originalInherited, concreteMethod.original());
 		}
-		if (!concreteMethod.isStatic() && !abstractMethod.isStatic())
+		if (analyseNullAnnotations && !concreteMethod.isStatic() && !abstractMethod.isStatic())
 			checkNullSpecInheritance(concreteMethod, abstractMethod);
 	}
 }
@@ -370,7 +371,9 @@ void checkInheritedMethods(MethodBinding inheritedMethod, MethodBinding otherInh
 	//		class Y { <T> void foo(T t) {} }
 	//		abstract class X extends Y implements I {}
 
-	if (inheritedMethod.declaringClass.isInterface() || inheritedMethod.isStatic()) return;
+	if (inheritedMethod.isStatic()) return;
+	if (this.environment.globalOptions.complianceLevel < ClassFileConstants.JDK1_7 && inheritedMethod.declaringClass.isInterface())
+		return;  // JDK7 checks for name clashes in interface inheritance, while JDK6 and below don't. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=354229
 
 	detectInheritedNameClash(inheritedMethod.original(), otherInheritedMethod.original());
 }
@@ -412,12 +415,15 @@ boolean checkInheritedReturnTypes(MethodBinding method, MethodBinding otherMetho
 void checkAgainstInheritedMethods(MethodBinding currentMethod, MethodBinding[] methods, int length, MethodBinding[] allInheritedMethods)
 {
 	super.checkAgainstInheritedMethods(currentMethod, methods, length, allInheritedMethods);
-	for (int i = length; --i >= 0;)
-		if (!currentMethod.isStatic() && !methods[i].isStatic())
-			checkNullSpecInheritance(currentMethod, methods[i]);
+	if (this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
+		for (int i = length; --i >= 0;)
+			if (!currentMethod.isStatic() && !methods[i].isStatic())
+				checkNullSpecInheritance(currentMethod, methods[i]);
+	}
 }
 
 void checkNullSpecInheritance(MethodBinding currentMethod, MethodBinding inheritedMethod) {
+	// precondition: caller has checked whether annotation-based null analysis is enabled.
 	long inheritedBits = inheritedMethod.tagBits;
 	long currentBits = currentMethod.tagBits;
 	AbstractMethodDeclaration srcMethod = null;
@@ -443,7 +449,8 @@ void checkNullSpecInheritance(MethodBinding currentMethod, MethodBinding inherit
 	if (inheritedMethod.parameterNonNullness != null) {
 		// inherited method has null-annotations, check compatibility:
 
-		for (int i = 0; i < inheritedMethod.parameterNonNullness.length; i++) {
+		int length = inheritedMethod.parameterNonNullness.length;
+		for (int i = 0; i < length; i++) {
 			Argument currentArgument = currentArguments == null ? null : currentArguments[i];
 
 			Boolean inheritedNonNullNess = inheritedMethod.parameterNonNullness[i];
@@ -460,7 +467,7 @@ void checkNullSpecInheritance(MethodBinding currentMethod, MethodBinding inherit
 						annotationName = this.environment.getNullableAnnotationName();
 					}
 					if (currentArgument != null) {
-						this.type.scope.problemReporter().parameterLackingNonNullAnnotation(
+						this.type.scope.problemReporter().parameterLackingNullAnnotation(
 								currentArgument,
 								inheritedMethod.declaringClass,
 								needNonNull,
@@ -615,8 +622,7 @@ void checkMethods() {
 			for (int i = 0; i < length; i++) {
 				MethodBinding inheritedMethod = inherited[i];
 				if (inheritedMethod.isPublic() && !inheritedMethod.declaringClass.isPublic())
-					if (!CharOperation.equals(inheritedMethod.declaringClass.qualifiedPackageName(), CharOperation.NO_CHAR)) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343060
-						this.type.addSyntheticBridgeMethod(inheritedMethod.original());
+					this.type.addSyntheticBridgeMethod(inheritedMethod.original());
 			}
 		}
 
@@ -700,8 +706,7 @@ void checkMethods() {
 			if (matchMethod == null && current != null && this.type.isPublic()) { // current == null case handled already.
 				MethodBinding inheritedMethod = inherited[i];
 				if (inheritedMethod.isPublic() && !inheritedMethod.declaringClass.isPublic()) {
-					if (!CharOperation.equals(inheritedMethod.declaringClass.qualifiedPackageName(), CharOperation.NO_CHAR)) // https://bugs.eclipse.org/bugs/show_bug.cgi?id=343060
-						this.type.addSyntheticBridgeMethod(inheritedMethod.original());
+					this.type.addSyntheticBridgeMethod(inheritedMethod.original());
 				}
 			}
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=296660, if current type is exposed,

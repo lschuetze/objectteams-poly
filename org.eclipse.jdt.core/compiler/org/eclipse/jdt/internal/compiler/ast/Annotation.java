@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
- *     Stephan Herrmann - Contribution for bug 186342 - [compiler][null] Using annotations for null checking
+ *     Stephan Herrmann - Contributions for
+ *								bug 186342 - [compiler][null] Using annotations for null checking
+ *								bug 365662 - [compiler][null] warn on contradictory and redundant null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -32,6 +34,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutB
 public abstract class Annotation extends Expression {
 
 	final static MemberValuePair[] NoValuePairs = new MemberValuePair[0];
+	private static final long TAGBITS_NULLABLE_OR_NONNULL = TagBits.AnnotationNullable|TagBits.AnnotationNonNull;
+
 	public int declarationSourceEnd;
 	public Binding recipient;
 
@@ -180,12 +184,6 @@ public abstract class Annotation extends Expression {
 				tagBits |= TagBits.AnnotationInstantiation;
 				break;
 // SH}
-			case TypeIds.T_JavaxAnnotationPostConstruct :
-				tagBits |= TagBits.AnnotationPostConstruct;
-				break;
-			case TypeIds.T_JavaxAnnotationPreDestroy :
-				tagBits |= TagBits.AnnotationPreDestroy;
-				break;
 			case TypeIds.T_ConfiguredAnnotationNullable :
 				tagBits |= TagBits.AnnotationNullable;
 				break;
@@ -411,6 +409,10 @@ public abstract class Annotation extends Expression {
 							AbstractMethodDeclaration methodDeclaration = sourceType.scope.referenceContext.declarationOf(sourceMethod);
 							recordSuppressWarnings(scope, methodDeclaration.declarationSourceStart, methodDeclaration.declarationSourceEnd, scope.compilerOptions().suppressWarnings);
 						}
+						if ((sourceMethod.tagBits & TAGBITS_NULLABLE_OR_NONNULL) == TAGBITS_NULLABLE_OR_NONNULL) {
+							scope.problemReporter().contradictoryNullAnnotations(this);
+							sourceMethod.tagBits &= ~TAGBITS_NULLABLE_OR_NONNULL; // avoid secondary problems
+						}
 						break;
 //{ObjectTeams: method mappings
 					case Binding.BINDING :
@@ -438,6 +440,10 @@ public abstract class Annotation extends Expression {
 						if ((tagBits & TagBits.AnnotationSuppressWarnings) != 0) {
 							 LocalDeclaration localDeclaration = variable.declaration;
 							recordSuppressWarnings(scope, localDeclaration.declarationSourceStart, localDeclaration.declarationSourceEnd, scope.compilerOptions().suppressWarnings);
+						}
+						if ((variable.tagBits & TAGBITS_NULLABLE_OR_NONNULL) == TAGBITS_NULLABLE_OR_NONNULL) {
+							scope.problemReporter().contradictoryNullAnnotations(this);
+							variable.tagBits &= ~TAGBITS_NULLABLE_OR_NONNULL; // avoid secondary problems
 						}
 						break;
 				}

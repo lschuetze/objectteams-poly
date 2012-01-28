@@ -1,16 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TypeDeclaration.java 23405 2010-02-03 17:02:18Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contribution for Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -111,7 +110,7 @@ public class TypeDeclaration extends Statement implements ProblemSeverities, Ref
 	public MethodScope initializerScope;
 	public MethodScope staticInitializerScope;
 	public boolean ignoreFurtherInvestigation = false;
-	public int maxFieldCount;
+	public int maxFieldCount; // maximum cumulative number of fields of this type and its inners (see updateMaxFieldCount())
 	public int declarationSourceStart;
 	public int declarationSourceEnd;
 	public int bodyStart;
@@ -546,7 +545,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			localType.setConstantPoolName(currentScope.compilationUnitScope().computeConstantPoolName(localType));
 		}
 		manageEnclosingInstanceAccessIfNecessary(currentScope, flowInfo);
-		updateMaxFieldCount(); // propagate down the max field count
 		internalAnalyseCode(flowContext, flowInfo);
 	} catch (AbortType e) {
 		this.ignoreFurtherInvestigation = true;
@@ -562,9 +560,7 @@ public void analyseCode(ClassScope enclosingClassScope) {
 	if (this.ignoreFurtherInvestigation)
 		return;
 	try {
-		// propagate down the max field count
-		updateMaxFieldCount();
-		internalAnalyseCode(null, FlowInfo.initial(this.maxFieldCount));
+		internalAnalyseCode(null, FlowInfo.initial(this.scope.outerMostClassScope().referenceType().maxFieldCount));
 	} catch (AbortType e) {
 		this.ignoreFurtherInvestigation = true;
 	}
@@ -584,7 +580,6 @@ public void analyseCode(ClassScope currentScope, FlowContext flowContext, FlowIn
 			localType.setConstantPoolName(currentScope.compilationUnitScope().computeConstantPoolName(localType));
 		}
 		manageEnclosingInstanceAccessIfNecessary(currentScope, flowInfo);
-		updateMaxFieldCount(); // propagate down the max field count
 		internalAnalyseCode(flowContext, flowInfo);
 	} catch (AbortType e) {
 		this.ignoreFurtherInvestigation = true;
@@ -878,6 +873,13 @@ public TypeDeclaration declarationOfType(char[][] typeName) {
 		if (typeDecl != null) {
 			return typeDecl;
 		}
+	}
+	return null;
+}
+
+public CompilationUnitDeclaration getCompilationUnitDeclaration() {
+	if (this.scope != null) {
+		return this.scope.compilationUnitScope().referenceContext;
 	}
 	return null;
 }
@@ -1200,6 +1202,11 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 				staticInitializerContext.handledExceptions = Binding.ANY_EXCEPTION; // tolerate them all, and record them
 				/*}*/
 				staticFieldInfo = field.analyseCode(this.staticInitializerScope, staticInitializerContext, staticFieldInfo);
+				if (field.binding != null && this.scope.compilerOptions().includeFieldsInNullAnalysis
+						&& ((field.binding.modifiers & ClassFileConstants.AccFinal) != 0)) {
+					// we won't reset null Info for constant fields
+					staticFieldInfo.updateConstantFieldsMask(field.binding);
+				}
 				// in case the initializer is not reachable, use a reinitialized flowInfo and enter a fake reachable
 				// branch, since the previous initializer already got the blame.
 				if (staticFieldInfo == FlowInfo.DEAD_END) {
@@ -1247,7 +1254,18 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 // SH}
 	if (this.methods != null) {
 		UnconditionalFlowInfo outerInfo = flowInfo.unconditionalFieldLessCopy();
-		FlowInfo constructorInfo = nonStaticFieldInfo.unconditionalInits().discardNonFieldInitializations().addInitializationsFrom(outerInfo);
+		UnconditionalFlowInfo staticFieldUnconditionalInfo = staticFieldInfo.unconditionalInits();
+		FlowInfo constructorInfo;
+		if (this.scope.compilerOptions().includeFieldsInNullAnalysis) {
+			flowInfo.addNullInfoFrom(staticFieldUnconditionalInfo.discardNonFieldInitializations());
+			flowInfo.addConstantFieldsMask(staticFieldUnconditionalInfo);	// prevent resetting null info for constant fields inside methods
+			flowInfo.resetNullInfoForFields();	// only preserve null info for constant fields
+			constructorInfo = nonStaticFieldInfo.unconditionalInits().discardNonFieldInitializations().addInitializationsFrom(flowInfo);
+			constructorInfo.addConstantFieldsMask(staticFieldUnconditionalInfo); // prevent resetting null info for constant fields inside c'tor too
+		} else {
+			constructorInfo = nonStaticFieldInfo.unconditionalInits().discardNonFieldInitializations().addInitializationsFrom(outerInfo);
+		}
+		
 		for (int i = 0, count = this.methods.length; i < count; i++) {
 			AbstractMethodDeclaration method = this.methods[i];
 			if (method.ignoreFurtherInvestigation)
@@ -1262,7 +1280,7 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 					((Clinit)method).analyseCode(
 						this.scope,
 						staticInitializerContext,
-						staticFieldInfo.unconditionalInits().discardNonFieldInitializations().addInitializationsFrom(outerInfo));
+						staticFieldUnconditionalInfo.addInitializationsFrom(outerInfo));
 				} else { // constructor
 					((ConstructorDeclaration)method).analyseCode(this.scope, initializerContext, constructorInfo.copy(), flowInfo.reachMode());
 				}
@@ -1738,8 +1756,6 @@ public void resolve() {
 			}
 		}
 // SH}
-		// this.maxFieldCount might already be set
-		int localMaxFieldCount = 0;
 		int lastVisibleFieldID = -1;
 		boolean hasEnumConstants = false;
 		FieldDeclaration[] enumConstantsWithoutBody = null;
@@ -1749,6 +1765,38 @@ public void resolve() {
 				this.typeParameters[i].resolve(this.scope);
 			}
 		}
+		// field count from enclosing and supertypes should be included in maxFieldCount,
+		// to make field-ids unique among all fields in scope.
+		// 1.: enclosing:
+		TypeBinding original = sourceType.original();
+		int fieldAnalysisOffset = 0;
+		if (original instanceof NestedTypeBinding) {
+			// note: local types have no enclosingType in the AST but only in the binding:
+			fieldAnalysisOffset = ((NestedTypeBinding)original).enclosingType.cumulativeFieldCount;
+		}
+		// 2.: supers:
+		ReferenceBinding superClassBinding = sourceType.superclass;
+		while (superClassBinding != null) {
+			FieldBinding[] unResolvedFields = superClassBinding.unResolvedFields();
+			if (unResolvedFields != null) {
+				for (int i=unResolvedFields.length-1; i>=0; i--) {
+ 					// if the field is an initializer we do not want to update the count 
+					switch (unResolvedFields[i].kind()) {
+						case AbstractVariableDeclaration.FIELD:
+						case AbstractVariableDeclaration.ENUM_CONSTANT:
+							fieldAnalysisOffset++;
+					}
+				}
+			}
+			fieldAnalysisOffset += findFieldCountFromSuperInterfaces(superClassBinding.superInterfaces());
+			superClassBinding = superClassBinding.superclass();
+		}
+		ReferenceBinding[] superInterfacesBinding = sourceType.superInterfaces;
+		fieldAnalysisOffset += findFieldCountFromSuperInterfaces(superInterfacesBinding);
+		sourceType.cumulativeFieldCount += fieldAnalysisOffset;
+		sourceType.fieldAnalysisOffset = fieldAnalysisOffset;
+		this.maxFieldCount = sourceType.cumulativeFieldCount;
+
 		if (this.memberTypes != null) {
 //{ObjectTeams: don't cache count, array may grow during this loop!
 /* orig:
@@ -1790,7 +1838,6 @@ public void resolve() {
 								&& TypeBinding.LONG == fieldBinding.type) {
 							needSerialVersion = false;
 						}
-						localMaxFieldCount++;
 						lastVisibleFieldID = field.binding.id;
 						break;
 
@@ -1803,12 +1850,9 @@ public void resolve() {
 		}
 //{ObjectTeams: also count type value parameters into maxFieldCount
 		if (this.typeParameters != null)
-			TypeValueParameter.updateMaxFieldCount(this);
+			sourceType.cumulativeFieldCount += TypeValueParameter.updateMaxFieldCount(this);
 	  }
 // SH}
-		if (this.maxFieldCount < localMaxFieldCount) {
-			this.maxFieldCount = localMaxFieldCount;
-		}
 		if (needSerialVersion) {
 			//check that the current type doesn't extend javax.rmi.CORBA.Stub
 			TypeBinding javaxRmiCorbaStub = this.scope.getType(TypeConstants.JAVAX_RMI_CORBA_STUB, 4);
@@ -1915,6 +1959,19 @@ public void resolve() {
 		this.ignoreFurtherInvestigation = true;
 		return;
 	}
+}
+
+private int findFieldCountFromSuperInterfaces(ReferenceBinding[] superinterfaces) {
+	int numOfFields = 0;
+	if (superinterfaces == null)
+		return numOfFields ;
+	for (int i = 0; i < superinterfaces.length; i++) {
+		FieldBinding[] unResolvedFields = superinterfaces[i].unResolvedFields();
+		// no need to check field kinds as initializer cannot occur inside interfaces
+		numOfFields += unResolvedFields != null ? unResolvedFields.length : 0;
+		numOfFields += findFieldCountFromSuperInterfaces(superinterfaces[i].superInterfaces());		
+	}
+	return numOfFields;
 }
 
 /**
@@ -2244,12 +2301,11 @@ public void traverse(ASTVisitor visitor, ClassScope classScope) {
 /**
  * MaxFieldCount's computation is necessary so as to reserve space for
  * the flow info field portions. It corresponds to the maximum amount of
- * fields this class or one of its innertypes have.
+ * accumulated fields this class or one of its innertypes have.
  *
- * During name resolution, types are traversed, and the max field count is recorded
- * on the outermost type. It is then propagated down during the flow analysis.
- *
- * This method is doing either up/down propagation.
+ * During buildFields() accumulative field counts are gather per class,
+ * which include fields of outer and super types.
+ * During resolve, the maximum of these counts is collected inside out.
  */
 void updateMaxFieldCount() {
 	if (this.binding == null)
@@ -2257,8 +2313,6 @@ void updateMaxFieldCount() {
 	TypeDeclaration outerMostType = this.scope.outerMostClassScope().referenceType();
 	if (this.maxFieldCount > outerMostType.maxFieldCount) {
 		outerMostType.maxFieldCount = this.maxFieldCount; // up
-	} else {
-		this.maxFieldCount = outerMostType.maxFieldCount; // down
 	}
 }
 

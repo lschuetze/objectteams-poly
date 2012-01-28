@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,7 +9,10 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
- *     Stephan Herrmann - Contribution for bug 186342 - [compiler][null] Using annotations for null checking
+ *     Stephan Herrmann - Contributions for
+ *								bug 186342 - [compiler][null] Using annotations for null checking
+ *								bug 367203 - [compiler][null] detect assigning null to nonnull argument
+ *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -213,19 +216,18 @@ public abstract class AbstractMethodDeclaration
 	}
 
 	/**
-	 * Materialize a null annotation that has been added from the current default,
+	 * Materialize a non-null annotation that has been added from the current default,
 	 * in order to ensure that this annotation will be generated into the .class file, too.
 	 */
-	public void addNullnessAnnotation(ReferenceBinding annotationBinding) {
+	public void addNonNullAnnotation(ReferenceBinding annotationBinding) {
 		this.annotations = addAnnotation(this, this.annotations, annotationBinding);
 	}
 
 	/**
-	 * Materialize a null parameter annotation that has been added from the current default,
+	 * Materialize a non-null parameter annotation that has been added from the current default,
 	 * in order to ensure that this annotation will be generated into the .class file, too.
 	 */
-	public void addParameterNonNullAnnotation(int i, ReferenceBinding annotationBinding) {
-		Argument argument = this.arguments[i];
+	public void addParameterNonNullAnnotation(Argument argument, ReferenceBinding annotationBinding) {
 		if (argument.type != null) // null happens for constructors of anonymous classes
 			argument.annotations = addAnnotation(argument.type, argument.annotations, annotationBinding);
 	}
@@ -441,17 +443,10 @@ public abstract class AbstractMethodDeclaration
 				// a fatal error was detected during code generation, need to restart code gen if possible
 				if (e.compilationResult == CodeStream.RESTART_IN_WIDE_MODE) {
 					// a branch target required a goto_w, restart code gen in wide mode.
-					if (!restart) {
-						classFile.contentsOffset = problemResetPC;
-						classFile.methodCount--;
-						classFile.codeStream.resetInWideMode(); // request wide mode
-						restart = true;
-					} else {
-						// after restarting in wide mode, code generation failed again
-						// report a problem
-						restart = false;
-						abort = true;
-					}
+					classFile.contentsOffset = problemResetPC;
+					classFile.methodCount--;
+					classFile.codeStream.resetInWideMode(); // request wide mode
+					restart = true;
 				} else if (e.compilationResult == CodeStream.RESTART_CODE_GEN_FOR_UNUSED_LOCALS_MODE) {
 					classFile.contentsOffset = problemResetPC;
 					classFile.methodCount--;
@@ -630,6 +625,13 @@ public abstract class AbstractMethodDeclaration
 		}
 	}
 
+	public CompilationUnitDeclaration getCompilationUnitDeclaration() {
+		if (this.scope != null) {
+			return this.scope.compilationUnitScope().referenceContext;
+		}
+		return null;
+	}
+
 	public boolean hasErrors() {
 		return this.ignoreFurtherInvestigation;
 	}
@@ -786,7 +788,7 @@ public abstract class AbstractMethodDeclaration
 // SH}
 			resolveJavadoc();
 			resolveAnnotations(this.scope, this.annotations, this.binding);
-			validateAnnotations();
+			validateNullAnnotations();
 			resolveStatements();
 			// check @Deprecated annotation presence
 			if (this.binding != null
@@ -888,10 +890,11 @@ public abstract class AbstractMethodDeclaration
 	    return null;
 	}
 
-	void validateAnnotations() {
+	void validateNullAnnotations() {
 		// null annotations on parameters?
 		if (this.binding != null && this.binding.parameterNonNullness != null) {
-			for (int i=0; i<this.binding.parameters.length; i++) {
+			int length = this.binding.parameters.length;
+			for (int i=0; i<length; i++) {
 				if (this.binding.parameterNonNullness[i] != null) {
 					long nullAnnotationTagBit =  this.binding.parameterNonNullness[i].booleanValue()
 							? TagBits.AnnotationNonNull : TagBits.AnnotationNullable;

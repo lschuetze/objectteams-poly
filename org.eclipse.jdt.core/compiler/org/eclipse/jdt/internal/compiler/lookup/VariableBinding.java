@@ -60,6 +60,10 @@ public abstract class VariableBinding
 		return this.constant;
 	}
 
+	public int getAnalysisId(int maxFieldCount) {
+		return this.id + maxFieldCount;
+	}
+
 	public abstract AnnotationBinding[] getAnnotations();
 
 	public final boolean isBlankFinal(){
