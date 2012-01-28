@@ -76,6 +76,6 @@ public class BaseCallTrackingVariable extends LocalDeclaration {
 				false);
 		this.binding.setConstant(Constant.NotAConstant);
 		// use a free slot without assigning it:
-		this.binding.id = scope.outerMostMethodScope().analysisIndex+1;
+		this.binding.id = scope.outerMostMethodScope().analysisIndex++;
 	}
 }

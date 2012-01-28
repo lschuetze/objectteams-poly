@@ -145,15 +145,14 @@ public class TypeValueParameter extends TypeParameter {
 	}
 
 	/** Count all TypeValuaParameters of declaration into the number of its fields. */
-	public static int updateMaxFieldCount(TypeDeclaration declaration) {
+	public static int count(TypeDeclaration declaration) {
 		TypeParameter[] typeParameters = declaration.typeParameters;
-		int incr = 0;
+		int count = 0;
 		for (int i = 0; i < typeParameters.length; i++) {
 			if (typeParameters[i] instanceof TypeValueParameter) {
-				incr++;
+				count++;
 			}
 		}
-		declaration.maxFieldCount += incr;
-		return incr;
+		return count;
 	}
 }

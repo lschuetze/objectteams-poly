@@ -842,6 +842,8 @@ public class ClassScope extends Scope {
 				fieldDeclaration, null, fieldDeclaration.modifiers|ExtraCompilerModifiers.AccUnresolved, sourceType);
 
 		sourceType.addField(fieldBinding);
+		sourceType.cumulativeFieldCount++;
+		this.referenceContext.updateMaxFieldCount();
 		checkAndSetModifiersForField(fieldBinding, fieldDeclaration);
 
 // FIXME(SH): does this improve robustness?

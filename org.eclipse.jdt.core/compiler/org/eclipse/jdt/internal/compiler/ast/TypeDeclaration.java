@@ -1793,6 +1793,11 @@ public void resolve() {
 		}
 		ReferenceBinding[] superInterfacesBinding = sourceType.superInterfaces;
 		fieldAnalysisOffset += findFieldCountFromSuperInterfaces(superInterfacesBinding);
+//{ObjectTeams: also count type value parameters into maxFieldCount
+		if (this.typeParameters != null)
+			fieldAnalysisOffset += TypeValueParameter.count(this);
+// SH}
+
 		sourceType.cumulativeFieldCount += fieldAnalysisOffset;
 		sourceType.fieldAnalysisOffset = fieldAnalysisOffset;
 		this.maxFieldCount = sourceType.cumulativeFieldCount;
@@ -1808,9 +1813,9 @@ public void resolve() {
 			}
 		}
 //{ObjectTeams:	should we work at all?
-	  Config config = Config.getConfig();
-	  boolean fieldsAndMethods = config.verifyMethods;
-	  if (fieldsAndMethods) {
+	    Config config = Config.getConfig();
+	    boolean fieldsAndMethods = config.verifyMethods;
+	  if (fieldsAndMethods)
 // SH}
 		if (this.fields != null) {
 			for (int i = 0, count = this.fields.length; i < count; i++) {
@@ -1848,11 +1853,6 @@ public void resolve() {
 				field.resolve(field.isStatic() ? this.staticInitializerScope : this.initializerScope);
 			}
 		}
-//{ObjectTeams: also count type value parameters into maxFieldCount
-		if (this.typeParameters != null)
-			sourceType.cumulativeFieldCount += TypeValueParameter.updateMaxFieldCount(this);
-	  }
-// SH}
 		if (needSerialVersion) {
 			//check that the current type doesn't extend javax.rmi.CORBA.Stub
 			TypeBinding javaxRmiCorbaStub = this.scope.getType(TypeConstants.JAVAX_RMI_CORBA_STUB, 4);
@@ -2307,6 +2307,9 @@ public void traverse(ASTVisitor visitor, ClassScope classScope) {
  * which include fields of outer and super types.
  * During resolve, the maximum of these counts is collected inside out.
  */
+//{ObjectTeams: make accessible for ClassScope.addGeneratedField():
+public
+// SH}
 void updateMaxFieldCount() {
 	if (this.binding == null)
 		return; // error scenario
