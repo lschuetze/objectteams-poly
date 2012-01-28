@@ -2177,13 +2177,22 @@ public abstract class ObjectTeamsTransformation
 	 */
 	protected Pair<Integer,InstructionHandle> addClassMonitorEnter(MethodGen 		mg, 
 																   InstructionList 	il,
-																   String			class_name, 
+																   String			class_name,
 																   int 				major, 
 																   ConstantPoolGen 	cpg)
 	{
+		return addClassMonitorEnter(mg, il, class_name, class_name, major, cpg);
+	}
+	protected Pair<Integer,InstructionHandle> addClassMonitorEnter(MethodGen 		mg, 
+			   InstructionList 	il,
+			   String			class_name_this,
+			   String			class_name_target,
+			   int 				major, 
+			   ConstantPoolGen 	cpg)
+	{
 		int monitor;
 		InstructionHandle ih= 
-			appendClassLiteral(il, class_name, major, cpg);
+			appendClassLiteral(il, class_name_this, class_name_target, major, cpg);
 		il.append(new DUP()); // for store and monitorenter
 		LocalVariableGen lg2= 
 			mg.addLocalVariable("monitor", Type.OBJECT, il.getStart(), null); //$NON-NLS-1$
@@ -2202,30 +2211,34 @@ public abstract class ObjectTeamsTransformation
 	 * @return the handle of the first instruction of the sequence.
 	 */
 	protected InstructionHandle appendClassLiteral(InstructionList il, 
-												   String          class_name, 
+												   String          class_name_this,
+												   String          class_name_target,
 												   int             major,
 												   ConstantPoolGen cpg) 
 	{
 		if (major >= 49) // java 5
-			return il.append(new LDC(cpg.addClass(new ObjectType(class_name))));
+			return il.append(new LDC(cpg.addClass(new ObjectType(class_name_target))));
 		// pre java 5, do it the hard way:
 		// if (_OT$self_class$ != null)
+		// if (ThisClass._OT$class$that$Class != null)
+	    String receiverClass = class_name_this;
+	    String fieldName = class_name_this.equals(class_name_this) ? OTConstants.SELF_CLASS : OTConstants.CLASS+class_name_target;
 	  InstructionHandle start= 
-		il.append(factory.createFieldAccess(class_name, OTConstants.SELF_CLASS, classType, Constants.GETSTATIC));
+		il.append(factory.createFieldAccess(receiverClass, fieldName, classType, Constants.GETSTATIC));
 	    il.append(new DUP()); // keep a copy as a potential result
 	  BranchInstruction checkLoaded=
 		          InstructionFactory.createBranchInstruction(Constants.IFNONNULL, null);
 	    il.append(checkLoaded);
 	    il.append(new POP()); // discard null from above
 	    // _OT$self_class$= Class.forName(<class_name>); // never fails, it is THIS class
-		il.append(new LDC(cpg.addString(class_name)));
+		il.append(new LDC(cpg.addString(class_name_target)));
 	  	il.append(factory.createInvoke("java.lang.Class", 
 	  								   "forName", 
 	  								   classType,
 	  								   new Type[]{new ObjectType("java.lang.String")},
 	  								   Constants.INVOKESTATIC));
 	  	il.append(new DUP()); // keep a copy as the result
-	  	il.append(factory.createFieldAccess(class_name, OTConstants.SELF_CLASS, classType, Constants.PUTSTATIC));
+	  	il.append(factory.createFieldAccess(receiverClass, fieldName, classType, Constants.PUTSTATIC));
 	
 	  	checkLoaded.setTarget(il.append(new NOP()));
 	  	return start;

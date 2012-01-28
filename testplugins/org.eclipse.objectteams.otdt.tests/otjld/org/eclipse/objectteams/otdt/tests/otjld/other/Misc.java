@@ -20,6 +20,7 @@ import java.util.Map;
 
 import junit.framework.Test;
 
+import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
@@ -421,6 +422,86 @@ public class Misc extends AbstractOTJLDTest {
     	 	null/*vmArguments*/,
     	 	customOptions,
     	 	null/*requestor*/);
+     }
+     
+     String[] getClassLibraries() {
+ 		if (this.verifier != null)
+ 			this.verifier.shutDown();
+         this.verifier = getTestVerifier(false);
+         this.createdVerifier = true;
+
+     	String[] jarFilenames = {"bug370040_prj14.jar", "bug370040_prj15.jar"};
+     	String destPath = this.outputRootDirectoryPath+"/regression";
+     	createOutputTestDirectory("/regression");
+     	// upload the jars:
+ 		Util.copy(getTestResourcePath(jarFilenames[0]), destPath);
+ 		Util.copy(getTestResourcePath(jarFilenames[1]), destPath);
+     	// setup classpath:
+     	String[] classPaths = getDefaultClassPaths();
+     	int l = classPaths.length;
+     	System.arraycopy(classPaths, 0, classPaths=new String[l+2], 0, l);
+ 		classPaths[l] = this.outputRootDirectoryPath+"/regression/"+jarFilenames[0];
+ 		classPaths[l+1] = this.outputRootDirectoryPath+"/regression/"+jarFilenames[1];
+ 		return classPaths;
+     }
+
+     // Bug 370040 - [otre] NoSuchFieldError when mixing class file versions within one type hierarchy
+     public void testMixedClassFileFormats1() {
+    	 runConformTest(
+    		new String[] {
+    			"potj/Main.java",
+    			"package potj;\n" + 
+    			"import p4.SubSubBase;\n" + 
+    			"public class Main {\n" + 
+    			"	public static void main(String[] args) {\n" + 
+    			"		new SubTeam().activate();\n" + 
+    			"		new Team3().activate();\n" + 
+    			"		new SubSubBase().foo();\n" + 
+    			"	}\n" + 
+    			"}\n",
+    			"potj/SuperTeam.java",
+    			"package potj;\n" + 
+    			"\n" + 
+    			"import base p1.AbstractSuperBase;\n" + 
+    			"public team class SuperTeam {\n" + 
+    			"	protected class R0 playedBy AbstractSuperBase {\n" + // weaving into a 1.5 class file (using ldc for class literal)
+    			"		ci <- replace foo;\n" + 
+    			"\n" + 
+    			"		callin void ci() {\n" + 
+    			"			System.out.println(\"SuperTeam$R.ci()\");\n" + 
+    			"			base.ci();\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"}",
+    			"potj/SubTeam.java",
+    			"package potj;\n" + 
+    			"\n" + 
+    			"import base p4.SubBase;\n" + 
+    			"public team class SubTeam extends SuperTeam {\n" + 
+    			"	protected class R1 extends R0 playedBy SubBase {\n" + // weaving into a 1.4 class file (needs manual management using Class.forName())
+    			"		\n" + 
+    			"	}\n" + 
+    			"}\n",
+    			"potj/Team3.java",
+    			"package potj;\n" + 
+    			"\n" + 
+    			"import base p4.SubSubBase;\n" + 
+    			"public team class Team3 {\n" + 
+    			"	protected class R3 playedBy SubSubBase {\n" + 
+    			"		rm <-after foo;\n" + 
+    			"\n" + 
+    			"		private void rm() {\n" + 
+    			"			System.out.println(\"R3.rm\");			\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"}\n",
+    		},
+    		"SuperTeam$R.ci()\n" + 
+			"SuperBase.foo()\n" + 
+			"R3.rm",
+            getClassLibraries(),
+            false/*shouldFlushOutputDirectory*/,
+            null/*vmArguments*/);
      }
 }
 

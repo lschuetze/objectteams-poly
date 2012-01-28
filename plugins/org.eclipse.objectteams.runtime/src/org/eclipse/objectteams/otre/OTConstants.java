@@ -121,7 +121,8 @@ public interface OTConstants {
 	/**							  Tsuper marker interface prefix. */
 	final static String TSUPER_PREFIX = "TSuper__OT__";
 	/** field for storing the class object in JVM < 5 */
-	final static String SELF_CLASS = "_OT$self_class$";
+	final static String SELF_CLASS 	= "_OT$self_class$";
+	final static String CLASS 		= "_OT$class_literal$";
 
 	// -----------------------------------------
 	// ---------- Signature enhancement --------

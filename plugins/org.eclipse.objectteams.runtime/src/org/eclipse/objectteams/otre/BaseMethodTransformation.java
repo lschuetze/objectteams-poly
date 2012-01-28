@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Map.Entry;
 
+import org.eclipse.objectteams.otre.util.BoundClass;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
 import org.eclipse.objectteams.otre.util.DebugUtil;
 import org.eclipse.objectteams.otre.util.ListValueHashMap;
@@ -349,6 +350,16 @@ public class BaseMethodTransformation
 	                           			 cpg)
 								.getField(),
 	                        cg);
+			BoundClass topBase = CallinBindingManager.getTopmostBoundBaseClass(class_name);
+			if (topBase != null && !topBase.getName().equals(class_name)) {
+				// initial wrapper will lock against that super-base, create another field for that class' literal:
+				ce.addField(new FieldGen(Constants.ACC_PROTECTED|Constants.ACC_STATIC, 
+				              			 classType, 
+				              			 OTConstants.CLASS+topBase.getName().replace('.','$'),
+				              			 cpg)
+								.getField(),
+				           cg);
+			}
 		}
     	
     	Method[] methods = cg.getMethods();
@@ -568,7 +579,9 @@ public class BaseMethodTransformation
 		    teams = lg.getIndex();
 		    
 		    // synchronized (TopMostBoundBaseClass.class) {
-		    Pair<Integer,InstructionHandle> monitorResult = addClassMonitorEnter(mg, il, CallinBindingManager.getTopmostBoundBaseClass(class_name), major, cpg);
+		    BoundClass superBase = CallinBindingManager.getTopmostBoundBaseClass(class_name);
+		    String classNameForLiteral = superBase != null ? superBase.getName() : class_name;
+		    Pair<Integer,InstructionHandle> monitorResult = addClassMonitorEnter(mg, il, class_name, classNameForLiteral, major, cpg);
 		    monitor = monitorResult.first;
 		    if (debugging)
 		    	// no natural lines in this method: step-over until chain call, which has step-into: debugging => addLineNumber
@@ -1321,7 +1334,7 @@ public class BaseMethodTransformation
 			if (useReflection) {
 				il.append(factory.createInvoke("java.lang.Object", "getClass", classType, new Type[0], Constants.INVOKEVIRTUAL));
 				il.append(new LDC(cpg.addString(mb.getWrapperName())));
-				pushTypeArray(il, wrapperArgTypes, major, cpg);
+				pushTypeArray(il, wrapperArgTypes, major, mg.getClassName(), cpg);
 				il.append(factory.createInvoke("java.lang.Class", "getMethod", methodType, OTConstants.getMethodSignature, Constants.INVOKEVIRTUAL));
 				
 				il.append(InstructionFactory.createLoad(teamType, ot_team));
@@ -1420,7 +1433,7 @@ public class BaseMethodTransformation
 		}
 	}
 	/* Push an array of Class representing the signature given by argTypes. */
-	private void pushTypeArray(InstructionList il, Type[] argTypes, int major, ConstantPoolGen cpg) {
+	private void pushTypeArray(InstructionList il, Type[] argTypes, int major, String class_name_this, ConstantPoolGen cpg) {
 		il.append(createIntegerPush(cpg, argTypes.length));
 		il.append(new ANEWARRAY(cpg.addClass(classType)));
 		for (int i=0; i<argTypes.length; i++) {
@@ -1430,7 +1443,7 @@ public class BaseMethodTransformation
 			if (type instanceof BasicType) {
 				il.append(factory.createFieldAccess(toObjectTypeName((BasicType)type), "TYPE", classType, Constants.GETSTATIC));
 			} else if (type instanceof ObjectType) {
-				appendClassLiteral(il, ((ObjectType)type).getClassName(), major, cpg);
+				appendClassLiteral(il, class_name_this, ((ObjectType)type).getClassName(), major, cpg);
 			} else if (type instanceof ArrayType) { 
 				String prefix = "";
 				while (type instanceof ArrayType) {
@@ -1442,7 +1455,7 @@ public class BaseMethodTransformation
 					elemTypeName = "L"+((ObjectType)type).getClassName()+';';
 				else if (type instanceof BasicType)
 					elemTypeName = ((BasicType)type).getSignature();
-				appendClassLiteral(il, prefix+elemTypeName, major, cpg);
+				appendClassLiteral(il, class_name_this, prefix+elemTypeName, major, cpg);
 			} else {
 				throw new OTREInternalError("unsupported type in signature "+type);
 			}
@@ -1595,7 +1608,7 @@ public class BaseMethodTransformation
 		if (useReflection) {
 			il.append(factory.createInvoke("java.lang.Object", "getClass", classType, new Type[0], Constants.INVOKEVIRTUAL));
 			il.append(new LDC(cpg.addString(mb.getWrapperName())));
-			pushTypeArray(il, wrapperArgTypes, major, cpg);
+			pushTypeArray(il, wrapperArgTypes, major, mg.getClassName(), cpg);
 			il.append(factory.createInvoke("java.lang.Class", "getMethod", methodType, OTConstants.getMethodSignature, Constants.INVOKEVIRTUAL));
 			
 			il.append(InstructionFactory.createLoad(teamType, ot_team));

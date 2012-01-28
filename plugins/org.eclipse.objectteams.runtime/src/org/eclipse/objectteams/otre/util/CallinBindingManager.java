@@ -657,9 +657,9 @@ public class CallinBindingManager {
 	 * Returns the name of the topmost bound base class.
 	 * 
 	 * @param baseClassName
-	 * @return
+	 * @return a BoundClass representing the topmost bound class or null
 	 */
-	public static String getTopmostBoundBaseClass(String baseClassName) {
+	public static BoundClass getTopmostBoundBaseClass(String baseClassName) {
 		LinkedList<RoleBaseBinding> rbbList = baseBindings.get(baseClassName);
 		if (rbbList != null) {
 			// assumption: EVERY BoundClass object has been connected to its bound super classes.
@@ -670,9 +670,9 @@ public class CallinBindingManager {
 					break; // use bc instead of travelling up to super interfaces
 	            bc = bc.getSuper();
 	        }
-			return bc.getName();
+			return bc;
 		}
-		return baseClassName;
+		return null;
 	}
 
 	/**
