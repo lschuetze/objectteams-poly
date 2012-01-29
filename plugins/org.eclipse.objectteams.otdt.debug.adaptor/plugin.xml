@@ -172,25 +172,6 @@
                tooltip="%showOTInternalAction.tooltip">
          </action>
        </viewContribution>
-             <viewContribution
-            targetID="org.eclipse.objectteams.otdt.debug.ui.views.team"
-            id="org.eclipse.objectteams.otdt.internal.debug.adaptor.VariableViewActions">
-         <action
-               style="toggle"
-               id="org.eclipse.objectteams.otdt.internal.debug.adaptor.variableViewActions.ShowOTInternal"
-               class="org.eclipse.objectteams.otdt.internal.debug.adaptor.actions.ShowOTInternalVariablesAction"
-               helpContextId="show_otinternal_action_context"
-               label="%showOTInternalAction.label"
-               menubarPath="org.eclipse.jdt.debug.ui.VariableView.javaSubmenu/javaPart"
-               tooltip="%showOTInternalAction.tooltip">
-         </action>
-         <menu
-               id="org.eclipse.jdt.debug.ui.VariableView.javaSubmenu"
-               label="%VariablesViewJavaSubmenu.label"
-               path="javaActions">
-            <groupMarker name="org.eclipse.jdt.debug.ui.javaPart"/>
-         </menu>
-       </viewContribution>
 	</extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
