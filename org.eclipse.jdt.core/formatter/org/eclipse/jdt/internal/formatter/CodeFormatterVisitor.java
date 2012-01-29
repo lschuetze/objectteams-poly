@@ -52,7 +52,6 @@ import org.eclipse.jdt.internal.compiler.ast.CompoundAssignment;
 import org.eclipse.jdt.internal.compiler.ast.ConditionalExpression;
 import org.eclipse.jdt.internal.compiler.ast.ConstructorDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.ContinueStatement;
-import org.eclipse.jdt.internal.compiler.ast.UnionTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.DoStatement;
 import org.eclipse.jdt.internal.compiler.ast.DoubleLiteral;
 import org.eclipse.jdt.internal.compiler.ast.EmptyStatement;
@@ -77,26 +76,27 @@ import org.eclipse.jdt.internal.compiler.ast.MarkerAnnotation;
 import org.eclipse.jdt.internal.compiler.ast.MemberValuePair;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.NameReference;
 import org.eclipse.jdt.internal.compiler.ast.NormalAnnotation;
-import org.eclipse.jdt.internal.compiler.ast.ParameterizedQualifiedTypeReference;
-import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
-import org.eclipse.jdt.internal.compiler.ast.SingleMemberAnnotation;
-import org.eclipse.jdt.internal.compiler.ast.StringLiteralConcatenation;
 import org.eclipse.jdt.internal.compiler.ast.NullLiteral;
 import org.eclipse.jdt.internal.compiler.ast.OR_OR_Expression;
 import org.eclipse.jdt.internal.compiler.ast.OperatorIds;
+import org.eclipse.jdt.internal.compiler.ast.ParameterizedQualifiedTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.ParameterizedSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.PostfixExpression;
 import org.eclipse.jdt.internal.compiler.ast.PrefixExpression;
+import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedSuperReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedThisReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
+import org.eclipse.jdt.internal.compiler.ast.SingleMemberAnnotation;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.StringLiteral;
+import org.eclipse.jdt.internal.compiler.ast.StringLiteralConcatenation;
 import org.eclipse.jdt.internal.compiler.ast.SuperReference;
 import org.eclipse.jdt.internal.compiler.ast.SwitchStatement;
 import org.eclipse.jdt.internal.compiler.ast.SynchronizedStatement;
@@ -108,6 +108,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.UnaryExpression;
+import org.eclipse.jdt.internal.compiler.ast.UnionTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.WhileStatement;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -132,6 +133,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDec
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrecedenceDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 import org.eclipse.text.edits.TextEdit;
@@ -387,12 +389,16 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		TypeDeclaration type = typeCount == 0 ? null : typeDeclaration.memberTypes[typeIndex];
 		int typeStart = type == null ? Integer.MAX_VALUE : type.declarationSourceStart;
 	
-//{ObjectTeams: add AbstractMethodMappingDeclarations
+//{ObjectTeams: add AbstractMethodMappingDeclarations and PrecedenceDeclarations
 		int callinCalloutIndex = 0, callinCalloutCount = (typeDeclaration.callinCallouts == null) ? 0 : typeDeclaration.callinCallouts.length;
 		AbstractMethodMappingDeclaration callinCallout = callinCalloutCount == 0 ? null : typeDeclaration.callinCallouts[callinCalloutIndex];
 		int callinCalloutStart = callinCallout == null ? Integer.MAX_VALUE : callinCallout.sourceStart;
 
-		final int memberLength = fieldCount+methodCount+typeCount+callinCalloutCount;
+		int precedenceIndex = 0, precedenceCount = (typeDeclaration.precedences == null) ? 0 : typeDeclaration.precedences.length;
+		PrecedenceDeclaration precedenceDecl = precedenceCount == 0 ? null : typeDeclaration.precedences[precedenceIndex];
+		int precedenceStart = precedenceDecl == null ? Integer.MAX_VALUE : precedenceDecl.sourceStart;
+	
+		final int memberLength = fieldCount+methodCount+typeCount+callinCalloutCount+precedenceCount;
 /*orig: 
 		final int memberLength = fieldCount+methodCount+typeCount;
  :giro */
@@ -402,11 +408,11 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			int index = 0;
 			int previousFieldStart = -1;
 			do {
-//{ObjectTeams: AbstractMethodMappingDeclarations
+//{ObjectTeams: AbstractMethodMappingDeclarations & PrecedenceDeclaration
 /*orig:	
 				if (fieldStart < methodStart && fieldStart < typeStart) {
  :giro */
-				if (fieldStart < methodStart && fieldStart < typeStart && fieldStart < callinCalloutStart) 
+				if (fieldStart < methodStart && fieldStart < typeStart && fieldStart < callinCalloutStart && fieldStart < precedenceStart) 
 				{
 //jsv}
 					if (field.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
@@ -442,8 +448,8 @@ public class CodeFormatterVisitor extends ASTVisitor {
 					} else {
 						fieldStart = Integer.MAX_VALUE;
 					}
-//{ObjectTeams: include AbstractMethodMappingDeclarations too
-				} else if (methodStart < fieldStart && methodStart < typeStart && methodStart < callinCalloutStart) 
+//{ObjectTeams: include AbstractMethodMappingDeclarations && PrecedenceDeclaration too
+				} else if (methodStart < fieldStart && methodStart < typeStart && methodStart < callinCalloutStart && methodStart < precedenceStart) 
 				{
 /*orig: 	
 				} else if (methodStart < fieldStart && methodStart < typeStart) {
@@ -458,14 +464,22 @@ public class CodeFormatterVisitor extends ASTVisitor {
 					} else {
 						methodStart = Integer.MAX_VALUE;
 					}
-//{ObjectTeams: include AbstractMethodMappingDeclarations, too				
-				} else if (callinCalloutStart < fieldStart && callinCalloutStart < typeStart && callinCalloutStart < methodStart) {
+//{ObjectTeams: include AbstractMethodMappingDeclarations and PrecedenceDeclaration, too
+				} else if (callinCalloutStart < fieldStart && callinCalloutStart < typeStart && callinCalloutStart < methodStart && callinCalloutStart < precedenceStart) {
 					// next member is a CallinMappingDeclaration or a CalloutMappingDeclaration
 					members[index++] = callinCallout;
 					if (++callinCalloutIndex < callinCalloutCount) { // find next callin/callout is any
 						callinCalloutStart = (callinCallout = typeDeclaration.callinCallouts[callinCalloutIndex]).sourceStart;
 					} else {
 						callinCalloutStart = Integer.MAX_VALUE;
+					}
+				} else if (precedenceStart < fieldStart && precedenceStart < typeStart && precedenceStart < methodStart && precedenceStart < callinCalloutStart) {
+					// next member is a CallinMappingDeclaration or a CalloutMappingDeclaration
+					members[index++] = precedenceDecl;
+					if (++precedenceIndex < precedenceCount) { // find next precedence is any
+						precedenceStart = (precedenceDecl = typeDeclaration.precedences[precedenceIndex]).sourceStart;
+					} else {
+						precedenceStart = Integer.MAX_VALUE;
 					}
 //jsv}					
 				} else {
@@ -484,7 +498,8 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			} while ((fieldIndex < fieldCount) || 
 					(typeIndex < typeCount) || 
 					(methodIndex < methodCount) || 
-					(callinCalloutIndex < callinCalloutCount) );
+					(callinCalloutIndex < callinCalloutCount) ||
+					(precedenceIndex < precedenceCount));
 //jsv}
 
 			if (members.length != index) {
@@ -699,7 +714,44 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		}
 		abstractMethodMappingDeclaration.traverse(this, scope);
 	}
-//jsv}
+
+	private void format(PrecedenceDeclaration precedenceDecl, ClassScope scope, boolean isChunkStart, boolean isFirstClassBodyDeclaration) {
+		if (isFirstClassBodyDeclaration) {
+			int newLinesBeforeFirstClassBodyDeclaration = this.preferences.blank_lines_before_first_class_body_declaration;
+			if (newLinesBeforeFirstClassBodyDeclaration > 0) {
+				this.scribe.printEmptyLines(newLinesBeforeFirstClassBodyDeclaration);
+			}
+		} else {
+			final int newLineBeforeChunk = isChunkStart ? this.preferences.blank_lines_before_new_chunk : 0;
+			if (newLineBeforeChunk > 0) {
+				this.scribe.printEmptyLines(newLineBeforeChunk);
+			}
+		}
+		final int newLinesBeforeMethod = this.preferences.blank_lines_before_method;
+		if (newLinesBeforeMethod > 0 && !isFirstClassBodyDeclaration) {
+			this.scribe.printEmptyLines(newLinesBeforeMethod);
+		} else if (this.scribe.line != 0 || this.scribe.column != 1) {
+			this.scribe.printNewLine();
+		}
+		this.scribe.printNextToken(TerminalTokens.TokenNameprecedence, true);
+		if (precedenceDecl.isAfter) {
+			this.scribe.printNextToken(TerminalTokens.TokenNameafter, true);
+			this.scribe.space();
+		}
+		boolean firstTime = true;
+		for (NameReference name : precedenceDecl.bindingNames) {
+			if (!firstTime) {
+				this.scribe.printNextToken(TerminalTokens.TokenNameCOMMA, true);
+				this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
+				this.scribe.space();
+			}
+			firstTime = false;
+			name.traverse(this, (BlockScope)null);
+		}		
+		this.scribe.printNextToken(TerminalTokens.TokenNameSEMICOLON, true);
+		this.scribe.printNewLine();
+	}
+//jsv+SH}
 
 	private void format(FieldDeclaration fieldDeclaration, ASTVisitor visitor, MethodScope scope, boolean isChunkStart, boolean isFirstClassBodyDeclaration) {
 		
@@ -2379,11 +2431,15 @@ public class CodeFormatterVisitor extends ASTVisitor {
 						} else if (member instanceof AbstractMethodDeclaration) {
 							isChunkStart = memberAlignment.checkChunkStart(Alignment.CHUNK_METHOD, i, this.scribe.scanner.currentPosition);
 							format((AbstractMethodDeclaration) member, typeDeclaration.scope, isChunkStart, i == 0);
-//{ObjectTeams: format for AbstractMethodMappingDeclaration
+//{ObjectTeams: format for AbstractMethodMappingDeclaration & PrecedenceDeclaration
 						} else if (member instanceof AbstractMethodMappingDeclaration) {
 							// TODO(jsv) use code styles for OT elements (not implemented yet, so we use a similar style)
 							isChunkStart = memberAlignment.checkChunkStart(Alignment.CHUNK_METHOD, i, this.scribe.scanner.currentPosition);
 							format((AbstractMethodMappingDeclaration) member, typeDeclaration.scope, isChunkStart, i == 0);
+						} else if (member instanceof PrecedenceDeclaration) {
+							// TODO(jsv) use code styles for OT elements (not implemented yet, so we use a similar style)
+							isChunkStart = memberAlignment.checkChunkStart(Alignment.CHUNK_METHOD, i, this.scribe.scanner.currentPosition);
+							format((PrecedenceDeclaration) member, typeDeclaration.scope, isChunkStart, i == 0);
 //jsv}
 						} else if (member instanceof TypeDeclaration) {
 							isChunkStart = memberAlignment.checkChunkStart(Alignment.CHUNK_TYPE, i, this.scribe.scanner.currentPosition);
@@ -6026,7 +6082,17 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		
 		this.scribe.printComment();
 		
+		
 		int startLine = this.scribe.line;
+		if (callinMappingDeclaration.hasName()) {
+			this.scribe.printNextToken(TerminalTokens.TokenNameIdentifier, false);
+			this.scribe.printNextToken(TerminalTokens.TokenNameCOLON, true);
+			// FIXME(SH): configurable?
+			this.scribe.printNewLine();
+		}
+		this.scribe.printModifiers(callinMappingDeclaration.annotations, this, ICodeFormatterConstants.ANNOTATION_ON_METHOD);
+		// FIXME(SH): configurable?
+		this.scribe.printNewLine();
         MethodSpec roleMethodSpec = callinMappingDeclaration.roleMethodSpec;
         if (roleMethodSpec != null)
         {
@@ -6082,6 +6148,8 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		
 		this.scribe.printComment();
 		
+		this.scribe.printModifiers(calloutMappingDeclaration.annotations, this, ICodeFormatterConstants.ANNOTATION_ON_METHOD);
+
 		int startLine = this.scribe.line;
 		MethodSpec roleMethodSpec = calloutMappingDeclaration.roleMethodSpec;
         if (roleMethodSpec != null)

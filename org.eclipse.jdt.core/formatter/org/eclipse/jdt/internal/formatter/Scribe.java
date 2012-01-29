@@ -4902,8 +4902,14 @@ public class Scribe implements IJavaDocTagConstants {
 	}
 
 	public void printNextToken(int expectedTokenType, boolean considerSpaceIfAny, int emptyLineRules) {
+//{ObjectTeams: save and restore some scanner state that will be killed by printComment:
+		boolean precedenceSeen = this.scanner._precedenceSeen;
+// orig:
 		// Set brace flag, it's useful for the scribe while preserving line breaks
 		printComment(CodeFormatter.K_UNKNOWN, NO_TRAILING_COMMENT, emptyLineRules);
+// :giro
+		this.scanner._precedenceSeen = precedenceSeen;
+// SH}
 		try {
 			this.currentToken = this.scanner.getNextToken();
 			if (expectedTokenType != this.currentToken) {

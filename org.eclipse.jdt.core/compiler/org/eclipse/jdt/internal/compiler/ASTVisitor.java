@@ -22,6 +22,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDec
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrecedenceDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
 
@@ -513,6 +514,9 @@ public abstract class ASTVisitor {
 	public void endVisit(BaseCallMessageSend messageSend, BlockScope scope) {
 		// do nothing by default
 	}
+	public void endVisit(PrecedenceDeclaration precedenceDeclaration, BlockScope scope) {
+		// do nothing by default	
+	}
 // SH et al}
 	public boolean visit(
     		AllocationExpression allocationExpression,
@@ -995,6 +999,9 @@ public abstract class ASTVisitor {
     }
     public boolean visit(BaseCallMessageSend messageSend, BlockScope scope)
     {
+    	return true; // do nothing by default, keep traversing
+    }
+    public boolean visit(PrecedenceDeclaration precedenceDeclaration, BlockScope scope) {
     	return true; // do nothing by default, keep traversing
     }
 // SH et al}

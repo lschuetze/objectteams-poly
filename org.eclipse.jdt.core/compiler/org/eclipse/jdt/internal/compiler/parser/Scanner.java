@@ -97,7 +97,7 @@ public class Scanner implements TerminalTokens {
     protected boolean _calloutSeen = false;
     protected boolean _callinSeen = false;
     // ... or the "precedence" keyword
-	protected boolean _precedenceSeen = false;
+	public boolean _precedenceSeen = false;
 
     // after a '.' even 'team' can be an identifier:
     private int _dotSeen = 0; // 0: no, 1: previos, 2: this token

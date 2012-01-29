@@ -23,12 +23,14 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 import java.util.LinkedList;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.NameReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -374,4 +376,15 @@ public class PrecedenceDeclaration extends ASTNode {
 		return output;
 	}
 
+	@Override
+	public void traverse(ASTVisitor visitor, BlockScope scope) {
+		if (visitor.visit(this, scope)) {
+			 if (this.bindingNames != null) {
+				 int len = this.bindingNames.length;
+				 for (int i=0; i<len; i++)
+					 this.bindingNames[i].traverse(visitor, scope);
+			 }
+		}
+		visitor.endVisit(this, scope);
+	}
 }
