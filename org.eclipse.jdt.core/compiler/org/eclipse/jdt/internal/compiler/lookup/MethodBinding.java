@@ -1292,12 +1292,7 @@ public char[] readableName() /* foo(int, Thread) */ {
 			if (i > firstParam)
 // SH}
 				buffer.append(", "); //$NON-NLS-1$
-//{ObjectTeams; more robust, was sourceName(), which doesn't work for ProblemReferenceBinding
-/* orig:
 			buffer.append(this.parameters[i].sourceName());
-  :giro */
-			buffer.append(this.parameters[i].readableName());
-// SH}
 		}
 	}
 	buffer.append(')');

@@ -1365,7 +1365,7 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
     		"1. ERROR in Team0c16iir1_1.java (at line 4)\n" + 
 			"	return \"O\"+base.test(u);\n" + 
 			"	           ^^^^^^^^^^^^\n" + 
-			"Cannot use \'base\' in the regular method \'test(java.lang.String)\' (OTJLD 2.6(c)).\n" + 
+			"Cannot use \'base\' in the regular method \'test(String)\' (OTJLD 2.6(c)).\n" + 
 			"----------\n");
     }
 

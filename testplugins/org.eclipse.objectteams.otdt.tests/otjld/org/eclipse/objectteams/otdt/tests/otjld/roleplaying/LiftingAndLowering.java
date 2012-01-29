@@ -4499,7 +4499,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		"1. ERROR in Team2228dlic6l_3.java (at line 4)\n" + 
     		"	public Team2228dlic6l_3(T2228dlic6l as R2 r) {\n" + 
     		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic6l_2(R<@tthis[Team2228dlic6l_2]>) of class Team2228dlic6l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
+    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic6l_2(R) of class Team2228dlic6l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
     		"----------\n",
         	null/*classLibraries*/,
         	false/*shouldFlushOutputDirectory*/);
@@ -4679,7 +4679,7 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		"1. ERROR in Team2228dlic7l_3.java (at line 4)\n" + 
     		"	public Team2228dlic7l_3(T2228dlic7l as R2 r) {\n" + 
     		"	       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic7l_2(R<@tthis[Team2228dlic7l_2]>) of class Team2228dlic7l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
+    		"Compiler limitation: This constructor seems to request lifting of an argument. However, the self call in Team2228dlic7l_2(R) of class Team2228dlic7l_2 passes its arguments in an unexpected way. Cannot perform required transitive byte-code translation.\n" + 
     		"----------\n",
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/);

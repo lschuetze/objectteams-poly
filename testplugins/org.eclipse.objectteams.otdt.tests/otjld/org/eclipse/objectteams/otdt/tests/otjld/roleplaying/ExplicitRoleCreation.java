@@ -1104,7 +1104,7 @@ public class ExplicitRoleCreation extends AbstractOTJLDTest {
 			"1. WARNING in Team236nsbc2.java (at line 6)\n" +
 			"	base(value);\n" +
 			"	^^^^^^^^^^^^\n" +
-			"Access restriction of constructor T236nsbc2(java.lang.String) is overridden by this base constructor call (OTJLD 2.4.2(b)).\n" +
+			"Access restriction of constructor T236nsbc2(String) is overridden by this base constructor call (OTJLD 2.4.2(b)).\n" +
 			"----------\n");
     }
 

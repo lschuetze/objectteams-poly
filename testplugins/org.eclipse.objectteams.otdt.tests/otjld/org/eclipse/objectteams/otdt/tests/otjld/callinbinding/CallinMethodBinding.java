@@ -7424,7 +7424,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			"1. WARNING in Team4141dcb2.java (at line 5)\n" +
 			"	void nothing() <- after boolean equals(Object other);\n" +
 			"	                                ^^^^^^\n" +
-			"Dangerous callin binding: equals(java.lang.Object) is used internally during lifting, which could create infinite recursion.\n" +
+			"Dangerous callin binding: equals(Object) is used internally during lifting, which could create infinite recursion.\n" +
 			"----------\n");
     }
 
