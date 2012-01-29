@@ -978,6 +978,7 @@ public void _test011_problem_categories() {
         expectedProblemAttributes.put("SyntaxErrorCtorMethodSpec", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
         expectedProblemAttributes.put("SyntaxErrorMethodSpecMissingReturnType", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
         expectedProblemAttributes.put("IllegalModifierInCallinBinding", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
+        expectedProblemAttributes.put("IllegalModifierBeforeCallinLabel", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
         expectedProblemAttributes.put("SyntaxErrorInCallinLabel", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
         expectedProblemAttributes.put("CallinReplaceKeyWordNotOptional", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
         expectedProblemAttributes.put("IllegalMappingRHSTypeParameter", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
@@ -2282,6 +2283,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("SyntaxErrorCtorMethodSpec", SKIP);
         expectedProblemAttributes.put("SyntaxErrorMethodSpecMissingReturnType", SKIP);
         expectedProblemAttributes.put("IllegalModifierInCallinBinding", SKIP);
+        expectedProblemAttributes.put("IllegalModifierBeforeCallinLabel", SKIP);
         expectedProblemAttributes.put("SyntaxErrorInCallinLabel", SKIP);
         expectedProblemAttributes.put("CallinReplaceKeyWordNotOptional", SKIP);
         expectedProblemAttributes.put("IllegalMappingRHSTypeParameter", SKIP);
