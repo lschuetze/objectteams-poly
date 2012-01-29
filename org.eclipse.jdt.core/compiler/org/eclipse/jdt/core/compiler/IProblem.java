@@ -1887,6 +1887,8 @@ void setSourceStart(int sourceStart);
 	int SyntaxErrorInCallinLabel                 = SYNTAX_RELATED + 3302; // A.3.3
 	int CallinReplaceKeyWordNotOptional          = SYNTAX_RELATED + 3303; // A.3.3
 	int IllegalMappingRHSTypeParameter   		 = SYNTAX_RELATED + 3304; // 4.3.3
+	int IllegalModifierBeforeCallinLabel 		 = SYNTAX_RELATED + 3305; // A.3.3 // FIXME: annotations are still missing from OTJLD A.3.3  
+
 	int IllegalModifierInMethodSpecRight         = SYNTAX_RELATED + 3501; // A.3.5
 
 	int SyntaxErrorIllegalDeclaredLifting        = SYNTAX_RELATED + 6001; // A.6(a)

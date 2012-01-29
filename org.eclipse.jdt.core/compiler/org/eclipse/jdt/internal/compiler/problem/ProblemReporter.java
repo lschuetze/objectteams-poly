@@ -11965,6 +11965,16 @@ public void illegalModifierInMethodMapping(
         modifiersEnd);
 }
 
+public void illegalModifierBeforeCallinLabel(int modifiersStart, int modifiersEnd)
+{
+    this.handle(
+        IProblem.IllegalModifierBeforeCallinLabel,
+        NoArgument,
+        NoArgument,
+        modifiersStart,
+        modifiersEnd);
+}
+
 public void wrongModifierInCalloutMapping(
 		AbstractMethodMappingDeclaration methodMapping, int modifiersStart, int modifiersEnd)
 {

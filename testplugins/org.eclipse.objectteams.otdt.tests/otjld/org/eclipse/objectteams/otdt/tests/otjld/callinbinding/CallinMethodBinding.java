@@ -8084,15 +8084,17 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
     // callin doesn't fire due to LiftingFailedException behind the scenes (arg lifting in replace-callin)
     public void test726_callinWithHiddenLiftingProblem4() {
         Map options = getCompilerOptions();
-        options.put(CompilerOptions.OPTION_ReportHiddenLiftingProblem, CompilerOptions.WARNING);
+        options.put(CompilerOptions.OPTION_ReportHiddenLiftingProblem, CompilerOptions.ERROR);
+        options.put(CompilerOptions.OPTION_SuppressOptionalErrors, CompilerOptions.ENABLED);
     	runConformTest(
     		new String[] {
     	"Team726cwhlp4.java",
     			"@SuppressWarnings(\"ambiguousbinding\")\n" +
     			"public team class Team726cwhlp4 {\n" +
     			"	protected class ROK playedBy T726cwhlp4 {\n" +
+    			"       mycallin:\n" +
     			"		@SuppressWarnings(\"hidden-lifting-problem\")\n" +
-    			"		mycallin: bar <- replace foo;\n" + // argument lifting going bad
+    			"		bar <- replace foo;\n" + // argument lifting going bad
     			"       @SuppressWarnings(\"basecall\")\n" +
     			"		callin void bar(R0 r) {\n" +
     			"			System.out.print(\"NOK\");\n" +

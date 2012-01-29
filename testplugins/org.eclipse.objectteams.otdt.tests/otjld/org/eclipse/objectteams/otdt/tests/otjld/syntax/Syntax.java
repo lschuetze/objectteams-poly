@@ -1375,4 +1375,88 @@ public class Syntax extends AbstractOTJLDTest {
     		"Illegal modifier for the field val; only public, protected, private, static, final, transient & volatile are permitted\n" + 
     		"----------\n");
     }
+    
+    // illegal order of callin label and annotation (long)
+    public void test8133_callinWithNameAndAnnotation1() {
+    	runNegativeTest(
+    		new String[] {
+    	"Team8133cwnaa1.java",
+    			"public team class Team8133cwnaa1 {\n" +
+    			"    protected class R playedBy T8133cwnaa1 {\n" +
+    			"	     @SuppressWarnings(\"unused\")\n" +
+    			"        name: void foo() <- after void bar();\n" +
+    			"        void foo() {}\n" +
+    			"    }\n" +
+    			"}\n",
+    	"T8133cwnaa1.java",
+    			"public class T8133cwnaa1 { void bar() {} }\n"
+    		},
+    		"----------\n" + 
+			"1. ERROR in Team8133cwnaa1.java (at line 3)\n" + 
+			"	@SuppressWarnings(\"unused\")\n" + 
+			"	^^^^^^^^^^^^^^^^^\n" + 
+			"Syntax error: callin annotations must be specified after the callin name (OTJLD A.3.3).\n" + 
+			"----------\n");
+    }
+
+    // illegal order of callin label and annotation (short)
+    public void test8133_callinWithNameAndAnnotation2() {
+    	runNegativeTest(
+    		new String[] {
+    	"Team8133cwnaa2.java",
+    			"public team class Team8133cwnaa2 {\n" +
+    			"    protected class R playedBy T8133cwnaa2 {\n" +
+    			"	     @SuppressWarnings(\"unused\")\n" +
+    			"        name: foo <- after bar;\n" +
+    			"        void foo() {}\n" +
+    			"    }\n" +
+    			"}\n",
+    	"T8133cwnaa2.java",
+    			"public class T8133cwnaa2 { void bar() {} }\n"
+    		},
+    		"----------\n" + 
+			"1. ERROR in Team8133cwnaa2.java (at line 3)\n" + 
+			"	@SuppressWarnings(\"unused\")\n" + 
+			"	^^^^^^^^^^^^^^^^^\n" + 
+			"Syntax error: callin annotations must be specified after the callin name (OTJLD A.3.3).\n" + 
+			"----------\n");
+    }
+    
+    // correct order of callin label and annotation (long)
+    public void test8133_callinWithNameAndAnnotation3() {
+    	runConformTest(
+    		new String[] {
+    	"Team8133cwnaa3.java",
+    			"public team class Team8133cwnaa3 {\n" +
+    			"    protected class R playedBy T8133cwnaa3 {\n" +
+    			"        name:\n" +
+    			"	     @SuppressWarnings(\"all\")\n" +
+    			"        void foo() <- after void bar();\n" +
+    			"        void foo() {}\n" +
+    			"    }\n" +
+    			"}\n",
+    	"T8133cwnaa3.java",
+    			"public class T8133cwnaa3 { void bar() {} }\n"
+    		},
+    		"");
+    }
+
+    // correct order of callin label and annotation (short)
+    public void test8133_callinWithNameAndAnnotation4() {
+    	runConformTest(
+    		new String[] {
+    	"Team8133cwnaa4.java",
+    			"public team class Team8133cwnaa4 {\n" +
+    			"    protected class R playedBy T8133cwnaa4 {\n" +
+    			"        name:\n" +
+    			"	     @SuppressWarnings(\"all\")\n" +
+    			"        foo <- after bar;\n" +
+    			"        void foo() {}\n" +
+    			"    }\n" +
+    			"}\n",
+    	"T8133cwnaa4.java",
+    			"public class T8133cwnaa4 { void bar() {} }\n"
+    		},
+    		"");
+    }
 }

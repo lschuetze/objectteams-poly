@@ -2505,6 +2505,11 @@ protected void consumeCallinLabel() {
 	}
 
 	pushOnAstStack(new CallinLabel(ident, (int)(pos >>> 32), (int)pos));
+	if (this.expressionLengthStack[this.expressionLengthPtr] > 0) {
+		Expression annot = this.expressionStack[this.expressionPtr];
+		this.problemReporter().illegalModifierBeforeCallinLabel(annot.sourceStart, annot.sourceEnd);
+		this.expressionPtr -= this.expressionLengthStack[this.expressionLengthPtr--];
+	}
 }
 private void consumeCallinModifier(int tokenID) {
 	// CallinModifier ::= 'replace'
