@@ -5044,7 +5044,7 @@ public class Java5 extends AbstractOTJLDTest {
     // An enum-in-a-team tries to refer to a role
     // Bug 355259 - Cannot declare role-typed field in an enum-as-team-member
     public void testA120_enumInTeam5() {
-    	runConformTest(
+    	runNegativeTest(
     		new String[] {
     	"TeamA120eit5.java",
 	    		"public team class TeamA120eit5 {\n" +
