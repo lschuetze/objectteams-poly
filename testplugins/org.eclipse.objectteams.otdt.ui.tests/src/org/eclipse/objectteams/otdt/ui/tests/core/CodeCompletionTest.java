@@ -524,6 +524,41 @@ public class CodeCompletionTest extends CoreTests {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
+	// Bug 353468 - [completion] completing a method binding inserts nested class by its binary name
+	public void testCreateMethodBinding1() throws Exception {
+		// secondary types:
+		createBaseClass("test1.b1", "B1", "    public class Inner{}\n");
+		createBaseClass("test1.b2", "B2", "");
+		// the base class bound to our role:
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test1.b1.B1;\n");
+		buf.append("import test1.b2.B2;\n");
+		buf.append("public class B {\n");
+		buf.append("    public void foo(B1 b1, B1.Inner inner, B2 b2);\n");
+		buf.append("}\n");
+		String contents= buf.toString();
+		IPackageFragment basePkg = CompletionTestSetup.getAbsoluteTestPackage("test1");
+		basePkg.createCompilationUnit("B.java", contents, true, null);
+		
+		fAfterImports = "\n" +
+				"import test1.b1.B1;\n" +
+				"import test1.b1.B1.Inner;\n" +
+				"import test1.b2.B2;\n";
+	
+		assertTypeBodyProposal(
+				"        |", 
+				"foo(", 
+				        "\n" +
+				"        /* (non-Javadoc)\n" +
+				"         * @see test1.B#foo(test1.b1.B1, test1.b1.B1.Inner, test1.b2.B2)\n" +
+				"         */\n" +
+				"        void |foo|(B1 b1, Inner inner, B2 b2) -> void foo(B1 b1, Inner inner,\n" +
+				"                B2 b2);\n" +
+				"        ",
+				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
+	}
+
 	/** A base method spec with return type and beginning of the selector is searched. */
 	public void testCompletionMethodSpecLong1() throws Exception {
 		createBaseClass("");
