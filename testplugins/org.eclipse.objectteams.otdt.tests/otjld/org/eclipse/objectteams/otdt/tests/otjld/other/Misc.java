@@ -491,7 +491,7 @@ public class Misc extends AbstractOTJLDTest {
     			"		rm <-after foo;\n" + 
     			"\n" + 
     			"		private void rm() {\n" + 
-    			"			System.out.println(\"R3.rm\");			\n" + 
+    			"			System.out.println(\"R3.rm\");\n" + 
     			"		}\n" + 
     			"	}\n" + 
     			"}\n",
@@ -502,6 +502,129 @@ public class Misc extends AbstractOTJLDTest {
             getClassLibraries(),
             false/*shouldFlushOutputDirectory*/,
             null/*vmArguments*/);
+     }
+     
+     // Bug 304728 - [otre] [compiler] Support basic serialization of teams and roles
+     // Bug 304729 - [otre] Selectively consider activation state during team serialization
+     public void testTeamSerialization1() {
+    	 runConformTest(
+    		new String[] {
+    			"TeamSerializationMain.java",
+    				"import java.io.ByteArrayInputStream;\n" + 
+    				"import java.io.ByteArrayOutputStream;\n" + 
+    				"import java.io.IOException;\n" + 
+    				"import java.io.ObjectInputStream;\n" + 
+    				"import java.io.ObjectOutputStream;\n" + 
+    				"\n" + 
+    				"import org.objectteams.Team;\n" + 
+    				"\n" + 
+    				"import teampack.PersistentTeam;\n" + 
+    				"import basepack.PersistentBase;\n" + 
+    				"\n" + 
+    				"\n" + 
+    				"public class TeamSerializationMain {\n" + 
+    				"	public static void main(String[] args) throws IOException, ClassNotFoundException {\n" + 
+    				"		PersistentTeam t = new PersistentTeam();\n" + 
+    				"		t.activate(Team.ALL_THREADS);\n" + 
+    				"		PersistentBase basel = new PersistentBase(\"b1\");\n" + 
+    				"		t.name(basel, \"R1\");\n" + 
+    				"		basel.hello();\n" + 
+    				"\n" + 
+    				"		// store, deactivate and forget it:\n" + 
+    				"		ByteArrayOutputStream baos = new ByteArrayOutputStream();\n" + 
+    				"		ObjectOutputStream oos = new ObjectOutputStream(baos);\n" + 
+    				"		oos.writeObject(t);\n" + 
+    				"		t.deactivate(Team.ALL_THREADS);\n" + 
+    				"		t = null;\n" + 
+    				"		basel = null;\n" + 
+    				"		\n" + 
+    				"		// no team active now:\n" + 
+    				"		new PersistentBase(\"interm\").hello();\n" + 
+    				"\n" + 
+    				"		// restore:\n" + 
+    				"		ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray()));\n" + 
+    				"		Object o = ois.readObject();\n" + 
+    				"		basel = (PersistentBase) ((PersistentTeam)o).getBase();\n" + 
+    				"		\n" + 
+    				"		// trigger from old and new objects:\n" + 
+    				"		basel.hello();\n" + 
+    				"		new PersistentBase(\"finale\").hello();\n" + 
+    				"	}\n" + 
+    				"}\n",
+    			"teampack/PersistentTeam.java",
+    				"package teampack;\n" + 
+    				"\n" + 
+    				"import java.io.IOException;\n" + 
+    				"import java.io.Serializable;\n" + 
+    				"\n" + 
+    				"import base basepack.PersistentBase;\n" + 
+    				"\n" + 
+    				"public team class PersistentTeam implements Serializable {\n" + 
+    				"\n" + 
+    				"	private void writeObject(java.io.ObjectOutputStream out)\n" + 
+    				"            throws IOException\n" + 
+    				"    {\n" + 
+    				"        out.defaultWriteObject();\n" + 
+    				"        writeGlobalActivationState(out);\n" + 
+    				"        Object[] allRoles = getAllRoles();\n" + 
+    				"        out.writeInt(allRoles.length);\n" + 
+    				"		 for (Object o : allRoles)\n" + 
+    				"        	out.writeObject(o);\n" + 
+    				"    }\n" + 
+    				"    private void readObject(java.io.ObjectInputStream in)\n" + 
+    				"            throws IOException, ClassNotFoundException\n" + 
+    				"    {\n" + 
+    				"        in.defaultReadObject();\n" + 
+    				"        readGlobalActivationState(in);\n" + 
+    				"        restore();\n" + 
+    				"        int numRoles = in.readInt();\n" + 
+    				"        for (int i = 0; i < numRoles; i++)\n" + 
+    				"			restoreRole(R.class, in.readObject());\n" + 
+    				"    }\n" + 
+    				"    \n" + 
+    				"    protected class R implements Serializable, ILowerable playedBy PersistentBase {\n" + 
+    				"    	protected String roleName;\n" + 
+    				"\n" + 
+    				"		void hello() <- after void hello();\n" + 
+    				"    	\n" + 
+    				"		private void hello() {\n" + 
+    				"			System.out.println(\"Says \"+this.roleName);\n" + 
+    				"		}    	\n" + 
+    				"    }\n" + 
+    				"\n" + 
+    				"	public void name(PersistentBase as R r, String name) {\n" + 
+    				"		r.roleName = name;\n" + 
+    				"	}\n" + 
+    				"	\n" + 
+    				"	public Object getBase() {\n" + 
+    				"		R[] rs = getAllRoles(R.class);\n" + 
+    				"		return rs[0].lower();\n" + 
+    				"	}\n" + 
+    				"}\n",
+    			"packbase/PersistentBase.java",
+	    			"package basepack;\n" + 
+	    			"\n" + 
+	    			"import java.io.Serializable;\n" + 
+	    			"\n" + 
+	    			"public class PersistentBase implements Serializable {\n" + 
+	    			"	String name;\n" + 
+	    			"\n" + 
+	    			"	public PersistentBase(String name) {\n" + 
+	    			"		this.name = name;\n" + 
+	    			"	}\n" + 
+	    			"\n" + 
+	    			"	public void hello() {\n" + 
+	    			"		System.out.println(\"Hello \"+this.name);\n" + 
+	    			"	}\n" + 
+	    			"}\n"
+    		}, 
+    		"Hello b1\n" + 
+			"Says R1\n" + 
+			"Hello interm\n" + 
+			"Hello b1\n" + 
+			"Says R1\n" + 
+			"Hello finale\n" + 
+			"Says null");
      }
 }
 

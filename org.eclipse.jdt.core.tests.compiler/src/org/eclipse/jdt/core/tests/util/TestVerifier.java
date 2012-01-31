@@ -249,6 +249,9 @@ private String getVerifyTestsCode() {
 "		if (name.startsWith(\"org.apache.bcel\"))\n" +
 "			return true;\n" +
 "			\n" +
+"		if (name.startsWith(\"sun\"))\n" + // have a test that needs sun/reflect/SerializationConstructorAccessorImpl
+"			return true;\n" +
+"			\n" +
 // SH}
 		"		// exclude the user defined package paths\n" +
 		"		for (int i= 0; i < fExcluded.length; i++) {\n" +
