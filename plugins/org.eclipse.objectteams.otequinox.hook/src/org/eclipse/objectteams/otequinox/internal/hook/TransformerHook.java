@@ -113,7 +113,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	// As an OSGI extension bundle, we can't depend on the transformer plugin, so we have to hardcode this
 	public static final String  TRANSFORMER_PLUGIN_ID           = "org.eclipse.objectteams.otequinox";
 	
-	private static final String OTRE_ID           				= "org.eclipse.objectteams.runtime";
+	private static final String TRANSFORMER_HOOK_ID           = "org.eclipse.objectteams.otequinox.hook";
 	private static final String WORKSPACE_INITIALIZER_PLUGIN_ID = "org.eclipse.objectteams.otdt.earlyui";
 	private static final String OTDT_QUALIFIER = "OTDT";
 
@@ -122,6 +122,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 	
 	// this one requires hot-fixing:
 	private static final String BCEL_PLUGIN_ID = "org.apache.bcel";
+	private static final String BCEL_PATH_DIR = "bcelpatch/";
 
 	// specific action may be required when this class is loaded:
 	private static final String ORG_OBJECTTEAMS_TEAM = "org.objectteams.Team";
@@ -434,10 +435,8 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 			}
 		}
 		if (shouldPatch) {
-			Bundle otre = this.packageAdmin.getBundles(OTRE_ID, null)[0];
-			URL entry = otre.getEntry(name.replace('.', '/')+".class"); // binary bundle: search in the jar root
-			if (entry == null)
-				entry = otre.getEntry("bin/"+name.replace('.', '/')+".class"); // workspace bundle: search in the bin folder
+			Bundle transformer = this.packageAdmin.getBundles(TRANSFORMER_HOOK_ID, null)[0];
+			URL entry = transformer.getEntry(BCEL_PATH_DIR+name+".class");
 			InputStream stream = null;
 			try {
 				stream = entry.openStream();
