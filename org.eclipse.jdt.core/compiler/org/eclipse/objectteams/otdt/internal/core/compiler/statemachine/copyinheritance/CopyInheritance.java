@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodVerifier;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
@@ -91,6 +92,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationS
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config.NotConfiguredException;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
@@ -1613,6 +1615,63 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			}
 		}
 	}
+	
+	public static class RoleConstructorCall extends MessageSend {
+    	public AllocationExpression allocationOrig;
+
+		public RoleConstructorCall(AllocationExpression allocationExpr) {
+			this.allocationOrig = allocationExpr;
+		}
+
+		// specialized MessageSend to perform analysis for unsafe role instantiation:
+    	@Override
+    	public TypeBinding resolveType(BlockScope blockScope) {
+    		TypeBinding result = super.resolveType(blockScope);
+    		ReferenceBinding roleType = (ReferenceBinding)this.resolvedType;
+    		if (roleType != null && roleType.isValidBinding()) {
+        		MethodBinding ctor = roleType.getExactConstructor(this.binding.parameters);
+        		if (Lifting.isLiftToConstructor(ctor, roleType)) // implies role is bound
+        		{
+					if (this.arguments != null && this.arguments.length > 0) {
+						Expression currentArg = this.arguments[0];
+						while (currentArg instanceof CastExpression)
+							currentArg = ((CastExpression)currentArg).expression; // unwrap
+						if (   (currentArg instanceof AllocationExpression)
+							|| (   (currentArg instanceof MessageSend)
+								 && isCreator(((MessageSend)currentArg).binding)))
+						{
+							// need to check if arg is compatible without lowering
+							TypeBinding allocType = currentArg.resolvedType;
+							Config confBak = Config.createOrResetConfig(this);
+							try {
+								if (   allocType.isCompatibleWith(roleType.baseclass())
+									&& !Config.getLoweringRequired()) // TODO(SH): could potentially ask the expression if conversions were involved?
+									return result; // we're clean
+							} finally {
+								Config.removeOrRestore(confBak, this);
+							}
+						}
+						blockScope.problemReporter().liftCtorArgNotAllocation(ctor, this, roleType.baseclass());
+						this.binding.roleCreatorRequiringRuntimeCheck = true;
+					}
+        		}
+    		}
+    		return result;
+    	}
+    	@Override
+    	protected TypeBinding afterMethodLookup(Scope scope, AnchorMapping anchorMapping, TypeBinding[] argumentTypes,
+    			TypeBinding returnType) {
+    		this.allocationOrig.binding = this.binding; // secure this for error reporting
+    		if (this.binding instanceof ProblemMethodBinding)
+    			this.allocationOrig.binding = ((ProblemMethodBinding)this.binding).closestMatch;
+    		if (this.allocationOrig.binding != null) {
+    			MethodModel model = this.allocationOrig.binding.model;
+    			if (model != null && model._srcCtor != null)
+    				this.allocationOrig.binding = model._srcCtor;
+    		}
+    		return super.afterMethodLookup(scope, anchorMapping, argumentTypes, returnType);
+    	}
+	}
     /**
      * Create an invocation of a creation method, which will replace a given
      * allocation expression, i.e.,
@@ -1674,43 +1733,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
         } else {
         	receiver = ThisReference.implicitThis();
         }
-        MessageSend message = new MessageSend() {
-        	// specialized MessageSend to perform analysis for unsafe role instantiation:
-        	@Override
-        	public TypeBinding resolveType(BlockScope blockScope) {
-        		TypeBinding result = super.resolveType(blockScope);
-        		ReferenceBinding roleType = (ReferenceBinding)this.resolvedType;
-        		if (roleType != null && roleType.isValidBinding()) {
-	        		MethodBinding ctor = roleType.getExactConstructor(this.binding.parameters);
-	        		if (Lifting.isLiftToConstructor(ctor, roleType)) // implies role is bound
-	        		{
-						if (this.arguments != null && this.arguments.length > 0) {
-							Expression currentArg = this.arguments[0];
-							while (currentArg instanceof CastExpression)
-								currentArg = ((CastExpression)currentArg).expression; // unwrap
-							if (   (currentArg instanceof AllocationExpression)
-								|| (   (currentArg instanceof MessageSend)
-									 && isCreator(((MessageSend)currentArg).binding)))
-							{
-								// need to check if arg is compatible without lowering
-								TypeBinding allocType = currentArg.resolvedType;
-								Config confBak = Config.createOrResetConfig(this);
-								try {
-									if (   allocType.isCompatibleWith(roleType.baseclass())
-										&& !Config.getLoweringRequired()) // TODO(SH): could potentially ask the expression if conversions were involved?
-										return result; // we're clean
-								} finally {
-									Config.removeOrRestore(confBak, this);
-								}
-							}
-							blockScope.problemReporter().liftCtorArgNotAllocation(ctor, this, roleType.baseclass());
-							this.binding.roleCreatorRequiringRuntimeCheck = true;
-						}
-	        		}
-        		}
-        		return result;
-        	}
-        };
+        MessageSend message = new RoleConstructorCall(allocationExpr);
         gen.setPos(message);
         message.nameSourcePosition = gen.pos;
         message.selector = selector;

@@ -5041,6 +5041,32 @@ public class Java5 extends AbstractOTJLDTest {
             null/*requestor*/);
     }
 
+    // An enum-in-a-team tries to refer to a role
+    // Bug 355259 - Cannot declare role-typed field in an enum-as-team-member
+    public void testA120_enumInTeam5() {
+    	runConformTest(
+    		new String[] {
+    	"TeamA120eit5.java",
+	    		"public team class TeamA120eit5 {\n" +
+	    		"   protected class R {}\n" +
+	    		"   protected enum Values {\n" +
+	    		"       V1, V2;\n" +
+	    		"       public R r = new R();\n" +
+	    		"   }\n" +
+	    		"	public static void main(String[] args) {\n" +
+	    		"		for (Values v : Values.values())\n" +
+	    		"			System.out.print(v);\n" +
+	    		"	}\n" +
+	    		"}"
+    		},
+    		"----------\n" + 
+			"1. ERROR in TeamA120eit5.java (at line 5)\n" + 
+			"	public R r = new R();\n" + 
+			"	             ^^^^^^^\n" + 
+			"No enclosing instance of type TeamA120eit5 is accessible. Must qualify the allocation with an enclosing instance of type TeamA120eit5 (e.g. x.new A() where x is an instance of TeamA120eit5).\n" + 
+			"----------\n");
+    }
+
     public void testA121_genericNestedTeam1() {
     	runConformTest(
     		new String[] {

@@ -161,6 +161,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance.RoleConstructorCall;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
@@ -3494,10 +3495,14 @@ public void invalidConstructor(Statement statement, MethodBinding targetConstruc
 			break;
 //{ObjectTeams: for roles we detect this earlier than JDT
 		case ProblemReasons.NonStaticReferenceInConstructorInvocation:
+		case ProblemReasons.NonStaticReferenceInStaticContext:
 			if (   targetConstructor.declaringClass != null
 				&& targetConstructor.declaringClass.isRole())
 			{
-				noSuchEnclosingInstance(targetConstructor.declaringClass.enclosingType(), statement, true);
+				if (statement instanceof CopyInheritance.RoleConstructorCall)
+					statement = ((RoleConstructorCall)statement).allocationOrig;
+				noSuchEnclosingInstance(targetConstructor.declaringClass.enclosingType(), statement, 
+						targetConstructor.problemId() == ProblemReasons.NonStaticReferenceInConstructorInvocation);
 				return;
 			}
 			break;
