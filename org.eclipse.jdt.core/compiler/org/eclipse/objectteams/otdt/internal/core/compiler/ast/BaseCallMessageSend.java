@@ -25,10 +25,8 @@ import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
-import org.eclipse.jdt.internal.compiler.ast.FalseLiteral;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.TrueLiteral;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
@@ -116,8 +114,9 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 			System.arraycopy(args, 0, args=new Expression[len+extra], extra, len);
 		}
 		// insert before regular args:
-		if (!CallinImplementorDyn.DYNAMIC_WEAVING) // FIXME(OTDYN): base.super calls not supported by dynamic weaver.
-			args[0] = this.isSuperAccess ? new TrueLiteral(this.sourceStart, this.sourceEnd) : new FalseLiteral(this.sourceStart, this.sourceEnd);
+		if (!CallinImplementorDyn.DYNAMIC_WEAVING) { // FIXME(OTDYN): base.super calls not supported by dynamic weaver.
+			args[0] = new AstGenerator(this).booleanLiteral(this.isSuperAccess);
+		}
 		this._sendOrig.arguments = args;
 	}
 

@@ -277,10 +277,11 @@ public class AstGenerator extends AstFactory {
 		return result;
 	}
 	public Literal booleanLiteral(boolean val) {
-		if (val)
-			return new TrueLiteral(this.sourceStart, this.sourceEnd);
-		else
-			return new FalseLiteral(this.sourceStart, this.sourceEnd);
+		Literal result = val
+			? new TrueLiteral(this.sourceStart, this.sourceEnd)
+			: new FalseLiteral(this.sourceStart, this.sourceEnd);
+		result.bits |= ASTNode.IsGenerated;
+		return result;
 	}
 	public StringLiteral stringLiteral(char[] cs) {
 		return new StringLiteral(cs, this.sourceStart, this.sourceEnd, /*lineNumber*/0);

@@ -67,6 +67,9 @@ public char[] source() {
 	return source;
 }
 public void traverse(ASTVisitor visitor, BlockScope scope) {
+//{ObjectTeams: hide synthetic nodes from visitors (e.g., inserted into a base call)	
+	if ((this.bits & ASTNode.IsGenerated) != 0) return;
+// SH}
 	visitor.visit(this, scope);
 	visitor.endVisit(this, scope);
 }
