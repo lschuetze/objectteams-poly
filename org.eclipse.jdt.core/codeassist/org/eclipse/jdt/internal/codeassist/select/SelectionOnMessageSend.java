@@ -118,16 +118,6 @@ public class SelectionOnMessageSend extends MessageSend {
 			MethodModel model = this.binding.model;
 			if (model != null && model._inferredCallout != null)
 				throw new SelectionNodeFound(model._inferredCallout.baseMethodSpec.resolvedMethod);
-
-			//method is part of a role but not copy inherited
-		    if(this.binding.declaringClass.isRole())
-		    {
-		        //have to generate a new binding here! FIXME(SH): WHY?
-		        ReferenceBinding roleClass = this.binding.declaringClass.roleModel.getClassPartBinding();
-		        MethodBinding newBinding = // FIXME(SH): findExactMethod does not handle inherited methods!
-		            scope.findExactMethod(roleClass, this.binding.selector, this.binding.parameters, this);
-		        throw new SelectionNodeFound(newBinding);
-		    }
  //haebor}
 			if(this.binding.isDefaultAbstract()) {
 				throw new SelectionNodeFound(findNonDefaultAbstractMethod(this.binding)); // 23594

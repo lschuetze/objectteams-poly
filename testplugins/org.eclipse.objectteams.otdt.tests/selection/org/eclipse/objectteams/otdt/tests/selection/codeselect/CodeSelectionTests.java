@@ -39,7 +39,7 @@ public class CodeSelectionTests extends AbstractJavaModelTests
         if (false)
         {
             TestSuite suite = new Suite(CodeSelectionTests.class.getName());
-            suite.addTest(new CodeSelectionTests("testLocalNameForClassFile"));
+            suite.addTest(new CodeSelectionTests("testMethodReference1"));
             return suite;
         }
         return new Suite(CodeSelectionTests.class);
@@ -241,6 +241,16 @@ public class CodeSelectionTests extends AbstractJavaModelTests
        assertElementsEqual(
                "Unexpected elements",
                "r1m1() [in R1 [in T1 [in T1.java [in teampkg2 [in src [in CodeSelection]]]]]]",
+               elements);
+   }
+
+   public void testMethodReference1() throws JavaModelException
+   {
+       ICompilationUnit cu = getCompilationUnit("CodeSelection", "src", "teampkg1", "T7.java");
+       IJavaElement[] elements = codeSelect(cu, "collect(strings);", "collect");
+       assertElementsEqual(
+               "Unexpected elements",
+               "collect(Set<String>) [in R1 [in T7 [in T7.java [in teampkg1 [in src [in CodeSelection]]]]]]",
                elements);
    }
 
