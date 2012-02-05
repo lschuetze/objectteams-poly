@@ -4342,13 +4342,15 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 					doTextInsert(pos, String.valueOf(')'), null);
 			} else if (removeSignature) {
 				List parameters = node.parameters();
-				int endPos;
+				int endPos = pos;
 				if (parameters.size() > 0) {
+					// skip parameters:
 					ASTNode lastNode = (ASTNode) parameters.get(parameters.size()-1);
-					endPos = lastNode.getStartPosition() + lastNode.getLength() + 1;
-				} else {
-					endPos= getScanner().getTokenEndOffset(TerminalTokens.TokenNameRPAREN, pos);
+					endPos = lastNode.getStartPosition() + lastNode.getLength();
 				}
+				// skip trailing ')'
+				endPos= getScanner().getTokenEndOffset(TerminalTokens.TokenNameRPAREN, endPos);
+				// end delete all that:
 				doTextRemove(pos, endPos-pos, null);
 			}
 			// !newHasSignature && !removeSignature -> nothing to rewrite
