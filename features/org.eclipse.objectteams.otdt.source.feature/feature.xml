@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="org.eclipse.objectteams.otdt.source"
+      label="%featureName"
+      version="2.1.0.qualifier"
+      provider-name="%providerName">
+
+   <description url="http://www.eclipse.org/objectteams">
+This Eclipse Plug-In feature supports development with Object Teams
+and the OT/J programming language (see http://www.eclipse.org/objectteams). 
+It extends all of the Eclipse Java development tools
+to support development with Object Teams
+throughout all views and development activities.
+This feature contains the sources of the OTDT.
+   </description>
+
+   <copyright>
+The software &quot;Object Teams Development Tooling&quot; (OTDT) is a result of
+the joint project TOPPrax and has been developed in collaboration between the 
+Fraunhofer Institut für Rechnerarchitektur und Softwaretechnik (FIRST)
+and the Technische Unversität Berlin.
+
+The software consists of three distinguishable parts:
+- A compiler for OT/J (Compiler),
+- A graphical user interface (GUI) and
+- A runtime environment for OT/J (Runtime).
+The copyright is held by the Technische Universität (Compiler and Runtime)
+and by the Fraunhofer Gesellschaft, München, Deutschland,
+for its Fraunhofer Institut für Rechnerarchitektur und Softwaretechnik
+(FIRST) (Compiler and GUI) and others.
+This software is based on Eclipse and the Java Development Tooling
+(JDT) of which it contains parts.
+Authors:
+	Andreas Kaiser
+	Carsten Pfeiffer
+	Christine Hering
+	Christine Hundt
+	Gregor Brcan
+	Jan Wloka
+	Jaroslav Svacina
+	Joachim Hänsel
+	Johannes Gebauer
+	Jürgen Widiker
+	Karsten Meier
+	Marco Mosconi
+	Markus Witte
+	Michael Krüger
+	Ralf Anklam
+	Sascha Kolewa
+	Stephan Herrmann
+Project Leader:
+	Stephan Herrmann
+   </copyright>
+
+   <license url="%licenseURL">
+   		%license
+   </license>
+
+</feature>
