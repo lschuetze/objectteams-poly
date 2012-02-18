@@ -49,11 +49,11 @@ import org.eclipse.jdt.internal.compiler.util.ObjectVector;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.core.ClasspathAccessRule;
 import org.eclipse.jdt.internal.core.CompilationUnit;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.pde.internal.core.RequiredPluginsClasspathContainer;
 import org.objectteams.LiftingVetoException;
 import org.objectteams.Team;
-import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 
 import base org.eclipse.jdt.core.JavaCore;
 import base org.eclipse.jdt.internal.core.CompilationUnitProblemFinder;
@@ -151,17 +151,35 @@ public team class AdaptorActivator
 		 */
 		static callin void addBaseBundleAttribute(IAccessRule[] accessRules, IClasspathAttribute[] extraAttributes) {
 			if (accessRules[0] instanceof ClasspathAccessRule) {
+				int len = extraAttributes.length;
+				int count = 0;
+				// filter existing attributes:
+				for (int i = 0; i < len; i++) {
+					if (!extraAttributes[i].getName().startsWith(CPENTRY_ATTR_ORIGIN_BASE_BUNDLE)) {
+						if (count != i)
+							extraAttributes[count] = extraAttributes[i];
+						count++;
+					}
+				}
+				// add new extraAttribute(s):
 				Object[] datas = ((ClasspathAccessRule)accessRules[0]).aspectBindingData;
 				int i = 0;
 				if (datas != null)
 					for (Object data : datas)
 						if (data instanceof AdaptedBaseBundle) {
 							// note: more than one data is rather infrequent, no need to optimize array copying
-							int len = extraAttributes.length;
-							System.arraycopy(extraAttributes, 0, extraAttributes=new IClasspathAttribute[len+1], 1, len);
+							int idx = 0;
+							if (count < len) {
+								idx = count++;
+							} else {
+								System.arraycopy(extraAttributes, 0, extraAttributes=new IClasspathAttribute[len+1], 1, len);
+							}
 							String baseBundleName = ((AdaptedBaseBundle) data).getSymbolicName();
-							extraAttributes[0] = newClasspathAttribute(CPENTRY_ATTR_ORIGIN_BASE_BUNDLE+(i++), baseBundleName);
+							extraAttributes[idx] = newClasspathAttribute(CPENTRY_ATTR_ORIGIN_BASE_BUNDLE+(i++), baseBundleName);
 						}
+				// compact the array, if existing extraAttributes are being removed:
+				if (count < len)
+					System.arraycopy(extraAttributes, 0, extraAttributes=new IClasspathAttribute[count], 0, count);
 			}
 			base.addBaseBundleAttribute(accessRules, extraAttributes);
 		}		
@@ -180,16 +198,16 @@ public team class AdaptorActivator
 		IProject getProject() -> IProject getProject();
 
 		@SuppressWarnings("rawtypes")
-		void enhanceCPEntry(IClasspathEntry[] resolvedEntries) 
+		void enhanceCPEntries(IClasspathEntry[] resolvedEntries) 
 			<- before void computePackageFragmentRoots(IClasspathEntry[] resolvedEntries, ObjectVector accumulatedRoots,
 													   HashSet rootIDs, IClasspathEntry referringEntry,
 													   boolean retrieveExportedRoots, Map rootToResolvedEntries);
 
 		/**
-		 * @param entry the entry to enhance
+		 * @param entries the entries whose access rules to enhance
 		 * @throws LiftingVetoException when the project is not an OT/Equinox project.
 		 */
-		void enhanceCPEntry(IClasspathEntry[] entries) throws LiftingVetoException 
+		void enhanceCPEntries(IClasspathEntry[] entries) throws LiftingVetoException 
 		{
 			IProject project = getProject();
 			AspectBindingReader reader = ResourceProjectAdaptor.getDefault().getAspectBindingReader((Project)project);

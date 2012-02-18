@@ -115,9 +115,10 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 		@SuppressWarnings("basecall")
 		callin void forbiddenReference(TypeBinding type, ASTNode location, AccessRestriction restriction) 
 		{
+			DecapsulationState baseclassDecapsulation = getBaseclassDecapsulation(location);
 			switch (restriction.getProblemId()) {
 			case IProblem.BaseclassDecapsulationForcedExport:
-				switch (getBaseclassDecapsulation(location)) {
+				switch (baseclassDecapsulation) {
 				case ALLOWED:
 					decapsulationByForcedExport((ReferenceBinding)type, location);
 					break;
@@ -128,42 +129,56 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 					illegalUseOfForcedExport((ReferenceBinding)type, location);
 				}
 				break;
-			case IProblem.AdaptedPluginAccess: 
-				// not a real error but requires consistency check against aspectBinding:
-				if (location instanceof ImportReference) {
-					ImportReference imp= (ImportReference)location;
-					if (imp.isBase()) {
-						String teamName= getReferenceTeam();
-						if (teamName == null) 
-							baseImportInRegularClass(getPublicType(), imp);
-						
-						Set<String> basePlugins= aspectBindingReader.getBasePlugins(teamName);
-						if (basePlugins == null || basePlugins.isEmpty()) {
-							illegalBaseImportNoAspectBinding(imp, teamName);
-							return;
-						}
-						String baseString = flattenSet(basePlugins);
-						Set<String> actualBases = new HashSet<String>();
-						AccessRule rule= restriction.getAccessRule();
-						if (rule.aspectBindingData != null) {
-							for (Object data : rule.aspectBindingData) {
-								AdaptedBaseBundle info= (AdaptedBaseBundle) data;
-								if (info.isAdaptedBy(teamName)) {
-									// OK, no error
-									if (info.hasPackageSplit)
-										baseImportFromSplitPackage(imp, baseString); // just a warning
-									return;
-								}
-								actualBases.add(info.getSymbolicName());
-							}
-						}
-						illegalBaseImport(imp, baseString, flattenSet(actualBases));
-					}
-				}
+			case IProblem.AdaptedPluginAccess:
+				checkAdaptedPluginAccess(location, restriction);
 				break;
 			default:
-				base.forbiddenReference(type, location, restriction);
+				// normal access restriction, but ...
+				if (baseclassDecapsulation == DecapsulationState.ALLOWED) {
+					AccessRule rule= restriction.getAccessRule();
+					if (rule.aspectBindingData != null)
+						// ... as we have aspectBindingData, those should be checked first:
+						if (!checkAdaptedPluginAccess(location, restriction))
+							return;
+				}
+				base.forbiddenReference(type, location, restriction);				
 			}
+		}
+		
+		boolean checkAdaptedPluginAccess(ASTNode location, AccessRestriction restriction) {
+			// not a real error but requires consistency check against aspectBinding:
+			if (location instanceof ImportReference) {
+				ImportReference imp= (ImportReference)location;
+				if (imp.isBase()) {
+					String teamName= getReferenceTeam();
+					if (teamName == null) 
+						baseImportInRegularClass(getPublicType(), imp);
+					
+					Set<String> basePlugins= aspectBindingReader.getBasePlugins(teamName);
+					if (basePlugins == null || basePlugins.isEmpty()) {
+						illegalBaseImportNoAspectBinding(imp, teamName);
+						return false;
+					}
+					String baseString = flattenSet(basePlugins);
+					Set<String> actualBases = new HashSet<String>();
+					AccessRule rule= restriction.getAccessRule();
+					if (rule.aspectBindingData != null) {
+						for (Object data : rule.aspectBindingData) {
+							AdaptedBaseBundle info= (AdaptedBaseBundle) data;
+							if (info.isAdaptedBy(teamName)) {
+								// OK, no error
+								if (info.hasPackageSplit)
+									baseImportFromSplitPackage(imp, baseString); // just a warning
+								return true;
+							}
+							actualBases.add(info.getSymbolicName());
+						}
+					}
+					illegalBaseImport(imp, baseString, flattenSet(actualBases));
+					return false;
+				}
+			}
+			return true;
 		}
 		void forbiddenReference(TypeBinding type, ASTNode location, AccessRestriction restriction)
 		<- replace void forbiddenReference(TypeBinding type, ASTNode location, byte entryType, AccessRestriction restriction)
@@ -245,7 +260,7 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 					if (!importedType.isValidBinding())
 						continue; // already reported
 					if (importedType.hasRestrictedAccess())
-						continue; // checked by forbiddenAccess()
+						continue; // checked by forbiddenReference()
 					if (aspectBindingReader.isAdaptingSelf(teamName)) {
 						char[][] current= CharOperation.splitOn('/', teamType.getFileName());
 						char[][] imported= CharOperation.splitOn('/', importedType.getFileName());
@@ -274,7 +289,7 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 	}
 	@SuppressWarnings("nls")
 	String flattenSet(Set<String> stringSet) {
-		if (stringSet == null) return null;
+		if (stringSet == null || stringSet.size() == 0) return null;
 		Iterator<String> iterator = stringSet.iterator();
 		if (stringSet.size()==1) {
 			return iterator.next();
