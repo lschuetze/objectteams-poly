@@ -56,4 +56,14 @@ Project Leader:
    		%license
    </license>
 
+   <plugin
+         id="org.eclipse.jdt.core.source"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
+         id="org.eclipse.objectteams.otdt.source"
+         version="0.0.0"
+         unpack="false"/>
+
 </feature>
