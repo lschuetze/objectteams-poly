@@ -62,7 +62,7 @@ Project Leader:
          unpack="false"/>
 
    <plugin
-         id="org.eclipse.objectteams.otdt.source"
+         id="org.eclipse.objectteams.otdt.ui.source"
          version="0.0.0"
          unpack="false"/>
 
