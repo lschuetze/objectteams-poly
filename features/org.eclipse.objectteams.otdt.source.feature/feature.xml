@@ -64,6 +64,13 @@ Project Leader:
          unpack="false"/>
 
    <plugin
+         id="org.eclipse.objectteams.otdt.source"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
+   <plugin
          id="org.eclipse.objectteams.otdt.debug.source"
          download-size="0"
          install-size="0"
