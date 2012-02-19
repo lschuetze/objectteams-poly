@@ -77,9 +77,6 @@ protected team class CreateMethodMappingCompletionProposal extends MethodMapping
 		public MyJavaLinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal, int relevance) {
 			base(unit, typeProposal, relevance);
 		}
-
-		TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model) 
-		-> TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model);
 	}
 
 
@@ -171,12 +168,20 @@ protected team class CreateMethodMappingCompletionProposal extends MethodMapping
 			// return type:
 			ITrackedNodePosition returnTypePosition = null;
 			ITypeBinding returnType = method.getReturnType();
+			final boolean[] hasAppliedVoidReturn = new boolean[1];
 			if (!(returnType.isPrimitive() && "void".equals(returnType.getName()))) { //$NON-NLS-1$
 				returnTypePosition = rewrite.track(roleMethodSpec.getReturnType2());
 				addLinkedPosition(returnTypePosition, true, ROLEMETHODRETURN_KEY);
 				LinkedProposalPositionGroup group1 = getLinkedProposalModel().getPositionGroup(ROLEMETHODRETURN_KEY, true);
 				group1.addProposal(new MyJavaLinkedModeProposal(iCU, method.getReturnType(), 13));
-				group1.addProposal("void", null, 13);  //$NON-NLS-1$
+				group1.addProposal(new Proposal("void", null, 13) { //$NON-NLS-1$
+					@Override
+					public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model)
+							throws CoreException {
+						hasAppliedVoidReturn[0] = true;
+						return super.computeEdits(offset, position, trigger, stateMask, model);
+					}
+				});
 			}
 			
 			// role method name:
@@ -197,21 +202,21 @@ protected team class CreateMethodMappingCompletionProposal extends MethodMapping
 				}
 				group2.addProposal(calloutToken, Images.getImage(CALLOUTBINDING_IMG), 13);
 			}
-			group2.addProposal(makeBeforeAfterBindingProposal("<- before", Images.getImage(CALLINBINDING_BEFORE_IMG), returnTypePosition));  //$NON-NLS-1$
+			group2.addProposal(makeBeforeAfterBindingProposal("<- before", Images.getImage(CALLINBINDING_BEFORE_IMG), returnTypePosition, hasAppliedVoidReturn));  //$NON-NLS-1$
 			group2.addProposal("<- replace", Images.getImage(CALLINBINDING_REPLACE_IMG), 13); //$NON-NLS-1$
-			group2.addProposal(makeBeforeAfterBindingProposal("<- after",  Images.getImage(CALLINBINDING_AFTER_IMG), returnTypePosition));   //$NON-NLS-1$
+			group2.addProposal(makeBeforeAfterBindingProposal("<- after",  Images.getImage(CALLINBINDING_AFTER_IMG), returnTypePosition, hasAppliedVoidReturn));   //$NON-NLS-1$
 		}
 		return true;	
 	}
 	/** Create a method-binding proposal that, when applied, will change the role-returntype to "void": */
-	Proposal makeBeforeAfterBindingProposal(String displayString, Image image, final ITrackedNodePosition returnTypePosition) {
+	Proposal makeBeforeAfterBindingProposal(String displayString, Image image, final ITrackedNodePosition returnTypePosition, final boolean[] hasAppliedVoidReturn) {
 		return new Proposal(displayString, image, 13) {
 			@Override
 			public TextEdit computeEdits(int offset, LinkedPosition position, char trigger, int stateMask, LinkedModeModel model)
 					throws CoreException 
 			{
 				MultiTextEdit edits = new MultiTextEdit();
-				if (returnTypePosition != null)
+				if (returnTypePosition != null && !hasAppliedVoidReturn[0])
 					edits.addChild(new ReplaceEdit(returnTypePosition.getStartPosition(), returnTypePosition.getLength(), "void")); //$NON-NLS-1$
 				edits.addChild(super.computeEdits(offset, position, trigger, stateMask, model));
 				return edits;

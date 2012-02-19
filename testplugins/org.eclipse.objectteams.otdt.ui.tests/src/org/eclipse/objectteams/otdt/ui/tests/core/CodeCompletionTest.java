@@ -621,6 +621,22 @@ public class CodeCompletionTest extends CoreTests {
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
+	// create callin with non-default selections in linked mode
+	// DISABLED because I'm yet to find a way for triggering linked mode selection in a test
+	public void _testCreateCallin2() throws Exception {
+		createBaseClass("    public String foo() {}\n");
+		assertTypeBodyProposal(
+				"        fo|", 
+				"foo(", 
+				        "\n" + // TODO(SH): initial newline is not intended?
+				"        /* (non-Javadoc)\n" +
+				"         * @see test1.B#foo()\n" +
+				"         */\n" +
+				"        |String| foo() <- before void foo();\n" +
+				"        ",
+				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
+	}
+
 	/* short, with callinModifier, follows: callout binding. */
 	public void testCompleteCallin2() throws Exception {
 		createBaseClass("    public void foo() {}\n");
