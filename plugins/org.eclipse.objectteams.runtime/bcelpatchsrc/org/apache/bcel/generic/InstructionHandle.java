@@ -117,20 +117,10 @@ public class InstructionHandle implements java.io.Serializable {
         setInstruction(i);
     }
 
-    private static InstructionHandle ih_list = null; // List of reusable handles
-
-
     /** Factory method.
      */
-    synchronized static final InstructionHandle getInstructionHandle( Instruction i ) {
-        if (ih_list == null) {
-            return new InstructionHandle(i);
-        } else {
-            InstructionHandle ih = ih_list;
-            ih_list = ih.next;
-            ih.setInstruction(i);
-            return ih;
-        }
+    static final InstructionHandle getInstructionHandle( Instruction i ) {
+        return new InstructionHandle(i);
     }
 
 
@@ -166,17 +156,6 @@ public class InstructionHandle implements java.io.Serializable {
         i_position = pos;
     }
 
-
-    /** Overridden in BranchHandle
-     */
-    protected void addHandle() {
-    	synchronized (InstructionHandle.class) {			
-    		next = ih_list;
-    		ih_list = this;
-		}
-    }
-
-
     /**
      * Delete contents, i.e., remove user access and make handle reusable.
      */
@@ -187,7 +166,6 @@ public class InstructionHandle implements java.io.Serializable {
         i_position = -1;
         attributes = null;
         removeAllTargeters();
-        addHandle();
     }
 
 
