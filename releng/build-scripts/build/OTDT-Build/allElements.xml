@@ -34,7 +34,7 @@
 
 		<ant antfile="${genericTargets}" target="${target}" >
 			<property name="type" value="feature" />
-			<property name="id" value="org.eclipse.objectteams.otdt.source" />
+			<property name="id" value="org.eclipse.objectteams.otdt.source.feature" />
 		</ant>
 		
 	  	<condition property="really.run.tests">
@@ -101,8 +101,8 @@
 	</target>
 	
 	<!-- set output repository for otdt.source.feature: -->
-	<property name="assemble.org.eclipse.objectteams.otdt.source.p2" value="true" />
-    <target   name="assemble.org.eclipse.objectteams.otdt.source.p2">
+	<property name="assemble.org.eclipse.objectteams.otdt.source.feature.p2" value="true" />
+    <target   name="assemble.org.eclipse.objectteams.otdt.source.feature.p2">
         <ant antfile="${assembleScriptName}" dir="${buildDirectory}">
 			<property name="p2.build.repo" value="file://${otdtUpdatesDir}"/>
 		</ant>

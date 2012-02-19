@@ -19,6 +19,9 @@
    <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.1.0,2.2.0)">
       <category name="org.eclipse.objectteams.otdt_2.1"/>
    </iu>
+   <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.1.0,2.2.0)">
+      <category name="org.eclipse.objectteams.otdt_2.1"/>
+   </iu>
    <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.1.0,2.2.0)">
       <category name="org.eclipse.objectteams.otdt_2.1"/>
    </iu>
