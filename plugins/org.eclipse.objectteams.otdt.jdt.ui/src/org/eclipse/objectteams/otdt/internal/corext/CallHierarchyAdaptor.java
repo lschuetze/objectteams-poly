@@ -24,14 +24,23 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchParticipant;
+import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodCall;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
@@ -64,6 +73,9 @@ public team class CallHierarchyAdaptor
 	 */
 	protected class MappingReferenceSearchRequestor playedBy MethodReferencesSearchRequestor
 	{
+		protected MappingReferenceSearchRequestor() {
+			base();
+		}
 		acceptSearchMatch <- replace acceptSearchMatch;
 	    @SuppressWarnings("basecall")
 		callin void acceptSearchMatch(SearchMatch match) {
@@ -96,6 +108,7 @@ public team class CallHierarchyAdaptor
 
 	    boolean getRequireExactMatch()               -> get boolean fRequireExactMatch;
 	    CallSearchResultCollector getSearchResults() -> get CallSearchResultCollector fSearchResults;
+		Map<String, MethodCall> getCallers()		 -> Map<String, MethodCall> getCallers();
 	}
 
 	/**
@@ -162,12 +175,15 @@ public team class CallHierarchyAdaptor
 				// directly fetch affected callins without search
 				children = getCallinsAffectedByGuard(member);
 			}
-			if (children != null)
+			if (children != null) {
 				// if found add result:
 				addReferencedMembers(children);
-			else
-				// nothing-found scenarii, revert to normal behavior:
-				base.doFindChildren(progressMonitor);
+				return;
+			}
+			if (handleRoleInstantiations(member, progressMonitor))
+				return;
+			// nothing-found scenarii, revert to normal behavior:
+			base.doFindChildren(progressMonitor);
 		}
 
 		private void addReferencedMembers(IMember[] children) {
@@ -192,17 +208,20 @@ public team class CallHierarchyAdaptor
 		IMember[] getCallinsAffectedByGuard(IMember member) {
 			/* default: */ return null;
 		}
+		boolean handleRoleInstantiations(IMember member, IProgressMonitor progressMonitor) {
+			/* default: */ return false;
+		}
 		
 		// callouts:
-		void setElementMap(Map<String,MethodCall> map)	-> set Map<String,MethodCall> fElements;
-		Map<String, MethodCall> getFElements() 	   		-> get Map<String,MethodCall> fElements;
-		void setMethodCall(MethodCall methodCall)  		-> set MethodCall fMethodCall;
-		void initCalls()                      		    -> void initCalls();
-		IMember getMember()                        		-> IMember getMember();
-		MethodCall getMethodCall()                 		-> MethodCall getMethodCall();
-		Map<String,MethodCall> lookupMethod(MethodCall methodCall)
-														-> Map<String,MethodCall> lookupMethod(MethodCall methodCall);
-		void addCallToCache(MethodCall methodCall) 		-> void addCallToCache(MethodCall methodCall);
+				  void setElementMap(Map<String,MethodCall> map)-> set Map<String,MethodCall> fElements;
+		protected Map<String, MethodCall> getFElements()		-> get Map<String,MethodCall> fElements;
+				  void setMethodCall(MethodCall methodCall)  	-> set MethodCall fMethodCall;
+		protected void initCalls()                  		    -> void initCalls();
+				  IMember getMember()                       	-> IMember getMember();
+				  MethodCall getMethodCall()                 	-> MethodCall getMethodCall();
+				  Map<String,MethodCall> lookupMethod(MethodCall methodCall)
+				  												-> Map<String,MethodCall> lookupMethod(MethodCall methodCall);
+		protected void addCallToCache(MethodCall methodCall) 	-> void addCallToCache(MethodCall methodCall);
 	}
 	
 	/**
@@ -235,6 +254,10 @@ public team class CallHierarchyAdaptor
 		extends MethodMappingWrapper
 		playedBy CallerMethodWrapper
 	{
+		IJavaSearchScope getAccurateSearchScope(IJavaSearchScope defaultSearchScope,	IMember member)
+			-> IJavaSearchScope getAccurateSearchScope(IJavaSearchScope defaultSearchScope, IMember arg1);
+		IJavaSearchScope getSearchScope() -> IJavaSearchScope getSearchScope();
+		
 		@Override
 		public IMethod[] getCallinMethods(ICallinMapping callinMapping)
 			throws JavaModelException 
@@ -334,6 +357,81 @@ public team class CallHierarchyAdaptor
 				return mList.toArray(new IMember[mList.size()]);
 			}
 		}
+
+		boolean handleRoleInstantiations(IMember member, IProgressMonitor monitor) {
+			if (member.getElementType() == IJavaElement.METHOD) {
+				if (isLiftingCtor((IMethod)member)) {
+					return findRoleInstantiations(member.getDeclaringType(), monitor);
+				}
+			} else if (member.getElementType() == IJavaElement.TYPE) {
+				IType type = (IType) member;
+				if (OTModelManager.isRole(type)) {
+					return findRoleInstantiations(type, monitor);
+				}
+			}
+			return false;
+		}
+
+		private boolean isLiftingCtor(IMethod method) {
+			try {
+				if (!method.isConstructor()) return false;
+				String[] parameterTypes = method.getParameterTypes();
+				if (parameterTypes.length != 1) return false;
+				IType declaringType = method.getDeclaringType();
+				IOTType otType = OTModelManager.getOTElement(declaringType);
+				if (otType == null || !otType.isRole()) return false;
+				String baseClassName = ((IRoleType) otType).getBaseclassName();
+				if (baseClassName == null) return false;
+				String paramType = Signature.toString(parameterTypes[0]);
+				if (baseClassName.indexOf('.') != -1)
+					return baseClassName.equals(paramType);
+				return baseClassName.equals(Signature.getSimpleName(paramType));
+			} catch (JavaModelException jme) {
+				return false;
+			}
+		}
+
+		boolean findRoleInstantiations(IType roleType, IProgressMonitor monitor) {
+			try {
+				initCalls();
+				Map<String, MethodCall> fElements = getFElements();
+				// search-engine based search for constructor invocations and lifting references:
+				Map<String, MethodCall> ctorElements = searchRoleCtorInvocations(roleType, monitor);
+				if (!ctorElements.isEmpty()) {
+					for (MethodCall call: ctorElements.values())
+						addCallToCache(call);
+					fElements.putAll(ctorElements);
+				}
+				// direct lookup of all non-static callins in this role:
+				IRoleType otRoleType = (IRoleType) OTModelManager.getOTElement(roleType);
+				for (IMethodMapping mapping : otRoleType.getMethodMappings(IRoleType.CALLINS)) {
+					if (!Flags.isStatic(mapping.getRoleMethod().getFlags())) {
+						MethodCall call = new MethodCall(mapping);
+						addCallToCache(call);
+						fElements.put(mapping.getHandleIdentifier(), call);
+					}
+				}
+				return true;
+			} catch (CoreException ex) {
+				return false; // search failed or some found element doesn't exist?
+			}			
+		}
+
+		Map<String, MethodCall> searchRoleCtorInvocations(IType roleType, IProgressMonitor monitor) throws CoreException {
+			// mimicked after pieces from CallerMethodWrapper.findChildren():
+			SearchPattern pattern= SearchPattern.createPattern(roleType,
+					IJavaSearchConstants.CLASS_INSTANCE_CREATION_TYPE_REFERENCE, // this is lifting-aware!
+					SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			SearchEngine searchEngine= new SearchEngine();
+			MappingReferenceSearchRequestor searchRequestor= new MappingReferenceSearchRequestor();
+			IJavaSearchScope defaultSearchScope= getSearchScope();
+			boolean isWorkspaceScope= SearchEngine.createWorkspaceScope().equals(defaultSearchScope);
+			IJavaSearchScope searchScope= isWorkspaceScope ? getAccurateSearchScope(defaultSearchScope, roleType) : defaultSearchScope;
+			searchEngine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, searchScope, searchRequestor,
+					monitor);
+			return searchRequestor.getCallers();
+		}
+
 		
 		// while searching for children in a caller-hierarchy, constrain all
 		// method-mapping matches to the non-declaration side. 
