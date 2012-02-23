@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -302,4 +303,12 @@ public class BaseCallMessageSendTest extends FileBasedDOMTest
                 expected, actual);
     }
     
+    // see http://bugs.eclipse.org/372433 - [refactoring][dom] extract method in a callin with tunneled base result throws NPE
+	public void testReturnWithHiddenExpression1() {
+		MethodDeclaration method = _role.getMethods()[1];
+		ReturnStatement returnStatement = (ReturnStatement) method.getBody().statements().get(1);
+
+		assertNull("Return should not show hidden expression: "+returnStatement.getExpression(),
+				returnStatement.getExpression());
+	}
 }

@@ -2617,6 +2617,13 @@ class ASTConverter {
 		final ReturnStatement returnStatement = new ReturnStatement(this.ast);
 		returnStatement.setSourceRange(statement.sourceStart, statement.sourceEnd - statement.sourceStart + 1);
 		if (statement.expression != null) {
+//{ObjectTeams: don't convert synthetic _OT$result in return statement:
+		  org.eclipse.jdt.internal.compiler.ast.Expression expr = statement.expression;
+		  if (expr.isGenerated() && expr instanceof SingleNameReference) {
+			  if (CharOperation.equals(((SingleNameReference)expr).token, IOTConstants.OT_RESULT))
+				  return returnStatement;
+		  }
+// SH}
 			returnStatement.setExpression(convert(statement.expression));
 		}
 		return returnStatement;

@@ -2,7 +2,7 @@ package basecall.teampkg;
 
 import basecall.basepkg.MyClass;
 
-public team class Team1 
+public team class Team2
 {
 	public class Role1<S,T> playedBy MissingBaseclass
     {

@@ -14,6 +14,7 @@ public team class Team1
         callin void roleMethod1()
         {
             base.roleMethod1();
+            return; // for testReturnWithHiddenExpression1()
         }
         
         callin int roleMethod2()

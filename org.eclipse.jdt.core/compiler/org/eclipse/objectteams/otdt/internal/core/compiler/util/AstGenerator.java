@@ -139,7 +139,9 @@ public class AstGenerator extends AstFactory {
 	}
 
 	public SingleNameReference singleNameReference(char[] name) {
-		return new SingleNameReference(name, this.pos);
+		SingleNameReference ref = new SingleNameReference(name, this.pos);
+		ref.bits |= ASTNode.IsGenerated;
+		return ref;
 	}
 	public QualifiedNameReference qualifiedNameReference(char[][] tokens) {
 		long[] poss = new long[tokens.length];
