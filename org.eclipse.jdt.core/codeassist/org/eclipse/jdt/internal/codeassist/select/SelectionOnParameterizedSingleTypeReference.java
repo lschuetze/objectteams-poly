@@ -34,8 +34,8 @@ public class SelectionOnParameterizedSingleTypeReference extends ParameterizedSi
 	}
 //{ObjectTeams: one more method to override:
 	@Override
-	public TypeBinding checkResolveUsingBaseImportScope(Scope scope) {
-		TypeBinding result = super.checkResolveUsingBaseImportScope(scope);
+	public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
+		TypeBinding result = super.checkResolveUsingBaseImportScope(scope, tolerate);
 		if (this.resolvedType != null)
 			throw new SelectionNodeFound(this.resolvedType);
 		return result;

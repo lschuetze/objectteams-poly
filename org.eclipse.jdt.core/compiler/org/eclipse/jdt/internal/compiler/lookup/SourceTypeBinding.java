@@ -2268,6 +2268,8 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 		} else {
 //{ObjectTeams: option to roll back problems:
 			CheckPoint cp = this.scope.referenceContext.compilationResult.getCheckPoint(methodDecl);
+			if (this.isTeam() && !method.isPrivate() && returnType.getBaseclassDecapsulation() == DecapsulationState.NONE)
+				returnType.setBaseclassDecapsulation(DecapsulationState.TOLERATED);
 //	 SH}
 			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=322817
 			boolean deferRawTypeCheck = !reportUnavoidableGenericTypeProblems && (returnType.bits & ASTNode.IgnoreRawTypeCheck) == 0;

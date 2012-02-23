@@ -167,7 +167,7 @@ protected TypeBinding internalResolveType(Scope scope) {
 	CompilationResult compilationResult = scope.referenceCompilationUnit().compilationResult();
 	CompilationResult.CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
 	try {
-	  type = checkResolveUsingBaseImportScope(scope);
+	  type = checkResolveUsingBaseImportScope(scope, false); // apply TOLERATE strategy only as a last resort below
 	  // copied from below:
 	  if (type != null && type.isValidBinding()) {
 		type = scope.environment().convertToRawType(type, false /*do not force conversion of enclosing types*/);
@@ -199,8 +199,8 @@ protected TypeBinding internalResolveType(Scope scope) {
 		throw snf; // found a valid node.
 	caughtException = snf;
   }
-  try {
 // a third chance trying an anchored type:
+  try {
     if (   (caughtException != null)
     	|| (this.resolvedType.problemId() == ProblemReasons.NotFound))
 	{
@@ -211,11 +211,25 @@ protected TypeBinding internalResolveType(Scope scope) {
     }
   } catch (SelectionNodeFound snf2) {
 	  caughtException = snf2; // throw the newer exception instead.
-  } finally {
+  }
+//a forth chance trying a TOLERATED base imported type:
+ try {
+   if (   (caughtException != null)
+	   || (this.resolvedType.problemId() == ProblemReasons.NotFound))
+	{
+   		if (this.baseclassDecapsulation == DecapsulationState.TOLERATED) {
+   			TypeBinding result = checkResolveUsingBaseImportScope(scope, true);
+   			if (result != null)             // did we do any better than before?
+   				type = this.resolvedType = result; // if non-null but ProblemBinding report below.
+   		}
+   }
+ } catch (SelectionNodeFound snf2) {
+	  caughtException = snf2; // throw the newer exception instead.
+ } finally {
 	  // the attempt to prevent an exception failed:
 	  if (caughtException != null)
 		  throw caughtException;
-  }
+ }
 // SH}
 	if ((hasError = !type.isValidBinding()) == true) {
 		reportInvalidType(scope);
@@ -258,7 +272,7 @@ public TypeBinding checkResolvedType(TypeBinding type, Scope scope, boolean hasE
 
 //{ObjectTeams: alternative strategies for resolving:
 /** Try to resolve this reference from base imports. */
-public TypeBinding checkResolveUsingBaseImportScope(Scope scope) {
+public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
 	return null; // override to do something useful (only in SingleTypeReference).
 }
 /**

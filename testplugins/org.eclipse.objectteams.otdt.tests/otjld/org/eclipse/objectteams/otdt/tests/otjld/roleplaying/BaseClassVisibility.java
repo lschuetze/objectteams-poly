@@ -30,7 +30,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test242_inaccessibleBaseClass"};
+//		TESTS_NAMES = new String[] { "test247_baseImportScope"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -2127,5 +2127,107 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
 			    "    \n"
             },
             "Syntax error");
+    }
+
+    // a team uses a base-imported class as a return type for one of its methods
+    public void test247_baseImportScope4() {
+        runConformTest(
+            new String[] {
+        "T247bis4Main.java",
+        		"public class T247bis4Main {\n" +
+        		"    public static void main(String... args) {\n" +
+        		"         System.out.print(new p2.Team247bis4().getR());\n" +
+        		"    }\n" +
+        		"}\n",
+		"p2/Team247bis4.java",
+			    "package p2;\n" +
+			    "import base p1.T247bis4_1;\n" +
+			    "public team class Team247bis4 {\n" +
+			    "    protected class R playedBy T247bis4_1 {\n" +
+			    "        protected R() {\n" +
+			    "            base();\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "    public T247bis4_1 getR() {\n" +
+			    "        return new R();\n" +
+			    "    }\n" +
+			    "}\n",
+		"p1/T247bis4_1.java",
+			    "\n" +
+			    "package p1;\n" +
+			    "public class T247bis4_1 {\n" +
+			    "    @Override public String toString() { return \"Base\"; }\n" +
+			    "}\n"
+            },
+            "Base");
+    }
+    // resolving team method return type prefers role over base class
+    public void test247_baseImportScope5() {
+        runConformTest(
+            new String[] {
+        "T247bis5Main.java",
+        		"public class T247bis5Main {\n" +
+        		"    public static void main(String... args) {\n" +
+        		"         new p2.Team247bis5().test();\n" +
+        		"    }\n" +
+        		"}\n",
+		"p2/Team247bis5.java",
+			    "package p2;\n" +
+			    "import base p1.T247bis5_1;\n" +
+			    "public team class Team247bis5 {\n" +
+			    "    protected class T247bis5_1 playedBy T247bis5_1 {\n" +
+			    "         protected T247bis5_1() { base(); }\n" +
+			    "         @Override public String toString() { return \"Role\"; }\n" +
+			    "    }\n" +
+			    "    T247bis5_1 getR() {\n" +
+			    "        return new T247bis5_1();\n" +
+			    "    }\n" +
+			    "    public void test() {\n" +
+			    "         System.out.print(getR());\n" +
+			    "    }\n" +
+			    "}\n",
+		"p1/T247bis5_1.java",
+			    "\n" +
+			    "package p1;\n" +
+			    "public class T247bis5_1 {\n" +
+			    "    @Override public String toString() { return \"Base\"; }\n" +
+			    "}\n"
+            },
+            "Role");
+    }
+
+    // a team uses a base-imported class as a return type for one of its methods
+    // also: Bug 372391 - [compiler] creating bound role in field declaration throws NPE on role cache
+    public void _test247_baseImportScope6() {
+        runConformTest(
+            new String[] {
+        "T247bis6Main.java",
+        		"public class T247bis6Main {\n" +
+        		"    public static void main(String... args) {\n" +
+        		"         System.out.print(new p2.Team247bis6().getR());\n" +
+        		"    }\n" +
+        		"}\n",
+		"p2/Team247bis6.java",
+			    "package p2;\n" +
+			    "import base p1.T247bis6_1;\n" +
+			    "public team class Team247bis6 {\n" +
+			    "    protected class R playedBy T247bis6_1 {\n" +
+			    "        protected R() {\n" +
+			    "            base();\n" +
+			    "        }\n" +
+			    "    }\n" +
+			    "    R r = new R();\n" +
+			    "    public T247bis6_1 getR() {\n" +
+			    "        return this.r;\n" +
+			    "    }\n" +
+			    "}\n",
+		"p1/T247bis6_1.java",
+			    "\n" +
+			    "package p1;\n" +
+			    "public class T247bis6_1 {\n" +
+			    "    @Override public String toString() { return \"Base\"; }\n" +
+			    "}\n"
+            },
+            "Base");
     }
 }

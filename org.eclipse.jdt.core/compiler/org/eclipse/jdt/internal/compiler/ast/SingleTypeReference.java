@@ -107,8 +107,9 @@ public class SingleTypeReference extends TypeReference {
 
 //{ObjectTeams: for base-imported types (only single is supported):
 	@Override
-	public TypeBinding checkResolveUsingBaseImportScope(Scope scope) {
+	public TypeBinding checkResolveUsingBaseImportScope(Scope scope, boolean tolerate) {
 		if (   this.getBaseclassDecapsulation().isAllowed()
+			|| tolerate
 			|| scope.isBaseGuard())
 		{
 			TypeBinding problem = this.resolvedType;

@@ -2369,7 +2369,7 @@ public class ClassScope extends Scope {
  */
 			typeReference.deprecationProblemId = IProblem.DeprecatedBaseclass;
 			ReferenceBinding superType;
-			if (typeReference.checkResolveUsingBaseImportScope(this) != null) {
+			if (typeReference.checkResolveUsingBaseImportScope(this, false) != null) {
 				superType = (ReferenceBinding)typeReference.resolvedType;
 			} else {
 				superType = (ReferenceBinding) typeReference.resolveSuperType(this);

@@ -110,7 +110,9 @@ public abstract class Expression extends Statement {
 		ALLOWED   { public boolean isAllowed() { return true;  }},
 		/** This node is either a playedBy reference for which decapsulation has been reported,
 		 *  or some other (generated) base reference for which decapsulation shall not be reported. */
-		REPORTED  { public boolean isAllowed() { return true;  }};
+		REPORTED  { public boolean isAllowed() { return true;  }},
+		/** This mode is for team method return types: prefer local resolution, but tolerate base class as a fallback. */
+		TOLERATED { public boolean isAllowed() { return false; }};
 		abstract public boolean isAllowed();
 	}
 	public DecapsulationState getBaseclassDecapsulation() {return DecapsulationState.NONE;}
