@@ -2198,7 +2198,7 @@ public class BaseClassVisibility extends AbstractOTJLDTest {
 
     // a team uses a base-imported class as a return type for one of its methods
     // also: Bug 372391 - [compiler] creating bound role in field declaration throws NPE on role cache
-    public void _test247_baseImportScope6() {
+    public void test247_baseImportScope6() {
         runConformTest(
             new String[] {
         "T247bis6Main.java",

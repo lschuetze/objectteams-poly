@@ -615,7 +615,7 @@ public class StandardElementGenerator {
 											   _OT_BASE,
 											   null);
 		boolean hasTypeProblem = baseclass instanceof MissingTypeBinding;
-		AstEdit.addField(roleType, baseField, createBinding, hasTypeProblem);
+		AstEdit.addField(roleType, baseField, createBinding, hasTypeProblem, false);
 		if (hasTypeProblem) {
 			// faked resolving for missing type
 			baseField.binding.type= baseclass;

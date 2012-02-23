@@ -59,8 +59,9 @@ public class AstEdit {
 	 * @param field
 	 * @param createBinding should FieldBinding be created?
 	 * @param hasTypeProblem
+	 * @param addToFront  should the field be inserted at the front of the array?
 	 */
-	public static void addField(TypeDeclaration decl, FieldDeclaration field, boolean createBinding, boolean hasTypeProblem) {
+	public static void addField(TypeDeclaration decl, FieldDeclaration field, boolean createBinding, boolean hasTypeProblem, boolean addToFront) {
         if (field.declarationSourceStart <= 0 ||
                 field.declarationSourceEnd <= 0 ||
                 field.declarationEnd <= 0 ||
@@ -82,11 +83,14 @@ public class AstEdit {
 				fields,
 				0,
 				(fields = new FieldDeclaration[length + 1]),
-				0,
+				addToFront ? 1 : 0,
 				length);
 		}
 
-		fields[length] = field;
+		if (addToFront)
+			fields[0] = field;
+		else
+			fields[length] = field;
 
 		decl.fields = fields;
 		boolean modifiersAdjusted = FieldModel.checkCreateModifiersAttribute(decl, field);

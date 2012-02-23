@@ -338,7 +338,7 @@ public class LiftingEnvironment
 		    };
 	    }
 	    
-	    AstEdit.addField(teamDecl, field, true, false/*typeProblem*/);
+	    AstEdit.addField(teamDecl, field, true, false/*typeProblem*/, false);
 		teamDecl.getTeamModel().addCache(field);
 	}
 
@@ -468,7 +468,7 @@ public class LiftingEnvironment
 					gen.singleTypeReference("boolean".toCharArray()), //$NON-NLS-1$
 					IOTConstants.CACHE_INIT_TRIGGERER,
 					gen.messageSend(thisReference, IOTConstants.OT_INIT_CACHES, new Expression[0]));
-			AstEdit.addField(teamType, trigger, true, false/*typeProblem*/);
+			AstEdit.addField(teamType, trigger, true, false/*typeProblem*/, true/*addToFront*/); // ensure this field's init is generated first into the constructor
 			trigger.binding.modifiers |= ExtraCompilerModifiers.AccLocallyUsed; //  prevent 'unused' warning;
 
 			// resolve them both:

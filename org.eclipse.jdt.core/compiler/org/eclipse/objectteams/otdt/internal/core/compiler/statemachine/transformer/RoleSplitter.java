@@ -151,7 +151,7 @@ public class RoleSplitter
                     && (field.modifiers & AccPrivate) == 0)
                 {
                     // move the field:
-					AstEdit.addField(roleIfcDecl, field, false, false/*typeProblem*/);
+					AstEdit.addField(roleIfcDecl, field, false, false/*typeProblem*/, false);
 					AstEdit.removeField(roleClassDecl, field);
 				}
 			}
