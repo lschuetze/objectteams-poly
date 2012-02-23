@@ -189,7 +189,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 		ReferenceBinding   teamType  = roleType.enclosingType();
 		TypeBinding        objParam  = scope.getJavaLangObject();
 
-		while(roleType.isRole()) { // loop up the superclass chain
+		while(roleType != null && roleType.isRole()) { // loop up the superclass chain (null if fetching super class of Confined)
 
 			char[][] methodNames = getBasePredicateNames(roleType, callinMapping);
 

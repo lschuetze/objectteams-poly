@@ -29,7 +29,7 @@ public class Confinement extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test1710_confinedBoundRole2"};
+//		TESTS_NAMES = new String[] { "test1710_confinedBoundRole3"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1340,6 +1340,50 @@ public class Confinement extends AbstractOTJLDTest {
 			    "    \n"
             },
             "Checking Agent: OK");
+    }
+
+    // a bound role is confined, callin defined
+    // see https://bugs.eclipse.org/370271 [compiler] NPE in PredicateGenerator with no predicate present
+    public void test1710_confinedBoundRole3() {
+       
+       runConformTest(
+            new String[] {
+		"T1710cbr2Main.java",
+			    "\n" +
+			    "public class T1710cbr2Main {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        Team1710cbr2 safe = new Team1710cbr2();\n" +
+			    "        safe.activate();\n" +
+			    "        T1710cbr2 object = new T1710cbr2(\"secret\");\n" +
+			    "        object.print();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"T1710cbr2.java",
+			    "\n" +
+			    "public class T1710cbr2 {\n" +
+			    "    String name;\n" +
+			    "    T1710cbr2(String name) {\n" +
+			    "        this.name = name;\n" +
+			    "    }\n" +
+			    "    void print() {\n" +
+			    "        System.out.print(this.name);\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"Team1710cbr2.java",
+			    "\n" +
+			    "public team class Team1710cbr2 {\n" +
+			    "    protected class Guard extends Confined playedBy T1710cbr2 {\n" +
+			    "        callin void forbid() {\n" +
+			    "            System.out.print(\"forbidden\");\n" +
+			    "        }\n" +
+			    "        forbid <- replace print;\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "forbidden");
     }
 
     // an array of confined is not(?) compatible
