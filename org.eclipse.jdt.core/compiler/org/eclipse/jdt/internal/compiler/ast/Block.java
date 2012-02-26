@@ -8,9 +8,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contribution for bug 349326 - [1.7] new warning for missing try-with-resources
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contributions for
+ *								bug 349326 - [1.7] new warning for missing try-with-resources
+ *								bug 368546 - [compiler][resource] Avoid remaining false positives found when compiling the Eclipse SDK
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -50,9 +52,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			flowInfo = stat.analyseCode(this.scope, flowContext, flowInfo);
 		}
 	}
-
 	if (this.explicitDeclarations > 0) // if block has its own scope analyze tracking vars now:
-		this.scope.checkUnclosedCloseables(flowInfo, null, null);
+		this.scope.checkUnclosedCloseables(flowInfo, flowContext, null, null);
 	return flowInfo;
 }
 /**

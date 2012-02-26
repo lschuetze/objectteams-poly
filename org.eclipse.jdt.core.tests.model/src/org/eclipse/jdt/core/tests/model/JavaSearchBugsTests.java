@@ -94,7 +94,7 @@ public class JavaSearchBugsTests extends AbstractJavaSearchTests {
 // Debug
 static {
 //	 org.eclipse.jdt.internal.core.search.BasicSearchEngine.VERBOSE = true;
-//	TESTS_NAMES = new String[] {"testBug306223"};
+//	TESTS_NAMES = new String[] {"testBug324189d"};
 }
 
 public JavaSearchBugsTests(String name) {
@@ -13408,7 +13408,7 @@ public void testBug324189d() throws CoreException, IOException {
 			},
 			new HashMap(),
 			libPath);
-		IJavaProject javaProject = createJavaProject("P", new String[0], new String[] {libPath}, "");
+		IJavaProject javaProject = createJavaProject("P", new String[0], new String[] {libPath, "JCL_LIB"}, "");
 		waitUntilIndexesReady();
 		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES ;
 		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { javaProject }, mask);
@@ -13751,4 +13751,5 @@ public void testBug241834() throws CoreException {
 		
 	}
 }
+// Add new tests in JavaSearchBugsTests2
 }

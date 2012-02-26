@@ -47,7 +47,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	protected static class OTTestVerifier extends TestVerifier {
 		protected OTTestVerifier(boolean reuseVM) {
 			super(reuseVM);
-			this.vmArguments = OT_VM_ARGS;
+			this.fVMArguments = OT_VM_ARGS;
 		}
 		@Override
 		public boolean verifyClassFiles(String sourceFilePath, String className, String expectedOutputString, String expectedErrorStringStart, 

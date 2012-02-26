@@ -16,6 +16,7 @@
  *								bug 349326 - [1.7] new warning for missing try-with-resources
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 358903 - Filter practically unimportant resource leak warnings
+ *								bug 370639 - [compiler][resource] restore the default for resource leak warnings
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -153,7 +154,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	boolean nonStatic = !this.binding.isStatic();
 	flowInfo = this.receiver.analyseCode(currentScope, flowContext, flowInfo, nonStatic).unconditionalInits();
 	// recording the closing of AutoCloseable resources:
-	if (CharOperation.equals(TypeConstants.CLOSE, this.selector)) 
+	boolean analyseResources = currentScope.compilerOptions().analyseResourceLeaks;
+	if (analyseResources && CharOperation.equals(TypeConstants.CLOSE, this.selector)) 
 	{
 		FakedTrackingVariable trackingVariable = FakedTrackingVariable.getCloseTrackingVariable(this.receiver);
 		if (trackingVariable != null) { // null happens if receiver is not a local variable or not an AutoCloseable
@@ -185,8 +187,10 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				this.arguments[i].checkNPE(currentScope, flowContext, flowInfo);
 			}
 			flowInfo = this.arguments[i].analyseCode(currentScope, flowContext, flowInfo).unconditionalInits();
-			// if argument is an AutoCloseable insert info that it *may* be closed (by the target method, i.e.)
-			flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.arguments[i], flowInfo, false);
+			if (analyseResources) {
+				// if argument is an AutoCloseable insert info that it *may* be closed (by the target method, i.e.)
+				flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.arguments[i], flowInfo, false);
+			}
 		}
 		analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
 	}
@@ -203,11 +207,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		//               NullReferenceTest#test0510
 	}
 	manageSyntheticAccessIfNecessary(currentScope, flowInfo);
-	// a method call can result in changed values for fields, 
-	// so wipe out null info for fields collected till now.
-	CompilerOptions options = currentScope.compilerOptions();
-	if(options.includeFieldsInNullAnalysis)
-		flowInfo.resetNullInfoForFields();
 //{ObjectTeams: base calls via super:
 	flowInfo = checkBaseCallsIfSuper(currentScope, flowInfo);
 // SH}
@@ -249,6 +248,11 @@ protected FlowInfo checkBaseCallsIfSuper(BlockScope currentScope, FlowInfo flowI
 	return flowInfo;
 }
 // SH}
+public void checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
+	super.checkNPE(scope, flowContext, flowInfo);
+	if ((nullStatus(flowInfo) & FlowInfo.POTENTIALLY_NULL) != 0)
+		scope.problemReporter().messageSendPotentialNullReference(this.binding, this);
+}
 /**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#computeConversion(org.eclipse.jdt.internal.compiler.lookup.Scope, org.eclipse.jdt.internal.compiler.lookup.TypeBinding, org.eclipse.jdt.internal.compiler.lookup.TypeBinding)
  */
@@ -395,11 +399,6 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 		}
 	}
 	codeStream.recordPositionsFrom(pc, (int)(this.nameSourcePosition >>> 32)); // highlight selector
-}
-public void checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
-	super.checkNPE(scope, flowContext, flowInfo);
-	if ((nullStatus(flowInfo) & FlowInfo.POTENTIALLY_NULL) != 0)
-		scope.problemReporter().messageSendPotentialNullReference(this.binding, this);
 }
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.InvocationSite#genericTypeArguments()

@@ -139,6 +139,7 @@ public class ClassScope extends Scope {
 	public TypeDeclaration referenceContext;
 	public TypeReference superTypeReference;
 	java.util.ArrayList deferredBoundChecks;
+
 	public ClassScope(Scope parent, TypeDeclaration context) {
 		super(Scope.CLASS_SCOPE, parent);
 		this.referenceContext = context;
@@ -179,7 +180,6 @@ public class ClassScope extends Scope {
 				}
 			}
 		}
-		this.referenceContext.binding.cumulativeFieldCount += outerMostMethodScope().analysisIndex;
 		connectMemberTypes();
 		buildFieldsAndMethods();
 //{ObjectTeams: catchup also in OT-specific process (see class comment concerning local types in Dependencies):
@@ -271,7 +271,6 @@ public class ClassScope extends Scope {
 		// remove duplicate fields
 		if (count != fieldBindings.length)
 			System.arraycopy(fieldBindings, 0, fieldBindings = new FieldBinding[count], 0, count);
-		sourceType.cumulativeFieldCount += count;
 		sourceType.tagBits &= ~(TagBits.AreFieldsSorted|TagBits.AreFieldsComplete); // in case some static imports reached already into this type
 		sourceType.setFields(fieldBindings);
 	}
@@ -412,7 +411,6 @@ public class ClassScope extends Scope {
 			checkParameterizedTypeBounds();
 			checkParameterizedSuperTypeCollisions();
 		}
-		this.referenceContext.binding.cumulativeFieldCount += outerMostMethodScope().analysisIndex;
 		buildFieldsAndMethods();
 //{ObjectTeams: catchup also in OT-specific process (see class comment concerning local types in Dependencies).
 	  if (this.referenceContext.isRole()) {
@@ -842,8 +840,6 @@ public class ClassScope extends Scope {
 				fieldDeclaration, null, fieldDeclaration.modifiers|ExtraCompilerModifiers.AccUnresolved, sourceType);
 
 		sourceType.addField(fieldBinding);
-		sourceType.cumulativeFieldCount++;
-		this.referenceContext.updateMaxFieldCount();
 		checkAndSetModifiersForField(fieldBinding, fieldDeclaration);
 
 // FIXME(SH): does this improve robustness?
