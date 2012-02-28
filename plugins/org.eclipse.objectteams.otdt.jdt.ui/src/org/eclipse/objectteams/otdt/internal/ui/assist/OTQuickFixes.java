@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.LiftingType;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodMappingElement;
@@ -238,6 +239,11 @@ public team class OTQuickFixes  {
 							// but an anchored role type needs no import: propose to add an anchor:
 							return TypeProposalSubProcessor.changeTypeToAnchored(cu, fullName, node, ((IRoleType)otType).getTeam().getFullyQualifiedName());
 						}
+					}
+					// import for the role side in DeclaredLifting?
+					ASTNode typeRef = node.getParent();
+					if (typeRef instanceof Type && typeRef.getLocationInParent() == LiftingType.ROLE_TYPE_PROPERTY) {
+						return null;
 					}
 				} catch (JavaModelException jme) {
 					// ignore

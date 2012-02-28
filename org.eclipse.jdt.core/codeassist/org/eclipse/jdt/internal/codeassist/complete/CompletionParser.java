@@ -43,6 +43,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDecl
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -5443,6 +5444,13 @@ protected FieldDeclaration createFieldDeclaration(char[] assistName, int sourceS
 }
 
 //{ObjectTeams: OT completion
+@Override
+protected LiftingTypeReference completeLiftingTypeReference(int dims) {
+	LiftingTypeReference ltr = super.completeLiftingTypeReference(dims);
+	if (ltr.roleReference instanceof CompletionOnSingleTypeReference)
+		((CompletionOnSingleTypeReference)ltr.roleReference).isLiftingRoleType = true;
+	return ltr;
+}
 @Override
 protected MethodSpec newMethodSpec(char[] ident, long poss) {
 	int start   = (int)(poss & 0xFFFFFFFF);

@@ -11070,6 +11070,10 @@ public final class CompletionEngine
 //{ObjectTeams: for @role tags nested types was all we care for:
 		if ((this.assistNodeInJavadoc &  CompletionOnJavadoc.ROLE) != 0)
 			return;
+		// similar for the role side in a lifting type declaration:
+		if (this.parser.assistNode instanceof CompletionOnSingleTypeReference
+			&& ((CompletionOnSingleTypeReference)this.parser.assistNode).isLiftingRoleType)
+			return;
 // SH}
 
 		boolean isEmptyPrefix = token.length == 0;

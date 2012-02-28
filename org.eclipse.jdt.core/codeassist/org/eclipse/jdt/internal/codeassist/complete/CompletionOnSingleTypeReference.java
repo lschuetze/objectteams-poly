@@ -36,6 +36,9 @@ public static final int K_EXCEPTION = 3;
 private int kind = K_TYPE;
 public boolean isCompletionNode;
 public boolean isConstructorType;
+//{ObjectTeams: mark the role side in a lifting type reference:
+public boolean isLiftingRoleType;
+// SH}
 public CompletionOnFieldType fieldTypeCompletionNode;
 
 public CompletionOnSingleTypeReference(char[] source, long pos) {
