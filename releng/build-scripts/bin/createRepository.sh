@@ -6,38 +6,59 @@ STAGINGBASE=/opt/public/download-staging.priv/tools/objectteams
 # Find the master repository to build upon:
 if [ "$1" == "none" ]
 then
-	MASTER="none"
-	echo "Generating fresh new repository"
+        MASTER="none"
+        echo "Generating fresh new repository"
 else
-	MASTER=${HOME}/downloads/objectteams/updates/$1
-	if [ -r ${MASTER}/features ]
-	then
-	    echo "Generating Repository based on ${MASTER}"
-	else
-	    echo "No such repository ${MASTER}"
-	    echo "Usage: $0 updateMasterRelativePath [ -nosign ] [ statsRepoId statsVersionId ]"
-	    exit 1
-	fi
+        MASTER=${HOME}/downloads/objectteams/updates/$1
+        if [ -r ${MASTER}/features ]
+        then
+            echo "Generating Repository based on ${MASTER}"
+        else
+            MASTER=${HOME}/shared/baseRepos/$1
+            if [ -r ${MASTER}/features ]
+            then
+                echo "Generating Repository based on ${MASTER}"
+            else
+                echo "No such repository ${MASTER}"
+                echo "Usage: $0 updateMasterRelativePath [ -nosign ] [ statsRepoId statsVersionId ]"
+                exit 1
+            fi
+        fi
 fi
 
 # Analyze the version number of the JDT feature as needed for patching content.xml later:
 JDTFEATURE=`ls -d ${BASE}/testrun/build-root/eclipse/features/org.eclipse.jdt_*`
 if echo $JDTFEATURE | grep "\.r"
 then
-	JDTVERSION="`echo ${JDTFEATURE} | cut -d '_' -f 2`_`echo ${JDTFEATURE} | cut -d '_' -f 3`"
+        JDTVERSION="`echo ${JDTFEATURE} | cut -d '_' -f 2`_`echo ${JDTFEATURE} | cut -d '_' -f 3`"
 else
-	JDTVERSION=`echo ${JDTFEATURE} | cut -d '_' -f 2`
+        JDTVERSION=`echo ${JDTFEATURE} | cut -d '_' -f 2`
 fi
 JDTVERSIONA=`echo ${JDTVERSION} | cut -d '-' -f 1`
 JDTVERSIONB=`echo ${JDTVERSION} | cut -d '-' -f 2`
-JDTVERSIONB2=`expr $JDTVERSIONB + 1`
-JDTVERSIONB2=`printf "%04d" ${JDTVERSIONB2}`
-JDTVERSION=${JDTVERSIONA}-${JDTVERSIONB}
-JDTVERSIONNEXT=${JDTVERSIONA}-${JDTVERSIONB2}
+echo "after first split: ${JDTVERSIONA} and ${JDTVERSIONB}"
+case ${JDTVERSIONB} in
+        ????)
+                #A=v20110813 B=0800
+                JDTVERSIONB2=`expr $JDTVERSIONB + 1`
+                JDTVERSIONB2=`printf "%04d" ${JDTVERSIONB2}`
+                JDTVERSION=${JDTVERSIONA}-${JDTVERSIONB}
+                JDTVERSIONNEXT=${JDTVERSIONA}-${JDTVERSIONB2}
+                ;;
+        *)
+                #A=3.8.0.v20110813 B=someunspeakablelonghashid
+                JDTVERSIONC1=`echo ${JDTVERSIONA} | cut -d 'v' -f 1`
+                JDTVERSIONC2=`echo ${JDTVERSIONA} | cut -d 'v' -f 2`
+                JDTVERSIONC3=`expr $JDTVERSIONC2 + 1`
+                JDTVERSION=${JDTVERSIONC1}v${JDTVERSIONC2}
+                JDTVERSIONNEXT=${JDTVERSIONC1}v${JDTVERSIONC3}
+                ;;
+esac
 # hardcode when unable to compute
 #JDTVERSION=${JDTVERSIONA}
-#JDTVERSIONNEXT=3.7.0.v20110332
+#JDTVERSIONNEXT=3.8.0.v20110728
 echo "JDT feature is ${JDTVERSION}"
+echo "Next           ${JDTVERSIONNEXT}"
 if [ ! -r ${BASE}/testrun/build-root/eclipse/features/org.eclipse.jdt_${JDTVERSION}-* ]
 then
     echo "JDT feature not correctly found in ${BASE}/testrun/build-root/eclipse/features"
@@ -88,13 +109,13 @@ mkdir ${BASE}/stagingRepo
 cd ${BASE}/stagingRepo
 if [ "$MASTER" != "none" ]
 then
-	mkdir features
-	(cd features; ln -s ${MASTER}/features/* .)
-	mkdir plugins
-	(cd plugins; ln -s ${MASTER}/plugins/* .)
+        mkdir features
+        (cd features; ln -s ${MASTER}/features/* .)
+        mkdir plugins
+        (cd plugins; ln -s ${MASTER}/plugins/* .)
 else
-	mkdir plugins
-	cp ${BASE}/testrun/updateSite/plugins/org.apache.bcel* plugins/
+        mkdir plugins
+        cp ${BASE}/testrun/updateSite/plugins/org.apache.bcel* plugins/
 fi
 unzip -n ${STAGINGBASE}/out/otdt.zip
 
@@ -147,9 +168,9 @@ echo "====Step 8: add download stats capability===="
 XSLT_FILE=${BASE}/bin/addDownloadStats.xsl
 
 if [ $# == 3 ]; then
-	mv artifacts.xml artifacts.xml.original
-	if grep p2.statsURI artifacts.xml.original ; then echo "p2.statsURI already defined: exiting"; exit 1; fi
-	xsltproc -o artifacts.xml --stringparam repo "http://download.eclipse.org/stats/objectteams/${2}" --stringparam version $3 $XSLT_FILE artifacts.xml.original
+        mv artifacts.xml artifacts.xml.original
+        if grep p2.statsURI artifacts.xml.original ; then echo "p2.statsURI already defined: exiting"; exit 1; fi
+        xsltproc -o artifacts.xml --stringparam repo "http://download.eclipse.org/stats/objectteams/${2}" --stringparam version $3 $XSLT_FILE artifacts.xml.original
 fi
 
 echo "====Step 9: jar-up metadata===="
