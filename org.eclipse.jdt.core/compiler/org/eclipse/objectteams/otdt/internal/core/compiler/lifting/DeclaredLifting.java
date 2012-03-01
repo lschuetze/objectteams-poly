@@ -304,7 +304,7 @@ public class DeclaredLifting implements IOTConstants {
 	        // TODO(SH): array of roles?
 	        // don't use RoleTypeBinding.isRoleWithoutExplicitAnchor, because
 	        // type wrapping in signature has not been done yet.
-	        if (	isRoleOf(param, teamDecl.binding)
+	        if (	isLiftableRoleOf(param, teamDecl.binding)
 				&& !ctor.isTSuper)
 	        {
 				int start = argument.type.sourceStart;
@@ -391,11 +391,12 @@ public class DeclaredLifting implements IOTConstants {
 	    }
 	}
 
-	private static boolean isRoleOf(TypeBinding type, ReferenceBinding enclosingTeam) {
+	private static boolean isLiftableRoleOf(TypeBinding type, ReferenceBinding enclosingTeam) {
+		if (RoleTypeBinding.isRoleWithExplicitAnchor(type))
+			return false;
+		type = type.erasure();
 		if (type instanceof MemberTypeBinding)
-			return ((MemberTypeBinding)type).enclosingType() == enclosingTeam;
-		if (type instanceof RoleTypeBinding)
-			return !((RoleTypeBinding)type).hasExplicitAnchor();
+			return ((MemberTypeBinding)type).enclosingType() == enclosingTeam.erasure();
 		return false;
 	}
 	/**

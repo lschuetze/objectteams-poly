@@ -34,7 +34,7 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test213_boundToInterface"};
+//		TESTS_NAMES = new String[] { "test2124_internalRole1"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -2624,5 +2624,23 @@ public class PlayedByRelation extends AbstractOTJLDTest {
 			    "    \n"
             },
             "not applicable");
+    }
+    
+    // see  https://bugs.eclipse.org/348082
+    // [compiler] Internal Role pattern with deeply nested team gives compile error in generated code
+    public void test2124_internalRole1() {
+    	runConformTest(
+    		new String[]{
+    	"p2124/Team2124ir1.java",
+    			"package p2124;\n" +
+    			"public team class Team2124ir1 {\n" +
+    			"    protected team class Mid {\n" + 
+    			"         protected team class Inner playedBy Mid {\n" +
+    			"\n" + 
+    			"         }\n" + 
+    			"   }\n" + 
+    			"" +
+    			"}\n"
+    		});
     }
 }
