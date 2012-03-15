@@ -48,17 +48,22 @@ fi
 
 # VERSIONS:
 # Eclipse SKD build identifier:
-EVERSION=I20120228-1047
+EVERSION=I20120315-1300
 # Architecture (as used by OSGi):
 ARCH=`arch`
 # used only locally:
-DROP=${BASEDIR}/e4drops/I20120228-1047
+DROP=${BASEDIR}/drops4/I20120315-1300
+
+#### TEMPORARILY, WHILE PRIMARY SDK BUILD IS STILL 3.8:
+EVERSION3=I20120314-1800
+DROP3=${BASEDIR}/drops/${EVERSION3}
+####
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
 
 # EXPORT: archive file of the eclipse test framework:
-ECLIPSE_TESTLIB_ZIP=${DROP}/eclipse-test-framework-${EVERSION}.zip
+ECLIPSE_TESTLIB_ZIP=${DROP3}/eclipse-test-framework-${EVERSION}.zip
 
 # EXPORT: where to find previously published plugins&features:
 PUBLISHED_UPDATES=${HOME}/downloads/objectteams/updates/ot2.0
