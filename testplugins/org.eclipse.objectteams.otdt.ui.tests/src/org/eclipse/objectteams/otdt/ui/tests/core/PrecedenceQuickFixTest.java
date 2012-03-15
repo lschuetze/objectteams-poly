@@ -24,7 +24,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 
 
 /**

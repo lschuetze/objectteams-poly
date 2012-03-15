@@ -23,8 +23,8 @@ package org.eclipse.objectteams.otdt.ui.tests.core;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalModel;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
+import base org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import base org.eclipse.jdt.internal.ui.text.java.ParameterGuessingProposal;
-import base org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 
 public team class ProposalAdaptor {
 
@@ -41,11 +41,11 @@ public team class ProposalAdaptor {
 	}
 
 	/** Access to one protected method: */
-	protected class CUCorrectionProposal playedBy CUCorrectionProposal {
+	protected class LinkedCorrectionProposal playedBy LinkedCorrectionProposal {
 		LinkedProposalModel getLinkedProposalModel() -> LinkedProposalModel getLinkedProposalModel();
 	}	
 	/** API */
-	public LinkedProposalModel getLinkedProposalModel(CUCorrectionProposal as CUCorrectionProposal proposal) {
+	public LinkedProposalModel getLinkedProposalModel(LinkedCorrectionProposal as LinkedCorrectionProposal proposal) {
 		return proposal.getLinkedProposalModel();
 	}
 }

@@ -27,7 +27,7 @@ import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.ASTRewriteCorrectionProposal;
+import org.eclipse.jdt.ui.text.java.correction.ASTRewriteCorrectionProposal;
 
 /** 
  * Proposals for removing signatures from method mappings. 

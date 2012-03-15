@@ -35,8 +35,9 @@ import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup;
 import org.eclipse.jdt.internal.corext.fix.LinkedProposalPositionGroup.Proposal;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.proposals.LinkedCorrectionProposal;
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 
@@ -565,7 +566,7 @@ public class UnresolvedMethodsQuickFixTest extends OTQuickFixTest {
 		assertNumberOfProposals(proposals, 1); // don't propose to generate into team!!
 		assertCorrectLabels(proposals);
 
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		LinkedCorrectionProposal proposal= (LinkedCorrectionProposal) proposals.get(0);
 		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();

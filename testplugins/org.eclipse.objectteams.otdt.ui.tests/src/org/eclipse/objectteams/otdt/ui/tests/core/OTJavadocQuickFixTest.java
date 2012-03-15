@@ -34,8 +34,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.ui.text.correction.proposals.CUCorrectionProposal;
 import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.jdt.ui.text.java.correction.CUCorrectionProposal;
 import org.eclipse.objectteams.otdt.ui.tests.util.JavaProjectHelper;
 
 /**
