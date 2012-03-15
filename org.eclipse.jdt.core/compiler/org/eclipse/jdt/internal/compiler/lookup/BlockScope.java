@@ -449,7 +449,7 @@ public ClassScope[] getAllLocalTypes() {
     if (this.subscopes == null)
         return new ClassScope[0];
     LinkedList<ClassScope> result = getAllLocalTypesInternal();
-    return (ClassScope[])result.toArray(new ClassScope[result.size()]);
+    return result.toArray(new ClassScope[result.size()]);
 }
 
 private LinkedList<ClassScope> getAllLocalTypesInternal() {

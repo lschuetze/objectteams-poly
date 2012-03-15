@@ -44,13 +44,13 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.FieldModel;
  */
 public class AnchorUsageRanksAttribute extends ListValueAttribute {
 
-	FieldBinding _field;
-	List<Integer> _ranks;
+	FieldBinding field;
+	List<Integer> ranks;
 	
 	/** Create a new instance during compiling the generic type. */
 	public AnchorUsageRanksAttribute(FieldBinding field) {
 		super(IOTConstants.ANCHOR_USAGE_RANKS, 0/*still unknown*/, 2);
-		this._field = field;
+		this.field = field;
 	}
 	
 	/** Create a new attribute from bytecode. */
@@ -61,27 +61,27 @@ public class AnchorUsageRanksAttribute extends ListValueAttribute {
 
 	@Override
 	public boolean setupForWriting() {
-		if (this._ranks != null)
-			this._count = _ranks.size();
+		if (this.ranks != null)
+			this._count = this.ranks.size();
 		return true;
 	}
 
 	/** During resolve add a rank, saying that the rank'th type parameter is anchored to this field. */
 	public void addUsageRank(int rank) {
-		if (this._ranks == null)
-			this._ranks = new ArrayList<Integer>();
-		this._ranks.add(rank);
+		if (this.ranks == null)
+			this.ranks = new ArrayList<Integer>();
+		this.ranks.add(rank);
 	}
 
 	void writeElementValue(int i) {
-		writeUnsignedShort(this._ranks.get(i));
+		writeUnsignedShort(this.ranks.get(i));
 	}
 	
 	@Override
 	void read(int i) {
 		if (i == 0)
-			this._ranks = new ArrayList<Integer>();
-		this._ranks.add(consumeShort());
+			this.ranks = new ArrayList<Integer>();
+		this.ranks.add(consumeShort());
 	}
 
 	public void evaluate(Binding binding, LookupEnvironment environment, char[][][] missingTypeNames) {
@@ -90,7 +90,7 @@ public class AnchorUsageRanksAttribute extends ListValueAttribute {
 	
 	@Override
 	public boolean evaluate(FieldBinding binding) {
-		this._field = binding;
+		this.field = binding;
 		FieldModel.getModel(binding).addAttribute(this);
 		return true;
 	}
@@ -99,11 +99,11 @@ public class AnchorUsageRanksAttribute extends ListValueAttribute {
 	public int[] getRanks() {
 		int[] ranks = new int[this._count];
 		for (int i=0; i<this._count; i++)
-			ranks[i] = this._ranks.get(i);
+			ranks[i] = this.ranks.get(i);
 		return ranks;
 	}
 
 	String toString(int i) {
-		return this._ranks.get(i).toString();
+		return this.ranks.get(i).toString();
 	}
 }

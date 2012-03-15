@@ -269,7 +269,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	 * <code>true</code> for a role, <code>false</code> for a class.
 	 * Defaults to class.
 	 */
-	boolean _isRole = false;
+	boolean isRole = false;
 
 	ASTNode.NodeList _precedences = new ASTNode.NodeList(PRECEDENCE_PROPERTY);
 
@@ -675,7 +675,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	@Override
 	public boolean isTeam()
 	{
-		return _isTeam;
+		return this._isTeam;
 	}
 
 	/**
@@ -687,7 +687,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	public void setTeam(boolean isTeam)
 	{
 		preValueChange(TEAM_PROPERTY);
-		_isTeam = isTeam;
+		this._isTeam = isTeam;
 		postValueChange(TEAM_PROPERTY);
 	}
 
@@ -700,7 +700,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	@Override
 	public boolean isRole()
 	{
-		return _isRole;
+		return this.isRole;
 	}
 
 	/**
@@ -712,12 +712,12 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	public void setRole(boolean isRole)
 	{
 		preValueChange(ROLE_PROPERTY);
-		_isRole = isRole;
+		this.isRole = isRole;
 		postValueChange(ROLE_PROPERTY);
 	}
 
 	public List precedences() {
-		return _precedences;
+		return this._precedences;
 	}
 //gbr}
 
@@ -1034,7 +1034,7 @@ public class TypeDeclaration extends AbstractTypeDeclaration {
 	}
 
 	public GuardPredicateDeclaration getGuardPredicate() {
-		return optionalGuardPredicate;
+		return this.optionalGuardPredicate;
 	}
 
 //jsv}

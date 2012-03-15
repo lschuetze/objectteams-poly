@@ -1775,11 +1775,11 @@ public ReferenceBinding baseclass () {
     return this.baseclass;
 }
 /** Needed for confined types: class file says "j.l.Object", but we actually mean: __OT__Confined.*/
-public void resetSuperclass(ReferenceBinding superclass) {
+public void resetSuperclass(ReferenceBinding superClass) {
 	if (CharOperation.equals(IOTConstants.ORG_OBJECTTEAMS_TEAM_CONFINED, this.compoundName))
 		this.superclass= null;
 	else if (isInterface())
-		this.superclass= superclass;
+		this.superclass= superClass;
 }
 // SH}
 

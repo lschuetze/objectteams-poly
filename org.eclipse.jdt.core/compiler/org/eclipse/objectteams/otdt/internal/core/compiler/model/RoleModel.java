@@ -551,7 +551,7 @@ public class RoleModel extends TypeModel
     		if (interfaceModel != null && interfaceModel != this) // model sharing didn't work
     			return interfaceModel.getInterfaceAst();
     	}
-    	if ((this._ast.bits & TypeDeclaration.IsLocalType) != 0)
+    	if ((this._ast.bits & ASTNode.IsLocalType) != 0)
     		return null;
     	assert this._ast.isInterface();
     	return this._ast;
@@ -836,11 +836,11 @@ public class RoleModel extends TypeModel
 		return null;
 	}
 
-	/**
-     * @return is this role bound to a base type?
-     */
 	private boolean hasCheckedBaseclass= false; // caching the result the below method
 	private boolean isBound; // --"--
+	/**
+	 * @return is this role bound to a base type?
+	 */
     public boolean isBound() {
     	if (this.hasCheckedBaseclass)
     		return this.isBound;

@@ -2087,7 +2087,7 @@ class DefaultBindingResolver extends BindingResolver {
         if (callbinding.isValidBinding())
         {
             MethodMappingBinding binding =
-                (MethodMappingBinding)bindingTables.compilerBindingsToASTBindings.get(callbinding);
+                (MethodMappingBinding)this.bindingTables.compilerBindingsToASTBindings.get(callbinding);
             if (binding != null)
             {
                 return binding;
@@ -2095,7 +2095,7 @@ class DefaultBindingResolver extends BindingResolver {
             else
             {
                 binding = new MethodMappingBinding(this, callbinding);
-                bindingTables.compilerBindingsToASTBindings.put(callbinding, binding);
+                this.bindingTables.compilerBindingsToASTBindings.put(callbinding, binding);
                 return binding;
             }
         }

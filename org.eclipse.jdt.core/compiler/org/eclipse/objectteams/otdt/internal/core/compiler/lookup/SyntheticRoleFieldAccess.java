@@ -173,7 +173,7 @@ public class SyntheticRoleFieldAccess extends SyntheticMethodBinding {
 			// FIXME(SH): throw new InternalCompilerError("accessor for static field not applicable.");
 		} else {
 			// prepare "this" and role args:
-			LocalVariableBinding thisArg = createArgumentBinding(codeStream, "this".toCharArray(), fieldBinding.declaringClass.enclosingType(), 0);
+			LocalVariableBinding thisArg = createArgumentBinding(codeStream, "this".toCharArray(), fieldBinding.declaringClass.enclosingType(), 0); //$NON-NLS-1$
 			char[] argName = typeNameToLower(this.parameters[0].sourceName());
 			LocalVariableBinding arg1 = createArgumentBinding(codeStream, argName, this.parameters[0], 1);
 
@@ -218,10 +218,10 @@ public class SyntheticRoleFieldAccess extends SyntheticMethodBinding {
 			codeStream.fieldAccess(Opcodes.OPC_putstatic, fieldBinding, fieldBinding.declaringClass);
 		} else {
 			// prepare "this" and role args:
-			LocalVariableBinding thisArg = createArgumentBinding(codeStream, "this".toCharArray(), fieldBinding.declaringClass.enclosingType(), 0);
+			LocalVariableBinding thisArg = createArgumentBinding(codeStream, "this".toCharArray(), fieldBinding.declaringClass.enclosingType(), 0); //$NON-NLS-1$
 			char[] argName = typeNameToLower(this.parameters[0].sourceName());
 			LocalVariableBinding arg1 = createArgumentBinding(codeStream, argName, this.parameters[0], 1);
-			LocalVariableBinding arg2 = createArgumentBinding(codeStream, "value".toCharArray(), this.parameters[1], 2);
+			LocalVariableBinding arg2 = createArgumentBinding(codeStream, "value".toCharArray(), this.parameters[1], 2); //$NON-NLS-1$
 
 			codeStream.aload_1(); // not a static accessor, positions shifted by 1.
 			fieldBinding = checkAdjustRoleFieldAccess(fieldBinding, codeStream);

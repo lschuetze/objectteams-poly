@@ -2440,7 +2440,7 @@ public class ASTMatcher {
 		MethodSpec otherMethodSpec = (MethodSpec) other;
 		int level = node.getAST().apiLevel;
 
-		if (level == AST.JLS3)
+		if (level >= AST.JLS3_INTERNAL)
 		{
 			if (!safeSubtreeMatch(node.getReturnType2(),
 			        otherMethodSpec.getReturnType2()))
@@ -2448,7 +2448,7 @@ public class ASTMatcher {
 				return false;
 			}
 		}
-		if (level == AST.JLS2)
+		if (level == AST.JLS2_INTERNAL)
 		{
 			node.setFlags(ASTNode.MALFORMED);
 		}
@@ -2482,7 +2482,7 @@ public class ASTMatcher {
 		CallinMappingDeclaration node2 = (CallinMappingDeclaration)other;
 		int level = node.getAST().apiLevel;
 
-		if (level == AST.JLS3)
+		if (level >= AST.JLS3_INTERNAL)
 		{
             if (!safeSubtreeMatch(node.getName(), node2.getName()))
             {
@@ -2508,7 +2508,7 @@ public class ASTMatcher {
                 return false;
             }
 		}
-		if (level >= AST.JLS2)
+		if (level == AST.JLS2_INTERNAL)
         {
 		    node.setFlags(ASTNode.MALFORMED);
 		}
@@ -2539,7 +2539,7 @@ public class ASTMatcher {
 		CalloutMappingDeclaration otherCalloutMappingDecl = (CalloutMappingDeclaration) other;
 		int level = node.getAST().apiLevel;
 
-		if (level == AST.JLS3)
+		if (level >= AST.JLS3_INTERNAL)
 		{
 			if (!safeSubtreeMatch(node.getRoleMappingElement(),
 			        otherCalloutMappingDecl.getRoleMappingElement()))
@@ -2557,7 +2557,7 @@ public class ASTMatcher {
 				return false;
 			}
 		}
-		if (level >= AST.JLS2)
+		if (level == AST.JLS2_INTERNAL)
         {
 		    node.setFlags(ASTNode.MALFORMED);
 		}
@@ -2779,30 +2779,30 @@ public class ASTMatcher {
 
         RoleTypeDeclaration o = (RoleTypeDeclaration) other;
         int level = node.getAST().apiLevel;
-        if (level == AST.JLS2)
+        if (level == AST.JLS2_INTERNAL)
         {
             if (node.getModifiers() != o.getModifiers())
             {
                 return false;
             }
-            if (!safeSubtreeMatch(node.getSuperclass(), o.getSuperclass()))
+            if (!safeSubtreeMatch(node.internalGetSuperclass(), o.internalGetSuperclass()))
             {
                 return false;
             }
-            if (!safeSubtreeMatch(node.getBaseClass(), o.getBaseClass()))
+            if (!safeSubtreeMatch(node.internalGetBaseClass(), o.internalGetBaseClass()))
             {
                 return false;
             }
-            if (!safeSubtreeMatch(node.getTeamClass(), o.getTeamClass()))
+            if (!safeSubtreeMatch(node.internalGetTeamClass(), o.internalGetTeamClass()))
             {
                 return false;
             }
-            if (!safeSubtreeListMatch(node.superInterfaces(), o.superInterfaces()))
+            if (!safeSubtreeListMatch(node.internalSuperInterfaces(), o.internalSuperInterfaces()))
             {
                 return false;
             }
         }
-        if (level >= AST.JLS3) {
+        if (level >= AST.JLS3_INTERNAL) {
             if (!safeSubtreeListMatch(node.modifiers(), o.modifiers()))
             {
                 return false;

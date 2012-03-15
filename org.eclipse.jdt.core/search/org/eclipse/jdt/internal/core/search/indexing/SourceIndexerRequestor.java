@@ -494,12 +494,15 @@ public void enterCallinMapping(CallinInfo callinInfo)
 }
 public void exitCallinMapping(int sourceEnd, int declarationSourceEnd)
 {
+	// empty stub
 }
 public void exitCalloutMapping(int sourceEnd, int declarationSourceEnd)
 {
+	// empty stub
 }
 public void exitCalloutToFieldMapping(int sourceEnd, int declarationSourceEnd)
 {
+	// empty stub
 }
 // support for indexed roleclass-lookup by means of a baseclass name.
 public void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd)

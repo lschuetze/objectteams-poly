@@ -111,6 +111,7 @@ import org.eclipse.core.runtime.IExtension;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
@@ -2727,7 +2728,7 @@ public final class JavaCore extends Plugin {
 //{ObjectTeams: provide logging to Config:
 		Config.setLogger(new ILogger() {
 			public void logException(String message, Throwable exception) {
-				JavaCore.this.getLog().log(new Status(Status.ERROR, JavaCore.PLUGIN_ID, 0, message, exception));
+				JavaCore.this.getLog().log(new Status(IStatus.ERROR, JavaCore.PLUGIN_ID, 0, message, exception));
 			}
 		});
 // SH}

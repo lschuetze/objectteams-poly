@@ -287,7 +287,7 @@ public class MethodDeclaration extends BodyDeclaration {
 		new ASTNode.NodeList(THROWN_EXCEPTIONS_PROPERTY);
 
 //{ObjectTeams: new element:
-	GuardPredicateDeclaration _optionalGuardPredicate = null;
+	GuardPredicateDeclaration optionalGuardPredicate = null;
 // SH}
 	/**
 	 * The method body, or <code>null</code> if none.
@@ -863,14 +863,14 @@ public class MethodDeclaration extends BodyDeclaration {
 	}
 //{ObjectTeams: accessors for new element
     public void setGuardPredicate(GuardPredicateDeclaration predicate) {
-        ASTNode oldChild = this._optionalGuardPredicate;
+        ASTNode oldChild = this.optionalGuardPredicate;
         preReplaceChild(oldChild, predicate, GUARD_PROPERTY);
-        this._optionalGuardPredicate = predicate;
+        this.optionalGuardPredicate = predicate;
         postReplaceChild(oldChild, predicate, GUARD_PROPERTY);
 	}
 
 	public GuardPredicateDeclaration getGuardPredicate() {
-		return _optionalGuardPredicate;
+		return this.optionalGuardPredicate;
 	}
 // SH}
 	/**

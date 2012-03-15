@@ -197,7 +197,10 @@ public final class SelectionEngine extends Engine implements ISearchRequestor {
 //{ObjectTeams: Simple tuple type for adjusting two char[] at once:
 	private class PackageTypeName
 	{
-	    public char[] qualifiedPackageName;
+	    public PackageTypeName() {
+			// explicti public ctor to avoid synth access
+		}
+		public char[] qualifiedPackageName;
 	    public char[] qualifiedSourceName;
 	}
 // haebor}

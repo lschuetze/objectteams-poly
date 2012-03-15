@@ -280,20 +280,20 @@ public class Scanner implements TerminalTokens {
 	public boolean returnOnlyGreater = false;
 
 //{ObjectTeams: really static:
-	static int i,j,k; // fields so IBM JVM has no chance to optimize out wrongly
+	static int si,sj,k; // fields so IBM JVM has no chance to optimize out wrongly
 	static {
 		// predictable initialization:
 		charArray_length =
 			new char[OptimizedLength][TableSize][InternalTableSize][];
-		for (i = 0; i < 6; i++) {
-			for (j = 0; j < TableSize; j++) {
+		for (si = 0; si < 6; si++) {
+			for (sj = 0; sj < TableSize; sj++) {
 				for (k = 0; k < InternalTableSize; k++) {
 // debug:
 //System.out.print("i="+i+", j="+j+", k="+k+"; O="+OptimizedLength+", T="+TableSize+", I="+InternalTableSize);
 //System.out.print(", l0="+charArray_length.length);
 //System.out.print(", l1="+charArray_length[i].length);
 //System.out.println(", l2="+charArray_length[i][j].length);
-					charArray_length[i][j][k] = initCharArray;
+					charArray_length[si][sj][k] = initCharArray;
 				}
 			}
 		}

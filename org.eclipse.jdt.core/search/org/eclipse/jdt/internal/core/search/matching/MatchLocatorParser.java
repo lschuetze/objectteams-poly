@@ -95,31 +95,31 @@ public class ClassButNoMethodDeclarationVisitor extends ASTVisitor {
 //{ObjectTeams: visit method mappings and method specs
 	public boolean visit(CalloutMappingDeclaration calloutMappingDeclaration, ClassScope scope)
 	{
-	    patternLocator.match(calloutMappingDeclaration, nodeSet);
+	    MatchLocatorParser.this.patternLocator.match(calloutMappingDeclaration, MatchLocatorParser.this.nodeSet);
 	    return true;
 	}
 
 	public boolean visit(CallinMappingDeclaration callinMappingDeclaration, ClassScope scope)
 	{
-	    patternLocator.match(callinMappingDeclaration, nodeSet);
+	    MatchLocatorParser.this.patternLocator.match(callinMappingDeclaration, MatchLocatorParser.this.nodeSet);
 	    return true;
 	}
 
 	public boolean visit(ParameterMapping paramMapping, BlockScope scope)
 	{
-	    patternLocator.match(paramMapping, nodeSet);
+	    MatchLocatorParser.this.patternLocator.match(paramMapping, MatchLocatorParser.this.nodeSet);
 	    return true;
 	}
 	
 	public boolean visit(MethodSpec methodSpec, BlockScope scope)
 	{
-		patternLocator.match(methodSpec, nodeSet);
+		MatchLocatorParser.this.patternLocator.match(methodSpec, MatchLocatorParser.this.nodeSet);
 	    return true;
 	}
 
 	public boolean visit(FieldAccessSpec fieldSpec, BlockScope scope)
 	{
-		patternLocator.match(fieldSpec, nodeSet);
+		MatchLocatorParser.this.patternLocator.match(fieldSpec, MatchLocatorParser.this.nodeSet);
 	    return true;
 	}
 //gbr}		
@@ -528,27 +528,27 @@ protected void consumeMethodInvocationTSuper(int kind)
 protected void consumeMethodSpecLong(boolean hasPlus)
 {
 	super.consumeMethodSpecLong(hasPlus);
-	patternLocator.match((MethodSpec)this.astStack[this.astPtr], this.nodeSet);
+	this.patternLocator.match((MethodSpec)this.astStack[this.astPtr], this.nodeSet);
 }
 protected void consumeMethodSpecShort()
 {
 	super.consumeMethodSpecShort();
-	patternLocator.match((MethodSpec)this.astStack[this.astPtr], this.nodeSet);
+	this.patternLocator.match((MethodSpec)this.astStack[this.astPtr], this.nodeSet);
 }
 protected void consumeFieldSpecLong()
 {
     super.consumeFieldSpecLong();
-	patternLocator.match((FieldAccessSpec)this.astStack[this.astPtr], this.nodeSet);
+	this.patternLocator.match((FieldAccessSpec)this.astStack[this.astPtr], this.nodeSet);
 }
 protected void consumeParameterMappingIn()
 {
     super.consumeParameterMappingIn();
-	patternLocator.match((ParameterMapping)this.astStack[this.astPtr], this.nodeSet);
+	this.patternLocator.match((ParameterMapping)this.astStack[this.astPtr], this.nodeSet);
 }
 protected void consumeParameterMappingOut()
 {
     super.consumeParameterMappingOut();
-	patternLocator.match((ParameterMapping)this.astStack[this.astPtr], this.nodeSet);
+	this.patternLocator.match((ParameterMapping)this.astStack[this.astPtr], this.nodeSet);
 }
 @Override
 protected void consumeCallinBindingLeft(boolean hasSignature) {
@@ -962,7 +962,7 @@ protected void parseBodies(TypeDeclaration type, CompilationUnitDeclaration unit
 	   for (int i = 0; i < mappings.length; i++) {
 	       AbstractMethodMappingDeclaration mapping = mappings[i];
 	       mapping.parseParamMappings(this, unit);
-	       mapping.traverse(localDeclarationVisitor, (ClassScope) null);
+	       mapping.traverse(this.localDeclarationVisitor, (ClassScope) null);
 	   } 
 	}
 //carp}
@@ -974,7 +974,7 @@ protected void parseBodies(TypeDeclaration type, CompilationUnitDeclaration unit
 			if (method.sourceStart >= type.bodyStart) { // if not synthetic
 //{ObjectTeams: getMethodBodies() may be called more than once. Prevent Parser from accumulating the methods' statements.
 				if (OTNameUtils.isPredicate(method.selector)) { // already parsed
-					((MethodDeclaration)method).traverse(localDeclarationVisitor, (ClassScope) null);
+					((MethodDeclaration)method).traverse(this.localDeclarationVisitor, (ClassScope) null);
 					continue;
 				}
 			    method.statements = null; // TODO(SH): is this still needed now that we are flagging HasAllMethodBodies?

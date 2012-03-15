@@ -6461,12 +6461,12 @@ public class CodeFormatterVisitor extends ASTVisitor {
 				if (idx > 0) {
 					this.scribe.printNextToken(TerminalTokens.TokenNameCOMMA);
 					this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
-					scribe.printNewLine();
+					this.scribe.printNewLine();
 				}
 				
 				mapping.traverse(this,abstractMethodMappingDeclaration.scope);
 			}
-			scribe.printNewLine();
+			this.scribe.printNewLine();
 			
 			this.scribe.printComment();
 			if (this.preferences.indent_statements_compare_to_body) {

@@ -42,9 +42,9 @@ public class OTJIncrementalImageBuilder extends IncrementalImageBuilder {
 	@SuppressWarnings("unchecked") // accessing super field with raw type
 	protected void addAffectedSourceFiles() {
 		super.addAffectedSourceFiles();
-		if (sourceFiles != null) {
-			SourceFile[] oldSources = new SourceFile[sourceFiles.size()];
-			sourceFiles.toArray(oldSources); // copy, because list might be extended.
+		if (this.sourceFiles != null) {
+			SourceFile[] oldSources = new SourceFile[this.sourceFiles.size()];
+			this.sourceFiles.toArray(oldSources); // copy, because list might be extended.
 			for (int i=0; i<oldSources.length; i++) {
 				checkAddTeamFile(oldSources[i]);
 			}
@@ -56,7 +56,7 @@ public class OTJIncrementalImageBuilder extends IncrementalImageBuilder {
 		// TODO (SH): should we try more than one level?
 		IPath teamPath = path.removeLastSegments(1).addFileExtension("java"); //$NON-NLS-1$
 		if (!teamPath.isEmpty()) {
-			SourceFile teamFile = javaBuilder.findSourceByPath(teamPath);
+			SourceFile teamFile = this.javaBuilder.findSourceByPath(teamPath);
 			if (teamFile != null) {
 				if (JavaBuilder.DEBUG)
 					System.out.println("Adding team file: "+teamPath); //$NON-NLS-1$
@@ -69,7 +69,7 @@ public class OTJIncrementalImageBuilder extends IncrementalImageBuilder {
 	@SuppressWarnings("unchecked") // accessing super field with raw type
 	void checkAddFile (SourceFile teamFile) {
 		// could use a hashtable, but probably this list won't grow too long.
-		if (!sourceFiles.contains(teamFile))
-			sourceFiles.add(0, teamFile); // put to front: compile teams first.
+		if (!this.sourceFiles.contains(teamFile))
+			this.sourceFiles.add(0, teamFile); // put to front: compile teams first.
 	}
 }

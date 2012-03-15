@@ -237,7 +237,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 //{ObjectTeams: avoid duplicate resolving:
 	  TypeBinding variableType = null;
 	  if (this.binding == null) {
-		variableType = type.resolveType(scope, true /* check bounds*/);
+		variableType = this.type.resolveType(scope, true /* check bounds*/);
 /* orig:
 		// create a binding and add it to the scope
 		TypeBinding variableType = type.resolveType(scope, true /* check bounds* /);

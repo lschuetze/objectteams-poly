@@ -87,7 +87,7 @@ public class BaseConstructorInvocation extends Statement
      * The list of argument expressions (element type:
      * <code>Expression</code>). Defaults to an empty list.
      */
-    private ASTNode.NodeList _arguments =
+    private ASTNode.NodeList arguments =
         new ASTNode.NodeList(ARGUMENTS_PROPERTY);
 
 	/**
@@ -110,7 +110,7 @@ public class BaseConstructorInvocation extends Statement
      */
     public List getArguments()
     {
-        return _arguments;
+        return this.arguments;
     }
 
 	final List internalStructuralPropertiesForType(int apiLevel)
@@ -157,7 +157,7 @@ public class BaseConstructorInvocation extends Statement
         if (visitChildren)
         {
             // visit children in normal left to right reading order
-            acceptChildren(visitor, _arguments);
+            acceptChildren(visitor, this.arguments);
         }
         visitor.endVisit(this);
     }
@@ -171,9 +171,9 @@ public class BaseConstructorInvocation extends Statement
 
 	int treeSize()
 	{
-		return memSize() + (_arguments == null
+		return memSize() + (this.arguments == null
 		                        ? 0
-                                : _arguments.listSize());
+                                : this.arguments.listSize());
 	}
 
     public IMethodBinding resolveConstructorBinding() {

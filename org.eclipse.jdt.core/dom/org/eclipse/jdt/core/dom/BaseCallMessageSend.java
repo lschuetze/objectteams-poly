@@ -96,13 +96,13 @@ public class BaseCallMessageSend extends Expression
     /**
      * The method name; lazily initialized;
      */
-    private SimpleName _methodName = null;
+    private SimpleName methodName = null;
 
     /**
      * The list of argument expressions (element type:
      * <code>Expression</code>). Defaults to an empty list.
      */
-    private ASTNode.NodeList _arguments =
+    private ASTNode.NodeList arguments =
         new ASTNode.NodeList(ARGUMENTS_PROPERTY);
 
 	/**
@@ -163,8 +163,8 @@ public class BaseCallMessageSend extends Expression
 	{
 		BaseCallMessageSend result = new BaseCallMessageSend(target);
 		result.setSourceRange(this.getStartPosition(), this.getLength());
-        result.setName((SimpleName)_methodName.clone(target));
-        result.getArguments().addAll(ASTNode.copySubtrees(target, _arguments));
+        result.setName((SimpleName)this.methodName.clone(target));
+        result.getArguments().addAll(ASTNode.copySubtrees(target, this.arguments));
         return result;
 	}
 
@@ -179,8 +179,8 @@ public class BaseCallMessageSend extends Expression
         boolean visitChildren = visitor.visit(this);
         if (visitChildren) {
             // visit children in normal left to right reading order
-            acceptChild(visitor, _methodName);
-            acceptChildren(visitor, _arguments);
+            acceptChild(visitor, this.methodName);
+            acceptChildren(visitor, this.arguments);
         }
         visitor.endVisit(this);
 	}
@@ -193,20 +193,20 @@ public class BaseCallMessageSend extends Expression
      */
     public SimpleName getName()
     {
-        if (_methodName == null)
+        if (this.methodName == null)
         {
             // lazy init must be thread-safe for readers
             synchronized (this)
             {
-                if (_methodName == null)
+                if (this.methodName == null)
                 {
                     preLazyInit();
-                    _methodName = new SimpleName(this.ast);
-                    postLazyInit(_methodName, NAME_PROPERTY);
+                    this.methodName = new SimpleName(this.ast);
+                    postLazyInit(this.methodName, NAME_PROPERTY);
                 }
             }
         }
-        return _methodName;
+        return this.methodName;
     }
 
     /**
@@ -226,9 +226,9 @@ public class BaseCallMessageSend extends Expression
         {
             throw new IllegalArgumentException();
         }
-        ASTNode oldChild = _methodName;
+        ASTNode oldChild = this.methodName;
         preReplaceChild(oldChild, name, NAME_PROPERTY);
-        _methodName = name;
+        this.methodName = name;
         postReplaceChild(oldChild, name, NAME_PROPERTY);
     }
 
@@ -241,7 +241,7 @@ public class BaseCallMessageSend extends Expression
      */
     public List getArguments()
     {
-        return _arguments;
+        return this.arguments;
     }
 
     /* (omit javadoc for this method)
@@ -259,8 +259,8 @@ public class BaseCallMessageSend extends Expression
     {
         return
             memSize()
-            + (_methodName == null ? 0 : _methodName.treeSize())
-            + (_arguments  == null ? 0 : _arguments.listSize());
+            + (this.methodName == null ? 0 : this.methodName.treeSize())
+            + (this.arguments  == null ? 0 : this.arguments.listSize());
     }
 
     public IMethodBinding resolveMethodBinding()

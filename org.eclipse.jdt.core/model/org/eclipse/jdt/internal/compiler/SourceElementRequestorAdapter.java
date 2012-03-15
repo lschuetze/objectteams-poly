@@ -233,7 +233,7 @@ public class SourceElementRequestorAdapter implements ISourceElementRequestor {
     }
 //jwl}
 //  {ObjectTeams: default implementation for baseReference
-    public void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd){}
+    public void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd){ /* empty stub */ }
 //    haebor}
 
 }

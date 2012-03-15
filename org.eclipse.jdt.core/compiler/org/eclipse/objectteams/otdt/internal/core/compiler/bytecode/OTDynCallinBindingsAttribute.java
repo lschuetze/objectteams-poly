@@ -204,9 +204,8 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
     /**
      * Read the attribute from byte code.
      *
-	 * @param info
+	 * @param reader
 	 * @param readOffset
-	 * @param structOffset
 	 * @param constantPoolOffsets
 	 */
 	public OTDynCallinBindingsAttribute(ClassFileStruct reader, int readOffset, int[] constantPoolOffsets) {
@@ -246,7 +245,7 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 				baseFlags |= BaseMethod.STATIC;
 			if (baseSpec.isStatic())
 				baseFlags |= BaseMethod.CALLIN;
-			mapping.addBaseMethod(i, baseSpec.selector, baseSpec.signature(), baseSpec.resolvedMethod.declaringClass.constantPoolName(), baseSpec.getCallinId(theTeam), baseFlags, baseSpec.getTranslationFlags());
+			mapping.addBaseMethod(i, baseSpec.selector, baseSpec.signature(), baseSpec.resolvedMethod.declaringClass.constantPoolName(), baseSpec.getCallinId(this.theTeam), baseFlags, baseSpec.getTranslationFlags());
 		}
 		mapping.setSMAPinfo(callinDecl);
 		this.mappings.add(mapping);
@@ -269,16 +268,16 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		buf.append(String.valueOf(mapping.declaringRoleName));
 		buf.append('.');
 		buf.append(String.valueOf(mapping.callinName));
-		buf.append(": ");
+		buf.append(": "); //$NON-NLS-1$
 		buf.append(String.valueOf(mapping.roleSelector));
 		buf.append(String.valueOf(mapping.roleSignature));
-		buf.append(" <- ");
+		buf.append(" <- "); //$NON-NLS-1$
 		buf.append(String.valueOf(mapping.callinModifier));
 		buf.append(' ');
 		buf.append(String.valueOf(mapping.baseClassName));
 		BaseMethod[] baseMethods = mapping.getBaseMethods();
 		for (int j = 0; j < baseMethods.length; j++) {
-			buf.append("\n\t\t");
+			buf.append("\n\t\t"); //$NON-NLS-1$
 			buf.append(String.valueOf(baseMethods[j].declaringBaseClassName));
 			buf.append('.');
 			buf.append(String.valueOf(baseMethods[j].baseMethodName));

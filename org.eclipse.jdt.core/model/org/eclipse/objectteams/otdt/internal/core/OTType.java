@@ -70,28 +70,28 @@ import org.eclipse.objectteams.otdt.internal.core.search.matching.ReferenceToTea
  */
 public class OTType extends OTJavaElement implements IOTType
 {
-	int _flags;
+	int flags;
 	
 	public OTType(int type, IType correspondingJavaType, IJavaElement parent, int flags)
 	{
 		super(type, correspondingJavaType, parent);
-		_flags                  = flags;
+		this.flags                  = flags;
 	}
 	
 	public OTType(int type, IType correspondingJavaType, IJavaElement parent, int flags, boolean addToParent)
 	{
 		super(type, correspondingJavaType, parent, addToParent);
-		_flags                  = flags;
+		this.flags                  = flags;
 	}
 
 	public boolean isRole()
 	{
-		return TypeHelper.isRole(_flags);
+		return TypeHelper.isRole(this.flags);
 	}
 
 	public boolean isTeam()
 	{
-		return TypeHelper.isTeam(_flags);
+		return TypeHelper.isTeam(this.flags);
 	}
 
 	/**
@@ -265,7 +265,7 @@ public class OTType extends OTJavaElement implements IOTType
 	
 	public int getFlags()
 	{
-		return _flags;
+		return this.flags;
 	}
 	
 	public IType getRoleType(String simpleName)

@@ -52,7 +52,7 @@ public abstract class MethodMappingElement extends ASTNode {
 	 * The signature flag.
 	 * True if MethodMappingElement have a signature
 	 */
-	private boolean _hasSignature = false;
+	private boolean hasSignature = false;
 
 	/**
 	 * The element name; lazily initialized; defaults to an unspecified,
@@ -101,7 +101,7 @@ public abstract class MethodMappingElement extends ASTNode {
 	 */
 	public boolean hasSignature()
 	{
-		return _hasSignature;
+		return this.hasSignature;
 	}
 
 	/**
@@ -111,7 +111,7 @@ public abstract class MethodMappingElement extends ASTNode {
 	{
 		SimplePropertyDescriptor p = signatureProperty();
 		preValueChange(p);
-		this._hasSignature = hasSignature;
+		this.hasSignature = hasSignature;
 		postValueChange(p);
 	}
 

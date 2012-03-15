@@ -212,10 +212,10 @@ public class Main implements ProblemSeverities, SuffixConstants {
 		
 //{ObjectTeams
 		/* lists of IProblem objects */
-		public ArrayList<IProblem> _globalProblems;
-		public ArrayList<IProblem> _globalErrors;
-		public ArrayList<IProblem> _globalWarnings;
-		public int _errorCode = -1;
+		public ArrayList<IProblem> globalProblems;
+		public ArrayList<IProblem> globalErrors;
+		public ArrayList<IProblem> globalWarnings;
+		public int errorCode = -1;
 //carp}
 
 		public String buildFileName(
@@ -820,14 +820,14 @@ public class Main implements ProblemSeverities, SuffixConstants {
 				this.printlnErr("----------"); //$NON-NLS-1$
 			}
 //{ObjectTeams							
-			_globalProblems.add(problem);
+			this.globalProblems.add(problem);
 			if (problem.isError()) {
 				// make exceptions distinguishable:								
-				_globalErrors.add(problem);
+				this.globalErrors.add(problem);
 				if (problem.getID() == IProblem.Unclassified)
-					_errorCode = -2; // signal an exception occurred.
+					this.errorCode = -2; // signal an exception occurred.
 			} else if (problem.isWarning()) {
-				_globalWarnings.add(problem);
+				this.globalWarnings.add(problem);
 			}
 //carp+SH}			
 		}
@@ -3984,9 +3984,9 @@ public void outputClassFiles(CompilationResult unitResult) {
 public void performCompilation() {
 
 //{ObjectTeams: initialize problem lists:
-	this.logger._globalProblems = new ArrayList<IProblem>();
-	this.logger._globalErrors   = new ArrayList<IProblem>();
-	this.logger._globalWarnings = new ArrayList<IProblem>();
+	this.logger.globalProblems = new ArrayList<IProblem>();
+	this.logger.globalErrors   = new ArrayList<IProblem>();
+	this.logger.globalWarnings = new ArrayList<IProblem>();
 //carp}
 
 	this.startTime = System.currentTimeMillis();

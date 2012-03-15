@@ -114,7 +114,7 @@ class ASTConverter {
 //{ObjectTeams: one more configuration option:
 		Object roleFileOption= options.get(JavaCore.AST_INCLUDES_ROLE_FILES);
 		if (roleFileOption != null)
-			includeRoleFiles= JavaCore.ENABLED.equals(roleFileOption);
+			this.includeRoleFiles= JavaCore.ENABLED.equals(roleFileOption);
 // SH}
 
 		this.scanner = new Scanner(
@@ -5639,15 +5639,15 @@ class ASTConverter {
 					modifiers &= ~ClassFileConstants.AccInterface; // remove AccInterface flags
 					// also allow additional flag to be passed:  (how about deprecated?)
 					modifiers &= ExtraCompilerModifiers.AccOTTypeJustFlag;
-					roleTypeDecl.setModifiers(modifiers);
+					roleTypeDecl.internalSetModifiers(modifiers);
 
 					if (typeDeclaration.baseclass != null)
-					    roleTypeDecl.setBaseClass(convert(typeDeclaration.baseclass));
+					    roleTypeDecl.internalSetBaseClass(convert(typeDeclaration.baseclass));
 
 					// need to set the superclass and super interfaces here since we cannot distinguish them at
 					// the type references level.
 					if (typeDeclaration.superclass != null)
-						roleTypeDecl.setSuperclass(convert(typeDeclaration.superclass));
+						roleTypeDecl.internalSetSuperclass(convert(typeDeclaration.superclass));
 
 				}
 				break;
@@ -5709,13 +5709,13 @@ class ASTConverter {
 			   			= typeDeclaration.enclosingType;
 			   teamClassName = this.ast.newSimpleName(new String(teamDecl.name));
 			   teamClassName.setSourceRange(teamDecl.sourceStart, teamDecl.sourceEnd - teamDecl.sourceStart + 1);
-			   if(this.ast.apiLevel >= AST.JLS3){
+			   if(this.ast.apiLevel >= AST.JLS3_INTERNAL){
 				   SimpleType teamType = this.ast.newSimpleType(teamClassName);
 				   teamType.setSourceRange(teamClassName.getStartPosition(), teamClassName.getLength());
 				   roleTypeDecl.setTeamClassType(teamType);
 			   }
 			   else
-				   roleTypeDecl.setTeamClass(teamClassName);
+				   roleTypeDecl.internalSetTeamClass(teamClassName);
 			}
 
 			if (this.resolveBindings)
@@ -5825,7 +5825,7 @@ class ASTConverter {
 		if (anchorRef.anchor instanceof NameReference) {
 			result.setPath(convert((NameReference)anchorRef.anchor));
 		} else if (anchorRef.anchor instanceof FieldReference) {
-			throw new InternalCompilerError("Unexpected type "+anchorRef.anchor.getClass()+" for anchor reference "+anchorRef.anchor);
+			throw new InternalCompilerError("Unexpected type "+anchorRef.anchor.getClass()+" for anchor reference "+anchorRef.anchor); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		int start = anchorRef.sourceStart;
 		int end = anchorRef.sourceEnd;
@@ -5835,8 +5835,8 @@ class ASTConverter {
 	
 	/**
 	 * annotations for method mappings:
-	 * @param methodDecl
-	 * @param methodDeclaration
+	 * @param mappingDecl
+	 * @param mappingDeclaration
 	 */
 	protected void setModifiers(org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration mappingDecl,
 			AbstractMethodMappingDeclaration mappingDeclaration) {
@@ -6013,7 +6013,7 @@ public BaseConstructorInvocation convert(
 
 		// name
 		if (callinMapping.hasName()) {
-			SimpleName labelName = ast.newSimpleName(String.valueOf(callinMapping.name));
+			SimpleName labelName = this.ast.newSimpleName(String.valueOf(callinMapping.name));
 			labelName.setSourceRange(callinMapping.sourceStart, callinMapping.sourceEnd - callinMapping.sourceStart + 1);
 			result.setName(labelName);
 		}
@@ -6234,7 +6234,7 @@ public BaseConstructorInvocation convert(
 			org.eclipse.jdt.internal.compiler.ast.TypeReference typeReference = methodSpec.returnType;
 			if (typeReference != null) {
 				Type returnType = convertType(typeReference);
-				if(result.getAST().apiLevel() >= AST.JLS3)
+				if(result.getAST().apiLevel() >= AST.JLS3_INTERNAL)
 					result.setReturnType2(returnType);
 				else
 					result.setReturnType(returnType);
@@ -6250,7 +6250,7 @@ public BaseConstructorInvocation convert(
 
 			org.eclipse.jdt.internal.compiler.ast.TypeParameter[] typeParameters = methodSpec.typeParameters;
 			if (typeParameters != null)
-				if (this.ast.apiLevel >= AST.JLS3)
+				if (this.ast.apiLevel >= AST.JLS3_INTERNAL)
 					for (int i = 0, max = typeParameters.length; i < max; i++)
 						result.typeParameters().add(convert(typeParameters[i]));
 		}
@@ -6281,10 +6281,10 @@ public BaseConstructorInvocation convert(
 			org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration methodDeclaration)
 	{
 		MethodDeclaration methodDecl = (MethodDeclaration) convert(isInterface, methodDeclaration);
-		if(methodDecl.ast.apiLevel() == AST.JLS2)
-			methodDecl.setModifiers(methodDecl.getModifiers() | Modifier.ABSTRACT);
+		if(methodDecl.ast.apiLevel() == AST.JLS2_INTERNAL)
+			methodDecl.internalSetModifiers(methodDecl.getModifiers() | Modifier.ABSTRACT);
 		else
-			methodDecl.modifiers().addAll(ast.newModifiers(methodDecl.getModifiers() | Modifier.ABSTRACT));
+			methodDecl.modifiers().addAll(this.ast.newModifiers(methodDecl.getModifiers() | Modifier.ABSTRACT));
 		return methodDecl;
 	}
 //SH+gbr+jsv+mkr}

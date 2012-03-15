@@ -111,7 +111,7 @@ public class GuardPredicateDeclaration extends ASTNode {
 			if (this.ast.apiLevel == AST.JLS2_INTERNAL) {
 				unsupportedIn2();
 			}
-			if (this.ast.apiLevel >= AST.JLS3) {
+			if (this.ast.apiLevel >= AST.JLS3_INTERNAL) {
 				acceptChild(visitor, this.expression);
 			}
 		}
@@ -137,7 +137,7 @@ public class GuardPredicateDeclaration extends ASTNode {
 
 	public boolean isBase()
 	{
-		return isBase;
+		return this.isBase;
 	}
 
 	public void setBase(boolean isBase)

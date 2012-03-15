@@ -414,7 +414,7 @@ public void generateSyntheticFieldInitializationsIfNecessary(MethodScope methodS
 	syntheticArgs = nestedType.syntheticEnclosingInstances();
 //SH}
 	if (syntheticArgs != null) {
-		for (int i = 0, max = syntheticArgs == null ? 0 : syntheticArgs.length; i < max; i++) {
+		for (int i = 0, max = syntheticArgs.length; i < max; i++) {
 			SyntheticArgumentBinding syntheticArg;
 			if ((syntheticArg = syntheticArgs[i]).matchingField != null) {
 				codeStream.aload_0();

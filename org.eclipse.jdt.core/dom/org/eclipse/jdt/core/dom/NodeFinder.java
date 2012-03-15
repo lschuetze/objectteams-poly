@@ -39,15 +39,15 @@ public final class NodeFinder {
 		// The topmost type found during traversal
 		private TypeDeclaration topType= null;
 		public boolean visit(TypeDeclaration type) {
-			if (topType == null)
-				topType= type;
+			if (this.topType == null)
+				this.topType= type;
 			return super.visit(type);
 		}
 		public boolean visit(RoleTypeDeclaration roleType) {
 			if (this.topType != null && roleType.isRoleFile())
 				return false;
-			if (topType == null)
-				topType= roleType;
+			if (this.topType == null)
+				this.topType= roleType;
 			return super.visit(roleType);
 		}
 // SH}

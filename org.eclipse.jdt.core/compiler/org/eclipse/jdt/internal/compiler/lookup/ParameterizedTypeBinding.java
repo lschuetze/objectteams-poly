@@ -999,7 +999,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		TypeBinding[] arguments = this.arguments;
 		// avoid printing incomplete parameters: if there are value parameters also print declared type params:
 		if (haveValueParameters && arguments == null && this.type.isGenericType())
-			arguments = ((ReferenceBinding)this.type).typeVariables();
+			arguments = this.type.typeVariables();
 
 		if (arguments != null) {
 		    for (int i = 0, length = arguments.length; i < length; i++) {

@@ -57,9 +57,9 @@ import org.eclipse.osgi.util.NLS;
  */
 public class RoleType extends OTType implements IRoleType
 {
-    private IType  _baseClass;
+    private IType  baseClass;
     private String _baseAnchor;
-    private String _baseClassName;
+    private String baseClassName;
 
 	public RoleType(IType correspondingJavaType,
 					IJavaElement parent,
@@ -68,7 +68,7 @@ public class RoleType extends OTType implements IRoleType
 					String baseClassAnchor)
     {
         super(ROLE | (TypeHelper.isTeam(flags) ? TEAM : 0), correspondingJavaType, parent, flags);
-        this._baseClassName = baseClassName;
+        this.baseClassName = baseClassName;
         this._baseAnchor= baseClassAnchor;
     }
 
@@ -138,7 +138,7 @@ public class RoleType extends OTType implements IRoleType
 	
 	public void setBaseClass(IType baseClass)
 	{
-		_baseClass = baseClass;
+		this.baseClass = baseClass;
 	}
 
 	public IType getBaseClass() throws JavaModelException {
@@ -146,14 +146,14 @@ public class RoleType extends OTType implements IRoleType
 	}
 	private IType getBaseClass(ITypeHierarchy hierarchy) throws JavaModelException
 	{
-		if (_baseClass == null)
+		if (this.baseClass == null)
 		{
 			JavaModelException jex = null;
 			
 			try
             {
 //			    System.out.println("RoleType.getBaseClass(): " + getElementName());
-                _baseClass = findBaseClass(hierarchy);
+                this.baseClass = findBaseClass(hierarchy);
             }
 			catch (JavaModelException ex)
 			{
@@ -163,11 +163,11 @@ public class RoleType extends OTType implements IRoleType
             {
             	// just be sure we get all kind of exceptions
             	Util.log(ex,
-            		NLS.bind("Resolving of base class ''{0}'' failed!", new Object[] {_baseClassName})); //$NON-NLS-1$
+            		NLS.bind("Resolving of base class ''{0}'' failed!", new Object[] {this.baseClassName})); //$NON-NLS-1$
             }
 
             // when having syntax/compilation errors, we can't ensure to find our baseclass
-            if (_baseClass == null && (_baseClassName != null || jex != null))
+            if (this.baseClass == null && (this.baseClassName != null || jex != null))
             {
             	IStatus status = new Status(
             			IStatus.WARNING, 
@@ -181,19 +181,19 @@ public class RoleType extends OTType implements IRoleType
             }
 		}
 		
-		return _baseClass;
+		return this.baseClass;
 	}
 	
 	public String getBaseclassName() {
-	    if (_baseAnchor != null)
-	        return _baseAnchor + '.' + _baseClassName;
-		return _baseClassName;
+	    if (this._baseAnchor != null)
+	        return this._baseAnchor + '.' + this.baseClassName;
+		return this.baseClassName;
 	}
 
 	public String getFullBaseclassName() {
 		if (this._baseAnchor == null || this._baseAnchor.length() == 0)
-			return this._baseClassName;
-		return this._baseClassName+"<@"+this._baseAnchor+">"; //$NON-NLS-1$ //$NON-NLS-2$
+			return this.baseClassName;
+		return this.baseClassName+"<@"+this._baseAnchor+">"; //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	public boolean equals(Object obj)
@@ -206,11 +206,11 @@ public class RoleType extends OTType implements IRoleType
 		RoleType other = (RoleType)obj;
 		
 		// only compare base class name, resolving the class is too expensive and unnecessary.
-		if ((_baseClassName==null) != (other._baseClassName==null))
+		if ((this.baseClassName==null) != (other.baseClassName==null))
 		{
 			return false;
 		}
-		if (_baseClassName != null && !_baseClassName.equals(other._baseClassName)) 
+		if (this.baseClassName != null && !this.baseClassName.equals(other.baseClassName)) 
 		{
 			return false;
 		}
@@ -231,27 +231,27 @@ public class RoleType extends OTType implements IRoleType
 	 */
     private IType findBaseClass(ITypeHierarchy hierarchy) throws JavaModelException
     {
-        if (_baseClassName == null)
+        if (this.baseClassName == null)
             return findSuperBaseClass(hierarchy);
         
-        if (_baseAnchor != null)
+        if (this._baseAnchor != null)
         {
             IOTType baseAnchorType = resolveBaseAnchor();
             if (baseAnchorType == null)
                 return null;
             
             // lookup via the anchor needs simple name:
-            String simpleBaseName = this._baseClassName;
-            int dotpos = this._baseClassName.lastIndexOf('.');
+            String simpleBaseName = this.baseClassName;
+            int dotpos = this.baseClassName.lastIndexOf('.');
             if (dotpos != -1)
-            	simpleBaseName = this._baseClassName.substring(dotpos+1);
+            	simpleBaseName = this.baseClassName.substring(dotpos+1);
             
             IType[] baseClasses = baseAnchorType.getRoleTypes(IOTType.ALL, simpleBaseName);
             if (baseClasses.length >= 1)
                 return baseClasses[0]; // the bottom-most in the hierarchy
         }
         // resolve relative to the current type:
-        return resolveInType(this, _baseClassName);
+        return resolveInType(this, this.baseClassName);
     }
 
     // argument avoids recursive building of hierarchy through getBaseClass -> findSuperBaseClass -> getBaseOf -> tsuper.getBaseClass()
@@ -292,7 +292,7 @@ public class RoleType extends OTType implements IRoleType
 
     private IOTType resolveBaseAnchor() throws JavaModelException
     {
-        if (_baseAnchor == null)
+        if (this._baseAnchor == null)
             return null;
         
         IOTType enclosingTeam = getTeam();
@@ -300,11 +300,11 @@ public class RoleType extends OTType implements IRoleType
             return null;
         
         IType currentType= enclosingTeam;
-        String anchorField= _baseAnchor;
-        int pos= _baseAnchor.lastIndexOf('.');
+        String anchorField= this._baseAnchor;
+        int pos= this._baseAnchor.lastIndexOf('.');
         if (pos>0) {
-        	anchorField= _baseAnchor.substring(pos+1);
-        	currentType= resolveInType(enclosingTeam, _baseAnchor.substring(0, pos));
+        	anchorField= this._baseAnchor.substring(pos+1);
+        	currentType= resolveInType(enclosingTeam, this._baseAnchor.substring(0, pos));
         }
 
         IType anchorType = null;
@@ -375,7 +375,7 @@ public class RoleType extends OTType implements IRoleType
     			if (superTeam != null) {
     				IType tsuperRole = superTeam.getType(getElementName());
     				if (tsuperRole != null && tsuperRole.exists()) {
-    					this._flags |= ExtraCompilerModifiers.AccOverriding;
+    					this.flags |= ExtraCompilerModifiers.AccOverriding;
     					tsuperRoles.add(tsuperRole);
     				}
     			}
@@ -398,7 +398,7 @@ public class RoleType extends OTType implements IRoleType
 		if (tsuperRole != null) {
 			// in case the client was only interested in the fact that we have a tsuper role
 			// store this flag to avoid duplicate search for tsuper roles:
-			this._flags |= ExtraCompilerModifiers.AccOverriding;
+			this.flags |= ExtraCompilerModifiers.AccOverriding;
 			tsuperRoles.add(tsuperRole);
 		}
     }

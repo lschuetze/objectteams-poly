@@ -47,8 +47,8 @@ import org.eclipse.jdt.internal.core.search.matching.PatternLocator;
 public class ReferenceToTeamPackagePattern extends JavaSearchPattern
 {
     protected static char[][] CATEGORIES = { IIndexConstants.REF_TO_TEAMPACKAGE };
-    protected char[] _teamQualifiedName;
-    protected char[] _roleName;
+    protected char[] teamQualifiedName;
+    protected char[] roleName;
     protected char[] _indexKey;
      
     /**
@@ -73,7 +73,7 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
     
     /**
      * Create a pattern for finding a specific role file of a given team.
-     * @param teamName	the name of the team to start at
+     * @param teamQualifiedName	the name of the team to start at
      * @param roleName  name of the role in the role file to search, 
      * 					if null is passed all role files of the given team will be found.
      * @param matchRule bitset of constants defined in {@link SearchPattern}
@@ -86,8 +86,8 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
         if (teamQualifiedName == null)
             throw new NullPointerException("teamQualifiedName must not be null"); //$NON-NLS-1$
 
-        _teamQualifiedName = teamQualifiedName; 
-    	_roleName = roleName;
+        this.teamQualifiedName = teamQualifiedName; 
+    	this.roleName = roleName;
     	
     	createIndexKey();
      }
@@ -115,23 +115,23 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
 	public boolean matchesDecodedKey(SearchPattern decodedPattern)
 	{
 		ReferenceToTeamPackagePattern pattern = (ReferenceToTeamPackagePattern) decodedPattern;
-		boolean teamMatches = matchesName(_teamQualifiedName, pattern._teamQualifiedName);
+		boolean teamMatches = matchesName(this.teamQualifiedName, pattern.teamQualifiedName);
 		if (!teamMatches)
 		    return false;
 		
-	    return matchesName(_roleName, pattern._roleName);
+	    return matchesName(this.roleName, pattern.roleName);
 	}
 	    
     public int matches(ImportReference importRef) {
 		// note: _roleName is not compared at this stage, deferred to handling by the ReferenceToTeamLocator
-		if (matchesName(this._teamQualifiedName, CharOperation.concatWith(importRef.tokens, '.')))
+		if (matchesName(this.teamQualifiedName, CharOperation.concatWith(importRef.tokens, '.')))
 			return PatternLocator.ACCURATE_MATCH;
 		return PatternLocator.IMPOSSIBLE_MATCH;
 	}
 
 	private void createIndexKey()
     {
-	    _indexKey = createIndexKey(_teamQualifiedName, _roleName);
+	    this._indexKey = createIndexKey(this.teamQualifiedName, this.roleName);
     }
 
     // contrary to what our SearchPattern.getIndexKey() says, we can't return null here (leads to NPE).
@@ -140,18 +140,18 @@ public class ReferenceToTeamPackagePattern extends JavaSearchPattern
     public char[] getIndexKey()
     {
         // If this assertion ever fails, then decodeIndexKey() probably needs to call createIndexKey().
-        assert(_indexKey != null);
+        assert(this._indexKey != null);
         
-        return _indexKey;
+        return this._indexKey;
     }
     
     public void decodeIndexKey(char[] key)
     {
         int slash = CharOperation.indexOf('/', key);
-        _teamQualifiedName = CharOperation.subarray(key, 0, slash);
+        this.teamQualifiedName = CharOperation.subarray(key, 0, slash);
         if (slash > 0 && slash < key.length - 2)
         {
-            _roleName = CharOperation.subarray(key, slash + 1, -1);
+            this.roleName = CharOperation.subarray(key, slash + 1, -1);
         }
 //        createIndexKey(); // should not be necessary
     }

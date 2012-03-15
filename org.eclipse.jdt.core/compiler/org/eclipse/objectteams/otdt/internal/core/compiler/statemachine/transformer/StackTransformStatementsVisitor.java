@@ -51,7 +51,7 @@ public class StackTransformStatementsVisitor
      */
     protected void assertAllConsumed(ASTNode node)
     {
-        Integer stackSize = (Integer)this.stackSizes.get(node);
+        Integer stackSize = this.stackSizes.get(node);
         if (stackSize == null)
             return; // nothing entered
         if (this.replacements.size() != stackSize.intValue())
@@ -87,7 +87,7 @@ public class StackTransformStatementsVisitor
             if (old == oldStat)
             {
                 this.toReplace.pop();
-                return (Statement)this.replacements.pop();
+                return this.replacements.pop();
             }
         }
         return oldStat;

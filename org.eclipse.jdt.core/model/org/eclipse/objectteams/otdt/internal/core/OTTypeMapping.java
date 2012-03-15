@@ -36,11 +36,11 @@ import org.eclipse.objectteams.otdt.core.IOTType;
  */
 public class OTTypeMapping
 {
-	private CompilationUnitMapping _data;
+	private CompilationUnitMapping data;
 
     public OTTypeMapping()
     {
-    	_data = new CompilationUnitMapping();
+    	this.data = new CompilationUnitMapping();
     }
 
 	public void put(IType type, IOTType otType)
@@ -49,13 +49,13 @@ public class OTTypeMapping
 		{
 			IJavaElement key= getParent(type);
 						
-			if (_data.contains(key))
+			if (this.data.contains(key))
 			{
-				_data.getOTTypes(key).add(otType);        
+				this.data.getOTTypes(key).add(otType);        
 			}
 			else
 			{
-				_data.add(key, new OTTypeList(otType));
+				this.data.add(key, new OTTypeList(otType));
 			}						
 		}
 	}
@@ -71,7 +71,7 @@ public class OTTypeMapping
 		{
 			ICompilationUnit unit = type.getCompilationUnit(); 
 			
-			OTTypeList list   = _data.getOTTypes(unit);
+			OTTypeList list   = this.data.getOTTypes(unit);
 			IOTType    otType = get(type);
 
 			if (otType != null)
@@ -88,7 +88,7 @@ public class OTTypeMapping
 			
 			if (list.getSize() == 0)
 			{
-				_data.remove(unit);
+				this.data.remove(unit);
 			}
 		}
 	}
@@ -121,7 +121,7 @@ public class OTTypeMapping
 			IJavaElement key = getParent(type);
 			if (key != null)
 			{
-				OTTypeList elems = _data.getOTTypes(key);
+				OTTypeList elems = this.data.getOTTypes(key);
 				
 				if (elems != null)
 				{
@@ -135,7 +135,7 @@ public class OTTypeMapping
 	
 	public List<OTType> getOTElements()
 	{
-		return _data.getOTElements();
+		return this.data.getOTElements();
 	}
 	
     public boolean contains(IType type)

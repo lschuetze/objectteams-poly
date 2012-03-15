@@ -797,7 +797,7 @@ public int resolveLevel(Binding binding) {
 	            if (type.isRole())
 	            {
 	                //...use the original binding
-	                method = (MethodBinding)method.copyInheritanceSrc;
+	                method = method.copyInheritanceSrc;
 	                break;
 	            }
 	        }
@@ -897,7 +897,7 @@ protected int resolveLevelAsSubtype(char[] simplePattern, char[] qualifiedPatter
 //{ObjectTeams: perform deferred checking of tsub/tsuper:	
 	if (level != IMPOSSIBLE_MATCH) {
 		char[] typeName= type.getRealType().readableName();
-		level= pattern.resolveLevelForType(new String(typeName), level);
+		level= this.pattern.resolveLevelForType(new String(typeName), level);
 	}
 // SH}
 	if (level != IMPOSSIBLE_MATCH) {

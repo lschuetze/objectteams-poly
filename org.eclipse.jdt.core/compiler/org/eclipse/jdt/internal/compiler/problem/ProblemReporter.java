@@ -8995,6 +8995,9 @@ public void nullityMismatchIsUnknown(Expression expression, TypeBinding provided
 //{ObjectTeams:
 /** This class is used for sorting which we do to make messages more deterministic. */
 private final class CharArrayComparator implements Comparator<char[]> {
+	public CharArrayComparator() {
+		// explicit public ctor to avoid synthetic access
+	}
 	public int compare(char[] o1, char[] o2) {
 		for (int i=0; i<o1.length && i<o2.length; i++) {
 			if (o1[i] < o2[i]) return -1;

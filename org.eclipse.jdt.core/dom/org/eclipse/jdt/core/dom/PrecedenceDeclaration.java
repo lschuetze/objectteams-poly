@@ -106,7 +106,7 @@ public class PrecedenceDeclaration extends ASTNode {
 			if (this.ast.apiLevel == AST.JLS2_INTERNAL) {
 				unsupportedIn2();
 			}
-			if (this.ast.apiLevel >= AST.JLS3) {
+			if (this.ast.apiLevel >= AST.JLS3_INTERNAL) {
 				acceptChildren(visitor, this._elements);
 			}
 		}

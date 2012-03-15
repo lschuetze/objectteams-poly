@@ -191,7 +191,7 @@ public class MethodSpec extends MethodMappingElement
 	MethodSpec(AST ast)
 	{
 		super(ast);
-		if (ast.apiLevel >= AST.JLS3)
+		if (ast.apiLevel >= AST.JLS3_INTERNAL)
 		    this.typeParameters = new ASTNode.NodeList(TYPE_PARAMETERS_PROPERTY);
 	}
 
@@ -200,7 +200,7 @@ public class MethodSpec extends MethodMappingElement
 	 * @since OTDT 1.1.3
 	 */
 	public boolean hasCovariantReturn()	{
-		return _hasCovariantReturn;
+		return this._hasCovariantReturn;
 	}
 
 	/**
@@ -319,12 +319,12 @@ public class MethodSpec extends MethodMappingElement
 	{
 		MethodSpec result = new MethodSpec(target);
 		result.setSourceRange(this.getStartPosition(), this.getLength());
-		if (this.ast.apiLevel == AST.JLS2)
+		if (this.ast.apiLevel == AST.JLS2_INTERNAL)
 		{
 			result.setReturnType(
 					(Type) ASTNode.copySubtree(target, getReturnType()));
 		}
-		if (this.ast.apiLevel >= AST.JLS3)
+		if (this.ast.apiLevel >= AST.JLS3_INTERNAL)
 		{
 			result.setReturnType2(
 					(Type) ASTNode.copySubtree(target, getReturnType2()));
@@ -351,7 +351,7 @@ public class MethodSpec extends MethodMappingElement
 		if (visitChildren)
 		{
 			// visit children in normal left to right reading order
-			if (this.ast.apiLevel == AST.JLS2)
+			if (this.ast.apiLevel == AST.JLS2_INTERNAL)
 			{
 				acceptChild(visitor, getReturnType());
 			}

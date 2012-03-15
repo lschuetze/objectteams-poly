@@ -844,15 +844,15 @@ public abstract class ASTNode {
 
     /**
      * Node type constant indicating a node of type
-     * <code>TSuperCallMessageSend</code>.
-     * @see TSuperCallMessageSend
+     * <code>TSuperMessageSend</code>.
+     * @see TSuperMessageSend
      */
      public static final int TSUPER_MESSAGE_SEND = 95;
 
      /**
       * Node type constant indicating a node of type
       * <code>TSuperCallMessageSend</code>.
-      * @see TSuperCallMessageSend
+      * @see TSuperMessageSend
       */
       public static final int TSUPER_CONSTRUCTOR_INVOCATION = 96;
 

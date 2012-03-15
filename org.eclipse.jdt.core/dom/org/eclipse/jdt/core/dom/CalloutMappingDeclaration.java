@@ -97,7 +97,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * @since 1.3.1
 	 */
 	public static final ChildPropertyDescriptor BINDING_OPERATOR_PROPERTY =
-		new ChildPropertyDescriptor(CalloutMappingDeclaration.class, "bindingOperator", MethodBindingOperator.class, MANDATORY, NO_CYCLE_RISK);
+		new ChildPropertyDescriptor(CalloutMappingDeclaration.class, "bindingOperator", MethodBindingOperator.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The right "methodSpec" structural property of this node type.
@@ -144,9 +144,9 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 
 	private static final List PROPERTY_DESCRIPTORS_3_0;
 
-	private MethodMappingElement _baseMappingElement = null;
-	private boolean _baseMappingInitialized= false;
-	private boolean _hasSignature = false;
+	private MethodMappingElement baseMappingElement = null;
+	private boolean baseMappingInitialized= false;
+	private boolean hasSignature = false;
 
 	static
 	{
@@ -183,7 +183,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	 */
 	public static List propertyDescriptors(int apiLevel)
 	{
-		if(apiLevel >= AST.JLS3)
+		if(apiLevel >= AST.JLS3_INTERNAL)
 			return PROPERTY_DESCRIPTORS_3_0;
 		else
 			return PROPERTY_DESCRIPTORS_2_0;
@@ -227,7 +227,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 			}
 			else
 			{
-				setModifiers(value);
+				internalSetModifiers(value);
 				return 0;
 			}
 		}
@@ -312,7 +312,7 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	ASTNode clone0(AST target)
     {
         CalloutMappingDeclaration result = new CalloutMappingDeclaration(target);
-		if (this.ast.apiLevel >= AST.JLS3)
+		if (this.ast.apiLevel >= AST.JLS3_INTERNAL)
 			result.modifiers().addAll(ASTNode.copySubtrees(target, modifiers())); // annotations
 		result.setSourceRange(this.getStartPosition(), this.getLength());
 		result.setJavadoc(
@@ -342,12 +342,12 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 		{
 			// visit children in normal left to right reading order
 			acceptChild(visitor, getJavadoc());
-			if (this.ast.apiLevel >= AST.JLS3)
-				acceptChildren(visitor, modifiers);
-			acceptChild(visitor, roleMappingElement);
-			acceptChild(visitor, bindingOperator);
-			acceptChild(visitor, _baseMappingElement);
-			acceptChildren(visitor,_parameterMappings);
+			if (this.ast.apiLevel >= AST.JLS3_INTERNAL)
+				acceptChildren(visitor, this.modifiers);
+			acceptChild(visitor, this.roleMappingElement);
+			acceptChild(visitor, this.bindingOperator);
+			acceptChild(visitor, this.baseMappingElement);
+			acceptChildren(visitor, this.parameterMappings);
 		}
 		visitor.endVisit(this);
     }
@@ -366,21 +366,21 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	 */
 	public MethodMappingElement getBaseMappingElement()
 	{
-		if (_baseMappingElement == null && !this._baseMappingInitialized)
+		if (this.baseMappingElement == null && !this.baseMappingInitialized)
 		{
 			// lazy init must be thread-safe for readers
 			synchronized (this)
 			{
-				if (_baseMappingElement == null)
+				if (this.baseMappingElement == null)
 				{
 					preLazyInit();
-					_baseMappingElement = new MethodSpec(this.ast);
-					this._baseMappingInitialized= true;
-					postLazyInit(_baseMappingElement, BASE_MAPPING_ELEMENT_PROPERTY);
+					this.baseMappingElement = new MethodSpec(this.ast);
+					this.baseMappingInitialized= true;
+					postLazyInit(this.baseMappingElement, BASE_MAPPING_ELEMENT_PROPERTY);
 				}
 			}
 		}
-		return _baseMappingElement;
+		return this.baseMappingElement;
 	}
 
 	/**
@@ -396,10 +396,10 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 	 */
     public void setBaseMappingElement(MethodMappingElement baseMappingElement)
     {
-		this._baseMappingInitialized= true;
-		ASTNode oldChild = _baseMappingElement;
+		this.baseMappingInitialized= true;
+		ASTNode oldChild = this.baseMappingElement;
 		preReplaceChild(oldChild, baseMappingElement, BASE_MAPPING_ELEMENT_PROPERTY);
-		_baseMappingElement = baseMappingElement;
+		this.baseMappingElement = baseMappingElement;
 		postReplaceChild(oldChild, baseMappingElement, BASE_MAPPING_ELEMENT_PROPERTY);
     }
 
@@ -424,13 +424,13 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 
 	public boolean hasSignature()
 	{
-		return _hasSignature;
+		return this.hasSignature;
 	}
 
 	public void setSignatureFlag(boolean hasSignature)
 	{
 		preValueChange(SIGNATURE_PROPERTY);
-		_hasSignature = hasSignature;
+		this.hasSignature = hasSignature;
 		postValueChange(SIGNATURE_PROPERTY);
 	}
 }

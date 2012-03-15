@@ -94,7 +94,7 @@ public int match(MethodSpec node, MatchingNodeSet nodeSet)
     if (node instanceof FieldAccessSpec)
     {
     	FieldAccessSpec fieldSpec = (FieldAccessSpec)node;
-        if (fieldSpec != null && matchesName(this.pattern.name, fieldSpec.selector))
+        if (matchesName(this.pattern.name, fieldSpec.selector))
         {
             level = this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH;
         }

@@ -115,7 +115,7 @@ public abstract class Expression extends Statement {
 		abstract public boolean isAllowed();
 	}
 	public DecapsulationState getBaseclassDecapsulation() {return DecapsulationState.NONE;}
-	public void tagReportedBaseclassDecapsulation() {}
+	public void tagReportedBaseclassDecapsulation() { /* subclasses may implement */ }
 
 	/** Is baseclass decapsulation allowed for this node referring to `type'? */
 	public DecapsulationState getBaseclassDecapsulation(ReferenceBinding type) {

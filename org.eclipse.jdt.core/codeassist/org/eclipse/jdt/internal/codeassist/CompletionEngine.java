@@ -6463,7 +6463,7 @@ public final class CompletionEngine
 			}
 //{ObjectTeams: callout-to-field:
 			boolean isOverride = false;
-			TypeBinding[] argumentTypes = TypeBinding.NO_PARAMETERS;
+			TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
 			switch (kind) {
 			case CompletionProposal.OT_CALLOUT_SET:
 				argumentTypes = new TypeBinding[] { field.type };

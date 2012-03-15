@@ -968,7 +968,7 @@ private SourceMethodMappingInfo createMappingInfo(MappingElementInfo mappingInfo
 			baseParameterTypes[m] = parameterTypes;
 	
 			String returnType = baseMethods[m].getReturnType();
-			if (returnType == null) returnType = "void";
+			if (returnType == null) returnType = "void"; //$NON-NLS-1$
 			baseReturnTypes[m] = manager.intern(returnType);		
 		}
 		info.setBaseArgumentNames(baseParameterNames);

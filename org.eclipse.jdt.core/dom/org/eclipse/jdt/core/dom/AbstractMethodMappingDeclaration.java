@@ -56,7 +56,7 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
 	 * The list of parameter mappings (element type: <code>ParameterMapping</code>).
 	 * Defaults to an empty list.
 	 */
-	ASTNode.NodeList _parameterMappings =
+	ASTNode.NodeList parameterMappings =
 		new ASTNode.NodeList(internalParameterMappingsProperty());
 
 	/** Return the structural property descriptor for the roleMappingElement property of this node. */
@@ -185,12 +185,12 @@ public abstract class AbstractMethodMappingDeclaration extends BodyDeclaration
      */
     public List getParameterMappings()
     {
-        return _parameterMappings;
+        return this.parameterMappings;
     }
 
     public boolean hasParameterMapping()
     {
-        return (! _parameterMappings.isEmpty());
+        return (! this.parameterMappings.isEmpty());
     }
 
 	public boolean hasSignature() {

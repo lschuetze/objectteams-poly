@@ -35,9 +35,7 @@ import org.eclipse.jdt.internal.core.search.matching.TypeDeclarationPattern;
 public class RoleTypePattern extends TypeDeclarationPattern
 {
     protected static char[][] ROLE_CATEGORIES = new char[][] { IIndexConstants.ROLE_DECL };
-    
-    protected int _modifiers = 0;
-    
+
     /**
      * @param classOrInterface TYPE_SUFFIX, CLASS_SUFFIX or INTERFACE_SUFFIX
      * @param matchRule SearchPattern.R_EXACT_MATCH et al.
@@ -61,14 +59,14 @@ public class RoleTypePattern extends TypeDeclarationPattern
 // Reimplement those when we need special index handling apart from the category
     public void decodeIndexKey(char[] key)
     {
-        _modifiers = 0;
+        this.modifiers = 0;
 
     	int slash = CharOperation.lastIndexOf(SEPARATOR, key, 0);
     	if (slash > 0)
     	{
         	String mods = String.valueOf(CharOperation.subarray(key, slash +1, key.length));
         	try {
-        	    _modifiers = Integer.parseInt(mods); 
+        	    this.modifiers = Integer.parseInt(mods); 
         	}
         	catch(NumberFormatException ex)
         	{
@@ -88,7 +86,7 @@ public class RoleTypePattern extends TypeDeclarationPattern
     public boolean matchesDecodedKey(SearchPattern decodedPattern)
     {
         RoleTypePattern pattern = (RoleTypePattern) decodedPattern;
-        return Flags.isRole(pattern._modifiers) && super.matchesDecodedKey(decodedPattern);
+        return Flags.isRole(pattern.modifiers) && super.matchesDecodedKey(decodedPattern);
     }
     
     public char[][] getIndexCategories()

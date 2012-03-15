@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.core.search.matching.PatternLocator;
  */
 public class ReferenceToTeamLocator extends PatternLocator
 {
-    ReferenceToTeamPackagePattern _pattern;
+    ReferenceToTeamPackagePattern pattern;
     
     /**
      * @param pattern
@@ -48,7 +48,7 @@ public class ReferenceToTeamLocator extends PatternLocator
     public ReferenceToTeamLocator(ReferenceToTeamPackagePattern pattern)
     {
         super(pattern);
-        _pattern = pattern;
+        this.pattern = pattern;
     }
 
     /** 
@@ -59,7 +59,7 @@ public class ReferenceToTeamLocator extends PatternLocator
     protected int matchLevel(ImportReference importRef) {
     	if (!importRef.isTeam())
     		return IMPOSSIBLE_MATCH;
-    	return this._pattern.matches(importRef);
+    	return this.pattern.matches(importRef);
     }
     
     /**
@@ -77,8 +77,8 @@ public class ReferenceToTeamLocator extends PatternLocator
     			IType[] types = cu.getTypes();
     			if (types != null && types.length > 0) {
     				// only now we have the info to check the role name:
-    				if (   this._pattern._roleName != null
-    					&& !new String(this._pattern._roleName).equals(types[0].getElementName()))
+    				if (   this.pattern.roleName != null
+    					&& !new String(this.pattern.roleName).equals(types[0].getElementName()))
     					return;
     				
     				int offset = importRef.sourceStart;

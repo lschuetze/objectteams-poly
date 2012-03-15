@@ -34,7 +34,6 @@ import org.eclipse.jdt.ui.text.java.correction.ICommandAccess;
  * OT/J specific quick assists.
  * @since 0.7.0
  */
-@SuppressWarnings("restriction")
 public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 	enum Errors { NONE, EXPECTED, UNEXPECTED }

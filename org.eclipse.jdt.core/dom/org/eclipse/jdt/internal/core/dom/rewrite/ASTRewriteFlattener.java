@@ -1428,7 +1428,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
     {
     	if (node.hasSignature())
 		{
-    		if(node.getAST().apiLevel() >= AST.JLS3) {
+    		if(node.getAST().apiLevel() >= JLS3_INTERNAL) {
     			visitList(node, MethodSpec.TYPE_PARAMETERS_PROPERTY, String.valueOf(','), String.valueOf('<'), " >"); //$NON-NLS-1$
     			if (node.hasSignature())
     				getChildNode(node, MethodSpec.RETURN_TYPE2_PROPERTY).accept(this);

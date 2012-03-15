@@ -290,7 +290,7 @@ public class RoleMigrationImplementor
 	}
 
 
-	private static void genMigrateToTeamInstructions(CodeStream codeStream, SourceTypeBinding roleBinding) {
+	static void genMigrateToTeamInstructions(CodeStream codeStream, SourceTypeBinding roleBinding) {
 		// this.this$n = (MyTeam)otherTeam
 		codeStream.aload_0(); // this
 		codeStream.aload_1(); // otherTeam
@@ -302,7 +302,7 @@ public class RoleMigrationImplementor
 	}
 
 
-	private static void genMigrateToBaseInstructions(CodeStream codeStream, SourceTypeBinding roleBinding, Scope scope, char[] cacheName)
+	static void genMigrateToBaseInstructions(CodeStream codeStream, SourceTypeBinding roleBinding, Scope scope, char[] cacheName)
 	{
 		FieldBinding baseField = roleBinding.getField(IOTConstants._OT_BASE, true);
 		// accessing the cache (using remove() and put()):

@@ -36,11 +36,11 @@ import org.eclipse.objectteams.otdt.core.IOTType;
 public class OTTypeList
 {
     /** Hashed map for ElementName:IOTType */
-	private Map<String, IOTType> _data;
+	private Map<String, IOTType> data;
 
     public OTTypeList()
     {
-        _data = new HashMap<String, IOTType>();
+        this.data = new HashMap<String, IOTType>();
     }
 
 	public OTTypeList(IOTType otType)
@@ -51,7 +51,7 @@ public class OTTypeList
 
 	public IOTType get(String fullyQualifiedName)
 	{
-		return _data.get(fullyQualifiedName);
+		return this.data.get(fullyQualifiedName);
 	}
 
 	/** Add the non existing elements and replaces existing ones. */
@@ -62,7 +62,7 @@ public class OTTypeList
 			return;
 		}
 		
-		_data.put(elem.getFullyQualifiedName(), elem);
+		this.data.put(elem.getFullyQualifiedName(), elem);
 	}
 
 	public void addAll(OTTypeList list)
@@ -72,7 +72,7 @@ public class OTTypeList
 			for (OTTypeIterator iter = list.getIterator(); iter.hasNext(); )
 			{
 				IOTType cur = iter.getNext();
-				_data.put(cur.getFullyQualifiedName(), cur);
+				this.data.put(cur.getFullyQualifiedName(), cur);
 			}
 		}
 	}
@@ -83,17 +83,17 @@ public class OTTypeList
 		{
 			return;
 		}
-		_data.remove(simpleName);
+		this.data.remove(simpleName);
 	}
 	
 	public int getSize()
 	{
-		return _data.size();
+		return this.data.size();
 	}
 	
 	public OTTypeIterator getIterator()
 	{
-		final Iterator<IOTType> _rawIter = _data.values().iterator();
+		final Iterator<IOTType> _rawIter = this.data.values().iterator();
     	
 		return new OTTypeIterator()
 		{

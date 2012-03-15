@@ -1729,7 +1729,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 			pos= rewriteNodeList(node, superInterfaceProperty, pos, keyword, ", "); //$NON-NLS-1$
 		}
 //{ObjectTeams: predicate
-        if (apiLevel >=  AST.JLS3) {
+        if (apiLevel >=  JLS3_INTERNAL) {
 	        RewriteEvent predicateEvent= getEvent(node, TypeDeclaration.GUARD_PROPERTY);
 	        int changeKind = rewriteGuardPredicate(predicateEvent, pos);
 	        if (changeKind == RewriteEvent.UNCHANGED)
@@ -3795,7 +3795,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		int pos = rewriteJavadoc(node, RoleTypeDeclaration.JAVADOC_PROPERTY);
 
 		// modifier
-		if(apiLevel >= AST.JLS3)
+		if(apiLevel >= JLS3_INTERNAL)
 			pos = rewriteModifiers2(node, RoleTypeDeclaration.MODIFIERS2_PROPERTY, pos);
 		else
 			rewriteModifiers(node, RoleTypeDeclaration.MODIFIERS_PROPERTY, pos);
@@ -3839,7 +3839,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		// name
 		pos = rewriteRequiredNode(node, RoleTypeDeclaration.NAME_PROPERTY);
 
-        if (apiLevel >= AST.JLS3) {
+        if (apiLevel >= JLS3_INTERNAL) {
             pos= rewriteOptionalTypeParameters(node, RoleTypeDeclaration.TYPE_PARAMETERS_PROPERTY, pos, "", false, true); //$NON-NLS-1$
         }
 
@@ -3946,7 +3946,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
         }
 
 		// predicate
-        if (apiLevel >=  AST.JLS3) {
+        if (apiLevel >=  JLS3_INTERNAL) {
 	        RewriteEvent predicateEvent= getEvent(node, RoleTypeDeclaration.GUARD_PROPERTY);
 	        changeKind = rewriteGuardPredicate(predicateEvent, pos);
 	        if (changeKind == RewriteEvent.UNCHANGED)
@@ -4209,8 +4209,8 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				doTextRemove(startPos, endPos - startPos, editGroup);
 				int startIndent= getIndent(parent.getStartPosition()) + 1;
 				String separatorString= getLineDelimiter() + createIndentString(startIndent);
-				endPos = rewriteNodeList(parent, bodyProperty, startPos, " with {"+separatorString, ","+separatorString);
-				doTextInsert(endPos, getLineDelimiter()+createIndentString(startIndent-1)+"}", editGroup);
+				endPos = rewriteNodeList(parent, bodyProperty, startPos, " with {"+separatorString, ","+separatorString); //$NON-NLS-1$ //$NON-NLS-2$
+				doTextInsert(endPos, getLineDelimiter()+createIndentString(startIndent-1)+"}", editGroup); //$NON-NLS-1$
 				return;
 			}
 			case RewriteEvent.CHILDREN_CHANGED:
@@ -4229,7 +4229,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 				} else {
 					int startIndent= getIndent(parent.getStartPosition()) + 1;
 					String separatorString= getLineDelimiter() + createIndentString(startIndent);
-					rewriteNodeList(parent, bodyProperty, startPos, "", ","+separatorString);
+					rewriteNodeList(parent, bodyProperty, startPos, "", ","+separatorString); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 				return;
 			case RewriteEvent.REMOVED: {
@@ -4275,7 +4275,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		boolean changedBindingKind= isChanged(node, MethodBindingOperator.BINDING_KIND_PROPERTY);
 		int pos = node.getStartPosition();
 		if (changedBindingKind) {
-			String str = "";
+			String str = ""; //$NON-NLS-1$
 			switch ((Integer)this.eventStore.getNewValue(node, MethodBindingOperator.BINDING_KIND_PROPERTY)) {
 			case MethodBindingOperator.KIND_CALLIN :		   str = CallinMappingDeclaration.CALLIN; break;
 			case MethodBindingOperator.KIND_CALLOUT :		   str = CalloutMappingDeclaration.CALLOUT; break;
@@ -4308,7 +4308,7 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 
 		int pos= node.getStartPosition();
 		// type parameters
-		if (node.getAST().apiLevel() >= AST.JLS3)
+		if (node.getAST().apiLevel() >= JLS3_INTERNAL)
 			pos= rewriteOptionalTypeParameters(node, MethodSpec.TYPE_PARAMETERS_PROPERTY, pos, String.valueOf(' '), true, pos != node.getStartPosition());
 
 		// return type

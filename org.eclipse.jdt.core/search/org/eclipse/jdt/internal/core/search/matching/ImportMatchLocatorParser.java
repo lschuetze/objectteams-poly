@@ -63,7 +63,7 @@ protected void consumeTypeImportOnDemandDeclarationName() {
 protected void consumePackageDeclarationNameWithModifiers()
 {
 	super.consumePackageDeclarationNameWithModifiers();
-	if (currentIsRole)
+	if (this.currentIsRole)
 	{
 	    if (   this.patternLocator instanceof TypeReferenceLocator
 	    	|| this.patternLocator instanceof ReferenceToTeamLocator)

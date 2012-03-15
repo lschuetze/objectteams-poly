@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.compiler.impl.*;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.util.Util;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AbstractAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorUsageRanksAttribute;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.SingleValueAttribute;
@@ -394,17 +395,17 @@ private void readModifierRelatedAttributes() {
 			int structOffset,
 			int[] constantPoolOffsets)
 	{
-        if (CharOperation.equals(attributeName, AbstractAttribute.MODIFIERS_NAME))
+        if (CharOperation.equals(attributeName, IOTConstants.MODIFIERS_NAME))
         {
             WordValueAttribute.readModifiers(info, readOffset);
             // not added to _readAttributes because evaluated immediately.
         }
-        else if (CharOperation.equals(attributeName, AbstractAttribute.FIELD_TYPE_ANCHOR))
+        else if (CharOperation.equals(attributeName, IOTConstants.FIELD_TYPE_ANCHOR))
         {
             this.fieldAttributes.add(SingleValueAttribute.readFieldTypeAnchor(
             		info, readOffset, structOffset, constantPoolOffsets));
         }
-        else if (CharOperation.equals(attributeName, AbstractAttribute.ANCHOR_USAGE_RANKS))
+        else if (CharOperation.equals(attributeName, IOTConstants.ANCHOR_USAGE_RANKS))
         {
             this.fieldAttributes.add(new AnchorUsageRanksAttribute(
             		info, readOffset, structOffset, constantPoolOffsets));

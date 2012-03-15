@@ -382,8 +382,8 @@ public class StandardElementGenerator {
 				msg.binding = new MethodBinding(AccPublic,
 												IOTConstants._OT_GETTEAM,
 												scope.getOrgObjectteamsITeam(),
-												TypeBinding.NO_PARAMETERS,
-												TypeBinding.NO_EXCEPTIONS,
+												Binding.NO_PARAMETERS,
+												Binding.NO_EXCEPTIONS,
 												castType);
 				assert castType.roleModel.isIgnoreFurtherInvestigation();
 			}
@@ -407,7 +407,7 @@ public class StandardElementGenerator {
 		origCheckClone.resolvedType = TypeBinding.BOOLEAN;
 		origCheckClone.constant = Constant.NotAConstant;
 
-		AND_AND_Expression andAnd = gen.setPos(new AND_AND_Expression(origCheckClone, teamInstanceComparison, OperatorExpression.AND_AND));
+		AND_AND_Expression andAnd = gen.setPos(new AND_AND_Expression(origCheckClone, teamInstanceComparison, OperatorIds.AND_AND));
 		andAnd.resolvedType = TypeBinding.BOOLEAN;
 		andAnd.constant = Constant.NotAConstant;
 		return andAnd;

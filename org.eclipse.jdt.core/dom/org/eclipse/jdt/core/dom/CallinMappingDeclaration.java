@@ -125,7 +125,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 * @since 1.3.1
 	 */
 	public static final ChildPropertyDescriptor BINDING_OPERATOR_PROPERTY =
-		new ChildPropertyDescriptor(CallinMappingDeclaration.class, "bindingOperator", MethodBindingOperator.class, MANDATORY, NO_CYCLE_RISK);
+		new ChildPropertyDescriptor(CallinMappingDeclaration.class, "bindingOperator", MethodBindingOperator.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The "baseMappingElements" structural property of this node type.
@@ -203,7 +203,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 */
 	public static List propertyDescriptors(int apiLevel)
 	{
-		if(apiLevel >= AST.JLS3)
+		if(apiLevel >= AST.JLS3_INTERNAL)
 			return PROPERTY_DESCRIPTORS_3_0;
 		else
 			return PROPERTY_DESCRIPTORS_2_0;
@@ -311,7 +311,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
     {
 		CallinMappingDeclaration result = new CallinMappingDeclaration(target);
         result.setName(this.getName());
-		if (this.ast.apiLevel >= AST.JLS3)
+		if (this.ast.apiLevel >= AST.JLS3_INTERNAL)
 			result.modifiers().addAll(ASTNode.copySubtrees(target, modifiers())); // annotations
 		result.setSourceRange(this.getStartPosition(), this.getLength());
 		result.setJavadoc(
@@ -342,14 +342,14 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		{
 			// visit children in normal left to right reading order
 			acceptChild(visitor, getJavadoc());
-			acceptChild(visitor, _labelName);
-			acceptChild(visitor, _roleMappingElement);
-			if (this.ast.apiLevel >= AST.JLS3)
-				acceptChildren(visitor, modifiers);
-			acceptChild(visitor, bindingOperator);
-			acceptChildren(visitor, _baseMappingElements);
+			acceptChild(visitor, this._labelName);
+			acceptChild(visitor, this._roleMappingElement);
+			if (this.ast.apiLevel >= AST.JLS3_INTERNAL)
+				acceptChildren(visitor, this.modifiers);
+			acceptChild(visitor, this.bindingOperator);
+			acceptChildren(visitor, this._baseMappingElements);
 			acceptChild(visitor, this.getGuardPredicate());
-            acceptChildren(visitor, _parameterMappings);
+            acceptChildren(visitor, this.parameterMappings);
 		}
 		visitor.endVisit(this);
     }
@@ -376,20 +376,20 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
     @Override
 	public MethodMappingElement getRoleMappingElement()
 	{
-        if (_roleMappingElement == null)
+        if (this._roleMappingElement == null)
         {
             // lazy init must be thread-safe for readers
             synchronized (this)
             {
-                if (_roleMappingElement == null)
+                if (this._roleMappingElement == null)
                 {
                     preLazyInit();
-                    _roleMappingElement = new MethodSpec(this.ast);
-                    postLazyInit(_roleMappingElement, ROLE_MAPPING_ELEMENT_PROPERTY);
+                    this._roleMappingElement = new MethodSpec(this.ast);
+                    postLazyInit(this._roleMappingElement, ROLE_MAPPING_ELEMENT_PROPERTY);
                 }
             }
         }
-        return _roleMappingElement;
+        return this._roleMappingElement;
     }
 
 	/**
@@ -409,9 +409,9 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		{
 			throw new IllegalArgumentException();
 		}
-		ASTNode oldChild = _roleMappingElement;
+		ASTNode oldChild = this._roleMappingElement;
 		preReplaceChild(oldChild, roleMappingElement, ROLE_MAPPING_ELEMENT_PROPERTY);
-		_roleMappingElement = roleMappingElement;
+		this._roleMappingElement = roleMappingElement;
 		postReplaceChild(oldChild, roleMappingElement, ROLE_MAPPING_ELEMENT_PROPERTY);
     }
 
@@ -426,7 +426,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 */
 	public List getBaseMappingElements()
 	{
-		return _baseMappingElements;
+		return this._baseMappingElements;
 	}
 
 	/**
@@ -447,7 +447,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	 */
 	public int getCallinModifier()
 	{
-		return bindingOperator.getBindingModifier();
+		return this.bindingOperator.getBindingModifier();
 	}
 
 	/**
@@ -488,7 +488,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 
 	public boolean hasName() {
-		return _labelName != null && _labelName.getIdentifier().charAt(0) != '<';
+		return this._labelName != null && this._labelName.getIdentifier().charAt(0) != '<';
 	}
     public void setName(SimpleName name)
     {
@@ -514,7 +514,7 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 	}
 
 	public GuardPredicateDeclaration getGuardPredicate() {
-		return _optionalGuardPredicate;
+		return this._optionalGuardPredicate;
 	}
 
 	/**

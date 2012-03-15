@@ -111,7 +111,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 	 * @param index the index to an entry of constantPoolOffsets[]
 	 * @return Type
 	 */
-	private int getConstantPoolEntryType(int index){
+	int getConstantPoolEntryType(int index){
 		int offset = this.constantPoolOffsets[index];
 		return u1At(offset);
 	}
@@ -254,7 +254,7 @@ public class ConstantPoolObjectReader extends ClassFileStruct implements ClassFi
 		//       copyInheritanceSrc will otherwise be broken!
 		if (mb == null && CharOperation.endsWith(name, IOTConstants._OT_TAG)) {
 			// This method is faked within the compiler, will be added by the OTRE.
-			return new MethodBinding(ClassFileConstants.AccPublic, name, TypeBinding.SHORT, TypeBinding.NO_PARAMETERS, TypeBinding.NO_EXCEPTIONS, class_rb);
+			return new MethodBinding(ClassFileConstants.AccPublic, name, TypeBinding.SHORT, Binding.NO_PARAMETERS, Binding.NO_EXCEPTIONS, class_rb);
 		}
 		assert(mb != null);
 		return mb;

@@ -171,7 +171,7 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 	}
 	/**
 	 * add callinCallouts read from attribute
-	 * @param _mappings
+	 * @param mappings
 	 */
 	public void addCallinCallouts(CallinCalloutBinding[] mappings) {
 		if (this.callinCallouts == null) {

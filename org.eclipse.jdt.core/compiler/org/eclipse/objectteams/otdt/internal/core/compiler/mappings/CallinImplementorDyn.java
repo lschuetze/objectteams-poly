@@ -860,7 +860,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		AstEdit.addMethod(teamDecl, decl);
 	}
 
-	private TypeBinding[] getReturnTypes(CallinMappingDeclaration mapping, int i) {
+	TypeBinding[] getReturnTypes(CallinMappingDeclaration mapping, int i) {
 		TypeBinding baseReturn = mapping.baseMethodSpecs[i].resolvedType();
 		TypeBinding roleReturn = mapping.roleMethodSpec.resolvedType();
 		if (roleReturn.isTypeVariable())

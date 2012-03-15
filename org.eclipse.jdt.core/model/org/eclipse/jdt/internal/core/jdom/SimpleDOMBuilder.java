@@ -221,7 +221,7 @@ public void exitCalloutToFieldMapping(int sourceEnd, int declarationSourceEnd)
 }
 //(ak)}
 //{ObjectTeams: default implementation
-public void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd){}
+public void acceptBaseReference(char[][] typeName, int sourceStart, int sourceEnd){ /* empty stub */ }
 //haebor}
 
 }

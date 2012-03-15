@@ -39,31 +39,31 @@ import org.eclipse.objectteams.otdt.internal.core.OTTypeList.OTTypeIterator;
 public class CompilationUnitMapping
 {
 	/** hashes ICompilationUnit:OTTypeList */
-	private Map<IJavaElement, OTTypeList> _data;
+	private Map<IJavaElement, OTTypeList> data;
 
     public CompilationUnitMapping()
     {
-    	_data = new HashMap<IJavaElement, OTTypeList>();
+    	this.data = new HashMap<IJavaElement, OTTypeList>();
     }
 
 	public OTTypeList getOTTypes(IJavaElement unit)
 	{
-		return _data.get(getHashkeyElement(unit));
+		return this.data.get(getHashkeyElement(unit));
 	}
 
 	public void add(IJavaElement unit, OTTypeList otElems)
 	{		
-		_data.put(getHashkeyElement(unit), otElems == null ? new OTTypeList() : otElems);
+		this.data.put(getHashkeyElement(unit), otElems == null ? new OTTypeList() : otElems);
 	}
 
 	public void remove(IJavaElement unit)
 	{
-		_data.remove(getHashkeyElement(unit));
+		this.data.remove(getHashkeyElement(unit));
 	}
 
     public boolean contains(IJavaElement unit)
     {
-        return _data.containsKey(getHashkeyElement(unit));
+        return this.data.containsKey(getHashkeyElement(unit));
     }
 
 	/**
@@ -76,7 +76,7 @@ public class CompilationUnitMapping
     {
         List<OTType> result = new LinkedList<OTType>();
         
-        for (Iterator<OTTypeList> iter = _data.values().iterator(); iter.hasNext(); )
+        for (Iterator<OTTypeList> iter = this.data.values().iterator(); iter.hasNext(); )
         {
         	OTTypeList cuTypes = iter.next(); 
 

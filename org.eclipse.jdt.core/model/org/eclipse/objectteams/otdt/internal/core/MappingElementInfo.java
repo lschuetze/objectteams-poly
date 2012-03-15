@@ -34,145 +34,145 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
  */
 public class MappingElementInfo
 {
-	private MethodData   _roleMethod;
-	private MethodData[] _baseMethods;
-    private IFieldAccessSpec    _baseField;
-    private int          _sourceStart;
-    private int          _sourceEnd;
-	private int          _declarationSourceStart;
-	private int          _declarationSourceEnd;
-	private char[]       _callinName;
-	private int          _callinKind;
-	private boolean      _hasSignature;
-	private boolean      _isOverride; // callout override.
-	private int			 _declaredModifiers;
-	char[][] 			 _categories;
+	private MethodData   roleMethod;
+	private MethodData[] baseMethods;
+    private IFieldAccessSpec    baseField;
+    private int          sourceStart;
+    private int          sourceEnd;
+	private int          declarationSourceStart;
+	private int          declarationSourceEnd;
+	private char[]       callinName;
+	private int          callinKind;
+	private boolean      hasSignature;
+	private boolean      isOverride; // callout override.
+	private int			 declaredModifiers;
+	char[][] 			 categories;
 	public Annotation[] annotations;
 	
     
     public MethodData getRoleMethod()
     {
-        return _roleMethod;
+        return this.roleMethod;
     }
     
     public MethodData[] getBaseMethods()
     {
-        return _baseMethods;
+        return this.baseMethods;
     }
     
     public IFieldAccessSpec getBaseField()
     {
-    	return _baseField;
+    	return this.baseField;
     }
 
     public int getDeclarationSourceStart()
     {
-        return _declarationSourceStart;
+        return this.declarationSourceStart;
     }
 
     public int getSourceStart() 
     {
-		return _sourceStart;
+		return this.sourceStart;
 	}
 
     public int getSourceEnd() 
     {
-		return _sourceEnd;
+		return this.sourceEnd;
 	}
     
     public int getDeclarationSourceEnd()
     {
-    	return _declarationSourceEnd;
+    	return this.declarationSourceEnd;
     }
     
     public char[] getCallinName() 
     {
-    	return _callinName;
+    	return this.callinName;
     }
 
     public int getCallinKind()
     {
-        return _callinKind;
+        return this.callinKind;
     }
 
     public char[][] getCategories()
     {
-    	return _categories;
+    	return this.categories;
     }
 
     public void setRoleMethod(MethodData data)
     {
-        _roleMethod = data;
+        this.roleMethod = data;
     }
     
     public void setBaseMethods(MethodData[] data)
     {
-        _baseMethods = data;
+        this.baseMethods = data;
     }
 
     public void setBaseField(IFieldAccessSpec data)
     {
-    	_baseField = data;
+    	this.baseField = data;
     }
     
     public void setDeclarationStart(int start)
     {
-        _declarationSourceStart = start;
+        this.declarationSourceStart = start;
     }
     
 	public void setSourceStart(int start) 
 	{
-		_sourceStart = start;
+		this.sourceStart = start;
 	}
     
 	public void setSourceEnd(int end) 
 	{
-		_sourceEnd = end;
+		this.sourceEnd = end;
 	}
     
     public void setDeclarationSourceEnd(int end)
     {
-        _declarationSourceEnd = end;
+        this.declarationSourceEnd = end;
     }
 
     public void setCallinName(char[] callinName) 
     {
-    	_callinName = callinName;
+    	this.callinName = callinName;
     }
     
     public void setCallinKind(int terminalTokenCallinKind)
     {
-    	_callinKind = CallinMapping.convertTerminalTokenToModel(terminalTokenCallinKind);
+    	this.callinKind = CallinMapping.convertTerminalTokenToModel(terminalTokenCallinKind);
     }
 
     public boolean hasSignature()
     {
-        return _hasSignature;
+        return this.hasSignature;
     }
     
     public void setHasSignature(boolean signature)
     {
-        _hasSignature = signature;
+        this.hasSignature = signature;
     }
     
     public void setCategories(char[][] categories)
     {
-    	_categories = categories;
+    	this.categories = categories;
     }
 
 	public boolean isOverride() {
-		return _isOverride;
+		return this.isOverride;
 	}
 	
 	public void setOverride(boolean flag) {
-		this._isOverride = flag;
+		this.isOverride = flag;
 	}
 
 	public int getDeclaredModifiers() {
-		return this._declaredModifiers;
+		return this.declaredModifiers;
 	}
 
 	public void setDeclaredModifiers(int declaredModifiers) {
-		this._declaredModifiers = declaredModifiers;
+		this.declaredModifiers = declaredModifiers;
 	}
 }

@@ -344,8 +344,8 @@ public class TestBase extends TestCase
 	public boolean hasAtLeastExpectedProblems(int[] problemIDs)
 	{
 		expected: for (int i = 0; i < problemIDs.length; i++) {
-			for (int j = 0; j < _compiler.logger._globalProblems.size(); j++) {
-				if (problemIDs[i] == ((IProblem)_compiler.logger._globalProblems.get(j)).getID())
+			for (int j = 0; j < _compiler.logger.globalProblems.size(); j++) {
+				if (problemIDs[i] == ((IProblem)_compiler.logger.globalProblems.get(j)).getID())
 					continue expected;
 			}
 			printAllProblems();
@@ -366,7 +366,7 @@ public class TestBase extends TestCase
 	 */
 	public boolean hasExpectedProblems(int[] problemIDs)
 	{
-		if ( areProblemsEqual(_compiler.logger._globalProblems, problemIDs) )
+		if ( areProblemsEqual(_compiler.logger.globalProblems, problemIDs) )
 		{       	
 			File file = new File(_workingDir.getAbsolutePath() 
 									+ File.separator 
@@ -385,7 +385,7 @@ public class TestBase extends TestCase
 	
     private void printAllProblems()
     {
-        for (Iterator iter = _compiler.logger._globalProblems.iterator(); iter.hasNext();)
+        for (Iterator iter = _compiler.logger.globalProblems.iterator(); iter.hasNext();)
         {
             IProblem prob = (IProblem)iter.next();
         	System.err.println(prob.toString());
@@ -402,8 +402,8 @@ public class TestBase extends TestCase
 	 */
     public boolean hasExpectedProblems(int[] errorIDs, int[] warningIDs)
     {
- 		if (   areProblemsEqual(_compiler.logger._globalErrors,   errorIDs)
- 		    && areProblemsEqual(_compiler.logger._globalWarnings, warningIDs) )
+ 		if (   areProblemsEqual(_compiler.logger.globalErrors,   errorIDs)
+ 		    && areProblemsEqual(_compiler.logger.globalWarnings, warningIDs) )
         {
         	
             File file = new File(_workingDir.getAbsolutePath() 

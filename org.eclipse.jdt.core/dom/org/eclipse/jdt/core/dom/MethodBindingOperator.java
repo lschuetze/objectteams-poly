@@ -40,7 +40,7 @@ public class MethodBindingOperator extends ASTNode {
 	 * The "binding-kind" property of this node type.
 	 */
 	public static final SimplePropertyDescriptor BINDING_KIND_PROPERTY =
-		new SimplePropertyDescriptor(MethodBindingOperator.class, "bindingKind", int.class, MANDATORY);
+		new SimplePropertyDescriptor(MethodBindingOperator.class, "bindingKind", int.class, MANDATORY); //$NON-NLS-1$
 
 	/**
 	 * The "binding-modifier" structural property of this node type, none if regular callout.
@@ -88,7 +88,7 @@ public class MethodBindingOperator extends ASTNode {
 	 */
 	public static List propertyDescriptors(int apiLevel)
 	{
-		if(apiLevel == AST.JLS3)
+		if(apiLevel == AST.JLS3_INTERNAL)
 			return PROPERTY_DESCRIPTORS_3_0;
 		else
 			return PROPERTY_DESCRIPTORS_2_0;
@@ -165,7 +165,7 @@ public class MethodBindingOperator extends ASTNode {
 		{
 			this.bindingModifierFlag = this.bindingModifier.getKeyword().toFlagValue();
 		}
-		return bindingModifierFlag;
+		return this.bindingModifierFlag;
 	}
 
 	/**
@@ -196,7 +196,7 @@ public class MethodBindingOperator extends ASTNode {
 	 */
 	public Modifier bindingModifier()
 	{
-		return bindingModifier;
+		return this.bindingModifier;
 	}
 
 	/** Returns whether this method mapping is a callout to field (get or set). */

@@ -728,7 +728,7 @@ protected void acceptMethodDeclaration(IType type, char[] selector, int start, i
 	if (otType != null) {
 		if (otType.isRole()) {
 			IRoleType role = (IRoleType)otType;
-			IMethodMapping[] mappings = role.getMethodMappings(IRoleType.CALLOUT_MAPPING);
+			IMethodMapping[] mappings = role.getMethodMappings(IOTJavaElement.CALLOUT_MAPPING);
 			for (IMethodMapping mapping : mappings) {
 				IMethodSpec mData = mapping.getRoleMethodHandle();
 				if (   mData != null

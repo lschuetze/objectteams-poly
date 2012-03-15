@@ -388,7 +388,7 @@ public void accept(ICompilationUnit sourceUnit, AccessRestriction accessRestrict
 	CompilationResult unitResult = new CompilationResult(sourceUnit, 1, 1, this.options.maxProblemsPerUnit);
 	try {
 //{ObjectTeams: setup Dependencies for the other parser etc.
-	    Dependencies.setup(this, basicParser(), lookupEnvironment, true, true);
+	    Dependencies.setup(this, basicParser(), this.lookupEnvironment, true, true);
 	    // strictDiet since we will only dietParse and not even go beyond STATE_BINDINGS_COMPLETED
 //carp}
 		CompilationUnitDeclaration parsedUnit = basicParser().dietParse(sourceUnit, unitResult);
@@ -1165,7 +1165,7 @@ protected void locateMatches(JavaProject javaProject, PossibleMatch[] possibleMa
 	boolean bindingsWereCreated = mustResolve;
 
 //{ObjectTeams: setup Dependencies
-    Dependencies.setup(this, parser, this.lookupEnvironment, true, true, true);
+    Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true, true);
     // is strictDiet correct here? (SH).
 //carp}
 
@@ -1772,7 +1772,7 @@ protected boolean parseAndBuildBindings(PossibleMatch possibleMatch, boolean mus
 	if (   mustResolve 
 	    || (this.patternLocator.mayBeGeneric && possibleMatch.nodeSet.mustResolve))
 	{
-		Dependencies.setup(this, parser, lookupEnvironment, true, true);
+		Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
 		useDependencies = true;
 	}
 //SH}
@@ -1827,7 +1827,7 @@ protected void process(PossibleMatch possibleMatch, boolean bindingsWereCreated)
 	CompilationUnitDeclaration unit = possibleMatch.parsedUnit;
 	try {
 //{ObjectTeams: guard with setup/release
-		Dependencies.setup(this, parser, lookupEnvironment, true, true);
+		Dependencies.setup(this, this.parser, this.lookupEnvironment, true, true);
 		// is strictDiet correct here?
 		if (bindingsWereCreated && unit.state.getState() < ITranslationStates.STATE_BINDINGS_BUILT)
 		    StateHelper.setStateRecursive(unit, ITranslationStates.STATE_BINDINGS_BUILT, true);

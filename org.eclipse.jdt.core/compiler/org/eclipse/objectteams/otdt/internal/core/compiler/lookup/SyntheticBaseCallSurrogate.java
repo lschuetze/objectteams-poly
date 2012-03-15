@@ -244,10 +244,10 @@ public class SyntheticBaseCallSurrogate extends SyntheticOTMethodBinding
 	{
 		if (isStatic)
 			return CharOperation.concatWith(
-					new char[][] {_OT, roleName, methodName, "base".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$
+					new char[][] {_OT, roleName, methodName, "base".toCharArray()}, //$NON-NLS-1$
 					'$');
 		return CharOperation.concatWith(
-				new char[][] {_OT, methodName, "base".toCharArray()}, //$NON-NLS-1$ //$NON-NLS-2$
+				new char[][] {_OT, methodName, "base".toCharArray()}, //$NON-NLS-1$
 				'$');
 	}
 

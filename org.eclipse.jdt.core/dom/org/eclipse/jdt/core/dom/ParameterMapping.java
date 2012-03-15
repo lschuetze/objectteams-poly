@@ -93,10 +93,10 @@ public class ParameterMapping extends Expression
 	 */
 	private static final List PROPERTY_DESCRIPTORS_2_0;
 
-	private Expression _expression = null;
-	private SimpleName _identifier = null;
-	private String _direction = null;
-	private boolean _isResult = false;
+	private Expression expression = null;
+	private SimpleName identifier = null;
+	private String direction = null;
+	private boolean isResult = false;
 
 	static
 	{
@@ -216,31 +216,31 @@ public class ParameterMapping extends Expression
 
 	public boolean hasResultFlag()
 	{
-		return _isResult;
+		return this.isResult;
 	}
 
 	public void setResultFlag(boolean resultFlag)
     {
 		preValueChange(IS_RESULT_PROPERTY);
-		_isResult = resultFlag;
+		this.isResult = resultFlag;
 		postValueChange(IS_RESULT_PROPERTY);
 	}
 
 	public SimpleName getIdentifier()
 	{
-		if (_identifier == null)
+		if (this.identifier == null)
 		{
 			// lazy init must be thread-safe for readers
 			synchronized (this)
 			{
-				if (_identifier == null)
+				if (this.identifier == null)
 				{
 					preLazyInit();
-					_identifier = new SimpleName(super.ast);
-					postLazyInit(_identifier, IDENTIFIER_PROPERTY);
+					this.identifier = new SimpleName(super.ast);
+					postLazyInit(this.identifier, IDENTIFIER_PROPERTY);
 				}
 			}
-		}	return _identifier;
+		}	return this.identifier;
 	}
 
 	public void setIdentifier(SimpleName identifier)
@@ -249,30 +249,30 @@ public class ParameterMapping extends Expression
 		{
 			throw new IllegalArgumentException();
 		}
-		ASTNode oldChild = _identifier;
+		ASTNode oldChild = this.identifier;
 		preReplaceChild(oldChild, identifier, IDENTIFIER_PROPERTY);
-		_identifier = identifier;
+		this.identifier = identifier;
 		postReplaceChild(oldChild, identifier, IDENTIFIER_PROPERTY);
 	}
 
 	public String getDirection()
 	{
-		if (_direction == null)
+		if (this.direction == null)
 		{
 			// lazy init must be thread-safe for readers
 			synchronized (this)
 			{
-				if (_direction == null)
+				if (this.direction == null)
 				{
-					_direction = new String(""); //$NON-NLS-1$
+					this.direction = new String(""); //$NON-NLS-1$
 				}
 			}
 		}
-		return _direction;
+		return this.direction;
 	}
 
 	public boolean isBindIN() {
-		return "<-".equals(getDirection());
+		return "<-".equals(getDirection()); //$NON-NLS-1$
 	}
 
 	public void setDirection(String direction)
@@ -281,25 +281,25 @@ public class ParameterMapping extends Expression
 		{
 			throw new IllegalArgumentException();
 		}
-		_direction = direction;
+		this.direction = direction;
 	}
 
 
 	public ASTNode getExpression()
 	{
-		if (_expression == null)
+		if (this.expression == null)
 		{
 			// lazy init must be thread-safe for readers
 			synchronized (this)
 			{
-				if (_expression == null)
+				if (this.expression == null)
 				{
 					preLazyInit();
-					_expression = new SimpleName(super.ast);
-					postLazyInit(_expression, EXPRESSION_PROPERTY);
+					this.expression = new SimpleName(super.ast);
+					postLazyInit(this.expression, EXPRESSION_PROPERTY);
 				}
 			}
-		}	return _expression;
+		}	return this.expression;
 	}
 
 	public void setExpression(Expression expression)
@@ -308,9 +308,9 @@ public class ParameterMapping extends Expression
 		{
 			throw new IllegalArgumentException();
 		}
-		ASTNode oldChild = _expression;
+		ASTNode oldChild = this.expression;
 		preReplaceChild(oldChild, expression, EXPRESSION_PROPERTY);
-		_expression = expression;
+		this.expression = expression;
 		postReplaceChild(oldChild, expression, EXPRESSION_PROPERTY);
 	}
 
@@ -355,7 +355,7 @@ public class ParameterMapping extends Expression
 		if (visitChildren)
 		{
 			// visit children in normal left to right reading order
-			if (getDirection().equals("->")) { 	// expr -> id
+			if (getDirection().equals("->")) { 	// expr -> id //$NON-NLS-1$
 				acceptChild(visitor, getExpression());
 				acceptChild(visitor, getIdentifier());
 			} else {							// id <- expr
