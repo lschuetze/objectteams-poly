@@ -112,7 +112,7 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 		}
 		showViewer();
 
-		updateAction(VARIABLES_FIND_ELEMENT_ACTION);
+//		updateAction(VARIABLES_FIND_ELEMENT_ACTION);
 		updateAction(FIND_ACTION);
 	}
 	
