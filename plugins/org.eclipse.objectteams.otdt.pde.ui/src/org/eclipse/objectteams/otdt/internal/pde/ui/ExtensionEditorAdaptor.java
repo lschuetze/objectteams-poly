@@ -96,8 +96,8 @@ public team class ExtensionEditorAdaptor
 				if (labelAtt == null) {
 					// try some hard-coded attributes that
 					// are used frequently
-					for (int i = 0; i < getCOMMON_LABEL_PROPERTIES().length; i++) {
-						labelAtt = element.getAttribute(getCOMMON_LABEL_PROPERTIES()[i]);
+					for (int i = 0; i < getCOMMON_LABEL_ATTRIBUTES().length; i++) {
+						labelAtt = element.getAttribute(getCOMMON_LABEL_ATTRIBUTES()[i]);
 						if (labelAtt != null)
 							break;
 					}
@@ -136,7 +136,7 @@ public team class ExtensionEditorAdaptor
 			}
 			return true; 
 		}
-		String[] getCOMMON_LABEL_PROPERTIES() -> get String[] COMMON_LABEL_PROPERTIES;
+		String[] getCOMMON_LABEL_ATTRIBUTES() -> get String[] COMMON_LABEL_ATTRIBUTES;
 		ISchemaElement getSchemaElement(IPluginElement element) -> ISchemaElement getSchemaElement(IPluginElement element);
 		String stripShortcuts(String input) -> String stripShortcuts(String input);
 	}
