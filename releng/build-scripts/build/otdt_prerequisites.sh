@@ -63,7 +63,7 @@ DROP3=${BASEDIR}/drops/${EVERSION3}
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
 
 # EXPORT: archive file of the eclipse test framework:
-ECLIPSE_TESTLIB_ZIP=${DROP3}/eclipse-test-framework-${EVERSION}.zip
+ECLIPSE_TESTLIB_ZIP=${DROP3}/eclipse-test-framework-${EVERSION3}.zip
 
 # EXPORT: where to find previously published plugins&features:
 PUBLISHED_UPDATES=${HOME}/downloads/objectteams/updates/ot2.0
