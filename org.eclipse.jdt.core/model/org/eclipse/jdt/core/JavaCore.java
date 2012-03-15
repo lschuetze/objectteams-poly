@@ -1087,12 +1087,13 @@ public final class JavaCore extends Plugin {
 	/**
 	 * Compiler option ID: Reporting Incomplete Enum Switch.
 	 * <p>When enabled, the compiler will issue an error or a warning whenever
-	 *    an enum constant has no corresponding case label in an enum switch
-	 *    statement.
+	 *    an enum switch statement lacks a default case.
+	 *    If no default case is given, additionally one error or warning is issued
+	 *    regarding each enum constant for which a corresponding case label is lacking.
 	 * <dl>
 	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.incompleteEnumSwitch"</code></dd>
 	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
-	 * <dt>Default:</dt><dd><code>"ignore"</code></dd>
+	 * <dt>Default:</dt><dd><code>"warning"</code></dd>
 	 * </dl>
 	 * @since 3.1
 	 * @category CompilerOptionID
@@ -1438,8 +1439,8 @@ public final class JavaCore extends Plugin {
 	 *    as specifying whether or not a given type includes the value <code>null</code>.</p>
 	 * <p>The effect of these analyses is further controlled by the options
 	 *    {@link #COMPILER_PB_NULL_SPECIFICATION_VIOLATION},
-	 *    {@link #COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION} and
-	 *    {@link #COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO}.
+	 *    {@link #COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT} and
+	 *    {@link #COMPILER_PB_NULL_UNCHECKED_CONVERSION}.
 	 * </p>
 	 * <dl>
 	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.annotation.nullanalysis"</code></dd>
@@ -1464,8 +1465,8 @@ public final class JavaCore extends Plugin {
 	 *    {@link #COMPILER_PB_POTENTIAL_NULL_REFERENCE}.</p>
 	 * <p>The compiler may furthermore check adherence to the null specification as
 	 *    further controlled by {@link #COMPILER_PB_NULL_SPECIFICATION_VIOLATION},
-	 *    {@link #COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION} and
-	 *    {@link #COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO}.</p>
+	 *    {@link #COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT} and
+	 *    {@link #COMPILER_PB_NULL_UNCHECKED_CONVERSION}.</p>
 	 * <p>This option only has an effect if the option {@link #COMPILER_ANNOTATION_NULL_ANALYSIS} is enabled.</p>
 	 * <dl>
 	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.annotation.nullable"</code></dd>
@@ -1490,8 +1491,8 @@ public final class JavaCore extends Plugin {
 	 *    will never occur at runtime in these positions.</p>
 	 * <p>The compiler may furthermore check adherence to the null specification as further
 	 *    controlled by {@link #COMPILER_PB_NULL_SPECIFICATION_VIOLATION},
-	 *    {@link #COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION} and
-	 *    {@link #COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO}.</p>
+	 *    {@link #COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT} and
+	 *    {@link #COMPILER_PB_NULL_UNCHECKED_CONVERSION}.</p>
 	 * <p>This option only has an effect if the option {@link #COMPILER_ANNOTATION_NULL_ANALYSIS} is enabled.</p>
 	 * <dl>
 	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.annotation.nonnull"</code></dd>
@@ -1510,9 +1511,7 @@ public final class JavaCore extends Plugin {
 	 *    within the annotated element will be treated as if they were specified with the non-null annotation
 	 *    (see {@link #COMPILER_NONNULL_ANNOTATION_NAME}).</p>
 	 * <p>If the annotation is applied with the constant <code>false</code> as its argument
-	 *    all corresponding defaults at outer scopes will be canceled for the annotated element.
-	 *    This includes defaults specified using this annotation type or a default defined using
-	 *    the compiler option {@link #COMPILER_NONNULL_IS_DEFAULT}.</p>
+	 *    all corresponding defaults at outer scopes will be canceled for the annotated element.</p>
 	 * <p>This option only has an effect if the option {@link #COMPILER_ANNOTATION_NULL_ANALYSIS} is enabled.</p>
 	 * <dl>
 	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.annotation.nonnullbydefault"</code></dd>
@@ -1525,31 +1524,35 @@ public final class JavaCore extends Plugin {
 	 */
 	public static final String COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME = PLUGIN_ID + ".compiler.annotation.nonnullbydefault"; //$NON-NLS-1$
 	/**
-	 * Compiler option ID: Globally specify non-null as the assumed default for unannotated types.
-	 * <p>When enabled, this option globally achieves the same effect 
-	 *    as specifying {@link #COMPILER_NONNULL_ANNOTATION_NAME} does for individual elements.</p>
+	 * Compiler option ID: Reporting missing default nullness annotation.
+	 * <p>When enabled, the compiler will issue an error or a warning in the following cases:</p>
+	 * <ul>
+	 * <li> When a package does not contain a default nullness annotation, as a result of missing package-info.java 
+	 * or missing default nullness annotation in package-info.java.</li>
+	 * <li> When a type inside a default package does not contain a default nullness annotation.</li>
+	 * </ul>
 	 * <p>This option only has an effect if the option {@link #COMPILER_ANNOTATION_NULL_ANALYSIS} is enabled.</p>
 	 * <dl>
-	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.annotation.nonnullisdefault"</code></dd>
-	 * <dt>Possible values:</dt><dd><code>{ "disabled", "enabled" }</code>.</dd>
-	 * <dt>Default:</dt><dd><code>"disabled"</code></dd>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.annotation.missingNonNullByDefaultAnnotation"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code>.</dd>
+	 * <dt>Default:</dt><dd><code>"ignore"</code></dd>
 	 * </dl>
 	 * @since 3.8
 	 * @category CompilerOptionID
 	 */
-	public static final String COMPILER_NONNULL_IS_DEFAULT = PLUGIN_ID + ".compiler.annotation.nonnullisdefault"; //$NON-NLS-1$
+	public static final String COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION = PLUGIN_ID + ".compiler.annotation.missingNonNullByDefaultAnnotation"; //$NON-NLS-1$
 	/**
 	 * Compiler option ID: Reporting Violations of Null Specifications.
 	 * <p>Depending on this option, the compiler will issue either an error or a warning
 	 *    whenever one of the following situations is detected:
 	 *    <ol>
-	 *    <li>A method declared with a nonnull annotation returns an expression	that is
-	 *          statically known to evaluate to a null value.</li>
-	 *    <li>An expression that is statically known to evaluate to a null value is	passed
-	 *        as an argument in a method call where the corresponding parameter of the called
-	 *        method is declared with a nonnull annotation.</li>
-	 *    <li>An expression that is statically known to evaluate to a null value is	assigned
-	 *        to a local variable that is declared with a nonnull annotation.</li>
+	 *    <li>A method declared with a nonnull annotation returns a
+	 *        <em>nullable</em> expression.</li>
+	 *    <li>A <em>nullable</em> expression is passed
+     *        as an argument in a method call where the corresponding parameter of the called
+     *        method is declared with a nonnull annotation.</li>
+	 *    <li>A <em>nullable</em> expression is assigned
+     *        to a local variable that is declared with a nonnull annotation.</li>
 	 *    <li>A method that overrides an inherited method declared with a nonnull annotation
 	 *        tries to relax that contract by specifying a nullable annotation
 	 *        (prohibition of contravariant return).</li>
@@ -1558,6 +1561,9 @@ public final class JavaCore extends Plugin {
 	 *        specifying a nonnull annotation for its corresponding parameter
 	 *        (prohibition of covariant parameters).</li>
 	 *    </ol>
+	 *    In the above an expression is considered as <em>nullable</em> if
+	 *    either it is statically known to evaluate to the value <code>null</code>, or if it is
+	 *    declared with a nullable annotation.
 	 * </p>
 	 * <p>The compiler options {@link #COMPILER_NONNULL_ANNOTATION_NAME} and
 	 *    {@link #COMPILER_NULLABLE_ANNOTATION_NAME} control which annotations the compiler
@@ -1574,7 +1580,7 @@ public final class JavaCore extends Plugin {
 	 */
 	public static final String COMPILER_PB_NULL_SPECIFICATION_VIOLATION = PLUGIN_ID + ".compiler.problem.nullSpecViolation"; //$NON-NLS-1$
 	/**
-	 * Compiler option ID: Reporting Violations of Null Specifications with Potential Null Value.
+	 * Compiler option ID: Reporting conflicts between declared null annotation and inferred null value 
 	 * <p>When enabled, the compiler will issue an error or a warning whenever one of the
 	 *    following situations is detected:
 	 *    <ol>
@@ -1593,16 +1599,16 @@ public final class JavaCore extends Plugin {
 	 * </p>
 	 * <p>This option only has an effect if the option {@link #COMPILER_ANNOTATION_NULL_ANALYSIS} is enabled.</p>
 	 * <dl>
-	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.potentialNullSpecViolation"</code></dd>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.nullAnnotationInferenceConflict"</code></dd>
 	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
 	 * <dt>Default:</dt><dd><code>"error"</code></dd>
 	 * </dl>
 	 * @since 3.8
 	 * @category CompilerOptionID
 	 */
-	public static final String COMPILER_PB_POTENTIAL_NULL_SPECIFICATION_VIOLATION = PLUGIN_ID + ".compiler.problem.potentialNullSpecViolation"; //$NON-NLS-1$
+	public static final String COMPILER_PB_NULL_ANNOTATION_INFERENCE_CONFLICT = PLUGIN_ID + ".compiler.problem.nullAnnotationInferenceConflict"; //$NON-NLS-1$
 	/**
-	 * Compiler option ID: Reporting Insufficient Information for Analysing Adherence to Null Specifications.
+	 * Compiler option ID: Reporting unchecked conversion from a type with unknown nullness to a null annotated type
 	 * <p>When enabled, the compiler will issue an error or a warning whenever one of the
 	 *    following situations is detected:
 	 *    <ol>
@@ -1617,7 +1623,7 @@ public final class JavaCore extends Plugin {
 	 *        statically proving that it will never evaluate to a null value at runtime
 	 *        is assigned to a local variable that is declared with a nonnull annotation.</li>
 	 *    </ol>
-	 *    Insufficient nullness information is usually a consequence of using other unannotated
+	 *    Unchecked null conversion is usually a consequence of using other unannotated
 	 *    variables or methods.
 	 * </p>
 	 * <p>The compiler options {@link #COMPILER_NONNULL_ANNOTATION_NAME} and
@@ -1626,21 +1632,20 @@ public final class JavaCore extends Plugin {
 	 * </p>
 	 * <p>This option only has an effect if the option {@link #COMPILER_ANNOTATION_NULL_ANALYSIS} is enabled.</p>
 	 * <dl>
-	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.nullSpecInsufficientInfo"</code></dd>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.nullUncheckedConversion"</code></dd>
 	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
 	 * <dt>Default:</dt><dd><code>"warning"</code></dd>
 	 * </dl>
 	 * @since 3.8
 	 * @category CompilerOptionID
 	 */
-	public static final String COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO = PLUGIN_ID + ".compiler.problem.nullSpecInsufficientInfo"; //$NON-NLS-1$
+	public static final String COMPILER_PB_NULL_UNCHECKED_CONVERSION = PLUGIN_ID + ".compiler.problem.nullUncheckedConversion"; //$NON-NLS-1$
 	/**
 	 * Compiler option ID: Reporting Redundant Null Annotations.
 	 * <p>When enabled, the compiler will issue an error or a warning when a non-null annotation
 	 *    (see {@link #COMPILER_NONNULL_ANNOTATION_NAME})
 	 *    is applied although the same effect is already achieved by a default applicable at the
-	 *    current location. Such a default may be set by enabling the option
-	 *    {@link #COMPILER_NONNULL_IS_DEFAULT} or by using the annotation specified by the option
+	 *    current location. Such a default may be set by using the annotation specified by the option
 	 *    {@link #COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME}.
 	 * </p>
 	 * <p>This option only has an effect if the option {@link #COMPILER_ANNOTATION_NULL_ANALYSIS} is enabled.</p>

@@ -18,6 +18,7 @@
  *     							bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 365208 - [compiler][batch] command line options for annotation based null analysis
  *								bug 370639 - [compiler][resource] restore the default for resource leak warnings
+ *								bug 365859 - [compiler][null] distinguish warnings based on flow analysis vs. null annotations
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -80,7 +81,7 @@ public class BatchCompilerTest extends AbstractRegressionTest {
 			"}\n";
 
 	static {
-//		TESTS_NAMES = new String[] { "test31" };
+//		TESTS_NAMES = new String[] { "test315_warn_options_a" };
 //		TESTS_NUMBERS = new int[] { 306 };
 //		TESTS_RANGE = new int[] { 298, -1 };
 	}
@@ -1583,6 +1584,9 @@ public void test012(){
         "    -deprecation     + deprecation outside deprecated code (equivalent to\n" +
         "                       -warn:+deprecation)\n" +
         "    -nowarn -warn:none disable all warnings\n" +
+        "    -nowarn:[<directories separated by " + File.pathSeparator+ ">]\n" +
+        "                       specify directories from which optional problems should\n" +
+        "                       be ignored\n" +
         "    -?:warn -help:warn display advanced warning options\n" +
         " \n" +
         " Error options:\n" + 
@@ -1647,9 +1651,8 @@ public void test012(){
         "    -enableJavadoc     consider references in javadoc\n" +
         "    -Xemacs            used to enable emacs-style output in the console.\n" +
         "                       It does not affect the xml log output\n" +
-        "    -nonNullByDefault  for annotation based null analysis assume nonnull\n" + 
-        "                       as the global default\n" + 
-        " \n" +
+        "    -missingNullDefault  report missing default nullness annotation\n" + 
+        " \n" + 
         "    -? -help           print this help message\n" +
         "    -v -version        print compiler version\n" +
         "    -showversion       print compiler version and continue\n" +
@@ -1695,6 +1698,9 @@ public void test012b(){
         " Warning options:\n" +
         "    -deprecation     + deprecation outside deprecated code\n" +
         "    -nowarn -warn:none disable all warnings\n" +
+        "    -nowarn:[<directories separated by " + File.pathSeparator+ ">]\n" +
+        "                       specify directories from which optional problems should\n" +
+        "                       be ignored\n" +
         "    -warn:<warnings separated by ,>    enable exactly the listed warnings\n" +
         "    -warn:+<warnings separated by ,>   enable additional warnings\n" +
         "    -warn:-<warnings separated by ,>   disable specific warnings\n" +
@@ -1877,9 +1883,9 @@ public void test012b(){
 			"		<argument value=\"---OUTPUT_DIR_PLACEHOLDER---\"/>\n" +
 			"	</command_line>\n" +
 			"	<options>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.missingNonNullByDefaultAnnotation\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nonnull\" value=\"org.eclipse.jdt.annotation.NonNull\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nonnullbydefault\" value=\"org.eclipse.jdt.annotation.NonNullByDefault\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nonnullisdefault\" value=\"disabled\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nullable\" value=\"org.eclipse.jdt.annotation.Nullable\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nullanalysis\" value=\"disabled\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode\" value=\"disabled\"/>\n" +
@@ -1914,7 +1920,7 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.hiddenCatchBlock\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.includeNullInfoFromAsserts\" value=\"disabled\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.incompatibleNonInheritedInterfaceMethod\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.incompleteEnumSwitch\" value=\"ignore\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.incompleteEnumSwitch\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.indirectStaticAccess\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadoc\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.invalidJavadocTags\" value=\"disabled\"/>\n" +
@@ -1940,15 +1946,15 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.noEffectAssignment\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.noImplicitStringConversion\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nonExternalizedStringLiteral\" value=\"ignore\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullAnnotationInferenceConflict\" value=\"error\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullReference\" value=\"warning\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullSpecInsufficientInfo\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullSpecViolation\" value=\"error\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.problem.nullUncheckedConversion\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.overridingMethodWithoutSuperInvocation\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.overridingPackageDefaultMethod\" value=\"warning\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.parameterAssignment\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.possibleAccidentalBooleanAssignment\" value=\"ignore\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.potentialNullReference\" value=\"ignore\"/>\n" + 
-			"		<option key=\"org.eclipse.jdt.core.compiler.problem.potentialNullSpecViolation\" value=\"error\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.potentiallyUnclosedCloseable\" value=\"ignore\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.rawTypeReference\" value=\"warning\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.problem.redundantNullAnnotation\" value=\"warning\"/>\n" +
@@ -11246,8 +11252,8 @@ public void test292_warn_options() {
 
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=325342
 // -warn option - regression tests to check option includeAssertNull
-// No null problems arising from asserts should be reported here
-// since includeAssertNull is not enabled
+// Null problems arising from asserts should be reported here
+// since includeAssertNull is enabled
 public void test293_warn_options() {
 	this.runConformTest(
 		new String[] {
@@ -11291,22 +11297,27 @@ public void test293_warn_options() {
 		"	    ^\n" + 
 		"Null comparison always yields false: The variable a can only be null at this location\n" + 
 		"----------\n" + 
-		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 10)\n" + 
+		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 9)\n" + 
+		"	a = null;\n" + 
+		"	^\n" + 
+		"Redundant assignment: The variable a can only be null at this location\n" + 
+		"----------\n" + 
+		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 10)\n" + 
 		"	if (a== null) {}\n" + 
 		"	    ^\n" + 
 		"Redundant null check: The variable a can only be null at this location\n" + 
 		"----------\n" + 
-		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 12)\n" + 
+		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 12)\n" + 
 		"	if (b!=null) {\n" + 
 		"	    ^\n" + 
 		"Redundant null check: The variable b cannot be null at this location\n" + 
 		"----------\n" + 
-		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 18)\n" + 
+		"5. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X.java (at line 18)\n" + 
 		"	if (c.equals(a)) {\n" + 
-		"	    ^\n" +  
+		"	    ^\n" + 
 		"Null pointer access: The variable c can only be null at this location\n" + 
 		"----------\n" + 
-		"4 problems (4 warnings)", 
+		"5 problems (5 warnings)", 
 		true);
 }
 
@@ -12522,12 +12533,12 @@ public void test312_warn_options() {
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 8)\n" + 
 		"	if (o.toString() == \"\"){ return null;}\n" + 
 		"	                                ^^^^\n" + 
-		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"Null type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
 		"----------\n" + 
 		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" + 
 		"	if (o2 == null) {}\n" + 
 		"	    ^^\n" + 
-		"Null comparison always yields false: The variable o2 cannot be null at this location\n" + 
+		"Null comparison always yields false: The variable o2 is specified as @NonNull\n" + 
 		"----------\n" + 
 		"5. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 10)\n" + 
 		"	goo(null).toString();\n" + 
@@ -12537,22 +12548,22 @@ public void test312_warn_options() {
 		"6. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 10)\n" + 
 		"	goo(null).toString();\n" + 
 		"	    ^^^^\n" + 
-		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"Null type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
 		"----------\n" + 
 		"7. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 13)\n" + 
 		"	return null;\n" + 
 		"	       ^^^^\n" + 
-		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"Null type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
 		"----------\n" + 
 		"8. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 19)\n" + 
 		"	if (o2 == null){}\n" + 
 		"	    ^^\n" + 
-		"Null comparison always yields false: The variable o2 cannot be null at this location\n" + 
+		"Null comparison always yields false: The variable o2 is specified as @NonNull\n" + 
 		"----------\n" + 
 		"9. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 20)\n" + 
 		"	if (o2 == null){\n" + 
 		"	    ^^\n" + 
-		"Null comparison always yields false: The variable o2 cannot be null at this location\n" + 
+		"Null comparison always yields false: The variable o2 is specified as @NonNull\n" + 
 		"----------\n" + 
 		"9 problems (9 warnings)", 
 		true);
@@ -12656,32 +12667,28 @@ public void test314_warn_options() {
 		true);
 }
 
-// https://bugs.eclipse.org/bugs/show_bug.cgi?id=325342
-// -warn option - regression tests to check option nullAnnot
-// Null warnings because of annotations, global nonNullByDefault
-// DISABLED due to dysfunctional global default after Bug 366063 - Compiler should not add synthetic @NonNull annotations
-public void _test315_warn_options() {
+// -warn option - regression tests to check option nullAnnot and missingNullDefault
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=372012
+public void test315_warn_options() {
 	this.runConformTest(
 		new String[] {
+				"p/package-info.java",
+				"@org.eclipse.jdt.annotation.NonNullByDefault\n" +
+				"package p;\n",
 				"p/X.java",
 				"package p;\n" +
-				"import org.eclipse.jdt.annotation.*;\n" +
-				"@SuppressWarnings(\"unused\")\n" +
 				"public class X {\n" +
-				"  Object foo(@Nullable Object o, Object o2) {\n" +
-				"    if (o.toString() == \"\"){ return null;}\n" +
-				"    if (o2 == null) {}\n" +
-				"    goo(null).toString();\n" +
-				"	 return null;\n" +
-				"  }\n" +
-				"  @Nullable Object goo(Object o2) {\n" +
-				"    return new Object();\n" +
-				"  }\n" +
-				"  @NonNullByDefault Object hoo(Object o2) {\n" + // redundant
-				"    if (o2 == null)\n" +
-				"	    return null;\n" +
-				"    return this;\n" +
-				"  }\n" +
+				"}\n",
+				"p1/X1.java",
+				"package p1;\n" +
+				"public class X1 {\n" +
+				"}\n",
+				"p1/X1a.java",
+				"package p1;\n" +
+				"public class X1a {\n" +
+				"}\n",
+				"Default1.java",
+				"public class Default1 {\n" +
 				"}\n",
 				"org/eclipse/jdt/annotation/NonNull.java",
 				NONNULL_ANNOTATION_CONTENT,
@@ -12693,50 +12700,77 @@ public void _test315_warn_options() {
 		"\"" + OUTPUT_DIR +  File.separator + "p" + File.separator + "X.java\""
 		+ " -sourcepath \"" + OUTPUT_DIR + "\""
 		+ " -1.5"
-		+ " -warn:+nullAnnot -warn:+null -nonNullByDefault -proc:none -d \"" + OUTPUT_DIR + "\"",
+		+ " -warn:+nullAnnot -warn:+null -missingNullDefault -proc:none -d \"" + OUTPUT_DIR + "\"",
+		"",
+		"",
+		true);
+}
+
+// -warn option - regression tests to check option nullAnnot and missingNullDefault
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=372012
+public void test315_warn_options_a() {
+	this.runConformTest(
+		new String[] {
+				"p1/X1.java",
+				"package p1;\n" +
+				"public class X1 {\n" +
+				"   class Inner{};\n" +
+				"}\n",
+				"org/eclipse/jdt/annotation/NonNull.java",
+				NONNULL_ANNOTATION_CONTENT,
+				"org/eclipse/jdt/annotation/Nullable.java",
+				NULLABLE_ANNOTATION_CONTENT,
+				"org/eclipse/jdt/annotation/NonNullByDefault.java",				
+				NONNULL_BY_DEFAULT_ANNOTATION_CONTENT
+		},
+		"\"" + OUTPUT_DIR +  File.separator + "p1" + File.separator + "X1.java\""
+		+ " -sourcepath \"" + OUTPUT_DIR + "\""
+		+ " -1.5"
+		+ " -warn:+nullAnnot -warn:+null -missingNullDefault -proc:none -d \"" + OUTPUT_DIR + "\"",
 		"",
 		"----------\n" + 
-		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 6)\n" + 
-		"	if (o.toString() == \"\"){ return null;}\n" + 
-		"	    ^\n" + 
-		"Potential null pointer access: The variable o may be null at this location\n" + 
+		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p1/X1.java (at line 1)\n" + 
+		"	package p1;\n" + 
+		"	        ^^\n" + 
+		"A default nullness annotation has not been specified for the package p1\n" + 
 		"----------\n" + 
-		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 6)\n" + 
-		"	if (o.toString() == \"\"){ return null;}\n" + 
-		"	                                ^^^^\n" + 
-		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
+		"1 problem (1 warning)", 
+		true);
+}
+
+// -warn option - regression tests to check option nullAnnot and missingNullDefault
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=372012
+public void test315_warn_options_b() {
+	this.runNegativeTest(
+		new String[] {
+				"X1.java",
+				"public class X1 {\n" +
+				"	Zork;\n" +
+				"}\n",
+				"org/eclipse/jdt/annotation/NonNull.java",
+				NONNULL_ANNOTATION_CONTENT,
+				"org/eclipse/jdt/annotation/Nullable.java",
+				NULLABLE_ANNOTATION_CONTENT,
+				"org/eclipse/jdt/annotation/NonNullByDefault.java",				
+				NONNULL_BY_DEFAULT_ANNOTATION_CONTENT
+		},
+		"\"" + OUTPUT_DIR +  File.separator + "X1.java\""
+		+ " -sourcepath \"" + OUTPUT_DIR + "\""
+		+ " -1.5"
+		+ " -warn:+nullAnnot -warn:+null -missingNullDefault -proc:none -d \"" + OUTPUT_DIR + "\"",
+		"",
 		"----------\n" + 
-		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 7)\n" + 
-		"	if (o2 == null) {}\n" + 
-		"	    ^^\n" + 
-		"Null comparison always yields false: The variable o2 cannot be null at this location\n" + 
+		"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/X1.java (at line 1)\n" + 
+		"	public class X1 {\n" + 
+		"	             ^^\n" + 
+		"A default nullness annotation has not been specified for the type X1\n" + 
 		"----------\n" + 
-		"4. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 8)\n" + 
-		"	goo(null).toString();\n" + 
-		"	^^^^^^^^^\n" + 
-		"Potential null pointer access: The method goo(Object) may return null\n" + 
+		"2. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/X1.java (at line 2)\n" + 
+		"	Zork;\n" + 
+		"	^^^^\n" + 
+		"Syntax error on token \"Zork\", VariableDeclarator expected after this token\n" + 
 		"----------\n" + 
-		"5. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 8)\n" + 
-		"	goo(null).toString();\n" + 
-		"	    ^^^^\n" + 
-		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
-		"----------\n" + 
-		"6. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" + 
-		"	return null;\n" + 
-		"	       ^^^^\n" + 
-		"Type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
-		"----------\n" + 
-		"7. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 14)\n" + 
-		"	@NonNullByDefault Object hoo(Object o2) {\n" + 
-		"	^^^^^^^^^^^^^^^^^\n" + 
-		"Nullness default is redundant with the global default\n" + 
-		"----------\n" + 
-		"8. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 15)\n" + 
-		"	if (o2 == null)\n" + 
-		"	    ^^\n" + 
-		"Null comparison always yields false: The variable o2 cannot be null at this location\n" + 
-		"----------\n" + 
-		"8 problems (8 warnings)", 
+		"2 problems (1 error, 1 warning)", 
 		true);
 }
 
@@ -12765,5 +12799,350 @@ public void test316_warn_options() {
 		"",
 		"Token nullAnnot(foo|bar) is not in the expected format \"nullAnnot(<non null annotation name> | <nullable annotation name> | <non-null by default annotation name>)\"\n", 
 		true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//default
+public void test317_nowarn_options() {
+	this.runConformTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\""
+			+ " -warn:javadoc -nowarn:[\"" +
+			OUTPUT_DIR + File.separator + "src" + 
+			"\"] -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//two different source folders ignore only from one
+public void test318_nowarn_options() {
+	this.runConformTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+				"src2/Y.java",
+				"public class Y {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}"
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\"" +
+			" \"" + OUTPUT_DIR + File.separator + "src2/Y.java\"" +
+			" -warn:javadoc -nowarn:[" +
+			"\"" + OUTPUT_DIR + File.separator + "src"
+			+ "\"] -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"----------\n" +
+			"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/src2/Y.java (at line 3)\n" +
+			"	@param\n" +
+			"	 ^^^^^\n" +
+			"Javadoc: Missing parameter name\n" +
+			"----------\n" +
+			"1 problem (1 warning)",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//two different source folders ignore from both
+public void test319_nowarn_options() {
+	this.runConformTest(
+		new String[] {
+				"src1/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+				"src2/Y.java",
+				"public class Y {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}"
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src1/X.java\"" +
+			" \"" + OUTPUT_DIR + File.separator + "src2/Y.java\"" +
+			" -warn:javadoc -nowarn:[" +
+			"\"" + OUTPUT_DIR + File.separator + "src1\"" + File.pathSeparator +
+			"\"" + OUTPUT_DIR + File.separator +
+			"src2\"] -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//two different source folders ignore from both using multiple -nowarn
+public void test320_nowarn_options() {
+	this.runConformTest(
+		new String[] {
+				"src1/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+				"src2/Y.java",
+				"public class Y {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}"
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src1/X.java\"" +
+			" \"" + OUTPUT_DIR + File.separator + "src2/Y.java\"" +
+			" -warn:javadoc -nowarn:[" +
+			"\"" + OUTPUT_DIR + File.separator + "src1\"] -nowarn:[" +
+			"\"" + OUTPUT_DIR + File.separator + "src2\"] " +
+			"-proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//option syntax error -nowarn:
+public void test321_nowarn_options() {
+	this.runNegativeTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\""
+			+ " -warn:javadoc -nowarn: -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"invalid syntax for nowarn option: -nowarn:\n",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//option syntax error -nowarn:[
+public void test322_nowarn_options() {
+	this.runNegativeTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\""
+			+ " -warn:javadoc -nowarn:[ -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"invalid syntax for nowarn option: -nowarn:[\n",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//option syntax error -nowarn:[src
+public void test323_nowarn_options() {
+	this.runNegativeTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\""
+			+ " -warn:javadoc -nowarn:[src -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"invalid syntax for nowarn option: -nowarn:[src\n",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//option syntax error -nowarn:src]
+public void test324_nowarn_options() {
+	this.runNegativeTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\""
+			+ " -warn:javadoc -nowarn:src] -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"invalid syntax for nowarn option: -nowarn:src]\n",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//option syntax error -nowarn[src]
+public void test325_nowarn_options() {
+	this.runNegativeTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\""
+			+ " -warn:javadoc -nowarn[src] -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"invalid syntax for nowarn option: -nowarn[src]\n",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//option syntax error -nowarn:[src1]src2
+public void test326_nowarn_options() {
+	this.runNegativeTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\""
+			+ " -warn:javadoc -nowarn:[src1]src2 -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"invalid syntax for nowarn option: -nowarn:[src1]src2\n",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//option syntax error -nowarn:[]
+public void test327_nowarn_options() {
+	this.runNegativeTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"  }\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\""
+			+ " -warn:javadoc -nowarn:[] -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"invalid syntax for nowarn option: -nowarn:[]\n",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//non-optional errors cannot be ignored
+public void test328_nowarn_options() {
+	this.runNegativeTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"    a++;\n" +
+				"  }\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\""
+			+ " -warn:javadoc -nowarn:[" +
+			"\"" + OUTPUT_DIR + File.separator + "src]\" -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"----------\n" +
+			"1. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/src/X.java (at line 6)\n" +
+			"	a++;\n" +
+			"	^\n" +
+			"a cannot be resolved to a variable\n" +
+			"----------\n" +
+			"1 problem (1 error)",
+			true);
+}
+
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928
+//-nowarn option - regression tests
+//task tags cannot be ignored
+public void test329_nowarn_options() {
+	this.runConformTest(
+		new String[] {
+				"src/X.java",
+				"public class X {\n" +
+				"  /**\n" +
+				"    @param\n" +
+				"  */\n" +
+				"  public void foo() {\n" +
+				"    // TODO nothing\n" +
+				"  }\n" +
+				"}",
+			},
+			"\"" + OUTPUT_DIR + File.separator + "src/X.java\""
+			+ " -warn:javadoc,tasks(TODO) -nowarn:[" +
+			"\"" + OUTPUT_DIR + File.separator + "src]\" -proc:none -d \"" + OUTPUT_DIR + "\"",
+			"",
+			"----------\n" +
+			"1. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/src/X.java (at line 6)\n" +
+			"	// TODO nothing\n" +
+			"	   ^^^^^^^^^^^^\n" +
+			"TODO nothing\n" +
+			"----------\n" +
+			"1 problem (1 warning)",
+			true);
 }
 }

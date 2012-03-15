@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -69,6 +69,14 @@ static {
 public static Test suite() {
 	return buildModelTestSuite(ReconcilerStatementsRecoveryTests.class);
 }
+
+/**
+ * Internal synonynm for deprecated constant AST.JSL3
+ * to alleviate deprecation warnings.
+ * @deprecated
+ */
+/*package*/ static final int JLS3_INTERNAL = AST.JLS3;
+
 protected void assertProblems(String message, String expected) {
 	assertProblems(message, expected, this.problemRequestor);
 }
@@ -83,7 +91,7 @@ protected void assertNoProblem(char[] source, ICompilationUnit unit) throws Inte
 		// Reconcile again to see if error goes away
 		this.problemRequestor.initialize(source);
 		unit.getBuffer().setContents(source); // need to set contents again to be sure that following reconcile will be really done
-		unit.reconcile(AST.JLS3,
+		unit.reconcile(JLS3_INTERNAL,
 			true, // force problem detection to see errors if any
 			null,	// do not use working copy owner to not use working copies in name lookup
 			null);
@@ -260,7 +268,7 @@ public void testStatementsRecovery02() throws CoreException {
 		"     UnknownType name\n" +
 		"  }\n" +
 		"}");
-	this.workingCopy.reconcile(AST.JLS3, false, false, null, null);
+	this.workingCopy.reconcile(JLS3_INTERNAL, false, false, null, null);
 	assertWorkingCopyDeltas(
 		"Unexpected delta after syntax error",
 		"[Working copy] X.java[*]: {CONTENT | FINE GRAINED | AST AFFECTED}"
@@ -325,7 +333,7 @@ public void testStatementsRecovery04() throws CoreException {
 		"     UnknownType name\n" +
 		"  }\n" +
 		"}");
-	this.workingCopy.reconcile(AST.JLS3, false, true, null, null);
+	this.workingCopy.reconcile(JLS3_INTERNAL, false, true, null, null);
 	assertWorkingCopyDeltas(
 		"Unexpected delta after syntax error",
 		"[Working copy] X.java[*]: {CONTENT | FINE GRAINED | AST AFFECTED}"

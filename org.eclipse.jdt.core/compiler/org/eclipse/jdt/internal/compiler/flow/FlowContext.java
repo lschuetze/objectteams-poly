@@ -11,6 +11,7 @@
  *     							bug 358827 - [1.7] exception analysis for t-w-r spoils null analysis
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 368546 - [compiler][resource] Avoid remaining false positives found when compiling the Eclipse SDK
+ *								bug 365859 - [compiler][null] distinguish warnings based on flow analysis vs. null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.flow;
 
@@ -57,15 +58,16 @@ public class FlowContext implements TypeConstants {
 
 	public int tagBits;
 
-	// array to store the expected type from the potential error location (for display in error messages):
-	public TypeBinding[] expectedTypes = null;
+	// array to store the provided and expected types from the potential error location (for display in error messages):
+	public TypeBinding[][] providedExpectedTypes = null;
 
 	public static final int DEFER_NULL_DIAGNOSTIC = 0x1;
 	public static final int PREEMPT_NULL_DIAGNOSTIC = 0x2;
 	/**
 	 * used to hide null comparison related warnings inside assert statements 
 	 */
-	public static final int HIDE_NULL_COMPARISON_WARNING = 0x4;
+	public static final int HIDE_NULL_COMPARISON_WARNING = 0x1000;
+	public static final int HIDE_NULL_COMPARISON_WARNING_MASK = 0xF000;
 
 public static final int CAN_ONLY_NULL_NON_NULL = 0x0000;
 //check against null and non null, with definite values -- comparisons
@@ -87,7 +89,7 @@ public static final int IN_ASSIGNMENT = 0x0300;
 // check happened in an assignment
 public static final int IN_INSTANCEOF = 0x0400;
 // check happened in an instanceof expression
-public static final int CONTEXT_MASK = ~CHECK_MASK;
+public static final int CONTEXT_MASK = ~CHECK_MASK & ~HIDE_NULL_COMPARISON_WARNING_MASK;
 
 public FlowContext(FlowContext parent, ASTNode associatedNode) {
 	this.parent = parent;
@@ -572,20 +574,20 @@ public boolean recordExitAgainstResource(BlockScope scope, FlowInfo flowInfo, Fa
 	return false; // not handled
 }
 
-protected void recordExpectedType(TypeBinding expectedType, int nullCount) {
+protected void recordProvidedExpectedTypes(TypeBinding providedType, TypeBinding expectedType, int nullCount) {
 	if (nullCount == 0) {
-		this.expectedTypes = new TypeBinding[5];
-	} else if (this.expectedTypes == null) {
+		this.providedExpectedTypes = new TypeBinding[5][];
+	} else if (this.providedExpectedTypes == null) {
 		int size = 5;
 		while (size <= nullCount) size *= 2;
-		this.expectedTypes = new TypeBinding[size];
+		this.providedExpectedTypes = new TypeBinding[size][];
 	}
-	else if (nullCount >= this.expectedTypes.length) {
-		int oldLen = this.expectedTypes.length;
-		System.arraycopy(this.expectedTypes, 0,
-			this.expectedTypes = new TypeBinding[nullCount * 2], 0, oldLen);
+	else if (nullCount >= this.providedExpectedTypes.length) {
+		int oldLen = this.providedExpectedTypes.length;
+		System.arraycopy(this.providedExpectedTypes, 0,
+			this.providedExpectedTypes = new TypeBinding[nullCount * 2][], 0, oldLen);
 	}
-	this.expectedTypes[nullCount] = expectedType;
+	this.providedExpectedTypes[nullCount] = new TypeBinding[]{providedType, expectedType};
 }
 
 protected boolean recordFinalAssignment(VariableBinding variable, Reference finalReference) {
@@ -646,6 +648,8 @@ public void recordSettingFinal(VariableBinding variable, Reference finalReferenc
  * 		CAN_ONLY_NULL_NON_NULL}, {@link #MAY_NULL MAY_NULL}, potentially
  *      combined with a context indicator (one of {@link #IN_COMPARISON_NULL},
  *      {@link #IN_COMPARISON_NON_NULL}, {@link #IN_ASSIGNMENT} or {@link #IN_INSTANCEOF})
+ *      and a bit to indicate whether the reference is being recorded inside an assert, 
+ *      {@link #HIDE_NULL_COMPARISON_WARNING}
  * @param flowInfo the flow info at the check point; deferring contexts will
  *  	perform supplementary checks against flow info instances that cannot
  *  	be known at the time of calling this method (they are influenced by
@@ -657,24 +661,21 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 			flowInfo.isDefinitelyUnknown(local)) {
 		return;
 	}
-	switch (checkType) {
+	// if reference is being recorded inside an assert, we will not raise redundant null check warnings
+	checkType |= (this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING);
+	int checkTypeWithoutHideNullWarning = checkType & ~FlowContext.HIDE_NULL_COMPARISON_WARNING_MASK;
+	switch (checkTypeWithoutHideNullWarning) {
 		case CAN_ONLY_NULL_NON_NULL | IN_COMPARISON_NULL:
 		case CAN_ONLY_NULL_NON_NULL | IN_COMPARISON_NON_NULL:
 			if (flowInfo.isDefinitelyNonNull(local)) {
-				if (checkType == (CAN_ONLY_NULL_NON_NULL | IN_COMPARISON_NON_NULL)) {
-					if ((this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) == 0) {
+				if (checkTypeWithoutHideNullWarning == (CAN_ONLY_NULL_NON_NULL | IN_COMPARISON_NON_NULL)) {
+					if ((checkType & HIDE_NULL_COMPARISON_WARNING) == 0) {
 						scope.problemReporter().localVariableRedundantCheckOnNonNull(local, location);
 					}
-					if (!flowInfo.isMarkedAsNullOrNonNullInAssertExpression(local)) {
-						flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
-					}
+					flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 				} else {
-					if ((this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) == 0) {
-						scope.problemReporter().localVariableNonNullComparedToNull(local, location);
-					}
-					if (!flowInfo.isMarkedAsNullOrNonNullInAssertExpression(local)) {
-						flowInfo.initsWhenTrue().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
-					}
+					scope.problemReporter().localVariableNonNullComparedToNull(local, location);
+					flowInfo.initsWhenTrue().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 				}
 				return;
 			}
@@ -688,30 +689,24 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 		case CAN_ONLY_NULL | IN_INSTANCEOF:
 			Expression reference = (Expression)location;
 			if (flowInfo.isDefinitelyNull(local)) {
-				switch(checkType & CONTEXT_MASK) {
+				switch(checkTypeWithoutHideNullWarning & CONTEXT_MASK) {
 					case FlowContext.IN_COMPARISON_NULL:
-						if (((checkType & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariableNullReference(local, reference);
 							return;
 						}
-						if ((this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) == 0) {
+						if ((checkType & HIDE_NULL_COMPARISON_WARNING) == 0) {
 							scope.problemReporter().localVariableRedundantCheckOnNull(local, reference);
 						}
-						if (!flowInfo.isMarkedAsNullOrNonNullInAssertExpression(local)) {
-							flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
-						}
+						flowInfo.initsWhenFalse().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 						return;
 					case FlowContext.IN_COMPARISON_NON_NULL:
-						if (((checkType & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariableNullReference(local, reference);
 							return;
 						}
-						if ((this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) == 0) {
-							scope.problemReporter().localVariableNullComparedToNonNull(local, reference);
-						}
-						if (!flowInfo.isMarkedAsNullOrNonNullInAssertExpression(local)) {
-							flowInfo.initsWhenTrue().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
-						}
+						scope.problemReporter().localVariableNullComparedToNonNull(local, reference);
+						flowInfo.initsWhenTrue().setReachMode(FlowInfo.UNREACHABLE_BY_NULLANALYSIS);
 						return;
 					case FlowContext.IN_ASSIGNMENT:
 						scope.problemReporter().localVariableRedundantNullAssignment(local, reference);
@@ -721,15 +716,15 @@ public void recordUsingNullReference(Scope scope, LocalVariableBinding local,
 						return;
 				}
 			} else if (flowInfo.isPotentiallyNull(local)) {
-				switch(checkType & CONTEXT_MASK) {
+				switch(checkTypeWithoutHideNullWarning & CONTEXT_MASK) {
 					case FlowContext.IN_COMPARISON_NULL:
-						if (((checkType & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariablePotentialNullReference(local, reference);
 							return;
 						}
 						break;
 					case FlowContext.IN_COMPARISON_NON_NULL:
-						if (((checkType & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
+						if (((checkTypeWithoutHideNullWarning & CHECK_MASK) == CAN_ONLY_NULL) && (reference.implicitConversion & TypeIds.UNBOXING) != 0) { // check for auto-unboxing first and report appropriate warning
 							scope.problemReporter().localVariablePotentialNullReference(local, reference);
 							return;
 						}
@@ -796,25 +791,33 @@ public String toString() {
  * Record that a nullity mismatch was detected against an annotated type reference.
  * @param currentScope scope for error reporting
  * @param expression the expression violating the specification
- * @param nullStatus the null status of expression at the current location
+ * @param providedType the type of the provided value, i.e., either expression or an element thereof (in ForeachStatements)
  * @param expectedType the declared type of the spec'ed variable, for error reporting.
+ * @param nullStatus the null status of expression at the current location
  */
-public void recordNullityMismatch(BlockScope currentScope, Expression expression, int nullStatus, TypeBinding expectedType) {
+public void recordNullityMismatch(BlockScope currentScope, Expression expression, TypeBinding providedType, TypeBinding expectedType, int nullStatus) {
+	if (providedType == null) {
+		return; // assume type error was already reported
+	}
 	if (expression.localVariableBinding() != null) { // flowContext cannot yet handle non-localvar expressions (e.g., fields)
 		// find the inner-most flowContext that might need deferred handling:
 		FlowContext currentContext = this;
 		while (currentContext != null) {
 			// some flow contexts implement deferred checking, should we participate in that?
-			if (currentContext.internalRecordNullityMismatch(expression, nullStatus, expectedType, ASSIGN_TO_NONNULL))
+			int isInsideAssert = 0x0;
+			if ((this.tagBits & FlowContext.HIDE_NULL_COMPARISON_WARNING) != 0) {
+				isInsideAssert = FlowContext.HIDE_NULL_COMPARISON_WARNING;
+			}
+			if (currentContext.internalRecordNullityMismatch(expression, providedType, nullStatus, expectedType, ASSIGN_TO_NONNULL | isInsideAssert))
 				return;
 			currentContext = currentContext.parent;
 		}
 	}
 	// no reason to defer, so report now:
 	char[][] annotationName = currentScope.environment().getNonNullAnnotationName();
-	currentScope.problemReporter().nullityMismatch(expression, expectedType, nullStatus, annotationName);
+	currentScope.problemReporter().nullityMismatch(expression, providedType, expectedType, nullStatus, annotationName);
 }
-protected boolean internalRecordNullityMismatch(Expression expression, int nullStatus, TypeBinding expectedType, int checkType) {
+protected boolean internalRecordNullityMismatch(Expression expression, TypeBinding providedType, int nullStatus, TypeBinding expectedType, int checkType) {
 	// nop, to be overridden in subclasses
 	return false; // not recorded
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -26,7 +26,12 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.tests.util.Util;
 
 public abstract class ConverterTestSetup extends AbstractASTTests {
-
+	/**
+	 * Internal synonynm for deprecated constant AST.JSL3
+	 * to alleviate deprecation warnings.
+	 * @deprecated
+	 */
+	/*package*/ static final int JLS3_INTERNAL = AST.JLS3;
 	protected AST ast;
 	static List TEST_SUITES = null;
 	static boolean PROJECT_SETUP = false;
@@ -432,7 +437,7 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 			parser.createAST(null);
 		}
 
-		parser = ASTParser.newParser(AST.JLS3);
+		parser = ASTParser.newParser(JLS3_INTERNAL);
 		parser.setSource(unit);
 		parser.setResolveBindings(resolveBindings);
 		parser.setBindingsRecovery(bindingRecovery);
@@ -664,5 +669,9 @@ public abstract class ConverterTestSetup extends AbstractASTTests {
 				}
 			}
 		}
+	}
+	
+	static int getJLS3() {
+		return JLS3_INTERNAL;
 	}
 }

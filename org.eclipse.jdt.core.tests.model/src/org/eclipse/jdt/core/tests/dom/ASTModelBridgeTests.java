@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2010 IBM Corporation and others.
+ * Copyright (c) 2004, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.tests.model.AbstractJavaSearchTests;
+import org.eclipse.jdt.core.tests.util.Util;
 
 import junit.framework.Test;
 
@@ -31,6 +32,20 @@ import junit.framework.Test;
 public class ASTModelBridgeTests extends AbstractASTTests {
 
 	ICompilationUnit workingCopy;
+
+	/**
+	 * Internal synonynm for deprecated constant AST.JSL3
+	 * to alleviate deprecation warnings.
+	 * @deprecated
+	 */
+	/*package*/ static final int JLS3_INTERNAL = AST.JLS3;
+	
+	protected void checkSourceRange(int start, int length, String expectedContents, String source) {
+		assertTrue("length == 0", length != 0); //$NON-NLS-1$ //$NON-NLS-2$
+		assertTrue("start == -1", start != -1); //$NON-NLS-1$
+		String actualContentsString = source.substring(start, start + length);
+		assertSourceEquals("Unexpected source", Util.convertToIndependantLineDelimiter(expectedContents), Util.convertToIndependantLineDelimiter(actualContentsString));
+	}
 
 	public ASTModelBridgeTests(String name) {
 		super(name);
@@ -44,7 +59,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	// All specified tests which do not belong to the class are skipped...
 	static {
 //		TESTS_PREFIX =  "testBug86380";
-//		TESTS_NAMES = new String[] { "testAnnotation9" };
+//		TESTS_NAMES = new String[] { "testLocalVariable7" };
 //		TESTS_NUMBERS = new int[] { 83230 };
 //		TESTS_RANGE = new int[] { 83304, -1 };
 		}
@@ -83,7 +98,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	private IBinding[] createBindings(String contents, IJavaElement element) throws JavaModelException {
 		this.workingCopy.getBuffer().setContents(contents);
 		this.workingCopy.makeConsistent(null);
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(JLS3_INTERNAL);
 		parser.setProject(getJavaProject("P"));
 		IJavaElement[] elements = new IJavaElement[] {element};
 		return parser.createBindings(elements, null);
@@ -91,7 +106,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 
 	private IBinding[] createBinaryBindings(String contents, IJavaElement element) throws CoreException {
 		createClassFile("/P/lib", "A.class", contents);
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(JLS3_INTERNAL);
 		parser.setProject(getJavaProject("P"));
 		IJavaElement[] elements = new IJavaElement[] {element};
 		return parser.createBindings(elements, null);
@@ -732,7 +747,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	 * (test several kinds of elements)
 	 */
 	public void testCreateBindings01() throws JavaModelException {
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(JLS3_INTERNAL);
 		parser.setResolveBindings(true);
 		parser.setProject(getJavaProject("P"));
 		WorkingCopyOwner owner = new WorkingCopyOwner() {};
@@ -783,7 +798,7 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=297757
 	 */
 	public void testCreateBindings23() throws JavaModelException {
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(JLS3_INTERNAL);
 		parser.setProject(getJavaProject("P"));
 		WorkingCopyOwner owner = new WorkingCopyOwner() {};
 		this.workingCopies = new ICompilationUnit[3];
@@ -1650,6 +1665,40 @@ public class ASTModelBridgeTests extends AbstractASTTests {
 				return true;
 			}
 		});
+	}
+
+	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=368646
+	 */
+	public void testLocalVariable7() throws JavaModelException {
+		final String source = "public class X {\n" + 
+				"	public void m(String strX) {\n" + 
+				"		String strB = strX;\n" + 
+				"	}\n" + 
+				"}";
+		ASTNode node = buildAST(source);
+		final boolean[] checked = new boolean[1];
+		node.accept(new ASTVisitor() {
+			public boolean visit(VariableDeclarationFragment fragment) {
+				final IVariableBinding binding = fragment.resolveBinding();
+				final IJavaElement javaElement = binding.getJavaElement();
+				assertNotNull("No java element", javaElement);
+				final int type = javaElement.getElementType();
+				assertEquals("Wrong type", IJavaElement.LOCAL_VARIABLE, type);
+				ILocalVariable variable = (ILocalVariable) javaElement;
+				ISourceRange range = variable.getNameRange();
+				checkSourceRange(range.getOffset(), range.getLength(), "strB", source);
+				try {
+					range = variable.getSourceRange();
+					checkSourceRange(range.getOffset(), range.getLength(), "String strB = strX;", source);
+				} catch(JavaModelException e) {
+					assertTrue("failed to retrieve the source range", false);
+				}
+				checked[0] = true;
+				return true;
+			}
+		});
+		assertTrue("Not checked", checked[0]);
 	}
 
 	/*

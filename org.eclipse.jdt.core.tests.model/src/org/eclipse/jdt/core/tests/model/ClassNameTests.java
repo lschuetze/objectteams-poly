@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -53,6 +53,13 @@ public static Test suite() {
 	TESTS_COUNT = suite.countTestCases();
 	return suite;
 }
+
+/**
+ * Internal synonynm for deprecated constant AST.JSL3
+ * to alleviate deprecation warnings.
+ * @deprecated
+ */
+/*package*/ static final int JLS3_INTERNAL = AST.JLS3;
 
 /* (non-Javadoc)
  * @see org.eclipse.jdt.core.tests.model.AbstractJavaModelTests#setUp()
@@ -1210,7 +1217,7 @@ public void testBug152841() throws Exception{
 		"}";
 		ICompilationUnit cu= pack.createCompilationUnit("Test.java", source, true, null);
 
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		ASTParser parser= ASTParser.newParser(JLS3_INTERNAL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		parser.createAST(null);

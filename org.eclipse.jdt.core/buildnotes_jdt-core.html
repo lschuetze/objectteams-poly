@@ -42,13 +42,168 @@
 	</td>
   </tr>
 </table>
+<a name="v_C40"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - March 13, 2012 - 3.8.0 M6
+<br>Project org.eclipse.jdt.core v_C40
+(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_C40">cvs</a>).
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=374063">374063</a>
+[builder][regression] bug 372012 causes regular problems to be reported against the package
+
+<a name="v_C39"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - March 13, 2012
+<br>
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=373953">373953</a>
+FUP of bug 127575: java.eclipse.core.runtime.Assert  is being recognized as org.eclipse.core.runtime.Assert
+
+<a name="v_C38"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - March 12, 2012
+<br>
+<h2>What's new in this drop</h2>
+<ul>
+<li> New IProblems for distinguishing null warnings based on flow analysis vs. null annotations.
+<pre>
+	/** @since 3.8 */
+	int RedundantNullCheckOnSpecdNonNullLocalVariable = Internal + 931;
+
+	/** @since 3.8 */
+	int SpecdNonNullLocalVariableComparisonYieldsFalse = Internal + 932;
+
+	/** @since 3.8 */
+	int RequiredNonNullButProvidedSpecdNullable = Internal + 933;
+</pre>
+</li>
+<li> New IProblems for reporting missing NonNullByDefault annotation on package/type.
+<pre>
+	/** @since 3.8 */
+	int MissingNonNullByDefaultAnnotationOnPackage = Internal + 913;
+	
+	/** @since 3.8 */
+	int MissingNonNullByDefaultAnnotationOnType = Internal + 930;
+</pre>
+</li>
+<li>Added new option in JavaCore to control warning for missing default nullness annotation:
+<pre>
+	/**
+	 * Compiler option ID: Reporting missing default nullness annotation.
+	 * 
+	 * When enabled, the compiler will issue an error or a warning in the following cases:
+	 * 
+	 * 1. When a package does not contain a default nullness annotation, as a result of missing package-info.java 
+	 * or missing default nullness annotation in package-info.java.
+	 * 2. When a type inside a default package does not contain a default nullness annotation.
+	 * 
+	 * This option only has an effect if the option {@link #COMPILER_ANNOTATION_NULL_ANALYSIS} is enabled.
+	 * 
+	 * Option id:"org.eclipse.jdt.core.compiler.annotation.missingNonNullByDefaultAnnotation"
+	 * Possible values:{ "error", "warning", "ignore" }
+	 * Default:"ignore"
+	 * 
+	 * @since 3.8
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_MISSING_NONNULL_BY_DEFAULT_ANNOTATION = PLUGIN_ID + ".compiler.annotation.missingNonNullByDefaultAnnotation"
+</pre>
+</li>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=365859">365859</a>
+[compiler][null] distinguish warnings based on flow analysis vs. null annotations
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=373571">373571</a>
+[null][regression] Incorrect application of null annotations to primitive types
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=367836">367836</a>
+Inconsistent source range for error from build and reconciler (declared package does not match expected)
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=368646">368646</a>
+[rename] rejects LocalVariable with initializer
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=372012">372012</a>
+[compiler][null] Warn when defaults not specified
+
+<a name="v_C37"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - March 6, 2012
+<br>
+<h2>What's new in this drop</h2>
+
+<ul>
+<li> New IProblems for reporting if an enum switch lacks a default cause (recommended by the JLS).
+<pre>
+	/** @since 3.8 */
+	int MissingEnumDefaultCase = Internal + 766;
+</pre>
+</li>
+<li>Adjusted the specification of the corresponding constant in JavaCore:
+<pre>
+	/**
+	 * Compiler option ID: Reporting Incomplete Enum Switch.
+	 *    
+	 * When enabled, the compiler will issue an error or a warning whenever
+	 * an enum switch statement lacks a default case.
+	 * If no default case is given, additionally one error or warning is issued
+	 * regarding each enum constant for which a corresponding case label is lacking.
+	 * 
+	 * Option id: "org.eclipse.jdt.core.compiler.problem.incompleteEnumSwitch"
+	 * Possible values: { "error", "warning", "ignore" }
+	 * Default: "warning"
+	 * @since 3.1
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_INCOMPLETE_ENUM_SWITCH = PLUGIN_ID + ".compiler.problem.incompleteEnumSwitch"; //$NON-NLS-1$
+</pre>
+</ul>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=371732">371732</a>
+Deprecate AST.JLS3
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=372909">372909</a>
+message verbiage for instanceof erasure
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=347386">347386</a>
+Cannot delete package from java project (two source and output folders)
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=372011">372011</a>
+[compiler][null] Restore behaviour of null defaults for binary types
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=127575">127575</a>
+Null reference checks don't handle Assert
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=265744">265744</a>
+Enum switch should warn about missing default
+
+<a name="v_C36"></a>
+<hr><h1>
+Eclipse Platform Build Notes<br>
+Java development tools core</h1>
+Eclipse SDK 3.8.0 - February 28, 2012
+<br>
+<h2>What's new in this drop</h2>
+
+<h3>Problem Reports Fixed</h3>
+<a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=372377">372377</a>
+ASTParser#createASTs(..) should not ignore optional compile problems
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=372351">372351</a>
+Illegal implementation of 'org.eclipse.jdt.internal.compiler.env.ICompilationUnit' in Tomcat Jasper
+<br><a href="https://bugs.eclipse.org/bugs/show_bug.cgi?id=220928">220928</a>
+[buildpath] Should be able to ignore warnings from certain source folders
+
 <a name="v_C35"></a>
 <hr><h1>
 Eclipse Platform Build Notes<br>
 Java development tools core</h1>
-Eclipse SDK 3.8.0 - February 21, 2012 - 3.8.0 M6
-<br>Project org.eclipse.jdt.core v_C35
-(<a href="http://dev.eclipse.org/viewcvs/index.cgi/org.eclipse.jdt.core/?only_with_tag=v_C35">cvs</a>).
+Eclipse SDK 3.8.0 - February 21, 2012
+<br>
 <h2>What's new in this drop</h2>
 
 <h3>Problem Reports Fixed</h3>

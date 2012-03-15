@@ -12,6 +12,7 @@
  *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 370639 - [compiler][resource] restore the default for resource leak warnings
+ *								bug 265744 - Enum switch should warn about missing default
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.compiler.impl;
@@ -176,18 +177,19 @@ public class IrritantSet {
 				| CompilerOptions.UnusedLabel
 				| CompilerOptions.UnusedTypeArguments
 				| CompilerOptions.UnusedWarningToken
-				| CompilerOptions.ComparingIdentical)
+				| CompilerOptions.ComparingIdentical
+				| CompilerOptions.IncompleteEnumSwitch)
 			// group-2 warnings enabled by default
 			.set(
 				CompilerOptions.DeadCode
 				|CompilerOptions.Tasks
 				|CompilerOptions.UnclosedCloseable
-				|CompilerOptions.NullSpecInsufficientInfo
+				|CompilerOptions.NullUncheckedConversion
 				|CompilerOptions.RedundantNullAnnotation);
 		// default errors IF AnnotationBasedNullAnalysis is enabled:
 		COMPILER_DEFAULT_ERRORS.set(
 				CompilerOptions.NullSpecViolation
-				|CompilerOptions.PotentialNullSpecViolation);
+				|CompilerOptions.NullAnnotationInferenceConflict);
 
 		ALL.setAll();
 		HIDING
@@ -198,8 +200,8 @@ public class IrritantSet {
 			.set(CompilerOptions.PotentialNullReference)
 			.set(CompilerOptions.RedundantNullCheck)
 			.set(CompilerOptions.NullSpecViolation)
-			.set(CompilerOptions.PotentialNullSpecViolation)
-			.set(CompilerOptions.NullSpecInsufficientInfo)
+			.set(CompilerOptions.NullAnnotationInferenceConflict)
+			.set(CompilerOptions.NullUncheckedConversion)
 			.set(CompilerOptions.RedundantNullAnnotation);
 
 		RESTRICTION.set(CompilerOptions.DiscouragedReference);

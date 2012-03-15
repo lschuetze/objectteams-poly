@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -569,7 +569,7 @@ public class ASTMatcher {
 				return false;
 			}
 		}
-		if (level >= AST.JLS3) {
+		if (level >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.typeArguments(), o.typeArguments())) {
 				return false;
 			}
@@ -654,7 +654,7 @@ public class ASTMatcher {
 			return false;
 		}
 		ConstructorInvocation o = (ConstructorInvocation) other;
-		if (node.getAST().apiLevel >= AST.JLS3) {
+		if (node.getAST().apiLevel >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.typeArguments(), o.typeArguments())) {
 				return false;
 			}
@@ -913,7 +913,7 @@ public class ASTMatcher {
 				return false;
 			}
 		}
-		if (level >= AST.JLS3) {
+		if (level >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.modifiers(), o.modifiers())) {
 				return false;
 			}
@@ -994,7 +994,7 @@ public class ASTMatcher {
 			return false;
 		}
 		ImportDeclaration o = (ImportDeclaration) other;
-		if (node.getAST().apiLevel >= AST.JLS3) {
+		if (node.getAST().apiLevel >= AST.JLS3_INTERNAL) {
 			if (node.isStatic() != o.isStatic()) {
 				return false;
 			}
@@ -1087,7 +1087,7 @@ public class ASTMatcher {
 				return false;
 			}
 		}
-		if (level >= AST.JLS3) {
+		if (level >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.modifiers(), o.modifiers())) {
 				return false;
 			}
@@ -1319,7 +1319,7 @@ public class ASTMatcher {
 		}
 		MethodRefParameter o = (MethodRefParameter) other;
 		int level = node.getAST().apiLevel;
-		if (level >= AST.JLS3) {
+		if (level >= AST.JLS3_INTERNAL) {
 			if (node.isVarargs() != o.isVarargs()) {
 				return false;
 			}
@@ -1365,7 +1365,7 @@ public class ASTMatcher {
 				return false;
 			}
 		}
-		if (level >= AST.JLS3) {
+		if (level >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.modifiers(), o.modifiers())) {
 				return false;
 			}
@@ -1409,7 +1409,7 @@ public class ASTMatcher {
 			return false;
 		}
 		MethodInvocation o = (MethodInvocation) other;
-		if (node.getAST().apiLevel >= AST.JLS3) {
+		if (node.getAST().apiLevel >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.typeArguments(), o.typeArguments())) {
 				return false;
 			}
@@ -1529,7 +1529,7 @@ public class ASTMatcher {
 			return false;
 		}
 		PackageDeclaration o = (PackageDeclaration) other;
-		if (node.getAST().apiLevel >= AST.JLS3) {
+		if (node.getAST().apiLevel >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeMatch(node.getJavadoc(), o.getJavadoc())) {
 				return false;
 			}
@@ -1824,7 +1824,7 @@ public class ASTMatcher {
 				return false;
 			}
 		}
-		if (level >= AST.JLS3) {
+		if (level >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.modifiers(), o.modifiers())) {
 				return false;
 			}
@@ -1880,7 +1880,7 @@ public class ASTMatcher {
 			return false;
 		}
 		SuperConstructorInvocation o = (SuperConstructorInvocation) other;
-		if (node.getAST().apiLevel >= AST.JLS3) {
+		if (node.getAST().apiLevel >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.typeArguments(), o.typeArguments())) {
 				return false;
 			}
@@ -1933,7 +1933,7 @@ public class ASTMatcher {
 			return false;
 		}
 		SuperMethodInvocation o = (SuperMethodInvocation) other;
-		if (node.getAST().apiLevel >= AST.JLS3) {
+		if (node.getAST().apiLevel >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.typeArguments(), o.typeArguments())) {
 				return false;
 			}
@@ -2127,7 +2127,7 @@ public class ASTMatcher {
 		TryStatement o = (TryStatement) other;
 		switch(node.getAST().apiLevel) {
 			case AST.JLS2_INTERNAL :
-			case AST.JLS3 :
+			case AST.JLS3_INTERNAL :
 				return (
 						safeSubtreeMatch(node.getBody(), o.getBody())
 							&& safeSubtreeListMatch(node.catchClauses(), o.catchClauses())
@@ -2171,7 +2171,7 @@ public class ASTMatcher {
 				return false;
 			}
 		}
-		if (level >= AST.JLS3) {
+		if (level >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.modifiers(), o.modifiers())) {
 				return false;
 			}
@@ -2297,7 +2297,7 @@ public class ASTMatcher {
 				return false;
 			}
 		}
-		if (level >= AST.JLS3) {
+		if (level >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.modifiers(), o.modifiers())) {
 				return false;
 			}
@@ -2359,7 +2359,7 @@ public class ASTMatcher {
 				return false;
 			}
 		}
-		if (level >= AST.JLS3) {
+		if (level >= AST.JLS3_INTERNAL) {
 			if (!safeSubtreeListMatch(node.modifiers(), o.modifiers())) {
 				return false;
 			}

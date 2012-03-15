@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -32,6 +32,13 @@ public class ASTRewritingTest extends AbstractJavaModelTests {
 	/** @deprecated using deprecated code */
 	private static final int AST_INTERNAL_JLS2 = AST.JLS2;
 
+	/**
+	 * Internal synonynm for deprecated constant AST.JSL3
+	 * to alleviate deprecation warnings.
+	 * @deprecated
+	 */
+	/*package*/ static final int JLS3_INTERNAL = AST.JLS3;
+	
 	protected IJavaProject project1;
 	protected IPackageFragmentRoot sourceFolder;
 
@@ -102,11 +109,11 @@ public class ASTRewritingTest extends AbstractJavaModelTests {
 	}
 
 	protected CompilationUnit createAST3(ICompilationUnit cu) {
-		return createAST(AST.JLS3, cu, false);
+		return createAST(JLS3_INTERNAL, cu, false);
 	}
 	
 	protected CompilationUnit createAST3(ICompilationUnit cu, boolean statementsRecovery) {
-		return createAST(AST.JLS3, cu, statementsRecovery);
+		return createAST(JLS3_INTERNAL, cu, statementsRecovery);
 	}
 	protected CompilationUnit createAST(int JLSLevel, ICompilationUnit cu, boolean statementsRecovery) {
 		return createAST(JLSLevel, cu, false, statementsRecovery);

@@ -21,6 +21,7 @@ import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
+import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.ReferenceContext;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -144,6 +145,17 @@ private void protectedHandle(
 // SH}
 	if (severity == ProblemSeverities.Ignore)
 		return;
+
+	if ((severity & ProblemSeverities.Optional) != 0 && problemId != IProblem.Task  && !this.options.ignoreSourceFolderWarningOption) {
+		ICompilationUnit cu = unitResult.getCompilationUnit();
+		try{
+			if (cu != null && cu.ignoreOptionalProblems())
+				return;
+		// workaround for illegal implementation of ICompilationUnit, see https://bugs.eclipse.org/372351
+		} catch (AbstractMethodError ex) {
+			// continue
+		}
+	}
 
 //{ObjectTeams: several kinds of filtering:
 	// some problems cannot be decided at the point of reporting, require recking:

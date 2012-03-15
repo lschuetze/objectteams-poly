@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -37,6 +37,13 @@ import org.eclipse.jdt.core.tests.model.AbstractJavaModelTests;
 
 public class ProfilingASTConvertionTest extends AbstractJavaModelTests {
 
+	/**
+	 * Internal synonynm for deprecated constant AST.JSL3
+	 * to alleviate deprecation warnings.
+	 * @deprecated
+	 */
+	/*package*/ static final int JLS3_INTERNAL = AST.JLS3;
+	
 	static class Result implements Comparable {
 		long length;
 		long time;
@@ -158,7 +165,7 @@ public class ProfilingASTConvertionTest extends AbstractJavaModelTests {
 			case AST.JLS2 :
 				System.out.print("JLS2");
 				break;
-			case AST.JLS3 :
+			case JLS3_INTERNAL :
 				System.out.print("JLS3");
 				break;
 		}
@@ -234,7 +241,7 @@ public class ProfilingASTConvertionTest extends AbstractJavaModelTests {
 	public void test0000() throws JavaModelException {
 		try {
 			RESOLVE_BINDINGS = true;
-			final int apiLevel = AST.JLS3;
+			final int apiLevel = JLS3_INTERNAL;
 			ASTParser parser = ASTParser.newParser(apiLevel);
 			parser.setResolveBindings(RESOLVE_BINDINGS);
 			int length = this.compilationUnits.length;
@@ -270,7 +277,7 @@ public class ProfilingASTConvertionTest extends AbstractJavaModelTests {
 	public void test0001() throws JavaModelException {
 		try {
 			RESOLVE_BINDINGS = true;
-			final int apiLevel = AST.JLS3;
+			final int apiLevel = JLS3_INTERNAL;
 			ASTParser parser = ASTParser.newParser(apiLevel);
 			parser.setResolveBindings(RESOLVE_BINDINGS);
 			long totalTime = 0;
@@ -309,7 +316,7 @@ public class ProfilingASTConvertionTest extends AbstractJavaModelTests {
 	public void test0002() throws JavaModelException {
 		try {
 			RESOLVE_BINDINGS = false;
-			final int apiLevel = AST.JLS3;
+			final int apiLevel = JLS3_INTERNAL;
 			ASTParser parser = ASTParser.newParser(apiLevel);
 			parser.setResolveBindings(RESOLVE_BINDINGS);
 			long totalTime = 0;
