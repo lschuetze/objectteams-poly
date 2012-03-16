@@ -110,6 +110,7 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 		
 
 		ReferenceContext getReferenceContext() -> get ReferenceContext referenceContext;
+		void setReferenceContext(ReferenceContext referenceContext) -> set ReferenceContext referenceContext;
 		
 		/** The callin entry into this role: analyze and report various access situations. */
 		@SuppressWarnings("basecall")
@@ -167,8 +168,11 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 							AdaptedBaseBundle info= (AdaptedBaseBundle) data;
 							if (info.isAdaptedBy(teamName)) {
 								// OK, no error
-								if (info.hasPackageSplit)
+								if (info.hasPackageSplit) {
+									ReferenceContext contextSave = getReferenceContext();
 									baseImportFromSplitPackage(imp, baseString); // just a warning
+									setReferenceContext(contextSave);
+								}
 								return true;
 							}
 							actualBases.add(info.getSymbolicName());
