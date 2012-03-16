@@ -45,7 +45,7 @@ import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
 public class ParameterMappingCallinTest extends FileBasedDOMTest 
 {
     public static final String TEST_PROJECT = "DOM_AST";
-	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS3;
+	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
 
 	private ASTParser _parser;
 	private ICompilationUnit _simpleTeam;
@@ -153,7 +153,7 @@ public class ParameterMappingCallinTest extends FileBasedDOMTest
 		ParameterMapping testObj = (ParameterMapping)parameterMappings.get(1);
 
 	    ParameterMapping clonedTestObject = 
-			(ParameterMapping)ASTNode.copySubtree(AST.newAST(AST.JLS3), testObj);
+			(ParameterMapping)ASTNode.copySubtree(AST.newAST(AST.JLS4), testObj);
 		boolean actual = testObj.subtreeMatch(new ASTMatcher(), clonedTestObject);
 
         assertTrue("Copy of subtree not correct", actual);

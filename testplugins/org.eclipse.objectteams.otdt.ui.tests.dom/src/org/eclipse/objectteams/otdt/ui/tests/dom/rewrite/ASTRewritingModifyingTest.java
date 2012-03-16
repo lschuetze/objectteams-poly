@@ -43,7 +43,7 @@ public class ASTRewritingModifyingTest
 	public CompilationUnit createCU(ICompilationUnit unit, boolean resolveBindings) {
 	
 		try {
-			ASTParser c = ASTParser.newParser(AST.JLS3);
+			ASTParser c = ASTParser.newParser(AST.JLS4);
 			c.setSource(unit);
 			c.setResolveBindings(resolveBindings);
 			ASTNode result = c.createAST(null);
@@ -58,7 +58,7 @@ public class ASTRewritingModifyingTest
 		if (source == null) {
 			throw new IllegalArgumentException();
 		}
-		ASTParser c = ASTParser.newParser(AST.JLS3);
+		ASTParser c = ASTParser.newParser(AST.JLS4);
 		c.setSource(source);
 		ASTNode result = c.createAST(null);
 		return (CompilationUnit) result;

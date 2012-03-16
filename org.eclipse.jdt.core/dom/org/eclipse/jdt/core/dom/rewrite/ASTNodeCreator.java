@@ -436,7 +436,7 @@ public class ASTNodeCreator
      */
     public static Expression createExpression(AST ast, String expr)
     {
-        ASTParser parser = ASTParser.newParser(AST.JLS4);
+        ASTParser parser = ASTParser.newParser(ast.apiLevel());
         parser.setKind(ASTParser.K_EXPRESSION);
         parser.setSource(expr.toCharArray());
         ASTNode parsedNode = parser.createAST(null);

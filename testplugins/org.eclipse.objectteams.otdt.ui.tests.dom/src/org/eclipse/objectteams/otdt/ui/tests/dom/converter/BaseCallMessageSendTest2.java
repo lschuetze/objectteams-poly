@@ -46,7 +46,7 @@ public class BaseCallMessageSendTest2 extends FileBasedDOMTest
 {
     
     public static final String TEST_PROJECT = "DOM_AST";
-    private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS3;
+    private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
 
     // Java class used for all within tests
     private TypeDeclaration _role;

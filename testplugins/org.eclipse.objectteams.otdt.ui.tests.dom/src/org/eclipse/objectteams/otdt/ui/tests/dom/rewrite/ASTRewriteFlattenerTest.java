@@ -59,7 +59,7 @@ import org.eclipse.jdt.internal.core.dom.rewrite.RewriteEventStore;
 public class ASTRewriteFlattenerTest extends TestCase {
     
     public static final String TEST_PROJECT = "DOM_AST";
-    private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS3;
+    private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
     
     
     private ASTRewriteFlattener _rewriteFlattener;

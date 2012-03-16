@@ -31,7 +31,7 @@ import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
 public class DOMRegressionTests extends FileBasedDOMTest {
 	
     public static final String TEST_PROJECT = "DOM_AST";
-    private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS3;
+    private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
 
     
 	public DOMRegressionTests(String name) {

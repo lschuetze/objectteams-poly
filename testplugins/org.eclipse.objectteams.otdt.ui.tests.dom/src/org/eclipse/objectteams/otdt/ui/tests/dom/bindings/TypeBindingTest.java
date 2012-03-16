@@ -48,7 +48,7 @@ import org.eclipse.objectteams.otdt.ui.tests.dom.TypeDeclarationFinder;
 public class TypeBindingTest extends FileBasedDOMTest
 {
 	public static final String TEST_PROJECT = "DOM_AST";
-	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS3;
+	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
 	
 	private ASTParser _parser;
 	private ICompilationUnit _cuTA;

@@ -44,7 +44,7 @@ import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
 public class FieldAccessSpecTest extends FileBasedDOMTest
 {
     public static final String TEST_PROJECT = "DOM_AST";
-	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS3;
+	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
 
 	private ASTParser _parser;
 	private ICompilationUnit _simpleTeam;
@@ -163,7 +163,7 @@ public class FieldAccessSpecTest extends FileBasedDOMTest
 		_testObj = (FieldAccessSpec)mapping.getBaseMappingElement();		
 		
 		FieldAccessSpec clonedTestObject = 
-			(FieldAccessSpec)ASTNode.copySubtree(AST.newAST(AST.JLS3), _testObj);
+			(FieldAccessSpec)ASTNode.copySubtree(AST.newAST(AST.JLS4), _testObj);
 		
 		boolean actual = _testObj.subtreeMatch(new ASTMatcher(), clonedTestObject);
 		assertTrue("Copy of subtree not correct", actual);

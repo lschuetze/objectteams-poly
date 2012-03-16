@@ -45,7 +45,7 @@ import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
 public class RoleTypeDeclarationTest extends FileBasedDOMTest
 {
 	public static final String TEST_PROJECT = "DOM_AST";
-	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS3;
+	private static final int JAVA_LANGUAGE_SPEC_LEVEL = AST.JLS4;
 	
 	private ASTParser _parser;
 	private ICompilationUnit _simpleTeam;
@@ -217,7 +217,7 @@ public class RoleTypeDeclarationTest extends FileBasedDOMTest
     public void testCopySubtree1()
     {
         RoleTypeDeclaration clonedTestObject = 
-            (RoleTypeDeclaration)ASTNode.copySubtree(AST.newAST(AST.JLS3), _testObj1);
+            (RoleTypeDeclaration)ASTNode.copySubtree(AST.newAST(AST.JLS4), _testObj1);
 
         boolean actual = _testObj1.subtreeMatch(new ASTMatcher(), clonedTestObject);
         

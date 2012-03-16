@@ -188,7 +188,7 @@ public class ASTRewritingModifyingTeamTest extends ASTRewritingModifyingTest {
 		 	"	}\n" + 
 		 	"}\n";
 		
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(AST.JLS4);
 		parser.setKind(ASTParser.K_STATEMENTS);
 		parser.setSource(generated.toCharArray());
 		
@@ -203,7 +203,7 @@ public class ASTRewritingModifyingTeamTest extends ASTRewritingModifyingTest {
 			"	protected class OtherRole {}\n" +
 			"	void foo() { System.out.println(this); }\n" +
 			"}\n";
-		parser = ASTParser.newParser(AST.JLS3);
+		parser = ASTParser.newParser(AST.JLS4);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setSource(existing.toCharArray());
 		CompilationUnit _astCU = (CompilationUnit)parser.createAST(null);
@@ -245,7 +245,7 @@ public class ASTRewritingModifyingTeamTest extends ASTRewritingModifyingTest {
 		 	"	}\n" + 
 		 	"}\n";
 		
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(AST.JLS4);
 		parser.setKind(ASTParser.K_STATEMENTS);
 		parser.setSource(generated.toCharArray());
 
@@ -261,7 +261,7 @@ public class ASTRewritingModifyingTeamTest extends ASTRewritingModifyingTest {
 			"	protected class OtherRole {}\n" +
 			"	void foo() { System.out.println(this); }\n" +
 			"}\n";
-		parser = ASTParser.newParser(AST.JLS3);
+		parser = ASTParser.newParser(AST.JLS4);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setSource(existing.toCharArray());
 		CompilationUnit _astCU = (CompilationUnit)parser.createAST(null);
@@ -302,7 +302,7 @@ public class ASTRewritingModifyingTeamTest extends ASTRewritingModifyingTest {
 		 	"       void bar() { nop(); }\n" +
 		 	"}\n";
 		
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(AST.JLS4);
 		parser.setKind(ASTParser.K_STATEMENTS);
 		parser.setSource(generated.toCharArray());
 
@@ -315,7 +315,7 @@ public class ASTRewritingModifyingTeamTest extends ASTRewritingModifyingTest {
 		// create a CU to copy into:
 		String existing =
 			"import javax.swing.JFrame;\n";
-		parser = ASTParser.newParser(AST.JLS3);
+		parser = ASTParser.newParser(AST.JLS4);
 		parser.setKind(ASTParser.K_COMPILATION_UNIT);
 		parser.setSource(existing.toCharArray());
 		CompilationUnit _astCU = (CompilationUnit)parser.createAST(null);
