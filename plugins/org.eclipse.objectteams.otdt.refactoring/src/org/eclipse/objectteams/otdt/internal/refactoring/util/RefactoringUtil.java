@@ -1241,7 +1241,7 @@ public class RefactoringUtil implements ITeamConstants {
 
 		ICompilationUnit source = member.getCompilationUnit();
 
-		ASTParser parser = ASTParser.newParser(AST.JLS3);
+		ASTParser parser = ASTParser.newParser(AST.JLS4);
 		parser.setSource(source);
 		parser.setResolveBindings(true);
 		CompilationUnit astRoot = (CompilationUnit) parser.createAST(null);

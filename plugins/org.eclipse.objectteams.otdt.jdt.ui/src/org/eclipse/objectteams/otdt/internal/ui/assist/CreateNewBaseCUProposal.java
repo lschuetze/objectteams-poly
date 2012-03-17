@@ -18,7 +18,6 @@ package org.eclipse.objectteams.otdt.internal.ui.assist;
 import org.eclipse.jdt.core.dom.LiftingType;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jface.text.IDocument;
 

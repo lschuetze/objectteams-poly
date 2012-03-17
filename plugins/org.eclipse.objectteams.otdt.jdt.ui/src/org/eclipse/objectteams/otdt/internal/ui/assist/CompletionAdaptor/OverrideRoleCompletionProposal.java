@@ -112,7 +112,7 @@ protected class OverrideRoleCompletionProposal extends JavaTypeCompletionProposa
 
 		recoveredDocument.set(new String(content));
 
-		final ASTParser parser= ASTParser.newParser(AST.JLS3);
+		final ASTParser parser= ASTParser.newParser(AST.JLS4);
 		parser.setResolveBindings(true);
 		parser.setStatementsRecovery(true);
 		parser.setSource(content);

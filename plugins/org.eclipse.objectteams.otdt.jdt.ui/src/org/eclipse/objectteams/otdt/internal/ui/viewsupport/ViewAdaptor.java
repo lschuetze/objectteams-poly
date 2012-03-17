@@ -61,6 +61,7 @@ import static org.eclipse.jdt.ui.JavaElementLabels.COLORIZE;
 import static org.eclipse.jdt.ui.JavaElementLabels.CONCAT_STRING;
 import static org.eclipse.jdt.ui.JavaElementLabels.M_POST_QUALIFIED;
 import static org.eclipse.jdt.ui.JavaElementLabels.T_FULLY_QUALIFIED;
+import static org.eclipse.jdt.ui.JavaElementLabels.M_FULLY_QUALIFIED;
 import static org.eclipse.objectteams.otdt.internal.ui.viewsupport.DummyDecorator.*;
 import static org.eclipse.objectteams.otdt.ui.ImageConstants.*;
 

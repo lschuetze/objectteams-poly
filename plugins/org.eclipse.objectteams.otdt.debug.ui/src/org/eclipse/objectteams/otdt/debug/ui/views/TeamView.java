@@ -71,8 +71,6 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 	private static final String ACTION_UPDATE_TEAMVIEW = "action.update.teamview"; //$NON-NLS-1$
 	private String _sortMode;
 	private boolean _updatePermantently = false;
-	
-	private static boolean DEBUG= false;
 
 	public TeamView()
 	{
@@ -91,10 +89,7 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 	}
 
 	@Override // COPY_AND_PASTE from super, edited:
-	public void contextActivated(ISelection selection)
-	{
-		if (DEBUG) System.out.println("TV: contextActivated: "+selection); //$NON-NLS-1$
-		
+	public void contextActivated(ISelection selection) {	
 		if (!isAvailable() || !isVisible()) {
 			return;
 		}
@@ -102,25 +97,19 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 		if (selection instanceof IStructuredSelection) {
 //ObjectTeams: if there are multiselected DebugElements - show nothing
 			IStructuredSelection structuredSelection = (IStructuredSelection)selection;
-			if(structuredSelection.size() == 1)
-  // orig:				
-				setViewerInput(structuredSelection.getFirstElement());
-  // :giro
-			else
+			if(structuredSelection.size() == 1) {
+				super.contextActivated(structuredSelection);
+				return;
+			} else {
 				setViewerInput(null);
+			}
 // carp+SH}
 		}
 		showViewer();
-
-//		updateAction(VARIABLES_FIND_ELEMENT_ACTION);
-		updateAction(FIND_ACTION);
 	}
 	
 	@Override // COPY_AND_PASTE from super, edited:
-	protected void setViewerInput(Object context)
-	{
-		if (DEBUG) System.out.println("TV: setViewerInput: "+context); //$NON-NLS-1$
-
+	protected void setViewerInput(Object context) {
 //{ObjectTeams
 		if(!isSuspended(context) && !_updatePermantently)
 			return;
@@ -128,15 +117,10 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 		
 		if (context == null) {
 			// Clear the detail pane
-//{ObjectTeams: workaround invisible field fDetailPane:
-	/* orig:
-			fDetailPane.display(null);
-	  :giro */
 			refreshDetailPaneContents();
-// SH}
 		}
 		
-		Object current= getViewer().getInput();
+		Object current = getViewer().getInput();
 		
 		if (current == null && context == null) {
 			return;
@@ -162,6 +146,7 @@ public class TeamView extends VariablesView implements ILaunchesListener2
 		
 		showViewer();
 		getViewer().setInput(context);
+		updateObjects();
 	}
 
 	private boolean isSuspended(Object context)

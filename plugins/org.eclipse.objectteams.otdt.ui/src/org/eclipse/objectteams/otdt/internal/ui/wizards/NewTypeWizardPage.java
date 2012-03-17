@@ -602,7 +602,7 @@ public abstract class NewTypeWizardPage extends org.eclipse.jdt.ui.wizards.NewTy
 					return status;
 				}
 				String typeDeclaration= "class " + typeNameWithParameters + " {}"; //$NON-NLS-1$//$NON-NLS-2$
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				ASTParser parser= ASTParser.newParser(AST.JLS4);
 				parser.setSource(typeDeclaration.toCharArray());
 				parser.setProject(root.getJavaProject());
 				CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
