@@ -452,13 +452,15 @@ public class CallinMarkerTests extends FileBasedUITest
 	        while(this._creator.isCreatingMarkersFor(resource))
 	        	Thread.sleep(100);
 	        
-	        assertEquals("Unexpeted number of log entries", 1, myLogListener.status.size());
-	        assertEquals("Unexpected Log", 
-	        			 "Status ERROR: org.eclipse.ui code=0 " +
-	        			 "Unable to create editor ID org.eclipse.jdt.ui.ClassFileEditorNoSource: " +
+	        assertEquals("Unexpeted number of log entries", 2, myLogListener.status.size());
+	        assertEquals("Unexpected Log[0]", 
+	        			 "Status ERROR: org.eclipse.ui code=4 Unable to create part null",
+	        			 myLogListener.status.get(0).toString());
+	        assertEquals("Unexpected Log[1]", 
+	        			 "Status ERROR: org.eclipse.jdt.ui code=995 " +
 	        			 "The class file is not on the classpath " +
 	        			 "org.eclipse.core.runtime.CoreException: The class file is not on the classpath", 
-	        			 myLogListener.status.get(0).toString());
+	        			 myLogListener.status.get(1).toString());
 	
 	        IMarker[] markers = getCallinMarkers(resource);
 	        assertEquals("Should have no markers", markers.length, 0);
