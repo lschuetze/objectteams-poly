@@ -7,14 +7,14 @@
 </head>
 <body>
 <h1>OTDT 2.1 - New and Noteworthy</h1>
-<div class="navigation"><i>Status: 2.1 M4</i></div>
+<div class="navigation"><i>Status: 2.1 M5</i></div>
 <div class="navigation">On this page:
 <!--a href="#metrics">&bull; Metrics Plug-in</a-->
 <!--a href="#configuration">&bull; Configuration</a-->
 <!--a href="#views">&bull; Views/Dialogs</a--> 
 <a href="#assist">&bull; Content Assist</a>  
 <!--a href="#refactor">&bull; Refactoring</a-->  
-<!--a href="#formatting">&bull; Formatting</a-->
+<a href="#formatting">&bull; Formatting</a>
 <a href="#debug">&bull; Run/Debug</a>
 <a href="#language">&bull; Language</a>
 <!--a href="#api">&bull; API</a-->
@@ -80,6 +80,33 @@
     	<p><img alt="Must implement .. abstract method" src="../images/screenshots/NN21/ImplementFromTSuper.png"></p>
     	<p>Invoking the quick fix (e.g., from the error hover) produces this change:</p>
     	<p><img alt="Result of &quot;Add unimplemented methods&quot; quick fix" src="../images/screenshots/NN21/ImplementFromTSuper1.png"></p>
+    </td>
+  </tr>
+  <tr>
+    <td><p align="right"><b>Improved handling of base imports</b><br>
+        <span class="since">since&nbsp;2.1M5</span><br>
+        <a class="buglink" title="improve handling of base imports" href="https://bugs.eclipse.org/356003">356003</a></p></td>
+    <td><p>So-called "base imports" are used in OT/J to distinguish those classes that are imported only as a base class of
+    		a role in the current team, disallowing direct use within the implementation of the team and its roles (see <a class="otjldlink" href="http://www.objectteams.org/def/1.3/s2.html#s2.1.2.d">OTJLD &sect;2.1.2(d)</a>).
+    		The umbrella bug 356003 lists several individual improvements to make content assist, wizards, and refactoring
+    		better aware of the semantic rules of base imports.
+    		In all these situations the correct base import or regular imported is now created,
+    		and base imports are correctly updated if mandated by a refactoring.
+    	</p>
+    </td>
+  </tr>
+  <tr><td colspan="2" id="formatting"><h2>Formatting</h2></td></tr>
+  <tr>
+    <td><p align="right"><b>Basid code formatting for OT/J</b><br>
+        <span class="since">since&nbsp;2.1M5</span><br>
+        <a class="buglink" title="Formatter fails silently on big Teams" href="https://bugs.eclipse.org/331731">331731</a></p></td>
+    <td><p>In previous versions support for code formatting for OT/J was incomplete, and the occurrence of some
+    		constructs like <code class="keyword">precedence</code> made the formatter silently fail.
+    		As of 2.1 M5 code formatting for OT/J now generally works for all language constructs.
+    		Results may not be optimal for all syntax elements because no special preference options have been introduced
+    		for elements like callin / callout. However, users who don't object to the default formatting style
+    		can now rely on automatic formatting of roles and teams. 
+    	</p>
     </td>
   </tr>
 <!--
@@ -180,7 +207,7 @@
     <td><p>
 			An internal data structure woven into each base class was initialized eagerly causing a performance penalty.
 			This eager initialization could be removed completely, lazy initialization was already implemented.
-			For situations where lots of base objects were created for which now role was ever created
+			For situations where lots of base objects were created for which no role was ever created
 			this results in a speedup of up-to 3.5 (from a micro benchmark).
     	</p>
     </td>
