@@ -46,8 +46,11 @@ import org.eclipse.pde.internal.core.plugin.PluginAttribute;
 import org.eclipse.pde.internal.core.schema.SchemaRegistry;
 import org.eclipse.pde.internal.core.util.IdUtil;
 import org.eclipse.pde.internal.ui.PDEPlugin;
+import org.eclipse.pde.internal.ui.PDEUIMessages;
+import org.eclipse.pde.internal.ui.parts.StructuredViewerPart;
 import org.eclipse.pde.internal.ui.util.PDEJavaHelperUI;
 
+import base org.eclipse.pde.internal.ui.editor.TreeSection;
 import base org.eclipse.pde.internal.ui.editor.plugin.ExtensionsSection;
 import base org.eclipse.pde.internal.ui.editor.plugin.JavaAttributeWizard;
 import base org.eclipse.pde.internal.ui.editor.plugin.rows.ClassAttributeRow;
@@ -63,9 +66,27 @@ public team class ExtensionEditorAdaptor
 {
 	// role for XMLInsertionComputer obsoleted by patch in https://bugs.eclipse.org/bugs/show_bug.cgi?id=195763
 	
+	// hot fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=374789
+	protected class FixBug374789 playedBy TreeSection {
+
+		void createViewerPart(String[] buttonLabels) <- replace StructuredViewerPart createViewerPart(String[] buttonLabels);
+
+		callin void createViewerPart(String[] buttonLabels) {
+			if (buttonLabels != null && buttonLabels.length > 0 
+					&& PDEUIMessages.ManifestEditor_DetailExtension_new == buttonLabels[0] // "==" indeed, we don't want to muddle with other equal strings.
+					&& ExtensionsSection.getButtonAdd() == 1) {
+				int len = buttonLabels.length;
+				System.arraycopy(buttonLabels, 0, buttonLabels = new String[len+1], 1, len);
+			}
+			base.createViewerPart(buttonLabels);
+		}
+	}
+
 	/* avoid to use the icon attribute for the label, too. */
 	protected class ExtensionsSection playedBy ExtensionsSection 
 	{
+		protected int getButtonAdd() -> get int BUTTON_ADD;
+		
 		String resolveObjectName(SchemaRegistry schemaRegistry, Object obj) <- replace String resolveObjectName(SchemaRegistry schemaRegistry, Object obj);
 		@SuppressWarnings("basecall")
 		callin static String resolveObjectName(SchemaRegistry schemaRegistry, Object obj) {
@@ -141,6 +162,7 @@ public team class ExtensionEditorAdaptor
 		String stripShortcuts(String input) -> String stripShortcuts(String input);
 	}
 
+	
 	protected class ClassAttributeRow playedBy ClassAttributeRow {
 		doOpenSelectionDialog <- replace doOpenSelectionDialog;
 		@SuppressWarnings({ "inferredcallout", "basecall" })
