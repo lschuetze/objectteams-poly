@@ -207,7 +207,7 @@ public class NewRoleWizardPage extends NewTypeWizardPage
 	private void setBaseClassCompletionContext(JavaTypeCompletionProcessor baseClassCompletionProcessor) {
 		if (getEnclosingType() != null) {
 			// to make it a role of this team fake a role file in the corresponding team package:
-			String           teamName = getEnclosingType().getFullyQualifiedName();
+			String           teamName = getEnclosingType().getFullyQualifiedName().replace('$', '.');
 			IPackageFragment currPack = getEnclosingType().getPackageFragment();
 			IPackageFragment teamPack = ((IPackageFragmentRoot) currPack.getParent()).getPackageFragment(teamName);
 			ICompilationUnit cu       = teamPack.getCompilationUnit(DUMMY_CU_NAME);
