@@ -4,7 +4,7 @@
 	
 	<groupId>org.eclipse</groupId>
 	<artifactId>objectteams-parent-pom</artifactId>
-	<version>2.0.1-SNAPSHOT</version>
+	<version>2.1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	
 	<name>Object Teams parent pom</name>
@@ -86,7 +86,7 @@
 
 		<!-- Versions of dependencies: -->
 		<bcel.version>5.2</bcel.version>
-		<tycho.version>0.11.1</tycho.version>
+		<tycho.version>0.14.1</tycho.version>
 		
 		<!-- Absolut paths for providing startup arguments to the JVM -->
 		<otj.otre.location>${settings.localRepository}/org/eclipse/objectteams-runtime/${otj.version}/objectteams-runtime-${otj.version}.jar</otj.otre.location>
@@ -143,13 +143,13 @@
 					<dependencies>
 						<!-- compile time only dependencies: -->
 						<dependency>
-							<groupId>org.sonatype.tycho</groupId>
+							<groupId>org.eclipse.tycho</groupId>
 							<artifactId>tycho-compiler-jdt</artifactId>
 							<version>${tycho.version}</version>
 							<exclusions>
 								<!-- Exclude the original JDT/Core to be replaced by the OT/J variant: -->
 								<exclusion>
-									<groupId>org.sonatype.tycho</groupId>
+									<groupId>org.eclipse.tycho</groupId>
 									<artifactId>org.eclipse.jdt.core</artifactId>
 								</exclusion>
 							</exclusions>
