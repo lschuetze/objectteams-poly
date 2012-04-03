@@ -52,9 +52,9 @@
 	<properties>
 		<!-- Object Teams versions, update manually: 					-->
 		<!--   version of the ecotj jar file:			 				-->
-		<ecotj.version>R-2.0.0-201106070718</ecotj.version> 
+		<ecotj.version>S-2.1.0M6-201203201245</ecotj.version> 
 		<!--   version of the org.eclipse.objectteams.runtime plugin:	-->
-		<otre.version>2.0.0.201106070730</otre.version> 	
+		<otre.version>2.1.0.201201311800</otre.version> 	
 		
 		<!-- locate the jar files to install/deploy: -->
 	    <ecotj.jar.file>${ecj.export.dir}/ecotj-${ecotj.version}.jar</ecotj.jar.file>

@@ -82,7 +82,7 @@
     	<project-repository-path>trunk/maven/infrastructure/parent-pom</project-repository-path>
 
 		<!-- Our Version: -->
-		<otj.version>2.0.0</otj.version>
+		<otj.version>2.1.0-SNAPSHOT</otj.version>
 
 		<!-- Versions of dependencies: -->
 		<bcel.version>5.2</bcel.version>
