@@ -300,12 +300,16 @@ public class OTModelManager
 	 */
     public static IOTType getOTElement(IType type)
     {
-        return MAPPING.getOTElement(type);
+    	if (type.exists()) // ensure opened
+    		return MAPPING.getOTElement(type);
+    	return null;
     }
 
     public static boolean hasOTElementFor(IType type)
     {
-        return MAPPING.hasOTElementFor(type);
+    	if (type.exists()) // ensure opened
+    		return MAPPING.hasOTElementFor(type);
+    	return false;
     }
         
     public static void removeOTElement(IType type)

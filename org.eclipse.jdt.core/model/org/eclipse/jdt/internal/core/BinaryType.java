@@ -21,6 +21,7 @@ import java.util.HashMap;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.core.*;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -57,7 +58,7 @@ public class BinaryType extends BinaryMember implements IType, SuffixConstants {
 	// which would otherwise cause StackOverflow during OTModelManager.addType(..)
 	// ((IBinaryType) getElementInfo()).getEnclosingTypeName();
 	private boolean enclosingNameSet = false;
-	private char[] enclosingTypeName = null;
+	private char[] storedEnclosingTypeName = null;
 	private boolean isRole = false;
 
 	protected BinaryType(char[] enclosingTypeName, JavaElement parent, String name) {
@@ -66,8 +67,19 @@ public class BinaryType extends BinaryMember implements IType, SuffixConstants {
 			this.isRole = true;
 			this.name = this.name.substring(IOTConstants.OT_DELIM_LEN);
 		}
-		this.enclosingTypeName = enclosingTypeName;
+		this.storedEnclosingTypeName = enclosingTypeName;
 		this.enclosingNameSet = true;
+	}
+
+	void updateEnclosingTypeName(@NonNull char[] enclosingTypeName) {
+		if (!this.enclosingNameSet && this.storedEnclosingTypeName == null) {
+			if (this.name.startsWith(IOTConstants.OT_DELIM)) {
+				this.isRole = true;
+				this.name = this.name.substring(IOTConstants.OT_DELIM_LEN);
+			}
+			this.storedEnclosingTypeName = enclosingTypeName;
+			this.enclosingNameSet = true;			
+		}
 	}
 // SH}
 
@@ -261,10 +273,10 @@ public IType getDeclaringType() {
 //{ObjectTeams: try not to call getElementInfo().
 // orig:	char[] enclosingTypeName = ((IBinaryType) getElementInfo()).getEnclosingTypeName();
 			if (!this.enclosingNameSet) {
-				this.enclosingTypeName = ((IBinaryType) getElementInfo()).getEnclosingTypeName();
+				this.storedEnclosingTypeName = ((IBinaryType) getElementInfo()).getEnclosingTypeName();
 				this.enclosingNameSet = true;
 			}
-			char[] enclosingTypeName = this.enclosingTypeName;
+			char[] enclosingTypeName = this.storedEnclosingTypeName;
 // SH}
 			if (enclosingTypeName == null) {
 				return null;

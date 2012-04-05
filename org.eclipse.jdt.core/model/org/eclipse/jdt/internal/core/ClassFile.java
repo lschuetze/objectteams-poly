@@ -565,6 +565,14 @@ IType getType(char[] enclosingTypeName) {
 // orig:
 	if (this.binaryType == null) {
 // :giro
+	  if (enclosingTypeName == null) {
+		  // maybe we can recover the enclosing type name?
+		  int lastDollar = this.name.lastIndexOf('$');
+		  if (lastDollar != -1) {
+			  String binaryParentName = this.parent.getElementName().replace('.', '/');
+			  enclosingTypeName = (binaryParentName+'/'+this.name.substring(0, lastDollar)).toCharArray();
+		  }
+	  }
 	  if (enclosingTypeName != null)
 		this.binaryType = new BinaryType(enclosingTypeName, this, getTypeName());
 	  else
@@ -576,6 +584,11 @@ IType getType(char[] enclosingTypeName) {
 // SH}
 
 	}
+//{ObjectTeams: was enclosingTypeName missing when generating binaryType?
+	else if (enclosingTypeName != null) {
+		this.binaryType.updateEnclosingTypeName(enclosingTypeName);
+	}
+// SH}
 	return this.binaryType;
 }
 public String getTypeName() {
