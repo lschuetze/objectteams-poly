@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.core;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
@@ -298,17 +299,21 @@ public class OTModelManager
 	 * 
 	 * @return corresponding OTM element or null if no such element exists
 	 */
-    public static IOTType getOTElement(IType type)
+    public static IOTType getOTElement(@Nullable IType type)
     {
-    	if (type.exists()) // ensure opened
+    	if (type != null) {
+    		type.exists(); // ensure opened
     		return MAPPING.getOTElement(type);
+    	}
     	return null;
     }
 
-    public static boolean hasOTElementFor(IType type)
+    public static boolean hasOTElementFor(@Nullable IType type)
     {
-    	if (type.exists()) // ensure opened
-    		return MAPPING.hasOTElementFor(type);
+    	if (type != null) {
+			type.exists(); // ensure opened
+			return MAPPING.hasOTElementFor(type);
+		}
     	return false;
     }
         

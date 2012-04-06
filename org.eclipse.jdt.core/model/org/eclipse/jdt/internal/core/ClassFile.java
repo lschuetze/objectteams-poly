@@ -568,9 +568,20 @@ IType getType(char[] enclosingTypeName) {
 	  if (enclosingTypeName == null) {
 		  // maybe we can recover the enclosing type name?
 		  int lastDollar = this.name.lastIndexOf('$');
-		  if (lastDollar != -1) {
+		  isMemberType: if (lastDollar != -1) {
+			  String enclosingName = this.name.substring(0, lastDollar);
+			  lastDollar = enclosingName.lastIndexOf('$');
+			  if (lastDollar != -1) {
+				  String previousSegment = enclosingName.substring(lastDollar+1);
+				  try {
+					  Integer.parseInt(previousSegment);
+					  break isMemberType; // s.t. like Outer$1$Local, i.e., not a member type
+				  } catch (NumberFormatException e) {
+					  // nop
+				  }
+			  }
 			  String binaryParentName = this.parent.getElementName().replace('.', '/');
-			  enclosingTypeName = (binaryParentName+'/'+this.name.substring(0, lastDollar)).toCharArray();
+			  enclosingTypeName = (binaryParentName+'/'+enclosingName).toCharArray();
 		  }
 	  }
 	  if (enclosingTypeName != null)
