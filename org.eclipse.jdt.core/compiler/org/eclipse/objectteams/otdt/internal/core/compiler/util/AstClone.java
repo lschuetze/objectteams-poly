@@ -326,8 +326,6 @@ public class AstClone
 
     /**
      * Copy all source locations from srcMethod to generated tgtMethod
-     * @param method
-     * @param newmethod
      */
     public static void copySrcLocation(
             AbstractMethodDeclaration srcMethod,

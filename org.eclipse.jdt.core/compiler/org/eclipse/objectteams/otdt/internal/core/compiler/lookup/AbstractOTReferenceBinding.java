@@ -125,7 +125,7 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 	}
 	/**
 	 * @param cpInhSrcs use this set to filter out duplicates due to diamond copy inheritance.
-	 * @return
+	 * @return a nonnull map from qualified callin names to callin bindings.
 	 */
 	HashMap<String, CallinCalloutBinding> internalGetCallins(HashSet<CallinCalloutBinding> cpInhSrcs)
 	{

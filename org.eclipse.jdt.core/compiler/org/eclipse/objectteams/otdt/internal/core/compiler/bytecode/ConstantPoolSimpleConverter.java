@@ -40,8 +40,7 @@ public class ConstantPoolSimpleConverter extends ClassFileStruct {
 
 	/**
 	 * @param srcRole    where the byte code is read from
-	 * @param srcBytes   bytes to read from
-	 * @param srcOffset  offset into srcBytes
+	 * @param srcMethod  method being copied
 	 * @param destBytes  where to write to
 	 * @param dstClassFile ClassFile of the destination class
 	 */

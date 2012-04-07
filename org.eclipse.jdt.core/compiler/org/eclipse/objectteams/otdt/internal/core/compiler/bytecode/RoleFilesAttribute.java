@@ -37,11 +37,6 @@ public class RoleFilesAttribute extends ListValueAttribute {
 
 	char[][] roleNames;
 
-	/**
-	 * @param name
-	 * @param count
-	 * @param elementSize
-	 */
 	public RoleFilesAttribute(char[][] names) {
 		super(IOTConstants.ROLE_FILES, names.length, 2);
 		this.roleNames = names;

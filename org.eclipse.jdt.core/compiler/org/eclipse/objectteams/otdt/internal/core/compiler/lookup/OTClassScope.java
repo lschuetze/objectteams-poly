@@ -82,8 +82,8 @@ public class OTClassScope extends ClassScope {
 	/**
 	 * This factory method is used for nested team types only.
 	 *
-	 * @param unitScope
-	 * @param otType
+	 * @param parent parent scope
+	 * @param otType type for which to create the new scope
 	 * @return a fresh OTClassScope
 	 */
 	public static OTClassScope createMemberOTClassScope(ClassScope parent, TypeDeclaration otType)

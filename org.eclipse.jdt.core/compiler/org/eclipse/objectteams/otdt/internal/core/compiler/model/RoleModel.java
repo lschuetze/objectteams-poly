@@ -979,8 +979,6 @@ public class RoleModel extends TypeModel
 
 	/**
 	 * Retrieve the known sub roles (including this) as determined by RoleHierarchyAnalyzer.analyze().
-	 *
-	 * @param subRoles
 	 */
 	public RoleModel[] getSubRoles() {
 		return this._subRoles;
@@ -1146,8 +1144,8 @@ public class RoleModel extends TypeModel
 	}
 
 	/**
-	 * @param field
-	 * @param newField
+	 * @param srcField a synthetic field from tsuper
+	 * @param newField the synthetic new field copy 
 	 */
 	public void addSyntheticFieldMapping(FieldBinding srcField, FieldBinding newField) {
 		this._syntheticMap.put(srcField, newField);

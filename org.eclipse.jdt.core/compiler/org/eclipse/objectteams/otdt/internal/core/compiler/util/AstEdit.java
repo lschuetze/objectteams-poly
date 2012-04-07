@@ -349,9 +349,6 @@ public class AstEdit {
 	/**
 	 * Adds a TypeDeclaration to a CompilationUnitDeclaration and link back.
 	 * (no further processing besides array growing).
-     *
-	 * @param compilationUnitDeclaration
-	 * @param typeDeclaration
 	 */
 	public static void addTypeDeclaration(
             CompilationUnitDeclaration unitDeclaration,

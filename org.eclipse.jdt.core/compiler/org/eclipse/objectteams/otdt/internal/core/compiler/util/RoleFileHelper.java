@@ -35,6 +35,7 @@ import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 
 /**
@@ -61,7 +62,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinhe
  * <li>If eager loading misses a role file that is needed later,
  *     {@link SourceTypeBinding#findTypeInTeamPackage} may retrieve a role file via the team package.
  *     Roles found this way are remembered using {@link TeamModel#addKnownRoleFile} and try to
- *     catch up using {@link Dependencies.lateRolesCatchup} and {@link CopyInheritance#copyLateRole}.
+ *     catch up using {@link Dependencies#lateRolesCatchup} and {@link CopyInheritance#copyLateRole}.
  * </ul>
  *
  * @author stephan

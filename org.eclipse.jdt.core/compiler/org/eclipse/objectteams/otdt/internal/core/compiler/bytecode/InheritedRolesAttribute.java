@@ -40,7 +40,7 @@ public class InheritedRolesAttribute extends ListValueAttribute {
     private ReferenceBinding[] _roles;
 
     /**
-     * @param type the team whose roles should be stored.
+     * @param teamBinding the team whose roles should be stored.
      */
     public InheritedRolesAttribute(ReferenceBinding teamBinding) {
         super(IOTConstants.INHERITED_ROLES,

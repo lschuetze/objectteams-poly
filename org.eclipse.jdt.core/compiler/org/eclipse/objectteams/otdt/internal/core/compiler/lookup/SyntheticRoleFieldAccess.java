@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.lookup;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
@@ -348,9 +349,10 @@ public class SyntheticRoleFieldAccess extends SyntheticMethodBinding {
 	 * @param enclosingTeam
 	 * @param targetField
 	 * @param isReadAccess
-	 * @return
+	 * @param externalizedReceiver whether the receiver of this field access is an externalized role
+	 * @return a synthetic field accessor method or null if not found
 	 */
-	public static SyntheticMethodBinding getAccessorFor(ReferenceBinding enclosingTeam,
+	public static @Nullable SyntheticMethodBinding getAccessorFor(ReferenceBinding enclosingTeam,
 													    FieldBinding targetField,
 													    boolean isReadAccess,
 													    boolean externalizedReceiver)

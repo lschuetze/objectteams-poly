@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer;
 
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
@@ -105,10 +106,10 @@ public class StandardElementGenerator {
 	 * 		public org.objectteams.Team _OT$getTeam()
 	 * If roleType is an interface generate the abstract interface method.
 	 *
-	 * @param roleType
-	 * @return
+	 * @param roleType the role to operate on
+	 * @return the binding of the created method or null
 	 */
-	public static MethodBinding createGetTeamMethod(TypeDeclaration roleType)
+	public static @Nullable MethodBinding createGetTeamMethod(TypeDeclaration roleType)
 	{
 		MethodBinding existingMethod = TypeAnalyzer.findMethod(
 				roleType.initializerScope,
@@ -170,7 +171,7 @@ public class StandardElementGenerator {
 	/**
 	 * Retreive (or create) a team level method used for casting an expression to a role.
 	 * After casting also check the containingInstance against the current team.
-	 * @param teamClass
+	 * @param teamModel
 	 * @param roleType
 	 * @param scope (used only for lookup of j.l.Object)
 	 * @param searchSuper  should super classes of teamClass be search, too?
@@ -469,8 +470,9 @@ public class StandardElementGenerator {
 	}
 
 	/**
+	 * @param scope use this for resolving a newly generated team expression
 	 * @param roleType retrieve the anchor from this type.
-	 * @param pos faked source code position (encoded start and end).
+	 * @param gen represents faked source code position.
 	 * @return a new reference
 	 */
 	private static Expression createTeamAnchorReference(BlockScope scope, DependentTypeBinding roleType, AstGenerator gen) {
@@ -579,7 +581,6 @@ public class StandardElementGenerator {
      * @param roleType  the type to hold the new _OT$base field
      * @param baseclass the type of the field
      * @param createBinding should a FieldBinding be created now?
-     * @return
      */
 	public static void checkCreateBaseField(TypeDeclaration roleType,
 										    ReferenceBinding baseclass,

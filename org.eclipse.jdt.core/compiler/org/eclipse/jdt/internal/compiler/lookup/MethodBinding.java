@@ -757,7 +757,7 @@ protected TypeBinding[] enhancedParameters = null;
 protected TypeBinding generalizedReturnType = null; // only set if return and parameters are temporarily retrenched.
 /**
  * Revert signature enhancement and return only those parameters defined in the source code.
- * @return
+ * @return a nonnull array of parameter types without the enhancing args
  */
 public TypeBinding[] getSourceParameters() {
 	TypeBinding[] allParameters = this.parameters;

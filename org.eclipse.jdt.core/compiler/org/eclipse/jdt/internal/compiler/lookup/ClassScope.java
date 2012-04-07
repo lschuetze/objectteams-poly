@@ -711,7 +711,7 @@ public class ClassScope extends Scope {
 
 //{ObjectTeams: build additional structural elements
 	/**
-	 * @param typeParamters all type parameters perhaps including type value parameters.
+	 * @param typeParameters all type parameters perhaps including type value parameters.
 	 * @return remaining unconsumed type parameters.
 	 */
 	private TypeParameter[] filterTypeValueVariables(TypeParameter[] typeParameters)

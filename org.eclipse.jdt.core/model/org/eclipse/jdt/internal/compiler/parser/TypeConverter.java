@@ -726,13 +726,7 @@ public abstract class TypeConverter {
 		return result;
 	}
 
-//{ObjectTeams: OT Elements are handled uniformely in source/binary types:
-	/**
-	 * @param methodMapping
-	 * @param compilationResult
-	 * @return
-	 * @throws JavaModelException 
-	 */
+//{ObjectTeams: OT Elements are handled uniformly in source/binary types:
 	protected AbstractMethodMappingDeclaration convertCallout(
 			IMethodMapping methodMapping, CompilationResult compilationResult) throws JavaModelException
 	{

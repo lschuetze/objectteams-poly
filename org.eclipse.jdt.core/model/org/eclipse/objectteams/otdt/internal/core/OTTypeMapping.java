@@ -145,8 +145,6 @@ public class OTTypeMapping
 
 	/**
 	 * Get type's parent (for use as a hash key).
-	 * @param type
-	 * @return
 	 */
 	private IJavaElement getParent(IType type) {
 		IJavaElement parent;

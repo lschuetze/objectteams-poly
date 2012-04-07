@@ -976,7 +976,7 @@ public void generateCode(ClassFile enclosingClassFile) {
 					&& field.binding.isPublic())
 				{
 					SourceTypeBinding enclosingTeam = (SourceTypeBinding)this.binding.enclosingType();
-					enclosingTeam.addSyntheticMethod(field.binding, true, true, false/*superAccess*/);
+					enclosingTeam.addSyntheticMethod(field.binding, true, true, false/*superAccess*/); // FIXME: mixing flags, superAccess 3. arg, shouldn't it be false??
 					enclosingTeam.addSyntheticMethod(field.binding, false, true, false/*superAccess*/);
 				}
 			}

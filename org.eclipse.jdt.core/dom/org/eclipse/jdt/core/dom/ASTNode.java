@@ -810,7 +810,7 @@ public abstract class ASTNode {
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>BaseConstructorMessageSend</code>.
-	 * @see BaseConstructorMessageSend
+	 * @see BaseConstructorInvocation
 	 */
 	public static final int BASE_CONSTRUCTOR_INVOCATION = 90;
 
@@ -838,7 +838,7 @@ public abstract class ASTNode {
     /**
      * Node type constant indicating a node of type
      * <code>RoleTypeDelaration</code>.
-     * @see RoleTypeDelaration
+     * @see RoleTypeDeclaration
      */
     public static final int ROLE_TYPE_DECLARATION = 94;
 

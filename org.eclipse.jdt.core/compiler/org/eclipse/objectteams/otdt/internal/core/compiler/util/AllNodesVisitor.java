@@ -278,18 +278,9 @@ public abstract class AllNodesVisitor extends ASTVisitor {
 	public void endVisit(LongLiteral node, BlockScope scope) {
 		visitNode(node);
 	}
-	/**
-	 * @param annotation
-	 * @param scope
-	 * @since 3.1
-	 */
 	public void endVisit(MarkerAnnotation node, BlockScope scope) {
 		visitNode(node);
 	}
-	/**
-	 * @param pair
-	 * @param scope
-	 */
 	public void endVisit(MemberValuePair node, BlockScope scope) {
 		visitNode(node);
 	}
@@ -302,11 +293,6 @@ public abstract class AllNodesVisitor extends ASTVisitor {
 	public void endVisit(StringLiteralConcatenation node, BlockScope scope) {
 		visitNode(node);
 	}
-	/**
-	 * @param annotation
-	 * @param scope
-	 * @since 3.1
-	 */
 	public void endVisit(NormalAnnotation node, BlockScope scope) {
 		visitNode(node);
 	}
@@ -382,11 +368,6 @@ public abstract class AllNodesVisitor extends ASTVisitor {
 	public void endVisit(ReturnStatement node, BlockScope scope) {
 		visitNode(node);
 	}
-	/**
-	 * @param annotation
-	 * @param scope
-	 * @since 3.1
-	 */
 	public void endVisit(SingleMemberAnnotation node, BlockScope scope) {
 		visitNode(node);
 	}

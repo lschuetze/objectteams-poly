@@ -124,10 +124,9 @@ public class OTDynCallinBindingsAttribute extends ListValueAttribute {
 		}
 		
 
-	    /** Compute the name of the file containing the given callin mapping.
-	     *  Do consider packages but no projects or source folders.
-	     * @param decl
-	     * @return
+	    /** 
+	     * Compute the name of the file containing the given callin mapping.
+	     * Do consider packages but no projects or source folders.
 	     */
 	    private char[] getFileName(CallinMappingDeclaration decl) {
 			CompilationUnitDeclaration compilationUnit = decl.scope.referenceCompilationUnit();

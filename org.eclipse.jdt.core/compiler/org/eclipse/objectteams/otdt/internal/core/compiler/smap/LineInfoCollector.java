@@ -47,9 +47,6 @@ public class LineInfoCollector
 
     /**
      * Does the given output line (as used in byte code) already have a re-mapping?
-     *
-     * @param outputStartLinenumber
-     * @return
      */
     public boolean existsLineInfoFor(int outputStartLinenumber)
     {
