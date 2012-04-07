@@ -1879,7 +1879,6 @@ class DefaultBindingResolver extends BindingResolver {
 			}
 //{ObjectTeams: arg w/ declared lifting needs to be registered twice (outside / inside):
 			if (abstractVariableDeclaration.type instanceof LiftingTypeReference) {
-				AST ast = variable.ast;
 				SingleVariableDeclaration realVariable = (SingleVariableDeclaration)variable;
 				LocalDeclaration fakedArgument = ((LiftingTypeReference)abstractVariableDeclaration.type).fakedArgument;
 				if (fakedArgument != null) {

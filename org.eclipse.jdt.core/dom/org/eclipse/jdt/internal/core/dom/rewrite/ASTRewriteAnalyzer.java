@@ -4076,8 +4076,6 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		// javadoc
 		int pos = rewriteJavadoc(node, CalloutMappingDeclaration.JAVADOC_PROPERTY);
 
-		int posAfterJavadoc = pos;
-
 		// annotations?
 		if (node.getAST().apiLevel() == JLS2_INTERNAL) {
 			throw new UnsupportedOperationException("OT/J support for JLS2 is incomplete"); //$NON-NLS-1$
@@ -4129,7 +4127,6 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 
 		// javadoc
 		int pos = rewriteJavadoc(node, CallinMappingDeclaration.JAVADOC_PROPERTY);
-		int posAfterJavadoc = pos;
 
 		// annotations?
 		if (node.getAST().apiLevel() == JLS2_INTERNAL) {

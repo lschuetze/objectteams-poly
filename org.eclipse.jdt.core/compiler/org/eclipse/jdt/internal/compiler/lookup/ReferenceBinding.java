@@ -337,7 +337,7 @@ public MethodBinding[] availableMethods() {
 	try {
 		if (isRole())
 			Dependencies.ensureBindingState(this, ITranslationStates.STATE_METHODS_CREATED);
-	} catch (Throwable t) {}
+	} catch (Throwable t) { /* don't care about exceptions in compiler */ }
 // SH}
 	return methods();
 }

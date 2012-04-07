@@ -9473,7 +9473,7 @@ public void extendIncompatibleEnclosingTypes(
 public void incompatibleSuperclasses(
 	       ASTNode location, ReferenceBinding newSuperclass, ReferenceBinding oldSuperclass, ReferenceBinding outerTSuper)
 {
-	 String outerTSuperName = outerTSuper == null ? "<unknown>" : String.valueOf(outerTSuper.readableName());
+	 String outerTSuperName = outerTSuper == null ? "<unknown>" : String.valueOf(outerTSuper.readableName()); //$NON-NLS-1$
 	 this.handle(
 			 IProblem.IncompatibleSuperclasses,
 			 new String[]{new String(newSuperclass.readableName()), new String(oldSuperclass.readableName()), outerTSuperName},

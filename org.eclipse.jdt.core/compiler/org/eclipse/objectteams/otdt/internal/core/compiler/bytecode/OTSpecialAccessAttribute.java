@@ -77,7 +77,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 				// creator is declared in the enclosing team
 				this.boundBaseclass = this.boundBaseclass.enclosingType();
 			if (CallinImplementorDyn.DYNAMIC_WEAVING)
-				this.accessId = nextAccessId++;
+				this.accessId = OTSpecialAccessAttribute.this.nextAccessId++;
 		}
 
 		void write() {
@@ -131,7 +131,7 @@ public class OTSpecialAccessAttribute extends AbstractAttribute {
 			if (field.isStatic())
 				this.flags |= CALLOUT_STATIC_FIELD;
 			if (CallinImplementorDyn.DYNAMIC_WEAVING)
-				this.accessId = nextAccessId++;
+				this.accessId = OTSpecialAccessAttribute.this.nextAccessId++;
 		}
 
 		public int calloutModifier() {
