@@ -975,9 +975,10 @@ public void generateCode(ClassFile enclosingClassFile) {
 					&& !field.isGenerated
 					&& field.binding.isPublic())
 				{
+					// prepare for accessed via externalized receiver:
 					SourceTypeBinding enclosingTeam = (SourceTypeBinding)this.binding.enclosingType();
-					enclosingTeam.addSyntheticMethod(field.binding, true, true, false/*superAccess*/); // FIXME: mixing flags, superAccess 3. arg, shouldn't it be false??
-					enclosingTeam.addSyntheticMethod(field.binding, false, true, false/*superAccess*/);
+					enclosingTeam.addSyntheticMethod(field.binding, true, false/*superAccess*/, true/*externalizedReceiver*/);
+					enclosingTeam.addSyntheticMethod(field.binding, false, false/*superAccess*/, true/*externalizedReceiver*/);
 				}
 			}
 		}

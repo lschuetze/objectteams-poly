@@ -79,8 +79,8 @@ public class SyntheticRoleFieldAccess extends SyntheticMethodBinding {
 
 	char[] encodedFieldName;
 
-	public SyntheticRoleFieldAccess(FieldBinding targetField, boolean isReadAccess, boolean isSuperAccess, SourceTypeBinding declaringClass) {
-		super(targetField, isReadAccess, isSuperAccess, declaringClass);
+	public SyntheticRoleFieldAccess(FieldBinding targetField, boolean isReadAccess, SourceTypeBinding declaringClass) {
+		super(targetField, isReadAccess, false, declaringClass);
 		FieldDeclaration sourceField = targetField.sourceField();
 		if (sourceField != null) {
 			this.sourceStart = sourceField.sourceStart;

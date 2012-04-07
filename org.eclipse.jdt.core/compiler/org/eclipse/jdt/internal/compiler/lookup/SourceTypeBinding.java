@@ -600,7 +600,7 @@ public SyntheticMethodBinding addSyntheticMethod(FieldBinding targetField, boole
 	if (accessors == null) {
 //{ObjectTeams: role field?
 	  if (enclosingTeam != null) // this team is responsible
-	  	  accessMethod = new SyntheticRoleFieldAccess(targetField, isReadAccess, isSuperAccess, this);
+	  	  accessMethod = new SyntheticRoleFieldAccess(targetField, isReadAccess, this);
 	  else
 // orig:
 		accessMethod = new SyntheticMethodBinding(targetField, isReadAccess, isSuperAccess, this);
@@ -611,7 +611,7 @@ public SyntheticMethodBinding addSyntheticMethod(FieldBinding targetField, boole
 		if ((accessMethod = accessors[isReadAccess ? 0 : 1]) == null) {
 //{ObjectTeams: role field?
 		  if (enclosingTeam != null) // this team is responsible
-			  accessMethod = new SyntheticRoleFieldAccess(targetField, isReadAccess, isSuperAccess, this);
+			  accessMethod = new SyntheticRoleFieldAccess(targetField, isReadAccess, this);
 		  else
 // orig:
 			accessMethod = new SyntheticMethodBinding(targetField, isReadAccess, isSuperAccess, this);
