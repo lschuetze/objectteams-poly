@@ -51,6 +51,7 @@ public class AllTests {
 		suite.addTest(OTSuperTypeHierarchyTest013.suite());
 		suite.addTest(OTSuperTypeHierarchyTest014.suite());
 		suite.addTest(OTSuperTypeHierarchyTest015.suite());
+		suite.addTest(OTSuperTypeHierarchyTest016_Regression.suite());
 		//$JUnit-END$
 		return suite;
 	}

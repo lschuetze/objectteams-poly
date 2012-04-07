@@ -247,9 +247,13 @@ public class StateMemento
 			throw new InternalCompilerError(msg);
 	}
 
-	/** Signal that processing for `state' has begun. */
-	public void startProcessing(int state) {
+	/** Signal that processing for `state' has begun.
+	 * @return the previous processing state
+	 */
+	public int startProcessing(int state) {
+		int previous = this._currentlyProcessingState;
 		this._currentlyProcessingState = Math.max(this._currentlyProcessingState, state);
+		return previous;
 	}
 
 

@@ -690,8 +690,7 @@ public class Dependencies implements ITranslationStates {
             	StateHelper.setStateRecursive(model.getAst(), nextState, true);
             	continue;
             }
-
-            model._state.startProcessing(nextState);
+            int previousProcessingState = model._state.startProcessing(nextState);
 
             if (model._isLocalType)
             {
@@ -783,6 +782,8 @@ public class Dependencies implements ITranslationStates {
                     	success &= ensureTeamState(model.getTeamModel(), nextState);
                     break;
                 case STATE_LATE_ATTRIBUTES_EVALUATED:
+                	if (previousProcessingState >= STATE_LATE_ATTRIBUTES_EVALUATED) // see http://bugs.eclipse.org/366976
+                		break;
         			// more attributes after fields and methods are in place:
         			// (notably copyInheritanceSrc must be evaluated before resolving)
         			model.evaluateLateAttributes(STATE_LATE_ATTRIBUTES_EVALUATED);

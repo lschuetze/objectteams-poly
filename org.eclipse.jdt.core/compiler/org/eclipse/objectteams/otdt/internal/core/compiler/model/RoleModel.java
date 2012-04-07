@@ -1332,7 +1332,8 @@ public class RoleModel extends TypeModel
 				continue;
 			if (superInterface.roleModel.getState() < ITranslationStates.STATE_LATE_ATTRIBUTES_EVALUATED-1)
 				continue; // not yet prepared
-			Dependencies.ensureBindingState(superInterface, ITranslationStates.STATE_LATE_ATTRIBUTES_EVALUATED);
+			if (!Dependencies.ensureBindingState(superInterface, ITranslationStates.STATE_LATE_ATTRIBUTES_EVALUATED))
+				continue;
 			CallinCalloutBinding[] methodMappings = superInterface.callinCallouts;
 			if (methodMappings != null)
 				for (CallinCalloutBinding mapping : methodMappings)
