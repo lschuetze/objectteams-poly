@@ -144,7 +144,7 @@ public class TSuperMessageSend extends MessageSend {
 	    for (int i=tsuperRoleBindings.length-1; i>=0; i--) {
 	    	ReferenceBinding tsuperRole = tsuperRoleBindings[i];
 	    	MethodBinding candidate = scope.getMethod(tsuperRole, this.selector, argumentTypes, this);
-	    	if (candidate != null && candidate.isValidBinding()) {
+	    	if (candidate.isValidBinding()) {
 	    		if (scope.parameterCompatibilityLevel(candidate, argumentTypes) != Scope.COMPATIBLE) {
 	    			scope.problemReporter().tsuperCallsWrongMethod(this);
 	    			return null;

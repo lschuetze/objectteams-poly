@@ -200,7 +200,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 		};
 		int prefixLen = 0;
 		// base arg?
-		if (isWrapper)
+		if (isWrapper && arguments != null)
 			newArgs[prefixLen++] = arguments[0];
 		// enhancing args:
 		for (int i=0; i<ENHANCING_ARG_LEN; i++)

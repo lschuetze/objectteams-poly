@@ -131,18 +131,15 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
             baseType = providedType;
             roleSideType     = this.expectedType;
         }
-        boolean incompatibilityFound = false;
         ReferenceBinding roleType = null;
         if (!(baseType instanceof ReferenceBinding)) {
-            incompatibilityFound = true;
+        	return reportIncompatibility(scope, providedType);
         } else {
             roleType = (ReferenceBinding)roleSideType;
             if (   !roleType.isDirectRole()
                 || !(baseType instanceof ReferenceBinding))
-                incompatibilityFound = true;
+            	return reportIncompatibility(scope, providedType);
         }
-        if (incompatibilityFound)
-        	return reportIncompatibility(scope, providedType);
 
         // reset Config, because below we want to check loweringRequired.
         Config oldConfig = Config.createOrResetConfig(this);

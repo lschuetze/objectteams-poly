@@ -313,8 +313,11 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 		} else {
 			for (int i=0; i<sourceArgsLen; i++) {
 				TypeBinding srcArgType = this.sourceArgs[i].resolvedType;
-				if (srcArgType == null && callinMethodDecl.hasErrors())
+				if (srcArgType == null) {
+					if (!callinMethodDecl.hasErrors())
+						throw new InternalCompilerError("Unexpected: srcArgType should only ever be missing in declarations with reported errors"); //$NON-NLS-1$
 					continue;
+				}
 				if (!srcArgType.isCompatibleWith(methodParams[i])) {
 					if (isBoxingCompatible(srcArgType, methodParams[i], this.sourceArgs[i], scope)) {
 						int enhancedArgIdx = i+MethodSignatureEnhancer.ENHANCING_ARG_LEN+1; // normal enhancement plus isSuperAccess flag

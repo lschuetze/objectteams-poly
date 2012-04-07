@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
@@ -226,6 +227,8 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 			else if (CharOperation.equals(memberTypes[i].name, IOTConstants.CONFINED))
 				confinedIfc   = memberTypes[i];
 		}
+		if (confinedClass == null || confinedIfc == null)
+			throw new InternalCompilerError("required type Team.Confined not found"); //$NON-NLS-1$
 		confinedClass.getRoleModel()._interfacePart = confinedIfc;
 		confinedIfc.getRoleModel()._classPart = confinedClass;
 	}

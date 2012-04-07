@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.util;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
@@ -96,8 +97,7 @@ public class RoleTypeCreator implements TagBits {
 			for (int i = 0; i < arguments.length; i++)
 			{
 				TypeBinding arg = genericType.arguments[i];
-				if (   arg != null
-					&& arg instanceof ReferenceBinding
+				if (   arg instanceof ReferenceBinding
 					&& !arg.isTypeVariable())
 					arguments[i] = updateArg((ReferenceBinding)arg);
 				else
@@ -674,10 +674,9 @@ public class RoleTypeCreator implements TagBits {
 	 * @param decl AST
 	 */
 	public static void wrapTypesInMethodDeclSignature (
-	        MethodBinding method, AbstractMethodDeclaration decl)
+	        MethodBinding method, @NonNull AbstractMethodDeclaration decl)
 	{
-		if ((   decl != null
-			 && decl.ignoreFurtherInvestigation)
+		if (   decl.ignoreFurtherInvestigation
 			|| method == null
 			|| method.isSynthetic()) // don't wrap role field accessors
 			return;
@@ -737,7 +736,7 @@ public class RoleTypeCreator implements TagBits {
 			parameters[i] = maybeWrapSignatureType(parameters[i], decl.scope, argument, defaultAnchor);
 	        // in case resolveTypesFor already created the binding,
 	        // update its type:
-	        if (argument.binding != null)
+	        if (argument != null && argument.binding != null)
 	        	argument.binding.type = parameters[i];
 	    }
 	    doingSignatures = false;
@@ -839,99 +838,97 @@ public class RoleTypeCreator implements TagBits {
 	 */
 	public static ITeamAnchor getAnchorVariableBinding(
 	        ReferenceBinding site,
-	        Expression       anchorExpr,
+/*nonnull*/ Expression       anchorExpr,
 	        ReferenceBinding roleType,
 			ProblemReporter  problemReporter,
 	        ASTNode          typedNode)
 	{
 	    ITeamAnchor      anchorBinding   = null;
 
-		if (anchorExpr != null)
-	    {
-	    	// unwrap meaningless cast:
-			if (anchorExpr instanceof CastExpression) {
-				CastExpression cast = (CastExpression)anchorExpr;
-				if (RoleTypeBinding.isRoleWithExplicitAnchor(cast.resolvedType))
-					anchorBinding = ((RoleTypeBinding)cast.resolvedType)._teamAnchor;
-				else
-					anchorExpr = ((CastExpression)anchorExpr).expression;
+		// unwrap meaningless cast:
+		if (anchorExpr instanceof CastExpression) {
+			CastExpression cast = (CastExpression)anchorExpr;
+			if (RoleTypeBinding.isRoleWithExplicitAnchor(cast.resolvedType))
+				anchorBinding = ((RoleTypeBinding)cast.resolvedType)._teamAnchor;
+			else
+				anchorExpr = ((CastExpression)anchorExpr).expression;
+		}
+
+		if (anchorExpr instanceof PotentialLowerExpression)
+		    anchorExpr = ((PotentialLowerExpression)anchorExpr).expression;
+		if (anchorExpr instanceof ThisReference)
+		{
+			ReferenceBinding teamBinding = (ReferenceBinding)anchorExpr.resolvedType;
+			ReferenceBinding enclosingTeam = TeamModel.findEnclosingTeamContainingRole(teamBinding, roleType);
+			if (enclosingTeam == null) {
+		        if ((problemReporter != null)) {
+		        	ASTNode location = anchorExpr;
+		        	if (location.sourceEnd == 0)
+		        		location = typedNode;
+		            problemReporter.typeAnchorNotEnclosingTeam(
+		            					location, teamBinding, roleType);
+		        }
+		        return null;
+		    }
+		    anchorBinding = TThisBinding.getTThisForRole(roleType, enclosingTeam);
+		    if (anchorBinding == null)
+		    	return cannotWrapType(roleType, problemReporter, typedNode);
+		} else {
+		    // extract the name reference from a type anchor reference used as expression:
+			if (   anchorExpr instanceof TypeAnchorReference
+				&& ((TypeAnchorReference)anchorExpr).isExpression)
+			{
+				anchorExpr = ((TypeAnchorReference)anchorExpr).anchor;
 			}
 
-	        if (anchorExpr instanceof PotentialLowerExpression)
-	            anchorExpr = ((PotentialLowerExpression)anchorExpr).expression;
-	        if (anchorExpr instanceof ThisReference)
-	        {
-	        	ReferenceBinding teamBinding = (ReferenceBinding)anchorExpr.resolvedType;
-	        	ReferenceBinding enclosingTeam = TeamModel.findEnclosingTeamContainingRole(teamBinding, roleType);
-	        	if (enclosingTeam == null) {
-	                if ((problemReporter != null)) {
-	                	ASTNode location = anchorExpr;
-	                	if (location.sourceEnd == 0)
-	                		location = typedNode;
-	                    problemReporter.typeAnchorNotEnclosingTeam(
-	                    					location, teamBinding, roleType);
-	                }
-	                return null;
-	            }
-	            anchorBinding = TThisBinding.getTThisForRole(roleType, enclosingTeam);
-	            if (anchorBinding == null)
-	            	return cannotWrapType(roleType, problemReporter, typedNode);
-	        } else {
-	            // extract the name reference from a type anchor reference used as expression:
-	        	if (   anchorExpr instanceof TypeAnchorReference
-	        		&& ((TypeAnchorReference)anchorExpr).isExpression)
-	        	{
-	        		anchorExpr = ((TypeAnchorReference)anchorExpr).anchor;
-	        	}
+		    if (anchorExpr instanceof ArrayReference)
+		    	anchorExpr = ((ArrayReference)anchorExpr).receiver;
 
-	            if (anchorExpr instanceof ArrayReference)
-	            	anchorExpr = ((ArrayReference)anchorExpr).receiver;
-
-	            if (anchorExpr instanceof FieldReference)
-	            {
-	                anchorBinding = ((Reference)anchorExpr).fieldBinding();
-	            }
-	            else if (anchorExpr.isTypeReference())
-	            {
-	                anchorBinding = null; // not an instance: not usable.
-	                ReferenceBinding teamBinding = TeamModel.findEnclosingTeamContainingRole(site, roleType);
-	                if (teamBinding == null) {
-	                    if ((problemReporter != null))
-	                        problemReporter.
-	                                missingTypeAnchor(anchorExpr, roleType);
-	                    return null;
-	                }
-	                anchorBinding = TThisBinding.getTThisForRole(roleType, teamBinding);
-	                if (anchorBinding == null) {
-	                    if ((problemReporter != null))
-	                        problemReporter.
-	                                typeAnchorIsNotAVariable(anchorExpr, roleType.sourceName());
-	                    return null;
-	                }
-	            }
-	            else if (anchorExpr instanceof NameReference)
-	            {
-	            	if (anchorExpr instanceof QualifiedNameReference) {
-	            		QualifiedNameReference qRef = (QualifiedNameReference)anchorExpr;
-	            		anchorBinding = getAnchorFromQualifiedReceiver(
-	            							site,
-	            							roleType,
-											(VariableBinding)qRef.binding,
-											qRef.otherBindings,
-											/*mergePaths*/false,
-											problemReporter,
-											anchorExpr,
-											qRef.sourcePositions);
-	            		if (anchorBinding == null)
-	            			return RoleTypeBinding.NoAnchor; // already reported
-	            	} else {
-	            		if (((NameReference)anchorExpr).binding instanceof VariableBinding) {
-	            			anchorBinding = (ITeamAnchor)((NameReference)anchorExpr).binding;
-	            			if (roleType.isTypeVariable()) {
-	            				ITeamAnchor[] anchors = ((TypeVariableBinding)roleType).anchors;
-	            				if (anchors != null)
-	            					return anchorBinding; // avoid analysis which requires knowledge about the role type
-	            			}
+		    if (anchorExpr instanceof FieldReference)
+		    {
+		        anchorBinding = ((Reference)anchorExpr).fieldBinding();
+		    }
+		    else if (anchorExpr.isTypeReference())
+		    {
+		        anchorBinding = null; // not an instance: not usable.
+		        ReferenceBinding teamBinding = TeamModel.findEnclosingTeamContainingRole(site, roleType);
+		        if (teamBinding == null) {
+		            if ((problemReporter != null))
+		                problemReporter.
+		                        missingTypeAnchor(anchorExpr, roleType);
+		            return null;
+		        }
+		        anchorBinding = TThisBinding.getTThisForRole(roleType, teamBinding);
+		        if (anchorBinding == null) {
+		            if ((problemReporter != null))
+		                problemReporter.
+		                        typeAnchorIsNotAVariable(anchorExpr, roleType.sourceName());
+		            return null;
+		        }
+		    }
+		    else if (anchorExpr instanceof NameReference)
+		    {
+		    	if (anchorExpr instanceof QualifiedNameReference) {
+		    		QualifiedNameReference qRef = (QualifiedNameReference)anchorExpr;
+		    		anchorBinding = getAnchorFromQualifiedReceiver(
+		    							site,
+		    							roleType,
+										(VariableBinding)qRef.binding,
+										qRef.otherBindings,
+										/*mergePaths*/false,
+										problemReporter,
+										anchorExpr,
+										qRef.sourcePositions);
+		    		if (anchorBinding == null)
+		    			return RoleTypeBinding.NoAnchor; // already reported
+		    	} else {
+		    		if (((NameReference)anchorExpr).binding instanceof VariableBinding) {
+		    			anchorBinding = (ITeamAnchor)((NameReference)anchorExpr).binding;
+		    			if (roleType.isTypeVariable()) {
+		    				ITeamAnchor[] anchors = ((TypeVariableBinding)roleType).anchors;
+		    				if (anchors != null)
+		    					return anchorBinding; // avoid analysis which requires knowledge about the role type
+		    			}
 
 // FIXME(SH): manual resolving of base-anchor?
 //	            			if (CharOperation.equals(((SingleNameReference)anchorExpr).token, IOTConstants._OT_BASE))
@@ -943,59 +940,58 @@ public class RoleTypeCreator implements TagBits {
 //	            					((FieldBinding)anchorBinding).type = site.baseclass();
 //	            				}
 //	            			}
-	            		} else {
-	    	                if ((problemReporter != null))
-	    	                    problemReporter.typeAnchorIsNotAVariable(anchorExpr, roleType.sourceName());
-	    	                return null;
-	            		}
-	            	}
-	            }
- 	            else if (anchorExpr instanceof QualifiedAllocationExpression)
-	            {
-	            	// propagate anchor from resolved type:
-	            	QualifiedAllocationExpression allocation = (QualifiedAllocationExpression)anchorExpr;
-	            	return ((RoleTypeBinding)allocation.resolvedType)._teamAnchor;
-	            }
-	            else if (anchorExpr instanceof MessageSend)
-	            {
-	            	TypeBinding receiverLeaf = ((MessageSend)anchorExpr).actualReceiverType.leafComponentType();
-	            	if (RoleTypeBinding.isRoleWithExplicitAnchor(receiverLeaf)) {
-	            		anchorBinding = ((RoleTypeBinding)receiverLeaf)._teamAnchor;
-	            	} else {
-	            		// regression fix during work on https://bugs.eclipse.org/331877
-	            		if (RoleTypeBinding.isRoleType(anchorExpr.resolvedType))
-	            			return ((DependentTypeBinding)anchorExpr.resolvedType)._teamAnchor;
-	            		return cannotWrapType(roleType, problemReporter, typedNode);
-	            	}
-	            }
-	            else if (anchorExpr instanceof AllocationExpression) 
-	            {
-	            	// this anchor matches nothing
-	            	String displayName = "fresh-instance-of-"+((AllocationExpression)anchorExpr).type.toString(); //$NON-NLS-1$
-					LocalVariableBinding fakeVariable = new LocalVariableBinding(displayName.toCharArray(), roleType.enclosingType(), ClassFileConstants.AccFinal, false);
-					fakeVariable.tagBits |= TagBits.IsFreshTeamInstance;
-					return fakeVariable;
-	            }
-	            else if (anchorBinding == null)
-	            {
-	                return cannotWrapType(roleType, problemReporter, typedNode);
-	            }
-	            /*
-	             * anchorBinding = non-null
-	             *      FieldReference
-	             *      NameReference
-	             *      isTypeReference() -> TThisBinding
-	             */
-	            assert (anchorBinding != null);
-	        }
-	        /*
-	         * variableBinding = non-null, anchorType = non-null:
-	         *      ThisReference
-	         *      + all others that did not already quit with an error.
-	         */
-	         // if ((problemReporter != null))
-	         //   assert anchorBinding != null; // redundant
-	    }
+		    		} else {
+		                if ((problemReporter != null))
+		                    problemReporter.typeAnchorIsNotAVariable(anchorExpr, roleType.sourceName());
+		                return null;
+		    		}
+		    	}
+		    }
+		    else if (anchorExpr instanceof QualifiedAllocationExpression)
+		    {
+		    	// propagate anchor from resolved type:
+		    	QualifiedAllocationExpression allocation = (QualifiedAllocationExpression)anchorExpr;
+		    	return ((RoleTypeBinding)allocation.resolvedType)._teamAnchor;
+		    }
+		    else if (anchorExpr instanceof MessageSend)
+		    {
+		    	TypeBinding receiverLeaf = ((MessageSend)anchorExpr).actualReceiverType.leafComponentType();
+		    	if (RoleTypeBinding.isRoleWithExplicitAnchor(receiverLeaf)) {
+		    		anchorBinding = ((RoleTypeBinding)receiverLeaf)._teamAnchor;
+		    	} else {
+		    		// regression fix during work on https://bugs.eclipse.org/331877
+		    		if (RoleTypeBinding.isRoleType(anchorExpr.resolvedType))
+		    			return ((DependentTypeBinding)anchorExpr.resolvedType)._teamAnchor;
+		    		return cannotWrapType(roleType, problemReporter, typedNode);
+		    	}
+		    }
+		    else if (anchorExpr instanceof AllocationExpression) 
+		    {
+		    	// this anchor matches nothing
+		    	String displayName = "fresh-instance-of-"+((AllocationExpression)anchorExpr).type.toString(); //$NON-NLS-1$
+				LocalVariableBinding fakeVariable = new LocalVariableBinding(displayName.toCharArray(), roleType.enclosingType(), ClassFileConstants.AccFinal, false);
+				fakeVariable.tagBits |= TagBits.IsFreshTeamInstance;
+				return fakeVariable;
+		    }
+		    else if (anchorBinding == null)
+		    {
+		        return cannotWrapType(roleType, problemReporter, typedNode);
+		    }
+		    /*
+		     * anchorBinding = non-null
+		     *      FieldReference
+		     *      NameReference
+		     *      isTypeReference() -> TThisBinding
+		     */
+		    assert (anchorBinding != null);
+		}
+		/*
+		 * variableBinding = non-null, anchorType = non-null:
+		 *      ThisReference
+		 *      + all others that did not already quit with an error.
+		 */
+		 // if ((problemReporter != null))
+		 //   assert anchorBinding != null; // redundant
 	    if (!anchorBinding.isTeamContainingRole(roleType))
 	    {
 	        anchorBinding = anchorBinding.retrieveAnchorFromAnchorRoleTypeFor(roleType);

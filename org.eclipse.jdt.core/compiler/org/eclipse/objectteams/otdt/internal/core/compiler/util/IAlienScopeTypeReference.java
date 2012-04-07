@@ -67,7 +67,7 @@ public interface IAlienScopeTypeReference {
 				return result;
 			// remove problem binding if any:
 			this.resolvedType = null;
-			if (cp != null)
+			if (cp != null && referenceContext != null) // 2. check redundant via correlation
 				referenceContext.compilationResult.rollBack(cp);
 			return super.resolveType(this.alienScope.classScope());
 		}
@@ -103,7 +103,7 @@ public interface IAlienScopeTypeReference {
 				return result;
 			// remove problem binding if any:
 			this.resolvedType = null;
-			if (cp != null)
+			if (cp != null && referenceContext != null) // 2. check redundant via correlation
 				referenceContext.compilationResult.rollBack(cp);
 			return super.resolveType(this.alienScope.classScope());
 		}
@@ -147,7 +147,7 @@ public interface IAlienScopeTypeReference {
 				return result;
 			// remove problem binding if any:
 			this.resolvedType = null;
-			if (cp != null)
+			if (cp != null && referenceContext != null) // 2. check redundant via correlation
 				referenceContext.compilationResult.rollBack(cp);
 			return super.resolveType(this.alienScope.classScope());
 		}
@@ -182,7 +182,7 @@ public interface IAlienScopeTypeReference {
 				return result;
 			// reset:
 			this.resolvedType = null;
-			if (cp != null)
+			if (cp != null && referenceContext != null) // 2. check redundant via correlation
 				referenceContext.compilationResult.rollBack(cp);
 			return super.resolveType(this.alienScope.classScope());
 		}
@@ -222,7 +222,7 @@ public interface IAlienScopeTypeReference {
 				return result;
 			// reset:
 			this.resolvedType = null;
-			if (cp != null)
+			if (cp != null && referenceContext != null) // 2. check redundant via correlation
 				referenceContext.compilationResult.rollBack(cp);
 			return super.resolveType(this.alienScope.classScope());
 		}

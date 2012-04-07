@@ -450,8 +450,10 @@ public class AstConverter implements ClassFileConstants, ExtraCompilerModifiers,
         	foundMethod.isCopied = false;
         	foundMethod.isGenerated = true;
         	foundMethod.modifiers &= ~(AccAbstract|AccSemicolonBody);
-        	for (int i = 0; i < argumentsCount; i++) {
-            	foundMethod.arguments[i].updateName(arguments[i].name);
+        	if (arguments != null) { // redundant via correlation with argumentsCount
+        		for (int i = 0; i < argumentsCount; i++) {
+        			foundMethod.arguments[i].updateName(arguments[i].name);
+        		}
 			}
         	if (foundMethod.binding != null) {
         		foundMethod.binding.modifiers &= ~(AccAbstract);

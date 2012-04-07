@@ -145,7 +145,7 @@ public abstract class SwitchOnBaseTypeGenerator implements IOTConstants {
 	     * else
 	     * 	<default action>
 	     */
-	    prevIf.elseStatement = createDefaultStatement(staticRoleType, problemId, gen);
+	    prevIf.elseStatement = createDefaultStatement(staticRoleType, problemId, gen); // prevIf should be set after at least one iteration into the else-branch
 
 	    return gen.block(stmts);
 	}

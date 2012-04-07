@@ -100,18 +100,15 @@ public class PotentialLowerExpression extends PotentialTranslationExpression {
             roleSideType = rawType;
             baseType     = this.expectedType;
         }
-        boolean incompatibilityFound = false;
         ReferenceBinding roleType = null;
         if (!(roleSideType instanceof ReferenceBinding)) {
-            incompatibilityFound = true;
+        	return reportIncompatibility(scope, rawType);
         } else {
             roleType = (ReferenceBinding)roleSideType;
             if (   !roleType.isDirectRole()
                 || !(baseType instanceof ReferenceBinding))
-                incompatibilityFound = true;
+            	return reportIncompatibility(scope, rawType);
         }
-        if (incompatibilityFound)
-        	return reportIncompatibility(scope, rawType);
 
         boolean oldLower = Config.getLoweringRequired();
         try {

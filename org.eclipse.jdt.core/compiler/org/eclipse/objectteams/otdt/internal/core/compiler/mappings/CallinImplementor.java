@@ -769,7 +769,7 @@ public class CallinImplementor extends MethodMappingImplementor
 		ReferenceBinding roleVarType = roleModel.getInterfacePartBinding();
 		// does lifting use type parameters? If so, use the same types as type arguments for the role variable
 		MethodBinding[] liftMethod = roleVarType.enclosingType().getMethods(liftCall.selector);
-		if (liftMethod != null & liftMethod.length > 0) {
+		if (liftMethod != null && liftMethod.length > 0) {
 			TypeBinding[] typeArguments = liftMethod[0].typeVariables();
 			if (typeArguments != Binding.NO_TYPE_VARIABLES)
 				try {

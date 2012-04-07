@@ -475,7 +475,7 @@ public class TypeAnchorReference extends TypeReference {
 			anchorBinding = (ITeamAnchor)((NameReference)this.anchor).binding;
 		else if (this.anchor instanceof FieldReference)
 			anchorBinding = ((FieldReference)this.anchor).binding;
-		if(	   type != null
+		if(	   anchorBinding != null
 			&& type instanceof ReferenceBinding
 			&& type.isValidBinding())
 		{

@@ -361,15 +361,16 @@ public class CalloutImplementor extends MethodMappingImplementor
     	boolean overridesExplicitNonRole = false;
     	ReferenceBinding superRole = null;
     	ReferenceBinding roleClass = this._role.getClassPartBinding();
-    	if (roleClass != null)
+    	if (roleClass != null) {
     		superRole = roleClass.superclass();
-    	if (   superRole != null									   // have a super class
-    		&& superRole.enclosingType() != roleClass.enclosingType()) // not a role from current team // (superRole != null) => (roleClass != null)
-    	{
-    		MethodBinding superMethod = TypeAnalyzer.findMethod(
-    				calloutBindingDeclaration.scope, superRole, templateBinding.selector, templateBinding.parameters);
-    		if (superMethod != null && superMethod.isValidBinding())
-    			overridesExplicitNonRole = true; // TODO(SH): need compatibility checks? (a la MethodVerifier??)
+	    	if (   superRole != null									   // have a super class
+	    		&& superRole.enclosingType() != roleClass.enclosingType()) // not a role from current team
+	    	{
+	    		MethodBinding superMethod = TypeAnalyzer.findMethod(
+	    				calloutBindingDeclaration.scope, superRole, templateBinding.selector, templateBinding.parameters);
+	    		if (superMethod != null && superMethod.isValidBinding())
+	    			overridesExplicitNonRole = true; // TODO(SH): need compatibility checks? (a la MethodVerifier??)
+	    	}
     	}
 
     	if (calloutBindingDeclaration.binding.inferred == InferenceKind.NONE) { // don't advertise inferred callout via the interface.
@@ -694,8 +695,10 @@ public class CalloutImplementor extends MethodMappingImplementor
 						adjustBaseSideType(baseMethodSpec.resolvedType()));
         	return arguments;
         } else {
+        	if (roleArgs == null)
+        		return new Expression[0];
         	TypeBinding[] baseParams =  baseMethodSpec.resolvedMethod.parameters;
-            minArguments = Math.min(baseParams.length, (roleArgs != null) ? roleArgs.length : 0); // (minArguments > 0) => (roleArgs != null)
+            minArguments = Math.min(baseParams.length, roleArgs.length);
             assert(minArguments == baseParams.length);
         	arguments = new Expression[minArguments];
         	for(int i=0; i<minArguments; i++)

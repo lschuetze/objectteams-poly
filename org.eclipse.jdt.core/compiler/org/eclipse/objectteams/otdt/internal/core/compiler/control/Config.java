@@ -325,9 +325,12 @@ public class Config {
 
 	public static void setSourceTypeRequired(boolean val) {
 		Config config = getConfig();
-		if (config == null && !val)
-			return; // ignore attempt to reset while no Config is configured
-		config.sourceTypeRequired = val;
+		if (config == null) {
+			if (!val) return; // ignore attempt to *reset* while no Config is configured
+			throw new NullPointerException("Not configured when requesting source type."); //$NON-NLS-1$
+		} else {
+			config.sourceTypeRequired = val;
+		}
 	}
 
 	public static boolean getSourceTypeRequired() {

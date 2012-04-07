@@ -55,6 +55,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -164,7 +165,7 @@ public static class CheckPoint {
 	ReferenceContext context;
 	boolean ignoreFurtherInvestigation;
 }
-public CheckPoint getCheckPoint(ReferenceContext referenceContext) {
+public @NonNull CheckPoint getCheckPoint(ReferenceContext referenceContext) {
 	CheckPoint result = new CheckPoint();
 	if (this.problems != null) {
 		int len = this.problems.length;

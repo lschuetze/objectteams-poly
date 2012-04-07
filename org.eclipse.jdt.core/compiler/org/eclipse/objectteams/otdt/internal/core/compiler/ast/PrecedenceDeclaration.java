@@ -253,8 +253,10 @@ public class PrecedenceDeclaration extends ASTNode {
 		for (int i = 0; i < len; i++) {
 			precedences[i] = type.binding.precedences[i];
 		}
-		for (int i = 0; i < lenSuper; i++) {
-			precedences[len+i] = strengthenPrecendence(type, superTeam.precedences[i]);
+		if (superTeam != null) { // redundant as per correlation with lenSuper
+			for (int i = 0; i < lenSuper; i++) {
+				precedences[len+i] = strengthenPrecendence(type, superTeam.precedences[i]);
+			}
 		}
 		int count = precedences.length;
 		for(int i=0; i<precedences.length-1; i++) {

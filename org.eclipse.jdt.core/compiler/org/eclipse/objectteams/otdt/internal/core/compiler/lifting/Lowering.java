@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 
+import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.Assignment;
@@ -172,6 +173,7 @@ public class Lowering implements IOTConstants {
 		}
         if (needNullCheck) {
         	// ((local = (expression)) == null) ? (RequiredType)local : lower(local));
+        	@SuppressWarnings("null") // needNullCheck => localVar != null
 			SingleNameReference lhs = gen.singleNameReference(localVar.name);
 			lhs.binding = localVar;
 			lhs.resolvedType = unloweredType;
@@ -185,7 +187,7 @@ public class Lowering implements IOTConstants {
         return loweringExpr;
 	}
 	
-	LocalVariableBinding makeNewLocal(BlockScope scope, TypeBinding variableType, int sourceStart, int sourceEnd) {
+	@NonNull LocalVariableBinding makeNewLocal(BlockScope scope, TypeBinding variableType, int sourceStart, int sourceEnd) {
 		char[] name = ("_OT$unlowered$"+sourceStart).toCharArray(); //$NON-NLS-1$
 		LocalVariableBinding varBinding = new LocalVariableBinding(name, variableType, 0, false);
 		varBinding.declaration = new LocalDeclaration(name, sourceStart, sourceEnd); // needed for BlockScope.computeLocalVariablePositions() -> CodeStream.record()

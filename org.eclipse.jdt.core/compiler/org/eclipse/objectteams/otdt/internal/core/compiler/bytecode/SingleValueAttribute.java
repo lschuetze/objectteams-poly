@@ -196,6 +196,7 @@ public class SingleValueAttribute
             		else if (staticPart != null)
             			break; // seen enough
             	}
+            	if (staticPart == null) return; // no success!
             	ReferenceBinding currentType = staticPart;
             	ITeamAnchor anchor = null; // accumulate anchor path here
             	while (i<anchorPath.length) {

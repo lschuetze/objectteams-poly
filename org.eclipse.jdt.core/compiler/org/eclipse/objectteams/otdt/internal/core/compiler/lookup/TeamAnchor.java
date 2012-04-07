@@ -277,13 +277,10 @@ public abstract class TeamAnchor extends Binding implements ITeamAnchor {
 	        if (expression instanceof QualifiedNameReference) {
 	        	FieldBinding[] otherFields = ((QualifiedNameReference)expression).otherBindings;
 	        	if (otherFields != null && otherFields.length > 0) {
-	        		ITeamAnchor anchor = null;
-	        		for (int i = otherFields.length-1; i >= 0; i--) {
-        				if (anchor == null)
-        					anchor = otherFields[i];
-        				else
-	        				anchor = anchor.setPathPrefix(otherFields[i]);
-					}
+	        		int len = otherFields.length;
+	        		ITeamAnchor anchor = otherFields[len-1];
+	        		for (int i = len-2; i >= 0; i--)
+        				anchor = anchor.setPathPrefix(otherFields[i]);
 	        		if (bind instanceof ITeamAnchor)
 	        			return anchor.setPathPrefix((ITeamAnchor)bind);
 	        	}

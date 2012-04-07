@@ -745,7 +745,8 @@ public class DeclaredLifting implements IOTConstants {
 	/* Generate the if-cascade for dynamic lifting depending on the argument's dynamic type. */
 	static Statement generateDynamicSwitch(BlockScope scope, ReferenceBinding roleType, int problemId, AstGenerator gen) {
 		ReferenceBinding[] boundDescendants = roleType.roleModel.getBoundDescendants();
-		if (boundDescendants.length == 0)
+		int len = boundDescendants.length;
+		if (len == 0)
 			return gen.throwStatement(
 						gen.allocation(
 							gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_ERROR),
@@ -755,49 +756,54 @@ public class DeclaredLifting implements IOTConstants {
 										"Lifting impossible, role has no bound descendants: ".toCharArray(), //$NON-NLS-1$
 										roleType.readableName()))
 							}));
-		IfStatement ifStat = null;
-		IfStatement current = null;
 		LookupEnvironment environment = scope.compilationUnitScope().environment;
-		for (int i=0; i<boundDescendants.length; i++) {
-			TypeBinding boundBase = boundDescendants[i].baseclass();
-			if (RoleTypeBinding.isRoleWithExplicitAnchor(boundBase)) {
-				if (boundBase.isParameterizedType()) {
-					// tricky case: need to discard type parameters, but retain/recreate the role type wrapping:
-					RoleTypeBinding baseRole = (RoleTypeBinding)boundBase;
-					boundBase = environment.createParameterizedType(baseRole._declaredRoleType, 
-																 	null, 					// erase type parameters 
-																	baseRole._teamAnchor, 	// but retain anchor
-																	-1,					// valueParamPosition 
-																	baseRole.enclosingType());
-				}
-				// only RTB but not parameterized: leave unchanged.
-			} else {
-				boundBase = boundBase.erasure();
-			}
-			IfStatement newIf = gen.ifStatement(
-									gen.instanceOfExpression(
-										gen.singleNameReference(IOTConstants.BASE),
-										gen.typeReference(boundBase)),
-									gen.returnStatement(
-										Lifting.liftCall(
-											scope,
-											gen.thisReference(),
-											gen.castExpression(
-												gen.singleNameReference(IOTConstants.BASE),
-												gen.typeReference(boundBase),
-												CastExpression.DO_WRAP),
-											boundBase,
-											boundDescendants[i],
-											false/*needLowering*/)),
-									null);
-			if (ifStat == null)
-				ifStat = newIf;					// toplevel "if"
-			else
-				current.elseStatement = newIf;  // nest within existing "if else { /* here */ }"
+		// toplevel "if"
+		IfStatement ifStat = genNewIf(scope, gen, boundDescendants[0], environment);
+		IfStatement current = ifStat;
+		// needed at least one if, nested ifs are optional:
+		for (int i=1; i<len; i++) {
+			IfStatement newIf = genNewIf(scope, gen, boundDescendants[i], environment);
+			current.elseStatement = newIf;  // nest within existing "if else { /* here */ }"
 			current = newIf;
 		}
 		// final branch:
 		current.elseStatement = Lifting.genLiftingFailedException(IOTConstants.BASE, roleType, problemId, gen);
 		return ifStat;
+	}
+
+	private static IfStatement genNewIf(BlockScope scope, AstGenerator gen, ReferenceBinding boundDescendant, 
+									    LookupEnvironment environment) 
+	{
+		TypeBinding boundBase = boundDescendant.baseclass();
+		if (RoleTypeBinding.isRoleWithExplicitAnchor(boundBase)) {
+			if (boundBase.isParameterizedType()) {
+				// tricky case: need to discard type parameters, but retain/recreate the role type wrapping:
+				RoleTypeBinding baseRole = (RoleTypeBinding)boundBase;
+				boundBase = environment.createParameterizedType(baseRole._declaredRoleType, 
+															 	null, 					// erase type parameters 
+																baseRole._teamAnchor, 	// but retain anchor
+																-1,						// valueParamPosition 
+																baseRole.enclosingType());
+			}
+			// only RTB but not parameterized: leave unchanged.
+		} else {
+			boundBase = boundBase.erasure();
+		}
+		return gen.ifStatement(
+					gen.instanceOfExpression(
+						gen.singleNameReference(IOTConstants.BASE),
+						gen.typeReference(boundBase)),
+					gen.returnStatement(
+						Lifting.liftCall(
+							scope,
+							gen.thisReference(),
+							gen.castExpression(
+								gen.singleNameReference(IOTConstants.BASE),
+								gen.typeReference(boundBase),
+								CastExpression.DO_WRAP),
+							boundBase,
+							boundDescendant,
+							false/*needLowering*/)),
+					null);
 	}
 }

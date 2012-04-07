@@ -428,6 +428,7 @@ public class RoleSplitter
 		    if (superClass.isDirectRole()) {
 		        TypeDeclaration interfaceAst = role.getInterfaceAst();
 		        if (interfaceAst != null) {
+		        	ifcPart = interfaceAst.binding;
 		        	ReferenceBinding superIfc = superClass.enclosingType().getMemberType(superClass.sourceName());
 					superIfc = superClass.transferTypeArguments(superIfc);
 					// special: linking an ifc from a custom Confined type to "Confined" from the correct team

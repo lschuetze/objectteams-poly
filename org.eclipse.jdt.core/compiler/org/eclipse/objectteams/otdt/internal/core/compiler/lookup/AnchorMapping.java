@@ -202,7 +202,7 @@ public class AnchorMapping {
 								}
 							}
 						}
-						if (isValidAnchor(anchor)) {
+						if ((anchor=validAnchor(anchor)) != null) {
 							// downgrading allowed:
 							return anchor.getRoleTypeBinding(paramDependentType, typeArguments, dimensions);
 						}
@@ -252,9 +252,10 @@ public class AnchorMapping {
 	                reportError ? problemReporter : null,
 	                null);
 	       }
-	       if (!isValidAnchor(anchor))
-	          anchor = TThisBinding.getTThisForRole(roleRef, site);
-	       if (isValidAnchor(anchor))
+	       anchor = validAnchor(anchor);
+	       if (anchor == null)
+	          anchor = validAnchor(TThisBinding.getTThisForRole(roleRef, site));
+	       if (anchor != null)
 	       {
 	       		if (!anchor.isTypeCompatibleWith(tthisType))
 	          		anchor = null; // cancel if incompatible.
@@ -262,11 +263,13 @@ public class AnchorMapping {
 	   }
 	return anchor;
 }
-	private boolean isValidAnchor(ITeamAnchor anchor) {
-	   return
-	   		(anchor != null)
-		 && (anchor != RoleTypeBinding.NoAnchor)
-		 && anchor.isValidAnchor();
+   // if anchor is valid return it otherwise null 
+   private ITeamAnchor validAnchor(ITeamAnchor anchor) {
+	   if (  (anchor != null)
+		   && (anchor != RoleTypeBinding.NoAnchor)
+		   && anchor.isValidAnchor())
+		   return anchor;
+	   return null;
    }
 
    /** Store successful instantiated parameters in the current mapping. */

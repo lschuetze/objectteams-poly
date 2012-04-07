@@ -1378,13 +1378,15 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 
 	    Argument[] newArguments = null;
 	    // Arguments (construct from bindings, using dummy names):
-	    TypeBinding[] srcParams = constructorBinding != null ? constructorBinding.parameters : null;
-	    if (srcParams != null) {
-	        newArguments = AstConverter.createArgumentsFromParameters(srcParams, gen);
-	        if (srcParams.length == 1 && srcParams[0] == roleModel.getInterfacePartBinding()) {     // single argument of type of this role itself?
-	        	if (constructorBinding.isPrivate() || constructorBinding.isDefault())				// srcParams != null => constructorBinding != null
-	        		roleModel.getAst().scope.problemReporter().roleConstructorHiddenByLiftingConstructor(constructor);
-	        }
+	    if (constructorBinding != null) {
+		    TypeBinding[] srcParams = constructorBinding.parameters;
+		    if (srcParams != null) {
+		        newArguments = AstConverter.createArgumentsFromParameters(srcParams, gen);
+		        if (srcParams.length == 1 && srcParams[0] == roleModel.getInterfacePartBinding()) {     // single argument of type of this role itself?
+		        	if (constructorBinding.isPrivate() || constructorBinding.isDefault())
+		        		roleModel.getAst().scope.problemReporter().roleConstructorHiddenByLiftingConstructor(constructor);
+		        }
+		    }
 	    }
 	    if (newArguments != null && constructorBinding != null && Lifting.isLiftingCtor(constructorBinding))
 	    	newArguments[0].type.setBaseclassDecapsulation(DecapsulationState.REPORTED);
@@ -1400,9 +1402,11 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    if (constructor != null) {
 		    if (constructor.thrownExceptions != null)
 		    	exceptions = AstClone.copyTypeArray(constructor.thrownExceptions);
-	    } else {
+	    } else if (constructorBinding != null) {
 	    	if (constructorBinding.thrownExceptions != Binding.NO_EXCEPTIONS)
 	    		exceptions = AstClone.copyExceptions(constructorBinding, gen);
+	    } else {
+	    	throw new InternalCompilerError("Either constructor or constructorBinding must be nonnull"); //$NON-NLS-1$
 	    }
 
 	    MethodDeclaration newMethod = internalCreateCreationMethod(
