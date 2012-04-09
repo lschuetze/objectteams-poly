@@ -442,6 +442,8 @@ public class TeamModel extends TypeModel {
 	    if (roleType.isParameterizedType())
 	    	roleType = ((ParameterizedTypeBinding)roleType).genericType();
     	ReferenceBinding roleOuter = (ReferenceBinding) roleType.enclosingType().erasure();
+    	if (roleOuter == teamCandidate)
+    		return 1; // shortcut
 	    if (teamCandidate.isRole()) {
 	    	ReferenceBinding outerTeam = teamCandidate.enclosingType();
 	    	int l2 = levelFromEnclosingTeam(outerTeam, roleOuter);

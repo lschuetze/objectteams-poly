@@ -19,6 +19,7 @@ package org.eclipse.objectteams.otdt.tests.otjld.regression;
 import java.util.Map;
 
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
@@ -39,7 +40,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testB11_sh9"};
+//		TESTS_NAMES = new String[] { "testBug372786"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -51,6 +52,20 @@ public class ReportedBugs extends AbstractOTJLDTest {
 	public static Class testClass() {
 		return ReportedBugs.class;
 	}
+
+    
+    String[] getClassLibraries(String jarFilename) {
+    	String destPath = this.outputRootDirectoryPath+"/regression";
+    	createOutputTestDirectory("/regression");
+    	// upload the jar:
+		Util.copy(getTestResourcePath(jarFilename), destPath);
+    	// setup classpath:
+    	String[] classPaths = getDefaultClassPaths();
+    	int l = classPaths.length;
+    	System.arraycopy(classPaths, 0, classPaths=new String[l+1], 0, l);
+		classPaths[l] = this.outputRootDirectoryPath+"/regression/"+jarFilename;
+		return classPaths;
+    }
 
     // reported against GebitProposalComputer - typo in testcase
     // B.1.1-otjld-sh-1f
@@ -5218,5 +5233,25 @@ public class ReportedBugs extends AbstractOTJLDTest {
             },
             "Adaptation");
     }
-
+    public void testBug372786() {
+    	runNegativeTest(
+    		new String[] {
+    	"TBug372786.java",
+    			"import jarred.TeamBug372786;\n" +
+    			"public class TBug372786 {\n" +
+    			"	TeamBug372786 t;\n" +
+    			"   void test() {\n" +
+    			"       t.run();\n" +
+    			"   }\n" +
+    			"}\n"
+    		},
+    		"----------\n" + 
+    		"1. ERROR in TBug372786.java (at line 1)\n" + 
+    		"	import jarred.TeamBug372786;\n" + 
+    		"	^\n" + 
+    		"The type notjarred.Missing cannot be resolved. It is indirectly referenced from required .class files\n" + 
+    		"----------\n",
+    		getClassLibraries("bug372786.jar"),
+    		false);
+    }
 }

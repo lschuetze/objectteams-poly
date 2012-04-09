@@ -154,6 +154,8 @@ public class TypeAnchorReference extends TypeReference {
 	public char[] getLastToken() {
 		if (this.anchor instanceof SingleNameReference)
 			return ((SingleNameReference)this.anchor).token;
+		if (this.anchor instanceof QualifiedBaseReference)
+			return IOTConstants.BASE;
 		char[][] tokens = ((QualifiedNameReference)this.anchor).tokens;
 		return tokens[tokens.length-1];
 	}

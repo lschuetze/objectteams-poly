@@ -148,8 +148,10 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		    {
 		    	TypeAnchorReference typeAnchorReference = (TypeAnchorReference)this.typeArguments[typeParamPos];
 				ITeamAnchor anchor = typeAnchorReference.resolveAnchor(scope);
-				if (!ProblemAnchorBinding.checkAnchor(scope, typeAnchorReference, anchor, this.token))
-					return null;
+				if (!ProblemAnchorBinding.checkAnchor(scope, typeAnchorReference, anchor, this.token)) {
+					int problemId = anchor != null ? anchor.problemId() : ProblemReasons.AnchorNotFound;
+					return this.resolvedType = new ProblemReferenceBinding(anchor, typeAnchorReference.getLastToken(), null, problemId);
+				}
 		    	for (ITeamAnchor seg : anchor.getBestNamePath())
 		    		if (!seg.isFinal())
 		    			scope.problemReporter().anchorPathNotFinal(typeAnchorReference, seg, this.token);
@@ -169,17 +171,17 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 					this.resolvedType = typeAnchorReference.createDependentTypeBinding(scope, this, typeParamPos);
 					if (this.resolvedType == null) {
 						this.resolvedType = new ProblemReferenceBinding(anchor, this.token, null, ProblemReasons.NotFound);
-						return null;
+						return this.resolvedType;
 					}
 				}
 				if (this.resolvedType != null && this.resolvedType.isValidBinding() && this.resolvedType instanceof ReferenceBinding) {
 					if (!checkParameterizedRoleVisibility(scope, anchor, (ReferenceBinding) this.resolvedType))
-						return null;
+						return this.resolvedType;
 				}
 	
 				if (   shouldAnalyzeRoleReference()
 					&& isIllegalQualifiedUseOfProtectedRole(scope))
-					return null; // problem binding may be in this.resolvedType
+					return this.resolvedType; // problem binding may be in this.resolvedType
 				// consume first arg:
 				int len = 0;
 				if (this.typeAnchors != null) {

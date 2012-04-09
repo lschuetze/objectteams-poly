@@ -844,6 +844,7 @@ public class AstGenerator extends AstFactory {
 		anonymousType.bodyEnd    = this.sourceEnd;
 		anonymousType.name = CharOperation.NO_CHAR;
 		anonymousType.bits |= (ASTNode.IsAnonymousType|ASTNode.IsLocalType);
+		anonymousType.isGenerated = true;
 		return anonymousType;
 	}
 	

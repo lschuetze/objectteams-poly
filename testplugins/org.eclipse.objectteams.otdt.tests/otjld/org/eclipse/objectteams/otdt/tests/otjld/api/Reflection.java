@@ -833,6 +833,11 @@ public class Reflection extends AbstractOTJLDTest {
     		"	R<@t> r = t.getRole(o, R<@t>.class);\n" + 
     		"	                       ^\n" + 
     		"Illegal parameterized use of non-public role R (OTJLD 1.2.3(b)).\n" + 
+    		"----------\n" +
+    		"3. ERROR in Team923grm2gp_2.java (at line 8)\n" + 
+    		"	r.print();\n" + 
+    		"	^\n" + 
+    		"The type R is not visible\n" + 
     		"----------\n");
     }
 

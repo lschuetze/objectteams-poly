@@ -2679,9 +2679,7 @@ public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, 
 	    if (   (methodBinding == null)
 	        || (methodBinding.declaringClass != this))
 	    {
-			// create it (if successful!)
-	    	if (!methodDeclaration.ignoreFurtherInvestigation)
-	    		this.scope.addGeneratedMethod(methodDeclaration.binding);
+    		this.scope.addGeneratedMethod(methodDeclaration.binding);
 	    }
 	    else
 	    {

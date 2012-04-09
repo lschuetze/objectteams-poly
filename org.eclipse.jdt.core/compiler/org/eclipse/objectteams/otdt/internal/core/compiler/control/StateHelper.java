@@ -47,6 +47,7 @@ public class StateHelper
 		switch (state) {
 		case STATE_NONE:
 		case STATE_ROLES_LINKED:
+		case STATE_ROLE_FEATURES_COPIED:
 		case STATE_ROLE_HIERARCHY_ANALYZED:
 		case STATE_FULL_LIFTING:
 		case STATE_FAULT_IN_TYPES:

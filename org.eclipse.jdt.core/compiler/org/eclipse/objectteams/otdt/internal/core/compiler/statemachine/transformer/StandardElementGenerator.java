@@ -53,6 +53,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.*;
@@ -279,6 +280,10 @@ public class StandardElementGenerator {
 						new Argument[]{
 							gen.argument(argName, exprTypeRef)
 						});
+		// see org.eclipse.objectteams.otdt.tests.otjld.regression.ReportedBugs.testB11_sh15():
+		// pre-set return type to prevent problems with resolving lateron
+		TypeBinding returnType = dimensions == 0 ? roleType : scope.environment().createArrayType(roleType, dimensions);
+		castMethod.returnType.resolvedType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(returnType, teamBinding);
 
 		// <role> role = (<role>)_OT$arg;
 		TypeReference arrayCastType = gen.createArrayTypeReference(roleType, dimensions);
