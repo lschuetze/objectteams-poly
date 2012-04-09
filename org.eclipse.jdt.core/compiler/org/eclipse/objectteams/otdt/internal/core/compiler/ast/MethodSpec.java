@@ -445,6 +445,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		if (this.resolvedMethod == null) {
 			scope.problemReporter().unresolvedMethodSpec(this, type, isCallout);
 			this.resolvedMethod = new ProblemMethodBinding(this.selector, Binding.NO_PARAMETERS, type, ProblemReasons.NotFound);
+			this.resolvedMethod.returnType = scope.getJavaLangObject(); // prevent NPE on missing return type
 			return;
 		} else if (!this.resolvedMethod.isValidBinding()) {
 			switch (this.resolvedMethod.problemId()) {
