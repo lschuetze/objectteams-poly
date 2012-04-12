@@ -53,8 +53,7 @@
 	<!-- ===================================================================== -->
 	<target name="getMapFiles">
 		<mkdir dir="${buildDirectory}/maps"/>
-		<echo message="REMEMBER: this is a workaround which requires manual pulling in ${git.repository.path}."/>
-		<copy file="${git.repository.path}/${pathToMapFile}/${mapFileName}" todir="${buildDirectory}/maps/" />
+		<copy file="${map.file.path}" todir="${buildDirectory}/maps/" />
 	</target>
 	
 	<!-- ===================================================================== -->

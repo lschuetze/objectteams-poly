@@ -221,9 +221,7 @@ should test be run (true|false)?
 	            <arg value="-Dtest.root.dir=${test.root.dir}"/>
 	            <arg value="-Dtest.eclipseDir=${test.eclipseDir}"/>
 	            <arg value="-DmapVersionTag=${mapVersionTag}"/>
-	            <arg value="-DpathToMapFile=${pathToMapFile}"/>
-		    	<arg value="-DmapFileName=otdt.map"/>
-		    	<arg value="-Dgit.repository.path=${git.repository.path}"/>
+		    	<arg value="-Dmap.file.path=${map.file.path}"/>
 	            <arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
 	            <arg value="-Declipse.tests.zip=${eclipse.tests.zip}"/>
 	            <!--arg value="-verbose" /-->
@@ -299,10 +297,8 @@ should test be run (true|false)?
 				<arg value="-Dbasearch=${arch}"/>
 				<arg value="-Dtest.root.dir=${test.root.dir}"/>
 				<arg value="-Dtest.eclipseDir=${test.eclipseDir}"/>
-				<arg value="-Dgit.repository.path=${git.repository.path}"/>
+				<arg value="-Dmap.file.path=${map.file.path}"/>
 				<arg value="-DmapVersionTag=${mapVersionTag}"/>
-				<arg value="-DpathToMapFile=${pathToMapFile}"/>
-				<arg value="-DmapFileName=otdt.map"/>
 				<arg value="-Ddo.run.tests=${do.run.tests}"/>
 				<arg value="-Ddo.build.all=${do.build.all}"/>
 				<arg value="-Declipse-app.tgz=${eclipse-app.tgz}"/>
