@@ -185,7 +185,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		}
 
 		// after having analysed exceptions above start tracking newly allocated resource:
-		if (FakedTrackingVariable.isAnyCloseable(this.resolvedType) && currentScope.compilerOptions().analyseResourceLeaks) {
+		if (currentScope.compilerOptions().analyseResourceLeaks && FakedTrackingVariable.isAnyCloseable(this.resolvedType)) {
 			FakedTrackingVariable.analyseCloseableAllocation(currentScope, flowInfo, this);
 		}
 

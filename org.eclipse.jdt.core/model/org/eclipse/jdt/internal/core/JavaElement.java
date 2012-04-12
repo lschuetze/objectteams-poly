@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -272,7 +272,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 //{ObjectTeams: role files are not found via containment of regular JavaElements:
 	  try {
 // orig:
-		return openWhenClosed(createElementInfo(), monitor);
+		return openWhenClosed(createElementInfo(), false, monitor);
 // :giro
 	  } catch (JavaModelException jme) {
 		// try to interpret as a ROFI:
@@ -573,7 +573,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 	 * Opens an <code>Openable</code> that is known to be closed (no check for <code>isOpen()</code>).
 	 * Returns the created element info.
 	 */
-	protected Object openWhenClosed(Object info, IProgressMonitor monitor) throws JavaModelException {
+	protected Object openWhenClosed(Object info, boolean forceAdd, IProgressMonitor monitor) throws JavaModelException {
 		JavaModelManager manager = JavaModelManager.getJavaModelManager();
 		boolean hadTemporaryCache = manager.hasTemporaryCache();
 		try {
@@ -592,7 +592,7 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 				throw newNotPresentException();
 			}
 			if (!hadTemporaryCache) {
-				manager.putInfos(this, newElements);
+				info = manager.putInfos(this, info, forceAdd, newElements);
 			}
 		} finally {
 			if (!hadTemporaryCache) {

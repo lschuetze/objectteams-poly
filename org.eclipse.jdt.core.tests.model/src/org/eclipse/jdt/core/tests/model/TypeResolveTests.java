@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -697,6 +697,36 @@ public void testParamAnnotations8() throws CoreException, IOException {
 		assertEquals("Wrong value", "id 1", String.valueOf(output));
 		assertEquals("Wrong length", 0, method.getParameters()[0].getAnnotations().length);
 		assertEquals("Wrong length", 0, method.getParameters()[2].getAnnotations().length);
+	} finally {
+		deleteProject("P");
+	}
+}
+/**
+ * @throws IOException 
+ * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=375568"
+ */
+public void testParamAnnotations9() throws CoreException, IOException {
+	try {
+		IJavaProject project = createJavaProject("P", new String[] {"src"}, new String[] {"JCL15_LIB"}, "bin", "1.5");
+		String[] pathAndContents = new String[]{"p/X.java",
+				"package p;\n" +
+				"public class X {\n" +
+				"	X field;\n" +
+				"	@Deprecated\n" +
+				"	public void Test(@Default String processor) {}\n" +
+				"}" +
+				"@interface Default{\n" +
+				"}"};
+		addLibrary(project, "lib334783.jar", "libsrc.zip", pathAndContents, JavaCore.VERSION_1_5);
+		
+		waitForAutoBuild();
+		IPackageFragmentRoot root = project.getPackageFragmentRoot(getFile("/P/lib334783.jar"));
+		IType type = root.getPackageFragment("p").getClassFile("X.class").getType();
+		String annotationString = "@p.Default [in processor [in Test(java.lang.String) [in X [in X.class [in p [in lib334783.jar [in P]]]]]]]";
+		
+		IMethod method = type.getMethods()[1];
+		assertEquals(1, method.getParameters()[0].getAnnotations().length);
+		assertEquals(annotationString, method.getParameters()[0].getAnnotations()[0].toString());
 	} finally {
 		deleteProject("P");
 	}
