@@ -10,7 +10,9 @@
  *     Tom Tromey - patch for readTable(String) as described in http://bugs.eclipse.org/bugs/show_bug.cgi?id=32196
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
- *     Stephan Herrmann - Contribution for Bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639)
+ *     Stephan Herrmann - Contributions for 
+ *								bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639)
+ *								bug 374605 - Unreasonable warning for enum-based switch statements
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.parser;
 
@@ -19,9 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
+import java.util.Properties;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
@@ -90,6 +90,7 @@ public class Parser implements  ParserBasicInformation, TerminalTokens, Operator
 	protected static final int THIS_CALL = ExplicitConstructorCall.This;
 	protected static final int SUPER_CALL = ExplicitConstructorCall.Super;
 	public static final char[] FALL_THROUGH_TAG = "$FALL-THROUGH$".toCharArray(); //$NON-NLS-1$
+	public static final char[] CASES_OMITTED_TAG = "$CASES-OMITTED$".toCharArray(); //$NON-NLS-1$
 	
 //{ObjectTeams:	new constants for tsuper
 	protected static final int TSUPER_CALL = ExplicitConstructorCall.Tsuper;
@@ -125,8 +126,7 @@ public class Parser implements  ParserBasicInformation, TerminalTokens, Operator
 	public static char nasr[] = null;
 	public static char non_terminal_index[] = null;
 	private final static String READABLE_NAMES_FILE = "readableNames"; //$NON-NLS-1$
-	private final static String READABLE_NAMES_FILE_NAME =
-		"org.eclipse.jdt.internal.compiler.parser." + READABLE_NAMES_FILE; //$NON-NLS-1$
+
 	public static String readableName[] = null;
 
 	public static byte rhs[] = null;
@@ -563,7 +563,7 @@ public class Parser implements  ParserBasicInformation, TerminalTokens, Operator
 		}
 	
 		buildFileForCompliance(prefix + (++i) + ".rsc", newRhs.length, tokens);//$NON-NLS-1$
-		buildFileForReadableName(READABLE_NAMES_FILE+".properties", newLhs, newNonTerminalIndex, newName, tokens);//$NON-NLS-1$
+		buildFileForReadableName(READABLE_NAMES_FILE+".props", newLhs, newNonTerminalIndex, newName, tokens);//$NON-NLS-1$
 	
 		buildFilesForRecoveryTemplates(
 				prefix + (++i) + ".rsc", //$NON-NLS-1$
@@ -649,7 +649,7 @@ public class Parser implements  ParserBasicInformation, TerminalTokens, Operator
 	
 		rules_compliance = readLongTable(prefix + (++i) + ".rsc"); //$NON-NLS-1$
 	
-		readableName = readReadableNameTable(READABLE_NAMES_FILE_NAME);
+		readableName = readReadableNameTable(READABLE_NAMES_FILE + ".props"); //$NON-NLS-1$
 	
 		reverse_index = computeReverseTable(terminal_index, non_terminal_index, name);
 	
@@ -750,28 +750,25 @@ public class Parser implements  ParserBasicInformation, TerminalTokens, Operator
 	
 		return result;
 	}
-	protected static String[] readReadableNameTable(String filename) {
+	protected static String[] readReadableNameTable(String filename){
 		String[] result = new String[name.length];
-	
-		ResourceBundle bundle;
+		
+		InputStream is = Parser.class.getResourceAsStream(filename);
+		Properties props = new Properties();
 		try {
-			bundle = ResourceBundle.getBundle(filename, Locale.getDefault());
-		} catch(MissingResourceException e) {
-			System.out.println("Missing resource : " + filename.replace('.', '/') + ".properties for locale " + Locale.getDefault()); //$NON-NLS-1$//$NON-NLS-2$
-			throw e;
+			props.load(is);
+		} catch (IOException e) {
+			result = name;
+			return result;
 		}
 		for (int i = 0; i < NT_OFFSET + 1; i++) {
 			result[i] = name[i];
 		}
 		for (int i = NT_OFFSET; i < name.length; i++) {
-			try {
-				String n = bundle.getString(name[i]);
-				if(n != null && n.length() > 0) {
-					result[i] = n;
-				} else {
-					result[i] = name[i];
-				}
-			} catch(MissingResourceException e) {
+			String n = props.getProperty(name[i]);
+			if (n != null && n.length() > 0) {
+				result[i] = n;
+			} else {
 				result[i] = name[i];
 			}
 		}
@@ -3736,10 +3733,13 @@ protected void consumeCreateInitializer() {
 protected void consumeDefaultLabel() {
 	// SwitchLabel ::= 'default' ':'
 	CaseStatement defaultStatement = new CaseStatement(null, this.intStack[this.intPtr--], this.intStack[this.intPtr--]);
-	// Look for $fall-through$ tag in leading comment for case statement
+	// Look for $fall-through$ and $CASES-OMITTED$ tags in leading comment for case statement
 	if (hasLeadingTagComment(FALL_THROUGH_TAG, defaultStatement.sourceStart)) {
 		defaultStatement.bits |= ASTNode.DocumentedFallthrough;
-	}	
+	}
+	if (hasLeadingTagComment(CASES_OMITTED_TAG, defaultStatement.sourceStart)) {
+		defaultStatement.bits |= ASTNode.DocumentedCasesOmitted;
+	}
 	pushOnAstStack(defaultStatement);
 }
 protected void consumeDefaultModifiers() {
@@ -11692,8 +11692,14 @@ public boolean hasLeadingTagComment(char[] commentPrefixTag, int rangeEnd) {
 			}
 		}
 		for (int iTag = 0, length = commentPrefixTag.length; iTag < length; iTag++, charPos++) {
-			if (charPos >= rangeEnd) return false; // comment is too small to host tag
-			if (source[charPos] != commentPrefixTag[iTag]) return false;
+			if (charPos >= rangeEnd // comment is too small to host tag
+					|| source[charPos] != commentPrefixTag[iTag]) {
+				if (iTag == 0) {
+					return false; // didn't even match leading '$' -> not a tag comment
+				} else {
+					continue previousComment; // accept as tag comment -> skip it and keep searching backwards
+				}
+			}
 		}
 		return true;
 	}

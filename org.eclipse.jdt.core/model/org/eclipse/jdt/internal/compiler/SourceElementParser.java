@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,7 +90,7 @@ public SourceElementParser(
 		DefaultErrorHandlingPolicies.exitAfterAllProblems(),
 		options,
 		problemFactory) {
-		public void record(CategorizedProblem problem, CompilationResult unitResult, ReferenceContext context) {
+		public void record(CategorizedProblem problem, CompilationResult unitResult, ReferenceContext context, boolean mandatoryError) {
 //{ObjectTeams: filter recording (cf. CompilationUnitProblemFinder):
 			if (context instanceof AbstractMethodDeclaration) {
 				AbstractMethodDeclaration method = (AbstractMethodDeclaration)context;
@@ -103,7 +103,7 @@ public SourceElementParser(
 				}
 			}
 // SH}
-			unitResult.record(problem, context); // TODO (jerome) clients are trapping problems either through factory or requestor... is result storing needed?
+			unitResult.record(problem, context, mandatoryError); // TODO (jerome) clients are trapping problems either through factory or requestor... is result storing needed?
 			SourceElementParser.this.requestor.acceptProblem(problem);
 		}
 	};
@@ -859,7 +859,6 @@ protected CompilationUnitDeclaration endParse(int act) {
 		return null;
 	}
 }
-
 public TypeReference getTypeReference(int dim) {
 	/* build a Reference on a variable that may be qualified or not
 	 * This variable is a type reference and dim will be its dimensions
@@ -1051,7 +1050,6 @@ protected QualifiedNameReference newQualifiedNameReference(char[][] tokens, long
 protected SingleNameReference newSingleNameReference(char[] source, long positions) {
 	return new SingleNameReference(source, positions);
 }
-
 public CompilationUnitDeclaration parseCompilationUnit(
 	ICompilationUnit unit,
 	boolean fullParse,
@@ -1102,7 +1100,6 @@ private void rememberCategories() {
 		}
 	}
 }
-
 private void reset() {
 	this.sourceEnds = new HashtableOfObjectToInt();
 	this.nodesToCategories = new HashMap();

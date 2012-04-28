@@ -312,7 +312,7 @@ public class CompilationUnitProblemFinder extends Compiler {
 				this.problemReporter.options,
 				this.problemReporter.problemFactory)
 			{
-				public void record(CategorizedProblem problem, CompilationResult unitResult, ReferenceContext context) {
+				public void record(CategorizedProblem problem, CompilationResult unitResult, ReferenceContext context, boolean mandatoryError) {
 					//filter recording:
 					if (context instanceof AbstractMethodDeclaration) {
 						AbstractMethodDeclaration method = (AbstractMethodDeclaration)context;
@@ -324,7 +324,7 @@ public class CompilationUnitProblemFinder extends Compiler {
 							}
 						}
 					}
-					super.record(problem, unitResult, context);
+					super.record(problem, unitResult, context, mandatoryError);
 				}
 		};
 // SH}

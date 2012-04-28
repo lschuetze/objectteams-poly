@@ -115,11 +115,10 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 		    TypeBinding substitute = methodSubstitute.typeArguments[i]; // retain for diagnostics
 		    /* https://bugs.eclipse.org/bugs/show_bug.cgi?id=375394, To avoid spurious bounds check failures due to circularity in formal bounds, 
 		       we should eliminate only the lingering embedded type variable references after substitution, not alien type variable references
-		       that constitute the inference per se. Also short circuit this step, if the substitution has no type variables in the first place 
-		       (as it is effectively a nop.)
+		       that constitute the inference per se.
 		     */ 
 		    TypeBinding substituteForChecks;
-		    if (substitute instanceof TypeVariableBinding || ((substitute.tagBits & TagBits.HasTypeVariable) == 0)) {
+		    if (substitute instanceof TypeVariableBinding) {
 		    	substituteForChecks = substitute;
 		    } else {
 		    	substituteForChecks = Scope.substitute(new LingeringTypeVariableEliminator(typeVariables, null, scope), substitute); // while using this for bounds check

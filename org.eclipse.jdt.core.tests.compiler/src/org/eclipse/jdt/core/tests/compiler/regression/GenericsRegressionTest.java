@@ -2568,4 +2568,34 @@ public void test375394() {
 		"Bound mismatch: The generic method foo(C1, C2) of type X is not applicable for the arguments (C2, C1). The inferred type C1 is not a valid substitute for the bounded parameter <C2 extends Collection<Object>>\n" + 
 		"----------\n");
 }
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=375394
+public void test375394a() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_7)
+		return;
+	this.runNegativeTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"    B<C, ? extends C<C>, ? extends C<C>> b = new B<>();\n" +
+			"}\n" +
+			"class B <T, U extends C<T>, V extends U>{}\n" +
+			"class C<T> {}\n",
+		},
+		"----------\n" + 
+		"1. WARNING in X.java (at line 2)\n" + 
+		"	B<C, ? extends C<C>, ? extends C<C>> b = new B<>();\n" + 
+		"	  ^\n" + 
+		"C is a raw type. References to generic type C<T> should be parameterized\n" + 
+		"----------\n" + 
+		"2. WARNING in X.java (at line 2)\n" + 
+		"	B<C, ? extends C<C>, ? extends C<C>> b = new B<>();\n" + 
+		"	                 ^\n" + 
+		"C is a raw type. References to generic type C<T> should be parameterized\n" + 
+		"----------\n" + 
+		"3. WARNING in X.java (at line 2)\n" + 
+		"	B<C, ? extends C<C>, ? extends C<C>> b = new B<>();\n" + 
+		"	                                 ^\n" + 
+		"C is a raw type. References to generic type C<T> should be parameterized\n" + 
+		"----------\n");
+}
 }

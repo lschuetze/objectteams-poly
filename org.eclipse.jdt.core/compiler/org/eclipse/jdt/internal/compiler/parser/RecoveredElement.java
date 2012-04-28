@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: RecoveredElement.java 23404 2010-02-03 14:10:22Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -78,7 +77,7 @@ public RecoveredElement add(AbstractMethodMappingDeclaration methodMapping, int 
 	this.updateSourceEndIfNecessary(previousAvailableLineEnd(methodMapping.declarationSourceStart - 1));
 	return this.parent.add(methodMapping, bracketBalanceValue);
 }
-// SH}
+//SH}
 /*
  * Record a field declaration
  */

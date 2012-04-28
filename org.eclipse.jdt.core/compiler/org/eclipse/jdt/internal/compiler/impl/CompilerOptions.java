@@ -17,6 +17,7 @@
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 370639 - [compiler][resource] restore the default for resource leak warnings
  *								bug 366063 - Compiler should not add synthetic @NonNull annotations
+ *								bug 374605 - Unreasonable warning for enum-based switch statements
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.impl;
 
@@ -126,6 +127,8 @@ public class CompilerOptions {
 	public static final String OPTION_ReportMissingOverrideAnnotationForInterfaceMethodImplementation = "org.eclipse.jdt.core.compiler.problem.missingOverrideAnnotationForInterfaceMethodImplementation"; //$NON-NLS-1$
 	public static final String OPTION_ReportMissingDeprecatedAnnotation = "org.eclipse.jdt.core.compiler.problem.missingDeprecatedAnnotation"; //$NON-NLS-1$
 	public static final String OPTION_ReportIncompleteEnumSwitch = "org.eclipse.jdt.core.compiler.problem.incompleteEnumSwitch"; //$NON-NLS-1$
+	public static final String OPTION_ReportMissingEnumCaseDespiteDefault = "org.eclipse.jdt.core.compiler.problem.missingEnumCaseDespiteDefault"; //$NON-NLS-1$
+	public static final String OPTION_ReportMissingDefaultCase = "org.eclipse.jdt.core.compiler.problem.missingDefaultCase"; //$NON-NLS-1$
 	public static final String OPTION_ReportForbiddenReference =  "org.eclipse.jdt.core.compiler.problem.forbiddenReference"; //$NON-NLS-1$
 	public static final String OPTION_ReportDiscouragedReference =  "org.eclipse.jdt.core.compiler.problem.discouragedReference"; //$NON-NLS-1$
 	public static final String OPTION_SuppressWarnings =  "org.eclipse.jdt.core.compiler.problem.suppressWarnings"; //$NON-NLS-1$
@@ -313,7 +316,7 @@ public class CompilerOptions {
 	public static final int AnnotationSuperInterface = IrritantSet.GROUP1 | ASTNode.Bit10;
 	public static final int TypeHiding = IrritantSet.GROUP1 | ASTNode.Bit11;
 	public static final int MissingOverrideAnnotation = IrritantSet.GROUP1 | ASTNode.Bit12;
-	public static final int IncompleteEnumSwitch = IrritantSet.GROUP1 | ASTNode.Bit13;
+	public static final int MissingEnumConstantCase = IrritantSet.GROUP1 | ASTNode.Bit13;
 	public static final int MissingDeprecatedAnnotation = IrritantSet.GROUP1 | ASTNode.Bit14;
 	public static final int DiscouragedReference = IrritantSet.GROUP1 | ASTNode.Bit15;
 	public static final int UnhandledWarningToken = IrritantSet.GROUP1 | ASTNode.Bit16;
@@ -347,6 +350,7 @@ public class CompilerOptions {
 	public static final int NullUncheckedConversion = IrritantSet.GROUP2 | ASTNode.Bit13;
 	public static final int RedundantNullAnnotation = IrritantSet.GROUP2 | ASTNode.Bit14;
 	public static final int MissingNonNullByDefaultAnnotation = IrritantSet.GROUP2 | ASTNode.Bit15;
+	public static final int MissingDefaultCase = IrritantSet.GROUP2 | ASTNode.Bit16;
 
 //{ObjectTeams: OT/J specific problems/irritants:
 	public static final int OTJFlag = IrritantSet.GROUP3;
@@ -520,6 +524,8 @@ public class CompilerOptions {
 	public long intendedDefaultNonNullness; // 0 or TagBits#AnnotationNonNull
 	/** Should resources (objects of type Closeable) be analysed for matching calls to close()? */
 	public boolean analyseResourceLeaks;
+	/** Should missing enum cases be reported even if a default case exists in the same switch? */
+	public boolean reportMissingEnumCaseDespiteDefault;
 
 	// keep in sync with warningTokenToIrritant and warningTokenFromIrritant
 	public final static String[] warningTokens = {
@@ -690,8 +696,10 @@ public class CompilerOptions {
 				return OPTION_ReportTypeParameterHiding;
 			case MissingOverrideAnnotation :
 				return OPTION_ReportMissingOverrideAnnotation;
-			case IncompleteEnumSwitch :
+			case MissingEnumConstantCase :
 				return OPTION_ReportIncompleteEnumSwitch;
+			case MissingDefaultCase :
+				return OPTION_ReportMissingDefaultCase;
 			case MissingDeprecatedAnnotation :
 				return OPTION_ReportMissingDeprecatedAnnotation;
 			case DiscouragedReference :
@@ -891,7 +899,9 @@ public class CompilerOptions {
 			OPTION_ReportForbiddenReference,
 			OPTION_ReportHiddenCatchBlock,
 			OPTION_ReportIncompatibleNonInheritedInterfaceMethod,
+			OPTION_ReportMissingDefaultCase,
 			OPTION_ReportIncompleteEnumSwitch,
+			OPTION_ReportMissingEnumCaseDespiteDefault,
 			OPTION_ReportIndirectStaticAccess,
 			OPTION_ReportInvalidJavadoc,
 			OPTION_ReportInvalidJavadocTags,
@@ -1030,7 +1040,8 @@ public class CompilerOptions {
 				return "boxing"; //$NON-NLS-1$
 			case TypeHiding :
 				return "hiding"; //$NON-NLS-1$
-			case IncompleteEnumSwitch :
+			case MissingEnumConstantCase :
+			case MissingDefaultCase :
 				return "incomplete-switch"; //$NON-NLS-1$
 			case MissingDeprecatedAnnotation :
 				return "dep-ann"; //$NON-NLS-1$
@@ -1301,7 +1312,9 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportUnnecessaryElse, getSeverityString(UnnecessaryElse));
 		optionsMap.put(OPTION_ReportAutoboxing, getSeverityString(AutoBoxing));
 		optionsMap.put(OPTION_ReportAnnotationSuperInterface, getSeverityString(AnnotationSuperInterface));
-		optionsMap.put(OPTION_ReportIncompleteEnumSwitch, getSeverityString(IncompleteEnumSwitch));
+		optionsMap.put(OPTION_ReportIncompleteEnumSwitch, getSeverityString(MissingEnumConstantCase));
+		optionsMap.put(OPTION_ReportMissingEnumCaseDespiteDefault, this.reportMissingEnumCaseDespiteDefault ? ENABLED : DISABLED);
+		optionsMap.put(OPTION_ReportMissingDefaultCase, getSeverityString(MissingDefaultCase));
 		optionsMap.put(OPTION_ReportInvalidJavadoc, getSeverityString(InvalidJavadoc));
 		optionsMap.put(OPTION_ReportInvalidJavadocTagsVisibility, getVisibilityString(this.reportInvalidJavadocTagsVisibility));
 		optionsMap.put(OPTION_ReportInvalidJavadocTags, this.reportInvalidJavadocTags ? ENABLED : DISABLED);
@@ -1332,7 +1345,6 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_ReportMissingOverrideAnnotation, getSeverityString(MissingOverrideAnnotation));
 		optionsMap.put(OPTION_ReportMissingOverrideAnnotationForInterfaceMethodImplementation, this.reportMissingOverrideAnnotationForInterfaceMethodImplementation ? ENABLED : DISABLED);
 		optionsMap.put(OPTION_ReportMissingDeprecatedAnnotation, getSeverityString(MissingDeprecatedAnnotation));
-		optionsMap.put(OPTION_ReportIncompleteEnumSwitch, getSeverityString(IncompleteEnumSwitch));
 		optionsMap.put(OPTION_ReportUnusedLabel, getSeverityString(UnusedLabel));
 		optionsMap.put(OPTION_ReportUnusedTypeArgumentsForMethodInvocation, getSeverityString(UnusedTypeArguments));
 		optionsMap.put(OPTION_Compliance, versionFromJdkLevel(this.complianceLevel));
@@ -1579,6 +1591,8 @@ public class CompilerOptions {
 		this.intendedDefaultNonNullness = 0;
 		
 		this.analyseResourceLeaks = true;
+
+		this.reportMissingEnumCaseDespiteDefault = false;
 	}
 
 	public void set(Map optionsMap) {
@@ -1841,7 +1855,15 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportAnnotationSuperInterface)) != null) updateSeverity(AnnotationSuperInterface, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportMissingOverrideAnnotation)) != null) updateSeverity(MissingOverrideAnnotation, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportMissingDeprecatedAnnotation)) != null) updateSeverity(MissingDeprecatedAnnotation, optionValue);
-		if ((optionValue = optionsMap.get(OPTION_ReportIncompleteEnumSwitch)) != null) updateSeverity(IncompleteEnumSwitch, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportIncompleteEnumSwitch)) != null) updateSeverity(MissingEnumConstantCase, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportMissingEnumCaseDespiteDefault)) != null) {
+			if (ENABLED.equals(optionValue)) {
+				this.reportMissingEnumCaseDespiteDefault = true;
+			} else if (DISABLED.equals(optionValue)) {
+				this.reportMissingEnumCaseDespiteDefault = false;
+			}
+		}
+		if ((optionValue = optionsMap.get(OPTION_ReportMissingDefaultCase)) != null) updateSeverity(MissingDefaultCase, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportUnhandledWarningToken)) != null) updateSeverity(UnhandledWarningToken, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportUnusedWarningToken)) != null) updateSeverity(UnusedWarningToken, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportUnusedLabel)) != null) updateSeverity(UnusedLabel, optionValue);
@@ -2136,7 +2158,7 @@ public class CompilerOptions {
 		buf.append("\n\t- missing @Override annotation: ").append(getSeverityString(MissingOverrideAnnotation)); //$NON-NLS-1$
 		buf.append("\n\t- missing @Override annotation for interface method implementation: ").append(this.reportMissingOverrideAnnotationForInterfaceMethodImplementation ? ENABLED : DISABLED); //$NON-NLS-1$
 		buf.append("\n\t- missing @Deprecated annotation: ").append(getSeverityString(MissingDeprecatedAnnotation)); //$NON-NLS-1$
-		buf.append("\n\t- incomplete enum switch: ").append(getSeverityString(IncompleteEnumSwitch)); //$NON-NLS-1$
+		buf.append("\n\t- incomplete enum switch: ").append(getSeverityString(MissingEnumConstantCase)); //$NON-NLS-1$
 		buf.append("\n\t- raise null related warnings for variables tainted in assert statements: ").append(this.includeNullInfoFromAsserts ? ENABLED : DISABLED); //$NON-NLS-1$
 		buf.append("\n\t- suppress warnings: ").append(this.suppressWarnings ? ENABLED : DISABLED); //$NON-NLS-1$
 		buf.append("\n\t- suppress optional errors: ").append(this.suppressOptionalErrors ? ENABLED : DISABLED); //$NON-NLS-1$

@@ -1071,21 +1071,6 @@ public FieldBinding[] fields() {
 	this.tagBits |= TagBits.AreFieldsComplete;
 	return this.fields;
 }
-
-public void tagIndirectlyAccessibleMembers() {
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=328281
-	for (int i = 0; i < this.fields.length; i++) {
-		if (!this.fields[i].isPrivate())
-			this.fields[i].modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
-	}
-	for (int i = 0; i < this.memberTypes.length; i++) {
-		if (!this.memberTypes[i].isPrivate())
-			this.memberTypes[i].modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
-	}
-	if (this.superclass.isPrivate()) 
-		if (this.superclass instanceof SourceTypeBinding)  // should always be true because private super type can only be accessed in same CU
-			((SourceTypeBinding) this.superclass).tagIndirectlyAccessibleMembers();
-}
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#genericTypeSignature()
  */
@@ -1759,6 +1744,11 @@ public MethodBinding[] methods() {
 		for (int i = 0; i < this.methods.length; i++) {
 			int length = this.methods.length;
 // SH}
+			if ((this.tagBits & TagBits.AreMethodsComplete) != 0) {
+				// recursive call to methods() from resolveTypesFor(..) resolved the methods
+				return this.methods;
+			}
+
 			if (resolveTypesFor(this.methods[i]) == null) {
 				// do not alter original method array until resolution is over, due to reentrance (143259)
 				if (resolvedMethods == this.methods) {
@@ -1942,6 +1932,10 @@ public MethodBinding[] methods() {
 			}
 		}
 	} finally {
+		if ((this.tagBits & TagBits.AreMethodsComplete) != 0) {
+			// recursive call to methods() from resolveTypesFor(..) resolved the methods
+			return this.methods;
+		}
 		if (failed > 0) {
 			int newSize = resolvedMethods.length - failed;
 			if (newSize == 0) {
@@ -2949,13 +2943,29 @@ void verifyMethods(MethodVerifier verifier) {
 public FieldBinding[] unResolvedFields() {
 	return this.fields;
 }
+
+public void tagIndirectlyAccessibleMembers() {
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=328281
+	for (int i = 0; i < this.fields.length; i++) {
+		if (!this.fields[i].isPrivate())
+			this.fields[i].modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
+	}
+	for (int i = 0; i < this.memberTypes.length; i++) {
+		if (!this.memberTypes[i].isPrivate())
+			this.memberTypes[i].modifiers |= ExtraCompilerModifiers.AccLocallyUsed;
+	}
+	if (this.superclass.isPrivate()) 
+		if (this.superclass instanceof SourceTypeBinding)  // should always be true because private super type can only be accessed in same CU
+			((SourceTypeBinding) this.superclass).tagIndirectlyAccessibleMembers();
+}
+
 //{ObjectTeams:  in state final we lost the scope, cannot use some code.
 private boolean isStateFinal() {
-    if (this.roleModel != null)
-    	return this.roleModel.getState() == ITranslationStates.STATE_FINAL;
-    if (this._teamModel != null)
-    	return this._teamModel.getState() == ITranslationStates.STATE_FINAL;
-    return (this.scope == null);
+  if (this.roleModel != null)
+  	return this.roleModel.getState() == ITranslationStates.STATE_FINAL;
+  if (this._teamModel != null)
+  	return this._teamModel.getState() == ITranslationStates.STATE_FINAL;
+  return (this.scope == null);
 }
 //SH}
 }

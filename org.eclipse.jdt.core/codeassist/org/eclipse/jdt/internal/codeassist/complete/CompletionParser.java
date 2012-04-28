@@ -1469,6 +1469,7 @@ private boolean checkKeyword() {
 			char[][] keywords = new char[Keywords.COUNT][];
 			int count = 0;
 			if(unit.typeCount == 0
+				&& (!this.compilationUnit.isPackageInfo() || this.compilationUnit.currentPackage != null)
 				&& this.lastModifiers == ClassFileConstants.AccDefault) {
 				keywords[count++] = Keywords.IMPORT;
 			}
@@ -1478,39 +1479,41 @@ private boolean checkKeyword() {
 				&& this.compilationUnit.currentPackage == null) {
 				keywords[count++] = Keywords.PACKAGE;
 			}
-			if((this.lastModifiers & ClassFileConstants.AccPublic) == 0) {
-				boolean hasNoPublicType = true;
-				for (int i = 0; i < unit.typeCount; i++) {
-					if((unit.types[i].typeDeclaration.modifiers & ClassFileConstants.AccPublic) != 0) {
-						hasNoPublicType = false;
+			if (!this.compilationUnit.isPackageInfo()) {
+				if((this.lastModifiers & ClassFileConstants.AccPublic) == 0) {
+					boolean hasNoPublicType = true;
+					for (int i = 0; i < unit.typeCount; i++) {
+						if((unit.types[i].typeDeclaration.modifiers & ClassFileConstants.AccPublic) != 0) {
+							hasNoPublicType = false;
+						}
+					}
+					if(hasNoPublicType) {
+						keywords[count++] = Keywords.PUBLIC;
 					}
 				}
-				if(hasNoPublicType) {
-					keywords[count++] = Keywords.PUBLIC;
+				if((this.lastModifiers & ClassFileConstants.AccAbstract) == 0
+					&& (this.lastModifiers & ClassFileConstants.AccFinal) == 0) {
+					keywords[count++] = Keywords.ABSTRACT;
 				}
-			}
-			if((this.lastModifiers & ClassFileConstants.AccAbstract) == 0
-				&& (this.lastModifiers & ClassFileConstants.AccFinal) == 0) {
-				keywords[count++] = Keywords.ABSTRACT;
-			}
-			if((this.lastModifiers & ClassFileConstants.AccAbstract) == 0
-				&& (this.lastModifiers & ClassFileConstants.AccFinal) == 0) {
-				keywords[count++] = Keywords.FINAL;
-			}
-
+				if((this.lastModifiers & ClassFileConstants.AccAbstract) == 0
+					&& (this.lastModifiers & ClassFileConstants.AccFinal) == 0) {
+					keywords[count++] = Keywords.FINAL;
+				}
+	
 //{ObjectTeams: consider team class
-			if (CharOperation.prefixEquals(this.identifierStack[ptr], Keywords.TEAM))
-			{
-			    keywords[count++] = Keywords.TEAM;
-			}
+				if (CharOperation.prefixEquals(this.identifierStack[ptr], Keywords.TEAM))
+				{
+				    keywords[count++] = Keywords.TEAM;
+				}
 //gbr}
-			keywords[count++] = Keywords.CLASS;
-			if (this.options.complianceLevel >= ClassFileConstants.JDK1_5) {
-				keywords[count++] = Keywords.ENUM;
-			}
-
-			if((this.lastModifiers & ClassFileConstants.AccFinal) == 0) {
-				keywords[count++] = Keywords.INTERFACE;
+				keywords[count++] = Keywords.CLASS;
+				if (this.options.complianceLevel >= ClassFileConstants.JDK1_5) {
+					keywords[count++] = Keywords.ENUM;
+				}
+	
+				if((this.lastModifiers & ClassFileConstants.AccFinal) == 0) {
+					keywords[count++] = Keywords.INTERFACE;
+				}
 			}
 			if(count != 0) {
 				System.arraycopy(keywords, 0, keywords = new char[count][], 0, count);
@@ -2468,9 +2471,6 @@ protected void consumeCatchFormalParameter() {
 				arg.annotations = new Annotation[length],
 				0,
 				length);
-			RecoveredType currentRecoveryType = this.currentRecoveryType();
-			if (currentRecoveryType != null)
-				currentRecoveryType.annotationsConsumed(arg.annotations);
 		}
 
 		arg.isCatchArgument = topKnownElementKind(COMPLETION_OR_ASSIST_PARSER) == K_BETWEEN_CATCH_AND_RIGHT_PAREN;
@@ -2962,6 +2962,9 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 				arg.annotations = new Annotation[length],
 				0,
 				length);
+			RecoveredType currentRecoveryType = this.currentRecoveryType();
+			if (currentRecoveryType != null)
+				currentRecoveryType.annotationsConsumed(arg.annotations);
 		}
 
 		arg.isCatchArgument = topKnownElementKind(COMPLETION_OR_ASSIST_PARSER) == K_BETWEEN_CATCH_AND_RIGHT_PAREN;
@@ -5271,30 +5274,6 @@ public void reset() {
 		this.sourceEnds = new HashtableOfObjectToInt();
 	}
 }
-
-/*
- * To find out if the given stack has an instanceof expression
- * at the given startIndex or at one prior to that
- */
-private boolean stackHasInstanceOfExpression(Object[] stackToSearch, int startIndex) {
-	int indexInstanceOf = startIndex;
-	while (indexInstanceOf >= 0) {
-		if (stackToSearch[indexInstanceOf] instanceof InstanceOfExpression) {
-			return true;
-		}
-		indexInstanceOf--;
-	}
-	return false;
-}
-
-// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292087
-protected boolean isInsideArrayInitializer(){
-	int i = this.elementPtr;
-	if (i > -1 && this.elementKindStack[i] == K_ARRAY_INITIALIZER) {
-		return true;
-	}
-	return false;	
-}
 /*
  * Reset internal state after completion is over
  */
@@ -5441,6 +5420,30 @@ protected FieldDeclaration createFieldDeclaration(char[] assistName, int sourceS
 		this.lastCheckPoint = sourceEnd + 1;
 		return field;
 	}
+}
+
+/*
+ * To find out if the given stack has an instanceof expression
+ * at the given startIndex or at one prior to that
+ */
+private boolean stackHasInstanceOfExpression(Object[] stackToSearch, int startIndex) {
+	int indexInstanceOf = startIndex;
+	while (indexInstanceOf >= 0) {
+		if (stackToSearch[indexInstanceOf] instanceof InstanceOfExpression) {
+			return true;
+		}
+		indexInstanceOf--;
+	}
+	return false;
+}
+
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=292087
+protected boolean isInsideArrayInitializer(){
+	int i = this.elementPtr;
+	if (i > -1 && this.elementKindStack[i] == K_ARRAY_INITIALIZER) {
+		return true;
+	}
+	return false;	
 }
 
 //{ObjectTeams: OT completion

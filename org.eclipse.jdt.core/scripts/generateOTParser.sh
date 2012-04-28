@@ -71,6 +71,9 @@ else
 	exit
 fi
 
+scriptDir=`dirname  "$0"`
+pluginDir=`readlink -f ${scriptDir}/..`
+
 echo "Initiales Aufräumen"
 if test -d output
 then
@@ -276,12 +279,12 @@ then
     	exit
   fi
 fi
-echo "Verwende jdtcore.jar aus ${JDTCORE_JAR}"
+echo "Verwende JDT/Core aus ${pluginDir}/bin"
 #cp ${JDTCORE_JAR} .
 echo "UpdateParserFiles kompilieren"
-javac -classpath ${JDTCORE_JAR} UpdateParserFiles.java
+javac -classpath ${pluginDir}/bin UpdateParserFiles.java
 echo "Ressourcendateien erzeugen (*.rsc)"
-java -classpath .:${JDTCORE_JAR} UpdateParserFiles javadcl.java javahdr.java
+java -classpath ${pluginDir}/bin:. UpdateParserFiles javadcl.java javahdr.java
 
 cd ..
 
@@ -309,8 +312,8 @@ cp output/TerminalTokens.java         $SOURCE/compiler/org/eclipse/jdt/internal/
 cp output/ParserBasicInformation.java $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser
 cp output/parser*.rsc                 $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser
 cp output/parser*.rsc                 $SOURCE/bin/org/eclipse/jdt/internal/compiler/parser
-cp output/readableNames.properties    $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser
-cp output/readableNames.properties    $SOURCE/bin/org/eclipse/jdt/internal/compiler/parser
+cp output/readableNames.props	      $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser
+cp output/readableNames.props         $SOURCE/bin/org/eclipse/jdt/internal/compiler/parser
 ############################################################################################################################################################
 #echo "Eclipse Build ausfhren mit Optionen build -os linux -ws motif"
 #cd $SOURCE

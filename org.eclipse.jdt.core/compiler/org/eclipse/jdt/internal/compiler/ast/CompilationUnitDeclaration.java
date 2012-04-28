@@ -138,7 +138,7 @@ public void abort(int abortLevel, CategorizedProblem problem) {
  */
 public void analyseCode() {
 //{ObjectTeams: postponed from resolve() to also catch import usage from late statement generators.
-	if (!this.compilationResult.hasErrors()) 
+	if (!this.compilationResult.hasMandatoryErrors())
 		checkUnusedImports();
 // SH}
 	if (this.ignoreFurtherInvestigation)
@@ -680,7 +680,7 @@ public void resolve() {
 		}
 //{ObjectTeams: postponed to analyseCode():
 /* orig:
-		if (!this.compilationResult.hasErrors()) checkUnusedImports();
+		if (!this.compilationResult.hasMandatoryErrors()) checkUnusedImports();
   :giro */
 	  if (!isRoleUnit())
 // SH}
