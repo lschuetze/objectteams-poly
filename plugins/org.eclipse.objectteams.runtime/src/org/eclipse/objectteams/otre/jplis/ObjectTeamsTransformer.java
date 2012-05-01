@@ -109,8 +109,10 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			break;
 		}
 		if (classBeingRedefined != null) {
-			System.out.println("Redefinition!");
-			return null;
+			if (!ObjectTeamsTransformation.debugging) {
+				System.out.println("Redefinition!");
+				return null;
+			}
 		}
 		
 		//

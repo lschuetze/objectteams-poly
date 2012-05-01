@@ -154,7 +154,7 @@ public abstract class ObjectTeamsTransformation
 	 // ---------- Debugging: ----------------------
 	 // ------------------------------------------
 	 /** Initialized from property <tt>ot.debug</tt>. */
-	 static boolean debugging = false;
+	 public static boolean debugging = false;
 	 
 	 static {
 	 	if(System.getProperty("ot.debug") != null)
