@@ -178,7 +178,7 @@ private boolean isTypeInSuperDeclaringTypeNames(char[][] typeName) {
  */
 protected boolean isVirtualInvoke(MethodBinding method, MessageSend messageSend) {
 	return !method.isStatic() && 
-//ObjectTeams: private role methods are visible in the implicit sub roles (OTJLD 1.2.1. (e))
+//{ObjectTeams: private role methods are visible in the implicit sub roles (OTJLD 1.2.1. (e))
 			(
 // orig:
 			    !method.isPrivate()
@@ -187,7 +187,11 @@ protected boolean isVirtualInvoke(MethodBinding method, MessageSend messageSend)
 		    && !(messageSend instanceof TSuperMessageSend) // similar to "super" but for codegen it's a "this"
 //jsv}
 			&& !messageSend.isSuperAccess()
-			&& !(method.isDefault() && this.pattern.focus != null 
+			&& !(method.isDefault() && this.pattern.focus != null
+//{ObjectTeams: focus != null && declaringQualification == null happens when searching for a role method, 
+			//  see SearchPattern#createPattern(IJavaElement element,int,int)
+			&& this.pattern.declaringQualification != null
+// SH}
 			&& !CharOperation.equals(this.pattern.declaringQualification, method.declaringClass.qualifiedPackageName()));
 }
 public int match(ASTNode node, MatchingNodeSet nodeSet) {
