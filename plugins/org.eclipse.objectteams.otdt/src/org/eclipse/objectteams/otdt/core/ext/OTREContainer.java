@@ -54,6 +54,7 @@ public class OTREContainer implements IClasspathContainer
     // these are served from the current plugin:
     private static IPath  OTRE_MIN_JAR_PATH;
     private static IPath  OTRE_AGENT_JAR_PATH;
+    private static IPath  OTEQUINOX_AGENT_JAR_PATH;
     
     public static IPath  BCEL_PATH; // will be initialized in {@link findBCEL(BundleContext)}
 
@@ -64,6 +65,7 @@ public class OTREContainer implements IClasspathContainer
     // file names for the above OTRE_X_JAR_PATH constants:
     private static final String OTRE_MIN_JAR_FILENAME   = "otre_min.jar"; //$NON-NLS-1$
     private static final String OTRE_AGENT_JAR_FILENAME = "otre_agent.jar"; //$NON-NLS-1$
+    private static final String OTEQUINOX_AGENT_JAR_FILENAME = "otequinoxAgent.jar"; //$NON-NLS-1$
 
     // data for initializing the above BCEL_PATH:
     private static final String BCEL_BUNDLE_NAME = "org.apache.bcel"; //$NON-NLS-1$
@@ -127,6 +129,16 @@ public class OTREContainer implements IClasspathContainer
     	if (OTRE_AGENT_JAR_PATH == null)
             OTRE_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTRE_AGENT_JAR_FILENAME); //$NON-NLS-1$
     	return OTRE_AGENT_JAR_PATH;
+    }
+    
+    /**
+     * Answer the path of the "otequinoxAgent.jar" archive, which is passed as a -javaagent to the JVM for OT/Equinox debug launches.
+     * @return resolved path
+     */
+    public static IPath getOtequinoxAgentJarPath() {
+    	if (OTEQUINOX_AGENT_JAR_PATH == null)
+    		OTEQUINOX_AGENT_JAR_PATH = OTDTPlugin.getResolvedVariablePath(OTDTPlugin.OTDT_INSTALLDIR, "lib/"+OTEQUINOX_AGENT_JAR_FILENAME); //$NON-NLS-1$
+    	return OTEQUINOX_AGENT_JAR_PATH;
     }
     
 	/**

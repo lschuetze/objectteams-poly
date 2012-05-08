@@ -26,6 +26,7 @@ import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
 import org.eclipse.debug.core.ILaunchManager;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.core.ext.OTREContainer;
 import org.eclipse.objectteams.otdt.debug.OTDebugPlugin;
 import org.eclipse.objectteams.otdt.debug.TeamBreakpointInstaller;
 import org.eclipse.objectteams.otdt.internal.debug.adaptor.DebugMessages;
@@ -60,9 +61,10 @@ public team class PDELaunchingAdaptor {
 	static final String ENABLE_OTEQUINOX      = "-Dot.equinox=1"; //$NON-NLS-1$     // this also causes the WORKAROUND_REPOSITORY flag being set to true in OTRE.
 	static final String DISABLE_OTEQUINOX     = "-Dot.equinox=false"; //$NON-NLS-1$ // prevents TransformerHook installation and start of TransformerPlugin
 	static final String OT_DEBUG_VMARG        = "-Dot.debug"; //$NON-NLS-1$
+	static final String OTE_AGENT_ARG		  = "-javaagent:" + OTREContainer.getOtequinoxAgentJarPath().toOSString();
 	// slot [0] to be filled in from the launch config:
 	static final String[] OT_VM_ARGS          = { null, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX };
-	static final String[] OT_VM_DEBUG_ARGS    = { null, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX, OT_DEBUG_VMARG };
+	static final String[] OT_VM_DEBUG_ARGS    = { null, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX, OT_DEBUG_VMARG, OTE_AGENT_ARG };
 	static final String[] VM_ARGS          = { CLASSLOADER_LOCKING, DISABLE_OTEQUINOX };
 	static final String[] VM_DEBUG_ARGS    = { CLASSLOADER_LOCKING, DISABLE_OTEQUINOX, OT_DEBUG_VMARG };
 

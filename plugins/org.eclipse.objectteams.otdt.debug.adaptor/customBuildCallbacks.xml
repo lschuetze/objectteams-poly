@@ -82,7 +82,7 @@
 	</target>
 
 	<target name="post.compile.@dot">
-		<echo message="Jaring otequinoxAgent.jar from ${target.folder} into lib/" />		<jar destfile="lib/otequinoxAgent.jar"			 basedir="${target.folder}"			 includes="org/eclipse/objectteams/otdt/internal/debug/adaptor/launching/OTEquinoxDebugAgent*.class"			 compress="true">			<manifest>				<attribute name="Premain-Class" value="org.eclipse.objectteams.otdt.internal.debug.adaptor.launching.OTEquinoxDebugAgent"/>				<attribute name="Can-Redefine-Classes" value="true"/>			</manifest>		</jar>	</target>
+		<echo message="Jaring otequinoxAgent.jar from ${target.folder} into ${buildDirectory}/plugins/org.eclipse.objectteams.otdt/lib" />		<jar destfile="${buildDirectory}/plugins/org.eclipse.objectteams.otdt/lib/otequinoxAgent.jar"			 basedir="${target.folder}"			 includes="org/eclipse/objectteams/otdt/internal/debug/adaptor/launching/OTEquinoxDebugAgent*.class"			 compress="true">			<manifest>				<attribute name="Premain-Class" value="org.eclipse.objectteams.otdt.internal.debug.adaptor.launching.OTEquinoxDebugAgent"/>				<attribute name="Can-Redefine-Classes" value="true"/>			</manifest>		</jar>	</target>
 	
 	<!-- ===================================================================== -->
 	<!-- Steps to do after the compilation target <name>                       -->
