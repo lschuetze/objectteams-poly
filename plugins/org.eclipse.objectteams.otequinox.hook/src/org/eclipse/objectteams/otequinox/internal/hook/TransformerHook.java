@@ -470,7 +470,7 @@ public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLo
 		this.logger.log(Util.OK, "about to transform "+kind+" class "+name);
 		long time= 0;
 		if (Util.PROFILE) time= System.nanoTime();
-		classbytes = objectTeamsTransformer.transform(resourceLoader, name, null, domain, classbytes);
+		classbytes = objectTeamsTransformer.transform(resourceLoader, name.replace('.', '/'), null, domain, classbytes);
 		if (Util.PROFILE) Util.profile(time, profileKind, name, this.logger);
 		return classbytes;
 	}
