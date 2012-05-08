@@ -7,11 +7,11 @@
 </head>
 <body>
 <h1>OTDT 2.1 - New and Noteworthy</h1>
-<div class="navigation"><i>Status: 2.1 M5</i></div>
+<div class="navigation"><i>Status: 2.1 M7</i></div>
 <div class="navigation">On this page:
 <!--a href="#metrics">&bull; Metrics Plug-in</a-->
 <!--a href="#configuration">&bull; Configuration</a-->
-<!--a href="#views">&bull; Views/Dialogs</a--> 
+<a href="#views">&bull; Views/Dialogs</a> 
 <a href="#assist">&bull; Content Assist</a>  
 <!--a href="#refactor">&bull; Refactoring</a-->  
 <a href="#formatting">&bull; Formatting</a>
@@ -21,6 +21,7 @@
 <a href="#compiler">&bull; Compiler</a>
 <a href="#otre">&bull; Runtime</a>  
 <!--a href="#otequinox">&bull; OT/Equinox</a-->
+<a href="#releng">&bull; Release Engineering</a>  
 </div>
 <table cellpadding="10" cellspacing="0" width="100%">
   <colgroup>
@@ -43,8 +44,23 @@
   </tr>
   <div class="listbox"><div class="listing"><pre><code class="keyword">public team class</code> <font color="blue">MyTeam</font> {
 }</pre></div></div>
-  <tr><td colspan="2" id="views"><h2>Views & Dialogs</h2></td></tr>
 -->
+  <tr><td colspan="2" id="views"><h2>Views & Dialogs</h2></td></tr>
+  <tr>
+    <td><p align="right"><b>Lifting in call hierarchy</b><br>
+        <span class="since">since&nbsp;2.1M6</span><br>
+        <a class="buglink" title="CallHierarchy should consider lifting as role instance creation" href="https://bugs.eclipse.org/301314">301314</a></p></td>
+    <td><p>Previously, the call hierarchy for a role constructor was incomplete because
+    		roles can be constructed on-demand by lifting.
+    		To visualize this implicit behavior the call hierarchy has been extended to
+    		consider occurrences of lifting as invocations of the role's lifting constructor.
+    	</p>
+    	<p><img alt="Call hierarchy for role construction" src="../images/screenshots/NN21/callHierarchyLifting.png"></p>
+    	<p>Here the call hierarchy was opened for the role type <code>Item</code> to find all paths towards instantiation.
+    		The call hierarchy shows the callin binding <code>earchCredit <- after book</code> because it may
+    		trigger lifting a <code>Segment</code> to its <code>Item</code> role.</p>
+    </td>
+  </tr>
   <tr><td colspan="2" id="assist"><h2>Content assist</h2></td></tr>
   <tr>
     <td><p align="right"><b>Add signatures to method binding</b><br>
@@ -149,6 +165,27 @@
     	</p>
     </td>
   </tr>
+  <tr>
+    <td><p align="right"><b>Base class as method return</b><br>
+        <span class="since">since&nbsp;2.1M6</span><br>
+        <a class="buglink" title="[compiler][otjld] consider allowing base imported types as the return type of a team method" href="https://bugs.eclipse.org/370273">370273</a></p></td>
+    <td><p>Mentioning a base imported class in the body of a team or role is allowed.
+    		However, a team method may want to return a role which then should be lowered on the way.
+    		Previously, this lowering was not possible, because the base type could not be mentioned (by its simple name).
+    		For the specific situation of team method return types this restriction has been removed.  
+    	</p>
+    	<p>
+    	<div class="listbox"><div class="listing"><pre><code class="keyword">import base</code> some.pack.Base; // <span style="color:red">base import restricts usage of "Base"</span>
+<code class="keyword">public team class</code> T {
+   <code class="keyword">protected class</code> R <code class="keyword">playedBy</code> Base { }
+   <code class="keyword">private </code> R r;
+   <code class="keyword">public</code> <b style="color:blue">Base</b> getObject() {
+       <code class="keyword">return this</code>.r; // <span style="color:green">applies lowering</span> 
+   } 
+}</pre></div></div>
+    	</p>
+    </td>
+  </tr>
   <tr><td colspan="2" id="debug"><h2>Run / Debug</h2></td></tr>
   <tr>
     <td><p align="right"><b>Simplified launching with OT/Equinox</b><br>
@@ -164,6 +201,30 @@
     	<p>
     		This restriction has been removed, i.e., the OT/Equinox bundles may be resolved from the workspace while
     		<code>org.eclipse.osgi</code> is resolved from the base platform.
+    	</p>
+    </td>
+  </tr>  
+  <tr>
+    <td><p align="right"><b>Hot code replacement</b><br>
+        <span class="since">since&nbsp;2.1M7</span><br>
+        <a class="buglink" title="[debug] support hot code replacement of teams/roles/bases" href="https://bugs.eclipse.org/378176">378176</a><br>
+        <a class="buglink" title="Support Hot Code Replacement for OT/Equinox" href="https://bugs.eclipse.org/378195">378195</a></p></td>
+    <td><p>
+    		Previously, when debugging an OT/J or OT/Equinox application,
+    		changes made to the source code of the running application could not be applied on the fly,
+    		because the JVM would detect signature mismatches.
+    		This was caused by the fact that during hot code replacement the Object Teams bytecode transformer was not used. 
+    	</p>
+    	<p>
+    		This has been fixed by enabling the Object Teams transformer to re-weave already loaded classes.
+    		Additionally, for OT/Equinox debug launches a new Java agent has been developed
+    		to trigger weaving also for hot code replacement (which is not supported by the underlying adaptor hooks in Equinox).
+    		This agent is automatically added to the Java command line for all OT/Equinox debug launches. 
+    	</p>
+    	<p>
+    		As the result it is no possible to directly see the effect of source code changes even in woven
+    		classes without restarting the application. Note, that hot code replacement is limited by the JVM
+    		to changes that do not affect any signatures.
     	</p>
     </td>
   </tr>  
@@ -212,6 +273,17 @@
     	</p>
     </td>
   </tr>  
+  
+  <tr><td colspan="2" id="releng"><h2>Release Engineering</h2></td></tr>
+  <tr><td><p align="right"><b>Source bundles</b><br>
+        <span class="since">since&nbsp;2.1M6</span><br>
+        <a class="buglink" title="Create source bundles and feature" href="https://bugs.eclipse.org/370650">370650</a></p></td>
+    <td><p>We now ship an additional (optional) feature, <code>org.eclipse.objectteams.otdt.source.feature</code>
+    		that includes the source code of all Object Teams plug-ins to support browsing into binary plug-ins
+    		on which plug-in projects in the workspace depend.
+    	</p>
+  	</td>
+  </tr>
   
 </table>
 </body>
