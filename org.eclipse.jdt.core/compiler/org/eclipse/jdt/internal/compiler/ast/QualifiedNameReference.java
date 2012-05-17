@@ -123,7 +123,7 @@ public FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowConte
 				}
 			}
 			if (!lastFieldBinding.isStatic()) {
-				currentScope.resetEnclosingMethodStaticFlag();
+				currentScope.resetDeclaringClassMethodStaticFlag(lastFieldBinding.declaringClass);
 			}
 			break;
 		case Binding.LOCAL :
@@ -232,7 +232,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				}
 			}
 			if (!fieldBinding.isStatic()) {
-				currentScope.resetEnclosingMethodStaticFlag();
+				currentScope.resetDeclaringClassMethodStaticFlag(fieldBinding.declaringClass);
 			}
 			break;
 		case Binding.LOCAL : // reading a local variable

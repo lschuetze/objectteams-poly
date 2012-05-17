@@ -20,6 +20,7 @@ import junit.framework.Test;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -39,7 +40,7 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 	}
 	
 	static {
-		//TESTS_NAMES = new String[] {"testBug123836j", "testBug376673"};
+		//TESTS_NAMES = new String[] {"testBug378390"};
 	}
 
 	public static Test suite() {
@@ -493,10 +494,10 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 		try {
 			IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL17_LIB"}, "bin", "1.7");
 			String content = "package pkg;\n" + 
-					"class 𠮟1 {}\n";
+					"class \uD842\uDF9F1 {}\n";
 			createFolder("/P/pkg");
 			try {
-				IFile file = createFile("/P/pkg/𠮟1.java", content, "UTF-8");
+				IFile file = createFile("/P/pkg/\uD842\uDF9F1.java", content, "UTF-8");
 				file.setCharset("UTF-8", null);
 			} catch (UnsupportedEncodingException e) {
 				System.out.println("unsupported encoding");
@@ -504,8 +505,8 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 			waitUntilIndexesReady();
 			IJavaSearchScope scope = SearchEngine. createJavaSearchScope(
 					new IJavaElement[] { project }, IJavaSearchScope.SOURCES);
-			search("𠮟1", TYPE, DECLARATIONS, EXACT_RULE, scope, this.resultCollector);
-			assertSearchResults("pkg/𠮟1.java pkg.𠮟1 [𠮟1] EXACT_MATCH");
+			search("\uD842\uDF9F1", TYPE, DECLARATIONS, EXACT_RULE, scope, this.resultCollector);
+			assertSearchResults("pkg/\uD842\uDF9F1.java pkg.\uD842\uDF9F1 [\uD842\uDF9F1] EXACT_MATCH");
 		} finally {
 			deleteProject("P");
 		}
@@ -515,12 +516,12 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 		try {
 			IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL17_LIB"}, "bin", "1.7");
 			String content = "package pkg;\n" + 
-					"class 𠮟1 {" +
-					"	public void 𠮟m() {}\n" +
+					"class \uD842\uDF9F1 {" +
+					"	public void \uD842\uDF9Fm() {}\n" +
 					"}\n";
 			createFolder("/P/pkg");
 			try {
-				IFile file = createFile("/P/pkg/𠮟1.java", content, "UTF-8");
+				IFile file = createFile("/P/pkg/\uD842\uDF9F1.java", content, "UTF-8");
 				file.setCharset("UTF-8", null);
 			} catch (UnsupportedEncodingException e) {
 				System.out.println("unsupported encoding");
@@ -528,8 +529,8 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 			waitUntilIndexesReady();
 			IJavaSearchScope scope = SearchEngine. createJavaSearchScope(
 					new IJavaElement[] { project }, IJavaSearchScope.SOURCES);
-			search("𠮟m", METHOD, DECLARATIONS, EXACT_RULE, scope, this.resultCollector);
-			assertSearchResults("pkg/𠮟1.java void pkg.𠮟1.𠮟m() [𠮟m] EXACT_MATCH");
+			search("\uD842\uDF9Fm", METHOD, DECLARATIONS, EXACT_RULE, scope, this.resultCollector);
+			assertSearchResults("pkg/\uD842\uDF9F1.java void pkg.\uD842\uDF9F1.\uD842\uDF9Fm() [\uD842\uDF9Fm] EXACT_MATCH");
 		} finally {
 			deleteProject("P");
 		}
@@ -539,12 +540,12 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 		try {
 			IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL17_LIB"}, "bin", "1.7");
 			String content = "package pkg;\n" + 
-					"class 𠮟1 {" +
-					"	public 𠮟1() {}\n" +
+					"class \uD842\uDF9F1 {" +
+					"	public \uD842\uDF9F1() {}\n" +
 					"}\n";
 			createFolder("/P/pkg");
 			try {
-				IFile file = createFile("/P/pkg/𠮟1.java", content, "UTF-8");
+				IFile file = createFile("/P/pkg/\uD842\uDF9F1.java", content, "UTF-8");
 				file.setCharset("UTF-8", null);
 			} catch (UnsupportedEncodingException e) {
 				System.out.println("unsupported encoding");
@@ -552,8 +553,8 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 			waitUntilIndexesReady();
 			IJavaSearchScope scope = SearchEngine. createJavaSearchScope(
 					new IJavaElement[] { project }, IJavaSearchScope.SOURCES);
-			search("𠮟1", CONSTRUCTOR, DECLARATIONS, EXACT_RULE, scope, this.resultCollector);
-			assertSearchResults("pkg/𠮟1.java pkg.𠮟1() [𠮟1] EXACT_MATCH");
+			search("\uD842\uDF9F1", CONSTRUCTOR, DECLARATIONS, EXACT_RULE, scope, this.resultCollector);
+			assertSearchResults("pkg/\uD842\uDF9F1.java pkg.\uD842\uDF9F1() [\uD842\uDF9F1] EXACT_MATCH");
 		} finally {
 			deleteProject("P");
 		}
@@ -563,12 +564,12 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 		try {
 			IJavaProject project = createJavaProject("P", new String[] {""}, new String[] {"JCL17_LIB"}, "bin", "1.7");
 			String content = "package pkg;\n" + 
-					"class 𠮟1 {" +
-					"	public int 𠮟f;\n" +
+					"class \uD842\uDF9F1 {" +
+					"	public int \uD842\uDF9Ff;\n" +
 					"}\n";
 			createFolder("/P/pkg");
 			try {
-				IFile file = createFile("/P/pkg/𠮟1.java", content, "UTF-8");
+				IFile file = createFile("/P/pkg/\uD842\uDF9F1.java", content, "UTF-8");
 				file.setCharset("UTF-8", null);
 			} catch (UnsupportedEncodingException e) {
 				System.out.println("unsupported encoding");
@@ -576,8 +577,8 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 			waitUntilIndexesReady();
 			IJavaSearchScope scope = SearchEngine. createJavaSearchScope(
 					new IJavaElement[] { project }, IJavaSearchScope.SOURCES);
-			search("𠮟f", FIELD, DECLARATIONS, EXACT_RULE, scope, this.resultCollector);
-			assertSearchResults("pkg/𠮟1.java pkg.𠮟1.𠮟f [𠮟f] EXACT_MATCH");
+			search("\uD842\uDF9Ff", FIELD, DECLARATIONS, EXACT_RULE, scope, this.resultCollector);
+			assertSearchResults("pkg/\uD842\uDF9F1.java pkg.\uD842\uDF9F1.\uD842\uDF9Ff [\uD842\uDF9Ff] EXACT_MATCH");
 		} finally {
 			deleteProject("P");
 		}
@@ -589,8 +590,8 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 		
 		org.eclipse.jdt.core.tests.util.Util.createJar(
 						new String[] {
-						"p𠮟/i𠮟/Test.java",
-						"package p𠮟.i𠮟;\n" +
+						"p\uD842\uDF9F/i\uD842\uDF9F/Test.java",
+						"package p\uD842\uDF9F.i\uD842\uDF9F;\n" +
 						"public class Test{}\n" },
 						p.getProject().getLocation().append("lib376673.jar").toOSString(),
 						"1.7");
@@ -599,7 +600,7 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 		int mask = IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SOURCES;
 		IJavaSearchScope scope = SearchEngine.createJavaSearchScope(new IJavaElement[] { p }, mask);
 		search("Test", TYPE, DECLARATIONS, scope, this.resultCollector);
-		assertSearchResults("lib376673.jar p𠮟.i𠮟.Test [No source] EXACT_MATCH");
+		assertSearchResults("lib376673.jar p\uD842\uDF9F.i\uD842\uDF9F.Test [No source] EXACT_MATCH");
 	} finally {
 		deleteProject("P");
 	}
@@ -893,6 +894,318 @@ public class JavaSearchBugsTests2 extends AbstractJavaSearchTests {
 			assertSearchResults("Wrong results", "p2/A.java long p2.A.k(int) [k] EXACT_MATCH", this.resultCollector);
 		} finally {
 			deleteProject(project);
+		}
+	}
+	public void testBug378390() throws CoreException {
+		IJavaProject project = null;
+		try
+		{
+			project = createJavaProject("P");
+			createFolder("/P/p1");
+			createFile("/P/p1/B.java",
+					"package p1;\n" +
+					"import p2.*;\n" +
+					"public class B extends A {\n" +
+					"long k(){\n" +
+					"return 0;\n" +
+			  		"}\n" +
+					"}\n");
+			createFolder("/P/p2");
+			createFile("/P/p2/A.java",
+					"package p2;\n" +
+					"public class A {\n" +
+					"class B extends A {\n" +
+					"long k(){\n" +
+					"return 0;\n" +
+			  		"}\n" +	
+			  		"}\n" +	
+					"long k(){\n" +
+					"return 0;\n" +
+			  		"}\n" +
+			  		"public long m(){\n"+
+			  		"return new A().k();\n" +
+			  		"}\n"+
+					"}\n");
+			IType type = getCompilationUnit("/P/p2/A.java").getType("A");
+			type = type.getTypes()[0];
+			IMethod method = type.getMethod("k", new String[]{});
+			search(method, REFERENCES, EXACT_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+			assertSearchResults("Wrong results", "p2/A.java long p2.A.m() [k()] EXACT_MATCH", this.resultCollector);
+		} finally {
+			deleteProject(project);
+		}
+	}
+	/**
+	 * @bug 375971: [search] Not finding method references with generics
+	 * @test TODO
+	 * @see "https://bugs.eclipse.org/bugs/show_bug.cgi?id=375971"
+	 */
+	public void testBug375971a() throws CoreException {
+		try {
+			createJavaProject("P");
+			createFile("/P/InterfaceI.java",
+				"public interface InterfaceI <K, V>{\n"+
+				" public void addListener();\n"+
+				"}\n");
+			createFile("/P/ClassA.java",
+				"public class ClassA <K, V, B> implements InterfaceI<K, V>{\n"+
+					" public void addListener() {\n" +
+					"}\n" +
+					"}\n");
+			createFile("/P/ClassB.java",
+					"public class ClassB extends ClassA<String, String, String>{\n"+
+						" public void doSomething() {" +
+						"   addListener();\n"+
+						"}\n" +
+						"}\n");
+			waitUntilIndexesReady();
+			// search
+			IType type = getCompilationUnit("/P/InterfaceI.java").getType("InterfaceI");
+			IMethod method = type.getMethod("addListener", new String[]{});
+			this.resultCollector.showRule();
+			search(method, REFERENCES, ERASURE_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+			assertSearchResults("ClassB.java void ClassB.doSomething() [addListener()] ERASURE_MATCH");
+		} finally {
+			deleteProject("P");
+		}
+	}
+	public void testBug375971b() throws CoreException {
+		try {
+			createJavaProject("P");
+			createFile("/P/InterfaceI.java",
+				"public interface InterfaceI <K, V>{\n"+
+				" public void addListener();\n"+
+				"}\n");
+			createFile("/P/ClassA.java",
+				"public class ClassA <K, V, B> {\n"+
+					" public void addListener() {\n" +
+					"}\n" +
+					"}\n");
+			createFile("/P/ClassB.java",
+					"public class ClassB extends ClassA<String, String, String> implements InterfaceI<String, String>{\n"+
+						" public void doSomething() {" +
+						"   addListener();\n"+
+						"}\n" +
+						"}\n");
+			waitUntilIndexesReady();
+			// search
+			IType type = getCompilationUnit("/P/InterfaceI.java").getType("InterfaceI");
+			IMethod method = type.getMethod("addListener", new String[]{});
+			this.resultCollector.showRule();
+			search(method, REFERENCES, ERASURE_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+			assertSearchResults("ClassB.java void ClassB.doSomething() [addListener()] ERASURE_MATCH");
+		} finally {
+			deleteProject("P");
+		}
+	}
+	public void testBug375971c() throws CoreException {
+		try {
+			createJavaProject("P");
+			createFile("/P/InterfaceI.java",
+				"public interface InterfaceI <K, V>{\n"+
+				" public void addListener();\n"+
+				"}\n");
+			createFile("/P/ClassA.java",
+				"public class ClassA <K, V, B> {\n"+
+					" public void addListener() {\n" +
+					"}\n" +
+					"}\n");
+			createFile("/P/ClassB.java",
+					"public class ClassB extends ClassA<String, String, String> implements InterfaceI<String, String>{\n"+
+						" public void doSomething() {" +
+						"   addListener();\n"+
+						"}\n" +
+						"}\n");
+			waitUntilIndexesReady();
+			// search
+			IType type = getCompilationUnit("/P/ClassA.java").getType("ClassA");
+			IMethod method = type.getMethod("addListener", new String[]{});
+			this.resultCollector.showRule();
+			search(method, REFERENCES, ERASURE_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+			assertSearchResults("ClassB.java void ClassB.doSomething() [addListener()] ERASURE_MATCH");
+		} finally {
+			deleteProject("P");
+		}
+	}
+	public void testBug375971d() throws CoreException {
+		try {
+			createJavaProject("P");
+			createFile("/P/InterfaceI.java",
+					"public interface InterfaceI <K, V>{\n"+
+					" public void addListener();\n"+
+					"}\n");
+			createFile("/P/ClassA.java",
+				"public class ClassA <K, V, B> implements InterfaceI<K, V>{\n"+
+					" public void addListener() {\n" +
+					"}\n" +
+					"}\n");
+			createFile("/P/ClassB.java",
+					"public class ClassB {\n"+
+						" public void doSomething(ClassA a) {" +
+						"   a.addListener();\n"+
+						"}\n" +
+						"}\n");
+			waitUntilIndexesReady();
+			// search
+			IType type = getCompilationUnit("/P/InterfaceI.java").getType("InterfaceI");
+			IMethod method = type.getMethod("addListener", new String[]{});
+			this.resultCollector.showRule();
+			search(method, REFERENCES, ERASURE_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+			assertSearchResults("ClassB.java void ClassB.doSomething(ClassA) [addListener()] ERASURE_RAW_MATCH");
+		} finally {
+			deleteProject("P");
+		}
+	}
+	public void testBug375971e() throws CoreException {
+		try {
+			createJavaProject("P");
+			createFile("/P/InterfaceI.java",
+				"public interface InterfaceI <K, V>{\n"+
+				" public void addListener();\n"+
+				"}\n");
+			createFile("/P/ClassA.java",
+				"public class ClassA <K, V, B> implements InterfaceI<K, V> {\n"+
+					" public void addListener() {\n" +
+					"}\n" +
+					"}\n");
+			createFile("/P/ClassB.java",
+					"public class ClassB implements InterfaceI<String, String> {\n"+
+						" public void doSomething() {" +
+						"   addListener();\n"+
+						"}\n" +
+						"}\n");
+			createFile("/P/ClassC.java",
+					"public class ClassC extends ClassA<Integer, String, String> {\n"+
+						" public void doSomething() {" +
+						"   addListener();\n"+
+						"}\n" +
+						"}\n");
+			waitUntilIndexesReady();
+			// search
+			ICompilationUnit unit = getCompilationUnit("/P/ClassB.java");
+			IMethod method = selectMethod(unit, "addListener");
+			this.resultCollector.showRule();
+			search(method, REFERENCES, ERASURE_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+			assertSearchResults("ClassB.java void ClassB.doSomething() [addListener()] EXACT_MATCH\n" + 
+								"ClassC.java void ClassC.doSomething() [addListener()] ERASURE_MATCH");
+		} finally {
+			deleteProject("P");
+		}
+	}
+	public void testBug375971f() throws CoreException {
+		try {
+			createJavaProject("P");
+			createFile("/P/InterfaceI.java",
+				"public interface InterfaceI {\n"+
+				" public void addListener();\n"+
+				"}\n");
+			createFile("/P/ClassA.java",
+				"public class ClassA <K, V, B> implements InterfaceI{\n"+
+					" public void addListener() {\n" +
+					"}\n" +
+					"}\n");
+			createFile("/P/ClassB.java",
+					"public class ClassB extends ClassA<String, String, String>{\n"+
+						" public void doSomething() {" +
+						"   addListener();\n"+
+						"}\n" +
+						"}\n");
+			waitUntilIndexesReady();
+			// search
+			IType type = getCompilationUnit("/P/InterfaceI.java").getType("InterfaceI");
+			IMethod method = type.getMethod("addListener", new String[]{});
+			this.resultCollector.showRule();
+			search(method, REFERENCES, ERASURE_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+			assertSearchResults("ClassB.java void ClassB.doSomething() [addListener()] EXACT_MATCH");
+		} finally {
+			deleteProject("P");
+		}
+	}
+	public void testBug375971g() throws CoreException {
+		try {
+			createJavaProject("P");
+			createFile("/P/InterfaceI.java",
+				"public interface InterfaceI {\n"+
+				" public void addListener();\n"+
+				"}\n");
+			createFile("/P/ClassA.java",
+				"public class ClassA <K, V, B> implements InterfaceI{\n"+
+					" public void addListener() {\n" +
+					"}\n" +
+					"}\n");
+			createFile("/P/ClassB.java",
+					"public class ClassB<K, V, B> extends ClassA<K, V, B>{\n"+
+						" public void doSomething() {" +
+						"   addListener();\n"+
+						"}\n" +
+						"}\n");
+			waitUntilIndexesReady();
+			// search
+			IType type = getCompilationUnit("/P/InterfaceI.java").getType("InterfaceI");
+			IMethod method = type.getMethod("addListener", new String[]{});
+			this.resultCollector.showRule();
+			search(method, REFERENCES, ERASURE_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+			assertSearchResults("ClassB.java void ClassB.doSomething() [addListener()] EXACT_MATCH");
+		} finally {
+			deleteProject("P");
+		}
+	}
+	public void testBug375971h() throws CoreException {
+		try {
+			createJavaProject("P");
+			createFile("/P/InterfaceI.java",
+				"public interface InterfaceI<K,V> {\n"+
+				" public void addListener();\n"+
+				"}\n");
+			createFile("/P/ClassA.java",
+				"public class ClassA <K, V, B> implements InterfaceI<K, V>{\n"+
+					" public void addListener() {\n" +
+					"}\n" +
+					"}\n");
+			createFile("/P/ClassB.java",
+					"public class ClassB<K, V, B> extends ClassA<K, V, B>{\n"+
+						" public void doSomething(InterfaceI<String, String> i) {" +
+						"   i.addListener();\n"+
+						"}\n" +
+						"}\n");
+			waitUntilIndexesReady();
+			// search
+			IType type = getCompilationUnit("/P/ClassA.java").getType("ClassA");
+			IMethod method = type.getMethod("addListener", new String[]{});
+			this.resultCollector.showRule();
+			search(method, REFERENCES, ERASURE_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+			assertSearchResults("ClassB.java void ClassB.doSomething(InterfaceI<String,String>) [addListener()] EXACT_MATCH");
+		} finally {
+			deleteProject("P");
+		}
+	}
+	public void testBug375971i() throws CoreException {
+		try {
+			createJavaProject("P");
+			createFile("/P/InterfaceI.java",
+				"public interface InterfaceI<K,V> {\n"+
+				" public void addListener(K k);\n"+
+				"}\n");
+			createFile("/P/ClassA.java",
+				"public class ClassA <K, V, B> implements InterfaceI<K, V>{\n"+
+					"public void addListener(K k) {\n" +
+					"}\n" +
+					"}\n");
+			createFile("/P/ClassB.java",
+					"public class ClassB<K, V, B> extends ClassA<K, V, B>{\n"+
+						" public void doSomething(K k) {" +
+						"   addListener(k);\n"+
+						"}\n" +
+						"}\n");
+			waitUntilIndexesReady();
+			// search
+			IType type = getCompilationUnit("/P/InterfaceI.java").getType("InterfaceI");
+			IMethod method = type.getMethods()[0];
+			this.resultCollector.showRule();
+			search(method, REFERENCES, ERASURE_RULE, SearchEngine.createWorkspaceScope(), this.resultCollector);
+			assertSearchResults("ClassB.java void ClassB.doSomething(K) [addListener(k)] ERASURE_MATCH");
+		} finally {
+			deleteProject("P");
 		}
 	}
 }
