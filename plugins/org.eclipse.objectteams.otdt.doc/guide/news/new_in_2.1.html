@@ -113,7 +113,7 @@
   </tr>
   <tr><td colspan="2" id="formatting"><h2>Formatting</h2></td></tr>
   <tr>
-    <td><p align="right"><b>Basid code formatting for OT/J</b><br>
+    <td><p align="right"><b>Basic code formatting for OT/J</b><br>
         <span class="since">since&nbsp;2.1M5</span><br>
         <a class="buglink" title="Formatter fails silently on big Teams" href="https://bugs.eclipse.org/331731">331731</a></p></td>
     <td><p>In previous versions support for code formatting for OT/J was incomplete, and the occurrence of some
@@ -169,7 +169,7 @@
     <td><p align="right"><b>Base class as method return</b><br>
         <span class="since">since&nbsp;2.1M6</span><br>
         <a class="buglink" title="[compiler][otjld] consider allowing base imported types as the return type of a team method" href="https://bugs.eclipse.org/370273">370273</a></p></td>
-    <td><p>Mentioning a base imported class in the body of a team or role is allowed.
+    <td><p>Mentioning a base imported class in the body of a team or role is not allowed.
     		However, a team method may want to return a role which then should be lowered on the way.
     		Previously, this lowering was not possible, because the base type could not be mentioned (by its simple name).
     		For the specific situation of team method return types this restriction has been removed.  
