@@ -41,7 +41,7 @@ plugin@org.eclipse.objectteams.otdt.pde.ui,2.1.0=GIT,repo=git://git.eclipse.org/
 plugin@org.eclipse.objectteams.otdt.samples,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.samples,tag=builds/201108142105
 
 !** Consume BCEL from Orbit: **!
-plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20110523182458/repository
+plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository
 
 !***************  OTDT Test CONTRIBUTION  ******************************************************** 
 
