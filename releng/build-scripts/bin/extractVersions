@@ -1,9 +1,102 @@
 #!/bin/sh
 
+if [ ! -d $1 ]
+then
+	echo "Not a directory: $1"
+	exit 1
+fi
+
+SDK=`ls $1/eclipse-SDK*linux-gtk.tar.gz`
+if [ ! -r $SDK ]
+then
+        echo "Can't read SDK from $SDK"
+        exit 1
+fi
+
 PDEBUILD=eclipse/plugins/org.eclipse.pde.build_.*/about.html
 LAUNCHER=eclipse/plugins/org.eclipse.equinox.launcher_
 JDTFEATURE=eclipse/features/org.eclipse.jdt_.*/feature.xml
-JDTCORE=eclipse/plugins/org.eclipse.jdt.core_
 
-tar tzvf $1 | egrep "${PDEBUILD}|${LAUNCHER}|${JDTCORE}|${JDTFEATURE}"
+for VERSION in `tar tzvf $SDK | egrep "${PDEBUILD}|${LAUNCHER}|${JDTFEATURE}" | sed -e "s#.*eclipse/[^/]*/\([^/]*\).*#\1#"`
+do
+	case $VERSION in
+		org.eclipse.pde.build*)
+			PDEBUILD_VERSION=$VERSION
+			;;
+		org.eclipse.jdt*)
+			JDT_VERSION_ALL=`echo $VERSION|grep jdt | sed -e 's/org.eclipse.jdt_\(.*\)/\1/'`
+			JDT_VERSIONA=`echo ${JDT_VERSION_ALL}| sed -e 's/\([0-9]\.[0-9]\.[0-9]\.[^-]*-\)[0-9]\{4\}.*/\1/'`
+			JDT_VERSIONB=`echo ${JDT_VERSION_ALL}| sed -e   's/[0-9]\.[0-9]\.[0-9]\.[^-]*-\([0-9]\{4\}\).*/\1/'`
+			JDT_VERSIONB_NEXT=`expr $JDT_VERSIONB + 1`
+			;;
+		org.eclipse.equinox.launcher*)
+			LAUNCHER_VERSION=$VERSION
+			;;
+	esac
+done
+
+echo "Versions for run.properties:"
+echo "============================"
+echo "# Details of the Eclipse SDK build upon:"
+echo "run.eclipseScriptDir=plugins/${PDEBUILD_VERSION}/scripts"
+echo "org.eclipse.equinox.launcher_jar=${LAUNCHER_VERSION}"
+echo
+echo "# for patching our patch feature to match this version with any suffix:"
+echo "jdt.feature.version=${JDT_VERSIONA}${JDT_VERSIONB}"
+echo "jdt.feature.version.next=${JDT_VERSIONA}${JDT_VERSIONB_NEXT}"
+
+echo
+echo "Version for org.eclipse.objectteams.otdt.core.patch.feature:"
+echo "============================================================"
+echo "      <import feature=\"org.eclipse.jdt\" version=\"${JDT_VERSION_ALL}\" patch=\"true\"/>"
+
+MAP=$1/directory.txt
+if [ ! -r $MAP ]
+then
+        echo "Can't read map from $MAP"
+        exit 1
+fi
+
+echo
+echo "Snippet for otdt.map :"
+echo "======================"
+
+for p in org.eclipse.jdt.core.tests.builder \
+                 org.eclipse.jdt.debug.tests \
+                 org.eclipse.jdt.ui.tests \
+                 org.eclipse.jdt.ui.tests.refactoring \
+                 org.eclipse.jdt.text.tests \
+                 org.eclipse.jface.text.tests \
+                 org.eclipse.text.tests \
+                 org.eclipse.core.filebuffers.tests
+do
+        grep $p= $MAP
+done
+echo "======================"
+
+echo "Snippet for build/test.properties :"
+echo "==================================="
+
+#define x.y.z versions (but replace . with _ since bash can't handle . in variable names):
+org_eclipse_jdt_core_tests_builder=3.8.1
+org_eclipse_test_performance=3.7.0
+org_eclipse_jdt_debug_tests=3.8.0
+org_eclipse_jdt_ui_tests=3.8.0
+org_eclipse_jdt_ui_tests_refactoring=3.8.0
+# currently no version qualifier:
+#org_eclipse_jdt_core_tests_compiler
+#org_eclipse_jdt_core_tests_model
+
+for p in org.eclipse.jdt.core.tests.builder \
+                org.eclipse.jdt.debug.tests \
+                org.eclipse.jdt.ui.tests \
+                org.eclipse.jdt.ui.tests.refactoring \
+                org.eclipse.test.performance
+do
+        qual=`grep $p= $MAP | sed -e "s|^.*=GIT,tag=\(.*\),repo=git.*$|\1|"`
+        r=`echo $p | tr "." "_"`
+        echo $p=${p}_${!r}.${qual}
+done
+
+echo "==================================="
 
