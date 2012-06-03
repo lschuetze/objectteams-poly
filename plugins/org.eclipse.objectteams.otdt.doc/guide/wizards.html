@@ -38,7 +38,7 @@
 	<p>
 	  <img src="images/screenshots/roleWizard.jpg"
 	  	   alt="Wizard for creating a new role class">
-	</p>    
+	</p>
     <h3>Opening the role wizard</h3>
     The easiest way to create a new role class is to use the role wizard.
     First select the container where you want the new role class to reside.
@@ -54,7 +54,8 @@
     dialog respectively. The fully qualified name of the enclosing team is displayed unless
     it stands in the default package. A role is inlined by default, i.e. a role is defined
     inside the specified enclosing team. If an external role should be created the checkbox
-    "inlined" has to be deselected.<br>
+    "inlined" has to be deselected
+    (<a href="otjld/def/s1.html#s1.2.5"><img src="../images/ot_paragraph.png"> OTJLD &sect;1.2.5</a>).<br>
 	<h4>Role name</h4>
     A valid name for the new role class must be entered. The type name is mandatory.<br>
   	<h4>Modifiers</h4>
@@ -64,8 +65,9 @@
 	<h4>Implicit superclass</h4>
     The implicit superclass field is set automatically if the entered type name matches a
     role type which already exists in a team class which is present in the supertype
-    hierarchy of the enclosing team. The fully qualified name of the implicit superclass is
-    then shown.<br>
+    hierarchy of the enclosing team 
+    (<a href="otjld/def/s1.html#s1.3.1"><img src="../images/ot_paragraph.png"> OTJLD &sect;1.3.1</a>). 
+    The fully qualified name of the implicit superclass is then shown.<br>
 	<h4>Explicit superclass</h4>
     Initially the explicit superclass is set to	"java.lang.Object". It can be changed by
     clicking the <b>Browse...</b> button and selecting a class from the selection dialog.
@@ -73,13 +75,18 @@
     regular class other than team classes.<br>
 	<h4>Bound base class</h4>
 	A bound base class can be defined by clicking the <b>Browse...</b> button and selecting
-	a class from the selection dialog. A bound base class can be any class.<br>
+	a class from the selection dialog. A bound base class can be any class.
+	(<a href="otjld/def/s2.html#s2.1"><img src="../images/ot_paragraph.png"> OTJLD &sect;2.1</a>)<br>
 	<h4>Interfaces</h4>
 	Interfaces which the role should implement can be added/removed with the <b>Add.../
 	Remove</b> buttons.
 	<h4>Method stubs</h4>	
 	Method stubs for inherited abstract methods	can be created by selecting the	according
-	checkbox. The checkbox is selected by default.
+	checkbox. Note, that this option includes those	abstract methods that are inherited
+	from an implicit super role 
+	(<a href="otjld/def/s1.html#s1.3.1"><img src="../images/ot_paragraph.png"> OTJLD &sect;1.3.1</a>).
+	</p> 
+	The checkbox is selected by default.
     <h3>Resulting effects</h3>
     By clicking the <b>Finish</b> button the role with the chosen properties is created
     inside the enclosing team, or, in the case of an external role, in a package which has

@@ -17,7 +17,7 @@
 		<div style="margin:10px;margin-top:100px;">
 		 <div style="margin-left:40px;padding:2px;float:left;background-color:#D0D0D0;">
           <div style="padding:4px;background-color:#def4fe;">
-			The release 2.1 is based on Eclipse SDK 3.8.<br/>
+			The release 2.1 is based on Eclipse SDK 3.8 / 4.2.<br/>
 			The OTDT contains a modified version of the JDT core and several added plugins.
           </div>
          </div>
@@ -32,7 +32,7 @@
 			  <li><a href="#bindingEditor">Binding Editor</a></li>
 			  <li><a href="#refactoring">Refactoring</a></li>
 			  <li><a href="#structureViewers">Structure Viewers</a></li>
-			  <li><a href="#Search">Search</a></li>
+			  <li><a href="#search">Search</a></li>
 			  <li><a href="#execution">Execution Environment</a></li>
 			  <li><a href="#otequinox">OT/Equinox</a></li>
 			  <li><a href="#debugging">Debugging</a></li>
@@ -216,6 +216,7 @@
 			<dd><ul><li>Also the call hierarchy has been extended for browsing control flows passing
 			through method bindings (callin and callout).</li>
 			<li>The OTDT introduced support for call hierarchies regarding field accesses (read, write, any) and class instantiations. As of version 3.4 this functionality has been adopted by Eclipse.</li>
+			<li>OT/J constructs that may cause role creation due to lifting are considered by the call hierarchy as calling the role's lifting constructor.</li>
 			</ul>
 			</dd>
 			</dl>
@@ -230,7 +231,7 @@
 			All aspect oriented languages have some kind of <em>weaving process</em>, where the aspect code is combined with the other (<em>base</em>) code.
 			</li>
 			<li>
-			Object Teams programs perform the weaving at application <em>startup time</em>, i.e. at the moment, the program is launched. In order to do this, there is the so-called <em>Object Teams Runtime Environment (OTRE)</em>, that wraps around the standard launching procedure.
+			Object Teams programs perform the weaving at application <em>startup time</em>, i.e. at the moment, the program is launched. In order to do this, there is the so-called <em>Object Teams Runtime Environment (OTRE)</em>, that hooks into the class-loading process.
 			</li>
 			<li>
 			All this is handled transparently using the standard Eclipse "Run" feature.
@@ -355,7 +356,6 @@
 			<dd><ul>
 			    <li>Dynamic code evaluation is not supported yet, 
 			    make sure to clear the Expression view.</li>
-			    <li>Hot code replacement of woven code is not supported.</li>
 			  </ul></dd>
 			</dl>
 			
