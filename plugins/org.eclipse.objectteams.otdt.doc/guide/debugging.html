@@ -36,5 +36,9 @@
     role/base/team instances. For that reason, filtering of these variables
     can be toggled from the variable view's menu: <span class="ui">Java &gt; Show OT/J Internal Variables</span>.
     The same holds for the detail drill down of the team monitor.
+    <h2><a name="hot-code-replace">Hot code replacement</a></h2>
+    During debugging, code changes can automatically be swapped into the running program even for classes
+    requiring bytecode weaving. Naturally, this is bounded by the inability of the JVM to handle
+    signature changes (incl. addition & removal of methods / fields) for hot code replacement.
   </body>
 </html>

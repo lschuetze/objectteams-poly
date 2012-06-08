@@ -33,5 +33,21 @@
       </p>
       <img src="images/screenshots/CallHierarchy.png"
 	  	   alt="Call hierarchy showing Object Teams method bindings">
+	  <p>Additionally, whenever the call hierarchy shows the <b>lifting constructor</b> 
+	    (<a href="otjld/def/s2.html#s2.3.1.b"><img src="../images/ot_paragraph.png"> 2.3.1(b &amp; c)</a>) of a role
+	  	(either as an intermediate node or when requesting the call hierarchy for
+	  	the role class) all those locations are considered as callers that involve
+	  	lifting a base object to the given role, because the lifting operation
+	  	can implicitly trigger creation of a role instance. According to
+	  	<a href="otjld/def/s2.html#s2.3.b"><img src="../images/ot_paragraph.png"> 2.3(b)</a>	  	
+	  	lifting can occur
+	  	<ul>
+	  	<li>in a callout method binding (for the return value)</li>
+	  	<li>in a callin method binding (call target and arguments)</li>
+	  	<li>in a team method with declared lifting</li>
+	  	</ul>
+	  </p>
+      <img src="images/screenshots/CallHierarchyLifting.png"
+	  	   alt="Call hierarchy showing implicit role creation by lifting">
    </body>
 </html>

@@ -61,5 +61,15 @@
 	Binding markers are enabled/disabled globally on the <span class="ui">Object Teams</span> preference page.<br>
 	Detailed configuration is possible via <span class="ui">Window->Preferences->General->Editors->Text Editors->Annotations</span>
 	</p>
-  </body>
+	<p>
+	Whenever the same base method is affected by multiple callin bindings of the same kind (before, replace or after),
+	the compiler will add a warning marker. This should help to prevent situations where different callin bindings
+	could potentiall interfere with each other.
+	</p>
+	<table>
+	<tr><td class="caption">Multiple-callins marker
+	  <td><img src="images/screenshots/NN21/MultipleCallins.png"
+	  	   alt="Warning marker for multiple callin bindings">
+	</tr>
+	</table>  </body>
 </html>
