@@ -47,12 +47,12 @@ else
 fi
 
 # VERSIONS:
-# Eclipse SKD build identifier:
-EVERSION=4.2RC3
+# Eclipse SDK build identifier:
+EVERSION=I20120608-1400
 # Architecture (as used by OSGi):
 ARCH=`arch`
 # used only locally:
-DROP=${BASEDIR}/drops4/S-4.2RC3-201205311500
+DROP=${BASEDIR}/drops4/I20120608-1400
 
 
 # EXPORT: archive file of the base eclipse SDK build:
