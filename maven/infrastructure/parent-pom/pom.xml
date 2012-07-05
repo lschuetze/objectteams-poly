@@ -229,6 +229,13 @@
 		<site>
 			<id>otSiteRepo</id>
 			<name>Object Teams sites repository for Maven 3</name>
+			<!--
+				for unclear reason when deploying dependent sites we need to first install this
+			    parent with the following URL:
+			    	scpexe://objectteams/maven/3/sites/${project.artifactId}
+			    otherwise the variables from the below URL will be pasted verbatim for references
+			    to the parent pom =:-0
+			-->
 			<url>scpexe://${ot.host}:${ot.maven.repository.basepath}/sites/${project.artifactId}</url>
 		</site>
 		<repository>
