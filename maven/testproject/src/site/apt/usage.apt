@@ -3,7 +3,7 @@
 	------
 	Olaf Otto & Stephan Herrmann
 	------
-	2001-10-18
+	2012-07-05
 	------
 
 Using Object Teams with Maven3
@@ -33,7 +33,7 @@ Using Object Teams with Maven3
 	<parent>
 		<groupId>org.eclipse</groupId>
 		<artifactId>objectteams-parent-pom</artifactId>
-		<version>0.8.0-SNAPSHOT</version>
+		<version>2.1.0</version>
 	</parent>
 +-----
 
@@ -64,4 +64,4 @@ Using Object Teams with Maven3
   
 * Source
 
-  See the full source of {{{http://dev.eclipse.org/viewcvs/index.cgi/trunk/maven/testproject/pom.xml?root=TOOLS_OBJECTTEAMS&revision=HEAD}pom.xml}}.
+  See the full source of {{{http://git.eclipse.org/c/objectteams/org.eclipse.objectteams.git/tree/maven/testproject/pom.xml}pom.xml}}.

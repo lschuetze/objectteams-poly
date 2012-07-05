@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.eclipse</groupId>
 		<artifactId>objectteams-parent-pom</artifactId>
-		<version>2.1.0-SNAPSHOT</version>
+		<version>2.1.0</version>
 		<relativePath>../parent-pom</relativePath>
 	</parent>
 
@@ -24,7 +24,7 @@
 			<comments>
 				This file is part of "Object Teams Development Tooling"-Software
 
-				Copyright 2010, 2011 GK Software AG and others.
+				Copyright 2010, 2012 GK Software AG and others.
 				All rights reserved. This program and the accompanying materials
 				are made available under the terms of the Eclipse Public License v1.0
 				which accompanies this distribution, and is available at
@@ -51,25 +51,25 @@
 
 	<properties>
 		<!-- Object Teams versions, update manually: 					-->
-		<!--   version of the ecotj jar file:			 				-->
-		<ecotj.version>S-2.1.0M6-201203201245</ecotj.version> 
+		<!--   version of the signed ecotj jar file:	 				-->
+		<ecotj.version>R-2.1.0-201206090440-signed</ecotj.version> 
 		<!--   version of the org.eclipse.objectteams.runtime plugin:	-->
-		<otre.version>2.1.0.201201311800</otre.version> 	
+		<otre.version>2.1.0.201205081843</otre.version>
 		
 		<!-- locate the jar files to install/deploy: -->
 	    <ecotj.jar.file>${ecj.export.dir}/ecotj-${ecotj.version}.jar</ecotj.jar.file>
-	    <otre.jar.file>${otre.export.dir}/org.eclipse.objectteams.runtime_${otre.version}.jar</otre.jar.file>
-	    <otre-agent.jar.file>${otre.export.dir}/otre_agent.jar</otre-agent.jar.file>
+	    <otre.jar.file>${otre.export.dir}-${otre.version}/org.eclipse.objectteams.runtime_${otre.version}.jar</otre.jar.file>
+	    <otre-agent.jar.file>${otre.export.dir}-${otre.version}/otre_agent.jar</otre-agent.jar.file>
 	    
-    	<!-- Repository path of this module within the Object Teams svn: -->
-    	<project-repository-path>trunk/maven/infrastructure/artifacts-deployer</project-repository-path>
+    	<!-- Repository path of this module within the Object Teams git: -->
+    	<project-repository-path>maven/infrastructure/artifacts-deployer</project-repository-path>
 	</properties>
 
     <!-- Override inherited declaration, otherwise Maven appends the artifactId to the path -->
 	<scm>
-	    <connection>scm:svn:svn://dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/tags/mvn-releases/objectteams-artifact-deployer-2.0.0</connection>
-	    <developerConnection>scm:svn:svn+ssh://${username}@dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/tags/mvn-releases/objectteams-artifact-deployer-2.0.0</developerConnection>
-	    <url>http://dev.eclipse.org/viewcvs/index.cgi/tags/mvn-releases/objectteams-artifact-deployer-2.0.0?root=TOOLS_OBJECTTEAMS</url>
+	    <connection>scm:git:git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git/${project-repository-path}</connection>
+	    <developerConnection>scm:git:ssh://${username}@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git/${project-repository-path}</developerConnection>
+	    <url>http://git.eclipse.org/c/objectteams/org.eclipse.objectteams.git/${project-repository-path}</url>
 	</scm>
 	
 	<!-- simply repeat this declaration from the parent pom, otherwise Maven duplicates the artifactId in the path -->

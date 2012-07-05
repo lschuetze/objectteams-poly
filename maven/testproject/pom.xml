@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.eclipse</groupId>
 		<artifactId>objectteams-parent-pom</artifactId>
-		<version>2.1.0-SNAPSHOT</version>
+		<version>2.1.0</version>
 	</parent>
 
 	<packaging>jar</packaging>
         
 	<artifactId>objectteams-compile-test</artifactId>
-	<version>1.0.1-SNAPSHOT</version>
+	<version>1.0.1</version>
 	<name>Object Teams test project</name>
 
 	<!-- simply repeat this declaration from the parent pom, otherwise Maven duplicates the artifactId in the path -->
@@ -53,14 +53,14 @@
 
     <properties>
     	<!-- Relative path of this module: -->
-    	<project-repository-path>trunk/maven/testproject</project-repository-path>
+    	<project-repository-path>maven/testproject</project-repository-path>
     </properties>
     
     <!-- Override inherited declaration, otherwise Maven appends the artifactId to the path -->
 	<scm>
-	    <connection>scm:svn:svn://dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/${project-repository-path}</connection>
-	    <developerConnection>scm:svn:svn+ssh://dev.eclipse.org/svnroot/tools/org.eclipse.objectteams/${project-repository-path}</developerConnection>
-	    <url>http://dev.eclipse.org/viewcvs/index.cgi/${project-repository-path}?root=TOOLS_OBJECTTEAMS</url>
+	    <connection>scm:git:git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git/${project-repository-path}</connection>
+	    <developerConnection>scm:git:ssh://${username}@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git/${project-repository-path}</developerConnection>
+	    <url>http://git.eclipse.org/c/objectteams/org.eclipse.objectteams.git/${project-repository-path}</url>
 	</scm>
 
 	<!-- simply repeat this declaration from the parent pom, otherwise Maven duplicates the artifactId in the path -->
