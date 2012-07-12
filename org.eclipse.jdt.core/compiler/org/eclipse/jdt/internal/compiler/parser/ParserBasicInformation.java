@@ -4,7 +4,15 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- *
+ *  
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -15,22 +23,22 @@ package org.eclipse.jdt.internal.compiler.parser;
 public interface ParserBasicInformation {
     public final static int
 
-      ERROR_SYMBOL      = 129,
-      MAX_NAME_LENGTH   = 41,
-      NUM_STATES        = 1266,
+      ERROR_SYMBOL      = 133,
+      MAX_NAME_LENGTH   = 50,
+      NUM_STATES        = 1391,
 
-      NT_OFFSET         = 129,
-      SCOPE_UBOUND      = 195,
-      SCOPE_SIZE        = 196,
-      LA_STATE_OFFSET   = 14988,
+      NT_OFFSET         = 133,
+      SCOPE_UBOUND      = 317,
+      SCOPE_SIZE        = 318,
+      LA_STATE_OFFSET   = 19245,
       MAX_LA            = 1,
-      NUM_RULES         = 886,
-      NUM_TERMINALS     = 129,
-      NUM_NON_TERMINALS = 394,
-      NUM_SYMBOLS       = 523,
-      START_STATE       = 1043,
-      EOFT_SYMBOL       = 73,
-      EOLT_SYMBOL       = 73,
-      ACCEPT_ACTION     = 14987,
-      ERROR_ACTION      = 14988;
+      NUM_RULES         = 978,
+      NUM_TERMINALS     = 133,
+      NUM_NON_TERMINALS = 426,
+      NUM_SYMBOLS       = 559,
+      START_STATE       = 1212,
+      EOFT_SYMBOL       = 72,
+      EOLT_SYMBOL       = 72,
+      ACCEPT_ACTION     = 19244,
+      ERROR_ACTION      = 19245;
 }

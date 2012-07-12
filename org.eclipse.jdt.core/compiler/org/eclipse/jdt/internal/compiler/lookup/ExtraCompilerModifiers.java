@@ -5,11 +5,17 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 328281 - visibility leaks not detected when analyzing unused field in private class
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
+ *								bug 328281 - visibility leaks not detected when analyzing unused field in private class
+ *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -27,7 +33,7 @@ public interface ExtraCompilerModifiers { // modifier constant
 	// those constants are depending upon ClassFileConstants (relying that classfiles only use the 16 lower bits)
 	final int AccJustFlag = 0xFFFF;// 16 lower bits
 
-	// bit17 - free
+	final int AccDefaultMethod = ASTNode.Bit17;
 	// bit18 - use by ClassFileConstants.AccAnnotationDefault
 	final int AccRestrictedAccess = ASTNode.Bit19;
 	final int AccFromClassFile = ASTNode.Bit20;

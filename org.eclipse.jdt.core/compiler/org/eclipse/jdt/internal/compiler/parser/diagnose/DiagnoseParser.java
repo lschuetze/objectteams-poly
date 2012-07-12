@@ -1,10 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: DiagnoseParser.java 19876 2009-04-13 19:39:46Z stephan $
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -14,10 +17,12 @@
 package org.eclipse.jdt.internal.compiler.parser.diagnose;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.parser.ParserBasicInformation;
 import org.eclipse.jdt.internal.compiler.parser.RecoveryScanner;
+import org.eclipse.jdt.internal.compiler.parser.Scanner;
 import org.eclipse.jdt.internal.compiler.parser.ScannerHelper;
 import org.eclipse.jdt.internal.compiler.parser.TerminalTokens;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
@@ -204,6 +209,9 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens {
 		if(this.recoveryScanner != null) {
 			oldRecord = this.recoveryScanner.record;
 			this.recoveryScanner.record = record;
+		}
+		if (this.options.sourceLevel >= ClassFileConstants.JDK1_8) {
+			this.parser.scanner.shouldDisambiguate = true;
 		}
 		try {
 			this.lexStream.reset();
@@ -448,6 +456,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens {
 			if(this.recoveryScanner != null) {
 				this.recoveryScanner.record = oldRecord;
 			}
+			this.parser.scanner.shouldDisambiguate = false;
 		}
 		return;
 	}
@@ -815,9 +824,9 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens {
 			}
 	    }
 
-		//
-		// Next, try deletion of the error token.
-		//
+		/* Next, try deletion of the error token, preferring deletion as a criteria in
+		   case of identical, superfluous keyword tokens. See below.
+		*/
 		j = parseCheck(
 				stck,
 				stack_top,
@@ -833,6 +842,25 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens {
 			repair.misspellIndex = k;
 			repair.code = DELETION_CODE;
 			repair.distance = j;
+		} else if (j == repair.distance) {
+			/* Handle some cases where deletion as a repair strategy is obviously superior to
+			   others. e.g: Object o = new new Object() {}; For some reason, with the new grammar
+			   rules to support type annotations in place, the scopeTrial's choice above wins out
+			   with the repair strategy being to insert a semicolon after the first new. That looks
+			   very suspicious. It is not clear if that is due to the bug in the implementation of
+			   scopeTrial or in the jikespg parser generator or in the grammar.
+			
+			   The current fix is a temporary point-fix to address this problem. It does make sense
+			   as a rule, but is a bit ad-hoc in nature and the reason why scopeTrial succeeds needs
+			   to be understood.
+			*/
+			LexStream.Token previousToken = this.lexStream.token(repair.bufferPosition + 1);
+			LexStream.Token curToken = this.lexStream.token(repair.bufferPosition + 2);
+			if (previousToken != null && curToken != null && previousToken.kind == curToken.kind && Scanner.isKeyword(curToken.kind)) {
+				repair.misspellIndex = k;
+				repair.code = DELETION_CODE;
+				repair.distance = j;
+			}
 		}
 
 		//
@@ -2303,10 +2331,13 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens {
 	            	addedTokens = new int[Parser.scope_rhs.length - Parser.scope_suffix[- nameIndex]];
 	            }
 
+	            int insertedToken = TokenNameNotAToken;
 				for (int i = Parser.scope_suffix[- nameIndex]; Parser.scope_rhs[i] != 0; i++) {
 					buf.append(Parser.readableName[Parser.scope_rhs[i]]);
 					if (Parser.scope_rhs[i + 1] != 0) // any more symbols to print?
 						buf.append(' ');
+					else
+						insertedToken = Parser.reverse_index[Parser.scope_rhs[i]];
 
 					if(addedTokens != null) {
 	                	int tmpAddedToken = Parser.reverse_index[Parser.scope_rhs[i]];
@@ -2345,6 +2376,13 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens {
 	            }
 
 				if (scopeNameIndex != 0) {
+					if (insertedToken == TokenNameElidedSemicolonAndRightBrace) {
+						/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=383046, we should never ever report the diagnostic, "Syntax error, insert ElidedSemicolonAndRightBraceto complete LambdaBody"
+						   as it is a synthetic token. Instead we should simply repair and move on. See how the regular Parser behaves at Parser.consumeElidedLeftBraceAndReturn and Parser.consumeExpression.
+						   See also: point (4) in https://bugs.eclipse.org/bugs/show_bug.cgi?id=380194#c15
+						*/
+						break;
+					}
 					if(this.reportProblem) problemReporter().parseErrorInsertToComplete(
 						errorStart,
 						errorEnd,
@@ -2479,12 +2517,14 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens {
 	            if(this.recoveryScanner != null) {
 	            	addedTokens = new int[Parser.scope_rhs.length - Parser.scope_suffix[- nameIndex]];
 	            }
-
+	            int insertedToken = TokenNameNotAToken;
 	            for (int i = Parser.scope_suffix[- nameIndex]; Parser.scope_rhs[i] != 0; i++) {
 
 	                buf.append(Parser.readableName[Parser.scope_rhs[i]]);
 	                if (Parser.scope_rhs[i+1] != 0)
 	                     buf.append(' ');
+	                else
+	                	insertedToken = Parser.reverse_index[Parser.scope_rhs[i]];
 
 	                if(addedTokens != null) {
 	                	int tmpAddedToken = Parser.reverse_index[Parser.scope_rhs[i]];
@@ -2520,6 +2560,13 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens {
 	            	this.recoveryScanner.insertTokens(addedTokens, completedToken, errorEnd);
 	            }
 	            if (scopeNameIndex != 0) {
+	            	if (insertedToken == TokenNameElidedSemicolonAndRightBrace) {
+						/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=383046, we should never ever report the diagnostic, "Syntax error, insert ElidedSemicolonAndRightBraceto complete LambdaBody"
+						   as it is a synthetic token. Instead we should simply repair and move on. See how the regular Parser behaves at Parser.consumeElidedLeftBraceAndReturn and Parser.consumeExpression.
+						   See also: point (4) in https://bugs.eclipse.org/bugs/show_bug.cgi?id=380194#c15
+						*/
+						break;
+					}
 	                if(this.reportProblem) problemReporter().parseErrorInsertToComplete(
 						errorStart,
 						errorEnd,

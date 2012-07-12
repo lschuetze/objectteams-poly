@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -490,7 +494,10 @@ protected static class JavacTestOptions {
 		}
 		Excuse excuseFor(JavacCompiler compiler) {
 			if (this.minorsFixed != null) {
-				if (compiler.compliance == ClassFileConstants.JDK1_7) {
+				if (compiler.compliance == ClassFileConstants.JDK1_8) {
+					return this.minorsFixed[5] > compiler.minor || this.minorsFixed[5] < 0 ?
+							this : null;
+				} else if (compiler.compliance == ClassFileConstants.JDK1_7) {
 					return this.minorsFixed[4] > compiler.minor || this.minorsFixed[4] < 0 ?
 							this : null;
 				} else if (compiler.compliance == ClassFileConstants.JDK1_6) {
@@ -842,6 +849,8 @@ protected static class JavacTestOptions {
 			buffer.append("\" -1.6 -proc:none");
 		} else if (this.complianceLevel == ClassFileConstants.JDK1_7) {
 			buffer.append("\" -1.7 -proc:none");
+		} else if (this.complianceLevel == ClassFileConstants.JDK1_8) {
+			buffer.append("\" -1.8 -proc:none");
 		}
 		buffer
 			.append(" -preserveAllLocals -nowarn -g -classpath \"")
@@ -1812,6 +1821,33 @@ protected void runNegativeTest(String[] testFiles, String expectedCompilerLog) {
 			// javac options
 			JavacTestOptions.DEFAULT /* default javac test options */);
 	}
+protected void runNegativeTest(String[] testFiles, String expectedCompilerLog, boolean performStatementRecovery) {
+	runTest(
+ 		// test directory preparation
+		true /* flush output directory */,
+		testFiles /* test files */,
+		// compiler options
+		null /* no class libraries */,
+		null /* no custom options */,
+		performStatementRecovery,
+		new Requestor( /* custom requestor */
+				false,
+				null /* no custom requestor */,
+				false,
+				false),
+		// compiler results
+		expectedCompilerLog == null || /* expecting compiler errors */
+			expectedCompilerLog.indexOf("ERROR") != -1,
+		expectedCompilerLog /* expected compiler log */,
+		// runtime options
+		false /* do not force execution */,
+		null /* no vm arguments */,
+		// runtime results
+		null /* do not check output string */,
+		null /* do not check error string */,
+		// javac options
+		JavacTestOptions.DEFAULT /* default javac test options */);
+}
 	// WORK potential elimination candidate (24 calls) - else clean up inline
 	protected void runNegativeTest(
 		String[] testFiles,

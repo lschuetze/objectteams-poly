@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - adapted for Object Teams
@@ -22,11 +26,11 @@ public class ComplianceDiagnoseTest extends AbstractRegressionTest {
 	}
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which does not belong to the class are skipped...
-//static {
-//	TESTS_NAMES = new String[] { "test000" };
+static {
+//	TESTS_NAMES = new String[] { "test0061" };
 //	TESTS_NUMBERS = new int[] { 50 };
 //	TESTS_RANGE = new int[] { 21, 50 };
-//}
+}
 public static Test suite() {
 	return buildAllCompliancesTestSuite(testClass());
 }
@@ -59,6 +63,25 @@ public void runComplianceParserTest(
 		} else if(this.complianceLevel < ClassFileConstants.JDK1_7) {
 			this.runNegativeTest(testFiles, expected15ProblemLog);
 		} else {
+			this.runNegativeTest(testFiles, expected17ProblemLog);
+		}
+	}
+public void runComplianceParserTest(
+		String[] testFiles,
+		String expected13ProblemLog,
+		String expected14ProblemLog,
+		String expected15ProblemLog,
+		String expected16ProblemLog,
+		String expected17ProblemLog){
+		if (this.complianceLevel == ClassFileConstants.JDK1_3) {
+			this.runNegativeTest(testFiles, expected13ProblemLog);
+		} else if(this.complianceLevel == ClassFileConstants.JDK1_4) {
+			this.runNegativeTest(testFiles, expected14ProblemLog);
+		} else if(this.complianceLevel == ClassFileConstants.JDK1_5) {
+			this.runNegativeTest(testFiles, expected15ProblemLog);
+		} else if(this.complianceLevel == ClassFileConstants.JDK1_6) {
+			this.runNegativeTest(testFiles, expected16ProblemLog);
+		} else if(this.complianceLevel < ClassFileConstants.JDK1_7) {
 			this.runNegativeTest(testFiles, expected17ProblemLog);
 		}
 	}
@@ -1289,7 +1312,7 @@ public void test0028() {
 		expected15ProblemLog
 	);
 }
-public void test0029() {
+public void _test0029() {
 	String[] testFiles = new String[] {
 		"X.java",
 		"public class X {\n" +
@@ -1344,7 +1367,7 @@ public void test0029() {
 		expected15ProblemLog
 	);
 }
-public void test0030() {
+public void _test0030() {
 	String[] testFiles = new String[] {
 		"X.java",
 		"public class X {\n" +
@@ -1459,7 +1482,7 @@ public void test0031() {
 		expected15ProblemLog
 	);
 }
-public void test0032() {
+public void _test0032() {
 	String[] testFiles = new String[] {
 		"X.java",
 		"public class X <T1 extends String, T2 extends Y {\n" +
@@ -1750,7 +1773,7 @@ public void test0037() {
 		expected15ProblemLog
 	);
 }
-public void test0038() {
+public void _test0038() {
 	String[] testFiles = new String[] {
 		"X.java",
 		"public class X {\n" +
@@ -1832,7 +1855,7 @@ public void test0039() {
 		expected15ProblemLog
 	);
 }
-public void test0040() {
+public void _test0040() {
 	String[] testFiles = new String[] {
 		"X.java",
 		"public class X {\n" +
@@ -1875,7 +1898,7 @@ public void test0040() {
 		expected15ProblemLog
 	);
 }
-public void test0041() {
+public void _test0041() {
 	String[] testFiles = new String[] {
 		"X.java",
 		"public class X {\n" +
@@ -2644,6 +2667,209 @@ public void test0056() {
 		expected14ProblemLog,
 		expected15ProblemLog,
 		expected17ProblemLog
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383714
+public void test0057() {
+	if(this.complianceLevel >= ClassFileConstants.JDK1_8) {
+		return;
+	}
+	String[] testFiles = new String[] {
+		"X.java",
+		"interface I {\n" +
+		"  public void foo() default { System.out.println(); }\n" +
+		"}\n"
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. ERROR in X.java (at line 2)\n" + 
+			"	public void foo() default { System.out.println(); }\n" + 
+			"	                           ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Default methods are allowed only at source level 1.8 or above\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+		testFiles,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383714
+public void test0058() {
+	if(this.complianceLevel >= ClassFileConstants.JDK1_8) {
+		return;
+	}
+	String[] testFiles = new String[] {
+		"X.java",
+		"interface I {\n" +
+		"  void foo(int p);\n" +
+		"}\n" +
+		"public class X {\n" +
+		"  I i = System::exit;\n" +
+		"}\n"
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. ERROR in X.java (at line 5)\n" + 
+			"	I i = System::exit;\n" + 
+			"	      ^^^^^^^^^^^^\n" + 
+			"Method references are allowed only at source level 1.8 or above\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+		testFiles,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383714
+public void test0059() {
+	if(this.complianceLevel >= ClassFileConstants.JDK1_8) {
+		return;
+	}
+	String[] testFiles = new String[] {
+		"X.java",
+		"interface I {\n" +
+		"  void foo(int p);\n" +
+		"}\n" +
+		"class Y {\n" +
+		"   static void goo(int x) {\n" +
+		"   }\n" +
+		"}\n" +
+		"public class X extends Y {\n" +
+		"  I i = super::goo;\n" +
+		"}\n"
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. ERROR in X.java (at line 9)\n" + 
+			"	I i = super::goo;\n" + 
+			"	      ^^^^^^^^^^\n" + 
+			"Method references are allowed only at source level 1.8 or above\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+		testFiles,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383714
+public void test0060() {
+	if(this.complianceLevel >= ClassFileConstants.JDK1_8) {
+		return;
+	}
+	String[] testFiles = new String[] {
+		"X.java",
+		"interface I {\n" +
+		"  void foo(int p);\n" +
+		"}\n" +
+		"class Y {\n" +
+		"   void goo(int x) {\n" +
+		"   }\n" +
+		"}\n" +
+		"public class X extends Y {\n" +
+		"  I i = new Y()::goo;\n" +
+		"}\n"
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. ERROR in X.java (at line 9)\n" + 
+			"	I i = new Y()::goo;\n" + 
+			"	      ^^^^^^^^^^^^\n" + 
+			"Method references are allowed only at source level 1.8 or above\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+		testFiles,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383714
+public void test0061() {
+	if(this.complianceLevel >= ClassFileConstants.JDK1_8) {
+		return;
+	}
+	String[] testFiles = new String[] {
+		"X.java",
+		"interface I {\n" +
+		"  void foo(int p);\n" +
+		"}\n" +
+		"class Y {\n" +
+		"   void goo(int x) {\n" +
+		"   }\n" +
+		"   Y() {}\n" +
+		"   Y(int x) {}\n" +
+		"}\n" +
+		"public class X extends Y {\n" +
+		"  I i = Y::new;\n" +
+		"}\n"
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. ERROR in X.java (at line 11)\n" + 
+			"	I i = Y::new;\n" + 
+			"	      ^^^^^^^\n" + 
+			"Constructor references are allowed only at source level 1.8 or above\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+		testFiles,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383714
+public void test0062() {
+	if(this.complianceLevel >= ClassFileConstants.JDK1_8) {
+		return;
+	}
+	String[] testFiles = new String[] {
+		"X.java",
+		"interface I {\n" +
+		"  int foo(int p);\n" +
+		"}\n" +
+		"public class X {\n" +
+		"  I i = p -> 10 + 20 + 30;\n" +
+		"}\n"
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. ERROR in X.java (at line 5)\n" + 
+			"	I i = p -> 10 + 20 + 30;\n" + 
+			"	      ^^^^^^^^^^^^^^^^^\n" + 
+			"Lambda expressions are allowed only at source level 1.8 or above\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+		testFiles,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog
 	);
 }
 }

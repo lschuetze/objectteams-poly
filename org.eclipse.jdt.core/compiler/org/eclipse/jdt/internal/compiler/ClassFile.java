@@ -4,7 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ClassFile.java 23404 2010-02-03 14:10:22Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -290,6 +293,11 @@ public class ClassFile implements TypeConstants, TypeIds {
 			this.codeStream = new StackMapFrameCodeStream(this);
 		} else {
 			this.codeStream = new CodeStream(this);
+		}
+		if (this.targetJDK == ClassFileConstants.JDK1_8) {
+			//TODO JAVA8: Version number is not yet updated in the java8 beta...
+			//Remove this after it is upgraded
+			this.targetJDK = ClassFileConstants.JDK1_7;
 		}
 		initByteArrays();
 	}
@@ -4296,6 +4304,11 @@ public class ClassFile implements TypeConstants, TypeIds {
 		} else if (this.targetJDK == ClassFileConstants.CLDC_1_1) {
 			this.targetJDK = ClassFileConstants.JDK1_1; // put back 45.3
 			this.produceAttributes |= ClassFileConstants.ATTR_STACK_MAP;
+		}
+		if (this.targetJDK == ClassFileConstants.JDK1_8) {
+			//TODO JAVA8: Version number is not yet updated in the java8 beta...
+			//Remove this after it is upgraded
+			this.targetJDK = ClassFileConstants.JDK1_7;
 		}
 		this.bytes = null;
 		this.constantPool.reset();

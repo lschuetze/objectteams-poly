@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -60,6 +64,13 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		this.originalSourceEnd = this.sourceEnd;
 		this.typeArguments = typeArguments;
 	}
+	public ParameterizedSingleTypeReference(char[] name, TypeReference[] typeArguments, int dim, Annotation[][] annotationsOnDimensions, long pos) {
+		this(name, typeArguments, dim, pos);
+		this.annotationsOnDimensions = annotationsOnDimensions;
+		if (annotationsOnDimensions != null) {
+			this.bits |= ASTNode.HasTypeAnnotations;
+		}
+	}
 	public void checkBounds(Scope scope) {
 		if (this.resolvedType == null) return;
 
@@ -78,6 +89,14 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 	 */
 	public TypeReference copyDims(int dim) {
 		return new ParameterizedSingleTypeReference(this.token, this.typeArguments, dim, (((long)this.sourceStart)<<32)+this.sourceEnd);
+	}
+	public TypeReference copyDims(int dim, Annotation [][] annotationsOnDims) {
+		ParameterizedSingleTypeReference parameterizedSingleTypeReference = new ParameterizedSingleTypeReference(this.token, this.typeArguments, dim, annotationsOnDims, (((long)this.sourceStart)<<32)+this.sourceEnd);
+		parameterizedSingleTypeReference.bits |= (this.bits & ASTNode.HasTypeAnnotations);
+		if (annotationsOnDims != null) {
+			parameterizedSingleTypeReference.bits |= ASTNode.HasTypeAnnotations;
+		}
+		return parameterizedSingleTypeReference;
 	}
 
 	/**
@@ -117,6 +136,10 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
     protected TypeBinding getTypeBinding(Scope scope) {
         return null; // not supported here - combined with resolveType(...)
     }
+    
+    public boolean isParameterizedTypeReference() {
+    	return true;
+    }
 
     /*
      * No need to check for reference to raw type per construction
@@ -142,6 +165,14 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			}
 		}
 		this.bits |= ASTNode.DidResolve;
+		if (this.annotations != null) {
+			switch(scope.kind) {
+				case Scope.BLOCK_SCOPE :
+				case Scope.METHOD_SCOPE :
+					resolveAnnotations((BlockScope) scope, this.annotations, new Annotation.TypeUseBinding(Binding.TYPE_USE));
+					break;
+			}
+		}
 //{ObjectTeams: check team anchor first:
 	    for (int typeParamPos=0; typeParamPos<this.typeArguments.length; typeParamPos++) {
 		    if (this.typeArguments[typeParamPos] instanceof TypeAnchorReference)
@@ -219,7 +250,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		}
 		TypeBinding type = internalResolveLeafType(importScope, scope, enclosingType, checkBounds);
 /* orig:
-		TypeBinding type = internalResolveLeafType(enclosingType, checkBounds);
+		TypeBinding type = internalResolveLeafType(scope, enclosingType, checkBounds);
   :giro */
 // SH}
 		// handle three different outcomes:
@@ -321,6 +352,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		    TypeBinding argType = isClassScope
 				? typeArgument.resolveTypeArgument((ClassScope) scope, currentOriginal, i)
 				: typeArgument.resolveTypeArgument((BlockScope) scope, currentOriginal, i);
+			this.bits |= (typeArgument.bits & ASTNode.HasTypeAnnotations);
 		     if (argType == null) {
 		         argHasError = true;
 		     } else {
@@ -399,8 +431,19 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		}
 		return type;
 	}
+	
+	protected void resolveAnnotations(BlockScope scope) {
+		super.resolveAnnotations(scope);
+		for (int i = 0, length = this.typeArguments.length; i < length; i++) {
+			this.typeArguments[i].resolveAnnotations(scope);
+		}
+	}
 
 	public StringBuffer printExpression(int indent, StringBuffer output){
+		if (this.annotations != null) {
+			printAnnotations(this.annotations, output);
+			output.append(' ');
+		}
 		output.append(this.token);
 		output.append("<"); //$NON-NLS-1$
 		int length = this.typeArguments.length;
@@ -425,11 +468,26 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		output.append(">"); //$NON-NLS-1$
 		if ((this.bits & IsVarArgs) != 0) {
 			for (int i= 0 ; i < this.dimensions - 1; i++) {
+				if (this.annotationsOnDimensions != null && this.annotationsOnDimensions[i] != null) {
+					output.append(" "); //$NON-NLS-1$
+					printAnnotations(this.annotationsOnDimensions[i], output);
+					output.append(" "); //$NON-NLS-1$
+				}
 				output.append("[]"); //$NON-NLS-1$
+			}
+			if (this.annotationsOnDimensions != null && this.annotationsOnDimensions[this.dimensions - 1] != null) {
+				output.append(" "); //$NON-NLS-1$
+				printAnnotations(this.annotationsOnDimensions[this.dimensions - 1], output);
+				output.append(" "); //$NON-NLS-1$
 			}
 			output.append("..."); //$NON-NLS-1$
 		} else {
 			for (int i= 0 ; i < this.dimensions; i++) {
+				if (this.annotationsOnDimensions != null && this.annotationsOnDimensions[i] != null) {
+					output.append(" "); //$NON-NLS-1$
+					printAnnotations(this.annotationsOnDimensions[i], output);
+					output.append(" "); //$NON-NLS-1$
+				}
 				output.append("[]"); //$NON-NLS-1$
 			}
 		}
@@ -511,6 +569,22 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 // SH}
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
+			if (this.annotations != null) {
+				int annotationsLength = this.annotations.length;
+				for (int i = 0; i < annotationsLength; i++)
+					this.annotations[i].traverse(visitor, scope);
+			}
+			if (this.annotationsOnDimensions != null) {
+				for (int i = 0, max = this.annotationsOnDimensions.length; i < max; i++) {
+					Annotation[] annotations2 = this.annotationsOnDimensions[i];
+					if (annotations2 != null) {
+						for (int j = 0, max2 = annotations2.length; j < max2; j++) {
+							Annotation annotation = annotations2[j];
+							annotation.traverse(visitor, scope);
+						}
+					}
+				}
+			}
 			for (int i = 0, max = this.typeArguments.length; i < max; i++) {
 				this.typeArguments[i].traverse(visitor, scope);
 			}
@@ -520,6 +594,20 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
 		if (visitor.visit(this, scope)) {
+			if (this.annotations != null) {
+				int annotationsLength = this.annotations.length;
+				for (int i = 0; i < annotationsLength; i++)
+					this.annotations[i].traverse(visitor, scope);
+			}
+			if (this.annotationsOnDimensions != null) {
+				for (int i = 0, max = this.annotationsOnDimensions.length; i < max; i++) {
+					Annotation[] annotations2 = this.annotationsOnDimensions[i];
+					for (int j = 0, max2 = annotations2.length; j < max2; j++) {
+						Annotation annotation = annotations2[j];
+						annotation.traverse(visitor, scope);
+					}
+				}
+			}
 			for (int i = 0, max = this.typeArguments.length; i < max; i++) {
 				this.typeArguments[i].traverse(visitor, scope);
 			}

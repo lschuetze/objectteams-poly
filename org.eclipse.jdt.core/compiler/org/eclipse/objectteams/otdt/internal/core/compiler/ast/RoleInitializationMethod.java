@@ -88,7 +88,7 @@ public class RoleInitializationMethod extends MethodDeclaration implements IOTCo
 	 */
 	public RoleInitializationMethod(CompilationResult compilationResult) {
 		super(compilationResult);
-		this.returnType = TypeReference.baseTypeReference(TypeIds.T_void, 0);
+		this.returnType = TypeReference.baseTypeReference(TypeIds.T_void, 0, null);
 		this.selector = INIT_METHOD_NAME;
 		this.bits |= ASTNode.NeedFreeReturn;
 		this.isGenerated = true;

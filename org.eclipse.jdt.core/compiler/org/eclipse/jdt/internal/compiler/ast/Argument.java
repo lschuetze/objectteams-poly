@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -41,7 +45,22 @@ public class Argument extends LocalDeclaration {
 		this.declarationSourceEnd = (int) posNom;
 		this.modifiers = modifiers;
 		this.type = tr;
+		if (tr != null) {
+			this.bits |= (tr.bits & ASTNode.HasTypeAnnotations);
+		}
 		this.bits |= (IsLocalDeclarationReachable | IsArgument);
+	}
+
+	public Argument(char[] name, long posNom, TypeReference tr, int modifiers, boolean typeElided) {
+
+		super(name, (int) (posNom >>> 32), (int) posNom);
+		this.declarationSourceEnd = (int) posNom;
+		this.modifiers = modifiers;
+		this.type = tr;
+		if (tr != null) {
+			this.bits |= (tr.bits & ASTNode.HasTypeAnnotations);
+		}
+		this.bits |= (IsLocalDeclarationReachable | IsArgument | IsTypeElided);
 	}
 
 //{ObjectTeams: consistent updating of name
@@ -128,6 +147,10 @@ public class Argument extends LocalDeclaration {
 		return (this.bits & ASTNode.IsArgument) != 0 ? PARAMETER : LOCAL_VARIABLE;
 	}
 
+	public boolean isArgument() {
+		return true;
+	}
+
 	public boolean isVarArgs() {
 		return this.type != null &&  (this.type.bits & IsVarArgs) != 0;
 	}
@@ -136,7 +159,10 @@ public class Argument extends LocalDeclaration {
 
 		printIndent(indent, output);
 		printModifiers(this.modifiers, output);
-		if (this.annotations != null) printAnnotations(this.annotations, output);
+		if (this.annotations != null) {
+			printAnnotations(this.annotations, output);
+			output.append(' ');
+		}
 
 		if (this.type == null) {
 			output.append("<no type> "); //$NON-NLS-1$

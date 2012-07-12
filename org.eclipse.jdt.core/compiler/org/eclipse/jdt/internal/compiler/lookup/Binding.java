@@ -4,8 +4,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Binding.java 23405 2010-02-03 17:02:18Z stephan $
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -43,10 +46,12 @@ public abstract class Binding {
 	public static final int GENERIC_TYPE = TYPE | ASTNode.Bit12;
 	public static final int TYPE_PARAMETER = TYPE | ASTNode.Bit13;
 	public static final int INTERSECTION_TYPE = TYPE | ASTNode.Bit14;
+	// jsr 308
+	public static final int TYPE_USE = TYPE | ASTNode.Bit15;
 
 //{ObjectTeams
-	public static final int BINDING = ASTNode.Bit15; //callin/callout-Binding
-	public static final int PRECEDENCE = ASTNode.Bit16; // binding for a precedence declaration
+	public static final int BINDING = ASTNode.Bit16; //callin/callout-Binding
+	public static final int PRECEDENCE = ASTNode.Bit17; // binding for a precedence declaration
 //Markus Witte + SH}
 
 	// Shared binding collections

@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -981,20 +985,21 @@ protected void flushElementStack() {
 /*
  * Build specific type reference nodes in case the cursor is located inside the type reference
  */
-protected TypeReference getTypeReference(int dim) {
+protected TypeReference getUnannotatedTypeReference(int dim) {
 //{ObjectTeams: wrap to introduce 2nd parameter
-	return getTypeReference(dim, false);  
+	return getUnannotatedTypeReference(dim, false);  
 }
-protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
+protected TypeReference getUnannotatedTypeReference(int dim, boolean liftingTypeAllowed) {
 // orig:
 	int index;
 
 	/* no need to take action if not inside completed identifiers */
 	if ((index = indexOfAssistIdentifier(true)) < 0) {
-/*
-		return super.getTypeReference(dim);
- :giro */
-		return super.getTypeReference(dim, liftingTypeAllowed);
+// orig: FIXME
+		return super.getUnannotatedTypeReference(dim);
+// :giro */
+// OT PREVIOUS:
+//		return super.getUnannotatedTypeReference(dim, liftingTypeAllowed);
 // SH}
 	}
 	int length = this.identifierLengthStack[this.identifierLengthPtr];
@@ -1801,6 +1806,9 @@ protected boolean resumeAfterRecovery() {
 	this.astLengthPtr = -1;
 	this.expressionPtr = -1;
 	this.expressionLengthPtr = -1;
+	this.unattachedAnnotationPtr = -1;
+	this.typeAnnotationLengthPtr = -1;
+	this.typeAnnotationPtr = -1;
 	this.identifierPtr = -1;
 	this.identifierLengthPtr	= -1;
 	this.intPtr = -1;

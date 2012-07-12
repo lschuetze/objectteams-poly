@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -865,15 +869,24 @@ protected TypeReference copyDims(TypeReference typeRef, int dim) {
 		this.nodeSet.addTrustedMatch(result, true);
 	return result;
 }
-protected TypeReference getTypeReference(int dim) {
-//{ObjectTeams: wrap to introduce 2nd parameter
-	return getTypeReference(dim, false);  
+protected TypeReference copyDims(TypeReference typeRef, int dim, Annotation [][] annotationsOnDimensions) {
+	TypeReference result = super.copyDims(typeRef, dim, annotationsOnDimensions);
+	 if (this.nodeSet.removePossibleMatch(typeRef) != null)
+		this.nodeSet.addPossibleMatch(result);
+	 else if (this.nodeSet.removeTrustedMatch(typeRef) != null)
+		this.nodeSet.addTrustedMatch(result, true);
+	return result;
 }
-protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
-/*orig:
-	TypeReference typeRef = super.getTypeReference(dim);
- :giro */
-	TypeReference typeRef = super.getTypeReference(dim, liftingTypeAllowed);
+protected TypeReference getUnannotatedTypeReference(int dim) {
+//{ObjectTeams: wrap to introduce 2nd parameter
+	return getUnannotatedTypeReference(dim, false);  
+}
+protected TypeReference getUnannotatedTypeReference(int dim, boolean liftingTypeAllowed) {
+// FIXME:
+//*orig:
+	TypeReference typeRef = super.getUnannotatedTypeReference(dim);
+// OT previous:
+//	TypeReference typeRef = super.getUnannotatedTypeReference(dim, liftingTypeAllowed);
 // SH}
 	if (this.patternFineGrain == 0) {
 		this.patternLocator.match(typeRef, this.nodeSet); // NB: Don't check container since type reference can happen anywhere

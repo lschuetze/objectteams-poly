@@ -1,11 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: QualifiedTypeReference.java 23404 2010-02-03 14:10:22Z stephan $
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -58,6 +61,18 @@ public class QualifiedTypeReference extends TypeReference {
 		//warning : the new type ref has a null binding
 		return new ArrayQualifiedTypeReference(this.tokens, dim, this.sourcePositions);
 	}
+	
+	public TypeReference copyDims(int dim, Annotation[][] annotationsOnDimensions) {
+		//return a type reference copy of me with some dimensions
+		//warning : the new type ref has a null binding
+		ArrayQualifiedTypeReference arrayQualifiedTypeReference = new ArrayQualifiedTypeReference(this.tokens, dim, annotationsOnDimensions, this.sourcePositions);
+		arrayQualifiedTypeReference.bits |= (this.bits & ASTNode.HasTypeAnnotations);
+		if (annotationsOnDimensions != null) {
+			arrayQualifiedTypeReference.bits |= ASTNode.HasTypeAnnotations;
+		}
+		return arrayQualifiedTypeReference;
+	}
+
 //{ObjectTeams:
 	/**
 	 * Try to resolve this type reference as an anchored type "t.R".
@@ -216,7 +231,10 @@ public class QualifiedTypeReference extends TypeReference {
 	}
 
 	public StringBuffer printExpression(int indent, StringBuffer output) {
-
+		if (this.annotations != null) {
+			printAnnotations(this.annotations, output);
+			output.append(' ');
+		}
 		for (int i = 0; i < this.tokens.length; i++) {
 			if (i > 0) output.append('.');
 //{ObjectTeams: suppress prefix:
@@ -230,14 +248,24 @@ public class QualifiedTypeReference extends TypeReference {
 	}
 
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
-
-		visitor.visit(this, scope);
+		if (visitor.visit(this, scope)) {
+			if (this.annotations != null) {
+				int annotationsLength = this.annotations.length;
+				for (int i = 0; i < annotationsLength; i++)
+					this.annotations[i].traverse(visitor, scope);
+			}
+		}
 		visitor.endVisit(this, scope);
 	}
 
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
-
-		visitor.visit(this, scope);
+		if (visitor.visit(this, scope)) {
+			if (this.annotations != null) {
+				int annotationsLength = this.annotations.length;
+				for (int i = 0; i < annotationsLength; i++)
+					this.annotations[i].traverse(visitor, scope);
+			}
+		}
 		visitor.endVisit(this, scope);
 	}
 }

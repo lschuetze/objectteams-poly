@@ -285,12 +285,6 @@ TypeInternal ::= PrimitiveType
 /.$putCase consumePrimitiveType(); $break ./
 TypeInternal -> ReferenceType0
 /:$readableName Type:/
--- {ObjectTeams
-Type -> LiftingType
-Type -> ArrayLiftingType
-Type -> InvalidDeclaredArrayLifting
--- Markus Witte}
-/:$readableName Type:/
 
 PrimitiveType -> NumericType
 /:$readableName PrimitiveType:/
@@ -383,23 +377,19 @@ GenericType ::= ClassOrInterface '<' '>'
 /:$compliance 1.7:/
 
 -- {ObjectTeams: "Base as Role" types:
+LiftingTypeopt ::= $empty
 
-LiftingType ::= ClassType 'as' ClassType
+LiftingTypeopt ::= 'as' Name DimsoptAnnotsopt
 /.$putCase consumeLiftingType(); $break ./
 /:$readableName LiftingType:/
 
-ArrayLiftingType ::= ArrayType 'as' ArrayType
-/.$putCase consumeLiftingTypeArray(); $break ./
-/:$readableName ArrayLiftingType:/
+LiftingTypeopt ::= 'as' GenericType DimsoptAnnotsopt
+/.$putCase consumeLiftingType(); $break ./
+/:$readableName LiftingType:/
 
--- handle invalid array liftings: "Type as Array" and "Array as Type"
-InvalidDeclaredArrayLifting ::= ClassType 'as' ArrayType
-/.$putCase consumeLiftingTypeArrayInvalid(); $break ./
-/:$readableName InvalidDeclaredArrayLifting:/
-
-InvalidDeclaredArrayLifting ::= ArrayType 'as' ClassType
-/.$putCase consumeLiftingTypeArrayInvalid(); $break ./
-/:$readableName InvalidDeclaredArrayLifting:/
+LiftingTypeopt ::= 'as' GenericTypeDotName DimsoptAnnotsopt
+/.$putCase consumeLiftingType(); $break ./
+/:$readableName LiftingType:/
 -- SH}
 
 -- {ObjectTeams: "base.R" types:
@@ -919,24 +909,25 @@ FormalParameter ::= Modifiersopt PrimitiveType DimsoptAnnotsopt VariableDeclarat
 FormalParameter ::= Modifiersopt PrimitiveType DimsoptAnnotsopt '...' VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(true); $break ./
 /:$compliance 1.5:/
-FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt PotentialNameArray VariableDeclaratorIdOrThis
+--{ObjectTeams: inserted LiftingTypeopt:
+FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt LiftingTypeopt PotentialNameArray VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(false); $break ./
-FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt PotentialNameArray '...' VariableDeclaratorIdOrThis
+FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt LiftingTypeopt PotentialNameArray '...' VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(true); $break ./
 /:$compliance 1.5:/
-FormalParameter ::= Modifiersopt GenericType DimsoptAnnotsopt VariableDeclaratorIdOrThis
+FormalParameter ::= Modifiersopt GenericType DimsoptAnnotsopt LiftingTypeopt VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(false); $break ./
-FormalParameter ::= Modifiersopt GenericType DimsoptAnnotsopt '...' VariableDeclaratorIdOrThis
+FormalParameter ::= Modifiersopt GenericType DimsoptAnnotsopt LiftingTypeopt '...' VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(true); $break ./
 /:$compliance 1.5:/
-FormalParameter ::= Modifiersopt GenericTypeDotName DimsoptAnnotsopt VariableDeclaratorIdOrThis
+FormalParameter ::= Modifiersopt GenericTypeDotName DimsoptAnnotsopt LiftingTypeopt VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(false); $break ./
-FormalParameter ::= Modifiersopt GenericTypeDotName DimsoptAnnotsopt '...' VariableDeclaratorIdOrThis
+FormalParameter ::= Modifiersopt GenericTypeDotName DimsoptAnnotsopt LiftingTypeopt '...' VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(true); $break ./
 /:$readableName FormalParameter:/
 /:$compliance 1.5:/
 /:$recovery_template Identifier Identifier:/
-
+-- SH}
 CatchFormalParameter ::= Modifiersopt CatchType VariableDeclaratorId
 /.$putCase consumeCatchFormalParameter(); $break ./
 /:$readableName FormalParameter:/
@@ -1051,8 +1042,43 @@ CalloutParameterMappingList ::= CalloutParameterMappingList ',' ParameterMapping
 /.$putCase consumeParameterMappingList(); $break ./
 /:$readableName CalloutParameterMappingList:/
 
-ParameterMapping ::= Expression '->' 'Identifier'
+ParameterMapping ::= ExpressionNoLambda '->' 'Identifier'
 /.$putCase consumeParameterMappingOut(); $break ./
+
+-- SYNTAX CHANGE TO AVOID CONFLICT WITH JSR-335: to allow all expressions on the LHS incl. lambda use a different binding token
+ParameterMapping ::= Expression '=>' 'Identifier'
+/.$putCase consumeParameterMappingOut(); $break ./
+
+-- (INCOMPLETE) SUBSET OF EXPRESSION PERMISSIBLE WITH OLD BINDING TOKEN '->':
+ExpressionNoLambda -> ArrayCreationWithArrayInitializer
+ExpressionNoLambda -> ArrayCreationWithoutArrayInitializer
+/:$readableName Expression:/
+ExpressionNoLambda -> ReferenceExpression
+ExpressionNoLambda -> Literal
+ExpressionNoLambda ::= 'this'
+/.$putCase consumePrimaryNoNewArrayThis(); $break ./
+ExpressionNoLambda ::= PushLPAREN Expression_NotName PushRPAREN 
+/.$putCase consumePrimaryNoNewArray(); $break ./
+ExpressionNoLambda ::= PushLPAREN Name PushRPAREN 
+/.$putCase consumePrimaryNoNewArrayWithName(); $break ./
+ExpressionNoLambda -> ClassInstanceCreationExpression
+ExpressionNoLambda -> BaseConstructorExpression
+ExpressionNoLambda -> FieldAccess
+ExpressionNoLambda ::= Name '.' 'this'
+/.$putCase consumePrimaryNoNewArrayNameThis(); $break ./
+ExpressionNoLambda ::= Name '.' 'super'
+/.$putCase consumePrimaryNoNewArrayNameSuper(); $break ./
+ExpressionNoLambda ::= Name '.' 'class'
+/.$putCase consumePrimaryNoNewArrayName(); $break ./
+ExpressionNoLambda ::= Name Dims '.' 'class'
+/.$putCase consumePrimaryNoNewArrayArrayType(); $break ./
+ExpressionNoLambda ::= PrimitiveType Dims '.' 'class'
+/.$putCase consumePrimaryNoNewArrayPrimitiveArrayType(); $break ./
+ExpressionNoLambda ::= PrimitiveType '.' 'class'
+/.$putCase consumePrimaryNoNewArrayPrimitiveType(); $break ./
+ExpressionNoLambda -> MethodInvocation
+ExpressionNoLambda -> ArrayAccess
+
 
 ParameterMapping ::= 'Identifier' '<-' ForceBaseIsIdentifier Expression RestoreBaseKeyword
 /.$putCase consumeParameterMappingIn(); $break ./
@@ -1187,7 +1213,7 @@ BaseMethodSpecLong ::= MethodSpecNamePlus FormalParameterListopt MethodHeaderRig
 /.$putCase consumeMethodSpecLong(true); $break ./
 /:$readableName MethodSpecLong:/
 
-MethodSpecNamePlus ::= Modifiersopt Type '+' 'Identifier'  '('
+MethodSpecNamePlus ::= Modifiersopt Type0 '+' 'Identifier'  '('
 /.$putCase consumeMethodHeaderName(false); $break ./
 /:$readableName MethodSpecName:/
 

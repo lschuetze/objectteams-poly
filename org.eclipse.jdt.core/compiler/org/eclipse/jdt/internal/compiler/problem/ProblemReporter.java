@@ -4,7 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ProblemReporter.java 23405 2010-02-03 17:02:18Z stephan $
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -21,6 +24,7 @@
  *								bug 365531 - [compiler][null] investigate alternative strategy for internally encoding nullness defaults
  *								bug 365859 - [compiler][null] distinguish warnings based on flow analysis vs. null annotations
  *								bug 374605 - Unreasonable warning for enum-based switch statements
+ *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
 
@@ -74,6 +78,7 @@ import org.eclipse.jdt.internal.compiler.ast.Initializer;
 import org.eclipse.jdt.internal.compiler.ast.InstanceOfExpression;
 import org.eclipse.jdt.internal.compiler.ast.JavadocSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.LabeledStatement;
+import org.eclipse.jdt.internal.compiler.ast.LambdaExpression;
 import org.eclipse.jdt.internal.compiler.ast.Literal;
 import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MemberValuePair;
@@ -86,6 +91,7 @@ import org.eclipse.jdt.internal.compiler.ast.QualifiedAllocationExpression;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedNameReference;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Reference;
+import org.eclipse.jdt.internal.compiler.ast.ReferenceExpression;
 import org.eclipse.jdt.internal.compiler.ast.ReturnStatement;
 import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.SingleTypeReference;
@@ -1727,6 +1733,23 @@ public void disallowedTargetForAnnotation(Annotation annotation) {
 		annotation.sourceStart,
 		annotation.sourceEnd);
 }
+public void explitAnnotationTargetRequired(Annotation annotation) {
+	int kind = annotation.recipient.kind();
+	if (kind == Binding.TYPE_USE) {
+		this.handle(IProblem.ExplicitAnnotationTargetRequired,
+			new String[] {new String(annotation.resolvedType.readableName())},
+			new String[]{new String(TypeConstants.TYPE_USE_TARGET)},
+			annotation.sourceStart,
+			annotation.sourceEnd);
+	}
+	else if (kind == Binding.TYPE_PARAMETER) {
+		this.handle(IProblem.ExplicitAnnotationTargetRequired,
+				new String[] {new String(annotation.resolvedType.readableName())},
+				new String[]{new String(TypeConstants.TYPE_PARAMETER_TARGET)},
+				annotation.sourceStart,
+				annotation.sourceEnd);
+	}
+}
 public void polymorphicMethodNotBelow17(ASTNode node) {
 	this.handle(
 			IProblem.PolymorphicMethodNotBelow17,
@@ -2787,11 +2810,13 @@ public void illegalModifierForInterfaceField(FieldDeclaration fieldDecl) {
 		fieldDecl.sourceStart,
 		fieldDecl.sourceEnd);
 }
-public void illegalModifierForInterfaceMethod(AbstractMethodDeclaration methodDecl) {
+public void illegalModifierForInterfaceMethod(AbstractMethodDeclaration methodDecl, boolean isDefaultMethod) {
 	// cannot include parameter types since they are not resolved yet
 	// and the error message would be too long
 	this.handle(
-		IProblem.IllegalModifierForInterfaceMethod,
+		isDefaultMethod 
+			? IProblem.IllegalModifierForInterfaceDefaultMethod 
+			: IProblem.IllegalModifierForInterfaceMethod,
 		new String[] {
 			new String(methodDecl.selector)
 		},
@@ -2850,6 +2875,14 @@ public void illegalModifierForMethod(AbstractMethodDeclaration methodDecl) {
 		},
 		methodDecl.sourceStart,
 		methodDecl.sourceEnd);
+}
+public void invalidLocationForModifiers(ASTNode location) {
+	this.handle(
+			IProblem.InvalidLocationForModifiers,
+			NoArgument,
+			NoArgument,
+			location.sourceStart,
+			location.sourceEnd);
 }
 public void illegalModifierForVariable(LocalDeclaration localDecl, boolean complainAsArgument) {
 	String[] arguments = new String[] {new String(localDecl.name)};
@@ -2918,6 +2951,48 @@ public void illegalVararg(Argument argType, AbstractMethodDeclaration methodDecl
 		arguments,
 		argType.sourceStart,
 		argType.sourceEnd);
+}
+public void illegalThis(Argument argument, AbstractMethodDeclaration method, long sourceLevel) {
+	String[] arguments = NoArgument;
+	this.handle(
+		sourceLevel <= ClassFileConstants.JDK1_7 ?  IProblem.ExplicitThisParameterNotBelow18 : IProblem.IllegalDeclarationOfThisParameter,
+		arguments,
+		arguments,
+		argument.sourceStart,
+		argument.sourceEnd);
+}
+public void illegalThis(Argument argument) {
+	String[] arguments = NoArgument;
+	this.handle(
+		IProblem.ExplicitThisParameterNotInLambda,
+		arguments,
+		arguments,
+		argument.sourceStart,
+		argument.sourceEnd);
+}
+public void defaultMethodsNotBelow18(MethodDeclaration md) {
+	this.handle(
+			IProblem.DefaultMethodNotBelow18,
+			NoArgument,
+			NoArgument,
+			md.bodyStart,
+			md.bodyEnd);
+}
+public void referenceExpressionsNotBelow18(ReferenceExpression rexp) {
+	this.handle(
+			rexp.isMethodReference() ? IProblem.MethodReferenceNotBelow18 : IProblem.ConstructorReferenceNotBelow18,
+			NoArgument,
+			NoArgument,
+			rexp.sourceStart,
+			rexp.sourceEnd);
+}
+public void lambdaExpressionsNotBelow18(LambdaExpression lexp) {
+	this.handle(
+			IProblem.LambdaExpressionNotBelow18,
+			NoArgument,
+			NoArgument,
+			lexp.sourceStart,
+			lexp.sourceEnd);
 }
 public void illegalVisibilityModifierCombinationForField(ReferenceBinding type, FieldDeclaration fieldDecl) {
 	String[] arguments = new String[] {new String(fieldDecl.name)};
@@ -4732,6 +4807,41 @@ public void invalidUsageOfVarargs(Argument argument) {
 		NoArgument,
 		argument.type.sourceStart,
 		argument.sourceEnd);
+}
+
+public void invalidUsageOfTypeAnnotations(Annotation annotation) {
+	this.handle(
+			IProblem.InvalidUsageOfTypeAnnotations,
+			NoArgument,
+			NoArgument,
+			annotation.sourceStart,
+			annotation.sourceEnd);
+}
+
+public void illegalReceiverAnnotations(Annotation first, Annotation last) {
+	this.handle(
+			IProblem.InvalidUsageOfReceiverAnnotations,
+			NoArgument,
+			NoArgument,
+			first.sourceStart,
+			last.sourceEnd);	
+}
+
+public void misplacedTypeAnnotations(Annotation first, Annotation last) {
+	this.handle(
+			IProblem.MisplacedTypeAnnotations,
+			NoArgument,
+			NoArgument,
+			first.sourceStart,
+			last.sourceEnd);	
+}
+public void illegalUsageOfTypeAnnotations(Annotation annotation) {
+	this.handle(
+			IProblem.IllegalUsageOfTypeAnnotations,
+			NoArgument,
+			NoArgument,
+			annotation.sourceStart,
+			annotation.sourceEnd);	
 }
 public void isClassPathCorrect(char[][] wellKnownTypeName, CompilationUnitDeclaration compUnitDecl, Object location) {
 	this.referenceContext = compUnitDecl;
@@ -7461,6 +7571,7 @@ private void syntaxError(
 
 	String[] arguments;
 	if(expectedToken != null) {
+		expectedToken = replaceIfSynthetic(expectedToken);
 		arguments = new String[] {eTokenName, expectedToken};
 	} else {
 		arguments = new String[] {eTokenName};
@@ -7471,6 +7582,19 @@ private void syntaxError(
 		arguments,
 		startPosition,
 		endPosition);
+}
+private String replaceIfSynthetic(String token) {
+	/* Java 8 grammar changes use some synthetic tokens to make the grammar LALR(1). These tokens should not be exposed in messages
+	   as it would make no sense to the programmer whatsoever. Replace such artificial tokens with some "suitable"  alternative. At
+	   the moment, there are two synthetic tokens that need such massaging viz : "BeginLambda" and "BeginTypeArguments". There is a
+	   third synthetic token "ElidedSemicolonAndRightBrace" that we don't expect to show up in messages since it is manufactured by
+	   the parser automatically.
+	*/
+	if (token.equals("BeginTypeArguments")) //$NON-NLS-1$
+		return "."; //$NON-NLS-1$
+	if (token.equals("BeginLambda")) //$NON-NLS-1$
+		return "("; //$NON-NLS-1$
+	return token;
 }
 public void task(String tag, String message, String priority, int start, int end){
 	this.handle(
@@ -12801,5 +12925,15 @@ public void missingNonNullByDefaultAnnotation(TypeDeclaration type) {
 			compUnitDecl.currentPackage.sourceStart,
 			compUnitDecl.currentPackage.sourceEnd);
 	}
+}
+
+public void illegalModifiersForElidedType(Argument argument) {
+	String[] arg = new String[] {new String(argument.name)};
+	this.handle(
+			IProblem.IllegalModifiersForElidedType,
+			arg,
+			arg,
+			argument.declarationSourceStart,
+			argument.declarationSourceEnd);
 }
 }

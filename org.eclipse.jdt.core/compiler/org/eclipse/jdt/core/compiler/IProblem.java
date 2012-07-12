@@ -4,7 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: IProblem.java 23306 2010-01-23 13:45:42Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -152,6 +155,7 @@
  *									UninitializedLocalVariableHintMissingDefault
  *									UninitializedBlankFinalFieldHintMissingDefault
  *									ShouldReturnValueHintMissingDefault
+ *									IllegalModifierForInterfaceDefaultMethod
  *******************************************************************************/
 package org.eclipse.jdt.core.compiler;
 
@@ -1292,7 +1296,33 @@ void setSourceStart(int sourceStart);
 	int UnusedWarningToken = Internal + 635;
 	/** @since 3.6 */
 	int MissingOverrideAnnotationForInterfaceMethodImplementation = MethodRelated + 636;
-
+	/** @since 3.9 */
+    int InvalidUsageOfTypeAnnotations = Syntax + Internal + 637;
+    /** @since 3.9 */
+    int InvalidUsageOfReceiverAnnotations = Syntax + Internal + 638;
+    /** @since 3.9 */
+    int MisplacedTypeAnnotations = Syntax + Internal + 639;
+    /** @since 3.9 */
+    int InvalidLocationForModifiers = Syntax + Internal + 640;
+    /** @since 3.9*/
+    int IllegalUsageOfTypeAnnotations = Internal + Syntax + 641;
+    /** @since 3.9*/
+    int IllegalDeclarationOfThisParameter = Internal + Syntax + 642;
+    /** @since 3.9*/
+    int ExplicitThisParameterNotBelow18 = Internal + Syntax + 643;
+    /** @since 3.9*/
+    int DefaultMethodNotBelow18 = Internal + Syntax + 644;
+    /** @since 3.9*/
+    int LambdaExpressionNotBelow18 = Internal + Syntax + 645;
+    /** @since 3.9*/
+    int MethodReferenceNotBelow18 = Internal + Syntax + 646;
+    /** @since 3.9*/
+    int ConstructorReferenceNotBelow18 = Internal + Syntax + 647;
+    /** @since 3.9*/
+    int ExplicitThisParameterNotInLambda = Internal + Syntax + 648;
+    /** @since 3.9 */
+    int ExplicitAnnotationTargetRequired = TypeRelated + 649;
+    
 	/**
 	 * More problems in generics
 	 */
@@ -1508,6 +1538,15 @@ void setSourceStart(int sourceStart);
 	int SpecdNonNullLocalVariableComparisonYieldsFalse = Internal + 932;
 	/** @since 3.8 */
 	int RequiredNonNullButProvidedSpecdNullable = Internal + 933;
+	
+	
+	// Java 8 work
+	/** @since 3.9 */
+	int IllegalModifiersForElidedType = Internal + 1001;
+
+	// default methods:
+	/** @since 3.9 */
+	int IllegalModifierForInterfaceDefaultMethod = MethodRelated + 1050;
 
 	/**
 	 * External problems -- These are problems defined by other plugins

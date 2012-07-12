@@ -29,7 +29,7 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
-import org.eclipse.jdt.internal.compiler.ast.ArrayTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.CharLiteral;
 import org.eclipse.jdt.internal.compiler.ast.DoubleLiteral;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
@@ -97,8 +97,16 @@ public class LiftingTypeReference extends TypeReference {
 	public TypeReference copyDims(int dim){
 		//return a type reference copy of me with some dimensions
 		//warning : the new type ref has a null binding
+		throw new InternalCompilerError("Method not applicable");
+//		return new ArrayTypeReference(this.roleToken,dim,(((long)this.sourceStart)<<32)+this.sourceEnd) ;
+	}
 
-		return new ArrayTypeReference(this.roleToken,dim,(((long)this.sourceStart)<<32)+this.sourceEnd) ;
+	@Override
+	public TypeReference copyDims(int dim, Annotation[][] annotationsOnDimensions) {
+		//return a type reference copy of me with some dimensions
+		//warning : the new type ref has a null binding
+		throw new InternalCompilerError("Method not applicable");
+		//return new ArrayTypeReference(this.roleToken,dim,annotationsOnDimensions,(((long)this.sourceStart)<<32)+this.sourceEnd) ;
 	}
 
 	// The binding is basically the baseReference's binding.

@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Matt McCutchen - partial fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=122995
@@ -41,8 +45,8 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 
 	// storage for internal flags (32 bits)				BIT USAGE
 	public final static int Bit1 = 0x1;					// return type (operator) | name reference kind (name ref) | add assertion (type decl) | useful empty statement (empty statement)
-	public final static int Bit2 = 0x2;					// return type (operator) | name reference kind (name ref) | has local type (type, method, field decl)
-	public final static int Bit3 = 0x4;					// return type (operator) | name reference kind (name ref) | implicit this (this ref)
+	public final static int Bit2 = 0x2;					// return type (operator) | name reference kind (name ref) | has local type (type, method, field decl) | if type elided (local)
+	public final static int Bit3 = 0x4;					// return type (operator) | name reference kind (name ref) | implicit this (this ref) | is argument(local)
 	public final static int Bit4 = 0x8;					// return type (operator) | first assignment to local (name ref,local decl) | undocumented empty block (block, type and method decl)
 	public final static int Bit5 = 0x10;					// value for return (expression) | has all method bodies (unit) | supertype ref (type ref) | resolved (field decl)
 	public final static int Bit6 = 0x20;					// depth (name ref, msg) | ignore need cast check (cast expression) | error in signature (method declaration/ initializer) | is recovered (annotation reference)
@@ -127,7 +131,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public static final int RestrictiveFlagMASK = Bit1|Bit2|Bit3;
 
 	// for local decls
+	public static final int IsTypeElided = Bit2;  // type elided lambda argument.
 	public static final int IsArgument = Bit3;
+	public static final int IsLocalDeclarationReachable = Bit31;
 
 	// for name refs or local decls
 	public static final int FirstAssignmentToLocal = Bit4;
@@ -148,8 +154,6 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public static final int DocumentedFallthrough = Bit30; // switch statement
 	public static final int DocumentedCasesOmitted = Bit31; // switch statement
 
-	// local decls
-	public static final int IsLocalDeclarationReachable = Bit31;
 
 	// try statements
 	public static final int IsSubRoutineEscaping = Bit15;
@@ -278,6 +282,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public static final int INVOCATION_ARGUMENT_UNCHECKED = 1;
 	public static final int INVOCATION_ARGUMENT_WILDCARD = 2;
 
+	// for all declarations that can contain type references that have type annotations
+	public static final int HasTypeAnnotations = Bit21;
+	
 	// for type reference (diamond case) - Java 7
 	public static final int IsUnionType = Bit30;
 	// Used to tag ParameterizedSingleTypeReference or ParameterizedQualifiedTypeReference when they are
@@ -578,8 +585,15 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public static StringBuffer printAnnotations(Annotation[] annotations, StringBuffer output) {
 		int length = annotations.length;
 		for (int i = 0; i < length; i++) {
-			annotations[i].print(0, output);
-			output.append(" "); //$NON-NLS-1$
+			if (i > 0) {
+				output.append(" "); //$NON-NLS-1$
+			}
+			Annotation annotation2 = annotations[i];
+			if (annotation2 != null) {
+				annotation2.print(0, output);
+			} else {
+				output.append('?');
+			}
 		}
 		return output;
 	}
@@ -691,6 +705,25 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 						local.setAnnotations(annotations, scope);
 					}
 					break;
+				case Binding.TYPE_PARAMETER :
+					// jsr308
+					ReferenceBinding typeVariableBinding = (ReferenceBinding) recipient;
+					if ((typeVariableBinding.tagBits & TagBits.AnnotationResolved) != 0) return;
+					typeVariableBinding.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					if (length > 0) {
+						annotations = new AnnotationBinding[length];
+						typeVariableBinding.setAnnotations(annotations);
+					}
+					break;
+				case Binding.TYPE_USE :
+					ReferenceBinding typeUseBinding = (ReferenceBinding) recipient;
+					if ((typeUseBinding.tagBits & TagBits.AnnotationResolved) != 0) return;
+					typeUseBinding.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					if (length > 0) {
+						annotations = new AnnotationBinding[length];
+						typeUseBinding.setAnnotations(annotations);
+					}
+					break;
 				default :
 					return;
 			}
@@ -787,6 +820,122 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 		}
 	}
 
+	/**
+	 * Resolve annotations, and check duplicates, answers combined tagBits
+	 * for recognized standard annotations
+	 */
+	public static void resolveAnnotations(ClassScope scope, Annotation[] sourceAnnotations, Binding recipient) {
+		AnnotationBinding[] annotations = null;
+		int length = sourceAnnotations == null ? 0 : sourceAnnotations.length;
+		if (recipient != null) {
+			switch (recipient.kind()) {
+				case Binding.PACKAGE :
+					PackageBinding packageBinding = (PackageBinding) recipient;
+					if ((packageBinding.tagBits & TagBits.AnnotationResolved) != 0) return;
+					packageBinding.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					break;
+				case Binding.TYPE :
+				case Binding.GENERIC_TYPE :
+					ReferenceBinding type = (ReferenceBinding) recipient;
+					if ((type.tagBits & TagBits.AnnotationResolved) != 0) return;
+					type.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					if (length > 0) {
+						annotations = new AnnotationBinding[length];
+						type.setAnnotations(annotations);
+					}
+					break;
+				case Binding.METHOD :
+					MethodBinding method = (MethodBinding) recipient;
+					if ((method.tagBits & TagBits.AnnotationResolved) != 0) return;
+					method.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					if (length > 0) {
+						annotations = new AnnotationBinding[length];
+						method.setAnnotations(annotations);
+					}
+					break;
+				case Binding.FIELD :
+					FieldBinding field = (FieldBinding) recipient;
+					if ((field.tagBits & TagBits.AnnotationResolved) != 0) return;
+					field.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					if (length > 0) {
+						annotations = new AnnotationBinding[length];
+						field.setAnnotations(annotations);
+					}
+					break;
+				case Binding.LOCAL :
+					LocalVariableBinding local = (LocalVariableBinding) recipient;
+					if ((local.tagBits & TagBits.AnnotationResolved) != 0) return;
+					local.tagBits |= (TagBits.AnnotationResolved | TagBits.DeprecatedAnnotationResolved);
+					if (length > 0) {
+						annotations = new AnnotationBinding[length];
+						local.setAnnotations(annotations, scope);
+					}
+					break;
+				default :
+					return;
+			}
+		}
+		if (sourceAnnotations == null)
+			return;
+		for (int i = 0; i < length; i++) {
+			Annotation annotation = sourceAnnotations[i];
+			final Binding annotationRecipient = annotation.recipient;
+			if (annotationRecipient != null && recipient != null) {
+				// only local and field can share annnotations
+				switch (recipient.kind()) {
+					case Binding.FIELD :
+						FieldBinding field = (FieldBinding) recipient;
+						field.tagBits = ((FieldBinding) annotationRecipient).tagBits;
+						break;
+					case Binding.LOCAL :
+						LocalVariableBinding local = (LocalVariableBinding) recipient;
+						local.tagBits = ((LocalVariableBinding) annotationRecipient).tagBits;
+						break;
+				}
+				if (annotations != null) {
+					// need to fill the instances array
+					annotations[0] = annotation.getCompilerAnnotation();
+					for (int j = 1; j < length; j++) {
+						Annotation annot = sourceAnnotations[j];
+						annotations[j] = annot.getCompilerAnnotation();
+					}
+				}
+				return;
+			} else {
+				annotation.recipient = recipient;
+				annotation.resolveType(scope);
+				// null if receiver is a package binding
+				if (annotations != null) {
+					annotations[i] = annotation.getCompilerAnnotation();
+				}
+			}
+		}
+		// check duplicate annotations
+		if (annotations != null) {
+			AnnotationBinding[] distinctAnnotations = annotations; // only copy after 1st duplicate is detected
+			for (int i = 0; i < length; i++) {
+				AnnotationBinding annotation = distinctAnnotations[i];
+				if (annotation == null) continue;
+				TypeBinding annotationType = annotation.getAnnotationType();
+				boolean foundDuplicate = false;
+				for (int j = i+1; j < length; j++) {
+					AnnotationBinding otherAnnotation = distinctAnnotations[j];
+					if (otherAnnotation == null) continue;
+					if (otherAnnotation.getAnnotationType() == annotationType) {
+						foundDuplicate = true;
+						if (distinctAnnotations == annotations) {
+							System.arraycopy(distinctAnnotations, 0, distinctAnnotations = new AnnotationBinding[length], 0, length);
+						}
+						distinctAnnotations[j] = null; // report it only once
+						scope.problemReporter().duplicateAnnotation(sourceAnnotations[j]);
+					}
+				}
+				if (foundDuplicate) {
+					scope.problemReporter().duplicateAnnotation(sourceAnnotations[i]);
+				}
+			}
+		}
+	}
 /**
  * Figures if @Deprecated annotation is specified, do not resolve entire annotations.
  */

@@ -5,6 +5,11 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - adapted for Object Teams
@@ -1867,7 +1872,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 
 	// JSR14-V10[2.4]: Not terminated consecutive declaration
 	// TODO (david) diagnosis message on error 3 sounds strange, doesn't it?
-	public void test0068() {
+	public void _test0068() {
 		this.runNegativeTest(
 			new String[] {
 				"test/X1.java",
@@ -1939,8 +1944,14 @@ public class GenericTypeTest extends AbstractComparableTest {
 			"----------\n" +
 			"1. ERROR in test\\X1.java (at line 3)\n" +
 			"	public class X1<A1>> {\n" +
+//{ObjectTeams: our diagnose parser suggests a different correction:
+/* orig:			
 			"	                  ^^\n" +
 			"Syntax error on token \">>\", > expected\n" +
+  :giro */
+			"	                ^^\n" + 
+			"Syntax error, insert \"< typeAnchor\" to complete AnchoredTypeParameter\n" + 
+// SH}
 			"----------\n"
 		);
 	}
@@ -2312,7 +2323,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 		);
 	}
 	// TODO (david) remove errors: insert dimension to complete array type
-	public void test0080() {
+	public void _test0080() {
 		this.runNegativeTest(
 			new String[] {
 				"test/X.java",
@@ -2399,7 +2410,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 		);
 	}
 	// TODO (david) remove error: insert dimension to complete array type
-	public void test0083() {
+	public void _test0083() {
 		this.runNegativeTest(
 			new String[] {
 				"test/X.java",
@@ -30415,7 +30426,7 @@ public void test0931() {
 		"----------\n");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=119238 - variation
-public void test0932() {
+public void _test0932() {
 	this.runNegativeTest(
 		new String[] {
 		"X.java",
@@ -37453,7 +37464,7 @@ public void test1096() {
 		null/* do not perform statements recovery */);
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=168232
-public void test1097() {
+public void _test1097() {
 	runNegativeTest(
 		// test directory preparation
 		new String[] { /* test files */
@@ -48324,7 +48335,7 @@ public void test1402()  throws Exception {
 		"----------\n");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=252120 - variation
-public void test1403()  throws Exception {
+public void _test1403()  throws Exception {
 	this.runNegativeTest(
 		new String[] {
 			"A.java",

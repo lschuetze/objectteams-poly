@@ -28,11 +28,6 @@
 JIKESPG_HOME=${JIKESPG_HOME:-/usr/bin}
 export JIKESPG_HOME
 
-# please adjust:
-JDTCORE_JAR=/home/local/eclipse-SDK-3.7/plugins/org.eclipse.jdt.core_3.7.0.v_B61.jar
-
-
-
 if test $# -ne 2
 then
 	echo "Achtung: JIKESPG_HOME muss KORREKT gesetzt sein!"
@@ -117,7 +112,7 @@ cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/Parser.java        
 cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/TerminalTokens.java           backup
 cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/ParserBasicInformation.java   backup
 cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/parser?.rsc                   backup
-cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/readableNames.properties      backup
+cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/readableNames.props	       backup
 
 cp $GRAMMAR output
 
@@ -239,11 +234,9 @@ cat TerminalTokens.java  | awk '{
 			print nextline ;
 		}
 		print nextline ;
-
 		while((getline nextline) == 1 ){
 			nextline ="";
 		}
-
 	} else {
 		print $0
 	}
@@ -253,9 +246,11 @@ cat TerminalTokens.java  | awk '{
 echo "Alles unnötige wegschneiden: javasym.java"
 cat javasym.java  | awk '{
 	if($0 ~ /^[ \t]*public final static int[ \t]*$/ ){
-		while((getline nextline) == 1 ){
+		while((getline nextline) == 1 && nextline !~ /^\}$/){
 			print nextline ;
 		}
+		print "\n\n\t// This alias is statically inserted by generateOTParser.sh:"
+		print "\tint TokenNameBINDOUT = TokenNameARROW;\n}\n" ;
 	}
 }
 ' > javasym_tmp.java
@@ -268,19 +263,7 @@ cd ..
 cd output
 
 cp  ../UpdateParserFiles.java .
-if [ -z ${JDTCORE_JAR} ]
-then
-  if test -f ${ECLIPSE_HOME}/plugins/org.eclipse.jdt.core_3.0.0/jdtcore.jar
-  then
-	JDTCORE_JAR=${ECLIPSE_HOME}/plugins/org.eclipse.jdt.core_3.0.0/jdtcore.jar
-  else
-    	echo "FEHLER: jdtcore.jar nicht gefunden!"
-	echo "Bitte Umgebungsvariable ECLIPSE_HOME setzen."
-    	exit
-  fi
-fi
-echo "Verwende JDT/Core aus ${pluginDir}/bin"
-#cp ${JDTCORE_JAR} .
+
 echo "UpdateParserFiles kompilieren"
 javac -classpath ${pluginDir}/bin UpdateParserFiles.java
 echo "Ressourcendateien erzeugen (*.rsc)"

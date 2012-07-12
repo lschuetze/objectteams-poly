@@ -4,7 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MethodScope.java 23405 2010-02-03 17:02:18Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -13,12 +16,16 @@
  *     Stephan Herrmann - Contributions for
  *								bug 349326 - [1.7] new warning for missing try-with-resources
  *								bug 374605 - Unreasonable warning for enum-based switch statements
+ *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
+ *								bug 382354 - [1.8][compiler] Compiler silent on conflicting modifier
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
+import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.flow.UnconditionalFlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.IrritantSet;
@@ -212,11 +219,20 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
   :giro */
 	if (declaringClass.isRegularInterface()) {
 // SH}
-		if ((realModifiers & ~(ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract)) != 0) {
+		int expectedModifiers = ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
+		// 9.4 got updated for JSR 335 (default methods):
+		boolean isDefaultMethod = (modifiers & ExtraCompilerModifiers.AccDefaultMethod) != 0; // no need to check validity, is done by the parser
+		if (compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8 && isDefaultMethod) {
+			expectedModifiers |= (ClassFileConstants.AccSynchronized | ClassFileConstants.AccStrictfp);
+		}
+		if ((realModifiers & ~expectedModifiers) != 0) {
 			if ((declaringClass.modifiers & ClassFileConstants.AccAnnotation) != 0)
 				problemReporter().illegalModifierForAnnotationMember((AbstractMethodDeclaration) this.referenceContext);
 			else
-				problemReporter().illegalModifierForInterfaceMethod((AbstractMethodDeclaration) this.referenceContext);
+				problemReporter().illegalModifierForInterfaceMethod((AbstractMethodDeclaration) this.referenceContext, isDefaultMethod);
+		}
+		if (isDefaultMethod && (modifiers & ClassFileConstants.AccAbstract) != 0) {
+			problemReporter().abstractMethodNeedingNoBody((AbstractMethodDeclaration) this.referenceContext);
 		}
 		return;
 	}
@@ -403,11 +419,16 @@ MethodBinding createMethod(AbstractMethodDeclaration method) {
 	} else {
 //{ObjectTeams: changed to isRegularInterface: role interfaces don't force public
 /*orig:
-		if (declaringClass.isInterface()) // interface or annotation type
+		if (declaringClass.isInterface()) {// interface or annotation type
  :giro */
-		if (declaringClass.isRegularInterface())
+		if (declaringClass.isRegularInterface()) {
 // SH}
-			modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
+			if (method.isDefaultMethod()) {
+				modifiers |= ClassFileConstants.AccPublic; // default method is not abstract
+			} else {
+				modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
+			}
+		}
 		method.binding =
 			new MethodBinding(modifiers, method.selector, null, null, null, declaringClass);
 		checkAndSetModifiersForMethod(method.binding);
@@ -424,12 +445,33 @@ MethodBinding createMethod(AbstractMethodDeclaration method) {
 
 	Argument[] argTypes = method.arguments;
 	int argLength = argTypes == null ? 0 : argTypes.length;
-	if (argLength > 0 && compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
-		if (argTypes[--argLength].isVarArgs())
+	long sourceLevel = compilerOptions().sourceLevel;
+	if (argLength > 0 && sourceLevel >= ClassFileConstants.JDK1_5) {
+		Argument argument = argTypes[--argLength];
+		if (argument.isVarArgs())
 			method.binding.modifiers |= ClassFileConstants.AccVarargs;
+		if (CharOperation.equals(argument.name, ConstantPool.This)) {
+			if (argLength != 0 || sourceLevel <= ClassFileConstants.JDK1_7) {
+				problemReporter().illegalThis(argument, method, sourceLevel);
+			}
+			if (argument.annotations != null) {
+				method.receiverAnnotations = argument.annotations;
+				method.bits |= ASTNode.HasTypeAnnotations;
+			}
+		}
 		while (--argLength >= 0) {
-			if (argTypes[argLength].isVarArgs())
-				problemReporter().illegalVararg(argTypes[argLength], method);
+			argument = argTypes[argLength];
+			if (argument.isVarArgs())
+				problemReporter().illegalVararg(argument, method);
+			if (CharOperation.equals(argument.name, ConstantPool.This)) {
+				if (argLength != 0 || sourceLevel <= ClassFileConstants.JDK1_7) {
+					problemReporter().illegalThis(argument, method, sourceLevel);
+				}
+				if (argument.annotations != null) {
+					method.receiverAnnotations = argument.annotations;
+					method.bits |= ASTNode.HasTypeAnnotations;
+				}
+			}	
 		}
 	}
 

@@ -111,7 +111,7 @@ public abstract class PotentialTranslationExpression extends Expression  impleme
 
 		                    this.expression = new CastExpression(
 		                            this.expression,
-		                            TypeReference.baseTypeReference(this.expectedType.id,0));
+		                            TypeReference.baseTypeReference(this.expectedType.id,0,null));
 		                    this.expression.constant = Constant.NotAConstant;
 		                    ((CastExpression)this.expression).checkCastTypesCompatibility(
 		                            scope,
