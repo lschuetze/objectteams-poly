@@ -46,7 +46,7 @@ public interface TerminalTokens {
 		TokenNameCOMMENT_JAVADOC = 1003;
 
 	int
-      TokenNameIdentifier = 14,
+      TokenNameIdentifier = 16,
       TokenNameabstract = 50,
       TokenNameassert = 88,
       TokenNameboolean = 33,
@@ -125,8 +125,8 @@ public interface TerminalTokens {
       TokenNamePLUS_PLUS = 4,
       TokenNameMINUS_MINUS = 5,
       TokenNameEQUAL_EQUAL = 20,
-      TokenNameLESS_EQUAL = 15,
-      TokenNameGREATER_EQUAL = 16,
+      TokenNameLESS_EQUAL = 14,
+      TokenNameGREATER_EQUAL = 15,
       TokenNameNOT_EQUAL = 21,
       TokenNameLEFT_SHIFT = 19,
       TokenNameRIGHT_SHIFT = 13,

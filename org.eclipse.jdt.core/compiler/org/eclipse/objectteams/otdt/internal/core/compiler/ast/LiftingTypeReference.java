@@ -103,10 +103,9 @@ public class LiftingTypeReference extends TypeReference {
 
 	@Override
 	public TypeReference copyDims(int dim, Annotation[][] annotationsOnDimensions) {
-		//return a type reference copy of me with some dimensions
-		//warning : the new type ref has a null binding
-		throw new InternalCompilerError("Method not applicable");
-		//return new ArrayTypeReference(this.roleToken,dim,annotationsOnDimensions,(((long)this.sourceStart)<<32)+this.sourceEnd) ;
+		this.baseReference = this.baseReference.copyDims(dim, annotationsOnDimensions);
+		// FIXME check consistency
+		return this;
 	}
 
 	// The binding is basically the baseReference's binding.
@@ -231,7 +230,7 @@ public class LiftingTypeReference extends TypeReference {
 	// faked argument, to avoid subsequent errors when resolving
 	// an invalid lifting call.
 	private TypeBinding invalidate(TypeBinding variableType) {
-	    if (this.fakedArgument != null) {
+	    if (this.fakedArgument != null && variableType != null) {
 	        int start = this.roleReference.sourceStart;
 	        int end   = this.roleReference.sourceEnd;
 

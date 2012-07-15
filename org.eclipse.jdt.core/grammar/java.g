@@ -379,18 +379,12 @@ GenericType ::= ClassOrInterface '<' '>'
 -- {ObjectTeams: "Base as Role" types:
 LiftingTypeopt ::= $empty
 
-LiftingTypeopt ::= 'as' Name DimsoptAnnotsopt
+LiftingTypeopt ::= 'as' BeginLiftingType Type
 /.$putCase consumeLiftingType(); $break ./
 /:$readableName LiftingType:/
 
-LiftingTypeopt ::= 'as' GenericType DimsoptAnnotsopt
-/.$putCase consumeLiftingType(); $break ./
-/:$readableName LiftingType:/
-
-LiftingTypeopt ::= 'as' GenericTypeDotName DimsoptAnnotsopt
-/.$putCase consumeLiftingType(); $break ./
-/:$readableName LiftingType:/
--- SH}
+BeginLiftingType ::= $empty
+/.$putCase consumeBeginLiftingType(); $break ./
 
 -- {ObjectTeams: "base.R" types:
 
