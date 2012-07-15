@@ -11487,6 +11487,8 @@ protected void consumeTypeAnchor(boolean haveBase) {
 		  newBaseReference()
 		: getUnspecifiedReference();
 	pushOnGenericsStack(new TypeAnchorReference(anchor, this.intStack[this.intPtr--]));
+	// anchor has not type annotations, yet it will be consumed in a context where type annotations are possible
+	pushOnTypeAnnotationLengthStack(0);
 }
 protected NameReference newBaseReference() {
 	return new SingleNameReference(IOTConstants._OT_BASE, (((long)this.intStack[this.intPtr--])<<32)+this.intStack[this.intPtr--]);
@@ -11509,6 +11511,8 @@ protected void consumeQualifiedBaseTypeAnchor() {
 	
 	Reference anchor = new QualifiedBaseReference(prefix, this.intStack[this.intPtr--], this.intStack[this.intPtr--]);
 	pushOnGenericsStack(new TypeAnchorReference(anchor, this.intStack[this.intPtr--]));
+	// anchor has not type annotations, yet it will be consumed in a context where type annotations are possible
+	pushOnTypeAnnotationLengthStack(0);
 }
 protected void consumeTypeValueParameter() {
 	// TypeParameter1 ::= TypeParameterHeader Identifier '>'
