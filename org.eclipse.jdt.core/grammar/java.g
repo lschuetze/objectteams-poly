@@ -386,6 +386,13 @@ LiftingTypeopt ::= 'as' BeginLiftingType Type
 BeginLiftingType ::= $empty
 /.$putCase consumeBeginLiftingType(); $break ./
 
+CatchLiftingTypeopt ::= $empty
+
+CatchLiftingTypeopt ::= 'as' Type
+/.$putCase consumeLiftingType(); $break ./
+/:$readableName LiftingType:/
+-- SH}
+
 -- {ObjectTeams: "base.R" types:
 
 BaseAnchoredType ::= 'base' '.' SimpleName
@@ -922,7 +929,7 @@ FormalParameter ::= Modifiersopt GenericTypeDotName DimsoptAnnotsopt LiftingType
 /:$compliance 1.5:/
 /:$recovery_template Identifier Identifier:/
 -- SH}
-CatchFormalParameter ::= Modifiersopt CatchType VariableDeclaratorId
+CatchFormalParameter ::= Modifiersopt CatchType CatchLiftingTypeopt VariableDeclaratorId
 /.$putCase consumeCatchFormalParameter(); $break ./
 /:$readableName FormalParameter:/
 /:$recovery_template Identifier Identifier:/

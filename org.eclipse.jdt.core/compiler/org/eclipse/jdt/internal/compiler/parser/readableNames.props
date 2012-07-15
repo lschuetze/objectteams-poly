@@ -81,6 +81,7 @@ CastExpression=CastExpression
 CatchClause=CatchClause
 CatchFormalParameter=FormalParameter
 CatchHeader=CatchHeader
+CatchLiftingTypeopt=LiftingType
 CatchType=CatchType
 Catches=Catches
 Catchesopt=Catches
