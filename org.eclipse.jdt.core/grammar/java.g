@@ -3368,6 +3368,8 @@ DOT ::=    '.'
 EQUAL ::=    '='    
 AT ::=    '@'    
 ELLIPSIS ::=    '...'    
+ARROW ::= '->'
+COLON_COLON ::= '::'
 
 -- {ObjectTeams
 BINDIN ::= '<-'
