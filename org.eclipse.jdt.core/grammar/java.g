@@ -402,11 +402,11 @@ BaseAnchoredType ::= 'base' '.' SimpleName
 -- Connecting BaseAnchoredType to other rules (2 variants):
 -- 1.) connect via      Type->ReferenceType->ClassOrInterfaceType
 --     as well as via   ClassType->ClassOrInterfaceType
-ClassOrInterfaceType -> BaseAnchoredType
+ClassOrInterfaceType0 -> BaseAnchoredType
 /:$readableName BaseAnchoredType:/
 
 -- 2.) via ReferenceType we may add dimensions:
-ReferenceType -> BaseAnchoredType Dims
+ReferenceType0 -> BaseAnchoredType Dims
 /:$readableName ArrayOfBaseAnchoredType:/
 -- SH}
 
