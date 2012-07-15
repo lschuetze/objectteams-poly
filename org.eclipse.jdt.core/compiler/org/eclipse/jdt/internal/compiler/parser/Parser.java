@@ -5190,7 +5190,11 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 		ltr = (LiftingTypeReference) this.astStack[this.astPtr--];
 		this.astLengthPtr--;
 		// role side:
-		roleRef = getTypeReference(this.intStack[this.intPtr--]);
+		int roleFirstDimensions = this.intStack[this.intPtr--];
+		roleRef = getTypeReference(roleFirstDimensions);
+		int roleDimensions = roleFirstDimensions + extendedDimensions + (isVarArgs?1:0);
+		if (roleDimensions > roleFirstDimensions)
+			roleRef = roleRef.copyDims(roleDimensions); // annotsOnDIms?
 		// done role side, the following balances the pushs from consumeBeginLiftingType():
 		this.genericsIdentifiersLengthPtr--;
 		this.genericsLengthPtr--;
