@@ -222,6 +222,9 @@ Goal ::= '~' BlockStatementsopt
 Goal ::= '||' MemberValue
 -- syntax diagnosis
 Goal ::= '?' AnnotationTypeMemberDeclaration
+-- JSR 335 Reconnaissance missions.
+Goal ::= '->' ParenthesizedLambdaParameterList
+Goal ::= '::' ReferenceExpressionTypeArgumentsAndTrunk
 --{ObjectTeams new goals:
 Goal ::= ':' CallinParameterMappings
 Goal ::= ';' CalloutParameterMappings
@@ -254,9 +257,9 @@ BooleanLiteral -> false
 /:$readableName BooleanLiteral:/
 
 -- Type is a wrapper that automatically allows for jsr308 style
--- annotations to prefix a (Java5/6) Type. If type annotations
+-- annotations to prefix a (Java7) Type. If type annotations
 -- are illegal in a certain place, use TypeInternal instead.
--- If type annotations are legal, but so are java5/6 style
+-- If type annotations are legal, but so are java7 style
 -- declaration annotations, use Type0 instead.
 
 Type ::= TypeInternal
@@ -271,7 +274,7 @@ Type ::= TypeAnnotations TypeInternal
 -- Type0 is to be used in places where type annotations are legal
 -- but are not consumed as TypeAnnotations, but as modifiers. This
 -- is because from the parser's point of view there are places where
--- java5/6 style declarations annotations can occur in the same place
+-- java7 style declarations annotations can occur in the same place
 -- and it is too early to tell which is which.
 Type0 ::= TypeInternal
 -- consumeUnannotatedType inserts 0 at the suitable place in the type
@@ -280,7 +283,7 @@ Type0 ::= TypeInternal
 /.$putCase consumeUnannotatedType();  $break ./
 /:$readableName Type:/
 
--- TypeInternal is the Java5/6 Type
+-- TypeInternal is the Java7 Type
 TypeInternal ::= PrimitiveType
 /.$putCase consumePrimitiveType(); $break ./
 TypeInternal -> ReferenceType0
@@ -371,7 +374,7 @@ GenericTypeDotName ::= GenericType '.' Name
 /.$putCase consumeClassOrInterface();  $break ./
 /:$readableName GenericTypeDotName:/
 
-GenericType ::= ClassOrInterface '<' '>'
+GenericType ::= ClassOrInterface '<' '>' PopZeroTypeAnnotations
 /.$putCase consumeGenericTypeWithDiamond(); $break ./
 /:$readableName GenericType:/
 /:$compliance 1.7:/
@@ -938,7 +941,7 @@ CatchType ::= UnionType
 /.$putCase consumeCatchType(); $break ./
 /:$readableName CatchType:/
 
-UnionType ::= TypeInternal
+UnionType ::= Type0
 /.$putCase consumeUnionTypeAsClassType(); $break ./
 UnionType ::= UnionType '|' Type
 /.$putCase consumeUnionType(); $break ./
@@ -1755,12 +1758,12 @@ TrailingSemiColon ::= ';'
 /:$readableName ;:/
 /:$compliance 1.7:/
 
-Resource ::= TypeInternal PushModifiers VariableDeclaratorId EnterVariable '=' ForceNoDiet VariableInitializer RestoreDiet ExitVariableWithInitialization
+Resource ::= Type0 PushModifiers VariableDeclaratorId EnterVariable '=' ForceNoDiet VariableInitializer RestoreDiet ExitVariableWithInitialization
 /.$putCase consumeResourceAsLocalVariableDeclaration(); $break ./
 /:$readableName Resource:/
 /:$compliance 1.7:/
 
-Resource ::= Modifiers TypeInternal PushRealModifiers VariableDeclaratorId EnterVariable '=' ForceNoDiet VariableInitializer RestoreDiet ExitVariableWithInitialization
+Resource ::= Modifiers Type0 PushRealModifiers VariableDeclaratorId EnterVariable '=' ForceNoDiet VariableInitializer RestoreDiet ExitVariableWithInitialization
 /.$putCase consumeResourceAsLocalVariableDeclaration(); $break ./
 /:$readableName Resource:/
 /:$compliance 1.7:/
@@ -1875,22 +1878,51 @@ PrimaryNoNewArray -> LambdaExpression
 PrimaryNoNewArray -> ReferenceExpression
 /:$readableName Expression:/
 
--- BeginTypeArguments is a synthetic token the scanner concocts to help disambiguate
--- between '<' as an operator and '<' in '<' TypeArguments '>'
-OnlyTypeArgumentsForReferenceExpression -> BeginTypeArguments OnlyTypeArguments
-/:$readableName OnlyTypeArgumentsForReferenceExpression:/
+ReferenceExpressionTypeArgumentsAndTrunk ::= OnlyTypeArguments Dimsopt 
+/.$putCase consumeReferenceExpressionTypeArgumentsAndTrunk(false); $break ./
+/:$compliance 1.8:/
+ReferenceExpressionTypeArgumentsAndTrunk ::= OnlyTypeArguments '.' ClassOrInterfaceType0 Dimsopt 
+/.$putCase consumeReferenceExpressionTypeArgumentsAndTrunk(true); $break ./
+/:$readableName ReferenceExpressionTypeArgumentsAndTrunk:/
 /:$compliance 1.8:/
 
-ReferenceExpression ::= PrimitiveType Dims '::' NonWildTypeArgumentsopt IdentifierOrNew
-/.$putCase consumeReferenceExpressionPrimitiveTypeForm(); $break ./
-ReferenceExpression ::= Name Dimsopt '::' NonWildTypeArgumentsopt IdentifierOrNew
+ReferenceExpression ::= PrimitiveType Dims PushModifiers '::' NonWildTypeArgumentsopt IdentifierOrNew
+/.$putCase consumeReferenceExpressionTypeForm(true, true); $break ./
+/:$compliance 1.8:/
+
+ReferenceExpression ::= Modifiers PrimitiveType Dims PushRealModifiers '::' NonWildTypeArgumentsopt IdentifierOrNew
+/.$putCase consumeReferenceExpressionTypeForm(true, true); $break ./
+/:$compliance 1.8:/
+
+ReferenceExpression ::= Name Dims PushModifiers '::' NonWildTypeArgumentsopt IdentifierOrNew
+/.$putCase consumeReferenceExpressionTypeForm(false, true); $break ./
+/:$compliance 1.8:/
+
+ReferenceExpression ::= Modifiers Name Dims PushRealModifiers '::' NonWildTypeArgumentsopt IdentifierOrNew
+/.$putCase consumeReferenceExpressionTypeForm(false, true); $break ./
+/:$compliance 1.8:/
+
+ReferenceExpression ::= Modifiers Name PushRealModifiers '::' NonWildTypeArgumentsopt IdentifierOrNew
+/.$putCase consumeReferenceExpressionTypeForm(false, false); $break ./
+/:$compliance 1.8:/
+
+ReferenceExpression ::= Name '::' NonWildTypeArgumentsopt IdentifierOrNew
 /.$putCase consumeReferenceExpressionNameForm(); $break ./
-ReferenceExpression ::= Name OnlyTypeArgumentsForReferenceExpression Dimsopt '::' NonWildTypeArgumentsopt IdentifierOrNew
-/.$putCase consumeReferenceExpressionTypeForm(false); $break ./
-ReferenceExpression ::= Name OnlyTypeArgumentsForReferenceExpression '.' ClassOrInterfaceType Dimsopt '::' NonWildTypeArgumentsopt IdentifierOrNew
-/.$putCase consumeReferenceExpressionTypeForm(true); $break ./
+/:$compliance 1.8:/
+
+-- BeginTypeArguments is a synthetic token the scanner concocts to help disambiguate
+-- between '<' as an operator and '<' in '<' TypeArguments '>'
+ReferenceExpression ::= Name PushModifiers BeginTypeArguments ReferenceExpressionTypeArgumentsAndTrunk '::' NonWildTypeArgumentsopt IdentifierOrNew
+/.$putCase consumeReferenceExpressionGenericTypeForm(); $break ./
+/:$compliance 1.8:/
+
+ReferenceExpression ::= Modifiers Name PushRealModifiers BeginTypeArguments ReferenceExpressionTypeArgumentsAndTrunk '::' NonWildTypeArgumentsopt IdentifierOrNew
+/.$putCase consumeReferenceExpressionGenericTypeForm(); $break ./
+/:$compliance 1.8:/
+
 ReferenceExpression ::= Primary '::' NonWildTypeArgumentsopt Identifier
 /.$putCase consumeReferenceExpressionPrimaryForm(); $break ./
+/:$compliance 1.8:/
 ReferenceExpression ::= 'super' '::' NonWildTypeArgumentsopt Identifier
 /.$putCase consumeReferenceExpressionSuperForm(); $break ./
 /:$readableName ReferenceExpression:/
@@ -1921,9 +1953,13 @@ LambdaParameters ::= Identifier
 
 -- to make the grammar LALR(1), the scanner transforms the input string to
 -- contain synthetic tokens to signal start of lambda parameter list.
-LambdaParameters -> BeginLambda PushLPAREN FormalParameterListopt PushRPAREN
-LambdaParameters -> BeginLambda PushLPAREN TypeElidedFormalParameterList PushRPAREN
+LambdaParameters -> BeginLambda ParenthesizedLambdaParameterList
 /:$readableName LambdaParameters:/
+/:$compliance 1.8:/
+
+ParenthesizedLambdaParameterList -> PushLPAREN FormalParameterListopt PushRPAREN
+ParenthesizedLambdaParameterList -> PushLPAREN TypeElidedFormalParameterList PushRPAREN
+/:$readableName ParenthesizedLambdaParameterList:/
 /:$compliance 1.8:/
 
 TypeElidedFormalParameterList -> TypeElidedFormalParameter
