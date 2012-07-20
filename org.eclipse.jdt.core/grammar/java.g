@@ -920,6 +920,13 @@ FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt LiftingTypeopt PotentialN
 FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt LiftingTypeopt PotentialNameArray '...' VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(true); $break ./
 /:$compliance 1.5:/
+--{ObjectTeams: 
+FormalParameter ::= Modifiersopt BaseAnchoredType DimsoptAnnotsopt LiftingTypeopt PotentialNameArray VariableDeclaratorIdOrThis
+/.$putCase consumeFormalParameter(false); $break ./
+FormalParameter ::= Modifiersopt BaseAnchoredType DimsoptAnnotsopt LiftingTypeopt PotentialNameArray '...' VariableDeclaratorIdOrThis
+/.$putCase consumeFormalParameter(true); $break ./
+/:$compliance 1.5:/
+-- SH}
 FormalParameter ::= Modifiersopt GenericType DimsoptAnnotsopt LiftingTypeopt VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(false); $break ./
 FormalParameter ::= Modifiersopt GenericType DimsoptAnnotsopt LiftingTypeopt '...' VariableDeclaratorIdOrThis
