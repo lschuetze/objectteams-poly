@@ -683,7 +683,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"1. ERROR in Team871buid4.java (at line 5)\n" + 
     		"	i;\n" + 
     		"	^\n" + 
-    		"Syntax error on token \"i\", VariableDeclarator expected after this token\n" + 
+    		"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" + 
     		"----------\n");
     }
 
@@ -859,7 +859,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"2. ERROR in Team881br2.java (at line 8)\n" + 
     		"	abstract int wrong(noTypeGiven);\n" + 
     		"	                   ^^^^^^^^^^^\n" + 
-    		"Syntax error on token \"noTypeGiven\", VariableDeclaratorId expected after this token\n" + 
+    		"Syntax error, insert \"VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n" + 
     		"3. ERROR in Team881br2.java (at line 9)\n" + 
     		"	}\n" + 
@@ -912,7 +912,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"2. ERROR in Team881br3.java (at line 14)\n" + 
     		"	abstract int wrong(noTypeGiven);\n" + 
     		"	                   ^^^^^^^^^^^\n" + 
-    		"Syntax error on token \"noTypeGiven\", VariableDeclaratorId expected after this token\n" + 
+    		"Syntax error, insert \"VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n" + 
     		"3. ERROR in Team881br3.java (at line 15)\n" + 
     		"	}\n" + 
@@ -1131,7 +1131,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"1. ERROR in Team8112dlse1.java (at line 7)\n" + 
     		"	void run(Object as R)  {\n" + 
     		"	                   ^\n" + 
-    		"Syntax error on token \"R\", VariableDeclaratorId expected after this token\n" + 
+    		"Syntax error, insert \"VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n");
     }
 
@@ -1159,7 +1159,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"1. ERROR in Team8112dlse2.java (at line 8)\n" + 
     		"	callin void run(Object as R)  {\n" + 
     		"	                          ^\n" + 
-    		"Syntax error on token \"R\", VariableDeclaratorId expected after this token\n" + 
+    		"Syntax error, insert \"VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n" + 
     		"2. ERROR in Team8112dlse2.java (at line 11)\n" + 
     		"	}\n" + 
@@ -1209,7 +1209,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"1. ERROR in Team8112dlse3.java (at line 7)\n" + 
     		"	callin void m(T8112dlse3_2 as R) {\n" + 
     		"	                              ^\n" + 
-    		"Syntax error on token \"R\", VariableDeclaratorId expected after this token\n" + 
+    		"Syntax error, insert \"VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n");
     }
 

@@ -34,7 +34,7 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test0c11_implicitlyInheritingStaticRoleMethod1"};
+//		TESTS_NAMES = new String[] { "test321_calloutInvocationWithMappedParameter6"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}

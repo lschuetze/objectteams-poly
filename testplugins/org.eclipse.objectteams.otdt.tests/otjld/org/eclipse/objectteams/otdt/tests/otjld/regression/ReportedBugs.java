@@ -2178,7 +2178,12 @@ public class ReportedBugs extends AbstractOTJLDTest {
 				"2. ERROR in TeamB11sh49.java (at line 4)\n" + 
 				"	void getString() -> toString;\n" + 
 				"	                    ^^^^^^^^\n" + 
-				"Syntax error on token \"toString\", invalid CallloutFieldSpec\n" + 
+				"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" + 
+				"----------\n" + 
+				"3. ERROR in TeamB11sh49.java (at line 4)\n" + 
+				"	void getString() -> toString;\n" + 
+				"	                    ^^^^^^^^\n" + 
+				"Syntax error, insert \")\" to complete MethodSpecLong\n" + 
 				"----------\n",
 				null/*classLibraries*/,
 				false/*shouldFlushOutputDirectory*/,
