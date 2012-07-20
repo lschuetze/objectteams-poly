@@ -6911,6 +6911,10 @@ protected void consumeParameterMappingsEmpty() {
 
 	pushOnAstLengthStack(0);
 	pushOnIntStack(0); // flagging no mappings
+	this.scanner._insideParameterMapping = false;
+}
+protected void consumeParameterMappings() {
+	this.scanner._insideParameterMapping = false;	
 }
 protected void consumeParameterMappingList() {
 	// CallinParameterMappingList  ::= CallinParameterMappingList ',' ParameterMapping
@@ -6941,11 +6945,8 @@ protected void consumeParameterMappingOut() {
 
 	char[] ident = getIdentifier();
 	long pos = this.identifierPositionStack[this.identifierPtr--];
-	this.intPtr--; // start pos of '->' token (unused)
-	int bindingKind = this.intStack[this.intPtr--];
-	assert(bindingKind == TerminalTokens.TokenNameBINDOUT);
 
-	pushOnAstStack(new ParameterMapping(bindingKind, expression, new SingleNameReference(ident, pos)));
+	pushOnAstStack(new ParameterMapping(TerminalTokens.TokenNameBINDOUT, expression, new SingleNameReference(ident, pos)));
 }
 /** consumes what is known to be a single identifier (currently only ident of param map) */
 protected char[] getIdentifier() {
@@ -6968,7 +6969,7 @@ protected void consumeNestedParamMappings() {
 	pushOnIntStack(1); // signal that we have param mappings
 	pushOnAstLengthStack(0); // no mappings yet
 	
-	// FIXME tell the scanner to enty param mapping mode?
+	this.scanner._insideParameterMapping = true;
 }
 //SH}
 
@@ -8133,6 +8134,10 @@ protected void consumeRule(int act) {
 		    consumeParameterMappingsEmpty();  
 			break;
  
+    case 277 : if (DEBUG) { System.out.println("CalloutParameterMappings ::= with NestedParamMappings..."); }  //$NON-NLS-1$
+		    consumeParameterMappings();  
+			break;
+ 
     case 280 : if (DEBUG) { System.out.println("CalloutParameterMappingList ::=..."); }  //$NON-NLS-1$
 		    consumeParameterMappingList();  
 			break;
@@ -8223,6 +8228,10 @@ protected void consumeRule(int act) {
  
     case 303 : if (DEBUG) { System.out.println("CallinParameterMappingsopt ::= SEMICOLON"); }  //$NON-NLS-1$
 		    consumeParameterMappingsEmpty();  
+			break;
+ 
+    case 304 : if (DEBUG) { System.out.println("CallinParameterMappings ::= with NestedParamMappings..."); }  //$NON-NLS-1$
+		    consumeParameterMappings();  
 			break;
  
     case 307 : if (DEBUG) { System.out.println("CallinParameterMappingList ::=..."); }  //$NON-NLS-1$

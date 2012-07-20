@@ -125,6 +125,7 @@ $Terminals
 -- {ObjectTeams
 	BINDIN
 	CALLOUT_OVERRIDE
+	SYNTHBINDOUT
 -- Markus Witte}
 --    BodyMarker
 
@@ -1035,6 +1036,7 @@ CalloutParameterMappingsopt ::= ';'
 
 
 CalloutParameterMappings ::= 'with' NestedParamMappings '{' CalloutParameterMappingList ,opt '}'
+/.$putCase consumeParameterMappings(); $break ./
 /:$readableName CalloutParameterMappings:/
 
 -- note that this rule is needed for diagnose parsing where bodies of parameter mappings are ignored
@@ -1046,43 +1048,9 @@ CalloutParameterMappingList ::= CalloutParameterMappingList ',' ParameterMapping
 /.$putCase consumeParameterMappingList(); $break ./
 /:$readableName CalloutParameterMappingList:/
 
-ParameterMapping ::= ExpressionNoLambda '->' 'Identifier'
+
+ParameterMapping ::= Expression SYNTHBINDOUT 'Identifier'
 /.$putCase consumeParameterMappingOut(); $break ./
-
--- SYNTAX CHANGE TO AVOID CONFLICT WITH JSR-335: to allow all expressions on the LHS incl. lambda use a different binding token
-ParameterMapping ::= Expression '=>' 'Identifier'
-/.$putCase consumeParameterMappingOut(); $break ./
-
--- (INCOMPLETE) SUBSET OF EXPRESSION PERMISSIBLE WITH OLD BINDING TOKEN '->':
-ExpressionNoLambda -> ArrayCreationWithArrayInitializer
-ExpressionNoLambda -> ArrayCreationWithoutArrayInitializer
-/:$readableName Expression:/
-ExpressionNoLambda -> ReferenceExpression
-ExpressionNoLambda -> Literal
-ExpressionNoLambda ::= 'this'
-/.$putCase consumePrimaryNoNewArrayThis(); $break ./
-ExpressionNoLambda ::= PushLPAREN Expression_NotName PushRPAREN 
-/.$putCase consumePrimaryNoNewArray(); $break ./
-ExpressionNoLambda ::= PushLPAREN Name PushRPAREN 
-/.$putCase consumePrimaryNoNewArrayWithName(); $break ./
-ExpressionNoLambda -> ClassInstanceCreationExpression
-ExpressionNoLambda -> BaseConstructorExpression
-ExpressionNoLambda -> FieldAccess
-ExpressionNoLambda ::= Name '.' 'this'
-/.$putCase consumePrimaryNoNewArrayNameThis(); $break ./
-ExpressionNoLambda ::= Name '.' 'super'
-/.$putCase consumePrimaryNoNewArrayNameSuper(); $break ./
-ExpressionNoLambda ::= Name '.' 'class'
-/.$putCase consumePrimaryNoNewArrayName(); $break ./
-ExpressionNoLambda ::= Name Dims '.' 'class'
-/.$putCase consumePrimaryNoNewArrayArrayType(); $break ./
-ExpressionNoLambda ::= PrimitiveType Dims '.' 'class'
-/.$putCase consumePrimaryNoNewArrayPrimitiveArrayType(); $break ./
-ExpressionNoLambda ::= PrimitiveType '.' 'class'
-/.$putCase consumePrimaryNoNewArrayPrimitiveType(); $break ./
-ExpressionNoLambda -> MethodInvocation
-ExpressionNoLambda -> ArrayAccess
-
 
 ParameterMapping ::= 'Identifier' '<-' ForceBaseIsIdentifier Expression RestoreBaseKeyword
 /.$putCase consumeParameterMappingIn(); $break ./
@@ -1182,6 +1150,7 @@ CallinParameterMappingsopt ::= ';'
 /:$readableName EmptyParameterMappings:/
 
 CallinParameterMappings ::= 'with' NestedParamMappings '{' CallinParameterMappingList ,opt '}'
+/.$putCase consumeParameterMappings(); $break ./
 /:$readableName CallinParameterMappings:/
 
 -- note that this rule is needed for diagnose parsing where bodies of parameter mappings are ignored
@@ -3410,6 +3379,7 @@ COLON_COLON ::= '::'
 -- {ObjectTeams
 BINDIN ::= '<-'
 CALLOUT_OVERRIDE ::= '=>'
+SYNTHBINDOUT ::= '->'
 -- Markus Witte}
 
 $end

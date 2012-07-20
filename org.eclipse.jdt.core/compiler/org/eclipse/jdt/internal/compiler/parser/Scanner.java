@@ -106,12 +106,83 @@ public class Scanner implements TerminalTokens {
     // after a '.' even 'team' can be an identifier:
     private int _dotSeen = 0; // 0: no, 1: previos, 2: this token
 
+    public boolean _insideParameterMapping = false;
+    enum LookaheadState { INIT, ONE_TOKEN, ID_SEEN, MATCH, ID_CONSUMED }
+    /** 
+     * A little state machine for lookahead of up-to 2 tokens.
+     * This is used to disambiguate whether a '->' inside parameter mappings is
+     * an ARRAW (lambda) or a SYNTHBINDOUT (parameter mapping role-to-base) 
+     */
+    class BindoutLookahead {
+    	
+    	LookaheadState state = LookaheadState.INIT;
+    	int[] tokens = new int[2];
+    	char[] identifier = null;
+    	int[][] positions = new int[2][];
+    	
+		public BindoutLookahead() throws InvalidInputException {
+			int token = this.tokens[0] = getNextToken0();
+			this.positions[0] = new int[] {Scanner.this.startPosition, Scanner.this.currentPosition};
+			if (token == TerminalTokens.TokenNameIdentifier) {
+				this.state = LookaheadState.ID_SEEN;
+				this.identifier = getCurrentIdentifierSource();
+			}
+		}
+		public char[] getIdentifier() {
+			if (this.state == LookaheadState.MATCH) {
+				return this.identifier;
+			}
+			return null;
+		}
+		public int getNextToken() throws InvalidInputException {
+			switch (this.state) {
+				case INIT :
+					// == initialization failed to match anything	=> signal no match
+					this.state = LookaheadState.ONE_TOKEN;
+					return TerminalTokens.TokenNameNotAToken;
+				case ONE_TOKEN :
+					// == we have one non-matching token			=> pop that token and unregister 
+					Scanner.this._bindoutLookahead = null;
+					return popToken(0);
+				case ID_SEEN :
+					// == we've seen an identifier					=> check if second token matches, too
+					this.tokens[1] = Scanner.this.getNextToken0();
+					switch (this.tokens[1]) {
+						case TerminalTokens.TokenNameCOMMA :	// more mappings?
+						case TerminalTokens.TokenNameSEMICOLON :// more mappings? (wrong delimiter, though)
+						case TerminalTokens.TokenNameRBRACE :	// end of parameter mappings?
+							this.positions[1] = new int[] {Scanner.this.startPosition, Scanner.this.currentPosition};
+							this.state = LookaheadState.MATCH;
+							return TokenNameSYNTHBINDOUT; // match, tweak '->' to mean SYNTHBINDOUT
+					}
+					return TerminalTokens.TokenNameARROW; // no match, '->' should be interpreted as normal
+				case MATCH :
+					// == we've seen a full match					=> pop the identifier now
+					this.state = LookaheadState.ID_CONSUMED;
+					return popToken(0);
+				case ID_CONSUMED :
+					// == identifier has already been consumed		=> pop the second token and unregister
+					Scanner.this._bindoutLookahead = null;
+					return popToken(1);
+			}
+			return TerminalTokens.TokenNameNotAToken;
+		}
+		private int popToken(int i) {
+			Scanner.this.startPosition = this.positions[i][0];
+			Scanner.this.currentPosition = this.positions[i][1];
+			return this.tokens[i];
+		}
+    }
+    BindoutLookahead _bindoutLookahead = null;
+
     public void resetOTFlags() {
     	this._isOTSource = this.parseOTJonly;
     	this._teamKeywordSeen = false;
     	this._forceBaseIsIdentifier = false;
     	this._callinSeen = false;
     	this._calloutSeen = false;
+    	this._insideParameterMapping = false;
+    	this._bindoutLookahead = null;
     }
     
     public void setOTFlags(CompilerOptions options) {
@@ -542,6 +613,13 @@ public void checkTaskTag(int commentStart, int commentEnd) throws InvalidInputEx
 }
 
 public char[] getCurrentIdentifierSource() {
+//{ObjectTeams: respect look-ahead:
+	if (this._bindoutLookahead != null) {
+		char[] result = this._bindoutLookahead.getIdentifier();
+		if (result != null)
+			return result;
+	}
+// SH}
 	//return the token REAL source (aka unicodes are precomputed)
 	if (this.withoutUnicodePtr != 0) {
 		//0 is used as a fast test flag so the real first char is in position 1
@@ -1264,6 +1342,14 @@ public int getNextToken() throws InvalidInputException {
 		return token; // presumed to be unambiguous.
 	}
 	
+//{ObjectTeams: consume lookahead for parameter mappings:
+	if (this._bindoutLookahead != null) {
+		int result = this._bindoutLookahead.getNextToken();
+		if (result != TerminalTokens.TokenNameNotAToken)
+			return result;
+	}
+// SH}
+
 	token = getNextToken0();
 	if (this.activeParser == null) { // anybody interested in the grammatical structure of the program should have registered.
 		return token;
@@ -1441,8 +1527,13 @@ protected int getNextToken0() throws InvalidInputException {
 							return TokenNameARROW;
   :giro */
 						if (getNextChar('>')) {
-							if (this._isOTSource)
-								this._calloutSeen = true;
+							if (this._isOTSource) {
+								this._calloutSeen = true; // TODO distinguish from ARROW?
+								if (this._insideParameterMapping) {
+									this._bindoutLookahead = new BindoutLookahead();
+									return this._bindoutLookahead.getNextToken();
+								}
+							}
 							return TokenNameARROW;
 						}
 // Markus Witte}
@@ -3281,6 +3372,10 @@ public void resetTo(int begin, int end) {
 	this.commentPtr = -1; // reset comment stack
 	this.foundTaskCount = 0;
 	this.lookBack[0] = this.lookBack[1] = this.nextToken = TokenNameNotAToken;
+//{ObjectTeams: lookahead on '->':
+	this._insideParameterMapping = false;
+	this._bindoutLookahead = null;
+// SH}
 }
 
 protected final void scanEscapeCharacter() throws InvalidInputException {

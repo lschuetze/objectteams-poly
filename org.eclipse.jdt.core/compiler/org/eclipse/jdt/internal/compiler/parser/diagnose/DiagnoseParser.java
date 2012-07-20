@@ -462,8 +462,9 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 //{ObjectTeams: WATCHOUT: needs to be updated with each new grammar!!!!
 	private void setScannerState(int act) {
 		switch(act) {
-		case 237: this.lexStream.forceBaseIsIdentifier(); break; // ForceBaseIsIdentifier
-		case 238: this.lexStream.restoreBaseKeyword(); break;    // RestoreBaseKeyword
+		case 183: this.lexStream.forceBaseIsIdentifier(); break; // ForceBaseIsIdentifier
+		case 184: this.lexStream.restoreBaseKeyword(); break;    // RestoreBaseKeyword
+		case 283: this.parser.scanner._insideParameterMapping = true; break;
 		}
 	}
 //SH}
@@ -1484,6 +1485,9 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 	            do  {
 	                this.tempStackTop -= (Parser.rhs[act]-1);
 	                int lhs_symbol = Parser.lhs[act];
+//{ObjectTeams: integrate stateful scanner:
+	                setScannerState(act);
+// SH}
 	                act =  (this.tempStackTop > max_pos
 	                            ?  this.tempStack[this.tempStackTop]
 	                            :  stck[this.tempStackTop]);
@@ -1569,6 +1573,9 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 								 	continue next;
 								}
 	                            top -= (Parser.rhs[act]-1);
+//{ObjectTeams: integrate stateful scanner:
+		                        setScannerState(act);
+// SH}
 	                            act = Parser.ntAction(stck[top], Parser.lhs[act]);
 	                        }
 	                        top++;
@@ -2182,6 +2189,7 @@ public class DiagnoseParser implements ParserBasicInformation, TerminalTokens, C
 			max_pos = max_pos < this.tempStackTop ? max_pos : this.tempStackTop;
 		} // process_terminal;
 	}
+
 	private void reportError(int msgCode, int nameIndex, int leftToken, int rightToken) {
 		reportError(msgCode, nameIndex, leftToken, rightToken, 0);
 	}
