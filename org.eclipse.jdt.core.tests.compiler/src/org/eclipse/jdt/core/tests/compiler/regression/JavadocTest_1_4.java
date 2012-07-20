@@ -665,12 +665,25 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"----------\n" +
 				"4. ERROR in X.java (at line 7)\n" +
 				"	public class X<T, , V> {}\n" +
-				"	              ^^\n" +
+//{ObjectTeams: different position due to different grammar:
+/* orig:
+			  	"	              ^^\n" +
+ 
+  :giro */
+				"	              ^^^^^^^^^^\n" +
+// SH}
 				"Syntax error on tokens, delete these tokens\n" +
 				"----------\n" +
 				"5. ERROR in X.java (at line 7)\n" +
 				"	public class X<T, , V> {}\n" +
 				"	               ^\n" +
+//{ObjectTeams: one more message:
+				"Syntax error, insert \"Identifier\" to complete TypeParameter\n" + 
+				"----------\n" + 
+				"6. ERROR in X.java (at line 7)\n" + 
+				"	public class X<T, , V> {}\n" + 
+				"	                       ^\n" + 
+// SH}
 				"Syntax error, insert \"ClassBody\" to complete CompilationUnit\n" +
 				"----------\n"
 		);
@@ -709,7 +722,7 @@ public class JavadocTest_1_4 extends JavadocTest {
 /* orig:
 				"	              ^^^^^^\n" +
   :giro */				
-				"	              ^^^^^^^^\n" + 
+				"	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 // SH}
 				"Syntax error on tokens, delete these tokens\n" +
 				"----------\n" +
@@ -718,10 +731,11 @@ public class JavadocTest_1_4 extends JavadocTest {
 //{ObjectTeams: changed position due to different grammar
 /* orig:
 				"	                   ^\n" +
+				"Syntax error, insert \"ClassBody\" to complete CompilationUnit\n" +
   :giro */
 				"	                     ^\n" +
+				"Syntax error, insert \"Identifier\" to complete TypeParameter\n" +
 // SH}
-				"Syntax error, insert \"ClassBody\" to complete CompilationUnit\n" +
 				"----------\n" +
 				"6. ERROR in X.java (at line 7)\n" +
 				"	public class X<T, U, V extend Exception> {}\n" +
@@ -734,6 +748,13 @@ public class JavadocTest_1_4 extends JavadocTest {
 				"V cannot be resolved to a type\n" +
 // SH}
 				"----------\n"
+//{ObjectTeams: one more message:
+				+"7. ERROR in X.java (at line 7)\n" + 
+				"	public class X<T, U, V extend Exception> {}\n" + 
+				"	                                         ^\n" + 
+				"Syntax error, insert \"ClassBody\" to complete CompilationUnit\n" + 
+				"----------\n"
+// SH}
 		);
 	}
 
