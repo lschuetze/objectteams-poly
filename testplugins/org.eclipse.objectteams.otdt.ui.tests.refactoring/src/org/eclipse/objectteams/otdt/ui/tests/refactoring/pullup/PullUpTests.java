@@ -327,4 +327,9 @@ public class PullUpTests extends RefactoringTest {
 	public void testPullUpFieldToImplicitSuperclass() throws Exception {
 		performPullUp_pass(new String[] { "T", "TSuper" }, new String[] {}, new String[][] { new String[0] }, new String[] { "f" }, true, false, 0, "R");
 	}
+	
+	// Bug 374841 - [refactoring] pull up does not work among (nested) roles
+	public void testPullUpWithReferenceToCallout()  throws Exception {
+		performPullUp_pass(new String[] {"T", "B"}, new String[]{"foo"}, new String[][] { new String[0] }, new String[0], true, true, 0, "RSub");
+	}
 }

@@ -8,15 +8,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
@@ -34,7 +40,9 @@ import org.eclipse.objectteams.otdt.core.ICallinMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.core.IMethodMapping;
+import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.core.IOTType;
+import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
@@ -45,6 +53,7 @@ import org.eclipse.objectteams.otdt.internal.refactoring.util.IOverloadingMessag
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 import org.eclipse.osgi.util.NLS;
 
+import base org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 
 /**
@@ -420,7 +429,97 @@ public team class PullUpAdaptor {
 		needsVisibilityAdjustment <- replace needsVisibilityAdjustment;
 			
 	}
-	
+
+	protected class Visibility playedBy MemberVisibilityAdjustor {
+
+		IJavaElement getFReferencing() -> get IJavaElement fReferencing;
+
+		void adjustOutgoingVisibility(IMember member, ModifierKeyword threshold, String template)
+		-> void adjustOutgoingVisibility(IMember member, ModifierKeyword threshold, String template);
+
+		ModifierKeyword thresholdTypeToMethod(IType referencing, IMethod referenced, IProgressMonitor monitor)
+		-> ModifierKeyword thresholdTypeToMethod(IType referencing, IMethod referenced, IProgressMonitor monitor);
+		
+		checkOTMember <- replace adjustOutgoingVisibilityChain;
+
+		@SuppressWarnings("basecall")
+		callin void checkOTMember(IMember member, IProgressMonitor monitor) throws JavaModelException {
+			try {
+				base.checkOTMember(member, monitor);
+			} catch (JavaModelException jme) {
+				if (jme.getJavaModelStatus().isDoesNotExist()) {
+					IType type = member.getDeclaringType();
+					IOTType ottype = OTModelManager.getOTElement(type);
+					if (ottype != null) {
+						if (ottype.isRole() && member instanceof IMethod) {
+							for (IMethodMapping map : ((IRoleType)ottype).getMethodMappings()) {
+								if (map.getElementType() != IMethodMapping.CALLIN_MAPPING
+										&& member.equals(map.getCorrespondingJavaElement())) 
+								{
+									if (!Modifier.isPublic(map.getFlags())) {
+										final ModifierKeyword threshold= computeOutgoingVisibilityThreshold(map, monitor);
+										adjustOutgoingVisibility(map, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning);
+									}
+									if (member.getDeclaringType() != null)
+										base.checkOTMember(member.getDeclaringType(), monitor);
+									return;
+								}
+							}
+						}
+					}
+				}
+				throw jme;
+			}
+		}
+		// adjusted copy, base version cannot handle OT elements
+		private ModifierKeyword computeOutgoingVisibilityThreshold(final IMember referenced, final IProgressMonitor monitor) throws JavaModelException {
+			final IJavaElement referencing = getFReferencing();
+			Assert.isTrue(referencing instanceof ICompilationUnit || referencing instanceof IType || referencing instanceof IPackageFragment);
+			ModifierKeyword keyword= ModifierKeyword.PUBLIC_KEYWORD;
+			try {
+				monitor.beginTask("", 1); //$NON-NLS-1$
+				monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
+				final int referencingType= referencing.getElementType();
+				final int referencedType= referenced.getElementType();
+				switch (referencedType) {
+					case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
+					case IOTJavaElement.CALLOUT_MAPPING: {
+						final IMethodMapping calloutReferenced= (IMethodMapping) referenced;
+						final ICompilationUnit referencedUnit= calloutReferenced.getCompilationUnit();
+						switch (referencingType) {
+							case IJavaElement.COMPILATION_UNIT: {
+								final ICompilationUnit unit= (ICompilationUnit) referencing;
+								if (referencedUnit != null && referencedUnit.equals(unit))
+									keyword= ModifierKeyword.PRIVATE_KEYWORD;
+								else if (referencedUnit != null && referencedUnit.getParent().equals(unit.getParent()))
+									keyword= null;
+								break;
+							}
+							case IJavaElement.TYPE: {
+								keyword= thresholdTypeToMethod((IType) referencing, 
+										(IMethod) calloutReferenced.getCorrespondingJavaElement(), monitor);
+								break;
+							}
+							case IJavaElement.PACKAGE_FRAGMENT: {
+								final IPackageFragment fragment= (IPackageFragment) referencing;
+								if (calloutReferenced.getDeclaringType().getPackageFragment().equals(fragment))
+									keyword= null;
+								break;
+							}
+							default:
+								Assert.isTrue(false);
+						}
+						break;
+					}
+					default:
+						Assert.isTrue(false);
+				}
+			} finally {
+				monitor.done();
+			}
+			return keyword;
+		}
+	}
 }
 
 
