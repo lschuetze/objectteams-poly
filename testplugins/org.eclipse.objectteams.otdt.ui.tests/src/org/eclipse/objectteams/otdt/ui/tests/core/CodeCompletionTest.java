@@ -106,7 +106,7 @@ public class CodeCompletionTest extends CoreTests {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new CodeCompletionTest("testOverrideRole3"));
+			suite.addTest(new CodeCompletionTest("testCreateCalloutOverride3"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -433,6 +433,53 @@ public class CodeCompletionTest extends CoreTests {
 		
 		// discriminate from overriding "setBlub(int i)":
 		assertProposal("setBlub(int)", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter+2, 0), 0);  
+	}
+	
+	
+	// Bug 374840 - [assist] callout completion after parameter mapping garbles the code
+	public void testCreateCalloutOverride3() throws Exception {
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		
+		pkg.createCompilationUnit("ABase.java", 
+				"package test1.p1;\n" +
+				"public class ABase {\n" +
+				"	Object blub;\n" +
+				"}\n", 
+				true, null);
+		
+		StringBuffer subTeamContent = new StringBuffer(); 
+		subTeamContent.append("package test1;\n");
+		subTeamContent.append("import base test1.p1.ABase;\n");
+		subTeamContent.append("public team class Completion_testCreateCalloutOverride3 {\n");
+		subTeamContent.append("    protected class MyRole playedBy ABase {\n");
+		subTeamContent.append("		public String getBlubString() -> get Object blub\n");
+		subTeamContent.append("		    with { result <- blub.toString() }\n");
+		subTeamContent.append("		toStr\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("}");
+		
+		StringBuffer expectedContent = new StringBuffer(); 
+		expectedContent.append("package test1;\n");
+		expectedContent.append("import base test1.p1.ABase;\n");
+		expectedContent.append("public team class Completion_testCreateCalloutOverride3 {\n");
+		expectedContent.append("    protected class MyRole playedBy ABase {\n");
+		expectedContent.append("		public String getBlubString() -> get Object blub\n");
+		expectedContent.append("		    with { result <- blub.toString() }\n");
+		expectedContent.append("\n");
+		expectedContent.append("        /* (non-Javadoc)\n");
+		expectedContent.append("         * @see java.lang.Object#toString()\n");
+		expectedContent.append("         */\n");
+		expectedContent.append("        String toString() => String toString();\n");
+		expectedContent.append("		\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("}");
+
+		String completeAfter = "		toStr";
+		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
+		int posAfter = expectedContent.indexOf("String toString");
+		
+		// discriminate from method override:
+		assertProposal("toString()  String", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, "String".length()), 0); 
 	}
 	
 

@@ -8678,6 +8678,9 @@ public final class CompletionEngine
 
 			for (int i = methodsFound.size; --i >= 0;) {
 				MethodBinding otherMethod = (MethodBinding) methodsFound.elementAt(i);
+//{ObjectTeams: callout override can refer to same methods on both sides:
+			  if (kind != CompletionProposal.OT_CALLOUT_DECLARATION)
+// SH}
 				if (method == otherMethod)
 					continue next;
 
@@ -8685,7 +8688,8 @@ public final class CompletionEngine
 						&& this.lookupEnvironment.methodVerifier().isMethodSubsignature(otherMethod, method)) {
 //{ObjectTeams: callout (override)? (the ui expands callout to a choice of any method binding)
 					if (curKind != CompletionProposal.METHOD_DECLARATION) {
-						if (otherMethod.declaringClass.isCompatibleWith(method.declaringClass))
+						if (otherMethod.declaringClass.isCompatibleWith(method.declaringClass)
+						    && !receiverType.isCompatibleWith(method.declaringClass))
 							continue next; // comparing two base methods.
 						if (MethodModel.isAbstract(otherMethod)) {
 							curKind = CompletionProposal.OT_CALLOUT_DECLARATION;

@@ -13440,7 +13440,8 @@ protected void recoveryForMethodMappingHeader(AbstractMethodMappingDeclaration m
 		}
 		if (haveTokenWith)
 		{
-			methodMapping.declarationSourceEnd = this.scanner.currentPosition; // before 'with'
+			// don't set declarationSourceEnd, but let RecoveredMethodMapping.updateSourceEndIfNecessary() do so
+			methodMapping.mappings = AbstractMethodMappingDeclaration.PENDING_MAPPINGS;
 			try {
 				this.currentToken = this.scanner.getNextToken(); // skip 'with', try to find '{'
 			} catch (InvalidInputException e) {
