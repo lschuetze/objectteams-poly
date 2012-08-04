@@ -21,7 +21,6 @@
 package org.eclipse.objectteams.otdt.internal.core;
 
 import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -31,7 +30,6 @@ import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
-import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.internal.core.util.FieldData;
@@ -61,22 +59,6 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
             boolean isOverride)
 	{
 		this(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, CALLOUT_TO_FIELD_MAPPING, role, correspondingJavaElem, roleMethodHandle, baseFieldHandle, hasSignature, isOverride, true);
-	}
-
-	protected CalloutToFieldMapping(
-			int declarationSourceStart, 
-			int sourceStart,
-			int sourceEnd,
-			int declarationSourceEnd,
-			int elementType,
-			IType parentRole,
-			IMethod correspondingJavaElem, 
-			MethodData roleMethodHandle,
-			IFieldAccessSpec baseFieldHandle,
-			boolean hasSignature,
-			boolean isOverride)
-	{
-		this(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, CALLOUT_TO_FIELD_MAPPING, parentRole, correspondingJavaElem, roleMethodHandle, baseFieldHandle, hasSignature, isOverride, true);
 	}
 	
 	protected CalloutToFieldMapping(
@@ -108,27 +90,6 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
         this.baseFieldHandle = baseFieldHandle;
 	}
     
-    public IMethodMapping createStealthMethodMapping()
-    {
-        CalloutToFieldMapping result = new CalloutToFieldMapping(
-                getDeclarationSourceStart(),
-				getSourceStart(),
-				getSourceEnd(),
-                getDeclarationSourceEnd(),
-                IJavaElement.METHOD, /* pretending to be a method */
-                (IType) getCorrespondingJavaElement().getParent(),
-                getIMethod(),
-                getRoleMethodHandle(),
-                getBaseFieldHandle(),
-                hasSignature(),
-                isOverride(),
-                false // don't add as child!
-        );
-		result.mimicMethodDecl = true;
-        result.originalMethodMapping = this;
-        return result;
-    }
-    
     public boolean isOverride() {
     	return this.isOverride;
     }
@@ -136,13 +97,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
     @SuppressWarnings("nls")
 	public String getElementName()
     {
-		if (this.mimicMethodDecl) {
-			
-			if (this.roleMethodHandle != null)
-				return this.roleMethodHandle.getSelector();
-			return "(unknown role method)";
-		}		
-
+		
         StringBuffer name = new StringBuffer(super.getElementName());
         name.append(" -> ");
         
@@ -291,9 +246,6 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 			        isOverride(),
 			        new String(uniqueKey));
 
-		if(isStealthMethodMapping())
-			resolvedHandle.originalMethodMapping = this.originalMethodMapping;
-		
 		return resolvedHandle;
 	}
 	

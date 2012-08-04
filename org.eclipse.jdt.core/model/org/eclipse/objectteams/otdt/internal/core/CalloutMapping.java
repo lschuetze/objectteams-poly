@@ -21,13 +21,11 @@
 package org.eclipse.objectteams.otdt.internal.core;
 
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.objectteams.otdt.core.ICalloutMapping;
-import org.eclipse.objectteams.otdt.core.IMethodMapping;
 import org.eclipse.objectteams.otdt.core.IMethodSpec;
 import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
@@ -58,6 +56,7 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
                           boolean isOverride,
                           int     declaredModifiers)
     {
+    	// FIXME(SH): can we use 'this' as the corrJavaMethod??
         this(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, CALLOUT_MAPPING, role, corrJavaMethod, roleMethodHandle, baseMethodHandle, hasSignature, isOverride, declaredModifiers);
     }
 
@@ -104,28 +103,6 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 		this.declaredModifiers = declarationSourceEnd;
 	}
 
-    public IMethodMapping createStealthMethodMapping()
-    {
-        CalloutMapping result = new CalloutMapping(
-		        getDeclarationSourceStart(),
-				getSourceStart(),
-				getSourceEnd(),
-		        getDeclarationSourceEnd(),
-		        IJavaElement.METHOD, /* pretending to be a method */
-		        (IType) getCorrespondingJavaElement().getParent(),
-		        getIMethod(),
-		        this.roleMethodHandle,
-		        this.baseMethodHandle,
-		        hasSignature(),
-		        isOverride(),
-		        getDeclaredModifiers(),
-		        false // don't add as child!
-		);
-		result.mimicMethodDecl = true;
-        result.originalMethodMapping = this;
-        return result;
-    }
-
     public boolean isOverride() {
     	return this.isOverride;
     }
@@ -133,13 +110,6 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	@SuppressWarnings("nls")
 	public String getElementName()
 	{
-		if (this.mimicMethodDecl) {
-			
-			if (this.roleMethodHandle != null)
-				return this.roleMethodHandle.getSelector();
-			return "(unknown role method)"; //$NON-NLS-1$
-		}		
-		
 		StringBuffer name = new StringBuffer(super.getElementName());
 		name.append(" -> ");
 	    
@@ -248,9 +218,6 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 			        isOverride(),
 			        getDeclaredModifiers(),
 					new String(uniqueKey));
-		
-		if(isStealthMethodMapping())
-			resolvedHandle.originalMethodMapping = this.originalMethodMapping;
 		
 		return resolvedHandle;
 	}

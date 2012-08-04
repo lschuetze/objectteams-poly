@@ -20,7 +20,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.core;
 
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMemberValuePair;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -37,9 +36,6 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
  * @author stephan
  */
 public abstract class AbstractCalloutMapping extends MethodMapping implements IMethod {
-
-	protected boolean         mimicMethodDecl = false;
-    protected IMethodMapping  originalMethodMapping; // only for stealth method mappings
 
 	public AbstractCalloutMapping(int declarationSourceStart, 
 								  int sourceStart, 
@@ -74,17 +70,8 @@ public abstract class AbstractCalloutMapping extends MethodMapping implements IM
 				  hasSignature, addAsChild);
 	}
 
-	public abstract IMethodMapping createStealthMethodMapping();
-	
-    public boolean isStealthMethodMapping()
-    {
-        return getElementType() == IJavaElement.METHOD;
-    }
-    
     public IMethodMapping getOriginalMethodMapping()
     {
-        if (isStealthMethodMapping())
-	        return this.originalMethodMapping;
         return this;
     }
 
