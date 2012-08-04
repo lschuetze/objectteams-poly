@@ -1,16 +1,15 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2012 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany, and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CalloutMapping.java 23416 2010-02-03 19:59:31Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -48,8 +47,8 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
     					  int        sourceStart,
     					  int        sourceEnd,
 						  int        declarationSourceEnd,
-						  IRoleType  role,
-						  IMethod	corrJavaMethod,
+						  IType  	 role,
+						  IMethod	 corrJavaMethod,
                           MethodData roleMethodHandle,
                           MethodData baseMethodHandle,
                           boolean hasSignature,

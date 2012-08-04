@@ -1,16 +1,15 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2012 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany, and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: OTJavaElement.java 23416 2010-02-03 19:59:31Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -21,6 +20,7 @@
 package org.eclipse.objectteams.otdt.internal.core;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -103,6 +103,18 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 		if (child != null)
 		{
 			this.children.add(child);
+		}
+	}
+	
+	protected void compactChildren(IOTJavaElement child) { 
+		// FIXME(SH): performance etc.
+		int count = 0;
+		Iterator it = this.children.iterator();
+		while (it.hasNext()) {
+			if (it.next().equals(child)) {
+				if (++count > 1)
+					it.remove();
+			}
 		}
 	}
 

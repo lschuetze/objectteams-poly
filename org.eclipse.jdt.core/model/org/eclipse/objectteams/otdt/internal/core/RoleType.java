@@ -1,16 +1,15 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2009 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2012 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany, and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: RoleType.java 23417 2010-02-03 20:13:55Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -103,15 +102,26 @@ public class RoleType extends OTType implements IRoleType
 	public IMethodMapping[] getMethodMappings(int type)
 	{
 		List<IMethodMapping> result   = new LinkedList<IMethodMapping>();
-		IJavaElement[]       children = getChildren();
+		if ((type & CALLINS) != 0) {	// callins from the RoleType:
+			filterMethodMappings(getChildren(), CALLINS, result);
+		}
+		if ((type & CALLOUTS) != 0) {	// callouts from the regular IType
+			try {
+				filterMethodMappings(((IType)getCorrespondingJavaElement()).getChildren(), CALLOUTS, result);
+			} catch (JavaModelException ex) {
+            	Util.log(ex,
+                		NLS.bind("Retrieving callouts of role class ''{0}'' failed!", new Object[] {getElementName()})); //$NON-NLS-1$
+			}
+		}
 		
-		for (int idx = 0; idx < children.length; idx++)
-		{
-			if (children[idx] instanceof IMethodMapping)
-			{
+		return result.toArray(new IMethodMapping[result.size()]);
+	}
+	
+	private void filterMethodMappings(IJavaElement[] children, int type, List<IMethodMapping> result) {
+		for (int idx = 0; idx < children.length; idx++) {
+			if (children[idx] instanceof IMethodMapping) {
 				IMethodMapping mapping = (IMethodMapping) children[idx];
-				switch(mapping.getElementType())
-				{
+				switch(mapping.getElementType()) {
 					case IOTJavaElement.CALLIN_MAPPING:
 					    if ((type & CALLINS) != 0)
 					        result.add(mapping);
@@ -127,8 +137,6 @@ public class RoleType extends OTType implements IRoleType
 				}
 			}
 		}
-		
-		return result.toArray(new IMethodMapping[result.size()]);
 	}
 
 	public boolean isRoleFile()

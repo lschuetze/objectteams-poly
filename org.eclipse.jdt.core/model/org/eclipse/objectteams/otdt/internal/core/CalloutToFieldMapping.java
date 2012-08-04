@@ -51,7 +51,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 			int sourceStart,
 			int sourceEnd,
             int declarationSourceEnd,
-            IRoleType role,
+            IType role,
             IMethod correspondingJavaElem, 
 			MethodData roleMethodHandle,
             IFieldAccessSpec baseFieldHandle,
