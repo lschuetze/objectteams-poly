@@ -553,6 +553,7 @@ public team class ViewAdaptor extends JFaceDecapsulator
 				public OTJavaElement resolved(char[] uniqueKey) { return null; /* don't care*/ }
 				protected void getBaseMethodsForHandle(StringBuffer buff) { /* don't care */}
 				protected char getMappingKindChar() { return 'o'; }
+				protected IRoleType getDeclaringRole() { return null; }
 			}
 			
 			class FakedType extends OTType {

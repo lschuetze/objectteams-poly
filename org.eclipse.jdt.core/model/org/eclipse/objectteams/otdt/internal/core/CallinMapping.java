@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
@@ -114,7 +115,20 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
     		getMethodForHandle(baseMethod, buff);
     }    
     // ====
-    
+
+	@Override
+	public IJavaElement getParent() {
+		// the parent of a callin mapping must be a role.
+		IJavaElement myParent = super.getParent();
+		if (myParent instanceof IRoleType)
+			return myParent;
+		return OTModelManager.getOTElement((IType)myParent);
+	}
+
+    protected IRoleType getDeclaringRole() {
+    	return (IRoleType)getParent();
+    }
+
     @Override
     protected String getSourceName() {
     	if (hasName())

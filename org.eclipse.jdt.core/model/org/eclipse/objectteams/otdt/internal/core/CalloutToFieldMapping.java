@@ -1,16 +1,15 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2012 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany, and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CalloutToFieldMapping.java 23416 2010-02-03 19:59:31Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -30,7 +29,6 @@ import org.eclipse.jdt.internal.core.JavaElement;
 import org.eclipse.jdt.internal.core.util.MementoTokenizer;
 import org.eclipse.objectteams.otdt.core.ICalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.core.IFieldAccessSpec;
-import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.internal.core.util.FieldData;
 import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
@@ -155,7 +153,7 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
      */
     private IField findBaseField() throws JavaModelException
     {
-        IType   baseClass   = ((IRoleType)getParent()).getBaseClass();
+        IType   baseClass   = getDeclaringRole().getBaseClass();
         IType[] typeParents = TypeHelper.getSuperTypes(baseClass);
                 
         return findField(typeParents, this.baseFieldHandle);

@@ -1,10 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2006 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MethodMapping.java 23401 2010-02-02 23:56:05Z stephan $
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -235,14 +234,6 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	{
 		this.roleMethod = meth;
 	}
-
-    public IType getRoleClass()
-    {
-        // TODO(jwl): simplify later
-    	IOTType owningType = (IOTType)getParent();
-    	
-    	return (IType)owningType.getCorrespondingJavaElement();
-    }
     
     /**
      * Only returns the role-methods part -- subclasses must override and 
@@ -300,7 +291,7 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 	 */
 	protected IMethod findRoleMethod() throws JavaModelException
 	{
-		IType[]    implicitParents = TypeHelper.getImplicitSuperTypes((IRoleType)getParent());
+		IType[]    implicitParents = TypeHelper.getImplicitSuperTypes(getDeclaringRole());
 		HashSet<IType> allParents      = new HashSet<IType>();
 
 		// collect all parents in role type hierarchy
@@ -324,6 +315,8 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 		return findMethod(allParents.toArray(new IType[allParents.size()]),
 						  this.roleMethodHandle);
 	}
+    
+	protected abstract IRoleType getDeclaringRole();
 
 	/**
 	 * Tries to find an IMethod matching the given methodHandle in a set
@@ -719,15 +712,6 @@ public abstract class MethodMapping extends OTJavaElement implements IMethodMapp
 		return 0;
 	}
 // km}
-
-	@Override
-	public IJavaElement getParent() {
-		// the parent of a method mapping must be a role.
-		IJavaElement myParent = super.getParent();
-		if (myParent instanceof IRoleType)
-			return myParent;
-		return OTModelManager.getOTElement((IType)myParent);
-	}
 
 	/**
 	 * Copied from Member.

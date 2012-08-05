@@ -175,7 +175,8 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
     	if (this.baseMethodHandle == null)
     		return null;
     	
-    	IType   baseClass   = ((IRoleType)getParent()).getBaseClass();
+    	IRoleType roleClass = getDeclaringRole();
+    	IType   baseClass   = roleClass.getBaseClass();
 		IType[] typeParents = TypeHelper.getSuperTypes(baseClass);
     	    	
     	return findMethod(typeParents, this.baseMethodHandle);
