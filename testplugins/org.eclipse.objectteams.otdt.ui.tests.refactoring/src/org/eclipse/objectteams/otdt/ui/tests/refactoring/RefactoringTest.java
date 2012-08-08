@@ -53,7 +53,6 @@ import org.eclipse.jdt.core.search.ITypeNameRequestor;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
@@ -63,7 +62,10 @@ import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.objectteams.otdt.core.IOTJavaElement;
+import org.eclipse.objectteams.otdt.internal.core.AbstractCalloutMapping;
 
+@SuppressWarnings("restriction")
 public abstract class RefactoringTest extends TestCase
 {
     private IPackageFragmentRoot _root;
@@ -496,7 +498,7 @@ public abstract class RefactoringTest extends TestCase
         {
             return new IField[0];
         }
-        Set fields = new HashSet();
+        Set<IField> fields = new HashSet<IField>();
         for (int i = 0; i < names.length; i++)
         {
             IField field = type.getField(names[i]);
@@ -504,7 +506,7 @@ public abstract class RefactoringTest extends TestCase
                     field.exists());
             fields.add(field);
         }
-        return (IField[])fields.toArray(new IField[fields.size()]);
+        return fields.toArray(new IField[fields.size()]);
     }
 
     public static IType[] getMemberTypes(IType type, String[] names)
@@ -514,7 +516,7 @@ public abstract class RefactoringTest extends TestCase
         {
             return new IType[0];
         }
-        Set memberTypes = new HashSet();
+        Set<IType> memberTypes = new HashSet<IType>();
         for (int i = 0; i < names.length; i++)
         {
             IType memberType = type.getType(names[i]);
@@ -522,20 +524,42 @@ public abstract class RefactoringTest extends TestCase
                     + " does not exist", memberType.exists());
             memberTypes.add(memberType);
         }
-        return (IType[])memberTypes.toArray(new IType[memberTypes.size()]);
+        return memberTypes.toArray(new IType[memberTypes.size()]);
     }
 
     public static IMethod[] getMethods(IType type, String[] names,
             String[][] signatures) throws JavaModelException
     {
+    	return getMethods(type, names, signatures, null, false);
+    }
+    public static IMethod[] getMethods(IType type, String[] names, String[][] signatures,
+    									boolean[] flags, boolean flag) 
+            		throws JavaModelException
+    {
         if (names == null || signatures == null)
         {
             return new IMethod[0];
         }
-        List methods = new ArrayList(names.length);
+        List<IMethod> methods = new ArrayList<IMethod>(names.length);
         for (int i = 0; i < names.length; i++)
         {
+        	// use flags to filter sub-set of names/signatures:
+        	if (flags != null && flags[i] != flag) continue;
+
             IMethod method = type.getMethod(names[i], signatures[i]);
+            if (!method.exists()) {
+            	// search a callout mapping that might be "equal" to this method:
+            	for (IJavaElement child : type.getChildren()) {
+            		int elementType = child.getElementType();
+					if (elementType == IOTJavaElement.CALLOUT_MAPPING || elementType == IOTJavaElement.CALLOUT_TO_FIELD_MAPPING) {
+						AbstractCalloutMapping map = (AbstractCalloutMapping) child;
+						if (method.equals(map.getCorrespondingJavaElement())) {
+							method = map;
+							break;
+						}
+					}
+            	}
+            }
             assertTrue("method " + method.getElementName() + " does not exist",
                     method.exists());
             if (!methods.contains(method))
@@ -543,12 +567,12 @@ public abstract class RefactoringTest extends TestCase
                 methods.add(method);
             }
         }
-        return (IMethod[])methods.toArray(new IMethod[methods.size()]);
+        return methods.toArray(new IMethod[methods.size()]);
     }
 
     public static IType[] findTypes(IType[] types, String[] namesOfTypesToPullUp)
     {
-        List found = new ArrayList(types.length);
+        List<IType> found = new ArrayList<IType>(types.length);
         for (int i = 0; i < types.length; i++)
         {
             IType type = types[i];
@@ -561,13 +585,13 @@ public abstract class RefactoringTest extends TestCase
                 }
             }
         }
-        return (IType[])found.toArray(new IType[found.size()]);
+        return found.toArray(new IType[found.size()]);
     }
 
     public static IField[] findFields(IField[] fields,
             String[] namesOfFieldsToPullUp)
     {
-        List found = new ArrayList(fields.length);
+        List<IField> found = new ArrayList<IField>(fields.length);
         for (int i = 0; i < fields.length; i++)
         {
             IField field = fields[i];
@@ -580,13 +604,13 @@ public abstract class RefactoringTest extends TestCase
                 }
             }
         }
-        return (IField[])found.toArray(new IField[found.size()]);
+        return found.toArray(new IField[found.size()]);
     }
 
     public static IMethod[] findMethods(IMethod[] selectedMethods,
             String[] namesOfMethods, String[][] signaturesOfMethods)
     {
-        List found = new ArrayList(selectedMethods.length);
+        List<IMethod> found = new ArrayList<IMethod>(selectedMethods.length);
         for (int i = 0; i < selectedMethods.length; i++)
         {
             IMethod method = selectedMethods[i];
@@ -606,7 +630,7 @@ public abstract class RefactoringTest extends TestCase
                 found.add(method);
             }
         }
-        return (IMethod[])found.toArray(new IMethod[found.size()]);
+        return found.toArray(new IMethod[found.size()]);
     }
 
     private static boolean areSameSignatures(String[] s1, String[] s2)

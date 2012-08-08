@@ -1,3 +1,19 @@
+/**********************************************************************
+ * This file is part of "Object Teams Development Tooling"-Software
+ * 
+ * Copyright 2010, 2012 Johannes Gebauer and others.
+ * 
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Please visit http://www.objectteams.org for updates and contact.
+ * 
+ * Contributors:
+ *		Johannes Gebauer - Initial API and implementation
+ *		Stephan Herrmann - Bug fixes and improvements
+ **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.refactoring.adaptor.pullup;
 
 import java.util.ArrayList;
@@ -6,6 +22,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.Assert;
@@ -20,9 +37,24 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NodeFinder;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
@@ -31,8 +63,19 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
+import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.TypeVariableMaplet;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -46,6 +89,7 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
+import org.eclipse.objectteams.otdt.internal.core.AbstractCalloutMapping;
 import org.eclipse.objectteams.otdt.internal.core.RoleType;
 import org.eclipse.objectteams.otdt.internal.refactoring.RefactoringMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IAmbuguityMessageCreator;
@@ -53,8 +97,10 @@ import org.eclipse.objectteams.otdt.internal.refactoring.util.IOverloadingMessag
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 import org.eclipse.osgi.util.NLS;
 
+import base org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
+import base org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 
 /**
  * @author Johannes Gebauer
@@ -427,9 +473,126 @@ public team class PullUpAdaptor {
 		}
 		
 		needsVisibilityAdjustment <- replace needsVisibilityAdjustment;
-			
+
+		void createAbstractMethod(IMethod sourceMethod, CompilationUnitRewrite sourceRewriter, CompilationUnit declaringCuNode, AbstractTypeDeclaration destination, TypeVariableMaplet[] mapping, CompilationUnitRewrite targetRewrite, Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, IProgressMonitor monitor, RefactoringStatus status)
+		<- replace void createAbstractMethod(IMethod sourceMethod, CompilationUnitRewrite sourceRewriter, CompilationUnit declaringCuNode, AbstractTypeDeclaration destination, TypeVariableMaplet[] mapping, CompilationUnitRewrite targetRewrite, Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, IProgressMonitor monitor, RefactoringStatus status)
+			base when (sourceMethod instanceof IMethodMapping);
+
+		/** support creation of an abstract method from a callout mapping. */
+		@SuppressWarnings({ "inferredcallout", "basecall" })
+		callin void createAbstractMethod(IMethod sourceMethod, CompilationUnitRewrite sourceRewriter, CompilationUnit declaringCuNode, AbstractTypeDeclaration destination, TypeVariableMaplet[] mapping, CompilationUnitRewrite targetRewrite, Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, IProgressMonitor monitor, RefactoringStatus status)
+				throws JavaModelException 
+		{
+			// search callout decl, not method decl:
+			final CalloutMappingDeclaration oldCallout= getCalloutDeclarationNode(sourceMethod, declaringCuNode);
+			if (JavaModelUtil.is50OrHigher(sourceMethod.getJavaProject()) && (fSettings.overrideAnnotation || JavaCore.ERROR.equals(sourceMethod.getJavaProject().getOption(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, true)))) {
+				final MarkerAnnotation annotation= sourceRewriter.getAST().newMarkerAnnotation();
+				annotation.setTypeName(sourceRewriter.getAST().newSimpleName("Override")); //$NON-NLS-1$
+				sourceRewriter.getASTRewrite().getListRewrite(oldCallout, CalloutMappingDeclaration.MODIFIERS2_PROPERTY).insertFirst(annotation, sourceRewriter.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_override_annotation, SET_PULL_UP));
+			}
+			final MethodDeclaration newMethod= targetRewrite.getAST().newMethodDeclaration();
+			newMethod.setBody(null);
+			newMethod.setConstructor(false);
+// callout has no extra dimensions:
+//			newMethod.setExtraDimensions(oldCallout.getExtraDimensions());
+			newMethod.setJavadoc(null);
+			int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, Modifier.ABSTRACT | JdtFlags.clearFlag(Modifier.NATIVE | Modifier.FINAL, sourceMethod.getFlags()), adjustments, monitor, false, status);
+// callout doesn't support varargs syntax:
+//			if (oldCallout.isVarargs())
+//				modifiers&= ~Flags.AccVarargs;
+			newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(targetRewrite.getAST(), modifiers));
+			newMethod.setName(((SimpleName) ASTNode.copySubtree(targetRewrite.getAST(), oldCallout.getRoleMappingElement().getName())));
+			copyReturnType(targetRewrite.getASTRewrite(), getDeclaringType().getCompilationUnit(), (MethodSpec)oldCallout.getRoleMappingElement(), newMethod, mapping);
+			copyParameters(targetRewrite.getASTRewrite(), getDeclaringType().getCompilationUnit(), (MethodSpec)oldCallout.getRoleMappingElement(), newMethod, mapping);
+// callout does not declare exceptions:
+//			copyThrownExceptions(oldCallout, newMethod);
+			ImportRewriteContext context= new ContextSensitiveImportRewriteContext(destination, targetRewrite.getImportRewrite());
+			ImportRewriteUtil.addImports(targetRewrite, context, newMethod, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
+			targetRewrite.getASTRewrite().getListRewrite(destination, destination.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, destination.bodyDeclarations()), targetRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_abstract_method, SET_PULL_UP));
+		}
+
+		// ==== COPY&PASTE from base class, use MethodSpec as a template rather then MethodDeclaration: ====
+		
+		@SuppressWarnings("inferredcallout")
+		protected void copyReturnType(ASTRewrite rewrite, ICompilationUnit unit, MethodSpec oldMethod, final MethodDeclaration newMethod, final TypeVariableMaplet[] mapping) throws JavaModelException {
+			Type newReturnType= null;
+			if (mapping.length > 0)
+				newReturnType= createPlaceholderForType(oldMethod.getReturnType2(), unit, mapping, rewrite);
+			else
+				newReturnType= createPlaceholderForType(oldMethod.getReturnType2(), unit, rewrite);
+			newMethod.setReturnType2(newReturnType);
+		}
+
+		@SuppressWarnings("inferredcallout")
+		protected void copyParameters(ASTRewrite rewrite, ICompilationUnit unit, MethodSpec oldMethod, MethodDeclaration newMethod, TypeVariableMaplet[] mapping) throws JavaModelException {
+			SingleVariableDeclaration newDeclaration= null;
+			for (int index= 0, size= oldMethod.parameters().size(); index < size; index++) {
+				final SingleVariableDeclaration oldDeclaration= (SingleVariableDeclaration) oldMethod.parameters().get(index);
+				if (mapping.length > 0)
+					newDeclaration= createPlaceholderForSingleVariableDeclaration(oldDeclaration, unit, mapping, rewrite);
+				else
+					newDeclaration= createPlaceholderForSingleVariableDeclaration(oldDeclaration, unit, rewrite);
+				newMethod.parameters().add(newDeclaration);
+			}
+		}
 	}
 
+	static CalloutMappingDeclaration getCalloutDeclarationNode(IMethod iMethod, CompilationUnit cuNode) throws JavaModelException {
+		ASTNode node = NodeFinder.perform(cuNode, iMethod.getNameRange());
+		return (CalloutMappingDeclaration)ASTNodes.getParent(node, CalloutMappingDeclaration.class);
+	}
+
+	/**
+	 * Enable pull-up also for callout mappings. 
+	 */
+	protected class Availability playedBy RefactoringAvailabilityTester {
+
+		boolean isPullUpAvailable(IMember member) <- replace boolean isPullUpAvailable(IMember member);
+
+		static callin boolean isPullUpAvailable(IMember member) throws JavaModelException {
+			if (base.isPullUpAvailable(member))
+				return true;
+			int kind = member.getElementType();
+			switch (kind) {
+			case IOTJavaElement.CALLOUT_MAPPING:
+			case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
+				// extract from base method:
+				if (!member.exists())
+					return false;
+				if (!Checks.isAvailable(member))
+					return false;
+				return true;
+			default:
+				return false;
+			}
+		}
+
+		IMember[] getPullUpMembers(IType type) <- replace IMember[] getPullUpMembers(IType type);
+
+		static callin IMember[] getPullUpMembers(IType type) throws JavaModelException {
+			IMember[] result = base.getPullUpMembers(type);
+			if (OTModelManager.isRole(type)) {
+				List<IMember> callouts = new ArrayList<IMember>();
+				for (IJavaElement elem : type.getChildren()) {
+					switch (elem.getElementType()) {
+					case IOTJavaElement.CALLOUT_MAPPING:
+					case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
+						callouts.add((IMember) elem);
+					}
+				}
+				if (callouts.size() > 0) {
+					int l1 = result.length, l2 = callouts.size();
+					IMember[] combined = new IMember[l1+l2];
+					callouts.toArray(combined);
+					System.arraycopy(result, 0, combined, l2, l1);
+					return combined;
+				}
+			}
+			return result;
+		}		
+	}
+
+	/** Visibility checking for callout mappings. */
 	protected class Visibility playedBy MemberVisibilityAdjustor {
 
 		IJavaElement getFReferencing() -> get IJavaElement fReferencing;
@@ -518,6 +681,74 @@ public team class PullUpAdaptor {
 				monitor.done();
 			}
 			return keyword;
+		}
+		
+		// simple adjustment: for visibility checks in incoming direction the corresponding IMethod suffices:
+		ModifierKeyword getVisibilityThreshold(IMember referenced)
+		<- replace ModifierKeyword getVisibilityThreshold(IJavaElement referencing, IMember referenced, IProgressMonitor monitor)
+			base when(referenced instanceof AbstractCalloutMapping)
+			with { referenced <- referenced, result -> result }
+
+		callin ModifierKeyword getVisibilityThreshold(IMember referencedMovedElement) throws JavaModelException {
+			IMethod method = (IMethod) ((AbstractCalloutMapping)referencedMovedElement).getCorrespondingJavaElement();
+			return base.getVisibilityThreshold(method);
+		}
+	}
+	
+	/**
+	 * Method ReferenceFinderUtil.getMethodsReferencedIn
+	 * should also report callout mappings as methods.
+	 */
+	protected class ReferenceFinder playedBy ReferenceFinderUtil {
+
+		/** Adapt the method that filters METHOD elements. */
+		Set<IJavaElement> extractMethods(SearchMatch[] searchResults)
+		<- replace Set<IJavaElement> extractElements(SearchMatch[] searchResults, int elementType)
+			base when (elementType == IJavaElement.METHOD);
+
+		@SuppressWarnings("basecall")
+		static callin Set<IJavaElement> extractMethods( SearchMatch[] searchResults) {
+			Set<IJavaElement> elements= new HashSet<IJavaElement>();
+			for (int i= 0; i < searchResults.length; i++) {
+				IJavaElement el= SearchUtils.getEnclosingJavaElement(searchResults[i]);
+				if (el instanceof IMember) {
+					el = methodOrCallout((IMember) el);
+					if (el != null)
+						elements.add(el);
+				}
+			}
+			return elements;
+		}
+		static IJavaElement methodOrCallout(IMember member) {
+			int memberType = member.getElementType();
+			if (member.exists()) {
+				switch (memberType) {
+				case IJavaElement.METHOD:
+				case IOTJavaElement.CALLOUT_MAPPING:
+				case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
+					return member;
+				default: 
+					return null;
+				}
+			}
+            if (memberType == IJavaElement.METHOD) {
+            	// search a callout mapping that might be "equal" to this method:
+            	IType type = member.getDeclaringType();
+            	try {
+					for (IJavaElement child : type.getChildren()) {
+						int elementType = child.getElementType();
+						if (elementType == IOTJavaElement.CALLOUT_MAPPING || elementType == IOTJavaElement.CALLOUT_TO_FIELD_MAPPING) {
+							AbstractCalloutMapping map = (AbstractCalloutMapping) child;
+							if (member.equals(map.getCorrespondingJavaElement())) {
+								return map;
+							}
+						}
+					}
+				} catch (JavaModelException e) {
+					return null;
+				}
+            }
+            return null;
 		}
 	}
 }

@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.core.search.indexing.*;
 import org.eclipse.jdt.internal.core.search.matching.*;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
+import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 
 /**
@@ -1557,6 +1558,10 @@ public class BasicSearchEngine {
 			case IJavaElement.METHOD:
 			case IJavaElement.TYPE:
 			case IJavaElement.COMPILATION_UNIT:
+//{ObjectTeams: callouts are valid, too:
+			case IOTJavaElement.CALLOUT_MAPPING:
+			case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
+// SH}
 				// valid element type
 				break;
 			default:
@@ -1584,6 +1589,10 @@ public class BasicSearchEngine {
 			case IJavaElement.METHOD:
 			case IJavaElement.TYPE:
 			case IJavaElement.COMPILATION_UNIT:
+//{ObjectTeams: callouts are valid, too:
+			case IOTJavaElement.CALLOUT_MAPPING:
+			case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
+// SH}
 				// valid element type
 				break;
 			default:
@@ -1611,6 +1620,10 @@ public class BasicSearchEngine {
 			case IJavaElement.METHOD:
 			case IJavaElement.TYPE:
 			case IJavaElement.COMPILATION_UNIT:
+//{ObjectTeams: callouts are valid, too:
+			case IOTJavaElement.CALLOUT_MAPPING:
+			case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
+// SH}
 				// valid element type
 				break;
 			default:

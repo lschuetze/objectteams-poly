@@ -129,15 +129,21 @@ public class PullUpTests extends RefactoringTest {
 	 */
 	private void performPullUp_pass(String[] cuNames, String[] methodNames, String[][] signatures, String[] fieldNames, boolean deleteAllInSourceType,
 			boolean deleteAllMatchingMethods, int targetClassIndex, String nameOfDeclaringType) throws Exception {
+		performPullUp_pass(cuNames, methodNames, signatures, null, fieldNames, deleteAllInSourceType, deleteAllMatchingMethods, targetClassIndex, nameOfDeclaringType);
+	}
+	private void performPullUp_pass(String[] cuNames, String[] methodNames, String[][] signatures, boolean[] makeAbstract, String[] fieldNames,
+			boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, int targetClassIndex, String nameOfDeclaringType) throws Exception {
 		ICompilationUnit[] cus = createCUs(cuNames);
 		try {
 
 			IType declaringType = getType(cus[0], nameOfDeclaringType);
-			IMethod[] methods = getMethods(declaringType, methodNames, signatures);
+			IMethod[] methods = getMethods(declaringType, methodNames, signatures, makeAbstract, false);
 			IField[] fields = getFields(declaringType, fieldNames);
 			IMember[] members = merge(methods, fields);
 
 			PullUpRefactoringProcessor processor = createRefactoringProcessor(members);
+			if (makeAbstract != null)
+				processor.setAbstractMethods(getMethods(declaringType, methodNames, signatures, makeAbstract, true));
 			Refactoring ref = processor.getRefactoring();
 
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
@@ -329,7 +335,16 @@ public class PullUpTests extends RefactoringTest {
 	}
 	
 	// Bug 374841 - [refactoring] pull up does not work among (nested) roles
-	public void testPullUpWithReferenceToCallout()  throws Exception {
-		performPullUp_pass(new String[] {"T", "B"}, new String[]{"foo"}, new String[][] { new String[0] }, new String[0], true, true, 0, "RSub");
+	public void testPullUpWithReferenceToCallout1()  throws Exception {
+		// without pull-up of getS1/getS2 we cannot succeed:
+		performPullUp_failing(new String[] {"T", "B"}, new String[]{"foo"}, new String[][] { new String[0] }, new String[0], true, true, 0, "RSub");
+	}
+	// Bug 386587 - [refactoring] pull-up refactoring cannot handle callout bindings
+	public void testPullUpWithReferenceToCallout2()  throws Exception {
+		performPullUp_pass(new String[] {"T", "B"}, 
+						new String[]{"foo", "getS1", "getS2"}, 
+						new String[][] { new String[0], new String[0], new String[0] }, 
+						new boolean[] {false, true, true}, 
+						new String[0], true, true, 0, "RSub");
 	}
 }
