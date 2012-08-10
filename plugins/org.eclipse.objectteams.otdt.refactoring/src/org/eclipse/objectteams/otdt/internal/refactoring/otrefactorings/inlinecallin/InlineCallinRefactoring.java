@@ -425,16 +425,17 @@ public class InlineCallinRefactoring extends Refactoring {
 				1));
 		for (int i = 0; i < referencedMethods.length; i++) {
 			IMethod referencedMethod = referencedMethods[i];
-			if (referencedMethod.getDeclaringType().equals(fRoleType)) {
+			if (   referencedMethod.getElementType() == IJavaElement.METHOD // not for callout mappings
+				&& referencedMethod.getDeclaringType().equals(fRoleType)) {
 				status.merge(RefactoringStatus.createErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_methodUsesRoleMethod_error,
 						fRoleMethodName, referencedMethod)));
 			}
 		}
 
-		IField[] referencedFileds = ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[] { fRoleMethod }, null /* owner */, new SubProgressMonitor(pm,
+		IField[] referencedFields = ReferenceFinderUtil.getFieldsReferencedIn(new IJavaElement[] { fRoleMethod }, null /* owner */, new SubProgressMonitor(pm,
 				1));
-		for (int i = 0; i < referencedFileds.length; i++) {
-			IField referencedFiled = referencedFileds[i];
+		for (int i = 0; i < referencedFields.length; i++) {
+			IField referencedFiled = referencedFields[i];
 			if (referencedFiled.getDeclaringType().equals(fRoleType)) {
 				status.merge(RefactoringStatus.createErrorStatus(NLS.bind(OTRefactoringMessages.InlineCallinRefactoring_methodUsesRoleField_error,
 						fRoleMethodName, referencedFiled)));
