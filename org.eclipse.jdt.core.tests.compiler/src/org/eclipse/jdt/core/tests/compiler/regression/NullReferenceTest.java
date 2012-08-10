@@ -22,6 +22,7 @@
  * 							bug 349326 - [1.7] new warning for missing try-with-resources
  * 							bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
  * 							bug 367879 - Incorrect "Potential null pointer access" warning on statement after try-with-resources within try-finally
+ * 							bug 383690 - [compiler] location of error re uninitialized final field should be aligned
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -11005,9 +11006,9 @@ public void test2014_flow_info() {
 			"  }\n" +
 			"}\n"},
 		"----------\n" +
-		"1. ERROR in X.java (at line 12)\n" +
-		"	class Inner extends X {\n" +
-		"	      ^^^^^\n" +
+		"1. ERROR in X.java (at line 20)\n" +
+		"	final int m164;\n" +
+		"	          ^^^^\n" +
 		"The blank final field m164 may not have been initialized\n" +
 		"----------\n");
 }
@@ -11070,11 +11071,11 @@ public void test2015_flow_info() {
 			"    System.out.println((new Inner()).bar());\n" +
 			"  }\n" +
 			"}\n"},
-		"----------\n" +
-		"1. ERROR in X.java (at line 26)\n" +
-		"	class Inner extends X {\n" +
-		"	      ^^^^^\n" +
-		"The blank final field m164 may not have been initialized\n" +
+		"----------\n" + 
+		"1. ERROR in X.java (at line 34)\n" + 
+		"	final int m164;\n" + 
+		"	          ^^^^\n" + 
+		"The blank final field m164 may not have been initialized\n" + 
 		"----------\n");
 }
 
@@ -11879,9 +11880,11 @@ public void testBug303448a() throws Exception {
 				"        [pc: 4, line: 7]\n" + 
 				"        [pc: 26, line: 8]\n" + 
 				"        [pc: 30, line: 9]\n" + 
+				"        [pc: 38, line: 10]\n" + 
 				"        [pc: 41, line: 11]\n" + 
 				"        [pc: 49, line: 13]\n" + 
 				"        [pc: 53, line: 14]\n" + 
+				"        [pc: 61, line: 15]\n" + 
 				"        [pc: 64, line: 16]\n" + 
 				"        [pc: 72, line: 19]\n" + 
 				"      Local variable table:\n" + 
@@ -11931,9 +11934,11 @@ public void testBug303448a() throws Exception {
 						"        [pc: 4, line: 7]\n" + 
 						"        [pc: 26, line: 8]\n" + 
 						"        [pc: 30, line: 9]\n" + 
+						"        [pc: 38, line: 10]\n" + 
 						"        [pc: 41, line: 11]\n" + 
 						"        [pc: 49, line: 13]\n" + 
 						"        [pc: 53, line: 14]\n" + 
+						"        [pc: 61, line: 15]\n" + 
 						"        [pc: 64, line: 16]\n" + 
 						"        [pc: 72, line: 19]\n" + 
 						"      Local variable table:\n" + 
@@ -11982,9 +11987,11 @@ public void testBug303448a() throws Exception {
 						"        [pc: 4, line: 7]\n" + 
 						"        [pc: 26, line: 8]\n" + 
 						"        [pc: 30, line: 9]\n" + 
+						"        [pc: 38, line: 10]\n" + 
 						"        [pc: 41, line: 11]\n" + 
 						"        [pc: 49, line: 13]\n" + 
 						"        [pc: 53, line: 14]\n" + 
+						"        [pc: 61, line: 15]\n" + 
 						"        [pc: 64, line: 16]\n" + 
 						"        [pc: 72, line: 19]\n" + 
 						"      Local variable table:\n" + 
