@@ -107,7 +107,7 @@ public class Scanner implements TerminalTokens {
     private int _dotSeen = 0; // 0: no, 1: previos, 2: this token
 
     public boolean _insideParameterMapping = false;
-    enum LookaheadState { INIT, ONE_TOKEN, ID_SEEN, MATCH, ID_CONSUMED }
+    enum LookaheadState { INIT, ONE_TOKEN, ID_SEEN, TWO_TOKENS, ID_CONSUMED }
     /** 
      * A little state machine for lookahead of up-to 2 tokens.
      * This is used to disambiguate whether a '->' inside parameter mappings is
@@ -129,7 +129,7 @@ public class Scanner implements TerminalTokens {
 			}
 		}
 		public char[] getIdentifier() {
-			if (this.state == LookaheadState.MATCH) {
+			if (this.state == LookaheadState.TWO_TOKENS) {
 				return this.identifier;
 			}
 			return null;
@@ -147,17 +147,18 @@ public class Scanner implements TerminalTokens {
 				case ID_SEEN :
 					// == we've seen an identifier					=> check if second token matches, too
 					this.tokens[1] = Scanner.this.getNextToken0();
+					this.positions[1] = new int[] {Scanner.this.startPosition, Scanner.this.currentPosition};
+					this.state = LookaheadState.TWO_TOKENS;
 					switch (this.tokens[1]) {
-						case TerminalTokens.TokenNameCOMMA :	// more mappings?
-						case TerminalTokens.TokenNameSEMICOLON :// more mappings? (wrong delimiter, though)
-						case TerminalTokens.TokenNameRBRACE :	// end of parameter mappings?
-							this.positions[1] = new int[] {Scanner.this.startPosition, Scanner.this.currentPosition};
-							this.state = LookaheadState.MATCH;
-							return TokenNameSYNTHBINDOUT; // match, tweak '->' to mean SYNTHBINDOUT
+						case TerminalTokens.TokenNameCOMMA :	  // more mappings?
+						case TerminalTokens.TokenNameSEMICOLON :  // more mappings? (wrong delimiter, though)
+						case TerminalTokens.TokenNameRBRACE :	  // end of parameter mappings?
+							return TokenNameSYNTHBINDOUT; 		  // match, tweak '->' to mean SYNTHBINDOUT
+						default:
+							return TerminalTokens.TokenNameARROW; // no match, '->' should be interpreted as normal
 					}
-					return TerminalTokens.TokenNameARROW; // no match, '->' should be interpreted as normal
-				case MATCH :
-					// == we've seen a full match					=> pop the identifier now
+				case TWO_TOKENS :
+					// == we've seen & stored two tokens			=> pop the identifier now
 					this.state = LookaheadState.ID_CONSUMED;
 					return popToken(0);
 				case ID_CONSUMED :
