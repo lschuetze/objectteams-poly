@@ -232,9 +232,9 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 
     	// return type:
 		TypeBinding returnType = null;
-    	if (referenceMethod != null && ! referenceMethod.ignoreFurtherInvestigation) {
+    	if (referenceMethod != null) {
     		returnType = MethodModel.getReturnType(referenceMethod.binding);
-			if (returnType.isBaseType()) {
+			if (returnType != null && returnType.isBaseType()) {
 				if (returnType != TypeBinding.VOID)
 					this._wrappee = gen.createUnboxing(this._wrappee, (BaseTypeBinding)returnType);
 				else if (outerCallinMethod == null)

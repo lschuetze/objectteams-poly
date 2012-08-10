@@ -24,7 +24,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.BaseCallMessageSend;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.objectteams.otdt.ui.tests.dom.FileBasedDOMTest;
 
@@ -95,4 +98,29 @@ public class DOMRegressionTests extends FileBasedDOMTest {
 		assertEquals("No fields expected",nestedTeam.getFields().length, 0);
 	}
 
+	// Bug 386704 - Requesting AST throws NPE if base class is unresolved
+	// request resolved AST despite syntax error (missing ';')
+	public void testBug386704() throws JavaModelException {
+		ICompilationUnit teamClass = getCompilationUnit(
+                getTestProjectDir(),
+                "src",
+                "regression.basecall",
+                "T.java");
+		ASTParser parser = ASTParser.newParser(JAVA_LANGUAGE_SPEC_LEVEL);
+		parser.setProject(getJavaProject(TEST_PROJECT));
+		parser.setSource(teamClass);
+		parser.setStatementsRecovery(true);
+		parser.setResolveBindings(true);
+		
+		ASTNode root = parser.createAST( new NullProgressMonitor() );        
+		CompilationUnit compUnit = (CompilationUnit) root;
+		TypeDeclaration topTeam = (TypeDeclaration) compUnit.types().get(0);
+		TypeDeclaration role = (TypeDeclaration) topTeam.getTypes()[0];
+		MethodDeclaration method = (MethodDeclaration) role.bodyDeclarations().get(1);
+		IfStatement ifStat = (IfStatement) method.getBody().statements().get(0);
+		BaseCallMessageSend basecall = (BaseCallMessageSend) ifStat.getExpression();
+		// note: the bug was related to mistakenly converted generated fields.
+		assertEquals("Call to foo expected", "foo", basecall.getName().getIdentifier());
+	}
+	
 }
