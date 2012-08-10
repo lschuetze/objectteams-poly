@@ -1060,7 +1060,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		return this.resolvedType;
 	}
 // SH}
-	// error scenarii
+	// error scenario
 	return this.resolvedType = reportError(scope);
 }
 
