@@ -233,17 +233,20 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
     	// return type:
 		TypeBinding returnType = null;
     	if (referenceMethod != null) {
-    		returnType = MethodModel.getReturnType(referenceMethod.binding);
-			if (returnType != null && returnType.isBaseType()) {
-				if (returnType != TypeBinding.VOID)
-					this._wrappee = gen.createUnboxing(this._wrappee, (BaseTypeBinding)returnType);
-				else if (outerCallinMethod == null)
-					// store value which is not used locally but has to be chained to the caller.
-					// (cannot set result in outer callin method!)
-					this._wrappee = gen.assignment(
-							gen.singleNameReference(IOTConstants.OT_RESULT), this._wrappee);
+			MethodBinding methodBinding = referenceMethod.binding;
+			if (methodBinding != null) {
+				returnType = MethodModel.getReturnType(methodBinding);
+				if (returnType != null && returnType.isBaseType()) {
+					if (returnType != TypeBinding.VOID)
+						this._wrappee = gen.createUnboxing(this._wrappee, (BaseTypeBinding)returnType);
+					else if (outerCallinMethod == null)
+						// store value which is not used locally but has to be chained to the caller.
+						// (cannot set result in outer callin method!)
+						this._wrappee = gen.assignment(
+								gen.singleNameReference(IOTConstants.OT_RESULT), this._wrappee);
+				}
 			}
-    	}
+		}
 
     	// check context:
 		if (outerCallinMethod==null) // already found appropriate context?
