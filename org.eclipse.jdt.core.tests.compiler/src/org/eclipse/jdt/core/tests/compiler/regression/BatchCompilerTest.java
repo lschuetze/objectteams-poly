@@ -1782,6 +1782,16 @@ public void test012b(){
         "      javadoc              invalid javadoc\n" +
         "      localHiding          local variable hiding another variable\n" +
         "      maskedCatchBlock   + hidden catch block\n" +
+        "      missingJavadocTags   missing Javadoc tags\n" + 
+        "      missingJavadocTagsOverriding missing Javadoc tags in overriding methods\n" + 
+        "      missingJavadocTagsMethod missing Javadoc tags for method type parameter\n" + 
+        "      missingJavadocTagsVisibility(<visibility>)  specify visibility modifier\n" + 
+        "							for missing javadoc tags warnings\n" + 
+        "      missingJavadocComments   missing Javadoc comments\n" + 
+        "      missingJavadocCommentsOverriding   missing Javadoc tags in overriding\n" + 
+        "							methods\n" + 
+        "      missingJavadocCommentsVisibility(<visibility>)  specify visibility\n" + 
+        "							modifier for missing javadoc comments warnings\n" + 
         "      nls                  string literal lacking non-nls tag //$NON-NLS-<n>$\n" +
         "      noEffectAssign     + assignment without effect\n" +
         "      null                 potential missing or redundant null check\n" +
