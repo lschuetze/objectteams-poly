@@ -17,6 +17,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.tests.otjld.callinbinding;
 
+import java.io.File;
 import java.util.Map;
 
 import junit.framework.Test;
@@ -1979,6 +1980,7 @@ public class BaseCalls extends AbstractOTJLDTest {
 
     	String jarFilename = "T4513bsa3.jar";
     	String destPath = this.outputRootDirectoryPath+"/regression";
+    	new File(destPath).mkdirs();
     	// upload the jar:
 		Util.copy(getTestResourcePath(jarFilename), destPath);
     	// setup classpath:
