@@ -139,7 +139,7 @@ public class PullUpTests extends RefactoringTest {
 
 			setTargetClass(processor, targetClassIndex);
 
-			List<IMethod> methodList = new ArrayList<>();
+			List<IMethod> methodList = new ArrayList<IMethod>();
 			if (deleteAllInSourceType)
 				methodList.addAll(Arrays.asList(methods));
 			if (deleteAllMatchingMethods)
