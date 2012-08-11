@@ -66,7 +66,11 @@ import java.util.List;
  * @since 2.0
  * @noinstantiate This class is not intended to be instantiated by clients.
  */
-public class MethodDeclaration extends BodyDeclaration {
+public class MethodDeclaration extends BodyDeclaration
+//{ObjectTeams: allow generalization with MethodSpec:
+								implements IMethodNode
+// SH}
+{
 
 	/**
 	 * The "javadoc" structural property of this node type (child type: {@link Javadoc}).

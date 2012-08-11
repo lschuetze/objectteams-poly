@@ -20,6 +20,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.pullup;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -52,6 +53,7 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
  * 
  * @author Johannes Gebauer
  */
+@SuppressWarnings("restriction")
 public class PullUpTests extends RefactoringTest {
 	private static final String REFACTORING_PATH = "PullUp/";
 
@@ -81,19 +83,6 @@ public class PullUpTests extends RefactoringTest {
 		return cus;
 	}
 
-	private String createInputTestFileName(ICompilationUnit[] cus, int idx) {
-		return getInputTestFileName(getSimpleNameOfCu(cus[idx].getElementName()));
-	}
-
-	private String createOutputTestFileName(ICompilationUnit[] cus, int idx) {
-		return getOutputTestFileName(getSimpleNameOfCu(cus[idx].getElementName()));
-	}
-
-	private String getSimpleNameOfCu(String compUnit) {
-		int dot = compUnit.lastIndexOf('.');
-		return compUnit.substring(0, dot);
-	}
-
 	private void setTargetClass(PullUpRefactoringProcessor processor, int targetClassIndex) throws JavaModelException {
 		IType[] possibleClasses = getPossibleTargetClasses(processor);
 		processor.setDestinationType(getPossibleTargetClasses(processor)[possibleClasses.length - 1 - targetClassIndex]);
@@ -104,8 +93,8 @@ public class PullUpTests extends RefactoringTest {
 	}
 
 	private static IMethod[] getMethods(IMember[] members) {
-		List l = Arrays.asList(JavaElementUtil.getElementsOfType(members, IJavaElement.METHOD));
-		return (IMethod[]) l.toArray(new IMethod[l.size()]);
+		List<IJavaElement> l = Arrays.asList(JavaElementUtil.getElementsOfType(members, IJavaElement.METHOD));
+		return l.toArray(new IMethod[l.size()]);
 	}
 
 	private static PullUpRefactoringProcessor createRefactoringProcessor(IMember[] methods) throws JavaModelException {
@@ -150,10 +139,13 @@ public class PullUpTests extends RefactoringTest {
 
 			setTargetClass(processor, targetClassIndex);
 
+			List<IMethod> methodList = new ArrayList<>();
 			if (deleteAllInSourceType)
-				processor.setDeletedMethods(methods);
+				methodList.addAll(Arrays.asList(methods));
 			if (deleteAllMatchingMethods)
-				processor.setDeletedMethods(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false)));
+				methodList.addAll(Arrays.asList(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false))));
+			if (!methodList.isEmpty())
+				processor.setDeletedMethods(methodList.toArray(new IMethod[methodList.size()]));
 
 			RefactoringStatus checkInputResult = ref.checkFinalConditions(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());

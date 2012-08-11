@@ -41,7 +41,7 @@ import java.util.List;
  *
  * @author jsv
  */
-public class MethodSpec extends MethodMappingElement
+public class MethodSpec extends MethodMappingElement implements IMethodNode
 {
 	/**
 	 * The "signature" structural property of this node type.

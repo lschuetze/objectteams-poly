@@ -28,6 +28,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -39,22 +40,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.MarkerAnnotation;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodSpec;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.NodeFinder;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
@@ -78,8 +64,11 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.TypeVariableMaplet;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -104,7 +93,9 @@ import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 import org.eclipse.osgi.util.NLS;
 
 import base org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
+import base org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor;
+import base org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
 
@@ -114,9 +105,15 @@ import base org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinde
  */
 @SuppressWarnings({ "restriction", "decapsulation" }) // private base classes
 public team class PullUpAdaptor {
-
-	public class PullUpRefactoringProcessorRole playedBy PullUpRefactoringProcessor {
+	
+	protected team class PullUpRefactoringProcessorRole playedBy PullUpRefactoringProcessor {
 		
+
+		public ChangeManagerDetails changeManagerDetails; // set when this team is activated (see #createChangeManager())
+
+
+		// callout (constant):
+		GroupCategorySet getSET_PULL_UP() -> get GroupCategorySet SET_PULL_UP;
 		// callouts (fields):
 		void setFCachedSkippedSuperTypes(Set<IType> fCachedSkippedSuperTypes) 
 																-> set Set<IType> fCachedSkippedSuperTypes;
@@ -569,10 +566,92 @@ public team class PullUpAdaptor {
 			targetRewrite.getASTRewrite().getListRewrite(destination, destination.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, destination.bodyDeclarations()), targetRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_abstract_method, SET_PULL_UP));
 		}
 
+		createChangeManager <- replace createChangeManager;
+		@SuppressWarnings("inferredcallout")
+		callin void createChangeManager(IProgressMonitor monitor, RefactoringStatus status) throws CoreException {
+			IType destinationType = getDestinationType();
+			IType declaringType = getDeclaringType();
+			this.changeManagerDetails = new ChangeManagerDetails(getCompilationUnitRewrite(fCompilationUnitRewrites, declaringType.getCompilationUnit()),
+																 getCompilationUnitRewrite(fCompilationUnitRewrites, destinationType.getCompilationUnit()),
+																 declaringType,
+																 destinationType, 
+																 status,
+																 monitor);
+			within (this)
+				base.createChangeManager(monitor, status);
+		}
+
+		/** during createChangeManager we add callouts to the declaration nodes to be removed. */
+		protected team class HierarchyProcRole playedBy HierarchyProcessor {
+			// Note: when defined in role PullUpRefactoringProcessorRole this currently triggers a VerifyError
+			
+			// === for removal of old callout declarations: ===
+			List<ASTNode> getDeclarationNodes(CompilationUnit cuNode, List<IMember> members) 
+			<- replace  List<ASTNode> getDeclarationNodes(CompilationUnit cuNode, List<IMember> members);
+				
+			static callin List<ASTNode> getDeclarationNodes(CompilationUnit cuNode, List<IMember> members)
+					throws JavaModelException 
+			{
+				List<ASTNode> result = base.getDeclarationNodes(cuNode, members);
+				for (IMember member : members) {
+					ASTNode node= null;
+					if (member instanceof AbstractCalloutMapping)
+						node= getCalloutDeclarationNode((IMethod) member, cuNode);
+					if (node != null)
+						result.add(node);
+				}
+				return result;
+			}
+		}
+
+		/** during createChangeManager we intercept the visibility adjustments: */
+		protected class Adjustor playedBy MemberVisibilityAdjustor {
+			setAdjustments <- after setAdjustments;
+
+			private void setAdjustments(Map<IMember, IncomingMemberVisibilityAdjustment> map) {
+				PullUpRefactoringProcessorRole.this.changeManagerDetails.adjustments = map;
+			}
+		}
+
+		/** during createChangeManager we hook into getMethodDeclarationNode to handle callouts, too: */
+		protected class CalloutUtil playedBy ASTNodeSearchUtil {
+			getMethodDeclarationNode <- replace getMethodDeclarationNode
+				base when (!PullUpRefactoringProcessorRole.this.isExecutingCallin());  // inhibit callin trigger during getDeclarationNodes()
+
+			@SuppressWarnings("basecall")
+			static callin MethodDeclaration getMethodDeclarationNode(IMethod iMethod, CompilationUnit compilationUnit) throws JavaModelException {
+				if (iMethod instanceof AbstractCalloutMapping) {
+					// cf block inside org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor.createChangeManager()
+					// which starts "} else if (member instanceof IMethod) {":
+					CalloutMappingDeclaration oldCallout = getCalloutDeclarationNode(iMethod, compilationUnit);
+					if (oldCallout != null) {
+						CompilationUnitRewrite sourceRewriter = PullUpRefactoringProcessorRole.this.changeManagerDetails.sourceRewrite;
+						CompilationUnitRewrite rewrite = PullUpRefactoringProcessorRole.this.changeManagerDetails.rewrite;
+						AbstractTypeDeclaration declaration = PullUpRefactoringProcessorRole.this.changeManagerDetails.declaration;
+						ImportRewriteContext context = PullUpRefactoringProcessorRole.this.changeManagerDetails.context;
+						RefactoringStatus status = PullUpRefactoringProcessorRole.this.changeManagerDetails.status;
+						TypeVariableMaplet[] mapping = PullUpRefactoringProcessorRole.this.changeManagerDetails.mapping;
+						Map<IMember, IncomingMemberVisibilityAdjustment> adjustments = PullUpRefactoringProcessorRole.this.changeManagerDetails.adjustments;
+						ASTRewrite rewriter = rewrite.getASTRewrite();
+						IProgressMonitor subsub = PullUpRefactoringProcessorRole.this.changeManagerDetails.monitor;
+						
+						if (JdtFlags.isStatic(iMethod) && getDestinationType().isInterface())
+							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.PullUpRefactoring_moving_static_method_to_interface, new String[] { JavaElementLabels.getTextLabel(iMethod, JavaElementLabels.ALL_FULLY_QUALIFIED)}), JavaStatusContext.create(iMethod)));
+						CalloutMappingDeclaration newMethod= createNewCalloutDeclarationNode(sourceRewriter, rewrite, iMethod, oldCallout, mapping, adjustments, new SubProgressMonitor(subsub, 1), status);
+						rewriter.getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), rewrite.createCategorizedGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member, getSET_PULL_UP()));
+						ImportRewriteUtil.addImports(rewrite, context, oldCallout, new HashMap<Name, String>(), new HashMap<Name, String>(), false);
+
+					}
+					return null;
+				}
+				return base.getMethodDeclarationNode(iMethod, compilationUnit);
+			}
+		}
+		
 		// ==== COPY&PASTE from base class, use MethodSpec as a template rather then MethodDeclaration: ====
 		
 		@SuppressWarnings("inferredcallout")
-		protected void copyReturnType(ASTRewrite rewrite, ICompilationUnit unit, MethodSpec oldMethod, final MethodDeclaration newMethod, final TypeVariableMaplet[] mapping) throws JavaModelException {
+		protected void copyReturnType(ASTRewrite rewrite, ICompilationUnit unit, MethodSpec oldMethod, IMethodNode newMethod, TypeVariableMaplet[] mapping) throws JavaModelException {
 			Type newReturnType= null;
 			if (mapping.length > 0)
 				newReturnType= createPlaceholderForType(oldMethod.getReturnType2(), unit, mapping, rewrite);
@@ -582,7 +661,7 @@ public team class PullUpAdaptor {
 		}
 
 		@SuppressWarnings("inferredcallout")
-		protected void copyParameters(ASTRewrite rewrite, ICompilationUnit unit, MethodSpec oldMethod, MethodDeclaration newMethod, TypeVariableMaplet[] mapping) throws JavaModelException {
+		protected void copyParameters(ASTRewrite rewrite, ICompilationUnit unit, MethodSpec oldMethod, IMethodNode newMethod, TypeVariableMaplet[] mapping) throws JavaModelException {
 			SingleVariableDeclaration newDeclaration= null;
 			for (int index= 0, size= oldMethod.parameters().size(); index < size; index++) {
 				final SingleVariableDeclaration oldDeclaration= (SingleVariableDeclaration) oldMethod.parameters().get(index);
@@ -592,6 +671,61 @@ public team class PullUpAdaptor {
 					newDeclaration= createPlaceholderForSingleVariableDeclaration(oldDeclaration, unit, rewrite);
 				newMethod.parameters().add(newDeclaration);
 			}
+		}
+
+		@SuppressWarnings("inferredcallout")
+		CalloutMappingDeclaration createNewCalloutDeclarationNode(CompilationUnitRewrite sourceRewrite, CompilationUnitRewrite targetRewrite, 
+				IMethod sourceMethod, CalloutMappingDeclaration oldCallout, TypeVariableMaplet[] mapping, Map<IMember, IncomingMemberVisibilityAdjustment> adjustments, IProgressMonitor monitor, RefactoringStatus status) 
+				throws JavaModelException 
+		{
+			final ASTRewrite rewrite= targetRewrite.getASTRewrite();
+			final AST ast= rewrite.getAST();
+			final CalloutMappingDeclaration newCallout= ast.newCalloutMappingDeclaration();
+// TODO: copy parameter mappings:
+//			if (!getDestinationType().isInterface())
+//				copyBodyOfPulledUpMethod(sourceRewrite, targetRewrite, sourceMethod, oldCallout, newMethod, mapping, monitor);
+			copyJavadocNode(rewrite, oldCallout, newCallout);
+			int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, sourceMethod.getFlags(), adjustments, monitor, true, status);
+
+// TODO
+//			copyAnnotations(oldCallout, newMethod);
+			newCallout.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
+			newCallout.setRoleMappingElement(createNewMethodSpec(ast, rewrite, mapping, (MethodSpec) oldCallout.getRoleMappingElement()));
+			MethodMappingElement baseMappingElement = oldCallout.getBaseMappingElement();
+			if (baseMappingElement instanceof MethodSpec) {
+				newCallout.setBaseMappingElement(createNewMethodSpec(ast, rewrite, mapping, (MethodSpec) baseMappingElement));
+			} else {
+				newCallout.setBaseMappingElement(createNewFieldSpec(ast, rewrite, mapping, (FieldAccessSpec) baseMappingElement));
+				newCallout.bindingOperator().setBindingModifier(ast.newModifier(oldCallout.bindingOperator().bindingModifier().getKeyword()));
+			}
+			newCallout.setSignatureFlag(oldCallout.hasSignature());
+			return newCallout;
+		}
+		MethodSpec createNewMethodSpec(AST ast, ASTRewrite rewrite, TypeVariableMaplet[] mapping, MethodSpec oldMethodSpec) throws JavaModelException {
+			MethodSpec newMethodSpec = ast.newMethodSpec();
+			newMethodSpec.setName(((SimpleName) ASTNode.copySubtree(ast, oldMethodSpec.getName())));
+			if (oldMethodSpec.hasSignature()) {
+				copyReturnType(rewrite, getDeclaringType().getCompilationUnit(), oldMethodSpec, newMethodSpec, mapping);
+				copyParameters(rewrite, getDeclaringType().getCompilationUnit(), oldMethodSpec, newMethodSpec, mapping);
+				newMethodSpec.setSignatureFlag(oldMethodSpec.hasSignature());
+//				copyTypeParameters(oldMethodSpec, newMethodSpec);
+			}
+			return newMethodSpec;
+		}
+		@SuppressWarnings("inferredcallout")
+		FieldAccessSpec createNewFieldSpec(AST ast, ASTRewrite rewrite, TypeVariableMaplet[] mapping, FieldAccessSpec oldFieldSpec) throws JavaModelException {
+			FieldAccessSpec newFieldSpec = ast.newFieldAccessSpec();
+			newFieldSpec.setName(((SimpleName) ASTNode.copySubtree(ast, oldFieldSpec.getName())));
+			if (oldFieldSpec.hasSignature()) {
+				Type newFielType= null;
+				if (mapping.length > 0)
+					newFielType= createPlaceholderForType(oldFieldSpec.getFieldType(), getDeclaringType().getCompilationUnit(), mapping, rewrite);
+				else
+					newFielType= createPlaceholderForType(oldFieldSpec.getFieldType(), getDeclaringType().getCompilationUnit(), rewrite);
+				newFieldSpec.setFieldType(newFielType);
+				newFieldSpec.setSignatureFlag(oldFieldSpec.hasSignature());
+			}
+			return newFieldSpec;
 		}
 	}
 
@@ -668,6 +802,8 @@ public team class PullUpAdaptor {
 			try {
 				base.checkOTMember(member, monitor);
 			} catch (JavaModelException jme) {
+				// when a MethodDeclarationMatch reports a SourceMethod representation actually a callout mapping
+				// the method answers that it doesn't exist, that's what we intercept here:
 				if (jme.getJavaModelStatus().isDoesNotExist()) {
 					IType type = member.getDeclaringType();
 					IOTType ottype = OTModelManager.getOTElement(type);
