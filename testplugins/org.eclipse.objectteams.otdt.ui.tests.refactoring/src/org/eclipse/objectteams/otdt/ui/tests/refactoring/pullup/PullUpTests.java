@@ -364,7 +364,7 @@ public class PullUpTests extends RefactoringTest {
 						new String[][] { new String[0], new String[0], new String[0] }, 
 						new boolean[] {false, false, true},  // true pull up of callout not possible 
 						new String[0], true, true, 0, "RSub",
-						new String[]{"The callout binding 'getS1() -> String s' can only be moved to a bound role (OTJLD \uFFFD3.1.(a))."});
+						new String[]{"The callout binding 'getS1() -> String s' can only be moved to a bound role (OTJLD \u00A73.1.(a))."});
 	}
 	// Bug 386814 - [refactoring] pull-up should distinguish callouts that can be pull-up vs. abstract decl.
 	public void testPullUpCallout2()  throws Exception {
@@ -382,7 +382,7 @@ public class PullUpTests extends RefactoringTest {
 						new boolean[] {false, false, false},  // true pull up of callout, which are NOT available in super base (B1)
 						new String[0], true, true, 0, "RSub",
 						new String[]{
-								"The callout binding 'getS1() -> String s' cannot be moved to class 'RSuper', because the the bound base member 's' will not be accessible after refactoring (OTJLD \uFFFD3.1.(a)).",
-								"The callout binding 'getS2() -> getS()' cannot be moved to class 'RSuper', because the the bound base member 'getS' will not be accessible after refactoring (OTJLD \uFFFD3.1.(a))."});
+								"The callout binding 'getS1() -> String s' cannot be moved to class 'RSuper', because the the bound base member 's' will not be accessible after refactoring (OTJLD \u00A73.1.(a)).",
+								"The callout binding 'getS2() -> getS()' cannot be moved to class 'RSuper', because the the bound base member 'getS' will not be accessible after refactoring (OTJLD \u00A73.1.(a))."});
 	}
 }
