@@ -19,6 +19,9 @@ public class RefactoringMessages extends NLS {
 	public static String MoveInstanceMethodAdaptor_overloading_error;
 	public static String PullUpAdaptor_ambiguousMethodSpec_error;
 	public static String PullUpAdaptor_callinMethodToNonRole_error;
+	public static String PullUpAdaptor_calloutToNonRole_error;
+	public static String PullUpAdaptor_calloutToUnboundRole_error;
+	public static String PullUpAdaptor_calloutBaseNotBoundInDest_error;
 	public static String PullUpAdaptor_checkOverloading_progress;
 	public static String PullUpAdaptor_checkOverriding_progress;
 	public static String PullUpAdaptor_checkShadowing_progress;
@@ -26,6 +29,7 @@ public class RefactoringMessages extends NLS {
 	public static String PullUpAdaptor_overloading_error;
 	public static String PullUpAdaptor_overriding_error;
 	public static String PullUpAdaptor_referencedByMethodBinding_error;
+	public static String PullUpAdaptor_referencedCalloutUnresolvedBaseMember_error;
 	public static String PushDownAdaptor_ambiguousMethodSpec_error;
 	public static String PushDownAdaptor_boundAsCallout_error;
 	public static String PushDownAdaptor_boundAsCTF_error;

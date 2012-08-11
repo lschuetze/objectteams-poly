@@ -221,15 +221,25 @@ public class PullUpTests extends RefactoringTest {
 	
 	private void performPullUp_failing(String[] cuNames, String[] methodNames, String[][] signatures, String[] fieldNames, boolean deleteAllInSourceType,
 			boolean deleteAllMatchingMethods, int targetClassIndex, String nameOfDeclaringType) throws Exception {
+		performPullUp_failing(cuNames, methodNames, signatures, null,
+				fieldNames, deleteAllInSourceType, deleteAllMatchingMethods, targetClassIndex, nameOfDeclaringType,
+				null);
+	}	
+	private void performPullUp_failing(String[] cuNames, String[] methodNames, String[][] signatures, boolean[] makeAbstract, String[] fieldNames, boolean deleteAllInSourceType,
+			boolean deleteAllMatchingMethods, int targetClassIndex, String nameOfDeclaringType, String[] errorMessages)
+					throws Exception
+	{
 		ICompilationUnit[] cus = createCUs(cuNames);
 		try {
 
 			IType declaringType = getType(cus[0], nameOfDeclaringType);
-			IMethod[] methods = getMethods(declaringType, methodNames, signatures);
+			IMethod[] methods = getMethods(declaringType, methodNames, signatures, makeAbstract, false);
 			IField[] fields = getFields(declaringType, fieldNames);
 			IMember[] members = merge(methods, fields);
 
 			PullUpRefactoringProcessor processor = createRefactoringProcessor(members);
+			if (makeAbstract != null)
+				processor.setAbstractMethods(getMethods(declaringType, methodNames, signatures, makeAbstract, true));
 			Refactoring ref = processor.getRefactoring();
 
 			setTargetClass(processor, targetClassIndex);
@@ -243,7 +253,15 @@ public class PullUpTests extends RefactoringTest {
 			assertNotNull("precondition was supposed to fail.", result);
             assertTrue("precondition was supposed to fail.", !result.isOK());
 			assertNotNull("precondition result is expected to contain an error.", result.getEntryMatchingSeverity(RefactoringStatus.ERROR));
-
+			if (errorMessages != null) {
+				int i=0;
+				for(RefactoringStatusEntry entry : result.getEntries()) {
+					if (entry.isFatalError()) {
+						assertEquals("Wrong error message", errorMessages[i++], entry.getMessage());
+					}
+				}
+				assertEquals("Wrong number of error messages", errorMessages.length, i);
+			}
 		} finally {
 			performDummySearch();
 			for (int i = 0; i < cus.length; i++) {
@@ -346,5 +364,33 @@ public class PullUpTests extends RefactoringTest {
 						new String[][] { new String[0], new String[0], new String[0] }, 
 						new boolean[] {false, true, true}, 
 						new String[0], true, true, 0, "RSub");
+	}
+	// Bug 386814 - [refactoring] pull-up should distinguish callouts that can be pull-up vs. abstract decl.
+	public void testPullUpCallout1()  throws Exception {
+		performPullUp_failing(new String[] {"T", "B"}, 
+						new String[]{"foo", "getS1", "getS2"}, 
+						new String[][] { new String[0], new String[0], new String[0] }, 
+						new boolean[] {false, false, true},  // true pull up of callout not possible 
+						new String[0], true, true, 0, "RSub",
+						new String[]{"The callout binding 'getS1() -> String s' can only be moved to a bound role (OTJLD \uFFFD3.1.(a))."});
+	}
+	// Bug 386814 - [refactoring] pull-up should distinguish callouts that can be pull-up vs. abstract decl.
+	public void testPullUpCallout2()  throws Exception {
+		performPullUp_pass(new String[] {"T", "B0", "B1", "B2"}, 
+						new String[]{"foo", "getS1", "getS2"}, 
+						new String[][] { new String[0], new String[0], new String[0] }, 
+						new boolean[] {false, false, false},  // true pull up of callout 
+						new String[0], true, true, 0, "RSub");
+	}
+	// Bug 386814 - [refactoring] pull-up should distinguish callouts that can be pull-up vs. abstract decl.
+	public void testPullUpCallout3()  throws Exception {
+		performPullUp_failing(new String[] {"T", "B0", "B1", "B2"}, 
+						new String[]{"foo", "getS1", "getS2"}, 
+						new String[][] { new String[0], new String[0], new String[0] }, 
+						new boolean[] {false, false, false},  // true pull up of callout, which are NOT available in super base (B1)
+						new String[0], true, true, 0, "RSub",
+						new String[]{
+								"The callout binding 'getS1() -> String s' cannot be moved to class 'RSuper', because the the bound base member 's' will not be accessible after refactoring (OTJLD \uFFFD3.1.(a)).",
+								"The callout binding 'getS2() -> getS()' cannot be moved to class 'RSuper', because the the bound base member 'getS' will not be accessible after refactoring (OTJLD \uFFFD3.1.(a))."});
 	}
 }

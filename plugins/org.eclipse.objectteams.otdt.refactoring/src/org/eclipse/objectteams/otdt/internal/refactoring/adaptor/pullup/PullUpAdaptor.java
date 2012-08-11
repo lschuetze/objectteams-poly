@@ -40,9 +40,12 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CalloutMappingDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodSpec;
@@ -76,6 +79,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdj
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -90,6 +94,8 @@ import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.TypeHelper;
 import org.eclipse.objectteams.otdt.core.hierarchy.OTTypeHierarchies;
 import org.eclipse.objectteams.otdt.internal.core.AbstractCalloutMapping;
+import org.eclipse.objectteams.otdt.internal.core.CalloutMapping;
+import org.eclipse.objectteams.otdt.internal.core.CalloutToFieldMapping;
 import org.eclipse.objectteams.otdt.internal.core.RoleType;
 import org.eclipse.objectteams.otdt.internal.refactoring.RefactoringMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IAmbuguityMessageCreator;
@@ -132,7 +138,7 @@ public team class PullUpAdaptor {
 			status.merge(checkOverloadingAndAmbiguity(pm));
 			status.merge(checkOverriding(pm));
 			if(TypeHelper.isRole(getDeclaringType().getFlags())){
-				status.merge(checkDestinationForOTElements());
+				status.merge(checkDestinationForOTElements(pm));
 				status.merge(checkShadowingFieldInImplicitHierarchy(pm));
 			}
 		}
@@ -193,7 +199,7 @@ public team class PullUpAdaptor {
 			
 		}
 		
-		private RefactoringStatus checkDestinationForOTElements() throws JavaModelException {
+		private RefactoringStatus checkDestinationForOTElements(IProgressMonitor pm) throws JavaModelException {
 			RefactoringStatus status = new RefactoringStatus();
 			for (int i = 0; i < getFMembersToMove().length; i++) {
 				IMember element = getFMembersToMove()[i];
@@ -203,6 +209,44 @@ public team class PullUpAdaptor {
 					if(Flags.isCallin(method.getFlags()) && !TypeHelper.isRole(getDestinationType().getFlags())){
 						String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_callinMethodToNonRole_error, method.getElementName());
 						status.addFatalError(msg, JavaStatusContext.create(method));
+					} else {
+						// for callout bindings check if the base member will be accessible after refactoring:
+						IMember baseMember = null;
+						switch (element.getElementType()) {
+						case IOTJavaElement.CALLOUT_MAPPING:
+							baseMember = ((CalloutMapping)element).getBoundBaseMethod();
+							break;
+						case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
+							baseMember = ((CalloutToFieldMapping)element).getBoundBaseField();
+							break;
+						}
+						if (baseMember != null) {
+							IType requiredBaseType = baseMember.getDeclaringType();
+							IType destinationType = getDestinationType();
+							if (!TypeHelper.isRole(destinationType.getFlags())) {
+								String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_calloutToNonRole_error, method.getElementName());
+								status.addFatalError(msg, JavaStatusContext.create(method));
+							} else {
+								IRoleType roleType = (IRoleType) OTModelManager.getOTElement(destinationType);
+								IType baseClass = roleType.getBaseClass();
+								if (baseClass == null) {
+									String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_calloutToUnboundRole_error, method.getElementName());
+									status.addFatalError(msg, JavaStatusContext.create(method));									
+								} else {
+									IJavaElement[] elements = new IJavaElement[]{requiredBaseType, baseClass};
+									ASTParser astParser = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+									astParser.setProject(getDeclaringType().getJavaProject());
+									IBinding[] bindings = astParser.createBindings(elements, pm);
+									ITypeBinding requiredBaseBinding = (ITypeBinding)bindings[0];
+									ITypeBinding baseOfDestination = (ITypeBinding)bindings[1];
+									if (!baseOfDestination.isAssignmentCompatible(requiredBaseBinding)) {
+										String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_calloutBaseNotBoundInDest_error, 
+																new Object[]{method.getElementName(), destinationType.getElementName(), baseMember.getElementName()});
+										status.addFatalError(msg, JavaStatusContext.create(method));											
+									}
+								}
+							}
+						}
 					}
 				}
 			}
@@ -375,13 +419,19 @@ public team class PullUpAdaptor {
 					Object element= match.getElement();
 					if (element instanceof ICalloutMapping) {
 						ICalloutMapping mapping = (ICalloutMapping) element;
-						if(mapping.getBoundBaseMethod().equals(member)){
+						IMethod boundBaseMethod = mapping.getBoundBaseMethod();
+						if (boundBaseMethod == null) {
+							addUnresolvedBaseMemberError(mapping, status, member);
+						} else if(boundBaseMethod.equals(member)){
 							addAspectBindingWarning(member, status, mapping);
 						}
 					}
 					if (element instanceof ICalloutToFieldMapping) {
 						ICalloutToFieldMapping mapping = (ICalloutToFieldMapping) element;
-						if(mapping.getBoundBaseField().equals(member)){
+						IField boundBaseField = mapping.getBoundBaseField();
+						if (boundBaseField == null) {
+							addUnresolvedBaseMemberError(mapping, status, member);
+						} else if(boundBaseField.equals(member)){
 							addAspectBindingWarning(member, status, mapping);
 						}
 					}
@@ -399,6 +449,14 @@ public team class PullUpAdaptor {
 			return status;
 		}
 		
+		private void addUnresolvedBaseMemberError(IMethodMapping referencedMapping, RefactoringStatus status, IMember member) 
+		{
+			status.addEntry(new RefactoringStatusEntry(RefactoringStatus.ERROR,
+					NLS.bind(RefactoringMessages.PullUpAdaptor_referencedCalloutUnresolvedBaseMember_error,
+							 referencedMapping.getElementName(),
+							 member.getElementName())));
+		}
+
 		/**
 		 * Adds a warning to the given refactoring status that notifies the user about existing aspect bingings.
 		 * 
