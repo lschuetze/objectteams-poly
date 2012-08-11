@@ -851,22 +851,37 @@ public class Syntax extends AbstractOTJLDTest {
 			    "	\n"
             },
             "----------\n" + 
-    		"1. ERROR in Team881br2.java (at line 8)\n" + 
+    		"1. ERROR in Team881br2.java (at line 6)\n" + 
+    		"	with { result <- result.intValue() };\n" + 
+    		"	      ^\n" + 
+    		"Syntax error on token \";\", & expected before this token\n" + 
+    		"----------\n" + 
+    		"2. ERROR in Team881br2.java (at line 6)\n" + 
+    		"	with { result <- result.intValue() };\n" + 
+    		"	                       ^\n" + 
+    		"Syntax error on token \".\", delete this token\n" + 
+    		"----------\n" + 
+    		"3. ERROR in Team881br2.java (at line 6)\n" + 
+    		"	with { result <- result.intValue() };\n" + 
+    		"	                                 ^\n" + 
+    		"Syntax error on token \")\", { expected after this token\n" + 
+    		"----------\n" + 
+    		"4. ERROR in Team881br2.java (at line 8)\n" + 
     		"	abstract int wrong(noTypeGiven);\n" + 
     		"	             ^^^^^^\n" + 
     		"Abstract methods do not specify a body\n" + 
     		"----------\n" + 
-    		"2. ERROR in Team881br2.java (at line 8)\n" + 
+    		"5. ERROR in Team881br2.java (at line 8)\n" + 
     		"	abstract int wrong(noTypeGiven);\n" + 
     		"	                   ^^^^^^^^^^^\n" + 
     		"Syntax error on token \"noTypeGiven\", VariableDeclaratorId expected after this token\n" + 
     		"----------\n" + 
-    		"3. ERROR in Team881br2.java (at line 9)\n" + 
+    		"6. ERROR in Team881br2.java (at line 9)\n" + 
     		"	}\n" + 
     		"	^\n" + 
     		"Syntax error on token \"}\", delete this token\n" + 
     		"----------\n" + 
-    		"4. ERROR in Team881br2.java (at line 10)\n" + 
+    		"7. ERROR in Team881br2.java (at line 10)\n" + 
     		"	}	\n" + 
     		"	^\n" + 
     		"Syntax error, insert \"}\" to complete ClassBody\n" + 
@@ -904,22 +919,43 @@ public class Syntax extends AbstractOTJLDTest {
 			    "	\n"
             },
             "----------\n" + 
-    		"1. ERROR in Team881br3.java (at line 14)\n" + 
+    		"1. ERROR in Team881br3.java (at line 7)\n" + 
+    		"	with { result <- result.intValue() };\n" + 
+    		"	      ^\n" + 
+    		"Syntax error on token \";\", & expected before this token\n" + 
+    		"----------\n" + 
+    		"2. ERROR in Team881br3.java (at line 7)\n" + 
+    		"	with { result <- result.intValue() };\n" + 
+    		"	                       ^\n" + 
+    		"Syntax error on token \".\", delete this token\n" + 
+    		"----------\n" + 
+    		"3. ERROR in Team881br3.java (at line 7)\n" + 
+    		"	with { result <- result.intValue() };\n" + 
+    		"	                                 ^\n" + 
+    		"Syntax error on token \")\", { expected after this token\n" + 
+    		"----------\n" + 
+    		"4. ERROR in Team881br3.java (at line 11)\n" + 
+    		"	result -> result\n" + 
+    		"			}\n" + 
+    		"	^^^^^^^^^^^^^^^^^^^^^\n" + 
+    		"Syntax error on tokens, delete these tokens\n" + 
+    		"----------\n" + 
+    		"5. ERROR in Team881br3.java (at line 14)\n" + 
     		"	abstract int wrong(noTypeGiven);\n" + 
     		"	             ^^^^^^\n" + 
     		"Abstract methods do not specify a body\n" + 
     		"----------\n" + 
-    		"2. ERROR in Team881br3.java (at line 14)\n" + 
+    		"6. ERROR in Team881br3.java (at line 14)\n" + 
     		"	abstract int wrong(noTypeGiven);\n" + 
     		"	                   ^^^^^^^^^^^\n" + 
     		"Syntax error on token \"noTypeGiven\", VariableDeclaratorId expected after this token\n" + 
     		"----------\n" + 
-    		"3. ERROR in Team881br3.java (at line 15)\n" + 
+    		"7. ERROR in Team881br3.java (at line 15)\n" + 
     		"	}\n" + 
     		"	^\n" + 
     		"Syntax error on token \"}\", delete this token\n" + 
     		"----------\n" + 
-    		"4. ERROR in Team881br3.java (at line 16)\n" + 
+    		"8. ERROR in Team881br3.java (at line 16)\n" + 
     		"	}	\n" + 
     		"	^\n" + 
     		"Syntax error, insert \"}\" to complete ClassBody\n" + 

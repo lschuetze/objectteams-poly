@@ -343,10 +343,68 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
 			    "    \n"
             },
             "----------\n" + 
-    		"1. ERROR in Team321ciwmp6.java (at line 5)\n" + 
+    		"1. ERROR in Team321ciwmp6.java (at line 1)\n" + 
+    		"	\n" + 
+    		"public team class Team321ciwmp6 {\n" + 
+    		"	^\n" + 
+    		"Syntax error on token \";\", ++ expected before this token\n" + 
+    		"----------\n" + 
+    		"2. ERROR in Team321ciwmp6.java (at line 5)\n" + 
     		"	int doSomethingOther(int r1) -> int doSomething(int b1) wrong\n" + 
     		"	                                                        ^^^^^\n" + 
     		"Syntax error on token \"wrong\", delete this token\n" + 
+    		"----------\n" + 
+    		"3. ERROR in Team321ciwmp6.java (at line 9)\n" + 
+    		"	};\n" + 
+    		"	 ^\n" + 
+    		"Syntax error, insert \"}\" to complete ClassBody\n" + 
+    		"----------\n" + 
+    		"4. ERROR in Team321ciwmp6.java (at line 9)\n" + 
+    		"	};\n" + 
+    		"	 ^\n" + 
+    		"Syntax error, insert \"}\" to complete ClassBody\n" + 
+    		"----------\n" + 
+    		"5. ERROR in Team321ciwmp6.java (at line 11)\n" + 
+    		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" + 
+    		"	^^^\n" + 
+    		"Syntax error on token \"int\", @ expected\n" + 
+    		"----------\n" + 
+    		"6. ERROR in Team321ciwmp6.java (at line 11)\n" + 
+    		"	int doCalloutGetSomeFieldDoubled() -> get int someField\n" + 
+    		"                        with {\n" + 
+    		"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+    		"Syntax error on tokens, ClassHeader expected instead\n" + 
+    		"----------\n" + 
+    		"7. ERROR in Team321ciwmp6.java (at line 12)\n" + 
+    		"	with {\n" + 
+    		"                                result <- 2 * base.someField\n" + 
+    		"	      ^\n" + 
+    		"Syntax error on token \";\", & expected before this token\n" + 
+    		"----------\n" + 
+    		"8. ERROR in Team321ciwmp6.java (at line 13)\n" + 
+    		"	result <- 2 * base.someField\n" + 
+    		"	^^^^^^^^^^^^^\n" + 
+    		"Syntax error on tokens, delete these tokens\n" + 
+    		"----------\n" + 
+    		"9. ERROR in Team321ciwmp6.java (at line 13)\n" + 
+    		"	result <- 2 * base.someField\n" + 
+    		"	              ^^^^^\n" + 
+    		"Syntax error on tokens, delete these tokens\n" + 
+    		"----------\n" + 
+    		"10. ERROR in Team321ciwmp6.java (at line 13)\n" + 
+    		"	result <- 2 * base.someField\n" + 
+    		"	                  ^\n" + 
+    		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" + 
+    		"----------\n" + 
+    		"11. ERROR in Team321ciwmp6.java (at line 13)\n" + 
+    		"	result <- 2 * base.someField\n" + 
+    		"	                  ^\n" + 
+    		"Syntax error, insert \"EnumBody\" to complete ClassBodyDeclarations\n" + 
+    		"----------\n" + 
+    		"12. ERROR in Team321ciwmp6.java (at line 14)\n" + 
+    		"	};\n" + 
+    		"	^\n" + 
+    		"Syntax error on token \"}\", { expected\n" + 
     		"----------\n");
     }
 
