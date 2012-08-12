@@ -951,20 +951,20 @@ public team class PullUpAdaptor {
 		}
 	}
 
-	/** Gateway to a private inner class: */
-	protected class MemberActionInfo playedBy MemberActionInfo {
-		// Note: we would like to make this a nested role of WizardPage, but bug 387077 hits here
-
-		int getNO_ACTION() 						-> get int NO_ACTION;
-
-		protected IMember getMember()  			-> IMember getMember();			
-		protected boolean hasAction() 			-> int getAction()
-				with { result 					<- result != getNO_ACTION() }
-		protected void setAction(int action) 	-> void setAction(int action);
-	}
 
 	/** Help the first wizard page to avoid illegal settings (impossible pull-up of callout). */
 	protected team class WizardPage playedBy PullUpMemberPage {
+
+		/** Gateway to a private inner class: */
+		protected class MemberActionInfo playedBy MemberActionInfo {
+
+			int getNO_ACTION() 						-> get int NO_ACTION;
+			
+			protected IMember getMember()  			-> IMember getMember();			
+			protected boolean hasAction() 			-> int getAction()
+					with { result 					<- result != getNO_ACTION() }
+			protected void setAction(int action) 	-> void setAction(int action);
+		}
 
 		int getDECLARE_ABSTRACT_ACTION()   -> get int DECLARE_ABSTRACT_ACTION;
 		int getPULL_UP_ACTION() 		   -> get int PULL_UP_ACTION;
