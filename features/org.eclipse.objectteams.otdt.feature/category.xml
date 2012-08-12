@@ -25,4 +25,18 @@
    <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.1.0,2.2.0)">
       <category name="org.eclipse.objectteams.otdt_2.1"/>
    </iu>
+   <category-def name="org.eclipse.objectteams.otdt_2.2" label="OTDT 2.2 based on Eclipse 4.3">
+      <description>
+         The Object Teams Development Tooling versions 2.2.x based on Eclipse 4.3.x
+      </description>
+   </category-def>
+   <iu id="org.eclipse.objectteams.otdt.feature.group" range="[2.2.0,2.3.0)">
+      <category name="org.eclipse.objectteams.otdt_2.2"/>
+   </iu>
+   <iu id="org.eclipse.objectteams.otdt.source.feature.feature.group" range="[2.2.0,2.3.0)">
+      <category name="org.eclipse.objectteams.otdt_2.2"/>
+   </iu>
+   <iu id="org.eclipse.objectteams.otequinox.feature.group" range="[2.2.0,2.3.0)">
+      <category name="org.eclipse.objectteams.otdt_2.2"/>
+   </iu>
 </site>
