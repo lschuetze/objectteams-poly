@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2012 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -152,7 +152,7 @@ public abstract class ArrayTranslations {
 	        if (teamDecl.isRole()) {
 	        	// if team is a role, also generate a ifc-part for the method and use that
 	        	TypeDeclaration ifcPart = teamDecl.getRoleModel().getInterfaceAst();
-	        	MethodDeclaration ifcMethod = AstConverter.genIfcMethodFromBinding(ifcPart.enclosingType, methodBinding, new AstGenerator(transformMethod));
+	        	MethodDeclaration ifcMethod = AstConverter.genRoleIfcMethod(ifcPart, transformMethod);
 	        	AstEdit.addMethod(ifcPart, ifcMethod);
 	        	methodBinding = ifcMethod.binding;
 	        }

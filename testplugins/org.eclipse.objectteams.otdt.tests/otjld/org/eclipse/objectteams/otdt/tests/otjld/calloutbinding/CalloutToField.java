@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010 Stephan Herrmann
+ * Copyright 2010, 2012 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -234,11 +233,11 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-			"1. ERROR in Team331cg4.java (at line 8)\n" + 
-			"	getValue -> get value;\n" + 
-			"	                ^^^^^\n" + 
-			"Callout binding cannot resolve field value in type T331cg4 (OTJLD 3.5).\n" + 
+            "----------\n" +
+			"1. ERROR in Team331cg4.java (at line 8)\n" +
+			"	getValue -> get value;\n" +
+			"	                ^^^^^\n" +
+			"Callout binding cannot resolve field value in type T331cg4 (OTJLD 3.5).\n" +
 			"----------\n");
     }
 
@@ -273,12 +272,12 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-			"1. ERROR in Team331cg5.java (at line 8)\n" + 
-			"	getValue -> get value;\n" + 
-			"	^^^^^^^^\n" + 
-			"When binding field value via callout to role method getValue():\n" + 
-			"Incompatible types: can\'t convert java.lang.String to int (OTJLD 3.5(b)).\n" + 
+            "----------\n" +
+			"1. ERROR in Team331cg5.java (at line 8)\n" +
+			"	getValue -> get value;\n" +
+			"	^^^^^^^^\n" +
+			"When binding field value via callout to role method getValue():\n" +
+			"Incompatible types: can\'t convert java.lang.String to int (OTJLD 3.5(b)).\n" +
 			"----------\n");
     }
 
@@ -313,12 +312,12 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team331cg5b.java (at line 8)\n" + 
-    		"	int getValue() -> get String value;\n" + 
-    		"	^^^^^^^^^^^^^^\n" + 
-    		"When binding field value via callout to role method getValue():\n" + 
-    		"Incompatible types: can\'t convert java.lang.String to int (OTJLD 3.5(b)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team331cg5b.java (at line 8)\n" +
+    		"	int getValue() -> get String value;\n" +
+    		"	^^^^^^^^^^^^^^\n" +
+    		"When binding field value via callout to role method getValue():\n" +
+    		"Incompatible types: can\'t convert java.lang.String to int (OTJLD 3.5(b)).\n" +
     		"----------\n");
     }
 
@@ -352,11 +351,11 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team331cg5c.java (at line 8)\n" + 
-    		"	int getValue() -> get int value;\n" + 
-    		"	                      ^^^\n" + 
-    		"Field specifier \'value\' resolves to type java.lang.String whereas type int is specified (OTJLD 3.5(a)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team331cg5c.java (at line 8)\n" +
+    		"	int getValue() -> get int value;\n" +
+    		"	                      ^^^\n" +
+    		"Field specifier \'value\' resolves to type java.lang.String whereas type int is specified (OTJLD 3.5(a)).\n" +
     		"----------\n");
     }
 
@@ -878,11 +877,11 @@ public class CalloutToField extends AbstractOTJLDTest {
     			"    String f;\n" +
     			"}\n"
     		}, 
-    		"----------\n" + 
-    		"1. ERROR in Team332cg14.java (at line 3)\n" + 
-    		"	String getF() -> get void f;\n" + 
-    		"	                     ^^^^\n" + 
-    		"Field specifier \'f\' resolves to type java.lang.String whereas type void is specified (OTJLD 3.5(a)).\n" + 
+    		"----------\n" +
+    		"1. ERROR in Team332cg14.java (at line 3)\n" +
+    		"	String getF() -> get void f;\n" +
+    		"	                     ^^^^\n" +
+    		"Field specifier \'f\' resolves to type java.lang.String whereas type void is specified (OTJLD 3.5(a)).\n" +
     		"----------\n");
     }
     
@@ -1158,11 +1157,11 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team332cs4.java (at line 8)\n" + 
-    		"	setValue -> set value;\n" + 
-    		"	                ^^^^^\n" + 
-    		"Callout binding cannot resolve field value in type T332cs4 (OTJLD 3.5).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team332cs4.java (at line 8)\n" +
+    		"	setValue -> set value;\n" +
+    		"	                ^^^^^\n" +
+    		"Callout binding cannot resolve field value in type T332cs4 (OTJLD 3.5).\n" +
     		"----------\n");
     }
 
@@ -1198,12 +1197,12 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team332cs5.java (at line 8)\n" + 
-    		"	setValue -> set value;\n" + 
-    		"	^^^^^^^^\n" + 
-    		"When binding role method setValue(int) via callout to field value:\n" + 
-    		"Incompatible types: can\'t convert int to java.lang.String (OTJLD 3.5(b)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team332cs5.java (at line 8)\n" +
+    		"	setValue -> set value;\n" +
+    		"	^^^^^^^^\n" +
+    		"When binding role method setValue(int) via callout to field value:\n" +
+    		"Incompatible types: can\'t convert int to java.lang.String (OTJLD 3.5(b)).\n" +
     		"----------\n");
     }
 
@@ -1239,11 +1238,11 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team332cs5b.java (at line 8)\n" + 
-    		"	void setValue(int val) -> set int value;\n" + 
-    		"	                                  ^^^^^\n" + 
-    		"Field specifier \'value\' resolves to type java.lang.String whereas type int is specified (OTJLD 3.5(a)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team332cs5b.java (at line 8)\n" +
+    		"	void setValue(int val) -> set int value;\n" +
+    		"	                                  ^^^^^\n" +
+    		"Field specifier \'value\' resolves to type java.lang.String whereas type int is specified (OTJLD 3.5(a)).\n" +
     		"----------\n");
     }
 
@@ -1283,12 +1282,12 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team332cs6.java (at line 11)\n" + 
-    		"	setValue -> set value;\n" + 
-    		"	^^^^^^^^\n" + 
-    		"Cannot bind role method setValue() to field value:\n" + 
-    		"Missing parameter of type java.lang.String (OTJLD 3.5(b)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team332cs6.java (at line 11)\n" +
+    		"	setValue -> set value;\n" +
+    		"	^^^^^^^^\n" +
+    		"Cannot bind role method setValue() to field value:\n" +
+    		"Missing parameter of type java.lang.String (OTJLD 3.5(b)).\n" +
     		"----------\n");
     }
 
@@ -2201,11 +2200,11 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3315ctfo4.java (at line 8)\n" + 
-    		"	void setIt(String v) -> set String right;\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"Callout binding conflicts with inherited callout binding from class Team3315ctfo4.R1. Use \'=>\' if you want to override it (OTJLD 3.5(g)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3315ctfo4.java (at line 8)\n" +
+    		"	void setIt(String v) -> set String right;\n" +
+    		"	^^^^^^^^^^^^^^^^^^^^\n" +
+    		"Callout binding conflicts with inherited callout binding from class Team3315ctfo4.R1. Use \'=>\' if you want to override it (OTJLD 3.5(g)).\n" +
     		"----------\n");
     }
 
@@ -2233,11 +2232,11 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}	\n" +
 			    "	\n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3315ctfo5.java (at line 7)\n" + 
-    		"	void setIt(String v) -> set String right;\n" + 
-    		"	^^^^^^^^^^^^^^^^^^^^\n" + 
-    		"A non-abstract role method exists for this callout-binding. Use callout-override (\'=>\') if you want to override it (OTJLD 3.5(g)).\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3315ctfo5.java (at line 7)\n" +
+    		"	void setIt(String v) -> set String right;\n" +
+    		"	^^^^^^^^^^^^^^^^^^^^\n" +
+    		"A non-abstract role method exists for this callout-binding. Use callout-override (\'=>\') if you want to override it (OTJLD 3.5(g)).\n" +
     		"----------\n");
     }
 
@@ -3474,16 +3473,16 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "}\n" +
 			    "    \n"
             },
-            "----------\n" + 
-    		"1. ERROR in Team3320ictf16.java (at line 7)\n" + 
-    		"	this.val += 13;\n" + 
-    		"	^^^^^^^^\n" + 
-    		"Attempting to infer callout to base field val in a compound assignment (OTJLD 3.1(j)).\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team3320ictf16.java (at line 7)\n" + 
-    		"	this.val += 13;\n" + 
-    		"	     ^^^\n" + 
-    		"val cannot be resolved or is not a field\n" + 
+            "----------\n" +
+    		"1. ERROR in Team3320ictf16.java (at line 7)\n" +
+    		"	this.val += 13;\n" +
+    		"	^^^^^^^^\n" +
+    		"Attempting to infer callout to base field val in a compound assignment (OTJLD 3.1(j)).\n" +
+    		"----------\n" +
+    		"2. ERROR in Team3320ictf16.java (at line 7)\n" +
+    		"	this.val += 13;\n" +
+    		"	     ^^^\n" +
+    		"val cannot be resolved or is not a field\n" +
     		"----------\n",
             null/*classLibraries*/,
             true/*shouldFlushOutputDirectory*/,
@@ -3612,5 +3611,63 @@ public class CalloutToField extends AbstractOTJLDTest {
 			    "    \n"
             },
             "2");
+    }
+    // Bug 387077 - [compiler] illegal modifiers generated for callout to static field
+    // two problems:
+    // - complains about invisible b.Base.Inner (against role R)
+    // - when run is forced a ClassFormatError is triggered
+    public void testBug387077() {
+    	runConformTest(
+    		new String[] {
+    		"t/T.java",
+    			"package t;\n" +
+    			"\n" +
+    			"import base b.Base;\n" +
+    			"import base b.Base.Inner;\n" +
+    			"\n" +
+    			"@SuppressWarnings(\"decapsulation\")\n" +
+    			"public team class T {\n" +
+    			"\n" +
+    			"	protected team class R playedBy Base {\n" +
+    			"\n" +
+    			"		protected class RI playedBy Inner {\n" +
+    			"			protected void ok() -> void ok();\n" +
+    			"		}\n" +
+    			"\n" +
+    			"		int getZERO() -> get int ZERO;\n" +
+    			"		RI[] getInners() -> Inner[] getInners();\n" +
+    			"		\n" +
+    			"		protected void testR() {\n" +
+    			"			for (RI ri : getInners())\n" +
+    			"				ri.ok();\n" +
+    			"			System.out.println(getZERO());\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"\n" +
+    			"	public static void main(String[] args) {\n" +
+    			"		new T().testT(new b.Base());\n" +
+    			"	}\n" +
+    			"\n" +
+    			"	private void testT(Base as R r) {\n" +
+    			"		r.testR();\n" +
+    			"	}\n" +
+    			"}\n",
+        	"b/Base.java",
+    			"package b;\n" +
+    			"\n" +
+    			"public class Base {\n" +
+    			"	protected static final int ZERO = 0;\n" +
+    			"	\n" +
+    			"	private Inner[] getInners() {\n" +
+    			"		return new Inner[]{ new Inner() };\n" +
+    			"	}\n" +
+    			"	private class Inner {\n" +
+    			"		public void ok() {\n" +
+    			"			System.out.print(\"OK\");\n" +
+    			"		}\n" +
+    			"	}\n" +
+    			"}\n"
+    		},
+    		"OK0");
     }
 }
