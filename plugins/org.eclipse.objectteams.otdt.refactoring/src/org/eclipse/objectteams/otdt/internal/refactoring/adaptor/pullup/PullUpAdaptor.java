@@ -28,6 +28,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -60,8 +61,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
-import org.eclipse.jdt.internal.corext.refactoring.structure.TypeVariableMaplet;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
+import org.eclipse.jdt.internal.corext.refactoring.structure.TypeVariableMaplet;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -94,10 +95,12 @@ import org.eclipse.osgi.util.NLS;
 
 import base org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
-import base org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
+import base org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
+import base org.eclipse.jdt.internal.ui.refactoring.PullUpMemberPage;
+import base org.eclipse.jdt.internal.ui.refactoring.PullUpMemberPage.MemberActionInfo;
 
 /**
  * @author Johannes Gebauer
@@ -208,48 +211,50 @@ public team class PullUpAdaptor {
 						status.addFatalError(msg, JavaStatusContext.create(method));
 					} else {
 						// for callout bindings check if the base member will be accessible after refactoring:
-						IMember baseMember = null;
-						switch (element.getElementType()) {
-						case IOTJavaElement.CALLOUT_MAPPING:
-							baseMember = ((CalloutMapping)element).getBoundBaseMethod();
-							break;
-						case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
-							baseMember = ((CalloutToFieldMapping)element).getBoundBaseField();
-							break;
-						}
-						if (baseMember != null) {
-							IType requiredBaseType = baseMember.getDeclaringType();
-							IType destinationType = getDestinationType();
-							if (!TypeHelper.isRole(destinationType.getFlags())) {
-								String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_calloutToNonRole_error, method.getElementName());
-								status.addFatalError(msg, JavaStatusContext.create(method));
-							} else {
-								IRoleType roleType = (IRoleType) OTModelManager.getOTElement(destinationType);
-								IType baseClass = roleType.getBaseClass();
-								if (baseClass == null) {
-									String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_calloutToUnboundRole_error, method.getElementName());
-									status.addFatalError(msg, JavaStatusContext.create(method));									
-								} else {
-									IJavaElement[] elements = new IJavaElement[]{requiredBaseType, baseClass};
-									ASTParser astParser = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
-									astParser.setProject(getDeclaringType().getJavaProject());
-									IBinding[] bindings = astParser.createBindings(elements, pm);
-									ITypeBinding requiredBaseBinding = (ITypeBinding)bindings[0];
-									ITypeBinding baseOfDestination = (ITypeBinding)bindings[1];
-									if (!baseOfDestination.isAssignmentCompatible(requiredBaseBinding)) {
-										String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_calloutBaseNotBoundInDest_error, 
-																new Object[]{method.getElementName(), destinationType.getElementName(), baseMember.getElementName()});
-										status.addFatalError(msg, JavaStatusContext.create(method));											
-									}
-								}
-							}
-						}
+						checkDestinationForCallout(method, getDestinationType(), status, pm);
 					}
 				}
 			}
 			return status;
 		}
 		
+		protected static void checkDestinationForCallout(IMethod method, IType destinationType, RefactoringStatus status, IProgressMonitor pm) throws JavaModelException {
+			IMember baseMember = null;
+			switch (method.getElementType()) {
+			case IOTJavaElement.CALLOUT_MAPPING:
+				baseMember = ((CalloutMapping)method).getBoundBaseMethod();
+				break;
+			case IOTJavaElement.CALLOUT_TO_FIELD_MAPPING:
+				baseMember = ((CalloutToFieldMapping)method).getBoundBaseField();
+				break;
+			}
+			if (baseMember == null) return; // not a callout or unresolvable base member
+			IType requiredBaseType = baseMember.getDeclaringType();
+			if (!TypeHelper.isRole(destinationType.getFlags())) {
+				String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_calloutToNonRole_error, method.getElementName());
+				status.addFatalError(msg, JavaStatusContext.create(method));
+			} else {
+				IRoleType roleType = (IRoleType) OTModelManager.getOTElement(destinationType);
+				IType baseClass = roleType.getBaseClass();
+				if (baseClass == null) {
+					String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_calloutToUnboundRole_error, method.getElementName());
+					status.addFatalError(msg, JavaStatusContext.create(method));									
+				} else if (!requiredBaseType.equals(baseClass)) {
+					IJavaElement[] elements = new IJavaElement[]{requiredBaseType, baseClass};
+					ASTParser astParser = ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+					astParser.setProject(method.getDeclaringType().getJavaProject());
+					IBinding[] bindings = astParser.createBindings(elements, pm);
+					ITypeBinding requiredBaseBinding = (ITypeBinding)bindings[0];
+					ITypeBinding baseOfDestination = (ITypeBinding)bindings[1];
+					if (!baseOfDestination.isAssignmentCompatible(requiredBaseBinding)) {
+						String msg = NLS.bind(RefactoringMessages.PullUpAdaptor_calloutBaseNotBoundInDest_error, 
+												new Object[]{method.getElementName(), destinationType.getElementName(), baseMember.getElementName()});
+						status.addFatalError(msg, JavaStatusContext.create(method));											
+					}
+				}
+			}
+		}
+
 		private RefactoringStatus checkOverloadingAndAmbiguityInType(IProgressMonitor pm, IType type) throws JavaModelException {
 			RefactoringStatus status = new RefactoringStatus();
 			ITypeHierarchy hier = getDestinationTypeHierarchy(pm);
@@ -945,6 +950,49 @@ public team class PullUpAdaptor {
             return null;
 		}
 	}
+
+	/** Gateway to a private inner class: */
+	protected class MemberActionInfo playedBy MemberActionInfo {
+		// Note: we would like to make this a nested role of WizardPage, but bug 387077 hits here
+
+		int getNO_ACTION() 						-> get int NO_ACTION;
+
+		protected IMember getMember()  			-> IMember getMember();			
+		protected boolean hasAction() 			-> int getAction()
+				with { result 					<- result != getNO_ACTION() }
+		protected void setAction(int action) 	-> void setAction(int action);
+	}
+
+	/** Help the first wizard page to avoid illegal settings (impossible pull-up of callout). */
+	protected team class WizardPage playedBy PullUpMemberPage {
+
+		int getDECLARE_ABSTRACT_ACTION()   -> get int DECLARE_ABSTRACT_ACTION;
+		int getPULL_UP_ACTION() 		   -> get int PULL_UP_ACTION;
+
+		MemberActionInfo[] getTableInput() -> MemberActionInfo[] getTableInput();
+		IType getDestinationType()         -> IType getDestinationType();
+
+		checkActionForCallouts <- before updateWizardPage;
+
+		void checkActionForCallouts() {
+			MemberActionInfo[] infos = getTableInput();
+			for (MemberActionInfo info : infos) {
+				if (!info.hasAction()) continue;
+				IMember member = info.getMember();
+				if (member instanceof AbstractCalloutMapping) {
+					RefactoringStatus status = new RefactoringStatus();
+					boolean haveError = false;
+					try {
+						PullUpRefactoringProcessorRole.checkDestinationForCallout((IMethod)member, getDestinationType(), status, new NullProgressMonitor());
+						haveError = status.hasFatalError();
+					} catch (JavaModelException e) {
+						haveError = true;
+					}
+					if (haveError) {
+						info.setAction(getDECLARE_ABSTRACT_ACTION());
+					}
+				}
+			}
+		}
+	}
 }
-
-
