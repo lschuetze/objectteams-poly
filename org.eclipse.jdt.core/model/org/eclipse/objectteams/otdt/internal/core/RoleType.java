@@ -185,6 +185,7 @@ public class RoleType extends OTType implements IRoleType
 							new Object[] { getTypeQualifiedName('.') }),
 						jex
             			);
+            	JavaCore.getJavaCore().getLog().log(status);
             	throw new JavaModelException(new CoreException(status));
             }
 		}
