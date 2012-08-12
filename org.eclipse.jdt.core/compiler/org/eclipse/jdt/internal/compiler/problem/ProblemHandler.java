@@ -147,6 +147,9 @@ private void protectedHandle(
 		return;
 
 	if ((severity & ProblemSeverities.Optional) != 0 && problemId != IProblem.Task  && !this.options.ignoreSourceFolderWarningOption) {
+//{ObjectTeams: NPE prevention:
+	  if (unitResult != null) {
+// orig:		  
 		ICompilationUnit cu = unitResult.getCompilationUnit();
 		try{
 			if (cu != null && cu.ignoreOptionalProblems())
@@ -155,10 +158,13 @@ private void protectedHandle(
 		} catch (AbstractMethodError ex) {
 			// continue
 		}
+// :giro
+	  }
+// SH}
 	}
 
 //{ObjectTeams: several kinds of filtering:
-	// some problems cannot be decided at the point of reporting, require recking:
+	// some problems cannot be decided at the point of reporting, require rechecking:
 	boolean requireRecheck = this.rechecker != null;
 	// avoid unnecessary duplication of diagnostics:
 	boolean markGenerated = false;
