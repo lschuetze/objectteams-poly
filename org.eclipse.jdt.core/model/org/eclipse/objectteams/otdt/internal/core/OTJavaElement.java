@@ -101,19 +101,21 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	public void addChild(IOTJavaElement child)
 	{
 		if (child != null)
-		{
-			this.children.add(child);
-		}
+			synchronized (this.children) {
+				this.children.add(child);
+			}
 	}
 	
 	protected void compactChildren(IOTJavaElement child) { 
 		// FIXME(SH): performance etc.
 		int count = 0;
-		Iterator it = this.children.iterator();
-		while (it.hasNext()) {
-			if (it.next().equals(child)) {
-				if (++count > 1)
-					it.remove();
+		synchronized (this.children) {
+			Iterator it = this.children.iterator();
+			while (it.hasNext()) {
+				if (it.next().equals(child)) {
+					if (++count > 1)
+						it.remove();
+				}
 			}
 		}
 	}
