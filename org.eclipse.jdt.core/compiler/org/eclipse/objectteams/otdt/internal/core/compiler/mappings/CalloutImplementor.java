@@ -418,7 +418,6 @@ public class CalloutImplementor extends MethodMappingImplementor
 			// if this one is given, it might be instantiated:
 			returnType = calloutBindingDeclaration.roleMethodSpec.returnType.resolvedType;
 		else
-			// CLOVER: never reached in jacks suite
 			// this one should exist in any case:
 			returnType = calloutBindingDeclaration.roleMethodSpec.resolvedMethod.returnType;
 		MethodDeclaration newMethod = gen.method(

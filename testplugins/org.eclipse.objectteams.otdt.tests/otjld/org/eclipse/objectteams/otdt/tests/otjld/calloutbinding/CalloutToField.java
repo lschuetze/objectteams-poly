@@ -3670,4 +3670,37 @@ public class CalloutToField extends AbstractOTJLDTest {
     		},
     		"OK0");
     }
+    
+    // Bug 387236 - [compiler] type mismatch in signature-less c-t-f with array type causes NPE
+    public void testBug387236() {
+    	runNegativeTest(new String[] {
+    		"b/Base.java",
+    			"package b;\n" + 
+    			"\n" + 
+    			"public class Base {\n" + 
+    			"	Object[] values;\n" + 
+    			"}",
+    		"t/Team.java",
+	    		"package t;\n" + 
+	    		"\n" + 
+	    		"import base b.Base;\n" + 
+	    		"\n" + 
+	    		"public team class Team {\n" + 
+	    		"	protected abstract class AR {\n" + 
+	    		"		protected abstract String[] getValues();\n" + 
+	    		"	}\n" + 
+	    		"	protected class CR extends AR playedBy Base {\n" + 
+	    		"		@SuppressWarnings(\"decapsulation\") getValues -> get values;\n" + 
+	    		"		\n" + 
+	    		"	}\n" + 
+	    		"}\n"
+    		},
+    		"----------\n" + 
+			"1. ERROR in t\\Team.java (at line 10)\n" + 
+			"	@SuppressWarnings(\"decapsulation\") getValues -> get values;\n" + 
+			"	                                   ^^^^^^^^^\n" + 
+			"When binding field values via callout to role method getValues():\n" + 
+			"Incompatible types: can\'t convert java.lang.Object[] to java.lang.String[] (OTJLD 3.5(b)).\n" + 
+			"----------\n");
+    }
 }

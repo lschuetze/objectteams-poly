@@ -236,6 +236,11 @@ public class CalloutMappingDeclaration extends AbstractMethodMappingDeclaration
 					this.roleMethodSpec.returnType.resolvedType = requiredType; // keep going..
 					return; // warned
 				}
+				if (this.roleMethodSpec.returnType.resolvedType == null) {
+					// https://bugs.eclipse.org/387236
+					// if returnType was added late (above) and if type mismatch exists, we still need a resolved type here:
+					this.roleMethodSpec.returnType.resolve(this.scope);
+				}
 			}
 		} else { // 'set'
 			if (this.roleMethodSpec.resolvedMethod.returnType != TypeBinding.VOID) {
