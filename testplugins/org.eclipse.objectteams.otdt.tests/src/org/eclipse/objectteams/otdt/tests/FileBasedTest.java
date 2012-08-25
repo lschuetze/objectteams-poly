@@ -284,6 +284,8 @@ public abstract class FileBasedTest extends AbstractJavaModelTests
                 || expected == null
                 || actual.length != expected.length)
         {
+        	System.out.println("Length mismatch: expected "+(expected == null ? "null" : expected.length)+
+        						" but got "+(actual == null ? "null" : actual.length));
             return false;
         }
         
