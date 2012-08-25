@@ -54,9 +54,26 @@ public class CalloutToFieldMapping extends AbstractCalloutMapping implements ICa
 			MethodData roleMethodHandle,
             IFieldAccessSpec baseFieldHandle,
             boolean hasSignature,
-            boolean isOverride)
+            boolean isOverride,
+            boolean addAsChild)
 	{
-		this(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, CALLOUT_TO_FIELD_MAPPING, role, correspondingJavaElem, roleMethodHandle, baseFieldHandle, hasSignature, isOverride, true);
+		this(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, CALLOUT_TO_FIELD_MAPPING, role, correspondingJavaElem, roleMethodHandle, baseFieldHandle, hasSignature, isOverride, addAsChild);
+	}
+
+	protected CalloutToFieldMapping(
+			int declarationSourceStart, 
+			int sourceStart,
+			int sourceEnd,
+			int declarationSourceEnd,
+			int elementType,
+			IType parentRole,
+			IMethod correspondingJavaElem, 
+			MethodData roleMethodHandle,
+			IFieldAccessSpec baseFieldHandle,
+			boolean hasSignature,
+			boolean isOverride)
+	{
+		this(declarationSourceStart, sourceStart, sourceEnd, declarationSourceEnd, CALLOUT_TO_FIELD_MAPPING, parentRole, correspondingJavaElem, roleMethodHandle, baseFieldHandle, hasSignature, isOverride, true);
 	}
 	
 	protected CalloutToFieldMapping(
