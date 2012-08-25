@@ -54,6 +54,7 @@
     <properties>
     	<!-- Relative path of this module: -->
     	<project-repository-path>maven/testproject</project-repository-path>
+    	<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     
     <!-- Override inherited declaration, otherwise Maven appends the artifactId to the path -->
