@@ -610,7 +610,8 @@ public TypeBinding resolveType(BlockScope scope) {
     // don't only expect NameReference, BaseReference can be static, too.
 	boolean receiverIsType = (   (this.receiver instanceof NameReference)
 							  || (this.receiver instanceof BaseReference))
-							 && (this.receiver.bits & Binding.TYPE) != 0;
+							 && (this.receiver.bits & Binding.TYPE) != 0
+							 || (this.receiver instanceof TypeReference); // happens in generated AST
 // MW,JH,SH}
 	if (receiverCast && this.actualReceiverType != null) {
 		 // due to change of declaring class with receiver type, only identity cast should be notified

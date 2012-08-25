@@ -318,7 +318,7 @@ public class PredicateGenerator extends SwitchOnBaseTypeGenerator
 			predicateParameters = new Expression[] {baseReference(this._baseVarName, roleType, gen)};
 		}
 		Expression receiver = roleType != null ?
-								gen.qualifiedNameReference(roleType) :
+								gen.typeReference(roleType) :
 								gen.thisReference(); // the team in a team base predicate
 
 		// assemble the statement:

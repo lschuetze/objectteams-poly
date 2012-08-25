@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.codeassist.select.SelectionNodeFound;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
+import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
@@ -123,6 +124,12 @@ public abstract TypeReference copyDims(int dim);
 public int dimensions() {
 	return 0;
 }
+//{ObjectTeams: synthetic AST can use TypeReference as receiver for static method:
+@Override
+public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
+	// nop
+}
+// SH}
 
 public abstract char[] getLastToken();
 

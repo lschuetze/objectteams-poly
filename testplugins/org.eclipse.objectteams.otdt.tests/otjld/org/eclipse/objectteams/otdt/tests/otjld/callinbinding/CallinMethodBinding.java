@@ -34,7 +34,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test726_callinWithHiddenLiftingProblem4"};
+//		TESTS_NAMES = new String[] { "testBug387996a" };
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -8121,5 +8121,27 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
             null/*vmArguments*/,
             options,
             null/*requester*/);
+    }
+    
+    // Bug 387996 - "no method found" warning due to field named like package
+    // secondary issue: we saw "T1 cannot be resolved or is not a field" flagged against the role methodspec
+    public void testBug387996a() {
+    	runConformTest(
+    		new String[] {
+    			"test/T1.java",
+    				"package test;\n" +
+    				"public team class T1 {\n" +
+    				"    private Object test;  // = name of package\n" +
+    				"    protected class R playedBy B base when (true) {\n" +
+    				"        void bar() {}\n" +
+    				"        bar <- after foo;  // <- warning!\n" +
+    				"    }\n" +
+    				"}",
+    			"test/B.java",
+    				"package test;\n" +
+    				"public class B {    \n" +
+    				"    public void foo() {};\n" +
+    				"}"
+    		});
     }
 }
