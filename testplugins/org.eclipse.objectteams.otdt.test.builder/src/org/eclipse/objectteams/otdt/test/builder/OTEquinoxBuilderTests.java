@@ -319,8 +319,6 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		expectingNoProblemsFor(project.getPath());
 	}
 	
-	// NOTE: run this as the last test here, because I haven't figured out how to
-	//       clean up after the simulated workbench restart.
 	public void testBaseImportTrac132_2 () throws CoreException, IOException {
 		IJavaProject trac132b= fileManager.setUpJavaProject("Trac132b"); 
 		env.addProject(trac132b.getProject());
@@ -348,6 +346,8 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		env.getWorkspace().save(true, null);
 		JavaModelManager.getJavaModelManager().shutdown();
 		JavaModelManager.doNotUse(); // reset the MANAGER singleton
+		// this one is extra: also restart PDE's PluginModelManager:
+		OTTestingEnvironment.restart();
 		JavaModelManager.getJavaModelManager().startup();
 		new JavaCorePreferenceInitializer().initializeDefaultPreferences();
 		

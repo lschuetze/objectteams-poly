@@ -24,11 +24,39 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.JavaCore;
+import base org.eclipse.pde.internal.core.PluginModelManager;
 import base org.eclipse.jdt.core.tests.builder.TestingEnvironment;
 
-/** Purpose: add OTJ_NATURE to test projects (method not normally overridable). */
+@SuppressWarnings("restriction")
 public team class OTTestingEnvironment {
-	
+	static OTTestingEnvironment instance;
+	public OTTestingEnvironment() {
+		instance = this;
+	}
+
+	/** Better shutdown to allow reinitialization */
+	protected class ModelManager playedBy PluginModelManager {
+		
+		ModelManager getInstance() -> PluginModelManager getInstance();
+		
+		@SuppressWarnings("decapsulation")
+		void setFModelManager(ModelManager fModelManager) -> set PluginModelManager fModelManager;
+				
+		@SuppressWarnings("decapsulation")
+		void shutdown() -> void shutdown();
+
+		protected void internalRestart() {
+			shutdown();
+			setFModelManager(null);
+			getInstance();
+		}
+		
+		protected static void restart() {
+			getInstance().internalRestart();
+		}
+	}
+
+	/** Purpose: add OTJ_NATURE to test projects (method not normally overridable). */
 	protected class TestingEnvironment playedBy TestingEnvironment {
 
 		@SuppressWarnings("decapsulation")
@@ -51,5 +79,15 @@ public team class OTTestingEnvironment {
 		@SuppressWarnings("decapsulation")
 		addBuilderSpecs <- replace addBuilderSpecs;
 		
+	}
+	
+	/** Restart PDE's PluginModelManager. */
+	public static void restart() {
+		instance.internalRestart();
+	}
+	
+	// need a team instance to invoke a role method:
+	private void internalRestart() {
+		ModelManager.restart();		
 	}
 }
