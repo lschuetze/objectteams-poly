@@ -8123,8 +8123,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
             null/*requester*/);
     }
     
-    // Bug 387996 - "no method found" warning due to field named like package
-    // secondary issue: we saw "T1 cannot be resolved or is not a field" flagged against the role methodspec
+    // Bug 387996 - "T cannot be resolved or is not a field" error due to field named like package
     public void testBug387996a() {
     	runConformTest(
     		new String[] {
