@@ -137,6 +137,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	boolean shouldAnalyseResource = this.binding != null 
 			&& flowInfo.reachMode() == FlowInfo.REACHABLE
 			&& currentScope.compilerOptions().analyseResourceLeaks
+//{ObjectTeams: notably lift methods of Closeable roles would trigger warnings against synthetic code
+			&& !currentScope.isGeneratedScope()
+// SH}
 			&& FakedTrackingVariable.isAnyCloseable(this.initialization.resolvedType);
 	if (shouldAnalyseResource) {
 		preInitInfo = flowInfo.unconditionalCopy();

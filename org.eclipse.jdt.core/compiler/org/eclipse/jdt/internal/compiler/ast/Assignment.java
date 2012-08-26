@@ -85,6 +85,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	boolean shouldAnalyseResource = local != null
 			&& flowInfo.reachMode() == FlowInfo.REACHABLE
 			&& currentScope.compilerOptions().analyseResourceLeaks
+//{ObjectTeams: notably lift methods of Closeable roles would trigger warnings against synthetic code
+			&& !currentScope.isGeneratedScope()
+// SH}
 			&& (FakedTrackingVariable.isAnyCloseable(this.expression.resolvedType)
 					|| this.expression.resolvedType == TypeBinding.NULL);
 	if (shouldAnalyseResource) {
