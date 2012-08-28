@@ -133,11 +133,6 @@
 							<include name="**/messages.properties"/>
 			</fileset>
 			<zipfileset dir="compiler" />
-<!-- {ObjectTeams: -->		    
-		    <zipfileset dir="util">
-		    	<exclude name="org/objectteams/otdt/core/util/**"/>
-		    </zipfileset>
-<!-- SH} -->		    
 			<zipfileset dir="antadapter">
 				<exclude name="org/eclipse/jdt/core/CheckDebugAttributes.java"/>
 				<exclude name="org/eclipse/jdt/core/BuildJarIndex.java"/>
