@@ -90,15 +90,6 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 
 	}
 	
-	protected void fullBuild() {
-		try {
-			Thread.sleep(200);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		super.fullBuild();
-	}
-	
 	IProject reopenProject(String projectName) throws CoreException {
 		final IProject project = fileManager.getWorkspaceRoot().getProject(projectName);
 		IWorkspaceRunnable populate = new IWorkspaceRunnable() {
