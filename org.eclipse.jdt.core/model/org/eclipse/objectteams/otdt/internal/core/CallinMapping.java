@@ -68,8 +68,6 @@ public class CallinMapping extends MethodMapping implements ICallinMapping
 		     parent, corrJavaMeth, 
 		     name, callinKind, roleMethodHandle, baseMethodHandles, 
 		     hasSignature, /*addAsChild*/true);
-		// after 'this' has been fully initialized check if it was duplicately entered to its parent's children
-		((OTJavaElement)parent).compactChildren(this);
 	}
 	
     // for use by sub-class ResolvedCallinMapping 

@@ -20,7 +20,6 @@
 package org.eclipse.objectteams.otdt.internal.core;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IResource;
@@ -101,25 +100,9 @@ public abstract class OTJavaElement extends Member implements IOTJavaElement
 	public void addChild(IOTJavaElement child)
 	{
 		if (child != null)
-			synchronized (this.children) {
-				this.children.add(child);
-			}
+			this.children.add(child);
 	}
 	
-	protected void compactChildren(IOTJavaElement child) { 
-		// FIXME(SH): performance etc.
-		int count = 0;
-		synchronized (this.children) {
-			Iterator it = this.children.iterator();
-			while (it.hasNext()) {
-				if (it.next().equals(child)) {
-					if (++count > 1)
-						it.remove();
-				}
-			}
-		}
-	}
-
 	public IJavaElement getParent()
 	{
 //{OTModelUpdate : if null return the parent of the wrapped java element
