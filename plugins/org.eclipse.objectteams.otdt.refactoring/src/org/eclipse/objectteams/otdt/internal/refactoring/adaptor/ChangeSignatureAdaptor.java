@@ -19,6 +19,7 @@ package org.eclipse.objectteams.otdt.internal.refactoring.adaptor;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractMethodMappingDeclaration;
@@ -39,6 +40,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.ui.viewsupport.BasicElementLabels;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -82,18 +84,24 @@ public team class ChangeSignatureAdaptor {
 				CompilationUnitRewrite cuRewrite, RefactoringStatus refResult) 
 		{
 			// base method cannot handle method spec, so check this first:
+			if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
+				ASTNode parent = node.getParent();
+				if (parent.getNodeType() == ASTNode.METHOD_SPEC)
+					node = parent; // fall through
+			}
 			if (node.getNodeType() == ASTNode.METHOD_SPEC) {
-				analyzeImpact(node, refResult);
+				MethodSpec spec = (MethodSpec)node;
+				analyzeImpact(spec, refResult);
 				activate(); // ensure nested role MethodSpecUpdate receives callin triggers
-				return new MethodSpecUpdate((MethodSpec)node, cuRewrite, refResult);
-				// don't bother to deactivate(), this direct team is temporary itself.
+				return new MethodSpecUpdate(spec, cuRewrite, refResult);
+				// to be deactivated after createChangeManager() (see below). 
 			}
 			return base.createOccurrenceUpdate(node, cuRewrite, refResult);
 		}
 		
 		/* Detect situations that are not fully supported by this refactoring and create INFOs for reporting. */
-		void analyzeImpact(ASTNode node, RefactoringStatus refResult) {
-			StructuralPropertyDescriptor locationInParent = node.getLocationInParent();
+		void analyzeImpact(MethodSpec spec, RefactoringStatus refResult) {
+			StructuralPropertyDescriptor locationInParent = spec.getLocationInParent();
 			boolean isSrcSide = false;
 			if (locationInParent == CalloutMappingDeclaration.ROLE_MAPPING_ELEMENT_PROPERTY) {
 				isSrcSide = true;
@@ -102,17 +110,31 @@ public team class ChangeSignatureAdaptor {
 			}
 			boolean hasDelections = !getDeletedInfos().isEmpty();
 			boolean hasAdditions = !getAddedInfos().isEmpty();
-			if (!isSrcSide && hasAdditions) {
-				if (node.getParent().getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
-					refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_callinRoleArgAddIncomplete_info));
-				else
-					refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_calloutBaseArgAddIncomplete_info));
-			} else if (isSrcSide && hasDelections) {
-				if (node.getParent().getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
-					refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_callinBaseArgDeleteIncomplete_info));
-				else
-					refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_calloutRoleArgDeleteIncomplete_info));
+			if (!spec.hasSignature()) {
+				if (hasDelections || hasAdditions || !isOrderSameAsInitial())
+					refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_singaturelessBindingIncomplete_info));
+			} else {
+				if (!isSrcSide && hasAdditions) {
+					if (spec.getParent().getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
+						refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_callinRoleArgAddIncomplete_info));
+					else
+						refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_calloutBaseArgAddIncomplete_info));
+				} else if (isSrcSide && hasDelections) {
+					if (spec.getParent().getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION)
+						refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_callinBaseArgDeleteIncomplete_info));
+					else
+						refResult.merge(RefactoringStatus.createInfoStatus(RefactoringMessages.ChangeSignatureAdaptor_calloutRoleArgDeleteIncomplete_info));
+				}
 			}
+		}
+
+		// not activity after createChangeManager():
+		void deactivate() <- after TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus refResult)
+			base when (ChangeSignatureAdaptor.this.hasRole(base, Processor.class));
+		
+		public void deactivate() {
+			super.deactivate();
+			ChangeSignatureAdaptor.this.unregisterRole(this, Processor.class);
 		}
 		
 		/* pure gateway */
@@ -120,8 +142,9 @@ public team class ChangeSignatureAdaptor {
 			when (this.fMethodSpec != null) // otherwise role was created by lifting, should not intercept anything
 		{
 			MethodSpec fMethodSpec;
-			void addParamterMappings() <- after void reshuffleElements(); // final method cannot be bound from subrole
-			void addParamterMappings() {
+			void addParamterMappings() <- replace void reshuffleElements(); // final method cannot be bound from subrole
+			callin void addParamterMappings() {
+				base.addParamterMappings();
 				// do nothing here, overrides will take over
 			}			
 		}
@@ -177,6 +200,7 @@ public team class ChangeSignatureAdaptor {
 			
 			@SuppressWarnings("inferredcallout") // almost verbatim copy from base
 			callin void checkIfDeletedParametersUsed() {
+				if (!fMethodSpec.hasSignature()) return;
 				for (Iterator iter= getDeletedInfos().iterator(); iter.hasNext();) {
 					ParameterInfo info= (ParameterInfo) iter.next();
 					SingleVariableDeclaration paramDecl= (SingleVariableDeclaration) fMethodSpec.parameters().get(info.getOldIndex());
@@ -210,9 +234,11 @@ public team class ChangeSignatureAdaptor {
 			
 			@SuppressWarnings("inferredcallout")
 			@Override
-			void addParamterMappings() {
-				if (isOrderSameAsInitial())
-					return;
+			callin void addParamterMappings() {
+				if (!this.fMethodSpec.hasSignature()) return;
+				base.addParamterMappings();
+				if (isOrderSameAsInitial()) return;
+
 				AbstractMethodMappingDeclaration mapping = (AbstractMethodMappingDeclaration) this.fMethodSpec.getParent();
 				if (mapping.hasParameterMapping()) {
 					fResult.merge(RefactoringStatus.createWarningStatus(RefactoringMessages.ChangeSignatureAdaptor_cannotUpdateParameterMapping_warning));

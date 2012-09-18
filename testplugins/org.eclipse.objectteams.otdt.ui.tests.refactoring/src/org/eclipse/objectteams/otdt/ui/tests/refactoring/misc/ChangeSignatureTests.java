@@ -16,6 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.misc;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -157,7 +159,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private void helperDelete(String[] signature, int[] deleteIndices, boolean createDelegate, String expectedInfo) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
-		IMethod method = classA.getMethod("m", signature);
+		helperDelete(cu, classA, signature, deleteIndices,
+				createDelegate, expectedInfo);
+	}
+
+	void helperDelete(ICompilationUnit cu, IType declaringClass, String[] signature, int[] deleteIndices, boolean createDelegate, String expectedInfo)
+			  throws JavaModelException, CoreException, Exception, IOException 
+	{
+		IMethod method = declaringClass.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
 		assertTrue("refactoring not available", RefactoringAvailabilityTester.isChangeSignatureAvailable(method));
 
@@ -306,6 +315,14 @@ public class ChangeSignatureTests extends RefactoringTest {
 	public void testDelete02()throws Exception{
 		int[] deleteIndices= {1};
 		helperDelete(new String[]{"I", "I"}, deleteIndices, false/*delegate*/, "Deleting arguments at the role side of a callout binding is not fully supported. Please manually update transitive references."/*expectInfo*/);
+	}
+
+	// delete argument in role method bound in signature-less callin
+	public void testDelete03()throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		IType roleR= getType(cu, "MyTeam").getType("R");
+		int[] deleteIndices= {1};
+		helperDelete(cu, roleR, new String[]{"I", "I"}, deleteIndices, false/*delegate*/, "Affected method binding has no signatures; consider adding signatures first so that the refactoring can absorb incompatible changes using parameter mappings"/*expectInfo*/);
 	}
 
 	public void testReorder01() throws Exception {
