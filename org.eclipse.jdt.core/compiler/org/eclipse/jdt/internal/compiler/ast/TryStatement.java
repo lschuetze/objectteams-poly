@@ -15,6 +15,8 @@
  *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *     							bug 359334 - Analysis for resource leak warnings does not consider exceptions as method exit points
  *								bug 358903 - Filter practically unimportant resource leak warnings
+ *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
+ *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -130,14 +132,11 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				this,
 				this.caughtExceptionTypes,
 				this.caughtExceptionsCatchBlocks,
-				this.catchArguments,
 				null,
 				this.scope,
-				flowInfo.unconditionalInits());
+				flowInfo);
   :giro */
 // SH}
-		handlingContext.initsOnFinally =
-			new NullInfoRegistry(flowInfo.unconditionalInits());
 		// only try blocks initialize that member - may consider creating a
 		// separate class if needed
 
@@ -209,13 +208,13 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				FlowInfo catchInfo;
 				if (isUncheckedCatchBlock(i)) {
 					catchInfo =
-						handlingContext.initsOnFinally.mitigateNullInfoOf(
-							flowInfo.unconditionalCopy().
-								addPotentialInitializationsFrom(
-									handlingContext.initsOnException(i)).
-								addPotentialInitializationsFrom(tryInfo).
-								addPotentialInitializationsFrom(
-									handlingContext.initsOnReturn));
+						flowInfo.unconditionalCopy().
+							addPotentialInitializationsFrom(
+								handlingContext.initsOnException(i)).
+							addPotentialInitializationsFrom(tryInfo).
+							addPotentialInitializationsFrom(
+								handlingContext.initsOnReturn).
+						addNullInfoFrom(handlingContext.initsOnFinally);
 				} else {
 					FlowInfo initsOnException = handlingContext.initsOnException(i);
 					catchInfo =
@@ -258,7 +257,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 		// chain up null info registry
 		if (flowContext.initsOnFinally != null) {
-			flowContext.initsOnFinally.add(handlingContext.initsOnFinally);
+			flowContext.initsOnFinally.addNullInfoFrom(handlingContext.initsOnFinally);
 		}
 
 		return tryInfo;
@@ -269,11 +268,23 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		// analyse finally block first
 		insideSubContext = new InsideSubRoutineFlowContext(flowContext, this);
 
+		// process the try block in a context handling the local exceptions.
+		// (advance instantiation so we can wire this into the FinallyFlowContext)
+		ExceptionHandlingFlowContext handlingContext =
+			new ExceptionHandlingFlowContext(
+				insideSubContext,
+				this,
+				this.caughtExceptionTypes,
+				this.caughtExceptionsCatchBlocks,
+				null,
+				this.scope,
+				flowInfo);
+
 		subInfo =
 			this.finallyBlock
 				.analyseCode(
 					currentScope,
-					finallyContext = new FinallyFlowContext(flowContext, this.finallyBlock),
+					finallyContext = new FinallyFlowContext(flowContext, this.finallyBlock, handlingContext),
 					flowInfo.nullInfoLessUnconditionalCopy())
 				.unconditionalInits();
 		if (subInfo == FlowInfo.DEAD_END) {
@@ -289,19 +300,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			}
 		}
 		this.subRoutineInits = subInfo;
-		// process the try block in a context handling the local exceptions.
-		ExceptionHandlingFlowContext handlingContext =
-			new ExceptionHandlingFlowContext(
-				insideSubContext,
-				this,
-				this.caughtExceptionTypes,
-				this.caughtExceptionsCatchBlocks,
-				this.catchArguments,
-				null,
-				this.scope,
-				flowInfo.unconditionalInits());
-		handlingContext.initsOnFinally =
-			new NullInfoRegistry(flowInfo.unconditionalInits());
 		// only try blocks initialize that member - may consider creating a
 		// separate class if needed
 
@@ -373,13 +371,13 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				FlowInfo catchInfo;
 				if (isUncheckedCatchBlock(i)) {
 					catchInfo =
-						handlingContext.initsOnFinally.mitigateNullInfoOf(
-							flowInfo.unconditionalCopy().
-								addPotentialInitializationsFrom(
-									handlingContext.initsOnException(i)).
-								addPotentialInitializationsFrom(tryInfo).
-								addPotentialInitializationsFrom(
-									handlingContext.initsOnReturn));
+						flowInfo.unconditionalCopy().
+							addPotentialInitializationsFrom(
+								handlingContext.initsOnException(i)).
+							addPotentialInitializationsFrom(tryInfo).
+							addPotentialInitializationsFrom(
+								handlingContext.initsOnReturn).
+							addNullInfoFrom(handlingContext.initsOnFinally);
 				}else {
 					FlowInfo initsOnException = handlingContext.initsOnException(i);
 					catchInfo =
@@ -420,19 +418,20 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		// we also need to check potential multiple assignments of final variables inside the finally block
 		// need to include potential inits from returns inside the try/catch parts - 1GK2AOF
 		finallyContext.complainOnDeferredChecks(
-			handlingContext.initsOnFinally.mitigateNullInfoOf(
-				(tryInfo.tagBits & FlowInfo.UNREACHABLE) == 0 ?
-					flowInfo.unconditionalCopy().
+			((tryInfo.tagBits & FlowInfo.UNREACHABLE) == 0 ?
+				flowInfo.unconditionalCopy().
 					addPotentialInitializationsFrom(tryInfo).
-						// lighten the influence of the try block, which may have
-						// exited at any point
+					// lighten the influence of the try block, which may have
+					// exited at any point
 					addPotentialInitializationsFrom(insideSubContext.initsOnReturn) :
-					insideSubContext.initsOnReturn),
+				insideSubContext.initsOnReturn).
+			addNullInfoFrom(
+					handlingContext.initsOnFinally),
 			currentScope);
 
 		// chain up null info registry
 		if (flowContext.initsOnFinally != null) {
-			flowContext.initsOnFinally.add(handlingContext.initsOnFinally);
+			flowContext.initsOnFinally.addNullInfoFrom(handlingContext.initsOnFinally);
 		}
 
 		this.naturalExitMergeInitStateIndex =
@@ -456,24 +455,12 @@ protected ExceptionHandlingFlowContext createFlowContext(FlowContext flowContext
 			this,
 			this.caughtExceptionTypes,
 			this.caughtExceptionsCatchBlocks,
-			this.catchArguments,
 			null,
 			this.scope,
-			flowInfo.unconditionalInits());
+			flowInfo);
 }
 // SH}
-public ExceptionLabel enterAnyExceptionHandler(CodeStream codeStream) {
-	if (this.subRoutineStartLabel == null)
-		return null;
-	return super.enterAnyExceptionHandler(codeStream);
-}
-
-public void enterDeclaredExceptionHandlers(CodeStream codeStream) {
-	for (int i = 0, length = this.declaredExceptionLabels == null ? 0 : this.declaredExceptionLabels.length; i < length; i++) {
-		this.declaredExceptionLabels[i].placeStart();
-	}
-}
-//Return true if the catch block corresponds to an unchecked exception making allowance for multi-catch blocks.
+// Return true if the catch block corresponds to an unchecked exception making allowance for multi-catch blocks.
 private boolean isUncheckedCatchBlock(int catchBlock) {
 	if (this.caughtExceptionsCatchBlocks == null) {
 		return this.caughtExceptionTypes[catchBlock].isUncheckedException(true);
@@ -486,6 +473,18 @@ private boolean isUncheckedCatchBlock(int catchBlock) {
 		}
 	}
 	return false;
+}
+
+public ExceptionLabel enterAnyExceptionHandler(CodeStream codeStream) {
+	if (this.subRoutineStartLabel == null)
+		return null;
+	return super.enterAnyExceptionHandler(codeStream);
+}
+
+public void enterDeclaredExceptionHandlers(CodeStream codeStream) {
+	for (int i = 0, length = this.declaredExceptionLabels == null ? 0 : this.declaredExceptionLabels.length; i < length; i++) {
+		this.declaredExceptionLabels[i].placeStart();
+	}
 }
 
 public void exitAnyExceptionHandler() {

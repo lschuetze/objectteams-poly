@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2011 IBM Corporation and others.
+ * Copyright (c) 2003, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -7,6 +7,9 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
+ *								bug 387612 - Unreachable catch block...exception is never thrown from the try
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -23,7 +26,7 @@ import junit.framework.Test;
 public class TryStatementTest extends AbstractRegressionTest {
 
 static {
-//	TESTS_NAMES = new String[] { "test000" };
+//	TESTS_NAMES = new String[] { "testBug387612" };
 //	TESTS_NUMBERS = new int[] { 74, 75 };
 //	TESTS_RANGE = new int[] { 11, -1 };
 }
@@ -5961,6 +5964,168 @@ public void test073() {
 		"No exception of type Exception[] can be thrown; an exception type must be a subclass of Throwable\n" + 
 		"----------\n");
 }
+// test for regression during work on bug 345305
+// saw "The local variable name may not have been initialized" against last code line
+public void test074() {
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	Class test(String name) throws ClassNotFoundException {\n" + 
+			"		Class c= findClass(name);\n" + 
+			"		if (c != null)\n" + 
+			"			return c;\n" + 
+			"		if (isExcluded(name)) {\n" + 
+			"			try {\n" + 
+			"				c= findClass(name);\n" + 
+			"				return c;\n" + 
+			"			} catch (ClassNotFoundException e) {\n" + 
+			"				// keep searching\n" + 
+			"			}\n" + 
+			"		}\n" + 
+			"		return findClass(name);\n" +
+			"    }\n" + 
+			"    boolean isExcluded(String name) { return false; }\n" +
+			"    Class findClass(String name) throws ClassNotFoundException { return null; }\n" +
+			"}\n"
+		});
+}
+
+// Bug 387612 - Unreachable catch block...exception is never thrown from the try
+// redundant exception in throws must not confuse downstream analysis
+public void testBug387612() {
+	String serialUID = "private static final long serialVersionUID=1L;";
+	runNegativeTest(
+		new String[] {
+			"E.java",
+			"public class E extends Exception {"+serialUID+"}\n",
+			"E1.java",
+			"public class E1 extends E {"+serialUID+"}\n",
+			"E2.java",
+			"public class E2 extends E {"+serialUID+"}\n",
+			"E3.java",
+			"public class E3 extends E {"+serialUID+"}\n",
+			"A.java",
+			"interface A {\n" +
+			"    void foo(String a1, String a2) throws E1, E;\n" +
+			"}\n",
+			"B.java",
+			"interface B extends A {\n" +
+			"    void foo(String a1, String a2) throws E;\n" +
+			"}\n",
+			"Client.java",
+			"public class Client {\n" +
+			"    void test() {\n" +
+			"        B b = new B() {\n" +
+			"            public void foo(String a1, String a2) {}\n" +
+			"        };\n" +
+			"        try {\n" +
+			"            b.foo(null, null);\n" +
+			"        }\n" +
+			"        catch (E1 e) {}\n" +
+			"        catch (E2 e) {}\n" +
+			"    }\n" +
+			"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in Client.java (at line 7)\n" + 
+		"	b.foo(null, null);\n" + 
+		"	^^^^^^^^^^^^^^^^^\n" + 
+		"Unhandled exception type E\n" + 
+		"----------\n");
+}
+
+// Bug 387612 - Unreachable catch block...exception is never thrown from the try
+// - changed order in redundant 'throws' clause.
+public void testBug387612b() {
+	String serialUID = "private static final long serialVersionUID=1L;";
+	runNegativeTest(
+		new String[] {
+			"E.java",
+			"public class E extends Exception {"+serialUID+"}\n",
+			"E1.java",
+			"public class E1 extends E {"+serialUID+"}\n",
+			"E2.java",
+			"public class E2 extends E {"+serialUID+"}\n",
+			"E3.java",
+			"public class E3 extends E {"+serialUID+"}\n",
+			"A.java",
+			"interface A {\n" +
+			"    void foo(String a1, String a2) throws E, E1;\n" +
+			"}\n",
+			"B.java",
+			"interface B extends A {\n" +
+			"    void foo(String a1, String a2) throws E;\n" +
+			"}\n",
+			"Client.java",
+			"public class Client {\n" +
+			"    void test() {\n" +
+			"        B b = new B() {\n" +
+			"            public void foo(String a1, String a2) {}\n" +
+			"        };\n" +
+			"        try {\n" +
+			"            b.foo(null, null);\n" +
+			"        }\n" +
+			"        catch (E1 e) {}\n" +
+			"        catch (E2 e) {}\n" +
+			"    }\n" +
+			"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in Client.java (at line 7)\n" + 
+		"	b.foo(null, null);\n" + 
+		"	^^^^^^^^^^^^^^^^^\n" + 
+		"Unhandled exception type E\n" + 
+		"----------\n");
+}
+
+// Bug 387612 - Unreachable catch block...exception is never thrown from the try
+// interface with redundant exceptions in throws is read from class file.
+public void testBug387612c() {
+	String serialUID = "private static final long serialVersionUID=1L;";
+	runConformTest(
+		new String[] {
+			"E.java",
+			"public class E extends Exception {"+serialUID+"}\n",
+			"E1.java",
+			"public class E1 extends E {"+serialUID+"}\n",
+			"E2.java",
+			"public class E2 extends E {"+serialUID+"}\n",
+			"A.java",
+			"interface A {\n" +
+			"    void foo(String a1, String a2) throws E1, E;\n" +
+			"}\n",
+			"B.java",
+			"interface B extends A {\n" +
+			"    void foo(String a1, String a2) throws E;\n" +
+			"}\n"
+		});
+	runNegativeTest(
+		new String[] {
+			"Client.java",
+			"public class Client {\n" +
+			"    void test() {\n" +
+			"        B b = new B() {\n" +
+			"            public void foo(String a1, String a2) {}\n" +
+			"        };\n" +
+			"        try {\n" +
+			"            b.foo(null, null);\n" +
+			"        }\n" +
+			"        catch (E1 e) {}\n" +
+			"        catch (E2 e) {}\n" +
+			"    }\n" +
+			"}\n",
+		},
+		"----------\n" + 
+		"1. ERROR in Client.java (at line 7)\n" + 
+		"	b.foo(null, null);\n" + 
+		"	^^^^^^^^^^^^^^^^^\n" + 
+		"Unhandled exception type E\n" + 
+		"----------\n",
+		null,
+		false/*shouldFlush*/);
+}
+
 public static Class testClass() {
 	return TryStatementTest.class;
 }

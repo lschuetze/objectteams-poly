@@ -163,9 +163,10 @@ public class GuardPredicateDeclaration extends MethodDeclaration {
 							flowContext,
 							this,
 							Binding.NO_EXCEPTIONS, // treat all exceptions as undeclared, want to see the error/warning
+							new int[0],
 							null, // initializationParent
 							this.scope,
-							flowInfo.unconditionalInits()) {
+							flowInfo) {
 					@Override
 					public UnconditionalFlowInfo initsOnException(int index) {
 						return new UnconditionalFlowInfo(); // empty, avoid AIOOBE in super method (empty array initsOnExceptions)

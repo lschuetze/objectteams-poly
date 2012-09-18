@@ -32,7 +32,7 @@ import org.eclipse.objectteams.otdt.internal.core.search.matching.RoleTypePatter
 import org.eclipse.objectteams.otdt.internal.core.search.matching.TeamDeclarationLocator;
 import org.eclipse.objectteams.otdt.internal.core.search.matching.TeamTypePattern;
 
-public abstract class PatternLocator implements IIndexConstants {
+public abstract class PatternLocator implements IIndexConstants, IQualifiedTypeResolutionListener {
 
 // store pattern info
 protected int matchMode;
@@ -1038,5 +1038,8 @@ protected int resolveLevelForType (char[] simpleNamePattern,
 }
 public String toString(){
 	return "SearchPattern"; //$NON-NLS-1$
+}
+public void recordResolution(QualifiedTypeReference typeReference, TypeBinding resolution) {
+	// noop by default
 }
 }

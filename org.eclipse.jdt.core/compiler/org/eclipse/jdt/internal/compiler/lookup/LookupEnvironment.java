@@ -1825,4 +1825,16 @@ public int getDependenciesStateCompleted() {
 }
 // SH}
 
+public IQualifiedTypeResolutionListener[] resolutionListeners = new IQualifiedTypeResolutionListener[0];
+
+public void addResolutionListener(IQualifiedTypeResolutionListener resolutionListener) {
+	int length = this.resolutionListeners.length;
+	for (int i = 0; i < length; i++){
+		if (this.resolutionListeners[i].equals(resolutionListener))
+			return;
+	}
+	System.arraycopy(this.resolutionListeners, 0,
+			this.resolutionListeners = new IQualifiedTypeResolutionListener[length + 1], 0, length);
+	this.resolutionListeners[length] = resolutionListener;
+}
 }

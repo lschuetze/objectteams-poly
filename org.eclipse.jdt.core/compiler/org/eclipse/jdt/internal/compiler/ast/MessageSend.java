@@ -17,6 +17,10 @@
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 358903 - Filter practically unimportant resource leak warnings
  *								bug 370639 - [compiler][resource] restore the default for resource leak warnings
+ *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
+ *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
+ *								bug 379784 - [compiler] "Method can be static" is not getting reported
+ *								bug 379834 - Wrong "method can be static" in presence of qualified super and different staticness of nested super class.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -159,7 +163,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	boolean analyseResources = currentScope.compilerOptions().analyseResourceLeaks;
 	if (analyseResources && CharOperation.equals(TypeConstants.CLOSE, this.selector)) 
 	{
-		FakedTrackingVariable trackingVariable = FakedTrackingVariable.getCloseTrackingVariable(this.receiver);
+		FakedTrackingVariable trackingVariable = FakedTrackingVariable.getCloseTrackingVariable(this.receiver, flowContext);
 		if (trackingVariable != null) { // null happens if receiver is not a local variable or not an AutoCloseable
 			if (trackingVariable.methodScope == currentScope.methodScope()) {
 				trackingVariable.markClose(flowInfo, flowContext);
@@ -171,9 +175,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	if (nonStatic) {
 		this.receiver.checkNPE(currentScope, flowContext, flowInfo);
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=318682
-		if (this.receiver.isThis()) {
+		if (this.receiver.isThis() || this.receiver.isSuper()) {
 			// accessing non-static method without an object
-			currentScope.resetDeclaringClassMethodStaticFlag(this.binding.declaringClass);
+			currentScope.resetDeclaringClassMethodStaticFlag(this.actualReceiverType);
 		}
 	} else if (this.receiver.isThis()) {
 		if ((this.receiver.bits & ASTNode.IsImplicitThis) == 0) {
@@ -223,7 +227,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			}
 			if (analyseResources) {
 				// if argument is an AutoCloseable insert info that it *may* be closed (by the target method, i.e.)
-				flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, argument, flowInfo, false);
+				flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, argument, flowInfo, flowContext, false);
 			}
 		}
 		analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
@@ -244,6 +248,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 //{ObjectTeams: base calls via super:
 	flowInfo = checkBaseCallsIfSuper(currentScope, flowInfo);
 // SH}
+	// account for pot. exceptions thrown by method execution
+	flowContext.recordAbruptExit();
 	return flowInfo;
 }
 //{ObjectTeams: checkBaseCallsIfSuper
