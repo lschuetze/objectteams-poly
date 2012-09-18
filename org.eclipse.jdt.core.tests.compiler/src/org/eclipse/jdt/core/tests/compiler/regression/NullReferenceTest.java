@@ -2443,7 +2443,7 @@ public void test0328_if_else() {
 		"1. ERROR in X.java (at line 9)\n" +
 		"	o.toString();\n" +
 		"	^\n" +
-		"Null pointer access: The variable o can only be null at this location\n" +
+		"Potential null pointer access: The variable o may be null at this location\n" +
 		"----------\n",
 	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
@@ -5605,8 +5605,6 @@ public void test0536_try_finally() {
 	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
 
-// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=325755#c36
-
 // null analysis -- try/finally
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=320170 -  [compiler] [null] Whitebox issues in null analysis
 // trigger nullbits 0111 (pot n|nn|un), don't let "definitely unknown" override previous information
@@ -5856,7 +5854,7 @@ public void test0556_try_catch() {
 		"1. ERROR in X.java (at line 9)\n" +
 		"	o.toString();\n" +
 		"	^\n" +
-		"Potential null pointer access: The variable o may be null at this location\n" +
+		"Null pointer access: The variable o can only be null at this location\n" +
 		"----------\n",
 	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
