@@ -79,6 +79,7 @@ public class QualifiedTypeReference extends TypeReference {
 							(ReferenceBinding)problemType.closestMatch().leafComponentType());
 					return null; // don't report again
 				}
+				recordResolution(scope.environment(), anchoredType);
 				return anchoredType; // includes the case of AnchorNotFinal
 			}
 		}
@@ -140,6 +141,7 @@ public class QualifiedTypeReference extends TypeReference {
 					if (!(enclosingType != null  && enclosingType.isSynthInterface()))
 						if ((this.bits & IsAllocationType) == 0) // new path.R() is a different story
 							reportDeprecatedPathSyntax(scope);
+					recordResolution(scope.environment(), roleType);
 					return roleType;
 				}
 			}
