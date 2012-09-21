@@ -205,7 +205,8 @@ class DefaultBindingResolver extends BindingResolver {
 					for (Object bodyObj : roleType.bodyDeclarations()) {
 						if (bodyObj instanceof CalloutMappingDeclaration) {
 							// callout and method are considered "equal"
-							if (((CalloutMappingDeclaration) bodyObj).resolveBinding().isEqualTo(binding))
+							IMethodMappingBinding calloutBinding = ((CalloutMappingDeclaration) bodyObj).resolveBinding();
+							if (calloutBinding != null && calloutBinding.isEqualTo(binding))
 								return (ASTNode)bodyObj;
 						}
 					}
