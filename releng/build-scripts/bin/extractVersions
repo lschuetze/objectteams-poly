@@ -80,9 +80,9 @@ echo "==================================="
 #define x.y.z versions (but replace . with _ since bash can't handle . in variable names):
 org_eclipse_jdt_core_tests_builder=3.8.1
 org_eclipse_test_performance=3.7.0
-org_eclipse_jdt_debug_tests=3.8.0
-org_eclipse_jdt_ui_tests=3.8.0
-org_eclipse_jdt_ui_tests_refactoring=3.8.0
+org_eclipse_jdt_debug_tests=3.8.100
+org_eclipse_jdt_ui_tests=3.9.0
+org_eclipse_jdt_ui_tests_refactoring=3.9.0
 # currently no version qualifier:
 #org_eclipse_jdt_core_tests_compiler
 #org_eclipse_jdt_core_tests_model
