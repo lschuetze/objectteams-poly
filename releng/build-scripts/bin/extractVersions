@@ -37,7 +37,7 @@ done
 
 echo "Versions for run.properties:"
 echo "============================"
-echo "# Details of the Eclipse SDK build upon:"
+echo "# Details of the Eclipse SDK built upon:"
 echo "run.eclipseScriptDir=plugins/${PDEBUILD_VERSION}/scripts"
 echo "org.eclipse.equinox.launcher_jar=${LAUNCHER_VERSION}"
 echo
