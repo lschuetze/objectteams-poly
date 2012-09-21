@@ -3982,11 +3982,6 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		"public team class TeamB11sh86_3 extends TeamB11sh86_2 { }\n" + 
     		"	^\n" + 
     		"The type TB11sh86_1 cannot be resolved. It is indirectly referenced from required .class files\n" + 
-    		"----------\n" + 
-    		"2. ERROR in TeamB11sh86_3.java (at line 2)\n" + 
-    		"	public team class TeamB11sh86_3 extends TeamB11sh86_2 { }\n" + 
-    		"	                  ^^^^^^^^^^^^^\n" + 
-    		"Role TeamB11sh86_3.R seems to refer to a stale tsuper role TeamB11sh86_1.R: tsuper method getBase(Ljava/lang/Object;)Lp1/TB11sh86_1; cannot be resolved. Please consider a full rebuild of the enclosing project.\n" + 
     		"----------\n",
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/,
@@ -4142,7 +4137,9 @@ public class ReportedBugs extends AbstractOTJLDTest {
 			    "	\n",
 		"TB11sh90.java",
 			    "\n" +
-			    "public class TB11sh90 {}\n"});
+			    "public class TB11sh90 {}\n",
+		"TeamB11sh90/.stamp","" // force directory created
+        });
         runNegativeTest(
                 new String[] {
 		"TeamB11sh90/RB11sh90.java",

@@ -181,7 +181,7 @@ public class RelevantRole extends AbstractOTJLDTest {
     		"----------\n" + 
     		"1. ERROR in Team182par1_2.java (at line 1)\n" + 
     		"	public team class Team182par1_2 extends Team182par1_1 {\n" + 
-    		"	                  ^^^^^^^^^^^^^\n" + 
+    		"	                                        ^^^^^^^^^^^^^\n" + 
     		"Team Team182par1_2 must be declared abstract, because abstract role R is relevant (OTJLD 2.5(b)).\n" + 
     		"----------\n",
     		null, // classLibraries
@@ -241,7 +241,7 @@ public class RelevantRole extends AbstractOTJLDTest {
     		"----------\n" + 
     		"1. WARNING in Team182par2_2.java (at line 1)\n" + 
     		"	public team class Team182par2_2 extends Team182par2_1 {\n" + 
-    		"	                  ^^^^^^^^^^^^^\n" + 
+    		"	                                        ^^^^^^^^^^^^^\n" + 
     		"[@sup:abstractrelevantrole] Team Team182par2_2 may need to be declared abstract, because irrelevance for abstract role R could not be shown (OTJLD 2.5(b)).\n" + 
     		"----------\n",
     		null, // classLibraries

@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
+import org.eclipse.jdt.internal.compiler.util.SimpleSetOfCharArray;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
@@ -1467,8 +1468,20 @@ public ReferenceBinding getMemberType(char[] name) {
 				return member;
 		}
 	}
-	return findTypeInTeamPackage(name);
+	if (!isTeam() || this.teamPackage == null)
+		return null;
+	if (this.notFoundMemberNames != null && this.notFoundMemberNames.includes(name)) {
+		return null;
+	}
+	ReferenceBinding res = findTypeInTeamPackage(name);
+	if (res == null) {
+		 if (this.notFoundMemberNames == null)
+			 this.notFoundMemberNames = new SimpleSetOfCharArray();
+		 this.notFoundMemberNames.add(name);
+	}
+	return res;
 }
+SimpleSetOfCharArray notFoundMemberNames;
 
 ReferenceBinding findTypeInTeamPackage(char[] name) {
 

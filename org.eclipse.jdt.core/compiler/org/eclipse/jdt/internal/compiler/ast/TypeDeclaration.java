@@ -1007,8 +1007,8 @@ public void generateCode(ClassFile enclosingClassFile) {
 // SH}
 			for (int i = 0, max = this.memberTypes.length; i < max; i++) {
 				TypeDeclaration memberType = this.memberTypes[i];
-//{ObjectTeams: teams are already handled above
-			  if (!isTeam())
+//{ObjectTeams: roles are already handled above
+			  if (!memberType.isRole())
 // SH}
 				classFile.recordInnerClasses(memberType.binding);
 				memberType.generateCode(this.scope, classFile);

@@ -167,8 +167,21 @@ public abstract class AbstractOTReferenceBinding extends TypeBinding
 	 */
 	public TeamPackageBinding teamPackage;
 	protected void maybeSetTeamPackage(char[][] compoundName, PackageBinding parentPackage, LookupEnvironment environment) {
-		if (isTeam())
-			this.teamPackage = new TeamPackageBinding(compoundName, parentPackage, environment);
+		if (isTeam()) {
+			char[][] packageName;
+			char[][] segments = CharOperation.splitOn('$', compoundName[compoundName.length-1]);
+			int segLength = segments.length;
+			if (segLength > 1) {
+				int packLength = parentPackage.compoundName.length;
+				packageName = new char[packLength+segLength-1][];
+				System.arraycopy(parentPackage.compoundName, 0, packageName, 0, packLength);
+				System.arraycopy(segments, 0, packageName, packLength, segLength-1);
+			} else {
+				packageName = parentPackage.compoundName;
+			}
+			if (environment.nameEnvironment.isPackage(packageName, sourceName()))
+				this.teamPackage = new TeamPackageBinding(compoundName, parentPackage, environment);
+		}
 	}
 	/**
 	 * add callinCallouts read from attribute
