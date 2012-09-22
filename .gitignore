@@ -1,7 +1,9 @@
 /*/bin/
 /plugins/*/bin/
-/testplugins/*/bin/
+/plugins/*/bcelpatchbin/
+/othersrc/*/bin/
 /othersrc/otdt-examples/*/bin/
+/testplugins/*/bin/
 /testplugins/*/jplis_dump/
 *~
 *.rej
