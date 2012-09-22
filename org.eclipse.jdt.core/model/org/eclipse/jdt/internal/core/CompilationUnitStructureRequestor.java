@@ -490,7 +490,7 @@ private LocalVariable[] acceptMethodParameters(Argument[] arguments, JavaElement
 		localVarInfo.setNameSourceStart(argument.sourceStart);
 		localVarInfo.setNameSourceEnd(argument.sourceEnd);
 		
-		String paramTypeSig = JavaModelManager.getJavaModelManager().intern(Signature.createTypeSignature(methodInfo.parameterTypes[i], false)); 
+		String paramTypeSig = JavaModelManager.getJavaModelManager().intern(Signature.createTypeSignature(methodInfo.parameterTypes[i], false));
 		result[i] = new LocalVariable(
 				methodHandle,
 				new String(argument.name),

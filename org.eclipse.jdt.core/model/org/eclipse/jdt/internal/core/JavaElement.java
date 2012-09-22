@@ -130,7 +130,6 @@ public abstract class JavaElement extends PlatformObject implements IJavaElement
 		return getElementName().equals(other.getElementName()) &&
 				this.parent.equals(other.parent);
 	}
-
 	protected void escapeMementoName(StringBuffer buffer, String mementoName) {
 		for (int i = 0, length = mementoName.length(); i < length; i++) {
 			char character = mementoName.charAt(i);
