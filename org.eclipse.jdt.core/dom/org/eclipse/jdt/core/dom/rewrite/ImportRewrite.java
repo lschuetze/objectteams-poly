@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.core.dom.rewrite.ImportRewriteAnalyzer;
 import org.eclipse.jdt.internal.core.util.Messages;
 import org.eclipse.jdt.internal.core.util.Util;
@@ -174,7 +175,14 @@ public final class ImportRewrite {
 			IImportDeclaration[] imports= cu.getImports();
 			for (int i= 0; i < imports.length; i++) {
 				IImportDeclaration curr= imports[i];
+//{ObjectTeams: consider base imports:
+/* orig:
 				char prefix= Flags.isStatic(curr.getFlags()) ? STATIC_PREFIX : NORMAL_PREFIX;
+  :gir */
+				int flags = curr.getFlags();
+				char prefix= Flags.isStatic(flags) ? STATIC_PREFIX :
+							(((flags & ExtraCompilerModifiers.AccBase) != 0) ? BASE_PREFIX : NORMAL_PREFIX);
+// SH}
 				existingImport.add(prefix + curr.getElementName());
 			}
 		}

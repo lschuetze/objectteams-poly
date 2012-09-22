@@ -94,6 +94,23 @@
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
       </aspectBinding>
+      <aspectBinding
+            icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/calloutbinding_obj.gif">
+         <basePlugin
+               icon="platform:/plugin/org.eclipse.pde.ui/icons/obj16/plugin_obj.gif"
+               id="org.eclipse.jdt.core">
+         </basePlugin>
+         <team
+               activation="NONE"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.MoveAdaptor"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
+         <team
+               activation="NONE"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.MoveAdaptor.MoveCU"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
+         </team>
+      </aspectBinding>
    </extension>
    <extension
          point="org.eclipse.ui.actionSets">

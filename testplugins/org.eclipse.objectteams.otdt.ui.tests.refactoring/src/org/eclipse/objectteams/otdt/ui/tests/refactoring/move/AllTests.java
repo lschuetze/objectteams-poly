@@ -27,7 +27,7 @@ import junit.framework.TestSuite;
 /**
  * @author brcan
  * 
- * Runs all OT-specific refactoring tests and corresponding eclipse refactoring tests
+ * Runs all OT-specific refactoring tests for this package (move)
  */
 public class AllTests
 {
@@ -45,6 +45,7 @@ public class AllTests
         suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveInstanceMethodTests.suite());
         suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveStaticMethodTests.suite());
         suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveRoleTests.suite());
+        suite.addTest(org.eclipse.objectteams.otdt.ui.tests.refactoring.move.MoveBaseClassTests.suite());
         
         return suite;
     }
