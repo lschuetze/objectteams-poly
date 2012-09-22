@@ -121,6 +121,8 @@ public team class CheckUniqueCallinCapture {
 		/** Report one affected base method. */
 		void reportDuplicateCallinCapture(MethodBinding methodBinding) {
 			try {
+				if (methodBinding.declaringClass == null)
+					return;
 				String qualifiedClassName = String.valueOf(methodBinding.declaringClass.readableName());
 				IType type = this.getJavaBuilder().getJavaProject().findType(qualifiedClassName);
 				if (type == null)
