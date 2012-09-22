@@ -180,7 +180,7 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		fullBuild();
 		expectingNoProblemsFor(trac18b.getPath());
 		expectingOnlySpecificProblemsFor(aspectPlugin.getPath(), new Problem[] {
-			new Problem("", "Illegal base import: no aspect binding declared for team MissingAspectBindingTeam (OT/Equinox).",
+			new Problem("", "Illegal base import: no aspect binding declared for team MissingAspectBindingTeam or any nested team (OT/Equinox).",
 						aspectPlugin.getPath().append(new Path("src/MissingAspectBindingTeam.java")),
 						12, 34,
 						CategorizedProblem.CAT_CODE_STYLE, IMarker.SEVERITY_ERROR)

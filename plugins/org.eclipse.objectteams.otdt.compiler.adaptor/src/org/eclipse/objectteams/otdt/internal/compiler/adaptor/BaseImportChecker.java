@@ -19,8 +19,11 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.compiler.adaptor;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.core.Flags;
@@ -150,13 +153,21 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 			if (location instanceof ImportReference) {
 				ImportReference imp= (ImportReference)location;
 				if (imp.isBase()) {
-					String teamName= getReferenceTeam();
-					if (teamName == null) 
+					List<String> teamNames= getReferenceTeams();
+					if (teamNames.isEmpty()) {
 						baseImportInRegularClass(getPublicType(), imp);
+						return false;
+					}
 					
-					Set<String> basePlugins= aspectBindingReader.getBasePlugins(teamName);
-					if (basePlugins == null || basePlugins.isEmpty()) {
-						illegalBaseImportNoAspectBinding(imp, teamName);
+					Set<String> basePlugins= new HashSet<String>();
+					for (String teamName : teamNames) {
+						Set<String> currentBasePlugins = aspectBindingReader.getBasePlugins(teamName);
+						if (currentBasePlugins != null && !currentBasePlugins.isEmpty())
+							basePlugins.addAll(currentBasePlugins);
+					}
+					
+					if (basePlugins.isEmpty()) {
+						illegalBaseImportNoAspectBinding(imp, teamNames.isEmpty() ? null : teamNames.get(0));
 						return false;
 					}
 					String baseString = flattenSet(basePlugins);
@@ -165,14 +176,16 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 					if (rule.aspectBindingData != null) {
 						for (Object data : rule.aspectBindingData) {
 							AdaptedBaseBundle info= (AdaptedBaseBundle) data;
-							if (info.isAdaptedBy(teamName)) {
-								// OK, no error
-								if (info.hasPackageSplit) {
-									ReferenceContext contextSave = getReferenceContext();
-									baseImportFromSplitPackage(imp, baseString); // just a warning
-									setReferenceContext(contextSave);
+							for (String teamName : teamNames) {
+								if (info.isAdaptedBy(teamName)) {
+									// OK, no error
+									if (info.hasPackageSplit) {
+										ReferenceContext contextSave = getReferenceContext();
+										baseImportFromSplitPackage(imp, baseString); // just a warning
+										setReferenceContext(contextSave);
+									}
+									return true;
 								}
-								return true;
 							}
 							actualBases.add(info.getSymbolicName());
 						}
@@ -212,11 +225,20 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 			}
 			return DecapsulationState.NONE;
 		}
-		private String getReferenceTeam() {
+		private List<String> getReferenceTeams() {
 			TypeDeclaration type= getPublicType();
-			if (type != null && type.isTeam())
-				return new String(type.binding.readableName());
-			return null;
+			if (type != null && type.isTeam()) {
+				List<String> names = new ArrayList<String>();
+				addTeamNames(type.binding, names);
+				return names;
+			}
+			return Collections.emptyList();
+		}
+		private void addTeamNames(ReferenceBinding type, List<String> names) {
+			names.add(String.valueOf(type.readableName()));
+			for (ReferenceBinding member : type.memberTypes())
+				if (member != null && member.isTeam())
+					addTeamNames(member, names);
 		}
 		private TypeDeclaration getPublicType() {
 			ReferenceContext context= getReferenceContext();
