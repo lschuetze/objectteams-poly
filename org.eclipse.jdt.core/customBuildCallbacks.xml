@@ -40,6 +40,7 @@
 		<property name="build.result.folder" value="${basedir}" />
 		<property name="postingDirectory" value="${build.result.folder}/ecj" />
 		<property name="dest" value="${postingDirectory}/${buildLabel}" />
+		<echo message="bundleVersion=${bundleVersion}"/>
 		<ant antfile="${basedir}/scripts/export-ecj.xml" target="export"/>
 	</target>
 	
