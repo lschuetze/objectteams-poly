@@ -31,6 +31,11 @@
 			project.setProperty("bundleVersionService", sArray[3]);
 			project.setProperty("bundleVersionQualifer", sArray[4])
 		</script>
+		<echo message="bundleVersion: ${bundleVersion}"/>
+		<echo message="bundleVersionMajor: ${bundleVersionMajor}"/>
+		<echo message="bundleVersionMinor: ${bundleVersionMinor}"/>
+		<echo message="bundleVersionService: ${bundleVersionService}"/>
+		<echo message="bundleVersionQualifier: ${bundleVersionQualifer}"/>
 		<property name="ecj-temp-folder" value="${basedir}/ecj-temp-folder" />
 		<property name="ecj-temp-src-folder" value="${basedir}/ecj-temp-src-folder" />
 		<mkdir dir="${ecj-temp-src-folder}" />
