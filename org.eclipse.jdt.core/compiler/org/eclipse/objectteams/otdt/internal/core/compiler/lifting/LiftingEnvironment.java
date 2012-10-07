@@ -67,7 +67,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.Protections;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
@@ -154,11 +153,8 @@ public class LiftingEnvironment
     public void createLiftingInfrastructure(RoleModel lateRole, boolean needMethodBodies) {
         TreeNode[] boundRoles = getBoundRoles();
         if ((boundRoles == null) || (boundRoles.length == 0)) {
-            if (   lateRole == null
-            	&& needMethodBodies
-            	&& !TypeAnalyzer.isOrgObjectteamsTeam(this._teamType.binding)
-            	&& !Protections.hasClassKindProblem(this._teamType.binding))
-            		ReflectionGenerator.createRoleQueryMethods(this._teamType);
+            if (lateRole == null && needMethodBodies)
+           		ReflectionGenerator.createRoleQueryMethods(this._teamType);
             return;
         }
         
@@ -190,7 +186,7 @@ public class LiftingEnvironment
         if (lateRole == null) {
             generateRoleCaches(this._teamType);
             // TODO(SH): split into decl and statements (see fillGeneratedMethods()).
-            if (needMethodBodies && !Protections.hasClassKindProblem(this._teamType.binding))
+            if (needMethodBodies)
             	ReflectionGenerator.createRoleQueryMethods(this._teamType);
         } else {
         	// isTopBound?

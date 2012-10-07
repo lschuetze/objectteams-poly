@@ -30,6 +30,7 @@ import junit.framework.Test;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
@@ -89,7 +90,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 	}
 	
 	static {
-//		TESTS_NAMES = new String[] { "testPlainJava_SyntaxError" };
+//		TESTS_NAMES = new String[] { "testEmptyNestedExternalTeam" };
 	}
 // ===== Copied all our modifications from AbstractJavaModelTests ===== 
 	/*
@@ -1562,4 +1563,72 @@ public class OTReconcilerTests extends ReconcilerTests {
     	}    	
     }
 
+    // Bug 382188 - NPE in copyRole() when commenting out roles in a nested
+    public void testEmptyNestedExternalTeam() throws CoreException, InterruptedException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+
+			this.createFolder("/P/p");
+			
+			String superTeamSourceString =	
+				"package p;\n" +
+				"public team class SuperTeam {\n" +
+				"}\n";
+			this.createFile(
+				"/P/p/SuperTeam.java",
+    			superTeamSourceString);
+
+			String superMidString = 
+				"team package p.SuperTeam;\n" +
+				"protected team class Mid {\n" +
+				"    protected class Inner {}\n" +
+				"}\n";
+			this.createFolder(
+				"/P/p/SuperTeam");
+			this.createFile(
+				"/P/p/SuperTeam/Mid.java",
+				superMidString);
+			
+			String subTeamSourceString =	
+				"package p;\n" +
+				"public team class SubTeam extends SuperTeam {\n" +
+				"    protected class Mid2 {}\n" +
+				"}\n";
+			this.createFile(
+				"/P/p/SubTeam.java",
+    			subTeamSourceString);
+			
+			this.createFolder(
+					"/P/p/SubTeam");
+			String subMidCompleteSourceString =	
+				"team package p/SubTeam;\n" +
+				"protected team class Mid {\n" +
+				"    protected class Inner {}\n" +
+				"}\n";
+			this.createFile("/P/p/SubTeam/Mid.java", subMidCompleteSourceString);
+			
+			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+			String subMidSourceString =	
+				"team package p.SubTeam;\n" +
+				"protected team class Mid {\n" +
+				"}\n";
+
+			char[] subMidSourceChars = subMidSourceString.toCharArray();
+			this.problemRequestor.initialize(subMidSourceChars);
+			
+			ICompilationUnit icu = getCompilationUnit("/P/p/SubTeam/Mid.java").getWorkingCopy(this.wcOwner, null);
+			assertNoProblem(subMidSourceChars, icu);
+    	} finally {
+    		deleteProject("P");
+    	}
+    }
 }

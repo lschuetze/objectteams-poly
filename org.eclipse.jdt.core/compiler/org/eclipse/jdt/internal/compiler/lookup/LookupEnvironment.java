@@ -42,6 +42,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleFileHelper;
@@ -351,9 +352,10 @@ public void completeTypeBindings(CompilationUnitDeclaration parsedUnit) {
 	Dependencies.ensureState(parsedUnit, getDependenciesStateCompleted());
 }
 // for use by Dependiencies only:
-public void internalCompleteTypeBindings(CompilationUnitDeclaration parsedUnit) {
+public int internalCompleteTypeBindings(CompilationUnitDeclaration parsedUnit) {
 	if (this.unitBeingCompleted == parsedUnit) 
-		return; // avoid re-entrance
+		return 0; // avoid re-entrance
+	int todo = this.stepCompleted;
 //SH}
 	if (this.stepCompleted == BUILD_FIELDS_AND_METHODS) {
 		// This can only happen because the original set of units are completely built and
@@ -361,16 +363,42 @@ public void internalCompleteTypeBindings(CompilationUnitDeclaration parsedUnit) 
 		// until they too are completely processed.
 		completeTypeBindings();
 	} else {
+//{ObjectTeams:
+		// add return value:
+/* orig:
 		if (parsedUnit.scope == null) return; // parsing errors were too severe
+  :giro */
+		if (parsedUnit.scope == null) return 0; // parsing errors were too severe
+		// request step from encl. team?
+		if (parsedUnit.isRoleUnit()) { // this implies types[0] exists
+			SourceTypeBinding roleBinding = parsedUnit.types[0].binding;
+			if (roleBinding != null) {
+				ReferenceBinding enclosingType = roleBinding.enclosingType();
+				if (enclosingType != null) {
+					TeamModel enclosingTeam = enclosingType.getTeamModel();
+					if (   enclosingTeam != null 
+						&& enclosingTeam._state.getProcessingState() == ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)
+						todo = CONNECT_TYPE_HIERARCHY;
+				}
+			}
+		}
+// orig:
 
 		if (this.stepCompleted >= CHECK_AND_SET_IMPORTS)
 			(this.unitBeingCompleted = parsedUnit).scope.checkAndSetImports();
 
+/*
 		if (this.stepCompleted >= CONNECT_TYPE_HIERARCHY)
+  :giro */
+		if (todo >= CONNECT_TYPE_HIERARCHY)
+// SH}
 			(this.unitBeingCompleted = parsedUnit).scope.connectTypeHierarchy();
 
 		this.unitBeingCompleted = null;
 	}
+//{ObjectTeams: report actual step achieved:
+	return todo;
+// SH}
 }
 
 /*

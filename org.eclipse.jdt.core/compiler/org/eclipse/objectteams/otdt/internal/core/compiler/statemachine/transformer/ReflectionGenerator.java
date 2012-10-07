@@ -53,6 +53,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.Protections;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
@@ -124,6 +125,9 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 	 */
 	public static void createRoleQueryMethods(TypeDeclaration teamDecl)
 	{
+		if (   TypeAnalyzer.isOrgObjectteamsTeam(teamDecl.binding)
+			|| Protections.hasClassKindProblem(teamDecl.binding))
+			return;
 		long sourceLevel = teamDecl.scope.compilerOptions().sourceLevel;
 		AstGenerator gen = new AstGenerator(sourceLevel, teamDecl.sourceStart, teamDecl.sourceEnd);
 		AstGenerator gen2 = gen;
@@ -305,8 +309,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 			getAStats2[g2++] = createFilterValues(gen);
 		else
 			getAStats2[g2++] = createThrowNoSuchRole(gen); // no caches to search
-		boolean needsAllMethods =    !TypeAnalyzer.isOrgObjectteamsTeam(teamDecl.binding)
-								  && !teamDecl.binding.superclass().isTeam();
+		boolean needsAllMethods = needToImplementITeamMethods(teamDecl);
 		if (h1 > 0 || needsAllMethods) {
 			System.arraycopy(
 					hasStats1, 0,
@@ -377,6 +380,11 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 			getARoles2.setStatements(getAStats2);
 			checkedAddMethod(teamDecl, getARoles2);
 		}
+	}
+
+	public static boolean needToImplementITeamMethods(TypeDeclaration teamDecl) {
+		return !TypeAnalyzer.isOrgObjectteamsTeam(teamDecl.binding)
+			&& !teamDecl.binding.superclass().isTeam();
 	}
 
 	private static Expression createMTList(AstGenerator gen, TypeBinding elemBinding) {

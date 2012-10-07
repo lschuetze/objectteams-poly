@@ -66,6 +66,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.RecordLocalTypesVisitor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReflectionGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.RoleSplitter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.StandardElementGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TransformStatementsVisitor;
@@ -307,8 +308,7 @@ public class Dependencies implements ITranslationStates {
 		    		checkReadKnownRoles(unit);
 		    		LookupEnvironment lookupEnvironment= Config.getLookupEnvironment();
 		    		if (Config.getBundledCompleteTypeBindingsMode()) {
-		            	Config.getLookupEnvironment().internalCompleteTypeBindings(unit);
-		            	int stateReached = lookupEnvironment.getDependenciesStateCompleted();
+		    			int stateReached = Config.getLookupEnvironment().internalCompleteTypeBindings(unit);
 		            	StateHelper.setStateRecursive(unit, stateReached, true);
 		            	if (stateReached >= state)
 		            		return new Pair<Boolean,Success>(done,
@@ -1458,6 +1458,8 @@ public class Dependencies implements ITranslationStates {
 				roleModel.setState(STATE_FULL_LIFTING);
         } else {
 	       	// nothing to do for binary types and role-less teams.
+        	if (teamDeclaration != null && ReflectionGenerator.needToImplementITeamMethods(teamDeclaration))
+				ReflectionGenerator.createRoleQueryMethods(teamDeclaration); // need to implement methods from ITeam
 	       	model.setState(STATE_FULL_LIFTING);
 	       	model.setMemberState(STATE_FULL_LIFTING);
         }
