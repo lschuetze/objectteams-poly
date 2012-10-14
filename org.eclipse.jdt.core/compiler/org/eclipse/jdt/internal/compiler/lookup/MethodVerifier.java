@@ -254,13 +254,28 @@ void checkAgainstInheritedMethods(MethodBinding currentMethod, MethodBinding[] m
 			// want to tag currentMethod even if return types are not equal
 			if (inheritedMethod.isAbstract()) {
 //{ObjectTeams: don't tag role class/ifc implementation:
-			  if (!RoleModel.isSynthIfcOfClass(inheritedMethod.declaringClass, currentMethod.declaringClass))
-// SH}
+			  ReferenceBinding superType = inheritedMethod.declaringClass;
+			  if (!RoleModel.isSynthIfcOfClass(superType, this.type)) {
+// orig:
 				if (inheritedMethod.declaringClass.isInterface()) {
 					currentMethod.modifiers |= ExtraCompilerModifiers.AccImplementing;
 				} else {
 					currentMethod.modifiers |= ExtraCompilerModifiers.AccImplementing | ExtraCompilerModifiers.AccOverriding;
 				}
+// :giro
+				// transfer this information also to the classpart:
+				if (this.type.isSynthInterface()) {
+					MethodBinding currentClassPart = MethodModel.getClassPartMethod(currentMethod);
+					if (currentClassPart != null) {
+						if (superType.isInterface()) {
+							currentClassPart.modifiers |= ExtraCompilerModifiers.AccImplementing;
+						} else {
+							currentClassPart.modifiers |= ExtraCompilerModifiers.AccImplementing | ExtraCompilerModifiers.AccOverriding;
+						}
+					}
+				}
+			  }
+// SH}
 //			with the above change an abstract method is tagged as implementing the inherited abstract method
 //			if (!currentMethod.isAbstract() && inheritedMethod.isAbstract()) {
 //				if ((currentMethod.modifiers & CompilerModifiers.AccOverriding) == 0)

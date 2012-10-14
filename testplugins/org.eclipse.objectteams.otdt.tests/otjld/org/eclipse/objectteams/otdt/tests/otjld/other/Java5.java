@@ -17,6 +17,8 @@ package org.eclipse.objectteams.otdt.tests.otjld.other;
 
 import java.util.Map;
 
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.otjld.AbstractOTJLDTest;
 
@@ -3645,6 +3647,119 @@ public class Java5 extends AbstractOTJLDTest {
             null/*vmArguments*/,
             customOptions,
             null/*no custom requestor*/);
+    }
+
+    // Bug 381790 - [compiler] support @Override for role method implementing an interface method
+    // With @Override Annotations
+    // R: role class implementing regular interface 
+    // R1: role class extending role class
+    // R2: role extending regular class
+    public void testA116_overrideAnnotation4() {
+    	if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+    	String[] sources = new String [] {
+    		"TeamA117oi4.java",
+    		"public team class TeamA117oi4 {\n" +
+    		"	protected class R implements IA117oi4 {\n" +
+    		"		@Override public void bar() {}\n" +
+    		"	}\n" +
+    		"	protected class R1 extends R {\n" +
+    		"		@Override public void bar() {}\n" +
+    		"	}\n" +
+			"	protected class R2 extends TA117oi4 {\n" +
+			"		@Override public void foo() {}\n" +
+			"	}\n" +
+    		"}\n",
+			"TA117oi4.java",
+			"public class TA117oi4 {\n" +
+			"	public void foo() {}\n" +
+			"}\n",
+    		"IA117oi4.java",
+    		"public interface IA117oi4 {\n" +
+    		"	public void bar();\n" +
+    		"}\n"
+    	};
+    	if (this.complianceLevel == ClassFileConstants.JDK1_5)
+    		runNegativeTest(sources,
+				"----------\n" + 
+				"1. ERROR in TeamA117oi4.java (at line 3)\n" + 
+				"	@Override public void bar() {}\n" + 
+				"	                      ^^^^^\n" + 
+				"The method bar() of type TeamA117oi4.R must override a superclass method\n" + 
+				"----------\n");
+    	else
+    		runConformTest(sources, "");
+    }
+
+    // Bug 381790 - [compiler] support @Override for role method implementing an interface method
+    // Missing @Override Annotations:
+    // R: role implements regular interface
+    // R1: role extends other role
+    // R2: role extending regular class
+    public void testA116_overrideAnnotation5() {
+    	if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+    	Map options = getCompilerOptions();
+    	options.put(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, JavaCore.ERROR);
+    	String[] sources = new String [] {
+			"TeamA117oi5.java",
+			"public team class TeamA117oi5 {\n" +
+			"	protected class R implements IA117oi5 {\n" +
+			"		public void bar() {}\n" +
+			"	}\n" +
+			"	protected class R1 extends R {\n" +
+			"		public void bar() {}\n" +
+			"	}\n" +
+			"	protected class R2 extends TA117oi5 {\n" +
+			"		public void foo() {}\n" +
+			"	}\n" +
+			"}\n",
+			"TA117oi5.java",
+			"public class TA117oi5 {\n" +
+			"	public void foo() {}\n" +
+			"}\n",
+			"IA117oi5.java",
+			"public interface IA117oi5 {\n" +
+			"	public void bar();\n" +
+			"}\n"
+		};
+    	if (this.complianceLevel == ClassFileConstants.JDK1_5)
+			runNegativeTest(
+	    		sources,
+	    		"----------\n" + 
+				"1. ERROR in TeamA117oi5.java (at line 6)\n" + 
+				"	public void bar() {}\n" + 
+				"	            ^^^^^\n" + 
+				"The method bar() of type TeamA117oi5.R1 should be tagged with @Override since it actually overrides a superclass method\n" + 
+				"----------\n" + 
+				"2. ERROR in TeamA117oi5.java (at line 9)\n" + 
+				"	public void foo() {}\n" + 
+				"	            ^^^^^\n" + 
+				"The method foo() of type TeamA117oi5.R2 should be tagged with @Override since it actually overrides a superclass method\n" + 
+				"----------\n",
+				null,
+				true,
+				options);
+    	else
+			runNegativeTest(
+	    		sources,
+				"----------\n" + 
+				"1. ERROR in TeamA117oi5.java (at line 3)\n" + 
+				"	public void bar() {}\n" + 
+				"	            ^^^^^\n" + 
+				"The method bar() of type TeamA117oi5.R should be tagged with @Override since it actually overrides a superinterface method\n" + 
+				"----------\n" + 
+				"2. ERROR in TeamA117oi5.java (at line 6)\n" + 
+				"	public void bar() {}\n" + 
+				"	            ^^^^^\n" + 
+				"The method bar() of type TeamA117oi5.R1 should be tagged with @Override since it actually overrides a superclass method\n" + 
+				"----------\n" + 
+				"3. ERROR in TeamA117oi5.java (at line 9)\n" + 
+				"	public void foo() {}\n" + 
+				"	            ^^^^^\n" + 
+				"The method foo() of type TeamA117oi5.R2 should be tagged with @Override since it actually overrides a superclass method\n" + 
+				"----------\n",
+				null,
+				true,
+				options);
     }
 
     // a role method is deprecated, so should be its tsub
