@@ -40,6 +40,8 @@ public class OTPDEUIMessages extends NLS
 	public static String Validation_MissingActivationPolicy_error;
 	public static String Resolution_AddBundleActivationPolicy_label;
 	
+	public static String Validation_UnresolveBasePlugin_error;
+
 	public static String ToggleOTSupportAction_configurationError_message;
 
 

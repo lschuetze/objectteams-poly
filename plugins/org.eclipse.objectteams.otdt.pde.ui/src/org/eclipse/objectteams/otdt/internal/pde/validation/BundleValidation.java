@@ -21,6 +21,7 @@ import static org.eclipse.objectteams.otequinox.Constants.*;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.objectteams.otdt.internal.pde.ui.OTPDEUIMessages;
 import org.eclipse.objectteams.otequinox.ActivationKind;
+import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.internal.core.builders.CompilerFlags;
 import org.eclipse.pde.internal.core.builders.IHeader;
 import org.eclipse.pde.internal.core.builders.PDEMarkerFactory;
@@ -31,6 +32,9 @@ import org.eclipse.pde.internal.ui.correction.AbstractManifestMarkerResolution;
 import org.eclipse.pde.internal.ui.correction.AbstractPDEMarkerResolution;
 import org.eclipse.ui.IMarkerResolution;
 import org.osgi.framework.Constants;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.util.NLS;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -90,6 +94,18 @@ public team class BundleValidation
 	protected class ExtensionAnalyzer playedBy ExtensionsErrorReporter 
 			base when (BundleValidation.this.bundleContext.get() != null)
 	{	
+		
+		@SuppressWarnings("decapsulation")
+		State getState() -> get IPluginModelBase fModel
+			with { result <- fModel.getBundleDescription().getContainingState() }
+		
+		IMarker report(String message, int line, int severity, String category) 
+		-> IMarker report(String message, int line, int severity, String category);
+
+		@SuppressWarnings("decapsulation")
+		int getLine(Element element) -> int getLine(Element element);
+
+
 		void checkAspectBinding(Element element) <- after void validateExtension(Element element);
 
 		protected void checkAspectBinding(Element element) 
@@ -105,8 +121,11 @@ public team class BundleValidation
 				NodeList baseNodes = element.getElementsByTagName(BASE_PLUGIN);
 				if (baseNodes.getLength() > 0) { 
 					String baseId = ((Element)baseNodes.item(0)).getAttribute(ID);
-					if (baseId != null && baseId.toUpperCase().equals(SELF))
-						return; // missing bundle activation is not fatal in this case
+					if (baseId != null) {
+						checkBasePlugIn(baseId, getLine((Element)baseNodes.item(0)));
+						if (baseId.toUpperCase().equals(SELF))
+							return; // missing bundle activation is not fatal in this case
+					}
 				}
 				
 				// check the teams for activation ALL_THREADS or THREAD:
@@ -122,6 +141,14 @@ public team class BundleValidation
 					}
 				}
 			}
+		}
+		void checkBasePlugIn(String symbolicName, int lineNo) {
+			BundleDescription[] bundles = getState().getBundles(symbolicName);
+			if (bundles.length == 0)
+				report(NLS.bind(OTPDEUIMessages.Validation_UnresolveBasePlugin_error, symbolicName),
+						   lineNo, 
+						   CompilerFlags.ERROR, 
+						   PDEMarkerFactory.CAT_OTHER);
 		}
 	}
 	

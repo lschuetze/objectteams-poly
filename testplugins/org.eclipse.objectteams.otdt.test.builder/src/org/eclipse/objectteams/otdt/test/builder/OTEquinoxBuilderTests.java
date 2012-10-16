@@ -356,6 +356,18 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		expectingNoProblemsFor(aspectPlugin2.getPath());
 	}
 
+	public void testBug374833() throws CoreException, IOException {
+		IJavaProject pluginPrj= fileManager.setUpJavaProject("UnresolvedBasePlugin"); 
+		env.addProject(pluginPrj.getProject());
+		fullBuild();
+		expectingOnlySpecificProblemsFor(pluginPrj.getPath(), 
+				new Problem[] {
+					new Problem("", "Base plug-in Missing.Plugin cannot be resolved",
+							pluginPrj.getPath().append("plugin.xml"),
+							-1, -1, -1, IMarker.SEVERITY_ERROR)
+				});
+	}
+
 	// ---------------- HELPERS: ---------------------------
 	private Problem getDecapsulationProblem(IJavaProject project, String baseclassName, String teamPath, int start, int end) {
 		return new Problem("", "Decapsulating base class "+baseclassName+" by means of a forced export. Note, that additionally a corresponing declaration is needed in config.ini (OTJLD 2.1.2(c) + OT/Equinox).",

@@ -1,8 +1,9 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: Test Illegal Use Of ForcedExport Plug-in
-Bundle-SymbolicName: IllegalUseOfForcedExport; singleton:=true
+Bundle-Name: UnresolvedBasePlugin Plug-in
+Bundle-SymbolicName: UnresolvedBasePlugin; singleton:=true
 Bundle-Version: 1.0.0
 Require-Bundle: org.eclipse.objectteams.otequinox,
- Trac18b
+ org.eclipse.objectteams.runtime
+Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: J2SE-1.5

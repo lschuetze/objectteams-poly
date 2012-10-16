@@ -6,4 +6,4 @@ Bundle-Version: 1.0.0
 Require-Bundle: org.eclipse.ui
 Export-Package: trac18b.api
 Bundle-ActivationPolicy: lazy
-
+Bundle-RequiredExecutionEnvironment: J2SE-1.5

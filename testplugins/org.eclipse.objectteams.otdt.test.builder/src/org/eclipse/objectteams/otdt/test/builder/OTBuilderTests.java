@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.tests.builder.BuilderTests;
 import org.eclipse.jdt.core.tests.builder.Problem;
 import org.eclipse.jdt.core.tests.builder.TestingEnvironment;
 import org.eclipse.objectteams.otdt.internal.compiler.adaptor.BuildManager;
+import org.eclipse.pde.internal.core.PDECoreMessages;
 
 public class OTBuilderTests extends BuilderTests {
 
@@ -42,7 +43,27 @@ public class OTBuilderTests extends BuilderTests {
 		
 		this.otenv = new OTTestingEnvironment();
 		this.otenv.activate();
-		env = new TestingEnvironment();
+		env = new TestingEnvironment() {
+			@Override
+			public Problem[] getProblemsFor(IPath path) {
+				// capture some more problems than the super method, but not all:
+				Problem[] allProblems = getProblemsFor(path, "org.eclipse.pde.core.problem");
+				Problem[] filteredProblems = new Problem[allProblems.length];
+				int j=0;
+				for (int i = 0; i < allProblems.length; i++) {
+					// don't know why this warning is getting reported against perfectly valid files, ignore it for now:
+					if (allProblems[i].getMessage().equals(PDECoreMessages.Builders_Manifest_useless_file))
+						continue;
+					// some plugin.xml have a deprecated 'action' extension, just ignore those: 
+					if (allProblems[i].getMessage().contains("deprecated"))
+						continue;
+					filteredProblems[j++] = allProblems[i];
+				}
+				if (j < allProblems.length)
+					System.arraycopy(filteredProblems, 0, filteredProblems = new Problem[j], 0, j);
+				return filteredProblems;
+			}
+		};
 		env.openEmptyWorkspace();
 		env.resetWorkspace();
 	
