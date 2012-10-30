@@ -4,7 +4,7 @@
 	
 	<groupId>org.eclipse</groupId>
 	<artifactId>objectteams-parent-pom</artifactId>
-	<version>2.1.0</version>
+	<version>2.1.1</version>
 	<packaging>pom</packaging>
 	
 	<name>Object Teams parent pom</name>
@@ -82,11 +82,11 @@
     	<project-repository-path>maven/infrastructure/parent-pom</project-repository-path>
 
 		<!-- Our Version: -->
-		<otj.version>2.1.0</otj.version>
+		<otj.version>2.1.1</otj.version>
 
 		<!-- Versions of dependencies: -->
 		<bcel.version>5.2</bcel.version>
-		<tycho.version>0.15.0</tycho.version>
+		<tycho.version>0.16.0</tycho.version>
 		
 		<!-- Absolut paths for providing startup arguments to the JVM -->
 		<otj.otre.location>${settings.localRepository}/org/eclipse/objectteams-runtime/${otj.version}/objectteams-runtime-${otj.version}.jar</otj.otre.location>
@@ -128,6 +128,7 @@
 	<build>
 		<pluginManagement>
 			<plugins>
+
 				<plugin>
 					<!--
 						Use compiler plugin with tycho as the adapter to the OT/J compiler.
@@ -162,6 +163,35 @@
 						</dependency>
 					</dependencies>
 				</plugin>
+
+				<plugin>
+					<!-- The same for tycho builds: -->
+					<groupId>org.eclipse.tycho</groupId>
+					<artifactId>tycho-compiler-plugin</artifactId>
+					<version>${tycho.version}</version>
+					<extensions>true</extensions>
+					<dependencies>
+						<dependency>
+							<groupId>org.eclipse.tycho</groupId>
+							<artifactId>tycho-compiler-jdt</artifactId>
+							<version>${tycho.version}</version>
+							<exclusions>
+								<!-- Exclude the original JDT/Core to be replaced by the OT/J variant: -->
+								<exclusion>
+									<groupId>org.eclipse.tycho</groupId>
+									<artifactId>org.eclipse.jdt.core</artifactId>
+								</exclusion>
+							</exclusions>
+						</dependency>
+						<dependency>
+							<!-- plug the OT/J compiler into the tycho-compiler-jdt plug-in: -->
+							<groupId>org.eclipse</groupId>
+							<artifactId>objectteams-otj-compiler</artifactId>
+							<version>${otj.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+
 				<!-- See http://maven.apache.org/plugins/maven-surefire-plugin/ -->
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
