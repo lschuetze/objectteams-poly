@@ -3,7 +3,7 @@
 	------
 	Olaf Otto & Stephan Herrmann
 	------
-	2012-07-05
+	2012-10-30
 	------
 
 Using the Object Teams Parent POM
@@ -33,9 +33,11 @@ Using the Object Teams Parent POM
 	<parent>
 		<groupId>org.eclipse</groupId>
 		<artifactId>objectteams-parent-pom</artifactId>
-		<version>2.1.0</version>
+		<version>2.1.1</version>
 	</parent>
 +-----
+
+ Starting with version 2.1.1 the parent pom also supports using OT/J in tycho builds (projects using OSGi).
 
 * Example
 
