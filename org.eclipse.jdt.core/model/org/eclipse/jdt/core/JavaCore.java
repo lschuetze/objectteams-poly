@@ -98,6 +98,7 @@
  *     								COMPILER_PB_NULL_SPECIFICATION_INSUFFICIENT_INFO
  *									COMPILER_PB_MISSING_ENUM_CASE_DESPITE_DEFAULT
  *									COMPILER_PB_SWITCH_MISSING_DEFAULT_CASE
+ *									COMPILER_INHERIT_NULL_ANNOTATIONS
  *******************************************************************************/
 package org.eclipse.jdt.core;
 
@@ -526,6 +527,21 @@ public final class JavaCore extends Plugin {
 	 * @category CompilerOptionID
 	 */
 	public static final String COMPILER_PB_SYNTHETIC_ACCESS_EMULATION = PLUGIN_ID + ".compiler.problem.syntheticAccessEmulation"; //$NON-NLS-1$
+
+	/**
+	 * Compiler option ID: Reporting Unused Type Parameter.
+	 * <p>When enabled, the compiler will issue an error or a warning whenever it encounters an 
+	 * unused type parameter. </p>
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.problem.unusedTypeParameter"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "error", "warning", "ignore" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"ignore"</code></dd>
+	 * </dl>
+	 * @since 3.9
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_PB_UNUSED_TYPE_PARAMETER = PLUGIN_ID + ".compiler.problem.unusedTypeParameter"; //$NON-NLS-1$
+
 	/**
 	 * Compiler option ID: Reporting Non-Externalized String Literal.
 	 * <p>When enabled, the compiler will issue an error or a warning for non externalized
@@ -1688,6 +1704,26 @@ public final class JavaCore extends Plugin {
 	 * @category CompilerOptionID
 	 */
 	public static final String COMPILER_PB_REDUNDANT_NULL_ANNOTATION = PLUGIN_ID + ".compiler.problem.redundantNullAnnotation"; //$NON-NLS-1$
+	/**
+	 * Compiler option ID: Inheritance of null annotations.
+	 * <p>When enabled, the compiler will check for each method without any explicit null annotations:
+	 *    If it overrides a method which has null annotations, it will treat the
+	 *    current method as if it had the same annotations as the overridden method.</p>
+	 * <p>Annotation inheritance will use the <em>effective</em> nullness of the overridden method
+	 *    after transitively applying inheritance and after applying any default nullness
+	 *    (see {@link #COMPILER_NONNULL_BY_DEFAULT_ANNOTATION_NAME}) at the site of the overridden method.</p>
+	 * <p>If different implicit null annotations (from a nonnull default and/or overridden methods) are applicable
+	 *    to the same type in a method signature, this is flagged as an error 
+	 *    and an explicit null annotation must be used to disambiguate.</p>
+	 * <dl>
+	 * <dt>Option id:</dt><dd><code>"org.eclipse.jdt.core.compiler.annotation.inheritNullAnnotations"</code></dd>
+	 * <dt>Possible values:</dt><dd><code>{ "disabled", "enabled" }</code></dd>
+	 * <dt>Default:</dt><dd><code>"disabled"</code></dd>
+	 * </dl>
+	 * @since 3.9
+	 * @category CompilerOptionID
+	 */
+	public static final String COMPILER_INHERIT_NULL_ANNOTATIONS = JavaCore.PLUGIN_ID+".compiler.annotation.inheritNullAnnotations"; //$NON-NLS-1$
 	/**
 	 * Compiler option ID: Setting Source Compatibility Mode.
 	 * <p>Specify whether which source level compatibility is used. From 1.4 on, <code>'assert'</code> is a keyword

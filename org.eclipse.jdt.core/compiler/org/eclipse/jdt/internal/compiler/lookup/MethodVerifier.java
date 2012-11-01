@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
  *     Benjamin Muskalla - Contribution for bug 239066
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -25,13 +27,10 @@ import org.eclipse.jdt.internal.compiler.util.HashtableOfObject;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
-import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.Protections;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
 /**
@@ -59,7 +58,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * Why:  would report unimplemented methods.
  *
  */
-public class MethodVerifier {
+public class MethodVerifier extends ImplicitNullAnnotationVerifier {
 	SourceTypeBinding type;
 	HashtableOfObject inheritedMethods;
 	HashtableOfObject currentMethods;
@@ -83,6 +82,9 @@ Binding creation is responsible for reporting all problems with types:
 		- defining an interface as a local type (local types can only be classes)
 */
 MethodVerifier(LookupEnvironment environment) {
+//{ObjectTeams: added 2nd arg:
+	super(environment.globalOptions, environment);
+// SH}
 	this.type = null;  // Initialized with the public method verify(SourceTypeBinding)
 	this.inheritedMethods = null;
 	this.currentMethods = null;
@@ -93,20 +95,6 @@ MethodVerifier(LookupEnvironment environment) {
 }
 boolean areMethodsCompatible(MethodBinding one, MethodBinding two) {
 	return isParameterSubsignature(one, two) && areReturnTypesCompatible(one, two);
-}
-boolean areParametersEqual(MethodBinding one, MethodBinding two) {
-	TypeBinding[] oneArgs = one.parameters;
-	TypeBinding[] twoArgs = two.parameters;
-	if (oneArgs == twoArgs) return true;
-
-	int length = oneArgs.length;
-	if (length != twoArgs.length) return false;
-
-	for (int i = 0; i < length; i++)
-//{ObjectTeams: added 3. argument
-		if (!areTypesEqual(oneArgs[i], twoArgs[i], two)) return false;
-// SH}
-	return true;
 }
 boolean areReturnTypesCompatible(MethodBinding one, MethodBinding two) {
 //{ObjectTeams: consider enhanced callin signatures:
@@ -147,56 +135,6 @@ boolean areReturnTypesCompatible0(MethodBinding one, MethodBinding two) {
 
 	return one.returnType.isCompatibleWith(two.returnType);
 }
-
-//{ObjectTeams:  enable role type comparison
-//	added 3. parameter:
-boolean areTypesEqual(TypeBinding one, TypeBinding two, MethodBinding methodTwo) {
-	if (one == two) return true;
-//  different comparison for role types:
-	if (areEqualRoleTypes(one, two, methodTwo.declaringClass, this.environment))
-		return true;
-// SH}
-
-	// its possible that an UnresolvedReferenceBinding can be compared to its resolved type
-	// when they're both UnresolvedReferenceBindings then they must be identical like all other types
-	// all wrappers of UnresolvedReferenceBindings are converted as soon as the type is resolved
-	// so its not possible to have 2 arrays where one is UnresolvedX[] and the other is X[]
-	if (one instanceof UnresolvedReferenceBinding)
-		return ((UnresolvedReferenceBinding) one).resolvedType == two;
-	if (two instanceof UnresolvedReferenceBinding)
-		return ((UnresolvedReferenceBinding) two).resolvedType == one;
-	return false; // all other type bindings are identical
-}
-//{ObjectTeams: specific check for role types and arrays thereof:
-public static boolean areEqualRoleTypes(TypeBinding one, TypeBinding two, ReferenceBinding site, LookupEnvironment environment) {
-	if (one instanceof ArrayBinding) {
-		if (! (two instanceof ArrayBinding))
-			return false;
-		ArrayBinding array1 = (ArrayBinding)one;
-		ArrayBinding array2 = (ArrayBinding)two;
-		if (array1.dimensions != array2.dimensions)
-			return false;
-		one = array1.leafComponentType();
-		two = array2.leafComponentType();
-	}
-	if (one instanceof WeakenedTypeBinding)
-		one = ((WeakenedTypeBinding)one).weakenedType;
-	if (two instanceof WeakenedTypeBinding)
-		two = ((WeakenedTypeBinding)two).weakenedType;
-	if (one instanceof RoleTypeBinding) {
-		if (two instanceof UnresolvedReferenceBinding)
-		{
-			// resolve type (incl. type wrapping) without resolving all of the method:
-			// (cf. comment in BinaryTypeBinding.unResolvedMethods()).
-			two = ((UnresolvedReferenceBinding)two).resolve(environment, false/*convertGenericToRaw*/);
-			two = RoleTypeCreator.maybeWrapUnqualifiedRoleType(two, site);
-		}
-		if (two instanceof RoleTypeBinding)
-			return TypeAnalyzer.areRoleTypesEqual((RoleTypeBinding)one, (RoleTypeBinding)two);
-	}
-	return false;
-}
-// SH}
 boolean canSkipInheritedMethods() {
 	if (this.type.superclass() != null && this.type.superclass().isAbstract())
 		return false;

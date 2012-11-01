@@ -21,6 +21,7 @@
  *								bug 365531 - [compiler][null] investigate alternative strategy for internally encoding nullness defaults
  *								bug 365859 - [compiler][null] distinguish warnings based on flow analysis vs. null annotations
  *								bug 374605 - Unreasonable warning for enum-based switch statements
+ *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
 
@@ -380,6 +381,8 @@ public static int getIrritant(int problemID) {
 		case IProblem.ParameterLackingNonNullAnnotation:
 		case IProblem.ParameterLackingNullableAnnotation:
 		case IProblem.CannotImplementIncompatibleNullness:
+		case IProblem.ConflictingNullAnnotations:
+		case IProblem.ConflictingInheritedNullAnnotations:
 			return CompilerOptions.NullSpecViolation;
 
 		case IProblem.RequiredNonNullButProvidedPotentialNull:
@@ -643,6 +646,9 @@ public static int getIrritant(int problemID) {
 		case IProblem.MissingNonNullByDefaultAnnotationOnPackage:
 		case IProblem.MissingNonNullByDefaultAnnotationOnType:
 			return CompilerOptions.MissingNonNullByDefaultAnnotation;
+			
+		case IProblem.UnusedTypeParameter:
+			return CompilerOptions.UnusedTypeParameter;
 	}
 	return 0;
 }
@@ -721,6 +727,7 @@ public static int getProblemCategory(int severity, int problemID) {
 			case CompilerOptions.UnusedLabel :
 			case CompilerOptions.RedundantSuperinterface :
 			case CompilerOptions.RedundantSpecificationOfTypeArguments :
+			case CompilerOptions.UnusedTypeParameter:
 				return CategorizedProblem.CAT_UNNECESSARY_CODE;
 
 			case CompilerOptions.UsingDeprecatedAPI :
@@ -1429,6 +1436,15 @@ public void cannotThrowType(ASTNode exception, TypeBinding expectedType) {
 		new String[] {new String(expectedType.shortReadableName())},
 		exception.sourceStart,
 		exception.sourceEnd);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391092
+public void illegalArrayOfUnionType(char[] identifierName, TypeReference typeReference) {
+		this.handle(
+		IProblem.IllegalArrayOfUnionType,
+		NoArgument,
+		NoArgument,
+		typeReference.sourceStart,
+		typeReference.sourceEnd);
 }
 public void cannotUseQualifiedEnumConstantInCaseLabel(Reference location, FieldBinding field) {
 	this.handle(
@@ -7213,14 +7229,6 @@ private int retrieveStartingPositionAfterOpeningParenthesis(int sourceStart, int
 	}
 	return sourceStart;
 }
-public void returnTypeCannotBeVoidArray(MethodDeclaration methodDecl) {
-	this.handle(
-		IProblem.CannotAllocateVoidArray,
-		NoArgument,
-		NoArgument,
-		methodDecl.returnType.sourceStart,
-		methodDecl.returnType.sourceEnd);
-}
 public void scannerError(Parser parser, String errorTokenName) {
 	Scanner scanner = parser.scanner;
 
@@ -8596,6 +8604,17 @@ public void unusedPrivateType(TypeDeclaration typeDecl) {
 		severity,
 		typeDecl.sourceStart,
 		typeDecl.sourceEnd);
+}
+public void unusedTypeParameter(TypeParameter typeParameter) {
+	int severity = computeSeverity(IProblem.UnusedTypeParameter);
+	if (severity == ProblemSeverities.Ignore) return;
+	String [] arguments = new String[] {new String(typeParameter.name)};
+	this.handle(
+			IProblem.UnusedTypeParameter,
+			arguments,
+			arguments,
+			typeParameter.sourceStart,
+			typeParameter.sourceEnd);
 }
 public void unusedWarningToken(Expression token) {
 	String[] arguments = new String[] { token.constant.stringValue() };
@@ -12755,6 +12774,44 @@ public void contradictoryNullAnnotations(Annotation annotation) {
 			new String(nullableAnnotationName[nullableAnnotationName.length-1])
 		};
 	this.handle(IProblem.ContradictoryNullAnnotations, arguments, shortArguments, annotation.sourceStart, annotation.sourceEnd);
+}
+
+// conflict default <-> inherited
+public void conflictingNullAnnotations(MethodBinding currentMethod, ASTNode location, MethodBinding inheritedMethod)
+{
+	char[][] nonNullAnnotationName = this.options.nonNullAnnotationName;
+	char[][] nullableAnnotationName = this.options.nullableAnnotationName;
+	String[] arguments = {
+		new String(CharOperation.concatWith(nonNullAnnotationName, '.')),
+		new String(CharOperation.concatWith(nullableAnnotationName, '.')),
+		new String(inheritedMethod.declaringClass.readableName())
+	};
+	String[] shortArguments = {
+			new String(nonNullAnnotationName[nonNullAnnotationName.length-1]),
+			new String(nullableAnnotationName[nullableAnnotationName.length-1]),
+			new String(inheritedMethod.declaringClass.shortReadableName())
+		};
+	this.handle(IProblem.ConflictingNullAnnotations, arguments, shortArguments, location.sourceStart, location.sourceEnd);
+}
+
+// conflict between different inheriteds
+public void conflictingInheritedNullAnnotations(ASTNode location, boolean previousIsNonNull, MethodBinding previousInherited, boolean isNonNull, MethodBinding inheritedMethod)
+{
+	char[][] previousAnnotationName = previousIsNonNull ? this.options.nonNullAnnotationName : this.options.nullableAnnotationName;
+	char[][] annotationName = isNonNull ? this.options.nonNullAnnotationName : this.options.nullableAnnotationName;
+	String[] arguments = {
+		new String(CharOperation.concatWith(previousAnnotationName, '.')),
+		new String(previousInherited.declaringClass.readableName()),
+		new String(CharOperation.concatWith(annotationName, '.')),
+		new String(inheritedMethod.declaringClass.readableName())
+	};
+	String[] shortArguments = {
+			new String(previousAnnotationName[previousAnnotationName.length-1]),
+			new String(previousInherited.declaringClass.shortReadableName()),
+			new String(annotationName[annotationName.length-1]),
+			new String(inheritedMethod.declaringClass.shortReadableName())
+		};
+	this.handle(IProblem.ConflictingInheritedNullAnnotations, arguments, shortArguments, location.sourceStart, location.sourceEnd);
 }
 
 public void illegalAnnotationForBaseType(TypeReference type, Annotation[] annotations, char[] annotationName, long nullAnnotationTagBit)

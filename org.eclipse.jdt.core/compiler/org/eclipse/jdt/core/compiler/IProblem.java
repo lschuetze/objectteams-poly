@@ -152,6 +152,8 @@
  *									UninitializedLocalVariableHintMissingDefault
  *									UninitializedBlankFinalFieldHintMissingDefault
  *									ShouldReturnValueHintMissingDefault
+ *									ConflictingNullAnnotations
+ *									ConflictingInheritedNullAnnotations
  *******************************************************************************/
 package org.eclipse.jdt.core.compiler;
 
@@ -1298,6 +1300,10 @@ void setSourceStart(int sourceStart);
 	 */
     /** @since 3.4 */
     int UnusedTypeArgumentsForConstructorInvocation = MethodRelated + 660;
+	/** @since 3.9 */
+	int UnusedTypeParameter = TypeRelated + 661;
+	/** @since 3.9 */
+	int IllegalArrayOfUnionType = TypeRelated + 662;
 
 	/**
 	 * Corrupted binaries
@@ -1508,6 +1514,10 @@ void setSourceStart(int sourceStart);
 	int SpecdNonNullLocalVariableComparisonYieldsFalse = Internal + 932;
 	/** @since 3.8 */
 	int RequiredNonNullButProvidedSpecdNullable = Internal + 933;
+	/** @since 3.9 */
+	int ConflictingNullAnnotations = MethodRelated + 939;
+	/** @since 3.9 */
+	int ConflictingInheritedNullAnnotations = MethodRelated + 940;
 
 	/**
 	 * External problems -- These are problems defined by other plugins

@@ -18,6 +18,7 @@
  *     							bug 359721 - [options] add command line option for new warning token "resource"
  *								bug 365208 - [compiler][batch] command line options for annotation based null analysis
  *								bug 374605 - Unreasonable warning for enum-based switch statements
+ *								bug 375366 - ECJ ignores unusedParameterIncludeDocCommentReference unless enableJavadoc option is set
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.batch;
 
@@ -2930,7 +2931,7 @@ private void initializeWarnings(String propertiesFile) {
 	for (Iterator iterator = properties.entrySet().iterator(); iterator.hasNext(); ) {
 		Map.Entry entry = (Map.Entry) iterator.next();
 		final String key = (String) entry.getKey();
-		if (key.startsWith("org.eclipse.jdt.core.compiler.problem")) { //$NON-NLS-1$
+		if (key.startsWith("org.eclipse.jdt.core.compiler.")) { //$NON-NLS-1$
 			this.options.put(key, entry.getValue());
 		}
 //{ObjectTeams: also use OT-options:
@@ -2938,6 +2939,19 @@ private void initializeWarnings(String propertiesFile) {
 			this.options.put(key, entry.getValue());
 		}
 // SH}
+	}
+	// when using a properties file mimic relevant defaults from JavaCorePreferenceInitializer:
+	if (!properties.containsKey(CompilerOptions.OPTION_LocalVariableAttribute)) {
+		this.options.put(CompilerOptions.OPTION_LocalVariableAttribute, CompilerOptions.GENERATE);
+	}
+	if (!properties.containsKey(CompilerOptions.OPTION_PreserveUnusedLocal)) {
+		this.options.put(CompilerOptions.OPTION_PreserveUnusedLocal, CompilerOptions.PRESERVE);
+	}
+	if (!properties.containsKey(CompilerOptions.OPTION_DocCommentSupport)) {
+		this.options.put(CompilerOptions.OPTION_DocCommentSupport, CompilerOptions.ENABLED);
+	}
+	if (!properties.containsKey(CompilerOptions.OPTION_ReportForbiddenReference)) {
+		this.options.put(CompilerOptions.OPTION_ReportForbiddenReference, CompilerOptions.ERROR);
 	}
 }
 protected void enableAll(int severity) {
@@ -3991,9 +4005,13 @@ private void handleErrorOrWarningToken(String token, boolean isEnabling, int sev
 				setSeverity(CompilerOptions.OPTION_ReportUnusedLabel, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportUnusedTypeArgumentsForMethodInvocation, severity, isEnabling);
 				setSeverity(CompilerOptions.OPTION_ReportRedundantSpecificationOfTypeArguments, severity, isEnabling);
+				setSeverity(CompilerOptions.OPTION_ReportUnusedTypeParameter, severity,isEnabling); //TODO - Enable this when tests are modified at ui addition.
 				return;
 			} else if (token.equals("unusedParam")) { //$NON-NLS-1$
 				setSeverity(CompilerOptions.OPTION_ReportUnusedParameter, severity, isEnabling);
+				return;
+			} else if (token.equals("unusedTypeParameter")) { //$NON-NLS-1$
+				setSeverity(CompilerOptions.OPTION_ReportUnusedTypeParameter, severity, isEnabling);
 				return;
 			} else if (token.equals("unusedParamIncludeDoc")) { //$NON-NLS-1$
 				this.options.put(

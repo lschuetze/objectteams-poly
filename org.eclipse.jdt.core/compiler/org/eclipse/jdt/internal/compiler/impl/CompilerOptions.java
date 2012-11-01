@@ -18,6 +18,7 @@
  *								bug 370639 - [compiler][resource] restore the default for resource leak warnings
  *								bug 366063 - Compiler should not add synthetic @NonNull annotations
  *								bug 374605 - Unreasonable warning for enum-based switch statements
+ *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.impl;
 
@@ -134,6 +135,7 @@ public class CompilerOptions {
 	public static final String OPTION_SuppressWarnings =  "org.eclipse.jdt.core.compiler.problem.suppressWarnings"; //$NON-NLS-1$
 	public static final String OPTION_SuppressOptionalErrors = "org.eclipse.jdt.core.compiler.problem.suppressOptionalErrors"; //$NON-NLS-1$
 	public static final String OPTION_ReportUnhandledWarningToken =  "org.eclipse.jdt.core.compiler.problem.unhandledWarningToken"; //$NON-NLS-1$
+	public static final String OPTION_ReportUnusedTypeParameter =  "org.eclipse.jdt.core.compiler.problem.unusedTypeParameter"; //$NON-NLS-1$
 	public static final String OPTION_ReportUnusedWarningToken =  "org.eclipse.jdt.core.compiler.problem.unusedWarningToken"; //$NON-NLS-1$
 	public static final String OPTION_ReportUnusedLabel =  "org.eclipse.jdt.core.compiler.problem.unusedLabel"; //$NON-NLS-1$
 	public static final String OPTION_FatalOptionalError =  "org.eclipse.jdt.core.compiler.problem.fatalOptionalError"; //$NON-NLS-1$
@@ -239,6 +241,7 @@ public class CompilerOptions {
 	static final char[][] DEFAULT_NONNULL_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.NonNull".toCharArray()); //$NON-NLS-1$
 	static final char[][] DEFAULT_NONNULLBYDEFAULT_ANNOTATION_NAME = CharOperation.splitOn('.', "org.eclipse.jdt.annotation.NonNullByDefault".toCharArray()); //$NON-NLS-1$
 	public static final String OPTION_ReportMissingNonNullByDefaultAnnotation = "org.eclipse.jdt.core.compiler.annotation.missingNonNullByDefaultAnnotation";  //$NON-NLS-1$
+	public static final String OPTION_InheritNullAnnotations = "org.eclipse.jdt.core.compiler.annotation.inheritNullAnnotations";  //$NON-NLS-1$
 	/**
 	 * Possible values for configurable options
 	 */
@@ -351,6 +354,7 @@ public class CompilerOptions {
 	public static final int RedundantNullAnnotation = IrritantSet.GROUP2 | ASTNode.Bit14;
 	public static final int MissingNonNullByDefaultAnnotation = IrritantSet.GROUP2 | ASTNode.Bit15;
 	public static final int MissingDefaultCase = IrritantSet.GROUP2 | ASTNode.Bit16;
+	public static final int UnusedTypeParameter = IrritantSet.GROUP2 | ASTNode.Bit17;
 
 //{ObjectTeams: OT/J specific problems/irritants:
 	public static final int OTJFlag = IrritantSet.GROUP3;
@@ -535,6 +539,8 @@ public class CompilerOptions {
 		String tolerateIllegalAmbiguousVarargs = System.getProperty("tolerateIllegalAmbiguousVarargsInvocation"); //$NON-NLS-1$
 		tolerateIllegalAmbiguousVarargsInvocation = tolerateIllegalAmbiguousVarargs != null && tolerateIllegalAmbiguousVarargs.equalsIgnoreCase("true"); //$NON-NLS-1$
 	}
+	/** Should null annotations of overridden methods be inherited? */
+	public boolean inheritNullAnnotations;
 
 	// keep in sync with warningTokenToIrritant and warningTokenFromIrritant
 	public final static String[] warningTokens = {
@@ -729,6 +735,8 @@ public class CompilerOptions {
 				return OPTION_ReportMissingJavadocTagDescription;
 			case UnusedTypeArguments :
 				return OPTION_ReportUnusedTypeArgumentsForMethodInvocation;
+			case UnusedTypeParameter:
+				return OPTION_ReportUnusedTypeParameter;
 			case UnusedWarningToken :
 				return OPTION_ReportUnusedWarningToken;
 			case RedundantSuperinterface :
@@ -1010,7 +1018,9 @@ public class CompilerOptions {
 			OPTION_ReportNullSpecViolation,
 			OPTION_ReportNullAnnotationInferenceConflict,
 			OPTION_ReportNullUncheckedConversion,
-			OPTION_ReportRedundantNullAnnotation
+			OPTION_ReportRedundantNullAnnotation,
+			OPTION_ReportUnusedTypeParameter,
+			OPTION_InheritNullAnnotations
 		};
 		return result;
 	}
@@ -1067,6 +1077,7 @@ public class CompilerOptions {
 			case DeadCode :
 			case UnusedObjectAllocation :
 			case RedundantSpecificationOfTypeArguments :
+			case UnusedTypeParameter:
 				return "unused"; //$NON-NLS-1$
 			case DiscouragedReference :
 			case ForbiddenReference :
@@ -1440,6 +1451,8 @@ public class CompilerOptions {
 		optionsMap.put(OPTION_NonNullAnnotationName, String.valueOf(CharOperation.concatWith(this.nonNullAnnotationName, '.')));
 		optionsMap.put(OPTION_NonNullByDefaultAnnotationName, String.valueOf(CharOperation.concatWith(this.nonNullByDefaultAnnotationName, '.')));
 		optionsMap.put(OPTION_ReportMissingNonNullByDefaultAnnotation, getSeverityString(MissingNonNullByDefaultAnnotation));
+		optionsMap.put(OPTION_ReportUnusedTypeParameter, getSeverityString(UnusedTypeParameter));
+		optionsMap.put(OPTION_InheritNullAnnotations, this.inheritNullAnnotations ? ENABLED : DISABLED);
 		return optionsMap;
 	}
 
@@ -1598,6 +1611,7 @@ public class CompilerOptions {
 		this.nonNullAnnotationName = DEFAULT_NONNULL_ANNOTATION_NAME;
 		this.nonNullByDefaultAnnotationName = DEFAULT_NONNULLBYDEFAULT_ANNOTATION_NAME;
 		this.intendedDefaultNonNullness = 0;
+		this.inheritNullAnnotations = false;
 		
 		this.analyseResourceLeaks = true;
 
@@ -1893,6 +1907,7 @@ public class CompilerOptions {
 		if ((optionValue = optionsMap.get(OPTION_ReportUnclosedCloseable)) != null) updateSeverity(UnclosedCloseable, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportPotentiallyUnclosedCloseable)) != null) updateSeverity(PotentiallyUnclosedCloseable, optionValue);
 		if ((optionValue = optionsMap.get(OPTION_ReportExplicitlyClosedAutoCloseable)) != null) updateSeverity(ExplicitlyClosedAutoCloseable, optionValue);
+		if ((optionValue = optionsMap.get(OPTION_ReportUnusedTypeParameter)) != null) updateSeverity(UnusedTypeParameter, optionValue);
 		if (getSeverity(UnclosedCloseable) == ProblemSeverities.Ignore
 				&& getSeverity(PotentiallyUnclosedCloseable) == ProblemSeverities.Ignore
 				&& getSeverity(ExplicitlyClosedAutoCloseable) == ProblemSeverities.Ignore) {
@@ -1974,6 +1989,9 @@ public class CompilerOptions {
 				this.nonNullByDefaultAnnotationName = CharOperation.splitAndTrimOn('.', ((String)optionValue).toCharArray());
 			}
 			if ((optionValue = optionsMap.get(OPTION_ReportMissingNonNullByDefaultAnnotation)) != null) updateSeverity(MissingNonNullByDefaultAnnotation, optionValue);
+			if ((optionValue = optionsMap.get(OPTION_InheritNullAnnotations)) != null) {
+				this.inheritNullAnnotations = ENABLED.equals(optionValue);
+			}
 		}
 
 		// Javadoc options
@@ -2193,6 +2211,7 @@ public class CompilerOptions {
 		buf.append("\n\t- resource is not closed: ").append(getSeverityString(UnclosedCloseable)); //$NON-NLS-1$
 		buf.append("\n\t- resource may not be closed: ").append(getSeverityString(PotentiallyUnclosedCloseable)); //$NON-NLS-1$
 		buf.append("\n\t- resource should be handled by try-with-resources: ").append(getSeverityString(ExplicitlyClosedAutoCloseable)); //$NON-NLS-1$
+		buf.append("\n\t- Unused Type Parameter: ").append(getSeverityString(UnusedTypeParameter)); //$NON-NLS-1$
 //{ObjectTeams
 		buf.append("\n\t- decapsulation : ").append(this.decapsulation); //$NON-NLS-1$
 		buf.append("\n\t- report if not exactly one basecall in callin method : ").append(getSeverityString(NotExactlyOneBasecall)); //$NON-NLS-1$
