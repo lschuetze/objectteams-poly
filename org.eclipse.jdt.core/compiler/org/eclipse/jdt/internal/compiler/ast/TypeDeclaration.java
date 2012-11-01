@@ -1200,6 +1200,9 @@ private void internalAnalyseCode(FlowContext flowContext, FlowInfo flowInfo) {
 			!this.scope.referenceCompilationUnit().compilationResult.hasSyntaxError) {
 		for (int i = 0, length = this.typeParameters.length; i < length; ++i) {
 			TypeParameter typeParameter = this.typeParameters[i];
+//{ObjectTeams: exclude:
+		  if (!(typeParameter instanceof TypeValueParameter))
+// SH}
 			if ((typeParameter.binding.modifiers & ExtraCompilerModifiers.AccLocallyUsed) == 0) {
 				this.scope.problemReporter().unusedTypeParameter(typeParameter);			
 			}
