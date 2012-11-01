@@ -21,6 +21,7 @@
 package org.eclipse.objectteams.otdt.internal.compiler.adaptor;
 
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
@@ -92,7 +93,7 @@ public team class PDEAdaptor
 		
 		@SuppressWarnings({ "decapsulation", "rawtypes" })
 		Rule[] addForcedExports(BundleDescription desc) 
-		 <- replace Rule[] getInclusions(Map map, BundleDescription desc)
+		 <- replace Rule[] getInclusions(Map<BundleDescription, ArrayList<Rule>> map, BundleDescription desc)
 		    with { desc <- desc }
 		/** Handles adaptation info for non-exported packages, Rule role explicitly created. */		
 		callin Rule[] addForcedExports(BundleDescription desc) 
@@ -140,7 +141,7 @@ public team class PDEAdaptor
 	 * Synthetic rules representing adapted or forcedExports.
 	 */
 	@SuppressWarnings("decapsulation")
-	protected class Rule playedBy Rule 
+	protected class Rule playedBy Rule
 	{
 		void setPath(IPath path) -> set IPath path;
 
