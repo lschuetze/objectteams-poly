@@ -48,7 +48,7 @@ fi
 
 # VERSIONS:
 # Eclipse SDK build identifier:
-EVERSION=I20121031-2000
+EVERSION=4.3M3
 # Architecture (as used by OSGi):
 ARCH=`arch`
 # used only locally:
