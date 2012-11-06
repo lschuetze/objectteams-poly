@@ -43,6 +43,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.ConstantPoolObjectReader.IncompatibleBytecodeException;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.ArrayTranslations;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -684,19 +685,25 @@ public class BytecodeTransformer
 	private ConstantPoolObject getLiftMethod(ClassFile dstClassFile, MethodModel mModel, int arg) {
 		// find the role type:
 		TypeBinding[] adjustedArgs = mModel.liftedParams;
-		ReferenceBinding role = (ReferenceBinding)adjustedArgs[arg-1];
+		TypeBinding roleOrig = adjustedArgs[arg-1];
 		AbstractMethodDeclaration mDecl = mModel.getDecl();
-		role = (ReferenceBinding)TeamModel.getRoleToLiftTo(
+		TypeBinding role = TeamModel.getRoleToLiftTo(
 												mDecl.scope,
 												mDecl.binding.parameters[arg-1],
-												role,
+												roleOrig,
 												true,
 												mDecl.arguments[arg-1]);
 		// find the method:
-		char[] liftName = Lifting.getLiftMethodName(role);
+		char[] liftName = null;
+		if (role.isArrayType()) {
+			liftName = ArrayTranslations.getTransformMethodName((ReferenceBinding) role.leafComponentType(), role.dimensions(), true);
+		} else {
+			liftName = Lifting.getLiftMethodName(role);
+		}
 		MethodBinding[] lifters = dstClassFile.referenceBinding.getMethods(liftName);
 		if (lifters.length != 1) {
-			assert RoleModel.hasTagBit(role.getRealClass(), RoleModel.HasLiftingProblem) : "must have lift method unless lifting problem was detected"; //$NON-NLS-1$
+			assert RoleModel.hasTagBit(((ReferenceBinding)role.leafComponentType()).getRealClass(), RoleModel.HasLiftingProblem) :
+					"must have lift method unless lifting problem was detected"; //$NON-NLS-1$
 			return null;
 		}
 		// wrap it:

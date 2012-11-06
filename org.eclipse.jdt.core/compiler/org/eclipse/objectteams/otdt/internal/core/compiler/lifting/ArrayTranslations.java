@@ -126,7 +126,7 @@ public abstract class ArrayTranslations {
 				  ((ReferenceBinding)requiredType.leafComponentType())
 				: ((ReferenceBinding)providedType.leafComponentType());
 
-		char[] transformMethodName = getTransformMethodName(providedType, roleType, isLifting);
+		char[] transformMethodName = getTransformMethodName(roleType, providedType.dimensions(), isLifting);
 
 	    ReferenceBinding enclosingTeam = roleType.enclosingType().getRealType();
 		MethodBinding[] transformMethods = enclosingTeam.getMethods(transformMethodName);
@@ -160,7 +160,7 @@ public abstract class ArrayTranslations {
 		return methodBinding;
 	}
 
-	public static char[] getTransformMethodName(TypeBinding baseType, ReferenceBinding roleType, boolean isLifting) {
+	public static char[] getTransformMethodName(ReferenceBinding roleType, int dimensions, boolean isLifting) {
 		return
 			CharOperation.concat(
 	                CharOperation.concat(
@@ -168,7 +168,7 @@ public abstract class ArrayTranslations {
 	                    roleType.sourceName()),
 	                CharOperation.concat(
 	                    IOTConstants.OT_DOLLAR_NAME,
-	                    (""+baseType.dimensions()).toCharArray())); //$NON-NLS-1$
+	                    (""+dimensions).toCharArray())); //$NON-NLS-1$
 	}
 	// === the following methods mark ast nodes as allowing baseclass decapsulation ===
 	// for lifting the input side allows decapsulation, for lowering its the output side.

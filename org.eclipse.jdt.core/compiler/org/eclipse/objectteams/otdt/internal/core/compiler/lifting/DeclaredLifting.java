@@ -294,14 +294,16 @@ public class DeclaredLifting implements IOTConstants {
 
 	    List<LocalDeclaration> localVariables = new LinkedList<LocalDeclaration>();
 
-	    boolean selfCallIsChanged = false;
+	    boolean changeSuperCallToCopiedThis = false;
 	    boolean chainArgAdded = false;
 	    for (int idx = 0; idx < ctor.arguments.length; idx++) {
 
 	        Argument argument = ctor.arguments[idx];
 	        TypeBinding param = ctor.binding.parameters[idx];
 
-	        // TODO(SH): array of roles?
+	        int dims = param.dimensions();
+	        param = param.leafComponentType();
+
 	        // don't use RoleTypeBinding.isRoleWithoutExplicitAnchor, because
 	        // type wrapping in signature has not been done yet.
 	        if (	isLiftableRoleOf(param, teamDecl.binding)
@@ -329,7 +331,7 @@ public class DeclaredLifting implements IOTConstants {
 				// (cf. CopyInheritance.weakenSignature)
 				Expression rhs = gen.castExpression(
 						gen.singleNameReference(newName),
-						gen.typeReference(((ReferenceBinding)param).getRealType()), // cast is safe here, but enclosing if is too strict!
+						gen.createArrayTypeReference(((ReferenceBinding)param).getRealType(), dims), // cast is guarded by isLiftableRoleOf() above
 						CastExpression.RAW);
 
 	        	argument.updateName(newName);
@@ -346,15 +348,16 @@ public class DeclaredLifting implements IOTConstants {
 	        	// replace references in super-call:
 	        	if (ctor.constructorCall != null) {
 	        		// replace argn with _OT$argn in ctor call:
-	        		selfCallIsChanged = ReplaceSingleNameVisitor.performReplacement(
+	        		ReplaceSingleNameVisitor.performReplacement(
 	        				ctor.constructorCall,
 	    					ctor.scope,
 	    					oldName,
 	    					newName);
+	        		changeSuperCallToCopiedThis = (ctor.constructorCall.accessMode != ExplicitConstructorCall.This);
 	        	}
 	        }
 
-	        if (selfCallIsChanged) {
+	        if (changeSuperCallToCopiedThis) {
 	    		// add a marker argument to this call:
 				ExplicitConstructorCall call = ctor.constructorCall;
 				call.accessMode = ExplicitConstructorCall.This;

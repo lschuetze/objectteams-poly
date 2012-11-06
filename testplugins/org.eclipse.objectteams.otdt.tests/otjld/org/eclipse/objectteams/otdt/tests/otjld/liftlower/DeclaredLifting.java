@@ -34,7 +34,7 @@ public class DeclaredLifting extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test0c11_implicitlyInheritingStaticRoleMethod1"};
+//		TESTS_NAMES = new String[] { "test6112_declaredLiftingInConstructor4"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1180,5 +1180,98 @@ public class DeclaredLifting extends AbstractOTJLDTest {
 			    "    \n"
             },
             "OK");
+    }
+
+    // Bug 393072 - VerifyError caused by super call within team constructor using declared lifting
+    // array lifting and super-call
+    public void test6112_declaredLiftingInConstructor3() {
+    	runConformTest(
+    		new String[] {
+    	"T6112dlic3.java",
+    			"public class T6112dlic3 {}\n",
+    	"Team6112dlic3_0.java",
+    			"public team class Team6112dlic3_0 {\n" + 
+    			"    R[] f;\n" + 
+    			"    Team6112dlic3_0(R[] roles){ this.f = roles; }\n" + 
+    			"    protected class R {}\n" + 
+    			"}\n",
+    	"Team6112dlic3_1.java",
+    			"public team class Team6112dlic3_1 extends Team6112dlic3_0 {\n" + 
+    			"    Team6112dlic3_1(T6112dlic3[] as R[] roles) { super(roles); }\n" + 
+    			"    @Override\n" +
+    			"    protected class R playedBy T6112dlic3 {}\n" + 
+    			"}\n"
+    		});
+    }
+
+    // Bug 393072 - VerifyError caused by super call within team constructor using declared lifting
+    // array lifting and super-call - additional contructor provided
+    public void test6112_declaredLiftingInConstructor4() {
+    	runConformTest(
+    		new String[] {
+    	"Team6112dlic4_1.java",
+    			"public team class Team6112dlic4_1 extends Team6112dlic4_0 {\n" + 
+    			"    Team6112dlic4_1(T6112dlic4[] as R[] roles) { super(roles); }\n" + 
+    			"    @Override\n" +
+    			"    protected class R playedBy T6112dlic4 {\n" +
+    			"        test -> OK;\n" +
+    			"    }\n" +
+    			"    public static void main(String[] args) {\n" +
+    			"        T6112dlic4 b = new T6112dlic4();\n" +
+    			"        new Team6112dlic4_1(new T6112dlic4[]{b});\n" +
+    			"    }\n" + 
+    			"}\n",
+    	"T6112dlic4.java",
+    			"public class T6112dlic4 {\n" +
+    			"    void OK() { System.out.print(\"OK\"); }\n" +
+    			"}\n",
+    	"Team6112dlic4_0.java",
+    			"public abstract team class Team6112dlic4_0 {\n" + 
+    			"    R[] f;\n" + 
+    			"    Team6112dlic4_0(){ System.out.print(\"wrong\"); }\n" + 
+    			"    Team6112dlic4_0(R[] roles){\n" +
+    			"        this.f = roles;\n" +
+    			"        this.f[0].test();" +
+    			"    }\n" + 
+    			"    protected abstract class R { protected abstract void test(); }\n" + 
+    			"}\n",
+    		},
+    		"OK");
+    }
+
+    // Bug 393072 - VerifyError caused by super call within team constructor using declared lifting
+    // expected lifting does not happen
+    public void test6112_declaredLiftingInConstructor5() {
+    	runConformTest(
+    		new String[] {
+		"Team6112dlic5_1.java",
+				"public team class Team6112dlic5_1 extends Team6112dlic5_0 {\n" + 
+				"    Team6112dlic5_1() { super(new R[0]); }\n" +
+				"    public void test() {\n" +
+				"        new R().test(this.f.length);\n" +
+				"    }\n" + 
+				"    @Override\n" +
+				"    protected class R playedBy T6112dlic5 {\n" +
+				"        protected R() { base(); }\n" +
+    			"        test -> OK;\n" +
+				"    }\n" + 
+    			"    public static void main(String[] args) {\n" +
+    			"        new Team6112dlic5_1().test();\n" +
+    			"    }\n" + 
+				"}\n",
+    	"T6112dlic5.java",
+    			"public class T6112dlic5 {\n" +
+    			"    void OK(int x) { System.out.print(\"OK\"+x); }\n" +
+    			"}\n",
+    	"Team6112dlic5_0.java",
+    			"public abstract team class Team6112dlic5_0 {\n" + 
+    			"    R[] f;\n" + 
+    			"    Team6112dlic5_0(R[] roles){\n" +
+    			"        this.f = roles;\n" +
+    			"    }\n" +
+    			"    protected abstract class R { protected abstract void test(int l); }\n" + 
+    			"}\n",
+    		},
+    		"OK0");
     }
 }
