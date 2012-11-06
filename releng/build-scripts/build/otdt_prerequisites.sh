@@ -52,7 +52,7 @@ EVERSION=I20121031-2000
 # Architecture (as used by OSGi):
 ARCH=`arch`
 # used only locally:
-DROP=${BASEDIR}/drops4/I20121031-2000
+DROP=${BASEDIR}/drops4/S-4.3M3-201210312000
 
 
 # EXPORT: archive file of the base eclipse SDK build:
