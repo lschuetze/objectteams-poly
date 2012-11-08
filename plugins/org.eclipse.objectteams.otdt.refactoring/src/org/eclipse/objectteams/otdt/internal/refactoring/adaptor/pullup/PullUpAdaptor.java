@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -44,6 +45,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -63,6 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.structure.TypeVariableMaplet;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -92,6 +95,7 @@ import org.eclipse.objectteams.otdt.internal.refactoring.util.IAmbuguityMessageC
 import org.eclipse.objectteams.otdt.internal.refactoring.util.IOverloadingMessageCreator;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 import org.eclipse.osgi.util.NLS;
+import org.eclipse.text.edits.TextEditGroup;
 
 import base org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
@@ -99,6 +103,7 @@ import base org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProce
 import base org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
+import base org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeRefactoringProcessor;
 import base org.eclipse.jdt.internal.ui.refactoring.PullUpMemberPage;
 import base org.eclipse.jdt.internal.ui.refactoring.PullUpMemberPage.MemberActionInfo;
 
@@ -993,6 +998,24 @@ public team class PullUpAdaptor {
 					}
 				}
 			}
+		}
+	}
+
+	// advance fix for Bug 393932 - [refactoring] pull-up with "use the destination type where possible" creates bogus import of nested type
+	protected class UseSuperTypeFix playedBy SuperTypeRefactoringProcessor {
+
+		void rewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group)
+		<- replace 
+		void rewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group);
+
+		@SuppressWarnings("basecall")
+		callin void rewriteTypeOccurrence(TType estimate, CompilationUnitRewrite rewrite, ASTNode node, TextEditGroup group) {
+			// combined from direct base method plus createCorrespondingNode(..):
+			rewrite.getImportRemover().registerRemovedNode(node);
+			ImportRewrite importRewrite= rewrite.getImportRewrite();
+			ImportRewriteContext context = new ContextSensitiveImportRewriteContext(node, importRewrite);
+			ASTNode correspondingNode = importRewrite.addImportFromSignature(new BindingKey(estimate.getBindingKey()).toSignature(), rewrite.getAST(), context);
+			rewrite.getASTRewrite().replace(node, correspondingNode, group);
 		}
 	}
 }

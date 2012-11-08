@@ -562,6 +562,9 @@ class TypeBinding implements ITypeBinding {
 			ITypeBinding[] newInterfaces = new ITypeBinding[length];
 			int interfacesCounter = 0;
 			for (int i = 0; i < length; i++) {
+//{ObjectTeams: filter synthetic role interfaces:
+				if (internalInterfaces[i].isSynthInterface()) continue;
+// SH}
 				ITypeBinding typeBinding = this.resolver.getTypeBinding(internalInterfaces[i]);
 				if (typeBinding == null) {
 					continue;

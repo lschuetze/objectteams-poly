@@ -5,7 +5,7 @@ public team class T {
 
 		protected abstract String getS1();
 
-		void foo()
+		protected void foo()
 		{
 			System.out.println(getS1()+getS2());
 		}
@@ -16,5 +16,9 @@ public team class T {
 		protected String getS1() -> get String s;
 		@Override
 		protected String getS2() -> String getS();
+	}
+	
+	void main(RSuper r) {
+		r.foo();
 	}
 }

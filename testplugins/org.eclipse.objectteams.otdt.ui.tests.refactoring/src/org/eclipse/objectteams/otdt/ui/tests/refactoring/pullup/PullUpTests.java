@@ -122,6 +122,12 @@ public class PullUpTests extends RefactoringTest {
 	}
 	private void performPullUp_pass(String[] cuNames, String[] methodNames, String[][] signatures, boolean[] makeAbstract, String[] fieldNames,
 			boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, int targetClassIndex, String nameOfDeclaringType) throws Exception {
+		performPullUp_pass(cuNames, methodNames, signatures, makeAbstract, fieldNames, deleteAllInSourceType, deleteAllMatchingMethods, targetClassIndex, nameOfDeclaringType, false/*replace*/);
+	}
+	private void performPullUp_pass(String[] cuNames, String[] methodNames, String[][] signatures, boolean[] makeAbstract, String[] fieldNames,
+			boolean deleteAllInSourceType, boolean deleteAllMatchingMethods, int targetClassIndex, String nameOfDeclaringType, boolean replace) 
+					throws Exception 
+	{
 		ICompilationUnit[] cus = createCUs(cuNames);
 		try {
 
@@ -146,6 +152,9 @@ public class PullUpTests extends RefactoringTest {
 				methodList.addAll(Arrays.asList(getMethods(processor.getMatchingElements(new NullProgressMonitor(), false))));
 			if (!methodList.isEmpty())
 				processor.setDeletedMethods(methodList.toArray(new IMethod[methodList.size()]));
+
+			if (replace)
+				processor.setReplace(true);
 
 			RefactoringStatus checkInputResult = ref.checkFinalConditions(new NullProgressMonitor());
 			assertTrue("precondition was supposed to pass", !checkInputResult.hasError());
@@ -355,7 +364,8 @@ public class PullUpTests extends RefactoringTest {
 						new String[]{"foo", "getS1", "getS2"}, 
 						new String[][] { new String[0], new String[0], new String[0] }, 
 						new boolean[] {false, true, true}, 
-						new String[0], true, true, 0, "RSub");
+						new String[0], true, true, 0, "RSub",
+						true /*replace*/);
 	}
 	// Bug 386814 - [refactoring] pull-up should distinguish callouts that can be pull-up vs. abstract decl.
 	public void testPullUpCallout1()  throws Exception {
