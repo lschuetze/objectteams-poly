@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TypeBinding.java 23405 2010-02-03 17:02:18Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -202,7 +201,7 @@ class TypeBinding implements ITypeBinding {
 		}
 		return null;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getGenericTypeOfWildcardType()
 	 */
@@ -217,7 +216,7 @@ class TypeBinding implements ITypeBinding {
 		}
 		return null;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.core.dom.ITypeBinding#getRank()
 	 */
@@ -231,7 +230,7 @@ class TypeBinding implements ITypeBinding {
 				return -1;
 		}
 	}
-
+	
 	/*
 	 * @see ITypeBinding#getComponentType()
 	 */
@@ -534,21 +533,15 @@ class TypeBinding implements ITypeBinding {
 		}
 		ReferenceBinding referenceBinding = (ReferenceBinding) this.binding;
 		ReferenceBinding[] internalInterfaces = null;
-		try {
 //{ObjectTeams: protect with minimally configured Dependencies:
 // see Bug 352605 - Eclipse is reporting "Could not retrieve superclass" every few minutes
-		  Config cfg = null;
-		  if (!Dependencies.isSetup())
+		Config cfg = null;
+		if (!Dependencies.isSetup())
 			cfg = Dependencies.setup(this, null, this.resolver.lookupEnvironment(), false, false, false, false, false, true);
-		  try {
-// orig:
+	  try {
+// - continued at bottom of method - SH}
+		try {
 			internalInterfaces = referenceBinding.superInterfaces();
-// :giro
-		  } finally {
-			if (cfg != null)
-				Dependencies.release(this);
-		  }
-// SH}	
 		} catch (RuntimeException e) {
 			/* in case a method cannot be resolvable due to missing jars on the classpath
 			 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=57871
@@ -559,24 +552,61 @@ class TypeBinding implements ITypeBinding {
 		}
 		int length = internalInterfaces == null ? 0 : internalInterfaces.length;
 		if (length != 0) {
+//{ObjectTeams: make synth role ifc transparent by transitively fetching it's super interfaces:
+//          accumulate into list not array because we may exceed length:
+			List/*<ITypeBinding>*/ interfacesList = new ArrayList(length);
+/* orig:
 			ITypeBinding[] newInterfaces = new ITypeBinding[length];
 			int interfacesCounter = 0;
+ */
 			for (int i = 0; i < length; i++) {
-//{ObjectTeams: filter synthetic role interfaces:
-				if (internalInterfaces[i].isSynthInterface()) continue;
-// SH}
+//  OT: look into synthetic role interfaces:
+				if (internalInterfaces[i].isSynthInterface()) {
+					try {
+						// mini version of the outer loop:
+						ReferenceBinding[] transitiveInterfaces = referenceBinding.superInterfaces();
+						int len = transitiveInterfaces.length;
+						for (int j=0; j<len; j++) {
+							ITypeBinding typeBinding = this.resolver.getTypeBinding(transitiveInterfaces[j]);
+							if (typeBinding != null)
+								interfacesList.add(typeBinding);
+						}
+					} catch (RuntimeException e) {
+						/* in case a method cannot be resolvable due to missing jars on the classpath
+						 * see https://bugs.eclipse.org/bugs/show_bug.cgi?id=57871
+						 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=63550
+						 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=64299
+						 */
+						org.eclipse.jdt.internal.core.util.Util.log(e, "Could not retrieve interfaces"); //$NON-NLS-1$
+					}
+					continue; // don't add the synth ifc itself
+				}
+//  :TO
 				ITypeBinding typeBinding = this.resolver.getTypeBinding(internalInterfaces[i]);
 				if (typeBinding == null) {
 					continue;
 				}
+//  OT: collect into list instead of array:
+				interfacesList.add(typeBinding);
+			}
+			ITypeBinding[] newInterfaces = (ITypeBinding[]) interfacesList.toArray(new ITypeBinding[interfacesList.size()]);
+/*    orig:
 				newInterfaces[interfacesCounter++] = typeBinding;
 			}
 			if (length != interfacesCounter) {
 				System.arraycopy(newInterfaces, 0, (newInterfaces = new ITypeBinding[interfacesCounter]), 0, interfacesCounter);
 			}
+     :giro */
+// :TO
 			return this.interfaces = newInterfaces;
 		}
 		return this.interfaces = NO_TYPE_BINDINGS;
+//{ObjectTeams: conclude try-finally from above
+	  } finally {
+		if (cfg != null)
+			Dependencies.release(this);
+	  }
+// SH}	
 	}
 
 	public IJavaElement getJavaElement() {
