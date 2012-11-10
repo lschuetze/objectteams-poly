@@ -57,6 +57,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLiftExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.BytecodeTransformer;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
@@ -225,41 +226,46 @@ public class DeclaredLifting implements IOTConstants {
 		ReferenceBinding roleRef = (ReferenceBinding)roleType;
 		//    using a PotentialLiftExpression allows us to defer type resolution.
 		Expression liftCall = null;
-		if (   roleRef.isValidBinding()
-			&& roleRef.isRole()
-			&& (roleRef.tagBits & TagBits.HierarchyHasProblems) == 0
-			&& !RoleModel.hasTagBit(roleRef, RoleModel.BaseclassHasProblems))
-		{
-			Expression receiverTeam = ThisReference.implicitThis();
-			ReferenceBinding teamBinding = roleRef.enclosingType();
-			if (teamBinding != scope.enclosingSourceType())
-				receiverTeam = gen.qualifiedThisReference(teamBinding);
-			if (roleRef.baseclass() == null) {
-				// static adjustment (OTJLD 2.3.2(a)):
-				ReferenceBinding baseType = null;
-				if (scope.classScope() instanceof OTClassScope) {
-					// try base scope first:
-					Scope baseScope = ((OTClassScope) scope.classScope()).getBaseImportScope();
-					if (baseScope != null)
-						baseType = (ReferenceBinding) baseScope.getType(ltr.baseTokens, ltr.baseTokens.length);
-				} 
-				if (baseType == null || !baseType.isValidBinding())
-					// fall back to normal scope:
-					baseType = (ReferenceBinding)scope.getType(ltr.baseTokens, ltr.baseTokens.length);
-				roleRef = (ReferenceBinding)TeamModel.getRoleToLiftTo(scope, baseType, roleRef, true, ltr);
-				if (baseType.isTypeVariable() && roleRef == null)
-					roleRef = (ReferenceBinding)roleType; // fall back to the declared type
+
+		// spare the details during completion - see comment regarding local.declaration.initialization inside
+		// InternalExtendedCompletionContext.searchVisibleVariablesAndMethods(Scope, ObjectVector, ObjectVector, ObjectVector, boolean)
+	    if (!Config.isUsingAssistParser()) { 
+			if (   roleRef.isValidBinding()
+				&& roleRef.isRole()
+				&& (roleRef.tagBits & TagBits.HierarchyHasProblems) == 0
+				&& !RoleModel.hasTagBit(roleRef, RoleModel.BaseclassHasProblems))
+			{
+				Expression receiverTeam = ThisReference.implicitThis();
+				ReferenceBinding teamBinding = roleRef.enclosingType();
+				if (teamBinding != scope.enclosingSourceType())
+					receiverTeam = gen.qualifiedThisReference(teamBinding);
+				if (roleRef.baseclass() == null) {
+					// static adjustment (OTJLD 2.3.2(a)):
+					ReferenceBinding baseType = null;
+					if (scope.classScope() instanceof OTClassScope) {
+						// try base scope first:
+						Scope baseScope = ((OTClassScope) scope.classScope()).getBaseImportScope();
+						if (baseScope != null)
+							baseType = (ReferenceBinding) baseScope.getType(ltr.baseTokens, ltr.baseTokens.length);
+					} 
+					if (baseType == null || !baseType.isValidBinding())
+						// fall back to normal scope:
+						baseType = (ReferenceBinding)scope.getType(ltr.baseTokens, ltr.baseTokens.length);
+					roleRef = (ReferenceBinding)TeamModel.getRoleToLiftTo(scope, baseType, roleRef, true, ltr);
+					if (baseType.isTypeVariable() && roleRef == null)
+						roleRef = (ReferenceBinding)roleType; // fall back to the declared type
+				}
+				if (roleRef != null) {
+					if (ltr.baseReference.dimensions() > 0)
+						roleType = scope.createArrayType(roleRef, ltr.baseReference.dimensions());
+					liftCall = new PotentialLiftExpression(
+						receiverTeam,
+						gen.singleNameReference(newName),
+						ltr.roleReference);
+				}
+				// errors are reported by LiftingTypeReference.resolveType().
 			}
-			if (roleRef != null) {
-				if (ltr.baseReference.dimensions() > 0)
-					roleType = scope.createArrayType(roleRef, ltr.baseReference.dimensions());
-				liftCall = new PotentialLiftExpression(
-					receiverTeam,
-					gen.singleNameReference(newName),
-					ltr.roleReference);
-			}
-			// errors are reported by LiftingTypeReference.resolveType().
-		}
+	    }
 		//    assemble the variable decl:
 		LocalDeclaration declaration = gen.localVariable(
 				oldName,

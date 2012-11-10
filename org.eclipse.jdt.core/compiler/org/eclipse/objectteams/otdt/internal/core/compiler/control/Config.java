@@ -381,6 +381,11 @@ public class Config {
 		return this.parser;
 	}
 
+	public static boolean isUsingAssistParser() {
+		Parser parser = getParser();
+		return parser != null && parser.isAssistParser();
+	}
+
 	/**
 	 * Find the proper object to fetch method bodies and delegate to that object.
 	 * (if MatchLocator is our client don't use it or its MatchLocatorParser,

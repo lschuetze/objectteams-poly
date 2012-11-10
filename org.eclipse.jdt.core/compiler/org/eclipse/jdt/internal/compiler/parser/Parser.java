@@ -13520,6 +13520,10 @@ private void skipPredicate() {
 		// noop
 	}
 }
+/** Check the kind of parser without depending on non-compiler classes. */
+public boolean isAssistParser() {
+	return false;
+}
 // SH}
 /* Token check performed on every token shift once having entered
  * recovery mode.

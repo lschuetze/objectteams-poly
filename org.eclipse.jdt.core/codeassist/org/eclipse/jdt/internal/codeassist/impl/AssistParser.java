@@ -1927,4 +1927,10 @@ protected ASTNode wrapWithExplicitConstructorCallIfNeeded(ASTNode ast) {
 		return ast;
 	}
 }
+//{ObjectTeams: new internal API
+/** Check the kind of parser without depending on non-compiler classes. */
+public boolean isAssistParser() {
+	return true;
+}
+// SH}
 }

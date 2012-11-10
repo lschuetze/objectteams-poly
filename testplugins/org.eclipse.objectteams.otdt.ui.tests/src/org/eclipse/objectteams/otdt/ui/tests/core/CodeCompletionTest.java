@@ -1713,6 +1713,47 @@ public class CodeCompletionTest extends CoreTests {
 		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
 	}
 
+	// propose methods invoked via a phantom role, simple nested case
+	public void testMethodInvocation5() throws CoreException {
+	
+		createBaseClass("test1", "B", "public boolean check() { return false; }");
+
+		StringBuffer subTeamContent = new StringBuffer(); 
+		subTeamContent.append("package test1;\n");
+		subTeamContent.append("public team class Completion_testMethodInvocation5 {\n");
+		subTeamContent.append("    protected class R playedBy B {\n");
+		subTeamContent.append("      protected void foo() {}\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("    java.util.List<R> roles;\n");
+		subTeamContent.append("    void test(B as R rarg) {\n");
+		subTeamContent.append("        roles.\n");
+		subTeamContent.append("    }\n");
+		subTeamContent.append("  }\n");
+		subTeamContent.append("}");
+		
+		StringBuffer expectedContent = new StringBuffer(); 
+		expectedContent.append("package test1;\n");
+		expectedContent.append("public team class Completion_testMethodInvocation5 {\n");
+		expectedContent.append("    protected class R playedBy B {\n");
+		expectedContent.append("      protected void foo() {}\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("    java.util.List<R> roles;\n");
+		expectedContent.append("    void test(B as R rarg) {\n");
+		expectedContent.append("        roles.add(arg0)\n");
+		expectedContent.append("    }\n");
+		expectedContent.append("  }\n");
+		expectedContent.append("}");
+		
+
+		String completeAfter = "roles.";
+		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
+		int posAfter = expectedContent.indexOf("roles.add(arg0)")+10; // at start of argument
+		
+		ICompletionProposal proposal = assertProposal("add", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 4), 0);
+		assertTrue("Should be a parameter guessing proposal", proposal instanceof ParameterGuessingProposal);
+		assertChoices(proposal, new String[][]{new String[]{"arg0", "rarg", "null"}}); // <- this is key: expect "rarg" next to "arg0"!
+	}
+
 	// == Below: Helper methods/fields. ==
 	
 	private void createBaseClass(String classBody) 
