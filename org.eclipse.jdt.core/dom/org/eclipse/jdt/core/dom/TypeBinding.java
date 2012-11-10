@@ -564,7 +564,7 @@ class TypeBinding implements ITypeBinding {
 				if (internalInterfaces[i].isSynthInterface()) {
 					try {
 						// mini version of the outer loop:
-						ReferenceBinding[] transitiveInterfaces = referenceBinding.superInterfaces();
+						ReferenceBinding[] transitiveInterfaces = internalInterfaces[i].superInterfaces();
 						int len = transitiveInterfaces.length;
 						for (int j=0; j<len; j++) {
 							ITypeBinding typeBinding = this.resolver.getTypeBinding(transitiveInterfaces[j]);
