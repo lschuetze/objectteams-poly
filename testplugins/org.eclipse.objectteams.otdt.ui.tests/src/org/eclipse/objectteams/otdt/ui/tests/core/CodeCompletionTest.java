@@ -27,6 +27,8 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -332,7 +334,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 	
 	public void testCreateCalloutOverride1() throws Exception {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
@@ -385,7 +387,7 @@ public class CodeCompletionTest extends CoreTests {
 	
 	// callout override to field
 	public void testCreateCalloutOverride2() throws Exception {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
@@ -438,7 +440,7 @@ public class CodeCompletionTest extends CoreTests {
 	
 	// Bug 374840 - [assist] callout completion after parameter mapping garbles the code
 	public void testCreateCalloutOverride3() throws Exception {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		
 		pkg.createCompilationUnit("ABase.java", 
 				"package test1.p1;\n" +
@@ -585,7 +587,7 @@ public class CodeCompletionTest extends CoreTests {
 		buf.append("    public void foo(B1 b1, B1.Inner inner, B2 b2);\n");
 		buf.append("}\n");
 		String contents= buf.toString();
-		IPackageFragment basePkg = CompletionTestSetup.getAbsoluteTestPackage("test1");
+		IPackageFragment basePkg = CompletionTestSetup.getAbsoluteTestPackage(this.fJProject1, "test1");
 		basePkg.createCompilationUnit("B.java", contents, true, null);
 		
 		fAfterImports = "\n" +
@@ -1156,7 +1158,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	public void testRoleTag1() throws Exception {
-		IPackageFragment teamPkg = CompletionTestSetup.getTestPackage("MyTeam");
+		IPackageFragment teamPkg = CompletionTestSetup.getTestPackage(this.fJProject1, "MyTeam");
 		teamPkg.createCompilationUnit("MyRole.java", 
 				"team package test1.MyTeam;\n" +
 				"public class MyRole {}\n", 
@@ -1184,7 +1186,7 @@ public class CodeCompletionTest extends CoreTests {
 	}
 	
 	public void testRoleTag2() throws Exception {
-		IPackageFragment teamPkg = CompletionTestSetup.getTestPackage("MyTeam");
+		IPackageFragment teamPkg = CompletionTestSetup.getTestPackage(this.fJProject1, "MyTeam");
 		teamPkg.createCompilationUnit("MyRole.java", 
 				"team package test1.MyTeam;\n" +
 				"public class MyRole {}\n", 
@@ -1213,7 +1215,7 @@ public class CodeCompletionTest extends CoreTests {
 	
 	
 	public void testCreateMethod1() throws Exception {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
@@ -1257,7 +1259,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	// Bug 362003 - [assist] completion is broken after <B base R> after a base guard
 	public void testCreateMethod2() throws Exception {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("BaseClass.java", 
 				"package test1.p1;\n" +
 				"public class BaseClass {\n" +
@@ -1326,7 +1328,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	// override role, simple case
 	public void testOverrideRole1() throws Exception {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
@@ -1360,14 +1362,14 @@ public class CodeCompletionTest extends CoreTests {
 	
 	// override role, role file with mentioning in the team
 	public void testOverrideRole2() throws Exception {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
 				"	RoleFile field\n;" + // help the compiler to find the role file
 				"}\n",
 				true, null);
-		IPackageFragment rolePack = CompletionTestSetup.getTestPackage("p1.SuperTeam");
+		IPackageFragment rolePack = CompletionTestSetup.getTestPackage(this.fJProject1, "p1.SuperTeam");
 		rolePack.createCompilationUnit("RoleFile.java", 
 				"team package test1.p1.SuperTeam;\n" +
 				"protected class RoleFile { }\n", 
@@ -1398,13 +1400,13 @@ public class CodeCompletionTest extends CoreTests {
 	
 	// override role, role file, without mentioning in the team (requires search engine help)
 	public void testOverrideRole3() throws Exception {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" + // no mentioning of RoleFile
 				"}\n",
 				true, null);
-		IPackageFragment rolePack = CompletionTestSetup.getTestPackage("p1.SuperTeam");
+		IPackageFragment rolePack = CompletionTestSetup.getTestPackage(this.fJProject1, "p1.SuperTeam");
 		ICompilationUnit rofiCU = rolePack.createCompilationUnit("RoleFile.java", 
 				"team package test1.p1.SuperTeam;\n" +
 				"protected class RoleFile { }\n", 
@@ -1435,7 +1437,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	// Bug 355255 - [assist] NPE during completion if team contains an enum
 	public void testOverrideRole4() throws Exception {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
@@ -1469,6 +1471,7 @@ public class CodeCompletionTest extends CoreTests {
 		assertProposal("MyRole - Override", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0); 
 	}
 
+	// propose creating a team instance:
 	public void testNewExpression1() throws CoreException {
 		createBaseClass("test2", "AClass", "public boolean check() { return false; }");
 		assertTypeBodyProposal(
@@ -1487,9 +1490,46 @@ public class CodeCompletionTest extends CoreTests {
 
 	}
 
+	// propose creating a role instance (bound role):
+	public void testNewExpression2() throws CoreException {
+		createBaseClass("test1", "AClass", "public boolean check() { return false; }");
+		assertTypeBodyProposal(
+				"protected class ARole playedBy AClass {\n" +
+				"}\n" +
+				"static void foo() {\n" +
+				"    new |\n" +
+				"}\n",
+				"A",
+				"protected class ARole playedBy AClass {\n" +
+				"}\n" +
+				"static void foo() {\n" +
+				"    new ARole(|base|)\n" + // editing base argument
+				"}\n",
+				0, false);
+
+	}
+
+	// propose creating a role instance (unbound role):
+	public void testNewExpression3() throws CoreException {
+		assertTypeBodyProposal(
+				"protected class ARole {\n" +
+				"}\n" +
+				"static void foo() {\n" +
+				"    new |\n" +
+				"}\n",
+				"A",
+				"protected class ARole {\n" +
+				"}\n" +
+				"static void foo() {\n" +
+				"    new ARole()|\n" + // no arguments to add
+				"}\n",
+				0, false);
+
+	}
+
 	// propose methods invoked via a phantom role, simple case
 	public void testMethodInvocation1() throws CoreException {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
@@ -1530,7 +1570,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	// propose methods invoked via a phantom role, two direct tsuper roles both have the method, pick the nearest version
 	public void testMethodInvocation2() throws CoreException {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
@@ -1583,7 +1623,7 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("  }\n");
 		expectedContent.append("}");
 		
-		String superMid1R = "%E2%98%82=TestSetupProject/src%3Ctest1.p1%7BSuperTeam.java%E2%98%83SuperTeam%E2%98%83Mid1%E2%98%83R";
+		String superMid1R = "%E2%98%82=OTTestProject1/src%3Ctest1.p1%7BSuperTeam.java%E2%98%83SuperTeam%E2%98%83Mid1%E2%98%83R";
 		String expectedInfo = ">foo in SuperMid2 " +
 							  "<div><b>Overrides:</b> " +
 							  "<a href='eclipse-javadoc:"+superMid1R+"~foo'>foo()</a> " +
@@ -1599,7 +1639,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	// propose methods invoked via a phantom role, two direct tsuper roles, only more distant one has the method
 	public void testMethodInvocation3() throws CoreException {
-		IPackageFragment pkg = CompletionTestSetup.getTestPackage("p1");
+		IPackageFragment pkg = CompletionTestSetup.getTestPackage(this.fJProject1, "p1");
 		pkg.createCompilationUnit("SuperTeam.java", 
 				"package test1.p1;\n" +
 				"public team class SuperTeam {\n" +
@@ -1650,7 +1690,7 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("  }\n");
 		expectedContent.append("}");
 		
-		String superMid1R = "%E2%98%82=TestSetupProject/src%3Ctest1.p1%7BSuperTeam.java%E2%98%83SuperTeam%E2%98%83Mid1%E2%98%83R";
+		String superMid1R = "%E2%98%82=OTTestProject1/src%3Ctest1.p1%7BSuperTeam.java%E2%98%83SuperTeam%E2%98%83Mid1%E2%98%83R";
 		String expectedInfo = ">foo in SubMid1 " +
 							  "<div><b>Overrides:</b> " +
 							  "<a href='eclipse-javadoc:"+superMid1R+"~foo'>foo()</a> " +
@@ -1772,7 +1812,7 @@ public class CodeCompletionTest extends CoreTests {
 		buf.append("}\n");
 		String contents= buf.toString();
 
-		IPackageFragment basePkg = CompletionTestSetup.getAbsoluteTestPackage(basePackage);
+		IPackageFragment basePkg = CompletionTestSetup.getAbsoluteTestPackage(this.fJProject1, basePackage);
 		basePkg.createCompilationUnit(className+".java", contents, true, null);
 	}
 
@@ -1821,7 +1861,7 @@ public class CodeCompletionTest extends CoreTests {
 	protected ICompletionProposal assertROFIBodyProposal(String before, String selector, String expected, int requiredRelevance) 
 			throws CoreException 
 	{
-		IPackageFragment testPkg = CompletionTestSetup.getTestPackage(null);
+		IPackageFragment testPkg = CompletionTestSetup.getTestPackage(this.fJProject1, null);
 		String teamName = "Completion_" + getName();
 		testPkg.createCompilationUnit(teamName + ".java", 
 				"package test1;\n" +
@@ -1915,7 +1955,7 @@ public class CodeCompletionTest extends CoreTests {
 
 	private ICompletionProposal assertProposal(String selector, String relativePackage, String typeName, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection, int requiredRelevance) throws CoreException {
 //{ObjectTeams: made package and file name configurable via new arguments `relativePackage'/`typeName':
-		IPackageFragment pkg = (relativePackage == null) ? CompletionTestSetup.getAnonymousTestPackage() : CompletionTestSetup.getTestPackage(relativePackage);
+		IPackageFragment pkg = (relativePackage == null) ? CompletionTestSetup.getAnonymousTestPackage(this.fJProject1) : CompletionTestSetup.getTestPackage(this.fJProject1, relativePackage);
 		fCU= (typeName == null) ? createCU(pkg, contents.toString()) : pkg.createCompilationUnit(typeName + ".java", contents.toString(), false, null); 
 // SH}
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
@@ -1944,7 +1984,7 @@ public class CodeCompletionTest extends CoreTests {
 	private void assertNosuchProposal(String selector, StringBuffer contents, IRegion preSelection, int requiredRelevance) 
 			throws CoreException 
 	{
-		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
+		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(this.fJProject1), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		try {
 			ICompletionProposal proposal= findNamedProposal(selector, fCU, preSelection, requiredRelevance);

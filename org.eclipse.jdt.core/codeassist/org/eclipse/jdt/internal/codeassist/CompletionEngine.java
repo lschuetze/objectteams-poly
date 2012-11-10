@@ -5003,7 +5003,12 @@ public final class CompletionEngine
 		if (missingElements != null) {
 			relevance += computeRelevanceForMissingElements(missingElementsHaveProblems);
 		}
-		
+//{ObjectTeams: other parts of completion prefer role interfaces, but here we need to go back to the role class:
+		if (currentType.isSynthInterface()) {
+			currentType = currentType.roleModel.getClassPartBinding();
+			if (currentType == null) return;
+		}
+// SH}
 		findAnonymousType(
 				currentType,
 				argTypes,
@@ -5764,7 +5769,12 @@ public final class CompletionEngine
 			InvocationSite invocationSite,
 			boolean isQualified,
 			int relevance) {
-		
+//{ObjectTeams: other parts of completion prefer role interfaces, but here we need to go back to the role class:
+		if (currentType.isSynthInterface()) {
+			currentType = currentType.roleModel.getClassPartBinding();
+			if (currentType == null) return;
+		}
+// SH}
 		if (!isIgnored(CompletionProposal.CONSTRUCTOR_INVOCATION, CompletionProposal.TYPE_REF)
 				&& currentType.isClass()
 				&& !currentType.isAbstract()) {

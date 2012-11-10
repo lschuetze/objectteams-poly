@@ -36,15 +36,14 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
  */
 class CompletionTestSetup extends ProjectTestSetup {
 
-	// SH: added parameter
-	public static IPackageFragment getTestPackage(String relativeName) throws CoreException {
+	// SH: added parameters
+	public static IPackageFragment getTestPackage(IJavaProject project, String relativeName) throws CoreException {
 		String packageName = "test1";
 		if (relativeName != null)
 			packageName += '.'+relativeName;
-		return getAbsoluteTestPackage(packageName);
+		return getAbsoluteTestPackage(project, packageName);
 	}
-	public static IPackageFragment getAbsoluteTestPackage(String packageName) throws CoreException {
-		IJavaProject project= getProject();
+	public static IPackageFragment getAbsoluteTestPackage(IJavaProject project, String packageName) throws CoreException {
 		IPackageFragmentRoot root= project.getPackageFragmentRoot("src");
 		if (!root.exists())
 			root= JavaProjectHelper.addSourceContainer(project, "src");
@@ -57,8 +56,7 @@ class CompletionTestSetup extends ProjectTestSetup {
 	}
 	
 	private static int fAnonymousSoureFolderCounter= 0;
-	public static IPackageFragment getAnonymousTestPackage() throws CoreException {
-		IJavaProject project= getProject();
+	public static IPackageFragment getAnonymousTestPackage(IJavaProject project) throws CoreException {
 		String sourceFolder= "src" + fAnonymousSoureFolderCounter++;
 		IPackageFragmentRoot root= project.getPackageFragmentRoot(sourceFolder);
 		if (!root.exists())
