@@ -4402,15 +4402,15 @@ public final class ASTRewriteAnalyzer extends ASTVisitor {
 		return false;
 	}
 
-	//FIXME(SH): XXX COMPLETE THESE!!!
-
 	public boolean visit(LiftingType node)
 	{
 		if (!hasChildrenChanges(node)) {
-//			System.out.println("visit LiftingType unchanged");
 			return doVisitUnchangedChildren(node);
 		}
-//		System.out.println("visit LiftingType changed");
+		rewriteRequiredNode(node, LiftingType.BASE_TYPE_PROPERTY);
+		ensureSpaceAfterReplace(node, LiftingType.BASE_TYPE_PROPERTY);
+		rewriteRequiredNode(node, LiftingType.ROLE_TYPE_PROPERTY);
+		ensureSpaceAfterReplace(node, LiftingType.ROLE_TYPE_PROPERTY);
 		return true;
 	}
 

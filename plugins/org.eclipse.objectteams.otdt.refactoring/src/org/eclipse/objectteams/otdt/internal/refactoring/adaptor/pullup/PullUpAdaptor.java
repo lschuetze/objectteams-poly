@@ -65,6 +65,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.structure.TypeVariableMaplet;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -1001,21 +1002,61 @@ public team class PullUpAdaptor {
 		}
 	}
 
-	// advance fix for Bug 393932 - [refactoring] pull-up with "use the destination type where possible" creates bogus import of nested type
 	protected class UseSuperTypeFix playedBy SuperTypeRefactoringProcessor {
 
-		void rewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group)
+		// === advance fix for Bug 393932 - [refactoring] pull-up with "use the destination type where possible" creates bogus import of nested type ===
+
+		void fixRewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group)
 		<- replace 
 		void rewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group);
 
 		@SuppressWarnings("basecall")
-		callin void rewriteTypeOccurrence(TType estimate, CompilationUnitRewrite rewrite, ASTNode node, TextEditGroup group) {
+		callin void fixRewriteTypeOccurrence(TType estimate, CompilationUnitRewrite rewrite, ASTNode node, TextEditGroup group) {
 			// combined from direct base method plus createCorrespondingNode(..):
 			rewrite.getImportRemover().registerRemovedNode(node);
 			ImportRewrite importRewrite= rewrite.getImportRewrite();
 			ImportRewriteContext context = new ContextSensitiveImportRewriteContext(node, importRewrite);
 			ASTNode correspondingNode = importRewrite.addImportFromSignature(new BindingKey(estimate.getBindingKey()).toSignature(), rewrite.getAST(), context);
 			rewrite.getASTRewrite().replace(node, correspondingNode, group);
+		}
+
+		// === tell the base class how to cope with LiftingType references: ===
+		
+		void rewriteTypeOccurrence(TType arg0, CompilationUnitRewrite arg1, ASTNode arg2, TextEditGroup arg3)
+		-> void rewriteTypeOccurrence(TType arg0, CompilationUnitRewrite arg1, ASTNode arg2, TextEditGroup arg3);
+		
+		void rewriteTypeOccurrence(final CompilationUnitRange range, final TType estimate, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final CompilationUnit copy, final Set<String> replacements, final TextEditGroup group)
+		<- after
+		void rewriteTypeOccurrence(final CompilationUnitRange range, final TType estimate, final ASTRequestor requestor, final CompilationUnitRewrite rewrite, final CompilationUnit copy, final Set<String> replacements, final TextEditGroup group);
+
+		private void rewriteTypeOccurrence(CompilationUnitRange range, TType estimate, ASTRequestor requestor, CompilationUnitRewrite rewrite, CompilationUnit copy, Set<String> replacements, TextEditGroup group) 
+		{
+			ASTNode node= null;
+			IBinding binding= null;
+			final CompilationUnit target= rewrite.getRoot();
+			node= NodeFinder.perform(copy, range.getSourceRange());
+			if (node != null) {
+				node= ASTNodes.getNormalizedNode(node);
+				// OT: remember whether we saw the base side or the role side of a LiftingType:
+				StructuralPropertyDescriptor locationInParent = node.getLocationInParent();
+				node = node.getParent();
+				if (node instanceof LiftingType) {
+					// climb up one more step than base method does to find the argument (LT only occurs as an argument's type):
+					VariableDeclaration argument = (VariableDeclaration) node.getParent();
+					binding= argument.resolveBinding();
+					node= target.findDeclaringNode(binding.getKey());
+					if (node instanceof SingleVariableDeclaration) {
+						// OT: drill into detail of LiftingType:
+						ASTNode oldTypeNode = (ASTNode)((SingleVariableDeclaration)node).getType().getStructuralProperty(locationInParent);
+						rewriteTypeOccurrence(estimate, rewrite, oldTypeNode, group);
+						if (node.getParent() instanceof MethodDeclaration) {
+							binding= ((VariableDeclaration) node).resolveBinding();
+							if (binding != null)
+								replacements.add(binding.getKey());
+						}
+					}
+				}
+			}
 		}
 	}
 }
