@@ -62,30 +62,23 @@ public team class MoveBaseClassTests extends TestCase {
 					"import base b.B;\n" +
 					"team class T1{void foo(){}protected class Role playedBy B{}}", 
 					false, new NullProgressMonitor());
-			try {
-				IType baseType = cuB.getTypes()[0];
-				IJavaElement[] javaElements= {baseType};
-				IResource[] resources= {};
-				JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			IType baseType = cuB.getTypes()[0];
+			IJavaElement[] javaElements= {baseType};
+			IResource[] resources= {};
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			
+			Object destination= packBTemp;
+			verifyValidDestination(ref, destination);
 				
-				Object destination= packBTemp;
-				verifyValidDestination(ref, destination);
-					
-				RefactoringStatus status= performRefactoring(ref, true);
-				assertEquals(null, status);
-				
-				// expect that base import has been updated in cuT:
-				String expectedSource2= 
-						"package p;\n" +
-						"import base b.temp.B;\n" +
-						"team class T1{void foo(){}protected class Role playedBy B{}}";
-				assertEqualLines("source compare failed", expectedSource2, cuT.getSource());
-				
-			} finally {
-				performDummySearch();
-				safeDelete(cuT);
-				safeDelete(packBTemp.getCompilationUnit("B.java"));
-			}
+			RefactoringStatus status= performRefactoring(ref, true);
+			assertEquals(null, status);
+			
+			// expect that base import has been updated in cuT:
+			String expectedSource2= 
+					"package p;\n" +
+					"import base b.temp.B;\n" +
+					"team class T1{void foo(){}protected class Role playedBy B{}}";
+			assertEqualLines("source compare failed", expectedSource2, cuT.getSource());
 		}
 	}
 

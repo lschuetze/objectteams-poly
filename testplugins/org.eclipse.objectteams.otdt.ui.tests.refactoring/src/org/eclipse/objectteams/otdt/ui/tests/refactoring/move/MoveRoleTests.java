@@ -57,31 +57,26 @@ public team class MoveRoleTests extends TestCase {
 			packB.createCompilationUnit("B.java", "package b;public class B {}", true, null);
 			ICompilationUnit cu1= getPackageP().createCompilationUnit("T1.java", "package p;import base b.B;team class T1{void foo(){}protected class Role playedBy B{}}", false, new NullProgressMonitor());
 			ICompilationUnit cu2= getPackageP().createCompilationUnit("T2.java", "package p;team class T2{void bar(){}}", false, new NullProgressMonitor());
-			try {
-				IType teamType = cu1.getTypes()[0];
-				IType roleType = teamType.getType("Role");
-				IJavaElement[] javaElements= { roleType };
-				IResource[] resources= {};
-				JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
-				
-				Object destination= cu2.getTypes()[0];
-				verifyValidDestination(ref, destination);
-					
-				RefactoringStatus status= performRefactoring(ref, true);
-				assertEquals(null, status);
-				
-				// expect that base import has been added to cu2:
-				String expectedSource2= "package p;\nimport base b.B;\nteam class T2{protected class Role playedBy B{}\n\nvoid bar(){}}";
-				assertEqualLines("source compare failed", expectedSource2, cu2.getSource());
 
-				// expect that base import has been removed from cu1:
-				String expectedSource1= "package p;team class T1{void foo(){}}";
-				assertEqualLines("source compare failed", expectedSource1, cu1.getSource());
+			IType teamType = cu1.getTypes()[0];
+			IType roleType = teamType.getType("Role");
+			IJavaElement[] javaElements= { roleType };
+			IResource[] resources= {};
+			JavaMoveProcessor ref= verifyEnabled(resources, javaElements, createReorgQueries());
+			
+			Object destination= cu2.getTypes()[0];
+			verifyValidDestination(ref, destination);
 				
-			} finally {
-				performDummySearch();
-				safeDelete(cu2);
-			}
+			RefactoringStatus status= performRefactoring(ref, true);
+			assertEquals(null, status);
+			
+			// expect that base import has been added to cu2:
+			String expectedSource2= "package p;\nimport base b.B;\nteam class T2{protected class Role playedBy B{}\n\nvoid bar(){}}";
+			assertEqualLines("source compare failed", expectedSource2, cu2.getSource());
+
+			// expect that base import has been removed from cu1:
+			String expectedSource1= "package p;team class T1{void foo(){}}";
+			assertEqualLines("source compare failed", expectedSource1, cu1.getSource());				
 		}
 	}
 
