@@ -195,6 +195,41 @@ public class ChangeSignatureTests extends RefactoringTest {
 //		assertParticipant(classA);
 	}
 
+	void helperRename(ICompilationUnit cu, IType declaringClass, String[] signature, int idx, String oldName, String newName, String expectedInfo)
+			  throws JavaModelException, CoreException, Exception, IOException 
+	{
+		IMethod method = declaringClass.getMethod("m", signature);
+		assertTrue("method does not exist", method.exists());
+		assertTrue("refactoring not available", RefactoringAvailabilityTester.isChangeSignatureAvailable(method));
+
+		ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+
+		processor.setDelegateUpdating(false);
+		markAsRenamed(processor.getParameterInfos().get(idx), oldName, newName);
+		RefactoringStatus initialConditions= ref.checkInitialConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass:"+initialConditions.getEntryWithHighestSeverity(), initialConditions.isOK());
+		RefactoringStatus result= performRefactoring(ref, true);
+		if (expectedInfo != null) {
+			assertTrue("precondition was supposed to create an info:"+result.getEntryWithHighestSeverity(), result.hasInfo());
+			assertEquals("wrong info", expectedInfo, result.getEntryMatchingSeverity(RefactoringStatus.INFO).getMessage());
+		} else {
+			assertEquals("precondition was supposed to pass", null, result);
+		}
+
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		String expectedFileContents= getFileContents(getTestFileName(true, false));
+		assertEqualLines("invalid content", expectedFileContents, newcu.getSource());
+	}
+
+	private void markAsRenamed(ParameterInfo parameterInfo, String oldName, String newName) {
+		assertEquals(parameterInfo.getOldName(), oldName);
+		parameterInfo.setNewName(newName);
+	}
+
 	private void helperPermute(String[] newOrder, String[] signature, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
@@ -327,5 +362,11 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	public void testReorder01() throws Exception {
 		helperPermute(new String[]{"ignore", "b", "a"}, new String[]{"I", "Z", "QString;"}, false);
+	}
+
+	public void testRename01() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		IType teamType = cu.getType("MyTeam");
+		helperRename(cu, teamType, new String[]{"QA;"}, 0, "arg", "renamed", null);
 	}
 }

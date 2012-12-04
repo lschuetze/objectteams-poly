@@ -35,8 +35,13 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.BaseCallMessageSend;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import base org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -300,6 +305,39 @@ public team class RenameAdaptor
 						return status;
 					}
 			return status;
+		}		
+	}
+
+	/**
+	 * Find more occurrences, currently:
+	 * - references to an argument with declared lifting via the fakedRoleVariable.
+	 */
+	@SuppressWarnings("decapsulation")
+	protected class TempOccurrenceAnalyzer playedBy TempOccurrenceAnalyzer {
+
+		boolean addReferenceNode(SimpleName name)                      -> get Set<SimpleName> fReferenceNodes
+        		with {  result 										<- 		base.fReferenceNodes.add(name) }
+		VariableDeclaration getFTempDeclaration() 						-> get VariableDeclaration fTempDeclaration;
+		void setFTempDeclaration(VariableDeclaration fTempDeclaration)	-> set VariableDeclaration fTempDeclaration;
+		void setFTempBinding(IBinding fTempBinding) 					-> set IBinding fTempBinding;
+
+		void perform() -> void perform();
+		
+		void performAgain() <- after void perform();
+	
+		private void performAgain() {
+			VariableDeclaration fTempDeclaration = getFTempDeclaration();
+			if (fTempDeclaration instanceof SingleVariableDeclaration) {
+				VariableDeclaration roleVar = ((SingleVariableDeclaration) fTempDeclaration).getFakedRoleVariable();
+				if (roleVar != null) {
+					// remember original declaration, faked one will be added in getReferenceAndDeclarationNodes():
+					addReferenceNode(fTempDeclaration.getName());
+					// re-initialize and search again using the faked roleVar:
+					setFTempDeclaration(roleVar);
+					setFTempBinding(roleVar.resolveBinding());
+					perform();
+				}
+			}			
 		}		
 	}
 }
