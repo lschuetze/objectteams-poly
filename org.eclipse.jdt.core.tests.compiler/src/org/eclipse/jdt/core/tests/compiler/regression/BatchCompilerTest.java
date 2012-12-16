@@ -22,6 +22,7 @@
  *								bug 374605 - Unreasonable warning for enum-based switch statements
  *								bug 375366 - ECJ ignores unusedParameterIncludeDocCommentReference unless enableJavadoc option is set
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
+ *								bug 381443 - [compiler][null] Allow parameter widening from @NonNull to unannotated
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -84,7 +85,7 @@ public class BatchCompilerTest extends AbstractRegressionTest {
 			"}\n";
 
 	static {
-//		TESTS_NAMES = new String[] { "testBug375366" };
+//		TESTS_NAMES = new String[] { "test320_warn_options" };
 //		TESTS_NUMBERS = new int[] { 306 };
 //		TESTS_RANGE = new int[] { 298, -1 };
 	}
@@ -1771,6 +1772,7 @@ public void test012b(){
         "      indirectStatic       indirect reference to static member\n" +
 //OT:
         "      inferredcallout    + a callout binding has to be inferred (OTJLD 3.1(j))\n" +
+        "      inheritNullAnnot     inherit null annotations\n" + 
         "      intfAnnotation     + annotation type used as super interface\n" +
         "      intfNonInherited   + interface non-inherited method compatibility\n" +
         "      intfRedundant        find redundant superinterfaces\n" + 
@@ -12697,12 +12699,7 @@ public void test313_warn_options() {
 		"	                     ^^^^^^\n" + 
 		"Missing nullable annotation: inherited method from X declares this parameter as @Nullable\n" + 
 		"----------\n" + 
-		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" + 
-		"	@Nullable Object foo(Object o, Object o2) { return null; }\n" + 
-		"	                               ^^^^^^\n" + 
-		"Missing non-null annotation: inherited method from X declares this parameter as @NonNull\n" + 
-		"----------\n" + 
-		"3 problems (3 warnings)", 
+		"2 problems (2 warnings)", 
 		true);
 }
 
@@ -12746,12 +12743,7 @@ public void test314_warn_options() {
 		"	                     ^^^^^^\n" + 
 		"Missing nullable annotation: inherited method from X declares this parameter as @Nullable\n" + 
 		"----------\n" + 
-		"3. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" + 
-		"	@Nullable Object foo(Object o, Object o2) { return null; }\n" + 
-		"	                               ^^^^^^\n" + 
-		"Missing non-null annotation: inherited method from X declares this parameter as @NonNull\n" + 
-		"----------\n" + 
-		"3 problems (3 errors)", 
+		"2 problems (2 errors)", 
 		true);
 }
 
@@ -12983,6 +12975,47 @@ public void test319_warn_options() {
 		"The switch over the enum type Color should have a default case\n" +
 		"----------\n" +
 		"1 problem (1 warning)",
+		true);
+}
+
+// Bug 388281 - [compiler][null] inheritance of null annotations as an option
+// -warn option - regression tests to check option inheritNullAnnot
+public void test320_warn_options() {
+	this.runNegativeTest(
+		new String[] {
+				"p/Super.java",
+				"package p;\n" +
+				"import org.eclipse.jdt.annotation.*;\n" +
+				"public class Super {\n" +
+				"    void foo(@NonNull String s) {}\n" +
+				"}\n",
+				"p/Sub.java",
+				"package p;\n" +
+				"public class Sub extends Super {\n" +
+				"    void foo(String s) {\n" +
+				"        s= null;\n" + // illegal since s inherits @NonNull
+				"        super.foo(s);\n" + // legal
+				"    }\n" +
+				"}\n",
+				"org/eclipse/jdt/annotation/NonNull.java",
+				NONNULL_ANNOTATION_CONTENT,
+				"org/eclipse/jdt/annotation/Nullable.java",
+				NULLABLE_ANNOTATION_CONTENT,
+				"org/eclipse/jdt/annotation/NonNullByDefault.java",				
+				NONNULL_BY_DEFAULT_ANNOTATION_CONTENT
+		},
+		"\"" + OUTPUT_DIR +  File.separator + "p" + File.separator + "Sub.java\""
+		+ " -sourcepath \"" + OUTPUT_DIR + "\""
+		+ " -1.5"
+		+ " -err:+nullAnnot,+null,+inheritNullAnnot -proc:none -d \"" + OUTPUT_DIR + "\"",
+		"",
+		"----------\n" + 
+		"1. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/p/Sub.java (at line 4)\n" + 
+		"	s= null;\n" + 
+		"	   ^^^^\n" + 
+		"Null type mismatch: required '@NonNull String' but the provided value is null\n" + 
+		"----------\n" + 
+		"1 problem (1 error)", 
 		true);
 }
 
@@ -13696,12 +13729,7 @@ public void testBug375366c() throws IOException {
 			"	                     ^^^^^^\n" + 
 			"Missing nullable annotation: inherited method from X declares this parameter as @Nullable\n" + 
 			"----------\n" + 
-			"3. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" + 
-			"	@Nullable Object foo(Object o, Object o2) { return null; }\n" + 
-			"	                               ^^^^^^\n" + 
-			"Missing non-null annotation: inherited method from X declares this parameter as @NonNull\n" + 
-			"----------\n" + 
-			"3 problems (3 errors)", 
+			"2 problems (2 errors)", 
 			false/*don't flush*/);
 }
 

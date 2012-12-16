@@ -22,6 +22,7 @@
  *								bug 365859 - [compiler][null] distinguish warnings based on flow analysis vs. null annotations
  *								bug 374605 - Unreasonable warning for enum-based switch statements
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
+ *								bug 376053 - [compiler][resource] Strange potential resource leak problems
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
 
@@ -4120,6 +4121,10 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 					String parameterTypeNames = typesAsString(problemMethod.parameters, false);
 					String closestParameterTypeShortNames = typesAsString(shownMethod, true);
 					String parameterTypeShortNames = typesAsString(problemMethod.parameters, true);
+					if (closestParameterTypeShortNames.equals(parameterTypeShortNames)) {
+						closestParameterTypeShortNames = closestParameterTypeNames;
+						parameterTypeShortNames = parameterTypeNames;
+					}
 					this.handle(
 						IProblem.ParameterMismatch,
 						new String[] {
@@ -8915,7 +8920,7 @@ public void redundantSpecificationOfTypeArguments(ASTNode location, TypeBinding[
     }
 }
 public void potentiallyUnclosedCloseable(FakedTrackingVariable trackVar, ASTNode location) {
-	String[] args = { String.valueOf(trackVar.name) };
+	String[] args = { trackVar.nameForReporting(location, this.referenceContext) };
 	if (location == null) {
 		this.handle(
 			IProblem.PotentiallyUnclosedCloseable,

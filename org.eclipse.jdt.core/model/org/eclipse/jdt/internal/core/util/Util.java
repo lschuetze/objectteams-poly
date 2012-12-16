@@ -1907,7 +1907,12 @@ public class Util {
 	 * Add a log entry
 	 */
 	public static void log(IStatus status) {
-		JavaCore.getPlugin().getLog().log(status);
+		Plugin plugin = JavaCore.getPlugin();
+		if (plugin == null) {
+			System.err.println(status.toString());
+		} else {
+			plugin.getLog().log(status);
+		}
 	}
 
 	public static void log(Throwable e) {

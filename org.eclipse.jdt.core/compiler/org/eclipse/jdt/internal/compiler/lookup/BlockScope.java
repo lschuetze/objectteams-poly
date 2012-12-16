@@ -18,6 +18,7 @@
  *								bug 370639 - [compiler][resource] restore the default for resource leak warnings
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *								bug 379784 - [compiler] "Method can be static" is not getting reported
+ *								bug 394768 - [compiler][resource] Incorrect resource leak warning when creating stream in conditional
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -1209,7 +1210,7 @@ public void checkUnclosedCloseables(FlowInfo flowInfo, FlowContext flowContext, 
 	if (location != null && flowInfo.reachMode() != 0) return;
 
 	FakedTrackingVariable returnVar = (location instanceof ReturnStatement) ?
-			FakedTrackingVariable.getCloseTrackingVariable(((ReturnStatement)location).expression, flowContext) : null;
+			FakedTrackingVariable.getCloseTrackingVariable(((ReturnStatement)location).expression, flowInfo, flowContext) : null;
 
 	Set varSet = new HashSet(this.trackingVariables);
 	FakedTrackingVariable trackingVar;
@@ -1259,7 +1260,7 @@ public void checkUnclosedCloseables(FlowInfo flowInfo, FlowContext flowContext, 
 	} else {
 		int size = this.trackingVariables.size();
 		for (int i=0; i<size; i++) {
-			FakedTrackingVariable tracker = (FakedTrackingVariable) this.trackingVariables.get(0);
+			FakedTrackingVariable tracker = (FakedTrackingVariable) this.trackingVariables.get(i);
 			tracker.resetReportingBits();
 		}
 	}
@@ -1293,7 +1294,8 @@ private void reportResourceLeak(FakedTrackingVariable trackingVar, ASTNode locat
  */
 public void correlateTrackingVarsIfElse(FlowInfo thenFlowInfo, FlowInfo elseFlowInfo) {
 	if (this.trackingVariables != null) {
-		for (int i=0; i<this.trackingVariables.size(); i++) {
+		int trackVarCount = this.trackingVariables.size();
+		for (int i=0; i<trackVarCount; i++) {
 			FakedTrackingVariable trackingVar = (FakedTrackingVariable) this.trackingVariables.get(i);
 			if (trackingVar.originalBinding == null)
 				continue;
@@ -1306,6 +1308,34 @@ public void correlateTrackingVarsIfElse(FlowInfo thenFlowInfo, FlowInfo elseFlow
 					 && thenFlowInfo.isDefinitelyNull(trackingVar.originalBinding))	// null in then branch
 			{
 				thenFlowInfo.markAsDefinitelyNonNull(trackingVar.binding);			// -> always closed
+			}
+			else {
+				if (thenFlowInfo == FlowInfo.DEAD_END || elseFlowInfo == FlowInfo.DEAD_END)
+					continue; // short cut
+
+				for (int j=i+1; j<trackVarCount; j++) {
+					FakedTrackingVariable var2 = ((FakedTrackingVariable) this.trackingVariables.get(j));
+					if (trackingVar.originalBinding == var2.originalBinding) {
+						// two tracking variables for the same original, merge info from both branches now:
+						boolean var1SeenInThen = thenFlowInfo.hasNullInfoFor(trackingVar.binding);
+						boolean var1SeenInElse = elseFlowInfo.hasNullInfoFor(trackingVar.binding);
+						boolean var2SeenInThen = thenFlowInfo.hasNullInfoFor(var2.binding);
+						boolean var2SeenInElse = elseFlowInfo.hasNullInfoFor(var2.binding);
+						int newStatus;
+						if (!var1SeenInThen && var1SeenInElse && var2SeenInThen && !var2SeenInElse) {
+							newStatus = FlowInfo.mergeNullStatus(thenFlowInfo.nullStatus(var2.binding), elseFlowInfo.nullStatus(trackingVar.binding));
+						} else if (var1SeenInThen && !var1SeenInElse && !var2SeenInThen && var2SeenInElse) {
+							newStatus = FlowInfo.mergeNullStatus(thenFlowInfo.nullStatus(trackingVar.binding), elseFlowInfo.nullStatus(var2.binding)); 
+						} else {
+							continue;
+						}
+						thenFlowInfo.markNullStatus(trackingVar.binding, newStatus);
+						elseFlowInfo.markNullStatus(trackingVar.binding, newStatus);
+						trackingVar.originalBinding.closeTracker = trackingVar; // avoid further use of var2
+						thenFlowInfo.markNullStatus(var2.binding, FlowInfo.NON_NULL);
+						elseFlowInfo.markNullStatus(var2.binding, FlowInfo.NON_NULL);
+					}
+				}
 			}
 		}
 	}
