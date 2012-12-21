@@ -368,7 +368,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 //{OTDyn: configurable:
 			CallinImplementorDyn.DYNAMIC_WEAVING 
 			? (makeShort 
-				? "IBoundBase, Team[], int, int[], int, Object[]"
+				? "IBoundBase, ITeam[], int, int[], int, Object[]"
 				: "org.objectteams.IBoundBase, org.objectteams.ITeam[], int, int[] int, java.lang.Object[]))")
 // SH}
 // {OT/JamVM support:
@@ -379,7 +379,7 @@ public class MethodSignatureEnhancer implements IOTConstants, TypeConstants, Cla
 // CH}
 			: (makeShort 
 				? "ITeam[], int[], int, int, int, Object[]"
-				: "org.objectteams.ITeam[], int[] int, int, int, java.lang.Object[]))");
+				: "org.objectteams.ITeam[], int[], int, int, int, java.lang.Object[]))");
 		if (typeString.startsWith(prefix)) {
 			types.delete(0, prefix.length());
 			if (types.length()> 0 && types.charAt(0) == ',')
