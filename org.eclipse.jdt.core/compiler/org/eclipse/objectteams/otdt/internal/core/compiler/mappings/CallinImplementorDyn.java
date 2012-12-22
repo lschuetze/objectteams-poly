@@ -18,6 +18,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.mappings;
 import static org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants.AccPublic;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -65,7 +66,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.PredicateGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReplaceResultReferenceVisitor;
-import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
@@ -347,13 +347,20 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		MethodModel.getModel(callMethod).setStatementsGenerator(new AbstractStatementsGenerator() {
 
 			protected boolean generateStatements(AbstractMethodDeclaration methodDecl) {
-				List<Statement> statements = new ArrayList<Statement>();
+				
+				// into head of tryStats we generate local vars to be shared by case statements:
+				List<Statement> tryStats = new ArrayList<Statement>();
+				HashSet<String> baseArgs = new HashSet<String>();
+
 				SwitchStatement switchStat = new SwitchStatement();
 				switchStat.expression =
 					isReplace 
 					? gen.arrayReference(gen.singleNameReference(CALLIN_ID), gen.singleNameReference(INDEX))	// switch(callinId[index]) {  ...
 					: gen.singleNameReference(CALLIN_ID);														// switch(callinId) { ...
 				
+				// statements for the body of the switchStatement:
+				List<Statement> statements = new ArrayList<Statement>();
+
 				int callinIdCount = teamDecl.getTeamModel().getCallinIdCount();
 				// callinIds not handled here will be handled using a super-call.
 				boolean[] handledCallinIds = new boolean[callinIdCount];
@@ -452,15 +459,17 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								Expression init = rawArg;
 								if (!baseParams[i].isTypeVariable())
 									init = gen.createCastOrUnboxing(rawArg, baseParams[i], callinDecl.scope);
+								if (baseArgs.add(String.valueOf(baseArg.name)))
+									tryStats.add(i, gen.localVariable(baseArg.name,
+														gen.alienScopeTypeReference(baseArg.type, callinDecl.scope),
+														null));
 								if (hasBasePredicate) {										 						//   BaseType baseArg = castAndOrUnbox(arguments[n]);
 									// add to front so it is already available for the base predicate check:
-									blockStatements.add(i, gen.localVariable(baseArg.name,
-																			 AstClone.copyTypeReference(baseArg.type), 
-																			 init));
+									blockStatements.add(i, gen.assignment(gen.singleNameReference(baseArg.name),
+																		  init));
 								} else {
 									// otherwise give it a chance for expressions/types that depend on the role instance
-									blockStatements.add(gen.localVariable(baseArg.name,
-																		  gen.alienScopeTypeReference(baseArg.type, callinDecl.scope), 
+									blockStatements.add(gen.assignment(gen.singleNameReference(baseArg.name),
 																		  new PotentialRoleReceiverExpression(
 																				  init,
 																				  roleVar,
@@ -710,10 +719,11 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 										 gen.qualifiedTypeReference(IOTConstants.ORG_OBJECTTEAMS_LIFTING_VETO))
 					};
 					exceptionStatementss = new Statement[][]{{catchStatement1}};				
-				}				
+				}
+				tryStats.add(switchStat);
 				methodDecl.statements = new Statement[] {
 							gen.tryCatch(
-								new Statement[] {switchStat},
+								tryStats.toArray(new Statement[tryStats.size()]),
 								// expected exception is ignored, do nothing (before/after) or proceed to callNext (replace)
 								exceptionArguments,
 								exceptionStatementss)
