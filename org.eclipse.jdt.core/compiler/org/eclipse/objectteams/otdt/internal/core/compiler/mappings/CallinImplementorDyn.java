@@ -50,6 +50,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMap
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLiftExpression;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialLowerExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PotentialRoleReceiverExpression;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrivateRoleMethodCall;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.OTDynCallinBindingsAttribute;
@@ -781,6 +782,10 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				caseBlockStats.add(gen.caseStatement(gen.intLiteral(baseSpec.getCallinId(aTeam))));					// case bseSpecCallinId:
 			int nRoleArgs = mapping.getRoleMethod().getSourceParamLength();
 			TypeBinding[] roleParams = mapping.getRoleMethod().getSourceParameters();
+			for (int i=0; i<roleParams.length; i++)
+				if (roleParams[i].isRole() && TeamModel.isTeamContainingRole(teamDecl.binding, (ReferenceBinding) roleParams[i]))
+					roleParams[i] = TeamModel.strengthenRoleType(teamDecl.binding, roleParams[i]);
+
 			List<Statement> repackingStats = new ArrayList<Statement>();
 			
 			if (mapping.positions != null) {
@@ -795,14 +800,11 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						 // FIXME(SH): per basemethod:
 						TypeBinding baseSideParameter = mapping.baseMethodSpecs[0].resolvedParameters()[poss[i]-1];
 						Expression roleSideArgument = gen.arrayReference(gen.singleNameReference(BASE_CALL_ARGS), i);//   ... baseCallArguments[i] ...
+						if (roleSideParameter != baseSideParameter)
+							roleSideArgument = gen.resolvedCastExpression(roleSideArgument, roleSideParameter, CastExpression.RAW);
 						if (   roleSideParameter.isRole() 
 							&& ((ReferenceBinding)roleSideParameter).baseclass().isCompatibleWith(baseSideParameter))
-							roleSideArgument = new Lowering().lowerExpression(mapping.scope, 
-																			  roleSideArgument, 
-																			  roleSideParameter, 
-																			  baseSideParameter, 
-																			  gen.thisReference(), 
-																			  true);
+							roleSideArgument = new PotentialLowerExpression(roleSideArgument, baseSideParameter, gen.thisReference());
 						repackingStats.add(gen.assignment(gen.arrayReference(gen.singleNameReference(ARGUMENTS), 	//   arguments[p] = baseCallArguments[i];
 								                                             poss[i]-1), // 0 represents result
 														  roleSideArgument));
@@ -811,21 +813,18 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				for (int i=0; i<nRoleArgs; i++) {
 					Expression basecallArg = gen.arrayReference(gen.singleNameReference(BASE_CALL_ARGS), i);
 					if (mapping.baseMethodSpecs[0].argNeedsTranslation(i)) { // FIXME(SH): per basemethod!
-						basecallArg = new Lowering().lowerExpression(mapping.scope,
-																	 gen.castExpression(basecallArg,
+						basecallArg = new PotentialLowerExpression(gen.castExpression(basecallArg,
 																			 			gen.typeReference(roleParams[i]),
 																			 			CastExpression.RAW),
-																	 roleParams[i],
-																	 mapping.baseMethodSpecs[0].resolvedParameters()[i],  // FIXME(SH): per basemethod!
-																	 gen.qualifiedThisReference(teamDecl.binding),
-																	 true);
+																   mapping.baseMethodSpecs[0].resolvedParameters()[i], // FIXME(SH): per basemethod!
+																   gen.qualifiedThisReference(teamDecl.binding));
 					}
 					repackingStats.add(gen.assignment(gen.arrayReference(gen.singleNameReference(ARGUMENTS), i),	//    arguments[i] = lower?(baseCallArguments[i])
 							  		   				  basecallArg));
 				}
 			}
 			caseBlockStats.add(gen.ifStatement(gen.nullCheck(gen.singleNameReference(BASE_CALL_ARGS)),				//    if (baseCallArgs == null) {} { arguments[i] = ...; ... } 
-											   null,
+											   gen.emptyStatement(),
 											   gen.block(repackingStats.toArray(new Statement[repackingStats.size()]))));
 
 			Expression result = gen.messageSend(gen.superReference(), OT_CALL_NEXT, superArgs);						//    return cast+lift?(super._OT$callNext(..));
