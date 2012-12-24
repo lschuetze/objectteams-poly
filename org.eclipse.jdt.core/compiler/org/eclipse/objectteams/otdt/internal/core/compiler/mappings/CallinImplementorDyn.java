@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.compiler.ast.SingleNameReference;
 import org.eclipse.jdt.internal.compiler.ast.Statement;
 import org.eclipse.jdt.internal.compiler.ast.SwitchStatement;
 import org.eclipse.jdt.internal.compiler.ast.ThisReference;
+import org.eclipse.jdt.internal.compiler.ast.TryStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
@@ -117,6 +118,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	static final char[][] AFTER_ARG_NAMES = new char[][]{IOTConstants.BASE, CALLIN_ID, BOUND_METHOD_ID, ARGUMENTS, _OT_RESULT};
 
 	protected static final String OT_LOCAL = "_OT$local$"; //$NON-NLS-1$
+
+	static final char[] CATCH_ARG = "_OT$caughtException".toCharArray(); //$NON-NLS-1$
 
 	
 	private RoleModel _role;
@@ -634,7 +637,11 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 									gen.breakStatement()															//   break;
 							};
 						}
-						blockStatements.add(gen.tryFinally(messageSendStatements, new Statement[]{resetFlag}));		//   try { roleMessageSend(); } finally { _OT$setExecutingCallin(_OT$oldIsExecutingCallin); } 
+						// assemble:
+						//		try { roleMessageSend(); }
+						//		catch(Exception _OT$caughtException) { throw new SneakyException(_OT$caughtException); }
+						//		finally { _OT$setExecutingCallin(_OT$oldIsExecutingCallin); } 
+						blockStatements.add(protectRoleMethodCall(messageSendStatements, roleMethodBinding, resetFlag, gen));
 						statements.add(gen.block(blockStatements.toArray(new Statement[blockStatements.size()])));
 						// collectively report the problem(s)
 						if (canLiftingFail)
@@ -875,6 +882,22 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		if (roleReturn.isTypeVariable())
 			roleReturn = ((TypeVariableBinding)roleReturn).firstBound;
 		return new TypeBinding[]{roleReturn, baseReturn};
+	}
+
+	/** Convert custom exceptions into SneakyException as to bypass checking by the compiler. */
+	TryStatement protectRoleMethodCall(Statement[] statements, MethodBinding roleMethod, Statement finallyStat, AstGenerator gen) {
+		Argument catchArg = gen.argument(CATCH_ARG, gen.qualifiedTypeReference(TypeConstants.JAVA_LANG_EXCEPTION));
+		Statement[] catchStat = new Statement[] {
+				gen.throwStatement(gen.allocation(
+						gen.qualifiedTypeReference(IOTConstants.SNEAKY_EXCEPTION),
+						new Expression[] { gen.singleNameReference(CATCH_ARG) }
+				))
+		};
+		return gen.tryStatement(
+				statements,
+				new Argument[] {catchArg}, 
+				new Statement[][] {catchStat},
+				new Statement[] {finallyStat});
 	}
 
 	private void generateCallOrigStatic(List<CallinMappingDeclaration> callinDecls, TeamModel aTeam) {

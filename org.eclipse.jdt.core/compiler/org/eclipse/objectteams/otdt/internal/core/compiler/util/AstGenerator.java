@@ -1067,6 +1067,30 @@ public class AstGenerator extends AstFactory {
 		return stat;
 	}
 
+	/** Generate a full try-catch-finally statement. */
+	public TryStatement tryStatement(Statement[] tryStatements,
+									 Argument[] exceptionArguments, Statement[][] catchStatementss,
+									 Statement[] finallyStatements)
+	{
+		TryStatement stat = new TryStatement();
+		stat.sourceStart = this.sourceStart;
+		stat.sourceEnd   = this.sourceEnd;
+		stat.tryBlock = block(tryStatements);
+		stat.catchArguments = exceptionArguments;
+		stat.catchBlocks = new Block[catchStatementss.length];
+		for(int i=0; i<catchStatementss.length; i++)
+			stat.catchBlocks[i] = block(catchStatementss[i]);
+		stat.finallyBlock = block(finallyStatements);
+		if (finallyStatements != null) {
+			int len = finallyStatements.length;
+			if (len > 0) {
+				stat.finallyBlock.sourceStart = finallyStatements[0].sourceStart;
+				stat.finallyBlock.sourceEnd   = finallyStatements[len-1].sourceEnd;
+			}
+		}
+		return stat;
+	}
+
 	/**
 	 * Create a lifting of an expression to an expectedType if expectedType is in deed
 	 * a role type different from the type of expression (deferred decision).
