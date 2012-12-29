@@ -2185,6 +2185,74 @@ public class CalloutMethodBinding extends AbstractOTJLDTest {
              "OK");
      }
 
+    // Bug 397235 - [compiler] cannot bind to a static role method
+    // anchored access to static method - static anchor
+    public void test3113_calloutToStatic5() {
+    	runConformTest(new String[] {
+    		"Team3113cts5_2.java",
+    			"public team class Team3113cts5_2 {\n" +
+				"    final static Team3113cts5_1 other = new Team3113cts5_1();\n" +
+    			"    protected class R playedBy R<@other> {\n" +
+    			"        void test() -> void test();\n" +
+    			"    }\n" +
+    			"    void test() {\n" +
+    			"        R.test();\n" +
+    			"    }\n" +
+    			"    public static void main(String[] args) {\n" +
+    			"        other.val = \"OK\";\n" +
+    			"        new Team3113cts5_2().test();\n" +
+    			"    }\n" +
+    			"}\n",
+    		"Team3113cts5_1.java",
+    			"public team class Team3113cts5_1 {\n" +
+    			"public String val;\n" +
+    			"public class R {\n" +
+    			"    public static void test() {\n" +
+    			"        System.out.print(val);\n" +
+    			"    }\n" +
+    			"}\n" +
+    			"public R getR() { return new R(); }\n" +
+    			"}\n"
+    	},
+    	"OK");
+    }
+
+
+    // Bug 397235 - [compiler] cannot bind to a static role method
+    // anchored access to static method - non-static anchor, two segments
+    public void test3113_calloutToStatic6() {
+    	runConformTest(new String[] {
+    		"Team3113cts6_2.java",
+    			"public team class Team3113cts6_2 {\n" +
+				"    final Team3113cts6_1 other = new Team3113cts6_1();\n" +
+    			"    protected class R playedBy R<@other.self> {\n" +
+    			"        void test() -> void test();\n" +
+    			"    }\n" +
+    			"    void test() {\n" +
+    			"        R.test();\n" +
+    			"    }\n" +
+    			"    public static void main(String[] args) {\n" + 
+    			"        Team3113cts6_2 t = new Team3113cts6_2();" +
+    			"        t.other.val = \"OK\";\n" +
+    			"        t.test();\n" +
+    			"    }\n" +
+    			"}\n",
+    		"Team3113cts6_1.java",
+    			"public team class Team3113cts6_1 {\n" +
+    			"    final public Team3113cts6_1 self = this;"+
+    			"    public String val;\n" +
+    			"    public class R {\n" +
+    			"        public static void test() {\n" +
+    			"            System.out.print(val);\n" +
+    			"        }\n" +
+    			"    }\n" +
+    			"    public R getR() { return new R(); }\n" +
+    			"}\n"
+    	},
+    	"OK");
+    }
+
+
     // A callout binding creates a role method
     // 3.1.14-otjld-callout-without-role-method-1
     public void test3114_calloutWithoutRoleMethod1() {

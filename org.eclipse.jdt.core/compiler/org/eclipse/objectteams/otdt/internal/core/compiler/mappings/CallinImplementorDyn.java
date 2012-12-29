@@ -929,8 +929,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			for (MethodSpec baseSpec : mapping.baseMethodSpecs) {
 				MethodBinding baseMethod = baseSpec.resolvedMethod;
 				if (baseMethod.isStatic()) {
-					swStatements.add(gen.caseStatement(gen.intLiteral(baseSpec.getCallinId(aTeam))));			// case baseSpecCallinId:
-					Expression result = gen.fakeMessageSend(gen.baseNameReference(baseMethod.declaringClass),	// 		return BaseClass._OT$callOrigStatic(boundMethodId, args);
+					ReferenceBinding baseClass = mapping.scope.enclosingReceiverType().baseclass();
+					swStatements.add(gen.caseStatement(gen.intLiteral(baseSpec.getCallinId(aTeam))));		// case baseSpecCallinId:
+					Expression result = gen.fakeMessageSend(gen.baseTypeReference(baseClass),				// 		return BaseClass._OT$callOrigStatic(boundMethodId, args);
 															OT_CALL_ORIG_STATIC, 
 															passThroughArgs,
 															baseMethod.declaringClass,

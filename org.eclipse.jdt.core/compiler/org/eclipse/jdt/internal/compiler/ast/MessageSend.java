@@ -419,6 +419,10 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	if (this.syntheticAccessor == null){
 		TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenBinding, this.actualReceiverType, this.receiver.isImplicitThis());
 		if (isStatic){
+//{ObjectTeams: role method via the class-part:
+			if (constantPoolDeclaringClass.isRole())
+				constantPoolDeclaringClass = ((ReferenceBinding)constantPoolDeclaringClass).getRealClass();
+// SH}
 			codeStream.invoke(Opcodes.OPC_invokestatic, codegenBinding, constantPoolDeclaringClass);
 //{ObjectTeams: decapsulated methods will not be private in the JVM any more:
 /* orig:
