@@ -60,7 +60,7 @@ public class OTREContainer implements IClasspathContainer
 
     // details of this container: name and hosting plugin:
     private static final IPath  OTRE_CONTAINER_PATH = new Path(OTRE_CONTAINER_NAME);
-    private static final String OT_RUNTIME_PLUGIN = "org.eclipse.objectteams.runtime"; //$NON-NLS-1$
+    static String OT_RUNTIME_PLUGIN = "org.eclipse.objectteams.runtime"; //$NON-NLS-1$
 
     // file names for the above OTRE_X_JAR_PATH constants:
     private static final String OTRE_MIN_JAR_FILENAME   = "otre_min.jar"; //$NON-NLS-1$

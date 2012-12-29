@@ -1,16 +1,15 @@
 /**********************************************************************
  * This file is part of the "Object Teams Runtime Environment"
- * 
+ *
  * Copyright 2010 Stephan Herrmann.
- * 
+ *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
- * 
+ *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
- * 
+ *
  * Contributors:
  * 		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
@@ -27,7 +26,7 @@ import java.util.WeakHashMap;
  * This class defines hash maps where both key and value are weak references.
  * It is implemented by delegating to a WeakHashMap and additionally
  * wrapping the value in a WeakReference.
- * 
+ *
  * @author stephan
  * @since 0.7.0
  * @param <K> type of keys: a base class
@@ -36,11 +35,11 @@ import java.util.WeakHashMap;
 public class DoublyWeakHashMap<K,V> implements Map<K,V> {
 
 	private WeakHashMap<K, WeakReference<V>> map;
-	
+
 	public DoublyWeakHashMap() {
 		this.map = new WeakHashMap<K, WeakReference<V>>();
 	}
-	
+
 	public int size() {
 		return this.map.size();
 	}

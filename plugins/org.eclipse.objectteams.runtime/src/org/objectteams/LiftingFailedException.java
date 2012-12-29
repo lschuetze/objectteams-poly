@@ -7,9 +7,8 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: LiftingFailedException.java 23408 2010-02-03 18:07:35Z stephan $
  *
- * Please visit http://www.objectteams.org for updates and contact.
+ * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
  * Contributors:
  * Berlin Institute of Technology - Initial API and implementation
@@ -22,12 +21,12 @@ package org.objectteams;
  */
 public class LiftingFailedException extends Exception {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private Object base;
 	private String roleType;
-	
+
 	/**
 	 * @param base the object that should be lifted
 	 * @param roleType the name of the role type for which
@@ -37,7 +36,8 @@ public class LiftingFailedException extends Exception {
 		this.base = base;
 		this.roleType = roleType;
 	}
-	
+
+	@Override
 	public String getMessage() {
 		return "\nFailed to lift '" + base + "' of " + base.getClass()
 				+ " to type '" + roleType

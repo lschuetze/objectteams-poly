@@ -7,7 +7,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: AspectPermissionManager.java 23468 2010-02-04 22:34:27Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -538,7 +537,7 @@ public class AspectPermissionManager {
 		if (status >= TransformerPlugin.WARN_LEVEL)
 			this.log.log(Constants.TRANSFORMER_PLUGIN_ID, status, "OT/Equinox: "+msg);
 	}
-
+		
 	List<Runnable> obligations = new ArrayList<Runnable>();
 	public void addBaseBundleObligations(final List<Object> teamInstances, final ArrayList<TeamClassRecord> teamClasses, final Bundle baseBundle) {
 		schedule(new Runnable() {

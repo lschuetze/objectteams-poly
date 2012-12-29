@@ -8,7 +8,7 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
- * Please visit http://www.objectteams.org for updates and contact.
+ * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
  * Contributors:
  * 		Stephan Herrmann - Initial API and implementation
@@ -17,18 +17,18 @@ package org.objectteams;
 
 /**
  * This exception signals that lifting failed due to unresolved
- * binding ambiguity. This variant is used when static analysis 
+ * binding ambiguity. This variant is used when static analysis
  * could not find reason for such failure just in case the class
  * files have changed since.
  */
 public class SoftLiftingFailedException extends RuntimeException {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private Object base;
 	private String roleType;
-	
+
 	/**
 	 * @param base the object that should be lifted
 	 * @param roleType the name of the role type for which
@@ -38,7 +38,8 @@ public class SoftLiftingFailedException extends RuntimeException {
 		this.base = base;
 		this.roleType = roleType;
 	}
-	
+
+	@Override
 	public String getMessage() {
 		return "\nFailed to lift '" + base + "' of " + base.getClass()
 				+ " to type '" + roleType

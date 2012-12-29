@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: HookConfigurator.java 23461 2010-02-04 22:10:39Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -37,7 +36,6 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
  * to contain the OTDT version number, too (for logging).
  * 
  * @author stephan
- * @version $Id: HookConfigurator.java 23461 2010-02-04 22:10:39Z stephan $
  */
 public class HookConfigurator implements org.eclipse.osgi.baseadaptor.HookConfigurator {
 	

@@ -7,7 +7,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: AspectBindingRequestAnswer.java 23468 2010-02-04 22:34:27Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -22,7 +21,7 @@ import org.eclipse.objectteams.otequinox.hook.AspectPermission;
  * Answer for an aspect binding request. See extension point org.eclipse.objectteams.otequinox.aspectBindingNegotiators.
  * 
  * @author stephan
- * @see 1.2.6
+ * @since 1.2.6
  */
 public class AspectBindingRequestAnswer 
 {

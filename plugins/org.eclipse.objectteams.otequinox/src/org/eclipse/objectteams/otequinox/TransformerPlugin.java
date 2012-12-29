@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TransformerPlugin.java 23468 2010-02-04 22:34:27Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -63,7 +62,6 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * i.e., if this class is not found, no workspace location will be used.
  * 
  * @author stephan
- * @version $Id: TransformerPlugin.java 23468 2010-02-04 22:34:27Z stephan $
  */
 @SuppressWarnings("restriction") // accessing InternalPlatform
 public class TransformerPlugin implements BundleActivator, IOTEquinoxService
@@ -72,7 +70,7 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 	static {
 		KNOWN_OTDT_ASPECTS.add("org.eclipse.objectteams.otdt.jdt.ui");
 		KNOWN_OTDT_ASPECTS.add("org.eclipse.objectteams.otdt.compiler.adaptor");
-		KNOWN_OTDT_ASPECTS.add("org.eclipse.objectteams.otdt.refactoring.adaptor");
+		KNOWN_OTDT_ASPECTS.add("org.eclipse.objectteams.otdt.refactoring");
 		KNOWN_OTDT_ASPECTS.add("org.eclipse.objectteams.otdt.pde.ui");
 		KNOWN_OTDT_ASPECTS.add("org.eclipse.objectteams.otdt.samples");
 	}
@@ -151,7 +149,7 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 	public static TransformerPlugin getDefault() {
 		return instance;
 	}
-	
+
 	/** public API: Do we know about any team that has not yet been initiaized as requested? */
 	public static boolean isWaitingForTeams() {
 		synchronized (instance.masterTeamLoaders) {
@@ -617,6 +615,10 @@ public class TransformerPlugin implements BundleActivator, IOTEquinoxService
 
 	public IByteCodeAnalyzer getByteCodeAnalyzer() {
 		return new ASMByteCodeAnalyzer();
+	}
+	
+	public static boolean useDynamicWeaving() {
+		return false;
 	}
 }
 
