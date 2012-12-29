@@ -310,6 +310,8 @@ public static void sortMethods(MethodBinding[] sortedMethods, int left, int righ
 	// some subclasses share an existing model
 	protected ReferenceBinding(TypeModel model) {
 		this.model = model;
+		if (model != null && model.getBinding() == null)
+			model.setBinding(this);
 	}
 // SH}
 

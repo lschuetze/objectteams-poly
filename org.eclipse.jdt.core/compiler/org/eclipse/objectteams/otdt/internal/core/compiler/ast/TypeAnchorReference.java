@@ -48,11 +48,16 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.UnresolvedReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.VariableBinding;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
+import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.TThisBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
@@ -291,17 +296,30 @@ public class TypeAnchorReference extends TypeReference {
 					haveReportedProblem = currentAnchor == null;
 				}
 				if (currentAnchor != null) {
-					
-					// find more fields:
-					for (int i = j; i < tokens.length; i++) {
-						currentPos = qualifiedAnchor.sourcePositions[i];
-						currentToken = tokens[i];
-						FieldBinding nextField = currentAnchor.getFieldOfType(currentToken, /*static*/false, true);
-						if (nextField == null || !nextField.hasValidReferenceType()) {
+					if (!currentAnchor.hasValidReferenceType()) {
+						if (j < tokens.length)	  // would need to process more tokens?
 							currentAnchor = null; // replace with problem binding below
-							break;
+					} else {
+						// find more fields:
+						for (int i = j; i < tokens.length; i++) {
+							TypeBinding fieldType = currentAnchor.getResolvedType().leafComponentType();
+							if (fieldType instanceof SourceTypeBinding) {
+								SourceTypeBinding stb = (SourceTypeBinding)fieldType;
+								if ((stb.scope != null)
+									&& (stb.scope.compilationUnitScope() != scope.compilationUnitScope()) 
+									&& (stb.tagBits & (TagBits.BeginHierarchyCheck|TagBits.EndHierarchyCheck)) == (TagBits.BeginHierarchyCheck|TagBits.EndHierarchyCheck)
+									&& StateHelper.isReadyToProcess(stb, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS))
+									Dependencies.ensureBindingState(stb, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS);
+							}
+							currentPos = qualifiedAnchor.sourcePositions[i];
+							currentToken = tokens[i];
+							FieldBinding nextField = currentAnchor.getFieldOfType(currentToken, /*static*/false, true);
+							if (nextField == null || !nextField.hasValidReferenceType()) {
+								currentAnchor = null; // replace with problem binding below
+								break;
+							}
+							currentAnchor = nextField.setPathPrefix(currentAnchor);
 						}
-						currentAnchor = nextField.setPathPrefix(currentAnchor);
 					}
 				}
 			}
