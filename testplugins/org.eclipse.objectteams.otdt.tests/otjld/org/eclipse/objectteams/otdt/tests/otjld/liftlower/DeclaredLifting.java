@@ -1274,4 +1274,35 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     		},
     		"OK0");
     }
+    
+    public void test6113_declaredLiftingOfExternalizedRole1() {
+    	runConformTest(new String[] {
+    		"Team6113dloer1_2.java",
+    			"public team class Team6113dloer1_2 {\n" +
+    			"final static Team6113dloer1_1 other = new Team6113dloer1_1();\n" +
+    			"    protected class R playedBy R<@other> {\n" +
+    			"        void test() -> void test();\n" +
+    			"    }\n" +
+    			"    void test(R<@other> as R r) {\n" +
+    			"        r.test();\n" +
+    			"    }\n" +
+    			"    public static void main(String[] args) {\n" +
+    			"        other.val = \"OK\";\n" +
+    			"        new Team6113dloer1_2().test(other.getR());\n" +
+    			"    }\n" +
+    			"}\n",
+    		"Team6113dloer1_1.java",
+    			"public team class Team6113dloer1_1 {\n" +
+    			"public String val;\n" +
+    			"public class R {\n" +
+    			"    public void test() {\n" +
+    			"        System.out.print(val);\n" +
+    			"    }\n" +
+    			"}\n" +
+    			"public R getR() { return new R(); }\n" +
+    			"}\n"
+    	},
+    	"OK");
+    }
+
 }
