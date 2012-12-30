@@ -659,7 +659,8 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		StringBuffer buffer = new StringBuffer();
 		buffer.append('(');
 		// manual retrenching:
-		int offset = method.isCallin() ? MethodSignatureEnhancer.ENHANCING_ARG_LEN : 0;
+		boolean shouldRetrench = !CallinImplementorDyn.DYNAMIC_WEAVING && method.isCallin();
+		int offset = shouldRetrench ? MethodSignatureEnhancer.ENHANCING_ARG_LEN : 0;
 		int paramLen = method.parameters.length;	
 		for (int i = offset; i < paramLen; i++) {
 			// 'weaken' to that erasure that was used in the tsuper version:
@@ -667,7 +668,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 			buffer.append(targetParameter.signature());
 		}
 		buffer.append(')');
-		TypeBinding sourceReturnType = method.isCallin()
+		TypeBinding sourceReturnType = shouldRetrench
 				? MethodModel.getReturnType(method)
 				: method.returnType;
 		// 'weaken' to that erasure that was used in the tsuper version:
