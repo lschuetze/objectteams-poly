@@ -658,7 +658,13 @@ public class MethodSpec extends ASTNode implements InvocationSite
 
 		StringBuffer buffer = new StringBuffer();
 		buffer.append('(');
-		// manual retrenching:
+		// synthetic args for static role method?
+		MethodBinding orig = method.copyInheritanceSrc != null ? method.copyInheritanceSrc : method; // normalize to copyInhSrc so reading a callin-attr. from bytes can more easily find the method
+		if (CallinImplementorDyn.DYNAMIC_WEAVING && orig.declaringClass.isRole() && orig.isStatic()) {
+			buffer.append('I');
+			buffer.append(String.valueOf(orig.declaringClass.enclosingType().signature()));
+		}
+		// manual retrenching?
 		boolean shouldRetrench = !CallinImplementorDyn.DYNAMIC_WEAVING && method.isCallin();
 		int offset = shouldRetrench ? MethodSignatureEnhancer.ENHANCING_ARG_LEN : 0;
 		int paramLen = method.parameters.length;	

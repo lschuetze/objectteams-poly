@@ -452,13 +452,16 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							receiver = gen.singleNameReference(callinDecl.getRoleMethod().declaringClass.sourceName());
 						}
 						
+						int baseArgOffset = 0;
+						if (baseSpec.isCallin()) baseArgOffset+=MethodSignatureEnhancer.ENHANCING_ARG_LEN;
+						if (baseSpec.isStatic() && baseSpec.getDeclaringClass().isRole()) baseArgOffset+=2;
 						// unpack arguments to be used by parameter mappings and base predicate:
 						// ArgTypeN argn = args[n]
 						if (callinDecl.mappings != null || (hasBasePredicate && baseSpec.arguments != null)) {
 							TypeBinding[] baseParams = baseSpec.resolvedParameters();
 							for (int i=0; i<baseSpec.arguments.length; i++) {
 								Argument baseArg = baseSpec.arguments[i];
-								Expression rawArg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i);
+								Expression rawArg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i+baseArgOffset);
 								Expression init = rawArg;
 								if (!baseParams[i].isTypeVariable())
 									init = gen.createCastOrUnboxing(rawArg, baseParams[i], callinDecl.scope);
@@ -505,7 +508,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 								}
 							}
 							if (callinDecl.mappings == null) {
-								arg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i);					//    prepare: somePreparation(arguments[i])
+								arg = gen.arrayReference(gen.singleNameReference(ARGUMENTS), i+baseArgOffset);					//    prepare: somePreparation(arguments[i])
 								TypeBinding baseArgType = baseSpec.resolvedParameters()[i];
 								if (roleParam.isBaseType()) {
 									// this includes intermediate cast to boxed type:
@@ -808,6 +811,12 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			if (mapping.positions != null) {
 				int[] poss = mapping.positions;
 				nLabels = caseBlockStats.size();
+				int argOffset = 0; // some methods have their real arguments at an offset
+				MethodSpec baseSpec = mapping.baseMethodSpecs[0]; // TODO(SH): check all base methods??
+				if (baseSpec.isCallin())
+					argOffset += 6;
+				if (baseSpec.isStatic() && baseSpec.getDeclaringClass().isRole())
+					argOffset += 2;
 				for (int i=0; i<poss.length; i++)
 					// arguments[basepos] = baseCallArguments[i]
 					if (poss[i] > 0) {
@@ -823,7 +832,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							&& ((ReferenceBinding)roleSideParameter).baseclass().isCompatibleWith(baseSideParameter))
 							roleSideArgument = new PotentialLowerExpression(roleSideArgument, baseSideParameter, gen.thisReference());
 						repackingStats.add(gen.assignment(gen.arrayReference(gen.singleNameReference(ARGUMENTS), 	//   arguments[p] = baseCallArguments[i];
-								                                             poss[i]-1), // 0 represents result
+								                                             poss[i]-1+argOffset), // 0 represents result
 														  roleSideArgument));
 					}
 			} else if (nRoleArgs > 0) {
