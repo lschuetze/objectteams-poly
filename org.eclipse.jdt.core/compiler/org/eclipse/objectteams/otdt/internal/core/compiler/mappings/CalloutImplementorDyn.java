@@ -64,7 +64,7 @@ public class CalloutImplementorDyn {
 		if (baseSpec.resolvedType() == TypeBinding.VOID)
 			return messageSend;
 		else
-			return gen.createCastOrUnboxing(messageSend, baseSpec.resolvedType());
+			return gen.createCastOrUnboxing(messageSend, baseSpec.resolvedType(), true/*baseAccess*/);
 	}
 
 	private static char[] ensureAccessor(Scope scope, ReferenceBinding baseType, boolean isStatic) {

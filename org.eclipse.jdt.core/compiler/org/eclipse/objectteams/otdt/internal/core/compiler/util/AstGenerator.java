@@ -1251,9 +1251,11 @@ public class AstGenerator extends AstFactory {
 					selector,
 					null);
 	}
-	public Expression createCastOrUnboxing(Expression expression, TypeBinding expectedType) {
+	public Expression createCastOrUnboxing(Expression expression, TypeBinding expectedType, boolean baseAccess) {
 		if (expectedType.isBaseType())
 			return createUnboxing(expression, (BaseTypeBinding)expectedType);
+		else if (baseAccess)
+			return castExpression(expression, baseclassReference(expectedType), CastExpression.RAW);
 		else
 			return castExpression(expression, typeReference(expectedType), CastExpression.RAW);
 	}

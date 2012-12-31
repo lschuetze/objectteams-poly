@@ -423,7 +423,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				        
 						if (mayUseResultArgument)
 							blockStatements.add(gen.localVariable(RESULT, baseReturn,								//   BaseReturnType result = (BaseReturnType)_OT$result; 
-																  gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn)));
+												  gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn, true/*baseAccess*/)));
 						Expression receiver;
 						char[] roleVar = null;
 						if (!isStaticRoleMethod) {
