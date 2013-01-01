@@ -59,6 +59,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.OTDynCallinB
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lifting;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lifting.Lowering;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -69,6 +70,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.ReplaceResultReferenceVisitor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
 
 /**
  * This class translates callin binding to the dynamic weaving strategy.
@@ -520,6 +522,9 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 															 CastExpression.RAW);
 								} else {
 									// Object -> MyBaseClass
+									ReferenceBinding baseclass = roleType.baseclass();
+									if (baseclass instanceof DependentTypeBinding && baseArgType instanceof ReferenceBinding)
+										baseArgType = RoleTypeCreator.maybeInstantiateFromPlayedBy(callinDecl.scope, (ReferenceBinding)baseArgType);
 									arg = gen.castExpression(arg,
 															 gen.alienScopeTypeReference(
 																	gen.typeReference(baseArgType),
