@@ -202,10 +202,11 @@ public class PotentialLiftExpression extends PotentialTranslationExpression {
 	private MessageSend genLiftCall(BlockScope scope, TypeBinding providedType) {
         MessageSend liftCall = Lifting.liftCall(scope, this.teamExpr, this.expression, providedType, this.expectedType, this.requireReverseOperation);
         liftCall.actualReceiverType = this.teamExpr.resolveType(scope);
-      	liftCall.binding = ((ReferenceBinding)this.teamExpr.resolvedType).getMethod(scope, liftCall.selector);
+        if (this.teamExpr.resolvedType instanceof ReferenceBinding) // i.e. not-null
+        	liftCall.binding = ((ReferenceBinding)this.teamExpr.resolvedType).getMethod(scope, liftCall.selector);
         if (liftCall.binding == null) // can't process (analyze,generate) if lift method is missing
         {
-        	if (TeamModel.hasRoFiCache((ReferenceBinding)liftCall.actualReceiverType))
+        	if (liftCall.actualReceiverType != null && TeamModel.hasRoFiCache((ReferenceBinding)liftCall.actualReceiverType))
         		scope.problemReporter().unresolvedLifting(this, providedType, this.expectedType);
         	else
         		scope.problemReporter().referenceContext.tagAsHavingErrors();

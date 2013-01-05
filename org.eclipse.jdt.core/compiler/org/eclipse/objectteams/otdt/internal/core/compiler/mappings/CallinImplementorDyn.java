@@ -532,9 +532,11 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 																	gen.typeReference(baseArgType),
 																	callinDecl.scope),
 															 CastExpression.DO_WRAP);
-									// lift?(MyBaseClass) 
-									arg = gen.potentialLift(gen.thisReference(), arg, roleParam, isReplace/*reversible*/);
-									canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, (ReferenceBinding)roleParam.leafComponentType());
+									if (!roleParam.leafComponentType().isBaseType()) {
+										// lift?(MyBaseClass) 
+										arg = gen.potentialLift(gen.thisReference(), arg, roleParam, isReplace/*reversible*/);
+										canLiftingFail |= checkLiftingProblem(teamDecl, callinDecl, (ReferenceBinding)roleParam.leafComponentType());
+									}
 								}
 							} else {
 								arg = getArgument(callinDecl, 														//    prepare:  <mappedArg<n>>
