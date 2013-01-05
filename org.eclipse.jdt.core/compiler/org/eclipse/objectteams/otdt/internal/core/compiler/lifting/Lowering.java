@@ -74,12 +74,23 @@ public class Lowering implements IOTConstants {
 	 * @return translation expression
 	 */
 	public Expression lowerExpression(
-              BlockScope  scope,
+              final BlockScope  scope,
               final Expression  expression,
+		      TypeBinding        unloweredType,
+			  TypeBinding        requiredType,
+			  final Expression  teamExpression,
+			  boolean           needNullCheck)
+	{
+		return lowerExpression(scope, expression, unloweredType, requiredType, teamExpression, needNullCheck, false);
+	}
+	public Expression lowerExpression(
+            final BlockScope  scope,
+            final Expression  expression,
 		      TypeBinding unloweredType,
 			  TypeBinding requiredType,
-			  Expression  teamExpression,
-			  boolean     needNullCheck)
+			  final Expression  teamExpression,
+			  boolean     needNullCheck,
+			  boolean 	   deferredResolve)
 	{
         // Note, this method is responsible for 'resolving' all AST nodes it generates!
 
@@ -116,7 +127,8 @@ public class Lowering implements IOTConstants {
 								scope,
 								unloweredExpression,
 								unloweredType,
-								requiredType);
+								requiredType,
+								deferredResolve);
 		}
 		else
 		{

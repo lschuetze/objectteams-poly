@@ -44,15 +44,17 @@ public class ArrayLowering extends ArrayTranslations {
 			BlockScope  scope,
 			Expression  expression,
 			TypeBinding providedType,
-			TypeBinding requiredType)
+			TypeBinding requiredType,
+			boolean    deferredResolve)
 	{
 		// TODO (SH): check if we need to use the team anchor of a RoleTypeBinding
 		//            as receiver for the translation call.
 		ReferenceBinding teamBinding = ((ReferenceBinding)providedType.leafComponentType()).enclosingType();
 		if (this._teamExpr == null)
 			this._teamExpr = new AstGenerator(expression).qualifiedThisReference(teamBinding);
-		this._teamExpr.resolveType(scope);
-		return translateArray(scope, expression, providedType, requiredType, /*isLifting*/false);
+		if (!deferredResolve)
+			this._teamExpr.resolveType(scope);
+		return translateArray(scope, expression, providedType, requiredType, /*isLifting*/false, deferredResolve);
 	}
 
 	/* implement hook. */

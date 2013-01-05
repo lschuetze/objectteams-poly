@@ -38,8 +38,10 @@ import org.eclipse.jdt.internal.compiler.ast.TryStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.BaseTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
@@ -109,7 +111,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 	static final char[] ARGUMENTS 		= "arguments".toCharArray(); //$NON-NLS-1$
 	static final char[] _OT_RESULT		= "_OT$result".toCharArray(); //$NON-NLS-1$
 	static final char[] RESULT		 	= "result".toCharArray(); //$NON-NLS-1$
-	static final String LOCAL_ROLE 		= "local$"; //$NON-NLS-1$
+	static final String LOCAL_ROLE 		= "local$role$"; //$NON-NLS-1$
 	
 	// for call next:
 	private static final char[] BASE_CALL_ARGS  = "baseCallArguments".toCharArray();   //$NON-NLS-1$
@@ -596,10 +598,15 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						Statement[] messageSendStatements;
 						if (isReplace) {
 							Expression result = roleMethodCall;
-							if (baseSpec.returnNeedsTranslation) {// FIXME(SH): per base method!
+							if (baseSpec.returnNeedsTranslation) {
 								// lowering:
 								TypeBinding[]/*role,base*/ returnTypes = getReturnTypes(callinDecl, 0);
-								result = new Lowering().lowerExpression(methodDecl.scope, result, returnTypes[0], returnTypes[1], gen.thisReference(), true);
+								//   who is responsible for lowering: the team or the current role?
+								Expression lowerReceiver = (isRoleOfCurrentRole(roleType, returnTypes[0]))
+										? gen.singleNameReference(roleVar)
+										: gen.thisReference();
+								result = new Lowering().lowerExpression(methodDecl.scope, result, returnTypes[0], returnTypes[1],
+										lowerReceiver, true/*needNullCheck*/, true/*delayedResolve*/);
 							}
 							// possibly convert using result mapping
 							callinDecl.checkResultMapping();
@@ -862,8 +869,13 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 			if (mapping.baseMethodSpecs[0].returnNeedsTranslation) { // FIXME(SH): per basemethod!
 				// lifting:
 				TypeBinding[]/*role,base*/ returnTypes = getReturnTypes(mapping, 0);
+				//   who is responsible for lifting: the team or the current role?
+				Expression liftReceiver = (isRoleOfCurrentRole(mapping.scope.enclosingReceiverType(), returnTypes[0]))
+					? Lifting.liftCall(mapping.scope, gen.thisReference(), gen.singleNameReference(IOTConstants.BASE), returnTypes[1], returnTypes[0], false)
+								// TODO: might want to extend the signature of callNext to pass the current role to avoid this lifting?
+					: gen.thisReference();
 				result = Lifting.liftCall(mapping.scope,
-										  gen.thisReference(),
+										  liftReceiver,
 										  gen.castExpression(result,
 												  			 gen.typeReference(returnTypes[1]),
 												  			 CastExpression.RAW),
@@ -974,4 +986,40 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 		}
 		return false;
 	}
+
+	/**
+	 * the expression local$role$n.roleMethod(..) should not wrap its
+	 * return type anchored to the generated team anchor _OT$role,
+	 * because the method should actually be seen as being within
+	 * the scope of this role already, although, physically it is part of
+	 * the team.
+	 *
+	 * @param scope use the scope to determine if we are actually within
+	 *        a callin wrapper.
+	 * @param receiver if this is _OT$role this is the role method call.
+	 * @return true if the return type should not be wrapped further.
+	 */
+	public static boolean avoidWrapRoleType(BlockScope scope, Expression receiver) {
+		MethodScope methodScope = scope.methodScope();
+		if (methodScope != null) { // CLOVER: never false in jacks suite
+			AbstractMethodDeclaration refMethod = methodScope.referenceMethod();
+			if (   refMethod != null
+				&& refMethod.isMappingWrapper._callin())
+			{
+				if (   receiver instanceof SingleNameReference
+					&& CharOperation.prefixEquals(LOCAL_ROLE.toCharArray(), ((SingleNameReference)receiver).token))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	boolean isRoleOfCurrentRole(ReferenceBinding currentRole, TypeBinding type) {
+		TypeBinding leafType = type.leafComponentType();
+		if (leafType.isRole()) {
+			return currentRole.erasure().isCompatibleWith(leafType.enclosingType().erasure());
+		}
+		return false;
+	}
+
 }

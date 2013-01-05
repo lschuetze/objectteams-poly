@@ -389,9 +389,15 @@ public class RoleTypeCreator implements TagBits {
 		            else
 		            	returnType = roleReturn;
 		        }
-		        if (CallinImplementor.avoidWrapRoleType(scope, send.receiver))
-	    			// don't use synthetic _OT$role as additional anchor
-	    			return returnType;
+		        if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+			        if (CallinImplementorDyn.avoidWrapRoleType(scope, send.receiver))
+		    			// don't use synthetic local$role$n as additional anchor
+		    			return returnType;		        	
+		        } else {
+		        	if (CallinImplementor.avoidWrapRoleType(scope, send.receiver))
+		        		// don't use synthetic _OT$role as additional anchor
+		        		return returnType;
+		        }
 		    }
         } else {
         	if (send.arguments != null && send.arguments.length > 0)

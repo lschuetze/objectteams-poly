@@ -40,7 +40,7 @@ public class ArrayLifting extends ArrayTranslations {
 			TypeBinding requiredType)
 	{
 		this._teamExpr = teamExpr;
-		return (MessageSend)translateArray(scope, expression, providedType, requiredType, /*isLifting*/true);
+		return (MessageSend)translateArray(scope, expression, providedType, requiredType, /*isLifting*/true, /*deferredResolve*/false);
 	}
 
 	/* implement hook. */

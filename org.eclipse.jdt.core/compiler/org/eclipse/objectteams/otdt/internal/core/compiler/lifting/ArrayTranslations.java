@@ -36,6 +36,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator.IRunInScope;
 
 /**
  * This class handles the common part of array lifting and lowering.
@@ -86,20 +87,34 @@ public abstract class ArrayTranslations {
 	 * @param providedType given type of expression
 	 * @param requiredType this should be produced by translation
 	 * @param isLifting is a lifting translation required (else == lowering)
+	 * @param deferredResolve if true we set up a special message send for custom resolving
 	 * @return a message send to the appropriate translation method.
 	 */
-	Expression translateArray(BlockScope  scope, Expression  expression, TypeBinding providedType, TypeBinding requiredType, boolean     isLifting) {
+	Expression translateArray(BlockScope scope, Expression expression,
+							TypeBinding providedType, TypeBinding requiredType,
+							boolean isLifting, boolean deferredResolve)
+	{
 		this._scope      = scope;
 		this._expression = expression;
 
 		MethodBinding methodBinding = ensureTransformMethod(
 										scope, this._teamExpr, providedType, requiredType, isLifting);
 
+        // if expression is resolved but teamExpression is unresolved schedule special resolving:
+        IRunInScope hook = new IRunInScope() { public void run(BlockScope blockScope) { /*nop*/ } };
+        if (deferredResolve && expression.resolvedType != null && this._teamExpr.resolvedType == null) {
+        	hook = new IRunInScope() { public void run(BlockScope blockScope) {
+        		// resolving this expression was deferred:
+        		ArrayTranslations.this._teamExpr.resolve(blockScope);
+        	}};
+        }
+
 		AstGenerator gen = new AstGenerator(expression.sourceStart, expression.sourceEnd);
-		MessageSend send = gen.messageSend(
+		MessageSend send = gen.messageSendWithResolveHook(
 				this._teamExpr,
 				methodBinding.selector,
-				new Expression[] {expression});
+				new Expression[] {expression},
+				hook);
 
 		// manual resolving since expression is already resolved:
         send.binding = methodBinding;
