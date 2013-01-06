@@ -378,6 +378,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				{
 					if (callinDecl.ignoreFurtherInvestigation || RoleModel.isRoleWithBaseProblem(callinDecl.scope.referenceType()))
 						continue;
+					if (!callinDecl.hasParsedParamMappings) // during reconcile we may not be interested in this level of detail (e.g., of a role file)
+						continue;
 
 					gen.retargetFrom(callinDecl);
 
@@ -661,7 +663,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 						blockStatements.add(protectRoleMethodCall(messageSendStatements, roleMethodBinding, resetFlag, gen));
 						statements.add(gen.block(blockStatements.toArray(new Statement[blockStatements.size()])));
 						// collectively report the problem(s)
-						if (canLiftingFail)
+						if (canLiftingFail && callinDecl.rolesWithLiftingProblem != null)
 							for (Map.Entry<ReferenceBinding, Integer> entry : callinDecl.rolesWithLiftingProblem.entrySet())
 								callinDecl.scope.problemReporter().callinDespiteLiftingProblem(entry.getKey(), entry.getValue(), callinDecl);
 					}
