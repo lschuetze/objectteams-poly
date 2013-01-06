@@ -405,7 +405,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 
 						// do we need to expose _OT$result as result?
 						if (callinDecl.callinModifier == TerminalTokens.TokenNameafter
-								&& callinDecl.mappings != null
+								&& (callinDecl.mappings != null || callinDecl.predicate != null) 
 								&& baseReturn != TypeBinding.VOID)
 							blockStatements.add(gen.localVariable(RESULT, baseReturn,								//   BaseReturnType result = (BaseReturnType)_OT$result; 
 												  gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn, true/*baseAccess*/)));
@@ -578,7 +578,7 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 							continue;
 
 						// -- role side predicate:
-						Expression[] predicateArgs = maybeAddResultReference(callinDecl, callArgs, _OT_RESULT, gen);
+						Expression[] predicateArgs = maybeAddResultReference(callinDecl, callArgs, RESULT, gen);
 				        Statement rolePredicateCheck = predGen.createPredicateCheck(								//    if (!when(callArgs)) throw new LiftingVetoException();
 				        		callinDecl,
 				        		callinDecl.scope.referenceType(),
