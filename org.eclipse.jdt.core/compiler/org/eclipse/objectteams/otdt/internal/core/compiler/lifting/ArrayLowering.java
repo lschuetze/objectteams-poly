@@ -58,7 +58,7 @@ public class ArrayLowering extends ArrayTranslations {
 	}
 
 	/* implement hook. */
-	Expression translation(Expression rhs, TypeBinding providedType, TypeBinding requiredType) {
+	Expression translation(Expression rhs, TypeBinding providedType, TypeBinding requiredType, AstGenerator gen) {
 		return new Lowering().lowerExpression(this._scope, rhs, providedType, requiredType, this._teamExpr, false);
 	}
 }

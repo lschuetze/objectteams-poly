@@ -872,8 +872,12 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				// lifting:
 				TypeBinding[]/*role,base*/ returnTypes = getReturnTypes(mapping, 0);
 				//   who is responsible for lifting: the team or the current role?
-				Expression liftReceiver = (isRoleOfCurrentRole(mapping.scope.enclosingReceiverType(), returnTypes[0]))
-					? Lifting.liftCall(mapping.scope, gen.thisReference(), gen.singleNameReference(IOTConstants.BASE), returnTypes[1], returnTypes[0], false)
+				ReferenceBinding currentRole = mapping.scope.enclosingReceiverType();
+				Expression liftReceiver = (isRoleOfCurrentRole(currentRole, returnTypes[0]))
+					? Lifting.liftCall(mapping.scope,
+										gen.thisReference(),
+										gen.castExpression(gen.singleNameReference(IOTConstants.BASE), gen.typeReference(currentRole.baseclass()), CastExpression.RAW),
+										currentRole.baseclass(), currentRole, false)
 								// TODO: might want to extend the signature of callNext to pass the current role to avoid this lifting?
 					: gen.thisReference();
 				result = Lifting.liftCall(mapping.scope,

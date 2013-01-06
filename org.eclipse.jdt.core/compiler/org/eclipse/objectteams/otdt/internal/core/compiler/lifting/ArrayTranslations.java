@@ -101,8 +101,8 @@ public abstract class ArrayTranslations {
 										scope, this._teamExpr, providedType, requiredType, isLifting);
 
         // if expression is resolved but teamExpression is unresolved schedule special resolving:
-        IRunInScope hook = new IRunInScope() { public void run(BlockScope blockScope) { /*nop*/ } };
-        if (deferredResolve && expression.resolvedType != null && this._teamExpr.resolvedType == null) {
+        IRunInScope hook = null;
+        if (!isLifting && deferredResolve && expression.resolvedType != null && this._teamExpr.resolvedType == null) {
         	hook = new IRunInScope() { public void run(BlockScope blockScope) {
         		// resolving this expression was deferred:
         		ArrayTranslations.this._teamExpr.resolve(blockScope);
@@ -110,11 +110,16 @@ public abstract class ArrayTranslations {
         }
 
 		AstGenerator gen = new AstGenerator(expression.sourceStart, expression.sourceEnd);
-		MessageSend send = gen.messageSendWithResolveHook(
+		MessageSend send = (hook != null)
+			? gen.messageSendWithResolveHook(
 				this._teamExpr,
 				methodBinding.selector,
 				new Expression[] {expression},
-				hook);
+				hook)
+			: gen.messageSend(
+				this._teamExpr,
+				methodBinding.selector,
+				new Expression[] {expression});
 
 		// manual resolving since expression is already resolved:
         send.binding = methodBinding;
@@ -371,7 +376,7 @@ public abstract class ArrayTranslations {
 		{
 			return new Assignment(
 					lhsReference,
-					translation(rhsReference, this._providedType.leafComponentType(), this._requiredType.leafComponentType()),
+					translation(rhsReference, this._providedType.leafComponentType(), this._requiredType.leafComponentType(), gen),
 					0);
 		}
 		else
@@ -399,9 +404,10 @@ public abstract class ArrayTranslations {
 	 * @param rhs
 	 * @param providedType
 	 * @param requiredType
+	 * @param gen generator for creating new AST nodes
 	 * @return expression translating a single object
 	 */
-	abstract Expression translation(Expression rhs, TypeBinding providedType, TypeBinding requiredType);
+	abstract Expression translation(Expression rhs, TypeBinding providedType, TypeBinding requiredType, AstGenerator gen);
 	private MethodDeclaration generateTransformArrayMethod(
 				TypeDeclaration teamType,
 				char[] transformMethodName,
