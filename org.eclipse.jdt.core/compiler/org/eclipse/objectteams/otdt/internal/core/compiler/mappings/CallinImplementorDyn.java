@@ -391,10 +391,6 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 															callinDecl.isReplaceCallin());
 	
 						TypeBinding baseReturn = baseSpec.resolvedType();
-						boolean mayUseResultArgument =    callinDecl.callinModifier == TerminalTokens.TokenNameafter
-													   && callinDecl.mappings != null
-													   && baseReturn != TypeBinding.VOID;
-						
 						boolean isStaticRoleMethod = callinDecl.getRoleMethod().isStatic();
 						ReferenceBinding roleType = callinDecl.scope.enclosingReceiverType();
 						MethodBinding roleMethodBinding = callinDecl.getRoleMethod();
@@ -404,8 +400,15 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 												&& roleType.isCompatibleWith(roleMethodBinding.declaringClass);
 						
 						List<Statement> blockStatements = new ArrayList<Statement>();
-						
-				        // -------------- base predicate check -------
+
+						// do we need to expose _OT$result as result?
+						if (callinDecl.callinModifier == TerminalTokens.TokenNameafter
+								&& callinDecl.mappings != null
+								&& baseReturn != TypeBinding.VOID)
+							blockStatements.add(gen.localVariable(RESULT, baseReturn,								//   BaseReturnType result = (BaseReturnType)_OT$result; 
+												  gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn, true/*baseAccess*/)));
+
+						// -------------- base predicate check -------
 						boolean hasBasePredicate = false;
 				        for (MethodSpec baseMethodSpec : callinDecl.baseMethodSpecs) {
 				        	char[] resultName = null;
@@ -424,11 +427,8 @@ public class CallinImplementorDyn extends MethodMappingImplementor {
 				        }
 				        Expression resetFlag = 
 				        	CallinImplementor.setExecutingCallin(roleType.roleModel, blockStatements);				//   boolean _OT$oldIsExecutingCallin = _OT$setExecutingCallin(true);
-				        
-						if (mayUseResultArgument)
-							blockStatements.add(gen.localVariable(RESULT, baseReturn,								//   BaseReturnType result = (BaseReturnType)_OT$result; 
-												  gen.createCastOrUnboxing(gen.singleNameReference(_OT_RESULT), baseReturn, true/*baseAccess*/)));
-						Expression receiver;
+
+				        Expression receiver;
 						char[] roleVar = null;
 						if (!isStaticRoleMethod) {
 							if (needLiftedRoleVar) {
