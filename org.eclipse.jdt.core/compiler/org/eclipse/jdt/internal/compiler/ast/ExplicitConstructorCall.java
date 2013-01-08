@@ -597,17 +597,9 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 					// all constructors with role parameters need to be copied,
 					// because subteams with declared lifting require control over all code
 					// in the super-call chain.
-					if (RoleTypeBinding.hasNonExternalizedRoleParameter(this.binding))
-					{
-						boolean needsLifting = ((ConstructorDeclaration)methodDeclaration).needsLifting;
-						tsuperMethod = DeclaredLifting.copyTeamConstructorForDeclaredLifting(
-														scope, this.binding, argumentTypes, needsLifting);
-					} else {
-						tsuperMethod = DeclaredLifting.maybeCreateTurningCtor(
-								scope.referenceType(),
-								this.binding,
-								new AstGenerator(this.sourceStart, this.sourceEnd));
-					}
+					tsuperMethod = DeclaredLifting.createCopyOrTurningCtor(scope, this.binding, argumentTypes,
+										((ConstructorDeclaration)methodDeclaration).needsLifting,
+										new AstGenerator(this.sourceStart, this.sourceEnd));
 					if (tsuperMethod != null)
 						tsuperArgs = AstEdit.extendTypeArray(
 											argumentTypes,
@@ -719,8 +711,7 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 						// Now create a chaining ctor for this self call:
 						// (only now we have the types of all actual arguments).
 						MethodBinding newBinding;
-						newBinding = DeclaredLifting.copyTeamConstructorForDeclaredLifting(
-													scope, ctor, argumentTypes, ctorDecl.needsLifting);
+						newBinding = DeclaredLifting.createCopyOrTurningCtor(scope, ctor, argumentTypes, ctorDecl.needsLifting, new AstGenerator(this));
 						if (newBinding != null)
 							this.binding = newBinding;
 						break;
@@ -739,8 +730,7 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 							// ie., create a copy of the super ctor with lifting:
 
 							MethodBinding newBinding;
-							newBinding = DeclaredLifting.copyTeamConstructorForDeclaredLifting(
-													scope, ctor, adjustedArgtypes, ctorDecl.needsLifting);
+							newBinding = DeclaredLifting.createCopyOrTurningCtor(scope, ctor, adjustedArgtypes, ctorDecl.needsLifting, new AstGenerator(this));
 							if (newBinding != null) {
 								this.binding = newBinding;
 								TypeBinding markerType = this.binding.parameters[this.binding.parameters.length-1];

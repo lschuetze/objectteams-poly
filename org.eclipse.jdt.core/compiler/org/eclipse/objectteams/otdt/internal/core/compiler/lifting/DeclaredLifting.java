@@ -408,6 +408,27 @@ public class DeclaredLifting implements IOTConstants {
 			return ((MemberTypeBinding)type).enclosingType() == enclosingTeam.erasure();
 		return false;
 	}
+	
+	/**
+	 * A team constructor copied for declared lifting requests access to targetMethod.
+	 * This can happen in two ways:
+	 * - create a new copy of the target constructor
+	 * - create a turning constructor that delegates to the target constructor using a real super call.
+	 * The strategy is chosen by searching the argument types for role types. 
+	 */
+	public static MethodBinding createCopyOrTurningCtor(Scope         scope, 
+														  MethodBinding targetConstructor,
+														  TypeBinding[] argumentTypes,
+														  boolean      needsLifting,
+														  AstGenerator  gen) 
+	{
+		if (RoleTypeBinding.hasNonExternalizedRoleParameter(targetConstructor))
+			return copyTeamConstructorForDeclaredLifting(
+											scope, targetConstructor, argumentTypes, needsLifting);
+		else
+			return maybeCreateTurningCtor(scope.referenceType(), targetConstructor, gen);
+	}
+
 	/**
 	 * Copy a team constructor such that the copy is suitable for chaining
 	 * previous super calls through a chain of tsuper-calls. This enables
@@ -577,8 +598,7 @@ public class DeclaredLifting implements IOTConstants {
 				if (roleType != null)
 				{
 					// compatibility only through lifting, need to copy the constructor for this selfcall
-					return copyTeamConstructorForDeclaredLifting(
-							scope, selfcall, mergeSelfcallArgs(providedArgs, parameters), needsLifting);
+					return createCopyOrTurningCtor(scope, selfcall, mergeSelfcallArgs(providedArgs, parameters), needsLifting, gen);
 				}
 			} else if (RoleTypeBinding.isRoleWithoutExplicitAnchor(parameters[i])) {
 				hasProblematicArg = true;

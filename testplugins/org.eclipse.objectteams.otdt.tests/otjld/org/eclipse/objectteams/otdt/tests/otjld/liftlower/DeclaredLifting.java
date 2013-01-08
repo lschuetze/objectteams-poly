@@ -1274,6 +1274,42 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     		},
     		"OK0");
     }
+
+    // Bug 397712 - [compiler] illegal bytecode from chains of team constructors
+    public void test6112_declaredLiftingInConstructor6() {
+    	runConformTest(
+    		new String[] {
+		"Team6112dlic6_2.java",
+				"public team class Team6112dlic6_2 extends Team6112dlic6_1 {\n" + 
+				"    Team6112dlic6_2(T6112dlic6 as R r) { super(r); }\n" +
+				"    @Override\n" +
+				"    protected class R playedBy T6112dlic6 {\n" +
+    			"        test -> OK;\n" +
+				"    }\n" + 
+    			"    public static void main(String[] args) {\n" +
+    			"        new Team6112dlic6_2(new T6112dlic6()).test();\n" +
+    			"    }\n" + 
+				"}\n",
+		"Team6112dlic6_1.java",
+				"public team class Team6112dlic6_1 extends Team6112dlic6_0 {\n" +
+				"    R r;" + 
+				"    protected Team6112dlic6_1(R r) { this.r = r; }\n" +
+				"    public void test() {\n" +
+				"        this.r.test(2);\n" +
+				"    }\n" + 
+				"}\n",
+    	"T6112dlic6.java",
+    			"public class T6112dlic6 {\n" +
+    			"    void OK(int x) { System.out.print(\"OK\"+x); }\n" +
+    			"}\n",
+    	"Team6112dlic6_0.java",
+    			"public abstract team class Team6112dlic6_0 {\n" + 
+    			"    Team6112dlic6_0(){}\n" +
+    			"    protected abstract class R { protected abstract void test(int l); }\n" + 
+    			"}\n",
+    		},
+    		"OK2");
+    }
     
     public void test6113_declaredLiftingOfExternalizedRole1() {
     	runConformTest(new String[] {

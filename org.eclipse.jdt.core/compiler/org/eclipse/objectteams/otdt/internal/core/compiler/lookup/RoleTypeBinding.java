@@ -383,8 +383,9 @@ public class RoleTypeBinding extends DependentTypeBinding
 		ReferenceBinding declaringClass = method.declaringClass;
 		TypeBinding[] parameters = method.parameters;
 		for (int j = 0; j < parameters.length; j++) {
-			if (   isRoleWithoutExplicitAnchor(parameters[j])
-				&& ((ReferenceBinding)parameters[j]).enclosingType() == declaringClass)
+			TypeBinding leafType = parameters[j].leafComponentType();
+			if (   isRoleWithoutExplicitAnchor(leafType)
+				&& ((ReferenceBinding)leafType).enclosingType() == declaringClass)
 				return true;
 		}
 		return false;
