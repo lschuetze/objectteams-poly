@@ -28,7 +28,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test166_typeAnchorIsPath9"};
+//		TESTS_NAMES = new String[] { "test1615_assigningExternalizedCreation3"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -2356,6 +2356,61 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 			    "    \n"
             },
             "1.2.2(c)");
+    }
+
+    // similar to the above, using new syntax, anchor is field of enclosing team
+    // see https://bugs.eclipse.org/397878 - [compiler] Using field of enclosing team as team anchor causes illegal bytecode to be created
+    public void test1615_assigningExternalizedCreation2() {
+        runConformTest(
+            new String[] {
+		"Team1615aec2.java",
+			    "\n" +
+			    "public team class Team1615aec2 {\n" +
+			    "    final Team1615aec2 t;" +
+			    "    Team1615aec2(Team1615aec2 other) { t = other; }\n" +
+			    "    public class R {" +
+			    "        protected void test() {" +
+			    "            t.test(new R<@t>());\n" + // verify error was observed here
+			    "        }\n" +
+			    "        protected void print() { System.out.print(\"OK\"); }\n" + 
+			    "    }\n" +
+			    "    public void test(R r) {" +
+			    "        r.print();\n" +
+			    "    }\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        new Team1615aec2(new Team1615aec2(null)).new R().test();\n" +
+			    "    }\n" +
+			    "}\n"
+            },
+            "OK");
+    }
+
+    // similar to the above, using new syntax, anchor is field of enclosing team
+    // see https://bugs.eclipse.org/397878 - [compiler] Using field of enclosing team as team anchor causes illegal bytecode to be created
+    // variation with public field.
+    public void test1615_assigningExternalizedCreation3() {
+        runConformTest(
+            new String[] {
+		"Team1615aec3.java",
+			    "\n" +
+			    "public team class Team1615aec3 {\n" +
+			    "    public final Team1615aec3 t;" +
+			    "    Team1615aec3(Team1615aec3 other) { t = other; }\n" +
+			    "    public class R {" +
+			    "        protected void test() {" +
+			    "            t.test(new R<@t>());\n" + // verify error was observed here
+			    "        }\n" +
+			    "        protected void print() { System.out.print(\"OK\"); }\n" + 
+			    "    }\n" +
+			    "    public void test(R r) {" +
+			    "        r.print();\n" +
+			    "    }\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        new Team1615aec3(new Team1615aec3(null)).new R().test();\n" +
+			    "    }\n" +
+			    "}\n"
+            },
+            "OK");
     }
 
     // a role is casted to its externalized type

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2009 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -152,7 +152,7 @@ public class TypeParameter extends AbstractVariableDeclaration {
 			if (!ProblemAnchorBinding.checkAnchor(scope, this.type, anchors[0], this.name))
 				return;
 			if (anchors[0] instanceof FieldBinding && anchors[0].isValidBinding())
-				FieldModel.getModel((FieldBinding)anchors[0]).addUsageRank(this.binding.rank);
+				FieldModel.getModel(((FieldBinding)anchors[0]).original()).addUsageRank(this.binding.rank);
 			// FIXME(SH): else store this in the AnchorListAttribute!
 			int boundCnt = 0;
 			if (this.bounds != null)

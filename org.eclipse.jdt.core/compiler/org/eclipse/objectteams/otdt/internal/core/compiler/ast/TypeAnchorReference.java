@@ -1,16 +1,15 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2006, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany, and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TypeAnchorReference.java 23401 2010-02-02 23:56:05Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -89,9 +88,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *  the receiver expression. In that case also resolveType and generateCode are supported.
  *
  * @author stephan
- * @version $Id: TypeAnchorReference.java 23401 2010-02-02 23:56:05Z stephan $
  */
-public class TypeAnchorReference extends TypeReference {
+public class TypeAnchorReference extends TypeReference implements InvocationSite {
 
 	// either NameReference or FieldReference
 	public Reference anchor;
@@ -230,6 +228,7 @@ public class TypeAnchorReference extends TypeReference {
 			currentToken = singleAnchor.token;
 			currentAnchor = findVariable(
 					scope, currentToken, scope.isStatic(), singleAnchor.sourceStart, singleAnchor.sourceEnd);
+			this.anchor.bits |= (this.bits & DepthMASK);
 			// could be ProblemAnchorBinding
 		} else if (reference instanceof FieldReference) {
 			FieldReference fieldRef = (FieldReference)reference;
@@ -411,13 +410,15 @@ public class TypeAnchorReference extends TypeReference {
 
 	private ITeamAnchor findVariable(Scope scope, char[] token, boolean isStaticScope, int start, int end)
 	{
-		ITeamAnchor anchorBinding = null;
-		Scope currentScope = scope;
-		scopes: while (currentScope != null) {
-			switch (currentScope.kind) {
+		if (scope instanceof ClassScope && ((ClassScope)scope).superTypeReference != null) {
+			scope.problemReporter().extendingExternalizedRole(((ClassScope)scope).superTypeReference);
+			return null;
+		}
+		VariableBinding anchorBinding = null;
+		switch (scope.kind) {
 			case Scope.METHOD_SCOPE:
 				// check arguments for possible anchor:
-				AbstractMethodDeclaration method = ((MethodScope)currentScope).referenceMethod();
+				AbstractMethodDeclaration method = ((MethodScope)scope).referenceMethod();
 				if (method != null) {
 					Argument[] arguments = method.arguments;
 					if (arguments != null)
@@ -429,20 +430,13 @@ public class TypeAnchorReference extends TypeReference {
 				//$FALL-THROUGH$
 			case Scope.BLOCK_SCOPE:
 			case Scope.BINDING_SCOPE:
-				anchorBinding = currentScope.findVariable(token);
+				anchorBinding = scope.findVariable(token);
 				break;
-			case Scope.CLASS_SCOPE:
-				ReferenceBinding classType = currentScope.enclosingSourceType();
-				if (classType.isSynthInterface())
-					classType = classType.getRealClass();
-				anchorBinding = TypeAnalyzer.findField(classType, token, isStaticScope, true);
-				isStaticScope = classType.isStatic(); // travelling out of this type
-				if (!classType.isLocalType())
-					break scopes; // don't walk out any further, findField already takes care of direct class-nesting
-			}
-			if (anchorBinding != null)
-				break;
-			currentScope = currentScope.parent;
+		}
+		if (anchorBinding == null) {
+			Binding binding = scope.getBinding(token, Binding.VARIABLE, this, true);
+			if (binding instanceof VariableBinding)
+				anchorBinding = (VariableBinding) binding;
 		}
 		return checkAnchor(scope, this.anchor, token, start, end, anchorBinding);
 	}
@@ -450,10 +444,7 @@ public class TypeAnchorReference extends TypeReference {
 	// post: return is either a valid anchor or null and problem has been reported.
 	private ITeamAnchor checkAnchor(Scope scope, Reference reference, char[] token, int start, int end, ITeamAnchor anchorBinding) {
 		if (anchorBinding == null) {
-			if (scope instanceof ClassScope && ((ClassScope)scope).superTypeReference != null)
-				scope.problemReporter().extendingExternalizedRole(((ClassScope)scope).superTypeReference);
-			else
-				scope.problemReporter().typeAnchorNotFound(token, start, end);
+			scope.problemReporter().typeAnchorNotFound(token, start, end);
 			return null;
 		}
 		if (anchorBinding instanceof ProblemFieldBinding) {
@@ -581,5 +572,34 @@ public class TypeAnchorReference extends TypeReference {
 				}
 			}
 		}		
+	}
+
+	// === implement InvocationSite: ===
+
+	public TypeBinding[] genericTypeArguments() {
+		return Binding.NO_TYPES;
+	}
+
+	public boolean isSuperAccess() {
+		return false;
+	}
+
+	public boolean isTypeAccess() {
+		return false;
+	}
+
+	public void setActualReceiverType(ReferenceBinding receiverType) {
+		// TODO Auto-generated method stub
+	}
+
+	public void setDepth(int depth) {
+		this.bits &= ~DepthMASK; // flush previous depth if any
+		if (depth > 0) {
+			this.bits |= (depth & 0xFF) << DepthSHIFT; // encoded on 8 bits
+		}
+	}
+
+	public void setFieldIndex(int depth) {
+		// ignored
 	}
 }

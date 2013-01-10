@@ -1,10 +1,9 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Reference.java 23404 2010-02-03 14:10:22Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -39,7 +38,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
  * Why:  inferred callout to field must be created with proper type, possibly involving lifting.
  * 
  * @author stephan
- * @version $Id: Reference.java 23404 2010-02-03 14:10:22Z stephan $
  */
 public abstract class Reference extends Expression  {
 //{ObjectTeams: store expected type to support infering callout-to-field
@@ -201,6 +199,7 @@ protected int getDepthForSynthFieldAccess(FieldBinding fieldBinding, SourceTypeB
 		// through copy inheritance this code could be executed within a different package!
 		if (depth == 0)
 			return -1; // neither a team field, nor an access across packages
+		this.bits = (this.bits & ~DepthMASK) | ((depth & 0xFF) << DepthSHIFT);
 	}
 	return depth;
 }
