@@ -159,6 +159,8 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 			return ((SingleNameReference)this.anchor).token;
 		if (this.anchor instanceof QualifiedBaseReference)
 			return IOTConstants.BASE;
+		if (this.anchor instanceof FieldReference)
+			return ((FieldReference)this.anchor).token;
 		char[][] tokens = ((QualifiedNameReference)this.anchor).tokens;
 		return tokens[tokens.length-1];
 	}
