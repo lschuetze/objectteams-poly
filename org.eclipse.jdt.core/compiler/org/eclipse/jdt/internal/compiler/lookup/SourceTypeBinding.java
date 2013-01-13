@@ -52,7 +52,6 @@ import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.compiler.util.SimpleSetOfCharArray;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleFileCache;
@@ -1442,6 +1441,9 @@ public MethodBinding[] getMethods(char[] selector) {
 }
 //{ObjectTeams: ROFI if it is a team, the member might be a role file still to be found:
 public ReferenceBinding getMemberType(char[] name) {
+	if (this.notFoundMemberNames != null && this.notFoundMemberNames.includes(name))
+		return null;
+
 	ReferenceBinding result = super.getMemberType(name);
 	if (result != null) {
 		// is it a member in a different file?
@@ -1455,33 +1457,31 @@ public ReferenceBinding getMemberType(char[] name) {
 		}
 		return result;
 	}
-// FIXME(SH): needed for 1.7.7-otjld-5f, but causes more problems.
-// Note: since State-Management has been restructured, things *might*
-// be different by now.
-	if (    isTeam()
-		&& !StateHelper.hasState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)
-		&& StateHelper.isReadyToProcess(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY))
-	{
-		if (   Dependencies.ensureBindingState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)
-			&& StateHelper.hasState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY))
-		{
-			ReferenceBinding member = getMemberType(name); // try again for copied roles.
-			if (member != null && (member.tagBits & TagBits.HasMissingType) == 0)
-				return member;
+	if (isTeam() && !StateHelper.hasState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)) {
+		if (StateHelper.isReadyToProcess(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)) {
+			if (   Dependencies.ensureBindingState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)
+				&& StateHelper.hasState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY))
+			{
+				ReferenceBinding member = getMemberType(name); // try again for copied roles.
+				if (member != null && (member.tagBits & TagBits.HasMissingType) == 0)
+					return member;
+			}
 		}
+		ReferenceBinding member = CopyInheritance.checkCopyLateRoleFile(this, name);
+		if (member != null)
+			return member;
 	}
-	if (!isTeam() || this.teamPackage == null)
-		return null;
-	if (this.notFoundMemberNames != null && this.notFoundMemberNames.includes(name)) {
-		return null;
+	if (isTeam() && this.teamPackage != null) {
+		ReferenceBinding member = findTypeInTeamPackage(name);
+		if (member != null)
+			return member;
 	}
-	ReferenceBinding res = findTypeInTeamPackage(name);
-	if (res == null) {
-		 if (this.notFoundMemberNames == null)
-			 this.notFoundMemberNames = new SimpleSetOfCharArray();
-		 this.notFoundMemberNames.add(name);
+	if (StateHelper.hasState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)) {
+		if (this.notFoundMemberNames == null)
+			this.notFoundMemberNames = new SimpleSetOfCharArray();
+		this.notFoundMemberNames.add(name);
 	}
-	return res;
+	return null;
 }
 SimpleSetOfCharArray notFoundMemberNames;
 
@@ -1549,26 +1549,12 @@ ReferenceBinding findTypeInTeamPackage(char[] name) {
 //					teamModel.liftingEnv.init(teamModel.getAst());
 			}
 		} else if (teamModel.getState() >= ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY) {
-			return checkCopyLateRoleFile(teamModel, name);
+			TypeDeclaration roleDecl = CopyInheritance.internalCheckCopyLateRoleFile(this, name);
+			if (roleDecl != null)
+				return roleDecl.binding;
 		}
 	}
 	return result;
-}
-private ReferenceBinding checkCopyLateRoleFile(TeamModel teamModel, char[] name) {
-	ReferenceBinding superTeam = superclass(); // FIXME(SH): tsuper teams
-	if (   superTeam != null
-		&& !TypeAnalyzer.isOrgObjectteamsTeam(superTeam)
-		&& !teamModel._isCopyingLateRole
-		&& !OTNameUtils.isTSuperMarkerInterface(name))
-	{
-		ReferenceBinding tsuperRole = superTeam.getMemberType(name);
-		if (   tsuperRole != null && tsuperRole.isRole() && tsuperRole.isValidBinding()
-			&& !tsuperRole.isLocalType())
-		{
-			return CopyInheritance.copyLateRole(teamModel.getAst(), tsuperRole);
-		}
-	}
-	return null;
 }
 //SH}
 /* Answer the synthetic field for <actualOuterLocalVariable>

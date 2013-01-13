@@ -76,13 +76,14 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
 public class TeamModel extends TypeModel {
 
 	// constants for bits in tagBits:
+	public static final int CopyRolesFromTSuperMASK = 0x0FF;
+	public static final int MaxTSuperRoles = 8; // so many bits allocated in CopyRolesFromTSuperMask
 
-    // can lifting fail due to role abstractness?
-    public static final int HasAbstractRelevantRole = ASTNode.Bit20;
-    
-    // details of completeTypeBindings:
-    public static final int BeginCopyRoles = ASTNode.Bit21;
+	// details of completeTypeBindings:
+	public static final int BeginCopyRoles = ASTNode.Bit9;
 
+	// can lifting fail due to role abstractness?
+    public static final int HasAbstractRelevantRole = ASTNode.Bit10;
 
 	/** The Marker interface created for this Team (_TSuper__OT__TeamName); */
 	public TypeDeclaration markerInterface;
@@ -332,8 +333,12 @@ public class TeamModel extends TypeModel {
 		return false;
 	}
 
-    public static void setTagBit(ReferenceBinding teamBinding, int tagBit) {
-		teamBinding.getTeamModel().tagBits |= tagBit;		
+    public static boolean setTagBit(ReferenceBinding teamBinding, int tagBit) {
+		TeamModel model = teamBinding.getTeamModel();
+		if ((model.tagBits & tagBit) != 0)
+			return false; // was already set
+		model.tagBits |= tagBit;
+		return true;
 	}
 
 	public static boolean hasTagBit(ReferenceBinding typeBinding, int tagBit) {

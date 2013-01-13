@@ -63,7 +63,7 @@ public class TypeLevel {
 	 * @param superTeam
 	 * @param roleDecl
 	 */
-	static SupertypeObligation[] connectRoleClasses(
+	public static SupertypeObligation[] connectRoleClasses(
 	        ReferenceBinding  superTeam,
 	        TypeDeclaration   roleDecl)
 	{

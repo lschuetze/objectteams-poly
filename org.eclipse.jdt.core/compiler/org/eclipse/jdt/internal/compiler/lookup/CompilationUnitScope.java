@@ -244,7 +244,7 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
 		}
 
 //{ObjectTeams: role files: (a) classes never match the name of the unit: prepended __OT__!
-//                          (b) always check for matching file name (also protected)
+//                          (b) always check for matching file name (also protected), except for purely copied role files
 		boolean isRole = typeDecl.isRole() ;
 		if (   (typeDecl.modifiers & ClassFileConstants.AccPublic) != 0 
 			|| typeDecl.isRole()) // (b) check independently of publicness 
@@ -258,7 +258,8 @@ void buildTypeBindings(AccessRestriction accessRestriction) {
   :giro */
 			if ((mainTypeName = this.referenceContext.getMainTypeName()) != null // mainTypeName == null means that implementor of ICompilationUnit decided to return null
 				&& !CharOperation.equals(mainTypeName, typeDecl.name)
-				&& !(isRole && !typeDecl.isInterface())) // (a): ignore role classes
+				&& !(isRole && !typeDecl.isInterface()) // (a): ignore role classes
+				&& !typeDecl.isPurelyCopied)            //      (has no file)
 			{
 			  if (typeDecl.isRole()) // (b) : more specific message 
 				problemReporter().roleFileMismatchingName(this.referenceContext, typeDecl);

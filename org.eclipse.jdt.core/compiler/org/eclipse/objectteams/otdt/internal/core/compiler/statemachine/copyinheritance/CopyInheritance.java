@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.jdt.internal.compiler.problem.IProblemRechecker;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
+import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleClassLiteralAccess;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeContainerMethod;
@@ -185,10 +186,6 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	 * Also connect roles with OT-specific links.
      */
 	public static void copyRoles(SourceTypeBinding teamBinding) {
-		if (TeamModel.hasTagBit(teamBinding, TeamModel.BeginCopyRoles))
-			return;
-		TeamModel.setTagBit(teamBinding, TeamModel.BeginCopyRoles);
-
 		TeamModel teamModel= teamBinding.getTeamModel();
 		ReferenceBinding superTeam= teamBinding.superclass;
 		if (superTeam == null) {
@@ -197,15 +194,24 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		}
 
 		// super team:
-		TSuperHelper.addMarkerInterface(teamModel, superTeam);
-		copyRolesFromTeam(superTeam, teamModel, false/*isTsuperTeam*/);
+		if (TeamModel.setTagBit(teamBinding, TeamModel.BeginCopyRoles)) {
+			TSuperHelper.addMarkerInterface(teamModel, superTeam);
+			copyRolesFromTeam(superTeam, teamModel, false/*isTsuperTeam*/);
+		}
 
 		// tsuper teams:
 		if (teamBinding.isRole()) {
-			RoleModel teamAsRole = teamBinding.roleModel;
-			for (ReferenceBinding tsuperTeam: teamAsRole.getTSuperRoleBindings()) {
-				TSuperHelper.addMarkerInterface(teamModel, tsuperTeam);
-				copyRolesFromTeam(tsuperTeam, teamModel, true/*isTsuperTeam*/);
+			ReferenceBinding[] tSuperRoleBindings = teamBinding.roleModel.getTSuperRoleBindings();
+			int length = tSuperRoleBindings.length;
+			if (length > TeamModel.MaxTSuperRoles)
+				throw new InternalCompilerError("Too many tsuper roles in "+String.valueOf(teamBinding.readableName())); //$NON-NLS-1$
+			for (int i = 0; i < length; i++) {
+				ReferenceBinding tsuperTeam = tSuperRoleBindings[i];
+				int tagBits = (1<<i) & TeamModel.CopyRolesFromTSuperMASK;
+				if (TeamModel.setTagBit(teamBinding, tagBits)) {
+					TSuperHelper.addMarkerInterface(teamModel, tsuperTeam);
+					copyRolesFromTeam(tsuperTeam, teamModel, true/*isTsuperTeam*/);
+				}
 			}
 		}
 
@@ -686,7 +692,67 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		subTeam.scope.compilationUnitScope().registerBinaryNested(subRole);
 	}
 
-	public static ReferenceBinding copyLateRole(TypeDeclaration teamDecl, ReferenceBinding tsuperRole) {
+	/**
+	 * If a requested member type was not found in a team binding try if a combination
+	 * of role file loading and role copying resolves the issue.
+	 */
+	public static ReferenceBinding checkCopyLateRoleFile(SourceTypeBinding teamBinding, char[] name) {
+		if (!TeamModel.hasTagBit(teamBinding, TeamModel.BeginCopyRoles))
+			return null;
+		ReferenceBinding ifcPart = null;
+		if (CharOperation.prefixEquals(IOTConstants.OT_DELIM_NAME, name)) {
+			char[] ifcName = CharOperation.subarray(name, IOTConstants.OT_DELIM_LEN, -1);
+			ifcPart = teamBinding.getMemberType(ifcName);
+		}
+		TypeDeclaration roleDecl = internalCheckCopyLateRoleFile(teamBinding, name);
+		if (roleDecl != null && ifcPart != null) {
+			ReferenceBinding superTeam = teamBinding.superclass;
+			if (!hasHiearchyCheckBegun(superTeam))
+				Dependencies.ensureBindingState(superTeam, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY);
+           	TypeLevel.connectRoleClasses(superTeam, roleDecl);
+		}
+		if (roleDecl != null)
+			return roleDecl.binding;
+		return null;
+	}
+	private static boolean hasHiearchyCheckBegun(ReferenceBinding type) {
+		if ((type.tagBits & TagBits.BeginHierarchyCheck) != 0)
+			return true;
+		if (type.enclosingType() != null)
+			return hasHiearchyCheckBegun(type.enclosingType());
+		return false;
+	}
+
+	public static TypeDeclaration internalCheckCopyLateRoleFile(SourceTypeBinding teamBinding, char[] name) {
+		ReferenceBinding superTeam = (ReferenceBinding) teamBinding.superclass().original(); // FIXME(SH): tsuper teams
+		if (   superTeam != null
+			&& superTeam.isTeam()
+			&& !TypeAnalyzer.isOrgObjectteamsTeam(superTeam)
+			&& !teamBinding._teamModel._isCopyingLateRole
+			&& !OTNameUtils.isTSuperMarkerInterface(name))
+		{
+			ReferenceBinding tsuperRole = superTeam.getMemberType(name);
+			if ((tsuperRole == null || 
+					(!tsuperRole.isValidBinding() && tsuperRole.problemId() == ProblemReasons.NotFound))
+				&& superTeam instanceof SourceTypeBinding) 
+			{
+				TypeDeclaration tsuperDecl = internalCheckCopyLateRoleFile(((SourceTypeBinding)superTeam), name);
+				if (tsuperDecl != null)
+					tsuperRole = tsuperDecl.binding;
+			}
+			if (   tsuperRole != null && tsuperRole.isRole() && tsuperRole.isValidBinding()
+				&& !tsuperRole.isLocalType())
+			{
+				if ((teamBinding.tagBits & TagBits.BeginHierarchyCheck) != 0)
+					return copyLateRole(teamBinding._teamModel.getAst(), tsuperRole);
+				else
+					return copyLateRolePart(teamBinding._teamModel.getAst(), tsuperRole);
+			}
+		}
+		return null;
+	}
+
+	public static TypeDeclaration copyLateRole(TypeDeclaration teamDecl, ReferenceBinding tsuperRole) {
 		TypeDeclaration roleType = null;
 		ReferenceBinding ifcPart = null;
 		char[] tsuperName = tsuperRole.internalName();
@@ -696,19 +762,18 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 		}
 		roleType = copyLateRolePart(teamDecl, tsuperRole);
 		if (ifcPart != null) {
-			// FIXME(SH): improve catch up: connecting bindings etc.
-			Dependencies.ensureBindingState(tsuperRole.enclosingType(), ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY);
+			ReferenceBinding superTeam = tsuperRole.enclosingType();
+			if ((superTeam.tagBits & TagBits.BeginHierarchyCheck) == 0)
+				Dependencies.ensureBindingState(superTeam, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY);
 			if (StateHelper.hasState(tsuperRole, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)) {
 	            RoleModel subRole = roleType.getRoleModel();
-	           	TypeLevel.connectRoleClasses(tsuperRole.enclosingType(), roleType);
-	//            subRole.set = ifcPart;
-	//            ifcPart.roleModel._classPart = roleType.binding;
+	           	TypeLevel.connectRoleClasses(superTeam, roleType);
 	            setRoleState(subRole, STATE_LENV_CONNECT_TYPE_HIERARCHY);
 			}
 		}
 		if (roleType == null) return null;
 		Dependencies.lateRolesCatchup(teamDecl.getTeamModel());
-		return roleType.binding;
+		return roleType;
 	}
 	private static TypeDeclaration copyLateRolePart(TypeDeclaration teamDecl, ReferenceBinding tsuperRole) {
 		TypeDeclaration roleDecl = copyRole(tsuperRole, false, teamDecl, false);
