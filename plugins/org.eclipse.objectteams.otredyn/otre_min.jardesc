@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <jardesc>
-    <jar path="org.eclipse.objectteams.otredyn/otre_min.jar"/>
+    <jar path="org.eclipse.objectteams.otdt/lib/otredyn_min.jar"/>
     <options buildIfNeeded="true" compress="true" descriptionLocation="/org.eclipse.objectteams.otredyn/otre_min.jardesc" exportErrors="false" exportWarnings="true" includeDirectoryEntries="false" overwrite="true" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
     <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
     <selectedProjects/>
@@ -11,7 +11,7 @@
         </sealing>
     </manifest>
     <selectedElements exportClassFiles="true" exportJavaFiles="false" exportOutputFolder="false">
-        <javaElement handleIdentifier="=org.eclipse.objectteams.otredyn/src&lt;org.objectteams"/>
         <javaElement handleIdentifier="=org.eclipse.objectteams.otredyn/src&lt;org.eclipse.objectteams.otredyn.runtime"/>
+        <javaElement handleIdentifier="=org.eclipse.objectteams.otredyn/src&lt;org.objectteams"/>
     </selectedElements>
 </jardesc>

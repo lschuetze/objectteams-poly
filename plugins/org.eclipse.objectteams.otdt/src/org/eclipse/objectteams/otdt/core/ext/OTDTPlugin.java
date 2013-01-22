@@ -241,7 +241,6 @@ public class OTDTPlugin extends Plugin
     public void start(BundleContext context) throws Exception {    
     	super.start(context);
     	try {
-    		OTREContainer.findBCEL(context);
     		String weavingProperty = System.getProperty("ot.weaving"); //$NON-NLS-1$
     		boolean useDynamicWeaving;
     		if (weavingProperty != null) {
@@ -249,6 +248,7 @@ public class OTDTPlugin extends Plugin
 			} else
     			useDynamicWeaving = TransformerPlugin.useDynamicWeaving();
     		CompilerVersion.setDynamicWeaving(useDynamicWeaving);
+    		OTREContainer.findBytecodeLib(context, useDynamicWeaving);
     		if (useDynamicWeaving)
     			OTREContainer.OT_RUNTIME_PLUGIN = "org.eclipse.objectteams.otredyn"; //$NON-NLS-1$
     	} catch (RuntimeException re) {
