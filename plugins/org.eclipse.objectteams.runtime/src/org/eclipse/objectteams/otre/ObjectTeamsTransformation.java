@@ -674,9 +674,6 @@ public abstract class ObjectTeamsTransformation
     				teamClass = RepositoryAccess.lookupClassFully(nextTeam);
     			} catch (ClassNotFoundException cfne) {
     				System.err.println("Config error: Team class '"+nextTeam+ "' in config file '"+ TEAM_CONFIG_FILE+"' can not be found!");
-    				System.err.println("Main class = "+main_class_name+
-    									", class loader = "+(this.loader!=null?this.loader.getClass().getName():"null")+
-    									", transformer = "+this.getClass().getName());
     				continue;
     			}
     			ClassGen teamClassGen = new ClassGen(teamClass);

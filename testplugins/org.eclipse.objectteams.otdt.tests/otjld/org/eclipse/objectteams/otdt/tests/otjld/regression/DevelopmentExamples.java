@@ -4760,8 +4760,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
             false/*expectingCompileErrors*/,
             null/*expectedCompilerLog*/,
             "MyBase.bm()"/*expectedOutputString*/,
-    		"Config error: Team class \'p19.TeamX19tcf5NOTEXISTING\' in config file \'"+OUTPUT_DIR+"/p19/config5.txt\' can not be found!\n" + 
-    		"Main class = X19tcfMain5, class loader = sun.misc.Launcher$AppClassLoader, transformer = org.eclipse.objectteams.otre.SubBoundBaseMethodRedefinition"/*exepectedErrorString*/,
+    		"Config error: Team class \'p19.TeamX19tcf5NOTEXISTING\' in config file \'"+OUTPUT_DIR+"/p19/config5.txt\' can not be found!" /*exepectedErrorString*/,
             false/*forceExecution*/,
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/,
@@ -4822,8 +4821,7 @@ public class DevelopmentExamples extends AbstractOTJLDTest {
             "MyTeam.MyRole.rm()\n" +
             "MyBase.bm()\n" +
             "MyTeam.MyRole.rm()"/*expectedOutputString*/,
-            "Config error: Team class 'p19.TeamX19tcf5aNOTEXISTING' in config file '"+OUTPUT_DIR+"/p19/config5a.txt' can not be found!\n" +
-			"Main class = X19tcfMain5a, class loader = sun.misc.Launcher$AppClassLoader, transformer = org.eclipse.objectteams.otre.SubBoundBaseMethodRedefinition"/*expectedErrorOutput*/,
+            "Config error: Team class 'p19.TeamX19tcf5aNOTEXISTING' in config file '"+OUTPUT_DIR+"/p19/config5a.txt' can not be found!",
             false/*forceExecution*/,
             null/*classLibraries*/,
             false/*shouldFlushOutputDirectory*/,
