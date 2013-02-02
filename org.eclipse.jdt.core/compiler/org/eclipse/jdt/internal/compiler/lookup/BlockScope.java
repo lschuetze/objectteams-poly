@@ -636,6 +636,14 @@ private Binding internalGetBinding(char[][] compoundName, int mask, InvocationSi
 		}
 		// binding is a ReferenceBinding
 		if (!binding.isValidBinding()) {
+//{ObjectTeams: let decapsulation see into nested levels of invisible types:
+		  if (binding.problemId() == ProblemReasons.NotVisible 
+				&& invocationSite instanceof Expression
+				&& ((Expression)invocationSite).getBaseclassDecapsulation().isAllowed())
+		  {
+			binding = ((ProblemReferenceBinding)binding).closestMatch;
+		  } else {
+// orig:
 			if (problemFieldBinding != null) {
 				return problemFieldBinding;
 			}
@@ -643,6 +651,9 @@ private Binding internalGetBinding(char[][] compoundName, int mask, InvocationSi
 				CharOperation.subarray(compoundName, 0, currentIndex),
 				(ReferenceBinding)((ReferenceBinding)binding).closestMatch(),
 				binding.problemId());
+// ;giro
+		  }
+// SH}
 		}
 		if (invocationSite instanceof ASTNode) {
 			referenceBinding = (ReferenceBinding) binding;
