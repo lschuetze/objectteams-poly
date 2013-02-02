@@ -931,6 +931,12 @@ public final class ImportRewriteAnalyzer {
 					} else if (lastPackage.isComment() && pack.isSameGroup(lastPackage)) {
 						// the last pack may be a dummy for a comment which doesn't belong to any extended range
 						stringsToInsert.add(lineDelim);
+//{ObjectTeams: space between regular imports and base import:
+					} else if (!lastPackage.isComment() && !pack.isComment() && pack.isBase() != lastPackage.isBase()) {
+						for (int k= spacesBetweenGroups; k > 0; k--) {
+							stringsToInsert.add(lineDelim);
+						}
+// SH}
 					}
 				}
 				lastPackage= pack;
