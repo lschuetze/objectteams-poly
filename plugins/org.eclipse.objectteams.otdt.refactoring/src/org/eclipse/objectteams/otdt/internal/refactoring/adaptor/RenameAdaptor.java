@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2005, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: RenameAdaptor.java 23473 2010-02-05 19:46:08Z stephan $
  * 
  * Please visit http://www.objectteams.org for updates and contact.
  * 
@@ -20,13 +19,17 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.refactoring.adaptor;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -41,6 +44,10 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -53,7 +60,9 @@ import org.eclipse.objectteams.otdt.internal.refactoring.adaptor.rename.RenameMe
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.OTRefactoringCoreMessages;
 import org.eclipse.objectteams.otdt.internal.refactoring.corext.rename.BaseCallFinder;
 import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
+import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.ReplaceEdit;
+import org.eclipse.text.edits.TextEdit;
 
 import base org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameAnalyzeUtil;
@@ -61,6 +70,9 @@ import base org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProc
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameAnalyzeUtil.ProblemNodeFinder;
+import base org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor.ImportsManager;
+import base org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor.PackageRenamer;
+import base org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor.ImportsManager.ImportChange;
 
 /**
  * @author stephan
@@ -308,8 +320,115 @@ public team class RenameAdaptor
 						return status;
 					}
 			return status;
-		}		
+		}
 	}
+
+	/** Add support for base imports: check if an import being updated is a base import and record those separately. */
+	protected class PackageRenamer playedBy PackageRenamer {
+
+		@SuppressWarnings("decapsulation")
+		ImportsManager getFImportsManager() -> get ImportsManager fImportsManager;
+
+		@SuppressWarnings("decapsulation")
+		updateImport <- replace updateImport;
+
+		@SuppressWarnings("basecall")
+		callin void updateImport(ICompilationUnit cu, IImportDeclaration importDeclaration, String updatedImport) throws JavaModelException {
+			if ((importDeclaration.getFlags() & ExtraCompilerModifiers.AccBase) != 0) {
+				final ImportsManager importsManager = getFImportsManager();
+				ImportChange<@importsManager> importChange= importsManager.getImportChange(cu);
+				importChange.removeBaseImport(importDeclaration.getElementName());
+				importChange.addBaseImport(updatedImport);
+				
+			} else {
+				base.updateImport(cu, importDeclaration, updatedImport);
+			}
+		}
+	}
+
+	/** Add support for base imports: when performing the changes invoke choose the appropriate add- method in ImportRewrite. */
+	protected team class ImportsManager playedBy ImportsManager {
+
+		/** Extend existing record class by two more lists. */
+		@SuppressWarnings("decapsulation")
+		public class ImportChange playedBy ImportChange {
+			protected List<String> 	getStaticToRemove() -> get ArrayList<String> 	fStaticToRemove;
+			protected List<String> 	getToRemove() 		-> get ArrayList<String> 	fToRemove;
+			protected List<String[]> 	getStaticToAdd() 	-> get ArrayList<String[]> 	fStaticToAdd;
+			protected List<String> 	getToAdd() 			-> get ArrayList<String> 	fToAdd;
+
+			protected ArrayList<String> fBaseToRemove= new ArrayList<String>();
+			protected ArrayList<String> fBaseToAdd= new ArrayList<String>();
+
+			public void removeBaseImport(String elementName) {
+				fBaseToRemove.add(elementName);
+			}
+			public void addBaseImport(String updatedImport) {
+				fBaseToAdd.add(updatedImport);
+			}
+		}
+
+		@SuppressWarnings("decapsulation")
+		Iterator<ICompilationUnit> getCompilationUnits() -> get HashMap<ICompilationUnit, ImportChange> fImportChanges
+				with {	result <- fImportChanges.keySet().iterator() }
+
+		protected ImportChange getImportChange(ICompilationUnit cu) ->  ImportChange getImportChange(ICompilationUnit cu);
+
+		rewriteImports <- replace rewriteImports;
+
+		/* Copy from its base version. */
+		@SuppressWarnings("basecall")
+		callin void rewriteImports(TextChangeManager changeManager, IProgressMonitor pm) throws CoreException {
+//{ObjectTeams: separate iteration (over ICU) from fetching ImportChanges (needs lifting):
+			/* orig:
+				for (Iterator<Entry<ICompilationUnit, ImportChange>> iter= fImportChanges.entrySet().iterator(); iter.hasNext();) {
+					Entry<ICompilationUnit, ImportChange> entry= iter.next();
+					ICompilationUnit cu= entry.getKey();
+					ImportChange importChange= entry.getValue();
+  :giro */
+			for (Iterator<ICompilationUnit> iter= getCompilationUnits(); iter.hasNext();) {
+				ICompilationUnit cu= iter.next();
+				ImportChange importChange= getImportChange(cu);
+// SH}
+				ImportRewrite importRewrite= StubUtility.createImportRewrite(cu, true);
+				importRewrite.setFilterImplicitImports(false);
+				for (Iterator<String> iterator= importChange.getStaticToRemove().iterator(); iterator.hasNext();) {
+					importRewrite.removeStaticImport(iterator.next());
+				}
+				for (Iterator<String> iterator= importChange.getToRemove().iterator(); iterator.hasNext();) {
+					importRewrite.removeImport(iterator.next());
+				}
+//{ObectTeams: one more kind of imports to remove
+				for (Iterator<String> iterator= importChange.fBaseToRemove.iterator(); iterator.hasNext();) {
+					importRewrite.removeImportBase(iterator.next());
+				}
+// SH}
+				for (Iterator<String[]> iterator= importChange.getStaticToAdd().iterator(); iterator.hasNext();) {
+					String[] toAdd= iterator.next();
+					importRewrite.addStaticImport(toAdd[0], toAdd[1], true);
+				}
+				for (Iterator<String> iterator= importChange.getToAdd().iterator(); iterator.hasNext();) {
+					importRewrite.addImport(iterator.next());
+				}
+//{ObectTeams: one more kind of imports to add
+				for (Iterator<String> iterator= importChange.fBaseToAdd.iterator(); iterator.hasNext();) {
+					importRewrite.addImportBase(iterator.next());
+				}
+// SH}
+				if (importRewrite.hasRecordedChanges()) {
+					TextEdit importEdit= importRewrite.rewriteImports(pm);
+					String name= RefactoringCoreMessages.RenamePackageRefactoring_update_imports;
+					try {
+						TextChangeCompatibility.addTextEdit(changeManager.get(cu), name, importEdit);
+					} catch (MalformedTreeException e) {
+						JavaPlugin.logErrorMessage("MalformedTreeException while processing cu " + cu); //$NON-NLS-1$
+						throw e;
+					}
+				}
+			}
+		}
+	}
+
 
 	/**
 	 * Find more occurrences, currently:

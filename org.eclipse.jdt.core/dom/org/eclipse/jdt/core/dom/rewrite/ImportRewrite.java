@@ -1061,6 +1061,16 @@ public final class ImportRewrite {
 		return removeEntry(STATIC_PREFIX + qualifiedName);
 	}
 
+//{ObjectTeams:
+	/**
+	 * Remove a base-import, similar to {@link #removeImport(String)} and {@link #removeStaticImport(String)}.
+	 * @since 3.9
+	 */
+	public boolean removeImportBase(String qualifiedName) {
+		return removeEntry(BASE_PREFIX + qualifiedName);		
+	}
+// SH}
+
 	private static String getRawName(ITypeBinding normalizedBinding) {
 		return normalizedBinding.getTypeDeclaration().getName();
 	}

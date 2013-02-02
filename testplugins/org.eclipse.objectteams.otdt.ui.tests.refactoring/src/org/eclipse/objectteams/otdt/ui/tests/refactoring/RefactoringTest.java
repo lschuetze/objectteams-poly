@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute and Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -61,6 +60,7 @@ import org.eclipse.ltk.core.refactoring.IUndoManager;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
 import org.eclipse.objectteams.otdt.internal.core.AbstractCalloutMapping;
@@ -197,6 +197,23 @@ public abstract class RefactoringTest extends TestCase
     {
         return _packageP;
     }
+
+    protected final Refactoring createRefactoring(RefactoringDescriptor descriptor) throws CoreException {
+	    RefactoringStatus status= new RefactoringStatus();
+		Refactoring refactoring= descriptor.createRefactoring(status);
+		assertNotNull("refactoring should not be null", refactoring);
+		assertTrue("status should be ok", status.isOK());
+	    return refactoring;
+    }
+
+	protected final RefactoringStatus performRefactoring(RefactoringDescriptor descriptor) throws Exception {
+		return performRefactoring(descriptor, true);
+	}
+
+	protected final RefactoringStatus performRefactoring(RefactoringDescriptor descriptor, boolean providesUndo) throws Exception {
+		Refactoring refactoring= createRefactoring(descriptor);
+		return performRefactoring(refactoring, providesUndo);
+	}
 
     protected final RefactoringStatus performRefactoring(Refactoring ref)
             throws Exception
