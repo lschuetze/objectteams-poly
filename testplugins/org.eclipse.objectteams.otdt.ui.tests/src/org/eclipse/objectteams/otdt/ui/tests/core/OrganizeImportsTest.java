@@ -704,6 +704,7 @@ public class OrganizeImportsTest extends TestCase
         buf = new StringBuffer();
         buf.append("package teamPkg;\n");
         buf.append("import static java.lang.Math.max;\n");
+        buf.append("\n");
         buf.append("import base basePkg.B1;\n");
         buf.append("public team class T1 {\n");
         buf.append("    public class R1 playedBy B1 when (max(1,2)==2) {\n");
@@ -757,6 +758,7 @@ public class OrganizeImportsTest extends TestCase
         buf = new StringBuffer();
         buf.append("package teamPkg;\n");
         buf.append("import static java.lang.Math.max;\n");
+        buf.append("\n");
         buf.append("import base basePkg.B1;\n");
         buf.append("public team class T1 {\n");
         buf.append("    public class R1 playedBy B1 {\n");
