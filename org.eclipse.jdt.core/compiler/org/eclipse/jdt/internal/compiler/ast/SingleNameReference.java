@@ -4,14 +4,16 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: SingleNameReference.java 23404 2010-02-03 14:10:22Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 292478 - Report potentially null across variable assignment,
- *     											    Contribution for bug 185682 - Increment/decrement operators mark local variables as read
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
+ *								bug 292478 - Report potentially null across variable assignment,
+ *								bug 185682 - Increment/decrement operators mark local variables as read
+ *								bug 331649 - [compiler][null] consider null annotations for fields
+ *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -61,7 +63,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
  *
  * What: wrap role type in resolveType().
  *
- * @version $Id: SingleNameReference.java 23404 2010-02-03 14:10:22Z stephan $
  */
 public class SingleNameReference extends NameReference implements OperatorIds {
 
@@ -139,6 +140,9 @@ public FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowConte
 				} else {
 					currentScope.problemReporter().cannotAssignToFinalField(fieldBinding, this);
 				}
+			} else if (!isCompound && fieldBinding.isNonNull()) {
+				// record assignment for detecting uninitialized non-null fields:
+				flowInfo.markAsDefinitelyAssigned(fieldBinding);
 			}
 			if (!fieldBinding.isStatic()) {
 				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=318682
@@ -262,6 +266,17 @@ public TypeBinding checkFieldAccess(BlockScope scope) {
 	}
 	return fieldBinding.type;
 
+}
+
+public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
+	if (!super.checkNPE(scope, flowContext, flowInfo)) {
+		VariableBinding var = nullAnnotatedVariableBinding();
+		if (var instanceof FieldBinding) {
+			checkNullableFieldDereference(scope, (FieldBinding) var, ((long)this.sourceStart<<32)+this.sourceEnd);
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
@@ -825,6 +840,19 @@ public TypeBinding[] genericTypeArguments() {
 	return null;
 }
 
+public boolean isEquivalent(Reference reference) {
+	char[] otherToken = null;
+	if (reference instanceof SingleNameReference) {
+		otherToken = ((SingleNameReference) reference).token;
+	} else if (reference instanceof FieldReference) {
+		// test for comparison "f1" vs. "this.f1":
+		FieldReference fr = (FieldReference) reference;
+		if (fr.receiver.isThis() && !(fr.receiver instanceof QualifiedThisReference))
+			otherToken = fr.token;
+	}
+	return otherToken != null && CharOperation.equals(this.token, otherToken);
+}
+
 /**
  * Returns the local variable referenced by this node. Can be a direct reference (SingleNameReference)
  * or thru a cast expression etc...
@@ -835,6 +863,16 @@ public LocalVariableBinding localVariableBinding() {
 			break;
 		case Binding.LOCAL : // reading a local variable
 			return (LocalVariableBinding) this.binding;
+	}
+	return null;
+}
+
+public VariableBinding nullAnnotatedVariableBinding() {
+	switch (this.bits & ASTNode.RestrictiveFlagMASK) {
+		case Binding.FIELD : // reading a field
+		case Binding.LOCAL : // reading a local variable
+			if ((((VariableBinding)this.binding).tagBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) != 0)
+				return (VariableBinding) this.binding;
 	}
 	return null;
 }
@@ -901,22 +939,7 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 	}
 }
 
-public int nullStatus(FlowInfo flowInfo) {
-	if (this.constant != null && this.constant != Constant.NotAConstant) {
-		return FlowInfo.NON_NULL; // constant expression cannot be null
-	}
-	switch (this.bits & ASTNode.RestrictiveFlagMASK) {
-		case Binding.FIELD : // reading a field
-			return FlowInfo.UNKNOWN;
-		case Binding.LOCAL : // reading a local variable
-			LocalVariableBinding local = (LocalVariableBinding) this.binding;
-			if (local != null)
-				return flowInfo.nullStatus(local);
-	}
-	return FlowInfo.NON_NULL; // never get there
-}
-
-	/**
+/**
  * @see org.eclipse.jdt.internal.compiler.ast.Expression#postConversionType(Scope)
  */
 public TypeBinding postConversionType(Scope scope) {

@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								bug 331649 - [compiler][null] consider null annotations for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -75,7 +77,17 @@ public abstract class VariableBinding
 	public final boolean isEffectivelyFinal() {
 		return (this.tagBits & TagBits.IsEffectivelyFinal) != 0;
 	}
-	
+
+	/** Answer true if null annotations are enabled and this field is specified @NonNull */
+	public boolean isNonNull() {
+		return (this.tagBits & TagBits.AnnotationNonNull) != 0;
+	}
+
+	/** Answer true if null annotations are enabled and this field is specified @Nullable */
+	public boolean isNullable() {
+		return (this.tagBits & TagBits.AnnotationNullable) != 0;
+	}
+
 	public char[] readableName() {
 //{ObjectTeams: pretty printing for generated names:
 	if (CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, this.name))

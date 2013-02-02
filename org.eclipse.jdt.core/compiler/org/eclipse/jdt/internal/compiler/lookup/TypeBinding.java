@@ -8,9 +8,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *      Stephen Herrmann <stephan@cs.tu-berlin.de> -  Contribution for bug 317046
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *      Stephen Herrmann <stephan@cs.tu-berlin.de> -  Contributions for
+ *								bug 317046 - Exception during debugging when hover mouse over a field
+ *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -476,7 +478,11 @@ public boolean isClass() {
 
 /* Answer true if the receiver type can be assigned to the argument type (right)
  */
-public abstract boolean isCompatibleWith(TypeBinding right);
+public boolean isCompatibleWith(TypeBinding right) {
+	return isCompatibleWith(right, null); // delegate from the old signature to the new implementation:
+}
+// version that allows to capture a type bound using 'scope':
+public abstract boolean isCompatibleWith(TypeBinding right, /*@Nullable*/ Scope scope);
 
 public boolean isEnum() {
 	return false;

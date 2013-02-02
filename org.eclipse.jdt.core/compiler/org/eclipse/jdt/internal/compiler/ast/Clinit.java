@@ -9,6 +9,8 @@
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
  *     Patrick Wienands <pwienands@abit.de> - Contribution for bug 393749
+ *     Stephan Herrmann - Contribution for
+ *								bug 331649 - [compiler][null] consider null annotations for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -77,17 +79,23 @@ public class Clinit extends AbstractMethodDeclaration {
 			flowInfo = flowInfo.mergedWith(staticInitializerFlowContext.initsOnReturn);
 			FieldBinding[] fields = this.scope.enclosingSourceType().fields();
 			for (int i = 0, count = fields.length; i < count; i++) {
-				FieldBinding field;
-				if ((field = fields[i]).isStatic()
-					&& field.isFinal()
+				FieldBinding field = fields[i];
 //{ObjectTeams: don't check copied fields:
-					&& (field.copyInheritanceSrc == null)
+				if (field.copyInheritanceSrc != null) continue;
 // SH}
-					&& (!flowInfo.isDefinitelyAssigned(fields[i]))) {
-					this.scope.problemReporter().uninitializedBlankFinalField(
-						field,
-						this.scope.referenceType().declarationOf(field.original()));
-					// can complain against the field decl, since only one <clinit>
+				if (field.isStatic()) {
+					if (!flowInfo.isDefinitelyAssigned(field)) {
+						if (field.isFinal()) {
+							this.scope.problemReporter().uninitializedBlankFinalField(
+									field,
+									this.scope.referenceType().declarationOf(field.original()));
+							// can complain against the field decl, since only one <clinit>
+						} else if (field.isNonNull()) {
+							this.scope.problemReporter().uninitializedNonNullField(
+									field,
+									this.scope.referenceType().declarationOf(field.original()));
+						}
+					}
 				}
 			}
 			// check static initializers thrown exceptions

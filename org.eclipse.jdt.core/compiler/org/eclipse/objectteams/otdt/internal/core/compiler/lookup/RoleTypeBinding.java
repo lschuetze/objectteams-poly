@@ -810,7 +810,7 @@ public class RoleTypeBinding extends DependentTypeBinding
                 return true;
 
         if (   this._staticallyKnownRoleClass == null
-        	&& this._staticallyKnownRoleType.isCompatibleWith(referenceBinding, false))
+        	&& this._staticallyKnownRoleType.isCompatibleWith(referenceBinding, false, null))
         {
         	checkAmbiguousObjectLower(referenceBinding);
         	return true; // this case is wittnessed by: "this=RoleIfc", right="Object"; other examples?
@@ -818,7 +818,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 
         // do we need the class part instead of the interface part?
         if (   (this._staticallyKnownRoleClass != null)
-            && this._staticallyKnownRoleClass.isStrictlyCompatibleWith(referenceBinding)
+            && this._staticallyKnownRoleClass.isStrictlyCompatibleWith(referenceBinding, null)
             && !TeamModel.isTeamContainingRole(this._staticallyKnownTeam, referenceBinding))
         {
         	// Cast from a role to its non-role superclass

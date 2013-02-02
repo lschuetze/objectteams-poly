@@ -21,6 +21,8 @@
  *								bug 384663 - Package Based Annotation Compilation Error in JDT 3.8/4.2 (works in 3.7.2)
  *								bug 386356 - Type mismatch error with annotations and generics
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
+ *								bug 331649 - [compiler][null] consider null annotations for fields
+ *								bug 380896 - [compiler][null] Enum constants not recognised as being NonNull.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -1990,75 +1992,91 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 		if (fieldDecls[f].binding != field)
 			continue;
 
-			MethodScope initializationScope = field.isStatic()
-				? this.scope.referenceContext.staticInitializerScope
-				: this.scope.referenceContext.initializerScope;
-			FieldBinding previousField = initializationScope.initializedField;
-			try {
-				initializationScope.initializedField = field;
-				FieldDeclaration fieldDecl = fieldDecls[f];
-				TypeBinding fieldType =
-					fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT
-						? initializationScope.environment().convertToRawType(this, false /*do not force conversion of enclosing types*/) // enum constant is implicitly of declaring enum type
-						: fieldDecl.type.resolveType(initializationScope, true /* check bounds*/);
-				field.type = fieldType;
-				field.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
-				if (fieldType == null) {
-					fieldDecl.binding = null;
-					return null;
-				}
-				if (fieldType == TypeBinding.VOID) {
-					this.scope.problemReporter().variableTypeCannotBeVoid(fieldDecl);
-					fieldDecl.binding = null;
-					return null;
-				}
-				if (fieldType.isArrayType() && ((ArrayBinding) fieldType).leafComponentType == TypeBinding.VOID) {
-					this.scope.problemReporter().variableTypeCannotBeVoidArray(fieldDecl);
-					fieldDecl.binding = null;
-					return null;
-				}
-				if ((fieldType.tagBits & TagBits.HasMissingType) != 0) {
-					field.tagBits |= TagBits.HasMissingType;
-				}
-				TypeBinding leafType = fieldType.leafComponentType();
-				if (leafType instanceof ReferenceBinding && (((ReferenceBinding)leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0) {
-					field.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
-				}
-			} finally {
-			    initializationScope.initializedField = previousField;
+		MethodScope initializationScope = field.isStatic()
+			? this.scope.referenceContext.staticInitializerScope
+			: this.scope.referenceContext.initializerScope;
+		FieldBinding previousField = initializationScope.initializedField;
+		try {
+			initializationScope.initializedField = field;
+			FieldDeclaration fieldDecl = fieldDecls[f];
+			TypeBinding fieldType =
+				fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT
+					? initializationScope.environment().convertToRawType(this, false /*do not force conversion of enclosing types*/) // enum constant is implicitly of declaring enum type
+					: fieldDecl.type.resolveType(initializationScope, true /* check bounds*/);
+			field.type = fieldType;
+			field.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
+			if (fieldType == null) {
+				fieldDecl.binding = null;
+				return null;
 			}
+			if (fieldType == TypeBinding.VOID) {
+				this.scope.problemReporter().variableTypeCannotBeVoid(fieldDecl);
+				fieldDecl.binding = null;
+				return null;
+			}
+			if (fieldType.isArrayType() && ((ArrayBinding) fieldType).leafComponentType == TypeBinding.VOID) {
+				this.scope.problemReporter().variableTypeCannotBeVoidArray(fieldDecl);
+				fieldDecl.binding = null;
+				return null;
+			}
+			if ((fieldType.tagBits & TagBits.HasMissingType) != 0) {
+				field.tagBits |= TagBits.HasMissingType;
+			}
+			TypeBinding leafType = fieldType.leafComponentType();
+			if (leafType instanceof ReferenceBinding && (((ReferenceBinding)leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0) {
+				field.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
+			}
+
+			// apply null default:
+			LookupEnvironment environment = this.scope.environment();
+			if (environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
+				if (fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
+					// enum constants neither have a type declaration nor can they be null
+					field.tagBits |= TagBits.AnnotationNonNull;
+				} else {
+					initializeNullDefault();
+					if (hasNonNullDefault()) {
+						field.fillInDefaultNonNullness(fieldDecl, initializationScope);
+					}
+					// validate null annotation:
+					this.scope.validateNullAnnotation(field.tagBits, fieldDecl.type, fieldDecl.annotations);
+				}
+			}
+		} finally {
+		    initializationScope.initializedField = previousField;
+		}
 //{ObjectTeams: copy-inherited fields and anchored types:
-			if (fieldDecls[f].getKind() != AbstractVariableDeclaration.ENUM_CONSTANT) {
-				if (fieldDecls[f].type == null)  // should not happen for non-enum types
-					throw new InternalCompilerError("Field "+fieldDecls[f]+" has no type in "+this);
+		if (fieldDecls[f].getKind() != AbstractVariableDeclaration.ENUM_CONSTANT) {
+			if (fieldDecls[f].type == null)  // should not happen for non-enum types
+				throw new InternalCompilerError("Field "+fieldDecls[f]+" has no type in "+this);
 	
-				field.copyInheritanceSrc = fieldDecls[f].copyInheritanceSrc;
-				field.maybeSetFieldTypeAnchorAttribute();
-				// anchored to tthis?
-				field.type = RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.scope, field.type, fieldDecls[f].type);
-				if (field.couldBeTeamAnchor()) {
-					// link decl and binding via model
-					// for early resolving from TeamAnchor.hasSameBestNameAs()
-					FieldModel.getModel(fieldDecls[f]).setBinding(field);
-				}
+			field.copyInheritanceSrc = fieldDecls[f].copyInheritanceSrc;
+			field.maybeSetFieldTypeAnchorAttribute();
+			// anchored to tthis?
+			field.type = RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.scope, field.type, fieldDecls[f].type);
+			if (field.couldBeTeamAnchor()) {
+				// link decl and binding via model
+				// for early resolving from TeamAnchor.hasSameBestNameAs()
+				FieldModel.getModel(fieldDecls[f]).setBinding(field);
 			}
-			// need role field bridges?
-			if (   isRole() 
-				&& ((field.modifiers & ClassFileConstants.AccPrivate) != 0) 
-				&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, field.name)) 
-			{
-				MethodBinding inner;
-				ReferenceBinding originalRole = field.declaringClass;
-				if (field.copyInheritanceSrc != null)
-					originalRole = field.copyInheritanceSrc.declaringClass;
-				inner = FieldModel.getDecapsulatingFieldAccessor(this, field, true/*isGetter*/);
+		}
+		// need role field bridges?
+		if (   isRole() 
+			&& ((field.modifiers & ClassFileConstants.AccPrivate) != 0) 
+			&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, field.name)) 
+		{
+			MethodBinding inner;
+			ReferenceBinding originalRole = field.declaringClass;
+			if (field.copyInheritanceSrc != null)
+				originalRole = field.copyInheritanceSrc.declaringClass;
+			inner = FieldModel.getDecapsulatingFieldAccessor(this, field, true/*isGetter*/);
+			((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
+			if (!field.isFinal()) { // no setter for final (includes all static role fields)
+								    // otherwise we would have to handle different signatures (w/ w/o role arg), which we currently don't
+				inner = FieldModel.getDecapsulatingFieldAccessor(this, field, false/*isGetter*/);
 				((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
-				if (!field.isFinal()) { // no setter for final (includes all static role fields)
-									    // otherwise we would have to handle different signatures (w/ w/o role arg), which we currently don't
-					inner = FieldModel.getDecapsulatingFieldAccessor(this, field, false/*isGetter*/);
-					((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
-				}
 			}
+		}
 // SH}
 		return field;
 	}

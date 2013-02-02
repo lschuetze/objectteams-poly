@@ -14,6 +14,8 @@
  *     Stephan Herrmann - Contributions for
  *								bug 319201 - [null] no warning when unboxing SingleNameReference causes NPE
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
+ *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
+ *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -165,7 +167,7 @@ public static void checkNeedForAssignedCast(BlockScope scope, TypeBinding expect
 	// double d = (float) n; // cast to float is unnecessary
 	if (castedExpressionType == null || rhs.resolvedType.isBaseType()) return;
 	//if (castedExpressionType.id == T_null) return; // tolerate null expression cast
-	if (castedExpressionType.isCompatibleWith(expectedType)) {
+	if (castedExpressionType.isCompatibleWith(expectedType, scope)) {
 		scope.problemReporter().unnecessaryCast(rhs);
 	}
 }
@@ -549,8 +551,8 @@ public LocalVariableBinding localVariableBinding() {
 	return this.expression.localVariableBinding();
 }
 
-public int nullStatus(FlowInfo flowInfo) {
-	return this.expression.nullStatus(flowInfo);
+public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
+	return this.expression.nullStatus(flowInfo, flowContext);
 }
 
 /**

@@ -16,6 +16,7 @@
  *								bug 358903 - Filter practically unimportant resource leak warnings
  *								bug 365531 - [compiler][null] investigate alternative strategy for internally encoding nullness defaults
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
+ *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -1481,15 +1482,15 @@ public ReferenceBinding transferTypeArguments(ReferenceBinding other) {
  * In addition to improving performance, caching also ensures there is no infinite regression
  * since per nature, the compatibility check is recursive through parameterized type arguments (122775)
  */
-public boolean isCompatibleWith(TypeBinding otherType) {
+public boolean isCompatibleWith(TypeBinding otherType, /*@Nullable*/ Scope captureScope) {
 //{ObjectTeams: behind the facade introduce new parameter useObjectShortcut.
-	return isCompatibleWith(otherType, true);
+	return isCompatibleWith(otherType, true, captureScope);
 }
 // version which does not consider everything conform to Object:
-public boolean isStrictlyCompatibleWith(TypeBinding otherType) {
-	return isCompatibleWith(otherType, false);
+public boolean isStrictlyCompatibleWith(TypeBinding otherType, /*@Nullable*/ Scope captureScope) {
+	return isCompatibleWith(otherType, false, captureScope);
 }
-public boolean isCompatibleWith(TypeBinding otherType, boolean useObjectShortcut) {
+public boolean isCompatibleWith(TypeBinding otherType, boolean useObjectShortcut, /*@Nullable*/ Scope captureScope) {
 // SH}
 	if (otherType == this)
 		return true;
@@ -1513,12 +1514,20 @@ public boolean isCompatibleWith(TypeBinding otherType, boolean useObjectShortcut
 	this.compatibleCache.put(otherType, Boolean.FALSE); // protect from recursive call
 //{ObjectTeams: propagate:
 /* orig:
-	if (isCompatibleWith0(otherType)) {
+	if (isCompatibleWith0(otherType, captureScope)) {
   :giro */
-	if (isCompatibleWith0(otherType, useObjectShortcut)) {
+	if (isCompatibleWith0(otherType, useObjectShortcut, captureScope)) {
 // SH}
 		this.compatibleCache.put(otherType, Boolean.TRUE);
 		return true;
+	}
+	if (captureScope == null 
+			&& this instanceof TypeVariableBinding 
+			&& ((TypeVariableBinding)this).firstBound instanceof ParameterizedTypeBinding) {
+		// see https://bugs.eclipse.org/395002#c9
+		// in this case a subsequent check with captureScope != null may actually get
+		// a better result, reset this info to ensure we're not blocking that re-check.
+		this.compatibleCache.put(otherType, null);
 	}
 	return false;
 }
@@ -1538,7 +1547,7 @@ public void resetIncompatibleTypes() {
  * Answer true if the receiver type can be assigned to the argument type (right)
  */
 //{ObjectTeams: new parameter useObjectShortcut
-private boolean isCompatibleWith0(TypeBinding otherType, boolean useObjectShortcut) {
+private boolean isCompatibleWith0(TypeBinding otherType, boolean useObjectShortcut, /*@Nullable*/ Scope captureScope) {
 // SH}
 	if (otherType == this)
 		return true;
@@ -1582,8 +1591,17 @@ private boolean isCompatibleWith0(TypeBinding otherType, boolean useObjectShortc
 										// above if same erasure
 			}
 			ReferenceBinding otherReferenceType = (ReferenceBinding) otherType;
-			if (otherReferenceType.isInterface()) // could be annotation type
-				return implementsInterface(otherReferenceType, true);
+			if (otherReferenceType.isInterface()) { // could be annotation type
+				if (implementsInterface(otherReferenceType, true))
+					return true;
+				if (this instanceof TypeVariableBinding && captureScope != null) {
+					TypeVariableBinding typeVariable = (TypeVariableBinding) this;
+					if (typeVariable.firstBound instanceof ParameterizedTypeBinding) {
+						TypeBinding bound = typeVariable.firstBound.capture(captureScope, -1); // no position needed as this capture will never escape this context
+						return bound.isCompatibleWith(otherReferenceType);
+					}
+				}
+			}
 //{ObjectTeams: only leave if we have checked for java.lang.Object above:
 /* orig:
 			if (isInterface())  // Explicit conversion from an interface

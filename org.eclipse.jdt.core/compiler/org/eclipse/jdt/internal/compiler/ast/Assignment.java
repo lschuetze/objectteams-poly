@@ -22,12 +22,16 @@
  *							bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *							bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *							bug 394768 - [compiler][resource] Incorrect resource leak warning when creating stream in conditional
+ *							bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
+ *							bug 331649 - [compiler][null] consider null annotations for fields
+ *							bug 383368 - [compiler][null] syntactic null analysis for field references
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
@@ -85,9 +89,10 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	}
 	
 	FlowInfo preInitInfo = null;
+	CompilerOptions compilerOptions = currentScope.compilerOptions();
 	boolean shouldAnalyseResource = local != null
 			&& flowInfo.reachMode() == FlowInfo.REACHABLE
-			&& currentScope.compilerOptions().analyseResourceLeaks
+			&& compilerOptions.analyseResourceLeaks
 //{ObjectTeams: notably lift methods of Closeable roles would trigger warnings against synthetic code
 			&& !currentScope.isGeneratedScope()
 // SH}
@@ -108,14 +113,29 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	else
 		FakedTrackingVariable.cleanUpAfterAssignment(currentScope, this.lhs.bits, this.expression);
 
-	int nullStatus = this.expression.nullStatus(flowInfo);
+	int nullStatus = this.expression.nullStatus(flowInfo, flowContext);
 	if (local != null && (local.type.tagBits & TagBits.IsBaseType) == 0) {
 		if (nullStatus == FlowInfo.NULL) {
 			flowContext.recordUsingNullReference(currentScope, local, this.lhs,
 				FlowContext.CAN_ONLY_NULL | FlowContext.IN_ASSIGNMENT, flowInfo);
 		}
 	}
-	nullStatus = checkAssignmentAgainstNullAnnotation(currentScope, flowContext, local, nullStatus, this.expression, this.expression.resolvedType);
+	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
+		VariableBinding var = this.lhs.nullAnnotatedVariableBinding();
+		if (var != null) {
+			nullStatus = checkAssignmentAgainstNullAnnotation(currentScope, flowContext, var, nullStatus, this.expression, this.expression.resolvedType);
+			if (nullStatus == FlowInfo.NON_NULL
+					&& var instanceof FieldBinding
+					&& this.lhs instanceof Reference
+					&& compilerOptions.enableSyntacticNullAnalysisForFields)
+			{
+				int timeToLive = (this.bits & InsideExpressionStatement) != 0
+									? 2  // assignment is statement: make info survives the end of this statement
+									: 1; // assignment is expression: expire on next event.
+				flowContext.recordNullCheckedFieldReference((Reference) this.lhs, timeToLive);
+			}
+		}
+	}
 	if (local != null && (local.type.tagBits & TagBits.IsBaseType) == 0) {
 		flowInfo.markNullStatus(local, nullStatus);
 		if (flowContext.initsOnFinally != null)
@@ -167,8 +187,8 @@ FieldBinding getLastField(Expression someExpression) {
     return null;
 }
 
-public int nullStatus(FlowInfo flowInfo) {
-	return this.expression.nullStatus(flowInfo);
+public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
+	return this.expression.nullStatus(flowInfo, flowContext);
 }
 
 public StringBuffer print(int indent, StringBuffer output) {
@@ -227,7 +247,7 @@ public TypeBinding resolveType(BlockScope scope) {
 		scope.compilationUnitScope().recordTypeConversion(lhsType, rhsType);
 	}
 	if (this.expression.isConstantValueOfTypeAssignableToType(rhsType, lhsType)
-			|| rhsType.isCompatibleWith(lhsType)) {
+			|| rhsType.isCompatibleWith(lhsType, scope)) {
 		this.expression.computeConversion(scope, lhsType, rhsType);
 		checkAssignment(scope, lhsType, rhsType);
 		if (this.expression instanceof CastExpression

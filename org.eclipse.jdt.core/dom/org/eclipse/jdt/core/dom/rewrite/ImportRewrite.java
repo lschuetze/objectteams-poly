@@ -1123,9 +1123,9 @@ public final class ImportRewrite {
 				  if (BASE_PREFIX == curr.charAt(0))
 					computer.addBaseImport(curr.substring(1));
 				  else
-					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0), /*isBase*/false);
+					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0), /*isBase*/false, usedAstRoot, this.restoreExistingImports);
   /* orig:
-					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0));
+					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0), usedAstRoot, this.restoreExistingImports);
     :giro */
 // SH}
 				}

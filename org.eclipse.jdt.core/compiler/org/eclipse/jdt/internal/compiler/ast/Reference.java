@@ -7,9 +7,12 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 185682 - Increment/decrement operators mark local variables as read
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
+ *								bug 185682 - Increment/decrement operators mark local variables as read
+ *								bug 331649 - [compiler][null] consider null annotations for fields
+ *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -26,6 +29,7 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
@@ -57,6 +61,21 @@ public abstract FlowInfo analyseAssignment(BlockScope currentScope, FlowContext 
 
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 	return flowInfo;
+}
+
+public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
+	if (flowContext.isNullcheckedFieldAccess(this)) {
+		return true; // enough seen
+	}
+	return super.checkNPE(scope, flowContext, flowInfo);
+}
+
+protected boolean checkNullableFieldDereference(Scope scope, FieldBinding field, long sourcePosition) {
+	if ((field.tagBits & TagBits.AnnotationNullable) != 0) {
+		scope.problemReporter().nullableFieldDereference(field, sourcePosition);
+		return true;
+	}
+	return false;
 }
 
 public FieldBinding fieldBinding() {
@@ -112,6 +131,34 @@ public abstract void generateAssignment(BlockScope currentScope, CodeStream code
 public abstract void generateCompoundAssignment(BlockScope currentScope, CodeStream codeStream, Expression expression, int operator, int assignmentImplicitConversion, boolean valueRequired);
 
 public abstract void generatePostIncrement(BlockScope currentScope, CodeStream codeStream, CompoundAssignment postIncrement, boolean valueRequired);
+
+/** 
+ * Is the given reference equivalent to the receiver, 
+ * meaning that both denote the same path of field reads?
+ * Used from {@link FlowContext#isNullcheckedFieldAccess(Reference)}.
+ */
+public boolean isEquivalent(Reference reference) {
+	return false;
+}
+
+public FieldBinding lastFieldBinding() {
+	// override to answer the field designated by the entire reference
+	// (as opposed to fieldBinding() which answers the first field in a QNR)
+	return null;
+}
+
+public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
+	FieldBinding fieldBinding = lastFieldBinding();
+	if (fieldBinding != null) {
+		if (fieldBinding.isNonNull() || flowContext.isNullcheckedFieldAccess(this)) {
+			return FlowInfo.NON_NULL;
+		} else if (fieldBinding.isNullable()) {
+			return FlowInfo.POTENTIALLY_NULL;
+		}
+		return FlowInfo.UNKNOWN;
+	}
+	return super.nullStatus(flowInfo, flowContext);
+}
 
 /* report if a private field is only read from a 'special operator',
  * i.e., in a postIncrement expression or a compound assignment,
