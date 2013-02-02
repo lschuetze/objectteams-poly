@@ -277,6 +277,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 // SH}
 	// account for pot. exceptions thrown by method execution
 	flowContext.recordAbruptExit();
+	flowContext.expireNullCheckedFieldInfo(); // no longer trust this info after any message send
 	return flowInfo;
 }
 //{ObjectTeams: checkBaseCallsIfSuper
