@@ -12,9 +12,9 @@ plugin@org.eclipse.jdt.core,3.9.0.v_OTDT_r220_qualifier=GIT,repo=git://git.eclip
 !next plug-in don't specify version so that org.eclipse.objectteams.runtime/customBuildCallbacks.xml will find the plug-in directory:
 plugin@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt
 
-plugin@org.eclipse.objectteams.otdt.debug,2.0.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug
-plugin@org.eclipse.objectteams.otdt.debug.ui,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.ui
-plugin@org.eclipse.objectteams.otdt.ui,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui
+plugin@org.eclipse.objectteams.otdt.debug,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug
+plugin@org.eclipse.objectteams.otdt.debug.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.ui
+plugin@org.eclipse.objectteams.otdt.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui
 plugin@org.eclipse.objectteams.otdt.doc,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.doc,tag=builds/201206090452
 plugin@org.eclipse.objectteams.otdt.metrics,0.7.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.metrics,tag=builds/201101290806
 
