@@ -1378,6 +1378,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 			}
         }
         AstGenerator gen = new AstGenerator(roleDeclaration.sourceStart, roleDeclaration.sourceEnd);
+	    gen.replaceableEnclosingClass = roleDeclaration.binding.enclosingType();
         FieldDeclaration fieldDeclaration =
                 AstConverter.createField(field, roleDeclaration, gen);
         AstEdit.addField(roleDeclaration,fieldDeclaration, true, false/*typeProblem*/, false);
