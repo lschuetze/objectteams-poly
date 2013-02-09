@@ -61,7 +61,7 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
     private IType _T8;
     
 	private IType _T1_R1;
-	private IType _T1_R2;
+	// private IType _T1_R2; not within the cone of types reachable from _T1_R1
 	
 	private IType _T2_R1;
 	private IType _T2_R2;
@@ -175,14 +175,7 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
 					pkg,
 					"T1",
 			        "R1").getCorrespondingJavaElement();
-		
-		_T1_R2 = (IType)
-			getRole(getTestProjectDir(),
-					SRC_FOLDER,
-					pkg,
-					"T1",
-			        "R2").getCorrespondingJavaElement();
-		
+
 		_T2_R1 = (IType)
 			getRole(getTestProjectDir(),
 					SRC_FOLDER,
@@ -272,7 +265,7 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
 		_allTypesInProject = new IType[]
 		                              {
 		        _T1, _T2, _T3, _T4, _T5, _T6, _T7, _T8,
-		        _T1_R1, _T1_R2, 
+		        _T1_R1, //_T1_R2, 
 		        _T2_R1, _T2_R2,
 		        _T3_R1, _T3_R2,
 		        _T4_R2,
@@ -310,6 +303,7 @@ public class OTSubHierarchyContentProviderTests extends FileBasedUITest
         for (int idx = 0; idx < _allTypesInProject.length; idx++)
         {
             IType cur = _allTypesInProject[idx];
+            if (cur == _T2_R2) continue; // skip, cur's parent is outside the visible cone
 	        actual = _testObject.getParent(cur);
 	        assertEquals("Unexpected parent for " + cur.getFullyQualifiedName() + " ", parents.get(cur), actual);
         }

@@ -43,6 +43,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeB
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.RoleSplitter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.TeamMethodGenerator;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleFileHelper;
@@ -141,6 +142,9 @@ public class LookupEnvironment implements ProblemReasons, TypeConstants {
 	final static int BUILD_TYPE_HIERARCHY = 1;
 	final static int CHECK_AND_SET_IMPORTS = 2;
 	final static int CONNECT_TYPE_HIERARCHY = 3;
+//{ObjectTeams: include this step into LookupEnvironment's control:
+	final static int ROLES_LINKED = 5;
+// SH}
 
 	static final ProblemPackageBinding TheNotFoundPackage = new ProblemPackageBinding(CharOperation.NO_CHAR, NotFound);
 	static final ProblemReferenceBinding TheNotFoundType = new ProblemReferenceBinding(CharOperation.NO_CHAR_CHAR, null, NotFound);
@@ -326,10 +330,26 @@ public void completeTypeBindings() {
 		done = true;
 	  }
 	  StateHelper.setStateRecursive(this.units[i], ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS, done);
-// SH}
+/* orig: defer to next loop:
 		this.units[i] = null; // release unnecessary reference to the parsed unit
+  :giro */
+// SH}
 	}
 	this.stepCompleted = BUILD_FIELDS_AND_METHODS;
+
+//{ObjectTeams: one more step to handle here:
+	for (int i = this.lastCompletedUnitIndex + 1; i <= this.lastUnitIndex; i++) {
+		boolean done = false;
+		if (this.units[i].state.getState() < ITranslationStates.STATE_ROLES_LINKED) {
+			RoleSplitter.linkRoles(this.units[i]);
+			done = true;
+		}
+		StateHelper.setStateRecursive(this.units[i], ITranslationStates.STATE_ROLES_LINKED, done);
+		this.units[i] = null; // release unnecessary reference to the parsed unit
+	}
+	this.stepCompleted = ROLES_LINKED;
+// SH}
+
 	this.lastCompletedUnitIndex = this.lastUnitIndex;
 	this.unitBeingCompleted = null;
 }
@@ -357,7 +377,12 @@ public int internalCompleteTypeBindings(CompilationUnitDeclaration parsedUnit) {
 		return 0; // avoid re-entrance
 	int todo = this.stepCompleted;
 //SH}
+//{ObjectTeams: different last step:
+/* orig:
 	if (this.stepCompleted == BUILD_FIELDS_AND_METHODS) {
+  :giro */
+	if (this.stepCompleted == ROLES_LINKED) {
+// SH}
 		// This can only happen because the original set of units are completely built and
 		// are now being processed, so we want to treat all the additional units as a group
 		// until they too are completely processed.
@@ -393,6 +418,10 @@ public int internalCompleteTypeBindings(CompilationUnitDeclaration parsedUnit) {
 		if (todo >= CONNECT_TYPE_HIERARCHY)
 // SH}
 			(this.unitBeingCompleted = parsedUnit).scope.connectTypeHierarchy();
+
+//{ObjectTeams: one more step:
+		if (todo >= ROLES_LINKED)
+			RoleSplitter.linkRoles(this.unitBeingCompleted = parsedUnit);
 
 		this.unitBeingCompleted = null;
 	}
@@ -1848,6 +1877,8 @@ public int getDependenciesStateCompleted() {
 		return ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY;
 	case BUILD_FIELDS_AND_METHODS:
 		return ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS;
+	case ROLES_LINKED:
+		return ITranslationStates.STATE_ROLES_LINKED;
 	}
 	return ITranslationStates.STATE_NONE;
 }

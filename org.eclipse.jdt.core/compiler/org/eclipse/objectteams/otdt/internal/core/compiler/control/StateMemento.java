@@ -130,7 +130,7 @@ public class StateMemento
 		if (state < this._currentlyProcessingState)
 			return false;
 		// FIXME(SH): obsolete after integrating both state models?
-		if (state >= ITranslationStates.STATE_LENV_BUILD_TYPE_HIERARCHY && state <= ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS)
+		if (state >= ITranslationStates.STATE_LENV_BUILD_TYPE_HIERARCHY && state <= ITranslationStates.STATE_ROLES_LINKED)
 			return step < this._completingBindingsStep;
 		return true;
 	}

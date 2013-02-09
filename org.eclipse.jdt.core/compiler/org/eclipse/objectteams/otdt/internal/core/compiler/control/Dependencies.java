@@ -305,6 +305,7 @@ public class Dependencies implements ITranslationStates {
 		    	case STATE_LENV_CHECK_AND_SET_IMPORTS:
 		    	case STATE_LENV_CONNECT_TYPE_HIERARCHY:
 		    	case STATE_LENV_DONE_FIELDS_AND_METHODS:
+		    	case STATE_ROLES_LINKED:
 		    		checkReadKnownRoles(unit);
 		    		LookupEnvironment lookupEnvironment= Config.getLookupEnvironment();
 		    		if (Config.getBundledCompleteTypeBindingsMode()) {
@@ -336,6 +337,8 @@ public class Dependencies implements ITranslationStates {
 	            		if (Config.getBuildFieldsAndMethods())
 	            			unit.scope.buildFieldsAndMethods();
 	            		break;
+	            	case STATE_ROLES_LINKED:
+	            		RoleSplitter.linkRoles(unit);
 	    			}
 		    		break;
 		        case STATE_METHODS_PARSED:
@@ -734,10 +737,15 @@ public class Dependencies implements ITranslationStates {
 					success &= establishRoleSplit(model);
 					break;
 				case STATE_ROLES_LINKED:
-					RoleSplitter.linkScopes(model);
-					RoleSplitter.linkSuperAndBaseInIfc(model);
-                    success &= true; // redundant
-                    model.setState(STATE_ROLES_LINKED);
+					// normally a CUD state, except for late roles
+					if (isLateRole(model, nextState)) {
+						if (model.getAst() != null)
+							RoleSplitter.linkRoles(model.getAst());
+						model.setState(nextState);
+						model.setMemberState(nextState);
+					} else {
+						success &= ensureUnitState(model, nextState);
+					}
 					break;
 				case STATE_ROLE_INIT_METHODS:
 					success &= establishRoleInitializationMethod(model);

@@ -21,7 +21,9 @@
 package org.eclipse.objectteams.otdt.ui.tests.hierarchy.contentprovider;
 
 import java.util.HashMap;
+import java.util.Map.Entry;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.objectteams.otdt.tests.FileBasedTest;
 
@@ -140,5 +142,20 @@ public class TreeNode
 	public void addChild(TreeNode node) {
 		this._children.put(node.getElement(), node);
 		
+	}
+
+	// facilitate debugging:
+	public String toString() {
+		StringBuffer buf = new StringBuffer();
+		toString(buf, 0);
+		return buf.toString();
+	}
+
+	private void toString(StringBuffer buf, int indent) {
+		for (int i=0; i<indent; i++) buf.append(' ');
+		IJavaElement element = (IJavaElement)this._element;
+		buf.append(element.getParent().getElementName()).append('.').append(element.getElementName()).append('\n');
+		for (Entry<Object,TreeNode> e : this._children.entrySet())
+			e.getValue().toString(buf, 4);
 	}
 }

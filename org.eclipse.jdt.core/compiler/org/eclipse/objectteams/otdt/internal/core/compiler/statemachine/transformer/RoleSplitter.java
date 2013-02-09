@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.codeassist.complete.CompletionOnQualifiedTypeRef
 import org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
@@ -52,9 +53,9 @@ import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.ProblemDetail;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
-import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel.ProblemDetail;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstClone;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstConverter;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstEdit;
@@ -397,7 +398,26 @@ public class RoleSplitter
 
     }
 
+    /** 
+     * API for LookupEnvironment:
+     * Establish necessary links between ifc- and class-part of each role in the given unit.
+     */
+    public static void linkRoles(CompilationUnitDeclaration unit) {
+		if (unit.types != null)
+			for (TypeDeclaration type : unit.types)
+				linkRoles(type);
+    }
 
+	public static void linkRoles(TypeDeclaration type) {
+		if (type.isRole()) {
+			RoleModel model = type.getRoleModel();
+			RoleSplitter.linkScopes(model);
+			RoleSplitter.linkSuperAndBaseInIfc(model);
+		}
+		if (type.memberTypes != null)
+			for (TypeDeclaration member : type.memberTypes)
+				linkRoles(member);		
+	}
 
 	/**
 	 * After roles have been split and bindings have been completed, transfer
@@ -406,11 +426,12 @@ public class RoleSplitter
 	 * Note: tsuper roles are not yet copied. We might need to adjust types from
 	 * super team to current team later (CopyInheritance.TypeLevel.adjustSuperinterfaces).
      */
-	public static void linkSuperAndBaseInIfc(RoleModel role) {
+	private static void linkSuperAndBaseInIfc(RoleModel role) {
 		if (!role.isSourceRole())
 			return; // local type nested in a proper role
-		if (role.getBinding().isBinaryBinding())
-			return; // already linked.
+		ReferenceBinding binding = role.getBinding();
+		if (binding == null || binding.isBinaryBinding())
+			return; // no hope or already linked.
 
 		ReferenceBinding classPart = role.getClassPartBinding();
 		ReferenceBinding ifcPart = role.getInterfacePartBinding();
@@ -451,7 +472,7 @@ public class RoleSplitter
 	 * which may appear in interface signatures).
 	 * @param model
 	 */
-	public static void linkScopes(RoleModel model) {
+	private static void linkScopes(RoleModel model) {
 		if (model._classPart != null && model._interfacePart != null) {
 			// may already have error
 			// (we observed duplicateNestedType, nestedHidesEnclosing)
@@ -461,8 +482,6 @@ public class RoleSplitter
 				model._interfacePart.scope.parent = model._classPart.scope;
 		}
 	}
-
-
 
 	public static boolean isClassPartName(char[] typeName) {
 		return CharOperation.prefixEquals(OT_DELIM_NAME, typeName);

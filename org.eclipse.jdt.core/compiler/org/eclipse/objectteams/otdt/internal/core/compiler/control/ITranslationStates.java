@@ -42,7 +42,7 @@ public interface ITranslationStates {
 	public static final int STATE_LENV_CHECK_AND_SET_IMPORTS=   5;//LookupEnvironment & Deps.
 	public static final int STATE_LENV_CONNECT_TYPE_HIERARCHY=  6;//LookupEnvironment & Deps. & CopyInheritance
 	public static final int STATE_LENV_DONE_FIELDS_AND_METHODS= 7;//LookupEnvironment & Deps.
-	public static final int STATE_ROLES_LINKED            =  8;//CopyInheritance & Deps.
+	public static final int STATE_ROLES_LINKED            =  8;//LookupEnvironment & RoleSplitter
 	public static final int STATE_METHODS_PARSED          =  9;//Compiler
 	public static final int STATE_ROLE_INIT_METHODS       = 10;//RoleInitializationMethod
     public static final int STATE_ROLE_FEATURES_COPIED    = 11;//Copy inheritance
