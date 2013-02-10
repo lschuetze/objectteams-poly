@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CopyInheritance.java 23417 2010-02-03 20:13:55Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -176,7 +175,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *
  *
  * @author Markus Witte
- * @version $Id: CopyInheritance.java 23417 2010-02-03 20:13:55Z stephan $
  */
 public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraCompilerModifiers, ITranslationStates
 {
@@ -1441,6 +1439,7 @@ public class CopyInheritance implements IOTConstants, ClassFileConstants, ExtraC
 	    }
 
 	    AstGenerator gen = new AstGenerator(start, end);
+	    gen.replaceableEnclosingClass = teamDeclaration.binding;
 
 	    Argument[] newArguments = null;
 	    // Arguments (construct from bindings, using dummy names):

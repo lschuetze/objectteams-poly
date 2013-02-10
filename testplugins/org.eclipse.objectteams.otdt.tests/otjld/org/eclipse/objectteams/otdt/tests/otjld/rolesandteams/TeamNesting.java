@@ -1,13 +1,12 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010 Stephan Herrmann
+ * Copyright 2010, 2013 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -2251,6 +2250,53 @@ public class TeamNesting extends AbstractOTJLDTest {
     			"}\n"
     		}, 
     		"OK");
+    }
+
+    // Bug 400404 - [compiler] No enclosing instance of the type TOuter.T1 is accessible in scope - layered team and inheritance
+    public void test1122_layerdTeams9() {
+       runConformTest(
+            new String[] {
+		"Team1122lt9_2.java",
+			    "\n" +
+			    "public team class Team1122lt9_2 {\n" +
+			    "  public team class T1 {\n" + 
+			    "    protected final Team1122lt9_1 thatTeam = new Team1122lt9_1();\n" + 
+			    "    protected class R playedBy R1<@thatTeam> {" +
+			    "      @SuppressWarnings(\"basecall\")\n" +
+			    "      callin String fixedToString() {\n" +
+			    "        return \"OK\";\n" +
+			    "      }\n" +
+			    "    }\n" + 
+			    "  }\n" +
+			    "  public team class T2 extends T1 {\n" +
+			    "    @Override protected class R {\n" + 
+			    "      String fixedToString() <- replace String toString();\n" +
+			    "    }\n" +
+			    "  }\n" +
+			    "  void test() {\n" +
+			    "    T2 t = new T2();\n" +
+			    "    t.activate();\n" +
+			    "    System.out.print(t.thatTeam.getR1(\"NOTOK\"));\n" +
+			    "  }\n" +
+			    "  public static void main(String[] args) {\n" +
+			    "    new Team1122lt9_2().test();\n" +
+			    "  }\n" +
+			    "}\n" +
+			    "  \n",
+		"Team1122lt9_1.java",
+			    "\n" +
+			    "public team class Team1122lt9_1 {\n" +
+			    "  public class R1 {\n" +
+			    "    String val;\n" +
+			    "    public R1(String v) { this.val = v; }\n" +
+			    "    @Override\n" +
+			    "    public String toString() { return val; }\n" +
+			    "  }\n" +
+			    "  public R1 getR1(String v) { return new R1(v); }\n" +
+			    "}\n" +
+			    "  \n"
+            },
+            "OK");
     }
 
     // a nested team is played by a regular class, its (inner) role by an inner of the base - (we had a problem with splitting creation methods in conjunction with base class decapsulation )
