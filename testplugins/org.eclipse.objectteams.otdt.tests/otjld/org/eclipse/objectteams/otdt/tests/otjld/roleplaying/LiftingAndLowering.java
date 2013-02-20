@@ -5495,4 +5495,53 @@ public class LiftingAndLowering extends AbstractOTJLDTest {
     		"----------\n");
     }
 
+    // [compiler] resolve error re lifting constructor with implicit playedBy refinement
+    public void testBug400833() {
+    	runConformTest(
+    		new String[] {
+    			"to/TOuter.java",
+    			"package to;\n" + 
+    			"\n" + 
+    			"\n" + 
+    			"import base tb.TB1;\n" + 
+    			"import base tb.TB2;\n" + 
+    			"\n" + 
+    			"public team class TOuter {\n" + 
+    			"	public team class T1 playedBy TB1 {\n" + 
+    			"		protected class R playedBy B<@base> { }\n" + 
+    			"		/* added method */\n" + 
+    			"		public void test() {\n" + 
+    			"			new R(new B<@base>()); // works!\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"	public team class T2 extends T1  playedBy TB2 {\n" + 
+    			"		@Override\n" +
+    			"		protected class R playedBy B<@base> { }\n" + 
+    			"		@Override\n" + 
+    			"		public void test() {\n" + 
+    			"			new R(new B<@base>());  // error!\n" + 
+    			"		}\n" + 
+    			"	}\n" +
+    			"	void test(TB2 as T2 t2) {\n" +
+    			"		t2.test();\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new TOuter().test(new tb.TB2());\n" +
+    			"	}\n" + 
+    			"}\n",
+    			"tb/TB2.java",
+    			"package tb;\n" +
+    			"public team class TB2 extends TB1 {\n" +
+    			"	@Override public class B {\n" +
+    			"		public B() { System.out.print(\"OK\"); }\n" +
+    			"	}\n" +
+    			"}\n",
+    			"tb/TB1.java",
+    			"package tb;\n" +
+    			"public team class TB1 {\n" +
+    			"	public class B {}\n" +
+    			"}\n",
+    		},
+    		"OK");
+    }
 }
