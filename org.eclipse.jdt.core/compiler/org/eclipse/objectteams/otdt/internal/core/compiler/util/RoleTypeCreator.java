@@ -236,7 +236,7 @@ public class RoleTypeCreator implements TagBits {
         if (typedNode instanceof Expression)
         	decapsulationAllowed = ((Expression)typedNode).getBaseclassDecapsulation().isAllowed();
         	
-        if (   (variableBinding instanceof LocalVariableBinding) // not that for FieldBinding Bit63L has a different meaning!
+        if (   (variableBinding instanceof LocalVariableBinding) // note that for FieldBinding Bit63L has a different meaning!
 			&& (((LocalVariableBinding)variableBinding).tagBits & TagBits.IsFreshTeamInstance) != 0) 
         {
         	if (!RoleTypeBinding.isRoleType(refBinding))
