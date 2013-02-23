@@ -15,6 +15,7 @@
 # INPUT: Variables from otdt_prerequisites:
 # -----------------------------------------------------------------------------
 # TMPDIR                for log output
+# TEST_TMPDIR           for temp test files
 # OT_TESTSUITE_DIR      root directory for building and testing
 # METADATA				directory for metadata from previous builds
 # OT_RECIPIENT          mail address for failure messages
@@ -90,6 +91,7 @@ DO_RUN="true"
 #LOCAL: Display to be used by VNC:
 VNC_DISPLAY=:23
 
+
 while test $# -gt 0; do
 	case "$1" in 
     -b)
@@ -105,6 +107,11 @@ while test $# -gt 0; do
 	    X11=X11
 		shift
 		;;
+	-tmp)
+        shift
+        TEST_TMPDIR="$1"
+        shift
+        ;;
 	*)
 		echo "Unknown argument: $1"
 		usage
@@ -144,7 +151,8 @@ ANT_OPTIONS="${ANT_PROFILE} \
     -Declipse.tests.zip=${ECLIPSE_TESTLIB_ZIP} \
     -Dpublished.updates=${PUBLISHED_UPDATES} \
     -Ddo.run.tests=${DO_RUN} \
-    -Ddo.build.all=${DO_BUILD}"
+    -Ddo.build.all=${DO_BUILD} \
+    -Dtest.tmpDir=${TEST_TMPDIR}"
 
 ANT_OPTS="-Xmx1024m"
 export ANT_OPTS

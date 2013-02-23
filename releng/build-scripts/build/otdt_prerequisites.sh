@@ -20,6 +20,9 @@ OT_TESTSUITE_DIR=${BASEDIR}/testrun
 # EXPORT: tmp directory for logging:
 TMPDIR="${BASEDIR}/tmp"
 
+# EXPORT: tmp directory for test files:
+TEST_TMPDIR="${HOME}/tmp"
+
 # EXPORT: directory for metadata from previous builds:
 METADATA="${BASEDIR}/metadata"
 
@@ -62,5 +65,5 @@ ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
 ECLIPSE_TESTLIB_ZIP=${DROP}/eclipse-test-framework-${EVERSION}.zip
 
 # EXPORT: where to find previously published plugins&features:
-PUBLISHED_UPDATES=${HOME}/downloads/objectteams/updates/ot2.1
+PUBLISHED_UPDATES=${HOME}/downloads/objectteams/updates/ot2.2
 
