@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,9 @@
  *							bug 394768 - [compiler][resource] Incorrect resource leak warning when creating stream in conditional
  *							bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *							bug 383368 - [compiler][null] syntactic null analysis for field references
+ *							bug 400761 - [compiler][null] null may be return as boolean without a diagnostic
+ *     Jesper S Moller - Contributions for
+ *							Bug 378674 - "The method can be declared as static" is wrong
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -133,9 +136,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	if (this.initialization == null) {
 		return flowInfo;
 	}
-	if ((this.initialization.implicitConversion & TypeIds.UNBOXING) != 0) {
-		this.initialization.checkNPE(currentScope, flowContext, flowInfo);
-	}
+	this.initialization.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
 	
 	FlowInfo preInitInfo = null;
 	boolean shouldAnalyseResource = this.binding != null 

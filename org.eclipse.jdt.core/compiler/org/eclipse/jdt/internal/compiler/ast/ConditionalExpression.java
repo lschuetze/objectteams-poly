@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@
  *     						bug 349326 - [1.7] new warning for missing try-with-resources
  *							bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *							bug 383368 - [compiler][null] syntactic null analysis for field references
+ *							bug 400761 - [compiler][null] null may be return as boolean without a diagnostic
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -85,6 +86,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		}
 		this.trueInitStateIndex = currentScope.methodScope().recordInitializationStates(trueFlowInfo);
 		trueFlowInfo = this.valueIfTrue.analyseCode(currentScope, flowContext, trueFlowInfo);
+		this.valueIfTrue.checkNPEbyUnboxing(currentScope, flowContext, trueFlowInfo);
 
 		// may need to fetch this null status before expireNullCheckedFieldInfo():
 		int preComputedTrueNullStatus = -1;
@@ -106,6 +108,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		}
 		this.falseInitStateIndex = currentScope.methodScope().recordInitializationStates(falseFlowInfo);
 		falseFlowInfo = this.valueIfFalse.analyseCode(currentScope, flowContext, falseFlowInfo);
+		this.valueIfFalse.checkNPEbyUnboxing(currentScope, flowContext, falseFlowInfo);
 
 		flowContext.conditionalLevel--;
 		
@@ -174,6 +177,14 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 			currentScope.methodScope().recordInitializationStates(mergedInfo);
 		mergedInfo.setReachMode(mode);
 		return mergedInfo;
+	}
+
+	public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
+		if ((this.nullStatus & FlowInfo.NULL) != 0)
+			scope.problemReporter().expressionNullReference(this);
+		else if ((this.nullStatus & FlowInfo.POTENTIALLY_NULL) != 0)
+			scope.problemReporter().expressionPotentialNullReference(this);
+		return true; // all checking done
 	}
 
 	private void computeNullStatus(int ifTrueNullStatus, FlowInfo trueBranchInfo, FlowInfo falseBranchInfo, FlowContext flowContext) {

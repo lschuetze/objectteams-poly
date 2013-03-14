@@ -1,10 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * 
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -17,6 +17,8 @@
  *								bug 365531 - [compiler][null] investigate alternative strategy for internally encoding nullness defaults
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
+ *								bug 400421 - [compiler] Null analysis for fields does not take @com.google.inject.Inject into account
+ *								bug 382069 - [null] Make the null analysis consider JUnit's assertNotNull similarly to assertions
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -86,15 +88,14 @@ abstract public class ReferenceBinding extends AbstractOTReferenceBinding {
 	public PackageBinding fPackage;
 //{ObjectTeams: accessible for sub-classes:
 /* orig:
-    char[] fileName;
-    char[] constantPoolName;
-    char[] signature;
+	char[] fileName;
+	char[] constantPoolName;
+	char[] signature;
   :giro */
     public char[] fileName;
     public char[] constantPoolName;
     protected char[] signature;
 // SH}
-
 
 	private SimpleLookupTable compatibleCache;
 
@@ -346,56 +347,6 @@ public MethodBinding[] availableMethods() {
 	return methods();
 }
 
-public FieldBinding[] unResolvedFields() {
-	return Binding.NO_FIELDS;
-}
-
-/*
- * If a type - known to be a Closeable - is mentioned in one of our white lists
- * answer the typeBit for the white list (BitWrapperCloseable or BitResourceFreeCloseable).
- */
-protected int applyCloseableWhitelists() {
-	switch (this.compoundName.length) {
-		case 3:
-			if (CharOperation.equals(TypeConstants.JAVA, this.compoundName[0])) {
-				if (CharOperation.equals(TypeConstants.IO, this.compoundName[1])) {
-					char[] simpleName = this.compoundName[2];
-					int l = TypeConstants.JAVA_IO_WRAPPER_CLOSEABLES.length;
-					for (int i = 0; i < l; i++) {
-						if (CharOperation.equals(simpleName, TypeConstants.JAVA_IO_WRAPPER_CLOSEABLES[i]))
-							return TypeIds.BitWrapperCloseable;
-					}
-					l = TypeConstants.JAVA_IO_RESOURCE_FREE_CLOSEABLES.length;
-					for (int i = 0; i < l; i++) {
-						if (CharOperation.equals(simpleName, TypeConstants.JAVA_IO_RESOURCE_FREE_CLOSEABLES[i]))
-							return TypeIds.BitResourceFreeCloseable;
-					}
-				}
-			}
-			break;
-		case 4:
-			if (CharOperation.equals(TypeConstants.JAVA, this.compoundName[0])) {
-				if (CharOperation.equals(TypeConstants.UTIL, this.compoundName[1])) {
-					if (CharOperation.equals(TypeConstants.ZIP, this.compoundName[2])) {
-						char[] simpleName = this.compoundName[3];
-						int l = TypeConstants.JAVA_UTIL_ZIP_WRAPPER_CLOSEABLES.length;
-						for (int i = 0; i < l; i++) {
-							if (CharOperation.equals(simpleName, TypeConstants.JAVA_UTIL_ZIP_WRAPPER_CLOSEABLES[i]))
-								return TypeIds.BitWrapperCloseable;
-						}
-					}
-				}
-			}
-			break;
-	}
-	int l = TypeConstants.OTHER_WRAPPER_CLOSEABLES.length;
-	for (int i = 0; i < l; i++) {
-		if (CharOperation.equals(this.compoundName, TypeConstants.OTHER_WRAPPER_CLOSEABLES[i]))
-			return TypeIds.BitWrapperCloseable;
-	}	
-	return 0;
-}
-
 /**
  * Answer true if the receiver can be instantiated
  */
@@ -605,10 +556,34 @@ public void computeId() {
 				return;
 			}
 // SH}
-			if (!CharOperation.equals(TypeConstants.JAVA, this.compoundName[0]))
-				return;
+			char[] packageName = this.compoundName[0];
+			// expect only java.*.* and javax.*.* and junit.*.* and org.junit.*
+			switch (packageName.length) {
+				case 3: // only one type in this group, yet:
+					if (CharOperation.equals(TypeConstants.ORG_JUNIT_ASSERT, this.compoundName))
+						this.id = TypeIds.T_OrgJunitAssert;
+					return;						
+				case 4:
+					if (!CharOperation.equals(TypeConstants.JAVA, packageName))
+						return;
+					break; // continue below ...
+				case 5:
+					switch (packageName[1]) {
+						case 'a':
+							if (CharOperation.equals(TypeConstants.JAVAX_ANNOTATION_INJECT_INJECT, this.compoundName))
+								this.id = TypeIds.T_JavaxInjectInject;
+							return;
+						case 'u':
+							if (CharOperation.equals(TypeConstants.JUNIT_FRAMEWORK_ASSERT, this.compoundName))
+								this.id = TypeIds.T_JunitFrameworkAssert;
+							return;
+					}
+					return;
+				default: return;
+			}
+			// ... at this point we know it's java.*.*
 			
-			char[] packageName = this.compoundName[1];
+			packageName = this.compoundName[1];
 			if (packageName.length == 0) return; // just to be safe
 			char[] typeName = this.compoundName[2];
 			if (typeName.length == 0) return; // just to be safe
@@ -655,6 +630,10 @@ public void computeId() {
 								case 'I' :
 									if (CharOperation.equals(typeName, TypeConstants.JAVA_UTIL_ITERATOR[2]))
 										this.id = TypeIds.T_JavaUtilIterator;
+									return;
+								case 'O' :
+									if (CharOperation.equals(typeName, TypeConstants.JAVA_UTIL_OBJECTS[2]))
+										this.id = TypeIds.T_JavaUtilObjects;
 									return;
 							}
 						}
@@ -823,6 +802,12 @@ public void computeId() {
 		break;
 
 		case 4:
+			// expect one type from com.*.*.*:
+			if (CharOperation.equals(TypeConstants.COM_GOOGLE_INJECT_INJECT, this.compoundName)) {
+				this.id = TypeIds.T_ComGoogleInjectInject;
+				return;
+			}
+			// otherwise only expect java.*.*.*
 			if (!CharOperation.equals(TypeConstants.JAVA, this.compoundName[0]))
 				return;
 			packageName = this.compoundName[1];
@@ -940,28 +925,48 @@ public void computeId() {
 					packageName = this.compoundName[1];
 					if (packageName.length == 0) return; // just to be safe
 
-					if (CharOperation.equals(TypeConstants.ECLIPSE, packageName)) {
-						packageName = this.compoundName[2];
-						if (packageName.length == 0) return; // just to be safe
-						switch (packageName[0]) {
-							case 'c' :
-								if (CharOperation.equals(packageName, TypeConstants.CORE)) { 
-									typeName = this.compoundName[3];
-									if (typeName.length == 0) return; // just to be safe
-									switch (typeName[0]) {
-										case 'r' :
-											char[] memberTypeName = this.compoundName[4];
-											if (memberTypeName.length == 0) return; // just to be safe
-											if (CharOperation.equals(typeName, TypeConstants.ORG_ECLIPSE_CORE_RUNTIME_ASSERT[3])
-													&& CharOperation.equals(memberTypeName, TypeConstants.ORG_ECLIPSE_CORE_RUNTIME_ASSERT[4]))
-												this.id = TypeIds.T_OrgEclipseCoreRuntimeAssert;
-											return;
-									}
+					switch (packageName[0]) {
+						case 'e':
+							if (CharOperation.equals(TypeConstants.ECLIPSE, packageName)) {
+								packageName = this.compoundName[2];
+								if (packageName.length == 0) return; // just to be safe
+								switch (packageName[0]) {
+									case 'c' :
+										if (CharOperation.equals(packageName, TypeConstants.CORE)) { 
+											typeName = this.compoundName[3];
+											if (typeName.length == 0) return; // just to be safe
+											switch (typeName[0]) {
+												case 'r' :
+													char[] memberTypeName = this.compoundName[4];
+													if (memberTypeName.length == 0) return; // just to be safe
+													if (CharOperation.equals(typeName, TypeConstants.ORG_ECLIPSE_CORE_RUNTIME_ASSERT[3])
+															&& CharOperation.equals(memberTypeName, TypeConstants.ORG_ECLIPSE_CORE_RUNTIME_ASSERT[4]))
+														this.id = TypeIds.T_OrgEclipseCoreRuntimeAssert;
+													return;
+											}
+										}
+										return;
 								}
 								return;
-						}
-						return;
+							}
+							return;
+						case 'a':
+							if (CharOperation.equals(TypeConstants.APACHE, packageName)) {
+								if (CharOperation.equals(TypeConstants.COMMONS, this.compoundName[2])) {
+									if (CharOperation.equals(TypeConstants.ORG_APACHE_COMMONS_LANG_VALIDATE, this.compoundName))
+										this.id = TypeIds.T_OrgApacheCommonsLangValidate;
+									else if (CharOperation.equals(TypeConstants.ORG_APACHE_COMMONS_LANG3_VALIDATE, this.compoundName))
+										this.id = TypeIds.T_OrgApacheCommonsLang3Validate;
+								}
+							}
+							return;
 					}
+					return;
+				case 'c':
+					if (!CharOperation.equals(TypeConstants.COM, this.compoundName[0]))
+						return;
+					if (CharOperation.equals(TypeConstants.COM_GOOGLE_COMMON_BASE_PRECONDITIONS, this.compoundName))
+						this.id = TypeIds.T_ComGoogleCommonBasePreconditions;
 					return;
 			}
 			break;
@@ -991,6 +996,7 @@ public char[] attributeName() /* p1.p2.COuter$CInner */ {
     return CharOperation.concatWith(this.compoundName, '.');
 }
 // SH}
+
 public String debugName() {
 	return (this.compoundName != null) ? new String(readableName()) : "UNNAMED TYPE"; //$NON-NLS-1$
 }
@@ -1085,12 +1091,6 @@ public long getAnnotationTagBits() {
 	return this.tagBits;
 }
 
-// Answer methods named selector, which take no more than the suggestedParameterLength.
-// The suggested parameter length is optional and may not be guaranteed by every type.
-public MethodBinding[] getMethods(char[] selector, int suggestedParameterLength) {
-	return getMethods(selector);
-}
-
 /**
  * @return the enclosingInstancesSlotSize
  */
@@ -1115,8 +1115,6 @@ public FieldBinding getField(char[] fieldName, boolean needResolve) {
 public char[] getFileName() {
 	return this.fileName;
 }
-/** Answer an additional bit characterizing this type, like {@link TypeIds#BitAutoCloseable}. */
-abstract public boolean hasTypeBit(int bit);
 
 public ReferenceBinding getMemberType(char[] typeName) {
 	ReferenceBinding[] memberTypes = memberTypes();
@@ -1142,6 +1140,13 @@ public ReferenceBinding getMemberTypeRecurse(char[] typeName) {
 public MethodBinding[] getMethods(char[] selector) {
 	return Binding.NO_METHODS;
 }
+
+// Answer methods named selector, which take no more than the suggestedParameterLength.
+// The suggested parameter length is optional and may not be guaranteed by every type.
+public MethodBinding[] getMethods(char[] selector, int suggestedParameterLength) {
+	return getMethods(selector);
+}
+
 //{ObjectTeams:
 	/**
 	 * get method by its selector, search includes superclasses, superinterfaces.
@@ -1331,6 +1336,8 @@ boolean hasNonNullDefault() {
 public final boolean hasRestrictedAccess() {
 	return (this.modifiers & ExtraCompilerModifiers.AccRestrictedAccess) != 0;
 }
+/** Answer an additional bit characterizing this type, like {@link TypeIds#BitAutoCloseable}. */
+abstract public boolean hasTypeBit(int bit);
 
 //{ObjectTeams: support asymmetric comparison. // FIXME(SH): is this needed or is super-impl smart enough??
 @Override
@@ -1927,7 +1934,7 @@ public char[] shortReadableName() /*Object*/ {
 	}
 	return shortReadableName;
 }
-// SH} // end sourceName - editid section
+// SH} // end sourceName - edited section
 
 //{ObjectTeams: to be overridden in RoleTypeBinding
 public char[] optimalName() {
@@ -2020,6 +2027,57 @@ public SyntheticArgumentBinding[] syntheticOuterLocalVariables() {
 MethodBinding[] unResolvedMethods() { // for the MethodVerifier so it doesn't resolve types
 	return methods();
 }
+
+public FieldBinding[] unResolvedFields() {
+	return Binding.NO_FIELDS;
+}
+
+/*
+ * If a type - known to be a Closeable - is mentioned in one of our white lists
+ * answer the typeBit for the white list (BitWrapperCloseable or BitResourceFreeCloseable).
+ */
+protected int applyCloseableWhitelists() {
+	switch (this.compoundName.length) {
+		case 3:
+			if (CharOperation.equals(TypeConstants.JAVA, this.compoundName[0])) {
+				if (CharOperation.equals(TypeConstants.IO, this.compoundName[1])) {
+					char[] simpleName = this.compoundName[2];
+					int l = TypeConstants.JAVA_IO_WRAPPER_CLOSEABLES.length;
+					for (int i = 0; i < l; i++) {
+						if (CharOperation.equals(simpleName, TypeConstants.JAVA_IO_WRAPPER_CLOSEABLES[i]))
+							return TypeIds.BitWrapperCloseable;
+					}
+					l = TypeConstants.JAVA_IO_RESOURCE_FREE_CLOSEABLES.length;
+					for (int i = 0; i < l; i++) {
+						if (CharOperation.equals(simpleName, TypeConstants.JAVA_IO_RESOURCE_FREE_CLOSEABLES[i]))
+							return TypeIds.BitResourceFreeCloseable;
+					}
+				}
+			}
+			break;
+		case 4:
+			if (CharOperation.equals(TypeConstants.JAVA, this.compoundName[0])) {
+				if (CharOperation.equals(TypeConstants.UTIL, this.compoundName[1])) {
+					if (CharOperation.equals(TypeConstants.ZIP, this.compoundName[2])) {
+						char[] simpleName = this.compoundName[3];
+						int l = TypeConstants.JAVA_UTIL_ZIP_WRAPPER_CLOSEABLES.length;
+						for (int i = 0; i < l; i++) {
+							if (CharOperation.equals(simpleName, TypeConstants.JAVA_UTIL_ZIP_WRAPPER_CLOSEABLES[i]))
+								return TypeIds.BitWrapperCloseable;
+						}
+					}
+				}
+			}
+			break;
+	}
+	int l = TypeConstants.OTHER_WRAPPER_CLOSEABLES.length;
+	for (int i = 0; i < l; i++) {
+		if (CharOperation.equals(this.compoundName, TypeConstants.OTHER_WRAPPER_CLOSEABLES[i]))
+			return TypeIds.BitWrapperCloseable;
+	}	
+	return 0;
+}
+
 //{ObjectTeams: support for checking substitution of a value parameter 
 public VariableBinding valueParamSynthArgAt(int typeParamPosition) {
 	SyntheticArgumentBinding[] args = valueParamSynthArgs();
