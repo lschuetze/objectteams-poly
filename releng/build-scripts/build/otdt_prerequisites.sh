@@ -51,11 +51,11 @@ fi
 
 # VERSIONS:
 # Eclipse SDK build identifier:
-EVERSION=4.3M5
+EVERSION=4.3M6
 # Architecture (as used by OSGi):
 ARCH=`arch`
 # used only locally:
-DROP=${BASEDIR}/drops4/S-4.3M5-201301302000
+DROP=${BASEDIR}/drops4/S-4.3M6-201303141330
 
 
 # EXPORT: archive file of the base eclipse SDK build:
