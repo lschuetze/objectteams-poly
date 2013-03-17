@@ -1518,92 +1518,87 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 			    "        \n"
             },
     		"----------\n" +
-			"1. ERROR in Team167ratb5f_2.java (at line 3)\n" +
-			"	public class R playedBy Team167ratb5f_1 {\n" +
-			"	             ^\n" +
-			"The type R must be an abstract class to define abstract methods\n" +
-			"----------\n" +
-			"2. ERROR in Team167ratb5f_2.java (at line 8)\n" +
+			"1. ERROR in Team167ratb5f_2.java (at line 8)\n" +
 			"	R<@base> r = getR2(getR1());\n" +
 			"	^\n" +
 			"Illegal use of value parameter: type Team167ratb5f_2.R does not declare a value parameter at position 1 (OTJLD 9.2.1).\n" +
 			"----------\n" +
-			"3. ERROR in Team167ratb5f_2.java (at line 8)\n" +
+			"2. ERROR in Team167ratb5f_2.java (at line 8)\n" +
 			"	R<@base> r = getR2(getR1());\n" +
 			"	             ^^^^^\n" +
 			"The method getR2(R<@tthis[Team167ratb5f_2]>) in the type Team167ratb5f_2.R is not applicable for the arguments (R)\n" +
 			"----------\n" +
-			"4. ERROR in Team167ratb5f_2.java (at line 9)\n" +
+			"3. ERROR in Team167ratb5f_2.java (at line 9)\n" +
 			"	r.test();\n" +
 			"	^\n" +
 			"The type R is not visible\n" +
 			"----------\n" +
-			"5. ERROR in Team167ratb5f_2.java (at line 11)\n" +
+			"4. ERROR in Team167ratb5f_2.java (at line 11)\n" +
 			"	abstract R<@base> getR1();\n" +
 			"	         ^\n" +
 			"Illegal use of value parameter: type Team167ratb5f_2.R does not declare a value parameter at position 1 (OTJLD 9.2.1).\n" +
 			"----------\n" +
-			"6. ERROR in Team167ratb5f_2.java (at line 11)\n" +
+			"5. ERROR in Team167ratb5f_2.java (at line 11)\n" +
 			"	abstract R<@base> getR1();\n" +
 			"	         ^^^^^^^^\n" +
 			"The return type is incompatible with Team167ratb5f_2.R.getR1()\n" +
 			"----------\n" +
-			"7. ERROR in Team167ratb5f_2.java (at line 12)\n" +
+			"6. ERROR in Team167ratb5f_2.java (at line 12)\n" +
 			"	R<@base> getR1() -> R<@base> getR1();\n" +
 			"	^\n" +
 			"Illegal use of value parameter: type Team167ratb5f_2.R does not declare a value parameter at position 1 (OTJLD 9.2.1).\n" +
 			"----------\n" +
-			"8. ERROR in Team167ratb5f_2.java (at line 12)\n" +
+			"7. ERROR in Team167ratb5f_2.java (at line 12)\n" +
 			"	R<@base> getR1() -> R<@base> getR1();\n" +
 			"	^\n" +
 			"Method designator binds to a method returning R whereas return type R is specified (OTJLD 3.1(c)).\n" +
 			"----------\n" +
-			"9. ERROR in Team167ratb5f_2.java (at line 12)\n" +
+			"8. ERROR in Team167ratb5f_2.java (at line 12)\n" +
 			"	R<@base> getR1() -> R<@base> getR1();\n" +
 			"	                    ^\n" +
 			"Illegal use of value parameter: type Team167ratb5f_2.R does not declare a value parameter at position 1 (OTJLD 9.2.1).\n" +
 			"----------\n" +
-			"10. ERROR in Team167ratb5f_2.java (at line 12)\n" +
+			"9. ERROR in Team167ratb5f_2.java (at line 12)\n" +
 			"	R<@base> getR1() -> R<@base> getR1();\n" +
 			"	                    ^\n" +
 			"Method designator binds to a method returning R1<@tthis[Team167ratb5f_1]> whereas return type R is specified (OTJLD 3.1(c)).\n" +
 			"----------\n" +
-			"11. ERROR in Team167ratb5f_2.java (at line 13)\n" +
+			"10. ERROR in Team167ratb5f_2.java (at line 13)\n" +
 			"	abstract R<@base> getR2(R<@base> in);\n" +
 			"	         ^\n" +
 			"Illegal use of value parameter: type Team167ratb5f_2.R does not declare a value parameter at position 1 (OTJLD 9.2.1).\n" +
 			"----------\n" +
-			"12. ERROR in Team167ratb5f_2.java (at line 13)\n" +
+			"11. ERROR in Team167ratb5f_2.java (at line 13)\n" +
 			"	abstract R<@base> getR2(R<@base> in);\n" +
 			"	                  ^^^^^^^^^^^^^^^^^^\n" +
 			"The abstract method getR2 in type R can only be defined by an abstract class\n" +
 			"----------\n" +
-			"13. ERROR in Team167ratb5f_2.java (at line 13)\n" +
+			"12. ERROR in Team167ratb5f_2.java (at line 13)\n" +
 			"	abstract R<@base> getR2(R<@base> in);\n" +
 			"	                        ^\n" +
 			"Illegal use of value parameter: type Team167ratb5f_2.R does not declare a value parameter at position 1 (OTJLD 9.2.1).\n" +
 			"----------\n" +
-			"14. ERROR in Team167ratb5f_2.java (at line 14)\n" +
+			"13. ERROR in Team167ratb5f_2.java (at line 14)\n" +
 			"	R<@base> getR2(R<@base> in) -> R<@base> getR2(R<@base>1 in); // here\n" +
 			"	^\n" +
 			"Illegal use of value parameter: type Team167ratb5f_2.R does not declare a value parameter at position 1 (OTJLD 9.2.1).\n" +
 			"----------\n" +
-			"15. ERROR in Team167ratb5f_2.java (at line 14)\n" +
+			"14. ERROR in Team167ratb5f_2.java (at line 14)\n" +
 			"	R<@base> getR2(R<@base> in) -> R<@base> getR2(R<@base>1 in); // here\n" +
 			"	               ^\n" +
 			"Illegal use of value parameter: type Team167ratb5f_2.R does not declare a value parameter at position 1 (OTJLD 9.2.1).\n" +
 			"----------\n" +
-			"16. ERROR in Team167ratb5f_2.java (at line 14)\n" +
+			"15. ERROR in Team167ratb5f_2.java (at line 14)\n" +
 			"	R<@base> getR2(R<@base> in) -> R<@base> getR2(R<@base>1 in); // here\n" +
 			"	                               ^\n" +
 			"Illegal use of value parameter: type Team167ratb5f_2.R does not declare a value parameter at position 1 (OTJLD 9.2.1).\n" +
 			"----------\n" +
-			"17. ERROR in Team167ratb5f_2.java (at line 14)\n" +
+			"16. ERROR in Team167ratb5f_2.java (at line 14)\n" +
 			"	R<@base> getR2(R<@base> in) -> R<@base> getR2(R<@base>1 in); // here\n" +
 			"	                               ^^^^^^^^^^^^^^^\n" +
 			"No method getR2() found in type Team167ratb5f_1 to resolve method designator (OTJLD 3.1(c)).\n" +
 			"----------\n" +
-			"18. ERROR in Team167ratb5f_2.java (at line 14)\n" +
+			"17. ERROR in Team167ratb5f_2.java (at line 14)\n" +
 			"	R<@base> getR2(R<@base> in) -> R<@base> getR2(R<@base>1 in); // here\n" +
 			"	                                                      ^\n" +
 			"Syntax error on token \"1\", delete this token\n" +

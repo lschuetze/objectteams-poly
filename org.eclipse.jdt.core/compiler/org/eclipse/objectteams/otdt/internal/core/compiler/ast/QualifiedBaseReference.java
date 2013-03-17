@@ -49,15 +49,17 @@ public class QualifiedBaseReference extends QualifiedThisReference {
 		TypeBinding superResult = super.resolveType(scope);
 		if (superResult == null || !superResult.isValidBinding())
 			return null;
-		if (this.currentCompatibleType != null && this.currentCompatibleType.isValidBinding()) {
-			this.baseField = this.currentCompatibleType.getField(IOTConstants._OT_BASE, true);
+		ReferenceBinding currentType = this.currentCompatibleType;
+		while (currentType != null && currentType.isValidBinding() && currentType.isRole()) {
+			this.baseField = currentType.getField(IOTConstants._OT_BASE, true);
 			if (this.baseField != null) {
 				if (this.baseField.isValidBinding())
 					return this.resolvedType = this.baseField.type;
-			} else {
-				this.baseField = new ProblemFieldBinding((ReferenceBinding)this.resolvedType, IOTConstants.BASE, ProblemReasons.NotFound);
 			}
-		}		
+			currentType = currentType.superclass(); // base field may be inherited
+		}
+		if (this.baseField == null)
+			this.baseField = new ProblemFieldBinding((ReferenceBinding)this.resolvedType, IOTConstants.BASE, ProblemReasons.NotFound);
 		scope.problemReporter().unboundQualifiedBase((ReferenceBinding)this.qualification.resolvedType, this);
 		return null; 
 	}
