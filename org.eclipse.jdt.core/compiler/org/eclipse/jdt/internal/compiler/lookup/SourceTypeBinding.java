@@ -2240,7 +2240,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
             	}
             }
             // fix for NPE of https://bugs.eclipse.org/403396
-            if (parameterType != null && !parameterType.isValidBinding() && !(parameterType instanceof MissingTypeBinding))
+            if (parameterType != null && !parameterType.isValidBinding() && ((parameterType.tagBits & TagBits.HasMissingType) == 0))
             	foundArgProblem = true;
 // SH}
 			if (parameterType == null) {
