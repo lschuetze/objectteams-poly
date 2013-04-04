@@ -654,14 +654,22 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 					"@interface Marker {}",
 					"X.java",
 					"public class X<@Marker T> {}",
+
+					"java/lang/annotation/ElementType.java",
+					"package java.lang.annotation;\n" +
+					"public enum ElementType {\n" +
+					"    TYPE,\n" +
+					"    FIELD,\n" +
+					"    METHOD,\n" +
+					"    PARAMETER,\n" +
+					"    CONSTRUCTOR,\n" +
+					"    LOCAL_VARIABLE,\n" +
+					"    ANNOTATION_TYPE,\n" +
+					"    PACKAGE,\n" +
+					"    TYPE_PARAMETER,\n" +
+					"    TYPE_USE\n" +
+					"}\n"
 				},
-				/* TODO(Srikanth/Jay) when JSR308 enabled runtime becomes available for testing, the first error message should be deleted. */
-				"----------\n" + 
-				"1. ERROR in Marker.java (at line 3)\n" + 
-				"	@Target(TYPE_USE)\n" + 
-				"	        ^^^^^^^^\n" + 
-				"TYPE_USE cannot be resolved to a variable\n" + 
-				"----------\n" + 
 				"----------\n" + 
 				"1. ERROR in X.java (at line 1)\n" + 
 				"	public class X<@Marker T> {}\n" + 
@@ -845,68 +853,28 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 		"----------\n" + 
 		"2. ERROR in X.java (at line 3)\n" + 
 		"	System.out.println(int @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
-		"	                       ^^^^^^^^^\n" + 
-		"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
-		"----------\n" + 
-		"3. ERROR in X.java (at line 3)\n" + 
-		"	System.out.println(int @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
 		"	                                       ^^^^^^^^^^^^^^^^\n" + 
 		"Syntax error, type annotations are illegal here\n" + 
 		"----------\n" + 
-		"4. ERROR in X.java (at line 3)\n" + 
-		"	System.out.println(int @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
-		"	                                       ^^^^^^^^^\n" + 
-		"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
-		"----------\n" + 
-		"5. ERROR in X.java (at line 3)\n" + 
-		"	System.out.println(int @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
-		"	                                                 ^^^^^^\n" + 
-		"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
-		"----------\n" + 
-		"6. ERROR in X.java (at line 3)\n" + 
+		"3. ERROR in X.java (at line 3)\n" + 
 		"	System.out.println(int @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
 		"	                                                              ^^^^^^^^^\n" + 
 		"Syntax error, type annotations are illegal here\n" + 
 		"----------\n" + 
-		"7. ERROR in X.java (at line 3)\n" + 
-		"	System.out.println(int @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
-		"	                                                              ^^^^^^^^^\n" + 
-		"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
-		"----------\n" + 
-		"8. ERROR in X.java (at line 4)\n" + 
+		"4. ERROR in X.java (at line 4)\n" + 
 		"	System.out.println(X @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
 		"	                     ^^^^^^^^^\n" + 
 		"Syntax error, type annotations are illegal here\n" + 
 		"----------\n" + 
-		"9. ERROR in X.java (at line 4)\n" + 
-		"	System.out.println(X @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
-		"	                     ^^^^^^^^^\n" + 
-		"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
-		"----------\n" + 
-		"10. ERROR in X.java (at line 4)\n" + 
+		"5. ERROR in X.java (at line 4)\n" + 
 		"	System.out.println(X @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
 		"	                                     ^^^^^^^^^^^^^^^^\n" + 
 		"Syntax error, type annotations are illegal here\n" + 
 		"----------\n" + 
-		"11. ERROR in X.java (at line 4)\n" + 
-		"	System.out.println(X @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
-		"	                                     ^^^^^^^^^\n" + 
-		"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
-		"----------\n" + 
-		"12. ERROR in X.java (at line 4)\n" + 
-		"	System.out.println(X @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
-		"	                                               ^^^^^^\n" + 
-		"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
-		"----------\n" + 
-		"13. ERROR in X.java (at line 4)\n" + 
+		"6. ERROR in X.java (at line 4)\n" + 
 		"	System.out.println(X @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
 		"	                                                            ^^^^^^^^^\n" + 
 		"Syntax error, type annotations are illegal here\n" + 
-		"----------\n" + 
-		"14. ERROR in X.java (at line 4)\n" + 
-		"	System.out.println(X @NonEmpty [] [] @NonEmpty @Empty [] [] @NonEmpty[].class); // illegal!\n" + 
-		"	                                                            ^^^^^^^^^\n" + 
-		"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
 		"----------\n");
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383950
@@ -973,13 +941,8 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 					"----------\n" + 
 					"1. ERROR in X.java (at line 1)\n" + 
 					"	import @Marker java.lang.String; // Compilation error \n" + 
-					"	^^^^^^\n" + 
-					"Syntax error on token(s), misplaced construct(s)\n" + 
-					"----------\n" + 
-					"2. ERROR in X.java (at line 1)\n" + 
-					"	import @Marker java.lang.String; // Compilation error \n" + 
-					"	        ^^^^^^\n" + 
-					"Syntax error on token \"Marker\", package expected after this token\n" + 
+					"	       ^^^^^^^\n" + 
+					"Syntax error, type annotations are illegal here\n" + 
 					"----------\n");
 	}
 	// Test that type name can't be left out in a cast expression with an annotations 
@@ -997,8 +960,8 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 					"----------\n" + 
 					"1. ERROR in X.java (at line 3)\n" + 
 					"	String myString = (@NonNull) myObject;	}\n" + 
-					"	                    ^^^^^^^\n" + 
-					"Syntax error on token \"NonNull\", void expected after this token\n" + 
+					"	                   ^\n" + 
+					"Syntax error on token \"@\", delete this token\n" + 
 					"----------\n");
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=385111
@@ -1292,7 +1255,23 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 						"    public void foobar(AnonymousInner this);\n" +
 						"}\n" +
 						"@Target(TYPE_USE)\n" + 
-						"@interface Marker {}"},
+						"@interface Marker {}",
+
+						"java/lang/annotation/ElementType.java",
+						"package java.lang.annotation;\n" +
+						"public enum ElementType {\n" +
+						"    TYPE,\n" +
+						"    FIELD,\n" +
+						"    METHOD,\n" +
+						"    PARAMETER,\n" +
+						"    CONSTRUCTOR,\n" +
+						"    LOCAL_VARIABLE,\n" +
+						"    ANNOTATION_TYPE,\n" +
+						"    PACKAGE,\n" +
+						"    TYPE_PARAMETER,\n" +
+						"    TYPE_USE\n" +
+						"}\n"
+					},
 							"----------\n" + 
 							"1. ERROR in Outer.java (at line 5)\n" + 
 							"	public Inner(@Missing Outer Outer.this) {}\n" + 
@@ -1311,33 +1290,18 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 							"----------\n" + 
 							"4. ERROR in Outer.java (at line 21)\n" + 
 							"	public StaticNested(@Marker Outer.StaticNested Outer.StaticNested.this) {}\n" + 
-							"	                    ^^^^^^^\n" + 
-							"The annotation @Marker is disallowed for this location\n" + 
-							"----------\n" + 
-							"5. ERROR in Outer.java (at line 21)\n" + 
-							"	public StaticNested(@Marker Outer.StaticNested Outer.StaticNested.this) {}\n" + 
 							"	                                                                  ^^^^\n" + 
 							"Explicit \'this\' parameter is allowed only in instance methods of non-anonymous classes and inner class constructors\n" + 
 							"----------\n" + 
-							"6. ERROR in Outer.java (at line 23)\n" + 
-							"	public static void foo(@Marker Outer this) {}\n" + 
-							"	                       ^^^^^^^\n" + 
-							"The annotation @Marker is disallowed for this location\n" + 
-							"----------\n" + 
-							"7. ERROR in Outer.java (at line 23)\n" + 
+							"5. ERROR in Outer.java (at line 23)\n" + 
 							"	public static void foo(@Marker Outer this) {}\n" + 
 							"	                                     ^^^^\n" + 
 							"Explicit \'this\' parameter is allowed only in instance methods of non-anonymous classes and inner class constructors\n" + 
 							"----------\n" + 
-							"8. ERROR in Outer.java (at line 24)\n" + 
+							"6. ERROR in Outer.java (at line 24)\n" + 
 							"	public void foo(@Missing Outer this, int i) {}\n" + 
 							"	                 ^^^^^^^\n" + 
 							"Missing cannot be resolved to a type\n" + 
-							"----------\n" + 
-							"9. ERROR in Outer.java (at line 29)\n" + 
-							"	@Target(TYPE_USE)\n" + 
-							"	        ^^^^^^^^\n" + 
-							"TYPE_USE cannot be resolved to a variable\n" + 
 							"----------\n");
 	}
 	public void test0383908() {
@@ -1364,5 +1328,1307 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"	     ^^^^^\n" + 
 				"Duplicate method foo() in type X\n" + 
 				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on nested package names.
+	public void test383596() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"package p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" +
+				"public class X {\n" +
+				"}"
+			}, 
+			"----------\n" + 
+			"1. ERROR in X.java (at line 1)\n" + 
+			"	package p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	           ^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 1)\n" + 
+			"	package p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	                        ^^^^^^^^^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 1)\n" + 
+			"	package p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	                                           ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on nested package names.
+	public void test383596a() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"@Marker package p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" +
+				"public class X {\n" +
+				"}"
+			}, 
+			"----------\n" + 
+			"1. ERROR in X.java (at line 1)\n" + 
+			"	@Marker package p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	^^^^^^^\n" + 
+			"Package annotations must be in file package-info.java\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 1)\n" + 
+			"	@Marker package p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	                   ^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 1)\n" + 
+			"	@Marker package p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	                                ^^^^^^^^^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 1)\n" + 
+			"	@Marker package p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	                                                   ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on nested import names.
+	public void test039b() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"import p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" +
+				"public class X {\n" +
+				"}"
+			}, 
+			"----------\n" + 
+			"1. ERROR in X.java (at line 1)\n" + 
+			"	import p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	       ^\n" + 
+			"The import p cannot be resolved\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 1)\n" + 
+			"	import p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	          ^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 1)\n" + 
+			"	import p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	                       ^^^^^^^^^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 1)\n" + 
+			"	import p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z. z2;\n" + 
+			"	                                          ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on nested import names.
+	public void test383596b() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"import p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.*;\n" +
+				"public class X {\n" +
+				"}"
+			}, 
+			"----------\n" + 
+			"1. ERROR in X.java (at line 1)\n" + 
+			"	import p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.*;\n" + 
+			"	       ^\n" + 
+			"The import p cannot be resolved\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 1)\n" + 
+			"	import p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.*;\n" + 
+			"	          ^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 1)\n" + 
+			"	import p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.*;\n" + 
+			"	                       ^^^^^^^^^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 1)\n" + 
+			"	import p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.*;\n" + 
+			"	                                          ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Syntax error, type annotations are illegal here\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on nested static import names.
+	public void test041() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import static p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.z2;\n" +
+						"public class X {\n" +
+						"}"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 1)\n" + 
+				"	import static p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.z2;\n" + 
+				"	              ^\n" + 
+				"The import p cannot be resolved\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 1)\n" + 
+				"	import static p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.z2;\n" + 
+				"	                 ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 1)\n" + 
+				"	import static p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.z2;\n" + 
+				"	                              ^^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 1)\n" + 
+				"	import static p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.z2;\n" + 
+				"	                                                 ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on nested static import names.
+	public void test042() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"import static p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.*;\n" +
+						"public class X {\n" +
+						"}"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 1)\n" + 
+				"	import static p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.*;\n" + 
+				"	              ^\n" + 
+				"The import p cannot be resolved\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 1)\n" + 
+				"	import static p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.*;\n" + 
+				"	                 ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 1)\n" + 
+				"	import static p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.*;\n" + 
+				"	                              ^^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 1)\n" + 
+				"	import static p. @Marker q.x. @Marker @Marker y. @Marker @Marker @Marker z.*;\n" + 
+				"	                                                 ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on Qualified name in explicit this.
+	// Much water has flown under the bridge. The grammar itself does not allow annotations in qualified name in explicit this.
+	// We now use the production UnannotatableName instead of plain Name. 
+	public void test043() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X {\n" +
+				"   class Y {\n" +
+			    "       class Z {\n" +
+				"           Z(X. @Marker Y  X.Y.this) {\n" +
+				"           }\n" +
+				"       }\n" +
+				"    }\n" +
+				"}"
+			}, 
+			"----------\n" + 
+			"1. ERROR in X.java (at line 4)\n" + 
+			"	Z(X. @Marker Y  X.Y.this) {\n" + 
+			"	      ^^^^^^\n" + 
+			"Marker cannot be resolved to a type\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on Qualified name in explicit constructor call -- super form
+	public void test044() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	static X x;\n" +
+						"	public class InnerBar {\n" +
+						"	}\n" +
+						"	public class SubInnerBar extends InnerBar {\n" +
+						"		SubInnerBar() {\n" +
+						"			X.@Marker x. @Marker @Marker @Marker x.super();\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 7)\n" + 
+				"	X.@Marker x. @Marker @Marker @Marker x.super();\n" + 
+				"	  ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 7)\n" + 
+				"	X.@Marker x. @Marker @Marker @Marker x.super();\n" + 
+				"	             ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"3. WARNING in X.java (at line 7)\n" + 
+				"	X.@Marker x. @Marker @Marker @Marker x.super();\n" + 
+				"	                                     ^\n" + 
+				"The static field X.x should be accessed in a static way\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on Qualified name in explicit constructor call, super form with explicit type arguments
+	public void test045() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	static X x;\n" +
+						"	public class InnerBar {\n" +
+						"	}\n" +
+						"	public class SubInnerBar extends InnerBar {\n" +
+						"		SubInnerBar() {\n" +
+						"			X.@Marker x. @Marker @Marker @Marker x.<String>super();\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 7)\n" + 
+				"	X.@Marker x. @Marker @Marker @Marker x.<String>super();\n" + 
+				"	  ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 7)\n" + 
+				"	X.@Marker x. @Marker @Marker @Marker x.<String>super();\n" + 
+				"	             ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"3. WARNING in X.java (at line 7)\n" + 
+				"	X.@Marker x. @Marker @Marker @Marker x.<String>super();\n" + 
+				"	                                     ^\n" + 
+				"The static field X.x should be accessed in a static way\n" + 
+				"----------\n" + 
+				"4. WARNING in X.java (at line 7)\n" + 
+				"	X.@Marker x. @Marker @Marker @Marker x.<String>super();\n" + 
+				"	                                        ^^^^^^\n" + 
+				"Unused type arguments for the non generic constructor X.InnerBar() of type X.InnerBar; it should not be parameterized with arguments <String>\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on Qualified name in explicit constructor call - this form
+	public void test046() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	Bar bar;\n" +
+						"	class Bar {\n" +
+						"		//static Bar x;\n" +
+						"		public class InnerBar {\n" +
+						"			InnerBar(Bar x) {\n" +
+						"			}\n" +
+						"		}\n" +
+						"		public class SubInnerBar extends InnerBar {\n" +
+						"			SubInnerBar() {\n" +
+						"				X. @Marker bar.this();\n" +
+						"			}\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 11)\n" + 
+				"	X. @Marker bar.this();\n" + 
+				"	^^^^^^^^^^^^^^\n" + 
+				"Illegal enclosing instance specification for type X.Bar.SubInnerBar\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 11)\n" + 
+				"	X. @Marker bar.this();\n" + 
+				"	^^^^^^^^^^^^^^\n" + 
+				"Cannot make a static reference to the non-static field X.bar\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 11)\n" + 
+				"	X. @Marker bar.this();\n" + 
+				"	   ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+					"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on Qualified name in explicit constructor call, this form with explicit type arguments
+	public void test047() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	Bar bar;\n" +
+						"	class Bar {\n" +
+						"		//static Bar x;\n" +
+						"		public class InnerBar {\n" +
+						"			InnerBar(Bar x) {\n" +
+						"			}\n" +
+						"		}\n" +
+						"		public class SubInnerBar extends InnerBar {\n" +
+						"			SubInnerBar() {\n" +
+						"				X.@Marker bar.<String>this();\n" +
+						"			}\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 11)\n" + 
+				"	X.@Marker bar.<String>this();\n" + 
+				"	^^^^^^^^^^^^^\n" + 
+				"Illegal enclosing instance specification for type X.Bar.SubInnerBar\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 11)\n" + 
+				"	X.@Marker bar.<String>this();\n" + 
+				"	^^^^^^^^^^^^^\n" + 
+				"Cannot make a static reference to the non-static field X.bar\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 11)\n" + 
+				"	X.@Marker bar.<String>this();\n" + 
+				"	  ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"4. WARNING in X.java (at line 11)\n" + 
+				"	X.@Marker bar.<String>this();\n" + 
+				"	               ^^^^^^\n" + 
+				"Unused type arguments for the non generic constructor X.Bar.SubInnerBar() of type X.Bar.SubInnerBar; it should not be parameterized with arguments <String>\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations on Qualified name in PrimaryNoNewArray
+	public void test048() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	X bar;\n" +
+						"	private void foo(X x) {\n" +
+						"		System.out.println((x. @Marker bar));\n" +
+						"	}\n" +
+						"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	System.out.println((x. @Marker bar));\n" + 
+				"	                       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in qualified this.
+	public void test049() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	class Y {\n" +
+						"		class Z {\n" +
+						"			void foo() {\n" +
+						"				Object o = X.@Marker Y.this; \n" +
+						"			}\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 5)\n" + 
+				"	Object o = X.@Marker Y.this; \n" + 
+				"	             ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" +
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in qualified super.
+	public void test050() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	public class Y  {\n" +
+						"		public void foo() {\n" +
+						"			X. @Marker Y.super.hashCode();\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	X. @Marker Y.super.hashCode();\n" + 
+				"	   ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in Name.class
+	public void test051() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	public class Y  {\n" +
+						"		public void foo() {\n" +
+						"			Class<?> c = X. @Marker @Illegal Y.class;\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	Class<?> c = X. @Marker @Illegal Y.class;\n" + 
+				"	                ^^^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in Name [].class.
+	public void test052() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"	public class Y  {\n" +
+						"		public void foo() {\n" +
+						"			Class<?> c = X. @Marker @Another Y @YetMore [].class;\n" +
+						"		}\n" +
+						"	}\n" +
+						"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	Class<?> c = X. @Marker @Another Y @YetMore [].class;\n" + 
+				"	                ^^^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 4)\n" + 
+				"	Class<?> c = X. @Marker @Another Y @YetMore [].class;\n" + 
+				"	                                   ^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in binary expressions with qualified names.
+	public void test053() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+						"X.java",
+						"public class X {\n" +
+						"    static int x;\n" +
+						"    static boolean fb;\n" +
+						"	 public void foo(boolean b) {\n" +
+						"		x = (X.@Marker x * 10);\n" +
+						"		x = (X.@Marker x / 10);\n" +
+						"		x = (X.@Marker x % 10);\n" +
+						"		x = (X.@Marker x + 10);\n" +
+						"		x = (X.@Marker x - 10);\n" +
+						"		x = (X.@Marker x << 10);\n" +
+						"		x = (X.@Marker x >> 10);\n" +
+						"		x = (X.@Marker x >>> 10);\n" +
+						"		b = (X.@Marker x < 10);\n" +
+						"		b = (X.@Marker x > 10);\n" +
+						"		b = (X.@Marker x <= 10);\n" +
+						"		b = (X.@Marker x >= 10);\n" +
+						"		b = (X.@Marker x instanceof Object);\n" +
+						"		b = (X.@Marker x == 10);\n" +
+						"		b = (X.@Marker x != 10);\n" +
+						"		x = (X.@Marker x & 10);\n" +
+						"		x = (X.@Marker x ^ 10);\n" +
+						"		x = (X.@Marker x | 10);\n" +
+						"		fb = (X.@Marker fb && true);\n" +
+						"		fb = (X.@Marker fb || true);\n" +
+						"		x = (X.@Marker fb ? 10 : 10);\n" +
+						"	 }\n" +
+						"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 5)\n" + 
+				"	x = (X.@Marker x * 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 6)\n" + 
+				"	x = (X.@Marker x / 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 7)\n" + 
+				"	x = (X.@Marker x % 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 8)\n" + 
+				"	x = (X.@Marker x + 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"5. ERROR in X.java (at line 9)\n" + 
+				"	x = (X.@Marker x - 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"6. ERROR in X.java (at line 10)\n" + 
+				"	x = (X.@Marker x << 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"7. ERROR in X.java (at line 11)\n" + 
+				"	x = (X.@Marker x >> 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"8. ERROR in X.java (at line 12)\n" + 
+				"	x = (X.@Marker x >>> 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"9. ERROR in X.java (at line 13)\n" + 
+				"	b = (X.@Marker x < 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"10. ERROR in X.java (at line 14)\n" + 
+				"	b = (X.@Marker x > 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"11. ERROR in X.java (at line 15)\n" + 
+				"	b = (X.@Marker x <= 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"12. ERROR in X.java (at line 16)\n" + 
+				"	b = (X.@Marker x >= 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"13. ERROR in X.java (at line 17)\n" + 
+				"	b = (X.@Marker x instanceof Object);\n" + 
+				"	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+				"Incompatible conditional operand types int and Object\n" + 
+				"----------\n" + 
+				"14. ERROR in X.java (at line 17)\n" + 
+				"	b = (X.@Marker x instanceof Object);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"15. ERROR in X.java (at line 18)\n" + 
+				"	b = (X.@Marker x == 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"16. ERROR in X.java (at line 19)\n" + 
+				"	b = (X.@Marker x != 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"17. ERROR in X.java (at line 20)\n" + 
+				"	x = (X.@Marker x & 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"18. ERROR in X.java (at line 21)\n" + 
+				"	x = (X.@Marker x ^ 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"19. ERROR in X.java (at line 22)\n" + 
+				"	x = (X.@Marker x | 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"20. ERROR in X.java (at line 23)\n" + 
+				"	fb = (X.@Marker fb && true);\n" + 
+				"	        ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"21. ERROR in X.java (at line 24)\n" + 
+				"	fb = (X.@Marker fb || true);\n" + 
+				"	        ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"22. ERROR in X.java (at line 25)\n" + 
+				"	x = (X.@Marker fb ? 10 : 10);\n" + 
+				"	       ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in annotations with qualified names.
+	   This test is disabled. Now the grammar itself forbids annotations in the said place by using the production
+	   AnnotationName ::= '@' UnannotatableName. We don't want to add tests that will be fragile and unstable due to 
+	   syntax. If a construct is provably not parsed at the grammar level, that ought to be good enough.
+	*/
+	public void test054() throws Exception {
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in qualified names used as annotation values.
+	public void test055() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"@interface Annot {\n" +
+					"	String bar();\n" +
+					"}\n" +
+					"@Annot(bar = X. @Marker s)\n" +
+					"public class X {\n" +
+					"	final static String s = \"\";\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	@Annot(bar = X. @Marker s)\n" + 
+				"	                ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in qualified names that are postfix expressions.
+	public void test056() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"    static int x;\n" +
+					"    int foo() {\n" +
+					"        return X.@Marker x;\n" +
+					"    }\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	return X.@Marker x;\n" + 
+				"	         ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in qualified names used in array access.
+	public void test057() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"    static int x[];\n" +
+					"    int foo() {\n" +
+					"        return X.@Marker x[0];\n" +
+					"    }\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	return X.@Marker x[0];\n" + 
+				"	         ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in qualified name with type arguments used in method invocation.
+	public void test058() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"    static X x;\n" +
+					"    int foo() {\n" +
+					"        return X.@Marker x.<String> foo();\n" +
+					"    }\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	return X.@Marker x.<String> foo();\n" + 
+				"	         ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. WARNING in X.java (at line 4)\n" + 
+				"	return X.@Marker x.<String> foo();\n" + 
+				"	                    ^^^^^^\n" + 
+				"Unused type arguments for the non generic method foo() of type X; it should not be parameterized with arguments <String>\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in qualified name used in method invocation.
+	public void test059() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"    static X x;\n" +
+					"    int foo() {\n" +
+					"        return X.@Marker x. @Blah foo();\n" +
+					"    }\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	return X.@Marker x. @Blah foo();\n" + 
+				"	         ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 4)\n" + 
+				"	return X.@Marker x. @Blah foo();\n" + 
+				"	                    ^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in qualified name used in class instance creation
+	public void test060() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"    static Y y;\n" +
+					"    class Y {\n" +
+					"        class Z {\n" +
+					"            void foo() {\n" +
+					"                Z z = X. @Marker y.new Z();\n" +
+					"            }\n" +
+					"        }\n" +
+					"    }\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 6)\n" + 
+				"	Z z = X. @Marker y.new Z();\n" + 
+				"	         ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383596 -- reject annotations in qualified name used in class instance creation
+	public void test061() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"    static X x;\n" +
+					"    X getX() {\n" +
+					"        return (X.@Marker x);\n" +
+					"    }\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	return (X.@Marker x);\n" + 
+				"	          ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	public void test062() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	public <T> @Marker Object foo() {\n" +
+					"	}\n" +
+					"}\n" +
+					"@interface Marker {\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 2)\n" + 
+				"	public <T> @Marker Object foo() {\n" + 
+				"	           ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	public void test063() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	Object o = @Marker int.class;\n" +
+					"}\n" +
+					"@interface Marker {\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 2)\n" + 
+				"	Object o = @Marker int.class;\n" + 
+				"	           ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	public void test064() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"@interface X {\n" +
+					"	<T> @Marker String foo();\n" +
+					"}\n" +
+					"@interface Marker {\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 2)\n" + 
+				"	<T> @Marker String foo();\n" + 
+				"	    ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 2)\n" + 
+				"	<T> @Marker String foo();\n" + 
+				"	                   ^^^^^\n" + 
+				"Annotation attributes cannot be generic\n" + 
+				"----------\n");
+	}
+	public void test065() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	Object o = new <String> @Marker X();\n" +
+					"}\n" +
+					"@interface Marker {\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. WARNING in X.java (at line 2)\n" + 
+				"	Object o = new <String> @Marker X();\n" + 
+				"	                ^^^^^^\n" + 
+				"Unused type arguments for the non generic constructor X() of type X; it should not be parameterized with arguments <String>\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 2)\n" + 
+				"	Object o = new <String> @Marker X();\n" + 
+				"	                        ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	public void test066() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	Object o = new X().new <String> @Marker X();\n" +
+					"}\n" +
+					"@interface Marker {\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 2)\n" + 
+				"	Object o = new X().new <String> @Marker X();\n" + 
+				"	                                ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 2)\n" + 
+				"	Object o = new X().new <String> @Marker X();\n" + 
+				"	                                ^^^^^^^^^\n" + 
+				"X.X cannot be resolved to a type\n" + 
+				"----------\n");
+	}
+	public void test067() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	Object o = x.new <String> @Marker X() {};\n" +
+					"}\n" +
+					"@interface Marker {\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 2)\n" + 
+				"	Object o = x.new <String> @Marker X() {};\n" + 
+				"	           ^\n" + 
+				"x cannot be resolved to a variable\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 2)\n" + 
+				"	Object o = x.new <String> @Marker X() {};\n" + 
+				"	                          ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	public void test068() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	Object o = new <String> @Marker X() {};\n" +
+					"}\n" +
+					"@interface Marker {\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. WARNING in X.java (at line 2)\n" + 
+				"	Object o = new <String> @Marker X() {};\n" + 
+				"	                ^^^^^^\n" + 
+				"Unused type arguments for the non generic constructor X() of type X; it should not be parameterized with arguments <String>\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 2)\n" + 
+				"	Object o = new <String> @Marker X() {};\n" + 
+				"	                        ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=385293
+	public void test069() throws Exception {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"class X<final T> {\n" +
+					"	Object o = (Object) (public X<final String>) null;\n" + 
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 1)\n" + 
+				"	class X<final T> {\n" + 
+				"	        ^^^^^\n" + 
+				"Syntax error on token \"final\", delete this token\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 2)\n" + 
+				"	Object o = (Object) (public X<final String>) null;\n" + 
+				"	                     ^^^^^^\n" + 
+				"Syntax error on token \"public\", delete this token\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 2)\n" + 
+				"	Object o = (Object) (public X<final String>) null;\n" + 
+				"	                              ^^^^^\n" + 
+				"Syntax error on token \"final\", delete this token\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=388085
+	public void test0388085() {
+		this.runNegativeTest(
+				new String[] {"X.java",
+						"class X {\n" +
+						"	public void main() {\n" +
+						"		final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;" +
+						"		one = null;\n" +
+						"	}\n" +
+						"}\n" +
+						"class One<R> {}\n" +
+						"class Two<S> {}\n" +
+						"class Three<T> {}\n" +
+						"class Four<U, V> {}\n"},
+							"----------\n" + 
+							"1. ERROR in X.java (at line 3)\n" + 
+							"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
+							"	           ^^^^^^\n" + 
+							"Marker cannot be resolved to a type\n" + 
+							"----------\n" + 
+							"2. ERROR in X.java (at line 3)\n" + 
+							"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
+							"	                                 ^^^^^^\n" + 
+							"Marker cannot be resolved to a type\n" + 
+							"----------\n" + 
+							"3. ERROR in X.java (at line 3)\n" + 
+							"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
+							"	                                                                      ^^^^^^\n" + 
+							"Marker cannot be resolved to a type\n" + 
+							"----------\n" + 
+							"4. ERROR in X.java (at line 3)\n" + 
+							"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
+							"	                                                                                              ^^^^^^\n" + 
+							"Marker cannot be resolved to a type\n" + 
+							"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=388085
+	public void test0388085a() {
+		this.runNegativeTest(
+				new String[] {"X.java",
+						"import java.lang.annotation.Target;\n" + 
+						"import static java.lang.annotation.ElementType.*;\n" + 
+						"class X {\n" +
+						"	public void main() {\n" +
+						"		final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;" +
+						"		one = null;\n" +
+						"	}\n" +
+						"}\n" +
+						"class One<R> {}\n" +
+						"class Two<S> {}\n" +
+						"class Three<T> {}\n" +
+						"class Four<U, V> {}\n" +
+						"@interface Marker {}"},
+						"----------\n" + 
+						"1. ERROR in X.java (at line 5)\n" + 
+						"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
+						"	          ^^^^^^^\n" + 
+						"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
+						"----------\n" + 
+						"2. ERROR in X.java (at line 5)\n" + 
+						"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
+						"	                                ^^^^^^^\n" + 
+						"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
+						"----------\n" + 
+						"3. ERROR in X.java (at line 5)\n" + 
+						"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
+						"	                                                                     ^^^^^^^\n" + 
+						"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
+						"----------\n" + 
+						"4. ERROR in X.java (at line 5)\n" + 
+						"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
+						"	                                                                                             ^^^^^^^\n" + 
+						"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
+						"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=390882
+	public void test0390882() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"import java.lang.annotation.Target;\n" +
+					"import static java.lang.annotation.ElementType.*;\n" +
+					"public class X {    \n " +
+					"	Object o1 = (@Marker java.lang.Integer) null;   // 1. Right.\n" +
+					"	Object o2 = (java. @Marker lang.Integer) null;  // 2. Wrong.\n" +
+					"	Object o3 = (java.lang. @Marker Integer) null;  // 3. Wrong.\n" +
+					"	public void foo(java. @Marker lang.Integer arg) {}\n" +
+					"	public void bar(java.lang. @Marker Integer arg) {}\n" +
+					"	public void foobar(@Marker java.lang.Integer arg) {}\n" +
+					"}\n" +
+					"@Target(TYPE_USE)\n" +
+					"@interface Marker {}\n",
+
+					"java/lang/annotation/ElementType.java",
+					"package java.lang.annotation;\n" +
+					"public enum ElementType {\n" +
+					"    TYPE,\n" +
+					"    FIELD,\n" +
+					"    METHOD,\n" +
+					"    PARAMETER,\n" +
+					"    CONSTRUCTOR,\n" +
+					"    LOCAL_VARIABLE,\n" +
+					"    ANNOTATION_TYPE,\n" +
+					"    PACKAGE,\n" +
+					"    TYPE_PARAMETER,\n" +
+					"    TYPE_USE\n" +
+					"}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 5)\n" + 
+				"	Object o2 = (java. @Marker lang.Integer) null;  // 2. Wrong.\n" + 
+				"	                   ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 6)\n" + 
+				"	Object o3 = (java.lang. @Marker Integer) null;  // 3. Wrong.\n" + 
+				"	                        ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 7)\n" + 
+				"	public void foo(java. @Marker lang.Integer arg) {}\n" + 
+				"	                      ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 8)\n" + 
+				"	public void bar(java.lang. @Marker Integer arg) {}\n" + 
+				"	                           ^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	public void test0390882a() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"import java.lang.annotation.Target;\n" +
+					"import static java.lang.annotation.ElementType.*;\n" +
+					"public class X {    \n " +
+					"	Object o1 = (java. @Marker @Annot lang.Integer) null;  // 2. Wrong.\n" +
+					"	Object o2 = (java.lang. @Marker @Annot Integer) null;  // 3. Wrong.\n" +
+					"	Object o3 = (java.@lang lang) null;  // 3. Wrong.\n" +
+					"}\n" +
+					"@Target(TYPE_USE)\n" +
+					"@interface Marker {}\n" +
+					"@Target(TYPE_USE)\n" +
+					"@interface Annot {}",
+
+					"java/lang/annotation/ElementType.java",
+					"package java.lang.annotation;\n" +
+					"public enum ElementType {\n" +
+					"    TYPE,\n" +
+					"    FIELD,\n" +
+					"    METHOD,\n" +
+					"    PARAMETER,\n" +
+					"    CONSTRUCTOR,\n" +
+					"    LOCAL_VARIABLE,\n" +
+					"    ANNOTATION_TYPE,\n" +
+					"    PACKAGE,\n" +
+					"    TYPE_PARAMETER,\n" +
+					"    TYPE_USE\n" +
+					"}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	Object o1 = (java. @Marker @Annot lang.Integer) null;  // 2. Wrong.\n" + 
+				"	                   ^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 5)\n" + 
+				"	Object o2 = (java.lang. @Marker @Annot Integer) null;  // 3. Wrong.\n" + 
+				"	                        ^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 6)\n" + 
+				"	Object o3 = (java.@lang lang) null;  // 3. Wrong.\n" + 
+				"	             ^^^^^^^^^^^^^^^\n" + 
+				"java.lang cannot be resolved to a type\n" + 
+				"----------\n");
+	}
+	public void test0390882b() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"import java.lang.annotation.Target;\n" +
+					"import static java.lang.annotation.ElementType.*;\n" +
+					"public class X {    \n " +
+					"	Object o1 = (java.util.@Marker @Annot List<String>) null; 	// 1. Wrong.\n" +
+					"	Object o2 = (java.lang.@Marker @Annot Integer[]) null;		// 2. Wrong.\n" +
+					"	Object o3 = (java.util.@Marker @Annot List<String>[]) null; // 3. Wrong.\n" +
+					"	Object o4 = (java.lang.Integer @Marker []) null;	// 4. Right.\n" +
+					"}\n" +
+					"@Target(TYPE_USE)\n" +
+					"@interface Marker {}\n" +
+					"@Target(TYPE_USE)\n" +
+					"@interface Annot {}",
+
+					"java/lang/annotation/ElementType.java",
+					"package java.lang.annotation;\n" +
+					"public enum ElementType {\n" +
+					"    TYPE,\n" +
+					"    FIELD,\n" +
+					"    METHOD,\n" +
+					"    PARAMETER,\n" +
+					"    CONSTRUCTOR,\n" +
+					"    LOCAL_VARIABLE,\n" +
+					"    ANNOTATION_TYPE,\n" +
+					"    PACKAGE,\n" +
+					"    TYPE_PARAMETER,\n" +
+					"    TYPE_USE\n" +
+					"}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	Object o1 = (java.util.@Marker @Annot List<String>) null; 	// 1. Wrong.\n" + 
+				"	                       ^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 5)\n" + 
+				"	Object o2 = (java.lang.@Marker @Annot Integer[]) null;		// 2. Wrong.\n" + 
+				"	                       ^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 6)\n" + 
+				"	Object o3 = (java.util.@Marker @Annot List<String>[]) null; // 3. Wrong.\n" + 
+				"	                       ^^^^^^^^^^^^^^\n" + 
+				"Syntax error, type annotations are illegal here\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=385137
+	public void test0385137() {
+		this.runNegativeTest(
+				new String[]{ "A.java",
+				"package p;" +
+				"import java.lang.annotation.Target;\n" + 
+				"import static java.lang.annotation.ElementType.*;\n" + 
+				"public class A<T> { \n" +
+				"	static class B<T> {" +
+				"		static class C<K, V> {" +
+				"		}	" +
+				"	}\n" +
+				"   public void foo() {\n" +
+				"		Object o = (@Marker @Annot A.@Marker B.@Marker C) null;\n" +
+				"		Object o2 = (@Marker p.@Marker A.@Marker B.@Marker C) null;\n" +
+				"   }\n" +
+				"}\n" +
+				"@Target(TYPE_USE)\n" + 
+				"@interface Marker {}\n" +
+				"@Target(TYPE_USE)\n" + 
+				"@interface Annot {}\n",
+
+				"java/lang/annotation/ElementType.java",
+				"package java.lang.annotation;\n" +
+				"public enum ElementType {\n" +
+				"    TYPE,\n" +
+				"    FIELD,\n" +
+				"    METHOD,\n" +
+				"    PARAMETER,\n" +
+				"    CONSTRUCTOR,\n" +
+				"    LOCAL_VARIABLE,\n" +
+				"    ANNOTATION_TYPE,\n" +
+				"    PACKAGE,\n" +
+				"    TYPE_PARAMETER,\n" +
+				"    TYPE_USE\n" +
+				"}\n"},
+					"----------\n" + 
+					"1. ERROR in A.java (at line 6)\n" + 
+					"	Object o = (@Marker @Annot A.@Marker B.@Marker C) null;\n" + 
+					"	            ^^^^^^^^^^^^^^\n" + 
+					"Type annotations are not allowed on type names used to access static members\n" + 
+					"----------\n" + 
+					"2. WARNING in A.java (at line 6)\n" + 
+					"	Object o = (@Marker @Annot A.@Marker B.@Marker C) null;\n" + 
+					"	            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+					"A.B.C is a raw type. References to generic type A<T>.B<T>.C<K,V> should be parameterized\n" + 
+					"----------\n" + 
+					"3. ERROR in A.java (at line 6)\n" + 
+					"	Object o = (@Marker @Annot A.@Marker B.@Marker C) null;\n" + 
+					"	                             ^^^^^^^\n" + 
+					"Type annotations are not allowed on type names used to access static members\n" + 
+					"----------\n" + 
+					"4. ERROR in A.java (at line 7)\n" + 
+					"	Object o2 = (@Marker p.@Marker A.@Marker B.@Marker C) null;\n" + 
+					"	             ^^^^^^^\n" + 
+					"Type annotations are not allowed on type names used to access static members\n" + 
+					"----------\n" + 
+					"5. WARNING in A.java (at line 7)\n" + 
+					"	Object o2 = (@Marker p.@Marker A.@Marker B.@Marker C) null;\n" + 
+					"	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+					"A.B.C is a raw type. References to generic type A<T>.B<T>.C<K,V> should be parameterized\n" + 
+					"----------\n" + 
+					"6. ERROR in A.java (at line 7)\n" + 
+					"	Object o2 = (@Marker p.@Marker A.@Marker B.@Marker C) null;\n" + 
+					"	                       ^^^^^^^\n" + 
+					"Syntax error, type annotations are illegal here\n" + 
+					"----------\n" + 
+					"7. ERROR in A.java (at line 7)\n" + 
+					"	Object o2 = (@Marker p.@Marker A.@Marker B.@Marker C) null;\n" + 
+					"	                                 ^^^^^^^\n" + 
+					"Type annotations are not allowed on type names used to access static members\n" + 
+					"----------\n");
+	}
+	public void test0385137a() {
+		this.runNegativeTest(
+				new String[]{"A.java",
+				"package p;" +
+				"import java.lang.annotation.Target;\n" + 
+				"import static java.lang.annotation.ElementType.*;\n" + 
+				"public class A { \n" +
+				"	static class B<T> {" +
+				"		static class C<K, V> {" +
+				"		}	" +
+				"	}\n" +
+				"   public void foo() {\n" +
+				"		Object o1 = (@Marker p.@Marker A.@Marker B.@Marker C[]) null;\n" +
+				"		Object o2 = (@Marker @Annot A.@Annot B.C<Integer, String>) null;\n" +
+				"		Object o5 = (@Marker @Annot A.B<String>[]) null;\n" +
+				"   }\n" +
+				"}\n" +
+				"@Target(TYPE_USE)\n" + 
+				"@interface Marker {}\n" +
+				"@Target(TYPE_USE)\n" + 
+				"@interface Annot {}\n",
+
+				"java/lang/annotation/ElementType.java",
+				"package java.lang.annotation;\n" +
+				"public enum ElementType {\n" +
+				"    TYPE,\n" +
+				"    FIELD,\n" +
+				"    METHOD,\n" +
+				"    PARAMETER,\n" +
+				"    CONSTRUCTOR,\n" +
+				"    LOCAL_VARIABLE,\n" +
+				"    ANNOTATION_TYPE,\n" +
+				"    PACKAGE,\n" +
+				"    TYPE_PARAMETER,\n" +
+				"    TYPE_USE\n" +
+				"}\n",
+				},
+				"----------\n" + 
+					"1. ERROR in A.java (at line 6)\n" + 
+					"	Object o1 = (@Marker p.@Marker A.@Marker B.@Marker C[]) null;\n" + 
+					"	             ^^^^^^^\n" + 
+					"Type annotations are not allowed on type names used to access static members\n" + 
+					"----------\n" + 
+					"2. ERROR in A.java (at line 6)\n" + 
+					"	Object o1 = (@Marker p.@Marker A.@Marker B.@Marker C[]) null;\n" + 
+					"	                       ^^^^^^^\n" + 
+					"Syntax error, type annotations are illegal here\n" + 
+					"----------\n" + 
+					"3. ERROR in A.java (at line 6)\n" + 
+					"	Object o1 = (@Marker p.@Marker A.@Marker B.@Marker C[]) null;\n" + 
+					"	                                 ^^^^^^^\n" + 
+					"Type annotations are not allowed on type names used to access static members\n" + 
+					"----------\n" + 
+					"4. ERROR in A.java (at line 7)\n" + 
+					"	Object o2 = (@Marker @Annot A.@Annot B.C<Integer, String>) null;\n" + 
+					"	             ^^^^^^^^^^^^^^\n" + 
+					"Type annotations are not allowed on type names used to access static members\n" + 
+					"----------\n" + 
+					"5. ERROR in A.java (at line 7)\n" + 
+					"	Object o2 = (@Marker @Annot A.@Annot B.C<Integer, String>) null;\n" + 
+					"	                              ^^^^^^\n" + 
+					"Type annotations are not allowed on type names used to access static members\n" + 
+					"----------\n" + 
+					"6. ERROR in A.java (at line 8)\n" + 
+					"	Object o5 = (@Marker @Annot A.B<String>[]) null;\n" + 
+					"	             ^^^^^^^^^^^^^^\n" + 
+					"Type annotations are not allowed on type names used to access static members\n" + 
+					"----------\n");
 	}
 }

@@ -206,6 +206,8 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 		}
 
 		PackageBinding packageBinding = binding == null ? null : (PackageBinding) binding;
+		rejectAnnotationsOnPackageQualifiers(scope, packageBinding);
+
 		boolean typeIsConsistent = true;
 		ReferenceBinding qualifyingType = null;
 		for (int i = packageBinding == null ? 0 : packageBinding.compoundName.length, max = this.tokens.length; i < max; i++) {
@@ -238,6 +240,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 						: scope.environment().convertToParameterizedType(qualifyingType);
 				}
 			} else {
+				 rejectAnnotationsOnStaticMemberQualififer(scope, currentType, packageBinding, i);
 				if (typeIsConsistent && currentType.isStatic()
 						&& (qualifyingType.isParameterizedTypeWithActualArguments() || qualifyingType.isGenericType())) {
 					scope.problemReporter().staticMemberOfParameterizedType(this, scope.environment().createParameterizedType((ReferenceBinding)currentType.erasure(), null, qualifyingType), i);
@@ -439,7 +442,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 			if (this.annotationsOnDimensions != null) {
 				for (int i = 0, max = this.annotationsOnDimensions.length; i < max; i++) {
 					Annotation[] annotations2 = this.annotationsOnDimensions[i];
-					for (int j = 0, max2 = annotations2.length; j < max2; j++) {
+					for (int j = 0, max2 = annotations2 == null ? 0 : annotations2.length; j < max2; j++) {
 						Annotation annotation = annotations2[j];
 						annotation.traverse(visitor, scope);
 					}
@@ -469,7 +472,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 			if (this.annotationsOnDimensions != null) {
 				for (int i = 0, max = this.annotationsOnDimensions.length; i < max; i++) {
 					Annotation[] annotations2 = this.annotationsOnDimensions[i];
-					for (int j = 0, max2 = annotations2.length; j < max2; j++) {
+					for (int j = 0, max2 = annotations2 == null ? 0 : annotations2.length; j < max2; j++) {
 						Annotation annotation = annotations2[j];
 						annotation.traverse(visitor, scope);
 					}

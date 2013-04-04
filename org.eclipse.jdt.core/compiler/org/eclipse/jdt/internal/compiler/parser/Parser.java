@@ -102,9 +102,6 @@ public class Parser implements ConflictedParser, ParserBasicInformation, Termina
 	//expression stack
 	protected final static int ExpressionStackIncrement = 100;
 
-	// annotation stack
-	protected final static int TypeAnnotationStackIncrement = 100;
-	
 	protected final static int GenericsStackIncrement = 10;
 
 	private final static String FILEPREFIX = "parser"; //$NON-NLS-1$
@@ -855,7 +852,6 @@ public class Parser implements ConflictedParser, ParserBasicInformation, Termina
 	protected int[] expressionLengthStack;
 	protected int expressionPtr;
 	protected Expression[] expressionStack = new Expression[ExpressionStackIncrement];
-	protected int unattachedAnnotationPtr;  // used for figuring out whether some set of annotations are annotating a dimension or not.
 	public int firstToken ; // handle for multiple parsing goals
 	
 	/* jsr308 -- Type annotation management, we now maintain type annotations in a separate stack
@@ -863,17 +859,17 @@ public class Parser implements ConflictedParser, ParserBasicInformation, Termina
 	   to handle such interleaving and will look ugly if changed. 
 	   
 	   See consumeArrayCreationExpressionWithoutInitializer for example. 
-	   
-	   See that annotations gets pushed into expression stack the moment an annotation is discovered and
-	   get moved to the new type annotations stack only later when the annotation is recognized to be a
-	   type annotation. Where ambiguities exist (i.e 1.7 annotation occurs in a place sanctioned for an
-	   1.5 type annotation, the annotation continues to stay in the expression stack, but in these case
-	   interleaving is not an issue.
+
+	   Where SE8 annotations occur in a place SE5 annotations are legal, the SE8 annotations end up in
+	   the expression stack as we have no way of distinguishing between the two.
 	*/  
 	protected int typeAnnotationPtr;
 	protected int typeAnnotationLengthPtr;
 	protected Annotation [] typeAnnotationStack = new Annotation[TypeAnnotationStackIncrement];
 	protected int [] typeAnnotationLengthStack;
+	// annotation stack
+	protected final static int TypeAnnotationStackIncrement = 100;
+	
 	// generics management
 	protected int genericsIdentifiersLengthPtr;
 	protected int[] genericsIdentifiersLengthStack = new int[GenericsStackIncrement];
@@ -959,7 +955,7 @@ private boolean shouldDeferRecovery = false; // https://bugs.eclipse.org/bugs/sh
 private int valueLambdaNestDepth = -1;
 private int stateStackLengthStack[] = new int[0];
 private boolean parsingJava8Plus;
-private int unstackedAct = ERROR_ACTION;
+protected int unstackedAct = ERROR_ACTION;
 
 
 //{ObjectTeams: context info while parsing separate role files:
@@ -968,7 +964,9 @@ private int unstackedAct = ERROR_ACTION;
 	public TypeDeclaration currentTeam = null;
 // SH}
 
-
+protected Parser () {
+	// Caveat Emptor: For inheritance purposes and then only in very special needs. Only minimal state is initialized !
+}
 public Parser(ProblemReporter problemReporter, boolean optimizeStringLiterals) {
 
 	this.problemReporter = problemReporter;
@@ -1335,8 +1333,7 @@ protected void checkForDiamond(TypeReference allocType) {
 		}
 	}
 }
-protected ParameterizedQualifiedTypeReference computeQualifiedGenericsFromRightSide(TypeReference rightSide, int dim) {
-	Annotation [][] annotationsOnDimensions = dim == 0 ? null : getAnnotationsOnDimensions(dim);
+protected ParameterizedQualifiedTypeReference computeQualifiedGenericsFromRightSide(TypeReference rightSide, int dim, Annotation [][] annotationsOnDimensions) {
 	int nameSize = this.identifierLengthStack[this.identifierLengthPtr];
 	int tokensSize = nameSize;
 	if (rightSide instanceof ParameterizedSingleTypeReference) {
@@ -1351,15 +1348,24 @@ protected ParameterizedQualifiedTypeReference computeQualifiedGenericsFromRightS
 	TypeReference[][] typeArguments = new TypeReference[tokensSize][];
 	char[][] tokens = new char[tokensSize][];
 	long[] positions = new long[tokensSize];
+	Annotation [][] typeAnnotations = null;
 	if (rightSide instanceof ParameterizedSingleTypeReference) {
 		ParameterizedSingleTypeReference singleParameterizedTypeReference = (ParameterizedSingleTypeReference) rightSide;
 		tokens[nameSize] = singleParameterizedTypeReference.token;
 		positions[nameSize] = (((long) singleParameterizedTypeReference.sourceStart) << 32) + singleParameterizedTypeReference.sourceEnd;
 		typeArguments[nameSize] = singleParameterizedTypeReference.typeArguments;
+		if (singleParameterizedTypeReference.annotations != null) {
+			typeAnnotations = new Annotation[tokensSize][];
+		    typeAnnotations[nameSize] = singleParameterizedTypeReference.annotations[0];
+		}
 	} else if (rightSide instanceof SingleTypeReference) {
 		SingleTypeReference singleTypeReference = (SingleTypeReference) rightSide;
 		tokens[nameSize] = singleTypeReference.token;
 		positions[nameSize] = (((long) singleTypeReference.sourceStart) << 32) + singleTypeReference.sourceEnd;
+		if (singleTypeReference.annotations != null) {
+			typeAnnotations = new Annotation[tokensSize][];
+			typeAnnotations[nameSize] =  singleTypeReference.annotations[0];
+		}
 	} else if (rightSide instanceof ParameterizedQualifiedTypeReference) {
 		ParameterizedQualifiedTypeReference parameterizedTypeReference = (ParameterizedQualifiedTypeReference) rightSide;
 		TypeReference[][] rightSideTypeArguments = parameterizedTypeReference.typeArguments;
@@ -1368,12 +1374,22 @@ protected ParameterizedQualifiedTypeReference computeQualifiedGenericsFromRightS
 		System.arraycopy(rightSideTokens, 0, tokens, nameSize, rightSideTokens.length);
 		long[] rightSidePositions = parameterizedTypeReference.sourcePositions;
 		System.arraycopy(rightSidePositions, 0, positions, nameSize, rightSidePositions.length);
+		Annotation [][] rightSideAnnotations = parameterizedTypeReference.annotations;
+		if (rightSideAnnotations != null) {
+			typeAnnotations = new Annotation[tokensSize][];
+			System.arraycopy(rightSideAnnotations, 0, typeAnnotations, nameSize, rightSideAnnotations.length);
+		}
 	} else if (rightSide instanceof QualifiedTypeReference) {
 		QualifiedTypeReference qualifiedTypeReference = (QualifiedTypeReference) rightSide;
 		char[][] rightSideTokens = qualifiedTypeReference.tokens;
 		System.arraycopy(rightSideTokens, 0, tokens, nameSize, rightSideTokens.length);
 		long[] rightSidePositions = qualifiedTypeReference.sourcePositions;
 		System.arraycopy(rightSidePositions, 0, positions, nameSize, rightSidePositions.length);
+		Annotation [][] rightSideAnnotations = qualifiedTypeReference.annotations;
+		if (rightSideAnnotations != null) {
+			typeAnnotations = new Annotation[tokensSize][];
+			System.arraycopy(rightSideAnnotations, 0, typeAnnotations, nameSize, rightSideAnnotations.length);
+		}
 	}
 
 	int currentTypeArgumentsLength = this.genericsLengthStack[this.genericsLengthPtr--];
@@ -1393,16 +1409,26 @@ protected ParameterizedQualifiedTypeReference computeQualifiedGenericsFromRightS
 	}
 	this.identifierLengthPtr--;
 	ParameterizedQualifiedTypeReference typeRef = new ParameterizedQualifiedTypeReference(tokens, typeArguments, dim, annotationsOnDimensions, positions);
-	int length;
-	if (this.typeAnnotationLengthPtr >= 0 && (length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
-		typeRef.annotations = new Annotation[tokensSize][];
-		System.arraycopy(
-			this.typeAnnotationStack,
-			(this.typeAnnotationPtr -= length) + 1,
-			typeRef.annotations[0] = new Annotation[length],
-			0,
-			length);
-		typeRef.sourceStart = typeRef.annotations[0][0].sourceStart;
+
+	while (nameSize > 0) {
+		int length;
+		if ((length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
+			if (typeAnnotations == null)
+				typeAnnotations = new Annotation[tokensSize][];
+			System.arraycopy(
+					this.typeAnnotationStack,
+					(this.typeAnnotationPtr -= length) + 1,
+					typeAnnotations[nameSize - 1] = new Annotation[length],
+					0,
+					length);
+			if (nameSize == 1) {
+				typeRef.sourceStart = typeAnnotations[0][0].sourceStart;
+			}
+		}
+		nameSize--;
+	}
+	
+	if ((typeRef.annotations = typeAnnotations) != null) {
 		typeRef.bits |= ASTNode.HasTypeAnnotations;
 	}
 	return typeRef;
@@ -2915,45 +2941,6 @@ protected void consumeCastExpressionLL1() {
 	updateSourcePosition(cast);
 	cast.sourceEnd=exp.sourceEnd;
 }
-protected void consumeCastExpressionLL1WithTypeAnnotations() {
-	// CastExpression ::= '(' Modifiers Name ')' InsideCastExpressionLL1 UnaryExpressionNotPlusMinus
-	// Expression is used in order to make the grammar LL1
-
-	//optimize push/pop
-
-	// pop the expression
-	Expression expression = this.expressionStack[this.expressionPtr--];
-	this.expressionLengthPtr--;
-	// pop the type reference
-	TypeReference typeReference = (TypeReference) this.expressionStack[this.expressionPtr--];
-	this.expressionLengthPtr--;
-	
-	int length;
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
-		System.arraycopy(
-				this.expressionStack,
-				(this.expressionPtr -= length) + 1,
-				typeReference.annotations[0] = new Annotation[length],
-				0,
-				length);
-		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
-		if (this.modifiersSourceStart < typeReferenceSourceStart) {
-			typeReferenceSourceStart = this.modifiersSourceStart;
-		}
-		typeReference.sourceStart = typeReferenceSourceStart;
-		typeReference.bits |= ASTNode.HasTypeAnnotations;
-	}
-	Expression cast;
-	pushOnExpressionStack(cast = new CastExpression(expression, typeReference));
-	// pop the two positions for left and right parenthesis 
-	updateSourcePosition(cast);
-	cast.sourceEnd = expression.sourceEnd;
-	if (this.modifiers != ClassFileConstants.AccDefault) {
-		problemReporter().invalidLocationForModifiers(typeReference);
-	}
-	resetModifiers();
-}
 protected void consumeCastExpressionWithGenericsArray() {
 	// CastExpression ::= PushLPAREN Name TypeArguments Dims PushRPAREN InsideCastExpression UnaryExpressionNotPlusMinus
 
@@ -2970,45 +2957,6 @@ protected void consumeCastExpressionWithGenericsArray() {
 	castType.sourceEnd = end - 1;
 	castType.sourceStart = (cast.sourceStart = this.intStack[this.intPtr--]) + 1;
 	cast.sourceEnd = exp.sourceEnd;
-}
-protected void consumeCastExpressionWithGenericsArrayWithTypeAnnotations() {
-	// CastExpression ::= PushLPAREN Modifiers Name OnlyTypeArgumentsForCastExpression Dimsopt PushRPARENForAnnotatedTypeCast InsideCastExpression UnaryExpressionNotPlusMinus
-	int end = this.intStack[this.intPtr--];
-	int dim = this.intStack[this.intPtr--];
-
-	pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
-	TypeReference typeReference = getTypeReference(dim);
-	
-	// pop expression
-	Expression expression = this.expressionStack[this.expressionPtr--];
-	this.expressionLengthPtr--;
-
-	int length;
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
-		System.arraycopy(
-				this.expressionStack,
-				(this.expressionPtr -= length) + 1,
-				typeReference.annotations[0] = new Annotation[length],
-				0,
-				length);
-		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
-		if (this.modifiersSourceStart < typeReferenceSourceStart) {
-			typeReferenceSourceStart = this.modifiersSourceStart;
-		}
-		typeReference.bits |= ASTNode.HasTypeAnnotations;
-		typeReference.sourceStart = typeReferenceSourceStart;
-	}
-	Expression cast;
-	pushOnExpressionStack(cast = new CastExpression(expression, typeReference));
-	this.intPtr--;
-	typeReference.sourceEnd = end - 1;
-	typeReference.sourceStart = (cast.sourceStart = this.intStack[this.intPtr--]) + 1;
-	cast.sourceEnd = expression.sourceEnd;
-	if (this.modifiers != ClassFileConstants.AccDefault) {
-		problemReporter().invalidLocationForModifiers(typeReference);
-	}
-	resetModifiers();
 }
 protected void consumeCastExpressionWithNameArray() {
 	// CastExpression ::= PushLPAREN Name Dims PushRPAREN InsideCastExpression UnaryExpressionNotPlusMinus
@@ -3027,46 +2975,6 @@ protected void consumeCastExpressionWithNameArray() {
 	castType.sourceStart = (cast.sourceStart = this.intStack[this.intPtr--]) + 1;
 	cast.sourceEnd = exp.sourceEnd;
 }
-protected void consumeCastExpressionWithNameArrayWithTypeAnnotations() {
-	// CastExpression ::= PushLPAREN Modifiers Name Dims PushRPARENForAnnotatedTypeCast InsideCastExpression UnaryExpressionNotPlusMinus
-
-	int end = this.intStack[this.intPtr--];
-
-	// handle type arguments
-	pushOnGenericsLengthStack(0);
-	pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
-
-	// pop expression
-	Expression expression = this.expressionStack[this.expressionPtr--];
-	this.expressionLengthPtr--;
-	TypeReference typeReference = getTypeReference(this.intStack[this.intPtr--]);
-
-	int length;
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
-		System.arraycopy(
-				this.expressionStack,
-				(this.expressionPtr -= length) + 1,
-				typeReference.annotations[0] = new Annotation[length],
-				0,
-				length);
-		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
-		if (this.modifiersSourceStart < typeReferenceSourceStart) {
-			typeReferenceSourceStart = this.modifiersSourceStart;
-		}
-		typeReference.bits |= ASTNode.HasTypeAnnotations;
-		typeReference.sourceStart = typeReferenceSourceStart;
-	}
-	Expression cast;
-	pushOnExpressionStack(cast = new CastExpression(expression, typeReference));
-	typeReference.sourceEnd = end - 1;
-	typeReference.sourceStart = (cast.sourceStart = this.intStack[this.intPtr--]) + 1;
-	cast.sourceEnd = expression.sourceEnd;
-	if (this.modifiers != ClassFileConstants.AccDefault) {
-		problemReporter().invalidLocationForModifiers(typeReference);
-	}
-	resetModifiers();
-}
 protected void consumeCastExpressionWithPrimitiveType() {
 	// CastExpression ::= PushLPAREN PrimitiveType Dimsopt PushRPAREN InsideCastExpression UnaryExpression
 
@@ -3083,45 +2991,6 @@ protected void consumeCastExpressionWithPrimitiveType() {
 	castType.sourceStart = (cast.sourceStart = this.intStack[this.intPtr--]) + 1;
 	cast.sourceEnd = exp.sourceEnd;
 }
-protected void consumeCastExpressionWithPrimitiveTypeWithTypeAnnotations() {
-	// CastExpression ::= PushLPAREN Modifiers PrimitiveType Dimsopt PushRPARENForAnnotatedTypeCast InsideCastExpression UnaryExpression
-
-	//this.intStack : posOfLeftParen dim posOfRightParen
-	int end = this.intStack[this.intPtr--];
-
-	// pop expression
-	Expression expression = this.expressionStack[this.expressionPtr--];
-	this.expressionLengthPtr--;
-
-	TypeReference typeReference = getTypeReference(this.intStack[this.intPtr--]);
-	int length;
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
-		System.arraycopy(
-				this.expressionStack,
-				(this.expressionPtr -= length) + 1,
-				typeReference.annotations[0] = new Annotation[length],
-				0,
-				length);
-		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
-		if (this.modifiersSourceStart < typeReferenceSourceStart) {
-			typeReferenceSourceStart = this.modifiersSourceStart;
-		}
-		typeReference.bits |= ASTNode.HasTypeAnnotations;
-		typeReference.sourceStart = typeReferenceSourceStart;
-	}
-	
-	Expression cast;
-	pushOnExpressionStack(cast = new CastExpression(expression, typeReference));
-	
-	typeReference.sourceEnd = end - 1;
-	typeReference.sourceStart = (cast.sourceStart = this.intStack[this.intPtr--]) + 1;
-	cast.sourceEnd = expression.sourceEnd;
-	if (this.modifiers != ClassFileConstants.AccDefault) {
-		problemReporter().invalidLocationForModifiers(typeReference);
-	}
-	resetModifiers();
-}
 protected void consumeCastExpressionWithQualifiedGenericsArray() {
 	// CastExpression ::= PushLPAREN Name OnlyTypeArguments '.' ClassOrInterfaceType Dims PushRPAREN InsideCastExpression UnaryExpressionNotPlusMinus
 	Expression exp;
@@ -3130,53 +2999,14 @@ protected void consumeCastExpressionWithQualifiedGenericsArray() {
 	int end = this.intStack[this.intPtr--];
 
 	int dim = this.intStack[this.intPtr--];
-	TypeReference rightSide = getUnannotatedTypeReference(0); // by design the type after . is not annotated.
-
-	ParameterizedQualifiedTypeReference qualifiedParameterizedTypeReference = computeQualifiedGenericsFromRightSide(rightSide, dim);
+	Annotation [][] annotationsOnDimensions = dim == 0 ? null : getAnnotationsOnDimensions(dim);
+	TypeReference rightSide = getTypeReference(0);
+    ParameterizedQualifiedTypeReference qualifiedParameterizedTypeReference = computeQualifiedGenericsFromRightSide(rightSide, dim, annotationsOnDimensions);
 	this.intPtr--;
 	this.expressionStack[this.expressionPtr] = cast = new CastExpression(exp = this.expressionStack[this.expressionPtr], castType = qualifiedParameterizedTypeReference);
 	castType.sourceEnd = end - 1;
 	castType.sourceStart = (cast.sourceStart = this.intStack[this.intPtr--]) + 1;
 	cast.sourceEnd = exp.sourceEnd;
-}
-protected void consumeCastExpressionWithQualifiedGenericsArrayWithTypeAnnotations() {
-	// CastExpression ::= PushLPAREN Name OnlyTypeArguments '.' ClassOrInterfaceType Dims PushRPAREN InsideCastExpression UnaryExpressionNotPlusMinus
-	int end = this.intStack[this.intPtr--];
-
-	int dim = this.intStack[this.intPtr--];
-	// pop expression
-	Expression expression = this.expressionStack[this.expressionPtr--];
-	this.expressionLengthPtr--;
-	
-	TypeReference rightSide = getUnannotatedTypeReference(0); // by design the type after . is not annotated.
-
-	ParameterizedQualifiedTypeReference typeReference = computeQualifiedGenericsFromRightSide(rightSide, dim);
-	this.intPtr--;
-	int length;
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
-		System.arraycopy(
-				this.expressionStack,
-				(this.expressionPtr -= length) + 1,
-				typeReference.annotations[0] = new Annotation[length],
-				0,
-				length);
-		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
-		if (this.modifiersSourceStart < typeReferenceSourceStart) {
-			typeReferenceSourceStart = this.modifiersSourceStart;
-		}
-		typeReference.bits |= ASTNode.HasTypeAnnotations;
-		typeReference.sourceStart = typeReferenceSourceStart;
-	}
-	Expression cast;
-	pushOnExpressionStack(cast = new CastExpression(expression, typeReference));
-	typeReference.sourceEnd = end - 1;
-	typeReference.sourceStart = (cast.sourceStart = this.intStack[this.intPtr--]) + 1;
-	cast.sourceEnd = expression.sourceEnd;
-	if (this.modifiers != ClassFileConstants.AccDefault) {
-		problemReporter().invalidLocationForModifiers(typeReference);
-	}
-	resetModifiers();
 }
 protected void consumeCatches() {
 	// Catches ::= Catches CatchClause
@@ -3622,6 +3452,7 @@ protected void consumeClassInstanceCreationExpressionQualifiedWithTypeArguments(
 				length);
 		}
 		alloc.type = getTypeReference(0);
+		rejectIllegalLeadingTypeAnnotations(alloc.type);
 		checkForDiamond(alloc.type);
 		length = this.genericsLengthStack[this.genericsLengthPtr--];
 		this.genericsPtr -= length;
@@ -3653,6 +3484,7 @@ protected void consumeClassInstanceCreationExpressionQualifiedWithTypeArguments(
 			allocationExpression.sourceStart = this.intStack[this.intPtr--];
 			checkForDiamond(allocationExpression.type);
 		}
+		rejectIllegalLeadingTypeAnnotations(allocationExpression.type);
 	}
 	
 	QualifiedAllocationExpression qae =
@@ -3687,6 +3519,7 @@ protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 				length);
 		}
 		alloc.type = getTypeReference(0);
+		rejectIllegalLeadingTypeAnnotations(alloc.type);
 		checkForDiamond(alloc.type);
 
 		length = this.genericsLengthStack[this.genericsLengthPtr--];
@@ -3719,6 +3552,7 @@ protected void consumeClassInstanceCreationExpressionWithTypeArguments() {
 			allocationExpression.sourceStart = this.intStack[this.intPtr--];
 			checkForDiamond(allocationExpression.type);
 		}
+		rejectIllegalLeadingTypeAnnotations(allocationExpression.type);
 	}
 }
 protected void consumeClassOrInterface() {
@@ -4047,8 +3881,8 @@ protected void consumeDims() {
 	this.dimensions = 0;
 }
 protected void consumeDimWithOrWithOutExpr() {
-	// DimWithOrWithOutExpr ::= '[' ']'
-	// DimWithOrWithOutExpr ::= OneOrMoreAnnotations '[' ']' 
+	// DimWithOrWithOutExpr ::= TypeAnnotationsopt '[' ']'
+	// DimWithOrWithOutExpr ::= TypeAnnotationsopt '[' Expression ']'
 	pushOnExpressionStack(null);
 
 	if(this.currentElement != null && this.currentToken == TokenNameLBRACE) {
@@ -4486,18 +4320,15 @@ protected Annotation[][] getMergedAnnotationsOnDimensions(int dims, Annotation[]
 		return null;
 
 	Annotation [][] mergedAnnotations = new Annotation[dims + extendedDims][];
-	for (int i = 0; i < dims; i++) {
-		if (annotationsOnDimensions != null) {
+	
+	if (annotationsOnDimensions != null) {
+		for (int i = 0; i < dims; i++) {
 			mergedAnnotations[i] = annotationsOnDimensions[i];
-		} else {
-			mergedAnnotations[i] = null;
-		}
+		} 
 	}
-	for (int i = dims, j = 0; i < dims + extendedDims; i++, j++) {
-		if (annotationsOnExtendedDimensions != null) {
+	if (annotationsOnExtendedDimensions != null) {
+		for (int i = dims, j = 0; i < dims + extendedDims; i++, j++) {
 			mergedAnnotations[i] = annotationsOnExtendedDimensions[j];
-		} else {
-			mergedAnnotations[i] = null;
 		}
 	}
 
@@ -5195,8 +5026,9 @@ protected void consumeForInit() {
 	pushOnAstLengthStack(-1);
 }
 protected void consumeFormalParameter(boolean isVarArgs) {
-	// FormalParameter ::= Type VariableDeclaratorId ==> false
-	// FormalParameter ::= Modifiers Type VariableDeclaratorId ==> true
+	// FormalParameter ::= Modifiersopt Type VariableDeclaratorIdOrThis
+	// FormalParameter ::= Modifiersopt Type PushZeroTypeAnnotations '...' VariableDeclaratorIdOrThis
+	// FormalParameter ::= Modifiersopt Type @308... TypeAnnotations '...' VariableDeclaratorIdOrThis
 	/*
 	this.astStack :
 	this.identifierStack : type identifier
@@ -5216,9 +5048,20 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 	char[] identifierName = this.identifierStack[this.identifierPtr];
 	long namePositions = this.identifierPositionStack[this.identifierPtr--];
 	int extendedDimensions = this.intStack[this.intPtr--];
+	Annotation [][] annotationsOnExtendedDimensions = extendedDimensions == 0 ? null : getAnnotationsOnDimensions(extendedDimensions);
+	Annotation [] varArgsAnnotations = null;
 	int endOfEllipsis = 0;
+	int length;
 	if (isVarArgs) {
 		endOfEllipsis = this.intStack[this.intPtr--];
+		if ((length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
+			System.arraycopy(
+				this.typeAnnotationStack,
+				(this.typeAnnotationPtr -= length) + 1,
+				varArgsAnnotations = new Annotation[length],
+				0,
+				length);
+		} 
 	}
 //{ObjectTeams: LiftingTypeReference?
 	// Inserted via LiftingTypeopt, e.g.,:
@@ -5241,33 +5084,24 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 	// next is base side:
 // SH}
 	int firstDimensions = this.intStack[this.intPtr--];
-	TypeReference type = getUnannotatedTypeReference(extendedDimensions);
-//{ObjectTeams: LiftingTypeReference? Compose:
+	TypeReference type = getTypeReference(firstDimensions);
+//{ObjectTeams: LiftingTypeReference? Compose:  FIXME?!? jdt moved some to getTypeReference?
 	if (ltr != null) {
 		ltr.setReferences(type, roleRef);
 		type = ltr;
 	}
 // SH}
-	Annotation [] varArgsAnnotations = null;
-	int length;
-	if ((length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
-		System.arraycopy(
-			this.typeAnnotationStack,
-			(this.typeAnnotationPtr -= length) + 1,
-			varArgsAnnotations = new Annotation[length],
-			0,
-			length);
-	} 
 	final int typeDimensions = firstDimensions + extendedDimensions + (isVarArgs ? 1 : 0);
 
-	if (typeDimensions != extendedDimensions) {
+	if (typeDimensions != firstDimensions) {
 		// jsr308 type annotations management
-		Annotation [][] annotationsOnFirstDimensions = firstDimensions == 0 ? null : getAnnotationsOnDimensions(firstDimensions);
-		Annotation [][] annotationsOnExtendedDimensions = extendedDimensions == 0 ? null : type.getAnnotationsOnDimensions();
-		Annotation [][] annotationsOnAllDimensions = null;
-		if (annotationsOnFirstDimensions != null || annotationsOnExtendedDimensions != null || varArgsAnnotations != null) {
-			annotationsOnAllDimensions = getMergedAnnotationsOnDimensions(firstDimensions, annotationsOnFirstDimensions, extendedDimensions, annotationsOnExtendedDimensions); 
-			annotationsOnAllDimensions = getMergedAnnotationsOnDimensions(firstDimensions + extendedDimensions, annotationsOnAllDimensions, isVarArgs ? 1 : 0, isVarArgs ? new Annotation[][]{varArgsAnnotations} : null);
+		Annotation [][] annotationsOnFirstDimensions = firstDimensions == 0 ? null : type.getAnnotationsOnDimensions();
+		Annotation [][] annotationsOnAllDimensions = annotationsOnFirstDimensions;
+		if (annotationsOnExtendedDimensions != null) {
+			annotationsOnAllDimensions = getMergedAnnotationsOnDimensions(firstDimensions, annotationsOnFirstDimensions, extendedDimensions, annotationsOnExtendedDimensions);
+		}
+		if (varArgsAnnotations != null) {
+			annotationsOnAllDimensions = getMergedAnnotationsOnDimensions(firstDimensions + extendedDimensions, annotationsOnAllDimensions, 1, new Annotation[][]{varArgsAnnotations});
 		}
 		type = copyDims(type, typeDimensions, annotationsOnAllDimensions);
 		type.sourceEnd = type.isParameterizedTypeReference() ? this.endStatementPosition : this.endPosition;
@@ -5324,14 +5158,6 @@ protected void consumeFormalParameter(boolean isVarArgs) {
 		} else if (!this.statementRecoveryActivated &&
 				extendedDimensions > 0) {
 			problemReporter().illegalExtendedDimensions(arg);
-		}
-	} else {
-		// The grammar allows trailing annotations in FormalParameter as in 
-		// "int @NonNull[] @Misplaced parameter" in order to allow for constructs such as
-		// "Object @NonNull[] @Correct ... objects" -- we prune these here.
-		if (varArgsAnnotations != null) {
-			problemReporter().misplacedTypeAnnotations(varArgsAnnotations[0],
-					varArgsAnnotations[varArgsAnnotations.length-1]);
 		}
 	}
 }
@@ -5417,9 +5243,6 @@ protected void consumeInsideCastExpressionLL1() {
 }
 protected void consumeInsideCastExpressionWithQualifiedGenerics() {
 	// InsideCastExpressionWithQualifiedGenerics ::= $empty
-}
-protected void consumeInsideCastExpressionWithAnnotatedQualifiedGenerics() {
-	// InsideCastExpressionWithAnnotatedQualifiedGenerics ::= $empty
 }
 protected void consumeInstanceOfExpression() {
 	// RelationalExpression ::= RelationalExpression 'instanceof' ReferenceType
@@ -5853,8 +5676,9 @@ protected void consumeLocalVariableDeclarationStatement() {
 	}
 
 }
-protected void consumeMarkerAnnotation() {
-	// MarkerAnnotation ::= '@' Name
+protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
+	// MarkerAnnotation ::= AnnotationName
+	// MarkerTypeAnnotation ::= TypeAnnotationName
 	MarkerAnnotation markerAnnotation = null;
 
 	int oldIndex = this.identifierPtr;
@@ -5862,7 +5686,11 @@ protected void consumeMarkerAnnotation() {
 	TypeReference typeReference = getAnnotationType();
 	markerAnnotation = new MarkerAnnotation(typeReference, this.intStack[this.intPtr--]);
 	markerAnnotation.declarationSourceEnd = markerAnnotation.sourceEnd;
-	pushOnExpressionStack(markerAnnotation);
+	if (isTypeAnnotation) {
+		pushOnTypeAnnotationStack(markerAnnotation);
+	} else {
+		pushOnExpressionStack(markerAnnotation);
+	}
 	if(!this.statementRecoveryActivated &&
 			this.options.sourceLevel < ClassFileConstants.JDK1_5 &&
 			this.lastErrorEndPositionBeforeRecovery < this.scanner.currentPosition) {
@@ -6146,6 +5974,7 @@ protected void consumeMethodHeaderNameWithTypeParameters(boolean isAnnotationMet
 	this.identifierLengthPtr--;
 	//type
 	TypeReference returnType = getTypeReference(this.intStack[this.intPtr--]);
+	rejectIllegalLeadingTypeAnnotations(returnType);
 	md.returnType = returnType;
 	md.bits |= (returnType.bits & ASTNode.HasTypeAnnotations);
 
@@ -6329,6 +6158,17 @@ protected void consumeMethodInvocationName() {
 		this.identifierLengthPtr--;
 	} else {
 		this.identifierLengthStack[this.identifierLengthPtr]--;
+		int length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--];
+		Annotation [] typeAnnotations;
+		if (length != 0) {
+			System.arraycopy(
+					this.typeAnnotationStack,
+					(this.typeAnnotationPtr -= length) + 1,
+					typeAnnotations = new Annotation[length],
+					0,
+					length);
+			problemReporter().misplacedTypeAnnotations(typeAnnotations[0], typeAnnotations[typeAnnotations.length - 1]);
+		}
 		m.receiver = getUnspecifiedReference();
 		m.sourceStart = m.receiver.sourceStart;
 	}
@@ -6665,26 +6505,21 @@ protected void consumeMultipleResources() {
 	// Resources ::= Resources ';' Resource
 	concatNodeLists();
 }
-protected void consumeOneMoreTypeAnnotation() {
-	// OneOrMoreAnnotations ::= OneOrMoreAnnotations Annotation
-	this.expressionLengthPtr --;
-	Annotation annotation = (Annotation) this.expressionStack[this.expressionPtr--];
-	pushOnTypeAnnotationStack(annotation);
-	this.typeAnnotationLengthStack[--this.typeAnnotationLengthPtr]++;
-	if(!this.statementRecoveryActivated &&
-			this.options.sourceLevel <= ClassFileConstants.JDK1_7 &&
+protected void consumeTypeAnnotation() {
+	// TypeAnnotation ::= NormalTypeAnnotation
+	// TypeAnnotation ::= MarkerTypeAnnotation
+	// TypeAnnotation ::= SingleMemberTypeAnnotation
+	
+	if (!this.statementRecoveryActivated &&
+			this.options.sourceLevel < ClassFileConstants.JDK1_8 &&
 			this.lastErrorEndPositionBeforeRecovery < this.scanner.currentPosition) {
+		Annotation annotation = this.typeAnnotationStack[this.typeAnnotationPtr];
 		problemReporter().invalidUsageOfTypeAnnotations(annotation);
 	}
 }
-protected void consumePotentialNameArrayType () {
-	
-	// FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt PotentialNameArray VariableDeclaratorId
-	// FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt PotentialNameArray '...' VariableDeclaratorId
-	// PotentialNameArray -> $empty
-	// Dimensions including lack of have been pushed appropriately by action attached to DimsoptAnnotsopt
-	pushOnGenericsLengthStack(0); // handle type arguments
-	pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
+protected void consumeOneMoreTypeAnnotation() {
+	// TypeAnnotations ::= TypeAnnotations TypeAnnotation
+	this.typeAnnotationLengthStack[--this.typeAnnotationLengthPtr]++;
 }
 protected void consumeNameArrayType() {
 	pushOnGenericsLengthStack(0); // handle type arguments
@@ -6714,8 +6549,9 @@ protected void consumeNestedType() {
 	this.nestedMethod[this.nestedType] = 0;
 	this.variablesCounter[this.nestedType] = 0;
 }
-protected void consumeNormalAnnotation() {
-	// NormalAnnotation ::= '@' Name '(' MemberValuePairsopt ')'
+protected void consumeNormalAnnotation(boolean isTypeAnnotation) {
+	// NormalTypeAnnotation ::= TypeAnnotationName '(' MemberValuePairsopt ')'
+	// NormalAnnotation ::= AnnotationName '(' MemberValuePairsopt ')'
 	NormalAnnotation normalAnnotation = null;
 
 	int oldIndex = this.identifierPtr;
@@ -6732,7 +6568,12 @@ protected void consumeNormalAnnotation() {
 			length);
 	}
 	normalAnnotation.declarationSourceEnd = this.rParenPos;
-	pushOnExpressionStack(normalAnnotation);
+	
+	if (isTypeAnnotation) {
+		pushOnTypeAnnotationStack(normalAnnotation);
+	} else {
+		pushOnExpressionStack(normalAnnotation);
+	}
 
 	if(this.currentElement != null) {
 		annotationRecoveryCheckPoint(normalAnnotation.sourceStart, normalAnnotation.declarationSourceEnd);
@@ -6749,21 +6590,13 @@ protected void consumeNormalAnnotation() {
 	}
 	this.recordStringLiterals = true;
 }
-protected void consumeOneDimLoop(boolean expressionStackMayHaveAnnotations) {
+protected void consumeOneDimLoop(boolean isAnnotated) {
 	// OneDimLoop ::= '[' ']'
-	// OneDimOrAnnot -> '[' ']'
+	// OneDimLoop ::= TypeAnnotations '[' ']'
 	this.dimensions++;
-	if (!expressionStackMayHaveAnnotations || this.unattachedAnnotationPtr == -1 ) {
-		pushOnTypeAnnotationLengthStack(0); // no annotations for the current dimension.
-	} else { 
-		this.unattachedAnnotationPtr = -1;	// Leave type annotation stacks they are. 
+	if (!isAnnotated) {
+		pushOnTypeAnnotationLengthStack(0); // signal no annotations for the current dimension.
 	}
-}
-protected void consumeOneDimLoopWithAnnotations() {
-	// OneDimLoop ::= OneOrMoreAnnotations '[' ']'
-	this.dimensions++;
-	// Top of expression stack contains annotations of length specified
-	// by top of expression length stack that apply to this dimension.
 }
 protected void consumeOnlySynchronized() {
 	// OnlySynchronized ::= 'synchronized'
@@ -6817,7 +6650,7 @@ protected void consumePackageDeclaration() {
 	impt.declarationSourceEnd = flushCommentsDefinedPriorTo(impt.declarationSourceEnd);
 }
 protected void consumePackageDeclarationName() {
-	// PackageDeclarationName ::= 'package' Name
+	// PackageDeclarationName ::= PackageComment 'package' Name RejectTypeAnnotations
 	/* build an ImportRef build from the last name
 	stored in the identifier stack. */
 
@@ -6859,7 +6692,7 @@ protected void consumePackageDeclarationName() {
 	}
 }
 protected void consumePackageDeclarationNameWithModifiers() {
-	// PackageDeclarationName ::= Modifiers 'package' Name
+	// PackageDeclarationName ::= Modifiers 'package' PushRealModifiers Name RejectTypeAnnotations
 	/* build an ImportRef build from the last name
 	stored in the identifier stack. */
 
@@ -7308,17 +7141,8 @@ protected void consumePrimaryNoNewArrayArrayType() {
 	pushOnGenericsLengthStack(0);
 	ClassLiteralAccess cla;
 	pushOnExpressionStack(
-		cla = new ClassLiteralAccess(this.intStack[this.intPtr--], getUnannotatedTypeReference(this.intStack[this.intPtr--])));
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383884
-	Annotation [][] dimensionAnnotations = cla.type.getAnnotationsOnDimensions();
-	if (dimensionAnnotations != null) {
-		for (int i = 0, max = dimensionAnnotations.length; i < max; i++) {
-			Annotation [] annotations = dimensionAnnotations[i];
-			if (annotations != null) {
-				problemReporter().misplacedTypeAnnotations(annotations[0], annotations[annotations.length - 1]);
-			}
-		}
-	}
+		cla = new ClassLiteralAccess(this.intStack[this.intPtr--], getTypeReference(this.intStack[this.intPtr--])));
+	rejectIllegalTypeAnnotations(cla.type);
 }
 protected void consumePrimaryNoNewArrayName() {
 	// PrimaryNoNewArray ::= Name '.' 'class'
@@ -7327,18 +7151,50 @@ protected void consumePrimaryNoNewArrayName() {
 	// handle type arguments
 	pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
 	pushOnGenericsLengthStack(0);
-	TypeReference typeReference = getUnannotatedTypeReference(0);
+	TypeReference typeReference = getTypeReference(0);
+	
+	rejectIllegalTypeAnnotations(typeReference);
 
 	pushOnExpressionStack(
 		new ClassLiteralAccess(this.intStack[this.intPtr--], typeReference));
+}
+protected void rejectIllegalLeadingTypeAnnotations(TypeReference typeReference) {
+	// Reject misplaced annotations prefixed to a type reference; Used when the grammar is permissive enough to allow them in the first place.
+	Annotation [][]  annotations = typeReference.annotations;
+	if (annotations != null && annotations[0] != null) {
+		problemReporter().misplacedTypeAnnotations(annotations[0][0], annotations[0][annotations[0].length - 1]);
+		annotations[0] = null;  // don't complain further.
+	}
+}
+private void rejectIllegalTypeAnnotations(TypeReference typeReference) {
+	// Reject misplaced annotations on type reference; Used when grammar is permissive enough to allow them in the first place.
+	Annotation [][]  annotations = typeReference.annotations;
+	Annotation[] misplacedAnnotations;
+	for (int i = 0, length = annotations == null ? 0 : annotations.length; i < length; i++) {
+		misplacedAnnotations =  annotations[i];
+		if (misplacedAnnotations != null) {
+			problemReporter().misplacedTypeAnnotations(misplacedAnnotations[0], misplacedAnnotations[misplacedAnnotations.length - 1]);
+		}
+	}
+	annotations = typeReference.getAnnotationsOnDimensions();
+	for (int i = 0, length = annotations == null ? 0 : annotations.length; i < length; i++) {
+		misplacedAnnotations = annotations[i];
+		if (misplacedAnnotations != null) {
+			problemReporter().misplacedTypeAnnotations(misplacedAnnotations[0], misplacedAnnotations[misplacedAnnotations.length - 1]);
+		}
+	}
+	typeReference.annotations = null;
+	typeReference.setAnnotationsOnDimensions(null);
+	typeReference.bits &= ~ASTNode.HasTypeAnnotations;
 }
 protected void consumePrimaryNoNewArrayNameSuper() {
 	// PrimaryNoNewArray ::= Name '.' 'super'
 	// handle type arguments
 	pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
 	pushOnGenericsLengthStack(0);
-	TypeReference typeReference = getUnannotatedTypeReference(0);
-
+	// javac does not accept annotations here anywhere ...
+	TypeReference typeReference = getTypeReference(0);
+	rejectIllegalTypeAnnotations(typeReference);
 	pushOnExpressionStack(
 		new QualifiedSuperReference(
 			typeReference,
@@ -7350,8 +7206,9 @@ protected void consumePrimaryNoNewArrayNameThis() {
 	// handle type arguments
 	pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
 	pushOnGenericsLengthStack(0); // handle type arguments
-	TypeReference typeReference = getUnannotatedTypeReference(0);
-
+	// javac does not accept annotations here anywhere ...
+	TypeReference typeReference = getTypeReference(0);
+	rejectIllegalTypeAnnotations(typeReference);
 	pushOnExpressionStack(
 		new QualifiedThisReference(
 			typeReference,
@@ -7363,30 +7220,23 @@ protected void consumePrimaryNoNewArrayPrimitiveArrayType() {
 	this.intPtr--; // remove the class start position
 	ClassLiteralAccess cla;
 	pushOnExpressionStack(
-		cla = new ClassLiteralAccess(this.intStack[this.intPtr--], getUnannotatedTypeReference(this.intStack[this.intPtr--])));
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383884
-	Annotation [][] dimensionAnnotations = cla.type.getAnnotationsOnDimensions();
-	if (dimensionAnnotations != null) {
-		for (int i = 0, max = dimensionAnnotations.length; i < max; i++) {
-			Annotation [] annotations = dimensionAnnotations[i];
-			if (annotations != null) {
-				problemReporter().misplacedTypeAnnotations(annotations[0], annotations[annotations.length - 1]);
-			}
-		}
-	}
+		cla = new ClassLiteralAccess(this.intStack[this.intPtr--], getTypeReference(this.intStack[this.intPtr--])));
+	rejectIllegalTypeAnnotations(cla.type);
 }
 protected void consumePrimaryNoNewArrayPrimitiveType() {
 	// PrimaryNoNewArray ::= PrimitiveType '.' 'class'
 	this.intPtr--; // remove the class start position
+	ClassLiteralAccess cla;
 	pushOnExpressionStack(
-		new ClassLiteralAccess(this.intStack[this.intPtr--], getUnannotatedTypeReference(0)));
+		cla = new ClassLiteralAccess(this.intStack[this.intPtr--], getTypeReference(0)));
+	rejectIllegalTypeAnnotations(cla.type);
 }
 protected void consumePrimaryNoNewArrayThis() {
 	// PrimaryNoNewArray ::= 'this'
 	pushOnExpressionStack(new ThisReference(this.intStack[this.intPtr--], this.endPosition));
 }
 protected void consumePrimaryNoNewArrayWithName() {
-	// PrimaryNoNewArray ::=  PushLPAREN Expression PushRPAREN
+	// PrimaryNoNewArray ::=  PushLPAREN Name PushRPAREN
 	pushOnExpressionStack(getUnspecifiedReferenceOptimized());
 	final Expression parenthesizedExpression = this.expressionStack[this.expressionPtr];
 	updateSourcePosition(parenthesizedExpression);
@@ -7429,11 +7279,19 @@ protected void consumePushRealModifiers() {
 	pushOnIntStack(this.modifiersSourceStart);
 	resetModifiers();
 }
-protected void consumeQualifiedName() {
+protected void consumeQualifiedName(boolean qualifiedNameIsAnnotated) {
 	// QualifiedName ::= Name '.' SimpleName
+	// QualifiedName ::= Name '.' TypeAnnotations SimpleName 
 	/*back from the recursive loop of QualifiedName.
 	Updates identifier length into the length stack*/
 
+	this.identifierLengthStack[--this.identifierLengthPtr]++;
+	if (!qualifiedNameIsAnnotated) {
+		pushOnTypeAnnotationLengthStack(0);
+	}
+}
+protected void consumeUnannotatableQualifiedName() {
+	// UnannotatableName ::= UnannotatableName '.' SimpleName
 	this.identifierLengthStack[--this.identifierLengthPtr]++;
 }
 protected void consumeRecoveryMethodHeaderName() {
@@ -7636,37 +7494,11 @@ protected void consumeZeroTypeAnnotations(boolean shouldPush) {
 		this.typeAnnotationLengthPtr --; // pop the 0 from the length stack
 	}
 }
-protected void consumeEmptyDimsoptAnnotsopt() {
-	// DimsoptAnnotsopt ::= $empty
-	pushOnIntStack(0);  // signal a non array
-	pushOnTypeAnnotationLengthStack(0); // no trailing annotations (receiver/vararg)
-}
-protected void consumeRightParenForUnannotatedTypeCast() {
-	consumeUnannotatedType();
-	// PushRPAREN ::= ')'
-	pushOnIntStack(this.rParenPos);
-}
-protected void consumeRightParenForNameUnannotatedTypeCast() {
-	pushOnIntStack(0);  // signal a non array
-	consumeUnannotatedType();
-	// remove the fake dimension
-	this.intPtr--;
-	// PushRPAREN ::= ')'
-	pushOnIntStack(this.rParenPos);
-}
-protected void consumeRightParenForAnnotatedTypeCast() {
-	consumeUnannotatedType();
-	// PushRPAREN ::= ')'
-	pushOnIntStack(this.rParenPos);
-}
-protected void consumeRightParenForNameAndAnnotatedTypeCast() {
-	// push a zero for dimensions
-	pushOnIntStack(0);
-	consumeUnannotatedType();
-	// remove the fake dimension
-	this.intPtr--;
-	// PushRPAREN ::= ')'
-	pushOnIntStack(this.rParenPos);
+protected void consumeZeroTypeAnnotations() {
+	// PushZeroTypeAnnotations ::= $empty
+	// Name ::= SimpleName
+	// TypeAnnotationsopt ::= $empty
+	pushOnTypeAnnotationLengthStack(0); // signal absence of @308 annotations.
 }
 // This method is part of an automatic generation : do NOT edit-modify
 protected void consumeRule(int act) {
@@ -10072,11 +9904,12 @@ protected void consumeVariableDeclaratorIdParameter () {
 }
 protected void consumeExplicitThisParameter(boolean isQualified) {
 	// VariableDeclaratorIdOrThis ::= 'this'
-	// VariableDeclaratorIdOrThis ::= Name '.' 'this'
+	// VariableDeclaratorIdOrThis ::= UnannotatableName '.' 'this'
+	// VariableDeclaratorIdOrThis ::= VariableDeclaratorId
 
 	NameReference qualifyingNameReference = null;
 	if (isQualified) {
-		qualifyingNameReference = getUnspecifiedReference();
+		qualifyingNameReference = getUnspecifiedReference(false); // By construction the qualified name is unannotated here, so we should not meddle with the type annotation stack
 	}
 	pushOnExpressionStack(qualifyingNameReference);
 
@@ -10229,11 +10062,9 @@ protected void consumeEmptyTypeArguments() {
 }
 protected void consumeReferenceExpressionTypeForm(boolean isPrimitive, boolean isArray) {
 	
-	// ReferenceExpression ::= PrimitiveType Dims PushModifiers '::' NonWildTypeArgumentsopt IdentifierOrNew
-	// ReferenceExpression ::= Modifiers PrimitiveType Dims PushRealModifiers '::' NonWildTypeArgumentsopt IdentifierOrNew
-	// ReferenceExpression ::= Name Dims PushModifiers '::' NonWildTypeArgumentsopt IdentifierOrNew
-	// ReferenceExpression ::= Modifiers Name Dims PushRealModifiers '::' NonWildTypeArgumentsopt IdentifierOrNew
-	// ReferenceExpression ::= Modifiers Name PushRealModifiers '::' NonWildTypeArgumentsopt IdentifierOrNew
+	// ReferenceExpression ::= PrimitiveType Dims '::' NonWildTypeArgumentsopt IdentifierOrNew
+	// ReferenceExpression ::= Name Dims '::' NonWildTypeArgumentsopt IdentifierOrNew
+	// ReferenceExpression ::= Name '::' NonWildTypeArgumentsopt IdentifierOrNew
 
 	ReferenceExpression rexp;
 	TypeReference type = null;
@@ -10245,7 +10076,8 @@ protected void consumeReferenceExpressionTypeForm(boolean isPrimitive, boolean i
 	if (newForm) {
 		newEnd = this.intStack[this.intPtr--] + 3; // "new"
 	} else {
-		methodReference = (SingleNameReference) getUnspecifiedReferenceOptimized();
+		methodReference = new SingleNameReference(this.identifierStack[this.identifierPtr], this.identifierPositionStack[this.identifierPtr--]);
+		this.identifierLengthPtr--;
 	}
 	
 	int length = this.genericsLengthStack[this.genericsLengthPtr--];
@@ -10255,77 +10087,21 @@ protected void consumeReferenceExpressionTypeForm(boolean isPrimitive, boolean i
 		this.intPtr--;  // pop type arguments source start.
 	}
 	
-	int illegalModifiersSourceStart = this.intStack[this.intPtr--];
-	int illegalModifiers = this.intStack[this.intPtr--];
+	// TODO(Srikanth) : Handle ambiguity with NameReference.
 	
 	if (!isPrimitive) { // handle type arguments
 		pushOnGenericsLengthStack(0);
 		pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
 	}
 
-	// Type Annotations are in the expression stack, so retrieve as unannotated type 
-	type = getUnannotatedTypeReference(isArray ? this.intStack[this.intPtr--] : 0);
-    // and attach the annotations now.
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		type.annotations = new Annotation[type.getAnnotatableLevels()][];
-		System.arraycopy(
-				this.expressionStack,
-				(this.expressionPtr -= length) + 1,
-				type.annotations[0] = new Annotation[length],
-				0,
-				length);
-		type.sourceStart = type.annotations[0][0].sourceStart;
-		type.bits |= ASTNode.HasTypeAnnotations;
-	}
-	if (illegalModifiersSourceStart >= 0 && illegalModifiersSourceStart < type.sourceStart) {
-		type.sourceStart = illegalModifiersSourceStart;
-	}
+	type = getTypeReference(isArray ? this.intStack[this.intPtr--] : 0);
 
-	if (illegalModifiers != ClassFileConstants.AccDefault) {
-		problemReporter().invalidLocationForModifiers(type);
-	}
-	resetModifiers();
-	
 	if (newForm) {
 		rexp = new ReferenceExpression(type, typeArguments, newEnd);
 	} else {
 		rexp = new ReferenceExpression(type, typeArguments, methodReference);
 	}
 
-	pushOnExpressionStack(rexp);
-	if (!this.parsingJava8Plus) {
-		problemReporter().referenceExpressionsNotBelow18(rexp);
-	}
-}
-protected void consumeReferenceExpressionNameForm() {
-	// ReferenceExpression ::= Name '::' NonWildTypeArgumentsopt IdentifierOrNew
-	
-	ReferenceExpression rexp;
-	TypeReference [] typeArguments = null;
-	SingleNameReference methodReference = null;
-	int newEnd = -1;
-	
-	boolean newForm = this.intStack[this.intPtr--] != 0;
-	if (newForm) {
-		newEnd = this.intStack[this.intPtr--] + 3; // "new"
-	} else {
-		methodReference = (SingleNameReference) getUnspecifiedReferenceOptimized();
-	}
-	
-	int length = this.genericsLengthStack[this.genericsLengthPtr--];
-	if (length > 0) {
-		this.genericsPtr -= length;
-		System.arraycopy(this.genericsStack, this.genericsPtr + 1, typeArguments = new TypeReference[length], 0, length);
-		this.intPtr--;  // pop type arguments source start.
-	}
-	
-	// There is some ambiguity between type reference and name reference here.
-	NameReference nameReference = getUnspecifiedReference();
-	if (newForm) {
-		rexp = new ReferenceExpression(nameReference, typeArguments, newEnd);
-	} else {
-		rexp = new ReferenceExpression(nameReference, typeArguments, methodReference); 
-	}
 	pushOnExpressionStack(rexp);
 	if (!this.parsingJava8Plus) {
 		problemReporter().referenceExpressionsNotBelow18(rexp);
@@ -10338,7 +10114,8 @@ protected void consumeReferenceExpressionPrimaryForm() {
 	TypeReference [] typeArguments = null;
 	SingleNameReference methodReference;
 	
-	methodReference = (SingleNameReference) getUnspecifiedReferenceOptimized();
+	methodReference = new SingleNameReference(this.identifierStack[this.identifierPtr], this.identifierPositionStack[this.identifierPtr--]);
+	this.identifierLengthPtr--;
 	int length = this.genericsLengthStack[this.genericsLengthPtr--];
 	if (length > 0) {
 		this.genericsPtr -= length;
@@ -10361,7 +10138,8 @@ protected void consumeReferenceExpressionSuperForm() {
 	TypeReference [] typeArguments = null;
 	SingleNameReference methodReference;
 	
-	methodReference = (SingleNameReference) getUnspecifiedReferenceOptimized();
+	methodReference = new SingleNameReference(this.identifierStack[this.identifierPtr], this.identifierPositionStack[this.identifierPtr--]);
+	this.identifierLengthPtr--;
 	int length = this.genericsLengthStack[this.genericsLengthPtr--];
 	if (length > 0) {
 		this.genericsPtr -= length;
@@ -10384,8 +10162,7 @@ protected void consumeReferenceExpressionTypeArgumentsAndTrunk(boolean qualified
 }
 protected void consumeReferenceExpressionGenericTypeForm() {
 
-	// ReferenceExpression ::= Name PushModifiers BeginTypeArguments ReferenceExpressionTypeArgumentsAndTrunk '::' NonWildTypeArgumentsopt IdentifierOrNew
-	// ReferenceExpression ::= Modifiers Name PushRealModifiers BeginTypeArguments ReferenceExpressionTypeArgumentsAndTrunk '::' NonWildTypeArgumentsopt IdentifierOrNew
+	// ReferenceExpression ::= Name BeginTypeArguments ReferenceExpressionTypeArgumentsAndTrunk '::' NonWildTypeArgumentsopt IdentifierOrNew
 	
 	ReferenceExpression rexp;
 	TypeReference type = null;
@@ -10397,7 +10174,8 @@ protected void consumeReferenceExpressionGenericTypeForm() {
 	if (newForm) {
 		newEnd = this.intStack[this.intPtr--] + 3; // "new"
 	} else {
-		methodReference = (SingleNameReference) getUnspecifiedReferenceOptimized();
+		methodReference = new SingleNameReference(this.identifierStack[this.identifierPtr], this.identifierPositionStack[this.identifierPtr--]);
+		this.identifierLengthPtr--;
 	}
 	
 	int length = this.genericsLengthStack[this.genericsLengthPtr--];
@@ -10410,44 +10188,19 @@ protected void consumeReferenceExpressionGenericTypeForm() {
 	int typeSourceEnd = this.intStack[this.intPtr--];
 	boolean qualified = this.intStack[this.intPtr--] != 0;
 	int dims = this.intStack[this.intPtr--];
-
 	if (qualified) {
-		TypeReference rightSide = getUnannotatedTypeReference(0); // until we add support for X. @Inner Y, by design the type after '.' is unannotated.
-		type = computeQualifiedGenericsFromRightSide(rightSide, dims);
+		Annotation [][] annotationsOnDimensions = dims == 0 ? null : getAnnotationsOnDimensions(dims);
+		TypeReference rightSide = getTypeReference(0);
+		type = computeQualifiedGenericsFromRightSide(rightSide, dims, annotationsOnDimensions);
 	} else {		
 		pushOnGenericsIdentifiersLengthStack(this.identifierLengthStack[this.identifierLengthPtr]);
-		type = getUnannotatedTypeReference(dims); // annotations attached below.
+		type = getTypeReference(dims);
 	}
 	this.intPtr--; // pop '<' position
-	int illegalModifiersSourceStart = this.intStack[this.intPtr--];
-	if (illegalModifiersSourceStart >= 0 && illegalModifiersSourceStart < type.sourceStart) {
-		type.sourceStart = illegalModifiersSourceStart;
-	}
 	type.sourceEnd = typeSourceEnd;
 	
 	rexp = newForm ? new ReferenceExpression(type, typeArguments, newEnd) : new ReferenceExpression(type, typeArguments, methodReference);
 
-	// Prefix annotations if any are on the expression stack, attach them now.
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		type.annotations = new Annotation[type.getAnnotatableLevels()][];
-		System.arraycopy(
-				this.expressionStack,
-				(this.expressionPtr -= length) + 1,
-				type.annotations[0] = new Annotation[length],
-				0,
-				length);
-		int annotStart = type.annotations[0][0].sourceStart;
-		if (annotStart < type.sourceStart) {
-			type.sourceStart = annotStart;
-		}
-		type.bits |= ASTNode.HasTypeAnnotations;
-	}
-
-	int illegalModifiers = this.intStack[this.intPtr--];
-	if (illegalModifiers != ClassFileConstants.AccDefault) {
-		problemReporter().invalidLocationForModifiers(type);
-	}
-	resetModifiers();
 	pushOnExpressionStack(rexp);
 	if (!this.parsingJava8Plus) {
 		problemReporter().referenceExpressionsNotBelow18(rexp);
@@ -10467,8 +10220,9 @@ protected void consumeSimpleAssertStatement() {
 	this.expressionLengthPtr--;
 	pushOnAstStack(new AssertStatement(this.expressionStack[this.expressionPtr--], this.intStack[this.intPtr--]));
 }
-protected void consumeSingleMemberAnnotation() {
-	// SingleMemberAnnotation ::= '@' Name '(' MemberValue ')'
+protected void consumeSingleMemberAnnotation(boolean isTypeAnnotation) {
+	// SingleMemberTypeAnnotation ::= TypeAnnotationName '(' SingleMemberAnnotationMemberValue ')'
+	// SingleMemberAnnotation ::= AnnotationName '(' SingleMemberAnnotationMemberValue ')'
 	SingleMemberAnnotation singleMemberAnnotation = null;
 
 	int oldIndex = this.identifierPtr;
@@ -10478,8 +10232,12 @@ protected void consumeSingleMemberAnnotation() {
 	singleMemberAnnotation.memberValue = this.expressionStack[this.expressionPtr--];
 	this.expressionLengthPtr--;
 	singleMemberAnnotation.declarationSourceEnd = this.rParenPos;
-	pushOnExpressionStack(singleMemberAnnotation);
-
+	
+	if (isTypeAnnotation) {
+		pushOnTypeAnnotationStack(singleMemberAnnotation);
+	} else {
+		pushOnExpressionStack(singleMemberAnnotation);
+	}
 
 	if(this.currentElement != null) {
 		annotationRecoveryCheckPoint(singleMemberAnnotation.sourceStart, singleMemberAnnotation.declarationSourceEnd);
@@ -10509,7 +10267,7 @@ protected void consumeSingleResource() {
 	// Resources ::= Resource
 }
 protected void consumeSingleStaticImportDeclarationName() {
-	// SingleTypeImportDeclarationName ::= 'import' 'static' Name
+	// SingleTypeImportDeclarationName ::= 'import' Name RejectTypeAnnotations
 	/* push an ImportRef build from the last name
 	stored in the identifier stack. */
 
@@ -10968,7 +10726,7 @@ protected void consumeStatementWhile() {
 			this.endStatementPosition);
 }
 protected void consumeStaticImportOnDemandDeclarationName() {
-	// TypeImportOnDemandDeclarationName ::= 'import' 'static' Name '.' '*'
+	// StaticImportOnDemandDeclarationName ::= 'import' 'static' Name '.' RejectTypeAnnotations '*'
 	/* push an ImportRef build from the last name
 	stored in the identifier stack. */
 
@@ -11398,6 +11156,7 @@ protected void consumeToken(int type) {
 		case TokenNameLPAREN :
 			this.lParenPos = this.scanner.startPosition;
 			break;
+		case TokenNameAT308:
 		case TokenNameAT :
 			pushOnIntStack(this.scanner.startPosition);
 			break;
@@ -11511,66 +11270,10 @@ protected void consumeTypeArgumentReferenceType1() {
 	pushOnGenericsStack(getTypeReference(0));
 	this.intPtr--;
 }
-protected void consumeTypeArgumentReferenceType1WithTypeAnnotations() {
-	concatGenericsLists();
-	TypeReference typeReference = getUnannotatedTypeReference(0);
-	// copy from expression stack to type annotation stack
-	int length;
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
-		System.arraycopy(
-				this.expressionStack,
-				(this.expressionPtr -= length) + 1,
-				typeReference.annotations[0] = new Annotation[length],
-				0,
-				length);
-		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
-		if (this.modifiersSourceStart < typeReferenceSourceStart) {
-			typeReferenceSourceStart = this.modifiersSourceStart;
-		}
-		typeReference.bits |= ASTNode.HasTypeAnnotations;
-		typeReference.sourceStart = typeReferenceSourceStart;
-	}
-	pushOnGenericsStack(typeReference);
-	// remove the 0 pushed by ZeroTypeAnnotation
-	this.typeAnnotationLengthPtr--;
-	this.intPtr--;
-	if (this.modifiers != ClassFileConstants.AccDefault) {
-		problemReporter().invalidLocationForModifiers(typeReference);
-	}
-	resetModifiers();
-}
 protected void consumeTypeArgumentReferenceType2() {
 	concatGenericsLists();
 	pushOnGenericsStack(getTypeReference(0));
 	this.intPtr--;
-}
-protected void consumeTypeArgumentReferenceType2WithTypeAnnotations() {
-	concatGenericsLists();
-	TypeReference typeReference = getUnannotatedTypeReference(0);
-	// copy from expression stack to type annotation stack
-	int length;
-	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
-		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
-		System.arraycopy(
-				this.expressionStack,
-				(this.expressionPtr -= length) + 1,
-				typeReference.annotations[0] = new Annotation[length],
-				0,
-				length);
-		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
-		if (this.modifiersSourceStart < typeReferenceSourceStart) {
-			typeReferenceSourceStart = this.modifiersSourceStart;
-		}
-		typeReference.bits |= ASTNode.HasTypeAnnotations;
-		typeReference.sourceStart = typeReferenceSourceStart;
-	}
-	pushOnGenericsStack(typeReference);
-	this.intPtr--;
-	if (this.modifiers != ClassFileConstants.AccDefault) {
-		problemReporter().invalidLocationForModifiers(typeReference);
-	}
-	resetModifiers();
 }
 protected void consumeTypeArguments() {
 	concatGenericsLists();
@@ -11688,7 +11391,7 @@ protected void consumeTypeHeaderNameWithTypeParameters() {
 	}
 }
 protected void consumeTypeImportOnDemandDeclarationName() {
-	// TypeImportOnDemandDeclarationName ::= 'import' Name '.' '*'
+	// TypeImportOnDemandDeclarationName ::= 'import' Name '.' RejectTypeAnnotations '*'
 	/* push an ImportRef build from the last name
 	stored in the identifier stack. */
 
@@ -11754,7 +11457,7 @@ protected void consumeTypeParameter1WithExtendsAndBounds() {
 	}
 }
 protected void consumeTypeParameterHeader() {
-	//TypeParameterHeader ::= Identifier
+	//TypeParameterHeader ::= TypeAnnotationsopt Identifier
 	TypeParameter typeParameter = new TypeParameter();
 	int length;
 	if ((length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
@@ -11953,12 +11656,14 @@ protected void consumeWildcard() {
 	final Wildcard wildcard = new Wildcard(Wildcard.UNBOUND);
 	wildcard.sourceEnd = this.intStack[this.intPtr--];
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	pushOnGenericsStack(wildcard);
 }
 protected void consumeWildcard1() {
 	final Wildcard wildcard = new Wildcard(Wildcard.UNBOUND);
 	wildcard.sourceEnd = this.intStack[this.intPtr--];
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	pushOnGenericsStack(wildcard);
 }
 protected void consumeWildcard1WithBounds() {
@@ -11969,6 +11674,7 @@ protected void consumeWildcard2() {
 	final Wildcard wildcard = new Wildcard(Wildcard.UNBOUND);
 	wildcard.sourceEnd = this.intStack[this.intPtr--];
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	pushOnGenericsStack(wildcard);
 }
 protected void consumeWildcard2WithBounds() {
@@ -11979,6 +11685,7 @@ protected void consumeWildcard3() {
 	final Wildcard wildcard = new Wildcard(Wildcard.UNBOUND);
 	wildcard.sourceEnd = this.intStack[this.intPtr--];
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	pushOnGenericsStack(wildcard);
 }
 protected void consumeWildcard3WithBounds() {
@@ -11991,6 +11698,7 @@ protected void consumeWildcardBounds1Extends() {
 	wildcard.sourceEnd = wildcard.bound.sourceEnd;
 	this.intPtr--; // remove end position of the '?'
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	this.genericsStack[this.genericsPtr] = wildcard;
 }
 protected void consumeWildcardBounds1Super() {
@@ -12000,6 +11708,7 @@ protected void consumeWildcardBounds1Super() {
 	wildcard.sourceEnd = wildcard.bound.sourceEnd;
 	this.intPtr--; // remove end position of the '?'
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	this.genericsStack[this.genericsPtr] = wildcard;
 }
 protected void consumeWildcardBounds2Extends() {
@@ -12008,6 +11717,7 @@ protected void consumeWildcardBounds2Extends() {
 	wildcard.sourceEnd = wildcard.bound.sourceEnd;
 	this.intPtr--; // remove end position of the '?'
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	this.genericsStack[this.genericsPtr] = wildcard;
 }
 protected void consumeWildcardBounds2Super() {
@@ -12017,6 +11727,7 @@ protected void consumeWildcardBounds2Super() {
 	wildcard.sourceEnd = wildcard.bound.sourceEnd;
 	this.intPtr--; // remove end position of the '?'
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	this.genericsStack[this.genericsPtr] = wildcard;
 }
 protected void consumeWildcardBounds3Extends() {
@@ -12025,6 +11736,7 @@ protected void consumeWildcardBounds3Extends() {
 	wildcard.sourceEnd = wildcard.bound.sourceEnd;
 	this.intPtr--; // remove end position of the '?'
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	this.genericsStack[this.genericsPtr] = wildcard;
 }
 protected void consumeWildcardBounds3Super() {
@@ -12034,6 +11746,7 @@ protected void consumeWildcardBounds3Super() {
 	wildcard.sourceEnd = wildcard.bound.sourceEnd;
 	this.intPtr--; // remove end position of the '?'
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	this.genericsStack[this.genericsPtr] = wildcard;
 }
 protected void consumeWildcardBoundsExtends() {
@@ -12042,6 +11755,7 @@ protected void consumeWildcardBoundsExtends() {
 	wildcard.sourceEnd = wildcard.bound.sourceEnd;
 	this.intPtr--; // remove end position of the '?'
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	pushOnGenericsStack(wildcard);
 }
 protected void consumeWildcardBoundsSuper() {
@@ -12051,6 +11765,7 @@ protected void consumeWildcardBoundsSuper() {
 	wildcard.sourceEnd = wildcard.bound.sourceEnd;
 	this.intPtr--; // remove end position of the '?'
 	wildcard.sourceStart = this.intStack[this.intPtr--];
+	annotateTypeReference(wildcard);
 	pushOnGenericsStack(wildcard);
 }
 protected void consumeWildcardWithBounds() {
@@ -12710,11 +12425,28 @@ protected Expression getTypeReference(Expression exp) {
 	exp.bits |= Binding.TYPE;
 	return exp;
 }
+protected void annotateTypeReference(TypeReference ref) {
+	int length;
+	if ((length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
+		if (ref.annotations == null)
+			ref.annotations = new Annotation[ref.getAnnotatableLevels()][];
+		System.arraycopy(
+				this.typeAnnotationStack,
+				(this.typeAnnotationPtr -= length) + 1,
+				ref.annotations[0] = new Annotation[length],
+				0,
+				length);
+		if (ref.sourceStart > ref.annotations[0][0].sourceStart) {
+			ref.sourceStart = ref.annotations[0][0].sourceStart;
+		}
+		ref.bits |= ASTNode.HasTypeAnnotations;
+	}
+}
 protected TypeReference getTypeReference(int dim) {
 //{ObjectTeams: wrap to introduce 2nd parameter
 	return getTypeReference(dim, false);  
 }
-protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
+protected void getTypeReference(int dims, boolean liftingTypeAllowed) {
 	if (this.astPtr > -1 && this.astStack[this.astPtr] instanceof LiftingTypeReference) {
 		LiftingTypeReference ltr = completeLiftingTypeReference(dim);
 		if (liftingTypeAllowed)
@@ -12723,25 +12455,7 @@ protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 			problemReporter().syntaxErrorIllegalDeclaredLifting(this.referenceContext, ltr);
 		return ltr.baseReference; // don't surface illegal LTR
 	}
-// SH}
-	TypeReference ref = getUnannotatedTypeReference(dim);
-	int length;
-	if (this.typeAnnotationLengthPtr >= 0
-			&& (length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
-		//	if ((length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
-		ref.annotations = new Annotation[ref.getAnnotatableLevels()][];
-		System.arraycopy(
-				this.typeAnnotationStack,
-				(this.typeAnnotationPtr -= length) + 1,
-				ref.annotations[0] = new Annotation[length],
-				0,
-				length);
-		ref.sourceStart = ref.annotations[0][0].sourceStart;
-		ref.bits |= ASTNode.HasTypeAnnotations;
-	}
-	return ref;
-	}
-protected TypeReference getUnannotatedTypeReference(int dim) {
+//SH}
 	/* build a Reference on a variable that may be qualified or not
 	 This variable is a type reference and dim will be its dimensions*/
 
@@ -12766,7 +12480,7 @@ protected TypeReference getUnannotatedTypeReference(int dim) {
 			// generic type
 			ref = getTypeReferenceForGenericType(dim, length, numberOfIdentifiers);
 		} else if (length == 1) {
-			// single variable reference
+			// single type reference
 			this.genericsLengthPtr--; // pop the 0
 			if (dim == 0) {
 				ref =
@@ -12788,7 +12502,7 @@ protected TypeReference getUnannotatedTypeReference(int dim) {
 			}
 		} else {
 			this.genericsLengthPtr--;
-			//Qualified variable reference
+			//Qualified type reference
 			char[][] tokens = new char[length][];
 			this.identifierPtr -= length;
 			long[] positions = new long[length];
@@ -12807,6 +12521,23 @@ protected TypeReference getUnannotatedTypeReference(int dim) {
 				ref.sourceEnd = this.endPosition;
 				ref.bits |= ASTNode.HasTypeAnnotations;
 			}
+		}
+	}
+	int levels = ref.getAnnotatableLevels();
+	for (int i = levels - 1; i >= 0; i--) {
+		if ((length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
+			if (ref.annotations == null)
+				ref.annotations = new Annotation[levels][];
+			System.arraycopy(
+					this.typeAnnotationStack,
+					(this.typeAnnotationPtr -= length) + 1,
+					ref.annotations[i] = new Annotation[length],
+					0,
+					length);
+			if (i == 0) {
+				ref.sourceStart = ref.annotations[0][0].sourceStart;
+			}
+			ref.bits |= ASTNode.HasTypeAnnotations;
 		}
 	}
 	return ref;
@@ -12894,8 +12625,13 @@ protected TypeReference getTypeReferenceForGenericType(int dim, int identifierLe
 	}
 }
 protected NameReference getUnspecifiedReference() {
+	return getUnspecifiedReference(true);
+}
+protected NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 	/* build a (unspecified) NameReference which may be qualified*/
-
+	if (rejectTypeAnnotations) { // Compensate for overpermissive grammar.
+		consumeNonTypeUseName();
+	}
 	int length;
 	NameReference ref;
 	if ((length = this.identifierLengthStack[this.identifierLengthPtr--]) == 1)
@@ -12927,7 +12663,7 @@ protected NameReference getUnspecifiedReferenceOptimized() {
 	a field access. This optimization is IMPORTANT while it results
 	that when a NameReference is build, the type checker should always
 	look for that it is not a type reference */
-
+	consumeNonTypeUseName();
 	int length;
 	NameReference ref;
 	if ((length = this.identifierLengthStack[this.identifierLengthPtr--]) == 1) {
@@ -13142,7 +12878,6 @@ public void initialize(boolean initializeNLS) {
 	this.astLengthPtr = -1;
 	this.expressionPtr = -1;
 	this.expressionLengthPtr = -1;
-	this.unattachedAnnotationPtr = -1;
 	this.typeAnnotationLengthPtr = -1;
 	this.typeAnnotationPtr = -1;
 	this.identifierPtr = -1;
@@ -13490,10 +13225,10 @@ protected void optimizedConcatNodeLists() {
 public boolean atConflictScenario(int token) {
 	
 	/* Answer true if the parser is at a configuration where the scanner must look ahead and help disambiguate between (a) '<' as an operator and '<' as the
-	   start of <type argument> and (b) the use of '(' in '(' expression ')' and '( type ')' and '(' lambda formal parameters ')'. When requested thus,
-	   the scanner helps by fabricating synthetic tokens and injecting them into the stream ahead of the tokens that trigger conflicts in the absence
-	   of these artificial tokens. These manufactured token help transform the grammar into LALR(1) by splitting the states so that they have unambigious
-	   prefixes.
+	   start of <type argument> and (b) the use of '(' in '(' expression ')' and '( type ')' and '(' lambda formal parameters ')'. (c) whether the token @
+	   begins a Java SE5 style declaration annotation or if it begins a SE8 style type annotation. When requested thus, the scanner helps by fabricating 
+	   synthetic tokens and injecting them into the stream ahead of the tokens that trigger conflicts in the absence of these artificial tokens. These 
+	   manufactured token help transform the grammar into LALR(1) by splitting the states so that they have unambigious prefixes.
 	   
 	   We do this by claiming to the automaton that the next token seen is the (suitable) synthetic token and observing the response of the state machine. 
 	   Error signals we are NOT at a conflict site, while shift or shift/reduce signals that we are. Accept is impossible, while there may be intermediate
@@ -13522,7 +13257,9 @@ public boolean atConflictScenario(int token) {
 	int stackTopState = this.stack[stackTop]; // single cell non write through "alternate stack" - the automaton's stack pointer either stays fixed during this manoeuvre or monotonically decreases.
 	int highWaterMark = stackTop;
 	
-	token = token == TokenNameLPAREN ? TokenNameBeginLambda : TokenNameBeginTypeArguments;
+	if (token != TokenNameAT) {
+		token = token == TokenNameLPAREN ? TokenNameBeginLambda : TokenNameBeginTypeArguments;
+	}
 	
 	// A rotated version of the automaton - cf. parse()'s for(;;)
 	for (;;) {  
@@ -15185,7 +14922,6 @@ protected void resetStacks() {
 	this.astLengthPtr = -1;
 	this.expressionPtr = -1;
 	this.expressionLengthPtr = -1;
-	this.unattachedAnnotationPtr = -1;
 	this.typeAnnotationLengthPtr = -1;
 	this.typeAnnotationPtr = -1;
 	this.identifierPtr = -1;

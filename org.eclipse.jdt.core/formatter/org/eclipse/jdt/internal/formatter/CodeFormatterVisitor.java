@@ -5,10 +5,6 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
- * This is an implementation of an early-draft specification developed under the Java
- * Community Process (JCP) and is made available for testing and evaluation purposes
- * only. The code is not compatible with any specification of the JCP.
- * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Brock Janiczak - Contribution for bug 150741
@@ -194,8 +190,8 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		TerminalTokens.TokenNamevoid
 	};
 	private static final int[] CLOSING_GENERICS_EXPECTEDTOKENS = new int[] {
-		TerminalTokens.TokenNameGREATER,
 		TerminalTokens.TokenNameRIGHT_SHIFT,
+		TerminalTokens.TokenNameGREATER,
 		TerminalTokens.TokenNameUNSIGNED_RIGHT_SHIFT,
 	};
 //{ObjectTeams: make robust against grammar changes:	

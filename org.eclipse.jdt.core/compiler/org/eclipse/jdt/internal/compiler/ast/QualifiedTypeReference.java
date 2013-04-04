@@ -135,6 +135,40 @@ public class QualifiedTypeReference extends TypeReference {
 	public char[] getLastToken() {
 		return this.tokens[this.tokens.length-1];
 	}
+
+	protected void rejectAnnotationsOnPackageQualifiers(Scope scope, PackageBinding packageBinding) {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=390882
+		if (packageBinding == null || this.annotations == null) return;
+
+		int i = packageBinding.compoundName.length;
+		for (int j = i; j > 0; j--) {
+			Annotation[] qualifierAnnot = this.annotations[j];
+			if (qualifierAnnot != null && qualifierAnnot.length > 0) {
+				scope.problemReporter().misplacedTypeAnnotations(qualifierAnnot[0], qualifierAnnot[qualifierAnnot.length - 1]);
+				this.annotations[j] = null;
+			}
+		}
+	}
+
+	protected void rejectAnnotationsOnStaticMemberQualififer(Scope scope, ReferenceBinding currentType, PackageBinding packageBinding, int tokenIndex) {
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=385137
+		if (this.annotations != null && currentType.isMemberType() && currentType.isStatic()) {
+			Annotation[] qualifierAnnot = this.annotations[tokenIndex - 1];
+			if (qualifierAnnot != null) {
+				scope.problemReporter().illegalTypeAnnotationsInStaticMemberAccess(qualifierAnnot[0],
+						qualifierAnnot[qualifierAnnot.length - 1]);
+			}
+			// For the case: @Marker p.X.StaticNestedType, where 'p' is a package and 'X' is a class
+			if (packageBinding != null && packageBinding.compoundName.length == (tokenIndex - 1)) {
+				qualifierAnnot = this.annotations[0];
+				if (qualifierAnnot != null) {
+					scope.problemReporter().illegalTypeAnnotationsInStaticMemberAccess(qualifierAnnot[0],
+							qualifierAnnot[qualifierAnnot.length - 1]);
+				}
+			}
+		}
+	}
+
 	protected TypeBinding getTypeBinding(Scope scope) {
 
 		if (this.resolvedType != null) {
@@ -169,6 +203,8 @@ public class QualifiedTypeReference extends TypeReference {
 			return (ReferenceBinding) binding; // not found
 		}
 	    PackageBinding packageBinding = binding == null ? null : (PackageBinding) binding;
+	    rejectAnnotationsOnPackageQualifiers(scope, packageBinding);
+
 	    boolean isClassScope = scope.kind == Scope.CLASS_SCOPE;
 	    ReferenceBinding qualifiedType = null;
 		for (int i = packageBinding == null ? 0 : packageBinding.compoundName.length, max = this.tokens.length, last = max-1; i < max; i++) {
@@ -198,6 +234,7 @@ public class QualifiedTypeReference extends TypeReference {
 					return null;
 			ReferenceBinding currentType = (ReferenceBinding) this.resolvedType;
 			if (qualifiedType != null) {
+				rejectAnnotationsOnStaticMemberQualififer(scope, currentType, packageBinding, i);
 				ReferenceBinding enclosingType = currentType.enclosingType();
 				if (enclosingType != null && enclosingType.erasure() != qualifiedType.erasure()) {
 					qualifiedType = enclosingType; // inherited member type, leave it associated with its enclosing rather than subtype

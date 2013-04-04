@@ -420,4 +420,157 @@ public class DefaultMethodsTest extends AbstractComparableTest {
 			"Name clash: The method foo(List<String>) of type I3 has the same erasure as foo(List) of type I2 but does not override it\n" + 
 			"----------\n");
 	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=390761
+	public void testDefaultNonclash() {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"public interface X extends Map<String, Object> {\n" +
+				"   Zork z;\n" +
+				"}\n" +
+				"\n" +
+				"interface Map<K,V> extends MapStream<K, V>  {\n" +
+				"   @Override\n" +
+				"	Iterable<BiValue<K, V>> asIterable() default {\n" +
+				"		return null;\n" +
+				"	}\n" +
+				"}\n" +
+				"interface MapStream<K, V> {\n" +
+				"	Iterable<BiValue<K, V>> asIterable();\n" +
+				"}\n" +
+				"\n" +
+				"interface BiValue<T, U> {\n" +
+				"    T getKey();\n" +
+				"    U getValue();\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 2)\n" + 
+			"	Zork z;\n" + 
+			"	^^^^\n" + 
+			"Zork cannot be resolved to a type\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=390761
+	public void testDefaultNonclash2() {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"public interface X extends Map<String, Object> {\n" +
+				"   Zork z;\n" +
+				"}\n" +
+				"\n" +
+				"interface Map<K,V> extends MapStream<K, V>  {\n" +
+				"   @Override\n" +
+				"	Iterable<BiValue<K, V>> asIterable();\n" +
+				"}\n" +
+				"interface MapStream<K, V> {\n" +
+				"	Iterable<BiValue<K, V>> asIterable() default {\n" +
+				"       return null;\n" +
+				"   }\n" +
+				"}\n" +
+				"\n" +
+				"interface BiValue<T, U> {\n" +
+				"    T getKey();\n" +
+				"    U getValue();\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 2)\n" + 
+			"	Zork z;\n" + 
+			"	^^^^\n" + 
+			"Zork cannot be resolved to a type\n" + 
+			"----------\n");
+	}
+	
+	public void _testDefaultNonclash3() {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"public interface X extends Map<String, Object> {\n" +
+				"   Zork z;\n" +
+				"}\n" +
+				"\n" +
+				"interface Map<K,V> extends MapStream<K, V>  {\n" +
+				"   @Override\n" +
+				"	Iterable<BiValue<K, V>> asIterable() default {\n" +
+				"       return null;\n" +
+				"   }\n" +
+				"}\n" +
+				"interface MapStream<K, V> {\n" +
+				"	Iterable<BiValue<K, V>> asIterable() default {\n" +
+				"       return null;\n" +
+				"   }\n" +
+				"}\n" +
+				"\n" +
+				"interface BiValue<T, U> {\n" +
+				"    T getKey();\n" +
+				"    U getValue();\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 2)\n" + 
+			"	Zork z;\n" + 
+			"	^^^^\n" + 
+			"Zork cannot be resolved to a type\n" + 
+			"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=390761
+	public void testDefaultNonclash4() {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"public interface X extends Map<String, Object> {\n" +
+				"   Zork z;\n" +
+				"}\n" +
+				"\n" +
+				"interface Map<K,V> extends MapStream<K, V>  {\n" +
+				"   @Override\n" +
+				"	Iterable<BiValue<K, V>> asIterable();\n" +
+				"}\n" +
+				"interface MapStream<K, V> {\n" +
+				"	Iterable<BiValue<K, V>> asIterable();\n" +
+				"}\n" +
+				"\n" +
+				"interface BiValue<T, U> {\n" +
+				"    T getKey();\n" +
+				"    U getValue();\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 2)\n" + 
+			"	Zork z;\n" + 
+			"	^^^^\n" + 
+			"Zork cannot be resolved to a type\n" + 
+			"----------\n");
+	}
+
+	// JLS 9.4.1
+	// Bug 382347 - [1.8][compiler] Compiler accepts incorrect default method inheritance
+	// Don't report conflict between the same method inherited on two paths.
+	public void testInheritedDefaultOverrides05() {
+		runConformTest(
+			new String[] {
+				"StringList.java",
+				"import java.util.Collection;\n" +
+				"public abstract class StringList implements Collection<String> {\n" +
+				"}\n"
+			},
+			"");
+	}
+
+	// JLS 9.4.1
+	// Bug 382347 - [1.8][compiler] Compiler accepts incorrect default method inheritance
+	// extract from SuperTypeTest.test013():
+	public void testInheritedDefaultOverrides06() {
+		runConformTest(
+			new String[] {
+				"IterableList.java",
+				"import java.util.*;\n" +
+				"public interface IterableList<E> extends Iterable<E>, List<E> {}\n" +
+				"interface ListIterable<E> extends Iterable<E>, List<E> {}\n" +
+				"\n"
+			},
+			"");
+	}
 }

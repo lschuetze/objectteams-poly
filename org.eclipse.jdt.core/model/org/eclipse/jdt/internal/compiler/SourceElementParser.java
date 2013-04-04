@@ -436,9 +436,9 @@ protected void consumeMemberValuePair() {
 		this.requestor.acceptMethodReference(memberValuepair.name, 0, memberValuepair.sourceStart);
 	}
 }
-protected void consumeMarkerAnnotation() {
-	super.consumeMarkerAnnotation();
-	Annotation annotation = (Annotation)this.expressionStack[this.expressionPtr];
+protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
+	super.consumeMarkerAnnotation(isTypeAnnotation);
+	Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
 	if (this.reportReferenceInfo) { // accept annotation type reference
 		this.requestor.acceptAnnotationTypeReference(annotation.type.getTypeName(), annotation.sourceStart, annotation.sourceEnd);
 	}
@@ -592,16 +592,16 @@ protected void consumeMethodInvocationBaseWithTypeArguments(boolean isSuperAcces
 	handleMessageSend(((BaseCallMessageSend) this.expressionStack[this.expressionPtr]).getMessageSend());
 }
 //SH}
-protected void consumeNormalAnnotation() {
-	super.consumeNormalAnnotation();
-	Annotation annotation = (Annotation)this.expressionStack[this.expressionPtr];
+protected void consumeNormalAnnotation(boolean isTypeAnnotation) {
+	super.consumeNormalAnnotation(isTypeAnnotation);
+	Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
 	if (this.reportReferenceInfo) { // accept annotation type reference
 		this.requestor.acceptAnnotationTypeReference(annotation.type.getTypeName(), annotation.sourceStart, annotation.sourceEnd);
 	}
 }
-protected void consumeSingleMemberAnnotation() {
-	super.consumeSingleMemberAnnotation();
-	SingleMemberAnnotation member = (SingleMemberAnnotation) this.expressionStack[this.expressionPtr];
+protected void consumeSingleMemberAnnotation(boolean isTypeAnnotation) {
+	super.consumeSingleMemberAnnotation(isTypeAnnotation);
+	SingleMemberAnnotation member = (SingleMemberAnnotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
 	if (this.reportReferenceInfo) {
 		this.requestor.acceptMethodReference(TypeConstants.VALUE, 0, member.sourceStart);
 	}
@@ -863,7 +863,7 @@ protected CompilationUnitDeclaration endParse(int act) {
 		return null;
 	}
 }
-public TypeReference getUnannotatedTypeReference(int dim) {
+public TypeReference getTypeReference(int dim) {
 	/* build a Reference on a variable that may be qualified or not
 	 * This variable is a type reference and dim will be its dimensions
 	 */
@@ -912,7 +912,7 @@ protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 				}
 			}
 		} else if (length == 1) {
-			// single variable reference
+			// single type reference
 			this.genericsLengthPtr--; // pop the 0
 			if (dim == 0) {
 				ref =
@@ -931,11 +931,14 @@ protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 						annotationsOnDimensions,
 						this.identifierPositionStack[this.identifierPtr--]);
 				ref.sourceEnd = this.endPosition;
+				if (annotationsOnDimensions != null) {
+					ref.bits |= ASTNode.HasTypeAnnotations;
+				}
 				if (this.reportReferenceInfo) {
 					this.requestor.acceptTypeReference(((ArrayTypeReference)ref).token, ref.sourceStart);
 				}
 			}
-		} else {//Qualified variable reference
+		} else { // Qualified type reference
 			this.genericsLengthPtr--;
 			char[][] tokens = new char[length][];
 			this.identifierPtr -= length;
@@ -957,17 +960,39 @@ protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 				ref =
 					new ArrayQualifiedTypeReference(tokens, dim, annotationsOnDimensions, positions);
 				ref.sourceEnd = this.endPosition;
+				if (annotationsOnDimensions != null) {
+					ref.bits |= ASTNode.HasTypeAnnotations;
+				}
 				if (this.reportReferenceInfo) {
 					this.requestor.acceptTypeReference(((ArrayQualifiedTypeReference)ref).tokens, ref.sourceStart, ref.sourceEnd);
 				}
 			}
 		}
 	}
+	int levels = ref.getAnnotatableLevels();
+	for (int i = levels - 1; i >= 0; i--) {
+		if ((length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
+			if (ref.annotations == null)
+				ref.annotations = new Annotation[levels][];
+			System.arraycopy(
+					this.typeAnnotationStack,
+					(this.typeAnnotationPtr -= length) + 1,
+					ref.annotations[i] = new Annotation[length],
+					0,
+					length);
+			if (i == 0) {
+				ref.sourceStart = ref.annotations[0][0].sourceStart;
+			}
+			ref.bits |= ASTNode.HasTypeAnnotations;
+		}
+	}
 	return ref;
 }
-public NameReference getUnspecifiedReference() {
+public NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
 	/* build a (unspecified) NameReference which may be qualified*/
-
+    if (rejectTypeAnnotations) {
+    	consumeNonTypeUseName();
+    }
 	int length;
 	if ((length = this.identifierLengthStack[this.identifierLengthPtr--]) == 1) {
 		// single variable reference
@@ -1005,7 +1030,7 @@ public NameReference getUnspecifiedReferenceOptimized() {
 	a field access. This optimization is IMPORTANT while it results
 	that when a NameReference is build, the type checker should always
 	look for that it is not a type reference */
-
+	consumeNonTypeUseName();
 	int length;
 	if ((length = this.identifierLengthStack[this.identifierLengthPtr--]) == 1) {
 		// single variable reference

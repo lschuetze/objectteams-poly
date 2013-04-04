@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -9876,7 +9880,7 @@ public void test297() {
 }
 // Bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639) 
 // many syntax errors fixed, does not trigger CCE 
-public void _testBug366003() {
+public void testBug366003() {
 	runNegativeTest(
 		new String[] {
 			"snippet/Bug366003.java",
@@ -9928,18 +9932,18 @@ public void _testBug366003() {
 		"----------\n" + 
 		"7. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
-		"	^^^^^^^^^^^^^^^^\n" + 
-		"Syntax error on tokens, delete these tokens\n" + 
+		"	            ^^^^\n" + 
+		"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" + 
 		"----------\n" + 
 		"8. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	            ^^^^\n" + 
-		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" + 
+		"Syntax error, insert \")\" to complete MethodDeclaration\n" + 
 		"----------\n" + 
 		"9. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	            ^^^^\n" + 
-		"Syntax error, insert \"EnumBody\" to complete EnumDeclaration\n" + 
+		"Syntax error, insert \";\" to complete MethodDeclaration\n" + 
 		"----------\n" + 
 		"10. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
@@ -9969,7 +9973,7 @@ public void _testBug366003() {
 }
 // Bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639) 
 // code is garbage, triggers CCE 
-public void _testBug366003b() {
+public void testBug366003b() {
 	runNegativeTest(
 		new String[] {
 			"snippet/Bug366003.java",
@@ -10014,18 +10018,18 @@ public void _testBug366003b() {
 		"----------\n" + 
 		"6. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
-		"	^^^^^^^^^^^^^^^^\n" + 
-		"Syntax error on tokens, delete these tokens\n" + 
+		"	            ^^^^\n" + 
+		"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" + 
 		"----------\n" + 
 		"7. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	            ^^^^\n" + 
-		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" + 
+		"Syntax error, insert \")\" to complete MethodDeclaration\n" + 
 		"----------\n" + 
 		"8. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	            ^^^^\n" + 
-		"Syntax error, insert \"EnumBody\" to complete EnumDeclaration\n" + 
+		"Syntax error, insert \";\" to complete MethodDeclaration\n" + 
 		"----------\n" + 
 		"9. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
@@ -10055,7 +10059,7 @@ public void _testBug366003b() {
 }
 // Bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639) 
 // minimal syntax error to trigger CCE 
-public void _testBug366003c() {
+public void testBug366003c() {
 	runNegativeTest(
 		new String[] {
 			"snippet/Bug366003.java",
@@ -10069,17 +10073,17 @@ public void _testBug366003c() {
 		"1. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
 		"	org.User(@Bla String a)\n" + 
 		"	^^^\n" + 
-		"Syntax error on token \"org\", delete this token\n" + 
+		"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" + 
 		"----------\n" + 
 		"2. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
 		"	org.User(@Bla String a)\n" + 
 		"	^^^\n" + 
-		"Syntax error, insert \"enum Identifier\" to complete EnumHeaderName\n" + 
+		"Syntax error, insert \")\" to complete MethodDeclaration\n" + 
 		"----------\n" + 
 		"3. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
 		"	org.User(@Bla String a)\n" + 
 		"	^^^\n" + 
-		"Syntax error, insert \"EnumBody\" to complete EnumDeclaration\n" + 
+		"Syntax error, insert \";\" to complete MethodDeclaration\n" + 
 		"----------\n" + 
 		"4. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
 		"	org.User(@Bla String a)\n" + 
@@ -10103,7 +10107,7 @@ public void _testBug366003c() {
 		"----------\n");
 }
 // unfinished attempt to trigger the same CCE via catch formal parameters
-public void _testBug366003d() {
+public void testBug366003d() {
 	runNegativeTest(
 		new String[] {
 			"snippet/Bug366003.java",
@@ -10118,26 +10122,26 @@ public void _testBug366003d() {
 			"	}\n" +
 			"}\n"
 		},
-		"----------\n" +
-		"1. ERROR in snippet\\Bug366003.java (at line 7)\n" +
-		"	e } catch (@Blah Exception eSecond) {\n" +
-		"	^\n" +
-		"Syntax error, insert \"AssignmentOperator Expression\" to complete Assignment\n" +
-		"----------\n" +
-		"2. ERROR in snippet\\Bug366003.java (at line 7)\n" +
-		"	e } catch (@Blah Exception eSecond) {\n" +
-		"	^\n" +
-		"Syntax error, insert \";\" to complete BlockStatements\n" +
-		"----------\n" +
-		"3. ERROR in snippet\\Bug366003.java (at line 8)\n" +
-		"	e }\n" +
-		"	^\n" +
-		"Syntax error, insert \"AssignmentOperator Expression\" to complete Expression\n" +
-		"----------\n" +
-		"4. ERROR in snippet\\Bug366003.java (at line 8)\n" +
-		"	e }\n" +
-		"	^\n" +
-		"Syntax error, insert \";\" to complete BlockStatements\n" +
+		"----------\n" + 
+		"1. ERROR in snippet\\Bug366003.java (at line 7)\n" + 
+		"	e } catch (@Blah Exception eSecond) {\n" + 
+		"	^\n" + 
+		"Syntax error, insert \"VariableDeclarators\" to complete LocalVariableDeclaration\n" + 
+		"----------\n" + 
+		"2. ERROR in snippet\\Bug366003.java (at line 7)\n" + 
+		"	e } catch (@Blah Exception eSecond) {\n" + 
+		"	^\n" + 
+		"Syntax error, insert \";\" to complete BlockStatements\n" + 
+		"----------\n" + 
+		"3. ERROR in snippet\\Bug366003.java (at line 8)\n" + 
+		"	e }\n" + 
+		"	^\n" + 
+		"Syntax error, insert \"VariableDeclarators\" to complete LocalVariableDeclaration\n" + 
+		"----------\n" + 
+		"4. ERROR in snippet\\Bug366003.java (at line 8)\n" + 
+		"	e }\n" + 
+		"	^\n" + 
+		"Syntax error, insert \";\" to complete BlockStatements\n" + 
 		"----------\n");
 }
 public void testBug366003e() {

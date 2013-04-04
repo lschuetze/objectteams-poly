@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -416,10 +416,10 @@ protected void consumeLocalVariableDeclaration() {
 	this.patternLocator.match((LocalDeclaration) this.astStack[this.astPtr], this.nodeSet);
 }
 
-protected void consumeMarkerAnnotation() {
-	super.consumeMarkerAnnotation();
+protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
+	super.consumeMarkerAnnotation(isTypeAnnotation);
 	if (this.patternFineGrain == 0 || (this.patternFineGrain & IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE) != 0) {
-		Annotation annotation = (Annotation) this.expressionStack[this.expressionPtr];
+		Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
 		this.patternLocator.match(annotation, this.nodeSet);
 	}
 }
@@ -595,11 +595,11 @@ protected void consumeMethodInvocationSuperWithTypeArguments() {
 	}
 }
 
-protected void consumeNormalAnnotation() {
-	super.consumeNormalAnnotation();
+protected void consumeNormalAnnotation(boolean isTypeAnnotation) {
+	super.consumeNormalAnnotation(isTypeAnnotation);
 	if (this.patternFineGrain == 0 || (this.patternFineGrain & IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE) != 0) {
 		// this is always an Annotation
-		Annotation annotation = (Annotation) this.expressionStack[this.expressionPtr];
+		Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
 		this.patternLocator.match(annotation, this.nodeSet);
 	}
 }
@@ -633,11 +633,11 @@ protected void consumePrimaryNoNewArrayWithName() {
 	this.intPtr--;
 }
 
-protected void consumeSingleMemberAnnotation() {
-	super.consumeSingleMemberAnnotation();
+protected void consumeSingleMemberAnnotation(boolean isTypeAnnotation) {
+	super.consumeSingleMemberAnnotation(isTypeAnnotation);
 	if (this.patternFineGrain == 0 || (this.patternFineGrain & IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE) != 0) {
 		// this is always an Annotation
-		Annotation annotation = (Annotation) this.expressionStack[this.expressionPtr];
+		Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
 		this.patternLocator.match(annotation, this.nodeSet);
 	}
 }
@@ -877,14 +877,14 @@ protected TypeReference copyDims(TypeReference typeRef, int dim, Annotation [][]
 		this.nodeSet.addTrustedMatch(result, true);
 	return result;
 }
-protected TypeReference getUnannotatedTypeReference(int dim) {
+protected TypeReference getTypeReference(int dim) {
 //{ObjectTeams: wrap to introduce 2nd parameter
-	return getUnannotatedTypeReference(dim, false);  
+	return getTypeReference(dim, false);  
 }
-protected TypeReference getUnannotatedTypeReference(int dim, boolean liftingTypeAllowed) {
+protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 // FIXME:
 //*orig:
-	TypeReference typeRef = super.getUnannotatedTypeReference(dim);
+	TypeReference typeRef = super.getTypeReference(dim);
 // OT previous:
 //	TypeReference typeRef = super.getUnannotatedTypeReference(dim, liftingTypeAllowed);
 // SH}
@@ -893,8 +893,8 @@ protected TypeReference getUnannotatedTypeReference(int dim, boolean liftingType
 	}
 	return typeRef;
 }
-protected NameReference getUnspecifiedReference() {
-	NameReference nameRef = super.getUnspecifiedReference();
+protected NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
+	NameReference nameRef = super.getUnspecifiedReference(rejectTypeAnnotations);
 	if (this.patternFineGrain == 0) {
 		this.patternLocator.match(nameRef, this.nodeSet); // NB: Don't check container since unspecified reference can happen anywhere
 	} else if ((this.patternFineGrain & IJavaSearchConstants.QUALIFIED_REFERENCE) != 0) {

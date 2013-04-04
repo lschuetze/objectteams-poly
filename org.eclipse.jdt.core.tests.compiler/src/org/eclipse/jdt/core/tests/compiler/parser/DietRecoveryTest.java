@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - adapted for Object Teams
@@ -4580,7 +4584,7 @@ public void test74() {
  * Bunch of syntax errors
  */
 
-public void _test75() {
+public void test75() {
 
 	String s =
 		"package ZKentTest;\n"+
@@ -4646,14 +4650,14 @@ public void _test75() {
 		"        super();\n" +
 		"      }\n" +
 		"      int hello() {\n" +
-		"        fo = $missing$;\n" +
+		"        fo $missing$;\n" +
 		"      }\n" +
 		"      int world() {\n" +
 		"      }\n" +
 		"      void foo() {\n" +
 		"      }\n" +
 		"    }\n" +
-		"    ba = $missing$;\n" +
+		"    ba $missing$;\n" +
 		"  }\n" +
 		"}\n";
 
@@ -4776,7 +4780,7 @@ public void test76() {
  * Should not recover duplicate field numberOfDisks
  */
 
-public void _test77() {
+public void test77() {
 
 	String s =
 		"package p;															\n"+
@@ -4848,7 +4852,7 @@ public void _test77() {
 		"    else\n" +
 		"        if ((depth > 1))\n" +
 		"            {\n" +
-		"              sol = $missing$;\n" +
+		"              sol $missing$;\n" +
 		"            }\n" +
 		"        else\n" +
 		"            ;\n" +
@@ -5951,7 +5955,7 @@ public void test98() {
 		expectedCompletionDietUnitToString, testName);
 }
 
-public void _test99() {
+public void test99() {
 	String s =
 		"import ;\n"+
 		"class X {\n"+
@@ -6003,7 +6007,7 @@ public void _test99() {
 		"    restricts breakpoint;\n" +
 		"    given thread;\n" +
 		"    any other;\n" +
-		"    specified = $missing$;\n" +
+		"    specified $missing$;\n" +
 		"  }\n" +
 		"  public void removeThreadFilter(IJavaThread thread) {\n" +
 		"    removes the;\n" +
@@ -6014,7 +6018,7 @@ public void _test99() {
 		"    request as;\n" +
 		"    does not;\n" +
 		"    the removal;\n" +
-		"    thread = $missing$;\n" +
+		"    thread $missing$;\n" +
  :giro */
 // SH}		
 		"  }\n" +
@@ -6582,7 +6586,7 @@ public void test109() {
 		expectedFullUnitToString,
 		expectedCompletionDietUnitToString, testName);
 }
-public void test110() {
+public void _test110() {
 	String s =
 		"public class X {\n" +
 		"	void bar(){\n" +

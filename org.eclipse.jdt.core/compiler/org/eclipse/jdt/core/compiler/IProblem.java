@@ -1304,7 +1304,7 @@ void setSourceStart(int sourceStart);
     /** @since 3.9 */
     int MisplacedTypeAnnotations = Syntax + Internal + 639;
     /** @since 3.9 */
-    int InvalidLocationForModifiers = Syntax + Internal + 640;
+    int IllegalTypeAnnotationsInStaticMemberAccess = Internal + Syntax + 640;
     /** @since 3.9*/
     int IllegalUsageOfTypeAnnotations = Internal + Syntax + 641;
     /** @since 3.9*/

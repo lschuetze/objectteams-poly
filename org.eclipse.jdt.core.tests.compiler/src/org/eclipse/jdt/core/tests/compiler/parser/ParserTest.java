@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -61,7 +65,7 @@ public void test002() {
 		"----------\n"
 	);
 }
-public void _test003() {
+public void test003() {
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -71,18 +75,22 @@ public void _test003() {
 			"	}\n" +
 			"}\n"
 		},
-		"----------\n" +
-		"1. ERROR in X.java (at line 3)\n" +
-		"	throws new X\n" +
-		"	^^^^^^\n" +
-		"Syntax error on token \"throws\", throw expected\n" +
-		"----------\n" +
-		"2. ERROR in X.java (at line 3)\n" +
-		"	throws new X\n" +
-		"	           ^\n" +
-		"Syntax error, unexpected end of method\n" +
-		"----------\n"
-	);
+		"----------\n" + 
+		"1. ERROR in X.java (at line 3)\n" + 
+		"	throws new X\n" + 
+		"	^^^^^^\n" + 
+		"Syntax error on token \"throws\", throw expected\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 3)\n" + 
+		"	throws new X\n" + 
+		"	           ^\n" + 
+		"Syntax error, insert \"( )\" to complete Expression\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 3)\n" + 
+		"	throws new X\n" + 
+		"	           ^\n" + 
+		"Syntax error, insert \";\" to complete BlockStatements\n" + 
+		"----------\n");
 }
 public void test004() {
 	this.runNegativeTest(
@@ -120,7 +128,7 @@ public void test005() {
 		"----------\n"
 	);
 }
-public void _test006() {
+public void test006() {
 	this.runNegativeTest(
 		new String[] {
 			"X.java",
@@ -130,18 +138,22 @@ public void _test006() {
 			"	}\n" +
 			"}\n"
 		},
-		"----------\n" +
-		"1. ERROR in X.java (at line 3)\n" +
-		"	throws new X\n" +
-		"	^^^^^^\n" +
-		"Syntax error on token \"throws\", throw expected\n" +
-		"----------\n" +
-		"2. ERROR in X.java (at line 3)\n" +
-		"	throws new X\n" +
-		"	           ^\n" +
-		"Syntax error, unexpected end of initializer\n" +
-		"----------\n"
-	);
+		"----------\n" + 
+		"1. ERROR in X.java (at line 3)\n" + 
+		"	throws new X\n" + 
+		"	^^^^^^\n" + 
+		"Syntax error on token \"throws\", throw expected\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 3)\n" + 
+		"	throws new X\n" + 
+		"	           ^\n" + 
+		"Syntax error, insert \"( )\" to complete Expression\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 3)\n" + 
+		"	throws new X\n" + 
+		"	           ^\n" + 
+		"Syntax error, insert \";\" to complete BlockStatements\n" + 
+		"----------\n");
 }
 public void test007() {
 	this.runNegativeTest(

@@ -2893,14 +2893,6 @@ public void illegalModifierForMethod(AbstractMethodDeclaration methodDecl) {
 		methodDecl.sourceStart,
 		methodDecl.sourceEnd);
 }
-public void invalidLocationForModifiers(ASTNode location) {
-	this.handle(
-			IProblem.InvalidLocationForModifiers,
-			NoArgument,
-			NoArgument,
-			location.sourceStart,
-			location.sourceEnd);
-}
 public void illegalModifierForVariable(LocalDeclaration localDecl, boolean complainAsArgument) {
 	String[] arguments = new String[] {new String(localDecl.name)};
 	this.handle(
@@ -4900,6 +4892,14 @@ public void illegalUsageOfTypeAnnotations(Annotation annotation) {
 			NoArgument,
 			annotation.sourceStart,
 			annotation.sourceEnd);	
+}
+public void illegalTypeAnnotationsInStaticMemberAccess(Annotation first, Annotation last) {
+	this.handle(
+			IProblem.IllegalTypeAnnotationsInStaticMemberAccess,
+			NoArgument,
+			NoArgument,
+			first.sourceStart,
+			last.sourceEnd);
 }
 public void isClassPathCorrect(char[][] wellKnownTypeName, CompilationUnitDeclaration compUnitDecl, Object location) {
 	this.referenceContext = compUnitDecl;
@@ -7618,6 +7618,11 @@ private void syntaxError(
 	String errorTokenName,
 	String expectedToken) {
 
+	if (currentKind == TerminalTokens.TokenNameAT && expectedToken != null && expectedToken.equals("@")) { //$NON-NLS-1$
+		// In the diagnose parser case, we don't have the wherewithal to discriminate when we should hand out @308 vs @. So we always answer @.
+		// We should silently recover so swallow the message.
+		return;
+	}
 	String eTokenName;
 	if (isKeyword(currentKind) ||
 		isLiteral(currentKind) ||
