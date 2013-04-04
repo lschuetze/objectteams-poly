@@ -9146,19 +9146,19 @@ protected void consumeRule(int act) {
 		    consumeTypeArgument();  
 			break;
  
-    case 737 : if (DEBUG) { System.out.println("TypeAnchor ::= AT Name"); }  //$NON-NLS-1$
+    case 737 : if (DEBUG) { System.out.println("TypeAnchor ::= ATOT Name"); }  //$NON-NLS-1$
 		    consumeTypeAnchor(false);  
 			break;
  
-    case 738 : if (DEBUG) { System.out.println("TypeAnchor ::= AT base"); }  //$NON-NLS-1$
+    case 738 : if (DEBUG) { System.out.println("TypeAnchor ::= ATOT base"); }  //$NON-NLS-1$
 		    consumeTypeAnchor(true);  
 			break;
  
-    case 739 : if (DEBUG) { System.out.println("TypeAnchor ::= AT this"); }  //$NON-NLS-1$
+    case 739 : if (DEBUG) { System.out.println("TypeAnchor ::= ATOT this"); }  //$NON-NLS-1$
 		    skipThisAnchor();  
 			break;
  
-    case 740 : if (DEBUG) { System.out.println("TypeAnchor ::= AT Name DOT base"); }  //$NON-NLS-1$
+    case 740 : if (DEBUG) { System.out.println("TypeAnchor ::= ATOT Name DOT base"); }  //$NON-NLS-1$
 		    consumeQualifiedBaseTypeAnchor();  
 			break;
  
@@ -13039,7 +13039,7 @@ public boolean atConflictScenario(int token) {
 	int stackTopState = this.stack[stackTop]; // single cell non write through "alternate stack" - the automaton's stack pointer either stays fixed during this manoeuvre or monotonically decreases.
 	int highWaterMark = stackTop;
 	
-	if (token != TokenNameAT) {
+	if (token != TokenNameAT && token != TokenNameATOT) {
 		token = token == TokenNameLPAREN ? TokenNameBeginLambda : TokenNameBeginTypeArguments;
 	}
 	

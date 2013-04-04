@@ -159,6 +159,10 @@
  *									InheritedDefaultMethodConflictsWithOtherInherited
  *									ConflictingNullAnnotations
  *									ConflictingInheritedNullAnnotations
+ *									ArrayReferencePotentialNullReference
+ *									DereferencingNullableExpression
+ *									NullityMismatchingTypeAnnotation
+ *									NullityMismatchingTypeAnnotationUnchecked
  *******************************************************************************/
 package org.eclipse.jdt.core.compiler;
 
@@ -1554,6 +1558,15 @@ void setSourceStart(int sourceStart);
 	/** @since 3.9 */
 	int ConflictingInheritedNullAnnotations = MethodRelated + 940;
 	
+	/** @since 3.9 */
+	int ArrayReferencePotentialNullReference = Internal + 951;
+	/** @since 3.9 */
+	int DereferencingNullableExpression = Internal + 952;
+	/** @since 3.9 */
+	int NullityMismatchingTypeAnnotation = Internal + 953;
+	/** @since 3.9 */
+	int NullityMismatchingTypeAnnotationUnchecked = Internal + 954;
+
 	// Java 8 work
 	/** @since 3.9 */
 	int IllegalModifiersForElidedType = Internal + 1001;

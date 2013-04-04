@@ -6,6 +6,10 @@
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: Expression.java 23404 2010-02-03 14:10:22Z stephan $
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -13,6 +17,7 @@
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for 
  *								bug 292478 - Report potentially null across variable assignment
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
+ *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -712,6 +717,16 @@ boolean handledByGeneratedMethod(Scope scope, TypeBinding castType, TypeBinding 
  * @param flowInfo the upstream flow info; caveat: may get modified
  */
 public void checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
+	if (this.resolvedType != null) {
+		if ((this.resolvedType.tagBits & TagBits.AnnotationNonNull) != 0) {
+			return; // no danger
+		} else if ((this.resolvedType.tagBits & TagBits.AnnotationNullable) != 0) {
+			scope.problemReporter().dereferencingNullableExpression(this, scope.environment());
+			return; // danger is definite.
+			// stopping analysis at this point requires that the above error is not suppressable
+			// unless suppressing all null warnings (otherwise we'd miss a stronger warning below).
+		}
+	}
 	LocalVariableBinding local = localVariableBinding();
 	if (local != null &&
 			(local.type.tagBits & TagBits.IsBaseType) == 0) {
@@ -1054,7 +1069,7 @@ public int nullStatus(FlowInfo flowInfo) {
 
 	if (/* (this.bits & IsNonNull) != 0 || */
 		this.constant != null && this.constant != Constant.NotAConstant)
-	return FlowInfo.NON_NULL; // constant expression cannot be null
+		return FlowInfo.NON_NULL; // constant expression cannot be null
 
 	LocalVariableBinding local = localVariableBinding();
 	if (local != null)

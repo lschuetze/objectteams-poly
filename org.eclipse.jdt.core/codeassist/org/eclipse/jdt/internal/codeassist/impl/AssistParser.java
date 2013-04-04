@@ -995,11 +995,10 @@ protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 
 	/* no need to take action if not inside completed identifiers */
 	if ((index = indexOfAssistIdentifier(true)) < 0) {
-// orig: FIXME
+/* orig: 
 		return super.getTypeReference(dim);
-// :giro */
-// OT PREVIOUS:
-//		return super.getUnannotatedTypeReference(dim, liftingTypeAllowed);
+ :giro */
+		return super.getTypeReference(dim, liftingTypeAllowed);
 // SH}
 	}
 	int length = this.identifierLengthStack[this.identifierLengthPtr];

@@ -23,19 +23,19 @@ package org.eclipse.jdt.internal.compiler.parser;
 public interface ParserBasicInformation {
     public final static int
 
-      ERROR_SYMBOL      = 136,
+      ERROR_SYMBOL      = 137,
       MAX_NAME_LENGTH   = 41,
       NUM_STATES        = 1313,
 
-      NT_OFFSET         = 136,
+      NT_OFFSET         = 137,
       SCOPE_UBOUND      = 354,
       SCOPE_SIZE        = 355,
       LA_STATE_OFFSET   = 17809,
       MAX_LA            = 1,
       NUM_RULES         = 935,
-      NUM_TERMINALS     = 136,
+      NUM_TERMINALS     = 137,
       NUM_NON_TERMINALS = 417,
-      NUM_SYMBOLS       = 553,
+      NUM_SYMBOLS       = 554,
       START_STATE       = 1185,
       EOFT_SYMBOL       = 65,
       EOLT_SYMBOL       = 65,
