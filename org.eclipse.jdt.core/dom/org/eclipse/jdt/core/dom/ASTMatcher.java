@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -329,7 +333,15 @@ public class ASTMatcher {
 			return false;
 		}
 		ArrayType o = (ArrayType) other;
-		return safeSubtreeMatch(node.getComponentType(), o.getComponentType());
+		switch(node.getAST().apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				return safeSubtreeMatch(node.getComponentType(), o.getComponentType());
+			default:
+				return safeSubtreeMatch(node.getComponentType(), o.getComponentType()) &&
+						safeSubtreeListMatch(node.annotations(), o.annotations());
+		}
 	}
 
 	/**
@@ -1653,7 +1665,15 @@ public class ASTMatcher {
 			return false;
 		}
 		PrimitiveType o = (PrimitiveType) other;
-		return (node.getPrimitiveTypeCode() == o.getPrimitiveTypeCode());
+		switch(node.getAST().apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				return (node.getPrimitiveTypeCode() == o.getPrimitiveTypeCode());
+			default:
+				return (node.getPrimitiveTypeCode() == o.getPrimitiveTypeCode()) &&
+						safeSubtreeListMatch(node.annotations(), o.annotations());
+		}		
 	}
 
 	/**
@@ -1675,9 +1695,17 @@ public class ASTMatcher {
 			return false;
 		}
 		QualifiedName o = (QualifiedName) other;
-		return (
-			safeSubtreeMatch(node.getQualifier(), o.getQualifier())
-				&& safeSubtreeMatch(node.getName(), o.getName()));
+		switch(node.getAST().apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				return safeSubtreeMatch(node.getQualifier(), o.getQualifier())
+						&& safeSubtreeMatch(node.getName(), o.getName());
+			default:
+				return safeSubtreeMatch(node.getQualifier(), o.getQualifier())
+						&& safeSubtreeMatch(node.getName(), o.getName()) &&
+						safeSubtreeListMatch(node.annotations(), o.annotations());
+		}	
 	}
 
 	/**
@@ -1700,9 +1728,20 @@ public class ASTMatcher {
 			return false;
 		}
 		QualifiedType o = (QualifiedType) other;
-		return (
-			safeSubtreeMatch(node.getQualifier(), o.getQualifier())
-				&& safeSubtreeMatch(node.getName(), o.getName()));
+		switch(node.getAST().apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				return (
+						safeSubtreeMatch(node.getQualifier(), o.getQualifier())
+							&& safeSubtreeMatch(node.getName(), o.getName()));
+			default:
+				return (
+						safeSubtreeMatch(node.getQualifier(), o.getQualifier())
+							&& safeSubtreeMatch(node.getName(), o.getName())
+							&& safeSubtreeListMatch(node.annotations(), o.annotations()));
+		}
+		
 	}
 
 	/**
@@ -1746,7 +1785,15 @@ public class ASTMatcher {
 			return false;
 		}
 		SimpleName o = (SimpleName) other;
-		return node.getIdentifier().equals(o.getIdentifier());
+		switch(node.getAST().apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				return node.getIdentifier().equals(o.getIdentifier());
+			default:
+				return (node.getIdentifier().equals(o.getIdentifier())) &&
+						safeSubtreeListMatch(node.annotations(), o.annotations());
+		}	
 	}
 
 	/**
@@ -1768,7 +1815,15 @@ public class ASTMatcher {
 			return false;
 		}
 		SimpleType o = (SimpleType) other;
-		return safeSubtreeMatch(node.getName(), o.getName());
+		switch(node.getAST().apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				return safeSubtreeMatch(node.getName(), o.getName());
+			default:
+				return (safeSubtreeMatch(node.getName(), o.getName())) &&
+						safeSubtreeListMatch(node.annotations(), o.annotations());
+		}
 	}
 
 	/**
@@ -2264,12 +2319,22 @@ public class ASTMatcher {
 			return false;
 		}
 		TypeParameter o = (TypeParameter) other;
-		return safeSubtreeMatch(node.getName(), o.getName())
 //{ObjectTeams: value parameter & <B base R>:
-				&& node.isValueParameter() == o.isValueParameter()
-				&& node.hasBaseBound() == o.hasBaseBound()
+		if (node.isValueParameter() != o.isValueParameter()
+			|| node.hasBaseBound() != o.hasBaseBound())
+			return false;
 // SH}
-				&& safeSubtreeListMatch(node.typeBounds(), o.typeBounds());
+		switch(node.getAST().apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				return (safeSubtreeMatch(node.getName(), o.getName())
+						&& safeSubtreeListMatch(node.typeBounds(), o.typeBounds()));
+			default:
+				return (safeSubtreeMatch(node.getName(), o.getName())
+						&& safeSubtreeListMatch(node.typeBounds(), o.typeBounds())
+						&& safeSubtreeListMatch(node.annotations(), o.annotations()));
+		}
 	}
 
 	/**
@@ -2412,8 +2477,17 @@ public class ASTMatcher {
 			return false;
 		}
 		WildcardType o = (WildcardType) other;
-		return node.isUpperBound() == o.isUpperBound()
-		&& safeSubtreeMatch(node.getBound(), o.getBound());
+		switch(node.getAST().apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				return (node.isUpperBound() == o.isUpperBound()
+						&& safeSubtreeMatch(node.getBound(), o.getBound()));
+			default:
+				return (node.isUpperBound() == o.isUpperBound()
+						&& safeSubtreeMatch(node.getBound(), o.getBound()) &&
+						safeSubtreeListMatch(node.annotations(), o.annotations()));
+		}
 	}
 
 //{ObjectTeams: match methods for OT-specific types

@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -2999,6 +3003,9 @@ class ASTConverter {
 		int end = typeParameter.sourceEnd;
 		simpleName.setSourceRange(start, end - start + 1);
 		typeParameter2.setName(simpleName);
+		if (typeParameter.annotations != null) {
+			annotateTypeParameter(typeParameter2, typeParameter.annotations);
+		}
 		final TypeReference superType = typeParameter.type;
 		end = typeParameter.declarationSourceEnd;
 		if (superType != null) {
@@ -3042,7 +3049,7 @@ class ASTConverter {
 			// QualifiedName
 			org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference qualifiedTypeReference = (org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) typeReference;
 			final long[] positions = qualifiedTypeReference.sourcePositions;
-			return setQualifiedNameNameAndSourceRanges(typeName, positions, typeReference);
+			return setQualifiedNameNameAndSourceRanges(typeName, positions, typeReference, typeReference.annotations);
 		} else {
 			final SimpleName name = new SimpleName(this.ast);
 			name.internalSetIdentifier(new String(typeName[0]));
@@ -3050,6 +3057,10 @@ class ASTConverter {
 			name.index = 1;
 			if (this.resolveBindings) {
 				recordNodes(name, typeReference);
+			}
+			org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations;
+			if (typeReference.annotations != null && (annotations = typeReference.annotations[0]) != null) {
+				annotateName(name, annotations);
 			}
 			return name;
 		}
@@ -3378,7 +3389,72 @@ class ASTConverter {
 		return variableDeclarationStatement;
 	}
 
+	private void annotateType(Type type, org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations) {
+		switch(this.ast.apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				type.setFlags(type.getFlags() | ASTNode.MALFORMED);
+				break;
+			default:
+				int annotationsLength = annotations.length;
+				for (int i = 0; i < annotationsLength; i++) {
+					org.eclipse.jdt.internal.compiler.ast.Annotation typeAnnotation = annotations[i];
+					if (typeAnnotation != null) {
+						Annotation annotation = convert(typeAnnotation);
+						int start = typeAnnotation.sourceStart;
+						int end = typeAnnotation.sourceEnd;
+						annotation.setSourceRange(start, end - start + 1);
+						type.annotations.add(annotation);
+					}
+				}
+		}
+	}
+	private void annotateName(Name name, org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations) {
+		switch(this.ast.apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				name.setFlags(name.getFlags() | ASTNode.MALFORMED);
+				break;
+			default:
+				int annotationsLength = annotations.length;
+				for (int i = 0; i < annotationsLength; i++) {
+					org.eclipse.jdt.internal.compiler.ast.Annotation typeAnnotation = annotations[i];
+					if (typeAnnotation != null) {
+						Annotation annotation = convert(typeAnnotation);
+						int start = typeAnnotation.sourceStart;
+						int end = typeAnnotation.sourceEnd;
+						annotation.setSourceRange(start, end - start + 1);
+						name.annotations.add(annotation);
+					}
+				}
+		}
+	}
+	private void annotateTypeParameter(TypeParameter typeParameter, org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations) {
+		switch(this.ast.apiLevel) {
+			case AST.JLS2_INTERNAL :
+			case AST.JLS3_INTERNAL :
+			case AST.JLS4:
+				typeParameter.setFlags(typeParameter.getFlags() | ASTNode.MALFORMED);
+				break;
+			default:
+				int annotationsLength = annotations.length;
+				for (int i = 0; i < annotationsLength; i++) {
+					org.eclipse.jdt.internal.compiler.ast.Annotation typeAnnotation = annotations[i];
+					if (typeAnnotation != null) {
+						Annotation annotation = convert(typeAnnotation);
+						int start = typeAnnotation.sourceStart;
+						int end = typeAnnotation.sourceEnd;
+						annotation.setSourceRange(start, end - start + 1);
+						typeParameter.annotations().add(annotation);
+					}
+				}
+		}
+	}
+
 	public Type convertType(TypeReference typeReference) {
+		org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations;
 		if (typeReference instanceof Wildcard) {
 			final Wildcard wildcard = (Wildcard) typeReference;
 			final WildcardType wildcardType = new WildcardType(this.ast);
@@ -3394,6 +3470,9 @@ class ASTConverter {
 			}
 			if (this.resolveBindings) {
 				recordNodes(wildcardType, typeReference);
+			}
+			if (typeReference.annotations != null && (annotations = typeReference.annotations[0]) != null) {
+				annotateType(wildcardType, annotations);
 			}
 			return wildcardType;
 		}
@@ -3426,6 +3505,9 @@ class ASTConverter {
 				primitiveType.setPrimitiveTypeCode(getPrimitiveTypeCode(name));
 				primitiveType.setSourceRange(sourceStart, end - sourceStart + 1);
 				type = primitiveType;
+				if (typeReference.annotations != null && (annotations = typeReference.annotations[0]) != null) {
+					annotateType(primitiveType, annotations);
+				}
 			} else if (typeReference instanceof ParameterizedSingleTypeReference) {
 				ParameterizedSingleTypeReference parameterizedSingleTypeReference = (ParameterizedSingleTypeReference) typeReference;
 				final SimpleName simpleName = new SimpleName(this.ast);
@@ -3450,6 +3532,9 @@ class ASTConverter {
 						simpleType = new SimpleType(this.ast);
 						simpleType.setName(simpleName);
 						simpleType.setSourceRange(simpleName.getStartPosition(), simpleName.getLength());
+						if (typeReference.annotations != null && (annotations = typeReference.annotations[0]) != null) {
+							annotateType(simpleType, annotations);
+						}
 						final ParameterizedType parameterizedType = new ParameterizedType(this.ast);
 						parameterizedType.setType(simpleType);
 						type = parameterizedType;
@@ -3499,17 +3584,27 @@ class ASTConverter {
 				if (this.resolveBindings) {
 					this.recordNodes(simpleName, typeReference);
 				}
+				if (typeReference.annotations != null && (annotations = typeReference.annotations[0]) != null) {
+					annotateType(simpleType, annotations);
+				}
 			}
 			if (dimensions != 0) {
+				org.eclipse.jdt.internal.compiler.ast.Annotation[][] annotationsOnDimensions = typeReference.getAnnotationsOnDimensions();
 				type = this.ast.newArrayType(type, dimensions);
 				type.setSourceRange(sourceStart, length);
 				ArrayType subarrayType = (ArrayType) type;
 				int index = dimensions - 1;
 				while (index > 0) {
+					if (annotationsOnDimensions != null && (annotations = annotationsOnDimensions[index]) != null) {
+						annotateType(subarrayType, annotations);
+					}
 					subarrayType = (ArrayType) subarrayType.getComponentType();
 					int end = retrieveProperRightBracketPosition(index, sourceStart);
 					subarrayType.setSourceRange(sourceStart, end - sourceStart + 1);
 					index--;
+				}
+				if (annotationsOnDimensions != null && (annotations = annotationsOnDimensions[0]) != null) {
+					annotateType(subarrayType, annotations);
 				}
 				if (this.resolveBindings) {
 					// store keys for inner types
@@ -3529,10 +3624,11 @@ class ASTConverter {
 						int nameLength = name.length;
 						sourceStart = (int)(positions[0]>>>32);
 						length = (int)(positions[nameLength - 1] & 0xFFFFFFFF) - sourceStart + 1;
-						Name qualifiedName = this.setQualifiedNameNameAndSourceRanges(name, positions, typeReference);
+						Name qualifiedName = this.setQualifiedNameNameAndSourceRanges(name, positions, typeReference, typeReference.annotations);
 						final SimpleType simpleType = new SimpleType(this.ast);
 						simpleType.setName(qualifiedName);
 						simpleType.setSourceRange(sourceStart, length);
+						simpleType.setFlags(simpleType.getFlags() | ASTNode.MALFORMED);
 						type = simpleType;
 					}
 					break;
@@ -3569,6 +3665,9 @@ class ASTConverter {
 							int start = (int)(positions[startingIndex]>>>32);
 							int end = (int) positions[endingIndex];
 							simpleType.setSourceRange(start, end - start + 1);
+							if (endingIndex == 0 && typeReference.annotations != null && (annotations = typeReference.annotations[0]) != null) {
+								annotateType(simpleType, annotations);
+							}
 							ParameterizedType parameterizedType = new ParameterizedType(this.ast);
 							parameterizedType.setType(simpleType);
 							if (this.resolveBindings) {
@@ -3600,6 +3699,9 @@ class ASTConverter {
 								QualifiedType qualifiedType = new QualifiedType(this.ast);
 								qualifiedType.setQualifier(currentType);
 								qualifiedType.setName(simpleName);
+								if (typeReference.annotations != null && (annotations = typeReference.annotations[startingIndex]) != null) {
+									annotateType(qualifiedType, annotations);
+								}
 								if (this.resolveBindings) {
 									recordNodes(simpleName, typeReference);
 									recordNodes(qualifiedType, typeReference);
@@ -3660,7 +3762,7 @@ class ASTConverter {
 				long[] positions = ((org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference) typeReference).sourcePositions;
 				sourceStart = (int)(positions[0]>>>32);
 				length = (int)(positions[nameLength - 1] & 0xFFFFFFFF) - sourceStart + 1;
-				final Name qualifiedName = this.setQualifiedNameNameAndSourceRanges(name, positions, typeReference);
+				final Name qualifiedName = this.setQualifiedNameNameAndSourceRanges(name, positions, typeReference, typeReference.annotations);
 				final SimpleType simpleType = new SimpleType(this.ast);
 				simpleType.setName(qualifiedName);
 				type = simpleType;
@@ -3697,6 +3799,7 @@ class ASTConverter {
 
 			length = typeReference.sourceEnd - sourceStart + 1;
 			if (dimensions != 0) {
+				org.eclipse.jdt.internal.compiler.ast.Annotation[][] annotationsOnDimensions = typeReference.getAnnotationsOnDimensions();
 				type = this.ast.newArrayType(type, dimensions);
 				if (this.resolveBindings) {
 					completeRecord((ArrayType) type, typeReference);
@@ -3710,10 +3813,16 @@ class ASTConverter {
 				ArrayType subarrayType = (ArrayType) type;
 				int index = dimensions - 1;
 				while (index > 0) {
+					if (annotationsOnDimensions != null  && (annotations = annotationsOnDimensions[index]) != null) {
+						annotateType(subarrayType, annotations);
+					}
 					subarrayType = (ArrayType) subarrayType.getComponentType();
 					end = retrieveProperRightBracketPosition(index, sourceStart);
 					subarrayType.setSourceRange(sourceStart, end - sourceStart + 1);
 					index--;
+				}
+				if (annotationsOnDimensions != null  && (annotations = annotationsOnDimensions[0]) != null) {
+					annotateType(subarrayType, annotations);
 				}
 			}
 		}
@@ -5245,6 +5354,11 @@ class ASTConverter {
 	}
 
 	protected QualifiedName setQualifiedNameNameAndSourceRanges(char[][] typeName, long[] positions, org.eclipse.jdt.internal.compiler.ast.ASTNode node) {
+		return setQualifiedNameNameAndSourceRanges(typeName, positions, node, null);
+	}
+
+	protected QualifiedName setQualifiedNameNameAndSourceRanges(char[][] typeName, long[] positions, org.eclipse.jdt.internal.compiler.ast.ASTNode node, org.eclipse.jdt.internal.compiler.ast.Annotation[][] annotations) {
+	    org.eclipse.jdt.internal.compiler.ast.Annotation[] typeAnnotations;
 		int length = typeName.length;
 		final SimpleName firstToken = new SimpleName(this.ast);
 		firstToken.internalSetIdentifier(new String(typeName[0]));
@@ -5253,6 +5367,9 @@ class ASTConverter {
 		int start = start0;
 		int end = (int)(positions[0] & 0xFFFFFFFF);
 		firstToken.setSourceRange(start, end - start + 1);
+		if (annotations != null && (typeAnnotations = annotations[0]) != null) {
+			annotateName(firstToken, typeAnnotations);
+		}
 		final SimpleName secondToken = new SimpleName(this.ast);
 		secondToken.internalSetIdentifier(new String(typeName[1]));
 		secondToken.index = 2;
@@ -5262,6 +5379,9 @@ class ASTConverter {
 		QualifiedName qualifiedName = new QualifiedName(this.ast);
 		qualifiedName.setQualifier(firstToken);
 		qualifiedName.setName(secondToken);
+		if (annotations != null && (typeAnnotations = annotations[1]) != null) {
+			annotateName(qualifiedName, typeAnnotations);
+		}
 		if (this.resolveBindings) {
 			recordNodes(qualifiedName, node);
 			recordPendingNameScopeResolution(qualifiedName);
@@ -5286,6 +5406,9 @@ class ASTConverter {
 			qualifiedName = qualifiedName2;
 			qualifiedName.index = newPart.index;
 			qualifiedName.setSourceRange(start0, end - start0 + 1);
+			if (annotations != null && (typeAnnotations = annotations[i]) != null) {
+				annotateName(qualifiedName, typeAnnotations);
+			}	
 			if (this.resolveBindings) {
 				recordNodes(qualifiedName, node);
 				recordNodes(newPart, node);
@@ -5301,7 +5424,8 @@ class ASTConverter {
 		return name;
 	}
 
-	protected QualifiedName setQualifiedNameNameAndSourceRanges(char[][] typeName, long[] positions, int endingIndex, org.eclipse.jdt.internal.compiler.ast.ASTNode node) {
+	protected QualifiedName setQualifiedNameNameAndSourceRanges(char[][] typeName, long[] positions, int endingIndex, org.eclipse.jdt.internal.compiler.ast.TypeReference node) {
+ 		org.eclipse.jdt.internal.compiler.ast.Annotation[] annotations;
  		int length = endingIndex + 1;
 		final SimpleName firstToken = new SimpleName(this.ast);
 		firstToken.internalSetIdentifier(new String(typeName[0]));
@@ -5310,6 +5434,9 @@ class ASTConverter {
 		int start = start0;
 		int end = (int) positions[0];
 		firstToken.setSourceRange(start, end - start + 1);
+		if (node.annotations != null && (annotations = node.annotations[0]) != null) {
+			annotateName(firstToken, annotations);
+		}
 		final SimpleName secondToken = new SimpleName(this.ast);
 		secondToken.internalSetIdentifier(new String(typeName[1]));
 		secondToken.index = 2;
@@ -5319,6 +5446,9 @@ class ASTConverter {
 		QualifiedName qualifiedName = new QualifiedName(this.ast);
 		qualifiedName.setQualifier(firstToken);
 		qualifiedName.setName(secondToken);
+		if (node.annotations != null && (annotations = node.annotations[1]) != null) {
+			annotateName(qualifiedName, annotations);
+		}
 		if (this.resolveBindings) {
 			recordNodes(qualifiedName, node);
 			recordPendingNameScopeResolution(qualifiedName);
@@ -5343,6 +5473,9 @@ class ASTConverter {
 			qualifiedName = qualifiedName2;
 			qualifiedName.index = newPart.index;
 			qualifiedName.setSourceRange(start0, end - start0 + 1);
+			if (node.annotations != null && (annotations = node.annotations[i]) != null) {
+				annotateName(qualifiedName, annotations);
+			}
 			if (this.resolveBindings) {
 				recordNodes(qualifiedName, node);
 				recordNodes(newPart, node);

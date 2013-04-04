@@ -2298,9 +2298,6 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 // SH}
 			if (methodType == null) {
 				foundReturnTypeProblem = true;
-			} else if (methodType.isArrayType() && ((ArrayBinding) methodType).leafComponentType == TypeBinding.VOID) {
-				methodDecl.scope.problemReporter().returnTypeCannotBeVoidArray((MethodDeclaration) methodDecl);
-				foundReturnTypeProblem = true;
 			} else {
 //{ObjectTeams: generalize return of callin method?
 				if (method.isCallin() && methodType.isBaseType())
