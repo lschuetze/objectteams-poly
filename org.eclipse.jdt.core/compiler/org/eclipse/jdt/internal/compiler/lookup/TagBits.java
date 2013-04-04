@@ -13,7 +13,9 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
- *     Stephan Herrmann - Contribution for bug 186342 - [compiler][null] Using annotations for null checking
+ *     Stephan Herrmann - Contributions for
+ *								bug 186342 - [compiler][null] Using annotations for null checking
+ *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -120,11 +122,10 @@ public interface TagBits {
 	long AnnotationForPackage = ASTNode.Bit44L;
 	long AnnotationForTypeUse = ASTNode.Bit54L;
 	long AnnotationForTypeParameter = ASTNode.Bit55L;
-	long AnnotationTargetMASK = AnnotationTarget
-				| AnnotationForType | AnnotationForField
-				| AnnotationForMethod | AnnotationForParameter
-				| AnnotationForConstructor | AnnotationForLocalVariable
-				| AnnotationForAnnotationType | AnnotationForPackage
+	long SE7AnnotationTargetMASK = AnnotationForType | AnnotationForField | AnnotationForMethod
+				| AnnotationForParameter | AnnotationForConstructor | AnnotationForLocalVariable
+				| AnnotationForAnnotationType | AnnotationForPackage;
+	long AnnotationTargetMASK = SE7AnnotationTargetMASK | AnnotationTarget
 				| AnnotationForTypeUse | AnnotationForTypeParameter;
 	// 2-bits for retention (should check (tagBits & RetentionMask) == RuntimeRetention
 	long AnnotationSourceRetention = ASTNode.Bit45L;
@@ -171,6 +172,7 @@ public interface TagBits {
 				| AnnotationNonNull
 				| AnnotationNonNullByDefault
 				| AnnotationNullUnspecifiedByDefault;
+	long AnnotationNullMASK = AnnotationNullable | AnnotationNonNull;
 
 	long DefaultValueResolved = ASTNode.Bit60L;
 

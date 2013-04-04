@@ -605,7 +605,7 @@ public class TeamModel extends TypeModel {
 		if (roleType.isParameterizedType()) {
 			// consult original role type for type arguments:
 			ParameterizedTypeBinding ptb = (ParameterizedTypeBinding)roleType;
-			TypeBinding parameterized = ptb.environment.createParameterizedType(roleRefType, ptb.arguments, anchor, -1, roleRefType.enclosingType());
+			TypeBinding parameterized = ptb.environment.createParameterizedType(roleRefType, ptb.arguments, 0L, anchor, -1, roleRefType.enclosingType());
 			if (dimensions > 0)
 				return ptb.environment.createArrayType(parameterized, dimensions);
 			return parameterized;

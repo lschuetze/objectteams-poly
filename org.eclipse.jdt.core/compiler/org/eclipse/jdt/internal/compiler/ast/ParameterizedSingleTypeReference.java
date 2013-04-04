@@ -11,9 +11,11 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contribution for Bug 342671 - ClassCastException: org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ArrayBinding
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contributions for
+ *								bug 342671 - ClassCastException: org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ArrayBinding
+ *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -165,14 +167,6 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			}
 		}
 		this.bits |= ASTNode.DidResolve;
-		if (this.annotations != null) {
-			switch(scope.kind) {
-				case Scope.BLOCK_SCOPE :
-				case Scope.METHOD_SCOPE :
-					resolveAnnotations((BlockScope) scope, this.annotations, new Annotation.TypeUseBinding(Binding.TYPE_USE));
-					break;
-			}
-		}
 //{ObjectTeams: check team anchor first:
 	    for (int typeParamPos=0; typeParamPos<this.typeArguments.length; typeParamPos++) {
 		    if (this.typeArguments[typeParamPos] instanceof TypeAnchorReference)
@@ -253,6 +247,7 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		TypeBinding type = internalResolveLeafType(scope, enclosingType, checkBounds);
   :giro */
 // SH}
+		resolveAnnotations(scope);
 		// handle three different outcomes:
 		if (type == null) {
 			this.resolvedType = createArrayType(scope, this.resolvedType);
@@ -359,7 +354,10 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 //{ObjectTeams:
 		    	argType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(scope, argType, typeArgument);
 // SH}
-			    argTypes[i] = argType;
+			    if (typeArgument.annotations != null)
+			    	argTypes[i] = captureTypeAnnotations(scope, enclosingType, argType, typeArgument.annotations[0]);
+			    else
+			    	argTypes[i] = argType;
 		     }
 		}
 		if (argHasError) {
@@ -430,13 +428,6 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			return scope.createArrayType(type, this.dimensions);
 		}
 		return type;
-	}
-	
-	protected void resolveAnnotations(BlockScope scope) {
-		super.resolveAnnotations(scope);
-		for (int i = 0, length = this.typeArguments.length; i < length; i++) {
-			this.typeArguments[i].resolveAnnotations(scope);
-		}
 	}
 
 	public StringBuffer printExpression(int indent, StringBuffer output){

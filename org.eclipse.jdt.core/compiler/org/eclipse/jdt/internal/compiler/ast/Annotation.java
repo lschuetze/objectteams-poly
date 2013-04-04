@@ -558,10 +558,12 @@ public abstract class Annotation extends Expression {
 			return false;
 		}
 		long metaTagBits = annotationBinding.getAnnotationTagBits(); // could be forward reference
-		// jsr 308
-		// we need to filter out type use and type parameter annotations
+
+		// we need to filter out only "pure" type use and type parameter annotations, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=392119
 		if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0) {
-			return false;
+			if ((metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0) {  // not a hybrid target. 
+				return false;
+			}
 		}
 
 		if ((metaTagBits & TagBits.AnnotationRetentionMASK) == 0)
@@ -576,10 +578,11 @@ public abstract class Annotation extends Expression {
 			return false;
 		}
 		long metaTagBits = annotationBinding.getAnnotationTagBits(); // could be forward reference
-		// jsr 308
-		// we need to filter out type use and type parameter annotations
-		if ((metaTagBits & (TagBits.AnnotationTargetMASK)) != 0
-				&& ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) == 0)) {
+
+		if ((metaTagBits & (TagBits.AnnotationTargetMASK)) == 0) { // explicit target required for JSR308 style annotations.
+			return false;
+		}
+		if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) == 0) {
 			return false;
 		}
 
@@ -595,8 +598,11 @@ public abstract class Annotation extends Expression {
 			return false;
 		}
 		long metaTagBits = annotationBinding.getAnnotationTagBits();
-		if ((metaTagBits & (TagBits.AnnotationTargetMASK)) != 0
-				&& ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) == 0)) {
+
+		if ((metaTagBits & (TagBits.AnnotationTargetMASK)) == 0) { // explicit target required for JSR308 style annotations.
+			return false;
+		}
+		if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) == 0) {
 			return false;
 		}
 		if ((metaTagBits & TagBits.AnnotationRetentionMASK) == 0)
@@ -611,8 +617,11 @@ public abstract class Annotation extends Expression {
 			return false;
 		}
 		long metaTagBits = annotationBinding.getAnnotationTagBits();
+		// we need to filter out only "pure" type use and type parameter annotations, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=392119
 		if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0) {
-			return false;
+			if ((metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0) { // not a hybrid target.
+				return false;
+			}
 		}
 		if ((metaTagBits & TagBits.AnnotationRetentionMASK) == 0)
 			return false; // by default the retention is CLASS
@@ -860,6 +869,21 @@ public abstract class Annotation extends Expression {
 					break checkTargetCompatibility;
 				}
 
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391201
+				if ((metaTagBits & TagBits.SE7AnnotationTargetMASK) == 0
+						&& (metaTagBits & (TagBits.AnnotationForTypeUse | TagBits.AnnotationForTypeParameter)) != 0) {
+					if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) {
+						switch (kind) {
+							case Binding.PACKAGE :
+							case Binding.TYPE :
+							case Binding.GENERIC_TYPE :
+							case Binding.METHOD :
+							case Binding.FIELD :
+							case Binding.LOCAL :
+								scope.problemReporter().invalidUsageOfTypeAnnotations(this);
+						}
+					}
+				}
 				switch (kind) {
 					case Binding.PACKAGE :
 						if ((metaTagBits & TagBits.AnnotationForPackage) != 0)
@@ -876,7 +900,7 @@ public abstract class Annotation extends Expression {
 						if (((ReferenceBinding)this.recipient).isAnnotationType()) {
 							if ((metaTagBits & (TagBits.AnnotationForAnnotationType | TagBits.AnnotationForType)) != 0)
 							break checkTargetCompatibility;
-						} else if ((metaTagBits & TagBits.AnnotationForType) != 0) {
+						} else if ((metaTagBits & (TagBits.AnnotationForType | TagBits.AnnotationForTypeUse)) != 0) {
 							break checkTargetCompatibility;
 						} else if ((metaTagBits & TagBits.AnnotationForPackage) != 0) {
 							if (CharOperation.equals(((ReferenceBinding)this.recipient).sourceName, TypeConstants.PACKAGE_INFO_NAME))
@@ -891,15 +915,11 @@ public abstract class Annotation extends Expression {
 					case Binding.METHOD :
 						MethodBinding methodBinding = (MethodBinding) this.recipient;
 						if (methodBinding.isConstructor()) {
-							if ((metaTagBits & TagBits.AnnotationForConstructor) != 0)
+							if ((metaTagBits & (TagBits.AnnotationForConstructor | TagBits.AnnotationForTypeUse)) != 0)
 								break checkTargetCompatibility;
 						} else if ((metaTagBits & TagBits.AnnotationForMethod) != 0) {
 							break checkTargetCompatibility;
 						} else if ((metaTagBits & TagBits.AnnotationForTypeUse) != 0) {
-							// jsr 308 - annotation on method return type
-							if (methodBinding.returnType != null && methodBinding.returnType.id == T_void) {
-								scope.problemReporter().illegalUsageOfTypeAnnotations(this);
-							}
 							break checkTargetCompatibility;
 						}
 						break;
@@ -931,7 +951,8 @@ public abstract class Annotation extends Expression {
 						}
 						break;
 					case Binding.TYPE_PARAMETER : // jsr308
-						if ((metaTagBits & TagBits.AnnotationForTypeParameter) != 0) {
+						// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391196
+						if ((metaTagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0) {
 							break checkTargetCompatibility;
 						}
 					}

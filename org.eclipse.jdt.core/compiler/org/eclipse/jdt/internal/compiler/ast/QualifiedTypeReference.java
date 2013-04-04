@@ -13,6 +13,8 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -105,6 +107,7 @@ public class QualifiedTypeReference extends TypeReference {
 		LookupEnvironment env = scope.environment();
 		try {
 			env.missingClassFileLocation = this;
+			ReferenceBinding previousType = null;
 			if (this.resolvedType == null) {
 				this.resolvedType = scope.getType(this.tokens[tokenIndex], packageBinding);
 			} else {
@@ -112,6 +115,8 @@ public class QualifiedTypeReference extends TypeReference {
 		    	if (this.resolvedType.isRole())
 		    		this.resolvedType = ((ReferenceBinding)this.resolvedType).roleModel.getClassPartBinding();
 // SH}
+				if (this.resolvedType instanceof ReferenceBinding)
+					previousType = (ReferenceBinding) this.resolvedType;
 				this.resolvedType = scope.getMemberType(this.tokens[tokenIndex], (ReferenceBinding) this.resolvedType);
 				if (!this.resolvedType.isValidBinding()) {
 					this.resolvedType = new ProblemReferenceBinding(
@@ -119,6 +124,9 @@ public class QualifiedTypeReference extends TypeReference {
 						(ReferenceBinding)this.resolvedType.closestMatch(),
 						this.resolvedType.problemId());
 				}
+			}
+			if (this.annotations != null && this.annotations[tokenIndex] != null) {
+				this.resolvedType = captureTypeAnnotations(scope, previousType, this.resolvedType, this.annotations[tokenIndex]);
 			}
 //{ObjectTeams: baseclass decapsulation?
 		    checkBaseclassDecapsulation(scope);

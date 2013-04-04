@@ -100,6 +100,8 @@ public class SingleTypeReference extends TypeReference {
 		}
 // SH}
 		boolean hasError = false;
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391500
+		resolveAnnotations(scope);
 		if (!memberType.isValidBinding()) {
 			hasError = true;
 			scope.problemReporter().invalidEnclosingType(this, memberType, enclosingType);

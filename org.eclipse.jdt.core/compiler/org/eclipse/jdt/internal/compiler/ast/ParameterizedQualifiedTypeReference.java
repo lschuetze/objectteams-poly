@@ -11,9 +11,11 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann - Contribution for Bug 342671 - ClassCastException: org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ArrayBinding
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contributions for
+ *								bug 342671 - ClassCastException: org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ArrayBinding
+ *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -169,14 +171,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 			}
 		}
 		this.bits |= ASTNode.DidResolve;
-		if (this.annotations != null) {
-			switch(scope.kind) {
-				case Scope.BLOCK_SCOPE :
-				case Scope.METHOD_SCOPE :
-					resolveAnnotations((BlockScope) scope, this.annotations, new Annotation.TypeUseBinding(Binding.TYPE_USE));
-					break;
-			}
-		}
+		resolveAnnotations(scope);
 		TypeBinding type = internalResolveLeafType(scope, checkBounds);
 		createArrayType(scope);
 		return type == null ? type : this.resolvedType;
@@ -273,7 +268,10 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 					if (argType == null) {
 						argHasError = true;
 					} else {
-						argTypes[j] = argType;
+						if (arg.annotations != null)
+							argTypes[j] = captureTypeAnnotations(scope, qualifyingType, argType, arg.annotations[0]);
+						else
+							argTypes[j] = argType;
 					}
 				}
 				if (argHasError) {
@@ -310,7 +308,7 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 						typeIsConsistent = false;
 					}
 				}
-				ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, qualifyingType);
+				ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, currentType.tagBits & TagBits.AnnotationNullMASK, qualifyingType);
 				// check argument type compatibility for non <> cases - <> case needs no bounds check, we will scream foul if needed during inference.
 				if (!isDiamond) {
 					if (checkBounds) // otherwise will do it in Scope.connectTypeVariables() or generic method resolution

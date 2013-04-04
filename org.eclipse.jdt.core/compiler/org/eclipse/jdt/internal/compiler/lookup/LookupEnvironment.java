@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -13,6 +17,7 @@
  *     							bug 337868 - [compiler][model] incomplete support for package-info.java when using SearchableEnvironment
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 365531 - [compiler][null] investigate alternative strategy for internally encoding nullness defaults
+ *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -1100,6 +1105,10 @@ public ParameterizedMethodBinding createGetClassMethod(TypeBinding receiverType,
 }
 
 public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ReferenceBinding enclosingType) {
+	return createParameterizedType(genericType, typeArguments, 0L, enclosingType);
+}
+/* Note: annotationBits are exactly those tagBits from annotations on type parameters that are interpreted by the compiler, currently: null annotations. */
+public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, long annotationBits, ReferenceBinding enclosingType) {
 //{ObjectTeams: new overload: support team anchors, too:
 	ITeamAnchor anchor = null;
 	int valueParamPosition = -1;
@@ -1107,9 +1116,9 @@ public ParameterizedTypeBinding createParameterizedType(ReferenceBinding generic
 		anchor = ((DependentTypeBinding)genericType)._teamAnchor;
 		valueParamPosition = ((DependentTypeBinding)genericType)._valueParamPosition;
 	}
-	return createParameterizedType(genericType, typeArguments, anchor, valueParamPosition, enclosingType);
+	return createParameterizedType(genericType, typeArguments, annotationBits, anchor, valueParamPosition, enclosingType);
 }
-public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType) {
+public ParameterizedTypeBinding createParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments, long annotationBits, ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType) {
 	if (teamAnchor != null) {
 		genericType = genericType.getRealType();
 		if (genericType.isParameterizedType())
@@ -1129,6 +1138,7 @@ public ParameterizedTypeBinding createParameterizedType(ReferenceBinding generic
 			    if (cachedType == null) break nextCachedType;
 			    if (cachedType.actualType() != genericType) continue nextCachedType; // remain of unresolved type
 			    if (cachedType.enclosingType() != enclosingType) continue nextCachedType;
+			    if (annotationBits != 0 && ((cachedType.tagBits & annotationBits) != annotationBits)) continue nextCachedType;
 				TypeBinding[] cachedArguments = cachedType.arguments;
 				int cachedArgLength = cachedArguments == null ? 0 : cachedArguments.length;
 				if (argLength != cachedArgLength) continue nextCachedType; // would be an error situation (from unresolved binaries)
@@ -1181,6 +1191,7 @@ public ParameterizedTypeBinding createParameterizedType(ReferenceBinding generic
 		}
 	}
 // SH}
+	parameterizedType.tagBits |= annotationBits;
 	cachedInfo[index] = parameterizedType;
 	return parameterizedType;
 }

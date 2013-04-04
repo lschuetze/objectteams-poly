@@ -204,7 +204,7 @@ public class LiftingTypeReference extends TypeReference {
 	    			ITeamAnchor anchor = null;
 	    			if (roleRefType.baseclass() instanceof RoleTypeBinding)
 	    				anchor = ((RoleTypeBinding)roleRefType.baseclass())._teamAnchor;
-	    			roleBase = parameterizedRole.environment.createParameterizedType((ReferenceBinding)roleBase.original(), typeArgs, anchor, -1, roleBase.enclosingType());
+	    			roleBase = parameterizedRole.environment.createParameterizedType((ReferenceBinding)roleBase.original(), typeArgs, 0L, anchor, -1, roleBase.enclosingType());
 	    		}
 	    		// THE compatibility check:
 		    	if (   !baseType.isCompatibleWith(roleBase)

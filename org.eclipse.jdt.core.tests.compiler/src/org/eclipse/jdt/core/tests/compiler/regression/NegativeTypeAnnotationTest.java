@@ -14,6 +14,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
+import java.io.File;
+
+import org.eclipse.jdt.core.util.ClassFileBytesDisassembler;
 import junit.framework.Test;
 
 public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
@@ -650,7 +653,7 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 					"Marker.java",
 					"import java.lang.annotation.Target;\n" + 
 					"import static java.lang.annotation.ElementType.*;\n" + 
-					"@Target(TYPE_USE)\n" + 
+					"@Target(TYPE)\n" + 
 					"@interface Marker {}",
 					"X.java",
 					"public class X<@Marker T> {}",
@@ -689,7 +692,7 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 1)\n" + 
 				"	public class X<@Marker T> {}\n" + 
 				"	               ^^^^^^^\n" + 
-				"Only annotation types that explicitly specify TYPE_PARAMETER as a possible target element type can be applied here\n" + 
+				"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
 				"----------\n");
 	}
 	public void test033() throws Exception {
@@ -706,7 +709,7 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 1)\n" + 
 				"	public class X extends @Marker Y {}\n" + 
 				"	                       ^^^^^^^\n" + 
-				"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
+				"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
 				"----------\n");
 	}
 	// check locations
@@ -895,12 +898,12 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 3)\n" + 
 				"	public class X<@Marker T>  extends @Marker Object{		// 3: Complain \n" + 
 				"	               ^^^^^^^\n" + 
-				"Only annotation types that explicitly specify TYPE_PARAMETER as a possible target element type can be applied here\n" + 
+				"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
 				"----------\n" + 
 				"2. ERROR in X.java (at line 3)\n" + 
 				"	public class X<@Marker T>  extends @Marker Object{		// 3: Complain \n" + 
 				"	                                   ^^^^^^^\n" + 
-				"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
+				"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
 				"----------\n");
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=383950
@@ -2167,7 +2170,7 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"2. ERROR in X.java (at line 2)\n" + 
 				"	Object o = new <String> @Marker X();\n" + 
 				"	                        ^^^^^^^\n" + 
-				"Syntax error, type annotations are illegal here\n" + 
+				"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
 				"----------\n");
 	}
 	public void test066() throws Exception {
@@ -2184,7 +2187,7 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"1. ERROR in X.java (at line 2)\n" + 
 				"	Object o = new X().new <String> @Marker X();\n" + 
 				"	                                ^^^^^^^\n" + 
-				"Syntax error, type annotations are illegal here\n" + 
+				"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
 				"----------\n" + 
 				"2. ERROR in X.java (at line 2)\n" + 
 				"	Object o = new X().new <String> @Marker X();\n" + 
@@ -2319,22 +2322,22 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 						"1. ERROR in X.java (at line 5)\n" + 
 						"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
 						"	          ^^^^^^^\n" + 
-						"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
+						"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
 						"----------\n" + 
 						"2. ERROR in X.java (at line 5)\n" + 
 						"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
 						"	                                ^^^^^^^\n" + 
-						"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
+						"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
 						"----------\n" + 
 						"3. ERROR in X.java (at line 5)\n" + 
 						"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
 						"	                                                                     ^^^^^^^\n" + 
-						"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
+						"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
 						"----------\n" + 
 						"4. ERROR in X.java (at line 5)\n" + 
 						"	final One<@Marker ? extends Two<@Marker ? super Three<? extends Four<@Marker ? super String, @Marker ? extends Object>>>> one = null;		one = null;\n" + 
 						"	                                                                                             ^^^^^^^\n" + 
-						"Only annotation types that explicitly specify TYPE_USE as a possible target element type can be applied here\n" + 
+						"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
 						"----------\n");
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=390882
@@ -2630,5 +2633,443 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 					"	             ^^^^^^^^^^^^^^\n" + 
 					"Type annotations are not allowed on type names used to access static members\n" + 
 					"----------\n");
+	}
+	public void testBug391196() {
+		this.runNegativeTest(
+				new String[]{
+					"p/Bug391196.java",
+					"package p;\n" +
+					"public class Bug391196 {\n" +
+					"	@Marker\n" +
+					"	public class X<@Marker @Marker2 T> {\n" +
+					"		@Marker @Marker2 X(@Marker int i) {}\n" +
+					"		@Unresolved X() {}\n" +
+					"	}\n" +
+					"	@Marker\n" +
+					"	enum Color {RED, BLUE}\n" +
+					"	@Marker\n" +
+					"	interface Inter {}\n" +
+					"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+					"@interface Marker {}\n" + 
+					"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+					"@interface Marker2 {}\n" + 
+					"}\n",
+					"java/lang/annotation/ElementType.java",
+					"package java.lang.annotation;\n" +
+					"public enum ElementType {\n" +
+					"    TYPE,\n" +
+					"    FIELD,\n" +
+					"    METHOD,\n" +
+					"    PARAMETER,\n" +
+					"    CONSTRUCTOR,\n" +
+					"    LOCAL_VARIABLE,\n" +
+					"    ANNOTATION_TYPE,\n" +
+					"    PACKAGE,\n" +
+					"    TYPE_PARAMETER,\n" +
+					"    TYPE_USE\n" +
+					"}\n",
+				},
+				"----------\n" + 
+				"1. ERROR in p\\Bug391196.java (at line 6)\n" + 
+				"	@Unresolved X() {}\n" + 
+				"	 ^^^^^^^^^^\n" + 
+				"Unresolved cannot be resolved to a type\n" + 
+				"----------\n");
+	}
+	public void testBug391315() {
+		this.runNegativeTest(
+				new String[]{
+				"X.java",
+				"class X<T> {\n" +
+				"	X<@Marker ?> l;\n" +
+				"	X<@Marker2 ?> l2;\n" +
+				"	X<@Marker3 ?> l3;\n" +
+				"	class Y {\n" +
+				"		void Y1(Y this) {}\n" +
+				"	}\n" +
+				"}\n" +
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_PARAMETER)\n" +
+				"@interface Marker {}\n" +
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+				"@interface Marker2 {}\n" +
+				"@interface Marker3 {}\n",
+				"java/lang/annotation/ElementType.java",
+				"package java.lang.annotation;\n" +
+				"public enum ElementType {\n" +
+				"    TYPE,\n" +
+				"    FIELD,\n" +
+				"    METHOD,\n" +
+				"    PARAMETER,\n" +
+				"    CONSTRUCTOR,\n" +
+				"    LOCAL_VARIABLE,\n" +
+				"    ANNOTATION_TYPE,\n" +
+				"    PACKAGE,\n" +
+				"    TYPE_PARAMETER,\n" +
+				"    TYPE_USE\n" +
+				"}\n"},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	X<@Marker3 ?> l3;\n" + 
+				"	  ^^^^^^^^\n" + 
+				"Annotation types that do not specify explicit target element types cannot be applied here\n" + 
+				"----------\n");
+	}
+	public void testBug391315a() {
+		this.runNegativeTest(
+				new String[]{
+				"X.java",
+				"public class X<@Marker T> {\n" +
+				"	@Marker T t;\n" +
+				"	T t2 = (@Marker T) null;\n" +
+				"}\n" +
+				"class X2<@Marker2 T> {\n" +
+				"	@Marker2 T t;\n" +
+				"	T t2 = (@Marker2 T) null;\n" +
+				"}\n" +
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+				"@interface Marker {}\n" +
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_PARAMETER)\n" +
+				"@interface Marker2 {}",
+				"java/lang/annotation/ElementType.java",
+				"package java.lang.annotation;\n" +
+				"public enum ElementType {\n" +
+				"    TYPE,\n" +
+				"    FIELD,\n" +
+				"    METHOD,\n" +
+				"    PARAMETER,\n" +
+				"    CONSTRUCTOR,\n" +
+				"    LOCAL_VARIABLE,\n" +
+				"    ANNOTATION_TYPE,\n" +
+				"    PACKAGE,\n" +
+				"    TYPE_PARAMETER,\n" +
+				"    TYPE_USE\n" +
+				"}\n"},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 6)\n" + 
+				"	@Marker2 T t;\n" + 
+				"	^^^^^^^^\n" + 
+				"The annotation @Marker2 is disallowed for this location\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 7)\n" + 
+				"	T t2 = (@Marker2 T) null;\n" + 
+				"	        ^^^^^^^^\n" + 
+				"The annotation @Marker2 is disallowed for this location\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391500
+	public void testBug391500() {
+		this.runNegativeTest(
+				new String[]{
+				"X.java",
+				"public class X {\n" +
+				"	class Y {\n" +
+				"		class Z {\n" +
+				"		}\n" +
+				"		Z z1 = new @Marker X().new @Marker Y().new @Marker Z();\n" +
+				"		Z z3 = new @Marker Z(){};\n" +
+				"	};\n" +
+				"}\n"},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 5)\n" + 
+				"	Z z1 = new @Marker X().new @Marker Y().new @Marker Z();\n" + 
+				"	            ^^^^^^\n" + 
+				"Marker cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 5)\n" + 
+				"	Z z1 = new @Marker X().new @Marker Y().new @Marker Z();\n" + 
+				"	                            ^^^^^^\n" + 
+				"Marker cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 5)\n" + 
+				"	Z z1 = new @Marker X().new @Marker Y().new @Marker Z();\n" + 
+				"	                                            ^^^^^^\n" + 
+				"Marker cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 6)\n" + 
+				"	Z z3 = new @Marker Z(){};\n" + 
+				"	            ^^^^^^\n" + 
+				"Marker cannot be resolved to a type\n" + 
+				"----------\n");
+	}
+	public void testBug391464() {
+		this.runNegativeTest(
+				new String[]{
+				"X.java",
+				"public class X<T> {\n" +
+				"	public void foo() {\n" +
+				"		Object o = (X @Marker []) null;\n" +
+				"		o = (java.lang.String @Marker []) null;\n" +
+				"		o = (X<String> @Marker []) null;\n" +
+				"		o = (java.util.List<String> @Marker []) null;\n" +
+				"		if (o == null) return;\n" +
+				"	}" +
+				"}\n"},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 3)\n" + 
+				"	Object o = (X @Marker []) null;\n" + 
+				"	               ^^^^^^\n" + 
+				"Marker cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 4)\n" + 
+				"	o = (java.lang.String @Marker []) null;\n" + 
+				"	                       ^^^^^^\n" + 
+				"Marker cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 5)\n" + 
+				"	o = (X<String> @Marker []) null;\n" + 
+				"	                ^^^^^^\n" + 
+				"Marker cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 6)\n" + 
+				"	o = (java.util.List<String> @Marker []) null;\n" + 
+				"	                             ^^^^^^\n" + 
+				"Marker cannot be resolved to a type\n" + 
+				"----------\n");
+	}	
+	public void testBug391464_2() {
+		this.runNegativeTest(
+				new String[]{
+				"X.java",
+				"public class X  {\n" +
+				"	class Y {\n" +
+				"		class Z {}\n" +
+				"	}\n" +
+				"	@M X.@M Y.@Unreported Z z = null;\n" +
+				"}\n" +
+				"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+				"@interface M {\n" +
+				"}\n",
+				
+				"java/lang/annotation/ElementType.java",
+				"package java.lang.annotation;\n" +
+				"public enum ElementType {\n" +
+				"    TYPE,\n" +
+				"    FIELD,\n" +
+				"    METHOD,\n" +
+				"    PARAMETER,\n" +
+				"    CONSTRUCTOR,\n" +
+				"    LOCAL_VARIABLE,\n" +
+				"    ANNOTATION_TYPE,\n" +
+				"    PACKAGE,\n" +
+				"    TYPE_PARAMETER,\n" +
+				"    TYPE_USE\n" +
+				"}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 5)\n" + 
+				"	@M X.@M Y.@Unreported Z z = null;\n" + 
+				"	           ^^^^^^^^^^\n" + 
+				"Unreported cannot be resolved to a type\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391108
+	public void testBug391108() {
+		this.runNegativeTest(
+				new String[]{
+						"X.java",
+						"public class X {\n" +
+						"	@Marker @Marker2 @Marker3 public void foo() {}\n" +
+						"	@Marker @Marker2 @Marker3 void foo2() {}\n" +
+						"}\n" +
+						"@java.lang.annotation.Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+						"@interface Marker {}\n" +
+						"@java.lang.annotation.Target (java.lang.annotation.ElementType.METHOD)\n" +
+						"@interface Marker2 {}\n" +
+						"@java.lang.annotation.Target ({java.lang.annotation.ElementType.TYPE_USE, java.lang.annotation.ElementType.METHOD})\n" +
+						"@interface Marker3 {}",
+						"java/lang/annotation/ElementType.java",
+						"package java.lang.annotation;\n" +
+						"public enum ElementType {\n" +
+						"    TYPE,\n" +
+						"    FIELD,\n" +
+						"    METHOD,\n" +
+						"    PARAMETER,\n" +
+						"    CONSTRUCTOR,\n" +
+						"    LOCAL_VARIABLE,\n" +
+						"    ANNOTATION_TYPE,\n" +
+						"    PACKAGE,\n" +
+						"    TYPE_PARAMETER,\n" +
+						"    TYPE_USE\n" +
+						"}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 2)\n" + 
+				"	@Marker @Marker2 @Marker3 public void foo() {}\n" + 
+				"	^^^^^^^\n" + 
+				"Type annotation is illegal for a method that returns void\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 3)\n" + 
+				"	@Marker @Marker2 @Marker3 void foo2() {}\n" + 
+				"	^^^^^^^\n" + 
+				"Type annotation is illegal for a method that returns void\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=392119
+	public void test392119() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+				"X.java", //-----------------------------------------------------------------------
+				"@Marker78 @Marker8 @Marker7\n" +
+				"public class X {\n" +
+				"    Zork z;\n" +
+				"}\n" +
+				"@java.lang.annotation.Target ({java.lang.annotation.ElementType.TYPE_USE, java.lang.annotation.ElementType.TYPE})\n" +
+				"@interface Marker78 {\n" +
+				"}\n" +
+				"@java.lang.annotation.Target ({java.lang.annotation.ElementType.TYPE})\n" +
+				"@interface Marker7 {\n" +
+				"}\n" +
+				"@java.lang.annotation.Target ({java.lang.annotation.ElementType.TYPE_USE})\n" +
+				"@interface Marker8 {\n" +
+				"}\n",
+				
+				"java/lang/annotation/ElementType.java",
+				"package java.lang.annotation;\n" +
+				"public enum ElementType {\n" +
+				"    TYPE,\n" +
+				"    FIELD,\n" +
+				"    METHOD,\n" +
+				"    PARAMETER,\n" +
+				"    CONSTRUCTOR,\n" +
+				"    LOCAL_VARIABLE,\n" +
+				"    ANNOTATION_TYPE,\n" +
+				"    PACKAGE,\n" +
+				"    TYPE_PARAMETER,\n" +
+				"    TYPE_USE\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 3)\n" + 
+			"	Zork z;\n" + 
+			"	^^^^\n" + 
+			"Zork cannot be resolved to a type\n" + 
+			"----------\n",
+			null,
+			true, // flush output
+			null,
+			true, // generate output
+			false,
+			false);
+		String expectedOutput =
+				"  RuntimeInvisibleAnnotations: \n" + 
+				"    #24 @Marker78(\n" + 
+				"    )\n" + 
+				"    #25 @Marker7(\n" + 
+				"    )\n";
+		checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput, ClassFileBytesDisassembler.SYSTEM);
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=392119, variant with explicit class file retention.
+	public void test392119b() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+				"X.java", //-----------------------------------------------------------------------
+				"@Marker78 @Marker8 @Marker7\n" +
+				"public class X {\n" +
+				"    Zork z;\n" +
+				"}\n" +
+				"@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n" +
+				"@java.lang.annotation.Target ({java.lang.annotation.ElementType.TYPE_USE, java.lang.annotation.ElementType.TYPE})\n" +
+				"@interface Marker78 {\n" +
+				"}\n" +
+				"@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n" +
+				"@java.lang.annotation.Target ({java.lang.annotation.ElementType.TYPE})\n" +
+				"@interface Marker7 {\n" +
+				"}\n" +
+				"@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)\n" +
+				"@java.lang.annotation.Target ({java.lang.annotation.ElementType.TYPE_USE})\n" +
+				"@interface Marker8 {\n" +
+				"}\n",
+				
+				"java/lang/annotation/ElementType.java",
+				"package java.lang.annotation;\n" +
+				"public enum ElementType {\n" +
+				"    TYPE,\n" +
+				"    FIELD,\n" +
+				"    METHOD,\n" +
+				"    PARAMETER,\n" +
+				"    CONSTRUCTOR,\n" +
+				"    LOCAL_VARIABLE,\n" +
+				"    ANNOTATION_TYPE,\n" +
+				"    PACKAGE,\n" +
+				"    TYPE_PARAMETER,\n" +
+				"    TYPE_USE\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 3)\n" + 
+			"	Zork z;\n" + 
+			"	^^^^\n" + 
+			"Zork cannot be resolved to a type\n" + 
+			"----------\n",
+			null,
+			true, // flush output
+			null,
+			true, // generate output
+			false,
+			false);
+		String expectedOutput =
+				"  RuntimeInvisibleAnnotations: \n" + 
+				"    #24 @Marker78(\n" + 
+				"    )\n" + 
+				"    #25 @Marker7(\n" + 
+				"    )\n";
+		checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput, ClassFileBytesDisassembler.SYSTEM);
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=392119, variant with explicit class file retention.
+	public void test392119c() throws Exception {
+		this.runNegativeTest(
+			new String[] {
+				"X.java", //-----------------------------------------------------------------------
+				"@Marker78 @Marker8 @Marker7\n" +
+				"public class X {\n" +
+				"    Zork z;\n" +
+				"}\n" +
+				"@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)\n" +
+				"@java.lang.annotation.Target ({java.lang.annotation.ElementType.TYPE_USE, java.lang.annotation.ElementType.TYPE})\n" +
+				"@interface Marker78 {\n" +
+				"}\n" +
+				"@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)\n" +
+				"@java.lang.annotation.Target ({java.lang.annotation.ElementType.TYPE})\n" +
+				"@interface Marker7 {\n" +
+				"}\n" +
+				"@java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)\n" +
+				"@java.lang.annotation.Target ({java.lang.annotation.ElementType.TYPE_USE})\n" +
+				"@interface Marker8 {\n" +
+				"}\n",
+				
+				"java/lang/annotation/ElementType.java",
+				"package java.lang.annotation;\n" +
+				"public enum ElementType {\n" +
+				"    TYPE,\n" +
+				"    FIELD,\n" +
+				"    METHOD,\n" +
+				"    PARAMETER,\n" +
+				"    CONSTRUCTOR,\n" +
+				"    LOCAL_VARIABLE,\n" +
+				"    ANNOTATION_TYPE,\n" +
+				"    PACKAGE,\n" +
+				"    TYPE_PARAMETER,\n" +
+				"    TYPE_USE\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 3)\n" + 
+			"	Zork z;\n" + 
+			"	^^^^\n" + 
+			"Zork cannot be resolved to a type\n" + 
+			"----------\n",
+			null,
+			true, // flush output
+			null,
+			true, // generate output
+			false,
+			false);
+		String expectedOutput =
+				"  RuntimeVisibleAnnotations: \n" + 
+				"    #24 @Marker78(\n" + 
+				"    )\n" + 
+				"    #25 @Marker7(\n" + 
+				"    )\n";
+		checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput, ClassFileBytesDisassembler.SYSTEM);
 	}
 }

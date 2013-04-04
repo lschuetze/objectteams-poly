@@ -2313,6 +2313,8 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 				TypeBinding leafType = methodType.leafComponentType();
 				if (leafType instanceof ReferenceBinding && (((ReferenceBinding) leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0)
 					method.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
+				else if (leafType == TypeBinding.VOID && methodDecl.annotations != null)
+					rejectTypeAnnotatedVoidMethod(methodDecl);
 			}
 		}
 	}
@@ -2358,6 +2360,19 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 	}
 // SH}
 	return method;
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=391108
+private void rejectTypeAnnotatedVoidMethod(AbstractMethodDeclaration methodDecl) {
+	Annotation[] annotations = methodDecl.annotations;
+	int length = annotations == null ? 0 : annotations.length;
+	for (int i = 0; i < length; i++) {
+		ReferenceBinding binding = (ReferenceBinding) annotations[i].resolvedType;
+		if (binding != null
+				&& (binding.tagBits & TagBits.AnnotationForTypeUse) != 0
+				&& (binding.tagBits & TagBits.AnnotationForMethod) == 0) {
+			methodDecl.scope.problemReporter().illegalUsageOfTypeAnnotations(annotations[i]);
+		}
+	}
 }
 private void createArgumentBindings(MethodBinding method) {
 	// ensure nullness defaults are initialized at all enclosing levels:
