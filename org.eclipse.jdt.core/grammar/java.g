@@ -889,17 +889,13 @@ FormalParameterList ::= FormalParameterList ',' FormalParameter
 /:$readableName FormalParameterList:/
 
 --1.1 feature
-FormalParameter ::= Modifiersopt Type VariableDeclaratorIdOrThis
+--{ObjectTeams: inserted LiftingTypeopt:
+FormalParameter ::= Modifiersopt Type LiftingTypeopt VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(false); $break ./
-FormalParameter ::= Modifiersopt Type PushZeroTypeAnnotations '...' VariableDeclaratorIdOrThis
+FormalParameter ::= Modifiersopt Type LiftingTypeopt PushZeroTypeAnnotations '...' VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(true); $break ./
 /:$compliance 1.5:/
---{ObjectTeams: inserted LiftingTypeopt: FIXME
--- example:
---FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt LiftingTypeopt PotentialNameArray VariableDeclaratorIdOrThis
---/.$putCase consumeFormalParameter(false); $break ./
--- real:
-FormalParameter ::= Modifiersopt Type @308... TypeAnnotations '...' VariableDeclaratorIdOrThis
+FormalParameter ::= Modifiersopt Type LiftingTypeopt @308... TypeAnnotations '...' VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(true); $break ./
 /:$readableName FormalParameter:/
 /:$compliance 1.8:/

@@ -7804,15 +7804,15 @@ protected void consumeRule(int act) {
 		    consumeFormalParameterList();  
 			break;
  
-    case 241 : if (DEBUG) { System.out.println("FormalParameter ::= Modifiersopt Type..."); }  //$NON-NLS-1$
+    case 241 : if (DEBUG) { System.out.println("FormalParameter ::= Modifiersopt Type LiftingTypeopt..."); }  //$NON-NLS-1$
 		    consumeFormalParameter(false);  
 			break;
  
-    case 242 : if (DEBUG) { System.out.println("FormalParameter ::= Modifiersopt Type..."); }  //$NON-NLS-1$
+    case 242 : if (DEBUG) { System.out.println("FormalParameter ::= Modifiersopt Type LiftingTypeopt..."); }  //$NON-NLS-1$
 		    consumeFormalParameter(true);  
 			break;
  
-    case 243 : if (DEBUG) { System.out.println("FormalParameter ::= Modifiersopt Type AT308DOTDOTDOT..."); }  //$NON-NLS-1$
+    case 243 : if (DEBUG) { System.out.println("FormalParameter ::= Modifiersopt Type LiftingTypeopt..."); }  //$NON-NLS-1$
 		    consumeFormalParameter(true);  
 			break;
  
