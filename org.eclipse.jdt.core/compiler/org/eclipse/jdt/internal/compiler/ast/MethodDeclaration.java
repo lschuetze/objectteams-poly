@@ -4,8 +4,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MethodDeclaration.java 23404 2010-02-03 14:10:22Z stephan $
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -15,11 +18,14 @@
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
  *								bug 368546 - [compiler][resource] Avoid remaining false positives found when compiling the Eclipse SDK
+ *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLAG_DEFINITELY_MISSING_BASECALL;
 import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.CALLIN_FLAG_POTENTIALLY_MISSING_BASECALL;
+
+import java.util.List;
 
 import org.eclipse.jdt.core.compiler.*;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
@@ -30,6 +36,7 @@ import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
+import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
@@ -41,6 +48,7 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeVariableBinding;
 import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.AbortMethod;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference.AnnotationCollector;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallTrackingVariable;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDeclaration;
@@ -148,6 +156,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 
 			if (this.arguments != null) {
 				for (int i = 0, count = this.arguments.length; i < count; i++) {
+					this.bits |= (this.arguments[i].bits & ASTNode.HasTypeAnnotations);
 					// if this method uses a type parameter declared by the declaring class,
 					// it can't be static. https://bugs.eclipse.org/bugs/show_bug.cgi?id=318682
 					if (this.arguments[i].binding != null && (this.arguments[i].binding.type instanceof TypeVariableBinding)) {
@@ -228,6 +237,18 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 	}
 // SH}
 
+	public void getAllAnnotationContexts(int targetType, List allAnnotationContexts) {
+		AnnotationCollector collector = new AnnotationCollector(this, targetType, allAnnotationContexts);
+		for (int i = 0, max = this.annotations.length; i < max; i++) {
+			Annotation annotation = this.annotations[i];
+			annotation.traverse(collector, (BlockScope) null);
+		}
+	}
+
+	public boolean isDefaultMethod() {
+		return (this.modifiers & ExtraCompilerModifiers.AccDefaultMethod) != 0;
+	}
+
 	public boolean isMethod() {
 		return true;
 	}
@@ -245,6 +266,7 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 	public void resolveStatements() {
 		// ========= abort on fatal error =============
 		if (this.returnType != null && this.binding != null) {
+			this.bits |= (this.returnType.bits & ASTNode.HasTypeAnnotations);
 			this.returnType.resolvedType = this.binding.returnType;
 			// record the return type binding
 		}
@@ -262,7 +284,9 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 		}
 		if (this.typeParameters != null) {
 			for (int i = 0, length = this.typeParameters.length; i < length; i++) {
-				this.typeParameters[i].resolve(this.scope);
+				TypeParameter typeParameter = this.typeParameters[i];
+				this.bits |= (typeParameter.bits & ASTNode.HasTypeAnnotations);
+				typeParameter.resolve(this.scope);
 				if (returnsUndeclTypeVar && this.typeParameters[i].binding == this.returnType.resolvedType) {
 					returnsUndeclTypeVar = false;
 				}

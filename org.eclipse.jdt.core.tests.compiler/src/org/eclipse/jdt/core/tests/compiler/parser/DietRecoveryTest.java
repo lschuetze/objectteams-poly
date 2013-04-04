@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -2500,7 +2504,7 @@ public void test31() {
  * Should recover from method with missing argument names
  */
 
-public void test32() {
+public void _test32() {
 
 	String s =
 		"public class WB2 {											\n"+
@@ -4646,14 +4650,14 @@ public void test75() {
 		"        super();\n" +
 		"      }\n" +
 		"      int hello() {\n" +
-		"        fo = $missing$;\n" +
+		"        fo $missing$;\n" +
 		"      }\n" +
 		"      int world() {\n" +
 		"      }\n" +
 		"      void foo() {\n" +
 		"      }\n" +
 		"    }\n" +
-		"    ba = $missing$;\n" +
+		"    ba $missing$;\n" +
 		"  }\n" +
 		"}\n";
 
@@ -4848,7 +4852,7 @@ public void test77() {
 		"    else\n" +
 		"        if ((depth > 1))\n" +
 		"            {\n" +
-		"              sol = $missing$;\n" +
+		"              sol $missing$;\n" +
 		"            }\n" +
 		"        else\n" +
 		"            ;\n" +
@@ -6003,7 +6007,7 @@ public void test99() {
 		"    restricts breakpoint;\n" +
 		"    given thread;\n" +
 		"    any other;\n" +
-		"    specified = $missing$;\n" +
+		"    specified $missing$;\n" +
 		"  }\n" +
 		"  public void removeThreadFilter(IJavaThread thread) {\n" +
 		"    removes the;\n" +
@@ -6014,7 +6018,7 @@ public void test99() {
 		"    request as;\n" +
 		"    does not;\n" +
 		"    the removal;\n" +
-		"    thread = $missing$;\n" +
+		"    thread $missing$;\n" +
  :giro */
 // SH}		
 		"  }\n" +
@@ -6582,7 +6586,7 @@ public void test109() {
 		expectedFullUnitToString,
 		expectedCompletionDietUnitToString, testName);
 }
-public void test110() {
+public void _test110() {
 	String s =
 		"public class X {\n" +
 		"	void bar(){\n" +
@@ -7585,7 +7589,7 @@ public void test123() {
 		expectedCompletionDietUnitToString, testName);
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=157570
-public void test124() {
+public void _test124() {
 	String s =
 		"public class Test {\n" +
 		"	void aMethod() {\n" +

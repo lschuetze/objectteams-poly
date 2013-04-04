@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -102,12 +106,84 @@ public class Scanner implements TerminalTokens {
     // after a '.' even 'team' can be an identifier:
     private int _dotSeen = 0; // 0: no, 1: previos, 2: this token
 
+    public boolean _insideParameterMapping = false;
+    enum LookaheadState { INIT, ONE_TOKEN, ID_SEEN, TWO_TOKENS, ID_CONSUMED }
+    /** 
+     * A little state machine for lookahead of up-to 2 tokens.
+     * This is used to disambiguate whether a '->' inside parameter mappings is
+     * an ARRAW (lambda) or a SYNTHBINDOUT (parameter mapping role-to-base) 
+     */
+    class BindoutLookahead {
+    	
+    	LookaheadState state = LookaheadState.INIT;
+    	int[] tokens = new int[2];
+    	char[] identifier = null;
+    	int[][] positions = new int[2][];
+    	
+		public BindoutLookahead() throws InvalidInputException {
+			int token = this.tokens[0] = getNextToken0();
+			this.positions[0] = new int[] {Scanner.this.startPosition, Scanner.this.currentPosition};
+			if (token == TerminalTokens.TokenNameIdentifier) {
+				this.state = LookaheadState.ID_SEEN;
+				this.identifier = getCurrentIdentifierSource();
+			}
+		}
+		public char[] getIdentifier() {
+			if (this.state == LookaheadState.TWO_TOKENS) {
+				return this.identifier;
+			}
+			return null;
+		}
+		public int getNextToken() throws InvalidInputException {
+			switch (this.state) {
+				case INIT :
+					// == initialization failed to match anything	=> signal no match
+					this.state = LookaheadState.ONE_TOKEN;
+					return TerminalTokens.TokenNameNotAToken;
+				case ONE_TOKEN :
+					// == we have one non-matching token			=> pop that token and unregister 
+					Scanner.this._bindoutLookahead = null;
+					return popToken(0);
+				case ID_SEEN :
+					// == we've seen an identifier					=> check if second token matches, too
+					this.tokens[1] = Scanner.this.getNextToken0();
+					this.positions[1] = new int[] {Scanner.this.startPosition, Scanner.this.currentPosition};
+					this.state = LookaheadState.TWO_TOKENS;
+					switch (this.tokens[1]) {
+						case TerminalTokens.TokenNameCOMMA :	  // more mappings?
+						case TerminalTokens.TokenNameSEMICOLON :  // more mappings? (wrong delimiter, though)
+						case TerminalTokens.TokenNameRBRACE :	  // end of parameter mappings?
+							return TokenNameSYNTHBINDOUT; 		  // match, tweak '->' to mean SYNTHBINDOUT
+						default:
+							return TerminalTokens.TokenNameARROW; // no match, '->' should be interpreted as normal
+					}
+				case TWO_TOKENS :
+					// == we've seen & stored two tokens			=> pop the identifier now
+					this.state = LookaheadState.ID_CONSUMED;
+					return popToken(0);
+				case ID_CONSUMED :
+					// == identifier has already been consumed		=> pop the second token and unregister
+					Scanner.this._bindoutLookahead = null;
+					return popToken(1);
+			}
+			return TerminalTokens.TokenNameNotAToken;
+		}
+		private int popToken(int i) {
+			Scanner.this.startPosition = this.positions[i][0];
+			Scanner.this.currentPosition = this.positions[i][1];
+			return this.tokens[i];
+		}
+    }
+    BindoutLookahead _bindoutLookahead = null;
+
     public void resetOTFlags() {
     	this._isOTSource = this.parseOTJonly;
     	this._teamKeywordSeen = false;
     	this._forceBaseIsIdentifier = false;
     	this._callinSeen = false;
     	this._calloutSeen = false;
+    	this._insideParameterMapping = false;
+    	this._bindoutLookahead = null;
     }
     
     public void setOTFlags(CompilerOptions options) {
@@ -305,7 +381,12 @@ public class Scanner implements TerminalTokens {
 		newEntry5 = 0,
 		newEntry6 = 0;
 	public boolean insideRecovery = false;
-
+	int lookBack[] = new int[2]; // fall back to spring forward.
+	private int nextToken = TokenNameNotAToken; // allows for one token push back, only the most recent token can be reliably ungotten.
+	private VanguardScanner vanguardScanner;
+	private VanguardParser vanguardParser;
+	private ConflictedParser activeParser = null;
+	
 	public static final int RoundBracket = 0;
 	public static final int SquareBracket = 1;
 	public static final int CurlyBracket = 2;
@@ -335,6 +416,7 @@ public Scanner(
 	this.tokenizeComments = tokenizeComments;
 	this.tokenizeWhiteSpace = tokenizeWhiteSpace;
 	this.sourceLevel = sourceLevel;
+	this.lookBack[0] = this.lookBack[1] = this.nextToken = TokenNameNotAToken;
 	this.complianceLevel = complianceLevel;
 	this.checkNonExternalizedStringLiterals = checkNonExternalizedStringLiterals;
 	if (taskTags != null) {
@@ -532,6 +614,13 @@ public void checkTaskTag(int commentStart, int commentEnd) throws InvalidInputEx
 }
 
 public char[] getCurrentIdentifierSource() {
+//{ObjectTeams: respect look-ahead:
+	if (this._bindoutLookahead != null) {
+		char[] result = this._bindoutLookahead.getIdentifier();
+		if (result != null)
+			return result;
+	}
+// SH}
 	//return the token REAL source (aka unicodes are precomputed)
 	if (this.withoutUnicodePtr != 0) {
 		//0 is used as a fast test flag so the real first char is in position 1
@@ -1238,7 +1327,54 @@ public int scanIdentifier() throws InvalidInputException {
 		return TokenNameERROR;
 	}
 }
+public void ungetToken(int unambiguousToken) {
+	if (this.nextToken != TokenNameNotAToken) {
+		throw new ArrayIndexOutOfBoundsException("Single cell array overflow"); //$NON-NLS-1$
+	}
+	this.nextToken = unambiguousToken;
+}
+
 public int getNextToken() throws InvalidInputException {
+	
+	int token;
+	if (this.nextToken != TokenNameNotAToken) {
+		token = this.nextToken;
+		this.nextToken = TokenNameNotAToken;
+		return token; // presumed to be unambiguous.
+	}
+	
+//{ObjectTeams: consume lookahead for parameter mappings:
+	if (this._bindoutLookahead != null) {
+		int result = this._bindoutLookahead.getNextToken();
+		if (result != TerminalTokens.TokenNameNotAToken)
+			return result;
+	}
+// SH}
+
+	token = getNextToken0();
+	if (this.activeParser == null) { // anybody interested in the grammatical structure of the program should have registered.
+		return token;
+	}
+
+	if (token == TokenNameLPAREN && atLambdaParameterList()) {
+		this.nextToken = token;
+		token = TokenNameBeginLambda;
+	} else if (token == TokenNameLESS && atReferenceExpression()) {
+		this.nextToken = token;
+		token = TokenNameBeginTypeArguments;
+	} else if (token == TokenNameAT && atTypeAnnotation()) {
+		token = TokenNameAT308;
+		if (atEllipsisAnnotation()) {
+			this.nextToken = token;
+			token = TokenNameAT308DOTDOTDOT;
+		}
+	}
+
+	this.lookBack[0] = this.lookBack[1];
+	this.lookBack[1] = token;
+	return token;
+}
+protected int getNextToken0() throws InvalidInputException {
 //{ObjectTeams: support '.' 'team':
 	if (this._dotSeen > 0)
 		this._dotSeen--; // "aging"
@@ -1392,13 +1528,20 @@ public int getNextToken() throws InvalidInputException {
 							return TokenNameMINUS_MINUS;
 						if (test > 0)
 							return TokenNameMINUS_EQUAL;
-//{ObjectTeams: check for callout binding after '-' tokens
-						else {
-							if (test < 0 && this._isOTSource)
-								if (getNextChar('>')) {
-									this._calloutSeen = true;
-									return TokenNameBINDOUT;
+//{ObjectTeams: set _calloutSeen?
+/* orig:
+						if (getNextChar('>'))
+							return TokenNameARROW;
+  :giro */
+						if (getNextChar('>')) {
+							if (this._isOTSource) {
+								this._calloutSeen = true; // TODO distinguish from ARROW?
+								if (this._insideParameterMapping) {
+									this._bindoutLookahead = new BindoutLookahead();
+									return this._bindoutLookahead.getNextToken();
 								}
+							}
+							return TokenNameARROW;
 						}
 // Markus Witte}
 						return TokenNameMINUS;
@@ -1502,6 +1645,8 @@ public int getNextToken() throws InvalidInputException {
 				case '?' :
 					return TokenNameQUESTION;
 				case ':' :
+					if (getNextChar(':'))
+						return TokenNameCOLON_COLON;
 					return TokenNameCOLON;
 				case '\'' :
 					{
@@ -2773,7 +2918,6 @@ public final void jumpOverPredicate() {
 	return;
 }
 // SH}
-
 public final boolean jumpOverUnicodeWhiteSpace() throws InvalidInputException {
 	//BOOLEAN
 	//handle the case of unicode. Jump over the next whiteSpace
@@ -3234,6 +3378,11 @@ public void resetTo(int begin, int end) {
 	}
 	this.commentPtr = -1; // reset comment stack
 	this.foundTaskCount = 0;
+	this.lookBack[0] = this.lookBack[1] = this.nextToken = TokenNameNotAToken;
+//{ObjectTeams: lookahead on '->':
+	this._insideParameterMapping = false;
+	this._bindoutLookahead = null;
+// SH}
 }
 
 protected final void scanEscapeCharacter() throws InvalidInputException {
@@ -4634,7 +4783,11 @@ public String toString() {
 	if (middleLength > -1) {
 		buffer.append(this.source, this.startPosition, middleLength);
 	}
-	buffer.append("<-- Ends here\n===============================\n"); //$NON-NLS-1$
+	if (this.nextToken != TerminalTokens.TokenNameNotAToken) {
+		buffer.append("<-- Ends here [in pipeline " + toStringAction(this.nextToken) + "]\n===============================\n"); //$NON-NLS-1$ //$NON-NLS-2$
+	} else {
+		buffer.append("<-- Ends here\n===============================\n"); //$NON-NLS-1$
+	}
 
 	buffer.append(this.source, (this.currentPosition - 1) + 1, this.eofPosition - (this.currentPosition - 1) - 1);
 
@@ -4789,8 +4942,6 @@ public String toStringAction(int act) {
 //{ObjectTeams: deal with callins/callouts
 		case TokenNameBINDIN :
 			return "<-"; //$NON-NLS-1$
-		case TokenNameBINDOUT :
-			return "->"; //$NON-NLS-1$
 		case TokenNameCALLOUT_OVERRIDE :
 			return "=>"; //$NON-NLS-1$
 // Markus Witte}
@@ -4810,6 +4961,8 @@ public String toStringAction(int act) {
 			return "+="; //$NON-NLS-1$
 		case TokenNameMINUS_EQUAL :
 			return "-="; //$NON-NLS-1$
+		case TokenNameARROW :
+			return "->"; //$NON-NLS-1$
 		case TokenNameMULTIPLY_EQUAL :
 			return "*="; //$NON-NLS-1$
 		case TokenNameDIVIDE_EQUAL :
@@ -4874,6 +5027,8 @@ public String toStringAction(int act) {
 			return "?"; //$NON-NLS-1$
 		case TokenNameCOLON :
 			return ":"; //$NON-NLS-1$
+		case TokenNameCOLON_COLON :
+			return "::"; //$NON-NLS-1$
 		case TokenNameCOMMA :
 			return ","; //$NON-NLS-1$
 		case TokenNameDOT :
@@ -4990,5 +5145,200 @@ public static boolean isKeyword(int token) {
 		default:
 			return false;
 	}
+}
+
+// Vanguard Scanner - A Private utility helper class for the scanner.
+private static class VanguardScanner extends Scanner {
+	
+	/* A lambda parameter list will/can NEVER contain ->, likewise the trunk of a reference expression will/can never contain ::, 
+	   We morph one or the other specific token into EOF and see if the parser enters accept state. On true EOF, we return fake
+	   EOF to force an error. This is so that the interim goal reduction actually happens only when -> or :: occur in input at
+	   the expected place.
+	   
+	   To make matters interesting, type annotations can occur inside both lambda parameter list and reference expression trunks
+	   and declarative annotations can occur in lambda parameter lists. We need to discriminate between them. Sigh.
+	*/
+	private int fakeEofToken = TokenNameNotAToken; // if encountered in input stream, will be exposed as EOF instead.
+
+	public VanguardScanner(long sourceLevel, long complianceLevel) {
+		super (false /*comment*/, false /*whitespace*/, false /*nls*/, sourceLevel, complianceLevel, null/*taskTag*/, null/*taskPriorities*/, false /*taskCaseSensitive*/);
+	}
+	
+	public int getNextToken() throws InvalidInputException {
+		int token = getNextToken0();
+		if (token == TokenNameAT && atTypeAnnotation()) {
+			token = TokenNameAT308;
+		}
+		return token == this.fakeEofToken ? TokenNameEOF : token == TokenNameEOF ? this.fakeEofToken : token; 
+	}
+
+	public void setFakeEofToken(int eofToken) {
+		this.fakeEofToken = eofToken;
+	}
+}
+
+// Vanguard Parser - A Private utility helper class for the scanner.
+private static class VanguardParser extends Parser {
+	
+	public VanguardParser(VanguardScanner scanner) {
+		this.scanner = scanner;
+	}
+	protected boolean parse(int specialToken) { // Canonical LALR pushdown automaton identical to Parser.parse() minus side effects of any kind.
+		this.scanner.setFakeEofToken(specialToken);
+		try {
+			int act = START_STATE;
+			this.stateStackTop = -1;
+			this.currentToken = specialToken; // steer the parser towards a single minded goal. 
+			ProcessTerminals : for (;;) {
+				int stackLength = this.stack.length;
+				if (++this.stateStackTop >= stackLength) {
+					System.arraycopy(
+						this.stack, 0,
+						this.stack = new int[stackLength + StackIncrement], 0,
+						stackLength);
+				}
+				this.stack[this.stateStackTop] = act;
+
+				act = Parser.tAction(act, this.currentToken);
+				if (act == ERROR_ACTION) {
+					return false;
+				}
+				if (act <= NUM_RULES) {
+					this.stateStackTop--;
+				} else if (act > ERROR_ACTION) { /* shift-reduce */
+					this.unstackedAct = act;
+					try {
+						this.currentToken = this.scanner.getNextToken();
+					} finally {
+						this.unstackedAct = ERROR_ACTION;
+					}
+					act -= ERROR_ACTION;
+				} else {
+				    if (act < ACCEPT_ACTION) { /* shift */
+				    	this.unstackedAct = act;
+						try {
+							this.currentToken = this.scanner.getNextToken();
+						} finally {
+							this.unstackedAct = ERROR_ACTION;
+						}
+						continue ProcessTerminals;
+					}
+				    return true; // accept !
+				}
+
+				// ProcessNonTerminals :
+				do { /* reduce */
+					this.stateStackTop -= (Parser.rhs[act] - 1);
+					act = Parser.ntAction(this.stack[this.stateStackTop], Parser.lhs[act]);
+				} while (act <= NUM_RULES);
+			}
+		} catch (Exception e) {
+			return false;
+		}
+	}
+	public String toString() {
+		return "\n\n\n----------------Scanner--------------\n" + this.scanner.toString(); //$NON-NLS-1$;
+	}
+}
+
+private VanguardParser getVanguardParser() {
+	if (this.vanguardParser == null) {
+		this.vanguardScanner = new VanguardScanner(this.sourceLevel, this.complianceLevel);
+		this.vanguardParser = new VanguardParser(this.vanguardScanner);
+		this.vanguardScanner.setActiveParser(this.vanguardParser);
+	}
+	this.vanguardScanner.setSource(this.source);
+	this.vanguardScanner.resetTo(this.startPosition, this.eofPosition - 1);
+	return this.vanguardParser;
+}
+
+public void setFakeEofToken(int specialToken) {
+	throw new UnsupportedOperationException();   // for specific specializations only.
+}
+
+protected final boolean atLambdaParameterList() { // Did the '(' we saw just now herald a lambda parameter list ?
+
+	switch (this.lookBack[1]) {
+		case TokenNameEQUAL : 
+		case TokenNamereturn:
+		case TokenNameLPAREN:
+		case TokenNameRPAREN:
+		case TokenNameCOMMA:
+		case TokenNameARROW:
+		case TokenNameQUESTION:
+		case TokenNameCOLON:
+		case TokenNameLBRACE:
+		case TokenNameNotAToken: // Not kosher, don't touch.
+			break;
+		default:
+			return false; // Not a viable prefix for lambda.
+
+	}
+	return this.activeParser.atConflictScenario(TokenNameLPAREN) && getVanguardParser().parse(TokenNameARROW);
+}
+
+protected final boolean atReferenceExpression() { // Did the '<' we saw just now herald a reference expression ?
+	switch (this.lookBack[1]) {
+		case TokenNameIdentifier:
+			switch (this.lookBack[0]) {
+				case TokenNameSEMICOLON:  // for (int i = 0; i < 10; i++);
+				case TokenNameRBRACE:     // class X { void foo() {} X<String> x = null; }
+				case TokenNameclass:      // class X<T> {}
+				case TokenNameinterface:  // interface I<T> {}
+				case TokenNameenum:       // enum E<T> {}
+				case TokenNamefinal:      // final Collection<String>
+				case TokenNameLESS:       // Collection<IScalarData<AbstractData>>
+				case TokenNameGREATER:    // public <T> List<T> foo() { /* */ }
+				case TokenNameRIGHT_SHIFT:// static <T extends SelfType<T>> List<T> makeSingletonList(T t) { /* */ }
+				case TokenNamenew:        // new ArrayList<String>();
+				case TokenNamepublic:     // public List<String> foo() {}
+				case TokenNameabstract:   // abstract List<String> foo() {}
+				case TokenNameprivate:    // private List<String> foo() {}
+				case TokenNameprotected:  // protected List<String> foo() {}
+				case TokenNamestatic:     // public static List<String> foo() {}
+				case TokenNameextends:    // <T extends Y<Z>>
+				case TokenNamesuper:      // ? super Context<N>
+				case TokenNameAND:        // T extends Object & Comparable<? super T>
+				case TokenNameimplements: // class A implements I<Z>
+				case TokenNamethrows:     // throws Y<Z>
+				case TokenNameAT:         // @Deprecated <T> void foo() {} 
+				case TokenNameinstanceof: // if (o instanceof List<E>[])  
+					return false;
+				default:
+					break;
+			}
+			break;
+		case TokenNameNotAToken: // Not kosher, don't touch.
+			break;
+		default:
+			return false;
+	}
+	return this.activeParser.atConflictScenario(TokenNameLESS) && getVanguardParser().parse(TokenNameCOLON_COLON);
+}
+protected final boolean atEllipsisAnnotation() { // Did the '@' we saw just now herald a type annotation on a ... ? Presumed to be at type annotation already.
+	switch (this.lookBack[1]) {
+		case TokenNamenew:
+		case TokenNameCOMMA:
+		case TokenNameextends:
+		case TokenNamesuper:
+		case TokenNameimplements:
+		case TokenNameDOT:
+		case TokenNameLBRACE:
+		case TokenNameinstanceof:
+		case TokenNameLESS:
+		case TokenNameGREATER:
+		case TokenNameAND:
+		case TokenNamethrows:
+			return false;
+	}
+	return getVanguardParser().parse(TokenNameELLIPSIS);
+}
+protected final boolean atTypeAnnotation() { // Did the '@' we saw just now herald a type annotation ? We should not ask the parser whether it would shift @308 !
+	return !this.activeParser.atConflictScenario(TokenNameAT);
+}
+
+public void setActiveParser(ConflictedParser parser) {
+	this.activeParser  = parser;
+	this.lookBack[0] = this.lookBack[1] = TokenNameNotAToken;  // no hand me downs please.
 }
 }

@@ -4,8 +4,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Scope.java 23405 2010-02-03 17:02:18Z stephan $
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -454,7 +457,7 @@ public abstract class Scope {
 					if (RoleTypeBinding.isRoleType(originalParameterizedType)) {
 						DependentTypeBinding originalRole = (DependentTypeBinding) originalParameterizedType;
 						return originalParameterizedType.environment.createParameterizedType(
-							originalParameterizedType.genericType(), substitutedArguments, originalRole._teamAnchor, originalRole._valueParamPosition, substitutedEnclosing);
+							originalParameterizedType.genericType(), substitutedArguments, 0L, originalRole._teamAnchor, originalRole._valueParamPosition, substitutedEnclosing);
 					}
 // SH}
 					return originalParameterizedType.environment.createParameterizedType(
@@ -890,6 +893,25 @@ public abstract class Scope {
 			parameterBinding.fPackage = unitPackage;
 			typeParameter.binding = parameterBinding;
 
+			if ((typeParameter.bits & ASTNode.HasTypeAnnotations) != 0) {
+				switch(declaringElement.kind()) {
+					case Binding.METHOD :
+						MethodBinding methodBinding = (MethodBinding) declaringElement;
+						AbstractMethodDeclaration sourceMethod = methodBinding.sourceMethod();
+						if (sourceMethod != null) {
+							sourceMethod.bits |= ASTNode.HasTypeAnnotations;
+						}
+						break;
+					case Binding.TYPE :
+						if (declaringElement instanceof SourceTypeBinding) {
+							SourceTypeBinding sourceTypeBinding = (SourceTypeBinding) declaringElement;
+							TypeDeclaration typeDeclaration = sourceTypeBinding.scope.referenceContext;
+							if (typeDeclaration != null) {
+								typeDeclaration.bits |= ASTNode.HasTypeAnnotations;
+							}
+						}
+				}
+			}
 			// detect duplicates, but keep each variable to reduce secondary errors with instantiating this generic type (assume number of variables is correct)
 			for (int j = 0; j < count; j++) {
 				TypeVariableBinding knownVar = typeVariableBindings[j];
@@ -4881,5 +4903,18 @@ public abstract class Scope {
 						annotationName[annotationName.length-1], nullAnnotationTagBit);
 			}
 		}
+	}
+	public static BlockScope typeAnnotationsResolutionScope(Scope scope) {
+		BlockScope resolutionScope = null;
+		switch(scope.kind) {
+			case Scope.CLASS_SCOPE:
+				resolutionScope = ((ClassScope) scope).referenceContext.staticInitializerScope;
+				break;
+			case Scope.BLOCK_SCOPE :
+			case Scope.METHOD_SCOPE :
+				resolutionScope = (BlockScope) scope;
+				break;
+		}
+		return resolutionScope;
 	}
 }

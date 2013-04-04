@@ -4,8 +4,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: LocalDeclaration.java 23405 2010-02-03 17:02:18Z stephan $
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -23,8 +26,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
+import java.util.List;
+
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.impl.*;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference.AnnotationCollector;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
@@ -249,6 +255,22 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		return LOCAL_VARIABLE;
 	}
 
+	// for local variables
+	public void getAllAnnotationContexts(int targetType, LocalVariableBinding localVariable, List allAnnotationContexts) {
+		AnnotationCollector collector = new AnnotationCollector(this, targetType, localVariable, allAnnotationContexts);
+		this.traverse(collector, (BlockScope) null);
+	}
+	// for arguments
+	public void getAllAnnotationContexts(int targetType, int parameterIndex, List allAnnotationContexts) {
+		AnnotationCollector collector = new AnnotationCollector(this, targetType, parameterIndex, allAnnotationContexts);
+		this.traverse(collector, (BlockScope) null);
+	}
+	public boolean isArgument() {
+		return false;
+	}
+	public boolean isReceiver() {
+		return false;
+	}
 	public void resolve(BlockScope scope) {
 //{ObjectTeams: avoid duplicate resolving:
 	  TypeBinding variableType = null;

@@ -29,7 +29,7 @@
 package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
-import org.eclipse.jdt.internal.compiler.ast.ArrayTypeReference;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.CharLiteral;
 import org.eclipse.jdt.internal.compiler.ast.DoubleLiteral;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
@@ -97,8 +97,15 @@ public class LiftingTypeReference extends TypeReference {
 	public TypeReference copyDims(int dim){
 		//return a type reference copy of me with some dimensions
 		//warning : the new type ref has a null binding
+		throw new InternalCompilerError("Method not applicable");
+//		return new ArrayTypeReference(this.roleToken,dim,(((long)this.sourceStart)<<32)+this.sourceEnd) ;
+	}
 
-		return new ArrayTypeReference(this.roleToken,dim,(((long)this.sourceStart)<<32)+this.sourceEnd) ;
+	@Override
+	public TypeReference copyDims(int dim, Annotation[][] annotationsOnDimensions) {
+		this.baseReference = this.baseReference.copyDims(dim, annotationsOnDimensions);
+		// FIXME check consistency
+		return this;
 	}
 
 	// The binding is basically the baseReference's binding.
@@ -197,7 +204,7 @@ public class LiftingTypeReference extends TypeReference {
 	    			ITeamAnchor anchor = null;
 	    			if (roleRefType.baseclass() instanceof RoleTypeBinding)
 	    				anchor = ((RoleTypeBinding)roleRefType.baseclass())._teamAnchor;
-	    			roleBase = parameterizedRole.environment.createParameterizedType((ReferenceBinding)roleBase.original(), typeArgs, anchor, -1, roleBase.enclosingType());
+	    			roleBase = parameterizedRole.environment.createParameterizedType((ReferenceBinding)roleBase.original(), typeArgs, 0L, anchor, -1, roleBase.enclosingType());
 	    		}
 	    		// THE compatibility check:
 		    	if (   !baseType.isCompatibleWith(roleBase)
@@ -223,7 +230,7 @@ public class LiftingTypeReference extends TypeReference {
 	// faked argument, to avoid subsequent errors when resolving
 	// an invalid lifting call.
 	private TypeBinding invalidate(TypeBinding variableType) {
-	    if (this.fakedArgument != null) {
+	    if (this.fakedArgument != null && variableType != null) {
 	        int start = this.roleReference.sourceStart;
 	        int end   = this.roleReference.sourceEnd;
 

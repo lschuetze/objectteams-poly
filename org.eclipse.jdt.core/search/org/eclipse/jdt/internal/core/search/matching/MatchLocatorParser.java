@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -412,10 +416,10 @@ protected void consumeLocalVariableDeclaration() {
 	this.patternLocator.match((LocalDeclaration) this.astStack[this.astPtr], this.nodeSet);
 }
 
-protected void consumeMarkerAnnotation() {
-	super.consumeMarkerAnnotation();
+protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
+	super.consumeMarkerAnnotation(isTypeAnnotation);
 	if (this.patternFineGrain == 0 || (this.patternFineGrain & IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE) != 0) {
-		Annotation annotation = (Annotation) this.expressionStack[this.expressionPtr];
+		Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
 		this.patternLocator.match(annotation, this.nodeSet);
 	}
 }
@@ -591,11 +595,11 @@ protected void consumeMethodInvocationSuperWithTypeArguments() {
 	}
 }
 
-protected void consumeNormalAnnotation() {
-	super.consumeNormalAnnotation();
+protected void consumeNormalAnnotation(boolean isTypeAnnotation) {
+	super.consumeNormalAnnotation(isTypeAnnotation);
 	if (this.patternFineGrain == 0 || (this.patternFineGrain & IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE) != 0) {
 		// this is always an Annotation
-		Annotation annotation = (Annotation) this.expressionStack[this.expressionPtr];
+		Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
 		this.patternLocator.match(annotation, this.nodeSet);
 	}
 }
@@ -629,11 +633,11 @@ protected void consumePrimaryNoNewArrayWithName() {
 	this.intPtr--;
 }
 
-protected void consumeSingleMemberAnnotation() {
-	super.consumeSingleMemberAnnotation();
+protected void consumeSingleMemberAnnotation(boolean isTypeAnnotation) {
+	super.consumeSingleMemberAnnotation(isTypeAnnotation);
 	if (this.patternFineGrain == 0 || (this.patternFineGrain & IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE) != 0) {
 		// this is always an Annotation
-		Annotation annotation = (Annotation) this.expressionStack[this.expressionPtr];
+		Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
 		this.patternLocator.match(annotation, this.nodeSet);
 	}
 }
@@ -865,23 +869,32 @@ protected TypeReference copyDims(TypeReference typeRef, int dim) {
 		this.nodeSet.addTrustedMatch(result, true);
 	return result;
 }
+protected TypeReference copyDims(TypeReference typeRef, int dim, Annotation [][] annotationsOnDimensions) {
+	TypeReference result = super.copyDims(typeRef, dim, annotationsOnDimensions);
+	 if (this.nodeSet.removePossibleMatch(typeRef) != null)
+		this.nodeSet.addPossibleMatch(result);
+	 else if (this.nodeSet.removeTrustedMatch(typeRef) != null)
+		this.nodeSet.addTrustedMatch(result, true);
+	return result;
+}
 protected TypeReference getTypeReference(int dim) {
 //{ObjectTeams: wrap to introduce 2nd parameter
 	return getTypeReference(dim, false);  
 }
 protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
-/*orig:
+// FIXME:
+//*orig:
 	TypeReference typeRef = super.getTypeReference(dim);
- :giro */
-	TypeReference typeRef = super.getTypeReference(dim, liftingTypeAllowed);
+// OT previous:
+//	TypeReference typeRef = super.getUnannotatedTypeReference(dim, liftingTypeAllowed);
 // SH}
 	if (this.patternFineGrain == 0) {
 		this.patternLocator.match(typeRef, this.nodeSet); // NB: Don't check container since type reference can happen anywhere
 	}
 	return typeRef;
 }
-protected NameReference getUnspecifiedReference() {
-	NameReference nameRef = super.getUnspecifiedReference();
+protected NameReference getUnspecifiedReference(boolean rejectTypeAnnotations) {
+	NameReference nameRef = super.getUnspecifiedReference(rejectTypeAnnotations);
 	if (this.patternFineGrain == 0) {
 		this.patternLocator.match(nameRef, this.nodeSet); // NB: Don't check container since unspecified reference can happen anywhere
 	} else if ((this.patternFineGrain & IJavaSearchConstants.QUALIFIED_REFERENCE) != 0) {

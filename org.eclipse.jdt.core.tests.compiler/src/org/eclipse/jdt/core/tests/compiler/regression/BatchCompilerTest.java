@@ -4,6 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -1578,8 +1582,9 @@ public void test012(){
         "    -1.5 -5 -5.0       use 1.5 compliance (-source 1.5 -target 1.5)\n" +
         "    -1.6 -6 -6.0       use 1.6 compliance (-source 1.6 -target 1.6)\n" +
         "    -1.7 -7 -7.0       use 1.7 compliance (-source 1.7 -target 1.7)\n" +
-        "    -source <version>  set source level: 1.3 to 1.7 (or 5, 5.0, etc)\n" +
-        "    -target <version>  set classfile target: 1.1 to 1.7 (or 5, 5.0, etc)\n" +
+        "    -1.8 -8 -8.0       use 1.8 compliance (-source 1.8 -target 1.8)\n" +
+        "    -source <version>  set source level: 1.3 to 1.8 (or 5, 5.0, etc)\n" +
+        "    -target <version>  set classfile target: 1.1 to 1.8 (or 5, 5.0, etc)\n" +
         "                       cldc1.1 can also be used to generate the StackMap\n" +
         "                       attribute\n" +
         " \n" +
@@ -12833,7 +12838,7 @@ public void test315_warn_options_b() {
 		new String[] {
 				"X1.java",
 				"public class X1 {\n" +
-				"	Zork;\n" +
+				"	Zork z;\n" +
 				"}\n",
 				"org/eclipse/jdt/annotation/NonNull.java",
 				NONNULL_ANNOTATION_CONTENT,
@@ -12854,9 +12859,9 @@ public void test315_warn_options_b() {
 		"A default nullness annotation has not been specified for the type X1\n" + 
 		"----------\n" + 
 		"2. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/X1.java (at line 2)\n" + 
-		"	Zork;\n" + 
+		"	Zork z;\n" + 
 		"	^^^^\n" + 
-		"Syntax error on token \"Zork\", VariableDeclarator expected after this token\n" + 
+		"Zork cannot be resolved to a type\n" + 
 		"----------\n" + 
 		"2 problems (1 error, 1 warning)", 
 		true);

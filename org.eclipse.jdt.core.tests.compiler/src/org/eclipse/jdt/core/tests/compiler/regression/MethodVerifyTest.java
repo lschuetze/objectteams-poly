@@ -4,9 +4,15 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								bug 388800 - [1.8] adjust tests to 1.8 JRE
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -1811,8 +1817,11 @@ public class MethodVerifyTest extends AbstractComparableTest {
 		this.runConformTest(
 			new String[] {
 				"X.java",
+				"import java.util.*;\n" + 
 				"public class X extends java.util.AbstractMap {\n" +
 				"	public java.util.Set entrySet() { return null; }\n" +
+				MAP_RAW_IMPL_JRE8 +
+				MAP_STREAM_RAW_IMPL_JRE8 +
 				"}\n"
 			},
 			""
@@ -6873,6 +6882,9 @@ X.java:7: name clash: <T#1>foo2(T#1) in X and <T#2>foo2(A) in Y have the same er
 				"	public boolean hasNext() {	return false; }\n" +
 				"	public Object next() {	return null; }\n" +
 				"	public void remove() {}\n" +
+				ITERABLE_RAW_WITHOUT_IS_EMPTY_IMPL_JRE8 +
+				COLLECTION_RAW_IMPL_JRE8 +
+				LIST_RAW_IMPL_JRE8 + 
 				"}\n", // =================
 			},
 			"----------\n" +
@@ -6993,6 +7005,9 @@ X.java:7: name clash: <T#1>foo2(T#1) in X and <T#2>foo2(A) in Y have the same er
 				"	public boolean hasNext() {	return false; }\n" +
 				"	public Object next() {	return null; }\n" +
 				"	public void remove() {}\n" +
+				ITERABLE_RAW_WITHOUT_IS_EMPTY_IMPL_JRE8 +
+				COLLECTION_RAW_IMPL_JRE8 +
+				LIST_RAW_IMPL_JRE8 + 
 				"}\n", // =================
 			},
 			"----------\n" +
@@ -7103,6 +7118,9 @@ X.java:7: name clash: <T#1>foo2(T#1) in X and <T#2>foo2(A) in Y have the same er
 				"	public boolean hasNext() {	return false; }\n" +
 				"	public Object next() {	return null; }\n" +
 				"	public void remove() {}\n" +
+				ITERABLE_RAW_WITHOUT_IS_EMPTY_IMPL_JRE8 +
+				COLLECTION_RAW_IMPL_JRE8 +
+				LIST_RAW_IMPL_JRE8 + 
 				"}\n", // =================
 			},
 			"----------\n" +
@@ -11388,6 +11406,7 @@ public void test203() {
 			"		return compare((I) o1, (I) o2);\n" +
 			"	}\n" +
 			"	public int compare(I o1, I o2) { return 0; }\n" +
+			COMPARATOR_RAW_IMPL_JRE8 +
 			"}"
 		},
 		""
@@ -12300,6 +12319,7 @@ public void test331446() {
 			"			public int compare(Object o1, Object o2) {\n" + 
 			"				return 0;\n" + 
 			"			}\n" + 
+			COMPARATOR_RAW_IMPL_JRE8 +
 			"		};\n" + 
 			"		Test.assertEquals(\"Test\", comparator, new ArrayList(), new ArrayList());\n" + 
 			"	}\n" + 
@@ -12370,6 +12390,7 @@ public void test331446a() {
 			"			public int compare(Object o1, Object o2) {\n" + 
 			"				return 0;\n" + 
 			"			}\n" + 
+			COMPARATOR_RAW_IMPL_JRE8 +
 			"		};\n" + 
 			"		Test.assertEquals(\"Test\", comparator, new ArrayList(), new ArrayList());\n" + 
 			"	}\n" + 

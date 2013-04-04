@@ -1,10 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ITerminalSymbols.java 22626 2009-09-30 17:37:31Z stephan $
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -165,10 +168,20 @@ public interface ITerminalSymbols {
 	/**
 	 * @since 3.1
 	 */
-	int TokenNamegoto = 404,
+	int TokenNamegoto = 404;  // goto not found in Java ? :)
+
+	/**
+	 * @since 3.9
+	 */
+	int TokenNameARROW = 405;
+	/**
+	 * @since 3.9
+	 */
+	int TokenNameCOLON_COLON = 406;
 
 //{ObjectTeams: mirrored from auto-generated TerminalTokens.java. Note: the values here must be constant across Eclipse-versions, so do not simply copy the identifiers!
 	// Take values from 5000 upwards
+    int
     TokenNamebase = 5000,
     TokenNametsuper = 5001,
     TokenNamecallin = 5002,

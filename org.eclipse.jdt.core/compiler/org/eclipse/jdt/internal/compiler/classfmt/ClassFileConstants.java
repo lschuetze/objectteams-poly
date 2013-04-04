@@ -4,7 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ClassFileConstants.java 19873 2009-04-13 16:51:05Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -149,4 +152,5 @@ public interface ClassFileConstants {
 	int ATTR_VARS = 0x4; // LocalVariableTableAttribute
 	int ATTR_STACK_MAP_TABLE = 0x8; // Stack map table attribute
 	int ATTR_STACK_MAP = 0x10; // Stack map attribute: cldc
+	int ATTR_TYPE_ANNOTATION = 0x20; // type annotation attribute (jsr 308)
 }

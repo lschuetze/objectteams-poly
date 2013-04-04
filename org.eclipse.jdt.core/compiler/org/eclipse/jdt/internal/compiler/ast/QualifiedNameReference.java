@@ -4,7 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: QualifiedNameReference.java 23405 2010-02-03 17:02:18Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -1298,5 +1301,9 @@ public void traverse(ASTVisitor visitor, ClassScope scope) {
 
 public String unboundReferenceErrorName() {
 	return new String(this.tokens[0]);
+}
+
+public char[][] getName() {
+	return this.tokens;
 }
 }

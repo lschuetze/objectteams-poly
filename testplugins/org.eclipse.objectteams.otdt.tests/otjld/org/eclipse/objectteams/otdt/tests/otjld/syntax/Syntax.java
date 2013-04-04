@@ -31,7 +31,7 @@ public class Syntax extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test8133_incompleteBaseCall"};
+//		TESTS_NAMES = new String[] { "test881_buggyRole3"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -683,7 +683,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"1. ERROR in Team871buid4.java (at line 5)\n" + 
     		"	i;\n" + 
     		"	^\n" + 
-    		"Syntax error on token \"i\", VariableDeclarator expected after this token\n" + 
+    		"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" + 
     		"----------\n");
     }
 
@@ -874,7 +874,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"5. ERROR in Team881br2.java (at line 8)\n" + 
     		"	abstract int wrong(noTypeGiven);\n" + 
     		"	                   ^^^^^^^^^^^\n" + 
-    		"Syntax error on token \"noTypeGiven\", VariableDeclaratorId expected after this token\n" + 
+    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n" + 
     		"6. ERROR in Team881br2.java (at line 9)\n" + 
     		"	}\n" + 
@@ -948,7 +948,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"6. ERROR in Team881br3.java (at line 14)\n" + 
     		"	abstract int wrong(noTypeGiven);\n" + 
     		"	                   ^^^^^^^^^^^\n" + 
-    		"Syntax error on token \"noTypeGiven\", VariableDeclaratorId expected after this token\n" + 
+    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n" + 
     		"7. ERROR in Team881br3.java (at line 15)\n" + 
     		"	}\n" + 
@@ -1147,7 +1147,7 @@ public class Syntax extends AbstractOTJLDTest {
     // a declared lifting lacks an argument name
     // 8.11.2-otjld-declared-lifting-syntax-error-1
     public void test8112_declaredLiftingSyntaxError1() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"Team8112dlse1.java",
 			    "\n" +
@@ -1167,7 +1167,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"1. ERROR in Team8112dlse1.java (at line 7)\n" + 
     		"	void run(Object as R)  {\n" + 
     		"	                   ^\n" + 
-    		"Syntax error on token \"R\", VariableDeclaratorId expected after this token\n" + 
+    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n");
     }
 
@@ -1195,7 +1195,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"1. ERROR in Team8112dlse2.java (at line 8)\n" + 
     		"	callin void run(Object as R)  {\n" + 
     		"	                          ^\n" + 
-    		"Syntax error on token \"R\", VariableDeclaratorId expected after this token\n" + 
+    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n" + 
     		"2. ERROR in Team8112dlse2.java (at line 11)\n" + 
     		"	}\n" + 
@@ -1245,7 +1245,7 @@ public class Syntax extends AbstractOTJLDTest {
     		"1. ERROR in Team8112dlse3.java (at line 7)\n" + 
     		"	callin void m(T8112dlse3_2 as R) {\n" + 
     		"	                              ^\n" + 
-    		"Syntax error on token \"R\", VariableDeclaratorId expected after this token\n" + 
+    		"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameterList\n" + 
     		"----------\n");
     }
 

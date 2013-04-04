@@ -62,7 +62,7 @@ public class TypeContainerMethod extends MethodDeclaration {
 		setStatements(new Statement[] {localType});
 		this.selector = SELECTOR;
 		this.isGenerated = true;
-		this.returnType = TypeReference.baseTypeReference(TypeIds.T_void, 0);
+		this.returnType = TypeReference.baseTypeReference(TypeIds.T_void, 0, null);
 	}
 
 	public void parseStatements(Parser parser, CompilationUnitDeclaration unit) {

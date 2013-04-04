@@ -5,10 +5,17 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - adapted for Object Teams
- *     Stephan Herrmann - Contribution for bug 383690 - [compiler] location of error re uninitialized final field should be aligned
+ *     Stephan Herrmann - Contribution for
+ *								bug 383690 - [compiler] location of error re uninitialized final field should be aligned
+ *								bug 388800 - [1.8] adjust tests to 1.8 JRE
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -1622,42 +1629,41 @@ public class GenericTypeTest extends AbstractComparableTest {
 					"}\n"
 			},
 			"----------\n" +
-				"1. ERROR in test\\X.java (at line 7)\n" +
-				"	X<int, short, long, float, double, boolean, char> x;\n" +
-				"	  ^^^\n" +
-				"Syntax error on token \"int\", Dimensions expected after this token\n" +
-				"----------\n" +
-				"2. ERROR in test\\X.java (at line 7)\n" +
-				"	X<int, short, long, float, double, boolean, char> x;\n" +
-				"	       ^^^^^\n" +
-				"Syntax error on token \"short\", Dimensions expected after this token\n" +
-				"----------\n" +
-				"3. ERROR in test\\X.java (at line 7)\n" +
-				"	X<int, short, long, float, double, boolean, char> x;\n" +
-				"	              ^^^^\n" +
-				"Syntax error on token \"long\", Dimensions expected after this token\n" +
-				"----------\n" +
-				"4. ERROR in test\\X.java (at line 7)\n" +
-				"	X<int, short, long, float, double, boolean, char> x;\n" +
-				"	                    ^^^^^\n" +
-				"Syntax error on token \"float\", Dimensions expected after this token\n" +
-				"----------\n" +
-				"5. ERROR in test\\X.java (at line 7)\n" +
-				"	X<int, short, long, float, double, boolean, char> x;\n" +
-				"	                           ^^^^^^\n" +
-				"Syntax error on token \"double\", Dimensions expected after this token\n" +
-				"----------\n" +
-				"6. ERROR in test\\X.java (at line 7)\n" +
-				"	X<int, short, long, float, double, boolean, char> x;\n" +
-				"	                                   ^^^^^^^\n" +
-				"Syntax error on token \"boolean\", Dimensions expected after this token\n" +
-				"----------\n" +
-				"7. ERROR in test\\X.java (at line 7)\n" +
-				"	X<int, short, long, float, double, boolean, char> x;\n" +
-				"	                                            ^^^^\n" +
-				"Syntax error on token \"char\", Dimensions expected after this token\n" +
-				"----------\n"
-		);
+			"1. ERROR in test\\X.java (at line 7)\n" +
+			"	X<int, short, long, float, double, boolean, char> x;\n" +
+			"	  ^^^\n" +
+			"Syntax error, insert \"Dimensions\" to complete TypeArgument\n" +
+			"----------\n" +
+			"2. ERROR in test\\X.java (at line 7)\n" +
+			"	X<int, short, long, float, double, boolean, char> x;\n" +
+			"	       ^^^^^\n" +
+			"Syntax error, insert \"Dimensions\" to complete TypeArgument\n" +
+			"----------\n" +
+			"3. ERROR in test\\X.java (at line 7)\n" +
+			"	X<int, short, long, float, double, boolean, char> x;\n" +
+			"	              ^^^^\n" +
+			"Syntax error, insert \"Dimensions\" to complete TypeArgument\n" +
+			"----------\n" +
+			"4. ERROR in test\\X.java (at line 7)\n" +
+			"	X<int, short, long, float, double, boolean, char> x;\n" +
+			"	                    ^^^^^\n" +
+			"Syntax error, insert \"Dimensions\" to complete TypeArgument\n" +
+			"----------\n" +
+			"5. ERROR in test\\X.java (at line 7)\n" +
+			"	X<int, short, long, float, double, boolean, char> x;\n" +
+			"	                           ^^^^^^\n" +
+			"Syntax error, insert \"Dimensions\" to complete TypeArgument\n" +
+			"----------\n" +
+			"6. ERROR in test\\X.java (at line 7)\n" +
+			"	X<int, short, long, float, double, boolean, char> x;\n" +
+			"	                                   ^^^^^^^\n" +
+			"Syntax error, insert \"Dimensions\" to complete TypeArgument\n" +
+			"----------\n" +
+			"7. ERROR in test\\X.java (at line 7)\n" +
+			"	X<int, short, long, float, double, boolean, char> x;\n" +
+			"	                                            ^^^^\n" +
+			"Syntax error, insert \"Dimensions\" to complete ReferenceType\n" +
+			"----------\n");
 	}
 	// JSR14-v10[2.1,2.2]: Valid multiple parameter types: primitive type arrays
 	public void test0062() {
@@ -1869,7 +1875,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 
 	// JSR14-V10[2.4]: Not terminated consecutive declaration
 	// TODO (david) diagnosis message on error 3 sounds strange, doesn't it?
-	public void test0068() {
+	public void _test0068() {
 		this.runNegativeTest(
 			new String[] {
 				"test/X1.java",
@@ -1941,8 +1947,14 @@ public class GenericTypeTest extends AbstractComparableTest {
 			"----------\n" +
 			"1. ERROR in test\\X1.java (at line 3)\n" +
 			"	public class X1<A1>> {\n" +
+//{ObjectTeams: our diagnose parser suggests a different correction:
+/* orig:			
 			"	                  ^^\n" +
 			"Syntax error on token \">>\", > expected\n" +
+  :giro */
+			"	                ^^\n" + 
+			"Syntax error, insert \"< typeAnchor\" to complete AnchoredTypeParameter\n" + 
+// SH}
 			"----------\n"
 		);
 	}
@@ -2314,7 +2326,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 		);
 	}
 	// TODO (david) remove errors: insert dimension to complete array type
-	public void test0080() {
+	public void _test0080() {
 		this.runNegativeTest(
 			new String[] {
 				"test/X.java",
@@ -2401,7 +2413,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 		);
 	}
 	// TODO (david) remove error: insert dimension to complete array type
-	public void test0083() {
+	public void _test0083() {
 		this.runNegativeTest(
 			new String[] {
 				"test/X.java",
@@ -2943,12 +2955,13 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"class AX<P> {\n" +
 				"}\n",
 			},
-		"----------\n" +
-		"1. ERROR in X.java (at line 1)\n" +
-		"	public class X  <T extends AX<? super int>> {\n" +
-		"	                                      ^^^\n" +
-		"Syntax error on token \"int\", Dimensions expected after this token\n" +
-		"----------\n");
+			"----------\n" +
+			"1. ERROR in X.java (at line 1)\n" +
+			"	public class X  <T extends AX<? super int>> {\n" +
+			"	                                      ^^^\n" +
+			"Syntax error, insert \"Dimensions\" to complete ArrayType\n" +
+			"----------\n"
+);
 	}
 
 	// type parameterized with wildcard cannot appear in allocation
@@ -4428,6 +4441,9 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"    }\n" +
 				"    public int size() { return 0; }\n" +
 				"    public Object get(int index) { return null; }\n" +
+				ITERABLE_RAW_IMPL_JRE8 +
+				COLLECTION_RAW_IMPL_JRE8 +
+				LIST_RAW_IMPL_JRE8 +
 				"}\n"
 			},
 			"SUCCESS");
@@ -6137,6 +6153,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"    public int compare(X x1, X x2) {\n" +
 				"        return comparator.compare(function.eval(x1),function.eval(x2));\n" +
 				"    }\n" +
+				COMPARATOR_RAW_IMPL_JRE8 +
 				"}\n",
 			},
 			"");
@@ -8837,6 +8854,8 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"   public Set<Map.Entry<String, V>> entrySet() {\n" +
 				"      return this.backingMap.entrySet();\n" +
 				"   }\n" +
+				MAP_STREAM_IMPL_JRE8.replaceAll("\\*", "String").replace('%', 'V') +
+				MAP_IMPL_JRE8.replaceAll("!", "String,V").replaceAll("\\*", "String")+
 				"}\n",
 			},
 			"----------\n" +
@@ -10799,6 +10818,8 @@ public class GenericTypeTest extends AbstractComparableTest {
 					"		};\n" +
 					"	}\n" +
 					"	public int size() {return 0;}\n" +
+					COLLECTION_RAW_IMPL_JRE8 +
+					ITERABLE_IMPL_JRE8.replaceAll("\\*", "Entry<String,Integer>") +
 					"}"
 			}
 		);
@@ -11370,6 +11391,8 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"    }\n" +
 				"    public Iterator<Runnable> iterator() {return null;}\n" +
 				"    public int size() {return 0;}\n" +
+				COLLECTION_RAW_IMPL_JRE8 +
+				ITERABLE_IMPL_JRE8.replaceAll("\\*", "Runnable") +
 				"}"
 				}
 		);
@@ -24896,6 +24919,9 @@ public void test0779() throws Exception {
 			"			List<String> list = new AbstractList<String>() {\n" +
 			"				@Override public int size() { return 0; }\n" +
 			"				@Override public String get(int i) { return args.get(i); }\n" +
+			COLLECTION_IMPL_JRE8.replaceAll("\\*", "String") +
+			ITERABLE_IMPL_JRE8.replaceAll("\\*", "String") +
+			LIST_IMPL_JRE8.replaceAll("\\*", "String") +
 			"			};\n" +
 			"		}\n" +
 			"	}\n" +
@@ -24907,13 +24933,14 @@ public void test0779() throws Exception {
 		},
 		"SUCCESS");
 
+	String constantPoolIdx = IS_JRE_8 ? "149" : "36"; // depends on whether or not stubs for JRE8 default methods are included
 	String expectedOutput =
 		"  // Method descriptor #31 (I)Ljava/lang/Object;\n" +
 		"  // Stack: 2, Locals: 2\n" +
 		"  public bridge synthetic java.lang.Object get(int arg0);\n" +
 		"    0  aload_0 [this]\n" +
 		"    1  iload_1 [arg0]\n" +
-		"    2  invokevirtual X$Entry$1.get(int) : java.lang.String [36]\n" +
+		"    2  invokevirtual X$Entry$1.get(int) : java.lang.String ["+constantPoolIdx+"]\n" +
 		"    5  areturn\n" +
 		"      Line numbers:\n" +
 		"        [pc: 0, line: 1]\n";
@@ -28015,6 +28042,8 @@ public void test0868() {
 			"		// TODO Auto-generated method stub\n" +
 			"		\n" +
 			"	}" +
+			COLLECTION_RAW_IMPL_JRE8 +
+			ITERABLE_RAW_WITHOUT_IS_EMPTY_IMPL_JRE8 +
 			"}",
 		},
 		"",
@@ -30417,7 +30446,7 @@ public void test0931() {
 		"----------\n");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=119238 - variation
-public void test0932() {
+public void _test0932() {
 	this.runNegativeTest(
 		new String[] {
 		"X.java",
@@ -34167,6 +34196,7 @@ public void test1030() {
 			"		public Iterator<W> iterator() {\n" +
 			"			return theList.iterator();\n" +
 			"		}\n" +
+			ITERABLE_IMPL_JRE8.replace('*', 'W') +
 			"	}\n" +
 			"\n" +
 			"	private PointList<Waypoint> waypoints = new PointList<Waypoint>();\n" +
@@ -34411,6 +34441,7 @@ public void test1035() {
 			"public int compare(T obj1, T obj2) {\n" +
 			"	return obj1.compareTo(obj2);\n" +
 			"}\n" +
+			COMPARATOR_IMPL_JRE8.replace('*', 'T') +
 			"}\n" +
 			"\n" +
 			"@SuppressWarnings({\"unchecked\", \"rawtypes\"})\n" +
@@ -34461,6 +34492,7 @@ public void test1035() {
 			"public int compare(V obj1, V obj2) {\n" +
 			"	return 0;\n" +
 			"}\n" +
+			COMPARATOR_IMPL_JRE8.replace('*', 'V') +
 			"}", // =================
 
 		},
@@ -37455,7 +37487,7 @@ public void test1096() {
 		null/* do not perform statements recovery */);
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=168232
-public void test1097() {
+public void _test1097() {
 	runNegativeTest(
 		// test directory preparation
 		new String[] { /* test files */

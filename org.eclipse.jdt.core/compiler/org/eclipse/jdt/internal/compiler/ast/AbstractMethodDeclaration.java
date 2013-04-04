@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -14,6 +18,8 @@
  *								bug 367203 - [compiler][null] detect assigning null to nonnull argument
  *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
  *								bug 365531 - [compiler][null] investigate alternative strategy for internally encoding nullness defaults
+ *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
+ *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
@@ -182,6 +188,9 @@ public abstract class AbstractMethodDeclaration
 	public int modifiers;
 	public int modifiersSourceStart;
 	public Annotation[] annotations;
+	// jsr 308
+	public Receiver receiver;
+	public Annotation[] receiverAnnotations;
 	public Argument[] arguments;
 	public TypeReference[] thrownExceptions;
 	public Statement[] statements;
@@ -226,12 +235,18 @@ public abstract class AbstractMethodDeclaration
 				Argument argument = this.arguments[i];
 				argument.createBinding(this.scope, this.binding.parameters[i]);
 				// createBinding() has resolved annotations, now transfer nullness info from the argument to the method:
-				if ((argument.binding.tagBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) != 0) {
+				// prefer type annotation:
+				long argTypeTagBits = (argument.type.resolvedType.tagBits & TagBits.AnnotationNullMASK);
+				// if none found try SE7 annotation:
+				if (argTypeTagBits == 0) {
+					argTypeTagBits = (argument.binding.tagBits & TagBits.AnnotationNullMASK);
+				}
+				if (argTypeTagBits != 0) {
 					if (this.binding.parameterNonNullness == null) {
 						this.binding.parameterNonNullness = new Boolean[this.arguments.length];
 						this.binding.tagBits |= TagBits.IsNullnessKnown;
 					}
-					this.binding.parameterNonNullness[i] = Boolean.valueOf((argument.binding.tagBits & TagBits.AnnotationNonNull) != 0);
+					this.binding.parameterNonNullness[i] = Boolean.valueOf(argTypeTagBits == TagBits.AnnotationNonNull);
 				}
 			}
 		}
@@ -574,6 +589,10 @@ public abstract class AbstractMethodDeclaration
 	}
 // SH}
 
+	public void getAllAnnotationContexts(int targetType, List allAnnotationContexts) {
+		// do nothing
+	}
+
 	private void checkArgumentsSize() {
 		TypeBinding[] parameters = this.binding.parameters;
 		int size = 1; // an abstract method or a native method cannot be static
@@ -631,6 +650,10 @@ public abstract class AbstractMethodDeclaration
 		return false;
 	}
 
+	public boolean isDefaultMethod() {
+		return false;
+	}
+
 	public boolean isInitializationMethod() {
 
 		return false;
@@ -669,7 +692,10 @@ public abstract class AbstractMethodDeclaration
 		}
 		printIndent(tab, output);
 		printModifiers(this.modifiers, output);
-		if (this.annotations != null) printAnnotations(this.annotations, output);
+		if (this.annotations != null) {
+			printAnnotations(this.annotations, output);
+			output.append(' ');
+		}
 
 		TypeParameter[] typeParams = typeParameters();
 		if (typeParams != null) {
@@ -684,6 +710,9 @@ public abstract class AbstractMethodDeclaration
 		}
 
 		printReturnType(0, output).append(this.selector).append('(');
+		if (this.receiver != null) {
+			this.receiver.print(0, output);
+		}
 		if (this.arguments != null) {
 //{ObjectTeams: retrench enhanced callin args:
 			int firstArg = 0;
@@ -694,11 +723,15 @@ public abstract class AbstractMethodDeclaration
 			for (int i = 0; i < this.arguments.length; i++) {
   :giro */
 // SH}
-				if (i > 0) output.append(", "); //$NON-NLS-1$
+				if (i > 0 || this.receiver != null) output.append(", "); //$NON-NLS-1$
 				this.arguments[i].print(0, output);
 			}
 		}
 		output.append(')');
+		if (this.receiverAnnotations != null) {
+			output.append(" "); //$NON-NLS-1$
+			printAnnotations(this.receiverAnnotations, output);
+		}
 		if (this.thrownExceptions != null) {
 			output.append(" throws "); //$NON-NLS-1$
 			for (int i = 0; i < this.thrownExceptions.length; i++) {
@@ -750,12 +783,15 @@ public abstract class AbstractMethodDeclaration
 
 		try {
 			bindArguments();
+			resolveReceiver();
 			bindThrownExceptions();
 //{ObjectTeams: no javadoc in generated / copied methods
 		  if (!(this.isGenerated || this.isCopied))
 // SH}
 			resolveJavadoc();
 			resolveAnnotations(this.scope, this.annotations, this.binding);
+			// jsr 308
+			resolveAnnotations(this.scope, this.receiverAnnotations, new Annotation.TypeUseBinding(Binding.TYPE_USE));
 			validateNullAnnotations();
 			resolveStatements();
 			// check @Deprecated annotation presence
@@ -771,6 +807,49 @@ public abstract class AbstractMethodDeclaration
 		}
 	}
 
+	public void resolveReceiver() {
+		if (this.receiver == null) return;
+
+		TypeBinding resolvedReceiverType = this.receiver.type.resolvedType;
+		if (this.binding == null || resolvedReceiverType == null || !resolvedReceiverType.isValidBinding()) {
+			return;
+		}
+
+		ReferenceBinding declaringClass = this.binding.declaringClass;
+		/* neither static methods nor methods in anonymous types can have explicit 'this' */
+		if (this.isStatic() || declaringClass.isAnonymousType()) {
+			this.scope.problemReporter().disallowedThisParameter(this.receiver);
+			return; // No need to do further validation
+		}
+
+		ReferenceBinding enclosingReceiver = this.scope.enclosingReceiverType();
+		if (this.isConstructor()) {
+			/* Only non static member types or local types can declare explicit 'this' params in constructors */
+			if (declaringClass.isStatic()
+					|| (declaringClass.tagBits & (TagBits.IsLocalType | TagBits.IsMemberType)) == 0) { /* neither member nor local type */
+				this.scope.problemReporter().disallowedThisParameter(this.receiver);
+				return; // No need to do further validation
+			}
+			enclosingReceiver = enclosingReceiver.enclosingType();
+		}
+
+		if (enclosingReceiver != resolvedReceiverType) {
+			this.scope.problemReporter().illegalTypeForExplicitThis(this.receiver, enclosingReceiver);
+		}
+
+		if ((this.receiver.qualifyingName == null) ? this.isConstructor() : !isQualifierValidForType(this.receiver.qualifyingName.getName(), enclosingReceiver)) {
+			this.scope.problemReporter().illegalQualifierForExplicitThis(this.receiver, enclosingReceiver);					
+		}
+	}
+	private boolean isQualifierValidForType(char[][] tokens, TypeBinding enclosingType) {
+		for(int index = tokens.length - 1; index >= 0 && enclosingType != null; index--) {
+			if (!CharOperation.equals(enclosingType.sourceName(), tokens[index])) {
+				return false;
+			}
+			enclosingType = enclosingType.enclosingType();
+		}
+		return true;
+	}
 	public void resolveJavadoc() {
 
 		if (this.binding == null) return;

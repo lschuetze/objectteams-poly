@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
@@ -18,6 +22,7 @@ import org.eclipse.jdt.internal.compiler.problem.AbortCompilation;
 
 public class ArrayQualifiedTypeReference extends QualifiedTypeReference {
 	int dimensions;
+	Annotation[][] annotationsOnDimensions;  // jsr308 style type annotations on dimensions
 
 //{ObjectTeams: mark generated reference:
 	public ArrayQualifiedTypeReference(char[][] sources , int dim, long[] poss, boolean isGenerated) {
@@ -29,11 +34,27 @@ public class ArrayQualifiedTypeReference extends QualifiedTypeReference {
 
 		super( sources , poss);
 		this.dimensions = dim ;
+		this.annotationsOnDimensions = null; 
+	}
+
+	public ArrayQualifiedTypeReference(char[][] sources, int dim, Annotation[][] annotationsOnDimensions, long[] poss) {
+		this(sources, dim, poss);
+		this.annotationsOnDimensions = annotationsOnDimensions;
+		if (annotationsOnDimensions != null)
+			this.bits |= ASTNode.HasTypeAnnotations;
 	}
 
 	public int dimensions() {
 
 		return this.dimensions;
+	}
+	
+	public Annotation[][] getAnnotationsOnDimensions() {
+		return this.annotationsOnDimensions;
+	}
+	
+	public void setAnnotationsOnDimensions(Annotation [][] annotationsOnDimensions) {
+		this.annotationsOnDimensions = annotationsOnDimensions;
 	}
 
 	/**
@@ -77,16 +98,36 @@ public class ArrayQualifiedTypeReference extends QualifiedTypeReference {
 		}
 	}
 
+	protected TypeBinding internalResolveType(Scope scope) {
+		TypeBinding internalResolveType = super.internalResolveType(scope);
+		return internalResolveType;
+	}
+
 	public StringBuffer printExpression(int indent, StringBuffer output){
 
 		super.printExpression(indent, output);
 		if ((this.bits & IsVarArgs) != 0) {
 			for (int i= 0 ; i < this.dimensions - 1; i++) {
+				if (this.annotationsOnDimensions != null && this.annotationsOnDimensions[i] != null) {
+					output.append(' ');
+					printAnnotations(this.annotationsOnDimensions[i], output);
+					output.append(' ');
+				}
 				output.append("[]"); //$NON-NLS-1$
+			}
+			if (this.annotationsOnDimensions != null && this.annotationsOnDimensions[this.dimensions - 1] != null) {
+				output.append(' ');
+				printAnnotations(this.annotationsOnDimensions[this.dimensions - 1], output);
+				output.append(' ');
 			}
 			output.append("..."); //$NON-NLS-1$
 		} else {
 			for (int i= 0 ; i < this.dimensions; i++) {
+				if (this.annotationsOnDimensions != null && this.annotationsOnDimensions[i] != null) {
+					output.append(" "); //$NON-NLS-1$
+					printAnnotations(this.annotationsOnDimensions[i], output);
+					output.append(" "); //$NON-NLS-1$
+				}
 				output.append("[]"); //$NON-NLS-1$
 			}
 		}
@@ -94,14 +135,48 @@ public class ArrayQualifiedTypeReference extends QualifiedTypeReference {
 	}
 
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
-
-		visitor.visit(this, scope);
+		if (visitor.visit(this, scope)) {
+			if (this.annotations != null) {
+				int annotationsLevels = this.annotations.length;
+				for (int i = 0; i < annotationsLevels; i++) {
+					int annotationsLength = this.annotations[i] == null ? 0 : this.annotations[i].length;
+					for (int j = 0; j < annotationsLength; j++)
+						this.annotations[i][j].traverse(visitor, scope);
+				}
+			}
+			if (this.annotationsOnDimensions != null) {
+				for (int i = 0, max = this.annotationsOnDimensions.length; i < max; i++) {
+					Annotation[] annotations2 = this.annotationsOnDimensions[i];
+					for (int j = 0, max2 = annotations2 == null ? 0 : annotations2.length; j < max2; j++) {
+						Annotation annotation = annotations2[j];
+						annotation.traverse(visitor, scope);
+					}
+				}
+			}
+		}
 		visitor.endVisit(this, scope);
 	}
 
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
-
-		visitor.visit(this, scope);
+		if (visitor.visit(this, scope)) {
+			if (this.annotations != null) {
+				int annotationsLevels = this.annotations.length;
+				for (int i = 0; i < annotationsLevels; i++) {
+					int annotationsLength = this.annotations[i] == null ? 0 : this.annotations[i].length;
+					for (int j = 0; j < annotationsLength; j++)
+						this.annotations[i][j].traverse(visitor, scope);
+				}
+			}
+			if (this.annotationsOnDimensions != null) {
+				for (int i = 0, max = this.annotationsOnDimensions.length; i < max; i++) {
+					Annotation[] annotations2 = this.annotationsOnDimensions[i];
+					for (int j = 0, max2 = annotations2 == null ? 0 : annotations2.length; j < max2; j++) {
+						Annotation annotation = annotations2[j];
+						annotation.traverse(visitor, scope);
+					}
+				}
+			}
+		}
 		visitor.endVisit(this, scope);
 	}
 }

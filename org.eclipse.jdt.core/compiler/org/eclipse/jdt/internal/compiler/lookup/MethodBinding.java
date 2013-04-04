@@ -96,6 +96,7 @@ public class MethodBinding extends Binding implements IProtectable {
 	public char[] selector;
 	public TypeBinding returnType;
 	public TypeBinding[] parameters;
+	public TypeBinding receiver;  // JSR308 - explicit this parameter
 	public ReferenceBinding[] thrownExceptions;
 	public ReferenceBinding declaringClass;
 	public TypeVariableBinding[] typeVariables = Binding.NO_TYPE_VARIABLES;
@@ -1126,6 +1127,11 @@ public final boolean isDefault() {
 */
 public final boolean isDefaultAbstract() {
 	return (this.modifiers & ExtraCompilerModifiers.AccDefaultAbstract) != 0;
+}
+
+/* Answer true if the receiver is a default method (Java 8 feature) */
+public boolean isDefaultMethod() {
+	return (this.modifiers & ExtraCompilerModifiers.AccDefaultMethod) != 0;
 }
 
 /* Answer true if the receiver is a deprecated method

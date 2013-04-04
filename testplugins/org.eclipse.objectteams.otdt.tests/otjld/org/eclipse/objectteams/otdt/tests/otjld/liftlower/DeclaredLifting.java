@@ -34,7 +34,8 @@ public class DeclaredLifting extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test6112_declaredLiftingInConstructor4"};
+//		TESTS_NAMES = new String[] { "test612_liftedExternalizedRoleFeatureAccess1"};
+//		TESTS_NAMES = new String[] { "test6113_maximalSyntax1" };
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1273,5 +1274,57 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     			"}\n",
     		},
     		"OK0");
+    }
+
+    public void test6113_maximalSyntax1() {
+        
+        runConformTest(
+             new String[] {
+ 		"T6113ms1Main.java",
+ 			    "\n" +
+ 			    "public class T6113ms1Main {\n" +
+ 			    "    @SuppressWarnings(\"roletypesyntax\")\n" +
+ 			    "    public static void main(String[] args) {\n" +
+ 			    "        final Team6113ms1 t = new Team6113ms1();\n" +
+ 			    "        t.Role6113ms1_2   r = t.new Role6113ms1_2(\"NOTOK\");\n" +
+ 			    "\n" +
+ 			    "        // should lower the role object as the external signature of the method is\n" +
+ 			    "        //   Team6113ms1.getValue(T6113ms1 obj)\n" +
+ 			    "        System.out.print(t.getValue(r));\n" +
+ 			    "    }\n" +
+ 			    "}\n" +
+ 			    "    \n",
+ 		"T6113ms1.java",
+ 			    "\n" +
+ 			    "public class T6113ms1 {}\n" +
+ 			    "    \n",
+ 		"Team6113ms1.java",
+ 			    "\n" +
+ 			    "public team class Team6113ms1 {\n" +
+ 			    "    public class Role6113ms1_1 playedBy T6113ms1 {\n" +
+ 			    "        protected String getValue() {\n" +
+ 			    "            return \"OK\";\n" +
+ 			    "        }\n" +
+ 			    "    }\n" +
+ 			    "\n" +
+ 			    "    public class Role6113ms1_2 playedBy T6113ms1 {\n" +
+ 			    "        @SuppressWarnings(\"unused\")\n" +
+ 			    "        private String value;\n" +
+ 			    "\n" +
+ 			    "        public Role6113ms1_2(String value) {\n" +
+ 			    "            base();\n" +
+ 			    "            this.value = value;\n" +
+ 			    "        }\n" +
+ 			    "    }\n" +
+ 			    "\n" +
+// 			    "    public String getValue(int i, final @NonNullB T6113ms1<@NullableB String>@d1[]@d12 @d123[]@d2 @d22 @d234[] as @NonNullR Role6113ms1_1<@NullableR String>@D2[]@D2 @D22[] obj) {\n" +
+ 				"    public String getValue(java.lang.Object i, final @NonNullB p1.T6113ms1[][][] as @NonNullR Role6113ms1_1[][] obj) {\n" +
+ 			    "        return obj.getValue();\n" +
+ 			    "    }\n" +
+ 			    "}\n" +
+ 			    "    \n"
+             },
+             "OK");
+    	
     }
 }

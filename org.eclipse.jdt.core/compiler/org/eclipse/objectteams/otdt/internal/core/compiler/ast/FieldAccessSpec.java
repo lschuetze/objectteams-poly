@@ -92,7 +92,7 @@ public class FieldAccessSpec extends MethodSpec {
 			this.arguments = new Argument[] {
 				new Argument(name, nameSourcePositions, type, 0)
 			};
-			this.returnType = TypeReference.baseTypeReference(TypeIds.T_void, 0);
+			this.returnType = TypeReference.baseTypeReference(TypeIds.T_void, 0, null);
 			this.returnType.sourceStart = this.sourceStart;
 			this.returnType.sourceEnd   = this.sourceEnd;
 		} else {

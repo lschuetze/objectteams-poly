@@ -789,7 +789,8 @@ public class DeclaredLifting implements IOTConstants {
 				// tricky case: need to discard type parameters, but retain/recreate the role type wrapping:
 				RoleTypeBinding baseRole = (RoleTypeBinding)boundBase;
 				boundBase = environment.createParameterizedType(baseRole._declaredRoleType, 
-															 	null, 					// erase type parameters 
+															 	null, 					// erase type parameters
+															 	0L,						// annotationTagBits
 																baseRole._teamAnchor, 	// but retain anchor
 																-1,						// valueParamPosition 
 																baseRole.enclosingType());

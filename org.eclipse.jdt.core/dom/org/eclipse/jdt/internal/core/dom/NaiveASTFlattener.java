@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -315,6 +319,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 */
 	public boolean visit(ArrayType node) {
 		node.getComponentType().accept(this);
+		visitTypeAnnotations(node);
 		this.buffer.append("[]");//$NON-NLS-1$
 		return false;
 	}
@@ -1142,6 +1147,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 * @see ASTVisitor#visit(PrimitiveType)
 	 */
 	public boolean visit(PrimitiveType node) {
+		visitTypeAnnotations(node);
 		this.buffer.append(node.getPrimitiveTypeCode().toString());
 		return false;
 	}
@@ -1152,6 +1158,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	public boolean visit(QualifiedName node) {
 		node.getQualifier().accept(this);
 		this.buffer.append(".");//$NON-NLS-1$
+		visitTypeAnnotations(node);
 		node.getName().accept(this);
 		return false;
 	}
@@ -1163,6 +1170,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	public boolean visit(QualifiedType node) {
 		node.getQualifier().accept(this);
 		this.buffer.append(".");//$NON-NLS-1$
+		visitTypeAnnotations(node);
 		node.getName().accept(this);
 		return false;
 	}
@@ -1185,6 +1193,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 * @see ASTVisitor#visit(SimpleName)
 	 */
 	public boolean visit(SimpleName node) {
+		visitTypeAnnotations(node);
 		this.buffer.append(node.getIdentifier());
 		return false;
 	}
@@ -1193,7 +1202,9 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 * @see ASTVisitor#visit(SimpleType)
 	 */
 	public boolean visit(SimpleType node) {
-		return true;
+		visitTypeAnnotations(node);
+		node.getName().accept(this);
+		return false;
 	}
 
 	/*
@@ -1583,6 +1594,16 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 * @since 3.1
 	 */
 	public boolean visit(TypeParameter node) {
+		if (node.getAST().apiLevel() >= AST.JLS8) {
+			List annotations = node.annotations();
+			if (annotations != null) {
+				for (Iterator it = annotations.iterator(); it.hasNext(); ) {
+					Annotation annotation = (Annotation) it.next();
+					annotation.accept(this);
+					this.buffer.append(' ');
+				}
+			}
+		}
 		node.getName().accept(this);
 		if (!node.typeBounds().isEmpty()) {
 //{ObjectTeams: "base" bound?
@@ -1695,6 +1716,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 * @since 3.1
 	 */
 	public boolean visit(WildcardType node) {
+		visitTypeAnnotations(node);
 		this.buffer.append("?");//$NON-NLS-1$
 		Type bound = node.getBound();
 		if (bound != null) {
@@ -1706,6 +1728,31 @@ public class NaiveASTFlattener extends ASTVisitor {
 			bound.accept(this);
 		}
 		return false;
+	}
+
+	private void visitTypeAnnotations(Type node) {
+		if (node.getAST().apiLevel() >= AST.JLS8) {
+			List annotations = node.annotations();
+			if (annotations != null) {
+				for (Iterator it = annotations.iterator(); it.hasNext(); ) {
+					Annotation annotation = (Annotation) it.next();
+					annotation.accept(this);
+					this.buffer.append(' ');
+				}
+			}
+		}
+	}
+	private void visitTypeAnnotations(Name node) {
+		if (node.getAST().apiLevel() >= AST.JLS8) {
+			List annotations = node.annotations();
+			if (annotations != null) {
+				for (Iterator it = annotations.iterator(); it.hasNext(); ) {
+					Annotation annotation = (Annotation) it.next();
+					annotation.accept(this);
+					this.buffer.append(' ');
+				}
+			}
+		}
 	}
 
 //{ObjectTeams: visit methods for OT-specific types

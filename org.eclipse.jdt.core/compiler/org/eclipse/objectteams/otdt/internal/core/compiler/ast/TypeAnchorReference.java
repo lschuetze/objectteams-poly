@@ -23,6 +23,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.Argument;
 import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.FieldReference;
@@ -101,8 +102,12 @@ public class TypeAnchorReference extends TypeReference {
 
 	@Override
 	public TypeReference copyDims(int dim) {
-		// TODO Auto-generated method stub
-		return null;
+		throw new InternalCompilerError("Method not applicable");
+	}
+
+	@Override
+	public TypeReference copyDims(int dim, Annotation[][] annotationsOnDimensions) {
+		throw new InternalCompilerError("Method not applicable");
 	}
 
 	@Override

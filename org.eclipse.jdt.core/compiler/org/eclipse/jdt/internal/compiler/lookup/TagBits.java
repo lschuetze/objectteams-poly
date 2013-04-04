@@ -5,12 +5,17 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contributions for
  *								bug 186342 - [compiler][null] Using annotations for null checking
+ *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
@@ -119,11 +124,13 @@ public interface TagBits {
 	long AnnotationForLocalVariable = ASTNode.Bit42L;
 	long AnnotationForAnnotationType = ASTNode.Bit43L;
 	long AnnotationForPackage = ASTNode.Bit44L;
-	long AnnotationTargetMASK = AnnotationTarget
-				| AnnotationForType | AnnotationForField
-				| AnnotationForMethod | AnnotationForParameter
-				| AnnotationForConstructor | AnnotationForLocalVariable
+	long AnnotationForTypeUse = ASTNode.Bit54L;
+	long AnnotationForTypeParameter = ASTNode.Bit55L;
+	long SE7AnnotationTargetMASK = AnnotationForType | AnnotationForField | AnnotationForMethod
+				| AnnotationForParameter | AnnotationForConstructor | AnnotationForLocalVariable
 				| AnnotationForAnnotationType | AnnotationForPackage;
+	long AnnotationTargetMASK = SE7AnnotationTargetMASK | AnnotationTarget
+				| AnnotationForTypeUse | AnnotationForTypeParameter;
 	// 2-bits for retention (should check (tagBits & RetentionMask) == RuntimeRetention
 	long AnnotationSourceRetention = ASTNode.Bit45L;
 	long AnnotationClassRetention = ASTNode.Bit46L;
@@ -169,6 +176,7 @@ public interface TagBits {
 				| AnnotationNonNull
 				| AnnotationNonNullByDefault
 				| AnnotationNullUnspecifiedByDefault;
+	long AnnotationNullMASK = AnnotationNullable | AnnotationNonNull;
 
 	long DefaultValueResolved = ASTNode.Bit60L;
 

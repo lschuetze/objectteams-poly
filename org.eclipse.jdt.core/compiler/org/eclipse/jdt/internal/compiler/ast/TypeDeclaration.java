@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -1588,10 +1592,13 @@ public StringBuffer printBody(int indent, StringBuffer output) {
 
 public StringBuffer printHeader(int indent, StringBuffer output) {
 	printModifiers(this.modifiers, output);
+	if (this.annotations != null) {
+		printAnnotations(this.annotations, output);
+		output.append(' ');
+	}
 //{ObjectTeams: role/team:
 	printTypeKind(this.modifiers, output);
 // SH}
-	if (this.annotations != null) printAnnotations(this.annotations, output);
 
 	switch (kind(this.modifiers)) {
 		case TypeDeclaration.CLASS_DECL :
