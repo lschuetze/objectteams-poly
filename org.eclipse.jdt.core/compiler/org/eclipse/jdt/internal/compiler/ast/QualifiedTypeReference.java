@@ -231,12 +231,12 @@ public class QualifiedTypeReference extends TypeReference {
 	}
 
 	public StringBuffer printExpression(int indent, StringBuffer output) {
-		if (this.annotations != null) {
-			printAnnotations(this.annotations, output);
-			output.append(' ');
-		}
 		for (int i = 0; i < this.tokens.length; i++) {
 			if (i > 0) output.append('.');
+			if (this.annotations != null && this.annotations[i] != null) {
+				printAnnotations(this.annotations[i], output);
+				output.append(' ');
+			}
 //{ObjectTeams: suppress prefix:
 		  if (CharOperation.equals(this.tokens[i], IOTConstants._OT_BASE))
 			output.append(IOTConstants.BASE);
@@ -250,9 +250,12 @@ public class QualifiedTypeReference extends TypeReference {
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.annotations != null) {
-				int annotationsLength = this.annotations.length;
-				for (int i = 0; i < annotationsLength; i++)
-					this.annotations[i].traverse(visitor, scope);
+				int annotationsLevels = this.annotations.length;
+				for (int i = 0; i < annotationsLevels; i++) {
+					int annotationsLength = this.annotations[i] == null ? 0 : this.annotations[i].length;
+					for (int j = 0; j < annotationsLength; j++)
+						this.annotations[i][j].traverse(visitor, scope);
+				}
 			}
 		}
 		visitor.endVisit(this, scope);
@@ -261,11 +264,17 @@ public class QualifiedTypeReference extends TypeReference {
 	public void traverse(ASTVisitor visitor, ClassScope scope) {
 		if (visitor.visit(this, scope)) {
 			if (this.annotations != null) {
-				int annotationsLength = this.annotations.length;
-				for (int i = 0; i < annotationsLength; i++)
-					this.annotations[i].traverse(visitor, scope);
+				int annotationsLevels = this.annotations.length;
+				for (int i = 0; i < annotationsLevels; i++) {
+					int annotationsLength = this.annotations[i] == null ? 0 : this.annotations[i].length;
+					for (int j = 0; j < annotationsLength; j++)
+						this.annotations[i][j].traverse(visitor, scope);
+				}
 			}
 		}
 		visitor.endVisit(this, scope);
+	}
+	public int getAnnotatableLevels() {
+		return this.tokens.length;
 	}
 }

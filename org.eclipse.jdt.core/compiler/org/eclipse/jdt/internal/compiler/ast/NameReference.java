@@ -4,7 +4,10 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: NameReference.java 19881 2009-04-13 23:35:46Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -105,6 +108,8 @@ public void setFieldIndex(int index){
 }
 
 public abstract String unboundReferenceErrorName();
+
+public abstract char[][] getName();
 
 //{ObjectTeams: hook after this reference has been fully resolved
 public void resolveFinished() { /* noop  */ }

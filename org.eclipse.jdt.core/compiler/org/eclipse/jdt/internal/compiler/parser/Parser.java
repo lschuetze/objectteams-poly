@@ -1395,13 +1395,14 @@ protected ParameterizedQualifiedTypeReference computeQualifiedGenericsFromRightS
 	ParameterizedQualifiedTypeReference typeRef = new ParameterizedQualifiedTypeReference(tokens, typeArguments, dim, annotationsOnDimensions, positions);
 	int length;
 	if (this.typeAnnotationLengthPtr >= 0 && (length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
+		typeRef.annotations = new Annotation[tokensSize][];
 		System.arraycopy(
 			this.typeAnnotationStack,
 			(this.typeAnnotationPtr -= length) + 1,
-			typeRef.annotations = new Annotation[length],
+			typeRef.annotations[0] = new Annotation[length],
 			0,
 			length);
-		typeRef.sourceStart = typeRef.annotations[0].sourceStart;
+		typeRef.sourceStart = typeRef.annotations[0][0].sourceStart;
 		typeRef.bits |= ASTNode.HasTypeAnnotations;
 	}
 	return typeRef;
@@ -2929,13 +2930,14 @@ protected void consumeCastExpressionLL1WithTypeAnnotations() {
 	
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}
@@ -2983,13 +2985,14 @@ protected void consumeCastExpressionWithGenericsArrayWithTypeAnnotations() {
 
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}
@@ -3040,13 +3043,14 @@ protected void consumeCastExpressionWithNameArrayWithTypeAnnotations() {
 
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}
@@ -3092,13 +3096,14 @@ protected void consumeCastExpressionWithPrimitiveTypeWithTypeAnnotations() {
 	TypeReference typeReference = getTypeReference(this.intStack[this.intPtr--]);
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}
@@ -3149,13 +3154,14 @@ protected void consumeCastExpressionWithQualifiedGenericsArrayWithTypeAnnotation
 	this.intPtr--;
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}
@@ -10248,13 +10254,14 @@ protected void consumeReferenceExpressionTypeForm(boolean isPrimitive, boolean i
 	type = getUnannotatedTypeReference(isArray ? this.intStack[this.intPtr--] : 0);
     // and attach the annotations now.
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		type.annotations = new Annotation[type.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				type.annotations = new Annotation[length],
+				type.annotations[0] = new Annotation[length],
 				0,
 				length);
-		type.sourceStart = type.annotations[0].sourceStart;
+		type.sourceStart = type.annotations[0][0].sourceStart;
 		type.bits |= ASTNode.HasTypeAnnotations;
 	}
 	if (illegalModifiersSourceStart >= 0 && illegalModifiersSourceStart < type.sourceStart) {
@@ -10409,13 +10416,14 @@ protected void consumeReferenceExpressionGenericTypeForm() {
 
 	// Prefix annotations if any are on the expression stack, attach them now.
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		type.annotations = new Annotation[type.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				type.annotations = new Annotation[length],
+				type.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int annotStart = type.annotations[0].sourceStart;
+		int annotStart = type.annotations[0][0].sourceStart;
 		if (annotStart < type.sourceStart) {
 			type.sourceStart = annotStart;
 		}
@@ -11496,13 +11504,14 @@ protected void consumeTypeArgumentReferenceType1WithTypeAnnotations() {
 	// copy from expression stack to type annotation stack
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}
@@ -11529,13 +11538,14 @@ protected void consumeTypeArgumentReferenceType2WithTypeAnnotations() {
 	// copy from expression stack to type annotation stack
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}
@@ -12706,14 +12716,14 @@ protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
 	if (this.typeAnnotationLengthPtr >= 0
 			&& (length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
 		//	if ((length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--]) != 0) {
-
+		ref.annotations = new Annotation[ref.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.typeAnnotationStack,
 				(this.typeAnnotationPtr -= length) + 1,
-				ref.annotations = new Annotation[length],
+				ref.annotations[0] = new Annotation[length],
 				0,
 				length);
-		ref.sourceStart = ref.annotations[0].sourceStart;
+		ref.sourceStart = ref.annotations[0][0].sourceStart;
 		ref.bits |= ASTNode.HasTypeAnnotations;
 	}
 	return ref;

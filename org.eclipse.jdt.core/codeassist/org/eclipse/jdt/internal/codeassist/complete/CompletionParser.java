@@ -2416,13 +2416,14 @@ protected void consumeCastExpressionWithPrimitiveTypeWithTypeAnnotations() {
 	this.expressionLengthPtr--;
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}
@@ -2457,13 +2458,14 @@ protected void consumeCastExpressionWithGenericsArrayWithTypeAnnotations() {
 
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}
@@ -2496,13 +2498,14 @@ protected void consumeCastExpressionWithQualifiedGenericsArrayWithTypeAnnotation
 	this.expressionLengthPtr--;
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}
@@ -2536,13 +2539,14 @@ protected void consumeCastExpressionWithNameArrayWithTypeAnnotations() {
 	
 	int length;
 	if ((length = this.expressionLengthStack[this.expressionLengthPtr--]) != 0) {
+		typeReference.annotations = new Annotation[typeReference.getAnnotatableLevels()][];
 		System.arraycopy(
 				this.expressionStack,
 				(this.expressionPtr -= length) + 1,
-				typeReference.annotations = new Annotation[length],
+				typeReference.annotations[0] = new Annotation[length],
 				0,
 				length);
-		int typeReferenceSourceStart = typeReference.annotations[0].sourceStart;
+		int typeReferenceSourceStart = typeReference.annotations[0][0].sourceStart;
 		if (this.modifiersSourceStart < typeReferenceSourceStart) {
 			typeReferenceSourceStart = this.modifiersSourceStart;
 		}

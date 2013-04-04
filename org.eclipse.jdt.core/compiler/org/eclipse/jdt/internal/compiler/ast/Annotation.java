@@ -87,14 +87,16 @@ public abstract class Annotation extends Expression {
 						this.currentIndexes.push(new Integer(((Integer) this.currentIndexes.pop()).intValue() + 1));
 					}
 				}
-				Annotation[] annotations = typeReference.annotations;
+				Annotation[][] annotations = typeReference.annotations;
 				if (annotations == null) {
-					annotations = primaryAnnotation;
+					annotations = new Annotation[][] { primaryAnnotation };
 				}
-				if (annotations != null) {
-					for (int i = 0; i < annotations.length; i++) {
-						Annotation current = annotations[i];
-						if (current == this.currentAnnotation) {
+				int annotationsLevels = annotations.length;
+				for (int i = 0; i < annotationsLevels; i++) {
+					Annotation [] current = annotations[i];
+					int annotationsLength = current == null ? 0 : current.length;
+					for (int j = 0; j < annotationsLength; j++) {
+						if (current[j] == this.currentAnnotation) {
 							this.search = false;
 							return false;
 						}
@@ -134,14 +136,16 @@ public abstract class Annotation extends Expression {
 						this.currentIndexes.push(new Integer(((Integer) this.currentIndexes.pop()).intValue() + 1));
 					}
 				}
-				Annotation[] annotations = typeReference.annotations;
+				Annotation[][] annotations = typeReference.annotations;
 				if (annotations == null) {
-					annotations = primaryAnnotation;
+					annotations = new Annotation[][] { primaryAnnotation };
 				}
-				if (annotations != null) {
-					for (int i = 0; i < annotations.length; i++) {
-						Annotation current = annotations[i];
-						if (current == this.currentAnnotation) {
+				int annotationsLevels = annotations.length;
+				for (int i = 0; i < annotationsLevels; i++) {
+					Annotation [] current = annotations[i];
+					int annotationsLength = current == null ? 0 : current.length;
+					for (int j = 0; j < annotationsLength; j++) {
+						if (current[j] == this.currentAnnotation) {
 							this.search = false;
 							return false;
 						}
@@ -181,14 +185,16 @@ public abstract class Annotation extends Expression {
 						this.currentIndexes.push(new Integer(((Integer) this.currentIndexes.pop()).intValue() + 1));
 					}
 				}
-				Annotation[] annotations = typeReference.annotations;
+				Annotation[][] annotations = typeReference.annotations;
 				if (annotations == null) {
-					annotations = primaryAnnotation;
+					annotations = new Annotation[][] { primaryAnnotation };
 				}
-				if (annotations != null) {
-					for (int i = 0; i < annotations.length; i++) {
-						Annotation current = annotations[i];
-						if (current == this.currentAnnotation) {
+				int annotationsLevels = annotations.length;
+				for (int i = 0; i < annotationsLevels; i++) {
+					Annotation [] current = annotations[i];
+					int annotationsLength = current == null ? 0 : current.length;
+					for (int j = 0; j < annotationsLength; j++) {
+						if (current[j] == this.currentAnnotation) {
 							this.search = false;
 							return false;
 						}
@@ -235,14 +241,16 @@ public abstract class Annotation extends Expression {
 						this.currentIndexes.push(new Integer(((Integer) this.currentIndexes.pop()).intValue() + 1));
 					}
 				}
-				Annotation[] annotations = typeReference.annotations;
+				Annotation[][] annotations = typeReference.annotations;
 				if (annotations == null) {
-					annotations = primaryAnnotation;
+					annotations = new Annotation[][] { primaryAnnotation };
 				}
-				if (annotations != null) {
-					for (int i = 0; i < annotations.length; i++) {
-						Annotation current = annotations[i];
-						if (current == this.currentAnnotation) {
+				int annotationsLevels = annotations.length;
+				for (int i = 0; i < annotationsLevels; i++) {
+					Annotation [] current = annotations[i];
+					int annotationsLength = current == null ? 0 : current.length;
+					for (int j = 0; j < annotationsLength; j++) {
+						if (current[j] == this.currentAnnotation) {
 							this.search = false;
 							return false;
 						}
@@ -290,11 +298,13 @@ public abstract class Annotation extends Expression {
 						this.currentIndexes.push(new Integer(((Integer) this.currentIndexes.pop()).intValue() + 1));
 					}
 				}
-				Annotation[] annotations = typeReference.annotations;
-				if (annotations != null) {
-					for (int i = 0; i < annotations.length; i++) {
-						Annotation current = annotations[i];
-						if (current == this.currentAnnotation) {
+				Annotation[][] annotations = typeReference.annotations;
+				int annotationsLevels = annotations == null ? 0 : annotations.length;
+				for (int i = 0; i < annotationsLevels; i++) {
+					Annotation [] current = annotations[i];
+					int annotationsLength = current == null ? 0 : current.length;
+					for (int j = 0; j < annotationsLength; j++) {
+						if (current[j] == this.currentAnnotation) {
 							this.search = false;
 							return false;
 						}
@@ -310,11 +320,13 @@ public abstract class Annotation extends Expression {
 			}
 			public boolean visit(QualifiedTypeReference typeReference, BlockScope scope) {
 				if (!this.search) return false;
-				Annotation[] annotations = typeReference.annotations;
-				if (annotations != null) {
-					for (int i = 0; i < annotations.length; i++) {
-						Annotation current = annotations[i];
-						if (current == this.currentAnnotation) {
+				Annotation[][] annotations = typeReference.annotations;
+				int annotationsLevels = annotations == null ? 0 : annotations.length;
+				for (int i = 0; i < annotationsLevels; i++) {
+					Annotation [] current = annotations[i];
+					int annotationsLength = current == null ? 0 : current.length;
+					for (int j = 0; j < annotationsLength; j++) {
+						if (current[j] == this.currentAnnotation) {
 							this.search = false;
 							return false;
 						}

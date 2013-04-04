@@ -1299,7 +1299,7 @@ void setSourceStart(int sourceStart);
 	/** @since 3.9 */
     int InvalidUsageOfTypeAnnotations = Syntax + Internal + 637;
     /** @since 3.9 */
-    int InvalidUsageOfReceiverAnnotations = Syntax + Internal + 638;
+    int DisallowedExplicitThisParameter = Syntax + Internal + 638;
     /** @since 3.9 */
     int MisplacedTypeAnnotations = Syntax + Internal + 639;
     /** @since 3.9 */
@@ -1322,6 +1322,10 @@ void setSourceStart(int sourceStart);
     int ExplicitThisParameterNotInLambda = Internal + Syntax + 648;
     /** @since 3.9 */
     int ExplicitAnnotationTargetRequired = TypeRelated + 649;
+    /** @since 3.9 */
+    int IllegalTypeForExplicitThis = Internal + Syntax + 650;
+    /** @since 3.9 */
+    int IllegalQualifierForExplicitThis = Internal + Syntax + 651;
     
 	/**
 	 * More problems in generics
