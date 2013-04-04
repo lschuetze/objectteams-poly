@@ -23,7 +23,7 @@ public class DefaultMethodsTest extends AbstractComparableTest {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All specified tests which do not belong to the class are skipped...
 	static {
-//			TESTS_NAMES = new String[] { "testModifiers1" };
+//			TESTS_NAMES = new String[] { "testInheritedDefaultOverrides" };
 //			TESTS_NUMBERS = new int[] { 561 };
 //			TESTS_RANGE = new int[] { 1, 2049 };
 	}
@@ -43,6 +43,7 @@ public class DefaultMethodsTest extends AbstractComparableTest {
 	// default methods with various modifiers, positive cases
 	public void testModifiers1() {
 // Inject an unrelated compile error to prevent class file verification. TODO revert
+// (even lambda-enabled JRE doesn't accept now-legal modifier combinations)
 //		runConformTest(
 		runNegativeTest(
 		new String[] {
@@ -198,25 +199,23 @@ public class DefaultMethodsTest extends AbstractComparableTest {
 	// class implements interface with default method. 
 	// - no need to implement this interface method as it is not abstract
 	public void testModifiers5() {
-// Inject an unrelated compile error to prevent class file verification. TODO revert
-//		runConformTest(
-		runNegativeTest(
+		runConformTest(
 			new String[] {
+				"C.java",
+				"public class C implements I {\n" +
+				"    public static void main(String[] args) {\n" +
+				"        new C().foo();\n" +
+				"    }\n" +
+				"}\n",
 				"I.java",
 				"public interface I {\n" +
-				"    void foo() default {}\n" +
-				"}\n",
-				"C.java",
-				"public class C implements I {}\n" +
-// TODO remove me:
-				"public class Wrong{}\n"
+				"    void foo() default {\n" +
+				"        System.out.println(\"default\");\n" +
+				"    }\n" +
+				"}\n"
 			},
-			"----------\n" +
-			"1. ERROR in C.java (at line 2)\n" +
-			"	public class Wrong{}\n" +
-			"	             ^^^^^\n" +
-			"The public type Wrong must be defined in its own file\n" +
-			"----------\n");
+			"default"
+			);
 	}
 	
 	// class implements interface with default method. 
@@ -237,6 +236,188 @@ public class DefaultMethodsTest extends AbstractComparableTest {
 			"	public class C implements I {}\n" + 
 			"	             ^\n" + 
 			"The type C must implement the inherited abstract method I.bar()\n" + 
+			"----------\n");
+	}
+	
+	// JLS 9.4.2  - default method cannot override method from Object
+	// Bug 382355 - [1.8][compiler] Compiler accepts erroneous default method
+	// new error message
+	public void testObjectMethod1() {
+		runNegativeTest(
+			new String[] {
+				"I.java",
+				"public interface I {\n" +
+				"    public String toString () default { return \"\";}\n" + 
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in I.java (at line 2)\n" + 
+			"	public String toString () default { return \"\";}\n" + 
+			"	              ^^^^^^^^^^^\n" + 
+			"A default method cannot override a method from java.lang.Object \n" + 
+			"----------\n");
+	}
+	
+	// JLS 9.4.2  - default method cannot override method from Object
+	// Bug 382355 - [1.8][compiler] Compiler accepts erroneous default method
+	// when using a type variable this is already reported as a name clash
+	public void testObjectMethod2() {
+		runNegativeTest(
+			new String[] {
+				"I.java",
+				"public interface I<T> {\n" +
+				"    public boolean equals (T other) default { return false;}\n" + 
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in I.java (at line 2)\n" + 
+			"	public boolean equals (T other) default { return false;}\n" + 
+			"	               ^^^^^^^^^^^^^^^^\n" + 
+			"Name clash: The method equals(T) of type I<T> has the same erasure as equals(Object) of type Object but does not override it\n" + 
+			"----------\n");
+	}
+	
+	// JLS 9.4.2  - default method cannot override method from Object
+	// Bug 382355 - [1.8][compiler] Compiler accepts erroneous default method
+	// one error for final method is enough
+	public void testObjectMethod3() {
+		runNegativeTest(
+			new String[] {
+				"I.java",
+				"public interface I<T> {\n" +
+				"    @Override\n" +
+				"    public Class<?> getClass() default { return null;}\n" + 
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in I.java (at line 3)\n" + 
+			"	public Class<?> getClass() default { return null;}\n" + 
+			"	                ^^^^^^^^^^\n" + 
+			"Cannot override the final method from Object\n" + 
+			"----------\n");
+	}
+
+	// JLS 9.4.1
+	// Bug 382347 - [1.8][compiler] Compiler accepts incorrect default method inheritance
+	// an inherited default methods clashes with another inherited method
+	// simple case
+	public void testInheritedDefaultOverrides01() {
+		runNegativeTest(
+			new String[] {
+				"I1.java",
+				"public interface I1 {\n" +
+				"	String foo();\n" +
+				"}\n",
+				"I2.java",
+				"public interface I2 {\n" +
+				"	String foo() default { return \"\"; }\n" +
+				"}\n",
+				"I3.java",
+				"public interface I3 extends I1, I2 {\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in I3.java (at line 1)\n" + 
+			"	public interface I3 extends I1, I2 {\n" + 
+			"	                 ^^\n" + 
+			"The default method foo() inherited from I2 conflicts with another method inherited from I1\n" +
+			"----------\n");
+	}
+	
+	// JLS 9.4.1
+	// Bug 382347 - [1.8][compiler] Compiler accepts incorrect default method inheritance
+	// an inherited default methods clashes with another inherited method
+	// indirect inheritance
+	public void testInheritedDefaultOverrides02() {
+		runNegativeTest(
+			new String[] {
+				"I1.java",
+				"public interface I1 {\n" +
+				"	String foo();\n" +
+				"}\n",
+				"I2.java",
+				"public interface I2 {\n" +
+				"	String foo() default { return \"\"; }\n" +
+				"}\n",
+				"I1A.java",
+				"public interface I1A extends I1 {\n" +
+				"}\n",
+				"I2A.java",
+				"public interface I2A extends I2 {\n" +
+				"}\n",
+				"I3.java",
+				"public interface I3 extends I1A, I2A {\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in I3.java (at line 1)\n" + 
+			"	public interface I3 extends I1A, I2A {\n" + 
+			"	                 ^^\n" + 
+			"The default method foo() inherited from I2 conflicts with another method inherited from I1\n" +
+			"----------\n");
+	}
+
+	// JLS 9.4.1
+	// Bug 382347 - [1.8][compiler] Compiler accepts incorrect default method inheritance
+	// Parameterized case is already reported as a clash
+	public void testInheritedDefaultOverrides03() {
+		runNegativeTest(
+			new String[] {
+				"I1.java",
+				"import java.util.List;\n" +
+				"public interface I1 {\n" +
+				"	String foo(List<String> l);\n" +
+				"}\n",
+				"I2.java",
+				"import java.util.List;\n" +
+				"public interface I2 {\n" +
+				"   @SuppressWarnings(\"rawtypes\")\n" +
+				"	String foo(List l) default { return \"\"; }\n" +
+				"}\n",
+				"I3.java",
+				"import java.util.List;\n" +
+				"public interface I3 extends I1, I2 {\n" +
+				"   @Override\n" +
+				"   String foo(List<String> l);\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in I3.java (at line 4)\n" + 
+			"	String foo(List<String> l);\n" + 
+			"	       ^^^^^^^^^^^^^^^^^^^\n" + 
+			"Name clash: The method foo(List<String>) of type I3 has the same erasure as foo(List) of type I2 but does not override it\n" + 
+			"----------\n");
+	}
+
+	// JLS 9.4.1
+	// Bug 382347 - [1.8][compiler] Compiler accepts incorrect default method inheritance
+	// Parameterized case is already reported as a clash - inverse case of previous
+	public void testInheritedDefaultOverrides04() {
+		runNegativeTest(
+			new String[] {
+				"I1.java",
+				"import java.util.List;\n" +
+				"public interface I1 {\n" +
+				"	String foo(List<String> l) default { return \"\"; }\n" +
+				"}\n",
+				"I2.java",
+				"import java.util.List;\n" +
+				"public interface I2 {\n" +
+				"   @SuppressWarnings(\"rawtypes\")\n" +
+				"	String foo(List l);\n" +
+				"}\n",
+				"I3.java",
+				"import java.util.List;\n" +
+				"public interface I3 extends I1, I2 {\n" +
+				"   @Override\n" +
+				"   String foo(List<String> l);\n" +
+				"}\n",
+			},
+			"----------\n" + 
+			"1. ERROR in I3.java (at line 4)\n" + 
+			"	String foo(List<String> l);\n" + 
+			"	       ^^^^^^^^^^^^^^^^^^^\n" + 
+			"Name clash: The method foo(List<String>) of type I3 has the same erasure as foo(List) of type I2 but does not override it\n" + 
 			"----------\n");
 	}
 }

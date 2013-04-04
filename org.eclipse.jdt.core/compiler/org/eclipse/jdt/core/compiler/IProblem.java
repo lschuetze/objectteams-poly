@@ -156,6 +156,7 @@
  *									UninitializedBlankFinalFieldHintMissingDefault
  *									ShouldReturnValueHintMissingDefault
  *									IllegalModifierForInterfaceDefaultMethod
+ *									InheritedDefaultMethodConflictsWithOtherInherited
  *******************************************************************************/
 package org.eclipse.jdt.core.compiler;
 
@@ -1551,6 +1552,12 @@ void setSourceStart(int sourceStart);
 	// default methods:
 	/** @since 3.9 */
 	int IllegalModifierForInterfaceDefaultMethod = MethodRelated + 1050;
+
+	/** @since 3.9 */
+	int DefaultMethodOverridesObjectMethod = MethodRelated + 1051;
+	
+	/** @since 3.9 */
+	int InheritedDefaultMethodConflictsWithOtherInherited = MethodRelated + 1052;
 
 	/**
 	 * External problems -- These are problems defined by other plugins

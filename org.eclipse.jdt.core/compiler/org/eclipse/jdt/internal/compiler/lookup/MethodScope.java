@@ -220,11 +220,12 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 	if (declaringClass.isRegularInterface()) {
 // SH}
 		int expectedModifiers = ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
-		// 9.4 got updated for JSR 335 (default methods):
-		boolean isDefaultMethod = (modifiers & ExtraCompilerModifiers.AccDefaultMethod) != 0; // no need to check validity, is done by the parser
-		if (compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8 && isDefaultMethod) {
+		// 9.4 got updated for JSR 335 (default methods), more permissive grammar plus:
+		// "It is a compile-time error if an abstract method declaration contains either of the keywords strictfp or synchronized."
+		if (compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8 && !methodBinding.isAbstract()) {
 			expectedModifiers |= (ClassFileConstants.AccSynchronized | ClassFileConstants.AccStrictfp);
 		}
+		boolean isDefaultMethod = (modifiers & ExtraCompilerModifiers.AccDefaultMethod) != 0; // no need to check validity, is done by the parser
 		if ((realModifiers & ~expectedModifiers) != 0) {
 			if ((declaringClass.modifiers & ClassFileConstants.AccAnnotation) != 0)
 				problemReporter().illegalModifierForAnnotationMember((AbstractMethodDeclaration) this.referenceContext);
@@ -451,27 +452,24 @@ MethodBinding createMethod(AbstractMethodDeclaration method) {
 		if (argument.isVarArgs() && sourceLevel >= ClassFileConstants.JDK1_5)
 			method.binding.modifiers |= ClassFileConstants.AccVarargs;
 		if (CharOperation.equals(argument.name, ConstantPool.This)) {
-			if (argLength != 0 || sourceLevel <= ClassFileConstants.JDK1_7) {
-				problemReporter().illegalThis(argument, method, sourceLevel);
-			}
-			if (argument.annotations != null) {
-				method.receiverAnnotations = argument.annotations;
-				method.bits |= ASTNode.HasTypeAnnotations;
-			}
+			problemReporter().illegalThisDeclaration(argument);
 		}
 		while (--argLength >= 0) {
 			argument = argTypes[argLength];
 			if (argument.isVarArgs() && sourceLevel >= ClassFileConstants.JDK1_5)
 				problemReporter().illegalVararg(argument, method);
 			if (CharOperation.equals(argument.name, ConstantPool.This)) {
-				if (argLength != 0 || sourceLevel <= ClassFileConstants.JDK1_7) {
-					problemReporter().illegalThis(argument, method, sourceLevel);
-				}
-				if (argument.annotations != null) {
-					method.receiverAnnotations = argument.annotations;
-					method.bits |= ASTNode.HasTypeAnnotations;
-				}
-			}	
+				problemReporter().illegalThisDeclaration(argument);
+			}
+		}
+	}
+	if (method.receiver != null) {
+		if (sourceLevel <= ClassFileConstants.JDK1_7) {
+			problemReporter().illegalSourceLevelForThis(method.receiver);
+		}
+		if (method.receiver.annotations != null) {
+			method.receiverAnnotations = method.receiver.annotations;
+			method.bits |= ASTNode.HasTypeAnnotations;
 		}
 	}
 

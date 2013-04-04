@@ -25,6 +25,7 @@
  *								bug 365859 - [compiler][null] distinguish warnings based on flow analysis vs. null annotations
  *								bug 374605 - Unreasonable warning for enum-based switch statements
  *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
+ *								bug 382347 - [1.8][compiler] Compiler accepts incorrect default method inheritance
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
 
@@ -1651,6 +1652,21 @@ public void corruptedSignature(TypeBinding enclosingType, char[] signature, int 
 		0,
 		0);
 }
+public void defaultMethodOverridesObjectMethod(MethodBinding currentMethod) {
+	// Java 8 feature
+	AbstractMethodDeclaration method = currentMethod.sourceMethod();
+	int sourceStart = 0;
+	int sourceEnd = 0;
+	if (method != null) {
+		sourceStart = method.sourceStart;
+		sourceEnd = method.sourceEnd;
+	}
+	this.handle(
+		IProblem.DefaultMethodOverridesObjectMethod,
+		NoArgument, NoArgument,
+		sourceStart, sourceEnd);
+}
+
 public void deprecatedField(FieldBinding field, ASTNode location) {
 	int severity = computeSeverity(IProblem.UsingDeprecatedField);
 	if (severity == ProblemSeverities.Ignore) return;
@@ -2953,10 +2969,19 @@ public void illegalVararg(Argument argType, AbstractMethodDeclaration methodDecl
 		argType.sourceStart,
 		argType.sourceEnd);
 }
-public void illegalThis(Argument argument, AbstractMethodDeclaration method, long sourceLevel) {
+public void illegalThisDeclaration(Argument argument) {
 	String[] arguments = NoArgument;
 	this.handle(
-		sourceLevel <= ClassFileConstants.JDK1_7 ?  IProblem.ExplicitThisParameterNotBelow18 : IProblem.IllegalDeclarationOfThisParameter,
+		IProblem.IllegalDeclarationOfThisParameter,
+		arguments,
+		arguments,
+		argument.sourceStart,
+		argument.sourceEnd);
+}
+public void illegalSourceLevelForThis(Argument argument) {
+	String[] arguments = NoArgument;
+	this.handle(
+		IProblem.ExplicitThisParameterNotBelow18,
 		arguments,
 		arguments,
 		argument.sourceStart,
@@ -3371,6 +3396,22 @@ public void indirectAccessToStaticMethod(ASTNode location, MethodBinding method)
 		severity,
 		location.sourceStart,
 		location.sourceEnd);
+}
+public void inheritedDefaultMethodConflictsWithOtherInherited(SourceTypeBinding type, MethodBinding defaultMethod, MethodBinding otherMethod) {
+	TypeDeclaration typeDecl = type.scope.referenceContext;
+	String[] problemArguments = new String[] { 
+			String.valueOf(defaultMethod.readableName()), 
+			String.valueOf(defaultMethod.declaringClass.readableName()), 
+			String.valueOf(otherMethod.declaringClass.readableName()) };
+	String[] messageArguments = new String[] { 
+			String.valueOf(defaultMethod.shortReadableName()), 
+			String.valueOf(defaultMethod.declaringClass.shortReadableName()), 
+			String.valueOf(otherMethod.declaringClass.shortReadableName()) };	
+	this.handle(IProblem.InheritedDefaultMethodConflictsWithOtherInherited,
+			problemArguments,
+			messageArguments,
+			typeDecl.sourceStart,
+			typeDecl.sourceEnd);
 }
 private void inheritedMethodReducesVisibility(int sourceStart, int sourceEnd, MethodBinding concreteMethod, MethodBinding[] abstractMethods) {
 	StringBuffer concreteSignature = new StringBuffer();

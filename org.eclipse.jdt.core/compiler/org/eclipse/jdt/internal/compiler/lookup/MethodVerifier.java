@@ -1,16 +1,22 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2012 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MethodVerifier.java 23405 2010-02-03 17:02:18Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Benjamin Muskalla - Contribution for bug 239066
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for
+ *     								bug 382347 - [1.8][compiler] Compiler accepts incorrect default method inheritance
+ *									bug 388954 - [1.8][compiler] detect default methods in class files
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -267,7 +273,21 @@ void checkAgainstInheritedMethods(MethodBinding currentMethod, MethodBinding[] m
 //					currentMethod.modifiers |= CompilerModifiers.AccImplementing;
 			} else if (inheritedMethod.isPublic() || !this.type.isInterface()) {
 				// interface I { @Override Object clone(); } does not override Object#clone()
-				currentMethod.modifiers |= ExtraCompilerModifiers.AccOverriding;
+				if (currentMethod.isDefaultMethod()
+						&& !inheritedMethod.isFinal() // overriding final is already reported, that's enough
+						&& inheritedMethod.declaringClass.id == TypeIds.T_JavaLangObject)
+				{
+					// JLS 9.4.3 (Java8): default method cannot override method from j.l.Object
+					problemReporter(currentMethod).defaultMethodOverridesObjectMethod(currentMethod);
+				} else {
+					// TODO (stephan) using AccImplementing for overrides of a default method works well
+					// for OPTION_ReportMissingOverrideAnnotationForInterfaceMethodImplementation
+					// but we should check if it has bad side effects elsewhere.
+					if (inheritedMethod.isDefaultMethod())
+						currentMethod.modifiers |= ExtraCompilerModifiers.AccImplementing;
+					else
+						currentMethod.modifiers |= ExtraCompilerModifiers.AccOverriding;
+				}
 			}
 
 			if (!areReturnTypesCompatible(currentMethod, inheritedMethod)
@@ -611,6 +631,8 @@ void checkInheritedMethods(MethodBinding[] methods, int length) {
 			}
 		} else if (noMatch) {
 			problemReporter().inheritedMethodsHaveIncompatibleReturnTypes(this.type, methods, length);
+		} else if (this.environment.globalOptions.sourceLevel >= ClassFileConstants.JDK1_8) {
+			checkInheritedDefaultMethods(methods, length);
 		}
 		return;
 	}
@@ -638,7 +660,21 @@ void checkInheritedMethods(MethodBinding[] methods, int length) {
 		System.arraycopy(abstractMethods, 0, abstractMethods = new MethodBinding[index], 0, index);
 	checkConcreteInheritedMethod(concreteMethod, abstractMethods);
 }
-
+private void checkInheritedDefaultMethods(MethodBinding[] methods, int length) {
+	// JSL 9.4.1 (Java 8): default method clashes with other inherited method which is override-equivalent 
+	if (length < 2) return;
+	findDefaultMethod: for (int i=0; i<length; i++) {
+		if (methods[i].isDefaultMethod()) {
+			findEquivalent: for (int j=0; j<length; j++) {
+				if (j == i) continue findEquivalent;
+				if (isMethodSubsignature(methods[i], methods[j])) {
+					problemReporter().inheritedDefaultMethodConflictsWithOtherInherited(this.type, methods[i], methods[j]);
+					continue findDefaultMethod;
+				}
+			}
+		}
+	}
+}
 boolean checkInheritedReturnTypes(MethodBinding method, MethodBinding otherMethod) {
 	if (areReturnTypesCompatible(method, otherMethod)) return true;
 
