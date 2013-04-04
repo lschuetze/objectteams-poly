@@ -336,11 +336,11 @@ BaseAnchoredType ::= 'base' '.' SimpleName
 -- Connecting BaseAnchoredType to other rules (2 variants):
 -- 1.) connect via      Type->ReferenceType->ClassOrInterfaceType
 --     as well as via   ClassType->ClassOrInterfaceType
-ClassOrInterfaceType0 -> BaseAnchoredType
+ClassOrInterfaceType -> BaseAnchoredType
 /:$readableName BaseAnchoredType:/
 
 -- 2.) via ReferenceType we may add dimensions:
-ReferenceType0 -> BaseAnchoredType Dims
+ReferenceType -> BaseAnchoredType Dims
 /:$readableName ArrayOfBaseAnchoredType:/
 -- SH}
 
@@ -560,12 +560,13 @@ SingleTypeImportDeclaration ::= SingleTypeImportDeclarationName ';'
 
 -- {ObjectTeams: special case: allow 'team' in imported package/type name:
 -- orig: SingleTypeImportDeclarationName ::= 'import' Name RejectTypeAnnotations
-SingleTypeImportDeclarationName ::= 'import' ImportName
+SingleTypeImportDeclarationName ::= 'import' ImportName RejectTypeAnnotations
 /.$putCase consumeSingleTypeImportDeclarationName(); $break ./
 /:$readableName SingleTypeImportDeclarationName:/
 
-ImportName -> Name RejectTypeAnnotations
-ImportName ::= Name RejectTypeAnnotations '.' 'team' '.' Name RejectTypeAnnotations
+ImportName -> Name
+-- FIXME: reject type annotations also for the first name:
+ImportName ::= Name '.' 'team' '.' Name 
 /.$putCase consumeNameContainingTeam(); $break ./
 /:$readableName Name:/
 -- SH}			  
@@ -887,10 +888,6 @@ FormalParameterList ::= FormalParameterList ',' FormalParameter
 /.$putCase consumeFormalParameterList(); $break ./
 /:$readableName FormalParameterList:/
 
-PotentialNameArray -> $empty
-/.$putCase consumePotentialNameArrayType(); $break ./
-/:$readableName PotentialNameArray:/
-
 --1.1 feature
 FormalParameter ::= Modifiersopt Type VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(false); $break ./
@@ -899,8 +896,8 @@ FormalParameter ::= Modifiersopt Type PushZeroTypeAnnotations '...' VariableDecl
 /:$compliance 1.5:/
 --{ObjectTeams: inserted LiftingTypeopt: FIXME
 -- example:
-FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt LiftingTypeopt PotentialNameArray VariableDeclaratorIdOrThis
-/.$putCase consumeFormalParameter(false); $break ./
+--FormalParameter ::= Modifiersopt Name DimsoptAnnotsopt LiftingTypeopt PotentialNameArray VariableDeclaratorIdOrThis
+--/.$putCase consumeFormalParameter(false); $break ./
 -- real:
 FormalParameter ::= Modifiersopt Type @308... TypeAnnotations '...' VariableDeclaratorIdOrThis
 /.$putCase consumeFormalParameter(true); $break ./
@@ -1161,7 +1158,7 @@ BaseMethodSpecLong ::= MethodSpecNamePlus FormalParameterListopt MethodHeaderRig
 /.$putCase consumeMethodSpecLong(true); $break ./
 /:$readableName MethodSpecLong:/
 
-MethodSpecNamePlus ::= Modifiersopt Type0 '+' 'Identifier'  '('
+MethodSpecNamePlus ::= Modifiersopt Type '+' 'Identifier'  '('
 /.$putCase consumeMethodHeaderName(false); $break ./
 /:$readableName MethodSpecName:/
 
