@@ -125,6 +125,7 @@ $Terminals
 	AT308DOTDOTDOT
 
 -- {ObjectTeams
+	ATOT
 	BINDIN
 	CALLOUT_OVERRIDE
 	SYNTHBINDOUT
@@ -187,6 +188,7 @@ $Alias
 	'@308...' ::= AT308DOTDOTDOT
 	
 -- {ObjectTeams
+	'@OT' ::= ATOT
 	'<-'   ::= BINDIN
 	'=>'   ::= CALLOUT_OVERRIDE
 -- Markus Witte}
@@ -2512,26 +2514,42 @@ TypeArgument -> Wildcard
 /:$readableName TypeArgument:/
 /:$compliance 1.5:/
 
---{ObjectTeams: anchored types:
-TypeArgument -> TypeAnchor
-TypeArgument1 -> TypeAnchor '>'
-TypeArgument2 -> TypeAnchor '>>'
+--{ObjectTeams: anchored types: we explicitly don't decide between TypeAnchor and annotated type parameter yet
+TypeArgument -> TypeAnchorOrAnnotatedTypeArgument
+TypeArgument1 -> TypeAnchorOrAnnotatedTypeArgument '>'
+TypeArgument2 -> TypeAnchorOrAnnotatedTypeArgument '>>'
 
-TypeAnchor ::= '@' Name
+-- case 1: it was indeed a type anchor:
+TypeAnchorOrAnnotatedTypeArgument -> AnyTypeAnchor
+-- case 2a: we were wrong in assuming a type anchor, now is the time to convert it into a marker type annotation:
+TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor ReferenceType
+/.$putCase convertTypeAnchor(); $break ./
+/:$readableName annotatedTypeArgument:/
+-- case 2b: we were wrong in assuming a type anchor, now is the time to convert it into a marker type annotation:
+TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor Wildcard
+/.$putCase convertTypeAnchor(); $break ./
+/:$readableName annotatedTypeArgument:/
+
+AnyTypeAnchor -> TypeAnchor
+AnyTypeAnchor -> TentativeTypeAnchor
+
+-- this rule could indicate either a type anchor or a type annotation
+TentativeTypeAnchor ::= '@OT' Name
 /.$putCase consumeTypeAnchor(false); $break ./
 /:$readableName typeAnchor:/
 
+-- the following rules indicate definite type anchors:
 -- base is a keyword in this mode, so explicitly expect it:
-TypeAnchor ::= '@' 'base'
+TypeAnchor ::= '@OT' 'base'
 /.$putCase consumeTypeAnchor(true); $break ./
 /:$readableName typeAnchor:/
 
 -- also 'this' requires special treatment (skip because redundant):
-TypeAnchor ::= '@' 'this'
+TypeAnchor ::= '@OT' 'this'
 /.$putCase skipThisAnchor(); $break ./
 /:$readableName typeAnchor:/
 
-TypeAnchor ::= '@' Name '.' 'base'
+TypeAnchor ::= '@OT' Name '.' 'base'
 /:$readableName typeAnchor:/
 /.$putCase consumeQualifiedBaseTypeAnchor(); $break ./
 
@@ -3238,6 +3256,7 @@ ARROW ::= '->'
 COLON_COLON ::= '::'
 
 -- {ObjectTeams
+ATOT ::= '@'
 BINDIN ::= '<-'
 CALLOUT_OVERRIDE ::= '=>'
 SYNTHBINDOUT ::= '->'

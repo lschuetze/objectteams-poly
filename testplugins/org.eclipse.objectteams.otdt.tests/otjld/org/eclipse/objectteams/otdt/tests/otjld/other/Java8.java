@@ -28,7 +28,7 @@ public class Java8 extends AbstractOTJLDTest {
 // Static initializer to specify tests subset using TESTS_* static variables
 // All tests which do not belong to the subset are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testA11_lambdaExpression04"};
+		TESTS_NAMES = new String[] { "testTypeAnnotationAndTypeAnchor_2"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -187,5 +187,56 @@ public class Java8 extends AbstractOTJLDTest {
 			"}",
 			},
 			"caught"); // FIXME real execution of lambda
+	}
+	
+	public void testTypeAnnotationAndTypeAnchor_1() {
+		runConformTest(
+			new String[] {
+		"Marker.java",
+			"import java.lang.annotation.*;\n" +
+			"@Retention(RetentionPolicy.CLASS)\n" + 
+			"@Target({ ElementType.TYPE_USE })\n" + 
+			"public @interface Marker {}\n",
+		"T1.java,",
+			"public team class T1 {\n" +
+			"	public class R {}\n" +
+			"}\n",
+		"C1.java",
+			"public abstract class C1 {\n" +
+			"	abstract void test1(final T1 o, R<@o> c);\n" +
+			"	abstract void test2(final Object o, C2<@Marker Object> c);\n" +
+			"}\n" +
+			"class C2<T> {}\n"
+			});
+	}
+	
+	public void testTypeAnnotationAndTypeAnchor_2() {
+		runConformTest(
+			new String[] {
+		"p1/Marker.java",
+				"package p1;\n" +
+				"import java.lang.annotation.*;\n" +
+				"@Retention(RetentionPolicy.CLASS)\n" + 
+				"@Target({ ElementType.TYPE_USE })\n" + 
+				"public @interface Marker {}\n",
+		"p1/Marker2.java",
+				"package p1;\n" +
+				"import java.lang.annotation.*;\n" +
+				"@Retention(RetentionPolicy.CLASS)\n" + 
+				"@Target({ ElementType.TYPE_USE })\n" + 
+				"public @interface Marker2 {}\n",
+		"T1.java,",
+			"public team class T1 {\n" +
+			"	public class R {}\n" +
+			"}\n",
+		"C1.java",
+			"public abstract class C1 {\n" +
+			"	final T1 t = new T1();\n" +
+			"	abstract void test1(final C1 a, R<@a.t> c);\n" +
+			"	abstract void test2(final Object o, C2<@p1.Marker java.lang.Object> c);\n" + // bug, should be java.lang. @p1.Marker Object
+			"	abstract void test3(final Object o, C2<@p1.Marker @p1.Marker2 Object> c);\n" + // bug, should be java.lang. @p1.Marker Object
+			"}\n" +
+			"class C2<T> {}\n"
+			});
 	}
 }

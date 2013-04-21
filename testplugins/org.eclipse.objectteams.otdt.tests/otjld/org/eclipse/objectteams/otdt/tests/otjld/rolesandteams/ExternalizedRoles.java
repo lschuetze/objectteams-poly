@@ -748,7 +748,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type anchor is a 3 element path - non final element in path
     // 1.6.6-otjld-type-anchor-is-path-1f
     public void test166_typeAnchorIsPath1f() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"T166taia1fMain.java",
 			    "\n" +
@@ -941,7 +941,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a type anchor is a 3 element path - role is accessed by a field - non final element in path
     // 1.6.6-otjld-type-anchor-is-path-4f
     public void test166_typeAnchorIsPath4f() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"T166taia4fMain.java",
 			    "\n" +

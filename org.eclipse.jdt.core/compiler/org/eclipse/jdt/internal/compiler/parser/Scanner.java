@@ -1363,11 +1363,19 @@ public int getNextToken() throws InvalidInputException {
 		this.nextToken = token;
 		token = TokenNameBeginTypeArguments;
 	} else if (token == TokenNameAT && atTypeAnnotation()) {
+//{ObjectTeams: '@' can mean 3 things now:
+	  if (atTypeAnchor()) {
+		token = TokenNameATOT;
+	  } else {
+// orig:
 		token = TokenNameAT308;
 		if (atEllipsisAnnotation()) {
 			this.nextToken = token;
 			token = TokenNameAT308DOTDOTDOT;
 		}
+// :giro
+	  }
+// SH
 	}
 
 	this.lookBack[0] = this.lookBack[1];
@@ -5336,7 +5344,11 @@ protected final boolean atEllipsisAnnotation() { // Did the '@' we saw just now 
 protected final boolean atTypeAnnotation() { // Did the '@' we saw just now herald a type annotation ? We should not ask the parser whether it would shift @308 !
 	return !this.activeParser.atConflictScenario(TokenNameAT);
 }
-
+//{ObjectTeams: one more variant of '@' to check: 
+protected final boolean atTypeAnchor() { // Did the '@' we saw just now herald a type anchor ?
+	return this.activeParser.atConflictScenario(TokenNameATOT);
+}
+// SH}
 public void setActiveParser(ConflictedParser parser) {
 	this.activeParser  = parser;
 	this.lookBack[0] = this.lookBack[1] = TokenNameNotAToken;  // no hand me downs please.
