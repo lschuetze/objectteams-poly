@@ -23,32 +23,62 @@ import java.security.ProtectionDomain;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.osgi.weaving.Activator;
+import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClass;
+import org.osgi.framework.hooks.weaving.WovenClassListener;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.service.component.ComponentContext;
+
 
 /**
  * This class integrates the OT/J weaver into OSGi using the standard API {@link WeavingHook}.
+ * <p>
+ * Additionally, we listen to events of woven classes changing to state {@link WovenClass#DEFINED}:
+ * </p>
+ * <ul>
+ * <li>Given that {@link AspectBindingRegistry#addDeferredTeamClasses} was used to record
+ * teams that could not be instantiated due to some required class being reported
+ * as {@link NoClassDefFoundError}.</li>
+ * <li>Assuming further that this error happened because the required class was in the process
+ * of being loaded further down the call stack.</li>
+ * <li>If later one of the not-found classes has been defined we use that trigger to
+ * re-attempt instantiating the dependent team(s).</li>
+ * </ul>
  */
-public class OTWeavingHook implements WeavingHook {
+public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 	private AspectBindingRegistry aspectBindingRegistry;
 	private ObjectTeamsTransformer objectTeamsTransformer;
 	
-	public OTWeavingHook() {
-		this.aspectBindingRegistry = Activator.loadAspectBindingRegistry();
+	/** Call-back from DS framework. */
+	public void activate(ComponentContext context) {
+		this.aspectBindingRegistry = loadAspectBindingRegistry(context.getBundleContext());
 		this.objectTeamsTransformer = new ObjectTeamsTransformer();
+	}
+
+	@SuppressWarnings("deprecation")
+	private AspectBindingRegistry loadAspectBindingRegistry(BundleContext context) {
+		org.osgi.service.packageadmin.PackageAdmin packageAdmin = null;;
+		
+		ServiceReference<?> ref= context.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class.getName());
+		if (ref!=null)
+			packageAdmin = (org.osgi.service.packageadmin.PackageAdmin)context.getService(ref);
+		else
+			log(ILogger.ERROR, "Failed to load PackageAdmin service. Will not be able to handle fragments.");
+
+		AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry();
+		aspectBindingRegistry.loadAspectBindings(packageAdmin);
+		return aspectBindingRegistry;
 	}
 
 	@Override
 	public void weave(WovenClass wovenClass) {
 		try {
-			// TODO(SH): ideally this trigger would be inserted into the previous woven class
-			// do whatever left-overs we find from previous invocations:
-			aspectBindingRegistry.instantiateScheduledTeams();
-			
 			BundleWiring bundleWiring = wovenClass.getBundleWiring();
 			String bundleName = bundleWiring.getBundle().getSymbolicName();
 			String className = wovenClass.getClassName();
@@ -70,10 +100,16 @@ public class OTWeavingHook implements WeavingHook {
 					log(e, "Failed to transform class "+className);
 				}
 			}
-			// unblock any waiting teams depending on this class:
-			aspectBindingRegistry.scheduleTeamClassesFor(className);
 		} catch (ClassCircularityError cce) {
 			log(cce, "Weaver encountered a circular class dependency");
+		}
+	}
+	
+	@Override
+	public void modified(WovenClass wovenClass) {
+		if (wovenClass.getState() == WovenClass.DEFINED) {
+			@SuppressWarnings("null") @NonNull String className = wovenClass.getClassName();
+			aspectBindingRegistry.instantiateScheduledTeams(className);
 		}
 	}
 

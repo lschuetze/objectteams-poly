@@ -35,21 +35,6 @@ public class Activator implements BundleActivator {
 		OTREInit();
 	}
 
-	@SuppressWarnings("deprecation")
-	public static AspectBindingRegistry loadAspectBindingRegistry() {
-		org.osgi.service.packageadmin.PackageAdmin packageAdmin = null;;
-		
-		ServiceReference<?> ref= context.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class.getName());
-		if (ref!=null)
-			packageAdmin = (org.osgi.service.packageadmin.PackageAdmin)context.getService(ref);
-		else
-			log(ILogger.ERROR, "Failed to load PackageAdmin service. Will not be able to handle fragments.");
-
-		AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry();
-		aspectBindingRegistry.loadAspectBindings(packageAdmin);
-		return aspectBindingRegistry;
-	}
-
 	@SuppressWarnings("restriction")
 	private void acquireLog(BundleContext bundleContext) {
 		try {

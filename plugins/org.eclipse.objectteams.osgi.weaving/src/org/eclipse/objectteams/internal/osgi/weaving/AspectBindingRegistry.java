@@ -110,8 +110,6 @@ public class AspectBindingRegistry {
 	}
 	// records of teams that have been deferred due to unresolved class dependencies:
 	private List<WaitingTeamRecord> deferredTeams = new ArrayList<>();
-	// records of teams whose class dependencies should/could be unblocked by now:
-	private List<WaitingTeamRecord> scheduledTeams = new ArrayList<>();
 
 	public static boolean IS_OTDT = false;
 	
@@ -323,37 +321,32 @@ public class AspectBindingRegistry {
 	}
 
 	/** Record the given team classes as waiting for instantiation/activation. */
-	public synchronized void addDeferredTeamClasses(List<WaitingTeamRecord> teamClasses) {
-		deferredTeams.addAll(teamClasses);		
-	}
-
-	/**
-	 * Check if the given class has been recorded as not-found before,
-	 * If so, unblock the team class(es) that depend on this class
-	 */
-	public synchronized void scheduleTeamClassesFor(@Nullable String className) {
-		List<WaitingTeamRecord> currentList = deferredTeams;
-		deferredTeams = new ArrayList<>();
-		for (WaitingTeamRecord record : currentList) {
-			if (record.notFoundClass.equals(className))
-				scheduledTeams.add(record);
-			else
-				deferredTeams.add(record);
+	public void addDeferredTeamClasses(List<WaitingTeamRecord> teamClasses) {
+		synchronized (deferredTeams) {
+			deferredTeams.addAll(teamClasses);
 		}
 	}
 
 	/**
-	 * Try to instantiate/activate any deferred teams that have been unblocked by now.
+	 * Try to instantiate/activate any deferred teams that may be unblocked
+	 * by the definition of the given trigger class.
 	 */
-	public void instantiateScheduledTeams() {
-		List<WaitingTeamRecord> currentList;
-		synchronized (this) {			
-			currentList = scheduledTeams;
-			scheduledTeams = new ArrayList<>();
+	public void instantiateScheduledTeams(String triggerClassName) {
+		List<WaitingTeamRecord> scheduledTeams = null;
+		synchronized(deferredTeams) {
+			for (WaitingTeamRecord record : new ArrayList<>(deferredTeams)) {
+				if (record.notFoundClass.equals(triggerClassName)) {
+					if (scheduledTeams == null)
+						scheduledTeams = new ArrayList<>();
+					if (deferredTeams.remove(record))
+						scheduledTeams.add(record);
+				}
+			}
 		}
-		for(WaitingTeamRecord record : currentList) {
+		if (scheduledTeams == null) return;
+		for(WaitingTeamRecord record : scheduledTeams) {
 			try {
-				new TeamLoader(deferredTeams).instantiateWaitingTeam(record);
+				new TeamLoader(deferredTeams).instantiateWaitingTeam(record); // may re-insert to deferredTeams
 			} catch (Exception e) {
 				log(e, "Failed to instantiate team "+record.getTeamName());
 				continue;

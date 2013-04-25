@@ -101,7 +101,9 @@ public class TeamLoader {
 			return instance;
 		} catch (NoClassDefFoundError ncdfe) {
 			needDeferring = true;
-			deferredTeams.add(new WaitingTeamRecord(teamClass, aspectBinding, ncdfe.getMessage().replace('/','.')));
+			synchronized(deferredTeams) {
+				deferredTeams.add(new WaitingTeamRecord(teamClass, aspectBinding, ncdfe.getMessage().replace('/','.')));
+			}
 		} catch (Throwable e) {
 			// application error during constructor execution?
 			log(e, "Failed to instantiate team "+teamName);
@@ -124,7 +126,9 @@ public class TeamLoader {
 				break;
 			}
 		} catch (NoClassDefFoundError e) {
-			deferredTeams.add(new WaitingTeamRecord(teamInstance, aspectBinding, e.getMessage().replace('/','.'))); // TODO(SH): synchronization
+			synchronized (deferredTeams) {
+				deferredTeams.add(new WaitingTeamRecord(teamInstance, aspectBinding, e.getMessage().replace('/','.'))); // TODO(SH): synchronization
+			}
 		} catch (Throwable t) {
 			// application errors during activation
 			log(t, "Failed to activate team "+teamName);
