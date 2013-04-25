@@ -84,14 +84,24 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 	 * @return char[][]
 	 */
 	public char [][] getParameterizedTypeName(){
-//{ObjectTeams: were all parameters value parameters?
-		if (this.typeArguments.length == 0) {
-			return super.getParameterizedTypeName();
-		}
-// SH}
 		StringBuffer buffer = new StringBuffer(5);
 		buffer.append(this.token).append('<');
+//{ObjectTeams: type anchors?
+		boolean haveOne = false;
+		if (this.typeAnchors != null) {
+			for (int i = 0, length = this.typeAnchors.length; i < length; i++) {
+				if (i > 0) buffer.append(',');
+				buffer.append(CharOperation.concatWith(this.typeAnchors[i].getParameterizedTypeName(), '.'));
+				haveOne = true;
+			}
+		}
+// SH}
 		for (int i = 0, length = this.typeArguments.length; i < length; i++) {
+//{ObjectTeams:
+		  if (haveOne)
+			  buffer.append(',');
+		  else
+// SH}
 			if (i > 0) buffer.append(',');
 			buffer.append(CharOperation.concatWith(this.typeArguments[i].getParameterizedTypeName(), '.'));
 		}
