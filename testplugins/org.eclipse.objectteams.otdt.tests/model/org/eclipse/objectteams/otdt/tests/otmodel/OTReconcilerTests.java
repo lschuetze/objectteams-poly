@@ -90,7 +90,7 @@ public class OTReconcilerTests extends ReconcilerTests {
 	}
 	
 	static {
-//		TESTS_NAMES = new String[] { "testEmptyNestedExternalTeam" };
+//		TESTS_NAMES = new String[] { "testDecodeTeamAnchor" };
 	}
 // ===== Copied all our modifications from AbstractJavaModelTests ===== 
 	/*
@@ -1695,5 +1695,60 @@ public class OTReconcilerTests extends ReconcilerTests {
     	} finally {
     		deleteProject("P");
     	}    	
+    }
+
+    // Bug 406603 - [reconciler] fails to decode team anchor reference if name contains a 'D'
+    public void testDecodeTeamAnchor() throws CoreException, InterruptedException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.ERROR);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+			
+			String teamSourceString =
+				"public team class  DomainObject {\n" +
+				"	public class Item{}\n" +
+				"   public void processItem(Item it) {}\n" +
+				"}\n";
+			this.createFile(
+				"/P/DomainObject.java",
+	    			teamSourceString);
+			
+			this.createFile(
+				"/P/ItemService.java",
+				"public class ItemService<DomainObject theDO> {\n" + 
+				"     public void processItem(Item<@theDO> item) { }\n" + 
+				"}\n");
+			
+			project.build(IncrementalProjectBuilder.FULL_BUILD, null);
+
+			String clientSourceString =	
+				"public class Client {\n" +
+				"	void foo(final DomainObject theDO) {\n" +
+				"		ItemService<@theDO> service = new ItemService<@theDO>();" +
+				"		Item<@theDO> myItem = new Item<@theDO>();\n" +
+				"		service.processItem(myItem);\n" + 
+				"	}\n" +
+				"}\n";
+			this.createFile(
+				"/P/Client.java",
+				clientSourceString);
+
+			char[] clientSourceChars = clientSourceString.toCharArray();
+			this.problemRequestor.initialize(clientSourceChars);
+			
+			ICompilationUnit unit = getCompilationUnit("/P/Client.java").getWorkingCopy(this.wcOwner, null);
+			
+			assertNoProblem(clientSourceChars, unit);
+
+    	} finally {
+    		deleteProject("P");
+    	}
     }
 }

@@ -359,6 +359,7 @@ public abstract class TypeConverter {
 //{ObjectTeams: detecting the @anchor
 				case '@':
 					isAnchor = true;
+					nameStarted = true;
 					nameFragmentStart++;
 					break;
 // SH}
