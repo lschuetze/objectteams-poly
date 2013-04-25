@@ -7,6 +7,7 @@ import java.security.ProtectionDomain;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.objectteams.osgi.weaving.Activator;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WeavingHook;
@@ -18,8 +19,8 @@ public class OTWeavingHook implements WeavingHook {
 	private AspectBindingRegistry aspectBindingRegistry;
 	private ObjectTeamsTransformer objectTeamsTransformer;
 	
-	public OTWeavingHook(AspectBindingRegistry aspectBindingRegistry) {
-		this.aspectBindingRegistry = aspectBindingRegistry;
+	public OTWeavingHook() {
+		this.aspectBindingRegistry = Activator.loadAspectBindingRegistry();
 		this.objectTeamsTransformer = new ObjectTeamsTransformer();
 	}
 
