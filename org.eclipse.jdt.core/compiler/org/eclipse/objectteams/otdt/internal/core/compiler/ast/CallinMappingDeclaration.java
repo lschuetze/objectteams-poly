@@ -247,10 +247,18 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 			// callin-to-final? respect OTJLD 4.1(f)
 			for (int i = 0; i < this.baseMethodSpecs.length; i++) {
 				MethodBinding baseMethod = this.baseMethodSpecs[i].resolvedMethod;
-				if (baseMethod != null && baseMethod.isFinal()) {
-					if (baseMethod.declaringClass != baseClass) {
-						this.scope.problemReporter().bindingToInheritedFinal(this.baseMethodSpecs[i], baseMethod, baseClass);
-						this.binding.tagBits |= TagBits.HasMappingIncompatibility;
+				if (baseMethod != null) {
+					if (baseMethod.isFinal()) {
+						if (baseMethod.declaringClass != baseClass) {
+							this.scope.problemReporter().bindingToInheritedFinal(this.baseMethodSpecs[i], baseMethod, baseClass);
+							this.binding.tagBits |= TagBits.HasMappingIncompatibility;
+						}
+					}
+					if (baseMethod.isConstructor()) {
+						if (this.callinModifier != TokenNameafter) {
+							this.scope.problemReporter().callinToCtorMustBeAfter(this.baseMethodSpecs[i], baseMethod);
+							this.binding.tagBits |= TagBits.HasMappingIncompatibility;							
+						}
 					}
 				}
 			}

@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.ast;
 
 import java.util.Arrays;
 
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.CompilationResult.CheckPoint;
@@ -280,6 +281,8 @@ public class MethodSpec extends ASTNode implements InvocationSite
     	// getRealClass() is used, because decapsulation needs to find private methods,
     	// which for roles are found only in the class part.
    		ReferenceBinding receiverClass = receiverType.getRealClass();
+		boolean isConstructorSpec = CharOperation.equals(this.selector, receiverClass.sourceName());
+		char[] realSelector = isConstructorSpec ? TypeConstants.INIT : this.selector;
 		if (this.hasSignature) {
    	    	TypeBinding[] enhancedParameters = this.parameters;
    	    	// first chance: try enhanced:
@@ -287,14 +290,14 @@ public class MethodSpec extends ASTNode implements InvocationSite
    	    	CompilationResult compilationResult = scope.referenceContext().compilationResult();
 			CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
 			
-			this.resolvedMethod = TypeAnalyzer.findMethod(scope, receiverClass, this.selector, enhancedParameters, isBaseSide);
+			this.resolvedMethod = TypeAnalyzer.findMethod(scope, receiverClass, realSelector, enhancedParameters, isBaseSide);
 			if (   !this.resolvedMethod.isValidBinding()
 				&& this.resolvedMethod.problemId() == ProblemReasons.NotFound)
 			{
 				// second+ chance: try plain:
 				while (receiverClass != null) {
 					compilationResult.rollBack(cp);
-					MethodBinding plainMethod = TypeAnalyzer.findMethod(scope, receiverClass, this.selector, this.parameters, isBaseSide);
+					MethodBinding plainMethod = TypeAnalyzer.findMethod(scope, receiverClass, realSelector, this.parameters, isBaseSide);
 					if (!callinExpected) {
 						this.resolvedMethod = plainMethod;
 					} else {
@@ -315,7 +318,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
    	    	CompilationResult compilationResult = scope.referenceContext().compilationResult();
 			CheckPoint cp = compilationResult.getCheckPoint(scope.referenceContext());
 			while (receiverClass != null) {
-				this.resolvedMethod = receiverClass.getMethod(scope, this.selector);
+				this.resolvedMethod = receiverClass.getMethod(scope, realSelector);
 				if (this.resolvedMethod != null && this.resolvedMethod.isValidBinding())
 					break; // good
 				if (!allowEnclosing)
@@ -643,6 +646,12 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		}
 	}
 
+	public char[] codegenSeletor() {
+		if (this.resolvedMethod != null && this.resolvedMethod.isConstructor())
+			return TypeConstants.INIT;
+		else
+			return this.selector;
+	}
 	/** Like MethodBinding.signature() but use getSourceParamters() instead of enhanced parameters. */
 	public char[] signature() {
 		return signature(this.resolvedMethod);

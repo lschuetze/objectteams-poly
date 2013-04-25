@@ -35,7 +35,6 @@ import org.eclipse.objectteams.otre.util.DebugUtil;
 import org.eclipse.objectteams.otre.util.ListValueHashMap;
 import org.eclipse.objectteams.otre.util.MethodBinding;
 import org.eclipse.objectteams.otre.util.TeamIdDispenser;
-
 import org.apache.bcel.Constants;
 import org.apache.bcel.classfile.Field;
 import org.apache.bcel.classfile.LineNumber;
@@ -58,7 +57,6 @@ import org.apache.bcel.generic.FieldGen;
 import org.apache.bcel.generic.GOTO;
 import org.apache.bcel.generic.IADD;
 import org.apache.bcel.generic.ICONST;
-
 import org.apache.bcel.generic.IFNE;
 import org.apache.bcel.generic.IFNONNULL;
 import org.apache.bcel.generic.IF_ICMPLT;
@@ -78,6 +76,7 @@ import org.apache.bcel.generic.NOP;
 import org.apache.bcel.generic.ObjectType;
 import org.apache.bcel.generic.POP;
 import org.apache.bcel.generic.PUSH;
+import org.apache.bcel.generic.ReturnInstruction;
 import org.apache.bcel.generic.TABLESWITCH;
 import org.apache.bcel.generic.Type;
 
@@ -107,6 +106,7 @@ import org.apache.bcel.generic.Type;
 public class BaseMethodTransformation
 	extends ObjectTeamsTransformation
 {
+	private static final String AFTER_INIT = "_OT$after_init$";
 	// configurability for stepping behavior of the chaining wrapper:
 	private static boolean SHOW_ORIG_CALL 		= true;
 	private static boolean SHOW_RECURSIVE_CALL	= true;
@@ -385,6 +385,45 @@ public class BaseMethodTransformation
     		/*if (bindingsForMethod != null || containsSign(inheritedSigns, m)*/ /*|| containsSign(interfaceInheritedSigns, m)*/ //) {
     		MethodBinding inheritedBinding = matchingBinding(inheritedBindings, m, false);
     		String method_key = method_name+'.'+method_signature;
+    		
+    		if (bindingsForMethod != null && INIT.equals(method_name)) {
+    			
+    			//add method '_OT$after_init$' :
+    			mg = getConcretMethodGen(m, class_name, cpg);
+    			MethodGen chainGen = generateAfterConstructorWrapper(class_name, cpg,
+    									mg.getAccessFlags(), method_name, method_signature, mg.getArgumentNames());
+    			Method    chain    = generateAfterConstructorWrapperBody(class_name, cg, cpg, 
+    									mg, method_name, method_signature, chainGen, firstLine);
+													
+    			if (cg.containsMethod(chain.getName(), chain.getSignature()) == null)
+    				ce.addMethod(chain, cg);
+    			
+    			mg = new MethodGen(m, class_name, cpg);
+    			InstructionList il = mg.getInstructionList();
+    			InstructionHandle end = il.getEnd();
+    			if (end.getInstruction() instanceof ReturnInstruction) {
+//    				CodeExceptionGen[] excGens = mg.getExceptionHandlers(); // needed to update exception handlers?
+    				end.setInstruction(new NOP());
+    				InstructionHandle afterInitDispatch = il.append(new NOP());
+    				createInitialDispatchCode(il, class_name, AFTER_INIT, mg, false, Type.VOID, cg.getMajor(), cpg);
+    				InstructionHandle[] instructionHandles = il.getInstructionHandles();
+					for (InstructionHandle ih : instructionHandles) {
+						if (ih == afterInitDispatch) break;
+    					if (ih.getInstruction() instanceof ReturnInstruction) {
+    						ih.setInstruction(new NOP());
+    						il.insert(ih, new GOTO(afterInitDispatch));
+    					}
+    				}
+    				// tidy:
+    		        mg.setMaxStack();
+    		        mg.setMaxLocals();
+    		        Method generatedMethod = mg.getMethod();
+    		        il.dispose();
+    		        ce.addOrReplaceMethod(generatedMethod, cg);
+    			}
+    			continue;
+    		}
+    	
 			if (bindingsForMethod != null || (inheritedBinding != null && !m.isStatic() && !m.isPrivate())) {
     			
     			mg = newMethodGen(m, class_name, cpg);
@@ -558,13 +597,30 @@ public class BaseMethodTransformation
         MethodGen mg = getConcretMethodGen(m, class_name, cpg);
 
         String  method_name     = m.getName();
-        Type    returnType      = mg.getReturnType();
-        Type    chainReturnType = object;
-        Type[]  argTypes        = mg.getArgumentTypes();
 
         String  name_chain      = genChainMethName(method_name);
 
         InstructionList il      = mg.getInstructionList();
+        
+        createInitialDispatchCode(il, class_name, name_chain, mg, m.isStatic(), object, major, cpg);
+		// tidy:
+        mg.setMaxStack();
+        mg.setMaxLocals();
+        Method generatedMethod = mg.getMethod();
+        il.dispose();
+        return generatedMethod;
+	}
+    private void createInitialDispatchCode(InstructionList il,
+    										String class_name,
+    										String name_chain,
+    										MethodGen mg,
+    										boolean isStatic,
+    										Type chainReturnType,
+    										int major,
+    										ConstantPoolGen cpg) 
+    {
+        Type[]  argTypes        = mg.getArgumentTypes();
+        Type    returnType      = mg.getReturnType();
 
         InstructionHandle startSynchronized;
         InstructionHandle chainCall; 
@@ -676,7 +732,7 @@ public class BaseMethodTransformation
 		    il.append(new MONITOREXIT());
 		    
 			// load special arguments:
-			if(!m.isStatic()) { // "this" cannot be accessed by static methods 
+			if(!isStatic) { // "this" cannot be accessed by static methods 
 				chainCall= il.append(InstructionFactory.createThis());                  // this
 			} else {
 				chainCall= il.append(new NOP());
@@ -696,9 +752,9 @@ public class BaseMethodTransformation
 		
 		
         // load regular arguments:
-        int index = m.isStatic()?0:1;
+        int index = isStatic?0:1;
         // chaining wrapper is always public, so never user INVOKESPECIAL:
-        short invocationKind = m.isStatic()?Constants.INVOKESTATIC:Constants.INVOKEVIRTUAL;
+        short invocationKind = isStatic?Constants.INVOKESTATIC:Constants.INVOKEVIRTUAL;
 		
         for (int i=0; i<argTypes.length; i++) {
             il.append(InstructionFactory.createLoad(argTypes[i],index));
@@ -724,13 +780,6 @@ public class BaseMethodTransformation
         il.append(InstructionFactory.createLoad(Type.THROWABLE, ex.getIndex()));
         il.append(new ATHROW());
         mg.addExceptionHandler(startSynchronized, chainCall, handler, Type.THROWABLE);
-        
-		// tidy:
-        mg.setMaxStack();
-        mg.setMaxLocals();
-        Method generatedMethod = mg.getMethod();
-        il.dispose();
-        return generatedMethod;
     }
 
 	/**
@@ -938,6 +987,116 @@ public class BaseMethodTransformation
         return generated;
     }
 
+	/**
+	 * Generate a chaining wrapper for the original method described by the passed arguments. 
+	 * @param class_name			the name of the appropriate class
+	 * @param cpg					the ConstantPoolGen of the class
+	 * @param accessFlags			raw flags of the method to add, visibility will however be ignored/set to public inside
+	 * @param method_name			the name of the original method
+	 * @param method_signature	    the signature of the original method
+	 * @param argumentNames			source level argument names, may be null
+	 * @return an new method with an empty instruction list
+	 */
+	MethodGen generateAfterConstructorWrapper(String 	 		class_name, 
+								      		  ConstantPoolGen 	cpg, 
+								      		  int	   			accessFlags,
+								      		  String 	 		method_name,
+								      		  String 	 		method_signature,
+								      		  String[] 			argumentNames)
+    {
+		Type[] argumentTypes = Type.getArgumentTypes(method_signature);
+		if (argumentNames == null) {
+			argumentNames = new String[argumentTypes.length];
+			for (int i = 0; i < argumentNames.length; i++)
+				argumentNames[i] = "arg"+i;
+		}
+        return new MethodGen(accessFlags,
+        					 Type.VOID,  					   // ALWAYS!
+        					 enhanceArgumentTypes(argumentTypes),
+        					 enhanceArgumentNames(argumentNames),
+        					 AFTER_INIT,
+        					 class_name,
+        					 new InstructionList(), 
+        					 cpg);
+    }
+	
+	/**
+	 * Create the instructions for the chaining wrapper, which includes dispatch code
+	 * and the termination condition for the recursion.
+	 * @param class_name
+	 * @param cg
+	 * @param cpg
+	 * @param mg
+	 * @param method_name
+	 * @param method_signature
+	 * @param chainMethod
+	 * @param firstLine
+	 * @return
+	 */
+	Method generateAfterConstructorWrapperBody(String 	 		class_name,
+			   						   ClassGen  		cg,
+			   						   ConstantPoolGen 	cpg,
+			   						   MethodGen 		mg,
+			   						   String 	 		method_name,
+			   						   String 	 		method_signature, 
+			   						   MethodGen		chainMethod,
+			   						   int 		 		firstLine)
+	{
+        InstructionList il     			   = chainMethod.getInstructionList();
+       
+        InstructionHandle ih;
+        int ot_team;
+		{
+			LocalVariableGen lg = chainMethod.addLocalVariable("_OT$team", teamType, null, null); //$NON-NLS-1$
+			ot_team = lg.getIndex();
+			// generated: Team _OT$team;
+		}
+
+        il.append(InstructionFactory.createLoad(Type.INT, IDX_ARG));
+        il.append(InstructionFactory.createLoad(teamArray, TEAMS_ARG));
+        il.append(new ARRAYLENGTH());
+        IF_ICMPLT recursionNotYetTerminated = new IF_ICMPLT(null);
+        il.append(recursionNotYetTerminated);
+        // generated: if (_OT$teams.length < _OT$idx) {
+     
+		// terminate the recursion:
+        il.append(InstructionFactory.createReturn(Type.VOID));
+        // generated: return;
+
+        ih = il.append(new NOP());
+        recursionNotYetTerminated.setTarget(ih);
+        // generated: ; (end of the if part)
+
+        il.append(InstructionFactory.createLoad(teamArray, TEAMS_ARG));
+        il.append(InstructionFactory.createLoad(Type.INT,  IDX_ARG));
+        il.append(InstructionFactory.createArrayLoad(teamType));
+        il.append(InstructionFactory.createStore(teamType, ot_team));
+        // generated: _OT$team = _OT$teams[_OT$idx];
+
+        // ---------------------------------------------
+        createAfterCtorDispatchCode(chainMethod, il,
+						   class_name, method_name,
+						   method_signature, ot_team, cg, firstLine);
+        // ---------------------------------------------
+        il.append(InstructionFactory.createReturn(Type.VOID));
+        if (debugging)
+        	chainMethod.addLineNumber(ih, STEP_OVER_LINENUMBER);
+        
+		// tidy:
+		chainMethod.removeNOPs();
+		try { // [SH]: overcautious: I once saw this CCE with no clue, why it happened :(
+			chainMethod.setMaxStack();
+		} catch (ClassCastException cce) {
+			System.err.println(chainMethod);
+			cce.printStackTrace();
+		}
+        chainMethod.setMaxLocals();
+		//chainMethod.removeNOPs();
+		Method generated = chainMethod.getMethod();
+		il.dispose();
+        return generated;
+    }
+
 	private short getInvocationType(MethodGen chainMethod) {
 		if (chainMethod.isStatic())
 			return Constants.INVOKESTATIC;
@@ -1102,6 +1261,59 @@ public class BaseMethodTransformation
         				  /*NORESULT*/result, firstLine, cg.getMajor(), useBindingIdx));
             if(logging) printLogMessage("after bindings: " //$NON-NLS-1$
         					+ sortedMethodBindings.get("after")); //$NON-NLS-1$
+        }
+    }
+
+	/**
+	 *  Generate the dispatch code by which a chaining wrapper invokes the
+	 *  callin method(s).
+	 *  For constructors we only have one block: after.
+	 * @param chainMethod		the chaining wrapper method
+	 * @param il				the InstructionList of the chaining wrapper			
+	 * @param class_name		the name of the appropriate class
+	 * @param method_name		the name of the original method
+	 * @param method_signature	the signature of the original method
+	 * @param ot_team			the index of the variable containing the team currently processed by the chaining wrapper
+	 * @param cg				the ClassGen of the appropriate class
+	 * @param firstLine			the first real source line of this method
+	 */
+	void createAfterCtorDispatchCode(MethodGen chainMethod, InstructionList il,
+							String class_name, String method_name,
+							String method_signature, int ot_team, ClassGen cg, int firstLine)
+    {
+		// no sort by modifier since we only handle "after" here.
+        Collection<MethodBinding> callinsForMethod;
+        callinsForMethod = CallinBindingManager.getBindingForBaseMethod(class_name,
+        																method_name, method_signature);
+        List<MethodBinding> inheritedMethodBindings = CallinBindingManager.getInheritedBaseMethodBindings(class_name, method_name, method_signature);
+        
+        //----------------------------------------------------------------------------------------------
+        if (!chainMethod.isStatic())
+        	callinsForMethod.addAll(inheritedMethodBindings);
+        
+        ListValueHashMap<MethodBinding> afterBindings = new ListValueHashMap<MethodBinding>();
+        
+        Iterator<MethodBinding> it = callinsForMethod.iterator();
+        while (it.hasNext()) {
+        	MethodBinding methodBinding = it.next();
+        	//sourceMapGen.addSourceMapInfo(methodBinding);
+        	// ----> added for precedence purpose:
+        	if (methodBinding.getModifier().equals("after")) { //$NON-NLS-1$
+        		afterBindings.put(methodBinding.getTeamClassName(), methodBinding);
+        	}
+        	// <---
+        }
+        
+        /****************************************************************************/
+        // after callin :
+        if (afterBindings.size() > 0) { //$NON-NLS-1$
+            if(logging) printLogMessage("after bindings will be applied..."); //$NON-NLS-1$
+        	il.append(createSwitch(
+        				  afterBindings,
+        				  chainMethod, ot_team,
+        				  /*NORESULT*/-1, firstLine, cg.getMajor(), false));
+            if(logging) printLogMessage("after bindings: " //$NON-NLS-1$
+        					+ afterBindings); //$NON-NLS-1$
         }
     }
 

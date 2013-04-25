@@ -117,7 +117,7 @@ cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/Parser.java        
 cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/TerminalTokens.java           backup
 cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/ParserBasicInformation.java   backup
 cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/parser?.rsc                   backup
-cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/readableNames.properties      backup
+cp $SOURCE/compiler/org/eclipse/jdt/internal/compiler/parser/readableNames.props		   backup
 
 cp $GRAMMAR output
 
