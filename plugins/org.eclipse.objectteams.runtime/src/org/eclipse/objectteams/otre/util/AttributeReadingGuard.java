@@ -25,7 +25,7 @@ import java.util.Map;
  */
 public class AttributeReadingGuard {
 	
-	private static Map<ClassLoader, AttributeReadingGuard> instances = new HashMap<ClassLoader, AttributeReadingGuard>();
+	private static Map<Object, AttributeReadingGuard> instances = new HashMap<Object, AttributeReadingGuard>();
     private static AttributeReadingGuard defaultInstance = new AttributeReadingGuard();
     
     private ArrayList<String> servedClasses = new ArrayList<String>();
@@ -66,15 +66,15 @@ public class AttributeReadingGuard {
 
 	/**
 	 * Since actual data are stored in an instance, static methods need to retrieve the appropriate
-     * instance regarding the given class loader.
+     * instance regarding the given token (s.t. like a class loader).
 	 */
-	public static AttributeReadingGuard getInstanceForLoader(ClassLoader loader) {
-		if (loader == null)
+	public static AttributeReadingGuard getInstanceForLoader(Object token) {
+		if (token == null)
 			return defaultInstance;
 		
-		AttributeReadingGuard instance = instances.get(loader);
+		AttributeReadingGuard instance = instances.get(token);
 		if (instance == null)
-			instances.put(loader, instance = new AttributeReadingGuard());
+			instances.put(token, instance = new AttributeReadingGuard());
 		return instance;
 	}
 }

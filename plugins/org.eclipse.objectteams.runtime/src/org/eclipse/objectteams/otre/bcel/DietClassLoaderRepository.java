@@ -38,6 +38,7 @@ import java.io.InputStream;
 
 import org.apache.bcel.classfile.JavaClass;
 import org.apache.bcel.util.ClassLoaderRepository;
+import org.eclipse.objectteams.otre.ClassLoaderAccess;
 
 /**
  * Class loader repository that retains less memory than BCEL's original.
@@ -46,10 +47,10 @@ import org.apache.bcel.util.ClassLoaderRepository;
 public class DietClassLoaderRepository extends ClassLoaderRepository {
 
 	// repeat a field that is private in the super class:
-	ClassLoader dietClassLoaderRepository_loader;
+	Object dietClassLoaderRepository_loader;
 	
-	public DietClassLoaderRepository(ClassLoader loader) {
-		super(loader);
+	public DietClassLoaderRepository(Object loader) {
+		super(loader instanceof ClassLoader ? (ClassLoader) loader : null);
 		dietClassLoaderRepository_loader = loader;
 	}
 
@@ -61,7 +62,7 @@ public class DietClassLoaderRepository extends ClassLoaderRepository {
             return c;
         }
         try {
-            InputStream is = dietClassLoaderRepository_loader.getResourceAsStream(classFile + ".class");
+            InputStream is = ClassLoaderAccess.getResourceAsStream(dietClassLoaderRepository_loader, classFile + ".class");
             if (is == null) {
                 throw new ClassNotFoundException(className + " not found.");
             }

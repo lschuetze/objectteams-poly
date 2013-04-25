@@ -32,7 +32,7 @@ import org.eclipse.objectteams.otre.bcel.DietClassLoaderRepository;
 public class RepositoryAccess {
 
 	/** One class repository per class loader. */
-	private static HashMap<ClassLoader,DietClassLoaderRepository> repositories = new HashMap<ClassLoader,DietClassLoaderRepository>();
+	private static HashMap<Object,DietClassLoaderRepository> repositories = new HashMap<Object,DietClassLoaderRepository>();
 	/** One current repository per thread. */
 	private static ThreadLocal<DietClassLoaderRepository> currentRepository = new ThreadLocal<DietClassLoaderRepository>();
 	 
@@ -41,7 +41,7 @@ public class RepositoryAccess {
 	 * @param loader class loader, may be null
 	 * @return the previously active class repository for this thread
 	 */
-	public static synchronized DietClassLoaderRepository setClassLoader(ClassLoader loader) {
+	public static synchronized DietClassLoaderRepository setClassLoader(Object loader) {
 		DietClassLoaderRepository clr = null;
 		if (loader != null) { // avoid creating ClassLoaderRepository with null loader
 			clr = repositories.get(loader);

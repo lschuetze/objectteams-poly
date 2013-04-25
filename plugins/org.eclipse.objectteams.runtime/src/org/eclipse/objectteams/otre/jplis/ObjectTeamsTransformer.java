@@ -228,7 +228,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	 * @throws IOException 
 	 * @throws ClassFormatError 
 	 */
-	public void readOTAttributes(InputStream file, String fileName, ClassLoader loader) 
+	public void readOTAttributes(InputStream file, String fileName, Object loader) 
 			throws ClassFormatError, IOException 
 	{
 		ClassParser   cp  = new ClassParser(file, fileName);
