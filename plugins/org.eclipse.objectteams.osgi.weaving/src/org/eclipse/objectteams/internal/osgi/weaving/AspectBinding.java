@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2009 Germany and Technical University Berlin, Germany.
+ * Copyright 2009, 2013 Germany and Technical University Berlin, Germany and others.
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -11,7 +11,8 @@
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
  * Contributors:
- * Technical University Berlin - Initial API and implementation
+ * 		Technical University Berlin - Initial API and implementation
+ * 		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 

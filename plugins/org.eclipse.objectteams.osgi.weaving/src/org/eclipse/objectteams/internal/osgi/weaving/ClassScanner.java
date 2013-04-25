@@ -1,18 +1,18 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2008, 2010 Technical University Berlin, Germany.
+ * Copyright 2008, 2013 Technical University Berlin, Germany and others
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ClassScanner.java 23461 2010-02-04 22:10:39Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
  * Contributors:
- * Technical University Berlin - Initial API and implementation
+ * 		Technical University Berlin - Initial API and implementation
+ * 		Stephan Herrmann - Initial API and implementation
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
@@ -32,8 +32,8 @@ import org.eclipse.objectteams.otre.util.CallinBindingManager;
 import org.osgi.framework.Bundle;
 
 /**
- * Bridge for the TransformerPlugin by which it can access the ObjectTeamsTransformer
- * without accessing that OTRE class.
+ * Simple facility for scanning class files for OT Attributes without
+ * actually doing any weaving.
  * 
  * @author stephan
  * @since 1.2.0

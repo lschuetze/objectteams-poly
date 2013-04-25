@@ -1,3 +1,19 @@
+/**********************************************************************
+ * This file is part of "Object Teams Development Tooling"-Software
+ * 
+ * Copyright 2008, 2013 Technical University Berlin, Germany and others.
+ *  
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Please visit http://www.objectteams.org for updates and contact.
+ * 
+ * Contributors:
+ *	Technical University Berlin - Initial API and implementation
+ * 	Stephan Herrmann - Initial API and implementation
+ **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
 import static org.eclipse.objectteams.osgi.weaving.Activator.log;
@@ -6,13 +22,13 @@ import static org.eclipse.objectteams.osgi.weaving.Constants.ASPECT_BINDING_EXTP
 import static org.eclipse.objectteams.osgi.weaving.Constants.BASE_PLUGIN;
 import static org.eclipse.objectteams.osgi.weaving.Constants.CLASS;
 import static org.eclipse.objectteams.osgi.weaving.Constants.ID;
+import static org.eclipse.objectteams.osgi.weaving.Constants.REQUIRED_FRAGMENT;
 import static org.eclipse.objectteams.osgi.weaving.Constants.SELF;
 import static org.eclipse.objectteams.osgi.weaving.Constants.SUPERCLASS;
 import static org.eclipse.objectteams.osgi.weaving.Constants.TEAM;
 import static org.eclipse.objectteams.osgi.weaving.Constants.TRANSFORMER_PLUGIN_ID;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -24,12 +40,19 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.osgi.weaving.Constants;
-import org.eclipse.objectteams.otequinox.hook.IAspectRegistry;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.objectteams.ITeam;
 import org.osgi.framework.Bundle;
-import org.osgi.service.packageadmin.PackageAdmin;
 
+/**
+ * An instance of this class holds the information loaded from extensions
+ * to the <code>aspectBindings</code> extension point.
+ * <p>
+ * Additionally it maintains dynamic data during the process of loading,
+ * instantiating and activating teams.
+ * </p>
+ */
+// parts of this class are moved from org.eclipse.objectteams.otequinox.TransformerPlugin
 @NonNullByDefault
 public class AspectBindingRegistry {
 	
@@ -46,17 +69,14 @@ public class AspectBindingRegistry {
 			   new HashMap<String, ArrayList<AspectBinding>>();
 	private static HashMap<String, ArrayList<AspectBinding>> aspectBindingsByAspectPlugin = 
 		       new HashMap<String, ArrayList<AspectBinding>>();
-	// map base bundle name to list of adapted base class names
-	private static HashMap<String, ArrayList<String>> adaptedBaseClassNames =
-		       new HashMap<String, ArrayList<String>>();
-	// set of aspect plug-ins which have internal teams:
-	private Set<String> selfAdaptingAspects= new HashSet<String>();
+	private Set<String> selfAdaptingAspects= new HashSet<String>(); // TODO, never read / evaluated
 	
-	private HashMap<String, BaseBundleActivation> baseTripWires = new HashMap<>();
+	private HashMap<String, BaseBundleLoadTrigger> baseTripWires = new HashMap<>();
 
+	/** Record for one team waiting for instantiation/activation. */
 	static class WaitingTeamRecord {
-		@Nullable Class<? extends ITeam> teamClass;
-		@Nullable ITeam teamInstance;
+		@Nullable Class<? extends ITeam> teamClass; // ... either this is set
+		@Nullable ITeam teamInstance;	// ... or this
 		AspectBinding aspectBinding;
 		String notFoundClass;
 		
@@ -100,7 +120,7 @@ public class AspectBindingRegistry {
 	}
 
 	/* Load extensions for org.eclipse.objectteams.otequinox.aspectBindings and check aspect permissions. */
-	public void loadAspectBindings(@Nullable PackageAdmin packageAdmin) {
+	public void loadAspectBindings(@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin) {
 		IConfigurationElement[] aspectBindingConfigs = RegistryFactory.getRegistry().getConfigurationElementsFor(
 				TRANSFORMER_PLUGIN_ID, ASPECT_BINDING_EXTPOINT_ID);
 		
@@ -111,6 +131,7 @@ public class AspectBindingRegistry {
 			@SuppressWarnings("null")@NonNull String aspectBundleId= currentBindingConfig.getContributor().getName();
 			IS_OTDT |= KNOWN_OTDT_ASPECTS.contains(aspectBundleId);
 			if (packageAdmin != null) {
+				@SuppressWarnings("deprecation")
 				Bundle[] aspectBundles = packageAdmin.getBundles(aspectBundleId, null);
 				if (aspectBundles == null || aspectBundles.length == 0 || (aspectBundles[0].getState() < Bundle.RESOLVED)) {
 					log(ILogger.ERROR, "aspect bundle "+aspectBundleId+" is not resolved - not loading aspectBindings.");
@@ -125,12 +146,16 @@ public class AspectBindingRegistry {
 				continue;
 			}
 			String baseBundleId = basePlugins[0].getAttribute(ID);
-			
-// FIXME(SH):
-//			//base fragments?
-//			IConfigurationElement[] fragments = basePlugins[0].getChildren(REQUIRED_FRAGMENT);
-//			if (fragments != null && !checkRequiredFragments(aspectBundleId, baseBundleId, fragments)) // reported inside
-//				continue;
+			if (baseBundleId == null) {
+				log(ILogger.ERROR, "aspectBinding of "+aspectBundleId+" must specify the id of a basePlugin");
+				continue;
+			}
+				
+ 			//base fragments?
+			IConfigurationElement[] fragments = basePlugins[0].getChildren(REQUIRED_FRAGMENT);
+			if (fragments != null 
+					&& !checkRequiredFragments(aspectBundleId, baseBundleId, fragments, packageAdmin)) // reported inside
+				continue;
 			
 			AspectBinding binding = new AspectBinding(aspectBundleId, baseBundleId, basePlugins[0].getChildren(Constants.FORCED_EXPORTS_ELEMENT));
 			// TODO(SH): maybe enforce that every bundle id is given only once?
@@ -150,7 +175,7 @@ public class AspectBindingRegistry {
 				addBindingForBaseBundle(realBaseBundleId, binding);
 				addBindingForAspectBundle(aspectBundleId, binding);
 				if (!baseTripWires.containsKey(realBaseBundleId))
-					baseTripWires.put(realBaseBundleId, new BaseBundleActivation(realBaseBundleId, this, packageAdmin));
+					baseTripWires.put(realBaseBundleId, new BaseBundleLoadTrigger(realBaseBundleId, this, packageAdmin));
 
 				
 				// now that binding.teamClasses is filled connect to super team, if requested:
@@ -166,6 +191,55 @@ public class AspectBindingRegistry {
 		}
 	}
 	
+	@SuppressWarnings("deprecation") // multiple uses of deprecated but still recommended class PackageAdmin
+	private boolean checkRequiredFragments(String aspectBundleId, String baseBundleId, IConfigurationElement[] fragments, 
+			@Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin) 
+	{
+		// checking only, no real action needed.
+		boolean hasError = false;
+		for (IConfigurationElement fragment : fragments) {
+			String fragId = fragment.getAttribute(ID);
+			if (fragId == null) {
+				log(ILogger.ERROR, "Mandatory attribute \"id\" missing from element \"requiredFragment\" of aspect binding in "+aspectBundleId);
+				return false;
+			} 
+			if (packageAdmin == null) {
+				log(ILogger.ERROR, "Not checking required fragment "+fragId+" in aspect binding of "+aspectBundleId+", package admin service not present");
+				return false; // report only once.
+			}
+			
+			Bundle[] fragmentBundles = packageAdmin.getBundles(fragId, null);
+			if (fragmentBundles == null || fragmentBundles.length == 0) {
+				log(ILogger.ERROR, "Required fragment "+fragId+" not found in aspect binding of "+aspectBundleId);
+				hasError = true;
+				continue;
+			}
+			Bundle fragmentBundle = fragmentBundles[0];
+			String aspectBindingHint = " (aspect binding of "+aspectBundleId+")";
+			if (packageAdmin.getBundleType(fragmentBundle) != org.osgi.service.packageadmin.PackageAdmin.BUNDLE_TYPE_FRAGMENT) {
+				log(ILogger.ERROR, "Required fragment " + fragId + " is not a fragment" + aspectBindingHint);
+				hasError = true;
+				continue;
+			}
+			Bundle[] hosts = packageAdmin.getHosts(fragmentBundle);
+			if (hosts == null || hosts.length == 0) {
+				if (fragmentBundle.getState() < Bundle.RESOLVED) {
+					log(ILogger.ERROR, "Required fragment " + fragId + " is not resolved" + aspectBindingHint);
+					hasError = true;
+					continue;
+				}
+				log(ILogger.ERROR, "Required fragment "+fragId+" has no host bundle"+aspectBindingHint);
+				hasError = true;					
+				continue;
+			}
+			Bundle host = hosts[0];
+			if (!host.getSymbolicName().equals(baseBundleId)) {
+				log(ILogger.ERROR, "Required fragment "+fragId+" has wrong host "+host.getSymbolicName()+aspectBindingHint);
+				hasError = true;
+			}
+		}
+		return !hasError;
+	}
 
 	private static void addBindingForBaseBundle(String baseBundleId, AspectBinding binding) {
 		ArrayList<AspectBinding> bindingList = aspectBindingsByBasePlugin.get(baseBundleId);
@@ -214,10 +288,9 @@ public class AspectBindingRegistry {
 		}		
 	}
 
-
 	/**
-	 * Internal API for TransformerHook:
-	 * see {@link IAspectRegistry#getAdaptedBasePlugins(Bundle)}
+	 * Given a potential aspect bundle, answer the symbolic names of all base bundles
+	 * adapted by the aspect bundle.
 	 */
 	public @Nullable String[] getAdaptedBasePlugins(Bundle aspectBundle) {
 		ArrayList<AspectBinding> bindings = aspectBindingsByAspectPlugin.get(aspectBundle.getSymbolicName());
@@ -234,75 +307,17 @@ public class AspectBindingRegistry {
 		ArrayList<AspectBinding> list = aspectBindingsByBasePlugin.get(symbolicName);
 		return list != null && !list.isEmpty();
 	}
-	
-	/**
-	 * public API:
-	 * {@link IAspectRegistry#getAdaptingAspectPlugins(Bundle)} 
-	 */
-	public String[] getAdaptingAspectPlugins(Bundle basePlugin) {
-		return getAdaptingAspectPlugins(basePlugin.getSymbolicName());
-	}
-	/**
-	 * public API:
-  	 * Get the names of aspect plugins adapting a given base plugin.
-	 * @param basePluginName symbolic name of a base plugin.
-	 * @return non-null array of symbolic names of aspect plugins.
-	 */
-	public String[] getAdaptingAspectPlugins(@Nullable String basePluginName) {
-		ArrayList<AspectBinding> list = aspectBindingsByBasePlugin.get(basePluginName);
-		
-		if (list == null)
-			return new String[0];
-		
-		String[] aspects = new String[list.size()];
-		for (int i=0; i< list.size(); i++) 
-			aspects[i] = list.get(i).aspectPlugin;
-		
-		return aspects;
-	}
-	
+
 	/**
 	 * Get the list of aspect bindings affecting the given base plugin.
 	 */
 	public @Nullable List<AspectBinding> getAdaptingAspectBindings(@Nullable String basePluginName) {
 		return aspectBindingsByBasePlugin.get(basePluginName);
 	}
-	
-	/**
-     * Recored the names of base classes adapted by a given team from a given aspect bundle.
-	 */
-	public void storeAdaptedBaseClassNames(String aspectBundleName, String teamName, Collection<String> baseClassNames) 
-	{
-		// search the base plugin being adapted by the given team:
-		String basePlugin = null;
-		bindings:
-		for (AspectBinding aspectBinding : aspectBindingsByAspectPlugin.get(aspectBundleName)) {
-			for (String aspectTeamClass : aspectBinding.teamClasses)
-				if (aspectTeamClass.equals(teamName)) {
-					basePlugin = aspectBinding.basePlugin;
-					break bindings;
-				}
-		}
-		if (basePlugin == null && selfAdaptingAspects.contains(aspectBundleName))
-			basePlugin = aspectBundleName;
-		if (basePlugin == null) {
-			log(ILogger.ERROR, "Base plugin for team "+teamName+" from "+aspectBundleName+" not found!");
-			return;
-		}
-		// merge base class names into existing:
-		synchronized (adaptedBaseClassNames) {
-			ArrayList<String> baseBundleClassNames = adaptedBaseClassNames.get(basePlugin);
-			if (baseBundleClassNames == null) {
-				baseBundleClassNames = new ArrayList<String>();
-				adaptedBaseClassNames.put(basePlugin, baseBundleClassNames);
-			}
-			baseBundleClassNames.addAll(baseClassNames);
-		}
-	}
 
 	/** Check if the given base bundle / base class mandate any loading/instantiation/activation of teams. */
 	public void triggerLoadingHooks(@Nullable String bundleName, @Nullable String className) {
-		BaseBundleActivation activation = baseTripWires.get(bundleName);
+		BaseBundleLoadTrigger activation = baseTripWires.get(bundleName);
 		if (activation != null)
 			activation.fire(className);
 	}
@@ -338,7 +353,7 @@ public class AspectBindingRegistry {
 		}
 		for(WaitingTeamRecord record : currentList) {
 			try {
-				BaseBundleActivation.instantiateWaitingTeam(record, deferredTeams);
+				new TeamLoader(deferredTeams).instantiateWaitingTeam(record);
 			} catch (Exception e) {
 				log(e, "Failed to instantiate team "+record.getTeamName());
 				continue;
