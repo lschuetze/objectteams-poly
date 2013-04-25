@@ -24,6 +24,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrecedenceDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TsuperReference;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
 
 /**
@@ -488,6 +489,12 @@ public abstract class ASTVisitor {
 		// do nothing by default
 	}
 	public void endVisit(LiftingTypeReference  liftingTypeReference, ClassScope scope) {
+		// do nothing by default
+	}
+	public void endVisit(TypeAnchorReference typeAnchorReference, BlockScope scope) {
+		// do nothing by default
+	}
+	public void endVisit(TypeAnchorReference typeAnchorReference, ClassScope scope) {
 		// do nothing by default
 	}
 	public void endVisit(WithinStatement withinStatement, BlockScope scope) {
@@ -968,6 +975,12 @@ public abstract class ASTVisitor {
 		return true; // do nothing by default, keep traversing
 	}
 	public boolean visit(LiftingTypeReference liftingTypeReference, ClassScope scope) {
+		return true; // do nothing by default, keep traversing
+	}
+	public boolean visit(TypeAnchorReference typeAnchorReference, BlockScope scope) {
+		return true; // do nothing by default, keep traversing
+	}
+	public boolean visit(TypeAnchorReference typeAnchorReference, ClassScope scope) {
 		return true; // do nothing by default, keep traversing
 	}
 	public boolean visit(WithinStatement withinStatement, BlockScope scope) {

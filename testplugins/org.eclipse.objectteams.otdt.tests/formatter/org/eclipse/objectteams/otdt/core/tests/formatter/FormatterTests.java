@@ -117,7 +117,7 @@ public class FormatterTests extends AbstractJavaModelTests {
 			description.setAutoBuilding(false);
 			getWorkspace().setDescription(description);
 		}
-		setUpJavaProject("Formatter", "1.5"); //$NON-NLS-1$ $NON-NLS-2$
+		this.currentProject = setUpJavaProject("Formatter", "1.5"); //$NON-NLS-1$ $NON-NLS-2$
 		if (DEBUG) {
 			this.time = System.currentTimeMillis();
 		}
@@ -158,9 +158,9 @@ public class FormatterTests extends AbstractJavaModelTests {
 	}
 
 	private void runTest(String packageName, String compilationUnitName) {
-		DefaultCodeFormatterOptions preferences = new DefaultCodeFormatterOptions(DefaultCodeFormatterConstants.getEclipse21Settings());
+		DefaultCodeFormatterOptions preferences = new DefaultCodeFormatterOptions(DefaultCodeFormatterConstants.getEclipseDefaultSettings());
 		preferences.number_of_empty_lines_to_preserve = 0;
-		DefaultCodeFormatter codeFormatter = new DefaultCodeFormatter(preferences);
+		DefaultCodeFormatter codeFormatter = new DefaultCodeFormatter(preferences, this.currentProject.getOptions(false));
 		runTest(codeFormatter, packageName, compilationUnitName, CodeFormatter.K_COMPILATION_UNIT, 0);
 	}
 
@@ -225,5 +225,9 @@ public class FormatterTests extends AbstractJavaModelTests {
 	
 	public void test007() {
 		runTest("test007", "Class1.java");//$NON-NLS-1$ //$NON-NLS-2$
+	}
+	
+	public void testFlightBonus() {
+		runTest("testFlightBonus", "FlightBonusDialog.java");
 	}
 }

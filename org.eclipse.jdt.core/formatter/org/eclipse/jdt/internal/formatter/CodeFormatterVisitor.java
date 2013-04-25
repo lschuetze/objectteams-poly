@@ -134,6 +134,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeRefere
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrecedenceDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.QualifiedBaseReference;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 import org.eclipse.text.edits.TextEdit;
@@ -5232,6 +5234,11 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		}
 		qualifiedThisReference.qualification.traverse(this, scope);
 		this.scribe.printNextToken(TerminalTokens.TokenNameDOT);
+//{ObjectTeams: could be either 'this' or 'base':
+	  if (qualifiedThisReference instanceof QualifiedBaseReference)
+		this.scribe.printNextToken(TerminalTokens.TokenNamebase);
+	  else
+// SH}
 		this.scribe.printNextToken(TerminalTokens.TokenNamethis);
 
 		if (numberOfParens > 0) {
@@ -5239,7 +5246,34 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		}
 		return false;
 	}
+//{ObjectTeams: as a type anchor in a playedBy clause even a qualified this reference can occur in classScope:
+	/**
+	 * @see org.eclipse.jdt.internal.compiler.ASTVisitor#visit(org.eclipse.jdt.internal.compiler.ast.QualifiedThisReference, org.eclipse.jdt.internal.compiler.lookup.BlockScope)
+	 */
+	public boolean visit(
+		QualifiedThisReference qualifiedThisReference,
+		ClassScope scope) {
 
+		final int numberOfParens = (qualifiedThisReference.bits & ASTNode.ParenthesizedMASK) >> ASTNode.ParenthesizedSHIFT;
+		if (numberOfParens > 0) {
+			manageOpeningParenthesizedExpression(qualifiedThisReference, numberOfParens);
+		}
+		qualifiedThisReference.qualification.traverse(this, scope);
+		this.scribe.printNextToken(TerminalTokens.TokenNameDOT);
+// adapted:
+		if (qualifiedThisReference instanceof QualifiedBaseReference)
+			this.scribe.printNextToken(TerminalTokens.TokenNamebase);
+		else
+//
+			this.scribe.printNextToken(TerminalTokens.TokenNamethis);
+
+		if (numberOfParens > 0) {
+			manageClosingParenthesizedExpression(qualifiedThisReference, numberOfParens);
+		}
+		return false;
+	}
+// SH}
+	
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.ASTVisitor#visit(org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference, org.eclipse.jdt.internal.compiler.lookup.BlockScope)
 	 */
@@ -6335,6 +6369,16 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			formatNecessaryEmptyStatement();
 		}
 		return false;
+	}
+	
+	public boolean visit(TypeAnchorReference anchorRef, ClassScope scope) {
+		this.scribe.printNextToken(TerminalTokens.TokenNameAT);
+		return true;
+	}
+	
+	public boolean visit(TypeAnchorReference anchorRef, BlockScope scope) {
+		this.scribe.printNextToken(TerminalTokens.TokenNameAT);
+		return true;
 	}
 
 	// Copy of formatMethodArguments
