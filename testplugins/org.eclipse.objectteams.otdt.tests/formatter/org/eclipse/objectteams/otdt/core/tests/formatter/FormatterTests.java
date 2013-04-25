@@ -230,4 +230,8 @@ public class FormatterTests extends AbstractJavaModelTests {
 	public void testFlightBonus() {
 		runTest("testFlightBonus", "FlightBonusDialog.java");
 	}
+	
+	public void testBaseCall() {
+		runTest("testBaseCall", "MyTeam.java");
+	}
 }

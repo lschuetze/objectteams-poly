@@ -1996,7 +1996,13 @@ public class CodeFormatterVisitor extends ASTVisitor {
 							break;
 					}
 					try {
+//{ObjectTeams: some synthetic arguments are hidden, don't try to separate them with ','
+						boolean previousIsHidden = false;
+// orig:
 						for (int i = 0; i < argumentsLength; i++) {
+//   OT:
+						  if (!previousIsHidden) {
+//   :TO
 							if (i > 0) {
 								this.scribe.printNextToken(TerminalTokens.TokenNameCOMMA, this.preferences.insert_space_before_comma_in_method_invocation_arguments);
 								this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
@@ -2010,6 +2016,11 @@ public class CodeFormatterVisitor extends ASTVisitor {
 							if (i > 0 && this.preferences.insert_space_after_comma_in_method_invocation_arguments) {
 								this.scribe.space();
 							}
+//    OT:
+						  } else { // only this one line left of the above block:
+							this.scribe.alignFragment(argumentsAlignment, i);
+						  }
+//    :TO
 							int fragmentIndentation = 0;
 							if (i == 0) {
 								int wrappedIndex = argumentsAlignment.wrappedIndex();
@@ -2020,6 +2031,10 @@ public class CodeFormatterVisitor extends ASTVisitor {
 									}
 								}
 							}
+//   OT:
+						  previousIsHidden = ((arguments[i].bits & ASTNode.IsGenerated) != 0);
+						  if (!previousIsHidden)
+// SH}
 							arguments[i].traverse(this, scope);
 							argumentsAlignment.startingColumn = -1;
 						}
