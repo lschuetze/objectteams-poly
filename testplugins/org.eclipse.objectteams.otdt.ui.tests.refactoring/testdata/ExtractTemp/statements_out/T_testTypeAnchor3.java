@@ -16,7 +16,7 @@ public team class T_testTypeAnchor2 {
 	}
 	public static void main(String[] args) {
 		final T_testTypeAnchor2 t1 = new T_testTypeAnchor2();
-		final R1<@t1.r> extracted=t1.r.r1;
+		final R1<@t1.r> extracted = t1.r.r1;
 		R2<@extracted> r2 = null;
 	}
 }
