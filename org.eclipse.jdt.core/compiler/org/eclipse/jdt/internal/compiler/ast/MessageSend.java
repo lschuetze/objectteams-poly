@@ -26,6 +26,8 @@
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *								bug 382069 - [null] Make the null analysis consider JUnit's assertNotNull similarly to assertions
+ *								bug 403086 - [compiler][null] include the effect of 'assert' in syntactic null analysis for fields
+ *								bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *******************************************************************************/
@@ -203,20 +205,13 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	if (nonStatic) {
 		this.receiver.checkNPE(currentScope, flowContext, flowInfo);
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=318682
-		if (this.receiver.isThis() || this.receiver.isSuper()) {
-			// accessing non-static method without an object
-			currentScope.resetDeclaringClassMethodStaticFlag(this.actualReceiverType);
-		}
 	}
 
 	if (this.arguments != null) {
 		int length = this.arguments.length;
 		for (int i = 0; i < length; i++) {
 			Expression argument = this.arguments[i];
-			if ((argument.implicitConversion & TypeIds.UNBOXING) != 0) {
-				argument.checkNPE(currentScope, flowContext, flowInfo);
-			}
+			argument.checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
 			switch (detectAssertionUtility(i)) {
 				case TRUE_ASSERTION:
 					flowInfo = analyseBooleanAssertion(currentScope, argument, flowContext, flowInfo, wasInsideAssert, true);
@@ -380,7 +375,7 @@ private FlowInfo analyseBooleanAssertion(BlockScope currentScope, Expression arg
 	int tagBitsSave = flowContext.tagBits;
 	flowContext.tagBits |= FlowContext.HIDE_NULL_COMPARISON_WARNING;
 	if (!passOnTrue)
-		flowContext.tagBits |= FlowContext.INSIDE_NEGATIVE_ASSERT; // this affects syntactic analysis for fields in EqualExpression
+		flowContext.tagBits |= FlowContext.INSIDE_NEGATION; // this affects syntactic analysis for fields in EqualExpression
 	FlowInfo conditionFlowInfo = argument.analyseCode(currentScope, flowContext, flowInfo.copy());
 	flowContext.extendTimeToLiveForNullCheckedField(2); // survive this assert as a MessageSend and as a Statement
 	flowContext.tagBits = tagBitsSave;

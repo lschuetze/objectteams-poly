@@ -16,6 +16,7 @@
  *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *								bug 401456 - Code compiles from javac/intellij, but fails from eclipse
  *								bug 401271 - StackOverflowError when searching for a methods references
+ *								bug 405706 - Eclipse compiler fails to give compiler error when return type is a inferred generic
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *******************************************************************************/
@@ -377,6 +378,16 @@ public abstract class Scope {
 					}
 					result[j] = null;
 					removed ++;
+				} else if (!jType.isCompatibleWith(iType, scope)) {
+					// avoid creating unsatisfiable intersection types (see https://bugs.eclipse.org/405706):
+					if (iType.isParameterizedType() && jType.isParameterizedType()) {
+						if (iType.original().isCompatibleWith(jType.original(), scope)
+								|| jType.original().isCompatibleWith(iType.original(), scope)) 
+						{
+							// parameterized types are incompatible due to incompatible type arguments => unsatisfiable
+							return null;
+						}
+					}
 				}
 			}
 		}
@@ -2820,7 +2831,7 @@ public abstract class Scope {
 	*/
 	// The return type of this method could be ReferenceBinding if we did not answer base types.
 	// NOTE: We could support looking for Base Types last in the search, however any code using
-	// this feature would be extraordinarily slow. Therefore we don't do this
+	// this feature would be extraordinarily slow. Therefore we don't do this.
 //{ObjectTeams: ROFI changed modifiers, was final
 	public TypeBinding getType(char[] name) {
 // SH}
@@ -4590,6 +4601,7 @@ public abstract class Scope {
 		}
 		return NOT_COMPATIBLE;
 	}
+
 	public abstract ProblemReporter problemReporter();
 
 //{ObjectTeams: removed final:

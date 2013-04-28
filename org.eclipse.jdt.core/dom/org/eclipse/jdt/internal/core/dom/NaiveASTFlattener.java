@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.internal.compiler.parser.ScannerHelper;
 
 /**
  * Internal AST visitor for serializing an AST in a quick and dirty fashion.
@@ -1394,9 +1395,15 @@ public class NaiveASTFlattener extends ASTVisitor {
 		boolean previousRequiresNewLine = false;
 		for (Iterator it = node.fragments().iterator(); it.hasNext(); ) {
 			ASTNode e = (ASTNode) it.next();
-			// assume text elements include necessary leading and trailing whitespace
-			// but Name, MemberRef, MethodRef, and nested TagElement do not include white space
-			boolean currentIncludesWhiteSpace = (e instanceof TextElement);
+			// Name, MemberRef, MethodRef, and nested TagElement do not include white space.
+			// TextElements don't always include whitespace, see <https://bugs.eclipse.org/206518>.
+			boolean currentIncludesWhiteSpace = false;
+			if (e instanceof TextElement) {
+				String text = ((TextElement) e).getText();
+				if (text.length() > 0 && ScannerHelper.isWhitespace(text.charAt(0))) {
+					currentIncludesWhiteSpace = true; // workaround for https://bugs.eclipse.org/403735
+				}
+			}
 			if (previousRequiresNewLine && currentIncludesWhiteSpace) {
 				this.buffer.append("\n * ");//$NON-NLS-1$
 			}

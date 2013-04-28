@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -2172,7 +2172,6 @@ private void classHeaderExtendsOrImplements(boolean isInterface) {
 							this.identifierStack[ptr],
 							this.identifierPositionStack[ptr],
 							keywords);
-						completionOnKeyword.canCompleteEmptyToken = true;
 						type.superclass = completionOnKeyword;
 						type.superclass.bits |= ASTNode.IsSuperType;
 						this.assistNode = completionOnKeyword;
@@ -2184,7 +2183,6 @@ private void classHeaderExtendsOrImplements(boolean isInterface) {
 							this.identifierStack[ptr],
 							this.identifierPositionStack[ptr],
 							Keywords.EXTENDS);
-						completionOnKeyword.canCompleteEmptyToken = true;
 						type.superInterfaces = new TypeReference[]{completionOnKeyword};
 						type.superInterfaces[0].bits |= ASTNode.IsSuperType;
 						this.assistNode = completionOnKeyword;
@@ -2251,7 +2249,6 @@ private GuardPredicateDeclaration completeGuardKeywords(int ptr, CompilationResu
 		this.identifierStack[ptr],
 		this.identifierPositionStack[ptr],
 		new char[][]{ Keywords.BASE_WHEN, Keywords.WHEN});
-	completionOnKeyword.canCompleteEmptyToken = true;
 
 	// store this type ref into a faked guard predicate:
 	GuardPredicateDeclaration result = new GuardPredicateDeclaration(cResult,
@@ -4323,7 +4320,6 @@ protected void consumeTypeParameterHeader() {
 		this.identifierStack[this.identifierPtr],
 		this.identifierPositionStack[this.identifierPtr],
 		Keywords.EXTENDS);
-	keyword.canCompleteEmptyToken = true;
 	typeParameter.type = keyword;
 
 	this.identifierPtr--;
@@ -4417,7 +4413,6 @@ protected void consumeWildcard() {
 		this.identifierStack[this.identifierPtr],
 		this.identifierPositionStack[this.identifierPtr],
 		new char[][]{Keywords.EXTENDS, Keywords.SUPER} );
-	keyword.canCompleteEmptyToken = true;
 	wildcard.kind = Wildcard.EXTENDS;
 	wildcard.bound = keyword;
 
