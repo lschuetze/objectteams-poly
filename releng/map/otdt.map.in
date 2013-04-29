@@ -60,12 +60,11 @@ plugin@org.eclipse.objectteams.otdt.test.builder,0.7.0=GIT,repo=git://git.eclips
 plugin@org.eclipse.objectteams.otdt.ui.tests,0.7.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests
 
 !-- Tests fetched from original GIT (some are required indirectly by jdt.ui.tests): --
-!   (these lines are generated from SDK map file using extractVersions)
-plugin@org.eclipse.jdt.core.tests.builder=GIT,tag=I20130423-0800,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.core.tests.builder
-plugin@org.eclipse.jdt.debug.tests=GIT,tag=I20130423-0800,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.debug.git,path=org.eclipse.jdt.debug.tests
-plugin@org.eclipse.jdt.ui.tests=GIT,tag=I20130423-0800,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
-plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=I20130423-0800,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
-plugin@org.eclipse.jdt.text.tests=GIT,tag=I20130423-0800,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.text.tests
-plugin@org.eclipse.jface.text.tests=GIT,tag=I20130423-0800,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.jface.text.tests
-plugin@org.eclipse.text.tests=GIT,tag=I20130423-0800,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.text.tests
-plugin@org.eclipse.core.filebuffers.tests=GIT,tag=I20130423-0800,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.core.filebuffers.tests
+plugin@org.eclipse.jdt.core.tests.builder=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.core.tests.builder
+plugin@org.eclipse.jdt.debug.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.debug.git,path=org.eclipse.jdt.debug.tests
+plugin@org.eclipse.jdt.ui.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
+plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
+plugin@org.eclipse.jdt.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.text.tests
+plugin@org.eclipse.jface.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.jface.text.tests
+plugin@org.eclipse.text.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.text.tests
+plugin@org.eclipse.core.filebuffers.tests=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.core.filebuffers.tests

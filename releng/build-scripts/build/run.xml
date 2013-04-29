@@ -17,6 +17,8 @@
 ------------------------------------------------------------------------------
 path of eclipse SDK:
 		eclipse-app.tgz  = ${eclipse-app.tgz}
+eclipse SDK build qualifier:
+		eclipse.sdk.qualifier = ${eclipse.sdk.qualifier}
 path of eclipse test framework:
 		eclipse.tests.zip= ${eclipse.tests.zip}
 path of published updates:
@@ -174,6 +176,17 @@ directory for tempory files during testing:
 	</target>
 
 	<target name="setupForCompile" depends="checkOS" unless="_hasCreatedOTDTEclipse">
+		<!-- Insert SDK build qualifier into our configuration files: -->
+		<copy file="${map.file.path}.in" tofile="${map.file.path}">
+			<filterset>
+				<filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
+			</filterset>
+		</copy>
+		<copy file="${OTScriptDir}/test.properties.in" tofile="${OTScriptDir}/test.properties">
+			<filterset>
+				<filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
+			</filterset>
+		</copy>
 		<antcall target="UnzipEclipse"/>
 		<antcall target="AddPluginsToEclipse"/>
 	</target>

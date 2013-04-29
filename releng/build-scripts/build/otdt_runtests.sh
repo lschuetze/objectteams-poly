@@ -19,6 +19,7 @@
 # OT_TESTSUITE_DIR      root directory for building and testing
 # METADATA				directory for metadata from previous builds
 # OT_RECIPIENT          mail address for failure messages
+# SDK_QUALIFIER			build qualifier of the base eclipse SDK
 # ECLIPSE_SDK_TGZ       archive file of the base eclipse SDK build (full path)
 # ECLIPSE_TESTLIB_ZIP   archive file of the eclipse test framework (full path)
 # PUBLISHED_UPDATES 	directory of previously published plugins&features
@@ -149,6 +150,7 @@ trap "echo Aborting by SIGTERM; cleanup; exit 130" INT
 ANT_OPTIONS="${ANT_PROFILE} \
     -Declipse-app.tgz=${ECLIPSE_SDK_TGZ} \
     -Declipse.tests.zip=${ECLIPSE_TESTLIB_ZIP} \
+    -Declipse.sdk.qualifier=${SDK_QUALIFIER} \
     -Dpublished.updates=${PUBLISHED_UPDATES} \
     -Ddo.run.tests=${DO_RUN} \
     -Ddo.build.all=${DO_BUILD} \
