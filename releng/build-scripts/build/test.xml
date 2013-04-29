@@ -50,7 +50,7 @@
 
 		<echo message="get library.xml"/>
 		<get src="http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/scripts/library.xml"
-				dest="${test.root.dir}"/>
+				dest="${test.root.dir}/library.xml"/>
 
 		<property name="tests.are.setup" value="true"/>
 	</target>
