@@ -75,7 +75,7 @@ directory for tempory files during testing:
 			</filterset>
 		</copy>
 
-		<!-- versions of test plugins, also find org.eclipse.test here: -->
+		<!-- versions of test plugins: -->
 		<loadproperties srcfile="${_toplevelDir}/test.properties" />
 
 		<!-- ======== More Configuration Details: ======== -->
@@ -380,7 +380,7 @@ directory for tempory files during testing:
 	</target>
 
 	<!-- currently unused target name="collectResults">
-		<ant target="collect" antfile="${test.eclipseDir}/plugins/${org.eclipse.test}/library.xml" dir="${otresults}">
+		<ant target="collect" antfile="${test.root.dir}/library.xml" dir="${otresults}">
 			<property name="includes" value="org.*.xml"/>
 			<property name="output-file" value="AllTestSuites.xml"/>
 		</ant>

@@ -12,9 +12,6 @@ org.eclipse.test.performance=org.eclipse.test.performance_3.7.0.@SDK_QUALIFIER@
 org.eclipse.jdt.core.tests.compiler=org.eclipse.jdt.core.tests.compiler_3.8.2
 org.eclipse.jdt.core.tests.model=org.eclipse.jdt.core.tests.model_3.8.2
 
-# this is part of eclipse-test-framework and holds library.xml:
-org.eclipse.test=org.eclipse.test_3.3.100
-
 org.eclipse.objectteams.otdt.tests=org.eclipse.objectteams.otdt.tests_1.3.0
 org.eclipse.objectteams.otdt.ui.tests=org.eclipse.objectteams.otdt.ui.tests_1.3.0
 org.eclipse.objectteams.otdt.ui.tests.dom=org.eclipse.objectteams.otdt.ui.tests.dom_1.3.0
