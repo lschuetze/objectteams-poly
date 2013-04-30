@@ -902,7 +902,7 @@ public class CodeCompletionTest extends CoreTests {
 		
 		// strictly expect one method only.
 		assertEquals(1, proposals.length);
-		assertAppliedProposal(contents, proposals[0], "foomethod()"); // arguments are not inserted by this method :(
+		assertAppliedProposal(contents, proposals[0], "foomethod();"); // arguments are not inserted by this method :(
 	}
 
 	// see Trac #126
@@ -912,7 +912,7 @@ public class CodeCompletionTest extends CoreTests {
 				"        void foo(int i) {} \n" +
 				"        callin void getText() {\n" +
 				"            int idx = 3;\n" +
-				"        	 foo|;\n" +
+				"        	 foo|\n" +
 				"        }\n" +
 				"        getText <- replace getText;\n",
 				"foo", // this is just step 1.
@@ -1575,7 +1575,7 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("import test1.p1.SuperTeam;\n");
 		expectedContent.append("public team class Completion_testMethodInvocation1 extends SuperTeam {\n");
 		expectedContent.append("    void test(R r) {\n");
-		expectedContent.append("        r.foo()\n");
+		expectedContent.append("        r.foo();\n");
 		expectedContent.append("    }\n");
 		expectedContent.append("}");
 		
@@ -1583,7 +1583,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		String completeAfter = "r.";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
-		int posAfter = expectedContent.indexOf("foo()")+5;
+		int posAfter = expectedContent.indexOf("foo();")+6;
 		
 		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
@@ -1639,7 +1639,7 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("  }\n");
 		expectedContent.append("  protected team class Mid2 {\n");
 		expectedContent.append("    void test(R r) {\n");
-		expectedContent.append("        r.foo()\n");
+		expectedContent.append("        r.foo();\n");
 		expectedContent.append("    }\n");
 		expectedContent.append("  }\n");
 		expectedContent.append("}");
@@ -1652,7 +1652,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		String completeAfter = "r.";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
-		int posAfter = expectedContent.indexOf("r.foo()")+7;
+		int posAfter = expectedContent.indexOf("r.foo();")+8;
 		
 		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
@@ -1706,7 +1706,7 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("  }\n");
 		expectedContent.append("  protected team class Mid2 {\n");
 		expectedContent.append("    void test(R r) {\n");
-		expectedContent.append("        r.foo()\n");
+		expectedContent.append("        r.foo();\n");
 		expectedContent.append("    }\n");
 		expectedContent.append("  }\n");
 		expectedContent.append("}");
@@ -1719,7 +1719,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		String completeAfter = "r.";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
-		int posAfter = expectedContent.indexOf("r.foo()")+7;
+		int posAfter = expectedContent.indexOf("r.foo();")+8;
 		
 		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
@@ -1759,7 +1759,7 @@ public class CodeCompletionTest extends CoreTests {
 		expectedContent.append("  protected team class Mid2 extends Mid1 {\n");
 		expectedContent.append("    protected class R {}\n");
 		expectedContent.append("    void test(R r) {\n");
-		expectedContent.append("        r.foo()\n");
+		expectedContent.append("        r.foo();\n");
 		expectedContent.append("    }\n");
 		expectedContent.append("  }\n");
 		expectedContent.append("}");
@@ -1768,7 +1768,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		String completeAfter = "r.";
 		int pos = subTeamContent.indexOf(completeAfter)+completeAfter.length();
-		int posAfter = expectedContent.indexOf("r.foo()")+7;
+		int posAfter = expectedContent.indexOf("r.foo();")+8;
 		
 		ICompletionProposal proposal = assertProposal("foo", null, null, subTeamContent, new Region(pos, 0), expectedContent, new Region(posAfter, 0), 0);
 		assertTrue("Unexpected additional info", proposal.getAdditionalProposalInfo().endsWith(expectedInfo));
