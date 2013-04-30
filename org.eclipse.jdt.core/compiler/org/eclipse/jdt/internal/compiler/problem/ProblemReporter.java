@@ -28,6 +28,7 @@
  *								bug 382789 - [compiler][null] warn when syntactically-nonnull expression is compared against null
  *								bug 376590 - Private fields with @Inject are ignored by unused field validation
  *								bug 400761 - [compiler][null] null may be return as boolean without a diagnostic
+ *								bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
 
@@ -3367,10 +3368,11 @@ public void inheritedMethodsHaveIncompatibleReturnTypes(ASTNode location, Method
 		location.sourceStart,
 		location.sourceEnd);
 }
-public void inheritedMethodsHaveIncompatibleReturnTypes(SourceTypeBinding type, MethodBinding[] inheritedMethods, int length) {
+public void inheritedMethodsHaveIncompatibleReturnTypes(SourceTypeBinding type, MethodBinding[] inheritedMethods, int length, boolean[] isOverridden) {
 	StringBuffer methodSignatures = new StringBuffer();
 	StringBuffer shortSignatures = new StringBuffer();
 	for (int i = length; --i >= 0;) {
+		if (isOverridden[i]) continue;
 		methodSignatures
 			.append(inheritedMethods[i].declaringClass.readableName())
 			.append('.')
