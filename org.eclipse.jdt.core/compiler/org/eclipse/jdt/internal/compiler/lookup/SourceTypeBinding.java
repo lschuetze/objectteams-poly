@@ -21,6 +21,8 @@
  *								bug 384663 - Package Based Annotation Compilation Error in JDT 3.8/4.2 (works in 3.7.2)
  *								bug 386356 - Type mismatch error with annotations and generics
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
+ *								bug 331649 - [compiler][null] consider null annotations for fields
+ *								bug 380896 - [compiler][null] Enum constants not recognised as being NonNull.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -52,7 +54,6 @@ import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.jdt.internal.compiler.util.SimpleSetOfCharArray;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
-import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleFileCache;
@@ -1442,6 +1443,9 @@ public MethodBinding[] getMethods(char[] selector) {
 }
 //{ObjectTeams: ROFI if it is a team, the member might be a role file still to be found:
 public ReferenceBinding getMemberType(char[] name) {
+	if (this.notFoundMemberNames != null && this.notFoundMemberNames.includes(name))
+		return null;
+
 	ReferenceBinding result = super.getMemberType(name);
 	if (result != null) {
 		// is it a member in a different file?
@@ -1455,33 +1459,31 @@ public ReferenceBinding getMemberType(char[] name) {
 		}
 		return result;
 	}
-// FIXME(SH): needed for 1.7.7-otjld-5f, but causes more problems.
-// Note: since State-Management has been restructured, things *might*
-// be different by now.
-	if (    isTeam()
-		&& !StateHelper.hasState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)
-		&& StateHelper.isReadyToProcess(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY))
-	{
-		if (   Dependencies.ensureBindingState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)
-			&& StateHelper.hasState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY))
-		{
-			ReferenceBinding member = getMemberType(name); // try again for copied roles.
-			if (member != null && (member.tagBits & TagBits.HasMissingType) == 0)
-				return member;
+	if (isTeam() && !StateHelper.hasState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)) {
+		if (StateHelper.isReadyToProcess(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)) {
+			if (   Dependencies.ensureBindingState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)
+				&& StateHelper.hasState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY))
+			{
+				ReferenceBinding member = getMemberType(name); // try again for copied roles.
+				if (member != null && (member.tagBits & TagBits.HasMissingType) == 0)
+					return member;
+			}
 		}
+		ReferenceBinding member = CopyInheritance.checkCopyLateRoleFile(this, name);
+		if (member != null)
+			return member;
 	}
-	if (!isTeam() || this.teamPackage == null)
-		return null;
-	if (this.notFoundMemberNames != null && this.notFoundMemberNames.includes(name)) {
-		return null;
+	if (isTeam() && this.teamPackage != null) {
+		ReferenceBinding member = findTypeInTeamPackage(name);
+		if (member != null)
+			return member;
 	}
-	ReferenceBinding res = findTypeInTeamPackage(name);
-	if (res == null) {
-		 if (this.notFoundMemberNames == null)
-			 this.notFoundMemberNames = new SimpleSetOfCharArray();
-		 this.notFoundMemberNames.add(name);
+	if (StateHelper.hasState(this, ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY)) {
+		if (this.notFoundMemberNames == null)
+			this.notFoundMemberNames = new SimpleSetOfCharArray();
+		this.notFoundMemberNames.add(name);
 	}
-	return res;
+	return null;
 }
 SimpleSetOfCharArray notFoundMemberNames;
 
@@ -1549,26 +1551,12 @@ ReferenceBinding findTypeInTeamPackage(char[] name) {
 //					teamModel.liftingEnv.init(teamModel.getAst());
 			}
 		} else if (teamModel.getState() >= ITranslationStates.STATE_LENV_CONNECT_TYPE_HIERARCHY) {
-			return checkCopyLateRoleFile(teamModel, name);
+			TypeDeclaration roleDecl = CopyInheritance.internalCheckCopyLateRoleFile(this, name);
+			if (roleDecl != null)
+				return roleDecl.binding;
 		}
 	}
 	return result;
-}
-private ReferenceBinding checkCopyLateRoleFile(TeamModel teamModel, char[] name) {
-	ReferenceBinding superTeam = superclass(); // FIXME(SH): tsuper teams
-	if (   superTeam != null
-		&& !TypeAnalyzer.isOrgObjectteamsTeam(superTeam)
-		&& !teamModel._isCopyingLateRole
-		&& !OTNameUtils.isTSuperMarkerInterface(name))
-	{
-		ReferenceBinding tsuperRole = superTeam.getMemberType(name);
-		if (   tsuperRole != null && tsuperRole.isRole() && tsuperRole.isValidBinding()
-			&& !tsuperRole.isLocalType())
-		{
-			return CopyInheritance.copyLateRole(teamModel.getAst(), tsuperRole);
-		}
-	}
-	return null;
 }
 //SH}
 /* Answer the synthetic field for <actualOuterLocalVariable>
@@ -2004,75 +1992,91 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 		if (fieldDecls[f].binding != field)
 			continue;
 
-			MethodScope initializationScope = field.isStatic()
-				? this.scope.referenceContext.staticInitializerScope
-				: this.scope.referenceContext.initializerScope;
-			FieldBinding previousField = initializationScope.initializedField;
-			try {
-				initializationScope.initializedField = field;
-				FieldDeclaration fieldDecl = fieldDecls[f];
-				TypeBinding fieldType =
-					fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT
-						? initializationScope.environment().convertToRawType(this, false /*do not force conversion of enclosing types*/) // enum constant is implicitly of declaring enum type
-						: fieldDecl.type.resolveType(initializationScope, true /* check bounds*/);
-				field.type = fieldType;
-				field.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
-				if (fieldType == null) {
-					fieldDecl.binding = null;
-					return null;
-				}
-				if (fieldType == TypeBinding.VOID) {
-					this.scope.problemReporter().variableTypeCannotBeVoid(fieldDecl);
-					fieldDecl.binding = null;
-					return null;
-				}
-				if (fieldType.isArrayType() && ((ArrayBinding) fieldType).leafComponentType == TypeBinding.VOID) {
-					this.scope.problemReporter().variableTypeCannotBeVoidArray(fieldDecl);
-					fieldDecl.binding = null;
-					return null;
-				}
-				if ((fieldType.tagBits & TagBits.HasMissingType) != 0) {
-					field.tagBits |= TagBits.HasMissingType;
-				}
-				TypeBinding leafType = fieldType.leafComponentType();
-				if (leafType instanceof ReferenceBinding && (((ReferenceBinding)leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0) {
-					field.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
-				}
-			} finally {
-			    initializationScope.initializedField = previousField;
+		MethodScope initializationScope = field.isStatic()
+			? this.scope.referenceContext.staticInitializerScope
+			: this.scope.referenceContext.initializerScope;
+		FieldBinding previousField = initializationScope.initializedField;
+		try {
+			initializationScope.initializedField = field;
+			FieldDeclaration fieldDecl = fieldDecls[f];
+			TypeBinding fieldType =
+				fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT
+					? initializationScope.environment().convertToRawType(this, false /*do not force conversion of enclosing types*/) // enum constant is implicitly of declaring enum type
+					: fieldDecl.type.resolveType(initializationScope, true /* check bounds*/);
+			field.type = fieldType;
+			field.modifiers &= ~ExtraCompilerModifiers.AccUnresolved;
+			if (fieldType == null) {
+				fieldDecl.binding = null;
+				return null;
 			}
+			if (fieldType == TypeBinding.VOID) {
+				this.scope.problemReporter().variableTypeCannotBeVoid(fieldDecl);
+				fieldDecl.binding = null;
+				return null;
+			}
+			if (fieldType.isArrayType() && ((ArrayBinding) fieldType).leafComponentType == TypeBinding.VOID) {
+				this.scope.problemReporter().variableTypeCannotBeVoidArray(fieldDecl);
+				fieldDecl.binding = null;
+				return null;
+			}
+			if ((fieldType.tagBits & TagBits.HasMissingType) != 0) {
+				field.tagBits |= TagBits.HasMissingType;
+			}
+			TypeBinding leafType = fieldType.leafComponentType();
+			if (leafType instanceof ReferenceBinding && (((ReferenceBinding)leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0) {
+				field.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
+			}
+
+			// apply null default:
+			LookupEnvironment environment = this.scope.environment();
+			if (environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
+				if (fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
+					// enum constants neither have a type declaration nor can they be null
+					field.tagBits |= TagBits.AnnotationNonNull;
+				} else {
+					initializeNullDefault();
+					if (hasNonNullDefault()) {
+						field.fillInDefaultNonNullness(fieldDecl, initializationScope);
+					}
+					// validate null annotation:
+					this.scope.validateNullAnnotation(field.tagBits, fieldDecl.type, fieldDecl.annotations);
+				}
+			}
+		} finally {
+		    initializationScope.initializedField = previousField;
+		}
 //{ObjectTeams: copy-inherited fields and anchored types:
-			if (fieldDecls[f].getKind() != AbstractVariableDeclaration.ENUM_CONSTANT) {
-				if (fieldDecls[f].type == null)  // should not happen for non-enum types
-					throw new InternalCompilerError("Field "+fieldDecls[f]+" has no type in "+this);
+		if (fieldDecls[f].getKind() != AbstractVariableDeclaration.ENUM_CONSTANT) {
+			if (fieldDecls[f].type == null)  // should not happen for non-enum types
+				throw new InternalCompilerError("Field "+fieldDecls[f]+" has no type in "+this);
 	
-				field.copyInheritanceSrc = fieldDecls[f].copyInheritanceSrc;
-				field.maybeSetFieldTypeAnchorAttribute();
-				// anchored to tthis?
-				field.type = RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.scope, field.type, fieldDecls[f].type);
-				if (field.couldBeTeamAnchor()) {
-					// link decl and binding via model
-					// for early resolving from TeamAnchor.hasSameBestNameAs()
-					FieldModel.getModel(fieldDecls[f]).setBinding(field);
-				}
+			field.copyInheritanceSrc = fieldDecls[f].copyInheritanceSrc;
+			field.maybeSetFieldTypeAnchorAttribute();
+			// anchored to tthis?
+			field.type = RoleTypeCreator.maybeWrapUnqualifiedRoleType(this.scope, field.type, fieldDecls[f].type);
+			if (field.couldBeTeamAnchor()) {
+				// link decl and binding via model
+				// for early resolving from TeamAnchor.hasSameBestNameAs()
+				FieldModel.getModel(fieldDecls[f]).setBinding(field);
 			}
-			// need role field bridges?
-			if (   isRole() 
-				&& ((field.modifiers & ClassFileConstants.AccPrivate) != 0) 
-				&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, field.name)) 
-			{
-				MethodBinding inner;
-				ReferenceBinding originalRole = field.declaringClass;
-				if (field.copyInheritanceSrc != null)
-					originalRole = field.copyInheritanceSrc.declaringClass;
-				inner = FieldModel.getDecapsulatingFieldAccessor(this, field, true/*isGetter*/);
+		}
+		// need role field bridges?
+		if (   isRole() 
+			&& ((field.modifiers & ClassFileConstants.AccPrivate) != 0) 
+			&& !CharOperation.prefixEquals(IOTConstants.OT_DOLLAR_NAME, field.name)) 
+		{
+			MethodBinding inner;
+			ReferenceBinding originalRole = field.declaringClass;
+			if (field.copyInheritanceSrc != null)
+				originalRole = field.copyInheritanceSrc.declaringClass;
+			inner = FieldModel.getDecapsulatingFieldAccessor(this, field, true/*isGetter*/);
+			((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
+			if (!field.isFinal()) { // no setter for final (includes all static role fields)
+								    // otherwise we would have to handle different signatures (w/ w/o role arg), which we currently don't
+				inner = FieldModel.getDecapsulatingFieldAccessor(this, field, false/*isGetter*/);
 				((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
-				if (!field.isFinal()) { // no setter for final (includes all static role fields)
-									    // otherwise we would have to handle different signatures (w/ w/o role arg), which we currently don't
-					inner = FieldModel.getDecapsulatingFieldAccessor(this, field, false/*isGetter*/);
-					((SourceTypeBinding) enclosingType()).addSyntheticRoleMethodBridge(this, originalRole, inner, SyntheticMethodBinding.RoleMethodBridgeOuter);
-				}
 			}
+		}
 // SH}
 		return field;
 	}

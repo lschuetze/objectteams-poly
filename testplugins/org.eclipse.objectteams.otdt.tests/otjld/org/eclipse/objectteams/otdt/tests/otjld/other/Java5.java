@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010, 2011 Stephan Herrmann
+ * Copyright 2010, 2013 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -4489,20 +4489,10 @@ public class Java5 extends AbstractOTJLDTest {
     		"	^^^^^^^^^^^\n" + 
     		"Using an experimental feature: Implementation for mixed type and value parameters is experimental..\n" + 
     		"----------\n" + 
-    		"2. ERROR in TeamA119nvp2.java (at line 10)\n" + 
-    		"	TA119nvp2_1<@t2,Role<@t1>> c = new TA119nvp2_1<@t2,Role<@t1>>();\n" + 
-    		"	                ^^^^\n" + 
-    		"Bound mismatch: The type Role<@t1> is not a valid substitute for the value dependent parameter <R<@t>> of the type TA119nvp2_1<@t,R<@t>> (OTJLD 9.2.2)\n" + 
-    		"----------\n" + 
-    		"3. WARNING in TeamA119nvp2.java (at line 10)\n" + 
+    		"2. WARNING in TeamA119nvp2.java (at line 10)\n" + 
     		"	TA119nvp2_1<@t2,Role<@t1>> c = new TA119nvp2_1<@t2,Role<@t1>>();\n" + 
     		"	                                   ^^^^^^^^^^^\n" + 
     		"Using an experimental feature: Implementation for mixed type and value parameters is experimental..\n" + 
-    		"----------\n" + 
-    		"4. ERROR in TeamA119nvp2.java (at line 10)\n" + 
-    		"	TA119nvp2_1<@t2,Role<@t1>> c = new TA119nvp2_1<@t2,Role<@t1>>();\n" + 
-    		"	                                                   ^^^^\n" + 
-    		"Bound mismatch: The type Role<@t1> is not a valid substitute for the value dependent parameter <R<@t>> of the type TA119nvp2_1<@t,R<@t>> (OTJLD 9.2.2)\n" + 
     		"----------\n");
     }
 

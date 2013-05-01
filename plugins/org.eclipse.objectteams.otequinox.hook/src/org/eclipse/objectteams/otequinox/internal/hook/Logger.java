@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MasterTeamLoader.java 15426 2007-02-25 12:52:19Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 

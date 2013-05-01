@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -15,6 +15,8 @@
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
  *								bug 185682 - Increment/decrement operators mark local variables as read
+ *								bug 331649 - [compiler][null] consider null annotations for fields
+ *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
@@ -45,7 +47,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
  * Why:  inferred callout to field must be created with proper type, possibly involving lifting.
  * 
  * @author stephan
- * @version $Id: Reference.java 23404 2010-02-03 14:10:22Z stephan $
  */
 public abstract class Reference extends Expression  {
 //{ObjectTeams: store expected type to support infering callout-to-field
@@ -65,6 +66,21 @@ public abstract FlowInfo analyseAssignment(BlockScope currentScope, FlowContext 
 
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 	return flowInfo;
+}
+
+public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
+	if (flowContext.isNullcheckedFieldAccess(this)) {
+		return true; // enough seen
+	}
+	return super.checkNPE(scope, flowContext, flowInfo);
+}
+
+protected boolean checkNullableFieldDereference(Scope scope, FieldBinding field, long sourcePosition) {
+	if ((field.tagBits & TagBits.AnnotationNullable) != 0) {
+		scope.problemReporter().nullableFieldDereference(field, sourcePosition);
+		return true;
+	}
+	return false;
 }
 
 public FieldBinding fieldBinding() {
@@ -121,6 +137,7 @@ public abstract void generateCompoundAssignment(BlockScope currentScope, CodeStr
 
 public abstract void generatePostIncrement(BlockScope currentScope, CodeStream codeStream, CompoundAssignment postIncrement, boolean valueRequired);
 
+// FIXME(SH): obsolete after merge??
 public int nullStatus(FlowInfo flowInfo) {
 	if (this.resolvedType != null) {
 		if ((this.resolvedType.tagBits & TagBits.AnnotationNonNull) != 0)
@@ -129,6 +146,34 @@ public int nullStatus(FlowInfo flowInfo) {
 			return FlowInfo.POTENTIALLY_NULL;
 	}
 	return FlowInfo.UNKNOWN;
+}
+
+/** 
+ * Is the given reference equivalent to the receiver, 
+ * meaning that both denote the same path of field reads?
+ * Used from {@link FlowContext#isNullcheckedFieldAccess(Reference)}.
+ */
+public boolean isEquivalent(Reference reference) {
+	return false;
+}
+
+public FieldBinding lastFieldBinding() {
+	// override to answer the field designated by the entire reference
+	// (as opposed to fieldBinding() which answers the first field in a QNR)
+	return null;
+}
+
+public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
+	FieldBinding fieldBinding = lastFieldBinding();
+	if (fieldBinding != null) {
+		if (fieldBinding.isNonNull() || flowContext.isNullcheckedFieldAccess(this)) {
+			return FlowInfo.NON_NULL;
+		} else if (fieldBinding.isNullable()) {
+			return FlowInfo.POTENTIALLY_NULL;
+		}
+		return FlowInfo.UNKNOWN;
+	}
+	return super.nullStatus(flowInfo, flowContext);
 }
 
 /* report if a private field is only read from a 'special operator',
@@ -217,6 +262,7 @@ protected int getDepthForSynthFieldAccess(FieldBinding fieldBinding, SourceTypeB
 		// through copy inheritance this code could be executed within a different package!
 		if (depth == 0)
 			return -1; // neither a team field, nor an access across packages
+		this.bits = (this.bits & ~DepthMASK) | ((depth & 0xFF) << DepthSHIFT);
 	}
 	return depth;
 }

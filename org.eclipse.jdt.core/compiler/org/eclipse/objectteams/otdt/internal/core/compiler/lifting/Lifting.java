@@ -44,6 +44,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.RoleInitializationMethod;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.WeakenedTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CallinImplementorDyn;
@@ -829,13 +830,23 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 		RoleTypeBinding baseRole = (RoleTypeBinding)baseClass;
 		if (!baseRole.hasExplicitAnchor())
 			return this._gen.emptyStatement();
+		NameReference anchorRef;
+		ITeamAnchor[] bestNamePath = baseRole._teamAnchor.getBestNamePath();
+		if (bestNamePath.length == 1) {
+			anchorRef = this._gen.singleNameReference(baseRole._teamAnchor.internalName());
+		} else {
+			char[][] names = new char[bestNamePath.length][];
+			for(int i=0; i<names.length; i++)
+				names[i] = bestNamePath[i].internalName();
+			anchorRef = this._gen.qualifiedNameReference(names);
+		}
 		return this._gen.ifStatement(
 				new EqualExpression(
 					this._gen.messageSend(
 						this._gen.baseNameReference(BASE),
 						_OT_GETTEAM,
 						null),
-					this._gen.singleNameReference(baseRole._teamAnchor.internalName()),
+					anchorRef,
 					OperatorIds.NOT_EQUAL),
 				this._gen.block(new Statement[] {
 					this._gen.throwStatement(

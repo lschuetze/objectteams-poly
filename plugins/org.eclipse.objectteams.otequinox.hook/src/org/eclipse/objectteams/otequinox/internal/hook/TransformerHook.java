@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id$
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -105,7 +104,6 @@ import org.osgi.service.packageadmin.PackageAdmin;
  * will throw an exception to avoid loading of any class from that bundle.
  * </p>
  * @author stephan
- * @version $Id$
  */
 @SuppressWarnings("nls")
 public class TransformerHook implements ClassLoadingHook, BundleWatcher, ClassLoaderDelegateHook, ClassLoadingStatsHook

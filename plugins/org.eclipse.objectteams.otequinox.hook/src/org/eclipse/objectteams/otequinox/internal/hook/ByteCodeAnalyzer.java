@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: TransformerPlugin.java 15357 2007-02-18 17:01:36Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 

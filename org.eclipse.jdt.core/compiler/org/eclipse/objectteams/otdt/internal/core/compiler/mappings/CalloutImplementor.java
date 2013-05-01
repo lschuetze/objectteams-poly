@@ -577,7 +577,7 @@ public class CalloutImplementor extends MethodMappingImplementor
     		if (calloutDecl.baseMethodSpec.isStatic())
     			// we thought we should use an instance
     			// but callout-to-static is sent to the base *class*
-    			receiver = gen.baseNameReference(baseType.getRealClass());
+    			receiver = gen.baseTypeReference(baseType);
     		switch (calloutDecl.baseMethodSpec.implementationStrategy) {
 				case DIRECT:
 					if (calloutDecl.isCalloutToField()) {

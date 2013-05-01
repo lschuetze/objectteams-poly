@@ -13,6 +13,7 @@
  *								bug 370930 - NonNull annotation not considered for enhanced for loops
  *								bug 365859 - [compiler][null] distinguish warnings based on flow analysis vs. null annotations
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
+ *								bug 393719 - [compiler] inconsistent warnings on iteration variables
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -443,7 +444,7 @@ public class ForeachStatement extends Statement {
 						&& !this.scope.isBoxingCompatibleWith(this.collectionElementType, elementType)) {
 					this.scope.problemReporter().notCompatibleTypesErrorInForeach(this.collection, this.collectionElementType, elementType);
 				} else if (this.collectionElementType.needsUncheckedConversion(elementType)) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=321085
-				    this.scope.problemReporter().unsafeTypeConversion(this.collection, collectionType, upperScope.createArrayType(elementType, 1));
+				    this.scope.problemReporter().unsafeElementTypeConversion(this.collection, this.collectionElementType, elementType);
 				}
 // :giro
 				if (Config.getLoweringRequired())
@@ -534,6 +535,8 @@ public class ForeachStatement extends Statement {
 					if (!this.collectionElementType.isCompatibleWith(elementType)
 							&& !this.scope.isBoxingCompatibleWith(this.collectionElementType, elementType)) {
 						this.scope.problemReporter().notCompatibleTypesErrorInForeach(this.collection, this.collectionElementType, elementType);
+					} else if (this.collectionElementType.needsUncheckedConversion(elementType)) { // https://bugs.eclipse.org/bugs/show_bug.cgi?id=393719
+					    this.scope.problemReporter().unsafeElementTypeConversion(this.collection, this.collectionElementType, elementType);
 					}
 // :giro
 					if (Config.getLoweringRequired())

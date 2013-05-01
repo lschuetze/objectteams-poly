@@ -1,10 +1,10 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2008 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany, and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -324,8 +324,20 @@ public class MethodSpec extends ASTNode implements InvocationSite
 				receiverClass = receiverClass.enclosingType();
 			}
    		}
-		if (this.resolvedMethod != null && !this.resolvedMethod.isValidBinding() && this.resolvedMethod.declaringClass == null)
-			this.resolvedMethod.declaringClass = receiverClass; // needed for computeUniqueKey (via CallinCalloutBinding.computeUniqueKey)
+		if (this.resolvedMethod != null) {
+			if (this.resolvedMethod.isValidBinding()) {
+				// check visibility of role-side in callin:
+				if (!isBaseSide 
+						&& scope.referenceContext() instanceof CallinMappingDeclaration 
+						&& !this.resolvedMethod.canBeSeenBy(this, scope)) 
+				{
+					scope.problemReporter().invisibleMethod(this, this.resolvedMethod);
+					this.resolvedMethod = new ProblemMethodBinding(this.resolvedMethod, this.selector, this.parameters, ProblemReasons.NotVisible);
+				}				
+			}
+			if (!this.resolvedMethod.isValidBinding() && this.resolvedMethod.declaringClass == null)
+				this.resolvedMethod.declaringClass = receiverClass; // needed for computeUniqueKey (via CallinCalloutBinding.computeUniqueKey)
+		}
 		return this.resolvedMethod;
 	}
 
@@ -646,8 +658,15 @@ public class MethodSpec extends ASTNode implements InvocationSite
 
 		StringBuffer buffer = new StringBuffer();
 		buffer.append('(');
-		// manual retrenching:
-		int offset = method.isCallin() ? MethodSignatureEnhancer.ENHANCING_ARG_LEN : 0;
+		// synthetic args for static role method?
+		MethodBinding orig = method.copyInheritanceSrc != null ? method.copyInheritanceSrc : method; // normalize to copyInhSrc so reading a callin-attr. from bytes can more easily find the method
+		if (CallinImplementorDyn.DYNAMIC_WEAVING && orig.declaringClass.isRole() && orig.isStatic()) {
+			buffer.append('I');
+			buffer.append(String.valueOf(orig.declaringClass.enclosingType().signature()));
+		}
+		// manual retrenching?
+		boolean shouldRetrench = !CallinImplementorDyn.DYNAMIC_WEAVING && method.isCallin();
+		int offset = shouldRetrench ? MethodSignatureEnhancer.ENHANCING_ARG_LEN : 0;
 		int paramLen = method.parameters.length;	
 		for (int i = offset; i < paramLen; i++) {
 			// 'weaken' to that erasure that was used in the tsuper version:
@@ -655,7 +674,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 			buffer.append(targetParameter.signature());
 		}
 		buffer.append(')');
-		TypeBinding sourceReturnType = method.isCallin()
+		TypeBinding sourceReturnType = shouldRetrench
 				? MethodModel.getReturnType(method)
 				: method.returnType;
 		// 'weaken' to that erasure that was used in the tsuper version:
@@ -724,7 +743,7 @@ public class MethodSpec extends ASTNode implements InvocationSite
 		return null;
 	}
 	public boolean isSuperAccess() {
-		return false;
+		return true; // grant access to inherited methods
 	}
 	
 	public boolean isTypeAccess() {

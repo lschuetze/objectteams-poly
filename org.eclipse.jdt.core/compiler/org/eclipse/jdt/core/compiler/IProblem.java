@@ -155,10 +155,19 @@
  *									UninitializedLocalVariableHintMissingDefault
  *									UninitializedBlankFinalFieldHintMissingDefault
  *									ShouldReturnValueHintMissingDefault
+ *									NullableFieldReference
+ *									UninitializedNonNullField
+ *									UninitializedNonNullFieldHintMissingDefault
+ *									NonNullMessageSendComparisonYieldsFalse
+ *									RedundantNullCheckOnNonNullSpecdField
+ *									NonNullSpecdFieldComparisonYieldsFalse
+ *									NonNullExpressionComparisonYieldsFalse
+ *									RedundantNullCheckOnNonNullExpression
  *									IllegalModifierForInterfaceDefaultMethod
  *									InheritedDefaultMethodConflictsWithOtherInherited
  *									ConflictingNullAnnotations
  *									ConflictingInheritedNullAnnotations
+ *									UnsafeElementTypeConversion
  *									ArrayReferencePotentialNullReference
  *									DereferencingNullableExpression
  *									NullityMismatchingTypeAnnotation
@@ -1204,6 +1213,9 @@ void setSourceStart(int sourceStart);
 	/** @since 3.8 */
 	int MethodNameClashHidden = MethodRelated + 584;
 	
+	/** @since 3.9 */
+	int UnsafeElementTypeConversion = TypeRelated + 585;
+
 	/**
 	 * 1.5 Syntax errors (when source level < 1.5)
 	 */
@@ -1351,6 +1363,14 @@ void setSourceStart(int sourceStart);
 	int UnusedTypeParameter = TypeRelated + 661;
 	/** @since 3.9 */
 	int IllegalArrayOfUnionType = TypeRelated + 662;
+
+	/**
+	 * Null analysis for other kinds of expressions, syntactically nonnull
+	 */
+	/** @since 3.9 */
+	int NonNullExpressionComparisonYieldsFalse = Internal + 670;
+	/** @since 3.9 */
+	int RedundantNullCheckOnNonNullExpression = Internal + 671;
 
 	/**
 	 * Corrupted binaries
@@ -1543,6 +1563,8 @@ void setSourceStart(int sourceStart);
 	int RedundantNullAnnotation = MethodRelated + 922;
 	/** @since 3.8 */
 	int IllegalAnnotationForBaseType = TypeRelated + 923;
+	/** @since 3.9 */
+	int NullableFieldReference = FieldRelated + 924;
 	/** @since 3.8 */
 	int RedundantNullDefaultAnnotation = Internal + 925; // shouldn't actually occur any more after bug 366063
 	/** @since 3.8 */
@@ -1561,6 +1583,16 @@ void setSourceStart(int sourceStart);
 	int SpecdNonNullLocalVariableComparisonYieldsFalse = Internal + 932;
 	/** @since 3.8 */
 	int RequiredNonNullButProvidedSpecdNullable = Internal + 933;
+	/** @since 3.9 */
+	int UninitializedNonNullField = FieldRelated + 934;
+	/** @since 3.9 */
+	int UninitializedNonNullFieldHintMissingDefault = FieldRelated + 935;
+	/** @since 3.9 */
+	int NonNullMessageSendComparisonYieldsFalse = Internal + 936;
+	/** @since 3.9 */
+	int RedundantNullCheckOnNonNullSpecdField = Internal + 937;
+	/** @since 3.9 */
+	int NonNullSpecdFieldComparisonYieldsFalse = Internal + 938;
 	/** @since 3.9 */
 	int ConflictingNullAnnotations = MethodRelated + 939;
 	/** @since 3.9 */

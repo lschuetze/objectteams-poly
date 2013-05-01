@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedFieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
+import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SyntheticArgumentBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
@@ -383,8 +384,9 @@ public class RoleTypeBinding extends DependentTypeBinding
 		ReferenceBinding declaringClass = method.declaringClass;
 		TypeBinding[] parameters = method.parameters;
 		for (int j = 0; j < parameters.length; j++) {
-			if (   isRoleWithoutExplicitAnchor(parameters[j])
-				&& ((ReferenceBinding)parameters[j]).enclosingType() == declaringClass)
+			TypeBinding leafType = parameters[j].leafComponentType();
+			if (   isRoleWithoutExplicitAnchor(leafType)
+				&& ((ReferenceBinding)leafType).enclosingType() == declaringClass)
 				return true;
 		}
 		return false;
@@ -760,7 +762,7 @@ public class RoleTypeBinding extends DependentTypeBinding
      * The former is relevant for type-checking. the latter serves mainly for code generation
      * and for determining overriding.
      */
-    public boolean isCompatibleWith(TypeBinding right) {
+    public boolean isCompatibleWith(TypeBinding right, /*@Nullable*/ Scope captureScope) {
         if (right == this)
             return true;
         if (!(right instanceof ReferenceBinding))
@@ -786,7 +788,7 @@ public class RoleTypeBinding extends DependentTypeBinding
     			{
     				ReferenceBinding leftStrengthened = this._teamAnchor.getMemberTypeOfType(internalName());
     				if (leftStrengthened != this)
-    					return leftStrengthened.isCompatibleWith(right);
+    					return leftStrengthened.isCompatibleWith(right, captureScope);
     			}
     			else if (TeamModel.areTypesCompatible(
     					this._staticallyKnownTeam,
@@ -801,7 +803,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 
     		// check the role types:
 			if (this._staticallyKnownRoleType.
-                    isCompatibleWith(rightRole._staticallyKnownRoleType))
+                    isCompatibleWith(rightRole._staticallyKnownRoleType, captureScope))
 				return true;
         }
         if (   referenceBinding.isInterface()
@@ -809,7 +811,7 @@ public class RoleTypeBinding extends DependentTypeBinding
                 return true;
 
         if (   this._staticallyKnownRoleClass == null
-        	&& this._staticallyKnownRoleType.isCompatibleWith(referenceBinding, false))
+        	&& this._staticallyKnownRoleType.isCompatibleWith(referenceBinding, false, captureScope))
         {
         	checkAmbiguousObjectLower(referenceBinding);
         	return true; // this case is wittnessed by: "this=RoleIfc", right="Object"; other examples?
@@ -817,7 +819,7 @@ public class RoleTypeBinding extends DependentTypeBinding
 
         // do we need the class part instead of the interface part?
         if (   (this._staticallyKnownRoleClass != null)
-            && this._staticallyKnownRoleClass.isStrictlyCompatibleWith(referenceBinding)
+            && this._staticallyKnownRoleClass.isStrictlyCompatibleWith(referenceBinding, captureScope)
             && !TeamModel.isTeamContainingRole(this._staticallyKnownTeam, referenceBinding))
         {
         	// Cast from a role to its non-role superclass

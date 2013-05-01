@@ -248,6 +248,12 @@ public interface IOTConstants
 																	"objectteams".toCharArray(), 
 																	"otre".toCharArray(), 
 																	"OTREInternalError".toCharArray()};
+	/**
+	 * @since 3.9 (OT 2.2)
+	 */
+	public static final char[][] SNEAKY_EXCEPTION = new char[][]{ORG, OBJECTTEAMS,
+																	"SneakyException".toCharArray()};
+
 
 	// Type IDs (cf. type TypeIds)
 	public static final int T_OrgObjectTeamsITeam      = 100;
@@ -296,5 +302,4 @@ public interface IOTConstants
 	public static final char[] QUERY_MODULE_SUFFIX = "_Queries__OT__".toCharArray();
 	// decapsulation accessor prefix:
 	public static final char[] OT_DECAPS = "_OT$decaps$".toCharArray();
-
 }

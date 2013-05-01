@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Premain-Class: org.eclipse.objectteams.otredyn.transformer.jplis.otreAgent
+Can-Redefine-Classes: true
+
+

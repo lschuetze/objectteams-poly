@@ -13,6 +13,7 @@
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
+ *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
@@ -186,6 +187,11 @@ public void generatePostIncrement(BlockScope currentScope, CodeStream codeStream
 	codeStream.generateImplicitConversion(
 		postIncrement.preAssignImplicitConversion);
 	codeStream.arrayAtPut(this.resolvedType.id, false);
+}
+
+
+public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
+	return FlowInfo.UNKNOWN;
 }
 
 public StringBuffer printExpression(int indent, StringBuffer output) {

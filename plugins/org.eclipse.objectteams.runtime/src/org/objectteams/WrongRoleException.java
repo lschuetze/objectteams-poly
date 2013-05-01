@@ -7,12 +7,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: WrongRoleException.java 23408 2010-02-03 18:07:35Z stephan $
  *
- * Please visit http://www.objectteams.org for updates and contact.
+ * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
  * Contributors:
- * Berlin Institute of Technology - Initial API and implementation
+ *		Berlin Institute of Technology - Initial API and implementation
  **********************************************************************/
 package org.objectteams;
 
@@ -24,7 +23,7 @@ package org.objectteams;
  */
 public class WrongRoleException extends RuntimeException {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
 	private Class<?> clazz;
@@ -41,7 +40,8 @@ public class WrongRoleException extends RuntimeException {
 		this.base = base;
 		this.role = role;
 	}
-	
+
+	@Override
 	public String getMessage() {
 		String baseClazz = base.getClass().getName();
 		String roleClazz = role.getClass().getName();
@@ -50,7 +50,7 @@ public class WrongRoleException extends RuntimeException {
 				+ " fails with the following objects\n"
 				+ "(see OT/J language definition para. 2.3.4(d)):\n"
 				+ "Provided:\n  Base object: " + base + "\n" + "  Base type:   "
-				+ baseClazz + "\n" 
+				+ baseClazz + "\n"
 				+ "Found in cache:\n  Role object: " + role + "\n"
 				+ "  Role type:   " + roleClazz;
 	}

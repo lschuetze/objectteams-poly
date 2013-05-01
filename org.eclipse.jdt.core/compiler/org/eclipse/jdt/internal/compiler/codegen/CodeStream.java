@@ -35,6 +35,8 @@ import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.ISMAPConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticOTMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleFieldAccess;
@@ -2823,6 +2825,25 @@ public void generateSyntheticEnclosingInstanceValues(BlockScope currentScope, Re
 						syntheticArgType,
 						false /*not only exact match (that is, allow compatible)*/,
 						denyEnclosingArgInConstructorCall);
+//{ObjectTeams: find enclosing via a team anchor?
+				if (emulationPath == null && RoleTypeBinding.isRoleWithExplicitAnchor(targetType)) {
+					ITeamAnchor anchor = ((DependentTypeBinding)targetType)._teamAnchor;
+					ITeamAnchor[] path = anchor.getBestNamePath();
+					if ((((VariableBinding)path[0]).modifiers & ClassFileConstants.AccStatic) == 0) {
+						Object[] path1 = currentScope.getEmulationPath(anchor.getFirstDeclaringClass(), true, false);
+						emulationPath = new Object[path1.length + path.length];
+						System.arraycopy(path1, 0, emulationPath, 0, path1.length);
+						System.arraycopy(path, 0, emulationPath, path1.length, path.length);
+					} else {
+						byte opcode = Opcodes.OPC_getstatic;
+						for(ITeamAnchor field : path) {
+							fieldAccess(opcode, (FieldBinding)field, ((FieldBinding)field).getDeclaringClass().getRealClass());
+							opcode = Opcodes.OPC_getfield;
+						}
+						return;
+					}
+				}
+// SH}
 				generateOuterAccess(emulationPath, invocationSite, syntheticArgType, currentScope);
 			}
 		}

@@ -7,7 +7,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Constants.java 23461 2010-02-04 22:10:39Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -60,5 +59,4 @@ public interface Constants {
 	
 	/** Simple name of the extension point org.eclipse.objectteams.otequinox.aspectBindingNegotiators. */
 	public static final String ASPECT_NEGOTIATOR_EXTPOINT_ID = "aspectBindingNegotiators";
-
 }

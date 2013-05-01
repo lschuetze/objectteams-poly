@@ -223,8 +223,7 @@ public class StateMemento
 	public void runPendingJobs(int state) {
     	List<Runnable> jobs;
     	synchronized (this) {
-    		jobs = this._pendingJobs.get(state);
-    		this._pendingJobs.remove(state);
+    		jobs = this._pendingJobs.remove(state);
 		}
     	if (jobs != null)
     		for (Runnable job : jobs)

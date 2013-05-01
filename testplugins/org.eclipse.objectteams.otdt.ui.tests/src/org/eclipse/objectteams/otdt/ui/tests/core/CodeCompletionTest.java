@@ -362,6 +362,7 @@ public class CodeCompletionTest extends CoreTests {
 		StringBuffer expectedContent = new StringBuffer(); 
 		expectedContent.append("package test1;\n");
 		expectedContent.append("import test1.p1.SuperTeam;\n");
+		expectedContent.append("\n");
 		expectedContent.append("import base test1.p1.ABase;\n");
 		expectedContent.append("public team class Completion_testCreateCalloutOverride1 extends SuperTeam {\n");
 		expectedContent.append("    protected class MyRole playedBy ABase {\n");

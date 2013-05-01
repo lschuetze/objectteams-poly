@@ -277,7 +277,9 @@ public class RoleTypeCreator implements TagBits {
 		        	&& !(existingAnchor instanceof TThisBinding)
 		        	&& !existingAnchor.hasSameBestNameAs(variableBinding))
 		        {
-	        		return originalType; // cannot merge anchors -> original type cannot be improved.
+		        	variableBinding = TeamAnchor.maybeImproveAnchor(site, existingAnchor, anchorExpr);
+		        	if (variableBinding == null)
+		        		return originalType; // cannot merge anchors -> original type cannot be improved.
 		        }
 		        // delegate to the principal function:
 		        TypeBinding[] typeArguments = refBinding.isParameterizedType() ? ((ParameterizedTypeBinding)refBinding).arguments : null;
@@ -387,9 +389,15 @@ public class RoleTypeCreator implements TagBits {
 		            else
 		            	returnType = roleReturn;
 		        }
-		        if (CallinImplementor.avoidWrapRoleType(scope, send.receiver))
-	    			// don't use synthetic _OT$role as additional anchor
-	    			return returnType;
+		        if (CallinImplementorDyn.DYNAMIC_WEAVING) {
+			        if (CallinImplementorDyn.avoidWrapRoleType(scope, send.receiver))
+		    			// don't use synthetic local$role$n as additional anchor
+		    			return returnType;		        	
+		        } else {
+		        	if (CallinImplementor.avoidWrapRoleType(scope, send.receiver))
+		        		// don't use synthetic _OT$role as additional anchor
+		        		return returnType;
+		        }
 		    }
         } else {
         	if (send.arguments != null && send.arguments.length > 0)

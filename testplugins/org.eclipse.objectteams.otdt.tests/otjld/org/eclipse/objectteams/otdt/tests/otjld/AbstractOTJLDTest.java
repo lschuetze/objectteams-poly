@@ -99,7 +99,7 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 		int len = defaults.length;
 		System.arraycopy(defaults, 0, defaults=new String[len+2], 0, len);
 		defaults[len] = new Path(ClasspathUtil.OTRE_PATH).toString();
-		defaults[len+1] = ClasspathUtil.BCEL_JAR_PATH.toString();
+		defaults[len+1] = ClasspathUtil.BYTECODE_LIB_JAR_PATH.toString();
 		return defaults;
 	}
 

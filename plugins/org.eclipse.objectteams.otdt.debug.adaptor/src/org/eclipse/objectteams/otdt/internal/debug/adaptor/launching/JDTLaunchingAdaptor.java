@@ -88,7 +88,7 @@ public team class JDTLaunchingAdaptor {
 			for (int i = 0; i < origEntries.length; i++)
 	        {
 	            IPath entryPath = origEntries[i].getPath();
-				if (OTREContainer.BCEL_PATH.equals(entryPath))
+				if (OTREContainer.BYTECODE_LIBRARY_PATH.equals(entryPath))
 					hasBCEL = true;
 				else if (otreMinJarPath.equals(entryPath))
 					hasOTRE_min = true;
@@ -98,7 +98,7 @@ public team class JDTLaunchingAdaptor {
 			IRuntimeClasspathEntry entry;
 	
 			if (!hasBCEL) {
-				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTREContainer.BCEL_PATH);
+				entry = JavaRuntime.newArchiveRuntimeClasspathEntry(OTREContainer.BYTECODE_LIBRARY_PATH);
 				result.add(entry);			
 			}
 

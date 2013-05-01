@@ -1061,6 +1061,16 @@ public final class ImportRewrite {
 		return removeEntry(STATIC_PREFIX + qualifiedName);
 	}
 
+//{ObjectTeams:
+	/**
+	 * Remove a base-import, similar to {@link #removeImport(String)} and {@link #removeStaticImport(String)}.
+	 * @since 3.9
+	 */
+	public boolean removeImportBase(String qualifiedName) {
+		return removeEntry(BASE_PREFIX + qualifiedName);		
+	}
+// SH}
+
 	private static String getRawName(ITypeBinding normalizedBinding) {
 		return normalizedBinding.getTypeDeclaration().getName();
 	}
@@ -1123,9 +1133,9 @@ public final class ImportRewrite {
 				  if (BASE_PREFIX == curr.charAt(0))
 					computer.addBaseImport(curr.substring(1));
 				  else
-					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0), /*isBase*/false);
+					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0), /*isBase*/false, usedAstRoot, this.restoreExistingImports);
   /* orig:
-					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0));
+					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0), usedAstRoot, this.restoreExistingImports);
     :giro */
 // SH}
 				}

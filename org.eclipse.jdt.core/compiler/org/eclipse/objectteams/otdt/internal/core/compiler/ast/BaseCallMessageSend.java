@@ -152,7 +152,7 @@ public class BaseCallMessageSend extends AbstractExpressionWrapper
 	}
 
 	@Override
-	public int nullStatus(FlowInfo flowInfo) {
+	public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
 		return FlowInfo.UNKNOWN;
 	}
 

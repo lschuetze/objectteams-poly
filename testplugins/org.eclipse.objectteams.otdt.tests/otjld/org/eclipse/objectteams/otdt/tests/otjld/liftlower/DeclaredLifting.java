@@ -1276,6 +1276,72 @@ public class DeclaredLifting extends AbstractOTJLDTest {
     		"OK0");
     }
 
+    // Bug 397712 - [compiler] illegal bytecode from chains of team constructors
+    public void test6112_declaredLiftingInConstructor6() {
+    	runConformTest(
+    		new String[] {
+		"Team6112dlic6_2.java",
+				"public team class Team6112dlic6_2 extends Team6112dlic6_1 {\n" + 
+				"    Team6112dlic6_2(T6112dlic6 as R r) { super(r); }\n" +
+				"    @Override\n" +
+				"    protected class R playedBy T6112dlic6 {\n" +
+    			"        test -> OK;\n" +
+				"    }\n" + 
+    			"    public static void main(String[] args) {\n" +
+    			"        new Team6112dlic6_2(new T6112dlic6()).test();\n" +
+    			"    }\n" + 
+				"}\n",
+		"Team6112dlic6_1.java",
+				"public team class Team6112dlic6_1 extends Team6112dlic6_0 {\n" +
+				"    R r;" + 
+				"    protected Team6112dlic6_1(R r) { this.r = r; }\n" +
+				"    public void test() {\n" +
+				"        this.r.test(2);\n" +
+				"    }\n" + 
+				"}\n",
+    	"T6112dlic6.java",
+    			"public class T6112dlic6 {\n" +
+    			"    void OK(int x) { System.out.print(\"OK\"+x); }\n" +
+    			"}\n",
+    	"Team6112dlic6_0.java",
+    			"public abstract team class Team6112dlic6_0 {\n" + 
+    			"    Team6112dlic6_0(){}\n" +
+    			"    protected abstract class R { protected abstract void test(int l); }\n" + 
+    			"}\n",
+    		},
+    		"OK2");
+    }
+    
+    public void test6113_declaredLiftingOfExternalizedRole1() {
+    	runConformTest(new String[] {
+    		"Team6113dloer1_2.java",
+    			"public team class Team6113dloer1_2 {\n" +
+    			"final static Team6113dloer1_1 other = new Team6113dloer1_1();\n" +
+    			"    protected class R playedBy R<@other> {\n" +
+    			"        void test() -> void test();\n" +
+    			"    }\n" +
+    			"    void test(R<@other> as R r) {\n" +
+    			"        r.test();\n" +
+    			"    }\n" +
+    			"    public static void main(String[] args) {\n" +
+    			"        other.val = \"OK\";\n" +
+    			"        new Team6113dloer1_2().test(other.getR());\n" +
+    			"    }\n" +
+    			"}\n",
+    		"Team6113dloer1_1.java",
+    			"public team class Team6113dloer1_1 {\n" +
+    			"public String val;\n" +
+    			"public class R {\n" +
+    			"    public void test() {\n" +
+    			"        System.out.print(val);\n" +
+    			"    }\n" +
+    			"}\n" +
+    			"public R getR() { return new R(); }\n" +
+    			"}\n"
+    	},
+    	"OK");
+    }
+
     public void test6113_maximalSyntax1() {
         
         runConformTest(
@@ -1327,4 +1393,5 @@ public class DeclaredLifting extends AbstractOTJLDTest {
              "OK");
     	
     }
+
 }

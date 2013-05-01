@@ -18,6 +18,7 @@
  *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 388795 - [compiler] detection of name clash depends on order of super interfaces
+ *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *								bug 388739 - [1.8][compiler] consider default methods when detecting whether a class needs to be declared abstract
  *								bug 390883 - [1.8][compiler] Unable to override default method
  *******************************************************************************/
@@ -747,6 +748,70 @@ void checkTypeVariableMethods(TypeParameter typeParameter) {
 			}
 		}
 	}
+}
+
+MethodBinding computeSubstituteMethod(MethodBinding inheritedMethod, MethodBinding currentMethod) {
+	if (inheritedMethod == null) return null;
+//{ObjectTeams: use source-level params in case of enhanced callin methods:
+/* orig:
+	if (currentMethod.parameters.length != inheritedMethod.parameters.length) return null; // no match
+  :giro */
+	if (currentMethod.getSourceParamLength() != inheritedMethod.getSourceParamLength()) return null; // no match
+// SH}
+
+	// due to hierarchy & compatibility checks, we need to ensure these 2 methods are resolved
+	if (currentMethod.declaringClass instanceof BinaryTypeBinding)
+		((BinaryTypeBinding) currentMethod.declaringClass).resolveTypesFor(currentMethod);
+	if (inheritedMethod.declaringClass instanceof BinaryTypeBinding)
+		((BinaryTypeBinding) inheritedMethod.declaringClass).resolveTypesFor(inheritedMethod);
+
+	TypeVariableBinding[] inheritedTypeVariables = inheritedMethod.typeVariables;
+	int inheritedLength = inheritedTypeVariables.length;
+	if (inheritedLength == 0) return inheritedMethod; // no substitution needed
+	TypeVariableBinding[] typeVariables = currentMethod.typeVariables;
+	int length = typeVariables.length;
+	if (length == 0)
+		return inheritedMethod.asRawMethod(this.environment);
+	if (length != inheritedLength)
+		return inheritedMethod; // no match JLS 8.4.2
+
+	// interface I { <T> void foo(T t); }
+	// class X implements I { public <T extends I> void foo(T t) {} }
+	// for the above case, we do not want to answer the substitute method since its not a match
+	TypeBinding[] arguments = new TypeBinding[length];
+	System.arraycopy(typeVariables, 0, arguments, 0, length);
+	ParameterizedGenericMethodBinding substitute =
+		this.environment.createParameterizedGenericMethod(inheritedMethod, arguments);
+	for (int i = 0; i < inheritedLength; i++) {
+		TypeVariableBinding inheritedTypeVariable = inheritedTypeVariables[i];
+		TypeBinding argument = arguments[i];
+		if (argument instanceof TypeVariableBinding) {
+			TypeVariableBinding typeVariable = (TypeVariableBinding) argument;
+			if (typeVariable.firstBound == inheritedTypeVariable.firstBound) {
+				if (typeVariable.firstBound == null)
+					continue; // both are null
+			} else if (typeVariable.firstBound != null && inheritedTypeVariable.firstBound != null) {
+				if (typeVariable.firstBound.isClass() != inheritedTypeVariable.firstBound.isClass())
+					return inheritedMethod; // not a match
+			}
+			if (Scope.substitute(substitute, inheritedTypeVariable.superclass) != typeVariable.superclass)
+				return inheritedMethod; // not a match
+			int interfaceLength = inheritedTypeVariable.superInterfaces.length;
+			ReferenceBinding[] interfaces = typeVariable.superInterfaces;
+			if (interfaceLength != interfaces.length)
+				return inheritedMethod; // not a match
+			next : for (int j = 0; j < interfaceLength; j++) {
+				TypeBinding superType = Scope.substitute(substitute, inheritedTypeVariable.superInterfaces[j]);
+				for (int k = 0; k < interfaceLength; k++)
+					if (superType == interfaces[k])
+						continue next;
+				return inheritedMethod; // not a match
+			}
+		} else if (inheritedTypeVariable.boundCheck(substitute, argument, this.type.scope) != TypeConstants.OK) {
+	    	return inheritedMethod;
+		}
+	}
+   return substitute;
 }
 boolean detectInheritedNameClash(MethodBinding inherited, MethodBinding otherInherited) {
 	if (!inherited.areParameterErasuresEqual(otherInherited))

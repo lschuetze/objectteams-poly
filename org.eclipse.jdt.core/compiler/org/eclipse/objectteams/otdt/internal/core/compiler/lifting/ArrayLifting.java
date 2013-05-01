@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 
 /**
  * @author stephan
@@ -40,16 +41,16 @@ public class ArrayLifting extends ArrayTranslations {
 			TypeBinding requiredType)
 	{
 		this._teamExpr = teamExpr;
-		return (MessageSend)translateArray(scope, expression, providedType, requiredType, /*isLifting*/true);
+		return (MessageSend)translateArray(scope, expression, providedType, requiredType, /*isLifting*/true, /*deferredResolve*/false);
 	}
 
 	/* implement hook. */
 	Expression translation(
 			Expression rhs,
 			TypeBinding providedType,
-			TypeBinding requiredType)
+			TypeBinding requiredType, AstGenerator gen)
 	{
-		return Lifting.liftCall(this._scope, this._teamExpr, rhs, providedType, requiredType, false);
+		return Lifting.liftCall(this._scope, gen.thisReference(), rhs, providedType, requiredType, false);
 	}
 
 }

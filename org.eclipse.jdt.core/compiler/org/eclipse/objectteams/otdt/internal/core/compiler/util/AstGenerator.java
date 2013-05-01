@@ -743,6 +743,47 @@ public class AstGenerator extends AstFactory {
 		return messageSend;
 	}
 
+	// function type for the next method:
+	public static interface IRunInScope { void run(BlockScope scope); }
+
+	/**
+	 * Create a message send that has a custom resolve method (see inside for details).
+	 */
+	public MessageSend messageSendWithResolveHook(Expression receiver, char[] selector, Expression[] parameters, final IRunInScope hook) {
+		MessageSend messageSend = new MessageSend() {
+			@Override
+			public TypeBinding resolveType(BlockScope scope) {
+				// arguments always need resolving:
+				if (this.arguments != null) {
+					int length = this.arguments.length;
+					for (int i = 0; i < length; i++){
+						Expression argument = this.arguments[i];
+						if (argument.resolvedType == null)
+							argument.resolveType(scope);
+					}
+				}
+				// skip the receiver unless its again a hooked message send:
+				if (this.receiver.getClass() == this.getClass())
+					this.receiver.resolveType(scope);
+				
+				// the main payload:
+				hook.run(scope);
+				
+				this.actualReceiverType = this.binding.declaringClass;
+				return this.resolvedType;
+			}
+		};
+		messageSend.sourceStart = this.sourceStart;
+		messageSend.sourceEnd   = this.sourceEnd;
+		messageSend.statementEnd = this.sourceEnd;
+		messageSend.nameSourcePosition = this.pos;
+		messageSend.receiver = receiver;
+		messageSend.selector = selector;
+		messageSend.arguments = parameters;
+		messageSend.constant = Constant.NotAConstant;
+		return messageSend;
+	}
+
 	public MessageSend messageSend(Expression receiver, char[] selector, Expression[] parameters, final TypeBinding resolvedReturn) {
 		MessageSend messageSend = new MessageSend() {
 			@Override
@@ -1067,6 +1108,30 @@ public class AstGenerator extends AstFactory {
 		return stat;
 	}
 
+	/** Generate a full try-catch-finally statement. */
+	public TryStatement tryStatement(Statement[] tryStatements,
+									 Argument[] exceptionArguments, Statement[][] catchStatementss,
+									 Statement[] finallyStatements)
+	{
+		TryStatement stat = new TryStatement();
+		stat.sourceStart = this.sourceStart;
+		stat.sourceEnd   = this.sourceEnd;
+		stat.tryBlock = block(tryStatements);
+		stat.catchArguments = exceptionArguments;
+		stat.catchBlocks = new Block[catchStatementss.length];
+		for(int i=0; i<catchStatementss.length; i++)
+			stat.catchBlocks[i] = block(catchStatementss[i]);
+		stat.finallyBlock = block(finallyStatements);
+		if (finallyStatements != null) {
+			int len = finallyStatements.length;
+			if (len > 0) {
+				stat.finallyBlock.sourceStart = finallyStatements[0].sourceStart;
+				stat.finallyBlock.sourceEnd   = finallyStatements[len-1].sourceEnd;
+			}
+		}
+		return stat;
+	}
+
 	/**
 	 * Create a lifting of an expression to an expectedType if expectedType is in deed
 	 * a role type different from the type of expression (deferred decision).
@@ -1227,9 +1292,11 @@ public class AstGenerator extends AstFactory {
 					selector,
 					null);
 	}
-	public Expression createCastOrUnboxing(Expression expression, TypeBinding expectedType) {
+	public Expression createCastOrUnboxing(Expression expression, TypeBinding expectedType, boolean baseAccess) {
 		if (expectedType.isBaseType())
 			return createUnboxing(expression, (BaseTypeBinding)expectedType);
+		else if (baseAccess)
+			return castExpression(expression, baseclassReference(expectedType), CastExpression.RAW);
 		else
 			return castExpression(expression, typeReference(expectedType), CastExpression.RAW);
 	}

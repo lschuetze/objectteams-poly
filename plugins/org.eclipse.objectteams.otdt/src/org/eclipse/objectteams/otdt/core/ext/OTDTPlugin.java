@@ -28,6 +28,8 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Plugin;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.objectteams.otdt.core.compiler.CompilerVersion;
+import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.osgi.framework.BundleContext;
 
 
@@ -239,7 +241,16 @@ public class OTDTPlugin extends Plugin
     public void start(BundleContext context) throws Exception {    
     	super.start(context);
     	try {
-    		OTREContainer.findBCEL(context);
+    		String weavingProperty = System.getProperty("ot.weaving"); //$NON-NLS-1$
+    		boolean useDynamicWeaving;
+    		if (weavingProperty != null) {
+				useDynamicWeaving = "dynamic".equals(weavingProperty);
+			} else
+    			useDynamicWeaving = TransformerPlugin.useDynamicWeaving();
+    		CompilerVersion.setDynamicWeaving(useDynamicWeaving);
+    		OTREContainer.findBytecodeLib(context, useDynamicWeaving);
+    		if (useDynamicWeaving)
+    			OTREContainer.OT_RUNTIME_PLUGIN = "org.eclipse.objectteams.otredyn"; //$NON-NLS-1$
     	} catch (RuntimeException re) {
     		this.getLog().log(new Status(IStatus.ERROR, PLUGIN_ID, "Cannot initialize BCEL location", re)); //$NON-NLS-1$
     	}

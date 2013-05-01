@@ -80,8 +80,8 @@ public abstract class PotentialTranslationExpression extends Expression  impleme
 
 	/** Simply forward. */
 	@Override
-	public int nullStatus(FlowInfo flowInfo) {
-		return this.expression.nullStatus(flowInfo);
+	public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
+		return this.expression.nullStatus(flowInfo, flowContext);
 	}
 
 	/** Simply forward. */

@@ -4,12 +4,14 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ThisReference.java 23404 2010-02-03 14:10:22Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								bug 331649 - [compiler][null] consider null annotations for fields
+ *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -25,8 +27,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
  * OTDT changes:
  *
  * What: if it's not an ImplicitThis, wrap the type if its a role.
- *
- * @version $Id: ThisReference.java 23404 2010-02-03 14:10:22Z stephan $
  */
 public class ThisReference extends Reference {
 
@@ -65,6 +65,10 @@ public class ThisReference extends Reference {
 			return false;
 		}
 		return true;
+	}
+
+	public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
+		return true; // never problematic
 	}
 
 	/*
@@ -107,10 +111,6 @@ public class ThisReference extends Reference {
 	public boolean isThis() {
 
 		return true ;
-	}
-
-	public int nullStatus(FlowInfo flowInfo) {
-		return FlowInfo.NON_NULL;
 	}
 
 	public StringBuffer printExpression(int indent, StringBuffer output){

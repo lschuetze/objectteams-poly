@@ -7,9 +7,8 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: RoleCastException.java 23408 2010-02-03 18:07:35Z stephan $
  *
- * Please visit http://www.objectteams.org for updates and contact.
+ * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
  * Contributors:
  * Berlin Institute of Technology - Initial API and implementation
@@ -24,15 +23,16 @@ package org.objectteams;
 public class RoleCastException extends ClassCastException {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 1L;
-	private static final String MSG = 
+	private static final String MSG =
 		"Different enclosing team instances (see OT/J language definition para. 1.2.4(b)).";
 
 	/* (non-Javadoc)
 	 * @see java.lang.Throwable#getMessage()
 	 */
+	@Override
 	public String getMessage() {
 		return MSG;
 	}

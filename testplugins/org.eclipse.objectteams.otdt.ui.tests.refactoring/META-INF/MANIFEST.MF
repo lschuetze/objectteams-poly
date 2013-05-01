@@ -31,7 +31,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jdt.core.manipulation,
  org.eclipse.jdt.ui.tests,
  org.eclipse.objectteams.otequinox,
- org.eclipse.objectteams.otequinox,
  org.eclipse.objectteams.otdt
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy

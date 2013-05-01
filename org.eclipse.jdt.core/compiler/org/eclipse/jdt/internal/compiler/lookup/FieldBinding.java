@@ -8,9 +8,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contribution for bug 185682 - Increment/decrement operators mark local variables as read
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
+ *								bug 185682 - Increment/decrement operators mark local variables as read
+ *								bug 331649 - [compiler][null] consider null annotations for fields
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -297,6 +299,17 @@ public Constant constant() {
 		this.constant = fieldConstant;
 	}
 	return fieldConstant;
+}
+
+public void fillInDefaultNonNullness(FieldDeclaration sourceField, Scope scope) {
+	if (   this.type != null
+		&& !this.type.isBaseType()
+		&& (this.tagBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) == 0)
+	{
+		this.tagBits |= TagBits.AnnotationNonNull;
+	} else if ((this.tagBits & TagBits.AnnotationNonNull) != 0) {
+		scope.problemReporter().nullAnnotationIsRedundant(sourceField);
+	}
 }
 
 /**

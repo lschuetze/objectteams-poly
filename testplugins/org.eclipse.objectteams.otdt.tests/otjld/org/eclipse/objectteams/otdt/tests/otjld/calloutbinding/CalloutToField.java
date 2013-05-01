@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2010, 2012 Stephan Herrmann
+ * Copyright 2010, 2013 Stephan Herrmann
  * 
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
@@ -33,7 +33,7 @@ public class CalloutToField extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test3319_calloutToArrayField1f"};
+//		TESTS_NAMES = new String[] { "testBug399781_1"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -3762,5 +3762,86 @@ public class CalloutToField extends AbstractOTJLDTest {
             null/*vmArguments*/,
             options,
             null/*no custom requestor*/);
+    }
+
+    // Bug 399781 - Callout to private field of deeply nested class gives compile error
+    // static nested classes
+    public void testBug399781_1() {
+    	runConformTest(
+    		new String[] {
+    			"MyTeam.java",
+    				"import base pack.Base.MidBase;\n" +
+    				"import base pack.Base.MidBase.InnerBase;\n" +
+    				"public team class MyTeam {\n" +
+    				"	protected team class MR playedBy MidBase {\n" +
+    				"		protected class IR playedBy InnerBase {\n" +
+    				"			protected IR() { base(); }\n" +
+    				"			public String getVal() -> get String val;\n" +
+    				"		}\n" +
+    				"		protected void test() {\n" +
+    				"			System.out.println(new IR().getVal());\n" +
+    				"		}\n" +
+    				"	}\n" +
+    				"	protected void test(MidBase as MR m) {\n" +
+    				"		m.test();\n" +
+    				"	}\n" +
+    				"	public static void main(String... args) {\n" +
+    				"		new MyTeam().test(pack.Base.getMid());\n" +
+    				"	}\n" +
+    				"}\n",
+				"pack/Base.java",
+    				"package pack;\n" +
+					"public class Base {\n" +
+					"	static class MidBase {\n" +
+					"		static class InnerBase {\n" +
+					"			private String val = \"OK\";\n" +
+					"		}\n" +
+					"		InnerBase getInner() { return new InnerBase(); }\n" +
+					"	}\n" +
+					"	public static MidBase getMid() { return new MidBase(); }\n" +
+					"}\n"
+    		},
+    		"OK");
+    }
+
+    // Bug 399781 - Callout to private field of deeply nested class gives compile error
+    // non-static inner classes
+    public void testBug399781_2() {
+    	runConformTest(
+    		new String[] {
+				"MyTeam.java",
+    				"import base pack.Base.MidBase;\n" +
+					"import base pack.Base.MidBase.InnerBase;\n" +
+					"public team class MyTeam {\n" +
+					"	protected team class MR playedBy MidBase {\n" +
+					"		protected class IR playedBy InnerBase {\n" +
+					"			protected IR() { base(); }\n" +
+					"			@SuppressWarnings(\"decapsulation\")\n" +
+					"			public String getVal() -> get String val;\n" +
+					"		}\n" +
+					"		protected void test() {\n" +
+					"			System.out.println(new IR().getVal());\n" +
+					"		}\n" +
+					"	}\n" +
+					"	protected void test(MidBase as MR m) {\n" +
+					"		m.test();\n" +
+					"	}\n" +
+					"	public static void main(String... args) {\n" +
+					"		new MyTeam().test(new pack.Base().getMid());\n" +
+					"	}\n" +
+					"}\n",
+    			"pack/Base.java",
+    				"package pack;\n" +
+    				"public class Base {\n" +
+    				"	class MidBase {\n" +
+    				"		class InnerBase {\n" +
+    				"			private String val = \"OK\";\n" +
+    				"		}\n" +
+    				"		InnerBase getInner() { return new InnerBase(); }\n" +
+    				"	}\n" +
+    				"	public MidBase getMid() { return new MidBase(); }\n" +
+    				"}\n"
+    		},
+    		"OK");
     }
 }
