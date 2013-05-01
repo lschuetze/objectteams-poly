@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -36,6 +36,25 @@ public class ASTRewriteFlattener extends ASTVisitor {
 	 * @deprecated
 	 */
 	/*package*/ static final int JLS3_INTERNAL = AST.JLS3;
+
+	/**
+	 * Internal synonym for deprecated constant MethodDeclaration.EXTRA_DIMENSIONS_PROPERTY
+	 * to alleviate deprecated warnings.
+	 * @deprecated
+	 */
+	static final SimplePropertyDescriptor INTERNAL_METHOD_EXTRA_DIMENSIONS_PROPERTY = MethodDeclaration.EXTRA_DIMENSIONS_PROPERTY;
+	/**
+	 * Internal synonym for deprecated constant SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY
+	 * to alleviate deprecated warnings.
+	 * @deprecated
+	 */
+	static final SimplePropertyDescriptor INTERNAL_VARIABLE_EXTRA_DIMENSIONS_PROPERTY = SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY;
+	/**
+	 * Internal synonym for deprecated constant VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY
+	 * to alleviate deprecated warnings.
+	 * @deprecated
+	 */
+	static final SimplePropertyDescriptor INTERNAL_FRAGMENT_EXTRA_DIMENSIONS_PROPERTY = VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY;
 
 	public static String asString(ASTNode node, RewriteEventStore store) {
 		ASTRewriteFlattener flattener= new ASTRewriteFlattener(store);
@@ -661,7 +680,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 		this.result.append('(');
 		visitList(node, MethodDeclaration.PARAMETERS_PROPERTY, String.valueOf(','));
 		this.result.append(')');
-		int extraDims= getIntAttribute(node, MethodDeclaration.EXTRA_DIMENSIONS_PROPERTY);
+		int extraDims= getIntAttribute(node, INTERNAL_METHOD_EXTRA_DIMENSIONS_PROPERTY);
 		for (int i = 0; i < extraDims; i++) {
 			this.result.append("[]"); //$NON-NLS-1$
 		}
@@ -780,9 +799,6 @@ public class ASTRewriteFlattener extends ASTVisitor {
 	public boolean visit(QualifiedName node) {
 		getChildNode(node, QualifiedName.QUALIFIER_PROPERTY).accept(this);
 		this.result.append('.');
-		if (node.getAST().apiLevel() >= AST.JLS8) {
-			visitList(node, QualifiedName.ANNOTATIONS_PROPERTY, String.valueOf(' '), Util.EMPTY_STRING, String.valueOf(' '));
-		}
 		getChildNode(node, QualifiedName.NAME_PROPERTY).accept(this);
 		return false;
 	}
@@ -805,9 +821,6 @@ public class ASTRewriteFlattener extends ASTVisitor {
 	 * @see ASTVisitor#visit(SimpleName)
 	 */
 	public boolean visit(SimpleName node) {
-		if (node.getAST().apiLevel() >= AST.JLS8) {
-			visitList(node, SimpleName.ANNOTATIONS_PROPERTY, String.valueOf(' '), Util.EMPTY_STRING, String.valueOf(' '));
-		}
 		this.result.append(getAttribute(node, SimpleName.IDENTIFIER_PROPERTY));
 		return false;
 	}
@@ -840,7 +853,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 		}
 		this.result.append(' ');
 		getChildNode(node, SingleVariableDeclaration.NAME_PROPERTY).accept(this);
-		int extraDimensions= getIntAttribute(node, SingleVariableDeclaration.EXTRA_DIMENSIONS_PROPERTY);
+		int extraDimensions= getIntAttribute(node, INTERNAL_VARIABLE_EXTRA_DIMENSIONS_PROPERTY);
 		for (int i = 0; i < extraDimensions; i++) {
 			this.result.append("[]"); //$NON-NLS-1$
 		}
@@ -1095,7 +1108,7 @@ public class ASTRewriteFlattener extends ASTVisitor {
 	 */
 	public boolean visit(VariableDeclarationFragment node) {
 		getChildNode(node, VariableDeclarationFragment.NAME_PROPERTY).accept(this);
-		int extraDimensions= getIntAttribute(node, VariableDeclarationFragment.EXTRA_DIMENSIONS_PROPERTY);
+		int extraDimensions= getIntAttribute(node, INTERNAL_FRAGMENT_EXTRA_DIMENSIONS_PROPERTY);
 		for (int i = 0; i < extraDimensions; i++) {
 			this.result.append("[]"); //$NON-NLS-1$
 		}

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -9,6 +9,9 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Jesper S Moller - Contributions for
+ *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
+
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -30,6 +33,8 @@ public interface ProblemReasons {
 	final int InvalidTypeForStaticImport = 14;
 	final int InvalidTypeForAutoManagedResource = 15;
 	final int VarargsElementTypeNotVisible = 16;
+	final int NoSuchSingleAbstractMethod = 17;
+	final int NotAFunctionalInterface = 18;
 //{ObjectTeams;
     final int NoTeamContext = 20;
     final int AnchorNotFinal = 21;

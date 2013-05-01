@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -29,6 +29,9 @@
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 376053 - [compiler][resource] Strange potential resource leak problems
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
+ *								bug 388739 - [1.8][compiler] consider default methods when detecting whether a class needs to be declared abstract
+ *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
+ *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
 
@@ -1485,6 +1488,14 @@ public void cannotUseSuperInJavaLangObject(ASTNode reference) {
 		NoArgument,
 		reference.sourceStart,
 		reference.sourceEnd);
+}
+public void targetTypeIsNotAFunctionalInterface(ASTNode target) {
+	this.handle(
+		IProblem.TargetTypeNotAFunctionalInterface,
+		NoArgument,
+		NoArgument,
+		target.sourceStart,
+		target.sourceEnd);
 }
 public void caseExpressionMustBeConstant(Expression expression) {
 	this.handle(
@@ -2974,6 +2985,15 @@ public void illegalVararg(Argument argType, AbstractMethodDeclaration methodDecl
 		argType.sourceStart,
 		argType.sourceEnd);
 }
+public void illegalVarargInLambda(Argument argType) {
+	String[] arguments = new String[] { CharOperation.toString(argType.type.getTypeName())};
+	this.handle(
+		IProblem.IllegalVarargInLambda,
+		arguments,
+		arguments,
+		argType.sourceStart,
+		argType.sourceEnd);
+}
 public void illegalThisDeclaration(Argument argument) {
 	String[] arguments = NoArgument;
 	this.handle(
@@ -3002,11 +3022,20 @@ public void disallowedThisParameter(Receiver receiver) {
 		receiver.sourceEnd);
 }
 public void illegalQualifierForExplicitThis(Receiver receiver, TypeBinding expectedType) {
+	String[] problemArguments = new String[] { new String(expectedType.sourceName())};
 	this.handle(
 		IProblem.IllegalQualifierForExplicitThis,
-		new String[] { new String(expectedType.readableName())},
-		new String[] { new String(expectedType.qualifiedSourceName())},
-		receiver.sourceStart,
+		problemArguments,
+		problemArguments,
+		(receiver.qualifyingName == null) ? receiver.sourceStart : receiver.qualifyingName.sourceStart,
+		receiver.sourceEnd);
+}
+public void illegalQualifierForExplicitThis2(Receiver receiver) {
+	this.handle(
+		IProblem.IllegalQualifierForExplicitThis2,
+		NoArgument,
+		NoArgument,
+		receiver.qualifyingName.sourceStart,
 		receiver.sourceEnd);
 }
 public void illegalTypeForExplicitThis(Receiver receiver, TypeBinding expectedType) {
@@ -3474,10 +3503,11 @@ public void inheritedMethodsHaveIncompatibleReturnTypes(ASTNode location, Method
 		location.sourceStart,
 		location.sourceEnd);
 }
-public void inheritedMethodsHaveIncompatibleReturnTypes(SourceTypeBinding type, MethodBinding[] inheritedMethods, int length) {
+public void inheritedMethodsHaveIncompatibleReturnTypes(SourceTypeBinding type, MethodBinding[] inheritedMethods, int length, boolean[] isOverridden) {
 	StringBuffer methodSignatures = new StringBuffer();
 	StringBuffer shortSignatures = new StringBuffer();
 	for (int i = length; --i >= 0;) {
+		if (isOverridden[i]) continue;
 		methodSignatures
 			.append(inheritedMethods[i].declaringClass.readableName())
 			.append('.')

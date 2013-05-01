@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,7 @@
  *								bug 383690 - [compiler] location of error re uninitialized final field should be aligned
  *								bug 388800 - [1.8] adjust tests to 1.8 JRE
  *								bug 388795 - [compiler] detection of name clash depends on order of super interfaces
+ *								bug 388739 - [1.8][compiler] consider default methods when detecting whether a class needs to be declared abstract
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -8855,8 +8856,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"   public Set<Map.Entry<String, V>> entrySet() {\n" +
 				"      return this.backingMap.entrySet();\n" +
 				"   }\n" +
-				MAP_STREAM_IMPL_JRE8.replaceAll("\\*", "String").replace('%', 'V') +
-				MAP_IMPL_JRE8.replaceAll("!", "String,V").replaceAll("\\*", "String")+
+				MAP_IMPL_JRE8.replaceAll("\\*", "String").replaceAll("\\%", "V")+
 				"}\n",
 			},
 			"----------\n" +
@@ -10816,6 +10816,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 					"			public boolean hasNext() {return false;}\n" +
 					"			public Entry<String, Integer> next() {return null;}\n" +
 					"			public void remove() {}	\n" +
+					ITERATOR_IMPL_JRE8.replaceAll("\\*", "Entry<String,Integer>") +
 					"		};\n" +
 					"	}\n" +
 					"	public int size() {return 0;}\n" +
@@ -13573,6 +13574,7 @@ public class GenericTypeTest extends AbstractComparableTest {
 				"    public boolean hasNext() { return false; }\n" +
 				"    public String next() { return null; }\n" +
 				"    public void remove() {}\n" +
+				ITERATOR_IMPL_JRE8.replaceAll("\\*", "String") +
 				"}\n",
 			},
 			"");
@@ -19910,6 +19912,7 @@ public void test0617() {
 				"			}\n" +
 				"			public void remove() {\n" +
 				"			}\n" +
+				ITERATOR_IMPL_JRE8.replaceAll("\\*", "U") +
 				"		}\n" +
 				"	}\n" +
 				"}\n",
@@ -24934,7 +24937,7 @@ public void test0779() throws Exception {
 		},
 		"SUCCESS");
 
-	String constantPoolIdx = IS_JRE_8 ? "149" : "36"; // depends on whether or not stubs for JRE8 default methods are included
+	String constantPoolIdx = IS_JRE_8 ? "67" : "36"; // depends on whether or not stubs for JRE8 default methods are included
 	String expectedOutput =
 		"  // Method descriptor #31 (I)Ljava/lang/Object;\n" +
 		"  // Stack: 2, Locals: 2\n" +
@@ -25888,6 +25891,7 @@ public void test0809() {
 			"	}\n" +
 			"	public void remove() {\n" +
 			"	}\n" +
+			ITERATOR_IMPL_JRE8.replaceAll("\\*", "N") +
 			"}\n" +
 			"interface Set3<N extends Node> extends Iterable<N> {\n" +
 			"	SetIterator<N> iterator();\n" +
@@ -25919,27 +25923,27 @@ public void test0809() {
 			"}\n",
 		},
 		"----------\n" +
-		"1. WARNING in X.java (at line 21)\n" +
+		"1. WARNING in X.java (at line 22)\n" +
 		"	void f1(Set1 s) {\n" +
 		"	        ^^^^\n" +
 		"Set1 is a raw type. References to generic type Set1<N> should be parameterized\n" +
 		"----------\n" +
-		"2. ERROR in X.java (at line 22)\n" +
+		"2. ERROR in X.java (at line 23)\n" +
 		"	Node n_ = s.iterator().next();\n" +
 		"	          ^^^^^^^^^^^^^^^^^^^\n" +
 		"Type mismatch: cannot convert from Object to Node\n" +
 		"----------\n" +
-		"3. ERROR in X.java (at line 25)\n" +
+		"3. ERROR in X.java (at line 26)\n" +
 		"	for (Node n : s) {\n" +
 		"	              ^\n" +
 		"Type mismatch: cannot convert from element type Object to Node\n" +
 		"----------\n" +
-		"4. WARNING in X.java (at line 35)\n" +
+		"4. WARNING in X.java (at line 36)\n" +
 		"	void f3(Set3 s) {\n" +
 		"	        ^^^^\n" +
 		"Set3 is a raw type. References to generic type Set3<N> should be parameterized\n" +
 		"----------\n" +
-		"5. ERROR in X.java (at line 38)\n" +
+		"5. ERROR in X.java (at line 39)\n" +
 		"	for (Node n : s) {\n" +
 		"	              ^\n" +
 		"Type mismatch: cannot convert from element type Object to Node\n" +
@@ -28044,7 +28048,7 @@ public void test0868() {
 			"		\n" +
 			"	}" +
 			COLLECTION_RAW_IMPL_JRE8 +
-			ITERABLE_RAW_WITHOUT_IS_EMPTY_IMPL_JRE8 +
+			ITERABLE_RAW_IMPL_JRE8 +
 			"}",
 		},
 		"",
@@ -32485,28 +32489,18 @@ public void test0986() {
 public void test0987() {
 	String expectedOutput = new CompilerOptions(getCompilerOptions()).sourceLevel < ClassFileConstants.JDK1_6
     ?	"----------\n" + 
-		"1. ERROR in X.java (at line 7)\n" + 
-		"	abstract class GLinkElementView<M,CM> extends AbstractLinkView<M> {}\n" + 
-		"	               ^^^^^^^^^^^^^^^^\n" + 
-		"The return types are incompatible for the inherited methods EditPart.getViewer(), AbstractLinkView<M>.getViewer()\n" + 
-		"----------\n" + 
-		"2. ERROR in X.java (at line 11)\n" + 
+		"1. ERROR in X.java (at line 11)\n" + 
 		"	public ISheetViewer getViewer() { return null; }	\n" + 
 		"	       ^^^^^^^^^^^^\n" + 
 		"The return type is incompatible with EditPart.getViewer()\n" + 
 		"----------\n" + 
-		"3. ERROR in X.java (at line 11)\n" + 
+		"2. ERROR in X.java (at line 11)\n" + 
 		"	public ISheetViewer getViewer() { return null; }	\n" + 
 		"	                    ^^^^^^^^^^^\n" + 
 		"The method getViewer() of type AbstractLinkView<M> must override a superclass method\n" + 
 		"----------\n"
     :		"----------\n" + 
-		"1. ERROR in X.java (at line 7)\n" + 
-		"	abstract class GLinkElementView<M,CM> extends AbstractLinkView<M> {}\n" + 
-		"	               ^^^^^^^^^^^^^^^^\n" + 
-		"The return types are incompatible for the inherited methods EditPart.getViewer(), AbstractLinkView<M>.getViewer()\n" + 
-		"----------\n" + 
-		"2. ERROR in X.java (at line 11)\n" + 
+		"1. ERROR in X.java (at line 11)\n" + 
 		"	public ISheetViewer getViewer() { return null; }	\n" + 
 		"	       ^^^^^^^^^^^^\n" + 
 		"The return type is incompatible with EditPart.getViewer()\n" + 
@@ -32595,12 +32589,7 @@ public void test0988() {
 				"}", // =================
 			},
 			"----------\n" + 
-			"1. ERROR in X.java (at line 7)\n" + 
-			"	abstract class GLinkElementView<M,CM> extends AbstractLinkView<M> {}\n" + 
-			"	               ^^^^^^^^^^^^^^^^\n" + 
-			"The return types are incompatible for the inherited methods EditPart.getViewer(), ILinkViewElement.getViewer(), AbstractLinkView<M>.getViewer()\n" + 
-			"----------\n" + 
-			"2. ERROR in X.java (at line 11)\n" + 
+			"1. ERROR in X.java (at line 11)\n" + 
 			"	public SheetViewer getViewer() { return null; }	\n" + 
 			"	       ^^^^^^^^^^^\n" + 
 			"The return type is incompatible with AbstractEditPart.getViewer()\n" + 
@@ -34442,7 +34431,7 @@ public void test1035() {
 			"public int compare(T obj1, T obj2) {\n" +
 			"	return obj1.compareTo(obj2);\n" +
 			"}\n" +
-			COMPARATOR_IMPL_JRE8.replace('*', 'T') +
+			COMPARATOR_IMPL_JRE8.replace('*', 'T').replace('%', 'U') +
 			"}\n" +
 			"\n" +
 			"@SuppressWarnings({\"unchecked\", \"rawtypes\"})\n" +
@@ -34493,7 +34482,7 @@ public void test1035() {
 			"public int compare(V obj1, V obj2) {\n" +
 			"	return 0;\n" +
 			"}\n" +
-			COMPARATOR_IMPL_JRE8.replace('*', 'V') +
+			COMPARATOR_IMPL_JRE8.replace('*', 'V').replace('%', 'U') +
 			"}", // =================
 
 		},
@@ -42843,7 +42832,7 @@ public void test1239() {
 		"4. ERROR in X.java (at line 13)\n" +
 		"	public interface CombinedSubInterface extends SubInterface, OtherSubInterface {}\n" +
 		"	                 ^^^^^^^^^^^^^^^^^^^^\n" +
-		"The return types are incompatible for the inherited methods X.OtherSubInterface.and(X.SuperInterface), X.SubInterface.and(X.SuperInterface)\n" +
+		"The return types are incompatible for the inherited methods X.SubInterface.and(X.SuperInterface), X.OtherSubInterface.and(X.SuperInterface)\n" +
 		"----------\n" +
 		"5. WARNING in X.java (at line 15)\n" +
 		"	public interface OtherSubInterface extends SuperInterface {\n" +
@@ -49757,6 +49746,7 @@ public void test1444() {
 				"			public boolean hasNext() {\n" + 
 				"				return false;\n" + 
 				"			}\n" + 
+				ITERATOR_RAW_IMPL_JRE8 +
 				"		};\n" + 
 				"	}\n" + 
 				"	Zork z;\n" +
@@ -49788,7 +49778,7 @@ public void test1444() {
 			"	                              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 			"Unnecessary cast from Iterator to Iterator<String>\n" + 
 			"----------\n" + 
-			"6. ERROR in X.java (at line 36)\n" + 
+			"6. ERROR in X.java (at line 37)\n" + 
 			"	Zork z;\n" + 
 			"	^^^^\n" + 
 			"Zork cannot be resolved to a type\n" + 

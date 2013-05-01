@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,8 @@
  *								bug 366003 - CCE in ASTNode.resolveAnnotations(ASTNode.java:639)
  *								bug 374605 - Unreasonable warning for enum-based switch statements
  *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
+ *     Jesper S Moller - Contributions for
+ *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.parser;
 
@@ -6165,19 +6167,19 @@ protected void consumeMethodInvocationName() {
 		this.identifierLengthPtr--;
 	} else {
 		this.identifierLengthStack[this.identifierLengthPtr]--;
-		int length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--];
-		Annotation [] typeAnnotations;
-		if (length != 0) {
-			System.arraycopy(
-					this.typeAnnotationStack,
-					(this.typeAnnotationPtr -= length) + 1,
-					typeAnnotations = new Annotation[length],
-					0,
-					length);
-			problemReporter().misplacedTypeAnnotations(typeAnnotations[0], typeAnnotations[typeAnnotations.length - 1]);
-		}
 		m.receiver = getUnspecifiedReference();
 		m.sourceStart = m.receiver.sourceStart;
+	}
+	int length = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr--];
+	Annotation [] typeAnnotations;
+	if (length != 0) {
+		System.arraycopy(
+				this.typeAnnotationStack,
+				(this.typeAnnotationPtr -= length) + 1,
+				typeAnnotations = new Annotation[length],
+				0,
+				length);
+		problemReporter().misplacedTypeAnnotations(typeAnnotations[0], typeAnnotations[typeAnnotations.length - 1]);
 	}
 	pushOnExpressionStack(m);
 }
@@ -9760,7 +9762,7 @@ protected void consumeLambdaExpression() {
 			problemReporter().illegalThis(arguments[i]);
 		}
 	}
-	LambdaExpression lexp = new LambdaExpression(arguments, body);
+	LambdaExpression lexp = new LambdaExpression(this.compilationUnit.compilationResult, arguments, body);
 	this.intPtr--;  // ')' position, discard for now.
 	lexp.sourceStart = this.intStack[this.intPtr--]; // '(' position or identifier position.
 	lexp.sourceEnd = body.sourceEnd;

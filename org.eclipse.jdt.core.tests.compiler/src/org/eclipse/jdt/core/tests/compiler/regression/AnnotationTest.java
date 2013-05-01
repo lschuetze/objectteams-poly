@@ -9939,35 +9939,46 @@ public void testBug366003() {
 		"----------\n" + 
 		"8. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
-		"	            ^^^^\n" + 
-		"Syntax error, insert \")\" to complete MethodDeclaration\n" + 
+		"	            ^^^^\n" +
+//{ObjectTeams: starting from here the OT/J grammar produces different errors:
+// different:
+		"Syntax error, insert \")\" to complete MethodSpecLong\n" +
 		"----------\n" + 
 		"9. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	            ^^^^\n" + 
-		"Syntax error, insert \";\" to complete MethodDeclaration\n" + 
+		"Syntax error, insert \"<-\" to complete CallinBindingLeft\n" + 
+//
 		"----------\n" + 
 		"10. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	            ^^^^\n" + 
+// new
+		"Syntax error, insert \"MethodSpecsLong EmptyParameterMappings\" to complete InvalidCallinBinding\n" + 
+		"----------\n" +
+// number changes beyond this point
+		"11. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	            ^^^^\n" + 
 		"Syntax error, insert \"}\" to complete ClassBody\n" + 
 		"----------\n" + 
-		"11. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"12. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 		"Return type for the method is missing\n" + 
 		"----------\n" + 
-		"12. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"13. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	                       ^^^^^^^\n" + 
 		"NonNull cannot be resolved to a type\n" + 
 		"----------\n" + 
-		"13. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"14. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	                                                      ^^^^^^^^\n" + 
 		"Nullable cannot be resolved to a type\n" + 
 		"----------\n" + 
-		"14. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+		"15. ERROR in snippet\\Bug366003.java (at line 13)\n" + 
+// SH}
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	                                                                           ^\n" + 
 		"Syntax error, insert \";\" to complete ConstructorDeclaration\n" + 
@@ -10026,34 +10037,45 @@ public void testBug366003b() {
 		"7. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	            ^^^^\n" + 
-		"Syntax error, insert \")\" to complete MethodDeclaration\n" + 
+//{ObjectTeams: starting from here the OT/J grammar produces different errors:
+// different:
+		"Syntax error, insert \")\" to complete MethodSpecLong\n" +
 		"----------\n" + 
 		"8. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	            ^^^^\n" + 
-		"Syntax error, insert \";\" to complete MethodDeclaration\n" + 
+		"Syntax error, insert \"<-\" to complete CallinBindingLeft\n" + 
+//
 		"----------\n" + 
+// new
 		"9. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
+		"	            ^^^^\n" + 
+		"Syntax error, insert \"MethodSpecsLong EmptyParameterMappings\" to complete InvalidCallinBinding\n" + 
+// number changes beyond this point
+		"----------\n" + 
+		"10. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	            ^^^^\n" + 
 		"Syntax error, insert \"}\" to complete ClassBody\n" + 
 		"----------\n" + 
-		"10. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"11. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 		"Return type for the method is missing\n" + 
 		"----------\n" + 
-		"11. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"12. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	                       ^^^^^^^\n" + 
 		"NonNull cannot be resolved to a type\n" + 
 		"----------\n" + 
-		"12. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"13. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	                                                      ^^^^^^^^\n" + 
 		"Nullable cannot be resolved to a type\n" + 
 		"----------\n" + 
-		"13. ERROR in snippet\\Bug366003.java (at line 11)\n" + 
+		"14. ERROR in snippet\\Bug366003.java (at line 11)\n" +
+// SH}
 		"	org.eclipse.User.User(@NonNull String name, int uid, @Nullable String email)\n" + 
 		"	                                                                           ^\n" + 
 		"Syntax error, insert \";\" to complete ConstructorDeclaration\n" + 
@@ -10079,30 +10101,41 @@ public void testBug366003c() {
 		"----------\n" + 
 		"2. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
 		"	org.User(@Bla String a)\n" + 
-		"	^^^\n" + 
-		"Syntax error, insert \")\" to complete MethodDeclaration\n" + 
+		"	^^^\n" +
+//{ObjectTeams: starting from here the OT/J grammar produces different errors:
+// different:
+		"Syntax error, insert \")\" to complete MethodSpecLong\n" +
 		"----------\n" + 
 		"3. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
 		"	org.User(@Bla String a)\n" + 
 		"	^^^\n" + 
-		"Syntax error, insert \";\" to complete MethodDeclaration\n" + 
-		"----------\n" + 
+		"Syntax error, insert \"<-\" to complete CallinBindingLeft\n" + 
+//
+		"----------\n" +
+// new
 		"4. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"	org.User(@Bla String a)\n" + 
+		"	^^^\n" + 
+		"Syntax error, insert \"MethodSpecsLong EmptyParameterMappings\" to complete InvalidCallinBinding\n" +
+// number changes beyond this point
+		"----------\n" + 
+		"5. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
 		"	org.User(@Bla String a)\n" + 
 		"	^^^\n" + 
 		"Syntax error, insert \"}\" to complete ClassBody\n" + 
 		"----------\n" + 
-		"5. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"6. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
 		"	org.User(@Bla String a)\n" + 
 		"	    ^^^^^^^^^^^^^^^^^^^\n" + 
 		"Return type for the method is missing\n" + 
 		"----------\n" + 
-		"6. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"7. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
 		"	org.User(@Bla String a)\n" + 
 		"	          ^^^\n" + 
 		"Bla cannot be resolved to a type\n" + 
-		"----------\n" + 
-		"7. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
+		"----------\n" +
+// SH}
+		"8. ERROR in snippet\\Bug366003.java (at line 5)\n" + 
 		"	org.User(@Bla String a)\n" + 
 		"	                      ^\n" + 
 		"Syntax error, insert \";\" to complete ConstructorDeclaration\n" + 

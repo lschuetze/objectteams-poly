@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -31,6 +35,12 @@ import java.util.List;
  * <pre>
  * SingleVariableDeclaration:
  *    { ExtendedModifier } Type [ <b>...</b> ] Identifier { <b>[</b><b>]</b> } [ <b>=</b> Expression ]
+ * </pre>
+ * For JLS8, variable declarations and extra dimensions on variable declarations are allowed to 
+ * have optional annotations. The annotatable extra dimensions are represented by {@link ExtraDimension}.
+ * <pre>
+ * SingleVariableDeclaration:
+ *    { ExtendedModifier } Type {Annotation} [ <b>...</b> ] Identifier { ExtraDimension } [ <b>=</b> Expression ]
  * </pre>
  *
  * @since 2.0
@@ -72,13 +82,29 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 */
 	public static final SimplePropertyDescriptor VARARGS_PROPERTY =
 		new SimplePropertyDescriptor(SingleVariableDeclaration.class, "varargs", boolean.class, MANDATORY); //$NON-NLS-1$
+	
+	/**
+	 * The "varargsAnnotations" structural property of variable arguments of this node type (child type: {@link Annotation}).
+	 * @since 3.9
+	 */
+	public static final ChildListPropertyDescriptor VARARGS_ANNOTATIONS_PROPERTY =
+		new ChildListPropertyDescriptor(SingleVariableDeclaration.class, "varargsAnnotations", Annotation.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The "extraDimensions" structural property of this node type (type: {@link Integer}).
+	 *
 	 * @since 3.0
+	 * @deprecated in JLS8, use {@link SingleVariableDeclaration#EXTRA_DIMENSION_INFOS_PROPERTY} instead.
 	 */
 	public static final SimplePropertyDescriptor EXTRA_DIMENSIONS_PROPERTY =
 		new SimplePropertyDescriptor(SingleVariableDeclaration.class, "extraDimensions", int.class, MANDATORY); //$NON-NLS-1$
+
+	/**
+	 * The "extraDimensionInfos" structural property of this node type (child type: {@link ExtraDimension}) (added in JLS8 API).
+	 * @since 3.9
+	 */
+	public static final ChildListPropertyDescriptor EXTRA_DIMENSION_INFOS_PROPERTY =
+			new ChildListPropertyDescriptor(SingleVariableDeclaration.class, "extraDimensionInfos", ExtraDimension.class, NO_CYCLE_RISK); //$NON-NLS-1$
 
 	/**
 	 * The "initializer" structural property of this node type (child type: {@link Expression}).
@@ -102,7 +128,15 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	 * @since 3.1
 	 */
 	private static final List PROPERTY_DESCRIPTORS_3_0;
-
+	
+	/**
+	 * A list of property descriptors (element type:
+	 * {@link StructuralPropertyDescriptor}),
+	 * or null if uninitialized.
+	 * @since 3.9
+	 */
+	private static final List PROPERTY_DESCRIPTORS_8_0;
+	
 	static {
 		List propertyList = new ArrayList(6);
 		createPropertyList(SingleVariableDeclaration.class, propertyList);
@@ -122,7 +156,20 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 		addProperty(EXTRA_DIMENSIONS_PROPERTY, propertyList);
 		addProperty(INITIALIZER_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
-	}
+		
+		
+		propertyList = new ArrayList(8);
+		createPropertyList(SingleVariableDeclaration.class, propertyList);
+		addProperty(MODIFIERS2_PROPERTY, propertyList);
+		addProperty(TYPE_PROPERTY, propertyList);
+		addProperty(VARARGS_ANNOTATIONS_PROPERTY, propertyList);
+		addProperty(VARARGS_PROPERTY, propertyList);
+		addProperty(NAME_PROPERTY, propertyList);
+		addProperty(EXTRA_DIMENSION_INFOS_PROPERTY, propertyList);
+		addProperty(INITIALIZER_PROPERTY, propertyList);
+		PROPERTY_DESCRIPTORS_8_0 = reapPropertyList(propertyList);		
+	
+		}
 
 	/**
 	 * Returns a list of structural property descriptors for this node type.
@@ -137,8 +184,10 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	public static List propertyDescriptors(int apiLevel) {
 		if (apiLevel == AST.JLS2_INTERNAL) {
 			return PROPERTY_DESCRIPTORS_2_0;
-		} else {
+		} else if (apiLevel < AST.JLS8) {
 			return PROPERTY_DESCRIPTORS_3_0;
+		} else {
+			return PROPERTY_DESCRIPTORS_8_0;
 		}
 	}
 
@@ -186,10 +235,23 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	private int extraArrayDimensions = 0;
 
 	/**
+	 * List of extra dimensions this node has with optional annotations.
+	 * 
+	 * @since 3.9
+	 */
+	protected ASTNode.NodeList extraDimensionInfos = null;
+
+	/**
 	 * The initializer expression, or <code>null</code> if none;
 	 * defaults to none.
 	 */
 	private Expression optionalInitializer = null;
+
+	/**
+	 * The type annotations (element type: {@link Annotation}).
+	 * @since 3.9
+	 */
+	private ASTNode.NodeList varargsAnnotations = null;
 
 //{ObjectTeams: emulation for declared lifting:
 	private SingleVariableDeclaration fakedRoleVariable;
@@ -240,6 +302,10 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 		super(ast);
 		if (ast.apiLevel >= AST.JLS3_INTERNAL) {
 			this.modifiers = new ASTNode.NodeList(MODIFIERS2_PROPERTY);
+			if (ast.apiLevel >= AST.JLS8) {
+				this.varargsAnnotations = new ASTNode.NodeList(VARARGS_ANNOTATIONS_PROPERTY);
+				this.extraDimensionInfos = new ASTNode.NodeList(EXTRA_DIMENSION_INFOS_PROPERTY);
+			}
 		}
 	}
 
@@ -353,6 +419,12 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 		if (property == MODIFIERS2_PROPERTY) {
 			return modifiers();
 		}
+		if (property == VARARGS_ANNOTATIONS_PROPERTY) {
+			return varargsAnnotations();
+		}
+		if (property == EXTRA_DIMENSION_INFOS_PROPERTY) {
+			return extraDimensionInfos();
+		}
 		// allow default implementation to flag the error
 		return super.internalGetChildListProperty(property);
 	}
@@ -377,10 +449,20 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 			result.setVarargs(isVarargs());
 		}
 		result.setType((Type) getType().clone(target));
-		result.setExtraDimensions(getExtraDimensions());
+		if (this.ast.apiLevel >= AST.JLS8) {
+			result.extraDimensionInfos.addAll(
+					ASTNode.copySubtrees(target, this.extraDimensionInfos));
+		} else {
+			result.setExtraDimensions(getExtraDimensions());
+		}
 		result.setName((SimpleName) getName().clone(target));
 		result.setInitializer(
 			(Expression) ASTNode.copySubtree(target, getInitializer()));
+		if (this.ast.apiLevel >= AST.JLS8) {
+			result.varargsAnnotations = new ASTNode.NodeList(VARARGS_ANNOTATIONS_PROPERTY);
+			result.varargsAnnotations().addAll(
+					ASTNode.copySubtrees(target, varargsAnnotations()));
+		}
 		return result;
 	}
 
@@ -403,7 +485,13 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 				acceptChildren(visitor, this.modifiers);
 			}
 			acceptChild(visitor, getType());
+			if (this.ast.apiLevel >= AST.JLS8 && isVarargs()) {
+				acceptChildren(visitor, this.varargsAnnotations);
+			}
 			acceptChild(visitor, getName());
+			if (this.ast.apiLevel >= AST.JLS8){
+				acceptChildren(visitor, this.extraDimensionInfos);
+			}
 			acceptChild(visitor, getInitializer());
 		}
 		visitor.endVisit(this);
@@ -608,25 +696,49 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 		postValueChange(VARARGS_PROPERTY);
 	}
 
-	/* (omit javadoc for this method)
-	 * Method declared on VariableDeclaration.
+	/**
+	 * Returns the number of extra array dimensions over and above the
+	 * explicitly-specified type.
+	 *
+	 * @return the number of extra array dimensions
 	 * @since 2.1
 	 */
 	public int getExtraDimensions() {
+		if (this.ast.apiLevel >= AST.JLS8) {
+			return this.extraDimensionInfos.size();
+		}
 		return this.extraArrayDimensions;
 	}
 
-	/* (omit javadoc for this method)
-	 * Method declared on VariableDeclaration.
+	/**
+	 * Sets the number of extra array dimensions over and above the
+	 * explicitly-specified type (Not supported in JLS8 and above). 
+	 *
+	 * @param dimensions the number of array dimensions
+	 * @exception IllegalArgumentException if the number of dimensions is
+	 *    negative
 	 * @since 2.1
+	 * @deprecated In the JLS8 API, see: {@link #extraDimensionInfos()}.
 	 */
 	public void setExtraDimensions(int dimensions) {
+		supportedOnlyIn2_3_4();
 		if (dimensions < 0) {
 			throw new IllegalArgumentException();
 		}
 		preValueChange(EXTRA_DIMENSIONS_PROPERTY);
 		this.extraArrayDimensions = dimensions;
 		postValueChange(EXTRA_DIMENSIONS_PROPERTY);
+	}
+
+	/**
+	 * Returns the live ordered list of extra dimensions with optional annotations (JLS8 API only).
+	 *
+	 * @return the live list of extra dimensions with optional annotations (element type: {@link ExtraDimension})
+	 * @since 3.9
+	 */
+	public List extraDimensionInfos() {
+		unsupportedIn2_3_4();
+		return this.extraDimensionInfos;
 	}
 
 	/* (omit javadoc for this method)
@@ -647,13 +759,28 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 		this.optionalInitializer = initializer;
 		postReplaceChild(oldChild, initializer,INITIALIZER_PROPERTY);
 	}
-
+	
+	/**
+	 * Returns the  ordered list of annotations of variable arguments.
+	 *
+	 * @return the list of annotations of the varargs (element type: {@link Annotation})
+	 * @exception UnsupportedOperationException if this operation is used
+	 *            in a JLS2, JLS3 or JLS4 AST
+	 * @since 3.9
+	 */
+	public List varargsAnnotations() {
+		if (this.varargsAnnotations == null) {
+			unsupportedIn2_3_4(); 
+		}
+		return this.varargsAnnotations;
+	}
+	
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
 	 */
 	int memSize() {
 		// treat Operator as free
-		return BASE_NODE_SIZE + 7 * 4;
+		return BASE_NODE_SIZE + 9 * 4;
 	}
 
 	/* (omit javadoc for this method)
@@ -662,7 +789,9 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 	int treeSize() {
 		return
 			memSize()
+			+ (this.varargsAnnotations == null ? 0 : this.varargsAnnotations.listSize())
 			+ (this.modifiers == null ? 0 : this.modifiers.listSize())
+			+ (this.extraDimensionInfos == null ? 0 : this.extraDimensionInfos.listSize())
 			+ (this.type == null ? 0 : getType().treeSize())
 			+ (this.variableName == null ? 0 : getName().treeSize())
 			+ (this.optionalInitializer == null ? 0 : getInitializer().treeSize());

@@ -22,6 +22,8 @@
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *								bug 394768 - [compiler][resource] Incorrect resource leak warning when creating stream in conditional
+ *     Jesper S Moller - Contributions for
+ *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -265,6 +267,7 @@ public void resolve(BlockScope scope) {
 	MethodScope methodScope = scope.methodScope();
 	MethodBinding methodBinding;
 	TypeBinding methodType =
+		(methodScope.referenceContext instanceof LambdaExpression) ? ((LambdaExpression) methodScope.referenceContext).expectedResultType() :
 		(methodScope.referenceContext instanceof AbstractMethodDeclaration)
 			? ((methodBinding = ((AbstractMethodDeclaration) methodScope.referenceContext).binding) == null
 				? null

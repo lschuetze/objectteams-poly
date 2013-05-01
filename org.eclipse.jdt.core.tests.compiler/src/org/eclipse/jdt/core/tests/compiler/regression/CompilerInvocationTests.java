@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2006, 2012 IBM Corporation and others.
+ * Copyright (c) 2006, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,7 +24,9 @@
  *								bug 382347 - [1.8][compiler] Compiler accepts incorrect default method inheritance
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
- *******************************************************************************/
+ *     Jesper S Moller - Contributions for
+ *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
+*******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
 import java.lang.reflect.Field;
@@ -541,6 +543,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("IllegalQualifiedEnumConstantLabel", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("IllegalQualifiedParameterizedTypeAllocation", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("IllegalQualifierForExplicitThis", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
+		expectedProblemAttributes.put("IllegalQualifierForExplicitThis2", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 		expectedProblemAttributes.put("IllegalReturnNullityRedefinition", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 		expectedProblemAttributes.put("IllegalRedefinitionToNonNullParameter", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 		expectedProblemAttributes.put("IllegalStaticModifierForMemberType", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
@@ -551,6 +554,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("IllegalUsageOfQualifiedTypeReference", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 		expectedProblemAttributes.put("IllegalUsageOfTypeAnnotations", new ProblemAttributes(CategorizedProblem.CAT_SYNTAX));
 		expectedProblemAttributes.put("IllegalVararg", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
+		expectedProblemAttributes.put("IllegalVarargInLambda", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("IllegalVisibilityModifierCombinationForField", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 		expectedProblemAttributes.put("IllegalVisibilityModifierCombinationForMemberType", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("IllegalVisibilityModifierCombinationForMethod", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
@@ -880,6 +884,7 @@ public void _test011_problem_categories() {
 		expectedProblemAttributes.put("SuperfluousSemicolon", new ProblemAttributes(CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM));
 		expectedProblemAttributes.put("SwitchOnEnumNotBelow15", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("SwitchOnStringsNotBelow17", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
+		expectedProblemAttributes.put("TargetTypeNotAFunctionalInterface", new ProblemAttributes(CategorizedProblem.CAT_TYPE));
 		expectedProblemAttributes.put("Task", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("ThisInStaticContext", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 		expectedProblemAttributes.put("ThisSuperDuringConstructorInvocation", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
@@ -1355,6 +1360,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("IllegalQualifiedEnumConstantLabel", SKIP);
 		expectedProblemAttributes.put("IllegalQualifiedParameterizedTypeAllocation", SKIP);
 		expectedProblemAttributes.put("IllegalQualifierForExplicitThis", SKIP);
+		expectedProblemAttributes.put("IllegalQualifierForExplicitThis2", SKIP);
 		expectedProblemAttributes.put("IllegalRedefinitionToNonNullParameter", new ProblemAttributes(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION));
 		expectedProblemAttributes.put("IllegalReturnNullityRedefinition", new ProblemAttributes(JavaCore.COMPILER_PB_NULL_SPECIFICATION_VIOLATION));
 		expectedProblemAttributes.put("IllegalStaticModifierForMemberType", SKIP);
@@ -1365,6 +1371,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("IllegalUsageOfQualifiedTypeReference", SKIP);
 		expectedProblemAttributes.put("IllegalUsageOfTypeAnnotations", SKIP);
 		expectedProblemAttributes.put("IllegalVararg", SKIP);
+		expectedProblemAttributes.put("IllegalVarargInLambda", SKIP);
 		expectedProblemAttributes.put("IllegalVisibilityModifierCombinationForField", SKIP);
 		expectedProblemAttributes.put("IllegalVisibilityModifierCombinationForMemberType", SKIP);
 		expectedProblemAttributes.put("IllegalVisibilityModifierCombinationForMethod", SKIP);
@@ -1695,6 +1702,7 @@ public void test012_compiler_problems_tuning() {
 		expectedProblemAttributes.put("SuperfluousSemicolon", new ProblemAttributes(JavaCore.COMPILER_PB_EMPTY_STATEMENT));
 		expectedProblemAttributes.put("SwitchOnEnumNotBelow15", SKIP);
 		expectedProblemAttributes.put("SwitchOnStringsNotBelow17", SKIP);
+		expectedProblemAttributes.put("TargetTypeNotAFunctionalInterface", SKIP);
 		expectedProblemAttributes.put("Task", SKIP);
 		expectedProblemAttributes.put("ThisInStaticContext", SKIP);
 		expectedProblemAttributes.put("ThisSuperDuringConstructorInvocation", SKIP);

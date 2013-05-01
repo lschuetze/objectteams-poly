@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -21,6 +21,8 @@
  *								bug 365531 - [compiler][null] investigate alternative strategy for internally encoding nullness defaults
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
+ *      Jesper S Moller - Contributions for
+ *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -28,6 +30,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
@@ -103,6 +106,7 @@ abstract public class ReferenceBinding extends AbstractOTReferenceBinding {
 	private SimpleLookupTable compatibleCache;
 
 	int typeBits; // additional bits characterizing this type
+	protected MethodBinding singleAbstractMethod;
 
 	public static final ReferenceBinding LUB_GENERIC = new ReferenceBinding() { /* used for lub computation */
 		public boolean hasTypeBit(int bit) { return false; }
@@ -346,56 +350,6 @@ public MethodBinding[] availableMethods() {
 	} catch (Throwable t) { /* don't care about exceptions in compiler */ }
 // SH}
 	return methods();
-}
-
-public FieldBinding[] unResolvedFields() {
-	return Binding.NO_FIELDS;
-}
-
-/*
- * If a type - known to be a Closeable - is mentioned in one of our white lists
- * answer the typeBit for the white list (BitWrapperCloseable or BitResourceFreeCloseable).
- */
-protected int applyCloseableWhitelists() {
-	switch (this.compoundName.length) {
-		case 3:
-			if (CharOperation.equals(TypeConstants.JAVA, this.compoundName[0])) {
-				if (CharOperation.equals(TypeConstants.IO, this.compoundName[1])) {
-					char[] simpleName = this.compoundName[2];
-					int l = TypeConstants.JAVA_IO_WRAPPER_CLOSEABLES.length;
-					for (int i = 0; i < l; i++) {
-						if (CharOperation.equals(simpleName, TypeConstants.JAVA_IO_WRAPPER_CLOSEABLES[i]))
-							return TypeIds.BitWrapperCloseable;
-					}
-					l = TypeConstants.JAVA_IO_RESOURCE_FREE_CLOSEABLES.length;
-					for (int i = 0; i < l; i++) {
-						if (CharOperation.equals(simpleName, TypeConstants.JAVA_IO_RESOURCE_FREE_CLOSEABLES[i]))
-							return TypeIds.BitResourceFreeCloseable;
-					}
-				}
-			}
-			break;
-		case 4:
-			if (CharOperation.equals(TypeConstants.JAVA, this.compoundName[0])) {
-				if (CharOperation.equals(TypeConstants.UTIL, this.compoundName[1])) {
-					if (CharOperation.equals(TypeConstants.ZIP, this.compoundName[2])) {
-						char[] simpleName = this.compoundName[3];
-						int l = TypeConstants.JAVA_UTIL_ZIP_WRAPPER_CLOSEABLES.length;
-						for (int i = 0; i < l; i++) {
-							if (CharOperation.equals(simpleName, TypeConstants.JAVA_UTIL_ZIP_WRAPPER_CLOSEABLES[i]))
-								return TypeIds.BitWrapperCloseable;
-						}
-					}
-				}
-			}
-			break;
-	}
-	int l = TypeConstants.OTHER_WRAPPER_CLOSEABLES.length;
-	for (int i = 0; i < l; i++) {
-		if (CharOperation.equals(this.compoundName, TypeConstants.OTHER_WRAPPER_CLOSEABLES[i]))
-			return TypeIds.BitWrapperCloseable;
-	}	
-	return 0;
 }
 
 /**
@@ -1087,12 +1041,6 @@ public long getAnnotationTagBits() {
 	return this.tagBits;
 }
 
-// Answer methods named selector, which take no more than the suggestedParameterLength.
-// The suggested parameter length is optional and may not be guaranteed by every type.
-public MethodBinding[] getMethods(char[] selector, int suggestedParameterLength) {
-	return getMethods(selector);
-}
-
 /**
  * @return the enclosingInstancesSlotSize
  */
@@ -1117,8 +1065,6 @@ public FieldBinding getField(char[] fieldName, boolean needResolve) {
 public char[] getFileName() {
 	return this.fileName;
 }
-/** Answer an additional bit characterizing this type, like {@link TypeIds#BitAutoCloseable}. */
-abstract public boolean hasTypeBit(int bit);
 
 public ReferenceBinding getMemberType(char[] typeName) {
 	ReferenceBinding[] memberTypes = memberTypes();
@@ -1144,6 +1090,13 @@ public ReferenceBinding getMemberTypeRecurse(char[] typeName) {
 public MethodBinding[] getMethods(char[] selector) {
 	return Binding.NO_METHODS;
 }
+
+//Answer methods named selector, which take no more than the suggestedParameterLength.
+//The suggested parameter length is optional and may not be guaranteed by every type.
+public MethodBinding[] getMethods(char[] selector, int suggestedParameterLength) {
+	return getMethods(selector);
+}
+
 //{ObjectTeams:
 	/**
 	 * get method by its selector, search includes superclasses, superinterfaces.
@@ -1214,7 +1167,7 @@ public MethodBinding[] getMethods(char[] selector) {
 					MethodBinding superSubstitute= verifier.computeSubstituteMethod(superMethod, match1);
 					if (superSubstitute != null)
 						superMethod= superSubstitute;
-					if (!verifier.areParametersEqual(match1, superMethod))
+					if (!ImplicitNullAnnotationVerifier.areParametersEqual(match1, superMethod, verifier.environment))
 						foundMethod = new ProblemMethodBinding(match1.selector, Binding.NO_PARAMETERS, ProblemReasons.Ambiguous);
 				}
 			}
@@ -1333,6 +1286,8 @@ boolean hasNonNullDefault() {
 public final boolean hasRestrictedAccess() {
 	return (this.modifiers & ExtraCompilerModifiers.AccRestrictedAccess) != 0;
 }
+/** Answer an additional bit characterizing this type, like {@link TypeIds#BitAutoCloseable}. */
+abstract public boolean hasTypeBit(int bit);
 
 //{ObjectTeams: support asymmetric comparison. // FIXME(SH): is this needed or is super-impl smart enough??
 @Override
@@ -2023,6 +1978,57 @@ public SyntheticArgumentBinding[] syntheticOuterLocalVariables() {
 MethodBinding[] unResolvedMethods() { // for the MethodVerifier so it doesn't resolve types
 	return methods();
 }
+
+public FieldBinding[] unResolvedFields() {
+	return Binding.NO_FIELDS;
+}
+
+/*
+ * If a type - known to be a Closeable - is mentioned in one of our white lists
+ * answer the typeBit for the white list (BitWrapperCloseable or BitResourceFreeCloseable).
+ */
+protected int applyCloseableWhitelists() {
+	switch (this.compoundName.length) {
+		case 3:
+			if (CharOperation.equals(TypeConstants.JAVA, this.compoundName[0])) {
+				if (CharOperation.equals(TypeConstants.IO, this.compoundName[1])) {
+					char[] simpleName = this.compoundName[2];
+					int l = TypeConstants.JAVA_IO_WRAPPER_CLOSEABLES.length;
+					for (int i = 0; i < l; i++) {
+						if (CharOperation.equals(simpleName, TypeConstants.JAVA_IO_WRAPPER_CLOSEABLES[i]))
+							return TypeIds.BitWrapperCloseable;
+					}
+					l = TypeConstants.JAVA_IO_RESOURCE_FREE_CLOSEABLES.length;
+					for (int i = 0; i < l; i++) {
+						if (CharOperation.equals(simpleName, TypeConstants.JAVA_IO_RESOURCE_FREE_CLOSEABLES[i]))
+							return TypeIds.BitResourceFreeCloseable;
+					}
+				}
+			}
+			break;
+		case 4:
+			if (CharOperation.equals(TypeConstants.JAVA, this.compoundName[0])) {
+				if (CharOperation.equals(TypeConstants.UTIL, this.compoundName[1])) {
+					if (CharOperation.equals(TypeConstants.ZIP, this.compoundName[2])) {
+						char[] simpleName = this.compoundName[3];
+						int l = TypeConstants.JAVA_UTIL_ZIP_WRAPPER_CLOSEABLES.length;
+						for (int i = 0; i < l; i++) {
+							if (CharOperation.equals(simpleName, TypeConstants.JAVA_UTIL_ZIP_WRAPPER_CLOSEABLES[i]))
+								return TypeIds.BitWrapperCloseable;
+						}
+					}
+				}
+			}
+			break;
+	}
+	int l = TypeConstants.OTHER_WRAPPER_CLOSEABLES.length;
+	for (int i = 0; i < l; i++) {
+		if (CharOperation.equals(this.compoundName, TypeConstants.OTHER_WRAPPER_CLOSEABLES[i]))
+			return TypeIds.BitWrapperCloseable;
+	}	
+	return 0;
+}
+
 //{ObjectTeams: support for checking substitution of a value parameter 
 public VariableBinding valueParamSynthArgAt(int typeParamPosition) {
 	SyntheticArgumentBinding[] args = valueParamSynthArgs();
@@ -2031,4 +2037,166 @@ public VariableBinding valueParamSynthArgAt(int typeParamPosition) {
 	return null;
 }
 // SH}
+private MethodBinding [] getInterfaceAbstractContracts(Scope scope) throws InvalidInputException {
+	
+	if (!isInterface() || !isValidBinding()) {
+		throw new InvalidInputException("Not a functional interface"); //$NON-NLS-1$
+	}
+	
+	MethodBinding [] methods = methods();
+	MethodBinding [] contracts = new MethodBinding[0];
+	int contractsCount = 0;
+	int contractsLength = 0;
+	MethodBinding aContract = null;
+	int contractParameterLength = 0;
+	char [] contractSelector = null;
+	
+	for (int i = 0, length = methods == null ? 0 : methods.length; i < length; i++) {
+		final MethodBinding method = methods[i];
+		if (!method.isAbstract() || method.redeclaresPublicObjectMethod(scope)) continue; // skips statics, defaults, public object methods ...
+		final boolean validBinding = method.isValidBinding();
+		if (aContract == null && validBinding) {
+			aContract = method;
+			contractParameterLength = aContract.parameters.length;
+			contractSelector = aContract.selector;
+		} else {
+			if (!validBinding || method.parameters.length != contractParameterLength || !CharOperation.equals(contractSelector, method.selector)) {
+				throw new InvalidInputException("Not a functional interface"); //$NON-NLS-1$
+			}
+		}
+		if (contractsCount == contractsLength) {
+			System.arraycopy(contracts, 0, contracts = new MethodBinding[contractsLength += 16], 0, contractsCount);
+		}
+		contracts[contractsCount++] = method;
+	}
+	ReferenceBinding [] superInterfaces = superInterfaces();
+	for (int i = 0, length = superInterfaces.length; i < length; i++) {
+		MethodBinding [] superInterfaceContracts = superInterfaces[i].getInterfaceAbstractContracts(scope);
+		final int superInterfaceContractsLength = superInterfaceContracts == null  ? 0 : superInterfaceContracts.length;
+		
+		if (superInterfaceContractsLength == 0) continue;
+		if (aContract == null) {
+			aContract = superInterfaceContracts[0];
+			contractParameterLength = aContract.parameters.length;
+			contractSelector = aContract.selector;
+			contracts = superInterfaceContracts;
+			contractsCount = contractsLength = superInterfaceContractsLength;
+		} else {
+			if (superInterfaceContracts[0].parameters.length != contractParameterLength || !CharOperation.equals(contractSelector, superInterfaceContracts[0].selector)) {
+				throw new InvalidInputException("Not a functional interface"); //$NON-NLS-1$
+			}
+			if (contractsLength < contractsCount + superInterfaceContractsLength) {
+				System.arraycopy(contracts, 0, contracts = new MethodBinding[contractsLength = contractsCount + superInterfaceContractsLength], 0, contractsCount);
+			}
+			System.arraycopy(superInterfaceContracts, 0, contracts, contractsCount,	superInterfaceContractsLength);
+			contractsCount += superInterfaceContractsLength;
+		}
+	}
+	if (contractsCount < contractsLength) {
+		System.arraycopy(contracts, 0, contracts = new MethodBinding[contractsCount], 0, contractsCount);
+	}
+	return contracts;
+}
+public MethodBinding getSingleAbstractMethod(Scope scope) {
+	
+	if (this.singleAbstractMethod != null) {
+		return this.singleAbstractMethod;
+	}
+
+	MethodBinding[] methods = null;
+	try {
+		methods = getInterfaceAbstractContracts(scope);
+	} catch (InvalidInputException e) {
+		return this.singleAbstractMethod = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NoSuchSingleAbstractMethod);
+	}
+	if (methods != null && methods.length == 1)
+		return this.singleAbstractMethod = methods[0];
+	
+	final LookupEnvironment environment = scope.environment();
+	boolean genericMethodSeen = false;
+	next:for (int i = 0, length = methods.length; i < length; i++) {
+		MethodBinding method = methods[i], otherMethod = null;
+		if (method.typeVariables != Binding.NO_TYPE_VARIABLES)
+			genericMethodSeen = true;
+		for (int j = 0; j < length; j++) {
+			if (i == j) continue;
+			otherMethod = methods[j];
+			if (otherMethod.typeVariables != Binding.NO_TYPE_VARIABLES)
+				genericMethodSeen = true;
+			if (!MethodVerifier.isParameterSubsignature(method, otherMethod, environment) || !MethodVerifier.areReturnTypesCompatible(method, otherMethod, environment)) 
+				continue next; 
+		}
+		// If we reach here, we found a method that is override equivalent with every other method and is also return type substitutable. Compute kosher exceptions now ...
+		ReferenceBinding [] exceptions = new ReferenceBinding[0];
+		int exceptionsCount = 0, exceptionsLength = 0;
+		final MethodBinding theAbstractMethod = method;
+		boolean shouldEraseThrows = theAbstractMethod.typeVariables == Binding.NO_TYPE_VARIABLES && genericMethodSeen;
+		boolean shouldAdaptThrows = theAbstractMethod.typeVariables != Binding.NO_TYPE_VARIABLES;
+		final int typeVariableLength = theAbstractMethod.typeVariables.length;
+		
+		none:for (i = 0; i < length; i++) {
+			method = methods[i];
+			ReferenceBinding[] methodThrownExceptions = method.thrownExceptions;
+			int methodExceptionsLength = methodThrownExceptions == null ? 0: methodThrownExceptions.length;
+			if (methodExceptionsLength == 0) break none;
+			if (shouldAdaptThrows && method != theAbstractMethod) {
+				System.arraycopy(methodThrownExceptions, 0, methodThrownExceptions = new ReferenceBinding[methodExceptionsLength], 0, methodExceptionsLength);
+				for (int tv = 0; tv < typeVariableLength; tv++) {
+					if (methodThrownExceptions[tv] instanceof TypeVariableBinding) {
+						methodThrownExceptions[tv] = theAbstractMethod.typeVariables[tv];
+					}
+				}
+			}
+			nextException: for (int j = 0; j < methodExceptionsLength; j++) {
+				ReferenceBinding methodException = methodThrownExceptions[j];
+				if (shouldEraseThrows)
+					methodException = (ReferenceBinding) methodException.erasure();
+				nextMethod: for (int k = 0; k < length; k++) {
+					if (i == k) continue;
+					otherMethod = methods[k];
+					ReferenceBinding[] otherMethodThrownExceptions = otherMethod.thrownExceptions;
+					int otherMethodExceptionsLength =  otherMethodThrownExceptions == null ? 0 : otherMethodThrownExceptions.length;
+					if (otherMethodExceptionsLength == 0) break none;
+					if (shouldAdaptThrows && otherMethod != theAbstractMethod) {
+						System.arraycopy(otherMethodThrownExceptions, 
+								0, 
+								otherMethodThrownExceptions = new ReferenceBinding[otherMethodExceptionsLength], 
+								0, 
+								otherMethodExceptionsLength);
+						for (int tv = 0; tv < typeVariableLength; tv++) {
+							if (otherMethodThrownExceptions[tv] instanceof TypeVariableBinding) {
+								otherMethodThrownExceptions[tv] = theAbstractMethod.typeVariables[tv];
+							}
+						}
+					}
+					for (int l = 0; l < otherMethodExceptionsLength; l++) {
+						ReferenceBinding otherException = otherMethodThrownExceptions[l];
+						if (shouldEraseThrows)
+							otherException = (ReferenceBinding) otherException.erasure();
+						if (methodException.isCompatibleWith(otherException))
+							continue nextMethod;
+					}
+					continue nextException;
+				}
+				// If we reach here, method exception or its super type is covered by every throws clause.
+				if (exceptionsCount == exceptionsLength) {
+					System.arraycopy(exceptions, 0, exceptions = new ReferenceBinding[exceptionsLength += 16], 0, exceptionsCount);
+				}
+				exceptions[exceptionsCount++] = methodException;
+			}
+		}
+		if (exceptionsCount != exceptionsLength) {
+			System.arraycopy(exceptions, 0, exceptions = new ReferenceBinding[exceptionsCount], 0, exceptionsCount);
+		}
+		this.singleAbstractMethod = new MethodBinding(theAbstractMethod.modifiers, 
+				theAbstractMethod.selector, 
+				theAbstractMethod.returnType, 
+				theAbstractMethod.parameters, 
+				exceptions, 
+				theAbstractMethod.declaringClass);
+	    this.singleAbstractMethod.typeVariables = theAbstractMethod.typeVariables;
+		return this.singleAbstractMethod;
+	}
+	return this.singleAbstractMethod = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NoSuchSingleAbstractMethod);
+}
 }

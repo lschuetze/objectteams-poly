@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2012 GK Software AG and others.
+ * Copyright (c) 2012, 2013 GK Software AG, IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -168,7 +168,9 @@ public class ImplicitNullAnnotationVerifier {
 			MethodBinding currentMethod = ifcMethods[i];
 			if (currentMethod.isStatic())
 				continue;
-			if (areParametersEqual(original, currentMethod)) {
+//{ObjectTeams: added 3. argument:
+			if (areParametersEqual(original, currentMethod, this.environment)) {
+// SH}
 				result.add(currentMethod);
 				return; // at most one method is overridden from any supertype
 			}
@@ -375,8 +377,9 @@ public class ImplicitNullAnnotationVerifier {
 	}
 
 	// ==== minimal set of utility methods previously from MethodVerifier15: ====
-	
-	boolean areParametersEqual(MethodBinding one, MethodBinding two) {
+//{ObjectTeams: added 3. argument:
+	static boolean areParametersEqual(MethodBinding one, MethodBinding two, LookupEnvironment environment) {
+// SH}
 //{ObjectTeams: retrench callin methods:
 /* orig:
 		TypeBinding[] oneArgs = one.parameters;
@@ -395,8 +398,8 @@ public class ImplicitNullAnnotationVerifier {
 		// with parameterized parameters for backwards compatibility, need a more complex check
 		int i;
 		foundRAW: for (i = 0; i < length; i++) {
-//{ObjectTeams: added 3. argument:
-			if (!areTypesEqual(oneArgs[i], twoArgs[i], two)) {
+//{ObjectTeams: added arguments 3 & 4:
+			if (!areTypesEqual(oneArgs[i], twoArgs[i], two, environment)) {
 // SH}
 				if (oneArgs[i].leafComponentType().isRawType()) {
 					if (oneArgs[i].dimensions() == twoArgs[i].dimensions() && oneArgs[i].leafComponentType().isEquivalentTo(twoArgs[i].leafComponentType())) {
@@ -418,7 +421,7 @@ public class ImplicitNullAnnotationVerifier {
 		// all raw mode for remaining parameters (if any)
 		for (i++; i < length; i++) {
 //{ObjectTeams: added 3. argument:
-	        if (!areTypesEqual(oneArgs[i], twoArgs[i], two)) {
+	        if (!areTypesEqual(oneArgs[i], twoArgs[i], two, null)) {
 // SH}
 				if (oneArgs[i].leafComponentType().isRawType())
 					if (oneArgs[i].dimensions() == twoArgs[i].dimensions() && oneArgs[i].leafComponentType().isEquivalentTo(twoArgs[i].leafComponentType()))
@@ -431,11 +434,11 @@ public class ImplicitNullAnnotationVerifier {
 		return true;
 	}
 //{ObjectTeams: enable role type comparison
-//added 3. parameter:
-	boolean areTypesEqual(TypeBinding one, TypeBinding two, MethodBinding methodTwo) {
+//added parameters 3 & 4:
+	static boolean areTypesEqual(TypeBinding one, TypeBinding two, MethodBinding methodTwo, LookupEnvironment environment) {
 	    if (one == two) return true;
 //  different comparison for role types:
-	    if (areEqualRoleTypes(one, two, methodTwo.declaringClass, this.environment))
+	    if (areEqualRoleTypes(one, two, methodTwo.declaringClass, environment))
 	        return true;
 // SH}
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=329584

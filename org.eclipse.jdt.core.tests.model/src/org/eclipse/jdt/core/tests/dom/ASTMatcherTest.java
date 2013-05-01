@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -39,6 +43,8 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 			if (methods[i].getName().startsWith("test")) { //$NON-NLS-1$
 				suite.addTest(new ASTMatcherTest(methods[i].getName(), AST.JLS2));
 				suite.addTest(new ASTMatcherTest(methods[i].getName(), JLS3_INTERNAL));
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391898
+				suite.addTest(new ASTMatcherTest(methods[i].getName(), AST.JLS8));
 			}
 		}
 		return suite;
@@ -62,6 +68,8 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 	Block B1;
 	SingleVariableDeclaration V1;
 	SingleVariableDeclaration V2;
+	AnnotatableType R1;
+	Name Q1;
 	VariableDeclarationFragment W1;
 	VariableDeclarationFragment W2;
 	FieldDeclaration FD1;
@@ -95,7 +103,8 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 	Modifier MOD2;
 	EnumConstantDeclaration EC1;
 	EnumConstantDeclaration EC2;
-
+	Type T3;
+	Type T4;
 	final StringBuffer b = new StringBuffer();
 
 	int API_LEVEL;
@@ -127,6 +136,10 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		this.S1 = this.ast.newContinueStatement();
 		this.S2 = this.ast.newBreakStatement();
 		this.B1 = this.ast.newBlock();
+		if (this.ast.apiLevel() >= AST.JLS8) {
+			this.R1 = this.ast.newSimpleType(this.ast.newSimpleName("XYZ"));
+			this.Q1 = this.ast.newSimpleName("XYZ");
+		}
 		this.V1 = this.ast.newSingleVariableDeclaration();
 		this.V1.setType(this.ast.newPrimitiveType(PrimitiveType.INT));
 		this.V1.setName(this.ast.newSimpleName("a")); //$NON-NLS-1$
@@ -225,7 +238,10 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 			this.EC2 = this.ast.newEnumConstantDeclaration();
 			this.EC2.setName(this.ast.newSimpleName("G")); //$NON-NLS-1$
 		}
-
+		if (this.ast.apiLevel() >= AST.JLS8) {
+			this.T3 = this.ast.newSimpleType(this.ast.newSimpleName("U")); //$NON-NLS-1$
+			this.T4 = this.ast.newSimpleType(this.ast.newSimpleName("V")); //$NON-NLS-1$
+		}
 	}
 
 	protected void tearDown() throws Exception {
@@ -986,12 +1002,20 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 			x1.typeParameters().add(this.TP1);
 			x1.typeParameters().add(this.TP2);
 			x1.setReturnType2(this.T1);
+			if (this.ast.apiLevel() >= AST.JLS8) {
+				x1.setReceiverType(this.R1);
+			}
 		}
 		x1.setName(this.N1);
 		x1.parameters().add(this.V1);
 		x1.parameters().add(this.V2);
-		x1.thrownExceptions().add(this.N2);
-		x1.thrownExceptions().add(this.N3);
+		if (this.ast.apiLevel() < AST.JLS8) {
+			x1.thrownExceptions().add(this.N2);
+			x1.thrownExceptions().add(this.N3);			
+		} else {
+			x1.thrownExceptionTypes().add(this.T3);
+			x1.thrownExceptionTypes().add(this.T4);			
+		}
 		x1.setBody(this.B1);
 		basicMatch(x1);
 	}
@@ -1320,4 +1344,45 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		basicMatch(x1);
 	}
 
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391898
+	public void testSingleVariableDeclarationVarargsAnnotation() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		SingleVariableDeclaration x1 = this.ast.newSingleVariableDeclaration();
+		x1.setType(this.T1);
+		x1.setName(this.N1);
+		x1.setVarargs(true);
+		x1.varargsAnnotations().add(this.ANO1);
+		basicMatch(x1);
+	}
+	
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395886
+	public void testQualifiedTypeAnnotation() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		QualifiedType x1 = this.ast.newQualifiedType(this.T1, this.N1);
+		x1.annotations().add(this.ANO1);
+		x1 = this.ast.newQualifiedType(x1, this.N2);
+		x1.annotations().add(this.ANO2);
+		basicMatch(x1);
+	}
+	
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=395886
+	public void testParameterizedQualifiedTypeAnnotation() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		QualifiedType qualifiedType = this.ast.newQualifiedType(this.T1, this.N1); 
+		qualifiedType.annotations().add(this.ANO1);
+		ParameterizedType x1 = this.ast.newParameterizedType(qualifiedType);
+		x1.typeArguments().add(this.ast.newSimpleType(this.ast.newSimpleName("SN1")));
+		qualifiedType = this.ast.newQualifiedType(x1, this.N2);
+		x1 = this.ast.newParameterizedType(qualifiedType);
+		SimpleType simpleType = this.ast.newSimpleType(this.ast.newSimpleName("SN2"));
+		simpleType.annotations().add(this.ANO2);
+		x1.typeArguments().add(simpleType);
+		basicMatch(x1);
+	}
 }

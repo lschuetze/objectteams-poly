@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2011, 2012 IBM Corporation and others.
+ * Copyright (c) 2011, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -11,6 +11,8 @@
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Jesper S Moller - Contributions for
+ *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
@@ -219,14 +221,14 @@ public void test009() {
 					"}\n" +
 					"public class X {\n" +
 					"  public void test1(int x) {\n" +
-					"    ActionListener al = (public xyz) -> System.out.println(e); \n" +
+					"    ActionListener al = (public xyz) -> System.out.println(xyz); \n" +
 					"    I f = (abstract final s, @Nullable t) -> System.out.println(s + t); \n" +
 					"  }\n" +
 					"}\n",
 				},
 				"----------\n" + 
 				"1. ERROR in X.java (at line 7)\n" + 
-				"	ActionListener al = (public xyz) -> System.out.println(e); \n" + 
+				"	ActionListener al = (public xyz) -> System.out.println(xyz); \n" + 
 				"	                            ^^^\n" + 
 				"Syntax error, modifiers and annotations are not allowed for the lambda parameter xyz as its type is elided\n" + 
 				"----------\n" + 
@@ -263,6 +265,148 @@ public void test010() {
 				"	^^^^\n" + 
 				"Zork cannot be resolved to a type\n" + 
 				"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=382701, [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expressions.
+public void test011() {
+	// This test checks that common semantic checks are indeed 
+	this.runNegativeTest(
+			new String[] {
+					"X.java",
+					"interface I {\n" +
+					"	Object foo(int [] ia);\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	I i = (int [] ia) -> {\n" +
+					"		Zork z;\n" +  // Error: No such type
+					"		unknown = 0;\n;" + // Error: No such variable
+					"		int a = 42 + ia;\n" + // Error: int + int[] is wrong 
+					"		return ia.clone();\n" +
+					"	};\n" +
+					"	static void staticLambda() {\n" +
+					"		I i = (int [] ia) -> this;\n" + // 'this' is static
+					"	}\n" +
+					"	I j = array -> {\n" +
+					"		int a = array[2] + 3;\n" + // No error, ia must be correctly identifies as int[]
+					"		int b = 42 + array;\n" + // Error: int + int[] is wrong - yes it is!
+					"		System.out.println(\"i(array) = \" + i.foo(array));\n" + // fields are accessible!
+					"		return;\n" + // Error here, expecting Object, not void
+					"	};\n" +
+					"	Runnable r = () -> { return 42; };\n" + // Runnable.run not expecting return value
+					"	void anotherLambda() {\n" +
+					"		final int beef = 0;\n" +
+					"		I k = (int [] a) -> a.length + beef;\n" + // No error, beef is in scope
+					"	}\n" +
+					"}\n",
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 6)\n" + 
+				"	Zork z;\n" + 
+				"	^^^^\n" + 
+				"Zork cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 7)\n" + 
+				"	unknown = 0;\n" + 
+				"	^^^^^^^\n" + 
+				"unknown cannot be resolved to a variable\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 8)\n" + 
+				"	;		int a = 42 + ia;\n" + 
+				"	 		        ^^^^^^^\n" + 
+				"The operator + is undefined for the argument type(s) int, int[]\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 12)\n" + 
+				"	I i = (int [] ia) -> this;\n" + 
+				"	                     ^^^^\n" + 
+				"Cannot use this in a static context\n" + 
+				"----------\n" +
+				"5. ERROR in X.java (at line 16)\n" + 
+				"	int b = 42 + array;\n" + 
+				"	        ^^^^^^^^^^\n" + 
+				"The operator + is undefined for the argument type(s) int, int[]\n" + 
+				"----------\n" + 
+				"6. ERROR in X.java (at line 18)\n" + 
+				"	return;\n" + 
+				"	^^^^^^^\n" + 
+				"This method must return a result of type Object\n" +
+				"----------\n" + 
+				"7. ERROR in X.java (at line 20)\n" + 
+				"	Runnable r = () -> { return 42; };\n" + 
+				"	                     ^^^^^^^^^^\n" + 
+				"Void methods cannot return a value\n" + 
+				"----------\n"
+);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=384600, [1.8] 'this' should not be allowed in lambda expressions in contexts that don't allow it
+public void test012() {
+	// This test checks that common semantic checks are indeed 
+	this.runNegativeTest(
+			new String[] {
+					"X.java",
+					"interface I {\n" +
+					"	void doit();\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	static void foo() {\n" +
+					"		I i = () -> {\n" +
+					"			System.out.println(this);\n" +
+					"			I j = () -> {\n" +
+					"				System.out.println(this);\n" +
+					"				I k = () -> {\n" +
+					"					System.out.println(this);\n" +
+					"				};\n" +
+					"			};\n" +
+					"		};\n" +
+					"	}\n" +
+					"}\n" ,
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 7)\n" + 
+				"	System.out.println(this);\n" + 
+				"	                   ^^^^\n" + 
+				"Cannot use this in a static context\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 9)\n" + 
+				"	System.out.println(this);\n" + 
+				"	                   ^^^^\n" + 
+				"Cannot use this in a static context\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 11)\n" + 
+				"	System.out.println(this);\n" + 
+				"	                   ^^^^\n" + 
+				"Cannot use this in a static context\n" + 
+				"----------\n"
+				);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=384600, [1.8] 'this' should not be allowed in lambda expressions in contexts that don't allow it
+public void test013() {
+	// This test checks that common semantic checks are indeed 
+	this.runNegativeTest(
+			new String[] {
+					"X.java",
+					"interface I {\n" +
+					"	void doit();\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	void foo(Zork z) {\n" +
+					"		I i = () -> {\n" +
+					"			System.out.println(this);\n" +
+					"			I j = () -> {\n" +
+					"				System.out.println(this);\n" +
+					"				I k = () -> {\n" +
+					"					System.out.println(this);\n" +
+					"				};\n" +
+					"			};\n" +
+					"		};\n" +
+					"	}\n" +
+					"}\n" ,
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 5)\n" + 
+				"	void foo(Zork z) {\n" + 
+				"	         ^^^^\n" + 
+				"Zork cannot be resolved to a type\n" + 
+				"----------\n"
+				);
 }
 public static Class testClass() {
 	return NegativeLambdaExpressionsTest.class;

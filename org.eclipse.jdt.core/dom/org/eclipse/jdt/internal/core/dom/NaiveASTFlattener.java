@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -321,6 +321,12 @@ public class NaiveASTFlattener extends ASTVisitor {
 		node.getComponentType().accept(this);
 		visitTypeAnnotations(node);
 		this.buffer.append("[]");//$NON-NLS-1$
+		return false;
+	}
+
+	public boolean visit(ExtraDimension node) {
+		visitAnnotationsList(node.annotations());
+		this.buffer.append("[]"); //$NON-NLS-1$
 		return false;
 	}
 
@@ -928,6 +934,22 @@ public class NaiveASTFlattener extends ASTVisitor {
 		}
 		node.getName().accept(this);
 		this.buffer.append("(");//$NON-NLS-1$
+		if (node.getAST().apiLevel() >= AST.JLS8) {
+			AnnotatableType receiverType = node.getReceiverType();
+			if (receiverType != null) {
+				receiverType.accept(this);
+				this.buffer.append(' ');
+				SimpleName qualifier = node.getReceiverQualifier();
+				if (qualifier != null) {
+					qualifier.accept(this);
+					this.buffer.append('.');
+				}
+				this.buffer.append("this"); //$NON-NLS-1$
+				if (node.parameters().size() > 0) {
+					this.buffer.append(',');
+				}
+			}
+		}
 		for (Iterator it = node.parameters().iterator(); it.hasNext(); ) {
 			SingleVariableDeclaration v = (SingleVariableDeclaration) it.next();
 			v.accept(this);
@@ -936,19 +958,41 @@ public class NaiveASTFlattener extends ASTVisitor {
 			}
 		}
 		this.buffer.append(")");//$NON-NLS-1$
-		for (int i = 0; i < node.getExtraDimensions(); i++) {
-			this.buffer.append("[]"); //$NON-NLS-1$
-		}
-		if (!node.thrownExceptions().isEmpty()) {
-			this.buffer.append(" throws ");//$NON-NLS-1$
-			for (Iterator it = node.thrownExceptions().iterator(); it.hasNext(); ) {
-				Name n = (Name) it.next();
-				n.accept(this);
-				if (it.hasNext()) {
-					this.buffer.append(", ");//$NON-NLS-1$
-				}
+		int size = node.getExtraDimensions();
+		if (node.getAST().apiLevel() >= AST.JLS8) {
+			List dimensions = node.extraDimensionInfos();
+			for (int i = 0; i < size; i++) {
+				visit((ExtraDimension) dimensions.get(i));
 			}
-			this.buffer.append(" ");//$NON-NLS-1$
+		} else {
+			for (int i = 0; i < size; i++) {
+				this.buffer.append("[]"); //$NON-NLS-1$
+			}
+		}
+		if (node.getAST().apiLevel() < AST.JLS8) {
+			if (!node.thrownExceptions().isEmpty()) {
+				this.buffer.append(" throws ");//$NON-NLS-1$
+				for (Iterator it = node.thrownExceptions().iterator(); it.hasNext(); ) {
+					Name n = (Name) it.next();
+					n.accept(this);
+					if (it.hasNext()) {
+						this.buffer.append(", ");//$NON-NLS-1$
+					}
+				}				
+				this.buffer.append(" ");//$NON-NLS-1$
+			} 
+		} else {
+			if (!node.thrownExceptionTypes().isEmpty()) {				
+				this.buffer.append(" throws ");//$NON-NLS-1$
+				for (Iterator it = node.thrownExceptionTypes().iterator(); it.hasNext(); ) {
+					Type n = (Type) it.next();
+					n.accept(this);
+					if (it.hasNext()) {
+						this.buffer.append(", ");//$NON-NLS-1$
+					}
+				}	
+				this.buffer.append(" ");//$NON-NLS-1$				
+			}
 		}
 		if (node.getBody() == null) {
 			this.buffer.append(";\n");//$NON-NLS-1$
@@ -1158,7 +1202,6 @@ public class NaiveASTFlattener extends ASTVisitor {
 	public boolean visit(QualifiedName node) {
 		node.getQualifier().accept(this);
 		this.buffer.append(".");//$NON-NLS-1$
-		visitTypeAnnotations(node);
 		node.getName().accept(this);
 		return false;
 	}
@@ -1193,7 +1236,6 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 * @see ASTVisitor#visit(SimpleName)
 	 */
 	public boolean visit(SimpleName node) {
-		visitTypeAnnotations(node);
 		this.buffer.append(node.getIdentifier());
 		return false;
 	}
@@ -1202,8 +1244,17 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 * @see ASTVisitor#visit(SimpleType)
 	 */
 	public boolean visit(SimpleType node) {
-		visitTypeAnnotations(node);
-		node.getName().accept(this);
+		Name name = node.getName();
+		if (name.isQualifiedName()) {
+			QualifiedName qualifiedName = (QualifiedName) name;
+			qualifiedName.getQualifier().accept(this);
+			this.buffer.append(".");//$NON-NLS-1$
+			visitTypeAnnotations(node);
+			qualifiedName.getName().accept(this);
+		} else {
+			visitTypeAnnotations(node);
+			node.getName().accept(this);			
+		}
 		return false;
 	}
 
@@ -1234,13 +1285,33 @@ public class NaiveASTFlattener extends ASTVisitor {
 		node.getType().accept(this);
 		if (node.getAST().apiLevel() >= JLS3) {
 			if (node.isVarargs()) {
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391898
+				if (node.getAST().apiLevel() >= AST.JLS8) {
+					List annotations = node.varargsAnnotations();
+					if (annotations != null) {
+						this.buffer.append(' ');						
+						for (Iterator it = annotations.iterator(); it.hasNext(); ) {
+							Annotation annotation = (Annotation) it.next();
+							annotation.accept(this);
+							this.buffer.append(' ');
+						}
+					}
+				}
 				this.buffer.append("...");//$NON-NLS-1$
 			}
 		}
 		this.buffer.append(" ");//$NON-NLS-1$
 		node.getName().accept(this);
-		for (int i = 0; i < node.getExtraDimensions(); i++) {
-			this.buffer.append("[]"); //$NON-NLS-1$
+		int size = node.getExtraDimensions();
+		if (node.getAST().apiLevel() >= AST.JLS8) {
+			List dimensions = node.extraDimensionInfos();
+			for (int i = 0; i < size; i++) {
+				visit((ExtraDimension) dimensions.get(i));
+			}
+		} else {
+			for (int i = 0; i < size; i++) {
+				this.buffer.append("[]"); //$NON-NLS-1$
+			}
 		}
 		if (node.getInitializer() != null) {
 			this.buffer.append("=");//$NON-NLS-1$
@@ -1665,8 +1736,16 @@ public class NaiveASTFlattener extends ASTVisitor {
 	 */
 	public boolean visit(VariableDeclarationFragment node) {
 		node.getName().accept(this);
-		for (int i = 0; i < node.getExtraDimensions(); i++) {
-			this.buffer.append("[]");//$NON-NLS-1$
+		int size = node.getExtraDimensions();
+		if (node.getAST().apiLevel() >= AST.JLS8) {
+			List dimensions = node.extraDimensionInfos();
+			for (int i = 0; i < size; i++) {
+				visit((ExtraDimension) dimensions.get(i));
+			}
+		} else {
+			for (int i = 0; i < size; i++) {
+				this.buffer.append("[]");//$NON-NLS-1$
+			}
 		}
 		if (node.getInitializer() != null) {
 			this.buffer.append("=");//$NON-NLS-1$
@@ -1729,28 +1808,18 @@ public class NaiveASTFlattener extends ASTVisitor {
 		}
 		return false;
 	}
-
-	private void visitTypeAnnotations(Type node) {
+	private void visitTypeAnnotations(AnnotatableType node) {
 		if (node.getAST().apiLevel() >= AST.JLS8) {
-			List annotations = node.annotations();
-			if (annotations != null) {
-				for (Iterator it = annotations.iterator(); it.hasNext(); ) {
-					Annotation annotation = (Annotation) it.next();
-					annotation.accept(this);
-					this.buffer.append(' ');
-				}
-			}
+			visitAnnotationsList(node.annotations());
 		}
 	}
-	private void visitTypeAnnotations(Name node) {
-		if (node.getAST().apiLevel() >= AST.JLS8) {
-			List annotations = node.annotations();
-			if (annotations != null) {
-				for (Iterator it = annotations.iterator(); it.hasNext(); ) {
-					Annotation annotation = (Annotation) it.next();
-					annotation.accept(this);
-					this.buffer.append(' ');
-				}
+
+	private void visitAnnotationsList(List annotations) {
+		if (annotations != null) {
+			for (Iterator it = annotations.iterator(); it.hasNext(); ) {
+				Annotation annotation = (Annotation) it.next();
+				annotation.accept(this);
+				this.buffer.append(' ');
 			}
 		}
 	}

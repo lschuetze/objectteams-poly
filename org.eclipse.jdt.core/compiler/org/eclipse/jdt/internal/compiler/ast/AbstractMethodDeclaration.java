@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -190,7 +190,6 @@ public abstract class AbstractMethodDeclaration
 	public Annotation[] annotations;
 	// jsr 308
 	public Receiver receiver;
-	public Annotation[] receiverAnnotations;
 	public Argument[] arguments;
 	public TypeReference[] thrownExceptions;
 	public Statement[] statements;
@@ -337,21 +336,21 @@ public abstract class AbstractMethodDeclaration
 	/**
 	 * Feed null information from argument annotations into the analysis and mark arguments as assigned.
 	 */
-	void analyseArguments(FlowInfo flowInfo) {
-		if (this.arguments != null) {
-			for (int i = 0, count = this.arguments.length; i < count; i++) {
-				if (this.binding.parameterNonNullness != null) {
+	static void analyseArguments(FlowInfo flowInfo, Argument[] methodArguments, MethodBinding methodBinding) {
+		if (methodArguments != null) {
+			for (int i = 0, count = methodArguments.length; i < count; i++) {
+				if (methodBinding.parameterNonNullness != null) {
 					// leverage null-info from parameter annotations:
-					Boolean nonNullNess = this.binding.parameterNonNullness[i];
+					Boolean nonNullNess = methodBinding.parameterNonNullness[i];
 					if (nonNullNess != null) {
 						if (nonNullNess.booleanValue())
-							flowInfo.markAsDefinitelyNonNull(this.arguments[i].binding);
+							flowInfo.markAsDefinitelyNonNull(methodArguments[i].binding);
 						else
-							flowInfo.markPotentiallyNullBit(this.arguments[i].binding);
+							flowInfo.markPotentiallyNullBit(methodArguments[i].binding);
 					}
 				}
 				// tag parameters as being set:
-				flowInfo.markAsDefinitelyAssigned(this.arguments[i].binding);
+				flowInfo.markAsDefinitelyAssigned(methodArguments[i].binding);
 			}
 		}
 	}
@@ -728,10 +727,6 @@ public abstract class AbstractMethodDeclaration
 			}
 		}
 		output.append(')');
-		if (this.receiverAnnotations != null) {
-			output.append(" "); //$NON-NLS-1$
-			printAnnotations(this.receiverAnnotations, output);
-		}
 		if (this.thrownExceptions != null) {
 			output.append(" throws "); //$NON-NLS-1$
 			for (int i = 0; i < this.thrownExceptions.length; i++) {
@@ -791,7 +786,8 @@ public abstract class AbstractMethodDeclaration
 			resolveJavadoc();
 			resolveAnnotations(this.scope, this.annotations, this.binding);
 			// jsr 308
-			resolveAnnotations(this.scope, this.receiverAnnotations, new Annotation.TypeUseBinding(Binding.TYPE_USE));
+			if (this.receiver != null && this.receiver.annotations != null)
+				resolveAnnotations(this.scope, this.receiver.annotations, new Annotation.TypeUseBinding(Binding.TYPE_USE));
 			validateNullAnnotations();
 			resolveStatements();
 			// check @Deprecated annotation presence
@@ -819,6 +815,7 @@ public abstract class AbstractMethodDeclaration
 		/* neither static methods nor methods in anonymous types can have explicit 'this' */
 		if (this.isStatic() || declaringClass.isAnonymousType()) {
 			this.scope.problemReporter().disallowedThisParameter(this.receiver);
+			this.receiver = null;
 			return; // No need to do further validation
 		}
 
@@ -828,27 +825,27 @@ public abstract class AbstractMethodDeclaration
 			if (declaringClass.isStatic()
 					|| (declaringClass.tagBits & (TagBits.IsLocalType | TagBits.IsMemberType)) == 0) { /* neither member nor local type */
 				this.scope.problemReporter().disallowedThisParameter(this.receiver);
+				this.receiver = null;
 				return; // No need to do further validation
 			}
 			enclosingReceiver = enclosingReceiver.enclosingType();
 		}
 
-		if (enclosingReceiver != resolvedReceiverType) {
-			this.scope.problemReporter().illegalTypeForExplicitThis(this.receiver, enclosingReceiver);
+		char[][] tokens = (this.receiver.qualifyingName == null) ? null : this.receiver.qualifyingName.getName();
+		if (this.isConstructor()) {
+			if (tokens == null || tokens.length > 1 || !CharOperation.equals(enclosingReceiver.sourceName(), tokens[0])) {
+				this.scope.problemReporter().illegalQualifierForExplicitThis(this.receiver, enclosingReceiver);
+				this.receiver.qualifyingName = null;
+			}
+		} else if (tokens != null && tokens.length > 0) {
+			this.scope.problemReporter().illegalQualifierForExplicitThis2(this.receiver);
+			this.receiver.qualifyingName = null;
 		}
 
-		if ((this.receiver.qualifyingName == null) ? this.isConstructor() : !isQualifierValidForType(this.receiver.qualifyingName.getName(), enclosingReceiver)) {
-			this.scope.problemReporter().illegalQualifierForExplicitThis(this.receiver, enclosingReceiver);					
+		if (enclosingReceiver != resolvedReceiverType) {
+			this.scope.problemReporter().illegalTypeForExplicitThis(this.receiver, enclosingReceiver);
+			this.receiver = null;
 		}
-	}
-	private boolean isQualifierValidForType(char[][] tokens, TypeBinding enclosingType) {
-		for(int index = tokens.length - 1; index >= 0 && enclosingType != null; index--) {
-			if (!CharOperation.equals(enclosingType.sourceName(), tokens[index])) {
-				return false;
-			}
-			enclosingType = enclosingType.enclosingType();
-		}
-		return true;
 	}
 	public void resolveJavadoc() {
 

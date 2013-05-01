@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,8 +12,9 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for
- *								bug 388795 - [compiler] detection of name clash depends on order of super interfaces
  *								bug 388800 - [1.8] adjust tests to 1.8 JRE
+ *								bug 388795 - [compiler] detection of name clash depends on order of super interfaces
+ *								bug 388739 - [1.8][compiler] consider default methods when detecting whether a class needs to be declared abstract
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -1822,7 +1823,6 @@ public class MethodVerifyTest extends AbstractComparableTest {
 				"public class X extends java.util.AbstractMap {\n" +
 				"	public java.util.Set entrySet() { return null; }\n" +
 				MAP_RAW_IMPL_JRE8 +
-				MAP_STREAM_RAW_IMPL_JRE8 +
 				"}\n"
 			},
 			""
@@ -2041,7 +2041,7 @@ public class MethodVerifyTest extends AbstractComparableTest {
 			"1. ERROR in X.java (at line 3)\n" +
 			"	public class X<T extends I&J> {}\n" +
 			"	               ^\n" +
-			"The return types are incompatible for the inherited methods J.foo(), I.foo()\n" +
+			"The return types are incompatible for the inherited methods I.foo(), J.foo()\n" +
 			"----------\n"
 			// types J and I are incompatible; both define foo(), but with unrelated return types
 		);
@@ -2367,7 +2367,7 @@ public class MethodVerifyTest extends AbstractComparableTest {
 					"1. ERROR in Y.java (at line 1)\n" + 
 					"	abstract class Y implements Equivalent<String>, EqualityComparable<Integer> {\n" + 
 					"	               ^\n" + 
-					"Name clash: The method equalTo(T) of type Equivalent<T> has the same erasure as equalTo(T) of type EqualityComparable<T> but does not override it\n" + 
+					"Name clash: The method equalTo(T) of type EqualityComparable<T> has the same erasure as equalTo(T) of type Equivalent<T> but does not override it\n" + 
 					"----------\n");
 		}
 	}
@@ -2387,29 +2387,29 @@ public class MethodVerifyTest extends AbstractComparableTest {
 			"1. ERROR in Y.java (at line 2)\n" +
 			"	public abstract boolean equalTo(Object other);\n" +
 			"	                        ^^^^^^^^^^^^^^^^^^^^^\n" +
-			"Name clash: The method equalTo(Object) of type Y has the same erasure as equalTo(T) of type Equivalent<T> but does not override it\n" +
+			"Name clash: The method equalTo(Object) of type Y has the same erasure as equalTo(T) of type EqualityComparable<T> but does not override it\n" +
 			"----------\n" +
 			"2. ERROR in Y.java (at line 2)\n" +
 			"	public abstract boolean equalTo(Object other);\n" +
 			"	                        ^^^^^^^^^^^^^^^^^^^^^\n" +
-			"Name clash: The method equalTo(Object) of type Y has the same erasure as equalTo(T) of type EqualityComparable<T> but does not override it\n" +
+			"Name clash: The method equalTo(Object) of type Y has the same erasure as equalTo(T) of type Equivalent<T> but does not override it\n" +
 			"----------\n" :
 			// name clash: equalTo(java.lang.Object) in Y and equalTo(T) in Equivalent<java.lang.String> have the same erasure, yet neither overrides the other
 			"----------\n" + 
 			"1. ERROR in Y.java (at line 1)\n" + 
 			"	abstract class Y implements Equivalent<String>, EqualityComparable<Integer> {\n" + 
 			"	               ^\n" + 
-			"Name clash: The method equalTo(T) of type Equivalent<T> has the same erasure as equalTo(T) of type EqualityComparable<T> but does not override it\n" + 
+			"Name clash: The method equalTo(T) of type EqualityComparable<T> has the same erasure as equalTo(T) of type Equivalent<T> but does not override it\n" + 
 			"----------\n" + 
 			"2. ERROR in Y.java (at line 2)\n" + 
 			"	public abstract boolean equalTo(Object other);\n" + 
 			"	                        ^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Name clash: The method equalTo(Object) of type Y has the same erasure as equalTo(T) of type Equivalent<T> but does not override it\n" + 
+			"Name clash: The method equalTo(Object) of type Y has the same erasure as equalTo(T) of type EqualityComparable<T> but does not override it\n" + 
 			"----------\n" + 
 			"3. ERROR in Y.java (at line 2)\n" + 
 			"	public abstract boolean equalTo(Object other);\n" + 
 			"	                        ^^^^^^^^^^^^^^^^^^^^^\n" + 
-			"Name clash: The method equalTo(Object) of type Y has the same erasure as equalTo(T) of type EqualityComparable<T> but does not override it\n" + 
+			"Name clash: The method equalTo(Object) of type Y has the same erasure as equalTo(T) of type Equivalent<T> but does not override it\n" + 
 			"----------\n"
 		);
 	}
@@ -6878,7 +6878,7 @@ X.java:7: name clash: <T#1>foo2(T#1) in X and <T#2>foo2(A) in Y have the same er
 				"	public boolean hasNext() {	return false; }\n" +
 				"	public Object next() {	return null; }\n" +
 				"	public void remove() {}\n" +
-				ITERABLE_RAW_WITHOUT_IS_EMPTY_IMPL_JRE8 +
+				ITERABLE_RAW_IMPL_JRE8 +
 				COLLECTION_RAW_IMPL_JRE8 +
 				LIST_RAW_IMPL_JRE8 + 
 				"}\n", // =================
@@ -7001,7 +7001,7 @@ X.java:7: name clash: <T#1>foo2(T#1) in X and <T#2>foo2(A) in Y have the same er
 				"	public boolean hasNext() {	return false; }\n" +
 				"	public Object next() {	return null; }\n" +
 				"	public void remove() {}\n" +
-				ITERABLE_RAW_WITHOUT_IS_EMPTY_IMPL_JRE8 +
+				ITERABLE_RAW_IMPL_JRE8 +
 				COLLECTION_RAW_IMPL_JRE8 +
 				LIST_RAW_IMPL_JRE8 + 
 				"}\n", // =================
@@ -7114,7 +7114,7 @@ X.java:7: name clash: <T#1>foo2(T#1) in X and <T#2>foo2(A) in Y have the same er
 				"	public boolean hasNext() {	return false; }\n" +
 				"	public Object next() {	return null; }\n" +
 				"	public void remove() {}\n" +
-				ITERABLE_RAW_WITHOUT_IS_EMPTY_IMPL_JRE8 +
+				ITERABLE_RAW_IMPL_JRE8 +
 				COLLECTION_RAW_IMPL_JRE8 +
 				LIST_RAW_IMPL_JRE8 + 
 				"}\n", // =================
@@ -9101,7 +9101,7 @@ public void test140() {
 		"1. ERROR in X.java (at line 1)\n" +
 		"	public abstract class X implements J, K {}\n" +
 		"	                      ^\n" +
-		"The return types are incompatible for the inherited methods K.foo(Number), J.foo(Number)\n" +
+		"The return types are incompatible for the inherited methods J.foo(Number), K.foo(Number)\n" +
 		"----------\n" +
 		"2. WARNING in X.java (at line 6)\n" +
 		"	XX foo(Number n);\n" +
@@ -9715,7 +9715,7 @@ public void test155() {
 		"1. ERROR in X.java (at line 9)\n" +
 		"	public abstract class X implements I, J {\n" +
 		"	                      ^\n" +
-		"The return types are incompatible for the inherited methods J.foo(), I.foo()\n" +
+		"The return types are incompatible for the inherited methods I.foo(), J.foo()\n" +
 		"----------\n"
 	);
 }
@@ -9740,7 +9740,7 @@ public void test156() {
 		"1. ERROR in X.java (at line 10)\n" +
 		"	public abstract class X implements I, J {\n" +
 		"	                      ^\n" +
-		"The return types are incompatible for the inherited methods J.foo(), I.foo()\n" +
+		"The return types are incompatible for the inherited methods I.foo(), J.foo()\n" +
 		"----------\n"
 	);
 }
@@ -9767,7 +9767,7 @@ public void test157() {
 		"1. ERROR in X.java (at line 7)\n" +
 		"	interface C extends A, B {}\n" +
 		"	          ^\n" +
-		"The return types are incompatible for the inherited methods B.foo(), A.foo()\n" +
+		"The return types are incompatible for the inherited methods A.foo(), B.foo()\n" +
 		"----------\n"
 	);
 }
@@ -9799,7 +9799,7 @@ public void test158() {
 		"1. ERROR in X.java (at line 17)\n" +
 		"	public abstract class X extends Root implements AFoo, BFoo {\n" +
 		"	                      ^\n" +
-		"The return types are incompatible for the inherited methods BFoo.bar(), AFoo.bar()\n" +
+		"The return types are incompatible for the inherited methods AFoo.bar(), BFoo.bar()\n" +
 		"----------\n"
 	);
 }
@@ -9830,17 +9830,17 @@ public void test159() {
 		"1. ERROR in X.java (at line 15)\n" + 
 		"	public abstract class X extends Root implements AFoo, BFoo {}\n" + 
 		"	                      ^\n" + 
-		"The return types are incompatible for the inherited methods BFoo.bar(), AFoo.bar()\n" + 
+		"The return types are incompatible for the inherited methods AFoo.bar(), BFoo.bar()\n" + 
 		"----------\n" + 
 		"2. ERROR in X.java (at line 16)\n" + 
 		"	abstract class Y extends X {}\n" + 
 		"	               ^\n" + 
-		"The return types are incompatible for the inherited methods BFoo.bar(), AFoo.bar()\n" + 
+		"The return types are incompatible for the inherited methods AFoo.bar(), BFoo.bar()\n" + 
 		"----------\n" + 
 		"3. ERROR in X.java (at line 17)\n" + 
 		"	class Z extends X {}\n" + 
 		"	      ^\n" + 
-		"The type Z must implement the inherited abstract method AFoo.bar()\n" + 
+		"The type Z must implement the inherited abstract method BFoo.bar()\n" + 
 		"----------\n");
 }
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=208010
@@ -10810,7 +10810,7 @@ public void test185() {
 		"1. ERROR in A.java (at line 3)\n" + 
 		"	class A implements I, J {}\n" + 
 		"	      ^\n" + 
-		"The type A must implement the inherited abstract method I.hello()\n" + 
+		"The type A must implement the inherited abstract method J.hello()\n" + 
 		"----------\n"
 	);
 }
@@ -13395,11 +13395,6 @@ public void testBug317719f() throws Exception {
 			"	Zork z;\n" + 
 			"	^^^^\n" + 
 			"Zork cannot be resolved to a type\n" + 
-			"----------\n" + 
-			"5. ERROR in X.java (at line 7)\n" + 
-			"	class ChildX<Z> extends X<Z>{}\n" + 
-			"	      ^^^^^^\n" + 
-			"Duplicate methods named forAccountSet with the parameters (List<R>) and (List) are defined by the type X<Z>\n" + 
 			"----------\n":
 				"----------\n" + 
 				"1. ERROR in X.java (at line 3)\n" + 
@@ -13734,7 +13729,7 @@ public void test354229() {
 					"1. ERROR in X.java (at line 8)\n" + 
 					"	interface C  extends A, B { \n" + 
 					"	          ^\n" + 
-					"Name clash: The method get(List<String>) of type A has the same erasure as get(List<Integer>) of type B but does not override it\n" + 
+					"Name clash: The method get(List<Integer>) of type B has the same erasure as get(List<String>) of type A but does not override it\n" + 
 					"----------\n" + 
 					"2. ERROR in X.java (at line 10)\n" + 
 					"	Zork z;\n" + 
@@ -13800,7 +13795,7 @@ public void test354229c() {
 					"1. ERROR in X.java (at line 7)\n" + 
 					"	interface E extends X, Y {\n" + 
 					"	          ^\n" + 
-					"Name clash: The method e(Action<T>) of type X has the same erasure as e(Action<S>) of type Y but does not override it\n" + 
+					"Name clash: The method e(Action<S>) of type Y has the same erasure as e(Action<T>) of type X but does not override it\n" + 
 					"----------\n" + 
 					"2. ERROR in X.java (at line 10)\n" + 
 					"	Zork z;\n" + 

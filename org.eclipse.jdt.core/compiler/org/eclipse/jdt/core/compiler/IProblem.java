@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -163,6 +163,8 @@
  *									DereferencingNullableExpression
  *									NullityMismatchingTypeAnnotation
  *									NullityMismatchingTypeAnnotationUnchecked
+ *      Jesper S Moller  - added the following constants
+ *									TargetTypeNotAFunctionalInterface
  *******************************************************************************/
 package org.eclipse.jdt.core.compiler;
 
@@ -1333,6 +1335,12 @@ void setSourceStart(int sourceStart);
     int IllegalTypeForExplicitThis = Internal + Syntax + 650;
     /** @since 3.9 */
     int IllegalQualifierForExplicitThis = Internal + Syntax + 651;
+    /** @since 3.9 */
+    int IllegalQualifierForExplicitThis2 = Internal + Syntax + 652;
+    /** @since 3.9 */
+    int TargetTypeNotAFunctionalInterface = Internal + TypeRelated + 653;
+    /** @since 3.9 */
+    int IllegalVarargInLambda = Internal + TypeRelated + 654;
     
 	/**
 	 * More problems in generics

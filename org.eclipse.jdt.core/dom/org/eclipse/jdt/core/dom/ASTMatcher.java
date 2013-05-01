@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -342,6 +342,28 @@ public class ASTMatcher {
 				return safeSubtreeMatch(node.getComponentType(), o.getComponentType()) &&
 						safeSubtreeListMatch(node.annotations(), o.annotations());
 		}
+	}
+
+	/**
+	 * Returns whether the given node and the other object match.
+	 * <p>
+	 * The default implementation provided by this class tests whether the
+	 * other object is a node of the same type with structurally isomorphic
+	 * child subtrees. Subclasses may override this method as needed.
+	 * </p>
+	 *
+	 * @param node the node
+	 * @param other the other object, or <code>null</code>
+	 * @return <code>true</code> if the subtree matches, or
+	 *   <code>false</code> if they do not match or the other object has a
+	 *   different node type or is <code>null</code>
+	 * @since 3.9
+	 */
+	public boolean match(ExtraDimension node, Object other) {
+		if (!(other instanceof ExtraDimension))
+			return false;
+		ExtraDimension o = (ExtraDimension) other;
+		return safeSubtreeListMatch(node.annotations(), o.annotations());
 	}
 
 	/**
@@ -1389,13 +1411,24 @@ public class ASTMatcher {
 				return false;
 			}
 		}
+		if (level >= AST.JLS8) {
+			if (!safeSubtreeMatch(node.getReceiverType(), o.getReceiverType())) {
+				return false;
+			}
+			if (!safeSubtreeMatch(node.getReceiverQualifier(), o.getReceiverQualifier())) {
+				return false;
+			}
+		}
 		return ((node.isConstructor() == o.isConstructor())
 				&& safeSubtreeMatch(node.getJavadoc(), o.getJavadoc())
 				&& safeSubtreeMatch(node.getName(), o.getName())
 				// n.b. compare return type even for constructors
 				&& safeSubtreeListMatch(node.parameters(), o.parameters())
-	 			&& node.getExtraDimensions() == o.getExtraDimensions()
-				&& safeSubtreeListMatch(node.thrownExceptions(), o.thrownExceptions())
+				&& ((node.getAST().apiLevel < AST.JLS8) ?
+							(node.getExtraDimensions() == o.getExtraDimensions()
+								&& safeSubtreeListMatch(node.thrownExceptions(), o.thrownExceptions())) :
+							(safeSubtreeListMatch(node.extraDimensionInfos(), o.extraDimensionInfos())
+								&& safeSubtreeListMatch(node.thrownExceptionTypes(), o.thrownExceptionTypes())))
 //{ObjectTeams:
 				&& safeSubtreeMatch(node.getGuardPredicate(), o.getGuardPredicate())
 // SH}
@@ -1695,17 +1728,9 @@ public class ASTMatcher {
 			return false;
 		}
 		QualifiedName o = (QualifiedName) other;
-		switch(node.getAST().apiLevel) {
-			case AST.JLS2_INTERNAL :
-			case AST.JLS3_INTERNAL :
-			case AST.JLS4:
-				return safeSubtreeMatch(node.getQualifier(), o.getQualifier())
-						&& safeSubtreeMatch(node.getName(), o.getName());
-			default:
-				return safeSubtreeMatch(node.getQualifier(), o.getQualifier())
-						&& safeSubtreeMatch(node.getName(), o.getName()) &&
-						safeSubtreeListMatch(node.annotations(), o.annotations());
-		}	
+
+		return safeSubtreeMatch(node.getQualifier(), o.getQualifier())
+				&& safeSubtreeMatch(node.getName(), o.getName());
 	}
 
 	/**
@@ -1785,15 +1810,7 @@ public class ASTMatcher {
 			return false;
 		}
 		SimpleName o = (SimpleName) other;
-		switch(node.getAST().apiLevel) {
-			case AST.JLS2_INTERNAL :
-			case AST.JLS3_INTERNAL :
-			case AST.JLS4:
-				return node.getIdentifier().equals(o.getIdentifier());
-			default:
-				return (node.getIdentifier().equals(o.getIdentifier())) &&
-						safeSubtreeListMatch(node.annotations(), o.annotations());
-		}	
+		return node.getIdentifier().equals(o.getIdentifier());
 	}
 
 	/**
@@ -1890,8 +1907,11 @@ public class ASTMatcher {
 		return
 		    safeSubtreeMatch(node.getType(), o.getType())
 				&& safeSubtreeMatch(node.getName(), o.getName())
-	 			&& node.getExtraDimensions() == o.getExtraDimensions()
-				&& safeSubtreeMatch(node.getInitializer(), o.getInitializer());
+	 			&& ((node.getAST().apiLevel < AST.JLS8) ?
+	 					node.getExtraDimensions() == o.getExtraDimensions() :
+	 						safeSubtreeListMatch(node.extraDimensionInfos(), o.extraDimensionInfos()))
+				&& safeSubtreeMatch(node.getInitializer(), o.getInitializer())
+				&& (level >= AST.JLS8 && node.isVarargs()) ? safeSubtreeListMatch(node.varargsAnnotations(), o.varargsAnnotations()) : true;		
 	}
 
 	/**
@@ -2395,7 +2415,9 @@ public class ASTMatcher {
 		}
 		VariableDeclarationFragment o = (VariableDeclarationFragment) other;
 		return safeSubtreeMatch(node.getName(), o.getName())
-			&& node.getExtraDimensions() == o.getExtraDimensions()
+			&& ((node.getAST().apiLevel < AST.JLS8) ?
+					node.getExtraDimensions() == o.getExtraDimensions() :
+						safeSubtreeListMatch(node.extraDimensionInfos(), o.extraDimensionInfos()))
 			&& safeSubtreeMatch(node.getInitializer(), o.getInitializer());
 	}
 

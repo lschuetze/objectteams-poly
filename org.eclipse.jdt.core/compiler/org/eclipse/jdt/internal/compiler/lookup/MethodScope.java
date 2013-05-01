@@ -18,6 +18,8 @@
  *								bug 374605 - Unreasonable warning for enum-based switch statements
  *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
  *								bug 382354 - [1.8][compiler] Compiler silent on conflicting modifier
+ *     Jesper S Moller - Contributions for
+ *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -89,7 +91,7 @@ public class MethodScope extends BlockScope {
 	// remember suppressed warning re missing 'default:' to give hints on possibly related flow problems
 	public boolean hasMissingSwitchDefault; // TODO(stephan): combine flags to a bitset?
 
-public MethodScope(ClassScope parent, ReferenceContext context, boolean isStatic) {
+public MethodScope(Scope parent, ReferenceContext context, boolean isStatic) {
 	super(METHOD_SCOPE, parent);
 	this.locals = new LocalVariableBinding[5];
 	this.referenceContext = context;
@@ -468,7 +470,6 @@ MethodBinding createMethod(AbstractMethodDeclaration method) {
 			problemReporter().illegalSourceLevelForThis(method.receiver);
 		}
 		if (method.receiver.annotations != null) {
-			method.receiverAnnotations = method.receiver.annotations;
 			method.bits |= ASTNode.HasTypeAnnotations;
 		}
 	}
@@ -482,6 +483,27 @@ MethodBinding createMethod(AbstractMethodDeclaration method) {
 		method.binding.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
 	}
 	return method.binding;
+}
+
+public MethodBinding createAnonymousMethodBinding(LambdaExpression lambda) {
+	
+	SourceTypeBinding declaringClass = null; // for now.
+	int modifiers = ClassFileConstants.AccPublic | ExtraCompilerModifiers.AccUnresolved;
+	MethodBinding binding = new MethodBinding(modifiers, TypeConstants.ANONYMOUS_METHOD, null, null, null, declaringClass);
+
+	Argument[] arguments = lambda.arguments;
+	int argLength = arguments == null ? 0 : arguments.length;
+	if (argLength > 0) {
+		Argument argument = arguments[--argLength];
+		if (argument.isVarArgs())
+			binding.modifiers |= ClassFileConstants.AccVarargs;
+		while (--argLength >= 0) {
+			argument = arguments[argLength];
+			if (argument.isVarArgs())
+				problemReporter().illegalVarargInLambda(argument);
+		}
+	}
+	return binding;
 }
 
 /**
