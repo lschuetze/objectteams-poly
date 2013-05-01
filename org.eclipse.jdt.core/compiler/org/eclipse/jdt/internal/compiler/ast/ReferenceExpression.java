@@ -73,7 +73,14 @@ public class ReferenceExpression extends FunctionalExpression {
 	
 	public TypeBinding resolveType(BlockScope blockScope) {
 		super.resolveType(blockScope);
-		return this.functionalInterfaceType;
+		if (this.primary != null) {
+			this.primary.resolveType(blockScope);
+		} else if (this.name != null) {
+			this.name.resolveType(blockScope);
+		} else if (this.type != null) {
+			this.type.resolveType(blockScope);
+		}
+		return this.resolvedType;
 	}
 	
 	public StringBuffer printExpression(int tab, StringBuffer output) {

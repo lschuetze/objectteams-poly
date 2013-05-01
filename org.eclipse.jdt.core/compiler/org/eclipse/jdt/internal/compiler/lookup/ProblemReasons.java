@@ -34,7 +34,7 @@ public interface ProblemReasons {
 	final int InvalidTypeForAutoManagedResource = 15;
 	final int VarargsElementTypeNotVisible = 16;
 	final int NoSuchSingleAbstractMethod = 17;
-	final int NotAFunctionalInterface = 18;
+	final int NotAWellFormedParameterizedType = 18;
 //{ObjectTeams;
     final int NoTeamContext = 20;
     final int AnchorNotFinal = 21;

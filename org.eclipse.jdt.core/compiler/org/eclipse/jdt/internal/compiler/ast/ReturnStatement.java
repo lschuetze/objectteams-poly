@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -45,11 +49,17 @@ public class ReturnStatement extends Statement {
 	public SubRoutineStatement[] subroutines;
 	public LocalVariableBinding saveValueVariable;
 	public int initStateIndex = -1;
+	private boolean implicitReturn;
 
 public ReturnStatement(Expression expression, int sourceStart, int sourceEnd) {
+	this(expression, sourceStart, sourceEnd, false);
+}
+
+public ReturnStatement(Expression expression, int sourceStart, int sourceEnd, boolean implicitReturn) {
 	this.sourceStart = sourceStart;
 	this.sourceEnd = sourceEnd;
-	this.expression = expression ;
+	this.expression = expression;
+	this.implicitReturn = implicitReturn;
 }
 
 public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {	// here requires to generate a sequence of finally blocks invocations depending corresponding
@@ -279,7 +289,10 @@ public void resolve(BlockScope scope) {
 		// the expression should be null
 		if (this.expression == null)
 			return;
-		if ((expressionType = this.expression.resolveType(scope)) != null)
+		expressionType = this.expression.resolveType(scope);
+		if (this.implicitReturn && (expressionType == TypeBinding.VOID || this.expression.statementExpression()))
+			return;
+		if (expressionType != null)
 			scope.problemReporter().attemptToReturnNonVoidExpression(this, expressionType);
 		return;
 	}

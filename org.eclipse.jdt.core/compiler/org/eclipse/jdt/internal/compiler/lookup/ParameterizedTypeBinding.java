@@ -1354,7 +1354,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 					break;
 			}
 			if (typeParameters[i].boundCheck(null, types[i]) != TypeConstants.OK)
-				return this.singleAbstractMethod = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NoSuchSingleAbstractMethod);
+				return this.singleAbstractMethod = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType);
 		}
 		ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(genericType(), types, this.enclosingType);
 		return this.singleAbstractMethod = new ParameterizedMethodBinding(parameterizedType, theAbstractMethod);
