@@ -215,6 +215,14 @@ public class SingleVariableDeclaration extends VariableDeclaration {
 		if (this.fakedRoleVariable != null)
 			this.fakedRoleVariable.setParent(this, FAKED_ROLE_VARIABLE);
 	}
+	/**
+	 * Retrieve a variable declaration that represents the role side (inner)
+	 * of an argument with declared lifting, else null.
+	 * @since 3.9
+	 */
+	public SingleVariableDeclaration getFakedRoleVariable() {
+		return this.fakedRoleVariable;
+	}
 // SH}
 
 	/**

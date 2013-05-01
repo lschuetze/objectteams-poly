@@ -11987,6 +11987,7 @@ protected CompilationUnitDeclaration endParse(int act) {
 			this.scanner.foundTaskPositions[i][0],
 			this.scanner.foundTaskPositions[i][1]);
 	}
+	this.javadoc = null;
 	return this.compilationUnit;
 }
 /*
@@ -12698,6 +12699,7 @@ public void initialize() {
 public void initialize(boolean initializeNLS) {
 	//positioning the parser for a new compilation unit
 	//avoiding stack reallocation and all that....
+	this.javadoc = null;
 	this.astPtr = -1;
 	this.astLengthPtr = -1;
 	this.expressionPtr = -1;

@@ -4,7 +4,7 @@
 feature@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.feature
 feature@org.eclipse.objectteams.otdt.source.feature=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.source.feature
 feature@org.eclipse.objectteams.otdt.core.patch=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.core.patch
-feature@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.feature,tag=builds/201206090452
+feature@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.feature
 
 !-- Also don't use version numbers for those plugins that hold the various otre jars: --
 plugin@org.eclipse.jdt.core,3.9.0.v_OTDT_r220_qualifier=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core
@@ -19,10 +19,10 @@ plugin@org.eclipse.objectteams.otdt.doc,2.1.0=GIT,repo=git://git.eclipse.org/git
 plugin@org.eclipse.objectteams.otdt.metrics,0.7.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.metrics,tag=builds/201101290806
 
 plugin@org.eclipse.objectteams.runtime=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.runtime
-fragment@org.eclipse.objectteams.otequinox.hook,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.hook,tag=builds/201206090452
+fragment@org.eclipse.objectteams.otequinox.hook,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.hook
 fragment@org.eclipse.objectteams.otequinox.sunjvm,2.0.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.sunjvm,tag=builds/201109201811
 !the following is also referenced in otdt.doc/buildDoc.xml (plugin-name without version):
-plugin@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox,tag=builds/201206090452
+plugin@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox
 plugin@org.eclipse.objectteams.eclipse.monitor,2.0.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.eclipse.monitor
 
 !not currently maintained:
@@ -37,7 +37,7 @@ plugin@org.eclipse.objectteams.otdt.apt,2.0.0=GIT,repo=git://git.eclipse.org/git
 plugin@org.eclipse.objectteams.otdt.compiler.adaptor,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor
 plugin@org.eclipse.objectteams.otdt.debug.adaptor,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor
 plugin@org.eclipse.objectteams.otdt.refactoring,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.refactoring
-plugin@org.eclipse.objectteams.otdt.pde.ui,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.pde.ui
+plugin@org.eclipse.objectteams.otdt.pde.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.pde.ui
 plugin@org.eclipse.objectteams.otdt.samples,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.samples
 
 !** Consume BCEL from Orbit: **!
@@ -62,10 +62,10 @@ plugin@org.eclipse.objectteams.otdt.ui.tests,0.7.0=GIT,repo=git://git.eclipse.or
 !-- Tests fetched from original GIT (some are required indirectly by jdt.ui.tests): --
 !   (these lines are generated from SDK map file using extractVersions)
 plugin@org.eclipse.jdt.core.tests.builder=GIT,tag=v20121025-162051,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.core.tests.builder
-plugin@org.eclipse.jdt.debug.tests=GIT,tag=v20120928-144533,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.debug.git,path=org.eclipse.jdt.debug.tests
-plugin@org.eclipse.jdt.ui.tests=GIT,tag=v20121029-145442,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
-plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=v20121029-145442,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
-plugin@org.eclipse.jdt.text.tests=GIT,tag=v20121009-174806,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.text.tests
-plugin@org.eclipse.jface.text.tests=GIT,tag=v20121004-073628,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.jface.text.tests
-plugin@org.eclipse.text.tests=GIT,tag=v20121025-122133,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.text.tests
+plugin@org.eclipse.jdt.debug.tests=GIT,tag=v20121210-204723,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.debug.git,path=org.eclipse.jdt.debug.tests
+plugin@org.eclipse.jdt.ui.tests=GIT,tag=v20121212-105310,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests
+plugin@org.eclipse.jdt.ui.tests.refactoring=GIT,tag=v20121210-135122,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.ui.tests.refactoring
+plugin@org.eclipse.jdt.text.tests=GIT,tag=v20121210-135122,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.ui.git,path=org.eclipse.jdt.text.tests
+plugin@org.eclipse.jface.text.tests=GIT,tag=v20121210-150853,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.jface.text.tests
+plugin@org.eclipse.text.tests=GIT,tag=v20121210-150853,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.text.tests
 plugin@org.eclipse.core.filebuffers.tests=GIT,tag=v20120705-111822,repo=git://git.eclipse.org/gitroot/platform/eclipse.platform.text.git,path=org.eclipse.core.filebuffers.tests

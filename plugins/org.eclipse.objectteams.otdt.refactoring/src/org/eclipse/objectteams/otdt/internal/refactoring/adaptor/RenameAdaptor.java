@@ -34,8 +34,13 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BaseCallMessageSend;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -51,8 +56,11 @@ import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 import org.eclipse.text.edits.ReplaceEdit;
 
 import base org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
+import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameAnalyzeUtil;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
+import base org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
+import base org.eclipse.jdt.internal.corext.refactoring.rename.RenameAnalyzeUtil.ProblemNodeFinder;
 
 /**
  * @author stephan
@@ -301,5 +309,94 @@ public team class RenameAdaptor
 					}
 			return status;
 		}		
+	}
+
+	/**
+	 * Find more occurrences, currently:
+	 * - references to an argument with declared lifting via the fakedRoleVariable.
+	 */
+	@SuppressWarnings("decapsulation")
+	protected class TempOccurrenceAnalyzer playedBy TempOccurrenceAnalyzer {
+
+		boolean addReferenceNode(SimpleName name)                      -> get Set<SimpleName> fReferenceNodes
+        		with {  result 										<- 		base.fReferenceNodes.add(name) }
+		VariableDeclaration getFTempDeclaration() 						-> get VariableDeclaration fTempDeclaration;
+		void setFTempDeclaration(VariableDeclaration fTempDeclaration)	-> set VariableDeclaration fTempDeclaration;
+		void setFTempBinding(IBinding fTempBinding) 					-> set IBinding fTempBinding;
+
+		void perform() -> void perform();
+		
+		SimpleName originalName;
+
+		void performAgain() <- after void perform();
+	
+		private void performAgain() {
+			VariableDeclaration fTempDeclaration = getFTempDeclaration();
+			if (fTempDeclaration instanceof SingleVariableDeclaration) {
+				VariableDeclaration roleVar = ((SingleVariableDeclaration) fTempDeclaration).getFakedRoleVariable();
+				if (roleVar != null) {
+					// remember original declaration to be added during getReferenceAndDeclarationNodes():
+					this.originalName = fTempDeclaration.getName();
+					// re-initialize and search again using the faked roleVar:
+					setFTempDeclaration(roleVar);
+					setFTempBinding(roleVar.resolveBinding());
+					perform();
+				}
+			}			
+		}
+
+		void getReferenceAndDeclarationNodes() <- before SimpleName[] getReferenceAndDeclarationNodes()
+			when(this.originalName != null);
+
+		private void getReferenceAndDeclarationNodes() {
+			addReferenceNode(originalName);
+		}		
+	}
+	
+	/** Resolve more issues with declared lifting. */
+	@SuppressWarnings("decapsulation")
+	protected team class OTNodeAdjustments playedBy ProblemNodeFinder {
+
+		@SuppressWarnings("decapsulation")
+		public OTNodeAdjustments() {
+			base();
+		}
+
+		getProblemNodes <- replace getProblemNodes;
+
+		/** 
+		 * When analyzing name clashes we compare variable bindings against a given binding key.
+		 * Ensure we never use the internal version (_OT$arg) of a lifting argument.
+		 */
+		static callin SimpleName[] getProblemNodes(ASTNode methodNode, VariableDeclaration variableNode) {
+			VariableDeclaration fakedRoleVariable = getFakeRoleVar(variableNode);
+			if (fakedRoleVariable != null) 			// this one has the correct name, so use this
+				within (new OTNodeAdjustments())	// and during the base call also do the second level adjustment via role Utility
+					return base.getProblemNodes(methodNode, fakedRoleVariable);
+			return base.getProblemNodes(methodNode, variableNode);
+		}
+
+		static VariableDeclaration getFakeRoleVar(VariableDeclaration variable) {
+			if (variable instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration fakedRoleVariable = ((SingleVariableDeclaration)variable).getFakedRoleVariable();
+				if (fakedRoleVariable != null)
+					return fakedRoleVariable;
+			}
+			return null;			
+		}
+
+		protected class Utility playedBy RenameAnalyzeUtil {
+			
+			// assume this is triggered only from NameNodeVisitor.visit(SimpleName) (on behalf of getProblemNodes(), see above)
+			getVariableDeclaration <- replace getVariableDeclaration;
+
+			static callin VariableDeclaration getVariableDeclaration() {
+				VariableDeclaration variable = base.getVariableDeclaration();
+				VariableDeclaration roleVar = getFakeRoleVar(variable);
+				if (roleVar != null)
+					return roleVar;
+				return variable;
+			}		
+		}
 	}
 }

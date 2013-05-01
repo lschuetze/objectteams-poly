@@ -17,6 +17,7 @@
  *								bug 370639 - [compiler][resource] restore the default for resource leak warnings
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
+ *								bug 395977 - [compiler][resource] Resource leak warning behavior possibly incorrect for anonymous inner class
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -157,12 +158,15 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		// process arguments
 		if (this.arguments != null) {
 			boolean analyseResources = currentScope.compilerOptions().analyseResourceLeaks;
+			boolean hasResourceWrapperType = analyseResources 
+						&& this.resolvedType instanceof ReferenceBinding 
+						&& ((ReferenceBinding)this.resolvedType).hasTypeBit(TypeIds.BitWrapperCloseable);
 			for (int i = 0, count = this.arguments.length; i < count; i++) {
-				if (analyseResources) {
+				flowInfo = this.arguments[i].analyseCode(currentScope, flowContext, flowInfo);
+				if (analyseResources && !hasResourceWrapperType) { // allocation of wrapped closeables is analyzed specially
 					// if argument is an AutoCloseable insert info that it *may* be closed (by the target method, i.e.)
 					flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.arguments[i], flowInfo, flowContext, false);
 				}
-				flowInfo = this.arguments[i].analyseCode(currentScope, flowContext, flowInfo);
 				if ((this.arguments[i].implicitConversion & TypeIds.UNBOXING) != 0) {
 					this.arguments[i].checkNPE(currentScope, flowContext, flowInfo);
 				}

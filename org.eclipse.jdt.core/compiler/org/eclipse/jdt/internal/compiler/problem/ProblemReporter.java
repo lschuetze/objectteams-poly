@@ -27,6 +27,7 @@
  *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
  *								bug 382347 - [1.8][compiler] Compiler accepts incorrect default method inheritance
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
+ *								bug 376053 - [compiler][resource] Strange potential resource leak problems
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
@@ -4250,6 +4251,10 @@ public void invalidMethod(MessageSend messageSend, MethodBinding method) {
 					String parameterTypeNames = typesAsString(problemMethod.parameters, false);
 					String closestParameterTypeShortNames = typesAsString(shownMethod, true);
 					String parameterTypeShortNames = typesAsString(problemMethod.parameters, true);
+					if (closestParameterTypeShortNames.equals(parameterTypeShortNames)) {
+						closestParameterTypeShortNames = closestParameterTypeNames;
+						parameterTypeShortNames = parameterTypeNames;
+					}
 					this.handle(
 						IProblem.ParameterMismatch,
 						new String[] {
@@ -9098,7 +9103,7 @@ public void redundantSpecificationOfTypeArguments(ASTNode location, TypeBinding[
     }
 }
 public void potentiallyUnclosedCloseable(FakedTrackingVariable trackVar, ASTNode location) {
-	String[] args = { String.valueOf(trackVar.name) };
+	String[] args = { trackVar.nameForReporting(location, this.referenceContext) };
 	if (location == null) {
 		this.handle(
 			IProblem.PotentiallyUnclosedCloseable,

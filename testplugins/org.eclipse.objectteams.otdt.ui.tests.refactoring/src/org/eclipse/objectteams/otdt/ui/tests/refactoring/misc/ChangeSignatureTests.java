@@ -27,10 +27,15 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.refactoring.IJavaRefactorings;
+import org.eclipse.jdt.core.refactoring.descriptors.RenameJavaElementDescriptor;
+import org.eclipse.jdt.internal.core.refactoring.descriptors.RefactoringSignatureDescriptorFactory;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureProcessor;
@@ -195,6 +200,69 @@ public class ChangeSignatureTests extends RefactoringTest {
 //		assertParticipant(classA);
 	}
 
+	void helperRename(ICompilationUnit cu, IType declaringClass, String[] signature, int idx, String oldName, String newName, String expectedInfo)
+			  throws JavaModelException, CoreException, Exception, IOException 
+	{
+		IMethod method = declaringClass.getMethod("m", signature);
+		assertTrue("method does not exist", method.exists());
+		assertTrue("refactoring not available", RefactoringAvailabilityTester.isChangeSignatureAvailable(method));
+
+		ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+
+		processor.setDelegateUpdating(false);
+		markAsRenamed(processor.getParameterInfos().get(idx), oldName, newName);
+		RefactoringStatus initialConditions= ref.checkInitialConditions(new NullProgressMonitor());
+		assertTrue("precondition was supposed to pass:"+initialConditions.getEntryWithHighestSeverity(), initialConditions.isOK());
+		RefactoringStatus result= performRefactoring(ref, true);
+		if (expectedInfo != null) {
+			assertTrue("precondition was supposed to create an info:"+result.getEntryWithHighestSeverity(), result.hasInfo());
+			assertEquals("wrong info", expectedInfo, result.getEntryMatchingSeverity(RefactoringStatus.INFO).getMessage());
+		} else {
+			assertEquals("precondition was supposed to pass", null, result);
+		}
+
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		String expectedFileContents= getFileContents(getTestFileName(true, false));
+		assertEqualLines("invalid content", expectedFileContents, newcu.getSource());
+	}
+
+	// from RenameTempTests with adaptation:
+	private void helperRegularRename(String newName, boolean updateReferences, IJavaElement element, ICompilationUnit cu,
+			// new for OT: don't use automatic outfile name
+			String outFileName) 
+					throws Exception
+	{
+		assertTrue(element.getClass().toString(), element instanceof ILocalVariable);
+
+		final RenameJavaElementDescriptor descriptor= RefactoringSignatureDescriptorFactory.createRenameJavaElementDescriptor(IJavaRefactorings.RENAME_LOCAL_VARIABLE);
+		descriptor.setJavaElement(element);
+		descriptor.setNewName(newName);
+		descriptor.setUpdateReferences(updateReferences);
+
+		final RefactoringStatus status= new RefactoringStatus();
+		final Refactoring refactoring= descriptor.createRefactoring(status);
+		assertTrue("status should be ok", status.isOK());
+		assertNotNull("refactoring should not be null", refactoring);
+
+		RefactoringStatus result= performRefactoring(refactoring);
+		assertEquals("precondition was supposed to pass", null, result);
+
+		IPackageFragment pack= (IPackageFragment) cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		assertEqualLines("incorrect renaming", getFileContents(outFileName), newcu.getSource());
+	}
+
+	private void markAsRenamed(ParameterInfo parameterInfo, String oldName, String newName) {
+		assertEquals(parameterInfo.getOldName(), oldName);
+		parameterInfo.setNewName(newName);
+	}
+
 	private void helperPermute(String[] newOrder, String[] signature, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
@@ -327,5 +395,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	public void testReorder01() throws Exception {
 		helperPermute(new String[]{"ignore", "b", "a"}, new String[]{"I", "Z", "QString;"}, false);
+	}
+
+	public void testRename01() throws Exception {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		IType teamType = cu.getType("MyTeam");
+		helperRename(cu, teamType, new String[]{"QA;"}, 0, "arg", "renamed", null);
+	}
+
+	// simulate performing the same operation as testRename01() triggered by Shift-Alt-R: 
+	public void testRename01a() throws Exception {
+		boolean canRename = true;
+		String simpleTestFileName = "A_testRename01_in.java";
+		String simpleOutFileName = "A_testRename01_out.java";
+		String testFolder = getTestFolderPath(canRename);
+		ICompilationUnit cu= createCU(getPackageP(), getSimpleTestFileName(canRename, true), getFileContents(testFolder+simpleTestFileName));
+		IType teamType = cu.getType("MyTeam");
+		IMethod method = teamType.getMethod("m", new String[]{"QA;"});
+		ILocalVariable argument = method.getParameters()[0];
+		helperRegularRename("renamed", true, argument, cu, testFolder+simpleOutFileName);
 	}
 }

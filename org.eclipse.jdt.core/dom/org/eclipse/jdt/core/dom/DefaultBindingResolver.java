@@ -1891,6 +1891,8 @@ class DefaultBindingResolver extends BindingResolver {
 						key = fakedBinding.getKey();
 						if (key != null)
 							this.bindingTables.bindingKeysToBindings.put(key, fakedBinding);
+						// for repeated lookup of fakedVariable (using this same method) we also need the AST mapping:
+						this.newAstToOldAst.put(fakedVariable, fakedArgument);
 					}
 				}
 			}

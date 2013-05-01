@@ -27,8 +27,6 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -570,6 +568,28 @@ public class CodeCompletionTest extends CoreTests {
 		        "     */\n" +
 				"    void |foo|() -> void foo();\n" +
 				"	", 
+				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
+	}
+
+	// See Bug 395762: this case could trigger the reported hang
+	public void testCompleteParameterMapping1() throws Exception {
+		createBaseClass("    java.util.List<String> names;\n");
+		assertNosuchTypeBodyProposal(
+				"        String setName(int i, String n) -> set java.util.List<String> names\n" +
+				"            with { n -> base.| }", 
+				"names",
+				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
+	}
+
+	// similar to above, positive case
+	public void testCompleteParameterMapping2() throws Exception {
+		createBaseClass("    java.util.List<String> names;\n");
+		assertTypeBodyProposal(
+				"        String getName(int i) -> get java.util.List<String> names\n" +
+				"            with { result <- base.| }", 
+				"names", 
+				"        String getName(int i) -> get java.util.List<String> names\n" +
+				"            with { result <- base.names|| }",
 				INTERESTING_CALLIN_CALLOUT_PROPOSAL);
 	}
 
@@ -1407,7 +1427,7 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n",
 				true, null);
 		IPackageFragment rolePack = CompletionTestSetup.getTestPackage(this.fJProject1, "p1.SuperTeam");
-		ICompilationUnit rofiCU = rolePack.createCompilationUnit("RoleFile.java", 
+		rolePack.createCompilationUnit("RoleFile.java", 
 				"team package test1.p1.SuperTeam;\n" +
 				"protected class RoleFile { }\n", 
 				true, null);
