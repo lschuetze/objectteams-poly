@@ -41,68 +41,6 @@ public static Class testClass() {
 	return NullAnnotationTest.class;
 }
 
-
-protected void setUp() throws Exception {
-	super.setUp();
-	if (this.LIBS == null) {
-		String[] defaultLibs = getDefaultClassPaths();
-		int len = defaultLibs.length;
-		this.LIBS = new String[len+1];
-		System.arraycopy(defaultLibs, 0, this.LIBS, 0, len);
-		File bundleFile = FileLocator.getBundleFile(Platform.getBundle("org.eclipse.jdt.annotation"));
-		if (bundleFile.isDirectory())
-			this.LIBS[len] = bundleFile.getPath()+"/bin";
-		else
-			this.LIBS[len] = bundleFile.getPath();
-	}
-}
-// Conditionally augment problem detection settings
-static boolean setNullRelatedOptions = true;
-protected Map getCompilerOptions() {
-    Map defaultOptions = super.getCompilerOptions();
-    if (setNullRelatedOptions) {
-    	defaultOptions.put(JavaCore.COMPILER_PB_NULL_REFERENCE, JavaCore.ERROR);
-	    defaultOptions.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.ERROR);
-	    defaultOptions.put(JavaCore.COMPILER_PB_REDUNDANT_NULL_CHECK, JavaCore.ERROR);
-		defaultOptions.put(JavaCore.COMPILER_PB_INCLUDE_ASSERTS_IN_NULL_ANALYSIS, JavaCore.ENABLED);
-
-		defaultOptions.put(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION_FOR_INTERFACE_METHOD_IMPLEMENTATION, JavaCore.DISABLED);
-
-		// enable null annotations:
-		defaultOptions.put(JavaCore.COMPILER_ANNOTATION_NULL_ANALYSIS, JavaCore.ENABLED);
-		// leave other new options at these defaults:
-//		defaultOptions.put(CompilerOptions.OPTION_ReportNullContractViolation, JavaCore.ERROR);
-//		defaultOptions.put(CompilerOptions.OPTION_ReportPotentialNullContractViolation, JavaCore.ERROR);
-//		defaultOptions.put(CompilerOptions.OPTION_ReportNullContractInsufficientInfo, CompilerOptions.WARNING);
-
-//		defaultOptions.put(CompilerOptions.OPTION_NullableAnnotationName, "org.eclipse.jdt.annotation.Nullable");
-//		defaultOptions.put(CompilerOptions.OPTION_NonNullAnnotationName, "org.eclipse.jdt.annotation.NonNull");
-    }
-    return defaultOptions;
-}
-void runNegativeTestWithLibs(String[] testFiles, String expectedErrorLog) {
-	runNegativeTest(
-			testFiles,
-			expectedErrorLog,
-			this.LIBS,
-			false /*shouldFlush*/);
-}
-void runNegativeTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFiles, Map customOptions, String expectedErrorLog) {
-	runNegativeTest(
-			shouldFlushOutputDirectory,
-			testFiles,
-			this.LIBS,
-			customOptions,
-			expectedErrorLog,
-			// runtime options
-		    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
-}
-void runNegativeTestWithLibs(String[] testFiles, Map customOptions, String expectedErrorLog) {
-	runNegativeTestWithLibs(false /* flush output directory */,	testFiles, customOptions, expectedErrorLog);
-}
-void runConformTestWithLibs(String[] testFiles, Map customOptions, String expectedCompilerLog) {
-	runConformTestWithLibs(false /* flush output directory */, testFiles, customOptions, expectedCompilerLog);
-}
 void runConformTestWithLibs(String[] testFiles, Map customOptions, String expectedCompilerLog, String expectedOutput) {
 	runConformTest(
 			false, /* flush output directory */
@@ -113,28 +51,6 @@ void runConformTestWithLibs(String[] testFiles, Map customOptions, String expect
 			expectedOutput,
 			"",/* expected error */
 		    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
-}
-void runConformTestWithLibs(boolean shouldFlushOutputDirectory, String[] testFiles, Map customOptions, String expectedCompilerLog) {
-	runConformTest(
-			shouldFlushOutputDirectory,
-			testFiles,
-			this.LIBS,
-			customOptions,
-			expectedCompilerLog,
-			"",/* expected output */
-			"",/* expected error */
-		    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
-}
-void runConformTest(String[] testFiles, Map customOptions, String expectedOutputString) {
-	runConformTest(
-			testFiles,
-			expectedOutputString,
-			null /*classLibraries*/,
-			true /*shouldFlushOutputDirectory*/,
-			null /*vmArguments*/,
-			customOptions,
-			null /*customRequestor*/);
-
 }
 // a nullable argument is dereferenced without a check
 public void test_nullable_paramter_001() {

@@ -85,6 +85,7 @@ import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.FakedTrackingVariable;
 import org.eclipse.jdt.internal.compiler.ast.FieldDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.FieldReference;
+import org.eclipse.jdt.internal.compiler.ast.FunctionalExpression;
 import org.eclipse.jdt.internal.compiler.ast.ImportReference;
 import org.eclipse.jdt.internal.compiler.ast.Initializer;
 import org.eclipse.jdt.internal.compiler.ast.InstanceOfExpression;
@@ -1507,7 +1508,7 @@ public void cannotUseSuperInJavaLangObject(ASTNode reference) {
 		reference.sourceStart,
 		reference.sourceEnd);
 }
-public void targetTypeIsNotAFunctionalInterface(ASTNode target) {
+public void targetTypeIsNotAFunctionalInterface(FunctionalExpression target) {
 	this.handle(
 		IProblem.TargetTypeNotAFunctionalInterface,
 		NoArgument,
@@ -1515,7 +1516,7 @@ public void targetTypeIsNotAFunctionalInterface(ASTNode target) {
 		target.sourceStart,
 		target.sourceEnd);
 }
-public void illFormedParameterizationOfFunctionalInterface(ASTNode target) {
+public void illFormedParameterizationOfFunctionalInterface(FunctionalExpression target) {
 	this.handle(
 		IProblem.illFormedParameterizationOfFunctionalInterface,
 		NoArgument,
@@ -1523,7 +1524,7 @@ public void illFormedParameterizationOfFunctionalInterface(ASTNode target) {
 		target.sourceStart,
 		target.sourceEnd);
 }
-public void lambdaSignatureMismatched(ASTNode target) {
+public void lambdaSignatureMismatched(LambdaExpression target) {
 	this.handle(
 		IProblem.lambdaSignatureMismatched,
 		NoArgument,
@@ -1537,11 +1538,20 @@ public void lambdaParameterTypeMismatched(Argument argument, TypeReference type,
 	String expectedTypeFullName = new String(expectedParameterType.readableName());
 	String expectedTypeShortName = new String(expectedParameterType.shortReadableName());
 	this.handle(
-			IProblem.lambdaParameterTypeMismatched,
+			expectedParameterType.isTypeVariable() ? IProblem.IncompatibleLambdaParameterType : IProblem.lambdaParameterTypeMismatched,
 			new String[] { name, expectedTypeFullName },
 			new String[] { name, expectedTypeShortName },
 			type.sourceStart,
 			type.sourceEnd);
+}
+public void lambdaExpressionCannotImplementGenericMethod(LambdaExpression lambda, MethodBinding sam) {
+	final String selector = new String(sam.selector);
+	this.handle(
+			IProblem.NoGenericLambda, 
+			new String[] { selector, new String(sam.declaringClass.readableName())},
+			new String[] { selector, new String(sam.declaringClass.shortReadableName())},
+			lambda.sourceStart,
+			lambda.sourceEnd);
 }
 public void caseExpressionMustBeConstant(Expression expression) {
 	this.handle(
