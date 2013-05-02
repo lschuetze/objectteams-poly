@@ -13,8 +13,8 @@
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contribution for
- *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
+ *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 

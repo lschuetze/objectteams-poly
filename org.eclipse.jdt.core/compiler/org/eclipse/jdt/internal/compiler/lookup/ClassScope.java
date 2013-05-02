@@ -547,7 +547,7 @@ public class ClassScope extends Scope {
 // SH}
 					MethodBinding methodBinding = scope.createMethod(methods[i]);
 					if (methodBinding != null) { // is null if binding could not be created
- 						methodBindings[count++] = methodBinding;
+						methodBindings[count++] = methodBinding;
 						hasNativeMethods = hasNativeMethods || methodBinding.isNative();
 					}
 				}
