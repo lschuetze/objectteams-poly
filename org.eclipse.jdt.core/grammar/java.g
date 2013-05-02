@@ -2565,25 +2565,84 @@ TypeArgument -> Wildcard
 
 --{ObjectTeams: anchored types: we explicitly don't decide between TypeAnchor and annotated type parameter yet
 TypeArgument -> TypeAnchorOrAnnotatedTypeArgument
-TypeArgument1 -> TypeAnchorOrAnnotatedTypeArgument '>'
-TypeArgument2 -> TypeAnchorOrAnnotatedTypeArgument '>>'
+TypeArgument1 -> TypeAnchorOrAnnotatedTypeArgument1
+TypeArgument2 -> TypeAnchorOrAnnotatedTypeArgument2
+TypeArgument3 -> TypeAnchorOrAnnotatedTypeArgument3
 
+-- ==== No Nested Generics ====
 -- case 1: it was indeed a type anchor:
 TypeAnchorOrAnnotatedTypeArgument -> AnyTypeAnchor
 -- case 2a: we were wrong in assuming a type anchor, now is the time to convert it into a marker type annotation:
-TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor ReferenceType
-/.$putCase convertTypeAnchor(); $break ./
-/:$readableName annotatedTypeArgument:/
+TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor NotAnAnchor ReferenceType
+/.$putCase consumeTypeArgumentFromAnchor(); $break ./
+/:$readableName TypeArgument:/
+/:$compliance 1.5:/
 -- case 2b: we were wrong in assuming a type anchor, now is the time to convert it into a marker type annotation:
-TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor Wildcard
-/.$putCase convertTypeAnchor(); $break ./
+TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor NotAnAnchor Wildcard
+/.$putCase consumeAnnotationsOnTypeArgumentFromAnchor(); $break ./
+/:$readableName TypeArgument:/
+/:$compliance 1.5:/
+
+-- ==== One Level Nested Generics ====
+-- case 1: it was indeed a type anchor:
+TypeAnchorOrAnnotatedTypeArgument1 -> AnyTypeAnchor '>'
+-- case 2a: we were wrong in assuming a type anchor, now is the time to convert it into a marker type annotation:
+TypeAnchorOrAnnotatedTypeArgument1 -> TentativeTypeAnchor NotAnAnchor ReferenceType1
+/.$putCase consumeAnnotationsOnTypeArgumentFromAnchor(); $break ./
+/:$readableName TypeArgument:/
+/:$compliance 1.5:/
+-- case 2b: we were wrong in assuming a type anchor, now is the time to convert it into a marker type annotation:
+TypeAnchorOrAnnotatedTypeArgument1 -> TentativeTypeAnchor NotAnAnchor Wildcard1
+/.$putCase consumeAnnotationsOnTypeArgumentFromAnchor(); $break ./
+/:$readableName TypeArgument:/
+/:$compliance 1.5:/
+
+-- ==== Two Levels Nested Generics ====
+-- case 1: it was indeed a type anchor:
+TypeAnchorOrAnnotatedTypeArgument2 -> AnyTypeAnchor '>>'
+-- case 2a: we were wrong in assuming a type anchor, now is the time to convert it into a marker type annotation:
+TypeAnchorOrAnnotatedTypeArgument2 -> TentativeTypeAnchor NotAnAnchor ReferenceType2
+/.$putCase consumeAnnotationsOnTypeArgumentFromAnchor(); $break ./
+/:$readableName TypeArgument:/
+/:$compliance 1.5:/
+-- case 2b: we were wrong in assuming a type anchor, now is the time to convert it into a marker type annotation:
+TypeAnchorOrAnnotatedTypeArgument2 -> TentativeTypeAnchor NotAnAnchor Wildcard2
+/.$putCase consumeAnnotationsOnTypeArgumentFromAnchor(); $break ./
+/:$readableName TypeArgument:/
+/:$compliance 1.5:/
+
+-- ==== Three Levels Nested Generics ====
+-- case 1: it was indeed a type anchor:
+TypeAnchorOrAnnotatedTypeArgument3 -> AnyTypeAnchor '>>>'
+-- case 2a: we were wrong in assuming a type anchor, now is the time to convert it into a marker type annotation:
+TypeAnchorOrAnnotatedTypeArgument3 -> TentativeTypeAnchor NotAnAnchor ReferenceType3
+/.$putCase consumeAnnotationsOnTypeArgumentFromAnchor(); $break ./
+/:$readableName TypeArgument:/
+/:$compliance 1.5:/
+-- case 2b: we were wrong in assuming a type anchor, now is the time to convert it into a marker type annotation:
+TypeAnchorOrAnnotatedTypeArgument3 -> TentativeTypeAnchor NotAnAnchor Wildcard3
+/.$putCase consumeAnnotationsOnTypeArgumentFromAnchor(); $break ./
+/:$readableName TypeArgument:/
+/:$compliance 1.5:/
+-- =====================================
+
+-- trigger converting a mistaken type anchor into a type argument
+NotAnAnchor ::= $empty
+/.$putCase convertTypeAnchor(0); $break ./
 /:$readableName annotatedTypeArgument:/
+NotAnAnchor -> '(' SingleMemberAnnotationMemberValue ')'
+/.$putCase convertTypeAnchor(1); $break ./
+/:$readableName annotatedTypeArgument:/
+NotAnAnchor -> '(' MemberValuePairsopt ')'
+/.$putCase convertTypeAnchor(2); $break ./
+/:$readableName annotatedTypeArgument:/
+
 
 AnyTypeAnchor -> TypeAnchor
 AnyTypeAnchor -> TentativeTypeAnchor
 
 -- this rule could indicate either a type anchor or a type annotation
-TentativeTypeAnchor ::= '@OT' Name
+TentativeTypeAnchor ::= '@OT' UnannotatableName
 /.$putCase consumeTypeAnchor(false); $break ./
 /:$readableName typeAnchor:/
 
@@ -2598,7 +2657,7 @@ TypeAnchor ::= '@OT' 'this'
 /.$putCase skipThisAnchor(); $break ./
 /:$readableName typeAnchor:/
 
-TypeAnchor ::= '@OT' Name '.' 'base'
+TypeAnchor ::= '@OT' UnannotatableName '.' 'base'
 /:$readableName typeAnchor:/
 /.$putCase consumeQualifiedBaseTypeAnchor(); $break ./
 

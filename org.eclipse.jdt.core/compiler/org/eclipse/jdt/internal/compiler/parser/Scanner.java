@@ -5411,7 +5411,6 @@ private int disambiguatedToken(int token) {
 	  } else {
 // orig:
 		token = TokenNameAT308;
-		token = TokenNameAT308;
 		if (maybeAtEllipsisAnnotation()) {
 			if (parser.parse(Goal.VarargTypeAnnotationGoal) == VanguardParser.SUCCESS) {
 				this.nextToken = TokenNameAT308;

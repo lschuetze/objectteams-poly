@@ -47,7 +47,12 @@ public class AbstractSyntaxTreeTest extends AbstractCompilerTest implements IDoc
 	protected static final int CHECK_JAVAC_PARSER = 0x80;
 	protected static int CHECK_ALL = (CHECK_PARSER | CHECK_COMPLETION_PARSER | CHECK_SELECTION_PARSER |
 												CHECK_DOCUMENT_ELEMENT_PARSER | CHECK_COMMENT_RECORDER_PARSER |
-												CHECK_SOURCE_ELEMENT_PARSER | CHECK_INDEXING_PARSER);
+//{ObjectTeams: with our grammar testing the IndexingParser is even less useful (creates false positives), just disable it:
+/* orig:
+												CHECK_SOURCE_ELEMENT_PARSER | CHECK_INDEXING_PARSER); 
+   :giro */
+												CHECK_SOURCE_ELEMENT_PARSER /*| CHECK_INDEXING_PARSER */);
+// SH}
 	public static boolean optimizeStringLiterals = false;
 	private String referenceCompiler;
 	private String referenceCompilerTestsScratchArea;
