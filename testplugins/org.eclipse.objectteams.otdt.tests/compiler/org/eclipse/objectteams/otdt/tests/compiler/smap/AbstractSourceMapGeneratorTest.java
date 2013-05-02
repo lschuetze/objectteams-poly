@@ -192,6 +192,10 @@ public abstract class AbstractSourceMapGeneratorTest extends FileBasedModelTest 
             {
                 return true;
             }
+
+			public boolean ignoreAllErrors() {
+				return false;
+			}
         };
     }
 

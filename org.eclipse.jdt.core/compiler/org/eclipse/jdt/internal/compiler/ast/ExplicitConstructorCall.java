@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -90,7 +90,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  *
  * @version $Id: ExplicitConstructorCall.java 23405 2010-02-03 17:02:18Z stephan $
  */
-public class ExplicitConstructorCall extends Statement implements InvocationSite {
+public class ExplicitConstructorCall extends Statement implements InvocationSite, ExpressionContext {
 
 	public Expression[] arguments;
 	public Expression qualification;
@@ -464,19 +464,24 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 			// arguments buffering for the method lookup
 			TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
 			boolean argsContainCast = false;
+			boolean polyExpressionSeen = false;
 			if (this.arguments != null) {
 				boolean argHasError = false; // typeChecks all arguments
 				int length = this.arguments.length;
 				argumentTypes = new TypeBinding[length];
+				TypeBinding argumentType;
 				for (int i = 0; i < length; i++) {
 					Expression argument = this.arguments[i];
 					if (argument instanceof CastExpression) {
 						argument.bits |= ASTNode.DisableUnnecessaryCastCheck; // will check later on
 						argsContainCast = true;
 					}
-					if ((argumentTypes[i] = argument.resolveType(scope)) == null) {
+					argument.setExpressionContext(INVOCATION_CONTEXT);
+					if ((argumentType = argumentTypes[i] = argument.resolveType(scope)) == null) {
 						argHasError = true;
 					}
+					if (argumentType != null && argumentType.kind() == Binding.POLY_TYPE)
+						polyExpressionSeen = true;
 				}
 				if (argHasError) {
 					if (receiverType == null) {
@@ -636,6 +641,22 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
                 		this.chainTSuperMarkArgPos = enclosingMethod.parameters.length+enclosingMethod.declaringClass.depth()+1;
                 }
 // SH}
+				if (polyExpressionSeen) {
+					boolean variableArity = this.binding.isVarargs();
+					final TypeBinding[] parameters = this.binding.parameters;
+					final int parametersLength = parameters.length;
+					for (int i = 0, length = this.arguments == null ? 0 : this.arguments.length; i < length; i++) {
+						Expression argument = this.arguments[i];
+						TypeBinding parameterType = i < parametersLength ? parameters[i] : parameters[parametersLength - 1];
+						if (argumentTypes[i] instanceof PolyTypeBinding) {
+							argument.setExpressionContext(INVOCATION_CONTEXT);
+							if (variableArity && i >= parametersLength - 1)
+								argument.tagAsEllipsisArgument();
+							argument.setExpectedType(parameterType);
+							argumentTypes[i] = argument.resolveType(scope);
+						}
+					}
+				}
 				if ((this.binding.tagBits & TagBits.HasMissingType) != 0) {
 					if (!methodScope.enclosingSourceType().isAnonymousType()) {
 						scope.problemReporter().missingTypeInConstructor(this, this.binding);

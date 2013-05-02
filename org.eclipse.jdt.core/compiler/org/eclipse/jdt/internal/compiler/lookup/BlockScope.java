@@ -19,6 +19,7 @@
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *								bug 379784 - [compiler] "Method can be static" is not getting reported
  *								bug 394768 - [compiler][resource] Incorrect resource leak warning when creating stream in conditional
+ *								bug 404649 - [1.8][compiler] detect illegal reference to indirect or redundant super
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -1352,5 +1353,32 @@ public void correlateTrackingVarsIfElse(FlowInfo thenFlowInfo, FlowInfo elseFlow
 	}
 	if (this.parent instanceof BlockScope)
 		((BlockScope) this.parent).correlateTrackingVarsIfElse(thenFlowInfo, elseFlowInfo);
+}
+
+/** 15.12.3 (Java 8) "Compile-Time Step 3: Is the Chosen Method Appropriate?" */
+public void checkAppropriateMethodAgainstSupers(char[] selector, MethodBinding compileTimeMethod,
+		TypeBinding[] parameters, InvocationSite site)
+{
+	ReferenceBinding enclosingType = enclosingReceiverType();
+	MethodBinding otherMethod = getMethod(enclosingType.superclass(), selector, parameters, site);
+	if (checkAppropriate(compileTimeMethod, otherMethod, site)) {
+		ReferenceBinding[] superInterfaces = enclosingType.superInterfaces();
+		if (superInterfaces != null) {
+			for (int i = 0; i < superInterfaces.length; i++) {
+				otherMethod = getMethod(superInterfaces[i], selector, parameters, site);
+				if (!checkAppropriate(compileTimeMethod, otherMethod, site))
+					break;
+			}
+		}
+	}
+}
+private boolean checkAppropriate(MethodBinding compileTimeDeclaration, MethodBinding otherMethod, InvocationSite location) {
+	if (otherMethod == null || !otherMethod.isValidBinding() || otherMethod == compileTimeDeclaration)
+		return true;
+	if (MethodVerifier.doesMethodOverride(otherMethod, compileTimeDeclaration, this.environment())) {
+		problemReporter().illegalSuperCallBypassingOverride(location, compileTimeDeclaration, otherMethod.declaringClass);
+		return false; 
+	}
+	return true;
 }
 }

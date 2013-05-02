@@ -26,11 +26,18 @@ import org.eclipse.jdt.core.dom.*;
 public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase {
 
 	/**
-	 * Internal synonynm for deprecated constant AST.JSL3
+	 * Internal synonym for deprecated constant AST.JSL3
 	 * to alleviate deprecation warnings.
 	 * @deprecated
 	 */
 	/*package*/ static final int JLS3_INTERNAL = AST.JLS3;
+	
+	/**
+	 * Internal synonym for deprecated constant AST.JSL4
+	 * to alleviate deprecation warnings.
+	 * @deprecated
+	 */
+	/*package*/ static final int JLS4_INTERNAL = AST.JLS4;
 	
 	/** @deprecated using deprecated code */
 	public static Test suite() {
@@ -551,6 +558,9 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		public boolean match(InstanceofExpression node, Object other) {
 			return standardBody(node, other, this.superMatch ? super.match(node, other) : false);
 		}
+		public boolean match(LambdaExpression node, Object other) {
+			return standardBody(node, other, this.superMatch ? super.match(node, other) : false);
+		}
 	}
 
 	/**
@@ -680,7 +690,7 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 	}
 
 	public void testUnionType() {
-		if (this.ast.apiLevel() < AST.JLS4) {
+		if (this.ast.apiLevel() < JLS4_INTERNAL) {
 			return;
 		}
 		UnionType x1 = this.ast.newUnionType();
@@ -1191,7 +1201,7 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		basicMatch(x1);
 	}
 	public void testTryStatementWithResources() {
-		if (this.ast.apiLevel() < AST.JLS4) {
+		if (this.ast.apiLevel() < JLS4_INTERNAL) {
 			return;
 		}
 		TryStatement x1 = this.ast.newTryStatement();
@@ -1552,7 +1562,7 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		Annotation Annot = this.ast.newMarkerAnnotation();
 		Annot.setTypeName(this.ast.newSimpleName("NewAnnot1"));
 		x2.annotations().add(Annot);
-		x1.extraDimensionInfos().add(x2);
+		x1.extraDimensions().add(x2);
 		x2 = this.ast.newExtraDimension();
 		Annot = this.ast.newMarkerAnnotation();
 		Annot.setTypeName(this.ast.newSimpleName("NewAnnot2"));
@@ -1560,7 +1570,56 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		Annot = this.ast.newMarkerAnnotation();
 		Annot.setTypeName(this.ast.newSimpleName("NewAnnot3"));
 		x2.annotations().add(Annot);
-		x1.extraDimensionInfos().add(x2);
+		x1.extraDimensions().add(x2);
+		basicMatch(x1);
+	}
+
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+	public void testLambdaExpressions1() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		LambdaExpression x1 = this.ast.newLambdaExpression();
+		VariableDeclarationFragment x2 = this.ast.newVariableDeclarationFragment();
+		x2.setName(this.N1);
+		x1.parameters().add(x2);
+		x1.setBody(this.ast.newBlock());
+		basicMatch(x1);
+	}
+
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+	public void testLambdaExpressions2() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		LambdaExpression x1 = this.ast.newLambdaExpression();
+		x1.setBody(this.ast.newBlock());
+		basicMatch(x1);
+	}
+
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+	public void testLambdaExpressions3() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		LambdaExpression x1 = this.ast.newLambdaExpression();
+		x1.setBody(this.E1);
+		basicMatch(x1);
+	}
+
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+	public void testLambdaExpressions4() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		LambdaExpression x1 = this.ast.newLambdaExpression();
+		SingleVariableDeclaration x2 = this.ast.newSingleVariableDeclaration();
+		x2.modifiers().add(this.MOD1);
+		x2.modifiers().add(this.MOD2);
+		x2.setType(this.T1);
+		x2.setName(this.N1);
+		x1.parameters().add(x2);
+		x1.setBody(this.E1);
 		basicMatch(x1);
 	}
 }

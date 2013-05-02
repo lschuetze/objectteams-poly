@@ -2567,9 +2567,8 @@ public void test075() {
 				"        public int size() {\n" +
 				"                return 0;\n" +
 				"        }\n" +
-				getListRawImplJRE8() +
+				getCollectionAndListRawImplJRE8() +
 				getIterableRawImplJRE8() +
-				getCollectionRawImplJRE8() +
 				"}", // =================
 			},
 			"");
@@ -2990,7 +2989,7 @@ public void test090() {
 		"3. ERROR in X.java (at line 4)\n" + 
 		"	public volatile void foo() {}\n" + 
 		"	                     ^^^^^\n" + 
-		"Illegal modifier for the method foo; only public, protected, private, static, final, abstract, synchronized & native are permitted\n" + 
+		"Illegal modifier for the method foo; only public, protected, private, static, final, abstract, synchronized, strictfp & native are permitted\n" + 
 		"----------\n"
 	);
 }

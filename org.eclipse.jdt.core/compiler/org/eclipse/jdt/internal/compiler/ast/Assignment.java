@@ -33,6 +33,7 @@
 package org.eclipse.jdt.internal.compiler.ast;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
@@ -125,7 +126,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		}
 	}
 	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
-		VariableBinding var = this.lhs.nullAnnotatedVariableBinding();
+		VariableBinding var = this.lhs.nullAnnotatedVariableBinding(compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8);
 		if (var != null) {
 			nullStatus = checkAssignmentAgainstNullAnnotation(currentScope, flowContext, var, nullStatus, this.expression, this.expression.resolvedType);
 			if (nullStatus == FlowInfo.NON_NULL
@@ -224,13 +225,14 @@ public TypeBinding resolveType(BlockScope scope) {
 		return null;
 	}
 	TypeBinding lhsType = this.lhs.resolveType(scope);
+	this.expression.setExpressionContext(ASSIGNMENT_CONTEXT);
 	this.expression.setExpectedType(lhsType); // needed in case of generic method invocation
 	if (lhsType != null) {
 		this.resolvedType = lhsType.capture(scope, this.sourceEnd);
 	}
 	LocalVariableBinding localVariableBinding = this.lhs.localVariableBinding();
-	if (localVariableBinding != null) {
-		localVariableBinding.tagBits &= ~TagBits.IsEffectivelyFinal;
+	if (localVariableBinding != null && localVariableBinding.isCatchParameter()) { 
+		localVariableBinding.tagBits &= ~TagBits.IsEffectivelyFinal;  // as it is already definitely assigned, we can conclude already. Also note: catch parameter cannot be compound assigned.
 	}
 	TypeBinding rhsType = this.expression.resolveType(scope);
 	if (lhsType == null || rhsType == null) {

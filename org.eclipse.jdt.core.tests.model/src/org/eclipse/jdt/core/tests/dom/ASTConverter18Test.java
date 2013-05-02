@@ -1055,25 +1055,25 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		List fragments = field.fragments();
 		assertEquals("Incorrect no of fragments", 3, fragments.size());
 		VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.get(0);
-		assertExtraDimensionsEqual("Incorrect extra dimensions", fragment.extraDimensionInfos(), "@Annot2 @Annot3 [] @Annot3 @Annot2 [] @Annot4 []");
+		assertExtraDimensionsEqual("Incorrect extra dimensions", fragment.extraDimensions(), "@Annot2 @Annot3 [] @Annot3 @Annot2 [] @Annot4 []");
 		fragment = (VariableDeclarationFragment) fragments.get(1);
-		assertExtraDimensionsEqual("Incorrect extra dimensions", fragment.extraDimensionInfos(), "@Annot2 @Annot3 [] @Annot4 []");		
+		assertExtraDimensionsEqual("Incorrect extra dimensions", fragment.extraDimensions(), "@Annot2 @Annot3 [] @Annot4 []");		
 		fragment = (VariableDeclarationFragment) fragments.get(2);
-		assertExtraDimensionsEqual("Incorrect extra dimensions", fragment.extraDimensionInfos(), "[] [] []");
+		assertExtraDimensionsEqual("Incorrect extra dimensions", fragment.extraDimensions(), "[] [] []");
 		MethodDeclaration[] methods = type.getMethods();
 		assertEquals("Incorrect no of methods", 3, methods.length);
 		MethodDeclaration method = methods[0];
 		List parameters = method.parameters();
 		assertEquals("Incorrect no of parameters", 1, parameters.size());
-		assertExtraDimensionsEqual("Incorrect extra dimensions", ((SingleVariableDeclaration) parameters.get(0)).extraDimensionInfos(), "@Annot2 @Annot3 [] @Annot3 @Annot2 [] @Annot4 @Annot3 []");
+		assertExtraDimensionsEqual("Incorrect extra dimensions", ((SingleVariableDeclaration) parameters.get(0)).extraDimensions(), "@Annot2 @Annot3 [] @Annot3 @Annot2 [] @Annot4 @Annot3 []");
 
 		method = methods[1];
 		parameters = method.parameters();
 		assertEquals("Incorrect no of parameters", 1, parameters.size());
-		assertExtraDimensionsEqual("Incorrect extra dimensions", ((SingleVariableDeclaration) parameters.get(0)).extraDimensionInfos(), "[] []");
+		assertExtraDimensionsEqual("Incorrect extra dimensions", ((SingleVariableDeclaration) parameters.get(0)).extraDimensions(), "[] []");
 
 		method = methods[2];
-		assertExtraDimensionsEqual("Incorrect extra dimensions", method.extraDimensionInfos(), "@Annot1 @Annot2 [] []");
+		assertExtraDimensionsEqual("Incorrect extra dimensions", method.extraDimensions(), "@Annot1 @Annot2 [] []");
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399600
 	public void test0010() throws JavaModelException {
@@ -1095,7 +1095,7 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		node = getASTNode(unit, 0, 0);
 		assertEquals("Not a method declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
 		MethodDeclaration method = (MethodDeclaration) node;
-		assertExtraDimensionsEqual("Incorrect extra dimensions", method.extraDimensionInfos(), "@Marker [] @Marker []");
+		assertExtraDimensionsEqual("Incorrect extra dimensions", method.extraDimensions(), "@Marker [] @Marker []");
 	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391894
 	public void test0011() throws JavaModelException {
@@ -1222,7 +1222,7 @@ public class ASTConverter18Test extends ConverterTestSetup {
 				"@java.lang.annotation.Target (ElementType.TYPE_USE)\n" + 
 				"@interface Marker3 {}";
 		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
-		CompilationUnit unit = (CompilationUnit) buildAST(AST.JLS4, contents, this.workingCopy, true, true, true);
+		CompilationUnit unit = (CompilationUnit) buildAST(getJLS4(), contents, this.workingCopy, true, true, true);
 		
 		ASTNode node = getASTNode(unit, 0, 0);
 		assertEquals("Not a Method Declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
@@ -1519,5 +1519,420 @@ public class ASTConverter18Test extends ConverterTestSetup {
 		assertEquals("@Marker1", annotation.toString());
 		abinding = annotation.resolveAnnotationBinding();
 		assertEquals("@Marker1()", abinding.toString());
+	}
+
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test399793a() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test399793/X.java",
+				true/* resolve */);
+		String contents = "package test399793;"
+				+ "interface I {\n"
+				+ "	int foo(int x);\n"
+				+ "}\n" 
+				+ "public class X {\n"
+				+ " I i =  vlambda -> {return 200;};\n"
+				+"}\n";
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 1);
+		FieldDeclaration fieldDeclaration = (FieldDeclaration) typedeclaration.bodyDeclarations().get(0);
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment)fieldDeclaration.fragments().get(0);
+		Expression expression = fragment.getInitializer();
+		assertTrue(expression instanceof LambdaExpression);
+		LambdaExpression lambdaExpression = (LambdaExpression)expression;
+		assertEquals("vlambda -> {\n  return 200;\n}\n", lambdaExpression.toString());
+		assertTrue(lambdaExpression.parameters().size() == 1);
+		IMethodBinding binding = lambdaExpression.resolveMethodBinding();
+		assertEquals("public int foo(int) ", binding.toString());
+		VariableDeclaration variableDeclaration = (VariableDeclaration) lambdaExpression.parameters().get(0);
+		assertTrue(variableDeclaration instanceof VariableDeclarationFragment);
+		fragment = (VariableDeclarationFragment)variableDeclaration;
+		assertEquals("vlambda", fragment.toString());		
+		IVariableBinding variableBinding = fragment.resolveBinding();		
+		ITypeBinding typeBinding = variableBinding.getType();
+		assertNotNull("Null Binding for lambda argument", typeBinding);
+		assertEquals("binding of int expected for lambda","int",typeBinding.getName());
+	}
+
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test399793b() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test399793/X.java",
+				true/* resolve */);
+		String contents = "package test399793;"
+				+ "interface I {\n"
+				+ "	int foo(int x);\n"
+				+ "}\n" 
+				+ "public class X {\n"
+				+ " I i =  vlambda -> 200;\n"
+				+"}\n";
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 1);
+		FieldDeclaration fieldDeclaration = (FieldDeclaration) typedeclaration.bodyDeclarations().get(0);
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment)fieldDeclaration.fragments().get(0);
+		Expression expression = fragment.getInitializer();
+		assertTrue(expression instanceof LambdaExpression);
+		LambdaExpression lambdaExpression = (LambdaExpression)expression;
+		assertEquals("vlambda -> 200", lambdaExpression.toString());
+		IMethodBinding binding = lambdaExpression.resolveMethodBinding();
+		assertEquals("public int foo(int) ", binding.toString());
+		assertTrue(lambdaExpression.parameters().size() == 1);
+		VariableDeclaration variableDeclaration = (VariableDeclaration) lambdaExpression.parameters().get(0);
+		assertTrue(variableDeclaration instanceof VariableDeclarationFragment);
+		fragment = (VariableDeclarationFragment)variableDeclaration;
+		assertEquals("vlambda", fragment.toString());		
+	}
+	
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test399793c() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test399793/X.java",
+				true/* resolve */);
+		String contents = "package test399793;"
+				+ "interface I {\n"
+				+ "	Object foo(int [] ia);\n"
+				+ "}\n" 
+				+ "public class X {\n"
+				+ " I i = (int [] ia) ->{\n"
+				+ "  	return ia.clone();"
+				+ "};\n"
+				+"}\n";
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 1);
+		FieldDeclaration fieldDeclaration = (FieldDeclaration) typedeclaration.bodyDeclarations().get(0);
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment)fieldDeclaration.fragments().get(0);
+		Expression expression = fragment.getInitializer();
+		assertTrue(expression instanceof LambdaExpression);
+		LambdaExpression lambdaExpression = (LambdaExpression)expression;
+		assertEquals("(int[] ia) -> {\n  return ia.clone();\n}\n", lambdaExpression.toString());
+		IMethodBinding binding = lambdaExpression.resolveMethodBinding();
+		assertEquals("public java.lang.Object foo(int[]) ", binding.toString());
+		assertTrue(lambdaExpression.parameters().size() == 1);
+		VariableDeclaration variableDeclaration = (VariableDeclaration) lambdaExpression.parameters().get(0);
+		assertTrue(variableDeclaration instanceof SingleVariableDeclaration);
+		SingleVariableDeclaration singleVariableDeclaration = (SingleVariableDeclaration)variableDeclaration;
+		assertEquals("int[] ia", singleVariableDeclaration.toString());		
+	}
+
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test399793d() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test399793/X.java",
+				true/* resolve */);
+		String contents = "package test399793;" +
+				"interface I {\n" +
+				"	void doit();\n" +
+				"}\n" +
+				"public class X {\n" +
+				"		I i = () -> {\n" +
+				"			System.out.println(this);\n" +
+				"			I j = () -> {\n" +
+				"				System.out.println(this);\n" +
+				"				I k = () -> {\n" +
+				"					System.out.println(this);\n" +
+				"				};\n" +
+				"			};\n" +
+				"		};\n" +
+				"	}\n"; 
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 1);
+		FieldDeclaration fieldDeclaration = (FieldDeclaration) typedeclaration.bodyDeclarations().get(0);
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment)fieldDeclaration.fragments().get(0);
+		IVariableBinding variableBinding = fragment.resolveBinding();
+		assertEquals("test399793.I i", variableBinding.toString());
+		Expression expression = fragment.getInitializer();
+		assertTrue(expression instanceof LambdaExpression);
+		LambdaExpression lambdaExpression = (LambdaExpression)expression;
+		assertEquals("() -> {\n  System.out.println(this);\n  I j=() -> {\n    System.out.println(this);\n    I k=() -> {\n      System.out.println(this);\n    }\n;\n  }\n;\n}\n", lambdaExpression.toString());
+		IMethodBinding binding = lambdaExpression.resolveMethodBinding();
+		assertEquals("public void doit() ", binding.toString());
+		assertTrue(lambdaExpression.parameters().size() == 0);
+	}
+
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test399793e() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test399793/X.java",
+				true/* resolve */);
+		String contents = "package test399793;" +
+				"interface I {\n" +
+				"  J foo();\n" +
+				"}\n" +
+				"interface J {\n" +
+				"  int foo();\n" +
+				"}\n" +
+				"public class X {\n" +
+				"    I I = () -> () -> 10;\n" +
+				"}\n";
+			
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 2);
+		FieldDeclaration fieldDeclaration = (FieldDeclaration) typedeclaration.bodyDeclarations().get(0);
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment)fieldDeclaration.fragments().get(0);
+		Expression expression = fragment.getInitializer();
+		assertTrue(expression instanceof LambdaExpression);
+		LambdaExpression lambdaExpression = (LambdaExpression)expression;
+		assertEquals("() -> () -> 10", lambdaExpression.toString());
+		IMethodBinding binding = lambdaExpression.resolveMethodBinding();
+		assertEquals("public test399793.J foo() ", binding.toString());
+		assertTrue(lambdaExpression.parameters().size() == 0);
+	}	
+	
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=402665
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test402665a() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test402665/X.java",
+				true/* resolve */);
+		String contents = "package test402665;" +
+				"public class X {\n" +
+				"  public static interface StringToInt {\n" +
+				"   	int stoi(String s);\n" +
+				"  }\n" +
+				"  public static interface ReduceInt {\n" +
+				"      int reduce(int a, int b);\n" +
+				"  }\n" +
+				"  void foo(StringToInt s) { }\n" +
+				"  void bar(ReduceInt r) { }\n" +
+				"  void bar() {\n" +
+				"      foo(s -> s.length());\n" +
+				"      foo((s) -> s.length());\n" +
+				"      foo((String s) -> s.length()); //SingleVariableDeclaration is OK\n" +
+				"      bar((x, y) -> x+y);\n" +
+				"      bar((int x, int y) -> x+y); //SingleVariableDeclarations are OK\n" +
+				"  }\n" +
+				"}\n";
+			
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 0);
+		MethodDeclaration methoddecl = (MethodDeclaration)typedeclaration.bodyDeclarations().get(4);
+		List statements = methoddecl.getBody().statements();
+		int sCount = 0;
+		
+		ExpressionStatement statement = (ExpressionStatement)statements.get(sCount++);
+		MethodInvocation methodInvocation = (MethodInvocation)statement.getExpression();
+		LambdaExpression lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		VariableDeclarationFragment fragment = (VariableDeclarationFragment)lambdaExpression.parameters().get(0);
+		checkSourceRange(fragment, "s", contents);
+		
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		fragment = (VariableDeclarationFragment)lambdaExpression.parameters().get(0);
+		checkSourceRange(fragment, "s", contents);
+
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		SingleVariableDeclaration singleVarDecl = (SingleVariableDeclaration)lambdaExpression.parameters().get(0);
+		checkSourceRange(singleVarDecl, "String s", contents);
+
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		fragment = (VariableDeclarationFragment)lambdaExpression.parameters().get(0);
+		checkSourceRange(fragment, "x", contents);
+		fragment = (VariableDeclarationFragment)lambdaExpression.parameters().get(1);
+		checkSourceRange(fragment, "y", contents);
+
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		singleVarDecl = (SingleVariableDeclaration)lambdaExpression.parameters().get(0);
+		checkSourceRange(singleVarDecl, "int x", contents);
+		singleVarDecl = (SingleVariableDeclaration)lambdaExpression.parameters().get(1);
+		checkSourceRange(singleVarDecl, "int y", contents);
+	}
+	public void testBug403132() throws JavaModelException {
+		String contents =
+			"import java.lang.annotation.*;\n" +
+			"public class X {\n" +
+			"	class Y {\n" +
+			"		class Z {\n" +
+			"			public Z(@A X.@B Y Y.this,String str){\n}" +
+			"    	 	public void foo(@A X.@B Y.@C Z this,String str){\n}\n" +
+			"		}\n" +
+			"    }\n" +
+			"}\n" +
+			"@Target(ElementType.TYPE_USE)\n" +
+			"@interface A {}\n" +
+			"@Target(ElementType.TYPE_USE)\n" +
+			"@interface B {}\n" +
+			"@Target(ElementType.TYPE_USE)\n" +
+			"@interface C {}\n";
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", true);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit unit = (CompilationUnit) node;
+		node = getASTNode(unit, 0, 0);
+		TypeDeclaration type = (TypeDeclaration)node;
+		node = (ASTNode) type.bodyDeclarations().get(0);
+		type = (TypeDeclaration) node;
+		node = (ASTNode) type.bodyDeclarations().get(0);
+		assertEquals("Not a method Declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
+		MethodDeclaration method = (MethodDeclaration) node;
+		AnnotatableType receiver = method.getReceiverType();
+		assertEquals("Not an annotatable type", ASTNode.QUALIFIED_TYPE, receiver.getNodeType());
+		assertEquals("Incorrect receiver", "@A X.@B Y", ((QualifiedType) receiver).toString());
+		assertEquals("Incorrect method signature", "public Z(@A X.@B Y Y.this,String str){\n}\n", method.toString());
+
+		method = (MethodDeclaration) type.bodyDeclarations().get(1);
+		receiver = method.getReceiverType();
+		assertEquals("Incorrect receiver", "@A X.@B Y.@C Z", ((QualifiedType) receiver).toString());
+		assertEquals("Incorrect method signature", "public void foo(@A X.@B Y.@C Z this,String str){\n}\n", method.toString());
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=403410
+	public void testBug403410() throws JavaModelException {
+		String contents =
+			"import java.lang.annotation.*;\n" +
+			"public class X {\n" +
+			"	class Y {\n" +
+			"		class Z {\n" +
+			"			public Z(final Y Y.this){\n}" +
+			"    	 	public void foo(static @A Z this){\n}\n" +
+			"		}\n" +
+			"    }\n" +
+			"}\n" +
+			"@Target(ElementType.TYPE_USE)\n" +
+			"@interface A {}\n";
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", false);
+		ASTNode node = buildAST(contents, this.workingCopy);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit unit = (CompilationUnit) node;
+		node = getASTNode(unit, 0, 0);
+		TypeDeclaration type = (TypeDeclaration)node;
+		node = (ASTNode) type.bodyDeclarations().get(0);
+		type = (TypeDeclaration) node;
+		node = (ASTNode) type.bodyDeclarations().get(0);
+		assertEquals("Not a method Declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
+		MethodDeclaration method = (MethodDeclaration) node;
+		assertEquals("Type should be malformed", ASTNode.MALFORMED, (method.getFlags() & ASTNode.MALFORMED));
+
+		method = (MethodDeclaration) type.bodyDeclarations().get(1);
+		assertEquals("Type should be malformed", ASTNode.MALFORMED, (method.getFlags() & ASTNode.MALFORMED));
+	}
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=402674
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test402674() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test402674/X.java",
+				true/* resolve */);
+		String contents = "package test402674;" +
+				"public class X {\n" +
+				"  public static interface StringToInt {\n" +
+				"   	int stoi(String s);\n" +
+				"  }\n" +
+				"  public static interface ReduceInt {\n" +
+				"      int reduce(int a, int b);\n" +
+				"  }\n" +
+				"  void foo(StringToInt s) { }\n" +
+				"  void bar(ReduceInt r) { }\n" +
+				"  void bar() {\n" +
+				"      foo(s -> s.length());\n" +
+				"      foo((s) -> s.length());\n" +
+				"      foo((String s) -> s.length()); //SingleVariableDeclaration is OK\n" +
+				"      bar((x, y) -> x+y);\n" +
+				"      bar((int x, int y) -> x+y); //SingleVariableDeclarations are OK\n" +
+				"  }\n" +
+				"}\n";
+			
+		CompilationUnit cu = (CompilationUnit) buildAST(contents, this.workingCopy);
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(cu, 0);
+		MethodDeclaration methoddecl = (MethodDeclaration)typedeclaration.bodyDeclarations().get(4);
+		List statements = methoddecl.getBody().statements();
+		int sCount = 0;
+		
+		ExpressionStatement statement = (ExpressionStatement)statements.get(sCount++);
+		MethodInvocation methodInvocation = (MethodInvocation)statement.getExpression();
+		LambdaExpression lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		ITypeBinding binding = lambdaExpression.resolveTypeBinding();
+		assertNotNull(binding);
+		assertEquals("StringToInt", binding.getName());
+		
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		binding = lambdaExpression.resolveTypeBinding();
+		assertNotNull(binding);
+		assertEquals("StringToInt", binding.getName());
+
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		binding = lambdaExpression.resolveTypeBinding();
+		assertNotNull(binding);
+		assertEquals("StringToInt", binding.getName());
+
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		binding = lambdaExpression.resolveTypeBinding();
+		assertNotNull(binding);
+		assertEquals("ReduceInt", binding.getName());
+
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		lambdaExpression = (LambdaExpression) methodInvocation.arguments().get(0);
+		binding = lambdaExpression.resolveTypeBinding();
+		assertNotNull(binding);
+		assertEquals("ReduceInt", binding.getName());
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399791
+	public void testBug399791() throws JavaModelException {
+		String contents =
+			"public interface X {\n" +
+			"	static void foo(){}\n" +
+			"   public default void foo(int i){}\n" +
+			"   native void foo(float f){}\n" +
+			"   abstract void foo(long l){}\n" +
+			"}\n";
+		this.workingCopy = getWorkingCopy("/Converter18/src/X.java", false);
+		ASTNode node = buildAST(contents, this.workingCopy, false);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit unit = (CompilationUnit) node;
+		TypeDeclaration type =  (TypeDeclaration) unit.types().get(0);
+		node = (ASTNode) type.bodyDeclarations().get(0);
+		assertEquals("Not a method Declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
+		MethodDeclaration method = (MethodDeclaration) node;
+		assertEquals("Method should not be malformed", 0, (method.getFlags() & ASTNode.MALFORMED));
+		List modifiers = method.modifiers();
+		assertEquals("Incorrect no of modfiers", 1, modifiers.size());
+		Modifier modifier = (Modifier) modifiers.get(0);
+		assertSame("Incorrect modifier keyword", Modifier.ModifierKeyword.STATIC_KEYWORD, modifier.getKeyword());
+
+		method = (MethodDeclaration) type.bodyDeclarations().get(1);
+		assertEquals("Method should not be malformed", 0, (method.getFlags() & ASTNode.MALFORMED));
+
+		modifiers = method.modifiers();
+		assertEquals("Incorrect no of modfiers", 2, modifiers.size());
+		modifier = (Modifier) modifiers.get(1);
+		assertSame("Incorrect modifier keyword", Modifier.ModifierKeyword.DEFAULT_KEYWORD, modifier.getKeyword());
+		assertTrue("Incorrect modifier", modifier.isDefaultMethod());
+		assertEquals("Incorrect AST", "public default void foo(int i){\n}\n", method.toString());
+
+		method = (MethodDeclaration) type.bodyDeclarations().get(2);
+		assertEquals("Method should be malformed", ASTNode.MALFORMED, (method.getFlags() & ASTNode.MALFORMED));
+
+		method = (MethodDeclaration) type.bodyDeclarations().get(3);
+		assertEquals("Method should be malformed", ASTNode.MALFORMED, (method.getFlags() & ASTNode.MALFORMED));
 	}
 }

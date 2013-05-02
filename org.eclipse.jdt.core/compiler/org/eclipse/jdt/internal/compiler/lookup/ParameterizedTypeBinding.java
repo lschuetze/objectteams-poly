@@ -15,8 +15,8 @@
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contributions for
  *								bug 349326 - [1.7] new warning for missing try-with-resources
- *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -203,7 +203,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 			}
 			return;
 		}
-		if (actualType == TypeBinding.NULL) return;
+		if (actualType == TypeBinding.NULL || actualType.kind() == POLY_TYPE) return;
 
 		if (!(actualType instanceof ReferenceBinding)) return;
 		TypeBinding formalEquivalent, actualEquivalent;
@@ -1321,12 +1321,16 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		return this.fields;
 	}
 	public MethodBinding getSingleAbstractMethod(final Scope scope) {
-		MethodBinding theAbstractMethod = genericType().getSingleAbstractMethod(scope);
+		if (this.singleAbstractMethod != null) {
+			return this.singleAbstractMethod;
+		}
+		final ReferenceBinding genericType = genericType();
+		MethodBinding theAbstractMethod = genericType.getSingleAbstractMethod(scope);
 		if (theAbstractMethod == null || !theAbstractMethod.isValidBinding())
-			return theAbstractMethod;
+			return this.singleAbstractMethod = theAbstractMethod;
 		
 		TypeBinding [] typeArguments = this.arguments; // A1 ... An 
-		TypeVariableBinding [] typeParameters = genericType().typeVariables(); // P1 ... Pn
+		TypeVariableBinding [] typeParameters = genericType.typeVariables(); // P1 ... Pn
 		TypeBinding [] types = new TypeBinding[typeArguments.length];  // T1 ... Tn
 		for (int i = 0, length = typeArguments.length; i < length; i++) {
 			TypeBinding typeArgument = typeArguments[i];
@@ -1353,37 +1357,33 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 					types[i] = typeArgument;
 					break;
 			}
-			if (typeParameters[i].boundCheck(null, types[i]) != TypeConstants.OK)
+			if (typeParameters[i].boundCheck(null, types[i], scope) != TypeConstants.OK)
 				return this.singleAbstractMethod = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NotAWellFormedParameterizedType);
 		}
-		ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(genericType(), types, this.enclosingType);
-		return this.singleAbstractMethod = new ParameterizedMethodBinding(parameterizedType, theAbstractMethod);
+		ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(genericType, types, genericType.enclosingType());
+		MethodBinding [] choices = parameterizedType.getMethods(theAbstractMethod.selector);
+		for (int i = 0, length = choices.length; i < length; i++) {
+			MethodBinding method = choices[i];
+			if (!method.isAbstract() || method.redeclaresPublicObjectMethod(scope)) continue; // (re)skip statics, defaults, public object methods ...
+			this.singleAbstractMethod = method;
+			break;
+		}
+		return this.singleAbstractMethod;
 	}
 
 	private boolean typeParametersMentioned(TypeBinding upperBound) {
-		class MentionListener implements Substitution {
+		class MentionListener extends TypeBindingVisitor {
 			private boolean typeParametersMentioned = false;
-			public TypeBinding substitute(TypeVariableBinding typeVariable) {
+			public boolean visit(TypeVariableBinding typeVariable) {
 				this.typeParametersMentioned = true;
-				return typeVariable;
-			}
-			public boolean isRawSubstitution() {
 				return false;
-			}
-			public LookupEnvironment environment() {
-				return null;
 			}
 			public boolean typeParametersMentioned() {
 				return this.typeParametersMentioned;
 			}
-//{ObjectTeams: new method:
-			public ITeamAnchor substituteAnchor(ITeamAnchor anchor, int rank) {
-				return anchor;
-			}
-// SH}
 		}
 		MentionListener mentionListener = new MentionListener();
-		Scope.substitute(mentionListener, upperBound);
+		TypeBindingVisitor.visit(mentionListener, upperBound);
 		return mentionListener.typeParametersMentioned();
 	}
 }

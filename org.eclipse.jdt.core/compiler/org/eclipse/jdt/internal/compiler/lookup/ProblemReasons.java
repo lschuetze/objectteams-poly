@@ -11,7 +11,8 @@
  *     Technical University Berlin - extended API and implementation
  *     Jesper S Moller - Contributions for
  *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
-
+ *	   Stephan Herrmann - Contribution for
+ *								bug 404649 - [1.8][compiler] detect illegal reference to indirect or redundant super
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -35,11 +36,14 @@ public interface ProblemReasons {
 	final int VarargsElementTypeNotVisible = 16;
 	final int NoSuchSingleAbstractMethod = 17;
 	final int NotAWellFormedParameterizedType = 18;
+	final int IntersectionHasMultipleFunctionalInterfaces = 19;
+	final int NonStaticOrAlienTypeReceiver = 20;
+	final int AttemptToBypassDirectSuper = 21; // super access within default method
 //{ObjectTeams;
-    final int NoTeamContext = 20;
-    final int AnchorNotFinal = 21;
-    final int AnchorNotATeam = 22;
-    final int AnchorNotFound = 23;
-    final int ProblemAlreadyReported = 24;
+    final int NoTeamContext = 22;
+    final int AnchorNotFinal = 23;
+    final int AnchorNotATeam = 24;
+    final int AnchorNotFound = 25;
+    final int ProblemAlreadyReported = 27;
 // SH}
 }

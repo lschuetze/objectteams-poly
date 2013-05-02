@@ -18,8 +18,8 @@
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
  *								bug 368546 - [compiler][resource] Avoid remaining false positives found when compiling the Eclipse SDK
- *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
+ *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -346,7 +346,6 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 								&& compilerOptions.reportMissingOverrideAnnotationForInterfaceMethodImplementation
 								&& this.binding.isImplementing()) {
 									// actually overrides, but did not claim to do so
-
 									this.scope.problemReporter().missingOverrideAnnotationForInterfaceMethodImplementation(this);
 							}
 							
@@ -365,7 +364,6 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 			}
 		}
 
-		// by grammatical construction, interface methods are always abstract
 		switch (TypeDeclaration.kind(this.scope.referenceType().modifiers)) {
 			case TypeDeclaration.ENUM_DECL :
 				if (this.selector == TypeConstants.VALUES) break;
@@ -387,6 +385,15 @@ public class MethodDeclaration extends AbstractMethodDeclaration {
 						this.bits |= ASTNode.CanBeStatic;
 					}
 				}
+				break;
+			case TypeDeclaration.INTERFACE_DECL :
+				if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8
+						&& (this.modifiers & (ExtraCompilerModifiers.AccSemicolonBody | ClassFileConstants.AccAbstract)) == ExtraCompilerModifiers.AccSemicolonBody) {
+					if ((this.modifiers & (ClassFileConstants.AccStatic | ExtraCompilerModifiers.AccDefaultMethod)) != 0) {
+							this.scope.problemReporter().methodNeedBody(this);
+					}
+				}
+				break;
 		}
 		super.resolveStatements();
 

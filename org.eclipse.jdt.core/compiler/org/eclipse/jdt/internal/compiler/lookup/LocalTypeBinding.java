@@ -1,22 +1,27 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: LocalTypeBinding.java 19874 2009-04-13 17:59:05Z stephan $
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
- *     Stephan Herrmann - Contribution for  bug 365662 - [compiler][null] warn on contradictory and redundant null annotations
+ *     Stephan Herrmann - Contributions for
+ *								bug 365662 - [compiler][null] warn on contradictory and redundant null annotations
+ *								bug 401030 - [1.8][null] Null analysis support for lambda methods. 
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.Annotation;
 import org.eclipse.jdt.internal.compiler.ast.CaseStatement;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
@@ -58,9 +63,9 @@ public LocalTypeBinding(ClassScope scope, SourceTypeBinding enclosingType, CaseS
 //{ObjectTeams: faked local types RoFi-cache have no method scope:
   if (methodScope != null) {
 // orig:
-	AbstractMethodDeclaration methodDeclaration = methodScope.referenceMethod();
-	if (methodDeclaration != null) {
-		this.enclosingMethod = methodDeclaration.binding;
+	MethodBinding methodBinding = methodScope.referenceMethodBinding();
+	if (methodBinding != null) {
+		this.enclosingMethod = methodBinding;
 	}
 // :giro
   }

@@ -1303,15 +1303,20 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 							"----------\n" + 
 							"4. ERROR in Outer.java (at line 21)\n" + 
 							"	public StaticNested(@Marker Outer.StaticNested Outer.StaticNested.this) {}\n" + 
+							"	                    ^^^^^^^\n" + 
+							"Type annotations are not allowed on type names used to access static members\n" + 
+							"----------\n" + 
+							"5. ERROR in Outer.java (at line 21)\n" + 
+							"	public StaticNested(@Marker Outer.StaticNested Outer.StaticNested.this) {}\n" + 
 							"	                                                                  ^^^^\n" + 
 							"Explicit \'this\' parameter is allowed only in instance methods of non-anonymous classes and inner class constructors\n" + 
 							"----------\n" + 
-							"5. ERROR in Outer.java (at line 23)\n" + 
+							"6. ERROR in Outer.java (at line 23)\n" + 
 							"	public static void foo(@Marker Outer this) {}\n" + 
 							"	                                     ^^^^\n" + 
 							"Explicit \'this\' parameter is allowed only in instance methods of non-anonymous classes and inner class constructors\n" + 
 							"----------\n" + 
-							"6. ERROR in Outer.java (at line 24)\n" + 
+							"7. ERROR in Outer.java (at line 24)\n" + 
 							"	public void foo(@Missing Outer this, int i) {}\n" + 
 							"	                 ^^^^^^^\n" + 
 							"Missing cannot be resolved to a type\n" + 
@@ -3195,5 +3200,167 @@ public class NegativeTypeAnnotationTest extends AbstractRegressionTest {
 				"	                                                                           ^^^^^^^\n" + 
 				"Syntax error, type annotations are illegal here\n" + 
 				"----------\n"); 
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=402618, [1.8][compiler] Compiler fails to resolve type annotations on method/constructor references
+	public void test402618() {
+		this.runNegativeTest(
+				new String[]{
+					"X.java",
+					"import java.util.List;\n" +
+					"interface I {\n" +
+					"	void foo(List<String> l);\n" +
+					"}\n" +
+					"\n" +
+					"public class X {\n" +
+					"	public void main(String[] args) {\n" +
+					"		I i = @Readonly List<@English String>::<@NonNegative Integer>size;\n" +
+					"	}\n" +
+					"}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 8)\n" + 
+				"	I i = @Readonly List<@English String>::<@NonNegative Integer>size;\n" + 
+				"	       ^^^^^^^^\n" + 
+				"Readonly cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 8)\n" + 
+				"	I i = @Readonly List<@English String>::<@NonNegative Integer>size;\n" + 
+				"	                      ^^^^^^^\n" + 
+				"English cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"3. WARNING in X.java (at line 8)\n" + 
+				"	I i = @Readonly List<@English String>::<@NonNegative Integer>size;\n" + 
+				"	                                        ^^^^^^^^^^^^^^^^^^^^\n" + 
+				"Unused type arguments for the non generic method size() of type List<String>; it should not be parameterized with arguments <Integer>\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 8)\n" + 
+				"	I i = @Readonly List<@English String>::<@NonNegative Integer>size;\n" + 
+				"	                                         ^^^^^^^^^^^\n" + 
+				"NonNegative cannot be resolved to a type\n" + 
+				"----------\n"); 
+		}
+	public void testBug403132() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"public class X {\n" +
+					"	class Y {\n" +
+					"		class Z {\n" +
+					"			public Z (@A X.@B Y Y.this, String str) {}\n" +
+					"    	 	public void foo (@A X.@B Y.@C Z this, String str) {}\n" +
+					"		}\n" +
+					"    }\n" +
+					"}\n"
+				}, 
+				"----------\n" + 
+				"1. ERROR in X.java (at line 4)\n" + 
+				"	public Z (@A X.@B Y Y.this, String str) {}\n" + 
+				"	           ^\n" + 
+				"A cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 4)\n" + 
+				"	public Z (@A X.@B Y Y.this, String str) {}\n" + 
+				"	                ^\n" + 
+				"B cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 5)\n" + 
+				"	public void foo (@A X.@B Y.@C Z this, String str) {}\n" + 
+				"	                  ^\n" + 
+				"A cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 5)\n" + 
+				"	public void foo (@A X.@B Y.@C Z this, String str) {}\n" + 
+				"	                       ^\n" + 
+				"B cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"5. ERROR in X.java (at line 5)\n" + 
+				"	public void foo (@A X.@B Y.@C Z this, String str) {}\n" + 
+				"	                            ^\n" + 
+				"C cannot be resolved to a type\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=403410
+	public void testBug403410() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"import java.lang.annotation.Target;\n" +
+					"import static java.lang.annotation.ElementType.*;\n" +
+					"@Target (java.lang.annotation.ElementType.TYPE_USE)\n" +
+					"@interface A {}\n" +
+					"public class X {\n" +
+					"	class Y {\n" +
+					"		public Y (final @A X X.this) {}\n" +
+					"		public Y (static @A X X.this, int i) {}\n" +
+					"		public void foo(final @A Y this) {}\n" +
+					"		public void foo(static @A Y this, int i) {}\n" +
+					"}\n}"},
+					"----------\n" + 
+					"1. ERROR in X.java (at line 7)\n" + 
+					"	public Y (final @A X X.this) {}\n" + 
+					"	          ^^^^^^^^^^^^^^^^^\n" + 
+					"Syntax error, modifiers are not allowed here\n" + 
+					"----------\n" +
+					"2. ERROR in X.java (at line 8)\n" + 
+					"	public Y (static @A X X.this, int i) {}\n" + 
+					"	          ^^^^^^^^^^^^^^^^^^\n" + 
+					"Syntax error, modifiers are not allowed here\n" + 
+					"----------\n" + 
+					"3. ERROR in X.java (at line 9)\n" + 
+					"	public void foo(final @A Y this) {}\n" + 
+					"	                ^^^^^^^^^^^^^^^\n" + 
+					"Syntax error, modifiers are not allowed here\n" + 
+					"----------\n" + 
+					"4. ERROR in X.java (at line 10)\n" + 
+					"	public void foo(static @A Y this, int i) {}\n" + 
+					"	                ^^^^^^^^^^^^^^^^\n" + 
+					"Syntax error, modifiers are not allowed here\n" + 
+					"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=403581,  [1.8][compiler] Compile error on varargs annotations.
+	public void test403581() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"import java.util.List;\n" +
+					"public class X {\n" +
+					"	void foo(List<String> @Marker ... ls) {}\n" +
+					"}\n" +
+					"@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE)\n" +
+					"@interface Marker {\n" +
+					"}\n"
+				},
+				"----------\n" + 
+				"1. WARNING in X.java (at line 3)\n" + 
+				"	void foo(List<String> @Marker ... ls) {}\n" + 
+				"	                                  ^^\n" + 
+				"Type safety: Potential heap pollution via varargs parameter ls\n" + 
+				"----------\n");
+	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=392671, [1.8][recovery] NPE with a method with explicit this and a following incomplete parameter
+	public void test392671() {
+		this.runNegativeTest(
+				new String[] {
+					"X.java",
+					"class X {\n" +
+					"    public void foobar(X this, int, int k) {} // NPE!\n" +
+					"}\n"
+				},
+				"----------\n" + 
+				"1. ERROR in X.java (at line 1)\n" + 
+				"	class X {\n" + 
+				"	        ^\n" + 
+				"Syntax error, insert \"}\" to complete ClassBody\n" + 
+				"----------\n" + 
+				"2. ERROR in X.java (at line 2)\n" + 
+				"	public void foobar(X this, int, int k) {} // NPE!\n" + 
+				"	                           ^^^\n" + 
+				"Syntax error, insert \"... VariableDeclaratorId\" to complete FormalParameter\n" + 
+				"----------\n" + 
+				"3. ERROR in X.java (at line 3)\n" + 
+				"	}\n" + 
+				"	^\n" + 
+				"Syntax error on token \"}\", delete this token\n" + 
+				"----------\n");
 	}
 }

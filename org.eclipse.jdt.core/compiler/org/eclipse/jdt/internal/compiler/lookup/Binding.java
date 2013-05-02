@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -48,6 +48,10 @@ public abstract class Binding {
 	public static final int INTERSECTION_TYPE = TYPE | ASTNode.Bit14;
 	// jsr 308
 	public static final int TYPE_USE = TYPE | ASTNode.Bit15;
+	public static final int INTERSECTION_CAST_TYPE = TYPE | ASTNode.Bit16;
+	public static final int POLY_TYPE = TYPE | ASTNode.Bit17;
+
+	// In the unlikely event you add a new type binding, remember to update TypeBindingVisitor and Scope.substitute methods. 
 
 //{ObjectTeams
 	public static final int BINDING = ASTNode.Bit16; //callin/callout-Binding

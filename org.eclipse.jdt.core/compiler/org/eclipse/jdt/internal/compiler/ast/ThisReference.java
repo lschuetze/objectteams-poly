@@ -113,6 +113,10 @@ public class ThisReference extends Reference {
 		return true ;
 	}
 
+	public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
+		return FlowInfo.NON_NULL;
+	}
+
 	public StringBuffer printExpression(int indent, StringBuffer output){
 
 		if (isImplicitThis()) return output;

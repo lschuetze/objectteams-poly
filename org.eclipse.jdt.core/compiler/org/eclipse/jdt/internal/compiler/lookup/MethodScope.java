@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -18,6 +18,7 @@
  *								bug 374605 - Unreasonable warning for enum-based switch statements
  *								bug 382353 - [1.8][compiler] Implementation property modifiers should be accepted on default methods.
  *								bug 382354 - [1.8][compiler] Compiler silent on conflicting modifier
+ *								bug 401030 - [1.8][null] Null analysis support for lambda methods. 
  *     Jesper S Moller - Contributions for
  *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
@@ -222,20 +223,22 @@ private void checkAndSetModifiersForMethod(final MethodBinding methodBinding) {
 	if (declaringClass.isRegularInterface()) {
 // SH}
 		int expectedModifiers = ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
-		// 9.4 got updated for JSR 335 (default methods), more permissive grammar plus:
-		// "It is a compile-time error if an abstract method declaration contains either of the keywords strictfp or synchronized."
-		if (compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8 && !methodBinding.isAbstract()) {
-			expectedModifiers |= (ClassFileConstants.AccSynchronized | ClassFileConstants.AccStrictfp);
-		}
 		boolean isDefaultMethod = (modifiers & ExtraCompilerModifiers.AccDefaultMethod) != 0; // no need to check validity, is done by the parser
+		if (compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8 && !declaringClass.isAnnotationType()) {
+			if (!methodBinding.isAbstract()) {
+				expectedModifiers |= ClassFileConstants.AccStrictfp
+										| (isDefaultMethod ?  ExtraCompilerModifiers.AccDefaultMethod : ClassFileConstants.AccStatic);
+			}
+			// Kludge - The AccDefaultMethod bit is outside the lower 16 bits and got removed earlier. Putting it back.
+			if (isDefaultMethod) {
+				realModifiers |= ExtraCompilerModifiers.AccDefaultMethod;
+			}
+		}
 		if ((realModifiers & ~expectedModifiers) != 0) {
 			if ((declaringClass.modifiers & ClassFileConstants.AccAnnotation) != 0)
 				problemReporter().illegalModifierForAnnotationMember((AbstractMethodDeclaration) this.referenceContext);
 			else
 				problemReporter().illegalModifierForInterfaceMethod((AbstractMethodDeclaration) this.referenceContext, isDefaultMethod);
-		}
-		if (isDefaultMethod && (modifiers & ClassFileConstants.AccAbstract) != 0) {
-			problemReporter().abstractMethodNeedingNoBody((AbstractMethodDeclaration) this.referenceContext);
 		}
 		return;
 	}
@@ -426,7 +429,7 @@ MethodBinding createMethod(AbstractMethodDeclaration method) {
  :giro */
 		if (declaringClass.isRegularInterface()) {
 // SH}
-			if (method.isDefaultMethod()) {
+			if (method.isDefaultMethod() || method.isStatic()) {
 				modifiers |= ClassFileConstants.AccPublic; // default method is not abstract
 			} else {
 				modifiers |= ClassFileConstants.AccPublic | ClassFileConstants.AccAbstract;
@@ -536,6 +539,10 @@ public boolean isInsideInitializer() {
 	return (this.referenceContext instanceof TypeDeclaration);
 }
 
+public boolean isLambdaScope() {
+	return this.referenceContext instanceof LambdaExpression;
+}
+
 public boolean isInsideInitializerOrConstructor() {
 	return (this.referenceContext instanceof TypeDeclaration)
 		|| (this.referenceContext instanceof ConstructorDeclaration);
@@ -611,10 +618,21 @@ public final int recordInitializationStates(FlowInfo flowInfo) {
 }
 
 /**
- *  Answer the reference method of this scope, or null if initialization scope.
+ *  Answer the reference method of this scope, or null if initialization scope or lambda scope.
  */
 public AbstractMethodDeclaration referenceMethod() {
 	if (this.referenceContext instanceof AbstractMethodDeclaration) return (AbstractMethodDeclaration) this.referenceContext;
+	return null;
+}
+
+/**
+ * Answers the binding of the reference method or reference lambda expression.
+ */
+public MethodBinding referenceMethodBinding() {
+	if (this.referenceContext instanceof LambdaExpression)
+		return ((LambdaExpression)this.referenceContext).binding;
+	if (this.referenceContext instanceof AbstractMethodDeclaration)
+		return ((AbstractMethodDeclaration)this.referenceContext).binding;
 	return null;
 }
 
@@ -628,10 +646,6 @@ public TypeDeclaration referenceType() {
 }
 
 //{ObjectTeams: new queries:
-	public MethodBinding referenceMethodBinding() {
-		if (this.referenceContext instanceof AbstractMethodDeclaration) return ((AbstractMethodDeclaration) this.referenceContext).binding;
-		return null;
-	}
 	/**
      * Does this scope represent a callin wrapper
      * (either the mapping declaration or the generated wrapper method)?

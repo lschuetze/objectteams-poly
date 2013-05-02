@@ -77,6 +77,7 @@ public class AllocationExpression extends Expression implements InvocationSite {
 	public boolean inferredReturnType;
 
 	public FakedTrackingVariable closeTracker;	// when allocation a Closeable store a pre-liminary tracking variable here
+	private ExpressionContext expressionContext = VANILLA_CONTEXT;
 
 //{ObjectTeams: alternate AST in case the creation needs to be redirected through a creator call:
 	private MessageSend roleCreatorCall = null;
@@ -421,19 +422,24 @@ public TypeBinding resolveType(BlockScope scope) {
 	// buffering the arguments' types
 	boolean argsContainCast = false;
 	TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
+	boolean polyExpressionSeen = false;
 	if (this.arguments != null) {
 		boolean argHasError = false;
 		int length = this.arguments.length;
 		argumentTypes = new TypeBinding[length];
+		TypeBinding argumentType;
 		for (int i = 0; i < length; i++) {
 			Expression argument = this.arguments[i];
 			if (argument instanceof CastExpression) {
 				argument.bits |= DisableUnnecessaryCastCheck; // will check later on
 				argsContainCast = true;
 			}
-			if ((argumentTypes[i] = argument.resolveType(scope)) == null) {
+			argument.setExpressionContext(INVOCATION_CONTEXT);
+			if ((argumentType = argumentTypes[i] = argument.resolveType(scope)) == null) {
 				argHasError = true;
 			}
+			if (argumentType != null && argumentType.kind() == Binding.POLY_TYPE)
+				polyExpressionSeen = true;
 		}
 		if (argHasError) {
 			/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=345359, if arguments have errors, completely bail out in the <> case.
@@ -521,6 +527,22 @@ public TypeBinding resolveType(BlockScope scope) {
 // :giro
 	  }
 // SH}
+	}
+	if (polyExpressionSeen) {
+		boolean variableArity = this.binding.isVarargs();
+		final TypeBinding[] parameters = this.binding.parameters;
+		final int parametersLength = parameters.length;
+		for (int i = 0, length = this.arguments == null ? 0 : this.arguments.length; i < length; i++) {
+			Expression argument = this.arguments[i];
+			TypeBinding parameterType = i < parametersLength ? parameters[i] : parameters[parametersLength - 1];
+			if (argumentTypes[i] instanceof PolyTypeBinding) {
+				argument.setExpressionContext(INVOCATION_CONTEXT);
+				if (variableArity && i >= parametersLength - 1)
+					argument.tagAsEllipsisArgument();
+				argument.setExpectedType(parameterType);
+				argumentTypes[i] = argument.resolveType(scope);
+			}
+		}
 	}
 	if ((this.binding.tagBits & TagBits.HasMissingType) != 0) {
 		scope.problemReporter().missingTypeInConstructor(this, this.binding);
@@ -724,6 +746,19 @@ public void traverse(ASTVisitor visitor, BlockScope scope) {
  */
 public void setExpectedType(TypeBinding expectedType) {
 	this.typeExpected = expectedType;
+}
+
+public void setExpressionContext(ExpressionContext context) {
+	this.expressionContext = context;
+}
+
+public boolean isPolyExpression() {
+	return (this.expressionContext == ASSIGNMENT_CONTEXT || this.expressionContext == INVOCATION_CONTEXT) &&
+			this.type != null && (this.type.bits & ASTNode.IsDiamond) != 0;
+}
+
+public boolean tIsMoreSpecific(TypeBinding t, TypeBinding s) {
+	return isPolyExpression() ? !t.isBaseType() && s.isBaseType() : super.tIsMoreSpecific(t, s);
 }
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.InvocationSite#expectedType()

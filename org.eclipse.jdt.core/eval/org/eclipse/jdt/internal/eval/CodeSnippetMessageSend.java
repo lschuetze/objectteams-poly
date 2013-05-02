@@ -1,11 +1,15 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: CodeSnippetMessageSend.java 23405 2010-02-03 17:02:18Z stephan $
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -28,6 +32,7 @@ import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.FieldBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -219,18 +224,23 @@ public TypeBinding resolveType(BlockScope scope) {
 	}
 	// will check for null after args are resolved
 	TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
+	boolean polyExpressionSeen = false;
 	if (this.arguments != null) {
 		boolean argHasError = false; // typeChecks all arguments 
 		int length = this.arguments.length;
 		argumentTypes = new TypeBinding[length];
+		TypeBinding argumentType;
 		for (int i = 0; i < length; i++) {
 			Expression argument = this.arguments[i];
 			if (argument instanceof CastExpression) {
 				argument.bits |= DisableUnnecessaryCastCheck; // will check later on
 				argsContainCast = true;
 			}
-			if ((argumentTypes[i] = this.arguments[i].resolveType(scope)) == null)
+			argument.setExpressionContext(INVOCATION_CONTEXT);
+			if ((argumentType = argumentTypes[i] = this.arguments[i].resolveType(scope)) == null)
 				argHasError = true;
+			if (argumentType != null && argumentType.kind() == Binding.POLY_TYPE)
+				polyExpressionSeen = true;
 		}
 		if (argHasError) {
 			if(this.actualReceiverType instanceof ReferenceBinding) {
@@ -324,6 +334,22 @@ public TypeBinding resolveType(BlockScope scope) {
 			}
 			scope.problemReporter().invalidMethod(this, this.binding);
 			return null;
+		}
+	}
+	if (polyExpressionSeen) {
+		boolean variableArity = this.binding.isVarargs();
+		final TypeBinding[] parameters = this.binding.parameters;
+		final int parametersLength = parameters.length;
+		for (int i = 0, length = this.arguments == null ? 0 : this.arguments.length; i < length; i++) {
+			Expression argument = this.arguments[i];
+			TypeBinding parameterType = i < parametersLength ? parameters[i] : parameters[parametersLength - 1];
+			if (argumentTypes[i] instanceof PolyTypeBinding) {
+				argument.setExpressionContext(INVOCATION_CONTEXT);
+				if (variableArity && i >= parametersLength - 1)
+					argument.tagAsEllipsisArgument();
+				argument.setExpectedType(parameterType);
+				argumentTypes[i] = argument.resolveType(scope);
+			}
 		}
 	}
 	if (!this.binding.isStatic()) {

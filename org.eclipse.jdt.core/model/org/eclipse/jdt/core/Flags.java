@@ -1,10 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Flags.java 19912 2009-04-18 23:04:37Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -28,9 +31,10 @@ import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
  * </p>
  * <p>
  * Note that the numeric values of these flags match the ones for class files
- * as described in the Java Virtual Machine Specification. The AST class
- * <code>Modifier</code> provides the same functionality as this class, only in
- * the <code>org.eclipse.jdt.core.dom</code> package.
+ * as described in the Java Virtual Machine Specification (except for
+ * {@link #AccDefaultFlag}). The AST class <code>Modifier</code> provides
+ * the same functionality as this class, only in the
+ * <code>org.eclipse.jdt.core.dom</code> package.
  * </p>
  *
  * @see IMember#getFlags()
@@ -148,6 +152,14 @@ public final class Flags {
 	 * @since 3.0
 	 */
 	public static final int AccAnnotation = ClassFileConstants.AccAnnotation;
+
+	/**
+	 * Default property flag (added in J2SE 1.8).
+	 * Note that the flag's value is internal and is not defined in the
+	 * Virtual Machine specification.
+	 * @since 3.9
+	 */
+	public static final int AccDefaultFlag = ExtraCompilerModifiers.AccDefaultMethod;
 
 //	{ObjectTeams: Team, role, and callin constants added
 	 /**
@@ -373,6 +385,19 @@ public final class Flags {
 		return (flags & AccAnnotation) != 0;
 	}
 
+	/**
+	 * Returns whether the given integer has the <code>AccDefaultFlag</code>
+	 * bit set. Note that this flag represents the usage of the 'default' keyword
+	 * on a method and should not be confused with the default access visibility.
+	 *
+	 * @return <code>true</code> if the <code>AccDefaultFlag</code> flag is included
+	 * @see #AccDefaultFlag
+	 * @since 3.9
+	 */
+	public static boolean isDefaultMethod(int flags) {
+		return (flags & AccDefaultFlag) != 0;
+	}
+
 //{ObjectTeams: more queries for element kinds:
 	/**
 	 * Returns whether the given integer includes the <code>team</code> modifier.
@@ -418,6 +443,7 @@ public final class Flags {
 	 *   <code>public</code> <code>protected</code> <code>private</code>
 	 *   <code>static</code>
 	 *   <code>abstract</code> <code>final</code> <code>native</code> <code>synchronized</code> <code>transient</code> <code>volatile</code> <code>strictfp</code>
+	 *   <code>default</code>
 	 * </pre>
 	 * This is a compromise between the orders specified in sections 8.1.1,
 	 * 8.3.1, 8.4.3, 8.8.3, 9.1.1, and 9.3 of <em>The Java Language
@@ -469,6 +495,8 @@ public final class Flags {
 			sb.append("volatile "); //$NON-NLS-1$
 		if (isStrictfp(flags))
 			sb.append("strictfp "); //$NON-NLS-1$
+		if (isDefaultMethod(flags))
+			sb.append("default "); //$NON-NLS-1$
 //{ObjectTeams: OT flags:
 		if (isTeam(flags))
 			sb.append("team "); //$NON-NLS-1$

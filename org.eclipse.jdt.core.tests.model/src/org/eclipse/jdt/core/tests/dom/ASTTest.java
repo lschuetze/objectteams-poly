@@ -34,7 +34,7 @@ import org.eclipse.jdt.core.dom.*;
 public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase {
 
 	/**
-	 * Internal synonynm for deprecated constant AST.JSL3
+	 * Internal synonym for deprecated constant AST.JSL3
 	 * to alleviate deprecation warnings.
 	 * @deprecated
 	 */
@@ -5611,7 +5611,8 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 				this.ast.newModifier(Modifier.ModifierKeyword.SYNCHRONIZED_KEYWORD),
 				this.ast.newModifier(Modifier.ModifierKeyword.TRANSIENT_KEYWORD),
 				this.ast.newModifier(Modifier.ModifierKeyword.VOLATILE_KEYWORD),
-				this.ast.newModifier(Modifier.ModifierKeyword.STRICTFP_KEYWORD)
+				this.ast.newModifier(Modifier.ModifierKeyword.STRICTFP_KEYWORD),
+				this.ast.newModifier(Modifier.ModifierKeyword.DEFAULT_KEYWORD)
 		};
 		return allMods;
 	}
@@ -8527,6 +8528,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 		assertTrue(Modifier.ModifierKeyword.TRANSIENT_KEYWORD.toString().equals("transient")); //$NON-NLS-1$
 		assertTrue(Modifier.ModifierKeyword.VOLATILE_KEYWORD.toString().equals("volatile")); //$NON-NLS-1$
 		assertTrue(Modifier.ModifierKeyword.STRICTFP_KEYWORD.toString().equals("strictfp")); //$NON-NLS-1$
+		assertTrue(Modifier.ModifierKeyword.DEFAULT_KEYWORD.toString().equals("default")); //$NON-NLS-1$
 
 		final Modifier.ModifierKeyword[] known = {
 			Modifier.ModifierKeyword.PUBLIC_KEYWORD,
@@ -8540,6 +8542,7 @@ public class ASTTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase
 			Modifier.ModifierKeyword.TRANSIENT_KEYWORD,
 			Modifier.ModifierKeyword.VOLATILE_KEYWORD,
 			Modifier.ModifierKeyword.STRICTFP_KEYWORD,
+			Modifier.ModifierKeyword.DEFAULT_KEYWORD
 		};
 
 		// check all modifiers are distinct

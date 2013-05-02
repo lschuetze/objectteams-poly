@@ -16,9 +16,10 @@
 package org.eclipse.jdt.core.tests.dom;
 
 import java.lang.reflect.Method;
+
 import junit.framework.Test;
+
 import org.eclipse.jdt.core.dom.*;
-import org.eclipse.jdt.core.dom.ASTNode;
 
 public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.TestCase {
 
@@ -33,6 +34,8 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 			if (methods[i].getName().startsWith("test")) { //$NON-NLS-1$
 				suite.addTest(new ASTVisitorTest(methods[i].getName(), AST.JLS2));
 				suite.addTest(new ASTVisitorTest(methods[i].getName(), AST.JLS3));
+				suite.addTest(new ASTVisitorTest(methods[i].getName(), AST.JLS4));
+				suite.addTest(new ASTVisitorTest(methods[i].getName(), AST.JLS8));
 			}
 		}
 		return suite;
@@ -135,6 +138,18 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 	public ASTVisitorTest(String name, int apiLevel) {
 		super(name);
 		this.API_LEVEL = apiLevel;
+	}
+	
+	public ASTVisitorTest(String name) {
+		super(name.substring(0, name.indexOf(" - JLS")));
+		name.indexOf(" - JLS");
+		this.API_LEVEL = Integer.parseInt(name.substring(name.indexOf(" - JLS") + 6));
+	}
+
+	/** @deprecated using deprecated code */
+	public String getName() {
+		String name = super.getName() + " - JLS" + this.API_LEVEL;
+		return name;
 	}
 
 	/**
@@ -301,20 +316,6 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		super.tearDown();
 	}
 
-	/** @deprecated using deprecated code */
-	public String getName() {
-		String name = super.getName();
-		switch (this.API_LEVEL) {
-			case AST.JLS2:
-				name = "JLS2 - " + name;
-				break;
-			case AST.JLS3:
-				name = "JLS3 - " + name;
-				break;
-		}
-		return name;
-	}
-
 	class TestVisitor extends ASTVisitor {
 
 		boolean visitTheKids = true;
@@ -395,6 +396,13 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		}
 		public void endVisit(QualifiedType node) {
 			ASTVisitorTest.this.b.append("tQ)"); //$NON-NLS-1$
+		}
+		public boolean visit(UnionType node) {
+			ASTVisitorTest.this.b.append("(tU"); //$NON-NLS-1$
+			return isVisitingChildren();
+		}
+		public void endVisit(UnionType node) {
+			ASTVisitorTest.this.b.append("tU)"); //$NON-NLS-1$
 		}
 		public boolean visit(WildcardType node) {
 			ASTVisitorTest.this.b.append("(tW"); //$NON-NLS-1$
@@ -1047,6 +1055,14 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 			ASTVisitorTest.this.b.append("MOD)"); //$NON-NLS-1$
 		}
 
+		public boolean visit(ExtraDimension node) {
+			ASTVisitorTest.this.b.append("(@ED"); //$NON-NLS-1$
+			return isVisitingChildren();
+		}
+		public void endVisit(ExtraDimension node) {
+			ASTVisitorTest.this.b.append("@ED)"); //$NON-NLS-1$
+		}
+		
 		public void preVisit(ASTNode node) {
 			ASTVisitorTest.this.b.append("["); //$NON-NLS-1$
 		}
@@ -1145,6 +1161,21 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		x1.accept(v1);
 		String result = this.b.toString();
 		assertTrue(result.equals("[(tW"+this.T1S+"tW)]")); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
+	/** @deprecated using deprecated code */
+	public void testUnionType() {
+		if (this.ast.apiLevel() <= AST.JLS4) {
+			return;
+		}
+		UnionType x1 = this.ast.newUnionType();
+		x1.types().add(this.T1);
+		x1.types().add(this.T2);
+		TestVisitor v1 = new TestVisitor();
+		this.b.setLength(0);
+		x1.accept(v1);
+		String result = this.b.toString();
+		assertTrue(result.equals("[(tU"+this.T1S+this.T2S+"tU)]")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	// EXPRESSIONS and STATEMENTS
@@ -1432,6 +1463,20 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		String result = this.b.toString();
 		assertTrue(result.equals("[(sEX"+this.E1S+"sEX)]")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
+	public void testExtraDimension() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		ExtraDimension x1 = this.ast.newExtraDimension();
+		x1.annotations().add(this.ANO1);
+		x1.annotations().add(this.ANO2);
+		TestVisitor v1 = new TestVisitor();
+		this.b.setLength(0);
+		x1.accept(v1);
+		String result = this.b.toString();
+		assertEquals("[(@ED"+this.ANO1S+this.ANO2S+"@ED)]", result); //$NON-NLS-1$ //$NON-NLS-2$
+	}
+
 	public void testFieldAccess() {
 		FieldAccess x1 = this.ast.newFieldAccess();
 		x1.setExpression(this.E1);
@@ -1641,8 +1686,8 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 			x1.thrownExceptions().add(this.N2);
 			x1.thrownExceptions().add(this.N3);			
 		} else {
-			x1.thrownExceptions().add(this.T3);
-			x1.thrownExceptions().add(this.T4);			
+			x1.thrownExceptionTypes().add(this.T3);
+			x1.thrownExceptionTypes().add(this.T4);			
 		}
 		x1.setBody(this.B1);
 		TestVisitor v1 = new TestVisitor();
@@ -1650,11 +1695,11 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		x1.accept(v1);
 		String result = this.b.toString();
 		if (this.ast.apiLevel() == AST.JLS2) {
-			assertTrue(result.equals("[(MD"+this.JD1S+this.T1S+this.N1S+this.V1S+this.V2S+this.N2S+this.N3S+this.B1S+"MD)]")); //$NON-NLS-1$ //$NON-NLS-2$
+			assertEquals("[(MD"+this.JD1S+this.T1S+this.N1S+this.V1S+this.V2S+this.N2S+this.N3S+this.B1S+"MD)]", result); //$NON-NLS-1$ //$NON-NLS-2$
 		} else if (this.ast.apiLevel() < AST.JLS8) {
-			assertTrue(result.equals("[(MD"+this.JD1S+this.MOD1S+this.MOD2S+this.TP1S+this.T1S+this.N1S+this.V1S+this.V2S+this.N2S+this.N3S+this.B1S+"MD)]")); //$NON-NLS-1$ //$NON-NLS-2$
+			assertEquals("[(MD"+this.JD1S+this.MOD1S+this.MOD2S+this.TP1S+this.T1S+this.N1S+this.V1S+this.V2S+this.N2S+this.N3S+this.B1S+"MD)]", result); //$NON-NLS-1$ //$NON-NLS-2$
 		} else {
-			assertTrue(result.equals("[(MD"+this.JD1S+this.MOD1S+this.MOD2S+this.TP1S+this.T1S+this.T3S+this.V1S+this.V2S+this.T4S+this.N3S+this.B1S+"MD)]")); //$NON-NLS-1$ //$NON-NLS-2$			
+			assertEquals("[(MD"+this.JD1S+this.MOD1S+this.MOD2S+this.TP1S+this.T1S+this.N1S+this.V1S+this.V2S+this.T3S+this.T4S+this.B1S+"MD)]", result); //$NON-NLS-1$ //$NON-NLS-2$			
 		}
 	}
 	/** @deprecated using deprecated code */
@@ -2013,8 +2058,18 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		String result = this.b.toString();
 		assertTrue(result.equals("[(sTR"+this.E1S+"sTR)]")); //$NON-NLS-1$ //$NON-NLS-2$
 	}
+	/** @deprecated using deprecated code */
 	public void testTryStatement() {
 		TryStatement x1 = this.ast.newTryStatement();
+		int level = this.ast.apiLevel();
+		if (level >= AST.JLS4) {
+			VariableDeclarationExpression vde1= this.ast.newVariableDeclarationExpression(this.W1);
+			vde1.setType(this.T1);
+			x1.resources().add(vde1);
+			VariableDeclarationExpression vde2= this.ast.newVariableDeclarationExpression(this.W2);
+			vde2.setType(this.T2);
+			x1.resources().add(vde2);
+		}
 		x1.setBody(this.B1);
 		CatchClause c1 = this.ast.newCatchClause();
 		c1.setException(this.V1);
@@ -2029,7 +2084,9 @@ public class ASTVisitorTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		this.b.setLength(0);
 		x1.accept(v1);
 		String result = this.b.toString();
-		assertTrue(result.equals("[(sTY"+this.B1S+"[(cc"+this.V1S+"[(sBsB)]"+"cc)]"+"[(cc"+this.V2S+"[(sBsB)]"+"cc)]"+"[(sBsB)]"+"sTY)]")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
+		assertEquals("[(sTY"
+				+(level >= AST.JLS4 ? "[(eVD"+this.T1S+this.W1S+"eVD)]"+"[(eVD"+this.T2S+this.W2S+"eVD)]" : "")
+				+this.B1S+"[(cc"+this.V1S+"[(sBsB)]"+"cc)]"+"[(cc"+this.V2S+"[(sBsB)]"+"cc)]"+"[(sBsB)]"+"sTY)]", result); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$
 	}
 	/** @deprecated using deprecated code */
 	public void testTypeDeclaration() {

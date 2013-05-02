@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,7 @@
 package org.eclipse.jdt.internal.compiler.ast;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
@@ -585,10 +586,6 @@ public StringBuffer printExpression(int indent, StringBuffer output) {
 public TypeBinding resolveType(BlockScope scope) {
 	// compute a new constant if the cast is effective
 
-	// due to the fact an expression may start with ( and that a cast can also start with (
-	// the field is an expression....it can be a TypeReference OR a NameReference Or
-	// any kind of Expression <-- this last one is invalid.......
-
 	this.constant = Constant.NotAConstant;
 	this.implicitConversion = TypeIds.T_undefined;
 
@@ -634,7 +631,13 @@ public TypeBinding resolveType(BlockScope scope) {
 	}
 /*orig*/TypeBinding castType = this.resolvedType;
 // SH}
-	//expression.setExpectedType(this.resolvedType); // needed in case of generic method invocation
+	if (scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8) {
+		this.expression.setExpressionContext(CASTING_CONTEXT);
+		if (this.expression instanceof FunctionalExpression) {
+			this.expression.setExpectedType(this.resolvedType);
+			this.bits |= ASTNode.DisableUnnecessaryCastCheck;
+		}
+	}
 	if (this.expression instanceof CastExpression) {
 		this.expression.bits |= ASTNode.DisableUnnecessaryCastCheck;
 		exprContainCast = true;

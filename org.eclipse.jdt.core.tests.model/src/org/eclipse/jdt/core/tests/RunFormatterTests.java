@@ -1,12 +1,18 @@
 /*******************************************************************************
- * Copyright (c) 2005, 2009 IBM Corporation and others.
+ * Copyright (c) 2005, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Jesper S Moller - Contribution for bug 402173
+ *                       Contribution for bug 402892
  *******************************************************************************/
 package org.eclipse.jdt.core.tests;
 
@@ -54,6 +60,8 @@ public class RunFormatterTests extends junit.framework.TestCase {
 			allClasses.add(FormatterBugsTests.class);
 		}
 		allClasses.add(CommentsTestSuite.class);
+		allClasses.add(FormatterJSR335Tests.class);
+		allClasses.add(FormatterJSR308Tests.class);
 		allClasses.addAll(TEST_SUITES);
 
 		// Reset forgotten subsets of tests

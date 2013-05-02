@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -283,6 +283,7 @@ public void resolve(MethodScope initializationScope) {
         	Config oldConfig = Config.createOrResetConfig(this);
 			try {
 // SH}
+			this.initialization.setExpressionContext(ASSIGNMENT_CONTEXT);
 			this.initialization.setExpectedType(fieldType); // needed in case of generic method invocation
 			if (this.initialization instanceof ArrayInitializer) {
 

@@ -280,14 +280,18 @@ public class Clinit extends AbstractMethodDeclaration {
 						case AbstractVariableDeclaration.ENUM_CONSTANT :
 							break;
 						case AbstractVariableDeclaration.INITIALIZER :
-							if (!fieldDecl.isStatic())
+							if (!fieldDecl.isStatic()) {
 								break;
+							}
+							remainingFieldCount--;
 							sourcePosition = ((Initializer) fieldDecl).block.sourceEnd;
 							fieldDecl.generateCode(staticInitializerScope, codeStream);
 							break;
 						case AbstractVariableDeclaration.FIELD :
-							if (!fieldDecl.binding.isStatic())
+							if (!fieldDecl.binding.isStatic()) {
 								break;
+							}
+							remainingFieldCount--;
 							sourcePosition = fieldDecl.declarationEnd;
 							fieldDecl.generateCode(staticInitializerScope, codeStream);
 							break;

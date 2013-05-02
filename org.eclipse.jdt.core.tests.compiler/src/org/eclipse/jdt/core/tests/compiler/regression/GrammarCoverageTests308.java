@@ -628,7 +628,7 @@ public class GrammarCoverageTests308 extends AbstractRegressionTest {
 				"----------\n");
 	}
 	// ReferenceExpression ::= PrimitiveType Dims '::' NonWildTypeArgumentsopt IdentifierOrNew
-	public void test013() throws Exception {  // WILL FAIL WHEN REFERENCE EXPRESSIONS ARE ANALYZED.
+	public void test013() throws Exception {
 		this.runNegativeTest(
 				new String[] {
 					"X.java",
@@ -653,7 +653,12 @@ public class GrammarCoverageTests308 extends AbstractRegressionTest {
 				"	                   ^^^^^^\n" + 
 				"Marker cannot be resolved to a type\n" + 
 				"----------\n" + 
-				"3. ERROR in X.java (at line 7)\n" + 
+				"3. WARNING in X.java (at line 6)\n" + 
+				"	I i = @Marker int @Marker []::<String>clone;\n" + 
+				"	                               ^^^^^^\n" + 
+				"Unused type arguments for the non generic method clone() of type Object; it should not be parameterized with arguments <String>\n" + 
+				"----------\n" + 
+				"4. ERROR in X.java (at line 7)\n" + 
 				"	Zork z;\n" + 
 				"	^^^^\n" + 
 				"Zork cannot be resolved to a type\n" + 
@@ -1055,7 +1060,7 @@ public class GrammarCoverageTests308 extends AbstractRegressionTest {
 				"----------\n");
 	}
 	// ReferenceExpressionTypeArgumentsAndTrunk ::= OnlyTypeArguments '.' ClassOrInterfaceType Dimsopt
-	public void test026() throws Exception {  // WILL FAIL WHEN REFERENCE EXPRESSIONS ARE ANALYZED.
+	public void test026() throws Exception {
 		this.runNegativeTest(
 				new String[] {
 					"X.java",
@@ -1395,7 +1400,7 @@ public class GrammarCoverageTests308 extends AbstractRegressionTest {
 				"----------\n");
 	}
 	// ReferenceExpression ::= Name Dimsopt '::' NonWildTypeArgumentsopt IdentifierOrNew
-	public void test037() throws Exception { // WILL FAIL WHEN REFERENCE EXPRESSIONS ARE ANALYZED.
+	public void test037() throws Exception {
 		this.runNegativeTest(
 				new String[] {
 					"X.java",
@@ -1425,25 +1430,30 @@ public class GrammarCoverageTests308 extends AbstractRegressionTest {
 				"----------\n" + 
 				"2. ERROR in X.java (at line 6)\n" + 
 				"	I i = @Marker Y. @Marker Z @Marker [] [] @Marker [] ::foo;\n" + 
-				"	       ^^^^^^\n" + 
-				"Marker cannot be resolved to a type\n" + 
+				"	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+				"The type Y.Z[][][] does not define foo(int) that is applicable here\n" + 
 				"----------\n" + 
 				"3. ERROR in X.java (at line 6)\n" + 
 				"	I i = @Marker Y. @Marker Z @Marker [] [] @Marker [] ::foo;\n" + 
-				"	                  ^^^^^^\n" + 
+				"	       ^^^^^^\n" + 
 				"Marker cannot be resolved to a type\n" + 
 				"----------\n" + 
 				"4. ERROR in X.java (at line 6)\n" + 
 				"	I i = @Marker Y. @Marker Z @Marker [] [] @Marker [] ::foo;\n" + 
-				"	                            ^^^^^^\n" + 
+				"	                  ^^^^^^\n" + 
 				"Marker cannot be resolved to a type\n" + 
 				"----------\n" + 
 				"5. ERROR in X.java (at line 6)\n" + 
 				"	I i = @Marker Y. @Marker Z @Marker [] [] @Marker [] ::foo;\n" + 
+				"	                            ^^^^^^\n" + 
+				"Marker cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"6. ERROR in X.java (at line 6)\n" + 
+				"	I i = @Marker Y. @Marker Z @Marker [] [] @Marker [] ::foo;\n" + 
 				"	                                          ^^^^^^\n" + 
 				"Marker cannot be resolved to a type\n" + 
 				"----------\n" + 
-				"6. ERROR in X.java (at line 8)\n" + 
+				"7. ERROR in X.java (at line 8)\n" + 
 				"	Zork z;\n" + 
 				"	^^^^\n" + 
 				"Zork cannot be resolved to a type\n" + 
@@ -1502,8 +1512,12 @@ public class GrammarCoverageTests308 extends AbstractRegressionTest {
 				"	i = @Marker W<@Marker Integer>::<@Marker String> new;\n" + 
 				"	               ^^^^^^\n" + 
 				"Marker cannot be resolved to a type\n" + 
-				"----------\n"
-				);
+				"----------\n" + 
+				"5. ERROR in X.java (at line 12)\n" + 
+				"	i = @Marker W<@Marker Integer>::<@Marker String> new;\n" + 
+				"	                                  ^^^^^^\n" + 
+				"Marker cannot be resolved to a type\n" + 
+				"----------\n");
 	}
 	// CastExpression ::= PushLPAREN Name PushRPAREN InsideCastExpressionLL1 UnaryExpressionNotPlusMinus
 	// CastExpression ::= PushLPAREN Name Dims PushRPAREN InsideCastExpression UnaryExpressionNotPlusMinus

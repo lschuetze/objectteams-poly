@@ -1,15 +1,21 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
+ *     Jesper S Moller - Contributions for
+ *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -130,10 +136,6 @@ public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
 		TypeBinding originalExpressionType = this.expression.resolveType(scope);
 		if (originalLhsType == null || originalExpressionType == null)
 			return null;
-		LocalVariableBinding localVariableBinding = this.lhs.localVariableBinding();
-		if (localVariableBinding != null) {
-			localVariableBinding.tagBits &= ~TagBits.IsEffectivelyFinal;
-		}
 		// autoboxing support
 		LookupEnvironment env = scope.environment();
 		TypeBinding lhsType = originalLhsType, expressionType = originalExpressionType;

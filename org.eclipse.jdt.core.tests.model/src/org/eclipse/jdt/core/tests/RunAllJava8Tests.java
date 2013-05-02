@@ -29,9 +29,11 @@ import org.eclipse.jdt.core.tests.compiler.parser.ComplianceDiagnoseTest;
 import org.eclipse.jdt.core.tests.compiler.parser.LambdaExpressionSyntaxTest;
 import org.eclipse.jdt.core.tests.compiler.parser.ReferenceExpressionSyntaxTest;
 import org.eclipse.jdt.core.tests.compiler.parser.TypeAnnotationSyntaxTest;
+import org.eclipse.jdt.core.tests.compiler.regression.ExpressionContextTests;
 import org.eclipse.jdt.core.tests.compiler.regression.CompilerInvocationTests;
-import org.eclipse.jdt.core.tests.compiler.regression.DefaultMethodsTest;
+import org.eclipse.jdt.core.tests.compiler.regression.FlowAnalysisTest8;
 import org.eclipse.jdt.core.tests.compiler.regression.GrammarCoverageTests308;
+import org.eclipse.jdt.core.tests.compiler.regression.InterfaceMethodsTest;
 import org.eclipse.jdt.core.tests.compiler.regression.NegativeLambdaExpressionsTest;
 import org.eclipse.jdt.core.tests.compiler.regression.NegativeTypeAnnotationTest;
 import org.eclipse.jdt.core.tests.compiler.regression.NullTypeAnnotationTest;
@@ -42,6 +44,9 @@ import org.eclipse.jdt.core.tests.dom.ASTConverterBugsTestJLS8;
 import org.eclipse.jdt.core.tests.dom.ASTConverterTestAST8_2;
 import org.eclipse.jdt.core.tests.dom.ConverterTestSetup;
 import org.eclipse.jdt.core.tests.dom.TypeAnnotationsConverterTest;
+import org.eclipse.jdt.core.tests.formatter.FormatterJSR308Tests;
+import org.eclipse.jdt.core.tests.formatter.FormatterJSR335Tests;
+import org.eclipse.jdt.core.tests.rewrite.describing.ASTRewritingTest;
 
 public class RunAllJava8Tests extends TestCase {
 	
@@ -55,11 +60,15 @@ public class RunAllJava8Tests extends TestCase {
 			NegativeTypeAnnotationTest.class,
 			TypeAnnotationSyntaxTest.class,
 			ReferenceExpressionSyntaxTest.class,
-			DefaultMethodsTest.class,
+			InterfaceMethodsTest.class,
 			ComplianceDiagnoseTest.class,
 			GrammarCoverageTests308.class,
 			NullTypeAnnotationTest.class,
-			CompilerInvocationTests.class
+			CompilerInvocationTests.class,
+			ExpressionContextTests.class,
+			FlowAnalysisTest8.class,
+			FormatterJSR335Tests.class,
+			FormatterJSR308Tests.class,
 		};
 	}
 	
@@ -71,6 +80,7 @@ public class RunAllJava8Tests extends TestCase {
 				ASTConverterBugsTestJLS8.class,
 				ASTConverter15JLS8Test.class,
 				ASTConverter18Test.class,
+				ASTRewritingTest.class,
 		};
 	}
 	public static Test suite() {

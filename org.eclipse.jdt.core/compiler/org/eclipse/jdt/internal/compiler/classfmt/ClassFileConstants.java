@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -108,7 +108,7 @@ public interface ClassFileConstants {
 	int MAJOR_VERSION_1_5 = 49;
 	int MAJOR_VERSION_1_6 = 50;
 	int MAJOR_VERSION_1_7 = 51;
-	int MAJOR_VERSION_1_8 = 52;  // Oracle has not updated this as of JDK8b39, i.e it still says 51.
+	int MAJOR_VERSION_1_8 = 52;
 
 	int MINOR_VERSION_0 = 0;
 	int MINOR_VERSION_1 = 1;

@@ -114,15 +114,15 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	// process the ELSE part
 	if (this.elseStatement != null) {
-	    // signal else clause unnecessarily nested, tolerate else-if code pattern
-	    if (thenFlowInfo == FlowInfo.DEAD_END
-	            && (this.bits & IsElseIfStatement) == 0 	// else of an else-if
-	            && !(this.elseStatement instanceof IfStatement)) {
+		// signal else clause unnecessarily nested, tolerate else-if code pattern
+		if (thenFlowInfo == FlowInfo.DEAD_END
+				&& (this.bits & IsElseIfStatement) == 0 	// else of an else-if
+				&& !(this.elseStatement instanceof IfStatement)) {
 //{ObjectTeams: silent for generated methods:
 	      if (!currentScope.isGeneratedScope())
 // SH}
-	        currentScope.problemReporter().unnecessaryElse(this.elseStatement);
-	    }
+			currentScope.problemReporter().unnecessaryElse(this.elseStatement);
+		}
 		// Save info for code gen
 		this.elseInitStateIndex = currentScope.methodScope().recordInitializationStates(elseFlowInfo);
 		if (isConditionOptimizedTrue || ((this.bits & ASTNode.IsElseStatementUnreachable) != 0)) {

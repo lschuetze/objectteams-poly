@@ -906,10 +906,12 @@ public void traverse(ASTVisitor visitor, BlockScope scope) {
 	visitor.endVisit(this, scope);
 }
 
-public VariableBinding nullAnnotatedVariableBinding() {
-	if (this.binding != null
-			&& ((this.binding.tagBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) != 0)) {
-		return this.binding;
+public VariableBinding nullAnnotatedVariableBinding(boolean supportTypeAnnotations) {
+	if (this.binding != null) {
+		if (supportTypeAnnotations
+				|| ((this.binding.tagBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable)) != 0)) {
+			return this.binding;
+		}
 	}
 	return null;
 }

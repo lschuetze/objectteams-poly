@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -41,7 +45,7 @@ public class ProblemHandler {
 
 	public final static String[] NoArgument = CharOperation.NO_STRINGS;
 
-	final public IErrorHandlingPolicy policy;
+	public IErrorHandlingPolicy policy;
 	public final IProblemFactory problemFactory;
 	public final CompilerOptions options;
 
@@ -145,6 +149,14 @@ private void protectedHandle(
 // SH}
 	if (severity == ProblemSeverities.Ignore)
 		return;
+
+	 boolean mandatory = (severity & (ProblemSeverities.Error | ProblemSeverities.Optional)) == ProblemSeverities.Error;
+	 if (this.policy.ignoreAllErrors()) { 
+		 // Error is not to be exposed, but clients may need still notification as to whether there are silently-ignored-errors.
+		 if (mandatory)
+			 referenceContext.tagAsHavingIgnoredMandatoryErrors(problemId);
+		 return;
+	 }
 
 	if ((severity & ProblemSeverities.Optional) != 0 && problemId != IProblem.Task  && !this.options.ignoreSourceFolderWarningOption) {
 //{ObjectTeams: NPE prevention:
@@ -288,7 +300,6 @@ private void protectedHandle(
 
 	switch (severity & ProblemSeverities.Error) {
 		case ProblemSeverities.Error :
-			boolean mandatory = ((severity & ProblemSeverities.Optional) == 0);
 			record(problem, unitResult, referenceContext, mandatory);
 			if ((severity & ProblemSeverities.Fatal) != 0) {
 				// don't abort or tag as error if the error is suppressed
@@ -338,7 +349,13 @@ public void handle(
 		referenceContext,
 		unitResult);
 }
-public void record(CategorizedProblem problem, CompilationResult unitResult, ReferenceContext referenceContext, boolean optionalError) {
-	unitResult.record(problem, referenceContext, optionalError);
+public void record(CategorizedProblem problem, CompilationResult unitResult, ReferenceContext referenceContext, boolean mandatoryError) {
+	unitResult.record(problem, referenceContext, mandatoryError);
+}
+/** @return old policy. */
+public IErrorHandlingPolicy switchErrorHandlingPolicy(IErrorHandlingPolicy newPolicy) {
+	IErrorHandlingPolicy presentPolicy = this.policy;
+	this.policy = newPolicy;
+	return presentPolicy;
 }
 }

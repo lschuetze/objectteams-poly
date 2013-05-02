@@ -464,6 +464,26 @@ public final boolean isBaseType() {
 	return (this.tagBits & TagBits.IsBaseType) != 0;
 }
 
+/* Answer true if the receiver is a primitive type or a boxed primitive type
+ */
+public final boolean isPrimitiveOrBoxedPrimitiveType() {
+	if ((this.tagBits & TagBits.IsBaseType) != 0)
+		return true;
+	switch (this.id) {
+		case TypeIds.T_JavaLangBoolean :
+		case TypeIds.T_JavaLangByte :
+		case TypeIds.T_JavaLangCharacter :
+		case TypeIds.T_JavaLangShort :
+		case TypeIds.T_JavaLangDouble :
+		case TypeIds.T_JavaLangFloat :
+		case TypeIds.T_JavaLangInteger :
+		case TypeIds.T_JavaLangLong :
+			return true;
+		default: 
+			return false;
+	}
+}
+
 /**
  *  Returns true if parameterized type AND not of the form List<?>
  */
@@ -525,6 +545,10 @@ public boolean isInterface() {
 	return false;
 }
 
+public boolean isFunctionalInterface() {
+	return false;
+}
+
 /**
  * Returns true if the current type denotes an intersection type: Number & Comparable<?>
  */
@@ -575,6 +599,10 @@ public boolean isRole() {
  */
 public final boolean isParameterizedType() {
 	return kind() == Binding.PARAMETERIZED_TYPE;
+}
+
+public boolean isIntersectionCastType() {
+	return false;
 }
 
 /**
@@ -1316,6 +1344,10 @@ public DependentTypeBinding asPlainDependentType() {
  * @return The single abstract method of a functional interface, or null, if the receiver is not a functional interface. 
  */
 public MethodBinding getSingleAbstractMethod(Scope scope) {
+	return null;
+}
+
+public ReferenceBinding[] getIntersectingTypes() {
 	return null;
 }
 }

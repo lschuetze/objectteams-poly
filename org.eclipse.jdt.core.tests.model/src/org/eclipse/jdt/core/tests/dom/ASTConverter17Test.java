@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
@@ -32,18 +36,22 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.NullLiteral;
 import org.eclipse.jdt.core.dom.NumberLiteral;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
@@ -53,7 +61,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 
 	public void setUpSuite() throws Exception {
 		super.setUpSuite();
-		this.ast = AST.newAST(AST.JLS4);
+		this.ast = AST.newAST(getJLS4());
 	}
 
 	public ASTConverter17Test(String name) {
@@ -204,7 +212,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 			"}";
 		this.workingCopy = getWorkingCopy("/Converter17/src/X.java", true/*resolve*/);
 		this.workingCopy.getBuffer().setContents(contents);
-		ASTNode node = runConversion(AST.JLS4, this.workingCopy, true);
+		ASTNode node = runConversion(getJLS4(), this.workingCopy, true);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit unit = (CompilationUnit) node;
 		assertProblemsSize(unit, 0);
@@ -268,7 +276,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 			"}";
 		this.workingCopy = getWorkingCopy("/Converter17/src/X.java", false/*resolve*/);
 		this.workingCopy.getBuffer().setContents(contents);
-		ASTNode node = runConversion(AST.JLS4, this.workingCopy, false);
+		ASTNode node = runConversion(getJLS4(), this.workingCopy, false);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit unit = (CompilationUnit) node;
 		assertProblemsSize(unit, 0);
@@ -301,7 +309,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 			"}";
 		this.workingCopy = getWorkingCopy("/Converter17/src/X.java", false/*resolve*/);
 		this.workingCopy.getBuffer().setContents(contents);
-		ASTNode node = runConversion(AST.JLS4, this.workingCopy, false);
+		ASTNode node = runConversion(getJLS4(), this.workingCopy, false);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit unit = (CompilationUnit) node;
 		assertProblemsSize(unit, 0);
@@ -334,7 +342,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 			"}";
 		this.workingCopy = getWorkingCopy("/Converter17/src/X.java", false/*resolve*/);
 		this.workingCopy.getBuffer().setContents(contents);
-		ASTNode node = runConversion(AST.JLS4, this.workingCopy, false);
+		ASTNode node = runConversion(getJLS4(), this.workingCopy, false);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit unit = (CompilationUnit) node;
 		assertProblemsSize(unit, 0);
@@ -368,7 +376,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 			"}";
 		this.workingCopy = getWorkingCopy("/Converter17/src/X.java", false/*resolve*/);
 		this.workingCopy.getBuffer().setContents(contents);
-		ASTNode node = runConversion(AST.JLS4, this.workingCopy, false);
+		ASTNode node = runConversion(getJLS4(), this.workingCopy, false);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit unit = (CompilationUnit) node;
 		assertProblemsSize(unit, 0);
@@ -426,7 +434,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 			"}";
 		this.workingCopy = getWorkingCopy("/Converter17/src/X.java", true/*resolve*/);
 		this.workingCopy.getBuffer().setContents(contents);
-		ASTNode node = runConversion(AST.JLS4, this.workingCopy, true);
+		ASTNode node = runConversion(getJLS4(), this.workingCopy, true);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit unit = (CompilationUnit) node;
 		assertProblemsSize(unit, 0);
@@ -448,7 +456,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 	 * Binary literals with underscores
 	 */
 	public void test0012() throws JavaModelException {
-		AST localAst= AST.newAST(AST.JLS4);
+		AST localAst= AST.newAST(getJLS4());
 		NumberLiteral literal= localAst.newNumberLiteral();
 		try {
 			literal.setToken("0b1010");
@@ -474,7 +482,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 				"}";
 		this.workingCopy = getWorkingCopy("/Converter17/src/X.java", true/*resolve*/);
 		this.workingCopy.getBuffer().setContents(contents);
-		ASTNode node = runConversion(AST.JLS4, this.workingCopy, true);
+		ASTNode node = runConversion(getJLS4(), this.workingCopy, true);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit unit = (CompilationUnit) node;
 		assertProblemsSize(unit, 0);
@@ -500,7 +508,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 				"}";
 		this.workingCopy = getWorkingCopy("/Converter17/src/X.java", true/*resolve*/);
 		this.workingCopy.getBuffer().setContents(contents);
-		ASTNode node = runConversion(AST.JLS4, this.workingCopy, true, true);
+		ASTNode node = runConversion(getJLS4(), this.workingCopy, true, true);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit unit = (CompilationUnit) node;
 		node = getASTNode(unit, 0, 0);
@@ -559,7 +567,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 				"}";
 		this.workingCopy = getWorkingCopy("/Converter17/src/X.java", true/*resolve*/);
 		this.workingCopy.getBuffer().setContents(contents);
-		ASTNode node = runConversion(AST.JLS4, this.workingCopy, true);
+		ASTNode node = runConversion(getJLS4(), this.workingCopy, true);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit unit = (CompilationUnit) node;
 		IProblem[] problems = unit.getProblems();
@@ -720,7 +728,7 @@ public class ASTConverter17Test extends ConverterTestSetup {
 			"}";
 		this.workingCopy = getWorkingCopy("/Converter17/src/X.java", true/*resolve*/);
 		this.workingCopy.getBuffer().setContents(contents);
-		ASTNode node = runConversion(AST.JLS4, this.workingCopy, true);
+		ASTNode node = runConversion(getJLS4(), this.workingCopy, true);
 		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
 		CompilationUnit unit = (CompilationUnit) node;
 		assertProblemsSize(unit, 0);
@@ -786,5 +794,173 @@ public class ASTConverter17Test extends ConverterTestSetup {
 		ITypeBinding binding = creation.resolveTypeBinding();
 		IMethodBinding[] methods = binding.getDeclaredMethods();
 		assertEquals("Wrong size", 2, methods.length);
+	}
+	/**
+     * https://bugs.eclipse.org/bugs/show_bug.cgi?id=402673
+     *
+     * @throws JavaModelException
+     */
+    public void test402673a() throws JavaModelException {
+            String contents = "package test402673;"
+                    + "public class X {\n"
+                    + "    Runnable r = () -> System.out.println(\"hi\");\n"
+                    +"}\n";
+        	this.workingCopy = getWorkingCopy("/Converter/src/test402673/X.java", true/* resolve */);
+        	this.workingCopy.getBuffer().setContents(contents);
+        	ASTNode node = runConversion(this.workingCopy, true);
+        	assertTrue(node != null);
+    		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+    		CompilationUnit unit = (CompilationUnit) node;
+    		assertProblemsSize(unit, 1, "Lambda expressions are allowed only at source level 1.8 or above");
+    		TypeDeclaration type = (TypeDeclaration) getASTNode(unit, 0);
+    		assertTrue((type.getFlags() & ASTNode.MALFORMED) != 0);
+    		node = getASTNode(unit, 0, 0);
+    		assertEquals("Not a field declaration", ASTNode.FIELD_DECLARATION, node.getNodeType());
+    		FieldDeclaration fieldDeclaration = (FieldDeclaration) node;
+    		final List fragments = fieldDeclaration.fragments();
+    		assertEquals("Wrong size", 1, fragments.size());
+    		VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.get(0);
+    		final Expression initializer = fragment.getInitializer();
+    		assertEquals("Not a null literal", ASTNode.NULL_LITERAL, initializer.getNodeType());
+    		NullLiteral nullLiteral = (NullLiteral) initializer;
+    		assertTrue((nullLiteral.getFlags() & ASTNode.MALFORMED) != 0);
+    }
+    /**
+     * https://bugs.eclipse.org/bugs/show_bug.cgi?id=402673
+     *
+     * @throws JavaModelException
+     */
+    public void test402673b() throws JavaModelException {
+            String contents = "package test402673;"
+                    + "public class X {\n"
+            		+ "    public void foo() {\n"
+                    + "        Runnable r = () -> System.out.println(\"hi\");\n"
+                    +"    }\n"
+                    +"}\n";
+        	this.workingCopy = getWorkingCopy("/Converter/src/test402673/X.java", true/* resolve */);
+        	this.workingCopy.getBuffer().setContents(contents);
+        	ASTNode node = runConversion(this.workingCopy, true);
+        	assertTrue(node != null);
+    		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+    		CompilationUnit unit = (CompilationUnit) node;
+    		assertProblemsSize(unit, 1, "Lambda expressions are allowed only at source level 1.8 or above");
+    		node = getASTNode(unit, 0, 0);
+    		assertEquals("Not a method declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
+    		MethodDeclaration methodDecl = (MethodDeclaration) node;
+    		assertTrue((methodDecl.getFlags() & ASTNode.MALFORMED) == 1);
+    		node = getASTNode(unit, 0, 0, 0);
+    		assertEquals("Not a variable declaration statement", ASTNode.VARIABLE_DECLARATION_STATEMENT, node.getNodeType());
+    		VariableDeclarationStatement variableDecl = (VariableDeclarationStatement) node;
+    		final List fragments = variableDecl.fragments();
+    		assertEquals("Wrong size", 1, fragments.size());
+    		VariableDeclarationFragment fragment = (VariableDeclarationFragment) fragments.get(0);
+    		final Expression initializer = fragment.getInitializer();
+    		assertEquals("Not a null literal", ASTNode.NULL_LITERAL, initializer.getNodeType());
+    		NullLiteral nullLiteral = (NullLiteral) initializer;
+    		assertTrue((nullLiteral.getFlags() & ASTNode.MALFORMED) != 0);
+    }
+	/**
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=402674
+	 * 
+	 * @throws JavaModelException
+	 */
+	public void test403444() throws JavaModelException {
+		this.workingCopy = getWorkingCopy("/Converter18/src/test403444/X.java",
+				true/* resolve */);
+		String contents = "package test403444;" +
+				"public class X {\n" +
+				"  public static interface StringToInt {\n" +
+				"   	int stoi(String s);\n" +
+				"  }\n" +
+				"  public static interface ReduceInt {\n" +
+				"      int reduce(int a, int b);\n" +
+				"  }\n" +
+				"  void foo(StringToInt s) { }\n" +
+				"  void bar(ReduceInt r) { }\n" +
+				"  void bar() {\n" +
+				"      foo(s -> s.length());\n" +
+				"      foo((s) -> s.length());\n" +
+				"      foo((String s) -> s.length()); //SingleVariableDeclaration is OK\n" +
+				"      bar((x, y) -> x+y);\n" +
+				"      bar((int x, int y) -> x+y); //SingleVariableDeclarations are OK\n" +
+				"  }\n" +
+				"}\n";
+		
+		
+    	this.workingCopy = getWorkingCopy("/Converter/src/test403444/X.java", true/* resolve */);
+    	this.workingCopy.getBuffer().setContents(contents);
+    	ASTNode node = runConversion(this.workingCopy, true);
+    	assertTrue(node != null);
+		assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+		CompilationUnit unit = (CompilationUnit) node;
+		
+		String error = "Lambda expressions are allowed only at source level 1.8 or above\n"
+				+ "Lambda expressions are allowed only at source level 1.8 or above\n"
+				+ "Lambda expressions are allowed only at source level 1.8 or above\n"
+				+ "Lambda expressions are allowed only at source level 1.8 or above\n"
+				+ "Lambda expressions are allowed only at source level 1.8 or above";
+		assertProblemsSize(unit, 5, error);
+
+		TypeDeclaration typedeclaration = (TypeDeclaration) getASTNode(unit, 0);
+		MethodDeclaration methoddecl = (MethodDeclaration)typedeclaration.bodyDeclarations().get(4);
+		List statements = methoddecl.getBody().statements();
+		int sCount = 0;
+		
+		ExpressionStatement statement = (ExpressionStatement)statements.get(sCount++);
+		MethodInvocation methodInvocation = (MethodInvocation)statement.getExpression();
+		Expression expression = (Expression) methodInvocation.arguments().get(0);
+		assertTrue(expression instanceof NullLiteral);
+		ITypeBinding binding = expression.resolveTypeBinding();
+		assertNull(binding);	
+		
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		expression = (Expression) methodInvocation.arguments().get(0);
+		assertTrue(expression instanceof NullLiteral);
+		binding = expression.resolveTypeBinding();
+		assertNull(binding);	
+
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		expression = (Expression) methodInvocation.arguments().get(0);
+		assertTrue(expression instanceof NullLiteral);
+		binding = expression.resolveTypeBinding();
+		assertNull(binding);	
+
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		expression = (Expression) methodInvocation.arguments().get(0);
+		assertTrue(expression instanceof NullLiteral);
+		binding = expression.resolveTypeBinding();
+		assertNull(binding);	
+
+		statement = (ExpressionStatement)statements.get(sCount++);
+		methodInvocation = (MethodInvocation)statement.getExpression();
+		expression = (Expression) methodInvocation.arguments().get(0);
+		assertTrue(expression instanceof NullLiteral);
+		binding = expression.resolveTypeBinding();
+		assertNull(binding);	
+	}
+	/*
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=399791
+	 */
+	public void test0021() throws JavaModelException {
+		String contents =
+				"public interface X {\n" +
+				"	static void foo(){}\n" +
+				"   default void foo(int i){}\n" +
+				"}\n";
+			this.workingCopy = getWorkingCopy("/Converter17/src/X.java", false);
+			ASTNode node = buildAST(contents, this.workingCopy, false);
+			assertEquals("Not a compilation unit", ASTNode.COMPILATION_UNIT, node.getNodeType());
+			CompilationUnit unit = (CompilationUnit) node;
+			TypeDeclaration type =  (TypeDeclaration) unit.types().get(0);
+			node = (ASTNode) type.bodyDeclarations().get(0);
+			assertEquals("Not a method Declaration", ASTNode.METHOD_DECLARATION, node.getNodeType());
+			MethodDeclaration method = (MethodDeclaration) node;
+			assertEquals("Method should be malformed", ASTNode.MALFORMED, (method.getFlags() & ASTNode.MALFORMED));
+
+			method = (MethodDeclaration) type.bodyDeclarations().get(1);
+			assertEquals("Method should be malformed", ASTNode.MALFORMED, (method.getFlags() & ASTNode.MALFORMED));
 	}
 }

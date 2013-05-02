@@ -17,12 +17,11 @@
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for 
  *								bug 292478 - Report potentially null across variable assignment
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
+ *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
- *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
-
 
 import java.util.ArrayList;
 
@@ -99,7 +98,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *
  * @version $Id: Expression.java 23404 2010-02-03 14:10:22Z stephan $
  */
-public abstract class Expression extends Statement {
+public abstract class Expression extends Statement implements ExpressionContext {
 
 //{ObjectTeams: baseclass decapsulation support:
 	/**
@@ -431,6 +430,15 @@ public final boolean checkCastTypesCompatibility(
 		return true;
 	}
 
+	if (castType.isIntersectionCastType()) {
+		ReferenceBinding [] intersectingTypes = castType.getIntersectingTypes();
+		for (int i = 0, length = intersectingTypes.length; i < length; i++) {
+			if (!checkCastTypesCompatibility(scope, intersectingTypes[i], expressionType, expression))
+				return false;
+		}
+		return true;
+	}
+	
 	switch(expressionType.kind()) {
 		case Binding.BASE_TYPE :
 			//-----------cast to something which is NOT a base type--------------------------
@@ -503,7 +511,13 @@ public final boolean checkCastTypesCompatibility(
 			}
 			// recursively on the type variable upper bound
 			return checkCastTypesCompatibility(scope, castType, ((WildcardBinding)expressionType).bound, expression);
-
+		case Binding.INTERSECTION_CAST_TYPE:
+			ReferenceBinding [] intersectingTypes = expressionType.getIntersectingTypes();
+			for (int i = 0, length = intersectingTypes.length; i < length; i++) {
+				if (checkCastTypesCompatibility(scope, castType, intersectingTypes[i], expression))
+					return true;
+			}
+			return false;
 		default:
 			if (expressionType.isInterface()) {
 				switch (castType.kind()) {
@@ -729,10 +743,10 @@ boolean handledByGeneratedMethod(Scope scope, TypeBinding castType, TypeBinding 
 public boolean checkNPE(BlockScope scope, FlowContext flowContext, FlowInfo flowInfo) {
 	if (this.resolvedType != null) {
 		if ((this.resolvedType.tagBits & TagBits.AnnotationNonNull) != 0) {
-			return; // no danger
+			return true; // no danger
 		} else if ((this.resolvedType.tagBits & TagBits.AnnotationNullable) != 0) {
 			scope.problemReporter().dereferencingNullableExpression(this, scope.environment());
-			return; // danger is definite.
+			return true; // danger is definite.
 			// stopping analysis at this point requires that the above error is not suppressable
 			// unless suppressing all null warnings (otherwise we'd miss a stronger warning below).
 		}
@@ -1056,6 +1070,14 @@ public boolean isConstantValueOfTypeAssignableToType(TypeBinding constantType, T
 	return false;
 }
 
+public boolean isAssignmentCompatible (TypeBinding left, Scope scope) {
+	if (this.resolvedType == null)
+		return false;
+	return isConstantValueOfTypeAssignableToType(this.resolvedType, left) || 
+				this.resolvedType.isCompatibleWith(left) || 
+				isBoxingCompatible(this.resolvedType, left, this, scope);
+}
+
 public boolean isTypeReference() {
 	return false;
 }
@@ -1078,14 +1100,7 @@ public void markAsNonNull() {
 }
 
 public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
-
-	if (/* (this.bits & IsNonNull) != 0 || */
-		this.constant != null && this.constant != Constant.NotAConstant)
-		return FlowInfo.NON_NULL; // constant expression cannot be null
-
-	LocalVariableBinding local = localVariableBinding();
-	if (local != null)
-		return flowInfo.nullStatus(local);
+	// many kinds of expression need no analysis / are always non-null, make it the default:
 	return FlowInfo.NON_NULL;
 }
 
@@ -1282,6 +1297,41 @@ public void setExpectedType(TypeBinding expectedType) {
     // do nothing by default
 }
 
+public void setExpressionContext(ExpressionContext context) {
+	// don't care. Subclasses that are poly expressions in specific contexts should listen in and make note.
+}
+
+public boolean isCompatibleWith(TypeBinding left, Scope scope) {
+	throw new UnsupportedOperationException("Unexpected control flow, should not have reached Expression.isCompatibleWith"); //$NON-NLS-1$
+}
+
+public boolean tIsMoreSpecific(TypeBinding t, TypeBinding s) {
+	TypeBinding expressionType = this.resolvedType;
+	if (expressionType == null || !expressionType.isValidBinding()) // Shouldn't get here, just to play it safe
+		return false; // trigger ambiguity.
+	
+	if (t.findSuperTypeOriginatingFrom(s) == s)
+		return true;
+	
+	final boolean tIsBaseType = t.isBaseType();
+	final boolean sIsBaseType = s.isBaseType();
+	
+	return expressionType.isBaseType() ? tIsBaseType && !sIsBaseType : !tIsBaseType && sIsBaseType;
+}
+
+public void tagAsEllipsisArgument() {
+	// don't care. Subclasses that are poly expressions in specific contexts should listen in and make note.
+}
+
+/* Answer if the receiver is a poly expression in the prevailing context. Caveat emptor: Some constructs (notably method calls)
+   cannot answer this question until after resolution is over and may throw unsupported operation exception if queried ahead of 
+   resolution. Default implementation here returns false which is true for vast majority of AST nodes. The ones that are poly
+   expressions under one or more contexts should override and return suitable value.  
+ */
+public boolean isPolyExpression() throws UnsupportedOperationException {
+	return false;
+}
+
 public void tagAsNeedCheckCast() {
     // do nothing by default
 }
@@ -1324,17 +1374,19 @@ public void traverse(ASTVisitor visitor, BlockScope scope) {
 public void traverse(ASTVisitor visitor, ClassScope scope) {
 	// nothing to do
 }
+// return true if this expression can be a stand alone statement when terminated with a semicolon
+public boolean statementExpression() {
+	return false;
+}
 
 /**
  * Used on the lhs of an assignment for detecting null spec violation.
  * If this expression represents a null-annotated variable return the variable binding,
  * otherwise null.
+ * @param supportTypeAnnotations if true this causes any variable binding to be used
+ *   independent of declaration annotations (for in-depth analysis of type annotations)
 */
-public VariableBinding nullAnnotatedVariableBinding() {
+public VariableBinding nullAnnotatedVariableBinding(boolean supportTypeAnnotations) {
 	return null;
-}
-//return true if this expression can be a stand alone statement when terminated with a semicolon
-public boolean statementExpression() {
-	return false;
 }
 }

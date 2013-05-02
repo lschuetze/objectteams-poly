@@ -177,6 +177,10 @@ public abstract class AbstractMethodMappingDeclaration
 	{
 		this.ignoreFurtherInvestigation = true;
 	}
+	
+	public void tagAsHavingIgnoredMandatoryErrors(int problemId) {
+		// nothing here
+	}
 
 	public void resetErrorFlag() {
 		this.ignoreFurtherInvestigation = false;

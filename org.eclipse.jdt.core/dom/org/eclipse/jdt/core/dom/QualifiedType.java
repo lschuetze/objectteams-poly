@@ -21,15 +21,9 @@ import java.util.List;
 /**
  * Type node for a qualified type (added in JLS3 API).
  * 
- * For JLS2, JLS3 and JLS4:
  * <pre>
  * QualifiedType:
- *    Type <b>.</b> SimpleName
- * </pre>
- * For JLS8, optional annotations were added:
- * <pre>
- * QualifiedType:
- *    Type <b>.</b> {Annotation} SimpleName
+ *    Type <b>.</b> { Annotation } SimpleName
  * </pre>
  * <p>
  * Not all node arrangements will represent legal Java constructs. In particular,
@@ -68,18 +62,18 @@ public class QualifiedType extends AnnotatableType {
 		new ChildPropertyDescriptor(QualifiedType.class, "qualifier", Type.class, MANDATORY, CYCLE_RISK); //$NON-NLS-1$
 
 	/**
+	 * The "annotations" structural property of this node type (element type: {@link Annotation}).
+	 * @since 3.9
+	 */
+	public static final ChildListPropertyDescriptor ANNOTATIONS_PROPERTY =
+			internalAnnotationsPropertyFactory(QualifiedType.class);
+	
+	/**
 	 * The "name" structural property of this node type (child type: {@link SimpleName}).
 	 */
 	public static final ChildPropertyDescriptor NAME_PROPERTY =
 		new ChildPropertyDescriptor(QualifiedType.class, "name", SimpleName.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 	
-	/**
-	 * The "annotations" structural property of this node type (child type: {@link Annotation}).
-	 * @since 3.9
-	 */
-	public static final ChildListPropertyDescriptor ANNOTATIONS_PROPERTY =
-		new ChildListPropertyDescriptor(QualifiedType.class, "annotations", Annotation.class, CYCLE_RISK); //$NON-NLS-1$
-
 	/**
 	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
@@ -104,8 +98,8 @@ public class QualifiedType extends AnnotatableType {
 		propertyList = new ArrayList(4);
 		createPropertyList(QualifiedType.class, propertyList);
 		addProperty(QUALIFIER_PROPERTY, propertyList);
-		addProperty(NAME_PROPERTY, propertyList);
 		addProperty(ANNOTATIONS_PROPERTY, propertyList);
+		addProperty(NAME_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_8_0 = reapPropertyList(propertyList);
 	}
 
@@ -122,7 +116,7 @@ public class QualifiedType extends AnnotatableType {
 		switch (apiLevel) {
 			case AST.JLS2_INTERNAL :
 			case AST.JLS3_INTERNAL :
-			case AST.JLS4:
+			case AST.JLS4_INTERNAL:
 				return PROPERTY_DESCRIPTORS;
 			default :
 				return PROPERTY_DESCRIPTORS_8_0;
@@ -131,7 +125,7 @@ public class QualifiedType extends AnnotatableType {
 
 	/**
 	 * The type node; lazily initialized; defaults to a type with
-	 * an unspecfied, but legal, simple name.
+	 * an unspecified, but legal, simple name.
 	 */
 	private Type qualifier = null;
 
@@ -153,9 +147,14 @@ public class QualifiedType extends AnnotatableType {
 	QualifiedType(AST ast) {
 		super(ast);
 	    unsupportedIn2();
-	    if (ast.apiLevel >= AST.JLS8) {
-			this.annotations = new ASTNode.NodeList(ANNOTATIONS_PROPERTY);
-		}
+	}
+
+	/* (omit javadoc for this method)
+	 * Method declared on AnnotatableType.
+	 * @since 3.9
+	 */
+	final ChildListPropertyDescriptor internalAnnotationsProperty() {
+		return ANNOTATIONS_PROPERTY;
 	}
 
 	/* (omit javadoc for this method)
@@ -214,11 +213,11 @@ public class QualifiedType extends AnnotatableType {
 		QualifiedType result = new QualifiedType(target);
 		result.setSourceRange(getStartPosition(), getLength());
 		result.setQualifier((Type) ((ASTNode) getQualifier()).clone(target));
-		result.setName((SimpleName) ((ASTNode) getName()).clone(target));
 		if (this.ast.apiLevel >= AST.JLS8) {
-			result.annotations.addAll(
+			result.annotations().addAll(
 					ASTNode.copySubtrees(target, annotations()));
 		}
+		result.setName((SimpleName) ((ASTNode) getName()).clone(target));
 		return result;
 	}
 
@@ -338,8 +337,8 @@ public class QualifiedType extends AnnotatableType {
 	int treeSize() {
 		return
 			memSize()
-			+ (this.annotations == null ? 0 : this.annotations.listSize())
 			+ (this.qualifier == null ? 0 : getQualifier().treeSize())
+			+ (this.annotations == null ? 0 : this.annotations.listSize())
 			+ (this.name == null ? 0 : getName().treeSize());
 	}
 }

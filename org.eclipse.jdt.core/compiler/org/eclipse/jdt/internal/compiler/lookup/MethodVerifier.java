@@ -20,6 +20,7 @@
  *									bug 388281 - [compiler][null] inheritance of null annotations as an option
  *									bug 388739 - [1.8][compiler] consider default methods when detecting whether a class needs to be declared abstract
  *									bug 390883 - [1.8][compiler] Unable to override default method
+ *									bug 401796 - [1.8][compiler] don't treat default methods as overriding an independent inherited abstract method
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -605,8 +606,6 @@ void checkInheritedMethods(MethodBinding[] methods, int length, boolean[] isOver
 			}
 		} else if (noMatch) {
 			problemReporter().inheritedMethodsHaveIncompatibleReturnTypes(this.type, methods, length, isOverridden);
-		} else if (this.environment.globalOptions.sourceLevel >= ClassFileConstants.JDK1_8) {
-			checkInheritedDefaultMethods(methods, length);
 		}
 		return;
 	}
@@ -633,22 +632,6 @@ void checkInheritedMethods(MethodBinding[] methods, int length, boolean[] isOver
 	if (index < abstractMethods.length)
 		System.arraycopy(abstractMethods, 0, abstractMethods = new MethodBinding[index], 0, index);
 	checkConcreteInheritedMethod(concreteMethod, abstractMethods);
-}
-private void checkInheritedDefaultMethods(MethodBinding[] methods, int length) {
-	// JSL 9.4.1 (Java 8): default method clashes with other inherited method which is override-equivalent 
-	if (length < 2) return;
-	findDefaultMethod: for (int i=0; i<length; i++) {
-		if (methods[i].isDefaultMethod()) {
-			findEquivalent: for (int j=0; j<length; j++) {
-				if (j == i) continue findEquivalent;
-				if (isMethodSubsignature(methods[i], methods[j])) {
-					if (!doesMethodOverride(methods[i], methods[j]) && !doesMethodOverride(methods[j], methods[i])) 
-						problemReporter().inheritedDefaultMethodConflictsWithOtherInherited(this.type, methods[i], methods[j]);
-					continue findDefaultMethod;
-				}
-			}
-		}
-	}
 }
 boolean checkInheritedReturnTypes(MethodBinding method, MethodBinding otherMethod) {
 	if (areReturnTypesCompatible(method, otherMethod)) return true;
@@ -833,6 +816,7 @@ void computeInheritedMethods(ReferenceBinding superclass, ReferenceBinding[] sup
 					&& MethodModel.isRoleMethodInheritedFromNonPublicRegular(inheritedMethod))
 					continue nextMethod;
 // SH}
+				if (inheritedMethod.isStatic()) continue nextMethod;
 				MethodBinding[] existingMethods = (MethodBinding[]) this.inheritedMethods.get(inheritedMethod.selector);
 				if (existingMethods == null) {
 					existingMethods = new MethodBinding[] {inheritedMethod};
@@ -903,11 +887,12 @@ static MethodBinding computeSubstituteMethod(MethodBinding inheritedMethod, Meth
 	if (inheritedMethod == null) return null;
 	if (currentMethod.parameters.length != inheritedMethod.parameters.length) return null; // no match
 
-    // due to hierarchy & compatibility checks, we need to ensure these 2 methods are resolved
-    if (currentMethod.declaringClass instanceof BinaryTypeBinding)
-        ((BinaryTypeBinding) currentMethod.declaringClass).resolveTypesFor(currentMethod);
-    if (inheritedMethod.declaringClass instanceof BinaryTypeBinding)
-        ((BinaryTypeBinding) inheritedMethod.declaringClass).resolveTypesFor(inheritedMethod);
+	// due to hierarchy & compatibility checks, we need to ensure these 2 methods are resolved
+	if (currentMethod.declaringClass instanceof BinaryTypeBinding)
+		((BinaryTypeBinding) currentMethod.declaringClass).resolveTypesFor(currentMethod);
+	if (inheritedMethod.declaringClass instanceof BinaryTypeBinding)
+		((BinaryTypeBinding) inheritedMethod.declaringClass).resolveTypesFor(inheritedMethod);
+
 	TypeVariableBinding[] inheritedTypeVariables = inheritedMethod.typeVariables;
 	int inheritedLength = inheritedTypeVariables.length;
 	if (inheritedLength == 0) return inheritedMethod; // no substitution needed
@@ -950,12 +935,13 @@ static MethodBinding computeSubstituteMethod(MethodBinding inheritedMethod, Meth
 						continue next;
 				return inheritedMethod; // not a match
 			}
-		} else if (inheritedTypeVariable.boundCheck(substitute, argument) != TypeConstants.OK) {
+		} else if (inheritedTypeVariable.boundCheck(substitute, argument, null) != TypeConstants.OK) {
 	    	return inheritedMethod;
 		}
 	}
    return substitute;
 }
+
 static boolean couldMethodOverride(MethodBinding method, MethodBinding inheritedMethod) {
 	if (!org.eclipse.jdt.core.compiler.CharOperation.equals(method.selector, inheritedMethod.selector))
 		return false;

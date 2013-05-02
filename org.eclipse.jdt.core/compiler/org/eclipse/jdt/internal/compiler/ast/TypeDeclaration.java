@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -1683,10 +1683,16 @@ public void resolve() {
 			this.staticInitializerScope.insideTypeAnnotation = old;
 		}
 		// check @Deprecated annotation
-		if ((sourceType.getAnnotationTagBits() & TagBits.AnnotationDeprecated) == 0
+		long annotationTagBits = sourceType.getAnnotationTagBits();
+		if ((annotationTagBits & TagBits.AnnotationDeprecated) == 0
 				&& (sourceType.modifiers & ClassFileConstants.AccDeprecated) != 0
 				&& this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
 			this.scope.problemReporter().missingDeprecatedAnnotationForType(this);
+		}
+		if ((annotationTagBits & TagBits.AnnotationFunctionalInterface) != 0) {
+			if(!this.binding.isFunctionalInterface(this.scope)) {
+				this.scope.problemReporter().notAFunctionalInterface(this);
+			}
 		}
 //{ObjectTeams: check @Override annotation:
 		boolean hasOverrideAnnotation = (this.binding.tagBits & TagBits.AnnotationOverride) != 0;
@@ -1994,7 +2000,7 @@ checkOuterScope:while (outerScope != null) {
 					outerScope = outerScope.parent;
 				}
 			} else if (existingType instanceof LocalTypeBinding
-						&& ((LocalTypeBinding) existingType).scope.methodScope() == blockScope.methodScope()) {
+						&& (((LocalTypeBinding) existingType).scope.methodScope() == blockScope.methodScope() || blockScope.isLambdaSubscope())) {
 					// dup in same method
 					blockScope.problemReporter().duplicateNestedType(this);
 			} else if (blockScope.isDefinedInType(existingType)) {
@@ -2059,6 +2065,9 @@ public void tagAsHavingErrors() {
 	this.ignoreFurtherInvestigation = true;
 }
 
+public void tagAsHavingIgnoredMandatoryErrors(int problemId) {
+	// Nothing to do for this context;
+}
 
 //{ObjectTeams: untag class and interface part:
 public void resetErrorFlag() {

@@ -130,6 +130,7 @@ abstract public class ReferenceBinding extends AbstractOTReferenceBinding {
 			return c == 0 ? m1.parameters.length - m2.parameters.length : c;
 		}
 	};
+	static protected ProblemMethodBinding samProblemBinding = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NoSuchSingleAbstractMethod);
 
 public static FieldBinding binarySearch(char[] name, FieldBinding[] sortedFields) {
 	if (sortedFields == null)
@@ -699,6 +700,8 @@ public void computeId() {
 				case 'F' :
 					if (CharOperation.equals(typeName, TypeConstants.JAVA_LANG_FLOAT[2]))
 						this.id = TypeIds.T_JavaLangFloat;
+					else if (CharOperation.equals(typeName, TypeConstants.JAVA_LANG_FUNCTIONAL_INTERFACE[2]))
+						this.id = TypeIds.T_JavaLangFunctionalInterface;
 					return;
 				case 'I' :
 					switch (typeName.length) {
@@ -1635,6 +1638,11 @@ public boolean isInterface() {
 	return (this.modifiers & ClassFileConstants.AccInterface) != 0;
 }
 
+public boolean isFunctionalInterface(Scope scope) {
+	MethodBinding method;
+	return isInterface() && (method = getSingleAbstractMethod(scope)) != null && method.isValidBinding();
+}
+
 /**
  * Answer true if the receiver has private visibility
  */
@@ -2127,7 +2135,7 @@ public MethodBinding getSingleAbstractMethod(Scope scope) {
 	try {
 		methods = getInterfaceAbstractContracts(scope);
 	} catch (InvalidInputException e) {
-		return this.singleAbstractMethod = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NoSuchSingleAbstractMethod);
+		return this.singleAbstractMethod = samProblemBinding;
 	}
 	if (methods != null && methods.length == 1)
 		return this.singleAbstractMethod = methods[0];
@@ -2223,6 +2231,6 @@ public MethodBinding getSingleAbstractMethod(Scope scope) {
 	    this.singleAbstractMethod.typeVariables = theAbstractMethod.typeVariables;
 		return this.singleAbstractMethod;
 	}
-	return this.singleAbstractMethod = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NoSuchSingleAbstractMethod);
+	return this.singleAbstractMethod = samProblemBinding;
 }
 }

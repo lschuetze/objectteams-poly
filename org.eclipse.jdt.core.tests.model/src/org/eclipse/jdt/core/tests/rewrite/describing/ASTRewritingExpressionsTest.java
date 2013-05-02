@@ -1,9 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -12,34 +16,24 @@ package org.eclipse.jdt.core.tests.rewrite.describing;
 import java.util.List;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
-
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 public class ASTRewritingExpressionsTest extends ASTRewritingTest {
-	private static final Class THIS= ASTRewritingExpressionsTest.class;
 
 	public ASTRewritingExpressionsTest(String name) {
 		super(name);
 	}
-
-	public static Test allTests() {
-		return new Suite(THIS);
-	}
-
-	public static Test setUpTest(Test someTest) {
-		TestSuite suite= new Suite("one test");
-		suite.addTest(someTest);
-		return suite;
+	public ASTRewritingExpressionsTest(String name, int apiLevel) {
+		super(name, apiLevel);
 	}
 
 	public static Test suite() {
-		return allTests();
+		return createSuite(ASTRewritingExpressionsTest.class);
 	}
 
 	/** @deprecated using deprecated code */
@@ -572,7 +566,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 
 
 	/** @deprecated using deprecated code */
-	public void testCatchClause() throws Exception {
+	public void testCatchClause_only_2_3_4() throws Exception {
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -640,7 +634,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 	}
 
 	/** @deprecated using deprecated code */
-	public void testClassInstanceCreation() throws Exception {
+	public void testClassInstanceCreation_only_2() throws Exception {
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -728,7 +722,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 
 	}
 
-	public void testClassInstanceCreation2() throws Exception {
+	public void testClassInstanceCreation2_since_3() throws Exception {
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -742,7 +736,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CompilationUnit astRoot= createAST3(cu);
+		CompilationUnit astRoot= createAST(cu);
 		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 
 		AST ast= astRoot.getAST();
@@ -1272,7 +1266,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 
 	}
 
-	public void testMethodInvocation2() throws Exception {
+	public void testMethodInvocation2_since_3() throws Exception {
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1284,7 +1278,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CompilationUnit astRoot= createAST3(cu);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -1549,7 +1543,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 
 	}
 
-	public void testSuperConstructorInvocation2() throws Exception {
+	public void testSuperConstructorInvocation2_since_3() throws Exception {
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1563,7 +1557,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CompilationUnit astRoot= createAST3(cu);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -1600,7 +1594,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 
 	}
 
-	public void testSuperConstructorInvocation4() throws Exception {
+	public void testSuperConstructorInvocation4_since_3() throws Exception {
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1614,7 +1608,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CompilationUnit astRoot= createAST3(cu);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
@@ -1783,7 +1777,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 
 	}
 
-	public void testSuperMethodInvocation2() throws Exception {
+	public void testSuperMethodInvocation2_since_3() throws Exception {
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1795,7 +1789,7 @@ public class ASTRewritingExpressionsTest extends ASTRewritingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
-		CompilationUnit astRoot= createAST3(cu);
+		CompilationUnit astRoot= createAST(cu);
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 

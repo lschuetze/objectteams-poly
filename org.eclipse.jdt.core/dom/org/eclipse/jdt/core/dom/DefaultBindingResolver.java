@@ -742,6 +742,7 @@ class DefaultBindingResolver extends BindingResolver {
 				case ASTNode.TYPE_LITERAL :
 				case ASTNode.INFIX_EXPRESSION :
 				case ASTNode.INSTANCEOF_EXPRESSION :
+				case ASTNode.LAMBDA_EXPRESSION:
 				case ASTNode.FIELD_ACCESS :
 				case ASTNode.SUPER_FIELD_ACCESS :
 				case ASTNode.ARRAY_ACCESS :
@@ -935,6 +936,26 @@ class DefaultBindingResolver extends BindingResolver {
 		return null;
 	}
 	/*
+	 * Method declared on BindingResolver.
+	 */
+	synchronized IMethodBinding resolveMethod(LambdaExpression lambda) {
+		Object oldNode = this.newAstToOldAst.get(lambda);
+		if (oldNode instanceof org.eclipse.jdt.internal.compiler.ast.LambdaExpression) {
+			org.eclipse.jdt.internal.compiler.ast.LambdaExpression lambdaExpression = (org.eclipse.jdt.internal.compiler.ast.LambdaExpression) oldNode;
+			IMethodBinding methodBinding = getMethodBinding(lambdaExpression.binding);
+			if (methodBinding == null) {
+				return null;
+			}
+			this.bindingsToAstNodes.put(methodBinding, lambda);
+			String key = methodBinding.getKey();
+			if (key != null) {
+				this.bindingTables.bindingKeysToBindings.put(key, methodBinding);
+			}
+			return methodBinding;
+		}
+		return null;
+	}
+/*
 	 * Method declared on BindingResolver.
 	 */
 	synchronized IMethodBinding resolveMethod(MethodInvocation method) {

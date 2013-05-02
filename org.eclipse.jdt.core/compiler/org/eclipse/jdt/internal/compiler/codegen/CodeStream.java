@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: CodeStream.java 23405 2010-02-03 17:02:18Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -2674,7 +2678,7 @@ public void generateSyntheticBodyForMethodAccess(SyntheticMethodBinding accessMe
 				|| accessMethod.purpose == SyntheticMethodBinding.SuperMethodAccess){
 			// target method declaring class may not be accessible (247953);
 			TypeBinding declaringClass = accessMethod.purpose == SyntheticMethodBinding.SuperMethodAccess 
-					? accessMethod.declaringClass.superclass() 
+					? findDirectSuperTypeTowards(accessMethod, targetMethod)
 					: accessMethod.declaringClass;				
 //{ObjectTeams: private methods also occur in role interfaces:
 /* orig:
@@ -2720,6 +2724,30 @@ public void generateSyntheticBodyForMethodAccess(SyntheticMethodBinding accessMe
 				this.checkcast(accessErasure); // for bridge methods
 			}
 			areturn();
+	}
+}
+/** When generating SuperMetodAccess towards targetMethod,
+ *  find the suitable direct super type, that will eventually lead to targetMethod.declaringClass.*/
+ReferenceBinding findDirectSuperTypeTowards(SyntheticMethodBinding accessMethod, MethodBinding targetMethod) {
+	ReferenceBinding currentType = accessMethod.declaringClass;
+	ReferenceBinding superclass = currentType.superclass();
+	if (targetMethod.isDefaultMethod()) {
+		// could be inherited via superclass *or* a super interface 
+		ReferenceBinding targetType = targetMethod.declaringClass;
+		if (superclass.isCompatibleWith(targetType))
+			return superclass;
+		ReferenceBinding[] superInterfaces = currentType.superInterfaces();
+		if (superInterfaces != null) {
+			for (int i = 0; i < superInterfaces.length; i++) {
+				ReferenceBinding superIfc = superInterfaces[i];
+				if (superIfc.isCompatibleWith(targetType))
+					return superIfc;
+			}
+		}
+		throw new RuntimeException("Assumption violated: some super type must be conform to the declaring class of a super method"); //$NON-NLS-1$
+	} else {
+		// only one path possible:
+		return superclass;
 	}
 }
 

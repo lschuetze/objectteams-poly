@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IProgressMonitor;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -122,7 +121,7 @@ public final class AST {
      * </p>
      *
 	 * @since 3.0
-	 * @deprecated Clients should use the {@link #JLS4} AST API instead.
+	 * @deprecated Clients should use the {@link #JLS8} AST API instead.
 	 */
 	public static final int JLS2 = 2;
 
@@ -146,7 +145,7 @@ public final class AST {
      * </p>
      *
 	 * @since 3.1
-	 * @deprecated Clients should use the {@link #JLS4} AST API instead.
+	 * @deprecated Clients should use the {@link #JLS8} AST API instead.
 	 */
 	public static final int JLS3 = 3;
 	
@@ -170,8 +169,16 @@ public final class AST {
 	 * </p>
 	 *
 	 * @since 3.7.1
+	 * @deprecated Clients should use the {@link #JLS8} AST API instead.
 	 */
 	public static final int JLS4 = 4;
+	
+	/**
+	 * Internal synonym for {@link #JLS4}. Use to alleviate
+	 * deprecation warnings.
+	 * @since 3.9 BETA_JAVA8
+	 */
+	/*package*/ static final int JLS4_INTERNAL = JLS4;
 	
 	/**
 	 * Constant for indicating the AST API that handles JLS8.
@@ -279,7 +286,7 @@ public final class AST {
 	 * Creates a new Java abstract syntax tree
      * (AST) following the specified set of API rules.
      * <p>
-     * Clients should use this method specifying {@link #JLS4} as the
+     * Clients should use this method specifying {@link #JLS8} as the
      * AST level in all cases, even when dealing with source of earlier JDK versions like 1.3 or 1.4.
      * </p>
      *
@@ -689,7 +696,7 @@ public final class AST {
 						null/*taskPriorities*/,
 						true/*taskCaseSensitive*/);
 				break;
-			case JLS4 :
+			case JLS4_INTERNAL :
 				this.apiLevel = level;
 				// initialize a scanner
 				this.scanner = new Scanner(
@@ -1155,25 +1162,6 @@ public final class AST {
 	}
 
 	/**
-	 * Creates and returns a new unparented annotatable extra dimension node
-	 * (Supported only in JLS8 level).
-	 *
-	 * @return a new unparented annotatable extra dimension node
-	 * @exception IllegalArgumentException if:
-	 * <ul>
-	 * <li>the node belongs to a different AST</li>
-	 * <li>the node already has a parent</li>
-	 * </ul>
-	 * @exception UnsupportedOperationException if this operation is used
-	 *            in a JLS2, JLS3 or JLS4 AST
-	 * @since 3.9
-	 */
-	public ExtraDimension newExtraDimension() {
-		ExtraDimension result = new ExtraDimension(this);
-		return result;
-	}
-
-	/**
 	 * Creates and returns a new unparented array type node with the given
 	 * element type and number of (additional) dimensions.
 	 * <p>
@@ -1450,17 +1438,6 @@ public final class AST {
 // km(merge) }
 
 	/**
-	 * Creates a new unparented union type node owned by this AST.
-	 * By default, the union type has no types.
-	 *
-	 * @return a new unparented do statement node
-	 * @since 3.7.1
-	 */
-	public UnionType newUnionType() {
-		return new UnionType(this);
-	}
-
-	/**
 	 * Creates a new unparented do statement node owned by this AST.
 	 * By default, the expression is unspecified (but legal), and
 	 * the body statement is an empty block.
@@ -1549,6 +1526,25 @@ public final class AST {
 	public ExpressionStatement newExpressionStatement(Expression expression) {
 		ExpressionStatement result = new ExpressionStatement(this);
 		result.setExpression(expression);
+		return result;
+	}
+
+	/**
+	 * Creates and returns a new unparented annotatable extra dimension node
+	 * (Supported only in JLS8 level).
+	 *
+	 * @return a new unparented annotatable extra dimension node
+	 * @exception IllegalArgumentException if:
+	 * <ul>
+	 * <li>the node belongs to a different AST</li>
+	 * <li>the node already has a parent</li>
+	 * </ul>
+	 * @exception UnsupportedOperationException if this operation is used
+	 *            in a JLS2, JLS3 or JLS4 AST
+	 * @since 3.9
+	 */
+	public ExtraDimension newExtraDimension() {
+		ExtraDimension result = new ExtraDimension(this);
 		return result;
 	}
 
@@ -1758,6 +1754,20 @@ public final class AST {
 	}
 
 	/**
+	 * Creates an unparented lambda expression node owned by this AST.
+	 * By default, the new lambda expression has parentheses enabled, contains an empty argument
+	 * list, and the body is an empty block.
+	 * 
+	 * @return a new unparented lambda expression node
+	 * @exception UnsupportedOperationException if this operation is used in a JLS2, JLS3 or JLS4 AST
+	 * @since 3.9
+	 */
+	public LambdaExpression newLambdaExpression() {
+		LambdaExpression result = new LambdaExpression(this);
+		return result;
+	}
+
+	/**
 	 * Creates and returns a new line comment placeholder node.
 	 * <p>
 	 * Note that this node type is used to recording the source
@@ -1924,7 +1934,7 @@ public final class AST {
 	 * for the given modifier flags. When multiple modifiers are
 	 * requested the modifiers nodes will appear in the following order:
 	 * public, protected, private, abstract, static, final, synchronized,
-	 * native, strictfp, transient, volatile. This order is consistent
+	 * native, strictfp, transient, volatile, default. This order is consistent
 	 * with the recommendations in JLS2 8.1.1, 8.3.1, and 8.4.3.
 	 *
 	 * @param flags bitwise or of modifier flags declared on {@link Modifier}
@@ -1971,6 +1981,9 @@ public final class AST {
 		}
 		if (Modifier.isVolatile(flags)) {
 			result.add(newModifier(Modifier.ModifierKeyword.VOLATILE_KEYWORD));
+		}
+		if (Modifier.isDefaultMethod(flags)) {
+			result.add(newModifier(Modifier.ModifierKeyword.DEFAULT_KEYWORD));
 		}
 //{ObjectTeams: OT-specific modifiers (any context):
 		if (Modifier.isReplace(flags) || Modifier.isBefore(flags) || Modifier.isAfter(flags))
@@ -2613,6 +2626,19 @@ public final class AST {
 	public TypeParameter newTypeParameter() {
 		TypeParameter result = new TypeParameter(this);
 		return result;
+	}
+
+	/**
+	 * Creates a new unparented union type node owned by this AST.
+	 * By default, the union type has no types.
+	 *
+	 * @return a new unparented UnionType node
+	 * @exception UnsupportedOperationException if this operation is used in
+	 * a JLS2 or JLS3 AST
+	 * @since 3.7.1
+	 */
+	public UnionType newUnionType() {
+		return new UnionType(this);
 	}
 
 	/**

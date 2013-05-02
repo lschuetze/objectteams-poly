@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,6 +17,8 @@
  *	 							bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 387612 - Unreachable catch block...exception is never thrown from the try
  *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
+ *     Jesper S Moller - Contributions for
+ *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -592,6 +594,24 @@ public abstract class Scope {
 		} while (scope != null);
 		return (CompilationUnitScope) lastScope;
 	}
+	
+	public boolean isLambdaScope() {
+		return false;
+	}
+	
+	public boolean isLambdaSubscope() {
+		for (Scope scope = this; scope != null; scope = scope.parent) {
+			switch (scope.kind) {
+				case BLOCK_SCOPE:
+			        continue;
+				case METHOD_SCOPE:
+					return scope.isLambdaScope();
+				default:
+					return false;
+			}
+		}
+		return false;
+	}
 
 	/**
 	 * Finds the most specific compiler options
@@ -1132,13 +1152,7 @@ public abstract class Scope {
 			if (exactMethod.isAbstract() && exactMethod.thrownExceptions != Binding.NO_EXCEPTIONS)
 				return null; // may need to merge exceptions with interface method
 			// special treatment for Object.getClass() in 1.5 mode (substitute parameterized return type)
-//{ObjectTeams: discriminate interface (may be role) and regularInterface
-			/* @original
-			if (receiverType.isInterface() || exactMethod.canBeSeenBy(receiverType, invocationSite, this)) {
-			 */
-			if (receiverType.isRegularInterface() ||
-                exactMethod.canBeSeenBy(this.origImplicitScope, receiverType, invocationSite, this)) {
-// SH}
+			if (exactMethod.canBeSeenBy(receiverType, invocationSite, this)) {
 				if (argumentTypes == Binding.NO_PARAMETERS
 				    && CharOperation.equals(selector, TypeConstants.GETCLASS)
 				    && exactMethod.returnType.isParameterizedType()/*1.5*/) {
@@ -1659,56 +1673,45 @@ public abstract class Scope {
 
 		// tiebreak using visibility check
 		int visiblesCount = 0;
-//{ObjectTeams: regular interfaces omit visibility check, so don't do this for synth-ifc:
-/* orig:
-		if (receiverTypeIsInterface) {
-  :giro */
-		if (receiverType.isRegularInterface()) {
-// SH}
-			if (candidatesCount == 1) {
-				unitScope.recordTypeReferences(candidates[0].thrownExceptions);
-				return candidates[0];
+		for (int i = 0; i < candidatesCount; i++) {
+			MethodBinding methodBinding = candidates[i];
+			if (methodBinding.canBeSeenBy(receiverType, invocationSite, this)) {
+				if (visiblesCount != i) {
+					candidates[i] = null;
+					candidates[visiblesCount] = methodBinding;
+				}
+				visiblesCount++;
 			}
-			visiblesCount = candidatesCount;
-		} else {
-			for (int i = 0; i < candidatesCount; i++) {
-				MethodBinding methodBinding = candidates[i];
-				if (methodBinding.canBeSeenBy(receiverType, invocationSite, this)) {
+//{ObjectTeams: check if decapsulation is allowed:
+			else if (invocationSite instanceof Expression) { 
+				if (((Expression)invocationSite).getBaseclassDecapsulation().isAllowed()) {
+					methodBinding = new ProblemMethodBinding(methodBinding, selector, argumentTypes, ProblemReasons.NotVisible);
 					if (visiblesCount != i) {
 						candidates[i] = null;
 						candidates[visiblesCount] = methodBinding;
+					} else {
+						candidates[i] = methodBinding;
 					}
 					visiblesCount++;
 				}
-//{ObjectTeams: check if decapsulation is allowed:
-				else if (invocationSite instanceof Expression) { 
-					if (((Expression)invocationSite).getBaseclassDecapsulation().isAllowed()) {
-						methodBinding = new ProblemMethodBinding(methodBinding, selector, argumentTypes, ProblemReasons.NotVisible);
-						if (visiblesCount != i) {
-							candidates[i] = null;
-							candidates[visiblesCount] = methodBinding;
-						} else {
-							candidates[i] = methodBinding;
-						}
-						visiblesCount++;
-					}
-				}
+			}
 // SH}
-			}
-			switch (visiblesCount) {
-				case 0 :
-					MethodBinding interfaceMethod =
-						findDefaultAbstractMethod(receiverType, selector, argumentTypes, invocationSite, classHierarchyStart, found, null);
-					if (interfaceMethod != null) return interfaceMethod;
-					return new ProblemMethodBinding(candidates[0], candidates[0].selector, candidates[0].parameters, ProblemReasons.NotVisible);
-				case 1 :
-					if (searchForDefaultAbstractMethod)
-						return findDefaultAbstractMethod(receiverType, selector, argumentTypes, invocationSite, classHierarchyStart, found, candidates[0]);
-					unitScope.recordTypeReferences(candidates[0].thrownExceptions);
-					return candidates[0];
-				default :
-					break;
-			}
+		}
+		switch (visiblesCount) {
+			case 0 :
+				MethodBinding interfaceMethod =
+					findDefaultAbstractMethod(receiverType, selector, argumentTypes, invocationSite, classHierarchyStart, found, null);
+				if (interfaceMethod != null) return interfaceMethod;
+			MethodBinding candidate = candidates[0];
+			return new ProblemMethodBinding(candidates[0], candidates[0].selector, candidates[0].parameters, 
+					candidate.isStatic() && candidate.declaringClass.isInterface() ? ProblemReasons.NonStaticOrAlienTypeReceiver : ProblemReasons.NotVisible);
+			case 1 :
+				if (searchForDefaultAbstractMethod)
+					return findDefaultAbstractMethod(receiverType, selector, argumentTypes, invocationSite, classHierarchyStart, found, candidates[0]);
+				unitScope.recordTypeReferences(candidates[0].thrownExceptions);
+				return candidates[0];
+			default :
+				break;
 		}
 
 		if (complianceLevel <= ClassFileConstants.JDK1_3) {
@@ -1802,7 +1805,8 @@ public abstract class Scope {
 		return methodBinding;
 	}
 
-	protected void findMethodInSuperInterfaces(ReferenceBinding currentType, char[] selector, ObjectVector found, InvocationSite invocationSite) {
+	protected void findMethodInSuperInterfaces(ReferenceBinding receiverType, char[] selector, ObjectVector found, InvocationSite invocationSite) {
+		ReferenceBinding currentType = receiverType;
 		ReferenceBinding[] itsInterfaces = currentType.superInterfaces();
 		if (itsInterfaces != null && itsInterfaces != Binding.NO_SUPERINTERFACES) {
 			ReferenceBinding[] interfacesToVisit = itsInterfaces;
@@ -1814,20 +1818,20 @@ public abstract class Scope {
 				MethodBinding[] currentMethods = currentType.getMethods(selector);
 				if (currentMethods.length > 0) {
 					int foundSize = found.size;
-					if (foundSize > 0) {
-						// its possible to walk the same superinterface from different classes in the hierarchy
-						next : for (int c = 0, l = currentMethods.length; c < l; c++) {
-							MethodBinding current = currentMethods[c];
+					next : for (int c = 0, l = currentMethods.length; c < l; c++) {
+						MethodBinding current = currentMethods[c];
+						if (!current.canBeSeenBy(receiverType, invocationSite, this)) continue next;
+
+						if (foundSize > 0) {
+							// its possible to walk the same superinterface from different classes in the hierarchy
 							for (int f = 0; f < foundSize; f++)
 								if (current == found.elementAt(f)) continue next;
 //{ObjectTeams: some fake ifc methods are not relevant here:
 							if (MethodModel.isRoleMethodInheritedFromNonPublicRegular(current))
 								continue next;
 // SH}
-							found.add(current);
 						}
-					} else {
-						found.addAll(currentMethods);
+						found.add(current);
 					}
 				}
 				if ((itsInterfaces = currentType.superInterfaces()) != null && itsInterfaces != Binding.NO_SUPERINTERFACES) {
@@ -1909,6 +1913,7 @@ public abstract class Scope {
 				Scope scope = this;
 				int depth = 0;
 				int foundDepth = 0;
+				boolean shouldTrackOuterLocals = false;
 				ReferenceBinding foundActualReceiverType = null;
 				done : while (true) { // done when a COMPILATION_UNIT_SCOPE is found
 					switch (scope.kind) {
@@ -1931,6 +1936,15 @@ public abstract class Scope {
 										ProblemReasons.InheritedNameHidesEnclosingName);
 								if (depth > 0)
 									invocationSite.setDepth(depth);
+								if (shouldTrackOuterLocals) {
+									if (invocationSite instanceof NameReference) {
+										NameReference nameReference = (NameReference) invocationSite;
+										nameReference.bits |= ASTNode.IsCapturedOuterLocal;
+									} else if (invocationSite instanceof AbstractVariableDeclaration) {
+										AbstractVariableDeclaration variableDeclaration = (AbstractVariableDeclaration) invocationSite;
+										variableDeclaration.bits |= ASTNode.ShadowsOuterLocal;
+									}
+								}
 								return variableBinding;
 							}
 							break;
@@ -2016,6 +2030,7 @@ public abstract class Scope {
 							}
 							insideTypeAnnotation = false;
 							depth++;
+							shouldTrackOuterLocals = true;
 							insideStaticContext |= receiverType.isStatic();
 							// 1EX5I8Z - accessing outer fields within a constructor call is permitted
 							// in order to do so, we change the flag as we exit from the type, not the method
@@ -2026,6 +2041,8 @@ public abstract class Scope {
 						case COMPILATION_UNIT_SCOPE :
 							break done;
 					}
+					if (scope.isLambdaScope()) // Not in Kansas anymore ...
+						shouldTrackOuterLocals = true;
 					scope = scope.parent;
 				}
 
@@ -3911,6 +3928,16 @@ public abstract class Scope {
 		} while (scope != null);
 		return null;
 	}
+	
+	public final MethodScope namedMethodScope() {
+		Scope scope = this;
+		do {
+			if (scope instanceof MethodScope && !scope.isLambdaScope())
+				return (MethodScope) scope;
+			scope = scope.parent;
+		} while (scope != null);
+		return null;
+	}
 
 	/**
 	 * Returns the most specific set of types compatible with all given types.
@@ -4602,6 +4629,18 @@ public abstract class Scope {
 		return level;
 	}
 
+	public int parameterCompatibilityLevel(TypeBinding arg, TypeBinding param) {
+		if (arg.isCompatibleWith(param))
+			return COMPATIBLE;
+		
+		if (arg.isBaseType() != param.isBaseType()) {
+			TypeBinding convertedType = environment().computeBoxingType(arg);
+			if (convertedType == param || convertedType.isCompatibleWith(param))
+				return AUTOBOX_COMPATIBLE;
+		}
+		return NOT_COMPATIBLE;
+	}
+	
 	private int parameterCompatibilityLevel(TypeBinding arg, TypeBinding param, LookupEnvironment env, boolean tieBreakingVarargsMethods) {
 		// only called if env.options.sourceLevel >= ClassFileConstants.JDK1_5
 		if (arg.isCompatibleWith(param, this))

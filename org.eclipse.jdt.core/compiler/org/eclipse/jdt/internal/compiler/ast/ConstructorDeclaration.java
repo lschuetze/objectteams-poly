@@ -612,7 +612,7 @@ private void internalGenerateCode(ClassScope classScope, ClassFile classFile) {
 		codeStream.recordPositionsFrom(0, this.bodyEnd);
 		try {
 			classFile.completeCodeAttribute(codeAttributeOffset);
-		} catch (NegativeArraySizeException e) {
+		} catch(NegativeArraySizeException e) {
 			throw new AbortMethod(this.scope.referenceCompilationUnit().compilationResult, null);
 		}
 //{ObjectTeams

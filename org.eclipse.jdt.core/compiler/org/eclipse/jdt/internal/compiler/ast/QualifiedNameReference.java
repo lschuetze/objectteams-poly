@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -19,6 +19,8 @@
  *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
  *								bug 368546 - [compiler][resource] Avoid remaining false positives found when compiling the Eclipse SDK
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
+ *     Jesper S Moller - Contributions for
+ *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *******************************************************************************/
@@ -253,9 +255,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				localBinding.useFlag = LocalVariableBinding.FAKE_USED;
 			}
 	}
-			if (needValue) {
+	if (needValue) {
 		checkInternalNPE(currentScope, flowContext, flowInfo, true);
-			}
+	}
 	if (needValue) {
 		manageEnclosingInstanceAccessIfNecessary(currentScope, flowInfo);
 		// only for first binding (if value needed only)
@@ -625,7 +627,8 @@ public FieldBinding generateReadSequence(BlockScope currentScope, CodeStream cod
 				// no implicit conversion
 			} else {
 				// outer local?
-				if ((this.bits & ASTNode.DepthMASK) != 0) {
+				if ((this.bits & ASTNode.IsCapturedOuterLocal) != 0) {
+					checkEffectiveFinality(localBinding, currentScope);
 					// outer local can be reached either through a synthetic arg or a synthetic field
 					VariableBinding[] path = currentScope.getEmulationPath(localBinding);
 					codeStream.generateOuterAccess(path, this, localBinding, currentScope);
@@ -1193,8 +1196,9 @@ public TypeBinding resolveType(BlockScope scope) {
 					this.bits &= ~ASTNode.RestrictiveFlagMASK; // clear bits
 					this.bits |= Binding.LOCAL;
 					LocalVariableBinding local = (LocalVariableBinding) this.binding;
-					if (!local.isFinal() && ((this.bits & ASTNode.DepthMASK) != 0)) {
-						scope.problemReporter().cannotReferToNonFinalOuterLocal((LocalVariableBinding) this.binding, this);
+					if (!local.isFinal() && (this.bits & ASTNode.IsCapturedOuterLocal) != 0) { 
+						if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) // for 8, defer till effective finality could be ascertained.
+							scope.problemReporter().cannotReferToNonFinalOuterLocal((LocalVariableBinding) this.binding, this);
 					}
 					if (local.type != null && (local.type.tagBits & TagBits.HasMissingType) != 0) {
 						// only complain if field reference (for local, its type got flagged already)
@@ -1370,7 +1374,7 @@ public char[][] getName() {
 	return this.tokens;
 }
 
-public VariableBinding nullAnnotatedVariableBinding() {
+public VariableBinding nullAnnotatedVariableBinding(boolean supportTypeAnnotations) {
 	if (this.binding != null && isFieldAccess()) {
 		FieldBinding fieldBinding;
 		if (this.otherBindings == null) {
@@ -1378,7 +1382,7 @@ public VariableBinding nullAnnotatedVariableBinding() {
 		} else {
 			fieldBinding = this.otherBindings[this.otherBindings.length - 1];
 		}
-		if (fieldBinding.isNullable() || fieldBinding.isNonNull()) {
+		if (supportTypeAnnotations || fieldBinding.isNullable() || fieldBinding.isNonNull()) {
 			return fieldBinding;
 		}
 	}

@@ -130,10 +130,26 @@ import org.eclipse.jdt.internal.core.dom.NaiveASTFlattener;
  */
 public abstract class ASTNode {
 	/*
+	 * ATTENTION: When doing anything to the ASTNode hierarchy, do not try to
+	 * reinvent the wheel.
+	 * 
+	 * Look out for precedents with
+	 * - the same structural property type
+	 * - for child node properties: the same optionality (can be null / lazy initialization blurbs and impl.)
+	 * - the same declaring node type kind (abstract supertype or concrete type)
+	 * - a similar history (added in JLSx API, below JLSx only, replaced by {@link #xx})
+	 * ..., and copy what was done there. Most of the code and
+	 * Javadoc in this package should look like it was created by a code generator.
+	 * 
+	 * In subclasses of ASTNode, order properties by order of occurrence in source.
+	 * In general classes that list all AST node types, order alphabetically.  
+	 */
+
+	/*
 	 * INSTRUCTIONS FOR ADDING NEW CONCRETE AST NODE TYPES
 	 *
 	 * There are several things that need to be changed when a
-	 * new concrete AST node type (call it "FooBar"):
+	 * new concrete AST node type (call it "FooBar") is added:
 	 *
 	 * 1. Create the FooBar AST node type class.
 	 * The most effective way to do this is to copy a similar
@@ -148,7 +164,7 @@ public abstract class ASTNode {
 	 *
 	 * 4. Add AST.newFooBar() factory method.
 	 *
-	 * 5. Add ASTVisitor.visit(FooBar) and endVisit(FooBar) methods.
+	 * 5. Add ASTVisitor.visit(FooBar) and endVisit(FooBar) methods. Same for DefaultASTVisitor.
 	 *
 	 * 6. Add ASTMatcher.match(FooBar,Object) method.
 	 *
@@ -158,10 +174,55 @@ public abstract class ASTNode {
 	 * 8. Add NaiveASTFlattener.visit(FooBar) method to illustrate
 	 * how these nodes should be serialized.
 	 *
-	 * 9. Update the AST test suites.
+	 * 9. Update the AST test suites (ASTVisitorTest, etc.)
 	 *
 	 * The next steps are to update AST.parse* to start generating
 	 * the new type of nodes, and ASTRewrite to serialize them back out.
+	 */
+
+	/*
+	 * INSTRUCTIONS FOR ADDING A NEW PROPERTY TO AN AST NODE TYPE
+	 * 
+	 * For concrete node types, use e.g. properties of SimpleName or ClassInstanceCreation
+	 * as templates:
+	 * 
+	 * 1. Copy/paste the field, property descriptor, and getter/setter.
+	 * 
+	 * 2. Adjust everything to the new property name and type. In the field's
+	 * Javadoc, properly document default value, initialization, and applicable
+	 * API levels.
+	 * 
+	 * 3. Add/remove @since tags as necessary.
+	 * 
+	 * 4. Search for references to the members in the template, and add similar
+	 * references in corresponding places for the new property.
+	 * 
+	 * 
+	 * For abstract node types, use AbstractTypeDeclaration as a template:
+	 * 
+	 * 1. Same steps as above, but take extra care to copy and adjust the
+	 * *internal*() methods as well. 
+	 * 
+	 * 2. Search for references to the members in the template, and add similar
+	 * references in corresponding places for the new property (e.g. property
+	 * descriptor in each leaf type).
+	 */
+
+	/*
+	 * INSTRUCTIONS FOR REPLACING/DEPRECATING A PROPERTY OF AN AST NODE
+	 * 
+	 * To replace a simple property with a child list property, see e.g. how
+	 * SingleVariableDeclaration replaced MODIFIERS_PROPERTY with
+	 * MODIFIERS2_PROPERTY.
+	 * 
+	 * 1. Reuse the old property id.
+	 * 
+	 * 2. Deprecate all references to the old property, except for the old
+	 * getter, which should compute the value from the new property in
+	 * later API levels.
+	 * 
+	 * To completely replace a property, see how ClassInstanceCreation replaced
+	 * NAME_PROPERTY with TYPE_PROPERTY.
 	 */
 
 	/**
@@ -783,6 +844,14 @@ public abstract class ASTNode {
 	 */
 	public static final int EXTRA_DIMENSION = 85;
 
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>LambdaExpression</code>.
+	 * @see LambdaExpression
+	 * @since 3.9
+	 */
+	public static final int LAMBDA_EXPRESSION = 86;
+
 //{ObjectTeams: required OT specific node type constants added
 
 	/**
@@ -790,93 +859,93 @@ public abstract class ASTNode {
 	 * <code>MethodSpec</code>.
 	 * @see MethodSpec
 	 */
-	public static final int METHOD_SPEC = 86;
+	public static final int METHOD_SPEC = 87;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CallinMappingDeclaration</code>.
 	 * @see CallinMappingDeclaration
 	 */
-	public static final int CALLIN_MAPPING_DECLARATION = 87;
+	public static final int CALLIN_MAPPING_DECLARATION = 88;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CalloutMappingDeclaration</code>.
 	 * @see CalloutMappingDeclaration
 	 */
-	public static final int CALLOUT_MAPPING_DECLARATION = 88;
+	public static final int CALLOUT_MAPPING_DECLARATION = 89;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>LiftingType</code>.
 	 * @see LiftingType
 	 */
-	public static final int LIFTING_TYPE = 89;
+	public static final int LIFTING_TYPE = 90;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>WithinStatement</code>.
 	 * @see WithinStatement
 	 */
-	public static final int WITHIN_STATEMENT = 90;
+	public static final int WITHIN_STATEMENT = 91;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>BaseConstructorMessageSend</code>.
 	 * @see BaseConstructorInvocation
 	 */
-	public static final int BASE_CONSTRUCTOR_INVOCATION = 91;
+	public static final int BASE_CONSTRUCTOR_INVOCATION = 92;
 
     /**
      * Node type constant indicating a node of type
      * <code>ParameterMapping</code>.
      * @see ParameterMapping
      */
-    public static final int PARAMETER_MAPPING = 92;
+    public static final int PARAMETER_MAPPING = 93;
 
     /**
      * Node type constant indicating a node of type
      * <code>BaseCallMessageSend</code>.
      * @see BaseCallMessageSend
      */
-     public static final int BASE_CALL_MESSAGE_SEND = 93;
+     public static final int BASE_CALL_MESSAGE_SEND = 94;
 
      /**
  	 * Node type constant indicating a node of type
  	 * <code>FieldAccessSpec</code>.
  	 * @see FieldAccessSpec
  	 */
- 	public static final int FIELD_ACCESS_SPEC = 94;
+ 	public static final int FIELD_ACCESS_SPEC = 95;
 
     /**
      * Node type constant indicating a node of type
      * <code>RoleTypeDelaration</code>.
      * @see RoleTypeDeclaration
      */
-    public static final int ROLE_TYPE_DECLARATION = 95;
+    public static final int ROLE_TYPE_DECLARATION = 96;
 
     /**
      * Node type constant indicating a node of type
      * <code>TSuperMessageSend</code>.
      * @see TSuperMessageSend
      */
-     public static final int TSUPER_MESSAGE_SEND = 96;
+     public static final int TSUPER_MESSAGE_SEND = 97;
 
      /**
       * Node type constant indicating a node of type
       * <code>TSuperCallMessageSend</code>.
       * @see TSuperMessageSend
       */
-      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 97;
+      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 98;
 
-      public static final int TYPE_ANCHOR = 98;
+      public static final int TYPE_ANCHOR = 99;
 
-      public static final int PRECEDENCE_DECLARATION = 99;
+      public static final int PRECEDENCE_DECLARATION = 100;
 
-      public static final int GUARD_PREDICATE_DECLARATION = 100;
+      public static final int GUARD_PREDICATE_DECLARATION = 101;
 
       /** @since 1.3.1 */
-      public static final int METHOD_BINDING_OPERATOR = 101;
+      public static final int METHOD_BINDING_OPERATOR = 102;
 //gbr}
 
 	/**
@@ -947,6 +1016,8 @@ public abstract class ASTNode {
 				return EnumDeclaration.class;
 			case EXPRESSION_STATEMENT :
 				return ExpressionStatement.class;
+			case EXTRA_DIMENSION:
+				return ExtraDimension.class;
 			case FIELD_ACCESS :
 				return FieldAccess.class;
 			case FIELD_DECLARATION :
@@ -967,6 +1038,8 @@ public abstract class ASTNode {
 				return Javadoc.class;
 			case LABELED_STATEMENT :
 				return LabeledStatement.class;
+			case LAMBDA_EXPRESSION :
+				return LambdaExpression.class;
 			case LINE_COMMENT :
 				return LineComment.class;
 			case MARKER_ANNOTATION :
@@ -1059,8 +1132,6 @@ public abstract class ASTNode {
 				return WhileStatement.class;
 			case WILDCARD_TYPE :
 				return WildcardType.class;
-			case EXTRA_DIMENSION:
-				return ExtraDimension.class;
 //{ObjectTeams: entries for OT specific node types added
 			case METHOD_SPEC :
 			    return MethodSpec.class;
@@ -1102,7 +1173,7 @@ public abstract class ASTNode {
 	/**
 	 * Owning AST.
      * <p>
-     * N.B. This ia a private field, but declared as package-visible
+     * N.B. This is a private field, but declared as package-visible
      * for more efficient access from inner classes.
      * </p>
 	 */
@@ -1135,7 +1206,7 @@ public abstract class ASTNode {
 	private Object property1 = null;
 
 	/**
-	 * Auxillary field used in representing node properties efficiently.
+	 * Auxiliary field used in representing node properties efficiently.
 	 *
 	 * @see #property1
 	 */
@@ -1311,7 +1382,7 @@ public abstract class ASTNode {
 			}
 
 			/**
-			 * Adjusts this cursor to accomodate an add/remove at the given
+			 * Adjusts this cursor to accommodate an add/remove at the given
 			 * index.
 			 *
 			 * @param index the position at which the element was added
@@ -1495,7 +1566,7 @@ public abstract class ASTNode {
 		}
 
 		/**
-		 * Adjusts all cursors to accomodate an add/remove at the given
+		 * Adjusts all cursors to accommodate an add/remove at the given
 		 * index.
 		 * <p>
 		 * This method is only used when the list is being modified.
@@ -1744,7 +1815,7 @@ public abstract class ASTNode {
 	 * Sets the value of the given int-valued property for this node.
 	 * The default implementation of this method throws an exception explaining
 	 * that this node does not have such a property. This method should be
-	 * extended in subclasses that have at leasy one simple property whose value
+	 * extended in subclasses that have at least one simple property whose value
 	 * type is int.
 	 *
 	 * @param property the property
@@ -1765,7 +1836,7 @@ public abstract class ASTNode {
 	 * Sets the value of the given boolean-valued property for this node.
 	 * The default implementation of this method throws an exception explaining
 	 * that this node does not have such a property. This method should be
-	 * extended in subclasses that have at leasy one simple property whose value
+	 * extended in subclasses that have at least one simple property whose value
 	 * type is boolean.
 	 *
 	 * @param property the property
@@ -1786,7 +1857,7 @@ public abstract class ASTNode {
 	 * Sets the value of the given property for this node.
 	 * The default implementation of this method throws an exception explaining
 	 * that this node does not have such a property. This method should be
-	 * extended in subclasses that have at leasy one simple property whose value
+	 * extended in subclasses that have at least one simple property whose value
 	 * type is a reference type.
 	 *
 	 * @param property the property
@@ -1808,7 +1879,7 @@ public abstract class ASTNode {
 	 * Sets the child value of the given property for this node.
 	 * The default implementation of this method throws an exception explaining
 	 * that this node does not have such a property. This method should be
-	 * extended in subclasses that have at leasy one child property.
+	 * extended in subclasses that have at least one child property.
 	 *
 	 * @param property the property
 	 * @param get <code>true</code> for a get operation, and
@@ -1828,8 +1899,8 @@ public abstract class ASTNode {
 	/**
 	 * Returns the list value of the given property for this node.
 	 * The default implementation of this method throws an exception explaining
-	 * that this noed does not have such a property. This method should be
-	 * extended in subclasses that have at leasy one child list property.
+	 * that this node does not have such a property. This method should be
+	 * extended in subclasses that have at least one child list property.
 	 *
 	 * @param property the property
 	 * @return the list (element type: {@link ASTNode})
@@ -1879,8 +1950,8 @@ public abstract class ASTNode {
 	 * Internal helper method that starts the building a list of
 	 * property descriptors for the given node type.
 	 *
-	 * @param nodeClass the class for a concrete node type
-	 * @param propertyList empty list
+	 * @param nodeClass the class for a concrete node type with n properties
+	 * @param propertyList empty list, with capacity for n+1 elements
 	 */
 	static void createPropertyList(Class nodeClass, List propertyList) {
 		// stuff nodeClass at head of list for future ref
@@ -1927,7 +1998,7 @@ public abstract class ASTNode {
      * Use this method to prevent access to new properties that have been added in JLS3.
      * </p>
      * 
-     * @exception UnsupportedOperationException
+	 * @exception UnsupportedOperationException if this operation is used in a JLS2 AST
 	 * @since 3.0
      */
 	final void unsupportedIn2() {
@@ -1943,12 +2014,12 @@ public abstract class ASTNode {
      * Use this method to prevent access to new properties that have been added in JLS4.
      * </p>
      * 
-	 * @exception UnsupportedOperationException
+	 * @exception UnsupportedOperationException if this operation is used in a JLS2 or JLS3 AST
 	 * @since 3.7
 	 */
 	final void unsupportedIn2_3() {
 		if (this.ast.apiLevel <= AST.JLS3_INTERNAL) {
-			throw new UnsupportedOperationException("Operation only supported in JLS4 AST"); //$NON-NLS-1$
+			throw new UnsupportedOperationException("Operation only supported in JLS4 and later AST"); //$NON-NLS-1$
 		}
 	}
 	
@@ -1959,12 +2030,12 @@ public abstract class ASTNode {
      * Use this method to prevent access to new properties that have been added in JLS8.
      * </p>
      * 
-	 * @exception UnsupportedOperationException
+	 * @exception UnsupportedOperationException if this operation is used below JLS8
 	 * @since 3.9
 	 */
 	final void unsupportedIn2_3_4() {
 		if (this.ast.apiLevel < AST.JLS8) {
-			throw new UnsupportedOperationException("Operation only supported in JLS8 AST"); //$NON-NLS-1$
+			throw new UnsupportedOperationException("Operation only supported in JLS8 and later AST"); //$NON-NLS-1$
 		}
 	}
 	
@@ -1975,9 +2046,10 @@ public abstract class ASTNode {
      * Use this method to prevent access to deprecated properties (deprecated in JLS3).
      * </p>
      * 
-     * @exception UnsupportedOperationException
+	 * @exception UnsupportedOperationException if this operation is used in an AST later than JLS2
 	 * @since 3.0
      */
+	// In API Javadocs, add: * @deprecated In the JLS3 API, this method is replaced by {@link #replacement()}.
 	final void supportedOnlyIn2() {
 	  if (this.ast.apiLevel != AST.JLS2_INTERNAL) {
 	  	throw new UnsupportedOperationException("Operation only supported in JLS2 AST"); //$NON-NLS-1$
@@ -1991,9 +2063,10 @@ public abstract class ASTNode {
      * Use this method to prevent access to deprecated properties (deprecated in JLS8).
      * </p>
      * 
-     * @exception UnsupportedOperationException
+	 * @exception UnsupportedOperationException if this operation is used in an AST later than JLS4
      * @since 3.9
      */
+	// In API Javadocs, add: * @deprecated In the JLS8 API, this method is replaced by {@link #replacement()}.
 	final void supportedOnlyIn2_3_4() {
 	  if (this.ast.apiLevel >= AST.JLS8) {
 	  	throw new UnsupportedOperationException("Operation only supported in JLS2, JLS3 and JLS4 ASTs"); //$NON-NLS-1$
@@ -2222,7 +2295,7 @@ public abstract class ASTNode {
 	 */
 	final void preValueChange(SimplePropertyDescriptor property) {
 		if ((this.typeAndFlags & PROTECT) != 0) {
-			// this node is protected => cannot change valure of properties
+			// this node is protected => cannot change value of properties
 			throw new IllegalArgumentException("AST node cannot be modified"); //$NON-NLS-1$
 		}
 		this.ast.preValueChangeEvent(this, property);
@@ -2667,6 +2740,21 @@ public abstract class ASTNode {
 	 * This method must be implemented in subclasses.
 	 * </p>
 	 * <p>
+	 * General template for implementation on each concrete ASTNode class:
+	 * <pre>
+	 * <code>
+	 * ConcreteNodeType result = new ConcreteNodeType(target);
+	 * result.setSourceRange(getStartPosition(), getLength());
+	 * result.setChildProperty(
+	 *         (ChildPropertyType) ASTNode.copySubtree(target, getChildProperty()));
+	 * result.setSimpleProperty(isSimpleProperty());
+	 * result.childrenProperty().addAll(
+	 *         ASTNode.copySubtrees(target, childrenProperty()));
+	 * return result;
+	 * </code>
+	 * </pre>
+	 * </p>
+	 * <p>
 	 * This method does not report pre- and post-clone events.
 	 * All callers should instead call <code>clone(AST)</code>
 	 * to ensure that pre- and post-clone events are reported.
@@ -2712,7 +2800,7 @@ public abstract class ASTNode {
 	 * if (visitChildren) {
 	 *    // visit children in normal left to right reading order
 	 *    acceptChild(visitor, getProperty1());
-	 *    acceptChildren(visitor, rawListProperty);
+	 *    acceptChildren(visitor, this.rawListProperty);
 	 *    acceptChild(visitor, getProperty2());
 	 * }
 	 * visitor.endVisit(this);

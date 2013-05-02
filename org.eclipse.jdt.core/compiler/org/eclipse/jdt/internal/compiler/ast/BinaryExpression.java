@@ -1692,7 +1692,7 @@ void nonRecursiveResolveTypeUpwards(BlockScope scope) {
 	int operator = (this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT;
 	int operatorSignature = OperatorExpression.OperatorSignatures[operator][(leftTypeID << 4) + rightTypeID];
 
-	this.left.computeConversion(scope, TypeBinding.wellKnownType(scope, (operatorSignature >>> 16) & 0x0000F), leftType);
+	this.left.computeConversion(scope, 	TypeBinding.wellKnownType(scope, (operatorSignature >>> 16) & 0x0000F), leftType);
 	this.right.computeConversion(scope, TypeBinding.wellKnownType(scope, (operatorSignature >>> 8) & 0x0000F), rightType);
 	this.bits |= operatorSignature & 0xF;
 	switch (operatorSignature & 0xF) { // record the current ReturnTypeID
@@ -1871,7 +1871,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	int operator = (this.bits & ASTNode.OperatorMASK) >> ASTNode.OperatorSHIFT;
 	int operatorSignature = OperatorExpression.OperatorSignatures[operator][(leftTypeID << 4) + rightTypeID];
 
-	this.left.computeConversion(scope, 	TypeBinding.wellKnownType(scope, (operatorSignature >>> 16) & 0x0000F), leftType);
+	this.left.computeConversion(scope, TypeBinding.wellKnownType(scope, (operatorSignature >>> 16) & 0x0000F), leftType);
 	this.right.computeConversion(scope, TypeBinding.wellKnownType(scope, (operatorSignature >>> 8) & 0x0000F), rightType);
 	this.bits |= operatorSignature & 0xF;
 	switch (operatorSignature & 0xF) { // record the current ReturnTypeID

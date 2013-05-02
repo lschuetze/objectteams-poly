@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2003, 2012 IBM Corporation and others.
+ * Copyright (c) 2003, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -22,15 +22,9 @@ import java.util.List;
 /**
  * Type parameter node (added in JLS3 API).
  * 
- * For JLS2, JLS3 and JLS4:
- * * <pre>
- * TypeParameter:
- *    TypeVariable [ <b>extends</b> Type { <b>&</b> Type } ]
- * </pre>
- * For JLS8 optional annotations were added:
  * <pre>
  * TypeParameter:
- *    {Annotation} TypeVariable [ <b>extends</b> Type { <b>&</b> Type } ]
+ *    { Annotation } TypeVariable [ <b>extends</b> Type { <b>&</b> Type } ]
  * </pre>
  *
  * @since 3.1
@@ -38,6 +32,13 @@ import java.util.List;
  */
 public class TypeParameter extends ASTNode {
 
+	/**
+	 * The "annotations" structural property of this node type (element type: {@link Annotation}) (added in JLS8 API).
+	 * @since 3.9
+	 */
+	public static final ChildListPropertyDescriptor ANNOTATIONS_PROPERTY =
+			new ChildListPropertyDescriptor(TypeParameter.class, "annotations", Annotation.class, CYCLE_RISK); //$NON-NLS-1$
+	
 	/**
 	 * The "name" structural property of this node type (child type: {@link SimpleName}).
 	 */
@@ -49,13 +50,6 @@ public class TypeParameter extends ASTNode {
 	 */
 	public static final ChildListPropertyDescriptor TYPE_BOUNDS_PROPERTY =
 		new ChildListPropertyDescriptor(TypeParameter.class, "typeBounds", Type.class, NO_CYCLE_RISK); //$NON-NLS-1$
-
-	/**
-	 * The "annotations" structural property of this node type (child type: {@link Annotation}).
-	 * @since 3.9
-	 */
-	public static final ChildListPropertyDescriptor ANNOTATIONS_PROPERTY =
-		new ChildListPropertyDescriptor(TypeParameter.class, "annotations", Annotation.class, CYCLE_RISK); //$NON-NLS-1$
 
 //{ObjectTeams: distinguish value parameters and <B base R>:
 	public static final SimplePropertyDescriptor VALUE_PARAMETER_PROPERTY =
@@ -90,9 +84,9 @@ public class TypeParameter extends ASTNode {
 		
 		propertyList = new ArrayList(4);
 		createPropertyList(TypeParameter.class, propertyList);
+		addProperty(ANNOTATIONS_PROPERTY, propertyList);
 		addProperty(NAME_PROPERTY, propertyList);
 		addProperty(TYPE_BOUNDS_PROPERTY, propertyList);
-		addProperty(ANNOTATIONS_PROPERTY, propertyList);
 //{ObjectTeams: value parameter:
 		addProperty(VALUE_PARAMETER_PROPERTY, propertyList);
 // SH}
@@ -118,7 +112,7 @@ public class TypeParameter extends ASTNode {
 		switch (apiLevel) {
 			case AST.JLS2_INTERNAL :
 			case AST.JLS3_INTERNAL :
-			case AST.JLS4:
+			case AST.JLS4_INTERNAL:
 				return PROPERTY_DESCRIPTORS;
 			default :
 				return PROPERTY_DESCRIPTORS_8_0;
@@ -126,7 +120,7 @@ public class TypeParameter extends ASTNode {
 	}
 
 	/**
-	 * The type variable node; lazily initialized; defaults to an unspecfied,
+	 * The type variable node; lazily initialized; defaults to an unspecified,
 	 * but legal, name.
 	 */
 	private SimpleName typeVariableName = null;
@@ -140,8 +134,8 @@ public class TypeParameter extends ASTNode {
 
 	/**
 	 * The type annotations (element type: {@link Annotation}).
-	 * Null in JLS2, JLS3 and JLS4. Added in JLS8.
-	 * @since 3.9
+	 * Null in JLS < 8. Added in JLS8; defaults to an empty list
+	 * (see constructor).
 	 */
 	private ASTNode.NodeList annotations = null;
 	
@@ -204,11 +198,11 @@ public class TypeParameter extends ASTNode {
 	 * Method declared on ASTNode.
 	 */
 	final List internalGetChildListProperty(ChildListPropertyDescriptor property) {
-		if (property == TYPE_BOUNDS_PROPERTY) {
-			return typeBounds();
-		}
 		if (property == ANNOTATIONS_PROPERTY) {
 			return annotations();
+		}
+		if (property == TYPE_BOUNDS_PROPERTY) {
+			return typeBounds();
 		}
 		// allow default implementation to flag the error
 		return super.internalGetChildListProperty(property);
@@ -227,17 +221,16 @@ public class TypeParameter extends ASTNode {
 	ASTNode clone0(AST target) {
 		TypeParameter result = new TypeParameter(target);
 		result.setSourceRange(getStartPosition(), getLength());
+		if (this.ast.apiLevel >= AST.JLS8) {
+			result.annotations().addAll(
+					ASTNode.copySubtrees(target, annotations()));
+		}
 		result.setName((SimpleName) ((ASTNode) getName()).clone(target));
 //{ObjectTeams: value parameter?
 		result.setIsValueParameter(this.isValueParameter());
 // SH}
 		result.typeBounds().addAll(
 			ASTNode.copySubtrees(target, typeBounds()));
-		if (this.ast.apiLevel >= AST.JLS8) {
-			result.annotations = new ASTNode.NodeList(ANNOTATIONS_PROPERTY);
-			result.annotations.addAll(
-					ASTNode.copySubtrees(target, annotations()));
-		}
 		return result;
 	}
 
@@ -334,7 +327,7 @@ public class TypeParameter extends ASTNode {
 	}
 	
 	/**
-	 * Returns the live ordered list of annotations for this TypeParameter node.
+	 * Returns the live ordered list of annotations for this TypeParameter node (added in JLS8 API).
 	 *
 	 * @return the live list of annotations (element type: {@link Annotation})
 	 * @exception UnsupportedOperationException if this operation is used
@@ -342,6 +335,7 @@ public class TypeParameter extends ASTNode {
 	 * @since 3.9
 	 */
 	public List annotations() {
+		// more efficient than just calling unsupportedIn2_3_4() to check
 		if (this.annotations == null) {
 			unsupportedIn2_3_4();
 		}

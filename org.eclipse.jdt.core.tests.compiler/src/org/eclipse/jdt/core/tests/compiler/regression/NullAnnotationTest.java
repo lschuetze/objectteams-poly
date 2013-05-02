@@ -5782,6 +5782,5 @@ public void testBug388281_10() {
 		"	      ^^^^\n" + 
 		"Null type mismatch: required \'@NonNull Object\' but the provided value is null\n" + 
 		"----------\n"); 
-	}
-
+}
 }

@@ -27,6 +27,7 @@
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *								bug 394768 - [compiler][resource] Incorrect resource leak warning when creating stream in conditional
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
+ *								bug 401030 - [1.8][null] Null analysis support for lambda methods. 
  *     Jesper S Moller - Contributions for
  *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
@@ -43,7 +44,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
  * OTDT changes:
  * What: compensate generalization of callin return
  */
-public class ReturnStatement extends Statement {
+public class ReturnStatement extends Statement implements ExpressionContext {
 
 	public Expression expression;
 	public SubRoutineStatement[] subroutines;
@@ -167,7 +168,7 @@ void checkAgainstNullAnnotation(BlockScope scope, FlowContext flowContext, int n
 		long tagBits;
 		MethodBinding methodBinding;
 		try {
-			methodBinding = scope.methodScope().referenceMethod().binding;
+			methodBinding = scope.methodScope().referenceMethodBinding();
 			tagBits = methodBinding.tagBits;
 		} catch (NullPointerException npe) {
 			// chain of references in try-block has several potential nulls;
@@ -277,19 +278,31 @@ public StringBuffer printStatement(int tab, StringBuffer output){
 public void resolve(BlockScope scope) {
 	MethodScope methodScope = scope.methodScope();
 	MethodBinding methodBinding;
+	LambdaExpression lambda = methodScope.referenceContext instanceof LambdaExpression ? (LambdaExpression) methodScope.referenceContext : null;
 	TypeBinding methodType =
-		(methodScope.referenceContext instanceof LambdaExpression) ? ((LambdaExpression) methodScope.referenceContext).expectedResultType() :
+		lambda != null ? lambda.expectedResultType() :
 		(methodScope.referenceContext instanceof AbstractMethodDeclaration)
 			? ((methodBinding = ((AbstractMethodDeclaration) methodScope.referenceContext).binding) == null
 				? null
 				: methodBinding.returnType)
 			: TypeBinding.VOID;
 	TypeBinding expressionType;
+	
+	if (this.expression != null) {
+		this.expression.setExpressionContext(ASSIGNMENT_CONTEXT);
+		this.expression.setExpectedType(methodType);
+	}
+	
 	if (methodType == TypeBinding.VOID) {
-		// the expression should be null
-		if (this.expression == null)
+		// the expression should be null, exceptions exist for lambda expressions.
+		if (this.expression == null) {
+			if (lambda != null)
+				lambda.returnsExpression(null, TypeBinding.VOID);
 			return;
+		}
 		expressionType = this.expression.resolveType(scope);
+		if (lambda != null && !this.implicitReturn)
+			lambda.returnsExpression(this.expression, expressionType);
 		if (this.implicitReturn && (expressionType == TypeBinding.VOID || this.expression.statementExpression()))
 			return;
 		if (expressionType != null)
@@ -297,11 +310,17 @@ public void resolve(BlockScope scope) {
 		return;
 	}
 	if (this.expression == null) {
+		if (lambda != null)
+			lambda.returnsExpression(null,  methodType);
 		if (methodType != null) scope.problemReporter().shouldReturn(methodType, this);
 		return;
 	}
-	this.expression.setExpectedType(methodType); // needed in case of generic method invocation
-	if ((expressionType = this.expression.resolveType(scope)) == null) return;
+	
+	expressionType = this.expression.resolveType(scope);
+	if (lambda != null)
+		lambda.returnsExpression(this.expression, expressionType);
+	
+	if (expressionType == null) return;
 	if (expressionType == TypeBinding.VOID) {
 		scope.problemReporter().attemptToReturnVoidValue(this);
 		return;

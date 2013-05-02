@@ -1,10 +1,14 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2010 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  * $Id: Modifier.java 19895 2009-04-15 13:52:23Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -34,12 +38,14 @@ import java.util.Map;
  *    <b>transient</b>
  *    <b>volatile</b>
  *    <b>strictfp</b>
+ *    <b>default</b>
  * </pre>
  * <p>
  * The numeric values of these flags match the ones for class
- * files as described in the Java Virtual Machine Specification.
- * Note that Java model class {@link org.eclipse.jdt.core.Flags} also
- * provides the same constants as this class.
+ * files as described in the Java Virtual Machine Specification
+ * (except for {@link #DEFAULT}). Note that Java model class
+ * {@link org.eclipse.jdt.core.Flags} also provides the same
+ * constants as this class.
  * </p>
  *
  * @since 2.0
@@ -92,6 +98,13 @@ public final class Modifier extends ASTNode implements IExtendedModifier {
 		/** "volatile" modifier with flag value {@link Modifier#VOLATILE}. */
 		public static final ModifierKeyword VOLATILE_KEYWORD = new ModifierKeyword("volatile", VOLATILE);//$NON-NLS-1$
 
+		/**
+		 * "default" modifier with flag value {@link Modifier#DEFAULT}. Note that the value of the modifier is
+		 * internal and is not specified in the Java Virtual Machine Specification.
+		 * @since 3.9
+		 */
+		public static final ModifierKeyword DEFAULT_KEYWORD = new ModifierKeyword("default", DEFAULT);//$NON-NLS-1$
+
 //{ObjectTeams: OT-specific callin modifier keywords
 		public static final ModifierKeyword AFTER_KEYWORD = new ModifierKeyword("after", OT_AFTER_CALLIN);//$NON-NLS-1$
 
@@ -142,8 +155,9 @@ public final class Modifier extends ASTNode implements IExtendedModifier {
 					GET_KEYWORD,
 					SET_KEYWORD,
 					TEAM_KEYWORD,
-					CALLIN_KEYWORD
+					CALLIN_KEYWORD,
 //gbr}
+					DEFAULT_KEYWORD
 				};
 			for (int i = 0; i < ops.length; i++) {
 				KEYWORDS.put(ops[i].toString(), ops[i]);
@@ -335,6 +349,17 @@ public final class Modifier extends ASTNode implements IExtendedModifier {
 	public static final int VOLATILE = 0x0040;
 
 	/**
+	 * "default" modifier constant (bit mask).
+	 * Applicable only to methods.
+	 *
+	 * Note that the value of the flag is internal and is not
+	 * specified in the Java Virtual Machine Specification.
+	 * @since 3.9
+	 */
+	public static final int DEFAULT = 0x10000;
+
+//{ObjectTeams: OT-specific modifier constants
+	/**
 	 * "callin" OT-specific modifier constant (bit mask).
 	 * Applicable to methods only ("callin" modifier).
 	 */
@@ -345,7 +370,7 @@ public final class Modifier extends ASTNode implements IExtendedModifier {
 	 * Applicable to types and methods.
 	 */
 	public static final int OT_TEAM = 0x8000;  // bit 16
-
+// SH}
 //{ObjectTeams: OT-specific callin modifier constants
 	// Note(SH): please note, that these modifiers differ from all others in this list,
 	//           since they cannot be applied a class, a method, nor a field.
@@ -534,6 +559,19 @@ public final class Modifier extends ASTNode implements IExtendedModifier {
 	 */
 	public static boolean isVolatile(int flags) {
 		return (flags & VOLATILE) != 0;
+	}
+
+	/**
+	 * Returns whether the given flags includes the "default" modifier.
+	 * Applicable only to methods.
+	 *
+	 * @param flags the modifier flags
+	 * @return <code>true</code> if the <code>DEFAULT</code> bit is set
+	 * and <code>false</code> otherwise
+	 * @since 3.9
+	 */
+	public static boolean isDefaultMethod(int flags) {
+		return (flags & DEFAULT) != 0;
 	}
 
 //{ObjectTeams: OT-specific check methods
@@ -846,6 +884,15 @@ public final class Modifier extends ASTNode implements IExtendedModifier {
 	 */
 	public boolean isVolatile() {
 		return this.modifierKeyword == ModifierKeyword.VOLATILE_KEYWORD;
+	}
+
+	/**
+	 * Answer true if the receiver is the default modifier, false otherwise.
+	 * @return true if the receiver is the default modifier, false otherwise
+	 * @since 3.9
+	 */
+	public boolean isDefaultMethod() {
+		return this.modifierKeyword == ModifierKeyword.DEFAULT_KEYWORD;
 	}
 
 	/* (omit javadoc for this method)

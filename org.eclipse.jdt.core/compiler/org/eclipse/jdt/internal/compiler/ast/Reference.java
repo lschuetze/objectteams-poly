@@ -15,9 +15,9 @@
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann <stephan@cs.tu-berlin.de> - Contributions for
  *								bug 185682 - Increment/decrement operators mark local variables as read
+ *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
- *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -137,17 +137,6 @@ public abstract void generateCompoundAssignment(BlockScope currentScope, CodeStr
 
 public abstract void generatePostIncrement(BlockScope currentScope, CodeStream codeStream, CompoundAssignment postIncrement, boolean valueRequired);
 
-// FIXME(SH): obsolete after merge??
-public int nullStatus(FlowInfo flowInfo) {
-	if (this.resolvedType != null) {
-		if ((this.resolvedType.tagBits & TagBits.AnnotationNonNull) != 0)
-			return FlowInfo.NON_NULL;
-		else if ((this.resolvedType.tagBits & TagBits.AnnotationNullable) != 0)
-			return FlowInfo.POTENTIALLY_NULL;
-	}
-	return FlowInfo.UNKNOWN;
-}
-
 /** 
  * Is the given reference equivalent to the receiver, 
  * meaning that both denote the same path of field reads?
@@ -171,9 +160,14 @@ public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
 		} else if (fieldBinding.isNullable()) {
 			return FlowInfo.POTENTIALLY_NULL;
 		}
-		return FlowInfo.UNKNOWN;
 	}
-	return super.nullStatus(flowInfo, flowContext);
+	if (this.resolvedType != null) {
+		if ((this.resolvedType.tagBits & TagBits.AnnotationNonNull) != 0)
+			return FlowInfo.NON_NULL;
+		else if ((this.resolvedType.tagBits & TagBits.AnnotationNullable) != 0)
+			return FlowInfo.POTENTIALLY_NULL;
+	}
+	return FlowInfo.UNKNOWN;
 }
 
 /* report if a private field is only read from a 'special operator',
@@ -222,7 +216,7 @@ static void reportOnlyUselesslyReadLocal(BlockScope currentScope, LocalVariableB
 	if (localBinding.declaration instanceof Argument) {
 		// check compiler options to report against unused arguments
 		MethodScope methodScope = currentScope.methodScope();
-		if (methodScope != null) {
+		if (methodScope != null && !methodScope.isLambdaScope()) { // lambda must be congruent with the descriptor.
 			MethodBinding method = ((AbstractMethodDeclaration)methodScope.referenceContext()).binding;
 			
 			boolean shouldReport = !method.isMain();

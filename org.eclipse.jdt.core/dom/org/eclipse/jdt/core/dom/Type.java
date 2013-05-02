@@ -20,12 +20,11 @@ package org.eclipse.jdt.core.dom;
  * Abstract base class of all type AST node types. A type node represents a
  * reference to a primitive type (including void), to an array type, or to a
  * simple named type (or type variable), to a qualified type, to a
- * parameterized type, or to a wildcard type. Note that not all of these
+ * parameterized type, to a union type, or to a wildcard type. Note that not all of these
  * are meaningful in all contexts; for example, a wildcard type is only
  * meaningful in the type argument position of a parameterized type.
  * UnionType got introduced in JLS4 to support common catch blocks for disjunctive types.
- * For JLS8, optional annotations indicated by {Annotation} got added and
- * these are absent in JLS2, JLS3 and JLS4.
+ * For JLS8, optional annotations indicated by {Annotation} got added.
  * <p>
  * <pre>
  * Type:
@@ -38,26 +37,28 @@ package org.eclipse.jdt.core.dom;
  *    ParameterizedType
  *    UnionType  
  *    
- * PrimitiveType:
- *    {Annotation} <b>byte</b>
- *    {Annotation} <b>short</b>
- *    {Annotation} <b>char</b>
- *    {Annotation} <b>int</b>
- *    {Annotation} <b>long</b>
- *    {Annotation} <b>float</b>
- *    {Annotation} <b>double</b>
- *    {Annotation} <b>boolean</b>
- *    {Annotation} <b>void</b>
- * ArrayType:
- *    Type {Annotation} <b>'['</b> <b>']'</b>
- * SimpleType:
- *    {Annotation} TypeName
- * ParameterizedType:
+ * {@link PrimitiveType}:
+ *    { Annotation } <b>byte</b>
+ *    { Annotation } <b>short</b>
+ *    { Annotation } <b>char</b>
+ *    { Annotation } <b>int</b>
+ *    { Annotation } <b>long</b>
+ *    { Annotation } <b>float</b>
+ *    { Annotation } <b>double</b>
+ *    { Annotation } <b>boolean</b>
+ *    { Annotation } <b>void</b>
+ * {@link ArrayType}:
+ *    Type { Annotation } <b>'['</b> <b>']'</b>
+ * {@link SimpleType}:
+ *    { Annotation } TypeName
+ * {@link QualifiedType}:
+ *    Type <b>.</b> {Annotation} SimpleName
+ * {@link WildcardType}:
+ *    { Annotation } <b>?</b> [ ( <b>extends</b> | <b>super</b>) Type ]
+ * {@link ParameterizedType}:
  *    Type <b>&lt;</b> Type { <b>,</b> Type } <b>&gt;</b>
- * QualifiedType:
- *    Type <b>.</b>{Annotation} SimpleName
- * WildcardType:
- *    <b>{Annotation} ?</b> [ ( <b>extends</b> | <b>super</b>) Type ]
+ * {@link UnionType}:
+ *    Type <b>|</b> Type { <b>|</b> Type }
  * </pre>
  * </p>
  *

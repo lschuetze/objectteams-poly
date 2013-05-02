@@ -22,6 +22,8 @@
  *								bug 374605 - Unreasonable warning for enum-based switch statements
  *								bug 384870 - [compiler] @Deprecated annotation not detected if preceded by other annotation
  *								bug 393719 - [compiler] inconsistent warnings on iteration variables
+ *     Jesper S Moller - Contributions for
+ *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -65,9 +67,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	public final static int Bit17 = 0x10000;			// compound assigned (reference lhs) | unchecked (msg, alloc, explicit constr call)
 	public final static int Bit18 = 0x20000;			// non null (expression) | onDemand (import reference)
 	public final static int Bit19 = 0x40000;			// didResolve (parameterized qualified type ref/parameterized single type ref)  | empty (javadoc return statement) | needReceiverGenericCast (msg/fieldref)
-	public final static int Bit20 = 0x80000;			// contains syntax errors (method declaration, type declaration, field declarations, initializer)
+	public final static int Bit20 = 0x80000;			// contains syntax errors (method declaration, type declaration, field declarations, initializer), typeref: <> name ref: lambda capture)
 	public final static int Bit21 = 0x100000;
-	public final static int Bit22 = 0x200000;			// parenthesis count (expression) | used (import reference)
+	public final static int Bit22 = 0x200000;			// parenthesis count (expression) | used (import reference) shadows outer local (local declarations)
 	public final static int Bit23 = 0x400000;			// parenthesis count (expression)
 	public final static int Bit24 = 0x800000;			// parenthesis count (expression)
 	public final static int Bit25 = 0x1000000;		// parenthesis count (expression)
@@ -135,8 +137,9 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	// for local decls
 	public static final int IsTypeElided = Bit2;  // type elided lambda argument.
 	public static final int IsArgument = Bit3;
-	public static final int IsForeachElementVariable = Bit5;
 	public static final int IsLocalDeclarationReachable = Bit31;
+	public static final int IsForeachElementVariable = Bit5;
+	public static final int ShadowsOuterLocal = Bit22;
 
 	// for name refs or local decls
 	public static final int FirstAssignmentToLocal = Bit4;
@@ -150,6 +153,7 @@ public abstract class ASTNode implements TypeConstants, TypeIds {
 	// for single name references
 	public static final int DepthSHIFT = 5;	// Bit6 -> Bit13
 	public static final int DepthMASK = Bit6|Bit7|Bit8|Bit9|Bit10|Bit11|Bit12|Bit13; // 8 bits for actual depth value (max. 255)
+	public static final int IsCapturedOuterLocal = Bit20;
 
 	// for statements
 	public static final int IsReachable = Bit32;

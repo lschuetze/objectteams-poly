@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -12,6 +12,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - adapted for Object Teams
+ *     Jesper S Moller - realigned with bug 399695
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.parser;
 
@@ -83,6 +84,28 @@ public void runComplianceParserTest(
 			this.runNegativeTest(testFiles, expected16ProblemLog);
 		} else if(this.complianceLevel < ClassFileConstants.JDK1_8) {
 			this.runNegativeTest(testFiles, expected17ProblemLog);
+		}
+	}
+public void runComplianceParserTest(
+		String[] testFiles,
+		String expected13ProblemLog,
+		String expected14ProblemLog,
+		String expected15ProblemLog,
+		String expected16ProblemLog,
+		String expected17ProblemLog,
+		String expected18ProblemLog){
+		if (this.complianceLevel == ClassFileConstants.JDK1_3) {
+			this.runNegativeTest(testFiles, expected13ProblemLog);
+		} else if(this.complianceLevel == ClassFileConstants.JDK1_4) {
+			this.runNegativeTest(testFiles, expected14ProblemLog);
+		} else if(this.complianceLevel == ClassFileConstants.JDK1_5) {
+			this.runNegativeTest(testFiles, expected15ProblemLog);
+		} else if(this.complianceLevel == ClassFileConstants.JDK1_6) {
+			this.runNegativeTest(testFiles, expected16ProblemLog);
+		} else if(this.complianceLevel < ClassFileConstants.JDK1_8) {
+			this.runNegativeTest(testFiles, expected17ProblemLog);
+		} else {
+			this.runNegativeTest(testFiles, expected18ProblemLog);
 		}
 	}
 public void test0001() {
@@ -2677,14 +2700,14 @@ public void test0057() {
 	String[] testFiles = new String[] {
 		"X.java",
 		"interface I {\n" +
-		"  public void foo() default { System.out.println(); }\n" +
+		"  public default void foo() { System.out.println(); }\n" +
 		"}\n"
 	};
 
 	String expectedProblemLog =
 			"----------\n" + 
 			"1. ERROR in X.java (at line 2)\n" + 
-			"	public void foo() default { System.out.println(); }\n" + 
+			"	public default void foo() { System.out.println(); }\n" + 
 			"	                           ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 			"Default methods are allowed only at source level 1.8 or above\n" + 
 			"----------\n";
@@ -2755,6 +2778,11 @@ public void test0059() {
 			"	I i = super::goo;\n" + 
 			"	      ^^^^^^^^^^\n" + 
 			"Method references are allowed only at source level 1.8 or above\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 9)\n" + 
+			"	I i = super::goo;\n" + 
+			"	      ^^^^^^^^^^\n" + 
+			"The method goo(int) from the type Y should be accessed in a static way \n" + 
 			"----------\n";
 
 	runComplianceParserTest(
@@ -2898,11 +2926,16 @@ public void test0063() {
 			"	      ^^^^^^^^^^^^^^\n" + 
 			"Method references are allowed only at source level 1.8 or above\n" + 
 			"----------\n" + 
-			"2. ERROR in X.java (at line 6)\n" + 
+			"2. ERROR in X.java (at line 5)\n" + 
+			"	I i = X<String>::foo;\n" + 
+			"	      ^^^^^^^^^^^^^^\n" + 
+			"The method foo(int) from the type X<String> should be accessed in a static way \n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 6)\n" + 
 			"	I i2 = (p) -> 10;\n" + 
 			"	       ^^^^^^^^^\n" + 
 			"Lambda expressions are allowed only at source level 1.8 or above\n" + 
-				"----------\n";
+			"----------\n";
 
 	runComplianceParserTest(
 		testFiles,
@@ -3003,6 +3036,250 @@ public void testBug391201() {
 		expectedProblemLog,
 		expectedProblemLog,
 		expectedProblemLog
+	);
+}
+public void testBug399773() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_8)
+		return;
+	String[] testFiles = new String[] {
+		"X.java",
+		"interface I {\n" +
+		"	void doit();\n" +
+		"	default void doitalso () {}\n" +
+		"}\n" +
+		"interface J {\n" +
+		"	void doit();\n" +
+		"	default void doitalso () {}\n" +
+		"}\n" +
+		"public class X {\n" +
+		"	Object p = (I & J) () -> {};\n" +
+		"}\n" ,
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. ERROR in X.java\n" + 
+			"Default methods are allowed only at source level 1.8 or above\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java\n" + 
+			"Default methods are allowed only at source level 1.8 or above\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 10)\n" + 
+			"	Object p = (I & J) () -> {};\n" + 
+			"	            ^^^^^\n" + 
+			"Additional bounds are not allowed in cast operator at source levels below 1.8\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 10)\n" + 
+			"	Object p = (I & J) () -> {};\n" + 
+			"	                   ^^^^^^^^\n" + 
+			"Lambda expressions are allowed only at source level 1.8 or above\n" + 
+			"----------\n" + 
+			"5. ERROR in X.java (at line 10)\n" + 
+			"	Object p = (I & J) () -> {};\n" + 
+			"	                   ^^^^^^^^\n" + 
+			"The target type of this expression must be a functional interface\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+		testFiles,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399778,  [1.8][compiler] Conditional operator expressions should propagate target types
+public void testBug399778() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	String[] testFiles = new String[] {
+		"X.java",
+		"import java.util.Arrays;\n" +
+		"import java.util.List;\n" +
+		"public class X  {\n" +
+		"		List<String> l = null == null ? Arrays.asList() : Arrays.asList(\"Hello\",\"world\");\n" +
+		"}\n",
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. ERROR in X.java (at line 4)\n" + 
+			"	List<String> l = null == null ? Arrays.asList() : Arrays.asList(\"Hello\",\"world\");\n" + 
+			"	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type mismatch: cannot convert from List<capture#1-of ? extends Object> to List<String>\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+		testFiles,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		""   // 1.8 should compile this fine.
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399778,  [1.8][compiler] Conditional operator expressions should propagate target types
+public void testBug399778a() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	String[] testFiles = new String[] {
+		"X.java",
+		"import java.util.Arrays;\n" +
+		"import java.util.List;\n" +
+		"public class X  {\n" +
+		"		List<String> l = (List<String>) (null == null ? Arrays.asList() : Arrays.asList(\"Hello\",\"world\"));\n" +
+		"}\n",
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. WARNING in X.java (at line 4)\n" + 
+			"	List<String> l = (List<String>) (null == null ? Arrays.asList() : Arrays.asList(\"Hello\",\"world\"));\n" + 
+			"	                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from List<capture#1-of ? extends Object> to List<String>\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+		testFiles,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog   // 1.8 also issue type safety warning.
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399780: static methods in interfaces.
+public void testBug399780() {
+	if(this.complianceLevel >= ClassFileConstants.JDK1_8) {
+		return;
+	}
+	String[] testFiles = new String[] {
+		"I.java",
+		"interface I {\n" +
+		"  public static void foo1() { System.out.println(); }\n" +
+		"  public static void foo2();\n" +
+		"  public abstract static void foo3();\n" +
+		"}\n"
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. ERROR in I.java (at line 2)\n" + 
+			"	public static void foo1() { System.out.println(); }\n" + 
+			"	                   ^^^^^^\n" + 
+			"Illegal modifier for the interface method foo1; only public & abstract are permitted\n" + 
+			"----------\n" + 
+			"2. ERROR in I.java (at line 2)\n" + 
+			"	public static void foo1() { System.out.println(); }\n" + 
+			"	                           ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Static methods are allowed in interfaces only at source level 1.8 or above\n" + 
+			"----------\n" + 
+			"3. ERROR in I.java (at line 3)\n" + 
+			"	public static void foo2();\n" + 
+			"	                   ^^^^^^\n" + 
+			"Illegal modifier for the interface method foo2; only public & abstract are permitted\n" + 
+			"----------\n" + 
+			"4. ERROR in I.java (at line 4)\n" + 
+			"	public abstract static void foo3();\n" + 
+			"	                            ^^^^^^\n" + 
+			"Illegal modifier for the interface method foo3; only public & abstract are permitted\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+		testFiles,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog,
+		expectedProblemLog
+	);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=399769:  Use of '_' as identifier name should trigger a diagnostic
+public void testBug399781() {
+	String[] testFiles = new String[] {
+		"X.java",
+		"public class X {\n" +
+		"   int _;\n" +
+		"	void foo(){\n" +
+		"		int _   = 3;\n" +
+        "		int _123 = 4;\n" +
+        "		int a_   = 5;\n" +
+		"	}\n" +
+        "   void goo(int _) {}\n" +
+		"   void zoo() {\n" +
+        "      try {\n" +
+		"      } catch (Exception _) {\n" +
+        "      }\n" +
+		"   }\n" +
+		"}\n",
+	};
+
+	String expectedProblemLog =
+			"----------\n" + 
+			"1. ERROR in X.java (at line 2)\n" + 
+			"	int _;\n" + 
+			"	    ^\n" + 
+			"\'_\' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 4)\n" + 
+			"	int _   = 3;\n" + 
+			"	    ^\n" + 
+			"\'_\' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on\n" + 
+			"----------\n" + 
+			"3. WARNING in X.java (at line 4)\n" + 
+			"	int _   = 3;\n" + 
+			"	    ^\n" + 
+			"The local variable _ is hiding a field from type X\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 8)\n" + 
+			"	void goo(int _) {}\n" + 
+			"	             ^\n" + 
+			"\'_\' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on\n" + 
+			"----------\n" + 
+			"5. WARNING in X.java (at line 8)\n" + 
+			"	void goo(int _) {}\n" + 
+			"	             ^\n" + 
+			"The parameter _ is hiding a field from type X\n" + 
+			"----------\n" + 
+			"6. ERROR in X.java (at line 11)\n" + 
+			"	} catch (Exception _) {\n" + 
+			"	                   ^\n" + 
+			"\'_\' should not be used as an identifier, since it is a reserved keyword from source level 1.8 on\n" + 
+			"----------\n" + 
+			"7. WARNING in X.java (at line 11)\n" + 
+			"	} catch (Exception _) {\n" + 
+			"	                   ^\n" + 
+			"The parameter _ is hiding a field from type X\n" + 
+			"----------\n";
+	String expected13ProblemLog =
+			"----------\n" + 
+			"1. WARNING in X.java (at line 4)\n" + 
+			"	int _   = 3;\n" + 
+			"	    ^\n" + 
+			"The local variable _ is hiding a field from type X\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 8)\n" + 
+			"	void goo(int _) {}\n" + 
+			"	             ^\n" + 
+			"The parameter _ is hiding a field from type X\n" + 
+			"----------\n" + 
+			"3. WARNING in X.java (at line 11)\n" + 
+			"	} catch (Exception _) {\n" + 
+			"	                   ^\n" + 
+			"The parameter _ is hiding a field from type X\n" + 
+			"----------\n";
+
+	runComplianceParserTest(
+			testFiles,
+			expected13ProblemLog,
+			expected13ProblemLog,
+			expected13ProblemLog,
+			expected13ProblemLog,
+			expected13ProblemLog,
+			expectedProblemLog
 	);
 }
 }
