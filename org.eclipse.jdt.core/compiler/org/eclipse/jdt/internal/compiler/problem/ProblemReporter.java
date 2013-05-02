@@ -37,6 +37,8 @@
  *								bug 402028 - [1.8][compiler] null analysis for reference expressions 
  *								bug 401796 - [1.8][compiler] don't treat default methods as overriding an independent inherited abstract method
  *								bug 404649 - [1.8][compiler] detect illegal reference to indirect or redundant super
+ *								bug 376590 - Private fields with @Inject are ignored by unused field validation
+ *								bug 400761 - [compiler][null] null may be return as boolean without a diagnostic
  *      Jesper S Moller <jesper@selskabet.org> -  Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
@@ -384,12 +386,16 @@ public static int getIrritant(int problemID) {
 
 		case IProblem.NullLocalVariableReference:
 		case IProblem.NullableFieldReference:
+		case IProblem.NullExpressionReference:
+		case IProblem.NullUnboxing:
 			return CompilerOptions.NullReference;
 
 		case IProblem.PotentialNullLocalVariableReference:
 		case IProblem.PotentialNullMessageSendReference:
 		case IProblem.ArrayReferencePotentialNullReference:
 		case IProblem.DereferencingNullableExpression:
+		case IProblem.PotentialNullExpressionReference:
+		case IProblem.PotentialNullUnboxing:
 			return CompilerOptions.PotentialNullReference;
 
 		case IProblem.RedundantLocalVariableNullAssignment:
@@ -6158,6 +6164,10 @@ public void localVariableNullInstanceof(LocalVariableBinding local, ASTNode loca
 }
 
 public void localVariableNullReference(LocalVariableBinding local, ASTNode location) {
+	if (location instanceof Expression && (((Expression)location).implicitConversion & TypeIds.UNBOXING) != 0) {
+		nullUnboxing(location, local.type);
+		return;
+	}
 	int severity = computeSeverity(IProblem.NullLocalVariableReference);
 	if (severity == ProblemSeverities.Ignore) return;
 	String[] arguments = new String[] {new String(local.name)  };
@@ -6179,6 +6189,10 @@ public void localVariableNullReference(LocalVariableBinding local, ASTNode locat
 }
 
 public void localVariablePotentialNullReference(LocalVariableBinding local, ASTNode location) {
+	if (location instanceof Expression && (((Expression)location).implicitConversion & TypeIds.UNBOXING) != 0) {
+		potentialNullUnboxing(location, local.type);
+		return;
+	}
 	int severity = computeSeverity(IProblem.PotentialNullLocalVariableReference);
 	if (severity == ProblemSeverities.Ignore) return;
 	String[] arguments = new String[] {new String(local.name)};
@@ -6198,7 +6212,16 @@ public void localVariablePotentialNullReference(LocalVariableBinding local, ASTN
 		nodeSourceStart(local, location),
 		nodeSourceEnd(local, location));
 }
-
+public void potentialNullUnboxing(ASTNode expression, TypeBinding boxType) {
+	String[] arguments = new String[] { String.valueOf(boxType.readableName()) };
+	String[] argumentsShort = new String[] { String.valueOf(boxType.shortReadableName()) };
+	this.handle(IProblem.PotentialNullUnboxing, arguments, argumentsShort, expression.sourceStart, expression.sourceEnd);
+}
+public void nullUnboxing(ASTNode expression, TypeBinding boxType) {
+	String[] arguments = new String[] { String.valueOf(boxType.readableName()) };
+	String[] argumentsShort = new String[] { String.valueOf(boxType.shortReadableName()) };
+	this.handle(IProblem.NullUnboxing, arguments, argumentsShort, expression.sourceStart, expression.sourceEnd);
+}
 public void nullableFieldDereference(VariableBinding variable, long position) {
 	String[] arguments = new String[] {new String(variable.name)};
 	char[][] nullableName = this.options.nullableAnnotationName;
@@ -8912,7 +8935,7 @@ public void unusedPrivateConstructor(ConstructorDeclaration constructorDecl) {
 	int severity = computeSeverity(IProblem.UnusedPrivateConstructor);
 	if (severity == ProblemSeverities.Ignore) return;
 	
-	if (excludeDueToAnnotation(constructorDecl.annotations)) return;
+	if (excludeDueToAnnotation(constructorDecl.annotations, IProblem.UnusedPrivateConstructor)) return;
 	
 	MethodBinding constructor = constructorDecl.binding;
 	this.handle(
@@ -8959,7 +8982,7 @@ public void unusedPrivateField(FieldDeclaration fieldDecl) {
 			}
 		}
 	}
-	if (excludeDueToAnnotation(fieldDecl.annotations)) return;
+	if (excludeDueToAnnotation(fieldDecl.annotations, IProblem.UnusedPrivateField)) return;
 	this.handle(
 			IProblem.UnusedPrivateField,
 		new String[] {
@@ -9013,7 +9036,7 @@ public void unusedPrivateMethod(AbstractMethodDeclaration methodDecl) {
 			&& CharOperation.equals(method.selector, TypeConstants.WRITEREPLACE)) {
 		return;
 	}
-	if (excludeDueToAnnotation(methodDecl.annotations)) return;
+	if (excludeDueToAnnotation(methodDecl.annotations, IProblem.UnusedPrivateMethod)) return;
 	
 	this.handle(
 			IProblem.UnusedPrivateMethod,
@@ -9035,9 +9058,10 @@ public void unusedPrivateMethod(AbstractMethodDeclaration methodDecl) {
 /**
  * Returns true if a private member should not be warned as unused if
  * annotated with a non-standard annotation.
- * https://bugs.eclipse.org/bugs/show_bug.cgi?id=365437
+ * https://bugs.eclipse.org/365437
+ * https://bugs.eclipse.org/376590
  */
-private boolean excludeDueToAnnotation(Annotation[] annotations) {
+private boolean excludeDueToAnnotation(Annotation[] annotations, int problemId) {
 	int annotationsLen = 0;
 	if (annotations != null) {
 		annotationsLen = annotations.length;
@@ -9056,6 +9080,11 @@ private boolean excludeDueToAnnotation(Annotation[] annotations) {
 				case TypeIds.T_ConfiguredAnnotationNullable:
 				case TypeIds.T_ConfiguredAnnotationNonNullByDefault:
 					break;
+				case TypeIds.T_JavaxInjectInject:
+				case TypeIds.T_ComGoogleInjectInject:
+					if (problemId != IProblem.UnusedPrivateField)
+						return true; // @Inject on method/ctor does constitute a relevant use, just on fields it doesn't
+					break;
 				default:
 					// non-standard annotation found, don't warn
 					return true;
@@ -9072,7 +9101,7 @@ public void unusedPrivateType(TypeDeclaration typeDecl) {
 // SH}
 	int severity = computeSeverity(IProblem.UnusedPrivateType);
 	if (severity == ProblemSeverities.Ignore) return;
-	if (excludeDueToAnnotation(typeDecl.annotations)) return;
+	if (excludeDueToAnnotation(typeDecl.annotations, IProblem.UnusedPrivateType)) return;
 	ReferenceBinding type = typeDecl.binding;
 	this.handle(
 			IProblem.UnusedPrivateType,
@@ -13293,6 +13322,22 @@ public void messageSendRedundantCheckOnNonNull(MethodBinding method, ASTNode loc
 		IProblem.RedundantNullCheckOnNonNullMessageSend,
 		arguments,
 		arguments,
+		location.sourceStart,
+		location.sourceEnd);
+}
+public void expressionNullReference(ASTNode location) {
+	this.handle(
+		IProblem.NullExpressionReference,
+		NoArgument,
+		NoArgument,
+		location.sourceStart,
+		location.sourceEnd);
+}
+public void expressionPotentialNullReference(ASTNode location) {
+	this.handle(
+		IProblem.PotentialNullExpressionReference,
+		NoArgument,
+		NoArgument,
 		location.sourceStart,
 		location.sourceEnd);
 }

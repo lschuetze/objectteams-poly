@@ -25,6 +25,8 @@ should sources be built (true|false)?
 		do.build.all     = ${do.build.all}
 should test be run (true|false)?
 		do.run.tests     = ${do.run.tests}
+directory for tempory files during testing:
+		test.tmpDir		 = ${test.tmpDir}
 ------------------------------------------------------------------------------
 		</echo>
 	</target>
@@ -343,6 +345,7 @@ should test be run (true|false)?
 			<property name="basearch" value="${arch}" />
 			<property name="otdtUpdatesDir" value="${otdtUpdatesDir}" />
 			<property name="testsUpdatesDirBase" value="${testsUpdatesDirBase}" />
+			<property name="test.tmpDir" value="${test.tmpDir}"/>
 			<property name="vmargs" value="${vmargs}" />
 		</ant>
 	</target>
@@ -357,6 +360,7 @@ should test be run (true|false)?
 			<property name="basearch" value="${arch}" />
 			<property name="otdtUpdatesDir" value="${otdtUpdatesDir}" />
 			<property name="testsUpdatesDirBase" value="${testsUpdatesDirBase}" />
+			<property name="test.tmpDir" value="${test.tmpDir}"/>
 			<property name="vmargs" value="${vmargs}" />
 		</ant>
 	</target>

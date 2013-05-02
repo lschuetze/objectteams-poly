@@ -20,6 +20,9 @@ OT_TESTSUITE_DIR=${BASEDIR}/testrun
 # EXPORT: tmp directory for logging:
 TMPDIR="${BASEDIR}/tmp"
 
+# EXPORT: tmp directory for test files:
+TEST_TMPDIR="${HOME}/tmp"
+
 # EXPORT: directory for metadata from previous builds:
 METADATA="${BASEDIR}/metadata"
 
@@ -48,11 +51,11 @@ fi
 
 # VERSIONS:
 # Eclipse SDK build identifier:
-EVERSION=4.3M5
+EVERSION=4.3M6
 # Architecture (as used by OSGi):
 ARCH=`arch`
 # used only locally:
-DROP=${BASEDIR}/drops4/S-4.3M5-201301302000
+DROP=${BASEDIR}/drops4/S-4.3M6-201303141330
 
 
 # EXPORT: archive file of the base eclipse SDK build:
@@ -62,5 +65,5 @@ ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
 ECLIPSE_TESTLIB_ZIP=${DROP}/eclipse-test-framework-${EVERSION}.zip
 
 # EXPORT: where to find previously published plugins&features:
-PUBLISHED_UPDATES=${HOME}/downloads/objectteams/updates/ot2.1
+PUBLISHED_UPDATES=${HOME}/downloads/objectteams/updates/ot2.2
 

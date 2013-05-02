@@ -69,7 +69,7 @@ public class TypeDeclarationTest extends AstRewritingDescribingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= createAST3(cu);
+		CompilationUnit astRoot= createAST(cu);
 		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -129,7 +129,7 @@ public class TypeDeclarationTest extends AstRewritingDescribingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("T.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= createAST3(cu);
+		CompilationUnit astRoot= createAST(cu);
 		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		

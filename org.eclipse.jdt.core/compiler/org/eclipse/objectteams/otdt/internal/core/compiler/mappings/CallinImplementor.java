@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: CallinImplementor.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -244,6 +243,7 @@ public class CallinImplementor extends MethodMappingImplementor
 		final AstGenerator gen = new AstGenerator(
 				callinBindingDeclaration.roleMethodSpec.sourceStart,
 				callinBindingDeclaration.roleMethodSpec.sourceEnd);
+		gen.replaceableEnclosingClass = teamDecl.binding;
 		if (this._role.getClassPartBinding() != null)
 			gen.replaceableBaseAnchor = this._role.getClassPartBinding().getField(IOTConstants._OT_BASE, true);
 

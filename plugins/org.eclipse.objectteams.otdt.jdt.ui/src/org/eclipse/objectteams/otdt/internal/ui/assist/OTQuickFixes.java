@@ -564,8 +564,7 @@ public team class OTQuickFixes  {
 		}
 
 		@SuppressWarnings("decapsulation")
-		int getNeededVisibility(ASTNode currNode, ITypeBinding targetType) 
-			<- replace  int getNeededVisibility(ASTNode currNode, ITypeBinding targetType);
+		getNeededVisibility <- replace  getNeededVisibility;
 
 		@SuppressWarnings("basecall")
 		callin static int getNeededVisibility(ASTNode currNode, ITypeBinding targetType) {

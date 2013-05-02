@@ -261,8 +261,9 @@ public class AnchorMapping {
 	          		anchor = null; // cancel if incompatible.
 		   }
 	   }
-	return anchor;
-}
+	   return anchor;
+   }
+
    // if anchor is valid return it otherwise null 
    private ITeamAnchor validAnchor(ITeamAnchor anchor) {
 	   if (  (anchor != null)

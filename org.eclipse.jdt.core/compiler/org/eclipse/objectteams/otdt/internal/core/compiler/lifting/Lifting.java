@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2003, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2003, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: Lifting.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -111,7 +110,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  *
  *
  * @author brcan, haebor, mac, stephan
- * @version $Id: Lifting.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class Lifting extends SwitchOnBaseTypeGenerator
 					 implements TypeIds, ClassFileConstants, ExtraCompilerModifiers
@@ -265,6 +263,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         AstGenerator gen = existingConstructor == null
         			? new AstGenerator(roleType)
         			: new AstGenerator(existingConstructor);
+        gen.replaceableEnclosingClass = roleType.binding.enclosingType();
         // public MyRole(MyBase base)
         ConstructorDeclaration generatedConstructor =
             gen.constructor(teamTypeDeclaration.compilationResult,
@@ -637,6 +636,7 @@ public class Lifting extends SwitchOnBaseTypeGenerator
 
         this._boundRootRoleModel = boundRootRoleNode.getTreeObject();
         this._gen = new AstGenerator(typeDecl.sourceStart, typeDecl.sourceEnd);
+        this._gen.replaceableEnclosingClass = teamTypeDeclaration.binding;
         this._sourceLevel= typeDecl.scope.compilerOptions().sourceLevel;
 
         try {

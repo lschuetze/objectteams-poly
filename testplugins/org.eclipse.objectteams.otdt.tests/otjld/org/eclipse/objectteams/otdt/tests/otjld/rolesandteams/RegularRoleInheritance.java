@@ -34,7 +34,7 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test148_extendingRoleFromUnrelatedTeam2" };
+//		TESTS_NAMES = new String[] { "testBug403396_2" };
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -1488,5 +1488,58 @@ public class RegularRoleInheritance extends AbstractOTJLDTest {
 			    "    \n"
             },
             "cannot be resolved");
+    }
+
+    public void testBug403396_1() {
+    	runConformTest(
+    		new String[] {
+    			"base/BGraph.java",
+    			"package base;\n" + 
+    			"\n" + 
+    			"public team class BGraph {\n" + 
+    			"	public class BNode { }\n" + 
+    			"	public class BEdge {}\n" + 
+    			"}\n",
+    			"features/Features.java",
+    			"package features;\n" + 
+    			"import base base.BGraph;\n" + 
+    			"public team class Features {\n" + 
+    			"	public team class BasicGraph playedBy BGraph {\n" + 
+    			"		public BasicGraph() { base(); }\n" + 
+    			"		public class Edge playedBy BEdge<@base> {\n" + 
+    			"			public Edge() { base(); }\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"	public team class WeightedGraph extends BasicGraph {\n" + 
+    			"	}\n" + 
+    			"}\n"
+    		});
+    }
+
+    public void testBug403396_2() {
+    	runConformTest(
+    		new String[] {
+    			"base/BGraph.java",
+    			"package base;\n" + 
+    			"\n" + 
+    			"public team class BGraph {\n" + 
+    			"	public class BNode { }\n" + 
+    			"	public class BEdge {}\n" + 
+    			"}\n",
+    			"features/Features.java",
+    			"package features;\n" + 
+    			"import base base.BGraph;\n" + 
+    			"public team class Features {\n" + 
+    			"	public team class BasicGraph playedBy BGraph {\n" + 
+    			"		public BasicGraph() { base(); }\n" + 
+    			"		public class Edge playedBy BEdge<@base> {\n" + 
+    			"			public Edge() { base(); }\n" + 
+    			"		}\n" + 
+    			"	}\n" + 
+    			"	public team class WeightedGraph extends BasicGraph {\n" +
+    			"		@Override public class Edge {}\n" + 
+    			"	}\n" + 
+    			"}\n"
+    		});
     }
 }

@@ -1631,4 +1631,69 @@ public class OTReconcilerTests extends ReconcilerTests {
     		deleteProject("P");
     	}
     }
+
+    // Bug 400360 - [reconciler] fails to resolve callout-to-field with path-anchored type
+    public void testBug400360() throws CoreException, InterruptedException {
+    	try {
+			// Resources creation
+			IJavaProject p = createOTJavaProject("P", new String[] {""}, new String[] {"JCL15_LIB"}, "bin");
+			IProject project = p.getProject();
+			IProjectDescription prjDesc = project.getDescription();
+			prjDesc.setBuildSpec(OTDTPlugin.createProjectBuildCommands(prjDesc));
+			project.setDescription(prjDesc, null);
+			p.setOption(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.IGNORE);
+	
+			OTREContainer.initializeOTJProject(project);
+
+			String allShapesSourceString =	
+					"public team class AllShapes {\n" + 
+		    		"\n" + 
+		    		"	public abstract class Connector { }\n" + 
+		    		"	public abstract class RectangularConnector extends Connector { }\n" + 
+		    		"}\n";
+			this.createFile(
+				"/P/AllShapes.java",
+				allShapesSourceString);
+			
+			String chdSourceString =	
+					"public team class CompanyHierarchyDisplay {\n" + 
+		    		"    \n" + 
+		    		"	public final AllShapes _shapes = new AllShapes();\n" + 
+		    		"	\n" + 
+		    		"    public class Connection {\n" + 
+		    		"    	Connector<@_shapes> connShape;\n" + 
+		    		"    }\n" + 
+		    		"}\n";
+			this.createFile(
+				"/P/CompanyHierarchyDisplay.java",
+    			chdSourceString);
+			
+			String versionASourceString =	
+					"public team class VersionA {\n" + 
+		    		"    private final CompanyHierarchyDisplay _chd;\n" + 
+		    		"    \n" + 
+		    		"    public VersionA(CompanyHierarchyDisplay chd) {\n" + 
+		    		"    	_chd = chd;\n" + 
+		    		"    }\n" + 
+		    		"    \n" + 
+		    		"    public class RectangularConnections playedBy Connection<@_chd> {\n" + 
+		    		"       final AllShapes _shapesX = _chd._shapes;\n" +
+		    		"       @SuppressWarnings(\"decapsulation\")\n" + 
+		    		"		void setShape(RectangularConnector<@_shapesX> shape) -> set Connector<@_chd._shapes> connShape;\n" + 
+		    		"    }\n" + 
+		    		"}\n";
+			this.createFile(
+				"/P/VersionA.java",
+				versionASourceString);
+
+			char[] versionASourceChars = versionASourceString.toCharArray();
+			this.problemRequestor.initialize(versionASourceChars);
+			
+			ICompilationUnit unit = getCompilationUnit("/P/VersionA.java").getWorkingCopy(this.wcOwner, null);
+			
+			assertNoProblem(versionASourceChars, unit);
+    	} finally {
+    		deleteProject("P");
+    	}    	
+    }
 }

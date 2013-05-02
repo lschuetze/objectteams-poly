@@ -1369,4 +1369,30 @@ public class ImplicitInheritance extends AbstractOTJLDTest {
 			"----------\n");
     }
 
+    // Bug 400362 - [compiler] role field with anchored role type breaks implicit inheritance
+    public void test0c16_implicitInheritanceRegression2() {
+    	runConformTest(
+    		new String[]{
+    	"p2/SubTeam.java",
+    		"package p2;\n" +
+    		"import p1.SuperTeam;\n" +
+    		"public team class SubTeam extends SuperTeam {\n" +
+    		"	public abstract class R {}\n" +
+    		"}\n",
+    	"p1/SuperTeam.java",
+    		"package p1;\n" +
+    		"public team class SuperTeam {\n" +
+    		"	final OtherTeam other=new OtherTeam();\n" +
+    		"	public abstract class R {\n" +
+    		"		OR<@other> otherRole;\n" +
+    		"	}\n" +
+    		"}\n",
+    	"p1/OtherTeam.java",
+    		"package p1;\n" +
+    		"public team class OtherTeam {\n" +
+    		"	public abstract class OR {}\n" +
+    		"}\n"
+    		},
+    		"");
+    }
 }

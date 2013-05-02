@@ -2248,6 +2248,9 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
             		this.scope.problemReporter().invalidType(arg.type, problemBinding);
             	}
             }
+            // fix for NPE of https://bugs.eclipse.org/403396
+            if (parameterType != null && !parameterType.isValidBinding() && ((parameterType.tagBits & TagBits.HasMissingType) == 0))
+            	foundArgProblem = true;
 // SH}
 			if (parameterType == null) {
 				foundArgProblem = true;

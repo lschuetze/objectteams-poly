@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2010 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany.
@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: StandardElementGenerator.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -88,7 +87,6 @@ import static org.eclipse.objectteams.otdt.core.compiler.IOTConstants.*;
  *   - generates getfield of real inherited field plus a checkcast to compensate for weakening
  *
  * @author stephan
- * @version $Id: StandardElementGenerator.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class StandardElementGenerator {
 
@@ -602,6 +600,7 @@ public class StandardElementGenerator {
 		AstGenerator gen= roleType.baseclass != null
 							 ? new AstGenerator(roleType.baseclass)
 							 : new AstGenerator(roleType);
+		gen.replaceableEnclosingClass = roleType.binding.enclosingType();
 		ReferenceBinding superRole = roleType.binding.superclass;
 		if (   superRole != null              // has parent
 			&& superRole.isRole()             // parent is role
@@ -698,6 +697,7 @@ public class StandardElementGenerator {
 		AstGenerator gen = roleType.baseclass != null ?
 			new AstGenerator(roleType.baseclass.sourceStart, roleType.baseclass.sourceEnd) :
 			new AstGenerator(roleType.sourceStart, roleType.sourceEnd);
+		gen.replaceableEnclosingClass = roleType.binding.enclosingType();
 
 		TypeReference baseclassReference; // must set in if or else
 		TypeParameter methodParam = null;

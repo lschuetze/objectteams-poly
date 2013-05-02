@@ -22,6 +22,8 @@
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
+ *								bug 400421 - [compiler] Null analysis for fields does not take @com.google.inject.Inject into account
+ *								bug 382069 - [null] Make the null analysis consider JUnit's assertNotNull similarly to assertions
  *      Jesper S Moller - Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
@@ -565,10 +567,34 @@ public void computeId() {
 				return;
 			}
 // SH}
-			if (!CharOperation.equals(TypeConstants.JAVA, this.compoundName[0]))
+			char[] packageName = this.compoundName[0];
+			// expect only java.*.* and javax.*.* and junit.*.* and org.junit.*
+			switch (packageName.length) {
+				case 3: // only one type in this group, yet:
+					if (CharOperation.equals(TypeConstants.ORG_JUNIT_ASSERT, this.compoundName))
+						this.id = TypeIds.T_OrgJunitAssert;
+					return;						
+				case 4:
+					if (!CharOperation.equals(TypeConstants.JAVA, packageName))
+						return;
+					break; // continue below ...
+				case 5:
+					switch (packageName[1]) {
+						case 'a':
+							if (CharOperation.equals(TypeConstants.JAVAX_ANNOTATION_INJECT_INJECT, this.compoundName))
+								this.id = TypeIds.T_JavaxInjectInject;
+							return;
+						case 'u':
+							if (CharOperation.equals(TypeConstants.JUNIT_FRAMEWORK_ASSERT, this.compoundName))
+								this.id = TypeIds.T_JunitFrameworkAssert;
+							return;
+					}
 				return;
+				default: return;
+			}
+			// ... at this point we know it's java.*.*
 			
-			char[] packageName = this.compoundName[1];
+			packageName = this.compoundName[1];
 			if (packageName.length == 0) return; // just to be safe
 			char[] typeName = this.compoundName[2];
 			if (typeName.length == 0) return; // just to be safe
@@ -615,6 +641,10 @@ public void computeId() {
 								case 'I' :
 									if (CharOperation.equals(typeName, TypeConstants.JAVA_UTIL_ITERATOR[2]))
 										this.id = TypeIds.T_JavaUtilIterator;
+									return;
+								case 'O' :
+									if (CharOperation.equals(typeName, TypeConstants.JAVA_UTIL_OBJECTS[2]))
+										this.id = TypeIds.T_JavaUtilObjects;
 									return;
 							}
 						}
@@ -785,6 +815,12 @@ public void computeId() {
 		break;
 
 		case 4:
+			// expect one type from com.*.*.*:
+			if (CharOperation.equals(TypeConstants.COM_GOOGLE_INJECT_INJECT, this.compoundName)) {
+				this.id = TypeIds.T_ComGoogleInjectInject;
+				return;
+			}
+			// otherwise only expect java.*.*.*
 			if (!CharOperation.equals(TypeConstants.JAVA, this.compoundName[0]))
 				return;
 			packageName = this.compoundName[1];
@@ -902,6 +938,8 @@ public void computeId() {
 					packageName = this.compoundName[1];
 					if (packageName.length == 0) return; // just to be safe
 
+					switch (packageName[0]) {
+						case 'e':
 					if (CharOperation.equals(TypeConstants.ECLIPSE, packageName)) {
 						packageName = this.compoundName[2];
 						if (packageName.length == 0) return; // just to be safe
@@ -924,6 +962,24 @@ public void computeId() {
 						}
 						return;
 					}
+					return;
+						case 'a':
+							if (CharOperation.equals(TypeConstants.APACHE, packageName)) {
+								if (CharOperation.equals(TypeConstants.COMMONS, this.compoundName[2])) {
+									if (CharOperation.equals(TypeConstants.ORG_APACHE_COMMONS_LANG_VALIDATE, this.compoundName))
+										this.id = TypeIds.T_OrgApacheCommonsLangValidate;
+									else if (CharOperation.equals(TypeConstants.ORG_APACHE_COMMONS_LANG3_VALIDATE, this.compoundName))
+										this.id = TypeIds.T_OrgApacheCommonsLang3Validate;
+			}
+							}
+							return;
+					}
+					return;
+				case 'c':
+					if (!CharOperation.equals(TypeConstants.COM, this.compoundName[0]))
+						return;
+					if (CharOperation.equals(TypeConstants.COM_GOOGLE_COMMON_BASE_PRECONDITIONS, this.compoundName))
+						this.id = TypeIds.T_ComGoogleCommonBasePreconditions;
 					return;
 			}
 			break;
@@ -1913,7 +1969,7 @@ public char[] shortReadableName() /*Object*/ {
 	}
 	return shortReadableName;
 }
-// SH} // end sourceName - editid section
+// SH} // end sourceName - edited section
 
 //{ObjectTeams: to be overridden in RoleTypeBinding
 public char[] optimalName() {
