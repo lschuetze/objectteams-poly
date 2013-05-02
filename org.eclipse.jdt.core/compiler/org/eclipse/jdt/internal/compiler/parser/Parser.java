@@ -6866,6 +6866,9 @@ protected void consumePackageDeclarationNameWithModifiers() {
 		}
 	}
 
+//{ObjectTeams: hide team modifier:
+	packageModifiers &= ~ClassFileConstants.AccTeam;
+// SH}
 	if (packageModifiers != 0) {
 		problemReporter().illegalModifiers(packageModifiersSourceStart, packageModifiersSourceEnd);
 	}
