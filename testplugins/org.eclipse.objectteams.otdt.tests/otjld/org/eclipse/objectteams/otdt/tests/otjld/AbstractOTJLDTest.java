@@ -138,8 +138,26 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	
 	protected void runNegativeTestMatching(String[] testFiles, String expectedCompilerLog) {
 		this.errorMatching = true;
-		// ensure expectingCompilerError is set, which runNegativeTest(String[],String) not always does
-		super.runNegativeTest(testFiles, expectedCompilerLog, DEFAULT_TEST_OPTIONS);
+		runTest(
+		 		// test directory preparation
+				true /* flush output directory */,
+				testFiles /* test files */,
+				// compiler options
+				null /* no class libraries */,
+				null /* no custom options */,
+				false /* do not perform statements recovery */,
+				null /* no custom requestor */,
+				// compiler results
+				true /* expecting compiler errors */,
+				expectedCompilerLog /* expected compiler log */,
+				// runtime options
+				false /* do not force execution */,
+				null /* no vm arguments */,
+				// runtime results
+				null /* do not check output string */,
+				null /* do not check error string */,
+				// javac options
+				DEFAULT_TEST_OPTIONS /* javac test options */);
 		this.errorMatching = false;
 	}
 

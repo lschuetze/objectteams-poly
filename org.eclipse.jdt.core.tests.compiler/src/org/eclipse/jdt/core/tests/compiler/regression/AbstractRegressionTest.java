@@ -2266,7 +2266,9 @@ protected void runNegativeTest(String[] testFiles, String expectedCompilerLog, b
 			// javac options
 			javacTestOptions /* javac test options */);
 	}
-	private void runTest(
+//{ObjectTeams: made accessible to sub-classes:
+	protected void runTest(
+// SH}
 			// test directory preparation
 			boolean shouldFlushOutputDirectory,
 			String[] testFiles,
