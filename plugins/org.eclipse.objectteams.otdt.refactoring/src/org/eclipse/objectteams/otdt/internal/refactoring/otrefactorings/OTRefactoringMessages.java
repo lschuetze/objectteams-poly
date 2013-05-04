@@ -78,6 +78,19 @@ public class OTRefactoringMessages extends NLS {
 	public static String InlineCallinWizard_inlineCallinInput_pageName;
 	public static String OTRefactoring_organizeImports_editName;
 	public static String RefactoringUtil_notFullyOTAware_info;
+
+	public static String MoveToRoleFileRefactoring_moveToRoleFile_name;
+	public static String MoveToRoleFileRefactoring_preconditions_progress;
+	public static String MoveToRoleFileRefactoring_noRole_error;
+	public static String MoveToRoleFileRefactoring_inexistentRole_error;
+	public static String MoveToRoleFileRefactoring_binaryRole_error;
+	public static String MoveToRoleFileRefactoring_readOnlyRole_error;
+	public static String MoveToRoleFileRefactoring_compileErrors_error;
+	public static String MoveToRoleFileRefactoring_notInsideRole_error;
+	public static String MoveToRoleFileRefactoring_insideRoleFile_error;
+	public static String MoveToRoleFileRefactoring_creatingChange_progress;
+	public static String MoveToRoleFileRefactoring_change_name;
+	
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, OTRefactoringMessages.class);
