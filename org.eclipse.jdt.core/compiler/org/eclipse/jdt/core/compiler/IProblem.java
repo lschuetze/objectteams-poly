@@ -2003,6 +2003,9 @@ void setSourceStart(int sourceStart);
 	
 	int AbstractStaticMethodCalled 				 = LIMITATIONS +     31; // actually a sign of corrupt byte code
 	
+	/** @since 4.3 OT 2.2 */
+	int RoleFileMissingTeamDeclaration			 = LIMITATIONS + 	 32;
+	
 // ==== EXPERIMENTAL: ====
 	int EXPERIMENTAL = OTJ_RELATED + 12*OTCHAP;
 	int MigrateNonRole 							 = EXPERIMENTAL +     1;

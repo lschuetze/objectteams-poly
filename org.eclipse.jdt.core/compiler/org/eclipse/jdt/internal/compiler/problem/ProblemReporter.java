@@ -12631,6 +12631,22 @@ public void roleFileInBinaryTeam(TypeDeclaration roleType, ReferenceBinding team
 
 }
 
+public void roleFileMissingTeamDeclaration(CompilationUnitDeclaration roleUnit) {
+	String[] args = { new String(roleUnit.getFileName()) };
+	int start = 0, end = 0;
+	if (roleUnit.types != null && roleUnit.types.length > 0) {
+		start = roleUnit.types[0].sourceStart;
+		end = roleUnit.types[0].sourceEnd;
+	}
+	this.handle(
+			IProblem.RoleFileMissingTeamDeclaration,
+			args,
+			args,
+			ProblemSeverities.Error | ProblemSeverities.AbortType | ProblemSeverities.Fatal,
+			start,
+			end);
+}
+
 public void mismatchingRoleParts(ReferenceBinding binding, TypeDeclaration type) {
 	String[] args = { String.valueOf(binding.readableName())};
 	this.handle(

@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
@@ -87,8 +88,17 @@ public class RoleFileHelper {
 			roleType.compilationUnit = roleUnit;
 
 		if (roleUnit.currentPackage == null) {
-			if (roleUnit.ignoreFurtherInvestigation)
-				return; // silently, error (assumably severe) has been reported
+			if (!roleUnit.ignoreFurtherInvestigation) {
+				// double protection for https://bugs.eclipse.org/407223
+				ProblemReporter problemReporter = environment.problemReporter;
+				problemReporter.referenceContext = roleType;
+				try {
+					problemReporter.roleFileMissingTeamDeclaration(roleUnit);
+				} finally {
+					problemReporter.referenceContext = null;
+				}
+			}
+			return; // silently, error (assumably severe) has been reported
 		}
 
 		boolean sourceTypeReqSave = Config.getSourceTypeRequired();
