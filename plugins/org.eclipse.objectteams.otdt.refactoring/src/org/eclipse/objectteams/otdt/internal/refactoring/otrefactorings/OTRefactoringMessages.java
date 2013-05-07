@@ -79,6 +79,12 @@ public class OTRefactoringMessages extends NLS {
 	public static String OTRefactoring_organizeImports_editName;
 	public static String RefactoringUtil_notFullyOTAware_info;
 
+	public static String MoveToRoleFile_movetoRolefile_commandName;
+	public static String MoveToRoleFile_movetoRolefile_tooltip;
+	public static String MoveToRoleFile_errorDialog_title;
+	public static String MoveToRoleFile_notAvailableOnSelection_error;
+	public static String MoveToRoleFile_exception;
+	public static String MoveToRoleFile_exception_seeLog;
 	public static String MoveToRoleFileRefactoring_moveToRoleFile_name;
 	public static String MoveToRoleFileRefactoring_preconditions_progress;
 	public static String MoveToRoleFileRefactoring_noRole_error;
@@ -88,6 +94,7 @@ public class OTRefactoringMessages extends NLS {
 	public static String MoveToRoleFileRefactoring_compileErrors_error;
 	public static String MoveToRoleFileRefactoring_notInsideRole_error;
 	public static String MoveToRoleFileRefactoring_insideRoleFile_error;
+	public static String MoveToRoleFileRefactoring_teamNotToplevel_error;
 	public static String MoveToRoleFileRefactoring_creatingChange_progress;
 	public static String MoveToRoleFileRefactoring_change_name;
 	

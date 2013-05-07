@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.rolefile.MoveToRoleFileRefactoring;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.MySetup;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
@@ -69,18 +70,12 @@ public class MoveToRileFileTests extends RefactoringTest {
 		return cus;
 	}
 
-
 	private static MoveToRoleFileRefactoring createMoveToRoleFileRefactoring(IType role)
 			throws JavaModelException {
 		MoveToRoleFileRefactoring refactoring = new MoveToRoleFileRefactoring(role);
 		return refactoring;
 	}
 
-	/**
-	 * The <code>ICompilationUnit</code> containing the role that defines the
-	 * <code>ICallinMapping</code> at position 0 and its base at position 1.
-	 * 
-	 */
 	private void performMoveToRoleFile_pass(String inputCU, String roleName, String[] outputCUNames) throws Exception {
 		ICompilationUnit cu = createCUfromTestFile(getPackageP(), inputCU);
 		ICompilationUnit[] outputCUs = null;
@@ -113,35 +108,58 @@ public class MoveToRileFileTests extends RefactoringTest {
 		}
 	}
 	
-	/**
-	 * The <code>ICompilationUnit</code> containing the role that defines the
-	 * <code>ICallinMapping</code> at position 0 and its base at position 1.
-	 * 
-	 */
-	private void performMoveToRoleFile_failing(String[] cuNames, String roleName) throws Exception {
-//		ICompilationUnit[] cus = createCUs(cuNames);
+	private void performMoveToRoleFile_initialChecksFailing(String inputCU, String roleName, String expectedMsg) throws Exception {
+		ICompilationUnit cu = createCUfromTestFile(getPackageP(), inputCU);
+		try {
+
+			IType roleType = getType(cu, roleName);
+			assertTrue("role  " + roleName + " does not exist", roleType.exists());
+
+
+			MoveToRoleFileRefactoring ref = createMoveToRoleFileRefactoring(roleType);
+
+			RefactoringStatus result = ref.checkInitialConditions(new NullProgressMonitor());
+			assertNotNull("initial condition must return a non-null result.", result);
+			assertTrue("initial condition was supposed to fail.", !result.isOK());
+			assertNotNull("initial condition result is expected to contain an error.", result.getEntryMatchingSeverity(RefactoringStatus.ERROR));
+			if (expectedMsg != null) {
+				for(RefactoringStatusEntry e : result.getEntries()) {
+					if (expectedMsg.equals(e.getMessage()))
+						return;
+				}
+				fail("Expected message not found "+expectedMsg);
+			}
+		} finally {
+			performDummySearch();
+		}
+	}
+
+//	private void performMoveToRoleFile_failing(String inputCU, String roleName, String expectedMsg) throws Exception {
+//		ICompilationUnit cu = createCUfromTestFile(getPackageP(), inputCU);
 //		try {
 //
-//			IType roleType = getType(cus[0], roleName);
+//			IType roleType = getType(cu, roleName);
 //			assertTrue("role  " + roleName + " does not exist", roleType.exists());
+//
 //
 //			MoveToRoleFileRefactoring ref = createMoveToRoleFileRefactoring(roleType);
 //
 //			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-//
-//			RefactoringStatus result = performRefactoring(ref);
+//	
+//			RefactoringStatus result = ref.checkFinalConditions(new NullProgressMonitor());
 //			assertNotNull("precondition was supposed to fail.", result);
 //			assertTrue("precondition was supposed to fail.", !result.isOK());
 //			assertNotNull("precondition result is expected to contain an error.", result.getEntryMatchingSeverity(RefactoringStatus.ERROR));
-//			
+//			if (expectedMsg != null)
+//				for(RefactoringStatusEntry e : result.getEntries()) {
+//					if (expectedMsg.equals(e.getMessage()))
+//						return;
+//				}
+//			fail("Expected message not found "+expectedMsg);
 //		} finally {
 //			performDummySearch();
-//			for (int i = 0; i < cus.length; i++) {
-//				cus[i].delete(false, null);
-//			}
-//
 //		}
-	}
+//	}
 
 
 	/******* tests ******************/
@@ -154,5 +172,17 @@ public class MoveToRileFileTests extends RefactoringTest {
 	
 	public void testWithMoreContents() throws Exception {
 		performMoveToRoleFile_pass("T", "R2", new String[] { "T", "T/R2" });
+	}
+	
+	public void testNotARole() throws Exception {
+		performMoveToRoleFile_initialChecksFailing("T", "R", "The selected type 'R' is not a role class.");
+	}
+
+	public void testTeamNotToplevel() throws Exception {
+		performMoveToRoleFile_initialChecksFailing("Outer", "R", "The enclosing team 'InnerTeam' is not a top-level type in its file.");
+	}
+
+	public void testMoveNestedTeam() throws Exception {
+		performMoveToRoleFile_pass("Outer", "Inner", new String[] { "Outer", "Outer/Inner" });
 	}
 }

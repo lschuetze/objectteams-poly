@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.extractcallin.ExtractCallinAction;
 import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.inlinecallin.InlineCallinAction;
+import org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.rolefile.MoveToRoleFileAction;
 import org.eclipse.ui.IWorkbenchSite;
 
 import base org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
@@ -40,6 +41,7 @@ public team class ActionGroupAdaptor
 {
 	public static final String INLINE_CALLIN = "org.eclipse.objectteams.otdt.refactoring.inline.callin"; //$NON-NLS-1$
 	public static final String EXTRACT_CALLIN = "org.eclipse.objectteams.otdt.refactoring.extract.callin"; //$NON-NLS-1$
+	public static final String MOVE_TO_ROLE_FILE = "org.eclipse.objectteams.otdt.refactoring.moveto.rolefile"; //$NON-NLS-1$
 	
 	protected team class CUEditorAdaptor playedBy CompilationUnitEditor 
 	{
@@ -93,6 +95,7 @@ public team class ActionGroupAdaptor
 		
 		SelectionDispatchAction inlineCallinAction;
 		SelectionDispatchAction extractCallinAction;
+		SelectionDispatchAction moveToRoleFileAction;
 		
 		protected ActionGroup(RefactorActionGroup group, JavaEditor editor, ISelection selection) {
 			this(group);
@@ -104,6 +107,10 @@ public team class ActionGroupAdaptor
 			this.extractCallinAction = new ExtractCallinAction().new SelectionDispatchAction(editor);
 			initUpdatingAction(this.extractCallinAction, null, null, selection, EXTRACT_CALLIN);
 			editor.setAction("ExtractCallin", this.extractCallinAction); //$NON-NLS-1$
+			
+			this.moveToRoleFileAction = new MoveToRoleFileAction().new SelectionDispatchAction(editor);
+			initUpdatingAction(this.moveToRoleFileAction, null, null, selection, MOVE_TO_ROLE_FILE);
+			editor.setAction("MoveToRoleFile", this.moveToRoleFileAction); //$NON-NLS-1$
 		}
 
 		protected ActionGroup(RefactorActionGroup group, ISelectionProvider provider, ISelectionProvider specialProvider,ISelection selection) 
@@ -115,6 +122,9 @@ public team class ActionGroupAdaptor
 			
 			this.extractCallinAction = new ExtractCallinAction().new SelectionDispatchAction(getFSite());
 			initUpdatingAction(this.extractCallinAction, provider, specialProvider, selection, EXTRACT_CALLIN);
+			
+			this.moveToRoleFileAction = new MoveToRoleFileAction().new SelectionDispatchAction(getFSite());
+			initUpdatingAction(this.moveToRoleFileAction, provider, specialProvider, selection, MOVE_TO_ROLE_FILE);
 		}
 
 		void addAction(IMenuManager menu, IAction action) 
@@ -127,6 +137,8 @@ public team class ActionGroupAdaptor
 				menu.add(this.inlineCallinAction);
 			if (this.extractCallinAction != null)
 				menu.add(this.extractCallinAction);
+			if (this.moveToRoleFileAction != null)
+				menu.add(this.moveToRoleFileAction);
 		}
 		
 		void disposeAction(ISelectionChangedListener action, ISelectionProvider provider) 
@@ -139,6 +151,8 @@ public team class ActionGroupAdaptor
 				provider.removeSelectionChangedListener(this.inlineCallinAction);
 			if (this.extractCallinAction != null)
 				provider.removeSelectionChangedListener(this.extractCallinAction);
+			if (this.moveToRoleFileAction != null)
+				provider.removeSelectionChangedListener(this.moveToRoleFileAction);
 		}			
 	}
 }

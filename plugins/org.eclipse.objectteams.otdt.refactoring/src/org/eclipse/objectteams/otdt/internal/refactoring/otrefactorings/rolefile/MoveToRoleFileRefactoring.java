@@ -15,7 +15,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.rolefile;
 
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -42,6 +41,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CreateCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CreatePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -110,7 +110,7 @@ public class MoveToRoleFileRefactoring extends Refactoring {
 			} else if (((IRoleType)OTModelManager.getOTElement(fRoleType)).isRoleFile()) {
 				status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.MoveToRoleFileRefactoring_insideRoleFile_error,
 						new Object[] { fRoleType.getElementName() })));
-			} else{ 
+			} else { 
 					status.merge(initialize(monitor));
 			}
 		} finally {
@@ -123,10 +123,15 @@ public class MoveToRoleFileRefactoring extends Refactoring {
 		RefactoringStatus status = new RefactoringStatus();
 		fTeamType = (IType) fRoleType.getParent();
 		fTeamCUnit = fTeamType.getCompilationUnit();
-
+		
+		if (fTeamType != null && !(fTeamType.getParent() instanceof ICompilationUnit)) {
+			status.merge(RefactoringStatus.createFatalErrorStatus(NLS.bind(OTRefactoringMessages.MoveToRoleFileRefactoring_teamNotToplevel_error,
+					new Object[] { fTeamType.getElementName() })));
+		} 
+		
 		if (fRootRole == null) {
 			fRootRole = RefactoringASTParser.parseWithASTProvider(fTeamCUnit, true, new SubProgressMonitor(monitor, 99));
-		}
+		}		
 		return status;
 	}
 	
@@ -146,7 +151,9 @@ public class MoveToRoleFileRefactoring extends Refactoring {
 			// packages
 			IPackageFragment enclosingPackage = fRoleType.getPackageFragment();
 			IPackageFragmentRoot root = (IPackageFragmentRoot) enclosingPackage.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-			IPackageFragment teamPackage = root.getPackageFragment(enclosingPackage.getElementName()+'.'+fTeamType.getElementName());
+			String enclPackName = enclosingPackage.getElementName();
+			IPackageFragment teamPackage = root.getPackageFragment(
+					enclPackName.length()==0 ? fTeamType.getElementName() : enclPackName+'.'+fTeamType.getElementName());
 
 			// fetch AST for team and role:
 			CompilationUnitRewrite cuRewrite = new CompilationUnitRewrite(fTeamCUnit);
@@ -156,7 +163,7 @@ public class MoveToRoleFileRefactoring extends Refactoring {
 
 			// new CU:
 			if (!teamPackage.getResource().exists())
-				((IFolder)teamPackage.getResource()).create(false, true, new SubProgressMonitor(pm, 1));
+				change.add(new CreatePackageChange(teamPackage));
 			newCuWC= teamPackage.getCompilationUnit(fRoleType.getElementName()+JavaModelUtil.DEFAULT_CU_SUFFIX).getWorkingCopy(new SubProgressMonitor(pm, 2));
 
 			// (1) create role:
@@ -177,7 +184,7 @@ public class MoveToRoleFileRefactoring extends Refactoring {
 			// (2) modify team:
 			// remove role from team:
 			ASTRewrite rewrite = cuRewrite.getASTRewrite();
-			ListRewrite teamMembersRewrite = rewrite.getListRewrite(teamNode, TypeDeclaration.BODY_DECLARATIONS_PROPERTY);
+			ListRewrite teamMembersRewrite = rewrite.getListRewrite(teamNode, teamNode.getBodyDeclarationsProperty());
 			teamMembersRewrite.remove(roleNode, editGroup);
 			
 			// add javadoc tag '@role roleName'
@@ -191,14 +198,14 @@ public class MoveToRoleFileRefactoring extends Refactoring {
 			if (teamDoc == null) { // need to add a fresh Javadoc
 				teamDoc = ast.newJavadoc();
 				teamDoc.tags().add(roleTag);
-				rewrite.set(teamNode, TypeDeclaration.JAVADOC_PROPERTY, teamDoc, editGroup);
+				rewrite.set(teamNode, teamNode.getJavadocProperty(), teamDoc, editGroup);
 			} else { // need to insert tag into existing Javadoc
 				ListRewrite tags = rewrite.getListRewrite(teamDoc, Javadoc.TAGS_PROPERTY);
 				tags.insertLast(roleTag, editGroup);
 			}
 
 			// done change #2:
-			change.add(cuRewrite.createChange(false, new SubProgressMonitor(pm, 2)));
+			change.add(cuRewrite.createChange(true, new SubProgressMonitor(pm, 2)));
 		} finally {
 			if (newCuWC != null)
 				newCuWC.discardWorkingCopy();

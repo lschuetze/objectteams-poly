@@ -151,6 +151,17 @@
                id="org.eclipse.objectteams.otdt.internal.refactoring.InlineCallin"
                label="%Inline.callin.label"
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+               tooltip="%Inline.callin.tooltip"
+               style="push">
+         </action>
+         <action
+			   class="org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.rolefile.MoveToRoleFileAction"
+               definitionId="org.eclipse.objectteams.otdt.refactoring.moveto.rolefile"
+               icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/role_obj.gif"
+               id="org.eclipse.objectteams.otdt.internal.refactoring.MoveToRoleFile"
+               label="%Moveto.rolefile.label"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
+               tooltip="%Moveto.rolefile.label"
                style="push">
          </action>
       </actionSet>
