@@ -58,6 +58,15 @@ public class PackageDeclaration extends ASTNode {
 	public static final ChildPropertyDescriptor NAME_PROPERTY =
 		new ChildPropertyDescriptor(PackageDeclaration.class, "name", Name.class, MANDATORY, NO_CYCLE_RISK); //$NON-NLS-1$
 
+//{ObjectTeams: 'team' modifier:
+	/**
+	 * The "name" structural property of this node type (child type: {@link Name}).
+	 * @since 4.3 (OT 2.2)
+	 */
+	public static final ChildListPropertyDescriptor MODIFIERS_PROPERTY =
+		new ChildListPropertyDescriptor(PackageDeclaration.class, "modifiers", IExtendedModifier.class, CYCLE_RISK); //$NON-NLS-1$
+// SH}
+	
 	/**
 	 * A list of property descriptors (element type:
 	 * {@link StructuralPropertyDescriptor}),
@@ -84,6 +93,9 @@ public class PackageDeclaration extends ASTNode {
 		createPropertyList(PackageDeclaration.class, propertyList);
 		addProperty(JAVADOC_PROPERTY, propertyList);
 		addProperty(ANNOTATIONS_PROPERTY, propertyList);
+//{ObjectTeams: 'team' modifier
+		addProperty(MODIFIERS_PROPERTY, propertyList);
+// SH}
 		addProperty(NAME_PROPERTY, propertyList);
 		PROPERTY_DESCRIPTORS_3_0 = reapPropertyList(propertyList);
 	}
@@ -122,6 +134,10 @@ public class PackageDeclaration extends ASTNode {
 	 */
 	private ASTNode.NodeList annotations = null;
 
+//{ObjectTeams: 'team' modifier
+	ASTNode.NodeList modifiers = null;
+// SH}
+
 	/**
 	 * The package name; lazily initialized; defaults to a unspecified,
 	 * legal Java package identifier.
@@ -144,6 +160,9 @@ public class PackageDeclaration extends ASTNode {
 		super(ast);
 		if (ast.apiLevel >= AST.JLS3_INTERNAL) {
 			this.annotations = new ASTNode.NodeList(ANNOTATIONS_PROPERTY);
+//{ObjectTeams:
+			this.modifiers = new ASTNode.NodeList(MODIFIERS_PROPERTY);
+// SH}
 		}
 	}
 
@@ -153,6 +172,26 @@ public class PackageDeclaration extends ASTNode {
 	final List internalStructuralPropertiesForType(int apiLevel) {
 		return propertyDescriptors(apiLevel);
 	}
+
+//{ObjectTeams: accessing 'team' modifier:
+	/**
+	 * Returns the live ordered list of modifiers and annotations
+	 * of this declaration (added in JLS3 API).
+	 *
+	 * @return the live list of modifiers and annotations
+	 *    (element type: {@link IExtendedModifier})
+	 * @exception UnsupportedOperationException if this operation is used in
+	 * a JLS2 AST
+	 * @since 3.1
+	 */
+	public List modifiers() {
+		// more efficient than just calling unsupportedIn2() to check
+		if (this.modifiers == null) {
+			unsupportedIn2();
+		}
+		return this.modifiers;
+	}
+// SH}
 
 	/* (omit javadoc for this method)
 	 * Method declared on ASTNode.
@@ -185,6 +224,11 @@ public class PackageDeclaration extends ASTNode {
 		if (property == ANNOTATIONS_PROPERTY) {
 			return annotations();
 		}
+//{ObjectTeams:
+		if (property == MODIFIERS_PROPERTY) {
+			return modifiers();
+		}
+// SH}
 		// allow default implementation to flag the error
 		return super.internalGetChildListProperty(property);
 	}

@@ -1087,6 +1087,11 @@ public class NaiveASTFlattener extends ASTVisitor {
 			}
 		}
 		printIndent();
+//{ObjectTeams:
+		if (node.getAST().apiLevel() >= JLS3) {
+			printModifiers(node.modifiers());
+		}
+// SH}
 		this.buffer.append("package ");//$NON-NLS-1$
 		node.getName().accept(this);
 		this.buffer.append(";\n");//$NON-NLS-1$
@@ -1785,6 +1790,7 @@ public class NaiveASTFlattener extends ASTVisitor {
 	    {
 			node.getJavadoc().accept(this);
 		}
+		printModifiers(node.modifiers());
 
 		if ((node.getRoleMappingElement() != null)
 		        && (node.getBaseMappingElements() != null))

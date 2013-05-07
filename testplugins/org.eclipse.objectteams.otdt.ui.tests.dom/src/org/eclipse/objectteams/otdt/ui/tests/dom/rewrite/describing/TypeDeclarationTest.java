@@ -23,25 +23,22 @@ package org.eclipse.objectteams.otdt.ui.tests.dom.rewrite.describing;
 import java.util.List;
 
 import junit.framework.Test;
-import junit.framework.TestSuite;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.tests.model.SuiteOfTestCases.Suite;
-import org.eclipse.objectteams.otdt.ui.tests.dom.converter.RoleTypeDeclarationTest;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 public class TypeDeclarationTest extends AstRewritingDescribingTest {
 	private static final Class THIS = TypeDeclarationTest.class;
@@ -188,5 +185,44 @@ public class TypeDeclarationTest extends AstRewritingDescribingTest {
 		buf.append("}\n");			
 		assertEqualString(preview, buf.toString());
 
+	}
+	public void testRoleTypeMakePackageTeam() throws Exception {
+		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test2", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("@NonNullByDefault ");
+		buf.append("package test2;\n");
+		buf.append("public class R1 implements Runnable, Serializable playedBy String {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("R1.java", buf.toString(), false, null);			
+
+		CompilationUnit astRoot= createAST3(cu);
+		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
+		AST ast= astRoot.getAST();
+		
+		PackageDeclaration packageDecl = astRoot.getPackage();
+		{  
+			// change to team
+			ListRewrite modifiersRewrite = rewrite.getListRewrite(packageDecl, PackageDeclaration.MODIFIERS_PROPERTY);
+			Modifier teamModifier = ast.newModifier(ModifierKeyword.TEAM_KEYWORD);
+			modifiersRewrite.insertLast(teamModifier, null);
+
+			// correct the package name
+			rewrite.set(packageDecl, PackageDeclaration.NAME_PROPERTY, ast.newName("test2.MyTeam"), null);
+		}
+
+		String preview= evaluateRewrite(cu, rewrite);
+		
+		buf= new StringBuffer();
+		buf.append("@NonNullByDefault ");
+		buf.append("team package test2.MyTeam;\n");
+		buf.append("public class R1 implements Runnable, Serializable playedBy String {\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+
+		// re-get to also challenge ASTConverter and NaiveASTFlattener:
+		IPackageFragment pack2 = this.sourceFolder.createPackageFragment("test2.MyTeam", false, null);
+		cu= pack2.createCompilationUnit("R1.java", buf.toString(), false, null);		
+		astRoot= createAST3(cu);
+		assertEqualString(astRoot.toString(), buf.toString());
 	}
 }

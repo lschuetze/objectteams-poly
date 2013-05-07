@@ -20,6 +20,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.dom.rewrite;
 
+import org.eclipse.objectteams.otdt.ui.tests.dom.rewrite.describing.CallinMappingDeclarationTest;
+import org.eclipse.objectteams.otdt.ui.tests.dom.rewrite.describing.TypeDeclarationTest;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
@@ -38,6 +41,8 @@ public class AllTests {
         suite.addTest(ASTRewritingModifyingRoleTest.suite());
         suite.addTest(ASTRewritingModifyingCallinMappingDeclarationTest.suite());
         suite.addTest(ASTRewritingModifyingCalloutMappingDeclarationTest.suite());
+        suite.addTest(TypeDeclarationTest.suite());
+        suite.addTest(CallinMappingDeclarationTest.suite());
 		//$JUnit-END$
 		return suite;
 	}

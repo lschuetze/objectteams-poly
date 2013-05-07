@@ -14,7 +14,10 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.eclipse.test.performance,
  org.eclipse.core.resources,
- org.eclipse.objectteams.otdt
+ org.eclipse.objectteams.otdt,
+ org.eclipse.objectteams.otdt.ui.tests,
+ org.eclipse.jdt.ui.tests,
+ org.eclipse.objectteams.otdt.ui
 Bundle-ActivationPolicy: lazy
 Export-Package: org.eclipse.objectteams.otdt.ui.tests.dom,
  org.eclipse.objectteams.otdt.ui.tests.dom.bindings,

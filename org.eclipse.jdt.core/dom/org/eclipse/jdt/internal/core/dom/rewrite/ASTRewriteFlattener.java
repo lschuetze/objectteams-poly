@@ -718,6 +718,9 @@ public class ASTRewriteFlattener extends ASTVisitor {
 				javadoc.accept(this);
 			}
 			visitList(node, PackageDeclaration.ANNOTATIONS_PROPERTY, String.valueOf(' '));
+//{ObjectTeams:
+			visitList(node, PackageDeclaration.MODIFIERS_PROPERTY, String.valueOf(' '), Util.EMPTY_STRING, String.valueOf(' '));
+// SH}
 		}
 		this.result.append("package "); //$NON-NLS-1$
 		getChildNode(node, PackageDeclaration.NAME_PROPERTY).accept(this);

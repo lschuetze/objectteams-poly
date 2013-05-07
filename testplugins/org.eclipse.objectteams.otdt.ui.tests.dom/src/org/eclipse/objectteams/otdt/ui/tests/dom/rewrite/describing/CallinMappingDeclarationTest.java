@@ -76,26 +76,28 @@ public class CallinMappingDeclarationTest extends AstRewritingDescribingTest {
 		RoleTypeDeclaration type= findRoleTypeDeclaration(findTypeDeclaration(astRoot, "T"), "E");
 		
 		{ // insert annotation first before normal
-			CallinMappingDeclaration methodDecl= findCallinMappingDeclaration(type, "foo1");
-			ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, CallinMappingDeclaration.MODIFIERS2_PROPERTY);
+			CallinMappingDeclaration mappingDecl= findCallinMappingDeclaration(type, "foo1");
+			ListRewrite listRewrite= rewrite.getListRewrite(mappingDecl, CallinMappingDeclaration.MODIFIERS2_PROPERTY);
 			MarkerAnnotation annot= ast.newMarkerAnnotation();
 			annot.setTypeName(ast.newSimpleName("Override"));
 			listRewrite.insertFirst(annot, null);
 		}
 		{ // insert annotation first before annotation
-			CallinMappingDeclaration methodDecl= findCallinMappingDeclaration(type, "foo2");
-			ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, CallinMappingDeclaration.MODIFIERS2_PROPERTY);
+			CallinMappingDeclaration mappingDecl= findCallinMappingDeclaration(type, "foo2");
+			ListRewrite listRewrite= rewrite.getListRewrite(mappingDecl, CallinMappingDeclaration.MODIFIERS2_PROPERTY);
 			MarkerAnnotation annot= ast.newMarkerAnnotation();
 			annot.setTypeName(ast.newSimpleName("Override"));
 			listRewrite.insertFirst(annot, null);
 		}		
 		{ // remove annotation before normal
-			CallinMappingDeclaration methodDecl= findCallinMappingDeclaration(type, "foo3");
-			rewrite.remove((ASTNode) methodDecl.modifiers().get(0), null);
+			CallinMappingDeclaration mappingDecl= findCallinMappingDeclaration(type, "foo3");
+			ListRewrite listRewrite= rewrite.getListRewrite(mappingDecl, CallinMappingDeclaration.MODIFIERS2_PROPERTY);
+			listRewrite.remove((ASTNode) mappingDecl.modifiers().get(0), null);
 		}
 		{ // remove annotation before annotation
-			CallinMappingDeclaration methodDecl= findCallinMappingDeclaration(type, "foo4");
-			rewrite.remove((ASTNode) methodDecl.modifiers().get(0), null);
+			CallinMappingDeclaration mappingDecl= findCallinMappingDeclaration(type, "foo4");
+			ListRewrite listRewrite= rewrite.getListRewrite(mappingDecl, CallinMappingDeclaration.MODIFIERS2_PROPERTY);
+			listRewrite.remove((ASTNode) mappingDecl.modifiers().get(0), null);
 		}
 		
 		String preview= evaluateRewrite(cu, rewrite);
