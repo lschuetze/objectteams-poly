@@ -3120,6 +3120,28 @@ protected void consumeMethodInvocationNameWithTypeArguments() {
 	popElement(K_SELECTOR_INVOCATION_TYPE);
 	super.consumeMethodInvocationNameWithTypeArguments();
 }
+//{ObjectTeams:
+protected void consumeMethodInvocationBase(boolean isSuperAccess) {
+	popElement(K_SELECTOR_QUALIFIER);
+	popElement(K_SELECTOR_INVOCATION_TYPE);
+	super.consumeMethodInvocationBase(isSuperAccess);
+}
+protected void consumeMethodInvocationBaseWithTypeArguments(boolean isSuperAccess) {
+	popElement(K_SELECTOR_QUALIFIER);
+	popElement(K_SELECTOR_INVOCATION_TYPE);
+	super.consumeMethodInvocationBaseWithTypeArguments(isSuperAccess);
+}
+protected void consumeMethodInvocationTSuper(int kind) {
+	popElement(K_SELECTOR_QUALIFIER);
+	popElement(K_SELECTOR_INVOCATION_TYPE);
+	super.consumeMethodInvocationTSuper(kind);
+}
+protected void consumeMethodInvocationTSuperWithTypeArguments(int kind) {
+	popElement(K_SELECTOR_QUALIFIER);
+	popElement(K_SELECTOR_INVOCATION_TYPE);
+	super.consumeMethodInvocationTSuperWithTypeArguments(kind);
+}
+// SH}
 protected void consumeMethodInvocationPrimary() {
 	popElement(K_SELECTOR_QUALIFIER);
 	popElement(K_SELECTOR_INVOCATION_TYPE);
