@@ -78,7 +78,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.AstGenerator;
 public class BaseCallMessageSend extends AbstractExpressionWrapper
 {
 	public char[] sourceSelector;
-	Expression[] sourceArgs;
+	public Expression[] sourceArgs;
 	// keep a reference to the original send in case the _wrappee is replaced by some transformation
 	// (e.g., CollectedReplacementsTransformer wrapping _wrappee with a cast).
 	protected MessageSend _sendOrig;

@@ -45,7 +45,7 @@ import java.util.List;
  * @author mkr
  * @version $Id: BaseConstructorInvocation.java 23416 2010-02-03 19:59:31Z stephan $
  */
-public class BaseConstructorInvocation extends Statement
+public class BaseConstructorInvocation extends Statement implements Invocation
 {
     /**
      * The "arguments" structural property of this node type.
@@ -111,6 +111,10 @@ public class BaseConstructorInvocation extends Statement
     public List getArguments()
     {
         return this.arguments;
+    }
+
+    public ChildListPropertyDescriptor getArgumentsProperty() {
+    	return ARGUMENTS_PROPERTY;
     }
 
 	final List internalStructuralPropertiesForType(int apiLevel)
@@ -180,5 +184,7 @@ public class BaseConstructorInvocation extends Statement
         return this.ast.getBindingResolver().resolveConstructor(this);
     }
 
-
+	public IMethodBinding resolveMethodBinding() {
+		return resolveConstructorBinding();
+	}
 }

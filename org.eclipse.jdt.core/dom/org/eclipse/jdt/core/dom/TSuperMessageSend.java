@@ -40,7 +40,7 @@ import java.util.List;
  *
  * @author mkr
  */
-public class TSuperMessageSend extends Expression
+public class TSuperMessageSend extends Expression implements Invocation
 {
        /**
      * The "name" structural property of this node type.
@@ -131,6 +131,10 @@ public class TSuperMessageSend extends Expression
 	TSuperMessageSend(AST ast)
 	{
 		super(ast);
+	}
+
+	public ChildListPropertyDescriptor getArgumentsProperty() {
+		return ARGUMENTS_PROPERTY;
 	}
 
 	@SuppressWarnings("rawtypes")
@@ -331,5 +335,4 @@ public class TSuperMessageSend extends Expression
     public IMethodBinding resolveMethodBinding() {
         return this.ast.getBindingResolver().resolveMethod(this);
     }
-
 }

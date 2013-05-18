@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.search.*;
 import org.eclipse.jdt.internal.compiler.ast.*;
 import org.eclipse.jdt.internal.compiler.lookup.*;
 import org.eclipse.jdt.internal.core.search.indexing.IIndexConstants;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
@@ -271,7 +272,11 @@ public int match(FieldAccessSpec fieldSpec, MatchingNodeSet nodeSet)
     // each subtype should override if needed
     return IMPOSSIBLE_MATCH;
 }
-//gbr}
+public int match(BaseCallMessageSend node, MatchingNodeSet nodeSet) {
+    // each subtype should override if needed
+    return IMPOSSIBLE_MATCH;
+}
+//gbr+SH}
 public int match(MemberValuePair node, MatchingNodeSet nodeSet) {
 	// each subtype should override if needed
 	return IMPOSSIBLE_MATCH;

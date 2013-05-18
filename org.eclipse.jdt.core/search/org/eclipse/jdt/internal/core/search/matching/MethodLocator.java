@@ -56,8 +56,10 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.core.search.BasicSearchEngine;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 
@@ -316,6 +318,19 @@ public int match(MethodSpec methodSpec, MatchingNodeSet nodeSet)
 	}
     
     return nodeSet.addMatch(methodSpec, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
+}
+public int match(BaseCallMessageSend node, MatchingNodeSet nodeSet) {
+	if (!this.pattern.findReferences) return IMPOSSIBLE_MATCH;
+
+	if (!matchesName(this.pattern.selector, node.sourceSelector)) return IMPOSSIBLE_MATCH;
+	if (this.pattern.parameterSimpleNames != null && (!this.pattern.varargs || ((node.bits & ASTNode.InsideJavadoc) != 0))) {
+		int length = this.pattern.parameterSimpleNames.length;
+		ASTNode[] args = node.sourceArgs; // that's why we need special treatment: don't use raw arguments (includes isSuperAccess flag)
+		int argsLength = args == null ? 0 : args.length;
+		if (length != argsLength) return IMPOSSIBLE_MATCH;
+	}
+
+	return nodeSet.addMatch(node._wrappee, this.pattern.mustResolve ? POSSIBLE_MATCH : ACCURATE_MATCH);
 }
 //gbr,carp}
 public int match(MessageSend node, MatchingNodeSet nodeSet) {
@@ -877,6 +892,10 @@ public int resolveLevel(Binding binding) {
 }
 protected int resolveLevel(MessageSend messageSend) {
 	MethodBinding method = messageSend.binding;
+//{ObjectTeams: base call?
+	if (method instanceof SyntheticBaseCallSurrogate)
+		method = ((SyntheticBaseCallSurrogate)method).targetMethod;
+// SH}
 	if (method == null) {
 		return INACCURATE_MATCH;
 	}

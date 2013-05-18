@@ -38,7 +38,7 @@ import java.util.List;
  * @author mkr
  * @version $Id: BaseCallMessageSend.java 23416 2010-02-03 19:59:31Z stephan $
  */
-public class BaseCallMessageSend extends Expression
+public class BaseCallMessageSend extends Expression implements Invocation
 {
     /**
      * The "name" structural property of this node type.
@@ -116,6 +116,10 @@ public class BaseCallMessageSend extends Expression
 		super(ast);
 	}
 
+	public ChildListPropertyDescriptor getArgumentsProperty() {
+		return ARGUMENTS_PROPERTY;
+	}
+	
 	final List internalStructuralPropertiesForType(int apiLevel)
 	{
 		return propertyDescriptors(apiLevel);

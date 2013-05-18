@@ -39,7 +39,7 @@ import java.util.List;
  *
  * @author mkr
  */
-public class TSuperConstructorInvocation extends Statement
+public class TSuperConstructorInvocation extends Statement implements Invocation
 {
 	/**
 	 * The "arguments" structural property of this node type.
@@ -100,8 +100,12 @@ public class TSuperConstructorInvocation extends Statement
     {
 		super(ast);
 	}
+	
+	public ChildListPropertyDescriptor getArgumentsProperty() {
+		return ARGUMENTS_PROPERTY;
+	}
 
-    /**
+	/**
      * Returns the live ordered list of argument expressions in this
      * base constructor invocation expression.
      *
@@ -182,4 +186,7 @@ public class TSuperConstructorInvocation extends Statement
 		return this.ast.getBindingResolver().resolveConstructor(this);
 	}
 
+	public IMethodBinding resolveMethodBinding() {
+		return resolveConstructorBinding();
+	}
 }
