@@ -1735,7 +1735,8 @@ public abstract class ASTVisitor {
      */
     public boolean visit(RoleTypeDeclaration node)
     {
-		return visitNode(node);
+        // default implementation: do the same as for regular TypeDeclaration:
+    	return visit((TypeDeclaration)node);
     }
 
 	/**
