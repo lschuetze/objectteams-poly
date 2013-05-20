@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.core.search.BasicSearchEngine;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec.ImplementationStrategy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
@@ -523,8 +524,10 @@ protected void matchReportReference(ASTNode reference, IJavaElement element, Bin
 protected void matchReportReference(ASTNode reference, IJavaElement element, IJavaElement localElement, IJavaElement[] otherElements, Binding elementBinding, int accuracy, MatchLocator locator) throws CoreException {
 	MethodBinding methodBinding = (reference instanceof MessageSend) ? ((MessageSend)reference).binding: ((elementBinding instanceof MethodBinding) ? (MethodBinding) elementBinding : null);
 //{ObjectTeams: one more chance:
-	if (methodBinding == null && reference instanceof MethodSpec)
-		methodBinding= ((MethodSpec)reference).resolvedMethod;
+	if (methodBinding == null && reference instanceof MethodSpec) {
+		if (this.pattern.findDecapsulationReferences || ((MethodSpec)reference).implementationStrategy == ImplementationStrategy.DIRECT)
+			methodBinding= ((MethodSpec)reference).resolvedMethod;
+	}
 // SH}
 	if (this.isDeclarationOfReferencedMethodsPattern) {
 		if (methodBinding == null) return;

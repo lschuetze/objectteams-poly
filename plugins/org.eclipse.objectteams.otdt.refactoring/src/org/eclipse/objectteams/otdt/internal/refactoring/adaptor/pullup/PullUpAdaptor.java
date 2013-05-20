@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -54,6 +53,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.core.search.matching.MethodPattern;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -97,6 +97,7 @@ import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.text.edits.TextEditGroup;
 
+import base org.eclipse.jdt.internal.core.search.BasicSearchEngine;
 import base org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
@@ -829,7 +830,7 @@ public team class PullUpAdaptor {
 	}
 
 	/** Visibility checking for callout mappings. */
-	protected class Visibility playedBy MemberVisibilityAdjustor {
+	protected team class Visibility playedBy MemberVisibilityAdjustor {
 
 		IJavaElement getFReferencing() -> get IJavaElement fReferencing;
 
@@ -931,6 +932,21 @@ public team class PullUpAdaptor {
 			IMethod method = (IMethod) ((AbstractCalloutMapping)referencedMovedElement).getCorrespondingJavaElement();
 			return base.getVisibilityThreshold(method);
 		}
+
+		adjustVisibility <- replace adjustVisibility;
+
+		// --- during adjustMemberVisibility don't find decapsulating base method references:
+		callin void adjustVisibility() throws JavaModelException {
+			within (this) base.adjustVisibility();			
+		}
+		protected class Search playedBy BasicSearchEngine {
+			searchDeclarations <- before searchDeclarations;
+			private void searchDeclarations(IJavaElement element, SearchRequestor requestor, SearchPattern pattern, IProgressMonitor monitor) {
+				if (pattern instanceof MethodPattern)
+					((MethodPattern) pattern).findDecapsulationReferences = false;				
+			}			
+		}
+		// ---
 	}
 	
 	/**
