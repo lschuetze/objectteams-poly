@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -1037,22 +1036,6 @@ public team class PullUpAdaptor {
 	}
 
 	protected class UseSuperTypeFix playedBy SuperTypeRefactoringProcessor {
-
-		// === advance fix for Bug 393932 - [refactoring] pull-up with "use the destination type where possible" creates bogus import of nested type ===
-
-		void fixRewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group)
-		<- replace 
-		void rewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group);
-
-		@SuppressWarnings("basecall")
-		callin void fixRewriteTypeOccurrence(TType estimate, CompilationUnitRewrite rewrite, ASTNode node, TextEditGroup group) {
-			// combined from direct base method plus createCorrespondingNode(..):
-			rewrite.getImportRemover().registerRemovedNode(node);
-			ImportRewrite importRewrite= rewrite.getImportRewrite();
-			ImportRewriteContext context = new ContextSensitiveImportRewriteContext(node, importRewrite);
-			ASTNode correspondingNode = importRewrite.addImportFromSignature(new BindingKey(estimate.getBindingKey()).toSignature(), rewrite.getAST(), context);
-			rewrite.getASTRewrite().replace(node, correspondingNode, group);
-		}
 
 		// === tell the base class how to cope with LiftingType references: ===
 		
