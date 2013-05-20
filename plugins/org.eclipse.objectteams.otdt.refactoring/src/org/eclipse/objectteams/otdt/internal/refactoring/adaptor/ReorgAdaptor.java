@@ -62,11 +62,9 @@ import base org.eclipse.jdt.internal.corext.refactoring.structure.ImportRewriteU
 
 /**
  * The team adapts classes from corext.refactoring.{reorg,structure}.
- * See also the role file OTASTNodeSearchUtil, which belongs to this team
- * in order to facilitate access to state role methods.
  * 
- * @author stephan
- *
+ * @role OTASTNodeSearchUtil belongs to this team
+ * in order to facilitate access to state role methods.
  */
 @SuppressWarnings({ "restriction", "decapsulation" })
 public team class ReorgAdaptor 

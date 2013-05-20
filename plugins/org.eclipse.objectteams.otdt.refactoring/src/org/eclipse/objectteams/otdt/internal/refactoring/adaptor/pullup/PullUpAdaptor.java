@@ -137,6 +137,9 @@ public team class PullUpAdaptor {
 		IType getDeclaringType() 								-> IType getDeclaringType();
 		ITypeHierarchy getDestinationTypeHierarchy(IProgressMonitor pm)
 																-> ITypeHierarchy getDestinationTypeHierarchy(IProgressMonitor pm);
+		IMember[] getCreatedDestinationMembers() 				-> IMember[] getCreatedDestinationMembers();
+		void addMatchingMember(Map<IMember, Set<IMember>> mapping, IMember key, IMember matchingMember)
+			-> void addMatchingMember(Map<IMember, Set<IMember>> mapping, IMember key, IMember matchingMember);
 		
 		private void checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, RefactoringStatus status) throws CoreException {
 			
@@ -590,6 +593,37 @@ public team class PullUpAdaptor {
 																 monitor);
 			within (this)
 				base.createChangeManager(monitor, status);
+		}
+
+		void getMatchingCalloutsMapping(IType initial, Map<IMember, Set<IMember>> map) 
+		<- after Map<IMember, Set<IMember>> getMatchingMembersMapping(IType initial)
+				with { initial <- initial, map <- result }
+
+		private void getMatchingCalloutsMapping(IType initial, Map<IMember, Set<IMember>> map) throws JavaModelException {
+			final IMember[] members= getCreatedDestinationMembers();
+			for (int i= 0; i < members.length; i++) {
+				final IMember member= members[i];
+				if (member instanceof IMethodMapping && !(member instanceof ICallinMapping)) {
+					IMethodMapping mapping = (IMethodMapping) member;
+					final IMethod found= findCalloutMethod((IMethod) mapping.getCorrespondingJavaElement(), initial);
+					if (found != null)
+						addMatchingMember(map, mapping, found);
+				}
+			}			
+		}
+		private IMethod findCalloutMethod(IMethod roleMethod, IType initial) throws JavaModelException {
+			if (roleMethod == null) return null;
+			IOTType otType = OTModelManager.getOTElement(initial);
+			if (otType != null && otType.isRole()) {
+				IRoleType roleType = (IRoleType) otType;
+				String name = roleMethod.getElementName();
+				String[] paramTypes = roleMethod.getParameterTypes();
+				for (IMethodMapping mapping : roleType.getMethodMappings(IMethodMapping.CALLOUT_MAPPING|IMethodMapping.CALLOUT_TO_FIELD_MAPPING)) {
+					if (JavaModelUtil.isSameMethodSignature(name, paramTypes, false, (IMethod) mapping.getCorrespondingJavaElement()))
+						return (IMethod) mapping;
+				}
+			}
+			return null;
 		}
 
 		/** during createChangeManager we add callouts to the declaration nodes to be removed. */
