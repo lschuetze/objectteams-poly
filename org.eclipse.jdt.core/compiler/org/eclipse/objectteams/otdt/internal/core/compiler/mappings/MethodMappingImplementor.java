@@ -1,16 +1,15 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  *
- * Copyright 2004, 2006 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
- * Germany.
+ * Germany and others.
  *
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MethodMappingImplementor.java 23416 2010-02-03 19:59:31Z stephan $
  *
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  *
@@ -59,7 +58,6 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
  * Generalize some functions of implementing callout and callin.
  *
  * @author stephan
- * @version $Id: MethodMappingImplementor.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public abstract class MethodMappingImplementor {
 
@@ -252,16 +250,19 @@ public abstract class MethodMappingImplementor {
 			char[] argName;
 			long pos = (((long)declaredMethodSpec.sourceStart)<<32) + declaredMethodSpec.sourceEnd;
 	    	int argModifiers = ClassFileConstants.AccFinal; // in case an argument serves as a type anchor.
+	    	TypeReference argTypeReference = null;
 			if(useDeclaredArgs) {
 				Argument argument = declaredMethodSpec.arguments[idx];
 				argName = argument.name;
 	        	pos     = (((long)argument.sourceStart) << 32) + argument.sourceEnd;
 	        	argModifiers = argument.modifiers;
+	        	// for callout prefer source-level args (from method spec) to avoid resolved/unresolved conflicts downstream
+	        	if (this.bindingDirection == TerminalTokens.TokenNameBINDOUT)
+	        		argTypeReference = AstClone.copyTypeReference(argument.type);
 			} else {
 				argName = (IOTConstants.OT_DOLLAR_ARG + idx).toCharArray();
 			}
 			TypeBinding argType = arguments[idx];
-	    	TypeReference argTypeReference = null;
 			if (this.bindingDirection == TerminalTokens.TokenNameBINDIN) { // only relevant for callin
 				argTypeReference = getAnchoredTypeReference(gen, baseSideAnchor, argType);
 			}

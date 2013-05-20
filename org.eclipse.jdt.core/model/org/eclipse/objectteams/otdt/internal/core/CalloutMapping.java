@@ -1,7 +1,7 @@
 /**********************************************************************
  * This file is part of "Object Teams Development Tooling"-Software
  * 
- * Copyright 2004, 2012 Fraunhofer Gesellschaft, Munich, Germany,
+ * Copyright 2004, 2013 Fraunhofer Gesellschaft, Munich, Germany,
  * for its Fraunhofer Institute for Computer Architecture and Software
  * Technology (FIRST), Berlin, Germany and Technical University Berlin,
  * Germany, and others.
@@ -34,7 +34,6 @@ import org.eclipse.objectteams.otdt.internal.core.util.MethodData;
 /**
  * Callout Mapping implementation
  * @author jwloka
- * @version $Id: CalloutMapping.java 23416 2010-02-03 19:59:31Z stephan $
  */
 public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMapping
 {
@@ -138,6 +137,11 @@ public class CalloutMapping extends AbstractCalloutMapping implements ICalloutMa
 	}	
 		
 	public int getDeclaredModifiers() {
+		return this.declaredModifiers;
+	}
+
+	@Override
+	public int getFlags() throws JavaModelException {
 		return this.declaredModifiers;
 	}
 
