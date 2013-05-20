@@ -1146,6 +1146,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 	 *	Declaration in<br>
 	 *		- 1 Declaration in Team1.Role1<br>
 	 *		- 1 Reference in a callin (short sig)
+	 *		- 1 Reference in base-call within the callin method itself.
 	 */
 	public void test035() throws CoreException
 	{
@@ -1167,6 +1168,7 @@ public class OTJavaMethodSearchTests extends OTJavaSearchTestBase
 		
 		assertSearchResults("Search for all occurrences of callin method. javaModel",
 				"src/p_callin_method/Team1.java void p_callin_method.Team1$Role1.callinMethod() [callinMethod]\n" +
+				"src/p_callin_method/Team1.java void p_callin_method.Team1$Role1.callinMethod() [callinMethod()]\n" +
 				"src/p_callin_method/Team1.java p_callin_method.Team1$Role1 callinMethod <- baseMethod [callinMethod]",
 				resultCollector);
 	}
