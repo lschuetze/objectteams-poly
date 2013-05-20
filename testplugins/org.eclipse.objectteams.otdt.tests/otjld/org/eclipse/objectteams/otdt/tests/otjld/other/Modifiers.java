@@ -721,7 +721,7 @@ public class Modifiers extends AbstractOTJLDTest {
             "4.2(d)");
     }
 
-    // a method with a callin modifier overwrites an inherited non-callin method, OK to expect 2. error re unimplemented ifc method
+    // a method with a callin modifier overwrites an inherited non-callin method
     // 7.1.12-otjld-callin-method-overwrites-noncallin-method-2
     public void test7112_callinMethodOverwritesNoncallinMethod2() {
         runNegativeTest(
@@ -751,12 +751,7 @@ public class Modifiers extends AbstractOTJLDTest {
 			    "    \n"
             },
             "----------\n" + 
-    		"1. ERROR in Team7112cmonm2.java (at line 3)\n" + 
-    		"	public class Role7112cmonm2 implements T7112cmonm2_1 playedBy T7112cmonm2_2 {\n" + 
-    		"	             ^^^^^^^^^^^^^^\n" + 
-    		"The type Team7112cmonm2.Role7112cmonm2 must implement the inherited abstract method T7112cmonm2_1.test()\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team7112cmonm2.java (at line 4)\n" + 
+    		"1. ERROR in Team7112cmonm2.java (at line 4)\n" + 
     		"	callin void test() {\n" + 
     		"	^^^^^^^^^^^^^^^^^^\n" + 
     		"Modifier \"callin\" not allowed here; trying to override a method from T7112cmonm2_1 which is not a callin method (OTJLD 4.2(d)). \n" + 
