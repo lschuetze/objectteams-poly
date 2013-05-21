@@ -21,7 +21,8 @@ OT_TESTSUITE_DIR=${BASEDIR}/testrun
 TMPDIR="${BASEDIR}/tmp"
 
 # EXPORT: tmp directory for test files:
-TEST_TMPDIR="${HOME}/tmp"
+#TEST_TMPDIR="${HOME}/tmp"
+TEST_TMPDIR="/tmp/objectteams"
 
 # EXPORT: directory for metadata from previous builds:
 METADATA="${BASEDIR}/metadata"
