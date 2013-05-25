@@ -159,10 +159,15 @@ public class BaseAllocationExpression extends Assignment {
 		        	receiver = gen.qualifiedNameReference(tokens);
 	        	}
         	} else {
-        		if (this.enclosingInstance != null)
-        			receiver= this.enclosingInstance;
-        		else
-        			receiver = gen.thisReference(); // creating a role of the same team as base instance??
+        		if (this.enclosingInstance != null) {
+					receiver= this.enclosingInstance;
+				}
+				else {
+					if (baseclass.enclosingType() == enclType.enclosingType())
+						receiver = gen.thisReference(); // creating a role of the same team as base instance??
+					else
+						receiver = gen.qualifiedThisReference(gen.typeReference(baseclass.enclosingType()));
+				}
         	}
             char[] selector = CharOperation.concat(CREATOR_PREFIX_NAME, baseclass.sourceName());
 
