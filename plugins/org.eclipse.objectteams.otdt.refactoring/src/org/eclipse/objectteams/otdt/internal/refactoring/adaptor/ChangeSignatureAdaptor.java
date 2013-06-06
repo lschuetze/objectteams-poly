@@ -262,12 +262,14 @@ public team class ChangeSignatureAdaptor {
 				}
 				// collect these pieces of information:
 				List otherSideArguments;	// arguments of the mapping side that is not affected by this refactoring
-				boolean isRoleSide;			// whether the affect method spec is on the role side
+				boolean isRoleSide;			// whether the affected method spec is on the role side
+				boolean isSourceSide;		// whether the affected method spec points to the source of the data flow
 				String parMapDirection;		// either of "->" or "<-"
 				ChildListPropertyDescriptor parMapProp; // descriptor denoting the parameter mappings property within 'mapping'
 				if (mapping.getNodeType() == ASTNode.CALLIN_MAPPING_DECLARATION) {
 					parMapProp = CallinMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY;
 					isRoleSide = this.fMethodSpec.getLocationInParent() == CallinMappingDeclaration.ROLE_MAPPING_ELEMENT_PROPERTY;
+					isSourceSide = !isRoleSide;
 					if (isRoleSide) {
 						List baseMappingElements = ((CallinMappingDeclaration)mapping).getBaseMappingElements();
 						if (baseMappingElements.size() > 1) {
@@ -282,6 +284,7 @@ public team class ChangeSignatureAdaptor {
 				} else {
 					parMapProp = CalloutMappingDeclaration.PARAMETER_MAPPINGS_PROPERTY;
 					isRoleSide = this.fMethodSpec.getLocationInParent() == CalloutMappingDeclaration.ROLE_MAPPING_ELEMENT_PROPERTY;
+					isSourceSide = isRoleSide;
 					if (isRoleSide) {
 						MethodMappingElement baseMappingElement = ((CalloutMappingDeclaration)mapping).getBaseMappingElement();
 						if (baseMappingElement.getNodeType() == ASTNode.FIELD_ACCESS_SPEC) {
@@ -294,13 +297,14 @@ public team class ChangeSignatureAdaptor {
 					}
 					parMapDirection = "->"; //$NON-NLS-1$
 				}
-				maybeAddParamMappings(mapping, parMapProp, otherSideArguments, getFParameterInfos(), parMapDirection);
+				maybeAddParamMappings(mapping, parMapProp, otherSideArguments, getFParameterInfos(), isSourceSide, parMapDirection);
 			}
 			
 			void maybeAddParamMappings(AbstractMethodMappingDeclaration mapping,
 									   ChildListPropertyDescriptor parMapProp,
 									   List otherSideArguments,
 									   List parameterInfos,
+									   boolean isSourceSide,
 									   String parMapDirection) 
 			{
 				checkRelevance: {
@@ -324,8 +328,13 @@ public team class ChangeSignatureAdaptor {
 					if (oldIndex > -1 && oldIndex < otherSideArguments.size()) {
 						SingleVariableDeclaration arg = (SingleVariableDeclaration) otherSideArguments.get(oldIndex);
 						ParameterMapping parMap = ast.newParameterMapping();
-						parMap.setIdentifier((SimpleName) ASTNode.copySubtree(ast, arg.getName()));
-						parMap.setExpression(ast.newSimpleName(info.getNewName()));
+						if (isSourceSide) {
+							parMap.setExpression(ast.newSimpleName(info.getNewName()));
+							parMap.setIdentifier((SimpleName) ASTNode.copySubtree(ast, arg.getName()));
+						} else {
+							parMap.setIdentifier(ast.newSimpleName(info.getNewName()));
+							parMap.setExpression((SimpleName) ASTNode.copySubtree(ast, arg.getName()));
+						}
 						parMap.setDirection(parMapDirection);
 						parMapRewrite.insertLast(parMap, editGroup);
 					}

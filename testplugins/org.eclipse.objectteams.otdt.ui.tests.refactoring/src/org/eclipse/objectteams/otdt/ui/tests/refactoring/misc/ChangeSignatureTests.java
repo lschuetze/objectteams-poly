@@ -434,6 +434,10 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperPermute(new String[]{"ignore", "b", "a"}, new String[]{"I", "Z", "QString;"}, false);
 	}
 
+	public void testReorder02() throws Exception {
+		helperPermute(new String[]{"string", "object", "i", "myRole"}, new String[]{"QString;", "I", "QObject;", "QA;"}, false);
+	}
+
 	public void testRename01() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType teamType = cu.getType("MyTeam");
