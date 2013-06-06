@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.ReturnTypeInfo;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -66,11 +67,13 @@ public team class ChangeSignatureAdaptor {
 	 */
 	protected team class Processor playedBy ChangeSignatureProcessor {
 
-		List getAddedInfos() 			-> List getAddedInfos();
-		List getDeletedInfos()			-> List getDeletedInfos();
-		boolean isOrderSameAsInitial() 	-> boolean isOrderSameAsInitial();
-		List getFParameterInfos() 		-> get List fParameterInfos;
-
+		List getAddedInfos() 				-> List getAddedInfos();
+		List getDeletedInfos()				-> List getDeletedInfos();
+		boolean isOrderSameAsInitial() 		-> boolean isOrderSameAsInitial();
+		boolean isReturnTypeSameAsInitial()-> boolean isReturnTypeSameAsInitial();
+		List getFParameterInfos() 			-> get List fParameterInfos;
+		ReturnTypeInfo getFReturnTypeInfo() -> get ReturnTypeInfo fReturnTypeInfo;
+		
 
 		// FIXME(SH): parameter name result -> error duplicate local variable result
 		OccurrenceUpdate createOccurrenceUpdate(ASTNode node,
@@ -161,11 +164,11 @@ public team class ChangeSignatureAdaptor {
 		protected class MethodSpecUpdate extends OccurrenceUpdate playedBy DeclarationUpdate
 		{
 			
+
 			CompilationUnitRewrite getCompilationUnitRewrite() -> CompilationUnitRewrite getCompilationUnitRewrite();
 
 			ASTRewrite getASTRewrite() -> ASTRewrite getASTRewrite();
 
-			
 			protected MethodSpecUpdate(MethodSpec node, CompilationUnitRewrite cuRewrite, RefactoringStatus refResult)
 			{
 				base(null/*MethodDeclaration*/, cuRewrite, refResult);
@@ -182,6 +185,19 @@ public team class ChangeSignatureAdaptor {
 
 			callin SimpleName getMethodNameNode() {
 				return this.fMethodSpec.getName();
+			}
+
+			void changeReturnType() <- replace void changeReturnType();
+
+			@SuppressWarnings("inferredcallout")
+			callin void changeReturnType() {
+			    if (Processor.this.isReturnTypeSameAsInitial())
+			    	return;
+				if (!fMethodSpec.hasSignature()) return;
+			    ReturnTypeInfo returnTypeInfo = Processor.this.getFReturnTypeInfo();
+				replaceTypeNode(this.fMethodSpec.getReturnType2(), returnTypeInfo.getNewTypeName(), returnTypeInfo.getNewTypeBinding());
+				// method spec has no extra dimensions
+		        // orig: removeExtraDimensions(fMethDecl);
 			}
 
 			void changeJavadocTags() <- replace void changeJavadocTags();
