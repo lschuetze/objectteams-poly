@@ -2138,17 +2138,14 @@ public void traverse(ASTVisitor visitor, CompilationUnitScope unitScope) {
 				for (int i = 0; i < length; i++)
 					this.methods[i].traverse(visitor, this.scope);
 			}
-		}
 //{ObjectTeams
-		if(this.callinCallouts != null)
-		{
-			int methodBindingsLength = this.callinCallouts.length;
-			for(int idx = 0; idx < methodBindingsLength; idx++)
-			{
-				this.callinCallouts[idx].traverse(visitor,  this.scope);
+			if(this.callinCallouts != null) {
+				int methodBindingsLength = this.callinCallouts.length;
+				for(int idx = 0; idx < methodBindingsLength; idx++)
+					this.callinCallouts[idx].traverse(visitor,  this.scope);
 			}
-		}
 // Joachim Haensel}
+		}
 		visitor.endVisit(this, unitScope);
 	} catch (AbortType e) {
 		// silent abort
