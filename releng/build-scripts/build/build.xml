@@ -50,6 +50,9 @@
 		
 		<!--this property required as of Eclipse 3.0 stream builds > 20031126 -->
 		<property name="buildingOSGi" value="true" />
+		
+		<!--let ecotj be generated into a "safe" location: -->
+		<property name="build.result.folder" value="${user.dir}" />
 
 		<!--run the pde-build for the specified ${builder} (OT-Compiler or OTDT-Build) -->
 		<ant antfile="build.xml" dir="${baseLocation}/${run.eclipseScriptDir}" />
