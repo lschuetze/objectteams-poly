@@ -76,16 +76,24 @@ protected class ContentProvider playedBy PackageExplorerContentProvider
 	callin Object[] getChildren(Object parentElement) 
     {
         List<Object> children = null;
-		if (parentElement instanceof IOTType)
-		{
-			IJavaElement javaParentElement = ((IOTJavaElement)parentElement).getCorrespondingJavaElement();
+        IOTType otType = null;
+        IJavaElement javaParentElement = null;
+        if (parentElement instanceof IOTType) {
+        	otType = (IOTType) parentElement;
+        	javaParentElement = ((IOTJavaElement)parentElement).getCorrespondingJavaElement();
+        } else if (parentElement instanceof IType) {
+        	// when asked for children of a TreeItem we always get the plain IType (see https://bugs.eclipse.org/355481)
+        	otType = OTModelManager.getOTElement((IType) parentElement);
+        	javaParentElement = (IJavaElement) parentElement;
+        }
+		if (otType != null) {
 			children = new ArrayList<Object>(Arrays.asList(getChildrenAdapted(javaParentElement)));
 			if (isHideRolePackages())
 			{
 				IType[] roleFiles = null;
                 try
                 {
-                    roleFiles = ((IOTType)parentElement).getRoleTypes(IOTType.ROLEFILE);
+                    roleFiles = otType.getRoleTypes(IOTType.ROLEFILE);
                     Util.replaceOTTypes(roleFiles);
                 }
                 catch (JavaModelException ex)
