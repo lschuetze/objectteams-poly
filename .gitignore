@@ -1,4 +1,5 @@
 /*/bin/
+/contrib/*/bin/
 /plugins/*/bin/
 /plugins/*/bcelpatchbin/
 /othersrc/*/bin/
