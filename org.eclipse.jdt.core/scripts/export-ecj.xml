@@ -16,12 +16,12 @@
 <project name="Eclipse Batch Compiler" default="export-all" basedir="..">
 	<target name="init">
 		<tstamp/>
-		<property name="bundleVersion" value="3.9.0.qualifier"/>
+		<property name="bundleVersion" value="3.10.0.qualifier"/>
 		<fail unless="bundleVersion" message="Property 'bundleVersion' must be provided by caller"/>
 		<condition property="bundleVersionOK">
-			<matches pattern="\d\.\d\.\d.*" string="${bundleVersion}"/>
+			<matches pattern="\d+\.\d+\.\d+.*" string="${bundleVersion}"/>
 		</condition>
-		<fail message="bundleVersion variable had unexpected format. Should be digit.digit.digit,ANY but was ${bundleVersion}" unless="bundleVersionOK"/>
+		<fail message="bundleVersion variable had unexpected format. Should be digit.digit+.digit,ANY but was ${bundleVersion}" unless="bundleVersionOK"/>
 		<script language="javascript">
 			var bundleVersion = project.getProperty("bundleVersion");
 			var pattern = new RegExp(/^(\d+)\.(\d+)\.(\d+)\.(.*)$/);
