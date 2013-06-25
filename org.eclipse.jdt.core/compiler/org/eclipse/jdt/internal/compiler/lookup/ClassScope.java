@@ -748,7 +748,7 @@ public class ClassScope extends Scope {
 	/**
 	 * build Callin and Callout
 	 */
-	private void buildCallinCallouts() {
+	public void buildCallinCallouts() {
 		if (this.referenceContext.callinCallouts == null) {
 			this.referenceContext.binding.callinCallouts = Binding.NO_CALLIN_CALLOUT_BINDINGS;
 			return;
@@ -760,6 +760,9 @@ public class ClassScope extends Scope {
 			this.referenceContext.binding.callinCallouts = Binding.NO_CALLIN_CALLOUT_BINDINGS;
 			return;
 		}
+
+		if (this.referenceContext.binding.callinCallouts != null)
+			return; // already done
 
 		// iterate the binding declarations to create the bindings
 		AbstractMethodMappingDeclaration[] callinCallouts = this.referenceContext.callinCallouts;
