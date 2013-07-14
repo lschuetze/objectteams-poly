@@ -57,10 +57,12 @@ import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.core.search.BasicSearchEngine;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec.ImplementationStrategy;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticBaseCallSurrogate;
+import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 
@@ -926,6 +928,11 @@ protected int resolveLevel(MessageSend messageSend) {
 	int declaringLevel;
 	if (isVirtualInvoke(method, messageSend) && (messageSend.actualReceiverType instanceof ReferenceBinding)) {
 		ReferenceBinding methodReceiverType = (ReferenceBinding) messageSend.actualReceiverType;
+//{ObjectTeams: for inferred callout pretend we would directly access the base method:
+		CalloutMappingDeclaration callout = MethodModel.getImplementingInferredCallout(messageSend.binding);
+		if (callout != null)
+			methodReceiverType = callout.getImplementationMethodSpec().getDeclaringClass();
+// SH}
 		declaringLevel = resolveLevelAsSubtype(this.pattern.declaringSimpleName, this.pattern.declaringQualification, methodReceiverType, method.selector, method.parameters, methodReceiverType.qualifiedPackageName(), method.isDefault());
 		if (declaringLevel == IMPOSSIBLE_MATCH) {
 			if (method.declaringClass == null || this.allSuperDeclaringTypeNames == null) {
@@ -948,7 +955,12 @@ protected int resolveLevel(MessageSend messageSend) {
 		declaringLevel = resolveLevelForType(this.pattern.declaringSimpleName, this.pattern.declaringQualification, method.declaringClass); 
   :giro */
 		char[] patternDeclaringQualification = this.pattern.getDeclaringQualification();
-		declaringLevel = resolveLevelForType(this.pattern.declaringSimpleName, patternDeclaringQualification, method.declaringClass);
+		ReferenceBinding declaringClass = method.declaringClass;
+		// also account for inferred callouts (see also above):
+		CalloutMappingDeclaration callout = MethodModel.getImplementingInferredCallout(messageSend.binding);
+		if (callout != null)
+			declaringClass = callout.getImplementationMethodSpec().getDeclaringClass();
+		declaringLevel = resolveLevelForType(this.pattern.declaringSimpleName, patternDeclaringQualification, declaringClass);
 // SH}
 	}
 	return (methodLevel & MATCH_LEVEL_MASK) > (declaringLevel & MATCH_LEVEL_MASK) ? declaringLevel : methodLevel; // return the weaker match

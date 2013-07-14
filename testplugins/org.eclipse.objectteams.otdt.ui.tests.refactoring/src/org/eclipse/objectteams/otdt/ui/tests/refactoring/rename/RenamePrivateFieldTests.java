@@ -29,6 +29,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.jdt.core.IAnnotatable;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IType;
@@ -37,6 +38,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.MySetup;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
@@ -45,9 +47,10 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
  * @author jwl
  *
  */
+@SuppressWarnings("restriction")
 public class RenamePrivateFieldTests extends RefactoringTest
 {
-	private static final Class	clazz            = RenamePrivateFieldTests.class;
+	private static final Class<RenamePrivateFieldTests>	clazz            = RenamePrivateFieldTests.class;
 	private static final String	REFACTORING_PATH = "RenamePrivateField/";
 
 	private Object _prefixPref;
@@ -72,15 +75,18 @@ public class RenamePrivateFieldTests extends RefactoringTest
 		return REFACTORING_PATH;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected void setUp() throws Exception
 	{
 		super.setUp();
 		Hashtable options = JavaCore.getOptions();
 		_prefixPref = options.get(JavaCore.CODEASSIST_FIELD_PREFIXES);
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, getPrefixes());
+		options.put(OTDTPlugin.OT_COMPILER_INFERRED_CALLOUT, JavaCore.WARNING);
 		JavaCore.setOptions(options);
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected void tearDown() throws Exception
 	{
 		super.tearDown();
@@ -94,29 +100,7 @@ public class RenamePrivateFieldTests extends RefactoringTest
 		return "_";
 	}
 
-    private void performRenamingFtoG_failing(
-            String[] cuNames, 
-            String selectionCuName, 
-            String declaringTypeName)
-        throws Exception
-    {
-    	performRenaming_failing(cuNames, selectionCuName, declaringTypeName, "f", "g");
-    }
-
-    private void performRenaming_failing(
-            String[] cuNames,
-            String selectionCuName,
-            String declaringTypeName,
-            String fieldName,
-            String newFieldName)
-        throws Exception
-    {
-    	performRenameRefactoring_failing(
-                cuNames, selectionCuName, declaringTypeName, fieldName, newFieldName, false, false);
-    }
-
-
-	private void performRenameRefactoring_failing(
+    private void performRenameRefactoring_failing(
             String[] cuNames,
             String selectionCuName,
             String declaringTypeName,
@@ -184,22 +168,19 @@ public class RenamePrivateFieldTests extends RefactoringTest
 		String newGetterName = processor.getNewGetterName();
 		String newSetterName = processor.getNewSetterName();
 
-		int numbers = 1;
-		List elements = new ArrayList();
+		List<IAnnotatable> elements = new ArrayList<IAnnotatable>();
 		elements.add(field);
-		List args = new ArrayList();
+		List<RenameArguments> args = new ArrayList<RenameArguments>();
 		args.add(new RenameArguments(newFieldName, updateReferences));
 		if (renameGetter && expectedGetterRenameEnabled)
 		{
 			elements.add(processor.getGetter());
 			args.add(new RenameArguments(newGetterName, updateReferences));
-			numbers++;
 		}
 		if (renameSetter && expectedSetterRenameEnabled)
 		{
 			elements.add(processor.getSetter());
 			args.add(new RenameArguments(newSetterName, updateReferences));
-			numbers++;
 		}
 //		String[] renameHandles = ParticipantTesting.createHandles(elements
 //				.toArray());
@@ -254,48 +235,7 @@ public class RenamePrivateFieldTests extends RefactoringTest
         return -1;
     }
 
-    private String createInputTestFileName(ICompilationUnit[] cus, int idx)
-    {
-        return getInputTestFileName(getSimpleNameOfCu(
-                cus[idx].getElementName()));
-    }
-
-    private String createOutputTestFileName(ICompilationUnit[] cus,
-                                                int idx)
-    {
-        return getOutputTestFileName(getSimpleNameOfCu(cus[idx].
-                getElementName()));
-    }
-
-    private String getSimpleNameOfCu(String compUnit)
-    {
-        int dot = compUnit.lastIndexOf('.');
-        return compUnit.substring(0, dot);
-    }
-    
-    private String getUnqualifiedMemberTypeName(String qualifiedMemberType)
-    {
-    	int dot = qualifiedMemberType.indexOf('.');
-        if (dot != -1)
-        {
-        	return qualifiedMemberType.substring(dot+1);
-        }
-        return qualifiedMemberType;
-    }
-
-    private ICompilationUnit[] createCUs(String[] cuNames) throws Exception
-    {
-        ICompilationUnit[] cus = new ICompilationUnit[cuNames.length];
-    
-        for (int idx = 0; idx < cuNames.length; idx++)
-        {
-            Assert.isNotNull(cuNames[idx]);
-            cus[idx] = createCUfromTestFile(getPackageP(), cuNames[idx]);
-        }
-        return cus;
-    }
-
-	//--------- tests ----------
+    //--------- tests ----------
     public void testRenameFieldInTeamclass() throws Exception
 	{
         performRenamingFtoG_passing(new String[]{"T"}, "T", true);
@@ -390,6 +330,16 @@ public class RenamePrivateFieldTests extends RefactoringTest
                 new String[]{"B", "T"}, "B", "name", "surname",
                 true, false, false, false, false, false);
     }
+    // referenced by inferred callout (fully inferred)
+	public void testUpdateReferenceInCalloutToField5() throws Exception
+	{
+        performRenamingFtoG_passing(new String[]{"B", "T"}, "B", true);
+	}
+    // referenced by inferred callout (explicit use of inferred accessor)
+	public void testUpdateReferenceInCalloutToField6() throws Exception
+	{
+        performRenamingFtoG_passing(new String[]{"B", "T"}, "B", true);
+	}
     
     //passing
     public void testRenameGetterAndSetter1() throws Exception

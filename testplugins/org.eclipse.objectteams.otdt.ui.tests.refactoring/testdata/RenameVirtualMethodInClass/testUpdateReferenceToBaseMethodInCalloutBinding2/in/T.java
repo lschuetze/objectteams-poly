@@ -1,5 +1,5 @@
 package p;
-//renaming B.m to k
+//renaming B.getAmount to getQuantity
 public team class T
 {
     public class R playedBy B

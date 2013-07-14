@@ -20,19 +20,22 @@
  **********************************************************************/
 package org.eclipse.objectteams.otdt.ui.tests.refactoring.rename;
 
+import java.util.Hashtable;
+
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+import org.eclipse.objectteams.otdt.core.ext.OTDTPlugin;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.MySetup;
 import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
 
@@ -40,6 +43,7 @@ import org.eclipse.objectteams.otdt.ui.tests.refactoring.RefactoringTest;
  * @author brcan
  * 
  */
+@SuppressWarnings("restriction")
 public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	private static final String REFACTORING_PATH = "RenameVirtualMethodInClass/";
 
@@ -53,6 +57,15 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 
 	public static Test setUpTest(Test test) {
 		return new MySetup(test);
+	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	protected void setUp() throws Exception
+	{
+		super.setUp();
+		Hashtable options = JavaCore.getOptions();
+		options.put(OTDTPlugin.OT_COMPILER_INFERRED_CALLOUT, JavaCore.WARNING);
+		JavaCore.setOptions(options);
 	}
 
 	protected String getRefactoringPath() {
@@ -134,29 +147,6 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		}
 	}
 
-	private String createInputTestFileName(ICompilationUnit[] cus, int idx) {
-		return getInputTestFileName(getSimpleNameOfCu(cus[idx].getElementName()));
-	}
-
-	private String createOutputTestFileName(ICompilationUnit[] cus, int idx) {
-		return getOutputTestFileName(getSimpleNameOfCu(cus[idx].getElementName()));
-	}
-
-	private String getSimpleNameOfCu(String compUnit) {
-		int dot = compUnit.lastIndexOf('.');
-		return compUnit.substring(0, dot);
-	}
-
-	private ICompilationUnit[] createCUs(String[] cuNames) throws Exception {
-		ICompilationUnit[] cus = new ICompilationUnit[cuNames.length];
-
-		for (int idx = 0; idx < cuNames.length; idx++) {
-			Assert.isNotNull(cuNames[idx]);
-			cus[idx] = createCUfromTestFile(getPackageP(), cuNames[idx]);
-		}
-		return cus;
-	}
-
 	/********** tests **********/
 
 	public void testUpdateDeclarationOfOverridingRoleMethod() throws Exception {
@@ -180,6 +170,10 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 
 	public void testUpdateReferenceToBaseMethodInCalloutBinding2() throws Exception {
+		performRenameRefactoring_passing(new String[] { "B", "T" }, "B", "getAmount", "getQuantity", new String[0], true, true);
+	}
+
+	public void testUpdateReferenceToBaseMethodInCalloutBinding3() throws Exception {
 		performRenameRefactoring_passing(new String[] { "B", "T" }, "B", "getAmount", "getQuantity", new String[0], true, true);
 	}
 

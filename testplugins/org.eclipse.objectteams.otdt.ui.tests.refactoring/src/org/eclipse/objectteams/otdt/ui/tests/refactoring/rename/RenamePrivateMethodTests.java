@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
@@ -43,6 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
  *  
  * @author brcan
  */
+@SuppressWarnings("restriction")
 public class RenamePrivateMethodTests extends RefactoringTest
 {
 	private static final String REFACTORING_PATH = "RenamePrivateMethod/";
@@ -92,11 +92,6 @@ public class RenamePrivateMethodTests extends RefactoringTest
 		assertNotNull("precondition was supposed to fail", result);
 	}
 	
-	private void performRenaming_failing() throws Exception
-	{
-		performRenameRefactoring_failing("m", "k", new String[0]);
-	}
-
 	private void performRenaming_passing(
 	        String cuNames[],
 	        String declaringTypeName) throws Exception
@@ -164,35 +159,7 @@ public class RenamePrivateMethodTests extends RefactoringTest
         }
 	}
 
-    private ICompilationUnit[] createCUs(String[] cuNames) throws Exception
-    {
-        ICompilationUnit[] cus = new ICompilationUnit[cuNames.length];
-	
-	    for (int idx = 0; idx < cuNames.length; idx++)
-	    {
-	        Assert.isNotNull(cuNames[idx]);
-	        cus[idx] = createCUfromTestFile(getPackageP(), cuNames[idx]);
-	    }
-	    return cus;
-	}
-
-    private String createInputTestFileName(ICompilationUnit[] cus, int idx)
-    {
-        return getInputTestFileName(getSimpleNameOfCu(cus[idx].getElementName()));
-    }
-
-    private String createOutputTestFileName(ICompilationUnit[] cus, int idx)
-    {
-        return getOutputTestFileName(getSimpleNameOfCu(cus[idx].getElementName()));
-    }
-
-    private String getSimpleNameOfCu(String compUnit)
-    {
-        int dot = compUnit.lastIndexOf('.');
-        return compUnit.substring(0, dot);
-    }
-
-	/******* tests ******************/
+    /******* tests ******************/
 	
     public void testUpdateReferenceInCalloutBinding1() throws Exception
     {

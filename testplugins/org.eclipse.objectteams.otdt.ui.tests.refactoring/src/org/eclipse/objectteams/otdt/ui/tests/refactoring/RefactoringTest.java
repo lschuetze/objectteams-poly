@@ -34,6 +34,7 @@ import junit.framework.TestCase;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -414,7 +415,30 @@ public abstract class RefactoringTest extends TestCase
                 + " disabled (" + explanation + ")");
     }
 
-    //-----------------------
+    protected ICompilationUnit[] createCUs(String[] cuNames) throws Exception {
+		ICompilationUnit[] cus = new ICompilationUnit[cuNames.length];
+	
+		for (int idx = 0; idx < cuNames.length; idx++) {
+			Assert.isNotNull(cuNames[idx]);
+			cus[idx] = createCUfromTestFile(getPackageP(), cuNames[idx]);
+		}
+		return cus;
+	}
+
+	protected String createInputTestFileName(ICompilationUnit[] cus, int idx) {
+		return getInputTestFileName(getSimpleNameOfCu(cus[idx].getElementName()));
+	}
+
+	protected String createOutputTestFileName(ICompilationUnit[] cus, int idx) {
+		return getOutputTestFileName(getSimpleNameOfCu(cus[idx].getElementName()));
+	}
+
+	private String getSimpleNameOfCu(String compUnit) {
+		int dot = compUnit.lastIndexOf('.');
+		return compUnit.substring(0, dot);
+	}
+
+	//-----------------------
     public static InputStream getStream(String content)
     {
         return new StringBufferInputStream(content);

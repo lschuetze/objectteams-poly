@@ -23,7 +23,6 @@ package org.eclipse.objectteams.otdt.ui.tests.refactoring.extractcallin;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -56,16 +55,6 @@ public class ExtractCallinTests extends RefactoringTest {
 
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
-	}
-
-	private ICompilationUnit[] createCUs(String[] cuNames) throws Exception {
-		ICompilationUnit[] cus = new ICompilationUnit[cuNames.length];
-
-		for (int idx = 0; idx < cuNames.length; idx++) {
-			Assert.isNotNull(cuNames[idx]);
-			cus[idx] = createCUfromTestFile(getPackageP(), cuNames[idx]);
-		}
-		return cus;
 	}
 
 	private ExtractCallinRefactoring createExtractCallinRefactoring(IMethod baseMethod, IType role, int mappingKind) {
