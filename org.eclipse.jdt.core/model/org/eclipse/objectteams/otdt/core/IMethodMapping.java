@@ -10,7 +10,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: IMethodMapping.java 23416 2010-02-03 19:59:31Z stephan $
  * 
  * Please visit http://www.eclipse.org/objectteams for updates and contact.
  * 
@@ -29,7 +28,6 @@ import org.eclipse.jdt.core.IMethod;
  * OTM Method mapping element
  * 
  * @author jwloka
- * @version $Id: IMethodMapping.java 23416 2010-02-03 19:59:31Z stephan $
  * @noimplement This interface is not intended to be implemented by clients.
  */
 public interface IMethodMapping extends IOTJavaElement, IMember, IAnnotatable
@@ -38,6 +36,7 @@ public interface IMethodMapping extends IOTJavaElement, IMember, IAnnotatable
 	 * Returns the type of mapping e.g. callin Mapping
 	 * @return possible values are: IOTJavaElement.CALLIN_MAPPING
 	 * 								IOTJavaElement.CALLOUT_MAPPING
+	 * 								IOTJavaElement.CALLOUT_TO_FIELD_MAPPING
 	 */
 	public int getMappingKind();
 
