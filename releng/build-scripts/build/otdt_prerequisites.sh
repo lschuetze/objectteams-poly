@@ -28,7 +28,7 @@ TEST_TMPDIR="/tmp/objectteams"
 METADATA="${BASEDIR}/metadata"
 
 # EXPORT: mail address to receive notification about build result (currently only build failures):
-OT_RECIPIENT="stephan@cs.tu-berlin.de"
+OT_RECIPIENT="nobody@nowhere.net"
 
 # Configure ANT:
 ANT_HOME=/shared/common/apache-ant-1.7.1/
@@ -52,14 +52,14 @@ fi
 
 # VERSIONS:
 # Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
-SDK_QUALIFIER=I20130516-2200
+SDK_QUALIFIER=I20130709-0800
 
 # Architecture (as used by OSGi):
 ARCH=`arch`
 
 # used only locally (components of the ECLIPSE_SDK_TGZ path):
-EVERSION=4.3RC4
-DROP=${BASEDIR}/drops4/S-4.3RC4-201306052000
+EVERSION=I20130709-0800
+DROP=${BASEDIR}/drops4/${SDK_QUALIFIER}
 
 # EXPORT: archive file of the base eclipse SDK build:
 ECLIPSE_SDK_TGZ=${DROP}/eclipse-SDK-${EVERSION}-linux-gtk-${ARCH}.tar.gz
