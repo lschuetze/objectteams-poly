@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: OT/J Weaving for OSGi
+Bundle-SymbolicName: org.eclipse.objectteams.osgi.weaving;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: org.eclipse.objectteams.osgi.weaving.Activator
+Bundle-Vendor: Eclipse.org - Object Teams
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.objectteams.runtime;bundle-version="2.1.0",
+ org.eclipse.osgi,
+ org.eclipse.equinox.ds;bundle-version="1.4.100"
+Import-Package: org.osgi.service.component;version="1.2.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Service-Component: OSGI-INF/weavinghook.xml

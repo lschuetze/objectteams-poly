@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<component name="weavinghook">
+	<implementation class="org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook"/>
+	<service>
+		<provide interface="org.osgi.framework.hooks.weaving.WeavingHook"/>
+		<provide interface="org.osgi.framework.hooks.weaving.WovenClassListener"/>
+	</service>
+</component>

@@ -95,9 +95,9 @@ public abstract class ObjectTeamsTransformation
 	InstructionFactory factory;
    
     /** Which class loader are we working for? */
-    protected ClassLoader loader;
+    protected Object loader; // standalone: ClassLoader, new equinox.weaving: Bundle
 
-	public ObjectTeamsTransformation(ClassLoader loader) {
+	public ObjectTeamsTransformation(Object loader) {
 		this.loader = loader;
 	}
 

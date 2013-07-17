@@ -116,7 +116,7 @@ public class LiftingParticipantTransformation extends ObjectTeamsTransformation 
 			if (participant != null)
 				throw new IllegalStateException("liftingParticipant already installed.");				
 			// install a shared instance into class Team:
-			Class<?> participantClass = loader.loadClass(PARTICIPANT_NAME);
+			Class<?> participantClass = ClassLoaderAccess.loadClass(loader, PARTICIPANT_NAME); 
 			participantField.set(null, participantClass.newInstance());
 		} 
 		else if (participant != null) 
