@@ -15,7 +15,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.otequinox.Activator.log;
+import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -25,6 +25,7 @@ import java.util.List;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry.WaitingTeamRecord;
 import org.eclipse.objectteams.otequinox.ActivationKind;
+import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.objectteams.ITeam;
 import org.objectteams.Team;
@@ -156,6 +157,7 @@ public class TeamLoader {
 	private @Nullable ITeam instantiateTeam(AspectBinding aspectBinding, Class<? extends ITeam> teamClass, String teamName) {
 		try {
 			ITeam instance = teamClass.newInstance();
+			TransformerPlugin.registerTeamInstance(instance);
 			log(ILogger.INFO, "Instantiated team "+teamName);
 			return instance;
 		} catch (NoClassDefFoundError ncdfe) {

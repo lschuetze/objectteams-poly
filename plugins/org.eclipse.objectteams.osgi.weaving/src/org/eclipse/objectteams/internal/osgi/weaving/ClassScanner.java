@@ -16,7 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.otequinox.Activator.log;
+import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
 import java.io.IOException;
 import java.io.InputStream;

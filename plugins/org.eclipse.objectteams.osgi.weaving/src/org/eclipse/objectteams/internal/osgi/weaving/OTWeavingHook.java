@@ -15,15 +15,19 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.otequinox.Activator.log;
+import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.osgi.framework.Bundle;
@@ -60,6 +64,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	public void activate(ComponentContext context) {
 		this.aspectBindingRegistry = loadAspectBindingRegistry(context.getBundleContext());
 		this.objectTeamsTransformer = new ObjectTeamsTransformer();
+		TransformerPlugin.getDefault().registerAspectBindingRegistry(this.aspectBindingRegistry);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -95,10 +100,24 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 					log(IStatus.INFO, "About to transform class "+wovenClass);
 					byte[] newBytes = objectTeamsTransformer.transform(bundleWiring.getClassLoader(),
 										className, classBeingRedefined, protectionDomain, bytes);
-					if (newBytes != bytes) {
+					if (newBytes != bytes && !Arrays.equals(newBytes, bytes)) {
 						wovenClass.setBytes(newBytes);
-						if (otreAdded.add(bundleWiring.getBundle()))
-							wovenClass.getDynamicImports().add("org.objectteams");
+						if (otreAdded.add(bundleWiring.getBundle())) {
+							List<String> imports = wovenClass.getDynamicImports();
+							imports.add("org.objectteams");
+							List<AspectBinding> aspects = aspectBindingRegistry.getAdaptingAspectBindings(bundleName);
+							if (aspects != null) {
+								for (AspectBinding aspect : aspects) {
+									Collection<String> teamsForBase = aspect.getTeamsForBase(className);
+									if (teamsForBase != null) {
+										for (String t : teamsForBase) {
+											int dot = t.lastIndexOf('.');
+											imports.add(t.substring(0, dot));
+										}
+									}
+								}
+							}
+						}
 					}
 				} catch (IllegalClassFormatException e) {
 					log(e, "Failed to transform class "+className);

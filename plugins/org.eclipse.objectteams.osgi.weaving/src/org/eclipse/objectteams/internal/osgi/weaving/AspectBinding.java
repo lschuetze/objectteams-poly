@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 
 /** 
@@ -92,7 +93,7 @@ public class AspectBinding {
 	}
 
 	/** Destructively read the names of teams to load for a given base class. */
-	public Collection<String> getTeamsForBase(String baseClassName) {
+	public @Nullable Collection<String> getTeamsForBase(String baseClassName) {
 		return teamsPerBase.remove(baseClassName);		
 	}
 

@@ -16,7 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.otequinox.Activator.log;
+import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 import static org.eclipse.objectteams.otequinox.Constants.ACTIVATION;
 import static org.eclipse.objectteams.otequinox.Constants.ASPECT_BINDING_EXTPOINT_ID;
 import static org.eclipse.objectteams.otequinox.Constants.BASE_PLUGIN;
