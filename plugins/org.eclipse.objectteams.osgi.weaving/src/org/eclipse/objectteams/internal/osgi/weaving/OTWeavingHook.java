@@ -15,14 +15,15 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.osgi.weaving.Activator.log;
+import static org.eclipse.objectteams.otequinox.Activator.log;
 
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
-import org.eclipse.objectteams.osgi.weaving.Activator;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.osgi.framework.Bundle;
@@ -88,14 +89,17 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			
 			if (requiresWeaving(bundleWiring)) {
 				Class<?> classBeingRedefined = null; // TODO
-				ProtectionDomain protectionDomain = null; // TODO
+				ProtectionDomain protectionDomain = wovenClass.getProtectionDomain();
 				byte[] bytes = wovenClass.getBytes();
 				try {
 					log(IStatus.INFO, "About to transform class "+wovenClass);
 					byte[] newBytes = objectTeamsTransformer.transform(bundleWiring.getClassLoader(),
 										className, classBeingRedefined, protectionDomain, bytes);
-					if (newBytes != bytes)
+					if (newBytes != bytes) {
 						wovenClass.setBytes(newBytes);
+						if (otreAdded.add(bundleWiring.getBundle()))
+							wovenClass.getDynamicImports().add("org.objectteams");
+					}
 				} catch (IllegalClassFormatException e) {
 					log(e, "Failed to transform class "+className);
 				}
@@ -105,6 +109,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		}
 	}
 	
+	Set<Bundle> otreAdded = new HashSet<>();
 	@Override
 	public void modified(WovenClass wovenClass) {
 		if (wovenClass.getState() == WovenClass.DEFINED) {

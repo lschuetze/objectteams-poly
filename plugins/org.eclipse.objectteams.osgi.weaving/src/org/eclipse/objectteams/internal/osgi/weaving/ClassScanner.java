@@ -16,7 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.osgi.weaving.Activator.log;
+import static org.eclipse.objectteams.otequinox.Activator.log;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -60,17 +60,20 @@ public class ClassScanner
 	 * @param bundle    where to look
 	 * @param className the class to investigate (team or role)
 	 * @param loader    the loader (could be null) to use for further classFile lookup
+	 * @return the real class name (potentially involving '$' and '__OT__' substitution/insertion
 	 * @throws ClassFormatError
 	 * @throws IOException
 	 * @throws ClassNotFoundException the team or role class was not found
 	 */
-	public void readOTAttributes(Bundle bundle, String className)
+	public String readOTAttributes(Bundle bundle, String className)
 			throws ClassFormatError, IOException, ClassNotFoundException 
 	{
 		Object loader = REPOSITORY_USE_RESOURCE_LOADER ? bundle : null;
-		URL classFile = bundle.getResource(className.replace('.', '/')+".class");
-		if (classFile == null) 
+		Pair<URL,String> result = TeamLoader.findTeamClassResource(className, bundle);
+		if (result == null)
 			throw new ClassNotFoundException(className);
+		URL classFile = result.first;
+		className = result.second;
 		ObjectTeamsTransformer transformer = new ObjectTeamsTransformer();
 		try (InputStream inputStream = classFile.openStream()) {
 			transformer.readOTAttributes(inputStream, classFile.getFile(), loader);
@@ -88,6 +91,7 @@ public class ClassScanner
 			allBaseClassNames.addAll(currentBaseNames);
 		}
 		readMemberTypeAttributes(bundle, className, transformer);
+		return className;
 	}
 	
 	/** 

@@ -16,6 +16,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -24,7 +25,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.objectteams.osgi.weaving.ActivationKind;
+import org.eclipse.objectteams.otequinox.ActivationKind;
 
 /** 
  * A simple record representing the information read from an extension to org.eclipse.objectteams.otequinox.aspectBindings.
@@ -40,6 +41,7 @@ public class AspectBinding {
 	public List<String>[]   subTeamClasses;
 	public boolean          activated= false; // FIXME: consistently set?
 	private HashMap<String, Set<String>> teamsPerBase = new HashMap<>();
+	HashMap<String, Collection<String>> basesPerTeam = new HashMap<>();
 	
 	public AspectBinding(String aspectId, String baseId, IConfigurationElement[] forcedExportsConfs) {
 		this.aspectPlugin= aspectId;
@@ -70,14 +72,17 @@ public class AspectBinding {
 
 	public List<String> getAllTeams() {
 		List<String> all = Arrays.asList(this.teamClasses);
-		if (subTeamClasses != null)
+		if (subTeamClasses != null) {
+			all = new ArrayList<>(all);
 			for (int i = 0; i < subTeamClasses.length; i++)
 				if (subTeamClasses[i] != null)
 					all.addAll(subTeamClasses[i]);
+		}
 		return all;
 	}
 
 	public void addBaseClassNames(String teamName, Collection<String> baseClassNames) {
+		basesPerTeam.put(teamName, baseClassNames);
 		for (String baseClassName : baseClassNames) {
 			Set<String> teams = teamsPerBase.get(baseClassName);
 			if (teams == null)

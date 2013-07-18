@@ -13,7 +13,7 @@
  * Contributors:
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.osgi.weaving;
+package org.eclipse.objectteams.otequinox;
 
 /**
  * Possible values for the "activation" attribute of a "team" element within an "aspectBinding" extension.

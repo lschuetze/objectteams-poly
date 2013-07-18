@@ -1,17 +1,15 @@
-package org.eclipse.objectteams.osgi.weaving;
+package org.eclipse.objectteams.otequinox;
 
-import static org.eclipse.objectteams.osgi.weaving.Constants.TRANSFORMER_PLUGIN_ID;
+import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
 
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otre.ClassLoaderAccess;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
 
 public class Activator implements BundleActivator {
 
@@ -84,7 +82,10 @@ public class Activator implements BundleActivator {
 		msg = "OT/Equinox: "+msg;
 		System.err.println(msg);
 		ex.printStackTrace();
-		log.log(new Status(IStatus.ERROR, TRANSFORMER_PLUGIN_ID, msg, ex));
+		if (log != null)
+			log.log(new Status(IStatus.ERROR, TRANSFORMER_PLUGIN_ID, msg, ex));
+		else
+			System.err.println(msg);
 	}
 	
 	public static void log(int status, String msg) {

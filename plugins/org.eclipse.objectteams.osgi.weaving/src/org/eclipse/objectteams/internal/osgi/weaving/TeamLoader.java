@@ -15,14 +15,16 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.osgi.weaving.Activator.log;
+import static org.eclipse.objectteams.otequinox.Activator.log;
 
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry.WaitingTeamRecord;
-import org.eclipse.objectteams.osgi.weaving.ActivationKind;
+import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.objectteams.ITeam;
 import org.objectteams.Team;
@@ -58,10 +60,9 @@ public class TeamLoader {
 		for (String teamForBase : teamsForBase) {
 			// Load:
 			Class<? extends ITeam> teamClass;
-			try {
-				teamClass = (Class<? extends ITeam>) aspectBundle.loadClass(teamForBase);
-			} catch (ClassNotFoundException e) {
-				log(e, "Failed to load team "+teamForBase);
+			teamClass = findTeamClass(teamForBase, aspectBundle);
+			if (teamClass == null) {
+				log(new ClassNotFoundException("Not found: "+teamForBase), "Failed to load team "+teamForBase);
 				continue;
 			}
 			// Instantiate?
@@ -94,6 +95,64 @@ public class TeamLoader {
 		activateTeam(record.aspectBinding, teamName, teamInstance, activationKind);
 	}
 
+	public static Pair<URL,String> findTeamClassResource(String className, Bundle bundle) {
+		for (String candidate : possibleTeamNames(className)) {
+			URL result = bundle.getResource(candidate.replace('.', '/')+".class");
+			if (result != null)
+				return new Pair<>(result, candidate);
+		}
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	public static Class<? extends ITeam> findTeamClass(String className, Bundle bundle) {
+		for (String candidate : possibleTeamNames(className)) {
+			try {
+				Class<?> result = bundle.loadClass(candidate);
+				if (result != null)
+					return (Class<? extends ITeam>) result;
+			} catch (NoClassDefFoundError|ClassNotFoundException e) {
+				// keep looking
+			}
+		}
+		return null;
+	}
+
+	/** 
+	 * Starting from currentName compute a list of potential binary names of (nested) teams
+	 * using "$__OT__" as the separator, to find class parts of nested teams.  
+	 */
+	public static List<String> possibleTeamNames(String currentName) {
+		List<String> result = new ArrayList<String>();
+		result.add(currentName);
+		char sep = '.'; // assume source name
+		if (currentName.indexOf('$') > -1)
+			// binary name
+			sep = '$';
+		int from = currentName.length()-1;
+		while (true) {
+			int pos = currentName.lastIndexOf(sep, from);
+			if (pos == -1)
+				break;
+			String prefix = currentName.substring(0, pos); 
+			String postfix = currentName.substring(pos+1);
+			if (sep=='$') {
+				if (!postfix.startsWith("__OT__"))
+					result.add(0, currentName = prefix+"$__OT__"+postfix);
+			} else {
+				// heuristic: 
+				// only replace if parent element looks like a class (expected to start with uppercase)
+				int prevDot = prefix.lastIndexOf('.');
+				if (prevDot > -1 && Character.isUpperCase(prefix.charAt(prevDot+1))) 
+					result.add(0, currentName = prefix+"$__OT__"+postfix);
+				else 
+					break;
+			}
+			from = pos-1;
+		}
+		return result;
+	}
+
 	private @Nullable ITeam instantiateTeam(AspectBinding aspectBinding, Class<? extends ITeam> teamClass, String teamName) {
 		try {
 			ITeam instance = teamClass.newInstance();
@@ -113,6 +172,19 @@ public class TeamLoader {
 
 	private void activateTeam(AspectBinding aspectBinding, String teamName, ITeam teamInstance, ActivationKind activationKind)
 	{
+		// don't try to activate before all base classes successfully load.
+		ClassLoader loader = teamInstance.getClass().getClassLoader();
+		for (String baseclass : aspectBinding.basesPerTeam.get(teamName)) {
+			try {
+				loader.loadClass(baseclass);
+			} catch (ClassNotFoundException cnfe) {
+				synchronized (deferredTeams) {
+					deferredTeams.add(new WaitingTeamRecord(teamInstance, aspectBinding, baseclass)); // TODO(SH): synchronization, deadlock?
+				}
+				return;
+			}
+		}
+		// good to go, so go:
 		try {
 			switch (activationKind) {
 			case ALL_THREADS:
@@ -124,10 +196,6 @@ public class TeamLoader {
 			//$CASES-OMITTED$
 			default:
 				break;
-			}
-		} catch (NoClassDefFoundError e) {
-			synchronized (deferredTeams) {
-				deferredTeams.add(new WaitingTeamRecord(teamInstance, aspectBinding, e.getMessage().replace('/','.'))); // TODO(SH): synchronization
 			}
 		} catch (Throwable t) {
 			// application errors during activation

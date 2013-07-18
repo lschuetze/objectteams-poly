@@ -15,7 +15,7 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.osgi.weaving.Activator.log;
+import static org.eclipse.objectteams.otequinox.Activator.log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +85,7 @@ public class BaseBundleLoadTrigger {
 		ClassScanner scanner = new ClassScanner();
 		for (String teamName : allTeams) {
 			try {
-				scanner.readOTAttributes(bundle, teamName);
+				teamName = scanner.readOTAttributes(bundle, teamName);
 				aspectBinding.addBaseClassNames(teamName, scanner.getCollectedBaseClassNames());
 			} catch (Exception e) {
 				log(e, "Failed to load team class "+teamName);

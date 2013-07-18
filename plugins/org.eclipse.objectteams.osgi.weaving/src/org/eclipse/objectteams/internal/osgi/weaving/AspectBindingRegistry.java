@@ -16,17 +16,17 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.osgi.weaving.Activator.log;
-import static org.eclipse.objectteams.osgi.weaving.Constants.ACTIVATION;
-import static org.eclipse.objectteams.osgi.weaving.Constants.ASPECT_BINDING_EXTPOINT_ID;
-import static org.eclipse.objectteams.osgi.weaving.Constants.BASE_PLUGIN;
-import static org.eclipse.objectteams.osgi.weaving.Constants.CLASS;
-import static org.eclipse.objectteams.osgi.weaving.Constants.ID;
-import static org.eclipse.objectteams.osgi.weaving.Constants.REQUIRED_FRAGMENT;
-import static org.eclipse.objectteams.osgi.weaving.Constants.SELF;
-import static org.eclipse.objectteams.osgi.weaving.Constants.SUPERCLASS;
-import static org.eclipse.objectteams.osgi.weaving.Constants.TEAM;
-import static org.eclipse.objectteams.osgi.weaving.Constants.TRANSFORMER_PLUGIN_ID;
+import static org.eclipse.objectteams.otequinox.Activator.log;
+import static org.eclipse.objectteams.otequinox.Constants.ACTIVATION;
+import static org.eclipse.objectteams.otequinox.Constants.ASPECT_BINDING_EXTPOINT_ID;
+import static org.eclipse.objectteams.otequinox.Constants.BASE_PLUGIN;
+import static org.eclipse.objectteams.otequinox.Constants.CLASS;
+import static org.eclipse.objectteams.otequinox.Constants.ID;
+import static org.eclipse.objectteams.otequinox.Constants.REQUIRED_FRAGMENT;
+import static org.eclipse.objectteams.otequinox.Constants.SELF;
+import static org.eclipse.objectteams.otequinox.Constants.SUPERCLASS;
+import static org.eclipse.objectteams.otequinox.Constants.TEAM;
+import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -39,7 +39,7 @@ import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.objectteams.osgi.weaving.Constants;
+import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.objectteams.ITeam;
 import org.osgi.framework.Bundle;

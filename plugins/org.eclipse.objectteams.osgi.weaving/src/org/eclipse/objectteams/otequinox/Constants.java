@@ -13,7 +13,7 @@
  * Contributors:
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.osgi.weaving;
+package org.eclipse.objectteams.otequinox;
 
 /**
  * Constants used for OT/Equinox.
@@ -24,7 +24,7 @@ package org.eclipse.objectteams.osgi.weaving;
 public interface Constants {
 	
 	/** ID of this plugin. */
-	public static final String TRANSFORMER_PLUGIN_ID         = "org.eclipse.objectteams.osgi.weaving" ; //$NON-NLS-1$
+	public static final String TRANSFORMER_PLUGIN_ID         = "org.eclipse.objectteams.otequinox" ; //$NON-NLS-1$
 	
 	// === Extension point elements: ===
 	

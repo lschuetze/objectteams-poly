@@ -191,7 +191,8 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			
 			JavaClass new_java_class = cg.getJavaClass(); 
 			if (dumping) {
-				new_java_class.dump("jplis_dump/" + className + ".class");
+				String binaryName = className.replace('.','/');
+				new_java_class.dump("jplis_dump/" + binaryName + ".class");
 			}
 			return new_java_class.getBytes();
 		} catch (IOException e) {
