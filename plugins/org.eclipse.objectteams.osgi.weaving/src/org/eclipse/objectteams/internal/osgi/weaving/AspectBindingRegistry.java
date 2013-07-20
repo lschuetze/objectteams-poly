@@ -42,7 +42,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
-import org.objectteams.ITeam;
+import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
 
@@ -83,17 +83,17 @@ public class AspectBindingRegistry {
 
 	/** Record for one team waiting for instantiation/activation. */
 	static class WaitingTeamRecord {
-		@Nullable Class<? extends ITeam> teamClass; // ... either this is set
-		@Nullable ITeam teamInstance;	// ... or this
+		@Nullable Class<? extends Team> teamClass; // ... either this is set
+		@Nullable Team teamInstance;	// ... or this
 		AspectBinding aspectBinding;
 		String notFoundClass;
 		
-		public WaitingTeamRecord(Class<? extends ITeam> teamClass, AspectBinding aspectBinding, String notFoundClass) {
+		public WaitingTeamRecord(Class<? extends Team> teamClass, AspectBinding aspectBinding, String notFoundClass) {
 			this.teamClass = teamClass;
 			this.aspectBinding = aspectBinding;
 			this.notFoundClass = notFoundClass;
 		}
-		public WaitingTeamRecord(ITeam teamInstance, AspectBinding aspectBinding, String notFoundClass) {
+		public WaitingTeamRecord(Team teamInstance, AspectBinding aspectBinding, String notFoundClass) {
 			this.teamInstance = teamInstance;
 			this.aspectBinding = aspectBinding;
 			this.notFoundClass = notFoundClass;
@@ -105,11 +105,11 @@ public class AspectBindingRegistry {
 			this.notFoundClass = notFoundClass;
 		}
 		public @Nullable String getTeamName() {
-			final Class<? extends ITeam> clazz = teamClass;
+			final Class<? extends Team> clazz = teamClass;
 			if (clazz != null) {
 				return clazz.getName();
 			} else {
-				final ITeam instance = teamInstance;
+				final Team instance = teamInstance;
 				if (instance != null)
 					return instance.getClass().getName();
 			}

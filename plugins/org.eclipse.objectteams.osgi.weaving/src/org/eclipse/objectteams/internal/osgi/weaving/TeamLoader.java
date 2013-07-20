@@ -29,7 +29,6 @@ import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry.Waiti
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
-import org.objectteams.ITeam;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
@@ -78,7 +77,7 @@ public class TeamLoader {
 			imports.add(packageOfTeam);
 			log(IStatus.INFO, "Added dependency from base "+baseClass.getClassName()+" to package '"+packageOfTeam+"'");
 			// Load:
-			Class<? extends ITeam> teamClass;
+			Class<? extends Team> teamClass;
 			teamClass = findTeamClass(teamForBase, aspectBundle);
 			if (teamClass == null) {
 				log(new ClassNotFoundException("Not found: "+teamForBase), "Failed to load team "+teamForBase);
@@ -88,7 +87,7 @@ public class TeamLoader {
 			ActivationKind activationKind = aspectBinding.getActivation(teamForBase);
 			if (activationKind == ActivationKind.NONE)
 				continue;
-			ITeam teamInstance = instantiateTeam(aspectBinding, teamClass, teamForBase);
+			Team teamInstance = instantiateTeam(aspectBinding, teamClass, teamForBase);
 			if (teamInstance == null)
 				continue;
 			// Activate?
@@ -101,7 +100,7 @@ public class TeamLoader {
 	public void instantiateWaitingTeam(WaitingTeamRecord record)
 			throws InstantiationException, IllegalAccessException 
 	{
-		ITeam teamInstance = record.teamInstance;
+		Team teamInstance = record.teamInstance;
 		String teamName = record.getTeamName();
 		if (teamInstance == null) {
 			// Instantiate (we only get here if activationKind != NONE)
@@ -124,12 +123,12 @@ public class TeamLoader {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static Class<? extends ITeam> findTeamClass(String className, Bundle bundle) {
+	public static Class<? extends Team> findTeamClass(String className, Bundle bundle) {
 		for (String candidate : possibleTeamNames(className)) {
 			try {
 				Class<?> result = bundle.loadClass(candidate);
 				if (result != null)
-					return (Class<? extends ITeam>) result;
+					return (Class<? extends Team>) result;
 			} catch (NoClassDefFoundError|ClassNotFoundException e) {
 				// keep looking
 			}
@@ -172,13 +171,13 @@ public class TeamLoader {
 		return result;
 	}
 
-	private @Nullable ITeam instantiateTeam(AspectBinding aspectBinding, Class<? extends ITeam> teamClass, String teamName) {
+	private @Nullable Team instantiateTeam(AspectBinding aspectBinding, Class<? extends Team> teamClass, String teamName) {
 		// don't try to instantiate before all base classes successfully loaded.
 		if (!isReadyToLoad(aspectBinding, teamClass, null, teamName))
 			return null;
 
 		try {
-			ITeam instance = teamClass.newInstance();
+			Team instance = teamClass.newInstance();
 			TransformerPlugin.registerTeamInstance(instance);
 			log(ILogger.INFO, "Instantiated team "+teamName);
 			return instance;
@@ -194,7 +193,7 @@ public class TeamLoader {
 		return null;
 	}
 
-	private void activateTeam(AspectBinding aspectBinding, String teamName, ITeam teamInstance, ActivationKind activationKind)
+	private void activateTeam(AspectBinding aspectBinding, String teamName, Team teamInstance, ActivationKind activationKind)
 	{
 		// don't try to activate before all base classes successfully loaded.
 		if (!isReadyToLoad(aspectBinding, teamInstance.getClass(), teamInstance, teamName))
@@ -219,7 +218,7 @@ public class TeamLoader {
 			log(t, "Failed to activate team "+teamName);
 		}
 	}
-	boolean isReadyToLoad(AspectBinding aspectBinding, Class<? extends ITeam> teamClass, ITeam teamInstance, String teamName) {
+	boolean isReadyToLoad(AspectBinding aspectBinding, Class<? extends Team> teamClass, Team teamInstance, String teamName) {
 		for (String baseclass : aspectBinding.basesPerTeam.get(teamName)) {
 			if (this.beingDefined.contains(baseclass)) {
 				synchronized (deferredTeams) {

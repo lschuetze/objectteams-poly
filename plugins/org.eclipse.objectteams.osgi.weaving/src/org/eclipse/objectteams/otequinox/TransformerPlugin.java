@@ -13,7 +13,7 @@ import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otre.ClassLoaderAccess;
-import org.objectteams.ITeam;
+import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -30,7 +30,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	private static TransformerPlugin plugin;
 	
 	private AspectBindingRegistry aspectBindingRegistry;
-	private List<ITeam> teamInstances = new ArrayList<>();
+	private List<Team> teamInstances = new ArrayList<>();
 
 	/*
 	 * (non-Javadoc)
@@ -141,13 +141,13 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		return result;
 	}
 
-	public static void registerTeamInstance(ITeam instance) {
+	public static void registerTeamInstance(Team instance) {
 		plugin.teamInstances.add(instance);
 	}
 	/**
 	 * Copy all registered team instances into the given list,
      */
-	public static synchronized void getTeamInstances(List<ITeam> list) {
+	public static synchronized void getTeamInstances(List<Team> list) {
 		list.addAll(plugin.teamInstances);
 	}
 
