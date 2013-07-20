@@ -65,6 +65,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	};
 
 	static boolean warmedUp = false;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -72,7 +73,13 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	 *      java.lang.String, java.lang.Class, java.security.ProtectionDomain,
 	 *      byte[])
 	 */
-	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+	public byte[] transform(ClassLoader loader, String className,
+			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
+			byte[] classfileBuffer) throws IllegalClassFormatException {
+		return transform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+	}
+	
+	public byte[] transform(Object loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer)
 			throws IllegalClassFormatException
 	{
@@ -86,7 +93,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			}		
 		}
 	}
-	public byte[] internalTransform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+	public byte[] internalTransform(Object loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer)
 			throws IllegalClassFormatException
 	{
@@ -125,7 +132,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		StaticSliceBaseTransformation 		staticSliceBaseTransformation 		= new StaticSliceBaseTransformation(loader);
 		SubBoundBaseMethodRedefinition 		subBoundBaseMethodRedefinition 		= new SubBoundBaseMethodRedefinition(loader);
 		TeamInterfaceImplementation 		teamInterfaceImplementation 		= new TeamInterfaceImplementation(loader);
-		ThreadActivation 					threadActivation					= new ThreadActivation();
+//		ThreadActivation 					threadActivation					= new ThreadActivation();
 				
 		// tell Repository about the class loader for improved lookupClass()
 		DietClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
@@ -179,7 +186,8 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 //			baseMethodTransformation.doTransformInterface(jpe, cg);
 //			staticSliceBaseTransformation.doTransformInterface(jpe, cg);
 //			teamInterfaceImplementation.doTransformInterface(jpe, cg);
-			threadActivation.doTransformInterface(jpe, cg);
+// FIXME:
+//			threadActivation.doTransformInterface(jpe, cg);
 
 			
 //			baseCallRedirection.doTransformCode(cg); // empty method
@@ -187,7 +195,8 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			liftingParticipantTransformation.doTransformCode(cg);
 			staticSliceBaseTransformation.doTransformCode(cg);
 			teamInterfaceImplementation.doTransformCode(cg);
-			threadActivation.doTransformCode(cg);
+// FIXME:
+//			threadActivation.doTransformCode(cg);
 			
 			JavaClass new_java_class = cg.getJavaClass(); 
 			if (dumping) {

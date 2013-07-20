@@ -50,7 +50,7 @@ public class StaticSliceBaseTransformation
 	static final String _OT_ACTIVE_TEAMS=    "_OT$activeTeams";   //$NON-NLS-1$
 	static final String _OT_ACTIVE_TEAM_IDS= "_OT$activeTeamIDs"; //$NON-NLS-1$
 
-	public StaticSliceBaseTransformation(ClassLoader loader) { super(loader); }
+	public StaticSliceBaseTransformation(Object loader) { super(loader); }
 	
 	private HashMap<String,String> rejectReasons = new HashMap<String, String>();
 

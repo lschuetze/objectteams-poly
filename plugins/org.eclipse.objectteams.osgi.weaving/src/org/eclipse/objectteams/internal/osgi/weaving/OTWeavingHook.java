@@ -20,7 +20,6 @@ import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,12 +57,13 @@ import org.osgi.service.component.ComponentContext;
 public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 	private AspectBindingRegistry aspectBindingRegistry;
-	private ObjectTeamsTransformer objectTeamsTransformer;
+	
+	@NonNull Set<String> beingDefined = new HashSet<>(); // shared with AspectBindingRegistry!
+	
 	
 	/** Call-back from DS framework. */
 	public void activate(ComponentContext context) {
 		this.aspectBindingRegistry = loadAspectBindingRegistry(context.getBundleContext());
-		this.objectTeamsTransformer = new ObjectTeamsTransformer();
 		TransformerPlugin.getDefault().registerAspectBindingRegistry(this.aspectBindingRegistry);
 	}
 
@@ -77,46 +77,39 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		else
 			log(ILogger.ERROR, "Failed to load PackageAdmin service. Will not be able to handle fragments.");
 
-		AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry();
+		AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry(this.beingDefined);
 		aspectBindingRegistry.loadAspectBindings(packageAdmin);
 		return aspectBindingRegistry;
 	}
 
 	@Override
 	public void weave(WovenClass wovenClass) {
+		beingDefined.add(wovenClass.getClassName());
+
 		try {
 			BundleWiring bundleWiring = wovenClass.getBundleWiring();
 			String bundleName = bundleWiring.getBundle().getSymbolicName();
 			String className = wovenClass.getClassName();
 			
 			// do whatever is needed *before* loading this class:
-			aspectBindingRegistry.triggerLoadingHooks(bundleName, className);
+			aspectBindingRegistry.triggerLoadingHooks(bundleName, wovenClass);
 			
 			if (requiresWeaving(bundleWiring)) {
+				ObjectTeamsTransformer transformer = new ObjectTeamsTransformer();
 				Class<?> classBeingRedefined = null; // TODO
 				ProtectionDomain protectionDomain = wovenClass.getProtectionDomain();
 				byte[] bytes = wovenClass.getBytes();
 				try {
-					log(IStatus.INFO, "About to transform class "+wovenClass);
-					byte[] newBytes = objectTeamsTransformer.transform(bundleWiring.getClassLoader(),
+					log(IStatus.OK, "About to transform class "+className);
+					byte[] newBytes = transformer.transform(bundleWiring.getBundle(),
 										className, classBeingRedefined, protectionDomain, bytes);
 					if (newBytes != bytes && !Arrays.equals(newBytes, bytes)) {
+						log(IStatus.INFO, "Transformation performed on "+className);
 						wovenClass.setBytes(newBytes);
 						if (otreAdded.add(bundleWiring.getBundle())) {
+							log(IStatus.INFO, "Adding OTRE import to "+bundleName);
 							List<String> imports = wovenClass.getDynamicImports();
 							imports.add("org.objectteams");
-							List<AspectBinding> aspects = aspectBindingRegistry.getAdaptingAspectBindings(bundleName);
-							if (aspects != null) {
-								for (AspectBinding aspect : aspects) {
-									Collection<String> teamsForBase = aspect.getTeamsForBase(className);
-									if (teamsForBase != null) {
-										for (String t : teamsForBase) {
-											int dot = t.lastIndexOf('.');
-											imports.add(t.substring(0, dot));
-										}
-									}
-								}
-							}
 						}
 					}
 				} catch (IllegalClassFormatException e) {
@@ -132,6 +125,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	@Override
 	public void modified(WovenClass wovenClass) {
 		if (wovenClass.getState() == WovenClass.DEFINED) {
+			beingDefined.remove(wovenClass.getClassName());
 			@SuppressWarnings("null") @NonNull String className = wovenClass.getClassName();
 			aspectBindingRegistry.instantiateScheduledTeams(className);
 		}

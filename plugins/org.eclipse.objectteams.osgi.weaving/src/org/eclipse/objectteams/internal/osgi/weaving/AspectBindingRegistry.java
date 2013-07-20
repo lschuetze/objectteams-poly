@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -43,6 +44,7 @@ import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.objectteams.ITeam;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.hooks.weaving.WovenClass;
 
 /**
  * An instance of this class holds the information loaded from extensions
@@ -72,6 +74,12 @@ public class AspectBindingRegistry {
 	private Set<String> selfAdaptingAspects= new HashSet<String>(); // TODO, never read / evaluated
 	
 	private HashMap<String, BaseBundleLoadTrigger> baseTripWires = new HashMap<>();
+	
+	Set<String> beingDefined = new HashSet<>(); // shared with OTWeavingHook!
+
+	public AspectBindingRegistry(Set<String> beingDefined) {
+		this.beingDefined = beingDefined;
+	}
 
 	/** Record for one team waiting for instantiation/activation. */
 	static class WaitingTeamRecord {
@@ -314,10 +322,12 @@ public class AspectBindingRegistry {
 	}
 
 	/** Check if the given base bundle / base class mandate any loading/instantiation/activation of teams. */
-	public void triggerLoadingHooks(@Nullable String bundleName, @Nullable String className) {
+	public void triggerLoadingHooks(@Nullable String bundleName, @Nullable WovenClass baseClass) {
 		BaseBundleLoadTrigger activation = baseTripWires.get(bundleName);
-		if (activation != null)
-			activation.fire(className);
+		if (activation != null) {
+			if (activation.fire(baseClass, beingDefined))
+				baseTripWires.remove(bundleName);
+		}
 	}
 
 	/** Record the given team classes as waiting for instantiation/activation. */
@@ -345,8 +355,9 @@ public class AspectBindingRegistry {
 		}
 		if (scheduledTeams == null) return;
 		for(WaitingTeamRecord record : scheduledTeams) {
+			log(IStatus.INFO, "Consider for instantiation/activation: team "+record.getTeamName());
 			try {
-				new TeamLoader(deferredTeams).instantiateWaitingTeam(record); // may re-insert to deferredTeams
+				new TeamLoader(deferredTeams, beingDefined).instantiateWaitingTeam(record); // may re-insert to deferredTeams
 			} catch (Exception e) {
 				log(e, "Failed to instantiate team "+record.getTeamName());
 				continue;

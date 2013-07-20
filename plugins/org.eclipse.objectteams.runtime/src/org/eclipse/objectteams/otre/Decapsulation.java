@@ -53,7 +53,7 @@ public class Decapsulation
 	private HashSet<String/*callout accessed fields*/> generatedFieldCalloutAccessors = new HashSet<String>();
 	private HashSet<String/*super-accessed methods (sign)*/> generatedSuperAccessors  = new HashSet<String>();
 	
-    public Decapsulation(ClassLoader loader) {
+    public Decapsulation(Object loader) {
     	super(loader);
     }
 

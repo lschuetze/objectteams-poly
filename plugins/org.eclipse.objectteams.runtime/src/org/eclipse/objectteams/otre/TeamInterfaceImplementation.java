@@ -46,7 +46,7 @@ public class TeamInterfaceImplementation
 	extends ObjectTeamsTransformation {
 
 
-	public TeamInterfaceImplementation(ClassLoader loader) {
+	public TeamInterfaceImplementation(Object loader) {
 		super(loader);
 	}
 

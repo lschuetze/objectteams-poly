@@ -69,7 +69,7 @@ public class LiftingParticipantTransformation extends ObjectTeamsTransformation 
 	private static final String CREATE_ROLE_METHOD = "createRole";
 	private static final String LIFTING_PARTICIPANT_FIELD = "_OT$liftingParticipant";
 	
-	public LiftingParticipantTransformation(ClassLoader loader) { super(loader); }
+	public LiftingParticipantTransformation(Object loader) { super(loader); }
 
 	public void doTransformCode(ClassGen cg) 
 	{

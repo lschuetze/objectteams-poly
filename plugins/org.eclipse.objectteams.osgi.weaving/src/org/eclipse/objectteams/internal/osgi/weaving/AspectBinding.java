@@ -16,6 +16,8 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
+import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,8 +27,10 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.otequinox.ActivationKind;
+import org.osgi.framework.Bundle;
 
 /** 
  * A simple record representing the information read from an extension to org.eclipse.objectteams.otequinox.aspectBindings.
@@ -34,15 +38,24 @@ import org.eclipse.objectteams.otequinox.ActivationKind;
  * @since 1.3.0 (was a nested class before that) 
  */
 public class AspectBinding {
+	enum State { Initial, TeamsScanned, TeamsActivated };
+	
 	public String aspectPlugin;
 	public String basePlugin;
 	public IConfigurationElement[] forcedExports;
 	public ActivationKind[] activations = null; 
 	public String[]         teamClasses;
 	public List<String>[]   subTeamClasses;
-	public boolean          activated= false; // FIXME: consistently set?
+
+	public State 			 state = State.Initial;
+	
+	/** Dispenser for team classes indexed by base classes that should trigger activating the team. */
 	private HashMap<String, Set<String>> teamsPerBase = new HashMap<>();
+	
+	/** Lookup to find base classes affected by a team (need to be available before instantiate/activate). */
 	HashMap<String, Collection<String>> basesPerTeam = new HashMap<>();
+	
+	Set<String> teamsInProgress = new HashSet<>(); // TODO cleanup teams that are done
 	
 	public AspectBinding(String aspectId, String baseId, IConfigurationElement[] forcedExportsConfs) {
 		this.aspectPlugin= aspectId;
@@ -93,8 +106,13 @@ public class AspectBinding {
 	}
 
 	/** Destructively read the names of teams to load for a given base class. */
-	public @Nullable Collection<String> getTeamsForBase(String baseClassName) {
-		return teamsPerBase.remove(baseClassName);		
+	public synchronized @Nullable Collection<String> getTeamsForBase(String baseClassName) {
+		Set<String> teamNames = teamsPerBase.remove(baseClassName);
+		if (teamNames != null) {
+			teamNames.removeAll(teamsInProgress);
+			teamsInProgress.addAll(teamNames);
+		}
+		return teamNames;		
 	}
 
 	public ActivationKind getActivation(String teamClassName) {
@@ -103,5 +121,21 @@ public class AspectBinding {
 				return activations[i];
 		}
 		return ActivationKind.NONE;
+	}
+
+	/** Read OT attributes of all teams in aspectBinding and collect affected base classes. */
+	public synchronized void scanTeamClasses(Bundle bundle) {
+		ClassScanner scanner = new ClassScanner();
+		for (String teamName : getAllTeams()) {
+			try {
+				teamName = scanner.readOTAttributes(bundle, teamName);
+				Collection<String> baseClassNames = scanner.getCollectedBaseClassNames();
+				addBaseClassNames(teamName, baseClassNames);
+				log(IStatus.INFO, "Scanned team class "+teamName+", found "+baseClassNames.size()+" base classes");
+			} catch (Exception e) {
+				log(e, "Failed to scan team class "+teamName);
+			}
+		}
+		this.state = State.TeamsScanned;
 	}
 }

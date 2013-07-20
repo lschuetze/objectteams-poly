@@ -15,13 +15,16 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.otequinox.Activator.log;
+import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.State;
 import org.osgi.framework.Bundle;
+import org.osgi.framework.hooks.weaving.WovenClass;
 
 /**
  * Each instance of this class represents the fact that a given base bundle has aspect bindings,
@@ -33,10 +36,7 @@ public class BaseBundleLoadTrigger {
 	@SuppressWarnings("deprecation")
 	private org.osgi.service.packageadmin.PackageAdmin admin;
 
-	private String baseBundleName;
-	
-	private boolean teamsScanned = false;
-	
+	private String baseBundleName;	
 
 	public BaseBundleLoadTrigger(String bundleSymbolicName, AspectBindingRegistry aspectBindingRegistry, 
 			@SuppressWarnings("deprecation") org.osgi.service.packageadmin.PackageAdmin admin) 
@@ -46,13 +46,20 @@ public class BaseBundleLoadTrigger {
 		this.admin = admin;
 	}
 	
-	/** Signal that the given class is being loaded and trigger any necessary loading/instantiation/activation. */
-	public void fire(String className) {
+	/**
+	 * Signal that the given class is being loaded and trigger any necessary steps:
+	 * - scan team & add reverse imports (now)
+	 * - load & instantiate & activate (now or later).
+	 */
+	public boolean fire(WovenClass baseClass, Set<String> beingDefined) {
 		List<AspectBindingRegistry.WaitingTeamRecord> deferredTeamClasses = new ArrayList<>();
 		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAdaptingAspectBindings(baseBundleName);
+		boolean allDone = true;
 		if (aspectBindings != null) {
 			for (AspectBinding aspectBinding : aspectBindings) {
-				if (aspectBinding.activated)
+				if (aspectBinding.state == State.Initial)
+					log(IStatus.INFO, "Preparing aspect binding for base bundle "+baseBundleName);
+				if (aspectBinding.state == State.TeamsActivated)
 					continue;
 				@SuppressWarnings("deprecation")
 				Bundle[] aspectBundles = admin.getBundles(aspectBinding.aspectPlugin, null);
@@ -61,35 +68,17 @@ public class BaseBundleLoadTrigger {
 					continue;
 				}
 				Bundle aspectBundle = aspectBundles[0];
-				if (shouldScan())
-					scanTeamClasses(aspectBundle, aspectBinding);
-				TeamLoader loading = new TeamLoader(deferredTeamClasses);
-				if (loading.loadTeams(aspectBundle, aspectBinding, className))
-//					aspectBinding.activated = true; // FIXME(SH): this still spoils team activation, the given class may not be the trigger
-					;
+				if (aspectBinding.state != State.TeamsScanned)
+					aspectBinding.scanTeamClasses(aspectBundle);
+				TeamLoader loading = new TeamLoader(deferredTeamClasses, beingDefined);
+				if (!loading.loadTeamsForBase(aspectBundle, aspectBinding, baseClass))
+					allDone = false;
 			}
-			if (!deferredTeamClasses.isEmpty())
+			if (!deferredTeamClasses.isEmpty()) {
 				aspectBindingRegistry.addDeferredTeamClasses(deferredTeamClasses);
-		}
-	}
-
-	private synchronized boolean shouldScan() {
-		boolean shouldScan = !teamsScanned;
-		teamsScanned = true;
-		return shouldScan;
-	}
-
-	/** Read OT attributes of all teams in aspectBinding and collect affected base classes. */
-	private void scanTeamClasses(Bundle bundle, AspectBinding aspectBinding) { 
-		List<String> allTeams = aspectBinding.getAllTeams();
-		ClassScanner scanner = new ClassScanner();
-		for (String teamName : allTeams) {
-			try {
-				teamName = scanner.readOTAttributes(bundle, teamName);
-				aspectBinding.addBaseClassNames(teamName, scanner.getCollectedBaseClassNames());
-			} catch (Exception e) {
-				log(e, "Failed to load team class "+teamName);
+				return false;
 			}
 		}
+		return allDone;
 	}
 }

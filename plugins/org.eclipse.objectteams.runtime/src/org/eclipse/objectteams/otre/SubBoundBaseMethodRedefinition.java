@@ -38,7 +38,7 @@ import org.eclipse.objectteams.otre.util.*;
 public class SubBoundBaseMethodRedefinition 
 	extends ObjectTeamsTransformation {
 
-	public SubBoundBaseMethodRedefinition(ClassLoader loader) { super(loader); }
+	public SubBoundBaseMethodRedefinition(Object loader) { super(loader); }
 
 	/**
 	 * Main entry for this transformer.

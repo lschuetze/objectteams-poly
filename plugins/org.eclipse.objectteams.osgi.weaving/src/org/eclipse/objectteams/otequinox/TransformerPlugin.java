@@ -128,7 +128,11 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	 * {@link IAspectRegistry#getAdaptingAspectPlugins(Bundle)} 
 	 */
 	public @NonNull String[] getAdaptingAspectPlugins(Bundle basePlugin) {
-		List<AspectBinding> aspectBindings = this.aspectBindingRegistry.getAdaptingAspectBindings(basePlugin.getSymbolicName());
+		return getAdaptingAspectPlugins(basePlugin.getSymbolicName());
+	}
+
+	public @NonNull String[] getAdaptingAspectPlugins(String id) {
+		List<AspectBinding> aspectBindings = this.aspectBindingRegistry.getAdaptingAspectBindings(id);
 		if (aspectBindings == null)
 			return new String[0];
 		String[] result = new String[aspectBindings.size()];
