@@ -26,6 +26,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
@@ -39,6 +42,7 @@ import org.osgi.framework.Bundle;
  * @since 1.2.0
  */
 @SuppressWarnings("nls")
+@NonNullByDefault
 public class ClassScanner 
 {
 	// default is "on", leave this switch for trouble shooting and profiling:
@@ -99,7 +103,7 @@ public class ClassScanner
 	 * encountered while reading the byte code attributes.
 	 * (Destructive read). 
 	 */
-	public Collection<String> getCollectedBaseClassNames(String teamName) {
+	public @Nullable Collection<String> getCollectedBaseClassNames(String teamName) {
 		return this.baseClassNamesByTeam.remove(teamName);
 	}
 
@@ -126,13 +130,13 @@ public class ClassScanner
 	/*
 	 * Recurse into member types scanning OT attributes.
 	 */
-	private void readMemberTypeAttributes(Bundle               bundle,
+	private void readMemberTypeAttributes(Bundle			     bundle,
 										  String                 className, 
 										  ObjectTeamsTransformer transformer)
 	{
 		List<String> roles = CallinBindingManager.getRolePerTeam(className);
 		if (roles != null) {
-			for (String roleName: roles) {
+			for (@SuppressWarnings("null")@NonNull String roleName: roles) {
 				log(ILogger.OK, "scanning role "+roleName);
 				try {
 					this.roleClassNames.add(roleName);

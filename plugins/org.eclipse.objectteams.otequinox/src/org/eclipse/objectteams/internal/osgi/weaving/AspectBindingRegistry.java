@@ -35,24 +35,17 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
-import org.objectteams.Team;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.hooks.weaving.WovenClass;
 
 /**
  * An instance of this class holds the information loaded from extensions
  * to the <code>aspectBindings</code> extension point.
- * <p>
- * Additionally it maintains dynamic data during the process of loading,
- * instantiating and activating teams.
- * </p>
  */
 // parts of this class are moved from org.eclipse.objectteams.otequinox.TransformerPlugin
 @NonNullByDefault
@@ -73,52 +66,6 @@ public class AspectBindingRegistry {
 		       new HashMap<String, ArrayList<AspectBinding>>();
 	private Set<String> selfAdaptingAspects= new HashSet<String>(); // TODO, never read / evaluated
 	
-	private HashMap<String, BaseBundleLoadTrigger> baseTripWires = new HashMap<>();
-	
-	Set<String> beingDefined = new HashSet<>(); // shared with OTWeavingHook!
-
-	public AspectBindingRegistry(Set<String> beingDefined) {
-		this.beingDefined = beingDefined;
-	}
-
-	/** Record for one team waiting for instantiation/activation. */
-	static class WaitingTeamRecord {
-		@Nullable Class<? extends Team> teamClass; // ... either this is set
-		@Nullable Team teamInstance;	// ... or this
-		AspectBinding aspectBinding;
-		String notFoundClass;
-		
-		public WaitingTeamRecord(Class<? extends Team> teamClass, AspectBinding aspectBinding, String notFoundClass) {
-			this.teamClass = teamClass;
-			this.aspectBinding = aspectBinding;
-			this.notFoundClass = notFoundClass;
-		}
-		public WaitingTeamRecord(Team teamInstance, AspectBinding aspectBinding, String notFoundClass) {
-			this.teamInstance = teamInstance;
-			this.aspectBinding = aspectBinding;
-			this.notFoundClass = notFoundClass;
-		}
-		public WaitingTeamRecord(WaitingTeamRecord record, String notFoundClass) {
-			this.teamClass = record.teamClass;
-			this.teamInstance = record.teamInstance;
-			this.aspectBinding = record.aspectBinding;
-			this.notFoundClass = notFoundClass;
-		}
-		public @Nullable String getTeamName() {
-			final Class<? extends Team> clazz = teamClass;
-			if (clazz != null) {
-				return clazz.getName();
-			} else {
-				final Team instance = teamInstance;
-				if (instance != null)
-					return instance.getClass().getName();
-			}
-			return "<unknown team>";
-		}		
-	}
-	// records of teams that have been deferred due to unresolved class dependencies:
-	private List<WaitingTeamRecord> deferredTeams = new ArrayList<>();
-
 	public static boolean IS_OTDT = false;
 	
 	public boolean isOTDT() {
@@ -126,7 +73,10 @@ public class AspectBindingRegistry {
 	}
 
 	/* Load extensions for org.eclipse.objectteams.otequinox.aspectBindings and check aspect permissions. */
-	public void loadAspectBindings(@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin) {
+	public void loadAspectBindings(
+			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
+			OTWeavingHook hook) 
+	{
 		IConfigurationElement[] aspectBindingConfigs = RegistryFactory.getRegistry().getConfigurationElementsFor(
 				TRANSFORMER_PLUGIN_ID, ASPECT_BINDING_EXTPOINT_ID);
 		
@@ -163,12 +113,14 @@ public class AspectBindingRegistry {
 					&& !checkRequiredFragments(aspectBundleId, baseBundleId, fragments, packageAdmin)) // reported inside
 				continue;
 			
-			AspectBinding binding = new AspectBinding(aspectBundleId, baseBundleId, basePlugins[0].getChildren(Constants.FORCED_EXPORTS_ELEMENT));
+			IConfigurationElement[] teams = currentBindingConfig.getChildren(TEAM);
+			AspectBinding binding = new AspectBinding(aspectBundleId,
+														baseBundleId,
+														basePlugins[0].getChildren(Constants.FORCED_EXPORTS_ELEMENT), 
+														teams.length);
 			// TODO(SH): maybe enforce that every bundle id is given only once?
 
 			//teams:
-			IConfigurationElement[] teams = currentBindingConfig.getChildren(TEAM);
-			binding.initTeams(teams.length);
 			try {
 				for (int j = 0; j < teams.length; j++) {
 					String teamClass = teams[j].getAttribute(CLASS);
@@ -180,8 +132,7 @@ public class AspectBindingRegistry {
 				@NonNull String realBaseBundleId = baseBundleId.toUpperCase().equals(SELF) ? aspectBundleId : baseBundleId;
 				addBindingForBaseBundle(realBaseBundleId, binding);
 				addBindingForAspectBundle(aspectBundleId, binding);
-				if (!baseTripWires.containsKey(realBaseBundleId))
-					baseTripWires.put(realBaseBundleId, new BaseBundleLoadTrigger(realBaseBundleId, this, packageAdmin));
+				hook.setBaseTripWire(packageAdmin, realBaseBundleId);
 
 				
 				// now that binding.teamClasses is filled connect to super team, if requested:
@@ -319,49 +270,5 @@ public class AspectBindingRegistry {
 	 */
 	public @Nullable List<AspectBinding> getAdaptingAspectBindings(@Nullable String basePluginName) {
 		return aspectBindingsByBasePlugin.get(basePluginName);
-	}
-
-	/** Check if the given base bundle / base class mandate any loading/instantiation/activation of teams. */
-	public void triggerLoadingHooks(@Nullable String bundleName, @Nullable WovenClass baseClass) {
-		BaseBundleLoadTrigger activation = baseTripWires.get(bundleName);
-		if (activation != null) {
-			if (activation.fire(baseClass, beingDefined))
-				baseTripWires.remove(bundleName);
-		}
-	}
-
-	/** Record the given team classes as waiting for instantiation/activation. */
-	public void addDeferredTeamClasses(List<WaitingTeamRecord> teamClasses) {
-		synchronized (deferredTeams) {
-			deferredTeams.addAll(teamClasses);
-		}
-	}
-
-	/**
-	 * Try to instantiate/activate any deferred teams that may be unblocked
-	 * by the definition of the given trigger class.
-	 */
-	public void instantiateScheduledTeams(String triggerClassName) {
-		List<WaitingTeamRecord> scheduledTeams = null;
-		synchronized(deferredTeams) {
-			for (WaitingTeamRecord record : new ArrayList<>(deferredTeams)) {
-				if (record.notFoundClass.equals(triggerClassName)) {
-					if (scheduledTeams == null)
-						scheduledTeams = new ArrayList<>();
-					if (deferredTeams.remove(record))
-						scheduledTeams.add(record);
-				}
-			}
-		}
-		if (scheduledTeams == null) return;
-		for(WaitingTeamRecord record : scheduledTeams) {
-			log(IStatus.INFO, "Consider for instantiation/activation: team "+record.getTeamName());
-			try {
-				new TeamLoader(deferredTeams, beingDefined).instantiateWaitingTeam(record); // may re-insert to deferredTeams
-			} catch (Exception e) {
-				log(e, "Failed to instantiate team "+record.getTeamName());
-				continue;
-			}
-		}
 	}
 }

@@ -19,13 +19,16 @@ import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
@@ -56,20 +59,30 @@ import org.osgi.service.component.ComponentContext;
  */
 public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
-	private AspectBindingRegistry aspectBindingRegistry;
+	/** Interface to data about aspectBinding extensions. */
+	private @NonNull AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry();
 	
-	@NonNull Set<String> beingDefined = new HashSet<>(); // shared with AspectBindingRegistry!
-	
+	/** Map of trip wires to be fired when a particular base bundle is loaded. */
+	private @NonNull HashMap<String, BaseBundleLoadTrigger> baseTripWires = new HashMap<>();
+
+	/** Set of classes for which processing has started but which are not yet defined in the class loader. */
+	private @NonNull Set<String> beingDefined = new HashSet<>();
+
+	/** Records of teams that have been deferred due to unresolved class dependencies: */
+	private @NonNull List<WaitingTeamRecord> deferredTeams = new ArrayList<>();
+
 	
 	/** Call-back from DS framework. */
 	public void activate(ComponentContext context) {
-		this.aspectBindingRegistry = loadAspectBindingRegistry(context.getBundleContext());
+		loadAspectBindingRegistry(context.getBundleContext());
 		TransformerPlugin.getDefault().registerAspectBindingRegistry(this.aspectBindingRegistry);
 	}
 
+	// ====== Aspect Binding: ======
+	
 	@SuppressWarnings("deprecation")
-	private AspectBindingRegistry loadAspectBindingRegistry(BundleContext context) {
-		org.osgi.service.packageadmin.PackageAdmin packageAdmin = null;;
+	private void loadAspectBindingRegistry(BundleContext context) {
+		org.osgi.service.packageadmin.PackageAdmin packageAdmin = null;
 		
 		ServiceReference<?> ref= context.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class.getName());
 		if (ref!=null)
@@ -77,10 +90,31 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		else
 			log(ILogger.ERROR, "Failed to load PackageAdmin service. Will not be able to handle fragments.");
 
-		AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry(this.beingDefined);
-		aspectBindingRegistry.loadAspectBindings(packageAdmin);
-		return aspectBindingRegistry;
+		aspectBindingRegistry.loadAspectBindings(packageAdmin, this);
 	}
+
+	// ====== Base Bundle Trip Wires: ======
+	
+	/**
+	 * Callback during AspectBindingRegistry#loadAspectBindings():
+	 * Set-up a trip wire to fire when the mentioned base bundle is loaded.
+	 */
+	void setBaseTripWire(@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin, @NonNull String baseBundleId) 
+	{
+		if (!baseTripWires.containsKey(baseBundleId))
+			baseTripWires.put(baseBundleId, new BaseBundleLoadTrigger(baseBundleId, aspectBindingRegistry, packageAdmin));
+	}
+
+	/** Check if the given base bundle / base class mandate any loading/instantiation/activation of teams. */
+	void triggerBaseTripWires(@Nullable String bundleName, @NonNull WovenClass baseClass) {
+		BaseBundleLoadTrigger activation = baseTripWires.get(bundleName);
+		if (activation != null) {
+			if (activation.fire(baseClass, beingDefined, this))
+				baseTripWires.remove(bundleName);
+		}
+	}
+
+	// ====== Main Weaving Entry: ======
 
 	@Override
 	public void weave(WovenClass wovenClass) {
@@ -91,10 +125,11 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			String bundleName = bundleWiring.getBundle().getSymbolicName();
 			String className = wovenClass.getClassName();
 			
-			// do whatever is needed *before* loading this class:
-			aspectBindingRegistry.triggerLoadingHooks(bundleName, wovenClass);
 			
 			if (requiresWeaving(bundleWiring)) {
+				// do whatever is needed *before* loading this class:
+				triggerBaseTripWires(bundleName, wovenClass);
+
 				ObjectTeamsTransformer transformer = new ObjectTeamsTransformer();
 				Class<?> classBeingRedefined = null; // TODO
 				ProtectionDomain protectionDomain = wovenClass.getProtectionDomain();
@@ -106,11 +141,6 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 					if (newBytes != bytes && !Arrays.equals(newBytes, bytes)) {
 						log(IStatus.INFO, "Transformation performed on "+className);
 						wovenClass.setBytes(newBytes);
-						if (otreAdded.add(bundleWiring.getBundle())) {
-							log(IStatus.INFO, "Adding OTRE import to "+bundleName);
-							List<String> imports = wovenClass.getDynamicImports();
-							imports.add("org.objectteams");
-						}
 					}
 				} catch (IllegalClassFormatException e) {
 					log(e, "Failed to transform class "+className);
@@ -120,22 +150,60 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			log(cce, "Weaver encountered a circular class dependency");
 		}
 	}
-	
-	Set<Bundle> otreAdded = new HashSet<>();
-	@Override
-	public void modified(WovenClass wovenClass) {
-		if (wovenClass.getState() == WovenClass.DEFINED) {
-			beingDefined.remove(wovenClass.getClassName());
-			@SuppressWarnings("null") @NonNull String className = wovenClass.getClassName();
-			aspectBindingRegistry.instantiateScheduledTeams(className);
-		}
-	}
 
-	private boolean requiresWeaving(BundleWiring bundleWiring) {
+	boolean requiresWeaving(BundleWiring bundleWiring) {
 		@SuppressWarnings("null")@NonNull
 		Bundle bundle = bundleWiring.getBundle();
 		return aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null
 				|| aspectBindingRegistry.isAdaptedBasePlugin(bundle.getSymbolicName());
 	}
 
+	// ===== handling deferred teams: ======
+
+	/**
+	 * Record the given team classes as waiting for instantiation/activation.
+	 * Callback during {@link BaseBundleLoadTrigger#fire()}
+	 */
+	public void addDeferredTeamClasses(List<WaitingTeamRecord> teamClasses) {
+		synchronized (deferredTeams) {
+			deferredTeams.addAll(teamClasses);
+		}
+	}
+
+	/**
+	 * Try to instantiate/activate any deferred teams that may be unblocked
+	 * by the definition of the given trigger class.
+	 */
+	public void instantiateScheduledTeams(String triggerClassName) {
+		List<WaitingTeamRecord> scheduledTeams = null;
+		synchronized(deferredTeams) {
+			for (WaitingTeamRecord record : new ArrayList<>(deferredTeams)) {
+				if (record.notFoundClass.equals(triggerClassName)) {
+					if (scheduledTeams == null)
+						scheduledTeams = new ArrayList<>();
+					if (deferredTeams.remove(record))
+						scheduledTeams.add(record);
+				}
+			}
+		}
+		if (scheduledTeams == null) return;
+		for(WaitingTeamRecord record : scheduledTeams) {
+			log(IStatus.INFO, "Consider for instantiation/activation: team "+record.getTeamName());
+			try {
+				new TeamLoader(deferredTeams, beingDefined).instantiateWaitingTeam(record); // may re-insert to deferredTeams
+			} catch (Exception e) {
+				log(e, "Failed to instantiate team "+record.getTeamName());
+				continue;
+			}
+		}
+	}
+
+	@Override
+	public void modified(WovenClass wovenClass) {
+		if (wovenClass.getState() == WovenClass.DEFINED) {
+			beingDefined.remove(wovenClass.getClassName());
+			@SuppressWarnings("null") @NonNull String className = wovenClass.getClassName();
+			instantiateScheduledTeams(className);
+		}
+	}
 }

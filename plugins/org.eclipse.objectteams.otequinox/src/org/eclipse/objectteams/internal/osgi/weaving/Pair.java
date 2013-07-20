@@ -15,6 +15,9 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
+import org.eclipse.jdt.annotation.NonNullByDefault;
+
+@NonNullByDefault
 class Pair<A, B> {
 	public A first;
 	public B second;

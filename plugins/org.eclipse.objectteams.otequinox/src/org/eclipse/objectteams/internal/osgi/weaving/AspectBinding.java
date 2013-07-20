@@ -28,6 +28,8 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.jdt.annotation.NonNull;
+import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.osgi.framework.Bundle;
@@ -37,14 +39,16 @@ import org.osgi.framework.Bundle;
  * @author stephan
  * @since 1.3.0 (was a nested class before that) 
  */
+@NonNullByDefault
 public class AspectBinding {
 	enum State { Initial, TeamsScanned, TeamsActivated };
 	
 	public String aspectPlugin;
 	public String basePlugin;
-	public IConfigurationElement[] forcedExports;
-	public ActivationKind[] activations = null; 
+	public @Nullable IConfigurationElement[] forcedExports;
+	// the following three are filled in lock-step:
 	public String[]         teamClasses;
+	public ActivationKind[] activations; 
 	public List<String>[]   subTeamClasses;
 
 	public State 			 state = State.Initial;
@@ -57,25 +61,23 @@ public class AspectBinding {
 	
 	Set<String> teamsInProgress = new HashSet<>(); // TODO cleanup teams that are done
 	
-	public AspectBinding(String aspectId, String baseId, IConfigurationElement[] forcedExportsConfs) {
+	@SuppressWarnings("unchecked")
+	public AspectBinding(String aspectId, String baseId, @Nullable IConfigurationElement[] forcedExportsConfs, int count) {
 		this.aspectPlugin= aspectId;
 		this.basePlugin= baseId;
 		this.forcedExports= forcedExportsConfs;
-	}
-	
-	@SuppressWarnings("unchecked")
-	public void initTeams(int count) {
 		this.teamClasses    = new String[count];
 		this.subTeamClasses = new List[count]; // new List<String>[count] is illegal!
 		this.activations    = new ActivationKind[count];
 	}
 	
-	public void setActivation(int i, String specifier) {
+	public void setActivation(int i, @Nullable String specifier) {
 		if (specifier == null)
 			this.activations[i] = ActivationKind.NONE;
 		else
 			this.activations[i] = ActivationKind.valueOf(specifier);
 	}
+
 	public String toString() {
 		String result = "\tbase plugin "+basePlugin+"\n\tadapted by aspect pluging "+aspectPlugin;
 		for (String teamClass : teamClasses) {
@@ -118,7 +120,7 @@ public class AspectBinding {
 	public ActivationKind getActivation(String teamClassName) {
 		for (int i=0; i<teamClasses.length; i++) {
 			if (teamClasses[i].equals(teamClassName))
-				return activations[i];
+				return activations[i]; // cannot declare array elements as nonnull
 		}
 		return ActivationKind.NONE;
 	}
@@ -126,7 +128,7 @@ public class AspectBinding {
 	/** Read OT attributes of all teams in aspectBinding and collect affected base classes. */
 	public synchronized void scanTeamClasses(Bundle bundle) {
 		ClassScanner scanner = new ClassScanner();
-		for (String teamName : getAllTeams()) {
+		for (@SuppressWarnings("null")@NonNull String teamName : getAllTeams()) {
 			try {
 				teamName = scanner.readOTAttributes(bundle, teamName);
 				Collection<String> baseClassNames = scanner.getCollectedBaseClassNames();
