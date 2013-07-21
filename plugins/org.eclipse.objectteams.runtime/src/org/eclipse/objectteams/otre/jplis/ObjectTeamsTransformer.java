@@ -76,7 +76,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	public byte[] transform(ClassLoader loader, String className,
 			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
 			byte[] classfileBuffer) throws IllegalClassFormatException {
-		return transform(loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+		return transform((Object)loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
 	}
 	
 	public byte[] transform(Object loader, String className, Class<?> classBeingRedefined,
