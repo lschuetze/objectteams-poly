@@ -188,6 +188,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		}
 		if (scheduledTeams == null) return;
 		for(WaitingTeamRecord record : scheduledTeams) {
+			if (record.aspectBinding.isActivated(record.getTeamName()))
+				continue;
 			log(IStatus.INFO, "Consider for instantiation/activation: team "+record.getTeamName());
 			try {
 				new TeamLoader(deferredTeams, beingDefined).instantiateWaitingTeam(record); // may re-insert to deferredTeams

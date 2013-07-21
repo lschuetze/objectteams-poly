@@ -16,15 +16,13 @@
 package org.eclipse.objectteams.internal.osgi.weaving;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.objectteams.Team;
 
-/** Record for one team waiting for instantiation/activation. */
+/** Record for one team waiting for instantiation & activation. */
 @NonNullByDefault
 class WaitingTeamRecord {
-	@Nullable Class<? extends Team> teamClass; // ... either this is set
-	@Nullable Team teamInstance;				// ... or this
+	Class<? extends Team> teamClass;
 	AspectBinding aspectBinding;
 	ActivationKind activationKind;
 	String notFoundClass;
@@ -35,29 +33,9 @@ class WaitingTeamRecord {
 		this.notFoundClass = notFoundClass;
 		this.activationKind = activationKind;
 	}
-	public WaitingTeamRecord(Team teamInstance, AspectBinding aspectBinding, ActivationKind activationKind, String notFoundClass) {
-		this.teamInstance = teamInstance;
-		this.aspectBinding = aspectBinding;
-		this.notFoundClass = notFoundClass;
-		this.activationKind = activationKind;
-	}
-	public WaitingTeamRecord(WaitingTeamRecord record, String notFoundClass) {
-		this.teamClass = record.teamClass;
-		this.teamInstance = record.teamInstance;
-		this.aspectBinding = record.aspectBinding;
-		this.activationKind = record.activationKind;
-		this.notFoundClass = notFoundClass;
-	}
-	@SuppressWarnings("null") // calling well-known library functions
+
+	@SuppressWarnings("null") // calling well-known library function
 	public String getTeamName() {
-		final Class<? extends Team> clazz = teamClass;
-		if (clazz != null) {
-			return clazz.getName();
-		} else {
-			final Team instance = teamInstance;
-			if (instance != null)
-				return instance.getClass().getName();
-		}
-		return "<unknown team>";
+		return teamClass.getName();
 	}		
 }

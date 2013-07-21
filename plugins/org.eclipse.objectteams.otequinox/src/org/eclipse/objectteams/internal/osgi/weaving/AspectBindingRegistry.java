@@ -114,19 +114,22 @@ public class AspectBindingRegistry {
 				continue;
 			
 			IConfigurationElement[] teams = currentBindingConfig.getChildren(TEAM);
+			int teamCount = teams.length;
+			for (int j = 0; j < teams.length; j++) if (teams[j].getAttribute(CLASS) == null) teamCount --;
 			AspectBinding binding = new AspectBinding(aspectBundleId,
 														baseBundleId,
 														basePlugins[0].getChildren(Constants.FORCED_EXPORTS_ELEMENT), 
-														teams.length);
+														teamCount);
 			// TODO(SH): maybe enforce that every bundle id is given only once?
 
 			//teams:
 			try {
-				for (int j = 0; j < teams.length; j++) {
+				for (int j = 0, count = 0; count < teamCount; j++) {
 					String teamClass = teams[j].getAttribute(CLASS);
-					binding.teamClasses[j] = teamClass;
+					if (teamClass == null) continue;
+					binding.teamClasses[count] = teamClass;
 					String activation = teams[j].getAttribute(ACTIVATION);
-					binding.setActivation(j, activation);
+					binding.setActivation(count++, activation);
 				}
 				
 				@NonNull String realBaseBundleId = baseBundleId.toUpperCase().equals(SELF) ? aspectBundleId : baseBundleId;
@@ -136,10 +139,14 @@ public class AspectBindingRegistry {
 
 				
 				// now that binding.teamClasses is filled connect to super team, if requested:
-				for (int j = 0; j < teams.length; j++) {
+				for (int j = 0; j < teamCount; j++) {
+					if (teams[j].getAttribute(CLASS) == null) continue;
 					String superTeamName = teams[j].getAttribute(SUPERCLASS);
-					if (superTeamName != null)
-						addSubTeam(aspectBundleId, binding.teamClasses[j], superTeamName);
+					if (superTeamName != null) {
+						String teamName = binding.teamClasses[j];
+						assert teamName != null : "array should not contain nulls";
+						addSubTeam(aspectBundleId, teamName, superTeamName);
+					}
 				}
 				log(ILogger.INFO, "registered:\n"+binding);
 			} catch (Throwable t) {

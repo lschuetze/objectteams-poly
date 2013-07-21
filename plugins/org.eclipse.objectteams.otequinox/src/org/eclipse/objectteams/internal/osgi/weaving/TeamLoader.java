@@ -61,8 +61,8 @@ public class TeamLoader {
 
 	/**
 	 * Team loading, 1st attempt before the base class is even loaded
-	 * Trying to do these phases load/instantiate/activate,
-	 * and also adds a reverse import to the base.
+	 * Trying to do these phases: load/instantiate/activate (if ready),
+	 * and also adds a reverse import to the base (always).
 	 */
 	public boolean loadTeamsForBase(Bundle aspectBundle, AspectBinding aspectBinding, WovenClass baseClass) {
 		@SuppressWarnings("null")@NonNull String className = baseClass.getClassName();
@@ -89,7 +89,7 @@ public class TeamLoader {
 			ActivationKind activationKind = aspectBinding.getActivation(teamForBase);
 			if (activationKind == ActivationKind.NONE)
 				continue;
-			Team teamInstance = instantiateAndActivate(aspectBinding, teamClass, teamForBase, activationKind);
+			Team teamInstance = instantiateAndActivate(aspectBinding, teamClass, activationKind);
 			if (teamInstance == null)
 				continue;
 		}
@@ -100,14 +100,10 @@ public class TeamLoader {
 	public void instantiateWaitingTeam(WaitingTeamRecord record)
 			throws InstantiationException, IllegalAccessException 
 	{
-		Team teamInstance = record.teamInstance;
-		String teamName = record.getTeamName();
-		if (teamInstance == null) {
-			// Instantiate (we only get here if activationKind != NONE)
-			Class<? extends Team> teamClass = record.teamClass;
-			assert teamClass != null : "cannot be null if teamInstance is null";
-			teamInstance = instantiateAndActivate(record.aspectBinding, teamClass, teamName, record.activationKind);
-		}
+		// Instantiate (we only get here if activationKind != NONE)
+		Class<? extends Team> teamClass = record.teamClass;
+		assert teamClass != null : "cannot be null if teamInstance is null";
+		instantiateAndActivate(record.aspectBinding, teamClass, record.activationKind);
 	}
 
 	public static @Nullable Pair<URL,String> findTeamClassResource(String className, Bundle bundle) {
@@ -168,14 +164,18 @@ public class TeamLoader {
 		return result;
 	}
 
-	@Nullable Team instantiateAndActivate(AspectBinding aspectBinding, Class<? extends Team> teamClass, String teamName, ActivationKind activationKind) 
+	@Nullable Team instantiateAndActivate(AspectBinding aspectBinding, Class<? extends Team> teamClass, ActivationKind activationKind) 
 	{
+		@SuppressWarnings("null")@NonNull String teamName = teamClass.getName();
 		// don't try to instantiate before all base classes successfully loaded.
-		if (!isReadyToLoad(aspectBinding, teamClass, null, teamName, activationKind))
-			return null;
+		synchronized(aspectBinding) {
+			if (!isReadyToLoad(aspectBinding, teamClass, teamName, activationKind))
+				return null;
+			aspectBinding.markAsActivated(teamName);
+		}
 
 		try {
-			Team instance = teamClass.newInstance();
+			@SuppressWarnings("null")@NonNull Team instance = teamClass.newInstance();
 			TransformerPlugin.registerTeamInstance(instance);
 			log(ILogger.INFO, "Instantiated team "+teamName);
 			
@@ -207,16 +207,14 @@ public class TeamLoader {
 	}
 
 	boolean isReadyToLoad(AspectBinding aspectBinding,
-			Class<? extends Team> teamClass, @Nullable Team teamInstance,
-			String teamName, ActivationKind activationKind)
+			Class<? extends Team> teamClass, String teamName,
+			ActivationKind activationKind)
 	{
 		for (@SuppressWarnings("null")@NonNull String baseclass : aspectBinding.basesPerTeam.get(teamName)) {
 			if (this.beingDefined.contains(baseclass)) {
 				synchronized (deferredTeams) {
-					WaitingTeamRecord record = teamInstance != null
-							? new WaitingTeamRecord(teamInstance, aspectBinding, activationKind, baseclass)
-							: new WaitingTeamRecord(teamClass, aspectBinding, activationKind, baseclass);
-					deferredTeams.add(record); // TODO(SH): synchronization, deadlock?
+					WaitingTeamRecord record = new WaitingTeamRecord(teamClass, aspectBinding, activationKind, baseclass);
+					deferredTeams.add(record); // TODO(SH): synchronization, deadlock? performed while holding lock an aspectBinding
 				}
 				log(IStatus.INFO, "Defer instantation/activation of team "+teamName);
 				return false;

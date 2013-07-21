@@ -50,6 +50,7 @@ public class AspectBinding {
 	public String[]         teamClasses;
 	public ActivationKind[] activations; 
 	public List<String>[]   subTeamClasses;
+	public boolean[]		 isActivated;
 
 	public State 			 state = State.Initial;
 	
@@ -69,6 +70,7 @@ public class AspectBinding {
 		this.teamClasses    = new String[count];
 		this.subTeamClasses = new List[count]; // new List<String>[count] is illegal!
 		this.activations    = new ActivationKind[count];
+		this.isActivated    = new boolean[count]; 
 	}
 	
 	public void setActivation(int i, @Nullable String specifier) {
@@ -132,12 +134,29 @@ public class AspectBinding {
 			try {
 				teamName = scanner.readOTAttributes(bundle, teamName);
 				Collection<String> baseClassNames = scanner.getCollectedBaseClassNames();
-				addBaseClassNames(teamName, baseClassNames);
+				if (!basesPerTeam.containsKey(teamName))
+					addBaseClassNames(teamName, baseClassNames);
 				log(IStatus.INFO, "Scanned team class "+teamName+", found "+baseClassNames.size()+" base classes");
 			} catch (Exception e) {
 				log(e, "Failed to scan team class "+teamName);
 			}
 		}
 		this.state = State.TeamsScanned;
+	}
+
+	public void markAsActivated(String teamName) {
+		for (int i = 0; i < this.teamClasses.length; i++) {
+			if (this.teamClasses[i].equals(teamName)) {
+				this.isActivated[i] = true;
+				return;
+			}
+		}
+	}
+	
+	public boolean isActivated(String teamName) {
+		for (int i = 0; i < this.teamClasses.length; i++)
+			if (this.teamClasses[i].equals(teamName))
+				return this.isActivated[i];
+		return false;
 	}
 }
