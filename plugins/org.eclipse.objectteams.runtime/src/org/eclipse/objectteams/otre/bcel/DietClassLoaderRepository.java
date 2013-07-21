@@ -68,7 +68,9 @@ public class DietClassLoaderRepository extends ClassLoaderRepository {
             }
             DietClassParser parser = new DietClassParser(is, className);
             c = parser.parse();
-            storeClass(c);
+            synchronized(this) {
+           		storeClass(c);
+            }
             return c;
         } catch (IOException e) {
             throw new ClassNotFoundException(e.toString());
@@ -79,7 +81,9 @@ public class DietClassLoaderRepository extends ClassLoaderRepository {
         if (c != null) { 
         	if (! (c instanceof DietJavaClass))
         		return c; // found fully parsed class, OK.
-        	removeClass(c); // force new loading
+        	synchronized(this) {
+        		removeClass(c); // force new loading
+        	}
         }
 		return super.loadClass(className);
 	}
