@@ -11,7 +11,6 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry;
-import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otre.ClassLoaderAccess;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
@@ -72,21 +71,21 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	}
 
 	// configure OT/Equinox debugging:
-	public static int WARN_LEVEL = ILogger.ERROR;
+	public static int WARN_LEVEL = IStatus.ERROR;
 	static {
 		String level = System.getProperty("otequinox.debug");
 		if (level != null) {
 			level = level.toUpperCase();
 			if (level.equals("OK"))
-				WARN_LEVEL = ILogger.OK;
+				WARN_LEVEL = IStatus.OK;
 			else if (level.equals("INFO"))
-				WARN_LEVEL = ILogger.INFO;
+				WARN_LEVEL = IStatus.INFO;
 			else if (level.startsWith("WARN"))
-				WARN_LEVEL = ILogger.WARNING;
+				WARN_LEVEL = IStatus.WARNING;
 			else if (level.startsWith("ERR"))
-				WARN_LEVEL = ILogger.ERROR;
+				WARN_LEVEL = IStatus.ERROR;
 			else
-				WARN_LEVEL = ILogger.OK;
+				WARN_LEVEL = IStatus.OK;
 		}
 	}
 

@@ -26,10 +26,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
 import org.osgi.framework.Bundle;
@@ -137,7 +137,7 @@ public class ClassScanner
 		List<String> roles = CallinBindingManager.getRolePerTeam(className);
 		if (roles != null) {
 			for (@SuppressWarnings("null")@NonNull String roleName: roles) {
-				log(ILogger.OK, "scanning role "+roleName);
+				log(IStatus.OK, "scanning role "+roleName);
 				try {
 					this.roleClassNames.add(roleName);
 					readOTAttributes(bundle, roleName);					

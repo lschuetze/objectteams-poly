@@ -30,7 +30,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
-import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
@@ -162,7 +161,7 @@ public class TeamLoader {
 		try {
 			@SuppressWarnings("null")@NonNull Team instance = team.teamClass.newInstance();
 			TransformerPlugin.registerTeamInstance(instance);
-			log(ILogger.INFO, "Instantiated team "+teamName);
+			log(IStatus.INFO, "Instantiated team "+teamName);
 			
 			try {
 				switch (activationKind) {

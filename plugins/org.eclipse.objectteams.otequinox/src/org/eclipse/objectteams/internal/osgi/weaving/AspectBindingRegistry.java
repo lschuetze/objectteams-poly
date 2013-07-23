@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
@@ -43,7 +44,6 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.otequinox.Constants;
-import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.osgi.framework.Bundle;
 
 /**
@@ -97,7 +97,7 @@ public class AspectBindingRegistry {
 				@SuppressWarnings("deprecation")
 				Bundle[] aspectBundles = packageAdmin.getBundles(aspectBundleId, null);
 				if (aspectBundles == null || aspectBundles.length == 0 || (aspectBundles[0].getState() < Bundle.RESOLVED)) {
-					log(ILogger.ERROR, "aspect bundle "+aspectBundleId+" is not resolved - not loading aspectBindings.");
+					log(IStatus.ERROR, "aspect bundle "+aspectBundleId+" is not resolved - not loading aspectBindings.");
 					continue;
 				}
 				aspectBundle = aspectBundles[0];
@@ -106,12 +106,12 @@ public class AspectBindingRegistry {
 			//base:
 			IConfigurationElement[] basePlugins = currentBindingConfig.getChildren(BASE_PLUGIN);
 			if (basePlugins.length != 1) {
-				log(ILogger.ERROR, "aspectBinding of "+aspectBundleId+" must declare exactly one basePlugin");
+				log(IStatus.ERROR, "aspectBinding of "+aspectBundleId+" must declare exactly one basePlugin");
 				continue;
 			}
 			String baseBundleId = basePlugins[0].getAttribute(ID);
 			if (baseBundleId == null) {
-				log(ILogger.ERROR, "aspectBinding of "+aspectBundleId+" must specify the id of a basePlugin");
+				log(IStatus.ERROR, "aspectBinding of "+aspectBundleId+" must specify the id of a basePlugin");
 				continue;
 			}
 			BaseBundle baseBundle = baseBundleLookup.get(baseBundleId); 
@@ -152,7 +152,7 @@ public class AspectBindingRegistry {
 				addBindingForAspectBundle(aspectBundleId, binding);
 				hook.setBaseTripWire(packageAdmin, realBaseBundleId);
 
-				log(ILogger.INFO, "registered:\n"+binding);
+				log(IStatus.INFO, "registered:\n"+binding);
 			} catch (Throwable t) {
 				log(t, "Invalid aspectBinding extension");
 			}
@@ -172,41 +172,41 @@ public class AspectBindingRegistry {
 		for (IConfigurationElement fragment : fragments) {
 			String fragId = fragment.getAttribute(ID);
 			if (fragId == null) {
-				log(ILogger.ERROR, "Mandatory attribute \"id\" missing from element \"requiredFragment\" of aspect binding in "+aspectBundleId);
+				log(IStatus.ERROR, "Mandatory attribute \"id\" missing from element \"requiredFragment\" of aspect binding in "+aspectBundleId);
 				return false;
 			} 
 			if (packageAdmin == null) {
-				log(ILogger.ERROR, "Not checking required fragment "+fragId+" in aspect binding of "+aspectBundleId+", package admin service not present");
+				log(IStatus.ERROR, "Not checking required fragment "+fragId+" in aspect binding of "+aspectBundleId+", package admin service not present");
 				return false; // report only once.
 			}
 			
 			Bundle[] fragmentBundles = packageAdmin.getBundles(fragId, null);
 			if (fragmentBundles == null || fragmentBundles.length == 0) {
-				log(ILogger.ERROR, "Required fragment "+fragId+" not found in aspect binding of "+aspectBundleId);
+				log(IStatus.ERROR, "Required fragment "+fragId+" not found in aspect binding of "+aspectBundleId);
 				hasError = true;
 				continue;
 			}
 			Bundle fragmentBundle = fragmentBundles[0];
 			String aspectBindingHint = " (aspect binding of "+aspectBundleId+")";
 			if (packageAdmin.getBundleType(fragmentBundle) != org.osgi.service.packageadmin.PackageAdmin.BUNDLE_TYPE_FRAGMENT) {
-				log(ILogger.ERROR, "Required fragment " + fragId + " is not a fragment" + aspectBindingHint);
+				log(IStatus.ERROR, "Required fragment " + fragId + " is not a fragment" + aspectBindingHint);
 				hasError = true;
 				continue;
 			}
 			Bundle[] hosts = packageAdmin.getHosts(fragmentBundle);
 			if (hosts == null || hosts.length == 0) {
 				if (fragmentBundle.getState() < Bundle.RESOLVED) {
-					log(ILogger.ERROR, "Required fragment " + fragId + " is not resolved" + aspectBindingHint);
+					log(IStatus.ERROR, "Required fragment " + fragId + " is not resolved" + aspectBindingHint);
 					hasError = true;
 					continue;
 				}
-				log(ILogger.ERROR, "Required fragment "+fragId+" has no host bundle"+aspectBindingHint);
+				log(IStatus.ERROR, "Required fragment "+fragId+" has no host bundle"+aspectBindingHint);
 				hasError = true;					
 				continue;
 			}
 			Bundle host = hosts[0];
 			if (!host.getSymbolicName().equals(baseBundleId)) {
-				log(ILogger.ERROR, "Required fragment "+fragId+" has wrong host "+host.getSymbolicName()+aspectBindingHint);
+				log(IStatus.ERROR, "Required fragment "+fragId+" has wrong host "+host.getSymbolicName()+aspectBindingHint);
 				hasError = true;
 			}
 		}

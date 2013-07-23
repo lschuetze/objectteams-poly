@@ -19,8 +19,8 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import org.eclipse.objectteams.otequinox.hook.HookConfigurator;
-import org.eclipse.objectteams.otequinox.hook.ILogger;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.osgi.framework.log.FrameworkLog;
 import org.eclipse.osgi.framework.log.FrameworkLogEntry;
 
@@ -31,8 +31,7 @@ import org.eclipse.osgi.framework.log.FrameworkLogEntry;
  * @author stephan
  * @since OTDT 1.1.4
  */
-public class Logger implements ILogger
-{
+public class Logger {
 	private FrameworkLog fwLog;
 	
 	public Logger(FrameworkLog fwLog) {
@@ -40,7 +39,7 @@ public class Logger implements ILogger
 	}
 
 	public void log(Throwable t, String msg) {
-		log(HookConfigurator.class.getPackage().getName(), t, msg);
+		log(Constants.TRANSFORMER_PLUGIN_ID, t, msg);
 	}
 	public void log(String pluginID, Throwable t, String msg) {
 		if (this.fwLog != null) {
@@ -55,7 +54,7 @@ public class Logger implements ILogger
 	
 	public void log(int status, String msg) {
 		if (status >= Util.WARN_LEVEL)		
-			doLog(HookConfigurator.class.getPackage().getName(), status, msg);
+			doLog(Constants.TRANSFORMER_PLUGIN_ID, status, msg);
 	}
 	public void log(String pluginID, int status, String msg) {
 		if (status >= Util.WARN_LEVEL)
@@ -63,7 +62,7 @@ public class Logger implements ILogger
 	}
 	
 	public void doLog(int status, String msg) {
-		doLog(HookConfigurator.class.getPackage().getName(), status, msg);
+		doLog(Constants.TRANSFORMER_PLUGIN_ID, status, msg);
 	}
 	public void doLog(String pluginID, int status, String msg) {
 		if (this.fwLog != null) {
@@ -71,7 +70,7 @@ public class Logger implements ILogger
 		} else {
 			// no success logging, print to console instead:
 			msg = "OT/Equinox: "+msg; //$NON-NLS-1$
-			if ((status & ERROR) != 0)
+			if ((status & IStatus.ERROR) != 0)
 				System.err.println(msg);
 			else
 				System.out.println(msg);

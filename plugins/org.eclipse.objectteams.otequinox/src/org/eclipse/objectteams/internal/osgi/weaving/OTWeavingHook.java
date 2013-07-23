@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
-import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -88,7 +87,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		if (ref!=null)
 			packageAdmin = (org.osgi.service.packageadmin.PackageAdmin)context.getService(ref);
 		else
-			log(ILogger.ERROR, "Failed to load PackageAdmin service. Will not be able to handle fragments.");
+			log(IStatus.ERROR, "Failed to load PackageAdmin service. Will not be able to handle fragments.");
 
 		aspectBindingRegistry.loadAspectBindings(packageAdmin, this);
 	}
