@@ -156,6 +156,10 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		// TODO Auto-generated method stub
 		return false;
 	}
+	
+	public static boolean useDynamicWeaving() {
+		return false;
+	}
 
 	@Override
 	public boolean isAdaptedBasePlugin(String baseBundleName) {

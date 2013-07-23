@@ -1,10 +1,10 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: OT/J Weaving for OSGi
+Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.otequinox;singleton:=true
 Bundle-Version: 2.3.0.qualifier
 Bundle-Activator: org.eclipse.objectteams.otequinox.TransformerPlugin
-Bundle-Vendor: Eclipse.org - Object Teams
+Bundle-Vendor: %providerName
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.objectteams.runtime;bundle-version="2.3.0";visibility:="reexport",
  org.eclipse.osgi;bundle-version="3.10.0",

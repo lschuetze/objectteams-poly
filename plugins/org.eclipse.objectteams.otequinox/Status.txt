@@ -3,14 +3,12 @@ See https://bugs.eclipse.org/bugs/show_bug.cgi?id=406518
 (0) Register our WeavingHook as early as possible during start-up.
 Done, but need re-thinking. TJ said on equinox-dev: use start level 1
 
-(3) Scan each registered team class
-Done but should try to improve using BundleWiring.getClassLoader()
-
 NOTYET:
 -------
 (5) Add dependencies so that each bound base bundle can see:
     - the OT runtime (package org.objectteams)
     - the aspect bundle(s) into which the woven code may call
+Pending: dynamically export the aspect package if not statically declared
 
 (8) Subclasses of Thread (and ideally: implementors of Runnable, the latter
     has not yet been realized) need to be woven to insert a trigger into OT's
