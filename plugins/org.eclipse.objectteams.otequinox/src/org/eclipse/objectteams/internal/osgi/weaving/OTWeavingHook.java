@@ -109,7 +109,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	void triggerBaseTripWires(@Nullable String bundleName, @NonNull WovenClass baseClass) {
 		BaseBundleLoadTrigger activation = baseTripWires.get(bundleName);
 		if (activation != null) {
-			if (activation.fire(baseClass, beingDefined, this))
+			activation.fire(baseClass, beingDefined, this);
+			if (activation.isDone())
 				baseTripWires.remove(bundleName);
 		}
 	}
@@ -188,13 +189,16 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		}
 		if (scheduledTeams == null) return;
 		for(WaitingTeamRecord record : scheduledTeams) {
-			if (record.aspectBinding.isActivated(record.getTeamName()))
+			if (record.team.isActivated)
 				continue;
-			log(IStatus.INFO, "Consider for instantiation/activation: team "+record.getTeamName());
+			String teamName = record.team.teamName;
+			log(IStatus.INFO, "Consider for instantiation/activation: team "+teamName);
 			try {
-				new TeamLoader(deferredTeams, beingDefined).instantiateWaitingTeam(record); // may re-insert to deferredTeams
+				TeamLoader loader = new TeamLoader(deferredTeams, beingDefined);
+				// Instantiate (we only get here if activationKind != NONE)
+				loader.instantiateAndActivate(record.aspectBinding, record.team, record.activationKind); // may re-insert to deferredTeams
 			} catch (Exception e) {
-				log(e, "Failed to instantiate team "+record.getTeamName());
+				log(e, "Failed to instantiate team "+teamName);
 				continue;
 			}
 		}

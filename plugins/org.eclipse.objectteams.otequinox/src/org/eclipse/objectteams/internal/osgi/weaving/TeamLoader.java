@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
@@ -37,13 +38,15 @@ import org.osgi.framework.hooks.weaving.WovenClass;
 /**
  * This class triggers the actual loading/instantiation/activation of teams.
  * <p>
- * It implements a strategy of deferring those teams where instantiation/activation
- * failed (NoClassDefFoundError), which assumably happens, if one required class
- * cannot be loaded, because its loading is already in progress further down in
- * our call stack.
+ * It implements a strategy of deferring those teams that are not ready for
+ * instantiating / activating, which we check by comparing the sets of
+ * bound base classes of the team vs. the set of classes currently being
+ * processed by class loading & weaving.
+ * This reflects that fact that classes for which loading has already been
+ * started would otherwise trigger an irrecoverable NoClassDefFoundError. 
  * </p><p>
- * Which teams participate in deferred instantiation is communicated via the list
- * {@link #deferredTeams}.
+ * Which teams participate in deferred instantiation is communicated via the 
+ * shared list {@link #deferredTeams}.
  * </p>
  */
 @NonNullByDefault
@@ -52,7 +55,7 @@ public class TeamLoader {
 	/** Collect here any teams that cannot yet be handled and should be scheduled later. */
 	private List<WaitingTeamRecord> deferredTeams;
 
-	private Set<String> beingDefined; 
+	private Set<String> beingDefined;
 	
 	public TeamLoader(List<WaitingTeamRecord> deferredTeams, Set<String> beingDefined) {
 		this.deferredTeams = deferredTeams;
@@ -61,49 +64,42 @@ public class TeamLoader {
 
 	/**
 	 * Team loading, 1st attempt before the base class is even loaded
-	 * Trying to do these phases: load/instantiate/activate (if ready),
-	 * and also adds a reverse import to the base (always).
+	 * Trying to do these phases: load (now) instantiate/activate (if ready),
 	 */
-	public boolean loadTeamsForBase(Bundle aspectBundle, AspectBinding aspectBinding, WovenClass baseClass) {
+	public void loadTeamsForBase(Bundle aspectBundle, AspectBinding aspectBinding, WovenClass baseClass) {
 		@SuppressWarnings("null")@NonNull String className = baseClass.getClassName();
-		Collection<String> teamsForBase = aspectBinding.getTeamsForBase(className);
+		Collection<TeamBinding> teamsForBase = aspectBinding.getTeamsForBase(className);
 		if (teamsForBase == null) 
-			return false; // not done
-		List<String> imports = baseClass.getDynamicImports();
-		for (String teamForBase : teamsForBase) {
-			// Add dependency:
-			String packageOfTeam = "";
-			int dot = teamForBase.lastIndexOf('.');
-			if (dot != -1)
-				packageOfTeam = teamForBase.substring(0, dot);
-			imports.add(packageOfTeam);
-			log(IStatus.INFO, "Added dependency from base "+baseClass.getClassName()+" to package '"+packageOfTeam+"'");
+			return; // not done
+		for (TeamBinding teamForBase : teamsForBase) {
+			if (teamForBase.isActivated) continue;
 			// Load:
 			Class<? extends Team> teamClass;
-			teamClass = findTeamClass(teamForBase, aspectBundle);
+			teamClass = teamForBase.loadTeamClass(aspectBundle);
 			if (teamClass == null) {
 				log(new ClassNotFoundException("Not found: "+teamForBase), "Failed to load team "+teamForBase);
 				continue;
 			}
 			// Try to instantiate & activate, failures are recorded in deferredTeams
-			ActivationKind activationKind = aspectBinding.getActivation(teamForBase);
-			if (activationKind == ActivationKind.NONE)
+			ActivationKind activationKind = teamForBase.activation;
+			if (activationKind == ActivationKind.NONE) {
+				teamForBase = aspectBinding.getOtherTeamToActivate(teamForBase);
+				if (teamForBase != null) {
+					if (teamForBase.isActivated) continue;
+					activationKind = teamForBase.activation;
+					teamClass = teamForBase.loadTeamClass(aspectBundle);
+					if (teamClass == null) {
+						log(new ClassNotFoundException("Not found: "+teamForBase.teamName+" in bundle "+aspectBundle.getSymbolicName()), "Failed to load team "+teamForBase);
+						continue;						
+					}
+				} else {
+					continue;
+				}
+			}
+			if (activationKind == ActivationKind.NONE) 
 				continue;
-			Team teamInstance = instantiateAndActivate(aspectBinding, teamClass, activationKind);
-			if (teamInstance == null)
-				continue;
+			instantiateAndActivate(aspectBinding, teamForBase, activationKind);
 		}
-		return true; // all activatable teams have been activated or added to deferredTeams
-	}
-
-	/** Team loading, subsequent attempts. */
-	public void instantiateWaitingTeam(WaitingTeamRecord record)
-			throws InstantiationException, IllegalAccessException 
-	{
-		// Instantiate (we only get here if activationKind != NONE)
-		Class<? extends Team> teamClass = record.teamClass;
-		assert teamClass != null : "cannot be null if teamInstance is null";
-		instantiateAndActivate(record.aspectBinding, teamClass, record.activationKind);
 	}
 
 	public static @Nullable Pair<URL,String> findTeamClassResource(String className, Bundle bundle) {
@@ -111,20 +107,6 @@ public class TeamLoader {
 			URL result = bundle.getResource(candidate.replace('.', '/')+".class");
 			if (result != null)
 				return new Pair<>(result, candidate);
-		}
-		return null;
-	}
-
-	@SuppressWarnings("unchecked")
-	public static @Nullable Class<? extends Team> findTeamClass(String className, Bundle bundle) {
-		for (String candidate : possibleTeamNames(className)) {
-			try {
-				Class<?> result = bundle.loadClass(candidate);
-				if (result != null)
-					return (Class<? extends Team>) result;
-			} catch (NoClassDefFoundError|ClassNotFoundException e) {
-				// keep looking
-			}
 		}
 		return null;
 	}
@@ -164,18 +146,21 @@ public class TeamLoader {
 		return result;
 	}
 
-	@Nullable Team instantiateAndActivate(AspectBinding aspectBinding, Class<? extends Team> teamClass, ActivationKind activationKind) 
+	/**
+	 * Check if the given team is ready. If so instantiate it and if activationKind requires also activate it.
+	 */
+	void instantiateAndActivate(AspectBinding aspectBinding, TeamBinding team, ActivationKind activationKind)
 	{
-		@SuppressWarnings("null")@NonNull String teamName = teamClass.getName();
+		String teamName = team.teamName;
 		// don't try to instantiate before all base classes successfully loaded.
 		synchronized(aspectBinding) {
-			if (!isReadyToLoad(aspectBinding, teamClass, teamName, activationKind))
-				return null;
-			aspectBinding.markAsActivated(teamName);
+			if (!isReadyToLoad(aspectBinding, team, teamName, activationKind))
+				return;
+			team.isActivated = true;
 		}
 
 		try {
-			@SuppressWarnings("null")@NonNull Team instance = teamClass.newInstance();
+			@SuppressWarnings("null")@NonNull Team instance = team.teamClass.newInstance();
 			TransformerPlugin.registerTeamInstance(instance);
 			log(ILogger.INFO, "Instantiated team "+teamName);
 			
@@ -197,23 +182,20 @@ public class TeamLoader {
 				// application errors during activation
 				log(t, "Failed to activate team "+teamName);
 			}
-
-			return instance;
 		} catch (Throwable e) {
 			// application error during constructor execution?
 			log(e, "Failed to instantiate team "+teamName);
 		}
-		return null;
 	}
 
-	boolean isReadyToLoad(AspectBinding aspectBinding,
-			Class<? extends Team> teamClass, String teamName,
-			ActivationKind activationKind)
+	private boolean isReadyToLoad(AspectBinding aspectBinding,
+									TeamBinding team, String teamName,
+									ActivationKind activationKind)
 	{
-		for (@SuppressWarnings("null")@NonNull String baseclass : aspectBinding.basesPerTeam.get(teamName)) {
+		for (@SuppressWarnings("null")@NonNull String baseclass : aspectBinding.getBasesPerTeam(teamName)) {
 			if (this.beingDefined.contains(baseclass)) {
 				synchronized (deferredTeams) {
-					WaitingTeamRecord record = new WaitingTeamRecord(teamClass, aspectBinding, activationKind, baseclass);
+					WaitingTeamRecord record = new WaitingTeamRecord(team, aspectBinding, activationKind, baseclass);
 					deferredTeams.add(record); // TODO(SH): synchronization, deadlock? performed while holding lock an aspectBinding
 				}
 				log(IStatus.INFO, "Defer instantation/activation of team "+teamName);

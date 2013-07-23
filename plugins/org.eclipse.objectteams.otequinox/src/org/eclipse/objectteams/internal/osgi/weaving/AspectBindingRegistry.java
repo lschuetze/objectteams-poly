@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -39,6 +40,8 @@ import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
+import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.hook.ILogger;
 import org.osgi.framework.Bundle;
@@ -79,6 +82,9 @@ public class AspectBindingRegistry {
 	{
 		IConfigurationElement[] aspectBindingConfigs = RegistryFactory.getRegistry().getConfigurationElementsFor(
 				TRANSFORMER_PLUGIN_ID, ASPECT_BINDING_EXTPOINT_ID);
+		Map<String, Set<TeamBinding>> teamLookup = new HashMap<>();
+		Map<String, BaseBundle> baseBundleLookup = new HashMap<>();
+		AspectBinding[] bindings = new AspectBinding[aspectBindingConfigs.length];
 		
 		for (int i = 0; i < aspectBindingConfigs.length; i++) {
 			IConfigurationElement currentBindingConfig = aspectBindingConfigs[i];
@@ -86,6 +92,7 @@ public class AspectBindingRegistry {
 			//aspect:
 			@SuppressWarnings("null")@NonNull String aspectBundleId= currentBindingConfig.getContributor().getName();
 			IS_OTDT |= KNOWN_OTDT_ASPECTS.contains(aspectBundleId);
+			Bundle aspectBundle = null;
 			if (packageAdmin != null) {
 				@SuppressWarnings("deprecation")
 				Bundle[] aspectBundles = packageAdmin.getBundles(aspectBundleId, null);
@@ -93,6 +100,7 @@ public class AspectBindingRegistry {
 					log(ILogger.ERROR, "aspect bundle "+aspectBundleId+" is not resolved - not loading aspectBindings.");
 					continue;
 				}
+				aspectBundle = aspectBundles[0];
 			}
 			
 			//base:
@@ -106,6 +114,9 @@ public class AspectBindingRegistry {
 				log(ILogger.ERROR, "aspectBinding of "+aspectBundleId+" must specify the id of a basePlugin");
 				continue;
 			}
+			BaseBundle baseBundle = baseBundleLookup.get(baseBundleId); 
+			if (baseBundle == null)		
+				baseBundleLookup.put(baseBundleId, baseBundle = new BaseBundle(baseBundleId));
 				
  			//base fragments?
 			IConfigurationElement[] fragments = basePlugins[0].getChildren(REQUIRED_FRAGMENT);
@@ -117,9 +128,11 @@ public class AspectBindingRegistry {
 			int teamCount = teams.length;
 			for (int j = 0; j < teams.length; j++) if (teams[j].getAttribute(CLASS) == null) teamCount --;
 			AspectBinding binding = new AspectBinding(aspectBundleId,
-														baseBundleId,
+														aspectBundle,
+														baseBundle,
 														basePlugins[0].getChildren(Constants.FORCED_EXPORTS_ELEMENT), 
 														teamCount);
+			bindings[i] = binding;
 			// TODO(SH): maybe enforce that every bundle id is given only once?
 
 			//teams:
@@ -127,9 +140,11 @@ public class AspectBindingRegistry {
 				for (int j = 0, count = 0; count < teamCount; j++) {
 					String teamClass = teams[j].getAttribute(CLASS);
 					if (teamClass == null) continue;
-					binding.teamClasses[count] = teamClass;
-					String activation = teams[j].getAttribute(ACTIVATION);
-					binding.setActivation(count++, activation);
+					TeamBinding team = binding.createResolvedTeam(count++, teamClass, teams[j].getAttribute(ACTIVATION), teams[j].getAttribute(SUPERCLASS));
+					Set<TeamBinding> teamSet = teamLookup.get(teamClass);
+					if (teamSet == null)
+						teamLookup.put(teamClass, teamSet = new HashSet<>());
+					teamSet.add(team);
 				}
 				
 				@NonNull String realBaseBundleId = baseBundleId.toUpperCase().equals(SELF) ? aspectBundleId : baseBundleId;
@@ -137,21 +152,14 @@ public class AspectBindingRegistry {
 				addBindingForAspectBundle(aspectBundleId, binding);
 				hook.setBaseTripWire(packageAdmin, realBaseBundleId);
 
-				
-				// now that binding.teamClasses is filled connect to super team, if requested:
-				for (int j = 0; j < teamCount; j++) {
-					if (teams[j].getAttribute(CLASS) == null) continue;
-					String superTeamName = teams[j].getAttribute(SUPERCLASS);
-					if (superTeamName != null) {
-						String teamName = binding.teamClasses[j];
-						assert teamName != null : "array should not contain nulls";
-						addSubTeam(aspectBundleId, teamName, superTeamName);
-					}
-				}
 				log(ILogger.INFO, "registered:\n"+binding);
 			} catch (Throwable t) {
 				log(t, "Invalid aspectBinding extension");
 			}
+		}
+		// second round to connect sub/super teams to aspect bindings:
+		for (int i = 0; i < bindings.length; i++) {
+			bindings[i].connect(teamLookup);
 		}
 	}
 	
@@ -221,36 +229,10 @@ public class AspectBindingRegistry {
 			aspectBindingsByAspectPlugin.put(aspectBundleId, bindingList);
 		}
 		bindingList.add(binding);
-		if (binding.basePlugin.toUpperCase().equals(SELF))
+		if (binding.basePluginName.toUpperCase().equals(SELF))
 			selfAdaptingAspects.add(aspectBundleId);
 	}
 	
-	/**
-	 * Record a sub-class relationship of two teams within the same aspect bundle.
-	 * 
-	 * @param aspectBundleId
-	 * @param subTeamName (nullable only until we have JSR 308)
-	 * @param teamName
-	 */
-	private void addSubTeam(String aspectBundleId, @Nullable String subTeamName, String teamName) {
-		ArrayList<AspectBinding> bindingList = aspectBindingsByAspectPlugin.get(aspectBundleId);
-		if (bindingList == null) {
-			Exception e = new Exception("No such aspect binding");
-			log(e, "Class "+teamName+" not registered (declared to be superclass of team "+subTeamName);
-		} else {
-			for (AspectBinding binding : bindingList)
-				if (binding.teamClasses != null)
-					for (int i=0; i < binding.teamClasses.length; i++) 
-						if (binding.teamClasses[i].equals(teamName)) {
-							if (binding.subTeamClasses[i] == null)
-								binding.subTeamClasses[i] = new ArrayList<String>();
-							binding.subTeamClasses[i].add(subTeamName);
-							return;
-						}
-			Exception e = new Exception("No such aspect binding");
-			log(e, "Class "+teamName+" not registered(2) (declared to be superclass of team "+subTeamName);
-		}		
-	}
 
 	/**
 	 * Given a potential aspect bundle, answer the symbolic names of all base bundles
@@ -261,7 +243,7 @@ public class AspectBindingRegistry {
 		if (bindings == null) return null;
 		String[] basePlugins = new String[bindings.size()];
 		for (int i=0; i<basePlugins.length; i++) {
-			basePlugins[i] = bindings.get(i).basePlugin;
+			basePlugins[i] = bindings.get(i).basePluginName;
 		}
 		return basePlugins;
 	}

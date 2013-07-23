@@ -22,10 +22,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.State;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
 
@@ -42,6 +40,7 @@ public class BaseBundleLoadTrigger {
 
 	private String baseBundleName;	
 	private boolean otreAdded = false;
+	private List<AspectBinding> aspectBindings = new ArrayList<>();
 
 	public BaseBundleLoadTrigger(String bundleSymbolicName, AspectBindingRegistry aspectBindingRegistry, 
 			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin admin) 
@@ -55,10 +54,11 @@ public class BaseBundleLoadTrigger {
 	 * Signal that the given class is being loaded and trigger any necessary steps:
 	 * (1) add import to OTRE (now)
 	 * (2) scan team (now)
-	 * (3) load & instantiate & activate (now or later).
+	 * (3) add imports base->aspect (now)
+	 * (4) load & instantiate & activate (now or later).
 	 */
 	@SuppressWarnings("deprecation") // uses deprecated PackageAdmin
-	public boolean fire(WovenClass baseClass, Set<String> beingDefined, OTWeavingHook hook) {
+	public void fire(WovenClass baseClass, Set<String> beingDefined, OTWeavingHook hook) {
 
 		// (1) OTRE import added once per base bundle:
 		synchronized(this) {
@@ -71,43 +71,58 @@ public class BaseBundleLoadTrigger {
 		}
 		
 		// for each team in each aspect binding:
-		boolean allDone = true;
-		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAdaptingAspectBindings(baseBundleName);
-		if (aspectBindings != null) {
-			List<WaitingTeamRecord> deferredTeamClasses = new ArrayList<>();
-			for (AspectBinding aspectBinding : aspectBindings) {
-				if (aspectBinding.state == State.Initial)
-					log(IStatus.INFO, "Preparing aspect binding for base bundle "+baseBundleName);
-				if (aspectBinding.state == State.TeamsActivated)
-					continue;
-				final org.osgi.service.packageadmin.PackageAdmin admin2 = admin;
-				if (admin2 == null) {
-					log(IStatus.ERROR, "Cannot find aspect bundle "+aspectBinding.aspectPlugin);
-					continue;					
-				} else {
+		if (aspectBindings.isEmpty())
+			aspectBindings.addAll(aspectBindingRegistry.getAdaptingAspectBindings(baseBundleName));
+		List<WaitingTeamRecord> deferredTeamClasses = new ArrayList<>();
+		for (AspectBinding aspectBinding : aspectBindings) {
+			if (!aspectBinding.hasScannedTeams)
+				log(IStatus.INFO, "Preparing aspect binding for base bundle "+baseBundleName);
+			final org.osgi.service.packageadmin.PackageAdmin admin2 = admin;
+			if (admin2 == null) {
+				log(IStatus.ERROR, "Cannot find aspect bundle "+aspectBinding.aspectPlugin);
+				continue;					
+			} else {
+				Bundle aspectBundle = aspectBinding.aspectBundle;
+				if (aspectBundle == null) {
 					Bundle[] aspectBundles = admin2.getBundles(aspectBinding.aspectPlugin, null);
 					if (aspectBundles == null || aspectBundles.length == 0) {
 						log(IStatus.ERROR, "Cannot find aspect bundle "+aspectBinding.aspectPlugin);
 						continue;
 					}
-					// (2) scan all teams in affecting aspect bindings:
-					@SuppressWarnings("null") @NonNull
-					Bundle aspectBundle = aspectBundles[0];
-					if (aspectBinding.state != State.TeamsScanned)
-						aspectBinding.scanTeamClasses(aspectBundle);
-
-					// (3) try optional steps:
-					TeamLoader loading = new TeamLoader(deferredTeamClasses, beingDefined);
-					if (!loading.loadTeamsForBase(aspectBundle, aspectBinding, baseClass))
-						allDone = false;
+					aspectBundle = aspectBundles[0];
+					assert aspectBundle != null : "Package admin should not return a null array element";
 				}
-			}
-			// if some had to be deferred collect them now:
-			if (!deferredTeamClasses.isEmpty()) {
-				hook.addDeferredTeamClasses(deferredTeamClasses);
-				return false;
+				// (2) scan all teams in affecting aspect bindings:
+				if (!aspectBinding.hasScannedTeams)
+					aspectBinding.scanTeamClasses(aspectBundle);
+				
+				// (3) add dependencies to the base bundle:
+				aspectBinding.addImports(baseClass);
+
+				// (4) try optional steps:
+				TeamLoader loading = new TeamLoader(deferredTeamClasses, beingDefined);
+				loading.loadTeamsForBase(aspectBundle, aspectBinding, baseClass);
 			}
 		}
-		return allDone;
+
+		// if some had to be deferred collect them now:
+		if (!deferredTeamClasses.isEmpty()) {
+			hook.addDeferredTeamClasses(deferredTeamClasses);
+		}
+
+		// mark done for this base class 
+		// (do outside the look in case multiple aspect bindings point to the same baseBundle)
+		for (AspectBinding aspectBinding : aspectBindings) {
+			String baseClassName = baseClass.getClassName();
+			assert baseClassName != null : "WovenClass.getClassName() should not answer null";
+			aspectBinding.cleanUp(baseClassName);
+		}
+	}
+
+	public boolean isDone() {
+		for (AspectBinding binding : aspectBindings)
+			if (!binding.isDone())
+				return false;
+		return true;
 	}
 }

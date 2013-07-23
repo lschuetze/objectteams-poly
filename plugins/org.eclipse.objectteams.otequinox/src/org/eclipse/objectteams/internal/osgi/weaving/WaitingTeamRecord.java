@@ -16,26 +16,21 @@
 package org.eclipse.objectteams.internal.osgi.weaving;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
+import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.otequinox.ActivationKind;
-import org.objectteams.Team;
 
 /** Record for one team waiting for instantiation & activation. */
 @NonNullByDefault
 class WaitingTeamRecord {
-	Class<? extends Team> teamClass;
+	TeamBinding team;
 	AspectBinding aspectBinding;
 	ActivationKind activationKind;
 	String notFoundClass;
 	
-	public WaitingTeamRecord(Class<? extends Team> teamClass, AspectBinding aspectBinding, ActivationKind activationKind, String notFoundClass) {
-		this.teamClass = teamClass;
+	public WaitingTeamRecord(TeamBinding team, AspectBinding aspectBinding, ActivationKind activationKind, String notFoundClass) {
+		this.team = team;
 		this.aspectBinding = aspectBinding;
 		this.notFoundClass = notFoundClass;
 		this.activationKind = activationKind;
-	}
-
-	@SuppressWarnings("null") // calling well-known library function
-	public String getTeamName() {
-		return teamClass.getName();
-	}		
+	}	
 }
