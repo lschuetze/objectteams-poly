@@ -191,7 +191,7 @@ public class TeamLoader {
 									TeamBinding team, String teamName,
 									ActivationKind activationKind)
 	{
-		for (@SuppressWarnings("null")@NonNull String baseclass : aspectBinding.getBasesPerTeam(teamName)) {
+		for (@SuppressWarnings("null")@NonNull String baseclass : team.baseClassNames) {
 			if (this.beingDefined.contains(baseclass)) {
 				synchronized (deferredTeams) {
 					WaitingTeamRecord record = new WaitingTeamRecord(team, aspectBinding, activationKind, baseclass);

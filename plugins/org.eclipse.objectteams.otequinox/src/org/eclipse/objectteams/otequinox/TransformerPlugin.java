@@ -106,10 +106,14 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 	private static void doLog(int status, String msg) {
 		msg = "OT/Equinox: "+msg;
-		if (log != null)
+		if (log != null) {
 			log.log(new Status(status, TRANSFORMER_PLUGIN_ID, msg));
-		else
-			System.err.println(msg);
+		} else {
+			if ((status & IStatus.ERROR) != 0)
+				System.err.println(msg);
+			else
+				System.out.println(msg);
+		}
 	}
 	
 	

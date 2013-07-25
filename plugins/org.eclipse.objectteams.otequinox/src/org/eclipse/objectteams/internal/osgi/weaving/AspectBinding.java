@@ -20,7 +20,6 @@ import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +35,9 @@ import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.hooks.weaving.WovenClass;
+import org.osgi.framework.namespace.PackageNamespace;
+import org.osgi.framework.wiring.BundleRevision;
+import org.osgi.resource.Capability;
 
 /** 
  * Each instance of this class represents the information read from one extension to org.eclipse.objectteams.otequinox.aspectBindings.
@@ -116,7 +118,22 @@ public class AspectBinding {
 			int dot = teamName.lastIndexOf('.'); // TODO: can we detect if thats really the package (vs. Outer.Inner)?
 			if (dot != -1)
 				packageOfTeam = teamName.substring(0, dot);
-			imports.add(packageOfTeam);
+			checkExported: {
+				Bundle aspectBundle = AspectBinding.this.aspectBundle;
+				BundleRevision bundleRevision = aspectBundle != null ? aspectBundle.adapt(BundleRevision.class) : null;
+				if (bundleRevision != null) { // catch uninstalled state
+					for (Capability capability : bundleRevision.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+						Object exported = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+						if (exported instanceof String && exported.equals(packageOfTeam)) {
+							imports.add(packageOfTeam);
+							break checkExported;
+						}
+					}
+					log(IStatus.ERROR, "Package "+packageOfTeam+" for team "+teamName.substring(dot+1)+" is not exported by its bundle "+aspectPlugin);
+				} else {
+					log(IStatus.WARNING, "Can't check exporting of "+teamName+", bundle information for "+aspectPlugin+" is not available");
+				}
+			}
 			log(IStatus.INFO, "Added dependency from base "+baseClass.getClassName()+" to package '"+packageOfTeam+"'");
 			if (direction != -1) {
 				importsAddedToSuper = true;
@@ -294,17 +311,6 @@ public class AspectBinding {
 				return;
 			}
 		}
-	}
-
-	public List<String> getBasesPerTeam(String teamName) {
-		for (int i = 0; i < this.teams.length; i++) {
-			TeamBinding team = this.teams[i];
-			if (team.teamName.equals(teamName))
-				return team.baseClassNames;
-		}
-		@SuppressWarnings("null")@NonNull // well-known library function
-		List<String> emptyList = Collections.emptyList();
-		return emptyList;		
 	}
 
 	/** Add all require imports to match the hidden reverse dependency created by any team binding to this base class. */
