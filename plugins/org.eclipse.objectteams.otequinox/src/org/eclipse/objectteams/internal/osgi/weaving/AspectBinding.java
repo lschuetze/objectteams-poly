@@ -67,6 +67,7 @@ public class AspectBinding {
 		Set<TeamBinding> equivalenceSet = new HashSet<>();
 
 		ActivationKind activation;
+		boolean hasScannedBases;
 		boolean isActivated;
 
 		boolean importsAdded;
@@ -287,11 +288,15 @@ public class AspectBinding {
 	public synchronized void scanTeamClasses(Bundle bundle) {
 		ClassScanner scanner = new ClassScanner();
 		for (@SuppressWarnings("null")@NonNull TeamBinding team : getAllTeamBindings()) {
+			if (team.hasScannedBases) continue; // not a surprise for members of equivalentSet
+			team.hasScannedBases = true;
 			try {
 				String teamName = scanner.readOTAttributes(bundle, team.teamName);
 				Collection<String> baseClassNames = scanner.getCollectedBaseClassNames();
-				if (team.baseClassNames.isEmpty())
-					addBaseClassNames(teamName, baseClassNames);
+				if (team.baseClassNames.isEmpty()) {
+					for (TeamBinding equivalent : team.equivalenceSet)
+						equivalent.addBaseClassNames(baseClassNames);
+				}
 				log(IStatus.INFO, "Scanned team class "+teamName+", found "+baseClassNames.size()+" base classes");
 			} catch (Exception e) {
 				log(e, "Failed to scan team class "+team.teamName);
@@ -309,27 +314,6 @@ public class AspectBinding {
 			all.addAll(teams[i].subTeams);
 		}
 		return all;
-	}
-
-	private void addBaseClassNames(String teamName, Collection<String> baseClassNames) {
-		for (int i = 0; i < teams.length; i++) {
-			TeamBinding team = teams[i];
-			if (team.teamName.equals(teamName)) {
-				for (TeamBinding equivalent : team.equivalenceSet)
-					equivalent.addBaseClassNames(baseClassNames);
-				return;
-			}
-		}
-		// try super:
-		for (int i = 0; i < teams.length; i++) {
-			TeamBinding team = teams[i];
-			TeamBinding superTeam = team.superTeam;
-			if (superTeam != null && superTeam.teamName.equals(teamName)) {
-				for (TeamBinding equivalentSuper : superTeam.equivalenceSet)
-					equivalentSuper.addBaseClassNames(baseClassNames);
-				return;
-			}
-		}
 	}
 
 	/** Add all require imports to match the hidden reverse dependency created by any team binding to this base class. */
