@@ -38,9 +38,9 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
-import base org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.objectteams.otdt.internal.corext.RoleFileAdaptor;
@@ -48,8 +48,8 @@ import org.eclipse.objectteams.otdt.internal.corext.RoleFileAdaptor;
 import base org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import base org.eclipse.jdt.internal.codeassist.CompletionEngine;
 import base org.eclipse.jdt.internal.codeassist.InternalCompletionProposal;
+import base org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleTypeReference;
 import base org.eclipse.jdt.internal.codeassist.complete.CompletionParser;
-import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 
 /**
  * This team advises the completion engine et al to produce base-imports if appropriate.
