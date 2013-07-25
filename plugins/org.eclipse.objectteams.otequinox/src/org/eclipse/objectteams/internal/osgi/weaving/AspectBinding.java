@@ -49,6 +49,13 @@ import org.osgi.resource.Capability;
 @NonNullByDefault
 public class AspectBinding {
 
+	/**
+	 * Attribute for exports and dynamic imports making the team visible to its adapted base classes.
+	 * The bundle id of the aspect bundle is used as the attribute value to disambiguate between
+	 * multiple same-names packages from different bundles. 
+	 */
+	static final String OT_ASPECT_HOST_ATTRIBUTE = "ot-aspect-host";
+
 	class TeamBinding {
 
 		String teamName;
@@ -113,11 +120,18 @@ public class AspectBinding {
 		 */
 		public void addImportTo(WovenClass baseClass, int direction) {
 			importsAdded = true;
-			List<String> imports = baseClass.getDynamicImports();
+			
 			String packageOfTeam = "";
 			int dot = teamName.lastIndexOf('.'); // TODO: can we detect if thats really the package (vs. Outer.Inner)?
 			if (dot != -1)
 				packageOfTeam = teamName.substring(0, dot);
+			String packageWithAttribute = packageOfTeam+";"+OT_ASPECT_HOST_ATTRIBUTE+"=\""+aspectPlugin+"\"";
+
+			List<String> imports = baseClass.getDynamicImports();
+			for (String imp : imports)
+				if (imp.equals(packageOfTeam) || imp.equals(packageWithAttribute))
+					return;
+			
 			checkExported: {
 				Bundle aspectBundle = AspectBinding.this.aspectBundle;
 				BundleRevision bundleRevision = aspectBundle != null ? aspectBundle.adapt(BundleRevision.class) : null;
@@ -125,7 +139,12 @@ public class AspectBinding {
 					for (Capability capability : bundleRevision.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
 						Object exported = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
 						if (exported instanceof String && exported.equals(packageOfTeam)) {
-							imports.add(packageOfTeam);
+							if (capability.getAttributes().containsKey(OT_ASPECT_HOST_ATTRIBUTE)) {
+								imports.add(packageWithAttribute);
+							} else {
+								log(IStatus.WARNING, "Package "+packageOfTeam+" for team "+teamName.substring(dot+1)+" is exported without an 'ot-aspect-host' attribute.");
+								imports.add(packageOfTeam);
+							}
 							break checkExported;
 						}
 					}

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.otdt.jdt.ui;singleton:=true
-Bundle-Version: 2.2.0.qualifier
+Bundle-Version: 2.3.0.qualifier
 Require-Bundle: org.eclipse.jdt.ui;bundle-version="[3.7.0,4.0.0)",
  org.eclipse.core.runtime;bundle-version="[3.7.0,4.0.0)",
  org.eclipse.core.resources;bundle-version="[3.7.0,4.0.0)",
@@ -26,12 +26,14 @@ Bundle-Vendor: %providerName
 Bundle-RequiredExecutionEnvironment: J2SE-1.5
 Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
-Export-Package: org.eclipse.objectteams.otdt.internal.ui.assist;x-friends:="org.eclipse.objectteams.otdt.ui.tests",
- org.eclipse.objectteams.otdt.internal.ui.packageview;x-friends:="org.eclipse.objectteams.otdt.ui.tests",
- org.eclipse.objectteams.otdt.internal.ui.javaeditor;x-friends:="org.eclipse.jdt.ui",
- org.eclipse.objectteams.otdt.internal.ui.util;x-friends:="org.eclipse.jdt.ui",
- org.eclipse.objectteams.otdt.internal.ui.search;x-friends:="org.eclipse.jdt.ui",
- org.eclipse.objectteams.otdt.internal.ui.viewsupport;x-friends:="org.eclipse.jdt.ui",
- org.eclipse.objectteams.otdt.internal.corext;x-friends:="org.eclipse.jdt.ui",
- org.eclipse.objectteams.otdt.internal.ui.text;ot-base:="org.eclipse.jdt.ui"
+Export-Package: org.eclipse.objectteams.otdt.internal.ui.assist;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui";x-friends:="org.eclipse.objectteams.otdt.ui.tests",
+ org.eclipse.objectteams.otdt.internal.ui.packageview;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui";x-friends:="org.eclipse.objectteams.otdt.ui.tests",
+ org.eclipse.objectteams.otdt.internal.ui.javaeditor;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.util;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.search;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.viewsupport;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.corext;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.text;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.compare;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.typehierarchy;ot-aspect-host="org.eclipse.objectteams.otdt.jdt.ui"
 
