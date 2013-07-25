@@ -10,7 +10,7 @@
  *     IBM Corporation - initial API and implementation
  * 	   Technical University Berlin - Initial API and implementation
  *******************************************************************************/
-package org.eclipse.objectteams.otdt.internal.ui.javaeditor;
+package org.eclipse.objectteams.otdt.internal.ui.javaeditor0;
 
 import java.util.HashMap;
 import java.util.Iterator;

@@ -33,7 +33,7 @@ Require-Bundle: org.eclipse.core.runtime;bundle-version="[3.7.0,4.0.0)",
 Bundle-ActivationPolicy: lazy
 Export-Package: 
  org.eclipse.objectteams.otdt.internal.ui.callinmarkers;x-friends:="org.eclipse.objectteams.otdt.ui.tests",
- org.eclipse.objectteams.otdt.internal.ui.javaeditor;x-friends:="org.eclipse.objectteams.otdt.debug.ui,org.eclipse.objectteams.otdt.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.javaeditor0;x-friends:="org.eclipse.objectteams.otdt.debug.ui,org.eclipse.objectteams.otdt.jdt.ui",
  org.eclipse.objectteams.otdt.internal.ui.preferences;x-friends:="org.eclipse.objectteams.otdt.ui.tests",
  org.eclipse.objectteams.otdt.internal.ui.wizards;x-friends:="org.eclipse.objectteams.otdt.ui.tests",
  org.eclipse.objectteams.otdt.internal.ui.wizards.listeners;x-friends:="org.eclipse.objectteams.otdt.ui.tests",

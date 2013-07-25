@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
+import base org.eclipse.jdt.internal.codeassist.complete.CompletionOnSingleTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
@@ -48,7 +49,7 @@ import base org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import base org.eclipse.jdt.internal.codeassist.CompletionEngine;
 import base org.eclipse.jdt.internal.codeassist.InternalCompletionProposal;
 import base org.eclipse.jdt.internal.codeassist.complete.CompletionParser;
-import base org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 
 /**
  * This team advises the completion engine et al to produce base-imports if appropriate.
@@ -102,8 +103,9 @@ public team class BaseImportRewriting
 		
 		/** Entry (output) conditionally passing data to next role. */
 		void checkRecordBaseclassReference(CompletionOnBaseTypeRef ref)
-			<- after TypeReference createSingleAssistTypeReference(char[] assistName, long position) 
-			with { ref <- result }
+			<- after TypeReference createSingleAssistTypeReference(char[] assistName, long position)
+			base when (result instanceof CompletionOnSingleTypeReference)
+			with { ref <- (CompletionOnSingleTypeReference)result }
 		void checkRecordBaseclassReference(CompletionOnBaseTypeRef ref) {
 			if (!this.nextIsBaseclass)
 				// not within required context, cancel the role:
@@ -115,7 +117,7 @@ public team class BaseImportRewriting
 	 * This role is registered by lifting in {@link CompletionParser#checkRecordBaseclassReference(CompletionOnBaseTypeRef)}.
 	 * Its presence marks a type reference as completion on base class.
 	 */
-	protected class CompletionOnBaseTypeRef	playedBy TypeReference
+	protected class CompletionOnBaseTypeRef	playedBy CompletionOnSingleTypeReference
 		base when (BaseImportRewriting.this.hasRole(base, CompletionOnBaseTypeRef.class))
 	{
 		/** adjust pretty printing for testing and debugging. */

@@ -18,7 +18,7 @@ package org.eclipse.objectteams.otdt.internal.ui.javaeditor;
 
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.VerticalRulerEvent;
-import org.eclipse.objectteams.otdt.internal.ui.javaeditor.RoleOverrideIndicatorManager;
+import org.eclipse.objectteams.otdt.internal.ui.javaeditor0.RoleOverrideIndicatorManager;
 import org.eclipse.swt.widgets.Event;
 
 import base org.eclipse.jdt.internal.ui.javaeditor.JavaSelectAnnotationRulerAction;

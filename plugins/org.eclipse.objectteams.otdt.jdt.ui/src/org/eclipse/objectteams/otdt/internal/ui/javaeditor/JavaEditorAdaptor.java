@@ -30,7 +30,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
-import org.eclipse.objectteams.otdt.internal.ui.javaeditor.RoleOverrideIndicatorManager;
+import org.eclipse.objectteams.otdt.internal.ui.javaeditor0.RoleOverrideIndicatorManager;
 
 import base org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import base org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;

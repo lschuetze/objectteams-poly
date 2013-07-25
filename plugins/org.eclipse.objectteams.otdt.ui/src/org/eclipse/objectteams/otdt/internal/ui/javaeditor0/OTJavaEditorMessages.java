@@ -18,13 +18,13 @@
  * Fraunhofer FIRST - Initial API and implementation
  * Technical University Berlin - Initial API and implementation
  **********************************************************************/
-package org.eclipse.objectteams.otdt.internal.ui.javaeditor;
+package org.eclipse.objectteams.otdt.internal.ui.javaeditor0;
 
 import org.eclipse.osgi.util.NLS;;
 
 public class OTJavaEditorMessages extends NLS {
 	
-	private static final String BUNDLE_NAME = "org.eclipse.objectteams.otdt.internal.ui.javaeditor.OTJavaEditorMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME = "org.eclipse.objectteams.otdt.internal.ui.javaeditor0.OTJavaEditorMessages"; //$NON-NLS-1$
 	
 	public static String RoleOverrideIndicator_open_error_message;
 	public static String RoleOverrideIndicator_open_error_messageHasLogEntry;

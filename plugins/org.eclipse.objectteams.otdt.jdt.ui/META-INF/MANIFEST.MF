@@ -28,5 +28,10 @@ Bundle-ActivationPolicy: lazy
 Bundle-Localization: plugin
 Export-Package: org.eclipse.objectteams.otdt.internal.ui.assist;x-friends:="org.eclipse.objectteams.otdt.ui.tests",
  org.eclipse.objectteams.otdt.internal.ui.packageview;x-friends:="org.eclipse.objectteams.otdt.ui.tests",
- org.eclipse.objectteams.otdt.internal.ui.javaeditor;x-internal:="true"
+ org.eclipse.objectteams.otdt.internal.ui.javaeditor;x-friends:="org.eclipse.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.util;x-friends:="org.eclipse.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.search;x-friends:="org.eclipse.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.viewsupport;x-friends:="org.eclipse.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.corext;x-friends:="org.eclipse.jdt.ui",
+ org.eclipse.objectteams.otdt.internal.ui.text;ot-base:="org.eclipse.jdt.ui"
 
