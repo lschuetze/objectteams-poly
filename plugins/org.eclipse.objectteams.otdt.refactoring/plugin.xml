@@ -15,7 +15,7 @@
          </team>
          <team
                activation="NONE"
-               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.RenameAdaptor.OTNodeAdjustments"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.RenameAdaptor$OTNodeAdjustments"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
          <team
@@ -45,7 +45,7 @@
          </team>
          <team
                activation="NONE"
-               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.pullup.PullUpAdaptor.PullUpRefactoringProcessorRole"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.pullup.PullUpAdaptor$PullUpRefactoringProcessorRole"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
          <team
@@ -85,7 +85,7 @@
          </team>
          <team
                activation="NONE"
-               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.ExtractInterfaceAdaptor.Processor"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.ExtractInterfaceAdaptor$Processor"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
          <team
@@ -95,7 +95,7 @@
          </team>
          <team
                activation="NONE"
-               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.ReorgAdaptor.BaseImporting"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.ReorgAdaptor$BaseImporting"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
       </aspectBinding>
@@ -107,12 +107,12 @@
          </basePlugin>
          <team
                activation="NONE"
-               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.MoveAdaptor.MoveCU"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.MoveAdaptor$MoveCU"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
          <team
                activation="NONE"
-               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.pullup.PullUpAdaptor.Visibility"
+               class="org.eclipse.objectteams.otdt.internal.refactoring.adaptor.pullup.PullUpAdaptor$Visibility"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
       </aspectBinding>
