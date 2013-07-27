@@ -132,7 +132,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		StaticSliceBaseTransformation 		staticSliceBaseTransformation 		= new StaticSliceBaseTransformation(loader);
 		SubBoundBaseMethodRedefinition 		subBoundBaseMethodRedefinition 		= new SubBoundBaseMethodRedefinition(loader);
 		TeamInterfaceImplementation 		teamInterfaceImplementation 		= new TeamInterfaceImplementation(loader);
-//		ThreadActivation 					threadActivation					= new ThreadActivation();
+		ThreadActivation 					threadActivation					= new ThreadActivation();
 				
 		// tell Repository about the class loader for improved lookupClass()
 		DietClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
@@ -186,8 +186,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 //			baseMethodTransformation.doTransformInterface(jpe, cg);
 //			staticSliceBaseTransformation.doTransformInterface(jpe, cg);
 //			teamInterfaceImplementation.doTransformInterface(jpe, cg);
-// FIXME:
-//			threadActivation.doTransformInterface(jpe, cg);
+			threadActivation.doTransformInterface(jpe, cg);
 
 			
 //			baseCallRedirection.doTransformCode(cg); // empty method
@@ -195,8 +194,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			liftingParticipantTransformation.doTransformCode(cg);
 			staticSliceBaseTransformation.doTransformCode(cg);
 			teamInterfaceImplementation.doTransformCode(cg);
-// FIXME:
-//			threadActivation.doTransformCode(cg);
+			threadActivation.doTransformCode(cg);
 			
 			JavaClass new_java_class = cg.getJavaClass(); 
 			if (dumping) {
