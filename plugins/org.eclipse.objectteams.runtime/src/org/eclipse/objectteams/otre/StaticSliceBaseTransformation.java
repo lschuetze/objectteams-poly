@@ -21,7 +21,6 @@ import java.util.HashMap;
 import org.apache.bcel.classfile.*;
 import org.apache.bcel.generic.*;
 import org.apache.bcel.*;
-
 import org.eclipse.objectteams.otre.util.*;
 import org.eclipse.objectteams.otre.util.CallinBindingManager.BoundSuperKind;
 
@@ -209,8 +208,6 @@ public class StaticSliceBaseTransformation
                                                     new String[] { "team", "teamID" },
                                                     "_OT$addTeam", class_name,
                                                     il, cpg);
-	    // synchronized (BaseClass.class) {
-	  int monitor = addClassMonitorEnter(addTeamMethod, il, class_name, major, cpg).first;
 
 		il.append(factory.createFieldAccess(class_name, _OT_ACTIVE_TEAMS, teamArray, Constants.GETSTATIC));
 		il.append(new ARRAYLENGTH());
@@ -306,13 +303,10 @@ public class StaticSliceBaseTransformation
 			// generated: _OT$activateNotify(team, teamID);
 		}
 		
-	    // No more access to array fields, release monitor:
-	  InstructionHandle exitSequence =
-		il.append(InstructionFactory.createLoad(Type.OBJECT, monitor));
-	    il.append(new MONITOREXIT());
-	    earlyExit.setTarget(exitSequence);
-
+	  InstructionHandle exit =
 		il.append(InstructionFactory.createReturn(Type.VOID));
+	    earlyExit.setTarget(exit);
+
 
 		addTeamMethod.setMaxStack();
 		addTeamMethod.setMaxLocals();
@@ -369,9 +363,6 @@ public class StaticSliceBaseTransformation
                                                     new String[] { "team" },
                                                     "_OT$removeTeam", class_name,
                                                     il, cpg);
-
-	    // synchronized (BaseClass.class) {
-	    int monitor = addClassMonitorEnter(removeTeamMethod, il, class_name, major, cpg).first;
 
 		il.append(factory.createFieldAccess(class_name, _OT_ACTIVE_TEAMS, teamArray, Constants.GETSTATIC));
 		il.append(new ARRAYLENGTH());
@@ -522,14 +513,10 @@ public class StaticSliceBaseTransformation
 			// generated: _OT$deactivateNotify(team);
 		}
 
-	    // No more access to array fields, release monitor:
-	  InstructionHandle exitSequence =
-	    il.append(InstructionFactory.createLoad(Type.OBJECT, monitor));
-	    il.append(new MONITOREXIT());
-	    earlyExit.setTarget(exitSequence);
-	    notFound.setTarget(exitSequence);
-
+	  InstructionHandle exit =
 		il.append(InstructionFactory.createReturn(Type.VOID));
+	  	earlyExit.setTarget(exit);
+	  	notFound.setTarget(exit);
 
 		removeTeamMethod.setMaxStack();
 		removeTeamMethod.setMaxLocals();
