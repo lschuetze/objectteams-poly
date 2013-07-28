@@ -28,6 +28,7 @@ import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
+import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.objectteams.Team;
@@ -159,6 +160,9 @@ public class TeamLoader {
 		}
 
 		try {
+			long time = 0;
+			if (Util.PROFILE) time= System.nanoTime();
+
 			@SuppressWarnings("null")@NonNull Team instance = team.teamClass.newInstance();
 			TransformerPlugin.registerTeamInstance(instance);
 			log(IStatus.INFO, "Instantiated team "+teamName);
@@ -177,6 +181,7 @@ public class TeamLoader {
 				default:
 					break;
 				}
+				if (Util.PROFILE) Util.profile(time, ProfileKind.Activation, teamName);
 			} catch (Throwable t) {
 				// application errors during activation
 				log(t, "Failed to activate team "+teamName);

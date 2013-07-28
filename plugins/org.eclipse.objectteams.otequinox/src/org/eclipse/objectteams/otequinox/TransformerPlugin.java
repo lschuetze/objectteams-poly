@@ -45,7 +45,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	}
 
 	@SuppressWarnings("restriction")
-	private void acquireLog(BundleContext bundleContext) {
+	private static void acquireLog(BundleContext bundleContext) {
 		try {
 			TransformerPlugin.log = org.eclipse.core.internal.runtime.InternalPlatform.getDefault().getLog(bundleContext.getBundle());
 		} catch (NullPointerException npe) {
@@ -104,8 +104,10 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			doLog(status, msg);
 	}
 
-	private static void doLog(int status, String msg) {
+	public static void doLog(int status, String msg) {
 		msg = "OT/Equinox: "+msg;
+// this seems to cause java.lang.NoClassDefFoundError: org/eclipse/ui/statushandlers/StatusAdapter etc.
+//		if (log == null) acquireLog(context);
 		if (log != null) {
 			log.log(new Status(status, TRANSFORMER_PLUGIN_ID, msg));
 		} else {

@@ -29,6 +29,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.osgi.framework.Bundle;
@@ -140,11 +141,16 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 				byte[] bytes = wovenClass.getBytes();
 				try {
 					log(IStatus.OK, "About to transform class "+className);
+					long time = 0;
+					if (Util.PROFILE) time= System.nanoTime();
 					byte[] newBytes = transformer.transform(bundleWiring.getBundle(),
 										className, classBeingRedefined, protectionDomain, bytes);
 					if (newBytes != bytes && !Arrays.equals(newBytes, bytes)) {
+						if (Util.PROFILE) Util.profile(time, ProfileKind.Transformation, className);
 						log(IStatus.INFO, "Transformation performed on "+className);
 						wovenClass.setBytes(newBytes);
+					} else {
+						if (Util.PROFILE) Util.profile(time, ProfileKind.NoTransformation, className);
 					}
 				} catch (IllegalClassFormatException e) {
 					log(e, "Failed to transform class "+className);

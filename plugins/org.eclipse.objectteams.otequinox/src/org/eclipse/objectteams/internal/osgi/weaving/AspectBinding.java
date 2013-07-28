@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.ActivationKind;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
@@ -286,6 +287,8 @@ public class AspectBinding {
 	 * and collect affected base classes into the teamBindings.
 	 */
 	public synchronized void scanTeamClasses(Bundle bundle) {
+		long time = 0;
+		if (Util.PROFILE) time= System.nanoTime();
 		ClassScanner scanner = new ClassScanner();
 		for (@SuppressWarnings("null")@NonNull TeamBinding team : getAllTeamBindings()) {
 			if (team.hasScannedBases) continue; // not a surprise for members of equivalentSet
@@ -303,6 +306,7 @@ public class AspectBinding {
 			}
 		}
 		this.hasScannedTeams = true;
+		if (Util.PROFILE) Util.profile(time, ProfileKind.Scan, bundle.getSymbolicName());
 	}
 
 	private List<TeamBinding> getAllTeamBindings() {
