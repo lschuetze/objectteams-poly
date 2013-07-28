@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 
 import base org.eclipse.jdt.internal.compiler.lookup.CompilationUnitScope;
@@ -235,7 +236,8 @@ public team class BaseImportChecker extends CompilationThreadWatcher
 			return Collections.emptyList();
 		}
 		private void addTeamNames(ReferenceBinding type, List<String> names) {
-			names.add(String.valueOf(type.readableName()));
+			char[] binaryName = CharOperation.concatWith(type.compoundName, '.');
+			names.add(String.valueOf(CharOperation.replace(binaryName, IOTConstants.OT_DELIM_NAME, new char[0])));
 			for (ReferenceBinding member : type.memberTypes())
 				if (member != null && member.isTeam())
 					addTeamNames(member, names);
