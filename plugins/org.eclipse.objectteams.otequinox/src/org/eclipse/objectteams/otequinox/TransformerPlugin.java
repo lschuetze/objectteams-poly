@@ -21,8 +21,8 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
 	private static BundleContext context;
 
-	static BundleContext getContext() {
-		return context;
+	public static Bundle getBundle() {
+		return context.getBundle();
 	}
 
 	private static ILog log;
@@ -186,5 +186,4 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		// TODO Auto-generated method stub
 		return false;
 	}
-
 }

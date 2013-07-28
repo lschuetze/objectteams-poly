@@ -125,7 +125,11 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			String bundleName = bundleWiring.getBundle().getSymbolicName();
 			String className = wovenClass.getClassName();
 			
-			
+			if (BCELPatcher.BCEL_PLUGIN_ID.equals(bundleName)) {
+				BCELPatcher.fixBCEL(wovenClass);
+				return;
+			}
+
 			if (requiresWeaving(bundleWiring)) {
 				// do whatever is needed *before* loading this class:
 				triggerBaseTripWires(bundleName, wovenClass);
