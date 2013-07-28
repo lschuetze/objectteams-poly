@@ -20,7 +20,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import java.util.HashSet;
 import static org.eclipse.core.runtime.IStatus.*;
 
 public class Util 
@@ -51,51 +50,6 @@ public class Util
 	enum ProfileKind { BaseTransformation, AspectTransformation, SuperClassFetching }
 	private static long[] profileTimes= new long[ProfileKind.values().length];
 	private static long systemStartTime= System.nanoTime();
-
-	static HashSet<String> PLATFORM_BUNDLES = null;
-	
-	@SuppressWarnings("nls")
-	private static void checkInit() {
-		if (PLATFORM_BUNDLES == null) {
-			PLATFORM_BUNDLES = new HashSet<String>();
-			// FIXME: reconsider:
-			for (String bundle : new String[] { "org.eclipse.equinox.common",
-												"org.eclipse.update.configurator",
-												"org.eclipse.core.runtime",
-												"org.eclipse.equinox.registry",
-												"org.eclipse.equinox.app",
-												"org.eclipse.equinox.ds",
-												"org.eclipse.equinox.event",
-												"org.eclipse.equinox.util",
-												"org.eclipse.osgi.services",
-												"org.eclipse.core.runtime.compatibility.auth",
-												"org.eclipse.equinox.preferences",
-												"org.eclipse.equinox.simpleconfigurator",
-												"org.eclipse.core.jobs",
-												"org.eclipse.core.runtime.compatibility",
-												"org.eclipse.equinox.p2.core",
-												"org.eclipse.equinox.p2.reconciler.dropins",
-												"org.eclipse.equinox.p2.directorywatcher",
-												"org.eclipse.ecf",
-												"org.eclipse.ecf.identity",
-												"org.eclipse.ecf.filetransfer",
-												"org.eclipse.ecf.provider.filetransfer",
-												"org.eclipse.ecf.provider.filetransfer.httpclient",
-												"org.apache.commons.httpclient",
-												// for Eclipse 4.x:
-												"org.eclipse.swt",
-												"org.eclipse.e4.ui.css.core",
-												"org.eclipse.e4.ui.css.swt.theme",
-												"org.eclipse.core.contenttype"
-				})
-				PLATFORM_BUNDLES.add(bundle);
-		}
-	}
-
-	static boolean isPlatformBundle(String bundleName) {
-		checkInit();
-		return PLATFORM_BUNDLES.contains(bundleName);
-	}
 
 	@SuppressWarnings("nls")
 	public static void profile(long startTime, ProfileKind kind, String msg, Logger logger) 

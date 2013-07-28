@@ -131,7 +131,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 				triggerBaseTripWires(bundleName, wovenClass);
 
 				ObjectTeamsTransformer transformer = new ObjectTeamsTransformer();
-				Class<?> classBeingRedefined = null; // TODO
+				Class<?> classBeingRedefined = null; // TODO prepare for otre-dyn
 				ProtectionDomain protectionDomain = wovenClass.getProtectionDomain();
 				byte[] bytes = wovenClass.getBytes();
 				try {

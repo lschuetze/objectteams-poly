@@ -195,7 +195,7 @@ public class TeamLoader {
 			if (this.beingDefined.contains(baseclass)) {
 				synchronized (deferredTeams) {
 					WaitingTeamRecord record = new WaitingTeamRecord(team, aspectBinding, activationKind, baseclass);
-					deferredTeams.add(record); // TODO(SH): synchronization, deadlock? performed while holding lock an aspectBinding
+					deferredTeams.add(record);
 				}
 				log(IStatus.INFO, "Defer instantation/activation of team "+teamName);
 				return false;
