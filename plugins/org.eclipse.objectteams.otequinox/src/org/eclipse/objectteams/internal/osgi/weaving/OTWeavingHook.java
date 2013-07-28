@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
@@ -42,7 +43,6 @@ import org.osgi.framework.hooks.weaving.WovenClassListener;
 import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleWiring;
 import org.osgi.resource.Wire;
-import org.osgi.service.component.ComponentContext;
 
 
 /**
@@ -75,16 +75,16 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	private @NonNull List<WaitingTeamRecord> deferredTeams = new ArrayList<>();
 
 	
-	/** Call-back from DS framework. */
-	public void activate(ComponentContext context) {
-		loadAspectBindingRegistry(context.getBundleContext());
+	/** Call-back once the extension registry is up and running. */
+	public void activate(BundleContext bundleContext, ServiceReference<IExtensionRegistry> serviceReference) {
+		loadAspectBindingRegistry(bundleContext, serviceReference);
 		TransformerPlugin.getDefault().registerAspectBindingRegistry(this.aspectBindingRegistry);
 	}
 
 	// ====== Aspect Binding: ======
-	
+
 	@SuppressWarnings("deprecation")
-	private void loadAspectBindingRegistry(BundleContext context) {
+	private void loadAspectBindingRegistry(BundleContext context, ServiceReference<IExtensionRegistry> serviceReference) {
 		org.osgi.service.packageadmin.PackageAdmin packageAdmin = null;
 		
 		ServiceReference<?> ref= context.getServiceReference(org.osgi.service.packageadmin.PackageAdmin.class.getName());
@@ -93,7 +93,11 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		else
 			log(IStatus.ERROR, "Failed to load PackageAdmin service. Will not be able to handle fragments.");
 
-		aspectBindingRegistry.loadAspectBindings(packageAdmin, this);
+		IExtensionRegistry extensionRegistry = context.getService(serviceReference);
+		if (extensionRegistry == null)
+			log(IStatus.ERROR, "Failed to acquire ExtensionRegistry service, cannot load aspect bindings.");
+		else
+			aspectBindingRegistry.loadAspectBindings(extensionRegistry, packageAdmin, this);
 	}
 
 	// ====== Base Bundle Trip Wires: ======

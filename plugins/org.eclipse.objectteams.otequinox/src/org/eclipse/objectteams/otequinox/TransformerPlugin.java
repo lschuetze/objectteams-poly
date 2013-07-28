@@ -5,17 +5,24 @@ import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBindingRegistry;
+import org.eclipse.objectteams.internal.osgi.weaving.OTWeavingHook;
 import org.eclipse.objectteams.otre.ClassLoaderAccess;
 import org.objectteams.Team;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
+import org.osgi.framework.hooks.weaving.WeavingHook;
+import org.osgi.framework.hooks.weaving.WovenClassListener;
 
 public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 
@@ -35,13 +42,33 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	 * (non-Javadoc)
 	 * @see org.osgi.framework.BundleActivator#start(org.osgi.framework.BundleContext)
 	 */
-	public void start(BundleContext bundleContext) throws Exception {
+	public void start(final BundleContext bundleContext) throws Exception {
 		plugin = this;
 		TransformerPlugin.context = bundleContext;
 		
 		acquireLog(bundleContext);
 	
 		OTREInit();
+		
+		// register our weaving service:
+		final OTWeavingHook otWeavingHook = new OTWeavingHook();
+		context.registerService(new String[] { WeavingHook.class.getName(), WovenClassListener.class.getName() },
+				otWeavingHook, null);
+		
+		// but wait until the extension registry is available for reading aspectBindings:
+		try {
+			context.addServiceListener(
+				new ServiceListener() { 
+					public void serviceChanged(ServiceEvent event) {
+						if(event.getType() == ServiceEvent.REGISTERED)
+							otWeavingHook.activate(bundleContext, context.getServiceReference(IExtensionRegistry.class));
+					}
+				},
+				"(objectclass="+IExtensionRegistry.class.getName()+")"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		catch (InvalidSyntaxException ex) {
+			log(ex, "Failed to register service listener");
+		}
 	}
 
 	@SuppressWarnings("restriction")

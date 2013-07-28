@@ -16,7 +16,6 @@
  **********************************************************************/
 package org.eclipse.objectteams.internal.osgi.weaving;
 
-import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 import static org.eclipse.objectteams.otequinox.Constants.ACTIVATION;
 import static org.eclipse.objectteams.otequinox.Constants.ASPECT_BINDING_EXTPOINT_ID;
 import static org.eclipse.objectteams.otequinox.Constants.BASE_PLUGIN;
@@ -27,6 +26,7 @@ import static org.eclipse.objectteams.otequinox.Constants.SELF;
 import static org.eclipse.objectteams.otequinox.Constants.SUPERCLASS;
 import static org.eclipse.objectteams.otequinox.Constants.TEAM;
 import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
+import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -36,8 +36,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.RegistryFactory;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
@@ -77,11 +77,12 @@ public class AspectBindingRegistry {
 
 	/* Load extensions for org.eclipse.objectteams.otequinox.aspectBindings and check aspect permissions. */
 	public void loadAspectBindings(
+			IExtensionRegistry extensionRegistry,
 			@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin,
 			OTWeavingHook hook) 
 	{
-		IConfigurationElement[] aspectBindingConfigs = RegistryFactory.getRegistry().getConfigurationElementsFor(
-				TRANSFORMER_PLUGIN_ID, ASPECT_BINDING_EXTPOINT_ID);
+		IConfigurationElement[] aspectBindingConfigs = extensionRegistry
+				.getConfigurationElementsFor(TRANSFORMER_PLUGIN_ID, ASPECT_BINDING_EXTPOINT_ID);
 		Map<String, Set<TeamBinding>> teamLookup = new HashMap<>();
 		Map<String, BaseBundle> baseBundleLookup = new HashMap<>();
 		AspectBinding[] bindings = new AspectBinding[aspectBindingConfigs.length];
