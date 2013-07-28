@@ -150,7 +150,7 @@ public class AspectBindingRegistry {
 				@NonNull String realBaseBundleId = baseBundleId.toUpperCase().equals(SELF) ? aspectBundleId : baseBundleId;
 				addBindingForBaseBundle(realBaseBundleId, binding);
 				addBindingForAspectBundle(aspectBundleId, binding);
-				hook.setBaseTripWire(packageAdmin, realBaseBundleId);
+				hook.setBaseTripWire(packageAdmin, realBaseBundleId, baseBundleLookup.get(realBaseBundleId));
 
 				log(IStatus.INFO, "registered:\n"+binding);
 			} catch (Throwable t) {

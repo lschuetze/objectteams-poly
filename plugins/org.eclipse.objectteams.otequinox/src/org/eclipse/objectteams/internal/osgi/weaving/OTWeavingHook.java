@@ -29,6 +29,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
@@ -38,7 +39,9 @@ import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClass;
 import org.osgi.framework.hooks.weaving.WovenClassListener;
+import org.osgi.framework.namespace.PackageNamespace;
 import org.osgi.framework.wiring.BundleWiring;
+import org.osgi.resource.Wire;
 import org.osgi.service.component.ComponentContext;
 
 
@@ -99,10 +102,10 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	 * Callback during AspectBindingRegistry#loadAspectBindings():
 	 * Set-up a trip wire to fire when the mentioned base bundle is loaded.
 	 */
-	void setBaseTripWire(@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin, @NonNull String baseBundleId) 
+	void setBaseTripWire(@SuppressWarnings("deprecation") @Nullable org.osgi.service.packageadmin.PackageAdmin packageAdmin, @NonNull String baseBundleId, BaseBundle baseBundle) 
 	{
 		if (!baseTripWires.containsKey(baseBundleId))
-			baseTripWires.put(baseBundleId, new BaseBundleLoadTrigger(baseBundleId, aspectBindingRegistry, packageAdmin));
+			baseTripWires.put(baseBundleId, new BaseBundleLoadTrigger(baseBundleId, baseBundle, aspectBindingRegistry, packageAdmin));
 	}
 
 	/** Check if the given base bundle / base class mandate any loading/instantiation/activation of teams. */
@@ -220,5 +223,19 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			@SuppressWarnings("null") @NonNull String className = wovenClass.getClassName();
 			instantiateScheduledTeams(className);
 		}
+	}
+
+	static boolean hasImport(WovenClass clazz, String packageName, String packageWithAttribute) {
+		List<String> imports = clazz.getDynamicImports();
+		for (String imp : imports)
+			if (imp.equals(packageName) || imp.equals(packageWithAttribute))
+				return true;
+		for (Wire wire : clazz.getBundleWiring().getRequiredResourceWires(PackageNamespace.PACKAGE_NAMESPACE)) {
+			Object packageValue = wire.getRequirement().getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+			if (packageName.equals(packageValue) || packageWithAttribute.equals(packageValue))
+				return true;
+		}
+		return false;
+	
 	}
 }

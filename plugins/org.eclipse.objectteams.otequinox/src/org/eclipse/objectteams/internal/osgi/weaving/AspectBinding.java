@@ -128,34 +128,32 @@ public class AspectBinding {
 			if (dot != -1)
 				packageOfTeam = teamName.substring(0, dot);
 			String packageWithAttribute = packageOfTeam+";"+OT_ASPECT_HOST_ATTRIBUTE+"=\""+aspectPlugin+"\"";
-
-			List<String> imports = baseClass.getDynamicImports();
-			for (String imp : imports)
-				if (imp.equals(packageOfTeam) || imp.equals(packageWithAttribute))
-					return;
 			
-			checkExported: {
-				Bundle aspectBundle = AspectBinding.this.aspectBundle;
-				BundleRevision bundleRevision = aspectBundle != null ? aspectBundle.adapt(BundleRevision.class) : null;
-				if (bundleRevision != null) { // catch uninstalled state
-					for (Capability capability : bundleRevision.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
-						Object exported = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
-						if (exported instanceof String && exported.equals(packageOfTeam)) {
-							if (capability.getAttributes().containsKey(OT_ASPECT_HOST_ATTRIBUTE)) {
-								imports.add(packageWithAttribute);
-							} else {
-								log(IStatus.WARNING, "Package "+packageOfTeam+" for team "+teamName.substring(dot+1)+" is exported without an 'ot-aspect-host' attribute.");
-								imports.add(packageOfTeam);
+			if (!OTWeavingHook.hasImport(baseClass, packageOfTeam, packageWithAttribute)) {	
+				checkExported: {
+					List<String> imports = baseClass.getDynamicImports();
+					Bundle aspectBundle = AspectBinding.this.aspectBundle;
+					BundleRevision bundleRevision = aspectBundle != null ? aspectBundle.adapt(BundleRevision.class) : null;
+					if (bundleRevision != null) { // catch uninstalled state
+						for (Capability capability : bundleRevision.getCapabilities(PackageNamespace.PACKAGE_NAMESPACE)) {
+							Object exported = capability.getAttributes().get(PackageNamespace.PACKAGE_NAMESPACE);
+							if (exported instanceof String && exported.equals(packageOfTeam)) {
+								if (capability.getAttributes().containsKey(OT_ASPECT_HOST_ATTRIBUTE)) {
+									imports.add(packageWithAttribute);
+								} else {
+									log(IStatus.WARNING, "Package "+packageOfTeam+" for team "+teamName.substring(dot+1)+" is exported without an 'ot-aspect-host' attribute.");
+									imports.add(packageOfTeam);
+								}
+								break checkExported;
 							}
-							break checkExported;
 						}
+						log(IStatus.ERROR, "Package "+packageOfTeam+" for team "+teamName.substring(dot+1)+" is not exported by its bundle "+aspectPlugin);
+					} else {
+						log(IStatus.WARNING, "Can't check exporting of "+teamName+", bundle information for "+aspectPlugin+" is not available");
 					}
-					log(IStatus.ERROR, "Package "+packageOfTeam+" for team "+teamName.substring(dot+1)+" is not exported by its bundle "+aspectPlugin);
-				} else {
-					log(IStatus.WARNING, "Can't check exporting of "+teamName+", bundle information for "+aspectPlugin+" is not available");
 				}
+				log(IStatus.INFO, "Added dependency from base "+baseClass.getClassName()+" to package '"+packageOfTeam+"'");
 			}
-			log(IStatus.INFO, "Added dependency from base "+baseClass.getClassName()+" to package '"+packageOfTeam+"'");
 			if (direction != -1) {
 				importsAddedToSuper = true;
 				final TeamBinding superTeam2 = superTeam;
@@ -191,7 +189,8 @@ public class AspectBinding {
 	static class BaseBundle {
 		String bundleName;
 		/** Team classes indexed by base classes that should trigger activating the team. */
-		private HashMap<String, Set<TeamBinding>> teamsPerBase = new HashMap<>();		
+		private HashMap<String, Set<TeamBinding>> teamsPerBase = new HashMap<>();
+		boolean otreAdded;		
 
 		public BaseBundle(String bundleName) {
 			this.bundleName = bundleName;

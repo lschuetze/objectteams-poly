@@ -156,7 +156,8 @@ public class TeamLoader {
 		synchronized(aspectBinding) {
 			if (!isReadyToLoad(aspectBinding, team, teamName, activationKind))
 				return;
-			team.isActivated = true;
+			for (TeamBinding equivalent : team.equivalenceSet)
+				equivalent.isActivated = true;
 		}
 
 		try {
