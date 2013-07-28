@@ -261,4 +261,8 @@ public class AspectBindingRegistry {
 	public @Nullable List<AspectBinding> getAdaptingAspectBindings(@Nullable String basePluginName) {
 		return aspectBindingsByBasePlugin.get(basePluginName);
 	}
+
+	public @Nullable List<AspectBinding> getAspectBindings(String aspectBundle) {
+		return aspectBindingsByAspectPlugin.get(aspectBundle);		
+	}
 }

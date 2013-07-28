@@ -21,6 +21,7 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -31,7 +32,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
+import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
+import org.eclipse.objectteams.otequinox.Constants;
 import org.eclipse.objectteams.otequinox.TransformerPlugin;
 import org.eclipse.objectteams.otre.jplis.ObjectTeamsTransformer;
 import org.osgi.framework.Bundle;
@@ -62,6 +65,8 @@ import org.osgi.resource.Wire;
  */
 public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
+	enum WeavingReason { None, Aspect, Base }
+	
 	/** Interface to data about aspectBinding extensions. */
 	private @NonNull AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry();
 	
@@ -74,7 +79,6 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	/** Records of teams that have been deferred due to unresolved class dependencies: */
 	private @NonNull List<WaitingTeamRecord> deferredTeams = new ArrayList<>();
 
-	
 	/** Call-back once the extension registry is up and running. */
 	public void activate(BundleContext bundleContext, ServiceReference<IExtensionRegistry> serviceReference) {
 		loadAspectBindingRegistry(bundleContext, serviceReference);
@@ -133,12 +137,16 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			String bundleName = bundleWiring.getBundle().getSymbolicName();
 			String className = wovenClass.getClassName();
 			
+			if (bundleName.equals(Constants.TRANSFORMER_PLUGIN_ID))
+				return;
+
 			if (BCELPatcher.BCEL_PLUGIN_ID.equals(bundleName)) {
 				BCELPatcher.fixBCEL(wovenClass);
 				return;
 			}
 
-			if (requiresWeaving(bundleWiring)) {
+			WeavingReason reason = requiresWeaving(bundleWiring);
+			if (reason != WeavingReason.None) {
 				// do whatever is needed *before* loading this class:
 				triggerBaseTripWires(bundleName, wovenClass);
 
@@ -156,6 +164,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 						if (Util.PROFILE) Util.profile(time, ProfileKind.Transformation, className);
 						log(IStatus.INFO, "Transformation performed on "+className);
 						wovenClass.setBytes(newBytes);
+						if (reason == WeavingReason.Aspect)
+							recordBaseClasses(transformer, bundleName, className);
 					} else {
 						if (Util.PROFILE) Util.profile(time, ProfileKind.NoTransformation, className);
 					}
@@ -168,11 +178,32 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		}
 	}
 
-	boolean requiresWeaving(BundleWiring bundleWiring) {
+	WeavingReason requiresWeaving(BundleWiring bundleWiring) {
 		@SuppressWarnings("null")@NonNull
 		Bundle bundle = bundleWiring.getBundle();
-		return aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null
-				|| aspectBindingRegistry.isAdaptedBasePlugin(bundle.getSymbolicName());
+		if (aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null)
+			return WeavingReason.Aspect;
+		if (aspectBindingRegistry.isAdaptedBasePlugin(bundle.getSymbolicName()))
+			return WeavingReason.Base;
+		return WeavingReason.None;
+	}
+
+	private void recordBaseClasses(ObjectTeamsTransformer transformer, @NonNull String aspectBundle, String className) {
+		Collection<String> adaptedBases = transformer.fetchAdaptedBases();
+		if (adaptedBases == null || adaptedBases.isEmpty()) return;
+		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAspectBindings(aspectBundle);
+		if (aspectBindings != null)
+			for (AspectBinding aspectBinding : aspectBindings)
+				if (!aspectBinding.hasScannedTeams)
+					for (TeamBinding team : aspectBinding.teams)
+						if (team.teamName.equals(className))
+							if (!team.hasScannedBases) {
+								for (TeamBinding equivalent : team.equivalenceSet) {
+									equivalent.addBaseClassNames(adaptedBases);
+									equivalent.hasScannedBases = true;
+								}
+								return; // done all equivalent teams
+							}
 	}
 
 	// ===== handling deferred teams: ======
