@@ -1,0 +1,160 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>org.eclipse.objectteams</groupId>
+	<artifactId>objectteams-weaver-maven-plugin</artifactId>
+	<packaging>maven-plugin</packaging>
+	<version>0.8.0-SNAPSHOT</version>
+	<name>Object Teams Built-time Weaver Maven Mojo</name>
+	<description>
+		This Maven plug-in lets you weave the OT/J class files of a projects,
+		so that the re-written class files can be executed without the
+		Object Teams load-time weaver.
+	</description>
+
+	<licenses>
+		<license>
+			<name>Eclipse Public License Version 1.0</name>
+			<comments>
+				This file is part of "Object Teams Development Tooling"-Software.
+
+				Copyright 2013 GK Software AG.
+				All rights reserved. This program and the accompanying materials
+				are made available under the terms of the Eclipse Public License v1.0
+				which accompanies this distribution, and is available at
+				http://www.eclipse.org/legal/epl-v10.html
+
+				Please visit http://www.eclipse.org/objectteams for updates and contact.
+
+				Contributors:
+					Stephan Herrmann - Initial API and implementation.
+			</comments>
+		</license>
+	</licenses>
+
+	<!-- simply repeat this declaration from the parent pom, otherwise Maven duplicates the artifactId in the path -->
+	<url>http://download.eclipse.org/objectteams/maven/3/sites/${project.artifactId}</url>
+
+	<organization>
+		<name>Eclipse Object Teams Project</name>
+		<url>http://www.eclipse.org/objectteams</url>
+	</organization>
+	
+	<developers>
+		<developer>
+			<name>Stephan Herrmann</name>
+			<organization>GK Software AG</organization>
+		</developer>
+	</developers>
+
+	<mailingLists>
+		<mailingList><name>Object Teams Forum</name><archive>http://www.eclipse.org/forums/eclipse.objectteams</archive></mailingList>
+	</mailingLists>
+	
+	<issueManagement>
+		<system>Bugzilla</system>
+		<url>http://bugs.eclipse.org/bugs</url>
+	</issueManagement>
+
+	<properties>
+		<maven.compiler.source>1.7</maven.compiler.source>
+		<maven.compiler.target>1.7</maven.compiler.target>
+		<otj.version>2.2.0</otj.version>
+		<!--  for deployment the following properties should be defined by an active profile:  	-->
+		<!--  REMOTE:																	  		-->
+		<!--  ot.host : user@host for the object teams repository server                  		-->
+		<!--  ot.maven.repository.path : absolute path to the maven repository on ot.host 		-->
+		
+		<!-- Repository path of this module within the Object Teams git: -->
+    	<project-repository-path>maven/obectteams-weaver-maven-plugin</project-repository-path>
+	</properties>
+
+    <!-- Override inherited declaration, otherwise Maven appends the artifactId to the path -->
+	<scm>
+	    <connection>scm:git:git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git/${project-repository-path}</connection>
+	    <developerConnection>scm:git:ssh://${username}@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git/${project-repository-path}</developerConnection>
+	    <url>http://git.eclipse.org/c/objectteams/org.eclipse.objectteams.git/${project-repository-path}</url>
+	</scm>
+	
+	<!-- simply repeat this declaration from the parent pom, otherwise Maven duplicates the artifactId in the path -->
+	<distributionManagement>
+		<site>
+			<id>otSiteRepo</id>
+			<name>Object Teams sites repository for Maven 3</name>
+			<url>scpexe://${ot.host}:${ot.maven.repository.basepath}/sites/${project.artifactId}</url>
+		</site>
+		<repository>
+			<id>ObjectTeamsRepository</id>
+			<name>Object Teams Repository</name>
+			<url>scpexe://${ot.host}:${ot.maven.repository.basepath}/repository/</url>
+		</repository>
+	</distributionManagement>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-plugin-plugin</artifactId>
+				<version>3.2</version>
+				<configuration>
+					<goalPrefix>objectteams-weaver</goalPrefix>
+				</configuration>
+			</plugin>
+		</plugins>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ssh-external</artifactId>
+				<version>2.2</version>
+			</extension>
+		</extensions>
+	</build>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-plugin-api</artifactId>
+			<version>2.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven.plugin-tools</groupId>
+			<artifactId>maven-plugin-annotations</artifactId>
+			<version>3.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.eclipse</groupId>
+			<artifactId>objectteams-runtime</artifactId>
+			<version>${otj.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.bcel</groupId>
+			<artifactId>bcel</artifactId>
+			<version>5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.maven</groupId>
+			<artifactId>maven-core</artifactId>
+			<version>3.0.4</version>
+		</dependency>
+	</dependencies>
+
+	<repositories>
+		<repository>
+			<id>ObjectTeamsRepository</id>
+			<name>Object Teams Repository</name>
+			<url>http://download.eclipse.org/objectteams/maven/3/repository</url>
+		</repository>
+	</repositories>
+
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9.1</version>
+			</plugin>
+		</plugins>
+	</reporting>
+
+</project>
