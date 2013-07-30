@@ -34,6 +34,7 @@ import org.eclipse.objectteams.otre.util.AnnotationHelper;
 import org.eclipse.objectteams.otre.util.AttributeReadingGuard;
 import org.eclipse.objectteams.otre.util.CallinBindingManager;
 import org.eclipse.objectteams.otre.util.RoleBaseBinding;
+
 import org.apache.bcel.Constants;
 import org.apache.bcel.classfile.Attribute;
 import org.apache.bcel.classfile.Constant;
@@ -571,17 +572,14 @@ public abstract class ObjectTeamsTransformation
     	List<String> classesToLoad;
     	synchronized (guard) {
     		if (!guard.iAmTheFirst(class_name)) {
-    			if (isScanOnly && class_name.equals("org.eclipse.objectteams.otdt.test.builder.OTTestingEnvironment")) {
+    			if (isScanOnly) {
     				System.err.println("I'm not the first "+this);
     				System.err.println(" guard ="+guard);
     				System.err.println(" loader="+this.loader);
     				System.err.println(" class ="+class_name);
-    				new Exception("I'm not the first "+this).printStackTrace();
     			}
 				return;
 			}
-    		if (class_name.equals("org.eclipse.objectteams.otdt.test.builder.OTTestingEnvironment"))
-    			new Exception("I AM the first "+this).printStackTrace();
 			if (AttributeReadingGuard.isFirstLoadedClass())
 				addTeamInitializations = true;
 			// scan for attributes here, because this transformer is applied first:
