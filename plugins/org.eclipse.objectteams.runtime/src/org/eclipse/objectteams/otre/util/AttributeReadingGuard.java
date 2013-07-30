@@ -49,15 +49,6 @@ public class AttributeReadingGuard {
     	this.servedClasses.add(className);    
     }
     
-    @Override
-    public String toString() {
-    	StringBuilder buf = new StringBuilder("AttributeReadingGuard with served classes:");
-    	for (String clazz : servedClasses) {
-			buf.append("\n\t"+clazz);
-		}
-    	return buf.toString();
-    }
-    
     /**
      * @return whether this class is the first being loaded => possibly the main class.
      */
