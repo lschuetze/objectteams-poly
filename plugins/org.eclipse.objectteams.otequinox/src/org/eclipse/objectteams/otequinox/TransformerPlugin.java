@@ -81,6 +81,8 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	}
 
 	private void OTREInit() {
+		// this influences the OTRE behavior (see e.g., JPLISEnhancer):
+		System.setProperty("ot.equinox", "true");
 		try {
 			ClassLoaderAccess.setLoadClass(Bundle.class.getMethod("loadClass", String.class));
 			ClassLoaderAccess.setGetResource(Bundle.class.getMethod("getResource", String.class));
