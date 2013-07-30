@@ -245,7 +245,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		DietClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
 		try {
 			setFirstTransformation(new ObjectTeamsTransformation(loader) {});
-			firstTransformation.checkReadClassAttributes(jpe, cg, cg.getClassName(), cg.getConstantPool());
+			firstTransformation.checkReadClassAttributes(jpe, cg, cg.getClassName(), cg.getConstantPool(), true);
 		} finally {
 			RepositoryAccess.resetRepository(prevRepository);
 		}
