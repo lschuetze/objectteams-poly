@@ -146,8 +146,6 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			}
 
 			WeavingReason reason = requiresWeaving(bundleWiring);
-			if (className.equals("org.eclipse.objectteams.otdt.test.builder.OTTestingEnvironment"))
-				log(IStatus.INFO, "Weaving reason for org.eclipse.objectteams.otdt.test.builder.OTTestingEnvironment:"+reason);
 			if (reason != WeavingReason.None) {
 				// do whatever is needed *before* loading this class:
 				triggerBaseTripWires(bundleName, wovenClass);
@@ -191,11 +189,6 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	}
 
 	private void recordBaseClasses(ObjectTeamsTransformer transformer, @NonNull String aspectBundle, String className) {
-		if (className.equals("org.eclipse.objectteams.otdt.test.builder.OTTestingEnvironment")) {
-			loggingRecord(transformer, aspectBundle, className);
-			return;
-		}
-			
 		Collection<String> adaptedBases = transformer.fetchAdaptedBases();
 		if (adaptedBases == null || adaptedBases.isEmpty()) return;
 		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAspectBindings(aspectBundle);
@@ -211,32 +204,6 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 								}
 								return; // done all equivalent teams
 							}
-	}
-
-	private void loggingRecord(ObjectTeamsTransformer transformer, String aspectBundle, String className) {
-		Collection<String> adaptedBases = transformer.fetchAdaptedBases();
-		if (adaptedBases == null || adaptedBases.isEmpty()) return;
-		List<AspectBinding> aspectBindings = aspectBindingRegistry.getAspectBindings(aspectBundle);
-		if (aspectBindings != null)
-			for (AspectBinding aspectBinding : aspectBindings) {
-				log(IStatus.INFO, "\taspectBinding: "+aspectBinding);
-				if (!aspectBinding.hasScannedTeams) {
-					log(IStatus.INFO, "\thas not scanned yet");
-					for (TeamBinding team : aspectBinding.teams)
-						if (team.teamName.equals(className)) {
-							log(IStatus.INFO, "Found team");
-							if (!team.hasScannedBases) {
-								log(IStatus.INFO, "\tteam has not scanned yet");
-								for (TeamBinding equivalent : team.equivalenceSet) {
-									log(IStatus.INFO, "\t\tadding "+adaptedBases.size()+" bases to "+team);
-									equivalent.addBaseClassNames(adaptedBases);
-									equivalent.hasScannedBases = true;
-								}
-								return; // done all equivalent teams
-							}
-						}
-				}
-			}		
 	}
 
 	// ===== handling deferred teams: ======
