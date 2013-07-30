@@ -17,6 +17,7 @@
  *								bug 401456 - Code compiles from javac/intellij, but fails from eclipse
  *								bug 401271 - StackOverflowError when searching for a methods references
  *								bug 405706 - Eclipse compiler fails to give compiler error when return type is a inferred generic
+ *								Bug 408441 - Type mismatch using Arrays.asList with 3 or more implementations of an interface with the interface type as the last parameter
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *******************************************************************************/
@@ -3678,7 +3679,7 @@ public abstract class Scope {
 		return false;
 	}
 
-	private TypeBinding leastContainingInvocation(TypeBinding mec, Object invocationData, List lubStack) {
+	private TypeBinding leastContainingInvocation(TypeBinding mec, Object invocationData, ArrayList lubStack) {
 		if (invocationData == null) return mec; // no alternate invocation
 		if (invocationData instanceof TypeBinding) { // only one invocation, simply return it (array only allocated if more than one)
 			return (TypeBinding) invocationData;
@@ -3700,7 +3701,7 @@ public abstract class Scope {
 				case Binding.GENERIC_TYPE :
 					TypeVariableBinding[] invocationVariables = invocation.typeVariables();
 					for (int j = 0; j < argLength; j++) {
-						TypeBinding bestArgument = leastContainingTypeArgument(bestArguments[j], invocationVariables[j], (ReferenceBinding) mec, j, lubStack);
+						TypeBinding bestArgument = leastContainingTypeArgument(bestArguments[j], invocationVariables[j], (ReferenceBinding) mec, j, (ArrayList)lubStack.clone());
 						if (bestArgument == null) return null;
 						bestArguments[j] = bestArgument;
 					}
@@ -3708,7 +3709,7 @@ public abstract class Scope {
 				case Binding.PARAMETERIZED_TYPE :
 					ParameterizedTypeBinding parameterizedType = (ParameterizedTypeBinding)invocation;
 					for (int j = 0; j < argLength; j++) {
-						TypeBinding bestArgument = leastContainingTypeArgument(bestArguments[j], parameterizedType.arguments[j], (ReferenceBinding) mec, j, lubStack);
+						TypeBinding bestArgument = leastContainingTypeArgument(bestArguments[j], parameterizedType.arguments[j], (ReferenceBinding) mec, j, (ArrayList)lubStack.clone());
 						if (bestArgument == null) return null;
 						bestArguments[j] = bestArgument;
 					}
@@ -3722,7 +3723,7 @@ public abstract class Scope {
 	}
 
 	// JLS 15.12.2
-	private TypeBinding leastContainingTypeArgument(TypeBinding u, TypeBinding v, ReferenceBinding genericType, int rank, List lubStack) {
+	private TypeBinding leastContainingTypeArgument(TypeBinding u, TypeBinding v, ReferenceBinding genericType, int rank, ArrayList lubStack) {
 		if (u == null) return v;
 		if (u == v) return u;
 		if (v.isWildcard()) {
@@ -3812,7 +3813,7 @@ public abstract class Scope {
 	}
 
 	// 15.12.2
-	private TypeBinding lowerUpperBound(TypeBinding[] types, List lubStack) {
+	private TypeBinding lowerUpperBound(TypeBinding[] types, ArrayList lubStack) {
 
 		int typeLength = types.length;
 		if (typeLength == 1) {

@@ -12,6 +12,7 @@
  *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *								bug 401456 - Code compiles from javac/intellij, but fails from eclipse
  *								bug 405706 - Eclipse compiler fails to give compiler error when return type is a inferred generic
+ *								Bug 408441 - Type mismatch using Arrays.asList with 3 or more implementations of an interface with the interface type as the last parameter
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -32,7 +33,7 @@ public class GenericsRegressionTest extends AbstractComparableTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testBug405706" };
+//		TESTS_NAMES = new String[] { "testBug408441" };
 //		TESTS_NAMES = new String[] { "test1464" };
 //		TESTS_NUMBERS = new int[] { 1465 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
@@ -1201,6 +1202,169 @@ public void test334622a() {
 			"Zork cannot be resolved to a type\n" + 
 			"----------\n");
 }
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=338350 (unchecked cast - only unavoidable on raw expression)
+public void test338350() {
+	String[] testFiles = new String[] {
+			"Try.java",
+			"import java.lang.reflect.Array;\n" + 
+			"import java.util.ArrayList;\n" + 
+			"import java.util.List;\n" + 
+			"public class Try<E> {\n" + 
+			"	void fooObj() {\n" + 
+			"		takeObj((E) Bar.getObject());\n" + 
+			"		takeObj((E) Bar.getArray());\n" + 
+			"		takeObj((E) Array.newInstance(Integer.class, 2));\n" + 
+			"	}\n" + 
+			"	void takeObj(E obj) { }\n" + 
+			"	void fooArray() {\n" + 
+			"		takeArray((E[]) Bar.getArray());\n" + 
+			"		takeArray((E[]) Array.newInstance(Integer.class, 2));\n" + 
+			"	}\n" + 
+			"	void takeArray(E[] array) { }\n" + 
+			"	<L> void foo(List<L> list) {\n" + 
+			"		list.toArray((L[]) Bar.getArray());\n" + 
+			"		list.toArray((L[]) Array.newInstance(Integer.class, 2));\n" + 
+			"	}\n" + 
+			"	void bar() {\n" + 
+			"		List<String> l = Bar.getRawList();\n" + 
+			"		ArrayList<String> l2 = (ArrayList<String>) Bar.getRawList();\n" + 
+			"	}\n" + 
+			"}\n",
+			"Bar.java",
+			"import java.lang.reflect.Array;\n" + 
+			"import java.util.ArrayList;\n" + 
+			"import java.util.List;\n" + 
+			"public class Bar {\n" + 
+			"	public static Object getObject() {\n" + 
+			"		return new Object();\n" + 
+			"	}\n" + 
+			"	public static Object[] getArray() {\n" + 
+			"		return (Object[]) Array.newInstance(Integer.class, 2);\n" + 
+			"	}\n" + 
+			"	public static List getRawList() {\n" + 
+			"		return new ArrayList();\n" + 
+			"	}\n" + 
+			"}\n"
+	};
+	Map customOptions = getCompilerOptions();
+	customOptions.put(CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems, CompilerOptions.ENABLED);
+	this.runNegativeTest(
+			testFiles,
+			"----------\n" + 
+			"1. WARNING in Try.java (at line 6)\n" + 
+			"	takeObj((E) Bar.getObject());\n" + 
+			"	        ^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from Object to E\n" + 
+			"----------\n" + 
+			"2. WARNING in Try.java (at line 7)\n" + 
+			"	takeObj((E) Bar.getArray());\n" + 
+			"	        ^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from Object[] to E\n" + 
+			"----------\n" + 
+			"3. WARNING in Try.java (at line 8)\n" + 
+			"	takeObj((E) Array.newInstance(Integer.class, 2));\n" + 
+			"	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from Object to E\n" + 
+			"----------\n" + 
+			"4. WARNING in Try.java (at line 12)\n" + 
+			"	takeArray((E[]) Bar.getArray());\n" + 
+			"	          ^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from Object[] to E[]\n" + 
+			"----------\n" + 
+			"5. WARNING in Try.java (at line 13)\n" + 
+			"	takeArray((E[]) Array.newInstance(Integer.class, 2));\n" + 
+			"	          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from Object to E[]\n" + 
+			"----------\n" + 
+			"6. WARNING in Try.java (at line 17)\n" + 
+			"	list.toArray((L[]) Bar.getArray());\n" + 
+			"	             ^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from Object[] to L[]\n" + 
+			"----------\n" + 
+			"7. WARNING in Try.java (at line 18)\n" + 
+			"	list.toArray((L[]) Array.newInstance(Integer.class, 2));\n" + 
+			"	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from Object to L[]\n" + 
+			"----------\n" + 
+			"8. WARNING in Try.java (at line 21)\n" + 
+			"	List<String> l = Bar.getRawList();\n" + 
+			"	                 ^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: The expression of type List needs unchecked conversion to conform to List<String>\n" + 
+			"----------\n" + 
+			"9. WARNING in Try.java (at line 22)\n" + 
+			"	ArrayList<String> l2 = (ArrayList<String>) Bar.getRawList();\n" + 
+			"	                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+			"Type safety: Unchecked cast from List to ArrayList<String>\n" + 
+			"----------\n" + 
+			"----------\n" + 
+			"1. WARNING in Bar.java (at line 11)\n" + 
+			"	public static List getRawList() {\n" + 
+			"	              ^^^^\n" + 
+			"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+			"----------\n" + 
+			"2. WARNING in Bar.java (at line 12)\n" + 
+			"	return new ArrayList();\n" + 
+			"	           ^^^^^^^^^\n" + 
+			"ArrayList is a raw type. References to generic type ArrayList<E> should be parameterized\n" + 
+			"----------\n",
+			null,
+			true,
+			customOptions);
+	customOptions.put(CompilerOptions.OPTION_ReportUnavoidableGenericTypeProblems, CompilerOptions.DISABLED);
+	this.runNegativeTest(
+			testFiles,
+			"----------\n" + 
+					"1. WARNING in Try.java (at line 6)\n" + 
+					"	takeObj((E) Bar.getObject());\n" + 
+					"	        ^^^^^^^^^^^^^^^^^^^\n" + 
+					"Type safety: Unchecked cast from Object to E\n" + 
+					"----------\n" + 
+					"2. WARNING in Try.java (at line 7)\n" + 
+					"	takeObj((E) Bar.getArray());\n" + 
+					"	        ^^^^^^^^^^^^^^^^^^\n" + 
+					"Type safety: Unchecked cast from Object[] to E\n" + 
+					"----------\n" + 
+					"3. WARNING in Try.java (at line 8)\n" + 
+					"	takeObj((E) Array.newInstance(Integer.class, 2));\n" + 
+					"	        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+					"Type safety: Unchecked cast from Object to E\n" + 
+					"----------\n" + 
+					"4. WARNING in Try.java (at line 12)\n" + 
+					"	takeArray((E[]) Bar.getArray());\n" + 
+					"	          ^^^^^^^^^^^^^^^^^^^^\n" + 
+					"Type safety: Unchecked cast from Object[] to E[]\n" + 
+					"----------\n" + 
+					"5. WARNING in Try.java (at line 13)\n" + 
+					"	takeArray((E[]) Array.newInstance(Integer.class, 2));\n" + 
+					"	          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+					"Type safety: Unchecked cast from Object to E[]\n" + 
+					"----------\n" + 
+					"6. WARNING in Try.java (at line 17)\n" + 
+					"	list.toArray((L[]) Bar.getArray());\n" + 
+					"	             ^^^^^^^^^^^^^^^^^^^^\n" + 
+					"Type safety: Unchecked cast from Object[] to L[]\n" + 
+					"----------\n" + 
+					"7. WARNING in Try.java (at line 18)\n" + 
+					"	list.toArray((L[]) Array.newInstance(Integer.class, 2));\n" + 
+					"	             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+					"Type safety: Unchecked cast from Object to L[]\n" + 
+					"----------\n" + 
+					"----------\n" + 
+					"1. WARNING in Bar.java (at line 11)\n" + 
+					"	public static List getRawList() {\n" + 
+					"	              ^^^^\n" + 
+					"List is a raw type. References to generic type List<E> should be parameterized\n" + 
+					"----------\n" + 
+					"2. WARNING in Bar.java (at line 12)\n" + 
+					"	return new ArrayList();\n" + 
+					"	           ^^^^^^^^^\n" + 
+					"ArrayList is a raw type. References to generic type ArrayList<E> should be parameterized\n" + 
+					"----------\n",
+					null,
+					true,
+					customOptions);
+}
+
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=334622 (private access - same package)
 public void test334622b() {
 	this.runNegativeTest(
@@ -2914,5 +3078,38 @@ public void testBug405706b() {
 		"	                               ^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 		"Type mismatch: cannot convert from List<String> to Collection<Integer>\n" + 
 		"----------\n");
+}
+
+// https://bugs.eclipse.org/408441 - Type mismatch using Arrays.asList with 3 or more implementations of an interface with the interface type as the last parameter
+public void testBug408441() {
+	runConformTest(
+		new String[] {
+			"TypeMistmatchIssue.java",
+			"import java.util.Arrays;\n" + 
+			"import java.util.List;\n" + 
+			"\n" + 
+			"\n" + 
+			"public class TypeMistmatchIssue {\n" + 
+			"	static interface A {\n" + 
+			"	}\n" + 
+			"	static class B implements A {\n" + 
+			"	}\n" + 
+			"	static class C implements A {\n" + 
+			"	}\n" + 
+			"	static class D implements A {\n" + 
+			"	}\n" + 
+			"	\n" + 
+			"	void illustrate() {\n" + 
+			"		List<Class<? extends A>> no1= Arrays.asList(B.class, A.class);						// compiles\n" + 
+			"		List<Class<? extends A>> no2= Arrays.asList(C.class, B.class, A.class);				// compiles\n" + 
+			"		List<Class<? extends A>> no3= Arrays.asList(D.class, B.class, A.class);				// compiles\n" + 
+			"		\n" + 
+			"		List<Class<? extends A>> no4= Arrays.asList(D.class, C.class, B.class, A.class);	// cannot convert error !!!\n" + 
+			"\n" + 
+			"		List<Class<? extends A>> no5= Arrays.asList(A.class, B.class, C.class, D.class);	// compiles\n" + 
+			"		List<Class<? extends A>> no6= Arrays.asList(A.class, D.class, C.class, B.class);	// compiles\n" + 
+			"	}\n" + 
+			"}\n"
+		});
 }
 }
