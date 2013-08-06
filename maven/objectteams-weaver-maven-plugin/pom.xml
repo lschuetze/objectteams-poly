@@ -67,14 +67,14 @@
 		<!--  ot.maven.repository.path : absolute path to the maven repository on ot.host 		-->
 		
 		<!-- Repository path of this module within the Object Teams git: -->
-    	<project-repository-path>maven/obectteams-weaver-maven-plugin</project-repository-path>
+    	<project-repository-path>maven/objectteams-weaver-maven-plugin</project-repository-path>
 	</properties>
 
     <!-- Override inherited declaration, otherwise Maven appends the artifactId to the path -->
 	<scm>
 	    <connection>scm:git:git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git/${project-repository-path}</connection>
 	    <developerConnection>scm:git:ssh://${username}@git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git/${project-repository-path}</developerConnection>
-	    <url>http://git.eclipse.org/c/objectteams/org.eclipse.objectteams.git/${project-repository-path}</url>
+	    <url>http://git.eclipse.org/c/objectteams/org.eclipse.objectteams.git/tree/${project-repository-path}</url>
 	</scm>
 	
 	<!-- simply repeat this declaration from the parent pom, otherwise Maven duplicates the artifactId in the path -->
