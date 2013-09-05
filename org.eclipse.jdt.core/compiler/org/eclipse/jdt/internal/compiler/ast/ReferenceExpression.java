@@ -26,27 +26,34 @@ import org.eclipse.jdt.internal.compiler.ASTVisitor;
 import org.eclipse.jdt.internal.compiler.CompilationResult;
 import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
+import org.eclipse.jdt.internal.compiler.lookup.ArrayBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
+import org.eclipse.jdt.internal.compiler.lookup.NestedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
+import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.SyntheticMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.TypeConstants;
 import org.eclipse.jdt.internal.compiler.lookup.TypeIds;
 import org.eclipse.jdt.internal.compiler.problem.ProblemSeverities;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 
 public class ReferenceExpression extends FunctionalExpression implements InvocationSite {
 	
+	private static char [] LAMBDA = { 'l', 'a', 'm', 'b', 'd', 'a' };
 	public Expression lhs;
 	public TypeReference [] typeArguments;
 	public char [] selector;
@@ -56,6 +63,9 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 	public TypeBinding[] resolvedTypeArguments;
 	private boolean typeArgumentsHaveErrors;
 	
+	MethodBinding syntheticAccessor;	// synthetic accessor for inner-emulation
+	private int depth;
+	
 	public ReferenceExpression(CompilationResult compilationResult, Expression lhs, TypeReference [] typeArguments, char [] selector, int sourceEnd) {
 		super(compilationResult);
 		this.lhs = lhs;
@@ -64,13 +74,139 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		this.sourceStart = lhs.sourceStart;
 		this.sourceEnd = sourceEnd;
 	}
-
+ 
+	public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean valueRequired) {
+		SourceTypeBinding sourceType = currentScope.enclosingSourceType();
+		if (this.receiverType.isArrayType()) {
+			if (isConstructorReference()) {
+				this.binding = sourceType.addSyntheticArrayMethod((ArrayBinding) this.receiverType, SyntheticMethodBinding.ArrayConstructor);
+			} else if (CharOperation.equals(this.selector, TypeConstants.CLONE)) {
+				this.binding = sourceType.addSyntheticArrayMethod((ArrayBinding) this.receiverType, SyntheticMethodBinding.ArrayClone);
+			}
+		} else if (this.syntheticAccessor != null) {
+			if (this.lhs.isSuper() || isMethodReference())
+				this.binding = this.syntheticAccessor;
+		}
+		
+		int pc = codeStream.position;
+		StringBuffer buffer = new StringBuffer();
+		int argumentsSize = 0;
+		buffer.append('(');
+		if (this.haveReceiver) {
+			this.lhs.generateCode(currentScope, codeStream, true);
+			if (this.lhs.isSuper()) {
+				if (this.lhs instanceof QualifiedSuperReference) {
+					QualifiedSuperReference qualifiedSuperReference = (QualifiedSuperReference) this.lhs;
+					TypeReference qualification = qualifiedSuperReference.qualification;
+					if (qualification.resolvedType.isInterface()) {
+						buffer.append(sourceType.signature());
+					} else {
+						buffer.append(((QualifiedSuperReference) this.lhs).currentCompatibleType.signature());
+					}
+				} else { 
+					buffer.append(sourceType.signature());
+				}
+			} else {
+				buffer.append(this.receiverType.signature());
+			}
+			argumentsSize = 1;
+		} else {
+			if (this.isConstructorReference()) {
+				ReferenceBinding[] enclosingInstances = Binding.UNINITIALIZED_REFERENCE_TYPES;
+				if (this.receiverType.isNestedType()) {
+					NestedTypeBinding nestedType = (NestedTypeBinding) this.receiverType;
+					if ((enclosingInstances = nestedType.syntheticEnclosingInstanceTypes()) != null) {
+						int length = enclosingInstances.length;
+						argumentsSize = length;
+						for (int i = 0 ; i < length; i++) {
+							ReferenceBinding syntheticArgumentType = enclosingInstances[i];
+							buffer.append(syntheticArgumentType.signature());
+							Object[] emulationPath = currentScope.getEmulationPath(
+									syntheticArgumentType,
+									false /* allow compatible match */,
+									true /* disallow instance reference in explicit constructor call */);
+							codeStream.generateOuterAccess(emulationPath, this, syntheticArgumentType, currentScope);
+						}
+					}
+					// Reject types that capture outer local arguments, these cannot be manufactured by the metafactory.
+					if (nestedType.syntheticOuterLocalVariables() != null) {
+						currentScope.problemReporter().noSuchEnclosingInstance(nestedType.enclosingType, this, false);
+						return;
+					}
+				}
+				if (this.syntheticAccessor != null) {
+					this.binding = sourceType.addSyntheticFactoryMethod(this.binding, this.syntheticAccessor, enclosingInstances);
+				}
+			}
+		}
+		buffer.append(')');
+		buffer.append('L');
+		buffer.append(this.resolvedType.constantPoolName());
+		buffer.append(';');
+		int invokeDynamicNumber = codeStream.classFile.recordBootstrapMethod(this);
+		codeStream.invokeDynamic(invokeDynamicNumber, argumentsSize, 1, LAMBDA, buffer.toString().toCharArray());
+		codeStream.recordPositionsFrom(pc, this.sourceStart);
+	}
+	
+	public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo flowInfo) {
+		
+		if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0 || this.binding == null || !this.binding.isValidBinding()) 
+			return;
+		
+		MethodBinding codegenBinding = this.binding.original();
+		SourceTypeBinding enclosingSourceType = currentScope.enclosingSourceType();
+		
+		if (this.isConstructorReference()) {
+			ReferenceBinding allocatedType = codegenBinding.declaringClass;
+			if (codegenBinding.isPrivate() && enclosingSourceType != (allocatedType = codegenBinding.declaringClass)) {
+				if ((allocatedType.tagBits & TagBits.IsLocalType) != 0) {
+					codegenBinding.tagBits |= TagBits.ClearPrivateModifier;
+				} else {
+					this.syntheticAccessor = ((SourceTypeBinding) allocatedType).addSyntheticMethod(codegenBinding, false);
+					currentScope.problemReporter().needToEmulateMethodAccess(codegenBinding, this);
+				}
+			}
+			return;
+		}
+	
+		// -----------------------------------   Only method references from now on -----------
+		if (this.binding.isPrivate()) {
+			if (enclosingSourceType != codegenBinding.declaringClass){
+				this.syntheticAccessor = ((SourceTypeBinding)codegenBinding.declaringClass).addSyntheticMethod(codegenBinding, false /* not super access */);
+				currentScope.problemReporter().needToEmulateMethodAccess(codegenBinding, this);
+			}
+			return;
+		}
+		
+		if (this.lhs.isSuper()) {
+			SourceTypeBinding destinationType = enclosingSourceType;
+			if (this.lhs instanceof QualifiedSuperReference) { 	// qualified super
+				QualifiedSuperReference qualifiedSuperReference = (QualifiedSuperReference) this.lhs;
+				TypeReference qualification = qualifiedSuperReference.qualification;
+				if (!qualification.resolvedType.isInterface()) // we can't drop the bridge in I, it may not even be a source type.
+					destinationType = (SourceTypeBinding) (qualifiedSuperReference.currentCompatibleType);
+			}
+			
+			this.syntheticAccessor = destinationType.addSyntheticMethod(codegenBinding, true);
+			currentScope.problemReporter().needToEmulateMethodAccess(codegenBinding, this);
+			return;
+		}
+		
+		if (this.binding.isProtected() && (this.bits & ASTNode.DepthMASK) != 0 && codegenBinding.declaringClass.getPackage() != enclosingSourceType.getPackage()) {
+			SourceTypeBinding currentCompatibleType = (SourceTypeBinding) enclosingSourceType.enclosingTypeAt((this.bits & ASTNode.DepthMASK) >> ASTNode.DepthSHIFT);
+			this.syntheticAccessor = currentCompatibleType.addSyntheticMethod(codegenBinding, isSuperAccess());
+			currentScope.problemReporter().needToEmulateMethodAccess(codegenBinding, this);
+			return;
+		}
+	}
+	
 	public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo) {
 		// static methods with receiver value never get here
 		if (this.haveReceiver) {
 			this.lhs.checkNPE(currentScope, flowContext, flowInfo);
 			this.lhs.analyseCode(currentScope, flowContext, flowInfo, true);
 		}
+		manageSyntheticAccessIfNecessary(currentScope, flowInfo);
 		return flowInfo;
 	}
 
@@ -141,7 +277,8 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		*/
 		
 		// handle the special case of array construction first.
-        final int parametersLength = descriptorParameters.length;
+        this.receiverType = lhsType;
+		final int parametersLength = descriptorParameters.length;
         if (isConstructorReference() && lhsType.isArrayType()) {
         	final TypeBinding leafComponentType = lhsType.leafComponentType();
 			if (leafComponentType.isParameterizedType()) {
@@ -156,10 +293,8 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         		scope.problemReporter().constructedArrayIncompatible(this, lhsType, this.descriptor.returnType);
         		return this.resolvedType = null;
         	}
-        	return this.resolvedType; // No binding construction possible. Code generator will have to conjure up a rabbit.
+        	return this.resolvedType; // No binding construction possible right now. Code generator will have to conjure up a rabbit.
         }
-		
-        this.receiverType = lhsType;
 		
 		this.haveReceiver = true;
 		if (this.lhs instanceof NameReference) {
@@ -178,10 +313,11 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         
         // 15.28.1
         final boolean isMethodReference = isMethodReference();
+        this.depth = 0;
         MethodBinding someMethod = isMethodReference ? scope.getMethod(this.receiverType, this.selector, descriptorParameters, this) :
         											       scope.getConstructor((ReferenceBinding) this.receiverType, descriptorParameters, this);
-        
-        if (someMethod != null && someMethod.isValidBinding()) {
+        int someMethodDepth = this.depth, anotherMethodDepth = 0;
+    	if (someMethod != null && someMethod.isValidBinding()) {
         	final boolean isStatic = someMethod.isStatic();
         	if (isStatic && (this.haveReceiver || this.receiverType.isParameterizedType())) {
     			scope.problemReporter().methodMustBeAccessedStatically(this, someMethod);
@@ -219,7 +355,10 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         			parameters = new TypeBinding[parametersLength - 1];
         			System.arraycopy(descriptorParameters, 1, parameters, 0, parametersLength - 1);
         		}
+        		this.depth = 0;
         		anotherMethod = scope.getMethod(typeToSearch, this.selector, parameters, this);
+        		anotherMethodDepth = this.depth;
+        		this.depth = 0;
         	}
         	if (anotherMethod != null && anotherMethod.isValidBinding() && anotherMethod.isStatic()) {
         		scope.problemReporter().methodMustBeAccessedStatically(this, anotherMethod);
@@ -231,9 +370,23 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         	scope.problemReporter().methodReferenceSwingsBothWays(this, anotherMethod, someMethod);
         	return this.resolvedType = null;
         }
-
-        this.binding = someMethod != null && someMethod.isValidBinding() ? someMethod : 
-        											anotherMethod != null && anotherMethod.isValidBinding() ? anotherMethod : null;
+        
+        if (someMethod != null && someMethod.isValidBinding()) {
+        	this.binding = someMethod;
+        	this.bits &= ~ASTNode.DepthMASK;
+        	if (someMethodDepth > 0) {
+        		this.bits |= (someMethodDepth & 0xFF) << ASTNode.DepthSHIFT;
+        	}
+        } else if (anotherMethod != null && anotherMethod.isValidBinding()) {
+        	this.binding = anotherMethod;
+        	this.bits &= ~ASTNode.DepthMASK;
+        	if (anotherMethodDepth > 0) {
+        		this.bits |= (anotherMethodDepth & 0xFF) << ASTNode.DepthSHIFT;
+        	}
+        } else {
+        	this.binding = null;
+        	this.bits &= ~ASTNode.DepthMASK;
+        }
 
         if (this.binding == null) {
         	char [] visibleName = isConstructorReference() ? this.receiverType.sourceName() : this.selector;
@@ -355,7 +508,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 	}
 
 	public void setDepth(int depth) {
-		return;
+		this.depth = depth;
 	}
 
 	public void setFieldIndex(int depth) {
@@ -400,7 +553,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 
 	public boolean isCompatibleWith(TypeBinding left, Scope scope) {
 		// 15.28.1
-		final MethodBinding sam = left.getSingleAbstractMethod(scope);
+		final MethodBinding sam = left.getSingleAbstractMethod(this.enclosingScope);
 		if (sam == null || !sam.isValidBinding())
 			return false;
 		boolean isCompatible;

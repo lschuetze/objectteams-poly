@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -24,6 +24,8 @@
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
+ *        Andy Clement - Contributions for
+ *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -258,7 +260,7 @@ public void generateArguments(MethodBinding binding, Expression[] arguments, Blo
 			// called with (argLength - lastIndex) elements : foo(1, 2) or foo(1, 2, 3, 4)
 			// need to gen elements into an array, then gen each remaining element into created array
 			codeStream.generateInlinedValue(argLength - varArgIndex);
-			codeStream.newArray(codeGenVarArgsType); // create a mono-dimensional array
+			codeStream.newArray(null, codeGenVarArgsType); // create a mono-dimensional array
 			for (int i = varArgIndex; i < argLength; i++) {
 				codeStream.dup();
 				codeStream.generateInlinedValue(i - varArgIndex);
@@ -277,7 +279,7 @@ public void generateArguments(MethodBinding binding, Expression[] arguments, Blo
 				// right number but not directly compatible or too many arguments - wrap extra into array
 				// need to gen elements into an array, then gen each remaining element into created array
 				codeStream.generateInlinedValue(1);
-				codeStream.newArray(codeGenVarArgsType); // create a mono-dimensional array
+				codeStream.newArray(null, codeGenVarArgsType); // create a mono-dimensional array
 				codeStream.dup();
 				codeStream.generateInlinedValue(0);
 				arguments[varArgIndex].generateCode(currentScope, codeStream, true);
@@ -287,7 +289,7 @@ public void generateArguments(MethodBinding binding, Expression[] arguments, Blo
 			// scenario: foo(1) --> foo(1, new int[0])
 			// generate code for an empty array of parameterType
 			codeStream.generateInlinedValue(0);
-			codeStream.newArray(codeGenVarArgsType); // create a mono-dimensional array
+			codeStream.newArray(null, codeGenVarArgsType); // create a mono-dimensional array
 		}
 	} else if (arguments != null) { // standard generation for method arguments
 //{ObjectTeams: decapsulation under OTREDyn requires packing into an array etc.:

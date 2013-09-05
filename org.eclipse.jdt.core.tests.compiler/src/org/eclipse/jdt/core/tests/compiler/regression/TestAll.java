@@ -15,6 +15,8 @@
  *     Stephan Herrmann - Contributions for
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 358903 - Filter practically unimportant resource leak warnings
+ *        Andy Clement - Contributions for
+ *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -132,10 +134,13 @@ public static Test suite() {
 	since_1_8.add(NegativeTypeAnnotationTest.class);
 	since_1_8.add(NullTypeAnnotationTest.class);
 	since_1_8.add(NegativeLambdaExpressionsTest.class);
+	since_1_8.add(LambdaExpressionsTest.class);
+	since_1_8.add(Jsr335ClassFileTest.class);
 	since_1_8.add(ExpressionContextTests.class);
 	since_1_8.add(InterfaceMethodsTest.class);
 	since_1_8.add(GrammarCoverageTests308.class);
 	since_1_8.add(FlowAnalysisTest8.class);
+	since_1_8.add(TypeAnnotationTest.class);
 
 	// Build final test suite
 	TestSuite all = new TestSuite(TestAll.class.getName());

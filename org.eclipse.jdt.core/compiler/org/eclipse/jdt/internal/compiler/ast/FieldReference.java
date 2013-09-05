@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: FieldReference.java 23405 2010-02-03 17:02:18Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -170,17 +169,6 @@ public FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowConte
 			flowInfo.markAsDefinitelyAssigned(this.binding);
 		}		
 	}
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=318682
-	if (!this.binding.isStatic()) {
-		if (this.receiver.isThis()) {
-			currentScope.resetDeclaringClassMethodStaticFlag(this.binding.declaringClass);
-		}
-	} else if (this.receiver.isThis()) {
-		if ((this.receiver.bits & ASTNode.IsImplicitThis) == 0) {
-			// explicit this, not allowed in static context
-			currentScope.resetDeclaringClassMethodStaticFlag(this.binding.declaringClass);
-		}
-	}
 	return flowInfo;
 }
 
@@ -193,10 +181,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	this.receiver.analyseCode(currentScope, flowContext, flowInfo, nonStatic);
 	if (nonStatic) {
 		this.receiver.checkNPE(currentScope, flowContext, flowInfo);
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=318682
-		if (this.receiver.isThis()) {
-			currentScope.resetDeclaringClassMethodStaticFlag(this.binding.declaringClass);
-		}
 	}
 
 	if (valueRequired || currentScope.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4) {

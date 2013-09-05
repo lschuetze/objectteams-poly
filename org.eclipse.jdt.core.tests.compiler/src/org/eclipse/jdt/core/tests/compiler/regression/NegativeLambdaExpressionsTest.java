@@ -1815,12 +1815,7 @@ public void test049() {
 					"  }\n" + 
 					"}" ,
 				},
-				"----------\n" + 
-				"1. ERROR in X.java (at line 8)\n" + 
-				"	System.out.println(args); // OK: args is not re-assignment since declaration/first assignment\n" + 
-				"	                   ^^^^\n" + 
-				"Missing code implementation in the compiler\n" +  // expected since emulation path computation is not in place.
-				"----------\n");
+				"");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
 public void test050() {
@@ -1843,12 +1838,7 @@ public void test050() {
 					"  }\n" +
 					"}\n"
 				},
-				"----------\n" + 
-				"1. ERROR in X.java (at line 10)\n" + 
-				"	System.out.println(ioe.getMessage()); // OK: args is not re-assignment since declaration/first assignment\n" + 
-				"	                   ^^^\n" + 
-				"Missing code implementation in the compiler\n" + // expected since emulation path computation is not in place.
-				"----------\n");
+				"");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
 public void test051() {
@@ -1871,12 +1861,7 @@ public void test051() {
 					"\n" +
 					"}\n" ,
 				},
-				"----------\n" + 
-				"1. ERROR in X.java (at line 9)\n" + 
-				"	System.out.println(s); // OK: args is not re-assignment since declaration/first assignment\n" + 
-				"	                   ^\n" + 
-				"Missing code implementation in the compiler\n" + // expected since emulation path computation is not in place.
-				"----------\n");
+				"");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
 public void test052() {
@@ -1928,12 +1913,7 @@ public void test053() {
 					"  }\n" +
 					"}\n" ,
 				},
-				"----------\n" + 
-				"1. ERROR in X.java (at line 10)\n" + 
-				"	System.out.println(e);\n" + 
-				"	                   ^\n" + 
-				"Missing code implementation in the compiler\n" + 
-				"----------\n");
+				"");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
 public void test054() {
@@ -2105,12 +2085,7 @@ public void test060() {
 					"	}\n" +
 					"}\n",
 				},
-				"----------\n" + 
-				"1. ERROR in X.java (at line 8)\n" + 
-				"	System.out.println(is);\n" + 
-				"	                   ^^\n" + 
-				"Missing code implementation in the compiler\n" + // expected. 
-				"----------\n");
+				"");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=382721, [1.8][compiler] Effectively final variables needs special treatment
 public void test061() {
@@ -4204,7 +4179,12 @@ public void test384750j() {
 					"    X<?> foo(int x, String p) { return null; }\n" +
 					"}\n"
 					},
-					"");
+					"----------\n" + 
+					"1. WARNING in X.java (at line 5)\n" + 
+					"	I i = super::foo;\n" + 
+					"	      ^^^^^^^^^^\n" + 
+					"Access to enclosing method foo(int, String) from the type Y is emulated by a synthetic accessor method\n" + 
+					"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=384750, [1.8] Compiler should reject invalid method reference expressions
 public void test384750k() {
@@ -4247,7 +4227,12 @@ public void test384750l() {
 					"    }\n" +
 					"}\n" 
 					},
-					"");
+					"----------\n" + 
+					"1. WARNING in X.java (at line 9)\n" + 
+					"	I i = X.super::zoo;\n" + 
+					"	      ^^^^^^^^^^^^\n" + 
+					"Access to enclosing method zoo() from the type Z is emulated by a synthetic accessor method\n" + 
+					"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=384750, [1.8] Compiler should reject invalid method reference expressions
 public void test384750m() {
@@ -5064,9 +5049,8 @@ this.runNegativeTest(
 				"----------\n" + 
 				"1. ERROR in X.java (at line 20)\n" + 
 				"	new X().foo((s)->{});\n" + 
-				"	        ^^^\n" + 
-				"The method foo(I) in the type X is not applicable for the arguments ((<no type> s) -> {\n" + 
-				"})\n" + 
+				"	            ^^^^^^^\n" + 
+				"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401610, [1.8][compiler] Allow lambda/reference expressions in non-overloaded method invocation contexts
@@ -5102,28 +5086,23 @@ this.runNegativeTest(
 				"----------\n" + 
 				"1. ERROR in X.java (at line 15)\n" + 
 				"	new X().foo(()->{ return \"\";});\n" + 
-				"	        ^^^\n" + 
-				"The method foo(I) in the type X is not applicable for the arguments (() -> {\n" + 
-				"  return \"\";\n" + 
-				"})\n" + 
+				"	                  ^^^^^^^^^^\n" + 
+				"Void methods cannot return a value\n" + 
 				"----------\n" + 
 				"2. ERROR in X.java (at line 16)\n" + 
 				"	new X().foo(()-> 10);\n" + 
-				"	        ^^^\n" + 
-				"The method foo(I) in the type X is not applicable for the arguments (() -> 10)\n" + 
+				"	                 ^^\n" + 
+				"Void methods cannot return a value\n" + 
 				"----------\n" + 
 				"3. ERROR in X.java (at line 17)\n" + 
 				"	new X().foo((s)->{});\n" + 
-				"	        ^^^\n" + 
-				"The method foo(I) in the type X is not applicable for the arguments ((<no type> s) -> {\n" + 
-				"})\n" + 
+				"	            ^^^^^^^\n" + 
+				"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 
 				"----------\n" + 
 				"4. ERROR in X.java (at line 18)\n" + 
 				"	new X().foo((s)->{ return;});\n" + 
-				"	        ^^^\n" + 
-				"The method foo(I) in the type X is not applicable for the arguments ((<no type> s) -> {\n" + 
-				"  return ;\n" + 
-				"})\n" + 
+				"	            ^^^^^^^^^^^^^^^\n" + 
+				"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401610, [1.8][compiler] Allow lambda/reference expressions in non-overloaded method invocation contexts
@@ -5166,9 +5145,8 @@ this.runNegativeTest(
 				"----------\n" + 
 				"3. ERROR in X.java (at line 7)\n" + 
 				"	new X().foo(()->{});\n" + 
-				"	        ^^^\n" + 
-				"The method foo(I<T>) in the type X is not applicable for the arguments (() -> {\n" + 
-				"})\n" + 
+				"	            ^^^^^^\n" + 
+				"The target type of this expression is not a well formed parameterized type due to bound(s) mismatch\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401610, [1.8][compiler] Allow lambda/reference expressions in non-overloaded method invocation contexts
@@ -5231,10 +5209,8 @@ this.runNegativeTest(
 				"----------\n" + 
 				"1. ERROR in X.java (at line 11)\n" + 
 				"	new X().foo(()->{ return 10; });\n" + 
-				"	        ^^^\n" + 
-				"The method foo(I) in the type X is not applicable for the arguments (() -> {\n" + 
-				"  return 10;\n" + 
-				"})\n" + 
+				"	                  ^^^^^^^^^^\n" + 
+				"Void methods cannot return a value\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401610, [1.8][compiler] Allow lambda/reference expressions in non-overloaded method invocation contexts
@@ -5282,9 +5258,8 @@ this.runNegativeTest(
 				"----------\n" + 
 				"1. ERROR in X.java (at line 11)\n" + 
 				"	new X().foo((Object o)->{});\n" + 
-				"	        ^^^\n" + 
-				"The method foo(I) in the type X is not applicable for the arguments ((Object o) -> {\n" + 
-				"})\n" + 
+				"	             ^^^^^^\n" + 
+				"Lambda expression\'s parameter o is expected to be of type int\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401789, [1.8][compiler] Enable support for method/constructor references in non-overloaded method calls.
@@ -5375,60 +5350,45 @@ this.runNegativeTest(
 				"----------\n" + 
 				"1. ERROR in X.java (at line 9)\n" + 
 				"	this(X::goo);\n" + 
-				"	^^^^^^^^^^^^^\n" + 
-				"The constructor X.Y(X::goo) is undefined\n" + 
+				"	     ^^^^^^\n" + 
+				"The type of goo() from the type X is int, this is incompatible with the descriptor\'s return type: String\n" + 
 				"----------\n" + 
 				"2. ERROR in X.java (at line 14)\n" + 
 				"	this((x) -> { return 10;});\n" + 
-				"	^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-				"The constructor X((<no type> x) -> {\n" + 
-				"  return 10;\n" + 
-				"}) is undefined\n" + 
+				"	                     ^^\n" + 
+				"Type mismatch: cannot convert from int to String\n" + 
 				"----------\n" + 
 				"3. ERROR in X.java (at line 18)\n" + 
 				"	foo(X::goo);\n" + 
-				"	^^^\n" + 
-				"The method foo(I) in the type X is not applicable for the arguments (X::goo)\n" + 
+				"	    ^^^^^^\n" + 
+				"The type of goo() from the type X is int, this is incompatible with the descriptor\'s return type: String\n" + 
 				"----------\n" + 
 				"4. ERROR in X.java (at line 19)\n" + 
 				"	new X((x)->{ return 10;});\n" + 
-				"	^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-				"The constructor X((<no type> x) -> {\n" + 
-				"  return 10;\n" + 
-				"}) is undefined\n" + 
+				"	                    ^^\n" + 
+				"Type mismatch: cannot convert from int to String\n" + 
 				"----------\n" + 
 				"5. ERROR in X.java (at line 20)\n" + 
 				"	new X((x)->{ return 10;}).new Y((x) -> { return 0;});\n" + 
-				"	^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-				"The constructor X((<no type> x) -> {\n" + 
-				"  return 10;\n" + 
-				"}) is undefined\n" + 
+				"	                    ^^\n" + 
+				"Type mismatch: cannot convert from int to String\n" + 
 				"----------\n" + 
-				"6. ERROR in X.java (at line 20)\n" + 
-				"	new X((x)->{ return 10;}).new Y((x) -> { return 0;});\n" + 
-				"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-				"The constructor X.Y((<no type> x) -> {\n" + 
-				"  return 0;\n" + 
-				"}) is undefined\n" + 
-				"----------\n" + 
-				"7. ERROR in X.java (at line 21)\n" + 
+				"6. ERROR in X.java (at line 21)\n" + 
 				"	new X((x)->{ return 10;}) {};\n" + 
-				"	^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
-				"The constructor X((<no type> x) -> {\n" + 
-				"  return 10;\n" + 
-				"}) is undefined\n" + 
+				"	                    ^^\n" + 
+				"Type mismatch: cannot convert from int to String\n" + 
 				"----------\n" + 
-				"8. ERROR in X.java (at line 26)\n" + 
+				"7. ERROR in X.java (at line 26)\n" + 
 				"	super(X::goo);\n" + 
-				"	^^^^^^^^^^^^^^\n" + 
-				"The constructor X(X::goo) is undefined\n" + 
+				"	      ^^^^^^\n" + 
+				"The type of goo() from the type X is int, this is incompatible with the descriptor\'s return type: String\n" + 
 				"----------\n" + 
-				"9. ERROR in X.java (at line 29)\n" + 
+				"8. ERROR in X.java (at line 29)\n" + 
 				"	super (x -> 10);\n" + 
-				"	^^^^^^^^^^^^^^^^\n" + 
-				"The constructor X((<no type> x) -> 10) is undefined\n" + 
+				"	            ^^\n" + 
+				"Type mismatch: cannot convert from int to String\n" + 
 				"----------\n" + 
-				"10. ERROR in X.java (at line 31)\n" + 
+				"9. ERROR in X.java (at line 31)\n" + 
 				"	Zork z;\n" + 
 				"	^^^^\n" + 
 				"Zork cannot be resolved to a type\n" + 
@@ -5478,15 +5438,13 @@ public void test401845a() {
 			"----------\n" + 
 			"1. ERROR in X.java (at line 8)\n" + 
 			"	foo(X::goo);\n" + 
-			"	^^^\n" + 
-			"The method foo(I[]...) in the type X is not applicable for the arguments (X::goo)\n" + 
+			"	    ^^^^^^\n" + 
+			"The target type of this expression must be a functional interface\n" + 
 			"----------\n" + 
 			"2. ERROR in X.java (at line 9)\n" + 
 			"	foo((x)-> {return 10;});\n" + 
-			"	^^^\n" + 
-			"The method foo(I[]...) in the type X is not applicable for the arguments ((<no type> x) -> {\n" + 
-			"  return 10;\n" + 
-			"})\n" + 
+			"	    ^^^^^^^^^^^^^^^^^^\n" + 
+			"The target type of this expression must be a functional interface\n" + 
 			"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401845, [1.8][compiler] Bad interaction between varargs and lambas/references
@@ -5642,13 +5600,28 @@ public void test401847a() {
 			"----------\n" + 
 			"1. ERROR in X.java (at line 8)\n" + 
 			"	foo(true ? X::goo : X::goo);\n" + 
-			"	^^^\n" + 
-			"The method foo(I...) in the type X is not applicable for the arguments ((true ? X::goo : X::goo))\n" + 
+			"	           ^^^^^^\n" + 
+			"The type of goo() from the type X is int, this is incompatible with the descriptor\'s return type: String\n" + 
 			"----------\n" + 
-			"2. ERROR in X.java (at line 9)\n" + 
+			"2. ERROR in X.java (at line 8)\n" + 
+			"	foo(true ? X::goo : X::goo);\n" + 
+			"	                    ^^^^^^\n" + 
+			"The type of goo() from the type X is int, this is incompatible with the descriptor\'s return type: String\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 9)\n" + 
 			"	foo(true ? x-> 1 : x->0);\n" + 
 			"	^^^\n" + 
 			"The method foo(I...) in the type X is not applicable for the arguments ((true ? (<no type> x) -> 1 : (<no type> x) -> 0))\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 9)\n" + 
+			"	foo(true ? x-> 1 : x->0);\n" + 
+			"	               ^\n" + 
+			"Type mismatch: cannot convert from int to String\n" + 
+			"----------\n" + 
+			"5. ERROR in X.java (at line 9)\n" + 
+			"	foo(true ? x-> 1 : x->0);\n" + 
+			"	                      ^\n" + 
+			"Type mismatch: cannot convert from int to String\n" + 
 			"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401939, [1.8][compiler] Incorrect shape analysis leads to method resolution failure .
@@ -5782,11 +5755,8 @@ public void test401939c() {
 				"----------\n" + 
 				"1. ERROR in X.java (at line 8)\n" + 
 				"	goo((x) -> { if (x) return null; });\n" + 
-				"	^^^\n" + 
-				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {\n" + 
-				"  if (x)\n" + 
-				"      return null;\n" + 
-				"})\n" + 
+				"	                 ^\n" + 
+				"Type mismatch: cannot convert from String to boolean\n" + 
 				"----------\n" + 
 				"2. ERROR in X.java (at line 9)\n" + 
 				"	goo((x) -> {});\n" + 
@@ -5835,10 +5805,8 @@ public void test401939e() {
 				"----------\n" + 
 				"1. ERROR in X.java (at line 8)\n" + 
 				"	goo((x) -> { return null; });\n" + 
-				"	^^^\n" + 
-				"The method goo(I) in the type X is not applicable for the arguments ((<no type> x) -> {\n" + 
-				"  return null;\n" + 
-				"})\n" + 
+				"	             ^^^^^^^^^^^^\n" + 
+				"Void methods cannot return a value\n" + 
 				"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=401939, [1.8][compiler] Incorrect shape analysis leads to method resolution failure .
@@ -6124,11 +6092,6 @@ public void test402609() {
 			"----------\n" + 
 			"1. ERROR in X.java (at line 18)\n" + 
 			"	f(super::foo);\n" + 
-			"	^\n" + 
-			"The method f(I) in the type X is not applicable for the arguments (super::foo)\n" + 
-			"----------\n" + 
-			"2. ERROR in X.java (at line 18)\n" + 
-			"	f(super::foo);\n" + 
 			"	  ^^^^^\n" + 
 			"Cannot use super in a static context\n" + 
 			"----------\n");
@@ -6202,6 +6165,11 @@ public void test402609b() {
 			"	f(super::foo);\n" + 
 			"	^\n" + 
 			"The method f(I) is ambiguous for the type X\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 18)\n" + 
+			"	f(super::foo);\n" + 
+			"	  ^^^^^^^^^^\n" + 
+			"Cannot directly invoke the abstract method foo() for the type Y\n" + 
 			"----------\n");
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=402609, [1.8][compiler] AIOOB exception with a program using method references.
@@ -6361,6 +6329,210 @@ public void testSuperReference03() {
 			"	       ^\n" + 
 			"y cannot be resolved to a type\n" + 
 			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=406614, [1.8][compiler] Missing and incorrect errors for lambda in explicit constructor call. 
+public void test406614() {
+	this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"	int doit();\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	int f;\n" +
+				"	X(I i) {\n" +
+				"	}\n" +
+				"	X() {\n" +
+				"		this(() -> this.f);\n" +
+				"	}\n" +
+				"	X(short s) {\n" +
+				"		this(() -> this.g());\n" +
+				"	}\n" +
+				"	X (int x) {\n" +
+				"	    this(() -> f);\n" +
+				"	}\n" +
+				"	X (long x) {\n" +
+				"	    this(() -> g());\n" +
+				"	}\n" +
+				"	int g() {\n" +
+				"		return 0;\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 9)\n" + 
+			"	this(() -> this.f);\n" + 
+			"	           ^^^^\n" + 
+			"Cannot refer to \'this\' nor \'super\' while explicitly invoking a constructor\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 12)\n" + 
+			"	this(() -> this.g());\n" + 
+			"	           ^^^^\n" + 
+			"Cannot refer to \'this\' nor \'super\' while explicitly invoking a constructor\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 15)\n" + 
+			"	this(() -> f);\n" + 
+			"	           ^\n" + 
+			"Cannot refer to an instance field f while explicitly invoking a constructor\n" + 
+			"----------\n" + 
+			"4. ERROR in X.java (at line 18)\n" + 
+			"	this(() -> g());\n" + 
+			"	           ^\n" + 
+			"Cannot refer to an instance method while explicitly invoking a constructor\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=406588, [1.8][compiler][codegen] java.lang.invoke.LambdaConversionException: Incorrect number of parameters for static method newinvokespecial 
+public void test406588() {
+	this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"	X.Y.Z makeY(int x);\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	class Y {\n" +
+				"		Y(I i) {\n" +
+				"			\n" +
+				"		}\n" +
+				"		Y() {\n" +
+				"			this(Z::new);\n" +
+				"		}\n" +
+				"		class Z {\n" +
+				"			Z(int x) {\n" +
+				"\n" +
+				"			}\n" +
+				"		}\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 10)\n" + 
+			"	this(Z::new);\n" + 
+			"	     ^^^^^^^\n" + 
+			"No enclosing instance of the type X.Y is accessible in scope\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=406586, [1.8][compiler] Missing error about unavailable enclosing instance 
+public void test406586() {
+	this.runNegativeTest(
+			new String[] {
+				"X.java",
+				"interface I {\n" +
+				"	X.Y makeY();\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	public class Y {\n" +
+				"	}\n" +
+				"	static void foo() {\n" +
+				"		I i = Y::new;\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 8)\n" + 
+			"	I i = Y::new;\n" + 
+			"	      ^^^^^^^\n" + 
+			"No enclosing instance of the type X is accessible in scope\n" + 
+			"----------\n");
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=401989, [1.8][compiler] hook lambda expressions into "can be static" analysis 
+public void test401989() {
+		Map compilerOptions = getCompilerOptions();
+		compilerOptions.put(CompilerOptions.OPTION_ReportMethodCanBeStatic, CompilerOptions.ERROR);
+		compilerOptions.put(CompilerOptions.OPTION_ReportMethodCanBePotentiallyStatic, CompilerOptions.ERROR);
+		this.runNegativeTest(
+			new String[] {
+				"X.java", 
+				"interface I {\n" +
+				"	void make();\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	int val;\n" +
+				"	private I test() {\n" +
+				"		return () -> System.out.println(val);\n" +
+				"	}\n" +
+				"	private I testCanBeStatic() {\n" +
+				"		return () -> System.out.println();\n" +
+				"	}\n" +
+				"	public void call() { test().make(); testCanBeStatic().make();}\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 9)\n" + 
+			"	private I testCanBeStatic() {\n" + 
+			"	          ^^^^^^^^^^^^^^^^^\n" + 
+			"The method testCanBeStatic() from the type X can be declared as static\n" + 
+			"----------\n",
+			null /* no extra class libraries */,
+			true /* flush output directory */,
+			compilerOptions /* custom options */
+		);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=406773, [1.8][compiler][codegen] "java.lang.IncompatibleClassChangeError" caused by attempted invocation of private constructor
+public void test406773() {
+		Map compilerOptions = getCompilerOptions();
+		compilerOptions.put(CompilerOptions.OPTION_ReportMethodCanBeStatic, CompilerOptions.ERROR);
+		compilerOptions.put(CompilerOptions.OPTION_ReportMethodCanBePotentiallyStatic, CompilerOptions.ERROR);
+		this.runNegativeTest(
+			new String[] {
+					"X.java", 
+					"interface I {\n" +
+					"	X makeX(int x);\n" +
+					"}\n" +
+					"public class X {\n" +
+					"	void foo() {\n" +
+					"		int local = 10;\n" +
+					"		class Y extends X {\n" +
+					"			class Z extends X {\n" +
+					"				void f() {\n" +
+					"					I i = X::new;\n" +
+					"					i.makeX(123456);\n" +
+					"					i = Y::new;\n" +
+					"					i.makeX(987654);\n" +
+					"					i = Z::new;\n" +
+					"					i.makeX(456789);\n" +
+					"				}\n" +
+					"				private Z(int z) {\n" +
+					"				}\n" +
+					"				Z() {}\n" +
+					"			}\n" +
+					"			private Y(int y) {\n" +
+					"				System.out.println(local);\n" +
+					"			}\n" +
+					"			private Y() {\n" +
+					"			}\n" +
+					"		}\n" +
+					"		new Y().new Z().f();\n" +
+					"	}\n" +
+					"	private X(int x) {\n" +
+					"	}\n" +
+					"	X() {\n" +
+					"	}\n" +
+					"	public static void main(String[] args) {\n" +
+					"		new X().foo();\n" +
+					"	}\n" +
+					"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 5)\n" + 
+			"	void foo() {\n" + 
+			"	     ^^^^^\n" + 
+			"The method foo() from the type X can potentially be declared as static\n" + 
+			"----------\n" + 
+			"2. WARNING in X.java (at line 10)\n" + 
+			"	I i = X::new;\n" + 
+			"	      ^^^^^^^\n" + 
+			"Access to enclosing constructor X(int) is emulated by a synthetic accessor method\n" + 
+			"----------\n" + 
+			"3. ERROR in X.java (at line 12)\n" + 
+			"	i = Y::new;\n" + 
+			"	    ^^^^^^^\n" + 
+			"No enclosing instance of the type X is accessible in scope\n" + 
+			"----------\n",
+			null /* no extra class libraries */,
+			true /* flush output directory */,
+			compilerOptions /* custom options */
+		);
 }
 public static Class testClass() {
 	return NegativeLambdaExpressionsTest.class;

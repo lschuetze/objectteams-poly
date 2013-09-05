@@ -4,8 +4,11 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: ExplicitConstructorCall.java 23405 2010-02-03 17:02:18Z stephan $
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
@@ -237,7 +240,7 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
 				}
 				codeStream.invoke(Opcodes.OPC_invokespecial, this.syntheticAccessor, null /* default declaringClass */);
 			} else {
-				codeStream.invoke(Opcodes.OPC_invokespecial, codegenBinding, null /* default declaringClass */);
+				codeStream.invoke(Opcodes.OPC_invokespecial, codegenBinding, null /* default declaringClass */, this.typeArguments);
 			}
 			codeStream.recordPositionsFrom(pc, this.sourceStart);
 		} finally {
@@ -561,7 +564,11 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
             try {
                 anchorMapping = AnchorMapping.setupNewMapping(
 	                    receiver, this.arguments, scope);
-	/*~orig~*/  this.binding = scope.getConstructor(receiverType, argumentTypes, this);
+    // orig:
+    			this.binding = scope.getConstructor(receiverType, argumentTypes, this);
+    			if (polyExpressionSeen && polyExpressionsHaveErrors(scope, this.binding, this.arguments, argumentTypes))
+    				return;
+	// giro:
 
 				// check different reasons for changing the accessMode
 
@@ -628,8 +635,9 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
                 AnchorMapping.removeCurrentMapping(anchorMapping);
             }
 
-
-/*~orig~*/  if (this.binding.isValidBinding()) {
+  // orig:
+			if (this.binding.isValidBinding()) {
+  // giro:
 
                 // record chainTSuperMarkArgPos if needed
                 if (   scope.enclosingSourceType().isRole()
@@ -641,22 +649,6 @@ public class ExplicitConstructorCall extends Statement implements InvocationSite
                 		this.chainTSuperMarkArgPos = enclosingMethod.parameters.length+enclosingMethod.declaringClass.depth()+1;
                 }
 // SH}
-				if (polyExpressionSeen) {
-					boolean variableArity = this.binding.isVarargs();
-					final TypeBinding[] parameters = this.binding.parameters;
-					final int parametersLength = parameters.length;
-					for (int i = 0, length = this.arguments == null ? 0 : this.arguments.length; i < length; i++) {
-						Expression argument = this.arguments[i];
-						TypeBinding parameterType = i < parametersLength ? parameters[i] : parameters[parametersLength - 1];
-						if (argumentTypes[i] instanceof PolyTypeBinding) {
-							argument.setExpressionContext(INVOCATION_CONTEXT);
-							if (variableArity && i >= parametersLength - 1)
-								argument.tagAsEllipsisArgument();
-							argument.setExpectedType(parameterType);
-							argumentTypes[i] = argument.resolveType(scope);
-						}
-					}
-				}
 				if ((this.binding.tagBits & TagBits.HasMissingType) != 0) {
 					if (!methodScope.enclosingSourceType().isAnonymousType()) {
 						scope.problemReporter().missingTypeInConstructor(this, this.binding);

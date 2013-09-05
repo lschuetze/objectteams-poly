@@ -99,42 +99,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	if ((flowInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) == 0) {
 		this.bits |= ASTNode.IsLocalDeclarationReachable; // only set if actually reached
 	}
-	if (this.binding != null && this.type.resolvedType instanceof TypeVariableBinding) {
-		TypeVariableBinding typeVariableBinding = (TypeVariableBinding) this.type.resolvedType;
-		MethodScope methodScope= this.binding.declaringScope.methodScope();
-		if (methodScope != null && methodScope.referenceContext instanceof TypeDeclaration) {
-			// initialization scope
-			methodScope = methodScope.enclosingMethodScope();
-		}
-		AbstractMethodDeclaration methodDeclaration = (methodScope != null) ? methodScope.referenceMethod() : null;
-		if (methodDeclaration != null && methodDeclaration.binding != null) {
-			TypeVariableBinding[] typeVariables = methodDeclaration.binding.typeVariables();
-			if (typeVariables == null) typeVariables = Binding.NO_TYPE_VARIABLES;
-			if (typeVariables == Binding.NO_TYPE_VARIABLES) {
-				// Method declares no type variables.
-				if (typeVariableBinding != null && typeVariableBinding.declaringElement instanceof TypeBinding)
-					currentScope.resetDeclaringClassMethodStaticFlag((TypeBinding) typeVariableBinding.declaringElement);
-				else
-					currentScope.resetEnclosingMethodStaticFlag();
-			} else {
-				// to check whether the resolved type for this is declared by enclosing method as a type variable
-				boolean usesEnclosingTypeVar = false; 
-				for (int i = 0; i < typeVariables.length ; i ++) {
-					if (typeVariables[i] == this.type.resolvedType){
-						usesEnclosingTypeVar = true;
-						break;
-					}
-				}
-				if (!usesEnclosingTypeVar) {
-					// uses a type variable not declared by enclosing method
-					if (typeVariableBinding != null && typeVariableBinding.declaringElement instanceof TypeBinding)
-						currentScope.resetDeclaringClassMethodStaticFlag((TypeBinding) typeVariableBinding.declaringElement);
-					else
-						currentScope.resetEnclosingMethodStaticFlag();
-				}
-			}
-		}
-	}
 //{ObjectTeams: pretend place holder is used:
 	if (this.isPlaceHolder)
 		this.binding.useFlag = LocalVariableBinding.USED;
@@ -282,7 +246,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		variableType = this.type.resolveType(scope, true /* check bounds*/);
 /* orig:
 		// create a binding and add it to the scope
-		TypeBinding variableType = type.resolveType(scope, true /* check bounds* /);
+		TypeBinding variableType = this.type.resolveType(scope, true /* check bounds* /);
   :giro */
 // SH}
 
@@ -294,6 +258,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			variableType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(variableType, typeScope, this);
 		}
 // SH}
+		this.bits |= (this.type.bits & ASTNode.HasTypeAnnotations);
 		checkModifiers();
 		if (variableType != null) {
 			if (variableType == TypeBinding.VOID) {

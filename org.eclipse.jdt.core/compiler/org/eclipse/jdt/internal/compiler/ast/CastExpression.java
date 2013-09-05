@@ -360,6 +360,7 @@ private static void checkAlternateBinding(BlockScope scope, Expression receiver,
 			public int sourceStart() { return 0; }
 			public int sourceEnd() { return 0; }
 			public TypeBinding expectedType() { return invocationSite.expectedType(); }
+			public boolean receiverIsImplicitThis() { return invocationSite.receiverIsImplicitThis();}
 		};
 		MethodBinding bindingIfNoCast;
 		if (binding.isConstructor()) {
@@ -523,7 +524,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 		if (valueRequired || needRuntimeCheckcast) { // Added for: 1F1W9IG: IVJCOM:WINNT - Compiler omits casting check
 			codeStream.generateConstant(this.constant, this.implicitConversion);
 			if (needRuntimeCheckcast) {
-				codeStream.checkcast(this.resolvedType);
+				codeStream.checkcast(this.type, this.resolvedType);
 			}
 			if (!valueRequired) {
 				// the resolveType cannot be double or long
@@ -535,7 +536,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	}
 	this.expression.generateCode(currentScope, codeStream, valueRequired || needRuntimeCheckcast);
 	if (needRuntimeCheckcast && this.expression.postConversionType(currentScope) != this.resolvedType.erasure()) { // no need to issue a checkcast if already done as genericCast
-		codeStream.checkcast(this.resolvedType);
+		codeStream.checkcast(this.type, this.resolvedType);
 	}
 	if (valueRequired) {
 		codeStream.generateImplicitConversion(this.implicitConversion);

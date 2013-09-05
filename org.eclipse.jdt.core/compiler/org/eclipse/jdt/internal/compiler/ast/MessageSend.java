@@ -30,11 +30,13 @@
  *								bug 381445 - [compiler][resource] Can the resource leak check be made aware of Closeables.closeQuietly?
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
+ *								bug 382069 - [null] Make the null analysis consider JUnit's assertNotNull similarly to assertions
  *								bug 382350 - [1.8][compiler] Unable to invoke inherited default method via I.super.m() syntax
  *								bug 404649 - [1.8][compiler] detect illegal reference to indirect or redundant super
- *								bug 382069 - [null] Make the null analysis consider JUnit's assertNotNull similarly to assertions
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
+ *        Andy Clement - Contributions for
+ *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -64,7 +66,6 @@ import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodScope;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedGenericMethodBinding;
-import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PolymorphicMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
@@ -213,11 +214,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 
 	if (nonStatic) {
 		this.receiver.checkNPE(currentScope, flowContext, flowInfo);
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=318682
-		if (this.receiver.isThis() || this.receiver.isSuper()) {
-			// accessing non-static method without an object
-			currentScope.resetDeclaringClassMethodStaticFlag(this.actualReceiverType);
-		}
 	}
 
 	if (this.arguments != null) {
@@ -565,7 +561,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 			if (constantPoolDeclaringClass.isRole())
 				constantPoolDeclaringClass = ((ReferenceBinding)constantPoolDeclaringClass).getRealClass();
 // SH}
-			codeStream.invoke(Opcodes.OPC_invokestatic, codegenBinding, constantPoolDeclaringClass);
+			codeStream.invoke(Opcodes.OPC_invokestatic, codegenBinding, constantPoolDeclaringClass, this.typeArguments);
 //{ObjectTeams: decapsulated methods will not be private in the JVM any more:
 /* orig:
 		} else if((this.receiver.isSuper()) || codegenBinding.isPrivate()){
@@ -573,7 +569,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 		} else if((this.receiver.isSuper()) || (codegenBinding.isPrivate() && !this.isDecapsulation)) 
 		{
 // SH}
-			codeStream.invoke(Opcodes.OPC_invokespecial, codegenBinding, constantPoolDeclaringClass);
+			codeStream.invoke(Opcodes.OPC_invokespecial, codegenBinding, constantPoolDeclaringClass, this.typeArguments);
 //{ObjectTeams: always use interface methods of role type binding:
 /* orig:
 		} else if (constantPoolDeclaringClass.isInterface()) { // interface or annotation type
@@ -582,9 +578,9 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 				   || constantPoolDeclaringClass instanceof RoleTypeBinding)
 		{
 // SH}
-			codeStream.invoke(Opcodes.OPC_invokeinterface, codegenBinding, constantPoolDeclaringClass);
+			codeStream.invoke(Opcodes.OPC_invokeinterface, codegenBinding, constantPoolDeclaringClass, this.typeArguments);
 		} else {
-			codeStream.invoke(Opcodes.OPC_invokevirtual, codegenBinding, constantPoolDeclaringClass);
+			codeStream.invoke(Opcodes.OPC_invokevirtual, codegenBinding, constantPoolDeclaringClass, this.typeArguments);
 		}
 	} else {
 		codeStream.invoke(Opcodes.OPC_invokestatic, this.syntheticAccessor, null /* default declaringClass */);
@@ -992,6 +988,10 @@ public TypeBinding resolveType(BlockScope scope) {
 		}
 	}
 // SH}
+
+	if (polyExpressionSeen && polyExpressionsHaveErrors(scope, this.binding, this.arguments, argumentTypes))
+		return null;
+
 	if (!this.binding.isValidBinding()) {
 		if (this.binding.declaringClass == null) {
 			if (this.actualReceiverType instanceof ReferenceBinding) {
@@ -1092,22 +1092,6 @@ public TypeBinding resolveType(BlockScope scope) {
     	}
     }
 // SH}
-	if (polyExpressionSeen) {
-		boolean variableArity = this.binding.isVarargs();
-		final TypeBinding[] parameters = this.binding.parameters;
-		final int parametersLength = parameters.length;
-		for (int i = 0, length = this.arguments == null ? 0 : this.arguments.length; i < length; i++) {
-			Expression argument = this.arguments[i];
-			TypeBinding parameterType = i < parametersLength ? parameters[i] : parameters[parametersLength - 1];
-			if (argumentTypes[i] instanceof PolyTypeBinding) {
-				argument.setExpressionContext(INVOCATION_CONTEXT);
-				if (variableArity && i >= parametersLength - 1)
-					argument.tagAsEllipsisArgument();
-				argument.setExpectedType(parameterType);
-				argumentTypes[i] = argument.resolveType(scope);
-			}
-		}
-	}
 	final CompilerOptions compilerOptions = scope.compilerOptions();
 	if (compilerOptions.complianceLevel <= ClassFileConstants.JDK1_6
 			&& this.binding.isPolymorphic()) {
@@ -1500,5 +1484,8 @@ public void traverse(ASTVisitor visitor, BlockScope blockScope) {
 }
 public boolean statementExpression() {
 	return true;
+}
+public boolean receiverIsImplicitThis() {
+	return this.receiver.isImplicitThis();
 }
 }

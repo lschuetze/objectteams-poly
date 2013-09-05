@@ -32,11 +32,10 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public static Test suite() {
-		return createSuite(ASTRewritingTypeAnnotationsTest.class);
+		return createSuite(ASTRewritingTypeAnnotationsTest.class, AST.JLS8);
 	}
 
 	public void testCastAnnotations() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -101,7 +100,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void testWildcardTypeArgumentAnnotations() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -201,7 +199,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void testWildcardBoudAnnotation() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 
@@ -262,7 +259,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void testTypeParameterBoundAnnotations() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 
@@ -329,7 +325,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void testTypeArgumentsParameterizedClassesAnnotations() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 
@@ -396,7 +391,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void testTypeArgumentsMethodInvocation() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 
@@ -477,7 +471,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void testClassInheritenceAnnotations() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 
@@ -544,7 +537,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void testTypeTests() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 
@@ -620,7 +612,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void testConstructorInvocation() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -690,7 +681,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void testConstructorDeclaration() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("import java.lang.annotation.ElementType;\n");
@@ -749,7 +739,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void testRewriteInsertAPIAnnotation() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 
@@ -821,7 +810,6 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 	}
 
 	public void _testEmptyListInsertAnnotation() throws Exception {
-		if (this.apiLevel < AST.JLS8) return;
 		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -858,6 +846,130 @@ public class ASTRewritingTypeAnnotationsTest extends ASTRewritingTest {
 		buf.append("	}\n");
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
+	}
+
+	/**
+	 * ASTRewriterTests for PackageQualifiedType
+	 * @throws Exception
+	 * 
+	 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=406469
+	 */
+	public void testPackageQualifiedTypeAnnotations() throws Exception {
+		IPackageFragment pack1= this.sourceFolder.createPackageFragment("test406469.bug", false, null);
+		String contents = "package test406469.bug;\n" +
+				"import java.lang.annotation.*;\n" +
+				"public class X {\n" +
+				"	@Target(ElementType.TYPE_USE)\n" +
+				"	@Retention(RetentionPolicy.RUNTIME)\n" +
+				"	@Documented\n" +
+				"	static @interface NonNull { }\n" +
+				"	class Inner {}\n" +
+				"	\n" +
+				"	/**\n" +
+				" 	* @param arg  \n" +
+				" 	*/\n" +
+				"	test406469.bug.@NonNull IOException foo(\n" +
+				"			test406469.bug.@NonNull FileNotFoundException arg)\n" +
+				"		throws test406469.bug.@NonNull EOFException {\n" +
+				"		try {\n" +
+				"			test406469.bug.@NonNull IOError e = new test406469.bug.IOError();\n" +
+				"			throw e;\n" +
+				"		} catch (test406469.bug.@NonNull IOError e) {\n" +
+				"		}\n" +
+				"		return null;\n" +
+				"	} \n" +
+				"	test406469.bug.@NonNull X.@NonNull Inner fInner;\n" +
+				"} \n" +
+				"@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE) @interface Marker {} \n" +
+				"\n" +
+				"class Outer {\n" +
+				"	public class Inner {\n" +
+				"		public class Deeper {}\n" +
+				"	}\n" +
+				"}\n" +
+				"class IOException extends Exception {private static final long serialVersionUID=10001L;}\n" +
+				"class FileNotFoundException extends Exception{private static final long serialVersionUID=10002L;}\n" +
+				"class EOFException extends Exception{private static final long serialVersionUID=10003L;}\n" +
+				"class IOError extends Exception{private static final long serialVersionUID=10004L;}\n";
+		StringBuffer buf = new StringBuffer(contents);			
+		ICompilationUnit cu= pack1.createCompilationUnit("X.java", buf.toString(), false, null);
+		CompilationUnit astRoot= createAST(cu, /* resolve */ true, false);
+		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
+		AST ast= astRoot.getAST();
+		TypeDeclaration typeDeclaration= findTypeDeclaration(astRoot, "X");
+		MethodDeclaration methodDeclaration= findMethodDeclaration(typeDeclaration, "foo");
+		{   //replace an annotation.
+			PackageQualifiedType packageQualifiedType = (PackageQualifiedType) methodDeclaration.getReturnType2();
+			MarkerAnnotation markerAnnotation= ast.newMarkerAnnotation();
+			markerAnnotation.setTypeName(ast.newSimpleName("Marker"));
+			rewrite.replace((ASTNode) packageQualifiedType.annotations().get(0), markerAnnotation, null);
+
+			// remove an annotation
+			SingleVariableDeclaration param = (SingleVariableDeclaration) methodDeclaration.parameters().get(0);
+			packageQualifiedType = (PackageQualifiedType) param.getType();
+			rewrite.remove((ASTNode) packageQualifiedType.annotations().get(0), null);
+			
+			// insert an annotation after an existing annotation
+			packageQualifiedType = (PackageQualifiedType) methodDeclaration.thrownExceptionTypes().get(0);
+			markerAnnotation= ast.newMarkerAnnotation();
+			markerAnnotation.setTypeName(ast.newSimpleName("Marker"));
+			rewrite.getListRewrite(packageQualifiedType, PackageQualifiedType.ANNOTATIONS_PROPERTY).insertLast(markerAnnotation, null);
+			
+			/* insert an annotation in a type not converted as a PackageQualifiedType. This would involve
+			 *  creation of a PackageQualifiedType from fields of the existing type.
+			 */
+			TryStatement tryStatement = (TryStatement) methodDeclaration.getBody().statements().get(0);
+			VariableDeclarationStatement variableDeclarationStatement = (VariableDeclarationStatement) tryStatement.getBody().statements().get(0);
+			VariableDeclarationFragment variableDeclarationFragment = (VariableDeclarationFragment) variableDeclarationStatement.fragments().get(0);
+			ClassInstanceCreation classInstanceCreation = (ClassInstanceCreation) variableDeclarationFragment.getInitializer();
+			SimpleType simpleType = (SimpleType) classInstanceCreation.getType();
+			QualifiedName qualifiedName = (QualifiedName) simpleType.getName();
+			SimpleName simpleName = ast.newSimpleName(qualifiedName.getName().getIdentifier());
+			qualifiedName = (QualifiedName) qualifiedName.getQualifier();
+			qualifiedName = ast.newQualifiedName(ast.newName(qualifiedName.getQualifier().toString()), ast.newSimpleName(qualifiedName.getName().toString()));
+			packageQualifiedType = ast.newPackageQualifiedType(qualifiedName, simpleName);
+			markerAnnotation= ast.newMarkerAnnotation();
+			markerAnnotation.setTypeName(ast.newSimpleName("Marker"));
+			rewrite.getListRewrite(packageQualifiedType, PackageQualifiedType.ANNOTATIONS_PROPERTY).insertLast(markerAnnotation, null);
+			rewrite.replace(classInstanceCreation.getType(), packageQualifiedType, null);
+		}
+		String preview= evaluateRewrite(cu, rewrite);
+		String contentsmodified = "package test406469.bug;\n" +
+				"import java.lang.annotation.*;\n" +
+				"public class X {\n" +
+				"	@Target(ElementType.TYPE_USE)\n" +
+				"	@Retention(RetentionPolicy.RUNTIME)\n" +
+				"	@Documented\n" +
+				"	static @interface NonNull { }\n" +
+				"	class Inner {}\n" +
+				"	\n" +
+				"	/**\n" +
+				" 	* @param arg  \n" +
+				" 	*/\n" +
+				"	test406469.bug.@Marker IOException foo(\n" +
+				"			FileNotFoundException arg)\n" +
+				"		throws test406469.bug.@NonNull @Marker EOFException {\n" +
+				"		try {\n" +
+				"			test406469.bug.@NonNull IOError e = new test406469.bug.@Marker IOError();\n" +
+				"			throw e;\n" +
+				"		} catch (test406469.bug.@NonNull IOError e) {\n" +
+				"		}\n" +
+				"		return null;\n" +
+				"	} \n" +
+				"	test406469.bug.@NonNull X.@NonNull Inner fInner;\n" +
+				"} \n" +
+				"@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_USE) @interface Marker {} \n" +
+				"\n" +
+				"class Outer {\n" +
+				"	public class Inner {\n" +
+				"		public class Deeper {}\n" +
+				"	}\n" +
+				"}\n" +
+				"class IOException extends Exception {private static final long serialVersionUID=10001L;}\n" +
+				"class FileNotFoundException extends Exception{private static final long serialVersionUID=10002L;}\n" +
+				"class EOFException extends Exception{private static final long serialVersionUID=10003L;}\n" +
+				"class IOError extends Exception{private static final long serialVersionUID=10004L;}\n";
+		assertEqualString(preview, contentsmodified);
 	}
 
 }

@@ -23,6 +23,10 @@
  *							bug 370639 - [compiler][resource] restore the default for resource leak warnings
  *							bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *							bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
+ *     Jesper S Moller <jesper@selskabet.org> - Contributions for
+ *							bug 378674 - "The method can be declared as static" is wrong
+ *        Andy Clement - Contributions for
+ *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -136,7 +140,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	if (this.binding.declaringClass.isMemberType() && !this.binding.declaringClass.isStatic()) {
 		// allocating a non-static member type without an enclosing instance of parent type
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335845
-		currentScope.resetDeclaringClassMethodStaticFlag(this.binding.declaringClass.enclosingType());
+		currentScope.tagAsAccessingEnclosingInstanceStateOf(this.binding.declaringClass.enclosingType(), false /* type variable access */);
+		// Reviewed for https://bugs.eclipse.org/bugs/show_bug.cgi?id=378674 :
+		// The corresponding problem (when called from static) is not produced until during code generation
 	}
 	manageEnclosingInstanceAccessIfNecessary(currentScope, flowInfo);
 	manageSyntheticAccessIfNecessary(currentScope, flowInfo);
@@ -182,7 +188,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	MethodBinding codegenBinding = this.binding.original();
 	ReferenceBinding allocatedType = codegenBinding.declaringClass;
 
-	codeStream.new_(allocatedType);
+	codeStream.new_(this.type, allocatedType);
 	boolean isUnboxing = (this.implicitConversion & TypeIds.UNBOXING) != 0;
 	if (valueRequired || isUnboxing) {
 		codeStream.dup();
@@ -219,7 +225,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 	}
 	// invoke constructor
 	if (this.syntheticAccessor == null) {
-		codeStream.invoke(Opcodes.OPC_invokespecial, codegenBinding, null /* default declaringClass */);
+		codeStream.invoke(Opcodes.OPC_invokespecial, codegenBinding, null /* default declaringClass */, this.typeArguments);
 	} else {
 		// synthetic accessor got some extra arguments appended to its signature, which need values
 		for (int i = 0,
@@ -500,7 +506,10 @@ public TypeBinding resolveType(BlockScope scope) {
 	  // ensure allocation type has methods:
 	  Dependencies.ensureBindingState(allocationType, ITranslationStates.STATE_LENV_DONE_FIELDS_AND_METHODS);
 // SH}
-	if (!(this.binding = scope.getConstructor(allocationType, argumentTypes, this)).isValidBinding()) {
+	this.binding = scope.getConstructor(allocationType, argumentTypes, this);
+	if (polyExpressionSeen && polyExpressionsHaveErrors(scope, this.binding, this.arguments, argumentTypes))
+		return null;
+	if (!this.binding.isValidBinding()) {
 //{ObjectTeams: baseclass decapsulation?
 	  boolean baseclassDecapsulationAllowed =
 						   this.type != null // null happens for enum constants
@@ -527,22 +536,6 @@ public TypeBinding resolveType(BlockScope scope) {
 // :giro
 	  }
 // SH}
-	}
-	if (polyExpressionSeen) {
-		boolean variableArity = this.binding.isVarargs();
-		final TypeBinding[] parameters = this.binding.parameters;
-		final int parametersLength = parameters.length;
-		for (int i = 0, length = this.arguments == null ? 0 : this.arguments.length; i < length; i++) {
-			Expression argument = this.arguments[i];
-			TypeBinding parameterType = i < parametersLength ? parameters[i] : parameters[parametersLength - 1];
-			if (argumentTypes[i] instanceof PolyTypeBinding) {
-				argument.setExpressionContext(INVOCATION_CONTEXT);
-				if (variableArity && i >= parametersLength - 1)
-					argument.tagAsEllipsisArgument();
-				argument.setExpectedType(parameterType);
-				argumentTypes[i] = argument.resolveType(scope);
-			}
-		}
 	}
 	if ((this.binding.tagBits & TagBits.HasMissingType) != 0) {
 		scope.problemReporter().missingTypeInConstructor(this, this.binding);

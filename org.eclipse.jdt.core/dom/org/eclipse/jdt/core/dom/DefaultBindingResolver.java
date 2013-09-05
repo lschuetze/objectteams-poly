@@ -1795,6 +1795,11 @@ class DefaultBindingResolver extends BindingResolver {
 					binding = typeBinding;
 				}
 			} else if (node instanceof TypeReference) {
+				if (type instanceof QualifiedType) {
+					return resolveTypeBindingForName(((QualifiedType)type).getName());
+				} else if (type instanceof PackageQualifiedType){
+					return resolveTypeBindingForName(((PackageQualifiedType)type).getName());
+				}
 				TypeReference typeReference = (TypeReference) node;
 				binding = typeReference.resolvedType;
 			} else if (node instanceof SingleNameReference && ((SingleNameReference)node).isTypeReference()) {

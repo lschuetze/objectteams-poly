@@ -1,10 +1,13 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: SourceElementNotifier.java 23404 2010-02-03 14:10:22Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -318,17 +321,17 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 		selectorSourceEnd = this.sourceEnds.get(methodDeclaration);
 		if (isInRange){
 			int currentModifiers = methodDeclaration.modifiers;
+			currentModifiers &= ExtraCompilerModifiers.AccJustFlag | ClassFileConstants.AccDeprecated;
 			if (isVarArgs)
 				currentModifiers |= ClassFileConstants.AccVarargs;
-
-			// remember deprecation so as to not lose it below
-			boolean deprecated = (currentModifiers & ClassFileConstants.AccDeprecated) != 0 || hasDeprecatedAnnotation(methodDeclaration.annotations);
+			if (hasDeprecatedAnnotation(methodDeclaration.annotations))
+				currentModifiers |= ClassFileConstants.AccDeprecated;
 
 			ISourceElementRequestor.MethodInfo methodInfo = new ISourceElementRequestor.MethodInfo();
 			methodInfo.isConstructor = true;
 			methodInfo.declarationStart = methodDeclaration.declarationSourceStart;
+			methodInfo.modifiers = currentModifiers;
 // Note(SH): OT: no callin flag in constructor ;-)
-			methodInfo.modifiers = deprecated ? (currentModifiers & ExtraCompilerModifiers.AccJustFlag) | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccJustFlag;
 			methodInfo.name = methodDeclaration.selector;
 			methodInfo.nameSourceStart = methodDeclaration.sourceStart;
 			methodInfo.nameSourceEnd = selectorSourceEnd;
@@ -378,11 +381,16 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 	selectorSourceEnd = this.sourceEnds.get(methodDeclaration);
 	if (isInRange) {
 		int currentModifiers = methodDeclaration.modifiers;
+//{ObjectTeams: additionally pass AccCallin:
+	/* orig:
+		currentModifiers &= ExtraCompilerModifiers.AccJustFlag | ClassFileConstants.AccDeprecated | ClassFileConstants.AccAnnotationDefault | ExtraCompilerModifiers.AccDefaultMethod;
+    :giro */
+		currentModifiers &= ExtraCompilerModifiers.AccJustFlag | ExtraCompilerModifiers.AccCallin | ClassFileConstants.AccDeprecated | ClassFileConstants.AccAnnotationDefault | ExtraCompilerModifiers.AccDefaultMethod;
+// SH}
 		if (isVarArgs)
 			currentModifiers |= ClassFileConstants.AccVarargs;
-
-		// remember deprecation so as to not lose it below
-		boolean deprecated = (currentModifiers & ClassFileConstants.AccDeprecated) != 0 || hasDeprecatedAnnotation(methodDeclaration.annotations);
+		if (hasDeprecatedAnnotation(methodDeclaration.annotations))
+			currentModifiers |= ClassFileConstants.AccDeprecated;
 
 		TypeReference returnType = methodDeclaration instanceof MethodDeclaration
 			? ((MethodDeclaration) methodDeclaration).returnType
@@ -390,13 +398,7 @@ protected void notifySourceElementRequestor(AbstractMethodDeclaration methodDecl
 		ISourceElementRequestor.MethodInfo methodInfo = new ISourceElementRequestor.MethodInfo();
 		methodInfo.isAnnotation = methodDeclaration instanceof AnnotationMethodDeclaration;
 		methodInfo.declarationStart = methodDeclaration.declarationSourceStart;
-//{ObjectTeams: special bitmask to pass selected bits:
-		int myJustFlags = ExtraCompilerModifiers.AccJustFlag | ExtraCompilerModifiers.AccCallin;
- 		methodInfo.modifiers = deprecated ? (currentModifiers & myJustFlags) | ClassFileConstants.AccDeprecated : currentModifiers & myJustFlags;
- /* orig:
-		methodInfo.modifiers = deprecated ? (currentModifiers & ExtraCompilerModifiers.AccJustFlag) | ClassFileConstants.AccDeprecated : currentModifiers & ExtraCompilerModifiers.AccJustFlag;
-   :giro */
-// SH,km}
+		methodInfo.modifiers = currentModifiers;
 		methodInfo.returnType = returnType == null ? null : CharOperation.concatWith(returnType.getParameterizedTypeName(), '.');
 		methodInfo.name = methodDeclaration.selector;
 		methodInfo.nameSourceStart = methodDeclaration.sourceStart;

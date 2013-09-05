@@ -22,6 +22,7 @@
  *     Jesper S Moller - Contributions for
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								Bug 378674 - "The method can be declared as static" is wrong
+ *  							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -2015,8 +2016,6 @@ public abstract class Scope {
 														fieldBinding.declaringClass,
 														name,
 														ProblemReasons.NonStaticReferenceInStaticContext);
-											} else if (methodScope != null) {
-												methodScope.resetEnclosingMethodStaticFlag();
 											}
 										}
 										if (receiverType == fieldBinding.declaringClass || compilerOptions().complianceLevel >= ClassFileConstants.JDK1_4) {
@@ -2416,7 +2415,7 @@ public abstract class Scope {
 												? ProblemReasons.NonStaticReferenceInConstructorInvocation
 												: ProblemReasons.NonStaticReferenceInStaticContext);
 									} else if (!methodBinding.isStatic() && methodScope != null) {
-										methodScope.resetDeclaringClassMethodStaticFlag(receiverType);
+										tagAsAccessingEnclosingInstanceStateOf(receiverType, false /* type variable access */);
 									}
 									if (inheritedHasPrecedence
 											|| receiverType == methodBinding.declaringClass
@@ -2628,6 +2627,19 @@ public abstract class Scope {
 		CompilationUnitScope unitScope = compilationUnitScope();
 		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_ENUM);
 		return unitScope.environment.getResolvedType(TypeConstants.JAVA_LANG_ENUM, this);
+	}
+
+	public final ReferenceBinding getJavaLangInvokeLambdaMetafactory() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_INVOKE_LAMBDAMETAFACTORY);
+		return unitScope.environment.getResolvedType(TypeConstants.JAVA_LANG_INVOKE_LAMBDAMETAFACTORY, this);
+	}
+
+	public final ReferenceBinding getJavaLangInvokeMethodHandlesLookup() {
+		CompilationUnitScope unitScope = compilationUnitScope();
+		unitScope.recordQualifiedReference(TypeConstants.JAVA_LANG_INVOKE_METHODHANDLES);
+		ReferenceBinding outerType = unitScope.environment.getResolvedType(TypeConstants.JAVA_LANG_INVOKE_METHODHANDLES, this);
+		return findDirectMemberType("Lookup".toCharArray(), outerType); //$NON-NLS-1$
 	}
 
 	public final ReferenceBinding getJavaLangIterable() {
@@ -3133,8 +3145,6 @@ public abstract class Scope {
 						if (typeVariable != null) {
 							if (insideStaticContext) // do not consider this type modifiers: access is legite within same type
 								return new ProblemReferenceBinding(new char[][]{name}, typeVariable, ProblemReasons.NonStaticReferenceInStaticContext);
-							else if (methodScope != null)
-								methodScope.resetEnclosingMethodStaticFlag();
 							return typeVariable;
 						}
 						insideStaticContext |= sourceType.isStatic();
@@ -4291,6 +4301,7 @@ public abstract class Scope {
 			public int sourceStart() { return invocationSite.sourceStart(); }
 			public int sourceEnd() { return invocationSite.sourceStart(); }
 			public TypeBinding expectedType() { return invocationSite.expectedType(); }
+			public boolean receiverIsImplicitThis() { return invocationSite.receiverIsImplicitThis();}
 		};
 		MethodBinding[] moreSpecific = new MethodBinding[visibleSize];
 		int count = 0;
@@ -4550,7 +4561,7 @@ public abstract class Scope {
 				TypeBinding param = parameters[i];
 				TypeBinding arg = arguments[i];
 				//https://bugs.eclipse.org/bugs/show_bug.cgi?id=330445
-				if (arg != param && !arg.isCompatibleWith(param.erasure()))
+				if (arg != param && !arg.isCompatibleWith(param.erasure(), this))
 					return NOT_COMPATIBLE;
 			}
 //{ObjectTeams: store successful parameters:
@@ -4945,5 +4956,38 @@ public abstract class Scope {
 				break;
 		}
 		return resolutionScope;
+	}
+	// Some entity in the receiver scope is referencing instance data of enclosing type. Tag all intervening methods as instance methods. 
+	public void tagAsAccessingEnclosingInstanceStateOf(ReferenceBinding enclosingType, boolean typeVariableAccess) {
+		MethodScope methodScope = methodScope();
+		if (methodScope != null && methodScope.referenceContext instanceof TypeDeclaration) {
+			if (!methodScope.enclosingReceiverType().isCompatibleWith(enclosingType)) { // unless invoking a method of the local type ...
+				// anonymous type, find enclosing method
+				methodScope = methodScope.enclosingMethodScope();
+			}
+		}
+		while (methodScope != null) {
+			while (methodScope != null && methodScope.referenceContext instanceof LambdaExpression) {
+				LambdaExpression lambda = (LambdaExpression) methodScope.referenceContext;
+				if (!typeVariableAccess)
+					lambda.shouldCaptureInstance = true;  // lambda can still be static, only when `this' is touched (implicitly or otherwise) it cannot be.
+				methodScope = methodScope.enclosingMethodScope();
+			}
+			if (methodScope != null) {
+				if (methodScope.referenceContext instanceof MethodDeclaration) {
+					MethodDeclaration methodDeclaration = (MethodDeclaration) methodScope.referenceContext;
+					methodDeclaration.bits &= ~ASTNode.CanBeStatic;
+				}
+				ClassScope enclosingClassScope = methodScope.enclosingClassScope();
+				if (enclosingClassScope != null) {
+					TypeDeclaration type = enclosingClassScope.referenceContext;
+					if (type != null && type.binding != null && enclosingType != null && !type.binding.isCompatibleWith(enclosingType.original())) {
+						methodScope = enclosingClassScope.enclosingMethodScope();
+						continue;
+					}
+				}
+				break;
+			}
+		}
 	}
 }

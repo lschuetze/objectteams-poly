@@ -32,8 +32,11 @@ import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
  * <p>
  * Note that the numeric values of these flags match the ones for class files
  * as described in the Java Virtual Machine Specification (except for
- * {@link #AccDefaultFlag}). The AST class <code>Modifier</code> provides
- * the same functionality as this class, only in the
+ * {@link #AccDeprecated} and {@link #AccDefaultMethod}).
+ * </p>
+ * <p>
+ * The AST class <code>Modifier</code> provides
+ * similar functionality as this class, only in the
  * <code>org.eclipse.jdt.core.dom</code> package.
  * </p>
  *
@@ -43,7 +46,7 @@ import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 public final class Flags {
 
 	/**
-	 * Constant representing the absence of any flag
+	 * Constant representing the absence of any flag.
 	 * @since 3.0
 	 */
 	public static final int AccDefault = ClassFileConstants.AccDefault;
@@ -118,7 +121,11 @@ public final class Flags {
 	 */
 	public static final int AccSynthetic = ClassFileConstants.AccSynthetic;
 	/**
-	 * Deprecated property flag. See The Java Virtual Machine Specification for more details.
+	 * Deprecated property flag.
+	 * <p>
+	 * Note that this flag's value is internal and is not defined in the
+	 * Virtual Machine specification.
+	 * </p>
 	 * @since 2.0
 	 */
 	public static final int AccDeprecated = ClassFileConstants.AccDeprecated;
@@ -153,13 +160,6 @@ public final class Flags {
 	 */
 	public static final int AccAnnotation = ClassFileConstants.AccAnnotation;
 
-	/**
-	 * Default property flag (added in J2SE 1.8).
-	 * Note that the flag's value is internal and is not defined in the
-	 * Virtual Machine specification.
-	 * @since 3.9
-	 */
-	public static final int AccDefaultFlag = ExtraCompilerModifiers.AccDefaultMethod;
 
 //	{ObjectTeams: Team, role, and callin constants added
 	 /**
@@ -176,6 +176,28 @@ public final class Flags {
 	  */
 	 public static final int AccCallin = ExtraCompilerModifiers.AccCallin;
 //	Markus Witte}
+
+	/**
+	 * Default method property flag.
+	 * <p>
+	 * Note that this flag's value is internal and is not defined in the
+	 * Virtual Machine specification.
+	 * </p>
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static final int AccDefaultMethod = ExtraCompilerModifiers.AccDefaultMethod;
+
+	/**
+	 * Annotation method default property flag.
+	 * Used to flag annotation type methods that declare a default value.
+	 * <p>
+	 * Note that this flag's value is internal and is not defined in the
+	 * Virtual Machine specification.
+	 * </p>
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static final int AccAnnotationDefault = ClassFileConstants.AccAnnotationDefault;
+
 	/**
 	 * Not instantiable.
 	 */
@@ -386,16 +408,16 @@ public final class Flags {
 	}
 
 	/**
-	 * Returns whether the given integer has the <code>AccDefaultFlag</code>
+	 * Returns whether the given integer has the <code>AccDefaultMethod</code>
 	 * bit set. Note that this flag represents the usage of the 'default' keyword
-	 * on a method and should not be confused with the default access visibility.
+	 * on a method and should not be confused with the 'package' access visibility (which used to be called 'default access').
 	 *
-	 * @return <code>true</code> if the <code>AccDefaultFlag</code> flag is included
-	 * @see #AccDefaultFlag
-	 * @since 3.9
+	 * @return <code>true</code> if the <code>AccDefaultMethod</code> flag is included
+	 * @see #AccDefaultMethod
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public static boolean isDefaultMethod(int flags) {
-		return (flags & AccDefaultFlag) != 0;
+		return (flags & AccDefaultMethod) != 0;
 	}
 
 //{ObjectTeams: more queries for element kinds:
@@ -434,20 +456,27 @@ public final class Flags {
 //}
 
 	/**
+	 * Returns whether the given integer has the <code>AccAnnnotationDefault</code>
+	 * bit set.
+	 *
+	 * @return <code>true</code> if the <code>AccAnnotationDefault</code> flag is included
+	 * @see #AccAnnotationDefault
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static boolean isAnnnotationDefault(int flags) {
+		return (flags & AccAnnotationDefault) != 0;
+	}
+	
+	/**
 	 * Returns a standard string describing the given modifier flags.
 	 * Only modifier flags are included in the output; deprecated,
 	 * synthetic, bridge, etc. flags are ignored.
 	 * <p>
 	 * The flags are output in the following order:
-	 * <pre>
-	 *   <code>public</code> <code>protected</code> <code>private</code>
-	 *   <code>static</code>
-	 *   <code>abstract</code> <code>final</code> <code>native</code> <code>synchronized</code> <code>transient</code> <code>volatile</code> <code>strictfp</code>
-	 *   <code>default</code>
-	 * </pre>
-	 * This is a compromise between the orders specified in sections 8.1.1,
-	 * 8.3.1, 8.4.3, 8.8.3, 9.1.1, and 9.3 of <em>The Java Language
-	 * Specification, Second Edition</em> (JLS2).
+	 * <pre> public protected private
+	 * abstract default static final synchronized native strictfp transient volatile</pre>
+	 * <p>
+	 * This order is consistent with the recommendations in JLS8 ("*Modifier:" rules in chapters 8 and 9).
 	 * </p>
 	 * <p>
 	 * Note that the flags of a method can include the AccVarargs flag that has no standard description. Since the AccVarargs flag has the same value as
@@ -479,24 +508,24 @@ public final class Flags {
 			sb.append("protected "); //$NON-NLS-1$
 		if (isPrivate(flags))
 			sb.append("private "); //$NON-NLS-1$
-		if (isStatic(flags))
-			sb.append("static "); //$NON-NLS-1$
 		if (isAbstract(flags))
 			sb.append("abstract "); //$NON-NLS-1$
+		if (isDefaultMethod(flags))
+			sb.append("default "); //$NON-NLS-1$
+		if (isStatic(flags))
+			sb.append("static "); //$NON-NLS-1$
 		if (isFinal(flags))
 			sb.append("final "); //$NON-NLS-1$
-		if (isNative(flags))
-			sb.append("native "); //$NON-NLS-1$
 		if (isSynchronized(flags))
 			sb.append("synchronized "); //$NON-NLS-1$
+		if (isNative(flags))
+			sb.append("native "); //$NON-NLS-1$
+		if (isStrictfp(flags))
+			sb.append("strictfp "); //$NON-NLS-1$
 		if (isTransient(flags))
 			sb.append("transient "); //$NON-NLS-1$
 		if (isVolatile(flags))
 			sb.append("volatile "); //$NON-NLS-1$
-		if (isStrictfp(flags))
-			sb.append("strictfp "); //$NON-NLS-1$
-		if (isDefaultMethod(flags))
-			sb.append("default "); //$NON-NLS-1$
 //{ObjectTeams: OT flags:
 		if (isTeam(flags))
 			sb.append("team "); //$NON-NLS-1$

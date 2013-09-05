@@ -840,7 +840,7 @@ public abstract class ASTNode {
 	 * <code>ExtraDimension</code>.
 	 *
 	 * @see ExtraDimension
-	 * @since 3.9
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public static final int EXTRA_DIMENSION = 85;
 
@@ -848,9 +848,26 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>LambdaExpression</code>.
 	 * @see LambdaExpression
-	 * @since 3.9
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public static final int LAMBDA_EXPRESSION = 86;
+
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>IntersectionType</code>.
+	 *
+	 * @see IntersectionType
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public static final int INTERSECTION_TYPE = 87;
+
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>QualifiedType</code>.
+	 * @see QualifiedType
+	 * @since 3.9 BETA_JAV8
+	 */
+	public static final int PACKAGE_QUALIFIED_TYPE = 88;
 
 //{ObjectTeams: required OT specific node type constants added
 
@@ -859,93 +876,93 @@ public abstract class ASTNode {
 	 * <code>MethodSpec</code>.
 	 * @see MethodSpec
 	 */
-	public static final int METHOD_SPEC = 87;
+	public static final int METHOD_SPEC = 89;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CallinMappingDeclaration</code>.
 	 * @see CallinMappingDeclaration
 	 */
-	public static final int CALLIN_MAPPING_DECLARATION = 88;
+	public static final int CALLIN_MAPPING_DECLARATION = 90;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CalloutMappingDeclaration</code>.
 	 * @see CalloutMappingDeclaration
 	 */
-	public static final int CALLOUT_MAPPING_DECLARATION = 89;
+	public static final int CALLOUT_MAPPING_DECLARATION = 91;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>LiftingType</code>.
 	 * @see LiftingType
 	 */
-	public static final int LIFTING_TYPE = 90;
+	public static final int LIFTING_TYPE = 92;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>WithinStatement</code>.
 	 * @see WithinStatement
 	 */
-	public static final int WITHIN_STATEMENT = 91;
+	public static final int WITHIN_STATEMENT = 93;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>BaseConstructorMessageSend</code>.
 	 * @see BaseConstructorInvocation
 	 */
-	public static final int BASE_CONSTRUCTOR_INVOCATION = 92;
+	public static final int BASE_CONSTRUCTOR_INVOCATION = 94;
 
     /**
      * Node type constant indicating a node of type
      * <code>ParameterMapping</code>.
      * @see ParameterMapping
      */
-    public static final int PARAMETER_MAPPING = 93;
+    public static final int PARAMETER_MAPPING = 95;
 
     /**
      * Node type constant indicating a node of type
      * <code>BaseCallMessageSend</code>.
      * @see BaseCallMessageSend
      */
-     public static final int BASE_CALL_MESSAGE_SEND = 94;
+     public static final int BASE_CALL_MESSAGE_SEND = 96;
 
      /**
  	 * Node type constant indicating a node of type
  	 * <code>FieldAccessSpec</code>.
  	 * @see FieldAccessSpec
  	 */
- 	public static final int FIELD_ACCESS_SPEC = 95;
+ 	public static final int FIELD_ACCESS_SPEC = 97;
 
     /**
      * Node type constant indicating a node of type
      * <code>RoleTypeDelaration</code>.
      * @see RoleTypeDeclaration
      */
-    public static final int ROLE_TYPE_DECLARATION = 96;
+    public static final int ROLE_TYPE_DECLARATION = 98;
 
     /**
      * Node type constant indicating a node of type
      * <code>TSuperMessageSend</code>.
      * @see TSuperMessageSend
      */
-     public static final int TSUPER_MESSAGE_SEND = 97;
+     public static final int TSUPER_MESSAGE_SEND = 99;
 
      /**
       * Node type constant indicating a node of type
       * <code>TSuperCallMessageSend</code>.
       * @see TSuperMessageSend
       */
-      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 98;
+      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 100;
 
-      public static final int TYPE_ANCHOR = 99;
+      public static final int TYPE_ANCHOR = 101;
 
-      public static final int PRECEDENCE_DECLARATION = 100;
+      public static final int PRECEDENCE_DECLARATION = 102;
 
-      public static final int GUARD_PREDICATE_DECLARATION = 101;
+      public static final int GUARD_PREDICATE_DECLARATION = 103;
 
       /** @since 1.3.1 */
-      public static final int METHOD_BINDING_OPERATOR = 102;
+      public static final int METHOD_BINDING_OPERATOR = 104;
 //gbr}
 
 	/**
@@ -1034,6 +1051,8 @@ public abstract class ASTNode {
 				return Initializer.class;
 			case INSTANCEOF_EXPRESSION :
 				return InstanceofExpression.class;
+			case INTERSECTION_TYPE:
+				return IntersectionType.class;
 			case JAVADOC :
 				return Javadoc.class;
 			case LABELED_STATEMENT :
@@ -1066,6 +1085,8 @@ public abstract class ASTNode {
 				return NumberLiteral.class;
 			case PACKAGE_DECLARATION :
 				return PackageDeclaration.class;
+			case PACKAGE_QUALIFIED_TYPE :
+				return PackageQualifiedType.class;
 			case PARAMETERIZED_TYPE :
 				return ParameterizedType.class;
 			case PARENTHESIZED_EXPRESSION :
@@ -2031,7 +2052,7 @@ public abstract class ASTNode {
      * </p>
      * 
 	 * @exception UnsupportedOperationException if this operation is used below JLS8
-	 * @since 3.9
+	 * @since 3.9 BETA_JAVA8
 	 */
 	final void unsupportedIn2_3_4() {
 		if (this.ast.apiLevel < AST.JLS8) {
@@ -2064,7 +2085,7 @@ public abstract class ASTNode {
      * </p>
      * 
 	 * @exception UnsupportedOperationException if this operation is used in an AST later than JLS4
-     * @since 3.9
+     * @since 3.9 BETA_JAVA8
      */
 	// In API Javadocs, add: * @deprecated In the JLS8 API, this method is replaced by {@link #replacement()}.
 	final void supportedOnlyIn2_3_4() {

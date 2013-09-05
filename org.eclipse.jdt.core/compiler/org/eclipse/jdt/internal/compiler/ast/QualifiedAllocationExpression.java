@@ -22,7 +22,11 @@
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *								bug 395977 - [compiler][resource] Resource leak warning behavior possibly incorrect for anonymous inner class
- *******************************************************************************/
+ *     Jesper S Moller <jesper@selskabet.org> - Contributions for
+ *								bug 378674 - "The method can be declared as static" is wrong
+ *        Andy Clement - Contributions for
+ *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
+ ******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
@@ -38,7 +42,6 @@ import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemMethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReferenceBinding;
@@ -146,10 +149,11 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				ReferenceBinding superclass = this.binding.declaringClass.superclass();
 				if (superclass != null && superclass.isMemberType() && !superclass.isStatic()) {
 					// creating an anonymous type of a non-static member type without an enclosing instance of parent type
-					currentScope.resetDeclaringClassMethodStaticFlag(superclass.enclosingType());
+					currentScope.tagAsAccessingEnclosingInstanceStateOf(superclass.enclosingType(), false /* type variable access */);
+					// Reviewed for https://bugs.eclipse.org/bugs/show_bug.cgi?id=378674 :
+					// The corresponding problem (when called from static) is not produced until during code generation
 				}
 			}
-			
 		}
 
 		// check captured variables are initialized in current context (26134)
@@ -224,7 +228,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		int pc = codeStream.position;
 		MethodBinding codegenBinding = this.binding.original();
 		ReferenceBinding allocatedType = codegenBinding.declaringClass;
-		codeStream.new_(allocatedType);
+		codeStream.new_(this.type, allocatedType);
 		boolean isUnboxing = (this.implicitConversion & TypeIds.UNBOXING) != 0;
 		if (valueRequired || isUnboxing) {
 			codeStream.dup();
@@ -261,7 +265,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 
 		// invoke constructor
 		if (this.syntheticAccessor == null) {
-			codeStream.invoke(Opcodes.OPC_invokespecial, codegenBinding, null /* default declaringClass */);
+			codeStream.invoke(Opcodes.OPC_invokespecial, codegenBinding, null /* default declaringClass */, this.typeArguments);
 		} else {
 			// synthetic accessor got some extra arguments appended to its signature, which need values
 			for (int i = 0,
@@ -541,32 +545,17 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
                         ITranslationStates.STATE_TYPES_ADJUSTED);
             AnchorMapping anchorMapping = AnchorMapping.setupNewMapping(
                     null, this.arguments, scope);
-/*original
-			if ((this.binding = scope.getConstructor(allocationType, argumentTypes, this)).isValidBinding()) {
-*/
-            try {
-	            this.binding = scope.getConstructor(allocationType, argumentTypes, this);
-            } finally {
+          try {
+   	// orig:
+   			this.binding = scope.getConstructor(allocationType, argumentTypes, this);
+    // :giro
+          } finally {
                 AnchorMapping.removeCurrentMapping(anchorMapping);
-            }
-			if (this.binding.isValidBinding()) {
+          }
 // SH}
-				if (polyExpressionSeen) {
-					boolean variableArity = this.binding.isVarargs();
-					final TypeBinding[] parameters = this.binding.parameters;
-					final int parametersLength = parameters.length;
-					for (int i = 0, length = this.arguments == null ? 0 : this.arguments.length; i < length; i++) {
-						Expression argument = this.arguments[i];
-						TypeBinding parameterType = i < parametersLength ? parameters[i] : parameters[parametersLength - 1];
-						if (argumentTypes[i] instanceof PolyTypeBinding) {
-							argument.setExpressionContext(INVOCATION_CONTEXT);
-							if (variableArity && i >= parametersLength - 1)
-								argument.tagAsEllipsisArgument();
-							argument.setExpectedType(parameterType);
-							argumentTypes[i] = argument.resolveType(scope);
-						}
-					}
-				}
+			if (polyExpressionSeen && polyExpressionsHaveErrors(scope, this.binding, this.arguments, argumentTypes))
+				return null;
+			if (this.binding.isValidBinding()) {
 				if (isMethodUseDeprecated(this.binding, scope, true)) {
 					scope.problemReporter().deprecatedMethod(this.binding, this);
 				}
@@ -648,6 +637,8 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 			return null; // stop secondary errors
 		}
 		MethodBinding inheritedBinding = scope.getConstructor(anonymousSuperclass, argumentTypes, this);
+		if (polyExpressionSeen && polyExpressionsHaveErrors(scope, inheritedBinding, this.arguments, argumentTypes))
+			return null;
 		if (!inheritedBinding.isValidBinding()) {
 			if (inheritedBinding.declaringClass == null) {
 				inheritedBinding.declaringClass = anonymousSuperclass;
@@ -658,22 +649,6 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 			}
 			scope.problemReporter().invalidConstructor(this, inheritedBinding);
 			return this.resolvedType;
-		}
-		if (polyExpressionSeen) {
-			boolean variableArity = inheritedBinding.isVarargs();
-			final TypeBinding[] parameters = inheritedBinding.parameters;
-			final int parametersLength = parameters.length;
-			for (int i = 0, length = this.arguments == null ? 0 : this.arguments.length; i < length; i++) {
-				Expression argument = this.arguments[i];
-				TypeBinding parameterType = i < parametersLength ? parameters[i] : parameters[parametersLength - 1];
-				if (argumentTypes[i] instanceof PolyTypeBinding) {
-					argument.setExpressionContext(INVOCATION_CONTEXT);
-					if (variableArity && i >= parametersLength - 1)
-						argument.tagAsEllipsisArgument();
-					argument.setExpectedType(parameterType);
-					argumentTypes[i] = argument.resolveType(scope);
-				}
-			}
 		}
 		if ((inheritedBinding.tagBits & TagBits.HasMissingType) != 0) {
 			scope.problemReporter().missingTypeInConstructor(this, inheritedBinding);
@@ -703,7 +678,6 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 	}
 
 	public void traverse(ASTVisitor visitor, BlockScope scope) {
-
 //{ObjectTeams: use the concrete class for this:
 		if (visitor.visit(_this(), scope)) {
 // SH}

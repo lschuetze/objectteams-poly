@@ -192,7 +192,7 @@ public final class AST {
 	 * up to and including Java SE 8 (aka JDK 1.8).
 	 * </p>
 	 *
-	 * @since 3.9
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public static final int JLS8 = 8;
 
@@ -802,6 +802,7 @@ public final class AST {
 	 * @return a new unparented node owned by this AST
 	 * @exception IllegalArgumentException if <code>nodeClass</code> is
 	 * <code>null</code> or is not a concrete node type class
+	 * or is not supported for this AST's API level
 	 * @since 3.0
 	 */
 	public ASTNode createInstance(Class nodeClass) {
@@ -828,7 +829,9 @@ public final class AST {
 		} catch (InvocationTargetException e) {
 			// concrete AST node classes do not die in the constructor
 			// therefore nodeClass is not legit
-			throw new IllegalArgumentException();
+			IllegalArgumentException iae = new IllegalArgumentException();
+			iae.initCause(e.getCause());
+			throw iae;
 		}
 	}
 
@@ -843,7 +846,7 @@ public final class AST {
 	 * constants declared on {@link ASTNode}
 	 * @return a new unparented node owned by this AST
 	 * @exception IllegalArgumentException if <code>nodeType</code> is
-	 * not a legal AST node type
+	 * not a legal AST node type or if it's not supported for this AST's API level
 	 * @since 3.0
 	 */
 	public ASTNode createInstance(int nodeType) {
@@ -1541,7 +1544,7 @@ public final class AST {
 	 * </ul>
 	 * @exception UnsupportedOperationException if this operation is used
 	 *            in a JLS2, JLS3 or JLS4 AST
-	 * @since 3.9
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public ExtraDimension newExtraDimension() {
 		ExtraDimension result = new ExtraDimension(this);
@@ -1760,7 +1763,7 @@ public final class AST {
 	 * 
 	 * @return a new unparented lambda expression node
 	 * @exception UnsupportedOperationException if this operation is used in a JLS2, JLS3 or JLS4 AST
-	 * @since 3.9
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public LambdaExpression newLambdaExpression() {
 		LambdaExpression result = new LambdaExpression(this);
@@ -1932,10 +1935,12 @@ public final class AST {
 	/**
 	 * Creates and returns a list of new unparented modifier nodes
 	 * for the given modifier flags. When multiple modifiers are
-	 * requested the modifiers nodes will appear in the following order:
-	 * public, protected, private, abstract, static, final, synchronized,
-	 * native, strictfp, transient, volatile, default. This order is consistent
-	 * with the recommendations in JLS2 8.1.1, 8.3.1, and 8.4.3.
+	 * requested, the modifier nodes will appear in the following order:
+	 * <pre> public protected private
+	 * abstract default static final synchronized native strictfp transient volatile</pre>
+	 * <p>
+	 * This order is consistent with the recommendations in JLS8 ("*Modifier:" rules in chapters 8 and 9).
+	 * </p>
 	 *
 	 * @param flags bitwise or of modifier flags declared on {@link Modifier}
 	 * @return a possibly empty list of new unparented modifier nodes
@@ -1961,6 +1966,9 @@ public final class AST {
 		if (Modifier.isAbstract(flags)) {
 			result.add(newModifier(Modifier.ModifierKeyword.ABSTRACT_KEYWORD));
 		}
+		if (Modifier.isDefault(flags)) {
+			result.add(newModifier(Modifier.ModifierKeyword.DEFAULT_KEYWORD));
+		}
 		if (Modifier.isStatic(flags)) {
 			result.add(newModifier(Modifier.ModifierKeyword.STATIC_KEYWORD));
 		}
@@ -1981,9 +1989,6 @@ public final class AST {
 		}
 		if (Modifier.isVolatile(flags)) {
 			result.add(newModifier(Modifier.ModifierKeyword.VOLATILE_KEYWORD));
-		}
-		if (Modifier.isDefaultMethod(flags)) {
-			result.add(newModifier(Modifier.ModifierKeyword.DEFAULT_KEYWORD));
 		}
 //{ObjectTeams: OT-specific modifiers (any context):
 		if (Modifier.isReplace(flags) || Modifier.isBefore(flags) || Modifier.isAfter(flags))
@@ -2154,6 +2159,29 @@ public final class AST {
 	 */
 	public PackageDeclaration newPackageDeclaration() {
 		PackageDeclaration result = new PackageDeclaration(this);
+		return result;
+	}
+
+	/**
+	 * Creates and returns a new unparented package qualified type node with
+	 * the given qualifier and name.
+	 *
+	 * @param qualifier the package qualifier type node
+	 * @param name the simple name being qualified
+	 * @return a new unparented qualified type node
+	 * @exception IllegalArgumentException if:
+	 * <ul>
+	 * <li>the node belongs to a different AST</li>
+	 * <li>the node already has a parent</li>
+	 * </ul>
+	 * @exception UnsupportedOperationException if this operation is used in
+	 * a JLS2, JLS3 and JLS4 AST
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public PackageQualifiedType newPackageQualifiedType(Name qualifier, SimpleName name) {
+		PackageQualifiedType result = new PackageQualifiedType(this);
+		result.setQualifier(qualifier);
+		result.setName(name);
 		return result;
 	}
 
@@ -2639,6 +2667,19 @@ public final class AST {
 	 */
 	public UnionType newUnionType() {
 		return new UnionType(this);
+	}
+
+	/**
+	 * Creates a new unparented intersection type node owned by this AST.
+	 * By default, the intersection type has no types.
+	 *
+	 * @return a new unparented IntersectionType node
+	 * @exception UnsupportedOperationException if this operation is used in
+	 * a JLS2, JLS3 or JLS4 AST
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public IntersectionType newIntersectionType() {
+		return new IntersectionType(this);
 	}
 
 	/**

@@ -23,6 +23,8 @@
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
+ *     Jesper S Moller <jesper@selskabet.org> - Contributions for
+ *								bug 378674 - "The method can be declared as static" is wrong
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -130,9 +132,6 @@ public FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowConte
 					currentScope.problemReporter().uninitializedBlankFinalField(lastFieldBinding, this);
 				}
 			}
-			if (!lastFieldBinding.isStatic()) {
-				currentScope.resetDeclaringClassMethodStaticFlag(lastFieldBinding.declaringClass);
-			}
 			break;
 		case Binding.LOCAL :
 			// first binding is a local variable
@@ -239,9 +238,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 						currentScope.problemReporter().uninitializedBlankFinalField(fieldBinding, this);
 					}
 				}
-			}
-			if (!fieldBinding.isStatic()) {
-				currentScope.resetDeclaringClassMethodStaticFlag(fieldBinding.declaringClass);
 			}
 			break;
 		case Binding.LOCAL : // reading a local variable
@@ -986,7 +982,7 @@ public FieldBinding lastFieldBinding() {
 
 public void manageEnclosingInstanceAccessIfNecessary(BlockScope currentScope, FlowInfo flowInfo) {
 	//If inlinable field, forget the access emulation, the code gen will directly target it
-	if (((this.bits & ASTNode.DepthMASK) == 0) || (this.constant != Constant.NotAConstant)) {
+	if (((this.bits & ASTNode.DepthMASK) == 0 && (this.bits & ASTNode.IsCapturedOuterLocal) == 0) || (this.constant != Constant.NotAConstant)) {
 		return;
 	}
 	if ((this.bits & ASTNode.RestrictiveFlagMASK) == Binding.LOCAL) {
@@ -1251,12 +1247,18 @@ public TypeBinding resolveType(BlockScope scope) {
 							scope.problemReporter().indirectAccessToStaticField(this, fieldBinding);
 						}						
 					} else {
-						if (this.indexOfFirstFieldBinding == 1 && scope.compilerOptions().getSeverity(CompilerOptions.UnqualifiedFieldAccess) != ProblemSeverities.Ignore) {
-							scope.problemReporter().unqualifiedFieldAccess(this, fieldBinding);
+						boolean inStaticContext = scope.methodScope().isStatic;
+						if (this.indexOfFirstFieldBinding == 1) {
+							if (scope.compilerOptions().getSeverity(CompilerOptions.UnqualifiedFieldAccess) != ProblemSeverities.Ignore) {
+								scope.problemReporter().unqualifiedFieldAccess(this, fieldBinding);
+							}
+							if (!inStaticContext) {
+								scope.tagAsAccessingEnclosingInstanceStateOf(fieldBinding.declaringClass, false /* type variable access */);
+							}
 						}
 						//must check for the static status....
 						if (this.indexOfFirstFieldBinding > 1  //accessing to a field using a type as "receiver" is allowed only with static field
-								 || scope.methodScope().isStatic) { 	// the field is the first token of the qualified reference....
+								 || inStaticContext) { 	// the field is the first token of the qualified reference....
 							scope.problemReporter().staticFieldAccessToNonStaticVariable(this, fieldBinding);
 							return null;
 						 }

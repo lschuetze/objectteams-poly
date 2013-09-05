@@ -13,6 +13,8 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Jesper S Moller - Contributions for
+ *							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335             
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.classfmt;
 
@@ -66,7 +68,7 @@ public interface ClassFileConstants {
 	int AccSuper = 0x0020;
 
 	/**
-	 * Extra flags for types and members attributes.
+	 * Extra flags for types and members attributes (not from the JVMS, should have been defined in ExtraCompilerModifiers).
 	 */
 	int AccAnnotationDefault = ASTNode.Bit18; // indicate presence of an attribute  "DefaultValue" (annotation method)
 	int AccDeprecated = ASTNode.Bit21; // indicate presence of an attribute "Deprecated"
@@ -100,6 +102,17 @@ public interface ClassFileConstants {
 	int ConstantMethodHandleFixedSize = 4;
 	int ConstantMethodTypeFixedSize = 3;
 	int ConstantInvokeDynamicFixedSize = 5;
+
+	// JVMS 4.4.8
+	int MethodHandleRefKindGetField = 1;
+	int MethodHandleRefKindGetStatic = 2;
+	int MethodHandleRefKindPutField = 3;
+	int MethodHandleRefKindPutStatic = 4;
+	int MethodHandleRefKindInvokeVirtual = 5;
+	int MethodHandleRefKindInvokeStatic = 6;
+	int MethodHandleRefKindInvokeSpecial = 7;
+	int MethodHandleRefKindNewInvokeSpecial = 8;
+	int MethodHandleRefKindInvokeInterface = 9;
 
 	int MAJOR_VERSION_1_1 = 45;
 	int MAJOR_VERSION_1_2 = 46;
