@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IAnnotation;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -142,6 +143,13 @@ public class SourceTypeConverter extends TypeConverter {
 
 		/* convert package and imports */
 		String[] packageName = ((PackageFragment) cuHandle.getParent()).names;
+//{ObjectTeams: try resilience (see https://bugs.eclipse.org/407223)
+		if (packageName.length == 0) {
+			IPackageDeclaration[] pDecls = cuHandle.getPackageDeclarations();
+			if (pDecls != null && pDecls.length > 0)
+				packageName = pDecls[0].getElementName().split("\\."); //$NON-NLS-1$
+		}
+// SH}
 		if (packageName.length > 0)
 			// if its null then it is defined in the default package
 //{ObjectTeams: also pass package modifiers ('team')

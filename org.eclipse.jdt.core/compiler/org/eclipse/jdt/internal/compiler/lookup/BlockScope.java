@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -23,6 +23,9 @@
  *								bug 379784 - [compiler] "Method can be static" is not getting reported
  *								bug 394768 - [compiler][resource] Incorrect resource leak warning when creating stream in conditional
  *								bug 404649 - [1.8][compiler] detect illegal reference to indirect or redundant super
+ *     Jesper S Moller <jesper@selskabet.org> - Contributions for
+ *								bug 378674 - "The method can be declared as static" is wrong
+ *     Keigo Imai - Contribution for  bug 388903 - Cannot extend inner class as an anonymous class when it extends the outer class
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -719,6 +722,8 @@ private Binding internalGetBinding(char[][] compoundName, int mask, InvocationSi
 				field.declaringClass,
 				CharOperation.concatWith(CharOperation.subarray(compoundName, 0, currentIndex), '.'),
 				ProblemReasons.NonStaticReferenceInStaticContext);
+		// Since a qualified reference must be for a static member, it won't affect static-ness of the enclosing method, 
+		// so we don't have to call resetEnclosingMethodStaticFlag() in this case
 		return binding;
 	}
 	if ((mask & Binding.TYPE) != 0 && (binding instanceof ReferenceBinding)) {
@@ -928,10 +933,13 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 	// use synthetic constructor arguments if possible
 	if (insideConstructor) {
 		SyntheticArgumentBinding syntheticArg;
-		if ((syntheticArg = ((NestedTypeBinding) sourceType).getSyntheticArgument(targetEnclosingType, onlyExactMatch)) != null) {
+		if ((syntheticArg = ((NestedTypeBinding) sourceType).getSyntheticArgument(targetEnclosingType, onlyExactMatch, currentMethodScope.isConstructorCall)) != null) {
+			boolean isAnonymousAndHasEnclosing = sourceType.isAnonymousType()
+				&& sourceType.scope.referenceContext.allocation.enclosingInstance != null;
 			// reject allocation and super constructor call
 			if (denyEnclosingArgInConstructorCall
 					&& currentMethodScope.isConstructorCall
+					&& !isAnonymousAndHasEnclosing
 					&& (sourceType == targetEnclosingType || (!onlyExactMatch && sourceType.findSuperTypeOriginatingFrom(targetEnclosingType) != null))) {
 				return BlockScope.NoEnclosingInstanceInConstructorCall;
 			}
@@ -943,7 +951,7 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 	if (currentMethodScope.isStatic && sourceType.isRole())
 	{
 		SyntheticArgumentBinding syntheticArg;
-		if ((syntheticArg = ((NestedTypeBinding) sourceType).getSyntheticArgument(targetEnclosingType, onlyExactMatch)) != null) {
+		if ((syntheticArg = ((NestedTypeBinding) sourceType).getSyntheticArgument(targetEnclosingType, onlyExactMatch, false)) != null) {
 			return new Object[] { syntheticArg };
 		}
 	}
@@ -962,7 +970,7 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 		ReferenceBinding enclosingType = sourceType.enclosingType();
 		if (enclosingType.isNestedType()) {
 			NestedTypeBinding nestedEnclosingType = (NestedTypeBinding) enclosingType;
-			SyntheticArgumentBinding enclosingArgument = nestedEnclosingType.getSyntheticArgument(nestedEnclosingType.enclosingType(), onlyExactMatch);
+			SyntheticArgumentBinding enclosingArgument = nestedEnclosingType.getSyntheticArgument(nestedEnclosingType.enclosingType(), onlyExactMatch, currentMethodScope.isConstructorCall);
 			if (enclosingArgument != null) {
 				FieldBinding syntheticField = sourceType.getSyntheticField(enclosingArgument);
 				if (syntheticField != null) {
@@ -984,7 +992,7 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 	Object[] path = new Object[2]; // probably at least 2 of them
 	ReferenceBinding currentType = sourceType.enclosingType();
 	if (insideConstructor) {
-		path[0] = ((NestedTypeBinding) sourceType).getSyntheticArgument(currentType, onlyExactMatch);
+		path[0] = ((NestedTypeBinding) sourceType).getSyntheticArgument(currentType, onlyExactMatch, currentMethodScope.isConstructorCall);
 	} else {
 		if (currentMethodScope.isConstructorCall){
 			return BlockScope.NoEnclosingInstanceInConstructorCall;
@@ -993,7 +1001,7 @@ public Object[] getEmulationPath(ReferenceBinding targetEnclosingType, boolean o
 	  if (currentMethodScope.isStatic && sourceType.isRole())
 	  {
 		  SyntheticArgumentBinding syntheticArg;
-		  if ((syntheticArg = ((NestedTypeBinding) sourceType).getSyntheticArgument(currentType, onlyExactMatch)) != null)
+		  if ((syntheticArg = ((NestedTypeBinding) sourceType).getSyntheticArgument(currentType, onlyExactMatch, false)) != null)
 			  path[0] = syntheticArg;
 		  else
 			  return null;

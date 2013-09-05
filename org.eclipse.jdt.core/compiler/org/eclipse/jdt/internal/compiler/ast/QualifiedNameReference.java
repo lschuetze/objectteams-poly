@@ -23,6 +23,9 @@
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
+ *								bug 402993 - [null] Follow up of bug 401088: Missing warning about redundant null check
+ *     Jesper S Moller <jesper@selskabet.org> - Contributions for
+ *								bug 378674 - "The method can be declared as static" is wrong
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -129,9 +132,6 @@ public FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowConte
 				if (!fieldInits.isDefinitelyAssigned(lastFieldBinding)) {
 					currentScope.problemReporter().uninitializedBlankFinalField(lastFieldBinding, this);
 				}
-			}
-			if (!lastFieldBinding.isStatic()) {
-				currentScope.resetDeclaringClassMethodStaticFlag(lastFieldBinding.declaringClass);
 			}
 			break;
 		case Binding.LOCAL :
@@ -240,9 +240,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 					}
 				}
 			}
-			if (!fieldBinding.isStatic()) {
-				currentScope.resetDeclaringClassMethodStaticFlag(fieldBinding.declaringClass);
-			}
 			break;
 		case Binding.LOCAL : // reading a local variable
 			LocalVariableBinding localBinding;
@@ -286,9 +283,7 @@ private void checkInternalNPE(BlockScope scope, FlowContext flowContext, FlowInf
 			}
 			flowInfo.markAsComparedEqualToNonNull(local);
 			// from thereon it is set
-			if (flowContext.initsOnFinally != null) {
-				flowContext.markFinallyNullStatus(local, FlowInfo.NON_NULL);
-			}
+			flowContext.markFinallyNullStatus(local, FlowInfo.NON_NULL);
 		}
 	}
 	if (this.otherBindings != null) {

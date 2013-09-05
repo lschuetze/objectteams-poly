@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,7 @@
  *								Bug 265744 - Enum switch should warn about missing default
  *								Bug 374605 - Unreasonable warning for enum-based switch statements
  *								bug 388739 - [1.8][compiler] consider default methods when detecting whether a class needs to be declared abstract
+ *								Bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 

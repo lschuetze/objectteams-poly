@@ -105,6 +105,12 @@ public class MySetup extends TestSetup
         comment.append(" * ${tags}\n");
         comment.append(" */");
         StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, comment.toString(), null);
+
+        comment = new StringBuffer();
+        comment.append("/**\n");
+        comment.append(" * Object Teams Test File Header\n");
+        comment.append(" */");
+        StubUtility.setCodeTemplate(CodeTemplateContextType.FILECOMMENT_ID, comment.toString(), null);
     }
 
     protected void tearDown() throws Exception

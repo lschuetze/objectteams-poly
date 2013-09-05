@@ -25,6 +25,9 @@
  *							bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *        Andy Clement - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
+ *							bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+ *     Jesper S Moller <jesper@selskabet.org> - Contributions for
+ *							bug 378674 - "The method can be declared as static" is wrong
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -109,10 +112,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			if (analyseResources && !hasResourceWrapperType) { // allocation of wrapped closeables is analyzed specially
 				flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.arguments[i], flowInfo, flowContext, false);
 			}
-			if ((this.arguments[i].implicitConversion & TypeIds.UNBOXING) != 0) {
-				this.arguments[i].checkNPE(currentScope, flowContext, flowInfo);
+			this.arguments[i].checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
 			}
-		}
 		analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
 	}
 
@@ -139,6 +140,8 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		// allocating a non-static member type without an enclosing instance of parent type
 		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=335845
 		currentScope.resetDeclaringClassMethodStaticFlag(this.binding.declaringClass.enclosingType());
+		// Reviewed for https://bugs.eclipse.org/bugs/show_bug.cgi?id=378674 :
+		// The corresponding problem (when called from static) is not produced until during code generation
 	}
 	manageEnclosingInstanceAccessIfNecessary(currentScope, flowInfo);
 	manageSyntheticAccessIfNecessary(currentScope, flowInfo);

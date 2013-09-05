@@ -15,17 +15,15 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 
 /**
  * Test suite to verify that DOM/AST bugs are fixed.
  *
  * Note that only specific JLS4 tests are defined in this test suite, but when
- * running it, all superclass {@link ASTConverterBugsTest} tests will be run
+ * running it, all superclass {@link ASTConverterBugsTestJLS3} tests will be run
  * as well.
  */
-public class ASTConverterBugsTestJLS4 extends ASTConverterBugsTest {
+public class ASTConverterBugsTestJLS4 extends ASTConverterBugsTestJLS3 {
 
 public ASTConverterBugsTestJLS4(String name) {
     super(name);
@@ -34,7 +32,7 @@ public ASTConverterBugsTestJLS4(String name) {
 
 public static Test suite() {
 	TestSuite suite = new Suite(ASTConverterBugsTestJLS4.class.getName());
-	List tests = buildTestsList(ASTConverterBugsTestJLS4.class, 1, 0/* do not sort*/);
+	List tests = buildTestsList(ASTConverterBugsTestJLS4.class, 2, 0/* do not sort*/);
 	for (int index=0, size=tests.size(); index<size; index++) {
 		suite.addTest((Test)tests.get(index));
 	}

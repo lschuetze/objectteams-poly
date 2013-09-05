@@ -26,6 +26,7 @@
  *								bug 401796 - [1.8][compiler] don't treat default methods as overriding an independent inherited abstract method
  *								bug 403867 - [1.8][compiler] Suspect error about duplicate default methods
  *								bug 391376 - [1.8] check interaction of default methods with bridge methods and generics
+ *								bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -51,14 +52,13 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
  * What: integrate changes done in MethodVerifier
  * How:  + make sure methods still override those from MethodVerifier (added 3. arg)
  *       + invoke areRoleTypesEqual()
- *
- * @version $Id: MethodVerifier15.java 23404 2010-02-03 14:10:22Z stephan $
  */
 class MethodVerifier15 extends MethodVerifier {
 
 MethodVerifier15(LookupEnvironment environment) {
 	super(environment);
 }
+
 // Given `overridingMethod' which overrides `inheritedMethod' answer whether some subclass method that
 // differs in erasure from overridingMethod could override `inheritedMethod'
 protected boolean canOverridingMethodDifferInErasure(MethodBinding overridingMethod, MethodBinding inheritedMethod) {
@@ -698,7 +698,7 @@ boolean isSkippableOrOverridden(MethodBinding specific, MethodBinding general, b
 	} else if (specificIsInterface == generalIsInterface) { 
 		if (isParameterSubsignature(specific, general)) {
 			skip[idx] = true;
-			isOverridden[idx] |= specific.declaringClass.isCompatibleWith(general.declaringClass);
+			isOverridden[idx] = specific.declaringClass.isCompatibleWith(general.declaringClass);
 			return true;
 		}
 	}

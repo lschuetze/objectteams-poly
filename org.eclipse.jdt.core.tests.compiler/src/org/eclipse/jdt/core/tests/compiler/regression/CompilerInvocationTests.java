@@ -1119,6 +1119,7 @@ public void _test011_problem_categories() {
         expectedProblemAttributes.put("UnexpectedAnnotationStructure", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         expectedProblemAttributes.put("IncompatibleOTJByteCodeVersion", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         expectedProblemAttributes.put("AbstractStaticMethodCalled", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
+        expectedProblemAttributes.put("RoleFileMissingTeamDeclaration", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
 //SH}
 		StringBuffer failures = new StringBuffer();
 		StringBuffer correctResult = new StringBuffer(70000);
@@ -2513,6 +2514,7 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("BaseMigrateNonRole", SKIP);
         expectedProblemAttributes.put("BaseMigrateUnboundRole", SKIP);
         expectedProblemAttributes.put("MigrateToWrongBase", SKIP);
+        expectedProblemAttributes.put("RoleFileMissingTeamDeclaration", SKIP);
 //SH}
 		Map constantNamesIndex = new HashMap();
 		Field[] fields = JavaCore.class.getFields();

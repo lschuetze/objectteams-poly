@@ -342,10 +342,10 @@ public class CallinMappingDeclaration extends AbstractMethodMappingDeclaration
 		{
 			// visit children in normal left to right reading order
 			acceptChild(visitor, getJavadoc());
-			acceptChild(visitor, this._labelName);
-			acceptChild(visitor, this._roleMappingElement);
 			if (this.ast.apiLevel >= AST.JLS3_INTERNAL)
 				acceptChildren(visitor, this.modifiers);
+			acceptChild(visitor, this._labelName);
+			acceptChild(visitor, this._roleMappingElement);
 			acceptChild(visitor, this.bindingOperator);
 			acceptChildren(visitor, this._baseMappingElements);
 			acceptChild(visitor, this.getGuardPredicate());

@@ -76,6 +76,10 @@ public class ImplicitNullAnnotationVerifier {
 			if (currentType.id == TypeIds.T_JavaLangObject) {
 				return;
 			}
+//{ObjectTeams: other top types:
+			if (TypeAnalyzer.isTopConfined(currentType))
+				return;
+// SH}
 			boolean needToApplyNonNullDefault = currentMethod.hasNonNullDefault();
 			// compatibility & inheritance do not consider constructors / static methods:
 			boolean isInstanceMethod = !currentMethod.isConstructor() && !currentMethod.isStatic();
@@ -143,6 +147,10 @@ public class ImplicitNullAnnotationVerifier {
 	{
 		if (currentType.id == TypeIds.T_JavaLangObject)
 			return;
+//{ObjectTeams: other top types:
+		if (TypeAnalyzer.isTopConfined(currentType))
+			return;
+// SH}
 
 		// superclass:
 		collectOverriddenMethods(original, selector, suggestedParameterLength, currentType.superclass(), ifcsSeen, result);

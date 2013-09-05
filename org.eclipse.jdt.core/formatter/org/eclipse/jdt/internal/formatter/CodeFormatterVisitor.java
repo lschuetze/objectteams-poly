@@ -147,6 +147,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.ast.LiftingTypeRefere
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.MethodSpec;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.ParameterMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.PrecedenceDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.QualifiedBaseReference;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.WithinStatement;
 import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transformer.MethodSignatureEnhancer;
 import org.eclipse.text.edits.TextEdit;
@@ -575,9 +577,20 @@ public class CodeFormatterVisitor extends ASTVisitor {
 								this.scribe.printNextToken(operators[i], this.preferences.insert_space_before_binary_operator);
 								this.scribe.alignFragment(binaryExpressionAlignment, i);
 							}
-							if (operators[i] == TerminalTokens.TokenNameMINUS && isNextToken(TerminalTokens.TokenNameMINUS)) {
-								// the next character is a minus (unary operator)
-								this.scribe.space();
+							switch(operators[i]) {
+								case TerminalTokens.TokenNameMINUS :
+									if (isNextToken(TerminalTokens.TokenNameMINUS)
+											|| isNextToken(TerminalTokens.TokenNameMINUS_MINUS)) {
+										// the next character is a '-' or '--' (unary operator)
+										this.scribe.space();
+									}
+									break;
+								case TerminalTokens.TokenNamePLUS :
+									if (isNextToken(TerminalTokens.TokenNamePLUS)
+											|| isNextToken(TerminalTokens.TokenNamePLUS_PLUS)) {
+										// the next character is a + or ++ (unary operator)
+										this.scribe.space();
+									}
 							}
 							if (this.preferences.insert_space_after_binary_operator) {
 								this.scribe.space();
@@ -2017,7 +2030,13 @@ public class CodeFormatterVisitor extends ASTVisitor {
 							break;
 					}
 					try {
+//{ObjectTeams: some synthetic arguments are hidden, don't try to separate them with ','
+						boolean previousIsHidden = false;
+// orig:
 						for (int i = 0; i < argumentsLength; i++) {
+//   OT:
+						  if (!previousIsHidden) {
+//   :TO
 							if (i > 0) {
 								this.scribe.printNextToken(TerminalTokens.TokenNameCOMMA, this.preferences.insert_space_before_comma_in_method_invocation_arguments);
 								this.scribe.printComment(CodeFormatter.K_UNKNOWN, Scribe.BASIC_TRAILING_COMMENT);
@@ -2031,6 +2050,11 @@ public class CodeFormatterVisitor extends ASTVisitor {
 							if (i > 0 && this.preferences.insert_space_after_comma_in_method_invocation_arguments) {
 								this.scribe.space();
 							}
+//    OT:
+						  } else { // only this one line left of the above block:
+							this.scribe.alignFragment(argumentsAlignment, i);
+						  }
+//    :TO
 							int fragmentIndentation = 0;
 							if (i == 0) {
 								int wrappedIndex = argumentsAlignment.wrappedIndex();
@@ -2041,6 +2065,10 @@ public class CodeFormatterVisitor extends ASTVisitor {
 									}
 								}
 							}
+//   OT:
+						  previousIsHidden = ((arguments[i].bits & ASTNode.IsGenerated) != 0);
+						  if (!previousIsHidden)
+// SH}
 							arguments[i].traverse(this, scope);
 							argumentsAlignment.startingColumn = -1;
 						}
@@ -5335,6 +5363,11 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		}
 		qualifiedThisReference.qualification.traverse(this, scope);
 		this.scribe.printNextToken(TerminalTokens.TokenNameDOT);
+//{ObjectTeams: could be either 'this' or 'base':
+	  if (qualifiedThisReference instanceof QualifiedBaseReference)
+		this.scribe.printNextToken(TerminalTokens.TokenNamebase);
+	  else
+// SH}
 		this.scribe.printNextToken(TerminalTokens.TokenNamethis);
 
 		if (numberOfParens > 0) {
@@ -5342,7 +5375,34 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		}
 		return false;
 	}
+//{ObjectTeams: as a type anchor in a playedBy clause even a qualified this reference can occur in classScope:
+	/**
+	 * @see org.eclipse.jdt.internal.compiler.ASTVisitor#visit(org.eclipse.jdt.internal.compiler.ast.QualifiedThisReference, org.eclipse.jdt.internal.compiler.lookup.BlockScope)
+	 */
+	public boolean visit(
+		QualifiedThisReference qualifiedThisReference,
+		ClassScope scope) {
 
+		final int numberOfParens = (qualifiedThisReference.bits & ASTNode.ParenthesizedMASK) >> ASTNode.ParenthesizedSHIFT;
+		if (numberOfParens > 0) {
+			manageOpeningParenthesizedExpression(qualifiedThisReference, numberOfParens);
+		}
+		qualifiedThisReference.qualification.traverse(this, scope);
+		this.scribe.printNextToken(TerminalTokens.TokenNameDOT);
+// adapted:
+		if (qualifiedThisReference instanceof QualifiedBaseReference)
+			this.scribe.printNextToken(TerminalTokens.TokenNamebase);
+		else
+//
+			this.scribe.printNextToken(TerminalTokens.TokenNamethis);
+
+		if (numberOfParens > 0) {
+			manageClosingParenthesizedExpression(qualifiedThisReference, numberOfParens);
+		}
+		return false;
+	}
+// SH}
+	
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.ASTVisitor#visit(org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference, org.eclipse.jdt.internal.compiler.lookup.BlockScope)
 	 */
@@ -6517,6 +6577,16 @@ public class CodeFormatterVisitor extends ASTVisitor {
 			formatNecessaryEmptyStatement();
 		}
 		return false;
+	}
+	
+	public boolean visit(TypeAnchorReference anchorRef, ClassScope scope) {
+		this.scribe.printNextToken(TerminalTokens.TokenNameAT);
+		return true;
+	}
+	
+	public boolean visit(TypeAnchorReference anchorRef, BlockScope scope) {
+		this.scribe.printNextToken(TerminalTokens.TokenNameAT);
+		return true;
 	}
 
 	// Copy of formatMethodArguments

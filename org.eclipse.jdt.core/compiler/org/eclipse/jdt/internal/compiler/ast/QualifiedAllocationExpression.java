@@ -24,7 +24,10 @@
  *								bug 395977 - [compiler][resource] Resource leak warning behavior possibly incorrect for anonymous inner class
  *        Andy Clement - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
- *******************************************************************************/
+ *								bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+ *     Jesper S Moller <jesper@selskabet.org> - Contributions for
+ *								bug 378674 - "The method can be declared as static" is wrong
+ ******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
@@ -148,6 +151,8 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				if (superclass != null && superclass.isMemberType() && !superclass.isStatic()) {
 					// creating an anonymous type of a non-static member type without an enclosing instance of parent type
 					currentScope.resetDeclaringClassMethodStaticFlag(superclass.enclosingType());
+					// Reviewed for https://bugs.eclipse.org/bugs/show_bug.cgi?id=378674 :
+					// The corresponding problem (when called from static) is not produced until during code generation
 				}
 			}
 		}
@@ -172,9 +177,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 					// if argument is an AutoCloseable insert info that it *may* be closed (by the target method, i.e.)
 					flowInfo = FakedTrackingVariable.markPassedToOutside(currentScope, this.arguments[i], flowInfo, flowContext, false);
 				}
-				if ((this.arguments[i].implicitConversion & TypeIds.UNBOXING) != 0) {
-					this.arguments[i].checkNPE(currentScope, flowContext, flowInfo);
-				}
+				this.arguments[i].checkNPEbyUnboxing(currentScope, flowContext, flowInfo);
 			}
 			analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
 		}

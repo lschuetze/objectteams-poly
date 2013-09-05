@@ -12,7 +12,7 @@ public team class T_testTypeAnchor1 {
 	}
 	public static void main(String[] args) {
 		final T_testTypeAnchor1 t1 = new T_testTypeAnchor1();
-		final InnerTeam<@t1> extracted=t1.it;
+		final InnerTeam<@t1> extracted = t1.it;
 		R1<@extracted> r1 = null;
 	}
 }

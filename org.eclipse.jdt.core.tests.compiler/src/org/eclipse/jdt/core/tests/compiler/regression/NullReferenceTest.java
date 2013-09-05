@@ -30,6 +30,10 @@
  *							bug 401088 - [compiler][null] Wrong warning "Redundant null check" inside nested try statement
  *							bug 401092 - [compiler][null] Wrong warning "Redundant null check" in outer catch of nested try
  *							bug 400761 - [compiler][null] null may be return as boolean without a diagnostic
+ *							bug 402993 - [null] Follow up of bug 401088: Missing warning about redundant null check
+ *							bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+ *							bug 384380 - False positive on a « Potential null pointer access » after a continue
+ *							bug 406384 - Internal error with I20130413
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -58,9 +62,9 @@ public NullReferenceTest(String name) {
 // Only the highest compliance level is run; add the VM argument
 // -Dcompliance=1.4 (for example) to lower it if needed
 static {
-//		TESTS_NAMES = new String[] { "test0037_conditional_expression" };
-//		TESTS_NAMES = new String[] { "test0515_try_finally" };
-//		TESTS_NAMES = new String[] { "testBug319201c" };
+//		TESTS_NAMES = new String[] { "test0037_autounboxing_3" };
+//		TESTS_NAMES = new String[] { "testBug401088" };
+//		TESTS_NAMES = new String[] { "testBug402993" };
 //		TESTS_NUMBERS = new int[] { 561 };
 //		TESTS_RANGE = new int[] { 1, 2049 };
 }
@@ -1024,6 +1028,265 @@ public void test0037_conditional_expression_5() {
 		"----------\n",
 	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
+// https://bugs.eclipse.org/403147 [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+// finally block injects pot-nn into itself via enclosing loop
+public void test0037_autounboxing_1() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+	Map options = getCompilerOptions();
+	options.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.ERROR);
+	runNegativeTest(
+		true,
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	void foo1(boolean b) {\n" +
+			"       int j = 0;\n" + 
+			"       Integer i = null;\n" + 
+			"       while (true) {\n" + 
+			"           try {\n" + 
+			"               j = 1;\n" + 
+			"           } finally {\n" + 
+			"               j = (b?i:1)+1;\n" + 
+			"               i = 2;\n" + 
+			"           }\n" + 
+			"       }\n" + 
+			"   }\n" +
+			"	void foo2(boolean b) {\n" +
+			"       int j = 0;\n" + 
+			"       Integer i = null;\n" + 
+			"       try {\n" + 
+			"           j = 1;\n" + 
+			"       } finally {\n" + 
+			"           j = (b?i:1)+1;\n" + 
+			"           i = 2;\n" + 
+			"       }\n" + 
+			"   }\n" +
+			"}\n"},
+		null,
+		options,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 9)\n" + 
+		"	j = (b?i:1)+1;\n" + 
+		"	       ^\n" + 
+		"Potential null pointer access: This expression of type Integer may be null but requires auto-unboxing\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 20)\n" + 
+		"	j = (b?i:1)+1;\n" + 
+		"	       ^\n" + 
+		"Null pointer access: This expression of type Integer is null but requires auto-unboxing\n" + 
+		"----------\n",
+	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/403147 [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+// inject pot.nn from try into finally 
+public void test0037_autounboxing_2() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+	Map options = getCompilerOptions();
+	options.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.ERROR);
+	runNegativeTest(
+		true,
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	void foo2(boolean b) {\n" + 
+			"       int j = 0;\n" + 
+			"       Integer i = null;\n" + 
+			"       while (true) {\n" + 
+			"           try {\n" + 
+			"               if (b)\n" + 
+			"                   i = 3;\n" + 
+			"           } finally {\n" + 
+			"               j = (b?i:1)+1;\n" + 
+			"           }\n" + 
+			"       }\n" + 
+			"   }\n" +
+			"	void foo3(boolean b) {\n" + 
+			"       int j = 0;\n" + 
+			"       Integer i = null;\n" + 
+			"       try {\n" + 
+			"           if (b)\n" + 
+			"               i = 3;\n" + 
+			"       } finally {\n" + 
+			"           j = (b?i:1)+1;\n" + 
+			"       }\n" + 
+			"   }\n" +
+			"}\n"},
+		null,
+		options,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 10)\n" + 
+		"	j = (b?i:1)+1;\n" + 
+		"	       ^\n" + 
+		"Potential null pointer access: This expression of type Integer may be null but requires auto-unboxing\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 21)\n" + 
+		"	j = (b?i:1)+1;\n" + 
+		"	       ^\n" + 
+		"Potential null pointer access: This expression of type Integer may be null but requires auto-unboxing\n" + 
+		"----------\n",
+	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/403147 [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+// null from try, nn from catch, merge both into finally
+public void test0037_autounboxing_3() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+	Map options = getCompilerOptions();
+	options.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.ERROR);
+	runNegativeTest(
+		true,
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	void foo3(Integer i, boolean b) {\n" + 
+			"       int j = 0;\n" + 
+			"       while (true) {\n" + 
+			"           try {\n" + 
+			"               i = null;\n" + 
+			"               unsafe();\n" + 
+			"           } catch (Exception e) {\n" + 
+			"               i = 3;\n" + 
+			"           } finally {\n" + 
+			"               j = (b?i:1)+1;\n" + 
+			"           }\n" + 
+			"       }\n" + 
+			"   }\n" + 
+			"	void foo4(Integer i, boolean b) {\n" + 
+			"       int j = 0;\n" + 
+			"       try {\n" + 
+			"           i = null;\n" + 
+			"           unsafe();\n" + 
+			"       } catch (Exception e) {\n" + 
+			"           i = 3;\n" + 
+			"       } finally {\n" + 
+			"           while (j < 0)\n" + 
+			"               j = (b?i:1)+1;\n" + 
+			"       }\n" + 
+			"   }\n" + 
+			"\n" + 
+			"   private void unsafe() throws Exception {\n" + 
+			"        throw new Exception();\n" + 
+			"   }\n" +
+			"}\n"},
+		null,
+		options,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 11)\n" + 
+		"	j = (b?i:1)+1;\n" + 
+		"	       ^\n" + 
+		"Potential null pointer access: This expression of type Integer may be null but requires auto-unboxing\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 24)\n" + 
+		"	j = (b?i:1)+1;\n" + 
+		"	       ^\n" + 
+		"Potential null pointer access: This expression of type Integer may be null but requires auto-unboxing\n" + 
+		"----------\n",
+	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+// https://bugs.eclipse.org/403147 [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+// effective protection locally within the finally block
+public void test0037_autounboxing_4() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+	Map options = getCompilerOptions();
+	options.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.ERROR);
+	runConformTest(
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"	void foo3(Integer i, boolean b) {\n" + 
+			"       int j = 0;\n" + 
+			"       while (true) {\n" + 
+			"           try {\n" + 
+			"               i = null;\n" + 
+			"               unsafe();\n" + 
+			"           } catch (Exception e) {\n" + 
+			"               i = 3;\n" + 
+			"           } finally {\n" +
+			"				if (i == null) i = 4;\n" + 
+			"               j = (b?i:1)+1;\n" + 
+			"           }\n" + 
+			"       }\n" + 
+			"   }\n" + 
+			"	void foo4(Integer i, boolean b) {\n" + 
+			"       int j = 0;\n" + 
+			"       try {\n" + 
+			"           i = null;\n" + 
+			"           unsafe();\n" + 
+			"       } catch (Exception e) {\n" + 
+			"           i = 3;\n" + 
+			"       } finally {\n" +
+			"           while (i == null)\n" + 
+			"				i = 4;\n" + 
+			"           while (j < 4)\n" + 
+			"               j = (b?i:1)+1;\n" + 
+			"       }\n" + 
+			"   }\n" + 
+			"\n" + 
+			"   private void unsafe() throws Exception {\n" + 
+			"        throw new Exception();\n" + 
+			"   }\n" +
+			"}\n"},
+		options);
+}
+// https://bugs.eclipse.org/403147 [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+// array reference in nested try
+public void test0037_autounboxing_5() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5) return;
+	Map options = getCompilerOptions();
+	options.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.ERROR);
+	runNegativeTest(
+		true,
+		new String[] {
+			"X.java",
+			"public class X {\n" +
+			"		void foo(Object [] o, boolean b, Integer i) {\n" + 
+			"		int j = 1;\n" + 
+			"		try {\n" + 
+			"			if (b) i = null;\n" + 
+			"		} catch (RuntimeException r) {\n" + 
+			"			i = 3;\n" + 
+			"		} finally {\n" + 
+			"			try {\n" + 
+			"				System.out.println(o[i]);  \n" + 
+			"			} finally {\n" + 
+			"				System.out.println(j);\n" + 
+			"			}\n" + 
+			"		}\n" + 
+			"	}\n" +
+			"}\n"},
+		null,
+		options,
+		"----------\n" + 
+		"1. ERROR in X.java (at line 10)\n" + 
+		"	System.out.println(o[i]);  \n" + 
+		"	                     ^\n" + 
+		"Potential null pointer access: This expression of type Integer may be null but requires auto-unboxing\n" + 
+		"----------\n",
+		JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
+}
+
+// Bug 406384 - Internal error with I20130413 
+public void test0037_autounboxing_6() {
+	if (this.complianceLevel < ClassFileConstants.JDK1_5)
+		return;
+	runConformTest(
+		new String[] {
+			"X.java",
+			"import java.util.List;\n" +
+			"public class X {\n" +
+			"	void test(List<String> l1, List<String> l2, int i, Object val) {\n" +
+			"		for (String s1 : l1) {\n" +
+			"			for (String s2 : l2) {\n" +
+			"				switch (i) {\n" +
+			"				case 1: \n" +
+			"					boolean booleanValue = (Boolean)val;\n" +
+			"				}\n" +
+			"			}\n" +
+			"		}\n" +
+			"	}\n" +
+			"}\n"
+		});
+}
+
 // null analysis -- autoboxing
 public void test0040_autoboxing_compound_assignment() {
 	if (this.complianceLevel >= ClassFileConstants.JDK1_5) {
@@ -14234,6 +14497,7 @@ public void testBug332637() {
 }
 // https://bugs.eclipse.org/bugs/show_bug.cgi?id=332637 
 // Dead Code detection removing code that isn't dead
+// variant with a finally block
 public void testBug332637b() {
 	if (this.complianceLevel < ClassFileConstants.JDK1_5)
 		return;
@@ -15771,6 +16035,82 @@ public void testBug360328d() {
 		"",/* expected error */
 	    JavacTestOptions.Excuse.EclipseWarningConfiguredAsError);
 }
+// Bug 384380 - False positive on a « Potential null pointer access » after a continue
+// original test case
+public void testBug384380() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_5) {
+		this.runConformTest(
+			new String[] {
+				"Test.java",
+				"public class Test {\n" +
+				"	public static class Container{\n" +
+				"		public int property;\n" +
+				"	}\n" +
+				"	public static class CustomException extends Exception {\n" +
+				"		private static final long	 serialVersionUID	= 1L;\n" +
+				"	}\n" +
+				"	public static void anotherMethod() throws CustomException {}\n" +
+				"\n" +
+				"	public static void method(final java.util.List<Container> list) {\n" +
+				"		for (final Container c : list) {\n" +
+				"			if(c == null)\n" +
+				"				continue; // return or break, are fine though\n" +
+				"\n" + 
+				"			// without this try-catch+for+exception block it does not fails\n" +
+				"			try {\n" +
+				"				for(int i = 0; i < 10 ; i++) // needs a loop here (a 'while' or a 'for') to fail\n" +
+				"					anotherMethod(); // throwing directly CustomException make it fails too\n" +
+				"			} catch (final CustomException e) {\n" +
+				"				// it fails even if catch is empty\n" +
+				"			}\n" +
+				"			c.property += 1; // \"Potential null pointer access: The variable c may be null at this location\"\n" +
+				"		}\n" +
+				"\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"");
+	}
+}
+// Bug 384380 - False positive on a « Potential null pointer access » after a continue
+// variant with a finally block
+public void testBug384380_a() {
+	if (this.complianceLevel >= ClassFileConstants.JDK1_5) {
+		this.runConformTest(
+			new String[] {
+				"Test.java",
+				"public class Test {\n" +
+				"	public static class Container{\n" +
+				"		public int property;\n" +
+				"	}\n" +
+				"	public static class CustomException extends Exception {\n" +
+				"		private static final long	 serialVersionUID	= 1L;\n" +
+				"	}\n" +
+				"	public static void anotherMethod() throws CustomException {}\n" +
+				"\n" +
+				"	public static void method(final java.util.List<Container> list) {\n" +
+				"		for (final Container c : list) {\n" +
+				"			if(c == null)\n" +
+				"				continue; // return or break, are fine though\n" +
+				"\n" + 
+				"			// without this try-catch+for+exception block it does not fails\n" +
+				"			try {\n" +
+				"				for(int i = 0; i < 10 ; i++) // needs a loop here (a 'while' or a 'for') to fail\n" +
+				"					anotherMethod(); // throwing directly CustomException make it fails too\n" +
+				"			} catch (final CustomException e) {\n" +
+				"				// it fails even if catch is empty\n" +
+				"			} finally {\n" +
+				"				System.out.print(3);\n" +
+				"			}\n" +
+				"			c.property += 1; // \"Potential null pointer access: The variable c may be null at this location\"\n" +
+				"		}\n" +
+				"\n" +
+				"	}\n" +
+				"}\n"
+			},
+			"");
+	}
+}
 public void testBug376263() {
 	Map customOptions = getCompilerOptions();
 	customOptions.put(JavaCore.COMPILER_PB_POTENTIAL_NULL_REFERENCE, JavaCore.ERROR);
@@ -16517,5 +16857,116 @@ public void test401092a() {
 			"    }\n" + 
 			"}\n"
 		});
+}
+// Bug 402993 - [null] Follow up of bug 401088: Missing warning about redundant null check
+public void testBug402993() {
+	runNegativeTest(
+		new String[] {
+			"Test.java",
+			"public class Test {\n" + 
+			"\n" + 
+			"	private static void occasionallyThrowException() throws Exception {\n" + 
+			"		if ((System.currentTimeMillis() & 1L) != 0L)\n" + 
+			"			throw new Exception();\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private static void open() throws Exception {\n" + 
+			"		occasionallyThrowException();\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private static void close() throws Exception {\n" + 
+			"		occasionallyThrowException();\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public static void main(String s[]) {\n" + 
+			"		Exception exc = null;\n" +
+			"		try {\n" + 
+			"			open();\n" + 
+			"			// do more things\n" + 
+			"		}\n" + 
+			"		catch (Exception e) {\n" + 
+			"			if (exc == null) // no warning here ??\n" + 
+			"				;\n" + 
+			"		}\n" + 
+			"		finally {\n" + 
+			"			try {\n" + 
+			"				close();\n" + 
+			"			}\n" + 
+			"			catch (Exception e) {\n" + 
+			"				if (exc == null) // No warning here ??\n" + 
+			"					exc = e;\n" + 
+			"			}\n" + 
+			"		}\n" + 
+			"	}\n" + 
+			"}\n"
+		}, 
+		"----------\n" + 
+		"1. ERROR in Test.java (at line 23)\n" + 
+		"	if (exc == null) // no warning here ??\n" + 
+		"	    ^^^\n" + 
+		"Redundant null check: The variable exc can only be null at this location\n" + 
+		"----------\n" + 
+		"2. ERROR in Test.java (at line 31)\n" + 
+		"	if (exc == null) // No warning here ??\n" + 
+		"	    ^^^\n" + 
+		"Redundant null check: The variable exc can only be null at this location\n" + 
+		"----------\n");
+}
+// Bug 402993 - [null] Follow up of bug 401088: Missing warning about redundant null check
+// variant with finally block in inner try
+public void testBug402993a() {
+	runNegativeTest(
+		new String[] {
+			"Test.java",
+			"public class Test {\n" + 
+			"\n" + 
+			"	private static void occasionallyThrowException() throws Exception {\n" + 
+			"		if ((System.currentTimeMillis() & 1L) != 0L)\n" + 
+			"			throw new Exception();\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private static void open() throws Exception {\n" + 
+			"		occasionallyThrowException();\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	private static void close() throws Exception {\n" + 
+			"		occasionallyThrowException();\n" + 
+			"	}\n" + 
+			"\n" + 
+			"	public static void main(String s[]) {\n" + 
+			"		Exception exc = null;\n" + 
+			"		try {\n" + 
+			"			open();\n" + 
+			"			// do more things\n" + 
+			"		}\n" + 
+			"		catch (Exception e) {\n" + 
+			"			if (exc == null) // no warning here ??\n" + 
+			"				;\n" + 
+			"		}\n" + 
+			"		finally {\n" + 
+			"			try {\n" + 
+			"				close();\n" + 
+			"			}\n" + 
+			"			catch (Exception e) {\n" + 
+			"				if (exc == null) // No warning here ??\n" + 
+			"					exc = e;\n" + 
+			"			} finally {\n" +
+			"				System.out.print(1);\n" +
+			"			}\n" +
+			"		}\n" + 
+			"	}\n" + 
+			"}\n"
+		}, 
+		"----------\n" + 
+		"1. ERROR in Test.java (at line 23)\n" + 
+		"	if (exc == null) // no warning here ??\n" + 
+		"	    ^^^\n" + 
+		"Redundant null check: The variable exc can only be null at this location\n" + 
+		"----------\n" + 
+		"2. ERROR in Test.java (at line 31)\n" + 
+		"	if (exc == null) // No warning here ??\n" + 
+		"	    ^^^\n" + 
+		"Redundant null check: The variable exc can only be null at this location\n" + 
+		"----------\n");
 }
 }

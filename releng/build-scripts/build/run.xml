@@ -17,6 +17,8 @@
 ------------------------------------------------------------------------------
 path of eclipse SDK:
 		eclipse-app.tgz  = ${eclipse-app.tgz}
+eclipse SDK build qualifier:
+		eclipse.sdk.qualifier = ${eclipse.sdk.qualifier}
 path of eclipse test framework:
 		eclipse.tests.zip= ${eclipse.tests.zip}
 path of published updates:
@@ -38,9 +40,6 @@ directory for tempory files during testing:
 		<!-- main configuration file (version dependent names etc.): -->
 		<loadproperties srcfile="${_toplevelDir}/run.properties" />
 
-		<!-- versions of test plugins, also find org.eclipse.test here: -->
-		<loadproperties srcfile="${_toplevelDir}/test.properties" />
-		
 		<!-- ======== Directories (indentation shows structure): ======== -->
 		<!--    build scripts: -->
 		<property name="OTScriptDir" value="${_toplevelDir}" />
@@ -63,6 +62,21 @@ directory for tempory files during testing:
 		<property name="otdtUpdatesDir" 		value="${user.dir}/updateSite"/>
 		<property name="testsUpdatesDirBase" 	value="${user.dir}/updateSiteTests"/>
 			<!-- will have sub directories "eclipse" and "otdt" -->
+
+		<!-- ======== Insert SDK build qualifier into our configuration files: ======== -->
+		<copy file="${map.file.path}.in" tofile="${map.file.path}">
+			<filterset>
+				<filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
+			</filterset>
+		</copy>
+		<copy file="${OTScriptDir}/test.properties.in" tofile="${OTScriptDir}/test.properties">
+			<filterset>
+				<filter token="SDK_QUALIFIER" value="${eclipse.sdk.qualifier}"/>
+			</filterset>
+		</copy>
+
+		<!-- versions of test plugins: -->
+		<loadproperties srcfile="${_toplevelDir}/test.properties" />
 
 		<!-- ======== More Configuration Details: ======== -->
 		<!-- maybe obsolete: file prefix to distinguish output files. -->
@@ -366,7 +380,7 @@ directory for tempory files during testing:
 	</target>
 
 	<!-- currently unused target name="collectResults">
-		<ant target="collect" antfile="${test.eclipseDir}/plugins/${org.eclipse.test}/library.xml" dir="${otresults}">
+		<ant target="collect" antfile="${test.root.dir}/library.xml" dir="${otresults}">
 			<property name="includes" value="org.*.xml"/>
 			<property name="output-file" value="AllTestSuites.xml"/>
 		</ant>

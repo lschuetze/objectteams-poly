@@ -1,15 +1,16 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: DefaultCodeFormatter.java 23290 2010-01-22 18:20:54Z stephan $
  * 
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Jesper Steen Moller - Contributions for
+ *								bug 404146 - [1.7][compiler] nested try-catch-finally-blocks leads to unrunnable Java byte code
  *******************************************************************************/
 package org.eclipse.jdt.internal.formatter;
 
@@ -383,6 +384,7 @@ public class DefaultCodeFormatter extends CodeFormatter {
 			optionsMap.put(CompilerOptions.OPTION_ReportSpecialParameterHidingField, CompilerOptions.DISABLED); 
 			optionsMap.put(CompilerOptions.OPTION_MaxProblemPerUnit, String.valueOf(100));
 			optionsMap.put(CompilerOptions.OPTION_InlineJsr, CompilerOptions.DISABLED);
+			optionsMap.put(CompilerOptions.OPTION_ShareCommonFinallyBlocks, CompilerOptions.DISABLED);
 			optionsMap.put(CompilerOptions.OPTION_ReportMethodCanBeStatic, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportMethodCanBePotentiallyStatic, CompilerOptions.IGNORE);
 			optionsMap.put(CompilerOptions.OPTION_ReportUnusedTypeParameter, CompilerOptions.IGNORE);

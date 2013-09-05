@@ -15,6 +15,7 @@
  *								bug 388739 - [1.8][compiler] consider default methods when detecting whether a class needs to be declared abstract
  *								bug 399567 - [1.8] Different error message from the reference compiler
  *								bug 401796 - [1.8][compiler] don't treat default methods as overriding an independent inherited abstract method
+ *								bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 

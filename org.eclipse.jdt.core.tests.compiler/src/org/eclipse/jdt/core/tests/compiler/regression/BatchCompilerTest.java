@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -28,6 +28,8 @@
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 381443 - [compiler][null] Allow parameter widening from @NonNull to unannotated
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
+ *     Jesper Steen Moller - Contributions for
+ *								bug 404146 - [1.7][compiler] nested try-catch-finally-blocks leads to unrunnable Java byte code
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -55,7 +57,6 @@ import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.batch.ClasspathJar;
 import org.eclipse.jdt.internal.compiler.batch.ClasspathLocation;
 import org.eclipse.jdt.internal.compiler.batch.Main;
-import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.util.ManifestAnalyzer;
 
 public class BatchCompilerTest extends AbstractRegressionTest {
@@ -104,7 +105,7 @@ public BatchCompilerTest(String name) {
  * @see TestAll
  */
 public static Test suite() {
-	return buildUniqueComplianceTestSuite(testClass(), ClassFileConstants.JDK1_5);
+	return buildMinimalComplianceTestSuite(testClass(), F_1_5);
 }
 public static Class testClass() {
 	return BatchCompilerTest.class;
@@ -1942,6 +1943,7 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nullable\" value=\"org.eclipse.jdt.annotation.Nullable\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nullanalysis\" value=\"disabled\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode\" value=\"disabled\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.shareCommonFinallyBlocks\" value=\"disabled\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.targetPlatform\" value=\"1.5\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.unusedLocal\" value=\"optimize out\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.compliance\" value=\"1.5\"/>\n" +
@@ -13852,6 +13854,27 @@ public void test385780_warn_option() {
 		"Unused type parameter T\n" + 
 		"----------\n" + 
 		"4 problems (4 warnings)",
+		true);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=405225
+public void test405225_extdirs() {
+	// check the option introduced in bug 359721
+	this.runConformTest(
+		new String[] {
+			"X.java",
+			"import java.io.FileReader;\n" +
+			"public class X {\n" +
+			"  void foo() throws java.io.IOException {\n" +
+			"      FileReader r = new FileReader(\"f1\");\n" +
+			"      char[] cs = new char[1024];\n" +
+			"	   r.read(cs);\n" +
+			"  }\n" +
+			"}\n"
+		},
+		"\"" + OUTPUT_DIR +  File.separator + "X.java\""
+		+ " -warn:-resource -1.7 -extdirs \"" + LIB_DIR + "\" -d \"" + OUTPUT_DIR + "\"",
+		"",
+		"",
 		true);
 }
 }

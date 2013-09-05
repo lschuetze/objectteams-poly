@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2004, 2011 IBM Corporation and others.
+ * Copyright (c) 2004, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -40,11 +40,11 @@ import org.eclipse.text.edits.TextEditGroup;
 public final class ListRewrite {
 
 	private ASTNode parent;
-	private StructuralPropertyDescriptor childProperty;
+	private ChildListPropertyDescriptor childListProperty;
 	private ASTRewrite rewriter;
 
 
-	/* package*/ ListRewrite(ASTRewrite rewriter, ASTNode parent, StructuralPropertyDescriptor childProperty) {
+	/* package*/ ListRewrite(ASTRewrite rewriter, ASTNode parent, ChildListPropertyDescriptor childProperty) {
 		this.rewriter= rewriter;
 		this.parent= parent;
 //{ObjectTeams: correct invalid combination TypeDeclaration/RoleTypeDeclaration:
@@ -63,7 +63,7 @@ public final class ListRewrite {
     			childProperty = RoleTypeDeclaration.BODY_DECLARATIONS_PROPERTY;
 		}
 // SH}
-		this.childProperty= childProperty;
+		this.childListProperty= childProperty;
 	}
 
 	private RewriteEventStore getRewriteStore() {
@@ -71,7 +71,7 @@ public final class ListRewrite {
 	}
 
 	private ListRewriteEvent getEvent() {
-		return getRewriteStore().getListEvent(this.parent, this.childProperty, true);
+		return getRewriteStore().getListEvent(this.parent, this.childListProperty, true);
 	}
 
 	/**
@@ -93,7 +93,7 @@ public final class ListRewrite {
 	 * @since 3.1
 	 */
 	public StructuralPropertyDescriptor getLocationInParent() {
-		return this.childProperty;
+		return this.childListProperty;
 	}
 
 	/**
@@ -156,6 +156,7 @@ public final class ListRewrite {
 		if (node == null) {
 			throw new IllegalArgumentException();
 		}
+		validatePropertyType(node);
 		RewriteEvent event= getEvent().replaceEntry(node, replacement);
 		if (editGroup != null) {
 			getRewriteStore().setEventEditGroup(event, editGroup);
@@ -300,12 +301,24 @@ public final class ListRewrite {
 	}
 
 	private void internalInsertAt(ASTNode node, int index, boolean boundToPrevious, TextEditGroup editGroup) {
+		validatePropertyType(node);
 		RewriteEvent event= getEvent().insert(node, index);
 		if (boundToPrevious) {
 			getRewriteStore().setInsertBoundToPrevious(node);
 		}
 		if (editGroup != null) {
 			getRewriteStore().setEventEditGroup(event, editGroup);
+		}
+	}
+
+	private void validatePropertyType(ASTNode node) {
+		if (!RewriteEventStore.DEBUG) {
+			return;
+		}
+		if (!this.childListProperty.getElementType().isAssignableFrom(node.getClass())) {
+			String message = node.getClass().getName() + " is not a valid type for " + this.childListProperty.getNodeClass().getName() //$NON-NLS-1$
+					+ " property '" + this.childListProperty.getId() + "'. Must be " + this.childListProperty.getElementType().getName(); //$NON-NLS-1$ //$NON-NLS-2$
+			throw new IllegalArgumentException(message);
 		}
 	}
 
@@ -322,7 +335,7 @@ public final class ListRewrite {
 		}
 
 		Block internalPlaceHolder= nodeStore.createCollapsePlaceholder();
-		CopySourceInfo info= getRewriteStore().createRangeCopy(this.parent, this.childProperty, first, last, isMove, internalPlaceHolder, replacingNode, editGroup);
+		CopySourceInfo info= getRewriteStore().createRangeCopy(this.parent, this.childListProperty, first, last, isMove, internalPlaceHolder, replacingNode, editGroup);
 		nodeStore.markAsCopyTarget(placeholder, info);
 
 		return placeholder;

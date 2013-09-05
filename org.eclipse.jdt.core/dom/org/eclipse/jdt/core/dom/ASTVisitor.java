@@ -3095,7 +3095,8 @@ public abstract class ASTVisitor {
      */
     public void endVisit(RoleTypeDeclaration node)
     {
-        // default implementation: do nothing
+        // default implementation: do the same as for regular TypeDeclaration:
+    	endVisit((TypeDeclaration)node);
     }
 
 	/**

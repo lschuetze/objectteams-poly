@@ -640,11 +640,8 @@ public class ASTRewriteFlattener extends ASTVisitor {
 		this.result.append(' ');
 		getChildNode(node, InfixExpression.RIGHT_OPERAND_PROPERTY).accept(this);
 
-		List list= getChildList(node, InfixExpression.EXTENDED_OPERANDS_PROPERTY);
-		for (int i= 0; i < list.size(); i++) {
-			this.result.append(operator);
-			((ASTNode) list.get(i)).accept(this);
-		}
+		String separator= ' ' + operator + ' ';
+		visitList(node, InfixExpression.EXTENDED_OPERANDS_PROPERTY, separator, separator, Util.EMPTY_STRING);
 		return false;
 	}
 
@@ -844,6 +841,9 @@ public class ASTRewriteFlattener extends ASTVisitor {
 				javadoc.accept(this);
 			}
 			visitList(node, PackageDeclaration.ANNOTATIONS_PROPERTY, String.valueOf(' '));
+//{ObjectTeams:
+			visitList(node, PackageDeclaration.MODIFIERS_PROPERTY, String.valueOf(' '), Util.EMPTY_STRING, String.valueOf(' '));
+// SH}
 		}
 		this.result.append("package "); //$NON-NLS-1$
 		getChildNode(node, PackageDeclaration.NAME_PROPERTY).accept(this);

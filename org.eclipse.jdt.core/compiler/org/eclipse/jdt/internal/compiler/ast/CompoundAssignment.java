@@ -16,6 +16,7 @@
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
  *     Jesper S Moller - Contributions for
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
+ *								bug 402993 - [null] Follow up of bug 401088: Missing warning about redundant null check
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -60,7 +61,6 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext,
 		if (local != null) {
 			// compound assignment results in a definitely non null value for String
 			flowInfo.markAsDefinitelyNonNull(local);
-			if (flowContext.initsOnFinally != null)
 				flowContext.markFinallyNullStatus(local, FlowInfo.NON_NULL);
 		}
 	}

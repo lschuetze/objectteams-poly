@@ -536,12 +536,16 @@ public class TypeAnchorReference extends TypeReference implements InvocationSite
 
 	@Override
 	public void traverse(ASTVisitor visitor, ClassScope classScope) {
-		this.anchor.traverse(visitor, classScope);
+		if (visitor.visit(this, classScope))
+			this.anchor.traverse(visitor, classScope);
+		visitor.endVisit(this, classScope);
 	}
 
 	@Override
 	public void traverse(ASTVisitor visitor, BlockScope blockScope) {
-		this.anchor.traverse(visitor, blockScope);
+		if (visitor.visit(this, blockScope))
+			this.anchor.traverse(visitor, blockScope);
+		visitor.endVisit(this, blockScope);
 	}
 
 	@Override

@@ -43,6 +43,7 @@
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 384567 - [1.5][compiler] Compiler accepts illegal modifiers on package declaration
+ *								bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.problem;
 
@@ -12970,6 +12971,22 @@ public void roleFileInBinaryTeam(TypeDeclaration roleType, ReferenceBinding team
 			roleType.sourceStart,
 			roleType.sourceEnd);
 
+}
+
+public void roleFileMissingTeamDeclaration(CompilationUnitDeclaration roleUnit) {
+	String[] args = { new String(roleUnit.getFileName()) };
+	int start = 0, end = 0;
+	if (roleUnit.types != null && roleUnit.types.length > 0) {
+		start = roleUnit.types[0].sourceStart;
+		end = roleUnit.types[0].sourceEnd;
+	}
+	this.handle(
+			IProblem.RoleFileMissingTeamDeclaration,
+			args,
+			args,
+			ProblemSeverities.Error | ProblemSeverities.AbortType | ProblemSeverities.Fatal,
+			start,
+			end);
 }
 
 public void mismatchingRoleParts(ReferenceBinding binding, TypeDeclaration type) {

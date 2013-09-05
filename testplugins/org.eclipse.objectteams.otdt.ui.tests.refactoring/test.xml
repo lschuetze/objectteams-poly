@@ -8,7 +8,7 @@
 	<!-- library.xml need these properties-->
 	<property name="eclipse-home" value="${test.eclipseDir}"/>
 	
-	<property name="library-file" value="${test.eclipseDir}/plugins/${org.eclipse.test}/library.xml"/>
+	<fail unless="library-file">Property "library-file" needs to be passed by the caller.</fail>
 
 	<!-- This target holds all initialization code that needs to be done for -->
 	<!-- all tests that are to be run. Initialization for individual tests -->

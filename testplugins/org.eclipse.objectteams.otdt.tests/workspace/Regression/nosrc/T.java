@@ -1,0 +1,1 @@
+public team class T {}

@@ -326,97 +326,104 @@ public class SuperHierarchyContentProviderTests extends FileBasedUITest
        assertTrue("Wrong supertypes", compareTypes(expected, actual));
     }
 
-    public void testGetChildren_T3R2()
+    public void testGetChildren_T3R2() throws JavaModelException
     {
         try
 		{
 		    _lifeCycle.doHierarchyRefresh(new IType[]{_T3_R2}, new NullProgressMonitor());
+		    IType[] expected = new IType[]{ _T3_R1, _T2_R2 };
+		    IType[] actual = castToIType(_testObject.getChildren(_T3_R2));
+		    
+		    assertTrue("Wrong supertypes", compareTypes(expected, actual));
 		}
 		catch (JavaModelException exc)
 		{
 		    exc.printStackTrace();
             fail("JavaModelException while refreshing hierarchy");
+		} finally {
+		    _lifeCycle.doHierarchyRefresh(new IType[]{_T5_R3}, new NullProgressMonitor());
 		}
-
-		IType[] expected = new IType[]{ _T3_R1, _T2_R2 };
-		IType[] actual = castToIType(_testObject.getChildren(_T3_R2));
-		
-		assertTrue("Wrong supertypes", compareTypes(expected, actual));
     }
 
-    public void testGetChildren_T1R2()
+    public void testGetChildren_T1R2() throws JavaModelException
     {
         try
 		{
 		    _lifeCycle.doHierarchyRefresh(new IType[]{_T1_R2}, new NullProgressMonitor());
+		    IType[] expected = new IType[]{ _objectType };
+		    IType[] actual = castToIType(_testObject.getChildren(_T1_R2));
+		    
+		    assertTrue("Wrong supertypes", compareTypes(expected, actual));
 		}
 		catch (JavaModelException exc)
 		{
 		    exc.printStackTrace();
             fail("JavaModelException while refreshing hierarchy");
+		} finally {
+		    _lifeCycle.doHierarchyRefresh(new IType[]{_T5_R3}, new NullProgressMonitor());
 		}
 
-		IType[] expected = new IType[]{ _objectType };
-		IType[] actual = castToIType(_testObject.getChildren(_T1_R2));
-		
-		assertTrue("Wrong supertypes", compareTypes(expected, actual));
     }
 
-    public void testGetChildren_T8R2()
+    public void testGetChildren_T8R2() throws JavaModelException
     {
         try
 		{
 		    _lifeCycle.doHierarchyRefresh(new IType[]{_T8_R2}, new NullProgressMonitor());
+		    IType[] expected = new IType[]{ _T6_R1, _T2_R2 };
+		    IType[] actual = castToIType(_testObject.getChildren(_T8_R2));
+		    
+		    assertTrue("Wrong supertypes", compareTypes(expected, actual));
 		}
 		catch (JavaModelException exc)
 		{
 		    exc.printStackTrace();
             fail("JavaModelException while refreshing hierarchy");
+		} finally {
+		    _lifeCycle.doHierarchyRefresh(new IType[]{_T5_R3}, new NullProgressMonitor());
 		}
 
-		IType[] expected = new IType[]{ _T6_R1, _T2_R2 };
-		IType[] actual = castToIType(_testObject.getChildren(_T8_R2));
-		
-		assertTrue("Wrong supertypes", compareTypes(expected, actual));
     }
     
-    public void testRecursiveGetChildren_T7R3()
+    public void testRecursiveGetChildren_T7R3() throws JavaModelException
     {
         try
         {
             _lifeCycle.doHierarchyRefresh(new IType[]{_T7_R3}, new NullProgressMonitor());
+            TreeNode actualRoot;
+            TreeNode expectedRoot;
+            
+            //pretty ugly, maybe replace this with an automatic hierarchy creation
+            //that generates the hierarchy according to some String or with the help 
+            //of an array of types that denotes a path :-I
+            expectedRoot = new TreeNode(_T7_R3);
+            
+            expectedRoot.setChildrenByElements(new Object[] {_T5_R1, _T5_R3});
+            expectedRoot.getChildNode(_T5_R1).setChildrenByElements(new Object[] {_T2_R1, _objectType});
+            expectedRoot.getChildNode(_T5_R3).setChildrenByElements(new Object[] {_T5_R1});
+            
+            expectedRoot.getChildNode(_T5_R1).getChildNode(_T2_R1).setChildrenByElements(new Object[] {_T1_R1, _objectType});
+            expectedRoot.getChildNode(_T5_R3).getChildNode(_T5_R1).setChildrenByElements(new Object[] {_T2_R1, _objectType});
+            
+            expectedRoot.getChildNode(_T5_R3).getChildNode(_T5_R1).getChildNode(_T2_R1).setChildrenByElements(new Object[] {_T1_R1, _objectType});
+            
+            expectedRoot.getChildNode(_T5_R1).getChildNode(_T2_R1).getChildNode(_T1_R1).setChildrenByElements(new Object[] {_objectType});
+            
+            expectedRoot.getChildNode(_T5_R3).getChildNode(_T5_R1).getChildNode(_T2_R1).getChildNode(_T1_R1).setChildrenByElements(new Object[] {_objectType});
+            
+            
+            actualRoot = fillTree(_testObject, new TreeNode(_T7_R3));
+            
+            assertTrue("Hierarchy trees don't match", expectedRoot.equalsAsserted(actualRoot, new ITypeComparator(), 0));
         }
         catch (JavaModelException exc)
         {
             exc.printStackTrace();
             fail("JavaModelException while refreshing hierarchy");
-        }
+        } finally {
+		    _lifeCycle.doHierarchyRefresh(new IType[]{_T5_R3}, new NullProgressMonitor());
+		}
         
-        TreeNode actualRoot;
-        TreeNode expectedRoot;
-        
-        //pretty ugly, maybe replace this with an automatic hierarchy creation
-        //that generates the hierarchy according to some String or with the help 
-        //of an array of types that denotes a path :-I
-        expectedRoot = new TreeNode(_T7_R3);
-        
-        expectedRoot.setChildrenByElements(new Object[] {_T5_R1, _T5_R3});
-        expectedRoot.getChildNode(_T5_R1).setChildrenByElements(new Object[] {_T2_R1, _objectType});
-        expectedRoot.getChildNode(_T5_R3).setChildrenByElements(new Object[] {_T5_R1});
-        
-        expectedRoot.getChildNode(_T5_R1).getChildNode(_T2_R1).setChildrenByElements(new Object[] {_T1_R1, _objectType});
-        expectedRoot.getChildNode(_T5_R3).getChildNode(_T5_R1).setChildrenByElements(new Object[] {_T2_R1, _objectType});
-
-        expectedRoot.getChildNode(_T5_R3).getChildNode(_T5_R1).getChildNode(_T2_R1).setChildrenByElements(new Object[] {_T1_R1, _objectType});
-        
-        expectedRoot.getChildNode(_T5_R1).getChildNode(_T2_R1).getChildNode(_T1_R1).setChildrenByElements(new Object[] {_objectType});
-        
-        expectedRoot.getChildNode(_T5_R3).getChildNode(_T5_R1).getChildNode(_T2_R1).getChildNode(_T1_R1).setChildrenByElements(new Object[] {_objectType});
-        
-        
-        actualRoot = fillTree(_testObject, new TreeNode(_T7_R3));
-        
-        assertTrue("Hierarchy trees don't match", expectedRoot.equalsAsserted(actualRoot, new ITypeComparator(), 0));
     }
 
 // test looks quite incomplete!?

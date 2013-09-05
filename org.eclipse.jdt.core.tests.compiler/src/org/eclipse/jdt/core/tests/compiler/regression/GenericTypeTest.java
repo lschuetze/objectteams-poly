@@ -18,6 +18,8 @@
  *								bug 388800 - [1.8] adjust tests to 1.8 JRE
  *								bug 388795 - [compiler] detection of name clash depends on order of super interfaces
  *								bug 388739 - [1.8][compiler] consider default methods when detecting whether a class needs to be declared abstract
+ *								bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
+ *								bug 406928 - computation of inherited methods seems damaged (affecting @Overrides)
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -32587,7 +32589,16 @@ public void test0988() {
 				"}", // =================
 			},
 			"----------\n" + 
+<<<<<<< HEAD
 			"1. ERROR in X.java (at line 11)\n" + 
+=======
+			"1. ERROR in X.java (at line 7)\n" + 
+			"	abstract class GLinkElementView<M,CM> extends AbstractLinkView<M> {}\n" + 
+			"	               ^^^^^^^^^^^^^^^^\n" + 
+			"The return types are incompatible for the inherited methods ILinkViewElement.getViewer(), EditPart.getViewer(), AbstractLinkView<M>.getViewer()\n" + 
+			"----------\n" + 
+			"2. ERROR in X.java (at line 11)\n" + 
+>>>>>>> ec20a16682652a850d7194f0a8e92d958de83c2b
 			"	public SheetViewer getViewer() { return null; }	\n" + 
 			"	       ^^^^^^^^^^^\n" + 
 			"The return type is incompatible with AbstractEditPart.getViewer()\n" + 

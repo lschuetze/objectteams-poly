@@ -48,6 +48,10 @@
 		<!-- do install using p2: -->
 		<ant antfile="${OTScriptDir}/p2helper.xml" target="installTests" dir="${test.eclipseDir}"/>
 
+		<echo message="get library.xml"/>
+		<get src="http://git.eclipse.org/c/platform/eclipse.platform.releng.aggregator.git/plain/eclipse.platform.releng.tychoeclipsebuilder/eclipse-junit-tests/src/main/scripts/library.xml"
+				dest="${test.root.dir}/library.xml"/>
+
 		<property name="tests.are.setup" value="true"/>
 	</target>
 	
@@ -59,6 +63,7 @@
 	>
 		<ant antfile="plugins/${testPlugin}/test.xml" dir="${test.eclipseDir}">
 			<property name="eclipse-home" value="${test.eclipseDir}" />
+			<property name="library-file" value="${test.root.dir}/library.xml"/>
             <property name="extraVMargs" value="-XX:MaxPermSize=320m -XX:+HeapDumpOnOutOfMemoryError -Djava.io.tmpdir=${test.tmpDir}"/>
 		</ant>
 	</target>
@@ -83,7 +88,7 @@
 	
 	<target name="jdt_builder_tests" description="Runs the org.eclipse.jdt.core.tests.builder test.xml">
 		<property name="library-file"
-		            value="${test.eclipseDir}/plugins/${org.eclipse.test}/library.xml"/>
+		            value="${test.root.dir}/library.xml"/>
 		<antcall target="runtests">
 			<param name="testPlugin" value="${org.eclipse.jdt.core.tests.builder}" />
 		</antcall>
@@ -110,7 +115,7 @@
 
 	<target name="jdt_ui_tests" description="Runs the org.eclipse.jdt.ui.tests test.xml">
 		<property name="library-file"
-		            value="${test.eclipseDir}/plugins/${org.eclipse.test}/library.xml"/>
+		            value="${test.root.dir}/library.xml"/>
 		<antcall target="runtests">
 			<param name="testPlugin" value="${org.eclipse.jdt.ui.tests}" />
 		</antcall>
@@ -118,7 +123,7 @@
 	
 	<target name="jdt_ref_tests" description="Runs the org.eclipse.jdt.ui.tests.refactoring test.xml">
 		<property name="library-file"
-		            value="${test.eclipseDir}/plugins/${org.eclipse.test}/library.xml"/>
+		            value="${test.root.dir}/library.xml"/>
 		<antcall target="runtests">
 			<param name="testPlugin" value="${org.eclipse.jdt.ui.tests.refactoring}" />
 		</antcall>
@@ -126,7 +131,7 @@
 
 	<target name="jdt_debug_tests" description="Runs the org.eclipse.jdt.debug.tests test.xml">
 		<property name="library-file"
-		            value="${test.eclipseDir}/plugins/${org.eclipse.test}/library.xml"/>
+		            value="${test.root.dir}/library.xml"/>
 		<antcall target="runtests">
 			<param name="testPlugin" value="${org.eclipse.jdt.debug.tests}" />
 		</antcall>
