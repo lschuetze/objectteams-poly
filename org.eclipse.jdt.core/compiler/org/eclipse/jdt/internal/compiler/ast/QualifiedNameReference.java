@@ -23,8 +23,6 @@
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
- *     Jesper S Moller <jesper@selskabet.org> - Contributions for
- *								bug 378674 - "The method can be declared as static" is wrong
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -132,6 +130,9 @@ public FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowConte
 					currentScope.problemReporter().uninitializedBlankFinalField(lastFieldBinding, this);
 				}
 			}
+			if (!lastFieldBinding.isStatic()) {
+				currentScope.resetDeclaringClassMethodStaticFlag(lastFieldBinding.declaringClass);
+			}
 			break;
 		case Binding.LOCAL :
 			// first binding is a local variable
@@ -238,6 +239,9 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 						currentScope.problemReporter().uninitializedBlankFinalField(fieldBinding, this);
 					}
 				}
+			}
+			if (!fieldBinding.isStatic()) {
+				currentScope.resetDeclaringClassMethodStaticFlag(fieldBinding.declaringClass);
 			}
 			break;
 		case Binding.LOCAL : // reading a local variable
