@@ -49,5 +49,6 @@ public interface InvocationSite {
 		public int sourceEnd() {return this.node.sourceEnd; }
 		public int sourceStart() {return this.node.sourceStart; }
 		public TypeBinding expectedType() { return null; }
+		public boolean receiverIsImplicitThis() { return false; }
 	}
 }

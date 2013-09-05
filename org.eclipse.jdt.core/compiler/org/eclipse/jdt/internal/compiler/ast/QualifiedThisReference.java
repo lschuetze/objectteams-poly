@@ -144,8 +144,7 @@ public class QualifiedThisReference extends ThisReference {
 			// otherwise problem will be reported by the caller
 			return this.resolvedType;
 		} else {
-			// Mark all methods between here and the declared type as not static
-			scope.resetDeclaringClassMethodStaticFlag(this.currentCompatibleType);
+			scope.tagAsAccessingEnclosingInstanceStateOf(this.currentCompatibleType, false /* type variable access */);
 		}
 
 		// Ensure one cannot write code like: B() { super(B.this); }

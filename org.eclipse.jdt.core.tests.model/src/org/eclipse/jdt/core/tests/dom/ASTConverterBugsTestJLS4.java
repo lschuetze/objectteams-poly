@@ -15,6 +15,9 @@ import java.util.List;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+
 
 /**
  * Test suite to verify that DOM/AST bugs are fixed.

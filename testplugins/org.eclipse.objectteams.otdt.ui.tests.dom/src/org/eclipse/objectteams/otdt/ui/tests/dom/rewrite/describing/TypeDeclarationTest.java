@@ -195,7 +195,7 @@ public class TypeDeclarationTest extends AstRewritingDescribingTest {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("R1.java", buf.toString(), false, null);			
 
-		CompilationUnit astRoot= createAST3(cu);
+		CompilationUnit astRoot= createAST(cu);
 		ASTRewrite rewrite= ASTRewrite.create(astRoot.getAST());
 		AST ast= astRoot.getAST();
 		
@@ -222,7 +222,7 @@ public class TypeDeclarationTest extends AstRewritingDescribingTest {
 		// re-get to also challenge ASTConverter and NaiveASTFlattener:
 		IPackageFragment pack2 = this.sourceFolder.createPackageFragment("test2.MyTeam", false, null);
 		cu= pack2.createCompilationUnit("R1.java", buf.toString(), false, null);		
-		astRoot= createAST3(cu);
+		astRoot= createAST(cu);
 		assertEqualString(astRoot.toString(), buf.toString());
 	}
 }

@@ -150,7 +150,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				ReferenceBinding superclass = this.binding.declaringClass.superclass();
 				if (superclass != null && superclass.isMemberType() && !superclass.isStatic()) {
 					// creating an anonymous type of a non-static member type without an enclosing instance of parent type
-					currentScope.resetDeclaringClassMethodStaticFlag(superclass.enclosingType());
+					currentScope.tagAsAccessingEnclosingInstanceStateOf(superclass.enclosingType(), false /* type variable access */);
 					// Reviewed for https://bugs.eclipse.org/bugs/show_bug.cgi?id=378674 :
 					// The corresponding problem (when called from static) is not produced until during code generation
 				}
