@@ -307,7 +307,7 @@ public class RoleMigrationImplementor
 		FieldBinding baseField = roleBinding.getField(IOTConstants._OT_BASE, true);
 		// accessing the cache (using remove() and put()):
 		ReferenceBinding cacheTypeBinding = (ReferenceBinding) scope.getType(IOTConstants.WEAK_HASH_MAP, 3);
-		MethodBinding remove = cacheTypeBinding.getMethod(scope, "remove".toCharArray()); //$NON-NLS-1$
+		MethodBinding remove = getMethod(cacheTypeBinding, "remove".toCharArray(), 1); //$NON-NLS-1$
 		MethodBinding put    = cacheTypeBinding.getMethod(scope, "put".toCharArray()); //$NON-NLS-1$
 		// accessing the base object (using _OT$removeRole() and _OT$addRole()):
 		ReferenceBinding iboundBase = (ReferenceBinding) scope.getType(IOTConstants.ORG_OBJECTTEAMS_IBOUNDBASE, 3);
@@ -349,6 +349,21 @@ public class RoleMigrationImplementor
 		genAddOrRemoveRole(codeStream, scope, iboundBase, true);	// -> void		// -> base._OT$addRemoveRole(this, false)
 
 		codeStream.return_();
+	}
+	
+	static MethodBinding getMethod(ReferenceBinding declaringClass, char[] selector, int numParams) {
+		MethodBinding[] methods = declaringClass.getMethods(selector);
+		MethodBinding found = null;
+		for (int i = 0; i < methods.length; i++) {
+			if (methods[i].parameters.length == numParams) {
+				if (found != null)
+					throw new IncompatibleClassChangeError("More than 1 "+String.valueOf(selector)+" method found"); //$NON-NLS-1$ //$NON-NLS-2$
+				found = methods[i];
+			}
+		}
+		if (found == null)
+			throw new IncompatibleClassChangeError("Required "+String.valueOf(selector)+" method not found"); //$NON-NLS-1$ //$NON-NLS-2$
+		return found;
 	}
 
 	// pre: call target (base) is on stack
