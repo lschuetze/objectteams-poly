@@ -82,12 +82,6 @@ public class ImportReference extends ASTNode {
 	}
 
 	public StringBuffer print(int tab, StringBuffer output, boolean withOnDemand) {
-//{ObjectTeams:
-		if (isStatic())
-			output.append("static "); //$NON-NLS-1$
-		else if (isBase())
-			output.append("base "); //$NON-NLS-1$
-// SH}
 		/* when withOnDemand is false, only the name is printed */
 		for (int i = 0; i < this.tokens.length; i++) {
 			if (i > 0) output.append('.');

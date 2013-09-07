@@ -523,6 +523,11 @@ public StringBuffer print(int indent, StringBuffer output) {
 			if (currentImport.isStatic()) {
 				output.append("static "); //$NON-NLS-1$
 			}
+//{ObjectTeams:
+			else if (currentImport.isBase()) {
+				output.append("base "); //$NON-NLS-1$
+			}
+// SH}
 			currentImport.print(0, output).append(";\n"); //$NON-NLS-1$
 		}
 
