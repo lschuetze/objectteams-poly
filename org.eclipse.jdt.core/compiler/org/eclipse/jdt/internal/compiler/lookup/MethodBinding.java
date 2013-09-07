@@ -487,6 +487,9 @@ public final boolean canBeSeenBy(Scope origImplicitScope, TypeBinding receiverTy
 public final boolean canBeSeenBy(TypeBinding receiverType, InvocationSite invocationSite, Scope scope) {
 
 	SourceTypeBinding invocationType = scope.enclosingSourceType();
+//{ObjectTeams: staticness is no problem in synthetic role interfaces:
+  if (!this.declaringClass.isSynthInterface())	
+// SH}
 	if (this.declaringClass.isInterface() && isStatic()) {
 		// Static interface methods can be explicitly invoked only through the type reference of the declaring interface or implicitly in the interface itself.
 		if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8)

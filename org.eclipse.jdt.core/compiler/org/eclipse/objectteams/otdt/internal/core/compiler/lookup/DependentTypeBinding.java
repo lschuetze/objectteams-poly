@@ -399,6 +399,11 @@ public class DependentTypeBinding extends ParameterizedTypeBinding {
 	public ReferenceBinding rawBaseclass() {
 		return this.type.rawBaseclass();
 	}
+	
+	@Override
+	public TypeBinding original() {
+		return this.type.original();
+	}
 
 	@Override
 	public void setIsBoundBase(ReferenceBinding roleType) {

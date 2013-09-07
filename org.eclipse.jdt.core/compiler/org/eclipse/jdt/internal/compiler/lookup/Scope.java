@@ -1854,6 +1854,10 @@ public abstract class Scope {
 					int foundSize = found.size;
 					next : for (int c = 0, l = currentMethods.length; c < l; c++) {
 						MethodBinding current = currentMethods[c];
+//{ObjectTeams: during this search decapsulation trumps inaccessibility:
+						boolean decapsulationAllowed = invocationSite instanceof Expression && ((Expression)invocationSite).getBaseclassDecapsulation().isAllowed();
+					  if (!decapsulationAllowed && !current.declaringClass.isSynthInterface())
+// SH}
 						if (!current.canBeSeenBy(receiverType, invocationSite, this)) continue next;
 
 						if (foundSize > 0) {
