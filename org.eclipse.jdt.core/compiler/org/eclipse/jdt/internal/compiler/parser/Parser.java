@@ -11362,6 +11362,7 @@ protected void convertTypeAnchor(int annotationKind) {
 	switch (annotationKind) {
 		case 0 : // no member values
 			annotation = new MarkerAnnotation(annotationTypeRef, anchor.sourceStart);
+			annotation.declarationSourceEnd = anchor.sourceEnd;
 			break;
 		case 1 : // single member value
 			// extracted from consumeSingleMemberAnnotation:
