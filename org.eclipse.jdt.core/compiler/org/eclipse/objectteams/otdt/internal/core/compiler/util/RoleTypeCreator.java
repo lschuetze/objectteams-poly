@@ -606,6 +606,9 @@ public class RoleTypeCreator implements TagBits {
 	        		}
 	        	};
 	        }
+	        if (typeToWrap instanceof IntersectionCastTypeBinding) { // FIXME (recurse?)
+	        	return originalType;
+	        }
 	        ReferenceBinding refBinding = (ReferenceBinding)typeToWrap;
 	        if (refBinding.isTypeVariable()) {
 	        	// inplace modifying the type variable. TODO(SH): is this ok, or do we need a copy?

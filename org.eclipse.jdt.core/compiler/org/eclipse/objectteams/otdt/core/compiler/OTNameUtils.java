@@ -85,6 +85,8 @@ public class OTNameUtils {
 
 	/** Does name denote a synthetic marker interface used for marking tsuper methods? */
 	public static boolean isTSuperMarkerInterface(char[] name) {
+		if (name == null) // some types like LocalTypeBinding and IntersectionCastTypeBinding don't have a name
+			return false;
 		int lastDollar = CharOperation.lastIndexOf('$', name);
 		if (lastDollar > -1)
 			name = CharOperation.subarray(name, lastDollar+1, -1);
