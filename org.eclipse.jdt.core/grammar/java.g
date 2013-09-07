@@ -1803,7 +1803,7 @@ PrimaryNoNewArray ::= PrimitiveType '.' 'class'
 
 --{ObjectTeams: R<@t>.class 
 -- (start with RelationalExpression to make the grammer LL1, further syntax checking in Parser)
-RelationalExpression ::= RelationalExpression '<' TypeAnchor '>' '.' 'class'
+RelationalExpression ::= RelationalExpression '<' AnyTypeAnchor '>' '.' 'class'
 /.$putCase consumeRoleClassLiteral(); $break ./
 -- SH}
 

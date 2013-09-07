@@ -30,7 +30,7 @@ public interface ParserBasicInformation {
       NT_OFFSET         = 138,
       SCOPE_UBOUND      = 370,
       SCOPE_SIZE        = 371,
-      LA_STATE_OFFSET   = 19091,
+      LA_STATE_OFFSET   = 19167,
       MAX_LA            = 1,
       NUM_RULES         = 969,
       NUM_TERMINALS     = 138,
@@ -39,6 +39,6 @@ public interface ParserBasicInformation {
       START_STATE       = 1707,
       EOFT_SYMBOL       = 65,
       EOLT_SYMBOL       = 65,
-      ACCEPT_ACTION     = 19090,
-      ERROR_ACTION      = 19091;
+      ACCEPT_ACTION     = 19166,
+      ERROR_ACTION      = 19167;
 }
