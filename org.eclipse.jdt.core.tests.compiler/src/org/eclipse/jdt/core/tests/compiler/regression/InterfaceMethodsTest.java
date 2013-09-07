@@ -118,15 +118,22 @@ public class InterfaceMethodsTest extends AbstractComparableTest {
 			"	^^^^^^^\n" +
 			"Syntax error, insert \"Identifier (\" to complete MethodHeaderName\n" +
 			"----------\n" +
-			"2. ERROR in I.java (at line 6)\n" +
-			"	stritfp default void foo3() {}\n" +
-			"	^^^^^^^\n" +
-			"Syntax error, insert \")\" to complete MethodDeclaration\n" +
-			"----------\n" +
-			"3. ERROR in I.java (at line 6)\n" +
-			"	stritfp default void foo3() {}\n" +
-			"	^^^^^^^\n" +
-			"Syntax error, insert \";\" to complete MethodDeclaration\n" +
+//{ObjectTeams: funny syntax errors, but so what ...
+			"2. ERROR in I.java (at line 6)\n" + 
+			"	stritfp default void foo3() {}\n" + 
+			"	^^^^^^^\n" + 
+			"Syntax error, insert \")\" to complete MethodSpecLong\n" + 
+			"----------\n" + 
+			"3. ERROR in I.java (at line 6)\n" + 
+			"	stritfp default void foo3() {}\n" + 
+			"	^^^^^^^\n" + 
+			"Syntax error, insert \"<-\" to complete CallinBindingLeft\n" + 
+			"----------\n" + 
+			"4. ERROR in I.java (at line 6)\n" + 
+			"	stritfp default void foo3() {}\n" + 
+			"	^^^^^^^\n" + 
+			"Syntax error, insert \"MethodSpecsLong EmptyParameterMappings\" to complete InvalidCallinBinding\n" +
+// SH}
 			"----------\n");
 	}
 
