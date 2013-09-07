@@ -133,7 +133,12 @@ public RecoveredElement add(AbstractMethodDeclaration methodDeclaration, int bra
 		element.attach(
 				this.pendingAnnotations,
 				this.pendingAnnotationCount,
+//{ObjectTeams: AccTeam was obviously not meant for us:
+/* orig:
 				this.pendingModifiers,
+  :giro */
+				this.pendingModifiers & ~ClassFileConstants.AccTeam,
+// SH}
 				this.pendingModifersSourceStart);
 	}
 	resetPendingModifiers();
