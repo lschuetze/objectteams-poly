@@ -533,7 +533,7 @@ public class Syntax extends AbstractOTJLDTest {
     // a parameter mapping separates parts with semicolon
     // 8.6.1-otjld-parammap-illegal-semi-1
     public void test861_parammapIllegalSemi1() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"Team861pis1.java",
 			    "\n" +
@@ -549,7 +549,18 @@ public class Syntax extends AbstractOTJLDTest {
 			    "}\n" +
 			    "	\n"
             },
-            "\";\"");
+            "----------\n" + 
+    		"1. WARNING in Team861pis1.java (at line 3)\n" + 
+    		"	protected class Role playedBy Object {\n" + 
+    		"	                              ^^^^^^\n" + 
+    		"Base class java.lang.Object appears to be a system class, which means that load time weaving could possibly fail\n" + 
+    		"if this class is loaded from rt.jar/the bootstrap classpath.\n" + 
+    		"----------\n" + 
+    		"2. ERROR in Team861pis1.java (at line 7)\n" + 
+    		"	this -> other;\n" + 
+    		"	^^^^^^^^^^^^^^\n" + 
+    		"Syntax error on tokens, delete these tokens\n" + 
+    		"----------\n");
     }
 
     // a parameter mapping is terminated by semicolon

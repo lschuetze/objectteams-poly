@@ -351,13 +351,14 @@ public class CalloutParameterBinding_LiftingAndLowering extends AbstractOTJLDTes
     		"----------\n" + 
     		"2. ERROR in Team321ciwmp6.java (at line 5)\n" + 
     		"	int doSomethingOther(int r1) -> int doSomething(int b1) wrong\n" + 
-    		"	                                                        ^^^^^\n" + 
-    		"Syntax error on token \"wrong\", delete this token\n" + 
+    		"                        with {\n" + 
+    		"	                                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+    		"Syntax error on tokens, EmptyParameterMappings expected instead\n" + 
     		"----------\n" + 
-    		"3. ERROR in Team321ciwmp6.java (at line 9)\n" + 
-    		"	};\n" + 
-    		"	 ^\n" + 
-    		"Syntax error, insert \"}\" to complete ClassBody\n" + 
+    		"3. ERROR in Team321ciwmp6.java (at line 7)\n" + 
+    		"	r1 -> b1,\n" + 
+    		"	        ^\n" + 
+    		"Syntax error on token \",\", ; expected\n" + 
     		"----------\n" + 
     		"4. ERROR in Team321ciwmp6.java (at line 9)\n" + 
     		"	};\n" + 
