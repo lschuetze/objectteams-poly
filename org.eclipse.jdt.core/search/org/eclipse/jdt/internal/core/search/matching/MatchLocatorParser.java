@@ -430,6 +430,17 @@ protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
 		this.patternLocator.match(annotation, this.nodeSet);
 	}
 }
+//{ObjectTeams: new hook that also creates annotations:
+protected void convertTypeAnchor(int annotationKind) {
+	// consumeMarkerAnnotation, consumeSingleMemberAnnotation, consumeNormalAnnotation:
+	super.convertTypeAnchor(annotationKind);
+	final boolean isTypeAnnotation = true;
+	if (this.patternFineGrain == 0 || (this.patternFineGrain & IJavaSearchConstants.ANNOTATION_TYPE_REFERENCE) != 0) {
+		Annotation annotation = (Annotation) (isTypeAnnotation ? this.typeAnnotationStack[this.typeAnnotationPtr] : this.expressionStack[this.expressionPtr]);
+		this.patternLocator.match(annotation, this.nodeSet);
+	}
+}
+// SH}
 protected void consumeMemberValuePair() {
 	super.consumeMemberValuePair();
 	this.patternLocator.match((MemberValuePair) this.astStack[this.astPtr], this.nodeSet);
@@ -889,11 +900,10 @@ protected TypeReference getTypeReference(int dim) {
 	return getTypeReference(dim, false);  
 }
 protected TypeReference getTypeReference(int dim, boolean liftingTypeAllowed) {
-// FIXME:
-//*orig:
+/*orig:
 	TypeReference typeRef = super.getTypeReference(dim);
-// OT previous:
-//	TypeReference typeRef = super.getUnannotatedTypeReference(dim, liftingTypeAllowed);
+*/
+	TypeReference typeRef = super.getTypeReference(dim, liftingTypeAllowed);
 // SH}
 	if (this.patternFineGrain == 0) {
 		this.patternLocator.match(typeRef, this.nodeSet); // NB: Don't check container since type reference can happen anywhere

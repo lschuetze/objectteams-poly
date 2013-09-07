@@ -443,6 +443,19 @@ protected void consumeMarkerAnnotation(boolean isTypeAnnotation) {
 		this.requestor.acceptAnnotationTypeReference(annotation.type.getTypeName(), annotation.sourceStart, annotation.sourceEnd);
 	}
 }
+//{ObjectTeams: new hook that also creates annotations:
+protected void convertTypeAnchor(int annotationKind) {
+	// consumeMarkerAnnotation, consumeSingleMemberAnnotation, consumeNormalAnnotation:
+	super.convertTypeAnchor(annotationKind);
+	if (this.reportReferenceInfo) { // accept annotation type reference
+		Annotation annotation = this.typeAnnotationStack[this.typeAnnotationPtr];
+		if (annotation instanceof SingleMemberAnnotation)
+			this.requestor.acceptMethodReference(TypeConstants.VALUE, 0, annotation.sourceStart);
+		else
+			this.requestor.acceptAnnotationTypeReference(annotation.type.getTypeName(), annotation.sourceStart, annotation.sourceEnd);
+	}
+}
+// SH}
 protected void consumeMethodHeaderName(boolean isAnnotationMethod) {
 	long selectorSourcePositions = this.identifierPositionStack[this.identifierPtr];
 	int selectorSourceEnd = (int) selectorSourcePositions;
