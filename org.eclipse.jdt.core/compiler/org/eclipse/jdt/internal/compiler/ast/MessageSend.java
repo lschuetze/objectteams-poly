@@ -1320,9 +1320,10 @@ protected TypeBinding afterMethodLookup(Scope scope, AnchorMapping anchorMapping
 	if (this.binding.isStatic() && this.actualReceiverType.isInterface()) {
 		// static method in an interface can only occur in a role.
 		ReferenceBinding receiverType = (ReferenceBinding)this.actualReceiverType;
-		assert receiverType.isRole();
-		ReferenceBinding classPart = receiverType.roleModel.getClassPartBinding();
-		this.actualReceiverType = classPart; // used when calling getUpdatedMethodBinding() and during codeGen
+		if (receiverType.isRole()) {
+			ReferenceBinding classPart = receiverType.roleModel.getClassPartBinding();
+			this.actualReceiverType = classPart; // used when calling getUpdatedMethodBinding() and during codeGen
+		}
 	}
 
 	// check role-type return type in non-generated methods:
