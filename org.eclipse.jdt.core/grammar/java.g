@@ -2838,7 +2838,7 @@ TypeBoundOpt1 ::= 'extends' ReferenceType1
 /:$compliance 1.5:/
 /:$readableName TypeParameterBound:/ 
 
-AnchoredTypeParameterHeader0 ::= TypeParameterHeader '<' TypeAnchor
+AnchoredTypeParameterHeader0 ::= TypeParameterHeader '<' AnyTypeAnchor
 /.$putCase consumeAnchoredTypeParameter(); $break ./
 /:$compliance 1.5:/
 /:$readableName AnchoredTypeParameter:/
