@@ -2639,7 +2639,9 @@ NotAnAnchor -> '(' MemberValuePairsopt ')'
 
 
 AnyTypeAnchor -> TypeAnchor
+/:$readableName typeAnchor:/
 AnyTypeAnchor -> TentativeTypeAnchor
+/:$readableName typeAnchor:/
 
 -- this rule could indicate either a type anchor or a type annotation
 TentativeTypeAnchor ::= '@OT' UnannotatableName
