@@ -2752,7 +2752,7 @@ public void generateSyntheticBodyForMethodAccess(SyntheticMethodBinding accessMe
 /* orig:
 			invoke(Opcodes.OPC_invokespecial, targetMethod, declaringClass);
   :giro */
-			if (targetMethod.declaringClass.isInterface())
+			if (targetMethod.declaringClass.isSynthInterface())
 				invoke(Opcodes.OPC_invokeinterface, targetMethod, declaringClass);
 			else
 				invoke(Opcodes.OPC_invokespecial, targetMethod, declaringClass);
