@@ -2769,8 +2769,7 @@ protected void runNegativeTest(
 		false /* do not perform statements recovery */,
 		null /* no custom requestor */,
 		// compiler results
-		expectedCompilerLog == null || /* expecting compiler errors */
-		expectedCompilerLog.indexOf("ERROR") != -1,
+		true /* expecting compiler errors */,
 		expectedCompilerLog /* expected compiler log */,
 		// runtime options
 		false /* do not force execution */,
@@ -2829,7 +2828,8 @@ protected void runNegativeTest(
 		false /* do not perform statements recovery */,
 		null /* no custom requestor */,
 		// compiler results
-		true /* expecting compiler errors */,
+		expectedCompilerLog == null || /* expecting compiler errors */
+		expectedCompilerLog.indexOf("ERROR") != -1,
 		expectedCompilerLog /* expected compiler log */,
 		// runtime options
 		false /* do not force execution */,
