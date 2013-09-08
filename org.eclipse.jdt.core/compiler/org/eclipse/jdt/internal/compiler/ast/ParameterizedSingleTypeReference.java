@@ -30,6 +30,7 @@ import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TypeAnchorReference;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
+import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.OTClassScope;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ProblemAnchorBinding;
@@ -421,9 +422,20 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 //{ObjectTeams: already done?
 		if (!isDiamond && argLength == 0)
 			return this.resolvedType;
-// SH}
 
-    	ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, enclosingType);
+		// feed more parameters into createParameterizedType:
+		long annotTagBits = currentType.tagBits & TagBits.AnnotationNullMASK;
+		ITeamAnchor anchor = null;
+		int valParPos = -1;
+		if (DependentTypeBinding.isDependentType(currentType)) {
+			anchor = ((DependentTypeBinding)currentType)._teamAnchor;
+			valParPos = ((DependentTypeBinding)currentType)._valueParamPosition;
+		}
+		ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, annotTagBits, anchor, valParPos,  enclosingType);
+/* orig:
+		ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, enclosingType);
+  :giro */
+// SH}
 		// check argument type compatibility for non <> cases - <> case needs no bounds check, we will scream foul if needed during inference.
     	if (!isDiamond) {
     		if (checkBounds) // otherwise will do it in Scope.connectTypeVariables() or generic method resolution

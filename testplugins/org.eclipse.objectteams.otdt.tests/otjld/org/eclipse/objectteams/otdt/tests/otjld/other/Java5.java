@@ -4564,6 +4564,72 @@ public class Java5 extends AbstractOTJLDTest {
             "OK");
     }
 
+    // a type parameter has a nested value parameter with additional type bound (super role)
+    // like previous but illegally use qualified type reference
+    public void testA119_nestedValueParameter4b() {
+       this.compileOrder = new String[][]{{"pb/TA119nvp4_2.java"}, {"pt/TeamA119nvp4.java"}, {"pb/TA119nvp4_1.java"}, {"TA119nvp4Main.java"}};
+       runNegativeTest(
+            new String[] {
+		"TA119nvp4Main.java",
+			    "\n" +
+			    "public class TA119nvp4Main {\n" +
+			    "    public static void main(String[] args) {\n" +
+			    "        final pt.TeamA119nvp4 t1 = new pt.TeamA119nvp4();\n" +
+			    "        Role<@t1> r = new Role<@t1>();\n" +
+			    "        pb.TA119nvp4_1<@t1,Role<@t1>> c = new pb.TA119nvp4_1<@t1,Role<@t1>>();\n" +
+			    "        c.test(r);\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"pb/TA119nvp4_1.java",
+			    "package pb;\n" +
+			    "import pt.TeamA119nvp4;\n" +
+			    "public class TA119nvp4_1<TeamA119nvp4 t, R<@t> extends Showable<@t>> {\n" +
+			    "    public void test(R<@t> r) {\n" +
+			    "        t.show(r);\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n",
+		"pb/TA119nvp4_2.java",
+			    "package pb;\n" +
+			    "public class TA119nvp4_2 {}\n" +
+			    "    \n",
+		"pt/TeamA119nvp4.java",
+			    "package pt;\n" +
+			    "public team class TeamA119nvp4 {\n" +
+			    "    public abstract class Showable {\n" +
+			    "        public abstract void show();\n" +
+			    "    }\n" +
+			    "    public class Role extends Showable playedBy pb.TA119nvp4_2 {\n" +
+			    "        public Role() { base(); }\n" +
+			    "		 @Override\n" +
+			    "        public void show() { System.out.print(\"OK\"); }\n" +
+			    "    }\n" +
+			    "    public void show(Showable s) {\n" +
+			    "        s.show();\n" +
+			    "    }\n" +
+			    "}\n" +
+			    "    \n"
+            },
+            "----------\n" + 
+    		"1. WARNING in pt\\TeamA119nvp4.java (at line 6)\n" + 
+    		"	public class Role extends Showable playedBy pb.TA119nvp4_2 {\n" + 
+    		"	                                            ^^^^^^^^^^^^^^\n" + 
+    		"Qualified reference to base class pb.TA119nvp4_2 is deprecated, should use a base import instead (OTJLD 2.1.2(d)).\n" + 
+    		"----------\n" + 
+    		"----------\n" + 
+    		"1. ERROR in TA119nvp4Main.java (at line 6)\n" + 
+    		"	pb.TA119nvp4_1<@t1,Role<@t1>> c = new pb.TA119nvp4_1<@t1,Role<@t1>>();\n" + 
+    		"	               ^^^\n" + 
+    		"Illegal position for value parameter @t1: must be a parameter of a single name type reference(OTJLD A.9(a)).\n" + 
+    		"----------\n" + 
+    		"2. ERROR in TA119nvp4Main.java (at line 6)\n" + 
+    		"	pb.TA119nvp4_1<@t1,Role<@t1>> c = new pb.TA119nvp4_1<@t1,Role<@t1>>();\n" + 
+    		"	                                                     ^^^\n" + 
+    		"Illegal position for value parameter @t1: must be a parameter of a single name type reference(OTJLD A.9(a)).\n" + 
+    		"----------\n");
+    }
+
     // a type parameter has a nested value parameter with additional type bound - role not subtype of bound
     // A.1.19-otjld-nested-value-parameter-5
     public void testA119_nestedValueParameter5() {
