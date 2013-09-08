@@ -874,8 +874,7 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 		typeVars[i].declaringElement = result;
 //{ObjectTeams:
 	// transfer "callsBaseCtor":
-	if ((result.modifiers & ExtraCompilerModifiers.AccCallsBaseCtor) != 0) {
-		result.modifiers &= ~ExtraCompilerModifiers.AccCallsBaseCtor;
+	if (method instanceof MethodInfo && ((MethodInfo)method).callsBaseCtor()) {
 		MethodModel.setCallsBaseCtor(result);
 	}
 	// handle various OT-specific methods:

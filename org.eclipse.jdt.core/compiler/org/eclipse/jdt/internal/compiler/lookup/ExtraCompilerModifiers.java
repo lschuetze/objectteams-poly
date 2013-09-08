@@ -81,8 +81,6 @@ public interface ExtraCompilerModifiers { // modifier constant
 	// future:
 	int AccReadonly = ASTNode.Bit27; // shared with blank final / default ctor
 
- 	// purely internal, only passes CallsBaseConstructor from MethodInfo to MethodBinding
- 	int AccCallsBaseCtor = 0x10000; // bit 17
 
 	final int AccOTTypeJustFlag = AccJustFlag | AccRole | AccOverriding;
 // SH}

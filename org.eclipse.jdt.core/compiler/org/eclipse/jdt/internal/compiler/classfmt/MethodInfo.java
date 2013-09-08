@@ -25,12 +25,12 @@ import static org.eclipse.objectteams.otdt.internal.core.compiler.lookup.Synthet
 import java.util.LinkedList;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.codegen.AttributeNamesConstants;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.util.Util;
@@ -72,6 +72,10 @@ public class MethodInfo extends ClassFileStruct implements IBinaryMethod, Compar
 //{ObjectTeams: method level attributes:
     /* After reading a method its attributes are stored here. */
     private LinkedList<AbstractAttribute> methodAttributes = new LinkedList<AbstractAttribute>();
+    // more bits decoded from attributes:
+    protected int otModifiers;
+	// constants for the above:
+	static final int AccCallsBaseCtor = ASTNode.Bit1;
 // SH}
 
 public static MethodInfo createMethod(byte classFileBytes[], int offsets[], int offset) {
@@ -153,7 +157,10 @@ public void setAccessFlags (int flags) {
 }
 // special flag which needs to be added to the regular access flags:
 public void setCallsBaseCtor() {
-	this.accessFlags |= ExtraCompilerModifiers.AccCallsBaseCtor;
+	this.otModifiers |= AccCallsBaseCtor;
+}
+public boolean callsBaseCtor() {
+	return (this.otModifiers & AccCallsBaseCtor) != 0;
 }
 public void maybeRegister(
         BinaryTypeBinding clazz,
