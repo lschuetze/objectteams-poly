@@ -891,7 +891,12 @@ MethodBinding computeSubstituteMethod(MethodBinding inheritedMethod, MethodBindi
 
 static MethodBinding computeSubstituteMethod(MethodBinding inheritedMethod, MethodBinding currentMethod, LookupEnvironment environment) {
 	if (inheritedMethod == null) return null;
+//{ObjectTeams: use source-level params in case of enhanced callin methods:
+/* orig:
 	if (currentMethod.parameters.length != inheritedMethod.parameters.length) return null; // no match
+  :giro */
+	if (currentMethod.getSourceParamLength() != inheritedMethod.getSourceParamLength()) return null; // no match
+// SH}
 
 	// due to hierarchy & compatibility checks, we need to ensure these 2 methods are resolved
 	if (currentMethod.declaringClass instanceof BinaryTypeBinding)

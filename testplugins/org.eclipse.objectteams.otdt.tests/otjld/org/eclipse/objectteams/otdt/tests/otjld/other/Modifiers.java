@@ -33,7 +33,7 @@ public class Modifiers extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test713_roleImplementsInheritedAbstractMethod2"};
+//		TESTS_NAMES = new String[] { "test7112_callinMethodOverwritesNoncallinMethod2"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -751,12 +751,7 @@ public class Modifiers extends AbstractOTJLDTest {
 			    "    \n"
             },
             "----------\n" + 
-    		"1. ERROR in Team7112cmonm2.java (at line 3)\n" + 
-    		"	public class Role7112cmonm2 implements T7112cmonm2_1 playedBy T7112cmonm2_2 {\n" + 
-    		"	             ^^^^^^^^^^^^^^\n" + 
-    		"The type Team7112cmonm2.Role7112cmonm2 must implement the inherited abstract method T7112cmonm2_1.test()\n" + 
-    		"----------\n" + 
-    		"2. ERROR in Team7112cmonm2.java (at line 4)\n" + 
+    		"1. ERROR in Team7112cmonm2.java (at line 4)\n" + 
     		"	callin void test() {\n" + 
     		"	^^^^^^^^^^^^^^^^^^\n" + 
     		"Modifier \"callin\" not allowed here; trying to override a method from T7112cmonm2_1 which is not a callin method (OTJLD 4.2(d)). \n" + 
