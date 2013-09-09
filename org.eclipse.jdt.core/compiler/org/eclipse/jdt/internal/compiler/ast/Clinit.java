@@ -316,6 +316,7 @@ public class Clinit extends AbstractMethodDeclaration {
 //{ObjectTeams: roles cannot initialize static fields with non-constant values:
 							int previousPosition = codeStream.position;
 // orig:
+							sourcePosition = fieldDecl.declarationEnd;
 							fieldDecl.generateCode(staticInitializerScope, codeStream);
 // :giro
 							if (  previousPosition != codeStream.position // field has indeed generated code
