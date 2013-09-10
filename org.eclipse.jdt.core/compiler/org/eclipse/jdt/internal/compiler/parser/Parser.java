@@ -6659,6 +6659,20 @@ protected void consumeTypeAnnotation() {
 }
 protected void consumeOneMoreTypeAnnotation() {
 	// TypeAnnotations ::= TypeAnnotations TypeAnnotation
+//{ObjectTeams: inside a sentinel-delimited list?
+	if (this.typeAnnotationLengthPtr > 1) {
+		int l = this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr-2];
+		if (this.typeAnnotationPtr - l - 1 > -1) {
+			if (this.typeAnnotationStack[this.typeAnnotationPtr - l - 1] == annotationSentinel) {
+				// so we have a sentinal delimited list of annotations at lenghts[-2]
+				// merge into that list rather than in into the list at [-1]
+				this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr-2]++;
+				this.typeAnnotationLengthStack[--this.typeAnnotationLengthPtr] = 0;
+				return;
+			}
+		}
+	}
+// SH}
 	this.typeAnnotationLengthStack[--this.typeAnnotationLengthPtr]++;
 }
 protected void consumeNameArrayType() {
@@ -11333,6 +11347,9 @@ protected void consumeTypeAnchor(boolean haveBase) {
 	// anchor has no type annotations, yet it will be consumed in a context where type annotations are possible
 	pushOnTypeAnnotationLengthStack(0);
 }
+// this sentinel annotation is pushed below a type annotation that was converted from a type anchor.
+// it signals to a subsequent type annotation that it shall be merged into the existing list
+static final Annotation annotationSentinel = new MarkerAnnotation(new SingleTypeReference("annotationSentinel".toCharArray(), 0), 0); //$NON-NLS-1$
 protected void convertTypeAnchor(int annotationKind) {
 	// rule number corresponds to argument annotationKind:
 	// (0) NotAnAnchor ::= $empty
@@ -11392,6 +11409,7 @@ protected void convertTypeAnchor(int annotationKind) {
 	}
 	// and push it back
 	this.typeAnnotationLengthPtr--; // drop the empty list pushed in consumeTypeAnchor()
+	pushOnTypeAnnotationStack(annotationSentinel);
 	pushOnTypeAnnotationStack(annotation);
 }
 protected void consumeTypeArgumentFromAnchor() {
@@ -11410,6 +11428,7 @@ protected void consumeTypeArgumentFromAnchor() {
 	this.typeAnnotationLengthPtr--;
 	// collect everything into a regular type argument:
 	consumeTypeArgument();
+	this.typeAnnotationPtr--; // drop the annotationSentinel
 }
 protected void consumeAnnotationsOnTypeArgumentFromAnchor() {
 	// TypeAnchorOrAnnotatedTypeArgument -> TentativeTypeAnchor NotAnAnchor Wildcard
@@ -11448,6 +11467,7 @@ protected void consumeAnnotationsOnTypeArgumentFromAnchor() {
 		ref.bits |= ASTNode.HasTypeAnnotations;
 	}
 	// type references are already on genericsStack, will be collected by consumeTypeArgumentList1()
+	this.typeAnnotationPtr--; // drop the annotationSentinel
 }
 protected NameReference newBaseReference() {
 	return new SingleNameReference(IOTConstants._OT_BASE, (((long)this.intStack[this.intPtr--])<<32)+this.intStack[this.intPtr--]);
@@ -14542,6 +14562,14 @@ protected void pushOnAstStack(ASTNode node) {
 }
 protected void pushOnTypeAnnotationStack(Annotation annotation) {
 
+//{ObjectTeams: detect the situation of having pushed the sentinel plus exactly one type annotation:
+	boolean atSentinel = this.typeAnnotationPtr > 0 
+			&& this.typeAnnotationPtr <= this.typeAnnotationStack.length 
+			&& this.typeAnnotationStack[this.typeAnnotationPtr-1] == annotationSentinel
+			&& this.typeAnnotationLengthPtr > -1
+			&& this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr] == 1;
+// SH}
+
 	int stackLength = this.typeAnnotationStack.length;
 	if (++this.typeAnnotationPtr >= stackLength) {
 		System.arraycopy(
@@ -14551,6 +14579,11 @@ protected void pushOnTypeAnnotationStack(Annotation annotation) {
 	}
 	this.typeAnnotationStack[this.typeAnnotationPtr] = annotation;
 
+//{ObjectTeams: the sentinel is not part of any list, don't record a length
+	if (annotation == annotationSentinel)
+		return;
+// SH}
+
 	stackLength = this.typeAnnotationLengthStack.length;
 	if (++this.typeAnnotationLengthPtr >= stackLength) {
 		System.arraycopy(
@@ -14558,6 +14591,11 @@ protected void pushOnTypeAnnotationStack(Annotation annotation) {
 			this.typeAnnotationLengthStack = new int[stackLength + TypeAnnotationStackIncrement], 0,
 			stackLength);
 	}
+//{ObjectTeams: at the sentinal situation we merge this new annotation into the previous list:
+  if (atSentinel)
+	this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr-1]++;
+  else
+// SH}
 	this.typeAnnotationLengthStack[this.typeAnnotationLengthPtr] = 1;
 }
 protected void pushOnTypeAnnotationLengthStack(int pos) {
