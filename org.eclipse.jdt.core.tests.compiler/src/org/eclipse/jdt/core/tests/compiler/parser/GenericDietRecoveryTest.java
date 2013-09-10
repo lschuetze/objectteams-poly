@@ -1122,7 +1122,7 @@ public void test0022() {
 	String expectedDietUnitToString =
 		"import java.util.*;\n" +
 		"public interface X<T> {\n" +
-		"  public <K>Map<K, T> foo();\n" +
+		"  <K>Map<K, T> foo();\n" +
 		"}\n";
 
 	String expectedDietPlusBodyUnitToString =
@@ -1216,7 +1216,7 @@ public void test0025() {
 	String expectedDietUnitToString =
 		"import java.util.*;\n" +
 		"public interface X<T> {\n" +
-		"  <K>Map<K, T> foo();\n" +
+		"  public <K>Map<K, T> foo();\n" +
 		"}\n";
 
 	String expectedDietPlusBodyUnitToString =
