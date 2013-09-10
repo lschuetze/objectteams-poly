@@ -33,13 +33,9 @@ import org.eclipse.jdt.internal.compiler.util.SimpleSet;
 import org.eclipse.jdt.internal.compiler.util.Sorting;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
-import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
-import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
-import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateHelper;
 import org.eclipse.objectteams.otdt.internal.core.compiler.mappings.CalloutImplementor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
-import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.copyinheritance.CopyInheritance;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.Protections;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 
@@ -165,8 +161,9 @@ void checkAbstractMethod(MethodBinding abstractMethod) {
 //{ObjectTeams: try to infer a callout:
 			if (this.type.isRole()) {
 				CalloutImplementor coi = new CalloutImplementor(this.type.roleModel);
-				if (coi.generateInferredCallout(typeDeclaration, abstractMethod)) {
-					typeDeclaration.scope.problemReporter().addingInferredCalloutForInherited(typeDeclaration, abstractMethod);
+				MethodDeclaration callout = coi.generateInferredCallout(typeDeclaration, abstractMethod);
+				if (callout != null) {
+					typeDeclaration.scope.problemReporter().addingInferredCalloutForInherited(typeDeclaration, abstractMethod, callout);
 					return;
 				}
 			}
@@ -830,15 +827,6 @@ protected boolean canOverridingMethodDifferInErasure(MethodBinding overridingMet
 	return false;   // the case for <= 1.4  (cannot differ)
 }
 void computeMethods() {
-//{ObjectTeams: make sure we actually have all methods we can have:
-	// supers (unless in danger of infinite recursion) should have all features:
-	ReferenceBinding superclass = this.type.superclass;
-	if (StateHelper.isDefinitelyReadyToProcess(superclass, this.type, ITranslationStates.STATE_METHODS_VERIFIED))
-		Dependencies.ensureBindingState(superclass, ITranslationStates.STATE_METHODS_VERIFIED);
-	// role should copy all we can get by now
-	if (this.type.isRole() && !this.type.isInterface())
-		CopyInheritance.copyGeneratedFeatures(this.type.roleModel);
-// SH}
 
 	MethodBinding[] methods = this.type.methods();
 	int size = methods.length;
