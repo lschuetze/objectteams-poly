@@ -23,6 +23,8 @@
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 380896 - [compiler][null] Enum constants not recognised as being NonNull.
+ *     Till Brychcy - Contributions for
+ *     							bug 415269 - NonNullByDefault is not always inherited to nested classes
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -1663,7 +1665,7 @@ void initializeForStaticImports() {
 	this.scope.buildMethods();
 }
 
-private void initializeNullDefault() {
+private int getNullDefault() {
 	// ensure nullness defaults are initialized at all enclosing levels:
 	switch (this.nullnessDefaultInitialized) {
 	case 0:
@@ -1673,6 +1675,7 @@ private void initializeNullDefault() {
 		getPackage().isViewedAsDeprecated(); // initialize annotations
 		this.nullnessDefaultInitialized = 2;
 	}
+	return this.defaultNullness;
 }
 
 /**
@@ -2034,7 +2037,6 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 					// enum constants neither have a type declaration nor can they be null
 					field.tagBits |= TagBits.AnnotationNonNull;
 				} else {
-					initializeNullDefault();
 					if (hasNonNullDefault()) {
 						field.fillInDefaultNonNullness(fieldDecl, initializationScope);
 					}
@@ -2393,7 +2395,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 	return method;
 }
 private void createArgumentBindings(MethodBinding method, CompilerOptions compilerOptions) {
-	initializeNullDefault();
+	getNullDefault(); // ensure initialized
 	AbstractMethodDeclaration methodDecl = method.sourceMethod();
 	if (methodDecl != null) {
 		// while creating argument bindings we also collect explicit null annotations:
@@ -2465,7 +2467,7 @@ protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation
 
 // return: should caller continue searching?
 protected boolean checkRedundantNullnessDefaultOne(ASTNode location, Annotation[] annotations, long annotationTagBits) {
-	int thisDefault = this.defaultNullness;
+	int thisDefault = getNullDefault();
 	if (thisDefault == NONNULL_BY_DEFAULT) {
 		if ((annotationTagBits & TagBits.AnnotationNonNullByDefault) != 0) {
 			this.scope.problemReporter().nullDefaultAnnotationIsRedundant(location, annotations, this);
@@ -2495,7 +2497,7 @@ boolean hasNonNullDefault() {
 			case Scope.CLASS_SCOPE:
 				currentType = ((ClassScope)currentScope).referenceContext.binding;
 				if (currentType != null) {
-					int foundDefaultNullness = currentType.defaultNullness;
+					int foundDefaultNullness = currentType.getNullDefault();
 					if (foundDefaultNullness != NO_NULL_DEFAULT) {
 						return foundDefaultNullness == NONNULL_BY_DEFAULT;
 					}
