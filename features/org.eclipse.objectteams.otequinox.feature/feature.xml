@@ -46,6 +46,13 @@ Author: Stephan Herrmann.
          version="0.0.0"
          unpack="false"/>
 
+   <fragment
+         id="org.eclipse.objectteams.otequinox.bug253244workaround"
+         download-size="0"
+         install-size="0"
+         version="0.0.0"
+         unpack="false"/>
+
    <plugin
          id="org.eclipse.objectteams.otequinox.branding"
          download-size="15"

@@ -1,3 +1,18 @@
+/**********************************************************************
+ * This file is part of "Object Teams Development Tooling"-Software
+ * 
+ * Copyright 2013 GK Software AG
+ *  
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ * 
+ * Please visit http://www.objectteams.org for updates and contact.
+ * 
+ * Contributors:
+ * 	Stephan Herrmann - Initial API and implementation
+ **********************************************************************/
 package org.eclipse.objectteams.otequinox;
 
 import static org.eclipse.objectteams.otequinox.Constants.TRANSFORMER_PLUGIN_ID;
@@ -21,6 +36,7 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
 import org.osgi.framework.ServiceListener;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.hooks.weaving.WeavingHook;
 import org.osgi.framework.hooks.weaving.WovenClassListener;
 
@@ -57,14 +73,19 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		
 		// but wait until the extension registry is available for reading aspectBindings:
 		try {
-			context.addServiceListener(
-				new ServiceListener() { 
-					public void serviceChanged(ServiceEvent event) {
-						if(event.getType() == ServiceEvent.REGISTERED)
-							otWeavingHook.activate(bundleContext, context.getServiceReference(IExtensionRegistry.class));
-					}
-				},
-				"(objectclass="+IExtensionRegistry.class.getName()+")"); //$NON-NLS-1$ //$NON-NLS-2$
+			ServiceReference<IExtensionRegistry> reference = context.getServiceReference(IExtensionRegistry.class);
+			if (reference != null) {
+				otWeavingHook.activate(bundleContext, reference);
+			} else {
+				context.addServiceListener(
+					new ServiceListener() { 
+						public void serviceChanged(ServiceEvent event) {
+							if(event.getType() == ServiceEvent.REGISTERED)
+								otWeavingHook.activate(bundleContext, context.getServiceReference(IExtensionRegistry.class));
+						}
+					},
+					"(objectclass="+IExtensionRegistry.class.getName()+")"); //$NON-NLS-1$ //$NON-NLS-2$
+			}
 		}
 		catch (InvalidSyntaxException ex) {
 			log(ex, "Failed to register service listener");
