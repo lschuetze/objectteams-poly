@@ -49,6 +49,7 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 	}
 
 	private static ILog log;
+	private static List<IStatus> pendingLogEntries = new ArrayList<>();
 	private static TransformerPlugin plugin;
 	
 	private AspectBindingRegistry aspectBindingRegistry;
@@ -139,14 +140,11 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 		}
 	}
 
-	public static void log (Throwable ex, String msg) {
+	public static synchronized void log (Throwable ex, String msg) {
 		msg = "OT/Equinox: "+msg;
 		System.err.println(msg);
 		ex.printStackTrace();
-		if (log != null)
-			log.log(new Status(IStatus.ERROR, TRANSFORMER_PLUGIN_ID, msg, ex));
-		else
-			System.err.println(msg);
+		pendingLogEntries.add(new Status(IStatus.ERROR, TRANSFORMER_PLUGIN_ID, msg, ex));
 	}
 	
 	public static void log(int status, String msg) {
@@ -154,20 +152,30 @@ public class TransformerPlugin implements BundleActivator, IAspectRegistry {
 			doLog(status, msg);
 	}
 
-	public static void doLog(int status, String msg) {
+	public static synchronized void doLog(int status, String msg) {
 		msg = "OT/Equinox: "+msg;
 // this seems to cause java.lang.NoClassDefFoundError: org/eclipse/ui/statushandlers/StatusAdapter etc.
 //		if (log == null) acquireLog(context);
-		if (log != null) {
-			log.log(new Status(status, TRANSFORMER_PLUGIN_ID, msg));
-		} else {
-			if ((status & IStatus.ERROR) != 0)
-				System.err.println(msg);
-			else
-				System.out.println(msg);
-		}
+		pendingLogEntries.add(new Status(status, TRANSFORMER_PLUGIN_ID, msg));
 	}
 	
+	public static void flushLog() {
+		List<IStatus> copy;
+		synchronized(TransformerPlugin.class) {
+			copy = pendingLogEntries;
+			pendingLogEntries = new ArrayList<>();
+		}
+		for (IStatus status : copy) {
+			if (log != null) {
+				log.log(status);
+			} else {
+				if (status.getCode() == IStatus.ERROR)
+					System.err.println(status.getMessage());
+				else
+					System.out.println(status.getMessage());
+			}
+		}
+	}
 	
 
 	public static TransformerPlugin getDefault() {

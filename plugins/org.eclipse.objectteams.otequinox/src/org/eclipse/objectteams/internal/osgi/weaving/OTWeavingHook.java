@@ -257,6 +257,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			beingDefined.remove(wovenClass.getClassName());
 			@SuppressWarnings("null") @NonNull String className = wovenClass.getClassName();
 			instantiateScheduledTeams(className);
+
+			TransformerPlugin.flushLog();
 		}
 	}
 
