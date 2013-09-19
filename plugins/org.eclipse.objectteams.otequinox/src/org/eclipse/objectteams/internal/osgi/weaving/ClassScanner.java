@@ -130,9 +130,9 @@ public class ClassScanner
 	/*
 	 * Recurse into member types scanning OT attributes.
 	 */
-	private void readMemberTypeAttributes(Bundle			     bundle,
-										  String                 className, 
-										  ObjectTeamsTransformer transformer)
+	void readMemberTypeAttributes(Bundle			     bundle,
+								  String                 className, 
+								  ObjectTeamsTransformer transformer)
 	{
 		List<String> roles = CallinBindingManager.getRolePerTeam(className);
 		if (roles != null) {

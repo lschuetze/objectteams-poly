@@ -42,7 +42,7 @@ public class Activator implements BundleActivator {
 			Bundle[] bundles = packageAdmin.getBundles("org.eclipse.objectteams.otequinox", "2.3.0");
 			if (bundles != null && bundles.length > 0) {
 				BundleStartLevel startLevel = bundles[0].adapt(BundleStartLevel.class);
-				if (startLevel.getStartLevel() < 1) {
+				if (startLevel.getStartLevel() != 1) {
 					startLevel.setStartLevel(1);
 				}
 				// this would cause lock problems (and is successfully handled already via p2.inf):
