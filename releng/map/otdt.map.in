@@ -21,7 +21,7 @@ plugin@org.eclipse.objectteams.otdt.metrics,0.7.0=GIT,repo=git://git.eclipse.org
 plugin@org.eclipse.objectteams.runtime=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.runtime
 !the following is also referenced in otdt.doc/buildDoc.xml (plugin-name without version):
 plugin@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox
-plugin@org.eclipse.objectteams.otequinox.bug253244workaround,1.0.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.bug253244workaround
+fragment@org.eclipse.objectteams.otequinox.bug253244workaround,1.0.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.bug253244workaround
 plugin@org.eclipse.objectteams.eclipse.monitor,2.0.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.eclipse.monitor,tag=builds/201305210612
 
 !not currently maintained:
