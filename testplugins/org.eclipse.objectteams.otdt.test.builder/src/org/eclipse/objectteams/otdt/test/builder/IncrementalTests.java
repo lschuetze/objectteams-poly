@@ -341,14 +341,13 @@ public class IncrementalTests extends OTBuilderTests {
 		expectingNoProblems();
 		
 		IJavaProject project = JavaCore.create(env.getProject("Project"));
-		OTLaunchEnvironment launcher = new OTLaunchEnvironment(
+		try (OTLaunchEnvironment launcher = new OTLaunchEnvironment(
 				env.getWorkspaceRootPath(),
-				project.getOutputLocation());
-		Object result = launcher.launch("p.AB", "test");
-		assertEquals("OK", result);
+				project.getOutputLocation())) {
+			Object result = launcher.launch("p.AB", "test");
+			assertEquals("OK", result);
+		}
 		// cleanup:
-		launcher = null;
-		result = null;
 		System.gc();
 	}
 	
@@ -408,14 +407,13 @@ public class IncrementalTests extends OTBuilderTests {
 		expectingNoProblems();
 		
 		IJavaProject project = JavaCore.create(env.getProject("Project"));
-		OTLaunchEnvironment launcher = new OTLaunchEnvironment(
+		try (OTLaunchEnvironment launcher = new OTLaunchEnvironment(
 				env.getWorkspaceRootPath(),
-				project.getOutputLocation());
-		Object result = launcher.launch("p.AC", "test");
-		assertEquals("OK", result);
+				project.getOutputLocation())) {
+			Object result = launcher.launch("p.AC", "test");
+			assertEquals("OK", result);
+		}
 // cleanup:
-		launcher = null;
-		result = null;
 		System.gc();
 	}
 
@@ -586,15 +584,14 @@ public class IncrementalTests extends OTBuilderTests {
 		expectingNoProblems();
 		
 		IJavaProject project = JavaCore.create(env.getProject("Project"));
-		OTLaunchEnvironment launcher = new OTLaunchEnvironment(
+		try (OTLaunchEnvironment launcher = new OTLaunchEnvironment(
 				env.getWorkspaceRootPath(),
 				project.getOutputLocation(),
-				true /* useTransformer */);
-		Object result = launcher.launch("p.AA", "test");
-		assertEquals("OK", result);
+				true /* useTransformer */)) {
+			Object result = launcher.launch("p.AA", "test");
+			assertEquals("OK", result);
+		}
 		// cleanup:
-		launcher = null;
-		result = null;
 		System.gc();
 	}
 	

@@ -107,12 +107,13 @@ public class OTLaunchEnvironment extends URLClassLoader
 	private Class<?> defineClassFromFile(String name, File file) 
 		throws Exception 
 	{
-		FileInputStream fis = new FileInputStream(file);
-		byte[] bytes = new byte[(int) file.length()];
-		fis.read(bytes);
-		if (transformer != null) 
-			bytes = transformer.transform(this, name, null, null, bytes);
-		return defineClass(name, bytes, 0, bytes.length);
+		try (FileInputStream fis = new FileInputStream(file)) {
+			byte[] bytes = new byte[(int) file.length()];
+			fis.read(bytes);
+			if (transformer != null) 
+				bytes = transformer.transform(this, name, null, null, bytes);
+			return defineClass(name, bytes, 0, bytes.length);
+		}
 	}
 	
 	/**
