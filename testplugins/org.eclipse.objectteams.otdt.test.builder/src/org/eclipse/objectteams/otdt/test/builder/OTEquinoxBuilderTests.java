@@ -67,9 +67,9 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		}
 	};
 	
-//	static {
-//		TESTS_NAMES = new String[] { "testBaseImportTrac304"};
-//	}
+	static {
+//		TESTS_NAMES = new String[] { "testBug419987"};
+	}
 	public OTEquinoxBuilderTests(String name) {
 		super(name);
 	}
@@ -150,8 +150,8 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		expectingNoProblemsFor(trac18b.getPath());
 		expectingOnlySpecificProblemsFor(trac18a.getPath(), new Problem[] {
 			getDecapsulationProblem(trac18a, "trac18b.actions.SampleAction", "trac18a/Team18.java", 42, 70),
-			getDecapsulationProblem(trac18a, "trac18b.actions.SampleAction", "trac18a/Team18.java", 163, 175),
-			getDecapsulationProblem(trac18a, "trac18b.actions.SampleAction", "trac18a/Team18.java", 201, 205) // location of the base-ctor call.
+			getDecapsulationProblem(trac18a, "trac18b.actions.SampleAction", "trac18a/Team18.java", 163, 175)
+			// base-ctor call no longer flagged
 		});
 	}
 	/* trying to produce a broken and bogus error message a la Trac #154 (no success yet). */
@@ -379,6 +379,16 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 		expectingOnlySpecificProblemsFor(aea.getPath(), 
 				new Problem[] {
 					getMissingAspectExportProblem(aea, "aea")});
+	}
+	
+	public void testBug419987() throws CoreException, IOException {
+		IJavaProject aeb= fileManager.setUpJavaProject("Base419987"); 
+		env.addProject(aeb.getProject());
+		IJavaProject aea= fileManager.setUpJavaProject("Bug419987"); 
+		env.addProject(aea.getProject());
+		fullBuild();
+		expectingNoProblemsFor(aeb.getPath());
+		expectingNoProblemsFor(aea.getPath());		
 	}
 
 	// ---------------- HELPERS: ---------------------------
