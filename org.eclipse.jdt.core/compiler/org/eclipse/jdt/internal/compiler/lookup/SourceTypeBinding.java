@@ -23,6 +23,7 @@
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 380896 - [compiler][null] Enum constants not recognised as being NonNull.
+ *								Bug 418235 - [compiler][null] Unreported nullness error when using generic
  *     Till Brychcy - Contributions for
  *     							bug 415269 - NonNullByDefault is not always inherited to nested classes
  *******************************************************************************/
@@ -2403,9 +2404,8 @@ private void createArgumentBindings(MethodBinding method, CompilerOptions compil
 			methodDecl.createArgumentBindings();
 		// add implicit annotations (inherited(?) & default):
 		if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
-//{ObjectTeams: added 2nd ctor arg:
-			new ImplicitNullAnnotationVerifier(compilerOptions.inheritNullAnnotations, this.scope.environment()).checkImplicitNullAnnotations(method, methodDecl, true, this.scope);
-// SH}
+			new ImplicitNullAnnotationVerifier(this.scope.environment(), compilerOptions.inheritNullAnnotations)
+					.checkImplicitNullAnnotations(method, methodDecl, true, this.scope);
 		}
 	}
 }

@@ -6471,4 +6471,45 @@ public void testBug416267() {
 		"Missing cannot be resolved to a type\n" + 
 		"----------\n");
 }
+//duplicate of bug 416267
+public void testBug418843() {
+	runNegativeTestWithLibs(
+		new String[] {
+			"TestEnum.java",
+			"public enum TestEnum {\n" + 
+			"	TestEntry(1){};\n" + 
+			"}"
+		},
+		"----------\n" + 
+		"1. ERROR in TestEnum.java (at line 2)\n" + 
+		"	TestEntry(1){};\n" + 
+		"	^^^^^^^^^\n" + 
+		"The constructor TestEnum(int) is undefined\n" + 
+		"----------\n");
+}
+public void testBug418235() {
+    runNegativeTestWithLibs(
+            new String[] {
+                    "GenericInterface.java",
+                    "public interface GenericInterface<T> {\n" + 
+                    "       T doSomethingGeneric(T o);\n" + 
+                    "}",
+                    "Implementation.java",
+                    "import org.eclipse.jdt.annotation.NonNullByDefault;\n" + 
+                    "@NonNullByDefault\n" + 
+                    "public class Implementation implements GenericInterface<Object> {\n" + 
+                    "\n" + 
+                    (this.complianceLevel < ClassFileConstants.JDK1_6 ? "\n" : "      @Override\n" ) +
+                    "       public Object doSomethingGeneric(Object o) {\n" + 
+                    "               return o;\n" + 
+                    "       }\n" + 
+                    "}\n"
+            },
+            "----------\n" + 
+            "1. ERROR in Implementation.java (at line 6)\n" + 
+    		"	public Object doSomethingGeneric(Object o) {\n" + 
+    		"	                                 ^^^^^^\n" + 
+            "Illegal redefinition of parameter o, inherited method from GenericInterface<Object> does not constrain this parameter\n" + 
+            "----------\n");
+}
 }

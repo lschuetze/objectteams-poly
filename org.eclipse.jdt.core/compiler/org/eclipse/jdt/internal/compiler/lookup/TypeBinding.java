@@ -1294,4 +1294,8 @@ public DependentTypeBinding asPlainDependentType() {
 	return null; // is not a dependent type
 }
 // SH}
+/** Answer an additional bit characterizing this type, like {@link TypeIds#BitAutoCloseable}. */
+public boolean hasTypeBit(int bit) {
+	return false;
+}
 }

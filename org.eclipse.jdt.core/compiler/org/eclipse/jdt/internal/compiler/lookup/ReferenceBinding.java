@@ -970,6 +970,12 @@ public void computeId() {
 					return;
 			}
 			break;
+		case 7 :
+			if (!CharOperation.equals(TypeConstants.JDT, this.compoundName[2]) || !CharOperation.equals(TypeConstants.TYPEBINDING, this.compoundName[6]))
+				return;
+			if (CharOperation.equals(TypeConstants.ORG_ECLIPSE_JDT_INTERNAL_COMPILER_LOOKUP_TYPEBINDING, this.compoundName))
+				this.typeBits |= TypeIds.BitUninternedType;
+			break;
 	}
 }
 
@@ -1339,8 +1345,6 @@ boolean hasNonNullDefault() {
 public final boolean hasRestrictedAccess() {
 	return (this.modifiers & ExtraCompilerModifiers.AccRestrictedAccess) != 0;
 }
-/** Answer an additional bit characterizing this type, like {@link TypeIds#BitAutoCloseable}. */
-abstract public boolean hasTypeBit(int bit);
 
 //{ObjectTeams: support asymmetric comparison. // FIXME(SH): is this needed or is super-impl smart enough??
 @Override

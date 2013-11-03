@@ -47,22 +47,21 @@ public class ImplicitNullAnnotationVerifier {
 	// can be 'this', but is never a MethodVerifier (to avoid infinite recursion).
 	ImplicitNullAnnotationVerifier buddyImplicitNullAnnotationsVerifier;
 	private boolean inheritNullAnnotations;
-	private LookupEnvironment environment;
+	protected LookupEnvironment environment;
 
-//{ObjectTeams: added 2nd arg:
-	public ImplicitNullAnnotationVerifier(boolean inheritNullAnnotations, LookupEnvironment environment) {
-		this.environment = environment;
-// SH}
+
+	public ImplicitNullAnnotationVerifier(LookupEnvironment environment, boolean inheritNullAnnotations) {
 		this.buddyImplicitNullAnnotationsVerifier = this;
 		this.inheritNullAnnotations = inheritNullAnnotations;
+		this.environment = environment;
 	}
 
 	// for sub-classes:
-//{ObjectTeams: added 2nd arg:
-	ImplicitNullAnnotationVerifier(CompilerOptions options, LookupEnvironment environment) {
-		this.buddyImplicitNullAnnotationsVerifier = new ImplicitNullAnnotationVerifier(options.inheritNullAnnotations, environment);
-// SH}
+	ImplicitNullAnnotationVerifier(LookupEnvironment environment) {
+		CompilerOptions options = environment.globalOptions;
+		this.buddyImplicitNullAnnotationsVerifier = new ImplicitNullAnnotationVerifier(environment, options.inheritNullAnnotations);
 		this.inheritNullAnnotations = options.inheritNullAnnotations;
+		this.environment = environment;
 	}
 
 	/**
@@ -176,7 +175,7 @@ public class ImplicitNullAnnotationVerifier {
 			MethodBinding currentMethod = ifcMethods[i];
 			if (currentMethod.isStatic())
 				continue;
-			if (areParametersEqual(original, currentMethod.original())) {
+			if (doesMethodOverride(original, currentMethod)) {
 				result.add(currentMethod);
 				return; // at most one method is overridden from any supertype
 			}
@@ -220,7 +219,6 @@ public class ImplicitNullAnnotationVerifier {
 		long currentBits = currentMethod.tagBits;
 		long currentNullnessBits = currentBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable);
 		
-		LookupEnvironment environment = scope.environment();
 		boolean shouldInherit = this.inheritNullAnnotations;
 
 		// return type:
@@ -257,7 +255,7 @@ public class ImplicitNullAnnotationVerifier {
 				{
 					if (srcMethod != null) {
 						scope.problemReporter().illegalReturnRedefinition(srcMethod, inheritedMethod,
-																	environment.getNonNullAnnotationName());
+																	this.environment.getNonNullAnnotationName());
 					} else {
 						scope.problemReporter().cannotImplementIncompatibleNullness(currentMethod, inheritedMethod);
 						return;
@@ -319,9 +317,9 @@ public class ImplicitNullAnnotationVerifier {
 			if (shouldComplain) {
 				char[][] annotationName;
 				if (inheritedNonNullNess == Boolean.TRUE) {
-					annotationName = environment.getNonNullAnnotationName();
+					annotationName = this.environment.getNonNullAnnotationName();
 				} else {
-					annotationName = environment.getNullableAnnotationName();
+					annotationName = this.environment.getNullableAnnotationName();
 				}
 				if (inheritedNonNullNess != Boolean.TRUE		// super parameter is not restricted to @NonNull
 						&& currentNonNullNess == Boolean.TRUE)	// current parameter is restricted to @NonNull 
@@ -331,7 +329,7 @@ public class ImplicitNullAnnotationVerifier {
 						scope.problemReporter().illegalRedefinitionToNonNullParameter(
 								currentArgument,
 								inheritedMethod.declaringClass,
-								(inheritedNonNullNess == null) ? null : environment.getNullableAnnotationName());
+								(inheritedNonNullNess == null) ? null : this.environment.getNullableAnnotationName());
 					} else {
 						scope.problemReporter().cannotImplementIncompatibleNullness(currentMethod, inheritedMethod);
 					}
@@ -512,4 +510,156 @@ public class ImplicitNullAnnotationVerifier {
 	    return false;
 	}
 // SH}
+	public boolean doesMethodOverride(MethodBinding method, MethodBinding inheritedMethod) {
+		return couldMethodOverride(method, inheritedMethod) && areMethodsCompatible(method, inheritedMethod);
+	}
+
+	protected boolean couldMethodOverride(MethodBinding method, MethodBinding inheritedMethod) {
+		if (!org.eclipse.jdt.core.compiler.CharOperation.equals(method.selector, inheritedMethod.selector))
+			return false;
+		if (method == inheritedMethod || method.isStatic() || inheritedMethod.isStatic())
+//{ObjectTeams: treat static pair of methods in role ifc/class as overriding:
+	      if (!staticRoleMethodImpl(method, inheritedMethod))
+// SH}
+			return false;
+		if (inheritedMethod.isPrivate())
+			return false;
+		if (inheritedMethod.isDefault() && method.declaringClass.getPackage() != inheritedMethod.declaringClass.getPackage())
+			return false;
+		if (!method.isPublic()) { // inheritedMethod is either public or protected & method is less than public
+			if (inheritedMethod.isPublic())
+				return false;
+			if (inheritedMethod.isProtected() && !method.isProtected())
+				return false;
+		}
+		return true;
+	}
+
+//{ObjectTeams: is method the static implementation of a role ifc's abstract static?
+	private boolean staticRoleMethodImpl(MethodBinding method, MethodBinding inheritedMethod)
+	{
+	    if (inheritedMethod.declaringClass.isSynthInterface())
+	        return method.isStatic() && inheritedMethod.isStatic();
+	    return false;
+	}
+// SH}
+	
+	protected boolean areMethodsCompatible(MethodBinding one, MethodBinding two) {
+		// use the original methods to test compatibility, but do not check visibility, etc
+		one = one.original();
+		two = one.findOriginalInheritedMethod(two);
+	
+		if (two == null)
+			return false; // method's declaringClass does not inherit from inheritedMethod's
+	
+		return isParameterSubsignature(one, two);
+	}
+
+	protected boolean isParameterSubsignature(MethodBinding method, MethodBinding inheritedMethod) {
+		MethodBinding substitute = computeSubstituteMethod(inheritedMethod, method);
+		return substitute != null && isSubstituteParameterSubsignature(method, substitute);
+	}
+
+	protected MethodBinding computeSubstituteMethod(MethodBinding inheritedMethod, MethodBinding currentMethod) {
+		if (inheritedMethod == null) return null;
+	//{ObjectTeams: use source-level params in case of enhanced callin methods:
+	/* orig:
+		if (currentMethod.parameters.length != inheritedMethod.parameters.length) return null; // no match
+	  :giro */
+		if (currentMethod.getSourceParamLength() != inheritedMethod.getSourceParamLength()) return null; // no match
+	// SH}
+	
+		// due to hierarchy & compatibility checks, we need to ensure these 2 methods are resolved
+		if (currentMethod.declaringClass instanceof BinaryTypeBinding)
+			((BinaryTypeBinding) currentMethod.declaringClass).resolveTypesFor(currentMethod);
+		if (inheritedMethod.declaringClass instanceof BinaryTypeBinding)
+			((BinaryTypeBinding) inheritedMethod.declaringClass).resolveTypesFor(inheritedMethod);
+	
+		TypeVariableBinding[] inheritedTypeVariables = inheritedMethod.typeVariables;
+		int inheritedLength = inheritedTypeVariables.length;
+		if (inheritedLength == 0) return inheritedMethod; // no substitution needed
+		TypeVariableBinding[] typeVariables = currentMethod.typeVariables;
+		int length = typeVariables.length;
+		if (length == 0)
+			return inheritedMethod.asRawMethod(this.environment);
+		if (length != inheritedLength)
+			return inheritedMethod; // no match JLS 8.4.2
+	
+		// interface I { <T> void foo(T t); }
+		// class X implements I { public <T extends I> void foo(T t) {} }
+		// for the above case, we do not want to answer the substitute method since its not a match
+		TypeVariableBinding[] arguments = new TypeVariableBinding[length];
+		System.arraycopy(typeVariables, 0, arguments, 0, length);
+		ParameterizedGenericMethodBinding substitute =
+			this.environment.createParameterizedGenericMethod(inheritedMethod, arguments);
+		for (int i = 0; i < inheritedLength; i++) {
+			TypeVariableBinding inheritedTypeVariable = inheritedTypeVariables[i];
+			TypeVariableBinding typeVariable = arguments[i];
+			if (typeVariable.firstBound == inheritedTypeVariable.firstBound) {
+				if (typeVariable.firstBound == null)
+					continue; // both are null
+			} else if (typeVariable.firstBound != null && inheritedTypeVariable.firstBound != null) {
+				if (typeVariable.firstBound.isClass() != inheritedTypeVariable.firstBound.isClass())
+					return inheritedMethod; // not a match
+			}
+			if (Scope.substitute(substitute, inheritedTypeVariable.superclass) != typeVariable.superclass)
+				return inheritedMethod; // not a match
+			int interfaceLength = inheritedTypeVariable.superInterfaces.length;
+			ReferenceBinding[] interfaces = typeVariable.superInterfaces;
+			if (interfaceLength != interfaces.length)
+				return inheritedMethod; // not a match
+			next : for (int j = 0; j < interfaceLength; j++) {
+				TypeBinding superType = Scope.substitute(substitute, inheritedTypeVariable.superInterfaces[j]);
+				for (int k = 0; k < interfaceLength; k++)
+					if (superType == interfaces[k])
+						continue next;
+				return inheritedMethod; // not a match
+			}
+		}
+	   return substitute;
+	}
+
+	protected boolean isSubstituteParameterSubsignature(MethodBinding method, MethodBinding substituteMethod) {
+		if (!areParametersEqual(method, substituteMethod)) {
+			// method can still override substituteMethod in cases like :
+			// <U extends Number> void c(U u) {}
+			// @Override void c(Number n) {}
+			// but method cannot have a "generic-enabled" parameter type
+			if (substituteMethod.hasSubstitutedParameters() && method.areParameterErasuresEqual(substituteMethod))
+				return method.typeVariables == Binding.NO_TYPE_VARIABLES && !hasGenericParameter(method);
+	
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=279836
+			if (method.declaringClass.isRawType() && substituteMethod.declaringClass.isRawType())
+				if (method.hasSubstitutedParameters() && substituteMethod.hasSubstitutedParameters())
+					return areMethodsCompatible(method, substituteMethod);
+	
+			return false;
+		}
+	
+		if (substituteMethod instanceof ParameterizedGenericMethodBinding) {
+			if (method.typeVariables != Binding.NO_TYPE_VARIABLES)
+				return !((ParameterizedGenericMethodBinding) substituteMethod).isRaw;
+			// since substituteMethod has substituted type variables, method cannot have a generic signature AND no variables -> its a name clash if it does
+			return !hasGenericParameter(method);
+		}
+	
+		// if method has its own variables, then substituteMethod failed bounds check in computeSubstituteMethod()
+		return method.typeVariables == Binding.NO_TYPE_VARIABLES;
+	}
+
+	boolean hasGenericParameter(MethodBinding method) {
+		if (method.genericSignature() == null) return false;
+	
+		// may be only the return type that is generic, need to check parameters
+		TypeBinding[] params = method.parameters;
+		for (int i = 0, l = params.length; i < l; i++) {
+			TypeBinding param = params[i].leafComponentType();
+			if (param instanceof ReferenceBinding) {
+				int modifiers = ((ReferenceBinding) param).modifiers;
+				if ((modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0)
+					return true;
+			}
+		}
+		return false;
+	}
 }
