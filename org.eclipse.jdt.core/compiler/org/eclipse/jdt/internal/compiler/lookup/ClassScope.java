@@ -1195,7 +1195,7 @@ public class ClassScope extends Scope {
 			} else if (!enclosingType.isStatic()) {
 //{ObjectTeams: member-interfaces are always (implicitly) static,
 			  // role interfaces need to be members (at any level of nesting)!
-			  if (!enclosingType.isTeam())
+			  if (!sourceType.isRole())
 // SH}
 				// error the enclosing type of a static field must be static or a top-level type
 				problemReporter().illegalStaticModifierForMemberType(sourceType);
