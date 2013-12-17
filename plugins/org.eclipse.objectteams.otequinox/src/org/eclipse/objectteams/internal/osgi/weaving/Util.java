@@ -48,7 +48,7 @@ public class Util
 	}
 
 	/** Profiling data: */
-	enum ProfileKind { Transformation, NoTransformation, Activation, Scan }
+	enum ProfileKind { Transformation, NoTransformation, Activation, Scan, SuperClassFetching }
 	private static long[] profileTimes= new long[ProfileKind.values().length];
 	private static long systemStartTime= System.nanoTime();
 

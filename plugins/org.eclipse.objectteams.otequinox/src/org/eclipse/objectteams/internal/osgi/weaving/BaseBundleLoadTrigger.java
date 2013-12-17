@@ -65,16 +65,12 @@ public class BaseBundleLoadTrigger {
 	public void fire(WovenClass baseClass, Set<String> beingDefined, OTWeavingHook hook) {
 
 		// (1) OTRE import added once per base bundle:
+		boolean useDynamicWeaver = hook.useDynamicWeaver;
 		synchronized(this) {
 			final BaseBundle baseBundle2 = baseBundle;
 			if (!otreAdded && !(baseBundle2 != null && baseBundle2.otreAdded)) {
 				otreAdded = true;
-				if (baseBundle2 != null) baseBundle2.otreAdded = true;
-				log(IStatus.INFO, "Adding OTRE import to "+baseBundleName);
-				List<String> imports = baseClass.getDynamicImports();
-				imports.add("org.objectteams");
-				if (hook.useDynamicWeaver)
-					imports.add("org.eclipse.objectteams.otredyn.runtime"); // for access to TeamManager
+				addOTREImport(baseBundle2, baseBundleName, baseClass, useDynamicWeaver);
 			}
 		}
 		
@@ -102,15 +98,15 @@ public class BaseBundleLoadTrigger {
 				}
 				// (2) scan all teams in affecting aspect bindings:
 				if (!aspectBinding.hasScannedTeams)
-					aspectBinding.scanTeamClasses(aspectBundle, DelegatingTransformer.newTransformer(hook.useDynamicWeaver));
+					aspectBinding.scanTeamClasses(aspectBundle, DelegatingTransformer.newTransformer(useDynamicWeaver));
 					// TODO: record adapted base classes?
 				
 				// (3) add dependencies to the base bundle:
-				if (!hook.useDynamicWeaver) // OTDRE access aspects by generic interface in o.o.Team
+				if (!useDynamicWeaver) // OTDRE access aspects by generic interface in o.o.Team
 					aspectBinding.addImports(baseClass);
 
 				// (4) try optional steps:
-				TeamLoader loading = new TeamLoader(deferredTeamClasses, beingDefined, hook.useDynamicWeaver);
+				TeamLoader loading = new TeamLoader(deferredTeamClasses, beingDefined, useDynamicWeaver);
 				loading.loadTeamsForBase(aspectBundle, aspectBinding, baseClass);
 			}
 		}
@@ -127,6 +123,16 @@ public class BaseBundleLoadTrigger {
 			assert baseClassName != null : "WovenClass.getClassName() should not answer null";
 			aspectBinding.cleanUp(baseClassName);
 		}
+	}
+
+	static void addOTREImport(@Nullable BaseBundle baseBundle, String baseBundleName, WovenClass baseClass, boolean useDynamicWeaver) 
+	{
+		if (baseBundle != null) baseBundle.otreAdded = true;
+		log(IStatus.INFO, "Adding OTRE import to "+baseBundleName);
+		List<String> imports = baseClass.getDynamicImports();
+		imports.add("org.objectteams");
+		if (useDynamicWeaver)
+			imports.add("org.eclipse.objectteams.otredyn.runtime"); // for access to TeamManager
 	}
 
 	public boolean isDone() {

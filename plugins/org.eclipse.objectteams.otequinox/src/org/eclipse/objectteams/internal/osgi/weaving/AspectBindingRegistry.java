@@ -68,6 +68,8 @@ public class AspectBindingRegistry {
 			   new HashMap<String, ArrayList<AspectBinding>>();
 	private static HashMap<String, ArrayList<AspectBinding>> aspectBindingsByAspectPlugin = 
 		       new HashMap<String, ArrayList<AspectBinding>>();
+	private Map<String, BaseBundle> baseBundleLookup = new HashMap<>();
+
 	private Set<String> selfAdaptingAspects= new HashSet<String>(); // TODO, never read / evaluated
 	
 	public static boolean IS_OTDT = false;
@@ -85,7 +87,6 @@ public class AspectBindingRegistry {
 		IConfigurationElement[] aspectBindingConfigs = extensionRegistry
 				.getConfigurationElementsFor(TRANSFORMER_PLUGIN_ID, ASPECT_BINDING_EXTPOINT_ID);
 		Map<String, Set<TeamBinding>> teamLookup = new HashMap<>();
-		Map<String, BaseBundle> baseBundleLookup = new HashMap<>();
 		AspectBinding[] bindings = new AspectBinding[aspectBindingConfigs.length];
 		
 		for (int i = 0; i < aspectBindingConfigs.length; i++) {
@@ -116,9 +117,7 @@ public class AspectBindingRegistry {
 				log(IStatus.ERROR, "aspectBinding of "+aspectBundleId+" must specify the id of a basePlugin");
 				continue;
 			}
-			BaseBundle baseBundle = baseBundleLookup.get(baseBundleId); 
-			if (baseBundle == null)		
-				baseBundleLookup.put(baseBundleId, baseBundle = new BaseBundle(baseBundleId));
+			BaseBundle baseBundle = getBaseBundle(baseBundleId);
 				
  			//base fragments?
 			IConfigurationElement[] fragments = basePlugins[0].getChildren(REQUIRED_FRAGMENT);
@@ -265,5 +264,14 @@ public class AspectBindingRegistry {
 
 	public @Nullable List<AspectBinding> getAspectBindings(String aspectBundle) {
 		return aspectBindingsByAspectPlugin.get(aspectBundle);		
+	}
+	
+	public BaseBundle getBaseBundle(String bundleName) {
+		BaseBundle bundle = baseBundleLookup.get(bundleName);
+		if (bundle == null) {
+			bundle = new BaseBundle(bundleName);
+			baseBundleLookup.put(bundleName, bundle);
+		}
+		return bundle;
 	}
 }

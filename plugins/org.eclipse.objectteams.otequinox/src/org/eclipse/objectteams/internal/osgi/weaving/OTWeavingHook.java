@@ -17,6 +17,8 @@ package org.eclipse.objectteams.internal.osgi.weaving;
 
 import static org.eclipse.objectteams.otequinox.TransformerPlugin.log;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
@@ -31,6 +33,7 @@ import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.jdt.annotation.NonNull;
 import org.eclipse.jdt.annotation.Nullable;
+import org.eclipse.objectteams.internal.osgi.weaving.ASMByteCodeAnalyzer.ClassInformation;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.BaseBundle;
 import org.eclipse.objectteams.internal.osgi.weaving.AspectBinding.TeamBinding;
 import org.eclipse.objectteams.internal.osgi.weaving.Util.ProfileKind;
@@ -68,7 +71,7 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 	// TODO: this master-switch, which selects the weaver, should probably be replaced by s.t. else?
 	boolean useDynamicWeaver = "dynamic".equals(System.getProperty("ot.weaving"));
 
-	enum WeavingReason { None, Aspect, Base }
+	enum WeavingReason { None, Aspect, Base, Thread }
 	
 	/** Interface to data about aspectBinding extensions. */
 	private @NonNull AspectBindingRegistry aspectBindingRegistry = new AspectBindingRegistry();
@@ -81,6 +84,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 
 	/** Records of teams that have been deferred due to unresolved class dependencies: */
 	private @NonNull List<WaitingTeamRecord> deferredTeams = new ArrayList<>();
+
+	private @NonNull ASMByteCodeAnalyzer byteCodeAnalyzer = new ASMByteCodeAnalyzer();
 
 	/** Call-back once the extension registry is up and running. */
 	public void activate(BundleContext bundleContext, ServiceReference<IExtensionRegistry> serviceReference) {
@@ -140,7 +145,8 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 			String bundleName = bundleWiring.getBundle().getSymbolicName();
 			String className = wovenClass.getClassName();
 			
-			if (bundleName.equals(Constants.TRANSFORMER_PLUGIN_ID))
+			if (bundleName.equals(Constants.TRANSFORMER_PLUGIN_ID)
+					|| bundleName.equals("org.objectweb.asm"))
 				return;
 
 			if (BCELPatcher.BCEL_PLUGIN_ID.equals(bundleName)) {
@@ -148,18 +154,24 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 				return;
 			}
 
-			WeavingReason reason = requiresWeaving(bundleWiring);
+			byte[] bytes = wovenClass.getBytes();
+			WeavingReason reason = requiresWeaving(bundleWiring, className, bytes);
 			if (reason != WeavingReason.None) {
 				// do whatever is needed *before* loading this class:
 				triggerBaseTripWires(bundleName, wovenClass);
+				if (reason == WeavingReason.Thread) {
+					BaseBundle baseBundle = this.aspectBindingRegistry.getBaseBundle(bundleName);
+					BaseBundleLoadTrigger.addOTREImport(baseBundle, bundleName, wovenClass, this.useDynamicWeaver);
+				}
+
+				long time = 0;
 
 				DelegatingTransformer transformer = DelegatingTransformer.newTransformer(useDynamicWeaver);
 				Class<?> classBeingRedefined = null; // TODO prepare for otre-dyn
 				ProtectionDomain protectionDomain = wovenClass.getProtectionDomain();
-				byte[] bytes = wovenClass.getBytes();
 				try {
 					log(IStatus.OK, "About to transform class "+className);
-					long time = 0;
+					time = 0;
 					if (Util.PROFILE) time= System.nanoTime();
 					byte[] newBytes = transformer.transform(bundleWiring.getBundle(),
 										className, classBeingRedefined, protectionDomain, bytes);
@@ -181,13 +193,23 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		}
 	}
 
-	WeavingReason requiresWeaving(BundleWiring bundleWiring) {
+	WeavingReason requiresWeaving(BundleWiring bundleWiring, String className, byte[] bytes) {
+		
+		// 1. consult the aspect binding registry (for per-bundle info):
 		@SuppressWarnings("null")@NonNull
 		Bundle bundle = bundleWiring.getBundle();
 		if (aspectBindingRegistry.getAdaptedBasePlugins(bundle) != null)
 			return WeavingReason.Aspect;
 		if (aspectBindingRegistry.isAdaptedBasePlugin(bundle.getSymbolicName()))
 			return WeavingReason.Base;
+
+		// 2. test for implementation of Runnable / Thread (per class):
+		long time = 0;
+		if (Util.PROFILE) time= System.nanoTime();
+		if (needsThreadNotificationCode(className, bytes, bundleWiring.getClassLoader()))
+			return WeavingReason.Thread;
+		if (Util.PROFILE) Util.profile(time, ProfileKind.SuperClassFetching, "");
+
 		return WeavingReason.None;
 	}
 
@@ -278,4 +300,35 @@ public class OTWeavingHook implements WeavingHook, WovenClassListener {
 		return false;
 	
 	}
+
+	private boolean needsThreadNotificationCode(String className, byte[] bytes, ClassLoader resourceLoader) {
+
+		if ("java.lang.Object".equals(className))
+			return false; // shortcut, have no super
+		ClassInformation classInfo = null;
+		if (bytes != null) {
+			classInfo = this.byteCodeAnalyzer.getClassInformation(bytes, className);
+		} else {
+			try (InputStream is = resourceLoader.getResourceAsStream(className.replace('.', '/')+".class")) {
+				if (is != null) {
+					classInfo = this.byteCodeAnalyzer.getClassInformation(is, className);
+				}
+			} catch (IOException e) {
+				return false;
+			}
+		}
+		if (classInfo != null && !classInfo.isInterface()) {
+			String superClassName = classInfo.getSuperClassName();
+			if ("java.lang.Thread".equals(superClassName))
+				return true; // ensure TeamActivation will weave the calls to TeamThreadManager
+			String[] superInterfaceNames = classInfo.getSuperInterfaceNames();
+			if (superInterfaceNames != null)
+				for (int i = 0; i < superInterfaceNames.length; i++) {
+					if ("java.lang.Runnable".equals(superInterfaceNames[i]))
+						return true; // ensure TeamActivation will weave the calls to TeamThreadManager
+				}
+		}
+		return false;
+	}
+	
 }
