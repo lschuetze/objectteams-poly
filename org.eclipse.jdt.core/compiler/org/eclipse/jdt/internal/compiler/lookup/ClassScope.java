@@ -931,6 +931,9 @@ public class ClassScope extends Scope {
 			// checks for member types before local types to catch local members
 			if (enclosingType.isInterface())
 				modifiers |= ClassFileConstants.AccPublic;
+//{ObjectTeams: check for role / team modifiers
+			modifiers = Protections.checkRoleModifiers(modifiers, this.referenceContext, this);
+// SH}
 			if (sourceType.isEnum()) {
 				if (!enclosingType.isStatic())
 					problemReporter().nonStaticContextForEnumMemberType(sourceType);
@@ -939,9 +942,6 @@ public class ClassScope extends Scope {
 			} else if (sourceType.isInterface()) {
 				modifiers |= ClassFileConstants.AccStatic; // 8.5.1
 			}
-//{ObjectTeams: check for role / team modifiers
-            modifiers = Protections.checkRoleModifiers(modifiers, this.referenceContext, this);
-// SH}
 		} else if (sourceType.isLocalType()) {
 			if (sourceType.isEnum()) {
 				problemReporter().illegalLocalTypeDeclaration(this.referenceContext);
