@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2008 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -35,6 +35,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.WordValueAtt
  *
  * What: reading of attributes.
  */
+@SuppressWarnings("rawtypes")
 public class FieldInfo extends ClassFileStruct implements IBinaryField, Comparable {
 	protected int accessFlags;
 	protected int attributeBytes;

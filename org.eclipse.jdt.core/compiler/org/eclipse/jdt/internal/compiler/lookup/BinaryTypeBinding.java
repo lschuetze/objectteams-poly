@@ -102,11 +102,9 @@ null is NOT a valid value for a non-public field... it just means the field is n
  *
  * RESOLVE:
  * What: Methods/fields wrap types in signatures, link tsupers to their source.
- *
- *
- * @version $Id: BinaryTypeBinding.java 23405 2010-02-03 17:02:18Z stephan $
  */
 
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class BinaryTypeBinding extends ReferenceBinding {
 
 	// all of these fields are ONLY guaranteed to be initialized if accessed using their public accessor method

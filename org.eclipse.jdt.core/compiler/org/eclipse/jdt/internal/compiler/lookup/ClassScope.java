@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -133,9 +133,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * What: if findSupertype() failed, consider dropping __OT__
  * Why:  RoleSplitter might have been over-eager.
  * How:  need to roll back: remove problem binding, remove IProblem.
- *
- * @version $Id: ClassScope.java 23405 2010-02-03 17:02:18Z stephan $
  */
+@SuppressWarnings({"rawtypes"})
 public class ClassScope extends Scope {
 
 	public TypeDeclaration referenceContext;
@@ -937,6 +936,8 @@ public class ClassScope extends Scope {
 					problemReporter().nonStaticContextForEnumMemberType(sourceType);
 				else
 					modifiers |= ClassFileConstants.AccStatic;
+			} else if (sourceType.isInterface()) {
+				modifiers |= ClassFileConstants.AccStatic; // 8.5.1
 			}
 //{ObjectTeams: check for role / team modifiers
             modifiers = Protections.checkRoleModifiers(modifiers, this.referenceContext, this);

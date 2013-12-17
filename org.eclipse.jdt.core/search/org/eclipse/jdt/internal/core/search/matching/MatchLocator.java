@@ -4,7 +4,6 @@
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MatchLocator.java 23417 2010-02-03 20:13:55Z stephan $
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
@@ -136,6 +135,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.statemachine.transfor
  * What: Account for role files when traversing type declarations
  * Where: purgeMethodStatements()
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class MatchLocator implements ITypeRequestor {
 
 public static final int MAX_AT_ONCE;

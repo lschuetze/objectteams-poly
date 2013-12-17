@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -58,9 +58,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.control.StateMemento;
  * DECOUPLE FROM COMPILER:
  * What: store index into Compiler.unitsToProcess
  * What: Let resolve only be called by Dependencies.
- *
- * @version $Id: CompilationUnitDeclaration.java 23404 2010-02-03 14:10:22Z stephan $
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class CompilationUnitDeclaration extends ASTNode implements ProblemSeverities, ReferenceContext {
 
 	private static final Comparator STRING_LITERAL_COMPARATOR = new Comparator() {
@@ -105,6 +104,8 @@ public class CompilationUnitDeclaration extends ASTNode implements ProblemSeveri
 	private StringLiteral[] stringLiterals;
 	private int stringLiteralsPtr;
 	private HashSetOfInt stringLiteralsStart;
+
+	public boolean[] validIdentityComparisonLines;
 
 	IrritantSet[] suppressWarningIrritants;  // irritant for suppressed warnings
 	Annotation[] suppressWarningAnnotations;

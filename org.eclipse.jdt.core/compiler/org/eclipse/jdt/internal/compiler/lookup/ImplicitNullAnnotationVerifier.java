@@ -31,6 +31,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * Next, also default nullness is filled into remaining empty slots.
  * After all implicit annotations have been filled in compatibility is checked and problems are complained.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ImplicitNullAnnotationVerifier {
 
 	/**

@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -82,9 +82,8 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TSuperHelper;
  * + AbstractMethodDeclaration.generateCode(ClassFile)
  *   if roleCreatorRequiringRuntimeCheck is set:
  *   -> call Lifting.createDuplicateRoleCheck to create the byte code sequence
- *
- * @version $Id: MethodBinding.java 23404 2010-02-03 14:10:22Z stephan $
  */
+@SuppressWarnings("rawtypes")
 //{ObjectTeams: added IProtectable
 /* orig:
 public class MethodBinding extends Binding {

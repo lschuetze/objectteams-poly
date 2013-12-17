@@ -44,9 +44,7 @@ import org.eclipse.jdt.internal.compiler.util.Util;
  * OTDT changes:
  * 	several new configurable options
  */
-//{ObjectTeams: be nice:
-@SuppressWarnings("rawtypes") // for Maps of options
-//SH}
+@SuppressWarnings({ "rawtypes", "unchecked" })
 public class CompilerOptions {
 
 	/**

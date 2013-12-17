@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2008, 2011 IBM Corporation and others.
+ * Copyright (c) 2008, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -64,6 +64,7 @@ import org.eclipse.jdt.internal.core.util.Util;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Config;
 import org.eclipse.objectteams.otdt.internal.core.compiler.control.Dependencies;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class InternalExtendedCompletionContext {
 	private static Util.BindingsToNodesMap EmptyNodeMap = new Util.BindingsToNodesMap() {
 		public ASTNode get(Binding binding) {
@@ -198,7 +199,7 @@ public class InternalExtendedCompletionContext {
 							}
 						} else {
 							FieldDeclaration fieldDeclaration = fields[i];							
-							if (fieldDeclaration.initialization != null) {
+							if (fieldDeclaration.initialization != null && fieldDeclaration.binding != null) {
 								boolean isInsideInitializer = false;
 								if (fieldDeclaration.initialization.sourceEnd > 0) {
 									if (fieldDeclaration.initialization.sourceStart <= astNode.sourceStart &&

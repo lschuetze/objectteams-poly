@@ -16,6 +16,7 @@ package org.eclipse.jdt.core.dom;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.CharOperation;
@@ -90,6 +91,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutS
  * threads, the methods are synchronized on the DefaultBindingResolver instance.
  * </p>
  */
+@SuppressWarnings({ "rawtypes", "unchecked" })
 class DefaultBindingResolver extends BindingResolver {
 
 	/*
@@ -109,8 +111,8 @@ class DefaultBindingResolver extends BindingResolver {
 		Map compilerBindingsToASTBindings;
 
 		BindingTables() {
-			this.compilerBindingsToASTBindings = new HashMap();
-			this.bindingKeysToBindings = new HashMap();
+			this.compilerBindingsToASTBindings = new ConcurrentHashMap();
+			this.bindingKeysToBindings = new ConcurrentHashMap();
 		}
 
 	}

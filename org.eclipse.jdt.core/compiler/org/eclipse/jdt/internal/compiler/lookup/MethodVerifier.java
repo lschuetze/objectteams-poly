@@ -65,6 +65,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
  * Why:  would report unimplemented methods.
  *
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class MethodVerifier extends ImplicitNullAnnotationVerifier {
 	SourceTypeBinding type;
 	HashtableOfObject inheritedMethods;
