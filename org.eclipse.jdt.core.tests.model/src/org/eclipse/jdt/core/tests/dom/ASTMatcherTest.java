@@ -504,6 +504,9 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		public boolean match(SuperMethodInvocation node, Object other) {
 			return standardBody(node, other, this.superMatch ? super.match(node, other) : false);
 		}
+		public boolean match(SuperMethodReference node, Object other) {
+			return standardBody(node, other, this.superMatch ? super.match(node, other) : false);
+		}
 		public boolean match(SwitchCase node, Object other) {
 			return standardBody(node, other, this.superMatch ? super.match(node, other) : false);
 		}
@@ -562,6 +565,15 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 			return standardBody(node, other, this.superMatch ? super.match(node, other) : false);
 		}
 		public boolean match(LambdaExpression node, Object other) {
+			return standardBody(node, other, this.superMatch ? super.match(node, other) : false);
+		}
+		public boolean match(CreationReference node, Object other) {
+			return standardBody(node, other, this.superMatch ? super.match(node, other) : false);
+		}
+		public boolean match(ExpressionMethodReference node, Object other) {
+			return standardBody(node, other, this.superMatch ? super.match(node, other) : false);
+		}
+		public boolean match(TypeMethodReference node, Object other) {
 			return standardBody(node, other, this.superMatch ? super.match(node, other) : false);
 		}
 		public boolean match(IntersectionType node, Object other) {
@@ -870,6 +882,16 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		x1.setLabel(this.N1);
 		basicMatch(x1);
 	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399794
+	public void testCreationReference() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		CreationReference x1 = this.ast.newCreationReference();
+		x1.setType(this.T1);
+		basicMatch(x1);
+	}
+	
 	public void testDoStatement() {
 		DoStatement x1 = this.ast.newDoStatement();
 		x1.setExpression(this.E1);
@@ -925,6 +947,17 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		x1.bodyDeclarations().add(this.FD2);
 		basicMatch(x1);
 	}
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399794
+	public void testExpressionMethodReference() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		ExpressionMethodReference x1 = this.ast.newExpressionMethodReference();
+		x1.setExpression(this.E1);
+		x1.setName(this.N1);
+		basicMatch(x1);
+	}
+	
 	public void testExpressionStatement() {
 		ExpressionStatement x1 = this.ast.newExpressionStatement(this.E1);
 		basicMatch(x1);
@@ -1155,6 +1188,15 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		x1.setName(this.N2);
 		x1.arguments().add(this.E1);
 		x1.arguments().add(this.E2);
+		basicMatch(x1);
+	}
+	public void testSuperMethodReference() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		SuperMethodReference x1 = this.ast.newSuperMethodReference();
+		x1.setQualifier(this.N1);
+		x1.setName(this.N2);
 		basicMatch(x1);
 	}
 	public void testSwitchCase() {
@@ -1589,6 +1631,17 @@ public class ASTMatcherTest extends org.eclipse.jdt.core.tests.junit.extension.T
 		basicMatch(x1);
 	}
 
+	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399794
+	public void testTypeMethodReference() {
+		if (this.ast.apiLevel() < AST.JLS8) {
+			return;
+		}
+		TypeMethodReference x1 = this.ast.newTypeMethodReference();
+		x1.setType(this.T1);
+		x1.setName(this.N1);
+		basicMatch(x1);
+	}
+	
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=399793
 	public void testLambdaExpressions1() {
 		if (this.ast.apiLevel() < AST.JLS8) {

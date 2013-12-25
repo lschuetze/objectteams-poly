@@ -1441,6 +1441,19 @@ public final class AST {
 // km(merge) }
 
 	/**
+	 * Creates an unparented creation reference node owned by this AST.
+	 * By default, the type is unspecified (but legal), and there are no type arguments.
+	 * 
+	 * @return a new unparented creation reference expression node
+	 * @exception UnsupportedOperationException if this operation is used in a JLS2, JLS3 or JLS4 AST
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public CreationReference newCreationReference() {
+		CreationReference result = new CreationReference(this);
+		return result;
+	}
+
+	/**
 	 * Creates a new unparented do statement node owned by this AST.
 	 * By default, the expression is unspecified (but legal), and
 	 * the body statement is an empty block.
@@ -1504,6 +1517,20 @@ public final class AST {
 	 */
 	public EnumDeclaration newEnumDeclaration() {
 		EnumDeclaration result = new EnumDeclaration(this);
+		return result;
+	}
+
+	/**
+	 * Creates an unparented expression method reference node owned by this AST.
+	 * By default, the expression and method name are unspecified (but legal),
+	 * and there are no type arguments.
+	 * 
+	 * @return a new unparented expression method reference expression node
+	 * @exception UnsupportedOperationException if this operation is used in a JLS2, JLS3 or JLS4 AST
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public ExpressionMethodReference newExpressionMethodReference() {
+		ExpressionMethodReference result = new ExpressionMethodReference(this);
 		return result;
 	}
 
@@ -2424,7 +2451,7 @@ public final class AST {
 
 	/**
 	 * Creates an unparented "super" method invocation expression node owned by
-	 * this AST. By default, the name of the method is unspecified (but legal)
+	 * this AST. By default, the name of the method is unspecified (but legal),
 	 * there is no qualifier, no type arguments, and the list of arguments is empty.
 	 *
 	 * @return a new unparented  "super" method invocation
@@ -2432,6 +2459,19 @@ public final class AST {
 	 */
 	public SuperMethodInvocation newSuperMethodInvocation() {
 		SuperMethodInvocation result = new SuperMethodInvocation(this);
+		return result;
+	}
+
+	/**
+	 * Creates and returns a new unparented super method reference node owned by
+	 * this AST. By default, the name of the method is unspecified (but legal),
+	 * and there is no qualifier and no type arguments.
+	 *
+	 * @return a new unparented super method reference node
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public SuperMethodReference newSuperMethodReference() {
+		SuperMethodReference result = new SuperMethodReference(this);
 		return result;
 	}
 
@@ -2639,6 +2679,20 @@ public final class AST {
 	 */
 	public TypeLiteral newTypeLiteral() {
 		TypeLiteral result = new TypeLiteral(this);
+		return result;
+	}
+
+	/**
+	 * Creates an unparented type method reference node owned by this AST.
+	 * By default, the type and method name are unspecified (but legal),
+	 * and there are no type arguments.
+	 * 
+	 * @return a new unparented type method reference node
+	 * @exception UnsupportedOperationException if this operation is used in a JLS2, JLS3 or JLS4 AST
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public TypeMethodReference newTypeMethodReference() {
+		TypeMethodReference result = new TypeMethodReference(this);
 		return result;
 	}
 

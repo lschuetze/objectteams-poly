@@ -37,7 +37,6 @@ import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.util.Util;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.bytecode.AnchorListAttribute;
-import org.eclipse.objectteams.otdt.internal.core.compiler.control.ITranslationStates;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.SyntheticRoleBridgeMethodBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.MethodModel;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
@@ -1703,14 +1702,7 @@ public AbstractMethodDeclaration sourceMethod() {
 		return null;
 	}
 
-//{ObjectTeams: more robust this way!?!
-/* orig:
-	AbstractMethodDeclaration[] methods = sourceType.scope.referenceContext.methods;
-  :giro */
-	if (sourceType.model.getState() == ITranslationStates.STATE_FINAL)
-		return null; // no source available any more
-	AbstractMethodDeclaration[] methods = sourceType.model.getAst().methods;
-// SH}
+	AbstractMethodDeclaration[] methods = sourceType.scope != null ? sourceType.scope.referenceContext.methods : null;
 	if (methods != null) {
 		for (int i = methods.length; --i >= 0;)
 			if (this == methods[i].binding)

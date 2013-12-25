@@ -869,6 +869,38 @@ public abstract class ASTNode {
 	 */
 	public static final int PACKAGE_QUALIFIED_TYPE = 88;
 
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>CreationReference</code>.
+	 * @see CreationReference
+	 * @since 3.9 BETA_JAV8
+	 */
+	public static final int CREATION_REFERENCE = 89;
+
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>ExpressionMethodReference</code>.
+	 * @see ExpressionMethodReference
+	 * @since 3.9 BETA_JAV8
+	 */
+	public static final int EXPRESSION_METHOD_REFERENCE = 90;
+
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>SuperMethhodReference</code>.
+	 * @see SuperMethodReference
+	 * @since 3.9 BETA_JAV8
+	 */
+	public static final int SUPER_METHOD_REFERENCE = 91;
+
+	/**
+	 * Node type constant indicating a node of type
+	 * <code>TypeMethodReference</code>.
+	 * @see TypeMethodReference
+	 * @since 3.9 BETA_JAV8
+	 */
+	public static final int TYPE_METHOD_REFERENCE = 92;
+
 //{ObjectTeams: required OT specific node type constants added
 
 	/**
@@ -876,93 +908,93 @@ public abstract class ASTNode {
 	 * <code>MethodSpec</code>.
 	 * @see MethodSpec
 	 */
-	public static final int METHOD_SPEC = 89;
+	public static final int METHOD_SPEC = 93;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CallinMappingDeclaration</code>.
 	 * @see CallinMappingDeclaration
 	 */
-	public static final int CALLIN_MAPPING_DECLARATION = 90;
+	public static final int CALLIN_MAPPING_DECLARATION = 94;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>CalloutMappingDeclaration</code>.
 	 * @see CalloutMappingDeclaration
 	 */
-	public static final int CALLOUT_MAPPING_DECLARATION = 91;
+	public static final int CALLOUT_MAPPING_DECLARATION = 95;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>LiftingType</code>.
 	 * @see LiftingType
 	 */
-	public static final int LIFTING_TYPE = 92;
+	public static final int LIFTING_TYPE = 96;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>WithinStatement</code>.
 	 * @see WithinStatement
 	 */
-	public static final int WITHIN_STATEMENT = 93;
+	public static final int WITHIN_STATEMENT = 97;
 
 	/**
 	 * Node type constant indicating a node of type
 	 * <code>BaseConstructorMessageSend</code>.
 	 * @see BaseConstructorInvocation
 	 */
-	public static final int BASE_CONSTRUCTOR_INVOCATION = 94;
+	public static final int BASE_CONSTRUCTOR_INVOCATION = 98;
 
     /**
      * Node type constant indicating a node of type
      * <code>ParameterMapping</code>.
      * @see ParameterMapping
      */
-    public static final int PARAMETER_MAPPING = 95;
+    public static final int PARAMETER_MAPPING = 99;
 
     /**
      * Node type constant indicating a node of type
      * <code>BaseCallMessageSend</code>.
      * @see BaseCallMessageSend
      */
-     public static final int BASE_CALL_MESSAGE_SEND = 96;
+     public static final int BASE_CALL_MESSAGE_SEND = 100;
 
      /**
  	 * Node type constant indicating a node of type
  	 * <code>FieldAccessSpec</code>.
  	 * @see FieldAccessSpec
  	 */
- 	public static final int FIELD_ACCESS_SPEC = 97;
+ 	public static final int FIELD_ACCESS_SPEC = 101;
 
     /**
      * Node type constant indicating a node of type
      * <code>RoleTypeDelaration</code>.
      * @see RoleTypeDeclaration
      */
-    public static final int ROLE_TYPE_DECLARATION = 98;
+    public static final int ROLE_TYPE_DECLARATION = 102;
 
     /**
      * Node type constant indicating a node of type
      * <code>TSuperMessageSend</code>.
      * @see TSuperMessageSend
      */
-     public static final int TSUPER_MESSAGE_SEND = 99;
+     public static final int TSUPER_MESSAGE_SEND = 103;
 
      /**
       * Node type constant indicating a node of type
       * <code>TSuperCallMessageSend</code>.
       * @see TSuperMessageSend
       */
-      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 100;
+      public static final int TSUPER_CONSTRUCTOR_INVOCATION = 104;
 
-      public static final int TYPE_ANCHOR = 101;
+      public static final int TYPE_ANCHOR = 105;
 
-      public static final int PRECEDENCE_DECLARATION = 102;
+      public static final int PRECEDENCE_DECLARATION = 106;
 
-      public static final int GUARD_PREDICATE_DECLARATION = 103;
+      public static final int GUARD_PREDICATE_DECLARATION = 107;
 
       /** @since 1.3.1 */
-      public static final int METHOD_BINDING_OPERATOR = 104;
+      public static final int METHOD_BINDING_OPERATOR = 108;
 //gbr}
 
 	/**
@@ -1019,6 +1051,8 @@ public abstract class ASTNode {
 				return ConstructorInvocation.class;
 			case CONTINUE_STATEMENT :
 				return ContinueStatement.class;
+			case CREATION_REFERENCE :
+				return CreationReference.class;
 			case UNION_TYPE :
 				return UnionType.class;
 			case DO_STATEMENT :
@@ -1031,6 +1065,8 @@ public abstract class ASTNode {
 				return EnumConstantDeclaration.class;
 			case ENUM_DECLARATION :
 				return EnumDeclaration.class;
+			case EXPRESSION_METHOD_REFERENCE :
+				return ExpressionMethodReference.class;
 			case EXPRESSION_STATEMENT :
 				return ExpressionStatement.class;
 			case EXTRA_DIMENSION:
@@ -1119,6 +1155,8 @@ public abstract class ASTNode {
 				return SuperFieldAccess.class;
 			case SUPER_METHOD_INVOCATION :
 				return SuperMethodInvocation.class;
+			case SUPER_METHOD_REFERENCE :
+				return SuperMethodReference.class;
 			case SWITCH_CASE:
 				return SwitchCase.class;
 			case SWITCH_STATEMENT :
@@ -1139,6 +1177,8 @@ public abstract class ASTNode {
 				return TypeDeclaration.class;
 			case TYPE_DECLARATION_STATEMENT :
 				return TypeDeclarationStatement.class;
+			case TYPE_METHOD_REFERENCE :
+				return TypeMethodReference.class;
 			case TYPE_LITERAL :
 				return TypeLiteral.class;
 			case TYPE_PARAMETER :

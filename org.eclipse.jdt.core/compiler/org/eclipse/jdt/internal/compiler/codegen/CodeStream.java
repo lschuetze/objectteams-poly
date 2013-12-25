@@ -22,6 +22,8 @@
  *								bug 391376 - [1.8] check interaction of default methods with bridge methods and generics
  *     Jesper S Moller - Contributions for
  *							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335        
+ *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
+ *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.codegen;
 
@@ -692,9 +694,11 @@ public void checkcast(int baseId) {
 			writeUnsignedShort(this.constantPool.literalIndexForType(ConstantPool.JavaLangBooleanConstantPoolName));
 	}
 }
+
 public void checkcast(TypeBinding typeBinding) {
 	this.checkcast(null, typeBinding);
 }
+
 public void checkcast(TypeReference typeReference, TypeBinding typeBinding) {
 	/* We use a slightly sub-optimal generation for intersection casts by resorting to a runtime cast for every intersecting type, but in
 	   reality this should not matter. In its intended use form such as (I & Serializable) () -> {}, no cast is emitted at all
@@ -710,6 +714,7 @@ public void checkcast(TypeReference typeReference, TypeBinding typeBinding) {
 		writeUnsignedShort(this.constantPool.literalIndexForType(types[i]));
 	}
 }
+
 public void d2f() {
 	this.countLabels = 0;
 	this.stackDepth--;
@@ -1774,13 +1779,11 @@ public void generateBoxingConversion(int unboxedTypeID) {
             }
     }
 }
-public void generateClassLiteralAccessForType(TypeBinding accessedType, FieldBinding syntheticFieldBinding) {
-	this.generateClassLiteralAccessForType(null, accessedType, syntheticFieldBinding);
-}
+
 /**
  * Macro for building a class descriptor object
  */
-public void generateClassLiteralAccessForType(TypeReference typeReference, TypeBinding accessedType, FieldBinding syntheticFieldBinding) {
+public void generateClassLiteralAccessForType(TypeBinding accessedType, FieldBinding syntheticFieldBinding) {
 	if (accessedType.isBaseType() && accessedType != TypeBinding.NULL) {
 		getTYPE(accessedType.id);
 		return;
@@ -2570,7 +2573,7 @@ public void generateSyntheticBodyForFactoryMethod(SyntheticMethodBinding methodB
 public void generateSyntheticBodyForEnumValueOf(SyntheticMethodBinding methodBinding) {
 	initializeMaxLocals(methodBinding);
 	final ReferenceBinding declaringClass = methodBinding.declaringClass;
-	generateClassLiteralAccessForType(null, declaringClass, null);
+	generateClassLiteralAccessForType(declaringClass, null);
 	aload_0();
 	invokeJavaLangEnumvalueOf(declaringClass);
 	this.checkcast(declaringClass);
@@ -4052,11 +4055,17 @@ public boolean inlineForwardReferencesFromLabelsTargeting(BranchLabel targetLabe
 	}
 	return (chaining & (L_OPTIMIZABLE|L_CANNOT_OPTIMIZE)) == L_OPTIMIZABLE; // check was some standards, and no case/recursive
 }
+
+/**
+ * We didn't call it instanceof because there is a conflict with the
+ * instanceof keyword
+ */
 public void instance_of(TypeBinding typeBinding) {
 	this.instance_of(null, typeBinding);
 }
+
 /**
- * We didn't call it instanceof because there is a conflit with the
+ * We didn't call it instanceof because there is a conflict with the
  * instanceof keyword
  */
 public void instance_of(TypeReference typeReference, TypeBinding typeBinding) {
@@ -4102,7 +4111,12 @@ protected void invoke(byte opcode, int receiverAndArgsSize, int returnTypeSize, 
 		this.stackMax = this.stackDepth;
 	}
 }
+
 public void invokeDynamic(int bootStrapIndex, int argsSize, int returnTypeSize, char[] selector, char[] signature) {
+	this.invokeDynamic(bootStrapIndex, argsSize, returnTypeSize, selector, signature, false, null, null);
+}
+
+public void invokeDynamic(int bootStrapIndex, int argsSize, int returnTypeSize, char[] selector, char[] signature, boolean isConstructorReference, TypeReference lhsTypeReference, TypeReference [] typeArguments) {
 	if (this.classFileOffset + 4 >= this.bCodeStream.length) {
 		resizeByteArray();
 	}
@@ -4117,6 +4131,11 @@ public void invokeDynamic(int bootStrapIndex, int argsSize, int returnTypeSize, 
 		this.stackMax = this.stackDepth;
 	}
 }
+
+public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declaringClass) {
+	this.invoke(opcode, methodBinding, declaringClass, null);
+}
+
 public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declaringClass, TypeReference[] typeArguments) {
 	if (declaringClass == null) declaringClass = methodBinding.declaringClass;
 	if ((declaringClass.tagBits & TagBits.ContainsNestedTypeReferences) != 0) {
@@ -4163,7 +4182,7 @@ public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declari
 								default: 
 									receiverAndArgsSize++;
 									break;
-							}
+							}    						
 						}
 					}
 				}
@@ -4264,10 +4283,6 @@ public void invokeGetTeam(ReferenceBinding roleIfc) {
 	 	   IOTConstants.GET_TEAM_SIGNATURE);
 }
 // SH}
-
-public void invoke(byte opcode, MethodBinding methodBinding, TypeBinding declaringClass) {
-	this.invoke(opcode, methodBinding, declaringClass, null);
-}
 
 protected void invokeAccessibleObjectSetAccessible() {
 	// invokevirtual: java.lang.reflect.AccessibleObject.setAccessible(Z)V;
@@ -5907,9 +5922,11 @@ public void monitorexit() {
 	this.position++;
 	this.bCodeStream[this.classFileOffset++] = Opcodes.OPC_monitorexit;
 }
+
 public void multianewarray(TypeBinding typeBinding, int dimensions) {
 	this.multianewarray(null, typeBinding, dimensions, null);
 }
+
 public void multianewarray(
 		TypeReference typeReference,
 		TypeBinding typeBinding,
@@ -5930,9 +5947,11 @@ public void multianewarray(
 // SH}
 	this.bCodeStream[this.classFileOffset++] = (byte) dimensions;
 }
+// We didn't call it new, because there is a conflit with the new keyword
 public void new_(TypeBinding typeBinding) {
 	this.new_(null, typeBinding);
 }
+
 // We didn't call it new, because there is a conflit with the new keyword
 public void new_(TypeReference typeReference, TypeBinding typeBinding) {
 	this.countLabels = 0;
@@ -5961,10 +5980,16 @@ public void newarray(int array_Type) {
 	this.bCodeStream[this.classFileOffset++] = Opcodes.OPC_newarray;
 	this.bCodeStream[this.classFileOffset++] = (byte) array_Type;
 }
+
 public void newArray(ArrayBinding arrayBinding) {
 	this.newArray(null, arrayBinding);
 }
+
 public void newArray(TypeReference typeReference, ArrayBinding arrayBinding) {
+	this.newArray(null, null, arrayBinding);
+}
+
+public void newArray(TypeReference typeReference, Annotation[][] annotationsOnDimensions, ArrayBinding arrayBinding) {
 	TypeBinding component = arrayBinding.elementsType();
 	switch (component.id) {
 		case TypeIds.T_int :

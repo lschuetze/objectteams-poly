@@ -156,12 +156,12 @@ class DefaultBindingResolver extends BindingResolver {
 	 * Toggle controlling whether DOM bindings should be created when missing internal compiler bindings..
 	 */
 	boolean isRecoveringBindings;
-
+	
 	/**
 	 * Set to <code>true</code> if initialized from a java project
 	 */
 	boolean fromJavaProject;
-
+	
 	/**
 	 * Constructor for DefaultBindingResolver.
 	 */
@@ -743,6 +743,10 @@ class DefaultBindingResolver extends BindingResolver {
 				case ASTNode.INFIX_EXPRESSION :
 				case ASTNode.INSTANCEOF_EXPRESSION :
 				case ASTNode.LAMBDA_EXPRESSION:
+				case ASTNode.CREATION_REFERENCE:
+				case ASTNode.EXPRESSION_METHOD_REFERENCE:
+				case ASTNode.TYPE_METHOD_REFERENCE:
+				case ASTNode.SUPER_METHOD_REFERENCE :
 				case ASTNode.FIELD_ACCESS :
 				case ASTNode.SUPER_FIELD_ACCESS :
 				case ASTNode.ARRAY_ACCESS :
@@ -918,26 +922,6 @@ class DefaultBindingResolver extends BindingResolver {
 	/*
 	 * Method declared on BindingResolver.
 	 */
-	synchronized IMethodBinding resolveMethod(MethodDeclaration method) {
-		Object oldNode = this.newAstToOldAst.get(method);
-		if (oldNode instanceof AbstractMethodDeclaration) {
-			AbstractMethodDeclaration methodDeclaration = (AbstractMethodDeclaration) oldNode;
-			IMethodBinding methodBinding = getMethodBinding(methodDeclaration.binding);
-			if (methodBinding == null) {
-				return null;
-			}
-			this.bindingsToAstNodes.put(methodBinding, method);
-			String key = methodBinding.getKey();
-			if (key != null) {
-				this.bindingTables.bindingKeysToBindings.put(key, methodBinding);
-			}
-			return methodBinding;
-		}
-		return null;
-	}
-	/*
-	 * Method declared on BindingResolver.
-	 */
 	synchronized IMethodBinding resolveMethod(LambdaExpression lambda) {
 		Object oldNode = this.newAstToOldAst.get(lambda);
 		if (oldNode instanceof org.eclipse.jdt.internal.compiler.ast.LambdaExpression) {
@@ -955,6 +939,26 @@ class DefaultBindingResolver extends BindingResolver {
 		}
 		return null;
 	}
+	/*
+	 * Method declared on BindingResolver.
+	 */
+	synchronized IMethodBinding resolveMethod(MethodDeclaration method) {
+		Object oldNode = this.newAstToOldAst.get(method);
+		if (oldNode instanceof AbstractMethodDeclaration) {
+			AbstractMethodDeclaration methodDeclaration = (AbstractMethodDeclaration) oldNode;
+			IMethodBinding methodBinding = getMethodBinding(methodDeclaration.binding);
+			if (methodBinding == null) {
+				return null;
+			}
+			this.bindingsToAstNodes.put(methodBinding, method);
+			String key = methodBinding.getKey();
+			if (key != null) {
+				this.bindingTables.bindingKeysToBindings.put(key, methodBinding);
+			}
+			return methodBinding;
+		}
+		return null;
+	}
 /*
 	 * Method declared on BindingResolver.
 	 */
@@ -963,6 +967,26 @@ class DefaultBindingResolver extends BindingResolver {
 		if (oldNode instanceof MessageSend) {
 			MessageSend messageSend = (MessageSend) oldNode;
 			return getMethodBinding(messageSend.binding);
+		}
+		return null;
+	}
+	/*
+	 * Method declared on BindingResolver.
+	 */
+	synchronized IMethodBinding resolveMethod(MethodReference methodReference) {
+		Object oldNode = this.newAstToOldAst.get(methodReference);
+		if (oldNode instanceof org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) {
+			org.eclipse.jdt.internal.compiler.ast.ReferenceExpression referenceExpression = (org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) oldNode;
+			IMethodBinding methodBinding = getMethodBinding(referenceExpression.binding);
+			if (methodBinding == null) {
+				return null;
+			}
+			this.bindingsToAstNodes.put(methodBinding, methodReference);
+			String key = methodBinding.getKey();
+			if (key != null) {
+				this.bindingTables.bindingKeysToBindings.put(key, methodBinding);
+			}
+			return methodBinding;
 		}
 		return null;
 	}
@@ -1289,6 +1313,11 @@ class DefaultBindingResolver extends BindingResolver {
 			IMethodBinding method = getMethodBinding(memberValuePair.binding);
 			if (method == null) return null;
 			return method.getReturnType();
+		} else if (node instanceof org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) {
+			org.eclipse.jdt.internal.compiler.ast.ReferenceExpression referenceExpression = (org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) node;
+			IMethodBinding method = getMethodBinding(referenceExpression.binding);
+			if (method == null) return null;
+			return method.getReturnType();
 //{ObjectTeams: Resolve bindings for OT-specific elements
 		} else if (node instanceof MethodSpec) {
 			if (node instanceof FieldAccessSpec) {
@@ -1307,7 +1336,6 @@ class DefaultBindingResolver extends BindingResolver {
 			return getTypeBinding(liftingTypeRef.resolvedType);
 // SH}
 		}
-		
 		return null;
 	}
 
@@ -1577,6 +1605,9 @@ class DefaultBindingResolver extends BindingResolver {
 		} else if (node instanceof org.eclipse.jdt.internal.compiler.ast.MemberValuePair) {
 			org.eclipse.jdt.internal.compiler.ast.MemberValuePair memberValuePair = (org.eclipse.jdt.internal.compiler.ast.MemberValuePair) node;
 			return getMethodBinding(memberValuePair.binding);
+		} else if (node instanceof org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) {
+			org.eclipse.jdt.internal.compiler.ast.ReferenceExpression referenceExpression = (org.eclipse.jdt.internal.compiler.ast.ReferenceExpression) node;
+			return getMethodBinding(referenceExpression.binding);
 		}
 //{ObjectTeams: Resolve bindings for OT-specific elements
 		else if (node instanceof MethodSpec)

@@ -521,6 +521,23 @@ public abstract class ASTVisitor {
 	 * Visits the given type-specific AST node.
 	 * <p>
 	 * The default implementation does nothing and return true.
+	 * Subclasses may re-implement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public boolean visit(CreationReference node) {
+		return true;
+	}
+
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
 	 * Subclasses may reimplement.
 	 * </p>
 	 *
@@ -596,6 +613,23 @@ public abstract class ASTVisitor {
 	 * @since 3.1
 	 */
 	public boolean visit(EnumConstantDeclaration node) {
+		return true;
+	}
+
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may re-implement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public boolean visit(ExpressionMethodReference node) {
 		return true;
 	}
 
@@ -1369,6 +1403,23 @@ public abstract class ASTVisitor {
 	 * @return <code>true</code> if the children of this node should be
 	 * visited, and <code>false</code> if the children of this node should
 	 * be skipped
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public boolean visit(SuperMethodReference node) {
+		return true;
+	}
+
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
 	 */
 	public boolean visit(SwitchCase node) {
 		return true;
@@ -1535,6 +1586,24 @@ public abstract class ASTVisitor {
 	 * be skipped
 	 */
 	public boolean visit(TypeLiteral node) {
+		return true;
+	}
+
+	/**
+	 * Visits the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing and return true.
+	 * Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @return <code>true</code> if the children of this node should be
+	 * visited, and <code>false</code> if the children of this node should
+	 * be skipped
+	 * 
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public boolean visit(TypeMethodReference node) {
 		return true;
 	}
 
@@ -2182,6 +2251,19 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public void endVisit(CreationReference node) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
 	 */
 	public void endVisit(DoStatement node) {
 		// default implementation: do nothing
@@ -2235,6 +2317,19 @@ public abstract class ASTVisitor {
 	 * @since 3.1
 	 */
 	public void endVisit(EnumDeclaration node) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public void endVisit(ExpressionMethodReference node) {
 		// default implementation: do nothing
 	}
 
@@ -2780,6 +2875,19 @@ public abstract class ASTVisitor {
 	 * </p>
 	 *
 	 * @param node the node to visit
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public void endVisit(SuperMethodReference node) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
 	 */
 	public void endVisit(SwitchCase node) {
 		// default implementation: do nothing
@@ -2903,6 +3011,20 @@ public abstract class ASTVisitor {
 	 * @param node the node to visit
 	 */
 	public void endVisit(TypeLiteral node) {
+		// default implementation: do nothing
+	}
+
+	/**
+	 * End of visit the given type-specific AST node.
+	 * <p>
+	 * The default implementation does nothing. Subclasses may reimplement.
+	 * </p>
+	 *
+	 * @param node the node to visit
+	 * 
+	 * @since 3.9 BETA_JAVA8
+	 */
+	public void endVisit(TypeMethodReference node) {
 		// default implementation: do nothing
 	}
 

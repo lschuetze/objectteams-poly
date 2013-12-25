@@ -196,6 +196,7 @@ public class CompletionParser extends AssistParser {
 
 	private boolean storeSourceEnds;
 	public HashtableOfObjectToInt sourceEnds;
+	private boolean inReferenceExpression;
 
 public CompletionParser(ProblemReporter problemReporter, boolean storeExtraSourceEnds) {
 	super(problemReporter);
@@ -3902,7 +3903,12 @@ protected void consumeToken(int token) {
 						break;
 				}
 				break;
+			case TokenNameCOLON_COLON:
+				this.inReferenceExpression = true;
+				break;
 			case TokenNameIdentifier:
+				if (this.inReferenceExpression)
+					break;
 				if (previous == TokenNameDOT) { // e.g. foo().[fred]()
 					if (this.invocationType != SUPER_RECEIVER // e.g. not super.[fred]()
 //{ObjectTeams: base:
@@ -3931,6 +3937,8 @@ protected void consumeToken(int token) {
 				}
 				break;
 			case TokenNamenew:
+				if (this.inReferenceExpression)
+					break;
 				pushOnElementStack(K_BETWEEN_NEW_AND_LEFT_BRACKET);
 				this.qualifier = this.expressionPtr; // NB: even if there is no qualification, set it to the expression ptr so that the number of arguments are correctly computed
 				if (previous == TokenNameDOT) { // e.g. fred().[new] X()
@@ -4373,6 +4381,10 @@ protected void consumeToken(int token) {
 
 		}
 	}
+}
+protected void consumeIdentifierOrNew(boolean newForm) {
+	this.inReferenceExpression = false;
+	super.consumeIdentifierOrNew(newForm);
 }
 protected void consumeOnlySynchronized() {
 	super.consumeOnlySynchronized();

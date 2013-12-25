@@ -1060,6 +1060,8 @@ public static Test suite() {
 	suite.addTest(new CompletionTests("testBug402812c"));
 	suite.addTest(new CompletionTests("testBug402812d"));
 	suite.addTest(new CompletionTests("testBug370971"));
+	suite.addTest(new CompletionTests("testBug406468a"));
+	suite.addTest(new CompletionTests("testBug406468b"));
 	return suite;
 }
 public CompletionTests(String name) {
@@ -25991,6 +25993,133 @@ public void testBug385858d() throws JavaModelException {
 			"completion token location={CONSTRUCTOR_START}",
 			requestor.getContext());
 }
+// Bug 402574 - Autocomplete does not recognize all enum constants when constants override methods
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=402574
+public void testBug402574() throws JavaModelException {
+	Map options = COMPLETION_PROJECT.getOptions(true);
+	Object savedOptionCompliance = options.get(CompilerOptions.OPTION_Source);
+	try {
+		options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_7);
+		COMPLETION_PROJECT.setOptions(options);
+		this.workingCopies = new ICompilationUnit[2];
+		this.workingCopies[1] = getWorkingCopy(
+			"/Completion/src/test/ExampleEnumNoAutocomplete.java",
+		    "public enum ExampleEnumNoAutocomplete {\n" +		
+			"    STUFF(\"a\", \"b\") {\n" +
+			"    @Override\n" +
+			"    public String getProperty1() {\n"+
+			"        return super.getProperty1().toUpperCase();\n" +
+			"    }\n" +
+			"    @Override\n" +
+			"			public String getSomething() {\n" +
+			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
+			"			}\n" +
+			"		},\n" +
+			"		THINGS(\"c\", \"d\") {\n" +
+			"			@Override\n" +
+			"			public String getProperty1() {\n" +
+			"				return super.getProperty2();\n" +
+			"			}\n" +
+			"			@Override\n" +
+			"			public String getProperty2() {\n" +
+			"				return super.getProperty1();\n" +
+			"			}\n" +
+			"			@Override\n" +
+			"			public String getSomething() {\n" +
+			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
+			"			}\n" +
+			"		},\n" +
+			"		MORE_STUFF(\"e\", \"f\") {\n" +
+			"			@Override\n" +
+			"			public String getProperty1() {\n" +
+			"				return getProperty2();\n" +
+			"			}\n" +
+			"			@Override\n" +
+			"			public String getSomething() {\n" +
+			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
+			"			}\n" +
+			"		},\n" +
+			"		OTHER(\"g\", \"h\") {\n" +
+			"			@Override\n" +
+			"			public String getSomething() {\n" +
+			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
+			"			}\n" +
+			"		},\n" +
+			"		STILL_OTHER(\"i\", \"j\") {\n" +
+			"			@Override\n" +
+			"			public String getSomething() {\n" +
+			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
+			"			}\n" +
+			"		},\n" +
+			"		IT_MAY_BE_DUE_TO_MIXING_PERHAPS(\"k\", \"l\") {\n" +
+			"			@Override\n" +
+			"			public String getProperty1() {\n" +
+			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
+			"			}\n" +
+			"			@Override\n" +
+			"			public String getProperty2() {\n" +
+			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
+			"			}\n" +
+			"			@Override\n" +
+			"			public String getSomething() {\n" +
+			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
+			"			}\n" +
+			"		};\n" +		
+			"		private final String property1;\n" +
+			"		private final String property2;\n" +	
+			"		ExampleEnumNoAutocomplete(final String property1, final String property2) {\n" +
+			"			this.property1 = property1;\n" +
+			"			this.property2 = property2;\n" +
+			"		}\n" +
+			"		public String getProperty1() {\n" +
+			"			return property1;\n" +
+			"		}\n" +
+			"		public String getProperty2() {\n" +
+			"			return property2;\n" +
+			"		}\n" +
+			"		public abstract String getSomething();\n" +
+			"	}\n");
+		this.workingCopies[0] = getWorkingCopy(
+			"/Completion/src/test/Tester.java",
+			"import java.util.EnumMap;\n" +
+			"import java.util.Map;\n" +
+			"public class Tester {\n" +
+			"	public static void main(String[] args) {\n" +
+			"		Map<ExampleEnumNoAutocomplete, Map<String, Object>> huh = new EnumMap<ExampleEnumNoAutocomplete, Map<String, Object>>(\n" +
+			"				ExampleEnumNoAutocomplete.class);\n" +
+			"		huh.put(ExampleEnumNoAutocomplete.STUFF, null);\n" +
+			"		ExampleEnumNoAutocomplete.   \n" +
+			"	}\n" +
+			"}\n");
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, false, false, true);
+		requestor.allowAllRequiredProposals();
+		requestor.setRequireExtendedContext(true);
+		requestor.setComputeEnclosingElement(true);
+		NullProgressMonitor monitor = new NullProgressMonitor();
+		String str = this.workingCopies[0].getSource();
+		String completeBehind = "		ExampleEnumNoAutocomplete.";
+		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
+		
+		assertResults(
+				"IT_MAY_BE_DUE_TO_MIXING_PERHAPS[FIELD_REF]{IT_MAY_BE_DUE_TO_MIXING_PERHAPS, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, IT_MAY_BE_DUE_TO_MIXING_PERHAPS, null, 26}\n" +
+				"MORE_STUFF[FIELD_REF]{MORE_STUFF, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, MORE_STUFF, null, 26}\n" +
+				"OTHER[FIELD_REF]{OTHER, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, OTHER, null, 26}\n" +
+				"STILL_OTHER[FIELD_REF]{STILL_OTHER, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, STILL_OTHER, null, 26}\n" +
+				"STUFF[FIELD_REF]{STUFF, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, STUFF, null, 26}\n" +
+				"THINGS[FIELD_REF]{THINGS, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, THINGS, null, 26}\n" +
+				"class[FIELD_REF]{class, null, Ljava.lang.Class<Ltest.ExampleEnumNoAutocomplete;>;, class, null, 26}\n" +
+				"valueOf[METHOD_REF]{valueOf(), Ltest.ExampleEnumNoAutocomplete;, (Ljava.lang.String;)Ltest.ExampleEnumNoAutocomplete;, valueOf, (arg0), 26}\n" +
+				"values[METHOD_REF]{values(), Ltest.ExampleEnumNoAutocomplete;, ()[Ltest.ExampleEnumNoAutocomplete;, values, null, 26}",
+				requestor.getResults());
+		assertEquals(false,
+			requestor.canUseDiamond(0));
+	} finally {
+		// Restore compliance settings.
+		options.put(CompilerOptions.OPTION_Source, savedOptionCompliance);
+		COMPLETION_PROJECT.setOptions(options);	
+	}
+}
 //https://bugs.eclipse.org/bugs/show_bug.cgi?id=402812
 //Bug 402812 - [1.8][completion] Code Completion problems with static/default interface methods.
 public void testBug402812a() throws Exception {
@@ -26211,103 +26340,27 @@ public void testBug402812d() throws Exception {
 		COMPLETION_PROJECT.setOptions(completionProjectOptions);	
 	}
 }
-// Bug 402574 - Autocomplete does not recognize all enum constants when constants override methods
-// https://bugs.eclipse.org/bugs/show_bug.cgi?id=402574
-public void testBug402574() throws JavaModelException {
+//Bug 370971 - Content Assist autocomplete broken within an array of anonymous classes instances
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=370971
+public void testBug370971() throws JavaModelException {
 	Map options = COMPLETION_PROJECT.getOptions(true);
 	Object savedOptionCompliance = options.get(CompilerOptions.OPTION_Source);
 	try {
 		options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_7);
 		COMPLETION_PROJECT.setOptions(options);
-		this.workingCopies = new ICompilationUnit[2];
-		this.workingCopies[1] = getWorkingCopy(
-			"/Completion/src/test/ExampleEnumNoAutocomplete.java",
-		    "public enum ExampleEnumNoAutocomplete {\n" +		
-			"    STUFF(\"a\", \"b\") {\n" +
-			"    @Override\n" +
-			"    public String getProperty1() {\n"+
-			"        return super.getProperty1().toUpperCase();\n" +
-			"    }\n" +
-			"    @Override\n" +
-			"			public String getSomething() {\n" +
-			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
-			"			}\n" +
-			"		},\n" +
-			"		THINGS(\"c\", \"d\") {\n" +
-			"			@Override\n" +
-			"			public String getProperty1() {\n" +
-			"				return super.getProperty2();\n" +
-			"			}\n" +
-			"			@Override\n" +
-			"			public String getProperty2() {\n" +
-			"				return super.getProperty1();\n" +
-			"			}\n" +
-			"			@Override\n" +
-			"			public String getSomething() {\n" +
-			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
-			"			}\n" +
-			"		},\n" +
-			"		MORE_STUFF(\"e\", \"f\") {\n" +
-			"			@Override\n" +
-			"			public String getProperty1() {\n" +
-			"				return getProperty2();\n" +
-			"			}\n" +
-			"			@Override\n" +
-			"			public String getSomething() {\n" +
-			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
-			"			}\n" +
-			"		},\n" +
-			"		OTHER(\"g\", \"h\") {\n" +
-			"			@Override\n" +
-			"			public String getSomething() {\n" +
-			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
-			"			}\n" +
-			"		},\n" +
-			"		STILL_OTHER(\"i\", \"j\") {\n" +
-			"			@Override\n" +
-			"			public String getSomething() {\n" +
-			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
-			"			}\n" +
-			"		},\n" +
-			"		IT_MAY_BE_DUE_TO_MIXING_PERHAPS(\"k\", \"l\") {\n" +
-			"			@Override\n" +
-			"			public String getProperty1() {\n" +
-			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
-			"			}\n" +
-			"			@Override\n" +
-			"			public String getProperty2() {\n" +
-			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
-			"			}\n" +
-			"			@Override\n" +
-			"			public String getSomething() {\n" +
-			"				throw new UnsupportedOperationException(\"What is this, I don't even?!\");\n" +
-			"			}\n" +
-			"		};\n" +		
-			"		private final String property1;\n" +
-			"		private final String property2;\n" +	
-			"		ExampleEnumNoAutocomplete(final String property1, final String property2) {\n" +
-			"			this.property1 = property1;\n" +
-			"			this.property2 = property2;\n" +
-			"		}\n" +
-			"		public String getProperty1() {\n" +
-			"			return property1;\n" +
-			"		}\n" +
-			"		public String getProperty2() {\n" +
-			"			return property2;\n" +
-			"		}\n" +
-			"		public abstract String getSomething();\n" +
-			"	}\n");
+		this.workingCopies = new ICompilationUnit[1];
 		this.workingCopies[0] = getWorkingCopy(
-			"/Completion/src/test/Tester.java",
-			"import java.util.EnumMap;\n" +
-			"import java.util.Map;\n" +
-			"public class Tester {\n" +
-			"	public static void main(String[] args) {\n" +
-			"		Map<ExampleEnumNoAutocomplete, Map<String, Object>> huh = new EnumMap<ExampleEnumNoAutocomplete, Map<String, Object>>(\n" +
-			"				ExampleEnumNoAutocomplete.class);\n" +
-			"		huh.put(ExampleEnumNoAutocomplete.STUFF, null);\n" +
-			"		ExampleEnumNoAutocomplete.   \n" +
-			"	}\n" +
+			"/Completion/src/test/ExampleEnumNoAutocomplete.java",
+			"public class X {\n" +
+			"	private Object[] items = new Object[] {\n" +
+			"        new Object() {\n" +
+			"              @Override\n" +
+			"              public String toString() {\n" +
+			"                  return super.toS;\n" +
+			"              }\n" +
+			"        },\n" +
+			"        new Object() { }\n" +
+			"    } ;\n" +
 			"}\n");
 		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true, false, false, false, true);
 		requestor.allowAllRequiredProposals();
@@ -26315,26 +26368,105 @@ public void testBug402574() throws JavaModelException {
 		requestor.setComputeEnclosingElement(true);
 		NullProgressMonitor monitor = new NullProgressMonitor();
 		String str = this.workingCopies[0].getSource();
-		String completeBehind = "		ExampleEnumNoAutocomplete.";
+		String completeBehind = "return super.toS";
 		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
 		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner, monitor);
 		
 		assertResults(
-				"IT_MAY_BE_DUE_TO_MIXING_PERHAPS[FIELD_REF]{IT_MAY_BE_DUE_TO_MIXING_PERHAPS, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, IT_MAY_BE_DUE_TO_MIXING_PERHAPS, null, 26}\n" +
-				"MORE_STUFF[FIELD_REF]{MORE_STUFF, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, MORE_STUFF, null, 26}\n" +
-				"OTHER[FIELD_REF]{OTHER, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, OTHER, null, 26}\n" +
-				"STILL_OTHER[FIELD_REF]{STILL_OTHER, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, STILL_OTHER, null, 26}\n" +
-				"STUFF[FIELD_REF]{STUFF, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, STUFF, null, 26}\n" +
-				"THINGS[FIELD_REF]{THINGS, Ltest.ExampleEnumNoAutocomplete;, Ltest.ExampleEnumNoAutocomplete;, THINGS, null, 26}\n" +
-				"class[FIELD_REF]{class, null, Ljava.lang.Class<Ltest.ExampleEnumNoAutocomplete;>;, class, null, 26}\n" +
-				"valueOf[METHOD_REF]{valueOf(), Ltest.ExampleEnumNoAutocomplete;, (Ljava.lang.String;)Ltest.ExampleEnumNoAutocomplete;, valueOf, (arg0), 26}\n" +
-				"values[METHOD_REF]{values(), Ltest.ExampleEnumNoAutocomplete;, ()[Ltest.ExampleEnumNoAutocomplete;, values, null, 26}",
+				"toString[METHOD_REF]{toString(), Ljava.lang.Object;, ()Ljava.lang.String;, toString, null, 65}",
 				requestor.getResults());
 		assertEquals(false,
 			requestor.canUseDiamond(0));
 	} finally {
 		// Restore compliance settings.
 		options.put(CompilerOptions.OPTION_Source, savedOptionCompliance);
+		COMPLETION_PROJECT.setOptions(options);	
+	}
+}
+// Bug 406468 - [1.8][code assist] No completion proposals after the use of a constructor reference
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=406468
+public void testBug406468a() throws JavaModelException {
+	Map options = COMPLETION_PROJECT.getOptions(true);
+	Object savedOptionCompliance = options.get(CompilerOptions.OPTION_Compliance);
+	Object savedOptionSource = options.get(CompilerOptions.OPTION_Source);
+	try {
+		options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_8);
+		options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_8);
+		COMPLETION_PROJECT.setOptions(options);
+		this.workingCopies = new ICompilationUnit[1];
+		this.workingCopies[0] = getWorkingCopy(
+				"/Completion/src/test/X.java",
+				"interface I {\n" +
+				"	X [][][] copy (int x);\n" +
+				"}\n" +
+				"public class X  {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		I i = X[][][]::new;\n" +
+				"		X[][][] x = i.copy(136);\n" +
+				"		System.out.println(x.length);\n" +
+				"           \n" +	
+				"	}\n" +
+				"}\n");
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+		String str = this.workingCopies[0].getSource();
+		String completeBehind = "System.out.println(x.length);";
+		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+		assertResults(
+			"I[TYPE_REF]{I, test, Ltest.I;, null, null, 27}\n" +
+			"X[TYPE_REF]{X, test, Ltest.X;, null, null, 27}\n" +
+			"args[LOCAL_VARIABLE_REF]{args, null, [Ljava.lang.String;, args, null, 27}\n" +
+			"i[LOCAL_VARIABLE_REF]{i, null, Ltest.I;, i, null, 27}\n" +
+			"main[METHOD_REF]{main(), Ltest.X;, ([Ljava.lang.String;)V, main, (args), 27}\n" +
+			"x[LOCAL_VARIABLE_REF]{x, null, [[[Ltest.X;, x, null, 27}",
+			requestor.getResults());
+	} finally {
+		// Restore compliance settings.
+		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
+		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
+		COMPLETION_PROJECT.setOptions(options);	
+	}
+}
+public void testBug406468b() throws JavaModelException {
+	Map options = COMPLETION_PROJECT.getOptions(true);
+	Object savedOptionCompliance = options.get(CompilerOptions.OPTION_Compliance);
+	Object savedOptionSource = options.get(CompilerOptions.OPTION_Source);
+	try {
+		options.put(CompilerOptions.OPTION_Compliance, CompilerOptions.VERSION_1_8);
+		options.put(CompilerOptions.OPTION_Source, CompilerOptions.VERSION_1_8);
+		COMPLETION_PROJECT.setOptions(options);
+		this.workingCopies = new ICompilationUnit[1];
+		this.workingCopies[0] = getWorkingCopy(
+				"/Completion/src/test/X.java",
+				"interface I {\n" +
+				"	X<java.lang.String> copy ();\n" +
+				"}\n" +
+				"public class X<S>  {\n" +
+				"	public static void main(String[] args) {\n" +
+				"		I i = X<java.lang.String>::new;\n" +
+				"		X x = i.copy();\n" +
+				"		System.out.println(x);\n" +
+				"           \n" +	
+				"	}\n" +
+				"}\n");
+		CompletionTestsRequestor2 requestor = new CompletionTestsRequestor2(true);
+		String str = this.workingCopies[0].getSource();
+		String completeBehind = "System.out.println(x);";
+		int cursorLocation = str.lastIndexOf(completeBehind) + completeBehind.length();
+		this.workingCopies[0].codeComplete(cursorLocation, requestor, this.wcOwner);
+		assertResults(
+			"I[TYPE_REF]{I, test, Ltest.I;, null, null, 27}\n" +
+			"S[TYPE_REF]{S, null, TS;, null, null, 27}\n" +
+			"X<S>[TYPE_REF]{X, test, Ltest.X<TS;>;, null, null, 27}\n" +
+			"args[LOCAL_VARIABLE_REF]{args, null, [Ljava.lang.String;, args, null, 27}\n" +
+			"i[LOCAL_VARIABLE_REF]{i, null, Ltest.I;, i, null, 27}\n" +
+			"main[METHOD_REF]{main(), Ltest.X<TS;>;, ([Ljava.lang.String;)V, main, (args), 27}\n" +
+			"x[LOCAL_VARIABLE_REF]{x, null, Ltest.X;, x, null, 27}",
+			requestor.getResults());
+	} finally {
+		// Restore compliance settings.
+		options.put(CompilerOptions.OPTION_Compliance, savedOptionCompliance);
+		options.put(CompilerOptions.OPTION_Source, savedOptionSource);
 		COMPLETION_PROJECT.setOptions(options);	
 	}
 }
