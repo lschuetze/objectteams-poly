@@ -392,6 +392,15 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDelete(cu, roleR, new String[]{"I", "I"}, deleteIndices, false/*delegate*/, "Affected method binding has no signatures; consider adding signatures first so that the refactoring can absorb incompatible changes using parameter mappings"/*expectInfo*/);
 	}
 
+	// delete argument at role side of callin with base call
+	public void testDelete04()throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		IType roleR= getType(cu, "MyTeam").getType("R");
+		int[] deleteIndices= {1};
+		helperDelete(cu, roleR, new String[]{"I", "I"}, deleteIndices, false/*delegate*/, "Removed parameter 'x' is used in method 'm' declared in type 'R'.");
+		// see https://bugs.eclipse.org/408387 regarding the bogus error
+	}
+
 	public void testReorder01() throws Exception {
 		helperPermute(new String[]{"ignore", "b", "a"}, new String[]{"I", "Z", "QString;"}, false);
 	}

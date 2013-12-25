@@ -33,6 +33,9 @@ public final class BindingKey {
 	 * @param key the key to decode
 	 */
 	public BindingKey(String key) {
+//{ObjectTeams: never surface __OT__ role prefix:
+		key = key.replaceAll("\\$__OT__", "\\$"); //$NON-NLS-1$ //$NON-NLS-2$
+// SH}
 		this.key = key;
 	}
 

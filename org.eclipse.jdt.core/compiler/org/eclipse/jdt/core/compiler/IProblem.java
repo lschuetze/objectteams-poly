@@ -1972,6 +1972,8 @@ void setSourceStart(int sourceStart);
 	int DuplicateCallinName 					 = CALLIN_RELATED + 1009; // 4.1(e)
 	int CallinToInheritedFinal 					 = CALLIN_RELATED + 1010; // 4.1(f)
 	int CallinUndeclaredException                = CALLIN_RELATED + 1011; // 4.1(g)
+	/** @since 3.9 OTDT 2.2 */
+	int CallinToConstructorMustUseAfter			 = CALLIN_RELATED + 1012; // 4.1(h)
 
 	int CallinToDeprecated						 = CALLIN_RELATED + 1099; // no OTJLD
 	

@@ -59,7 +59,7 @@ esac
 #JDTVERSIONNEXT=3.8.0.v20110728
 echo "JDT feature is ${JDTVERSION}"
 echo "Next           ${JDTVERSIONNEXT}"
-if [ ! -r ${BASE}/testrun/build-root/eclipse/features/org.eclipse.jdt_${JDTVERSION}-* ]
+if [ ! -r ${BASE}/testrun/build-root/eclipse/features/org.eclipse.jdt_${JDTVERSION} ]
 then
     echo "JDT feature not correctly found in ${BASE}/testrun/build-root/eclipse/features"
     exit 2

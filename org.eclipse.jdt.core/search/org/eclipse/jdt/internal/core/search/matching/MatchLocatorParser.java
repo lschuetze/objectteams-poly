@@ -24,6 +24,7 @@ import org.eclipse.jdt.internal.compiler.parser.Parser;
 import org.eclipse.jdt.internal.compiler.problem.ProblemReporter;
 import org.eclipse.objectteams.otdt.core.compiler.OTNameUtils;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.AbstractMethodMappingDeclaration;
+import org.eclipse.objectteams.otdt.internal.core.compiler.ast.BaseCallMessageSend;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CallinMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.CalloutMappingDeclaration;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.FieldAccessSpec;
@@ -539,12 +540,46 @@ protected void consumeMethodInvocationSuper() {
 		this.patternLocator.match((MessageSend) this.expressionStack[this.expressionPtr], this.nodeSet);
 	}
 }
-//{ObjectTeams:
+//{ObjectTeams: more kinds of message sends:
+@Override
+protected void consumeMethodInvocationBase(boolean isSuperAccess)
+{
+    super.consumeMethodInvocationBase(isSuperAccess);
+    //this is always a BaseCallMessageSend
+    this.patternLocator.match((BaseCallMessageSend)this.expressionStack[this.expressionPtr], this.nodeSet);
+}
+@Override
+protected void consumeMethodInvocationBaseWithTypeArguments(boolean isSuperAccess) {
+	super.consumeMethodInvocationBaseWithTypeArguments(isSuperAccess);
+	BaseCallMessageSend messageSend = (BaseCallMessageSend) this.expressionStack[this.expressionPtr];
+	if (this.patternFineGrain == 0) {
+		this.patternLocator.match(messageSend, this.nodeSet);
+	} else {
+		// receiver is always implicit this
+		if ((this.patternFineGrain & IJavaSearchConstants.IMPLICIT_THIS_REFERENCE) != 0) {
+			this.patternLocator.match(messageSend, this.nodeSet);
+		}
+	}
+}
+@Override
 protected void consumeMethodInvocationTSuper(int kind)
 {
     super.consumeMethodInvocationTSuper(kind);
     //this is always a MessageSend
     this.patternLocator.match((MessageSend)this.expressionStack[this.expressionPtr], this.nodeSet);
+}
+@Override
+protected void consumeMethodInvocationTSuperWithTypeArguments(int kind) {
+	super.consumeMethodInvocationTSuperWithTypeArguments(kind);
+	MessageSend messageSend = (MessageSend) this.expressionStack[this.expressionPtr];
+	if (this.patternFineGrain == 0) {
+		this.patternLocator.match(messageSend, this.nodeSet);
+	} else {
+		// receiver is always implicit this
+		if ((this.patternFineGrain & IJavaSearchConstants.IMPLICIT_THIS_REFERENCE) != 0) {
+			this.patternLocator.match(messageSend, this.nodeSet);
+		}
+	}
 }
 @Override
 protected void consumeMethodSpecLong(boolean hasPlus)

@@ -311,7 +311,7 @@ public class CallinMethodMappingsAttribute extends AbstractAttribute {
 
 				this._size += BASE_METHOD_PART_LENGTH;
 				currentMapping._baseMethods[j] = new BaseMethod(
-						bm.selector,
+						bm.codegenSeletor(),
 						bm.resolvedMethod.signature(),
 						wrapper.selector,
 						wrapper.binding.signature(),

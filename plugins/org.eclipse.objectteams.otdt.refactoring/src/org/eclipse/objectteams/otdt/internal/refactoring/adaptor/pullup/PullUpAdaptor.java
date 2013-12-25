@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -45,7 +44,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -55,6 +53,7 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
 import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
+import org.eclipse.jdt.internal.core.search.matching.MethodPattern;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -98,6 +97,7 @@ import org.eclipse.objectteams.otdt.internal.refactoring.util.RefactoringUtil;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.text.edits.TextEditGroup;
 
+import base org.eclipse.jdt.internal.core.search.BasicSearchEngine;
 import base org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import base org.eclipse.jdt.internal.corext.refactoring.structure.HierarchyProcessor;
@@ -137,6 +137,9 @@ public team class PullUpAdaptor {
 		IType getDeclaringType() 								-> IType getDeclaringType();
 		ITypeHierarchy getDestinationTypeHierarchy(IProgressMonitor pm)
 																-> ITypeHierarchy getDestinationTypeHierarchy(IProgressMonitor pm);
+		IMember[] getCreatedDestinationMembers() 				-> IMember[] getCreatedDestinationMembers();
+		void addMatchingMember(Map<IMember, Set<IMember>> mapping, IMember key, IMember matchingMember)
+			-> void addMatchingMember(Map<IMember, Set<IMember>> mapping, IMember key, IMember matchingMember);
 		
 		private void checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, RefactoringStatus status) throws CoreException {
 			
@@ -592,6 +595,37 @@ public team class PullUpAdaptor {
 				base.createChangeManager(monitor, status);
 		}
 
+		void getMatchingCalloutsMapping(IType initial, Map<IMember, Set<IMember>> map) 
+		<- after Map<IMember, Set<IMember>> getMatchingMembersMapping(IType initial)
+				with { initial <- initial, map <- result }
+
+		private void getMatchingCalloutsMapping(IType initial, Map<IMember, Set<IMember>> map) throws JavaModelException {
+			final IMember[] members= getCreatedDestinationMembers();
+			for (int i= 0; i < members.length; i++) {
+				final IMember member= members[i];
+				if (member instanceof IMethodMapping && !(member instanceof ICallinMapping)) {
+					IMethodMapping mapping = (IMethodMapping) member;
+					final IMethod found= findCalloutMethod((IMethod) mapping.getCorrespondingJavaElement(), initial);
+					if (found != null)
+						addMatchingMember(map, mapping, found);
+				}
+			}			
+		}
+		private IMethod findCalloutMethod(IMethod roleMethod, IType initial) throws JavaModelException {
+			if (roleMethod == null) return null;
+			IOTType otType = OTModelManager.getOTElement(initial);
+			if (otType != null && otType.isRole()) {
+				IRoleType roleType = (IRoleType) otType;
+				String name = roleMethod.getElementName();
+				String[] paramTypes = roleMethod.getParameterTypes();
+				for (IMethodMapping mapping : roleType.getMethodMappings(IMethodMapping.CALLOUT_MAPPING|IMethodMapping.CALLOUT_TO_FIELD_MAPPING)) {
+					if (JavaModelUtil.isSameMethodSignature(name, paramTypes, false, (IMethod) mapping.getCorrespondingJavaElement()))
+						return (IMethod) mapping;
+				}
+			}
+			return null;
+		}
+
 		/** during createChangeManager we add callouts to the declaration nodes to be removed. */
 		protected team class HierarchyProcRole playedBy HierarchyProcessor {
 			// Note: when defined in role PullUpRefactoringProcessorRole this currently triggers a VerifyError
@@ -796,7 +830,7 @@ public team class PullUpAdaptor {
 	}
 
 	/** Visibility checking for callout mappings. */
-	protected class Visibility playedBy MemberVisibilityAdjustor {
+	protected team class Visibility playedBy MemberVisibilityAdjustor {
 
 		IJavaElement getFReferencing() -> get IJavaElement fReferencing;
 
@@ -898,6 +932,21 @@ public team class PullUpAdaptor {
 			IMethod method = (IMethod) ((AbstractCalloutMapping)referencedMovedElement).getCorrespondingJavaElement();
 			return base.getVisibilityThreshold(method);
 		}
+
+		adjustVisibility <- replace adjustVisibility;
+
+		// --- during adjustMemberVisibility don't find decapsulating base method references:
+		callin void adjustVisibility() throws JavaModelException {
+			within (this) base.adjustVisibility();			
+		}
+		protected class Search playedBy BasicSearchEngine {
+			searchDeclarations <- before searchDeclarations;
+			private void searchDeclarations(IJavaElement element, SearchRequestor requestor, SearchPattern pattern, IProgressMonitor monitor) {
+				if (pattern instanceof MethodPattern)
+					((MethodPattern) pattern).findDecapsulationReferences = false;				
+			}			
+		}
+		// ---
 	}
 	
 	/**
@@ -1003,22 +1052,6 @@ public team class PullUpAdaptor {
 	}
 
 	protected class UseSuperTypeFix playedBy SuperTypeRefactoringProcessor {
-
-		// === advance fix for Bug 393932 - [refactoring] pull-up with "use the destination type where possible" creates bogus import of nested type ===
-
-		void fixRewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group)
-		<- replace 
-		void rewriteTypeOccurrence(final TType estimate, final CompilationUnitRewrite rewrite, final ASTNode node, final TextEditGroup group);
-
-		@SuppressWarnings("basecall")
-		callin void fixRewriteTypeOccurrence(TType estimate, CompilationUnitRewrite rewrite, ASTNode node, TextEditGroup group) {
-			// combined from direct base method plus createCorrespondingNode(..):
-			rewrite.getImportRemover().registerRemovedNode(node);
-			ImportRewrite importRewrite= rewrite.getImportRewrite();
-			ImportRewriteContext context = new ContextSensitiveImportRewriteContext(node, importRewrite);
-			ASTNode correspondingNode = importRewrite.addImportFromSignature(new BindingKey(estimate.getBindingKey()).toSignature(), rewrite.getAST(), context);
-			rewrite.getASTRewrite().replace(node, correspondingNode, group);
-		}
 
 		// === tell the base class how to cope with LiftingType references: ===
 		

@@ -1059,6 +1059,7 @@ public static Test suite() {
 	suite.addTest(new CompletionTests("testBug402812b"));
 	suite.addTest(new CompletionTests("testBug402812c"));
 	suite.addTest(new CompletionTests("testBug402812d"));
+	suite.addTest(new CompletionTests("testBug370971"));
 	return suite;
 }
 public CompletionTests(String name) {

@@ -34,15 +34,33 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BaseCallMessageSend;
+import org.eclipse.jdt.core.dom.BaseConstructorInvocation;
 import org.eclipse.jdt.core.dom.CallinMappingDeclaration;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.ConstructorInvocation;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Invocation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodSpec;
 import org.eclipse.jdt.core.dom.RoleTypeDeclaration;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.TSuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.TSuperMessageSend;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.internal.core.JavaProject;
 import org.eclipse.jdt.internal.core.search.JavaSearchScope;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+
+import base org.eclipse.jdt.internal.corext.refactoring.code.Invocations;
+
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.objectteams.otdt.core.IOTJavaElement;
@@ -63,6 +81,55 @@ import base org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyz
 @SuppressWarnings("restriction")
 public team class CorextAdaptor 
 {
+	/**
+	 * Support access to arguments of base call and tsuper message sends.
+	 */
+	@SuppressWarnings("basecall")
+	protected class Invocations playedBy Invocations {
+
+		getArguments <- replace getArguments;
+		getArgumentsProperty <- replace getArgumentsProperty;
+		getInferredTypeArguments <- replace getInferredTypeArguments;
+		isInvocation <- replace isInvocation;
+		isInvocationWithArguments <- replace isInvocationWithArguments;
+		getExpression <- replace getExpression;
+		// don't replace this one, our invocations have not type arguments
+		// getInferredTypeArgumentsRewrite <- replace getInferredTypeArgumentsRewrite;
+		
+		static callin List<Expression> getArguments(ASTNode invocation) {
+			if (invocation instanceof Invocation)
+				return ((Invocation)invocation).getArguments();
+			return base.getArguments(invocation);
+		}
+
+		static callin ChildListPropertyDescriptor getArgumentsProperty( ASTNode invocation) {
+			if (invocation instanceof Invocation)
+				return ((Invocation)invocation).getArgumentsProperty(); 
+			return base.getArgumentsProperty(invocation);
+		}
+
+		static callin ITypeBinding[] getInferredTypeArguments(Expression invocation) {
+			if (invocation instanceof Invocation) {
+				IMethodBinding methodBinding= ((Invocation) invocation).resolveMethodBinding();
+				return methodBinding == null ? null : methodBinding.getTypeArguments();
+			}
+			return base.getInferredTypeArguments(invocation);
+		}
+
+		static callin Expression getExpression(ASTNode astNode) {
+			if (astNode instanceof Invocation) return null;
+			return base.getExpression(astNode);
+		}
+
+		static callin boolean isInvocation(ASTNode node) {
+			return node instanceof Invocation || base.isInvocation(node);
+		}		
+
+		static callin boolean isInvocationWithArguments(ASTNode node) {
+			return node instanceof Invocation || base.isInvocationWithArguments(node);			
+		}
+	}
+
 	protected class TypedSource playedBy TypedSource
 	{
 		static callin boolean canCreateForType(int type){

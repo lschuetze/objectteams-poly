@@ -186,11 +186,11 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
   :giro */
 				assertEquals("Wrong number of child properties", 117, childProperties.size());
 				
-			 // 1 new child list property: PRECEDENCES_PROPERTY
+			 // 2 new child list properties: TypeDeclaration.PRECEDENCES_PROPERTY, PackageDeclaration.MODIFIERS_PROPERTY  
 /* orig:
 				assertEquals("Wrong number of child list properties", 52, childListProperties.size());
   :giro */
-				assertEquals("Wrong number of child list properties", 53, childListProperties.size());
+				assertEquals("Wrong number of child list properties", 54, childListProperties.size());
 // SH}
 				break;
 			case AST.JLS4 :

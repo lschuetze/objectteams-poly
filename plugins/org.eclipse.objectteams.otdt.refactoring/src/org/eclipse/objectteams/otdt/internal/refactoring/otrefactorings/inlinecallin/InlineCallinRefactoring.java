@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
@@ -332,6 +333,13 @@ public class InlineCallinRefactoring extends Refactoring {
 		engine.search(pattern, new SearchParticipant[] { SearchEngine.getDefaultSearchParticipant() }, scope, new SearchRequestor() {
 			@Override
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
+				if (match.getResource().equals(fRoleCUnit.getResource())) {
+					// check if the reference is from within (self- or base-call).
+					int matchOffset = match.getOffset();
+					ISourceRange methodRange = fRoleMethod.getSourceRange();
+					if (matchOffset > methodRange.getOffset() && matchOffset < methodRange.getOffset()+methodRange.getLength())
+						return;
+				}
 				if (match.getAccuracy() == SearchMatch.A_ACCURATE && !match.isInsideDocComment()) {
 					references.add(match);
 				}

@@ -1477,7 +1477,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     // a syntax error in previous test triggered an NPE
     // 1.6.7-otjld-role-anchored-to-base-5f
     public void test167_roleAnchoredToBase5f() {
-        runNegativeTestMatching(
+        runNegativeTest(
             new String[] {
 		"Team167ratb5f_2.java",
 			    "\n" +
@@ -1526,7 +1526,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 			"2. ERROR in Team167ratb5f_2.java (at line 8)\n" +
 			"	R<@base> r = getR2(getR1());\n" +
 			"	             ^^^^^\n" +
-			"The method getR2(R<@tthis[Team167ratb5f_2]>) in the type Team167ratb5f_2.R is not applicable for the arguments (R)\n" +
+			"The method getR2() in the type Team167ratb5f_2.R is not applicable for the arguments (R)\n" +
 			"----------\n" +
 			"3. ERROR in Team167ratb5f_2.java (at line 9)\n" +
 			"	r.test();\n" +

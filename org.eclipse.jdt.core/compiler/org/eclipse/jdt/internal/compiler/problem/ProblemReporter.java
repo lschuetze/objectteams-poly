@@ -10929,6 +10929,13 @@ public void callinCalloutUndeclaredException(
 			bind.sourceStart,
 			bind.sourceEnd);
 }
+
+public void callinToCtorMustBeAfter(MethodSpec methodSpec, MethodBinding baseMethod) {
+	String[] args = new String[] {
+		String.valueOf(baseMethod.readableName())	
+	};
+	this.handle(IProblem.CallinToConstructorMustUseAfter, args, args, methodSpec.sourceStart, methodSpec.sourceEnd);
+}
 //-- 3.2 / 4.4 --
 public void tooFewArgumentsInMethodMapping(MethodSpec roleMethodSpec, MethodSpec baseMethodSpec, boolean isCallout)
 {

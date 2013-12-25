@@ -69,6 +69,8 @@ public interface OTConstants {
 
 	String STRING_BUFFER_NAME    = "java.lang.StringBuffer";
 	
+	String INIT	= "<init>";
+	
 	// ============ VERSION: ==============
 	public static final int    OT_VERSION_MAJOR = 1;
     public static final int    OT_VERSION_MINOR = 6;

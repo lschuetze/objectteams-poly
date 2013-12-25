@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.java.ParameterGuessingProposal;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -106,7 +107,7 @@ public class CodeCompletionTest extends CoreTests {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new CodeCompletionTest("testCreateCalloutOverride3"));
+			suite.addTest(new CodeCompletionTest("testMethodInvocations2"));
 			return new ProjectTestSetup(suite);
 		}
 	}
@@ -862,7 +863,77 @@ public class CodeCompletionTest extends CoreTests {
 				"",
 				0); // should only have one proposal, so accept any to see if there are others
 	}
-	
+
+	// http://bugs.eclipse.org/394061 - [assist] template proposals not working after a base call
+	public void testMethodInvocations1() throws Exception {
+		createBaseClass("    public String getBaseText(Object object) {return null;}\n");
+		assertTypeBodyProposal(
+				"        callin String getText(Object o) {\n" +
+				"			 if (o != null)\n"+
+				"        	 	return base.getText(o);\n" +
+				"			 sysout|\n" +
+				"			 return \"\";\n" +
+				"        }\n" +
+				"        getText <- replace getBaseText;\n",
+				"", // should only have one proposal, so accept any to see if there are others
+				"        callin String getText(Object o) {\n"+
+				"			 if (o != null)\n"+
+				"        	 	return base.getText(o);\n" +
+				"			 System.out.println(||);\n" +
+				"			 return \"\";\n" +
+				"        }\n" +
+				"        getText <- replace getBaseText;\n" +
+				"",
+				0); // should only have one proposal, so accept any to see if there are others
+	}
+	// http://bugs.eclipse.org/394061 - [assist] template proposals not working after a base call
+	// variant challenging completion after a tsuper call
+	public void testMethodInvocations2() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		String contents= "package test1;\n" +
+				"\n" +
+				"public team class CompletionTeam0 {\n" +
+				"    protected class R {\n" +
+				"        void foomethod(int i) {}\n" +
+				"        void foomethod(String s) {}\n" +
+				"        void barmethod(int i) {}\n" +
+				"    }\n" +
+				"}\n";
+		pack1.createCompilationUnit("CompletionTeam0.java", contents, false, null);
+
+		contents= "package test1;\n" +
+				"\n" +
+				"public team class CompletionTeam1 extends CompletionTeam0 {\n" +
+				"    protected class R {\n" +
+				"        void foomethod(int i) {\n" +
+				"            tsuper.foomethod(i);\n" +
+				"			 sysout//here\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n";
+		ICompilationUnit cu1= pack1.createCompilationUnit("CompletionTeam1.java", contents, false, null);
+
+		String str= "//here";
+
+		int offset= contents.indexOf(str);
+		
+		fEditor= (JavaEditor) EditorUtility.openInEditor(cu1);
+		ICompletionProposal proposal= findNonNullProposal("", cu1, new Region(offset, 0), 0);
+		String expectedContents= "package test1;\n" +
+				"\n" +
+				"public team class CompletionTeam1 extends CompletionTeam0 {\n" +
+				"    protected class R {\n" +
+				"        void foomethod(int i) {\n" +
+				"            tsuper.foomethod(i);\n" +
+				"			 System.out.println();//here\n" +
+				"        }\n" +
+				"    }\n" +
+				"}\n";
+		assertAppliedTemplateProposal(contents, (TemplateProposal)proposal, expectedContents);
+	}
+
 	public void testCompleteTSuperCall1()  throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -2022,6 +2093,12 @@ public class CodeCompletionTest extends CoreTests {
 		int offset2= contents.indexOf("//here");
 		String result= contents.substring(0, offset2) + completion + contents.substring(offset2);
 		assertEquals(result, doc.get());
+	}
+
+	private void assertAppliedTemplateProposal(String contents, TemplateProposal proposal, String expectedContents) {
+		int offset= contents.indexOf("//here");
+		proposal.apply(fEditor.getViewer(), ';', 0, offset);
+		assertEquals(expectedContents, fEditor.getViewer().getDocument().get());
 	}
 
 	private ICompilationUnit createCU(IPackageFragment pack1, String contents) throws JavaModelException {

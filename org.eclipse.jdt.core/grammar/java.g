@@ -1177,6 +1177,10 @@ BaseMethodSpecLong ::= MethodSpecNamePlus FormalParameterListopt MethodHeaderRig
 /.$putCase consumeMethodSpecLong(true); $break ./
 /:$readableName MethodSpecLong:/
 
+BaseMethodSpecLong ::= ConstructorHeaderName FormalParameterListopt MethodHeaderRightParen
+/.$putCase consumeMethodSpecLong(false); $break ./
+/:$readableName ConstructorSpecLong:/
+
 MethodSpecNamePlus ::= Modifiersopt Type '+' 'Identifier'  '('
 /.$putCase consumeMethodHeaderName(false); $break ./
 /:$readableName MethodSpecName:/

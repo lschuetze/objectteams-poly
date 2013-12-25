@@ -1066,6 +1066,7 @@ public void _test011_problem_categories() {
         expectedProblemAttributes.put("DifferentReturnInCalloutMethodSpec", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
 
         expectedProblemAttributes.put("CovariantReturnRequiresTypeParameter", new ProblemAttributes(CategorizedProblem.CAT_MEMBER));
+        expectedProblemAttributes.put("CallinToConstructorMustUseAfter", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
         
         // OT SYNTAX_RELATED:
         expectedProblemAttributes.put("SYNTAX_RELATED", new ProblemAttributes(CategorizedProblem.CAT_INTERNAL));
@@ -2163,6 +2164,8 @@ public void test012_compiler_problems_tuning() {
         expectedProblemAttributes.put("CallinIncompatibleStatic", SKIP);
         expectedProblemAttributes.put("ReplaceCallinIncompatibleStatic", SKIP);
         expectedProblemAttributes.put("UnknownPrecedence", SKIP);
+        expectedProblemAttributes.put("CallinToConstructorMustUseAfter", SKIP);
+
 
         expectedProblemAttributes.put("OTJ_RELATED", SKIP);
         expectedProblemAttributes.put("OTCHAP", SKIP);

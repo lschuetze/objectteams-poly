@@ -721,7 +721,7 @@ public class Modifiers extends AbstractOTJLDTest {
             "4.2(d)");
     }
 
-    // a method with a callin modifier overwrites an inherited non-callin method, OK to expect 2. error re unimplemented ifc method
+    // a method with a callin modifier overwrites an inherited non-callin method
     // 7.1.12-otjld-callin-method-overwrites-noncallin-method-2
     public void test7112_callinMethodOverwritesNoncallinMethod2() {
         runNegativeTest(

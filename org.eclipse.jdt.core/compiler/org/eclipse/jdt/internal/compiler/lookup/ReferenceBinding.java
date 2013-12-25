@@ -1161,7 +1161,8 @@ public MethodBinding[] getMethods(char[] selector, int suggestedParameterLength)
 
 //{ObjectTeams:
 	/**
-	 * get method by its selector, search includes superclasses, superinterfaces.
+	 * get method by its selector, search includes superclasses, superinterfaces
+	 * (except when searching a constructor).
 	 * If more than one method (significantly, ie., not overriding each other)
 	 * is found, return a ProblemMethodBinding, if none is found return null.
 	 * Ignore tsuper versions of methods.
@@ -1184,6 +1185,8 @@ public MethodBinding[] getMethods(char[] selector, int suggestedParameterLength)
 			else if (numFound > 1)
 				return new ProblemMethodBinding(selector, Binding.NO_PARAMETERS, ProblemReasons.Ambiguous);
 		}
+		if (CharOperation.equals(TypeConstants.INIT, selector))
+			return foundMethod; // don't search supers for constructor
 		MethodVerifier verifier = scope.environment().methodVerifier(); // respect source level.
 		if (superclass() != null) {
 			MethodBinding superclassMethod = superclass().getMethod(scope, selector);

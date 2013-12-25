@@ -33,7 +33,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "test4143J_callinToTeamMethod4" };
+//		TESTS_NAMES = new String[] { "test4146_callinToConstructor" };
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -7803,7 +7803,119 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
             customOptions,
             null/*no custom requestor*/);
     }
-    
+
+    public void test4146_callinToConstructor1() {
+    	runConformTest(
+    		new String[] {
+    			"Team4146ctc1.java",
+    			"public team class Team4146ctc1 {\n" +
+    			"	protected class R playedBy T4146ctc1 {\n" +
+    			"		void print() { System.out.print('K'); }\n" +
+    			"		void print() <- after T4146ctc1();\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new Team4146ctc1().activate();\n" +
+    			"		new T4146ctc1().test();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"T4146ctc1.java",
+    			"public class T4146ctc1 {\n" +
+    			"	T4146ctc1() { System.out.print('O'); }\n" +
+    			"	public void test() { System.out.print('!'); }\n" +
+    			"}\n"
+    		},
+    		"OK!");
+    }
+
+    // before-ctor callin is illegal
+    public void test4146_callinToConstructor2() {
+    	runNegativeTest(
+    		new String[] {
+    			"Team4146ctc1.java",
+    			"public team class Team4146ctc1 {\n" +
+    			"	protected class R playedBy T4146ctc1 {\n" +
+    			"		void print() { System.out.print('K'); }\n" +
+    			"		print <- before T4146ctc1;\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new Team4146ctc1().activate();\n" +
+    			"		new T4146ctc1().test();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"T4146ctc1.java",
+    			"public class T4146ctc1 {\n" +
+    			"	T4146ctc1() { System.out.print('O'); }\n" +
+    			"	public void test() { System.out.print('!'); }\n" +
+    			"}\n"
+    		},
+    		"----------\n" + 
+			"1. ERROR in Team4146ctc1.java (at line 4)\n" + 
+			"	print <- before T4146ctc1;\n" + 
+			"	                ^^^^^^^^^\n" + 
+			"Callin binding to constructor \'T4146ctc1()\' must use the callin modifier \"after\" (OTJLD 4.1(h)). \n" + 
+			"----------\n");
+    }
+
+    // passing ctor arguments into the callin
+    public void test4146_callinToConstructor3() {
+    	runConformTest(
+    		new String[] {
+    			"Team4146ctc1.java",
+    			"public team class Team4146ctc1 {\n" +
+    			"	protected class R playedBy T4146ctc1 {\n" +
+    			"		void print(String prefix, int n) {\n" +
+    			"			for (int i=0; i<n; i++)\n" +
+    			"				System.out.print(prefix);\n" +
+    			"		}" +
+    			"		print <- after T4146ctc1;\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new Team4146ctc1().activate();\n" +
+    			"		new T4146ctc1(\"_\", 3).test();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"T4146ctc1.java",
+    			"public class T4146ctc1 {\n" +
+    			"	T4146ctc1(String prefix, int n) { System.out.print('O'); }\n" +
+    			"	public void test() { System.out.print('!'); }\n" +
+    			"}\n"
+    		},
+    		"O___!");
+    }
+
+    // ctor with early return
+    public void test4146_callinToConstructor4() {
+    	runConformTest(
+    		new String[] {
+    			"Team4146ctc1.java",
+    			"public team class Team4146ctc1 {\n" +
+    			"	protected class R playedBy T4146ctc1 {\n" +
+    			"		void print(String prefix, int n) {\n" +
+    			"			for (int i=0; i<n; i++)\n" +
+    			"				System.out.print(prefix);\n" +
+    			"		}" +
+    			"		print <- after T4146ctc1;\n" +
+    			"	}\n" +
+    			"	public static void main(String... args) {\n" +
+    			"		new Team4146ctc1().activate();\n" +
+    			"		new T4146ctc1(\"_\", 3).test();\n" +
+    			"	}\n" +
+    			"}\n",
+    			"T4146ctc1.java",
+    			"public class T4146ctc1 {\n" +
+    			"	T4146ctc1(String prefix, int n) {\n" +
+    			"		if (n == 3) {\n" +
+    			"			System.out.print('O');\n" +
+    			"			return;\n" +
+    			"		}\n" +
+    			"		System.out.print(\"NotOK\");\n" +
+    			"	}\n" +
+    			"	public void test() { System.out.print('!'); }\n" +
+    			"}\n"
+    		},
+    		"O___!");
+    }
+
     // ==== from binding-of-abstract-and-concrete-methods: ====
 
 

@@ -55,6 +55,9 @@ public static ThreadLocal<Object> findingCallers = new ThreadLocal<Object>();
 // for tsuper/tsub matching:
 private IType declaringRoleClass= null;
 private ITypeHierarchy cachedRoleHierarchy= null;
+
+// filter decapsulating base method references in callout bindinds?
+public boolean findDecapsulationReferences = true;
 // SH}
 
 // extra reference info
