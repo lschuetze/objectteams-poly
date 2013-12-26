@@ -67,62 +67,9 @@ public class RoleTypeCreator implements TagBits {
     static boolean doingSignatures = false;
 
 	/** Simulate map() HOF over all arguments of a type for recursive wrapping. */
-	static abstract class TypeArgumentUpdater {
-		/** the function argument ot map(). */
-		abstract TypeBinding updateArg(ReferenceBinding arg);
-		/** Entry: perform the update. */
-		TypeBinding updateType(TypeBinding type, ASTNode typedNode)
-		{
-			// first check whether we need to work at all:
-
-			if (!type.isParameterizedType())
-				return type;
-			// don't wrap args of cache-field reference:
-			if (typedNode != null && typedNode instanceof FieldReference)
-				if (CharOperation.prefixEquals(IOTConstants.CACHE_PREFIX,
-											   ((FieldReference)typedNode).token))
-					return type;
-
-			// consider arrays:
-			TypeBinding origType = type;
-			int dimensions = type.dimensions();
-			type = type.leafComponentType();
-			//
-			ParameterizedTypeBinding genericType = (ParameterizedTypeBinding)type; // checked above
-			if (genericType.arguments == null)
-				return origType;
-
-			boolean modified = false;
-			TypeBinding[] arguments = new TypeBinding[genericType.arguments.length];
-			for (int i = 0; i < arguments.length; i++)
-			{
-				TypeBinding arg = genericType.arguments[i];
-				if (   arg instanceof ReferenceBinding
-					&& !arg.isTypeVariable())
-					arguments[i] = updateArg((ReferenceBinding)arg);
-				else
-					arguments[i] = arg;
-
-				// must avoid nulls in arguments (no longer observed in otjld-tests):
-				if (arguments[i] == null) {
-					arguments[i] = new ProblemReferenceBinding(arg.internalName(),
-									   (arg instanceof ReferenceBinding) ? (ReferenceBinding)arg: null,
-									   ProblemReasons.NotFound);
-					continue; // not a good modification
-				}
-				modified |= (arguments[i] != arg);
-			}
-			if (!modified)
-				return origType;
-
-			// yes, we have a modification
-			LookupEnvironment environment = ((ParameterizedTypeBinding)type).environment;
-			TypeBinding newType = environment.createParameterizedType((ReferenceBinding) type.erasure(), arguments, type.enclosingType()); 
-			if (dimensions == 0)
-				return newType;
-			else
-				return environment.createArrayType(newType, dimensions);
-		}
+	public interface TypeArgumentUpdater {
+		/** the function argument to map(). */
+		public abstract TypeBinding updateArg(ReferenceBinding arg);
 	}
 
 	/**
@@ -169,14 +116,13 @@ public class RoleTypeCreator implements TagBits {
 			return ((CaptureBinding) refBinding).maybeWrapQualifiedRoleType(scope, anchorExpr, typedNode, originalType);
 
     	TypeBinding wrappedRoleType = internalWrapQualifiedRoleType(scope, anchorExpr, originalType, typedNode, refBinding, dimensions);
-		return new TypeArgumentUpdater() {
-						@Override
-						TypeBinding updateArg(ReferenceBinding arg) {
+		return wrappedRoleType.maybeWrapRoleType(typedNode, new TypeArgumentUpdater() {
+						public TypeBinding updateArg(ReferenceBinding arg) {
 			        		if (arg instanceof WildcardBinding)
 					        	return ((WildcardBinding) arg).maybeWrapQualifiedRoleType(scope, anchorExpr, typedNode);
 			        		return arg;
 						}
-					}.updateType(wrappedRoleType, typedNode);
+					});
     }
     static TypeBinding internalWrapQualifiedRoleType (
     		final Scope      scope,
@@ -196,11 +142,11 @@ public class RoleTypeCreator implements TagBits {
 
         if (existingAnchor == null) {
         	if (!refBinding.isDirectRole())
-        		return new TypeArgumentUpdater() {
-					TypeBinding updateArg(ReferenceBinding arg) {
+        		return originalType.maybeWrapRoleType(typedNode, new TypeArgumentUpdater() {
+					public TypeBinding updateArg(ReferenceBinding arg) {
 						return maybeWrapQualifiedRoleType(scope, anchorExpr, arg, typedNode);
 					}
-        		}.updateType(originalType, typedNode);
+        		});
         } else {
             if (  !(existingAnchor instanceof TThisBinding)) {
             	// possibly have two significant anchors..
@@ -610,23 +556,13 @@ public class RoleTypeCreator implements TagBits {
 	        	return originalType;
 	        }
 	        ReferenceBinding refBinding = (ReferenceBinding)typeToWrap;
-	        if (refBinding.isTypeVariable()) {
-	        	// inplace modifying the type variable. TODO(SH): is this ok, or do we need a copy?
-	        	TypeVariableBinding typeVariable= (TypeVariableBinding)refBinding;
-	        	typeVariable.firstBound= maybeWrapUnqualifiedRoleType(scope, site, typeVariable.firstBound, typedNode, problemReporter);
-	        	typeVariable.superclass= (ReferenceBinding)maybeWrapUnqualifiedRoleType(scope, site, typeVariable.superclass, typedNode, problemReporter);
-	        	if (typeVariable.superInterfaces != null)
-		        	for (int i = 0; i < typeVariable.superInterfaces.length; i++)
-						typeVariable.superInterfaces[i]= (ReferenceBinding)maybeWrapUnqualifiedRoleType(scope, site, typeVariable.superInterfaces[i], typedNode, problemReporter);
-	        	return originalType;
-	        }
 	        if (  !refBinding.isDirectRole()) {
 	        	final ProblemReporter reporter = problemReporter;
-	            return new TypeArgumentUpdater() {
-					TypeBinding updateArg(ReferenceBinding arg) {
+	            return originalType.maybeWrapRoleType(typedNode, new TypeArgumentUpdater() {
+					public TypeBinding updateArg(ReferenceBinding arg) {
 						return maybeWrapUnqualifiedRoleType(scope, site, arg, typedNode, reporter);
 					}
-	        	}.updateType(originalType, typedNode);
+	        	});
 	        }
 
 	        // already wrapped:
@@ -1600,12 +1536,12 @@ public class RoleTypeCreator implements TagBits {
 											ReferenceBinding baseSideType)
 	{
 		TypeArgumentUpdater typeArgumentUpdater = new TypeArgumentUpdater () {
-			TypeBinding updateArg(ReferenceBinding arg) {
+			public TypeBinding updateArg(ReferenceBinding arg) {
 				return maybeInstantiateFromPlayedBy(scope, arg);
 			}
 		};
 		if (!baseSideType.isDirectRole())
-			return (ReferenceBinding)typeArgumentUpdater.updateType(baseSideType, null);
+			return (ReferenceBinding)baseSideType.maybeWrapRoleType(null, typeArgumentUpdater);
 
 		ITeamAnchor baseSideAnchor = getPlayedByAnchor(scope);
 // FIXME(SH): strengthen base type?

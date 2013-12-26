@@ -23,10 +23,14 @@ package org.eclipse.jdt.internal.compiler.lookup;
 import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
+import org.eclipse.jdt.internal.compiler.ast.FieldReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
+import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator.TypeArgumentUpdater;
 
 /**
  * OTDT changes:
@@ -1387,4 +1391,49 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		TypeBindingVisitor.visit(mentionListener, upperBound);
 		return mentionListener.typeParametersMentioned();
 	}
+
+//{ObjectTeams: recursive role wrapping:
+	@Override
+	public TypeBinding maybeWrapRoleType(ASTNode typedNode, TypeArgumentUpdater updater) {
+		// don't wrap args of cache-field reference:
+		if (typedNode != null && typedNode instanceof FieldReference)
+			if (CharOperation.prefixEquals(IOTConstants.CACHE_PREFIX,
+										   ((FieldReference)typedNode).token))
+				return this;
+
+//		// TODO (left-over comment from RoleTypeCreator): consider arrays:
+//		TypeBinding origType = this;
+//		int dimensions = this.dimensions();
+//		TypeBinding curType = this.leafComponentType();
+		//
+		if (this.arguments == null)
+			return this;
+
+		boolean modified = false;
+		TypeBinding[] newArguments = new TypeBinding[this.arguments.length];
+		for (int i = 0; i < newArguments.length; i++)
+		{
+			TypeBinding arg = this.arguments[i];
+			if (   arg instanceof ReferenceBinding
+				&& !arg.isTypeVariable())
+				newArguments[i] = updater.updateArg((ReferenceBinding) arg);
+			else
+				newArguments[i] = arg; // TODO recurse?
+
+			// must avoid nulls in arguments (no longer observed in otjld-tests):
+			if (newArguments[i] == null) {
+				newArguments[i] = new ProblemReferenceBinding(arg.internalName(),
+								   (arg instanceof ReferenceBinding) ? (ReferenceBinding)arg: null,
+								   ProblemReasons.NotFound);
+				continue; // not a good modification
+			}
+			modified |= (newArguments[i] != arg);
+		}
+		if (!modified)
+			return this;
+
+		// yes, we have a modification
+		return this.environment.createParameterizedType(this.type, newArguments, this.enclosingType()); 
+	}
+// SH}
 }

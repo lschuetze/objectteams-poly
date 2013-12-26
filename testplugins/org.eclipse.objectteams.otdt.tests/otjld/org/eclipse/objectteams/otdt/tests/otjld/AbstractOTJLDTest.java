@@ -87,11 +87,16 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 	}
 	protected String foreach(String elemType) {
 		return (IS_JRE_8 && this.complianceLevel < ClassFileConstants.JDK1_8) 
-				? "void forEach(java.util.function.Consumer<? super "+elemType+"> element) {}\n"
+				? "public void forEach(java.util.function.Consumer<? super "+elemType+"> element) {}\n"
+				: "";
+	}
+	protected String spliterator(String elemType) {
+		return (IS_JRE_8 && this.complianceLevel < ClassFileConstants.JDK1_8) 
+				? "public java.util.Spliterator<"+elemType+"> spliterator() { return null; }\n"
 				: "";
 	}
 	protected String spliteratorCallout() {
-		return IS_JRE_8 ? "spliterator -> spliterator;\n" : "";
+		return (IS_JRE_8 && this.complianceLevel < ClassFileConstants.JDK1_8) ? "spliterator -> spliterator;\n" : "";
 	}
 	// ===
 	

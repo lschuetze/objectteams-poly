@@ -26,6 +26,7 @@ import org.eclipse.jdt.internal.compiler.ast.Expression;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator.TypeArgumentUpdater;
 
 /*
  * A wildcard acts as an argument for parameterized types, allowing to
@@ -76,6 +77,30 @@ public class WildcardBinding extends ReferenceBinding {
     	// TODO: wrap otherBounds?
     	return new WildcardBinding(this.genericType, this.rank, wrappedBound, this.otherBounds, this.boundKind, this.environment);
     }
+	@Override
+	public TypeBinding maybeWrapRoleType(ASTNode typedNode, TypeArgumentUpdater updater) {
+		TypeBinding newBound = null;
+		boolean haveChange = false;
+		if (this.bound instanceof ReferenceBinding) {
+			newBound = updater.updateArg((ReferenceBinding) this.bound);
+			haveChange = newBound != this.bound;
+		}
+		TypeBinding[] newOtherBounds = null;
+		if (this.otherBounds != null) {
+			newOtherBounds = new TypeBinding[this.otherBounds.length];
+			for (int i = 0; i < this.otherBounds.length; i++) {
+				if (this.otherBounds[i] instanceof ReferenceBinding) {
+					newOtherBounds[i] = updater.updateArg((ReferenceBinding) this.otherBounds[i]);
+					haveChange |= newOtherBounds[i] != this.otherBounds[i];
+				} else {
+					newOtherBounds[i] = this.otherBounds[i];
+				}
+			}
+		}
+		if (!haveChange)
+			return this;
+		return this.environment.createWildcard(this.genericType, this.rank, newBound, newOtherBounds, this.boundKind);
+	}
 // SH}
 
 	public int kind() {

@@ -22,12 +22,14 @@
 package org.eclipse.jdt.internal.compiler.lookup;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.CallinCalloutBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.model.TeamModel;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator.TypeArgumentUpdater;
 
 /**
  * Binding for a type parameter, held by source/binary type or method.
@@ -255,6 +257,27 @@ public class TypeVariableBinding extends ReferenceBinding {
 		if (this.anchors == null || this.anchors.length <= typeParamPosition)
 			return null;
 		return (VariableBinding) this.anchors[typeParamPosition];
+	}
+	
+	boolean inRecursiveFunction = false;
+	
+	@Override
+	public TypeBinding maybeWrapRoleType(ASTNode typedNode, TypeArgumentUpdater updater) {
+    	// inplace modifying the type variable. TODO(SH): is this ok, or do we need a copy?
+		if (this.inRecursiveFunction)
+			return this;
+		this.inRecursiveFunction = true;
+		try {
+			if (this.firstBound != null)
+				this.firstBound= updater.updateArg((ReferenceBinding) this.firstBound);
+	    	this.superclass=  (ReferenceBinding) updater.updateArg(this.superclass);
+	    	if (this.superInterfaces != null)
+	        	for (int i = 0; i < this.superInterfaces.length; i++)
+					this.superInterfaces[i]= (ReferenceBinding)updater.updateArg(this.superInterfaces[i]);
+		} finally {
+			this.inRecursiveFunction = false;
+		}
+    	return this;
 	}
 // SH}
 	/**

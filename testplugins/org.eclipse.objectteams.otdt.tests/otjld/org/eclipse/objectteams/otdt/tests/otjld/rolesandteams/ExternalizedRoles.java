@@ -3327,6 +3327,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
     		"			return list.iterator();\n" +
     		"		}\n" +
     		foreach("R2") +
+    		spliterator("R2") +
     		"	}\n" +
     		"	public class R2 {\n" +
     		"		String val;\n" +
@@ -3386,6 +3387,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 	    		"			return list.iterator();\n" +
 	    		"		}\n" +
 	    		foreach("R0") +
+	    		spliterator("R0") +
 	    		"	}\n" +
 	    		"	public class R0 {\n" +
 	    		"		String val;\n" +
@@ -3442,6 +3444,7 @@ public class ExternalizedRoles extends AbstractOTJLDTest {
 	    		"			return list.iterator();\n" +
 	    		"		}\n" +
 	    		foreach("R0") +
+	    		spliterator("R0") +
 	    		"	}\n" +
 	    		"	public class R0 {\n" +
 	    		"		String val;\n" +

@@ -25,9 +25,11 @@ package org.eclipse.jdt.internal.compiler.lookup;
 import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.RoleTypeBinding;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator.TypeArgumentUpdater;
 
 /**
  * OTDT changes:
@@ -1334,6 +1336,11 @@ public SyntheticArgumentBinding[] valueParamSynthArgs() {
 }
 public DependentTypeBinding asPlainDependentType() {
 	return null; // is not a dependent type
+}
+
+
+public TypeBinding maybeWrapRoleType (ASTNode typedNode, TypeArgumentUpdater updater) {
+	return this;
 }
 // SH}
 
