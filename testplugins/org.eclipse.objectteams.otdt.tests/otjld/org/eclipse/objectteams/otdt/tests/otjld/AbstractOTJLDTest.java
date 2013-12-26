@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.tests.util.TestVerifier;
 import org.eclipse.jdt.core.tests.util.Util;
 import org.eclipse.jdt.internal.compiler.Compiler;
 import org.eclipse.jdt.internal.compiler.batch.FileSystem;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.tests.ClasspathUtil;
@@ -78,6 +79,20 @@ public class AbstractOTJLDTest extends AbstractComparableTest {
 			"-Xbootclasspath/a:"+ClasspathUtil.OTRE_MIN_JAR_PATH,
 			"-Dot.dump=1"
 		};
+	
+	public static boolean IS_JRE_8;
+	static {
+		String javaVersion = System.getProperty("java.specification.version");
+		IS_JRE_8 = "1.8".equals(javaVersion);
+	}
+	protected String foreach(String elemType) {
+		return (IS_JRE_8 && this.complianceLevel < ClassFileConstants.JDK1_8) 
+				? "void forEach(java.util.function.Consumer<? super "+elemType+"> element) {}\n"
+				: "";
+	}
+	protected String spliteratorCallout() {
+		return IS_JRE_8 ? "spliterator -> spliterator;\n" : "";
+	}
 	// ===
 	
 	protected static final JavacTestOptions DEFAULT_TEST_OPTIONS = new JavacTestOptions();

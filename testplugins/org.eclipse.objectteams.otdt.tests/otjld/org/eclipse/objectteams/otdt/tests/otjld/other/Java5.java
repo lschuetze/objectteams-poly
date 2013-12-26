@@ -2211,6 +2211,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "        }\n" +
 			    "        U getLast() -> U getLast();\n" +
 			    "        Iterator<U> iterator() -> Iterator<U> iterator();\n" +
+			    spliteratorCallout() +
 			    "    }\n" +
 			    "    public String manipulate(TA17gb5List<String> as R<String> r, String e) {\n" +
 			    "        r.duplicate();\n" +
@@ -2266,6 +2267,7 @@ public class Java5 extends AbstractOTJLDTest {
 			    "        }\n" +
 			    "        U getLast() -> U getLast();\n" +
 			    "        Iterator<U> iterator() -> Iterator<U> iterator();\n" +
+			    spliteratorCallout() +
 			    "    }\n" +
 			    "    public <X> X manipulate(TA17gb6List<X> as R<X> r, X e) {\n" +
 			    "        r.duplicate();\n" +
