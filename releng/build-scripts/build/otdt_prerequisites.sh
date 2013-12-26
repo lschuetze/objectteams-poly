@@ -51,7 +51,7 @@ fi
 
 # VERSIONS:
 # Eclipse SDK build identifier (used for substitution in otdt.map.in etc.):
-SDK_QUALIFIER=R-4.3-201306052000
+SDK_QUALIFIER=R4_3
 
 # Architecture (as used by OSGi):
 ARCH=`arch`
