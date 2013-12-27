@@ -268,8 +268,12 @@ public class TypeVariableBinding extends ReferenceBinding {
 			return this;
 		this.inRecursiveFunction = true;
 		try {
-			if (this.firstBound != null)
-				this.firstBound= updater.updateArg((ReferenceBinding) this.firstBound);
+			if (this.firstBound != null) {
+				if (this.firstBound instanceof ReferenceBinding)
+					this.firstBound= updater.updateArg((ReferenceBinding) this.firstBound);
+				else
+					this.firstBound = this.firstBound.maybeWrapRoleType(typedNode, updater);
+			}
 	    	this.superclass=  (ReferenceBinding) updater.updateArg(this.superclass);
 	    	if (this.superInterfaces != null)
 	        	for (int i = 0; i < this.superInterfaces.length; i++)

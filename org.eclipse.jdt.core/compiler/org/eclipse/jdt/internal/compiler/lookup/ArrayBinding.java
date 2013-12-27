@@ -21,9 +21,11 @@ package org.eclipse.jdt.internal.compiler.lookup;
 import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
+import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator.TypeArgumentUpdater;
 
 public final class ArrayBinding extends TypeBinding {
 	// creation and initialization of the length field
@@ -331,6 +333,17 @@ public void swapUnresolved(UnresolvedReferenceBinding unresolvedType, ReferenceB
 		this.tagBits |= this.leafComponentType.tagBits & (TagBits.HasTypeVariable | TagBits.HasDirectWildcard | TagBits.HasMissingType);
 	}
 }
+//{ObjectTeams: role wrapping:
+@Override
+public TypeBinding maybeWrapRoleType(ASTNode typedNode, TypeArgumentUpdater updater) {
+	if (!this.leafComponentType.isBaseType()) {
+		TypeBinding updated = this.leafComponentType.maybeWrapRoleType(typedNode, updater);
+		if (updated != this.leafComponentType)
+			return this.environment.createArrayType(updated, this.dimensions);
+	}
+	return this;
+}
+// SH}
 public String toString() {
 	return this.leafComponentType != null ? debugName() : "NULL TYPE ARRAY"; //$NON-NLS-1$
 }

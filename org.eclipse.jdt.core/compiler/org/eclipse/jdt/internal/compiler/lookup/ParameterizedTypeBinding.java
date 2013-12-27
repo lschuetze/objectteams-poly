@@ -1401,11 +1401,6 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 										   ((FieldReference)typedNode).token))
 				return this;
 
-//		// TODO (left-over comment from RoleTypeCreator): consider arrays:
-//		TypeBinding origType = this;
-//		int dimensions = this.dimensions();
-//		TypeBinding curType = this.leafComponentType();
-		//
 		if (this.arguments == null)
 			return this;
 
@@ -1414,11 +1409,20 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		for (int i = 0; i < newArguments.length; i++)
 		{
 			TypeBinding arg = this.arguments[i];
-			if (   arg instanceof ReferenceBinding
-				&& !arg.isTypeVariable())
+			if (arg.isRawType()) {
+				ReferenceBinding originalType = ((RawTypeBinding)arg).type;
+				TypeBinding updated = updater.updateArg(originalType);
+				if (updated != originalType)
+					newArguments[i] = this.environment.convertToRawType(updated, false);
+				else
+					newArguments[i] = arg;
+			} else if (   arg instanceof ReferenceBinding
+					   && !arg.isTypeVariable()) {
 				newArguments[i] = updater.updateArg((ReferenceBinding) arg);
-			else
-				newArguments[i] = arg; // TODO recurse?
+			} else {
+				newArguments[i] = arg.maybeWrapRoleType(typedNode, updater);
+			}
+			
 
 			// must avoid nulls in arguments (no longer observed in otjld-tests):
 			if (newArguments[i] == null) {
