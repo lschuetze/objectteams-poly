@@ -664,6 +664,8 @@ public class JavadocTest_1_3 extends JavadocTest {
 				"----------\n" +
 				"4. ERROR in X.java (at line 7)\n" +
 				"	public class X<T, , V> {}\n" +
+//{ObjectTeams: different errors due to difference grammar:
+/* orig:
 				"	              ^^\n" +
 				"Syntax error on tokens, delete these tokens\n" +
 				"----------\n" +
@@ -671,6 +673,20 @@ public class JavadocTest_1_3 extends JavadocTest {
 				"	public class X<T, , V> {}\n" +
 				"	               ^\n" +
 				"Syntax error, insert \"ClassBody\" to complete CompilationUnit\n" +
+  :giro */
+				"	              ^^^^^^^^^^\n" + 
+				"Syntax error on tokens, delete these tokens\n" + 
+				"----------\n" + 
+				"5. ERROR in X.java (at line 7)\n" + 
+				"	public class X<T, , V> {}\n" + 
+				"	               ^\n" + 
+				"Syntax error, insert \"Identifier\" to complete TypeParameter\n" + 
+				"----------\n" + 
+				"6. ERROR in X.java (at line 7)\n" + 
+				"	public class X<T, , V> {}\n" + 
+				"	                       ^\n" + 
+				"Syntax error, insert \"ClassBody\" to complete CompilationUnit\n" + 
+// SH}
 				"----------\n"
 		);
 	}
@@ -704,34 +720,39 @@ public class JavadocTest_1_3 extends JavadocTest {
 				"----------\n" +
 				"4. ERROR in X.java (at line 7)\n" +
 				"	public class X<T, U, V extend Exception> {}\n" +
-//{ObjectTeams: changed position due to different grammar
+//{ObjectTeams: changed errors due to different grammar
 /* orig:
 				"	              ^^^^^^\n" +
-  :giro */				
-				"	              ^^^^^^^^\n" + 
-// SH}
 				"Syntax error on tokens, delete these tokens\n" +
 				"----------\n" +
 
 				"5. ERROR in X.java (at line 7)\n" +
 				"	public class X<T, U, V extend Exception> {}\n" +
-//{ObjectTeams: changed position due to different grammar
-/* orig:
-				"	                   ^\n" +
-  :giro */
-				"	                     ^\n" +
-// SH}
+			  	"	                   ^\n" +
 				"Syntax error, insert \"ClassBody\" to complete CompilationUnit\n" +
 				"----------\n" +
 				"6. ERROR in X.java (at line 7)\n" +
 				"	public class X<T, U, V extend Exception> {}\n" +
-//{ObjectTeams: different interpretation (value param):
-/* orig:
 				"	                       ^^^^^^\n" +
 				"extend cannot be resolved to a type\n" +
-  :giro */
-				"	                     ^\n" +
-				"V cannot be resolved to a type\n" +
+  :giro */				
+				"	              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+				"Syntax error on tokens, delete these tokens\n" + 
+				"----------\n" + 
+				"5. ERROR in X.java (at line 7)\n" + 
+				"	public class X<T, U, V extend Exception> {}\n" + 
+				"	                     ^\n" + 
+				"Syntax error, insert \"Identifier\" to complete TypeParameter\n" + 
+				"----------\n" + 
+				"6. ERROR in X.java (at line 7)\n" + 
+				"	public class X<T, U, V extend Exception> {}\n" + 
+				"	                     ^\n" + 
+				"V cannot be resolved to a type\n" + 
+				"----------\n" + 
+				"7. ERROR in X.java (at line 7)\n" + 
+				"	public class X<T, U, V extend Exception> {}\n" + 
+				"	                                         ^\n" + 
+				"Syntax error, insert \"ClassBody\" to complete CompilationUnit\n" + 
 // SH}
 				"----------\n"
 		);
