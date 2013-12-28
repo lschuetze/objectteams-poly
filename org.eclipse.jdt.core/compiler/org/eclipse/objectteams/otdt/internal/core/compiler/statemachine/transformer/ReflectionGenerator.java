@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.TypeParameter;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
+import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -406,7 +407,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 		 */
 		return gen.ifStatement(
 					gen.messageSend(
-							gen.fieldReference(gen.thisReference(), cacheName),
+							gen.fieldReference(gen.thisReference(), cacheName, DecapsulationState.REPORTED),
 							CONTAINS_KEY,
 							new Expression[] { gen.singleNameReference(_OT_BASE_ARG) }
 					),
@@ -427,7 +428,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 					ADD_ALL,
 					new Expression[] {
 						gen.messageSend(
-							gen.fieldReference(gen.thisReference(), cacheName),
+							gen.fieldReference(gen.thisReference(), cacheName, DecapsulationState.REPORTED),
 							VALUES,
 							null
 						)
@@ -456,7 +457,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 					gen.assignment(
 						gen.singleNameReference(FIRST_RESULT),
 						gen.messageSend(
-							gen.fieldReference(gen.thisReference(),cacheName),
+							gen.fieldReference(gen.thisReference(),cacheName,DecapsulationState.REPORTED),
 							GET,
 							new Expression[] {
 								gen.singleNameReference(_OT_BASE_ARG)
@@ -470,7 +471,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 				});
 		return gen.ifStatement(
 					gen.messageSend(
-							gen.fieldReference(gen.thisReference(), cacheName),
+							gen.fieldReference(gen.thisReference(), cacheName, DecapsulationState.REPORTED),
 							CONTAINS_KEY,
 							new Expression[] { gen.singleNameReference(_OT_BASE_ARG) }
 					),
@@ -517,7 +518,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 		Block innerThen = gen.block(new Statement[] {
 					gen.assignment(
 						gen.singleNameReference(  FIRST_CACHE),
-						gen.fieldReference(gen.thisReference(),cacheName)
+						gen.fieldReference(gen.thisReference(),cacheName,DecapsulationState.REPORTED)
 					),
 					gen.assignment(
 						gen.singleNameReference(FIRST_NAME),
@@ -543,7 +544,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 						),
 						gen.ifStatement(
 							gen.messageSend(
-								gen.fieldReference(gen.thisReference(), cacheName),
+								gen.fieldReference(gen.thisReference(), cacheName, DecapsulationState.REPORTED),
 								CONTAINS_KEY,
 								new Expression[] { gen.singleNameReference(FOUND_BASE) }
 							),
@@ -652,7 +653,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 							    gen.returnStatement(
 							    	// <cacheName>.containsKey(_OT$base_arg)
 									gen.messageSend(
-										gen.fieldReference(gen.thisReference(), cacheName),
+										gen.fieldReference(gen.thisReference(), cacheName, DecapsulationState.REPORTED),
 										CONTAINS_KEY,
 										new Expression[] { gen.singleNameReference(_OT_BASE_ARG) }
 									)
@@ -666,7 +667,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 										IS_INSTANCE,
 										new Expression[] {
 											gen.messageSend(
-												gen.fieldReference(gen.thisReference(), cacheName),
+												gen.fieldReference(gen.thisReference(), cacheName, DecapsulationState.REPORTED),
 												GET,
 												new Expression[] { gen.singleNameReference(_OT_BASE_ARG) },
 												objectBinding // pretend to return object even if role is confined (avoid lowering)
@@ -690,7 +691,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 		 * 		}
 		 */
 		Expression messageSendGet = gen.messageSend(
-				gen.fieldReference(gen.thisReference(), cacheName),
+				gen.fieldReference(gen.thisReference(), cacheName, DecapsulationState.REPORTED),
 				GET,
 				new Expression[] { gen.singleNameReference(_OT_BASE_ARG) }
 		);
@@ -738,7 +739,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 							gen.assignment(
 								gen.singleNameReference(VALUES),
 								gen.messageSend(
-									gen.fieldReference(gen.thisReference(), cacheName),
+									gen.fieldReference(gen.thisReference(), cacheName, DecapsulationState.REPORTED),
 									VALUES,
 									null
 								)
@@ -852,7 +853,7 @@ public class ReflectionGenerator implements IOTConstants, ClassFileConstants {
 								new Expression[0]
 							)),
 					gen.messageSend(
-						gen.fieldReference(gen.thisReference(), cacheName),
+						gen.fieldReference(gen.thisReference(), cacheName, DecapsulationState.REPORTED),
 						REMOVE,
 						new Expression[] {
 						    gen.singleNameReference(BASE_OBJ)

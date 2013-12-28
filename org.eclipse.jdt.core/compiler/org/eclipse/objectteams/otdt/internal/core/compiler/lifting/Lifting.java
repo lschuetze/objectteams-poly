@@ -22,6 +22,7 @@ package org.eclipse.objectteams.otdt.internal.core.compiler.lifting;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.internal.compiler.ast.*;
+import org.eclipse.jdt.internal.compiler.ast.Expression.DecapsulationState;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.BranchLabel;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
@@ -1010,7 +1011,8 @@ public class Lifting extends SwitchOnBaseTypeGenerator
         // _OT$team_param._OT$cache_OT$RootRole
         return this._gen.fieldReference(
     				this._gen.setPos(ThisReference.implicitThis()),
-					LiftingEnvironment.getCacheName(this._boundRootRoleModel));
+					LiftingEnvironment.getCacheName(this._boundRootRoleModel),
+					DecapsulationState.REPORTED);
     }
 
     private Block createTryCastBlock(

@@ -222,8 +222,14 @@ public class AstGenerator extends AstFactory {
     }
 
 	public FieldReference fieldReference (Expression receiver, char[] name) {
+		return fieldReference(receiver, name, DecapsulationState.NONE);
+	}
+
+	public FieldReference fieldReference (Expression receiver, char[] name, DecapsulationState baseDecapsulation) {
 		FieldReference field = new FieldReference(name, this.pos);
 		field.receiver = receiver;
+		if (baseDecapsulation != DecapsulationState.NONE)
+			field.setBaseclassDecapsulation(baseDecapsulation);
 		return field;
 	}
 
