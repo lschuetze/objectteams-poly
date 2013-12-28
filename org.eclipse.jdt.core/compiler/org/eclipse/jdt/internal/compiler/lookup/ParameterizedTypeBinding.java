@@ -24,10 +24,8 @@ import java.util.List;
 
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
-import org.eclipse.jdt.internal.compiler.ast.FieldReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
-import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator.TypeArgumentUpdater;
@@ -1395,12 +1393,6 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 //{ObjectTeams: recursive role wrapping:
 	@Override
 	public TypeBinding maybeWrapRoleType(ASTNode typedNode, TypeArgumentUpdater updater) {
-		// don't wrap args of cache-field reference:
-		if (typedNode != null && typedNode instanceof FieldReference)
-			if (CharOperation.prefixEquals(IOTConstants.CACHE_PREFIX,
-										   ((FieldReference)typedNode).token))
-				return this;
-
 		if (this.arguments == null)
 			return this;
 

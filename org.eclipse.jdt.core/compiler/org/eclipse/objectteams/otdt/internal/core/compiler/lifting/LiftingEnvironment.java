@@ -328,11 +328,11 @@ public class LiftingEnvironment
 	    // hoping, that no-one maliciously accesses the cache.
 	    
 	    // if base is generic, we refer to it via the raw type, suppress that warning:
-	    if (usingRawType) {
-		    field.annotations = new Annotation[] {
-		    	gen.singleStringsMemberAnnotation(TypeConstants.JAVA_LANG_SUPPRESSWARNINGS, new char[][]{"rawtypes".toCharArray()}) //$NON-NLS-1$ 
-		    };
-	    }
+//	    if (usingRawType) {
+//		    field.annotations = new Annotation[] {
+//		    	gen.singleStringsMemberAnnotation(TypeConstants.JAVA_LANG_SUPPRESSWARNINGS, new char[][]{"rawtypes".toCharArray()}) //$NON-NLS-1$ 
+//		    };
+//	    }
 	    
 	    AstEdit.addField(teamDecl, field, true, false/*typeProblem*/, false);
 		teamDecl.getTeamModel().addCache(field);
