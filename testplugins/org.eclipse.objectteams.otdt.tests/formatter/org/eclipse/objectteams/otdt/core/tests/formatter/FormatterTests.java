@@ -234,4 +234,8 @@ public class FormatterTests extends AbstractJavaModelTests {
 	public void testBaseCall() {
 		runTest("testBaseCall", "MyTeam.java");
 	}
+
+	public void testTeamLayering() {
+		runTest("testTeamLayering", "R2.java");
+	}
 }

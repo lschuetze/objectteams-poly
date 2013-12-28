@@ -63,6 +63,7 @@ import org.eclipse.jdt.internal.compiler.ast.SuperReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.UnionTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
+import org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration.WrapperKind;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
@@ -225,6 +226,14 @@ class ASTConverter {
 
 			int position = Integer.MAX_VALUE;
 			int nextDeclarationType = -1;
+//{ObjectTeams: skip generated / synthetic elements:
+			while (fieldsIndex < fieldsLength && shouldIgnore(fields[fieldsIndex]))
+				fieldsIndex++;
+			while (methodsIndex < methodsLength && shouldIgnore(methods[methodsIndex]))
+				methodsIndex++;
+			while (membersIndex < membersLength && shouldIgnore(members[membersIndex]))
+				membersIndex++;
+// SH}
 			if (fieldsIndex < fieldsLength) {
 				nextFieldDeclaration = fields[fieldsIndex];
 				if (nextFieldDeclaration.declarationSourceStart < position) {
@@ -259,12 +268,6 @@ class ASTConverter {
 //gbr}
 			switch (nextDeclarationType) {
 				case 0 :
-//{ObjectTeams: skip generated:
-					if (nextFieldDeclaration.isGenerated) {
-						fieldsIndex++;
-						continue;
-					}
-// SH}
 					if (nextFieldDeclaration.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
 						typeDecl.bodyDeclarations().add(convert(nextFieldDeclaration));
 					} else {
@@ -274,17 +277,7 @@ class ASTConverter {
 					break;
 				case 1 :
 					methodsIndex++;
-//{ObjectTeams: skip guard predicates which come as methods (are converted via field TypeDeclaration.predicate)
-					if (nextMethodDeclaration instanceof org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDeclaration) {
-						break;
-					}
-// SH}
-					if (!nextMethodDeclaration.isDefaultConstructor() && !nextMethodDeclaration.isClinit()
-//{ObjectTeams: ignore generated and copied method declarations
-                            && !nextMethodDeclaration.isGenerated
-                            && !nextMethodDeclaration.isCopied)
-//jwl}
-					{
+					if (!nextMethodDeclaration.isDefaultConstructor() && !nextMethodDeclaration.isClinit()) {
 						typeDecl.bodyDeclarations().add(convert(isInterface, nextMethodDeclaration));
 					}
 //{ObjectTeams: convert reused abstract method declaration
@@ -296,13 +289,6 @@ class ASTConverter {
 					break;
 				case 2 :
 					membersIndex++;
-//{ObjectTeams: skip generated members and role files when visited via enclosing team - conditionally:
-					if (   nextMemberDeclaration.isGenerated
-                        || Flags.isSynthetic(nextMemberDeclaration.modifiers))
-						continue;
-					if (!this.includeRoleFiles && nextMemberDeclaration.isRoleFile())
-						continue;
-// SH, jwl}
 					ASTNode node = convert(nextMemberDeclaration);
 					if (node == null) {
 						typeDecl.setFlags(typeDecl.getFlags() | ASTNode.MALFORMED);
@@ -413,6 +399,14 @@ class ASTConverter {
 
 			int position = Integer.MAX_VALUE;
 			int nextDeclarationType = -1;
+//{ObjectTeams: skip generated / synthetic elements:
+			while (fieldsIndex < fieldsLength && shouldIgnore(fields[fieldsIndex]))
+				fieldsIndex++;
+			while (methodsIndex < methodsLength && shouldIgnore(methods[methodsIndex]))
+				methodsIndex++;
+			while (membersIndex < membersLength && shouldIgnore(members[membersIndex]))
+				membersIndex++;
+// SH}
 			if (fieldsIndex < fieldsLength) {
 				nextFieldDeclaration = fields[fieldsIndex];
 				if (nextFieldDeclaration.declarationSourceStart < position) {
@@ -445,12 +439,7 @@ class ASTConverter {
 					break;
 				case 1 :
 					methodsIndex++;
-					if (!nextMethodDeclaration.isDefaultConstructor() && !nextMethodDeclaration.isClinit()
-//{ObjectTeams: ignore generated and copied method declarations
-                            && !nextMethodDeclaration.isGenerated
-                            && !nextMethodDeclaration.isCopied)
-					{
-//jwl})
+					if (!nextMethodDeclaration.isDefaultConstructor() && !nextMethodDeclaration.isClinit()) {
 						anonymousClassDeclaration.bodyDeclarations().add(convert(false, nextMethodDeclaration));
 					}
 //{ObjectTeams: convert reused abstract method declaration
@@ -466,9 +455,6 @@ class ASTConverter {
 					if (node == null) {
 						anonymousClassDeclaration.setFlags(anonymousClassDeclaration.getFlags() | ASTNode.MALFORMED);
 					} else {
-//{ObjectTeams: ignore generated role interfaces
-					  if (!Flags.isSynthetic(nextMemberDeclaration.modifiers))
-//	jwl}
 						anonymousClassDeclaration.bodyDeclarations().add(node);
 					}
 			}
@@ -513,6 +499,28 @@ class ASTConverter {
 	private static List internalThownExceptions(MethodDeclaration node) {
 		return node.thrownExceptions();
 	}
+
+//{ObjectTeams: detect synthetic elements to ignore:
+	private boolean shouldIgnore(org.eclipse.jdt.internal.compiler.ast.FieldDeclaration field) {
+		return field.isGenerated || field.copyInheritanceSrc != null || Flags.isSynthetic(field.modifiers);
+	}
+
+	private boolean shouldIgnore(org.eclipse.jdt.internal.compiler.ast.AbstractMethodDeclaration method) {
+		// always skip guard predicates which come as methods (are converted via field TypeDeclaration.predicate):
+		if (method instanceof org.eclipse.objectteams.otdt.internal.core.compiler.ast.GuardPredicateDeclaration)
+			return true;
+		// other than predicates do not skip abstract methods reused for a callout:
+		if (method.isReusingSourceMethod && method.isMappingWrapper == WrapperKind.CALLOUT)
+			return false;
+		return method.isGenerated || method.isCopied;
+	}
+
+	private boolean shouldIgnore(org.eclipse.jdt.internal.compiler.ast.TypeDeclaration type) {
+		return type.isGenerated || Flags.isSynthetic(type.modifiers)
+				// also skip generated members and role files when visited via enclosing team - conditionally:
+				|| (!this.includeRoleFiles && type.isRoleFile());
+	}
+// SH}
 
 	/**
 	 * @param compilationUnit

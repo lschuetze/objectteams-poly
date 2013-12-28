@@ -27,6 +27,7 @@
  *								bug 403867 - [1.8][compiler] Suspect error about duplicate default methods
  *								bug 391376 - [1.8] check interaction of default methods with bridge methods and generics
  *								bug 395681 - [compiler] Improve simulation of javac6 behavior from bug 317719 after fixing bug 388795
+ *								bug 409473 - [compiler] JDT cannot compile against JRE 1.8
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 

@@ -174,6 +174,10 @@ public class MoveToRileFileTests extends RefactoringTest {
 		performMoveToRoleFile_pass("T", "R2", new String[] { "T", "T/R2" });
 	}
 	
+	public void testFieldAndRole() throws Exception {
+		performMoveToRoleFile_pass("T2", "R2", new String[] { "T2", "T2/R2" });
+	}
+
 	public void testNotARole() throws Exception {
 		performMoveToRoleFile_initialChecksFailing("T", "R", "The selected type 'R' is not a role class.");
 	}

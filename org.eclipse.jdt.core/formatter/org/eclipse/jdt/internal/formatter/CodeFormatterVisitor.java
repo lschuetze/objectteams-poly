@@ -6578,7 +6578,11 @@ public class CodeFormatterVisitor extends ASTVisitor {
 		}
 		return false;
 	}
-	
+
+	public boolean visit(SingleNameReference singleNameReference, ClassScope scope) {
+		return visit(singleNameReference, (BlockScope)null);
+	}
+
 	public boolean visit(TypeAnchorReference anchorRef, ClassScope scope) {
 		this.scribe.printNextToken(TerminalTokens.TokenNameAT);
 		return true;

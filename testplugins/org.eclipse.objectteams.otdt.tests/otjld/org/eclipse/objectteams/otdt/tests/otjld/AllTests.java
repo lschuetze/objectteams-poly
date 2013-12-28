@@ -34,6 +34,7 @@ import org.eclipse.objectteams.otdt.tests.otjld.other.Java7;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Misc;
 import org.eclipse.objectteams.otdt.tests.otjld.other.Modifiers;
 import org.eclipse.objectteams.otdt.tests.otjld.regression.CompilationOrder;
+import org.eclipse.objectteams.otdt.tests.otjld.regression.ComplexStructures;
 import org.eclipse.objectteams.otdt.tests.otjld.regression.DevelopmentExamples;
 import org.eclipse.objectteams.otdt.tests.otjld.regression.ReportedBugs;
 import org.eclipse.objectteams.otdt.tests.otjld.roleplaying.AllBindingAmbiguitiesTests;
@@ -136,6 +137,9 @@ public class AllTests {
 		/*B.1*/suite.addTest(ReportedBugs.suite());
 		/*B.2*/suite.addTest(CompilationOrder.suite());
 		/*X.2*/suite.addTest(DevelopmentExamples.suite());
+		
+		suite.addTest(ComplexStructures.suite());
+		
 		return suite;
 	}
 }

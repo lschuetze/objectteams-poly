@@ -16,7 +16,8 @@
 	</condition>
 	<property file="${buildDirectory}/version.properties"/>
 	<property name="buildLabel" value="${buildType}-${featureVersion}"/>
-	<property name="buildId" value="${featureVersion}"/>	
+	<property name="buildId" value="${featureVersion}"/>
+
 	
 	
 	<!-- ===================================================================== -->

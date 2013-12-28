@@ -320,6 +320,35 @@ public class ChangeSignatureTests extends RefactoringTest {
 		return -1;
 	}
 
+	private void helperChangeReturn(String[] signature, String newReturnType, boolean createDelegate, boolean expectError) throws Exception{
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
+		IType classA= getType(cu, "A");
+		IMethod method = classA.getMethod("m", signature);
+		assertTrue("method does not exist", method.exists());
+		assertTrue("refactoring not available", RefactoringAvailabilityTester.isChangeSignatureAvailable(method));
+
+		ChangeSignatureProcessor processor= new ChangeSignatureProcessor(method);
+		Refactoring ref= new ProcessorBasedRefactoring(processor);
+
+		processor.setDelegateUpdating(createDelegate);
+		processor.setNewReturnTypeName(newReturnType);
+		ref.checkInitialConditions(new NullProgressMonitor());
+		RefactoringStatus result= performRefactoring(ref, true);
+		if (expectError) {
+			assertNotNull("precondition was supposed to have an error", result);
+			assertFalse("result was not supposed to be OK", result.isOK());
+		} else {
+			assertEquals("precondition was supposed to pass", null, result);			
+		}
+
+		IPackageFragment pack= (IPackageFragment)cu.getParent();
+		String newCuName= getSimpleTestFileName(true, true);
+		ICompilationUnit newcu= pack.getCompilationUnit(newCuName);
+		assertTrue(newCuName + " does not exist", newcu.exists());
+		String expectedFileContents= getFileContents(getTestFileName(true, false));
+		assertEqualLines(expectedFileContents, newcu.getSource());
+	}
+
 	private void markAsDeleted(List list, int[] deleted) {
 		if (deleted == null)
 			return;
@@ -329,7 +358,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	// add argument at base side of callin
-	public void testAdd01()throws Exception{
+	public void testAdd01() throws Exception{
 		String[] signature= {"I"};
 		String[] newNames= {"x"};
 		String[] newTypes= {"int"};
@@ -405,6 +434,10 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperPermute(new String[]{"ignore", "b", "a"}, new String[]{"I", "Z", "QString;"}, false);
 	}
 
+	public void testReorder02() throws Exception {
+		helperPermute(new String[]{"string", "object", "i", "myRole"}, new String[]{"QString;", "I", "QObject;", "QA;"}, false);
+	}
+
 	public void testRename01() throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType teamType = cu.getType("MyTeam");
@@ -422,5 +455,9 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IMethod method = teamType.getMethod("m", new String[]{"QA;"});
 		ILocalVariable argument = method.getParameters()[0];
 		helperRegularRename("renamed", true, argument, cu, testFolder+simpleOutFileName);
+	}
+
+	public void testToVoid01() throws Exception {
+		helperChangeReturn(new String[]{"QString;", "I", "QObject;", "QA;"}, "void", false, true/*expect error*/);
 	}
 }

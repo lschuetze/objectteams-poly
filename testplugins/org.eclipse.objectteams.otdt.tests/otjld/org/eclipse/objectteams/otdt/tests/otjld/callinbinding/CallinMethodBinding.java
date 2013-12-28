@@ -7852,7 +7852,7 @@ public class CallinMethodBinding extends AbstractOTJLDTest {
 			"1. ERROR in Team4146ctc1.java (at line 4)\n" + 
 			"	print <- before T4146ctc1;\n" + 
 			"	                ^^^^^^^^^\n" + 
-			"Callin binding to constructor \'T4146ctc1()\' must use the callin modifier \"after\" (OTJLD 4.1(h)). \n" + 
+			"Callin binding to constructor \'T4146ctc1()\' must use the callin modifier \"after\" (OTJLD 4.1(i)). \n" + 
 			"----------\n");
     }
 
