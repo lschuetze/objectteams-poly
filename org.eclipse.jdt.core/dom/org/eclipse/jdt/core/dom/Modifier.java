@@ -399,19 +399,19 @@ public final class Modifier extends ASTNode implements IExtendedModifier {
      * OT-specific modifier constant.
      * Applicable only to CallinMappingDeclaration.
      */
-	public static final int OT_AFTER_CALLIN = 0x10000;  // bit 17
+	public static final int OT_AFTER_CALLIN = 0x20000;  // bit 18
 
     /**
      * OT-specific modifier constant.
      * Applicable only to callout to field (FieldAccessSpec).
      */
-    public static final int OT_GET_CALLOUT = 0x20000;  // bit 18
+    public static final int OT_GET_CALLOUT = 0x40000;  // bit 19
 
     /**
      * OT-specific modifier constant.
      * Applicable only to callout to field (FieldAccessSpec).
      */
-    public static final int OT_SET_CALLOUT = 0x40000;  // bit 19
+    public static final int OT_SET_CALLOUT = 0x80000;  // bit 20
 
 //gbr}
 
