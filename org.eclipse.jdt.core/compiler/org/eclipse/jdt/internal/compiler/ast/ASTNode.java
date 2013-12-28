@@ -22,6 +22,7 @@
  *								bug 374605 - Unreasonable warning for enum-based switch statements
  *								bug 384870 - [compiler] @Deprecated annotation not detected if preceded by other annotation
  *								bug 393719 - [compiler] inconsistent warnings on iteration variables
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis 
  *     Jesper S Moller - Contributions for
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *******************************************************************************/

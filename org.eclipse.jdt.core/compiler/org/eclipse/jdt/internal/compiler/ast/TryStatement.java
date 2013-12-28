@@ -184,7 +184,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			if ((tryInfo.tagBits & FlowInfo.UNREACHABLE_OR_DEAD) != 0)
 				this.bits |= ASTNode.IsTryBlockExiting;
 		}
-		if (resourcesLength > 0) { 
+		if (resourcesLength > 0) {
 			this.postTryInitStateIndex = currentScope.methodScope().recordInitializationStates(tryInfo);
 			// the resources are not in scope after the try block, so remove their assignment info
 			// to avoid polluting the state indices. However, do this after the postTryInitStateIndex is calculated since
@@ -221,7 +221,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			currentScope.methodScope().recordInitializationStates(tryInfo);
 
 		// chain up null info registry
-			flowContext.mergeFinallyNullInfo(handlingContext.initsOnFinally);
+		flowContext.mergeFinallyNullInfo(handlingContext.initsOnFinally);
 
 		return tryInfo;
 	} else {
@@ -284,7 +284,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				// this was false alarm, we don't need to track the resource
 				this.tryBlock.scope.removeTrackingVar(resourceBinding.closeTracker);
 				// keep the tracking variable in the resourceBinding in order to prevent creating a new one while analyzing the try block
-			} 
+			}
 			MethodBinding closeMethod = findCloseMethod(resource, resourceBinding);
 			if (closeMethod != null && closeMethod.isValidBinding() && closeMethod.returnType.id == TypeIds.T_void) {
 				ReferenceBinding[] thrownExceptions = closeMethod.thrownExceptions;
@@ -345,7 +345,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			currentScope);
 
 		// chain up null info registry
-			flowContext.mergeFinallyNullInfo(handlingContext.initsOnFinally);
+		flowContext.mergeFinallyNullInfo(handlingContext.initsOnFinally);
 
 		this.naturalExitMergeInitStateIndex =
 			currentScope.methodScope().recordInitializationStates(tryInfo);
@@ -1088,8 +1088,9 @@ public void resolve(BlockScope upperScope) {
 			this.anyExceptionVariable.setConstant(Constant.NotAConstant); // not inlinable
 
 			if (!methodScope.isInsideInitializer()) {
-				MethodBinding methodBinding =
-					((AbstractMethodDeclaration) methodScope.referenceContext).binding;
+				MethodBinding methodBinding = methodScope.referenceContext instanceof AbstractMethodDeclaration ?
+					((AbstractMethodDeclaration) methodScope.referenceContext).binding : (methodScope.referenceContext instanceof LambdaExpression ? 
+							((LambdaExpression)methodScope.referenceContext).binding : null);
 				if (methodBinding != null) {
 					TypeBinding methodReturnType = methodBinding.returnType;
 					if (methodReturnType.id != TypeIds.T_void) {

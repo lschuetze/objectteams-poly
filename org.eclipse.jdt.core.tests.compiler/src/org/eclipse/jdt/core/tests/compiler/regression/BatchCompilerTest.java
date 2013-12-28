@@ -28,8 +28,10 @@
  *								bug 388281 - [compiler][null] inheritance of null annotations as an option
  *								bug 381443 - [compiler][null] Allow parameter widening from @NonNull to unannotated
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis 
  *     Jesper Steen Moller - Contributions for
  *								bug 404146 - [1.7][compiler] nested try-catch-finally-blocks leads to unrunnable Java byte code
+ *								bug 407297 - [1.8][compiler] Control generation of parameter names by option
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -1660,6 +1662,7 @@ public void test012(){
         "    -repeat <n>        repeat compilation process <n> times for perf analysis\n" +
         "    -inlineJSR         inline JSR bytecode (implicit if target >= 1.5)\n" +
         "    -enableJavadoc     consider references in javadoc\n" +
+        "    -parameters        generate method parameters attribute (for target >= 1.8)\n" +
         "    -Xemacs            used to enable emacs-style output in the console.\n" +
         "                       It does not affect the xml log output\n" +
         "    -missingNullDefault  report missing default nullness annotation\n" + 
@@ -1942,7 +1945,8 @@ public void test012b(){
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nonnullbydefault\" value=\"org.eclipse.jdt.annotation.NonNullByDefault\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nullable\" value=\"org.eclipse.jdt.annotation.Nullable\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.annotation.nullanalysis\" value=\"disabled\"/>\n" +
-			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode\" value=\"disabled\"/>\n" +
+			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode\" value=\"disabled\"/>\n" + 
+			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.methodParameters\" value=\"do not generate\"/>\n" + 
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.shareCommonFinallyBlocks\" value=\"disabled\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.targetPlatform\" value=\"1.5\"/>\n" +
 			"		<option key=\"org.eclipse.jdt.core.compiler.codegen.unusedLocal\" value=\"optimize out\"/>\n" +
@@ -12707,12 +12711,12 @@ public void test313_warn_options() {
 		"2. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" + 
 		"	@Nullable Object foo(Object o, Object o2) { return null; }\n" + 
 		"	                     ^^^^^^\n" + 
-		"Missing nullable annotation: inherited method from X declares this parameter as @Nullable\n" + 
+		"Missing nullable annotation: inherited method from X specifies this parameter as @Nullable\n" + 
 		"----------\n" + 
 		"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" +
 		"	@Nullable Object foo(Object o, Object o2) { return null; }\n" +
 		"	                               ^^^^^^\n" +
-		"Missing non-null annotation: inherited method from X declares this parameter as @NonNull\n" +
+		"Missing non-null annotation: inherited method from X specifies this parameter as @NonNull\n" +
 		"----------\n" +
 		"3 problems (3 warnings)", 
 		true);
@@ -12756,12 +12760,12 @@ public void test314_warn_options() {
 		"2. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" + 
 		"	@Nullable Object foo(Object o, Object o2) { return null; }\n" + 
 		"	                     ^^^^^^\n" + 
-		"Missing nullable annotation: inherited method from X declares this parameter as @Nullable\n" + 
+		"Missing nullable annotation: inherited method from X specifies this parameter as @Nullable\n" + 
 		"----------\n" + 
 		"3. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" +
 		"	@Nullable Object foo(Object o, Object o2) { return null; }\n" +
 		"	                               ^^^^^^\n" +
-		"Missing non-null annotation: inherited method from X declares this parameter as @NonNull\n" +
+		"Missing non-null annotation: inherited method from X specifies this parameter as @NonNull\n" +
 		"----------\n" +
 		"3 problems (3 errors)", 
 		true);
@@ -13519,7 +13523,8 @@ public void testBug375409e() {
 				"import java.lang.annotation.*;\n" +
 				"public class X {\n" +
 				"  @NonNull Object foo(@Nullable Object o, @NonNull Object o2) {\n" +
-				"	 return new X().bar();\n" +
+				"	 Object o3 = new X().bar();\n" + // need a local to involve flow analysis
+				"	 return o3;\n" +
 				"  }\n" +
 				"  @Nullable Object bar() {\n" +
 				"	 return null;\n" +
@@ -13747,12 +13752,12 @@ public void testBug375366c() throws IOException {
 			"2. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" + 
 			"	@Nullable Object foo(Object o, Object o2) { return null; }\n" + 
 			"	                     ^^^^^^\n" + 
-			"Missing nullable annotation: inherited method from X declares this parameter as @Nullable\n" + 
+			"Missing nullable annotation: inherited method from X specifies this parameter as @Nullable\n" + 
 			"----------\n" + 
 			"3. WARNING in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" +
 			"	@Nullable Object foo(Object o, Object o2) { return null; }\n" +
 			"	                               ^^^^^^\n" +
-			"Missing non-null annotation: inherited method from X declares this parameter as @NonNull\n" +
+			"Missing non-null annotation: inherited method from X specifies this parameter as @NonNull\n" +
 			"----------\n" +
 			"3 problems (2 errors, 1 warning)", 
 			false/*don't flush*/);
@@ -13801,7 +13806,7 @@ public void testBug375366d() throws IOException {
 			"2. ERROR in ---OUTPUT_DIR_PLACEHOLDER---/p/X.java (at line 9)\n" +
 			"	@Nullable Object foo(Object o, Object o2) { return null; }\n" +
 			"	                     ^^^^^^\n" +
-			"Missing nullable annotation: inherited method from X declares this parameter as @Nullable\n" +
+			"Missing nullable annotation: inherited method from X specifies this parameter as @Nullable\n" +
 			"----------\n" +
 			"2 problems (2 errors)", 
 			false/*don't flush*/);

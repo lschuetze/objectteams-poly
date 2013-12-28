@@ -28,6 +28,8 @@
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								bug 380896 - [compiler][null] Enum constants not recognised as being NonNull.
  *								bug 391376 - [1.8] check interaction of default methods with bridge methods and generics
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -154,7 +156,7 @@ public class SourceTypeBinding extends ReferenceBinding {
 	private int defaultNullness;
 	private int nullnessDefaultInitialized = 0; // 0: nothing; 1: type; 2: package
 	private int lambdaOrdinal = 0;
-
+	
 public SourceTypeBinding(char[][] compoundName, PackageBinding fPackage, ClassScope scope) {
 //{ObjectTeams:	// share model from TypeDeclaration:
 	super(scope.referenceContext.getModel());
@@ -2036,7 +2038,8 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 	if ((field.modifiers & ExtraCompilerModifiers.AccUnresolved) == 0)
 		return field;
 
-	if (this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
+	long sourceLevel = this.scope.compilerOptions().sourceLevel;
+	if (sourceLevel >= ClassFileConstants.JDK1_5) {
 		if ((field.getAnnotationTagBits() & TagBits.AnnotationDeprecated) != 0)
 			field.modifiers |= ClassFileConstants.AccDeprecated;
 	}
@@ -2088,6 +2091,7 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 			// apply null default:
 			LookupEnvironment environment = this.scope.environment();
 			if (environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
+				// TODO(SH): different strategy for 1.8, or is "repair" below enough?
 				if (fieldDecl.getKind() == AbstractVariableDeclaration.ENUM_CONSTANT) {
 					// enum constants neither have a type declaration nor can they be null
 					field.tagBits |= TagBits.AnnotationNonNull;
@@ -2098,6 +2102,12 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 					}
 					// validate null annotation:
 					this.scope.validateNullAnnotation(field.tagBits, fieldDecl.type, fieldDecl.annotations);
+				}
+				if (sourceLevel >= ClassFileConstants.JDK1_8 && !fieldType.isBaseType()) {
+					long nullTagBits = field.tagBits & TagBits.AnnotationNullMASK;
+					if (nullTagBits != 0 && nullTagBits != (fieldType.tagBits & TagBits.AnnotationNullMASK))
+						field.type = environment.pushAnnotationIntoType(fieldType, fieldDecl.type, nullTagBits);
+					// do not reset field.tagBits, since more fields may need to share this information ("@NonNull Object o1, o2;")
 				}
 			}
 		} finally {
@@ -2431,6 +2441,20 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 // SH}
 	CompilerOptions compilerOptions = this.scope.compilerOptions();
 	if (compilerOptions.isAnnotationBasedNullAnalysisEnabled) {
+		if (compilerOptions.sourceLevel >= ClassFileConstants.JDK1_8) {
+			long nullTagBits = method.tagBits & TagBits.AnnotationNullMASK;
+			if (nullTagBits != (method.returnType.tagBits & TagBits.AnnotationNullMASK)) {
+				TypeReference returnTypeRef = ((MethodDeclaration)methodDecl).returnType;
+				if (method.returnType.isBaseType()) {
+					if (method.returnType.id != TypeIds.T_void)  // type annotations are *always* illegal for 'void'
+						this.scope.problemReporter().illegalAnnotationForBaseType(returnTypeRef, methodDecl.annotations, nullTagBits);
+				} else {
+					// annotation was mistakenly associated to the method, create the annotated type now:
+					method.returnType = this.scope.environment().pushAnnotationIntoType(method.returnType, returnTypeRef, nullTagBits);
+				}
+				method.tagBits &= ~TagBits.AnnotationNullMASK;
+			}
+		}
 		createArgumentBindings(method, compilerOptions); // need annotations resolved already at this point
 	}
 	if (foundReturnTypeProblem)
@@ -2456,7 +2480,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 // SH}
 	return method;
 }
-//https://bugs.eclipse.org/bugs/show_bug.cgi?id=391108
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=391108
 private void rejectTypeAnnotatedVoidMethod(AbstractMethodDeclaration methodDecl) {
 	Annotation[] annotations = methodDecl.annotations;
 	int length = annotations == null ? 0 : annotations.length;

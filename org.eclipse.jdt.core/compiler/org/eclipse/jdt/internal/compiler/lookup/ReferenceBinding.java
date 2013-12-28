@@ -24,6 +24,10 @@
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *								bug 400421 - [compiler] Null analysis for fields does not take @com.google.inject.Inject into account
  *								bug 382069 - [null] Make the null analysis consider JUnit's assertNotNull similarly to assertions
+ *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								Bug 415291 - [1.8][null] differentiate type incompatibilities due to null annotations
+ *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *      Jesper S Moller - Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
@@ -1013,7 +1017,7 @@ public String debugName() {
 	return (this.compoundName != null) ? new String(readableName()) : "UNNAMED TYPE"; //$NON-NLS-1$
 }
 
-public final int depth() {
+public int depth() {
 	int depth = 0;
 	ReferenceBinding current = this;
 	while ((current = current.enclosingType()) != null)
@@ -1514,6 +1518,9 @@ public boolean isStrictlyCompatibleWith(TypeBinding otherType, /*@Nullable*/ Sco
 }
 public boolean isCompatibleWith(TypeBinding otherType, boolean useObjectShortcut, /*@Nullable*/ Scope captureScope) {
 // SH}
+	otherType = otherType.unannotated(); // for now consider un-annotated type as compatible to type with any type annotations
+	if ((this.tagBits & TagBits.HasNullTypeAnnotation) != 0)
+		return unannotated().isCompatibleWith(otherType, captureScope);
 	if (otherType == this)
 		return true;
 //{ObjectTeams: respect new argument useObjectShortcut:
@@ -1834,24 +1841,6 @@ public ReferenceBinding[] memberTypes() {
 
 public MethodBinding[] methods() {
 	return Binding.NO_METHODS;
-}
-
-public char[] nullAnnotatedReadableName(LookupEnvironment env, boolean shortNames) /* java.lang.Object @o.e.j.a.NonNull[] */ {
-	char[] typeName = shortNames ? shortReadableName() : readableName();
-	if ((this.tagBits & TagBits.AnnotationNullMASK) == 0)
-		return typeName;
-	char[][] fqAnnotationName;
-	if ((this.tagBits & TagBits.AnnotationNonNull) != 0)
-		fqAnnotationName = env.getNonNullAnnotationName();
-	else
-		fqAnnotationName = env.getNullableAnnotationName();
-	char[] annotationName = shortNames
-								? fqAnnotationName[fqAnnotationName.length-1]
-								: CharOperation.concatWith(fqAnnotationName, '.');				
-	char[] prefix = new char[annotationName.length+1];
-	prefix[0] = '@';
-	System.arraycopy(annotationName, 0, prefix, 1, annotationName.length);
-	return CharOperation.concat(prefix, typeName, ' ');
 }
 
 public final ReferenceBinding outermostEnclosingType() {

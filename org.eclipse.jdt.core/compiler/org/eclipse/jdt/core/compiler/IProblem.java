@@ -155,6 +155,15 @@
  *									UninitializedLocalVariableHintMissingDefault
  *									UninitializedBlankFinalFieldHintMissingDefault
  *									ShouldReturnValueHintMissingDefault
+ *									IllegalModifierForInterfaceDefaultMethod
+ *									InheritedDefaultMethodConflictsWithOtherInherited
+ *									ConflictingNullAnnotations
+ *									ConflictingInheritedNullAnnotations
+ *									UnsafeElementTypeConversion
+ *									ArrayReferencePotentialNullReference
+ *									DereferencingNullableExpression
+ *									NullityMismatchingTypeAnnotation
+ *									NullityUncheckedTypeAnnotationDetail
  *									NullableFieldReference
  *									UninitializedNonNullField
  *									UninitializedNonNullFieldHintMissingDefault
@@ -178,11 +187,16 @@
  *									ArrayReferencePotentialNullReference
  *									DereferencingNullableExpression
  *									NullityMismatchingTypeAnnotation
- *									NullityMismatchingTypeAnnotationUnchecked
+ *									ConflictingNullAnnotations
+ *									ConflictingInheritedNullAnnotations
+ *									UnsafeElementTypeConversion
  *									PotentialNullUnboxing
  *									NullUnboxing
  *									NullExpressionReference
  *									PotentialNullExpressionReference
+ *									RedundantNullCheckAgainstNonNullType
+ *									NullAnnotationUnsupportedLocation
+ *									NullityMismatchTypeArgument
  *      Jesper S Moller  - added the following constants
  *									TargetTypeNotAFunctionalInterface
  *									OuterLocalMustBeEffectivelyFinal
@@ -1250,7 +1264,7 @@ void setSourceStart(int sourceStart);
 	int DuplicateInheritedMethods = MethodRelated + 583;
 	/** @since 3.8 */
 	int MethodNameClashHidden = MethodRelated + 584;
-	
+
 	/** @since 3.9 */
 	int UnsafeElementTypeConversion = TypeRelated + 585;
 
@@ -1458,7 +1472,7 @@ void setSourceStart(int sourceStart);
 	int IllegalModifierForEnum = TypeRelated + 750;
 	/** @since 3.1 */
 	int IllegalModifierForEnumConstant = FieldRelated + 751;
-	/** @deprecated - problem could not be reported, enums cannot be local takes precedence
+	/** @deprecated - problem could not be reported, enums cannot be local takes precedence 
 	 *   @since 3.1 */
 	int IllegalModifierForLocalEnum = TypeRelated + 752;
 	/** @since 3.1 */
@@ -1668,6 +1682,10 @@ void setSourceStart(int sourceStart);
 	int ConflictingNullAnnotations = MethodRelated + 939;
 	/** @since 3.9 */
 	int ConflictingInheritedNullAnnotations = MethodRelated + 940;
+	/** @since 3.9 BETA_JAVA8 */
+	int RedundantNullCheckOnField = Internal + 941;
+	/** @since 3.9 BETA_JAVA8 */
+	int FieldComparisonYieldsFalse = Internal + 942;
 	
 	/** @since 3.9 BETA_JAVA8 */
 	int ArrayReferencePotentialNullReference = Internal + 951;
@@ -1676,7 +1694,7 @@ void setSourceStart(int sourceStart);
 	/** @since 3.9 BETA_JAVA8 */
 	int NullityMismatchingTypeAnnotation = Internal + 953;
 	/** @since 3.9 BETA_JAVA8 */
-	int NullityMismatchingTypeAnnotationUnchecked = Internal + 954;
+	int NullityUncheckedTypeAnnotationDetail = Internal + 954;
 	/** @since 3.9 BETA_JAVA8 */
 	int ReferenceExpressionParameterMismatchPromisedNullable = MethodRelated + 955;
 	/** @since 3.9 BETA_JAVA8 */
@@ -1685,6 +1703,12 @@ void setSourceStart(int sourceStart);
 	int ReferenceExpressionReturnNullRedef = MethodRelated + 957;
 	/** @since 3.9 BETA_JAVA8 */
 	int ReferenceExpressionReturnNullRedefUnchecked = MethodRelated + 958;
+	/** @since 3.9 BETA_JAVA8 */
+	int RedundantNullCheckAgainstNonNullType = Internal + 959;
+	/** @since 3.9 BETA_JAVA8 */
+	int NullAnnotationUnsupportedLocation = Internal + 960;
+	/** @since 3.9 BETA_JAVA8 */
+	int NullityMismatchTypeArgument = Internal + 961;
 
 	// Java 8 work
 	/** @since 3.9 BETA_JAVA8 */
@@ -1694,7 +1718,7 @@ void setSourceStart(int sourceStart);
 
 	// default methods:
 	/** @since 3.9 BETA_JAVA8 */
-	int IllegalModifierForInterfaceDefaultMethod = MethodRelated + 1050;
+	int IllegalModifierForInterfaceMethod18 = MethodRelated + 1050;
 
 	/** @since 3.9 BETA_JAVA8 */
 	int DefaultMethodOverridesObjectMethod = MethodRelated + 1051;
@@ -1709,6 +1733,10 @@ void setSourceStart(int sourceStart);
 	int SuperAccessCannotBypassDirectSuper = TypeRelated + 1054;
 	/** @since 3.9 BETA_JAVA8 */
 	int SuperCallCannotBypassOverride = MethodRelated + 1055;
+	/** @since 3.9 BETA_JAVA8 */
+	int IllegalModifierCombinationForInterfaceMethod = MethodRelated + 1056;
+	/** @since 3.9 BETA_JAVA8 */
+	int IllegalStrictfpForAbstractInterfaceMethod = MethodRelated + 1057;
 
 	/**
 	 * External problems -- These are problems defined by other plugins

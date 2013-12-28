@@ -35,10 +35,13 @@
  *								bug 404649 - [1.8][compiler] detect illegal reference to indirect or redundant super
  *								bug 403086 - [compiler][null] include the effect of 'assert' in syntactic null analysis for fields
  *								bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
- *        Andy Clement - Contributions for
+ *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
+ *                          Bug 409245 - [1.8][compiler] Type annotations dropped when call is routed through a synthetic bridge method
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -245,6 +248,11 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 			}
 		}
 		analyseArguments(currentScope, flowContext, flowInfo, this.binding, this.arguments);
+	}
+	if (this.binding instanceof ParameterizedGenericMethodBinding && this.typeArguments != null) {
+		ParameterizedGenericMethodBinding parameterizedBinding = (ParameterizedGenericMethodBinding) this.binding;
+		for (int i = 0; i < this.typeArguments.length; i++)
+			parameterizedBinding.checkNullConstraints(currentScope, this.typeArguments[i], i);
 	}
 	ReferenceBinding[] thrownExceptions;
 	if ((thrownExceptions = this.binding.thrownExceptions) != Binding.NO_EXCEPTIONS) {
@@ -583,7 +591,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 			codeStream.invoke(Opcodes.OPC_invokevirtual, codegenBinding, constantPoolDeclaringClass, this.typeArguments);
 		}
 	} else {
-		codeStream.invoke(Opcodes.OPC_invokestatic, this.syntheticAccessor, null /* default declaringClass */);
+		codeStream.invoke(Opcodes.OPC_invokestatic, this.syntheticAccessor, null /* default declaringClass */, this.typeArguments);
 	}
 	// required cast must occur even if no value is required
 	if (this.valueCast != null) codeStream.checkcast(this.valueCast);
@@ -689,7 +697,9 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 public int nullStatus(FlowInfo flowInfo, FlowContext flowContext) {
 	if (this.binding.isValidBinding()) {
 		// try to retrieve null status of this message send from an annotation of the called method:
-		long tagBits = this.binding.tagBits;
+		long tagBits = this.binding.tagBits & TagBits.AnnotationNullMASK;
+		if (tagBits == 0L) // alternatively look for type annotation (will only be present in 1.8+):
+			tagBits = this.binding.returnType.tagBits & TagBits.AnnotationNullMASK;
 		if ((tagBits & TagBits.AnnotationNonNull) != 0)
 			return FlowInfo.NON_NULL;
 		if ((tagBits & TagBits.AnnotationNullable) != 0)

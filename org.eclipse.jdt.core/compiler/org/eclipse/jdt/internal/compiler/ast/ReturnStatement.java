@@ -27,14 +27,17 @@
  *								bug 388996 - [compiler][resource] Incorrect 'potential resource leak'
  *								bug 394768 - [compiler][resource] Incorrect resource leak warning when creating stream in conditional
  *								bug 383368 - [compiler][null] syntactic null analysis for field references
- *								bug 401030 - [1.8][null] Null analysis support for lambda methods. 
  *								bug 400761 - [compiler][null] null may be return as boolean without a diagnostic
+ *								bug 401030 - [1.8][null] Null analysis support for lambda methods.
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *     Jesper S Moller - Contributions for
  *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
 import org.eclipse.jdt.internal.compiler.ASTVisitor;
+import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.codegen.*;
 import org.eclipse.jdt.internal.compiler.flow.*;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
@@ -162,18 +165,29 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	return FlowInfo.DEAD_END;
 }
 void checkAgainstNullAnnotation(BlockScope scope, FlowContext flowContext, int nullStatus) {
+	long tagBits;
+	MethodBinding methodBinding = null;
+	boolean useTypeAnnotations = scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8;
+	try {
+		methodBinding = scope.methodScope().referenceMethodBinding();
+		tagBits = (useTypeAnnotations) ? methodBinding.returnType.tagBits : methodBinding.tagBits;
+	} catch (NullPointerException npe) {
+		// chain of references in try-block has several potential nulls;
+		// any null means we cannot perform the following check
+		return;			
+	}
+	if (useTypeAnnotations) {
+		int severity = findNullTypeAnnotationMismatch(methodBinding.returnType, this.expression.resolvedType, nullStatus);
+		if (severity == 2) {
+			scope.problemReporter().nullityMismatchingTypeAnnotation(this.expression, this.expression.resolvedType, methodBinding.returnType, severity);
+			return;
+		} else if (severity == 1) {
+			flowContext.recordNullityMismatch(scope, this.expression, this.expression.resolvedType, methodBinding.returnType, nullStatus);
+			return;
+		}
+	}
 	if (nullStatus != FlowInfo.NON_NULL) {
 		// if we can't prove non-null check against declared null-ness of the enclosing method:
-		long tagBits;
-		MethodBinding methodBinding;
-		try {
-			methodBinding = scope.methodScope().referenceMethodBinding();
-			tagBits = methodBinding.tagBits;
-		} catch (NullPointerException npe) {
-			// chain of references in try-block has several potential nulls;
-			// any null means we cannot perform the following check
-			return;			
-		}
 		if ((tagBits & TagBits.AnnotationNonNull) != 0) {
 			flowContext.recordNullityMismatch(scope, this.expression, this.expression.resolvedType, methodBinding.returnType, nullStatus);
 		}

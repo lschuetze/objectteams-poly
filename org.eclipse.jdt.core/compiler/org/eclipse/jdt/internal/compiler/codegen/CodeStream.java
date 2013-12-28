@@ -24,6 +24,8 @@
  *							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335        
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
+ *                          Bug 409247 - [1.8][compiler] Verify error with code allocating multidimensional array
+ *                          Bug 409236 - [1.8][compiler] Type annotations on intersection cast types dropped by code generator
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.codegen;
 
@@ -704,7 +706,7 @@ public void checkcast(TypeReference typeReference, TypeBinding typeBinding) {
 	   reality this should not matter. In its intended use form such as (I & Serializable) () -> {}, no cast is emitted at all
 	*/
 	TypeBinding [] types = typeBinding instanceof IntersectionCastTypeBinding ? typeBinding.getIntersectingTypes() : new TypeBinding [] { typeBinding };
-	for (int i = types.length - 1; i >=0; i--) {
+	for (int i = 0, max = types.length; i < max; i++) {
 		this.countLabels = 0;
 		if (this.classFileOffset + 2 >= this.bCodeStream.length) {
 			resizeByteArray();
@@ -2750,7 +2752,7 @@ public void generateSyntheticBodyForMethodAccess(SyntheticMethodBinding accessMe
 			// target method declaring class may not be accessible (247953);
 			TypeBinding declaringClass = accessMethod.purpose == SyntheticMethodBinding.SuperMethodAccess 
 					? findDirectSuperTypeTowards(accessMethod, targetMethod)
-					: accessMethod.declaringClass;				
+					: accessMethod.declaringClass;
 //{ObjectTeams: private methods also occur in role interfaces:
 /* orig:
 			invoke(Opcodes.OPC_invokespecial, targetMethod, declaringClass);
@@ -5923,14 +5925,11 @@ public void monitorexit() {
 	this.bCodeStream[this.classFileOffset++] = Opcodes.OPC_monitorexit;
 }
 
-public void multianewarray(TypeBinding typeBinding, int dimensions) {
-	this.multianewarray(null, typeBinding, dimensions, null);
-}
-
 public void multianewarray(
 		TypeReference typeReference,
 		TypeBinding typeBinding,
 		int dimensions,
+		int declaredDimensions,
 		Annotation [][] annotationsOnDimensions) {
 	this.countLabels = 0;
 	this.stackDepth += (1 - dimensions);
@@ -5947,6 +5946,7 @@ public void multianewarray(
 // SH}
 	this.bCodeStream[this.classFileOffset++] = (byte) dimensions;
 }
+
 // We didn't call it new, because there is a conflit with the new keyword
 public void new_(TypeBinding typeBinding) {
 	this.new_(null, typeBinding);

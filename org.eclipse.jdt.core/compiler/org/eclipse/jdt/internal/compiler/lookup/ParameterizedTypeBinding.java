@@ -17,6 +17,10 @@
  *								bug 349326 - [1.7] new warning for missing try-with-resources
  *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
+ *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								Bug 415291 - [1.8][null] differentiate type incompatibilities due to null annotations
+ *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -26,6 +30,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.ITeamAnchor;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator.TypeArgumentUpdater;
@@ -71,10 +76,15 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		if (type instanceof UnresolvedReferenceBinding)
 			((UnresolvedReferenceBinding) type).addWrapper(this, environment);
 		if (arguments != null) {
-			for (int i = 0, l = arguments.length; i < l; i++)
+			for (int i = 0, l = arguments.length; i < l; i++) {
 				if (arguments[i] instanceof UnresolvedReferenceBinding)
 					((UnresolvedReferenceBinding) arguments[i]).addWrapper(this, environment);
+				if (arguments[i].hasNullTypeAnnotations())
+					this.tagBits |= TagBits.HasNullTypeAnnotation;
+			}
 		}
+		if (enclosingType != null && enclosingType.hasNullTypeAnnotations())
+			this.tagBits |= TagBits.HasNullTypeAnnotation;
 		this.tagBits |=  TagBits.HasUnresolvedTypeVariables; // cleared in resolve()
 	}
 
@@ -364,16 +374,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 */
 	public String debugName() {
 	    StringBuffer nameBuffer = new StringBuffer(10);
-	    if (this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
-	    	// restore applied null annotation from tagBits:
-		    if ((this.tagBits & TagBits.AnnotationNonNull) != 0) {
-		    	char[][] nonNullAnnotationName = environment().getNonNullAnnotationName();
-				nameBuffer.append('@').append(nonNullAnnotationName[nonNullAnnotationName.length-1]).append(' ');
-		    } else if ((this.tagBits & TagBits.AnnotationNullable) != 0) {
-		    	char[][] nullableAnnotationName = environment().getNullableAnnotationName();
-				nameBuffer.append('@').append(nullableAnnotationName[nullableAnnotationName.length-1]).append(' ');
-		    }
-	    }
+	    appendNullAnnotation(nameBuffer);
 	    if (this.type instanceof UnresolvedReferenceBinding) {
 	    	nameBuffer.append(this.type);
 	    } else {
@@ -841,6 +842,8 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	            for (int i = 0; i < length; i++) {
 	            	if (!this.arguments[i].isTypeArgumentContainedBy(otherArguments[i]))
 	            		return false;
+	            	if ((this.arguments[i].tagBits & TagBits.AnnotationNullMASK) != (otherArguments[i].tagBits & TagBits.AnnotationNullMASK))
+	            		return false;
 	            }
 	            return true;
 
@@ -869,6 +872,30 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 	 */
 	public boolean isRawSubstitution() {
 		return isRawType();
+	}
+
+	public boolean isAnnotatedTypeWithoutArguments() {
+		if (this.arguments != null)
+			return false;
+		if (this.enclosingType != null)
+			return this.enclosingType.isAnnotatedTypeWithoutArguments();
+		return true;
+	}
+
+	public TypeBinding unannotated() {
+		if (!hasNullTypeAnnotations())
+			return this;
+		if (isAnnotatedTypeWithoutArguments())
+			return this.type;
+		TypeBinding[] unannotatedArguments = null;
+		if (this.arguments != null) {
+			unannotatedArguments = new TypeBinding[this.arguments.length];
+			for (int i = 0; i < unannotatedArguments.length; i++) {
+				unannotatedArguments[i] = this.arguments[i].unannotated();
+			}
+		}
+		return this.environment.createParameterizedType(this.type, unannotatedArguments, 
+				this.enclosingType == null ? null : (ReferenceBinding) this.enclosingType.unannotated());
 	}
 
 	public int kind() {
@@ -1115,6 +1142,88 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		char[] shortReadableName = new char[nameLength];
 		nameBuffer.getChars(0, nameLength, shortReadableName, 0);
 	    return shortReadableName;
+	}
+
+	/**
+	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#nullAnnotatedReadableName(CompilerOptions,boolean)
+	 */
+	public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNames) {
+		if (shortNames)
+			return nullAnnotatedShortReadableName(options);
+		return nullAnnotatedReadableName(options);
+	}
+
+	char[] nullAnnotatedReadableName(CompilerOptions options) {
+	    StringBuffer nameBuffer = new StringBuffer(10);
+		if (isMemberType()) {
+			nameBuffer.append(enclosingType().nullAnnotatedReadableName(options, false));
+			nameBuffer.append('.');
+			appendNullAnnotation(nameBuffer);
+			nameBuffer.append(this.sourceName);
+		} else if (this.type.compoundName != null) {
+			int i;
+			int l=this.type.compoundName.length;
+			for (i=0; i<l-1; i++) {
+				nameBuffer.append(this.type.compoundName[i]);
+				nameBuffer.append('.');
+			}
+		    appendNullAnnotation(nameBuffer);
+			nameBuffer.append(this.type.compoundName[i]);
+		} else {
+			// case of TypeVariableBinding with nullAnnotationTagBits:
+			appendNullAnnotation(nameBuffer);
+			nameBuffer.append(this.type.sourceName);
+		}
+		if (this.arguments != null && this.arguments.length > 0) { // empty arguments array happens when PTB has been created just to capture type annotations
+			nameBuffer.append('<');
+		    for (int i = 0, length = this.arguments.length; i < length; i++) {
+		        if (i > 0) nameBuffer.append(',');
+		        nameBuffer.append(this.arguments[i].nullAnnotatedReadableName(options, false));
+		    }
+		    nameBuffer.append('>');
+		}
+		int nameLength = nameBuffer.length();
+		char[] readableName = new char[nameLength];
+		nameBuffer.getChars(0, nameLength, readableName, 0);
+	    return readableName;
+	}
+
+	char[] nullAnnotatedShortReadableName(CompilerOptions options) {
+	    StringBuffer nameBuffer = new StringBuffer(10);
+		if (isMemberType()) {
+			nameBuffer.append(enclosingType().nullAnnotatedReadableName(options, true));
+			nameBuffer.append('.');
+			appendNullAnnotation(nameBuffer);
+			nameBuffer.append(this.sourceName);
+		} else {
+			appendNullAnnotation(nameBuffer);
+			nameBuffer.append(this.type.sourceName);
+		}
+		if (this.arguments != null && this.arguments.length > 0) { // empty arguments array happens when PTB has been created just to capture type annotations
+			nameBuffer.append('<');
+		    for (int i = 0, length = this.arguments.length; i < length; i++) {
+		        if (i > 0) nameBuffer.append(',');
+		        nameBuffer.append(this.arguments[i].nullAnnotatedReadableName(options, true));
+		    }
+		    nameBuffer.append('>');
+		}
+		int nameLength = nameBuffer.length();
+		char[] shortReadableName = new char[nameLength];
+		nameBuffer.getChars(0, nameLength, shortReadableName, 0);
+	    return shortReadableName;
+	}
+
+	private void appendNullAnnotation(StringBuffer nameBuffer) {
+		if (this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
+			// restore applied null annotation from tagBits:
+		    if ((this.tagBits & TagBits.AnnotationNonNull) != 0) {
+		    	char[][] nonNullAnnotationName = environment().getNonNullAnnotationName();
+				nameBuffer.append('@').append(nonNullAnnotationName[nonNullAnnotationName.length-1]).append(' ');
+		    } else if ((this.tagBits & TagBits.AnnotationNullable) != 0) {
+		    	char[][] nullableAnnotationName = environment().getNullableAnnotationName();
+				nameBuffer.append('@').append(nullableAnnotationName[nullableAnnotationName.length-1]).append(' ');
+		    }
+		}
 	}
 
 	/**

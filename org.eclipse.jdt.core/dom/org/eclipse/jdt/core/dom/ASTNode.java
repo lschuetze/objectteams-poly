@@ -2843,8 +2843,8 @@ public abstract class ASTNode {
 		}
 		// begin with the generic pre-visit
 		if (visitor.preVisit2(this)) {
-		// dynamic dispatch to internal method for type-specific visit/endVisit
-		accept0(visitor);
+			// dynamic dispatch to internal method for type-specific visit/endVisit
+			accept0(visitor);
 		}
 		// end with the generic post-visit
 		visitor.postVisit(this);
@@ -2911,16 +2911,14 @@ public abstract class ASTNode {
 	final void acceptChildren(ASTVisitor visitor, ASTNode.NodeList children) {
 		// use a cursor to keep track of where we are up to
 		// (the list may be changing under foot)
-		if(children != null) {
-			NodeList.Cursor cursor = children.newCursor();
-			try {
-				while (cursor.hasNext()) {
-					ASTNode child = (ASTNode) cursor.next();
-					child.accept(visitor);
-				}
-			} finally {
-				children.releaseCursor(cursor);
+		NodeList.Cursor cursor = children.newCursor();
+		try {
+			while (cursor.hasNext()) {
+				ASTNode child = (ASTNode) cursor.next();
+				child.accept(visitor);
 			}
+		} finally {
+			children.releaseCursor(cursor);
 		}
 	}
 

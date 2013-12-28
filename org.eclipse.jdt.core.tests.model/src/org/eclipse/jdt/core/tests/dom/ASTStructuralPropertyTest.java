@@ -426,7 +426,7 @@ public class ASTStructuralPropertyTest extends org.eclipse.jdt.core.tests.junit.
 		Set classes = new HashSet(100);
 		// make sure node types are contiguous starting at 0
 		int hi = 0;
-		for (int nodeType = 1; nodeType < 100; nodeType++) { 
+		for (int nodeType = 1; nodeType < 100; nodeType++) {
   :giro */
 		Set classes = new HashSet(120);
 		// make sure node types are contiguous starting at 0

@@ -16,6 +16,7 @@
  *     Stephan Herrmann - Contributions for
  *								bug 342671 - ClassCastException: org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ArrayBinding
  *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *        Andy Clement - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
@@ -371,12 +372,9 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		         argHasError = true;
 		     } else {
 //{ObjectTeams:
-		    	argType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(scope, argType, typeArgument);
+		    	 argType = RoleTypeCreator.maybeWrapUnqualifiedRoleType(scope, argType, typeArgument);
 // SH}
-			    if (typeArgument.annotations != null)
-			    	argTypes[i] = captureTypeAnnotations(scope, enclosingType, argType, typeArgument.annotations[0]);
-			    else
-			    	argTypes[i] = argType;
+		    	 argTypes[i] = argType;
 		     }
 		}
 		if (argHasError) {

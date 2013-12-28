@@ -17,6 +17,8 @@
  *							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335             
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
+ *                          Bug 409236 - [1.8][compiler] Type annotations on intersection cast types dropped by code generator
+ *                          Bug 409246 - [1.8][compiler] Type annotations on catch parameters not handled properly
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler;
 
@@ -63,7 +65,6 @@ import org.eclipse.jdt.internal.compiler.codegen.AttributeNamesConstants;
 import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.codegen.ExceptionLabel;
-import org.eclipse.jdt.internal.compiler.codegen.MultiCatchExceptionLabel;
 import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
 import org.eclipse.jdt.internal.compiler.codegen.StackMapFrame;
 import org.eclipse.jdt.internal.compiler.codegen.StackMapFrameCodeStream;
@@ -935,57 +936,58 @@ public class ClassFile implements TypeConstants, TypeIds {
 			int attributeNumber = generateMethodInfoAttributes(methodBinding);
 			completeMethodInfo(methodBinding, methodAttributeOffset, attributeNumber);
 		}
+		
 		// add synthetic methods infos
 		int emittedSyntheticsCount = 0;
 		boolean continueScanningSynthetics = true;
 		while (continueScanningSynthetics) {
 			continueScanningSynthetics = false;
-		SyntheticMethodBinding[] syntheticMethods = this.referenceBinding.syntheticMethods();
+			SyntheticMethodBinding[] syntheticMethods = this.referenceBinding.syntheticMethods();
 			int currentSyntheticsCount = syntheticMethods == null ? 0: syntheticMethods.length;
 			if (emittedSyntheticsCount != currentSyntheticsCount) {
 				for (int i = emittedSyntheticsCount, max = currentSyntheticsCount; i < max; i++) {
-				SyntheticMethodBinding syntheticMethod = syntheticMethods[i];
-				switch (syntheticMethod.purpose) {
-					case SyntheticMethodBinding.FieldReadAccess :
-					case SyntheticMethodBinding.SuperFieldReadAccess :
-						// generate a method info to emulate an reading access to
-						// a non-accessible field
-						addSyntheticFieldReadAccessMethod(syntheticMethod);
-						break;
-					case SyntheticMethodBinding.FieldWriteAccess :
-					case SyntheticMethodBinding.SuperFieldWriteAccess :
-						// generate a method info to emulate an writing access to
-						// a non-accessible field
-						addSyntheticFieldWriteAccessMethod(syntheticMethod);
-						break;
-					case SyntheticMethodBinding.MethodAccess :
-					case SyntheticMethodBinding.SuperMethodAccess :
-					case SyntheticMethodBinding.BridgeMethod :
+					SyntheticMethodBinding syntheticMethod = syntheticMethods[i];
+					switch (syntheticMethod.purpose) {
+						case SyntheticMethodBinding.FieldReadAccess :
+						case SyntheticMethodBinding.SuperFieldReadAccess :
+							// generate a method info to emulate an reading access to
+							// a non-accessible field
+							addSyntheticFieldReadAccessMethod(syntheticMethod);
+							break;
+						case SyntheticMethodBinding.FieldWriteAccess :
+						case SyntheticMethodBinding.SuperFieldWriteAccess :
+							// generate a method info to emulate an writing access to
+							// a non-accessible field
+							addSyntheticFieldWriteAccessMethod(syntheticMethod);
+							break;
+						case SyntheticMethodBinding.MethodAccess :
+						case SyntheticMethodBinding.SuperMethodAccess :
+						case SyntheticMethodBinding.BridgeMethod :
 //{ObjectTeams: more kinds:
-					case SyntheticMethodBinding.RoleMethodBridgeInner :
-					case SyntheticMethodBinding.RoleMethodBridgeOuter :
+						case SyntheticMethodBinding.RoleMethodBridgeInner :
+						case SyntheticMethodBinding.RoleMethodBridgeOuter :
 // SH}
-						// generate a method info to emulate an access to a non-accessible method / super-method or bridge method
-						addSyntheticMethodAccessMethod(syntheticMethod);
-						break;
-					case SyntheticMethodBinding.ConstructorAccess :
-						// generate a method info to emulate an access to a non-accessible constructor
-						addSyntheticConstructorAccessMethod(syntheticMethod);
-						break;
-					case SyntheticMethodBinding.EnumValues :
-						// generate a method info to define <enum>#values()
-						addSyntheticEnumValuesMethod(syntheticMethod);
-						break;
-					case SyntheticMethodBinding.EnumValueOf :
-						// generate a method info to define <enum>#valueOf(String)
-						addSyntheticEnumValueOfMethod(syntheticMethod);
-						break;
-					case SyntheticMethodBinding.SwitchTable :
-						// generate a method info to define the switch table synthetic method
-						addSyntheticSwitchTable(syntheticMethod);
-						break;
-					case SyntheticMethodBinding.TooManyEnumsConstants :
-						addSyntheticEnumInitializationMethod(syntheticMethod);
+							// generate a method info to emulate an access to a non-accessible method / super-method or bridge method
+							addSyntheticMethodAccessMethod(syntheticMethod);
+							break;
+						case SyntheticMethodBinding.ConstructorAccess :
+							// generate a method info to emulate an access to a non-accessible constructor
+							addSyntheticConstructorAccessMethod(syntheticMethod);
+							break;
+						case SyntheticMethodBinding.EnumValues :
+							// generate a method info to define <enum>#values()
+							addSyntheticEnumValuesMethod(syntheticMethod);
+							break;
+						case SyntheticMethodBinding.EnumValueOf :
+							// generate a method info to define <enum>#valueOf(String)
+							addSyntheticEnumValueOfMethod(syntheticMethod);
+							break;
+						case SyntheticMethodBinding.SwitchTable :
+							// generate a method info to define the switch table synthetic method
+							addSyntheticSwitchTable(syntheticMethod);
+							break;
+						case SyntheticMethodBinding.TooManyEnumsConstants :
+							addSyntheticEnumInitializationMethod(syntheticMethod);
 							break;
 						case SyntheticMethodBinding.LambdaMethod:
 							syntheticMethod.lambda.generateCode(this.referenceBinding.scope, this);
@@ -1000,8 +1002,8 @@ public class ClassFile implements TypeConstants, TypeIds {
 						case SyntheticMethodBinding.FactoryMethod:
 							addSyntheticFactoryMethod(syntheticMethod);
 							break;	
+					}
 				}
-			}
 				emittedSyntheticsCount = currentSyntheticsCount;
 			}
 		}
@@ -1491,17 +1493,10 @@ public class ClassFile implements TypeConstants, TypeIds {
 		}
 		
 		ExceptionLabel[] exceptionLabels = this.codeStream.exceptionLabels;
-		int tableIndex = 0;
 		for (int i = 0, max = this.codeStream.exceptionLabelsCounter; i < max; i++) {
 			ExceptionLabel exceptionLabel = exceptionLabels[i];
-			if (exceptionLabel instanceof MultiCatchExceptionLabel) {
-				MultiCatchExceptionLabel multiCatchExceptionLabel = (MultiCatchExceptionLabel)exceptionLabel;
-				tableIndex += multiCatchExceptionLabel.getAllAnnotationContexts(tableIndex, allTypeAnnotationContexts);
-			} else {
-				if (exceptionLabel.exceptionTypeReference != null) { // ignore those which cannot be annotated
-					exceptionLabel.exceptionTypeReference.getAllAnnotationContexts(AnnotationTargetTypeConstants.EXCEPTION_PARAMETER, tableIndex, allTypeAnnotationContexts);
-				}
-				tableIndex++;
+			if (exceptionLabel.exceptionTypeReference != null && (exceptionLabel.exceptionTypeReference.bits & ASTNode.HasTypeAnnotations) != 0) {
+				exceptionLabel.exceptionTypeReference.getAllAnnotationContexts(AnnotationTargetTypeConstants.EXCEPTION_PARAMETER, i, allTypeAnnotationContexts);
 			}
 		}
 		
@@ -2114,6 +2109,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 		}
 		this.contents[codeAttributeAttributeOffset++] = (byte) (attributesNumber >> 8);
 		this.contents[codeAttributeAttributeOffset] = (byte) attributesNumber;
+
 		// update the attribute length
 		int codeAttributeLength = this.contentsOffset - (codeAttributeOffset + 6);
 		this.contents[codeAttributeOffset + 2] = (byte) (codeAttributeLength >> 24);
@@ -2287,8 +2283,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 				// bytecode offset
 				this.contents[this.contentsOffset++] = (byte) (annotationContext.info >> 8);
 				this.contents[this.contentsOffset++] = (byte) annotationContext.info;
-				// type_argument_index not set for cast
-				this.contents[this.contentsOffset++] = (byte)0;
+				this.contents[this.contentsOffset++] = (byte) annotationContext.info2;
 				break;
 				
 			case AnnotationTargetTypeConstants.CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT :

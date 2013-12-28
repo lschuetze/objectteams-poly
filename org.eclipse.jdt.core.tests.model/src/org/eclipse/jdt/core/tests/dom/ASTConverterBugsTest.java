@@ -859,10 +859,10 @@ public void testBug218824a() throws JavaModelException {
 			"8. ERROR in /Converter15/src/a/X.java (at line 16)\n" +
 			"	}takeParam((int) c);\n" +
 			"	^\n" +
-			"Syntax error, insert \";\" to complete Statement\n" +			
-			"9. ERROR in /Converter15/src/a/X.java (at line 16)\n" +
-			"	}takeParam((int) c);\n" +
-			"	 ^^^^^^^^^^\n" +
+			"Syntax error, insert \";\" to complete Statement\n" + 
+			"9. ERROR in /Converter15/src/a/X.java (at line 16)\n" + 
+			"	}takeParam((int) c);\n" + 
+			"	 ^^^^^^^^^^\n" + 
 			"Return type for the method is missing\n",
 			result);
 }

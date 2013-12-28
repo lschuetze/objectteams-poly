@@ -1,16 +1,22 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2011 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
- * $Id: MethodInfo.java 23405 2010-02-03 17:02:18Z stephan $
+ *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contribution for bug 186342 - [compiler][null] Using annotations for null checking
+ *     Jesper Steen Moeller - Contribution for bug 406973 - [compiler] Parse MethodParameters attribute
+ *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
+ *         Bug 407191 - [1.8] Binary access support for type annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.classfmt;
 
@@ -30,6 +36,7 @@ import org.eclipse.jdt.internal.compiler.codegen.AttributeNamesConstants;
 import org.eclipse.jdt.internal.compiler.codegen.ConstantPool;
 import org.eclipse.jdt.internal.compiler.env.IBinaryAnnotation;
 import org.eclipse.jdt.internal.compiler.env.IBinaryMethod;
+import org.eclipse.jdt.internal.compiler.env.IBinaryTypeAnnotation;
 import org.eclipse.jdt.internal.compiler.lookup.BinaryTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.LookupEnvironment;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
@@ -59,6 +66,7 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.RoleModel;
 public class MethodInfo extends ClassFileStruct implements IBinaryMethod, Comparable {
 	static private final char[][] noException = CharOperation.NO_CHAR_CHAR;
 	static private final char[][] noArgumentNames = CharOperation.NO_CHAR_CHAR;
+	static private final char[] ARG = "arg".toCharArray();  //$NON-NLS-1$
 	protected int accessFlags;
 	protected int attributeBytes;
 	protected char[] descriptor;
@@ -68,7 +76,7 @@ public class MethodInfo extends ClassFileStruct implements IBinaryMethod, Compar
 	protected int signatureUtf8Offset;
 	protected long tagBits;
 	protected char[][] argumentNames;
-	protected int argumentNamesIndex;
+
 //{ObjectTeams: method level attributes:
     /* After reading a method its attributes are stored here. */
     private LinkedList<AbstractAttribute> methodAttributes = new LinkedList<AbstractAttribute>();
@@ -84,12 +92,18 @@ public static MethodInfo createMethod(byte classFileBytes[], int offsets[], int 
 	int readOffset = 8;
 	AnnotationInfo[] annotations = null;
 	AnnotationInfo[][] parameterAnnotations = null;
+	TypeAnnotationInfo[] typeAnnotations = null;
 	for (int i = 0; i < attributesCount; i++) {
 		// check the name of each attribute
 		int utf8Offset = methodInfo.constantPoolOffsets[methodInfo.u2At(readOffset)] - methodInfo.structOffset;
 		char[] attributeName = methodInfo.utf8At(utf8Offset + 3, methodInfo.u2At(utf8Offset + 1));
 		if (attributeName.length > 0) {
 			switch(attributeName[0]) {
+				case 'M' :
+					if (CharOperation.equals(attributeName, AttributeNamesConstants.MethodParametersName)) {
+						methodInfo.decodeMethodParameters(readOffset, methodInfo);
+					}
+					break;
 				case 'S' :
 					if (CharOperation.equals(AttributeNamesConstants.SignatureName, attributeName))
 						methodInfo.signatureUtf8Offset = methodInfo.constantPoolOffsets[methodInfo.u2At(readOffset + 6)] - methodInfo.structOffset;
@@ -97,6 +111,7 @@ public static MethodInfo createMethod(byte classFileBytes[], int offsets[], int 
 				case 'R' :
 					AnnotationInfo[] methodAnnotations = null;
 					AnnotationInfo[][] paramAnnotations = null;
+					TypeAnnotationInfo[] methodTypeAnnotations = null;
 					if (CharOperation.equals(attributeName, AttributeNamesConstants.RuntimeVisibleAnnotationsName)) {
 						methodAnnotations = decodeMethodAnnotations(readOffset, true, methodInfo);
 					} else if (CharOperation.equals(attributeName, AttributeNamesConstants.RuntimeInvisibleAnnotationsName)) {
@@ -105,6 +120,10 @@ public static MethodInfo createMethod(byte classFileBytes[], int offsets[], int 
 						paramAnnotations = decodeParamAnnotations(readOffset, true, methodInfo);
 					} else if (CharOperation.equals(attributeName, AttributeNamesConstants.RuntimeInvisibleParameterAnnotationsName)) {
 						paramAnnotations = decodeParamAnnotations(readOffset, false, methodInfo);
+					} else if (CharOperation.equals(attributeName, AttributeNamesConstants.RuntimeVisibleTypeAnnotationsName)) {
+						methodTypeAnnotations = decodeTypeAnnotations(readOffset, true, methodInfo);
+					} else if (CharOperation.equals(attributeName, AttributeNamesConstants.RuntimeInvisibleTypeAnnotationsName)) {
+						methodTypeAnnotations = decodeTypeAnnotations(readOffset, false, methodInfo);
 					}
 					if (methodAnnotations != null) {
 						if (annotations == null) {
@@ -136,6 +155,16 @@ public static MethodInfo createMethod(byte classFileBytes[], int offsets[], int 
 								}
 							}
 						}
+					} else if (methodTypeAnnotations != null) {
+						if (typeAnnotations == null) {
+							typeAnnotations = methodTypeAnnotations;
+						} else {
+							int length = typeAnnotations.length;
+							TypeAnnotationInfo[] newAnnotations = new TypeAnnotationInfo[length + methodTypeAnnotations.length];
+							System.arraycopy(typeAnnotations, 0, newAnnotations, 0, length);
+							System.arraycopy(methodTypeAnnotations, 0, newAnnotations, length, methodTypeAnnotations.length);
+							typeAnnotations = newAnnotations;
+						}
 					}
 					break;
 			}
@@ -144,6 +173,8 @@ public static MethodInfo createMethod(byte classFileBytes[], int offsets[], int 
 	}
 	methodInfo.attributeBytes = readOffset;
 
+	if (typeAnnotations != null)
+		return new MethodInfoWithTypeAnnotations(methodInfo, annotations, parameterAnnotations, typeAnnotations);
 	if (parameterAnnotations != null)
 		return new MethodInfoWithParameterAnnotations(methodInfo, annotations, parameterAnnotations);
 	if (annotations != null)
@@ -247,6 +278,20 @@ static AnnotationInfo[] decodeMethodAnnotations(int offset, boolean runtimeVisib
 			}
 		}
 		return annos;
+	}
+	return null;
+}
+static TypeAnnotationInfo[] decodeTypeAnnotations(int offset, boolean runtimeVisible, MethodInfo methodInfo) {
+	int numberOfAnnotations = methodInfo.u2At(offset + 6);
+	if (numberOfAnnotations > 0) {
+		int readOffset = offset + 8;
+		TypeAnnotationInfo[] typeAnnos = new TypeAnnotationInfo[numberOfAnnotations];
+		for (int i = 0; i < numberOfAnnotations; i++) {
+			TypeAnnotationInfo newInfo = new TypeAnnotationInfo(methodInfo.reference, methodInfo.constantPoolOffsets, readOffset + methodInfo.structOffset, runtimeVisible, false);
+			readOffset += newInfo.readOffset;
+			typeAnnos[i] = newInfo;
+		}
+		return typeAnnos;
 	}
 	return null;
 }
@@ -378,6 +423,9 @@ public IBinaryAnnotation[] getParameterAnnotations(int index) {
 public int getAnnotatedParametersCount() {
 	return 0;
 }
+public IBinaryTypeAnnotation[] getTypeAnnotations() {
+	return null;
+}
 /**
  * Answer the name of the method.
  *
@@ -495,7 +543,7 @@ private void readModifierRelatedAttributes() {
 				default:
 					readOTAttribute(attributeName, this, readOffset+6, this.structOffset, this.constantPoolOffsets);
 // SH}
-  			}
+			}
 		}
 		readOffset += (6 + u4At(readOffset + 2));
 	}
@@ -635,7 +683,7 @@ private void decodeLocalVariableAttribute(int offset, int codeLength) {
 	if (length != 0) {
 		readOffset += 2;
 		this.argumentNames = new char[length][];
-		this.argumentNamesIndex = 0;
+		int argumentNamesIndex = 0;
 		for (int i = 0; i < length; i++) {
 			int startPC = u2At(readOffset);
 			if (startPC == 0) {
@@ -643,16 +691,35 @@ private void decodeLocalVariableAttribute(int offset, int codeLength) {
 				int utf8Offset = this.constantPoolOffsets[nameIndex] - this.structOffset;
 				char[] localVariableName = utf8At(utf8Offset + 3, u2At(utf8Offset + 1));
 				if (!CharOperation.equals(localVariableName, ConstantPool.This)) {
-					this.argumentNames[this.argumentNamesIndex++] = localVariableName;
+					this.argumentNames[argumentNamesIndex++] = localVariableName;
 				}
 			} else {
 				break;
 			}
 			readOffset += 10;
 		}
-		if (this.argumentNamesIndex != this.argumentNames.length) {
+		if (argumentNamesIndex != this.argumentNames.length) {
 			// resize
-			System.arraycopy(this.argumentNames, 0, (this.argumentNames = new char[this.argumentNamesIndex][]), 0, this.argumentNamesIndex);
+			System.arraycopy(this.argumentNames, 0, (this.argumentNames = new char[argumentNamesIndex][]), 0, argumentNamesIndex);
+		}
+	}
+}
+private void decodeMethodParameters(int offset, MethodInfo methodInfo) {
+	int readOffset = offset + 6;
+	final int length = u1At(readOffset);
+	if (length != 0) {
+		readOffset += 1;
+		this.argumentNames = new char[length][];
+		for (int i = 0; i < length; i++) {
+			int nameIndex = u2At(readOffset);
+			if (nameIndex != 0) {
+				int utf8Offset = this.constantPoolOffsets[nameIndex] - this.structOffset;
+				char[] parameterName = utf8At(utf8Offset + 3, u2At(utf8Offset + 1));
+				this.argumentNames[i] = parameterName;
+			} else {
+				this.argumentNames[i] = CharOperation.concat(ARG, String.valueOf(i).toCharArray());
+			}
+			readOffset += 4;
 		}
 	}
 }

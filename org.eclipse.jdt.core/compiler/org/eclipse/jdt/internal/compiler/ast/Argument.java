@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2012 IBM Corporation and others.
+ * Copyright (c) 2000, 2013 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -16,6 +16,8 @@
  *     Stephan Herrmann - Contributions for
  *								bug 186342 - [compiler][null] Using annotations for null checking
  *								bug 365519 - editorial cleanup after bug 186342 and bug 365387
+ *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
+ *                          Bug 409246 - [1.8][compiler] Type annotations on catch parameters not handled properly
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -71,7 +73,7 @@ public class Argument extends LocalDeclaration {
 	}
 // SH}
 
-	public void createBinding(MethodScope scope, TypeBinding typeBinding) {
+	public TypeBinding createBinding(MethodScope scope, TypeBinding typeBinding) {
 		if (this.binding == null) {
 			// for default constructors and fake implementation of abstract methods 
 			this.binding = new LocalVariableBinding(this, typeBinding, this.modifiers, true /*isArgument*/);
@@ -93,10 +95,11 @@ public class Argument extends LocalDeclaration {
 		}
 		resolveAnnotations(scope, this.annotations, this.binding);
 		this.binding.declaration = this;
+		return this.binding.type; // might have been updated during resolveAnnotations (for typeAnnotations)
 	}
 
-	public void bind(MethodScope scope, TypeBinding typeBinding, boolean used) {
-		createBinding(scope, typeBinding); // basically a no-op if createBinding() was called before
+	public TypeBinding bind(MethodScope scope, TypeBinding typeBinding, boolean used) {
+		TypeBinding newTypeBinding = createBinding(scope, typeBinding); // basically a no-op if createBinding() was called before
 
 		// record the resolved type into the type reference
 //{ObjectTeams:
@@ -105,7 +108,7 @@ public class Argument extends LocalDeclaration {
 		// SourceTypeBinding.resolveTypesFor already sets the binding,
 		// without entering it into the method scope.
 		if ((this.bits & ASTNode.HasBeenResolved) != 0)
-			return;
+			return this.binding.type;
 		this.bits |= ASTNode.HasBeenResolved;
 
 //		// lifting type needs some further analysis now:
@@ -141,6 +144,7 @@ public class Argument extends LocalDeclaration {
 		}
 		scope.addLocalVariable(this.binding);
 		this.binding.useFlag = used ? LocalVariableBinding.USED : LocalVariableBinding.UNUSED;
+		return newTypeBinding;
 	}
 
 	/**
@@ -231,6 +235,49 @@ public class Argument extends LocalDeclaration {
 			this.binding = new CatchParameterBinding(this, exceptionType, this.modifiers, false); // argument decl, but local var  (where isArgument = false)
 		}
 		resolveAnnotations(scope, this.annotations, this.binding);
+
+		// Type annotations may need attaching to the type references
+		// Example of code this block handles: } catch(@A Exception e) {
+		if (this.annotations != null) {
+			for (int i = 0, max = this.annotations.length; i < max; i++) {
+				Annotation annotation = this.annotations[i];
+				if ((annotation.resolvedType.tagBits & (TagBits.AnnotationForTypeParameter | TagBits.AnnotationForTypeUse)) != 0) {
+					// Copy it to the type reference.
+					if (this.type instanceof UnionTypeReference) {
+						// Only need to consider the first element of the union type reference
+						TypeReference firstTypeReference = ((UnionTypeReference) this.type).typeReferences[0];
+						Annotation[][] annotationsOnFirstReference = firstTypeReference.annotations;
+						if (annotationsOnFirstReference == null) {
+							firstTypeReference.annotations = annotationsOnFirstReference = new Annotation[firstTypeReference.getAnnotatableLevels()][];
+						} 
+						if (annotationsOnFirstReference[0] == null) {
+							firstTypeReference.annotations[0] = new Annotation[] { annotation };
+						} else {
+							int len = annotationsOnFirstReference.length;
+							Annotation[] newAnnotations = new Annotation[len + 1];
+							System.arraycopy(annotationsOnFirstReference[0], 0, newAnnotations, 0, len);
+							newAnnotations[len] = annotation;
+							firstTypeReference.annotations[0] = newAnnotations;
+						}
+						firstTypeReference.bits |= ASTNode.HasTypeAnnotations;
+					} else {
+						if (this.type.annotations == null) {
+							this.type.annotations = new Annotation[this.type.getAnnotatableLevels()][];
+						}
+						if (this.type.annotations[0] == null) {
+							this.type.annotations[0] = new Annotation[] { annotation };
+						} else {
+							int len = this.type.annotations[0].length;
+							Annotation[] newAnnotations = new Annotation[len + 1];
+							System.arraycopy(this.type.annotations[0], 0, newAnnotations, 0, len);
+							newAnnotations[len] = annotation;
+							this.type.annotations[0] = newAnnotations;
+						}
+						this.type.bits |= ASTNode.HasTypeAnnotations;
+					}
+				}
+			}
+		}
 
 		scope.addLocalVariable(this.binding);
 		this.binding.setConstant(Constant.NotAConstant);

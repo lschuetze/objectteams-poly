@@ -16,6 +16,7 @@
  *     Stephan Herrmann - Contributions for
  *								Bug 360328 - [compiler][null] detect null problems in nested code (local class inside a loop)
  *								Bug 388630 - @NonNull diagnostics at line 0
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis 
  *     Keigo Imai - Contribution for  bug 388903 - Cannot extend inner class as an anonymous class when it extends the outer class
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
@@ -791,6 +792,7 @@ public MethodBinding createDefaultConstructorWithBinding(MethodBinding inherited
 		System.arraycopy(inheritedConstructorBinding.parameterNonNullness, 0, 
 				constructor.binding.parameterNonNullness = new Boolean[len], 0, len);
 	}
+	// TODO(stephan): do argument types already carry sufficient info about type annotations?
 
 	constructor.scope = new MethodScope(this.scope, constructor, true);
 	constructor.bindArguments();
@@ -1695,6 +1697,18 @@ public void resolve() {
 				this.scope.problemReporter().notAFunctionalInterface(this);
 			}
 		}
+		if (this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8) {
+			if ((annotationTagBits & TagBits.AnnotationNullMASK) != 0) {
+				for (int i = 0; i < this.annotations.length; i++) {
+					ReferenceBinding annotationType = this.annotations[i].getCompilerAnnotation().getAnnotationType();
+					if (annotationType != null) {
+						if (annotationType.id == TypeIds.T_ConfiguredAnnotationNonNull
+								|| annotationType.id == TypeIds.T_ConfiguredAnnotationNullable)
+						this.scope.problemReporter().nullAnnotationUnsupportedLocation(this.annotations[i]);
+					}
+				}
+			}
+		}
 //{ObjectTeams: check @Override annotation:
 		boolean hasOverrideAnnotation = (this.binding.tagBits & TagBits.AnnotationOverride) != 0;
 		if (isSourceRole()) {
@@ -1706,6 +1720,7 @@ public void resolve() {
 				this.scope.problemReporter().missingOverrideAnnotationForRole(this);
 		} // @Override on non-role types is detected by Annotation.resolveType
 // SH}
+
 		if ((this.bits & ASTNode.UndocumentedEmptyBlock) != 0) {
 			this.scope.problemReporter().undocumentedEmptyBlock(this.bodyStart-1, this.bodyEnd);
 		}

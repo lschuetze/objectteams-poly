@@ -14,6 +14,8 @@
  *     IBM Corporation - initial API and implementation
  *     Fraunhofer FIRST - extended API and implementation
  *     Technical University Berlin - extended API and implementation
+ *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
+ *                          Bug 409245 - [1.8][compiler] Type annotations dropped when call is routed through a synthetic bridge method
  *******************************************************************************/
 package org.eclipse.jdt.internal.eval;
 
@@ -79,21 +81,21 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 			if ((this.bits & NeedReceiverGenericCast) != 0) {
 				codeStream.checkcast(this.actualReceiverType);
 			}			
-			codeStream.recordPositionsFrom(pc, this.sourceStart);			
+			codeStream.recordPositionsFrom(pc, this.sourceStart);
 		}
 		// generate arguments
 		generateArguments(this.binding, this.arguments, currentScope, codeStream);
 		// actual message invocation
 		TypeBinding constantPoolDeclaringClass = CodeStream.getConstantPoolDeclaringClass(currentScope, codegenBinding, this.actualReceiverType, this.receiver.isImplicitThis());
 		if (isStatic) {
-			codeStream.invoke(Opcodes.OPC_invokestatic, codegenBinding, constantPoolDeclaringClass);
+			codeStream.invoke(Opcodes.OPC_invokestatic, codegenBinding, constantPoolDeclaringClass, this.typeArguments);
 		} else if( (this.receiver.isSuper()) || codegenBinding.isPrivate()){
-			codeStream.invoke(Opcodes.OPC_invokespecial, codegenBinding, constantPoolDeclaringClass);
-			} else {
+			codeStream.invoke(Opcodes.OPC_invokespecial, codegenBinding, constantPoolDeclaringClass, this.typeArguments);
+		} else {
 			if (constantPoolDeclaringClass.isInterface()) { // interface or annotation type
-				codeStream.invoke(Opcodes.OPC_invokeinterface, codegenBinding, constantPoolDeclaringClass);
-				} else {
-				codeStream.invoke(Opcodes.OPC_invokevirtual, codegenBinding, constantPoolDeclaringClass);
+				codeStream.invoke(Opcodes.OPC_invokeinterface, codegenBinding, constantPoolDeclaringClass, this.typeArguments);
+			} else {
+				codeStream.invoke(Opcodes.OPC_invokevirtual, codegenBinding, constantPoolDeclaringClass, this.typeArguments);
 			}
 		}
 	} else {
@@ -109,7 +111,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 			if ((this.bits & NeedReceiverGenericCast) != 0) {
 				codeStream.checkcast(this.actualReceiverType);
 			}			
-			codeStream.recordPositionsFrom(pc, this.sourceStart);			
+			codeStream.recordPositionsFrom(pc, this.sourceStart);
 		}
 		if (isStatic) {
 			// we need an object on the stack which is ignored for the method invocation
@@ -131,11 +133,11 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 				codeStream.aastore();
 				if (i < argsLength - 1) {
 					codeStream.dup();
-				}	
+				}
 			}
 		} else {
 			codeStream.generateInlinedValue(0);
-			codeStream.newArray(null, currentScope.createArrayType(currentScope.getType(TypeConstants.JAVA_LANG_OBJECT, 3), 1));			
+			codeStream.newArray(null, currentScope.createArrayType(currentScope.getType(TypeConstants.JAVA_LANG_OBJECT, 3), 1));
 		}
 		codeStream.invokeJavaLangReflectMethodInvoke();
 
@@ -171,7 +173,7 @@ public void generateCode(BlockScope currentScope, CodeStream codeStream, boolean
 			default :
 				codeStream.pop();
 		}
-	}	
+	}
 	codeStream.recordPositionsFrom(pc, (int)(this.nameSourcePosition >>> 32)); // highlight selector
 }
 public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo flowInfo) {
@@ -180,14 +182,14 @@ public void manageSyntheticAccessIfNecessary(BlockScope currentScope, FlowInfo f
 		// if method from parameterized type got found, use the original method at codegen time
 		MethodBinding codegenBinding = this.binding.original();
 		if (codegenBinding != this.binding) {
-	    // extra cast needed if method return type was type variable
+		    // extra cast needed if method return type was type variable
 		    if (codegenBinding.returnType.isTypeVariable()) {
 		        TypeVariableBinding variableReturnType = (TypeVariableBinding) codegenBinding.returnType;
-	        if (variableReturnType.firstBound != this.binding.returnType) { // no need for extra cast if same as first bound anyway
-			    this.valueCast = this.binding.returnType;
-	        }
-	    }
-	} 
+		        if (variableReturnType.firstBound != this.binding.returnType) { // no need for extra cast if same as first bound anyway
+				    this.valueCast = this.binding.returnType;
+		        }
+		    }
+		}
 	}
 }
 public TypeBinding resolveType(BlockScope scope) {
@@ -195,7 +197,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	// Base type promotion
 
 	this.constant = Constant.NotAConstant;
-	boolean receiverCast = false, argsContainCast = false; 
+	boolean receiverCast = false, argsContainCast = false;
 	if (this.receiver instanceof CastExpression) {
 		this.receiver.bits |= DisableUnnecessaryCastCheck; // will check later on
 		receiverCast = true;
@@ -203,8 +205,8 @@ public TypeBinding resolveType(BlockScope scope) {
 	this.actualReceiverType = this.receiver.resolveType(scope);
 	if (receiverCast && this.actualReceiverType != null) {
 		 // due to change of declaring class with receiver type, only identity cast should be notified
-		if (((CastExpression)this.receiver).expression.resolvedType == this.actualReceiverType) { 
-			scope.problemReporter().unnecessaryCast((CastExpression)this.receiver);		
+		if (((CastExpression)this.receiver).expression.resolvedType == this.actualReceiverType) {
+			scope.problemReporter().unnecessaryCast((CastExpression)this.receiver);
 		}
 	}
 	// resolve type arguments (for generic constructor call)
@@ -225,7 +227,7 @@ public TypeBinding resolveType(BlockScope scope) {
 	TypeBinding[] argumentTypes = Binding.NO_PARAMETERS;
 	boolean polyExpressionSeen = false;
 	if (this.arguments != null) {
-		boolean argHasError = false; // typeChecks all arguments 
+		boolean argHasError = false; // typeChecks all arguments
 		int length = this.arguments.length;
 		argumentTypes = new TypeBinding[length];
 		TypeBinding argumentType;
@@ -245,7 +247,7 @@ public TypeBinding resolveType(BlockScope scope) {
 			if(this.actualReceiverType instanceof ReferenceBinding) {
 				// record any selector match, for clients who may still need hint about possible method match
 				this.binding = scope.findMethod((ReferenceBinding)this.actualReceiverType, this.selector, new TypeBinding[]{}, this);
-			}			
+			}
 			return null;
 		}
 	}
@@ -260,22 +262,21 @@ public TypeBinding resolveType(BlockScope scope) {
 
 //{ObjectTeams:
     AnchorMapping anchorMapping = null;
-  try {
+  try  {
 	anchorMapping = beforeMethodLookup(argumentTypes, scope);
 //jwl}
-
-	this.binding = 
+	this.binding =
 		this.receiver.isImplicitThis()
 			? scope.getImplicitMethod(this.selector, argumentTypes, this)
-			: scope.getMethod(this.actualReceiverType, this.selector, argumentTypes, this); 
+			: scope.getMethod(this.actualReceiverType, this.selector, argumentTypes, this);
 //{ObjectTeams:
   } finally {
 	afterMethodLookup(scope, anchorMapping, argumentTypes, this.binding.returnType);  
 	if (anchorMapping != null)
 	   	AnchorMapping.removeCurrentMapping(anchorMapping);
   }
-//jwl} 
-
+//jwl}
+	
 	if (polyExpressionSeen && polyExpressionsHaveErrors(scope, this.binding, this.arguments, argumentTypes))
 		return null;
 	
@@ -294,23 +295,22 @@ public TypeBinding resolveType(BlockScope scope) {
 				scope.problemReporter().invalidMethod(this, this.binding);
 				return null;
 			}
-			CodeSnippetScope localScope = new CodeSnippetScope(scope);			
+			CodeSnippetScope localScope = new CodeSnippetScope(scope);
 //{ObjectTeams:
 			AnchorMapping privateAnchorMapping = null;
 			MethodBinding privateBinding = null;
 		  try  {
 			privateAnchorMapping = beforeMethodLookup(argumentTypes, localScope);
-// jwl}
-			privateBinding = 
+//jwl}
+			privateBinding =
 				this.receiver instanceof CodeSnippetThisReference && ((CodeSnippetThisReference) this.receiver).isImplicit
 					? localScope.getImplicitMethod((ReferenceBinding)this.delegateThis.type, this.selector, argumentTypes, this)
-					: localScope.getMethod(this.delegateThis.type, this.selector, argumentTypes, this); 
+					: localScope.getMethod(this.delegateThis.type, this.selector, argumentTypes, this);
 //{ObjectTeams:
-		  } finally {
+	      } finally {
 			afterMethodLookup(localScope, privateAnchorMapping, argumentTypes, this.binding.returnType);
-		  }
-// jwl} 
-
+	      }
+//jwl}
 			if (!privateBinding.isValidBinding()) {
 				if (this.binding.declaringClass == null) {
 					if (this.actualReceiverType instanceof ReferenceBinding) {
@@ -351,9 +351,9 @@ public TypeBinding resolveType(BlockScope scope) {
 			this.receiver.computeConversion(scope, this.actualReceiverType, this.actualReceiverType);
 			if (this.actualReceiverType != oldReceiverType && this.receiver.postConversionType(scope) != this.actualReceiverType) { // record need for explicit cast at codegen since receiver could not handle it
 				this.bits |= NeedReceiverGenericCast;
-				}
-			}
+			}			
 		}
+	}
 	if (checkInvocationArguments(scope, this.receiver, this.actualReceiverType, this.binding, this.arguments, argumentTypes, argsContainCast, this)) {
 		this.bits |= ASTNode.Unchecked;
 	}
@@ -370,8 +370,8 @@ public TypeBinding resolveType(BlockScope scope) {
 
 	// from 1.5 compliance on, array#clone() returns the array type (but binding still shows Object)
 	if (this.actualReceiverType.isArrayType()
-			&& this.binding.parameters == Binding.NO_PARAMETERS 
-			&& scope.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_5 
+			&& this.binding.parameters == Binding.NO_PARAMETERS
+			&& scope.compilerOptions().complianceLevel >= ClassFileConstants.JDK1_5
 			&& CharOperation.equals(this.binding.selector, CLONE)) {
 		this.resolvedType = this.actualReceiverType;
 	} else {

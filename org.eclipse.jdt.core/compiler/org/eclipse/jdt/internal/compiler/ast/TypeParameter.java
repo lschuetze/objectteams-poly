@@ -12,6 +12,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
+ *     Stephan Herrmann - Contribution for
+ *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -130,6 +132,8 @@ public class TypeParameter extends AbstractVariableDeclaration {
 		BlockScope resolutionScope = Scope.typeAnnotationsResolutionScope(scope);
 		if (resolutionScope != null) {
 			resolveAnnotations(resolutionScope, this.annotations, new Annotation.TypeUseBinding(Binding.TYPE_PARAMETER));
+			if (this.binding != null && this.binding.isValidBinding())
+				this.binding.evaluateNullAnnotations(this.annotations);
 		}	
 	}
 	/* (non-Javadoc)

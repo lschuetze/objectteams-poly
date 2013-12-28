@@ -15,6 +15,9 @@
  *     Stephan Herrmann - Contribution for
  *								bug 392862 - [1.8][compiler][null] Evaluate null annotations on array types
  *								bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
+ *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *								Bug 415291 - [1.8][null] differentiate type incompatibilities due to null annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -23,6 +26,7 @@ import java.util.List;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ast.ASTNode;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.TypeAnalyzer;
 import org.eclipse.objectteams.otdt.internal.core.compiler.util.RoleTypeCreator.TypeArgumentUpdater;
@@ -59,6 +63,7 @@ public ArrayBinding(TypeBinding type, int dimensions, LookupEnvironment environm
 	if (nullTagBitsPerDimension != null) {
 		this.tagBits |= nullTagBitsPerDimension[0]; // outer-most dimension
 		this.nullTagBitsPerDimension = nullTagBitsPerDimension;
+		this.tagBits |= TagBits.HasNullTypeAnnotation;
 	}
 }
 
@@ -158,8 +163,8 @@ public TypeBinding elementsType() {
 		System.arraycopy(this.nullTagBitsPerDimension, 1, nullTagBitsSub = new long[len], 0, len);
 	}
 	if (this.dimensions == 1) {
-		if (nullTagBitsSub != null && nullTagBitsSub[0] != 0L && this.leafComponentType instanceof ReferenceBinding)
-			return this.environment.createParameterizedType((ReferenceBinding) this.leafComponentType, null, nullTagBitsSub[0], null);
+		if (nullTagBitsSub != null && nullTagBitsSub[0] != 0L)
+			return this.environment.createAnnotatedType(this.leafComponentType, nullTagBitsSub[0]);
 		return this.leafComponentType;
 	}
 	return this.environment.createArrayType(this.leafComponentType, this.dimensions - 1, nullTagBitsSub);
@@ -253,7 +258,7 @@ public TypeBinding leafComponentType(){
 	return this.leafComponentType;
 }
 
-public char[] nullAnnotatedReadableName(LookupEnvironment env, boolean shortNames) /* java.lang.Object @o.e.j.a.NonNull[] */ {
+public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNames) /* java.lang.Object @o.e.j.a.NonNull[] */ {
 	if (this.nullTagBitsPerDimension == null)
 		return shortNames ? shortReadableName() : readableName();
 	char[][] brackets = new char[this.dimensions][];
@@ -261,9 +266,9 @@ public char[] nullAnnotatedReadableName(LookupEnvironment env, boolean shortName
 		if ((this.nullTagBitsPerDimension[i] & TagBits.AnnotationNullMASK) != 0) {
 			char[][] fqAnnotationName;
 			if ((this.nullTagBitsPerDimension[i] & TagBits.AnnotationNonNull) != 0)
-				fqAnnotationName = env.getNonNullAnnotationName();
+				fqAnnotationName = options.nonNullAnnotationName;
 			else
-				fqAnnotationName = env.getNullableAnnotationName();
+				fqAnnotationName = options.nullableAnnotationName;
 			char[] annotationName = shortNames 
 										? fqAnnotationName[fqAnnotationName.length-1] 
 										: CharOperation.concatWith(fqAnnotationName, '.');
@@ -346,5 +351,8 @@ public TypeBinding maybeWrapRoleType(ASTNode typedNode, TypeArgumentUpdater upda
 // SH}
 public String toString() {
 	return this.leafComponentType != null ? debugName() : "NULL TYPE ARRAY"; //$NON-NLS-1$
+}
+public TypeBinding unannotated() {
+	return this.environment.createArrayType(this.leafComponentType, this.dimensions);
 }
 }

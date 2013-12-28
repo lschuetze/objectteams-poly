@@ -17,6 +17,7 @@
  *	   Stephan Herrmann - Contribution for
  *							bug 402028 - [1.8][compiler] null analysis for reference expressions 
  *							bug 404649 - [1.8][compiler] detect illegal reference to indirect or redundant super via I.super.m() syntax
+ *							Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis 
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contribution for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
@@ -40,6 +41,7 @@ import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.InvocationSite;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.NestedTypeBinding;
+import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.PolyTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ProblemReasons;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
@@ -116,7 +118,12 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 			if (this.isConstructorReference()) {
 				ReferenceBinding[] enclosingInstances = Binding.UNINITIALIZED_REFERENCE_TYPES;
 				if (this.receiverType.isNestedType()) {
-					NestedTypeBinding nestedType = (NestedTypeBinding) this.receiverType;
+					NestedTypeBinding nestedType = null;
+					if (this.receiverType instanceof ParameterizedTypeBinding) {
+						nestedType = (NestedTypeBinding)((ParameterizedTypeBinding) this.receiverType).genericType();
+					} else {
+						nestedType = (NestedTypeBinding) this.receiverType;
+					}
 					if ((enclosingInstances = nestedType.syntheticEnclosingInstanceTypes()) != null) {
 						int length = enclosingInstances.length;
 						argumentsSize = length;
@@ -425,6 +432,9 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         TypeBinding [] methodExceptions = this.binding.thrownExceptions;
         TypeBinding [] kosherExceptions = this.descriptor.thrownExceptions;
         next: for (int i = 0, iMax = methodExceptions.length; i < iMax; i++) {
+        	if (methodExceptions[i].isUncheckedException(true)) {
+        		continue next;
+    		}
         	for (int j = 0, jMax = kosherExceptions.length; j < jMax; j++) {
         		if (methodExceptions[i].isCompatibleWith(kosherExceptions[j], scope))
         			continue next;
@@ -434,25 +444,25 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         if (scope.compilerOptions().isAnnotationBasedNullAnalysisEnabled) {
         	int len = this.descriptor.parameters.length;
     		for (int i = 0; i < len; i++) {
-    			Boolean declared = this.descriptor.parameterNonNullness == null ? null : this.descriptor.parameterNonNullness[i];
-    			Boolean implemented = this.binding.parameterNonNullness == null ? null : this.binding.parameterNonNullness[i];
-    			if (declared == Boolean.FALSE) { // promise to accept null
-    				if (implemented != Boolean.FALSE) {
-    					char[][] requiredAnnot = implemented == null ? null : scope.environment().getNonNullAnnotationName();
+    			long declared = this.descriptor.parameters[i].tagBits & TagBits.AnnotationNullMASK;
+    			long implemented = this.binding.parameters[i].tagBits & TagBits.AnnotationNullMASK;
+    			if (declared == TagBits.AnnotationNullable) { // promise to accept null
+    				if (implemented != TagBits.AnnotationNullable) {
+    					char[][] requiredAnnot = implemented == 0L ? null : scope.environment().getNonNullAnnotationName();
     					scope.problemReporter().parameterLackingNullableAnnotation(this, this.descriptor, i, 
     							scope.environment().getNullableAnnotationName(),
     							requiredAnnot, this.binding.parameters[i]);
     				}
-    			} else if (declared == null) {
-    				if (implemented == Boolean.TRUE) {
+    			} else if (declared == 0L) {
+    				if (implemented == TagBits.AnnotationNonNull) {
     					scope.problemReporter().parameterRequiresNonnull(this, this.descriptor, i,
     							scope.environment().getNonNullAnnotationName(), this.binding.parameters[i]);
     				}
     			}
     		}
-        	if ((this.descriptor.tagBits & TagBits.AnnotationNonNull) != 0) {
-        		if ((this.binding.tagBits & TagBits.AnnotationNonNull) == 0) {
-        			char[][] providedAnnotationName = ((this.binding.tagBits & TagBits.AnnotationNullable) != 0) ?
+        	if ((this.descriptor.returnType.tagBits & TagBits.AnnotationNonNull) != 0) {
+        		if ((this.binding.returnType.tagBits & TagBits.AnnotationNonNull) == 0) {
+        			char[][] providedAnnotationName = ((this.binding.returnType.tagBits & TagBits.AnnotationNullable) != 0) ?
         					scope.environment().getNullableAnnotationName() : null;
         			scope.problemReporter().illegalReturnRedefinition(this, this.descriptor,
         					scope.environment().getNonNullAnnotationName(),
@@ -571,6 +581,8 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		try {
 			this.binding = null;
 			resolveType(this.enclosingScope);
+		} catch (IncongruentLambdaException e) {
+			return false;
 		} finally {
 			this.enclosingScope.problemReporter().switchErrorHandlingPolicy(oldPolicy);
 			isCompatible = this.binding != null && this.binding.isValidBinding();

@@ -21,6 +21,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
+import java.io.IOException;
 import java.util.Map;
 
 import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
@@ -1249,7 +1250,7 @@ public void test037() {
 			"----------\n" + 
 			"3. ERROR in X.java (at line 8)\n" + 
 			"	System.out.println(\"Constructor Reference in illegal context: \" + String::new);\n" + 
-			"	                                                                  ^^^^^^^^^^^^\n" + 
+			"	                                                                  ^^^^^^^^^^^\n" + 
 			"The target type of this expression must be a functional interface\n" + 
 			"----------\n" + 
 			"4. ERROR in X.java (at line 10)\n" + 
@@ -4261,7 +4262,7 @@ public void test384750m() {
 					"----------\n" + 
 					"1. ERROR in X.java (at line 12)\n" + 
 					"	I i3 = ArrayList<Integer>::new;\n" + 
-					"	       ^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+					"	       ^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 					"The constructed object of type ArrayList<Integer> is incompatible with the descriptor\'s return type: List<String>\n" + 
 					"----------\n" + 
 					"2. ERROR in X.java (at line 13)\n" + 
@@ -4304,12 +4305,12 @@ public void test384750n() {
 					"----------\n" + 
 					"1. ERROR in X.java (at line 7)\n" + 
 					"	I i1 = ArrayList<String>[]::new;\n" + 
-					"	       ^^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
+					"	       ^^^^^^^^^^^^^^^^^^^^^^^^\n" + 
 					"Cannot create a generic array of ArrayList<String>\n" + 
 					"----------\n" + 
 					"2. ERROR in X.java (at line 8)\n" + 
 					"	I i2 = List<String>[]::new;\n" + 
-					"	       ^^^^^^^^^^^^^^^^^^^^\n" + 
+					"	       ^^^^^^^^^^^^^^^^^^^\n" + 
 					"Cannot create a generic array of List<String>\n" + 
 					"----------\n");
 }
@@ -4366,27 +4367,27 @@ public void test384750o() {
 					"----------\n" + 
 					"1. ERROR in X.java (at line 34)\n" + 
 					"	I i = List[]::new;\n" + 
-					"	      ^^^^^^^^^^^^\n" + 
+					"	      ^^^^^^^^^^^\n" + 
 					"Incompatible parameter list for array constructor. Expected (int), but found ()\n" + 
 					"----------\n" + 
 					"2. ERROR in X.java (at line 35)\n" + 
 					"	J j = ArrayList[]::new;\n" + 
-					"	      ^^^^^^^^^^^^^^^^^\n" + 
+					"	      ^^^^^^^^^^^^^^^^\n" + 
 					"Incompatible parameter list for array constructor. Expected (int), but found (long)\n" + 
 					"----------\n" + 
 					"3. ERROR in X.java (at line 36)\n" + 
 					"	K k = ArrayList[]::new;\n" + 
-					"	      ^^^^^^^^^^^^^^^^^\n" + 
+					"	      ^^^^^^^^^^^^^^^^\n" + 
 					"Incompatible parameter list for array constructor. Expected (int), but found (String, long)\n" + 
 					"----------\n" + 
 					"4. ERROR in X.java (at line 42)\n" + 
 					"	Q q = ArrayList[]::new;\n" + 
-					"	      ^^^^^^^^^^^^^^^^^\n" + 
+					"	      ^^^^^^^^^^^^^^^^\n" + 
 					"Incompatible parameter list for array constructor. Expected (int), but found (Float)\n" + 
 					"----------\n" + 
 					"5. ERROR in X.java (at line 43)\n" + 
 					"	R r = ArrayList[][][]::new;\n" + 
-					"	      ^^^^^^^^^^^^^^^^^^^^^\n" + 
+					"	      ^^^^^^^^^^^^^^^^^^^^\n" + 
 					"Constructed array ArrayList[][][] cannot be assigned to List<String>[] as required in the interface descriptor  \n" + 
 					"----------\n");
 }
@@ -4630,17 +4631,17 @@ public void test384750w() {
 					"----------\n" + 
 					"1. ERROR in X.java (at line 23)\n" + 
 					"	J j = X<Integer>::new;\n" + 
-					"	      ^^^^^^^^^^^^^^^^\n" + 
+					"	      ^^^^^^^^^^^^^^^\n" + 
 					"The constructed object of type X<Integer> is incompatible with the descriptor\'s return type: X<String>\n" + 
 					"----------\n" + 
 					"2. ERROR in X.java (at line 24)\n" + 
 					"	K k = X::new;\n" + 
-					"	      ^^^^^^^\n" + 
+					"	      ^^^^^^\n" + 
 					"The target type of this expression must be a functional interface\n" + 
 					"----------\n" + 
 					"3. ERROR in X.java (at line 26)\n" + 
 					"	M m = X<String>::new;\n" + 
-					"	      ^^^^^^^^^^^^^^^\n" + 
+					"	      ^^^^^^^^^^^^^^\n" + 
 					"The type X<String> does not define X(String) that is applicable here\n" + 
 					"----------\n");
 }
@@ -4677,22 +4678,22 @@ public void test384750x() {
 					"----------\n" + 
 					"1. ERROR in X.java (at line 19)\n" + 
 					"	I i = X::new;\n" + 
-					"	      ^^^^^^^\n" + 
+					"	      ^^^^^^\n" + 
 					"Unhandled exception type IOException\n" + 
 					"----------\n" + 
 					"2. ERROR in X.java (at line 19)\n" + 
 					"	I i = X::new;\n" + 
-					"	      ^^^^^^^\n" + 
+					"	      ^^^^^^\n" + 
 					"Unhandled exception type FileNotFoundException\n" + 
 					"----------\n" + 
 					"3. ERROR in X.java (at line 20)\n" + 
 					"	J j = X<Integer>::new;\n" + 
-					"	      ^^^^^^^^^^^^^^^^\n" + 
+					"	      ^^^^^^^^^^^^^^^\n" + 
 					"The constructed object of type X<Integer> is incompatible with the descriptor\'s return type: X<String>\n" + 
 					"----------\n" + 
 					"4. ERROR in X.java (at line 21)\n" + 
 					"	K k = X::new;\n" + 
-					"	      ^^^^^^^\n" + 
+					"	      ^^^^^^\n" + 
 					"Unhandled exception type IOException\n" + 
 					"----------\n");
 }
@@ -6408,7 +6409,7 @@ public void test406588() {
 			"----------\n" + 
 			"1. ERROR in X.java (at line 10)\n" + 
 			"	this(Z::new);\n" + 
-			"	     ^^^^^^^\n" + 
+			"	     ^^^^^^\n" + 
 			"No enclosing instance of the type X.Y is accessible in scope\n" + 
 			"----------\n");
 }
@@ -6431,7 +6432,7 @@ public void test406586() {
 			"----------\n" + 
 			"1. ERROR in X.java (at line 8)\n" + 
 			"	I i = Y::new;\n" + 
-			"	      ^^^^^^^\n" + 
+			"	      ^^^^^^\n" + 
 			"No enclosing instance of the type X is accessible in scope\n" + 
 			"----------\n");
 }
@@ -6521,12 +6522,12 @@ public void test406773() {
 			"----------\n" + 
 			"2. WARNING in X.java (at line 10)\n" + 
 			"	I i = X::new;\n" + 
-			"	      ^^^^^^^\n" + 
+			"	      ^^^^^^\n" + 
 			"Access to enclosing constructor X(int) is emulated by a synthetic accessor method\n" + 
 			"----------\n" + 
 			"3. ERROR in X.java (at line 12)\n" + 
 			"	i = Y::new;\n" + 
-			"	    ^^^^^^^\n" + 
+			"	    ^^^^^^\n" + 
 			"No enclosing instance of the type X is accessible in scope\n" + 
 			"----------\n",
 			null /* no extra class libraries */,
@@ -6660,6 +6661,220 @@ public void test406859d() {
 		null /* no extra class libraries */,
 		true /* flush output directory */,
 		compilerOptions /* custom options */
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=410114, [1.8] CCE when trying to parse method reference expression with inappropriate type arguments
+public void test410114() throws IOException {
+	String source = "interface I {\n" +
+					"    void foo(Y<String> y);\n" +
+					"}\n" +
+					"public class Y<T> {\n" +
+					"    class Z<K> {\n" +
+					"        Z(Y<String> y) {\n" +
+					"            System.out.println(\"Y<T>.Z<K>:: new\");\n" +
+					"        }\n" +
+					"        void bar() {\n" +
+					"            I i = Y<String>.Z<Integer>::<String> new;\n" +
+					"            i.foo(new Y<String>());\n" +
+					"            i = Y<String>.Z<Integer>:: new;\n" +
+					"            i.foo(new Y<String>());\n" +
+					"            i = Y.Z:: new;\n" +
+					"            i.foo(new Y<String>());\n" +
+					"        }\n" +
+					"    }\n" +
+					"}\n";
+	this.runNegativeTest(
+			new String[]{"Y.java",
+						source},
+						"----------\n" + 
+						"1. WARNING in Y.java (at line 10)\n" + 
+						"	I i = Y<String>.Z<Integer>::<String> new;\n" + 
+						"	                             ^^^^^^\n" + 
+						"Unused type arguments for the non generic constructor Y<String>.Z<Integer>(Y<String>) of type Y<String>.Z<Integer>; it should not be parameterized with arguments <String>\n" + 
+						"----------\n" + 
+						"2. WARNING in Y.java (at line 14)\n" + 
+						"	i = Y.Z:: new;\n" + 
+						"	    ^^^^^^^^^\n" + 
+						"Type safety: The constructor Y.Z(Y) belongs to the raw type Y.Z. References to generic type Y<T>.Z<K> should be parameterized\n" + 
+						"----------\n");
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=412453,
+//[1.8][compiler] Stackoverflow when compiling LazySeq
+public void test412453() {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"import java.util.AbstractList;\n" +
+				"import java.util.Comparator;\n" +
+				"import java.util.Optional;\n" +
+				"\n" +
+				"import java.util.function.*;\n" +
+				"\n" +
+				"abstract class Y<E> extends AbstractList<E> {\n" +
+				"	public <C extends Comparable<? super C>> Optional<E> minBy(Function<E, C> propertyFun) { return null;} \n" +
+				"}\n" +
+				"\n" +
+				"public class X {\n" +
+				"	public void foo(Y<Integer> empty) throws Exception {\n" +
+				"		final Optional<Integer> min = empty.minBy((a, b) -> a - b);\n" +
+				"	}\n" +
+				"}\n" +
+				"\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 13)\n" + 
+		"	final Optional<Integer> min = empty.minBy((a, b) -> a - b);\n" + 
+		"	                                          ^^^^^^^^^^^^^^^\n" + 
+		"Lambda expression\'s signature does not match the signature of the functional interface method\n" + 
+		"----------\n",
+		null /* no extra class libraries */,
+		true /* flush output directory */,
+		null /* custom options */
+	);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=412284,
+//[1.8][compiler] [1.8][compiler] Inspect all casts to/instanceof AbstractMethodDeclaration to eliminate potential CCEs
+public void test412284a() {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"import java.io.IOException;\n" +
+				"interface I { void foo() throws IOException; }\n" +
+				"public class X {\n" +
+				" void bar() {\n" +
+				"	 I i = () -> {\n" +
+				"		 try {\n" +
+				"			 throw new IOException();\n" +
+				"		 } catch (IOException e) {			 \n" +
+				"		 } finally {\n" +
+				"			 i.foo();\n" +
+				"		 }\n" +
+				"	 };\n" +
+				" }\n" +
+				"}\n"
+		},
+
+		"----------\n" + 
+		"1. ERROR in X.java (at line 10)\n" + 
+		"	i.foo();\n" + 
+		"	^\n" + 
+		"The local variable i may not have been initialized\n" + 
+		"----------\n",
+		null /* no extra class libraries */,
+		true /* flush output directory */,
+		null /* custom options */
+	);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=412284,
+//[1.8][compiler] [1.8][compiler] Inspect all casts to/instanceof AbstractMethodDeclaration to eliminate potential CCEs
+public void test412284b() {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"interface I { void foo();}\n" + 
+				"class X { \n" +
+				"   final int t;\n" +
+				"   X(){\n" +
+				"       I x = () ->  {\n" +
+				"    	 try {\n" +
+				"           t = 3;\n" +
+				"         } catch (Exception e) {\n" +
+				"           t = 4;\n" +
+				"         }\n" +
+				"      };\n" +
+				"  }\n" +
+				"}\n"
+		},
+
+		"----------\n" + 
+		"1. ERROR in X.java (at line 4)\n" + 
+		"	X(){\n" + 
+		"	^^^\n" + 
+		"The blank final field t may not have been initialized\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 7)\n" + 
+		"	t = 3;\n" + 
+		"	^\n" + 
+		"The final field X.t cannot be assigned\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 9)\n" + 
+		"	t = 4;\n" + 
+		"	^\n" + 
+		"The final field X.t cannot be assigned\n" + 
+		"----------\n",
+		null /* no extra class libraries */,
+		true /* flush output directory */,
+		null /* custom options */
+	);
+}
+//https://bugs.eclipse.org/bugs/show_bug.cgi?id=412284,
+//[1.8][compiler] [1.8][compiler] Inspect all casts to/instanceof AbstractMethodDeclaration to eliminate potential CCEs
+public void test412284c() {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"interface I { void foo();}\n" + 
+				"class X { \n" +
+				"   final int t;\n" +
+				"   X(){\n" +
+				"       I x = () ->  {\n" +
+				"    	 try {\n" +
+				"           t += 3;\n" +
+				"         } catch (Exception e) {\n" +
+				"           t += 4;\n" +
+				"         }\n" +
+				"      };\n" +
+				"  }\n" +
+				"}\n"
+		},
+
+		"----------\n" + 
+		"1. ERROR in X.java (at line 4)\n" + 
+		"	X(){\n" + 
+		"	^^^\n" + 
+		"The blank final field t may not have been initialized\n" + 
+		"----------\n" + 
+		"2. ERROR in X.java (at line 7)\n" + 
+		"	t += 3;\n" + 
+		"	^\n" + 
+		"The final field X.t cannot be assigned\n" + 
+		"----------\n" + 
+		"3. ERROR in X.java (at line 9)\n" + 
+		"	t += 4;\n" + 
+		"	^\n" + 
+		"The final field X.t cannot be assigned\n" + 
+		"----------\n",
+		null /* no extra class libraries */,
+		true /* flush output directory */,
+		null /* custom options */
+	);
+}
+// https://bugs.eclipse.org/bugs/show_bug.cgi?id=412650
+// [1.8][compiler]Incongruent Lambda Exception thrown
+public void test412650() {
+	this.runNegativeTest(
+		new String[] {
+				"X.java",
+				"interface I {\n" +
+				"	String sam();\n" +
+				"}\n" +
+				"public class X {\n" +
+				"	static String foo(I i) { return \"\"; }\n" +
+				"	public static void main(String[] args) {\n" +
+				"		foo(() -> foo(X::getInt));\n" +
+				"	}\n" +
+				"	static Integer getInt() { return 0; }\n" +
+				"}\n"
+		},
+		"----------\n" + 
+		"1. ERROR in X.java (at line 7)\n" +
+		"	foo(() -> foo(X::getInt));\n" +
+		"	              ^^^^^^^^^\n" +
+		"The type of getInt() from the type X is Integer, this is incompatible with the descriptor's return type: String\n" + 
+		"----------\n",
+		null /* no extra class libraries */,
+		true /* flush output directory */,
+		null /* custom options */
 	);
 }
 public static Class testClass() {

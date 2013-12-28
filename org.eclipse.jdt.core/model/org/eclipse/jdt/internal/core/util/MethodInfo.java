@@ -15,6 +15,8 @@
  *     Technical University Berlin - extended API and implementation
  *        Andy Clement - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
+ *        Jesper Steen Moeller - Contribution for
+ *                          Bug 406973 - [compiler] Parse MethodParameters attribute
  *******************************************************************************/
 package org.eclipse.jdt.internal.core.util;
 
@@ -127,6 +129,8 @@ public class MethodInfo extends ClassFileStruct implements IMethodInfo {
 				this.attributes[attributesIndex++] = new RuntimeVisibleTypeAnnotationsAttribute(classFileBytes, constantPool, offset + readOffset);
 			} else if (equals(attributeName, IAttributeNamesConstants.RUNTIME_INVISIBLE_TYPE_ANNOTATIONS)) {
 				this.attributes[attributesIndex++] = new RuntimeInvisibleTypeAnnotationsAttribute(classFileBytes, constantPool, offset + readOffset);
+			} else if (equals(attributeName, IAttributeNamesConstants.METHOD_PARAMETERS)) {
+				this.attributes[attributesIndex++] = new MethodParametersAttribute(classFileBytes, constantPool, offset + readOffset);
 			} else {
 //{ObjectTeams: OT-specific bytecode attribute
 				if (equals(attributeName, IOTConstants.ROLECLASS_METHOD_MODIFIERS_NAME))

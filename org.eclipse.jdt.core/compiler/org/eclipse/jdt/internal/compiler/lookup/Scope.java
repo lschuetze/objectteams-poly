@@ -3627,7 +3627,9 @@ public abstract class Scope {
 				MethodScope methodScope = methodScope();
 				if (!methodScope.isInsideInitializer()){
 					// check method modifiers to see if deprecated
-					MethodBinding context = ((AbstractMethodDeclaration)methodScope.referenceContext).binding;
+					ReferenceContext referenceContext = methodScope.referenceContext;
+					MethodBinding context = referenceContext instanceof AbstractMethodDeclaration ?
+							((AbstractMethodDeclaration)referenceContext).binding : ((LambdaExpression)referenceContext).binding;
 					if (context != null && context.isViewedAsDeprecated())
 						return true;
 				} else if (methodScope.initializedField != null && methodScope.initializedField.isViewedAsDeprecated()) {
@@ -4948,15 +4950,11 @@ public abstract class Scope {
 	}
 
 	public void validateNullAnnotation(long tagBits, TypeReference typeRef, Annotation[] annotations) {
-		long nullAnnotationTagBit = tagBits & (TagBits.AnnotationNonNull|TagBits.AnnotationNullable);
+		long nullAnnotationTagBit = tagBits & (TagBits.AnnotationNullMASK);
 		if (nullAnnotationTagBit != 0) {
 			TypeBinding type = typeRef.resolvedType;
 			if (type != null && type.isBaseType()) {
-				char[][] annotationName = (nullAnnotationTagBit == TagBits.AnnotationNonNull)
-						? environment().getNonNullAnnotationName()
-						: environment().getNullableAnnotationName();
-				problemReporter().illegalAnnotationForBaseType(typeRef, annotations,
-						annotationName[annotationName.length-1], nullAnnotationTagBit);
+				problemReporter().illegalAnnotationForBaseType(typeRef, annotations, nullAnnotationTagBit);
 			}
 		}
 	}
