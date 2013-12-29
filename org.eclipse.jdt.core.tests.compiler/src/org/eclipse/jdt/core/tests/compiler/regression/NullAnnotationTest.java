@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     Stephan Herrmann - initial API and implementation
  *******************************************************************************/
@@ -110,6 +114,9 @@ protected void setUp() throws Exception {
 	super.setUp();
 	if (this.complianceLevel >= ClassFileConstants.JDK1_8)
 		this.TEST_JAR_SUFFIX = "_1.8.jar";
+	if (this.LIBS == null) {
+		this.LIBS = getLibsWithNullAnnotations(this.complianceLevel);
+	}
 }
 
 // a nullable argument is dereferenced without a check
