@@ -50,11 +50,8 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
-import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
-import org.eclipse.jdt.core.search.SearchRequestor;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jface.action.IStatusLineManager;
@@ -74,7 +71,7 @@ import org.eclipse.objectteams.otdt.core.IRoleType;
 import org.eclipse.objectteams.otdt.core.OTModelManager;
 import org.eclipse.objectteams.otdt.core.ext.IMarkableJavaElement;
 import org.eclipse.objectteams.otdt.core.ext.MarkableFactory;
-import org.eclipse.objectteams.otdt.core.search.OTSearchEngine;
+import org.eclipse.objectteams.otdt.core.search.OTSearchHelper;
 import org.eclipse.objectteams.otdt.internal.ui.preferences.GeneralPreferences;
 import org.eclipse.objectteams.otdt.ui.OTDTUIPlugin;
 import org.eclipse.osgi.util.NLS;
@@ -306,7 +303,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 		    // ==== role bindings: ====
 		    IJavaProject[] projects = target.getProjects();
 		    Set<IType> allTypes = target.getAllTypes(projects, monitor); // 10 ticks
-		    Map<IMember, Set<IType>> playedByMap = searchPlayedByBindings(allTypes, projects, new MySubProgressMonitor(monitor, 20));
+		    Map<IMember, Set<IType>> playedByMap = OTSearchHelper.searchPlayedByBindings(allTypes, projects, new MySubProgressMonitor(monitor, 20));
 			if (playedByMap == null || playedByMap.size() == 0)
 				return; // no base types or cancelled
 
@@ -368,7 +365,7 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 			    // find direct roles:
 			    ArrayList<IType> allTypes = new ArrayList<IType>(1);
 			    allTypes.add((IType)member.getAncestor(IJavaElement.TYPE)); // TODO(SH): could be IOTType?
-			    Map<IMember, Set<IType>> playedByMap = searchPlayedByBindings(allTypes,
+			    Map<IMember, Set<IType>> playedByMap = OTSearchHelper.searchPlayedByBindings(allTypes,
 			    															  new IJavaProject[]{member.getJavaProject()}, 
 			    															  new MySubProgressMonitor(monitor, 20));
 			    if (playedByMap == null || playedByMap.isEmpty())
@@ -540,74 +537,6 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
     }
     
     /**
-     * Find all playedBy bindings within a given set of projects refering to one of baseTypes as its baseclass.
-     * 
-     * @param baseTypes 
-     * @param projects
-     * @param monitor
-     * @return a map indexed by base types containing sets of role types bound to the given base type.
-     * @throws CoreException
-     */
-    private Map<IMember, Set<IType>> searchPlayedByBindings(Collection<IType> baseTypes, IJavaProject[] projects, MySubProgressMonitor monitor)
-    {
-        if (baseTypes == null || baseTypes.size() == 0) {
-            monitor.doneNothing();
-            return null;
-        }
-        
-        OTSearchEngine engine = new OTSearchEngine();
-        IJavaSearchScope searchScope = OTSearchEngine.createOTSearchScope(projects, false);
-        final Map<IMember, Set<IType>> resultMap = new HashMap<IMember, Set<IType>>();
-
-        try {
-	        monitor.beginTask(OTDTUIPlugin.getResourceString("searching role types"), baseTypes.size()); //$NON-NLS-1$
-	        
-	        for (final IType baseType : baseTypes)
-	        {
-	        	if (monitor.isCanceled()) return null;
-	        	try
-	        	{
-		            IProgressMonitor searchMonitor = new SubProgressMonitor(monitor, 1);
-		            if (!baseType.exists()) // ensure it's 'open'
-		                continue;
-		            if (baseType.isEnum() || baseType.isAnnotation())
-		            	continue; // no callin-to-enum/annot 
-			        SearchPattern pattern = SearchPattern.createPattern(baseType, IJavaSearchConstants.PLAYEDBY_REFERENCES);
-			        if (pattern == null)
-			            OTDTUIPlugin.getDefault().getLog().log(new Status(Status.ERROR, OTDTUIPlugin.UIPLUGIN_ID, "Error creating pattern")); //$NON-NLS-1$
-			        else
-			        	engine.search(
-	                        pattern, 
-	                        searchScope, 
-	                        new SearchRequestor() {
-			                    public void acceptSearchMatch(SearchMatch match)
-			                            throws CoreException
-			                    {
-			                        Object element = match.getElement();
-			                        if (element instanceof IType)
-			                        {
-			                        	// FIXME(SH): check: if mapping is a role, baseType must be conform to its baseclass 
-			                            IType mapping = (IType) element;
-			                            addToMapOfSets(resultMap, baseType, mapping);
-			                        }
-			                    }
-	                        },
-	                        searchMonitor);
-	            }
-	            catch (CoreException ex)
-	            {
-	            	OTDTUIPlugin.getDefault().getLog().log(new Status(Status.ERROR, OTDTUIPlugin.UIPLUGIN_ID, "Error finding playedBy bindings", ex)); //$NON-NLS-1$
-	            }
-	        }
-        }
-        finally {
-            monitor.done();
-        }
-        
-        return resultMap;
-    }
-
-    /**
      * Search all callin bindings within allRoleTypes mentioning one of baseMethods as a base method.
      * 
      * @param baseMembers   base methods and fields of interest
@@ -644,19 +573,19 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
 						ICallinMapping callinMapping = (ICallinMapping) mapping;
 							for (IMethod baseMethod : callinMapping.getBoundBaseMethods())
 								if (baseMembers.contains(baseMethod)) // TODO(SH): would comparison of resources suffice??
-							    	addToMapOfSets(callinMap, baseMethod, mapping);
+							    	OTSearchHelper.addToMapOfSets(callinMap, baseMethod, mapping);
 					}
 					else if (mapping.getElementType() == IOTJavaElement.CALLOUT_MAPPING) {
 						ICalloutMapping calloutMapping = (ICalloutMapping) mapping;
 						IMethod baseMethod = calloutMapping.getBoundBaseMethod();
 						if (baseMembers.contains(baseMethod) && !isVisibleFor(baseMethod, roleType))
-					    	addToMapOfSets(calloutMap, baseMethod, mapping);
+					    	OTSearchHelper.addToMapOfSets(calloutMap, baseMethod, mapping);
 					}
 					else if (mapping.getElementType() == IOTJavaElement.CALLOUT_TO_FIELD_MAPPING) {
 						ICalloutToFieldMapping calloutMapping = (ICalloutToFieldMapping) mapping;
 						IField baseField = calloutMapping.getBoundBaseField();
 						if (baseMembers.contains(baseField) && !isVisibleFor(baseField, roleType))
-					    	addToMapOfSets(calloutMap, baseField, mapping);
+					    	OTSearchHelper.addToMapOfSets(calloutMap, baseField, mapping);
 					}
 				} catch (JavaModelException ex) {
 					OTDTUIPlugin.getDefault().getLog().log(new Status(Status.ERROR, OTDTUIPlugin.UIPLUGIN_ID, "Error checking callin/callout binding", ex)); //$NON-NLS-1$
@@ -676,20 +605,6 @@ public class CallinMarkerCreator2 extends JavaEditorActivationListener
     }
     
     /**
-     * add the key->value pair to the given map of sets, creating a new value set if needed.
-     * @param mapOfSets
-     * @param key
-     * @param value
-     */
-	private <M extends IMember> void addToMapOfSets(final Map<IMember, Set<M>> mapOfSets, IMember key, M value) 
-	{
-		Set<M> setForType = mapOfSets.get(key);
-		if (setForType == null)
-			mapOfSets.put(key, setForType = new HashSet<M>());
-		setForType.add(value);
-	}
-    
-	/**
 	 * Create actual markers wrapped by CallinMarkers from the data given as bindingMap.
 	 * 
 	 * @param target      where to attach the markers

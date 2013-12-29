@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethod
  * 
  * @author brcan
  */
+@SuppressWarnings("restriction")
 public class RenameStaticMethodTests extends RefactoringTest
 {
     private static final String REFACTORING_PATH = "RenameStaticMethod/";
@@ -164,6 +165,46 @@ public class RenameStaticMethodTests extends RefactoringTest
             cu.delete(true, null);
         }
     }
+	private void performRenameRefactoring_passing(String[] cuNames, String declaringTypeName, String methodName, String newMethodName, String[] signatures,
+			boolean shouldPass, boolean updateReferences) throws Exception {
+		ICompilationUnit[] cus = createCUs(cuNames);
+		IType declaringType = getType(cus[0], declaringTypeName);
+		IMethod method = declaringType.getMethod(methodName, signatures);
+		RenameMethodProcessor processor = createProcessor(method);
+		RenameRefactoring ref = createRefactoring(processor);
+		processor.setUpdateReferences(updateReferences);
+		processor.setNewElementName(newMethodName);
+		RefactoringStatus status = performRefactoring(ref);
+
+		assertEquals("was supposed to pass!", null, status);
+		if (!shouldPass) {
+			for (int idx = 0; idx < cus.length; idx++) {
+				assertTrue("incorrect renaming because of java model!", !getFileContents(createOutputTestFileName(cus, idx)).equals(cus[idx].getSource()));
+			}
+			return;
+		}
+
+		for (int idx = 0; idx < cus.length; idx++) {
+			String expectedRenaming = getFileContents(createOutputTestFileName(cus, idx));
+			String actualRenaming = cus[idx].getSource();
+			assertEqualLines("incorrect renaming!", expectedRenaming, actualRenaming);
+		}
+		assertTrue("anythingToUndo", RefactoringCore.getUndoManager().anythingToUndo());
+		assertTrue("! anythingToRedo", !RefactoringCore.getUndoManager().anythingToRedo());
+
+		RefactoringCore.getUndoManager().performUndo(null, new NullProgressMonitor());
+
+		for (int idx = 0; idx < cus.length; idx++) {
+			assertEqualLines("invalid undo!", getFileContents(createInputTestFileName(cus, idx)), cus[idx].getSource());
+		}
+		assertTrue("! anythingToUndo", !RefactoringCore.getUndoManager().anythingToUndo());
+		assertTrue("anythingToRedo", RefactoringCore.getUndoManager().anythingToRedo());
+
+		RefactoringCore.getUndoManager().performRedo(null, new NullProgressMonitor());
+		for (int idx = 0; idx < cus.length; idx++) {
+			assertEqualLines("invalid redo", getFileContents(createOutputTestFileName(cus, idx)), cus[idx].getSource());
+		}
+	}
 
     /********** tests **********/
 // test method template
@@ -292,5 +333,9 @@ public class RenameStaticMethodTests extends RefactoringTest
 			packageA.delete(true, new NullProgressMonitor());
 			packageB.delete(true, new NullProgressMonitor());
 		}
+	}
+	
+	public void testUpdateReferenceToBaseMethodInCalloutBinding1() throws Exception {
+		performRenameRefactoring_passing(new String[] { "B", "T" }, "B", "getAmount", "getQuantity", new String[0], true, true);
 	}
 }

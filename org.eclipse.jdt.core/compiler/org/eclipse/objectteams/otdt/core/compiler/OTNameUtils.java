@@ -82,6 +82,21 @@ public class OTNameUtils {
 		char[] prefix = isSetter ? OTNameUtils.SET : OTNameUtils.GET;
 		return CharOperation.concat(prefix, capitalized);
 	}
+	/** 
+	 * Given a fieldName (e.g. val) construct an accessor method name (getVal, or setVal) for inferred callout.
+	 * @param isSetter asking for a "set" accessor?
+	 * @param fieldName 
+	 */
+	public static String accessorName(boolean isSetter, String fieldName) {
+		if (fieldName == null)
+			return null;
+		int len = fieldName.length();
+		char[] accessor = new char[3+len];
+		System.arraycopy(isSetter ? OTNameUtils.SET : OTNameUtils.GET, 0, accessor, 0, 3);
+		accessor[3] = Character.toUpperCase(fieldName.charAt(0)); 
+		fieldName.getChars(1, len, accessor, 4);
+		return String.valueOf(accessor);
+	}
 
 	/** Does name denote a synthetic marker interface used for marking tsuper methods? */
 	public static boolean isTSuperMarkerInterface(char[] name) {

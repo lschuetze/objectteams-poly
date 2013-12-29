@@ -196,7 +196,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest
         }
     }
 
-    private ICompilationUnit[] createCUs(String[] qualifiedNames)
+    protected ICompilationUnit[] createCUs(String[] qualifiedNames)
 		throws Exception
 	{
 	    ICompilationUnit[] cus = new ICompilationUnit[qualifiedNames.length];

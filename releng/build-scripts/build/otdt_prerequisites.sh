@@ -28,7 +28,7 @@ TEST_TMPDIR="/tmp/objectteams"
 METADATA="${BASEDIR}/metadata"
 
 # EXPORT: mail address to receive notification about build result (currently only build failures):
-OT_RECIPIENT="stephan@cs.tu-berlin.de"
+OT_RECIPIENT="nobody@nowhere.net"
 
 # Configure ANT:
 ANT_HOME=/shared/common/apache-ant-1.7.1/

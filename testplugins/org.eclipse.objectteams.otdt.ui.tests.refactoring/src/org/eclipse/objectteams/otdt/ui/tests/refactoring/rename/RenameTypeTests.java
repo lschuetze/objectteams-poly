@@ -217,18 +217,7 @@ public class RenameTypeTests extends RefactoringTest
 		}
     }
     
-    private String getSimpleNameOfCu(String compUnit)
-    {
-        int dot = compUnit.lastIndexOf('.');
-        return compUnit.substring(0, dot);
-    }
-    
-    private String createOutputTestFileName(ICompilationUnit[] cus, int idx)
-    {
-        return getOutputTestFileName(getSimpleNameOfCu(cus[idx].getElementName()));
-    }
-
-    private ICompilationUnit[] createCUs(String[] cuNames) throws Exception
+    protected ICompilationUnit[] createCUs(String[] cuNames) throws Exception
     {
         ICompilationUnit[] cus = new ICompilationUnit[cuNames.length];
 
