@@ -21,6 +21,7 @@
  *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								Bug 415291 - [1.8][null] differentiate type incompatibilities due to null annotations
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
+ *								Bug 412076 - [compiler] @NonNullByDefault doesn't work for varargs parameter when in generic interface
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -751,7 +752,9 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		this._teamModel = someType._teamModel;
 		this.roleModel = someType.roleModel;
 // SH}
-		this.tagBits |= someType.tagBits & (TagBits.IsLocalType| TagBits.IsMemberType | TagBits.IsNestedType | TagBits.HasMissingType | TagBits.ContainsNestedTypeReferences | TagBits.AnnotationNullMASK);
+		this.tagBits |= someType.tagBits & (TagBits.IsLocalType| TagBits.IsMemberType | TagBits.IsNestedType | TagBits.ContainsNestedTypeReferences
+				 | TagBits.HasMissingType
+				 | TagBits.AnnotationNonNullByDefault | TagBits.AnnotationNullUnspecifiedByDefault);
 		this.tagBits &= ~(TagBits.AreFieldsComplete|TagBits.AreMethodsComplete);
 	}
 

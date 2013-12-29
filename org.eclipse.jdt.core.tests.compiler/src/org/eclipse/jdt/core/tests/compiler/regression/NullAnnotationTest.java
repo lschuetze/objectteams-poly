@@ -3879,7 +3879,7 @@ public void test_nonnull_field_2e() {
 		new String[] {
 			"X.java",
 			"import org.eclipse.jdt.annotation.*;\n" +
-			"public class X {\n" +
+			"public class X<T> {\n" +
 			"    @NonNull Object f;\n" +
 			"    {\n" +
 			"         this.f = new Object();\n" +
@@ -6204,5 +6204,39 @@ public void testBug403086_2() {
 		},
 		customOptions,
 		"");
+}
+
+// https://bugs.eclipse.org/412076 - [compiler] @NonNullByDefault doesn't work for varargs parameter when in generic interface
+public void testBug412076() {
+	Map options = getCompilerOptions();
+	options.put(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, JavaCore.IGNORE);
+	runConformTestWithLibs(
+		new String[] {
+			"Foo.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" + 
+			"public interface Foo<V> {\n" + 
+			"  V bar(String... values);\n" + 
+			"  V foo(String value);\n" + 
+			"}\n"
+		},
+		options,
+		"");
+	runConformTestWithLibs(
+		new String[] {
+			"FooImpl.java",
+			"import org.eclipse.jdt.annotation.*;\n" +
+			"@NonNullByDefault\n" + 
+			"public class FooImpl implements Foo<String> {\n" + 
+			"  public String bar(final String... values) {\n" + 
+			"    return (\"\");\n" + 
+			"  }\n" + 
+			"  public String foo(final String value) {\n" + 
+			"    return (\"\");\n" + 
+			"  }\n" + 
+			"}\n"
+		},
+		options,
+		"");	
 }
 }
