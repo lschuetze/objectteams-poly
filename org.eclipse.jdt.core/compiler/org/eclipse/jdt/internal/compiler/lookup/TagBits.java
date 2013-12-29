@@ -159,7 +159,7 @@ public interface TagBits {
 	long AnnotationFunctionalInterface = ASTNode.Bit60L;
 
 //{ObjectTeams: one more standard annotation:
-	long AnnotationInstantiation = ASTNode.Bit21;
+	long AnnotationInstantiation = ASTNode.Bit64L;
 // SH}
 
 	long AllStandardAnnotationsMask =
@@ -202,8 +202,6 @@ public interface TagBits {
     // "new SomeTeam()" expression, unmatchable anchor
     long IsFreshTeamInstance = ASTNode.Bit63L; 				// for LocalVariableBinding
 
-    // did a nested team require correction of team/role flags?
-    long HasClassKindProblem = ASTNode.Bit64L;				// for type binding (team&role)
     // parameter/return incompatibility btw base-role?
     long HasMappingIncompatibility = ASTNode.Bit64L; 		// for method mapping bindings
     long IsCopyOfParameterized = ASTNode.Bit64L;			// for method bindings

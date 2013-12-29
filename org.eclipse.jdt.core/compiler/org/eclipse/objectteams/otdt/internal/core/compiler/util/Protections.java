@@ -29,7 +29,6 @@ import org.eclipse.jdt.internal.compiler.lookup.PackageBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ReferenceBinding;
 import org.eclipse.jdt.internal.compiler.lookup.Scope;
 import org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding;
-import org.eclipse.jdt.internal.compiler.lookup.TagBits;
 import org.eclipse.jdt.internal.compiler.lookup.TypeBinding;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
 import org.eclipse.objectteams.otdt.internal.core.compiler.ast.TSuperMessageSend;
@@ -88,8 +87,7 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
                 	modifiers |= AccTeam;
                 	type.modifiers |= AccTeam;
                 }
-        		type.binding.tagBits |= TagBits.HasClassKindProblem;
-        		type.getTeamModel(); // initialize
+        		type.getTeamModel().tagBits |= TeamModel.HasClassKindProblem; // initialize
         		for (int i = 0; i < type.memberTypes.length; i++) {
 					type.memberTypes[i].modifiers |= AccRole;
 					type.memberTypes[i].enclosingType = type;
@@ -109,7 +107,8 @@ public class Protections implements ClassFileConstants, ExtraCompilerModifiers {
     }
 
     public static boolean hasClassKindProblem(ReferenceBinding binding) {
-    	if ((binding.tagBits & TagBits.HasClassKindProblem) != 0)
+    	TeamModel model = binding._teamModel;
+    	if (model != null && (model.tagBits & TeamModel.HasClassKindProblem) != 0)
     		return true;
     	if (binding.enclosingType() != null)
     		return hasClassKindProblem(binding.enclosingType());

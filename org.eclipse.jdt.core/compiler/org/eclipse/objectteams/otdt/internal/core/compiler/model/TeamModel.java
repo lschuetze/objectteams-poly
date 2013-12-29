@@ -84,6 +84,9 @@ public class TeamModel extends TypeModel {
 
 	// can lifting fail due to role abstractness?
     public static final int HasAbstractRelevantRole = ASTNode.Bit10;
+    
+    // did a nested team require correction of team/role flags?
+    public static final int HasClassKindProblem = ASTNode.Bit11;
 
 	/** The Marker interface created for this Team (_TSuper__OT__TeamName); */
 	public TypeDeclaration markerInterface;
