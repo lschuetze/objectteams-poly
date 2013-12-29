@@ -1581,7 +1581,7 @@ public class FileStructure extends AbstractOTJLDTest {
 			"	\n" + 
 			"\n" + 
 			"	^^^\n" + 
-			"Type mismatch: cannot convert from Mid1517nrf5<@tthis[Team1517nrf5]> to Mid1517nrf5<@tthis[Team1517nrf5]>\n" + 
+			"Type mismatch: cannot convert from Team1517nrf5.Mid1517nrf5 to Team1517nrf5.Mid1517nrf5\n" + 
 			"----------\n" + 
 			"----------\n" + 
 			"1. ERROR in "+convertedOutputPath+"p\\Team1517nrf5\\Mid1517nrf5.java (at line 3)\n" + 

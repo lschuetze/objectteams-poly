@@ -4156,7 +4156,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
     		"1. ERROR in "+convertedOutputPath+"TeamB11sh90.java (at line 3)\n" + 
     		"	public class RB11sh90 {}\n" + 
     		"	  ^^^^^^^^\n" + 
-    		"The method put(TB11sh90, RB11sh90<@tthis[TeamB11sh90]>) in the type DoublyWeakHashMap<TB11sh90,RB11sh90<@tthis[TeamB11sh90]>> is not applicable for the arguments (TB11sh90, RB11sh90<@tthis[TeamB11sh90]>)\n" + 
+    		"The method put(TB11sh90, TeamB11sh90.RB11sh90) in the type DoublyWeakHashMap<TB11sh90,RB11sh90<@tthis[TeamB11sh90]>> is not applicable for the arguments (TB11sh90, TeamB11sh90.RB11sh90)\n" + 
     		"----------\n" + 
     		"----------\n" + 
     		"1. ERROR in TeamB11sh90\\RB11sh90.java (at line 3)\n" + 
@@ -4521,7 +4521,7 @@ public class ReportedBugs extends AbstractOTJLDTest {
 		"1. ERROR in t\\T1.java (at line 4)\n" + 
 		"	protected team interface IR {}\n" + 
 		"	                         ^^\n" + 
-		"Illegal modifier for the member interface IR; only public, protected, private, static & abstract are permitted\n" + 
+		"Illegal modifier for the member interface IR; only public, protected, private, abstract & static are permitted\n" + 
 		"----------\n" + 
 		"2. WARNING in t\\T1.java (at line 8)\n" + 
 		"	this.foo();\n" + 
