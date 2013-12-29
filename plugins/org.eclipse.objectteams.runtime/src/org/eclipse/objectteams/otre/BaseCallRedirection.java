@@ -58,7 +58,7 @@ public class BaseCallRedirection extends ObjectTeamsTransformation {
 		public InstructionHandle snd() {return _ih2; }
 	}
 
-    public BaseCallRedirection(ClassLoader loader) {
+    public BaseCallRedirection(Object loader) {
     	super(loader);
     }
     

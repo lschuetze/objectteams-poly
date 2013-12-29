@@ -44,7 +44,7 @@
          </team>
          <team
                activation="NONE"
-               class="org.eclipse.objectteams.otdt.internal.compiler.adaptor.CheckUniqueCallinCapture.Batch"
+               class="org.eclipse.objectteams.otdt.internal.compiler.adaptor.CheckUniqueCallinCapture$Batch"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
       </aspectBinding>

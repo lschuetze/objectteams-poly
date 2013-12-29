@@ -167,7 +167,7 @@
          <team class="org.eclipse.objectteams.otdt.internal.samples.SamplesAdapter"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"
                activation="ALL_THREADS"/>
-         <team class="org.eclipse.objectteams.otdt.internal.samples.SamplesAdapter.SampleWizardAdapter"
+         <team class="org.eclipse.objectteams.otdt.internal.samples.SamplesAdapter$SampleWizardAdapter"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif"
                activation="NONE"/>
       </aspectBinding>

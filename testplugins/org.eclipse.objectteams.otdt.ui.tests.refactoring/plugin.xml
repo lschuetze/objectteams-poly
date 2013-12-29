@@ -16,7 +16,7 @@
          </team>
          <team
                activation="NONE"
-               class="org.eclipse.objectteams.otdt.ui.tests.refactoring.adapt.JdtTests.ChangeSignature"
+               class="org.eclipse.objectteams.otdt.ui.tests.refactoring.adapt.JdtTests$ChangeSignature"
                icon="platform:/plugin/org.eclipse.objectteams.otdt.ui/icons/ot/team_obj.gif">
          </team>
          <team

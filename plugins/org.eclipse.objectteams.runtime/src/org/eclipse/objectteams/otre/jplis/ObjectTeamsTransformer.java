@@ -65,6 +65,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	};
 
 	static boolean warmedUp = false;
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -72,7 +73,13 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	 *      java.lang.String, java.lang.Class, java.security.ProtectionDomain,
 	 *      byte[])
 	 */
-	public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+	public byte[] transform(ClassLoader loader, String className,
+			Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
+			byte[] classfileBuffer) throws IllegalClassFormatException {
+		return transform((Object)loader, className, classBeingRedefined, protectionDomain, classfileBuffer);
+	}
+	
+	public byte[] transform(Object loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer)
 			throws IllegalClassFormatException
 	{
@@ -86,7 +93,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			}		
 		}
 	}
-	public byte[] internalTransform(ClassLoader loader, String className, Class<?> classBeingRedefined,
+	public byte[] internalTransform(Object loader, String className, Class<?> classBeingRedefined,
 			ProtectionDomain protectionDomain, byte[] classfileBuffer)
 			throws IllegalClassFormatException
 	{
@@ -191,7 +198,8 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 			
 			JavaClass new_java_class = cg.getJavaClass(); 
 			if (dumping) {
-				new_java_class.dump("jplis_dump/" + className + ".class");
+				String binaryName = className.replace('.','/');
+				new_java_class.dump("jplis_dump/" + binaryName + ".class");
 			}
 			return new_java_class.getBytes();
 		} catch (IOException e) {
@@ -228,7 +236,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 	 * @throws IOException 
 	 * @throws ClassFormatError 
 	 */
-	public void readOTAttributes(InputStream file, String fileName, ClassLoader loader) 
+	public void readOTAttributes(InputStream file, String fileName, Object loader) 
 			throws ClassFormatError, IOException 
 	{
 		ClassParser   cp  = new ClassParser(file, fileName);
@@ -237,7 +245,7 @@ public class ObjectTeamsTransformer implements ClassFileTransformer {
 		DietClassLoaderRepository prevRepository = RepositoryAccess.setClassLoader(loader);
 		try {
 			setFirstTransformation(new ObjectTeamsTransformation(loader) {});
-			firstTransformation.checkReadClassAttributes(jpe, cg, cg.getClassName(), cg.getConstantPool());
+			firstTransformation.checkReadClassAttributes(jpe, cg, cg.getClassName(), cg.getConstantPool(), true);
 		} finally {
 			RepositoryAccess.resetRepository(prevRepository);
 		}

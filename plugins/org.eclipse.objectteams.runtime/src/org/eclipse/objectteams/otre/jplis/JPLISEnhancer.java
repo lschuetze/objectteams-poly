@@ -21,9 +21,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.eclipse.objectteams.otre.ClassEnhancer;
+import org.eclipse.objectteams.otre.ClassLoaderAccess;
 import org.eclipse.objectteams.otre.OTREInternalError;
 import org.eclipse.objectteams.otre.ObjectTeamsTransformation;
-
 import org.apache.bcel.Constants;
 import org.apache.bcel.classfile.ClassParser;
 import org.apache.bcel.classfile.Field;
@@ -44,9 +44,9 @@ import org.apache.bcel.generic.MethodGen;
 
 public class JPLISEnhancer implements ClassEnhancer {
 
-	private ClassLoader loader;
+	private Object loader;
 	
-	public JPLISEnhancer(ClassGen cg, ClassLoader loader) {
+	public JPLISEnhancer(ClassGen cg, Object loader) {
 		this.loader = loader;
 	}
 	
@@ -109,7 +109,7 @@ public class JPLISEnhancer implements ClassEnhancer {
 		InputStream is = null;
 		try {
 			String binaryName = className.replace('.', '/');
-			is = loader.getResourceAsStream(binaryName+".class");
+			is = ClassLoaderAccess.getResourceAsStream(this.loader, binaryName+".class");
 			if (is != null) {
 				ClassGen cg = new ClassGen(new ClassParser(is, className).parse());
 				client.checkReadClassAttributes(this, cg, className, cg.getConstantPool());

@@ -137,6 +137,7 @@ directory for tempory files during testing:
 		<echo message="Starting BuildProcess in ${build.root.dir}"/>
 		<antcall target="verifyAntInstall"/>
 		<antcall target="createOTDTEclipse"/>
+		<antcall target="setupTests" />
 	</target>
 
 	<target name="ot-compiler-build" depends="setupProperties,checkOS" description="build only the compiler (for debugging the build)">
@@ -148,6 +149,11 @@ directory for tempory files during testing:
 	<target name="ot-junit-run" depends="setupProperties,checkOS" description="Run tests without building">
 		<echo message="Starting Testrun ${test.root.dir}"/>
 		<antcall target="runAllTests" />
+	</target>
+
+	<target name="ot-junit-run-ot" depends="setupProperties,checkOS" description="Run OT tests without building">
+		<echo message="Starting Testrun ${test.root.dir}"/>
+		<antcall target="runOTDTTests" />
 	</target>
 
 	<!-- =================== END Public Targets ==================== -->

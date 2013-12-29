@@ -54,30 +54,34 @@ public team class PDELaunchingAdaptor {
 	/** Mediating between LauncherTab and JREBlock: */
 	LauncherTab currentTab = null;
 	
-	static final String OSGI_EXTENSIONS       = "-Dosgi.framework.extensions=reference:file:"; //$NON-NLS-1$
-	static final String OTEQUINOX_HOOK 		  = "org.eclipse.objectteams.otequinox.hook";
-	static final String HOOK_CONFIGURATOR     = "-Dosgi.hook.configurators.include=org.eclipse.objectteams.otequinox.hook.HookConfigurator";//$NON-NLS-1$
-	static final String CLASSLOADER_LOCKING   = "-Dosgi.classloader.lock=classname"; //$NON-NLS-1$
+//	static final String OSGI_EXTENSIONS       = "-Dosgi.framework.extensions=reference:file:"; //$NON-NLS-1$
+//	static final String OTEQUINOX_HOOK 		  = "org.eclipse.objectteams.otequinox.hook";
+//	static final String HOOK_CONFIGURATOR     = "-Dosgi.hook.configurators.include=org.eclipse.objectteams.otequinox.hook.HookConfigurator";//$NON-NLS-1$
+//	static final String CLASSLOADER_LOCKING   = "-Dosgi.classloader.lock=classname"; //$NON-NLS-1$
 	static final String ENABLE_OTEQUINOX      = "-Dot.equinox=1"; //$NON-NLS-1$     // this also causes the WORKAROUND_REPOSITORY flag being set to true in OTRE.
 	static final String DISABLE_OTEQUINOX     = "-Dot.equinox=false"; //$NON-NLS-1$ // prevents TransformerHook installation and start of TransformerPlugin
 	static final String OT_DEBUG_VMARG        = "-Dot.debug"; //$NON-NLS-1$
 	static final String OTE_AGENT_ARG		  = "-javaagent:" + OTREContainer.getOtequinoxAgentJarPath().toOSString();
 	// slot [0] to be filled in from the launch config:
-	static final String[] OT_VM_ARGS          = { null, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX };
-	static final String[] OT_VM_DEBUG_ARGS    = { null, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX, OT_DEBUG_VMARG, OTE_AGENT_ARG };
-	static final String[] VM_ARGS          = { CLASSLOADER_LOCKING, DISABLE_OTEQUINOX };
-	static final String[] VM_DEBUG_ARGS    = { CLASSLOADER_LOCKING, DISABLE_OTEQUINOX, OT_DEBUG_VMARG };
+	static final String[] OT_VM_ARGS          = { ENABLE_OTEQUINOX };
+	static final String[] OT_VM_DEBUG_ARGS    = { ENABLE_OTEQUINOX, OT_DEBUG_VMARG, OTE_AGENT_ARG };
+	static final String[] VM_ARGS          = { DISABLE_OTEQUINOX };
+	static final String[] VM_DEBUG_ARGS    = { DISABLE_OTEQUINOX, OT_DEBUG_VMARG };
+//	static final String[] OT_VM_ARGS          = { null, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX };
+//	static final String[] OT_VM_DEBUG_ARGS    = { null, HOOK_CONFIGURATOR, CLASSLOADER_LOCKING, ENABLE_OTEQUINOX, OT_DEBUG_VMARG, OTE_AGENT_ARG };
+//	static final String[] VM_ARGS          = { CLASSLOADER_LOCKING, DISABLE_OTEQUINOX };
+//	static final String[] VM_DEBUG_ARGS    = { CLASSLOADER_LOCKING, DISABLE_OTEQUINOX, OT_DEBUG_VMARG };
 
 	/** select proper set of arguments for an OT-launch, insert otequinox.hook using it's actual install location. */
 	static String[] getOTArgs(ISharedPluginModel hookModel, String mode) {
 		String[] otArgs = OT_VM_ARGS;
 		if (mode != null && mode.equals(ILaunchManager.DEBUG_MODE))
 			otArgs = OT_VM_DEBUG_ARGS;
-		if (hookModel == null) {
-			OTDebugAdaptorPlugin.logError("Required fragment "+OTEQUINOX_HOOK+" not found");
-			return null;
-		}
-		otArgs[0] = OSGI_EXTENSIONS+hookModel.getInstallLocation();
+//		if (hookModel == null) {
+//			OTDebugAdaptorPlugin.logError("Required fragment "+OTEQUINOX_HOOK+" not found");
+//			return null;
+//		}
+//		otArgs[0] = OSGI_EXTENSIONS+hookModel.getInstallLocation();
 		return otArgs;
 	}
 	/** 
@@ -186,7 +190,7 @@ public team class PDELaunchingAdaptor {
 		{
 			String[] args = base.extendVMArguments(config);
 			if (isOTLaunch(config))
-				return PDELaunchingAdaptor.extendVMArguments(args, getBundle(OTEQUINOX_HOOK), this.mode);
+				return PDELaunchingAdaptor.extendVMArguments(args, null /*getBundle(OTEQUINOX_HOOK)*/, this.mode);
 			else
 				return PDELaunchingAdaptor.addDisableOTEquinoxArgument(args);
 		}
@@ -223,7 +227,7 @@ public team class PDELaunchingAdaptor {
 		{
 			String result = base.extendVMArgument(config);
 			if (isOTLaunch(config))
-				return PDELaunchingAdaptor.extendVMArguments(result, getBundle(OTEQUINOX_HOOK), this.mode);
+				return PDELaunchingAdaptor.extendVMArguments(result, null /*getBundle(OTEQUINOX_HOOK)*/, this.mode);
 			else
 				return result+' '+DISABLE_OTEQUINOX;
 		}

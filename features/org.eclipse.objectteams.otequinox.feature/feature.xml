@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.objectteams.otequinox"
       label="%featureName"
-      version="2.2.0.qualifier"
+      version="2.3.0.qualifier"
       provider-name="%providerName"
       plugin="org.eclipse.objectteams.otequinox"
       colocation-affinity="org.eclipse.rcp">
@@ -26,14 +26,6 @@ Author: Stephan Herrmann.
    </url>
 
    <plugin
-         id="org.eclipse.objectteams.otequinox.hook"
-         download-size="24"
-         install-size="56"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
          id="org.eclipse.objectteams.runtime"
          download-size="89"
          install-size="202"
@@ -52,33 +44,6 @@ Author: Stephan Herrmann.
          download-size="27"
          install-size="52"
          version="0.0.0"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.objectteams.otequinox.sunjvm"
-         os="linux"
-         download-size="1"
-         install-size="1"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.objectteams.otequinox.sunjvm"
-         os="solaris"
-         download-size="1"
-         install-size="1"
-         version="0.0.0"
-         fragment="true"
-         unpack="false"/>
-
-   <plugin
-         id="org.eclipse.objectteams.otequinox.sunjvm"
-         os="win32"
-         download-size="1"
-         install-size="1"
-         version="0.0.0"
-         fragment="true"
          unpack="false"/>
 
    <plugin

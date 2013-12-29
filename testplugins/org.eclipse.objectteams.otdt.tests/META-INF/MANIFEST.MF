@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OTDTTest Plug-in
 Bundle-SymbolicName: org.eclipse.objectteams.otdt.tests;singleton:=true
-Bundle-Version: 1.3.0
+Bundle-Version: 2.0.0
 Bundle-ClassPath: otdt-tests.jar
 Bundle-Vendor: The TOPPrax consortium
 Export-Package: org.eclipse.objectteams.otdt.tests,

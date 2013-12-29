@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.objectteams.otdt.refactoring;singleton:=true
-Bundle-Version: 2.2.0.qualifier
+Bundle-Version: 2.3.0.qualifier
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
 Require-Bundle: org.eclipse.jdt.ui;bundle-version="[3.7.0,4.0.0)",
@@ -18,9 +18,13 @@ Require-Bundle: org.eclipse.jdt.ui;bundle-version="[3.7.0,4.0.0)",
  org.eclipse.ltk.ui.refactoring;bundle-version="[3.4.1,4.0.0)",
  org.eclipse.objectteams.otdt;bundle-version="[2.0.0,3.0.0)",
  org.eclipse.objectteams.otdt.jdt.ui;bundle-version="[2.1.0,3.0.0)"
-Export-Package: org.eclipse.objectteams.otdt.internal.refactoring.adaptor.extractmethod;x-internal:=true,
+Export-Package: org.eclipse.objectteams.otdt.internal.refactoring.adaptor;x-internal:=true,
+ org.eclipse.objectteams.otdt.internal.refactoring.adaptor.extractmethod;x-internal:=true,
+ org.eclipse.objectteams.otdt.internal.refactoring.adaptor.pullup;x-internal:=true,
+ org.eclipse.objectteams.otdt.internal.refactoring.adaptor.pushdown;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.refactoring.corext;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.refactoring.corext.base;x-internal:=true,
+ org.eclipse.objectteams.otdt.internal.refactoring.corext.rename;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.extractcallin;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.inlinecallin;x-internal:=true,
  org.eclipse.objectteams.otdt.internal.refactoring.otrefactorings.rolefile;x-friends:="org.eclipse.objectteams.otdt.ui.tests.refactoring",

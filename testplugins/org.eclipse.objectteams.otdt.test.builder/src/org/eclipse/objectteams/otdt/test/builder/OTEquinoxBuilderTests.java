@@ -368,6 +368,19 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 				});
 	}
 
+	public void testAspectExport () throws CoreException, IOException {
+		IJavaProject aeb= fileManager.setUpJavaProject("AspectExportBase"); 
+		env.addProject(aeb.getProject());
+		IJavaProject aea= fileManager.setUpJavaProject("AspectExportAspect"); 
+		aea.setOption("org.eclipse.objectteams.otdt.compiler.problem.binding_conventions", "error");
+		env.addProject(aea.getProject());
+		fullBuild();
+		expectingNoProblemsFor(aeb.getPath());
+		expectingOnlySpecificProblemsFor(aea.getPath(), 
+				new Problem[] {
+					getMissingAspectExportProblem(aea, "aea")});
+	}
+
 	// ---------------- HELPERS: ---------------------------
 	private Problem getDecapsulationProblem(IJavaProject project, String baseclassName, String teamPath, int start, int end) {
 		return new Problem("", "Decapsulating base class "+baseclassName+" by means of a forced export. Note, that additionally a corresponing declaration is needed in config.ini (OTJLD 2.1.2(c) + OT/Equinox).",
@@ -388,5 +401,11 @@ public class OTEquinoxBuilderTests extends OTBuilderTests {
 						start, end, 
 						CategorizedProblem.CAT_RESTRICTION, IMarker.SEVERITY_ERROR)
 		);
+	}
+	private Problem getMissingAspectExportProblem(IJavaProject project, String packageName) {
+		return new Problem("", "Package "+packageName+" containing one or more bound teams must be exported.",
+				project.getPath().append(new Path("META-INF/MANIFEST.MF")), 
+				-1, -1,
+				-1, IMarker.SEVERITY_ERROR);
 	}
 }

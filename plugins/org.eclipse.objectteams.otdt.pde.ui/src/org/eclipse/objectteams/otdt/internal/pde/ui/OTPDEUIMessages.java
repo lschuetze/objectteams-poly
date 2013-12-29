@@ -47,6 +47,12 @@ public class OTPDEUIMessages extends NLS
 
 	public static String ToggleOTSupportAction_configurationError_title;
 
+
+	public static String Validation_MissingAspectPackageExport_error;
+
+	public static String Resolution_AddAspectPackageExport_label;
+	public static String Resolution_AddAspectPackageExport_description;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, OTPDEUIMessages.class);
 	}

@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: OT Refactoring Test Plug-in
 Bundle-SymbolicName: org.eclipse.objectteams.otdt.ui.tests.refactoring;singleton:=true
-Bundle-Version: 1.3.0
+Bundle-Version: 2.0.0
 Bundle-ClassPath: otrefactoringtests.jar
 Bundle-Activator: org.eclipse.objectteams.otdt.ui.tests.refactoring.OTRefactoringTestPlugin
 Bundle-Vendor: The TOPPrax consortium
@@ -12,7 +12,8 @@ Export-Package: org.eclipse.objectteams.otdt.ui.tests.refactoring,
  org.eclipse.objectteams.otdt.ui.tests.refactoring.rename,
  org.eclipse.objectteams.otdt.ui.tests.refactoring.reorg,
  org.eclipse.objectteams.otdt.ui.tests.refactoring.requiredfeatures,
- org.eclipse.objectteams.otdt.ui.tests.refactoring.util
+ org.eclipse.objectteams.otdt.ui.tests.refactoring.util,
+ org.eclipse.objectteams.otdt.ui.tests.refactoring.adapt
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,

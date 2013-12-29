@@ -69,7 +69,7 @@ public class LiftingParticipantTransformation extends ObjectTeamsTransformation 
 	private static final String CREATE_ROLE_METHOD = "createRole";
 	private static final String LIFTING_PARTICIPANT_FIELD = "_OT$liftingParticipant";
 	
-	public LiftingParticipantTransformation(ClassLoader loader) { super(loader); }
+	public LiftingParticipantTransformation(Object loader) { super(loader); }
 
 	public void doTransformCode(ClassGen cg) 
 	{
@@ -116,7 +116,7 @@ public class LiftingParticipantTransformation extends ObjectTeamsTransformation 
 			if (participant != null)
 				throw new IllegalStateException("liftingParticipant already installed.");				
 			// install a shared instance into class Team:
-			Class<?> participantClass = loader.loadClass(PARTICIPANT_NAME);
+			Class<?> participantClass = ClassLoaderAccess.loadClass(loader, PARTICIPANT_NAME); 
 			participantField.set(null, participantClass.newInstance());
 		} 
 		else if (participant != null) 

@@ -142,7 +142,7 @@ public class BaseMethodTransformation
 
 	public boolean useReflection = false;
 
-	public BaseMethodTransformation(ClassLoader loader) {
+	public BaseMethodTransformation(Object loader) {
 		super(loader);
 	}
 	/**
