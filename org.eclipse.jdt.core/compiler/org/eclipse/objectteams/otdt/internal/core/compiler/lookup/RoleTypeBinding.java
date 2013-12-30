@@ -766,7 +766,7 @@ public class RoleTypeBinding extends DependentTypeBinding
      * and for determining overriding.
      */
     public boolean isCompatibleWith(TypeBinding right, /*@Nullable*/ Scope captureScope) {
-        if (right == this)
+        if (TypeBinding.equalsEquals(right, this))
             return true;
         if (!(right instanceof ReferenceBinding))
             return false;
@@ -786,13 +786,13 @@ public class RoleTypeBinding extends DependentTypeBinding
         	}
 
     		// compensate weakened signature:
-    		if (rightRole._staticallyKnownTeam != this._staticallyKnownTeam) {
+    		if (TypeBinding.notEquals(rightRole._staticallyKnownTeam, this._staticallyKnownTeam)) {
     			if (TeamModel.areTypesCompatible(
     					rightTeam,
 						this._staticallyKnownTeam))
     			{
     				ReferenceBinding leftStrengthened = this._teamAnchor.getMemberTypeOfType(internalName());
-    				if (leftStrengthened != this)
+    				if (TypeBinding.notEquals(leftStrengthened, this))
     					return leftStrengthened.isCompatibleWith(right, captureScope);
     			}
     			else if (TeamModel.areTypesCompatible(

@@ -117,9 +117,14 @@ public class AnnotatableTypeSystem {
 				TypeBinding cachedType = cachedInfo[index];
 				if (cachedType == null) 
 					break;
+//{ObjectTeams: parameterized and/or anchored?
+/* orig:
 				if (!cachedType.isParameterizedType())
 					continue;
-//{ObjectTeams: also match team anchor if given:
+  :giro */
+				if (!cachedType.isParameterizedType() && typeArguments != null)
+					continue;
+				// also match team anchor if given:
 				if (!this.unannotatedTypeSystem.isRoleTypeMatch(teamAnchor, valueParamPosition, cachedType))
 					continue;
 // SH}
