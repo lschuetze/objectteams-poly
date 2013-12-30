@@ -70,6 +70,20 @@ public class WildcardBinding extends ReferenceBinding {
 		this.typeBits = TypeIds.BitUninitialized;
 	}
 
+	public WildcardBinding(WildcardBinding prototype) {
+		super(prototype);
+		this.genericType = prototype.genericType;
+		this.rank = prototype.rank;
+	    this.bound = prototype.bound;
+	    this.otherBounds = prototype.otherBounds;
+		this.genericSignature = prototype.genericSignature;
+		this.boundKind = prototype.boundKind;
+		this.superclass = prototype.superclass;
+		this.superInterfaces = prototype.superInterfaces;
+		this.typeVariable = prototype.typeVariable;
+		this.environment = prototype.environment;
+	}
+
 //{ObjectTeams: role wrapping?
 	public TypeBinding maybeWrapQualifiedRoleType(Scope scope, Expression anchorExpr, ASTNode typedNode) {
     	TypeBinding wrappedBound = RoleTypeCreator.maybeWrapQualifiedRoleType(scope, anchorExpr, this.bound, typedNode);
@@ -420,6 +434,32 @@ public class WildcardBinding extends ReferenceBinding {
 		return erasure().constantPoolName();
 	}
 
+	public TypeBinding clone(TypeBinding immaterial, TypeBinding[] irrelevant) {
+		return new WildcardBinding(this);
+	}
+	
+	public String annotatedDebugName() {
+		StringBuffer buffer = new StringBuffer(16);
+		AnnotationBinding [] annotations = getTypeAnnotations();
+		for (int i = 0, length = annotations == null ? 0 : annotations.length; i < length; i++) {
+			buffer.append(annotations[i]);
+			buffer.append(' ');
+		}
+		switch (this.boundKind) {
+            case Wildcard.UNBOUND :
+                return buffer.append(TypeConstants.WILDCARD_NAME).toString();
+            case Wildcard.EXTENDS :
+            	if (this.otherBounds == null)
+                	return buffer.append(CharOperation.concat(TypeConstants.WILDCARD_NAME, TypeConstants.WILDCARD_EXTENDS, this.bound.annotatedDebugName().toCharArray())).toString();
+            	buffer.append(this.bound.annotatedDebugName());
+            	for (int i = 0, length = this.otherBounds.length; i < length; i++) {
+            		buffer.append('&').append(this.otherBounds[i].annotatedDebugName());
+            	}
+            	return buffer.toString();
+			default: // SUPER
+			    return buffer.append(CharOperation.concat(TypeConstants.WILDCARD_NAME, TypeConstants.WILDCARD_SUPER, this.bound.annotatedDebugName().toCharArray())).toString();
+        }
+	}
 	/**
 	 * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#debugName()
 	 */
@@ -539,6 +579,10 @@ public class WildcardBinding extends ReferenceBinding {
 	    return true;
 	}
 
+	int rank() {
+		return this.rank;
+	}
+	
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.compiler.lookup.Binding#readableName()
      */
@@ -748,6 +792,8 @@ public class WildcardBinding extends ReferenceBinding {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
+		if (this.hasTypeAnnotations())
+			return annotatedDebugName();
         switch (this.boundKind) {
             case Wildcard.UNBOUND :
                 return new String(TypeConstants.WILDCARD_NAME);
@@ -776,15 +822,6 @@ public class WildcardBinding extends ReferenceBinding {
 	}
 
 	public TypeBinding unannotated() {
-		if (!hasNullTypeAnnotations())
-			return this;
-		TypeBinding boundType = this.bound.unannotated();
-		TypeBinding[] otherBoundTypes = null;
-		if (this.otherBounds != null) {
-			otherBoundTypes = new TypeBinding[this.otherBounds.length];
-			for (int i = 0; i < this.otherBounds.length; i++)
-				otherBoundTypes[i] = this.otherBounds[i].unannotated();
-		}
-		return this.environment.createWildcard(this.genericType, this.rank, boundType, otherBoundTypes, this.boundKind);
+		return this.hasTypeAnnotations() ? this.environment.getUnannotatedType(this) : this;
 	}
 }

@@ -426,7 +426,7 @@ public abstract class Annotation extends Expression {
 					needsInnerEntryInfo = new boolean[typeReference.tokens.length];
 					int counter = needsInnerEntryInfo.length - 1;
 					ReferenceBinding type = resolvedType;//resolvedType.enclosingType();
-					while (type != null) {
+					while (type != null && counter > 0) {
 						needsInnerEntryInfo[counter--] = !type.isStatic();
 						type = type.enclosingType();
 					}
@@ -528,21 +528,6 @@ public abstract class Annotation extends Expression {
 			result[offset++] = pathElement[1];
 		}
 		return result;
-	}
-		
-    // jsr 308
-	public static class TypeUseBinding extends ReferenceBinding {
-		private int kind;
-		public TypeUseBinding(int kind) {
-			this.tagBits = 0L;
-			this.kind = kind;
-		}
-		public int kind() {
-			return this.kind;
-		}
-		public boolean hasTypeBit(int bit) {
-			return false;
-		}
 	}
 
 	final static MemberValuePair[] NoValuePairs = new MemberValuePair[0];
@@ -959,11 +944,6 @@ public abstract class Annotation extends Expression {
 					case Binding.PACKAGE :
 						((PackageBinding)this.recipient).tagBits |= tagBits;
 						break;
-					case Binding.TYPE_PARAMETER:
-					case Binding.TYPE_USE:
-						ReferenceBinding typeAnnotationRecipient = (ReferenceBinding) this.recipient;
-						typeAnnotationRecipient.tagBits |= tagBits;
-						break;
 					case Binding.TYPE :
 					case Binding.GENERIC_TYPE :
 						SourceTypeBinding sourceType = (SourceTypeBinding) this.recipient;
@@ -1052,8 +1032,6 @@ public abstract class Annotation extends Expression {
 									if (((variable.type.tagBits & TagBits.AnnotationNullMASK) | nullTagBits ) == TagBits.AnnotationNullMASK) {
 										scope.problemReporter().contradictoryNullAnnotations(this);
 										variable.type = variable.type.unannotated();
-									} else {
-										variable.type = scope.environment().createAnnotatedType(variable.type, nullTagBits);
 									}
 								}
 							}
@@ -1187,7 +1165,7 @@ public abstract class Annotation extends Expression {
 		}
 		return this.resolvedType;
 	}
-	private boolean isTypeUseCompatible(TypeReference reference, Scope scope) {
+	public static boolean isTypeUseCompatible(TypeReference reference, Scope scope) {
 		if (reference != null && !(reference instanceof SingleTypeReference)) {
 			Binding binding = scope.getPackage(reference.getTypeName());
 			// In case of ProblemReferenceBinding, don't report additional error

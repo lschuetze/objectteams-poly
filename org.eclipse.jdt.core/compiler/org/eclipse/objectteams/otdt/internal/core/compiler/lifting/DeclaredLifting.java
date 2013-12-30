@@ -810,10 +810,10 @@ public class DeclaredLifting implements IOTConstants {
 				RoleTypeBinding baseRole = (RoleTypeBinding)boundBase;
 				boundBase = environment.createParameterizedType(baseRole._declaredRoleType, 
 															 	null, 					// erase type parameters
-															 	0L,						// annotationTagBits
-																baseRole._teamAnchor, 	// but retain anchor
-																-1,						// valueParamPosition 
-																baseRole.enclosingType());
+															 	baseRole._teamAnchor, 	// but retain anchor
+																-1,						// valueParamPosition
+																baseRole.enclosingType(), 
+																Binding.NO_ANNOTATIONS);
 			}
 			// only RTB but not parameterized: leave unchanged.
 		} else {

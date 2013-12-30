@@ -773,7 +773,7 @@ public class CallinImplementor extends MethodMappingImplementor
 			TypeBinding[] typeArguments = liftMethod[0].typeVariables();
 			if (typeArguments != Binding.NO_TYPE_VARIABLES)
 				try {
-					roleVarType = Config.getLookupEnvironment().createParameterizedType(roleVarType, typeArguments, 0L, null, -1, roleModel.getBinding().enclosingType());
+					roleVarType = Config.getLookupEnvironment().createParameterizedType(roleVarType, typeArguments, null, -1, roleModel.getBinding().enclosingType(), Binding.NO_ANNOTATIONS);
 				} catch (NotConfiguredException e) {
 					e.logWarning("Cannot lookup parameterized type"); //$NON-NLS-1$
 				}

@@ -39,10 +39,16 @@ import org.eclipse.objectteams.otdt.internal.core.compiler.model.TypeModel;
  *
  */
 public final class MemberTypeBinding extends NestedTypeBinding {
+
 public MemberTypeBinding(char[][] compoundName, ClassScope scope, SourceTypeBinding enclosingType) {
 	super(compoundName, scope, enclosingType);
 	this.tagBits |= TagBits.MemberTypeMask;
 }
+
+public MemberTypeBinding(MemberTypeBinding prototype) {
+	super(prototype);
+}
+
 void checkSyntheticArgsAndFields() {
 //{ObjectTeams: role ifcs require synth args too
 /* orig:
@@ -56,6 +62,10 @@ void checkSyntheticArgsAndFields() {
 	}
 	if (isStatic()) return;
 // SH}
+	if (this != this.prototype) {
+		((MemberTypeBinding) this.prototype).checkSyntheticArgsAndFields();
+		return;
+	}
 	this.addSyntheticArgumentAndField(this.enclosingType);
 }
 /* Answer the receiver's constant pool name.
@@ -64,16 +74,32 @@ void checkSyntheticArgsAndFields() {
 */
 
 public char[] constantPoolName() /* java/lang/Object */ {
+	
 	if (this.constantPoolName != null)
 		return this.constantPoolName;
+	
+	if (this != this.prototype) {
+		return this.prototype.constantPoolName();
+	}
 
 	return this.constantPoolName = CharOperation.concat(enclosingType().constantPoolName(), this.sourceName, '$');
+}
+
+public TypeBinding clone(TypeBinding outerType, TypeBinding[] typeArguments) {
+	MemberTypeBinding copy = new MemberTypeBinding(this);
+	if (outerType != null)
+		copy.enclosingType = (SourceTypeBinding) outerType;
+	return copy;
 }
 
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.Binding#initializeDeprecatedAnnotationTagBits()
  */
 public void initializeDeprecatedAnnotationTagBits() {
+	if (this != this.prototype) {
+		this.prototype.initializeDeprecatedAnnotationTagBits();
+		return;
+	}
 	if ((this.tagBits & TagBits.DeprecatedAnnotationResolved) == 0) {
 		super.initializeDeprecatedAnnotationTagBits();
 		if ((this.tagBits & TagBits.AnnotationDeprecated) == 0) {
@@ -279,6 +305,10 @@ private ReferenceBinding checkRefineBase(
 }
 //SH}
 public String toString() {
-	return "Member type : " + new String(sourceName()) + " " + super.toString(); //$NON-NLS-2$ //$NON-NLS-1$
+	if (this.hasTypeAnnotations()) {
+		return annotatedDebugName();
+    } else {
+    	return "Member type : " + new String(sourceName()) + " " + super.toString(); //$NON-NLS-2$ //$NON-NLS-1$
+    }
 }
 }

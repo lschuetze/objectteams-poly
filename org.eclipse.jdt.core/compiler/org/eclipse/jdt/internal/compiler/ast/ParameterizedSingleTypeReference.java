@@ -267,19 +267,26 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 		TypeBinding type = internalResolveLeafType(scope, enclosingType, checkBounds);
   :giro */
 // SH}
-		resolveAnnotations(scope);
-		checkNullConstraints(scope, this.typeArguments);
 
 		// handle three different outcomes:
 		if (type == null) {
 			this.resolvedType = createArrayType(scope, this.resolvedType);
+			resolveAnnotations(scope);
+			checkNullConstraints(scope, this.typeArguments);
 			return null;							// no useful type, but still captured dimensions into this.resolvedType
 		} else {
 			type = createArrayType(scope, type);
-			if (!this.resolvedType.isValidBinding())
+			if (!this.resolvedType.isValidBinding()) {
+				resolveAnnotations(scope);
+				checkNullConstraints(scope, this.typeArguments);
 				return type;						// found some error, but could recover useful type (like closestMatch)
-			else 
-				return this.resolvedType = type; 	// no complaint, keep fully resolved type (incl. dimensions)
+			} else {
+				this.resolvedType = type; 	// no complaint, keep fully resolved type (incl. dimensions)
+				resolveAnnotations(scope);
+				checkNullConstraints(scope, this.typeArguments);
+				return this.resolvedType; // pick up any annotated type.
+			}
+
 		}
 	}
 //{ObjectTeams: consider two scopes (base imports, regular):
@@ -424,14 +431,14 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
 			return this.resolvedType;
 
 		// feed more parameters into createParameterizedType:
-		long annotTagBits = currentType.tagBits & TagBits.AnnotationNullMASK;
+		AnnotationBinding[] currentAnnotations = currentType.getAnnotations();
 		ITeamAnchor anchor = null;
 		int valParPos = -1;
 		if (DependentTypeBinding.isDependentType(currentType)) {
 			anchor = ((DependentTypeBinding)currentType)._teamAnchor;
 			valParPos = ((DependentTypeBinding)currentType)._valueParamPosition;
 		}
-		ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, annotTagBits, anchor, valParPos,  enclosingType);
+		ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, anchor, valParPos, enclosingType,  currentAnnotations);
 /* orig:
 		ParameterizedTypeBinding parameterizedType = scope.environment().createParameterizedType(currentOriginal, argTypes, enclosingType);
   :giro */

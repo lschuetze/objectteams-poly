@@ -43,6 +43,10 @@ public MissingTypeBinding(PackageBinding packageBinding, char[][] compoundName, 
 	this.methods = Binding.NO_METHODS;
 }
 
+public MissingTypeBinding(MissingTypeBinding prototype) {
+	super(prototype);
+}
+
 //{ObjectTeams: missing o.o.Team cannot be further initialized:
 @Override
 protected void setupOrgObjectteamsTeamModel() {
@@ -51,6 +55,14 @@ protected void setupOrgObjectteamsTeamModel() {
 }
 // SH}
 
+public TypeBinding clone(TypeBinding outerType, TypeBinding[] typeArguments) {
+	MissingTypeBinding copy = new MissingTypeBinding(this);
+	copy.enclosingType = (ReferenceBinding) outerType; // for better or worse.
+	return copy;
+}
+public TypeBinding unannotated() {
+	return this.prototype; 
+}
 /**
  * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#collectMissingTypes(java.util.List)
  */
@@ -78,10 +90,13 @@ public int problemId() {
  * @see LookupEnvironment#createMissingType(PackageBinding, char[][])
  */
 void setMissingSuperclass(ReferenceBinding missingSuperclass) {
+	if (this != this.prototype) {
+		((MissingTypeBinding) this.prototype).setMissingSuperclass(missingSuperclass);
+	}
 	this.superclass = missingSuperclass;
 }
 
 public String toString() {
-		return "[MISSING:" + new String(CharOperation.concatWith(this.compoundName, '.')) + "]"; //$NON-NLS-1$ //$NON-NLS-2$
-	}
+		return this.hasTypeAnnotations() ? annotatedDebugName() + " (missing)" : "[MISSING:" + new String(CharOperation.concatWith(this.compoundName, '.')) + "]"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+}
 }

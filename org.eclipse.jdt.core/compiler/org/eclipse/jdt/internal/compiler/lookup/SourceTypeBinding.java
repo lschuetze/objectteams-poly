@@ -126,6 +126,7 @@ public class SourceTypeBinding extends ReferenceBinding {
 // SH}
 
 	public ClassScope scope;
+	protected SourceTypeBinding prototype;
 
 	// Synthetics are separated into 4 categories: methods, super methods, fields, class literals and bridge methods
 	// if a new category is added, also increment MAX_SYNTHETICS
@@ -150,7 +151,7 @@ public class SourceTypeBinding extends ReferenceBinding {
     	MultipleCasts.compoundName = new char[][] { "multiple".toCharArray(), "casts".toCharArray(), "required".toCharArray() }; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     }
 
-	protected SourceTypeBinding() { super(null); } // default ctor for Singleton membertypes NoBaseclass, ProblemBaseclass
+	protected SourceTypeBinding() { super(); } // default ctor for Singleton membertypes NoBaseclass, ProblemBaseclass
 
 //Markus Witte}
 
@@ -183,8 +184,34 @@ public SourceTypeBinding(char[][] compoundName, PackageBinding fPackage, ClassSc
 	// expect the fields & methods to be initialized correctly later
 	this.fields = Binding.UNINITIALIZED_FIELDS;
 	this.methods = Binding.UNINITIALIZED_METHODS;
-
+	this.prototype = this;
 	computeId();
+}
+
+public SourceTypeBinding(SourceTypeBinding prototype) {
+	super(prototype);
+	this.prototype = prototype.prototype;
+    this.compoundName = prototype.compoundName;
+	this.fPackage = prototype.fPackage;
+	this.fileName = prototype.fileName;
+	this.modifiers = prototype.modifiers;
+	this.sourceName = prototype.sourceName;
+
+	this.superclass = prototype.superclass;
+	this.superInterfaces = prototype.superInterfaces;
+	this.fields = prototype.fields;
+	this.methods = prototype.methods;
+	this.memberTypes = prototype.memberTypes;
+	this.typeVariables = prototype.typeVariables;
+
+	// this.scope = prototype.scope;  // Will defeat CompilationUnitDeclaration.cleanUp(TypeDeclaration) && CompilationUnitDeclaration.cleanUp(), so not copied, not an issue for JSR 308.
+
+	this.synthetics = prototype.synthetics;
+	this.genericReferenceTypeSignature = prototype.genericReferenceTypeSignature;
+	this.storedAnnotations = prototype.storedAnnotations;
+	this.defaultNullness = prototype.defaultNullness;
+	this.nullnessDefaultInitialized= prototype.nullnessDefaultInitialized;
+	this.lambdaOrdinal = prototype.lambdaOrdinal;
 }
 
 private void addDefaultAbstractMethods() {
@@ -902,9 +929,9 @@ public SyntheticMethodBinding addSyntheticBridgeMethod(MethodBinding inheritedMe
 //{ObjectTeams: retrieve callin method's real return type:
 	TypeBinding inheritedReturn= MethodModel.getReturnType(inheritedMethodToBridge);
 	TypeBinding targetReturn= MethodModel.getReturnType(targetMethod);
-	if (inheritedReturn.erasure() == targetReturn.erasure()
+	if (TypeBinding.equalsEquals(inheritedReturn.erasure(), targetReturn.erasure())
 /* orig:
-	if (inheritedMethodToBridge.returnType.erasure() == targetMethod.returnType.erasure()
+	if (TypeBinding.equalsEquals(inheritedMethodToBridge.returnType.erasure(), targetMethod.returnType.erasure())
   :giro */
 // SH}
 		&& inheritedMethodToBridge.areParameterErasuresEqual(targetMethod)) {
@@ -991,9 +1018,13 @@ public SyntheticMethodBinding addSyntheticBridgeMethod(MethodBinding inheritedMe
 	return accessMethod;
 }
 boolean areFieldsInitialized() {
+	if (this != this.prototype)
+		return this.prototype.areFieldsInitialized();
 	return this.fields != Binding.UNINITIALIZED_FIELDS;
 }
 boolean areMethodsInitialized() {
+	if (this != this.prototype)
+		return this.prototype.areMethodsInitialized();
 	return this.methods != Binding.UNINITIALIZED_METHODS;
 }
 public int kind() {
@@ -1001,7 +1032,13 @@ public int kind() {
 	return Binding.TYPE;
 }
 
+public TypeBinding clone(TypeBinding immaterial, TypeBinding[] irrelevant) {
+	return new SourceTypeBinding(this);
+}
+
 public char[] computeUniqueKey(boolean isLeaf) {
+	if (this != this.prototype)
+		return this.prototype.computeUniqueKey();
 //{ObjectTeams: don't use __OT__R names for keys (TODO(SH): nested roles?)
 	if (isRole()) {
 		if (isClass()) {
@@ -1078,6 +1115,10 @@ void faultInTypesForFieldsAndMethods() {
 }
 // NOTE: the type of each field of a source type is resolved when needed
 public FieldBinding[] fields() {
+	
+	if (this != this.prototype)
+		return this.prototype.fields();
+	
 	if ((this.tagBits & TagBits.AreFieldsComplete) != 0)
 		return this.fields;
 
@@ -1144,6 +1185,9 @@ public FieldBinding[] fields() {
  * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#genericTypeSignature()
  */
 public char[] genericTypeSignature() {
+	if (this != this.prototype)
+		return this.prototype.genericTypeSignature();
+	
     if (this.genericReferenceTypeSignature == null)
     	this.genericReferenceTypeSignature = computeGenericTypeSignature(this.typeVariables);
     return this.genericReferenceTypeSignature;
@@ -1153,6 +1197,9 @@ public char[] genericTypeSignature() {
  * <T:LY<TT;>;U:Ljava/lang/Object;V::Ljava/lang/Runnable;:Ljava/lang/Cloneable;:Ljava/util/Map;>Ljava/lang/Exception;Ljava/lang/Runnable;
  */
 public char[] genericSignature() {
+	if (this != this.prototype)
+		return this.prototype.genericSignature();
+	
     StringBuffer sig = null;
 	if (this.typeVariables != Binding.NO_TYPE_VARIABLES) {
 	    sig = new StringBuffer(10);
@@ -1185,6 +1232,9 @@ public char[] genericSignature() {
  * @see org.eclipse.jdt.internal.compiler.lookup.Binding#getAnnotationTagBits()
  */
 public long getAnnotationTagBits() {
+	if (this != this.prototype)
+		return this.prototype.getAnnotationTagBits();
+	
 	if ((this.tagBits & TagBits.AnnotationResolved) == 0 && this.scope != null) {
 		TypeDeclaration typeDecl = this.scope.referenceContext;
 		boolean old = typeDecl.staticInitializerScope.insideTypeAnnotation;
@@ -1206,6 +1256,9 @@ public long getAnnotationTagBits() {
 	return this.tagBits;
 }
 public MethodBinding[] getDefaultAbstractMethods() {
+	if (this != this.prototype)
+		return this.prototype.getDefaultAbstractMethods();
+	
 	int count = 0;
 	for (int i = this.methods.length; --i >= 0;)
 		if (this.methods[i].isDefaultAbstract())
@@ -1221,6 +1274,9 @@ public MethodBinding[] getDefaultAbstractMethods() {
 }
 // NOTE: the return type, arg & exception types of each method of a source type are resolved when needed
 public MethodBinding getExactConstructor(TypeBinding[] argumentTypes) {
+	if (this != this.prototype)
+		return this.prototype.getExactConstructor(argumentTypes);
+	
 	int argCount = argumentTypes.length;
 	if ((this.tagBits & TagBits.AreMethodsComplete) != 0) { // have resolved all arg types & return type of the methods
 		long range;
@@ -1273,6 +1329,9 @@ public MethodBinding getExactConstructor(TypeBinding[] argumentTypes) {
 //NOTE: the return type, arg & exception types of each method of a source type are resolved when needed
 //searches up the hierarchy as long as no potential (but not exact) match was found.
 public MethodBinding getExactMethod(char[] selector, TypeBinding[] argumentTypes, CompilationUnitScope refScope) {
+	if (this != this.prototype)
+		return this.prototype.getExactMethod(selector, argumentTypes, refScope);
+	
 	// sender from refScope calls recordTypeReference(this)
 	int argCount = argumentTypes.length;
 	boolean foundNothing = true;
@@ -1368,6 +1427,8 @@ public MethodBinding getExactMethod(char[] selector, TypeBinding[] argumentTypes
 
 //NOTE: the type of a field of a source type is resolved when needed
 public FieldBinding getField(char[] fieldName, boolean needResolve) {
+	if (this != this.prototype)
+		return this.prototype.getField(fieldName, needResolve);
 //{ObjectTeams: could be called before fields are present
 //              (from ClassScope.findSupertype if supertyperef is a QualifiedTypeReference),
 //              can't find any fields, but mustn't prematurely set NO_FIELDS.
@@ -1454,6 +1515,9 @@ public FieldBinding getField(char[] fieldName, boolean needResolve) {
 
 // NOTE: the return type, arg & exception types of each method of a source type are resolved when needed
 public MethodBinding[] getMethods(char[] selector) {
+	if (this != this.prototype)
+		return this.prototype.getMethods(selector);
+	
 	if ((this.tagBits & TagBits.AreMethodsComplete) != 0) {
 		long range;
 		if ((range = ReferenceBinding.binarySearch(selector, this.methods)) >= 0) {
@@ -1688,6 +1752,9 @@ public SyntheticMethodBinding getSyntheticBridgeMethod(MethodBinding inheritedMe
 }
 
 public boolean hasTypeBit(int bit) {
+	if (this != this.prototype) {
+		return this.prototype.hasTypeBit(bit);
+	}
 	// source types initialize type bits during connectSuperclass/interfaces()
 	return (this.typeBits & bit) != 0;
 }
@@ -1696,6 +1763,10 @@ public boolean hasTypeBit(int bit) {
  * @see org.eclipse.jdt.internal.compiler.lookup.Binding#initializeDeprecatedAnnotationTagBits()
  */
 public void initializeDeprecatedAnnotationTagBits() {
+	if (this != this.prototype) {
+		this.prototype.initializeDeprecatedAnnotationTagBits();
+		return;
+	}
 	if ((this.tagBits & TagBits.DeprecatedAnnotationResolved) == 0) {
 		TypeDeclaration typeDecl = this.scope.referenceContext;
 		boolean old = typeDecl.staticInitializerScope.insideTypeAnnotation;
@@ -1718,6 +1789,10 @@ public void initializeDeprecatedAnnotationTagBits() {
 protected
 // SH}
 void initializeForStaticImports() {
+	if (this != this.prototype) {
+		this.prototype.initializeForStaticImports();
+		return;
+	}
 	if (this.scope == null) return; // already initialized
 
 	if (this.superInterfaces == null)
@@ -1743,7 +1818,9 @@ private void initializeNullDefault() {
  * or for generic types, true if compared to its raw type.
  */
 public boolean isEquivalentTo(TypeBinding otherType) {
-
+	if (this != this.prototype)
+		return this.prototype.isEquivalentTo(otherType);
+	
 	if (this == otherType) return true;
 	if (otherType == null) return false;
 	switch(otherType.kind()) {
@@ -1786,21 +1863,33 @@ public boolean isEquivalentTo(TypeBinding otherType) {
 	return false;
 }
 public boolean isGenericType() {
+	if (this != this.prototype)
+		return this.prototype.isGenericType();
     return this.typeVariables != Binding.NO_TYPE_VARIABLES;
 }
 public boolean isHierarchyConnected() {
+	if (this != this.prototype)
+		return this.prototype.isHierarchyConnected();
 	return (this.tagBits & TagBits.EndHierarchyCheck) != 0;
 }
 public ReferenceBinding[] memberTypes() {
+	if (this != this.prototype)
+		return this.prototype.memberTypes();
 	return this.memberTypes;
 }
 
 public boolean hasMemberTypes() {
+	if (this != this.prototype)
+		return this.prototype.hasMemberTypes();
     return this.memberTypes.length > 0;
 }
 
 // NOTE: the return type, arg & exception types of each method of a source type are resolved when needed
 public MethodBinding[] methods() {
+	
+	if (this != this.prototype)
+		return this.prototype.methods();
+	
 	if ((this.tagBits & TagBits.AreMethodsComplete) != 0)
 		return this.methods;
 
@@ -2038,6 +2127,10 @@ public MethodBinding[] methods() {
 	return this.methods;
 }
 public FieldBinding resolveTypeFor(FieldBinding field) {
+	
+	if (this != this.prototype)
+		return this.prototype.resolveTypeFor(field);
+
 	if ((field.modifiers & ExtraCompilerModifiers.AccUnresolved) == 0)
 		return field;
 
@@ -2091,6 +2184,12 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 				field.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
 			}
 
+			if (sourceLevel >= ClassFileConstants.JDK1_8) {
+				AnnotationBinding [] annotations = field.getAnnotations();
+				if (annotations != null && annotations != Binding.NO_ANNOTATIONS) {
+					ASTNode.copySE8AnnotationsToType(initializationScope, field, annotations);
+				}
+			}
 			// apply null default:
 			LookupEnvironment environment = this.scope.environment();
 			if (environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
@@ -2106,12 +2205,6 @@ public FieldBinding resolveTypeFor(FieldBinding field) {
 					// validate null annotation:
 					if (!this.scope.validateNullAnnotation(field.tagBits, fieldDecl.type, fieldDecl.annotations))
 						field.tagBits &= ~TagBits.AnnotationNullMASK;
-				}
-				if (sourceLevel >= ClassFileConstants.JDK1_8 && !fieldType.isBaseType()) {
-					long nullTagBits = field.tagBits & TagBits.AnnotationNullMASK;
-					if (nullTagBits != 0 && nullTagBits != (fieldType.tagBits & TagBits.AnnotationNullMASK))
-						field.type = environment.createAnnotatedType(fieldType, nullTagBits);
-					// do not reset field.tagBits, since more fields may need to share this information ("@NonNull Object o1, o2;")
 				}
 			}
 		} finally {
@@ -2160,6 +2253,10 @@ public MethodBinding resolveTypesFor(MethodBinding method) {
 }
 public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic) {
 // SH}
+
+	if (this != this.prototype)
+		return this.prototype.resolveTypesFor(method);
+	
 	if ((method.modifiers & ExtraCompilerModifiers.AccUnresolved) == 0)
 		return method;
 //{ObjectTeams:  in state final we lost the scope, cannot use code below any more.
@@ -2167,7 +2264,8 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
     	return method;
 //SH}
 
-	if (this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_5) {
+	final long sourceLevel = this.scope.compilerOptions().sourceLevel;
+	if (sourceLevel >= ClassFileConstants.JDK1_5) {
 		if ((method.getAnnotationTagBits() & TagBits.AnnotationDeprecated) != 0)
 			method.modifiers |= ClassFileConstants.AccDeprecated;
 	}
@@ -2349,7 +2447,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 	}
 
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=337799
-	if (this.scope.compilerOptions().sourceLevel >= ClassFileConstants.JDK1_7) {
+	if (sourceLevel >= ClassFileConstants.JDK1_7) {
 		if ((method.tagBits & TagBits.AnnotationSafeVarargs) != 0) {
 			if (!method.isVarargs()) {
 				methodDecl.scope.problemReporter().safeVarargsOnFixedArityMethod(method);
@@ -2417,6 +2515,12 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 					method.tagBits |= TagBits.HasMissingType;
 				}
 				method.returnType = methodType;
+				if (sourceLevel >= ClassFileConstants.JDK1_8) {
+					AnnotationBinding [] annotations = method.getAnnotations();
+					if (annotations != null && annotations != Binding.NO_ANNOTATIONS) {
+						ASTNode.copySE8AnnotationsToType(methodDecl.scope, method, annotations);
+					}
+				}
 				TypeBinding leafType = methodType.leafComponentType();
 				if (leafType instanceof ReferenceBinding && (((ReferenceBinding) leafType).modifiers & ExtraCompilerModifiers.AccGenericSignature) != 0)
 					method.modifiers |= ExtraCompilerModifiers.AccGenericSignature;
@@ -2455,10 +2559,7 @@ public MethodBinding resolveTypesFor(MethodBinding method, boolean fromSynthetic
 				} else {
 					if (nullTagBits != (method.returnType.tagBits & TagBits.AnnotationNullMASK)) {
 						if (!this.scope.validateNullAnnotation(nullTagBits, returnTypeRef, methodDecl.annotations)) {
-							method.returnType = method.returnType.unannotated();
-						} else {
-							// annotation was mistakenly associated to the method, create the annotated type now:
-							method.returnType = this.scope.environment().createAnnotatedType(method.returnType, nullTagBits);
+							method.returnType.tagBits &= ~TagBits.AnnotationNullMASK;
 						}
 						method.tagBits &= ~TagBits.AnnotationNullMASK;
 					}
@@ -2519,6 +2620,7 @@ private void createArgumentBindings(MethodBinding method, CompilerOptions compil
 	}
 }
 private void evaluateNullAnnotations(long annotationTagBits) {
+	
 	if (this.nullnessDefaultInitialized > 0 || !this.scope.compilerOptions().isAnnotationBasedNullAnalysisEnabled)
 		return;
 	boolean isPackageInfo = CharOperation.equals(this.sourceName, TypeConstants.PACKAGE_INFO_NAME);
@@ -2565,6 +2667,10 @@ private void evaluateNullAnnotations(long annotationTagBits) {
 }
 
 protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation[] annotations, long annotationTagBits) {
+	if (this != this.prototype) {
+		this.prototype.checkRedundantNullnessDefaultRecurse(location, annotations, annotationTagBits);
+		return;
+	}
 	if (this.fPackage.defaultNullness != NO_NULL_DEFAULT) {
 		if ((this.fPackage.defaultNullness == NONNULL_BY_DEFAULT
 				&& ((annotationTagBits & TagBits.AnnotationNonNullByDefault) != 0))) {
@@ -2576,6 +2682,9 @@ protected void checkRedundantNullnessDefaultRecurse(ASTNode location, Annotation
 
 // return: should caller continue searching?
 protected boolean checkRedundantNullnessDefaultOne(ASTNode location, Annotation[] annotations, long annotationTagBits) {
+	if (this != this.prototype)
+		return this.prototype.checkRedundantNullnessDefaultOne(location, annotations, annotationTagBits);
+
 	int thisDefault = this.defaultNullness;
 	if (thisDefault == NONNULL_BY_DEFAULT) {
 		if ((annotationTagBits & TagBits.AnnotationNonNullByDefault) != 0) {
@@ -2587,6 +2696,10 @@ protected boolean checkRedundantNullnessDefaultOne(ASTNode location, Annotation[
 }
 
 boolean hasNonNullDefault() {
+	
+	if (this != this.prototype)
+		return this.prototype.hasNonNullDefault();
+
 	// find the applicable default inside->out:
 
 	SourceTypeBinding currentType = null;
@@ -2639,6 +2752,8 @@ public AnnotationHolder retrieveAnnotationHolder(Binding binding, boolean forceI
 }
 public void setFields(FieldBinding[] fields) {
 	this.fields = fields;
+	if (this != this.prototype)
+		this.prototype.setFields(fields);
 //{ObjectTeams: // integrate pendingField
 	if (this.pendingField != null) {
 		int l= fields.length;
@@ -2664,6 +2779,8 @@ public void setMethods(MethodBinding[] methods) {
 	} else
 // SH}
 	this.methods = methods;
+	if (this != this.prototype)
+		this.prototype.setMethods(methods);
 }
 //{ObjectTeams: adding generated elements
 FieldBinding pendingField= null;
@@ -2842,18 +2959,27 @@ public void resolveGeneratedMethod(AbstractMethodDeclaration methodDeclaration, 
 
 //Markus Witte}
 public final int sourceEnd() {
+	if (this != this.prototype)
+		return this.prototype.sourceEnd();
 	return this.scope.referenceContext.sourceEnd;
 }
 public final int sourceStart() {
+	if (this != this.prototype)
+		return this.prototype.sourceStart();
+
 	return this.scope.referenceContext.sourceStart;
 }
 SimpleLookupTable storedAnnotations(boolean forceInitialize) {
+	if (this != this.prototype)
+		return this.prototype.storedAnnotations(forceInitialize);
+
 	if (forceInitialize && this.storedAnnotations == null && this.scope != null) { // scope null when no annotation cached, and type got processed fully (159631)
 		this.scope.referenceCompilationUnit().compilationResult.hasAnnotations = true;
+		final CompilerOptions globalOptions = this.scope.environment().globalOptions;
 //{ObjectTeams: do support annotations for roles for the sake of copying:
 	  if (!this.isRole())
 // SH}
-		if (!this.scope.environment().globalOptions.storeAnnotations)
+		if (!globalOptions.storeAnnotations && !globalOptions.isAnnotationBasedNullAnalysisEnabled)
 			return null; // not supported during this compile
 		this.storedAnnotations = new SimpleLookupTable(3);
 	}
@@ -2866,6 +2992,8 @@ public ReferenceBinding[] superInterfaces() {
 	return this.superInterfaces;
 }
 public SyntheticMethodBinding[] syntheticMethods() {
+	if (this != this.prototype)
+		return this.prototype.syntheticMethods();
 //{ObjectTeams: two different kinds of synthetics:
 /* orig:
 	if (this.synthetics == null 
@@ -2927,6 +3055,9 @@ public SyntheticMethodBinding[] syntheticMethods() {
  * Answer the collection of synthetic fields to append into the classfile
  */
 public FieldBinding[] syntheticFields() {
+	if (this != this.prototype)
+		return this.prototype.syntheticFields();
+	
 	if (this.synthetics == null) return null;
 	int fieldSize = this.synthetics[SourceTypeBinding.FIELD_EMUL] == null ? 0 : this.synthetics[SourceTypeBinding.FIELD_EMUL].size();
 	int literalSize = this.synthetics[SourceTypeBinding.CLASS_LITERAL_EMUL] == null ? 0 :this.synthetics[SourceTypeBinding.CLASS_LITERAL_EMUL].size();
@@ -2953,7 +3084,11 @@ public FieldBinding[] syntheticFields() {
 	return bindings;
 }
 public String toString() {
-    StringBuffer buffer = new StringBuffer(30);
+	if (this.hasTypeAnnotations()) {
+		return annotatedDebugName();
+    }
+	
+	StringBuffer buffer = new StringBuffer(30);
     buffer.append("(id="); //$NON-NLS-1$
     if (this.id == TypeIds.NoId)
         buffer.append("NoId"); //$NON-NLS-1$
@@ -3057,6 +3192,10 @@ public TypeVariableBinding[] typeVariables() {
 	return this.typeVariables != null ? this.typeVariables : Binding.NO_TYPE_VARIABLES;
 }
 void verifyMethods(MethodVerifier verifier) {
+	if (this != this.prototype) {
+		this.prototype.verifyMethods(verifier);
+		return;
+	}
 //{ObjectTeams: shortcut for predefined confined types (override final methods???)
 	if (TypeAnalyzer.isTopConfined(this))
 		return;
@@ -3076,11 +3215,21 @@ void verifyMethods(MethodVerifier verifier) {
 // SH}
 }
 
+public TypeBinding unannotated() {
+	return this.prototype;
+}
+
 public FieldBinding[] unResolvedFields() {
+	if (this != this.prototype)
+		return this.prototype.unResolvedFields();
 	return this.fields;
 }
 
 public void tagIndirectlyAccessibleMembers() {
+	if (this != this.prototype) {
+		this.prototype.tagIndirectlyAccessibleMembers();
+		return;
+	}
 	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=328281
 	for (int i = 0; i < this.fields.length; i++) {
 		if (!this.fields[i].isPrivate())

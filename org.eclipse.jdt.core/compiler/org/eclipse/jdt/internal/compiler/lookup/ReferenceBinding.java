@@ -118,6 +118,7 @@ abstract public class ReferenceBinding extends AbstractOTReferenceBinding {
 	protected MethodBinding singleAbstractMethod;
 
 	public static final ReferenceBinding LUB_GENERIC = new ReferenceBinding() { /* used for lub computation */
+		{ this.id = TypeIds.T_undefined; }
 		public boolean hasTypeBit(int bit) { return false; }
 	};
 
@@ -139,6 +140,29 @@ abstract public class ReferenceBinding extends AbstractOTReferenceBinding {
 		}
 	};
 	static protected ProblemMethodBinding samProblemBinding = new ProblemMethodBinding(TypeConstants.ANONYMOUS_METHOD, null, ProblemReasons.NoSuchSingleAbstractMethod);
+
+
+	public ReferenceBinding(ReferenceBinding prototype) {
+	super(prototype);
+
+	this.compoundName = prototype.compoundName;
+	this.sourceName = prototype.sourceName;
+	this.modifiers = prototype.modifiers;
+	this.fPackage = prototype.fPackage;
+	this.fileName = prototype.fileName;
+	this.constantPoolName = prototype.constantPoolName;
+	this.signature = prototype.signature;
+	this.compatibleCache = prototype.compatibleCache;
+	this.typeBits = prototype.typeBits;
+	this.singleAbstractMethod = prototype.singleAbstractMethod;
+}
+
+public ReferenceBinding() {
+	super();
+//{ObjectTeams: most subclasses need model to be set:
+	this.model = new TypeModel(this);
+// SH}
+}
 
 public static FieldBinding binarySearch(char[] name, FieldBinding[] sortedFields) {
 	if (sortedFields == null)
@@ -322,11 +346,7 @@ public static void sortMethods(MethodBinding[] sortedMethods, int left, int righ
 	Arrays.sort(sortedMethods, left, right, METHOD_COMPARATOR);
 }
 
-//{ObjectTeams: most subclasses need model to be set:
-	protected ReferenceBinding() {
-		this.model = new TypeModel(this);
-	}
-	// some subclasses share an existing model
+//{ObjectTeams: some subclasses share an existing model
 	protected ReferenceBinding(TypeModel model) {
 		this.model = model;
 		if (model != null && model.getBinding() == null)
@@ -455,7 +475,7 @@ public final boolean canBeSeenBy(ReferenceBinding receiverType, ReferenceBinding
 		if (currentType.isCapture()) {  // https://bugs.eclipse.org/bugs/show_bug.cgi?id=285002
 			if (originalDeclaringClass == currentType.erasure().original()) return true;
 		} else { 
-			if (originalDeclaringClass == currentType.original()) return true;
+			if (equalsEquals(originalDeclaringClass, currentType.original())) return true;
 		}
 		PackageBinding currentPackage = currentType.fPackage;
 		// package could be null for wildcards/intersection types, ignore and recurse in superclass
@@ -1016,7 +1036,7 @@ public char[] attributeName() /* p1.p2.COuter$CInner */ {
 }
 // SH}
 public String debugName() {
-	return (this.compoundName != null) ? new String(readableName()) : "UNNAMED TYPE"; //$NON-NLS-1$
+	return (this.compoundName != null) ? this.hasTypeAnnotations() ? annotatedDebugName() : new String(readableName()) : "UNNAMED TYPE"; //$NON-NLS-1$
 }
 
 public int depth() {
@@ -1520,15 +1540,9 @@ public boolean isStrictlyCompatibleWith(TypeBinding otherType, /*@Nullable*/ Sco
 }
 public boolean isCompatibleWith(TypeBinding otherType, boolean useObjectShortcut, /*@Nullable*/ Scope captureScope) {
 // SH}
-	// disregard any type annotations on this and otherType
-	// recursive call needed when this is annotated, unless the annotation was introduced on a declaration
-	otherType = otherType.unannotated();
-	TypeBinding unannotated = unannotated();
-	if (unannotated != this)
-		return unannotated.isCompatibleWith(otherType, captureScope);
-
-	if (otherType == this)
+	if (equalsEquals(otherType, this))
 		return true;
+
 //{ObjectTeams: respect new argument useObjectShortcut:
 /* orig:
 	if (otherType.id == TypeIds.T_JavaLangObject)
@@ -1942,6 +1956,83 @@ AnnotationBinding[] retrieveAnnotations(Binding binding) {
 
 public void setAnnotations(AnnotationBinding[] annotations) {
 	storeAnnotations(this, annotations);
+}
+
+/**
+ * @see org.eclipse.jdt.internal.compiler.lookup.TypeBinding#nullAnnotatedReadableName(CompilerOptions,boolean)
+ */
+public char[] nullAnnotatedReadableName(CompilerOptions options, boolean shortNames) {
+	if (shortNames)
+		return nullAnnotatedShortReadableName(options);
+	return nullAnnotatedReadableName(options);
+}
+
+char[] nullAnnotatedReadableName(CompilerOptions options) {
+    StringBuffer nameBuffer = new StringBuffer(10);
+	if (isMemberType()) {
+		nameBuffer.append(enclosingType().nullAnnotatedReadableName(options, false));
+		nameBuffer.append('.');
+		appendNullAnnotation(nameBuffer, options);
+		nameBuffer.append(this.sourceName);
+	} else if (this.compoundName != null) {
+		int i;
+		int l=this.compoundName.length;
+		for (i=0; i<l-1; i++) {
+			nameBuffer.append(this.compoundName[i]);
+			nameBuffer.append('.');
+		}
+	    appendNullAnnotation(nameBuffer, options);
+		nameBuffer.append(this.compoundName[i]);
+	} else {
+		// case of TypeVariableBinding with nullAnnotationTagBits:
+		appendNullAnnotation(nameBuffer, options);
+		if (this.sourceName != null)
+			nameBuffer.append(this.sourceName);
+		else // WildcardBinding, CaptureBinding have no sourceName
+			nameBuffer.append(this.readableName());
+	}
+	TypeBinding [] arguments = typeArguments();
+	if (arguments != null && arguments.length > 0) { // empty arguments array happens when PTB has been created just to capture type annotations
+		nameBuffer.append('<');
+	    for (int i = 0, length = arguments.length; i < length; i++) {
+	        if (i > 0) nameBuffer.append(',');
+	        nameBuffer.append(arguments[i].nullAnnotatedReadableName(options, false));
+	    }
+	    nameBuffer.append('>');
+	}
+	int nameLength = nameBuffer.length();
+	char[] readableName = new char[nameLength];
+	nameBuffer.getChars(0, nameLength, readableName, 0);
+    return readableName;
+}
+
+char[] nullAnnotatedShortReadableName(CompilerOptions options) {
+    StringBuffer nameBuffer = new StringBuffer(10);
+	if (isMemberType()) {
+		nameBuffer.append(enclosingType().nullAnnotatedReadableName(options, true));
+		nameBuffer.append('.');
+		appendNullAnnotation(nameBuffer, options);
+		nameBuffer.append(this.sourceName);
+	} else {
+		appendNullAnnotation(nameBuffer, options);
+		if (this.sourceName != null)
+			nameBuffer.append(this.sourceName);
+		else // WildcardBinding, CaptureBinding have no sourceName
+			nameBuffer.append(this.shortReadableName());
+	}
+	TypeBinding [] arguments = typeArguments();
+	if (arguments != null && arguments.length > 0) { // empty arguments array happens when PTB has been created just to capture type annotations
+		nameBuffer.append('<');
+	    for (int i = 0, length = arguments.length; i < length; i++) {
+	        if (i > 0) nameBuffer.append(',');
+	        nameBuffer.append(arguments[i].nullAnnotatedReadableName(options, true));
+	    }
+	    nameBuffer.append('>');
+	}
+	int nameLength = nameBuffer.length();
+	char[] shortReadableName = new char[nameLength];
+	nameBuffer.getChars(0, nameLength, shortReadableName, 0);
+    return shortReadableName;
 }
 
 public char[] shortReadableName() /*Object*/ {

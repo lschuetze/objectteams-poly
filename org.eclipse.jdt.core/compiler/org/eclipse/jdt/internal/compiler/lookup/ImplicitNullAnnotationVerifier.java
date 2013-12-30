@@ -136,9 +136,11 @@ public class ImplicitNullAnnotationVerifier {
 						if (sourceLevel < ClassFileConstants.JDK1_8) {
 							currentMethod.tagBits |= tagBits;
 						} else {
-							if (!currentMethod.returnType.isBaseType())
-								currentMethod.returnType = scope.environment()
-										.createAnnotatedType(currentMethod.returnType, tagBits);
+							if (!currentMethod.returnType.isBaseType()) {
+								// TODO(Stephan: Synthesize AnnotationBinding[] and call LE#createAnnotatedType(TB, AB[]);
+								// currentMethod.returnType = scope.environment()
+								//		.createAnnotatedType(currentMethod.returnType, tagBits);
+							}
 						}
 					}
 				}
@@ -398,8 +400,10 @@ public class ImplicitNullAnnotationVerifier {
 		if (environment.globalOptions.sourceLevel < ClassFileConstants.JDK1_8) {
 			method.tagBits |= nullnessBits;
 		} else {
-			if (!method.returnType.isBaseType())
-				method.returnType = environment.createAnnotatedType(method.returnType, nullnessBits);
+			if (!method.returnType.isBaseType()) {
+				// TODO(Stephan: Synthesize AnnotationBinding[] and call LE#createAnnotatedType(TB, AB[]);
+				//	method.returnType = environment.createAnnotatedType(method.returnType, nullnessBits);
+			}
 		}
 	}
 
@@ -454,8 +458,9 @@ public class ImplicitNullAnnotationVerifier {
 		}
 	}
 	void recordArgNonNullness18(MethodBinding method, int paramIdx, Argument currentArgument, Boolean nonNullNess, LookupEnvironment env) {
-		method.parameters[paramIdx] = env.createAnnotatedType(method.parameters[paramIdx],
-										nonNullNess.booleanValue() ? TagBits.AnnotationNonNull : TagBits.AnnotationNullable);
+		// TODO(Stephan: Synthesize AnnotationBinding[] and call LE#createAnnotatedType(TB, AB[]);
+		//		method.parameters[paramIdx] = env.createAnnotatedType(method.parameters[paramIdx],
+		//										nonNullNess.booleanValue() ? TagBits.AnnotationNonNull : TagBits.AnnotationNullable);
 		if (currentArgument != null) {
 			currentArgument.binding.type = method.parameters[paramIdx];
 		}
@@ -522,7 +527,7 @@ public class ImplicitNullAnnotationVerifier {
 //{ObjectTeams: enable role type comparison
 //added parameters 3 & 4:
 	static boolean areTypesEqual(TypeBinding one, TypeBinding two, MethodBinding methodTwo, LookupEnvironment environment) {
-	    if (one == two) return true;
+		if (TypeBinding.equalsEquals(one, two)) return true;
 //  different comparison for role types:
 	    if (areEqualRoleTypes(one, two, methodTwo.declaringClass, environment))
 	        return true;

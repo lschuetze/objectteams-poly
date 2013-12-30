@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.compiler.ast.LocalDeclaration;
 import org.eclipse.jdt.internal.compiler.ast.LongLiteral;
 import org.eclipse.jdt.internal.compiler.ast.NullLiteral;
 import org.eclipse.jdt.internal.compiler.ast.TypeReference;
+import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ClassScope;
 import org.eclipse.jdt.internal.compiler.lookup.MissingTypeBinding;
@@ -204,7 +205,7 @@ public class LiftingTypeReference extends TypeReference {
 	    			ITeamAnchor anchor = null;
 	    			if (roleRefType.baseclass() instanceof RoleTypeBinding)
 	    				anchor = ((RoleTypeBinding)roleRefType.baseclass())._teamAnchor;
-	    			roleBase = parameterizedRole.environment.createParameterizedType((ReferenceBinding)roleBase.original(), typeArgs, 0L, anchor, -1, roleBase.enclosingType());
+	    			roleBase = parameterizedRole.environment.createParameterizedType((ReferenceBinding)roleBase.original(), typeArgs, anchor, -1, roleBase.enclosingType(), Binding.NO_ANNOTATIONS);
 	    		}
 	    		// THE compatibility check:
 		    	if (   !baseType.isCompatibleWith(roleBase)
