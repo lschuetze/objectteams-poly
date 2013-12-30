@@ -268,6 +268,8 @@ public class ParameterizedSingleTypeReference extends ArrayTypeReference {
   :giro */
 // SH}
 		resolveAnnotations(scope);
+		checkNullConstraints(scope, this.typeArguments);
+
 		// handle three different outcomes:
 		if (type == null) {
 			this.resolvedType = createArrayType(scope, this.resolvedType);

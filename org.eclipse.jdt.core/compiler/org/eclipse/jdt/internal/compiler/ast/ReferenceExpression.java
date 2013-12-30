@@ -14,10 +14,12 @@
  *     Jesper S Moller - Contributions for
  *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *                          Bug 384687 - [1.8] Wildcard type arguments should be rejected for lambda and reference expressions
+ *							Bug 416885 - [1.8][compiler]IncompatibleClassChange error (edit)
  *	   Stephan Herrmann - Contribution for
  *							bug 402028 - [1.8][compiler] null analysis for reference expressions 
  *							bug 404649 - [1.8][compiler] detect illegal reference to indirect or redundant super via I.super.m() syntax
- *							Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis 
+ *							Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *							Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contribution for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
@@ -57,7 +59,6 @@ import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 
 public class ReferenceExpression extends FunctionalExpression implements InvocationSite {
 	
-	private static char [] LAMBDA = { 'l', 'a', 'm', 'b', 'd', 'a' };
 	public Expression lhs;
 	public TypeReference [] typeArguments;
 	public char [] selector;
@@ -153,7 +154,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
 		buffer.append(this.resolvedType.constantPoolName());
 		buffer.append(';');
 		int invokeDynamicNumber = codeStream.classFile.recordBootstrapMethod(this);
-		codeStream.invokeDynamic(invokeDynamicNumber, argumentsSize, 1, LAMBDA, buffer.toString().toCharArray(), 
+		codeStream.invokeDynamic(invokeDynamicNumber, argumentsSize, 1, this.descriptor.selector, buffer.toString().toCharArray(), 
 				this.isConstructorReference(), (this.lhs instanceof TypeReference? (TypeReference) this.lhs : null), this.typeArguments);
 		codeStream.recordPositionsFrom(pc, this.sourceStart);
 	}
@@ -351,6 +352,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
     	}
 
         MethodBinding anotherMethod = null;
+        int paramOffset = 0;
         if (!this.haveReceiver && isMethodReference && parametersLength > 0) {
         	final TypeBinding potentialReceiver = descriptorParameters[0];
         	if (potentialReceiver.isCompatibleWith(this.receiverType, scope)) {
@@ -369,6 +371,7 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         		anotherMethod = scope.getMethod(typeToSearch, this.selector, parameters, this);
         		anotherMethodDepth = this.depth;
         		this.depth = 0;
+        		paramOffset = 1; // 0 is receiver, real parameters start at 1
         	}
         	if (anotherMethod != null && anotherMethod.isValidBinding() && anotherMethod.isStatic()) {
         		scope.problemReporter().methodMustBeAccessedStatically(this, anotherMethod);
@@ -442,20 +445,20 @@ public class ReferenceExpression extends FunctionalExpression implements Invocat
         	scope.problemReporter().unhandledException(methodExceptions[i], this);
         }
         if (scope.compilerOptions().isAnnotationBasedNullAnalysisEnabled) {
-        	int len = this.descriptor.parameters.length;
+        	int len = this.binding.parameters.length;
     		for (int i = 0; i < len; i++) {
-    			long declared = this.descriptor.parameters[i].tagBits & TagBits.AnnotationNullMASK;
+    			long declared = this.descriptor.parameters[i+paramOffset].tagBits & TagBits.AnnotationNullMASK;
     			long implemented = this.binding.parameters[i].tagBits & TagBits.AnnotationNullMASK;
     			if (declared == TagBits.AnnotationNullable) { // promise to accept null
     				if (implemented != TagBits.AnnotationNullable) {
     					char[][] requiredAnnot = implemented == 0L ? null : scope.environment().getNonNullAnnotationName();
-    					scope.problemReporter().parameterLackingNullableAnnotation(this, this.descriptor, i, 
+    					scope.problemReporter().parameterLackingNullableAnnotation(this, this.descriptor, i, paramOffset, 
     							scope.environment().getNullableAnnotationName(),
     							requiredAnnot, this.binding.parameters[i]);
     				}
     			} else if (declared == 0L) {
     				if (implemented == TagBits.AnnotationNonNull) {
-    					scope.problemReporter().parameterRequiresNonnull(this, this.descriptor, i,
+    					scope.problemReporter().parameterRequiresNonnull(this, this.descriptor, i+paramOffset,
     							scope.environment().getNonNullAnnotationName(), this.binding.parameters[i]);
     				}
     			}

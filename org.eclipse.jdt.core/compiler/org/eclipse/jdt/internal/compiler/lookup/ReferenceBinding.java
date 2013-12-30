@@ -28,6 +28,7 @@
  *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								Bug 415291 - [1.8][null] differentiate type incompatibilities due to null annotations
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
+ *								Bug 416176 - [1.8][compiler][null] null type annotations cause grief on type variables
  *      Jesper S Moller - Contributions for
  *								bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *******************************************************************************/
@@ -40,6 +41,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.compiler.ast.MethodDeclaration;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.util.SimpleLookupTable;
 import org.eclipse.objectteams.otdt.core.compiler.IOTConstants;
 import org.eclipse.objectteams.otdt.core.exceptions.InternalCompilerError;
@@ -1518,9 +1520,13 @@ public boolean isStrictlyCompatibleWith(TypeBinding otherType, /*@Nullable*/ Sco
 }
 public boolean isCompatibleWith(TypeBinding otherType, boolean useObjectShortcut, /*@Nullable*/ Scope captureScope) {
 // SH}
-	otherType = otherType.unannotated(); // for now consider un-annotated type as compatible to type with any type annotations
-	if ((this.tagBits & TagBits.HasNullTypeAnnotation) != 0)
-		return unannotated().isCompatibleWith(otherType, captureScope);
+	// disregard any type annotations on this and otherType
+	// recursive call needed when this is annotated, unless the annotation was introduced on a declaration
+	otherType = otherType.unannotated();
+	TypeBinding unannotated = unannotated();
+	if (unannotated != this)
+		return unannotated.isCompatibleWith(otherType, captureScope);
+
 	if (otherType == this)
 		return true;
 //{ObjectTeams: respect new argument useObjectShortcut:
@@ -1906,6 +1912,19 @@ public char[] readableName() /*java.lang.Object,  p.X<T> */ {
 		nameBuffer.getChars(0, nameLength, readableName, 0);
 	}
 	return readableName;
+}
+
+protected void appendNullAnnotation(StringBuffer nameBuffer, CompilerOptions options) {
+	if (options.isAnnotationBasedNullAnalysisEnabled) {
+		// restore applied null annotation from tagBits:
+	    if ((this.tagBits & TagBits.AnnotationNonNull) != 0) {
+	    	char[][] nonNullAnnotationName = options.nonNullAnnotationName;
+			nameBuffer.append('@').append(nonNullAnnotationName[nonNullAnnotationName.length-1]).append(' ');
+	    } else if ((this.tagBits & TagBits.AnnotationNullable) != 0) {
+	    	char[][] nullableAnnotationName = options.nullableAnnotationName;
+			nameBuffer.append('@').append(nullableAnnotationName[nullableAnnotationName.length-1]).append(' ');
+	    }
+	}
 }
 
 public AnnotationHolder retrieveAnnotationHolder(Binding binding, boolean forceInitialization) {

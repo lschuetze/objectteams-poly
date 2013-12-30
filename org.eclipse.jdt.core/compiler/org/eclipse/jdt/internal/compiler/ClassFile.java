@@ -15,6 +15,8 @@
  *     Technical University Berlin - extended API and implementation
  *     Jesper S Moller - Contributions for
  *							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335             
+ *							Bug 406982 - [1.8][compiler] Generation of MethodParameters Attribute in classfile
+ *							Bug 416885 - [1.8][compiler]IncompatibleClassChange error (edit)
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *                          Bug 409236 - [1.8][compiler] Type annotations on intersection cast types dropped by code generator
@@ -311,6 +313,9 @@ public class ClassFile implements TypeConstants, TypeIds {
 			if (this.targetJDK >= ClassFileConstants.JDK1_8) {
 				this.produceAttributes |= ClassFileConstants.ATTR_TYPE_ANNOTATION;
 				this.codeStream = new TypeAnnotationCodeStream(this);
+				if (options.produceMethodParameters) {
+					this.produceAttributes |= ClassFileConstants.ATTR_METHOD_PARAMETERS;
+				}
 			} else {
 				this.codeStream = new StackMapFrameCodeStream(this);
 			}
@@ -1078,6 +1083,9 @@ public class ClassFile implements TypeConstants, TypeIds {
 				.compilationResult
 				.getLineSeparatorPositions());
 		// update the number of attributes
+		if ((this.produceAttributes & ClassFileConstants.ATTR_METHOD_PARAMETERS) != 0) {
+			attributeNumber += generateMethodParameters(methodBinding);
+		}
 		this.contents[methodAttributeOffset++] = (byte) (attributeNumber >> 8);
 		this.contents[methodAttributeOffset] = (byte) attributeNumber;
 	}
@@ -2233,6 +2241,9 @@ public class ClassFile implements TypeConstants, TypeIds {
 						invisibleTypeAnnotationsCounter);
 			}
 		}
+		if ((this.produceAttributes & ClassFileConstants.ATTR_METHOD_PARAMETERS) != 0) {
+			attributesNumber += generateMethodParameters(binding);
+		}
 		// update the number of attributes
 		this.contents[methodAttributeOffset++] = (byte) (attributesNumber >> 8);
 		this.contents[methodAttributeOffset] = (byte) attributesNumber;
@@ -2971,7 +2982,7 @@ public class ClassFile implements TypeConstants, TypeIds {
 			this.contents[localContentsOffset++] = 0;
 			this.contents[localContentsOffset++] = (byte) 3;
 			
-			int functionalDescriptorIndex = this.constantPool.literalIndexForMethodHandle(functional.descriptor.original());
+			int functionalDescriptorIndex = this.constantPool.literalIndexForMethodType(functional.descriptor.original().signature());
 			this.contents[localContentsOffset++] = (byte) (functionalDescriptorIndex >> 8);
 			this.contents[localContentsOffset++] = (byte) functionalDescriptorIndex;
 
@@ -3874,6 +3885,120 @@ public class ClassFile implements TypeConstants, TypeIds {
 			}
 		}
 		return attributesNumber;
+	}
+
+	/**
+	 * @param binding the given method binding
+	 * @return the number of attributes created while dumping he method's parameters in the .class file (0 or 1)
+	 */
+	private int generateMethodParameters(final MethodBinding binding) {
+		
+		int initialContentsOffset = this.contentsOffset;
+		int length = 0; // count of actual parameters
+		
+		AbstractMethodDeclaration methodDeclaration = binding.sourceMethod();
+		
+		boolean isConstructor = binding.isConstructor();
+		TypeBinding[] targetParameters = binding.parameters;
+		ReferenceBinding declaringClass = binding.declaringClass;
+
+		if (declaringClass.isEnum()) {
+			if (isConstructor) { // insert String name,int ordinal
+				length = writeArgumentName(ConstantPool.EnumName, ClassFileConstants.AccSynthetic, length);
+				length = writeArgumentName(ConstantPool.EnumOrdinal, ClassFileConstants.AccSynthetic, length);
+			} else if (CharOperation.equals(ConstantPool.ValueOf, binding.selector)) { // insert String name
+				length = writeArgumentName(ConstantPool.Name, ClassFileConstants.AccMandated, length);
+				targetParameters =  Binding.NO_PARAMETERS; // Override "unknown" synthetics below
+			}
+		}
+
+		boolean needSynthetics = isConstructor && declaringClass.isNestedType();
+		if (needSynthetics) {
+			// Take into account the synthetic argument names
+			// This tracks JLS8, paragraph 8.8.9
+			boolean anonymousWithLocalSuper = declaringClass.isAnonymousType() && declaringClass.superclass().isLocalType();
+			boolean anonymousWithNestedSuper = declaringClass.isAnonymousType() && declaringClass.superclass().isNestedType();
+			boolean isImplicitlyDeclared = ((! declaringClass.isPrivate()) || declaringClass.isAnonymousType()) && !anonymousWithLocalSuper;
+			ReferenceBinding[] syntheticArgumentTypes = declaringClass.syntheticEnclosingInstanceTypes();
+			if (syntheticArgumentTypes != null) {
+				for (int i = 0, count = syntheticArgumentTypes.length; i < count; i++) {
+					// This behaviour tracks JLS 15.9.5.1
+					// This covers that the parameter ending up in a nested class must be mandated "on the way in", even if it
+					// isn't the first. The practical relevance of this is questionable, since the constructor call will be
+					// generated by the same constructor.
+					boolean couldForwardToMandated = anonymousWithNestedSuper ? declaringClass.superclass().enclosingType().equals(syntheticArgumentTypes[i]) : true;
+					int modifier = couldForwardToMandated && isImplicitlyDeclared ? ClassFileConstants.AccMandated : ClassFileConstants.AccSynthetic;
+					char[] name = CharOperation.concat(
+							TypeConstants.SYNTHETIC_ENCLOSING_INSTANCE_PREFIX,
+							String.valueOf(i).toCharArray()); // cannot use depth, can be identical
+					length = writeArgumentName(name, modifier | ClassFileConstants.AccFinal, length);
+				}
+			}
+			if (binding instanceof SyntheticMethodBinding) {
+				targetParameters = ((SyntheticMethodBinding)binding).targetMethod.parameters;
+				methodDeclaration = ((SyntheticMethodBinding)binding).targetMethod.sourceMethod();
+			}
+		}
+		if (targetParameters != Binding.NO_PARAMETERS) {
+			for (int i = 0, max = targetParameters.length; i < max; i++) {
+				if (methodDeclaration != null && methodDeclaration.arguments != null && methodDeclaration.arguments.length > i && methodDeclaration.arguments[i] != null) {
+					Argument argument = methodDeclaration.arguments[i];
+					length = writeArgumentName(argument.name, argument.binding.modifiers, length);
+				} else {
+					length = writeArgumentName(null, ClassFileConstants.AccSynthetic, length);
+				}
+			}
+		}
+		if (needSynthetics) {
+			SyntheticArgumentBinding[] syntheticOuterArguments = declaringClass.syntheticOuterLocalVariables();
+			int count = syntheticOuterArguments == null ? 0 : syntheticOuterArguments.length;
+			for (int i = 0; i < count; i++) {
+				length = writeArgumentName(syntheticOuterArguments[i].name, syntheticOuterArguments[i].modifiers  | ClassFileConstants.AccSynthetic, length);
+			}
+			// move the extra padding arguments of the synthetic constructor invocation to the end
+			for (int i = targetParameters.length, extraLength = binding.parameters.length; i < extraLength; i++) {
+				TypeBinding parameter = binding.parameters[i];
+				length = writeArgumentName(parameter.constantPoolName(), ClassFileConstants.AccSynthetic, length);
+			}
+		}
+
+		if (length > 0) {
+			// so we actually output the parameter
+	 		int attributeLength = 1 + 4 * length; // u1 for count, u2+u2 per parameter
+			if (this.contentsOffset + 6 + attributeLength >= this.contents.length) {
+				resizeContents(6 + attributeLength);
+			}
+			int methodParametersNameIndex = this.constantPool.literalIndex(AttributeNamesConstants.MethodParametersName);
+			this.contents[initialContentsOffset++] = (byte) (methodParametersNameIndex >> 8);
+			this.contents[initialContentsOffset++] = (byte) methodParametersNameIndex;
+			this.contents[initialContentsOffset++] = (byte) (attributeLength >> 24);
+			this.contents[initialContentsOffset++] = (byte) (attributeLength >> 16);
+			this.contents[initialContentsOffset++] = (byte) (attributeLength >> 8);
+			this.contents[initialContentsOffset++] = (byte) attributeLength;
+			this.contents[initialContentsOffset++] = (byte) length;
+			return 1;
+		}
+		else {
+			return 0;
+		}
+	}
+	private int writeArgumentName(char[] name, int modifiers, int oldLength) {
+		int ensureRoomForBytes = 4;
+		if (oldLength == 0) {
+			// Make room for 
+			ensureRoomForBytes += 7;
+			this.contentsOffset += 7; // Make room for attribute header + count byte
+		}
+		if (this.contentsOffset + ensureRoomForBytes > this.contents.length) {
+				resizeContents(ensureRoomForBytes);
+		}
+		int parameterNameIndex = name == null ? 0 : this.constantPool.literalIndex(name);
+		this.contents[this.contentsOffset++] = (byte) (parameterNameIndex >> 8);
+		this.contents[this.contentsOffset++] = (byte) parameterNameIndex;
+		int flags = modifiers & (ClassFileConstants.AccFinal | ClassFileConstants.AccSynthetic | ClassFileConstants.AccMandated);
+		this.contents[this.contentsOffset++] = (byte) (flags >> 8);
+		this.contents[this.contentsOffset++] = (byte) flags;
+		return oldLength + 1;
 	}
 
 	private int generateSignatureAttribute(char[] genericSignature) {

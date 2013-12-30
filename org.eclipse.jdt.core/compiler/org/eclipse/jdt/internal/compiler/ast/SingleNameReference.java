@@ -22,6 +22,7 @@
  *     Jesper S Moller - <jesper@selskabet.org>   - Contributions for
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								bug 378674 - "The method can be declared as static" is wrong
+ *								bug 404657 - [1.8][compiler] Analysis for effectively final variables fails to consider loops
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -158,19 +159,23 @@ public FlowInfo analyseAssignment(BlockScope currentScope, FlowContext flowConte
 			} else {
 				this.bits &= ~ASTNode.FirstAssignmentToLocal;
 			}
-			if (flowInfo.isPotentiallyAssigned(localBinding)) {
+			if (flowInfo.isPotentiallyAssigned(localBinding) || (this.bits & ASTNode.IsCapturedOuterLocal) != 0) {
 				localBinding.tagBits &= ~TagBits.IsEffectivelyFinal;
 				if (!isFinal && (this.bits & ASTNode.IsCapturedOuterLocal) != 0) {
 					currentScope.problemReporter().cannotReferToNonEffectivelyFinalOuterLocal(localBinding, this);
 				}
 			}
-			if (isFinal) {
+			if (! isFinal && (localBinding.tagBits & TagBits.IsEffectivelyFinal) != 0 && (localBinding.tagBits & TagBits.IsArgument) == 0) {
+				flowContext.recordSettingFinal(localBinding, this, flowInfo);
+			} else if (isFinal) {
 				if ((this.bits & ASTNode.DepthMASK) == 0) {
 					// tolerate assignment to final local in unreachable code (45674)
 					if ((isReachable && isCompound) || !localBinding.isBlankFinal()){
 						currentScope.problemReporter().cannotAssignToFinalLocal(localBinding, this);
 					} else if (flowInfo.isPotentiallyAssigned(localBinding)) {
 						currentScope.problemReporter().duplicateInitializationOfFinalLocal(localBinding, this);
+					} else if ((this.bits & ASTNode.IsCapturedOuterLocal) != 0) {
+						currentScope.problemReporter().cannotAssignToFinalOuterLocal(localBinding, this);
 					} else {
 						flowContext.recordSettingFinal(localBinding, this, flowInfo);
 					}

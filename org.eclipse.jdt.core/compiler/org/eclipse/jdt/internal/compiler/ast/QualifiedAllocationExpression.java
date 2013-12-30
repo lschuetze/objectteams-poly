@@ -25,11 +25,15 @@
  *        Andy Clement - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *								bug 403147 - [compiler][null] FUP of bug 400761: consolidate interaction between unboxing, NPE, and deferred checking
+ *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
+ *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *     Jesper S Moller <jesper@selskabet.org> - Contributions for
  *								bug 378674 - "The method can be declared as static" is wrong
- *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
+ *     Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *                          Bug 409245 - [1.8][compiler] Type annotations dropped when call is routed through a synthetic bridge method
+ *     Till Brychcy - Contributions for
+ *     							bug 413460 - NonNullByDefault is not inherited to Constructors when accessed via Class File
  ******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -39,10 +43,12 @@ import org.eclipse.jdt.internal.compiler.codegen.CodeStream;
 import org.eclipse.jdt.internal.compiler.codegen.Opcodes;
 import org.eclipse.jdt.internal.compiler.flow.FlowContext;
 import org.eclipse.jdt.internal.compiler.flow.FlowInfo;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
 import org.eclipse.jdt.internal.compiler.impl.Constant;
 import org.eclipse.jdt.internal.compiler.lookup.Binding;
 import org.eclipse.jdt.internal.compiler.lookup.BlockScope;
 import org.eclipse.jdt.internal.compiler.lookup.ExtraCompilerModifiers;
+import org.eclipse.jdt.internal.compiler.lookup.ImplicitNullAnnotationVerifier;
 import org.eclipse.jdt.internal.compiler.lookup.LocalTypeBinding;
 import org.eclipse.jdt.internal.compiler.lookup.MethodBinding;
 import org.eclipse.jdt.internal.compiler.lookup.ParameterizedTypeBinding;
@@ -158,6 +164,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 					// The corresponding problem (when called from static) is not produced until during code generation
 				}
 			}
+			
 		}
 
 		// check captured variables are initialized in current context (26134)
@@ -345,7 +352,20 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 		if (this.anonymousType == null && this.enclosingInstance == null) {
 			return super.resolveType(scope);
 		}
-
+		TypeBinding result=resolveTypeForQualifiedAllocationExpression(scope);
+		if(result != null && this.binding != null) {
+			final CompilerOptions compilerOptions = scope.compilerOptions();
+			if (compilerOptions.isAnnotationBasedNullAnalysisEnabled && (this.binding.tagBits & TagBits.IsNullnessKnown) == 0) {
+//{ObjectTeams: added 2nd arg:
+				new ImplicitNullAnnotationVerifier(compilerOptions.inheritNullAnnotations, scope.environment())
+// SH}
+						.checkImplicitNullAnnotations(this.binding, null/*srcMethod*/, false, scope);
+			}
+		}
+		return result;
+	}
+	
+	private TypeBinding resolveTypeForQualifiedAllocationExpression(BlockScope scope) {
 		// Propagate the type checking to the arguments, and checks if the constructor is defined.
 		// ClassInstanceCreationExpression ::= Primary '.' 'new' SimpleName '(' ArgumentListopt ')' ClassBodyopt
 		// ClassInstanceCreationExpression ::= Name '.' 'new' SimpleName '(' ArgumentListopt ')' ClassBodyopt
@@ -391,6 +411,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				hasError = true;
 			} else {
 				receiverType = ((SingleTypeReference) this.type).resolveTypeEnclosing(scope, (ReferenceBinding) enclosingInstanceType);
+				receiverType = checkIllegalNullAnnotation(scope, receiverType);
 				if (receiverType != null && enclosingInstanceContainsCast) {
 					CastExpression.checkNeedForEnclosingInstanceCast(scope, this.enclosingInstance, enclosingInstanceType, receiverType);
 				}
@@ -401,6 +422,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 				receiverType = scope.enclosingSourceType();
 			} else {
 				receiverType = this.type.resolveType(scope, true /* check bounds*/);
+				receiverType = checkIllegalNullAnnotation(scope, receiverType);
 				checkParameterizedAllocation: {
 					if (receiverType == null || !receiverType.isValidBinding()) break checkParameterizedAllocation;
 					if (this.type instanceof ParameterizedQualifiedTypeReference) { // disallow new X<String>.Y<Integer>()
@@ -549,7 +571,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
                     null, this.arguments, scope);
           try {
    	// orig:
-   			this.binding = scope.getConstructor(allocationType, argumentTypes, this);
+  			this.binding = scope.getConstructor(allocationType, argumentTypes, this);
     // :giro
           } finally {
                 AnchorMapping.removeCurrentMapping(anchorMapping);
@@ -557,7 +579,7 @@ public static abstract class AbstractQualifiedAllocationExpression extends Alloc
 // SH}
 			if (polyExpressionSeen && polyExpressionsHaveErrors(scope, this.binding, this.arguments, argumentTypes))
 				return null;
-			if (this.binding.isValidBinding()) {
+			if (this.binding.isValidBinding()) {	
 				if (isMethodUseDeprecated(this.binding, scope, true)) {
 					scope.problemReporter().deprecatedMethod(this.binding, this);
 				}

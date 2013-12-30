@@ -19,6 +19,8 @@
  *								bug 331649 - [compiler][null] consider null annotations for fields
  *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
+ *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
+ *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *                          Bug 409517 - [1.8][compiler] Type annotation problems on more elaborate array references
@@ -544,7 +546,6 @@ public abstract class Annotation extends Expression {
 	}
 
 	final static MemberValuePair[] NoValuePairs = new MemberValuePair[0];
-	private static final long TAGBITS_NULLABLE_OR_NONNULL = TagBits.AnnotationNullable|TagBits.AnnotationNonNull;
 
 	static final int[] TYPE_PATH_ELEMENT_ARRAY = new int[]{0,0};
 	static final int[] TYPE_PATH_INNER_TYPE = new int[]{1,0};
@@ -1024,18 +1025,18 @@ public abstract class Annotation extends Expression {
 						}
 						// fields don't yet have their type resolved, in 1.8 null annotations
 						// will be transfered from the field to its type during STB.resolveTypeFor().
-						if ((sourceField.tagBits & TAGBITS_NULLABLE_OR_NONNULL) == TAGBITS_NULLABLE_OR_NONNULL) {
+						if ((sourceField.tagBits & TagBits.AnnotationNullMASK) == TagBits.AnnotationNullMASK) {
 							scope.problemReporter().contradictoryNullAnnotations(this);
-							sourceField.tagBits &= ~TAGBITS_NULLABLE_OR_NONNULL; // avoid secondary problems
+							sourceField.tagBits &= ~TagBits.AnnotationNullMASK; // avoid secondary problems
 						}
 						break;
 					case Binding.LOCAL :
 						LocalVariableBinding variable = (LocalVariableBinding) this.recipient;
 						if (scope.compilerOptions().sourceLevel < ClassFileConstants.JDK1_8) {
 							variable.tagBits |= tagBits;
-							if ((variable.tagBits & TAGBITS_NULLABLE_OR_NONNULL) == TAGBITS_NULLABLE_OR_NONNULL) {
+							if ((variable.tagBits & TagBits.AnnotationNullMASK) == TagBits.AnnotationNullMASK) {
 								scope.problemReporter().contradictoryNullAnnotations(this);
-								variable.tagBits &= ~TAGBITS_NULLABLE_OR_NONNULL; // avoid secondary problems
+								variable.tagBits &= ~TagBits.AnnotationNullMASK; // avoid secondary problems
 							}
 						} else if (variable.type != null) {
 							// bits not relating to null analysis go into the variable:
@@ -1045,11 +1046,14 @@ public abstract class Annotation extends Expression {
 							if (nullTagBits != 0) {
 								if (variable.type.isBaseType()) {
 									scope.problemReporter().illegalAnnotationForBaseType(this, variable.type);
-								} else {
-									variable.type = scope.environment().pushAnnotationIntoType(variable.type, variable.declaration.type, nullTagBits);
-									if ((variable.type.tagBits & TAGBITS_NULLABLE_OR_NONNULL) == TAGBITS_NULLABLE_OR_NONNULL) {
+								} else if (variable.declaration.type instanceof QualifiedTypeReference) {
+									scope.problemReporter().nullAnnotationUnsupportedLocation(this);
+								} else if (nullTagBits != (variable.type.tagBits & TagBits.AnnotationNullMASK)) {
+									if (((variable.type.tagBits & TagBits.AnnotationNullMASK) | nullTagBits ) == TagBits.AnnotationNullMASK) {
 										scope.problemReporter().contradictoryNullAnnotations(this);
 										variable.type = variable.type.unannotated();
+									} else {
+										variable.type = scope.environment().createAnnotatedType(variable.type, nullTagBits);
 									}
 								}
 							}
@@ -1184,7 +1188,7 @@ public abstract class Annotation extends Expression {
 		return this.resolvedType;
 	}
 	private boolean isTypeUseCompatible(TypeReference reference, Scope scope) {
-		if (!(reference instanceof SingleTypeReference)) {
+		if (reference != null && !(reference instanceof SingleTypeReference)) {
 			Binding binding = scope.getPackage(reference.getTypeName());
 			// In case of ProblemReferenceBinding, don't report additional error
 			if (binding instanceof PackageBinding) {

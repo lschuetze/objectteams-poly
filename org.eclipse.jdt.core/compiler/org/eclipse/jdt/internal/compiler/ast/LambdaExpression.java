@@ -14,9 +14,11 @@
  *     Jesper S Moller - Contributions for
  *							bug 382701 - [1.8][compiler] Implement semantic analysis of Lambda expressions & Reference expression
  *							bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
+ *							Bug 416885 - [1.8][compiler]IncompatibleClassChange error (edit)
  *     Stephan Herrmann - Contribution for
  *							bug 401030 - [1.8][null] Null analysis support for lambda methods.
- *							Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis 
+ *							Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
+ *							Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -115,7 +117,7 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		signature.append(')');
 		signature.append(this.expectedType.signature());
 		int invokeDynamicNumber = codeStream.classFile.recordBootstrapMethod(this);
-		codeStream.invokeDynamic(invokeDynamicNumber, (this.shouldCaptureInstance ? 1 : 0) + this.outerLocalVariablesSlotSize, 1, TypeConstants.ANONYMOUS_METHOD, signature.toString().toCharArray());
+		codeStream.invokeDynamic(invokeDynamicNumber, (this.shouldCaptureInstance ? 1 : 0) + this.outerLocalVariablesSlotSize, 1, this.descriptor.selector, signature.toString().toCharArray());
 		codeStream.recordPositionsFrom(pc, this.sourceStart);		
 	}
 
@@ -349,8 +351,8 @@ public class LambdaExpression extends FunctionalExpression implements ReferenceC
 		if (this.binding != null) {
 			int length = this.binding.parameters.length;
 			for (int i=0; i<length; i++) {
-				long nullAnnotationTagBit =  this.binding.returnType.tagBits & TagBits.AnnotationNullMASK;
-				this.scope.validateNullAnnotation(nullAnnotationTagBit, this.arguments[i].type, this.arguments[i].annotations);
+				if (!this.scope.validateNullAnnotation(this.binding.returnType.tagBits, this.arguments[i].type, this.arguments[i].annotations))
+					this.binding.returnType = this.binding.returnType.unannotated();
 			}
 		}
 	}

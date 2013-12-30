@@ -17,6 +17,7 @@
  *								bug 342671 - ClassCastException: org.eclipse.jdt.internal.compiler.lookup.SourceTypeBinding cannot be cast to org.eclipse.jdt.internal.compiler.lookup.ArrayBinding
  *								bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
+ *								Bug 416181 – [1.8][compiler][null] Invalid assignment is not rejected by the compiler
  *        Andy Clement - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
  *******************************************************************************/
@@ -185,9 +186,12 @@ public class ParameterizedQualifiedTypeReference extends ArrayQualifiedTypeRefer
 			}
 		}
 		this.bits |= ASTNode.DidResolve;
-		resolveAnnotations(scope);
 		TypeBinding type = internalResolveLeafType(scope, checkBounds);
 		createArrayType(scope);
+		resolveAnnotations(scope);
+		if (this.typeArguments != null)
+			// relevant null annotations are on the inner most type:
+			checkNullConstraints(scope, this.typeArguments[this.typeArguments.length-1]); 
 		return type == null ? type : this.resolvedType;
 	}
 	private TypeBinding internalResolveLeafType(Scope scope, boolean checkBounds) {

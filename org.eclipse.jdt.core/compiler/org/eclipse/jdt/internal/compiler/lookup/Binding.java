@@ -15,6 +15,8 @@
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contribution for
  *								bug 365531 - [compiler][null] investigate alternative strategy for internally encoding nullness defaults
+ *     Jesper Steen Moller - Contributions for
+ *								Bug 412150 [1.8] [compiler] Enable reflected parameter names during annotation processing
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -70,6 +72,7 @@ public abstract class Binding {
 	public static final TypeVariableBinding[] NO_TYPE_VARIABLES = new TypeVariableBinding[0];
 	public static final AnnotationBinding[] NO_ANNOTATIONS = new AnnotationBinding[0];
 	public static final ElementValuePair[] NO_ELEMENT_VALUE_PAIRS = new ElementValuePair[0];
+	public static final char[][] NO_PARAMETER_NAMES = new char[0][];
 //{ObjectTeams
 	public static final CallinCalloutBinding[] NO_CALLIN_CALLOUT_BINDINGS = new CallinCalloutBinding[0];
 	public static final SyntheticArgumentBinding[] NO_SYNTH_ARGUMENTS = new SyntheticArgumentBinding[0];

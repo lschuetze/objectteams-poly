@@ -14,6 +14,7 @@
  *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contribution for
  *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
+ *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 415543 - [1.8][compiler] Incorrect bound index in RuntimeInvisibleTypeAnnotations attribute
  *******************************************************************************/
@@ -141,7 +142,7 @@ public class TypeParameter extends AbstractVariableDeclaration {
 		if (resolutionScope != null) {
 			resolveAnnotations(resolutionScope, this.annotations, new Annotation.TypeUseBinding(Binding.TYPE_PARAMETER));
 			if (this.binding != null && this.binding.isValidBinding())
-				this.binding.evaluateNullAnnotations(this.annotations);
+				this.binding.evaluateNullAnnotations(scope, this);
 		}	
 	}
 	/* (non-Javadoc)

@@ -13,6 +13,7 @@
  *     IBM Corporation - initial API and implementation
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
  *                          Bug 383624 - [1.8][compiler] Revive code generation support for type annotations (from Olivier's work)
+ *                          Bug 409250 - [1.8][compiler] Various loose ends in 308 code generation
  *******************************************************************************/
 package org.eclipse.jdt.core.util;
 
@@ -22,7 +23,7 @@ package org.eclipse.jdt.core.util;
  *
  * This interface may be implemented by clients.
  *
- * @since 3.10 BETA_JAVA8
+ * @since 3.9 BETA_JAVA8
  */
 public interface IExtendedAnnotation extends IAnnotation {
 	/**
@@ -73,7 +74,7 @@ public interface IExtendedAnnotation extends IAnnotation {
 	 * Answer back the local variable reference info table length of this entry as specified in
 	 * the JVM specifications.
 	 * 
-	 * <p>This is defined only for annotations related a local variable.</p>
+	 * <p>This is defined only for annotations related to a local variable.</p>
 	 *
 	 * @return the local variable reference info table length of this entry as specified in
 	 * the JVM specifications
@@ -84,7 +85,7 @@ public interface IExtendedAnnotation extends IAnnotation {
 	 * Answer back the local variable reference info table of this entry as specified in
 	 * the JVM specifications. Answer an empty array if none.
 	 * 
-	 * <p>This is defined only for annotations related a local variable.</p>
+	 * <p>This is defined only for annotations related to a local variable.</p>
 	 *
 	 * @return the local variable reference info table of this entry as specified in
 	 * the JVM specifications. Answer an empty array if none

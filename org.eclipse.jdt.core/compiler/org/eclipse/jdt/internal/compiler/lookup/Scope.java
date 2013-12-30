@@ -20,6 +20,11 @@
  *								bug 401456 - Code compiles from javac/intellij, but fails from eclipse
  *								bug 401271 - StackOverflowError when searching for a methods references
  *								bug 405706 - Eclipse compiler fails to give compiler error when return type is a inferred generic
+ *								Bug 408441 - Type mismatch using Arrays.asList with 3 or more implementations of an interface with the interface type as the last parameter
+ *								Bug 413958 - Function override returning inherited Generic Type
+ *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
+ *								Bug 416183 - [1.8][compiler][null] Overload resolution fails with null annotations
+ *								Bug 416176 - [1.8][compiler][null] null type annotations cause grief on type variables
  *     Jesper S Moller - Contributions for
  *								bug 382721 - [1.8][compiler] Effectively final variables needs special treatment
  *								Bug 378674 - "The method can be declared as static" is wrong
@@ -444,6 +449,16 @@ public abstract class Scope {
 	 *  of its type in the generic declaration corresponding to C." 
 	 */
 	public static TypeBinding substitute(Substitution substitution, TypeBinding originalType) {
+		TypeBinding unannotatedOriginal = originalType.unannotated();
+		TypeBinding substitute = substitute0(substitution, unannotatedOriginal);
+		if (unannotatedOriginal == originalType)		// no annotation => use naked substitute
+			return substitute;
+		else if (substitute == unannotatedOriginal)		// no substitution => re-use annotated type
+			return originalType;
+		else 											// substitution and annotation: merge both
+			return substitution.environment().copyAnnotations(originalType, substitute);
+	}
+	private static TypeBinding substitute0(Substitution substitution, TypeBinding originalType) {
 		if (originalType == null) return null;
 //{ObjectTeams: unwrap type variable from dependent type?
 		if (DependentTypeBinding.isDependentTypeVariable(originalType))
@@ -759,7 +774,8 @@ public abstract class Scope {
 		Map invocations = new HashMap(2);
 		boolean noProblems = true;
 		// preinitializing each type variable
-		for (int i = 0, paramLength = typeParameters.length; i < paramLength; i++) {
+		int paramLength = typeParameters.length;
+		for (int i = 0; i < paramLength; i++) {
 			TypeParameter typeParameter = typeParameters[i];
 //{ObjectTeams: don't expect a TypeVariableBinding for a TypeValueParameter:
 			if (typeParameter instanceof TypeValueParameter)
@@ -773,7 +789,7 @@ public abstract class Scope {
 			// set firstBound to the binding of the first explicit bound in parameter declaration
 			typeVariable.firstBound = null; // first bound used to compute erasure
 		}
-		nextVariable: for (int i = 0, paramLength = typeParameters.length; i < paramLength; i++) {
+		nextVariable: for (int i = 0; i < paramLength; i++) {
 			TypeParameter typeParameter = typeParameters[i];
 //{ObjectTeams: don't expect a TypeVariableBinding for a TypeValueParameter:
 			if (typeParameter instanceof TypeValueParameter)
@@ -923,6 +939,10 @@ public abstract class Scope {
 			}
 			noProblems &= (typeVariable.tagBits & TagBits.HierarchyHasProblems) == 0;
 		}
+		// after bounds have been resolved we're ready for resolving the type parameter itself,
+		// which includes resolving/evaluating type annotations and checking for inconsistencies
+		for (int i = 0; i < paramLength; i++)
+			resolveTypeParameter(typeParameters[i]);
 		return noProblems;
 	}
 
@@ -995,6 +1015,10 @@ public abstract class Scope {
 		if (count != length)
 			System.arraycopy(typeVariableBindings, 0, typeVariableBindings = new TypeVariableBinding[count], 0, count);
 		return typeVariableBindings;
+	}
+
+	void resolveTypeParameter(TypeParameter typeParameter) {
+		// valid only for ClassScope and MethodScope
 	}
 
 	public final ClassScope enclosingClassScope() {
@@ -4949,14 +4973,28 @@ public abstract class Scope {
 		return visibleIndex == 1 ? visible[0] : mostSpecificMethodBinding(visible, visibleIndex, argumentTypes, allocationSite, allocationType);
 	}
 
-	public void validateNullAnnotation(long tagBits, TypeReference typeRef, Annotation[] annotations) {
+	public boolean validateNullAnnotation(long tagBits, TypeReference typeRef, Annotation[] annotations) {
 		long nullAnnotationTagBit = tagBits & (TagBits.AnnotationNullMASK);
 		if (nullAnnotationTagBit != 0) {
 			TypeBinding type = typeRef.resolvedType;
 			if (type != null && type.isBaseType()) {
-				problemReporter().illegalAnnotationForBaseType(typeRef, annotations, nullAnnotationTagBit);
+				// type annotations are *always* illegal for 'void' (already reported)
+				if (!(typeRef.resolvedType.id == TypeIds.T_void && compilerOptions().sourceLevel >= ClassFileConstants.JDK1_8))
+					problemReporter().illegalAnnotationForBaseType(typeRef, annotations, nullAnnotationTagBit);
+				return false;
+			}
+			if (annotations != null && typeRef instanceof QualifiedTypeReference) {
+				// illegal @NonNull Outer.Inner:
+				for (int i = 0; i < annotations.length; i++) {
+					int id = annotations[i].resolvedType.id;
+					if (id == TypeIds.T_ConfiguredAnnotationNonNull || id == TypeIds.T_ConfiguredAnnotationNullable) {
+						problemReporter().nullAnnotationUnsupportedLocation(annotations[i]);
+						return false;
+					}
+				}
 			}
 		}
+		return true;
 	}
 	public static BlockScope typeAnnotationsResolutionScope(Scope scope) {
 		BlockScope resolutionScope = null;

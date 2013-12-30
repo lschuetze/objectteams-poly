@@ -16,7 +16,6 @@
 package org.eclipse.jdt.internal.compiler.lookup;
 
 import org.eclipse.jdt.internal.compiler.ast.MessageSend;
-import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.AnchorMapping;
 import org.eclipse.objectteams.otdt.internal.core.compiler.lookup.DependentTypeBinding;
@@ -396,17 +395,6 @@ public class ParameterizedGenericMethodBinding extends ParameterizedMethodBindin
 // SH}
 	    this.wasInferred = true;// resulting from method invocation inferrence
 	    this.parameterNonNullness = originalMethod.parameterNonNullness;
-	}
-
-	public void checkNullConstraints(Scope scope, TypeReference typeArgument, int rank) {
-    	TypeBinding[] variables = this.originalMethod.typeVariables();
-		if (variables != null && variables.length > rank) {
-			if (variables[rank].hasNullTypeAnnotations()) {
-				if ((typeArgument.resolvedType.tagBits & TagBits.AnnotationNullMASK) != (variables[rank].tagBits & TagBits.AnnotationNullMASK)) {
-					scope.problemReporter().nullityMismatchTypeArgument(variables[rank], typeArgument.resolvedType, typeArgument);
-				}
-	    	}
-		}
 	}
 
 	/*

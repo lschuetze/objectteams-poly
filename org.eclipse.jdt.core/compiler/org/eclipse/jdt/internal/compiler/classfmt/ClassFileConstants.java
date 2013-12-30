@@ -15,6 +15,7 @@
  *     Technical University Berlin - extended API and implementation
  *     Jesper S Moller - Contributions for
  *							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335             
+ *							Bug 406982 - [1.8][compiler] Generation of MethodParameters Attribute in classfile
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.classfmt;
 
@@ -62,6 +63,13 @@ public interface ClassFileConstants {
  	int AccValueParam = 0x8000;
 // SH}
 
+	/**
+	 * From classfile version 52 (compliance 1.8 up), meaning that a formal parameter is mandated
+	 * by a language specification, so all compilers for the language must emit it.
+	 */
+	int AccMandated     = 0x8000;
+
+	
 	/**
 	 * Other VM flags.
 	 */
@@ -166,4 +174,5 @@ public interface ClassFileConstants {
 	int ATTR_STACK_MAP_TABLE = 0x8; // Stack map table attribute
 	int ATTR_STACK_MAP = 0x10; // Stack map attribute: cldc
 	int ATTR_TYPE_ANNOTATION = 0x20; // type annotation attribute (jsr 308)
+	int ATTR_METHOD_PARAMETERS = 0x40; // method parameters attribute (jep 118)
 }

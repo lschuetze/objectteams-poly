@@ -840,7 +840,7 @@ public abstract class ASTNode {
 	 * <code>ExtraDimension</code>.
 	 *
 	 * @see ExtraDimension
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public static final int EXTRA_DIMENSION = 85;
 
@@ -848,7 +848,7 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>LambdaExpression</code>.
 	 * @see LambdaExpression
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public static final int LAMBDA_EXPRESSION = 86;
 
@@ -857,7 +857,7 @@ public abstract class ASTNode {
 	 * <code>IntersectionType</code>.
 	 *
 	 * @see IntersectionType
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public static final int INTERSECTION_TYPE = 87;
 
@@ -865,7 +865,7 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>QualifiedType</code>.
 	 * @see QualifiedType
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAV8
 	 */
 	public static final int PACKAGE_QUALIFIED_TYPE = 88;
 
@@ -873,7 +873,7 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>CreationReference</code>.
 	 * @see CreationReference
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAV8
 	 */
 	public static final int CREATION_REFERENCE = 89;
 
@@ -881,7 +881,7 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>ExpressionMethodReference</code>.
 	 * @see ExpressionMethodReference
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAV8
 	 */
 	public static final int EXPRESSION_METHOD_REFERENCE = 90;
 
@@ -889,7 +889,7 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>SuperMethhodReference</code>.
 	 * @see SuperMethodReference
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAV8
 	 */
 	public static final int SUPER_METHOD_REFERENCE = 91;
 
@@ -897,7 +897,7 @@ public abstract class ASTNode {
 	 * Node type constant indicating a node of type
 	 * <code>TypeMethodReference</code>.
 	 * @see TypeMethodReference
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAV8
 	 */
 	public static final int TYPE_METHOD_REFERENCE = 92;
 
@@ -2092,7 +2092,7 @@ public abstract class ASTNode {
      * </p>
      * 
 	 * @exception UnsupportedOperationException if this operation is used below JLS8
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	final void unsupportedIn2_3_4() {
 		if (this.ast.apiLevel < AST.JLS8) {
@@ -2125,7 +2125,7 @@ public abstract class ASTNode {
      * </p>
      * 
 	 * @exception UnsupportedOperationException if this operation is used in an AST later than JLS4
-     * @since 3.10 BETA_JAVA8
+     * @since 3.9 BETA_JAVA8
      */
 	// In API Javadocs, add: * @deprecated In the JLS8 API, this method is replaced by {@link #replacement()}.
 	final void supportedOnlyIn2_3_4() {

@@ -16,6 +16,11 @@
  *                          Bug 409236 - [1.8][compiler] Type annotations on intersection cast types dropped by code generator
  *                          Bug 409246 - [1.8][compiler] Type annotations on catch parameters not handled properly
  *                          Bug 409517 - [1.8][compiler] Type annotation problems on more elaborate array references
+ *        Stephan Herrmann - Contribution for
+ *							Bug 415911 - [1.8][compiler] NPE when TYPE_USE annotated method with missing return type
+ *							Bug 416176 - [1.8][compiler][null] null type annotations cause grief on type variables
+ *         Jesper S Moller - Contributions for
+ *                          Bug 416885 - [1.8][compiler]IncompatibleClassChange error (edit)
  *******************************************************************************/
 package org.eclipse.jdt.core.tests.compiler.regression;
 
@@ -30,6 +35,7 @@ public class TypeAnnotationTest extends AbstractRegressionTest {
 
 	static {
 //		TESTS_NUMBERS = new int [] { 40 };
+//		TESTS_NAMES = new String[] { "testTypeVariable" };
 	}
 	public static Class testClass() {
 		return TypeAnnotationTest.class;
@@ -3211,7 +3217,7 @@ public class TypeAnnotationTest extends AbstractRegressionTest {
 		"");
 		String expectedOutput =
 			"    RuntimeVisibleTypeAnnotations: \n" + 
-			"      #48 @A(\n" + 
+			"      #47 @A(\n" + 
 			"        target type = 0x46 METHOD_REFERENCE\n" + 
 			"        offset = 8\n" + 
 			"      )\n";
@@ -3243,14 +3249,14 @@ public class TypeAnnotationTest extends AbstractRegressionTest {
 		"");
 		String expectedOutput =
 			"    RuntimeVisibleTypeAnnotations: \n" + 
-			"      #31 @B(\n" + 
-			"        #32 value=(int) 1 (constant type)\n" + 
+			"      #30 @B(\n" + 
+			"        #31 value=(int) 1 (constant type)\n" + 
 			"        target type = 0x46 METHOD_REFERENCE\n" + 
 			"        offset = 0\n" + 
 			"        location = [ARRAY]\n" + 
 			"      )\n" + 
-			"      #31 @B(\n" + 
-			"        #32 value=(int) 2 (constant type)\n" + 
+			"      #30 @B(\n" + 
+			"        #31 value=(int) 2 (constant type)\n" + 
 			"        target type = 0x46 METHOD_REFERENCE\n" + 
 			"        offset = 0\n" + 
 			"      )\n";
@@ -3285,7 +3291,7 @@ public class TypeAnnotationTest extends AbstractRegressionTest {
 		"");
 		String expectedOutput =
 			"    RuntimeVisibleTypeAnnotations: \n" + 
-			"      #54 @A(\n" + 
+			"      #53 @A(\n" + 
 			"        target type = 0x4a CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT\n" + 
 			"        offset = 8\n" + 
 			"        type argument index = 0\n" + 
@@ -3320,7 +3326,7 @@ public class TypeAnnotationTest extends AbstractRegressionTest {
 		"");
 		String expectedOutput =
 			"    RuntimeVisibleTypeAnnotations: \n" + 
-			"      #48 @A(\n" + 
+			"      #47 @A(\n" + 
 			"        target type = 0x4b METHOD_REFERENCE_TYPE_ARGUMENT\n" + 
 			"        offset = 8\n" + 
 			"        type argument index = 0\n" + 
@@ -5465,7 +5471,46 @@ public class TypeAnnotationTest extends AbstractRegressionTest {
 			"      )\n";
 		checkDisassembledClassFile(OUTPUT_DIR + File.separator + "X.class", "X", expectedOutput, ClassFileBytesDisassembler.SYSTEM);
 	}
-	
-	
+
+	public void testBug415911() {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"import java.lang.annotation.ElementType;\n" + 
+				"import java.lang.annotation.Target;\n" + 
+				"\n" + 
+				"@Target(ElementType.TYPE_USE)\n" + 
+				"@interface Marker {\n" + 
+				"}\n" + 
+				"\n" + 
+				"public class X {\n" + 
+				"    @Marker\n" + 
+				"    foo(String s) {\n" + 
+				"\n" + 
+				"    }\n" + 
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 10)\n" + 
+			"	foo(String s) {\n" + 
+			"	^^^^^^^^^^^^^\n" + 
+			"Return type for the method is missing\n" + 
+			"----------\n");
+	}
+
+	public void testTypeVariable() {
+		runNegativeTest(
+			new String[] {
+				"X.java",
+				"public class X<@Missing T> {\n" +
+				"}\n"
+			},
+			"----------\n" + 
+			"1. ERROR in X.java (at line 1)\n" + 
+			"	public class X<@Missing T> {\n" + 
+			"	                ^^^^^^^\n" + 
+			"Missing cannot be resolved to a type\n" + 
+			"----------\n");
+	}
 }
 

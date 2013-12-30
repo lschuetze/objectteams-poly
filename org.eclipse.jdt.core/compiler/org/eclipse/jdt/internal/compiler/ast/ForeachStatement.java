@@ -5,6 +5,10 @@
  * which accompanies this distribution, and is available at
  * http://www.eclipse.org/legal/epl-v10.html
  *
+ * This is an implementation of an early-draft specification developed under the Java
+ * Community Process (JCP) and is made available for testing and evaluation purposes
+ * only. The code is not compatible with any specification of the JCP.
+ *
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *     Technical University Berlin - extended API and implementation
@@ -14,6 +18,8 @@
  *								bug 365859 - [compiler][null] distinguish warnings based on flow analysis vs. null annotations
  *								bug 345305 - [compiler][null] Compiler misidentifies a case of "variable can only be null"
  *								bug 393719 - [compiler] inconsistent warnings on iteration variables
+ *								Bug 411964 - [1.8][null] leverage null type annotation in foreach statement
+ *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *     Jesper S Moller -  Contribution for
  *								bug 401853 - Eclipse Java compiler creates invalid bytecode (java.lang.VerifyError)
  *******************************************************************************/
@@ -121,11 +127,9 @@ public class ForeachStatement extends Statement {
 			condInfo.nullInfoLessUnconditionalCopy();
 		actionInfo.markAsDefinitelyUnknown(elementVarBinding);
 		if (currentScope.compilerOptions().isAnnotationBasedNullAnalysisEnabled) {
-			// this currently produces an unavoidable warning against all @NonNull element vars:
-			int nullStatus = this.elementVariable.checkAssignmentAgainstNullAnnotation(currentScope, flowContext, 
-															elementVarBinding, FlowInfo.UNKNOWN, this.collection, this.collectionElementType);
-			// TODO (stephan): 	once we have JSR 308 fetch nullStatus from the collection element type
-			//              	and feed the result into the above check (instead of FlowInfo.UNKNOWN)
+			int elementNullStatus = FlowInfo.tagBitsToNullStatus(this.collectionElementType.tagBits);
+			int nullStatus = NullAnnotationMatching.checkAssignment(currentScope, flowContext, elementVarBinding, elementNullStatus,
+																		this.collection, this.collectionElementType);
 			if ((elementVarBinding.type.tagBits & TagBits.IsBaseType) == 0) {
 				actionInfo.markNullStatus(elementVarBinding, nullStatus);
 			}

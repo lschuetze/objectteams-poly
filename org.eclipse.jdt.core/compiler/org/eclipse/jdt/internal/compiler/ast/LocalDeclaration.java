@@ -27,8 +27,12 @@
  *							bug 395002 - Self bound generic class doesn't resolve bounds properly for wildcards for certain parametrisation.
  *							bug 383368 - [compiler][null] syntactic null analysis for field references
  *							bug 400761 - [compiler][null] null may be return as boolean without a diagnostic
+ *							Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
+ *							Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *     Jesper S Moller - Contributions for
  *							Bug 378674 - "The method can be declared as static" is wrong
+ *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
+ *							Bug 409250 - [1.8][compiler] Various loose ends in 308 code generation
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.ast;
 
@@ -139,7 +143,7 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		this.bits &= ~FirstAssignmentToLocal;  // int i = (i = 0);
 	}
 	flowInfo.markAsDefinitelyAssigned(this.binding);
-	nullStatus = checkAssignmentAgainstNullAnnotation(currentScope, flowContext, this.binding, nullStatus, this.initialization, this.initialization.resolvedType);
+	nullStatus = NullAnnotationMatching.checkAssignment(currentScope, flowContext, this.binding, nullStatus, this.initialization, this.initialization.resolvedType);
 	if ((this.binding.type.tagBits & TagBits.IsBaseType) == 0) {
 		flowInfo.markNullStatus(this.binding, nullStatus);
 		// no need to inform enclosing try block since its locals won't get
@@ -366,7 +370,18 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 		}
 		// only resolve annotation at the end, for constant to be positioned before (96991)
 		resolveAnnotations(scope, this.annotations, this.binding);
-		scope.validateNullAnnotation(this.binding.tagBits, this.type, this.annotations);
+		// Check if this declaration should now have the type annotations bit set
+		if (this.annotations != null) {
+			for (int i = 0, max = this.annotations.length; i < max; i++) {
+				TypeBinding resolvedAnnotationType = this.annotations[i].resolvedType;
+				if (resolvedAnnotationType != null && (resolvedAnnotationType.getAnnotationTagBits() & TagBits.AnnotationForTypeUse) != 0) {
+					this.bits |= ASTNode.HasTypeAnnotations;
+					break;
+				}
+			}
+		}
+		if (!scope.validateNullAnnotation(this.binding.tagBits, this.type, this.annotations))
+			this.binding.tagBits &= ~TagBits.AnnotationNullMASK;
 	}
 
 	public void traverse(ASTVisitor visitor, BlockScope scope) {

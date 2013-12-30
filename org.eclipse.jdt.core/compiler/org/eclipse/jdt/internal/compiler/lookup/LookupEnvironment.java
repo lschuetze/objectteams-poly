@@ -22,6 +22,11 @@
  *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
  *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								Bug 415291 - [1.8][null] differentiate type incompatibilities due to null annotations
+ *								Bug 392238 - [1.8][compiler][null] Detect semantically invalid null type annotations
+ *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
+ *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
+ *								Bug 416183 - [1.8][compiler][null] Overload resolution fails with null annotations
+ *								Bug 416307 - [1.8][compiler][null] subclass with type parameter substitution confuses null checking
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -35,9 +40,7 @@ import java.util.Set;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.internal.compiler.ClassFilePool;
 import org.eclipse.jdt.internal.compiler.ast.CompilationUnitDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.QualifiedTypeReference;
 import org.eclipse.jdt.internal.compiler.ast.TypeDeclaration;
-import org.eclipse.jdt.internal.compiler.ast.TypeReference;
 import org.eclipse.jdt.internal.compiler.ast.Wildcard;
 import org.eclipse.jdt.internal.compiler.classfmt.ClassFileConstants;
 import org.eclipse.jdt.internal.compiler.classfmt.TypeAnnotationWalker;
@@ -897,7 +900,7 @@ public ArrayBinding createArrayType(TypeBinding leafComponentType, int dimension
 		if (currentBinding == null) // no matching array, but space left
 			return arrayBindings[index] = new ArrayBinding(leafComponentType, dimensionCount, this, nullTagBitsPerDimension);
 		if (currentBinding.leafComponentType == leafComponentType
-				&& (nullTagBitsPerDimension == null || Arrays.equals(currentBinding.nullTagBitsPerDimension, nullTagBitsPerDimension)))
+				&& Arrays.equals(currentBinding.nullTagBitsPerDimension, nullTagBitsPerDimension))
 			return currentBinding;
 	}
 
@@ -972,9 +975,6 @@ public BinaryTypeBinding createBinaryTypeFrom(IBinaryType binaryType, PackageBin
 	}
 	packageBinding.addType(binaryBinding);
 	setAccessRestriction(binaryBinding, accessRestriction);
-	// need type annotations before processing methods (for @NonNullByDefault)
-	if (this.globalOptions.isAnnotationBasedNullAnalysisEnabled)
-		binaryBinding.scanTypeForNullDefaultAnnotation(binaryType, packageBinding, binaryBinding);
 	binaryBinding.cachePartsFrom(binaryType, needFieldsAndMethods);
 	return binaryBinding;
 }
@@ -1236,7 +1236,7 @@ public TypeBinding createAnnotatedType(TypeBinding genericType, long annotationB
 	}
 	if (genericType instanceof ReferenceBinding) {
 		TypeBinding[] typeArguments = genericType.isParameterizedType() ? ((ParameterizedTypeBinding) genericType).arguments : null;
-		ParameterizedTypeBinding parameterizedType = createParameterizedType((ReferenceBinding) genericType, typeArguments, 
+		ParameterizedTypeBinding parameterizedType = createParameterizedType((ReferenceBinding) genericType.original(), typeArguments, 
 																			annotationBits, genericType.enclosingType());
 		parameterizedType.id = genericType.id; // for well-known types shared the id (only here since those types are not generic, are they?)
 		return parameterizedType;
@@ -1249,41 +1249,50 @@ public TypeBinding createAnnotatedType(TypeBinding genericType, long annotationB
 			return createArrayType(genericType.leafComponentType(), genericType.dimensions(), tagBitsPerDims);
 		}
 	}
-	// TODO(stephan): PolyTypeBinding
 	return genericType;
 }
 
 /**
- * Create an annotated type from 'type' by applying 'annotationBits' to its outermost enclosing type.
- * This is used for those locations where a null annotations was parsed as a declaration annotation
- * and later must be pushed into the type.
- * @param type
- * @param annotationBits
+ * After an 'annotatedType' has been substituted yielding 'unannotatedSubstitute,
+ * use this method to re-apply the null type annotations from 'annotatedType' to the substitute.
+ * We assume that both types are structurally equivalent.
  */
-public TypeBinding pushAnnotationIntoType(TypeBinding type, TypeReference typeRef, long annotationBits) {
-	TypeBinding outermostType = type;
-	if (typeRef instanceof QualifiedTypeReference) {
-		int depth = typeRef.getAnnotatableLevels();
-		while (--depth > 0)
-			outermostType = outermostType.enclosingType();
-	}
-	if ((outermostType.tagBits & TagBits.AnnotationNullMASK) != annotationBits) {
-		if (type == outermostType)
-			return createAnnotatedType(type, annotationBits);
-		// types with true enclosingType() must be ReferenceBindings
-		return reWrap((ReferenceBinding) type, outermostType, (ReferenceBinding)createAnnotatedType(outermostType, annotationBits));
-	}
-	return type;
-}
+public TypeBinding copyAnnotations(TypeBinding annotatedType, TypeBinding unannotatedSubstitute) {
+	if (!annotatedType.hasNullTypeAnnotations())
+		return unannotatedSubstitute;
 
-private ReferenceBinding reWrap(ReferenceBinding inner, TypeBinding outer, ReferenceBinding annotatedOuter) {
-	ReferenceBinding annotatedEnclosing =  (inner.enclosingType() == outer) 
-			? annotatedOuter
-			: reWrap(inner.enclosingType(), outer, annotatedOuter);
-	TypeBinding[] arguments = (inner instanceof ParameterizedTypeBinding)
-			? ((ParameterizedTypeBinding) inner).arguments 
-			: Binding.NO_TYPES;
-	return createParameterizedType((ReferenceBinding)inner.original(), arguments, inner.tagBits, annotatedEnclosing);	
+	// FIXME(stephan): what if both types have (some) null annotations??
+	if (unannotatedSubstitute instanceof ReferenceBinding) {
+		TypeBinding[] newArguments = null;
+		if (annotatedType.isParameterizedType() && unannotatedSubstitute.isParameterizedType()) {
+			ParameterizedTypeBinding unannotatedPTB = (ParameterizedTypeBinding) unannotatedSubstitute;
+			ParameterizedTypeBinding annotatedPTB = (ParameterizedTypeBinding) annotatedType;
+			if (unannotatedPTB.arguments != null 
+					&& annotatedPTB.arguments != null
+					&& unannotatedPTB.arguments.length == annotatedPTB.arguments.length) {
+				int length = annotatedPTB.arguments.length;
+				newArguments = new TypeBinding[length];
+				for (int i = 0; i < length; i++) {
+					newArguments[i] = copyAnnotations(annotatedPTB.arguments[i], unannotatedPTB.arguments[i]);
+				}
+			}
+		}
+		ReferenceBinding annotatedEnclosing = annotatedType.enclosingType();
+		ReferenceBinding newEnclosing = unannotatedSubstitute.enclosingType();
+		if (annotatedEnclosing != null && annotatedEnclosing.hasNullTypeAnnotations())
+			newEnclosing = (ReferenceBinding) copyAnnotations(annotatedEnclosing, newEnclosing);
+		long nullTagBits = annotatedType.tagBits & TagBits.AnnotationNullMASK;
+		return createParameterizedType((ReferenceBinding)unannotatedSubstitute.original(), newArguments, nullTagBits, newEnclosing);
+
+	} else if (annotatedType instanceof ArrayBinding && unannotatedSubstitute instanceof ArrayBinding) {
+		long[] tagBitsOnDimensions = ((ArrayBinding) annotatedType).nullTagBitsPerDimension;
+		TypeBinding annotatedLeaf = annotatedType.leafComponentType();
+		TypeBinding newLeafType = unannotatedSubstitute.leafComponentType(); 
+		if (annotatedLeaf.hasNullTypeAnnotations())
+			newLeafType = copyAnnotations(annotatedLeaf, newLeafType);
+		return createArrayType(newLeafType, unannotatedSubstitute.dimensions(), tagBitsOnDimensions);
+	}
+	return unannotatedSubstitute; // shouldn't happen actually
 }
 
 /**
@@ -1415,6 +1424,9 @@ public RawTypeBinding createRawType(ReferenceBinding genericType, ReferenceBindi
 }
 
 public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind) {
+	return createWildcard(genericType, rank, bound, otherBounds, boundKind, 0);
+}
+public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, TypeBinding bound, TypeBinding[] otherBounds, int boundKind, long annotationTagBits) {
 	// cached info is array of already created wildcard  types for this type
 	if (genericType == null) // pseudo wildcard denoting composite bounds for lub computation
 		genericType = ReferenceBinding.LUB_GENERIC;
@@ -1429,6 +1441,7 @@ public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, Ty
 			    if (cachedType == null) break nextCachedType;
 			    if (cachedType.genericType != genericType) continue nextCachedType; // remain of unresolved type
 			    if (cachedType.rank != rank) continue nextCachedType;
+			    if ((cachedType.tagBits & TagBits.AnnotationNullMASK) != annotationTagBits) continue nextCachedType;
 			    if (cachedType.boundKind != boundKind) continue nextCachedType;
 			    if (cachedType.bound != bound) continue nextCachedType;
 			    if (cachedType.otherBounds != otherBounds) {
@@ -1455,6 +1468,8 @@ public WildcardBinding createWildcard(ReferenceBinding genericType, int rank, Ty
 	}
 	// add new binding
 	WildcardBinding wildcard = new WildcardBinding(genericType, rank, bound, otherBounds, boundKind, this);
+	if (annotationTagBits != 0)
+		wildcard.tagBits |= annotationTagBits | TagBits.HasNullTypeAnnotation;
 	cachedInfo[index] = wildcard;
 	return wildcard;
 }
@@ -1964,17 +1979,20 @@ TypeBinding getTypeFromVariantTypeSignature(
 		case '-' :
 			// ? super aType
 			wrapper.start++;
-			TypeBinding bound = getTypeFromTypeSignature(wrapper, staticVariables, enclosingType, missingTypeNames, walker);
-			return createWildcard(genericType, rank, bound, null /*no extra bound*/, Wildcard.SUPER);
+			TypeBinding bound = getTypeFromTypeSignature(wrapper, staticVariables, enclosingType, missingTypeNames, walker.toWildcardBound());
+			long tagBits = typeAnnotationsToTagBits(walker.getAnnotationsAtCursor());
+			return createWildcard(genericType, rank, bound, null /*no extra bound*/, Wildcard.SUPER, tagBits);
 		case '+' :
 			// ? extends aType
 			wrapper.start++;
-			bound = getTypeFromTypeSignature(wrapper, staticVariables, enclosingType, missingTypeNames, walker);
-			return createWildcard(genericType, rank, bound, null /*no extra bound*/, Wildcard.EXTENDS);
+			bound = getTypeFromTypeSignature(wrapper, staticVariables, enclosingType, missingTypeNames, walker.toWildcardBound());
+			tagBits = typeAnnotationsToTagBits(walker.getAnnotationsAtCursor());
+			return createWildcard(genericType, rank, bound, null /*no extra bound*/, Wildcard.EXTENDS, tagBits);
 		case '*' :
 			// ?
 			wrapper.start++;
-			return createWildcard(genericType, rank, null, null /*no extra bound*/, Wildcard.UNBOUND);
+			tagBits = typeAnnotationsToTagBits(walker.getAnnotationsAtCursor());
+			return createWildcard(genericType, rank, null, null /*no extra bound*/, Wildcard.UNBOUND, tagBits);
 		default :
 			return getTypeFromTypeSignature(wrapper, staticVariables, enclosingType, missingTypeNames, walker);
 	}

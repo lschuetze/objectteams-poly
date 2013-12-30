@@ -703,7 +703,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public boolean match(CreationReference node, Object other) {
 		if (!(other instanceof CreationReference)) {
@@ -860,7 +860,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public boolean match(ExpressionMethodReference node, Object other) {
 		if (!(other instanceof ExpressionMethodReference)) {
@@ -908,7 +908,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public boolean match(ExtraDimension node, Object other) {
 		if (!(other instanceof ExtraDimension)) {
@@ -1164,7 +1164,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public boolean match(IntersectionType node, Object other) {
 		if (!(other instanceof IntersectionType)) {
@@ -1263,7 +1263,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public boolean match(LambdaExpression node, Object other) {
 		if (!(other instanceof LambdaExpression)) {
@@ -1649,7 +1649,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public boolean match(PackageQualifiedType node, Object other) {
 		if (!(other instanceof PackageQualifiedType)) {
@@ -2080,7 +2080,7 @@ public class ASTMatcher {
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
 	 *   
-	 *   @since 3.10 BETA_JAVA8
+	 *   @since 3.9 BETA_JAVA8
 	 */
 	public boolean match(SuperMethodReference node, Object other) {
 		if (!(other instanceof SuperMethodReference)) {
@@ -2397,7 +2397,7 @@ public class ASTMatcher {
 	 * @return <code>true</code> if the subtree matches, or
 	 *   <code>false</code> if they do not match or the other object has a
 	 *   different node type or is <code>null</code>
-	 * @since 3.10 BETA_JAVA8
+	 * @since 3.9 BETA_JAVA8
 	 */
 	public boolean match(TypeMethodReference node, Object other) {
 		if (!(other instanceof TypeMethodReference)) {

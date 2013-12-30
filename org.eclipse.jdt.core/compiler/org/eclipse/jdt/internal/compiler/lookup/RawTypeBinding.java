@@ -13,6 +13,8 @@
  *     IBM Corporation - initial API and implementation
  *     Stephan Herrmann - Contribution for
  *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
+ *								Bug 416174 - [1.8][compiler][null] Bogus name clash error with null annotations
+ *								Bug 416176 - [1.8][compiler][null] null type annotations cause grief on type variables
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -136,6 +138,13 @@ public class RawTypeBinding extends ParameterizedTypeBinding {
 	}
 
     public boolean isEquivalentTo(TypeBinding otherType) {
+    	// disregard any type annotations on this and otherType
+    	// recursive call needed when this is annotated, unless the annotation was introduced on a declaration
+    	otherType = otherType.unannotated();
+    	TypeBinding unannotated = unannotated();
+    	if (unannotated != this)
+    		return unannotated.isEquivalentTo(otherType);
+
 		if (this == otherType || erasure() == otherType)
 		    return true;
 	    if (otherType == null)

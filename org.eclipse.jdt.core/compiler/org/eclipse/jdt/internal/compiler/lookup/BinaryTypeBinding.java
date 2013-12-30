@@ -26,6 +26,9 @@
  *								bug 392384 - [1.8][compiler][null] Restore nullness info from type annotations in class files
  *								Bug 392099 - [1.8][compiler][null] Apply null annotation on types for null analysis
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
+ *								Bug 415850 - [1.8] Ensure RunJDTCoreTests can cope with null annotations enabled
+ *    Jesper Steen Moller - Contributions for
+ *								Bug 412150 [1.8] [compiler] Enable reflected parameter names during annotation processing
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -118,6 +121,8 @@ null is NOT a valid value for a non-public field... it just means the field is n
  */
 
 public class BinaryTypeBinding extends ReferenceBinding {
+
+	private static final IBinaryMethod[] NO_BINARY_METHODS = new IBinaryMethod[0];
 
 	// all of these fields are ONLY guaranteed to be initialized if accessed using their public accessor method
 	protected ReferenceBinding superclass;
@@ -572,8 +577,9 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 		}
 
 		if (needFieldsAndMethods) {
-			createFields(binaryType.getFields(), sourceLevel, missingTypeNames);
-			createMethods(binaryType.getMethods(), sourceLevel, missingTypeNames);
+			IBinaryField[] iFields = binaryType.getFields();
+			createFields(iFields, sourceLevel, missingTypeNames);
+			IBinaryMethod[] iMethods = createMethods(binaryType.getMethods(), sourceLevel, missingTypeNames);
 			boolean isViewedAsDeprecated = isViewedAsDeprecated();
 			if (isViewedAsDeprecated) {
 				for (int i = 0, max = this.fields.length; i < max; i++) {
@@ -587,6 +593,19 @@ void cachePartsFrom(IBinaryType binaryType, boolean needFieldsAndMethods) {
 					if (!method.isDeprecated()) {
 						method.modifiers |= ExtraCompilerModifiers.AccDeprecatedImplicitly;
 					}
+				}
+			}
+			if (this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
+				// need annotations on the type before processing null annotations on members respecting any @NonNullByDefault:
+				scanTypeForNullDefaultAnnotation(binaryType, this.fPackage, this);
+
+				if (iFields != null) {
+					for (int i = 0; i < iFields.length; i++)
+						scanFieldForNullAnnotation(iFields[i], this.fields[i]);
+				}
+				if (iMethods != null) {
+					for (int i = 0; i < iMethods.length; i++)
+						scanMethodForNullAnnotation(iMethods[i], this.methods[i]);
 				}
 			}
 		}
@@ -669,12 +688,6 @@ private void createFields(IBinaryField[] iFields, long sourceLevel, char[][][] m
 					this.fields[i].setAnnotations(createAnnotations(binaryField.getAnnotations(), this.environment, missingTypeNames));
 				}
 			}
-			if (this.environment.globalOptions.isAnnotationBasedNullAnalysisEnabled) {
-				for (int i = 0; i <size; i++) {
-					IBinaryField binaryField = iFields[i];
-					scanFieldForNullAnnotation(binaryField, this.fields[i]);
-				}
-			}
 		}
 	}
 }
@@ -725,6 +738,8 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 	TypeVariableBinding[] typeVars = Binding.NO_TYPE_VARIABLES;
 	AnnotationBinding[][] paramAnnotations = null;
 	TypeBinding returnType = null;
+
+	char[][] argumentNames = method.getArgumentNames();
 
 	final boolean use15specifics = sourceLevel >= ClassFileConstants.JDK1_5;
 	/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=324850, Since a 1.4 project can have a 1.5
@@ -808,6 +823,19 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 
 		if (!method.isConstructor())
 			returnType = this.environment.getTypeFromSignature(methodDescriptor, index + 1, -1, false, this, missingTypeNames, walker.toMethodReturn());   // index is currently pointing at the ')'
+		
+		final int argumentNamesLength = argumentNames == null ? 0 : argumentNames.length;
+		if (startIndex > 0 && argumentNamesLength > 0) {
+			// We'll have to slice the starting arguments off
+			if (startIndex >= argumentNamesLength) {
+				argumentNames = Binding.NO_PARAMETER_NAMES; // We know nothing about the argument names
+			} else {
+				char[][] slicedArgumentNames = new char[argumentNamesLength - startIndex][];
+				System.arraycopy(argumentNames, startIndex, slicedArgumentNames, 0, argumentNamesLength - startIndex);
+				argumentNames = slicedArgumentNames;
+			}
+		}
+
 	} else {
 		methodModifiers |= ExtraCompilerModifiers.AccGenericSignature;
 		// MethodTypeSignature = ParameterPart(optional) '(' TypeSignatures ')' return_typeSignature ['^' TypeSignature (optional)]
@@ -888,6 +916,8 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
 			isAnnotationType() ? convertMemberValue(method.getDefaultValue(), this.environment, missingTypeNames) : null,
 			this.environment);
 
+	if (argumentNames != null) result.parameterNames = argumentNames;
+	
 	if (use15specifics)
 		result.tagBits |= method.getTagBits();
 	result.typeVariables = typeVars;
@@ -940,15 +970,15 @@ private MethodBinding createMethod(IBinaryMethod method, long sourceLevel, char[
   }
 // SH}
 
-	scanMethodForNullAnnotation(method, result);
-
 	return result;
 }
 
 /**
  * Create method bindings for binary type, filtering out <clinit> and synthetics
+ * As some iMethods may be ignored in this process we return the matching array of those
+ * iMethods for which MethodBindings have been created; indices match those in this.methods.
  */
-private void createMethods(IBinaryMethod[] iMethods, long sourceLevel, char[][][] missingTypeNames) {
+private IBinaryMethod[] createMethods(IBinaryMethod[] iMethods, long sourceLevel, char[][][] missingTypeNames) {
 	int total = 0, initialTotal = 0, iClinit = -1;
 	int[] toSkip = null;
 	if (iMethods != null) {
@@ -979,7 +1009,7 @@ private void createMethods(IBinaryMethod[] iMethods, long sourceLevel, char[][][
 	}
 	if (total == 0) {
 		this.methods = Binding.NO_METHODS;
-		return;
+		return NO_BINARY_METHODS;
 	}
 
 	boolean hasRestrictedAccess = hasRestrictedAccess();
@@ -991,15 +1021,19 @@ private void createMethods(IBinaryMethod[] iMethods, long sourceLevel, char[][][
 				method.modifiers |= ExtraCompilerModifiers.AccRestrictedAccess;
 			this.methods[i] = method;
 		}
+		return iMethods;
 	} else {
+		IBinaryMethod[] mappedBinaryMethods = new IBinaryMethod[total];
 		for (int i = 0, index = 0; i < initialTotal; i++) {
 			if (iClinit != i && (toSkip == null || toSkip[i] != -1)) {
 				MethodBinding method = createMethod(iMethods[i], sourceLevel, missingTypeNames);
 				if (hasRestrictedAccess)
 					method.modifiers |= ExtraCompilerModifiers.AccRestrictedAccess;
+				mappedBinaryMethods[index] = iMethods[i];
 				this.methods[index++] = method;
 			}
 		}
+		return mappedBinaryMethods;
 	}
 }
 //{ObjectTeams: create bindings for OTRE-generated methods:

@@ -13,6 +13,8 @@
  *     IBM Corporation - initial API and implementation
  *     Jesper S Moller - Contributions for
  *							Bug 405066 - [1.8][compiler][codegen] Implement code generation infrastructure for JSR335        
+ *							Bug 406982 - [1.8][compiler] Generation of MethodParameters Attribute in classfile
+ *							Bug 416885 - [1.8][compiler]IncompatibleClassChange error (edit)
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.codegen;
 
@@ -86,6 +88,8 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 	public static final char[] doubleDoubleSignature = "(D)Ljava/lang/Double;".toCharArray(); //$NON-NLS-1$
 	public static final char[] DOUBLEVALUE_DOUBLE_METHOD_NAME = "doubleValue".toCharArray(); //$NON-NLS-1$
 	public static final char[] DOUBLEVALUE_DOUBLE_METHOD_SIGNATURE = "()D".toCharArray(); //$NON-NLS-1$
+	public static final char[] EnumName = "$enum$name".toCharArray();//$NON-NLS-1$
+	public static final char[] EnumOrdinal = "$enum$ordinal".toCharArray();//$NON-NLS-1$
 	public static final char[] Exit = "exit".toCharArray(); //$NON-NLS-1$
 	public static final char[] ExitIntSignature = "(I)V".toCharArray(); //$NON-NLS-1$
 	public static final char[] FloatConstrSignature = "(F)V".toCharArray(); //$NON-NLS-1$
@@ -181,6 +185,7 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 	public static final char[] longLongSignature = "(J)Ljava/lang/Long;".toCharArray(); //$NON-NLS-1$
 	public static final char[] LONGVALUE_LONG_METHOD_NAME = "longValue".toCharArray(); //$NON-NLS-1$
 	public static final char[] LONGVALUE_LONG_METHOD_SIGNATURE = "()J".toCharArray(); //$NON-NLS-1$
+	public static final char[] Name = "name".toCharArray();//$NON-NLS-1$
 	public static final char[] NewInstance = "newInstance".toCharArray(); //$NON-NLS-1$
 	public static final char[] NewInstanceSignature = "(Ljava/lang/Class;[I)Ljava/lang/Object;".toCharArray(); //$NON-NLS-1$
 	public static final char[] Next = "next".toCharArray();//$NON-NLS-1$
@@ -256,8 +261,8 @@ public class ConstantPool implements ClassFileConstants, TypeIds {
 	// java 7 java.lang.invoke.MethodHandle.invokeExact(..)/invokeGeneric(..)
 	public static final char[] JAVA_LANG_INVOKE_METHODHANDLE_POLYMORPHICSIGNATURE = "Ljava/lang/invoke/MethodHandle$PolymorphicSignature;".toCharArray(); //$NON-NLS-1$
 	// Java 8 lambda support
-	public static final char[] METAFACTORY = "metaFactory".toCharArray(); //$NON-NLS-1$
-	public static final char[] JAVA_LANG_INVOKE_LAMBDAMETAFACTORY_METAFACTORY_SIGNATURE = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;".toCharArray(); //$NON-NLS-1$
+	public static final char[] METAFACTORY = "metafactory".toCharArray(); //$NON-NLS-1$
+	public static final char[] JAVA_LANG_INVOKE_LAMBDAMETAFACTORY_METAFACTORY_SIGNATURE = "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;".toCharArray(); //$NON-NLS-1$
 
 	public static final char[] HashCode = "hashCode".toCharArray(); //$NON-NLS-1$
 	public static final char[] HashCodeSignature = "()I".toCharArray(); //$NON-NLS-1$; 
