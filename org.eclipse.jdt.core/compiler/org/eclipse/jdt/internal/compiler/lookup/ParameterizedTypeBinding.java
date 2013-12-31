@@ -111,7 +111,7 @@ public class ParameterizedTypeBinding extends ReferenceBinding implements Substi
 		ReferenceBinding realClass = super.getRealClass();
 		if (realClass == this)
 			return this; // no further wrapping if this _is_ the class part
-		return this.environment.createParameterizedType(realClass, this.arguments, realClass.enclosingType()); 
+		return this.environment.createParameterizedType(realClass, this.arguments, this.enclosingType()); 
 	}
 // FIXME(SH): this method causes regressions (still looks consistent, though):
 //	@Override

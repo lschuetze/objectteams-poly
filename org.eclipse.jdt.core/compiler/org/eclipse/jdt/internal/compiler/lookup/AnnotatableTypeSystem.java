@@ -88,6 +88,8 @@ public class AnnotatableTypeSystem {
 	}
 	public ParameterizedTypeBinding getParameterizedType(ReferenceBinding genericType, TypeBinding[] typeArguments,
 			ITeamAnchor teamAnchor, int valueParamPosition, ReferenceBinding enclosingType, AnnotationBinding [] annotations) {
+		if (teamAnchor == null && genericType instanceof DependentTypeBinding)
+			teamAnchor = ((DependentTypeBinding) genericType)._teamAnchor;
 /* orig:
 		if (!haveTypeAnnotations(genericType, enclosingType, typeArguments, annotations))
 			return this.unannotatedTypeSystem.getParameterizedType(genericType, typeArguments, enclosingType);
@@ -122,7 +124,7 @@ public class AnnotatableTypeSystem {
 				if (!cachedType.isParameterizedType())
 					continue;
   :giro */
-				if (!cachedType.isParameterizedType() && typeArguments != null)
+				if (!(cachedType instanceof ParameterizedTypeBinding)) // roles might answer 'false' to isParameterized(), still they are valid candidates, here
 					continue;
 				// also match team anchor if given:
 				if (!this.unannotatedTypeSystem.isRoleTypeMatch(teamAnchor, valueParamPosition, cachedType))

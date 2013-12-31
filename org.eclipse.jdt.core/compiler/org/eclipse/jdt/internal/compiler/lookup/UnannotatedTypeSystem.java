@@ -125,7 +125,7 @@ public class UnannotatedTypeSystem {
 			if (!cachedType.isParameterizedType())
 				continue;
   :giro */
-			if (!cachedType.isParameterizedType() && typeArguments != null)
+			if (!(cachedType instanceof ParameterizedTypeBinding)) // roles might answer 'false' to isParameterized(), still they are valid candidates, here
 				continue;
 			// also match team anchor if given:
 			if (!isRoleTypeMatch(teamAnchor, valueParamPosition, cachedType))

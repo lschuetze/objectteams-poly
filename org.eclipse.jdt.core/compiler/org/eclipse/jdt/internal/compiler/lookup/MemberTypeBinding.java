@@ -47,6 +47,10 @@ public MemberTypeBinding(char[][] compoundName, ClassScope scope, SourceTypeBind
 
 public MemberTypeBinding(MemberTypeBinding prototype) {
 	super(prototype);
+//{ObjectTeams: role?
+	if (prototype.roleModel != null)
+		this.roleModel = new RoleModel(this);
+// SH}
 }
 
 void checkSyntheticArgsAndFields() {

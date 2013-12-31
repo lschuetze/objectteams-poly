@@ -212,6 +212,11 @@ public SourceTypeBinding(SourceTypeBinding prototype) {
 	this.defaultNullness = prototype.defaultNullness;
 	this.nullnessDefaultInitialized= prototype.nullnessDefaultInitialized;
 	this.lambdaOrdinal = prototype.lambdaOrdinal;
+	
+//{ObjectTeams: team?
+	if (prototype._teamModel != null)
+		setTeamModel(new TeamModel(this));
+// SH}
 }
 
 private void addDefaultAbstractMethods() {

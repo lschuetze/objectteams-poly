@@ -125,7 +125,7 @@ static boolean areReturnTypesCompatible(MethodBinding one, MethodBinding two, Lo
 	TypeBinding oneReturnType = MethodModel.getReturnType(one);
 	TypeBinding twoReturnType = MethodModel.getReturnType(two);
   // almost orig:
-	if (oneReturnType == twoReturnType) return true;
+	if (TypeBinding.equalsEquals(oneReturnType, twoReturnType)) return true;
 	if (environment.globalOptions.sourceLevel >= ClassFileConstants.JDK1_5) {
 		// short is compatible with int, but as far as covariance is concerned, its not
 		if (oneReturnType.isBaseType()) return false;
