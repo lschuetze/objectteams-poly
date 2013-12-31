@@ -39,6 +39,7 @@
  *								Bug 415043 - [1.8][null] Follow-up re null type annotations after bug 392099
  *								Bug 405569 - Resource leak check false positive when using DbUtils.closeQuietly
  *								Bug 411964 - [1.8][null] leverage null type annotation in foreach statement
+ *								Bug 405569 - Resource leak check false positive when using DbUtils.closeQuietly
  *     Jesper S Moller - Contributions for
  *								Bug 378674 - "The method can be declared as static" is wrong
  *        Andy Clement (GoPivotal, Inc) aclement@gopivotal.com - Contributions for
@@ -190,11 +191,10 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	CompilerOptions compilerOptions = currentScope.compilerOptions();
 	boolean analyseResources = compilerOptions.analyseResourceLeaks;
 	if (analyseResources) {
-		Expression closeTarget = null;
 		if (nonStatic) {
 			// closeable.close()
 			if (CharOperation.equals(TypeConstants.CLOSE, this.selector)) {
-				closeTarget = this.receiver;
+				recordCallingClose(currentScope, flowContext, flowInfo, this.receiver);
 			}
 		} else if (this.arguments != null && this.arguments.length > 0 && FakedTrackingVariable.isAnyCloseable(this.arguments[0].resolvedType)) {
 			// Helper.closeMethod(closeable, ..)
@@ -203,18 +203,10 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 				if (CharOperation.equals(record.selector, this.selector)
 						&& CharOperation.equals(record.typeName, this.binding.declaringClass.compoundName)) 
 				{
-					closeTarget = this.arguments[0];
+					int len = Math.min(record.numCloseableArgs, this.arguments.length);
+					for (int j=0; j<len; j++)
+						recordCallingClose(currentScope, flowContext, flowInfo, this.arguments[j]);
 					break;
-				}
-			}
-		}
-		if (closeTarget != null) {
-			FakedTrackingVariable trackingVariable = FakedTrackingVariable.getCloseTrackingVariable(closeTarget, flowInfo, flowContext);
-			if (trackingVariable != null) { // null happens if target is not a local variable or not an AutoCloseable
-				if (trackingVariable.methodScope == currentScope.methodScope()) {
-					trackingVariable.markClose(flowInfo, flowContext);
-				} else {
-					trackingVariable.markClosedInNestedMethod();
 				}
 			}
 		}
@@ -280,6 +272,17 @@ public FlowInfo analyseCode(BlockScope currentScope, FlowContext flowContext, Fl
 	flowContext.expireNullCheckedFieldInfo(); // no longer trust this info after any message send
 	return flowInfo;
 }
+private void recordCallingClose(BlockScope currentScope, FlowContext flowContext, FlowInfo flowInfo, Expression closeTarget) {
+	FakedTrackingVariable trackingVariable = FakedTrackingVariable.getCloseTrackingVariable(closeTarget, flowInfo, flowContext);
+	if (trackingVariable != null) { // null happens if target is not a local variable or not an AutoCloseable
+		if (trackingVariable.methodScope == currentScope.methodScope()) {
+			trackingVariable.markClose(flowInfo, flowContext);
+		} else {
+			trackingVariable.markClosedInNestedMethod();
+		}
+	}
+}
+
 //{ObjectTeams: checkBaseCallsIfSuper
 protected FlowInfo checkBaseCallsIfSuper(BlockScope currentScope, FlowInfo flowInfo) {
 	MethodScope methodScope = currentScope.methodScope();

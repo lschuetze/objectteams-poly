@@ -1,0 +1,16 @@
+<lifecycleMappingMetadata>
+	<pluginExecutions>
+		<pluginExecution>
+			<pluginExecutionFilter>
+				<groupId>org.eclipse.objectteams</groupId>
+				<artifactId>objectteams-weaver-maven-plugin</artifactId>
+				<goals>
+					<goal>weave</goal>
+				</goals>
+			</pluginExecutionFilter>
+			<action>
+				<ignore />
+			</action>
+		</pluginExecution>
+	</pluginExecutions>
+</lifecycleMappingMetadata>

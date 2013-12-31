@@ -369,7 +369,7 @@ public abstract class Scope {
 	}
 
 	// 5.1.10
-	public static TypeBinding[] greaterLowerBound(TypeBinding[] types, /*@Nullable*/ Scope scope) {
+	public static TypeBinding[] greaterLowerBound(TypeBinding[] types, /*@Nullable*/ Scope scope, LookupEnvironment environment) {
 		if (types == null) return null;
 		int length = types.length;
 		if (length == 0) return null;
@@ -391,10 +391,34 @@ public abstract class Scope {
 				} else if (!jType.isCompatibleWith(iType, scope)) {
 					// avoid creating unsatisfiable intersection types (see https://bugs.eclipse.org/405706):
 					if (iType.isParameterizedType() && jType.isParameterizedType()) {
-						if (iType.original().isCompatibleWith(jType.original(), scope)
-								|| jType.original().isCompatibleWith(iType.original(), scope)) 
-						{
-							// parameterized types are incompatible due to incompatible type arguments => unsatisfiable
+						// if the wider of the two types (judged by originals) has type variables
+						// substitute those with their upper bounds and re-check (see https://bugs.eclipse.org/413958):
+						ParameterizedTypeBinding wideType, narrowType;
+						if (iType.original().isCompatibleWith(jType.original(), scope)) {
+							wideType = (ParameterizedTypeBinding) jType;
+							narrowType = (ParameterizedTypeBinding) iType;
+						} else if (jType.original().isCompatibleWith(iType.original(), scope)) {
+							wideType = (ParameterizedTypeBinding) iType;
+							narrowType = (ParameterizedTypeBinding) jType;
+						} else {
+							continue;
+						}
+						if (wideType.arguments == null)
+							continue; // assume we already have an error here
+						int numTypeArgs = wideType.arguments.length;
+						TypeBinding[] bounds = new TypeBinding[numTypeArgs];
+						for (int k = 0; k < numTypeArgs; k++) {
+							TypeBinding argument = wideType.arguments[k];
+							bounds[k] = argument.isTypeVariable() ? ((TypeVariableBinding)argument).upperBound() : argument;
+						}
+						ReferenceBinding wideOriginal = (ReferenceBinding) wideType.original();
+						TypeBinding substitutedWideType =
+								environment.createParameterizedType(wideOriginal, bounds, wideOriginal.enclosingType());
+						// if the narrow type is compatible with the substituted wide type, we keep silent, 
+						// substituting type variables with proper types can still satisfy all constraints,
+						// otherwise ... 
+						if (!narrowType.isCompatibleWith(substitutedWideType, scope)) {
+							// ... parameterized types are incompatible due to incompatible type arguments => unsatisfiable
 							return null;
 						}
 					}
@@ -516,7 +540,7 @@ public abstract class Scope {
 			    			TypeBinding [] bounds = new TypeBinding[1 + substitutedOtherBounds.length];
 			    			bounds[0] = substitutedBound;
 			    			System.arraycopy(substitutedOtherBounds, 0, bounds, 1, substitutedOtherBounds.length);
-			    			TypeBinding[] glb = Scope.greaterLowerBound(bounds, null); // re-evaluate
+			    			TypeBinding[] glb = Scope.greaterLowerBound(bounds, null, substitution.environment()); // re-evaluate
 			    			if (glb != null && glb != bounds) {
 			    				substitutedBound = glb[0];
 		    					if (glb.length == 1) {
@@ -3746,7 +3770,7 @@ public abstract class Scope {
 		return false;
 	}
 
-	private TypeBinding leastContainingInvocation(TypeBinding mec, Object invocationData, List lubStack) {
+	private TypeBinding leastContainingInvocation(TypeBinding mec, Object invocationData, ArrayList lubStack) {
 		if (invocationData == null) return mec; // no alternate invocation
 		if (invocationData instanceof TypeBinding) { // only one invocation, simply return it (array only allocated if more than one)
 			return (TypeBinding) invocationData;
@@ -3768,7 +3792,7 @@ public abstract class Scope {
 				case Binding.GENERIC_TYPE :
 					TypeVariableBinding[] invocationVariables = invocation.typeVariables();
 					for (int j = 0; j < argLength; j++) {
-						TypeBinding bestArgument = leastContainingTypeArgument(bestArguments[j], invocationVariables[j], (ReferenceBinding) mec, j, lubStack);
+						TypeBinding bestArgument = leastContainingTypeArgument(bestArguments[j], invocationVariables[j], (ReferenceBinding) mec, j, (ArrayList)lubStack.clone());
 						if (bestArgument == null) return null;
 						bestArguments[j] = bestArgument;
 					}
@@ -3776,7 +3800,7 @@ public abstract class Scope {
 				case Binding.PARAMETERIZED_TYPE :
 					ParameterizedTypeBinding parameterizedType = (ParameterizedTypeBinding)invocation;
 					for (int j = 0; j < argLength; j++) {
-						TypeBinding bestArgument = leastContainingTypeArgument(bestArguments[j], parameterizedType.arguments[j], (ReferenceBinding) mec, j, lubStack);
+						TypeBinding bestArgument = leastContainingTypeArgument(bestArguments[j], parameterizedType.arguments[j], (ReferenceBinding) mec, j, (ArrayList)lubStack.clone());
 						if (bestArgument == null) return null;
 						bestArguments[j] = bestArgument;
 					}
@@ -3790,7 +3814,7 @@ public abstract class Scope {
 	}
 
 	// JLS 15.12.2
-	private TypeBinding leastContainingTypeArgument(TypeBinding u, TypeBinding v, ReferenceBinding genericType, int rank, List lubStack) {
+	private TypeBinding leastContainingTypeArgument(TypeBinding u, TypeBinding v, ReferenceBinding genericType, int rank, ArrayList lubStack) {
 		if (u == null) return v;
 		if (u == v) return u;
 		if (v.isWildcard()) {
@@ -3818,7 +3842,7 @@ public abstract class Scope {
 					case Wildcard.SUPER :
 						// ? super U, ? super V
 						if (wildU.boundKind == Wildcard.SUPER) {
-							TypeBinding[] glb = greaterLowerBound(new TypeBinding[]{wildU.bound,wildV.bound}, this);
+							TypeBinding[] glb = greaterLowerBound(new TypeBinding[]{wildU.bound,wildV.bound}, this, this.environment());
 							if (glb == null) return null;
 							return environment().createWildcard(genericType, rank, glb[0], null /*no extra bound*/, Wildcard.SUPER);	// TODO (philippe) need to capture entire bounds
 						}
@@ -3834,7 +3858,7 @@ public abstract class Scope {
 						return environment().createWildcard(genericType, rank, lub, null /*no extra bound*/, Wildcard.EXTENDS);
 					// U, ? super V
 					case Wildcard.SUPER :
-						TypeBinding[] glb = greaterLowerBound(new TypeBinding[]{u,wildV.bound}, this);
+						TypeBinding[] glb = greaterLowerBound(new TypeBinding[]{u,wildV.bound}, this, this.environment());
 						if (glb == null) return null;
 						return environment().createWildcard(genericType, rank, glb[0], null /*no extra bound*/, Wildcard.SUPER);	// TODO (philippe) need to capture entire bounds
 					case Wildcard.UNBOUND :
@@ -3852,7 +3876,7 @@ public abstract class Scope {
 					return environment().createWildcard(genericType, rank, lub, null /*no extra bound*/, Wildcard.EXTENDS);
 				// U, ? super V
 				case Wildcard.SUPER :
-					TypeBinding[] glb = greaterLowerBound(new TypeBinding[]{wildU.bound, v}, this);
+					TypeBinding[] glb = greaterLowerBound(new TypeBinding[]{wildU.bound, v}, this, this.environment());
 					if (glb == null) return null;
 					return environment().createWildcard(genericType, rank, glb[0], null /*no extra bound*/, Wildcard.SUPER); // TODO (philippe) need to capture entire bounds
 				case Wildcard.UNBOUND :
@@ -3880,7 +3904,7 @@ public abstract class Scope {
 	}
 
 	// 15.12.2
-	private TypeBinding lowerUpperBound(TypeBinding[] types, List lubStack) {
+	private TypeBinding lowerUpperBound(TypeBinding[] types, ArrayList lubStack) {
 
 		int typeLength = types.length;
 		if (typeLength == 1) {

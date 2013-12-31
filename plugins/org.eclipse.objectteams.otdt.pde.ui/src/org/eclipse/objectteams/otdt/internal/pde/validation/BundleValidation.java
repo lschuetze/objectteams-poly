@@ -18,12 +18,16 @@ package org.eclipse.objectteams.otdt.internal.pde.validation;
 
 import static org.eclipse.objectteams.otequinox.Constants.*;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.objectteams.otdt.internal.pde.ui.OTPDEUIMessages;
 import org.eclipse.objectteams.otequinox.ActivationKind;
+import org.eclipse.osgi.service.resolver.BundleDescription;
+import org.eclipse.osgi.service.resolver.State;
+import org.eclipse.osgi.util.ManifestElement;
+import org.eclipse.osgi.util.NLS;
 import org.eclipse.pde.core.plugin.IPluginModelBase;
 import org.eclipse.pde.internal.core.builders.CompilerFlags;
 import org.eclipse.pde.internal.core.builders.IHeader;
@@ -36,10 +40,6 @@ import org.eclipse.pde.internal.ui.correction.AbstractPDEMarkerResolution;
 import org.eclipse.pde.internal.ui.correction.AddExportPackageMarkerResolution;
 import org.eclipse.ui.IMarkerResolution;
 import org.osgi.framework.Constants;
-import org.eclipse.osgi.service.resolver.BundleDescription;
-import org.eclipse.osgi.service.resolver.State;
-import org.eclipse.osgi.util.ManifestElement;
-import org.eclipse.osgi.util.NLS;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -78,7 +78,7 @@ public team class BundleValidation
 		// flags set during validation of one bundle:
 		protected boolean isAspectBundle = false;
 		protected boolean hasTeamActivation = false;
-		protected List<String> aspectPackages = new ArrayList<String>();
+		protected Set<String> aspectPackages = new HashSet<String>();
 
 		@SuppressWarnings("decapsulation")
 		spanContext <- replace validateFiles;
@@ -106,7 +106,7 @@ public team class BundleValidation
 		State getState() -> get IPluginModelBase fModel
 			with { result <- fModel.getBundleDescription().getContainingState() }
 		
-		IMarker report(String message, int line, int severity, String category) 
+		IMarker report(String message, int line, int severity, String category)
 		-> IMarker report(String message, int line, int severity, String category);
 
 		@SuppressWarnings("decapsulation")
@@ -205,7 +205,7 @@ public team class BundleValidation
 		void validateExportPackages() <- after void validateExportPackages();
 
 		void validateExportPackages() {
-			List<String> needingExport = bundleContext.get().aspectPackages;
+			Set<String> needingExport = bundleContext.get().aspectPackages;
 			if (needingExport.isEmpty()) return;
 			IHeader header = getHeader(Constants.EXPORT_PACKAGE);
 			if (header != null) {
