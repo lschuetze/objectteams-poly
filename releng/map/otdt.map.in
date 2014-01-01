@@ -1,21 +1,21 @@
 !***************  OTDT CONTRIBUTION  ******************************************************** 
 
 !-- Don't set version numbers for features, otherwise pdebuild would complain about a non-existent Basedir: -- 
-feature@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.feature,tag=OT_BETA_JAVA8
-feature@org.eclipse.objectteams.otdt.source.feature=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.source.feature,tag=OT_BETA_JAVA8
-feature@org.eclipse.objectteams.otdt.core.patch=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.core.patch,tag=OT_BETA_JAVA8
+feature@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.feature,tag=branches/OT_BETA_JAVA8
+feature@org.eclipse.objectteams.otdt.source.feature=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.source.feature,tag=branches/OT_BETA_JAVA8
+feature@org.eclipse.objectteams.otdt.core.patch=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.core.patch,tag=branches/OT_BETA_JAVA8
 feature@org.eclipse.objectteams.otequinox=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otequinox.feature,tag=builds/201305210612
 
 !-- Also don't use version numbers for those plugins that hold the various otre jars: --
-plugin@org.eclipse.jdt.core,3.9.0.v_OTDT_r220_qualifier=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core,tag=OT_BETA_JAVA8
+plugin@org.eclipse.jdt.core,3.9.0.v_OTDT_r220_qualifier=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core,tag=branches/OT_BETA_JAVA8
 
 !next plug-in don't specify version so that org.eclipse.objectteams.runtime/customBuildCallbacks.xml will find the plug-in directory:
-plugin@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt,tag=OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt,tag=branches/OT_BETA_JAVA8
 
-plugin@org.eclipse.objectteams.otdt.debug,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.debug.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.ui,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.doc,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.doc,tag=OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.debug,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.debug.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.ui,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.doc,2.1.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.doc,tag=branches/OT_BETA_JAVA8
 plugin@org.eclipse.objectteams.otdt.metrics,0.7.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.metrics,tag=builds/201101290806
 
 plugin@org.eclipse.objectteams.runtime=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.runtime,tag=builds/201305210612
@@ -30,15 +30,15 @@ plugin@org.eclipse.objectteams.eclipse.monitor,2.0.0=GIT,repo=git://git.eclipse.
 !plugin@org.eclipse.objectteams.otdt.metrics.export=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.metrics.export
 
 !** OT/J Plugins **!
-plugin@org.eclipse.objectteams.otequinox.branding,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.branding,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.jdt.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.jdt.ui,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.ui.help,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui.help,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.apt,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.apt,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.compiler.adaptor,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.debug.adaptor,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.refactoring,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.refactoring,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.pde.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.pde.ui,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.samples,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.samples,tag=OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otequinox.branding,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otequinox.branding,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.jdt.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.jdt.ui,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.ui.help,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.ui.help,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.apt,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.apt,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.compiler.adaptor,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.compiler.adaptor,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.debug.adaptor,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.debug.adaptor,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.refactoring,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.refactoring,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.pde.ui,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.pde.ui,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.samples,2.2.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=plugins/org.eclipse.objectteams.otdt.samples,tag=branches/OT_BETA_JAVA8
 
 !** Consume BCEL from Orbit: **!
 plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400,repository=http://download.eclipse.org/tools/orbit/downloads/drops/R20120526062928/repository
@@ -46,18 +46,18 @@ plugin@org.apache.bcel,5.2.0=p2IU,id=org.apache.bcel,version=5.2.0.v201005080400
 !***************  OTDT Test CONTRIBUTION  ******************************************************** 
 
 
-feature@org.eclipse.objectteams.otdt-tests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.feature/unit-tests-feature,tag=OT_BETA_JAVA8
+feature@org.eclipse.objectteams.otdt-tests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=features/org.eclipse.objectteams.otdt.feature/unit-tests-feature,tag=branches/OT_BETA_JAVA8
 
-plugin@org.eclipse.jdt.core.tests.compiler=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core.tests.compiler,tag=OT_BETA_JAVA8
-plugin@org.eclipse.jdt.core.tests.model=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core.tests.model,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.tests,0.7.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.tests,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.ui.tests.dom,0.7.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.dom,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.debug.tests,0.7.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.debug.tests,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring,0.7.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.refactoring,tag=OT_BETA_JAVA8
+plugin@org.eclipse.jdt.core.tests.compiler=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core.tests.compiler,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.jdt.core.tests.model=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=org.eclipse.jdt.core.tests.model,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.tests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.tests,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.ui.tests.dom=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.dom,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.debug.tests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.debug.tests,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.ui.tests.refactoring=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests.refactoring,tag=branches/OT_BETA_JAVA8
 
 !** OT/J Test Plugins **!
-plugin@org.eclipse.objectteams.otdt.test.builder,0.7.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.test.builder,tag=OT_BETA_JAVA8
-plugin@org.eclipse.objectteams.otdt.ui.tests,0.7.0=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests,tag=OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.test.builder=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.test.builder,tag=branches/OT_BETA_JAVA8
+plugin@org.eclipse.objectteams.otdt.ui.tests=GIT,repo=git://git.eclipse.org/gitroot/objectteams/org.eclipse.objectteams.git,path=testplugins/org.eclipse.objectteams.otdt.ui.tests,tag=branches/OT_BETA_JAVA8
 
 !-- Tests fetched from original GIT (some are required indirectly by jdt.ui.tests): --
 plugin@org.eclipse.jdt.core.tests.builder=GIT,tag=@SDK_QUALIFIER@,repo=git://git.eclipse.org/gitroot/jdt/eclipse.jdt.core.git,path=org.eclipse.jdt.core.tests.builder
