@@ -923,7 +923,7 @@ public abstract class Annotation extends Expression {
 				}
 //{ObjectTeams: allow @Override for roles:
 				if (   (((ReferenceBinding)annotation.recipient).isRole())
-					&& (annotation.resolvedType.id == TypeIds.T_JavaLangObject))
+					&& (annotation.resolvedType.id == TypeIds.T_JavaLangOverride))
 					return true;
 //SH}
 				break;
