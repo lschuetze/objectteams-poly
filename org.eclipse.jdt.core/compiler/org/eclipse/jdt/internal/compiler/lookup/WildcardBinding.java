@@ -11,10 +11,11 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     Technical University Berlin - extended API and implementation
  *     Stephan Herrmann - Contribution for
  *     							bug 349326 - [1.7] new warning for missing try-with-resources
  *     							bug 359362 - FUP of bug 349326: Resource leak on non-Closeable resource
- *     Technical University Berlin - extended API and implementation
+ *								bug 358903 - Filter practically unimportant resource leak warnings
  *******************************************************************************/
 package org.eclipse.jdt.internal.compiler.lookup;
 
@@ -118,6 +119,22 @@ public class WildcardBinding extends ReferenceBinding {
 	}
 // SH}
 
+	TypeBinding bound() {
+		return this.bound;
+	}
+	
+	int boundKind() {
+		return this.boundKind;
+	}
+	
+	protected ReferenceBinding actualType() {
+		return this.genericType;
+	}
+	
+	TypeBinding[] additionalBounds() {
+		return this.otherBounds;
+	}
+	
 	public int kind() {
 		return this.otherBounds == null ? Binding.WILDCARD_TYPE : Binding.INTERSECTION_TYPE;
 	}

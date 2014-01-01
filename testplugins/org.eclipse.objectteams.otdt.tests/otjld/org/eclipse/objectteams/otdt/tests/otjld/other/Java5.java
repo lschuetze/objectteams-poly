@@ -34,7 +34,7 @@ public class Java5 extends AbstractOTJLDTest {
 	// Static initializer to specify tests subset using TESTS_* static variables
 	// All specified tests which does not belong to the class are skipped...
 	static {
-//		TESTS_NAMES = new String[] { "testA112_genericTeam4"};
+//		TESTS_NAMES = new String[] { "testA122_genericsRegression1"};
 //		TESTS_NUMBERS = new int[] { 1459 };
 //		TESTS_RANGE = new int[] { 1097, -1 };
 	}
@@ -5269,5 +5269,15 @@ public class Java5 extends AbstractOTJLDTest {
     		});
     }
     
+    public void testA122_genericsRegression1() {
+    	runConformTest(
+    		new String[] {
+    	"TA122gr1.java",
+    		"import java.util.*;\n" +
+    		"public class TA122gr1 {\n" +
+    		"	HashMap<String,Class<?>> map = new HashMap<String,Class<?>>();\n" +
+    		"}\n"
+    		});
+    }
 
 }
